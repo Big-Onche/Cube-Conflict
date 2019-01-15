@@ -1,5 +1,5 @@
-Cube Conflict utilise le fork Tesseract (http://tesseract.gg/) comme moteur de jeu.
-
+Cube Conflict utilise Tesseract (http://tesseract.gg) comme moteur de jeu.
+Cube Conflict uses Tesseract (http://tesseract.gg) as game engine.
 
 LICENSE CUBE CONFLICT
 =====================
@@ -7,7 +7,7 @@ LICENSE CUBE CONFLICT
 Le contenu relatif à Cube Conflict est sous licence CC BY-NC-SA 4.0
 (Attribution-NonCommercial-ShareAlike 4.0 International)
 
-La lience s'applique aux contenus du jeu, ses modèles 3D, son gamedesign, son logo et autres fichers spécifiques au jeu Cube Conflict.
+La lience s'applique aux contenus du jeu (modèles 3D, gamedesign, son, logo et autres fichers spécifiques au jeu Cube Conflict).
 Cette licence ne s'applique pas au contenu relatif à Tesseract (Voir licence Tesseract plus bas)
 
 You are free to:
