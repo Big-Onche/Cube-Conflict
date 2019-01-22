@@ -1,0 +1,10 @@
+/***************************************************************
+ * Name:      resource.rc
+ * Author:    VuSurTF1
+ * Created:   2014-06-23
+ * Copyright: VuSurTF1
+ **************************************************************/
+
+aaaa ICON "wx/msw/logo.ico"
+
+#include "wx/msw/wx.rc"
