@@ -200,7 +200,7 @@ namespace ai
         if(!d->name[0])
         {
             if(aidebug) conoutf("%s assigned to %s at skill %d", colorname(d, name), o ? colorname(o) : "?", sk);
-            else conoutf("\f7%s\f4 vient de rejoindre la partie %d", colorname(d, name));
+            else conoutf("\f7%s\f4 vient de rejoindre la partie", colorname(d, name));
             resetthisguy = true;
         }
         else
