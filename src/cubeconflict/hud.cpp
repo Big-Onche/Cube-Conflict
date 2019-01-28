@@ -7,77 +7,139 @@ int message_streak1;
 
 string strclassetueur, straptitudevictime;
 
+int decal_message = 0;
+bool need_message1, need_message3;
+
 namespace game
 {
     void drawmessages(int killstreak, string str_pseudovictime, int n_aptitudevictime, string str_pseudoacteur, int n_killstreakacteur)
     {
-        int decal_message = 0;
+        decal_message = 0;
 
-        int wb, hb;
+        hudmatrix.ortho(0, screenw, screenh, 0, -1, 1);
+        resethudmatrix();
+        resethudshader();
 
-        pushhudmatrix();
-        hudmatrix.scale(screenh/2500.0f, screenh/2500.0f, 1);
-        flushhudmatrix();
+        gle::defvertex(2);
+        gle::deftexcoord0();
+
+        glEnable(GL_BLEND);
+
+        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
         if(totalmillis-message1<=2500)
         {
-            if(killstreak==3) text_bounds("Triplette ! (x3)", wb, hb);
-            else if(killstreak==5) text_bounds("Pentaplette ! (x5)", wb, hb);
-            else if(killstreak==10) text_bounds("Décaplette ! (x10)", wb, hb);
-            else if(killstreak==15) text_bounds("Pentadécaaplette ! (x15)", wb, hb);
-            else if(killstreak==20) text_bounds("Eicoplette ! (x20)", wb, hb);
-            else if(killstreak==30) text_bounds("Triaconplette ! (x30)", wb, hb);
-            else if(killstreak>=31) text_bounds("%dplette ! (x%d)", wb, hb, killstreak);
-            int x = ((screenw/2)*2.350f)-wb/2, y = (screenh/2)*2.350f;
+            string streakmsg;
 
-            if(killstreak==3) draw_textf("Triplette ! \fc(x3)",  x, y-385);
-            else if(killstreak==5) draw_textf("Pentaplette ! \fc(x5)",  x, y-385);
-            else if(killstreak==10) draw_textf("Décaplette ! \fc(x10)",  x, y-385);
-            else if(killstreak==15) draw_textf("Pentadécaplette ! \fc(x15)",  x, y-385);
-            else if(killstreak==20) draw_textf("Eicoplette ! \fc(x20)",  x, y-385);
-            else if(killstreak==30) draw_textf("Triaconplette ! \fc(x30)",  x, y-385);
-            else if(killstreak>=31) draw_textf("%dplette ! \fc(x%d)",  x, y-385, killstreak, killstreak);
-            decal_message = decal_message - 50;
+            switch(killstreak)
+            {
+                case 3: formatstring(streakmsg, "Triplette ! \fc(x%d)", killstreak); need_message1 = true; break;
+                case 5: formatstring(streakmsg, "Pentaplette ! \fc(x%d)", killstreak); need_message1 = true; break;
+                case 10: formatstring(streakmsg, "Décaplette ! \fc(x%d)", killstreak); need_message1 = true; break;
+                case 20: formatstring(streakmsg, "Eicoplette ! \fc(x%d)", killstreak); need_message1 = true; break;
+                case 30: formatstring(streakmsg, "Triaconplette ! \fc(x%d)", killstreak); need_message1 = true; break;
+                default: need_message1 = false;
+            }
+
+            if(need_message1)
+            {
+                int tw = text_width(streakmsg);
+                float tsz = 0.04f*min(screenw, screenh)/85,
+                      tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*8.8f*min(screenw, screenh) - 85*tsz;
+                pushhudmatrix();
+                hudmatrix.translate(tx, ty, 0);
+                hudmatrix.scale(tsz, tsz, 1);
+                flushhudmatrix();
+                draw_text(streakmsg, 0, 0);
+                pophudmatrix();
+
+                decal_message -= 45;
+            }
         }
 
         if(totalmillis-message2<=2500)
         {
-            text_bounds("Superpseudo123 (Aptitude)", wb, hb);
-            int x = ((screenw/2)*2.170f)-wb/2, y = (screenh/2)*2.350f;
-            draw_textf("Tu as tué \fc%s \f7! (%s)",  x, y-385+decal_message, str_pseudovictime, aptitudes[n_aptitudevictime].apt_nom);
-            decal_message = decal_message - 50;
+            string killmsg;
+
+            formatstring(killmsg, "Tu as tué \fc%s \f7! (%s)", str_pseudovictime, aptitudes[n_aptitudevictime].apt_nom);
+
+            int tw = text_width(killmsg);
+            float tsz = 0.04f*min(screenw, screenh)/100,
+                  tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*8.8f*min(screenw, screenh+decal_message) - 100*tsz;
+            pushhudmatrix();
+            hudmatrix.translate(tx, ty, 0);
+            hudmatrix.scale(tsz, tsz, 1);
+            flushhudmatrix();
+            draw_text(killmsg, 0, 0);
+            pophudmatrix();
+
+            decal_message -= 40;
         }
 
         if(totalmillis-message3<=2500)
         {
-            text_bounds("[BOT]Abcdef est chaud (Triple", wb, hb);
-            int x = ((screenw/2)*2.170f)-wb/2, y = (screenh/2)*2.350f;
+            string infomsg;
+
             switch(n_killstreakacteur)
             {
-                case 3: draw_textf("\fc%s\f7 est chaud ! (Triplette)",  x, y-385+decal_message, str_pseudoacteur); break;
-                case 5: draw_textf("\fc%s\f7 domine ! (Pentaplette)",  x, y-385+decal_message, str_pseudoacteur); break;
-                case 10: draw_textf("\fc%s\f7 est inarrêtable ! (Décaplette)",  x, y-385+decal_message, str_pseudoacteur); break;
+                case 3: formatstring(infomsg, "\fc%s\f7 est chaud ! (Triplette)", str_pseudoacteur); need_message3 = true; break;
+                case 5: formatstring(infomsg, "\fc%s\f7 domine ! (Pentaplette)", str_pseudoacteur); need_message3 = true; break;
+                case 10: formatstring(infomsg, "\fc%s\f7 est inarrêtable ! (Décaplette)", str_pseudoacteur); need_message3 = true; break;
+                case 20: formatstring(infomsg, "\fc%s\f7 est invincible ! (Eicoplette)", str_pseudoacteur); need_message3 = true; break;
+                case 30: formatstring(infomsg, "\fc%s\f7 est un Dieu ! (Triaconplette)", str_pseudoacteur);  need_message3 = true; break;
+                default: need_message3 = false;
             }
-            decal_message = decal_message - 50;
+
+            if(need_message3)
+            {
+                int tw = text_width(infomsg);
+                float tsz = 0.04f*min(screenw, screenh)/100,
+                      tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*8.8f*min(screenw, screenh+decal_message) - 100*tsz;
+                pushhudmatrix();
+                hudmatrix.translate(tx, ty, 0);
+                hudmatrix.scale(tsz, tsz, 1);
+                flushhudmatrix();
+                draw_text(infomsg, 0, 0);
+                pophudmatrix();
+
+                decal_message -= 40;
+            }
         }
+
         if(gamemillismsg < 5000)
         {
-            text_bounds("Armes activées", wb, hb);
-            int x = ((screenw/2)*2.170f)-wb/2, y = (screenh/2)*2.350f;
-            draw_textf("\f6Armes activées dans :%s %.1f",  x, y-385+decal_message, gamemillismsg<1000 ? "\fe" : gamemillismsg > 3000 ? "\fc" : "\fd", (5000-gamemillismsg)/1000.0f);
-            decal_message = decal_message - 50;
+            string countdownmsg;
+
+            formatstring(countdownmsg, "\f6Armes activées dans :%s %.1f",  gamemillismsg<1000 ? "\fe" : gamemillismsg > 3000 ? "\fc" : "\fd", (5000-gamemillismsg)/1000.0f);
+
+            int tw = text_width(countdownmsg);
+            float tsz = 0.04f*min(screenw, screenh)/85,
+                  tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*8.8f*min(screenw, screenh) - 85*tsz;
+            pushhudmatrix();
+            hudmatrix.translate(tx, ty, 0);
+            hudmatrix.scale(tsz, tsz, 1);
+            flushhudmatrix();
+            draw_text(countdownmsg, 0, 0);
+            pophudmatrix();
         }
+
         if(m_battle)
         {
-            text_bounds("Joueurs vi", wb, hb);
-            int x = ((screenw/2)*2.170f)-wb/2, y = (screenh/2)*2.350f;
-            draw_textf("\f7Joueurs vivants : %d",  x, y-1200, battlevivants);
-            //decal_message = decal_message - 50;
-        }
-        pophudmatrix();
-    }
+            string remainingplayersmsg;
 
-    float dodo = 0;
+            formatstring(remainingplayersmsg, "\f7Joueurs vivants : %d",  battlevivants);
+
+            int tw = text_width(remainingplayersmsg);
+            float tsz = 0.04f*min(screenw, screenh)/75,
+                  tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*10.0f*min(screenw, screenh) - 75*tsz;
+            pushhudmatrix();
+            hudmatrix.translate(tx, ty, 0);
+            hudmatrix.scale(tsz, tsz, 1);
+            flushhudmatrix();
+            draw_text(remainingplayersmsg, 0, 0);
+            pophudmatrix();
+        }
+    }
 
     void gameplayhud(int w, int h)
     {
