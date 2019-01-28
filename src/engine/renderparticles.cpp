@@ -11,6 +11,8 @@ VARP(particlesize, 20, 100, 500);
 VARP(softparticles, 0, 1, 1);
 VARP(softparticleblend, 1, 8, 64);
 
+VARR(partcloudcolour, 0, 8947848, 16777215);
+
 extern void setparticleslod();
 VARFP(particles_lod, 0, 2, 3, {setparticleslod();});
 
@@ -860,6 +862,10 @@ static partrenderer *parts[] =
     new quadrenderer("media/particle/flames_2.png", PT_PART|PT_FLIP|PT_BRIGHT),
     new quadrenderer("media/particle/neige.png", PT_PART|PT_FLIP|PT_RND4|PT_COLLIDE, -1),            // colliding snow
     new trailrenderer("media/particle/pluie.png", PT_TRAIL|PT_LERP|PT_COLLIDE),
+    new trailrenderer("media/particle/nuage_1.png", PT_TRAIL),
+    new trailrenderer("media/particle/nuage_2.png", PT_TRAIL),
+    new trailrenderer("media/particle/nuage_3.png", PT_TRAIL),
+    new trailrenderer("media/particle/nuage_4.png", PT_TRAIL),
     &lightnings,                                                                               // lightning
     &fireballs,                                                                                // explosion fireball
     &pulsebursts,                                                                              // pulse burst
@@ -1017,7 +1023,7 @@ static inline particle *newparticle(const vec &o, const vec &d, int fade, int ty
     return parts[type]->addpart(o, d, fade, color, size, gravity);
 }
 
-VARP(maxparticledistance, 256, 1024, 4096);
+VARP(maxparticledistance, 256, 8192, 8192);
 
 static void splash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity)
 {
@@ -1242,8 +1248,9 @@ void regularshape(int type, int radius, int color, int dir, int num, int fade, c
         if(enhanced)
         {
             //The new, optimized weather code! :D --Q009
+            //Contient quelques modifications pour Cube Conflict
+            //see readme_SE.txt
                 vec toz(to.x, to.y, camera1->o.z);
-                        //if(camera1->o.dist(toz) > (lodparticules+1)*333 && !seedemitter) continue;
                 if(camera1->o.dist(toz) > 200*particles_lod && !seedemitter) continue;
 
                 float z = camera1->o.z+300;
@@ -1375,6 +1382,9 @@ static void makeparticles(entity &e)
         case 12: // smoke plume <radius> <height> <rgb>
             regularflame(PART_SMOKE, e.o, float(e.attr2)/100.0f, float(e.attr3)/100.0f, colorfromattr(e.attr4), 1, 4.0f, 100.0f, 2000.0f, -20);
             break;
+        case 14: //Clouds/Nuages
+            newparticle(e.o, offsetvec(e.o, e.attr4, 1000*3+(e.attr5*300)), 1, PART_NUAGE1+e.attr2, partcloudcolour, 100+(e.attr3*10));
+            break;
         case 32: //lens flares - plain/sparkle/sun/sparklesun <red> <green> <blue>
         case 33:
         case 34:
@@ -1383,6 +1393,9 @@ static void makeparticles(entity &e)
             break;
         case 50:    //rain
         {
+            //The new, optimized weather code! :D --Q009
+            //Contient quelques modifications pour Cube Conflict
+            //see readme_SE.txt
             if(n_ambiance==4) {loopi((particles_lod*32)+3) regularshape(PART_RAIN, max(1+e.attr2, 1), 0x888888, 44, 50, 0, e.o, 0.6f, 0, -1100, 70, true); }
             break;
         }
@@ -1485,14 +1498,14 @@ void updateparticles()
         loopv(entgroup)
         {
             entity &e = *ents[entgroup[i]];
-            particle_textcopy(e.o, entname(e), PART_TEXT, 1, 0xFF4B19, 2.0f);
+            particle_textcopy(e.o, entname(e), PART_TEXT, 1, 0xFF4B19, 2.5f);
         }
         loopv(ents)
         {
             entity &e = *ents[i];
             if(e.type==ET_EMPTY) continue;
-            particle_textcopy(e.o, entname(e), PART_TEXT, 1, 0x1EC850, 2.0f);
-            regular_particle_splash(PART_EDIT, 2, 40, e.o, 0x3232FF, 0.32f*particlesize/100.0f);
+            particle_textcopy(e.o, entname(e), PART_TEXT, 1, 0x1EC850, 2.5f);
+            regular_particle_splash(PART_EDIT, 2, 60, e.o, 0x3232FF, 1.00f*particlesize/100.0f);
         }
     }
 }
@@ -1504,22 +1517,18 @@ void setparticleslod()
         case 0:
             maxparticles = 512;
             softparticles = 0;
-            maxparticledistance = 512;
             break;
         case 1:
             maxparticles = 2048;
             softparticles = 1;
-            maxparticledistance = 1024;
             break;
         case 2:
             maxparticles = 8192;
             softparticles = 1;
-            maxparticledistance = 2048;
             break;
         case 3:
             maxparticles = 16384;
             softparticles = 1;
-            maxparticledistance = 4096;
             break;
     }
     initparticles();
