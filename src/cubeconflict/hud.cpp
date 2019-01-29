@@ -132,6 +132,17 @@ namespace game
 
     void gameplayhud(int w, int h)
     {
+        if(zoom && crosshairsize >= 31) {crosshairsize -= 3; if(crosshairsize<31) crosshairsize = 31;}
+        else if (crosshairsize<40) crosshairsize += 3;
+        zoomfov = guns[player1->gunselect].maxzoomfov;
+
+        gameent *d = hudplayer();
+        if(d->state!=CS_EDITING)
+        {
+            if(cmode) cmode->drawhud(d, w, h);
+        }
+        if(player1->state==CS_SPECTATOR && d==player1) {pophudmatrix(); return; }
+
         if((player1->gunselect == GUN_SKS  || player1->gunselect == GUN_SV98 || player1->gunselect==GUN_ARBALETE || player1->gunselect==GUN_S_CAMPOUZE) && zoom == 1)
         {
             gle::colorf(crosshairalpha, crosshairalpha, crosshairalpha, crosshairalpha);
@@ -165,36 +176,23 @@ namespace game
         }
 
         pushhudmatrix();
-        hudmatrix.scale(h/1800.0f, h/1800.0f, 1);
-        flushhudmatrix();
-
-        if(zoom && crosshairsize >= 31) {crosshairsize -= 3; if(crosshairsize<31) crosshairsize = 31;}
-        else if (crosshairsize<40) crosshairsize += 3;
-        zoomfov = guns[player1->gunselect].maxzoomfov;
-
-        gameent *d = hudplayer();
-        if(d->state!=CS_EDITING)
-        {
-            if(cmode) cmode->drawhud(d, w, h);
-        }
 
         //////////////////////////////////////// RENDU DES IMAGES ////////////////////////////////////////
-        int pw, ph, tw, th, fh;
-        th = max(th, ph);
-        fh = max(fh, ph);
-
-        if(player1->state==CS_SPECTATOR && d==player1) {pophudmatrix(); return; }
 
         if(d->state==CS_DEAD)
         {
             settexture("media/interface/hud/mort.png");
-            bgquad(30, 1580,  200 - tw - pw,  200 - th - ph);
+            bgquad(15, h-130, 115, 115);
             pophudmatrix();
             return;
         }
 
+        if(player1->gunselect == GUN_CAC349 || player1->gunselect == GUN_CACFLEAU || player1->gunselect == GUN_CACMARTEAU || player1->gunselect == GUN_CACMASTER) settexture("media/interface/hud/epee.png");
+        else settexture("media/interface/hud/balle.png");
+        bgquad(w-130, h-130, 115, 115);
+
         settexture("media/interface/hud/coeur.png");
-        bgquad(30, 1580,  200 - tw - pw,  200 - th - ph);
+        bgquad(15, h-130, 115, 115);
 
         if(d->armour)
         {
@@ -205,134 +203,48 @@ namespace game
                 case A_YELLOW: settexture("media/interface/hud/bouclier_or.png"); break;
                 case A_MAGNET: settexture("media/interface/hud/bouclier_magnetique.png"); break;
             }
-            bgquad(350, 1580,  200 - tw - pw,  200 - th - ph);
+            bgquad(250, h-130, 115, 115);
         }
 
-        settexture("media/interface/hud/balle.png");
-        bgquad(2980, 1580,  200 - tw - pw,  200 - th - ph);
+        int decal_icon = 0;
+        if(player1->crouching && player1->aptitude==9)
+        {
+            settexture("media/interface/hud/campeur.png");
+            bgquad(15, h-260, 115, 115);
+            decal_icon += 130;
+        }
+
+        if(player1->ragemillis){settexture("media/interface/hud/rage.png"); bgquad(15, h-260, 115, 115); decal_icon += 130;}
+        if(player1->steromillis){settexture("media/interface/hud/steros.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
+        if(player1->epomillis){settexture("media/interface/hud/epo.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
+        if(player1->champimillis){settexture("media/interface/hud/champis.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
+        if(player1->jointmillis){settexture("media/interface/hud/joint.png"); bgquad(15, h-260-decal_icon, 115, 115);}
+
+        //////////////////////////////////////// RENDU DES NOMBRES ////////////////////////////////////////
+
+        int decal_number = 0;
 
         if(m_random)
         {
             if(player1->gunselect==GUN_S_CAMPOUZE  || player1->gunselect==GUN_S_GAU8 || player1->gunselect==GUN_S_NUKE || player1->gunselect==GUN_S_ROQUETTES);
-            else {settexture("media/interface/hud/inf.png"); bgquad(2820, 1580,  200 - tw - pw,  200 - th - ph);}
+            else {settexture("media/interface/hud/inf.png"); bgquad(w-240, h-130, 115, 115);}
         }
+        else draw_textf("%d", (d->ammo[d->gunselect] > 99 ? w-227 : d->ammo[d->gunselect] > 9 ? w-196 : w-166), h-103, d->ammo[d->gunselect]);
 
-        int dope_img = 0;
-        if(player1->crouching && player1->aptitude==9)
-        {
-            settexture("media/interface/hud/campeur.png");
-            bgquad(30, 1380,  200 - tw - pw,  200 - th - ph);
-            dope_img = dope_img+2;
-        }
-        if(player1->steromillis)
-        {
-            settexture("media/interface/hud/steros.png");
-            bgquad(30, 1380,  200 - tw - pw,  200 - th - ph);
-            dope_img = dope_img+2;
-        }
-        if(player1->ragemillis)
-        {
-            settexture("media/interface/hud/rage.png");
-            bgquad(30, 1380-dope_img*100,  200 - tw - pw,  200 - th - ph);
-            dope_img = dope_img+2;
-        }
-        if(player1->epomillis)
-        {
-            settexture("media/interface/hud/epo.png");
-            bgquad(30, 1380-dope_img*100,  200 - tw - pw,  200 - th - ph);
-            dope_img = dope_img+2;
-        }
-        if(player1->champimillis)
-        {
-            settexture("media/interface/hud/champis.png");
-            bgquad(30, 1380-dope_img*100,  200 - tw - pw,  200 - th - ph);
-            dope_img = dope_img+2;
-        }
-        if(player1->jointmillis)
-        {
-            settexture("media/interface/hud/joint.png");
-            bgquad(30, 1380-dope_img*100,  200 - tw - pw,  200 - th - ph);
-        }
+        draw_textf("%d", 135, h-103, d->health < 9 ? 1 : d->health/10);
 
-        //////////////////////////////////////// RENDU DES TEXTES ////////////////////////////////////////
-        hudmatrix.scale(1*1.4f, 1*1.4f, 1);
-        flushhudmatrix();
+        if(d->armour > 0) draw_textf("%d", 370, h-103, d->armour < 9 ? 1 : d->armour/10);
 
-
-        text_bounds("100", tw, th);
-        draw_textf("%d", 250 - tw - pw, 1235 - th - fh, d->health < 9 ? 1 : d->health/10);
-
-        if(d->armour > 0)
-        {
-            text_bounds("100", tw, th);
-            draw_textf("%d", 480 - tw - pw, 1235 - th - fh, d->armour < 9 ? 1 : d->armour/10);
-        }
-
-        text_bounds("100", tw, th);
-        if(m_random)
-        {
-            if(player1->gunselect==GUN_S_CAMPOUZE  || player1->gunselect==GUN_S_GAU8 || player1->gunselect==GUN_S_NUKE || player1->gunselect==GUN_S_ROQUETTES) draw_textf("%d", (d->ammo[d->gunselect] > 99 ? 2138 : d->ammo[d->gunselect] > 9 ? 2168 : 2200) - tw - pw, 1235 - th - fh, d->ammo[d->gunselect]);
-        }
-        else draw_textf("%d", (d->ammo[d->gunselect] > 99 ? 2138 : d->ammo[d->gunselect] > 9 ? 2168 : 2200) - tw - pw, 1235 - th - fh, d->ammo[d->gunselect]);
-
-
-
-        int dope_txt = 0;
-        if(player1->steromillis)
-        {
-            text_bounds("00", tw, th);
-            draw_textf("%d", 220 - tw - pw, 1085 - th - fh-dope_txt*70, d->steromillis/1000);
-            dope_txt = dope_txt+2;
-        }
-        if(player1->epomillis)
-        {
-            text_bounds("00", tw, th);
-            draw_textf("%d", 220 - tw - pw, 1085 - th - fh-dope_txt*70, d->epomillis/1000);
-            dope_txt = dope_txt+2;
-        }
-        if(player1->champimillis)
-        {
-            text_bounds("00", tw, th);
-            draw_textf("%d", 220 - tw - pw, 1085 - th - fh-dope_txt*70, d->champimillis/1000);
-            dope_txt = dope_txt+2;
-        }
-        if(player1->jointmillis)
-        {
-            text_bounds("00", tw, th);
-            draw_textf("%d", 220 - tw - pw, 1085 - th - fh-dope_txt*70, d->jointmillis/1000);
-            dope_txt = dope_txt+2;
-        }
-        if(player1->ragemillis)
-        {
-            text_bounds("00", tw, th);
-            draw_textf("%d", 220 - tw - pw, 1085 - th - fh-dope_txt*70, d->ragemillis/100);
-            dope_txt = dope_txt+2;
-        }
-
-        if(player1->epomillis)
-        {
-            text_bounds("  ", tw, th);
-            dope_txt = dope_txt+2;
-        }
-
-        if(player1->champimillis)
-        {
-            text_bounds("100", tw, th);
-            dope_txt = dope_txt+2;
-        }
-
-        if(player1->jointmillis)
-        {
-            text_bounds("100", tw, th);
-
-        }
+        if(player1->crouching && player1->aptitude==9) decal_number +=130;
+        if(player1->ragemillis) {draw_textf("%d", 135, h-233-decal_number, d->ragemillis/1000); decal_number +=130;}
+        if(player1->steromillis) {draw_textf("%d", 135, h-233-decal_number, d->steromillis/1000); decal_number +=130;}
+        if(player1->epomillis) {draw_textf("%d", 135, h-233-decal_number, d->epomillis/1000); decal_number +=130;}
+        if(player1->champimillis) {draw_textf("%d", 135, h-233-decal_number, d->champimillis/1000); decal_number +=130;}
+        if(player1->jointmillis) {draw_textf("%d", 135, h-233-decal_number, d->jointmillis/1000); decal_number +=130;}
 
         pophudmatrix();
     }
 }
-
-
-
 
 // Code des autres modes de jeux à remettre
 

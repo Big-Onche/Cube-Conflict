@@ -9,7 +9,7 @@
 			<Target title="client64">
 				<Option output="../../bin64/cubeconflict.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="../../" />
-				<Option object_output=".objs/client64" />
+				<Option object_output="../../../../GitHub" />
 				<Option type="0" />
 				<Option compiler="gcc" />
 				<Option parameters="-t0 -w640 -h480 -qhome" />
@@ -57,7 +57,7 @@
 			<Target title="client32">
 				<Option output="../../bin/cubeconflict.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="../../" />
-				<Option object_output=".objs/client32" />
+				<Option object_output="../../../../GitHub" />
 				<Option type="0" />
 				<Option compiler="gcc" />
 				<Option parameters="-t0 -w640 -h480 -qhome" />
