@@ -8,24 +8,27 @@ int message_streak1;
 string strclassetueur, straptitudevictime;
 
 int decal_message = 0;
-bool need_message1, need_message3;
+bool need_message1, need_message2;
 
 namespace game
 {
+    void rendermessage(string message, int textsize = 100, float pos = 8.8f, int decal = 0)
+    {
+        int tw = text_width(message);
+        float tsz = 0.04f*min(screenw, screenh)/textsize,
+              tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*pos*min(screenw, screenh+decal) - textsize*tsz;
+        pushhudmatrix();
+        hudmatrix.translate(tx, ty, 0);
+        hudmatrix.scale(tsz, tsz, 1);
+        flushhudmatrix();
+        draw_text(message, 0, 0);
+        pophudmatrix();
+    }
+
+
     void drawmessages(int killstreak, string str_pseudovictime, int n_aptitudevictime, string str_pseudoacteur, int n_killstreakacteur)
     {
-        decal_message = 0;
-
-        hudmatrix.ortho(0, screenw, screenh, 0, -1, 1);
-        resethudmatrix();
-        resethudshader();
-
-        gle::defvertex(2);
-        gle::deftexcoord0();
-
-        glEnable(GL_BLEND);
-
-        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+        decal_message = 0, need_message1 = true, need_message2 = true;
 
         if(totalmillis-message1<=2500)
         {
@@ -33,28 +36,15 @@ namespace game
 
             switch(killstreak)
             {
-                case 3: formatstring(streakmsg, "Triplette ! \fc(x%d)", killstreak); need_message1 = true; break;
-                case 5: formatstring(streakmsg, "Pentaplette ! \fc(x%d)", killstreak); need_message1 = true; break;
-                case 10: formatstring(streakmsg, "Décaplette ! \fc(x%d)", killstreak); need_message1 = true; break;
-                case 20: formatstring(streakmsg, "Eicoplette ! \fc(x%d)", killstreak); need_message1 = true; break;
-                case 30: formatstring(streakmsg, "Triaconplette ! \fc(x%d)", killstreak); need_message1 = true; break;
-                default: need_message1 = false;
+                case 3: formatstring(streakmsg, "Triplette ! \fc(x%d)", killstreak); break;
+                case 5: formatstring(streakmsg, "Pentaplette ! \fc(x%d)", killstreak); break;
+                case 10: formatstring(streakmsg, "Décaplette ! \fc(x%d)", killstreak); break;
+                case 20: formatstring(streakmsg, "Eicoplette ! \fc(x%d)", killstreak); break;
+                case 30: formatstring(streakmsg, "Triaconplette ! \fc(x%d)", killstreak); break;
+                default : need_message1 = false;
             }
 
-            if(need_message1)
-            {
-                int tw = text_width(streakmsg);
-                float tsz = 0.04f*min(screenw, screenh)/85,
-                      tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*8.8f*min(screenw, screenh) - 85*tsz;
-                pushhudmatrix();
-                hudmatrix.translate(tx, ty, 0);
-                hudmatrix.scale(tsz, tsz, 1);
-                flushhudmatrix();
-                draw_text(streakmsg, 0, 0);
-                pophudmatrix();
-
-                decal_message -= 45;
-            }
+            if(need_message1) {rendermessage(streakmsg, 85, 8.8f, decal_message); decal_message -= 45;}
         }
 
         if(totalmillis-message2<=2500)
@@ -62,17 +52,7 @@ namespace game
             string killmsg;
 
             formatstring(killmsg, "Tu as tué \fc%s \f7! (%s)", str_pseudovictime, aptitudes[n_aptitudevictime].apt_nom);
-
-            int tw = text_width(killmsg);
-            float tsz = 0.04f*min(screenw, screenh)/100,
-                  tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*8.8f*min(screenw, screenh+decal_message) - 100*tsz;
-            pushhudmatrix();
-            hudmatrix.translate(tx, ty, 0);
-            hudmatrix.scale(tsz, tsz, 1);
-            flushhudmatrix();
-            draw_text(killmsg, 0, 0);
-            pophudmatrix();
-
+            rendermessage(killmsg, 100, 8.8f, decal_message);
             decal_message -= 40;
         }
 
@@ -82,28 +62,15 @@ namespace game
 
             switch(n_killstreakacteur)
             {
-                case 3: formatstring(infomsg, "\fc%s\f7 est chaud ! (Triplette)", str_pseudoacteur); need_message3 = true; break;
-                case 5: formatstring(infomsg, "\fc%s\f7 domine ! (Pentaplette)", str_pseudoacteur); need_message3 = true; break;
-                case 10: formatstring(infomsg, "\fc%s\f7 est inarrêtable ! (Décaplette)", str_pseudoacteur); need_message3 = true; break;
-                case 20: formatstring(infomsg, "\fc%s\f7 est invincible ! (Eicoplette)", str_pseudoacteur); need_message3 = true; break;
-                case 30: formatstring(infomsg, "\fc%s\f7 est un Dieu ! (Triaconplette)", str_pseudoacteur);  need_message3 = true; break;
-                default: need_message3 = false;
+                case 3: formatstring(infomsg, "\fc%s\f7 est chaud ! (Triplette)", str_pseudoacteur); break;
+                case 5: formatstring(infomsg, "\fc%s\f7 domine ! (Pentaplette)", str_pseudoacteur); break;
+                case 10: formatstring(infomsg, "\fc%s\f7 est inarrêtable ! (Décaplette)", str_pseudoacteur); break;
+                case 20: formatstring(infomsg, "\fc%s\f7 est invincible ! (Eicoplette)", str_pseudoacteur); break;
+                case 30: formatstring(infomsg, "\fc%s\f7 est un Dieu ! (Triaconplette)", str_pseudoacteur); break;
+                default: need_message2 = false;
             }
 
-            if(need_message3)
-            {
-                int tw = text_width(infomsg);
-                float tsz = 0.04f*min(screenw, screenh)/100,
-                      tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*8.8f*min(screenw, screenh+decal_message) - 100*tsz;
-                pushhudmatrix();
-                hudmatrix.translate(tx, ty, 0);
-                hudmatrix.scale(tsz, tsz, 1);
-                flushhudmatrix();
-                draw_text(infomsg, 0, 0);
-                pophudmatrix();
-
-                decal_message -= 40;
-            }
+            if(need_message2) {rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= 40;}
         }
 
         if(gamemillismsg < 5000)
@@ -111,16 +78,7 @@ namespace game
             string countdownmsg;
 
             formatstring(countdownmsg, "\f6Armes activées dans :%s %.1f",  gamemillismsg<1000 ? "\fe" : gamemillismsg > 3000 ? "\fc" : "\fd", (5000-gamemillismsg)/1000.0f);
-
-            int tw = text_width(countdownmsg);
-            float tsz = 0.04f*min(screenw, screenh)/85,
-                  tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*8.8f*min(screenw, screenh) - 85*tsz;
-            pushhudmatrix();
-            hudmatrix.translate(tx, ty, 0);
-            hudmatrix.scale(tsz, tsz, 1);
-            flushhudmatrix();
-            draw_text(countdownmsg, 0, 0);
-            pophudmatrix();
+            rendermessage(countdownmsg, 85);
         }
 
         if(m_battle)
@@ -128,16 +86,47 @@ namespace game
             string remainingplayersmsg;
 
             formatstring(remainingplayersmsg, "\f7Joueurs vivants : %d",  battlevivants);
+            rendermessage(remainingplayersmsg, 75, 10.0f);
+        }
 
-            int tw = text_width(remainingplayersmsg);
-            float tsz = 0.04f*min(screenw, screenh)/75,
-                  tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*10.0f*min(screenw, screenh) - 75*tsz;
-            pushhudmatrix();
-            hudmatrix.translate(tx, ty, 0);
-            hudmatrix.scale(tsz, tsz, 1);
-            flushhudmatrix();
-            draw_text(remainingplayersmsg, 0, 0);
-            pophudmatrix();
+        if(player1->state==CS_DEAD)
+        {
+            string killedbymsg, withmsg, waitmsg;
+
+            formatstring(killedbymsg, "Tué par %s (%s)", str_pseudotueur, aptitudes[n_aptitudetueur].apt_nom);
+            rendermessage(killedbymsg, 65, 1.5f, 0);
+            formatstring(withmsg, "Avec %s", str_armetueur);
+            rendermessage(withmsg, 95, 1.5f, -360);
+
+            int wait = cmode ? cmode->respawnwait(player1) : (lastmillis < player1->lastpain + 1000) ? 1 : 0 ;
+            if(wait>0) formatstring(waitmsg, "Respawn possible dans %d seconde%s", wait, wait<=1?"":"s");
+            else formatstring(waitmsg, "Appuie n'importe où pour revivre ! ");
+            rendermessage(waitmsg, 95, 1.5f, -580);
+        }
+
+
+        if(player1->state==CS_SPECTATOR)
+        {
+            string spectatormsg, color;
+
+            gameent *f = followingplayer();
+
+            if(f)
+            {
+                f->state!=CS_DEAD ? formatstring(color, "\f7") : formatstring(color, "\fg") ;
+
+                if(f->privilege)
+                {
+                    f->privilege>=PRIV_ADMIN ? formatstring(color, "\fc") : formatstring(color, "\f7");
+                    if(f->state==CS_DEAD) formatstring(color, "\fg") ;
+                }
+                formatstring(spectatormsg, "Spectateur : %s%s", color, colorname(f));
+            }
+            else
+            {
+                formatstring(spectatormsg, "Spectateur : Caméra libre");
+            }
+            rendermessage(spectatormsg, 75, 2.0f);
         }
     }
 
@@ -182,46 +171,6 @@ namespace game
         if(zoom && crosshairsize >= 31) {crosshairsize -= 3; if(crosshairsize<31) crosshairsize = 31;}
         else if (crosshairsize<40) crosshairsize += 3;
         zoomfov = guns[player1->gunselect].maxzoomfov;
-
-        if(player1->state==CS_SPECTATOR)
-        {
-            int pw, ph, tw, th, fw, fh;
-            text_bounds("  ", pw, ph);
-            text_bounds("SPECTATEUR", tw, th);
-            th = max(th, ph);
-            gameent *f = followingplayer();
-            text_bounds(f ? colorname(f) : " ", fw, fh);
-            fh = max(fh, ph);
-            draw_text("SPECTATEUR", w*1800/h - tw - pw, 1550 - th - fh);
-            if(f)
-            {
-                int color = f->state!=CS_DEAD ? 0xFFFFFF : 0x606060;
-                if(f->privilege)
-                {
-                    color = f->privilege>=PRIV_ADMIN ? 0xFF8000 : 0x40FF80;
-                    if(f->state==CS_DEAD) color = (color>>1)&0x7F7F7F;
-                }
-                draw_text(colorname(f), w*1800/h - fw - pw, 1550 - fh, (color>>16)&0xFF, (color>>8)&0xFF, color&0xFF);
-            }
-            resethudshader();
-        }
-
-        if(player1->state==CS_DEAD)
-        {
-            int pw, ph, tw, th, fh;
-            text_bounds("  ", pw, ph);
-            text_bounds("Tué par Superpseudo12345 (Americain)", tw, th);
-            th = max(th, ph);
-            fh = max(fh, ph);
-
-            draw_textf("Tué par %s (%s)", w*1800/h - tw - pw, 1650 - th - fh + 50, str_pseudotueur, aptitudes[n_aptitudetueur].apt_nom); //, strclassetueur
-            draw_textf("Avec %s", w*1800/h - tw - pw, 1650 - th - fh + 100, str_armetueur);
-
-            int wait = cmode ? cmode->respawnwait(player1) : (lastmillis < player1->lastpain + 1000) ? 1 : 0 ;
-            if(wait>0) draw_textf("Respawn possible dans %d seconde%s", w*1800/h - tw - pw, 1650 - th - fh + 150, wait, wait<=1?"":"s");
-            else draw_textf("Appuie n'importe où pour revivre ! ", w*1800/h - tw - pw, 1650 - th - fh + 150);
-            resethudshader();
-        }
 
         gameent *d = hudplayer();
         if(d->state!=CS_EDITING)

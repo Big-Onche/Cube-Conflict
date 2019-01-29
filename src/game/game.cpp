@@ -955,6 +955,9 @@ namespace game
     int selectcrosshair(vec &col)
     {
         gameent *d = hudplayer();
+
+        drawmessages(player1->killstreak, str_pseudovictime, n_aptitudevictime, str_pseudoacteur, n_killstreakacteur);
+
         if(d->state==CS_SPECTATOR || d->state==CS_DEAD || UI::uivisible("scoreboard")) return -1;
 
         if(d->state!=CS_ALIVE) return 0;
@@ -974,7 +977,6 @@ namespace game
 
         if(d->gunwait) col.mul(0.5f);
 
-        drawmessages(player1->killstreak, str_pseudovictime, n_aptitudevictime, str_pseudoacteur, n_killstreakacteur);
         return crosshair;
     }
 
