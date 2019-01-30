@@ -494,7 +494,7 @@ namespace game
 
     VARP(teamcolorfrags, 0, 1, 1);
 
-    static const struct guninfo { const char *partverb, *parttroll, *partsuicide; } partmessage[] =
+    static const struct part { const char *partverb, *parttroll, *partsuicide; } partmessage[] =
     {
         {"explosé", "ta bêtise.", "suicidé : Darwin Award"},
         {"owned", "ton incompétence.", "tué tout seul"},

@@ -225,16 +225,12 @@ namespace game
     VARFP(player1_chapeau, 0, 0, 14, player1->customhat = player1_chapeau);
     VARFP(player1_cape, 0, 0, 14, player1->customcape = player1_cape);
 
-    string bouclier;
+    string bouclier, chapeau, cape;
 
     void renderplayer(gameent *d, const playermodelinfo &mdl, int color, int team, float fade, int flags = 0, bool mainpass = true)
     {
+        //////////////////////////////////////////////////////////////////ANIMATIONS//////////////////////////////////////////////////////////////////
         int lastaction = d->lastaction, anim = ANIM_IDLE|ANIM_LOOP, attack = 0, delay = 0;
-        //if(d->lastattack >= 0)
-        //{
-        //    attack = attacks[d->lastattack].anim;
-        //    delay = attacks[d->lastattack].attackdelay+50;
-        //}
         if(intermission && d->state!=CS_DEAD)
         {
             anim = attack = ANIM_LOSE|ANIM_LOOP;
@@ -330,112 +326,37 @@ namespace game
         if(!mainpass) flags &= ~(MDL_FULLBRIGHT | MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY | MDL_CULL_DIST);
         float trans = d->state == CS_LAGGED ? 0.5f : 1.0f;
 
+        //////////////////////////////////////////////////////////////////MODELES//////////////////////////////////////////////////////////////////
+        ////////Boucliers////////
         if(d->armour && d->state == CS_ALIVE && camera1->o.dist(d->o) <= maxmodelradiusdistance*10)
         {
             switch(d->armourtype)
             {
-                case A_YELLOW:
-                if(d->armour<=2000) copystring(bouclier, "worldshield/or/100");
-                if(d->armour<=1600) copystring(bouclier, "worldshield/or/80");
-                if(d->armour<=1200) copystring(bouclier, "worldshield/or/60");
-                if(d->armour<=800)  copystring(bouclier, "worldshield/or/40");
-                if(d->armour<=400)  copystring(bouclier, "worldshield/or/20");
-                break;
-
-                case A_GREEN:
-                if(d->armour<=1250)  copystring(bouclier, "worldshield/fer/100");
-                if(d->armour<=1000)  copystring(bouclier, "worldshield/fer/80");
-                if(d->armour<=750)   copystring(bouclier, "worldshield/fer/60");
-                if(d->armour<=500)   copystring(bouclier, "worldshield/fer/40");
-                if(d->armour<=250)   copystring(bouclier, "worldshield/fer/20");
-                break;
-
-                case A_BLUE:
-                if(d->armour<=750) copystring(bouclier, "worldshield/bois/100");
-                if(d->armour<=600) copystring(bouclier, "worldshield/bois/80");
-                if(d->armour<=450) copystring(bouclier, "worldshield/bois/60");
-                if(d->armour<=300) copystring(bouclier, "worldshield/bois/40");
-                if(d->armour<=150) copystring(bouclier, "worldshield/bois/20");
-                break;
-
-                case A_MAGNET:
-                if(d->armour<=1500)  copystring(bouclier,  "worldshield/magnetique/100");
-                if(d->armour<=1200)  copystring(bouclier,  "worldshield/magnetique/80");
-                if(d->armour<=900)   copystring(bouclier,  "worldshield/magnetique/60");
-                if(d->armour<=600)   copystring(bouclier,  "worldshield/magnetique/40");
-                if(d->armour<=300)   copystring(bouclier, "worldshield/magnetique/20");
-                break;
-
+                case A_YELLOW: {int shieldvalue = d->armour<=400 ? 4 : d->armour<=800 ? 3 : d->armour<=1200 ? 2 : d->armour<=1600 ? 1 : 0; copystring(bouclier, shields[shieldvalue].gold);} break;
+                case A_GREEN: {int shieldvalue = d->armour<=250 ? 4 : d->armour<=500 ? 3 : d->armour<=750 ? 2 : d->armour<=1000 ? 1 : 0; copystring(bouclier, shields[shieldvalue].fer);} break;
+                case A_BLUE: {int shieldvalue = d->armour<=150 ? 4 : d->armour<=300 ? 3 : d->armour<=450 ? 2 : d->armour<=600 ? 1 : 0; copystring(bouclier, shields[shieldvalue].bois);} break;
+                case A_MAGNET: {int shieldvalue = d->armour<=300 ? 4 : d->armour<=600 ? 3 : d->armour<=900 ? 2 : d->armour<=1200 ? 1 : 0; copystring(bouclier, shields[shieldvalue].magnetique);} break;
             }
             a[ai++] = modelattach("tag_shield", bouclier, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
+        ////////Boosts////////
+        if(d->jointmillis>0) a[ai++] = modelattach("tag_boost", "boosts/joint", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+        if(d->steromillis>0) a[ai++] = modelattach("tag_boost", "boosts/steros", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+        if(d->epomillis>0)   a[ai++] = modelattach("tag_boost", "boosts/epo", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
 
-        //if(d->jointmillis) a[ai++] = modelattach("tag_boost", "boosts/joint", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-        //if(d->steromillis) a[ai++] = modelattach("tag_boost", "boosts/steros", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-        //if(d->epomillis) a[ai++] = modelattach("tag_boost", "boosts/epo", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+        ////////Customisations////////
+        if(d->customhat>=1 && d->customhat<=14)
+        {
+            copystring(chapeau, customs[d->customhat].chapeau);
+            a[ai++] = modelattach("tag_hat", chapeau, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+        }
+        if(d->customcape>=1 && d->customcape<=11)
+        {
+            copystring(cape, team==2 ? customs[d->customcape].capeteam2 : customs[d->customcape].capeteam1);
+            a[ai++] = modelattach("tag_hat", cape, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+        }
 
-                    if(d->customhat>=1 && d->customhat<=14)
-                    {
-                        switch(d->customhat) {
-                            case 1: a[ai++] = modelattach("tag_hat", "chapeaux/sombrero", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                            case 2: a[ai++] = modelattach("tag_hat", "chapeaux/lapin", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                            case 3: a[ai++] = modelattach("tag_hat", "chapeaux/aureole", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                            case 4: a[ai++] = modelattach("tag_hat", "chapeaux/cornes", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                            case 5: a[ai++] = modelattach("tag_hat", "chapeaux/joker", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                            case 6: a[ai++] = modelattach("tag_hat", "chapeaux/champignon", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                            case 7: a[ai++] = modelattach("tag_hat", "chapeaux/couronne", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                            case 8: a[ai++] = modelattach("tag_hat", "chapeaux/heaume", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                            case 9: a[ai++] = modelattach("tag_hat", "chapeaux/bandana", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                            case 10: a[ai++] = modelattach("tag_hat", "chapeaux/melon", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                            case 11: a[ai++] = modelattach("tag_hat", "chapeaux/casque", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                            case 12: a[ai++] = modelattach("tag_hat", "chapeaux/helices", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                            case 13: a[ai++] = modelattach("tag_hat", "chapeaux/aventurier", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                            case 14: a[ai++] = modelattach("tag_hat", "chapeaux/bug", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                            default : a[ai++] = modelattach("tag_hat", "chapeaux/lapin", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-                        }
-                    }
-
-                    string capedir;
-
-                    if(d->customcape>=1)
-                    {
-                        if(team==1 || team==0) {
-                            switch(d->customcape) {
-                                case 1: copystring(capedir, "capes/Cape_JVC"); break;
-                                case 2: copystring(capedir, "capes/Cape_Cisla"); break;
-                                case 3: copystring(capedir, "capes/Cape_Tabasco"); break;
-                                case 4: copystring(capedir, "capes/Cape_CubeEngine"); break;
-                                case 5: copystring(capedir, "capes/Cape_Cislattack"); break;
-                                case 6: copystring(capedir, "capes/Cape_Ruinee"); break;
-                                case 7: copystring(capedir, "capes/Cape_Weed"); break;
-                                case 8: copystring(capedir, "capes/Cape_Diable"); break;
-                                case 9: copystring(capedir, "capes/Cape_High"); break;
-                                case 10: copystring(capedir, "capes/Cape_Quenelle"); break;
-                                case 11: copystring(capedir, "capes/Cape_Poulet"); break;
-                            }
-                        }
-                        if(team==2) {
-                            switch(d->customcape) {
-                                case 1: copystring(capedir, "capes/Cape_JVC/orange"); break;
-                                case 2: copystring(capedir, "capes/Cape_Cisla/orange"); break;
-                                case 3: copystring(capedir, "capes/Cape_Tabasco/orange"); break;
-                                case 4: copystring(capedir, "capes/Cape_CubeEngine/orange"); break;
-                                case 5: copystring(capedir, "capes/Cape_Cislattack/orange"); break;
-                                case 6: copystring(capedir, "capes/Cape_Ruinee/orange"); break;
-                                case 7: copystring(capedir, "capes/Cape_Weed/orange"); break;
-                                case 8: copystring(capedir, "capes/Cape_Diable/orange"); break;
-                                case 9: copystring(capedir, "capes/Cape_High/orange"); break;
-                                case 10: copystring(capedir, "capes/Cape_Quenelle/orange"); break;
-                                case 11: copystring(capedir, "capes/Cape_Poulet/orange"); break;
-                            }
-                        }
-                    a[ai++] = modelattach("tag_hat", capedir, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-                    }
-
-
-        if(d->pitch>30) pitch=30;
-        if(d->pitch<-30) pitch=-30;
-        rendermodel(mdlname, anim, o, yaw, pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), trans));
+        rendermodel(mdlname, anim, o, yaw, d->pitch>17 ? 17 : d->pitch<-17 ? -17 : pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), trans));
     }
 
 void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team, float fade, int flags = 0, bool mainpass = true)
@@ -685,8 +606,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
 
         if(d->muzzle.x >= 0) d->muzzle = calcavatarpos(d->muzzle, 12);
 
-        if(player1->armour==0) return;
-        string bouclier;
+        if(d->armour<=0) return;
 
         vec sway2;
         vecfromyawpitch(d->yaw, 0, 0, shieldside, sway2);
@@ -696,39 +616,12 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
         sway2.z += (swayup/3.0f)*(fabs(sinf(steps2)) - 1);
         if(!zoom) sway2.add(swaydir).add(d->o);
 
-        switch(player1->armourtype)
+        switch(d->armourtype)
         {
-            case A_YELLOW:
-            if(player1->armour<=2000)  copystring(bouclier, "hudshield/or/100");
-            if(player1->armour<=1600)  copystring(bouclier, "hudshield/or/80");
-            if(player1->armour<=1200)  copystring(bouclier, "hudshield/or/60");
-            if(player1->armour<=800)   copystring(bouclier, "hudshield/or/40");
-            if(player1->armour<=400)   copystring(bouclier, "hudshield/or/20");
-            break;
-
-            case A_GREEN:
-            if(player1->armour<=1250)  copystring(bouclier, "hudshield/fer/100");
-            if(player1->armour<=1000)  copystring(bouclier, "hudshield/fer/80");
-            if(player1->armour<=750)   copystring(bouclier, "hudshield/fer/60");
-            if(player1->armour<=500)   copystring(bouclier, "hudshield/fer/40");
-            if(player1->armour<=250)   copystring(bouclier, "hudshield/fer/20");
-            break;
-
-            case A_BLUE:
-            if(player1->armour<=750) copystring(bouclier, "hudshield/bois/100");
-            if(player1->armour<=600) copystring(bouclier, "hudshield/bois/80");
-            if(player1->armour<=450) copystring(bouclier, "hudshield/bois/60");
-            if(player1->armour<=300) copystring(bouclier, "hudshield/bois/40");
-            if(player1->armour<=150) copystring(bouclier, "hudshield/bois/20");
-            break;
-
-            case A_MAGNET:;
-            if(player1->armour<=1500)  copystring(bouclier, "hudshield/magnetique/100");
-            if(player1->armour<=1200)  copystring(bouclier, "hudshield/magnetique/80");
-            if(player1->armour<=900)   copystring(bouclier, "hudshield/magnetique/60");
-            if(player1->armour<=600)   copystring(bouclier, "hudshield/magnetique/40");
-            if(player1->armour<=300)   copystring(bouclier, "hudshield/magnetique/20");
-            break;
+            case A_YELLOW: {int shieldvalue = d->armour<=400 ? 4 : d->armour<=800 ? 3 : d->armour<=1200 ? 2 : d->armour<=1600 ? 1 : 0; copystring(bouclier, shields[shieldvalue].hudgold);} break;
+            case A_GREEN: {int shieldvalue = d->armour<=250 ? 4 : d->armour<=500 ? 3 : d->armour<=750 ? 2 : d->armour<=1000 ? 1 : 0; copystring(bouclier, shields[shieldvalue].hudfer);} break;
+            case A_BLUE: {int shieldvalue = d->armour<=150 ? 4 : d->armour<=300 ? 3 : d->armour<=450 ? 2 : d->armour<=600 ? 1 : 0; copystring(bouclier, shields[shieldvalue].hudbois);} break;
+            case A_MAGNET: {int shieldvalue = d->armour<=300 ? 4 : d->armour<=600 ? 3 : d->armour<=900 ? 2 : d->armour<=1200 ? 1 : 0; copystring(bouclier, shields[shieldvalue].hudmagnetique);} break;
         }
         rendermodel(bouclier, anim, sway2, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), 1));
     }

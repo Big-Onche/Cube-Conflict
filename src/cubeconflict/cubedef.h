@@ -29,6 +29,36 @@ static struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt
     { 85,   80,   90,  110, "Junkie"},      //13
 };
 
+//Définition des boucliers
+static const struct shieldsinfo { const char *bois, *fer, *gold, *magnetique, *hudbois, *hudfer, *hudgold, *hudmagnetique; } shields[] =
+{
+    {"worldshield/bois/100", "worldshield/fer/100", "worldshield/or/100", "worldshield/magnetique/100", "hudshield/bois/100", "hudshield/fer/100", "hudshield/or/100", "hudshield/magnetique/100"},
+    {"worldshield/bois/80",  "worldshield/fer/80",  "worldshield/or/80",  "worldshield/magnetique/80",  "hudshield/bois/80",  "hudshield/fer/80",  "hudshield/or/80",  "hudshield/magnetique/80"},
+    {"worldshield/bois/60",  "worldshield/fer/60",  "worldshield/or/60",  "worldshield/magnetique/60",  "hudshield/bois/60",  "hudshield/fer/60",  "hudshield/or/60",  "hudshield/magnetique/60"},
+    {"worldshield/bois/40",  "worldshield/fer/40",  "worldshield/or/40",  "worldshield/magnetique/40",  "hudshield/bois/40",  "hudshield/fer/40",  "hudshield/or/40",  "hudshield/magnetique/40"},
+    {"worldshield/bois/20",  "worldshield/fer/20",  "worldshield/or/20",  "worldshield/magnetique/20" , "hudshield/bois/20",  "hudshield/fer/20",  "hudshield/or/20",  "hudshield/magnetique/20"},
+};
+
+static const struct custominfo { const char *chapeau, *capeteam1, *capeteam2; } customs[] =
+{
+    {}, //0 = Rien
+    {"chapeaux/sombrero",   "capes/Cape_JVC",           "capes/Cape_JVC/orange"},
+    {"chapeaux/lapin",      "capes/Cape_Cisla",         "capes/Cape_Cisla/orange"},
+    {"chapeaux/aureole",    "capes/Cape_Tabasco",       "capes/Cape_Tabasco/orange"},
+    {"chapeaux/cornes",     "capes/Cape_CubeEngine",    "capes/Cape_CubeEngine/orange"},
+    {"chapeaux/joker",      "capes/Cape_Cislattack",    "capes/Cape_Cislattack/orange"},
+    {"chapeaux/champignon", "capes/Cape_Ruinee",        "capes/Cape_Ruinee/orange"},
+    {"chapeaux/couronne",   "capes/Cape_Weed",          "capes/Cape_Weed/orange"},
+    {"chapeaux/heaume",     "capes/Cape_Diable",        "capes/Cape_Diable/orange"},
+    {"chapeaux/bandana",    "capes/Cape_High",          "capes/Cape_High/orange"},
+    {"chapeaux/melon",      "capes/Cape_Quenelle",      "capes/Cape_Quenelle/orange"},
+    {"chapeaux/casque",     "capes/Cape_Poulet",        "capes/Cape_Poulet/orange"},
+    {"chapeaux/helices"},
+    {"chapeaux/aventurier"},
+    {"chapeaux/bug"},
+    {"chapeaux/lapin"},
+};
+
 //Messages de kill
 extern bool suicided;
 extern string str_pseudotueur, str_armetueur;
