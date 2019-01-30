@@ -29,6 +29,11 @@ static struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt
     { 85,   80,   90,  110, "Junkie"},      //13
 };
 
+//Messages de kill
+extern bool suicided;
+extern string str_pseudotueur, str_armetueur;
+extern int n_aptitudetueur, n_aptitudevictime;
+
 //HUD
 extern int message1, message2, message3;  //Messages HUD
 extern int gamemillismsg; //Décompte HUD

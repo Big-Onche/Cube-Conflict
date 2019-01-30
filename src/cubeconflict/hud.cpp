@@ -25,7 +25,6 @@ namespace game
         pophudmatrix();
     }
 
-
     void drawmessages(int killstreak, string str_pseudovictime, int n_aptitudevictime, string str_pseudoacteur, int n_killstreakacteur)
     {
         decal_message = 0, need_message1 = true, need_message2 = true;
@@ -92,8 +91,9 @@ namespace game
         if(player1->state==CS_DEAD)
         {
             string killedbymsg, withmsg, waitmsg;
+            if(suicided) formatstring(killedbymsg, "Tu t'es suicidé !");
+            else formatstring(killedbymsg, "Tué par %s (%s)", str_pseudotueur, aptitudes[n_aptitudetueur].apt_nom);
 
-            formatstring(killedbymsg, "Tué par %s (%s)", str_pseudotueur, aptitudes[n_aptitudetueur].apt_nom);
             rendermessage(killedbymsg, 65, 1.5f, 0);
             formatstring(withmsg, "Avec %s", str_armetueur);
             rendermessage(withmsg, 95, 1.5f, -360);
@@ -224,13 +224,18 @@ namespace game
 
         int decal_number = 0;
 
-        if(m_random)
+        switch(player1->gunselect)
         {
-            if(player1->gunselect==GUN_S_CAMPOUZE  || player1->gunselect==GUN_S_GAU8 || player1->gunselect==GUN_S_NUKE || player1->gunselect==GUN_S_ROQUETTES);
-            else {settexture("media/interface/hud/inf.png"); bgquad(w-240, h-130, 115, 115);}
+            case GUN_S_CAMPOUZE: case GUN_S_GAU8: case GUN_S_NUKE: case GUN_S_ROQUETTES: draw_textf("%d", (d->ammo[d->gunselect] > 99 ? w-227 : d->ammo[d->gunselect] > 9 ? w-196 : w-166), h-103, d->ammo[d->gunselect]); break;
+            default:
+            {
+                if(m_random)
+                {
+                    settexture("media/interface/hud/inf.png"); bgquad(w-227, h-130, 115, 115);
+                }
+                else draw_textf("%d", (d->ammo[d->gunselect] > 99 ? w-227 : d->ammo[d->gunselect] > 9 ? w-196 : w-166), h-103, d->ammo[d->gunselect]);
+            }
         }
-        else draw_textf("%d", (d->ammo[d->gunselect] > 99 ? w-227 : d->ammo[d->gunselect] > 9 ? w-196 : w-166), h-103, d->ammo[d->gunselect]);
-
         draw_textf("%d", 135, h-103, d->health < 9 ? 1 : d->health/10);
 
         if(d->armour > 0) draw_textf("%d", 370, h-103, d->armour < 9 ? 1 : d->armour/10);

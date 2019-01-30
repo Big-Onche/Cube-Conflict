@@ -817,9 +817,6 @@ extern float grassstep;
 
 extern int n_map;
 
-extern string str_pseudotueur, str_armetueur;
-extern int n_aptitudetueur, n_aptitudevictime;
-
 extern int maxsoundradius;
 
 extern void sendresume(int ci);

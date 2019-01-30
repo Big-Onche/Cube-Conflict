@@ -3,6 +3,7 @@
 
 string str_pseudovictime, str_pseudotueur, str_armetueur, str_pseudoacteur;
 int n_aptitudetueur, n_aptitudevictime, n_killstreakacteur;
+bool suicided;
 
 namespace game
 {
@@ -493,17 +494,17 @@ namespace game
 
     VARP(teamcolorfrags, 0, 1, 1);
 
-    static const struct guninfo { const char *partverb, *partsuicide; } partmessage[] =
+    static const struct guninfo { const char *partverb, *parttroll, *partsuicide; } partmessage[] =
     {
-        {"explosé", "suicidé : Darwin Award"},
-        {"owned", "tué tout seul"},
-        {"niqué", "niqué comme un con"},
-        {"tué", "annihilé bêtement"},
-        {"butté", "exterminé sans ennemis"},
-        {"troué"},
-        {"dézingué"},
-        {"annihilé"},
-        {"brisé"},
+        {"explosé", "ta bêtise.", "suicidé : Darwin Award"},
+        {"owned", "ton incompétence.", "tué tout seul"},
+        {"niqué", "ta débilité !", "niqué comme un con"},
+        {"tué", "ton manque de chance.", "annihilé bêtement"},
+        {"butté", "avec la meilleure volonté du monde.", "exterminé sans ennemis"},
+        {"troué", "succès."},
+        {"dézingué", "détermination."},
+        {"annihilé", "une précision sans précédent."},
+        {"brisé", "d'atronces souffrances."},
         {"neutralisé"},
         {"pulverisé"},
         {"exterminé"},
@@ -587,7 +588,7 @@ namespace game
         if(d==actor) // Suicide ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
             conoutf(contype, "%s%s %s %s%s", d==player1 ? "\fd" : "", dname, d==player1 ? "t'es" : "s'est", partmessage[rnd(5)].partsuicide, d==player1 ? " !" : ".");
-            if(d==player1) player1->killstreak=0;
+            if(d==player1) {player1->killstreak=0; copystring(str_armetueur, partmessage[rnd(9)].parttroll); suicided = true;}
         }
         else if(isteam(d->team, actor->team)) // Tir allié /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
@@ -599,7 +600,7 @@ namespace game
         else // Kill ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
             if(actor==player1) { conoutf(contype, "\fd%s \f7as %s \fc%s \f7avec %s", aname, partmessage[rnd(15)].partverb, dname, guns[actor->gunselect].armedesc); playsound(S_KILL); message1 = totalmillis; message2 = totalmillis; copystring(str_pseudovictime, dname); n_aptitudevictime = d->aptitude;} //TU as tué quelqu'un
-            else if(d==player1) { conoutf(contype, "\fd%s \f7as été %s par \fc%s \f7avec %s", dname, partmessage[rnd(15)].partverb, aname, guns[actor->gunselect].armedesc);  player1->killstreak=0; copystring(str_pseudotueur, aname); n_aptitudetueur = actor->aptitude; copystring(str_armetueur, guns[actor->gunselect].armedesc);} //TU as été tué
+            else if(d==player1) { conoutf(contype, "\fd%s \f7as été %s par \fc%s \f7avec %s", dname, partmessage[rnd(15)].partverb, aname, guns[actor->gunselect].armedesc);  player1->killstreak=0; copystring(str_pseudotueur, aname); n_aptitudetueur = actor->aptitude; copystring(str_armetueur, guns[actor->gunselect].armedesc);  suicided = false;} //TU as été tué
             else conoutf(contype, "%s \f7a %s %s \f7avec %s", aname, partmessage[rnd(15)].partverb, dname, guns[actor->gunselect].armedesc); //Quelqu'un a tué quelqu'un
 
             if(actor!=player1) // Informe que quelqu'un est chaud  /////////////////////////////////////////////////////////////////////////////////////////////////////////
