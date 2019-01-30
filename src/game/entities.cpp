@@ -44,7 +44,7 @@ namespace entities
             "munitions/fusilelectrique", "munitions/fusilplasma", "munitions/smaw", "munitions/minigun", "munitions/spockgun", "munitions/M32",
             "munitions/lanceflammes", "munitions/uzi", "munitions/famas", "munitions/mossberg500", "munitions/hydra", "munitions/SV_98",
             "munitions/sks", "munitions/arbalete", "munitions/ak47", "munitions/GRAP1", "munitions/feuartifice", "munitions/glock",
-            NULL, NULL, NULL, NULL,
+            "munitions/supercaisse", NULL, NULL, NULL,
 
             "objets/panachay", "objets/cochongrillay", "objets/steroides", "objets/champis", "objets/epo", "objets/joint",
             "objets/bouclierbois", "objets/bouclierfer", "objets/bouclieror", "objets/boucliermagnetique",
@@ -73,7 +73,8 @@ namespace entities
             {
                 case I_RAIL: case I_PULSE: case I_SMAW: case I_MINIGUN: case I_SPOCKGUN: case I_M32:
                 case I_LANCEFLAMMES: case I_UZI: case I_FAMAS: case I_MOSSBERG: case I_HYDRA: case I_SV98:
-                case I_SKS: case I_ARBALETE: case I_AK47: case I_GRAP1: case I_ARTIFICE: case I_GLOCK: case I_SUPERCAISSE:
+                case I_SKS: case I_ARBALETE: case I_AK47: case I_GRAP1: case I_ARTIFICE: case I_GLOCK:
+                case I_S_NUKE: case I_S_GAU8: case I_S_ROQUETTES: case I_S_CAMPOUZE:
                     //if(m_noammo) continue;
                     break;
                 case I_SANTE: case I_BOOSTPV: case I_BOOSTDEGATS: case I_BOOSTPRECISION: case I_BOOSTVITESSE: case I_BOOSTGRAVITE:
@@ -157,7 +158,7 @@ namespace entities
         if(d==player1) switch(type)
         {
             case I_BOOSTPV:
-                conoutf(CON_GAMEINFO, "\f8Le cochon grillay augmente ta santé maximale à %d !", d->maxhealth);
+                conoutf(CON_GAMEINFO, "\f8Le cochon grillay te donne 75 points de vie supplémentaires !");
                 playsound(S_COCHON, NULL, NULL, 0, 0, 0, -1, 0, 0);
                 break;
             case I_BOOSTDEGATS:
@@ -481,10 +482,10 @@ namespace entities
         {
             "none?", "light", "mapmodel", "playerstart", "envmap", "particles", "sound", "spotlight", "decal",
 
-            "fusil_electrique", "fusil_plasma", "smaw", "minigun", "spockgun", "M32",
-            "lanceflammes", "uzi", "famas", "mossberg_500", "hydra", "SV_98",
-            "sks", "arbalete", "ak_47", "grap-1", "feu_artifice", "glock",
-            "supercaisse", "null1", "null2", "null3",
+            "fusil_electrique", "fusil_plasma", "smaw", "minigun", "spockgun", "m32",
+            "lanceflammes", "uzi", "famas", "mossberg", "hydra", "SV98",
+            "sks", "arbalete", "ak47", "grap1", "feu_artifice", "glock",
+            "bombe_nucleaire", "gau8", "miniroquettes", "campouze2000",
 
             "panache", "cochon_grille", "steroides", "champis", "epo", "joint",
             "bouclier_bois", "bouclier_fer", "bouclier_or", "bouclier_magnetique",

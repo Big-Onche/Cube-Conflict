@@ -874,77 +874,43 @@ namespace server
         int sec = 0;
         switch(type)
         {
-            case I_MOSSBERG: sec = np*5; break;
-            case I_UZI: sec = np*4; break;
-            case I_SMAW: sec = np*5; break;
-            case I_ARTIFICE: sec = np*5; break;
-            case I_SV98: sec = np*5; break;
-            case I_M32: sec = np*5; break;
-            case I_MINIGUN: sec = np*6; break;
-            case I_FAMAS: sec = np*5; break;
-            case I_SPOCKGUN: sec = np*5; break;
-            case I_LANCEFLAMMES: sec = np*4; break;
-            case I_RAIL: sec = np*5; break;
-            case I_PULSE: sec = np*5; break;
-            case I_ARBALETE: sec = np*4; break;
-            case I_AK47: sec = np*5; break;
-            case I_GRAP1: sec = np*5; break;
-            case I_HYDRA: sec = np*4; break;
             case I_GLOCK: sec = np*3; break;
-
-            case I_SUPERCAISSE: sec = np*15; break;
-
-            case I_SANTE: sec = np*4; break;
-            case I_BOUCLIERBOIS: sec = np*4; break;
-            case I_BOUCLIERFER: sec = np*6; break;
-            case I_BOUCLIEROR: sec = np*8; break;
+            case I_UZI: case I_LANCEFLAMMES: case I_ARBALETE: case I_HYDRA: case I_SANTE: case I_BOUCLIERBOIS: sec = np*4; break;
+            case I_MOSSBERG: case I_SMAW: case I_ARTIFICE: case I_SV98: case I_M32: case I_FAMAS: case I_PULSE: case I_AK47: case I_GRAP1: sec = np*5; break;
+            case I_MINIGUN: case I_RAIL: case I_SPOCKGUN: case I_BOUCLIERFER: sec = np*6;
             case I_BOUCLIERMAGNETIQUE: sec = np*7; break;
+            case I_BOUCLIEROR: sec = np*8; break;
+            case I_S_NUKE: case I_S_GAU8: case I_S_ROQUETTES: case I_S_CAMPOUZE: sec = np*20; break;
 
-            case I_BOOSTDEGATS: sec = 60; break;
-            case I_BOOSTPV: sec = 45; break;
-            case I_BOOSTPRECISION: sec = 60; break;
-            case I_BOOSTVITESSE: sec = 30; break;
-            case I_BOOSTGRAVITE: sec = 30; break;
+            case I_BOOSTPV: sec = 30; break;
+            case I_BOOSTPRECISION: sec = 45; break;
+            case I_BOOSTVITESSE: sec = 60; break;
+            case I_BOOSTDEGATS: sec = 75; break;
+            case I_BOOSTGRAVITE: sec = 20; break;
         }
         return sec*1000;
     }
 
     bool delayspawn(int type)
     {
-        if(m_battle)
+        switch(type)
         {
-            switch(type)
-            {
-                case I_BOOSTDEGATS:
-                case I_BOOSTGRAVITE:
-                case I_BOOSTPRECISION:
-                case I_BOOSTPV:
-                case I_BOOSTVITESSE:
-                case I_SUPERCAISSE:
-                    return true;
-                default:
-                    return false;
-            }
+            case I_BOUCLIERMAGNETIQUE:
+            case I_BOUCLIERFER:
+            case I_BOUCLIEROR:
+            case I_BOOSTDEGATS:
+            case I_BOOSTGRAVITE:
+            case I_BOOSTPRECISION:
+            case I_BOOSTPV:
+            case I_BOOSTVITESSE:
+            case I_S_NUKE:
+            case I_S_GAU8:
+            case I_S_ROQUETTES:
+            case I_S_CAMPOUZE:
+                return true;
+            default:
+                return false;
         }
-        else
-        {
-            switch(type)
-            {
-                case I_BOUCLIERMAGNETIQUE:
-                case I_BOUCLIERFER:
-                case I_BOUCLIEROR:
-                case I_BOOSTDEGATS:
-                case I_BOOSTGRAVITE:
-                case I_BOOSTPRECISION:
-                case I_BOOSTPV:
-                case I_BOOSTVITESSE:
-                case I_SUPERCAISSE:
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
     }
 
     bool pickup(int i, int sender)         // server side item pickup, acknowledge first client that gets it
@@ -2509,7 +2475,7 @@ namespace server
                             sents[i].spawned = true;
                             sendf(-1, 1, "ri2", N_ITEMSPAWN, i);
                         }
-                        else if(sents[i].spawntime<=10000 && oldtime>10000 && (sents[i].type==I_BOOSTDEGATS || sents[i].type==I_BOOSTPV || sents[i].type==I_BOOSTGRAVITE || sents[i].type==I_BOOSTPRECISION || sents[i].type==I_BOOSTVITESSE || sents[i].type==I_SUPERCAISSE))
+                        else if(sents[i].spawntime<=10000 && oldtime>10000 && (sents[i].type==I_BOOSTDEGATS || sents[i].type==I_BOOSTPV || sents[i].type==I_BOOSTGRAVITE || sents[i].type==I_BOOSTPRECISION || sents[i].type==I_BOOSTVITESSE || sents[i].type==I_S_NUKE || sents[i].type==I_S_GAU8 || sents[i].type==I_S_ROQUETTES || sents[i].type==I_S_CAMPOUZE))
                         {
                             sendf(-1, 1, "ri2", N_ANNOUNCE, sents[i].type);
                         }

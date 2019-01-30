@@ -2040,7 +2040,10 @@ namespace game
                     case I_BOOSTPRECISION: playsound(S_V_QUAD10, NULL, NULL, 0, 0, 0, -1, 300, 3000);  conoutf(CON_GAMEINFO, "\faLES CHAMPIGNONS REPOUSSENT !"); break;
                     case I_BOOSTVITESSE: playsound(S_V_QUAD10, NULL, NULL, 0, 0, 0, -1, 300, 3000);  conoutf(CON_GAMEINFO, "\faL'EPO ARRIVE POUR LES CYCLISTES !"); break;
                     case I_BOOSTGRAVITE: playsound(S_V_QUAD10, NULL, NULL, 0, 0, 0, -1, 300, 3000);  conoutf(CON_GAMEINFO, "\faQUELQU'UN ROULE UN GROS JOINT !"); break;
-                    case I_SUPERCAISSE: playsound(S_V_QUAD10, NULL, NULL, 0, 0, 0, -1, 300, 3000);  conoutf(CON_GAMEINFO, "\faUNE SUPER-ARME VA VENIR TOUT NIQUER !"); break;
+                    case I_S_NUKE: playsound(S_V_QUAD10, NULL, NULL, 0, 0, 0, -1, 300, 3000);  conoutf(CON_GAMEINFO, "\faLE PURIFIEUR PAR L'ATÔME EST BIENTÔT DISPONIBLE"); break;
+                    case I_S_GAU8: playsound(S_V_QUAD10, NULL, NULL, 0, 0, 0, -1, 300, 3000);  conoutf(CON_GAMEINFO, "\faLE GAU-8 VA TOMBER DE L'AVION"); break;
+                    case I_S_ROQUETTES: playsound(S_V_QUAD10, NULL, NULL, 0, 0, 0, -1, 300, 3000);  conoutf(CON_GAMEINFO, "\faPROTOTYPE DU MINIGUN À ROQUETTES PRESQUE AU POINT"); break;
+                    case I_S_CAMPOUZE: playsound(S_V_QUAD10, NULL, NULL, 0, 0, 0, -1, 300, 3000);  conoutf(CON_GAMEINFO, "\faAVIS AUX CAMPEURS : BOUGEZ POUR PRENDRE LE CAMPOUZE 2000"); break;
                 }
                 break;
             }

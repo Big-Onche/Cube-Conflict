@@ -480,7 +480,7 @@ namespace ai
             }
             default:
             {
-                if(e.type >= I_RAIL && e.type <= I_SUPERCAISSE && !d->hasmaxammo(e.type))
+                if(e.type >= I_RAIL && e.type <= I_S_CAMPOUZE && !d->hasmaxammo(e.type))
                 {
                     int gun = e.type - I_RAIL + GUN_RAIL;
                     // go get a weapon upgrade
@@ -660,7 +660,10 @@ namespace ai
                     case I_BOUCLIERFER:
                     case I_BOUCLIEROR:
                     case I_BOUCLIERMAGNETIQUE:
-                    case I_SUPERCAISSE: wantsitem = true; break;
+                    case I_S_NUKE:
+                    case I_S_GAU8:
+                    case I_S_ROQUETTES:
+                    case I_S_CAMPOUZE: wantsitem = true; break;
                     default:
                     {
                         itemstat &is = itemstats[entities::ents[ent]->type-I_RAIL];

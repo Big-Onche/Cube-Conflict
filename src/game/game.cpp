@@ -493,20 +493,40 @@ namespace game
 
     VARP(teamcolorfrags, 0, 1, 1);
 
+    static const struct guninfo { const char *partverb, *partsuicide; } partmessage[] =
+    {
+        {"explosé", "suicidé : Darwin Award"},
+        {"owned", "tué tout seul"},
+        {"niqué", "niqué comme un con"},
+        {"tué", "annihilé bêtement"},
+        {"butté", "exterminé sans ennemis"},
+        {"troué"},
+        {"dézingué"},
+        {"annihilé"},
+        {"brisé"},
+        {"neutralisé"},
+        {"pulverisé"},
+        {"exterminé"},
+        {"achevé"},
+        {"détruit"},
+        {"vaporisé"},
+    };
+
     void killed(gameent *d, gameent *actor)
     {
-        if(actor->aptitude==7)
-        {
-            if(camera1->o.dist(d->o) >= 250) playsound(S_ECLAIRLOIN, &d->o, NULL, 0, 0, 100, -1, 1000);
-            else playsound(S_ECLAIRPROCHE, &d->o, NULL, 0, 0, 100, -1, 300);
-            adddynlight(d->o.add(vec(0, 0, 20)), 5000, vec(1.5f, 1.5f, 1.5f), 80, 40);
-            particle_flare(vec(0, rnd(15000)+rnd(-30000), 20000+rnd(20000)), d->o.add(vec(0, 0, -50)), 175, PART_LIGHTNING, 0xFFFFFF, 40.0f);
-            particle_splash(PART_SMOKE,  15, 2000, d->o, 0x333333, 40.0f,  150,   500);
-            if(actor==player1) {playsound(S_FAUCHEUSE);}
-        }
-
         d->killstreak = 0;
-        switch (actor->killstreak)
+
+        if(d->state==CS_EDITING)
+        {
+            d->editstate = CS_DEAD;
+            d->deaths++;
+            if(d!=player1) d->resetinterp();
+            return;
+        }
+        else if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission) return;
+
+        //////////////////////////////SONS//////////////////////////////
+        switch (actor->killstreak) //Sons Risitas Killstreak
         {
             case 3:
                 playsound(S_RISIKILL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300);
@@ -523,7 +543,8 @@ namespace game
                     if(camera1->o.dist(actor->o) >= 250) playsound(S_GIGARISIKILLLOIN-1, &actor->o, NULL, 0, 0 , 200, -1, 1500);
                 }
         }
-        if(m_battle && actor==player1) playsound(S_BATTLEKILL);
+
+        if(m_battle && actor==player1) playsound(S_BATTLEKILL);  //Sons de kills pour certaines armes
         else
         {
             switch(actor->gunselect)
@@ -536,21 +557,22 @@ namespace game
             }
         }
 
-
-        if(d->state==CS_EDITING)
+        //////////////////////////////GRAPHISMES//////////////////////////////
+        if(actor->aptitude==7) //Eclair aptitude faucheuse
         {
-            d->editstate = CS_DEAD;
-            d->deaths++;
-            d->killstreak = 0;
-            if(d!=player1) d->resetinterp();
-            return;
+            if(camera1->o.dist(d->o) >= 250) playsound(S_ECLAIRLOIN, &d->o, NULL, 0, 0, 100, -1, 1000);
+            else playsound(S_ECLAIRPROCHE, &d->o, NULL, 0, 0, 100, -1, 300);
+            adddynlight(d->o.add(vec(0, 0, 20)), 5000, vec(1.5f, 1.5f, 1.5f), 80, 40);
+            particle_flare(vec(0, rnd(15000)+rnd(-30000), 20000+rnd(20000)), d->o.add(vec(0, 0, -50)), 175, PART_LIGHTNING, 0xFFFFFF, 40.0f);
+            particle_splash(PART_SMOKE,  15, 2000, d->o, 0x333333, 40.0f,  150,   500);
+            if(actor==player1) {playsound(S_FAUCHEUSE);}
         }
-        else if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission) return;
 
+        //////////////////////////////MESSAGES//////////////////////////////
         gameent *h = followingplayer();
         if(!h) h = player1;
         int contype = d==h || actor==h ? CON_FRAG_SELF : CON_FRAG_OTHER;
-        const char *dname = "", *aname = "", *rndverbe = "", *arme = "";
+        const char *dname = "", *aname = "";
         if(m_teammode && teamcolorfrags)
         {
             dname = teamcolorname(d, "Tu");
@@ -558,24 +580,16 @@ namespace game
         }
         else
         {
-            dname = colorname(d, NULL, "Tu");
-            aname = colorname(actor, NULL, "Tu");
+            dname = colorname(d, NULL, "\fdTu", "\fc");
+            aname = colorname(actor, NULL, "\fdTu", "\fc");
         }
 
         if(d==actor) // Suicide ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
-            switch(rnd(5))
-            {
-                case 0: rndverbe = "suicidé : Darwin Award"; break;
-                case 1: rndverbe = "tué tout seul"; break;
-                case 2: rndverbe = "niqué comme un con"; break;
-                case 3: rndverbe = "annihilé bêtement"; break;
-                case 4: rndverbe = "exterminé sans ennemis"; break;
-            }
-            conoutf(contype, "%s%s %s %s%s", d==player1 ? "\fd" : "", dname, d==player1 ? "t'es" : "s'est", rndverbe, d==player1 ? " !" : ".");
+            conoutf(contype, "%s%s %s %s%s", d==player1 ? "\fd" : "", dname, d==player1 ? "t'es" : "s'est", partmessage[rnd(5)].partsuicide, d==player1 ? " !" : ".");
             if(d==player1) player1->killstreak=0;
         }
-        else if(isteam(d->team, actor->team)) // Tir alié ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        else if(isteam(d->team, actor->team)) // Tir allié /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
             contype |= CON_TEAMKILL;
             if(actor==player1) conoutf(contype, "\f6%s fragged a teammate (%s)", aname, dname); //TU as tué un allié
@@ -584,68 +598,11 @@ namespace game
         }
         else // Kill ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
-            switch(rnd(15))
-            {
-                case 0: rndverbe = "explosé"; break;
-                case 1: rndverbe = "owned"; break;
-                case 2: rndverbe = "niqué"; break;
-                case 3: rndverbe = "tué"; break;
-                case 4: rndverbe = "butté"; break;
-                case 5: rndverbe = "troué"; break;
-                case 6: rndverbe = "dézingué"; break;
-                case 7: rndverbe = "annihilé"; break;
-                case 8: rndverbe = "brisé"; break;
-                case 9: rndverbe = "neutralisé"; break;
-                case 10: rndverbe = "pulverisé"; break;
-                case 11: rndverbe = "exterminé"; break;
-                case 12: rndverbe = "achevé"; break;
-                case 13: rndverbe = "détruit"; break;
-                case 14: rndverbe = "vaporisé"; break;
-            }
+            if(actor==player1) { conoutf(contype, "\fd%s \f7as %s \fc%s \f7avec %s", aname, partmessage[rnd(15)].partverb, dname, guns[actor->gunselect].armedesc); playsound(S_KILL); message1 = totalmillis; message2 = totalmillis; copystring(str_pseudovictime, dname); n_aptitudevictime = d->aptitude;} //TU as tué quelqu'un
+            else if(d==player1) { conoutf(contype, "\fd%s \f7as été %s par \fc%s \f7avec %s", dname, partmessage[rnd(15)].partverb, aname, guns[actor->gunselect].armedesc);  player1->killstreak=0; copystring(str_pseudotueur, aname); n_aptitudetueur = actor->aptitude; copystring(str_armetueur, guns[actor->gunselect].armedesc);} //TU as été tué
+            else conoutf(contype, "%s \f7a %s %s \f7avec %s", aname, partmessage[rnd(15)].partverb, dname, guns[actor->gunselect].armedesc); //Quelqu'un a tué quelqu'un
 
-            if(actor->gunselect == GUN_CAC349) {arme = "l'épée collector à 349 euros."; }
-            if(actor->gunselect == GUN_CACMASTER) {arme = "une épée légendaire !"; }
-            if(actor->gunselect == GUN_CACFLEAU) {arme = "un fléau d'armes !"; }
-            if(actor->gunselect == GUN_CACMARTEAU) {arme = "un marteau de bannissement !"; }
-
-            if(actor->gunselect == GUN_MOSSBERG) {arme = "un fusil à pompe de ton grand-père."; }
-            if(actor->gunselect == GUN_MINIGUN ) {arme = "un minigun cheaté."; }
-            if(actor->gunselect == GUN_GLOCK) {arme = "un glock de merde."; }
-            if(actor->gunselect == GUN_M32) {arme = "une grenade imprévisible."; }
-            if(actor->gunselect == GUN_SMAW) {arme = "un SMAW de noob."; }
-            if(actor->gunselect == GUN_SV98) {arme = "la SV 98 de campeur."; }
-            if(actor->gunselect == GUN_UZI) {arme = "une UZI de gangster."; }
-            if(actor->gunselect == GUN_FAMAS) {arme = "un FAMAS de merde."; }
-            if(actor->gunselect == GUN_SPOCKGUN) {arme = "un pistolet alien"; }
-            if(actor->gunselect == GUN_ARTIFICE) {arme = "un feu d'artifice ! :fete:"; }
-            if(actor->gunselect == GUN_RAIL) {arme = "un fusil électrique !"; }
-            if(actor->gunselect == GUN_PULSE) {arme = "un fusil du turfu !"; }
-            if(actor->gunselect == GUN_ARBALETE) {arme = "une flèche à la con !"; }
-            if(actor->gunselect == GUN_AK47) {arme = "une AK-47 à Poutine !"; }
-            if(actor->gunselect == GUN_GRAP1) {arme = "un GRAP-1 turfuristique !"; }
-            if(actor->gunselect == GUN_HYDRA) {arme = "un fusil à pompe triple canon !"; }
-            if(actor->gunselect == GUN_SKS) {arme = "une carabine russe !"; }
-            if(actor->gunselect == GUN_LANCEFLAMMES) {arme = "un lance-flammes !"; }
-
-            if(actor->gunselect == GUN_KAMIKAZE) {arme = "une ceinture d'explosifs !"; }
-
-            if(actor->gunselect == GUN_S_CAMPOUZE) {arme = "el famoso Campouze 2000 !"; }
-            if(actor->gunselect == GUN_S_NUKE) {arme = "une putain de bombe nucléaire !"; }
-            if(actor->gunselect == GUN_S_ROQUETTES) {arme = "un minigun à roquettes !"; }
-            if(actor->gunselect == GUN_S_GAU8) {arme = "un GAU-8 portable !"; }
-            if(d==player1) copystring(str_armetueur, arme);
-
-            //if(actor->gunselect == GUN_NUNCHA) {arme = "un GAU-8 portatif !"; }
-            //if(actor->gunselect == GUN_MJAVLIN) {arme = "un lance-missile ultra puissant !"; }
-            //if(actor->gunselect == GUN_CAMPOUZE) {arme = "une arme de campeur cheatée !"; }
-
-            //if(actor->gunselect == GUN_KAMIKAZE) {arme = "de la dynamite !"; }
-
-            if(actor==player1) { conoutf(contype, "\fd%s \f7as %s \fc%s \f7avec %s", aname, rndverbe, dname, arme); playsound(S_KILL); message1 = totalmillis; message2 = totalmillis; copystring(str_pseudovictime, dname); n_aptitudevictime = d->aptitude;} //TU as tué quelqu'un
-            else if(d==player1) { conoutf(contype, "\fd%s \f7as été %s par \fc%s \f7avec %s", dname, rndverbe, aname, arme);  player1->killstreak=0; copystring(str_pseudotueur, aname); n_aptitudetueur = actor->aptitude;} //TU as été tué
-            else conoutf(contype, "%s \f7a %s %s \f7avec %s", aname, rndverbe, dname, arme); //Quelqu'un a tué quelqu'un
-
-            if(actor!=player1)
+            if(actor!=player1) // Informe que quelqu'un est chaud  /////////////////////////////////////////////////////////////////////////////////////////////////////////
             {
                 if(actor->killstreak==3 || actor->killstreak==5 || actor->killstreak==10)
                 {
