@@ -2139,7 +2139,7 @@ namespace server
             case 1: {if(atk==ATK_MEDIGUN_SHOOT) damage = -20;} break;
             case 3: {if(atk==ATK_CAC349_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACMASTER_SHOOT) damage *= 2.5f;} break;
             case 9: {if(atk==ATK_SV98_SHOOT || atk==ATK_SKS_SHOOT || atk==ATK_ARBALETE_SHOOT || atk==ATK_CAMPOUZE_SHOOT) damage *= 1.5f;} break;
-            case 12: {if(actor->state.ragemillis>0) damage *=1.5f;} break;
+            case 12: {if(actor->state.ragemillis>0) damage *=1.25f;} break;
         }
 
         servstate &ts = target->state;

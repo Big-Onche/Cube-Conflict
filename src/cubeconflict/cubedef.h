@@ -25,7 +25,7 @@ static struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt
     { 100,  60,  125,  150, "Campeur"},     //9 ---> OK
     { 120,  110, 110,   85, "Commando"},    //10
     { 90,   90,   80,  120, "Prêtre"},      //11
-    { 120,  120,  60,  115, "Viking"},      //12---> OK
+    { 100,  120,  60,  115, "Viking"},      //12---> OK
     { 85,   80,   90,  110, "Junkie"},      //13
 };
 
