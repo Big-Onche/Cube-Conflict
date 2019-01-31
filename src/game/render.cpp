@@ -242,7 +242,7 @@ namespace game
             anim = attack = ANIM_TAUNT;
             delay = 1000;
         }
-        modelattach a[7];
+        modelattach a[9];
         int ai = 0;
         if(guns[d->gunselect].vwep)
         {
@@ -340,9 +340,9 @@ namespace game
             a[ai++] = modelattach("tag_shield", bouclier, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
         ////////Boosts////////
-        if(d->jointmillis>0) a[ai++] = modelattach("tag_boost", "boosts/joint", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-        if(d->steromillis>0) a[ai++] = modelattach("tag_boost", "boosts/steros", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-        if(d->epomillis>0)   a[ai++] = modelattach("tag_boost", "boosts/epo", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+        if(d->jointmillis) a[ai++] = modelattach("tag_boost", "boosts/joint", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+        if(d->steromillis) a[ai++] = modelattach("tag_boost", "boosts/steros", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+        if(d->epomillis)   a[ai++] = modelattach("tag_boost", "boosts/epo", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
 
         ////////Customisations////////
         if(d->customhat>=1 && d->customhat<=14)
@@ -392,7 +392,6 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
             d->muzzle = vec(-1, -1, -1);
             if(guns[d->gunselect].vwep) a[ai++] = modelattach("tag_muzzle", &d->muzzle);
         }
-        const char *mdlname = mdl.model[validteam(team) ? team : 0];
         float yaw = testanims && d==player1 ? 0 : d->yaw,
               pitch = testpitch && d==player1 ? testpitch : d->pitch;
         vec o = d->feetpos();
@@ -404,55 +403,20 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
         else flags |= MDL_CULL_DIST;
         if(!mainpass) flags &= ~(MDL_FULLBRIGHT | MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY | MDL_CULL_DIST);
 
-        if(player1->customhat>=1 && player1->customhat<=14)
+
+        if(player1->customhat>=1 &&player1->customhat<=14)
         {
-            switch(player1->customhat) {
-                case 1: a[ai++] = modelattach("tag_hat", "chapeaux/sombrero", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                case 2: a[ai++] = modelattach("tag_hat", "chapeaux/lapin", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                case 3: a[ai++] = modelattach("tag_hat", "chapeaux/aureole", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                case 4: a[ai++] = modelattach("tag_hat", "chapeaux/cornes", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                case 5: a[ai++] = modelattach("tag_hat", "chapeaux/joker", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                case 6: a[ai++] = modelattach("tag_hat", "chapeaux/champignon", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                case 7: a[ai++] = modelattach("tag_hat", "chapeaux/couronne", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                case 8: a[ai++] = modelattach("tag_hat", "chapeaux/heaume", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                case 9: a[ai++] = modelattach("tag_hat", "chapeaux/bandana", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                case 10: a[ai++] = modelattach("tag_hat", "chapeaux/melon", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                case 11: a[ai++] = modelattach("tag_hat", "chapeaux/casque", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                case 12: a[ai++] = modelattach("tag_hat", "chapeaux/helices", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                case 13: a[ai++] = modelattach("tag_hat", "chapeaux/aventurier", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                case 14: a[ai++] = modelattach("tag_hat", "chapeaux/bug", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                default : a[ai++] = modelattach("tag_hat", "chapeaux/lapin", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-            }
+            copystring(chapeau, customs[player1->customhat].chapeau);
+            a[ai++] = modelattach("tag_hat", chapeau, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+        }
+        if(player1->customcape>=1 && player1->customcape<=11)
+        {
+            copystring(cape, customs[player1->customcape].capeteam1);
+            a[ai++] = modelattach("tag_hat", cape, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
 
-        if(player1->customcape>=1)
-        {
-            switch(player1->customcape) {
-                case 1: a[ai++] = modelattach("tag_hat", "capes/Cape_JVC", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                case 2: a[ai++] = modelattach("tag_hat", "capes/Cape_Cisla", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                case 3: a[ai++] = modelattach("tag_hat", "capes/Cape_Tabasco", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                case 4: a[ai++] = modelattach("tag_hat", "capes/Cape_CubeEngine", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                case 5: a[ai++] = modelattach("tag_hat", "capes/Cape_Cislattack", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                case 6: a[ai++] = modelattach("tag_hat", "capes/Cape_Ruinee", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                case 7: a[ai++] = modelattach("tag_hat", "capes/Cape_Weed", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                case 8: a[ai++] = modelattach("tag_hat", "capes/Cape_Diable", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                case 9: a[ai++] = modelattach("tag_hat", "capes/Cape_High", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                case 10: a[ai++] = modelattach("tag_hat", "capes/Cape_Quenelle", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-                case 11: a[ai++] = modelattach("tag_hat", "capes/Cape_Poulet", ANIM_VWEP_IDLE|ANIM_LOOP, 0); break;
-            }
-        }
-        switch(player1->playermodel)
-        {
-            case 0: mdlname = "smileys/hap"; break;
-            case 1: mdlname = "smileys/noel"; break;
-            case 2: mdlname = "smileys/malade"; break;
-            case 3: mdlname = "smileys/content"; break;
-            case 4: mdlname = "smileys/colere"; break;
-            case 5: mdlname = "smileys/sournois"; break;
-            case 6: mdlname = "smileys/fou"; break;
-            case 7: mdlname = "smileys/cool"; break;
-            case 8: mdlname = "smileys/bug"; break;
-        }
+        defformatstring(mdlname, customs[player1->playermodel+1].smiley);
+
         rendermodel(mdlname, anim, o.add(vec(0, 10, -5)), yaw, pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), 5));
     }
 
@@ -462,6 +426,10 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
         int team = m_teammode && validteam(d->team) ? d->team : 0;
         renderplayer(d, getplayermodelinfo(d), getplayercolor(d, team), team, fade, flags);
     }
+
+    VAR(test1, -20, 0, 20);
+    VAR(test2, -20, 0, 20);
+    VAR(test3, -20, 0, 20);
 
     void rendergame()
     {
@@ -503,6 +471,8 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
                 }
                 //clientinfo *ci = clients[d];
                 if(d->ragemillis>0) switch(rnd(12)){case 0: particle_splash(PART_SMOKE,  1,  120, d->o, 0xFF3300, 10+rnd(5),  300, 100);}
+                if(d->jointmillis>0) switch(rnd(5)) {case 1: regularflame(PART_SMOKE, d->abovehead().add(vec(-12, 5, -19)), 2, 3, 0x888888, 1, 1.6f, 50.0f, 1000.0f, -10);}
+
             }
         }
         loopv(ragdolls)
@@ -602,6 +572,22 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
             basetime = 0;
         }
 
+        if(d->jointmillis)
+        {
+            vec sway3;
+            vecfromyawpitch(d->yaw, 0, 0, 1, sway3);
+            sway3.mul((swayside/1.5f)*cosf(steps));
+            sway3.z += (swayup/1.5f)*(fabs(sinf(steps)) - 1);
+            sway3.add(swaydir).add(d->o);
+
+            modelattach a[2];
+            d->weed = vec(-1, -1, -1);
+            a[0] = modelattach("tag_joint", &d->weed);
+            rendermodel("hudboost/joint", anim, sway3, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), 1));
+            if(d->weed.x >= 0) d->weed = calcavatarpos(d->weed, 12);
+            switch(rnd(10)) {case 1: regularflame(PART_SMOKE, d->weed, 2, 3, 0x888888, 1, 1.3f, 50.0f, 1000.0f, -10); particle_splash(PART_FLAME2,  4, 50, d->weed, 0xFF6600, 0.6f, 20, 150);}
+        }
+
         rendermodel(gunname, anim, weapzoom.add(sway), d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), 1));
 
         if(d->muzzle.x >= 0) d->muzzle = calcavatarpos(d->muzzle, 12);
@@ -611,9 +597,8 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
         vec sway2;
         vecfromyawpitch(d->yaw, 0, 0, shieldside, sway2);
 
-        float steps2 = swaydist/swaystep*M_PI;
-        sway2.mul((swayside/3.0f)*cosf(steps2));
-        sway2.z += (swayup/3.0f)*(fabs(sinf(steps2)) - 1);
+        sway2.mul((swayside/3.0f)*cosf(steps));
+        sway2.z += (swayup/3.0f)*(fabs(sinf(steps)) - 1);
         if(!zoom) sway2.add(swaydir).add(d->o);
 
         switch(d->armourtype)

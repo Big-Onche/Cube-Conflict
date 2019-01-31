@@ -39,18 +39,18 @@ static const struct shieldsinfo { const char *bois, *fer, *gold, *magnetique, *h
     {"worldshield/bois/20",  "worldshield/fer/20",  "worldshield/or/20",  "worldshield/magnetique/20" , "hudshield/bois/20",  "hudshield/fer/20",  "hudshield/or/20",  "hudshield/magnetique/20"},
 };
 
-static const struct custominfo { const char *chapeau, *capeteam1, *capeteam2; } customs[] =
+static const struct custominfo { const char *chapeau, *smiley, *capeteam1, *capeteam2; } customs[] =
 {
     {}, //0 = Rien
-    {"chapeaux/sombrero",   "capes/Cape_JVC",           "capes/Cape_JVC/orange"},
-    {"chapeaux/lapin",      "capes/Cape_Cisla",         "capes/Cape_Cisla/orange"},
-    {"chapeaux/aureole",    "capes/Cape_Tabasco",       "capes/Cape_Tabasco/orange"},
-    {"chapeaux/cornes",     "capes/Cape_CubeEngine",    "capes/Cape_CubeEngine/orange"},
-    {"chapeaux/joker",      "capes/Cape_Cislattack",    "capes/Cape_Cislattack/orange"},
-    {"chapeaux/champignon", "capes/Cape_Ruinee",        "capes/Cape_Ruinee/orange"},
-    {"chapeaux/couronne",   "capes/Cape_Weed",          "capes/Cape_Weed/orange"},
-    {"chapeaux/heaume",     "capes/Cape_Diable",        "capes/Cape_Diable/orange"},
-    {"chapeaux/bandana",    "capes/Cape_High",          "capes/Cape_High/orange"},
+    {"chapeaux/sombrero",   "smileys/hap",      "capes/Cape_JVC",           "capes/Cape_JVC/orange"},
+    {"chapeaux/lapin",      "smileys/noel",     "capes/Cape_Cisla",         "capes/Cape_Cisla/orange"},
+    {"chapeaux/aureole",    "smileys/malade",   "capes/Cape_Tabasco",       "capes/Cape_Tabasco/orange"},
+    {"chapeaux/cornes",     "smileys/content",  "capes/Cape_CubeEngine",    "capes/Cape_CubeEngine/orange"},
+    {"chapeaux/joker",      "smileys/colere",   "capes/Cape_Cislattack",    "capes/Cape_Cislattack/orange"},
+    {"chapeaux/champignon", "smileys/sournois", "capes/Cape_Ruinee",        "capes/Cape_Ruinee/orange"},
+    {"chapeaux/couronne",   "smileys/fou",      "capes/Cape_Weed",          "capes/Cape_Weed/orange"},
+    {"chapeaux/heaume",     "smileys/cool",     "capes/Cape_Diable",        "capes/Cape_Diable/orange"},
+    {"chapeaux/bandana",    "smileys/bug",      "capes/Cape_High",          "capes/Cape_High/orange"},
     {"chapeaux/melon",      "capes/Cape_Quenelle",      "capes/Cape_Quenelle/orange"},
     {"chapeaux/casque",     "capes/Cape_Poulet",        "capes/Cape_Poulet/orange"},
     {"chapeaux/helices"},
