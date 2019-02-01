@@ -711,12 +711,9 @@ struct gamestate
         {
             armourtype = A_BLUE;
             armour = 750;
-            //ammo[GUN_GLOCK] = aptitude==2 ? 45 : 30;
-            //ammo[GUN_M32] = aptitude==2 ? 3 : 1;
-            //gunselect = GUN_GLOCK;
-
-            ammo[GUN_GRAP1] = 100;
-            gunselect = GUN_GRAP1;
+            ammo[GUN_GLOCK] = aptitude==2 ? 45 : 30;
+            ammo[GUN_M32] = aptitude==2 ? 3 : 1;
+            gunselect = GUN_GLOCK;
             if(!m_battle) addsweaps();
         }
     }
