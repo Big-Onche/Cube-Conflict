@@ -540,6 +540,16 @@ namespace game
             }
             break;
 
+            case ATK_GRAP1_SHOOT:
+            {
+                playsound(S_IMPACTGRAP1, &v, 0, 0, 0 , 100, -1, 250);
+                particle_splash(PART_SPARK, 200, 100, v, 0xAA4466, 0.2f, 150);
+                particle_fireball(v, 1.15f*attacks[atk].exprad, PART_PULSE_BURST, int(attacks[atk].exprad*20), 0x330011, 1.5f);
+                vec debrisorigin = vec(v).sub(vec(vel).mul(5));
+                adddynlight(safe ? v : debrisorigin, 2*attacks[atk].exprad, vec(3.0f, 0.0f, 2.0f), 350, 40, 0, attacks[atk].exprad/2, vec(3.0f, 0.0f, 2.0f));
+            }
+            break;
+
             case ATK_SPOCKGUN_SHOOT:
             {
                 playsound(S_IMPACTALIEN, &v, 0, 0, 0 , 100, -1, 250);
@@ -779,9 +789,9 @@ namespace game
     void grap1stain(const projectile &p, const vec &pos)
     {
         vec dir = vec(p.dir).neg();
-        addstain(STAIN_RAIL_GLOW, pos, dir, 5.0f, 0xFF88FF);
-        adddynlight(vec(pos).madd(dir, 4), 10, vec(0.8f, 0.2f, 0.8f), 225, 75);
-        addstain(STAIN_PULSE_SCORCH, pos, dir, 8);
+        addstain(STAIN_RAIL_GLOW, pos, dir, 5.0f, 0xFF4455);
+        adddynlight(vec(pos).madd(dir, 4), 30, vec(1.5f, 0.2f, 0.2f), 50, 75);
+        addstain(STAIN_PULSE_SCORCH, pos, dir, 10);
     }
 
     void projsplash(projectile &p, const vec &v, dynent *safe)
@@ -932,6 +942,14 @@ namespace game
                             if(p.owner->steromillis) loopi(2)particle_flare(tail, head, 1, PART_PULSE_SIDE, 0xFF0000, 2.5f);
                             else particle_flare(tail, head, 1, PART_PULSE_SIDE, 0xFF2200, 2.0f);
                             p.projsound = S_FLYBYALIEN;
+                            canplaysound = true;
+                            break;
+                        case ATK_GRAP1_SHOOT:
+                            particle_splash(PART_PULSE_FRONT, 1, 1, pos, 0xFF0033, 3.0f, 150, 20);
+                            if(p.owner->steromillis) loopi(2)particle_flare(tail, head, 1, PART_PULSE_SIDE, 0xFF0000, 2.5f);
+                            else particle_flare(tail, head, 1, PART_PULSE_SIDE, 0xCC0011, 3.0f);
+                            regular_particle_splash(PART_SMOKE, 1, 500, pos, 0xAAAAAA, 4.0f, 25, 250);
+                            p.projsound = S_FLYBYGRAP1;
                             canplaysound = true;
                             break;
                         case ATK_SPOCKGUN_SHOOT:
@@ -1086,6 +1104,7 @@ namespace game
                 if(d==player1) mousemove(ATK_MINIGUN_SHOOT ? -7+rnd(15) : -3+rnd(4), ATK_MINIGUN_SHOOT ? -7+rnd(15) :  -3+rnd(4));
                 break;
             case ATK_GAU8_SHOOT:
+                if(d->type==ENT_PLAYER) sound = S_GAU8;
                 spawnbouncer(d->muzzle, d->muzzle, d, BNC_DOUILLES);
                 particle_flare(d->muzzle, d->muzzle, 100, PART_MINIGUN_MUZZLE_FLASH, d->steromillis ? 0xFF0000 : 0xFF7722, zoom ? 3.0f : 8.0f, d);
                 if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 100, PART_MINIGUN_MUZZLE_FLASH, 0xFF0000, zoom ? 5.0f : 12.0f, d);
@@ -1180,12 +1199,7 @@ namespace game
             }
             case ATK_GRAP1_SHOOT:
             {
-                if(d->type==ENT_PLAYER) sound = S_GRAP1;
-                loopi(attacks[atk].rays)
-                {
-                    newprojectile(from, rays[i], attacks[atk].projspeed, local, id, d, atk);
-                    //particle_flare(d->muzzle, rays[i], 30, PART_LIGHTNING, 0xFF22FF, 0.75f);
-                }
+                newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
                 particle_flare(d->muzzle, d->muzzle, 150, PART_RAIL_MUZZLE_FLASH, d->steromillis ? 0xFF0000 : 0xFF00FF, 2.5f, d);
                 if(d->ragemillis) particle_splash(PART_SPARK,  3, 500, d->muzzle, 0xFF0000, 1.0f,  50,   200);
                 adddynlight(hudgunorigin(gun, d->o, to, d), 40, vec(1.0f, 0.0f, 1.0f), 100, 100, DL_FLASH, 0, vec(0, 0, 0), d);
@@ -1231,8 +1245,8 @@ namespace game
         switch(sound)
         {
             case S_FLAMEATTACK:
-            case S_GRAP1:
             case S_MEDIGUN:
+            case S_GAU8:
                 if(d->attacksound >= 0) looped = true;
                 d->attacksound = sound;
                 d->attackchan = playsound(sound, d==hudplayer() ? NULL : &d->o, NULL, 0, -1, 100, d->attackchan, 300);
@@ -1507,7 +1521,7 @@ namespace game
         loopv(projs)
         {
             projectile &p = projs[i];
-            if(p.atk==ATK_SMAW_SHOOT || p.atk==ATK_ARTIFICE_SHOOT || p.atk==ATK_ARBALETE_SHOOT || p.atk==ATK_GRAP1_SHOOT || p.atk==ATK_ROQUETTES_SHOOT || p.atk==ATK_NUKE_SHOOT)
+            if(p.atk==ATK_SMAW_SHOOT || p.atk==ATK_ARTIFICE_SHOOT || p.atk==ATK_ARBALETE_SHOOT || p.atk==ATK_ROQUETTES_SHOOT || p.atk==ATK_NUKE_SHOOT)
             {
                 float dist = min(p.o.dist(p.to)/32.0f, 1.0f);
                 vec pos = vec(p.o).add(vec(p.offset).mul(dist*p.offsetmillis/float(OFFSETMILLIS))),
@@ -1517,7 +1531,7 @@ namespace game
                 v.add(pos);
                 //if(lookupmaterial(pos)==MAT_WATER) regular_particle_splash(PART_BULLE, 4, 2000, pos, 0x666666, rnd(2)+2.0f, 50, 50);
                 //else
-                if(p.atk!=ATK_GRAP1_SHOOT)rendermodel(p.atk==ATK_SMAW_SHOOT ? "projectiles/missile" : p.atk==ATK_ARTIFICE_SHOOT ? "projectiles/feuartifice" : p.atk==ATK_ROQUETTES_SHOOT ? "projectiles/minimissile" : p.atk==ATK_NUKE_SHOOT ? "projectiles/missilenuke" :"projectiles/fleche", ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, MDL_CULL_VFC|MDL_CULL_OCCLUDED);
+                rendermodel(p.atk==ATK_SMAW_SHOOT ? "projectiles/missile" : p.atk==ATK_ARTIFICE_SHOOT ? "projectiles/feuartifice" : p.atk==ATK_ROQUETTES_SHOOT ? "projectiles/minimissile" : p.atk==ATK_NUKE_SHOOT ? "projectiles/missilenuke" :"projectiles/fleche", ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, MDL_CULL_VFC|MDL_CULL_OCCLUDED);
                 switch(p.atk)
                 {
                     case ATK_NUKE_SHOOT:
@@ -1535,16 +1549,6 @@ namespace game
                         regular_particle_splash(PART_FLAME1+rnd(2), 2, 100, pos, 0xFFFFFF, 0.8f, 50, 500);
                         particle_flare(pos, pos, 1, PART_NORMAL_MUZZLE_FLASH, 0xFFC864, 0.5f+rndscale(2), NULL);
                         break;
-                    case ATK_GRAP1_SHOOT:
-                        switch(rnd(3))
-                        {
-                            case 0: regular_particle_splash(PART_SPARK, 2, 100, pos, 0xFF00FF, 0.35f+(rnd(20)/100.0f), 50, 500); break;
-                            case 1: regular_particle_splash(PART_SPARK, 2, 100, pos, 0x5555AA, 0.35f+(rnd(20)/100.0f), 50, 500); break;
-                            case 2: regular_particle_splash(PART_SPARK, 2, 100, pos, 0xAA2222, 0.35f+(rnd(20)/100.0f), 50, 500); break;
-                        }
-                        //regular_particle_splash(PART_FLAME1+rnd(2), 2, 100, pos, 0xFFFFFF, 0.8f, 50, 500);
-                        //particle_flare(pos, pos, 1, PART_NORMAL_MUZZLE_FLASH, 0xFFC864, 0.5f+rndscale(2), NULL);
-                        break;
                 }
             }
         }
@@ -1558,11 +1562,11 @@ namespace game
             case S_FLAMEATTACK:
                 atk = ATK_LANCEFLAMMES_SHOOT;
                 break;
-            case S_GRAP1:
-                atk = ATK_GRAP1_SHOOT;
-                break;
             case S_MEDIGUN:
                 atk = ATK_MEDIGUN_SHOOT;
+                break;
+            case S_GAU8:
+                atk = ATK_GAU8_SHOOT;
                 break;
             default:
                 return;
@@ -1604,4 +1608,3 @@ namespace game
         }
     }
 };
-

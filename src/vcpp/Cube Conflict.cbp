@@ -36,6 +36,7 @@
 					<Add directory="../vcpp" />
 				</ResourceCompiler>
 				<Linker>
+					<Add option="-O3" />
 					<Add option="-s" />
 					<Add option="-m64" />
 					<Add option="-mwindows" />
@@ -84,6 +85,7 @@
 					<Add directory="../vcpp" />
 				</ResourceCompiler>
 				<Linker>
+					<Add option="-O3" />
 					<Add option="-s" />
 					<Add option="-m32" />
 					<Add option="-mwindows" />

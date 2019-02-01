@@ -234,7 +234,7 @@ enum
     S_ARTIFICELOIN, S_EXPLOSIONLOIN,
     S_AK47_LOIN, S_FAMAS_LOIN, S_UZI_LOIN, S_SV98_LOIN, S_GLOCK_LOIN, S_MINIGUN_LOIN, S_SKS_LOIN, S_LANCEMISSILE_LOIN, S_MISSILE_LOIN, S_FELECTRIQUE_LOIN, S_FPLASMA_LOIN, S_SPOCK_LOIN, S_MOSSBERG_LOIN, S_HYDRA_LOIN, S_LANCEGRENADE_LOIN, S_ARTIFICE_LOIN, S_ARMESLOIN,
 
-    S_RIFLELOIN, S_BALLECORPS, S_BALLEBOUCLIER, S_BALLEBOUCLIERENT, S_REGENMEDIGUN, S_FLYBY, S_FLYBYSNIPE, S_FLYBYALIEN, S_FLYBYELEC, S_IMPACT, S_IMPACTLOURDLOIN, S_IMPACTALIEN, S_IMPACTSNIPE, S_IMPACTELEC,
+    S_RIFLELOIN, S_BALLECORPS, S_BALLEBOUCLIER, S_BALLEBOUCLIERENT, S_REGENMEDIGUN, S_FLYBY, S_FLYBYSNIPE, S_FLYBYGRAP1, S_FLYBYALIEN, S_FLYBYELEC, S_IMPACT, S_IMPACTLOURDLOIN, S_IMPACTGRAP1, S_IMPACTALIEN, S_IMPACTSNIPE, S_IMPACTELEC,
 
     S_FAMASLOL, S_BLOHBLOH, S_BOOBARL, S_KALASHLOL, S_ARTIFICELOL,
 
@@ -429,12 +429,12 @@ static struct itemstat { int add, max, sound; const char *name; int icon, info; 
 static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound, hudsound, farsound1, farsound2, attackdelay, damage, spread, nozoomspread, margin, projspeed, kickamount, range, rays, hitpush, exprad, ttl, use; } attacks[NUMATKS] =
 {
     //Armes "normales"
-    { GUN_RAIL,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FELECTRIQUE,  S_FELECTRIQUE,  S_FELECTRIQUE_LOIN, S_NULL,     350,  400,  10, 100, 0,    0,  10, 4000,  1,    30,   0, 0, 0},
+    { GUN_RAIL,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FELECTRIQUE,  S_FELECTRIQUE,  S_FELECTRIQUE_LOIN, S_NULL,     350,  325,  10, 100, 0,    0,  10, 4000,  1,    30,   0, 0, 0},
     { GUN_PULSE,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FUSILPLASMA,  S_FUSILPLASMA,  S_FPLASMA_LOIN, S_NULL,         120,  180,  70, 200, 0, 1000,   5, 2000,  1,    50,  25, 0, 0},
     { GUN_SMAW,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_SMAW,         S_SMAW,         S_LANCEMISSILE_LOIN, S_NULL,   1250,  850,  20, 200, 0,  600,  15, 3000,  1,   750, 100, 0, 0},
     { GUN_MINIGUN,      ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MINIGUN,      S_MINIGUN,      S_MINIGUN_LOIN, S_ARMESLOIN,     70,  180, 120, 400, 0, 3000,   5, 2000,  1,    15 , 12, 0, 0},
     { GUN_SPOCKGUN,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_SPOCKGUN,     S_SPOCKGUN,     S_SPOCK_LOIN, S_NULL,           250,  300,  30, 150, 0, 1500,   5,  520,  1,    30,  15, 0, 0},
-    { GUN_M32,          ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_LANCEGRENADE, S_LANCEGRENADE, S_LANCEGRENADE_LOIN, S_NULL,   1000, 1250,  25, 250, 0,  400,  10, 1000,  1,   600, 125, 1000, 0},
+    { GUN_M32,          ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_LANCEGRENADE, S_LANCEGRENADE, S_LANCEGRENADE_LOIN, S_NULL,   1000, 1250,  25, 250, 0,  400,  10, 1000,  1,   600, 150, 1000, 0},
     { GUN_LANCEFLAMMES, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FLAMEATTACK,  S_FLAMEATTACK,  S_NULL, S_NULL,                 100,   90, 450, 250, 0,  750,   2,  280,  3,    10 , 25, 0, 0},
     { GUN_UZI,          ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_UZI,          S_UZI,          S_UZI_LOIN, S_ARMESLOIN,         75,  150, 130, 300, 0, 3000,   2, 2000,  1,    10,   7, 0, 0},
     { GUN_FAMAS,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FAMAS,        S_FAMAS,        S_FAMAS_LOIN, S_ARMESLOIN,       90,  140, 100, 250, 0, 3000,   3, 2000,  1,    20,  10, 0, 0},
@@ -444,8 +444,8 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound
     { GUN_SKS,          ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_SKS,          S_SKS,          S_SKS_LOIN, S_RIFLELOIN,        420,  500,   5, 150, 0, 2750,  25, 6000,  1,    50,   7, 0, 0},
     { GUN_ARBALETE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_ARBALETE,     S_ARBALETE,     S_NULL, S_NULL,                 900,  700,  15, 200, 0, 2000,   7, 2000,  1,    20,   3, 0, 0},
     { GUN_AK47,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_AK47,         S_AK47,         S_AK47_LOIN, S_ARMESLOIN,        92,  170, 125, 300, 0, 3000,   7, 1000,  1,    50,   3, 0, 0},
-    { GUN_GRAP1,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GRAP1,        S_GRAP1,        S_NULL, S_NULL,                 200,   50,  30, 150, 0, 1500,  -3,  840,  5,  -400,   3, 0, 0},
-    { GUN_ARTIFICE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_ARTIFICE,     S_ARTIFICE,     S_ARTIFICE_LOIN, S_NULL,       1000, 600, 100, 400, 0,  900,  60,   520,  1,   500,  80, 0, 0},
+    { GUN_GRAP1,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GRAP1,        S_GRAP1,        S_NULL, S_NULL,                 230,  200,  30, 400, 0, 1500,  -3,  840,  1,  -400, 20, 0, 0},
+    { GUN_ARTIFICE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_ARTIFICE,     S_ARTIFICE,     S_ARTIFICE_LOIN, S_NULL,       1000,  600, 100, 400, 0,  900,  60,  520,  1,   500, 80, 0, 0},
     { GUN_GLOCK,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GLOCK,        S_GLOCK,        S_GLOCK_LOIN, S_ARMESLOIN,      400,  280, 175, 350, 0, 2000,   7, 1000,  1,    30,   3, 0, 0},
     // Super armes
     { GUN_S_NUKE, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_NUKELAUNCH, S_NUKELAUNCH, S_NULL, S_NULL,           3000, 5000,  20, 300, 0,  175,  10, 2000,  1,   400, 1280, 0, 0},
@@ -711,9 +711,12 @@ struct gamestate
         {
             armourtype = A_BLUE;
             armour = 750;
-            ammo[GUN_GLOCK] = aptitude==2 ? 45 : 30;
-            ammo[GUN_M32] = aptitude==2 ? 2 : 1;
-            gunselect = GUN_GLOCK;
+            //ammo[GUN_GLOCK] = aptitude==2 ? 45 : 30;
+            //ammo[GUN_M32] = aptitude==2 ? 3 : 1;
+            //gunselect = GUN_GLOCK;
+
+            ammo[GUN_GRAP1] = 100;
+            gunselect = GUN_GRAP1;
             if(!m_battle) addsweaps();
         }
     }

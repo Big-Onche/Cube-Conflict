@@ -2257,7 +2257,6 @@ namespace server
             case ATK_AK47_SHOOT:
             case ATK_ARTIFICE_SHOOT:
             case ATK_GLOCK_SHOOT:
-            case ATK_GRAP1_SHOOT:
             case ATK_NUKE_SHOOT:
             case ATK_GAU8_SHOOT:
             case ATK_ROQUETTES_SHOOT:
@@ -2266,6 +2265,7 @@ namespace server
             case ATK_MOSSBERG_SHOOT:
             case ATK_LANCEFLAMMES_SHOOT:
             case ATK_MEDIGUN_SHOOT:
+            case ATK_GRAP1_SHOOT:
                 if(!gs.projs.remove(id)) return;
                 break;
             case ATK_KAMIKAZE_SHOOT:
@@ -2342,6 +2342,7 @@ namespace server
             case ATK_GAU8_SHOOT:
             case ATK_ROQUETTES_SHOOT:
             case ATK_CAMPOUZE_SHOOT:
+            case ATK_GRAP1_SHOOT:
                 loopi(attacks[atk].rays) {gs.projs.add(id);} break;
             case ATK_M32_SHOOT:
                 gs.grenades.add(id); break;
@@ -2349,7 +2350,6 @@ namespace server
                 gs.kamikaze.add(id); break;
             case ATK_HYDRA_SHOOT:
             case ATK_MOSSBERG_SHOOT:
-            case ATK_GRAP1_SHOOT:
             case ATK_LANCEFLAMMES_SHOOT:
             case ATK_MEDIGUN_SHOOT:
             {

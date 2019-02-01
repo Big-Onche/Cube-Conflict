@@ -231,6 +231,11 @@ namespace game
     {
         //////////////////////////////////////////////////////////////////ANIMATIONS//////////////////////////////////////////////////////////////////
         int lastaction = d->lastaction, anim = ANIM_IDLE|ANIM_LOOP, attack = 0, delay = 0;
+        if(d->lastattack >= 0)
+        {
+            attack = attacks[d->lastattack].anim;
+            delay = attacks[d->lastattack].attackdelay+50;
+        }
         if(intermission && d->state!=CS_DEAD)
         {
             anim = attack = ANIM_LOSE|ANIM_LOOP;
@@ -242,7 +247,7 @@ namespace game
             anim = attack = ANIM_TAUNT;
             delay = 1000;
         }
-        modelattach a[9];
+        modelattach a[8];
         int ai = 0;
         if(guns[d->gunselect].vwep)
         {
@@ -332,10 +337,10 @@ namespace game
         {
             switch(d->armourtype)
             {
-                case A_YELLOW: {int shieldvalue = d->armour<=400 ? 4 : d->armour<=800 ? 3 : d->armour<=1200 ? 2 : d->armour<=1600 ? 1 : 0; copystring(bouclier, shields[shieldvalue].gold);} break;
-                case A_GREEN: {int shieldvalue = d->armour<=250 ? 4 : d->armour<=500 ? 3 : d->armour<=750 ? 2 : d->armour<=1000 ? 1 : 0; copystring(bouclier, shields[shieldvalue].fer);} break;
-                case A_BLUE: {int shieldvalue = d->armour<=150 ? 4 : d->armour<=300 ? 3 : d->armour<=450 ? 2 : d->armour<=600 ? 1 : 0; copystring(bouclier, shields[shieldvalue].bois);} break;
-                case A_MAGNET: {int shieldvalue = d->armour<=300 ? 4 : d->armour<=600 ? 3 : d->armour<=900 ? 2 : d->armour<=1200 ? 1 : 0; copystring(bouclier, shields[shieldvalue].magnetique);} break;
+                case A_YELLOW: {int shieldvalue = d->armour<=400 ? 4 : d->armour<=800 ? 3 : d->armour<=1200 ? 2 : d->armour<=1600 ? 1 : 0; formatstring(bouclier, shields[shieldvalue].gold);} break;
+                case A_GREEN: {int shieldvalue = d->armour<=250 ? 4 : d->armour<=500 ? 3 : d->armour<=750 ? 2 : d->armour<=1000 ? 1 : 0; formatstring(bouclier, shields[shieldvalue].fer);} break;
+                case A_BLUE: {int shieldvalue = d->armour<=150 ? 4 : d->armour<=300 ? 3 : d->armour<=450 ? 2 : d->armour<=600 ? 1 : 0; formatstring(bouclier, shields[shieldvalue].bois);} break;
+                case A_MAGNET: {int shieldvalue = d->armour<=300 ? 4 : d->armour<=600 ? 3 : d->armour<=900 ? 2 : d->armour<=1200 ? 1 : 0; formatstring(bouclier, shields[shieldvalue].magnetique);} break;
             }
             a[ai++] = modelattach("tag_shield", bouclier, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
@@ -347,12 +352,12 @@ namespace game
         ////////Customisations////////
         if(d->customhat>=1 && d->customhat<=14)
         {
-            copystring(chapeau, customs[d->customhat].chapeau);
+            formatstring(chapeau, customs[d->customhat].chapeau);
             a[ai++] = modelattach("tag_hat", chapeau, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
         if(d->customcape>=1 && d->customcape<=11)
         {
-            copystring(cape, team==2 ? customs[d->customcape].capeteam2 : customs[d->customcape].capeteam1);
+            formatstring(cape, team==2 ? customs[d->customcape].capeteam2 : customs[d->customcape].capeteam1);
             a[ai++] = modelattach("tag_hat", cape, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
 
