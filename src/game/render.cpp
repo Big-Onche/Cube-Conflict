@@ -224,9 +224,10 @@ namespace game
 
     VARFP(player1_chapeau, 0, 0, 14, player1->customhat = player1_chapeau);
     VARFP(player1_cape, 0, 0, 14, player1->customcape = player1_cape);
+    VARFP(player1_ghost, 0, 0, 5, player1->customghost = player1_ghost);
 
     string bouclier, chapeau, cape;
-
+    bool rendered = false;
     void renderplayer(gameent *d, const playermodelinfo &mdl, int color, int team, float fade, int flags = 0, bool mainpass = true)
     {
         //////////////////////////////////////////////////////////////////ANIMATIONS//////////////////////////////////////////////////////////////////
@@ -270,13 +271,20 @@ namespace game
               pitch = testpitch && d==player1 ? testpitch : d->pitch;
         vec o = d->feetpos();
         int basetime = 0;
+
+        if(d->state==CS_ALIVE) rendered = false;
         if(animoverride) anim = (animoverride<0 ? ANIM_ALL : animoverride)|ANIM_LOOP;
         else if(d->state==CS_DEAD)
         {
-            anim = ANIM_DYING|ANIM_NOPITCH;
-            basetime = d->lastpain;
-            if(ragdoll && mdl.ragdoll) anim |= ANIM_RAGDOLL;
-            else if(lastmillis-basetime>1000) anim = ANIM_DEAD|ANIM_LOOP|ANIM_NOPITCH;
+            if(totalmillis-d->lastdeath<=30 && !rendered)
+            {
+                vec pos(d->o.x, d->o.y, d->o.z-9);
+                //regular_particle_splash(PART_SMOKE, 3, 2500, pos, 0xFFFFFF, 15.00f+rnd(8), 50, 100);
+                regular_particle_flame(PART_AURA, pos, 8, 1, 0xAAAAAA, 3, 14.00f, 8, 1500, -5);
+                regular_particle_flame(PART_FANTOME1+d->customghost, pos, 1, 1, 0xFFFFFF, 1, 12.00f, 8, 2000, -5);
+                rendered = true;
+            }
+            return;
         }
         else if(d->state==CS_EDITING || d->state==CS_SPECTATOR) anim = ANIM_EDIT|ANIM_LOOP;
         else if(d->state==CS_LAGGED)                            anim = ANIM_LAG|ANIM_LOOP;
@@ -408,7 +416,6 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
         else flags |= MDL_CULL_DIST;
         if(!mainpass) flags &= ~(MDL_FULLBRIGHT | MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY | MDL_CULL_DIST);
 
-
         if(player1->customhat>=1 &&player1->customhat<=14)
         {
             copystring(chapeau, customs[player1->customhat].chapeau);
@@ -431,10 +438,6 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
         int team = m_teammode && validteam(d->team) ? d->team : 0;
         renderplayer(d, getplayermodelinfo(d), getplayercolor(d, team), team, fade, flags);
     }
-
-    VAR(test1, -20, 0, 20);
-    VAR(test2, -20, 0, 20);
-    VAR(test3, -20, 0, 20);
 
     void rendergame()
     {

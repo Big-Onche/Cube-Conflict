@@ -135,8 +135,8 @@ enum
     M_LOBBY      = 1<<6,
     M_RANDOM     = 1<<7,
     M_FULLSTUFF  = 1<<8,
-    M_MELEE      = 1<<9,
-    M_BATTLE     = 1<<10,
+    M_EXPLOSION  = 1<<9,
+    //M_BATTLE     = 1<<10,
 };
 
 static struct gamemodeinfo
@@ -151,15 +151,21 @@ static struct gamemodeinfo
 
     //MODE 1, 2, 3, 4
     { "Tue Les Tous", "Tue Les Tous", M_LOBBY, "Tue les tous." },
-    { "Tue Les Tous (Aléatoire)", "Tue Les Tous (Aléatoire)", M_LOBBY | M_RANDOM, "Tue les tous.\n (Aléatoire)" },
-    { "Tue Les Tous (Full stuff)", "Tue Les Tous (Full stuff)", M_LOBBY | M_FULLSTUFF, "Tue les tous.\n (Full stuff)" },
-    { "Tue Les Tous (Corps à corps)", "Tue Les Tous (Corps à corps)", M_LOBBY | M_MELEE, "Tue les tous.\n (Corps à corps)" },
+    { "Tue Les Tous (Aléatoire)", "Tue Les Tous (Aléatoire)", M_LOBBY | M_RANDOM, "Tue les tous. (Aléatoire)" },
+    { "Tue Les Tous (Full stuff)", "Tue Les Tous (Full stuff)", M_LOBBY | M_FULLSTUFF, "Tue les tous. (Full stuff)" },
+    { "Tue Les Tous (Explosion)", "Tue Les Tous (Explosifs)", M_LOBBY | M_EXPLOSION, "Tue les tous.(Explosifs)" },
     //MODE 5, 6, 7, 8
     { "Tue Les Tous", "Tue Les Tous", M_LOBBY | M_TEAM, "Tue les tous.\n (Par équipe)" },
-    { "Tue Les Tous (Aléatoire)", "Tue Les Tous (Aléatoire)", M_LOBBY | M_RANDOM | M_TEAM, "     Tue les tous.    \n (Aléatoire/Par équipe)" },
-    { "Tue Les Tous (Full stuff)", "Tue Les Tous (Full stuff)", M_LOBBY | M_FULLSTUFF | M_TEAM, "Tue les tous.\n (Full stuff)" },
-    { "Tue Les Tous (Corps à corps)", "Tue Les Tous (Corps à corps)", M_LOBBY | M_MELEE | M_TEAM, "Tue les tous.\n (Corps à corps)" },
+    { "Tue Les Tous (Aléatoire)", "Tue Les Tous (Aléatoire)", M_LOBBY | M_RANDOM | M_TEAM, "Tue les tous. (Aléatoire/Par équipe)" },
+    { "Tue Les Tous (Full stuff)", "Tue Les Tous (Full stuff)", M_LOBBY | M_FULLSTUFF | M_TEAM, "Tue les tous.(Full stuff)" },
+    { "Tue Les Tous (Corps à corps)", "Tue Les Tous (Explosifs)", M_LOBBY | M_EXPLOSION | M_TEAM, "Tue les tous. (Explosifs)" },
 
+    { "Capture de drapeau", "Capture de drapeau", M_TEAM | M_CTF, "Capture de drapeau." },
+    { "Capture de drapeau (Aléatoire)", "Capture de drapeau (Aléatoire)", M_RANDOM | M_TEAM | M_CTF, "Capture de drapeau. (Aléatoire)" },
+    { "Capture de drapeau (Full stuff)", "Capture de drapeau (Full stuff)", M_TEAM | M_FULLSTUFF | M_CTF, "Capture de drapeau." },
+    { "Capture de drapeau (Corps à corps)", "Capture de drapeau (Explosifs)", M_EXPLOSION | M_TEAM | M_CTF, "Capture de drapeau. (Explosifs)" },
+
+    /*
     { "Battle royale", "Battle royale", M_LOBBY | M_BATTLE, "Tue les tous." },
     { "Battle royale (Aléatoire)", "Battle royale (Aléatoire)", M_LOBBY | M_RANDOM | M_BATTLE, "Tue les tous.\n (Aléatoire)" },
     { "Battle royale (Full stuff)", "Battle royale (Full stuff)", M_LOBBY | M_FULLSTUFF | M_BATTLE, "Tue les tous.\n (Full stuff)" },
@@ -179,12 +185,7 @@ static struct gamemodeinfo
     { "Battle royale (Aléatoire)", "Battle royale (Aléatoire)", M_LOBBY | M_RANDOM | M_TEAM | M_BATTLE, "     Tue les tous.    \n (Aléatoire/Par équipe)" },
     { "Battle royale (Full stuff)", "Battle royale (Full stuff)", M_LOBBY | M_FULLSTUFF | M_TEAM | M_BATTLE, "Tue les tous.\n (Full stuff)" },
     { "Battle royale (Corps à corps)", "Battle royale (Corps à corps)", M_LOBBY | M_MELEE | M_TEAM | M_BATTLE, "Tue les tous.\n (Corps à corps)" },
-
-
-    { "Capture de drapeau", "Capture de drapeau", M_TEAM | M_CTF, "Capture de drapeau." },
-    { "Capture de drapeau (Aléatoire)", "Capture de drapeau (Aléatoire)", M_RANDOM | M_TEAM | M_CTF, "Capture de drapeau.    \n (Aléatoire)" },
-    { "Capture de drapeau (Full stuff)", "Capture de drapeau (Full stuff)", M_TEAM | M_FULLSTUFF | M_CTF, "Capture de drapeau." },
-    { "Capture de drapeau (Corps à corps)", "Capture de drapeau (Corps à corps)", M_RANDOM | M_TEAM | M_CTF, "Capture de drapeau.    \n (Aléatoire)" },
+    */
 };
 
 #define STARTGAMEMODE (-1)
@@ -202,8 +203,8 @@ static struct gamemodeinfo
 
 #define m_random       (m_check(gamemode, M_RANDOM))
 #define m_fullstuff    (m_check(gamemode, M_FULLSTUFF))
-#define m_melee        (m_check(gamemode, M_MELEE))
-#define m_battle       (m_check(gamemode, M_BATTLE))
+#define m_explosion    (m_check(gamemode, M_EXPLOSION))
+//#define m_battle       (m_check(gamemode, M_BATTLE))
 
 #define m_demo         (m_check(gamemode, M_DEMO))
 #define m_edit         (m_check(gamemode, M_EDIT))
@@ -223,53 +224,53 @@ enum
 {
     S_JUMP = 0, S_LAND, S_SPLASH2, S_SPLASH1, S_BURN, S_JUMPPAD, S_TELEPORTEUR, S_SANG,
 
+    //Armes
     S_GLOCK, S_UZI, S_MINIGUN, S_MOSSBERG, S_EPEEIDLE, S_EPEEATTACK, S_SMAW, S_FAMAS, S_SPOCKGUN, S_SV98, S_FELECTRIQUE, S_LANCEGRENADE,
     S_ARTIFICE, S_FLAMEATTACK, S_NUKELAUNCH, S_FUSILPLASMA, S_EXPLOSIONARTIFICE, S_EXPLOSION, S_EXPLOSIONGRENADE, S_NUKE, S_KAMIKAZEBOOM,
     S_ARBALETE, S_AK47, S_GRAP1, S_MARTEAUBAN, S_MASTERSWORD, S_FLEAU, S_GAU8, S_MINIROQUETTE, S_CAMPOUZE, S_MEDIGUN, S_HYDRA, S_SKS,
-
     S_EAU_GLOCK, S_EAU_UZI, S_EAU_MINIGUN, S_EAU_MOSSBERG, S_EAU_CORPSACORPS, S_EAU_SMAW, S_EAU_FAMAS, S_EAU_SPOCKGUN, S_EAU_SV98, S_EAU_FELECTRIQUE, S_EAU_LANCEGRENADE,
-    S_EAU_ARTIFICE, S_EAU_FLAMEATTACK, S_EAU_NUKELAUNCH, S_EAU_FUSILPLASMA,
-    S_EAU_ARBALETE, S_EAU_AK47, S_EAU_GAU8, S_EAU_MINIROQUETTE, S_EAU_MEDIGUN, S_EAU_KAMIKAZE,
+    S_EAU_ARTIFICE, S_EAU_FLAMEATTACK, S_EAU_NUKELAUNCH, S_EAU_FUSILPLASMA, S_EAU_ARBALETE, S_EAU_AK47, S_EAU_GAU8, S_EAU_MINIROQUETTE, S_EAU_MEDIGUN, S_EAU_KAMIKAZE,
 
-    S_ARTIFICELOIN, S_EXPLOSIONLOIN,
-    S_AK47_LOIN, S_FAMAS_LOIN, S_UZI_LOIN, S_SV98_LOIN, S_GLOCK_LOIN, S_MINIGUN_LOIN, S_SKS_LOIN, S_LANCEMISSILE_LOIN, S_MISSILE_LOIN, S_FELECTRIQUE_LOIN, S_FPLASMA_LOIN, S_SPOCK_LOIN, S_MOSSBERG_LOIN, S_HYDRA_LOIN, S_LANCEGRENADE_LOIN, S_ARTIFICE_LOIN, S_ARMESLOIN,
+    //Sons au loin
+    S_ARTIFICELOIN, S_EXPLOSIONLOIN, S_AK47_LOIN, S_FAMAS_LOIN, S_UZI_LOIN, S_SV98_LOIN, S_GLOCK_LOIN, S_MINIGUN_LOIN, S_SKS_LOIN, S_LANCEMISSILE_LOIN, S_MISSILE_LOIN,
+    S_FELECTRIQUE_LOIN, S_FPLASMA_LOIN, S_SPOCK_LOIN, S_MOSSBERG_LOIN, S_HYDRA_LOIN, S_LANCEGRENADE_LOIN, S_ARTIFICE_LOIN, S_ARMESLOIN, S_RIFLELOIN,
 
-    S_RIFLELOIN, S_BALLECORPS, S_BALLEBOUCLIER, S_BALLEBOUCLIERENT, S_REGENMEDIGUN, S_FLYBY, S_FLYBYSNIPE, S_FLYBYGRAP1, S_FLYBYALIEN, S_FLYBYELEC, S_IMPACT, S_IMPACTLOURDLOIN, S_IMPACTGRAP1, S_IMPACTALIEN, S_IMPACTSNIPE, S_IMPACTELEC,
+    //Balles
+    S_BALLECORPS, S_BALLEBOUCLIER, S_BALLEBOUCLIERENT, S_REGENMEDIGUN, S_FLYBY, S_FLYBYSNIPE, S_FLYBYGRAP1, S_FLYBYALIEN, S_FLYBYELEC,
+    S_IMPACT, S_IMPACTLOURDLOIN, S_IMPACTGRAP1, S_IMPACTALIEN, S_IMPACTSNIPE, S_IMPACTELEC,
 
-    S_FAMASLOL, S_BLOHBLOH, S_BOOBARL, S_KALASHLOL, S_ARTIFICELOL,
-
+    //Armes autre
+    S_FAMASLOL, S_BLOHBLOH, S_BOOBARL, S_KALASHLOL, S_ARTIFICELOL, S_GRENADELOL,
     S_RECHARGEMENT1, S_RECHARGEMENT2, S_RECHARGEMENT3,
 
+    // Objets
     S_ITEMHEALTH, S_COCHON, S_ITEMAMMO, S_ITEMARMOUR, S_ITEMCHAMPIS, S_ITEMJOINT, S_ITEMEPO, S_ITEMSTEROS, S_WEAPLOAD,
-
     S_HEARTBEAT, S_ALARME,
-
     S_DESTRUCTION, S_INVENTAIRE,
 
+    //Bruitages physique
     S_MISSILE, S_FUSEE, S_MISSILENUKE, S_FLECHE, S_CARTOUCHE, S_RGRENADE, S_ECLAIRPROCHE, S_ECLAIRLOIN,
 
+    // Sorts
     S_SORTLANCE, S_SORTMAGE1, S_SORTMAGE2, S_SORTMAGE3, S_SORTPRETRE1, S_SORTPRETRE2, S_SORTPRETRE3, S_SORTPHY1, S_SORTPHY2, S_SORTPHY3, S_SORTIMPOSSIBLE, S_SORTPRET, S_FAUCHEUSE, S_RAGE,
 
+    // Menus
     S_MENUBOUTON, S_CAISSEENREGISTREUSE,
 
-    S_RISIKILL, S_BIGRISIKILL, S_GIGARISIKILL, S_RISIKILLLOIN, S_BIGRISIKILLLOIN, S_GIGARISIKILLLOIN, S_KILL, S_PIXEL, S_DRAPEAUPRIS, S_DRAPEAUTOMBE, S_DRAPEAUSCORE,
+    //Messages
+    S_RISIKILL, S_BIGRISIKILL, S_GIGARISIKILL, S_RISIKILLLOIN, S_BIGRISIKILLLOIN, S_GIGARISIKILLLOIN, S_KILL, S_PIXEL, S_DRAPEAUPRIS, S_DRAPEAUTOMBE, S_DRAPEAUSCORE, S_BATTLEKILL,
 
-    S_BATTLEKILL,
-
+    // Mobs
     S_M_PIXELVOI, S_M_PIXELHIT, S_M_PIXELATK,
-
     S_M_CHEFVOI, S_M_CHEFHIT,
-
     S_M_FERMIERVOI, S_M_FERMIERHIT,
 
-    S_PIECE,
-    S_PET,
+    S_PIECE, S_PET,
 
     S_QUENELLE,
 
+    //Null
     S_NULL,
-
-
     S_PUNCH1, S_CG,
     S_ITEMSPAWN, S_NOAMMO, S_PUPOUT,
     S_PAIN1, S_PAIN2, S_PAIN3, S_PAIN4, S_PAIN5,
@@ -316,7 +317,7 @@ enum
     N_SWITCHNAME, N_SWITCHMODEL, N_SWITCHCOLOR, N_SWITCHTEAM,
     N_SERVCMD,
     N_DEMOPACKET,
-    N_SENDHAT, N_SENDCAPE, N_SENDAPTITUDE,
+    N_SENDHAT, N_SENDCAPE, N_SENDGHOST, N_SENDAPTITUDE,
     N_ANNOUNCE,
     NUMMSG
 };
@@ -346,7 +347,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_SWITCHNAME, 0, N_SWITCHMODEL, 2, N_SWITCHCOLOR, 2, N_SWITCHTEAM, 2,
     N_SERVCMD, 0,
     N_DEMOPACKET, 0,
-    N_SENDHAT, 2, N_SENDCAPE, 2, N_SENDAPTITUDE, 2,
+    N_SENDHAT, 2, N_SENDCAPE, 2, N_SENDGHOST, 2, N_SENDAPTITUDE, 2,
     N_ANNOUNCE, 2,
     -1
 };
@@ -512,6 +513,11 @@ struct gamestate
 
     gamestate() : maxhealth(1), aitype(AI_NONE), skill(0) {}
 
+    void baseammo(int gun, int k = 2)
+    {
+        ammo[gun] = (itemstats[gun-GUN_RAIL].add*k);
+    }
+
     bool hasmaxammo(int type)
     {
        const itemstat &is = itemstats[type-I_RAIL];
@@ -556,7 +562,6 @@ struct gamestate
     {
         if(type<I_RAIL || type>I_BOUCLIERMAGNETIQUE) return;
         itemstat &is = itemstats[type-I_RAIL];
-
         switch(type)
         {
             case I_BOOSTPV:
@@ -649,20 +654,24 @@ struct gamestate
         }
     }
 
-    void addsweaps()
+    void addsweaps(int gamemode)
     {
-        switch(rnd(30))
+        switch(rnd(100))
         {
-            case 0:
+            case 0: ammo[GUN_S_ROQUETTES] = 20; gunselect = GUN_S_ROQUETTES; break;
+            case 1:
             {
-                switch(rnd(4))
-                {
-                    case 0: ammo[GUN_S_ROQUETTES] = 20; gunselect = GUN_S_ROQUETTES; break;
-                    case 1: ammo[GUN_S_GAU8] = 250; gunselect = GUN_S_GAU8; break;
-                    case 2: ammo[GUN_S_CAMPOUZE] = 10; gunselect = GUN_S_CAMPOUZE; break;
-                    case 3: ammo[GUN_S_NUKE] = 1; gunselect = GUN_S_NUKE; break;
-                }
+                if(m_explosion) {ammo[GUN_S_ROQUETTES] = 30; gunselect = GUN_S_ROQUETTES;}
+                else ammo[GUN_S_GAU8] = 250; gunselect = GUN_S_GAU8;
+                break;
             }
+            case 2:
+            {
+                if(m_explosion) {ammo[GUN_S_NUKE] = 1; gunselect = GUN_S_NUKE;}
+                else ammo[GUN_S_CAMPOUZE] = 15; gunselect = GUN_S_CAMPOUZE;
+                break;
+            }
+            case 3: ammo[GUN_S_NUKE] = 1; gunselect = GUN_S_NUKE; break;
         }
     }
 
@@ -683,28 +692,37 @@ struct gamestate
             int randomarme = rnd(17);
             gunselect = aptitude==1 ? GUN_MEDIGUN : aptitude==6 ? GUN_KAMIKAZE : randomarme;
             ammo[randomarme] = aptitude==2 ? 1.5f*itemstats[randomarme].max : itemstats[randomarme].max;
-            if(!m_battle) addsweaps();
+            addsweaps(gamemode);
             return;
         }
         else if (m_fullstuff)
         {
-            armourtype = A_GREEN;
-            armour = 1250;
-            int randomarmea = rnd(17);
-            int randomarmeb = rnd(17);
-            int randomarmec = rnd(17);
-            ammo[randomarmea] = aptitude==2 ? 1.5f*itemstats[randomarmea].max/2 : itemstats[randomarmea].max/2;
-            ammo[randomarmeb] = aptitude==2 ? 1.5f*itemstats[randomarmeb].max/2 : itemstats[randomarmeb].max/2;
-            ammo[randomarmec] = aptitude==2 ? 1.5f*itemstats[randomarmec].max/2 : itemstats[randomarmec].max/2;
-            gunselect = aptitude==1 ? GUN_MEDIGUN : aptitude==6 ? GUN_KAMIKAZE : randomarmea;
-            if(!m_battle) addsweaps();
+            armourtype = A_YELLOW;
+            armour = 2000;
+            int spawngun1 = rnd(17), spawngun2, spawngun3;
+            gunselect = spawngun1;
+            baseammo(spawngun1, 4);
+            do spawngun2 = rnd(17); while(spawngun1==spawngun2);
+            baseammo(spawngun2, 4);
+            do spawngun3 = rnd(17); while(spawngun3==spawngun1 || spawngun3==spawngun2);
+            baseammo(spawngun3, 4);
+            gunselect = aptitude==1 ? GUN_MEDIGUN : aptitude==6 ? GUN_KAMIKAZE : spawngun1;
+            addsweaps(gamemode);
             return;
         }
-        else if (m_melee)
+        else if (m_explosion)
         {
-            armourtype = A_BLUE;
-            armour = 750;
-            if(aptitude==6) ammo[GUN_KAMIKAZE] = 0;
+            armourtype = A_GREEN;
+            armour = 1250;
+            int gun;
+            switch(rnd(3))
+            {
+                case 0: gun = GUN_M32; break;
+                case 1: gun = GUN_SMAW; break;
+                case 2: gun = GUN_ARTIFICE; break;
+            }
+
+            ammo[gun] = aptitude==2 ? 1.5f*itemstats[gun].max  : itemstats[gun].max;
             return;
         }
         else
@@ -714,7 +732,7 @@ struct gamestate
             ammo[GUN_GLOCK] = aptitude==2 ? 45 : 30;
             ammo[GUN_M32] = aptitude==2 ? 3 : 1;
             gunselect = GUN_GLOCK;
-            if(!m_battle) addsweaps();
+            addsweaps(gamemode);
         }
     }
 
@@ -771,19 +789,19 @@ struct gameent : dynent, gamestate
     int attacksound, attackchan, idlesound, idlechan, hurtchan, ragechan;
     int lasttaunt;
     int lastpickup, lastpickupmillis, flagpickup;
-    int killstreak, frags, flags, deaths, totaldamage, totalshots;
+    int killstreak, frags, flags, deaths, totaldamage, totalshots, lastdeath;
     editinfo *edit;
     float deltayaw, deltapitch, deltaroll, newyaw, newpitch, newroll;
     int smoothmillis;
 
     string name, info;
-    int team, playermodel, playercolor, customhat, customcape, aptitude;
+    int team, playermodel, playercolor, customhat, customcape, customghost, aptitude;
     ai::aiinfo *ai;
     int ownernum, lastnode;
 
     vec muzzle, weed;
 
-    gameent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), attacksound(-1), attackchan(-1), killstreak(0), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
+    gameent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), attacksound(-1), attackchan(-1), killstreak(0), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), lastdeath(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
     {
         name[0] = info[0] = 0;
         respawn();

@@ -221,6 +221,7 @@ namespace ai
         d->playercolor = col;
         d->customhat = rnd(15);
         d->customcape = rnd(12);
+        d->customghost = rnd(5);
         d->aptitude = cl;
 
         if(resetthisguy) removeweapons(d);
@@ -1351,7 +1352,7 @@ namespace ai
                 cleannext = false;
             }
 
-            if(d->state == CS_DEAD && d->respawned!=d->lifesequence && (!cmode || cmode->respawnwait(d) <= 0) && lastmillis - d->lastpain >= 500)
+            if(d->state == CS_DEAD && d->respawned!=d->lifesequence && (!cmode || cmode->respawnwait(d) <= 0) && lastmillis - d->lastpain >= 2000+rnd(3000))
             {
                 addmsg(N_TRYSPAWN, "rc", d);
                 d->respawned = d->lifesequence;

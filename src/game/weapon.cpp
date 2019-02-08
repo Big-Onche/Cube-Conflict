@@ -459,7 +459,6 @@ namespace game
         if(at->type==ENT_PLAYER && !isteam(at->team, f->team)) at->totaldamage += damage;
 
         if(!m_mp(gamemode) || f==at) f->hitpush(damage, vel, at, atk);
-
         if(!m_mp(gamemode)) damaged(damage, f, at, false, atk);
         else
         {
@@ -479,14 +478,15 @@ namespace game
                         regenblend(damage);
                         regencompass(damage, at ? at->o : f->o);
                     }
-                    else if (atk!=ATK_MEDIGUN_SHOOT)
+                    else
                     {
                         damageblend(damage);
                         damagecompass(damage, at ? at->o : f->o);
                         playsound(S_BALLECORPS);
                         switch(rnd(2)) {case 0: if(player1->armour>0)playsound(S_BALLEBOUCLIER); break; }
+                        playsound(S_PAIN2);
                     }
-                    playsound(S_PAIN2);
+
                 }
                 else switch(rnd(2)) {case 0: if(f->armour>0)playsound(S_BALLEBOUCLIERENT, &f->o, 0, 0, 0 , 100, -1, 200); break; }
             }
@@ -517,7 +517,7 @@ namespace game
         float dist = projdist(o, dir, v, vel);
         if(dist<attacks[atk].exprad)
         {
-            float damage = qdam*(1-dist/EXP_DISTSCALE/attacks[atk].exprad);
+            float damage = attacks[atk].damage*(1-dist/EXP_DISTSCALE/attacks[atk].exprad);
             if(o==at) damage /= EXP_SELFDAMDIV;
             if(damage > 0) hit(max(int(damage), 1), o, at, dir, atk, dist);
             if((atk==ATK_ARTIFICE_SHOOT || atk==ATK_SMAW_SHOOT || atk==ATK_M32_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_KAMIKAZE_SHOOT) && dist<attacks[atk].exprad*2.0f && o==player1) execfile("config/shake.cfg");
@@ -1082,8 +1082,8 @@ namespace game
             case ATK_SMAW_SHOOT:
             case ATK_ROQUETTES_SHOOT:
             case ATK_NUKE_SHOOT:
-                particle_flare(d->muzzle, d->muzzle, 250, PART_NORMAL_MUZZLE_FLASH, d->steromillis ? 0xFF0000 : 0xFF7700, ATK_ROQUETTES_SHOOT ? 8.0f : 3.50f, d);
-                if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 250, PART_NORMAL_MUZZLE_FLASH, 0xFF0000, ATK_ROQUETTES_SHOOT ? 12.0f : 6.00f, d);
+                particle_flare(d->muzzle, d->muzzle, 250, PART_NORMAL_MUZZLE_FLASH, d->steromillis ? 0xFF0000 : 0xFF7700, ATK_ROQUETTES_SHOOT ? 3.0f : 7.00f, d);
+                if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 250, PART_NORMAL_MUZZLE_FLASH, 0xFF0000, ATK_ROQUETTES_SHOOT ? 5.0f : 12.00f, d);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
                 break;
 
@@ -1106,7 +1106,7 @@ namespace game
             case ATK_GAU8_SHOOT:
                 if(d->type==ENT_PLAYER) sound = S_GAU8;
                 spawnbouncer(d->muzzle, d->muzzle, d, BNC_DOUILLES);
-                particle_flare(d->muzzle, d->muzzle, 100, PART_MINIGUN_MUZZLE_FLASH, d->steromillis ? 0xFF0000 : 0xFF7722, zoom ? 3.0f : 8.0f, d);
+                particle_flare(d->muzzle, d->muzzle, 100, PART_MINIGUN_MUZZLE_FLASH, d->steromillis ? 0xFF0000 : 0xFF7722, zoom ? 1.5f : 3.0f, d);
                 if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 100, PART_MINIGUN_MUZZLE_FLASH, 0xFF0000, zoom ? 5.0f : 12.0f, d);
                 particle_splash(PART_SMOKE,  4, 500, d->muzzle, 0x444444, 3.5f, 20, 500);
                 adddynlight(hudgunorigin(gun, d->o, to, d), 15, vec(1.0f, 0.75f, 0.5f), 30, 100, DL_FLASH, 0, vec(0, 0, 0), d);
@@ -1364,8 +1364,6 @@ namespace game
 
     void shoot(gameent *d, const vec &targ)
     {
-        if(gamemillismsg < 5000) return;
-
         int prevaction = d->lastaction, attacktime = lastmillis-prevaction;
         if(attacktime<d->gunwait) return;
         d->gunwait = 0;

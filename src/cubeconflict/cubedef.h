@@ -51,8 +51,8 @@ static const struct custominfo { const char *chapeau, *smiley, *capeteam1, *cape
     {"chapeaux/couronne",   "smileys/fou",      "capes/Cape_Weed",          "capes/Cape_Weed/orange"},
     {"chapeaux/heaume",     "smileys/cool",     "capes/Cape_Diable",        "capes/Cape_Diable/orange"},
     {"chapeaux/bandana",    "smileys/bug",      "capes/Cape_High",          "capes/Cape_High/orange"},
-    {"chapeaux/melon",      "capes/Cape_Quenelle",      "capes/Cape_Quenelle/orange"},
-    {"chapeaux/casque",     "capes/Cape_Poulet",        "capes/Cape_Poulet/orange"},
+    {"chapeaux/melon",      "",                 "capes/Cape_Quenelle",      "capes/Cape_Quenelle/orange"},
+    {"chapeaux/casque",     "",                 "capes/Cape_Poulet",        "capes/Cape_Poulet/orange"},
     {"chapeaux/helices"},
     {"chapeaux/aventurier"},
     {"chapeaux/bug"},
@@ -66,7 +66,6 @@ extern int n_aptitudetueur, n_aptitudevictime;
 
 //HUD
 extern int message1, message2, message3;  //Messages HUD
-extern int gamemillismsg; //Décompte HUD
 extern int zoomfov, zoom, crosshairsize; //HUD Zoom
 extern float crosshairalpha;
 

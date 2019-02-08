@@ -848,6 +848,7 @@ static partrenderer *parts[] =
     new quadrenderer("<grey>media/particle/blood.png", PT_PART|PT_FLIP|PT_MOD|PT_RND4|PT_COLLIDE, STAIN_BLOOD), // blood spats (note: rgb is inverted)
     new trailrenderer("media/particle/base.png", PT_TRAIL|PT_LERP),                            // water, entity
     new quadrenderer("<grey>media/particle/fumee.png", PT_PART|PT_FLIP|PT_LERP),               // smoke
+    new quadrenderer("<grey>media/particle/aura.png", PT_PART|PT_FLIP|PT_LERP),               // smoke
     new quadrenderer("<grey>media/particle/steam.png", PT_PART|PT_FLIP),                       // steam
     new quadrenderer("<grey>media/particle/flames.png", PT_PART|PT_HFLIP|PT_RND4|PT_BRIGHT),   // flame
     new taperenderer("media/particle/flare.png", PT_TAPE|PT_BRIGHT),                           // streak
@@ -866,6 +867,11 @@ static partrenderer *parts[] =
     new trailrenderer("media/particle/nuage_2.png", PT_TRAIL),
     new trailrenderer("media/particle/nuage_3.png", PT_TRAIL),
     new trailrenderer("media/particle/nuage_4.png", PT_TRAIL),
+    new quadrenderer("media/particle/fantome_1.png", PT_PART),
+    new quadrenderer("media/particle/fantome_2.png", PT_PART),
+    new quadrenderer("media/particle/fantome_3.png", PT_PART),
+    new quadrenderer("media/particle/fantome_4.png", PT_PART),
+    new quadrenderer("media/particle/fantome_5.png", PT_PART),
     &lightnings,                                                                               // lightning
     &fireballs,                                                                                // explosion fireball
     &pulsebursts,                                                                              // pulse burst

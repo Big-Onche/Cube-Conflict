@@ -71,15 +71,7 @@ namespace game
 
             if(need_message2) {rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= 40;}
         }
-
-        if(gamemillismsg < 5000)
-        {
-            string countdownmsg;
-
-            formatstring(countdownmsg, "\f6Armes activées dans :%s %.1f",  gamemillismsg<1000 ? "\fe" : gamemillismsg > 3000 ? "\fc" : "\fd", (5000-gamemillismsg)/1000.0f);
-            rendermessage(countdownmsg, 85);
-        }
-
+        /*
         if(m_battle)
         {
             string remainingplayersmsg;
@@ -87,7 +79,7 @@ namespace game
             formatstring(remainingplayersmsg, "\f7Joueurs vivants : %d",  battlevivants);
             rendermessage(remainingplayersmsg, 75, 10.0f);
         }
-
+        */
         if(player1->state==CS_DEAD)
         {
             string killedbymsg, withmsg, waitmsg;

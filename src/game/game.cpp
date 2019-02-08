@@ -205,11 +205,10 @@ namespace game
         {
             gameent *d = players[i];
 
-            if(d->state==CS_ALIVE && m_battle) battlevivants++;
+            //if(d->state==CS_ALIVE && m_battle) battlevivants++;
 
             //if(d->ragemillis>0 && d->state==CS_ALIVE && d==hudplayer()) playsound(S_RAGE, NULL, NULL, 0, -1, 50, d->ragechan);
             //else d->stopragesound();
-
             if(curtime>0 && d->ragemillis && d!=player1) d->ragemillis = max(d->ragemillis-curtime, 0);
             if(d==hudplayer())
             {
@@ -248,22 +247,6 @@ namespace game
                 else moveplayer(d, 1, false, d->epomillis, d->jointmillis, aptitudes[d->aptitude].apt_vitesse);
             }
             else if(d->state==CS_DEAD && !d->ragdoll && lastmillis-d->lastpain<2000) moveplayer(d, 1, true, d->epomillis, d->jointmillis, aptitudes[d->aptitude].apt_vitesse);
-        }
-        if(battlevivants<=1 && gamemillismsg > 250  && m_battle)
-        {
-            intermission = true;
-            player1->attacking = ACT_IDLE;
-            if(cmode) cmode->gameover();
-            conoutf(CON_GAMEINFO, "\f2FIN DE LA PARTIE !");
-            //if(m_ctf) conoutf(CON_GAMEINFO, "\f2player frags: %d, flags: %d, deaths: %d", player1->frags, player1->flags, player1->deaths);
-            //else conoutf(CON_GAMEINFO, "\f2player frags: %d, deaths: %d", player1->frags, player1->deaths);
-            //int accuracy = (player1->totaldamage*100)/max(player1->totalshots, 1);
-            //conoutf(CON_GAMEINFO, "\f2player total damage dealt: %d, damage wasted: %d, accuracy(%%): %d", player1->totaldamage, player1->totalshots-player1->totaldamage, accuracy);
-
-            showscores(true);
-            disablezoom();
-
-            execident("intermission");
         }
     }
 
@@ -438,18 +421,18 @@ namespace game
         }
         if(d==h)
         {
-            if(atk!=ATK_MEDIGUN_SHOOT)
-            {
-                damageblend(damage);
-                damagecompass(damage, actor->o);
-                playsound(S_BALLECORPS);
-                switch(rnd(2)) {case 0: if(d->armour>0)playsound(S_BALLEBOUCLIER); break; }
-            }
             if(atk==ATK_MEDIGUN_SHOOT)
             {
                 regenblend(damage);
                 regencompass(damage, actor->o);
                 playsound(S_REGENMEDIGUN);
+            }
+            else
+            {
+                damageblend(damage);
+                damagecompass(damage, actor->o);
+                playsound(S_BALLECORPS);
+                switch(rnd(2)) {case 0: if(d->armour>0)playsound(S_BALLEBOUCLIER); break; }
             }
         }
         else switch(rnd(2)) {case 0: if(d->armour>0)playsound(S_BALLEBOUCLIERENT, &d->o, 0, 0, 0 , 100, -1, 200); break; }
@@ -472,6 +455,7 @@ namespace game
             gibeffect(max(-d->health, 0), d->vel, d);
             d->deaths++;
             d->killstreak = 0;
+            d->lastdeath = totalmillis;
         }
         if(d==player1)
         {
@@ -516,6 +500,7 @@ namespace game
     void killed(gameent *d, gameent *actor)
     {
         d->killstreak = 0;
+        d->lastdeath = totalmillis;
 
         if(d->state==CS_EDITING)
         {
@@ -545,17 +530,16 @@ namespace game
                 }
         }
 
-        if(m_battle && actor==player1) playsound(S_BATTLEKILL);  //Sons de kills pour certaines armes
-        else
+        //if(m_battle && actor==player1) playsound(S_BATTLEKILL);  //Sons de kills pour certaines armes
+
+        switch(actor->gunselect)
         {
-            switch(actor->gunselect)
-            {
-                case GUN_UZI: playsound(S_BLOHBLOH, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
-                case GUN_FAMAS: playsound(S_FAMASLOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
-                case GUN_SMAW: playsound(S_BOOBARL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
-                case GUN_AK47: playsound(S_KALASHLOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
-                case GUN_ARTIFICE: playsound(S_ARTIFICELOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
-            }
+            case GUN_UZI: playsound(S_BLOHBLOH, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
+            case GUN_FAMAS: playsound(S_FAMASLOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
+            case GUN_SMAW: playsound(S_BOOBARL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
+            case GUN_AK47: playsound(S_KALASHLOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
+            case GUN_ARTIFICE: playsound(S_ARTIFICELOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
+            case GUN_M32: playsound(S_GRENADELOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
         }
 
         //////////////////////////////GRAPHISMES//////////////////////////////
@@ -564,7 +548,8 @@ namespace game
             if(camera1->o.dist(d->o) >= 250) playsound(S_ECLAIRLOIN, &d->o, NULL, 0, 0, 100, -1, 1000);
             else playsound(S_ECLAIRPROCHE, &d->o, NULL, 0, 0, 100, -1, 300);
             adddynlight(d->o.add(vec(0, 0, 20)), 5000, vec(1.5f, 1.5f, 1.5f), 80, 40);
-            particle_flare(vec(0, rnd(15000)+rnd(-30000), 20000+rnd(20000)), d->o.add(vec(0, 0, -50)), 175, PART_LIGHTNING, 0xFFFFFF, 40.0f);
+            vec pos(d->o.x, d->o.y, d->o.z-50);
+            particle_flare(vec(0, rnd(15000)+rnd(-30000), 20000+rnd(20000)), pos, 175, PART_LIGHTNING, 0xFFFFFF, 40.0f);
             particle_splash(PART_SMOKE,  15, 2000, d->o, 0x333333, 40.0f,  150,   500);
             if(actor==player1) {playsound(S_FAUCHEUSE);}
         }
@@ -716,7 +701,7 @@ namespace game
         player1->aptitude = player1_aptitude;
     }
 
-    VARP(showmodeinfo, 0, 1, 1);
+    VARP(showmodeinfo, 0, 0, 1);
 
     void startgame()
     {

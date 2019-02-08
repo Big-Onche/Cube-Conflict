@@ -25,8 +25,6 @@ namespace game
 
 extern ENetAddress masteraddress;
 
-int gamemillismsg = 0;
-
 namespace server
 {
     struct server_entity            // server side version of "entity" type
@@ -247,7 +245,7 @@ namespace server
         int authkickvictim;
         char *authkickreason;
 
-        int customhat, customcape, aptitude;
+        int customhat, customcape, customghost, aptitude;
 
         clientinfo() : getdemo(NULL), getmap(NULL), clipboard(NULL), authchallenge(NULL), authkickreason(NULL) { reset(); }
         ~clientinfo() { events.deletecontents(); cleanclipboard(); cleanauth(); }
@@ -1760,6 +1758,7 @@ namespace server
             putint(p, ci->playercolor);
             putint(p, ci->customhat);
             putint(p, ci->customcape);
+            putint(p, ci->customghost);
             putint(p, ci->aptitude);
         }
     }
@@ -2175,6 +2174,7 @@ namespace server
             actor->state.frags += fragvalue;
             actor->state.killstreak += 1;
             target->state.killstreak = 0;
+            target->state.lastdeath = totalmillis;
 
             if(fragvalue>0)
             {
@@ -2224,6 +2224,7 @@ namespace server
         int fragvalue = smode ? smode->fragvalue(ci, ci) : -1;
         ci->state.frags += fragvalue;
         ci->state.killstreak = 0;
+        ci->state.lastdeath = totalmillis;
         ci->state.deaths++;
         teaminfo *t = m_teammode && validteam(ci->team) ? &teaminfos[ci->team-1] : NULL;
         if(t) t->frags += fragvalue;
@@ -2457,7 +2458,6 @@ namespace server
         if(shouldstep && !gamepaused)
         {
             gamemillis += curtime;
-            gamemillismsg = gamemillis;
 
             if(m_demo) readdemo();
             else if(!m_timed || gamemillis < gamelimit)
@@ -2940,6 +2940,7 @@ namespace server
                     ci->playercolor = getint(p);
                     ci->customhat = getint(p);
                     ci->customcape = getint(p);
+                    ci->customghost = getint(p);
                     ci->aptitude = getint(p);
 
                     string password, authdesc, authname;
@@ -3143,7 +3144,7 @@ namespace server
                 break;
 
             case N_TRYSPAWN:
-                if(m_battle && gamemillis > 250) return;
+                //if(m_battle && gamemillis > 250) return;
 
                 if(!ci || !cq || cq->state.state!=CS_DEAD || cq->state.lastspawn>=0 || (smode && !smode->canspawn(cq))) break;
                 if(!ci->clientmap[0] && !ci->mapcrc)

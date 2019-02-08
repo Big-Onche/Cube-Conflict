@@ -573,7 +573,7 @@ namespace game
 
 
     VAR(n_mode, 1, 1, 99);
-    VAR(n_type, 0, 0, 99);
+    VAR(n_type, 0, 1, 99);
     VAR(n_team, 0, 0, 1);
 
     int gamemode, nextmode;
@@ -1139,6 +1139,7 @@ namespace game
         putint(p, player1->playercolor);
         putint(p, player1->customhat);
         putint(p, player1->customcape);
+        putint(p, player1->customghost);
         putint(p, player1->aptitude);
         string hash = "";
         if(connectpass[0])
@@ -1499,6 +1500,7 @@ namespace game
                 d->playercolor = getint(p);
                 d->customhat = getint(p);
                 d->customcape = getint(p);
+                d->customghost = getint(p);
                 d->aptitude = getint(p);
                 break;
             }
@@ -1561,6 +1563,16 @@ namespace game
                 if(d)
                 {
                     d->customcape = cape;
+                }
+                break;
+            }
+
+            case N_SENDGHOST:
+            {
+                int ghost = getint(p);
+                if(d)
+                {
+                    d->customghost = ghost;
                 }
                 break;
             }
@@ -1655,7 +1667,6 @@ namespace game
                 damaged(damage, target, actor, false, atk);
                 //gameent *d = getclient(cn);
                 if(player1->aptitude==12 && target==player1 && actor!=player1) {player1->ragemillis+=damage*5; }
-                //sendf(-1, 1, "ri3", N_ITEMACC, I_BOUCLIERMAGNETIQUE, player1);
                 break;
             }
             case N_VAMPIRE:
@@ -1694,6 +1705,7 @@ namespace game
                 actor->frags = frags;
                 actor->killstreak = killstreak;
                 victim->killstreak = 0;
+                victim->lastdeath = totalmillis;
                 if(m_teammode) setteaminfo(actor->team, tfrags);
 #if 0
                 if(actor!=player1 && (!cmode || !cmode->hidefrags()))
