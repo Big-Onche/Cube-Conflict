@@ -13,7 +13,7 @@ namespace game
 
     VARP(ragdoll, 0, 1, 1);
     VARP(ragdollmillis, 0, 10000, 300000);
-    VARP(ragdollfade, 0, 100, 5000);
+    VARP(ragdollfade, 0, 1000, 5000);
     VARP(forceplayermodels, 0, 0, 1);
     VARP(hidedead, 0, 0, 1);
 
@@ -24,12 +24,24 @@ namespace game
     void saveragdoll(gameent *d)
     {
         if(!d->ragdoll || !ragdollmillis || (!ragdollfade && lastmillis > d->lastpain + ragdollmillis)) return;
-        //if(!ragdollmillis || (!ragdollfade && lastmillis > d->lastpain + ragdollmillis)) return; RAGRAG
         gameent *r = new gameent(*d);
         r->lastupdate = ragdollfade && lastmillis > d->lastpain + max(ragdollmillis - ragdollfade, 0) ? lastmillis - max(ragdollmillis - ragdollfade, 0) : d->lastpain;
         r->edit = NULL;
         r->ai = NULL;
         if(d==player1) r->playermodel = playermodel;
+        r->attackchan = -1;
+        ragdolls.add(r);
+        d->ragdoll = NULL;
+    }
+
+    void savetombe(gameent *d)
+    {
+        if(!ragdollmillis || (!ragdollfade && lastmillis > d->lastpain + ragdollmillis)) return;
+        gameent *r = new gameent(*d);
+        r->lastupdate = ragdollfade && lastmillis > d->lastpain + max(ragdollmillis - ragdollfade, 0) ? lastmillis - max(ragdollmillis - ragdollfade, 0) : d->lastpain;
+        r->edit = NULL;
+        r->ai = NULL;
+        if(d==player1) r->playermodel = customs[d->customtombe].custtombe;
         r->attackchan = -1;
         ragdolls.add(r);
         d->ragdoll = NULL;
@@ -224,10 +236,15 @@ namespace game
 
     VARFP(player1_chapeau, 0, 0, 14, player1->customhat = player1_chapeau);
     VARFP(player1_cape, 0, 0, 14, player1->customcape = player1_cape);
-    VARFP(player1_ghost, 0, 0, 5, player1->customghost = player1_ghost);
+    VARFP(player1_tombe, 1, 1, 5, player1->customtombe = player1_tombe);
 
-    string bouclier, chapeau, cape;
-    bool rendered = false;
+    void rendertombeplayer(gameent *d, float fade)
+    {
+        if(d!=player1) particle_text(vec(d->o.x, d->o.y, d->o.z), tempformatstring("RIP %s", d->name), PART_TEXT, 1, 0x333333, 1.0f);
+        rendermodel(customs[d->customtombe].custtombe, ANIM_MAPMODEL, vec(d->o.x, d->o.y, d->o.z-17.0f), d->yaw, 0, 0, NULL, d, NULL, 0, 0, fade);
+        //rendermodel(mdlname, anim, o, yaw, d->pitch>17 ? 17 : d->pitch<-17 ? -17 : pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), trans));
+    }
+
     void renderplayer(gameent *d, const playermodelinfo &mdl, int color, int team, float fade, int flags = 0, bool mainpass = true)
     {
         //////////////////////////////////////////////////////////////////ANIMATIONS//////////////////////////////////////////////////////////////////
@@ -272,18 +289,11 @@ namespace game
         vec o = d->feetpos();
         int basetime = 0;
 
-        if(d->state==CS_ALIVE) rendered = false;
         if(animoverride) anim = (animoverride<0 ? ANIM_ALL : animoverride)|ANIM_LOOP;
         else if(d->state==CS_DEAD)
         {
-            if(totalmillis-d->lastdeath<=30 && !rendered)
-            {
-                vec pos(d->o.x, d->o.y, d->o.z-9);
-                //regular_particle_splash(PART_SMOKE, 3, 2500, pos, 0xFFFFFF, 15.00f+rnd(8), 50, 100);
-                regular_particle_flame(PART_AURA, pos, 8, 1, 0xAAAAAA, 3, 14.00f, 8, 1500, -5);
-                regular_particle_flame(PART_FANTOME1+d->customghost, pos, 1, 1, 0xFFFFFF, 1, 12.00f, 8, 2000, -5);
-                rendered = true;
-            }
+            if(d!=player1) particle_text(vec(d->o.x, d->o.y, d->o.z), d->name, PART_TEXT, 1, 0x333333, 1.0f);
+            rendermodel(customs[d->customtombe].custtombe, ANIM_MAPMODEL, vec(d->o.x, d->o.y, d->o.z-16.5f), d->yaw, 0, 0);
             return;
         }
         else if(d->state==CS_EDITING || d->state==CS_SPECTATOR) anim = ANIM_EDIT|ANIM_LOOP;
@@ -343,6 +353,7 @@ namespace game
         ////////Boucliers////////
         if(d->armour && d->state == CS_ALIVE && camera1->o.dist(d->o) <= maxmodelradiusdistance*10)
         {
+            string bouclier;
             switch(d->armourtype)
             {
                 case A_YELLOW: {int shieldvalue = d->armour<=400 ? 4 : d->armour<=800 ? 3 : d->armour<=1200 ? 2 : d->armour<=1600 ? 1 : 0; formatstring(bouclier, shields[shieldvalue].gold);} break;
@@ -360,13 +371,11 @@ namespace game
         ////////Customisations////////
         if(d->customhat>=1 && d->customhat<=14)
         {
-            formatstring(chapeau, customs[d->customhat].chapeau);
-            a[ai++] = modelattach("tag_hat", chapeau, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+            a[ai++] = modelattach("tag_hat", customs[d->customhat].chapeau, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
         if(d->customcape>=1 && d->customcape<=11)
         {
-            formatstring(cape, team==2 ? customs[d->customcape].capeteam2 : customs[d->customcape].capeteam1);
-            a[ai++] = modelattach("tag_hat", cape, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+            a[ai++] = modelattach("tag_hat", team==2 ? customs[d->customcape].capeteam2 : customs[d->customcape].capeteam1, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
 
         rendermodel(mdlname, anim, o, yaw, d->pitch>17 ? 17 : d->pitch<-17 ? -17 : pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), trans));
@@ -418,13 +427,11 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
 
         if(player1->customhat>=1 &&player1->customhat<=14)
         {
-            copystring(chapeau, customs[player1->customhat].chapeau);
-            a[ai++] = modelattach("tag_hat", chapeau, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+            a[ai++] = modelattach("tag_hat", customs[player1->customhat].chapeau, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
         if(player1->customcape>=1 && player1->customcape<=11)
         {
-            copystring(cape, customs[player1->customcape].capeteam1);
-            a[ai++] = modelattach("tag_hat", cape, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+            a[ai++] = modelattach("tag_hat", customs[player1->customcape].capeteam1, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
 
         defformatstring(mdlname, customs[player1->playermodel+1].smiley);
@@ -489,7 +496,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
             float fade = 1.0f;
             if(ragdollmillis && ragdollfade)
                 fade -= clamp(float(lastmillis - (d->lastupdate + max(ragdollmillis - ragdollfade, 0)))/min(ragdollmillis, ragdollfade), 0.0f, 1.0f);
-            renderplayer(d, fade);
+            rendertombeplayer(d, fade);
         }
         if(exclude)
             renderplayer(exclude, 1, MDL_ONLYSHADOW);
@@ -609,6 +616,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
         sway2.z += (swayup/3.0f)*(fabs(sinf(steps)) - 1);
         if(!zoom) sway2.add(swaydir).add(d->o);
 
+        string bouclier;
         switch(d->armourtype)
         {
             case A_YELLOW: {int shieldvalue = d->armour<=400 ? 4 : d->armour<=800 ? 3 : d->armour<=1200 ? 2 : d->armour<=1600 ? 1 : 0; copystring(bouclier, shields[shieldvalue].hudgold);} break;

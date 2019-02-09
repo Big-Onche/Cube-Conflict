@@ -184,7 +184,7 @@ namespace game
         loopi(attacks[atk].rays) offsetray(from, to, attacks[atk].spread, attacks[atk].nozoomspread, attacks[atk].range, rays[i], d);
     }
 
-    enum { BNC_GRENADE, BNC_KAMIKAZE, BNC_GIBS, BNC_DEBRIS, BNC_DOUILLES };
+    enum { BNC_GRENADE, BNC_KAMIKAZE, BNC_GIBS, BNC_DEBRIS, BNC_DOUILLES,};
 
     struct bouncer : physent
     {
@@ -285,13 +285,11 @@ namespace game
                 pos.add(vec(bnc.offset).mul(bnc.offsetmillis/float(OFFSETMILLIS)));
                 switch(rnd(16)) { case 1: regular_particle_splash(PART_BLOOD, 1, 9999, pos, 0x60FFFF  , 1.0f, 50);}
             }
-
             if(bnc.bouncetype==BNC_DEBRIS)
             {
                 vec pos(bnc.o);
                 regular_particle_splash(PART_SMOKE, 3, 250, pos, 0x222222, 2.0f, 50, -50);
             }
-
 
             bool stopped = false;
             if(bnc.bouncetype==BNC_GRENADE) stopped = bounce(&bnc, 0.6f, 0.5f, 0.8f) || (bnc.lifetime -= time)<0;
@@ -408,7 +406,7 @@ namespace game
         {
             if(blood) particle_splash(PART_BLOOD, damage/10, 1000, p, 0x60FFFF, 2.96f);
             if(damage>=600) playsound(S_SANG, &d->o, 0, 0, 0 , 100, -1, 250);
-            loopi(damage/100) spawnbouncer(d->o, vec(0,0,0), d, BNC_GIBS);
+            gibeffect(damage, vec(0,0,0), d);
         }
         if(thirdperson)
         {
@@ -437,11 +435,8 @@ namespace game
 
     void gibeffect(int damage, const vec &vel, gameent *d)
     {
-#if 0
-        if(!blood || !maxgibs || damage < 0) return;
-        vec from = d->abovehead();
-        loopi(rnd(maxgibs)+1) spawnbouncer(from, vel, d, BNC_GIBS);
-#endif
+        if(damage < 0) return;
+        loopi(damage/300) spawnbouncer(d->o, vec(0,0,0), d, BNC_GIBS);
     }
 
     void hit(int damage, dynent *d, gameent *at, const vec &vel, int atk, float info1, int info2 = 1)

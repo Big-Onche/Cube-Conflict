@@ -317,7 +317,7 @@ enum
     N_SWITCHNAME, N_SWITCHMODEL, N_SWITCHCOLOR, N_SWITCHTEAM,
     N_SERVCMD,
     N_DEMOPACKET,
-    N_SENDHAT, N_SENDCAPE, N_SENDGHOST, N_SENDAPTITUDE,
+    N_SENDHAT, N_SENDCAPE, N_SENDTOMBE, N_SENDAPTITUDE,
     N_ANNOUNCE,
     NUMMSG
 };
@@ -347,17 +347,17 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_SWITCHNAME, 0, N_SWITCHMODEL, 2, N_SWITCHCOLOR, 2, N_SWITCHTEAM, 2,
     N_SERVCMD, 0,
     N_DEMOPACKET, 0,
-    N_SENDHAT, 2, N_SENDCAPE, 2, N_SENDGHOST, 2, N_SENDAPTITUDE, 2,
+    N_SENDHAT, 2, N_SENDCAPE, 2, N_SENDTOMBE, 2, N_SENDAPTITUDE, 2,
     N_ANNOUNCE, 2,
     -1
 };
 
-#define TESSERACT_SERVER_PORT 42000
-#define TESSERACT_LANINFO_PORT 41998
-#define TESSERACT_MASTER_PORT 41999
-#define PROTOCOL_VERSION 2              // bump when protocol changes
+#define CC_SERVER_PORT 43000
+#define CC_LANINFO_PORT 42998
+#define CC_MASTER_PORT 42999
+#define PROTOCOL_VERSION 1              // bump when protocol changes
 #define DEMO_VERSION 1                  // bump when demo format changes
-#define DEMO_MAGIC "TESSERACT_DEMO\0\0"
+#define DEMO_MAGIC "CC_DEMO\0\0"
 
 struct demoheader
 {
@@ -789,19 +789,19 @@ struct gameent : dynent, gamestate
     int attacksound, attackchan, idlesound, idlechan, hurtchan, ragechan;
     int lasttaunt;
     int lastpickup, lastpickupmillis, flagpickup;
-    int killstreak, frags, flags, deaths, totaldamage, totalshots, lastdeath;
+    int killstreak, frags, flags, deaths, totaldamage, totalshots;
     editinfo *edit;
     float deltayaw, deltapitch, deltaroll, newyaw, newpitch, newroll;
     int smoothmillis;
 
     string name, info;
-    int team, playermodel, playercolor, customhat, customcape, customghost, aptitude;
+    int team, playermodel, playercolor, customhat, customcape, customtombe, aptitude;
     ai::aiinfo *ai;
     int ownernum, lastnode;
 
     vec muzzle, weed;
 
-    gameent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), attacksound(-1), attackchan(-1), killstreak(0), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), lastdeath(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
+    gameent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), attacksound(-1), attackchan(-1), killstreak(0), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
     {
         name[0] = info[0] = 0;
         respawn();
@@ -1061,6 +1061,7 @@ namespace game
     };
 
     extern void saveragdoll(gameent *d);
+    extern void savetombe(gameent *d);
     extern void clearragdolls();
     extern void moveragdolls();
     extern const playermodelinfo &getplayermodelinfo(gameent *d);

@@ -245,7 +245,7 @@ namespace server
         int authkickvictim;
         char *authkickreason;
 
-        int customhat, customcape, customghost, aptitude;
+        int customhat, customcape, customtombe, aptitude;
 
         clientinfo() : getdemo(NULL), getmap(NULL), clipboard(NULL), authchallenge(NULL), authkickreason(NULL) { reset(); }
         ~clientinfo() { events.deletecontents(); cleanclipboard(); cleanauth(); }
@@ -1758,7 +1758,7 @@ namespace server
             putint(p, ci->playercolor);
             putint(p, ci->customhat);
             putint(p, ci->customcape);
-            putint(p, ci->customghost);
+            putint(p, ci->customtombe);
             putint(p, ci->aptitude);
         }
     }
@@ -2940,7 +2940,7 @@ namespace server
                     ci->playercolor = getint(p);
                     ci->customhat = getint(p);
                     ci->customcape = getint(p);
-                    ci->customghost = getint(p);
+                    ci->customtombe = getint(p);
                     ci->aptitude = getint(p);
 
                     string password, authdesc, authname;
@@ -3771,10 +3771,10 @@ namespace server
         }
     }
 
-    int laninfoport() { return TESSERACT_LANINFO_PORT; }
-    int serverport() { return TESSERACT_SERVER_PORT; }
+    int laninfoport() { return CC_LANINFO_PORT; }
+    int serverport() { return CC_SERVER_PORT; }
     const char *defaultmaster() { return "master.cubeconflict.com"; }
-    int masterport() { return TESSERACT_MASTER_PORT; }
+    int masterport() { return CC_MASTER_PORT; }
     int numchannels() { return 3; }
 
     #include "extinfo.h"

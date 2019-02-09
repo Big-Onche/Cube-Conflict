@@ -1139,7 +1139,7 @@ namespace game
         putint(p, player1->playercolor);
         putint(p, player1->customhat);
         putint(p, player1->customcape);
-        putint(p, player1->customghost);
+        putint(p, player1->customtombe);
         putint(p, player1->aptitude);
         string hash = "";
         if(connectpass[0])
@@ -1500,7 +1500,7 @@ namespace game
                 d->playercolor = getint(p);
                 d->customhat = getint(p);
                 d->customcape = getint(p);
-                d->customghost = getint(p);
+                d->customtombe = getint(p);
                 d->aptitude = getint(p);
                 break;
             }
@@ -1567,12 +1567,12 @@ namespace game
                 break;
             }
 
-            case N_SENDGHOST:
+            case N_SENDTOMBE:
             {
                 int ghost = getint(p);
                 if(d)
                 {
-                    d->customghost = ghost;
+                    d->customtombe = ghost;
                 }
                 break;
             }
@@ -1585,7 +1585,7 @@ namespace game
             {
                 if(d)
                 {
-                    if(d->state==CS_DEAD && d->lastpain) saveragdoll(d);
+                    if(d->state==CS_DEAD && d->lastpain) savetombe(d);
                     d->respawn();
                 }
                 parsestate(d, p);
@@ -1601,7 +1601,7 @@ namespace game
                 int scn = getint(p);
                 gameent *s = getclient(scn);
                 if(!s) { parsestate(NULL, p); break; }
-                if(s->state==CS_DEAD && s->lastpain) saveragdoll(s);
+                if(s->state==CS_DEAD && s->lastpain) savetombe(s);
                 if(s==player1)
                 {
                     if(editmode) toggleedit();
@@ -1705,7 +1705,6 @@ namespace game
                 actor->frags = frags;
                 actor->killstreak = killstreak;
                 victim->killstreak = 0;
-                victim->lastdeath = totalmillis;
                 if(m_teammode) setteaminfo(actor->team, tfrags);
 #if 0
                 if(actor!=player1 && (!cmode || !cmode->hidefrags()))

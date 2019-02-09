@@ -221,7 +221,7 @@ namespace ai
         d->playercolor = col;
         d->customhat = rnd(15);
         d->customcape = rnd(12);
-        d->customghost = rnd(5);
+        d->customtombe = rnd(5)+1;
         d->aptitude = cl;
 
         if(resetthisguy) removeweapons(d);

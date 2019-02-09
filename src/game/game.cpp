@@ -450,20 +450,21 @@ namespace game
     {
         d->state = CS_DEAD;
         d->lastpain = lastmillis;
-        if(!restore)
-        {
-            gibeffect(max(-d->health, 0), d->vel, d);
-            d->deaths++;
-            d->killstreak = 0;
-            d->lastdeath = totalmillis;
-        }
+
+        d->deaths++;
+        d->killstreak = 0;
+        vec pos(d->o.x, d->o.y, d->o.z-9);
+        gibeffect(10000, d->vel, d);
+        particle_splash(PART_SMOKE,  8, 1500, pos, 0x333333, 12.0f,  125, 400);
+        particle_splash(PART_SMOKE,  5, 900, pos, 0x440000, 10.0f,  125, 200);
+        regular_particle_flame(PART_MORT, pos, 1, 1, 0xFFFFFF, 1, 12.00f, 8, 2000, -5);
+        //MORT
+
         if(d==player1)
         {
             if(deathscore) showscores(true);
-            //player1->state = CS_SPECTATOR;
             disablezoom();
             d->attacking = ACT_IDLE;
-            //d->pitch = 0;
             d->roll = 0;
             playsound(S_DIE2);
         }
@@ -500,7 +501,6 @@ namespace game
     void killed(gameent *d, gameent *actor)
     {
         d->killstreak = 0;
-        d->lastdeath = totalmillis;
 
         if(d->state==CS_EDITING)
         {
