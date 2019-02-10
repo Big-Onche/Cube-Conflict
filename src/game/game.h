@@ -796,6 +796,7 @@ struct gameent : dynent, gamestate
 
     string name, info;
     int team, playermodel, playercolor, customhat, customcape, customtombe, aptitude;
+    float skeletonfade, tombepop;
     ai::aiinfo *ai;
     int ownernum, lastnode;
 

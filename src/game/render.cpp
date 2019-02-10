@@ -241,9 +241,11 @@ namespace game
     void rendertombeplayer(gameent *d, float fade)
     {
         if(d!=player1) particle_text(vec(d->o.x, d->o.y, d->o.z), tempformatstring("RIP %s", d->name), PART_TEXT, 1, 0x333333, 1.0f);
-        rendermodel(customs[d->customtombe].custtombe, ANIM_MAPMODEL, vec(d->o.x, d->o.y, d->o.z-17.0f), d->yaw, 0, 0, NULL, d, NULL, 0, 0, fade);
+        rendermodel(customs[d->customtombe].custtombe, ANIM_MAPMODEL, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, NULL, d, NULL, 0, 0, fade);
         //rendermodel(mdlname, anim, o, yaw, d->pitch>17 ? 17 : d->pitch<-17 ? -17 : pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), trans));
     }
+
+    string bouclier;
 
     void renderplayer(gameent *d, const playermodelinfo &mdl, int color, int team, float fade, int flags = 0, bool mainpass = true)
     {
@@ -289,11 +291,18 @@ namespace game
         vec o = d->feetpos();
         int basetime = 0;
 
+        if(d->state==CS_ALIVE) {d->skeletonfade = 1.0f; d->tombepop = 0.0f;}
+
         if(animoverride) anim = (animoverride<0 ? ANIM_ALL : animoverride)|ANIM_LOOP;
         else if(d->state==CS_DEAD)
         {
-            if(d!=player1) particle_text(vec(d->o.x, d->o.y, d->o.z), d->name, PART_TEXT, 1, 0x333333, 1.0f);
-            rendermodel(customs[d->customtombe].custtombe, ANIM_MAPMODEL, vec(d->o.x, d->o.y, d->o.z-16.5f), d->yaw, 0, 0);
+            if(d->tombepop<1.0f) d->tombepop += 0.02f;
+            particle_text(vec(d->o.x, d->o.y, d->o.z), tempformatstring("RIP %s", d->name), PART_TEXT, 1, 0x333333, 1.0f);
+            rendermodel(customs[d->customtombe].custtombe, ANIM_MAPMODEL, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, flags, d, NULL, 0, 0, d->tombepop);
+
+            if(d->skeletonfade<0) return;
+            d->skeletonfade -= 0.015f;
+            rendermodel("mapmodel/smileys/mort", ANIM_MAPMODEL, o, d->yaw+90, 0, 0, flags, d, NULL, 0, 0, d->skeletonfade);
             return;
         }
         else if(d->state==CS_EDITING || d->state==CS_SPECTATOR) anim = ANIM_EDIT|ANIM_LOOP;
@@ -353,7 +362,6 @@ namespace game
         ////////Boucliers////////
         if(d->armour && d->state == CS_ALIVE && camera1->o.dist(d->o) <= maxmodelradiusdistance*10)
         {
-            string bouclier;
             switch(d->armourtype)
             {
                 case A_YELLOW: {int shieldvalue = d->armour<=400 ? 4 : d->armour<=800 ? 3 : d->armour<=1200 ? 2 : d->armour<=1600 ? 1 : 0; formatstring(bouclier, shields[shieldvalue].gold);} break;

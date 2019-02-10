@@ -1309,7 +1309,7 @@ namespace ai
         else if(d->state == CS_DEAD)
         {
             if(d->ragdoll) moveragdoll(d); // RAGRAG
-            else if(lastmillis-d->lastpain<2000)
+            else
             {
                 d->move = d->strafe = 0;
                 moveplayer(d, 10, false, d->epomillis, d->jointmillis, aptitudes[d->aptitude].apt_vitesse);

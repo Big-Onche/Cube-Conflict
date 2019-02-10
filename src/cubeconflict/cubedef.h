@@ -43,10 +43,10 @@ static const struct custominfo { const char *chapeau, *smiley, *capeteam1, *cape
 {
     {}, //0 = Rien
     {"chapeaux/sombrero",   "smileys/hap",      "capes/Cape_JVC",           "capes/Cape_JVC/orange",            "tombes/basique"},
-    {"chapeaux/lapin",      "smileys/noel",     "capes/Cape_Cisla",         "capes/Cape_Cisla/orange",          "tombes/basique"},
+    {"chapeaux/lapin",      "smileys/noel",     "capes/Cape_Cisla",         "capes/Cape_Cisla/orange",          "tombes/fleur"},
     {"chapeaux/aureole",    "smileys/malade",   "capes/Cape_Tabasco",       "capes/Cape_Tabasco/orange",        "tombes/fuck"},
     {"chapeaux/cornes",     "smileys/content",  "capes/Cape_CubeEngine",    "capes/Cape_CubeEngine/orange",     "tombes/monument"},
-    {"chapeaux/joker",      "smileys/colere",   "capes/Cape_Cislattack",    "capes/Cape_Cislattack/orange",     "tombes/basique"},
+    {"chapeaux/joker",      "smileys/colere",   "capes/Cape_Cislattack",    "capes/Cape_Cislattack/orange",     "tombes/cristal"},
     {"chapeaux/champignon", "smileys/sournois", "capes/Cape_Ruinee",        "capes/Cape_Ruinee/orange"},
     {"chapeaux/couronne",   "smileys/fou",      "capes/Cape_Weed",          "capes/Cape_Weed/orange"},
     {"chapeaux/heaume",     "smileys/cool",     "capes/Cape_Diable",        "capes/Cape_Diable/orange"},

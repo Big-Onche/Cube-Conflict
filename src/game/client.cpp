@@ -2046,7 +2046,7 @@ namespace game
                 int t = getint(p);
                 switch(t)
                 {
-                    case I_BOOSTDEGATS: playsound(S_V_QUAD10, NULL, NULL, 0, 0, 0, -1, 300, 3000);  conoutf(CON_GAMEINFO, "\faLES STÉROS SONT BIENÔT PRÊTS !"); break;
+                    case I_BOOSTDEGATS: playsound(S_V_QUAD10, NULL, NULL, 0, 0, 0, -1, 300, 3000);  conoutf(CON_GAMEINFO, "\faLES STÉROS SONT BIENTÔT PRÊTS !"); break;
                     case I_BOOSTPV: playsound(S_V_QUAD10, NULL, NULL, 0, 0, 0, -1, 300, 3000);  conoutf(CON_GAMEINFO, "\faLE COCHON GRILLAY EST PRESQUE CUIT !"); break;
                     case I_BOOSTPRECISION: playsound(S_V_QUAD10, NULL, NULL, 0, 0, 0, -1, 300, 3000);  conoutf(CON_GAMEINFO, "\faLES CHAMPIGNONS REPOUSSENT !"); break;
                     case I_BOOSTVITESSE: playsound(S_V_QUAD10, NULL, NULL, 0, 0, 0, -1, 300, 3000);  conoutf(CON_GAMEINFO, "\faL'EPO ARRIVE POUR LES CYCLISTES !"); break;

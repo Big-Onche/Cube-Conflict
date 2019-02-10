@@ -306,7 +306,7 @@ namespace game
             if(player1->state == CS_DEAD)
             {
                 if(player1->ragdoll) moveragdoll(player1);
-                else if(lastmillis-player1->lastpain<2000)
+                else
                 {
                     player1->move = player1->strafe = 0;
                     moveplayer(player1, 10, true, player1->epomillis, player1->jointmillis, aptitudes[player1_aptitude].apt_vitesse);
@@ -457,7 +457,6 @@ namespace game
         gibeffect(10000, d->vel, d);
         particle_splash(PART_SMOKE,  8, 1500, pos, 0x333333, 12.0f,  125, 400);
         particle_splash(PART_SMOKE,  5, 900, pos, 0x440000, 10.0f,  125, 200);
-        regular_particle_flame(PART_MORT, pos, 1, 1, 0xFFFFFF, 1, 12.00f, 8, 2000, -5);
         //MORT
 
         if(d==player1)
