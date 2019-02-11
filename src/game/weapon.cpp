@@ -355,6 +355,7 @@ namespace game
         ~projectile()
         {
             if(projchan>=0) stopsound(projsound, projchan);
+
         }
     };
     vector<projectile> projs;
@@ -977,8 +978,12 @@ namespace game
                             if(p.owner->steromillis) loopi(2)particle_flare(tail, head, 1, PART_BALLE_SIDE, 0xFF0000, 2.75f);
                             else particle_flare(tail, head, 1, PART_BALLE_SIDE, 0xFF7722, 2.00f);
                             break;
-                        case ATK_ROQUETTES_SHOOT:
+                        case ATK_SMAW_SHOOT:
                             p.projsound = S_MISSILE;
+                            canplaysound = true;
+                            break;
+                        case ATK_ROQUETTES_SHOOT:
+                            p.projsound = S_MINIMISSILE;
                             canplaysound = true;
                             break;
                         case ATK_NUKE_SHOOT:
@@ -990,7 +995,7 @@ namespace game
                             canplaysound = true;
                             break;
                     }
-                    if(canplaysound) p.projchan = playsound(p.projsound, &pos, NULL, 0, -1, 128, p.projchan, 500);
+                    if(canplaysound) p.projchan = playsound(p.projsound, &pos, NULL, 0, -1, 128, p.projchan, 400);
                 }
             }
             if(exploded)
@@ -1252,8 +1257,9 @@ namespace game
                     else playsound(attacks[atk].sound, &d->o, NULL, 0, 0 , 50, -1, 350);
                 }
         }
+
         if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 250) playsound(attacks[atk].farsound1, &d->muzzle, NULL, 0, 0 , 200, -1, 600);
-        if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 500) playsound(attacks[atk].farsound2, &d->muzzle, NULL, 0, 0 , 200, -1, 750);
+        else if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 500 && camera1->o.dist(hudgunorigin(gun, d->o, to, d)) <= 850) playsound(attacks[atk].farsound2, &d->muzzle, NULL, 0, 0 , 200, -1, 800);
     }
 
     void particletrack(physent *owner, vec &o, vec &d)

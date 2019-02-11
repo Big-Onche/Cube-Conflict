@@ -49,11 +49,11 @@ namespace ai
     VARF(IA_lvl, 0, 2, 4,
         switch(IA_lvl)
         {
-            case 0: IA_rndlvl = 15; return;
-            case 1: IA_rndlvl = 30; return;
-            case 2: IA_rndlvl = 50; return;
-            case 3: IA_rndlvl = 70; return;
-            case 4: IA_rndlvl = 85; return;
+            case 0: IA_rndlvl = 30; return;
+            case 1: IA_rndlvl = 50; return;
+            case 2: IA_rndlvl = 60; return;
+            case 3: IA_rndlvl = 75; return;
+            case 4: IA_rndlvl = 90; return;
         }
     );
 
@@ -130,16 +130,12 @@ namespace ai
     bool canshoot(gameent *d, int atk, gameent *e)
     {
         if(d->gunselect==GUN_KAMIKAZE && targetable(d, e) && e->o.squaredist(d->o)<10000.0f)
-           return true;
+            return true;
+        if(d->gunselect==GUN_MEDIGUN && isteam(d->team, e->team) && e->health<100)
+            return true;
         if(attackrange(d, atk, e->o.squaredist(d->o)) && targetable(d, e))
             return d->ammo[attacks[atk].gun] > 0 && lastmillis - d->lastaction >= d->gunwait;
         return false;
-    }
-
-    bool canshoot2(gameent *d, int atk)
-    {
-        if(d->gunselect==GUN_KAMIKAZE || d->gunselect==GUN_MEDIGUN) return true;
-        return !d->ai->becareful && d->ammo[attacks[atk].gun] > 0 && lastmillis - d->lastaction >= d->gunwait;
     }
 
     bool hastarget(gameent *d, int atk, aistate &b, gameent *e, float yaw, float pitch, float dist)
@@ -158,14 +154,18 @@ namespace ai
     vec getaimpos(gameent *d, int atk, gameent *e)
     {
         vec o = e->o;
-        if(atk == ATK_PULSE_SHOOT) o.z += (e->aboveeye*0.2f)-(0.8f*d->eyeheight);
-        else if (atk == ATK_KAMIKAZE_SHOOT) o.z += (e->aboveeye-e->eyeheight)*0;
-        else o.z += (e->aboveeye-e->eyeheight)*0.5f;
+        switch(atk)
+        {
+            case ATK_PULSE_SHOOT: o.z += (e->aboveeye*0.2f)-(0.8f*d->eyeheight); break;
+            case ATK_KAMIKAZE_SHOOT: case ATK_M32_SHOOT: case ATK_SMAW_SHOOT: case ATK_NUKE_SHOOT: case ATK_ROQUETTES_SHOOT: case ATK_ARTIFICE_SHOOT: o.z += (e->aboveeye-e->eyeheight)*0; break;
+            default: o.z += (e->aboveeye-e->eyeheight)*0.5f;
+        }
+
         if(d->skill <= 100)
         {
             if(lastmillis >= d->ai->lastaimrnd)
             {
-                int aiskew = 1;
+                int aiskew = 100;
 
                 #define rndaioffset(r) ((rnd(int(r*aiskew*2)+1)-(r*aiskew))*(1.f/float(max(d->skill, 1))))
                 loopk(3) d->ai->aimrnd[k] = rndaioffset(e->radius);
@@ -320,8 +320,8 @@ namespace ai
 
     bool badhealth(gameent *d)
     {
-        if(d->skill <= 100) return 80;
-        return false;
+        if(d->health<85 && d->health-d->skill<60) return true;
+        else return false;
     }
 
     bool enemy(gameent *d, aistate &b, const vec &pos, float guard = SIGHTMIN, int pursue = 0)
@@ -437,12 +437,13 @@ namespace ai
         return false;
     }
 
-    int isgoodammo(int gun) { return gun == GUN_PULSE || gun == GUN_RAIL || gun == GUN_SMAW || gun == GUN_MINIGUN || gun == GUN_SPOCKGUN || gun == GUN_M32 || gun == GUN_LANCEFLAMMES || gun == GUN_UZI || gun == GUN_FAMAS; }
+    int isgoodammo(int gun) { return gun == GUN_S_CAMPOUZE || gun == GUN_S_GAU8 || gun==GUN_S_NUKE || gun == GUN_S_ROQUETTES || gun == GUN_PULSE || gun == GUN_RAIL || gun == GUN_SMAW || gun == GUN_MINIGUN || gun == GUN_SPOCKGUN || gun == GUN_M32 || gun == GUN_LANCEFLAMMES || gun == GUN_UZI || gun == GUN_FAMAS; }
 
     bool hasgoodammo(gameent *d)
     {
-        static const int goodguns[] = { GUN_PULSE, GUN_RAIL, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_M32, GUN_LANCEFLAMMES };
+        static const int goodguns[] = { GUN_S_CAMPOUZE, GUN_S_NUKE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_PULSE, GUN_RAIL, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_M32 };
         loopi(sizeof(goodguns)/sizeof(goodguns[0])) if(d->hasammo(goodguns[0])) return true;
+        if(d->ammo[GUN_M32] > 5) return true;
         return false;
     }
 
@@ -466,27 +467,31 @@ namespace ai
         float score = 0;
         switch(e.type)
         {
-        case I_BOOSTDEGATS: case I_BOOSTGRAVITE: case I_BOOSTPRECISION: case I_BOOSTPV: case I_BOOSTVITESSE:
-                if(d->health > 0)
+            case I_S_NUKE: case I_S_CAMPOUZE: case I_S_GAU8: case I_S_ROQUETTES:
+                score = 1e10f;
+                break;
+            case I_BOOSTDEGATS: case I_BOOSTGRAVITE: case I_BOOSTPRECISION: case I_BOOSTPV: case I_BOOSTVITESSE:
+                if(d->health > 0) score = 1e8f;
                 break;
             case I_SANTE:
-                if(d->health < min(d->skill, 75)) score = 1e3f;
+                if(d->health < 80) score = 1e6f;
                 break;
-            case I_BOUCLIERBOIS: case I_BOUCLIERFER: case I_BOUCLIEROR: case I_BOUCLIERMAGNETIQUE:
-            {
-                int atype = A_BLUE + e.type - I_BOUCLIERFER;
-                if(atype > d->armourtype) score = atype == A_YELLOW ? 1e2f : 1e1f;
-                else if(d->armour < 50) score = 1e1f;
+            case I_BOUCLIERBOIS:
+                if(d->armour < 60) score = 1e8f;
                 break;
-            }
+            case I_BOUCLIERFER:
+                if(d->armour < 80) score = 1e8f;
+                break;
+            case I_BOUCLIEROR: case I_BOUCLIERMAGNETIQUE:
+                if(d->armour < 130) score = 1e8f;
+                break;
             default:
             {
                 if(e.type >= I_RAIL && e.type <= I_S_CAMPOUZE && !d->hasmaxammo(e.type))
                 {
                     int gun = e.type - I_RAIL + GUN_RAIL;
-                    // go get a weapon upgrade
-                    if(gun == d->ai->weappref) score = 1e8f;
-                    else if(isgoodammo(gun)) score = hasgoodammo(d) ? 1e2f : 1e4f;
+                    if(isgoodammo(gun)) score = hasgoodammo(d) ? 1e6f : 1e8f;
+                    else score = 1e4f;
                 }
                 break;
             }
@@ -495,7 +500,7 @@ namespace ai
         {
             interest &n = interests.add();
             n.state = AI_S_INTEREST;
-            n.node = closestwaypoint(e.o, SIGHTMIN, true);
+            n.node = closestwaypoint(e.o, SIGHTMIN*2, true);
             n.target = id;
             n.targtype = AI_T_ENTITY;
             n.score = d->feetpos().squaredist(e.o)/(force ? -1 : score);
@@ -545,8 +550,8 @@ namespace ai
     {
         static vector<interest> interests;
         interests.setsize(0);
-#if 0
-        if(!hasgoodammo(d) || d->health < min(d->skill - 15, 75))
+
+        if(!hasgoodammo(d) || d->health < 75)
             items(d, b, interests);
         else
         {
@@ -557,10 +562,10 @@ namespace ai
             {
                 int id = nearby[i];
                 extentity &e = *(extentity *)entities::ents[id];
-                if(d->canpickup(e.type)) tryitem(d, e, id, b, interests);
+                if(d->canpickup(e.type, d->aptitude)) tryitem(d, e, id, b, interests);
             }
         }
-#endif
+
         if(cmode) cmode->aifind(d, b, interests);
         if(m_teammode) assist(d, b, interests);
         return parseinterests(d, b, interests, override);
@@ -664,12 +669,16 @@ namespace ai
                     case I_S_NUKE:
                     case I_S_GAU8:
                     case I_S_ROQUETTES:
-                    case I_S_CAMPOUZE: wantsitem = true; break;
+                    case I_S_CAMPOUZE:
+                    {
+                        itemstat &is = itemstats[entities::ents[ent]->type-I_RAIL];
+                        wantsitem = true;
+                        break;
+                    }
                     default:
                     {
                         itemstat &is = itemstats[entities::ents[ent]->type-I_RAIL];
                         wantsitem = isgoodammo(is.info) && d->ammo[is.info] <= (d->ai->weappref == is.info ? is.add : is.add/2);
-                        break;
                     }
                 }
                 if(wantsitem)
@@ -1341,6 +1350,7 @@ namespace ai
         // others spawn new commands to the stack the ai reads the top command from the stack and executes
         // it or pops the stack and goes back along the history until it finds a suitable command to execute
         bool cleannext = false;
+
         if(d->ai->state.empty()) d->ai->addstate(AI_S_WAIT);
         loopvrev(d->ai->state)
         {

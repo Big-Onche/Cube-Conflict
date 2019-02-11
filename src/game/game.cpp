@@ -250,36 +250,36 @@ namespace game
         }
     }
 
+    int stepmillis;
+
     void updateworld()        // main game update loop
     {
         //CubeConflict
         //Bon ce code fonctionne mais il est à chier on est d'accord, amélioration à faire à l'avenir.
         //(Toujours mieux codé que Fallout 76)
-        int nbmove = 1;
-        if(nbfps<30) nbmove = 5; //Permet d'éviter que l'animation ne soit trop lente en cas de framerate bas, y'a surement moyen de faire mieux mais ça fait le taff pour l'instant
-        else if(nbfps<60) nbmove = 3;
-        else if(nbfps<100) nbmove = 2;
+        int nbmove = 2;
+        if(nbfps<30) nbmove = 6; //Permet d'éviter que l'animation ne soit trop lente en cas de framerate bas, y'a surement moyen de faire mieux mais ça fait le taff pour l'instant
+        else if(nbfps<60) nbmove = 4;
+        else if(nbfps<120) nbmove = 3;
 
         loopi(nbmove)
         {
-                if(zoom==1)
-                {
-                    if(weapposside<guns[player1->gunselect].maxweapposside) weapposside += 2;
-                    else if(weapposside>guns[player1->gunselect].maxweapposside) weapposside -= 1;
-                    if(shieldside>maxshieldside) shieldside -= 1;
-                    else if(shieldside<maxshieldside) shieldside += 1;
-                    if(weapposup>1) weapposup -= 1;
-                    if(crosshairalpha<1.00f) crosshairalpha += 0.04f;
-                }
-                else
-                {
-                    if(weapposup<guns[player1->gunselect].maxweapposup) weapposup += 1;
-                    else if(weapposup>guns[player1->gunselect].maxweapposup) weapposup -= 1;
-                    if(maxshieldside<-7)maxshieldside=-7;
-                    if(weapposside>1) weapposside -= 1;
-                    if(shieldside<1) shieldside += 1;
-                    if(crosshairalpha>=0.04f) crosshairalpha -= 0.04f;
-                }
+            if(zoom==1)
+            {
+                if(weapposside<guns[player1->gunselect].maxweapposside) weapposside += 2;
+                else if(weapposside>guns[player1->gunselect].maxweapposside) weapposside -= 1;
+                if(shieldside>maxshieldside) shieldside -= 1;
+                else if(shieldside<maxshieldside) shieldside += 1;
+                if(weapposup>1) weapposup -= 1;
+            }
+            else
+            {
+                if(weapposup<guns[player1->gunselect].maxweapposup) weapposup += 1;
+                else if(weapposup>guns[player1->gunselect].maxweapposup) weapposup -= 1;
+                if(maxshieldside<-7)maxshieldside=-7;
+                if(weapposside>1) weapposside -= 1;
+                if(shieldside<1) shieldside += 1;
+            }
         }
 
         if(!maptime) { maptime = lastmillis; maprealtime = totalmillis; return; }

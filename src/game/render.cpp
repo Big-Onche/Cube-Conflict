@@ -297,7 +297,6 @@ namespace game
         else if(d->state==CS_DEAD)
         {
             if(d->tombepop<1.0f) d->tombepop += 0.02f;
-            particle_text(vec(d->o.x, d->o.y, d->o.z), tempformatstring("RIP %s", d->name), PART_TEXT, 1, 0x333333, 1.0f);
             rendermodel(customs[d->customtombe].custtombe, ANIM_MAPMODEL, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, flags, d, NULL, 0, 0, d->tombepop);
 
             if(d->skeletonfade<0) return;

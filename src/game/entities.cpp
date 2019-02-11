@@ -379,7 +379,7 @@ namespace entities
         {
             d->champimillis = 0;
 //            playsound(S_PUPOUT, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
-            if(d==player1) conoutf(CON_GAMEINFO, "\f8La weed ne fait plus effet, il est temps de fumer un autre pétard !");
+            if(d==player1) conoutf(CON_GAMEINFO, "\f8Les champignons sont digérés, il est temps d'en reprendre !");
         }
     }
 
