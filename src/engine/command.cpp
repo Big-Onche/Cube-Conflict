@@ -3033,16 +3033,26 @@ bool execidentbool(const char *name, bool noid, bool lookup)
     return id ? executebool(id, NULL, 0, lookup) : noid;
 }
 
-bool execfile(const char *cfgfile, bool msg)
+bool execfile(const char *cfgfile, bool msg, bool encrypted)
 {
     string s;
     copystring(s, cfgfile);
     char *buf = loadfile(path(s), NULL);
+
     if(!buf)
     {
         if(msg) conoutf(CON_ERROR, "could not read \"%s\"", cfgfile);
         return false;
     }
+
+    if(encrypted)
+    {
+        int i;
+
+        for(i = 0; (i < 100 && buf[i] != '\0'); i++)
+            buf[i] = buf[i] - 10;
+    }
+
     const char *oldsourcefile = sourcefile, *oldsourcestr = sourcestr;
     sourcefile = cfgfile;
     sourcestr = buf;

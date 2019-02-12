@@ -113,6 +113,7 @@
 		</Compiler>
 		<Unit filename="../cubeconflict/cubedef.h" />
 		<Unit filename="../cubeconflict/hud.cpp" />
+		<Unit filename="../cubeconflict/stats.cpp" />
 		<Unit filename="../engine/aa.cpp" />
 		<Unit filename="../engine/animmodel.h" />
 		<Unit filename="../engine/bih.cpp" />

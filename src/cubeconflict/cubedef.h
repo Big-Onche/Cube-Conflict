@@ -39,6 +39,7 @@ static const struct shieldsinfo { const char *bois, *fer, *gold, *magnetique, *h
     {"worldshield/bois/20",  "worldshield/fer/20",  "worldshield/or/20",  "worldshield/magnetique/20" , "hudshield/bois/20",  "hudshield/fer/20",  "hudshield/or/20",  "hudshield/magnetique/20"},
 };
 
+//Définition des customisations
 static const struct custominfo { const char *chapeau, *smiley, *capeteam1, *capeteam2, *custtombe; } customs[] =
 {
     {}, //0 = Rien
@@ -59,6 +60,9 @@ static const struct custominfo { const char *chapeau, *smiley, *capeteam1, *cape
     {"chapeaux/lapin"},
 };
 
+extern void addxp(int nbxp);
+extern void writesave();
+
 //Messages de kill
 extern bool suicided;
 extern string str_pseudotueur, str_armetueur;
@@ -67,9 +71,11 @@ extern int n_aptitudetueur, n_aptitudevictime;
 //HUD
 extern int message1, message2, message3;  //Messages HUD
 extern int zoomfov, zoom, crosshairsize; //HUD Zoom
-extern float crosshairalpha;
+extern float crosshairalpha, pourcents;
+extern int ccxp, lvl, needxp, oldneed, neededxp;
 
 extern float weapposside, weapposup, maxweapposside, maxweapposup, shieldside, maxshieldside; //Visée à la mire
 extern int nbfps;
 
 extern int parallaxX, parallaxY; //Effet parallax des menus
+

@@ -30,6 +30,7 @@ extern void writeinitcfg();
 
 void quit()                     // normal exit
 {
+    writesave();
     writeinitcfg();
     writeservercfg();
     abortconnect();
@@ -1167,6 +1168,8 @@ int main(int argc, char **argv)
     execfile("config/ui.cfg");
     execfile("config/heightmap.cfg");
     execfile("config/blendbrush.cfg");
+    execfile("config/sauvegarde.cfg", false, true);
+
     if(game::savedservers()) execfile(game::savedservers(), false);
 
     identflags |= IDF_PERSIST;

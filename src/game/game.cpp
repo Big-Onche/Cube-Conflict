@@ -250,8 +250,6 @@ namespace game
         }
     }
 
-    int stepmillis;
-
     void updateworld()        // main game update loop
     {
         //CubeConflict
@@ -500,6 +498,8 @@ namespace game
     void killed(gameent *d, gameent *actor)
     {
         d->killstreak = 0;
+        //////////////////////////////GESTION DE L'XP//////////////////////////////
+        if(actor==player1 && d!=player1) addxp(5+player1->killstreak-1);
 
         if(d->state==CS_EDITING)
         {

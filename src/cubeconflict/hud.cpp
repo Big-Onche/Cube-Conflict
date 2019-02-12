@@ -212,6 +212,14 @@ namespace game
         if(player1->champimillis){settexture("media/interface/hud/champis.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
         if(player1->jointmillis){settexture("media/interface/hud/joint.png"); bgquad(15, h-260-decal_icon, 115, 115);}
 
+        float lxbarvide = 0.5f*(w - 966), lxbarpleine = 0.5f*(w - 954);
+
+        settexture("media/interface/hud/barrexppleine.png", 3);
+        bgquad(lxbarpleine, h-19, (pourcents + 1)*954.0f, 19);
+
+        settexture("media/interface/hud/barrexpvide.png", 3);
+        bgquad(lxbarvide, h-29, 966, 40);
+
         //////////////////////////////////////// RENDU DES NOMBRES ////////////////////////////////////////
 
         int decal_number = 0;
@@ -238,6 +246,20 @@ namespace game
         if(player1->epomillis) {draw_textf("%d", 135, h-233-decal_number, d->epomillis/1000); decal_number +=130;}
         if(player1->champimillis) {draw_textf("%d", 135, h-233-decal_number, d->champimillis/1000); decal_number +=130;}
         if(player1->jointmillis) {draw_textf("%d", 135, h-233-decal_number, d->jointmillis/1000); decal_number +=130;}
+
+        defformatstring(infobarrexp, "%d/%d XP - LVL %d", neededxp-(needxp-ccxp), neededxp, lvl);
+
+        int tw = text_width(infobarrexp);
+        float tsz = 0.4f,
+              tx = 0.5f*(w - tw*tsz), ty = h - 22;
+        pushhudmatrix();
+        hudmatrix.translate(tx, ty, 0);
+        hudmatrix.scale(tsz, tsz, 1);
+        flushhudmatrix();
+
+        draw_text(infobarrexp, 0, 0);
+        pophudmatrix();
+
 
         pophudmatrix();
     }

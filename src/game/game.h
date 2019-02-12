@@ -252,22 +252,13 @@ enum
     S_MISSILE, S_FUSEE, S_MISSILENUKE, S_MINIMISSILE, S_FLECHE, S_CARTOUCHE, S_RGRENADE, S_ECLAIRPROCHE, S_ECLAIRLOIN,
 
     // Sorts
-    S_SORTLANCE, S_SORTMAGE1, S_SORTMAGE2, S_SORTMAGE3, S_SORTPRETRE1, S_SORTPRETRE2, S_SORTPRETRE3, S_SORTPHY1, S_SORTPHY2, S_SORTPHY3, S_SORTIMPOSSIBLE, S_SORTPRET, S_FAUCHEUSE, S_RAGE,
+    S_SORTLANCE, S_SORTMAGE1, S_SORTMAGE2, S_SORTMAGE3, S_SORTPRETRE1, S_SORTPRETRE2, S_SORTPRETRE3, S_SORTPHY1, S_SORTPHY2, S_SORTPHY3, S_SORTIMPOSSIBLE, S_SORTPRET, S_FAUCHEUSE,
 
     // Menus
     S_MENUBOUTON, S_CAISSEENREGISTREUSE,
 
     //Messages
     S_RISIKILL, S_BIGRISIKILL, S_GIGARISIKILL, S_RISIKILLLOIN, S_BIGRISIKILLLOIN, S_GIGARISIKILLLOIN, S_KILL, S_PIXEL, S_DRAPEAUPRIS, S_DRAPEAUTOMBE, S_DRAPEAUSCORE, S_BATTLEKILL,
-
-    // Mobs
-    S_M_PIXELVOI, S_M_PIXELHIT, S_M_PIXELATK,
-    S_M_CHEFVOI, S_M_CHEFHIT,
-    S_M_FERMIERVOI, S_M_FERMIERHIT,
-
-    S_PIECE, S_PET,
-
-    S_QUENELLE,
 
     //Null
     S_NULL,
@@ -814,7 +805,6 @@ struct gameent : dynent, gamestate
         if(attackchan >= 0) stopsound(attacksound, attackchan);
         if(idlechan >= 0) stopsound(idlesound, idlechan);
         if(hurtchan >= 0) stopsound(S_HEARTBEAT, hurtchan);
-        if(ragechan >= 0) stopsound(S_RAGE, ragechan);
         if(ai) delete ai;
     }
 
@@ -836,12 +826,6 @@ struct gameent : dynent, gamestate
     {
         if(hurtchan >= 0) stopsound(S_HEARTBEAT, hurtchan, 4000);
         hurtchan = -1;
-    }
-
-    void stopragesound()
-    {
-        if(ragechan >= 0) stopsound(S_RAGE, ragechan, 4000);
-        ragechan = -1;
     }
 
     void respawn()
