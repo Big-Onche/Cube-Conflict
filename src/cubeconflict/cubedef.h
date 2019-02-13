@@ -61,6 +61,7 @@ static const struct custominfo { const char *chapeau, *smiley, *capeteam1, *cape
 };
 
 extern void addxp(int nbxp);
+extern void addstat(int valeur, int stat);
 extern void writesave();
 
 //Messages de kill
@@ -72,7 +73,7 @@ extern int n_aptitudetueur, n_aptitudevictime;
 extern int message1, message2, message3;  //Messages HUD
 extern int zoomfov, zoom, crosshairsize; //HUD Zoom
 extern float crosshairalpha, pourcents;
-extern int ccxp, lvl, needxp, oldneed, neededxp;
+extern int ccxp, cclvl, needxp, oldneed, neededxp;
 
 extern float weapposside, weapposup, maxweapposside, maxweapposup, shieldside, maxshieldside; //Visée à la mire
 extern int nbfps;

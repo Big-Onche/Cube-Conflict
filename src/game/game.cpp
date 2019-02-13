@@ -1,5 +1,6 @@
 #include "game.h"
 #include "../cubeconflict/cubedef.h"
+#include "../cubeconflict/stats.h"
 
 string str_pseudovictime, str_pseudotueur, str_armetueur, str_pseudoacteur;
 int n_aptitudetueur, n_aptitudevictime, n_killstreakacteur;
@@ -498,8 +499,14 @@ namespace game
     void killed(gameent *d, gameent *actor)
     {
         d->killstreak = 0;
-        //////////////////////////////GESTION DE L'XP//////////////////////////////
-        if(actor==player1 && d!=player1) addxp(5+player1->killstreak-1);
+        //////////////////////////////GESTION DE ET STATISTIQUES//////////////////////////////
+        if(actor==player1 && d!=player1)
+        {
+            addxp(5+player1->killstreak-1);
+            addstat(1, STAT_KILLS);
+            if(player1->killstreak>stat_killstreak) addstat(player1->killstreak, STAT_KILLSTREAK);
+        }
+        else if (d==player1) addstat(1, STAT_MORTS);
 
         if(d->state==CS_EDITING)
         {

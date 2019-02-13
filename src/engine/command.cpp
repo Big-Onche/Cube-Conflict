@@ -3045,6 +3045,10 @@ bool execfile(const char *cfgfile, bool msg, bool encrypted)
         return false;
     }
 
+    const char *oldsourcefile = sourcefile, *oldsourcestr = sourcestr;
+    sourcefile = cfgfile;
+    sourcestr = buf;
+
     if(encrypted)
     {
         int i;
@@ -3053,9 +3057,6 @@ bool execfile(const char *cfgfile, bool msg, bool encrypted)
             buf[i] = buf[i] - 10;
     }
 
-    const char *oldsourcefile = sourcefile, *oldsourcestr = sourcestr;
-    sourcefile = cfgfile;
-    sourcestr = buf;
     execute(buf);
     sourcefile = oldsourcefile;
     sourcestr = oldsourcestr;
