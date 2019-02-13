@@ -671,7 +671,6 @@ namespace ai
                     case I_S_ROQUETTES:
                     case I_S_CAMPOUZE:
                     {
-                        itemstat &is = itemstats[entities::ents[ent]->type-I_RAIL];
                         wantsitem = true;
                         break;
                     }

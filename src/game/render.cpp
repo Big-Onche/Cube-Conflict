@@ -41,7 +41,7 @@ namespace game
         r->lastupdate = ragdollfade && lastmillis > d->lastpain + max(ragdollmillis - ragdollfade, 0) ? lastmillis - max(ragdollmillis - ragdollfade, 0) : d->lastpain;
         r->edit = NULL;
         r->ai = NULL;
-        if(d==player1) r->playermodel = customs[d->customtombe].custtombe;
+        //if(d==player1) r->playermodel = customs[d->customtombe].custtombe;
         r->attackchan = -1;
         ragdolls.add(r);
         d->ragdoll = NULL;
@@ -240,7 +240,6 @@ namespace game
 
     void rendertombeplayer(gameent *d, float fade)
     {
-        if(d!=player1) particle_text(vec(d->o.x, d->o.y, d->o.z), tempformatstring("RIP %s", d->name), PART_TEXT, 1, 0x333333, 1.0f);
         rendermodel(customs[d->customtombe].custtombe, ANIM_MAPMODEL, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, NULL, d, NULL, 0, 0, fade);
         //rendermodel(mdlname, anim, o, yaw, d->pitch>17 ? 17 : d->pitch<-17 ? -17 : pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), trans));
     }

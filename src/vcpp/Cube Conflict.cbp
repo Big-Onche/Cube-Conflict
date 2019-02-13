@@ -14,12 +14,9 @@
 				<Option compiler="gcc" />
 				<Option parameters="-t0 -w640 -h480 -qhome" />
 				<Compiler>
-					<Add option="-fomit-frame-pointer" />
-					<Add option="-fexpensive-optimizations" />
-					<Add option="-O3" />
-					<Add option="-Wunreachable-code" />
 					<Add option="-Wall" />
 					<Add option="-m64" />
+					<Add option="-g" />
 					<Add option="-fpermissive" />
 					<Add option="-ffast-math" />
 					<Add option="-fsigned-char" />
@@ -36,8 +33,6 @@
 					<Add directory="../vcpp" />
 				</ResourceCompiler>
 				<Linker>
-					<Add option="-O3" />
-					<Add option="-s" />
 					<Add option="-m64" />
 					<Add option="-mwindows" />
 					<Add library="SDL2" />
@@ -63,10 +58,7 @@
 				<Option compiler="gcc" />
 				<Option parameters="-t0 -w640 -h480 -qhome" />
 				<Compiler>
-					<Add option="-fomit-frame-pointer" />
-					<Add option="-fexpensive-optimizations" />
 					<Add option="-O3" />
-					<Add option="-Wunreachable-code" />
 					<Add option="-Wall" />
 					<Add option="-m32" />
 					<Add option="-fpermissive" />
@@ -85,8 +77,6 @@
 					<Add directory="../vcpp" />
 				</ResourceCompiler>
 				<Linker>
-					<Add option="-O3" />
-					<Add option="-s" />
 					<Add option="-m32" />
 					<Add option="-mwindows" />
 					<Add library="SDL2" />
