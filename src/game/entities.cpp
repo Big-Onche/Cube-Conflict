@@ -1,4 +1,5 @@
 #include "game.h"
+#include "../cubeconflict/cubedef.h"
 
 namespace entities
 {
@@ -293,6 +294,16 @@ namespace entities
             default:
                 if(d->canpickup(ents[n]->type, d->aptitude))
                 {
+                    if(d==player1)
+                    {
+                        switch(ents[n]->type)
+                        {
+                            case I_BOUCLIERBOIS: addstat(1, STAT_BOUCLIERBOIS); break;
+                            case I_BOUCLIERFER: addstat(1, STAT_BOUCLIERFER); break;
+                            case I_BOUCLIEROR: addstat(1, STAT_BOUCLIEROR); break;
+                            case I_BOUCLIERMAGNETIQUE: addstat(1, STAT_BOUCLIERMAGNETIQUE); break;
+                        }
+                    }
                     addmsg(N_ITEMPICKUP, "rci", d, n);
                     ents[n]->clearspawned(); // even if someone else gets it first
                 }

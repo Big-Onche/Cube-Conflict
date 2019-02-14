@@ -1,6 +1,5 @@
 #include "game.h"
 #include "../cubeconflict/cubedef.h"
-#include "../cubeconflict/stats.h"
 
 string str_pseudovictime, str_pseudotueur, str_armetueur, str_pseudoacteur;
 int n_aptitudetueur, n_aptitudevictime, n_killstreakacteur;
@@ -522,17 +521,17 @@ namespace game
         {
             case 3:
                 playsound(S_RISIKILL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300);
-                if(camera1->o.dist(actor->o) >= 250) playsound(S_RISIKILLLOIN-1, &actor->o, NULL, 0, 0 , 200, -1, 2000);
+                if(camera1->o.dist(actor->o) >= 250) playsound(S_RISIKILLLOIN, &actor->o, NULL, 0, 0 , 200, -1, 2000);
                 break;
             case 5: case 7:
                 playsound(S_BIGRISIKILL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300);
-                if(camera1->o.dist(actor->o) >= 250) playsound(S_BIGRISIKILLLOIN-1, &actor->o, NULL, 0, 0 , 200, -1, 750);
+                if(camera1->o.dist(actor->o) >= 250) playsound(S_BIGRISIKILLLOIN, &actor->o, NULL, 0, 0 , 200, -1, 750);
                 break;
             default:
                 if(actor->killstreak>=10)
                 {
                     playsound(S_GIGARISIKILL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300);
-                    if(camera1->o.dist(actor->o) >= 250) playsound(S_GIGARISIKILLLOIN-1, &actor->o, NULL, 0, 0 , 200, -1, 1500);
+                    if(camera1->o.dist(actor->o) >= 250) playsound(S_GIGARISIKILLLOIN, &actor->o, NULL, 0, 0 , 200, -1, 1500);
                 }
         }
 

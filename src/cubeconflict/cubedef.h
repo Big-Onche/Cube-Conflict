@@ -80,3 +80,18 @@ extern int nbfps;
 
 extern int parallaxX, parallaxY; //Effet parallax des menus
 
+//Statistiques & sauvegarde
+enum {STAT_KILLS, STAT_MORTS, STAT_KILLSTREAK, STAT_BOUCLIERBOIS, STAT_BOUCLIERFER, STAT_BOUCLIEROR, STAT_BOUCLIERMAGNETIQUE};
+
+extern int ccxp, cclvl, needxp, oldneed, neededxp;
+extern float pourcents;
+
+extern int stat_kills, stat_morts, stat_killstreak, stat_bouclierbois, stat_bouclierfer, stat_bouclieror, stat_boucliermagnetique;
+
+extern void addstat(int valeur, int stat);
+extern float menustat(int value);
+
+extern void writesave();
+extern void addxp(int nbxp);
+
+

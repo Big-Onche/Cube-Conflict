@@ -1,6 +1,6 @@
 #include "game.h"
 #include "engine.h"
-#include "cubedef.h"
+#include "../cubeconflict/cubedef.h"
 
 int message1, message2, message3, message4, message5, message6, message7, message8, message9, message10, message11, message12;
 int message_streak1;

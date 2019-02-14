@@ -165,7 +165,7 @@ namespace ai
         {
             if(lastmillis >= d->ai->lastaimrnd)
             {
-                int aiskew = 100;
+                int aiskew = 1;
 
                 #define rndaioffset(r) ((rnd(int(r*aiskew*2)+1)-(r*aiskew))*(1.f/float(max(d->skill, 1))))
                 loopk(3) d->ai->aimrnd[k] = rndaioffset(e->radius);
@@ -1061,7 +1061,7 @@ namespace ai
     int process(gameent *d, aistate &b)
     {
         int result = 0, stupify = d->skill <= 10+rnd(15) ? rnd(d->skill*1000) : 0, skmod = 101-d->skill;
-        float frame = d->skill <= 100 ? float(lastmillis-d->ai->lastrun)/float(max(skmod,1)*10) : 1;
+        float frame = 1;
         vec dp = d->headpos();
 
         bool idle = b.idle == 1 || (stupify && stupify <= skmod);
@@ -1087,7 +1087,7 @@ namespace ai
 
         gameent *e = getclient(d->ai->enemy);
         bool enemyok = e && targetable(d, e);
-        if(!enemyok || d->skill >= 50)
+        if(!enemyok)
         {
             gameent *f = (gameent *)intersectclosest(dp, d->ai->target, d, 1);
             if(f)

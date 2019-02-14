@@ -1,5 +1,6 @@
 #include "engine.h"
 #include "textedit.h"
+#include "../cubeconflict/cubedef.h"
 
 namespace UI
 {
@@ -3361,8 +3362,20 @@ namespace UI
         }
     }
 
+    static inline void buildstattext(float nombre, float scale, float scalemod, const Color &color, float wrap, uint *children, bool needfloat)
+    {
+        if(scale <= 0) scale = 1;
+        scale *= scalemod;
+        if(needfloat)BUILD(TextFloat, o, o->setup(nombre, scale, color, wrap), children);
+        else BUILD(TextInt, o, o->setup(nombre, scale, color, wrap), children);
+    }
+
     ICOMMAND(uicolortext, "tife", (tagval *text, int *c, float *scale, uint *children),
         buildtext(*text, *scale, uitextscale, Color(*c), -1, children));
+
+    ICOMMAND(uistat, "ffe", (float *stat, float *scale, uint *children),
+        if(*stat==-3) buildstattext(menustat(*stat), *scale, uitextscale, Color(0, 0, 0), -1, children, true);
+        else buildstattext(menustat(*stat), *scale, uitextscale, Color(0, 0, 0), -1, children, false));
 
     ICOMMAND(uitext, "tfe", (tagval *text, float *scale, uint *children),
         buildtext(*text, *scale, uitextscale, Color(255, 255, 255), -1, children));

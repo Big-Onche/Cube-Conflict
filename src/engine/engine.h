@@ -812,7 +812,6 @@ extern void bgquad(float x, float y, float w, float h, float tx = 0, float ty = 
 extern int n_ambiance;  //CubeConflict
 
 extern int maxmodelradiusdistance, grassdist, grass, dynlightdist; // LOD  //CubeConflict
-
 extern float grassstep;
 
 extern int n_map;
@@ -820,6 +819,8 @@ extern int n_map;
 extern int maxsoundradius;
 
 extern void sendresume(int ci);
+
+extern float menustat(int value);
 
 #endif
 #endif
