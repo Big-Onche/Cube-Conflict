@@ -199,7 +199,7 @@ namespace game
         }
 
         int decal_icon = 0;
-        if(player1->crouching && player1->aptitude==9)
+        if(player1->crouching && player1->aptitude==APT_CAMPEUR)
         {
             settexture("media/interface/hud/campeur.png");
             bgquad(15, h-260, 115, 115);

@@ -1308,7 +1308,7 @@ namespace ai
             if(!intermission)
             {
                 if(d->ragdoll) cleanragdoll(d); // RAGRAG
-                moveplayer(d, 10, true, d->epomillis, d->jointmillis, aptitudes[d->aptitude].apt_vitesse);
+                moveplayer(d, 10, true, d->epomillis, d->jointmillis, d->aptitude);
                 if(allowmove && !b.idle) timeouts(d, b);
                 entities::checkitems(d);
                 if(cmode) cmode->checkitems(d);
@@ -1320,7 +1320,7 @@ namespace ai
             else
             {
                 d->move = d->strafe = 0;
-                moveplayer(d, 10, false, d->epomillis, d->jointmillis, aptitudes[d->aptitude].apt_vitesse);
+                moveplayer(d, 10, false, d->epomillis, d->jointmillis, d->aptitude);
             }
         }
         d->attacking = ACT_IDLE;

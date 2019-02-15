@@ -395,8 +395,8 @@ extern vec collidewall;
 extern int collideinside;
 extern physent *collideplayer;
 
-extern void moveplayer(physent *pl, int moveres, bool local, int epomillis, int jointmillis, int vitesse);
-extern bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis, int jointmillis, int vitesse);
+extern void moveplayer(physent *pl, int moveres, bool local, int epomillis, int jointmillis, int aptitude);
+extern bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis, int jointmillis, int aptitude);
 extern void crouchplayer(physent *pl, int moveres, bool local);
 extern bool collide(physent *d, const vec &dir = vec(0, 0, 0), float cutoff = 0.0f, bool playercol = true, bool insideplayercol = false);
 extern bool bounce(physent *d, float secs, float elasticity, float waterfric, float grav);

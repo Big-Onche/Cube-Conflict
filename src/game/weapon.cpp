@@ -152,7 +152,7 @@ namespace game
             spread/= (d->champimillis/1000);
             nozoomspread/= (d->champimillis/1000);
         }
-        if(d->aptitude==9 && d->crouching)
+        if(d->aptitude==APT_CAMPEUR && d->crouching)
         {
             spread/= 2;
             nozoomspread/= 2;
@@ -411,13 +411,13 @@ namespace game
         }
         if(thirdperson)
         {
-            actor->steromillis > 0 ? damage*=2 : damage+=0;
+            actor->steromillis > 0 ? damage*=actor->aptitude==13 ? 3 : 2 : damage+=0;
             damage = (((damage*aptitudes[actor->aptitude].apt_degats)/100)*100)/aptitudes[d->aptitude].apt_resistance;
             damage = damage/10.0f;
 
             if(actor->aptitude==3)
             {
-                if(atk==ATK_CAC349_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACMARTEAU_SHOOT || atk==ATK_CACMASTER_SHOOT) particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*2.0f), PART_TEXT, 2000, 0xFF0000, actor==player1 ? 7.0f : 5.0f, -8);
+                if(atk==ATK_CAC349_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACMARTEAU_SHOOT || atk==ATK_CACMASTER_SHOOT) particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*3.0f), PART_TEXT, 2000, 0xFF0000, actor==player1 ? 7.0f : 5.0f, -8);
                 else particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.0f), PART_TEXT, 2000, damage<0 ? 0x22FF22 : actor->steromillis > 0 ? 0xFF0000: 0xFF4B19,  actor==player1 ?  7.0f : 3.0f, -8);
             }
             else if(actor->aptitude==9)
@@ -1398,7 +1398,7 @@ namespace game
             switch (d->aptitude)
             {
                 case 2: kickfactor = 0; break;
-                case 3: if(d->gunselect==GUN_CAC349 || d->gunselect==GUN_CACFLEAU || d->gunselect==GUN_CACMARTEAU || d->gunselect==GUN_CACMASTER) kickfactor = d->armour > 0 ? 2.5f : 25.0f; break;
+                case 3: if(d->gunselect==GUN_CAC349 || d->gunselect==GUN_CACFLEAU || d->gunselect==GUN_CACMARTEAU || d->gunselect==GUN_CACMASTER) kickfactor = 15.0f; break;
                 default: kickfactor = 2.5f;
             }
             vec kickback = vec(dir).mul(attacks[atk].kickamount*-kickfactor);

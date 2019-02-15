@@ -2136,7 +2136,7 @@ namespace server
         switch (actor->aptitude)
         {
             case 1: {if(atk==ATK_MEDIGUN_SHOOT) damage = -20;} break;
-            case 3: {if(atk==ATK_CAC349_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACMASTER_SHOOT) damage *= 2.5f;} break;
+            case 3: {if(atk==ATK_CAC349_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACMASTER_SHOOT) damage *= 3.0f;} break;
             case 9: {if(atk==ATK_SV98_SHOOT || atk==ATK_SKS_SHOOT || atk==ATK_ARBALETE_SHOOT || atk==ATK_CAMPOUZE_SHOOT) damage *= 1.5f;} break;
             case 12: {if(actor->state.ragemillis>0) damage *=1.25f;} break;
         }
@@ -2292,7 +2292,7 @@ namespace server
             if(dup) continue;
 
             float damage = attacks[atk].damage*(1-h.dist/EXP_DISTSCALE/attacks[atk].exprad);
-            if(gs.steromillis) damage*=2;
+            if(gs.steromillis) damage*= ci->aptitude==13 ? 3 : 2;
             if(target==ci) damage /= EXP_SELFDAMDIV;
 
             nbhits++;
@@ -2323,7 +2323,7 @@ namespace server
                 int(to.x*DMF), int(to.y*DMF), int(to.z*DMF),
                 ci->ownernum);
         gs.shotdamage += attacks[atk].damage*attacks[atk].rays;
-        if(gs.steromillis) gs.shotdamage*=2;
+        if(gs.steromillis) gs.shotdamage*=ci->aptitude==13 ? 3 : 2;
         if(gs.ragemillis) gs.shotdamage*=3;
         switch(atk)
         {
@@ -2369,7 +2369,7 @@ namespace server
                     totalrays += h.rays;
                     if(totalrays>maxrays) continue;
                     int damage = h.rays*attacks[atk].damage;
-                    if(gs.steromillis) damage*=2;
+                    if(gs.steromillis) damage*=ci->aptitude==13 ? 3 : 2;
                     dodamage(target, ci, damage, atk, h.dir);
                     if(ci->aptitude==4) doregen(target, ci, damage, atk, h.dir);
                 }

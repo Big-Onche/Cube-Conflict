@@ -446,10 +446,10 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound
     { GUN_S_ROQUETTES, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MINIROQUETTE, S_MINIROQUETTE, S_NULL, S_NULL,   170,  800,  10, 300, 0,  700,   6, 2000,  1,   500,   70, 0, 0},
     { GUN_S_CAMPOUZE, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_CAMPOUZE, S_CAMPOUZE, S_NULL, S_NULL,           500,   700,  30,  30, 0, 5000,   3, 8000, 10,   150,    8, 0, 0},
     // Armes corps à corps
-    { GUN_CAC349, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_EPEEATTACK, S_EPEEATTACK, S_NULL, S_NULL,           1000, 100, 400, 400, 0,    0, -10,   40, 20,    50,  0, 0, 0},
-    { GUN_CACMARTEAU, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MARTEAUBAN, S_MARTEAUBAN, S_NULL, S_NULL,       1500, 140, 400, 400, 0,    0,  -5,   45, 20,    50,  0, 0, 0},
-    { GUN_CACMASTER, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MASTERSWORD, S_MASTERSWORD, S_NULL, S_NULL,       600,  80, 700, 700, 0,    0,  -8,   40, 20,    50,  0, 0, 0},
-    { GUN_CACFLEAU, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FLEAU, S_FLEAU, S_NULL, S_NULL,                   1250,  90, 200, 200, 0,    0,  -7,   55, 20,    70,  0, 0, 0},
+    { GUN_CAC349, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_EPEEATTACK, S_EPEEATTACK, S_NULL, S_NULL,           1000, 400, 400, 400, 0, 0, -12,   55, 20,    50,  0, 0, 0},
+    { GUN_CACMARTEAU, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MARTEAUBAN, S_MARTEAUBAN, S_NULL, S_NULL,       1500, 600, 400, 400, 0, 0,  -7,   60, 20,    50,  0, 0, 0},
+    { GUN_CACMASTER, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MASTERSWORD, S_MASTERSWORD, S_NULL, S_NULL,       600, 350, 700, 700, 0, 0, -10,   50, 20,    50,  0, 0, 0},
+    { GUN_CACFLEAU, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FLEAU, S_FLEAU, S_NULL, S_NULL,                   1250, 500, 200, 200, 0, 0,  -9,   70, 20,    70,  0, 0, 0},
     // Armes spéciales aptitudes
     { GUN_KAMIKAZE, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_KAMIKAZEBOOM, S_KAMIKAZEBOOM, S_NULL, S_NULL,    1000, 3000,   1,   1, 0,    1,  10,   70,  1,   300, 400, 1, 0},
     { GUN_MEDIGUN, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MEDIGUN, S_MEDIGUN, S_NULL, S_NULL,                100,  -50, 500, 700, 0,  750,   2,  280,  4,    10,  25, 0, 0},
@@ -558,10 +558,10 @@ struct gamestate
         {
             case I_BOOSTPV:
                 //if(maxhealth<1300) maxhealth = maxhealth+100;
-                health = min(health+is.add, 2500);
+                health = min(health+is.add*(aptitude==1 ? 1.5f : 1), 2500.0f);
                 break;
             case I_SANTE: // boost also adds to health
-                health = min(health+is.add, maxhealth);
+                health = min(health+is.add*(aptitude==1 ? 2 : 1), maxhealth);
                 break;
             case I_BOUCLIERBOIS:
             case I_BOUCLIERFER:
@@ -570,10 +570,10 @@ struct gamestate
                 armour = min(armour+is.add, is.max);
                 armourtype = is.info;
                 break;
-            case I_BOOSTDEGATS: steromillis = min(steromillis+is.add, is.max); break;
-            case I_BOOSTVITESSE: epomillis = min(epomillis+is.add, is.max); break;
-            case I_BOOSTGRAVITE: jointmillis = min(jointmillis+is.add, is.max); break;
-            case I_BOOSTPRECISION: champimillis = min(champimillis+is.add, is.max); break;
+            case I_BOOSTDEGATS: steromillis = min(steromillis+is.add*(aptitude==13 ? 1.5f : 1), is.max*(aptitude==13 ? 1.5f : 1)); break;
+            case I_BOOSTVITESSE: epomillis = min(epomillis+is.add*(aptitude==13 ? 1.5f : 1), is.max*(aptitude==13 ? 1.5f : 1)); break;
+            case I_BOOSTGRAVITE: jointmillis = min(jointmillis+is.add*(aptitude==13 ? 1.5f : 1), is.max*(aptitude==13 ? 1.5f : 1)); break;
+            case I_BOOSTPRECISION: champimillis = min(champimillis+is.add*(aptitude==13 ? 1.5f : 1), is.max*(aptitude==13 ? 1.5f : 1)); break;
                 //if(classe==14) jointmillis = jointmillis*1.50f;
                 break;
             default:

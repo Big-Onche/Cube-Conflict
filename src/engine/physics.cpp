@@ -5,6 +5,7 @@
 
 #include "engine.h"
 #include "mpr.h"
+#include "../cubeconflict/cubedef.h"
 
 const int MAXCLIPOFFSET = 4;
 const int MAXCLIPPLANES = 1024;
@@ -1744,7 +1745,7 @@ FVAR(straferoll, 0, 0.033f, 90);
 FVAR(faderoll, 0, 0.95f, 1);
 VAR(floatspeed, 1, 400, 10000);
 
-void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curtime, int jointmillis)
+void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curtime, int jointmillis, int aptitude)
 {
     bool allowmove = game::allowmove(pl);
     if(floating)
@@ -1753,7 +1754,6 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
         {
             pl->jumping = false;
             pl->vel.z = max(pl->vel.z, JUMPVEL);
-            if(jointmillis>0) pl->vel.z = max(pl->vel.z, JUMPVEL*(1.0f+(jointmillis/30000.f)));
         }
     }
     else if(pl->physstate >= PHYS_SLOPE || water)
@@ -1762,8 +1762,8 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
         if(pl->jumping && allowmove)
         {
             pl->jumping = false;
-
-            pl->vel.z = max(pl->vel.z, JUMPVEL); // physics impulse upwards
+            if(jointmillis>0) pl->vel.z = max(pl->vel.z, JUMPVEL*(jointmillis/(aptitude==13 ? 15000 : 30000)));
+            else pl->vel.z = max(pl->vel.z, JUMPVEL); // physics impulse upwards
             if(water) { pl->vel.x /= 8.0f; pl->vel.y /= 8.0f; } // dampen velocity change even harder, gives correct water feel
 
             game::physicstrigger(pl, local, 1, 0);
@@ -1806,10 +1806,10 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
 //    pl->vel.lerp(pl->vel, d, fpsfric);
 }
 
-void modifygravity(physent *pl, bool water, int curtime, int jointmillis)
+void modifygravity(physent *pl, bool water, int curtime, int jointmillis, int aptitude)
 {
     float secs = curtime/1000.0f;
-    if(jointmillis>0) secs = (curtime/((jointmillis/10)+1000.0f));
+    if(jointmillis>0) secs = (curtime/((jointmillis/(aptitude==13 ? 7.5f : 10)+1000.0f)));
 
     vec g(0, 0, 0);
     if(pl->physstate == PHYS_FALL) g.z -= GRAVITY*secs;
@@ -1839,22 +1839,24 @@ void modifygravity(physent *pl, bool water, int curtime, int jointmillis)
 // moveres indicated the physics precision (which is lower for monsters and multiplayer prediction)
 // local is false for multiplayer prediction
 
-bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis, int jointmillis, int vitesse)
+bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis, int jointmillis, int aptitude)
 {
     int material = lookupmaterial(vec(pl->o.x, pl->o.y, pl->o.z + (3*pl->aboveeye - pl->eyeheight)/4));
     bool water = isliquid(material&MATF_VOLUME);
     bool floating = pl->type==ENT_PLAYER && (pl->state==CS_EDITING || pl->state==CS_SPECTATOR);
 
-    float classespeed = vitesse*10.f;
-    float secs = curtime/classespeed;
-    if(epomillis>0) secs = (curtime/(classespeed-(epomillis/100)));
+    float classespeed = aptitudes[aptitude].apt_vitesse*10.f;
+
+    float secs;
+    if(epomillis>0) secs = (curtime/(classespeed-(epomillis/(aptitude==13 ? 75 : 100))));
+    else secs = curtime/classespeed;
 
     //if(accroupi) secs*=20;
 
     // apply gravity
-    if(!floating) modifygravity(pl, water, curtime, jointmillis);
+    if(!floating) modifygravity(pl, water, curtime, jointmillis, aptitude);
     // apply any player generated changes in velocity
-    modifyvelocity(pl, local, water, floating, curtime, jointmillis);
+    modifyvelocity(pl, local, water, floating, curtime, jointmillis, aptitude);
 
     vec d(pl->vel);
     if(!floating && water) d.mul(0.5f);
@@ -1939,7 +1941,7 @@ void interppos(physent *pl)
     pl->o.add(deltapos);
 }
 
-void moveplayer(physent *pl, int moveres, bool local, int epomillis, int jointmillis, int vitesse)
+void moveplayer(physent *pl, int moveres, bool local, int epomillis, int jointmillis, int aptitude)
 {
     if(physsteps <= 0)
     {
@@ -1948,9 +1950,9 @@ void moveplayer(physent *pl, int moveres, bool local, int epomillis, int jointmi
     }
 
     if(local) pl->o = pl->newpos;
-    loopi(physsteps-1) moveplayer(pl, moveres, local, physframetime, epomillis, jointmillis, vitesse);
+    loopi(physsteps-1) moveplayer(pl, moveres, local, physframetime, epomillis, jointmillis, aptitude);
     if(local) pl->deltapos = pl->o;
-    moveplayer(pl, moveres, local, physframetime, epomillis, jointmillis, vitesse);
+    moveplayer(pl, moveres, local, physframetime, epomillis, jointmillis, aptitude);
     if(local)
     {
         pl->newpos = pl->o;

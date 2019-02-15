@@ -11,7 +11,9 @@
 
 
 //Définition des aptitudes
-static struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt_vitesse; const char *apt_nom; } aptitudes[] =
+enum {APT_SOLDAT = 0, APT_MEDECIN, APT_AMERICAIN, APT_NINJA, APT_VAMPIRE, APT_MAGICIEN, APT_KAMIKAZE, APT_FAUCHEUSE, APT_PHYSICIEN, APT_CAMPEUR, APT_COMMANDO, APT_PRETRE, APT_VICKING, APT_JUNKIE, NUMAPTS};
+
+static struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt_vitesse; const char *apt_nom; } aptitudes[NUMAPTS] =
 {
     { 100,  100, 100,  100, "Soldat"},      //0 ---> OK
     { 80,   75,  100,  100, "Médecin"},     //1 ---> Fix medigun regenscreen & IA
@@ -25,8 +27,8 @@ static struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt
     { 100,  60,  125,  150, "Campeur"},     //9 ---> OK
     { 120,  110, 110,   85, "Commando"},    //10
     { 90,   90,   80,  120, "Prêtre"},      //11
-    { 100,  120,  60,  115, "Viking"},      //12---> OK
-    { 85,   80,   90,  110, "Junkie"},      //13
+    { 100,  120,  60,  115, "Viking"},      //12 --> OK
+    { 100,  110,  85,  120, "Junkie"},      //13 --> OK
 };
 
 //Définition des boucliers
