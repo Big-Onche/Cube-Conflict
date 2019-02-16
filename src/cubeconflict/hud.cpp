@@ -206,6 +206,13 @@ namespace game
             decal_icon += 130;
         }
 
+        if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN)
+        {
+            settexture("media/interface/hud/mana.png");
+            bgquad(15, h-260, 115, 115);
+            decal_icon += 130;
+        }
+
         if(player1->ragemillis){settexture("media/interface/hud/rage.png"); bgquad(15, h-260, 115, 115); decal_icon += 130;}
         if(player1->steromillis){settexture("media/interface/hud/steros.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
         if(player1->epomillis){settexture("media/interface/hud/epo.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
@@ -240,6 +247,7 @@ namespace game
 
         if(d->armour > 0) draw_textf("%d", 370, h-103, d->armour < 9 ? 1 : d->armour/10);
 
+        if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN) {draw_textf("%d", 135, h-233-decal_number, d->mana); decal_number +=130;}
         if(player1->crouching && player1->aptitude==9) decal_number +=130;
         if(player1->ragemillis) {draw_textf("%d", 135, h-233-decal_number, d->ragemillis/1000); decal_number +=130;}
         if(player1->steromillis) {draw_textf("%d", 135, h-233-decal_number, d->steromillis/1000); decal_number +=130;}

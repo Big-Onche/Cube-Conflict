@@ -76,7 +76,9 @@ enum                            // static entity types
     I_SUPERARME, I_NULL1, I_NULL2, I_NULL3,
     //OBJETS
     I_SANTE, I_BOOSTPV, I_BOOSTDEGATS, I_BOOSTPRECISION, I_BOOSTVITESSE, I_BOOSTGRAVITE,
-    I_BOUCLIERBOIS, I_BOUCLIERFER, I_BOUCLIEROR, I_BOUCLIERMAGNETIQUE,
+    I_BOUCLIERBOIS, I_BOUCLIERFER, I_BOUCLIEROR, I_BOUCLIERMAGNETIQUE, I_ARMUREASSISTEE,
+
+    I_MANA,
 
     TELEPORT,                   // attr1 = idx, attr2 = model, attr3 = tag
     TELEDEST,                   // attr1 = angle, attr2 = idx
@@ -409,6 +411,10 @@ static struct itemstat { int add, max, sound; const char *name; int icon, info; 
     {1000,    1250, S_ITEMARMOUR, "BOUCLIER DE FER",     HICON_SIZE, A_GREEN},
     {2000,    2000, S_ITEMARMOUR, "BOUCLIER D'OR",       HICON_SIZE, A_YELLOW},
     {1500,    1500, S_ITEMARMOUR, "BOUCLIER MAGNETIQUE", HICON_SIZE, A_MAGNET},
+    {2500,    2500, S_ITEMARMOUR, "ARMURE ASSISTEE",     HICON_SIZE, A_MAGNET}, //Futur bouclier
+
+    {50,       150, S_ITEMHEALTH, "MANA",                HICON_SIZE},
+
 };
 
 #define validitem(n) false
@@ -498,6 +504,7 @@ struct gamestate
 {
     int health, maxhealth;
     int armour, armourtype;
+    int mana;
     int steromillis, epomillis, jointmillis, champimillis, ragemillis;
     int gunselect, gunwait;
     int ammo[NUMGUNS];
@@ -519,7 +526,7 @@ struct gamestate
     bool canpickup(int type, int aptitude)
     {
         //return validitem(type);
-        if(type<I_RAIL || type>I_BOUCLIERMAGNETIQUE) return false;
+        if(type<I_RAIL || type>I_MANA) return false;
         itemstat &is = itemstats[type-I_RAIL];
 
         switch(type)
@@ -529,6 +536,9 @@ struct gamestate
                 //else
                 return health<maxhealth;
                 break;
+            case I_MANA:
+                if(aptitude==5 || aptitude==11) return mana<is.max;
+                else return false;
             case I_BOOSTPV: return maxhealth<is.max;
             case I_BOOSTDEGATS: return steromillis<is.max;
             case I_BOOSTPRECISION: return champimillis<is.max;
@@ -552,7 +562,7 @@ struct gamestate
 
     void pickup(int type, int aptitude, int rndsuperweapon)
     {
-        if(type<I_RAIL || type>I_BOUCLIERMAGNETIQUE) return;
+        if(type<I_RAIL || type>I_MANA) return;
         itemstat &is = itemstats[type-I_RAIL];
         switch(type)
         {
@@ -562,6 +572,9 @@ struct gamestate
                 break;
             case I_SANTE: // boost also adds to health
                 health = min(health+is.add*(aptitude==1 ? 2 : 1), maxhealth);
+                break;
+            case I_MANA: // boost also adds to health
+                mana = min(mana+is.add, is.max);
                 break;
             case I_BOUCLIERBOIS:
             case I_BOUCLIERFER:
@@ -606,6 +619,7 @@ struct gamestate
     void respawn()
     {
         health = maxhealth;
+        mana = 100;
         steromillis = 0;
         epomillis = 0;
         jointmillis = 0;

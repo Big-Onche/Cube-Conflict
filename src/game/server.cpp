@@ -863,7 +863,7 @@ namespace server
     ctfservmode ctfmode;
     servmode *smode = NULL;
 
-    bool canspawnitem(int type) { return type>=I_RAIL && type<=I_BOUCLIERMAGNETIQUE; }
+    bool canspawnitem(int type) { return type>=I_RAIL && type<=I_MANA; }
 //    bool canspawnitem(int type) { return !m_noitems && (type>=I_SHELLS && type<=I_QUAD && (!m_noammo || type<I_SHELLS || type>I_CARTRIDGES)); }
     int spawntime(int type)
     {
@@ -873,12 +873,12 @@ namespace server
         switch(type)
         {
             case I_GLOCK: sec = np*3; break;
-            case I_UZI: case I_LANCEFLAMMES: case I_ARBALETE: case I_HYDRA: case I_SANTE: case I_BOUCLIERBOIS: sec = np*4; break;
+            case I_UZI: case I_LANCEFLAMMES: case I_ARBALETE: case I_HYDRA: case I_SANTE: case I_MANA: case I_BOUCLIERBOIS: sec = np*4; break;
             case I_MOSSBERG: case I_SMAW: case I_ARTIFICE: case I_SV98: case I_M32: case I_FAMAS: case I_PULSE: case I_AK47: case I_GRAP1: sec = np*5; break;
             case I_MINIGUN: case I_RAIL: case I_SPOCKGUN: case I_BOUCLIERFER: sec = np*6;
             case I_BOUCLIERMAGNETIQUE: sec = np*7; break;
             case I_BOUCLIEROR: sec = np*8; break;
-            case I_SUPERARME: sec = 30+rnd(30); break;
+            case I_SUPERARME: sec = 45+rnd(45); break;
 
             case I_BOOSTPV: sec = 30; break;
             case I_BOOSTPRECISION: sec = 45; break;
@@ -1705,6 +1705,7 @@ namespace server
         putint(p, gs.maxhealth);
         putint(p, gs.armour);
         putint(p, gs.armourtype);
+        putint(p, gs.mana);
         putint(p, gs.gunselect);
         loopi(NUMGUNS) putint(p, gs.ammo[i]);
     }
@@ -1720,9 +1721,10 @@ namespace server
     {
         servstate &gs = ci->state;
         spawnstate(ci);
-        sendf(ci->ownernum, 1, "rii7v", N_SPAWNSTATE, ci->clientnum, gs.lifesequence,
+        sendf(ci->ownernum, 1, "rii8v", N_SPAWNSTATE, ci->clientnum, gs.lifesequence,
             gs.health, gs.maxhealth,
             gs.armour, gs.armourtype,
+            gs.mana,
             gs.gunselect, NUMGUNS, gs.ammo);
         gs.lastspawn = gamemillis;
     }
@@ -1919,12 +1921,13 @@ namespace server
     void sendresume(clientinfo *ci) //PARSESTATE
     {
         servstate &gs = ci->state;
-        sendf(-1, 1, "ri9i9vi", N_RESUME, ci->clientnum, gs.state,
+        sendf(-1, 1, "ri9i10vi", N_RESUME, ci->clientnum, gs.state,
             gs.killstreak, gs.frags, gs.flags, gs.deaths,
             gs.steromillis, gs.epomillis, gs.jointmillis, gs.champimillis, gs.ragemillis,
             gs.lifesequence,
             gs.health, gs.maxhealth,
             gs.armour, gs.armourtype,
+            gs.mana,
             gs.gunselect, NUMGUNS, gs.ammo, -1);
     }
 

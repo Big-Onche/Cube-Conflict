@@ -1316,6 +1316,7 @@ namespace game
         d->maxhealth = getint(p);
         d->armour = getint(p);
         d->armourtype = getint(p);
+        d->mana = getint(p);
 
         if(resume && d==player1)
         {

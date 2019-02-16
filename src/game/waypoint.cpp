@@ -620,7 +620,7 @@ namespace ai
                     addwaypoint(e.o);
                     break;
                 default:
-                    if(e.type >= I_RAIL && e.type <= I_BOUCLIERMAGNETIQUE) addwaypoint(e.o);
+                    if(e.type >= I_RAIL && e.type <= I_MANA) addwaypoint(e.o);
                     break;
             }
         }

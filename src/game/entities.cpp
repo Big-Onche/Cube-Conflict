@@ -26,14 +26,14 @@ namespace entities
     const char *itemname(int i)
     {
         int t = ents[i]->type;
-        if(t<I_RAIL || t>I_BOUCLIERMAGNETIQUE) return NULL;
+        if(t<I_RAIL || t>I_MANA) return NULL;
         return itemstats[t-I_RAIL].name;
     }
 
     int itemicon(int i)
     {
         int t = ents[i]->type;
-        if(t<I_RAIL || t>I_BOUCLIERMAGNETIQUE) return -1;
+        if(t<I_RAIL || t>I_MANA) return -1;
         return itemstats[t-I_RAIL].icon;
     }
 
@@ -48,7 +48,10 @@ namespace entities
             "munitions/supercaisse", "munitions/supercaisse", "munitions/supercaisse", "munitions/supercaisse",
 
             "objets/panachay", "objets/cochongrillay", "objets/steroides", "objets/champis", "objets/epo", "objets/joint",
-            "objets/bouclierbois", "objets/bouclierfer", "objets/bouclieror", "objets/boucliermagnetique",
+            "objets/bouclierbois", "objets/bouclierfer", "objets/bouclieror", "objets/boucliermagnetique", NULL,
+
+            "objets/mana",
+
             "objets/teleporteur",
 
             NULL, NULL, NULL, NULL,
@@ -80,6 +83,7 @@ namespace entities
                     break;
                 case I_SANTE: case I_BOOSTPV: case I_BOOSTDEGATS: case I_BOOSTPRECISION: case I_BOOSTVITESSE: case I_BOOSTGRAVITE:
                 case I_BOUCLIERBOIS: case I_BOUCLIERFER: case I_BOUCLIEROR: case I_BOUCLIERMAGNETIQUE:
+                case I_MANA:
                     break;
             }
             const char *mdl = entmdlname(i);
@@ -112,7 +116,7 @@ namespace entities
                     if(e.attr2 < 0) continue;
                     break;
                 default:
-                    if(!e.spawned() || e.type < I_RAIL || e.type > I_BOUCLIERMAGNETIQUE) continue;
+                    if(!e.spawned() || e.type < I_RAIL || e.type > I_MANA) continue;
                     break;
             }
             const char *mdlname = entmodel(e);
@@ -145,7 +149,7 @@ namespace entities
     {
         if(!ents.inrange(n)) return;
         int type = ents[n]->type;
-        if(type<I_RAIL || type>I_BOUCLIERMAGNETIQUE) return;
+        if(type<I_RAIL || type>I_MANA) return;
         ents[n]->clearspawned();
         if(!d) return;
         itemstat &is = itemstats[type-I_RAIL];
@@ -408,7 +412,7 @@ namespace entities
     void putitems(packetbuf &p)            // puts items in network stream and also spawns them locally
     {
         putint(p, N_ITEMLIST);
-        loopv(ents) if(ents[i]->type>=I_RAIL && ents[i]->type<=I_BOUCLIERMAGNETIQUE) // && (!m_noammo || ents[i]->type<I_RAIL || ents[i]->type>I_GLOCK)
+        loopv(ents) if(ents[i]->type>=I_RAIL && ents[i]->type<=I_MANA) // && (!m_noammo || ents[i]->type<I_RAIL || ents[i]->type>I_GLOCK)
         {
             putint(p, i);
             putint(p, ents[i]->type);
@@ -422,7 +426,7 @@ namespace entities
     {
         //if(m_noitems) return;
 
-        loopv(ents) if(ents[i]->type>=I_RAIL && ents[i]->type<=I_BOUCLIERMAGNETIQUE) //&& (!m_noammo || ents[i]->type<I_SHELLS || ents[i]->type>I_CARTRIDGES)
+        loopv(ents) if(ents[i]->type>=I_RAIL && ents[i]->type<=I_MANA) //&& (!m_noammo || ents[i]->type<I_SHELLS || ents[i]->type>I_CARTRIDGES)
         {
             ents[i]->setspawned(force || !server::delayspawn(ents[i]->type));
         }
@@ -499,10 +503,12 @@ namespace entities
             "fusil_electrique", "fusil_plasma", "smaw", "minigun", "spockgun", "m32",
             "lanceflammes", "uzi", "famas", "mossberg", "hydra", "SV98",
             "sks", "arbalete", "ak47", "grap1", "feu_artifice", "glock",
-            "bombe_nucleaire", "gau8", "miniroquettes", "campouze2000",
+            "supercaisse", "NULL", "NULL", "NULL",
 
             "panache", "cochon_grille", "steroides", "champis", "epo", "joint",
-            "bouclier_bois", "bouclier_fer", "bouclier_or", "bouclier_magnetique",
+            "bouclier_bois", "bouclier_fer", "bouclier_or", "bouclier_magnetique", "armure_assitee",
+
+            "mana",
 
             "teleport", "teledest", "jumppad", "flag",
         };

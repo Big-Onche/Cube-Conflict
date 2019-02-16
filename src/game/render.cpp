@@ -477,7 +477,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
                 int team = m_teammode && validteam(d->team) ? d->team : 0;
                 if(player1->state!=CS_SPECTATOR)particle_text(d->abovehead(), d->info, PART_TEXT, 1, teamtextcolor[team], 2.0f);
                 //if(player1->state!=CS_SPECTATOR)particle_text(d->abovehead(), d->killstreak, PART_TEXT, 1, teamtextcolor[team], 5.0f);
-                if(d->health<100) switch(rnd(d->health)) { case 1: regular_particle_splash(PART_BLOOD, 1, 9999, d->o, 0x60FFFF  , 1.0f, 50);}
+                if(d->health<200) switch(rnd(d->health/2)) {case 0: gibeffect(300, d->o, d);}
                 if(player1->aptitude==1 && team==1)
                 {
                     if (d->health > 1000)

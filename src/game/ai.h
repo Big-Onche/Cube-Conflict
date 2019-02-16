@@ -295,6 +295,7 @@ namespace ai
     extern void think(gameent *d, bool run);
 
     extern bool badhealth(gameent *d);
+    extern bool lowmana(gameent *d);
     extern bool checkothers(vector<int> &targets, gameent *d = NULL, int state = -1, int targtype = -1, int target = -1, bool teams = false, int *members = NULL);
     extern bool makeroute(gameent *d, aistate &b, int node, bool changed = true, int retries = 0);
     extern bool makeroute(gameent *d, aistate &b, const vec &pos, bool changed = true, int retries = 0);

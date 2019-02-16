@@ -325,6 +325,12 @@ namespace ai
         else return false;
     }
 
+    bool lowmana(gameent *d)
+    {
+        if(d->mana<60 && d->mana-d->skill<60) return true;
+        else return false;
+    }
+
     bool enemy(gameent *d, aistate &b, const vec &pos, float guard = SIGHTMIN, int pursue = 0)
     {
         gameent *t = NULL;
@@ -477,6 +483,8 @@ namespace ai
                 break;
             case I_SANTE:
                 if(d->health < 80) score = 1e6f;
+            case I_MANA:
+                if(d->mana < 70) score = 1e5f;
             case I_BOUCLIERBOIS:
                 if(d->armour < 60) score = 1e8f;
             case I_BOUCLIERFER:
@@ -657,7 +665,7 @@ namespace ai
     {
         if(!entities::ents.inrange(ent)) return;
         extentity &e = *entities::ents[ent];
-        if(e.type >= I_RAIL && e.type <= I_BOUCLIERMAGNETIQUE)
+        if(e.type >= I_RAIL && e.type <= I_MANA)
         {
             loopv(players) if(players[i] && players[i]->ai && players[i]->aitype == AI_BOT && players[i]->canpickup(e.type, players[i]->aptitude))
             {
@@ -670,6 +678,7 @@ namespace ai
                     case I_BOUCLIERFER:
                     case I_BOUCLIEROR:
                     case I_BOUCLIERMAGNETIQUE:
+                    case I_MANA: wantsitem = lowmana(d); break;
                     case I_SUPERARME:
                     {
                         wantsitem = true;
