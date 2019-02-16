@@ -486,7 +486,7 @@ namespace game
         {"troué", "succès."},
         {"dézingué", "détermination."},
         {"annihilé", "une précision sans précédent."},
-        {"brisé", "d'atronces souffrances."},
+        {"brisé", "d'atroces souffrances."},
         {"neutralisé"},
         {"pulverisé"},
         {"exterminé"},

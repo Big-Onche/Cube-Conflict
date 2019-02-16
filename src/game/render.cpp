@@ -266,7 +266,7 @@ namespace game
             anim = attack = ANIM_TAUNT;
             delay = 1000;
         }
-        modelattach a[8];
+        modelattach a[9];
         int ai = 0;
         if(guns[d->gunselect].vwep)
         {

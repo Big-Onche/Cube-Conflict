@@ -1756,6 +1756,7 @@ namespace game
             {
                 int i = getint(p);
                 if(!entities::ents.inrange(i)) break;
+
                 entities::setspawn(i, true);
                 ai::itemspawned(i);
                 playsound(S_ITEMSPAWN, &entities::ents[i]->o, NULL, 0, 0, 0, -1, 300, 1500);
@@ -1770,9 +1771,9 @@ namespace game
 
             case N_ITEMACC:            // server acknowledges that I picked up this item
             {
-                int i = getint(p), cn = getint(p);
+                int i = getint(p), cn = getint(p), rndsuperweapon = getint(p);
                 gameent *d = getclient(cn);
-                entities::pickupeffects(i, d);
+                entities::pickupeffects(i, d, rndsuperweapon);
                 break;
             }
 
@@ -2051,10 +2052,7 @@ namespace game
                     case I_BOOSTPRECISION: playsound(S_V_QUAD10, NULL, NULL, 0, 0, 0, -1, 300, 3000);  conoutf(CON_GAMEINFO, "\faLES CHAMPIGNONS REPOUSSENT !"); break;
                     case I_BOOSTVITESSE: playsound(S_V_QUAD10, NULL, NULL, 0, 0, 0, -1, 300, 3000);  conoutf(CON_GAMEINFO, "\faL'EPO ARRIVE POUR LES CYCLISTES !"); break;
                     case I_BOOSTGRAVITE: playsound(S_V_QUAD10, NULL, NULL, 0, 0, 0, -1, 300, 3000);  conoutf(CON_GAMEINFO, "\faQUELQU'UN ROULE UN GROS JOINT !"); break;
-                    case I_S_NUKE: playsound(S_V_QUAD10, NULL, NULL, 0, 0, 0, -1, 300, 3000);  conoutf(CON_GAMEINFO, "\faLE PURIFIEUR PAR L'ATÔME EST BIENTÔT DISPONIBLE"); break;
-                    case I_S_GAU8: playsound(S_V_QUAD10, NULL, NULL, 0, 0, 0, -1, 300, 3000);  conoutf(CON_GAMEINFO, "\faLE GAU-8 VA TOMBER DE L'AVION"); break;
-                    case I_S_ROQUETTES: playsound(S_V_QUAD10, NULL, NULL, 0, 0, 0, -1, 300, 3000);  conoutf(CON_GAMEINFO, "\faPROTOTYPE DU MINIGUN À ROQUETTES PRESQUE AU POINT"); break;
-                    case I_S_CAMPOUZE: playsound(S_V_QUAD10, NULL, NULL, 0, 0, 0, -1, 300, 3000);  conoutf(CON_GAMEINFO, "\faAVIS AUX CAMPEURS : BOUGEZ POUR PRENDRE LE CAMPOUZE 2000"); break;
+                    case I_SUPERARME: playsound(S_V_QUAD10, NULL, NULL, 0, 0, 0, -1, 300, 3000);  conoutf(CON_GAMEINFO, "\faLA SUPER-ARME EST BIENTÔT PRÊTE À ANNIHILER"); break;
                 }
                 break;
             }

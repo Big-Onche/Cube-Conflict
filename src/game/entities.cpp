@@ -45,7 +45,7 @@ namespace entities
             "munitions/fusilelectrique", "munitions/fusilplasma", "munitions/smaw", "munitions/minigun", "munitions/spockgun", "munitions/M32",
             "munitions/lanceflammes", "munitions/uzi", "munitions/famas", "munitions/mossberg500", "munitions/hydra", "munitions/SV_98",
             "munitions/sks", "munitions/arbalete", "munitions/ak47", "munitions/GRAP1", "munitions/feuartifice", "munitions/glock",
-            "munitions/supercaisse", NULL, NULL, NULL,
+            "munitions/supercaisse", "munitions/supercaisse", "munitions/supercaisse", "munitions/supercaisse",
 
             "objets/panachay", "objets/cochongrillay", "objets/steroides", "objets/champis", "objets/epo", "objets/joint",
             "objets/bouclierbois", "objets/bouclierfer", "objets/bouclieror", "objets/boucliermagnetique",
@@ -75,7 +75,7 @@ namespace entities
                 case I_RAIL: case I_PULSE: case I_SMAW: case I_MINIGUN: case I_SPOCKGUN: case I_M32:
                 case I_LANCEFLAMMES: case I_UZI: case I_FAMAS: case I_MOSSBERG: case I_HYDRA: case I_SV98:
                 case I_SKS: case I_ARBALETE: case I_AK47: case I_GRAP1: case I_ARTIFICE: case I_GLOCK:
-                case I_S_NUKE: case I_S_GAU8: case I_S_ROQUETTES: case I_S_CAMPOUZE:
+                case I_SUPERARME:
                     //if(m_noammo) continue;
                     break;
                 case I_SANTE: case I_BOOSTPV: case I_BOOSTDEGATS: case I_BOOSTPRECISION: case I_BOOSTVITESSE: case I_BOOSTGRAVITE:
@@ -141,7 +141,7 @@ namespace entities
     // these two functions are called when the server acknowledges that you really
     // picked up the item (in multiplayer someone may grab it before you).
 
-    void pickupeffects(int n, gameent *d)
+    void pickupeffects(int n, gameent *d, int rndsuperweapon)
     {
         if(!ents.inrange(n)) return;
         int type = ents[n]->type;
@@ -153,8 +153,10 @@ namespace entities
         {
             particle_icon(d->abovehead(), is.icon%4, is.icon/4, PART_HUD_ICON_GREY, 2000, 0xFFFFFF, 2.0f, -8);
         }
-        d->pickup(type, d->aptitude);
-        //d->pickup(type, d->classe, d->sortmiracle, gamemode);
+
+        if(type>=I_RAIL && type<=I_SUPERARME) gunselect(type-9+rndsuperweapon, d);
+        d->pickup(type+rndsuperweapon, d->aptitude, rndsuperweapon);
+
         if(d==player1) playsound(itemstats[type-I_RAIL].sound, d!=player1 ? &d->o : NULL, NULL, 0, 0, 0, -1, 0, 1500);
         if(d==player1) switch(type)
         {
@@ -419,6 +421,7 @@ namespace entities
     void spawnitems(bool force)
     {
         //if(m_noitems) return;
+
         loopv(ents) if(ents[i]->type>=I_RAIL && ents[i]->type<=I_BOUCLIERMAGNETIQUE) //&& (!m_noammo || ents[i]->type<I_SHELLS || ents[i]->type>I_CARTRIDGES)
         {
             ents[i]->setspawned(force || !server::delayspawn(ents[i]->type));

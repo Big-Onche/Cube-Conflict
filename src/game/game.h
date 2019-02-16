@@ -73,7 +73,7 @@ enum                            // static entity types
     DECAL = ET_DECAL,
     //ARMES
     I_RAIL, I_PULSE, I_SMAW, I_MINIGUN, I_SPOCKGUN, I_M32, I_LANCEFLAMMES, I_UZI, I_FAMAS, I_MOSSBERG, I_HYDRA, I_SV98, I_SKS, I_ARBALETE, I_AK47, I_GRAP1, I_ARTIFICE, I_GLOCK,
-    I_S_NUKE, I_S_GAU8, I_S_ROQUETTES, I_S_CAMPOUZE,
+    I_SUPERARME, I_NULL1, I_NULL2, I_NULL3,
     //OBJETS
     I_SANTE, I_BOOSTPV, I_BOOSTDEGATS, I_BOOSTPRECISION, I_BOOSTVITESSE, I_BOOSTGRAVITE,
     I_BOUCLIERBOIS, I_BOUCLIERFER, I_BOUCLIEROR, I_BOUCLIERMAGNETIQUE,
@@ -321,7 +321,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_DIED, 6, N_DAMAGE, 6, N_VAMPIRE, 6, N_HITPUSH, 7, N_SHOTFX, 10, N_EXPLODEFX, 4,
     N_TRYSPAWN, 1, N_SPAWNSTATE, 9, N_SPAWN, 3, N_FORCEDEATH, 2,
     N_GUNSELECT, 2, N_TAUNT, 1,
-    N_MAPCHANGE, 0, N_MAPVOTE, 0, N_TEAMINFO, 0, N_ITEMSPAWN, 2, N_ITEMPICKUP, 2, N_ITEMACC, 3,
+    N_MAPCHANGE, 0, N_MAPVOTE, 0, N_TEAMINFO, 0, N_ITEMSPAWN, 2, N_ITEMPICKUP, 2, N_ITEMACC, 4,
     N_PING, 2, N_PONG, 2, N_CLIENTPING, 2,
     N_TIMEUP, 2, N_FORCEINTERMISSION, 1,
     N_SERVMSG, 0, N_ITEMLIST, 0, N_RESUME, 0,
@@ -394,7 +394,7 @@ static struct itemstat { int add, max, sound; const char *name; int icon, info; 
     {10,    40,    S_ITEMAMMO,   "FEU D'ARTIFICE",   HICON_SIZE, GUN_ARTIFICE},
     {30,   120,    S_ITEMAMMO,   "GLOCK",            HICON_SIZE, GUN_GLOCK},
     //Super armes
-    {  1,     4,    S_ITEMAMMO,   "BOMBE NUCLEAIRE", HICON_SIZE, GUN_S_NUKE},
+    {  1,     1,    S_ITEMAMMO,   "BOMBE NUCLEAIRE", HICON_SIZE, GUN_S_NUKE},
     {250,  1000,    S_ITEMAMMO,   "GAU-8",           HICON_SIZE, GUN_S_GAU8},
     { 30,   120,    S_ITEMAMMO,   "MINI-ROQUETTES",  HICON_SIZE, GUN_S_ROQUETTES},
     { 15,    60,    S_ITEMAMMO,   "CAMPOUZE 2000",   HICON_SIZE, GUN_S_CAMPOUZE},
@@ -441,10 +441,10 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound
     { GUN_ARTIFICE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_ARTIFICE,     S_ARTIFICE,     S_ARTIFICE_LOIN, S_NULL,       1000,  600, 100, 400, 0,  900,  60,  520,  1,   500, 80, 0, 0},
     { GUN_GLOCK,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GLOCK,        S_GLOCK,        S_GLOCK_LOIN, S_ARMESLOIN,      400,  280, 175, 350, 0, 2000,   7, 1000,  1,    30,   3, 0, 0},
     // Super armes
-    { GUN_S_NUKE, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_NUKELAUNCH, S_NUKELAUNCH, S_NULL, S_NULL,           3000, 5000,  20, 300, 0,  175,  10, 2000,  1,   400, 1280, 0, 0},
-    { GUN_S_GAU8, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GAU8, S_GAU8, S_NULL, S_NULL,                        13,   500, 150, 250, 0, 4000,   1, 4000,  1,    80,   15, 0, 0},
-    { GUN_S_ROQUETTES, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MINIROQUETTE, S_MINIROQUETTE, S_NULL, S_NULL,   170,  800,  10, 300, 0,  700,   6, 2000,  1,   500,   70, 0, 0},
-    { GUN_S_CAMPOUZE, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_CAMPOUZE, S_CAMPOUZE, S_NULL, S_NULL,           500,   700,  30,  30, 0, 5000,   3, 8000, 10,   150,    8, 0, 0},
+    { GUN_S_NUKE, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_NUKELAUNCH, S_NUKELAUNCH, S_NULL, S_NULL,           3000,  2500,  20, 300, 0,  175,  10, 2000,  1,   400, 1280, 0, 0},
+    { GUN_S_GAU8, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GAU8, S_GAU8, S_NULL, S_NULL,                         13,   200, 150, 250, 0, 4000,   1, 4000,  1,    80,   15, 0, 0},
+    { GUN_S_ROQUETTES, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MINIROQUETTE, S_MINIROQUETTE, S_NULL, S_NULL,   170,  1000,  10, 300, 0,  700,   6, 2000,  1,   500,   70, 0, 0},
+    { GUN_S_CAMPOUZE, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_CAMPOUZE, S_CAMPOUZE, S_NULL, S_NULL,            500,   500,  30,  30, 0, 5000,   3, 8000, 10,   150,    8, 0, 0},
     // Armes corps à corps
     { GUN_CAC349, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_EPEEATTACK, S_EPEEATTACK, S_NULL, S_NULL,           1000, 400, 400, 400, 0, 0, -12,   55, 20,    50,  0, 0, 0},
     { GUN_CACMARTEAU, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MARTEAUBAN, S_MARTEAUBAN, S_NULL, S_NULL,       1500, 600, 400, 400, 0, 0,  -7,   60, 20,    50,  0, 0, 0},
@@ -550,7 +550,7 @@ struct gamestate
         }
     }
 
-    void pickup(int type, int aptitude)
+    void pickup(int type, int aptitude, int rndsuperweapon)
     {
         if(type<I_RAIL || type>I_BOUCLIERMAGNETIQUE) return;
         itemstat &is = itemstats[type-I_RAIL];
@@ -576,6 +576,12 @@ struct gamestate
             case I_BOOSTPRECISION: champimillis = min(champimillis+is.add*(aptitude==13 ? 1.5f : 1), is.max*(aptitude==13 ? 1.5f : 1)); break;
                 //if(classe==14) jointmillis = jointmillis*1.50f;
                 break;
+            case I_SUPERARME:
+                {
+                    float aptboost;
+                    aptitude == 2 ? aptboost = 1.5f : aptboost = 1;
+                    ammo[is.info+rndsuperweapon] = min(ammo[is.info+rndsuperweapon]+is.add*aptboost, is.max*aptboost);
+                }
             default:
                 {
                     float aptboost;
@@ -684,7 +690,6 @@ struct gamestate
             int randomarme = rnd(17);
             gunselect = aptitude==1 ? GUN_MEDIGUN : aptitude==6 ? GUN_KAMIKAZE : randomarme;
             ammo[randomarme] = aptitude==2 ? 1.5f*itemstats[randomarme].max : itemstats[randomarme].max;
-            addsweaps(gamemode);
             return;
         }
         else if (m_fullstuff)
@@ -699,7 +704,6 @@ struct gamestate
             do spawngun3 = rnd(17); while(spawngun3==spawngun1 || spawngun3==spawngun2);
             baseammo(spawngun3, 4);
             gunselect = aptitude==1 ? GUN_MEDIGUN : aptitude==6 ? GUN_KAMIKAZE : spawngun1;
-            addsweaps(gamemode);
             return;
         }
         else if (m_explosion)
@@ -724,7 +728,6 @@ struct gamestate
             ammo[GUN_GLOCK] = aptitude==2 ? 45 : 30;
             ammo[GUN_M32] = aptitude==2 ? 3 : 1;
             gunselect = GUN_GLOCK;
-            addsweaps(gamemode);
         }
     }
 
@@ -903,7 +906,7 @@ namespace entities
     extern void putitems(packetbuf &p);
     extern void setspawn(int i, bool on);
     extern void teleport(int n, gameent *d);
-    extern void pickupeffects(int n, gameent *d);
+    extern void pickupeffects(int n, gameent *d, int rndsuperweapon);
     extern void teleporteffects(gameent *d, int tp, int td, bool local = true);
     extern void jumppadeffects(gameent *d, int jp, bool local = true);
 }

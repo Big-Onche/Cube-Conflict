@@ -878,7 +878,7 @@ namespace server
             case I_MINIGUN: case I_RAIL: case I_SPOCKGUN: case I_BOUCLIERFER: sec = np*6;
             case I_BOUCLIERMAGNETIQUE: sec = np*7; break;
             case I_BOUCLIEROR: sec = np*8; break;
-            case I_S_NUKE: case I_S_GAU8: case I_S_ROQUETTES: case I_S_CAMPOUZE: sec = np*20; break;
+            case I_SUPERARME: sec = np*10; break;
 
             case I_BOOSTPV: sec = 30; break;
             case I_BOOSTPRECISION: sec = 45; break;
@@ -901,10 +901,7 @@ namespace server
             case I_BOOSTPRECISION:
             case I_BOOSTPV:
             case I_BOOSTVITESSE:
-            case I_S_NUKE:
-            case I_S_GAU8:
-            case I_S_ROQUETTES:
-            case I_S_CAMPOUZE:
+            case I_SUPERARME:
                 return true;
             default:
                 return false;
@@ -915,12 +912,16 @@ namespace server
     {
         if((m_timed && gamemillis>=gamelimit) || !sents.inrange(i) || !sents[i].spawned) return false;
         clientinfo *ci = getinfo(sender);
+
         if(!ci || (!ci->local && !ci->state.canpickup(sents[i].type, ci->aptitude))) return false;
         sents[i].spawned = false;
         sents[i].spawntime = spawntime(sents[i].type);
-        sendf(-1, 1, "ri3", N_ITEMACC, i, sender);
-        ci->state.pickup(sents[i].type, ci->aptitude);
+
+        int rndsuperweapon = rnd(4);
+        sendf(-1, 1, "ri4", N_ITEMACC, i, sender, sents[i].type==I_SUPERARME ? rndsuperweapon : 0);
+        ci->state.pickup(sents[i].type, ci->aptitude, sents[i].type==I_SUPERARME ? rndsuperweapon : 0);
         return true;
+
     }
 
     static teaminfo teaminfos[MAXTEAMS];
@@ -2475,7 +2476,7 @@ namespace server
                             sents[i].spawned = true;
                             sendf(-1, 1, "ri2", N_ITEMSPAWN, i);
                         }
-                        else if(sents[i].spawntime<=10000 && oldtime>10000 && (sents[i].type==I_BOOSTDEGATS || sents[i].type==I_BOOSTPV || sents[i].type==I_BOOSTGRAVITE || sents[i].type==I_BOOSTPRECISION || sents[i].type==I_BOOSTVITESSE || sents[i].type==I_S_NUKE || sents[i].type==I_S_GAU8 || sents[i].type==I_S_ROQUETTES || sents[i].type==I_S_CAMPOUZE))
+                        else if(sents[i].spawntime<=10000 && oldtime>10000 && (sents[i].type==I_BOOSTDEGATS || sents[i].type==I_BOOSTPV || sents[i].type==I_BOOSTGRAVITE || sents[i].type==I_BOOSTPRECISION || sents[i].type==I_BOOSTVITESSE || sents[i].type==I_SUPERARME))
                         {
                             sendf(-1, 1, "ri2", N_ANNOUNCE, sents[i].type);
                         }
