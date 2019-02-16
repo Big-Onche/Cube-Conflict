@@ -211,6 +211,31 @@ namespace game
             settexture("media/interface/hud/mana.png");
             bgquad(15, h-260, 115, 115);
             decal_icon += 130;
+
+            float positionsorts = 0.5f*(w - 100);
+            switch(player1->aptitude)
+            {
+                case APT_MAGICIEN:
+                {
+                    settexture("media/interface/hud/sortmage1.png", 3);
+                    bgquad(positionsorts-85, h-114, 100, 100);
+                    settexture("media/interface/hud/sortmage2.png", 3);
+                    bgquad(positionsorts, h-114, 100, 100);
+                    settexture("media/interface/hud/sortmage3.png", 3);
+                    bgquad(positionsorts+85, h-114, 100, 100);
+                }
+                break;
+                case APT_PHYSICIEN:
+                {
+                    settexture("media/interface/hud/sortphysicien1.png", 3);
+                    bgquad(positionsorts-85, h-114, 100, 100);
+                    settexture("media/interface/hud/sortphysicien2.png", 3);
+                    bgquad(positionsorts, h-114, 100, 100);
+                    settexture("media/interface/hud/sortphysicien3.png", 3);
+                    bgquad(positionsorts+85, h-114, 100, 100);
+                }
+                break;
+            }
         }
 
         if(player1->ragemillis){settexture("media/interface/hud/rage.png"); bgquad(15, h-260, 115, 115); decal_icon += 130;}
