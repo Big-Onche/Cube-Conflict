@@ -878,7 +878,7 @@ namespace server
             case I_MINIGUN: case I_RAIL: case I_SPOCKGUN: case I_BOUCLIERFER: sec = np*6;
             case I_BOUCLIERMAGNETIQUE: sec = np*7; break;
             case I_BOUCLIEROR: sec = np*8; break;
-            case I_SUPERARME: sec = np*10; break;
+            case I_SUPERARME: sec = 30+rnd(30); break;
 
             case I_BOOSTPV: sec = 30; break;
             case I_BOOSTPRECISION: sec = 45; break;

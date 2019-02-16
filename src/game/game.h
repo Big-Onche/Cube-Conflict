@@ -222,7 +222,7 @@ static const char * const mastermodeicons[] =  { "server", "server", "serverlock
 // hardcoded sounds, defined in sounds.cfg
 enum
 {
-    S_JUMP = 0, S_LAND, S_SPLASH2, S_SPLASH1, S_BURN, S_JUMPPAD, S_TELEPORTEUR, S_SANG,
+    S_JUMP = 0, S_LAND, S_SPLASH2, S_SPLASH1, S_BURN, S_JUMPPAD, S_TELEPORTEUR, S_SANG, S_ITEMSPAWN, S_NOAMMO,
 
     //Armes
     S_GLOCK, S_UZI, S_MINIGUN, S_MOSSBERG, S_EPEEIDLE, S_EPEEATTACK, S_SMAW, S_FAMAS, S_SPOCKGUN, S_SV98, S_FELECTRIQUE, S_LANCEGRENADE,
@@ -264,7 +264,7 @@ enum
     //Null
     S_NULL,
     S_PUNCH1, S_CG,
-    S_ITEMSPAWN, S_NOAMMO, S_PUPOUT,
+    S_PUPOUT,
     S_PAIN1, S_PAIN2, S_PAIN3, S_PAIN4, S_PAIN5,
     S_DIE1, S_DIE2,
 
@@ -422,7 +422,7 @@ static struct itemstat { int add, max, sound; const char *name; int icon, info; 
 static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound, hudsound, farsound1, farsound2, attackdelay, damage, spread, nozoomspread, margin, projspeed, kickamount, range, rays, hitpush, exprad, ttl, use; } attacks[NUMATKS] =
 {
     //Armes "normales"
-    { GUN_RAIL,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FELECTRIQUE,  S_FELECTRIQUE,  S_FELECTRIQUE_LOIN, S_NULL,     350,  325,  10, 100, 0,    0,  10, 4000,  1,    30,   0, 0, 0},
+    { GUN_RAIL,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FELECTRIQUE,  S_FELECTRIQUE,  S_FELECTRIQUE_LOIN, S_NULL,     350,  325,  40, 100, 0,    0,  10, 4000,  1,    30,   0, 0, 0},
     { GUN_PULSE,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FUSILPLASMA,  S_FUSILPLASMA,  S_FPLASMA_LOIN, S_NULL,         120,  180,  70, 200, 0, 1000,   5, 2000,  1,    50,  25, 0, 0},
     { GUN_SMAW,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_SMAW,         S_SMAW,         S_LANCEMISSILE_LOIN, S_NULL,   1250,  850,  20, 200, 0,  600,  15, 3000,  1,   750, 100, 0, 0},
     { GUN_MINIGUN,      ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MINIGUN,      S_MINIGUN,      S_MINIGUN_LOIN, S_ARMESLOIN,     70,  180, 120, 400, 0, 3000,   5, 2000,  1,    15 , 12, 0, 0},
@@ -444,7 +444,7 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound
     { GUN_S_NUKE, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_NUKELAUNCH, S_NUKELAUNCH, S_NULL, S_NULL,           3000,  2500,  20, 300, 0,  175,  10, 2000,  1,   400, 1280, 0, 0},
     { GUN_S_GAU8, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GAU8, S_GAU8, S_NULL, S_NULL,                         13,   200, 150, 250, 0, 4000,   1, 4000,  1,    80,   15, 0, 0},
     { GUN_S_ROQUETTES, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MINIROQUETTE, S_MINIROQUETTE, S_NULL, S_NULL,   170,  1000,  10, 300, 0,  700,   6, 2000,  1,   500,   70, 0, 0},
-    { GUN_S_CAMPOUZE, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_CAMPOUZE, S_CAMPOUZE, S_NULL, S_NULL,            500,   500,  30,  30, 0, 5000,   3, 8000, 10,   150,    8, 0, 0},
+    { GUN_S_CAMPOUZE, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_CAMPOUZE, S_CAMPOUZE, S_NULL, S_NULL,            500,   200,  30,  30, 0, 5000,   3, 8000, 10,   150,    8, 0, 0},
     // Armes corps à corps
     { GUN_CAC349, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_EPEEATTACK, S_EPEEATTACK, S_NULL, S_NULL,           1000, 400, 400, 400, 0, 0, -12,   55, 20,    50,  0, 0, 0},
     { GUN_CACMARTEAU, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MARTEAUBAN, S_MARTEAUBAN, S_NULL, S_NULL,       1500, 600, 400, 400, 0, 0,  -7,   60, 20,    50,  0, 0, 0},

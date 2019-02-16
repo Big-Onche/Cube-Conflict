@@ -1759,7 +1759,7 @@ namespace game
 
                 entities::setspawn(i, true);
                 ai::itemspawned(i);
-                playsound(S_ITEMSPAWN, &entities::ents[i]->o, NULL, 0, 0, 0, -1, 300, 1500);
+                playsound(entities::ents[i]->type==I_SUPERARME ? S_ALARME : S_ITEMSPAWN, &entities::ents[i]->o, NULL, 0, 0, 0, -1, entities::ents[i]->type==I_SUPERARME ? 4000 : 300);
                 #if 0
                 const char *name = entities::itemname(i);
                 if(name) particle_text(entities::ents[i]->o, name, PART_TEXT, 2000, 0x32FF64, 4.0f, -8);
