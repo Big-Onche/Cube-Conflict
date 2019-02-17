@@ -97,5 +97,6 @@ float menustat(int value)
         case 4: return stat_bouclierfer;
         case 5: return stat_bouclieror;
         case 6: return stat_boucliermagnetique;
+        default: return 0;
     }
 }
