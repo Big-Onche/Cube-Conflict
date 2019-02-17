@@ -1316,7 +1316,7 @@ namespace ai
             if(!intermission)
             {
                 if(d->ragdoll) cleanragdoll(d); // RAGRAG
-                moveplayer(d, 10, true, d->epomillis, d->jointmillis, d->aptitude);
+                moveplayer(d, 10, true, d->epomillis, d->jointmillis, d->aptitude, d->sortflash);
                 if(allowmove && !b.idle) timeouts(d, b);
 				entities::checkitems(d);
 				if(cmode) cmode->checkitems(d);
@@ -1328,7 +1328,7 @@ namespace ai
             else
             {
                 d->move = d->strafe = 0;
-                moveplayer(d, 10, false, d->epomillis, d->jointmillis, d->aptitude);
+                moveplayer(d, 10, false, d->epomillis, d->jointmillis, d->aptitude, d->sortflash);
             }
         }
         d->attacking = d->jumping = false;
@@ -1360,6 +1360,7 @@ namespace ai
         loopvrev(d->ai->state)
         {
             aistate &c = d->ai->state[i];
+
             if(cleannext)
             {
                 c.millis = lastmillis;
@@ -1375,11 +1376,13 @@ namespace ai
             {
                 int result = 0;
                 c.idle = 0;
+                if(d->health<250+d->skill && d->aptitude==APT_MAGICIEN && d->mana>=60) aptitude_3(d);
+
                 switch(c.type)
                 {
                     case AI_S_WAIT: result = dowait(d, c); break;
                     case AI_S_DEFEND: result = dodefend(d, c); break;
-                    case AI_S_PURSUE: result = dopursue(d, c); break;
+                    case AI_S_PURSUE: result = dopursue(d, c); if((d->mana>80 || d->mana<60)&& d->aptitude==APT_MAGICIEN) {aptitude_1(d);} break;
                     case AI_S_INTEREST: result = dointerest(d, c); break;
                     default: result = 0; break;
                 }

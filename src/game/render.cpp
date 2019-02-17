@@ -482,15 +482,17 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
                 {
                     if (d->health > 1000)
                     {
-                        unsigned int lifeColor = (d->health > 1800) ? 800 : d->health-1000;
-                        particle_meter(d->abovehead().add(vec(0,0,4)), d->health/1000.0f, PART_METER, 0.5f, (static_cast<unsigned char>((800-lifeColor)*3.18) << 8) | (static_cast<unsigned char>(lifeColor*3.18) << 0), 2.5f);
+                        unsigned int lifeColor = (d->health/10 > 180) ? 80 : d->health/10-100;
+                        particle_meter(d->abovehead().add(vec(0,0,4)), d->health/1000.0f, PART_METER, 0.5f, (static_cast<unsigned char>((80-lifeColor)*3.18) << 8) | (static_cast<unsigned char>(lifeColor*3.18) << 0), 2.5f);
                     }
                     else if (d->health > 0)
                     {
-                        particle_meter(d->abovehead().add(vec(0,0,4)), d->health/1000.0f, PART_METER, 0.5f, (static_cast<unsigned char>((1000-d->health)*2.55) << 16) | (static_cast<unsigned char>(d->health*2.55) << 8), 2.5f);
+                        particle_meter(d->abovehead().add(vec(0,0,4)), d->health/1000.0f, PART_METER, 0.5f, (static_cast<unsigned char>((100-d->health/10)*2.55) << 16) | (static_cast<unsigned char>(d->health/10*2.55) << 8), 2.5f);
                     }
                 }
-                //clientinfo *ci = clients[d];
+
+                if(d->sortresistance>0 && d->aptitude==APT_MAGICIEN) particle_fireball(d->abovehead().add(vec(0, 0,-12)), 15.2f, PART_EXPLOSION, 5,  0x880088, 13.0f);
+                if(d->sortflash>0 && d->aptitude==APT_MAGICIEN) particle_splash(PART_SMOKE,  1,  120, d->o, 0xFF33FF, 10+rnd(5),  400, 400);
                 if(d->ragemillis>0) switch(rnd(12)){case 0: particle_splash(PART_SMOKE,  1,  120, d->o, 0xFF3300, 10+rnd(5),  300, 100);}
                 if(d->jointmillis>0) switch(rnd(5)) {case 1: regularflame(PART_SMOKE, d->abovehead().add(vec(-12, 5, -19)), 2, 3, 0x888888, 1, 1.6f, 50.0f, 1000.0f, -10);}
 

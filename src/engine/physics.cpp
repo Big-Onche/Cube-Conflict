@@ -1839,7 +1839,7 @@ void modifygravity(physent *pl, bool water, int curtime, int jointmillis, int ap
 // moveres indicated the physics precision (which is lower for monsters and multiplayer prediction)
 // local is false for multiplayer prediction
 
-bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis, int jointmillis, int aptitude)
+bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis, int jointmillis, int aptitude, int sortflash)
 {
     int material = lookupmaterial(vec(pl->o.x, pl->o.y, pl->o.z + (3*pl->aboveeye - pl->eyeheight)/4));
     bool water = isliquid(material&MATF_VOLUME);
@@ -1855,6 +1855,9 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
 
     // apply gravity
     if(!floating) modifygravity(pl, water, curtime, jointmillis, aptitude);
+
+    if(aptitude==APT_MAGICIEN && sortflash>0) {secs = curtime/200.f;}
+
     // apply any player generated changes in velocity
     modifyvelocity(pl, local, water, floating, curtime, jointmillis, aptitude);
 
@@ -1941,7 +1944,7 @@ void interppos(physent *pl)
     pl->o.add(deltapos);
 }
 
-void moveplayer(physent *pl, int moveres, bool local, int epomillis, int jointmillis, int aptitude)
+void moveplayer(physent *pl, int moveres, bool local, int epomillis, int jointmillis, int aptitude, int sortflash)
 {
     if(physsteps <= 0)
     {
@@ -1950,9 +1953,9 @@ void moveplayer(physent *pl, int moveres, bool local, int epomillis, int jointmi
     }
 
     if(local) pl->o = pl->newpos;
-    loopi(physsteps-1) moveplayer(pl, moveres, local, physframetime, epomillis, jointmillis, aptitude);
+    loopi(physsteps-1) moveplayer(pl, moveres, local, physframetime, epomillis, jointmillis, aptitude, sortflash);
     if(local) pl->deltapos = pl->o;
-    moveplayer(pl, moveres, local, physframetime, epomillis, jointmillis, aptitude);
+    moveplayer(pl, moveres, local, physframetime, epomillis, jointmillis, aptitude, sortflash);
     if(local)
     {
         pl->newpos = pl->o;

@@ -147,12 +147,22 @@ namespace game
             gle::colorf(1, 1, 1, 1);
         }
 
-        if(player1->ragemillis>0 && player1->state==CS_ALIVE)
+        if(player1->ragemillis>0)
         {
             if(player1->ragemillis>1000) gle::colorf(1, 1, 1, 1);
             else gle::colorf(player1->ragemillis/1000.0f, player1->ragemillis/1000.0f, player1->ragemillis/1000.0f, player1->ragemillis/1000.0f);
 
             settexture("media/interface/hud/ragescreen.png");
+            bgquad(0, 0, w, h);
+
+            gle::colorf(1, 1, 1, 1);
+        }
+
+        if(player1->sortresistance)
+        {
+            gle::colorf(1, 1, 1, 0.7f);
+
+            settexture("media/interface/hud/mageprotectionscreen.png");
             bgquad(0, 0, w, h);
 
             gle::colorf(1, 1, 1, 1);
@@ -206,23 +216,38 @@ namespace game
             decal_icon += 130;
         }
 
-        if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN)
+        if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE)
         {
             settexture("media/interface/hud/mana.png");
             bgquad(15, h-260, 115, 115);
             decal_icon += 130;
 
             float positionsorts = 0.5f*(w - 100);
+
             switch(player1->aptitude)
             {
                 case APT_MAGICIEN:
                 {
+                    if(player1->sortflash) gle::colorf(2, 2, 2, 1);
+                    else if(player1->mana<30 || !player1->sort1pret) gle::colorf(0.2, 0.2, 0.2, 1);
+                    else gle::colorf(1, 1, 1, 1);
                     settexture("media/interface/hud/sortmage1.png", 3);
                     bgquad(positionsorts-85, h-114, 100, 100);
+                    gle::colorf(1, 1, 1, 1);
+
+                    if(player1->sortprecision) gle::colorf(2, 2, 2, 1);
+                    else if(player1->mana<40 || !player1->sort2pret) gle::colorf(0.2, 0.2, 0.2, 1);
+                    else gle::colorf(1, 1, 1, 1);
                     settexture("media/interface/hud/sortmage2.png", 3);
                     bgquad(positionsorts, h-114, 100, 100);
+                    gle::colorf(1, 1, 1, 1);
+
+                    if(player1->sortresistance) gle::colorf(2, 2, 2, 1);
+                    else if(player1->mana<60 || !player1->sort3pret) gle::colorf(0.2, 0.2, 0.2, 1);
+                    else gle::colorf(1, 1, 1, 1);
                     settexture("media/interface/hud/sortmage3.png", 3);
                     bgquad(positionsorts+85, h-114, 100, 100);
+                    gle::colorf(1, 1, 1, 1);
                 }
                 break;
                 case APT_PHYSICIEN:

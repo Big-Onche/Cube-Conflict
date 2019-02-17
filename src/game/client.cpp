@@ -1317,6 +1317,8 @@ namespace game
         d->armour = getint(p);
         d->armourtype = getint(p);
         d->mana = getint(p);
+        d->sortflash = getint(p);
+        d->sortresistance = getint(p);
 
         if(resume && d==player1)
         {
@@ -1537,6 +1539,47 @@ namespace game
                 if(d)
                 {
                     d->aptitude = plclasse;
+                }
+                break;
+            }
+
+            case N_SENDSORTRESISTANCE:
+            {
+                int plresistance = getint(p);
+                if(d)
+                {
+                    d->sortresistance = plresistance;
+                }
+                break;
+            }
+
+            case N_SENDSORTMIRACLE:
+            {
+                int plmiracle = 0;
+                plmiracle = getint(p);
+                if(d)
+                {
+                    d->sortmiracle = plmiracle;
+                }
+                break;
+            }
+            case N_SENDSORTRETOUR:
+            {
+                int plretour = 0;
+                plretour = getint(p);
+                if(d)
+                {
+                    d->sortretour = plretour;
+                }
+                break;
+            }
+            case N_SENDSORTPROTECTION:
+            {
+                int plprotection = 0;
+                plprotection = getint(p);
+                if(d)
+                {
+                    d->sortprotection = plprotection;
                 }
                 break;
             }

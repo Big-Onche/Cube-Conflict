@@ -107,6 +107,9 @@ namespace game
     gameent *spawnstate(gameent *d)              // reset player state not persistent accross spawns
     {
         d->respawn();
+        d->sortresistance = 0;
+        d->sortprecision = 0;
+        d->sortflash = 0;
         d->spawnstate(gamemode, d->aptitude);
         return d;
     }
@@ -181,7 +184,7 @@ namespace game
         d->roll = d->newroll;
         if(move)
         {
-            moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude);
+            moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude, d->sortflash);
             d->newpos = d->o;
         }
         float k = 1.0f - float(lastmillis - d->smoothmillis)/smoothmove;
@@ -221,6 +224,9 @@ namespace game
                     d->stopheartbeat();
                 }
             }
+
+            updatespecials(d);
+
             if(d == player1 || d->ai) continue;
             if(d->state==CS_DEAD && d->ragdoll) moveragdoll(d); //if() RAGRAG
             else if(!intermission)
@@ -244,9 +250,9 @@ namespace game
             {
                 crouchplayer(d, 10, false);
                 if(smoothmove && d->smoothmillis>0) predictplayer(d, true);
-                else moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude);
+                else moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude, d->sortflash);
             }
-            else if(d->state==CS_DEAD && !d->ragdoll && lastmillis-d->lastpain<2000) moveplayer(d, 1, true, d->epomillis, d->jointmillis, d->aptitude);
+            else if(d->state==CS_DEAD && !d->ragdoll && lastmillis-d->lastpain<2000) moveplayer(d, 1, true, d->epomillis, d->jointmillis, d->aptitude, d->sortflash);
         }
     }
 
@@ -293,6 +299,7 @@ namespace game
             if(player1->jointmillis) entities::checkjoint(curtime, player1);
             if(player1->champimillis) entities::checkchampi(curtime, player1);
             if(player1->ragemillis) entities::checkrage(curtime, player1);
+            updatespecials(player1);
         }
         updateweapons(curtime);
         otherplayers(curtime);
@@ -307,14 +314,14 @@ namespace game
                 else
                 {
                     player1->move = player1->strafe = 0;
-                    moveplayer(player1, 10, true, player1->epomillis, player1->jointmillis, player1->aptitude);
+                    moveplayer(player1, 10, true, player1->epomillis, player1->jointmillis, player1->aptitude, player1->sortflash);
                 }
             }
             else if(!intermission)
             {
                 if(player1->ragdoll) cleanragdoll(player1);
                 crouchplayer(player1, 10, true);
-                moveplayer(player1, 10, true, player1->epomillis, player1->jointmillis, player1->aptitude); //
+                moveplayer(player1, 10, true, player1->epomillis, player1->jointmillis, player1->aptitude, player1->sortflash);
                 swayhudgun(curtime);
                 entities::checkitems(player1);
                 if(cmode) cmode->checkitems(player1);

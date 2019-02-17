@@ -247,6 +247,9 @@ namespace server
 
         int customhat, customcape, customtombe, aptitude;
 
+        int sortflash, sortprecision, sortresistance;
+        int sortmiracle, sortretour, sortprotection;
+
         clientinfo() : getdemo(NULL), getmap(NULL), clipboard(NULL), authchallenge(NULL), authkickreason(NULL) { reset(); }
         ~clientinfo() { events.deletecontents(); cleanclipboard(); cleanauth(); }
 
@@ -1706,6 +1709,8 @@ namespace server
         putint(p, gs.armour);
         putint(p, gs.armourtype);
         putint(p, gs.mana);
+        putint(p, gs.sortflash);
+        putint(p, gs.sortresistance);
         putint(p, gs.gunselect);
         loopi(NUMGUNS) putint(p, gs.ammo[i]);
     }
@@ -1721,10 +1726,11 @@ namespace server
     {
         servstate &gs = ci->state;
         spawnstate(ci);
-        sendf(ci->ownernum, 1, "rii8v", N_SPAWNSTATE, ci->clientnum, gs.lifesequence,
+        sendf(ci->ownernum, 1, "rii7iiiv", N_SPAWNSTATE, ci->clientnum, gs.lifesequence,
             gs.health, gs.maxhealth,
             gs.armour, gs.armourtype,
             gs.mana,
+            gs.sortflash, gs.sortresistance,
             gs.gunselect, NUMGUNS, gs.ammo);
         gs.lastspawn = gamemillis;
     }
@@ -1921,13 +1927,14 @@ namespace server
     void sendresume(clientinfo *ci) //PARSESTATE
     {
         servstate &gs = ci->state;
-        sendf(-1, 1, "ri9i10vi", N_RESUME, ci->clientnum, gs.state,
+        sendf(-1, 1, "ri9i9iiivi", N_RESUME, ci->clientnum, gs.state,
             gs.killstreak, gs.frags, gs.flags, gs.deaths,
             gs.steromillis, gs.epomillis, gs.jointmillis, gs.champimillis, gs.ragemillis,
             gs.lifesequence,
             gs.health, gs.maxhealth,
             gs.armour, gs.armourtype,
             gs.mana,
+            gs.sortflash, gs.sortresistance,
             gs.gunselect, NUMGUNS, gs.ammo, -1);
     }
 
@@ -2136,6 +2143,7 @@ namespace server
     {
         if(teamkill==0 && atk!=ATK_MEDIGUN_SHOOT) { if(actor!=target) if(isteam(target->team, actor->team)) return; } //ENLEVE LE TEAMKILL
         damage = (((damage*aptitudes[actor->aptitude].apt_degats)/100)*100)/aptitudes[target->aptitude].apt_resistance;
+        if(target->sortresistance>0 && target->aptitude==APT_MAGICIEN) damage = damage/5.0f;
 
         switch (actor->aptitude)
         {
@@ -2214,6 +2222,7 @@ namespace server
         }
 
         damage = ((damage*100)/aptitudes[target->aptitude].apt_resistance)/2.5f;
+        if(target->sortresistance>0 && target->aptitude==APT_MAGICIEN) damage = damage/5.0f;
 
         gamestate &as = actor->state;
         as.doregen(damage);
@@ -3306,8 +3315,33 @@ namespace server
 
             case N_SENDAPTITUDE:
             {
-                //aptitude = getint(p);
                 ci->aptitude = getint(p);
+                QUEUE_MSG;
+                break;
+            }
+
+            case N_SENDSORTRESISTANCE:
+            {
+                ci->sortresistance = getint(p);
+                QUEUE_MSG;
+                break;
+            }
+
+            case N_SENDSORTMIRACLE:
+            {
+                ci->sortmiracle = getint(p);
+                QUEUE_MSG;
+                break;
+            }
+            case N_SENDSORTRETOUR:
+            {
+                ci->sortretour = getint(p);
+                QUEUE_MSG;
+                break;
+            }
+            case N_SENDSORTPROTECTION:
+            {
+                ci->sortprotection = getint(p);
                 QUEUE_MSG;
                 break;
             }

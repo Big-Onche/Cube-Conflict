@@ -123,6 +123,10 @@ namespace aiman
         ci->aireinit = 2;
         ci->connected = true;
         ci->aptitude = rnd(14);
+
+        ci->sortflash = 0;
+        ci->sortresistance = 0;
+
         dorefresh = true;
         return true;
     }

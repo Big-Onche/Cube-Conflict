@@ -313,6 +313,7 @@ enum
     N_DEMOPACKET,
     N_SENDHAT, N_SENDCAPE, N_SENDTOMBE, N_SENDAPTITUDE,
     N_ANNOUNCE,
+    N_SENDSORTRESISTANCE, N_SENDSORTMIRACLE, N_SENDSORTRETOUR, N_SENDSORTPROTECTION,
     NUMMSG
 };
 
@@ -321,7 +322,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_CONNECT, 0, N_SERVINFO, 0, N_WELCOME, 1, N_INITCLIENT, 0, N_POS, 0, N_TEXT, 0, N_SOUND, 2, N_CDIS, 2,
     N_SHOOT, 0, N_EXPLODE, 0, N_SUICIDE, 1,
     N_DIED, 6, N_DAMAGE, 6, N_VAMPIRE, 6, N_HITPUSH, 7, N_SHOTFX, 10, N_EXPLODEFX, 4,
-    N_TRYSPAWN, 1, N_SPAWNSTATE, 9, N_SPAWN, 3, N_FORCEDEATH, 2,
+    N_TRYSPAWN, 1, N_SPAWNSTATE, 0, N_SPAWN, 3, N_FORCEDEATH, 2,
     N_GUNSELECT, 2, N_TAUNT, 1,
     N_MAPCHANGE, 0, N_MAPVOTE, 0, N_TEAMINFO, 0, N_ITEMSPAWN, 2, N_ITEMPICKUP, 2, N_ITEMACC, 4,
     N_PING, 2, N_PONG, 2, N_CLIENTPING, 2,
@@ -343,6 +344,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_DEMOPACKET, 0,
     N_SENDHAT, 2, N_SENDCAPE, 2, N_SENDTOMBE, 2, N_SENDAPTITUDE, 2,
     N_ANNOUNCE, 2,
+    N_SENDSORTRESISTANCE, 2, N_SENDSORTMIRACLE, 2, N_SENDSORTRETOUR, 2, N_SENDSORTPROTECTION, 2,
     -1
 };
 
@@ -504,8 +506,9 @@ struct gamestate
 {
     int health, maxhealth;
     int armour, armourtype;
-    int mana;
     int steromillis, epomillis, jointmillis, champimillis, ragemillis;
+    int mana;
+    int sortflash, sortprecision, sortresistance;
     int gunselect, gunwait;
     int ammo[NUMGUNS];
     int aitype, skill;
@@ -626,6 +629,9 @@ struct gamestate
         champimillis = 0;
         ragemillis = 0;
         gunwait = 0;
+        sortflash = 0;
+        sortprecision = 0;
+        sortresistance = 0;
         loopi(NUMGUNS) ammo[i] = 0;
     }
 
@@ -803,6 +809,13 @@ struct gameent : dynent, gamestate
     float deltayaw, deltapitch, deltaroll, newyaw, newpitch, newroll;
     int smoothmillis;
 
+    int lastspecial1update, lastspecial2update, lastspecial3update;
+    bool sort1pret, sort2pret, sort3pret;
+    bool sended1, sended2, sended3;
+
+    int sortflash, sortprecision, sortresistance;
+    int sortinversion, sortfloating, sortvitesse, sortmiracle, sortretour, sortprotection;
+
     string name, info;
     int team, playermodel, playercolor, customhat, customcape, customtombe, aptitude;
     float skeletonfade, tombepop;
@@ -929,6 +942,7 @@ namespace game
 {
     //Fonctions Cube Conflict
     extern void drawmessages(int killstreak, string str_pseudovictime, int n_aptitudevictime, string str_pseudoacteur, int n_killstreakacteur);
+    extern void updatespecials(gameent *d);
     //
 
     extern int gamemode, battlevivants;
@@ -1073,6 +1087,11 @@ namespace game
     extern void syncplayer();
     extern void swayhudgun(int curtime);
     extern vec hudgunorigin(int gun, const vec &from, const vec &to, gameent *d);
+
+    // sorts
+    extern void aptitude_1(gameent *d);
+    extern void aptitude_2(gameent *d);
+    extern void aptitude_3(gameent *d);
 }
 
 namespace server

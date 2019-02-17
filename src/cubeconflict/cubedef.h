@@ -95,5 +95,3 @@ extern float menustat(int value);
 
 extern void writesave();
 extern void addxp(int nbxp);
-
-
