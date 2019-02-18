@@ -360,7 +360,7 @@ namespace entities
         }
     }
 
-    void checkstero(int time, gameent *d)
+    void checkboosts(int time, gameent *d)
     {
         if(d->steromillis && (d->steromillis -= time)<=0)
         {
@@ -368,39 +368,27 @@ namespace entities
             //playsound(S_PUPOUT, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
             if(d==player1) conoutf(CON_GAMEINFO, "\f8La cure de stéros est terminée !");
         }
-    }
-
-    void checkepo(int time, gameent *d)
-    {
         if(d->epomillis && (d->epomillis -= time)<=0)
         {
             d->epomillis = 0;
-//            playsound(S_PUPOUT, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
+            //playsound(S_PUPOUT, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
             if(d==player1) conoutf(CON_GAMEINFO, "\f8L'EPO ne fait plus effet !");
         }
-    }
-
-    void checkjoint(int time, gameent *d)
-    {
+        if(d->champimillis && (d->champimillis -= time)<=0)
+        {
+            d->champimillis = 0;
+            //playsound(S_PUPOUT, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
+            if(d==player1) conoutf(CON_GAMEINFO, "\f8Les champignons sont digérés, il est temps d'en reprendre !");
+        }
         if(d->jointmillis && (d->jointmillis -= time)<=0)
         {
             d->jointmillis = 0;
-//            playsound(S_PUPOUT, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
+            //playsound(S_PUPOUT, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
             if(d==player1) conoutf(CON_GAMEINFO, "\f8La weed ne fait plus effet, il est temps de fumer un autre pétard !");
         }
     }
 
-    void checkchampi(int time, gameent *d)
-    {
-        if(d->champimillis && (d->champimillis -= time)<=0)
-        {
-            d->champimillis = 0;
-//            playsound(S_PUPOUT, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
-            if(d==player1) conoutf(CON_GAMEINFO, "\f8Les champignons sont digérés, il est temps d'en reprendre !");
-        }
-    }
-
-    void checkrage(int time, gameent *d)
+    void checkaptiskill(int time, gameent *d)
     {
         if(d->ragemillis && (d->ragemillis -= time)<=0)
         {

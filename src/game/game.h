@@ -922,11 +922,8 @@ namespace entities
     extern void renderentities();
     extern void checkitems(gameent *d);
 
-    extern void checkstero(int time, gameent *d);
-    extern void checkepo(int time, gameent *d);
-    extern void checkjoint(int time, gameent *d);
-    extern void checkchampi(int time, gameent *d);
-    extern void checkrage(int time, gameent *d);
+    extern void checkboosts(int time, gameent *d);
+    extern void checkaptiskill(int time, gameent *d);
 
     extern void resetspawns();
     extern void spawnitems(bool force = false);

@@ -1762,8 +1762,7 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
         if(pl->jumping && allowmove)
         {
             pl->jumping = false;
-            if(jointmillis>0) pl->vel.z = max(pl->vel.z, JUMPVEL*(jointmillis/(aptitude==13 ? 15000 : 30000)));
-            else pl->vel.z = max(pl->vel.z, JUMPVEL); // physics impulse upwards
+            pl->vel.z = max(pl->vel.z, (jointmillis/(aptitude==13 ? 150 : 300))+JUMPVEL);  // physics impulse upwards
             if(water) { pl->vel.x /= 8.0f; pl->vel.y /= 8.0f; } // dampen velocity change even harder, gives correct water feel
 
             game::physicstrigger(pl, local, 1, 0);

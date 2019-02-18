@@ -210,8 +210,6 @@ namespace game
 
             //if(d->state==CS_ALIVE && m_battle) battlevivants++;
 
-            //if(d->ragemillis>0 && d->state==CS_ALIVE && d==hudplayer()) playsound(S_RAGE, NULL, NULL, 0, -1, 50, d->ragechan);
-            //else d->stopragesound();
             if(curtime>0 && d->ragemillis && d!=player1) d->ragemillis = max(d->ragemillis-curtime, 0);
             if(d==hudplayer())
             {
@@ -225,19 +223,16 @@ namespace game
                 }
             }
 
+            if(d->state==CS_ALIVE && !intermission && d!=player1)
+            {
+                if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
+                if(d->steromillis || d->epomillis || d->jointmillis || d->champimillis || d->ragemillis) entities::checkboosts(curtime, d);
+                if(d->ragemillis) entities::checkaptiskill(curtime, d);
+            }
             updatespecials(d);
 
             if(d == player1 || d->ai) continue;
-            if(d->state==CS_DEAD && d->ragdoll) moveragdoll(d); //if() RAGRAG
-            else if(!intermission)
-            {
-                if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
-                if(d->steromillis) entities::checkstero(curtime, d);
-                if(d->epomillis) entities::checkepo(curtime, d);
-                if(d->jointmillis) entities::checkjoint(curtime, d);
-                if(d->champimillis) entities::checkchampi(curtime, d);
-                if(d->ragemillis) entities::checkrage(curtime, d);
-            }
+            if(d->state==CS_DEAD && d->ragdoll) moveragdoll(d);
 
             const int lagtime = totalmillis-d->lastupdate;
             if(!lagtime || intermission) continue;
@@ -294,11 +289,8 @@ namespace game
 
         if(player1->state != CS_DEAD && !intermission)
         {
-            if(player1->steromillis) entities::checkstero(curtime, player1);
-            if(player1->epomillis) entities::checkepo(curtime, player1);
-            if(player1->jointmillis) entities::checkjoint(curtime, player1);
-            if(player1->champimillis) entities::checkchampi(curtime, player1);
-            if(player1->ragemillis) entities::checkrage(curtime, player1);
+            if(player1->steromillis || player1->epomillis || player1->jointmillis || player1->champimillis) entities::checkboosts(curtime, player1);
+            if(player1->ragemillis) entities::checkaptiskill(curtime, player1);
             updatespecials(player1);
         }
         updateweapons(curtime);
