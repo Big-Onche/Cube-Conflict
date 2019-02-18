@@ -313,7 +313,7 @@ enum
     N_DEMOPACKET,
     N_SENDHAT, N_SENDCAPE, N_SENDTOMBE, N_SENDAPTITUDE,
     N_ANNOUNCE,
-    N_SENDSORTRESISTANCE, N_SENDSORTMIRACLE, N_SENDSORTRETOUR, N_SENDSORTPROTECTION,
+    N_SENDSORT1, N_SENDSORT2, N_SENDSORT3,
     NUMMSG
 };
 
@@ -344,7 +344,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_DEMOPACKET, 0,
     N_SENDHAT, 2, N_SENDCAPE, 2, N_SENDTOMBE, 2, N_SENDAPTITUDE, 2,
     N_ANNOUNCE, 2,
-    N_SENDSORTRESISTANCE, 2, N_SENDSORTMIRACLE, 2, N_SENDSORTRETOUR, 2, N_SENDSORTPROTECTION, 2,
+    N_SENDSORT1, 2, N_SENDSORT2, 2, N_SENDSORT3, 2,
     -1
 };
 
@@ -507,8 +507,8 @@ struct gamestate
     int health, maxhealth;
     int armour, armourtype;
     int steromillis, epomillis, jointmillis, champimillis, ragemillis;
+    int aptisort1, aptisort2, aptisort3;
     int mana;
-    int sortflash, sortprecision, sortresistance;
     int gunselect, gunwait;
     int ammo[NUMGUNS];
     int aitype, skill;
@@ -618,7 +618,6 @@ struct gamestate
         }
     }
 
-
     void respawn()
     {
         health = maxhealth;
@@ -629,9 +628,9 @@ struct gamestate
         champimillis = 0;
         ragemillis = 0;
         gunwait = 0;
-        sortflash = 0;
-        sortprecision = 0;
-        sortresistance = 0;
+        aptisort1 = 0;
+        aptisort2 = 0;
+        aptisort3 = 0;
         loopi(NUMGUNS) ammo[i] = 0;
     }
 
@@ -812,9 +811,6 @@ struct gameent : dynent, gamestate
     int lastspecial1update, lastspecial2update, lastspecial3update;
     bool sort1pret, sort2pret, sort3pret;
     bool sended1, sended2, sended3;
-
-    int sortflash, sortprecision, sortresistance;
-    int sortinversion, sortfloating, sortvitesse, sortmiracle, sortretour, sortprotection;
 
     string name, info;
     int team, playermodel, playercolor, customhat, customcape, customtombe, aptitude;

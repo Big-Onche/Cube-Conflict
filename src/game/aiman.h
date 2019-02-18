@@ -124,9 +124,6 @@ namespace aiman
         ci->connected = true;
         ci->aptitude = rnd(14);
 
-        ci->sortflash = 0;
-        ci->sortresistance = 0;
-
         dorefresh = true;
         return true;
     }

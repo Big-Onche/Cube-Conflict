@@ -247,9 +247,6 @@ namespace server
 
         int customhat, customcape, customtombe, aptitude;
 
-        int sortflash, sortprecision, sortresistance;
-        int sortmiracle, sortretour, sortprotection;
-
         clientinfo() : getdemo(NULL), getmap(NULL), clipboard(NULL), authchallenge(NULL), authkickreason(NULL) { reset(); }
         ~clientinfo() { events.deletecontents(); cleanclipboard(); cleanauth(); }
 
@@ -1709,8 +1706,6 @@ namespace server
         putint(p, gs.armour);
         putint(p, gs.armourtype);
         putint(p, gs.mana);
-        putint(p, gs.sortflash);
-        putint(p, gs.sortresistance);
         putint(p, gs.gunselect);
         loopi(NUMGUNS) putint(p, gs.ammo[i]);
     }
@@ -1726,11 +1721,10 @@ namespace server
     {
         servstate &gs = ci->state;
         spawnstate(ci);
-        sendf(ci->ownernum, 1, "rii7iiiv", N_SPAWNSTATE, ci->clientnum, gs.lifesequence,
+        sendf(ci->ownernum, 1, "rii7iv", N_SPAWNSTATE, ci->clientnum, gs.lifesequence,
             gs.health, gs.maxhealth,
             gs.armour, gs.armourtype,
             gs.mana,
-            gs.sortflash, gs.sortresistance,
             gs.gunselect, NUMGUNS, gs.ammo);
         gs.lastspawn = gamemillis;
     }
@@ -1902,6 +1896,9 @@ namespace server
                 putint(p, oi->state.jointmillis);
                 putint(p, oi->state.champimillis);
                 putint(p, oi->state.ragemillis);
+                putint(p, oi->state.aptisort1);
+                putint(p, oi->state.aptisort2);
+                putint(p, oi->state.aptisort3);
                 sendstate(oi->state, p);
             }
 
@@ -1927,14 +1924,14 @@ namespace server
     void sendresume(clientinfo *ci) //PARSESTATE
     {
         servstate &gs = ci->state;
-        sendf(-1, 1, "ri9i9iiivi", N_RESUME, ci->clientnum, gs.state,
+        sendf(-1, 1, "ri9iiii10vi", N_RESUME, ci->clientnum, gs.state,
             gs.killstreak, gs.frags, gs.flags, gs.deaths,
             gs.steromillis, gs.epomillis, gs.jointmillis, gs.champimillis, gs.ragemillis,
+            gs.aptisort1, gs.aptisort2, gs.aptisort3,
             gs.lifesequence,
             gs.health, gs.maxhealth,
             gs.armour, gs.armourtype,
             gs.mana,
-            gs.sortflash, gs.sortresistance,
             gs.gunselect, NUMGUNS, gs.ammo, -1);
     }
 
@@ -2142,28 +2139,32 @@ namespace server
     void dodamage(clientinfo *target, clientinfo *actor, int damage, int atk, const vec &hitpush = vec(0, 0, 0))
     {
         if(teamkill==0 && atk!=ATK_MEDIGUN_SHOOT) { if(actor!=target) if(isteam(target->team, actor->team)) return; } //ENLEVE LE TEAMKILL
-        damage = (((damage*aptitudes[actor->aptitude].apt_degats)/100)*100)/aptitudes[target->aptitude].apt_resistance;
-        if(target->sortresistance>0 && target->aptitude==APT_MAGICIEN) damage = damage/5.0f;
-
-        switch (actor->aptitude)
-        {
-            case 1: {if(atk==ATK_MEDIGUN_SHOOT) damage = -20;} break;
-            case 3: {if(atk==ATK_CAC349_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACMASTER_SHOOT) damage *= 3.0f;} break;
-            case 9: {if(atk==ATK_SV98_SHOOT || atk==ATK_SKS_SHOOT || atk==ATK_ARBALETE_SHOOT || atk==ATK_CAMPOUZE_SHOOT) damage *= 1.5f;} break;
-            case 12: {if(actor->state.ragemillis>0) damage *=1.25f;} break;
-        }
 
         servstate &ts = target->state;
         servstate &as = actor->state;
 
-        if(atk==ATK_MEDIGUN_SHOOT) {if(ts.health < ts.maxhealth) ts.dodamage(damage);}
+        //Calcul des dommages de base
+        damage = (((damage*aptitudes[actor->aptitude].apt_degats)/100)*100)/aptitudes[target->aptitude].apt_resistance;
+        if(ts.aptisort3 && target->aptitude==APT_MAGICIEN) {damage = damage/5.0f;};
+
+        //Dommages spéciaux d'aptitudes
+        switch (actor->aptitude)
+        {
+            case APT_MEDECIN: {if(atk==ATK_MEDIGUN_SHOOT) damage = -20;} break;
+            case APT_NINJA: {if(atk==ATK_CAC349_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACMASTER_SHOOT) damage *= 3.0f;} break;
+            case APT_CAMPEUR: {if(atk==ATK_SV98_SHOOT || atk==ATK_SKS_SHOOT || atk==ATK_ARBALETE_SHOOT || atk==ATK_CAMPOUZE_SHOOT) damage *= 1.5f;} break;
+            case APT_VICKING: {if(as.ragemillis>0) damage *=1.25f;} break;
+        }
+
+        if(atk==ATK_MEDIGUN_SHOOT) {if(ts.health < ts.maxhealth) ts.dodamage(damage);} //Le medigun ne regen pas plus que la santé max du joueur
         else ts.dodamage(damage);
 
-        if(target!=actor && !isteam(target->team, actor->team)) actor->state.damage += damage;
-        if(target->aptitude==12 && actor!=target) {target->state.ragemillis+=damage*5; sendresume(target);}
+        if(target!=actor && !isteam(target->team, actor->team)) as.damage += damage;
+        if(target->aptitude==APT_VICKING && actor!=target) {ts.ragemillis+=damage*5; sendresume(target);} //Ajoute la rage au Vicking et l'envoie au client
 
         sendf(-1, 1, "ri7", N_DAMAGE, target->clientnum, actor->clientnum, damage, ts.armour, ts.health, atk);
-        if(actor->aptitude==4) sendf(-1, 1, "ri5", N_VAMPIRE, actor->clientnum, damage, ts.armour, ts.health);
+        if(actor->aptitude==APT_VAMPIRE) sendf(-1, 1, "ri5", N_VAMPIRE, actor->clientnum, damage, ts.armour, ts.health);
+
         if(target==actor) target->setpushed();
         else if(!hitpush.iszero())
         {
@@ -2173,19 +2174,19 @@ namespace server
         }
         if(ts.health<=0)
         {
-            if(actor->aptitude==7)
+            if(actor->aptitude==APT_FAUCHEUSE) //Augmente la santé maxi de la faucheuse si elle tue un joueur
             {
-                if(as.maxhealth >= 1500) as.health = min(as.health+250, as.maxhealth);
-                if(as.maxhealth <= 1300) {as.maxhealth += 500; as.health += 500;}
-                sendresume(actor);
+                if(as.maxhealth >= 1500) as.health = min(as.health+250, as.maxhealth); //Rends juste de la santé si le boost est déjà appliqué
+                if(as.maxhealth < 1500) {as.maxhealth += 500; as.health += 500;} //Augmente la santé max à 150 PV si c'est le premier kill
+                sendresume(actor); //Envoie tout ça au client
             }
-            else if (target->aptitude==7 && ts.maxhealth>=1500) ts.maxhealth -= 500;
+            else if (target->aptitude==APT_FAUCHEUSE && ts.maxhealth>=1500) { ts.maxhealth = 1000; sendresume(target); } //Si la faucheuse est tué alors la santé redevient normal + envoi au client
 
             target->state.deaths++;
+            actor->state.killstreak++;
+            target->state.killstreak = 0;
             int fragvalue = smode ? smode->fragvalue(target, actor) : (target==actor || isteam(target->team, actor->team) ? -1 : 1);
             actor->state.frags += fragvalue;
-            actor->state.killstreak += 1;
-            target->state.killstreak = 0;
             target->state.lastdeath = totalmillis;
 
             if(fragvalue>0)
@@ -2222,7 +2223,7 @@ namespace server
         }
 
         damage = ((damage*100)/aptitudes[target->aptitude].apt_resistance)/2.5f;
-        if(target->sortresistance>0 && target->aptitude==APT_MAGICIEN) damage = damage/5.0f;
+        if(target->state.aptisort3 && target->aptitude==APT_MAGICIEN) damage = damage/5.0f;
 
         gamestate &as = actor->state;
         as.doregen(damage);
@@ -3320,28 +3321,23 @@ namespace server
                 break;
             }
 
-            case N_SENDSORTRESISTANCE:
+            case N_SENDSORT1:
             {
-                ci->sortresistance = getint(p);
+                ci->state.aptisort1 = getint(p);
                 QUEUE_MSG;
                 break;
             }
 
-            case N_SENDSORTMIRACLE:
+            case N_SENDSORT2:
             {
-                ci->sortmiracle = getint(p);
+                ci->state.aptisort2 = getint(p);
                 QUEUE_MSG;
                 break;
             }
-            case N_SENDSORTRETOUR:
+            case N_SENDSORT3:
             {
-                ci->sortretour = getint(p);
-                QUEUE_MSG;
-                break;
-            }
-            case N_SENDSORTPROTECTION:
-            {
-                ci->sortprotection = getint(p);
+                if(!cq) break;
+                cq->state.aptisort3 = getint(p);
                 QUEUE_MSG;
                 break;
             }

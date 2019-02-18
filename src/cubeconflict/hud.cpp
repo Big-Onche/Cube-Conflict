@@ -158,7 +158,7 @@ namespace game
             gle::colorf(1, 1, 1, 1);
         }
 
-        if(player1->sortresistance)
+        if(player1->aptisort3)
         {
             gle::colorf(1, 1, 1, 0.7f);
 
@@ -228,21 +228,21 @@ namespace game
             {
                 case APT_MAGICIEN:
                 {
-                    if(player1->sortflash) gle::colorf(2, 2, 2, 1);
+                    if(player1->aptisort1) gle::colorf(2, 2, 2, 1);
                     else if(player1->mana<30 || !player1->sort1pret) gle::colorf(0.2, 0.2, 0.2, 1);
                     else gle::colorf(1, 1, 1, 1);
                     settexture("media/interface/hud/sortmage1.png", 3);
                     bgquad(positionsorts-85, h-114, 100, 100);
                     gle::colorf(1, 1, 1, 1);
 
-                    if(player1->sortprecision) gle::colorf(2, 2, 2, 1);
+                    if(player1->aptisort2) gle::colorf(2, 2, 2, 1);
                     else if(player1->mana<40 || !player1->sort2pret) gle::colorf(0.2, 0.2, 0.2, 1);
                     else gle::colorf(1, 1, 1, 1);
                     settexture("media/interface/hud/sortmage2.png", 3);
                     bgquad(positionsorts, h-114, 100, 100);
                     gle::colorf(1, 1, 1, 1);
 
-                    if(player1->sortresistance) gle::colorf(2, 2, 2, 1);
+                    if(player1->aptisort3) gle::colorf(2, 2, 2, 1);
                     else if(player1->mana<60 || !player1->sort3pret) gle::colorf(0.2, 0.2, 0.2, 1);
                     else gle::colorf(1, 1, 1, 1);
                     settexture("media/interface/hud/sortmage3.png", 3);

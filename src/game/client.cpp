@@ -1310,6 +1310,12 @@ namespace game
             else d->champimillis = getint(p);
             if(d==player1) getint(p);
             else d->ragemillis = getint(p);
+            if(d==player1) getint(p);
+            else d->aptisort1 = getint(p);
+            if(d==player1) getint(p);
+            else d->aptisort2 = getint(p);
+            if(d==player1) getint(p);
+            else d->aptisort3 = getint(p);
         }
         d->lifesequence = getint(p);
         d->health = getint(p);
@@ -1317,8 +1323,6 @@ namespace game
         d->armour = getint(p);
         d->armourtype = getint(p);
         d->mana = getint(p);
-        d->sortflash = getint(p);
-        d->sortresistance = getint(p);
 
         if(resume && d==player1)
         {
@@ -1543,43 +1547,28 @@ namespace game
                 break;
             }
 
-            case N_SENDSORTRESISTANCE:
+            case N_SENDSORT1:
             {
-                int plresistance = getint(p);
                 if(d)
                 {
-                    d->sortresistance = plresistance;
+                    d->aptisort1 = getint(p);
                 }
                 break;
             }
 
-            case N_SENDSORTMIRACLE:
+            case N_SENDSORT2:
             {
-                int plmiracle = 0;
-                plmiracle = getint(p);
                 if(d)
                 {
-                    d->sortmiracle = plmiracle;
+                    d->aptisort2 = getint(p);
                 }
                 break;
             }
-            case N_SENDSORTRETOUR:
+            case N_SENDSORT3:
             {
-                int plretour = 0;
-                plretour = getint(p);
                 if(d)
                 {
-                    d->sortretour = plretour;
-                }
-                break;
-            }
-            case N_SENDSORTPROTECTION:
-            {
-                int plprotection = 0;
-                plprotection = getint(p);
-                if(d)
-                {
-                    d->sortprotection = plprotection;
+                    d->aptisort3 = getint(p);
                 }
                 break;
             }

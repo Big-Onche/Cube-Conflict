@@ -152,7 +152,7 @@ namespace game
             spread/= (d->champimillis/1000);
             nozoomspread/= (d->champimillis/1000);
         }
-        if(d->aptitude==APT_MAGICIEN && d->sortprecision)
+        if(d->aptitude==APT_MAGICIEN && d->aptisort2)
         {
             spread/=3;
             nozoomspread/=3;
@@ -418,7 +418,7 @@ namespace game
         {
             actor->steromillis > 0 ? damage*=actor->aptitude==13 ? 3 : 2 : damage+=0;
             damage = (((damage*aptitudes[actor->aptitude].apt_degats)/100)*100)/aptitudes[d->aptitude].apt_resistance;
-            if(d->sortresistance>0 && d->aptitude==APT_MAGICIEN) damage = damage/5.0f;
+            if(d->aptisort3>0 && d->aptitude==APT_MAGICIEN) damage = damage/5.0f;
             damage = damage/10.0f;
 
             if(actor->aptitude==3)
@@ -1054,7 +1054,7 @@ namespace game
         int gun = attacks[atk].gun;
         int sound = attacks[atk].sound;
         //int soundwater = attacks[atk]].soundwater;
-        if(player1->sortprecision>0 && d==player1) playsound(S_SORTMAGE2);
+        if(player1->aptisort2>0 && d==player1) playsound(S_SORTMAGE2);
 
         switch(atk)
         {
