@@ -813,8 +813,6 @@ namespace game
             case ATK_SKS_SHOOT: bigballestain(p, v); break;
             case ATK_SPOCKGUN_SHOOT: spockstain(p, v); break;
             case ATK_UZI_SHOOT:
-            case ATK_MOSSBERG_SHOOT:
-            case ATK_HYDRA_SHOOT:
             case ATK_ARBALETE_SHOOT:
             case ATK_GLOCK_SHOOT:
             case ATK_FAMAS_SHOOT: littleballestain(p, v); break;
@@ -1047,6 +1045,21 @@ namespace game
         adddynlight(vec(to).madd(dir, 4), 10, vec(1.00f, 0.5f, 0.0f), 225, 75);
     }
 
+    void pompehit(const vec &from, const vec &to, bool stain = true)
+    {
+        vec dir = vec(from).sub(to).safenormalize();
+        if(stain)
+        {
+            switch(rnd(3))
+            {
+                case 0: addstain(STAIN_BALLE_1, to, dir, 0.5f); break;
+                case 1: addstain(STAIN_BALLE_2, to, dir, 0.5f); break;
+                case 2: addstain(STAIN_BALLE_3, to, dir, 0.5f); break;
+            }
+            addstain(STAIN_BALLE_GLOW, to, dir, 1.0f, 0x883300);
+        }
+    }
+
     bool looped;
 
     void shoteffects(int atk, const vec &from, const vec &to, gameent *d, bool local, int id, int prevaction)     // create visual effect from a shot
@@ -1130,9 +1143,11 @@ namespace game
                 adddynlight(hudgunorigin(gun, d->o, to, d), 15, vec(1.0f, 0.75f, 0.5f), 30, 100, DL_FLASH, 0, vec(0, 0, 0), d);
                 loopi(attacks[atk].rays)
                 {
-                    newprojectile(from, rays[i], attacks[atk].projspeed, local, id, d, atk);
+                    particle_flare(d->muzzle, rays[i], 30, PART_POMPE_SIDE, 0xFFFF22, 0.2f);
+                    pompehit(from, rays[i]);
                     if(d!=hudplayer()) sound_nearmiss(S_FLYBY, from, rays[i]);
                 }
+
                 break;
             case ATK_SV98_SHOOT:
             case ATK_SKS_SHOOT:
@@ -1341,9 +1356,7 @@ namespace game
                 if((hits[i] = intersectclosest(from, rays[i], d, margin, dist)))
                 {
                     shorten(from, rays[i], dist);
-                    if(atk==ATK_RAIL_SHOOT) railhit(from, rays[i], false);
                 }
-                else if(atk==ATK_RAIL_SHOOT) railhit(from, rays[i]);
             }
             loopi(maxrays) if(hits[i])
             {

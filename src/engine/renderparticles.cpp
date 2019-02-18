@@ -856,6 +856,7 @@ static partrenderer *parts[] =
     new taperenderer("media/particle/pulse_side.png", PT_TAPE|PT_FEW|PT_BRIGHT),               // pulse side
     new quadrenderer("media/particle/pulse_front.png", PT_PART|PT_FLIP|PT_FEW|PT_BRIGHT),      // pulse front
     new taperenderer("media/particle/balle_side.png", PT_TAPE|PT_FEW|PT_BRIGHT),
+    new taperenderer("media/particle/pompe_side.png", PT_TAPE|PT_FEW|PT_BRIGHT),
     new trailrenderer("media/particle/impact.png", PT_TRAIL|PT_BRIGHT),                          // streak
     new quadrenderer("media/particle/spock_front.png", PT_PART|PT_FEW|PT_BRIGHT),
     new quadrenderer("media/particle/sante.png", PT_PART|PT_BRIGHT),

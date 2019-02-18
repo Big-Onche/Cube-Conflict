@@ -1721,7 +1721,7 @@ namespace server
     {
         servstate &gs = ci->state;
         spawnstate(ci);
-        sendf(ci->ownernum, 1, "rii7iv", N_SPAWNSTATE, ci->clientnum, gs.lifesequence,
+        sendf(ci->ownernum, 1, "rii8v", N_SPAWNSTATE, ci->clientnum, gs.lifesequence,
             gs.health, gs.maxhealth,
             gs.armour, gs.armourtype,
             gs.mana,
@@ -1924,8 +1924,8 @@ namespace server
     void sendresume(clientinfo *ci) //PARSESTATE
     {
         servstate &gs = ci->state;
-        sendf(-1, 1, "ri9iiii10vi", N_RESUME, ci->clientnum, gs.state,
-            gs.killstreak, gs.frags, gs.flags, gs.deaths,
+        sendf(-1, 1, "ri9i9iiiivi", N_RESUME, ci->clientnum,
+            gs.state, gs.killstreak, gs.frags, gs.flags, gs.deaths,
             gs.steromillis, gs.epomillis, gs.jointmillis, gs.champimillis, gs.ragemillis,
             gs.aptisort1, gs.aptisort2, gs.aptisort3,
             gs.lifesequence,
@@ -2276,8 +2276,6 @@ namespace server
             case ATK_GAU8_SHOOT:
             case ATK_ROQUETTES_SHOOT:
             case ATK_CAMPOUZE_SHOOT:
-            case ATK_HYDRA_SHOOT:
-            case ATK_MOSSBERG_SHOOT:
             case ATK_LANCEFLAMMES_SHOOT:
             case ATK_MEDIGUN_SHOOT:
             case ATK_GRAP1_SHOOT:
@@ -2363,8 +2361,6 @@ namespace server
                 gs.grenades.add(id); break;
             case ATK_KAMIKAZE_SHOOT:
                 gs.kamikaze.add(id); break;
-            case ATK_HYDRA_SHOOT:
-            case ATK_MOSSBERG_SHOOT:
             case ATK_LANCEFLAMMES_SHOOT:
             case ATK_MEDIGUN_SHOOT:
             {
