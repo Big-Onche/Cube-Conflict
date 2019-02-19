@@ -548,7 +548,8 @@ namespace game
                 particle_splash(PART_SPARK, 200, 100, v, 0xAA4466, 0.2f, 150);
                 particle_fireball(v, 1.15f*attacks[atk].exprad, PART_PULSE_BURST, int(attacks[atk].exprad*20), 0x330011, 1.5f);
                 vec debrisorigin = vec(v).sub(vec(vel).mul(5));
-                adddynlight(safe ? v : debrisorigin, 2*attacks[atk].exprad, vec(3.0f, 0.0f, 2.0f), 350, 40, 0, attacks[atk].exprad/2, vec(3.0f, 0.0f, 2.0f));
+                adddynlight(safe ? v : debrisorigin, 2*attacks[atk].exprad, vec(3.0f, 0.0f, 2.0f), 350, 40, L_NODYNSHADOW, attacks[atk].exprad/2, vec(3.0f, 0.0f, 2.0f));
+                adddynlight(safe ? v : debrisorigin, 1*attacks[atk].exprad, vec(1.0f, 0.0f, 0.6f), 350, 40, L_VOLUMETRIC|L_NODYNSHADOW, attacks[atk].exprad/2, vec(1.0f, 0.0f, 0.6f));
             }
             break;
 
@@ -567,7 +568,8 @@ namespace game
                 playsound(S_EXPLOSION, &v, 0, 0, 0 , 100, -1, 350);
                 if(camera1->o.dist(v) >= 300) playsound(S_EXPLOSIONLOIN, &v, NULL, 0, 0, 100, -1, 1200);
                 vec debrisorigin = vec(v).sub(vec(vel).mul(5));
-                adddynlight(safe ? v : debrisorigin, 7*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 80, 40, 0, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
+                adddynlight(safe ? v : debrisorigin, 7*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 80, 40, L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
+                adddynlight(safe ? v : debrisorigin, 4*attacks[atk].exprad, vec(1.2f, 0.4f, 0.0f), 80, 40, L_VOLUMETRIC|L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.0f, 0.0f, 1.5f));
                 particle_splash(PART_SMOKE,  9, 2000, v, 0x333333, 40.0f,  150,   300);
                 particle_splash(PART_SMOKE,  9, 1300, v, 0x333333, 25.0f,  150,   600);
                 particle_splash(PART_SPARK, 12,  150, v, 0xFFC864,  1.7f, 1500,  1500);
@@ -580,13 +582,14 @@ namespace game
                 particle_fireball(v, 350, PART_ONDECHOC, 300, 0xFFFFFF, 20.0f);
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
             }
+            break;
             case ATK_ROQUETTES_SHOOT:
             {
                 //particle_splash(PART_SPARK, 200, 300, v, 0xFF8800, 0.45f);
                 playsound(S_EXPLOSION, &v, 0, 0, 0 , 100, -1, 350);
                 if(camera1->o.dist(v) >= 300) playsound(S_EXPLOSIONLOIN, &v, NULL, 0, 0, 100, -1, 1200);
                 vec debrisorigin = vec(v).sub(vec(vel).mul(5));
-                adddynlight(safe ? v : debrisorigin, 7*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 80, 40, 0, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
+                adddynlight(safe ? v : debrisorigin, 7*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 80, 40, L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
                 particle_splash(PART_SMOKE,  6, 2000, v, 0x333333, 30.0f,  125,   200);
                 particle_splash(PART_SMOKE,  6, 1300, v, 0x333333, 15.0f,  125,   400);
                 particle_splash(PART_SPARK,  5,  150, v, 0xFFC864,  1.7f, 1000,  1000);
@@ -624,23 +627,36 @@ namespace game
             {
                 //particle_splash(PART_SPARK, 200, 300, v, 0xFF8800, 0.45f);
                 playsound(S_NUKE);
-                adddynlight(safe ? v : debrisorigin, 7*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 80, 40, 0, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
-                particle_splash(PART_SMOKE, 50, 2000, v, 0x212121, 150.0f, 700, 70);
-                particle_splash(PART_SMOKE, 50, 15000, v, 0x222222, 200.0f, 500, 300);
-                particle_splash(PART_SMOKE, 100, 5000, v, 0x333333, 250.0f, 1000, 500);
-                particle_splash(PART_FLAME1+rnd(2),  100,  800, v, 0xFFFF00, 75+rnd(50), 1500, 800);
-                particle_splash(PART_FLAME1+rnd(2),  100,  800, v, 0x224400, 75+rnd(50), 1500, 800);
-                particle_splash(PART_FLAME1+rnd(2),  100,  800, v, 0xFF2222, 75+rnd(50), 1200, 600);
+                adddynlight(safe ? v : debrisorigin, 7*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 300, 40, L_NOSHADOW, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
+                adddynlight(safe ? v : debrisorigin, 5*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 300, 40, L_NOSHADOW|L_VOLUMETRIC, attacks[atk].exprad/2, vec(0.0f, 0.0f, 1.5f));
+
+                loopi(60)
+                {
+                    vec pos = vec(v).add(vec(rnd(200), rnd(200), rnd(200)));
+                    pos.sub(vec(rnd(200), rnd(200), rnd(200)));
+                    particle_splash(PART_SMOKE, 1, 2000,  pos, 0x212121, 150.0f, 700, 70);
+                    particle_splash(PART_SMOKE, 1, 15000, pos, 0x222222, 200.0f, 500, 300);
+                    particle_splash(PART_SMOKE, 2, 5000,  pos, 0x333333, 250.0f, 1000, 500);
+                    particle_splash(PART_FLAME1+rnd(2),  3, 1000, pos, 0xFFFF00, 35+rnd(15), 800, 300);
+                    particle_splash(PART_FLAME1+rnd(2),  3, 1000, pos, 0x224400, 35+rnd(15), 800, 300);
+                    particle_splash(PART_FLAME1+rnd(2),  3, 1000, pos, 0xFF2222, 35+rnd(15), 800, 300);
+                }
+
+                particle_fireball(v, 350, PART_ONDECHOC, 300, 0xFFCCAA, 800.0f);
+                particle_fireball(v, 350, PART_ONDECHOC, 300, 0xFFCCAA, 800.0f);
+                particle_fireball(v, 350, PART_ONDECHOC, 300, 0xFFCCAA, 800.0f);
                 //particle_fireball(v, 350, PART_ONDECHOC, 300, 0xFF5500, 10.0f);
                 //particle_fireball(v, 350, PART_ONDECHOC, 300, 0xFFFFFF, 20.0f);
-                particle_fireball(v, 100, PART_EXPLOSION, 300, 0xFFEEDD, 1200.0f);
-                particle_fireball(v, 350, PART_ONDECHOC, 300, 0xFFFFFF, 300.0f);
+                //particle_fireball(v, 100, PART_EXPLOSION, 300, 0xFFEEDD, 1200.0f);
+
                 //loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
             }
             break;
             case ATK_ARTIFICE_SHOOT:
             {
                 //particle_fireball(v,  50, PART_EXPLOSION, 120, 0xFFFFFF, 30.0f);
+                vec debrisorigin = vec(v).sub(vec(vel).mul(5));
+
                 playsound(S_EXPLOSIONARTIFICE, &v, 0, 0, 0 , 100, -1, 350);
                 if(camera1->o.dist(v) >= 300) playsound(S_ARTIFICELOIN, &v, NULL, 0, 0, 100, -1, 1000);
                 particle_splash(PART_FLAME1+rnd(2),  5,  40, v, 0xFFC864, 20,  800, 1600);
@@ -649,7 +665,8 @@ namespace game
                 particle_splash(PART_GLOWSPARK, 12+rnd(10),  300, v, rnd(16777215),  1.25f+rnd(2),   700, 7000);
                 particle_splash(PART_GLOWSPARK, 12+rnd(10),  350, v, rnd(16777215),  1.5f+rnd(2),    800, 8000);
 
-                adddynlight(safe ? v : debrisorigin, 7*attacks[atk].exprad, vec(1.5f, 1.5f, 1.5f), 80, 40, 0, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
+                adddynlight(safe ? v : debrisorigin, 7*attacks[atk].exprad, vec(1+rnd(4), 1+rnd(4), 1+rnd(4)), 80, 40, 0, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
+                adddynlight(safe ? v : debrisorigin, 4*attacks[atk].exprad, vec(rnd(15)/10.0f, rnd(15)/10.0f, rnd(15)/10.0f), 80, 40, L_VOLUMETRIC|L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.0f, 0.0f, 1.5f));
             }
             break;
             case ATK_M32_SHOOT:
@@ -659,7 +676,8 @@ namespace game
                 particle_fireball(v, 40, PART_PLASMA, 300, 0xFFFFFF, 1.0f);
                 particle_fireball(v, 60, PART_PLASMA, 300, 0xAAAAFF, 1.0f);
                 particle_fireball(v, 80, PART_PLASMA, 300, 0x5555FF, 1.0f);
-                adddynlight(v, 7*attacks[atk].exprad, vec(0.0f, 3.0f, 9.0f), 80, 40, 0, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
+                adddynlight(v, 7*attacks[atk].exprad, vec(0.0f, 3.0f, 9.0f), 80, 40, L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
+                adddynlight(v, 5*attacks[atk].exprad, vec(0.0f, 0.4f, 1.2f), 80, 40, L_VOLUMETRIC|L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.0f, 0.0f, 1.5f));
                 particle_splash(PART_SMOKE,  9, 2000, v, 0x555555, 40.0f,  150,   300);
                 particle_splash(PART_SMOKE,  9, 1300, v, 0x555555, 25.0f,  250,   600);
                 particle_splash(PART_SPARK, 10,  150, v, 0xFFFFFF,  2.0f, 1500,  1500);
