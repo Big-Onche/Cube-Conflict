@@ -393,8 +393,20 @@ namespace entities
         if(d->ragemillis && (d->ragemillis -= time)<=0)
         {
             d->ragemillis = 0;
-            //playsound(S_PUPOUT, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
         }
+        if(d->aptisort1 && (d->aptisort1 -= time)<=0)
+        {
+            d->aptisort1 = 0;
+        }
+        if(d->aptisort2 && (d->aptisort2 -= time)<=0)
+        {
+            d->aptisort2 = 0;
+        }
+        if(d->aptisort3 && (d->aptisort3 -= time)<=0)
+        {
+            d->aptisort3 = 0;
+        }
+                    conoutf("%d", d->aptisort3);
     }
 
     void putitems(packetbuf &p)            // puts items in network stream and also spawns them locally

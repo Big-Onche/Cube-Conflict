@@ -76,7 +76,6 @@ namespace game
                 addmsg(N_SENDSORT3, "rci", d, d->aptisort3);
                 d->mana -= 60;
                 d->sort3pret = false;
-                d->sended3 = false;
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 150);
                 playsound(S_SORTMAGE3, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 150);
                 //if(con_serveurofficiel) stat_sortslances++;
@@ -86,33 +85,18 @@ namespace game
     }
     ICOMMAND(aptitude_3, "", (), aptitude_3(player1));
 
-    void updatespecials(gameent *d)
+    void updatespecials(gameent *d) //Permet de réarmer les sorts en fonction de la durée de rechargement de ceux-ci
     {
         switch(d->aptitude)
         {
             case APT_MAGICIEN:
             {
                 // Sort flash
-                if(totalmillis-d->lastspecial1update >= d->aptisort1)
-                {
-                    d->aptisort1=0;
-                    if(totalmillis-d->lastspecial1update >= 3000 && !d->sort1pret) {if(d==player1)playsound(S_SORTPRET); d->sort1pret = true; }
-                }
-
+                if(totalmillis-d->lastspecial1update >= 3000 && !d->sort1pret) {if(d==player1)playsound(S_SORTPRET); d->sort1pret = true; }
                 // Sort précision
-                if(totalmillis-d->lastspecial2update >= d->aptisort2)
-                {
-                    d->aptisort2=0;
-                    if(totalmillis-d->lastspecial2update >= 7000 && !d->sort2pret) {if(d==player1)playsound(S_SORTPRET); d->sort2pret = true; }
-                }
+                if(totalmillis-d->lastspecial2update >= 9000 && !d->sort2pret) {if(d==player1)playsound(S_SORTPRET); d->sort2pret = true; }
                 // Sort résistance
                 if(totalmillis-d->lastspecial3update >= 6000 && !d->sort3pret) {if(d==player1)playsound(S_SORTPRET); d->sort3pret = true; }
-                if(totalmillis-d->lastspecial3update >= d->aptisort3 && !d->sended3)
-                {
-                    d->aptisort3=0;
-                    addmsg(N_SENDSORT3, "rci", d, d->aptisort3);
-                    d->sended3 = true;
-                }
                 break;
             }
         }

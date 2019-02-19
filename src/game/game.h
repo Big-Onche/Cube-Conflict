@@ -810,7 +810,6 @@ struct gameent : dynent, gamestate
 
     int lastspecial1update, lastspecial2update, lastspecial3update;
     bool sort1pret, sort2pret, sort3pret;
-    bool sended1, sended2, sended3;
 
     string name, info;
     int team, playermodel, playercolor, customhat, customcape, customtombe, aptitude;

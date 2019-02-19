@@ -224,7 +224,7 @@ namespace game
             {
                 if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
                 if(d->steromillis || d->epomillis || d->jointmillis || d->champimillis || d->ragemillis) entities::checkboosts(curtime, d);
-                if(d->ragemillis) entities::checkaptiskill(curtime, d);
+                if(d->ragemillis || d->aptisort1 || d->aptisort2 || d->aptisort3) entities::checkaptiskill(curtime, d);
             }
             updatespecials(d);
 
@@ -287,7 +287,7 @@ namespace game
         if(player1->state != CS_DEAD && !intermission)
         {
             if(player1->steromillis || player1->epomillis || player1->jointmillis || player1->champimillis) entities::checkboosts(curtime, player1);
-            if(player1->ragemillis) entities::checkaptiskill(curtime, player1);
+            if(player1->ragemillis || player1->aptisort1 || player1->aptisort2 || player1->aptisort3) entities::checkaptiskill(curtime, player1);
             updatespecials(player1);
         }
         updateweapons(curtime);
@@ -447,11 +447,13 @@ namespace game
 
         d->deaths++;
         d->killstreak = 0;
+        d->sort1pret = d->sort2pret = d->sort3pret = true; //Si le joueur meurt les sorts sont réarmés
+
+        //Effet graphique de mort
         vec pos(d->o.x, d->o.y, d->o.z-9);
         gibeffect(10000, d->vel, d);
         particle_splash(PART_SMOKE,  8, 1500, pos, 0x333333, 12.0f,  125, 400);
         particle_splash(PART_SMOKE,  5, 900, pos, 0x440000, 10.0f,  125, 200);
-        //MORT
 
         if(d==player1)
         {
