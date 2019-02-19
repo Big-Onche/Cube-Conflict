@@ -758,12 +758,6 @@ namespace game
         addstain(STAIN_PULSE_SCORCH, pos, dir, rad);
     }
 
-    void flamestain(const projectile &p, const vec &pos)
-    {
-        vec dir = vec(p.dir).neg();
-        addstain(STAIN_BRULAGE, pos, dir, 15.0f);
-    }
-
     void bigballestain(const projectile &p, const vec &pos)
     {
         vec dir = vec(p.dir).neg();
@@ -817,7 +811,6 @@ namespace game
             case ATK_GLOCK_SHOOT:
             case ATK_FAMAS_SHOOT: littleballestain(p, v); break;
             case ATK_GRAP1_SHOOT: grap1stain(p, v); break;
-            case ATK_LANCEFLAMMES_SHOOT: flamestain(p, v); break;
         }
 
     }
@@ -852,7 +845,6 @@ namespace game
                     case ATK_GLOCK_SHOOT:
                     case ATK_FAMAS_SHOOT: littleballestain(p, pos); break;
                     case ATK_GRAP1_SHOOT: grap1stain(p, pos); break;
-                    case ATK_LANCEFLAMMES_SHOOT: flamestain(p, pos); break;
                     default: break;
                 }
                 projs.remove(i);
@@ -1060,6 +1052,15 @@ namespace game
         }
     }
 
+    void flamehit(const vec &from, const vec &to, bool stain = true)
+    {
+        vec dir = vec(from).sub(to).safenormalize();
+        if(stain)
+        {
+            addstain(STAIN_BRULAGE, to, dir, 20.0f);
+        }
+    }
+
     bool looped;
 
     void shoteffects(int atk, const vec &from, const vec &to, gameent *d, bool local, int id, int prevaction)     // create visual effect from a shot
@@ -1208,14 +1209,20 @@ namespace game
                     vec irays(rays[i]);
                     irays.sub(d->muzzle);
                     irays.normalize().mul(1300.0f);
-                    switch(rnd(3)) { case 1:  particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0xAA0000 :  0x994422, 6, 100); }
-                    switch(rnd(3)) { case 1:  particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x990000 :  0xBB0011, 6, 100); }
-                    switch(rnd(3)) { case 1:  particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0xBB0000 :  0x991100, 6, 100); }
-                    //switch(rnd(20)) { case 1:  particle_splash(PART_FLAME1+rnd(4),  1*lodparticules, 1500, to, arprecision ? rndcolor : 0x444444, 1.00f,  50, 175, NULL, 1, false, 1); }
-                    particle_flying_flare(d->muzzle, irays, 900, PART_SMOKE, 0x111111, 7, 120);
-                    newprojectile(from, rays[i], attacks[atk].projspeed, local, id, d, atk);
+
+                    switch(rnd(5))
+                    {
+                        case 1:
+                        {
+                            particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0xAA0000 :  0x994422, 6, 100);
+                            particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x990000 :  0xBB0011, 6, 100);
+                            particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0xBB0000 :  0x991100, 6, 100);
+                            particle_flying_flare(d->muzzle, irays, 900, PART_SMOKE, 0x111111, 9, 120);
+                            adddynlight(hudgunorigin(gun, d->o, irays, d), 100, vec(1.0f, 0.75f, 0.5f), 100, 100, L_NODYNSHADOW, 10, vec(1.0f, 0, 0), d);
+                            flamehit(from, rays[i]);
+                        }
+                    }
                 }
-                adddynlight(hudgunorigin(gun, d->o, to, d), 40, vec(1.0f, 0.75f, 0.5f), 20, 100, DL_FLASH, 0, vec(0, 0, 0), d);
                 if(d->ragemillis) particle_splash(PART_SPARK,  3, 500, d->muzzle, 0xFF0000, 1.0f,  50,   200);
                 break;
             }
@@ -1466,7 +1473,6 @@ namespace game
             switch(p.atk)
             {
                 case ATK_PULSE_SHOOT: adddynlight(pos, 30, vec(1.00f, 0.75f, 0.0f)); break;
-                case ATK_LANCEFLAMMES_SHOOT: switch(rnd(2)) {case 0: adddynlight(pos, 50, vec(0.60f, 0.30f, 0.0f));} break;
                 case ATK_SPOCKGUN_SHOOT: adddynlight(pos, 30, vec(0.00f, 1.00f, 0.0f)); break;
                 case ATK_GRAP1_SHOOT: adddynlight(pos, 50, vec(0.3f, 0.00f, 0.2f)); break;
                 case ATK_ARTIFICE_SHOOT:

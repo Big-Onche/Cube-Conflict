@@ -2276,7 +2276,6 @@ namespace server
             case ATK_GAU8_SHOOT:
             case ATK_ROQUETTES_SHOOT:
             case ATK_CAMPOUZE_SHOOT:
-            case ATK_LANCEFLAMMES_SHOOT:
             case ATK_MEDIGUN_SHOOT:
             case ATK_GRAP1_SHOOT:
                 if(!gs.projs.remove(id)) return;
@@ -2361,7 +2360,6 @@ namespace server
                 gs.grenades.add(id); break;
             case ATK_KAMIKAZE_SHOOT:
                 gs.kamikaze.add(id); break;
-            case ATK_LANCEFLAMMES_SHOOT:
             case ATK_MEDIGUN_SHOOT:
             {
                 loopi(attacks[atk].rays) {gs.projs.add(id);}
