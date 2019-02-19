@@ -1298,7 +1298,13 @@ void particle_explodesplash(const vec &o, int fade, int type, int color, int siz
     regularshape(type, 16, color, 22, num, fade, o, size, gravity, num);
 }
 
-static void regularflame(int type, const vec &p, float radius, float height, int color, int density = 3, float scale = 2.0f, float speed = 200.0f, float fade = 600.0f, int gravity = -15)
+void regular_particle_flame(int type, const vec &p, float radius, float height, int color, int density, float scale, float speed, float fade, int gravity)
+{
+    if(!canaddparticles()) return;
+    regularflame(type, p, radius, height, color, density, scale, speed, fade, gravity);
+}
+
+static void regularflame(int type, const vec &p, float radius, float height, int color, int density, float scale, float speed, float fade, int gravity)
 {
     if(!canemitparticles()) return;
 
@@ -1311,12 +1317,6 @@ static void regularflame(int type, const vec &p, float radius, float height, int
         s.y += rndscale(radius*2.0f)-radius;
         newparticle(s, v, rnd(max(int(fade*height), 1))+1, type, color, size, gravity);
     }
-}
-
-void regular_particle_flame(int type, const vec &p, float radius, float height, int color, int density, float scale, float speed, float fade, int gravity)
-{
-    if(!canaddparticles()) return;
-    regularflame(type, p, radius, height, color, density, scale, speed, fade, gravity);
 }
 
 static void makeparticles(entity &e)

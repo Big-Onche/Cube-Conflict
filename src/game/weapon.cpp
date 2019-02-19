@@ -1601,7 +1601,7 @@ namespace game
         loopv(players)
         {
             gameent *d = players[i];
-            checkattacksound(d, d==following);
+            checkattacksound(d, (long)d==following);
         }
     }
 
