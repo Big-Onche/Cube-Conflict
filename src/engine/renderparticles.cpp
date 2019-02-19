@@ -1305,7 +1305,7 @@ void regular_particle_flame(int type, const vec &p, float radius, float height, 
     regularflame(type, p, radius, height, color, density, scale, speed, fade, gravity);
 }
 
-static void regularflame(int type, const vec &p, float radius, float height, int color, int density, float scale, float speed, float fade, int gravity)
+void regularflame(int type, const vec &p, float radius, float height, int color, int density, float scale, float speed, float fade, int gravity)
 {
     if(!canemitparticles()) return;
 
