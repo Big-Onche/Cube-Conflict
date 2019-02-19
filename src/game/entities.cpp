@@ -406,7 +406,6 @@ namespace entities
         {
             d->aptisort3 = 0;
         }
-                    conoutf("%d", d->aptisort3);
     }
 
     void putitems(packetbuf &p)            // puts items in network stream and also spawns them locally

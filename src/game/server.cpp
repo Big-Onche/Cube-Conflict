@@ -2435,7 +2435,11 @@ namespace server
             if(curtime>0 && ci->state.jointmillis) ci->state.jointmillis = max(ci->state.jointmillis-curtime, 0);
             if(curtime>0 && ci->state.champimillis) ci->state.champimillis = max(ci->state.champimillis-curtime, 0);
             if(curtime>0 && ci->state.ragemillis) ci->state.ragemillis = max(ci->state.ragemillis-curtime, 0);
-            //conoutf("%d CI RAGEMILLIS", ci->state.ragemillis);
+
+            if(curtime>0 && ci->state.aptisort1) ci->state.aptisort1 = max(ci->state.aptisort1-curtime, 0);
+            if(curtime>0 && ci->state.aptisort2) ci->state.aptisort2 = max(ci->state.aptisort2-curtime, 0);
+            if(curtime>0 && ci->state.aptisort3) ci->state.aptisort3 = max(ci->state.aptisort3-curtime, 0);
+
             flushevents(ci, gamemillis);
         }
     }
