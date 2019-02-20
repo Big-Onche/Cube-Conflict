@@ -101,6 +101,7 @@ namespace ai
     bool targetable(gameent *d, gameent *e)
     {
         if(d == e || !canmove(d)) return false;
+        if(e->aptisort2 && e->aptitude==APT_PHYSICIEN) switch(rnd(15)) {case 0: return true; break; default: return false;}
         if(d->gunselect==GUN_MEDIGUN && e->health<100) return e->state == CS_ALIVE && isteam(d->team, e->team);
         else return e->state == CS_ALIVE && !isteam(d->team, e->team);
     }
@@ -325,9 +326,9 @@ namespace ai
         else return false;
     }
 
-    bool lowmana(gameent *d)
+    bool needmana(gameent *d)
     {
-        if(d->mana<60 && d->mana-d->skill<60) return true;
+        if(d->mana<=100) return true;
         else return false;
     }
 
@@ -678,7 +679,7 @@ namespace ai
                     case I_BOUCLIERFER:
                     case I_BOUCLIEROR:
                     case I_BOUCLIERMAGNETIQUE:
-                    case I_MANA: wantsitem = lowmana(d); break;
+                    case I_MANA: wantsitem = needmana(d); break;
                     case I_SUPERARME:
                     {
                         wantsitem = true;
@@ -1088,6 +1089,7 @@ namespace ai
             d->ai->spot = vec(0, 0, 0);
         }
 
+        if(d->aptisort3 && d->aptitude==APT_PHYSICIEN) switch(rnd(60)) {case 1: d->jumping = true;}
 		if(!d->ai->dontmove) jumpto(d, b, d->ai->spot);
 
         gameent *e = getclient(d->ai->enemy);
@@ -1316,7 +1318,7 @@ namespace ai
             if(!intermission)
             {
                 if(d->ragdoll) cleanragdoll(d); // RAGRAG
-                moveplayer(d, 10, true, d->epomillis, d->jointmillis, d->aptitude, d->aptisort1);
+                moveplayer(d, 10, true, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptisort3);
                 if(allowmove && !b.idle) timeouts(d, b);
 				entities::checkitems(d);
 				if(cmode) cmode->checkitems(d);
@@ -1328,7 +1330,7 @@ namespace ai
             else
             {
                 d->move = d->strafe = 0;
-                moveplayer(d, 10, false, d->epomillis, d->jointmillis, d->aptitude, d->aptisort1);
+                moveplayer(d, 10, false, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptisort3);
             }
         }
         d->attacking = d->jumping = false;
@@ -1376,13 +1378,25 @@ namespace ai
             {
                 int result = 0;
                 c.idle = 0;
-                if(d->health<250+d->skill && d->aptitude==APT_MAGICIEN && d->mana>=60) aptitude_3(d);
+
+                if(d->health<250+d->skill*2 && d->aptitude==APT_MAGICIEN && d->mana>=60) aptitude_3(d);
+                if(d->aptitude==APT_PHYSICIEN)
+                {
+                        switch(rnd(50)) {case 0: if(d->mana>70) aptitude_3(d);}
+                        if(d->health<250+d->skill*2 && d->armour<50 && d->mana>=25) aptitude_1(d);
+                }
+
 
                 switch(c.type)
                 {
                     case AI_S_WAIT: result = dowait(d, c); break;
                     case AI_S_DEFEND: result = dodefend(d, c); break;
-                    case AI_S_PURSUE: result = dopursue(d, c); if((d->mana>80 || d->mana<60)&& d->aptitude==APT_MAGICIEN) {aptitude_1(d);} break;
+                    case AI_S_PURSUE: result = dopursue(d, c);
+                    {
+                        if((d->mana>80 || d->mana<60)&& d->aptitude==APT_MAGICIEN) aptitude_1(d);
+                        if(d->health<650+d->skill && d->aptitude==APT_PHYSICIEN && d->mana>=50) aptitude_2(d);
+                        break;
+                    }
                     case AI_S_INTEREST: result = dointerest(d, c); break;
                     default: result = 0; break;
                 }

@@ -1838,11 +1838,12 @@ void modifygravity(physent *pl, bool water, int curtime, int jointmillis, int ap
 // moveres indicated the physics precision (which is lower for monsters and multiplayer prediction)
 // local is false for multiplayer prediction
 
-bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis, int jointmillis, int aptitude, int sortflash)
+bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis, int jointmillis, int aptitude, int aptisort)
 {
     int material = lookupmaterial(vec(pl->o.x, pl->o.y, pl->o.z + (3*pl->aboveeye - pl->eyeheight)/4));
     bool water = isliquid(material&MATF_VOLUME);
     bool floating = pl->type==ENT_PLAYER && (pl->state==CS_EDITING || pl->state==CS_SPECTATOR);
+    if(aptisort && aptitude==APT_PHYSICIEN && pl->type==ENT_PLAYER) floating = true;
 
     float classespeed = aptitudes[aptitude].apt_vitesse*10.f;
 
@@ -1855,7 +1856,7 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
     // apply gravity
     if(!floating) modifygravity(pl, water, curtime, jointmillis, aptitude);
 
-    if(aptitude==APT_MAGICIEN && sortflash>0) {secs = curtime/200.f;}
+    if(aptitude==APT_MAGICIEN && aptisort>0) {secs = curtime/200.f;}
 
     // apply any player generated changes in velocity
     modifyvelocity(pl, local, water, floating, curtime, jointmillis, aptitude);
@@ -1869,6 +1870,17 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
 
     if(floating)                // just apply velocity
     {
+        if(aptisort && aptitude==APT_PHYSICIEN)
+        {
+            floatspeed = 150;
+            pl->physstate = PHYS_FLOAT;
+            const float f = 1.0f/moveres;
+            const int timeinair = pl->timeinair;
+            int collisions = 0;
+                    d.mul(f);
+            loopi(moveres) if(!move(pl, d) && ++collisions<5) i--; // discrete steps collision detection & sliding
+        }
+
         if(pl->physstate != PHYS_FLOAT)
         {
             pl->physstate = PHYS_FLOAT;
@@ -1943,7 +1955,7 @@ void interppos(physent *pl)
     pl->o.add(deltapos);
 }
 
-void moveplayer(physent *pl, int moveres, bool local, int epomillis, int jointmillis, int aptitude, int sortflash)
+void moveplayer(physent *pl, int moveres, bool local, int epomillis, int jointmillis, int aptitude, int aptisort)
 {
     if(physsteps <= 0)
     {
@@ -1952,9 +1964,9 @@ void moveplayer(physent *pl, int moveres, bool local, int epomillis, int jointmi
     }
 
     if(local) pl->o = pl->newpos;
-    loopi(physsteps-1) moveplayer(pl, moveres, local, physframetime, epomillis, jointmillis, aptitude, sortflash);
+    loopi(physsteps-1) moveplayer(pl, moveres, local, physframetime, epomillis, jointmillis, aptitude, aptisort);
     if(local) pl->deltapos = pl->o;
-    moveplayer(pl, moveres, local, physframetime, epomillis, jointmillis, aptitude, sortflash);
+    moveplayer(pl, moveres, local, physframetime, epomillis, jointmillis, aptitude, aptisort);
     if(local)
     {
         pl->newpos = pl->o;

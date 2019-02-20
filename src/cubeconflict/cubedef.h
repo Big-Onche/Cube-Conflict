@@ -20,10 +20,10 @@ static struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt
     { 100,  130,  75,  130, "Américain"},   //2 ---> OK
     { 80,   80,   75,   80, "Ninja"},       //3 ---> OK
     { 100,  50,  100,  100, "Vampire"},     //4 ---> OK (Regen screen ?)
-    { 90,   75,   90,  100, "Magicien"},    //5
-    { 100,  100,  85,   70, "Kamikaze"},    //6 ---> OK
+    { 95,   75,   90,  100, "Magicien"},    //5 ---> OK
+    { 100,  100,  80,   70, "Kamikaze"},    //6 ---> OK
     { 100,  80,   90,  110, "Faucheuse"},   //7 ---> OK
-    { 90,   80,   80,  110, "Physicien"},   //8
+    { 90,   80,   80,  110, "Physicien"},   //8 ---> OK
     { 100,  60,  125,  150, "Campeur"},     //9 ---> OK
     { 120,  110, 110,   85, "Commando"},    //10
     { 90,   90,   80,  120, "Prêtre"},      //11

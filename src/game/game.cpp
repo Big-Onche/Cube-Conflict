@@ -181,7 +181,7 @@ namespace game
         d->roll = d->newroll;
         if(move)
         {
-            moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude, d->aptisort1);
+            moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptisort3);
             d->newpos = d->o;
         }
         float k = 1.0f - float(lastmillis - d->smoothmillis)/smoothmove;
@@ -242,9 +242,9 @@ namespace game
             {
                 crouchplayer(d, 10, false);
                 if(smoothmove && d->smoothmillis>0) predictplayer(d, true);
-                else moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude, d->aptisort1);
+                else moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptisort3);
             }
-            else if(d->state==CS_DEAD && !d->ragdoll && lastmillis-d->lastpain<2000) moveplayer(d, 1, true, d->epomillis, d->jointmillis, d->aptitude, d->aptisort1);
+            else if(d->state==CS_DEAD && !d->ragdoll && lastmillis-d->lastpain<2000) moveplayer(d, 1, true, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptisort3);
         }
     }
 
@@ -303,14 +303,14 @@ namespace game
                 else
                 {
                     player1->move = player1->strafe = 0;
-                    moveplayer(player1, 10, true, player1->epomillis, player1->jointmillis, player1->aptitude, player1->aptisort1);
+                    moveplayer(player1, 10, true, player1->epomillis, player1->jointmillis, player1->aptitude, player1->aptitude==APT_MAGICIEN ? player1->aptisort1 : player1->aptisort3);
                 }
             }
             else if(!intermission)
             {
                 if(player1->ragdoll) cleanragdoll(player1);
                 crouchplayer(player1, 10, true);
-                moveplayer(player1, 10, true, player1->epomillis, player1->jointmillis, player1->aptitude, player1->aptisort1);
+                moveplayer(player1, 10, true, player1->epomillis, player1->jointmillis, player1->aptitude, player1->aptitude==APT_MAGICIEN ? player1->aptisort1 : player1->aptisort3);
                 swayhudgun(curtime);
                 entities::checkitems(player1);
                 if(cmode) cmode->checkitems(player1);
@@ -396,7 +396,6 @@ namespace game
     void regened(int damage, gameent *d, gameent *actor, bool local)
     {
         if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission) return;
-        //if(local) damage = m_sp ? d->dodamage(damage/3.0f) : d->dodamage(damage);
         if(local && actor->aptitude==4) damage = actor->doregen(damage);
     }
 
@@ -404,7 +403,7 @@ namespace game
     {
         if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission) return;
 
-        if(local) damage = d->dodamage(damage);
+        if(local) damage = d->dodamage(damage, d->aptitude, d->aptisort1);
         else if(actor==player1) return;
 
         gameent *h = hudplayer();
@@ -426,10 +425,23 @@ namespace game
                 damageblend(damage);
                 damagecompass(damage, actor->o);
                 playsound(S_BALLECORPS);
-                switch(rnd(2)) {case 0: if(d->armour>0)playsound(S_BALLEBOUCLIER); break; }
+                switch(rnd(2))
+                {
+                    case 0:
+                        if(d->aptitude==APT_PHYSICIEN && d->aptisort1 && d->armour>0) playsound(S_SORTPHY1);
+                        else if(d->armour>0) playsound(S_BALLEBOUCLIER);
+                }
             }
         }
-        else switch(rnd(2)) {case 0: if(d->armour>0)playsound(S_BALLEBOUCLIERENT, &d->o, 0, 0, 0 , 100, -1, 200); break; }
+        else
+        {
+            switch(rnd(2))
+            {
+                case 0:
+                    if(d->aptitude==APT_PHYSICIEN && d->aptisort1 && d->armour>0) playsound(S_SORTPHY1, &d->o, 0, 0, 0 , 100, -1, 200);
+                    else if(d->armour>0) playsound(S_BALLEBOUCLIERENT, &d->o, 0, 0, 0 , 100, -1, 200);
+            }
+        }
 
         damageeffect(damage, d, actor, d!=h, atk);
 

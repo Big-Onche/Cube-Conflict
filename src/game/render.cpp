@@ -355,6 +355,7 @@ namespace game
         else flags |= MDL_CULL_DIST;
         if(!mainpass) flags &= ~(MDL_FULLBRIGHT | MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY | MDL_CULL_DIST);
         float trans = d->state == CS_LAGGED ? 0.5f : 1.0f;
+        if(d->aptisort2 && d->aptitude==APT_PHYSICIEN) {trans = 0.1f; }
 
         //////////////////////////////////////////////////////////////////MODELES//////////////////////////////////////////////////////////////////
         ////////Boucliers////////
@@ -490,11 +491,21 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
                         particle_meter(d->abovehead().add(vec(0,0,4)), d->health/1000.0f, PART_METER, 0.5f, (static_cast<unsigned char>((100-d->health/10)*2.55) << 16) | (static_cast<unsigned char>(d->health/10*2.55) << 8), 2.5f);
                     }
                 }
+                if(d->aptitude==APT_MAGICIEN)
+                {
+                    vec pos = d->abovehead().add(vec(0, 0,-12));
+                    if(d->aptisort1) particle_splash(PART_SMOKE,  1,  120, d->o, 0xFF33FF, 10+rnd(5),  400, 400);
+                    if(d->aptisort3) particle_fireball(pos , 15.2f, PART_EXPLOSION, 5,  0x880088, 13.0f);
+                }
+                else if(d->aptitude==APT_PHYSICIEN)
+                {
+                    vec pos = d->o.add(vec(-3+rnd(7), -3+rnd(7), -17));
 
-                if(d->aptisort3>0 && d->aptitude==APT_MAGICIEN) particle_fireball(d->abovehead().add(vec(0, 0,-12)), 15.2f, PART_EXPLOSION, 5,  0x880088, 13.0f);
-                if(d->aptisort1>0 && d->aptitude==APT_MAGICIEN) particle_splash(PART_SMOKE,  1,  120, d->o, 0xFF33FF, 10+rnd(5),  400, 400);
-                if(d->ragemillis>0) switch(rnd(12)){case 0: particle_splash(PART_SMOKE,  1,  120, d->o, 0xFF3300, 10+rnd(5),  300, 100);}
-                if(d->jointmillis>0) switch(rnd(5)) {case 1: regularflame(PART_SMOKE, d->abovehead().add(vec(-12, 5, -19)), 2, 3, 0x888888, 1, 1.6f, 50.0f, 1000.0f, -10);}
+                    if(d->aptisort2) switch(rnd(3)) {case 0: particle_splash(PART_SMOKE,  1,  300, d->o, 0x7777FF, 10+rnd(5),  400, 400); }
+                    if(d->aptisort3) switch(rnd(2)) {case 0: particle_splash(PART_SMOKE,  1,  150, pos, 0x8888BB, 7+rnd(4),  100, -200); particle_splash(PART_FLAME1+rnd(2),  5,  100, pos, 0xFF6600, 1+rnd(2),  100, -20); }
+                }
+                if(d->ragemillis) switch(rnd(8)){case 0: particle_splash(PART_SMOKE,  1,  120, d->o, 0xFF3300, 10+rnd(5),  300, 100);}
+                if(d->jointmillis) switch(rnd(5)) {case 1: regularflame(PART_SMOKE, d->abovehead().add(vec(-12, 5, -19)), 2, 3, 0x888888, 1, 1.6f, 50.0f, 1000.0f, -10);}
 
             }
         }
@@ -595,6 +606,9 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
             basetime = 0;
         }
 
+        float trans = 1.0f;
+        if(d->aptitude==APT_PHYSICIEN && d->aptisort2) trans = 0.15f;
+
         if(d->jointmillis)
         {
             vec sway3;
@@ -606,12 +620,12 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
             modelattach a[2];
             d->weed = vec(-1, -1, -1);
             a[0] = modelattach("tag_joint", &d->weed);
-            rendermodel("hudboost/joint", anim, sway3, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), 1));
+            rendermodel("hudboost/joint", anim, sway3, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
             if(d->weed.x >= 0) d->weed = calcavatarpos(d->weed, 12);
             switch(rnd(10)) {case 1: regularflame(PART_SMOKE, d->weed, 2, 3, 0x888888, 1, 1.3f, 50.0f, 1000.0f, -10); particle_splash(PART_FLAME2,  4, 50, d->weed, 0xFF6600, 0.6f, 20, 150);}
         }
 
-        rendermodel(gunname, anim, weapzoom.add(sway), d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), 1));
+        rendermodel(gunname, anim, weapzoom.add(sway), d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
 
         if(d->muzzle.x >= 0) d->muzzle = calcavatarpos(d->muzzle, 12);
 
@@ -632,7 +646,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
             case A_BLUE: {int shieldvalue = d->armour<=150 ? 4 : d->armour<=300 ? 3 : d->armour<=450 ? 2 : d->armour<=600 ? 1 : 0; copystring(bouclier, shields[shieldvalue].hudbois);} break;
             case A_MAGNET: {int shieldvalue = d->armour<=300 ? 4 : d->armour<=600 ? 3 : d->armour<=900 ? 2 : d->armour<=1200 ? 1 : 0; copystring(bouclier, shields[shieldvalue].hudmagnetique);} break;
         }
-        rendermodel(bouclier, anim, sway2, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), 1));
+        rendermodel(bouclier, anim, sway2, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
     }
 
     void drawhudgun()

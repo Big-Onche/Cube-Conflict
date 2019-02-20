@@ -158,9 +158,19 @@ namespace game
             gle::colorf(1, 1, 1, 1);
         }
 
-        if(player1->aptisort3)
+        if(d->aptisort3 && d->aptitude==APT_MAGICIEN)
         {
             gle::colorf(1, 1, 1, 0.7f);
+
+            settexture("media/interface/hud/mageprotectionscreen.png");
+            bgquad(0, 0, w, h);
+
+            gle::colorf(1, 1, 1, 1);
+        }
+
+        if(d->aptisort2 && d->aptitude==APT_PHYSICIEN)
+        {
+            gle::colorf(0.3, 0.6, 1, 0.7f);
 
             settexture("media/interface/hud/mageprotectionscreen.png");
             bgquad(0, 0, w, h);
@@ -252,12 +262,27 @@ namespace game
                 break;
                 case APT_PHYSICIEN:
                 {
+
+                    if(player1->aptisort1) gle::colorf(2, 2, 2, 1);
+                    else if(player1->mana<25 || !player1->sort1pret) gle::colorf(0.2, 0.2, 0.2, 1);
+                    else gle::colorf(1, 1, 1, 1);
                     settexture("media/interface/hud/sortphysicien1.png", 3);
                     bgquad(positionsorts-85, h-114, 100, 100);
+                    gle::colorf(1, 1, 1, 1);
+
+                    if(player1->aptisort2) gle::colorf(2, 2, 2, 1);
+                    else if(player1->mana<50 || !player1->sort2pret) gle::colorf(0.2, 0.2, 0.2, 1);
+                    else gle::colorf(1, 1, 1, 1);
                     settexture("media/interface/hud/sortphysicien2.png", 3);
                     bgquad(positionsorts, h-114, 100, 100);
+                    gle::colorf(1, 1, 1, 1);
+
+                    if(player1->aptisort3) gle::colorf(2, 2, 2, 1);
+                    else if(player1->mana<60 || !player1->sort3pret) gle::colorf(0.2, 0.2, 0.2, 1);
+                    else gle::colorf(1, 1, 1, 1);
                     settexture("media/interface/hud/sortphysicien3.png", 3);
                     bgquad(positionsorts+85, h-114, 100, 100);
+                    gle::colorf(1, 1, 1, 1);
                 }
                 break;
             }

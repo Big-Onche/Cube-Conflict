@@ -485,12 +485,24 @@ namespace game
                         damageblend(damage);
                         damagecompass(damage, at ? at->o : f->o);
                         playsound(S_BALLECORPS);
-                        switch(rnd(2)) {case 0: if(player1->armour>0)playsound(S_BALLEBOUCLIER); break; }
-                        playsound(S_PAIN2);
+                        switch(rnd(2))
+                        {
+                            case 0:
+                                if(player1->aptitude==APT_PHYSICIEN && player1->aptisort1 && player1->armour>0) playsound(S_SORTPHY1);
+                                else if(player1->armour>0) playsound(S_BALLEBOUCLIER);
+                        }
                     }
 
                 }
-                else switch(rnd(2)) {case 0: if(f->armour>0)playsound(S_BALLEBOUCLIERENT, &f->o, 0, 0, 0 , 100, -1, 200); break; }
+                else
+                {
+                    switch(rnd(2))
+                    {
+                        case 0:
+                            if(f->aptitude==APT_PHYSICIEN && f->aptisort1 && f->armour>0) playsound(S_SORTPHY1, &f->o, 0, 0, 0 , 100, -1, 200);
+                            else if(f->armour>0)playsound(S_BALLEBOUCLIERENT, &f->o, 0, 0, 0 , 100, -1, 200);
+                    }
+                }
             }
         }
     }
@@ -1086,7 +1098,7 @@ namespace game
         int gun = attacks[atk].gun;
         int sound = attacks[atk].sound;
         //int soundwater = attacks[atk]].soundwater;
-        if(player1->aptisort2>0 && d==player1) playsound(S_SORTMAGE2);
+        if(player1->aptisort2>0 && d==player1 && d->aptitude==APT_MAGICIEN) playsound(S_SORTMAGE2);
 
         switch(atk)
         {
@@ -1419,22 +1431,17 @@ namespace game
         d->lastattack = atk;
         if(!d->ammo[gun])
         {
-            if(d==player1)
-            {
-                msgsound(S_NOAMMO, d);
-                d->gunwait = 600;
-                d->lastattack = -1;
-                weaponswitch(d);
-            }
+            if(d==player1) msgsound(S_NOAMMO, d);
+            d->gunwait = 600;
+            d->lastattack = -1;
+            weaponswitch(d);
             return;
+
         }
         //d->ammo[gun] -= attacks[atk].use;
-        if(!m_random)
-        {
-            if(atk==ATK_CAC349_SHOOT || atk==ATK_CACMARTEAU_SHOOT || atk==ATK_CACMASTER_SHOOT || atk==ATK_CACFLEAU_SHOOT);
-            else d->ammo[gun]--;
-        }
+        if(atk==ATK_CAC349_SHOOT || atk==ATK_CACMARTEAU_SHOOT || atk==ATK_CACMASTER_SHOOT || atk==ATK_CACFLEAU_SHOOT);
         else if(atk==ATK_GAU8_SHOOT || atk==ATK_NUKE_SHOOT || atk==ATK_CAMPOUZE_SHOOT ||atk==ATK_ROQUETTES_SHOOT) d->ammo[gun]--;
+        else if(!m_random) d->ammo[gun]--;
 
         vec from = d->o, to = targ, dir = vec(to).sub(from).safenormalize();
         float dist = to.dist(from);

@@ -540,7 +540,7 @@ struct gamestate
                 return health<maxhealth;
                 break;
             case I_MANA:
-                if(aptitude==5 || aptitude==11) return mana<is.max;
+                if(aptitude==5 || aptitude==8 || aptitude==11) return mana<is.max;
                 else return false;
             case I_BOOSTPV: return maxhealth<is.max;
             case I_BOOSTDEGATS: return steromillis<is.max;
@@ -713,7 +713,7 @@ struct gamestate
         }
         else if (m_fullstuff)
         {
-            armourtype = A_YELLOW;
+            armourtype = A_GREEN;
             armour = 2000;
             int spawngun1 = rnd(17), spawngun2, spawngun3;
             gunselect = spawngun1;
@@ -751,14 +751,15 @@ struct gamestate
     }
 
     // just subtract damage here, can set death, etc. later in code calling this
-    int dodamage(int damage)
+    int dodamage(int damage, int aptitude, int aptisort)
     {
         int ad = damage*(armourtype+1)*25/100; // let armour absorb when possible
 
         if(damage>0)
         {
             if(ad>armour) ad = armour;
-            armour -= ad;
+            if(aptitude==8 && aptisort>0 && armour>0) armour = min(armour+ad, armourtype==A_BLUE ? 750 : armourtype==A_GREEN ? 1250 : armourtype==A_YELLOW ? 2000 : 1500);
+            else armour -= ad;
         }
         damage -= ad;
         health -= damage;

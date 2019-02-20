@@ -19,11 +19,11 @@
 					<Add option="-Wunreachable-code" />
 					<Add option="-Wall" />
 					<Add option="-m64" />
-					<Add option="-fpermissive" />
 					<Add option="-ffast-math" />
 					<Add option="-fsigned-char" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
+					<Add option="-fpermissive" />
 					<Add directory="../enet/include" />
 					<Add directory="../include" />
 					<Add directory="../engine" />
@@ -66,11 +66,11 @@
 					<Add option="-Wunreachable-code" />
 					<Add option="-Wall" />
 					<Add option="-m32" />
-					<Add option="-fpermissive" />
 					<Add option="-ffast-math" />
 					<Add option="-fsigned-char" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
+					<Add option="-fpermissive" />
 					<Add directory="../enet/include" />
 					<Add directory="../include" />
 					<Add directory="../engine" />
@@ -107,6 +107,7 @@
 		<Compiler>
 			<Add option="-g" />
 		</Compiler>
+		<Unit filename="../cubeconflict/aptitudes.cpp" />
 		<Unit filename="../cubeconflict/cubedef.h" />
 		<Unit filename="../cubeconflict/hud.cpp" />
 		<Unit filename="../cubeconflict/stats.cpp" />
@@ -175,7 +176,6 @@
 		<Unit filename="../game/ai.cpp" />
 		<Unit filename="../game/ai.h" />
 		<Unit filename="../game/aiman.h" />
-		<Unit filename="../game/aptitudes.h" />
 		<Unit filename="../game/camera.cpp" />
 		<Unit filename="../game/client.cpp" />
 		<Unit filename="../game/ctf.h" />

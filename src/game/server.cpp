@@ -2156,8 +2156,8 @@ namespace server
             case APT_VICKING: {if(as.ragemillis>0) damage *=1.25f;} break;
         }
 
-        if(atk==ATK_MEDIGUN_SHOOT) {if(ts.health < ts.maxhealth) ts.dodamage(damage);} //Le medigun ne regen pas plus que la santé max du joueur
-        else ts.dodamage(damage);
+        if(atk==ATK_MEDIGUN_SHOOT) {if(ts.health < ts.maxhealth) ts.dodamage(damage, target->aptitude, ts.aptisort1);} //Le medigun ne regen pas plus que la santé max du joueur
+        else ts.dodamage(damage, target->aptitude, ts.aptisort1);
 
         if(target!=actor && !isteam(target->team, actor->team)) as.damage += damage;
         if(target->aptitude==APT_VICKING && actor!=target) {ts.ragemillis+=damage*5; sendresume(target);} //Ajoute la rage au Vicking et l'envoie au client
@@ -3321,6 +3321,7 @@ namespace server
 
             case N_SENDSORT1:
             {
+                if(!cq) break;
                 ci->state.aptisort1 = getint(p);
                 QUEUE_MSG;
                 break;
@@ -3328,6 +3329,7 @@ namespace server
 
             case N_SENDSORT2:
             {
+                if(!cq) break;
                 ci->state.aptisort2 = getint(p);
                 QUEUE_MSG;
                 break;
