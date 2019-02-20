@@ -5,7 +5,7 @@
 #ifdef __APPLE__
   #include "SDL2_image/SDL_image.h"
 #else
-  #include "SDL_image.h"
+  #include "../include/SDL_image.h"
 #endif
 
 template<int BPP> static void halvetexture(uchar * RESTRICT src, uint sw, uint sh, uint stride, uchar * RESTRICT dst)
