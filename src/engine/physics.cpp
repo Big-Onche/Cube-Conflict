@@ -1875,7 +1875,6 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
             floatspeed = 150;
             pl->physstate = PHYS_FLOAT;
             const float f = 1.0f/moveres;
-            const int timeinair = pl->timeinair;
             int collisions = 0;
                     d.mul(f);
             loopi(moveres) if(!move(pl, d) && ++collisions<5) i--; // discrete steps collision detection & sliding

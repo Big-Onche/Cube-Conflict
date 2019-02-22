@@ -18,17 +18,19 @@ namespace game
             }
         }
 
+        int neededdata = 0;
+
         switch(d->aptitude)
         {
             case APT_MAGICIEN:
             {
                 //Sort de vitesse
-                if(!d->sort1pret || d->mana<30) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
+                if(!d->sort1pret || d->mana<sorts[neededdata].mana1) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
 
                 d->aptisort1 = 250;
                 d->lastspecial1update = totalmillis;
                 addmsg(N_SENDSORT1, "rci", d, d->aptisort1);
-                d->mana -= 30;
+                d->mana -= sorts[neededdata].mana1;
                 d->sort1pret = false;
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
                 //if(con_serveurofficiel) stat_sortslances++;
@@ -37,12 +39,13 @@ namespace game
             case APT_PHYSICIEN:
             {
                 //Sort de régénération de bouclier
-                if(!d->sort1pret || d->mana<25) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
+                neededdata++;
+                if(!d->sort1pret || d->mana<sorts[neededdata].mana1) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
 
                 d->aptisort1 = 1500;
                 d->lastspecial1update = totalmillis;
                 addmsg(N_SENDSORT1, "rci", d, d->aptisort1);
-                d->mana -= 25;
+                d->mana -= sorts[neededdata].mana1;
                 d->sort1pret = false;
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
                 playsound(S_SORTPHY1, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
@@ -52,12 +55,13 @@ namespace game
             case APT_PRETRE:
             {
                 //Sort qui double les objets pris
-                if(!d->sort1pret || d->mana<20) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
+                neededdata+=2;
+                if(!d->sort1pret || d->mana<sorts[neededdata].mana1) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
 
                 d->aptisort1 = 4000;
                 d->lastspecial1update = totalmillis;
                 addmsg(N_SENDSORT1, "rci", d, d->aptisort1);
-                d->mana -= 20;
+                d->mana -= sorts[neededdata].mana1;
                 d->sort1pret = false;
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
                 playsound(S_SORTPRETRE1, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
@@ -72,17 +76,19 @@ namespace game
     {
         if(d->state==CS_DEAD) return;
 
+        int neededdata=0;
+
         switch(d->aptitude)
         {
             case APT_MAGICIEN:
             {
                 // Sort précision et dégâts
-                if(!d->sort2pret || d->mana<40) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
+                if(!d->sort2pret || d->mana<sorts[neededdata].mana2) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
 
                 d->aptisort2 = 5000;
                 d->lastspecial2update = totalmillis;
                 addmsg(N_SENDSORT2, "rci", d, d->aptisort2);
-                d->mana -= 40;
+                d->mana -= d->mana<sorts[neededdata].mana2;
                 d->sort2pret = false;
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 150);
                 playsound(S_SORTMAGE2, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 150);
@@ -92,12 +98,13 @@ namespace game
             case APT_PHYSICIEN:
             {
                 // Sort invisibilité
-                if(!d->sort2pret || d->mana<50) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
+                neededdata++;
+                if(!d->sort2pret || d->mana<sorts[neededdata].mana2) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
 
                 d->aptisort2 = 4000;
                 d->lastspecial2update = totalmillis;
                 addmsg(N_SENDSORT2, "rci", d, d->aptisort2);
-                d->mana -= 50;
+                d->mana -= d->mana<sorts[neededdata].mana2;
                 d->sort2pret = false;
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 150);
                 playsound(S_SORTPHY2, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 150);
@@ -107,12 +114,13 @@ namespace game
             case APT_PRETRE:
             {
                 //Sort qui régénere la santé
-                if(!d->sort2pret || d->mana<30) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
+                neededdata+=2;
+                if(!d->sort2pret || d->mana<sorts[neededdata].mana2) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
 
                 d->aptisort2 = 5000;
                 d->lastspecial2update = totalmillis;
                 addmsg(N_SENDSORT2, "rci", d, d->aptisort2);
-                d->mana -= 30;
+                d->mana -= d->mana<sorts[neededdata].mana2;
                 d->sort2pret = false;
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
                 playsound(S_SORTPRETRE2, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
@@ -127,17 +135,19 @@ namespace game
     {
         if(d->state==CS_DEAD) return;
 
+        int neededdata=0;
+
         switch(d->aptitude)
         {
             case APT_MAGICIEN:
             {
                 //Sort de résistance ultime
-                if(!d->sort3pret || d->mana<60) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
+                if(!d->sort3pret || d->mana<sorts[neededdata].mana3) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
 
                 d->aptisort3 = 3000;
                 d->lastspecial3update = totalmillis;
                 addmsg(N_SENDSORT3, "rci", d, d->aptisort3);
-                d->mana -= 60;
+                d->mana -= sorts[neededdata].mana3;
                 d->sort3pret = false;
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 150);
                 playsound(S_SORTMAGE3, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 150);
@@ -147,12 +157,13 @@ namespace game
             case APT_PHYSICIEN:
             {
                 //Sort jet-pack
-                if(!d->sort3pret || d->mana<60) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
+                neededdata++;
+                if(!d->sort3pret || d->mana<sorts[neededdata].mana3) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
 
                 d->aptisort3 = 6000;
                 d->lastspecial3update = totalmillis;
                 addmsg(N_SENDSORT3, "rci", d, d->aptisort3);
-                d->mana -= 60;
+                d->mana -= sorts[neededdata].mana3;
                 d->sort3pret = false;
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 150);
                 playsound(S_SORTPHY3, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 150);
@@ -162,12 +173,13 @@ namespace game
             case APT_PRETRE:
             {
                 //Sort qui multiplie par 2.5x la cadence de tirs
-                if(!d->sort3pret || d->mana<70) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
+                neededdata+=2;
+                if(!d->sort3pret || d->mana<sorts[neededdata].mana3) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
 
                 d->aptisort3 = 4000;
                 d->lastspecial3update = totalmillis;
                 addmsg(N_SENDSORT3, "rci", d, d->aptisort3);
-                d->mana -= 70;
+                d->mana -= sorts[neededdata].mana3;
                 d->sort3pret = false;
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 150);
                 playsound(S_SORTPRETRE3, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 150);

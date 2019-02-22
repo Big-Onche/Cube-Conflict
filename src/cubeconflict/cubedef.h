@@ -9,11 +9,10 @@
 //    { APT_SPEC_CHANCEUX,    1.00f,  1.00f,  1.00f,  1.00f}, // Changés aléatoirement à chaque vie
 //};
 
-
 //Définition des aptitudes
 enum {APT_SOLDAT = 0, APT_MEDECIN, APT_AMERICAIN, APT_NINJA, APT_VAMPIRE, APT_MAGICIEN, APT_KAMIKAZE, APT_FAUCHEUSE, APT_PHYSICIEN, APT_CAMPEUR, APT_COMMANDO, APT_PRETRE, APT_VICKING, APT_JUNKIE, NUMAPTS};
 
-static struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt_vitesse; const char *apt_nom; } aptitudes[NUMAPTS] =
+static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt_vitesse; const char *apt_nom; } aptitudes[NUMAPTS] =
 {
     { 100,  100, 100,  100, "Soldat"},      //0 ---> OK
     { 80,   75,  100,  100, "Médecin"},     //1 ---> Fix medigun regenscreen & IA
@@ -29,6 +28,13 @@ static struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt
     {  80,  105,  80,   90, "Prêtre"},      //11 --> OK
     { 100,  120,  60,  115, "Viking"},      //12 --> OK
     { 100,  110,  85,  120, "Junkie"},      //13 --> OK
+};
+
+static const struct aptisortsinfo { const char *tex1, *tex2, *tex3; int mana1, mana2, mana3, duree1, duree2, duree3, reload1, reload2, reload3; } sorts[] =
+{
+    { "media/interface/hud/sortmage1.png", "media/interface/hud/sortmage2.png", "media/interface/hud/sortmage3.png",                    30, 40, 60},      // Magicien
+    { "media/interface/hud/sortphysicien1.png", "media/interface/hud/sortphysicien2.png", "media/interface/hud/sortphysicien3.png",     45, 50, 65},      // Physicien
+    { "media/interface/hud/sortpretre1.png", "media/interface/hud/sortpretre2.png", "media/interface/hud/sortpretre3.png",              20, 30, 80},      // Prêtre
 };
 
 //Définition des boucliers

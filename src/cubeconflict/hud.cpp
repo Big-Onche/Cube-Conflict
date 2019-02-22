@@ -231,85 +231,34 @@ namespace game
             settexture("media/interface/hud/mana.png");
             bgquad(15, h-260, 115, 115);
             decal_icon += 130;
+        }
 
+        if(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE)
+        {
             float positionsorts = 0.5f*(w - 100);
+            int neededdata = 0;
+            switch(d->aptitude) {case APT_PHYSICIEN: neededdata++; break; case APT_PRETRE: neededdata+=2;}
 
-            switch(player1->aptitude)
-            {
-                case APT_MAGICIEN:
-                {
-                    if(player1->aptisort1) gle::colorf(2, 2, 2, 1);
-                    else if(player1->mana<30 || !player1->sort1pret) gle::colorf(0.2, 0.2, 0.2, 1);
-                    else gle::colorf(1, 1, 1, 1);
-                    settexture("media/interface/hud/sortmage1.png", 3);
-                    bgquad(positionsorts-85, h-114, 100, 100);
-                    gle::colorf(1, 1, 1, 1);
+            if(d->aptisort1) gle::colorf(2, 2, 2, 1);
+            else if(d->mana<sorts[neededdata].mana1 || !d->sort1pret) gle::colorf(0.2, 0.2, 0.2, 1);
+            else gle::colorf(1, 1, 1, 1);
+            settexture(sorts[neededdata].tex1, 3);
+            bgquad(positionsorts-85, h-114, 100, 100);
+            gle::colorf(1, 1, 1, 1);
 
-                    if(player1->aptisort2) gle::colorf(2, 2, 2, 1);
-                    else if(player1->mana<40 || !player1->sort2pret) gle::colorf(0.2, 0.2, 0.2, 1);
-                    else gle::colorf(1, 1, 1, 1);
-                    settexture("media/interface/hud/sortmage2.png", 3);
-                    bgquad(positionsorts, h-114, 100, 100);
-                    gle::colorf(1, 1, 1, 1);
+            if(d->aptisort2) gle::colorf(2, 2, 2, 1);
+            else if(d->mana<sorts[neededdata].mana2 || !d->sort2pret) gle::colorf(0.2, 0.2, 0.2, 1);
+            else gle::colorf(1, 1, 1, 1);
+            settexture(sorts[neededdata].tex2, 3);
+            bgquad(positionsorts, h-114, 100, 100);
+            gle::colorf(1, 1, 1, 1);
 
-                    if(player1->aptisort3) gle::colorf(2, 2, 2, 1);
-                    else if(player1->mana<60 || !player1->sort3pret) gle::colorf(0.2, 0.2, 0.2, 1);
-                    else gle::colorf(1, 1, 1, 1);
-                    settexture("media/interface/hud/sortmage3.png", 3);
-                    bgquad(positionsorts+85, h-114, 100, 100);
-                    gle::colorf(1, 1, 1, 1);
-                }
-                break;
-                case APT_PHYSICIEN:
-                {
-
-                    if(player1->aptisort1) gle::colorf(2, 2, 2, 1);
-                    else if(player1->mana<25 || !player1->sort1pret) gle::colorf(0.2, 0.2, 0.2, 1);
-                    else gle::colorf(1, 1, 1, 1);
-                    settexture("media/interface/hud/sortphysicien1.png", 3);
-                    bgquad(positionsorts-85, h-114, 100, 100);
-                    gle::colorf(1, 1, 1, 1);
-
-                    if(player1->aptisort2) gle::colorf(2, 2, 2, 1);
-                    else if(player1->mana<50 || !player1->sort2pret) gle::colorf(0.2, 0.2, 0.2, 1);
-                    else gle::colorf(1, 1, 1, 1);
-                    settexture("media/interface/hud/sortphysicien2.png", 3);
-                    bgquad(positionsorts, h-114, 100, 100);
-                    gle::colorf(1, 1, 1, 1);
-
-                    if(player1->aptisort3) gle::colorf(2, 2, 2, 1);
-                    else if(player1->mana<60 || !player1->sort3pret) gle::colorf(0.2, 0.2, 0.2, 1);
-                    else gle::colorf(1, 1, 1, 1);
-                    settexture("media/interface/hud/sortphysicien3.png", 3);
-                    bgquad(positionsorts+85, h-114, 100, 100);
-                    gle::colorf(1, 1, 1, 1);
-                }
-                case APT_PRETRE:
-                {
-
-                    if(player1->aptisort1) gle::colorf(2, 2, 2, 1);
-                    else if(player1->mana<20 || !player1->sort1pret) gle::colorf(0.2, 0.2, 0.2, 1);
-                    else gle::colorf(1, 1, 1, 1);
-                    settexture("media/interface/hud/sortpretre1.png", 3);
-                    bgquad(positionsorts-85, h-114, 100, 100);
-                    gle::colorf(1, 1, 1, 1);
-
-                    if(player1->aptisort2) gle::colorf(2, 2, 2, 1);
-                    else if(player1->mana<30 || !player1->sort2pret) gle::colorf(0.2, 0.2, 0.2, 1);
-                    else gle::colorf(1, 1, 1, 1);
-                    settexture("media/interface/hud/sortpretre2.png", 3);
-                    bgquad(positionsorts, h-114, 100, 100);
-                    gle::colorf(1, 1, 1, 1);
-
-                    if(player1->aptisort3) gle::colorf(2, 2, 2, 1);
-                    else if(player1->mana<70 || !player1->sort3pret) gle::colorf(0.2, 0.2, 0.2, 1);
-                    else gle::colorf(1, 1, 1, 1);
-                    settexture("media/interface/hud/sortpretre3.png", 3);
-                    bgquad(positionsorts+85, h-114, 100, 100);
-                    gle::colorf(1, 1, 1, 1);
-                }
-                break;
-            }
+            if(d->aptisort3) gle::colorf(2, 2, 2, 1);
+            else if(d->mana<sorts[neededdata].mana3 || !d->sort3pret) gle::colorf(0.2, 0.2, 0.2, 1);
+            else gle::colorf(1, 1, 1, 1);
+            settexture(sorts[neededdata].tex3, 3);
+            bgquad(positionsorts+85, h-114, 100, 100);
+            gle::colorf(1, 1, 1, 1);
         }
 
         if(player1->ragemillis){settexture("media/interface/hud/rage.png"); bgquad(15, h-260, 115, 115); decal_icon += 130;}
