@@ -1690,12 +1690,14 @@ namespace game
                     damage = getint(p),
                     armour = getint(p),
                     health = getint(p),
+                    mana = getint(p),
                     atk = getint(p);
                 gameent *target = getclient(tcn),
                         *actor = getclient(acn);
                 if(!target || !actor) break;
                 target->armour = armour;
                 target->health = health;
+                target->mana = mana;
                 if(target->state == CS_ALIVE && actor != player1) target->lastpain = lastmillis;
                 damaged(damage, target, actor, false, atk);
                 //gameent *d = getclient(cn);

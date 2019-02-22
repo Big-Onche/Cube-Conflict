@@ -284,6 +284,30 @@ namespace game
                     bgquad(positionsorts+85, h-114, 100, 100);
                     gle::colorf(1, 1, 1, 1);
                 }
+                case APT_PRETRE:
+                {
+
+                    if(player1->aptisort1) gle::colorf(2, 2, 2, 1);
+                    else if(player1->mana<20 || !player1->sort1pret) gle::colorf(0.2, 0.2, 0.2, 1);
+                    else gle::colorf(1, 1, 1, 1);
+                    settexture("media/interface/hud/sortpretre1.png", 3);
+                    bgquad(positionsorts-85, h-114, 100, 100);
+                    gle::colorf(1, 1, 1, 1);
+
+                    if(player1->aptisort2) gle::colorf(2, 2, 2, 1);
+                    else if(player1->mana<30 || !player1->sort2pret) gle::colorf(0.2, 0.2, 0.2, 1);
+                    else gle::colorf(1, 1, 1, 1);
+                    settexture("media/interface/hud/sortpretre2.png", 3);
+                    bgquad(positionsorts, h-114, 100, 100);
+                    gle::colorf(1, 1, 1, 1);
+
+                    if(player1->aptisort3) gle::colorf(2, 2, 2, 1);
+                    else if(player1->mana<70 || !player1->sort3pret) gle::colorf(0.2, 0.2, 0.2, 1);
+                    else gle::colorf(1, 1, 1, 1);
+                    settexture("media/interface/hud/sortpretre3.png", 3);
+                    bgquad(positionsorts+85, h-114, 100, 100);
+                    gle::colorf(1, 1, 1, 1);
+                }
                 break;
             }
         }
@@ -322,7 +346,7 @@ namespace game
 
         if(d->armour > 0) draw_textf("%d", 370, h-103, d->armour < 9 ? 1 : d->armour/10);
 
-        if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN) {draw_textf("%d", 135, h-233-decal_number, d->mana); decal_number +=130;}
+        if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE) {draw_textf("%d", 135, h-233-decal_number, d->mana); decal_number +=130;}
         if(player1->crouching && player1->aptitude==9) decal_number +=130;
         if(player1->ragemillis) {draw_textf("%d", 135, h-233-decal_number, d->ragemillis/1000); decal_number +=130;}
         if(player1->steromillis) {draw_textf("%d", 135, h-233-decal_number, d->steromillis/1000); decal_number +=130;}

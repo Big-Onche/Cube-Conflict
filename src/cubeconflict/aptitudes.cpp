@@ -27,6 +27,7 @@ namespace game
 
                 d->aptisort1 = 250;
                 d->lastspecial1update = totalmillis;
+                addmsg(N_SENDSORT1, "rci", d, d->aptisort1);
                 d->mana -= 30;
                 d->sort1pret = false;
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
@@ -48,6 +49,21 @@ namespace game
                 //if(con_serveurofficiel) stat_sortslances++;
                 break;
             }
+            case APT_PRETRE:
+            {
+                //Sort qui double les objets pris
+                if(!d->sort1pret || d->mana<20) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
+
+                d->aptisort1 = 4000;
+                d->lastspecial1update = totalmillis;
+                addmsg(N_SENDSORT1, "rci", d, d->aptisort1);
+                d->mana -= 20;
+                d->sort1pret = false;
+                playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
+                playsound(S_SORTPRETRE1, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
+                //if(con_serveurofficiel) stat_sortslances++;
+                break;
+            }
         }
     }
     ICOMMAND(aptitude_1, "", (), aptitude_1(player1));
@@ -60,11 +76,12 @@ namespace game
         {
             case APT_MAGICIEN:
             {
-                // Sort précision
+                // Sort précision et dégâts
                 if(!d->sort2pret || d->mana<40) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
 
                 d->aptisort2 = 5000;
                 d->lastspecial2update = totalmillis;
+                addmsg(N_SENDSORT2, "rci", d, d->aptisort2);
                 d->mana -= 40;
                 d->sort2pret = false;
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 150);
@@ -79,10 +96,26 @@ namespace game
 
                 d->aptisort2 = 4000;
                 d->lastspecial2update = totalmillis;
+                addmsg(N_SENDSORT2, "rci", d, d->aptisort2);
                 d->mana -= 50;
                 d->sort2pret = false;
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 150);
                 playsound(S_SORTPHY2, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 150);
+                //if(con_serveurofficiel) stat_sortslances++;
+                break;
+            }
+            case APT_PRETRE:
+            {
+                //Sort qui régénere la santé
+                if(!d->sort2pret || d->mana<30) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
+
+                d->aptisort2 = 5000;
+                d->lastspecial2update = totalmillis;
+                addmsg(N_SENDSORT2, "rci", d, d->aptisort2);
+                d->mana -= 30;
+                d->sort2pret = false;
+                playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
+                playsound(S_SORTPRETRE2, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
                 //if(con_serveurofficiel) stat_sortslances++;
                 break;
             }
@@ -116,13 +149,28 @@ namespace game
                 //Sort jet-pack
                 if(!d->sort3pret || d->mana<60) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
 
-                d->aptisort3 = 5000;
+                d->aptisort3 = 6000;
                 d->lastspecial3update = totalmillis;
                 addmsg(N_SENDSORT3, "rci", d, d->aptisort3);
                 d->mana -= 60;
                 d->sort3pret = false;
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 150);
                 playsound(S_SORTPHY3, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 150);
+                //if(con_serveurofficiel) stat_sortslances++;
+                break;
+            }
+            case APT_PRETRE:
+            {
+                //Sort qui multiplie par 2.5x la cadence de tirs
+                if(!d->sort3pret || d->mana<70) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
+
+                d->aptisort3 = 4000;
+                d->lastspecial3update = totalmillis;
+                addmsg(N_SENDSORT3, "rci", d, d->aptisort3);
+                d->mana -= 70;
+                d->sort3pret = false;
+                playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 150);
+                playsound(S_SORTPRETRE3, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 150);
                 //if(con_serveurofficiel) stat_sortslances++;
                 break;
             }
@@ -152,6 +200,16 @@ namespace game
                 if(totalmillis-d->lastspecial2update >= 5000 && !d->sort2pret) {if(d==player1)playsound(S_SORTPRET); d->sort2pret = true; }
                 // Sort jet-pack
                 if(totalmillis-d->lastspecial3update >= 9000 && !d->sort3pret) {if(d==player1)playsound(S_SORTPRET); d->sort3pret = true; }
+                break;
+            }
+            case APT_PRETRE:
+            {
+                // Sort qui double les objets pris
+                if(totalmillis-d->lastspecial1update >= 5000 && !d->sort1pret) {if(d==player1)playsound(S_SORTPRET); d->sort1pret = true; }
+                // Sort retour de balles
+                if(totalmillis-d->lastspecial2update >= 8000 && !d->sort2pret) {if(d==player1)playsound(S_SORTPRET); d->sort2pret = true; }
+                // Sort d'immportalité
+                if(totalmillis-d->lastspecial3update >= 10000 && !d->sort3pret) {if(d==player1)playsound(S_SORTPRET); d->sort3pret = true; }
                 break;
             }
         }

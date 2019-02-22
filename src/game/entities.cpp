@@ -159,7 +159,13 @@ namespace entities
         }
 
         if(type>=I_RAIL && type<=I_SUPERARME) gunselect(type-9+rndsuperweapon, d);
-        d->pickup(type+rndsuperweapon, d->aptitude, rndsuperweapon);
+        d->pickup(type+rndsuperweapon, d->aptitude, rndsuperweapon, d->mana >= 20 ? d->aptisort1 : 0);
+        if(d->aptisort1 && d->aptitude==APT_PRETRE)
+        {
+            d->mana-=20;
+            adddynlight(d->o, 20, vec(1.5f, 1.5f, 0.0f), 300, 50, L_NOSHADOW|L_VOLUMETRIC);
+            playsound(S_SORTPRETRE1, d!=player1 ? &d->o : NULL, NULL, 0, 0, 0, -1, 150, 300);
+        }
 
         if(d==player1) playsound(itemstats[type-I_RAIL].sound, d!=player1 ? &d->o : NULL, NULL, 0, 0, 0, -1, 0, 1500);
         if(d==player1) switch(type)
@@ -356,7 +362,10 @@ namespace entities
             if(e.type==NOTUSED) continue;
             if(!e.spawned() && e.type!=TELEPORT && e.type!=JUMPPAD) continue;
             float dist = e.o.dist(o);
-            if(dist<(e.type==TELEPORT ? 16 : 12)) trypickup(i, d);
+            if(dist<(e.type==TELEPORT ? 16 : 12))
+            {
+                trypickup(i, d);
+            }
         }
     }
 

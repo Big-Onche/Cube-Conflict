@@ -919,9 +919,9 @@ namespace server
 
         int rndsuperweapon = rnd(4);
         sendf(-1, 1, "ri4", N_ITEMACC, i, sender, sents[i].type==I_SUPERARME ? rndsuperweapon : 0);
-        ci->state.pickup(sents[i].type, ci->aptitude, sents[i].type==I_SUPERARME ? rndsuperweapon : 0);
+        ci->state.pickup(sents[i].type, ci->aptitude, sents[i].type==I_SUPERARME ? rndsuperweapon : 0, ci->state.mana>=20 ? ci->state.aptisort1 : 0);
+        if(ci->aptitude==APT_PRETRE && ci->state.aptisort1 && ci->state.mana>=20) ci->state.mana-=20;
         return true;
-
     }
 
     static teaminfo teaminfos[MAXTEAMS];
@@ -2145,24 +2145,31 @@ namespace server
 
         //Calcul des dommages de base
         damage = (((damage*aptitudes[actor->aptitude].apt_degats)/100)*100)/aptitudes[target->aptitude].apt_resistance;
-        if(ts.aptisort3 && target->aptitude==APT_MAGICIEN) {damage = damage/5.0f;};
 
         //Dommages spéciaux d'aptitudes
-        switch (actor->aptitude)
+        switch(actor->aptitude)
         {
             case APT_MEDECIN: {if(atk==ATK_MEDIGUN_SHOOT) damage = -20;} break;
             case APT_NINJA: {if(atk==ATK_CAC349_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACMASTER_SHOOT) damage *= 3.0f;} break;
+            case APT_MAGICIEN: {if(as.aptisort2) damage *= 1.333333f; break;}
             case APT_CAMPEUR: {if(atk==ATK_SV98_SHOOT || atk==ATK_SKS_SHOOT || atk==ATK_ARBALETE_SHOOT || atk==ATK_CAMPOUZE_SHOOT) damage *= 1.5f;} break;
-            case APT_VICKING: {if(as.ragemillis>0) damage *=1.25f;} break;
+            case APT_VICKING: {if(as.ragemillis) damage *=1.25f;} break;
         }
 
-        if(atk==ATK_MEDIGUN_SHOOT) {if(ts.health < ts.maxhealth) ts.dodamage(damage, target->aptitude, ts.aptisort1);} //Le medigun ne regen pas plus que la santé max du joueur
-        else ts.dodamage(damage, target->aptitude, ts.aptisort1);
+        //Absorptions et skills spéciaux d'aptitudes
+        switch(target->aptitude)
+        {
+            case APT_MAGICIEN: {if(ts.aptisort3) damage = damage/5.0f;} break;
+            case APT_VICKING: {if(actor!=target && atk!=ATK_MEDIGUN_SHOOT) {ts.ragemillis+=damage*5; sendresume(target);}} break; //Ajoute la rage au Vicking et l'envoie au client
+            case APT_PRETRE: { if(ts.aptisort2 && ts.mana>=damage/10) {ts.mana -= damage/10; damage=0; } } break;
+        }
+
+        if(atk==ATK_MEDIGUN_SHOOT) {if(ts.health < ts.maxhealth) ts.dodamage(damage, target->aptitude, 0);} //Le medigun ne regen pas plus que la santé max du joueur, les sorts de dégats ne sont pas pris en compte
+        ts.dodamage(damage, target->aptitude, ts.aptisort1);
 
         if(target!=actor && !isteam(target->team, actor->team)) as.damage += damage;
-        if(target->aptitude==APT_VICKING && actor!=target) {ts.ragemillis+=damage*5; sendresume(target);} //Ajoute la rage au Vicking et l'envoie au client
 
-        sendf(-1, 1, "ri7", N_DAMAGE, target->clientnum, actor->clientnum, damage, ts.armour, ts.health, atk);
+        sendf(-1, 1, "ri8", N_DAMAGE, target->clientnum, actor->clientnum, damage, ts.armour, ts.health, ts.mana, atk);
         if(actor->aptitude==APT_VAMPIRE) sendf(-1, 1, "ri5", N_VAMPIRE, actor->clientnum, damage, ts.armour, ts.health);
 
         if(target==actor) target->setpushed();
@@ -2328,7 +2335,11 @@ namespace server
             return;
         gs.ammo[gun] -= attacks[atk].use;
         gs.lastshot = millis;
-        gs.gunwait = attacks[atk].attackdelay;
+
+        int waitfactor = 1;
+        if(ci->aptitude==APT_PRETRE && ci->state.aptisort3) waitfactor = 2.5f;
+        gs.gunwait = attacks[atk].attackdelay/waitfactor;
+
         sendf(-1, 1, "rii9x", N_SHOTFX, ci->clientnum, atk, id,
                 int(from.x*DMF), int(from.y*DMF), int(from.z*DMF),
                 int(to.x*DMF), int(to.y*DMF), int(to.z*DMF),
@@ -3322,7 +3333,7 @@ namespace server
             case N_SENDSORT1:
             {
                 if(!cq) break;
-                ci->state.aptisort1 = getint(p);
+                cq->state.aptisort1 = getint(p);
                 QUEUE_MSG;
                 break;
             }
@@ -3330,7 +3341,7 @@ namespace server
             case N_SENDSORT2:
             {
                 if(!cq) break;
-                ci->state.aptisort2 = getint(p);
+                cq->state.aptisort2 = getint(p);
                 QUEUE_MSG;
                 break;
             }

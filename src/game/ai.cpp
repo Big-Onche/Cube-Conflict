@@ -101,8 +101,10 @@ namespace ai
     bool targetable(gameent *d, gameent *e)
     {
         if(d == e || !canmove(d)) return false;
-        if(e->aptisort2 && e->aptitude==APT_PHYSICIEN) switch(rnd(15)) {case 0: return true; break; default: return false;}
-        if(d->gunselect==GUN_MEDIGUN && e->health<100) return e->state == CS_ALIVE && isteam(d->team, e->team);
+        //Les IA captent les sorts des autres joueurs
+        if(e->aptisort2 && e->aptitude==APT_PHYSICIEN) switch(rnd(100)) {case 0: return true; break; default: return false;}
+
+        if(d->gunselect==GUN_MEDIGUN && e->health<100 && e->state == CS_ALIVE && isteam(d->team, e->team)) return true;
         else return e->state == CS_ALIVE && !isteam(d->team, e->team);
     }
 
@@ -409,6 +411,7 @@ namespace ai
             {
                 d->ai->enemyseen = d->ai->enemymillis = lastmillis;
                 d->ai->enemy = e->clientnum;
+                switch(rnd(5)) {if(d->aptitude==APT_PRETRE && d->mana>=70) aptitude_3(d); }
             }
             return true;
         }
@@ -525,6 +528,7 @@ namespace ai
         {
             extentity &e = *(extentity *)entities::ents[i];
             if(!e.spawned() || !d->canpickup(e.type, d->aptitude)) continue;
+            if(d->mana>40 && d->aptitude==APT_PRETRE) aptitude_1(d);
             tryitem(d, e, i, b, interests, force);
         }
     }
@@ -1395,6 +1399,7 @@ namespace ai
                     {
                         if((d->mana>80 || d->mana<60)&& d->aptitude==APT_MAGICIEN) aptitude_1(d);
                         if(d->health<650+d->skill && d->aptitude==APT_PHYSICIEN && d->mana>=50) aptitude_2(d);
+                        if(d->mana>30 && d->health<500+d->skill && d->aptitude==APT_PRETRE) aptitude_2(d);
                         break;
                     }
                     case AI_S_INTEREST: result = dointerest(d, c); break;

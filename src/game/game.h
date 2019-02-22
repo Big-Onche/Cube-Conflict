@@ -321,7 +321,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
 {
     N_CONNECT, 0, N_SERVINFO, 0, N_WELCOME, 1, N_INITCLIENT, 0, N_POS, 0, N_TEXT, 0, N_SOUND, 2, N_CDIS, 2,
     N_SHOOT, 0, N_EXPLODE, 0, N_SUICIDE, 1,
-    N_DIED, 6, N_DAMAGE, 6, N_VAMPIRE, 6, N_HITPUSH, 7, N_SHOTFX, 10, N_EXPLODEFX, 4,
+    N_DIED, 6, N_DAMAGE, 7, N_VAMPIRE, 6, N_HITPUSH, 7, N_SHOTFX, 10, N_EXPLODEFX, 4,
     N_TRYSPAWN, 1, N_SPAWNSTATE, 0, N_SPAWN, 3, N_FORCEDEATH, 2,
     N_GUNSELECT, 2, N_TAUNT, 1,
     N_MAPCHANGE, 0, N_MAPVOTE, 0, N_TEAMINFO, 0, N_ITEMSPAWN, 2, N_ITEMPICKUP, 2, N_ITEMACC, 4,
@@ -563,18 +563,22 @@ struct gamestate
         }
     }
 
-    void pickup(int type, int aptitude, int rndsuperweapon)
+    void pickup(int type, int aptitude, int rndsuperweapon, int aptisort)
     {
         if(type<I_RAIL || type>I_MANA) return;
         itemstat &is = itemstats[type-I_RAIL];
+
+        int boostitem = 1;
+        if(aptitude==11 && aptisort>0) boostitem++;
+
         switch(type)
         {
             case I_BOOSTPV:
                 //if(maxhealth<1300) maxhealth = maxhealth+100;
-                health = min(health+is.add*(aptitude==1 ? 1.5f : 1), 2500.0f);
+                health = min(health+is.add*(aptitude==1 ? 1.5f : boostitem), 2500.0f);
                 break;
             case I_SANTE: // boost also adds to health
-                health = min(health+is.add*(aptitude==1 ? 2 : 1), maxhealth);
+                health = min(health+is.add*(aptitude==1 ? 2 : boostitem), maxhealth);
                 break;
             case I_MANA: // boost also adds to health
                 mana = min(mana+is.add, is.max);
@@ -586,23 +590,23 @@ struct gamestate
                 armour = min(armour+is.add, is.max);
                 armourtype = is.info;
                 break;
-            case I_BOOSTDEGATS: steromillis = min(steromillis+is.add*(aptitude==13 ? 1.5f : 1), is.max*(aptitude==13 ? 1.5f : 1)); break;
-            case I_BOOSTVITESSE: epomillis = min(epomillis+is.add*(aptitude==13 ? 1.5f : 1), is.max*(aptitude==13 ? 1.5f : 1)); break;
-            case I_BOOSTGRAVITE: jointmillis = min(jointmillis+is.add*(aptitude==13 ? 1.5f : 1), is.max*(aptitude==13 ? 1.5f : 1)); break;
-            case I_BOOSTPRECISION: champimillis = min(champimillis+is.add*(aptitude==13 ? 1.5f : 1), is.max*(aptitude==13 ? 1.5f : 1)); break;
+            case I_BOOSTDEGATS: steromillis = min(steromillis+is.add*(aptitude==13 ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;
+            case I_BOOSTVITESSE: epomillis = min(epomillis+is.add*(aptitude==13 ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;
+            case I_BOOSTGRAVITE: jointmillis = min(jointmillis+is.add*(aptitude==13 ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;
+            case I_BOOSTPRECISION: champimillis = min(champimillis+is.add*(aptitude==13 ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;
                 //if(classe==14) jointmillis = jointmillis*1.50f;
                 break;
             case I_SUPERARME:
                 {
                     float aptboost;
                     aptitude == 2 ? aptboost = 1.5f : aptboost = 1;
-                    ammo[is.info+rndsuperweapon] = min(ammo[is.info+rndsuperweapon]+is.add*aptboost, is.max*aptboost);
+                    ammo[is.info+rndsuperweapon] = min(ammo[is.info+rndsuperweapon]+is.add*boostitem*aptboost, is.max*aptboost);
                 }
             default:
                 {
                     float aptboost;
                     aptitude == 2 ? aptboost = 1.5f : aptboost = 1;
-                    ammo[is.info] = min(ammo[is.info]+is.add*aptboost, is.max*aptboost);
+                    ammo[is.info] = min(ammo[is.info]+is.add*boostitem*aptboost, is.max*aptboost);
                 }
                 break;
                 //if(classe==2)

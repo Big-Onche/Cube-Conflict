@@ -504,6 +504,11 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
                     if(d->aptisort2) switch(rnd(3)) {case 0: particle_splash(PART_SMOKE,  1,  300, d->o, 0x7777FF, 10+rnd(5),  400, 400); }
                     if(d->aptisort3) switch(rnd(2)) {case 0: particle_splash(PART_SMOKE,  1,  150, pos, 0x8888BB, 7+rnd(4),  100, -200); particle_splash(PART_FLAME1+rnd(2),  5,  100, pos, 0xFF6600, 1+rnd(2),  100, -20); }
                 }
+                else if (d->aptitude==APT_PRETRE)
+                {
+                    vec pos = d->abovehead().add(vec(0, 0,-12));
+                    if(d->aptisort2) particle_fireball(pos , 16.0f, PART_ONDECHOC, 5,  0xFFFF00, 16.0f);
+                }
                 if(d->ragemillis) switch(rnd(8)){case 0: particle_splash(PART_SMOKE,  1,  120, d->o, 0xFF3300, 10+rnd(5),  300, 100);}
                 if(d->jointmillis) switch(rnd(5)) {case 1: regularflame(PART_SMOKE, d->abovehead().add(vec(-12, 5, -19)), 2, 3, 0x888888, 1, 1.6f, 50.0f, 1000.0f, -10);}
 
