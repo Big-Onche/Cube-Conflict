@@ -296,11 +296,11 @@ namespace game
         else if(d->state==CS_DEAD)
         {
             if(d->tombepop<1.0f) d->tombepop += 0.02f;
-            rendermodel(customs[d->customtombe].custtombe, ANIM_MAPMODEL, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, flags, d, NULL, 0, 0, d->tombepop);
+            rendermodel(customs[d->customtombe].custtombe, ANIM_MAPMODEL, vec(o.x, o.y, o.z-16.0f), d->yaw, 0, 0, flags, NULL, NULL, 0, 0, d->tombepop, vec4(vec::hexcolor(color), 5));
 
             if(d->skeletonfade<0) return;
             d->skeletonfade -= 0.015f;
-            rendermodel("mapmodel/smileys/mort", ANIM_MAPMODEL, o, d->yaw+90, 0, 0, flags, d, NULL, 0, 0, d->skeletonfade);
+            rendermodel("mapmodel/smileys/mort", ANIM_MAPMODEL, o, d->yaw+90, 0, 0, flags, NULL, NULL, 0, 0, d->skeletonfade);
             return;
         }
         else if(d->state==CS_EDITING || d->state==CS_SPECTATOR) anim = ANIM_EDIT|ANIM_LOOP;

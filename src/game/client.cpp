@@ -2136,13 +2136,13 @@ namespace game
 
             case N_INITAI:
             {
-                int bn = getint(p), on = getint(p), at = getint(p), cl = getint(p), sk = clamp(getint(p), 1, 101), pm = getint(p), col = getint(p), team = getint(p);
+                int bn = getint(p), on = getint(p), at = getint(p), apti = getint(p), hat = getint(p), cape = getint(p), tombe = getint(p), sk = clamp(getint(p), 1, 101), pm = getint(p), col = getint(p), team = getint(p);
                 string name;
                 getstring(text, p);
                 filtertext(name, text, false, false, MAXNAMELEN);
                 gameent *b = newclient(bn);
                 if(!b) break;
-                ai::init(b, at, on, cl, sk, bn, pm, col, name, team);
+                ai::init(b, at, on, apti, hat, cape, tombe, sk, bn, pm, col, name, team);
                 break;
             }
 

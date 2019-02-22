@@ -124,6 +124,10 @@ namespace aiman
         ci->connected = true;
         ci->aptitude = rnd(14);
 
+        ci->customhat = rnd(15);
+        ci->customcape = rnd(12);
+        ci->customtombe = rnd(5)+1;
+
         dorefresh = true;
         return true;
     }
@@ -156,7 +160,7 @@ namespace aiman
         if(ci->ownernum < 0) deleteai(ci);
         else if(ci->aireinit >= 1)
         {
-            sendf(-1, 1, "ri9s", N_INITAI, ci->clientnum, ci->ownernum, ci->state.aitype, ci->aptitude, ci->state.skill, ci->playermodel, ci->playercolor, ci->team, ci->name);
+            sendf(-1, 1, "riiii9s", N_INITAI, ci->clientnum, ci->ownernum, ci->state.aitype, ci->aptitude, ci->customhat, ci->customcape, ci->customtombe, ci->state.skill, ci->playermodel, ci->playercolor, ci->team, ci->name);
             if(ci->aireinit == 2)
             {
                 ci->reassign();

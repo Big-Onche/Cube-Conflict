@@ -190,7 +190,7 @@ namespace ai
         if(d->ai) DELETEP(d->ai);
     }
 
-    void init(gameent *d, int at, int ocn, int cl, int sk, int bn, int pm, int col, const char *name, int team)
+    void init(gameent *d, int at, int ocn, int apti, int hat, int cape, int tombe, int sk, int bn, int pm, int col, const char *name, int team)
     {
         loadwaypoints();
 
@@ -223,10 +223,14 @@ namespace ai
         d->skill = sk;
         d->playermodel = chooserandomplayermodel(pm);
         d->playercolor = col;
-        d->customhat = rnd(15);
-        d->customcape = rnd(12);
-        d->customtombe = rnd(5)+1;
-        d->aptitude = cl;
+
+        d->aptitude = apti;
+        d->customhat = hat;
+        d->customcape = cape;
+        d->customtombe = tombe;
+
+        d->tombepop = 0;
+        d->skeletonfade = 1.0f;
 
         if(resetthisguy) removeweapons(d);
         if(d->ownernum >= 0 && player1->clientnum == d->ownernum)
