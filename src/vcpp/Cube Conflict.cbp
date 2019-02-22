@@ -23,7 +23,6 @@
 					<Add option="-fsigned-char" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
-					<Add option="-fpermissive" />
 					<Add directory="../enet/include" />
 					<Add directory="../include" />
 					<Add directory="../engine" />
@@ -70,7 +69,6 @@
 					<Add option="-fsigned-char" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
-					<Add option="-fpermissive" />
 					<Add directory="../enet/include" />
 					<Add directory="../include" />
 					<Add directory="../engine" />
