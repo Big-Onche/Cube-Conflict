@@ -513,7 +513,7 @@ namespace game
         {
             addxp(5+player1->killstreak-1);
             addstat(1, STAT_KILLS);
-            if(player1->killstreak>stat_killstreak) addstat(player1->killstreak, STAT_KILLSTREAK);
+            if(player1->killstreak>stat[STAT_KILLSTREAK]) addstat(player1->killstreak, STAT_KILLSTREAK);
         }
         else if (d==player1) addstat(1, STAT_MORTS);
 
