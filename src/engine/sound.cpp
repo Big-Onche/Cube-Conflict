@@ -5,7 +5,7 @@
 #ifdef __APPLE__
   #include "SDL2_mixer/SDL_mixer.h"
 #else
-  #include "SDL_mixer.h"
+  #include "../include/SDL_mixer.h"
 #endif
 
 bool nosound = true;
