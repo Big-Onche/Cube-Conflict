@@ -415,7 +415,7 @@ namespace ai
             {
                 d->ai->enemyseen = d->ai->enemymillis = lastmillis;
                 d->ai->enemy = e->clientnum;
-                switch(rnd(5)) {if(d->aptitude==APT_PRETRE && d->mana>=70) aptitude_3(d); }
+                switch(rnd(5)) {if(d->aptitude==APT_PRETRE && d->mana>=70) aptitude(d, 3); }
             }
             return true;
         }
@@ -532,7 +532,7 @@ namespace ai
         {
             extentity &e = *(extentity *)entities::ents[i];
             if(!e.spawned() || !d->canpickup(e.type, d->aptitude)) continue;
-            if(d->mana>40 && d->aptitude==APT_PRETRE) aptitude_1(d);
+            if(d->mana>40 && d->aptitude==APT_PRETRE) aptitude(d, 1);
             tryitem(d, e, i, b, interests, force);
         }
     }
@@ -1387,11 +1387,11 @@ namespace ai
                 int result = 0;
                 c.idle = 0;
 
-                if(d->health<250+d->skill*2 && d->aptitude==APT_MAGICIEN && d->mana>=60) aptitude_3(d);
+                if(d->health<250+d->skill*2 && d->aptitude==APT_MAGICIEN && d->mana>=60) aptitude(d, 3);
                 if(d->aptitude==APT_PHYSICIEN)
                 {
-                        switch(rnd(50)) {case 0: if(d->mana>70) aptitude_3(d);}
-                        if(d->health<250+d->skill*2 && d->armour<50 && d->mana>=25) aptitude_1(d);
+                        switch(rnd(50)) {case 0: if(d->mana>70) aptitude(d, 3);}
+                        if(d->health<250+d->skill*2 && d->armour<50 && d->mana>=25) aptitude(d, 1);
                 }
 
 
@@ -1401,9 +1401,9 @@ namespace ai
                     case AI_S_DEFEND: result = dodefend(d, c); break;
                     case AI_S_PURSUE: result = dopursue(d, c);
                     {
-                        if((d->mana>80 || d->mana<60)&& d->aptitude==APT_MAGICIEN) aptitude_1(d);
-                        if(d->health<650+d->skill && d->aptitude==APT_PHYSICIEN && d->mana>=50) aptitude_2(d);
-                        if(d->mana>30 && d->health<500+d->skill && d->aptitude==APT_PRETRE) aptitude_2(d);
+                        if((d->mana>80 || d->mana<60)&& d->aptitude==APT_MAGICIEN) aptitude(d, 1);
+                        if(d->health<650+d->skill && d->aptitude==APT_PHYSICIEN && d->mana>=50) aptitude(d, 2);
+                        if(d->mana>30 && d->health<500+d->skill && d->aptitude==APT_PRETRE) aptitude(d, 2);
                         break;
                     }
                     case AI_S_INTEREST: result = dointerest(d, c); break;

@@ -226,7 +226,8 @@ namespace game
                 if(d->steromillis || d->epomillis || d->jointmillis || d->champimillis || d->ragemillis) entities::checkboosts(curtime, d);
                 if(d->ragemillis || d->aptisort1 || d->aptisort2 || d->aptisort3) entities::checkaptiskill(curtime, d);
             }
-            updatespecials(d);
+
+            if(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE) updatespecials(d);
 
             if(d == player1 || d->ai) continue;
             if(d->state==CS_DEAD && d->ragdoll) moveragdoll(d);
@@ -288,7 +289,7 @@ namespace game
         {
             if(player1->steromillis || player1->epomillis || player1->jointmillis || player1->champimillis) entities::checkboosts(curtime, player1);
             if(player1->ragemillis || player1->aptisort1 || player1->aptisort2 || player1->aptisort3) entities::checkaptiskill(curtime, player1);
-            updatespecials(player1);
+            if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE)updatespecials(player1);
         }
         updateweapons(curtime);
         otherplayers(curtime);
@@ -414,7 +415,7 @@ namespace game
         }
         if(d==h)
         {
-            if(atk==ATK_MEDIGUN_SHOOT)
+            if(actor->gunselect==GUN_MEDIGUN)
             {
                 regenblend(damage);
                 regencompass(damage, actor->o);

@@ -1086,9 +1086,7 @@ namespace game
     extern vec hudgunorigin(int gun, const vec &from, const vec &to, gameent *d);
 
     // sorts
-    extern void aptitude_1(gameent *d);
-    extern void aptitude_2(gameent *d);
-    extern void aptitude_3(gameent *d);
+    extern void aptitude(gameent *d, int skill);
 }
 
 namespace server

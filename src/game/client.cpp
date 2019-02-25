@@ -572,7 +572,7 @@ namespace game
     string clientmap = "";
 
 
-    VAR(n_mode, 1, 1, 99);
+    VAR(n_mode, -1, 1, 99);
     VAR(n_type, 0, 1, 99);
     VAR(n_team, 0, 0, 1);
 
