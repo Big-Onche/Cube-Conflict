@@ -46,6 +46,7 @@ namespace game
                     playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
                     playsound(sorts[neededdata].sound2, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
                     //if(con_serveurofficiel) stat_sortslances++;
+                    break;
                 case 3:
                     if(!d->sort3pret || d->mana<sorts[neededdata].mana3) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
 
