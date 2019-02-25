@@ -744,7 +744,7 @@ namespace game
 
         conoutf(CON_GAMEINFO, "\f2Le mode de jeu est : %s", server::modeprettyname(gamemode));
 
-        const char *info = m_valid(gamemode) ? gamemodes[gamemode - STARTGAMEMODE].info : NULL;
+        const char *info = m_valid(gamemode) ? gamemodes[gamemode - STARTGAMEMODE].name : NULL;
         if(showmodeinfo && info) conoutf(CON_GAMEINFO, "\f0%s", info);
 
         syncplayer();
@@ -771,7 +771,7 @@ namespace game
 
     const char *getmapinfo()
     {
-        return showmodeinfo && m_valid(gamemode) ? gamemodes[gamemode - STARTGAMEMODE].info : NULL;
+        return showmodeinfo && m_valid(gamemode) ? gamemodes[gamemode - STARTGAMEMODE].name : NULL;
     }
 
     const char *getscreenshotinfo()

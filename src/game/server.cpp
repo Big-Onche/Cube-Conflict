@@ -750,7 +750,7 @@ namespace server
 
     const char *modeprettyname(int n, const char *unknown)
     {
-        if(m_valid(n)) return gamemodes[n - STARTGAMEMODE].prettyname;
+        if(m_valid(n)) return gamemodes[n - STARTGAMEMODE].name;
         return unknown;
     }
 

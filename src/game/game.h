@@ -143,51 +143,28 @@ enum
 
 static struct gamemodeinfo
 {
-    const char *name, *prettyname;
+    const char *name;
     int flags;
-    const char *info;
 } gamemodes[] =
 {
-    { "demo", "Demo", M_DEMO | M_LOCAL, NULL},
-    { "Editeur de maps", "Editeur de maps", M_EDIT, "Editeur de maps" },
+    { "demo", M_DEMO | M_LOCAL },
+    { "Editeur de maps", M_EDIT },
 
     //MODE 1, 2, 3, 4
-    { "Tue Les Tous", "Tue Les Tous", M_LOBBY, "Tue les tous." },
-    { "Tue Les Tous (Aléatoire)", "Tue Les Tous (Aléatoire)", M_LOBBY | M_RANDOM, "Tue les tous. (Aléatoire)" },
-    { "Tue Les Tous (Full stuff)", "Tue Les Tous (Full stuff)", M_LOBBY | M_FULLSTUFF, "Tue les tous. (Full stuff)" },
-    { "Tue Les Tous (Explosion)", "Tue Les Tous (Explosifs)", M_LOBBY | M_EXPLOSION, "Tue les tous.(Explosifs)" },
+    { "Tue Les Tous", M_LOBBY },
+    { "Tue Les Tous (Aléatoire)", M_LOBBY | M_RANDOM },
+    { "Tue Les Tous (Full stuff)", M_LOBBY | M_FULLSTUFF },
+    { "Tue Les Tous (Explosion)", M_LOBBY | M_EXPLOSION },
     //MODE 5, 6, 7, 8
-    { "Tue Les Tous", "Tue Les Tous", M_LOBBY | M_TEAM, "Tue les tous.\n (Par équipe)" },
-    { "Tue Les Tous (Aléatoire)", "Tue Les Tous (Aléatoire)", M_LOBBY | M_RANDOM | M_TEAM, "Tue les tous. (Aléatoire/Par équipe)" },
-    { "Tue Les Tous (Full stuff)", "Tue Les Tous (Full stuff)", M_LOBBY | M_FULLSTUFF | M_TEAM, "Tue les tous.(Full stuff)" },
-    { "Tue Les Tous (Corps à corps)", "Tue Les Tous (Explosifs)", M_LOBBY | M_EXPLOSION | M_TEAM, "Tue les tous. (Explosifs)" },
-
-    { "Capture de drapeau", "Capture de drapeau", M_TEAM | M_CTF, "Capture de drapeau." },
-    { "Capture de drapeau (Aléatoire)", "Capture de drapeau (Aléatoire)", M_RANDOM | M_TEAM | M_CTF, "Capture de drapeau. (Aléatoire)" },
-    { "Capture de drapeau (Full stuff)", "Capture de drapeau (Full stuff)", M_TEAM | M_FULLSTUFF | M_CTF, "Capture de drapeau." },
-    { "Capture de drapeau (Corps à corps)", "Capture de drapeau (Explosifs)", M_EXPLOSION | M_TEAM | M_CTF, "Capture de drapeau. (Explosifs)" },
-
-    /*
-    { "Battle royale", "Battle royale", M_LOBBY | M_BATTLE, "Tue les tous." },
-    { "Battle royale (Aléatoire)", "Battle royale (Aléatoire)", M_LOBBY | M_RANDOM | M_BATTLE, "Tue les tous.\n (Aléatoire)" },
-    { "Battle royale (Full stuff)", "Battle royale (Full stuff)", M_LOBBY | M_FULLSTUFF | M_BATTLE, "Tue les tous.\n (Full stuff)" },
-    { "Battle royale (Corps à corps)", "Battle royale (Corps à corps)", M_LOBBY | M_MELEE | M_BATTLE, "Tue les tous.\n (Corps à corps)" },
-    //MODE 13, 14, 15, 16
-    { "Battle royale", "Battle royale", M_LOBBY | M_TEAM | M_BATTLE, "Tue les tous.\n (Par équipe)" },
-    { "Battle royale (Aléatoire)", "Battle royale (Aléatoire)", M_LOBBY | M_RANDOM | M_TEAM | M_BATTLE, "     Tue les tous.    \n (Aléatoire/Par équipe)" },
-    { "Battle royale (Full stuff)", "Battle royale (Full stuff)", M_LOBBY | M_FULLSTUFF | M_TEAM | M_BATTLE, "Tue les tous.\n (Full stuff)" },
-    { "Battle royale (Corps à corps)", "Battle royale (Corps à corps)", M_LOBBY | M_MELEE | M_TEAM | M_BATTLE, "Tue les tous.\n (Corps à corps)" },
+    { "Tue Les Tous", M_LOBBY | M_TEAM },
+    { "Tue Les Tous (Aléatoire)", M_LOBBY | M_RANDOM | M_TEAM },
+    { "Tue Les Tous (Full stuff)", M_LOBBY | M_FULLSTUFF | M_TEAM },
+    { "Tue Les Tous (Corps à corps)", M_LOBBY | M_EXPLOSION | M_TEAM },
     //MODE 9, 10, 11, 12
-    { "Battle royale", "Battle royale", M_LOBBY | M_BATTLE, "Tue les tous." },
-    { "Battle royale (Aléatoire)", "Battle royale (Aléatoire)", M_LOBBY | M_RANDOM | M_BATTLE, "Tue les tous.\n (Aléatoire)" },
-    { "Battle royale (Full stuff)", "Battle royale (Full stuff)", M_LOBBY | M_FULLSTUFF | M_BATTLE, "Tue les tous.\n (Full stuff)" },
-    { "Battle royale (Corps à corps)", "Battle royale (Corps à corps)", M_LOBBY | M_MELEE | M_BATTLE, "Tue les tous.\n (Corps à corps)" },
-    //MODE 13, 14, 15, 16
-    { "Battle royale", "Battle royale", M_LOBBY | M_TEAM | M_BATTLE, "Tue les tous.\n (Par équipe)" },
-    { "Battle royale (Aléatoire)", "Battle royale (Aléatoire)", M_LOBBY | M_RANDOM | M_TEAM | M_BATTLE, "     Tue les tous.    \n (Aléatoire/Par équipe)" },
-    { "Battle royale (Full stuff)", "Battle royale (Full stuff)", M_LOBBY | M_FULLSTUFF | M_TEAM | M_BATTLE, "Tue les tous.\n (Full stuff)" },
-    { "Battle royale (Corps à corps)", "Battle royale (Corps à corps)", M_LOBBY | M_MELEE | M_TEAM | M_BATTLE, "Tue les tous.\n (Corps à corps)" },
-    */
+    { "Capture de drapeau", M_TEAM | M_CTF },
+    { "Capture de drapeau (Aléatoire)", M_RANDOM | M_TEAM | M_CTF },
+    { "Capture de drapeau (Full stuff)", M_FULLSTUFF | M_TEAM | M_CTF },
+    { "Capture de drapeau (Corps à corps)", M_EXPLOSION | M_TEAM | M_CTF },
 };
 
 #define STARTGAMEMODE (-1)
