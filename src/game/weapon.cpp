@@ -1492,8 +1492,9 @@ namespace game
                    (int)(to.x*DMF), (int)(to.y*DMF), (int)(to.z*DMF),
                    hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
         }
-        int waitfactor = 1;
-        if(d->aptitude==APT_PRETRE && d->aptisort3)waitfactor = 2.5f;
+        float waitfactor = 1;
+        if(d->aptitude==APT_COMMANDO) waitfactor = 0.8f;
+        if(d->aptitude==APT_PRETRE && d->aptisort3) waitfactor = 2.5f;
         d->gunwait = attacks[atk].attackdelay/waitfactor;
         //if(d->ai) d->gunwait += int(d->gunwait*(((101-d->skill)+rnd(111-d->skill))/100.f));
         d->steromillis ? d->totalshots += (attacks[atk].damage*attacks[atk].rays)*2: d->totalshots += attacks[atk].damage*attacks[atk].rays;

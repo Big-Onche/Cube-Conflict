@@ -2336,7 +2336,8 @@ namespace server
         gs.ammo[gun] -= attacks[atk].use;
         gs.lastshot = millis;
 
-        int waitfactor = 1;
+        float waitfactor = 1;
+        if(ci->aptitude==APT_COMMANDO) waitfactor = 0.8f;
         if(ci->aptitude==APT_PRETRE && ci->state.aptisort3) waitfactor = 2.5f;
         gs.gunwait = attacks[atk].attackdelay/waitfactor;
 

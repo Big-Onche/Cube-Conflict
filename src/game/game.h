@@ -623,7 +623,7 @@ struct gamestate
 
     void addsweaps(int gamemode)
     {
-        switch(rnd(100))
+        switch(rnd(50))
         {
             case 0: ammo[GUN_S_ROQUETTES] = 20; gunselect = GUN_S_ROQUETTES; break;
             case 1:
@@ -648,6 +648,7 @@ struct gamestate
 
         switch(aptitude)
         {
+            case 0: addsweaps(gamemode); break;
             case 1: ammo[GUN_MEDIGUN] = 160; break;
             case 6: ammo[GUN_KAMIKAZE] = 1; break;
         }
