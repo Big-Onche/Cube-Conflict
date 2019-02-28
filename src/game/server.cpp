@@ -2161,7 +2161,7 @@ namespace server
         {
             case APT_MAGICIEN: {if(ts.aptisort3) damage = damage/5.0f;} break;
             case APT_VICKING: {if(actor!=target && atk!=ATK_MEDIGUN_SHOOT) {ts.ragemillis+=damage*5; sendresume(target);}} break; //Ajoute la rage au Vicking et l'envoie au client
-            case APT_PRETRE: { if(ts.aptisort2 && ts.mana>=damage/10) {ts.mana -= damage/10; damage=0; } } break;
+            case APT_PRETRE: { if(ts.aptisort2 && ts.mana>=damage/10) {ts.mana -= damage/10; damage=0; sendresume(target);} } break;
         }
 
         if(atk==ATK_MEDIGUN_SHOOT) {if(ts.health < ts.maxhealth) ts.dodamage(damage, target->aptitude, 0);} //Le medigun ne regen pas plus que la santé max du joueur, les sorts de dégats ne sont pas pris en compte
@@ -2169,7 +2169,7 @@ namespace server
 
         if(target!=actor && !isteam(target->team, actor->team)) as.damage += damage;
 
-        sendf(-1, 1, "ri8", N_DAMAGE, target->clientnum, actor->clientnum, damage, ts.armour, ts.health, ts.mana, atk);
+        sendf(-1, 1, "ri7", N_DAMAGE, target->clientnum, actor->clientnum, damage, ts.armour, ts.health, atk);
         if(actor->aptitude==APT_VAMPIRE) sendf(-1, 1, "ri5", N_VAMPIRE, actor->clientnum, damage, ts.armour, ts.health);
 
         if(target==actor) target->setpushed();

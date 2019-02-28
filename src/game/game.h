@@ -294,7 +294,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
 {
     N_CONNECT, 0, N_SERVINFO, 0, N_WELCOME, 1, N_INITCLIENT, 0, N_POS, 0, N_TEXT, 0, N_SOUND, 2, N_CDIS, 2,
     N_SHOOT, 0, N_EXPLODE, 0, N_SUICIDE, 1,
-    N_DIED, 6, N_DAMAGE, 7, N_VAMPIRE, 6, N_HITPUSH, 7, N_SHOTFX, 10, N_EXPLODEFX, 4,
+    N_DIED, 6, N_DAMAGE, 6, N_VAMPIRE, 6, N_HITPUSH, 7, N_SHOTFX, 10, N_EXPLODEFX, 4,
     N_TRYSPAWN, 1, N_SPAWNSTATE, 0, N_SPAWN, 3, N_FORCEDEATH, 2,
     N_GUNSELECT, 2, N_TAUNT, 1,
     N_MAPCHANGE, 0, N_MAPVOTE, 0, N_TEAMINFO, 0, N_ITEMSPAWN, 2, N_ITEMPICKUP, 2, N_ITEMACC, 4,
@@ -377,7 +377,7 @@ static struct itemstat { int add, max, sound; const char *name; int icon, info; 
     { 15,    60,    S_ITEMAMMO,   "CAMPOUZE 2000",   HICON_SIZE, GUN_S_CAMPOUZE},
     //Objets
     {250,     1000, S_ITEMHEALTH, "PANACHAY",            HICON_SIZE},
-    {750,     2500, S_COCHON,     "COCHON GRILLAY",      HICON_SIZE},
+    {500,     2500, S_COCHON,     "COCHON GRILLAY",      HICON_SIZE},
     {30000,  45000, S_ITEMSTEROS, "STEROIDES",           HICON_SIZE},
     {60000, 120000, S_ITEMCHAMPIS,"CHAMPIS",             HICON_SIZE},
     {45000,  75000, S_ITEMEPO,    "EPO",                 HICON_SIZE},
@@ -546,13 +546,12 @@ struct gamestate
         switch(type)
         {
             case I_BOOSTPV:
-                //if(maxhealth<1300) maxhealth = maxhealth+100;
                 health = min(health+is.add*(aptitude==1 ? 1.5f : boostitem), 2500.0f);
                 break;
-            case I_SANTE: // boost also adds to health
+            case I_SANTE:
                 health = min(health+is.add*(aptitude==1 ? 2 : boostitem), maxhealth);
                 break;
-            case I_MANA: // boost also adds to health
+            case I_MANA:
                 mana = min(mana+is.add, is.max);
                 break;
             case I_BOUCLIERBOIS:
