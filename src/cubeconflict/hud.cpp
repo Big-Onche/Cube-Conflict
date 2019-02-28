@@ -135,7 +135,7 @@ namespace game
         }
         if(player1->state==CS_SPECTATOR && d==player1) {pophudmatrix(); return; }
 
-        if((player1->gunselect == GUN_SKS  || player1->gunselect == GUN_SV98 || player1->gunselect==GUN_ARBALETE || player1->gunselect==GUN_S_CAMPOUZE) && zoom == 1)
+        if((player1->gunselect == GUN_SKS  || player1->gunselect == GUN_SV98 || player1->gunselect==GUN_ARBALETE || player1->gunselect==GUN_S_CAMPOUZE || player1->gunselect==GUN_S_ROQUETTES) && zoom == 1)
         {
             gle::colorf(crosshairalpha, crosshairalpha, crosshairalpha, crosshairalpha);
 
@@ -291,6 +291,7 @@ namespace game
                 else draw_textf("%d", (d->ammo[d->gunselect] > 99 ? w-227 : d->ammo[d->gunselect] > 9 ? w-196 : w-166), h-103, d->ammo[d->gunselect]);
             }
         }
+
         draw_textf("%d", 135, h-103, d->health < 9 ? 1 : d->health/10);
 
         if(d->armour > 0) draw_textf("%d", 370, h-103, d->armour < 9 ? 1 : d->armour/10);

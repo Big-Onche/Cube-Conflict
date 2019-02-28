@@ -664,9 +664,9 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
         }
 
         int anim = ANIM_GUN_IDLE|ANIM_LOOP, basetime = 0;
+
         if(d->lastaction && d->lastattack >= 0 && attacks[d->lastattack].gun==d->gunselect && lastmillis-d->lastaction<attacks[d->lastattack].attackdelay)
         {
-            //if(zoom) anim = ANIM_GUN_ZOOM_SHOOT;
             anim = attacks[d->lastattack].hudanim;
             basetime = d->lastaction;
         }

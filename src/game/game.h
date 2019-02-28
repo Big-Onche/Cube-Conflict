@@ -19,8 +19,6 @@ enum
     ANIM_EDIT, ANIM_LAG, ANIM_TAUNT, ANIM_WIN, ANIM_LOSE,
     ANIM_GUN_IDLE, ANIM_GUN_SHOOT, ANIM_GUN_MELEE,
     ANIM_VWEP_IDLE, ANIM_VWEP_SHOOT, ANIM_VWEP_MELEE,
-    ANIM_GUN_ZOOM_IDLE, ANIM_GUN_ZOOM_SHOOT,
-    ANIM_GUN_VIDE, ANIM_GUN_RELOAD,
     NUMANIMS
 };
 
@@ -39,8 +37,6 @@ static const char * const animnames[] =
     "edit", "lag", "taunt", "win", "lose",
     "gun idle", "gun shoot", "gun melee",
     "vwep idle", "vwep shoot", "vwep melee"
-    "gun zoom idle", "gun zoom shoot",
-    "gun vide", "gun reload",
 };
 
 // console message types
@@ -161,10 +157,10 @@ static struct gamemodeinfo
     { "Tue Les Tous (Full stuff)", M_LOBBY | M_FULLSTUFF | M_TEAM },
     { "Tue Les Tous (Corps à corps)", M_LOBBY | M_EXPLOSION | M_TEAM },
     //MODE 9, 10, 11, 12
-    { "Capture de drapeau", M_TEAM | M_CTF },
-    { "Capture de drapeau (Aléatoire)", M_RANDOM | M_TEAM | M_CTF },
-    { "Capture de drapeau (Full stuff)", M_FULLSTUFF | M_TEAM | M_CTF },
-    { "Capture de drapeau (Corps à corps)", M_EXPLOSION | M_TEAM | M_CTF },
+    { "Capture de drapeau", M_CTF | M_TEAM },
+    { "Capture de drapeau (Aléatoire)", M_RANDOM | M_CTF | M_TEAM },
+    { "Capture de drapeau (Full stuff)", M_FULLSTUFF | M_CTF | M_TEAM },
+    { "Capture de drapeau (Corps à corps)", M_EXPLOSION | M_CTF | M_TEAM },
 };
 
 #define STARTGAMEMODE (-1)
@@ -362,7 +358,7 @@ static struct itemstat { int add, max, sound; const char *name; int icon, info; 
     {75,   300,    S_ITEMAMMO,   "MINIGUN",          HICON_SIZE, GUN_MINIGUN},
     {15,    60,    S_ITEMAMMO,   "SPOCKGUN",         HICON_SIZE, GUN_SPOCKGUN},
     {7,     28,    S_ITEMAMMO,   "M32",              HICON_SIZE, GUN_M32},
-    {100,  400,    S_ITEMAMMO,   "LANCE-FLAMMES",    HICON_SIZE, GUN_LANCEFLAMMES},
+    {50,   200,    S_ITEMAMMO,   "LANCE-FLAMMES",    HICON_SIZE, GUN_LANCEFLAMMES},
     {50,   200,    S_ITEMAMMO,   "UZI",              HICON_SIZE, GUN_UZI},
     {60,   240,    S_ITEMAMMO,   "FAMAS",            HICON_SIZE, GUN_FAMAS},
     {10,    40,    S_ITEMAMMO,   "MOSSBERG 500",     HICON_SIZE, GUN_MOSSBERG},
@@ -392,8 +388,7 @@ static struct itemstat { int add, max, sound; const char *name; int icon, info; 
     {1500,    1500, S_ITEMARMOUR, "BOUCLIER MAGNETIQUE", HICON_SIZE, A_MAGNET},
     {2500,    2500, S_ITEMARMOUR, "ARMURE ASSISTEE",     HICON_SIZE, A_MAGNET}, //Futur bouclier
 
-    {50,       150, S_ITEMHEALTH, "MANA",                HICON_SIZE},
-
+    {40,       150, S_ITEMHEALTH, "MANA",                HICON_SIZE},
 };
 
 #define validitem(n) false
@@ -422,8 +417,8 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound
     { GUN_SKS,          ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_SKS,          S_SKS,          S_SKS_LOIN, S_RIFLELOIN,        420,  500,   5, 150, 0, 2750,  25, 6000,  1,    50,   7, 0, 0},
     { GUN_ARBALETE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_ARBALETE,     S_ARBALETE,     S_NULL, S_NULL,                 900,  700,  15, 200, 0, 2000,   7, 2000,  1,    20,   3, 0, 0},
     { GUN_AK47,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_AK47,         S_AK47,         S_AK47_LOIN, S_ARMESLOIN,        92,  170, 125, 300, 0, 3000,   7, 1000,  1,    50,   3, 0, 0},
-    { GUN_GRAP1,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GRAP1,        S_GRAP1,        S_NULL, S_NULL,                 230,  200,  30, 400, 0, 1500,  -3,  840,  1,  -400, 20, 0, 0},
-    { GUN_ARTIFICE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_ARTIFICE,     S_ARTIFICE,     S_ARTIFICE_LOIN, S_NULL,       1000,  600, 100, 400, 0,  900,  60,  520,  1,   500, 80, 0, 0},
+    { GUN_GRAP1,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GRAP1,        S_GRAP1,        S_NULL, S_NULL,                 230,  200,  30, 400, 0, 1500,  -3,  840,  1,  -400,  20, 0, 0},
+    { GUN_ARTIFICE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_ARTIFICE,     S_ARTIFICE,     S_ARTIFICE_LOIN, S_NULL,       1000,  600, 100, 400, 0,  900,  60,  520,  1,   500,  80, 0, 0},
     { GUN_GLOCK,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GLOCK,        S_GLOCK,        S_GLOCK_LOIN, S_ARMESLOIN,      400,  280, 175, 350, 0, 2000,   7, 1000,  1,    30,   3, 0, 0},
     // Super armes
     { GUN_S_NUKE, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_NUKELAUNCH, S_NUKELAUNCH, S_NULL, S_NULL,           3000,  2500,  20, 300, 0,  175,  10, 2000,  1,   400, 1280, 0, 0},
@@ -617,38 +612,12 @@ struct gamestate
 
     void addcacweaps(int gamemode, int aptitude)
     {
-        if(aptitude == 3)
+        switch(rnd(4))
         {
-            switch(rnd(9))
-            {
-                case 0: ammo[GUN_CAC349] = 1; ammo[GUN_CACMARTEAU] = 1; break;
-                case 1: ammo[GUN_CAC349] = 1; ammo[GUN_CACMASTER] = 1; break;
-                case 2: ammo[GUN_CAC349] = 1; ammo[GUN_CACFLEAU] = 1; break;
-                case 3: ammo[GUN_CACMARTEAU] = 1; ammo[GUN_CAC349] = 1; break;
-                case 4: ammo[GUN_CACMARTEAU] = 1; ammo[GUN_CACMASTER] = 1; break;
-                case 5: ammo[GUN_CACMARTEAU] = 1; ammo[GUN_CACFLEAU] = 1; break;
-                case 6: ammo[GUN_CACFLEAU] = 1; ammo[GUN_CAC349] = 1; break;
-                case 7: ammo[GUN_CACFLEAU] = 1; ammo[GUN_CAC349] = 1; break;
-                case 8: ammo[GUN_CACFLEAU] = 1; ammo[GUN_CACMASTER] = 1;  break;
-            }
-            switch(rnd(4))
-            {
-                case 0: gunselect = GUN_CAC349; return;
-                case 1: gunselect = GUN_CACMARTEAU; return;
-                case 2: gunselect = GUN_CACMASTER; return;
-                case 3: gunselect = GUN_CACFLEAU; return;
-            }
-        }
-        else if(aptitude==6 || aptitude==9) return;
-        else
-        {
-            switch(rnd(4))
-            {
-                case 0: ammo[GUN_CAC349] = 1; gunselect = GUN_CAC349; break;
-                case 1: ammo[GUN_CACMARTEAU] = 1; gunselect = GUN_CACMARTEAU; break;
-                case 2: ammo[GUN_CACMASTER] = 1; gunselect = GUN_CACMASTER; break;
-                case 3: ammo[GUN_CACFLEAU] = 1; gunselect = GUN_CACFLEAU; break;
-            }
+            case 0: ammo[GUN_CAC349] = 1; gunselect = GUN_CAC349; break;
+            case 1: ammo[GUN_CACMARTEAU] = 1; gunselect = GUN_CACMARTEAU; break;
+            case 2: ammo[GUN_CACMASTER] = 1; gunselect = GUN_CACMASTER; break;
+            case 3: ammo[GUN_CACFLEAU] = 1; gunselect = GUN_CACFLEAU; break;
         }
     }
 

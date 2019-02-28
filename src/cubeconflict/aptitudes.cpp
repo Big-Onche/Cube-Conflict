@@ -5,7 +5,7 @@
 //Commandes d'aptitudes (touches 1, 2 et 3)
 namespace game
 {
-    void aptitude(gameent *d, int skill) //Touche 1
+    void aptitude(gameent *d, int skill)
     {
         if(d->state==CS_DEAD) return;
 

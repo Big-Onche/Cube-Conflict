@@ -174,7 +174,6 @@ namespace game
         if(d==player1)offset.mul((to.dist(from)/1024)*(zoom ? spread : nozoomspread));
         else offset.mul((to.dist(from)/1024)*spread);
 
-
         offset.z /= 2;
         dest = vec(offset).add(to);
         if(dest != from)
@@ -1437,18 +1436,19 @@ namespace game
         d->gunwait = 0;
         if(!d->attacking) return;
         int gun = d->gunselect, act = d->attacking, atk = guns[gun].attacks[act];
+
         d->lastaction = lastmillis;
         d->lastattack = atk;
-        if(!d->ammo[gun])
+
+        if (!d->ammo[gun])
         {
             if(d==player1) msgsound(S_NOAMMO, d);
             d->gunwait = 600;
             d->lastattack = -1;
             weaponswitch(d);
             return;
-
         }
-        //d->ammo[gun] -= attacks[atk].use;
+
         if(atk==ATK_CAC349_SHOOT || atk==ATK_CACMARTEAU_SHOOT || atk==ATK_CACMASTER_SHOOT || atk==ATK_CACFLEAU_SHOOT);
         else if(atk==ATK_GAU8_SHOOT || atk==ATK_NUKE_SHOOT || atk==ATK_CAMPOUZE_SHOOT ||atk==ATK_ROQUETTES_SHOOT) d->ammo[gun]--;
         else if(!m_random) d->ammo[gun]--;

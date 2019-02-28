@@ -571,12 +571,8 @@ namespace game
 
     string clientmap = "";
 
-
-    VAR(n_mode, -1, 1, 99);
-    VAR(n_type, 0, 1, 99);
-    VAR(n_team, 0, 0, 1);
-
     int gamemode, nextmode;
+    extern int n_type, n_mode, n_team;
 
     void changemapserv(const char *name, int mode)        // forced map change from the server
     {
@@ -586,7 +582,9 @@ namespace game
             loopi(NUMGAMEMODES) if(m_mp(STARTGAMEMODE + i)) { mode = STARTGAMEMODE + i; break; }
         }
 
-        mode = n_mode+(n_team*4);
+        if(n_type==0) mode = n_mode+(n_team*4);
+        else if (n_type==1)  mode = n_mode+8;
+
         gamemode = mode;
         nextmode = mode;
         //conoutf("MODE %d", mode);
@@ -609,11 +607,18 @@ namespace game
             intret(0);
             return;
         }
-        mode = n_mode+(n_team*4);
+        if(n_type==0) mode = n_mode+(n_team*4);
+        else if (n_type==1)  mode = n_mode+8;
         nextmode = mode;
-        //conoutf("MODE %d", mode);
+
         intret(1);
     }
+
+    VARFP(n_mode, -1, 1, 99, setmode(n_mode));
+    VARFP(n_type, 0, 0, 99, setmode(n_mode));
+    VARFP(n_team, 0, 0, 1, setmode(n_mode));
+
+
     ICOMMAND(mode, "i", (int *val), setmode(*val));
     ICOMMAND(getmode, "", (), intret(gamemode));
     ICOMMAND(getnextmode, "", (), intret(m_valid(nextmode) ? nextmode : (remote ? 1 : 0)));
@@ -637,6 +642,9 @@ namespace game
 
     void changemap(const char *name, int mode) // request map change, server may ignore
     {
+        if(n_type==0) mode = n_mode+(n_team*4);
+        else if (n_type==1)  mode = n_mode+8;
+
         if(!remote)
         {
             server::forcemap(name, mode);
@@ -644,6 +652,7 @@ namespace game
         }
         else if(player1->state!=CS_SPECTATOR || player1->privilege) addmsg(N_MAPVOTE, "rsi", name, mode);
     }
+
     void changemap(const char *name)
     {
         switch(n_map)
@@ -656,8 +665,11 @@ namespace game
             case 5: name = "Volcan"; break;
             default: newmap(13); break;
         }
-         UI::hideui(NULL);
-        changemap(name, n_mode+(n_team*4));
+        UI::hideui(NULL);
+        int mode;
+        if(n_type==0) mode = n_mode+(n_team*4);
+        else if (n_type==1)  mode = n_mode+8;
+        changemap(name, mode);
     }
     ICOMMAND(map, "siii", (char *name, int n_mode, int n_type, int n_team), changemap(name));
 
@@ -1300,23 +1312,30 @@ namespace game
             d->frags = getint(p);
             d->flags = getint(p);
             d->deaths = getint(p);
-            if(d==player1) getint(p);
-            else d->steromillis = getint(p);
-            if(d==player1) getint(p);
-            else d->epomillis = getint(p);
-            if(d==player1) getint(p);
-            else d->jointmillis = getint(p);
-            if(d==player1) getint(p);
-            else d->champimillis = getint(p);
-            if(d==player1) getint(p);
-            else d->ragemillis = getint(p);
-            if(d==player1) getint(p);
-            else d->aptisort1 = getint(p);
-            if(d==player1) getint(p);
-            else d->aptisort2 = getint(p);
-            if(d==player1) getint(p);
-            else d->aptisort3 = getint(p);
+            if(d==player1)
+            {
+                getint(p);
+                getint(p);
+                getint(p);
+                getint(p);
+                getint(p);
+                getint(p);
+                getint(p);
+                getint(p);
+            }
+            else
+            {
+                d->steromillis = getint(p);
+                d->epomillis = getint(p);
+                d->jointmillis = getint(p);
+                d->champimillis = getint(p);
+                d->ragemillis = getint(p);
+                d->aptisort1 = getint(p);
+                d->aptisort2 = getint(p);
+                d->aptisort3 = getint(p);
+            }
         }
+
         d->lifesequence = getint(p);
         d->health = getint(p);
         d->maxhealth = getint(p);
