@@ -642,9 +642,6 @@ namespace game
 
     void changemap(const char *name, int mode) // request map change, server may ignore
     {
-        if(n_type==0) mode = n_mode+(n_team*4);
-        else if (n_type==1)  mode = n_mode+8;
-
         if(!remote)
         {
             server::forcemap(name, mode);
@@ -666,9 +663,9 @@ namespace game
             default: newmap(13); break;
         }
         UI::hideui(NULL);
-        int mode;
+        int mode = 0;
         if(n_type==0) mode = n_mode+(n_team*4);
-        else if (n_type==1)  mode = n_mode+8;
+        else if (n_type==1) mode = n_mode+8;
         changemap(name, mode);
     }
     ICOMMAND(map, "siii", (char *name, int n_mode, int n_type, int n_team), changemap(name));

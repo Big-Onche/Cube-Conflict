@@ -25,7 +25,8 @@ void writesave()
 {
     stream *f = openutf8file("config/sauvegarde.cfg", "w");
 
-    f->printf("%s", encryptsave(tempformatstring("loadsave %d %d %d %d %d %d %d %d", ccxp, stat[0], stat[1], stat[2], stat[3], stat[4], stat[5], stat[6])));
+    f->printf("%s%s", encryptsave(tempformatstring("loadsavepart1 %d %d %d %d %d %d %d %d %d %d; ", ccxp, stat[0], stat[1], stat[2], stat[3], stat[4], stat[5], stat[6], stat[7], stat[8])), encryptsave(tempformatstring("loadsavepart2 %d %d %d %d %d", stat[9], stat[10], stat[11], stat[12], stat[13])));
+    //f->printf("%s\n", );
 }
 
 //////////////////////Gestion de l'xp et autres statistiques//////////////////////
@@ -42,12 +43,17 @@ void genlvl() //Calcule le niveau du joueur
     if(pour1!=0) pourcents = pour2/pour1; //Calcul le pourcentage pour prochain niveau
 }
 
-ICOMMAND(loadsave, "iiiiiiii", (int *save1, int *save2, int *save3, int *save4, int *save5, int *save6, int *save7, int *save8),
+ICOMMAND(loadsavepart1, "iiiiiiiiii", (int *save1, int *save2, int *save3, int *save4, int *save5, int *save6, int *save7, int *save8, int *save9, int *save10),
 {
     ccxp = *save1; //Xp donc level
     stat[0] = *save2; stat[1] = *save3; stat[2] = *save4; //Kills, morts, killstrak donc ratio
-    stat[3] = *save5; stat[4] = *save6; stat[5] = *save7; stat[6] = *save8; //Objets
+    stat[3] = *save5; stat[4] = *save6; stat[5] = *save7; stat[6] = *save8; stat[7] = *save9; stat[8] = *save10; //Objets
     genlvl(); //Regénère le niveau afin d'avoir le bon niveau & pourcentage pour prochain niveau
+});
+
+ICOMMAND(loadsavepart2, "iiiiiiiiiiii", (int *save1, int *save2, int *save3, int *save4, int *save5),
+{
+    stat[9] = *save1; stat[10] = *save2; stat[11] = *save3; stat[12] = *save4; stat[13] = *save5; //Boosts
 });
 
 void addxp(int nbxp) // Ajoute l'xp très simplment
