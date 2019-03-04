@@ -37,7 +37,6 @@ struct mapheader
     int numvslots;
 };
 
-#define WATER_AMPLITUDE 0.4f
 #define WATER_OFFSET 1.1f
 
 enum

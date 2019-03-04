@@ -2,6 +2,8 @@
 
 #define NUMCAUSTICS 32
 
+FVARR(wateramplitude, 0.1, 0.5, 5.0); //#define WATER_AMPLITUDE 0.4f)
+
 static Texture *caustictex[NUMCAUSTICS] = { NULL };
 
 void loadcaustics(bool force)
@@ -45,7 +47,7 @@ void setupcaustics(int tmu, float surface = -1e16f)
     float blendscale = causticcontrast, blendoffset = 1;
     if(surface > -1e15f)
     {
-        float bz = surface + camera1->o.z + (vertwater ? WATER_AMPLITUDE : 0);
+        float bz = surface + camera1->o.z + (vertwater ? wateramplitude : 0);
         matrix4 m(vec4(s.x, t.x,  0, 0),
                   vec4(s.y, t.y,  0, 0),
                   vec4(s.z, t.z, -1, 0),
@@ -98,7 +100,7 @@ void renderwaterfog(int mat, float surface)
         invcamprojmatrix.perspectivetransform(vec(1, -1, -1)),
         invcamprojmatrix.perspectivetransform(vec(1, 1, -1))
     };
-    float bz = surface + camera1->o.z + (vertwater ? WATER_AMPLITUDE : 0),
+    float bz = surface + camera1->o.z + (vertwater ? wateramplitude : 0),
           syl = p[1].z > p[0].z ? 2*(bz - p[0].z)/(p[1].z - p[0].z) - 1 : 1,
           syr = p[3].z > p[2].z ? 2*(bz - p[2].z)/(p[3].z - p[2].z) - 1 : 1;
 
@@ -160,7 +162,7 @@ static float whscale, whoffset;
         float angle = (v1-wx1)*(v2-wy1)*(v1-wx2)*(v2-wy2)*whscale+whoffset; \
         float s = angle - int(angle) - 0.5f; \
         s *= 8 - fabs(s)*16; \
-        float h = WATER_AMPLITUDE*s-WATER_OFFSET; \
+        float h = wateramplitude*s-WATER_OFFSET; \
         gle::attribf(v1, v2, v3+h); \
         body; \
     }
@@ -348,7 +350,7 @@ static inline void renderwater(const materialsurface &m, int mat = MAT_WATER)
     VARR(name##fog, 0, 30, 10000); \
     VARR(name##deep, 0, 50, 10000); \
     VARR(name##spec, 0, 150, 200); \
-    FVARR(name##refract, 0, 0.1f, 1e3f); \
+    FVARR(name##refract, 0, 0.5f, 1e3f); \
     CVARR(name##fallcolour, 0); \
     CVARR(name##fallrefractcolour, 0); \
     VARR(name##fallspec, 0, 150, 200); \
@@ -375,8 +377,8 @@ GETMATIDXVAR(water, fallrefract, float)
 #define LAVAVARS(name) \
     CVAR0R(name##colour, 0xFF4000); \
     VARR(name##fog, 0, 50, 10000); \
-    FVARR(name##glowmin, 0, 0.25f, 2); \
-    FVARR(name##glowmax, 0, 1.0f, 2); \
+    FVARR(name##glowmin, 0, 0.63f, 2); \
+    FVARR(name##glowmax, 0, 0.77f, 2); \
     VARR(name##spec, 0, 25, 200);
 
 LAVAVARS(lava)
@@ -436,7 +438,7 @@ static void renderwaterfall(const materialsurface &m, float offset, const vec *n
         gle::begin(GL_QUADS);
     }
     float x = m.o.x, y = m.o.y, zmin = m.o.z, zmax = zmin;
-    if(m.ends&1) zmin += -WATER_OFFSET-WATER_AMPLITUDE;
+    if(m.ends&1) zmin += -WATER_OFFSET-wateramplitude;
     if(m.ends&2) zmax += wfwave;
     int csize = m.csize, rsize = m.rsize;
 #define GENFACEORIENT(orient, v0, v1, v2, v3) \
@@ -483,7 +485,7 @@ void renderlava()
         MatSlot &lslot = lookupmaterialslot(MAT_LAVA+k);
 
         SETSHADER(lava);
-        float t = lastmillis/2000.0f;
+        float t = lastmillis/5000.0f;
         t -= floor(t);
         t = 1.0f - 2*fabs(t-0.5f);
         t = 0.5f + 0.5f*t;
@@ -517,7 +519,7 @@ void renderlava()
             float angle = fmod(float(lastmillis/2000.0f/(2*M_PI)), 1.0f),
                   s = angle - int(angle) - 0.5f;
             s *= 8 - fabs(s)*16;
-            wfwave = vertwater ? WATER_AMPLITUDE*s-WATER_OFFSET : -WATER_OFFSET;
+            wfwave = vertwater ? wateramplitude*s-WATER_OFFSET : -WATER_OFFSET;
             wfscroll = 16.0f*lastmillis/3000.0f;
             wfxscale = TEX_SCALE/(tex->xs*lslot.scale);
             wfyscale = TEX_SCALE/(tex->ys*lslot.scale);
@@ -551,7 +553,7 @@ void renderwaterfalls()
         float angle = fmod(float(lastmillis/600.0f/(2*M_PI)), 1.0f),
               s = angle - int(angle) - 0.5f;
         s *= 8 - fabs(s)*16;
-        wfwave = vertwater ? WATER_AMPLITUDE*s-WATER_OFFSET : -WATER_OFFSET;
+        wfwave = vertwater ? wateramplitude*s-WATER_OFFSET : -WATER_OFFSET;
         wfscroll = 16.0f*lastmillis/1000.0f;
         wfxscale = TEX_SCALE/(tex->xs*wslot.scale);
         wfyscale = TEX_SCALE/(tex->ys*wslot.scale);
@@ -702,11 +704,15 @@ void setwaterlod()
             vertwater = 1;
             caustics = 1;
             waterreflect = 0;
+            waterlod = 2;
+            watersubdiv = 2;
             break;
         case 3:
             vertwater = 1;
             caustics = 1;
             waterreflect = 1;
+            waterlod = 3;
+            watersubdiv = 3;
             break;
     }
     allchanged();

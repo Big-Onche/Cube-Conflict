@@ -937,10 +937,10 @@ void resolvemsaacolor(int w = vieww, int h = viewh)
 }
 
 FVAR(bloomthreshold, 1e-3f, 0.8f, 1e3f);
-FVARP(bloomscale, 0, 1.0f, 1e3f);
+FVARP(bloomscale, 0, 2.0f, 1e3f);
 VARP(bloomblur, 0, 7, 7);
-VARP(bloomiter, 0, 0, 4);
-VARFP(bloomsize, 6, 9, 11, cleanupbloom());
+VARP(bloomiter, 0, 2, 4);
+VARFP(bloomsize, 6, 8, 11, cleanupbloom());
 VARFP(bloomprec, 0, 2, 3, cleanupbloom());
 FVAR(hdraccumscale, 0, 0.9f, 1);
 VAR(hdraccummillis, 1, 30, 1000);

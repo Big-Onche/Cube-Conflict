@@ -87,6 +87,7 @@ struct flarerenderer : partrenderer
             if(mod < 0.0f) return;
             size = flaresize / 5.0f;
         }
+        mod = 1.0;
         newflare(o, center, r, g, b, mod, size, sun, sparkle);
     }
 
@@ -114,6 +115,7 @@ struct flarerenderer : partrenderer
         gle::defattrib(gle::ATTRIB_TEXCOORD0, 2, GL_FLOAT);
         gle::defattrib(gle::ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE);
         gle::begin(GL_QUADS);
+
         loopi(numflares)
         {
             const flare &f = flares[i];

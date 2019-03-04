@@ -92,6 +92,8 @@ extern int nbfps;
 
 extern int parallaxX, parallaxY; //Effet parallax des menus
 
+extern float wateramplitude;
+
 //Statistiques & sauvegarde
 enum {STAT_KILLS, STAT_MORTS, STAT_KILLSTREAK, STAT_BOUCLIERBOIS, STAT_BOUCLIERFER, STAT_BOUCLIEROR, STAT_BOUCLIERMAGNETIQUE,
         STAT_PANACHAY, STAT_MANA, STAT_COCHON, STAT_STEROS, STAT_EPO, STAT_JOINT, STAT_CHAMPIS, NUMSTATS};
