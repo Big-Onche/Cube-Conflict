@@ -478,6 +478,9 @@ namespace game
             h.info1 = int(info1*DMF);
             h.info2 = info2;
             h.dir = f==at ? ivec(0, 0, 0) : ivec(vec(vel).mul(DNF));
+
+            int armoursound = f->armourtype == A_BLUE ? S_BALLEBOUCLIERBOIS : f->armourtype == A_GREEN ? S_BALLEBOUCLIERFER : f->armourtype == A_YELLOW ? S_BALLEBOUCLIEROR : S_BALLEBOUCLIERMAGNETIQUE;
+
             if(at==player1)
             {
                 damageeffect(damage, f, at, true, atk);
@@ -492,12 +495,14 @@ namespace game
                     {
                         damageblend(damage);
                         damagecompass(damage, at ? at->o : f->o);
-                        playsound(S_BALLECORPS);
                         switch(rnd(2))
                         {
                             case 0:
                                 if(player1->aptitude==APT_PHYSICIEN && player1->aptisort1 && player1->armour>0) playsound(S_SORTPHY1);
-                                else if(player1->armour>0) playsound(S_BALLEBOUCLIER);
+                                else if(player1->armour>0) playsound(armoursound);
+                                break;
+                            case 1:
+                                playsound(S_BALLECORPS);
                         }
                     }
 
@@ -508,7 +513,7 @@ namespace game
                     {
                         case 0:
                             if(f->aptitude==APT_PHYSICIEN && f->aptisort1 && f->armour>0) playsound(S_SORTPHY1, &f->o, 0, 0, 0 , 100, -1, 200);
-                            else if(f->armour>0)playsound(S_BALLEBOUCLIERENT, &f->o, 0, 0, 0 , 100, -1, 200);
+                            else if(f->armour>0)playsound(armoursound+4, &f->o, 0, 0, 0 , 100, -1, 200);
                     }
                 }
             }

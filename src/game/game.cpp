@@ -413,6 +413,9 @@ namespace game
             if(hitsound && lasthit != lastmillis) playsound(S_HIT);
             lasthit = lastmillis;
         }
+
+        int armoursound = d->armourtype == A_BLUE ? S_BALLEBOUCLIERBOIS : d->armourtype == A_GREEN ? S_BALLEBOUCLIERFER : d->armourtype == A_YELLOW ? S_BALLEBOUCLIEROR : S_BALLEBOUCLIERMAGNETIQUE;
+
         if(d==h)
         {
             if(actor->gunselect==GUN_MEDIGUN)
@@ -426,11 +429,12 @@ namespace game
                 damageblend(damage);
                 damagecompass(damage, actor->o);
                 playsound(S_BALLECORPS);
+
                 switch(rnd(2))
                 {
                     case 0:
                         if(d->aptitude==APT_PHYSICIEN && d->aptisort1 && d->armour>0) playsound(S_SORTPHY1);
-                        else if(d->armour>0) playsound(S_BALLEBOUCLIER);
+                        else if(d->armour>0) playsound(armoursound);
                 }
             }
         }
@@ -440,7 +444,7 @@ namespace game
             {
                 case 0:
                     if(d->aptitude==APT_PHYSICIEN && d->aptisort1 && d->armour>0) playsound(S_SORTPHY1, &d->o, 0, 0, 0 , 100, -1, 200);
-                    else if(d->armour>0) playsound(S_BALLEBOUCLIERENT, &d->o, 0, 0, 0 , 100, -1, 200);
+                    else if(d->armour>0) playsound(armoursound+4, &d->o, 0, 0, 0 , 100, -1, 200);
             }
         }
 
