@@ -1311,10 +1311,10 @@ namespace game
                 break;
         }
 
+        switch(rnd(attacks[atk].specialsounddelay)) {case 0: if(d->steromillis) playsound(S_STEROSTIR, d==player1 ? NULL : &d->o, NULL, 0, 0 , 150, -1, 400); }
+
         looped = false;
-
         if(d->attacksound >= 0 && d->attacksound != sound) d->stopattacksound();
-
         switch(sound)
         {
             case S_FLAMEATTACK:
