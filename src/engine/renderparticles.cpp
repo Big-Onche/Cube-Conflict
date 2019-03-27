@@ -862,6 +862,7 @@ static partrenderer *parts[] =
     new quadrenderer("media/particle/sante.png", PT_PART|PT_BRIGHT),
     new quadrenderer("media/particle/flames_1.png", PT_PART|PT_FLIP|PT_BRIGHT),
     new quadrenderer("media/particle/flames_2.png", PT_PART|PT_FLIP|PT_BRIGHT),
+    new quadrenderer("media/particle/eau.png", PT_PART|PT_FLIP|PT_BRIGHT),
     new quadrenderer("media/particle/neige.png", PT_PART|PT_FLIP|PT_RND4|PT_COLLIDE, -1),            // colliding snow
     new trailrenderer("media/particle/pluie.png", PT_TRAIL|PT_LERP|PT_COLLIDE),
     new trailrenderer("media/particle/nuage_1.png", PT_TRAIL),

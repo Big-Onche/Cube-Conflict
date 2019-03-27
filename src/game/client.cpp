@@ -660,6 +660,7 @@ namespace game
             case 3: name = "Dota"; break;
             case 4: name = "Lune"; break;
             case 5: name = "Volcan"; break;
+            case 6: name = "Ile"; break;
             default: newmap(13); break;
         }
         UI::hideui(NULL);

@@ -785,10 +785,37 @@ namespace game
 
     void physicstrigger(physent *d, bool local, int floorlevel, int waterlevel, int material)
     {
-        if     (waterlevel>0) { if(material!=MAT_LAVA) playsound(S_SPLASH1, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 350); }
-        else if(waterlevel<0) playsound(material==MAT_LAVA ? S_BURN : S_SPLASH2, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 350);
-        if     (floorlevel>0) { if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(S_JUMP, d); }
-        else if(floorlevel<0) { if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(S_LAND, d); }
+        vec o = (d==hudplayer() && !isthirdperson()) ? d->feetpos() : d->o;
+        if(waterlevel>0)
+        {
+            if(material&MAT_WATER)
+                playsound(S_SPLASH1, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 350);
+                particle_splash(PART_EAU, 25, 120, o, 0x151515, 10.0f+rnd(5), 500, -20);
+        }
+        else if(waterlevel<0)
+        {
+            if(material&MAT_WATER)
+            {
+                playsound(S_SPLASH2, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 350);
+                particle_splash(PART_EAU, 25, 120, o, 0x151515, 10.0f+rnd(5), 500, 20);
+            }
+            else if(material&MAT_LAVA)
+            {
+                playsound(S_BURN, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 350);
+                particle_splash(PART_SMOKE, 25, 100, o, 0x222222, 10.0f+rnd(5), 400, 20);
+                particle_splash(PART_FLAME1+rnd(2), 7, 120, o, 0xCC7744, 10.00f+rnd(5), 400, 300);
+            }
+        }
+        if (floorlevel>0)
+        {
+            particle_splash(PART_SMOKE, 10, 100, d->feetpos(), 0x666666, 7.0f+rnd(5), 400, 20);
+            if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(S_JUMP, d);
+        }
+        else if(floorlevel<0)
+        {
+            particle_splash(PART_SMOKE, 15, 120, d->feetpos(), 0x442211, 7.0f+rnd(5), 400, 20);
+            if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(S_LAND, d);
+        }
     }
 
     void dynentcollide(physent *d, physent *o, const vec &dir)
