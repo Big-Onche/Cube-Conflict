@@ -873,10 +873,9 @@ namespace game
         return colorname(d, NULL, alt, teamtextcode[d->team]);
     }
 
-    const char *teamcolor(const char *prefix, const char *suffix, int team, const char *alt)
+    const char *teamcolor(int team)
     {
-        if(!teamcolortext || !m_teammode || !validteam(team)) return alt;
-        return tempformatstring("\fs%s%s%s%s\fr", teamtextcode[team], prefix, teamnames[team], suffix);
+        return tempformatstring("\fs%s%s\fr", teamtextcode[team], teamnames[team]);
     }
 
     void suicide(physent *d)

@@ -540,7 +540,7 @@ struct ctfclientmode : clientmode
 
     const char *teamcolorflag(flag &f)
     {
-        return teamcolor("", "'s flag", f.team, "a flag");
+        return teamcolor(f.team);
     }
 
     void dropflag(gameent *d, int i, int version, const vec &droploc)
@@ -557,7 +557,7 @@ struct ctfclientmode : clientmode
             f.droploc = vec(-1, -1, -1);
             f.interptime = 0;
         }
-        conoutf(CON_GAMEINFO, "%s dropped %s", teamcolorname(d), teamcolorflag(f));
+        conoutf(CON_GAMEINFO, "%s\f7 %s perdu le drapeau %s", teamcolorname(d), d==player1 ? "as" : "a", teamcolorflag(f));
         playsound(S_DRAPEAUTOMBE);
     }
 
@@ -591,7 +591,7 @@ struct ctfclientmode : clientmode
         flageffect(i, f.team, interpflagpos(f), vec(f.spawnloc).addz(FLAGFLOAT+FLAGCENTER));
         f.interptime = 0;
         returnflag(i);
-        conoutf(CON_GAMEINFO, "%s returned %s", teamcolorname(d), teamcolorflag(f));
+        conoutf(CON_GAMEINFO, "%s\f7 %s récupéré le drapeau %s", teamcolorname(d), d==player1 ? "as" : "a", teamcolorflag(f));
         playsound(S_FLAGRETURN);
     }
 
@@ -603,7 +603,7 @@ struct ctfclientmode : clientmode
         flageffect(i, f.team, interpflagpos(f), vec(f.spawnloc).addz(FLAGFLOAT+FLAGCENTER));
         f.interptime = 0;
         returnflag(i);
-        conoutf(CON_GAMEINFO, "%s reset", teamcolorflag(f));
+        conoutf(CON_GAMEINFO, "Le drapeau %s\f7 a été replacé.", teamcolorflag(f));
         playsound(S_FLAGRESET);
     }
 
@@ -627,10 +627,10 @@ struct ctfclientmode : clientmode
         }
         if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%d", score), PART_TEXT, 2000, 0x32FF64, 4.0f, -8);
         d->flags = dflags;
-        conoutf(CON_GAMEINFO, "%s scored for %s", teamcolorname(d), teamcolor("team ", "", team, "a team"));
+        conoutf(CON_GAMEINFO, "%s\f7 %s marqué un point pour l'équipe %s !", teamcolorname(d), d==player1 ? "as" : "a", teamcolor(team));
         playsound(team==player1->team ? S_DRAPEAUSCORE : S_DRAPEAUTOMBE);
 
-        if(score >= FLAGLIMIT) conoutf(CON_GAMEINFO, "%s captured %d flags", teamcolor("team ", "", team, "a team"), score);
+        if(score >= FLAGLIMIT) conoutf(CON_GAMEINFO, "%s\f7 a gagné la partie !", teamcolor(team));
     }
 
     void takeflag(gameent *d, int i, int version)
@@ -640,8 +640,7 @@ struct ctfclientmode : clientmode
         f.version = version;
         f.interploc = interpflagpos(f, f.interpangle);
         f.interptime = lastmillis;
-        if(f.droptime) conoutf(CON_GAMEINFO, "%s picked up %s", teamcolorname(d), teamcolorflag(f));
-        else conoutf(CON_GAMEINFO, "%s stole %s", teamcolorname(d), teamcolorflag(f));
+        conoutf(CON_GAMEINFO, "%s\f7 %s volé le drapeau %s", teamcolorname(d), d==player1 ? "as" : "a", teamcolorflag(f));
         ownflag(i, d, lastmillis);
         playsound(S_DRAPEAUPRIS);
     }
