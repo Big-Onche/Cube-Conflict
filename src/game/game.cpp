@@ -826,9 +826,9 @@ namespace game
         if(d->physstate>=PHYS_SLOPE && moving)
         {
             int snd = S_PAS;
-            if(d->inwater) snd = S_NAGE;
+            if(lookupmaterial(d->feetpos())&MAT_WATER) snd = S_NAGE;
             if(lastmillis-pl->lastfootstep < (d->vel.magnitude()*(aptitudes[pl->aptitude].apt_vitesse*3.5f)*(pl->crouched() ? 2 : 1)*(d->inwater ? 2 : 1)/d->vel.magnitude())) return;
-            else playsound(snd, &d->o, 0, 0, 0 , 100, -1, 250);
+            else {playsound(snd, &d->o, 0, 0, 0 , 150, -1, 300); if(pl->epomillis) switch(rnd(4)) {case 0: playsound(S_PASEPO, &d->o, 0, 0, 0 , 500, -1, 1000);}}
         }
         pl->lastfootstep = lastmillis;
     }
