@@ -818,6 +818,21 @@ namespace game
         }
     }
 
+    void footsteps(physent *d)
+    {
+        if(d->blocked) return;
+        bool moving = d->move || d->strafe;
+        gameent *pl = (gameent *)d;
+        if(d->physstate>=PHYS_SLOPE && moving)
+        {
+            int snd = S_PAS;
+            if(d->inwater) snd = S_NAGE;
+            if(lastmillis-pl->lastfootstep < (d->vel.magnitude()*(aptitudes[pl->aptitude].apt_vitesse*3.5f)*(pl->crouched() ? 2 : 1)*(d->inwater ? 2 : 1)/d->vel.magnitude())) return;
+            else playsound(snd, &d->o, 0, 0, 0 , 100, -1, 250);
+        }
+        pl->lastfootstep = lastmillis;
+    }
+
     void dynentcollide(physent *d, physent *o, const vec &dir)
     {
     }

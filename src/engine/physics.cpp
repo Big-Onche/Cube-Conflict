@@ -1900,6 +1900,7 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
         {
             game::physicstrigger(pl, local, -1, 0);
         }
+        game::footsteps(pl);
     }
 
     if(pl->state==CS_ALIVE) updatedynentcache(pl);
