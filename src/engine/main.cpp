@@ -135,6 +135,7 @@ string backgroundcaption = "";
 Texture *backgroundmapshot = NULL;
 string backgroundmapname = "";
 char *backgroundmapinfo = NULL;
+char *backgroundastuce = NULL;
 
 void bgquad(float x, float y, float w, float h, float tx, float ty, float tw, float th)
 {
@@ -147,7 +148,7 @@ void bgquad(float x, float y, float w, float h, float tx, float ty, float tw, fl
 }
 
 string backgroundimg = "media/interface/image_fond.jpg";
-void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, const char *mapname, const char *mapinfo, bool force = false)
+void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, const char *mapname, const char *mapinfo, const char *astuce, bool force = false)
 {
     static int lastupdate = -1, lastw = -1, lasth = -1;
 
@@ -191,17 +192,8 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
         settexture("media/interface/shadow.png", 3);
         bgquad(0, 0, w, h);
 
-        float infowidth = 14*FONTH, sz = 0.35f*min(w, h), msz = (0.85f*min(w, h) - sz)/(infowidth + FONTH), x = 0.5f*w, y = (ly+lh - sz/15)/2.1f, mx = 0, my = 0, mw = 0, mh = 0;
-        if(mapinfo)
-        {
-            text_boundsf(mapinfo, mw, mh, infowidth);
-            x -= 0.5f*mw*msz;
-            if(mapshot && mapshot!=notexture)
-            {
-                x -= 0.5f*FONTH*msz;
-                mx = sz + FONTH*msz;
-            }
-        }
+        float infowidth = 17.5f*FONTH, sz = 0.35f*min(w, h), x = 0.5f*w, y = (ly+lh - sz/15)/2.1f;
+
         if(mapshot && mapshot!=notexture)
         {
             x -= 0.5f*sz;
@@ -209,18 +201,29 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
             glBindTexture(GL_TEXTURE_2D, mapshot->id);
             bgquad(x, y, sz, sz);
         }
+
         if(mapname)
         {
-            float tw = text_widthf(mapname), tsz = sz/(8*FONTH), tx = max(0.5f*(mw*msz - tw*tsz), 0.0f);
-            pushhudtranslate(x+mx+tx, y, tsz);
-            draw_text(mapname, 0, 0, 0x00, 0x00, 0x00);
+            int tw = text_width(mapname);
+            float tsz = 0.04f*min(screenw, screenh)/70,
+                  tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*8.0f*min(screenw, screenh) - 70*tsz;
+            pushhudmatrix();
+            hudmatrix.translate(tx, ty, 0);
+            hudmatrix.scale(tsz, tsz, 1);
+            flushhudmatrix();
+            draw_text(mapname, 0, 0, 0x01, 0x01, 0x01, 0xFF, -1);
             pophudmatrix();
-            my = 1.5f*FONTH*tsz;
         }
-        if(mapinfo)
+        if(astuce)
         {
-            pushhudtranslate(x+mx/1.2f, y+my/1.2f, msz);
-            draw_text(mapinfo, 0, 0, 0xAA, 0x00, 0x00, 0xFF, -1, infowidth);
+            int tw = infowidth+2;
+            float tsz = 0.04f*min(screenw, screenh)/100,
+                  tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*7.3f*min(screenw, screenh) - 100*tsz;
+            pushhudmatrix();
+            hudmatrix.translate(tx, ty, 0);
+            hudmatrix.scale(tsz, tsz, 1);
+            flushhudmatrix();
+            draw_text(astuce, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, -1, infowidth+2);
             pophudmatrix();
         }
     }
@@ -269,7 +272,7 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
 
 VAR(menumute, 0, 1, 1);
 
-void renderbackground(const char *caption, Texture *mapshot, const char *mapname, const char *mapinfo, bool force)
+void renderbackground(const char *caption, Texture *mapshot, const char *mapname, const char *mapinfo, const char *astuce, bool force)
 {
     if(!inbetweenframes && !force) return;
 
@@ -282,13 +285,13 @@ void renderbackground(const char *caption, Texture *mapshot, const char *mapname
 
     if(force)
     {
-        renderbackgroundview(w, h, caption, mapshot, mapname, mapinfo, true);
+        renderbackgroundview(w, h, caption, mapshot, mapname, mapinfo, astuce, true);
         return;
     }
 
     loopi(3)
     {
-        renderbackgroundview(w, h, caption, mapshot, mapname, mapinfo);
+        renderbackgroundview(w, h, caption, mapshot, mapname, mapinfo, astuce);
         swapbuffers(false);
     }
 
@@ -301,12 +304,17 @@ void renderbackground(const char *caption, Texture *mapshot, const char *mapname
         DELETEA(backgroundmapinfo);
         if(mapinfo) backgroundmapinfo = newstring(mapinfo);
     }
+    if(astuce != backgroundastuce)
+    {
+        DELETEA(backgroundastuce);
+        if(astuce) backgroundastuce = newstring(astuce);
+    }
 }
 
 void restorebackground(int w, int h)
 {
     if(renderedframe) return;
-    renderbackgroundview(w, h, backgroundcaption[0] ? backgroundcaption : NULL, backgroundmapshot, backgroundmapname[0] ? backgroundmapname : NULL, backgroundmapinfo);
+    renderbackgroundview(w, h, backgroundcaption[0] ? backgroundcaption : NULL, backgroundmapshot, backgroundmapname[0] ? backgroundmapname : NULL, backgroundmapinfo, backgroundastuce);
 }
 
 float loadprogress = 0;
@@ -1169,6 +1177,7 @@ int main(int argc, char **argv)
     execfile("config/heightmap.cfg");
     execfile("config/blendbrush.cfg");
     execfile("config/sauvegarde.cfg", false, true);
+    execfile("config/astuces.cfg");
 
     if(game::savedservers()) execfile(game::savedservers(), false);
 

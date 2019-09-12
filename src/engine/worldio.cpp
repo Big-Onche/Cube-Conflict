@@ -692,7 +692,7 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     resetmap();
 
     Texture *mapshot = textureload(picname, 3, true, false);
-    renderbackground("Chargement...", mapshot, mname, game::getmapinfo());
+    renderbackground("Chargement...", mapshot, mname, game::getmapinfo(), game::getastuce());
 
     setvar("mapversion", hdr.version, true, false);
 
@@ -880,7 +880,7 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     attachentities();
     allchanged(true);
 
-    renderbackground("Chargement...", mapshot, mname, game::getmapinfo());
+    renderbackground("Chargement...", mapshot, mname, game::getmapinfo(), game::getastuce());
 
     //if(maptitle[0] && strcmp(maptitle, "Untitled Map by Unknown")) conoutf(CON_ECHO, "%s", maptitle);
 

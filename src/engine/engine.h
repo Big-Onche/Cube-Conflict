@@ -619,7 +619,7 @@ extern void pushevent(const SDL_Event &e);
 extern bool interceptkey(int sym);
 
 extern float loadprogress;
-extern void renderbackground(const char *caption = NULL, Texture *mapshot = NULL, const char *mapname = NULL, const char *mapinfo = NULL, bool force = false);
+extern void renderbackground(const char *caption = NULL, Texture *mapshot = NULL, const char *mapname = NULL, const char *mapinfo = NULL, const char *astuce = NULL, bool force = false);
 extern void renderprogress(float bar, const char *text, bool background = false);
 
 extern void getframemillis(float &avg, float &best, float &worst);

@@ -2485,7 +2485,7 @@ void gl_drawview()
 
 void gl_drawmainmenu()
 {
-    renderbackground(NULL, NULL, NULL, NULL, true);
+    renderbackground(NULL, NULL, NULL, NULL, NULL, true);
 }
 
 VARNP(damagecompass, usedamagecompass, 0, 1, 1);

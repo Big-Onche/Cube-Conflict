@@ -749,8 +749,8 @@ struct gameent : dynent, gamestate
     int lastpain;
     int lastaction, lastattack;
     int attacking;
-    int attacksound, attackchan, idlesound, idlechan, hurtchan, ragechan;
-    int lasttaunt, lastfootstep;
+    int lastfootstep, attacksound, attackchan, idlesound, idlechan, hurtchan, ragechan;
+    int lasttaunt;
     int lastpickup, lastpickupmillis, flagpickup;
     int killstreak, frags, flags, deaths, totaldamage, totalshots;
     editinfo *edit;

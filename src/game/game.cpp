@@ -778,6 +778,20 @@ namespace game
         return showmodeinfo && m_valid(gamemode) ? gamemodes[gamemode - STARTGAMEMODE].name : NULL;
     }
 
+    vector<char *> astuces;
+    ICOMMAND(astucetxt, "s", (char *astuce), { astuces.add(newstring(astuce)); });
+
+    const char *getastuce()
+    {
+        static char astuce[1000];
+        astuce[0] = '\0';
+        if(!astuces.empty())
+        {
+            strcat(astuce, astuces[rnd(astuces.length())]);
+        }
+        return astuce;
+    }
+
     const char *getscreenshotinfo()
     {
         return server::modename(gamemode, NULL);
