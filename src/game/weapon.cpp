@@ -1285,7 +1285,7 @@ namespace game
                 up.z += dist/8;
                 particle_splash(PART_SMOKE,  10, 600, d->muzzle, 0x444444, 4.0f, 20, 500);
                 if(d->ragemillis) particle_splash(PART_SPARK,  8, 500, d->muzzle, 0xFF0000, 1.0f,  50,   200);
-                newbouncer(d==player1 ? d->muzzle : hudgunorigin(gun, d->o, to, d), up, local, id, d, BNC_GRENADE, attacks[atk].ttl, attacks[atk].projspeed);
+                newbouncer(d==player1 && !thirdperson ? d->muzzle : hudgunorigin(gun, d->o, to, d)   , up, local, id, d, BNC_GRENADE, attacks[atk].ttl, attacks[atk].projspeed);
                 break;
             }
             case ATK_KAMIKAZE_SHOOT:
