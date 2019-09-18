@@ -266,8 +266,7 @@ namespace game
         }
 
         b->bounces++;
-
-        if(b->bouncetype == BNC_GIBS || b->bounces <= 2) addstain(STAIN_BLOOD, vec(b->o).sub(vec(surface).mul(b->radius)), surface, 2.96f/b->bounces, bvec(0x60, 0xFF, 0xFF), rnd(4));
+        if(b->bouncetype == BNC_GIBS && b->bounces <= 2) addstain(STAIN_BLOOD, vec(b->o).sub(vec(surface).mul(b->radius)), surface, 2.96f/b->bounces, bvec(0x60, 0xFF, 0xFF), rnd(4));
     }
 
     void updatebouncers(int time)
@@ -287,7 +286,7 @@ namespace game
                     case BNC_DOUILLES: case BNC_BIGDOUILLES: case BNC_CARTOUCHES: regular_particle_splash(PART_SMOKE, 1, 150, pos, 0x404040, BNC_DOUILLES ? 1.0f : 1.75f, 50, -20); break;
                     case BNC_GRENADE: regular_particle_splash(PART_SMOKE, 1, 150, pos, 0x404040, 2.5f, 50, -20); break;
                     case BNC_DEBRIS: regular_particle_splash(PART_SMOKE, 3, 250, pos, 0x222222, 2.5f, 50, -50); break;
-                    case BNC_GIBS:  {switch(rnd(16)) {case 1: regular_particle_splash(PART_BLOOD, 1, 9999, pos, 0x60FFFF, 1.0f, 50);}}
+                    case BNC_GIBS: {switch(rnd(16)) {case 1: regular_particle_splash(PART_BLOOD, 1, 9999, pos, 0x60FFFF, 1.0f, 50);}}
                 }
             }
 
