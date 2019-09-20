@@ -96,7 +96,6 @@ namespace game
             rendermessage(waitmsg, 95, 1.5f, -580);
         }
 
-
         if(player1->state==CS_SPECTATOR)
         {
             string spectatormsg, color;
@@ -133,7 +132,6 @@ namespace game
         {
             if(cmode) cmode->drawhud(d, w, h);
         }
-        if(player1->state==CS_SPECTATOR && d==player1) {pophudmatrix(); return; }
 
         if((player1->gunselect == GUN_SKS  || player1->gunselect == GUN_SV98 || player1->gunselect==GUN_ARBALETE || player1->gunselect==GUN_S_CAMPOUZE || player1->gunselect==GUN_S_ROQUETTES) && zoom == 1)
         {
@@ -191,10 +189,13 @@ namespace game
 
         //////////////////////////////////////// RENDU DES IMAGES ////////////////////////////////////////
 
-        if(d->state==CS_DEAD)
+        if(d->state==CS_DEAD || player1->state==CS_SPECTATOR)
         {
-            settexture("media/interface/hud/mort.png");
-            bgquad(15, h-130, 115, 115);
+            if(d->state==CS_DEAD)
+            {
+                settexture("media/interface/hud/mort.png");
+                bgquad(15, h-130, 115, 115);
+            }
             pophudmatrix();
             return;
         }
