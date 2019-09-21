@@ -381,9 +381,13 @@ struct ctfclientmode : clientmode
                 break;
             }
         }
+        pushhudscale(2);
+        pophudmatrix();
+        resethudshader();
 
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         int s = 1800/4, x = 1800*w/h - s - s/10, y = s/10;
+
         gle::colorf(1, 1, 1, minimapalpha);
         if(minimapalpha >= 1) glDisable(GL_BLEND);
         bindminimap();
@@ -413,18 +417,6 @@ struct ctfclientmode : clientmode
             drawblip(d, x, y, s, i, true);
         }
         drawteammates(d, x, y, s);
-        if(d->state == CS_DEAD)
-        {
-            int wait = respawnwait(d);
-            if(wait>=0)
-            {
-                pushhudscale(2);
-                bool flash = wait>0 && d==player1 && lastspawnattempt>=d->lastpain && lastmillis < lastspawnattempt+100;
-                draw_textf("%s%d", (x+s/2)/2-(wait>=10 ? 28 : 16), (y+s/2)/2-32, flash ? "\f3" : "", wait);
-                pophudmatrix();
-                resethudshader();
-            }
-        }
     }
 
     void removeplayer(gameent *d)

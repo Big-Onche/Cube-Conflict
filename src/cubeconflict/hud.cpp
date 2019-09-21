@@ -123,15 +123,18 @@ namespace game
 
     void gameplayhud(int w, int h)
     {
+        gameent *d = hudplayer();
+        if(d->state==CS_EDITING || d->state==CS_SPECTATOR) return;
+        else
+        {
+            pushhudscale(h/1800.0f);
+            if(cmode) cmode->drawhud(d, w, h);
+            pophudmatrix();
+        }
+
         if(zoom && crosshairsize >= 31) {crosshairsize -= 3; if(crosshairsize<31) crosshairsize = 31;}
         else if (crosshairsize<40) crosshairsize += 3;
         zoomfov = guns[player1->gunselect].maxzoomfov;
-
-        gameent *d = hudplayer();
-        if(d->state!=CS_EDITING)
-        {
-            if(cmode) cmode->drawhud(d, w, h);
-        }
 
         if((player1->gunselect == GUN_SKS  || player1->gunselect == GUN_SV98 || player1->gunselect==GUN_ARBALETE || player1->gunselect==GUN_S_CAMPOUZE || player1->gunselect==GUN_S_ROQUETTES) && zoom == 1)
         {
@@ -320,6 +323,7 @@ namespace game
 
 
         pophudmatrix();
+
     }
 }
 

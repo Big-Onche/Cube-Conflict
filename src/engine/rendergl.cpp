@@ -2049,7 +2049,7 @@ void clipminimap(ivec &bbmin, ivec &bbmax, cube *c = worldroot, const ivec &co =
 
 void drawminimap()
 {
-    if(!game::needminimap()) { clearminimap(); return; }
+    //if(!game::needminimap()) { clearminimap(); return; }
 
     if(!showminimap)
     {
