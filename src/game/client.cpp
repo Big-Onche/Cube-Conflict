@@ -240,8 +240,19 @@ namespace game
         genprivkey(secret, privkey, pubkey);
         conoutf("private key: %s", privkey.getbuf());
         conoutf("public key: %s", pubkey.getbuf());
+        result(privkey.getbuf());
     }
     COMMAND(genauthkey, "s");
+
+    void getpubkey(const char *desc)
+    {
+        authkey *k = findauthkey(desc);
+        if(!k) { if(desc[0]) conoutf("no authkey found: %s", desc); else conoutf("no global authkey found"); return; }
+        vector<char> pubkey;
+        if(!calcpubkey(k->key, pubkey)) { conoutf("failed calculating pubkey"); return; }
+        result(pubkey.getbuf());
+    }
+    COMMAND(getpubkey, "s");
 
     void saveauthkeys()
     {
@@ -1757,7 +1768,8 @@ namespace game
                 victim->killstreak = 0;
                 if(m_teammode) setteaminfo(actor->team, tfrags);
 #if 0
-                if(actor!=player1 && (!cmode || !cmode->hidefrags()))
+                extern int hidefrags;
+                if(actor!=player1 && (!cmode || !cmode->hidefrags() || !hidefrags))
                     particle_textcopy(actor->abovehead(), tempformatstring("%d", actor->frags), PART_TEXT, 2000, 0x32FF64, 4.0f, -8);
 #endif
                 if(!victim) break;
