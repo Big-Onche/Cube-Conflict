@@ -188,7 +188,7 @@ namespace game
         loopi(attacks[atk].rays) offsetray(from, to, attacks[atk].spread, attacks[atk].nozoomspread, attacks[atk].range, rays[i], d);
     }
 
-    enum { BNC_GRENADE, BNC_KAMIKAZE, BNC_GIBS, BNC_DEBRIS, BNC_DOUILLES, BNC_BIGDOUILLES, BNC_CARTOUCHES};
+    enum { BNC_GRENADE, BNC_KAMIKAZE, BNC_GIBS, BNC_DEBRIS, BNC_DOUILLES, BNC_BIGDOUILLES, BNC_CARTOUCHES, BNC_DOUILLESUZI};
 
     struct bouncer : physent
     {
@@ -258,7 +258,7 @@ namespace game
         {
             switch(b->bouncetype)
             {
-                case BNC_DOUILLES: playsound(S_DOUILLE, &b->o, 0, 0, 0 , 50, -1, 150); break;
+                case BNC_DOUILLES: case BNC_DOUILLESUZI: playsound(S_DOUILLE, &b->o, 0, 0, 0 , 50, -1, 150); break;
                 case BNC_BIGDOUILLES: playsound(S_BIGDOUILLE, &b->o, 0, 0, 0 , 50, -1, 150); break;
                 case BNC_CARTOUCHES: playsound(S_CARTOUCHE, &b->o, 0, 0, 0 , 50, -1, 150); break;
                 case BNC_GRENADE: playsound(S_RGRENADE, &b->o, 0, 0, 0 , 100, -1, 350); break;
@@ -283,7 +283,7 @@ namespace game
 
                 switch(bnc.bouncetype)
                 {
-                    case BNC_DOUILLES: case BNC_BIGDOUILLES: case BNC_CARTOUCHES: regular_particle_splash(PART_SMOKE, 1, 150, pos, 0x404040, BNC_DOUILLES ? 1.0f : 1.75f, 50, -20); break;
+                    case BNC_DOUILLES: case BNC_DOUILLESUZI: case BNC_BIGDOUILLES: case BNC_CARTOUCHES: regular_particle_splash(PART_SMOKE, 1, 150, pos, 0x404040, BNC_DOUILLES ? 1.0f : BNC_DOUILLESUZI ? 0.75 : 1.75f, 50, -20); break;
                     case BNC_GRENADE: regular_particle_splash(PART_SMOKE, 1, 150, pos, 0x404040, 2.5f, 50, -20); break;
                     case BNC_DEBRIS: regular_particle_splash(PART_SMOKE, 3, 250, pos, 0x222222, 2.5f, 50, -50); break;
                     case BNC_GIBS: {switch(rnd(16)) {case 1: regular_particle_splash(PART_BLOOD, 1, 9999, pos, 0x60FFFF, 1.0f, 50);}}
@@ -389,11 +389,13 @@ namespace game
 
     void spawnbouncer(const vec &p, const vec &vel, gameent *d, int type)
     {
-        vec to;
+        vec to(0, 0, 0);
+
         switch(type)
         {
-            case BNC_DOUILLES: case BNC_BIGDOUILLES: case BNC_CARTOUCHES: {vec to(1, 1, 1);} break;
-            default: vec to(rnd(100)-50, rnd(100)-50, rnd(100)-50);
+            case BNC_GIBS: case BNC_DEBRIS: to.add(vec(rnd(100)-50, rnd(100)-50, rnd(100)-50)); break;
+            case BNC_DOUILLESUZI: to.add(vec(0, 0, -1)); break;
+            default: to.add(vec(0, 0, 1));
         }
         if(to.iszero()) to.z += 1;
         to.normalize();
@@ -660,7 +662,7 @@ namespace game
                     vec pos = vec(v).add(vec(rnd(200), rnd(200), rnd(200)));
                     pos.sub(vec(rnd(200), rnd(200), rnd(200)));
                     particle_splash(PART_SMOKE, 1, 2000,  pos, 0x212121, 150.0f, 700, 70);
-                    particle_splash(PART_SMOKE, 1, 15000, pos, 0x222222, 200.0f, 500, 300);
+                    particle_splash(PART_SMOKE, 1, 15000, pos, 0x222222, 200.0f,  35, 300);
                     particle_splash(PART_SMOKE, 2, 5000,  pos, 0x333333, 250.0f, 1000, 500);
                     particle_splash(PART_FLAME1+rnd(2),  3, 1000, pos, 0xFFFF00, 35+rnd(15), 800, 300);
                     particle_splash(PART_FLAME1+rnd(2),  3, 1000, pos, 0x224400, 35+rnd(15), 800, 300);
@@ -670,11 +672,6 @@ namespace game
                 particle_fireball(v, 350, PART_ONDECHOC, 300, 0xFFCCAA, 800.0f);
                 particle_fireball(v, 350, PART_ONDECHOC, 300, 0xFFCCAA, 800.0f);
                 particle_fireball(v, 350, PART_ONDECHOC, 300, 0xFFCCAA, 800.0f);
-                //particle_fireball(v, 350, PART_ONDECHOC, 300, 0xFF5500, 10.0f);
-                //particle_fireball(v, 350, PART_ONDECHOC, 300, 0xFFFFFF, 20.0f);
-                //particle_fireball(v, 100, PART_EXPLOSION, 300, 0xFFEEDD, 1200.0f);
-
-                //loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
             }
             break;
             case ATK_ARTIFICE_SHOOT:
@@ -1112,14 +1109,13 @@ namespace game
         //int soundwater = attacks[atk]].soundwater;
         if(player1->aptisort2 && d==player1 && player1->aptitude==APT_MAGICIEN) playsound(S_SORTMAGE2);
         if(d->aptisort3 && d->aptitude==APT_PRETRE) adddynlight(d->muzzle, 15, vec(0.5f, 0.5f, 0.0f), 300, 50, L_NOSHADOW|L_VOLUMETRIC);
-
         switch(atk)
         {
             case ATK_PULSE_SHOOT:
                 particle_flare(d->muzzle, d->muzzle, 140, PART_PULSE_MUZZLE_FLASH, d->steromillis ? 0xFF0000 : 0xFF4400, zoom ? 1.00f : 3.50f, d);
                 if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 140, PART_PULSE_MUZZLE_FLASH, 0xFF0000, zoom ? 1.50f : 5.50f, d);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
-                if(d==player1) mousemove(-5+rnd(6),-5+rnd(6));
+                if(d==player1) mousemove(-5+rnd(11),-5+rnd(11));
                 break;
 
             case ATK_SPOCKGUN_SHOOT:
@@ -1165,7 +1161,7 @@ namespace game
                 adddynlight(hudgunorigin(gun, d->o, to, d), 15, vec(1.0f, 0.75f, 0.5f), 30, 100, DL_FLASH, 0, vec(0, 0, 0), d);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
                 if(d!=hudplayer()) sound_nearmiss(S_FLYBY, from, to);
-                if(d==player1) mousemove(ATK_MINIGUN_SHOOT ? -7+rnd(15) : -3+rnd(4), ATK_MINIGUN_SHOOT ? -7+rnd(15) :  -3+rnd(4));
+                if(d==player1) mousemove(ATK_MINIGUN_SHOOT ? -7+rnd(15) : -3+rnd(7), ATK_MINIGUN_SHOOT ? -7+rnd(15) :  -3+rnd(7));
                 break;
             case ATK_GAU8_SHOOT:
                 if(d->type==ENT_PLAYER) sound = S_GAU8;
@@ -1181,9 +1177,7 @@ namespace game
             case ATK_MOSSBERG_SHOOT:
             case ATK_HYDRA_SHOOT:
                 {
-                    int nbdouilles = 2;
-                    if(atk==ATK_HYDRA_SHOOT) nbdouilles++;
-                    loopi(nbdouilles) spawnbouncer(d->balles, d->balles, d, BNC_CARTOUCHES);
+                    loopi(atk==ATK_HYDRA_SHOOT ? 3 : 2) spawnbouncer(d->balles, d->balles, d, BNC_CARTOUCHES);
                     particle_flare(d->muzzle, d->muzzle, 140, PART_NORMAL_MUZZLE_FLASH, d->steromillis ? 0xFF0000 : 0xFF7722, zoom ? 1.25f : 3.50f, d);
                     if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 140, PART_NORMAL_MUZZLE_FLASH, 0xFF0000, zoom ? 2.00f : 5.50f, d);
                     particle_splash(PART_SMOKE,  4, 500, d->muzzle, 0x444444, 3.5f, 20, 500);
@@ -1199,7 +1193,7 @@ namespace game
             case ATK_SV98_SHOOT:
             case ATK_SKS_SHOOT:
             case ATK_CAMPOUZE_SHOOT:
-                spawnbouncer(d->muzzle, d->muzzle, d, BNC_BIGDOUILLES);
+                spawnbouncer(d->balles, d->muzzle, d, BNC_BIGDOUILLES);
                 particle_splash(PART_SMOKE,  4,  600,   d->muzzle, 0x444444, 2.0f, 20, 500);
                 particle_flare(d->muzzle, d->muzzle, 100, PART_NORMAL_MUZZLE_FLASH, d->steromillis ? 0xFF0000 : 0xFFFFFF, 1.25f, d);
                 particle_flare(d->muzzle, d->muzzle, 100, PART_SNIPE_MUZZLE_FLASH, d->steromillis ? 0xFF0000 : 0xFFFFFF, 5.0f, d);
@@ -1224,14 +1218,14 @@ namespace game
             case ATK_UZI_SHOOT:
             case ATK_FAMAS_SHOOT:
             case ATK_GLOCK_SHOOT:
-                spawnbouncer(d->balles, d->balles, d, BNC_DOUILLES);
+                spawnbouncer(d->balles, d->balles, d, atk==ATK_UZI_SHOOT ? BNC_DOUILLESUZI : BNC_DOUILLES);
                 particle_flare(d->muzzle, d->muzzle, 140, PART_MINIGUN_MUZZLE_FLASH, d->steromillis ? 0xFF0000 : 0xFF7722, zoom ? 0.75f : 2.00f, d);
                 if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 80, PART_MINIGUN_MUZZLE_FLASH, 0xFF00002, zoom ? 1.5f : 5.00f, d);
                 particle_splash(PART_SMOKE,  4, 500, d->muzzle, 0x444444, 2.0f, 20, 500);
                 adddynlight(hudgunorigin(gun, d->o, to, d), 15, vec(1.0f, 0.75f, 0.5f), 30, 100, DL_FLASH, 0, vec(0, 0, 0), d);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
                 if(d!=hudplayer()) sound_nearmiss(S_FLYBY, from, to);
-                if(d==player1) {if(atk!=ATK_GLOCK_SHOOT) mousemove(-4+rnd(5), -4+rnd(5));}
+                if(d==player1) {if(atk!=ATK_GLOCK_SHOOT) mousemove(-3+rnd(7), -3+rnd(7));}
                 break;
             case ATK_MEDIGUN_SHOOT:
             {
@@ -1256,14 +1250,14 @@ namespace game
                     irays.sub(d->muzzle);
                     irays.normalize().mul(1300.0f);
 
-                    switch(rnd(5))
+                    switch(rnd(6))
                     {
                         case 1:
                         {
-                            particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0xAA0000 :  0x994422, 6, 100);
-                            particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x990000 :  0xBB0011, 6, 100);
-                            particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0xBB0000 :  0x991100, 6, 100);
-                            particle_flying_flare(d->muzzle, irays, 900, PART_SMOKE, 0x111111, 9, 120);
+                            particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0xAA0000 :  0x994422, 9, 100);
+                            particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x990000 :  0xBB0011, 9, 100);
+                            particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0xBB0000 :  0x991100, 9, 100);
+                            particle_flying_flare(d->muzzle, irays, 900, PART_SMOKE, 0x111111, 12, 120);
                             adddynlight(hudgunorigin(gun, d->o, irays, d), 100, vec(1.0f, 0.75f, 0.5f), 100, 100, L_NODYNSHADOW, 10, vec(1.0f, 0, 0), d);
                             flamehit(from, rays[i]);
                         }
@@ -1578,7 +1572,7 @@ namespace game
                 {
                     case BNC_GIBS: mdl = gibnames[bnc.variant]; break;
                     case BNC_DEBRIS: mdl = debrisnames[bnc.variant]; break;
-                    case BNC_DOUILLES: mdl = douillesnames[bnc.variant]; break;
+                    case BNC_DOUILLES: case BNC_DOUILLESUZI: mdl = douillesnames[bnc.variant]; break;
                     case BNC_BIGDOUILLES: mdl = bigdouillesnames[bnc.variant]; break;
                     case BNC_CARTOUCHES: mdl = cartouchessnames[bnc.variant]; break;
                     default: continue;
