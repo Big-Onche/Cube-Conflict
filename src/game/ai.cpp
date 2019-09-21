@@ -104,7 +104,7 @@ namespace ai
         //Les IA captent les sorts des autres joueurs
         if(e->aptisort2 && e->aptitude==APT_PHYSICIEN) switch(rnd(100)) {case 0: return true; break; default: return false;}
 
-        if(d->gunselect==GUN_MEDIGUN && e->health<100 && e->state == CS_ALIVE && isteam(d->team, e->team)) return true;
+        if(d->gunselect==GUN_MEDIGUN && e->health<100 && isteam(d->team, e->team)) return e->state == CS_ALIVE;
         else return e->state == CS_ALIVE && !isteam(d->team, e->team);
     }
 
@@ -127,14 +127,18 @@ namespace ai
         return false;
     }
 
-    bool canshoot(gameent *d, gameent *e)
+    extern bool hasrange(gameent *d, gameent *e, int weap);
+
+    bool canshoot(gameent *d, int atk, gameent *e)
     {
         if(attackrange(d, d->gunselect, e->o.squaredist(d->o)) && targetable(d, e))
             return d->ammo[d->gunselect] > 0 && lastmillis - d->lastaction >= d->gunwait;
+
         return false;
+        //return !d->ai->becareful && d->ammo[d->gunselect] > 0 && lastmillis - d->lastaction >= d->gunwait;
     }
 
-    bool canshoot(gameent *d, int atk, gameent *e)
+    bool canshoot(gameent *d)
     {
         return !d->ai->becareful && d->ammo[d->gunselect] > 0 && lastmillis - d->lastaction >= d->gunwait;
     }
@@ -457,7 +461,7 @@ namespace ai
 
     bool hasgoodammo(gameent *d)
     {
-        static const int goodguns[] = { GUN_S_CAMPOUZE, GUN_S_NUKE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_PULSE, GUN_RAIL, GUN_FAMAS, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_AK47, GUN_SV98, GUN_SKS, GUN_ARTIFICE, GUN_ARBALETE, GUN_KAMIKAZE, GUN_LANCEFLAMMES };
+        static const int goodguns[] = { GUN_S_CAMPOUZE, GUN_S_NUKE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_KAMIKAZE, GUN_PULSE, GUN_RAIL, GUN_FAMAS, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_AK47, GUN_SV98, GUN_SKS, GUN_ARTIFICE, GUN_ARBALETE, GUN_KAMIKAZE, GUN_LANCEFLAMMES };
         loopi(sizeof(goodguns)/sizeof(goodguns[0])) if(d->hasammo(goodguns[0])) return true;
         if(d->ammo[GUN_M32] > 5) return true;
         return false;
@@ -654,7 +658,13 @@ namespace ai
         d->ai->lastrun = lastmillis;
 
         if(forcegun >= 0 && forcegun < NUMGUNS) d->ai->weappref = forcegun;
-        else d->ai->weappref = rnd(GUN_S_CAMPOUZE-GUN_RAIL+1)+GUN_RAIL;
+
+        switch(d->aptitude)
+        {
+            case APT_KAMIKAZE: d->ai->weappref = GUN_KAMIKAZE; break;
+            case APT_MEDECIN: d->ai->weappref = m_teammode ? GUN_MEDIGUN : rnd(GUN_GLOCK-GUN_RAIL+1)+GUN_RAIL; break;
+            default: d->ai->weappref = rnd(GUN_GLOCK-GUN_RAIL+1)+GUN_RAIL;
+        }
 
         vec dp = d->headpos();
         findorientation(dp, d->yaw, d->pitch, d->ai->target);
@@ -1232,7 +1242,7 @@ namespace ai
 
         if(!d->hasammo(d->gunselect) || !hasrange(d, e, d->gunselect) || (d->gunselect != d->ai->weappref && (!isgoodammo(d->gunselect) || d->hasammo(d->ai->weappref))))
         {
-            static const int gunprefs[] = {GUN_S_NUKE, GUN_S_CAMPOUZE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_KAMIKAZE, GUN_MINIGUN, GUN_PULSE, GUN_RAIL, GUN_LANCEFLAMMES, GUN_HYDRA, GUN_SV98, GUN_SMAW, GUN_ARBALETE, GUN_ARTIFICE, GUN_MOSSBERG, GUN_FAMAS, GUN_M32, GUN_SKS, GUN_SPOCKGUN, GUN_UZI };
+            static const int gunprefs[] = {GUN_S_NUKE, GUN_S_CAMPOUZE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_KAMIKAZE, GUN_CACFLEAU, GUN_CACMARTEAU, GUN_CACMASTER, GUN_CAC349, GUN_MINIGUN, GUN_PULSE, GUN_RAIL, GUN_LANCEFLAMMES, GUN_HYDRA, GUN_SV98, GUN_SMAW, GUN_ARBALETE, GUN_ARTIFICE, GUN_MOSSBERG, GUN_FAMAS, GUN_M32, GUN_SKS, GUN_SPOCKGUN, GUN_UZI };
 
             int gun = -1;
             if(d->hasammo(d->ai->weappref) && hasrange(d, e, d->ai->weappref)) gun = d->ai->weappref;
