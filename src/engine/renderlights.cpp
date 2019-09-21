@@ -5043,7 +5043,7 @@ void setlightlod()
             smdynshadow = 1;
             smnoshadow = 0;
             csmsplits = 3;
-            smsize = 16;
+            smsize = 14;
             smminradius = 100;
             dynlightdist = 1024;
             volumetric = 1;

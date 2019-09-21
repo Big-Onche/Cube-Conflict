@@ -153,7 +153,7 @@ void stopmusic()
 }
 
 VARF(sound, 0, 1, 1, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
-VARF(soundchans, 1, 32, 512, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
+VARF(soundchans, 1, 128, 512, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 VARF(soundfreq, 0, 44100, 44100, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 VARF(soundbufferlen, 128, 1024, 4096, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 
@@ -583,7 +583,7 @@ void updatesounds()
     }
 }
 
-VARP(maxsoundsatonce, 0, 32, 256);
+VARP(maxsoundsatonce, 0, 128, 256);
 
 VAR(dbgsound, 0, 0, 1);
 

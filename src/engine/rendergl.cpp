@@ -2616,8 +2616,8 @@ VARFP(damagescreen, 0, 1, 1, { if(!damagescreen) damageblendmillis = 0; });
 VARP(damagescreenfactor, 1, 5, 100);
 VARP(damagescreenalpha, 1, 60, 100);
 VARP(damagescreenfade, 0, 1000, 1000);
-VARP(damagescreenmin, 1, 7, 1000);
-VARP(damagescreenmax, 1, 75, 1000);
+VARP(damagescreenmin, 1, 10, 1000);
+VARP(damagescreenmax, 1, 100, 1000);
 
 void damageblend(int n)
 {
