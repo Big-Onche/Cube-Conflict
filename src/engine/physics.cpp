@@ -1176,6 +1176,7 @@ void slideagainst(physent *d, vec &dir, const vec &obstacle, bool foundfloor, bo
     d->vel.project(wall);
     d->falling.project(wall);
     recalcdir(d, oldvel, dir);
+    d->lastjump = lastmillis;
 }
 
 void switchfloor(physent *d, vec &dir, const vec &floor)
@@ -1748,6 +1749,9 @@ VAR(floatspeed, 1, 400, 10000);
 void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curtime, int jointmillis, int aptitude)
 {
     bool allowmove = game::allowmove(pl);
+    int maxjumps = aptitude==APT_NINJA ? 2 : 1;
+    float jumpheight = aptitude==APT_NINJA ? JUMPVEL*1.5f : JUMPVEL;
+
     if(floating)
     {
         if(pl->jumping && allowmove)
@@ -1756,17 +1760,23 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
             pl->vel.z = max(pl->vel.z, JUMPVEL);
         }
     }
-    else if(pl->physstate >= PHYS_SLOPE || water)
+    else if(((pl->physstate >= PHYS_FALL || lastmillis-pl->lastjump < 280) || water) && pl->jumps<maxjumps)
     {
         if(water && !pl->inwater) pl->vel.div(8);
         if(pl->jumping && allowmove)
         {
             pl->jumping = false;
-            pl->vel.z = max(pl->vel.z, (jointmillis/(aptitude==13 ? 150 : 300))+JUMPVEL);  // physics impulse upwards
+            pl->vel.z = max(pl->vel.z, (jointmillis/(aptitude==13 ? 150 : 300))+jumpheight);  // physics impulse upwards
             if(water) { pl->vel.x /= 8.0f; pl->vel.y /= 8.0f; } // dampen velocity change even harder, gives correct water feel
 
             game::physicstrigger(pl, local, 1, 0);
+            pl->jumps++;
         }
+    }
+    if(pl->physstate >= PHYS_SLOPE)
+    {
+        pl->jumps = 0;
+        pl->jumping = false;
     }
     if(!floating && pl->physstate == PHYS_FALL) pl->timeinair += curtime;
 
