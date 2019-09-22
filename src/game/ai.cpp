@@ -102,10 +102,10 @@ namespace ai
     {
         if(d == e || !canmove(d)) return false;
         //Les IA captent les sorts des autres joueurs
-        if(e->aptisort2 && e->aptitude==APT_PHYSICIEN) switch(rnd(100)) {case 0: return true; break; default: return false;}
+        if(e->aptisort2 && e->aptitude==APT_PHYSICIEN) switch(rnd(25)) {case 0: return true; break; default: return false;}
 
-        if(d->gunselect==GUN_MEDIGUN && e->health<100 && isteam(d->team, e->team)) return e->state == CS_ALIVE;
-        else return e->state == CS_ALIVE && !isteam(d->team, e->team);
+        if(d->gunselect==GUN_MEDIGUN && e->health<100) return e->state == CS_ALIVE && isteam(d->team, e->team);
+        else if (d->gunselect!=GUN_MEDIGUN) return e->state == CS_ALIVE && !isteam(d->team, e->team);
     }
 
     bool getsight(vec &o, float yaw, float pitch, vec &q, vec &v, float mdist, float fovx, float fovy)
@@ -136,11 +136,6 @@ namespace ai
 
         return false;
         //return !d->ai->becareful && d->ammo[d->gunselect] > 0 && lastmillis - d->lastaction >= d->gunwait;
-    }
-
-    bool canshoot(gameent *d)
-    {
-        return !d->ai->becareful && d->ammo[d->gunselect] > 0 && lastmillis - d->lastaction >= d->gunwait;
     }
 
     bool hastarget(gameent *d, int atk, aistate &b, gameent *e, float yaw, float pitch, float dist)
@@ -419,8 +414,8 @@ namespace ai
             {
                 d->ai->enemyseen = d->ai->enemymillis = lastmillis;
                 d->ai->enemy = e->clientnum;
-                switch(rnd(5)) {if(d->aptitude==APT_PRETRE && d->mana>=70) aptitude(d, 3); }
             }
+            switch(rnd(7)) {if(d->aptitude==APT_PRETRE && d->mana>=70) aptitude(d, 3); }
             return true;
         }
         return false;
@@ -494,16 +489,16 @@ namespace ai
                 if(d->health > 0) score = 1e8f;
                 break;
             case I_SANTE:
-                if(d->health < 80) score = 1e6f;
+                if(d->health<1000) score = d->health < 800 ? 1e4f : d->health < 400 ? 1e7f : 1e3f;
             case I_MANA:
-                if(d->mana < 70) score = 1e5f;
+                if(d->mana < 101) score = 1e6f;
             case I_BOUCLIERBOIS:
-                if(d->armour < 60) score = 1e8f;
+                if(d->armour < 600) score = 1e6f;
             case I_BOUCLIERFER:
-                if(d->armour < 80) score = 1e8f;
+                if(d->armour < 800) score = 1e7f;
                 break;
             case I_BOUCLIEROR: case I_BOUCLIERMAGNETIQUE:
-                if(d->armour < 130) score = 1e8f;
+                if(d->armour < 1300) score = 1e8f;
                 break;
             default:
             {
@@ -693,11 +688,11 @@ namespace ai
                 switch(e.type)
                 {
                     case I_SANTE: wantsitem = badhealth(d); break;
+                    case I_MANA: wantsitem = needmana(d); break;
                     case I_BOUCLIERBOIS:
                     case I_BOUCLIERFER:
                     case I_BOUCLIEROR:
                     case I_BOUCLIERMAGNETIQUE:
-                    case I_MANA: wantsitem = needmana(d); break;
                     case I_SUPERARME:
                     {
                         wantsitem = true;
@@ -1105,6 +1100,7 @@ namespace ai
         {
             idle = d->ai->dontmove = true;
             d->ai->spot = vec(0, 0, 0);
+            d->crouching = -1;
         }
 
         if(d->aptisort3 && d->aptitude==APT_PHYSICIEN) switch(rnd(60)) {case 1: d->jumping = true;}
@@ -1193,7 +1189,7 @@ namespace ai
             vectoyawpitch(v, offyaw, offpitch);
             offyaw -= d->yaw; offpitch -= d->pitch;
             if(fabs(offyaw)+fabs(offpitch) >= 135) d->ai->becareful = false;
-            else if(d->ai->becareful) d->ai->dontmove = true;
+            else if(d->ai->becareful) {d->crouching = -1 ; d->ai->dontmove = true;}
         }
         else d->ai->becareful = false;
 
@@ -1269,12 +1265,20 @@ namespace ai
                 d->ai->blockseq++;
                 switch(d->ai->blockseq)
                 {
-                    case 1: case 2: case 3:
+                    case 1:
+                        d->ai->reset(true); break;
+                        d->crouching = -1;
+                        break;
+                    case 2: case 3:
                         if(entities::ents.inrange(d->ai->targnode)) d->ai->addprevnode(d->ai->targnode);
                         d->ai->clear(false);
+                        d->crouching = -1;
                         break;
                     case 4: d->ai->reset(true); break;
-                    case 5: d->ai->reset(false); break;
+                    case 5:
+                        d->ai->reset(false);
+                        d->crouching = -1;
+                        break;
                     case 6: default: suicide(d); return; break; // this is our last resort..
                 }
             }

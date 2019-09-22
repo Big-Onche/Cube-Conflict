@@ -747,7 +747,7 @@ struct ctfclientmode : clientmode
                 {
                     bool guard = false;
                     //if((f.owner && f.team != f.owner->team) || f.droptime || targets.empty())
-                    if(d->gunselect==GUN_SKS || d->gunselect==GUN_ARBALETE || d->gunselect==GUN_SV98) guard = true;
+                    if(d->hasammo(GUN_SV98) || d->hasammo(GUN_SKS)) guard = true;
 #if 0
                     else if(d->hasammo(d->ai->weappref))
                     { // see if we can relieve someone who only has a piece of crap
