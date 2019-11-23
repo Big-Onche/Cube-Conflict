@@ -372,15 +372,6 @@ struct ctfclientmode : clientmode
 
     void drawhud(gameent *d, int w, int h)
     {
-        if(d->state == CS_ALIVE)
-        {
-            loopv(flags) if(flags[i].owner == d)
-            {
-                float x = 1800*w/h*0.5f-HICON_SIZE/2, y = 1800*0.95f-HICON_SIZE/2;
-                drawicon(flags[i].team==1 ? HICON_BLUE_FLAG : HICON_RED_FLAG, x, y);
-                break;
-            }
-        }
         pushhudscale(2);
         pophudmatrix();
         resethudshader();
@@ -584,6 +575,7 @@ struct ctfclientmode : clientmode
         f.interptime = 0;
         returnflag(i);
         conoutf(CON_GAMEINFO, "%s\f7 %s récupéré le drapeau %s", teamcolorname(d), d==player1 ? "as" : "a", teamcolorflag(f));
+        d->team==player1->team ? ctfmessage3=totalmillis : ctfmessage4=totalmillis;
         playsound(S_FLAGRETURN);
     }
 
@@ -620,6 +612,7 @@ struct ctfclientmode : clientmode
         if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%d", score), PART_TEXT, 2000, 0x32FF64, 4.0f, -8);
         d->flags = dflags;
         conoutf(CON_GAMEINFO, "%s\f7 %s marqué un point pour l'équipe %s !", teamcolorname(d), d==player1 ? "as" : "a", teamcolor(team));
+        team==player1->team ? ctfmessage1=totalmillis : ctfmessage2=totalmillis;
         playsound(team==player1->team ? S_DRAPEAUSCORE : S_DRAPEAUTOMBE);
 
         if(score >= FLAGLIMIT) conoutf(CON_GAMEINFO, "%s\f7 a gagné la partie !", teamcolor(team));
@@ -727,6 +720,7 @@ struct ctfclientmode : clientmode
     void aifind(gameent *d, ai::aistate &b, vector<ai::interest> &interests)
     {
         vec pos = d->feetpos();
+
         loopvj(flags)
         {
             flag &f = flags[j];
@@ -743,32 +737,39 @@ struct ctfclientmode : clientmode
                     if(targets.find(e->clientnum) < 0 && (ep.squaredist(f.pos()) <= (FLAGRADIUS*FLAGRADIUS*4) || f.owner == e))
                         targets.add(e->clientnum);
                 }
+
                 if(home)
-                {
-                    bool guard = false;
-                    //if((f.owner && f.team != f.owner->team) || f.droptime || targets.empty())
-                    if(d->hasammo(GUN_SV98) || d->hasammo(GUN_SKS)) guard = true;
-#if 0
-                    else if(d->hasammo(d->ai->weappref))
-                    { // see if we can relieve someone who only has a piece of crap
-                        gameent *t;
-                        loopvk(targets) if((t = getclient(targets[k])))
-                        {
-                            if((t->ai && !t->hasammo(t->ai->weappref)) || (!t->ai && t->gunselect == GUN_MELEE))
-                            {
-                                guard = true;
-                                break;
-                            }
-                        }
-                    }
-#endif
-                    if(guard)
-                    { // defend the flag
+				{
+					bool guard = false;
+					if((f.owner && f.team != f.owner->team) || f.droptime || targets.empty());
+					else if(d->hasammo(d->ai->weappref))
+					{
+						gameent *t;
+						loopvk(targets) if((t = getclient(targets[k])))
+						{
+							if((!t->ai && (t->gunselect == GUN_SKS || t->gunselect == GUN_SV98)))
+							{
+								guard = true;
+								break;
+							}
+						}
+					}
+					if(guard)
+					{ // defend the flag
                         ai::interest &n = interests.add();
                         n.state = ai::AI_S_DEFEND;
                         n.node = ai::closestwaypoint(f.pos(), ai::SIGHTMIN, true);
                         n.target = j;
                         n.targtype = ai::AI_T_AFFINITY;
+                        n.score = pos.squaredist(f.pos())/100.f;
+					}
+					else
+                    {
+                        ai::interest &n = interests.add();
+                        n.state = ai::AI_S_PURSUE;
+                        n.node = ai::closestwaypoint(f.pos(), ai::SIGHTMIN, true);
+                        n.target = j;
+                        n.targtype = ai::AI_T_PLAYER;
                         n.score = pos.squaredist(f.pos())/100.f;
                     }
                 }
