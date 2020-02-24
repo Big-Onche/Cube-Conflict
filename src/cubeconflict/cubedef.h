@@ -16,22 +16,22 @@
 
 enum {APT_SOLDAT = 0, APT_MEDECIN, APT_AMERICAIN, APT_NINJA, APT_VAMPIRE, APT_MAGICIEN, APT_KAMIKAZE, APT_FAUCHEUSE, APT_PHYSICIEN, APT_CAMPEUR, APT_COMMANDO, APT_PRETRE, APT_VICKING, APT_JUNKIE, NUMAPTS};
 
-static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt_vitesse; const char *apt_nom; } aptitudes[NUMAPTS] =
+static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt_vitesse; const char *apt_tete, *apt_nom; } aptitudes[NUMAPTS] =
 {
-    { 105,  105, 105,   95, "Soldat"},      //0 ---> OK
-    { 80,   75,  100,  100, "Médecin"},     //1 ---> Fix medigun regenscreen & IA
-    { 100,  130,  75,  130, "Américain"},   //2 ---> OK
-    { 80,   80,   75,   80, "Ninja"},       //3 ---> OK
-    { 100,  50,  100,  100, "Vampire"},     //4 ---> OK (Regen screen ?)
-    { 95,   75,   90,  100, "Magicien"},    //5 ---> OK
-    { 100,  100,  80,   70, "Kamikaze"},    //6 ---> OK
-    { 100,  80,   90,  110, "Faucheuse"},   //7 ---> OK
-    { 90,   80,   80,  110, "Physicien"},   //8 ---> OK
-    { 100,  60,  125,  150, "Campeur"},     //9 ---> OK
-    { 115,  115, 115,   85, "Commando"},    //10 --> OK
-    {  80,  105,  80,   90, "Prêtre"},      //11 --> OK
-    { 100,  120,  60,  115, "Viking"},      //12 --> OK
-    { 100,  110,  85,  120, "Junkie"},      //13 --> OK
+    { 105,  105, 105,   95, "chapeaux/casquette",   "Soldat"},      //0 ---> OK
+    { 80,   75,  100,  100, "chapeaux/medic",       "Médecin"},     //1 ---> Fix medigun regenscreen & IA
+    { 100,  130,  75,  130, "chapeaux/aventurier",  "Américain"},   //2 ---> OK
+    { 80,   80,   75,   80, "chapeaux/bandana",     "Ninja"},       //3 ---> OK
+    { 100,  50,  100,  100, "chapeaux/cornes",      "Vampire"},      //4 ---> OK (Regen screen ?)
+    { 95,   75,   90,  100, "chapeaux/magicien",    "Magicien"},    //5 ---> OK
+    { 100,  100,  80,   70, "chapeaux/japonais",    "Kamikaze"},    //6 ---> OK
+    { 100,  80,   90,  110, "chapeaux/crane",       "Faucheuse"},   //7 ---> OK
+    { 90,   80,   80,  110, "chapeaux/graduation",  "Physicien"},   //8 ---> OK
+    { 100,  60,  125,  150, "chapeaux/tente",       "Campeur"},     //9 ---> OK
+    { 115,  115, 115,   85, "chapeaux/kepi",        "Commando"},    //10 --> OK
+    {  80,  105,  80,   90, "chapeaux/saint",       "Prêtre"},      //11 --> OK
+    { 100,  120,  60,  115, "chapeaux/viking",      "Viking"},      //12 --> OK
+    { 100,  110,  85,  120, "chapeaux/champignon",  "Junkie"},      //13 --> OK
 };
 
 static const struct aptisortsinfo { const char *tex1, *tex2, *tex3; int mana1, mana2, mana3, duree1, duree2, duree3, reload1, reload2, reload3, sound1, sound2, sound3; } sorts[] =
@@ -52,24 +52,20 @@ static const struct shieldsinfo { const char *bois, *fer, *gold, *magnetique, *h
 };
 
 //Définition des customisations
-static const struct custominfo { const char *chapeau, *smiley, *capeteam1, *capeteam2, *custtombe; } customs[] =
+static const struct custominfo { const char *smiley, *capeteam1, *capeteam2, *custtombe; } customs[] =
 {
     {}, //0 = Rien
-    {"chapeaux/sombrero",   "smileys/hap",      "capes/cape_JVC",          "capes/cape_JVC/orange",            "tombes/basique"},
-    {"chapeaux/lapin",      "smileys/noel",     "capes/cape_cisla",        "capes/cape_cisla/orange",          "tombes/fleur"},
-    {"chapeaux/aureole",    "smileys/malade",   "capes/cape_atome",        "capes/cape_atome/orange",          "tombes/fuck"},
-    {"chapeaux/cornes",     "smileys/content",  "capes/cape_cubeengine",   "capes/cape_cubeengine/orange",     "tombes/monument"},
-    {"chapeaux/joker",      "smileys/colere",   "capes/cape_cislattack",   "capes/cape_cislattack/orange",     "tombes/cristal"},
-    {"chapeaux/champignon", "smileys/sournois", "capes/cape_ruinee",       "capes/cape_ruinee/orange"},
-    {"chapeaux/couronne",   "smileys/fou",      "capes/cape_weed",         "capes/cape_weed/orange"},
-    {"chapeaux/heaume",     "smileys/cool",     "capes/cape_larry",        "capes/cape_larry/orange"},
-    {"chapeaux/bandana",    "smileys/bug",      "capes/cape_high",         "capes/cape_high/orange"},
-    {"chapeaux/melon",      "",                 "capes/cape_spartiate",    "capes/cape_spartiate/orange"},
-    {"chapeaux/casque",     "",                 "capes/cape_risitasbg",    "capes/cape_risitasbg/orange"},
-    {"chapeaux/helices"},
-    {"chapeaux/aventurier"},
-    {"chapeaux/bug"},
-    {"chapeaux/lapin"},
+    {"smileys/hap",      "capes/cape_JVC",          "capes/cape_JVC/orange",            "tombes/basique"},
+    {"smileys/noel",     "capes/cape_cisla",        "capes/cape_cisla/orange",          "tombes/fleur"},
+    {"smileys/malade",   "capes/cape_atome",        "capes/cape_atome/orange",          "tombes/fuck"},
+    {"smileys/content",  "capes/cape_cubeengine",   "capes/cape_cubeengine/orange",     "tombes/monument"},
+    {"smileys/colere",   "capes/cape_cislattack",   "capes/cape_cislattack/orange",     "tombes/cristal"},
+    {"smileys/sournois", "capes/cape_ruinee",       "capes/cape_ruinee/orange"},
+    {"smileys/fou",      "capes/cape_weed",         "capes/cape_weed/orange"},
+    {"smileys/cool",     "capes/cape_larry",        "capes/cape_larry/orange"},
+    {"smileys/bug",      "capes/cape_high",         "capes/cape_high/orange"},
+    {"",                 "capes/cape_spartiate",    "capes/cape_spartiate/orange"},
+    {"",                 "capes/cape_risitasbg",    "capes/cape_risitasbg/orange"},
 };
 
 extern void addxp(int nbxp);
@@ -82,7 +78,7 @@ extern string str_pseudotueur, str_armetueur;
 extern int n_aptitudetueur, n_aptitudevictime;
 
 //HUD
-extern int message1, message2, message3;  //Messages HUD
+extern int message1, message2, message3, ctfmessage1, ctfmessage2, ctfmessage3, ctfmessage4;  //Messages HUD
 extern int zoomfov, zoom, crosshairsize; //HUD Zoom
 extern float crosshairalpha, pourcents;
 extern int ccxp, cclvl, needxp, oldneed, neededxp;

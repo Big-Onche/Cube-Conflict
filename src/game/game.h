@@ -278,7 +278,7 @@ enum
     N_SWITCHNAME, N_SWITCHMODEL, N_SWITCHCOLOR, N_SWITCHTEAM,
     N_SERVCMD,
     N_DEMOPACKET,
-    N_SENDHAT, N_SENDCAPE, N_SENDTOMBE, N_SENDAPTITUDE,
+    N_SENDCAPE, N_SENDTOMBE, N_SENDAPTITUDE,
     N_ANNOUNCE,
     N_SENDSORT1, N_SENDSORT2, N_SENDSORT3,
     NUMMSG
@@ -309,7 +309,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_SWITCHNAME, 0, N_SWITCHMODEL, 2, N_SWITCHCOLOR, 2, N_SWITCHTEAM, 2,
     N_SERVCMD, 0,
     N_DEMOPACKET, 0,
-    N_SENDHAT, 2, N_SENDCAPE, 2, N_SENDTOMBE, 2, N_SENDAPTITUDE, 2,
+    N_SENDCAPE, 2, N_SENDTOMBE, 2, N_SENDAPTITUDE, 2,
     N_ANNOUNCE, 2,
     N_SENDSORT1, 2, N_SENDSORT2, 2, N_SENDSORT3, 2,
     -1
@@ -757,7 +757,7 @@ struct gameent : dynent, gamestate
     bool sort1pret, sort2pret, sort3pret;
 
     string name, info;
-    int team, playermodel, playercolor, customhat, customcape, customtombe, aptitude;
+    int team, playermodel, playercolor, customcape, customtombe, aptitude;
     float skeletonfade, tombepop;
     ai::aiinfo *ai;
     int ownernum, lastnode;

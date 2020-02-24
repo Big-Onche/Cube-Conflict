@@ -245,7 +245,7 @@ namespace server
         int authkickvictim;
         char *authkickreason;
 
-        int customhat, customcape, customtombe, aptitude;
+        int customcape, customtombe, aptitude;
 
         clientinfo() : getdemo(NULL), getmap(NULL), clipboard(NULL), authchallenge(NULL), authkickreason(NULL) { reset(); }
         ~clientinfo() { events.deletecontents(); cleanclipboard(); cleanauth(); }
@@ -1759,7 +1759,6 @@ namespace server
             putint(p, ci->team);
             putint(p, ci->playermodel);
             putint(p, ci->playercolor);
-            putint(p, ci->customhat);
             putint(p, ci->customcape);
             putint(p, ci->customtombe);
             putint(p, ci->aptitude);
@@ -2962,7 +2961,6 @@ namespace server
                     copystring(ci->name, text, MAXNAMELEN+1);
                     ci->playermodel = getint(p);
                     ci->playercolor = getint(p);
-                    ci->customhat = getint(p);
                     ci->customcape = getint(p);
                     ci->customtombe = getint(p);
                     ci->aptitude = getint(p);
@@ -3357,20 +3355,6 @@ namespace server
             case N_SWITCHCOLOR:
             {
                 ci->playercolor = getint(p);
-                QUEUE_MSG;
-                break;
-            }
-
-            case N_SENDHAT:
-            {
-                ci->customhat = getint(p);
-                QUEUE_MSG;
-                break;
-            }
-
-            case N_SENDCAPE:
-            {
-                ci->customcape = getint(p);
                 QUEUE_MSG;
                 break;
             }

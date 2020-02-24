@@ -234,9 +234,17 @@ namespace game
     VAR(testanims, 0, 0, 1);
     VAR(testpitch, -90, 0, 90);
 
-    VARFP(player1_chapeau, 0, 0, 14, player1->customhat = player1_chapeau);
-    VARFP(player1_cape, 0, 0, 14, player1->customcape = player1_cape);
-    VARFP(player1_tombe, 1, 1, 5, player1->customtombe = player1_tombe);
+    VARFP(player1_cape, 0, 0, 12,
+        {
+        addmsg(N_SENDCAPE, "ri", player1_cape);
+        player1->customcape = player1_cape;
+    });
+
+    VARFP(player1_tombe, 1, 1, 5,
+        {
+        addmsg(N_SENDTOMBE, "ri", player1_tombe);
+        player1->customtombe = player1_tombe;
+    });
 
     void rendertombeplayer(gameent *d, float fade)
     {
@@ -270,7 +278,7 @@ namespace game
 
         //////////////////////////////////////////////////////////////////MODELES//////////////////////////////////////////////////////////////////
 
-        modelattach a[10];
+        modelattach a[9];
         int ai = 0;
         if(guns[d->gunselect].vwep)
         {
@@ -306,11 +314,9 @@ namespace game
         if(d->steromillis) a[ai++] = modelattach("tag_boost1", "boosts/steros", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         if(d->epomillis)   a[ai++] = modelattach("tag_boost2", "boosts/epo", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
 
+        a[ai++] = modelattach("tag_hat", aptitudes[d->aptitude].apt_tete, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+
         ////////Customisations////////
-        if(d->customhat>=1 && d->customhat<=14)
-        {
-            a[ai++] = modelattach("tag_hat", customs[d->customhat].chapeau, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-        }
         if(d->customcape>=1 && d->customcape<=11)
         {
             a[ai++] = modelattach("tag_cape", team==2 ? customs[d->customcape].capeteam2 : customs[d->customcape].capeteam1, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
@@ -404,10 +410,8 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
         else flags |= MDL_CULL_DIST;
         if(!mainpass) flags &= ~(MDL_FULLBRIGHT | MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY | MDL_CULL_DIST);
 
-        if(player1->customhat>=1 &&player1->customhat<=14)
-        {
-            a[ai++] = modelattach("tag_hat", customs[player1->customhat].chapeau, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-        }
+        a[ai++] = modelattach("tag_hat", aptitudes[player1->aptitude].apt_tete, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+
         if(player1->customcape>=1 && player1->customcape<=11)
         {
             a[ai++] = modelattach("tag_cape", customs[player1->customcape].capeteam1, ANIM_VWEP_IDLE|ANIM_LOOP, 0);

@@ -189,7 +189,7 @@ namespace ai
         if(d->ai) DELETEP(d->ai);
     }
 
-    void init(gameent *d, int at, int ocn, int apti, int hat, int cape, int tombe, int sk, int bn, int pm, int col, const char *name, int team)
+    void init(gameent *d, int at, int ocn, int apti, int cape, int tombe, int sk, int bn, int pm, int col, const char *name, int team)
     {
         loadwaypoints();
 
@@ -224,7 +224,6 @@ namespace ai
         d->playercolor = col;
 
         d->aptitude = apti;
-        d->customhat = hat;
         d->customcape = cape;
         d->customtombe = tombe;
 

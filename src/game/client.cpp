@@ -1158,7 +1158,6 @@ namespace game
         sendstring(player1->name, p);
         putint(p, player1->playermodel);
         putint(p, player1->playercolor);
-        putint(p, player1->customhat);
         putint(p, player1->customcape);
         putint(p, player1->customtombe);
         putint(p, player1->aptitude);
@@ -1533,7 +1532,6 @@ namespace game
                 if(!validteam(d->team)) d->team = 0;
                 d->playermodel = getint(p);
                 d->playercolor = getint(p);
-                d->customhat = getint(p);
                 d->customcape = getint(p);
                 d->customtombe = getint(p);
                 d->aptitude = getint(p);
@@ -1605,16 +1603,6 @@ namespace game
             {
                 int color = getint(p);
                 if(d) d->playercolor = color;
-                break;
-            }
-
-            case N_SENDHAT:
-            {
-                int hat = getint(p);
-                if(d)
-                {
-                    d->customhat = hat;
-                }
                 break;
             }
 
@@ -2163,13 +2151,13 @@ namespace game
 
             case N_INITAI:
             {
-                int bn = getint(p), on = getint(p), at = getint(p), apti = getint(p), hat = getint(p), cape = getint(p), tombe = getint(p), sk = clamp(getint(p), 1, 101), pm = getint(p), col = getint(p), team = getint(p);
+                int bn = getint(p), on = getint(p), at = getint(p), apti = getint(p), cape = getint(p), tombe = getint(p), sk = clamp(getint(p), 1, 101), pm = getint(p), col = getint(p), team = getint(p);
                 string name;
                 getstring(text, p);
                 filtertext(name, text, false, false, MAXNAMELEN);
                 gameent *b = newclient(bn);
                 if(!b) break;
-                ai::init(b, at, on, apti, hat, cape, tombe, sk, bn, pm, col, name, team);
+                ai::init(b, at, on, apti, cape, tombe, sk, bn, pm, col, name, team);
                 break;
             }
 
