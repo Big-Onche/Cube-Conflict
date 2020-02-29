@@ -5010,8 +5010,7 @@ void setlightlod()
             smdynshadow = 0;
             smnoshadow = 1;
             csmsplits = 1;
-            smsize = 10;
-            smminradius = 900;
+            smsize = 9;
             dynlightdist = 128;
             volumetric = 0;
             volsteps = 6;
@@ -5021,8 +5020,7 @@ void setlightlod()
             smdynshadow = 0;
             smnoshadow = 0;
             csmsplits = 2;
-            smsize = 12;
-            smminradius = 600;
+            smsize = 10;
             dynlightdist = 256;
             volumetric = 1;
             volsteps = 8;
@@ -5032,8 +5030,7 @@ void setlightlod()
             smdynshadow = 1;
             smnoshadow = 0;
             csmsplits = 2;
-            smsize = 14;
-            smminradius = 300;
+            smsize = 11;
             dynlightdist = 512;
             volumetric = 1;
             volsteps = 16;
@@ -5043,8 +5040,7 @@ void setlightlod()
             smdynshadow = 1;
             smnoshadow = 0;
             csmsplits = 3;
-            smsize = 14;
-            smminradius = 100;
+            smsize = 12;
             dynlightdist = 1024;
             volumetric = 1;
             volsteps = 32;
