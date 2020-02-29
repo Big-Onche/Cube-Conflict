@@ -414,7 +414,6 @@ namespace ai
                 d->ai->enemyseen = d->ai->enemymillis = lastmillis;
                 d->ai->enemy = e->clientnum;
             }
-            switch(rnd(7)) {if(d->aptitude==APT_PRETRE && d->mana>=70) aptitude(d, 3); }
             return true;
         }
         return false;
@@ -489,6 +488,7 @@ namespace ai
                 break;
             case I_SANTE:
                 if(d->health<1000) score = d->health < 800 ? 1e4f : d->health < 400 ? 1e7f : 1e3f;
+                if(d->mana>40 && d->aptitude==APT_PRETRE && d->health<=300) aptitude(d, 1);
             case I_MANA:
                 if(d->mana < 101) score = 1e6f;
             case I_BOUCLIERBOIS:
@@ -530,7 +530,6 @@ namespace ai
         {
             extentity &e = *(extentity *)entities::ents[i];
             if(!e.spawned() || !d->canpickup(e.type, d->aptitude)) continue;
-            if(d->mana>40 && d->aptitude==APT_PRETRE) aptitude(d, 1);
             tryitem(d, e, i, b, interests, force);
         }
     }
@@ -1115,6 +1114,7 @@ namespace ai
                 if(targetable(d, f))
                 {
                     if(!enemyok) violence(d, b, f);
+                    switch(rnd(2)) {case 0: if(d->aptitude==APT_PRETRE && d->mana>=70) aptitude(d, 3); }
                     enemyok = true;
                     e = f;
                 }
