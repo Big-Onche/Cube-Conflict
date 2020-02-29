@@ -658,7 +658,7 @@ struct gamestate
         else if (m_fullstuff)
         {
             armourtype = A_GREEN;
-            armour = 2000;
+            armour = 1250;
             int spawngun1 = rnd(17), spawngun2, spawngun3;
             gunselect = spawngun1;
             baseammo(spawngun1, 4);
@@ -682,6 +682,7 @@ struct gamestate
             }
 
             ammo[gun] = aptitude==2 ? 1.5f*itemstats[gun].max  : itemstats[gun].max;
+            gunselect = gun;
             return;
         }
         else
