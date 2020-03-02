@@ -65,6 +65,9 @@ CLIENT_OBJS= \
 	shared/stream.o \
 	shared/tools.o \
 	shared/zip.o \
+	cubeconflict/aptitudes.o \
+	cubeconflict/hud.o \
+	cubeconflict/stats.o \
 	engine/aa.o \
 	engine/bih.o \
 	engine/blend.o \
@@ -227,6 +230,9 @@ depend:
 
 # DO NOT DELETE
 
+cubeconflict/aptitudes.o: game/game.h engine/engine.h cubeconflict/cubedef.h
+cubeconflict/hud.o: game/game.h engine/engine.h cubeconflict/cubedef.h
+cubeconflict/stats.o: engine/engine.h cubeconflict/cubedef.h
 shared/crypto.o: shared/cube.h shared/tools.h shared/geom.h shared/ents.h
 shared/crypto.o: shared/command.h shared/glexts.h shared/glemu.h
 shared/crypto.o: shared/iengine.h shared/igame.h
@@ -285,7 +291,7 @@ engine/light.o: engine/engine.h shared/cube.h shared/tools.h shared/geom.h
 engine/light.o: shared/ents.h shared/command.h shared/glexts.h shared/glemu.h
 engine/light.o: shared/iengine.h shared/igame.h engine/world.h engine/octa.h
 engine/light.o: engine/light.h engine/texture.h engine/bih.h engine/model.h
-engine/main.o: engine/engine.h shared/cube.h shared/tools.h shared/geom.h
+engine/main.o: engine/engine.h cubeconflict/cubedef.h shared/cube.h shared/tools.h shared/geom.h
 engine/main.o: shared/ents.h shared/command.h shared/glexts.h shared/glemu.h
 engine/main.o: shared/iengine.h shared/igame.h engine/world.h engine/octa.h
 engine/main.o: engine/light.h engine/texture.h engine/bih.h engine/model.h
@@ -322,7 +328,7 @@ engine/octarender.o: shared/glexts.h shared/glemu.h shared/iengine.h
 engine/octarender.o: shared/igame.h engine/world.h engine/octa.h
 engine/octarender.o: engine/light.h engine/texture.h engine/bih.h
 engine/octarender.o: engine/model.h
-engine/physics.o: engine/engine.h shared/cube.h shared/tools.h shared/geom.h
+engine/physics.o: engine/engine.h cubeconflict/cubedef.h shared/cube.h shared/tools.h shared/geom.h
 engine/physics.o: shared/ents.h shared/command.h shared/glexts.h
 engine/physics.o: shared/glemu.h shared/iengine.h shared/igame.h
 engine/physics.o: engine/world.h engine/octa.h engine/light.h
@@ -331,7 +337,7 @@ engine/pvs.o: engine/engine.h shared/cube.h shared/tools.h shared/geom.h
 engine/pvs.o: shared/ents.h shared/command.h shared/glexts.h shared/glemu.h
 engine/pvs.o: shared/iengine.h shared/igame.h engine/world.h engine/octa.h
 engine/pvs.o: engine/light.h engine/texture.h engine/bih.h engine/model.h
-engine/rendergl.o: engine/engine.h shared/cube.h shared/tools.h shared/geom.h
+engine/rendergl.o: engine/engine.h cubeconflict/cubedef.h shared/cube.h shared/tools.h shared/geom.h
 engine/rendergl.o: shared/ents.h shared/command.h shared/glexts.h
 engine/rendergl.o: shared/glemu.h shared/iengine.h shared/igame.h
 engine/rendergl.o: engine/world.h engine/octa.h engine/light.h
@@ -404,7 +410,7 @@ engine/texture.o: shared/ents.h shared/command.h shared/glexts.h
 engine/texture.o: shared/glemu.h shared/iengine.h shared/igame.h
 engine/texture.o: engine/world.h engine/octa.h engine/light.h
 engine/texture.o: engine/texture.h engine/bih.h engine/model.h
-engine/ui.o: engine/engine.h shared/cube.h shared/tools.h shared/geom.h
+engine/ui.o: engine/engine.h cubeconflict/cubedef.h shared/cube.h shared/tools.h shared/geom.h
 engine/ui.o: shared/ents.h shared/command.h shared/glexts.h shared/glemu.h
 engine/ui.o: shared/iengine.h shared/igame.h engine/world.h engine/octa.h
 engine/ui.o: engine/light.h engine/texture.h engine/bih.h engine/model.h
@@ -422,35 +428,36 @@ engine/worldio.o: shared/ents.h shared/command.h shared/glexts.h
 engine/worldio.o: shared/glemu.h shared/iengine.h shared/igame.h
 engine/worldio.o: engine/world.h engine/octa.h engine/light.h
 engine/worldio.o: engine/texture.h engine/bih.h engine/model.h
-game/ai.o: game/game.h shared/cube.h shared/tools.h shared/geom.h
+game/ai.o: game/game.h cubeconflict/cubedef.h shared/cube.h shared/tools.h shared/geom.h
 game/ai.o: shared/ents.h shared/command.h shared/glexts.h shared/glemu.h
 game/ai.o: shared/iengine.h shared/igame.h game/ai.h
-game/client.o: game/game.h shared/cube.h shared/tools.h shared/geom.h
+game/client.o: game/game.h cubeconflict/cubedef.h shared/cube.h shared/tools.h shared/geom.h
 game/client.o: shared/ents.h shared/command.h shared/glexts.h shared/glemu.h
 game/client.o: shared/iengine.h shared/igame.h game/ai.h game/ctf.h
-game/entities.o: game/game.h shared/cube.h shared/tools.h shared/geom.h
+game/entities.o: game/game.h cubeconflict/cubedef.h shared/cube.h shared/tools.h shared/geom.h
 game/entities.o: shared/ents.h shared/command.h shared/glexts.h
 game/entities.o: shared/glemu.h shared/iengine.h shared/igame.h game/ai.h
-game/game.o: game/game.h shared/cube.h shared/tools.h shared/geom.h
+game/game.o: game/game.h cubeconflict/cubedef.h shared/cube.h shared/tools.h shared/geom.h
 game/game.o: shared/ents.h shared/command.h shared/glexts.h shared/glemu.h
 game/game.o: shared/iengine.h shared/igame.h game/ai.h
-game/render.o: game/game.h shared/cube.h shared/tools.h shared/geom.h
+game/render.o: game/game.h cubeconflict/cubedef.h shared/cube.h shared/tools.h shared/geom.h
 game/render.o: shared/ents.h shared/command.h shared/glexts.h shared/glemu.h
 game/render.o: shared/iengine.h shared/igame.h game/ai.h
 game/scoreboard.o: game/game.h shared/cube.h shared/tools.h shared/geom.h
 game/scoreboard.o: shared/ents.h shared/command.h shared/glexts.h
 game/scoreboard.o: shared/glemu.h shared/iengine.h shared/igame.h game/ai.h
 game/server.o: game/game.h shared/cube.h shared/tools.h shared/geom.h
-game/server.o: shared/ents.h shared/command.h shared/glexts.h shared/glemu.h
+game/server.o: shared/ents.h cubeconflict/cubedef.h shared/command.h shared/glexts.h shared/glemu.h
 game/server.o: shared/iengine.h shared/igame.h game/ai.h game/ctf.h
 game/server.o: game/extinfo.h game/aiman.h
 game/waypoint.o: game/game.h shared/cube.h shared/tools.h shared/geom.h
 game/waypoint.o: shared/ents.h shared/command.h shared/glexts.h
 game/waypoint.o: shared/glemu.h shared/iengine.h shared/igame.h game/ai.h
-game/weapon.o: game/game.h shared/cube.h shared/tools.h shared/geom.h
+game/weapon.o: game/game.h cubeconflict/cubedef.h shared/cube.h shared/tools.h shared/geom.h
 game/weapon.o: shared/ents.h shared/command.h shared/glexts.h shared/glemu.h
 game/weapon.o: shared/iengine.h shared/igame.h game/ai.h
 
+cubeconflict/cubedef.h.gch: game/game.h.gch
 shared/cube.h.gch: shared/tools.h shared/geom.h shared/ents.h
 shared/cube.h.gch: shared/command.h shared/glexts.h shared/glemu.h
 shared/cube.h.gch: shared/iengine.h shared/igame.h
