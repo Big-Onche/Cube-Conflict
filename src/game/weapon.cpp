@@ -488,7 +488,7 @@ namespace game
                 damageeffect(damage, f, at, true, atk);
                 if(f==player1)
                 {
-                    if(atk==ATK_MEDIGUN_SHOOT)
+                    if(f->gunselect==GUN_MEDIGUN)
                     {
                         regenblend(damage);
                         regencompass(damage, at ? at->o : f->o);
@@ -501,10 +501,11 @@ namespace game
                         {
                             case 0:
                                 if(player1->aptitude==APT_PHYSICIEN && player1->aptisort1 && player1->armour>0) playsound(S_SORTPHY1);
-                                else if(player1->armour>0) playsound(armoursound);
+                                else if(player1->armour>0 && atk!=ATK_LANCEFLAMMES_SHOOT) playsound(armoursound);
                                 break;
                             case 1:
-                                playsound(S_BALLECORPS);
+                                if(atk==ATK_LANCEFLAMMES_SHOOT) switch(rnd(3)){case 0: playsound(S_FEUCORPS);}
+                                else playsound(S_BALLECORPS);
                         }
                     }
 
@@ -1244,6 +1245,7 @@ namespace game
             case ATK_LANCEFLAMMES_SHOOT:
             {
                 if(d->type==ENT_PLAYER) sound = S_FLAMEATTACK;
+                if(d!=hudplayer()) switch(rnd(5)){case 0: sound_nearmiss(S_FLYBYFLAME, from, to);}
                 loopi(attacks[atk].rays)
                 {
                     vec irays(rays[i]);

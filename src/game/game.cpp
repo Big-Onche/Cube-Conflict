@@ -356,18 +356,22 @@ namespace game
 
     // inputs
 
+    VARP(attackspawn, 0, 1, 1);
+
     void doaction(int act)
     {
         if(!connected || intermission) return;
-        if((player1->attacking = act)) respawn();
+        if((player1->attacking = act) && attackspawn) respawn();
     }
 
     ICOMMAND(shoot, "D", (int *down), doaction(*down ? ACT_SHOOT : ACT_IDLE));
 
+    VARP(jumpspawn, 0, 1, 1);
+
     bool canjump()
     {
         if(!connected || intermission) return false;
-        respawn();
+        if(jumpspawn) respawn();
         return player1->state!=CS_DEAD;
     }
 
@@ -428,13 +432,12 @@ namespace game
             {
                 damageblend(damage);
                 damagecompass(damage, actor->o);
-                playsound(S_BALLECORPS);
 
                 switch(rnd(2))
                 {
                     case 0:
                         if(d->aptitude==APT_PHYSICIEN && d->aptisort1 && d->armour>0) playsound(S_SORTPHY1);
-                        else if(d->armour>0) playsound(armoursound);
+                        else if(d->armour>0 && actor->gunselect!=GUN_LANCEFLAMMES) playsound(armoursound);
                 }
             }
         }
@@ -444,7 +447,7 @@ namespace game
             {
                 case 0:
                     if(d->aptitude==APT_PHYSICIEN && d->aptisort1 && d->armour>0) playsound(S_SORTPHY1, &d->o, 0, 0, 0 , 100, -1, 200);
-                    else if(d->armour>0) playsound(armoursound+4, &d->o, 0, 0, 0 , 100, -1, 200);
+                    else if(d->armour>0 && actor->gunselect!=GUN_LANCEFLAMMES) playsound(armoursound+4, &d->o, 0, 0, 0 , 100, -1, 200);
             }
         }
 
@@ -898,7 +901,7 @@ namespace game
 
     const char *teamcolorname(gameent *d, const char *alt)
     {
-        if(!teamcolortext || !m_teammode || !validteam(d->team)) return colorname(d, NULL, alt);
+        if(!teamcolortext || !m_teammode || !validteam(d->team) || d->state == CS_SPECTATOR) return colorname(d, NULL, alt);
         return colorname(d, NULL, alt, teamtextcode[d->team]);
     }
 
