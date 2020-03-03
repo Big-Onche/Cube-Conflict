@@ -102,10 +102,11 @@ namespace ai
     {
         if(d == e || !canmove(d)) return false;
         //Les IA captent les sorts des autres joueurs
-        if(e->aptisort2 && e->aptitude==APT_PHYSICIEN) switch(rnd(25)) {case 0: return true; break; default: return false;}
+        if(e->aptisort2 && e->aptitude==APT_PHYSICIEN) switch(rnd(10)) {case 0: return true; break; default: return false;}
 
         if(d->gunselect==GUN_MEDIGUN && e->health<100) return e->state == CS_ALIVE && isteam(d->team, e->team);
         else if (d->gunselect!=GUN_MEDIGUN) return e->state == CS_ALIVE && !isteam(d->team, e->team);
+        else return false;
     }
 
     bool getsight(vec &o, float yaw, float pitch, vec &q, vec &v, float mdist, float fovx, float fovy)
@@ -135,7 +136,7 @@ namespace ai
             return d->ammo[d->gunselect] > 0 && lastmillis - d->lastaction >= d->gunwait;
 
         return false;
-        //return !d->ai->becareful && d->ammo[d->gunselect] > 0 && lastmillis - d->lastaction >= d->gunwait;
+        return !d->ai->becareful && d->ammo[d->gunselect] > 0 && lastmillis - d->lastaction >= d->gunwait;
     }
 
     bool hastarget(gameent *d, int atk, aistate &b, gameent *e, float yaw, float pitch, float dist)
@@ -166,7 +167,7 @@ namespace ai
         {
             if(lastmillis >= d->ai->lastaimrnd)
             {
-                const int aiskew[NUMGUNS] = { 75, 1, 1, 30, 30, 1, 1, 15, 40, 1, 1, 3, 25, 10, 25, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+                const int aiskew[NUMGUNS] = { 125, 1, 1, 30, 30, 1, 1, 15, 40, 1, 1, 3, 25, 10, 25, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
                 //int aiskew = 1;
 
                 #define rndaioffset(r) ((rnd(int(r*aiskew[d->gunselect]*2)+1)-(r*aiskew[d->gunselect]))*(1.f/float(max(d->skill, 1))))
@@ -499,6 +500,7 @@ namespace ai
             case I_BOUCLIEROR: case I_BOUCLIERMAGNETIQUE:
                 if(d->armour < 1300) score = 1e8f;
                 break;
+            case FLAG: score = 1e30f; break;
             default:
             {
                 if(e.type >= I_RAIL && e.type <= I_SUPERARME && !d->hasmaxammo(e.type))
@@ -574,7 +576,7 @@ namespace ai
         {
             static vector<int> nearby;
             nearby.setsize(0);
-            findents(I_FIRST, I_LAST, false, d->feetpos(), vec(32, 32, 24), nearby);
+            findents(I_RAIL, I_BOUCLIERMAGNETIQUE, false, d->feetpos(), vec(32, 32, 24), nearby);
             loopv(nearby)
             {
                 int id = nearby[i];
@@ -1406,7 +1408,6 @@ namespace ai
                         switch(rnd(50)) {case 0: if(d->mana>70) aptitude(d, 3);}
                         if(d->health<250+d->skill*2 && d->armour<50 && d->mana>=25) aptitude(d, 1);
                 }
-
 
                 switch(c.type)
                 {
