@@ -112,10 +112,12 @@ void writeinitcfg()
     f->printf("screenw %d\n", scr_w);
     f->printf("screenh %d\n", scr_h);
     extern int sound, soundchans, soundfreq, soundbufferlen;
+    extern char *audiodriver;
     f->printf("sound %d\n", sound);
     f->printf("soundchans %d\n", soundchans);
     f->printf("soundfreq %d\n", soundfreq);
     f->printf("soundbufferlen %d\n", soundbufferlen);
+    if(audiodriver[0]) f->printf("audiodriver %s\n", escapestring(audiodriver));
     delete f;
 }
 
@@ -1053,6 +1055,16 @@ int getclockmillis()
 
 VAR(numcpus, 1, 1, 16);
 
+extern void changerlangue();
+
+VARFP(langage, 0, 0, 1, changerlangue());
+
+void changerlangue()
+{
+    if(langage==0) execfile("config/ui_FR.cfg");
+    if(langage==1) execfile("config/ui_EN.cfg");
+}
+
 int main(int argc, char **argv)
 {
     #ifdef WIN32
@@ -1173,7 +1185,14 @@ int main(int argc, char **argv)
     execfile("config/stdedit.cfg");
     execfile(game::gameconfig());
     execfile("config/sound.cfg");
-    execfile("config/ui.cfg");
+
+    switch(langage)
+    {
+        case 0: execfile("config/ui_FR.cfg"); break;
+        case 1: execfile("config/ui_EN.cfg"); break;
+        default: execfile("config/ui_FR.cfg");
+    }
+
     execfile("config/heightmap.cfg");
     execfile("config/blendbrush.cfg");
     execfile("config/sauvegarde.cfg", false, true);
