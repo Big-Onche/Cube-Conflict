@@ -540,7 +540,7 @@ void checkpings()
         getstring(text, p);
         filtertext(si->map, text, false);
         getstring(text, p);
-        filtertext(si->desc, text);
+        filtertext(si->desc, text, true, true);
     }
 }
 
