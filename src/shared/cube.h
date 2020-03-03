@@ -38,14 +38,14 @@
 
 #ifndef STANDALONE
   #ifdef __APPLE__
-    #include "../include/SDL.h"
+    #include "SDL2/SDL.h"
     #define GL_GLEXT_LEGACY
     #define __glext_h_
-    #include "../include/SDL_opengl.h"
+    #include <OpenGL/gl.h>
     #define main SDL_main
   #else
-    #include "../include/SDL.h"
-    #include "../include/SDL_opengl.h"
+    #include <SDL.h>
+    #include <SDL_opengl.h>
   #endif
 #endif
 
