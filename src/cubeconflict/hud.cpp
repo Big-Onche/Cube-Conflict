@@ -2,7 +2,7 @@
 #include "engine.h"
 #include "../cubeconflict/cubedef.h"
 
-int message1, message2, message3, message4, message5, message6, message7, message8, message9, message10, message11, message12;
+int message1, message2, message3, ctfmessage1, ctfmessage2, ctfmessage3, ctfmessage4, ctfmessage5, ctfmessage6;
 int message_streak1;
 
 string strclassetueur, straptitudevictime;
@@ -71,15 +71,19 @@ namespace game
 
             if(need_message2) {rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= 40;}
         }
-        /*
-        if(m_battle)
-        {
-            string remainingplayersmsg;
 
-            formatstring(remainingplayersmsg, "\f7Joueurs vivants : %d",  battlevivants);
-            rendermessage(remainingplayersmsg, 75, 10.0f);
+        if(m_ctf)
+        {
+            string infomsg;
+            if(totalmillis-ctfmessage1<=3000) {formatstring(infomsg, "\f9Notre équipe a marqué un point !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= 40;}
+            if(totalmillis-ctfmessage2<=3000) {formatstring(infomsg, "\f3L'équipe ennemie a marqué un point."); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= 40;}
+            if(totalmillis-ctfmessage3<=3000) {formatstring(infomsg, "\f9Notre équipe a récupéré son drapeau !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= 40;}
+            if(totalmillis-ctfmessage4<=3000) {formatstring(infomsg, "\f3L'équipe ennemie a récupéré son drapeau."); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= 40;}
+            if(totalmillis-ctfmessage5<=3000) {formatstring(infomsg, "\f9Notre équipe a volé le drapeau ennemi !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= 40;}
+            if(totalmillis-ctfmessage6<=3000) {formatstring(infomsg, "\f3L'équipe ennemie a volé notre drapeau !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= 40;}
         }
-        */
+
+
         if(player1->state==CS_DEAD)
         {
             string killedbymsg, withmsg, waitmsg;
@@ -223,6 +227,7 @@ namespace game
         }
 
         int decal_icon = 0;
+
         if(player1->crouching && player1->aptitude==APT_CAMPEUR)
         {
             settexture("media/interface/hud/campeur.png");
@@ -297,8 +302,8 @@ namespace game
         }
 
         draw_textf("%d", 135, h-103, d->health < 9 ? 1 : d->health/10);
-
         if(d->armour > 0) draw_textf("%d", 370, h-103, d->armour < 9 ? 1 : d->armour/10);
+
 
         if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE) {draw_textf("%d", 135, h-233-decal_number, d->mana); decal_number +=130;}
         if(player1->crouching && player1->aptitude==9) decal_number +=130;
@@ -330,68 +335,6 @@ namespace game
 // Code des autres modes de jeux à remettre
 
     /*
-        if(totalmillis-message1<=3000)
-        {
-            text_bounds("\f9Notre équipe a marqué un point !", wb, hb);
-            int x = ((w/2)*2.35f)-wb/2, y = (h/2)*2.35f;
-            draw_textf("\f9Notre équipe a marqué un point !",  x, y-385+decal_message);
-            decal_message = decal_message - 50;
-        }
-        if(totalmillis-message2<=3000)
-        {
-            text_bounds("\f3L'équipe ennemie a marqué un point.", wb, hb);
-            int x = ((w/2)*2.35f)-wb/2, y = (h/2)*2.35f;
-            draw_textf("\f3L'équipe ennemie a marqué un point.",  x, y-385+decal_message);
-            decal_message = decal_message - 50;
-        }
-        if(totalmillis-message3<=3000)
-        {
-            m_hold ? text_bounds("\f9Un allié s'est transformé en ananas !", wb, hb) : text_bounds("\f2Un allié a volé le drapeau ennemi !", wb, hb);
-            int x = ((w/2)*2.35f)-wb/2, y = (h/2)*2.35f;
-            m_hold ? draw_textf("\f9Un allié s'est transformé en ananas !", x, y-385+decal_message) : draw_textf("\f9Un allié a volé le drapeau ennemi !",  x, y-385+decal_message);
-            decal_message = decal_message - 50;
-        }
-        if(totalmillis-message4<=3000)
-        {
-            m_hold ? text_bounds("\f3Un ennemi s'est transformé en ananas.", wb, hb) : text_bounds("\f3Un ennemi a volé notre drapeau.", wb, hb);
-            int x = ((w/2)*2.35f)-wb/2, y = (h/2)*2.35f;
-            m_hold ? draw_textf("\f3Un ennemi s'est transformé en ananas.", x, y-385+decal_message) : draw_textf("\f3Un ennemi a volé notre drapeau.",  x, y-385+decal_message);
-            decal_message = decal_message - 50;
-        }
-        if(totalmillis-message6<=3000)
-        {
-            text_bounds("\f9Notre équipe a récupéré son drapeau !", wb, hb);
-            int x = ((w/2)*2.35f)-wb/2, y = (h/2)*2.35f;
-            draw_textf("\f9Notre équipe a récupéré son drapeau !", x, y-385+decal_message);
-            decal_message = decal_message - 50;
-        }
-        if(totalmillis-message7<=3000)
-        {
-            text_bounds("\f3L'équipe ennemie a récupéré son drapeau.", wb, hb);
-            int x = ((w/2)*2.35f)-wb/2, y = (h/2)*2.35f;
-            draw_textf("\f3L'équipe ennemie a récupéré son drapeau.", x, y-385+decal_message);
-            decal_message = decal_message - 50;
-        }
-        if(totalmillis-message8<=3000)
-        {
-            m_hold ? text_bounds("\f9Un allié est mort en ananas.", wb, hb) : text_bounds("\f2Un allié a perdu le drapeau ennemi.", wb, hb);
-            int x = ((w/2)*2.35f)-wb/2, y = (h/2)*2.35f;
-            m_hold ? draw_textf("\f9Un allié est mort en ananas.", x, y-385+decal_message) : draw_textf("\f9Un allié a perdu le drapeau ennemi.",  x, y-385+decal_message);
-            decal_message = decal_message - 50;
-        }
-        if(totalmillis-message9<=3000)
-        {
-            m_hold ? text_bounds("\f3Un ennemi est mort en ananas !", wb, hb) : text_bounds("\f3Un ennemi a perdu notre drapeau !", wb, hb);
-            int x = ((w/2)*2.35f)-wb/2, y = (h/2)*2.35f;
-            m_hold ? draw_textf("\f3Un ennemi est mort en ananas !", x, y-385+decal_message) : draw_textf("\f3Un ennemi a perdu notre drapeau !",  x, y-385+decal_message);
-            decal_message = decal_message - 50;
-        }
-        if(totalmillis-message10<=3000)
-        {
-            text_bounds("\f6ATTENTION, ALERTE NUCLÉAIRE !", wb, hb);
-            int x = ((w/2)*2.35f)-wb/2, y = (h/2)*2.35f;
-            draw_textf("\f6ATTENTION, ALERTE NUCLÉAIRE !", x, y-385+decal_message);
-            decal_message = decal_message - 50;
-        }
+
     }
     */

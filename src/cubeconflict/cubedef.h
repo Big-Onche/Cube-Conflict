@@ -78,7 +78,7 @@ extern string str_pseudotueur, str_armetueur;
 extern int n_aptitudetueur, n_aptitudevictime;
 
 //HUD
-extern int message1, message2, message3, ctfmessage1, ctfmessage2, ctfmessage3, ctfmessage4;  //Messages HUD
+extern int message1, message2, message3, ctfmessage1, ctfmessage2, ctfmessage3, ctfmessage4, ctfmessage5, ctfmessage6;  //Messages HUD
 extern int zoomfov, zoom, crosshairsize; //HUD Zoom
 extern float crosshairalpha, pourcents;
 extern int ccxp, cclvl, needxp, oldneed, neededxp;

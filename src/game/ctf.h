@@ -9,7 +9,7 @@ struct ctfclientmode : clientmode
 #endif
 {
     static const int MAXFLAGS = 20;
-    static const int FLAGRADIUS = 16;
+    static const int FLAGRADIUS = 20;
     static const int FLAGLIMIT = 10;
     static const int RESPAWNSECS = 5;
 
@@ -576,7 +576,7 @@ struct ctfclientmode : clientmode
         returnflag(i);
         conoutf(CON_GAMEINFO, "%s\f7 %s récupéré le drapeau %s", teamcolorname(d), d==player1 ? "as" : "a", teamcolorflag(f));
         d->team==player1->team ? ctfmessage3=totalmillis : ctfmessage4=totalmillis;
-        playsound(S_FLAGRETURN);
+        playsound(S_DRAPEAURESET);
     }
 
     void resetflag(int i, int version)
@@ -588,7 +588,7 @@ struct ctfclientmode : clientmode
         f.interptime = 0;
         returnflag(i);
         conoutf(CON_GAMEINFO, "Le drapeau %s\f7 a été replacé.", teamcolorflag(f));
-        playsound(S_FLAGRESET);
+        playsound(S_DRAPEAURESET);
     }
 
     void scoreflag(gameent *d, int relay, int relayversion, int goal, int goalversion, int team, int score, int dflags)
@@ -626,6 +626,7 @@ struct ctfclientmode : clientmode
         f.interploc = interpflagpos(f, f.interpangle);
         f.interptime = lastmillis;
         conoutf(CON_GAMEINFO, "%s\f7 %s volé le drapeau %s", teamcolorname(d), d==player1 ? "as" : "a", teamcolorflag(f));
+        d->team==player1->team ? ctfmessage5=totalmillis : ctfmessage6=totalmillis;
         ownflag(i, d, lastmillis);
         playsound(S_DRAPEAUPRIS);
     }
@@ -634,14 +635,32 @@ struct ctfclientmode : clientmode
     {
         if(d->state!=CS_ALIVE) return;
         vec o = d->feetpos();
+        bool tookflag = false;
         loopv(flags)
         {
             flag &f = flags[i];
-            if(!validteam(f.team) || f.owner || (f.droptime && f.droploc.x<0)) continue;
+            if(!validteam(f.team) || f.team==player1->team || f.owner || (f.droptime && f.droploc.x<0)) continue;
             const vec &loc = f.droptime ? f.droploc : f.spawnloc;
             if(o.dist(loc) < FLAGRADIUS)
             {
                 if(d->flagpickup&(1<<f.id)) continue;
+                if((lookupmaterial(o)&MATF_CLIP) != MAT_GAMECLIP && (lookupmaterial(loc)&MATF_CLIP) != MAT_GAMECLIP)
+                {
+                    tookflag = true;
+                    addmsg(N_TAKEFLAG, "rcii", d, i, f.version);
+                }
+                d->flagpickup |= 1<<f.id;
+            }
+            else d->flagpickup &= ~(1<<f.id);
+        }
+        loopv(flags)
+        {
+            flag &f = flags[i];
+            if(!validteam(f.team) || f.team!=player1->team || f.owner || (f.droptime && f.droploc.x<0)) continue;
+            const vec &loc = f.droptime ? f.droploc : f.spawnloc;
+            if(o.dist(loc) < FLAGRADIUS)
+            {
+                if(!tookflag && d->flagpickup&(1<<f.id)) continue;
                 if((lookupmaterial(o)&MATF_CLIP) != MAT_GAMECLIP && (lookupmaterial(loc)&MATF_CLIP) != MAT_GAMECLIP)
                     addmsg(N_TAKEFLAG, "rcii", d, i, f.version);
                 d->flagpickup |= 1<<f.id;
@@ -667,38 +686,39 @@ struct ctfclientmode : clientmode
         return max(0, RESPAWNSECS-(lastmillis-d->lastpain)/1000);
     }
 
-    bool aihomerun(gameent *d, ai::aistate &b)
-    {
-        vec pos = d->feetpos();
-        loopk(2)
-        {
-            int goal = -1;
-            loopv(flags)
+
+	bool aihomerun(gameent *d, ai::aistate &b)
+	{
+            vec pos = d->feetpos();
+            loopk(2)
             {
-                flag &g = flags[i];
-                if(g.team == d->team && (k || (!g.owner && !g.droptime)) &&
-                    (!flags.inrange(goal) || g.pos().squaredist(pos) < flags[goal].pos().squaredist(pos)))
+                int goal = -1;
+                loopv(flags)
                 {
-                    goal = i;
+                    flag &g = flags[i];
+                    if(g.team == d->team && (k || (!g.owner && !g.droptime)) &&
+                        (!flags.inrange(goal) || g.pos().squaredist(pos) < flags[goal].pos().squaredist(pos)))
+                    {
+                        goal = i;
+                    }
+                }
+                if(flags.inrange(goal) && ai::makeroute(d, b, flags[goal].pos()))
+                {
+                    d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, goal);
+                    return true;
                 }
             }
-            if(flags.inrange(goal) && ai::makeroute(d, b, flags[goal].pos()))
-            {
-                d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, goal);
-                return true;
-            }
-        }
-        if(b.type == ai::AI_S_INTEREST && b.targtype == ai::AI_T_NODE) return true; // we already did this..
-        if(randomnode(d, b, ai::SIGHTMIN, 1e16f))
-        {
+	    if(b.type == ai::AI_S_INTEREST && b.targtype == ai::AI_T_NODE) return true; // we already did this..
+		if(randomnode(d, b, ai::SIGHTMIN, 1e16f))
+		{
             d->ai->switchstate(b, ai::AI_S_INTEREST, ai::AI_T_NODE, d->ai->route[0]);
             return true;
-        }
-        return false;
-    }
+		}
+		return false;
+	}
 
-    bool aicheck(gameent *d, ai::aistate &b)
-    {
+	bool aicheck(gameent *d, ai::aistate &b)
+	{
         static vector<int> takenflags;
         takenflags.setsize(0);
         loopv(flags)
@@ -714,40 +734,38 @@ struct ctfclientmode : clientmode
             d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, takenflags[flag]);
             return true;
         }
-        return false;
-    }
+		return false;
+	}
 
-    void aifind(gameent *d, ai::aistate &b, vector<ai::interest> &interests)
-    {
-        vec pos = d->feetpos();
-
-        loopvj(flags)
-        {
-            flag &f = flags[j];
-            if(f.owner != d)
-            {
-                static vector<int> targets; // build a list of others who are interested in this
-                targets.setsize(0);
-                bool home = f.team == d->team;
-                ai::checkothers(targets, d, home ? ai::AI_S_DEFEND : ai::AI_S_PURSUE, ai::AI_T_AFFINITY, j, true);
-                gameent *e = NULL;
-                loopi(numdynents()) if((e = (gameent *)iterdynents(i)) && !e->ai && e->state == CS_ALIVE && isteam(d->team, e->team))
-                { // try to guess what non ai are doing
-                    vec ep = e->feetpos();
-                    if(targets.find(e->clientnum) < 0 && (ep.squaredist(f.pos()) <= (FLAGRADIUS*FLAGRADIUS*4) || f.owner == e))
-                        targets.add(e->clientnum);
-                }
-
-                if(home)
+	void aifind(gameent *d, ai::aistate &b, vector<ai::interest> &interests)
+	{
+		vec pos = d->feetpos();
+		loopvj(flags)
+		{
+			flag &f = flags[j];
+			if(f.owner != d)
+			{
+				static vector<int> targets; // build a list of others who are interested in this
+				targets.setsize(0);
+				bool home = f.team != d->team;
+				ai::checkothers(targets, d, home ? ai::AI_S_DEFEND : ai::AI_S_PURSUE, ai::AI_T_AFFINITY, j, true);
+				gameent *e = NULL;
+				loopi(numdynents()) if((e = (gameent *)iterdynents(i)) && !e->ai && e->state == CS_ALIVE && isteam(d->team, e->team))
+				{ // try to guess what non ai are doing
+					vec ep = e->feetpos();
+					if(targets.find(e->clientnum) < 0 && (ep.squaredist(f.pos()) <= (FLAGRADIUS*FLAGRADIUS*4) || f.owner == e))
+						targets.add(e->clientnum);
+				}
+				if(home)
 				{
 					bool guard = false;
-					if((f.owner && f.team != f.owner->team) || f.droptime || targets.empty());
+					if((f.owner && f.team != f.owner->team) || f.droptime || targets.empty()) guard = true;
 					else if(d->hasammo(d->ai->weappref))
-					{
+					{ // see if we can relieve someone who only has a piece of crap
 						gameent *t;
 						loopvk(targets) if((t = getclient(targets[k])))
 						{
-							if((!t->ai && (t->gunselect == GUN_SKS || t->gunselect == GUN_SV98)))
+							if((t->ai && !t->hasammo(t->ai->weappref)) || (!t->ai && (t->gunselect == GUN_GLOCK)))
 							{
 								guard = true;
 								break;
@@ -756,128 +774,124 @@ struct ctfclientmode : clientmode
 					}
 					if(guard)
 					{ // defend the flag
-                        ai::interest &n = interests.add();
-                        n.state = ai::AI_S_DEFEND;
-                        n.node = ai::closestwaypoint(f.pos(), ai::SIGHTMIN, true);
-                        n.target = j;
-                        n.targtype = ai::AI_T_AFFINITY;
-                        n.score = pos.squaredist(f.pos())/100.f;
+					    switch(rnd(100))
+					    {
+					        case 0:
+                            ai::interest &n = interests.add();
+                            n.state = ai::AI_S_PURSUE;
+                            n.node = ai::closestwaypoint(f.pos(), ai::SIGHTMIN, true);
+                            n.target = j;
+                            n.targtype = ai::AI_T_PLAYER;
+                            n.score = pos.squaredist(f.pos())/100.f;
+					    }
+
+					}
+				}
+				else
+				{
+					if(targets.empty())
+					{ // attack the flag
+						ai::interest &n = interests.add();
+						n.state = ai::AI_S_PURSUE;
+						n.node = ai::closestwaypoint(f.pos(), ai::SIGHTMIN, true);
+						n.target = j;
+						n.targtype = ai::AI_T_AFFINITY;
+						n.score = pos.squaredist(f.pos());
 					}
 					else
-                    {
-                        ai::interest &n = interests.add();
-                        n.state = ai::AI_S_PURSUE;
-                        n.node = ai::closestwaypoint(f.pos(), ai::SIGHTMIN, true);
-                        n.target = j;
-                        n.targtype = ai::AI_T_PLAYER;
-                        n.score = pos.squaredist(f.pos())/100.f;
-                    }
-                }
-                else
-                {
-                    if(targets.empty())
-                    { // attack the flag
-                        ai::interest &n = interests.add();
-                        n.state = ai::AI_S_PURSUE;
-                        n.node = ai::closestwaypoint(f.pos(), ai::SIGHTMIN, true);
-                        n.target = j;
-                        n.targtype = ai::AI_T_AFFINITY;
-                        n.score = pos.squaredist(f.pos());
-                    }
-                    else
-                    { // help by defending the attacker
-                        gameent *t;
-                        loopvk(targets) if((t = getclient(targets[k])))
-                        {
-                            ai::interest &n = interests.add();
-                            n.state = ai::AI_S_DEFEND;
-                            n.node = t->lastnode;
-                            n.target = t->clientnum;
-                            n.targtype = ai::AI_T_PLAYER;
-                            n.score = d->o.squaredist(t->o);
-                        }
-                    }
-                }
-            }
-        }
-    }
+					{ // help by defending the attacker
+						gameent *t;
+						loopvk(targets) if((t = getclient(targets[k])))
+						{
+							ai::interest &n = interests.add();
+							n.state = ai::AI_S_PURSUE;
+							n.node = t->lastnode;
+							n.target = t->clientnum;
+							n.targtype = ai::AI_T_PLAYER;
+							n.score = d->o.squaredist(t->o);
+						}
+					}
+				}
+			}
+		}
+	}
 
-    bool aidefend(gameent *d, ai::aistate &b)
-    {
+	bool aidefend(gameent *d, ai::aistate &b)
+	{
         loopv(flags)
         {
             flag &g = flags[i];
             if(g.owner == d) return aihomerun(d, b);
         }
-        if(flags.inrange(b.target))
-        {
-            flag &f = flags[b.target];
-            if(f.droptime) return ai::makeroute(d, b, f.pos());
-            if(f.owner) return ai::violence(d, b, f.owner, 4);
-            int walk = 0;
-            if(lastmillis-b.millis >= (201-d->skill)*33)
-            {
-                static vector<int> targets; // build a list of others who are interested in this
-                targets.setsize(0);
-                ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, b.target, true);
-                gameent *e = NULL;
-                loopi(numdynents()) if((e = (gameent *)iterdynents(i)) && !e->ai && e->state == CS_ALIVE && isteam(d->team, e->team))
-                { // try to guess what non ai are doing
-                    vec ep = e->feetpos();
-                    if(targets.find(e->clientnum) < 0 && (ep.squaredist(f.pos()) <= (FLAGRADIUS*FLAGRADIUS*4) || f.owner == e))
-                        targets.add(e->clientnum);
-                }
-                if(!targets.empty())
-                {
-                    d->ai->trywipe = true; // re-evaluate so as not to herd
-                    return true;
-                }
-                else
-                {
-                    walk = 2;
-                    b.millis = lastmillis;
-                }
-            }
-            vec pos = d->feetpos();
-            float mindist = float(FLAGRADIUS*FLAGRADIUS*8);
-            loopv(flags)
-            { // get out of the way of the returnee!
-                flag &g = flags[i];
-                if(pos.squaredist(g.pos()) <= mindist)
-                {
-                    if(g.owner && g.owner->team == d->team) walk = 1;
-                    if(g.droptime && ai::makeroute(d, b, g.pos())) return true;
-                }
-            }
-            return ai::defend(d, b, f.pos(), float(FLAGRADIUS*2), float(FLAGRADIUS*(2+(walk*2))), walk);
-        }
-        return false;
-    }
+		if(flags.inrange(b.target))
+		{
+			flag &f = flags[b.target];
+			if(f.droptime) return ai::makeroute(d, b, f.pos());
+			if(f.owner) return ai::violence(d, b, f.owner, 4);
+			int walk = 0;
+			if(lastmillis-b.millis >= (201-d->skill)*33)
+			{
+				static vector<int> targets; // build a list of others who are interested in this
+				targets.setsize(0);
+				ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, b.target, true);
+				gameent *e = NULL;
+				loopi(numdynents()) if((e = (gameent *)iterdynents(i)) && !e->ai && e->state == CS_ALIVE && isteam(d->team, e->team))
+				{ // try to guess what non ai are doing
+					vec ep = e->feetpos();
+					if(targets.find(e->clientnum) < 0 && (ep.squaredist(f.pos()) <= (FLAGRADIUS*FLAGRADIUS*4) || f.owner == e))
+						targets.add(e->clientnum);
+				}
+				if(!targets.empty())
+				{
+					d->ai->trywipe = true; // re-evaluate so as not to herd
+					return true;
+				}
+				else
+				{
+					walk = 2;
+					b.millis = lastmillis;
+				}
+			}
+			vec pos = d->feetpos();
+			float mindist = float(FLAGRADIUS*FLAGRADIUS*8);
+			loopv(flags)
+			{ // get out of the way of the returnee!
+				flag &g = flags[i];
+				if(pos.squaredist(g.pos()) <= mindist)
+				{
+					if(g.owner && g.owner->team == d->team) walk = 1;
+					if(g.droptime && ai::makeroute(d, b, g.pos())) return true;
+				}
+			}
+			return ai::defend(d, b, f.pos(), float(FLAGRADIUS*2), float(FLAGRADIUS*(2+(walk*2))), walk);
+		}
+		return false;
+	}
 
-    bool aipursue(gameent *d, ai::aistate &b)
-    {
-        if(flags.inrange(b.target))
-        {
-            flag &f = flags[b.target];
+	bool aipursue(gameent *d, ai::aistate &b)
+	{
+		if(flags.inrange(b.target))
+		{
+			flag &f = flags[b.target];
             if(f.owner == d) return aihomerun(d, b);
-            if(f.team == d->team)
-            {
-                if(f.droptime) return ai::makeroute(d, b, f.pos());
-                if(f.owner) return ai::violence(d, b, f.owner, 4);
+			if(f.team == d->team)
+			{
+				if(f.droptime) return ai::makeroute(d, b, f.pos());
+				if(f.owner) return ai::violence(d, b, f.owner, 4);
                 loopv(flags)
                 {
                     flag &g = flags[i];
                     if(g.owner == d) return ai::makeroute(d, b, f.pos());
                 }
-            }
-            else
-            {
-                if(f.owner) return ai::violence(d, b, f.owner, 4);
-                return ai::makeroute(d, b, f.pos());
-            }
-        }
-        return false;
-    }
+			}
+			else
+			{
+				if(f.owner) return ai::violence(d, b, f.owner, 4);
+				return ai::makeroute(d, b, f.pos());
+			}
+		}
+		return false;
+	}
 };
 
 extern ctfclientmode ctfmode;
