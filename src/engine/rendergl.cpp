@@ -2489,9 +2489,9 @@ void gl_drawmainmenu()
 }
 
 VARNP(damagecompass, usedamagecompass, 0, 1, 1);
-VARP(damagecompassfade, 1, 1000, 10000);
-VARP(damagecompasssize, 1, 30, 100);
-VARP(damagecompassalpha, 1, 25, 100);
+VARP(damagecompassfade, 1, 500, 10000);
+VARP(damagecompasssize, 1, 20, 100);
+VARP(damagecompassalpha, 1, 80, 100);
 VARP(damagecompassmin, 1, 25, 1000);
 VARP(damagecompassmax, 1, 200, 1000);
 
