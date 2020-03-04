@@ -147,11 +147,11 @@ namespace game
         do offset = vec(rndscale(1), rndscale(1), rndscale(1)).sub(0.5f);
         while(offset.squaredlen() > 0.5f*0.5f);
 
-        if(d->champimillis>0)
-        {
-            spread/= (d->champimillis/1000);
-            nozoomspread/= (d->champimillis/1000);
-        }
+        //if(d->champimillis>0)
+        //{
+        //    spread/= (d->champimillis/1000);
+        //    nozoomspread/= (d->champimillis/1000);
+        //}
         if(d->aptitude==APT_MAGICIEN && d->aptisort2)
         {
             spread/=3;
@@ -224,7 +224,6 @@ namespace game
 
         switch(type)
         {
-            case BNC_DEBRIS: bnc.variant = rnd(4); break;
             case BNC_GIBS: bnc.variant = rnd(3); break;
             default:  bnc.collidetype = COLLIDE_ELLIPSE;
         }
@@ -1540,6 +1539,9 @@ namespace game
     void preloadbouncers()
     {
         loopi(sizeof(gibnames)/sizeof(gibnames[0])) preloadmodel(gibnames[i]);
+        loopi(sizeof(douillesnames)/sizeof(douillesnames[0])) preloadmodel(douillesnames[i]);
+        loopi(sizeof(bigdouillesnames)/sizeof(bigdouillesnames[0])) preloadmodel(bigdouillesnames[i]);
+        loopi(sizeof(cartouchessnames)/sizeof(cartouchessnames[0])) preloadmodel(cartouchessnames[i]);
         loopi(sizeof(debrisnames)/sizeof(debrisnames[0])) preloadmodel(debrisnames[i]);
     }
 
@@ -1561,23 +1563,22 @@ namespace game
                 bnc.lastyaw = yaw;
             }
             pitch = -bnc.roll;
+			int cull = MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED;
 
-            if(bnc.bouncetype==BNC_GRENADE)
-                rendermodel("projectiles/grenade", ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, MDL_CULL_VFC|MDL_CULL_OCCLUDED);
+            if(bnc.bouncetype==BNC_GRENADE) rendermodel("projectiles/grenade", ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, cull);
             else
             {
                 const char *mdl = NULL;
-                int cull = MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED;
                 float fade = 1;
                 if(bnc.lifetime < 250) fade = bnc.lifetime/250.0f;
                 switch(bnc.bouncetype)
                 {
                     case BNC_GIBS: mdl = gibnames[bnc.variant]; break;
-                    case BNC_DEBRIS: mdl = debrisnames[bnc.variant]; break;
-                    case BNC_DOUILLES: case BNC_DOUILLESUZI: mdl = douillesnames[bnc.variant]; break;
-                    case BNC_BIGDOUILLES: mdl = bigdouillesnames[bnc.variant]; break;
-                    case BNC_CARTOUCHES: mdl = cartouchessnames[bnc.variant]; break;
-                    default: continue;
+                    case BNC_DEBRIS: mdl = "pixels/noir"; break;
+                    case BNC_DOUILLES: case BNC_DOUILLESUZI: mdl = "douilles/normale"; break;
+                    case BNC_BIGDOUILLES: mdl = "douilles/grosse"; break;
+                    case BNC_CARTOUCHES: mdl = "douilles/cartouche"; break;
+                    default: return;
                 }
                 rendermodel(mdl, ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, 0, cull, NULL, NULL, 0, 0, fade);
             }
