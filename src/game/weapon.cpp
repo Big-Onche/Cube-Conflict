@@ -147,7 +147,7 @@ namespace game
         do offset = vec(rndscale(1), rndscale(1), rndscale(1)).sub(0.5f);
         while(offset.squaredlen() > 0.5f*0.5f);
 
-        if(d->champimillis)
+        if(d->champimillis>0)
         {
             spread/= (d->champimillis/1000);
             nozoomspread/= (d->champimillis/1000);
