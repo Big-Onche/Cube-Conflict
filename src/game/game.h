@@ -359,9 +359,9 @@ static struct itemstat { int add, max, sound; const char *name; int icon, info; 
     {30,   120,    S_ITEMAMMO,   "GLOCK",            HICON_SIZE, GUN_GLOCK},
     //Super armes
     {  1,     1,    S_ITEMAMMO,   "BOMBE NUCLEAIRE", HICON_SIZE, GUN_S_NUKE},
-    {250,  1000,    S_ITEMAMMO,   "GAU-8",           HICON_SIZE, GUN_S_GAU8},
-    { 30,   120,    S_ITEMAMMO,   "MINI-ROQUETTES",  HICON_SIZE, GUN_S_ROQUETTES},
-    { 15,    60,    S_ITEMAMMO,   "CAMPOUZE 2000",   HICON_SIZE, GUN_S_CAMPOUZE},
+    {300,  1000,    S_ITEMAMMO,   "GAU-8",           HICON_SIZE, GUN_S_GAU8},
+    { 40,   120,    S_ITEMAMMO,   "MINI-ROQUETTES",  HICON_SIZE, GUN_S_ROQUETTES},
+    { 20,    60,    S_ITEMAMMO,   "CAMPOUZE 2000",   HICON_SIZE, GUN_S_CAMPOUZE},
     //Objets
     {250,     1000, S_ITEMHEALTH, "PANACHAY",            HICON_SIZE},
     {500,     2500, S_COCHON,     "COCHON GRILLAY",      HICON_SIZE},
@@ -409,9 +409,9 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound
     { GUN_GLOCK,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GLOCK,        S_GLOCK,        S_GLOCK_LOIN, S_ARMESLOIN,    10,  400,  280, 175, 350, 0, 2000,   7, 1000,  1,    30,   3, 0, 0},
     // Super armes
     { GUN_S_NUKE, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_NUKELAUNCH, S_NUKELAUNCH, S_NULL, S_NULL,           1, 3000,  3000,  20, 300, 0,  175,  10, 2000,  1,   400, 1280, 0, 0},
-    { GUN_S_GAU8, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GAU8, S_GAU8, S_NULL, S_NULL,                      90,   13,   200, 150, 250, 0, 4000,   1, 4000,  1,    80,   15, 0, 0},
-    { GUN_S_ROQUETTES, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MINIROQUETTE, S_MINIROQUETTE, S_NULL, S_NULL, 14,  170,  1300,  10, 300, 0,  700,   6, 2000,  1,   500,   70, 0, 0},
-    { GUN_S_CAMPOUZE, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_CAMPOUZE, S_CAMPOUZE, S_NULL, S_NULL,           8,  500,   300,  50,  50, 0, 5000,   3, 8000, 10,   150,    8, 0, 0},
+    { GUN_S_GAU8, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GAU8, S_GAU8, S_NULL, S_NULL,                      90,   13,   350, 150, 250, 0, 4000,   1, 4000,  1,    80,   15, 0, 0},
+    { GUN_S_ROQUETTES, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MINIROQUETTE, S_MINIROQUETTE, S_NULL, S_NULL, 14,  170,  2000,  10, 300, 0,  700,   6, 2000,  1,   500,   70, 0, 0},
+    { GUN_S_CAMPOUZE, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_CAMPOUZE, S_CAMPOUZE, S_NULL, S_NULL,           8,  500,   500,  50,  50, 0, 5000,   3, 8000, 10,   150,    8, 0, 0},
     // Armes corps à corps
     { GUN_CAC349, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_EPEEATTACK, S_EPEEATTACK, S_NULL, S_NULL,          3, 1000,  20, 400, 400, 0, 0, -12,   60, 20, 50,  0, 0, 0},
     { GUN_CACMARTEAU, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MARTEAUBAN, S_MARTEAUBAN, S_NULL, S_NULL,      2, 1500,  30, 250, 250, 0, 0,  -7,   70, 20, 50,  0, 0, 0},
@@ -419,7 +419,7 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound
     { GUN_CACFLEAU, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FLEAU, S_FLEAU, S_NULL, S_NULL,                  3, 1250,  25, 175, 175, 0, 0,  -9,   80, 20, 50,  0, 0, 0},
     // Armes spéciales aptitudes
     { GUN_KAMIKAZE, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_KAMIKAZEBOOM, S_KAMIKAZEBOOM, S_NULL, S_NULL,   1, 1000, 3000,   1,   1, 0,    1,  10,   90,  1,   300, 400, 1, 0},
-    { GUN_MEDIGUN, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MEDIGUN, S_MEDIGUN, S_NULL, S_NULL,             30,  100,  -50, 500, 700, 0,  750,   2,  280,  4,    10,  25, 0, 0},
+    { GUN_MEDIGUN, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MEDIGUN, S_MEDIGUN, S_NULL, S_NULL,             30,  100, -150, 500, 700, 0,  750,   2,  280,  4,    10,  25, 0, 0},
 };
 
 static const struct guninfo { const char *name, *file, *vwep, *armedesc; int maxweapposside, maxweapposup, maxzoomfov, attacks[NUMACTS]; } guns[NUMGUNS] =

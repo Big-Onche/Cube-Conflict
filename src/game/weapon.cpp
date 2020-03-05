@@ -992,7 +992,7 @@ namespace game
                         case ATK_MINIGUN_SHOOT:
                         case ATK_AK47_SHOOT:
                             if(p.owner->steromillis) loopi(2)particle_flare(tail, head, 1, PART_BALLE_SIDE, 0xFF0000, 3.0f);
-                            else particle_flare(tail, head, 1, PART_BALLE_SIDE, 0xFF7722, 2.5f);
+                            else particle_flare(tail, head, 1, PART_BALLE_SIDE, 0xFF9944, 2.5f);
                             break;
                         case ATK_SV98_SHOOT:
                         case ATK_SKS_SHOOT:
@@ -1002,7 +1002,7 @@ namespace game
                             //particle_trail(PART_SMOKE, 500, pos, to, 0x404040, 0.6f, 20);
                             particle_flare(tail, head, 200+(rnd(800)), PART_SMOKE, 0x404040, 1.0f+(rnd(2)));
                             if(p.owner->steromillis) loopi(2)particle_flare(tail, head, 1, PART_BALLE_SIDE, 0xFF0000,  ATK_GAU8_SHOOT ? 7.0f : 3.5f);
-                            else particle_flare(tail, head, 1, PART_BALLE_SIDE, 0xFF7722, ATK_GAU8_SHOOT ? 6.0f : 3.0f);
+                            else particle_flare(tail, head, 1, PART_BALLE_SIDE, 0xFF9944, ATK_GAU8_SHOOT ? 6.0f : 3.0f);
                             break;
                         case ATK_UZI_SHOOT:
                         case ATK_MOSSBERG_SHOOT:
@@ -1010,7 +1010,7 @@ namespace game
                         case ATK_GLOCK_SHOOT:
                         case ATK_FAMAS_SHOOT:
                             if(p.owner->steromillis) loopi(2)particle_flare(tail, head, 1, PART_BALLE_SIDE, 0xFF0000, 2.75f);
-                            else particle_flare(tail, head, 1, PART_BALLE_SIDE, 0xFF7722, 2.00f);
+                            else particle_flare(tail, head, 1, PART_BALLE_SIDE, 0xFF9944, 2.00f);
                             break;
                         case ATK_SMAW_SHOOT:
                             p.projsound = S_MISSILE;
@@ -1141,8 +1141,8 @@ namespace game
             case ATK_SMAW_SHOOT:
             case ATK_ROQUETTES_SHOOT:
             case ATK_NUKE_SHOOT:
-                particle_flare(d->muzzle, d->muzzle, 250, PART_NORMAL_MUZZLE_FLASH, d->steromillis ? 0xFF0000 : 0xFF7700, ATK_ROQUETTES_SHOOT ? 3.0f : 7.00f, d);
-                if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 250, PART_NORMAL_MUZZLE_FLASH, 0xFF0000, ATK_ROQUETTES_SHOOT ? 5.0f : 12.00f, d);
+                particle_flare(d->muzzle, d->muzzle, 250, PART_NORMAL_MUZZLE_FLASH, d->steromillis ? 0xFF0000 : 0xFF7700, ATK_ROQUETTES_SHOOT ? 2.5f : 7.00f, d);
+                if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 250, PART_NORMAL_MUZZLE_FLASH, 0xFF0000, ATK_ROQUETTES_SHOOT ? 3.0f : 12.00f, d);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
                 break;
 
@@ -1165,13 +1165,13 @@ namespace game
             case ATK_GAU8_SHOOT:
                 if(d->type==ENT_PLAYER) sound = S_GAU8;
                 spawnbouncer(d->balles, d->balles, d, BNC_BIGDOUILLES);
-                particle_flare(d->muzzle, d->muzzle, 100, PART_MINIGUN_MUZZLE_FLASH, d->steromillis ? 0xFF0000 : 0xFF7722, zoom ? 1.5f : 3.0f, d);
-                if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 100, PART_MINIGUN_MUZZLE_FLASH, 0xFF0000, zoom ? 5.0f : 12.0f, d);
-                particle_splash(PART_SMOKE,  4, 500, d->muzzle, 0x444444, 3.5f, 20, 500);
+                particle_flare(d->muzzle, d->muzzle, 100, PART_MINIGUN_MUZZLE_FLASH, d->steromillis ? 0xFF0000 : 0xFF7722, zoom ? 1.5f : 2.0f, d);
+                if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 100, PART_MINIGUN_MUZZLE_FLASH, 0xFF0000, zoom ? 1.5f : 2.5f, d);
+                switch(rnd(7)){case 0: particle_splash(PART_SMOKE,  4, 250, d->muzzle, 0x444444, 3.0f, 20, 500);}
                 adddynlight(hudgunorigin(gun, d->o, to, d), 15, vec(1.0f, 0.75f, 0.5f), 30, 100, DL_FLASH, 0, vec(0, 0, 0), d);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
                 if(d!=hudplayer()) sound_nearmiss(S_FLYBYSNIPE, from, to);
-                if(d==player1) mousemove(-12+rnd(25), -12+rnd(25));
+                if(d==player1) mousemove(-9+rnd(19), -9+rnd(19));
                 break;
             case ATK_MOSSBERG_SHOOT:
             case ATK_HYDRA_SHOOT:
