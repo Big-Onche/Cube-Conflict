@@ -487,7 +487,7 @@ namespace game
                 damageeffect(damage, f, at, true, atk);
                 if(f==player1)
                 {
-                    if(f->gunselect==GUN_MEDIGUN)
+                    if(atk==ATK_MEDIGUN_SHOOT)
                     {
                         regenblend(damage);
                         regencompass(damage, at ? at->o : f->o);
@@ -503,8 +503,7 @@ namespace game
                                 else if(player1->armour>0 && atk!=ATK_LANCEFLAMMES_SHOOT) playsound(armoursound);
                                 break;
                             case 1:
-                                if(atk==ATK_LANCEFLAMMES_SHOOT) switch(rnd(3)){case 0: playsound(S_FEUCORPS);}
-                                else playsound(S_BALLECORPS);
+                                playsound(S_BALLECORPS);
                         }
                     }
 
@@ -515,7 +514,7 @@ namespace game
                     {
                         case 0:
                             if(f->aptitude==APT_PHYSICIEN && f->aptisort1 && f->armour>0) playsound(S_SORTPHY1, &f->o, 0, 0, 0 , 100, -1, 200);
-                            else if(f->armour>0)playsound(armoursound+4, &f->o, 0, 0, 0 , 100, -1, 200);
+                            else if(f->armour>0 && atk!=ATK_LANCEFLAMMES_SHOOT) playsound(armoursound+4, &f->o, 0, 0, 0 , 100, -1, 200);
                     }
                 }
             }
@@ -1244,24 +1243,21 @@ namespace game
             case ATK_LANCEFLAMMES_SHOOT:
             {
                 if(d->type==ENT_PLAYER) sound = S_FLAMEATTACK;
-                if(d!=hudplayer()) switch(rnd(5)){case 0: sound_nearmiss(S_FLYBYFLAME, from, to);}
                 loopi(attacks[atk].rays)
                 {
                     vec irays(rays[i]);
                     irays.sub(d->muzzle);
-                    irays.normalize().mul(1300.0f);
+                    irays.normalize().mul(1500.0f);
 
                     switch(rnd(6))
                     {
-                        case 1:
-                        {
-                            particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0xAA0000 :  0x994422, 9, 100);
-                            particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x990000 :  0xBB0011, 9, 100);
-                            particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0xBB0000 :  0x991100, 9, 100);
-                            particle_flying_flare(d->muzzle, irays, 900, PART_SMOKE, 0x111111, 12, 120);
-                            adddynlight(hudgunorigin(gun, d->o, irays, d), 100, vec(1.0f, 0.75f, 0.5f), 100, 100, L_NODYNSHADOW, 10, vec(1.0f, 0, 0), d);
-                            flamehit(from, rays[i]);
-                        }
+                        case 0: particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0xAA0000 :  0x883322, 1.5f, 100, 1); flamehit(from, rays[i]); break;
+                        case 1: particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x990000 :  0x992211, 1.5f, 100, 1); flamehit(from, rays[i]); break;
+                        case 2: particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0xBB0000 :  0x773300, 1.5f, 100, 1); flamehit(from, rays[i]); break;
+                        default:
+                            particle_flying_flare(d->muzzle, irays, 1000, PART_SMOKE, 0x111111, 3.5f, 120, 1);
+                            adddynlight(hudgunorigin(gun, d->o, irays, d), 50, vec(0.40f, 0.2f, 0.1f), 100, 100, L_NODYNSHADOW, 10, vec(0.50f, 0, 0), d);
+                            switch(rnd(2)){case 0: if(d!=hudplayer()) sound_nearmiss(S_FLYBYFLAME, from, rays[i]);}
                     }
                 }
                 if(d->ragemillis) particle_splash(PART_SPARK,  3, 500, d->muzzle, 0xFF0000, 1.0f,  50,   200);
