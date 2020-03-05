@@ -132,7 +132,7 @@ const char *partnames[] = { "part", "tape", "trail", "text", "textup", "meter", 
 struct particle
 {
     vec o, d;
-    int gravity, fade, millis;
+    int gravity, fade, millis, expand;
     bvec color;
     uchar flags;
     float size;
@@ -184,7 +184,7 @@ struct partrenderer
     virtual void init(int n) { }
     virtual void reset() = 0;
     virtual void resettracked(physent *owner) { }
-    virtual particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity = 0) = 0;
+    virtual particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity = 0, int expand = 0) = 0;
     virtual void update() { }
     virtual void render() = 0;
     virtual bool haswork() = 0;
@@ -213,6 +213,13 @@ struct partrenderer
         }
         else
         {
+            if(p->expand)
+            {
+                switch(p->expand)
+                {
+                    case 1: p->size += 0.16f;
+                }
+            }
             ts = lastmillis-p->millis;
             blend = max(255 - (ts<<8)/p->fade, 0);
             if(p->gravity)
@@ -320,7 +327,7 @@ struct listrenderer : partrenderer
         }
     }
 
-    particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity)
+    particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity, int expand)
     {
         if(!parempty)
         {
@@ -677,7 +684,7 @@ struct varenderer : partrenderer
         return (numparts > 0);
     }
 
-    particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity)
+    particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity, int expand)
     {
         particle *p = parts + (numparts < maxparts ? numparts++ : rnd(maxparts)); //next free slot, or kill a random kitten
         p->o = o;
@@ -689,6 +696,7 @@ struct varenderer : partrenderer
         p->size = size;
         p->owner = NULL;
         p->flags = 0x80 | (rndmask ? rnd(0x80) & rndmask : 0);
+        p->expand = expand;
         lastupdate = -1;
         return p;
     }
@@ -1013,7 +1021,7 @@ void renderparticles(int layer)
 
 static int addedparticles = 0;
 
-static inline particle *newparticle(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity = 0)
+static inline particle *newparticle(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity = 0, int expand = 0)
 {
     static particle dummy;
     if(seedemitter)
@@ -1023,7 +1031,7 @@ static inline particle *newparticle(const vec &o, const vec &d, int fade, int ty
     }
     if(fade + emitoffset < 0) return &dummy;
     addedparticles++;
-    return parts[type]->addpart(o, d, fade, color, size, gravity);
+    return parts[type]->addpart(o, d, fade, color, size, gravity, expand);
 }
 
 int maxparticledistance = 8192;
@@ -1056,9 +1064,9 @@ static void regularsplash(int type, int color, int radius, int num, int fade, co
     splash(type, color, radius, num, fade, p, size, gravity);
 }
 
-void particle_flying_flare(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity)
+void particle_flying_flare(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity, int expand)
 {
-    newparticle(o, d, fade, type, color, size, gravity);
+    newparticle(o, d, fade, type, color, size, gravity, expand);
 }
 
 bool canaddparticles()
