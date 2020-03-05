@@ -5046,5 +5046,8 @@ void setlightlod()
             volsteps = 32;
             break;
     }
+    cleardeferredlightshaders();
+    cleanupshadowatlas();
+    cleanupvolumetric();
     initparticles();
 }
