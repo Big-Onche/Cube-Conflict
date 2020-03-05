@@ -3140,22 +3140,6 @@ void writecfg(const char *name)
     }
     f->printf("\n");
     writebinds(f);
-    f->printf("\n");
-    loopv(ids)
-    {
-        ident &id = *ids[i];
-        if(id.type==ID_ALIAS && id.flags&IDF_PERSIST && !(id.flags&IDF_OVERRIDDEN)) switch(id.valtype)
-        {
-        case VAL_STR:
-            if(!id.val.s[0]) break;
-            if(!validateblock(id.val.s)) { f->printf("%s = %s\n", escapeid(id), escapestring(id.val.s)); break; }
-        case VAL_FLOAT:
-        case VAL_INT:
-            f->printf("%s = [%s]\n", escapeid(id), id.getstr()); break;
-        }
-    }
-    f->printf("\n");
-    writecompletions(f);
     delete f;
 }
 
