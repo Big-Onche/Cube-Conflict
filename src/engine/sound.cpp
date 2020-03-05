@@ -634,7 +634,7 @@ void updatesounds()
     }
 }
 
-VARP(maxsoundsatonce, 0, 128, 256);
+VARP(maxsoundsatonce, 0, 128, 512);
 
 VAR(dbgsound, 0, 0, 1);
 
