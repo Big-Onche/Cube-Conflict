@@ -14,9 +14,7 @@
 				<Option compiler="gcc" />
 				<Option parameters="-t0 -w640 -h480 -qhome" />
 				<Compiler>
-					<Add option="-fomit-frame-pointer" />
 					<Add option="-O3" />
-					<Add option="-Wunreachable-code" />
 					<Add option="-Wall" />
 					<Add option="-m64" />
 					<Add option="-ffast-math" />
@@ -29,12 +27,13 @@
 					<Add directory="../shared" />
 					<Add directory="../vcpp" />
 					<Add directory="../game" />
+					<Add directory="../cubeconflict" />
 				</Compiler>
 				<ResourceCompiler>
 					<Add directory="../vcpp" />
 				</ResourceCompiler>
 				<Linker>
-					<Add option="-O3" />
+					<Add option="-s" />
 					<Add option="-m64" />
 					<Add option="-mwindows" />
 					<Add library="SDL2" />
@@ -60,27 +59,22 @@
 				<Option compiler="gcc" />
 				<Option parameters="-t0 -w640 -h480 -qhome" />
 				<Compiler>
-					<Add option="-fomit-frame-pointer" />
 					<Add option="-O3" />
-					<Add option="-Wunreachable-code" />
 					<Add option="-Wall" />
 					<Add option="-m32" />
-					<Add option="-ffast-math" />
-					<Add option="-fsigned-char" />
-					<Add option="-fno-exceptions" />
-					<Add option="-fno-rtti" />
 					<Add directory="../enet/include" />
 					<Add directory="../include" />
 					<Add directory="../engine" />
 					<Add directory="../shared" />
 					<Add directory="../vcpp" />
 					<Add directory="../game" />
+					<Add directory="../cubeconflict" />
 				</Compiler>
 				<ResourceCompiler>
 					<Add directory="../vcpp" />
 				</ResourceCompiler>
 				<Linker>
-					<Add option="-O3" />
+					<Add option="-s" />
 					<Add option="-m32" />
 					<Add option="-mwindows" />
 					<Add library="SDL2" />
@@ -103,8 +97,12 @@
 			<Add alias="All" targets="client32;client64;" />
 		</VirtualTargets>
 		<Compiler>
-			<Add option="-g" />
+			<Add option="-O3" />
+			<Add option="-Wall" />
 		</Compiler>
+		<Linker>
+			<Add option="-s" />
+		</Linker>
 		<Unit filename="../cubeconflict/aptitudes.cpp" />
 		<Unit filename="../cubeconflict/cubedef.h" />
 		<Unit filename="../cubeconflict/hud.cpp" />
