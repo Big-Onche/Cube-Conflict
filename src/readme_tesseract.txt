@@ -15,7 +15,7 @@ LICENSE
 
 Tesseract game engine source code, any release.
 
-Copyright (C) 2001-2015 Wouter van Oortmerssen, Lee Salzman, Mike Dysart, Robert Pointon, Quinton Reeves, and Benjamin Segovia
+Copyright (C) 2001-2020 Wouter van Oortmerssen, Lee Salzman, Mike Dysart, Robert Pointon, Quinton Reeves, and Benjamin Segovia
 
 This software is provided 'as-is', without any express or implied
 warranty.  In no event will the authors be held liable for any damages
@@ -65,4 +65,3 @@ http://www.redeclipse.net
 Benjamin Segovia
 
 For additional authors/contributors, see the Tesseract distribution readme.
-

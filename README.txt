@@ -1,47 +1,9 @@
-Cube Conflict utilise Tesseract (http://tesseract.gg) comme moteur de jeu.
-Cube Conflict uses Tesseract (http://tesseract.gg) as game engine.
+LICENSE
+=======
 
-LICENSE CUBE CONFLICT
-=====================
+Cube Conflict game, any release.
 
-Le contenu relatif à Cube Conflict est sous licence CC BY-NC-SA 4.0
-(Attribution-NonCommercial-ShareAlike 4.0 International)
-
-La lience s'applique aux contenus du jeu (modèles 3D, gamedesign, son, logo et autres fichers spécifiques au jeu Cube Conflict).
-Cette licence ne s'applique pas au contenu relatif à Tesseract (Voir licence Tesseract plus bas)
-
-You are free to:
-
-Share — copy and redistribute the material in any medium or format
-Adapt — remix, transform, and build upon the material
-The licensor cannot revoke these freedoms as long as you follow the license terms.
-
-Under the following terms:
-
-Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
-NonCommercial — You may not use the material for commercial purposes.
-ShareAlike — If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original.
-
-No additional restrictions — You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
-
-https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
-
-
-
-CONTRIBUTEURS DE CUBE CONFLICT
-==============================
-Chef de projet : Jean Onche
-Site web, comptes, gestion communauté : LordSpock (PixStudio)
-Autres : Skyser, JoueurZero, JambonBeurreMan, Kara, Harmonyra, Ugo Jong-Un.
-
-
-
-LICENSE TESSERACT
-=================
-
-Tesseract game engine source code, any release.
-
-Copyright (C) 2001-2015 Wouter van Oortmerssen, Lee Salzman, Mike Dysart, Robert Pointon, Quinton Reeves, and Benjamin Segovia
+Copyright (C) 2013-2020 Jean Onche
 
 This software is provided 'as-is', without any express or implied
 warranty.  In no event will the authors be held liable for any damages
@@ -63,32 +25,21 @@ freely, subject to the following restrictions:
 
 LICENSE NOTES
 =============
-The license covers the source code found in the "src" directory of this
-archive as well as the .cfg files under the "data" directory. The included 
-ENet network library which Tesseract uses is covered by an MIT-style 
-license, which is however compatible with the above license for all 
-practical purposes.
 
-Other media included with this distribution (maps, textures, sounds, models etc.)
-are NOT covered by this license, and may have individual copyrights and
-distribution restrictions (see individual readmes).
+This license covers all files related to Cube Conflict (maps, textures, 
+sounds, models etc.) and changes to the Tesseract source code.
+
+
+
+DEPENDENCIES
+=============
+
+Cube Conflict uses Tesseract (http://tesseract.gg) as game engine. (src/readme_tesseract.txt)
+Some parts of codes are inspired by SauerEnhanced project (src/readme_SE.tet)
 
 
 
 AUTHORS
-=======
-Wouter "Aardappel" van Oortmerssen
-http://strlen.com
-
-Lee "eihrul" Salzman 
-http://lee.fov120.com
-
-Mike "Gilt" Dysart
-
-Robert "baby-rabbit" Pointon
-http://www.fernlightning.com
-
-Quinton "Quin" Reeves
-http://www.redeclipse.net
-
-Benjamin Segovia
+======
+Jean Onche and LordSpock (PixStudio)
+Others : Skyser, JoueurZero, JambonBeurreMan, Kara, Harmonyra.
