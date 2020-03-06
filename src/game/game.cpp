@@ -2,6 +2,7 @@
 #include "../cubeconflict/cubedef.h"
 
 string str_pseudovictime, str_pseudotueur, str_armetueur, str_pseudoacteur;
+float killdistance = 0;
 int n_aptitudetueur, n_aptitudevictime, n_killstreakacteur;
 bool suicided;
 
@@ -607,9 +608,10 @@ namespace game
         }
         else // Kill ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
-            if(actor==player1) { conoutf(contype, "\fd%s \f7as %s \fc%s \f7avec %s", aname, partmessage[rnd(15)].partverb, dname, guns[actor->gunselect].armedesc); playsound(S_KILL); message1 = totalmillis; message2 = totalmillis; copystring(str_pseudovictime, dname); n_aptitudevictime = d->aptitude;} //TU as tué quelqu'un
-            else if(d==player1) { conoutf(contype, "\fd%s \f7as été %s par \fc%s \f7avec %s", dname, partmessage[rnd(15)].partverb, aname, guns[actor->gunselect].armedesc);  player1->killstreak=0; copystring(str_pseudotueur, aname); n_aptitudetueur = actor->aptitude; copystring(str_armetueur, guns[actor->gunselect].armedesc);  suicided = false;} //TU as été tué
-            else conoutf(contype, "%s \f7a %s %s \f7avec %s", aname, partmessage[rnd(15)].partverb, dname, guns[actor->gunselect].armedesc); //Quelqu'un a tué quelqu'un
+            float distance = actor->o.dist(d->o)/18.f;
+            if(actor==player1) { conoutf(contype, "\fd%s \f7as %s \fc%s \f7avec %s (%.1fm)", aname, partmessage[rnd(15)].partverb, dname, guns[actor->gunselect].armedesc, distance); playsound(S_KILL); message1 = totalmillis; message2 = totalmillis; copystring(str_pseudovictime, dname); n_aptitudevictime = d->aptitude; killdistance = distance;} //TU as tué quelqu'un
+            else if(d==player1) { conoutf(contype, "\fd%s \f7as été %s par \fc%s \f7avec %s (%.1fm)", dname, partmessage[rnd(15)].partverb, aname, guns[actor->gunselect].armedesc, distance);  player1->killstreak=0; copystring(str_pseudotueur, aname); n_aptitudetueur = actor->aptitude; copystring(str_armetueur, guns[actor->gunselect].armedesc);  suicided = false;} //TU as été tué
+            else conoutf(contype, "%s \f7a %s %s \f7avec %s (%.1fm)", aname, partmessage[rnd(15)].partverb, dname, guns[actor->gunselect].armedesc, distance); //Quelqu'un a tué quelqu'un
 
             if(actor!=player1) // Informe que quelqu'un est chaud  /////////////////////////////////////////////////////////////////////////////////////////////////////////
             {
@@ -977,7 +979,7 @@ namespace game
     {
         gameent *d = hudplayer();
 
-        drawmessages(player1->killstreak, str_pseudovictime, n_aptitudevictime, str_pseudoacteur, n_killstreakacteur);
+        drawmessages(player1->killstreak, str_pseudovictime, n_aptitudevictime, str_pseudoacteur, n_killstreakacteur, killdistance);
 
         if(d->state==CS_SPECTATOR || d->state==CS_DEAD || UI::uivisible("scoreboard")) return -1;
 

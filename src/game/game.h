@@ -872,7 +872,7 @@ namespace entities
 namespace game
 {
     //Fonctions Cube Conflict
-    extern void drawmessages(int killstreak, string str_pseudovictime, int n_aptitudevictime, string str_pseudoacteur, int n_killstreakacteur);
+    extern void drawmessages(int killstreak, string str_pseudovictime, int n_aptitudevictime, string str_pseudoacteur, int n_killstreakacteur, float killdistance);
     extern void updatespecials(gameent *d);
     //
 

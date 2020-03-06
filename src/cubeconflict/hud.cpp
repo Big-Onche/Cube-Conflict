@@ -25,7 +25,7 @@ namespace game
         pophudmatrix();
     }
 
-    void drawmessages(int killstreak, string str_pseudovictime, int n_aptitudevictime, string str_pseudoacteur, int n_killstreakacteur)
+    void drawmessages(int killstreak, string str_pseudovictime, int n_aptitudevictime, string str_pseudoacteur, int n_killstreakacteur, float killdistance)
     {
         decal_message = 0, need_message1 = true, need_message2 = true;
 
@@ -50,7 +50,7 @@ namespace game
         {
             string killmsg;
 
-            formatstring(killmsg, "Tu as tué \fc%s \f7! (%s)", str_pseudovictime, aptitudes[n_aptitudevictime].apt_nom);
+            formatstring(killmsg, "Tu as tué \fc%s \f7! (%s à %.1fm)", str_pseudovictime, aptitudes[n_aptitudevictime].apt_nom, killdistance);
             rendermessage(killmsg, 100, 8.8f, decal_message);
             decal_message -= 40;
         }
