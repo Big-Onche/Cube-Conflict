@@ -1,5 +1,5 @@
 #include "game.h"
-#include "../cubeconflict/cubedef.h"
+#include "cubedef.h"
 
 int ambiancealeatoire;
 VARP(forceambiance, 0, 0, 6);

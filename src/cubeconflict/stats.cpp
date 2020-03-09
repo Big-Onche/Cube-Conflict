@@ -1,7 +1,7 @@
 #include <climits>
 #include <cstdlib>
 #include "engine.h"
-#include "../cubeconflict/cubedef.h"
+#include "cubedef.h"
 
 using namespace std;
 

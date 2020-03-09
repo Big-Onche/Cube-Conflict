@@ -101,5 +101,7 @@ extern float pourcents;
 extern void addstat(int valeur, int stat);
 extern float menustat(int value);
 
+extern int langage;
+
 extern void writesave();
 extern void addxp(int nbxp);

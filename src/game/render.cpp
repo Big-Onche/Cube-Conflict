@@ -1,6 +1,6 @@
 #include "game.h"
 #include "engine.h"
-#include "../cubeconflict/cubedef.h"
+#include "cubedef.h"
 
 float weapposside, weapposup, maxweapposside, maxweapposup, shieldside;
 float maxshieldside = -15;

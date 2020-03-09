@@ -1,5 +1,5 @@
 #include "game.h"
-#include "../cubeconflict/cubedef.h"
+#include "cubedef.h"
 
 namespace entities
 {

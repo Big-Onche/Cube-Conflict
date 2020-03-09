@@ -1,4 +1,5 @@
 #include "engine.h"
+#include "cubedef.h"
 
 void notifywelcome()
 {
@@ -63,7 +64,14 @@ void menuprocess()
         execident("mainmenutoggled");
     }
     if(uimusic) {musicmanager(7, true); uimusic = 0;}
-    if(mainmenu && !isconnected(true) && !UI::hascursor()) UI::showui("main");
+    if(mainmenu && !isconnected(true) && !UI::hascursor())
+    {
+        switch(langage)
+        {
+            case 0: UI::showui("main_fr"); break;
+            case 1: UI::showui("main_en");
+        }
+    }
 }
 
 VAR(mainmenu, 1, 1, 0);

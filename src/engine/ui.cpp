@@ -1,6 +1,6 @@
 #include "engine.h"
 #include "textedit.h"
-#include "../cubeconflict/cubedef.h"
+#include "cubedef.h"
 
 namespace UI
 {

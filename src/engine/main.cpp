@@ -1,7 +1,7 @@
 // main.cpp: initialisation & main loop
 
 #include "engine.h"
-#include "../cubeconflict/cubedef.h"
+#include "cubedef.h"
 
 extern void cleargamma();
 
@@ -1057,12 +1057,24 @@ VAR(numcpus, 1, 1, 16);
 
 extern void changerlangue();
 
+bool init = true;
 VARFP(langage, 0, 0, 1, changerlangue());
+VAR(UI_menutabs, 0, 4, 8);
 
 void changerlangue()
 {
-    if(langage) {execfile("config/ui_EN.cfg"); execfile("config/keymap_EN.cfg"); execfile("config/default_EN.cfg");}
-    else {execfile("config/ui_FR.cfg"); execfile("config/keymap_FR.cfg"); execfile("config/default_FR.cfg");}
+    if(langage) {execfile("config/keymap_EN.cfg"); execfile("config/ui_EN.cfg"); execfile("config/default_EN.cfg");}
+    else {execfile("config/keymap_FR.cfg"); execfile("config/ui_FR.cfg"); execfile("config/default_FR.cfg");}
+
+    if(!init)
+    {
+        switch(langage)
+        {
+            case 0: UI_menutabs = 7; UI::showui("main_fr"); break;
+            case 1: UI_menutabs = 7; UI::showui("main_en");
+        }
+    }
+    else {UI_menutabs = 5; init = false;}
 }
 
 int main(int argc, char **argv)
@@ -1188,9 +1200,8 @@ int main(int argc, char **argv)
 
     switch(langage)
     {
-        case 0: execfile("config/ui_FR.cfg"); execfile("config/keymap_FR.cfg"); execfile("config/default_FR.cfg"); break;
-        case 1: execfile("config/ui_EN.cfg"); execfile("config/keymap_EN.cfg"); execfile("config/default_EN.cfg"); break;
-        default: execfile("config/ui_FR.cfg");
+        case 0: execfile("config/keymap_FR.cfg"); execfile("config/ui_FR.cfg"); execfile("config/default_FR.cfg"); break;
+        case 1: execfile("config/keymap_EN.cfg"); execfile("config/ui_EN.cfg"); execfile("config/default_EN.cfg");
     }
 
     execfile("config/heightmap.cfg");
@@ -1245,8 +1256,11 @@ int main(int argc, char **argv)
     inputgrab(grabinput = true);
     ignoremousemotion();
 
-    //execfile("config/menu_open.cfg");
-    UI::showui("main");
+    switch(langage)
+    {
+        case 0: UI::showui("main_fr"); break;
+        case 1: UI::showui("main_en");
+    }
 
     for(;;)
     {

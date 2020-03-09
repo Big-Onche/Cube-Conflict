@@ -1,6 +1,6 @@
 #include "game.h"
 #include "engine.h"
-#include "../cubeconflict/cubedef.h"
+#include "cubedef.h"
 
 //Commandes d'aptitudes (touches 1, 2 et 3)
 namespace game

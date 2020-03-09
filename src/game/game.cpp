@@ -1,5 +1,5 @@
 #include "game.h"
-#include "../cubeconflict/cubedef.h"
+#include "cubedef.h"
 
 string str_pseudovictime, str_pseudotueur, str_armetueur, str_pseudoacteur;
 float killdistance = 0;

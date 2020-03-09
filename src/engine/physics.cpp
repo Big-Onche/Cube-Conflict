@@ -5,7 +5,7 @@
 
 #include "engine.h"
 #include "mpr.h"
-#include "../cubeconflict/cubedef.h"
+#include "cubedef.h"
 
 const int MAXCLIPOFFSET = 4;
 const int MAXCLIPPLANES = 1024;
