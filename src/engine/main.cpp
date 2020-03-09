@@ -1061,8 +1061,8 @@ VARFP(langage, 0, 0, 1, changerlangue());
 
 void changerlangue()
 {
-    if(langage==0) execfile("config/ui_FR.cfg");
-    if(langage==1) execfile("config/ui_EN.cfg");
+    if(langage) {execfile("config/ui_EN.cfg"); execfile("config/keymap_EN.cfg"); execfile("config/default_EN.cfg");}
+    else {execfile("config/ui_FR.cfg"); execfile("config/keymap_FR.cfg"); execfile("config/default_FR.cfg");}
 }
 
 int main(int argc, char **argv)
@@ -1181,15 +1181,15 @@ int main(int argc, char **argv)
 
     logoutf("init: cfg");
     initing = INIT_LOAD;
-    execfile("config/keymap.cfg");
+
     execfile("config/stdedit.cfg");
     execfile(game::gameconfig());
     execfile("config/sound.cfg");
 
     switch(langage)
     {
-        case 0: execfile("config/ui_FR.cfg"); break;
-        case 1: execfile("config/ui_EN.cfg"); break;
+        case 0: execfile("config/ui_FR.cfg"); execfile("config/keymap_FR.cfg"); execfile("config/default_FR.cfg"); break;
+        case 1: execfile("config/ui_EN.cfg"); execfile("config/keymap_EN.cfg"); execfile("config/default_EN.cfg"); break;
         default: execfile("config/ui_FR.cfg");
     }
 

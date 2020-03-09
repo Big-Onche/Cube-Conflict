@@ -2766,7 +2766,7 @@ VARP(wallclocksecs, 0, 0, 1);
 
 static time_t walltime = 0;
 
-VARP(showfps, 0, 1, 1);
+VARP(showfps, 0, 0, 1);
 VARP(showfpsrange, 0, 0, 1);
 VAR(statrate, 1, 200, 1000);
 
@@ -2827,12 +2827,8 @@ void gl_drawhud()
             getfps(nextfps[0], nextfps[1], nextfps[2]);
             loopi(3) if(prevfps[i]==curfps[i]) curfps[i] = nextfps[i];
             nbfps = curfps[0];
-            if(showfps)
-            {
-                if(showfpsrange) draw_textf("fps %d+%d-%d", conw-7*FONTH, conh-FONTH*3/2, curfps[0], curfps[1], curfps[2]);
-                else draw_textf("%sFPS : %d", conw-5*FONTH, conh-FONTH*3/3.2f, curfps[0]<=24 ? "\f3" : curfps[0]<= 39 ? "\f9" :  curfps[0]<= 59 ? "\f0" : "\f8", curfps[0]);
-                roffset += FONTH;
-            }
+            draw_textf("%s%sFPS : %d", conw-5*FONTH, conh-FONTH*3/3.2f, showfps ? "" : "            ", curfps[0]<=24 ? "\f3" : curfps[0]<= 39 ? "\f9" :  curfps[0]<= 59 ? "\f0" : "\f8", curfps[0]);
+            roffset += FONTH;
 
             printtimers(conw, conh);
 

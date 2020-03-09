@@ -83,9 +83,38 @@ VARP(miniconwidth, 0, 40, 100);
 VARP(confade, 0, 30, 60);
 VARP(miniconfade, 0, 30, 60);
 VARP(fullconsize, 0, 75, 100);
-HVARP(confilter, 0, 0xFFFFFF, 0xFFFFFF);
-HVARP(fullconfilter, 0, 0xFFFFFF, 0xFFFFFF);
-HVARP(miniconfilter, 0, 0, 0xFFFFFF);
+
+HVARP(confilter, 0, 0x001F00, 0xFFFFFF);
+HVARP(fullconfilter, 0, 0x001F37, 0xFFFFFF);
+HVARP(miniconfilter, 0, 0, 0x000300);
+
+extern void updateconfilter();
+
+VARFP(contchat, 0, 1, 1, updateconfilter());
+VARFP(conteamtchat, 0, 1, 1, updateconfilter());
+VARFP(congame, 0, 1, 1, updateconfilter());
+VARFP(conkills, 0, 1, 1, updateconfilter());
+VARFP(conallkills, 0, 0, 1, updateconfilter());
+VARFP(coninfos, 0, 0, 1, updateconfilter());
+VARFP(conwarnings, 0, 0, 1, updateconfilter());
+VARFP(conerrors, 0, 0, 1, updateconfilter());
+VARFP(coninit, 0, 0, 1, updateconfilter());
+VARFP(conscripts, 0, 0, 1, updateconfilter());
+
+void updateconfilter()
+{
+    confilter = 0;
+    if(contchat) confilter+=0x100;
+    if(conteamtchat) confilter+=0x200;
+    if(congame) confilter+=0x400;
+    if(conkills) confilter+=0x800;
+    if(conallkills) confilter+=0x1000;
+    if(coninfos) confilter+=0x01;
+    if(conwarnings) confilter+=0x02;
+    if(conerrors) confilter+=0x04;
+    if(coninit) confilter+=0x10;
+    if(conscripts) confilter+=0x20;
+}
 
 int conskip = 0, miniconskip = 0;
 
