@@ -624,7 +624,7 @@ void updatesounds()
     {
         reclaimchannels();
         if(mainmenu) stopmapsounds();
-        else checkmapsounds();
+        checkmapsounds();
         syncchannels();
     }
     if(music)
@@ -634,7 +634,7 @@ void updatesounds()
     }
 }
 
-VARP(maxsoundsatonce, 0, 128, 512);
+VARP(maxsoundsatonce, 0, 256, 512);
 
 VAR(dbgsound, 0, 0, 1);
 

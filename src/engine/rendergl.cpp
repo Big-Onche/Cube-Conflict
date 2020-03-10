@@ -2363,9 +2363,17 @@ namespace modelpreview
     }
 }
 
+VAR(playerpreviewyaw, 0, 200, 360);
+
 vec calcmodelpreviewpos(const vec &radius, float &yaw)
 {
-    yaw = fmod(lastmillis/10000.0f*360.0f, 360.0f);
+    //switch(yawmodifier)
+    //{
+    //    case -1: yaw = fmod(lastmillis/10000.0f*360.0f, 360.0f); break;
+    //    case 1: yaw = 155; break;
+    //    case 2: yaw = 25;
+    //}
+    yaw = playerpreviewyaw;
     float dist = max(radius.magnitude2()/aspect, radius.magnitude())/sinf(fovy/2*RAD);
     return vec(0, dist, 0).rotate_around_x(camera1->pitch*RAD);
 }

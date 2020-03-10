@@ -3323,6 +3323,27 @@ namespace server
                 break;
             }
 
+            case N_SENDCAPE:
+            {
+                ci->customcape = getint(p);
+                QUEUE_MSG;
+                break;
+            }
+
+            case N_SENDTOMBE:
+            {
+                ci->customtombe = getint(p);
+                QUEUE_MSG;
+                break;
+            }
+
+            case N_SENDDANSE:
+            {
+                ci->customdanse = getint(p);
+                QUEUE_MSG;
+                break;
+            }
+
             case N_SENDAPTITUDE:
             {
                 ci->aptitude = getint(p);

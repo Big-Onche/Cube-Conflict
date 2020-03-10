@@ -389,9 +389,11 @@ namespace game
     }
 
     VARFP(player1_danse, 1, 1, 7,
-        {
+    {
         addmsg(N_SENDDANSE, "ri", player1_danse);
+        stopsounds();
         player1->customdanse = player1_danse;
+        playsound(S_DANSE1+(player1_danse-1));
     });
 
     void taunt()
