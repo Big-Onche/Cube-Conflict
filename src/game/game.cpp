@@ -385,14 +385,21 @@ namespace game
     bool allowmove(physent *d)
     {
         if(d->type!=ENT_PLAYER) return true;
-        return !((gameent *)d)->lasttaunt || lastmillis-((gameent *)d)->lasttaunt>=1000;
+        return !((gameent *)d)->lasttaunt || lastmillis-((gameent *)d)->lasttaunt>=5000;
     }
+
+    VARFP(player1_danse, 1, 1, 7,
+        {
+        addmsg(N_SENDDANSE, "ri", player1_danse);
+        player1->customdanse = player1_danse;
+    });
 
     void taunt()
     {
         if(player1->state!=CS_ALIVE || player1->physstate<PHYS_SLOPE) return;
-        if(lastmillis-player1->lasttaunt<1000) return;
+        if(lastmillis-player1->lasttaunt<20000){conoutf(CON_GAMEINFO, "\faTON ENCEINTE BLUETOOTH EST DÉCHARGÉE, PAS DE CHANCE !"); return;}
         player1->lasttaunt = lastmillis;
+        playsound(S_DANSE1+(player1->customdanse-1));
         addmsg(N_TAUNT, "rc", player1);
     }
     COMMAND(taunt, "");

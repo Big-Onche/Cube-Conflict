@@ -230,13 +230,12 @@ enum
 
     //Messages
     S_RISIKILL, S_BIGRISIKILL, S_GIGARISIKILL,
-    S_RISIKILLLOIN, S_BIGRISIKILLLOIN, S_GIGARISIKILLLOIN, S_KILL, S_PIXEL, S_DRAPEAUPRIS, S_DRAPEAUTOMBE, S_DRAPEAUSCORE, S_DRAPEAURESET, S_BATTLEKILL,
+    S_RISIKILLLOIN, S_BIGRISIKILLLOIN, S_GIGARISIKILLLOIN, S_KILL, S_PIXEL, S_DRAPEAUPRIS, S_DRAPEAUTOMBE, S_DRAPEAUSCORE, S_DRAPEAURESET,
+
+    S_DANSE1, S_DANSE2, S_DANSE3, S_DANSE4, S_DANSE5, S_DANSE6, S_DANSE7,
 
     //Null
-    S_NULL,
-    S_PUNCH1, S_CG,
-    S_PUPOUT,
-    S_PAIN1, S_PAIN2, S_PAIN3, S_PAIN4, S_PAIN5,
+    S_NULL, //S_PUPOUT,
     S_DIE1, S_DIE2,
 
     S_HIT,
@@ -271,7 +270,7 @@ enum
     N_SWITCHNAME, N_SWITCHMODEL, N_SWITCHCOLOR, N_SWITCHTEAM,
     N_SERVCMD,
     N_DEMOPACKET,
-    N_SENDCAPE, N_SENDTOMBE, N_SENDAPTITUDE,
+    N_SENDCAPE, N_SENDTOMBE, N_SENDDANSE, N_SENDAPTITUDE,
     N_ANNOUNCE,
     N_SENDSORT1, N_SENDSORT2, N_SENDSORT3,
     NUMMSG
@@ -302,7 +301,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_SWITCHNAME, 0, N_SWITCHMODEL, 2, N_SWITCHCOLOR, 2, N_SWITCHTEAM, 2,
     N_SERVCMD, 0,
     N_DEMOPACKET, 0,
-    N_SENDCAPE, 2, N_SENDTOMBE, 2, N_SENDAPTITUDE, 2,
+    N_SENDCAPE, 2, N_SENDTOMBE, 2, N_SENDDANSE, 2, N_SENDAPTITUDE, 2,
     N_ANNOUNCE, 2,
     N_SENDSORT1, 2, N_SENDSORT2, 2, N_SENDSORT3, 2,
     -1
@@ -751,7 +750,7 @@ struct gameent : dynent, gamestate
     bool sort1pret, sort2pret, sort3pret;
 
     string name, info;
-    int team, playermodel, playercolor, customcape, customtombe, aptitude;
+    int team, playermodel, playercolor, customcape, customtombe, customdanse, aptitude;
     float skeletonfade, tombepop;
     ai::aiinfo *ai;
     int ownernum, lastnode;

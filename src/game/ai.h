@@ -289,7 +289,7 @@ namespace ai
     extern bool targetable(gameent *d, gameent *e);
     extern bool cansee(gameent *d, vec &x, vec &y, vec &targ = aitarget);
 
-    extern void init(gameent *d, int at, int on, int apti, int cape, int tombe, int sk, int bn, int pm, int col, const char *name, int team);
+    extern void init(gameent *d, int at, int on, int apti, int cape, int tombe, int danse, int sk, int bn, int pm, int col, const char *name, int team);
     extern void update();
     extern void avoid();
     extern void think(gameent *d, bool run);

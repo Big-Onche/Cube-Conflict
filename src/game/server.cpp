@@ -245,7 +245,7 @@ namespace server
         int authkickvictim;
         char *authkickreason;
 
-        int customcape, customtombe, aptitude;
+        int customcape, customtombe, customdanse, aptitude;
 
         clientinfo() : getdemo(NULL), getmap(NULL), clipboard(NULL), authchallenge(NULL), authkickreason(NULL) { reset(); }
         ~clientinfo() { events.deletecontents(); cleanclipboard(); cleanauth(); }
@@ -1760,6 +1760,7 @@ namespace server
             putint(p, ci->playercolor);
             putint(p, ci->customcape);
             putint(p, ci->customtombe);
+            putint(p, ci->customdanse);
             putint(p, ci->aptitude);
         }
     }
@@ -2962,6 +2963,7 @@ namespace server
                     ci->playercolor = getint(p);
                     ci->customcape = getint(p);
                     ci->customtombe = getint(p);
+                    ci->customdanse = getint(p);
                     ci->aptitude = getint(p);
 
                     string password, authdesc, authname;

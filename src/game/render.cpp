@@ -325,6 +325,11 @@ namespace game
         //////////////////////////////////////////////////////////////////ANIMATIONS//////////////////////////////////////////////////////////////////
         if(d->state==CS_EDITING || d->state==CS_SPECTATOR) anim = ANIM_EDIT|ANIM_LOOP;
         else if(d->state==CS_LAGGED)                       anim = ANIM_LAG|ANIM_LOOP;
+        else if(d->lasttaunt && lastmillis-d->lasttaunt<5000)
+        {
+            lastaction = d->lasttaunt;
+            anim = ANIM_TAUNT|ANIM_LOOP;
+        }
         else
         {
             if(d->inwater && d->physstate<=PHYS_FALL) anim |= (((game::allowmove(d) && (d->move || d->strafe)) || d->vel.z+d->falling.z>0 ? ANIM_SWIM : ANIM_SINK)|ANIM_LOOP)<<ANIM_SECONDARY;

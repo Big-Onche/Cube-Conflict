@@ -62,6 +62,15 @@ namespace ai
     ICOMMAND(botlimit, "i", (int *n), addmsg(N_BOTLIMIT, "ri", *n));
     ICOMMAND(botbalance, "i", (int *n), addmsg(N_BOTBALANCE, "ri", *n));
 
+    void bottaunt(gameent *d)
+    {
+        if(d->state!=CS_ALIVE || d->physstate<PHYS_SLOPE) return;
+        if(lastmillis-d->lasttaunt<20000) return;
+        d->lasttaunt = lastmillis;
+        playsound(S_DANSE1+(d->customdanse-1), &d->o,  NULL, 0, 0 , 150, -1, 400);
+        addmsg(N_TAUNT, "rc", d);
+    }
+
     float viewdist(int x)
     {
         return x <= 100 ? clamp((SIGHTMIN+(SIGHTMAX-SIGHTMIN))/100.f*float(x), float(SIGHTMIN), float(fog)) : float(fog);
@@ -190,7 +199,7 @@ namespace ai
         if(d->ai) DELETEP(d->ai);
     }
 
-    void init(gameent *d, int at, int ocn, int apti, int cape, int tombe, int sk, int bn, int pm, int col, const char *name, int team)
+    void init(gameent *d, int at, int ocn, int apti, int cape, int tombe, int danse, int sk, int bn, int pm, int col, const char *name, int team)
     {
         loadwaypoints();
 
@@ -227,6 +236,7 @@ namespace ai
         d->aptitude = apti;
         d->customcape = cape;
         d->customtombe = tombe;
+        d->customdanse = danse;
 
         d->tombepop = 0;
         d->skeletonfade = 1.0f;
@@ -1409,9 +1419,14 @@ namespace ai
                         if(d->health<250+d->skill*2 && d->armour<50 && d->mana>=25) aptitude(d, 1);
                 }
 
+
+
                 switch(c.type)
                 {
-                    case AI_S_WAIT: result = dowait(d, c); break;
+                    case AI_S_WAIT:
+                        result = dowait(d, c);
+                        if(d->health>70) switch(rnd(200)){case 0: bottaunt(d);}
+                        break;
                     case AI_S_DEFEND: result = dodefend(d, c); break;
                     case AI_S_PURSUE: result = dopursue(d, c);
                     {
