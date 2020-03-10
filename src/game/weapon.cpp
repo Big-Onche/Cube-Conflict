@@ -430,8 +430,11 @@ namespace game
                 case APT_MAGICIEN:
                     if(actor->aptisort2) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.3333f), PART_TEXT, 2500, 0xFF5500, actor==player1 ? 5.5f : 4.0f, -8); normaldamage = false; }
                 case APT_CAMPEUR:
-                    if(atk==ATK_SV98_SHOOT || atk==ATK_SKS_SHOOT || atk==ATK_ARBALETE_SHOOT || atk==ATK_CAMPOUZE_SHOOT) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*2.0f), PART_TEXT, 2500, 0xFF0000, actor==player1 ? 7.0f : 5.0f, -8);  normaldamage = false; }
-                    break;
+                    {
+                        float campdamage = damage+=actor->o.dist(d->o)/2.5f;
+                        particle_textcopy(d->abovehead(), tempformatstring("%.1f", campdamage), PART_TEXT, actor->steromillis > 0 ? 2500 : 1500, damage<0 ? 0x22FF22 : actor->steromillis > 0 ? 0xFF0000: 0xFF4B19, actor==player1 ? 7.0f : 3.0f, -8);  normaldamage = false;
+                        break;
+                    }
                 case APT_VICKING:
                     if(actor->ragemillis) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.5f), PART_TEXT, 2500, 0xAA0000, actor==player1 ? 10.0f : 7.0f, -8); normaldamage = false; }
                     break;

@@ -2151,7 +2151,7 @@ namespace server
             case APT_MEDECIN: {if(atk==ATK_MEDIGUN_SHOOT) damage = -20;} break;
             case APT_NINJA: {if(atk==ATK_CAC349_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACMASTER_SHOOT) damage *= 3.0f;} break;
             case APT_MAGICIEN: {if(as.aptisort2) damage *= 1.333333f; break;}
-            case APT_CAMPEUR: {if(atk==ATK_SV98_SHOOT || atk==ATK_SKS_SHOOT || atk==ATK_ARBALETE_SHOOT || atk==ATK_CAMPOUZE_SHOOT) damage *= 1.5f;} break;
+            case APT_CAMPEUR: damage += as.o.dist(ts.o)/2.5f; break;
             case APT_VICKING: {if(as.ragemillis) damage *=1.25f;} break;
         }
 
