@@ -109,13 +109,8 @@ namespace ai
 
     bool targetable(gameent *d, gameent *e)
     {
-        if(d == e || !canmove(d)) return false;
-        //Les IA captent les sorts des autres joueurs
-        if(e->aptisort2 && e->aptitude==APT_PHYSICIEN) switch(rnd(10)) {case 0: return true; break; default: return false;}
-
-        if(d->gunselect==GUN_MEDIGUN && e->health<100) return e->state == CS_ALIVE && isteam(d->team, e->team);
-        else if (d->gunselect!=GUN_MEDIGUN) return e->state == CS_ALIVE && !isteam(d->team, e->team);
-        else return false;
+        if(d == e) return false;
+        return e->state == CS_ALIVE && !isteam(d->team, e->team);
     }
 
     bool getsight(vec &o, float yaw, float pitch, vec &q, vec &v, float mdist, float fovx, float fovy)
@@ -595,7 +590,7 @@ namespace ai
             }
         }
         if(cmode) cmode->aifind(d, b, interests);
-        if(m_teammode) assist(d, b, interests);
+        //if(m_teammode) assist(d, b, interests);
         return parseinterests(d, b, interests, override);
     }
 
@@ -667,7 +662,7 @@ namespace ai
         switch(d->aptitude)
         {
             case APT_KAMIKAZE: d->ai->weappref = GUN_KAMIKAZE; break;
-            case APT_MEDECIN: d->ai->weappref = m_teammode ? GUN_MEDIGUN : rnd(GUN_GLOCK-GUN_RAIL+1)+GUN_RAIL; break;
+            //case APT_MEDECIN: d->ai->weappref = m_teammode ? GUN_MEDIGUN : rnd(GUN_GLOCK-GUN_RAIL+1)+GUN_RAIL; break;
             default: d->ai->weappref = rnd(GUN_GLOCK-GUN_RAIL+1)+GUN_RAIL;
         }
 

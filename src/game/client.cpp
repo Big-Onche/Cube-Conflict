@@ -1535,6 +1535,7 @@ namespace game
                 d->playercolor = getint(p);
                 d->customcape = getint(p);
                 d->customtombe = getint(p);
+                d->customdanse = getint(p);
                 d->aptitude = getint(p);
                 break;
             }

@@ -19,7 +19,7 @@ enum {APT_SOLDAT = 0, APT_MEDECIN, APT_AMERICAIN, APT_NINJA, APT_VAMPIRE, APT_MA
 static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt_vitesse; const char *apt_tete, *apt_nom; } aptitudes[NUMAPTS] =
 {
     { 105,  105, 105,   95, "chapeaux/casquette",   "Soldat"},      //0 ---> OK
-    { 80,   75,  100,  100, "chapeaux/medic",       "Médecin"},     //1 ---> Fix medigun regenscreen & IA
+    { 80,   75,  100,  100, "chapeaux/medic",       "Médecin"},     //1 ---> OK
     { 100,  130,  75,  130, "chapeaux/aventurier",  "Américain"},   //2 ---> OK
     { 80,   80,   75,   80, "chapeaux/bandana",     "Ninja"},       //3 ---> OK
     { 100,  50,  100,  100, "chapeaux/cornes",      "Vampire"},      //4 ---> OK (Regen screen ?)

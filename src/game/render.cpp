@@ -278,7 +278,7 @@ namespace game
 
         //////////////////////////////////////////////////////////////////MODELES//////////////////////////////////////////////////////////////////
 
-        modelattach a[9];
+        modelattach a[12];
         int ai = 0;
         if(guns[d->gunselect].vwep)
         {
@@ -460,7 +460,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
                 if(player1->state!=CS_SPECTATOR)particle_text(d->abovehead(), d->info, PART_TEXT, 1, teamtextcolor[team], 2.0f);
                 //if(player1->state!=CS_SPECTATOR)particle_text(d->abovehead(), d->killstreak, PART_TEXT, 1, teamtextcolor[team], 5.0f);
                 if(d->health<300) switch(rnd(d->health+30)) {case 0: gibeffect(300, d->o, d);}
-                if(player1->aptitude==1 && team==1)
+                if(player1->aptitude==APT_MEDECIN && team==1)
                 {
                     if (d->health > 1000)
                     {

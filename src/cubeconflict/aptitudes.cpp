@@ -54,7 +54,7 @@ namespace game
             case 1:
                 switch(player1->aptitude)
                 {
-                    case APT_MEDECIN: player1->gunselect = GUN_MEDIGUN; playsound(S_WEAPLOAD); return;
+                    //case APT_MEDECIN: player1->gunselect = GUN_MEDIGUN; playsound(S_WEAPLOAD); return;
                     case APT_KAMIKAZE: player1->gunselect = GUN_KAMIKAZE; playsound(S_WEAPLOAD); return;
                     case APT_PRETRE: case APT_PHYSICIEN: case APT_MAGICIEN: aptitude(player1, skill);
                     default: return;

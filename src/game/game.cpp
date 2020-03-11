@@ -226,6 +226,26 @@ namespace game
                 if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
                 if(d->steromillis || d->epomillis || d->jointmillis || d->champimillis || d->ragemillis) entities::checkboosts(curtime, d);
                 if(d->ragemillis || d->aptisort1 || d->aptisort2 || d->aptisort3) entities::checkaptiskill(curtime, d);
+                if(players[i]->aptitude==APT_MEDECIN)
+                {
+                    gameent *h = players[i];
+                    loopv(players)
+                    {
+                        if(d[i].o.dist(h->o)/18.f<6 && d[i].health<d[i].maxhealth+200 && isteam(h->team, d[i].team))
+                        {
+                            switch(rnd(70))
+                            {
+                                case 0:
+                                d[i].health+=30;
+                                vec irays(d[i].o);
+                                irays.sub(h->o);
+                                irays.normalize().mul(1300.0f);
+                                particle_flying_flare(h->o, irays, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
+                                if(d[i].health>d[i].maxhealth+150) d[i].health=d[i].maxhealth+200;
+                            }
+                        }
+                    }
+                }
             }
 
             if(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE) updatespecials(d);
@@ -291,7 +311,32 @@ namespace game
             if(player1->steromillis || player1->epomillis || player1->jointmillis || player1->champimillis) entities::checkboosts(curtime, player1);
             if(player1->ragemillis || player1->aptisort1 || player1->aptisort2 || player1->aptisort3) entities::checkaptiskill(curtime, player1);
             if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE) updatespecials(player1);
+
+            loopv(players)
+            {
+                if(players[i]->aptitude==APT_MEDECIN)
+                {
+                    gameent *h = players[i];
+                    loopv(players)
+                    {
+                        if(players[i]->o.dist(h->o)/18.f<6 && players[i]->health<players[i]->maxhealth+200 && isteam(h->team, players[i]->team))
+                        {
+                            switch(rnd(70))
+                            {
+                                case 0:
+                                players[i]->health+=30;
+                                vec irays(players[i]->o);
+                                irays.sub(h->o);
+                                irays.normalize().mul(1300.0f);
+                                particle_flying_flare(h->o, irays, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
+                                if(players[i]->health>players[i]->maxhealth+150) players[i]->health=players[i]->maxhealth+200;
+                            }
+                        }
+                    }
+                }
+            }
         }
+
         updateweapons(curtime);
         otherplayers(curtime);
         ai::update();

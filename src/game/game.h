@@ -566,16 +566,6 @@ struct gamestate
                     ammo[is.info] = min(ammo[is.info]+is.add*boostitem*aptboost, is.max*aptboost);
                 }
                 break;
-                //if(classe==2)
-                //{
-                //    health = min(health+(is.add)*1.6f, (maxhealth*1.0f));
-               //     ammo[GUN_MEDIGUN] = min(ammo[GUN_MEDIGUN]+(is.add)*1.6f, (is.max*1.6f));
-               // }
-                //else if(classe==12 && sortpretre>0)
-                //{
-                //    health = min(health+(is.add)*2.0f, (maxhealth*1.0f));
-                //}
-                //else health = min(health+is.add, maxhealth);
         }
     }
 
@@ -634,7 +624,6 @@ struct gamestate
         switch(aptitude)
         {
             case 0: addsweaps(gamemode); break;
-            case 1: ammo[GUN_MEDIGUN] = 160; break;
             case 6: ammo[GUN_KAMIKAZE] = 1; break;
         }
 
@@ -643,7 +632,7 @@ struct gamestate
             armourtype = A_BLUE;
             armour = 750;
             int randomarme = rnd(17);
-            gunselect = aptitude==1 ? GUN_MEDIGUN : aptitude==6 ? GUN_KAMIKAZE : randomarme;
+            gunselect = aptitude==6 ? GUN_KAMIKAZE : randomarme;
             ammo[randomarme] = aptitude==2 ? 1.5f*itemstats[randomarme].max : itemstats[randomarme].max;
             return;
         }
@@ -656,9 +645,9 @@ struct gamestate
             baseammo(spawngun1, 4);
             do spawngun2 = rnd(17); while(spawngun1==spawngun2);
             baseammo(spawngun2, 4);
-            do spawngun3 = rnd(17); while(spawngun3==spawngun1 || spawngun3==spawngun2);
+            do spawngun3 = rnd(17); while(spawngun3==spawngun1 && spawngun3==spawngun2);
             baseammo(spawngun3, 4);
-            gunselect = aptitude==1 ? GUN_MEDIGUN : aptitude==6 ? GUN_KAMIKAZE : spawngun1;
+            gunselect = aptitude==6 ? GUN_KAMIKAZE : spawngun1;
             return;
         }
         else if (m_explosion)
