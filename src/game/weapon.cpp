@@ -284,7 +284,11 @@ namespace game
                 {
                     case BNC_DOUILLES: case BNC_DOUILLESUZI: case BNC_BIGDOUILLES: case BNC_CARTOUCHES: regular_particle_splash(PART_SMOKE, 1, 150, pos, 0x404040, BNC_DOUILLES ? 1.0f : BNC_DOUILLESUZI ? 0.75 : 1.75f, 50, -20); break;
                     case BNC_GRENADE: regular_particle_splash(PART_SMOKE, 1, 150, pos, 0x404040, 2.5f, 50, -20); break;
-                    case BNC_DEBRIS: regular_particle_splash(PART_SMOKE, 3, 250, pos, 0x222222, 2.5f, 50, -50); break;
+                    case BNC_DEBRIS:
+                        regular_particle_splash(PART_SMOKE, 3, 250, pos, 0x222222, 2.5f, 50, -50);
+                        regular_particle_splash(PART_FLAME1+rnd(2), 2, 75, pos, 0x994400, 0.7f, 30, -30);
+
+                        break;
                     case BNC_GIBS: {switch(rnd(16)) {case 1: regular_particle_splash(PART_BLOOD, 1, 9999, pos, 0x60FFFF, 1.0f, 50);}}
                 }
             }
@@ -392,7 +396,8 @@ namespace game
 
         switch(type)
         {
-            case BNC_GIBS: case BNC_DEBRIS: to.add(vec(rnd(100)-50, rnd(100)-50, rnd(100)-50)); break;
+            case BNC_GIBS: to.add(vec(rnd(100)-50, rnd(100)-50, rnd(100)-50)); break;
+            case BNC_DEBRIS: to.add(vec(rnd(300)-150, rnd(300)-150, rnd(300)-150)); break;
             case BNC_DOUILLESUZI: to.add(vec(0, 0, -1)); break;
             default: to.add(vec(0, 0, 1));
         }
@@ -604,9 +609,10 @@ namespace game
                 particle_splash(PART_SPARK, 12,  150, v, 0xFFC864,  1.7f, 1500,  1500);
                 particle_splash(PART_SPARK, 12,  200, v, 0xFFAA44,  1.7f, 2500,  2500);
                 particle_splash(PART_SPARK, 12,  250, v, 0xFFAA44,  1.7f, 3500,  3500);
-                particle_splash(PART_FLAME1+rnd(2),  15,  120, v, 0xCC8833, 17+rnd(5),  800, 800);
-                particle_splash(PART_FLAME1+rnd(2),  15,  120, v, 0xCC7722, 17+rnd(5), 1000, 800);
-                particle_splash(PART_FLAME1+rnd(2),  15,  120, v, 0xCC4422, 17+rnd(5), 1200, 800);
+                particle_splash(PART_FLAME1+rnd(2),  15,  120, v, 0xCC8833, 7+rnd(5),  800, 800, 1);
+                particle_splash(PART_FLAME1+rnd(2),  15,  120, v, 0xCC7722, 7+rnd(5), 1000, 800, 1);
+                particle_splash(PART_FLAME1+rnd(2),  15,  120, v, 0xCC4422, 7+rnd(5), 1200, 800, 1);
+                //particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0xBB0000 :  0x773300, 1.5f, 100, 1);
                 particle_fireball(v, 350, PART_ONDECHOC, 300, 0xFF5500, 10.0f);
                 particle_fireball(v, 350, PART_ONDECHOC, 300, 0xFFFFFF, 20.0f);
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);

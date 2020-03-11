@@ -1036,7 +1036,7 @@ static inline particle *newparticle(const vec &o, const vec &d, int fade, int ty
 
 int maxparticledistance = 8192;
 
-static void splash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity)
+static void splash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int expand)
 {
     if(camera1->o.dist(p) > maxparticledistance && !seedemitter) return;
     float collidez = parts[type]->type&PT_COLLIDE ? p.z - raycube(p, vec(0, 0, -1), COLLIDERADIUS, RAY_CLIPMAT) + (parts[type]->stain >= 0 ? COLLIDEERROR : 0) : -1;
@@ -1054,14 +1054,14 @@ static void splash(int type, int color, int radius, int num, int fade, const vec
         while(x*x+y*y+z*z>radius*radius);
         vec tmp = vec((float)x, (float)y, (float)z);
         int f = (num < 10) ? (fmin + rnd(fmax)) : (fmax - (i*(fmax-fmin))/(num-1)); //help deallocater by using fade distribution rather than random
-        newparticle(p, tmp, f, type, color, size, gravity)->val = collidez;
+        newparticle(p, tmp, f, type, color, size, gravity, expand)->val = collidez;
     }
 }
 
-static void regularsplash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int delay = 0)
+static void regularsplash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int delay = 0, int expand = 0)
 {
     if(!canemitparticles() || (delay > 0 && rnd(delay) != 0)) return;
-    splash(type, color, radius, num, fade, p, size, gravity);
+    splash(type, color, radius, num, fade, p, size, gravity, expand);
 }
 
 void particle_flying_flare(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity, int expand)
@@ -1080,10 +1080,10 @@ void regular_particle_splash(int type, int num, int fade, const vec &p, int colo
     regularsplash(type, color, radius, num, fade, p, size, gravity, delay);
 }
 
-void particle_splash(int type, int num, int fade, const vec &p, int color, float size, int radius, int gravity)
+void particle_splash(int type, int num, int fade, const vec &p, int color, float size, int radius, int gravity, int expand)
 {
     if(!canaddparticles()) return;
-    splash(type, color, radius, num, fade, p, size, gravity);
+    splash(type, color, radius, num, fade, p, size, gravity, expand);
 }
 
 VARP(maxtrail, 1, 500, 10000);
