@@ -1,4 +1,4 @@
-VARP(fullbrightmodels, 0, 0, 200);
+int fullbrightmodels = 0;
 VAR(testtags, 0, 0, 1);
 VARF(dbgcolmesh, 0, 0, 1,
 {

@@ -1,4 +1,5 @@
 #include "game.h"
+#include "engine.h"
 #include "cubedef.h"
 
 namespace entities
@@ -179,14 +180,8 @@ namespace entities
                 playsound(S_ITEMSTEROS, NULL, NULL, 0, 0, 0, -1, 0);
                 break;
             case I_BOOSTPRECISION:
-                //arprecision = true;
-                //string hallu;
-                //switch(rnd(3)) {
-                // case 0: copystring(hallu, "sobel"); break;
-                // case 1: copystring(hallu, "rotoscope"); break;
-                // case 2: copystring(hallu, "gbr"); break;
-                //}
-                //addpostfx(hallu, 1, 1, 1, 1, vec4(1, 1, 1, 1));
+                addpostfx("sobel", 1, 1, 1, 1, vec4(1, 1, 1, 1));
+                fullbrightmodels = 200;
                 conoutf(CON_GAMEINFO, "\f8Les psilos commencent à te petay à laggle !");
                 playsound(S_ITEMCHAMPIS, NULL, NULL, 0, 0, 0, -1, 0);
                 break;
@@ -394,6 +389,8 @@ namespace entities
         {
             d->champimillis = 0;
             //playsound(S_PUPOUT, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
+            fullbrightmodels = 0;
+            clearpostfx();
             if(d==player1) conoutf(CON_GAMEINFO, "\f8Les champignons sont digérés, il est temps d'en reprendre !");
         }
         if(d->jointmillis && (d->jointmillis -= time)<=0)

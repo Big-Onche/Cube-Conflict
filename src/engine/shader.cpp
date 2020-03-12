@@ -1462,7 +1462,7 @@ void renderpostfx(GLuint outfbo)
     endtimer(postfxtimer);
 }
 
-static bool addpostfx(const char *name, int outputbind, int outputscale, uint inputs, uint freeinputs, const vec4 &params)
+bool addpostfx(const char *name, int outputbind, int outputscale, uint inputs, uint freeinputs, const vec4 &params)
 {
     if(!*name) return false;
     Shader *s = useshaderbyname(name);

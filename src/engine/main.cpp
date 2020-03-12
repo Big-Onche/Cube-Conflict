@@ -1237,6 +1237,10 @@ int main(int argc, char **argv)
 
     identflags |= IDF_PERSIST;
 
+    addpostfx("bw", 1, 1, 1, 1, vec4(1, 1, 1, 1));
+    addpostfx("sobel", 1, 1, 1, 1, vec4(1, 1, 1, 1));
+    clearpostfx();
+
     logoutf("init: mainloop");
 
     if(execfile("once.cfg", false)) remove(findfile("once.cfg", "rb"));
