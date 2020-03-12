@@ -217,7 +217,8 @@ struct partrenderer
             {
                 switch(p->expand)
                 {
-                    case 1: p->size += 0.16f;
+                    case 1: p->size += 0.16f; break;
+                    case 2: p->size += 0.017f;
                 }
             }
             ts = lastmillis-p->millis;
@@ -1064,8 +1065,19 @@ static void regularsplash(int type, int color, int radius, int num, int fade, co
     splash(type, color, radius, num, fade, p, size, gravity, expand);
 }
 
-void particle_flying_flare(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity, int expand)
+static const struct colors{ int color; } rndcolor[] =
 {
+    {0xFF0000},
+    {0x00FF00},
+    {0x0000FF},
+    {0xFFFF00},
+    {0x00FFFF},
+    {0xFF00FF}
+};
+
+void particle_flying_flare(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity, int expand, bool randomcolor)
+{
+    if(randomcolor) color = rndcolor[rnd(6)].color;
     newparticle(o, d, fade, type, color, size, gravity, expand);
 }
 
@@ -1080,9 +1092,10 @@ void regular_particle_splash(int type, int num, int fade, const vec &p, int colo
     regularsplash(type, color, radius, num, fade, p, size, gravity, delay);
 }
 
-void particle_splash(int type, int num, int fade, const vec &p, int color, float size, int radius, int gravity, int expand)
+void particle_splash(int type, int num, int fade, const vec &p, int color, float size, int radius, int gravity, int expand, bool randomcolor)
 {
     if(!canaddparticles()) return;
+    if(randomcolor) color = rndcolor[rnd(6)].color;
     splash(type, color, radius, num, fade, p, size, gravity, expand);
 }
 
@@ -1141,15 +1154,17 @@ void particle_meter(const vec &s, float val, int type, int fade, int color, int 
     p->progress = clamp(int(val*100), 0, 100);
 }
 
-void particle_flare(const vec &p, const vec &dest, int fade, int type, int color, float size, physent *owner)
+void particle_flare(const vec &p, const vec &dest, int fade, int type, int color, float size, physent *owner, bool randomcolor)
 {
     if(!canaddparticles()) return;
+    if(randomcolor) color = rndcolor[rnd(6)].color;
     newparticle(p, dest, fade, type, color, size)->owner = owner;
 }
 
-void particle_fireball(const vec &dest, float maxsize, int type, int fade, int color, float size)
+void particle_fireball(const vec &dest, float maxsize, int type, int fade, int color, float size, bool randomcolor)
 {
     if(!canaddparticles()) return;
+    if(randomcolor) color = rndcolor[rnd(6)].color;
     float growth = maxsize - size;
     if(fade < 0) fade = int(growth*20);
     newparticle(dest, vec(0, 0, 1), fade, type, color, size)->val = growth;

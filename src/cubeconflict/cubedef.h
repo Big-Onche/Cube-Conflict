@@ -105,3 +105,5 @@ extern int langage;
 
 extern void writesave();
 extern void addxp(int nbxp);
+
+extern int fullbrightmodels;
