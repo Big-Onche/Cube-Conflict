@@ -931,8 +931,11 @@ namespace game
                             particle_splash(PART_PULSE_FRONT, 1, 1, pos, p.owner->steromillis ? 0xFF0000 : 0xFF9944, p.owner==player1 ? 0.65f : ATK_MINIGUN_SHOOT || ATK_AK47_SHOOT ? 0.4f : 0.3f, 150, 20, 0, player1->champimillis ? true : false);
                             break;
                             case ATK_ARBALETE_SHOOT:
-                            particle_flare(tail, head, 1, PART_BALLE_SIDE, p.owner->steromillis ? 0xFF0000 : 0xFF9944, 0.30f, p.owner, player1->champimillis ? true : false);
-                            particle_splash(PART_PULSE_FRONT, 1, 1, pos, p.owner->steromillis ? 0xFF0000 : 0xFF9944, p.owner==player1 ? 0.5f : 0.25f, 150, 20, 0, player1->champimillis ? true : false);
+                            if(p.owner->steromillis)
+                            {
+                                particle_flare(tail, head, 1, PART_BALLE_SIDE, 0xFF0000, 0.30f, p.owner, player1->champimillis ? true : false);
+                                particle_splash(PART_PULSE_FRONT, 1, 1, pos, 0xFF0000, p.owner==player1 ? 0.5f : 0.25f, 150, 20, 0, player1->champimillis ? true : false);
+                            }
                             break;
                         case ATK_SMAW_SHOOT:
                             p.projsound = S_MISSILE;
