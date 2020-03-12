@@ -1,4 +1,5 @@
 #include "game.h"
+#include "engine.h"
 #include "cubedef.h"
 
 string str_pseudovictime, str_pseudotueur, str_armetueur, str_pseudoacteur;
@@ -231,17 +232,18 @@ namespace game
                     gameent *h = players[i];
                     loopv(players)
                     {
-                        if(d[i].o.dist(h->o)/18.f<6 && d[i].health<d[i].maxhealth+200 && isteam(h->team, d[i].team))
+                        gameent *r = players[i];
+                        if(r->o.dist(h->o)/18.f<6 && r->health<r->maxhealth+200 && isteam(h->team, r->team))
                         {
                             switch(rnd(70))
                             {
                                 case 0:
-                                d[i].health+=30;
-                                vec irays(d[i].o);
+                                r->health+=30;
+                                vec irays(r->o);
                                 irays.sub(h->o);
                                 irays.normalize().mul(1300.0f);
                                 particle_flying_flare(h->o, irays, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
-                                if(d[i].health>d[i].maxhealth+150) d[i].health=d[i].maxhealth+200;
+                                if(r->health>r->maxhealth+150) r->health=r->maxhealth+200;
                             }
                         }
                     }
@@ -387,6 +389,8 @@ namespace game
     {
         if(player1->state==CS_DEAD)
         {
+            fullbrightmodels = 0;
+            clearpostfx();
             player1->attacking = ACT_IDLE;
             int wait = cmode ? cmode->respawnwait(player1) : 0;
             if(wait>0)
