@@ -352,7 +352,7 @@ namespace game
                 else
                 {
                     player1->move = player1->strafe = 0;
-                    moveplayer(player1, 10, true, player1->epomillis, player1->jointmillis, player1->aptitude, player1->aptitude==APT_MAGICIEN ? player1->aptisort1 : player1->aptisort3);
+                    moveplayer(player1, 10, true, 0, 0, player1->aptitude, 0);
                 }
             }
             else if(!intermission)
@@ -539,6 +539,7 @@ namespace game
             if(deathscore) showscores(true);
             disablezoom();
             d->attacking = ACT_IDLE;
+            clearpostfx();
             d->roll = 0;
             playsound(S_DIE2);
         }
