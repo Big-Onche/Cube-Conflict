@@ -160,7 +160,7 @@ namespace entities
         }
 
         if(type>=I_RAIL && type<=I_SUPERARME) gunselect(type-9+rndsuperweapon, d);
-        d->pickup(type+rndsuperweapon, d->aptitude, rndsuperweapon, d->mana >= 20 ? d->aptisort1 : 0);
+        d->pickup(type+rndsuperweapon, d->aptitude, rndsuperweapon, d->aptisort1);
         if(d->aptisort1 && d->aptitude==APT_PRETRE)
         {
             d->mana-=20;

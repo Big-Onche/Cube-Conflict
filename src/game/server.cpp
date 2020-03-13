@@ -919,8 +919,7 @@ namespace server
 
         int rndsuperweapon = rnd(4);
         sendf(-1, 1, "ri4", N_ITEMACC, i, sender, sents[i].type==I_SUPERARME ? rndsuperweapon : 0);
-        ci->state.pickup(sents[i].type, ci->aptitude, sents[i].type==I_SUPERARME ? rndsuperweapon : 0, ci->state.mana>=20 ? ci->state.aptisort1 : 0);
-        if(ci->aptitude==APT_PRETRE && ci->state.aptisort1 && ci->state.mana>=20) ci->state.mana-=20;
+        ci->state.pickup(sents[i].type, ci->aptitude, sents[i].type==I_SUPERARME ? rndsuperweapon : 0, ci->state.aptisort1);
         return true;
     }
 

@@ -389,8 +389,6 @@ namespace game
     {
         if(player1->state==CS_DEAD)
         {
-            fullbrightmodels = 0;
-            clearpostfx();
             player1->attacking = ACT_IDLE;
             int wait = cmode ? cmode->respawnwait(player1) : 0;
             if(wait>0)
@@ -540,6 +538,7 @@ namespace game
             disablezoom();
             d->attacking = ACT_IDLE;
             clearpostfx();
+            fullbrightmodels = 0;
             d->roll = 0;
             playsound(S_DIE2);
         }
