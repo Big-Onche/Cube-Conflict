@@ -188,12 +188,13 @@ namespace game
         loopi(attacks[atk].rays) offsetray(from, to, attacks[atk].spread, attacks[atk].nozoomspread, attacks[atk].range, rays[i], d);
     }
 
+    VARP(bnclifetime, 1000, 5000, 30000);
     enum { BNC_GRENADE, BNC_KAMIKAZE, BNC_GIBS, BNC_DEBRIS, BNC_DOUILLES, BNC_BIGDOUILLES, BNC_CARTOUCHES, BNC_DOUILLESUZI};
 
     struct bouncer : physent
     {
         int lifetime, bounces;
-        float lastyaw, roll;
+        float lastyaw, lastpitch, roll;
         bool local;
         gameent *owner;
         int bouncetype, variant;
@@ -265,7 +266,7 @@ namespace game
         }
 
         b->bounces++;
-        if(b->bouncetype == BNC_GIBS && b->bounces <= 2) addstain(STAIN_BLOOD, vec(b->o).sub(vec(surface).mul(b->radius)), surface, 2.96f/b->bounces, bvec(0x60, 0xFF, 0xFF), rnd(4));
+        if(b->bouncetype == BNC_GIBS && b->bounces < 2) {switch(rnd(3)) {case 0: addstain(STAIN_BLOOD, vec(b->o).sub(vec(surface).mul(b->radius)), surface, 2.96f/b->bounces, bvec(0x60, 0xFF, 0xFF), rnd(4));}}
     }
 
     void updatebouncers(int time)
@@ -275,7 +276,7 @@ namespace game
             bouncer &bnc = *bouncers[i];
             vec old(bnc.o);
 
-            if(bnc.vel.magnitude() > 30.0f)
+            if(bnc.vel.magnitude() > 25.0f)
             {
                 vec pos(bnc.o);
                 pos.add(vec(bnc.offset).mul(bnc.offsetmillis/float(OFFSETMILLIS)));
@@ -289,7 +290,7 @@ namespace game
                         regular_particle_splash(PART_FLAME1+rnd(2), 2, 75, pos, 0x994400, 0.7f, 30, -30);
 
                         break;
-                    case BNC_GIBS: {switch(rnd(16)) {case 1: regular_particle_splash(PART_BLOOD, 1, 9999, pos, 0x60FFFF, 1.0f, 50);}}
+                    case BNC_GIBS: {switch(rnd(40)) {case 1: regular_particle_splash(PART_BLOOD, 1, 9999, pos, 0x60FFFF, 1.0f, 50);}}
                 }
             }
 
@@ -390,7 +391,7 @@ namespace game
 
     VARP(blood, 0, 1, 1);
 
-    void spawnbouncer(const vec &p, const vec &vel, gameent *d, int type)
+    void spawnbouncer(const vec &p, const vec &vel, gameent *d, int type, int lifetime = rnd(1000)+1000)
     {
         vec to(0, 0, 0);
 
@@ -404,7 +405,7 @@ namespace game
         if(to.iszero()) to.z += 1;
         to.normalize();
         to.add(p);
-        newbouncer(p, to, true, 0, d, type, rnd(1000)+1000, rnd(100)+20);
+        newbouncer(p, to, true, 0, d, type, lifetime, rnd(100)+20);
     }
 
     void damageeffect(int damage, gameent *d, gameent *actor, bool thirdperson, int atk)
@@ -415,7 +416,7 @@ namespace game
         p.z += 0.6f*(d->eyeheight + d->aboveeye) - d->eyeheight;
         if(d->armourtype!=A_MAGNET)
         {
-            if(blood) particle_splash(PART_BLOOD, damage/10, 1000, p, 0x60FFFF, 2.96f);
+            if(blood) particle_splash(PART_BLOOD, damage/100, 1000, p, 0x60FFFF, 2.96f);
             if(damage>=600) playsound(S_SANG, &d->o, 0, 0, 0 , 100, -1, 250);
             gibeffect(damage, vec(0,0,0), d);
         }
@@ -1007,11 +1008,11 @@ namespace game
         {
             switch(rnd(3))
             {
-                case 0: addstain(STAIN_BALLE_1, to, dir, 0.5f); break;
-                case 1: addstain(STAIN_BALLE_2, to, dir, 0.5f); break;
-                case 2: addstain(STAIN_BALLE_3, to, dir, 0.5f); break;
+                case 0: addstain(STAIN_BALLE_1, to, dir, 0.4f); break;
+                case 1: addstain(STAIN_BALLE_2, to, dir, 0.4f); break;
+                case 2: addstain(STAIN_BALLE_3, to, dir, 0.4f); break;
             }
-            addstain(STAIN_BALLE_GLOW, to, dir, 1.0f, 0x883300);
+            addstain(STAIN_BALLE_GLOW, to, dir, 0.8f, 0x991100);
         }
     }
 
@@ -1020,7 +1021,7 @@ namespace game
         vec dir = vec(from).sub(to).safenormalize();
         if(stain)
         {
-            addstain(STAIN_BRULAGE, to, dir, 20.0f);
+            switch(rnd(2)){case 0: addstain(STAIN_BRULAGE, to, dir, 20.0f);}
         }
     }
 
@@ -1052,7 +1053,7 @@ namespace game
                 playsound(S_IMPACTELEC, &to, 0, 0, 0 , 100, -1, 250);
                 if(d!=hudplayer()) sound_nearmiss(S_FLYBYELEC, from, to);
 
-                particle_splash(PART_SPARK, 200, 250, to, 0xFF4400, 0.45f, 15, 0, 0, player1->champimillis ? true : false);
+                particle_splash(PART_SPARK, 50, 150, to, 0xFF4400, 0.45f, 300, 30, 0, player1->champimillis ? true : false);
                 loopi(3) particle_flare(d->muzzle, to,  50+rnd(50), PART_LIGHTNING, 0x8888FF, 1.5f+rnd(2), d, player1->champimillis ? true : false);
                 particle_flare(d->muzzle, d->muzzle, 140, PART_RAIL_MUZZLE_FLASH, d->steromillis ? 0xFF0000 : 0x50CFFF, zoom ? 1.75f : 3.0f, d, player1->champimillis ? true : false);
                 if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 140, PART_RAIL_MUZZLE_FLASH, 0xFF0000, zoom ? 2.5f : 5.5f, d, player1->champimillis ? true : false);
@@ -1075,7 +1076,7 @@ namespace game
 
             case ATK_MINIGUN_SHOOT:
             case ATK_AK47_SHOOT:
-                spawnbouncer(d->balles, d->balles, d, BNC_DOUILLES);
+                spawnbouncer(d->balles, d->balles, d, BNC_DOUILLES, bnclifetime+rnd(bnclifetime));
                 particle_flare(d->muzzle, d->muzzle, 100, PART_MINIGUN_MUZZLE_FLASH, d->steromillis ? 0xFF0000 : 0xFF7722, zoom ? 1.5f : 3.5f, d, player1->champimillis ? true : false);
                 if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 100, PART_MINIGUN_MUZZLE_FLASH, 0xFF0000, zoom ? 2.0f : 5.5f, d, player1->champimillis ? true : false);
                 particle_splash(PART_SMOKE,  4, 500, d->muzzle, 0x444444, 3.5f, 20, 500, 0, player1->champimillis ? true : false);
@@ -1086,7 +1087,7 @@ namespace game
                 break;
             case ATK_GAU8_SHOOT:
                 if(d->type==ENT_PLAYER) sound = S_GAU8;
-                spawnbouncer(d->balles, d->balles, d, BNC_BIGDOUILLES);
+                spawnbouncer(d->balles, d->balles, d, BNC_BIGDOUILLES,  bnclifetime+rnd(bnclifetime));
                 particle_flare(d->muzzle, d->muzzle, 100, PART_MINIGUN_MUZZLE_FLASH, d->steromillis ? 0xFF0000 : 0xFF7722, zoom ? 1.5f : 2.0f, d, player1->champimillis ? true : false);
                 if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 100, PART_MINIGUN_MUZZLE_FLASH, 0xFF0000, zoom ? 1.5f : 2.5f, d, player1->champimillis ? true : false);
                 switch(rnd(7)){case 0: particle_splash(PART_SMOKE,  4, 250, d->muzzle, 0x444444, 3.0f, 20, 500, 0, player1->champimillis ? true : false);}
@@ -1098,7 +1099,7 @@ namespace game
             case ATK_MOSSBERG_SHOOT:
             case ATK_HYDRA_SHOOT:
                 {
-                    loopi(atk==ATK_HYDRA_SHOOT ? 3 : 2) spawnbouncer(d->balles, d->balles, d, BNC_CARTOUCHES);
+                    loopi(atk==ATK_HYDRA_SHOOT ? 3 : 2) spawnbouncer(d->balles, d->balles, d, BNC_CARTOUCHES, bnclifetime+rnd(bnclifetime));
                     particle_flare(d->muzzle, d->muzzle, 140, PART_NORMAL_MUZZLE_FLASH, d->steromillis ? 0xFF0000 : 0xFF7722, zoom ? 1.25f : 3.50f, d, player1->champimillis ? true : false);
                     if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 140, PART_NORMAL_MUZZLE_FLASH, 0xFF0000, zoom ? 2.00f : 5.50f, d, player1->champimillis ? true : false);
                     particle_splash(PART_SMOKE,  4, 500, d->muzzle, 0x444444, 3.5f, 20, 500, 0, player1->champimillis ? true : false);
@@ -1118,7 +1119,7 @@ namespace game
             case ATK_SV98_SHOOT:
             case ATK_SKS_SHOOT:
             case ATK_CAMPOUZE_SHOOT:
-                spawnbouncer(d->balles, d->muzzle, d, BNC_BIGDOUILLES);
+                spawnbouncer(d->balles, d->muzzle, d, BNC_BIGDOUILLES, bnclifetime+rnd(bnclifetime));
                 particle_splash(PART_SMOKE, 4, 600, d->muzzle, 0x444444, 2.0f, 20, 500, 0, player1->champimillis ? true : false);
                 particle_flare(d->muzzle, d->muzzle, 100, PART_NORMAL_MUZZLE_FLASH, d->steromillis ? 0xFF0000 : 0xFFFFFF, 1.25f, d, player1->champimillis ? true : false);
                 particle_flare(d->muzzle, d->muzzle, 100, PART_SNIPE_MUZZLE_FLASH, d->steromillis ? 0xFF0000 : 0xFFFFFF, 5.0f, d, player1->champimillis ? true : false);
@@ -1143,7 +1144,7 @@ namespace game
             case ATK_UZI_SHOOT:
             case ATK_FAMAS_SHOOT:
             case ATK_GLOCK_SHOOT:
-                spawnbouncer(d->balles, d->balles, d, atk==ATK_UZI_SHOOT ? BNC_DOUILLESUZI : BNC_DOUILLES);
+                spawnbouncer(d->balles, d->balles, d, atk==ATK_UZI_SHOOT ? BNC_DOUILLESUZI : BNC_DOUILLES, bnclifetime+rnd(bnclifetime));
                 particle_flare(d->muzzle, d->muzzle, 140, PART_MINIGUN_MUZZLE_FLASH, d->steromillis ? 0xFF0000 : 0xFF7722, zoom ? 0.75f : 2.00f, d, player1->champimillis ? true : false);
                 if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 80, PART_MINIGUN_MUZZLE_FLASH, 0xFF00002, zoom ? 1.5f : 5.00f, d, player1->champimillis ? true : false);
                 particle_splash(PART_SMOKE,  4, 500, d->muzzle, 0x444444, 2.0f, 20, 500, 0,  player1->champimillis ? true : false);
@@ -1477,14 +1478,15 @@ namespace game
             vec pos(bnc.o);
             pos.add(vec(bnc.offset).mul(bnc.offsetmillis/float(OFFSETMILLIS)));
             vec vel(bnc.vel);
-            if(vel.magnitude() <= 25.0f) yaw = bnc.lastyaw;
+            pitch = -bnc.roll;
+            if(vel.magnitude() <= 25.0f) {yaw = bnc.lastyaw; pitch = bnc.lastpitch;}
             else
             {
                 vectoyawpitch(vel, yaw, pitch);
                 yaw += 90;
                 bnc.lastyaw = yaw;
+                bnc.lastpitch = pitch;
             }
-            pitch = -bnc.roll;
 			int cull = MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED;
 
             if(bnc.bouncetype==BNC_GRENADE) rendermodel("projectiles/grenade", ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, cull);

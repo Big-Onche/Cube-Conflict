@@ -26,7 +26,7 @@ enum
 };
 
 VARFP(maxstaintris, 1, 2048, 20480, initstains());
-VARMP(stainfade, 1, 15, 60, 1000);
+VARMP(stainfade, 1, 15, 300, 1000);
 VAR(dbgstain, 0, 0, 1);
 
 struct stainbuffer
@@ -832,27 +832,27 @@ void setdecorationlod()
     {
         case 0:
             maxstaintris = 1024;
-            stainfade = 30;
+            stainfade = 15;
             grassdist = 64;
             grass = 0;
             break;
         case 1:
             maxstaintris = 4096;
-            stainfade = 120;
+            stainfade = 30;
             grassdist = 128;
             grassstep = 3.5f;
             grass = 1;
             break;
         case 2:
             maxstaintris = 8192;
-            stainfade = 300;
+            stainfade = 90;
             grassdist = 256;
             grassstep = 2.5f;
             grass = 1;
             break;
         case 3:
             maxstaintris = 20480;
-            stainfade = 1000;
+            stainfade = 300;
             grassdist = 512;
             grassstep = 1.5f;
             grass = 1;
