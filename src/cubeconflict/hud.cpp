@@ -35,11 +35,11 @@ namespace game
 
             switch(killstreak)
             {
-                case 3: formatstring(streakmsg, "Triplette ! \fc(x%d)", killstreak); break;
-                case 5: formatstring(streakmsg, "Pentaplette ! \fc(x%d)", killstreak); break;
-                case 10: formatstring(streakmsg, "Décaplette ! \fc(x%d)", killstreak); break;
-                case 20: formatstring(streakmsg, "Eicoplette ! \fc(x%d)", killstreak); break;
-                case 30: formatstring(streakmsg, "Triaconplette ! \fc(x%d)", killstreak); break;
+                case 3: formatstring(streakmsg, "%s \fc(x%d)", langage ? "You are hot !" : "Triplette !", killstreak); break;
+                case 5: formatstring(streakmsg, "%s \fc(x%d)", langage ? "You are on fire !" : "Pentaplette !", killstreak); break;
+                case 10: formatstring(streakmsg, "%s \fc(x%d)", langage ? "YYou are unstoppable !" : "Décaplette !", killstreak); break;
+                case 20: formatstring(streakmsg, "%s \fc(x%d)", langage ? "You are a god !" : "Eicoplette !", killstreak); break;
+                case 30: formatstring(streakmsg, "%s \fc(x%d)", langage ? "Are you cheating ?" : "Triaconplette !", killstreak); break;
                 default : need_message1 = false;
             }
 
@@ -50,7 +50,7 @@ namespace game
         {
             string killmsg;
 
-            formatstring(killmsg, "Tu as tué \fc%s \f7! (%s à %.1fm)", str_pseudovictime, aptitudes[n_aptitudevictime].apt_nom, killdistance);
+            formatstring(killmsg, "%s \fc%s \f7! (%s à %.1fm)", langage ? "You killed" : "Tu as tué",str_pseudovictime, langage ? aptitudes[n_aptitudevictime].apt_nomEN : aptitudes[n_aptitudevictime].apt_nomFR, killdistance);
             rendermessage(killmsg, 100, 8.8f, decal_message);
             decal_message -= 40;
         }
@@ -61,11 +61,11 @@ namespace game
 
             switch(n_killstreakacteur)
             {
-                case 3: formatstring(infomsg, "\fc%s\f7 est chaud ! (Triplette)", str_pseudoacteur); break;
-                case 5: formatstring(infomsg, "\fc%s\f7 domine ! (Pentaplette)", str_pseudoacteur); break;
-                case 10: formatstring(infomsg, "\fc%s\f7 est inarrêtable ! (Décaplette)", str_pseudoacteur); break;
-                case 20: formatstring(infomsg, "\fc%s\f7 est invincible ! (Eicoplette)", str_pseudoacteur); break;
-                case 30: formatstring(infomsg, "\fc%s\f7 est un Dieu ! (Triaconplette)", str_pseudoacteur); break;
+                case 3: formatstring(infomsg, "\fc%s\f7 %s %s", str_pseudoacteur, langage ? "is hot !" : "est chaud !", langage ? "(Triple kill)" : "(Triplette)"); break;
+                case 5: formatstring(infomsg, "\fc%s\f7 %s %s", str_pseudoacteur, langage ? "dominate !" : "est chaud !", langage ? "(Pentakill)" : "(Pentaplette)"); break;
+                case 10: formatstring(infomsg, "\fc%s\f7 %s %s", str_pseudoacteur, langage ? "is instoppable !" : "est chaud !", langage ? "(x10 !)" : "(Décaplette)"); break;
+                case 20: formatstring(infomsg, "\fc%s\f7 %s %s", str_pseudoacteur, langage ? "is invincible !" : "est chaud !", langage ? "(x20 !)" : "(Eicoplette)"); break;
+                case 30: formatstring(infomsg, "\fc%s\f7 %s %s", str_pseudoacteur, langage ? "is as god !" : "est chaud !", langage ? "(x30 !)" : "(Triaconplette)"); break;
                 default: need_message2 = false;
             }
 
@@ -87,16 +87,16 @@ namespace game
         if(player1->state==CS_DEAD)
         {
             string killedbymsg, withmsg, waitmsg;
-            if(suicided) formatstring(killedbymsg, "Tu t'es suicidé !");
-            else formatstring(killedbymsg, "Tué par %s (%s)", str_pseudotueur, aptitudes[n_aptitudetueur].apt_nom);
+            if(suicided) formatstring(killedbymsg, langage ? "You committed suicide !" : "Tu t'es suicidé !");
+            else formatstring(killedbymsg, "%s %s (%s)", langage ? "Killed by" : "Tué par", str_pseudotueur, langage ? aptitudes[n_aptitudetueur].apt_nomEN : aptitudes[n_aptitudetueur].apt_nomFR);
 
             rendermessage(killedbymsg, 65, 1.5f, 0);
-            formatstring(withmsg, "Avec %s", str_armetueur);
+            formatstring(withmsg, "%s %s", langage ? "With" : "Avec", str_armetueur);
             rendermessage(withmsg, 95, 1.5f, -360);
 
             int wait = cmode ? cmode->respawnwait(player1) : (lastmillis < player1->lastpain + 1000) ? 1 : 0 ;
-            if(wait>0) formatstring(waitmsg, "Respawn possible dans %d seconde%s", wait, wait<=1?"":"s");
-            else formatstring(waitmsg, "Appuie n'importe où pour revivre ! ");
+            if(wait>0) formatstring(waitmsg, "%s %d second%s%s", langage ? "Respawn available in" : "Respawn possible dans", wait, langage ? "" : "e", wait<=1?"":"s");
+            else formatstring(waitmsg, langage ? "Press any key to respawn !" : "Appuie n'importe où pour revivre !");
             rendermessage(waitmsg, 95, 1.5f, -580);
         }
 

@@ -312,7 +312,7 @@ namespace game
     ICOMMAND(getclientcolorname, "i", (int *cn),
     {
         gameent *d = getclient(*cn);
-        defformatstring(pseudo_aptitude, "%s \f4(%s)", colorname(d), aptitudes[d->aptitude].apt_nom);
+        defformatstring(pseudo_aptitude, "%s \f4(%s)", colorname(d), langage ? aptitudes[d->aptitude].apt_nomEN : aptitudes[d->aptitude].apt_nomFR);
         if(d) result(pseudo_aptitude);
     });
 

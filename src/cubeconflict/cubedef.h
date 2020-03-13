@@ -16,22 +16,22 @@
 
 enum {APT_SOLDAT = 0, APT_MEDECIN, APT_AMERICAIN, APT_NINJA, APT_VAMPIRE, APT_MAGICIEN, APT_KAMIKAZE, APT_FAUCHEUSE, APT_PHYSICIEN, APT_CAMPEUR, APT_COMMANDO, APT_PRETRE, APT_VICKING, APT_JUNKIE, NUMAPTS};
 
-static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt_vitesse; const char *apt_tete, *apt_nom; } aptitudes[NUMAPTS] =
+static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt_vitesse; const char *apt_tete, *apt_nomFR, *apt_nomEN; } aptitudes[NUMAPTS] =
 {
-    { 105,  105, 105,   95, "chapeaux/casquette",   "Soldat"},      //0 ---> OK
-    { 80,   75,  100,  100, "chapeaux/medic",       "Médecin"},     //1 ---> OK
-    { 100,  130,  75,  130, "chapeaux/aventurier",  "Américain"},   //2 ---> OK
-    { 80,   80,   75,   80, "chapeaux/bandana",     "Ninja"},       //3 ---> OK
-    { 100,  50,  100,  100, "chapeaux/cornes",      "Vampire"},      //4 ---> OK (Regen screen ?)
-    { 95,   75,   90,  100, "chapeaux/magicien",    "Magicien"},    //5 ---> OK
-    { 100,  100,  80,   70, "chapeaux/japonais",    "Kamikaze"},    //6 ---> OK
-    { 100,  80,   90,  110, "chapeaux/crane",       "Faucheuse"},   //7 ---> OK
-    { 90,   80,   80,  110, "chapeaux/graduation",  "Physicien"},   //8 ---> OK
-    { 100,  60,  125,  150, "chapeaux/tente",       "Campeur"},     //9 ---> OK
-    { 115,  115, 115,   85, "chapeaux/kepi",        "Commando"},    //10 --> OK
-    {  80,  105,  80,   90, "chapeaux/saint",       "Prêtre"},      //11 --> OK
-    { 100,  120,  60,  115, "chapeaux/viking",      "Viking"},      //12 --> OK
-    { 100,  110,  85,  120, "chapeaux/champignon",  "Junkie"},      //13 --> OK
+    { 105,  105, 105,   95, "chapeaux/casquette",   "Soldat", "Soldier"},       //0
+    { 80,   75,  100,  100, "chapeaux/medic",       "Médecin", "Medic"},        //1 ---> Ajouter son regen santé
+    { 100,  140,  75,  130, "chapeaux/aventurier",  "Américain", "American"},   //2
+    { 80,   80,   75,   80, "chapeaux/bandana",     "Ninja", "Ninja"},          //3
+    { 110,  50,  110,  110, "chapeaux/cornes",      "Vampire", "Vampire"},      //4 ---> OK (Regen screen ?)
+    { 95,   75,   90,  100, "chapeaux/magicien",    "Magicien", "Magician"},    //5
+    { 100,  100,  80,   70, "chapeaux/japonais",    "Kamikaze", "Kamikaze"},    //6
+    { 100,  80,   90,  110, "chapeaux/crane",       "Faucheuse", "Reaper"},     //7
+    { 90,   80,   80,  110, "chapeaux/graduation",  "Physicien", "Physicist"},  //8
+    { 100,  60,  125,  150, "chapeaux/tente",       "Campeur", "Camper"},       //9
+    { 115,  115, 115,   85, "chapeaux/kepi",        "Commando", "Commando"},    //10
+    {  80,  105,  80,   90, "chapeaux/saint",       "Prêtre", "Priest"},        //11
+    { 100,  120,  60,  115, "chapeaux/viking",      "Viking", "Viking"},        //12
+    { 100,  110,  85,  120, "chapeaux/champignon",  "Junkie", "Junkie"},        //13
 };
 
 static const struct aptisortsinfo { const char *tex1, *tex2, *tex3; int mana1, mana2, mana3, duree1, duree2, duree3, reload1, reload2, reload3, sound1, sound2, sound3; } sorts[] =
