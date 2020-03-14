@@ -334,10 +334,13 @@ void renderprogressview(int w, int h, float bar, const char *text)   // also use
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     float fh = 0.060f*min(w, h), fw = fh*15,
-          fx = renderedframe ? w - fw - fh/4 : -0.027f*(w - fw),
-          fy = renderedframe ? fh/4 : h - fh*0.7f;
+          fx = renderedframe ? w - fw - fh/4 : 0,
+          fy = renderedframe ? fh/4 : h - fh;
     settexture("media/interface/loading_frame.png", 3);
-    bgquad(fx, fy+20, fw*2, fh);
+    bgquad(fx, fy, fw*2, fh);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     float bw = fw*(512 - 2*8)/512.0f, bh = fh*20/32.0f,
           bx = fx + fw*8/512.0f, by = fy + fh*6/32.0f,
@@ -348,9 +351,9 @@ void renderprogressview(int w, int h, float bar, const char *text)   // also use
     if(bar > 0)
     {
         settexture("media/interface/loading_bar.png", 3);
-        bgquad(bx, by+25, sw*2.1f, bh, su1, 0, su2-su1, 1);
-        bgquad(bx+sw, by+25, (ex-(bx+sw))*2.1f, bh, su2, 0, eu1-su2, 1);
-        bgquad(ex, by+25, ew*2.1f, bh, eu1, 0, eu2-eu1, 1);
+        bgquad(bx-50, by*1.04f, sw*2.1f, bh, su1, 0, su2-su1, 1);
+        bgquad(bx+sw-50, by*1.04f, (ex-(bx+sw))*2.1f, bh, su2, 0, eu1-su2, 1);
+        bgquad(ex-50, by*1.04f, ew*2.1f, bh, eu1, 0, eu2-eu1, 1);
     }
 
     if(text)
@@ -650,7 +653,7 @@ void resetgl()
         fatal("failed to reload core texture");
     reloadfonts();
     inbetweenframes = true;
-    renderbackground("Chargement...");
+    renderbackground(langage ? "Loading..." : "Chargement...");
     restoregamma();
     restorevsync();
     initgbuffer();
@@ -1182,7 +1185,7 @@ int main(int argc, char **argv)
     UI::setup();
 
     inbetweenframes = true;
-    renderbackground("Chargement...");
+    renderbackground("");
 
     logoutf("init: world");
     camera1 = player = game::iterdynents(0);
@@ -1220,6 +1223,7 @@ int main(int argc, char **argv)
     }
     execfile(game::autoexec(), false);
 
+    renderbackground(langage ? "Loading..." : "Chargement...");
     identflags &= ~IDF_PERSIST;
 
     initing = INIT_GAME;
