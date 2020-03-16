@@ -331,10 +331,3 @@ namespace game
 
     }
 }
-
-// Code des autres modes de jeux à remettre
-
-    /*
-
-    }
-    */

@@ -149,7 +149,8 @@ void bgquad(float x, float y, float w, float h, float tx, float ty, float tw, fl
     gle::end();
 }
 
-string backgroundimg = "media/interface/image_fond.jpg";
+string backgroundimg = "media/interface/image_fond.jpg", backgroundname;
+
 void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, const char *mapname, const char *mapinfo, const char *astuce, bool force = false)
 {
     static int lastupdate = -1, lastw = -1, lasth = -1;
@@ -235,14 +236,26 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
 
         if(force) //CubeConflict
         {
+            float ilh = 1.1f*min(w, h), ilw = ilh*1.8f,
+                  ilx = 0.5f*(w - ilw), ily = 0.5f*(h - ilh);
+
+            switch(n_map)
+            {
+                case 0: formatstring(backgroundname, "media/map/Village.jpg"); break;
+                case 1: formatstring(backgroundname, "media/map/Usine.jpg"); break;
+                case 2: formatstring(backgroundname, "media/map/Chateaux.jpg"); break;
+                case 3: formatstring(backgroundname, "media/map/Dota.jpg"); break;
+                case 4: formatstring(backgroundname, "media/map/Lune.jpg"); break;
+                case 5: formatstring(backgroundname, "media/map/Volcan.jpg"); break;
+            }
+
+            settexture(backgroundname);
+            bgquad(ilx-parallaxX/-40, ily-parallaxY/-40, ilw, ilh);
+            gle::colorf(1, 1, 1, 0.3f);
+
             settexture("media/interface/image_fond.jpg");
-            bgquad(0-parallaxX/-40, 0-parallaxY/-40, w, h);
-
-            settexture("<premul>media/interface/sticker.png", 3);
-            bgquad(1400-parallaxX/20, 150-parallaxY/20, w/1.7777f, h);
-
-            settexture("<premul>media/interface/sticker2.png", 3);
-            bgquad(-350-parallaxX/20, 150-parallaxY/20, w/1.7777f, h);
+            bgquad(ilx-parallaxX/-40, ily-parallaxY/-40, ilw, ilh);
+            gle::colorf(1, 1, 1, 1);
 
             float lh = 0.43f*min(w, h), lw = lh*2,
                   lx = 0.5f*(w - lw), ly = 0.5f*(h*0.5f - lh);
