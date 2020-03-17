@@ -421,40 +421,40 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound
     { GUN_MEDIGUN, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MEDIGUN, S_MEDIGUN, S_NULL, S_NULL,             30,  100, -150, 500, 700, 0,  750,   2,  280,  4,    10,  25, 0, 0},
 };
 
-static const struct guninfo { const char *name, *file, *vwep, *armedesc; int maxweapposside, maxweapposup, maxzoomfov, attacks[NUMACTS]; } guns[NUMGUNS] =
+static const struct guninfo { const char *name, *file, *vwep, *armedescFR, *armedescEN; int maxweapposside, maxweapposup, maxzoomfov, attacks[NUMACTS]; } guns[NUMGUNS] =
 {
     //Armes "normales"
-    { "fusilelectrique", "fusilelectrique", "worldgun/fusilelectrique", "un fusil électrique !",            66,  26, 60,  { -1, ATK_RAIL_SHOOT }, },
-    { "fusilplasma", "fusilplasma", "worldgun/fusilplasma",             "un fusil du turfu !",              28,  10, 60,  { -1, ATK_PULSE_SHOOT }, },
-    { "smaw", "smaw", "worldgun/smaw",                                  "un lance-roquettes de noob.",       8,   8, 85,  { -1, ATK_SMAW_SHOOT }, },
-    { "minigun", "minigun", "worldgun/minigun",                         "un minigun cheaté.",               36,  11, 80,  { -1, ATK_MINIGUN_SHOOT }, },
-    { "spockgun", "spockgun", "worldgun/spockgun",                      "un pistolet alien",                52,  20, 70,  { -1, ATK_SPOCKGUN_SHOOT }, },
-    { "m32", "m32", "worldgun/m32",                                     "une grenade imprévisible.",        65,  21, 85,  { -1, ATK_M32_SHOOT }, },
-    { "lanceflammes", "lanceflammes", "worldgun/lanceflammes",          "un lance-flammes !",               40,  15, 95,  { -1, ATK_LANCEFLAMMES_SHOOT }, },
-    { "uzi", "uzi", "worldgun/uzi",                                     "une mitraillette de gangster.",    23,  21, 80,  { -1, ATK_UZI_SHOOT }, },
-    { "famas", "famas", "worldgun/famas",                               "une arme made in France",          54,  14, 70,  { -1, ATK_FAMAS_SHOOT }, },
-    { "mossberg500", "mossberg500", "worldgun/mossberg500",             "un fusil à pompe de vieux con.",   38,  18, 95,  { -1, ATK_MOSSBERG_SHOOT }, },
-    { "hydra", "hydra", "worldgun/hydra",                               "un fusil venant d'un autre jeu !", 92,  39, 95,  { -1, ATK_HYDRA_SHOOT }, },
-    { "sv_98", "sv_98", "worldgun/sv_98",                               "un sniper de campeur.",             1,   3, 30,  { -1, ATK_SV98_SHOOT }, },
-    { "sks", "sks", "worldgun/sks",                                     "une carabine russe !",              1,   3, 50,  { -1, ATK_SKS_SHOOT }, },
-    { "arbalete", "arbalete", "worldgun/arbalete",                      "une flèche de merde !",             1,   3, 45,  { -1, ATK_ARBALETE_SHOOT }, },
-    { "ak47", "ak47", "worldgun/ak47",                                  "l'arme à Vladimir Poutine !",      46,  25, 70,  { -1, ATK_AK47_SHOOT }, },
-    { "GRAP1", "GRAP1", "worldgun/GRAP1",                               "un projectile rose de tapette !",  43,  17, 85,  { -1, ATK_GRAP1_SHOOT }, },
-    { "feuartifice", "feuartifice", "worldgun/feuartifice",             "une arme de Gilet jaune.",         70,  30, 85,  { -1, ATK_ARTIFICE_SHOOT }, },
-    { "glock", "glock", "worldgun/glock",                               "un pistolet vraiment pourri.",     55,  20, 85,  { -1, ATK_GLOCK_SHOOT }, },
+    { "fusilelectrique", "fusilelectrique", "worldgun/fusilelectrique", "un fusil électrique !", "an electric rifle.",                   66,  26, 60,  { -1, ATK_RAIL_SHOOT }, },
+    { "fusilplasma", "fusilplasma", "worldgun/fusilplasma",             "un fusil du turfu !", "a futuristic rifle.",                    28,  10, 60,  { -1, ATK_PULSE_SHOOT }, },
+    { "smaw", "smaw", "worldgun/smaw",                                  "un lance-roquettes de noob.", "a noob rocket launcher.",        8,   8, 85,  { -1, ATK_SMAW_SHOOT }, },
+    { "minigun", "minigun", "worldgun/minigun",                         "un minigun cheaté.", "a cheated minigun.",                      36,  11, 80,  { -1, ATK_MINIGUN_SHOOT }, },
+    { "spockgun", "spockgun", "worldgun/spockgun",                      "un pistolet alien", "an alien gun.",                           52,  20, 70,  { -1, ATK_SPOCKGUN_SHOOT }, },
+    { "m32", "m32", "worldgun/m32",                                     "une grenade imprévisible.", "an unpredictable grenade",         65,  21, 85,  { -1, ATK_M32_SHOOT }, },
+    { "lanceflammes", "lanceflammes", "worldgun/lanceflammes",          "un lance-flammes !", "a flame thrower !",                       40,  15, 95,  { -1, ATK_LANCEFLAMMES_SHOOT }, },
+    { "uzi", "uzi", "worldgun/uzi",                                     "une mitraillette de gangster.", "a gangster's weapon.",         23,  21, 80,  { -1, ATK_UZI_SHOOT }, },
+    { "famas", "famas", "worldgun/famas",                               "une arme made in France", "a weapon made in France.",           54,  14, 70,  { -1, ATK_FAMAS_SHOOT }, },
+    { "mossberg500", "mossberg500", "worldgun/mossberg500",             "un fusil à pompe de vieux con.", "an old man's shotgun.",       38,  18, 95,  { -1, ATK_MOSSBERG_SHOOT }, },
+    { "hydra", "hydra", "worldgun/hydra",                               "un fusil venant d'un autre jeu !", "a gun from another game !", 92,  39, 95,  { -1, ATK_HYDRA_SHOOT }, },
+    { "sv_98", "sv_98", "worldgun/sv_98",                               "un sniper de campeur.", "a camper rifle.",                       1,   3, 30,  { -1, ATK_SV98_SHOOT }, },
+    { "sks", "sks", "worldgun/sks",                                     "une carabine russe !", "a russian rifle !",                      1,   3, 50,  { -1, ATK_SKS_SHOOT }, },
+    { "arbalete", "arbalete", "worldgun/arbalete",                      "une flèche de merde !", "rotten arrow.",                         1,   3, 45,  { -1, ATK_ARBALETE_SHOOT }, },
+    { "ak47", "ak47", "worldgun/ak47",                                  "l'arme à Vladimir Poutine !", "Putin's weapon !",               46,  25, 70,  { -1, ATK_AK47_SHOOT }, },
+    { "GRAP1", "GRAP1", "worldgun/GRAP1",                               "un projectile rose de tapette !", "a gay ass pink projectile.", 43,  17, 85,  { -1, ATK_GRAP1_SHOOT }, },
+    { "feuartifice", "feuartifice", "worldgun/feuartifice",             "une arme de Gilet jaune.", "a yellow vests weapon",             70,  30, 85,  { -1, ATK_ARTIFICE_SHOOT }, },
+    { "glock", "glock", "worldgun/glock",                               "un pistolet vraiment pourri.", "a very bad gun",                55,  20, 85,  { -1, ATK_GLOCK_SHOOT }, },
     //Super armes
-    { "missilenorko", "missilenorko", "worldgun/missilenorko",          "une putain de bombe nucléaire !",   8,   3, 85,  { -1, ATK_NUKE_SHOOT }, },
-    { "GAU8", "GAU8", "worldgun/GAU8",                                  "un GAU-8 portable !",              57,  10, 85,  { -1, ATK_GAU8_SHOOT }, },
-    { "miniroquettes", "miniroquettes", "worldgun/miniroquettes",       "un minigun à roquettes !",         10,  10, 70,  { -1, ATK_ROQUETTES_SHOOT }, },
-    { "campouze2000", "campouze2000", "worldgun/campouze2000",          "el famoso Campouze 2000 !",        10,  10, 60,  { -1, ATK_CAMPOUZE_SHOOT }, },
+    { "missilenorko", "missilenorko", "worldgun/missilenorko",          "une putain de bombe nucléaire !", "a fucking nuclear missile !",   8,   3, 85,  { -1, ATK_NUKE_SHOOT }, },
+    { "GAU8", "GAU8", "worldgun/GAU8",                                  "un GAU-8 portable !", "a portable GAU-8!",                        57,  10, 85,  { -1, ATK_GAU8_SHOOT }, },
+    { "miniroquettes", "miniroquettes", "worldgun/miniroquettes",       "un minigun à roquettes !", "a missiles minigun",                  10,  10, 70,  { -1, ATK_ROQUETTES_SHOOT }, },
+    { "campouze2000", "campouze2000", "worldgun/campouze2000",          "el famoso Campouze 2000 !", "the famous Camp-2000!",              10,  10, 60,  { -1, ATK_CAMPOUZE_SHOOT }, },
     //Corps à corps
-    { "epee349", "armes_cac/epee349", "worldgun/armes_cac/epee349",             "l'épée collector à 349 euros.", 4, 3, 95,   { -1, ATK_CAC349_SHOOT }, },
-    { "marteauban", "armes_cac/marteauban", "worldgun/armes_cac/marteauban",    "un marteau de bannissement !",  4, 3, 95,   { -1, ATK_CACMARTEAU_SHOOT }, },
-    { "mastersword", "armes_cac/mastersword", "worldgun/armes_cac/mastersword", "une épée légendaire !",         4, 3, 95,   { -1, ATK_CACMASTER_SHOOT }, },
-    { "fleau", "armes_cac/fleau", "worldgun/armes_cac/fleau",                   "une boule piquante !",          4, 3, 95,   { -1, ATK_CACFLEAU_SHOOT }, },
+    { "epee349", "armes_cac/epee349", "worldgun/armes_cac/epee349",             "l'épée collector à 349 euros.", "a 386$ collector sword.",      4, 3, 95,   { -1, ATK_CAC349_SHOOT }, },
+    { "marteauban", "armes_cac/marteauban", "worldgun/armes_cac/marteauban",    "un marteau de bannissement !", "the Ban Hammer.",               4, 3, 95,   { -1, ATK_CACMARTEAU_SHOOT }, },
+    { "mastersword", "armes_cac/mastersword", "worldgun/armes_cac/mastersword", "une épée légendaire !", "a legendary sword !",                  4, 3, 95,   { -1, ATK_CACMASTER_SHOOT }, },
+    { "fleau", "armes_cac/fleau", "worldgun/armes_cac/fleau",                   "une boule piquante !", "a spiky ball.",                         4, 3, 95,   { -1, ATK_CACFLEAU_SHOOT }, },
     // Armes spéciales aptitudes
-    { "kamikaze", "kamikaze", "worldgun/kamikaze",  "une ceinture d'explosifs !",        4, 3, 95,   { -1, ATK_KAMIKAZE_SHOOT }, },
-    { "medigun", "medigun", "worldgun/medigun",  "un médigun (c'est pas normal) !",     10, 3, 85,   { -1, ATK_MEDIGUN_SHOOT }, },
+    { "kamikaze", "kamikaze", "worldgun/kamikaze",  "une ceinture d'explosifs !", "an explosives ISIS's made belt !",        4, 3, 95,   { -1, ATK_KAMIKAZE_SHOOT }, },
+    { "medigun", "medigun", "worldgun/medigun",  "un médigun (c'est pas normal) !", "a medigun (it's not normal)",          10, 3, 85,   { -1, ATK_MEDIGUN_SHOOT }, },
 };
 
 #include "ai.h"
@@ -551,12 +551,11 @@ struct gamestate
             case I_BOOSTVITESSE: epomillis = min(epomillis+is.add*(aptitude==13 ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;
             case I_BOOSTGRAVITE: jointmillis = min(jointmillis+is.add*(aptitude==13 ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;
             case I_BOOSTPRECISION: champimillis = min(champimillis+is.add*(aptitude==13 ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;
-                //if(classe==14) jointmillis = jointmillis*1.50f;
                 break;
             case I_SUPERARME:
                 {
                     float aptboost;
-                    aptitude == 2 ? aptboost = 1.5f : aptboost = 1;
+                    aptitude == 2 ? aptboost = 2 : aptboost = 1;
                     ammo[is.info+rndsuperweapon] = min(ammo[is.info+rndsuperweapon]+is.add*boostitem*aptboost, is.max*aptboost);
                 }
             default:
@@ -709,7 +708,7 @@ struct gamestate
 };
 
 #define MAXTEAMS 2
-static const char * const teamnames[1+MAXTEAMS] = { "", "SWAG", "YOLO" };
+static const char * const teamnames[1+MAXTEAMS] = { "", "YORARIEN", "YORAKEKCHOSE" };
 static const char * const teamtextcode[1+MAXTEAMS] = { "\fd", "\fd", "\fc" };
 static const int teamtextcolor[1+MAXTEAMS] = { 0xFFFF22, 0xFFFF22, 0xFF2222 }; // red
 static const int teamscoreboardcolor[1+MAXTEAMS] = { 0xFFFF22, 0xFFFF22, 0xFF2222 };
