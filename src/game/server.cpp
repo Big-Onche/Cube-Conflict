@@ -2227,7 +2227,7 @@ namespace server
             if(actor!=target) if(isteam(target->team, actor->team)) return; //ENLEVE LE TEAMKILL
         }
 
-        damage = ((damage*100)/aptitudes[target->aptitude].apt_resistance)/2.5f;
+        damage = ((damage*100)/aptitudes[target->aptitude].apt_resistance)/2.0f;
         if(target->state.aptisort3 && target->aptitude==APT_MAGICIEN) damage = damage/5.0f;
 
         gamestate &as = actor->state;
