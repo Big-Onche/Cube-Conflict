@@ -124,7 +124,7 @@ namespace aiman
         ci->connected = true;
         ci->aptitude = rnd(14);
         ci->customcape = rnd(12);
-        ci->customtombe = rnd(5)+1;
+        ci->customtombe = rnd(7)+1;
         ci->customdanse = rnd(7)+1;
 
         dorefresh = true;

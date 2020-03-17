@@ -240,7 +240,7 @@ namespace game
         player1->customcape = player1_cape;
     });
 
-    VARFP(player1_tombe, 1, 1, 5,
+    VARFP(player1_tombe, 1, 1, 7,
         {
         addmsg(N_SENDTOMBE, "ri", player1_tombe);
         player1->customtombe = player1_tombe;
