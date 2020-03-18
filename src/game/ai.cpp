@@ -493,19 +493,19 @@ namespace ai
                 d->aptitude==APT_JUNKIE ? score = 1e10f : score = 1e7f;
                 break;
             case I_SANTE:
-                if(d->health<1000) score = d->health < 800 ? 1e4f : d->health < 400 ? 1e7f : 1e3f;
+                if(d->health<1000)  score = d->health < 500 ? 1e7f : d->health < 800 ? 1e5f : 1e3f;
                 if(d->mana>40 && d->aptitude==APT_PRETRE && d->health<=300) aptitude(d, 1);
             case I_MANA:
-                if(d->mana < 101) score = 1e6f;
+                if(d->mana < 101 && d->aptitude!=APT_VAMPIRE) score = 1e6f;
+                else if (d->aptitude==APT_VAMPIRE) score = d->health < 500 ? 1e7f : d->health < 800 ? 1e5f : 1e3f;
             case I_BOUCLIERBOIS:
                 if(d->armour < 600) score = 1e6f;
             case I_BOUCLIERFER:
-                if(d->armour < 800) score = 1e7f;
+                if(d->armour <= 750) score = 1e7f;
                 break;
             case I_BOUCLIEROR: case I_BOUCLIERMAGNETIQUE:
-                if(d->armour < 1300) score = 1e8f;
+                if(d->armour <= 1250) score = 1e8f;
                 break;
-            case FLAG: score = 1e30f; break;
             default:
             {
                 if(e.type >= I_RAIL && e.type <= I_SUPERARME && !d->hasmaxammo(e.type))
@@ -1420,7 +1420,7 @@ namespace ai
                 {
                     case AI_S_WAIT:
                         result = dowait(d, c);
-                        if(d->health>70) switch(rnd(200)){case 0: bottaunt(d);}
+                        if(d->health>80 && !d->steromillis && !d->epomillis && !d->champimillis && !d->attacking) switch(rnd(300)){case 0: bottaunt(d);}
                         break;
                     case AI_S_DEFEND: result = dodefend(d, c); break;
                     case AI_S_PURSUE: result = dopursue(d, c);
