@@ -490,7 +490,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
                     vec pos = d->abovehead().add(vec(0, 0,-12));
                     if(d->aptisort2) particle_fireball(pos , 16.0f, PART_ONDECHOC, 5,  0xFFFF00, 16.0f);
                 }
-                if(d->ragemillis) switch(rnd(8)){case 0: particle_splash(PART_SMOKE,  1,  120, d->o, 0xFF3300, 10+rnd(5),  300, 100);}
+                if(d->ragemillis) switch(rnd(8)){case 0: particle_splash(PART_SMOKE, 1, 120, d->o, 0xFF3300, 10+rnd(5),  300, 100);}
                 if(d->jointmillis) switch(rnd(5)) {case 1: regularflame(PART_SMOKE, d->abovehead().add(vec(-12, 5, -19)), 2, 3, 0x888888, 1, 1.6f, 50.0f, 1000.0f, -10);}
 
             }

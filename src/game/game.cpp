@@ -210,6 +210,7 @@ namespace game
             //if(d->state==CS_ALIVE && m_battle) battlevivants++;
 
             if(curtime>0 && d->ragemillis && d!=player1) d->ragemillis = max(d->ragemillis-curtime, 0);
+            else if (curtime>0 && d->vampimillis && d!=player1) d->vampimillis = max(d->vampimillis-curtime, 0);
             if(d==hudplayer())
             {
                 if(d->health<=15 && d->state==CS_ALIVE)
@@ -225,7 +226,7 @@ namespace game
             if(d->state==CS_ALIVE && !intermission && d!=player1)
             {
                 if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
-                if(d->steromillis || d->epomillis || d->jointmillis || d->champimillis || d->ragemillis) entities::checkboosts(curtime, d);
+                if(d->steromillis || d->epomillis || d->jointmillis || d->champimillis) entities::checkboosts(curtime, d);
                 if(d->ragemillis || d->aptisort1 || d->aptisort2 || d->aptisort3) entities::checkaptiskill(curtime, d);
                 if(players[i]->aptitude==APT_MEDECIN)
                 {
@@ -311,7 +312,7 @@ namespace game
         if(player1->state != CS_DEAD && !intermission)
         {
             if(player1->steromillis || player1->epomillis || player1->jointmillis || player1->champimillis) entities::checkboosts(curtime, player1);
-            if(player1->ragemillis || player1->aptisort1 || player1->aptisort2 || player1->aptisort3) entities::checkaptiskill(curtime, player1);
+            if(player1->ragemillis || player1->vampimillis || player1->aptisort1 || player1->aptisort2 || player1->aptisort3) entities::checkaptiskill(curtime, player1);
             if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE) updatespecials(player1);
 
             loopv(players)
@@ -460,7 +461,15 @@ namespace game
         if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission) return;
         if(local && actor->aptitude==4) damage = actor->doregen(damage);
 
-        if(actor==player1) playsound(S_HIT);
+        gameent *h = hudplayer();
+        if(h!=player1 && actor==h && d!=actor)
+        {
+            if(hitsound && lasthit != lastmillis) playsound(S_HIT);
+            lasthit = lastmillis;
+        }
+        if(d==h) regenblend(damage);
+
+        regeneffect(damage, d, actor, d!=h);
     }
 
     void damaged(int damage, gameent *d, gameent *actor, bool local, int atk)

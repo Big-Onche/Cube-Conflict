@@ -410,8 +410,6 @@ namespace game
 
     void damageeffect(int damage, gameent *d, gameent *actor, bool thirdperson, int atk)
     {
-        if(atk!=ATK_MEDIGUN_SHOOT) { if(actor!=d) if(isteam(d->team, actor->team)) return; }
-
         vec p = d->o;
         p.z += 0.6f*(d->eyeheight + d->aboveeye) - d->eyeheight;
         if(d->armourtype!=A_MAGNET)
@@ -458,6 +456,22 @@ namespace game
         }
     }
 
+    void regeneffect(int damage, gameent *d, gameent *actor, bool thirdperson)
+    {
+        vec p = d->o;
+        p.z += 0.6f*(d->eyeheight + d->aboveeye) - d->eyeheight;
+
+        if(thirdperson && actor->health<actor->maxhealth)
+        {
+            actor->steromillis > 0 ? damage*=actor->aptitude==13 ? 3 : 2 : damage+=0;
+            damage = (((damage*aptitudes[actor->aptitude].apt_degats)/100)*100)/aptitudes[d->aptitude].apt_resistance;
+            if(d->aptisort3>0 && d->aptitude==APT_MAGICIEN) damage = damage/5.0f;
+            damage = damage/10.0f;
+
+            particle_textcopy(actor->abovehead(), tempformatstring("%.1f", damage*1.0f), PART_TEXT, actor->steromillis > 0 ? 2500 : 1500, 0xBBDDBB, 3.5f, -8);
+        }
+    }
+
     void gibeffect(int damage, const vec &vel, gameent *d)
     {
         if(damage < 0) return;
@@ -496,35 +510,26 @@ namespace game
                 damageeffect(damage, f, at, true, atk);
                 if(f==player1)
                 {
-                    if(atk==ATK_MEDIGUN_SHOOT)
-                    {
-                        regenblend(damage);
-                        regencompass(damage, at ? at->o : f->o);
-                    }
-                    else
-                    {
-                        damageblend(damage);
-                        damagecompass(damage, at ? at->o : f->o);
-                        switch(rnd(2))
-                        {
-                            case 0:
-                                if(player1->aptitude==APT_PHYSICIEN && player1->aptisort1 && player1->armour>0) playsound(S_SORTPHY1);
-                                else if(player1->armour>0 && atk!=ATK_LANCEFLAMMES_SHOOT) playsound(armoursound);
-                                break;
-                            case 1:
-                                playsound(S_BALLECORPS);
-                        }
-                    }
-
-                }
-                else
-                {
+                    damageblend(damage);
+                    damagecompass(damage, at ? at->o : f->o);
                     switch(rnd(2))
                     {
                         case 0:
-                            if(f->aptitude==APT_PHYSICIEN && f->aptisort1 && f->armour>0) playsound(S_SORTPHY1, &f->o, 0, 0, 0 , 100, -1, 200);
-                            else if(f->armour>0 && atk!=ATK_LANCEFLAMMES_SHOOT) playsound(armoursound+4, &f->o, 0, 0, 0 , 100, -1, 200);
+                            if(player1->aptitude==APT_PHYSICIEN && player1->aptisort1 && player1->armour>0) playsound(S_SORTPHY1);
+                            else if(player1->armour>0 && atk!=ATK_LANCEFLAMMES_SHOOT) playsound(armoursound);
+                            break;
+                        case 1:
+                            playsound(S_BALLECORPS);
                     }
+                }
+            }
+            else
+            {
+                switch(rnd(2))
+                {
+                    case 0:
+                        if(f->aptitude==APT_PHYSICIEN && f->aptisort1 && f->armour>0) playsound(S_SORTPHY1, &f->o, 0, 0, 0 , 100, -1, 200);
+                        else if(f->armour>0 && atk!=ATK_LANCEFLAMMES_SHOOT) playsound(armoursound+4, &f->o, 0, 0, 0 , 100, -1, 200);
                 }
             }
         }

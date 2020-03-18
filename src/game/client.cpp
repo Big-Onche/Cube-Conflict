@@ -1339,6 +1339,7 @@ namespace game
                 d->jointmillis = getint(p);
                 d->champimillis = getint(p);
                 d->ragemillis = getint(p);
+                d->vampimillis = getint(p);
                 d->aptisort1 = getint(p);
                 d->aptisort2 = getint(p);
                 d->aptisort3 = getint(p);
@@ -1743,6 +1744,7 @@ namespace game
                 actor->health = health;
                 if(actor->state == CS_ALIVE && actor != player1) actor->lastpain = lastmillis;
                 regened(damage, actor, actor, false);
+                actor->vampimillis+=damage*1.5f;
                 break;
             }
 

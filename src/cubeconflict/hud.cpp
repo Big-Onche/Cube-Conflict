@@ -163,6 +163,17 @@ namespace game
             gle::colorf(1, 1, 1, 1);
         }
 
+        if(player1->vampimillis>0)
+        {
+            if(player1->vampimillis>1000) gle::colorf(1, 1, 1, 1);
+            else gle::colorf(player1->vampimillis/1000.0f, player1->vampimillis/1000.0f, player1->vampimillis/1000.0f, player1->vampimillis/1000.0f);
+
+            settexture("media/interface/hud/vampire.png");
+            bgquad(0, 0, w, h);
+
+            gle::colorf(1, 1, 1, 1);
+        }
+
         if(d->aptisort3 && d->aptitude==APT_MAGICIEN)
         {
             gle::colorf(1, 1, 1, 0.7f);

@@ -404,6 +404,7 @@ namespace entities
     void checkaptiskill(int time, gameent *d)
     {
         if(d->ragemillis && (d->ragemillis -= time)<=0) d->ragemillis = 0;
+        if(d->vampimillis && (d->vampimillis -= time)<=0) d->vampimillis = 0;
         if(d->aptisort1 && (d->aptisort1 -= time)<=0) d->aptisort1 = 0;
         if(d->aptisort2 && (d->aptisort2 -= time)<=0) d->aptisort2 = 0;
         if(d->aptisort3 && (d->aptisort3 -= time)<=0) d->aptisort3 = 0;

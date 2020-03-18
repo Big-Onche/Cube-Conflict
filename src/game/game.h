@@ -464,7 +464,7 @@ struct gamestate
 {
     int health, maxhealth;
     int armour, armourtype;
-    int steromillis, epomillis, jointmillis, champimillis, ragemillis;
+    int steromillis, epomillis, jointmillis, champimillis, ragemillis, vampimillis;
     int aptisort1, aptisort2, aptisort3;
     int mana;
     int gunselect, gunwait;
@@ -579,6 +579,7 @@ struct gamestate
         jointmillis = 0;
         champimillis = 0;
         ragemillis = 0;
+        vampimillis = 0;
         gunwait = 0;
         aptisort1 = 0;
         aptisort2 = 0;
@@ -962,6 +963,7 @@ namespace game
     extern void explode(bool local, gameent *owner, const vec &v, const vec &vel, dynent *safe, int dam, int atk);
     extern void explodeeffects(int atk, gameent *d, bool local, int id = 0);
     extern void damageeffect(int damage, gameent *d, gameent *actor, bool thirdperson = true, int atk = 0);
+    extern void regeneffect(int damage, gameent *d, gameent *actor, bool thirdperson = true);
     extern void gibeffect(int damage, const vec &vel, gameent *d);
     extern float intersectdist;
     extern bool intersect(dynent *d, const vec &from, const vec &to, float margin = 0, float &dist = intersectdist);
