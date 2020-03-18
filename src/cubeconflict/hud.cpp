@@ -115,13 +115,13 @@ namespace game
                     f->privilege>=PRIV_ADMIN ? formatstring(color, "\fc") : formatstring(color, "\f7");
                     if(f->state==CS_DEAD) formatstring(color, "\fg") ;
                 }
-                formatstring(spectatormsg, "Spectateur : %s%s", color, colorname(f));
+                formatstring(spectatormsg, "Spectateur : %s%s (%s)", color, colorname(f),  langage ? aptitudes[n_aptitudevictime].apt_nomEN : aptitudes[n_aptitudevictime].apt_nomFR);
             }
             else
             {
                 formatstring(spectatormsg, "Spectateur : Caméra libre");
             }
-            rendermessage(spectatormsg, 75, 2.0f);
+            rendermessage(spectatormsg, 75, 1.0f);
         }
     }
 
