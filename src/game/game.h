@@ -2,6 +2,7 @@
 #define __GAME_H__
 
 #include "cube.h"
+#include "engine.h"
 
 // animations
 
@@ -584,6 +585,7 @@ struct gamestate
         aptisort1 = 0;
         aptisort2 = 0;
         aptisort3 = 0;
+        fullbrightmodels = 0;
         loopi(NUMGUNS) ammo[i] = 0;
     }
 

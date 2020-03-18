@@ -825,6 +825,8 @@ extern float menustat(int value);
 extern bool addpostfx(const char *name, int outputbind, int outputscale, uint inputs, uint freeinputs, const vec4 &params);
 extern void clearpostfx();
 
+extern int fullbrightmodels;
+
 #endif
 #endif
 
