@@ -693,7 +693,10 @@ namespace ai
                 switch(e.type)
                 {
                     case I_SANTE: wantsitem = badhealth(d); break;
-                    case I_MANA: wantsitem = needmana(d); break;
+                    case I_MANA:
+                        if(d->aptitude==APT_VAMPIRE) wantsitem = badhealth(d);
+                        else wantsitem = needmana(d);
+                        break;
                     case I_BOUCLIERBOIS:
                     case I_BOUCLIERFER:
                     case I_BOUCLIEROR:

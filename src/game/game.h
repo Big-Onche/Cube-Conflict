@@ -374,7 +374,7 @@ static struct itemstat { int add, max, sound; const char *name; int icon, info; 
     {1500,    1500, S_ITEMARMOUR, "BOUCLIER MAGNETIQUE", HICON_SIZE, A_MAGNET},
     {2500,    2500, S_ITEMARMOUR, "ARMURE ASSISTEE",     HICON_SIZE, A_MAGNET}, //Futur bouclier
 
-    {40,       150, S_ITEMHEALTH, "MANA",                HICON_SIZE},
+    {50,       150, S_ITEMHEALTH, "MANA",                HICON_SIZE},
 };
 
 #define validitem(n) false
@@ -499,6 +499,7 @@ struct gamestate
                 break;
             case I_MANA:
                 if(aptitude==5 || aptitude==8 || aptitude==11) return mana<is.max;
+                else if (aptitude==4) return  health<maxhealth;
                 else return false;
             case I_BOOSTPV: return maxhealth<is.max;
             case I_BOOSTDEGATS: return steromillis<is.max;
@@ -538,7 +539,8 @@ struct gamestate
                 health = min(health+is.add*(aptitude==1 ? 2 : boostitem), maxhealth);
                 break;
             case I_MANA:
-                mana = min(mana+is.add, is.max);
+                if(aptitude!=4) mana = min(mana+is.add, is.max);
+                else health = min(health+250, maxhealth);
                 break;
             case I_BOUCLIERBOIS:
             case I_BOUCLIERFER:
