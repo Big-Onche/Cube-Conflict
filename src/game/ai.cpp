@@ -490,7 +490,7 @@ namespace ai
                 score = 1e10f;
                 break;
             case I_BOOSTDEGATS: case I_BOOSTGRAVITE: case I_BOOSTPRECISION: case I_BOOSTPV: case I_BOOSTVITESSE:
-                if(d->health > 0) score = 1e8f;
+                d->aptitude==APT_JUNKIE ? score = 1e10f : score = 1e7f;
                 break;
             case I_SANTE:
                 if(d->health<1000) score = d->health < 800 ? 1e4f : d->health < 400 ? 1e7f : 1e3f;
@@ -663,7 +663,6 @@ namespace ai
         {
             case APT_KAMIKAZE: d->ai->weappref = GUN_KAMIKAZE; break;
             case APT_NINJA: d->ai->weappref = d->ammo[GUN_CACMARTEAU]>0 ? GUN_CACMARTEAU : d->ammo[GUN_CACFLEAU]>0 ? GUN_CACFLEAU : d->ammo[GUN_CACMASTER]>0 ? GUN_CACMASTER : GUN_CAC349; break;
-            //case APT_MEDECIN: d->ai->weappref = m_teammode ? GUN_MEDIGUN : rnd(GUN_GLOCK-GUN_RAIL+1)+GUN_RAIL; break;
             default: d->ai->weappref = rnd(GUN_GLOCK-GUN_RAIL+1)+GUN_RAIL;
         }
 
