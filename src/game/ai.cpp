@@ -662,6 +662,7 @@ namespace ai
         switch(d->aptitude)
         {
             case APT_KAMIKAZE: d->ai->weappref = GUN_KAMIKAZE; break;
+            case APT_NINJA: d->ai->weappref = d->ammo[GUN_CACMARTEAU]>0 ? GUN_CACMARTEAU : d->ammo[GUN_CACFLEAU]>0 ? GUN_CACFLEAU : d->ammo[GUN_CACMASTER]>0 ? GUN_CACMASTER : GUN_CAC349; break;
             //case APT_MEDECIN: d->ai->weappref = m_teammode ? GUN_MEDIGUN : rnd(GUN_GLOCK-GUN_RAIL+1)+GUN_RAIL; break;
             default: d->ai->weappref = rnd(GUN_GLOCK-GUN_RAIL+1)+GUN_RAIL;
         }
