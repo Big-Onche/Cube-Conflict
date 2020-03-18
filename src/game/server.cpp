@@ -2336,8 +2336,9 @@ namespace server
         gs.lastshot = millis;
 
         float waitfactor = 1;
-        if(ci->aptitude==APT_COMMANDO) waitfactor = 0.8f;
+        if(ci->aptitude==APT_COMMANDO) waitfactor = 0.75f;
         if(ci->aptitude==APT_PRETRE && ci->state.aptisort3) waitfactor = 2.5f;
+        if(gs.champimillis>0) waitfactor*=1.25f;
         gs.gunwait = attacks[atk].attackdelay/waitfactor;
 
         sendf(-1, 1, "rii9x", N_SHOTFX, ci->clientnum, atk, id,
