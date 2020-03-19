@@ -186,7 +186,7 @@ namespace entities
                 playsound(S_ITEMCHAMPIS, NULL, NULL, 0, 0, 0, -1, 0);
                 break;
             case I_BOOSTVITESSE:
-                switch(rnd(10))
+                switch(rnd(20))
                 {
                     case 0:
                         suicide(player1);
