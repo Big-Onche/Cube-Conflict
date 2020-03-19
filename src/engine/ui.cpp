@@ -3142,7 +3142,6 @@ namespace UI
     ICOMMAND(holdui, "sD", (char *name, int *down), holdui(name, *down!=0));
     ICOMMAND(uivisible, "s", (char *name), intret(uivisible(name) ? 1 : 0));
     ICOMMAND(uiname, "", (), { if(window) result(window->name); });
-    ICOMMAND(pausedui, "", (), if(isconnected(true, true)){intret(toggleui("paused")); });
 
     #define IFSTATEVAL(state,t,f) { if(state) { if(t->type == VAL_NULL) intret(1); else result(*t); } else if(f->type == VAL_NULL) intret(0); else result(*f); }
     #define DOSTATE(flags, func) \

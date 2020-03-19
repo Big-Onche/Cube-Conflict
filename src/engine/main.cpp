@@ -1084,10 +1084,11 @@ void changerlangue()
 
     if(!init)
     {
+        game::ispaused() ? UI_menutabs = 3 : UI_menutabs = 7;
         switch(langage)
         {
-            case 0: UI_menutabs = 7; UI::showui("main_fr"); break;
-            case 1: UI_menutabs = 7; UI::showui("main_en");
+            case 0: UI::showui(game::ispaused() ? "pause_fr" : "main_fr"); break;
+            case 1: UI::showui(game::ispaused() ? "pause_en" : "main_en");
         }
     }
     else {UI_menutabs = 5; init = false;}
