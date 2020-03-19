@@ -198,19 +198,14 @@ namespace game
         }
     }
 
-    int battlevivants;
-
     void otherplayers(int curtime)
     {
-        battlevivants=0;
         loopv(players)
         {
             gameent *d = players[i];
 
-            //if(d->state==CS_ALIVE && m_battle) battlevivants++;
-
             if(curtime>0 && d->ragemillis && d!=player1) d->ragemillis = max(d->ragemillis-curtime, 0);
-            else if (curtime>0 && d->vampimillis && d!=player1) d->vampimillis = max(d->vampimillis-curtime, 0);
+
             if(d==hudplayer())
             {
                 if(d->health<=15 && d->state==CS_ALIVE)

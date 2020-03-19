@@ -1339,7 +1339,6 @@ namespace game
                 d->jointmillis = getint(p);
                 d->champimillis = getint(p);
                 d->ragemillis = getint(p);
-                d->vampimillis = getint(p);
                 d->aptisort1 = getint(p);
                 d->aptisort2 = getint(p);
                 d->aptisort3 = getint(p);

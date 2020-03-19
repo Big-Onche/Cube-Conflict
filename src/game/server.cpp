@@ -1894,7 +1894,6 @@ namespace server
                 putint(p, oi->state.jointmillis);
                 putint(p, oi->state.champimillis);
                 putint(p, oi->state.ragemillis);
-                putint(p, oi->state.vampimillis);
                 putint(p, oi->state.aptisort1);
                 putint(p, oi->state.aptisort2);
                 putint(p, oi->state.aptisort3);
@@ -1923,9 +1922,9 @@ namespace server
     void sendresume(clientinfo *ci) //PARSESTATE
     {
         servstate &gs = ci->state;
-        sendf(-1, 1, "ri9i9iiiiivi", N_RESUME, ci->clientnum,
+        sendf(-1, 1, "ri9i9iiiivi", N_RESUME, ci->clientnum,
             gs.state, gs.killstreak, gs.frags, gs.flags, gs.deaths,
-            gs.steromillis, gs.epomillis, gs.jointmillis, gs.champimillis, gs.ragemillis, gs.vampimillis,
+            gs.steromillis, gs.epomillis, gs.jointmillis, gs.champimillis, gs.ragemillis,
             gs.aptisort1, gs.aptisort2, gs.aptisort3,
             gs.lifesequence,
             gs.health, gs.maxhealth,
@@ -2447,7 +2446,6 @@ namespace server
             if(curtime>0 && ci->state.jointmillis) ci->state.jointmillis = max(ci->state.jointmillis-curtime, 0);
             if(curtime>0 && ci->state.champimillis) ci->state.champimillis = max(ci->state.champimillis-curtime, 0);
             if(curtime>0 && ci->state.ragemillis) ci->state.ragemillis = max(ci->state.ragemillis-curtime, 0);
-            if(curtime>0 && ci->state.vampimillis) ci->state.vampimillis = max(ci->state.vampimillis-curtime, 0);
 
             if(curtime>0 && ci->state.aptisort1) ci->state.aptisort1 = max(ci->state.aptisort1-curtime, 0);
             if(curtime>0 && ci->state.aptisort2) ci->state.aptisort2 = max(ci->state.aptisort2-curtime, 0);
