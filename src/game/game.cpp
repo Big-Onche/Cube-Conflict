@@ -4,15 +4,24 @@
 
 string str_pseudovictime, str_pseudotueur, str_armetueur, str_pseudoacteur;
 float killdistance = 0;
-int n_aptitudetueur, n_aptitudevictime, n_killstreakacteur;
+int n_aptitudetueur, n_aptitudevictime, n_killstreakacteur, oldapti;
 bool suicided;
 
 namespace game
 {
     VARFP(player1_aptitude, 0, 0, 13,
+    {
+        if(player1->state != CS_DEAD && isconnected())
         {
-        addmsg(N_SENDAPTITUDE, "ri", player1_aptitude);
-        player1->aptitude = player1_aptitude;
+            conoutf(CON_GAMEINFO, "\fcImpossible de changer d'aptitude en étant vivant !");
+            player1_aptitude = oldapti;
+        }
+        else
+        {
+            addmsg(N_SENDAPTITUDE, "ri", player1_aptitude);
+            player1->aptitude = player1_aptitude;
+            oldapti = player1->aptitude;
+        }
     });
 
     bool intermission = false;
@@ -268,6 +277,8 @@ namespace game
         }
     }
 
+    VAR(isalive, 0, 1, 1);
+
     void updateworld()        // main game update loop
     {
         //CubeConflict
@@ -306,6 +317,7 @@ namespace game
 
         if(player1->state != CS_DEAD && !intermission)
         {
+            isalive = 1;
             if(player1->steromillis || player1->epomillis || player1->jointmillis || player1->champimillis) entities::checkboosts(curtime, player1);
             if(player1->ragemillis || player1->vampimillis || player1->aptisort1 || player1->aptisort2 || player1->aptisort3) entities::checkaptiskill(curtime, player1);
             if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE) updatespecials(player1);
@@ -334,6 +346,7 @@ namespace game
                 }
             }
         }
+        else if (player1->state == CS_DEAD) isalive = 0;
 
         updateweapons(curtime);
         otherplayers(curtime);
