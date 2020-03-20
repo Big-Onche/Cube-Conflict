@@ -128,7 +128,7 @@ enum
     M_RANDOM     = 1<<7,
     M_FULLSTUFF  = 1<<8,
     M_EXPLOSION  = 1<<9,
-    //M_BATTLE     = 1<<10,
+    M_NOAMMO     = 1<<10,
 };
 
 static struct gamemodeinfo
@@ -142,19 +142,19 @@ static struct gamemodeinfo
 
     //MODE 1, 2, 3, 4
     { "Tue Les Tous", M_LOBBY },
-    { "Tue Les Tous (Aléatoire)", M_LOBBY | M_RANDOM },
-    { "Tue Les Tous (Full stuff)", M_LOBBY | M_FULLSTUFF },
-    { "Tue Les Tous (Explosion)", M_LOBBY | M_EXPLOSION },
+    { "Tue Les Tous (Aléatoire)", M_LOBBY | M_RANDOM | M_NOAMMO},
+    { "Tue Les Tous (Full stuff)", M_LOBBY | M_FULLSTUFF | M_NOAMMO},
+    { "Tue Les Tous (Explosion)", M_LOBBY | M_EXPLOSION | M_NOAMMO},
     //MODE 5, 6, 7, 8
     { "Tue Les Tous", M_LOBBY | M_TEAM },
-    { "Tue Les Tous (Aléatoire)", M_LOBBY | M_RANDOM | M_TEAM },
-    { "Tue Les Tous (Full stuff)", M_LOBBY | M_FULLSTUFF | M_TEAM },
-    { "Tue Les Tous (Corps à corps)", M_LOBBY | M_EXPLOSION | M_TEAM },
+    { "Tue Les Tous (Aléatoire)", M_LOBBY | M_RANDOM | M_TEAM | M_NOAMMO},
+    { "Tue Les Tous (Full stuff)", M_LOBBY | M_FULLSTUFF | M_TEAM | M_NOAMMO},
+    { "Tue Les Tous (Corps à corps)", M_LOBBY | M_EXPLOSION | M_TEAM | M_NOAMMO},
     //MODE 9, 10, 11, 12
     { "Capture de drapeau", M_CTF | M_TEAM },
-    { "Capture de drapeau (Aléatoire)", M_RANDOM | M_CTF | M_TEAM },
-    { "Capture de drapeau (Full stuff)", M_FULLSTUFF | M_CTF | M_TEAM },
-    { "Capture de drapeau (Corps à corps)", M_EXPLOSION | M_CTF | M_TEAM },
+    { "Capture de drapeau (Aléatoire)", M_RANDOM | M_CTF | M_TEAM | M_NOAMMO},
+    { "Capture de drapeau (Full stuff)", M_FULLSTUFF | M_CTF | M_TEAM | M_NOAMMO},
+    { "Capture de drapeau (Corps à corps)", M_EXPLOSION | M_CTF | M_TEAM | M_NOAMMO},
 };
 
 #define STARTGAMEMODE (-1)
@@ -173,6 +173,7 @@ static struct gamemodeinfo
 #define m_random       (m_check(gamemode, M_RANDOM))
 #define m_fullstuff    (m_check(gamemode, M_FULLSTUFF))
 #define m_explosion    (m_check(gamemode, M_EXPLOSION))
+#define m_noammo       (m_check(gamemode, M_NOAMMO))
 //#define m_battle       (m_check(gamemode, M_BATTLE))
 
 #define m_demo         (m_check(gamemode, M_DEMO))

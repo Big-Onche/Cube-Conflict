@@ -575,8 +575,7 @@ namespace ai
         static vector<interest> interests;
         interests.setsize(0);
 
-        if(!hasgoodammo(d) || d->health < 75)
-            items(d, b, interests);
+        if((!m_noammo && !hasgoodammo(d)) || d->health < 75) items(d, b, interests);
         else
         {
             static vector<int> nearby;

@@ -79,8 +79,8 @@ namespace entities
                 case I_RAIL: case I_PULSE: case I_SMAW: case I_MINIGUN: case I_SPOCKGUN: case I_M32:
                 case I_LANCEFLAMMES: case I_UZI: case I_FAMAS: case I_MOSSBERG: case I_HYDRA: case I_SV98:
                 case I_SKS: case I_ARBALETE: case I_AK47: case I_GRAP1: case I_ARTIFICE: case I_GLOCK:
+                    if(m_noammo) continue; break;
                 case I_SUPERARME:
-                    //if(m_noammo) continue;
                     break;
                 case I_SANTE: case I_BOOSTPV: case I_BOOSTDEGATS: case I_BOOSTPRECISION: case I_BOOSTVITESSE: case I_BOOSTGRAVITE:
                 case I_BOUCLIERBOIS: case I_BOUCLIERFER: case I_BOUCLIEROR: case I_BOUCLIERMAGNETIQUE:
@@ -413,7 +413,7 @@ namespace entities
     void putitems(packetbuf &p)            // puts items in network stream and also spawns them locally
     {
         putint(p, N_ITEMLIST);
-        loopv(ents) if(ents[i]->type>=I_RAIL && ents[i]->type<=I_MANA) // && (!m_noammo || ents[i]->type<I_RAIL || ents[i]->type>I_GLOCK)
+        loopv(ents) if(ents[i]->type>=I_RAIL && ents[i]->type<=I_MANA && (!m_noammo || ents[i]->type<I_RAIL || ents[i]->type>I_GLOCK))
         {
             putint(p, i);
             putint(p, ents[i]->type);
@@ -425,9 +425,7 @@ namespace entities
 
     void spawnitems(bool force)
     {
-        //if(m_noitems) return;
-
-        loopv(ents) if(ents[i]->type>=I_RAIL && ents[i]->type<=I_MANA) //&& (!m_noammo || ents[i]->type<I_SHELLS || ents[i]->type>I_CARTRIDGES)
+        loopv(ents) if(ents[i]->type>=I_RAIL && ents[i]->type<=I_MANA && (!m_noammo || ents[i]->type<I_RAIL || ents[i]->type>I_GLOCK))
         {
             ents[i]->setspawned(force || !server::delayspawn(ents[i]->type));
         }
