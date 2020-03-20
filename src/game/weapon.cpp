@@ -575,31 +575,29 @@ namespace game
             case ATK_PULSE_SHOOT:
             {
                 playsound(S_IMPACTALIEN, &v, 0, 0, 0 , 100, -1, 250);
-                vec debrisorigin = vec(v).sub(vec(vel).mul(5));
-                particle_splash(PART_SPARK, 50, 300, v, owner->steromillis ? 0xFF0000 : 0xFF4400, 0.45f, 30, 20, 10, player1->champimillis ? true : false);
-                adddynlight(safe ? v : debrisorigin, 2*attacks[atk].exprad, vec(4.0f, 1.0f, 0.0f), 350, 40, 0, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
-                particle_fireball(v, 1.15f*attacks[atk].exprad, PART_PULSE_BURST, int(attacks[atk].exprad*20), owner->steromillis ? 0xFF0000 : 0x221100, 2.5f, player1->champimillis ? true : false);
+                vec debrisorigin = vec(v).sub(vec(vel).mul(6));
+                particle_splash(PART_SPARK, 20, 150, v, owner->steromillis ? 0xFF0000 : 0xFF4400, 0.45f, 150, 150, 10, player1->champimillis ? true : false);
+                adddynlight(safe ? v : debrisorigin, 2*attacks[atk].exprad, vec(1.5f, 0.75f, 0.0f), 150, 50, 0, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
+                particle_fireball(v, 0.6f*attacks[atk].exprad, PART_PULSE_BURST, int(attacks[atk].exprad*15), owner->steromillis ? 0xFF0000 : 0xFF9900, 2.5f, player1->champimillis ? true : false);
             }
             break;
 
             case ATK_GRAP1_SHOOT:
             {
                 playsound(S_IMPACTGRAP1, &v, 0, 0, 0 , 100, -1, 250);
-                vec debrisorigin = vec(v).sub(vec(vel).mul(5));
-                adddynlight(safe ? v : debrisorigin, 2*attacks[atk].exprad, vec(3.0f, 0.0f, 2.0f), 350, 40, L_NODYNSHADOW, attacks[atk].exprad/2, vec(3.0f, 0.0f, 2.0f));
-                adddynlight(safe ? v : debrisorigin, 1*attacks[atk].exprad, vec(1.0f, 0.0f, 0.6f), 350, 40, L_VOLUMETRIC|L_NODYNSHADOW, attacks[atk].exprad/2, vec(1.0f, 0.0f, 0.6f));
-                particle_splash(PART_SPARK, 50, 100, v, owner->steromillis ? 0xFF0000 : 0xAA4466, 0.2f, 150, 0, 0, player1->champimillis ? true : false);
-                particle_fireball(v, 1.15f*attacks[atk].exprad, PART_PULSE_BURST, int(attacks[atk].exprad*20), owner->steromillis ? 0xFF0000 : 0x330011, 1.5f, player1->champimillis ? true : false);
+                vec debrisorigin = vec(v).sub(vec(vel).mul(6));
+                adddynlight(safe ? v : debrisorigin, 2*attacks[atk].exprad, vec(1.5f, 0.0f, 1.5f), 300, 100, L_NODYNSHADOW, attacks[atk].exprad/2, vec(0.5f, 0.0f, 0.5f));
+                particle_splash(PART_SPARK, 30, 175, v, owner->steromillis ? 0xFF0000 : 0xAA4466, 0.5f, 200, 200, 0, player1->champimillis ? true : false);
+                particle_fireball(v, 1.15f*attacks[atk].exprad, PART_ONDECHOC, int(attacks[atk].exprad*25), owner->steromillis ? 0xFF0000 : 0xAA00AA, 1.5f, player1->champimillis ? true : false);
             }
             break;
 
             case ATK_SPOCKGUN_SHOOT:
             {
                 playsound(S_IMPACTALIEN, &v, 0, 0, 0 , 100, -1, 250);
-                particle_splash(PART_SPARK, 200, 300, v, owner->steromillis ? 0xFF0000 : 0x22FF22, 0.45f, 20, 30, 200, player1->champimillis ? true : false);
-                vec debrisorigin = vec(v).sub(vec(vel).mul(5));
-                adddynlight(safe ? v : debrisorigin, 2*attacks[atk].exprad, vec(0.0f, 4.0f, 0.0f), 350, 40, 0, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
-                particle_fireball(v, 1.15f*attacks[atk].exprad, PART_PULSE_BURST, int(attacks[atk].exprad*20), owner->steromillis ? 0xFF0000 : 0x22FF22, 2.0f, player1->champimillis ? true : false);
+                particle_splash(PART_SPOCK_FRONT, 30, 150, v, owner->steromillis ? 0xFF0000 : 0x22FF22, 1.25f, 150, 150, 200, player1->champimillis ? true : false);
+                vec debrisorigin = vec(v).sub(vec(vel).mul(6));
+                adddynlight(safe ? v : debrisorigin, 2*attacks[atk].exprad, vec(0.0f, 2.5f, 0.0f), 250, 40, 0, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
             }
             break;
             case ATK_SMAW_SHOOT:
@@ -1038,7 +1036,7 @@ namespace game
         int sound = attacks[atk].sound;
         //int soundwater = attacks[atk]].soundwater;
         if(player1->aptisort2 && d==player1 && player1->aptitude==APT_MAGICIEN) playsound(S_SORTMAGE2);
-        if(d->aptisort3 && d->aptitude==APT_PRETRE) adddynlight(d->muzzle, 15, vec(0.5f, 0.5f, 0.0f), 100, 40, L_NOSHADOW|L_VOLUMETRIC|DL_FLASH);
+        if(d->aptisort3 && d->aptitude==APT_PRETRE)adddynlight(d->muzzle, 6, vec(1.5f, 1.5f, 0.0f), 80, 40, L_NOSHADOW|L_VOLUMETRIC|DL_FLASH);
         switch(atk)
         {
             case ATK_PULSE_SHOOT:
