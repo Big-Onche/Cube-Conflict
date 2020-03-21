@@ -1079,8 +1079,8 @@ VAR(UI_menutabs, 0, 4, 8);
 
 void changerlangue()
 {
-    if(langage) {execfile("config/keymap_EN.cfg"); execfile("config/ui_EN.cfg"); execfile("config/default_EN.cfg");}
-    else {execfile("config/keymap_FR.cfg"); execfile("config/ui_FR.cfg"); execfile("config/default_FR.cfg");}
+    if(langage) {execfile("config/keymap_EN.cfg"); execfile("config/ui_EN.cfg"); execfile("config/default_EN.cfg"); execfile("config/astuces_EN.cfg");}
+    else {execfile("config/keymap_FR.cfg"); execfile("config/ui_FR.cfg"); execfile("config/default_FR.cfg"); execfile("config/astuces_FR.cfg");}
 
     if(!init)
     {
@@ -1217,14 +1217,13 @@ int main(int argc, char **argv)
 
     switch(langage)
     {
-        case 0: execfile("config/keymap_FR.cfg"); execfile("config/ui_FR.cfg"); execfile("config/default_FR.cfg"); break;
-        case 1: execfile("config/keymap_EN.cfg"); execfile("config/ui_EN.cfg"); execfile("config/default_EN.cfg");
+        case 0: execfile("config/keymap_FR.cfg"); execfile("config/ui_FR.cfg"); execfile("config/default_FR.cfg"); execfile("config/astuces_FR.cfg"); break;
+        case 1: execfile("config/keymap_EN.cfg"); execfile("config/ui_EN.cfg"); execfile("config/default_EN.cfg"); execfile("config/astuces_EN.cfg");
     }
 
     execfile("config/heightmap.cfg");
     execfile("config/blendbrush.cfg");
     execfile("config/sauvegarde.cfg", false, true);
-    execfile("config/astuces.cfg");
 
     if(game::savedservers()) execfile(game::savedservers(), false);
 
