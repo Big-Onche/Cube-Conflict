@@ -79,8 +79,7 @@ namespace entities
                 case I_RAIL: case I_PULSE: case I_SMAW: case I_MINIGUN: case I_SPOCKGUN: case I_M32:
                 case I_LANCEFLAMMES: case I_UZI: case I_FAMAS: case I_MOSSBERG: case I_HYDRA: case I_SV98:
                 case I_SKS: case I_ARBALETE: case I_AK47: case I_GRAP1: case I_ARTIFICE: case I_GLOCK:
-                case I_SUPERARME:
-                    break;
+                case I_SUPERARME: case I_NULL1: case I_NULL2: case I_NULL3:
                 case I_SANTE: case I_BOOSTPV: case I_BOOSTDEGATS: case I_BOOSTPRECISION: case I_BOOSTVITESSE: case I_BOOSTGRAVITE:
                 case I_BOUCLIERBOIS: case I_BOUCLIERFER: case I_BOUCLIEROR: case I_BOUCLIERMAGNETIQUE:
                 case I_MANA:
@@ -160,8 +159,11 @@ namespace entities
             particle_icon(d->abovehead(), is.icon%4, is.icon/4, PART_HUD_ICON_GREY, 2000, 0xFFFFFF, 2.0f, -8);
         }
 
-        if(type>=I_RAIL && type<=I_SUPERARME && d!=player1) gunselect(type-9+rndsuperweapon, d);
-        else if(autowield) gunselect(type-9+rndsuperweapon, d);
+        if(type>=I_RAIL && type<=I_SUPERARME)
+        {
+            if (d!=player1) gunselect(type-9+rndsuperweapon, d);
+            else if(autowield) gunselect(type-9+rndsuperweapon, player1);
+        }
 
         d->pickup(type+rndsuperweapon, d->aptitude, rndsuperweapon, d->aptisort1);
         if(d->aptisort1 && d->aptitude==APT_PRETRE)
