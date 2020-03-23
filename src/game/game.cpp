@@ -212,6 +212,7 @@ namespace game
         loopv(players)
         {
             gameent *d = players[i];
+            if(m_identique && d==player1){gunselect(cnidentiquearme, d);}
 
             if(curtime>0 && d->ragemillis && d!=player1) d->ragemillis = max(d->ragemillis-curtime, 0);
 

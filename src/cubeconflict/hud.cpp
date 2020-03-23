@@ -115,7 +115,7 @@ namespace game
                     f->privilege>=PRIV_ADMIN ? formatstring(color, "\fc") : formatstring(color, "\f7");
                     if(f->state==CS_DEAD) formatstring(color, "\fg") ;
                 }
-                formatstring(spectatormsg, "Spectateur : %s%s (%s)", color, colorname(f),  langage ? aptitudes[n_aptitudevictime].apt_nomEN : aptitudes[n_aptitudevictime].apt_nomFR);
+                formatstring(spectatormsg, "Spectateur : %s%s (%s)", color, colorname(f), langage ? aptitudes[n_aptitudevictime].apt_nomEN : aptitudes[n_aptitudevictime].apt_nomFR);
             }
             else
             {
@@ -304,7 +304,7 @@ namespace game
             case GUN_S_CAMPOUZE: case GUN_S_GAU8: case GUN_S_NUKE: case GUN_S_ROQUETTES: draw_textf("%d", (d->ammo[d->gunselect] > 99 ? w-227 : d->ammo[d->gunselect] > 9 ? w-196 : w-166), h-103, d->ammo[d->gunselect]); break;
             default:
             {
-                if(m_random)
+                if(m_muninfinie)
                 {
                     settexture("media/interface/hud/inf.png"); bgquad(w-227, h-130, 115, 115);
                 }

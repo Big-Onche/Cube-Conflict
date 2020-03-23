@@ -7,6 +7,8 @@ VARR(mapofficielle, 0, 0, 1);
 VAR(n_map, 0, 0, 99);
 VAR(n_ambiance, 0, 0, 99);
 
+int cnidentiquearme = 0;
+
 namespace game
 {
     VARP(minradarscale, 0, 384, 10000);
@@ -593,8 +595,8 @@ namespace game
             loopi(NUMGAMEMODES) if(m_mp(STARTGAMEMODE + i)) { mode = STARTGAMEMODE + i; break; }
         }
 
-        if(n_type==0) mode = n_mode+(n_team*4);
-        else if (n_type==1)  mode = n_mode+8;
+        //if(n_type==0) mode = n_mode+(n_team*4);
+        //else if (n_type==1)  mode = n_mode+8;
 
         gamemode = mode;
         nextmode = mode;
@@ -1601,6 +1603,12 @@ namespace game
                 break;
             }
 
+            case N_IDENTIQUEARME:
+            {
+                cnidentiquearme = getint(p);
+                break;
+            }
+
             case N_SWITCHCOLOR:
             {
                 int color = getint(p);
@@ -2117,6 +2125,7 @@ namespace game
                     case I_BOOSTVITESSE: conoutf(CON_GAMEINFO, "\faL'EPO ARRIVE POUR LES CYCLISTES !"); break;
                     case I_BOOSTGRAVITE: conoutf(CON_GAMEINFO, "\faQUELQU'UN ROULE UN GROS JOINT !"); break;
                     case I_SUPERARME: conoutf(CON_GAMEINFO, "\faLA SUPER-ARME EST BIENTÔT PRÊTE À ANNIHILER"); break;
+                    case 50: conoutf(CON_GAMEINFO, "\faCHANGEMENT D'ARME DANS 5 SECONDES !"); break;
                 }
                 break;
             }

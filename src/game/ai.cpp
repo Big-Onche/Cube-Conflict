@@ -460,7 +460,7 @@ namespace ai
 
     bool hasgoodammo(gameent *d)
     {
-        static const int goodguns[] = { GUN_S_CAMPOUZE, GUN_S_NUKE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_KAMIKAZE, GUN_PULSE, GUN_RAIL, GUN_FAMAS, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_AK47, GUN_SV98, GUN_SKS, GUN_ARTIFICE, GUN_ARBALETE, GUN_KAMIKAZE, GUN_LANCEFLAMMES };
+        static const int goodguns[] = { GUN_S_CAMPOUZE, GUN_S_NUKE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_PULSE, GUN_RAIL, GUN_FAMAS, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_AK47, GUN_SV98, GUN_SKS, GUN_ARTIFICE, GUN_ARBALETE, GUN_LANCEFLAMMES };
         loopi(sizeof(goodguns)/sizeof(goodguns[0])) if(d->hasammo(goodguns[0])) return true;
         if(d->ammo[GUN_M32] > 5) return true;
         return false;
@@ -511,11 +511,8 @@ namespace ai
                 if(e.type >= I_RAIL && e.type <= I_SUPERARME && !d->hasmaxammo(e.type))
                 {
                     int gun = e.type - I_RAIL + GUN_RAIL;
-                    if(isgoodammo(gun)) score = hasgoodammo(d) ? 1e6f : 1e8f;
-                    else score = 1e4f;
-                    // go get a weapon upgrade
-                    if(gun == d->ai->weappref) score = 1e8f;
-                    else if(isgoodammo(gun)) score = hasgoodammo(d) ? 1e2f : 1e4f;
+                    if(isgoodammo(gun)) score = hasgoodammo(d) ? 1e4f : 1e8f;
+                    else score = 1e6f;
                 }
                 break;
             }
@@ -656,7 +653,8 @@ namespace ai
         d->ai->reset(true);
         d->ai->lastrun = lastmillis;
 
-        if(forcegun >= 0 && forcegun < NUMGUNS) d->ai->weappref = forcegun;
+        if(m_identique) d->ai->weappref = cnidentiquearme;
+        else if(forcegun >= 0 && forcegun < NUMGUNS) d->ai->weappref = forcegun;
 
         switch(d->aptitude)
         {
@@ -696,20 +694,8 @@ namespace ai
                         if(d->aptitude==APT_VAMPIRE) wantsitem = badhealth(d);
                         else wantsitem = needmana(d);
                         break;
-                    case I_BOUCLIERBOIS:
-                    case I_BOUCLIERFER:
-                    case I_BOUCLIEROR:
-                    case I_BOUCLIERMAGNETIQUE:
-                    case I_SUPERARME:
-                    {
-                        wantsitem = true;
-                        break;
-                    }
                     default:
-                    {
-                        itemstat &is = itemstats[entities::ents[ent]->type-I_RAIL];
-                        wantsitem = isgoodammo(is.info) && d->ammo[is.info] <= (d->ai->weappref == is.info ? is.add : is.add/2);
-                    }
+                        wantsitem = true;
                 }
                 if(wantsitem)
                 {
@@ -1243,6 +1229,7 @@ namespace ai
     bool request(gameent *d, aistate &b)
     {
         gameent *e = getclient(d->ai->enemy);
+        if(m_identique) {gunselect(cnidentiquearme, d); return process(d, b) >= 2;}
 
         if(!d->hasammo(d->gunselect) || !hasrange(d, e, d->gunselect) || (d->gunselect != d->ai->weappref && (!isgoodammo(d->gunselect) || d->hasammo(d->ai->weappref))))
         {

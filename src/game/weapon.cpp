@@ -92,6 +92,32 @@ namespace game
          cycleweapon(numguns, guns);
     });
 
+    int oldweap = 0;
+
+    ICOMMAND(getgrenade, "", (),
+    {
+         oldweap = player1->gunselect;
+         if(player1->ammo[GUN_M32]>0) gunselect(GUN_M32, player1);
+    });
+
+    ICOMMAND(getcac, "", (),
+    {
+         oldweap = player1->gunselect;
+         int gun = 0;
+         if(player1->ammo[GUN_CAC349]>0) gun = GUN_CAC349;
+         else if(player1->ammo[GUN_CACMASTER]>0) gun = GUN_CACMASTER;
+         else if(player1->ammo[GUN_CACFLEAU]>0) gun = GUN_CACFLEAU;
+         else if(player1->ammo[GUN_CACMARTEAU]>0) gun = GUN_CACMARTEAU;
+         gunselect(gun, player1);
+    });
+
+    ICOMMAND(getoldweap, "", (),
+    {
+         gunselect(oldweap, player1);
+    });
+
+
+
     void weaponswitch(gameent *d)
     {
         if(d->state!=CS_ALIVE) return;
@@ -1378,7 +1404,7 @@ namespace game
 
         if(atk==ATK_CAC349_SHOOT || atk==ATK_CACMARTEAU_SHOOT || atk==ATK_CACMASTER_SHOOT || atk==ATK_CACFLEAU_SHOOT);
         else if(atk==ATK_GAU8_SHOOT || atk==ATK_NUKE_SHOOT || atk==ATK_CAMPOUZE_SHOOT ||atk==ATK_ROQUETTES_SHOOT) d->ammo[gun]--;
-        else if(!m_random) d->ammo[gun]--;
+        else if(!m_muninfinie) d->ammo[gun]--;
 
         vec from = d->o, to = targ, dir = vec(to).sub(from).safenormalize();
         float dist = to.dist(from);

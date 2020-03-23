@@ -161,7 +161,7 @@ namespace entities
 
         if(type>=I_RAIL && type<=I_SUPERARME)
         {
-            if (d!=player1) gunselect(type-9+rndsuperweapon, d);
+            if(d!=player1) gunselect(type-9+rndsuperweapon, d);
             else if(autowield) gunselect(type-9+rndsuperweapon, player1);
         }
 

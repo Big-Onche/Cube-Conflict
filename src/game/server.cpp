@@ -4,9 +4,7 @@
 
 VARP(gamelength, 1, 10, 60);
 
-VARP(joueursminimum, 0, 0, 200);
-VARP(botniveauminimum, 0, 0, 100);
-VARP(botniveaumaximum, 0, 0, 100);
+int identiquearme = rnd(17);
 
 namespace game
 {
@@ -383,6 +381,8 @@ namespace server
         extern void removeai(clientinfo *ci);
         extern void clearai();
         extern void checkai();
+        extern bool addai(int skill, int limit);
+        extern bool deleteai();
         extern void reqadd(clientinfo *ci, int skill);
         extern void reqdel(clientinfo *ci);
         extern void setbotlimit(clientinfo *ci, int limit);
@@ -1496,7 +1496,7 @@ namespace server
         }
 
         uchar operator[](int msg) const { return msg >= 0 && msg < NUMMSG ? msgmask[msg] : 0; }
-    } msgfilter(-1, N_CONNECT, N_SERVINFO, N_INITCLIENT, N_WELCOME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_VAMPIRE, N_HITPUSH, N_SHOTFX, N_EXPLODEFX, N_DIED, N_SPAWNSTATE, N_FORCEDEATH, N_TEAMINFO, N_ITEMACC, N_ITEMSPAWN, N_ANNOUNCE, N_TIMEUP, N_CDIS, N_CURRENTMASTER, N_PONG, N_RESUME, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_SENDMAP, N_DROPFLAG, N_SCOREFLAG, N_RETURNFLAG, N_RESETFLAG, N_CLIENT, N_AUTHCHAL, N_INITAI, N_DEMOPACKET, -2, N_CALCLIGHT, N_REMIP, N_NEWMAP, N_GETMAP, N_SENDMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, N_EDITVAR, N_EDITVSLOT, N_UNDO, N_REDO, -4, N_POS, NUMMSG),
+    } msgfilter(-1, N_CONNECT, N_SERVINFO, N_INITCLIENT, N_WELCOME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_VAMPIRE, N_HITPUSH, N_SHOTFX, N_EXPLODEFX, N_DIED, N_IDENTIQUEARME, N_SPAWNSTATE, N_FORCEDEATH, N_TEAMINFO, N_ITEMACC, N_ITEMSPAWN, N_ANNOUNCE, N_TIMEUP, N_CDIS, N_CURRENTMASTER, N_PONG, N_RESUME, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_SENDMAP, N_DROPFLAG, N_SCOREFLAG, N_RETURNFLAG, N_RESETFLAG, N_CLIENT, N_AUTHCHAL, N_INITAI, N_DEMOPACKET, -2, N_CALCLIGHT, N_REMIP, N_NEWMAP, N_GETMAP, N_SENDMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, N_EDITVAR, N_EDITVSLOT, N_UNDO, N_REDO, -4, N_POS, NUMMSG),
       connectfilter(-1, N_CONNECT, -2, N_AUTHANS, -3, N_PING, NUMMSG);
 
     int checktype(int type, clientinfo *ci)
@@ -1902,7 +1902,9 @@ namespace server
 
             putint(p, -1);
             welcomeinitclient(p, ci ? ci->clientnum : -1);
+            if(m_identique) sendf(-1, 1, "ri2", N_IDENTIQUEARME, identiquearme);
         }
+
         if(smode) smode->initclient(ci, p, true);
         return 1;
     }
@@ -2121,6 +2123,13 @@ namespace server
         }
     }
 
+    int timerpartie;
+
+    void checkidentique()
+    {
+
+    }
+
     void checkintermission()
     {
         if(gamemillis >= gamelimit && !interm)
@@ -2130,6 +2139,7 @@ namespace server
             changegamespeed(100);
             interm = gamemillis + 10000;
         }
+        if(m_identique) checkidentique();
     }
 
     void startintermission() { gamelimit = min(gamelimit, gamemillis); checkintermission(); }
@@ -2476,6 +2486,9 @@ namespace server
         ci->timesync = false;
     }
 
+    int identiquetimer;
+    bool announced = false;
+
     void serverupdate()
     {
         if(shouldstep && !gamepaused)
@@ -2503,7 +2516,21 @@ namespace server
                             sendf(-1, 1, "ri2", N_ANNOUNCE, sents[i].type);
                         }
                     }
+
+                    if(m_identique)
+                    {
+                        identiquetimer += curtime;
+                        if(identiquetimer>=15000 && identiquetimer<=16000 && announced==false) {sendf(-1, 1, "ri2", N_ANNOUNCE, 50); announced = true;}
+                        else if(identiquetimer>20000)
+                        {
+                            identiquearme = rnd(17);
+                            sendf(-1, 1, "ri2", N_IDENTIQUEARME, identiquearme);
+                            identiquetimer = 0;
+                            announced = false;
+                        }
+                    }
                 }
+
                 aiman::checkai();
                 if(smode) smode->update();
             }
@@ -2941,6 +2968,10 @@ namespace server
         if(servermotd[0]) sendf(ci->clientnum, 1, "ris", N_SERVMSG, servermotd);
     }
 
+    VARP(joueursminimum, 0, 0, 200);
+    VARP(botniveauminimum, 0, 0, 100);
+    VARP(botniveaumaximum, 0, 0, 100);
+
     void parsepacket(int sender, int chan, packetbuf &p)     // has to parse exactly each byte of the packet
     {
         if(sender<0 || p.packet->flags&ENET_PACKET_FLAG_UNSEQUENCED || chan > 2) return;
@@ -2981,15 +3012,13 @@ namespace server
                         ci->connectauth = disc;
                     }
                     else connected(ci);
-
-                    //if(!local)
-                    //{
-                    //    int nbjoueurs = numclients(-1, true, false);
-                    //    int nbbots = joueursminimum-nbjoueurs;
-                    //    if(nbbots>0) loopi(nbbots) aiman::addai(botniveauminimum+rnd(botniveaumaximum-botniveauminimum), -1);
-                    //    loopi(nbjoueurs>joueursminimum) aiman::deleteai();
-                    //}
-
+                    if(multiplayer(false))
+                    {
+                        int nbjoueurs = numclients(-1, true, false);
+                        int nbbots = joueursminimum-nbjoueurs;
+                        if(nbbots>0) loopi(nbbots) aiman::addai(botniveauminimum+rnd(botniveaumaximum-botniveauminimum), -1);
+                        loopi(nbjoueurs>joueursminimum) aiman::deleteai();
+                    }
                     break;
                 }
 

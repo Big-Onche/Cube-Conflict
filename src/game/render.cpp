@@ -41,7 +41,6 @@ namespace game
         r->lastupdate = ragdollfade && lastmillis > d->lastpain + max(ragdollmillis - ragdollfade, 0) ? lastmillis - max(ragdollmillis - ragdollfade, 0) : d->lastpain;
         r->edit = NULL;
         r->ai = NULL;
-        //if(d==player1) r->playermodel = customs[d->customtombe].custtombe;
         r->attackchan = -1;
         ragdolls.add(r);
         d->ragdoll = NULL;
@@ -206,6 +205,10 @@ namespace game
             player1->playercolor = col;
             addmsg(N_SWITCHCOLOR, "ri", player1->playercolor);
         }
+
+        addmsg(N_SENDCAPE, "ri", player1->customcape);
+        addmsg(N_SENDTOMBE, "ri", player1->customtombe);
+
     }
 
     void preloadplayermodel()
@@ -270,8 +273,8 @@ namespace game
             if(d->tombepop<1.0f) d->tombepop += 0.02f;
             rendermodel(customs[d->customtombe].custtombe, ANIM_MAPMODEL, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, flags, NULL, NULL, 0, 0, d->tombepop, vec4(vec::hexcolor(color), 5));
 
-            if(d->skeletonfade<0) return;
             d->skeletonfade -= 0.015f;
+            if(d->skeletonfade<0.015f) return;
             rendermodel("mapmodel/smileys/mort", ANIM_MAPMODEL, o, d->yaw+90, 0, 0, flags, NULL, NULL, 0, 0, d->skeletonfade);
             return;
         }

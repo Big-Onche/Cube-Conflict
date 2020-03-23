@@ -127,8 +127,9 @@ enum
     M_LOBBY      = 1<<6,
     M_RANDOM     = 1<<7,
     M_FULLSTUFF  = 1<<8,
-    M_EXPLOSION  = 1<<9,
+    M_IDENTIQUE  = 1<<9,
     M_NOAMMO     = 1<<10,
+    M_MUNINFINIE = 1<<11,
 };
 
 static struct gamemodeinfo
@@ -142,19 +143,19 @@ static struct gamemodeinfo
 
     //MODE 1, 2, 3, 4
     { "Tue Les Tous", M_LOBBY },
-    { "Tue Les Tous (Aléatoire)", M_LOBBY | M_RANDOM | M_NOAMMO},
-    { "Tue Les Tous (Full stuff)", M_LOBBY | M_FULLSTUFF | M_NOAMMO},
-    { "Tue Les Tous (Explosion)", M_LOBBY | M_EXPLOSION | M_NOAMMO},
+    { "Tue Les Tous (Aléatoire)", M_LOBBY | M_RANDOM | M_NOAMMO | M_MUNINFINIE},
+    { "Tue Les Tous (Full stuff)", M_LOBBY | M_FULLSTUFF},
+    { "Tue Les Tous (Identique)", M_LOBBY | M_IDENTIQUE | M_NOAMMO | M_MUNINFINIE},
     //MODE 5, 6, 7, 8
     { "Tue Les Tous", M_LOBBY | M_TEAM },
-    { "Tue Les Tous (Aléatoire)", M_LOBBY | M_RANDOM | M_TEAM | M_NOAMMO},
-    { "Tue Les Tous (Full stuff)", M_LOBBY | M_FULLSTUFF | M_TEAM | M_NOAMMO},
-    { "Tue Les Tous (Corps à corps)", M_LOBBY | M_EXPLOSION | M_TEAM | M_NOAMMO},
+    { "Tue Les Tous (Aléatoire)", M_LOBBY | M_RANDOM | M_TEAM | M_NOAMMO | M_MUNINFINIE},
+    { "Tue Les Tous (Full stuff)", M_LOBBY | M_FULLSTUFF | M_TEAM},
+    { "Tue Les Tous (Identique)", M_LOBBY | M_IDENTIQUE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
     //MODE 9, 10, 11, 12
     { "Capture de drapeau", M_CTF | M_TEAM },
-    { "Capture de drapeau (Aléatoire)", M_RANDOM | M_CTF | M_TEAM | M_NOAMMO},
-    { "Capture de drapeau (Full stuff)", M_FULLSTUFF | M_CTF | M_TEAM | M_NOAMMO},
-    { "Capture de drapeau (Corps à corps)", M_EXPLOSION | M_CTF | M_TEAM | M_NOAMMO},
+    { "Capture de drapeau (Aléatoire)", M_RANDOM | M_CTF | M_TEAM | M_NOAMMO | M_MUNINFINIE},
+    { "Capture de drapeau (Full stuff)", M_FULLSTUFF | M_CTF | M_TEAM},
+    { "Capture de drapeau (Identique)", M_IDENTIQUE | M_CTF | M_TEAM | M_NOAMMO | M_MUNINFINIE},
 };
 
 #define STARTGAMEMODE (-1)
@@ -172,9 +173,9 @@ static struct gamemodeinfo
 
 #define m_random       (m_check(gamemode, M_RANDOM))
 #define m_fullstuff    (m_check(gamemode, M_FULLSTUFF))
-#define m_explosion    (m_check(gamemode, M_EXPLOSION))
+#define m_identique    (m_check(gamemode, M_IDENTIQUE))
 #define m_noammo       (m_check(gamemode, M_NOAMMO))
-//#define m_battle       (m_check(gamemode, M_BATTLE))
+#define m_muninfinie   (m_check(gamemode, M_MUNINFINIE))
 
 #define m_demo         (m_check(gamemode, M_DEMO))
 #define m_edit         (m_check(gamemode, M_EDIT))
@@ -275,6 +276,7 @@ enum
     N_SENDCAPE, N_SENDTOMBE, N_SENDDANSE, N_SENDAPTITUDE,
     N_ANNOUNCE,
     N_SENDSORT1, N_SENDSORT2, N_SENDSORT3,
+    N_IDENTIQUEARME,
     NUMMSG
 };
 
@@ -306,6 +308,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_SENDCAPE, 2, N_SENDTOMBE, 2, N_SENDDANSE, 2, N_SENDAPTITUDE, 2,
     N_ANNOUNCE, 2,
     N_SENDSORT1, 2, N_SENDSORT2, 2, N_SENDSORT3, 2,
+    N_IDENTIQUEARME, 2,
     -1
 };
 
@@ -603,21 +606,11 @@ struct gamestate
 
     void addsweaps(int gamemode)
     {
-        switch(rnd(50))
+        switch(rnd(200))
         {
             case 0: ammo[GUN_S_ROQUETTES] = 20; gunselect = GUN_S_ROQUETTES; break;
-            case 1:
-            {
-                if(m_explosion) {ammo[GUN_S_ROQUETTES] = 30; gunselect = GUN_S_ROQUETTES;}
-                else ammo[GUN_S_GAU8] = 250; gunselect = GUN_S_GAU8;
-                break;
-            }
-            case 2:
-            {
-                if(m_explosion) {ammo[GUN_S_NUKE] = 1; gunselect = GUN_S_NUKE;}
-                else ammo[GUN_S_CAMPOUZE] = 15; gunselect = GUN_S_CAMPOUZE;
-                break;
-            }
+            case 1: ammo[GUN_S_GAU8] = 250; gunselect = GUN_S_GAU8; break;
+            case 2: ammo[GUN_S_CAMPOUZE] = 15; gunselect = GUN_S_CAMPOUZE; break;
             case 3: ammo[GUN_S_NUKE] = 1; gunselect = GUN_S_NUKE; break;
         }
     }
@@ -650,25 +643,20 @@ struct gamestate
             baseammo(spawngun1, 4);
             do spawngun2 = rnd(17); while(spawngun1==spawngun2);
             baseammo(spawngun2, 4);
-            do spawngun3 = rnd(17); while(spawngun3==spawngun1 && spawngun3==spawngun2);
+            do spawngun3 = rnd(17); while(spawngun1==spawngun3 && spawngun2==spawngun3);
             baseammo(spawngun3, 4);
             gunselect = aptitude==6 ? GUN_KAMIKAZE : spawngun1;
             return;
         }
-        else if (m_explosion)
+        else if(m_identique)
         {
             armourtype = A_GREEN;
-            armour = 1250;
-            int gun = -1;
-            switch(rnd(3))
-            {
-                case 0: gun = GUN_M32; break;
-                case 1: gun = GUN_SMAW; break;
-                case 2: gun = GUN_ARTIFICE; break;
-            }
-
-            ammo[gun] = aptitude==2 ? 1.5f*itemstats[gun].max  : itemstats[gun].max;
-            gunselect = gun;
+            armour = 100;
+            loopi(17) baseammo(i);
+            armourtype = A_BLUE;
+            armour = 750;
+            gunselect = aptitude==6 ? GUN_KAMIKAZE : cnidentiquearme;
+            ammo[cnidentiquearme] = aptitude==2 ? 1.5f*itemstats[cnidentiquearme].max : itemstats[cnidentiquearme].max;
             return;
         }
         else
@@ -751,7 +739,7 @@ struct gameent : dynent, gamestate
 
     vec muzzle, weed, balles;
 
-    gameent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), lastfootstep(0), attacksound(-1), attackchan(-1), killstreak(0), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
+    gameent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), lastfootstep(0), attacksound(-1), attackchan(-1), killstreak(0), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0), customcape(0), customtombe(1), customdanse(0), aptitude(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
     {
         name[0] = info[0] = 0;
         respawn();
@@ -938,6 +926,8 @@ namespace game
     const char *mastermodeicon(int n, const char *unknown);
 
     extern void movehudgun(gameent *d);
+    extern void aptichange(int aptitude);
+    extern void armechange(int arme);
 
     // client
     extern bool connected, remote, demoplayback;
