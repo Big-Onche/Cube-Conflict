@@ -422,8 +422,8 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound
     { GUN_CACMASTER, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MASTERSWORD, S_MASTERSWORD, S_NULL, S_NULL,     6,  600,  18, 700, 700, 0, 0, -10,   50, 20, 50,  0, 0, 0},
     { GUN_CACFLEAU, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FLEAU, S_FLEAU, S_NULL, S_NULL,                  3, 1250,  25, 175, 175, 0, 0,  -9,   80, 20, 50,  0, 0, 0},
     // Armes spéciales aptitudes
-    { GUN_KAMIKAZE, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_KAMIKAZEBOOM, S_KAMIKAZEBOOM, S_NULL, S_NULL,   1, 1000, 3000,   1,   1, 0,    1,  10,   90,  1,   300, 400, 1, 0},
-    { GUN_MEDIGUN, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MEDIGUN, S_MEDIGUN, S_NULL, S_NULL,             30,  100, -150, 500, 700, 0,  750,   2,  280,  4,    10,  25, 0, 0},
+    { GUN_KAMIKAZE, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_KAMIKAZEBOOM, S_KAMIKAZEBOOM, S_NULL, S_NULL,    1, 1000, 3000,  1,   1, 0, 1,  10,  120,  1, 300, 425, 1, 0},
+    { GUN_MEDIGUN, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MEDIGUN, S_MEDIGUN, S_NULL, S_NULL,              30,  100, -150, 500, 700, 0,  750,   2,  280,  4,    10,  25, 0, 0},
 };
 
 static const struct guninfo { const char *name, *file, *vwep, *armedescFR, *armedescEN; int maxweapposside, maxweapposup, maxzoomfov, attacks[NUMACTS]; } guns[NUMGUNS] =

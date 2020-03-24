@@ -666,10 +666,10 @@ namespace game
                 vec debrisorigin = vec(v).sub(vec(vel).mul(15));
                 adddynlight(safe ? v : debrisorigin, 7*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 80, 40, L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
                 adddynlight(safe ? v : debrisorigin, 4*attacks[atk].exprad, vec(1.2f, 0.4f, 0.0f), 80, 40, L_VOLUMETRIC|L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.0f, 0.0f, 1.5f));
-                particle_splash(PART_SMOKE, ATK_ROQUETTES_SHOOT ? 5 : 9, 2000, v, 0x333333, 40.0f,  150,  300, 0, player1->champimillis ? true : false);
-                particle_splash(PART_SMOKE, ATK_ROQUETTES_SHOOT ? 5 : 9, 1300, v, 0x333333, 25.0f,  150,  600, 0, player1->champimillis ? true : false);
+                particle_splash(PART_SMOKE, ATK_ROQUETTES_SHOOT ? 5 : 9, 2000, v, 0x333333, 40.0f,  ATK_KAMIKAZE_SHOOT ? 200+rnd(75) : 150+rnd(50), ATK_KAMIKAZE_SHOOT ? 450 : 300+rnd(100), 0, player1->champimillis ? true : false);
+                particle_splash(PART_SMOKE, ATK_ROQUETTES_SHOOT ? 5 : 9, 1300, v, 0x333333, 25.0f,  ATK_KAMIKAZE_SHOOT ? 200+rnd(75)  : 150+rnd(50), ATK_KAMIKAZE_SHOOT ? 750 : 600+rnd(100), 0, player1->champimillis ? true : false);
                 particle_splash(PART_SPARK, ATK_ROQUETTES_SHOOT ? 7 : 10, 300, v, owner->steromillis ? 0xFF0000 : 0xFFAA44,  1.7f+rnd(2), 3500, 3500, 0, player1->champimillis ? true : false);
-                loopi(3) particle_splash(PART_FLAME1+rnd(2), ATK_ROQUETTES_SHOOT ? 7 : 12, 80+rnd(40), v, owner->steromillis ? 0xFF0000 : i==0 ? 0xCC8833 : i==1 ? 0xCC7722 : 0xCC4422, 7+rnd(5), ATK_KAMIKAZE_SHOOT ? 1000+rnd(700) : ATK_ROQUETTES_SHOOT ? 600+rnd(400) : 800+rnd(400), 800, 1, player1->champimillis ? true : false);
+                loopi(3) particle_splash(PART_FLAME1+rnd(2), ATK_ROQUETTES_SHOOT ? 7 : 15, ATK_KAMIKAZE_SHOOT ? 120+rnd(50) : 80+rnd(40), v, owner->steromillis ? 0xFF0000 : ATK_KAMIKAZE_SHOOT ? 0xFF9900 : i==0 ? 0xCC8833 : i==1 ? 0xDD3922 : 0x998800, 7+rnd(5), ATK_KAMIKAZE_SHOOT ? 1200+rnd(700) : ATK_KAMIKAZE_SHOOT ? 1200+rnd(700): ATK_ROQUETTES_SHOOT ? 600+rnd(400) : 800+rnd(400), 800, 1, player1->champimillis ? true : false);
                 particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFF5500, 10.0f, player1->champimillis ? true : false);
                 particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFFFFFF, 20.0f, player1->champimillis ? true : false);
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
