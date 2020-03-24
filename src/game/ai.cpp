@@ -653,14 +653,17 @@ namespace ai
         d->ai->reset(true);
         d->ai->lastrun = lastmillis;
 
-        if(m_identique) d->ai->weappref = cnidentiquearme;
-        else if(forcegun >= 0 && forcegun < NUMGUNS) d->ai->weappref = forcegun;
+        if(forcegun >= 0 && forcegun < NUMGUNS) d->ai->weappref = forcegun;
 
         switch(d->aptitude)
         {
             case APT_KAMIKAZE: d->ai->weappref = GUN_KAMIKAZE; break;
             case APT_NINJA: d->ai->weappref = d->ammo[GUN_CACMARTEAU]>0 ? GUN_CACMARTEAU : d->ammo[GUN_CACFLEAU]>0 ? GUN_CACFLEAU : d->ammo[GUN_CACMASTER]>0 ? GUN_CACMASTER : GUN_CAC349; break;
-            default: d->ai->weappref = rnd(GUN_GLOCK-GUN_RAIL+1)+GUN_RAIL;
+            default:
+            {
+                if(m_identique) d->ai->weappref = cnidentiquearme;
+                else d->ai->weappref = rnd(GUN_GLOCK-GUN_RAIL+1)+GUN_RAIL;
+            }
         }
 
         vec dp = d->headpos();
@@ -1229,7 +1232,27 @@ namespace ai
     bool request(gameent *d, aistate &b)
     {
         gameent *e = getclient(d->ai->enemy);
-        if(m_identique) {gunselect(cnidentiquearme, d); return process(d, b) >= 2;}
+        if(m_identique)
+        {
+            switch(d->aptitude)
+            {
+                case APT_KAMIKAZE:
+                    if(hasrange(d, e, GUN_KAMIKAZE)) gunselect(GUN_KAMIKAZE, d);
+                    else gunselect(cnidentiquearme, d);
+                    break;
+                case APT_NINJA:
+                    if(hasrange(d, e, GUN_CAC349) && d->hasammo(GUN_CAC349)) gunselect(GUN_CAC349, d);
+                    else if(hasrange(d, e, GUN_CACMASTER) && d->hasammo(GUN_CACMASTER)) gunselect(GUN_CACMASTER, d);
+                    else if(hasrange(d, e, GUN_CACFLEAU) && d->hasammo(GUN_CACFLEAU)) gunselect(GUN_CACFLEAU, d);
+                    else if(hasrange(d, e, GUN_CACMARTEAU) && d->hasammo(GUN_CACMARTEAU)) gunselect(GUN_CACMARTEAU, d);
+                    else gunselect(cnidentiquearme, d);
+                    break;
+                default:
+                    gunselect(cnidentiquearme, d);
+            }
+            return process(d, b) >= 2;
+        }
+
 
         if(!d->hasammo(d->gunselect) || !hasrange(d, e, d->gunselect) || (d->gunselect != d->ai->weappref && (!isgoodammo(d->gunselect) || d->hasammo(d->ai->weappref))))
         {
