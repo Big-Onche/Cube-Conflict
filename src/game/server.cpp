@@ -837,9 +837,11 @@ namespace server
         virtual void moved(clientinfo *ci, const vec &oldpos, bool oldclip, const vec &newpos, bool newclip) {}
         virtual bool canspawn(clientinfo *ci, bool connecting = false) { return true; }
         virtual void spawned(clientinfo *ci) {}
-        virtual int fragvalue(clientinfo *victim, clientinfo *actor)
+        virtual int fragvalue(clientinfo *victim, clientinfo *actor, int atk = -1)
         {
-            if(victim==actor || isteam(victim->team, actor->team)) return -1;
+            int value;
+            atk==ATK_KAMIKAZE_SHOOT ? value = 0 : value = -1;
+            if(victim==actor || isteam(victim->team, actor->team)) return value;
             return 1;
         }
         virtual void died(clientinfo *victim, clientinfo *actor) {}
@@ -2200,7 +2202,7 @@ namespace server
             target->state.deaths++;
             actor->state.killstreak++;
             target->state.killstreak = 0;
-            int fragvalue = smode ? smode->fragvalue(target, actor) : (target==actor || isteam(target->team, actor->team) ? -1 : 1);
+            int fragvalue = smode ? smode->fragvalue(target, actor, atk) : (target==actor || isteam(target->team, actor->team) ? atk==ATK_KAMIKAZE_SHOOT ? 0 : -1 : 1);
             actor->state.frags += fragvalue;
             target->state.lastdeath = totalmillis;
 
