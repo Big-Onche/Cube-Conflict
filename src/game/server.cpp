@@ -2487,7 +2487,7 @@ namespace server
     }
 
     int identiquetimer;
-    bool announced = false;
+    bool announced = false, firstlaunch = true;
 
     void serverupdate()
     {
@@ -2519,6 +2519,7 @@ namespace server
 
                     if(m_identique)
                     {
+                        if(firstlaunch) {identiquearme = rnd(17); sendf(-1, 1, "ri2", N_IDENTIQUEARME, identiquearme); firstlaunch = false;}
                         identiquetimer += curtime;
                         if(identiquetimer>=15000 && identiquetimer<=16000 && announced==false) {sendf(-1, 1, "ri2", N_ANNOUNCE, 50); announced = true;}
                         else if(identiquetimer>20000)

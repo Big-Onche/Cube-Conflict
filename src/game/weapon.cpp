@@ -33,9 +33,66 @@ namespace game
         d->gunselect = gun;
     }
 
+    int oldweap = 0;
+
+    ICOMMAND(getgrenade, "", (),
+    {
+         if(m_identique) return;
+         oldweap = player1->gunselect;
+         if(player1->ammo[GUN_M32]>0) gunselect(GUN_M32, player1);
+    });
+
+    void getcac()
+    {
+         if(m_identique && player1->aptitude!=APT_NINJA) return;
+         oldweap = player1->gunselect;
+         int gun = 0;
+         if(player1->ammo[GUN_CAC349]>0) gun = GUN_CAC349;
+         else if(player1->ammo[GUN_CACMASTER]>0) gun = GUN_CACMASTER;
+         else if(player1->ammo[GUN_CACFLEAU]>0) gun = GUN_CACFLEAU;
+         else if(player1->ammo[GUN_CACMARTEAU]>0) gun = GUN_CACMARTEAU;
+         gunselect(gun, player1);
+    }
+    ICOMMAND(getcac, "", (), getcac(););
+
+    ICOMMAND(getoldweap, "", (),
+    {
+         if(m_identique) return;
+         gunselect(oldweap, player1);
+    });
+
+    void getsweap()
+    {
+         if(!m_identique) return;
+         int gun = cnidentiquearme;
+         if(player1->ammo[GUN_S_NUKE]>0) gun = GUN_S_NUKE;
+         else if(player1->ammo[GUN_S_GAU8]>0) gun = GUN_S_GAU8;
+         else if(player1->ammo[GUN_S_CAMPOUZE]>0) gun = GUN_S_CAMPOUZE;
+         else if(player1->ammo[GUN_S_ROQUETTES]>0) gun = GUN_S_ROQUETTES;
+         gunselect(gun, player1);
+    }
+
     void nextweapon(int dir, bool force = false)
     {
         if(player1->state!=CS_ALIVE) return;
+        if(m_identique)
+        {
+            switch(player1->aptitude)
+            {
+                case APT_KAMIKAZE:
+                    if(player1->gunselect==cnidentiquearme) {dir-1 ? gunselect(GUN_KAMIKAZE, player1) : getsweap();}
+                    else gunselect(cnidentiquearme, player1);
+                    return;
+                case APT_NINJA:
+                    if(player1->gunselect==cnidentiquearme) {dir-1 ? getcac() : getsweap();}
+                    else gunselect(cnidentiquearme, player1);
+                    return;
+                default:
+                    if(player1->gunselect==cnidentiquearme) getsweap();
+                    else gunselect(cnidentiquearme, player1);
+                    return;
+            }
+        }
         dir = (dir < 0 ? NUMGUNS-1 : 1);
         int gun = player1->gunselect;
         loopi(NUMGUNS)
@@ -91,32 +148,6 @@ namespace game
          loopi(numguns) guns[i] = getweapon(args[i].getstr());
          cycleweapon(numguns, guns);
     });
-
-    int oldweap = 0;
-
-    ICOMMAND(getgrenade, "", (),
-    {
-         oldweap = player1->gunselect;
-         if(player1->ammo[GUN_M32]>0) gunselect(GUN_M32, player1);
-    });
-
-    ICOMMAND(getcac, "", (),
-    {
-         oldweap = player1->gunselect;
-         int gun = 0;
-         if(player1->ammo[GUN_CAC349]>0) gun = GUN_CAC349;
-         else if(player1->ammo[GUN_CACMASTER]>0) gun = GUN_CACMASTER;
-         else if(player1->ammo[GUN_CACFLEAU]>0) gun = GUN_CACFLEAU;
-         else if(player1->ammo[GUN_CACMARTEAU]>0) gun = GUN_CACMARTEAU;
-         gunselect(gun, player1);
-    });
-
-    ICOMMAND(getoldweap, "", (),
-    {
-         gunselect(oldweap, player1);
-    });
-
-
 
     void weaponswitch(gameent *d)
     {

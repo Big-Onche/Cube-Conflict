@@ -207,12 +207,37 @@ namespace game
         }
     }
 
+    void getaptiweap()
+    {
+        switch(player1->aptitude)
+        {
+            case APT_KAMIKAZE:
+                if(player1->gunselect!=GUN_KAMIKAZE) gunselect(cnidentiquearme, player1);
+                break;
+            case APT_NINJA:
+                switch(player1->gunselect)
+                {
+                    case GUN_CAC349: case GUN_CACFLEAU: case GUN_CACMARTEAU: case GUN_CACMASTER: break;
+                    default: gunselect(cnidentiquearme, player1);
+                }
+                break;
+            default: gunselect(cnidentiquearme, player1);
+        }
+    }
+
     void otherplayers(int curtime)
     {
         loopv(players)
         {
             gameent *d = players[i];
-            if(m_identique && d==player1){gunselect(cnidentiquearme, d);}
+            if(m_identique && d==player1)
+            {
+                switch(player1->gunselect)
+                {
+                    case GUN_S_NUKE: case GUN_S_GAU8: case GUN_S_CAMPOUZE: case GUN_S_ROQUETTES: break;
+                    default: getaptiweap();
+                }
+            }
 
             if(curtime>0 && d->ragemillis && d!=player1) d->ragemillis = max(d->ragemillis-curtime, 0);
 
