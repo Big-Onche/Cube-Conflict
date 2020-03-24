@@ -47,17 +47,14 @@ namespace game
          if(m_identique && player1->aptitude!=APT_NINJA) return;
          oldweap = player1->gunselect;
          int gun = 0;
-         if(player1->ammo[GUN_CAC349]>0) gun = GUN_CAC349;
-         else if(player1->ammo[GUN_CACMASTER]>0) gun = GUN_CACMASTER;
-         else if(player1->ammo[GUN_CACFLEAU]>0) gun = GUN_CACFLEAU;
-         else if(player1->ammo[GUN_CACMARTEAU]>0) gun = GUN_CACMARTEAU;
+         loopi(4) if(player1->ammo[GUN_CAC349+i]>0) gun = GUN_CAC349+i;
          gunselect(gun, player1);
     }
     ICOMMAND(getcac, "", (), getcac(););
 
     ICOMMAND(getoldweap, "", (),
     {
-         if(m_identique) return;
+         if(player1->aptitude != APT_NINJA && m_identique) return;
          gunselect(oldweap, player1);
     });
 
@@ -65,10 +62,7 @@ namespace game
     {
          if(!m_identique) return;
          int gun = cnidentiquearme;
-         if(player1->ammo[GUN_S_NUKE]>0) gun = GUN_S_NUKE;
-         else if(player1->ammo[GUN_S_GAU8]>0) gun = GUN_S_GAU8;
-         else if(player1->ammo[GUN_S_CAMPOUZE]>0) gun = GUN_S_CAMPOUZE;
-         else if(player1->ammo[GUN_S_ROQUETTES]>0) gun = GUN_S_ROQUETTES;
+         loopi(4) if(player1->ammo[GUN_S_CAMPOUZE-i]>0) gun = GUN_S_CAMPOUZE-i;
          gunselect(gun, player1);
     }
 
