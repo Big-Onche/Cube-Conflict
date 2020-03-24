@@ -490,10 +490,10 @@ namespace ai
                 score = 1e10f;
                 break;
             case I_BOOSTDEGATS: case I_BOOSTGRAVITE: case I_BOOSTPRECISION: case I_BOOSTPV: case I_BOOSTVITESSE:
-                d->aptitude==APT_JUNKIE ? score = 1e10f : score = 1e7f;
+                d->aptitude==APT_JUNKIE ? score = 1e9f : score = 1e7f;
                 break;
             case I_SANTE:
-                if(d->health<1000)  score = d->health < 500 ? 1e7f : d->health < 800 ? 1e5f : 1e3f;
+                if(d->health<800){score = d->health < 500 ? 1e5f : 1e3f; }
                 if(d->mana>40 && d->aptitude==APT_PRETRE && d->health<=300) aptitude(d, 1);
             case I_MANA:
                 if(d->mana < 101 && d->aptitude!=APT_VAMPIRE) score = 1e6f;
@@ -571,7 +571,8 @@ namespace ai
         static vector<interest> interests;
         interests.setsize(0);
 
-        if((!m_noammo && !hasgoodammo(d)) || d->health < 75) items(d, b, interests);
+        if(!hasgoodammo(d) || d->health < 750)
+            items(d, b, interests);
         else
         {
             static vector<int> nearby;
@@ -584,7 +585,7 @@ namespace ai
                 if(d->canpickup(e.type, d->aptitude)) tryitem(d, e, id, b, interests);
             }
         }
-        if(cmode && m_teammode) cmode->aifind(d, b, interests);
+        if(cmode) cmode->aifind(d, b, interests);
         return parseinterests(d, b, interests, override);
     }
 
