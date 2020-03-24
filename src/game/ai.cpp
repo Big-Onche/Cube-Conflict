@@ -508,11 +508,10 @@ namespace ai
                 break;
             default:
             {
-                if(e.type >= I_RAIL && e.type <= I_SUPERARME && !d->hasmaxammo(e.type))
+                if(e.type >= I_RAIL && e.type <= I_GLOCK && !d->hasmaxammo(e.type))
                 {
                     int gun = e.type - I_RAIL + GUN_RAIL;
-                    if(isgoodammo(gun)) score = hasgoodammo(d) ? 1e4f : 1e8f;
-                    else score = 1e6f;
+                    if(isgoodammo(gun)) score = hasgoodammo(d) ? 1e2f : 1e3f;
                 }
                 break;
             }
@@ -585,8 +584,7 @@ namespace ai
                 if(d->canpickup(e.type, d->aptitude)) tryitem(d, e, id, b, interests);
             }
         }
-        if(cmode) cmode->aifind(d, b, interests);
-        //if(m_teammode) assist(d, b, interests);
+        if(cmode && m_teammode) cmode->aifind(d, b, interests);
         return parseinterests(d, b, interests, override);
     }
 
