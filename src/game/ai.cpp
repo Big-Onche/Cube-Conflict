@@ -1232,6 +1232,8 @@ namespace ai
     bool request(gameent *d, aistate &b)
     {
         gameent *e = getclient(d->ai->enemy);
+        loopi(4) if(hasrange(d, e, GUN_S_NUKE+i) && d->hasammo(GUN_S_NUKE+i)){gunselect(GUN_S_NUKE+i, d); return process(d, b) >= 2;} //Super armes sélectionnées en priorité
+
         if(m_identique)
         {
             switch(d->aptitude)
@@ -1252,7 +1254,6 @@ namespace ai
             }
             return process(d, b) >= 2;
         }
-
 
         if(!d->hasammo(d->gunselect) || !hasrange(d, e, d->gunselect) || (d->gunselect != d->ai->weappref && (!isgoodammo(d->gunselect) || d->hasammo(d->ai->weappref))))
         {
