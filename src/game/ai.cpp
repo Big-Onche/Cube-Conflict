@@ -147,7 +147,7 @@ namespace ai
 	{ // add margins of error
         if(attackrange(d, d->gunselect, dist) || (d->skill <= 100 && !rnd(d->skill)))
         {
-            float skew = clamp(float(lastmillis-d->ai->enemymillis)/float((d->skill*attacks[atk].attackdelay/2000.f)), 0.f, attacks[atk].projspeed ? 0.25f : 1e16f),
+            float skew = clamp(float(lastmillis-d->ai->enemymillis)/float((d->skill*attacks[atk].attackdelay/2000.f)), 0.f, 1e16f),
                 offy = yaw-d->yaw, offp = pitch-d->pitch;
 
             if(offy > 180) offy -= 360;
@@ -240,9 +240,9 @@ namespace ai
             create(d);
             if(d->ai)
             {
-                d->ai->views[0] = viewfieldx(d->skill);
-                d->ai->views[1] = viewfieldy(d->skill);
-                d->ai->views[2] = viewdist(d->skill);
+                d->ai->views[0] = viewfieldx(d->skill*2.5f);
+                d->ai->views[1] = viewfieldy(d->skill*2.5f);
+                d->ai->views[2] = viewdist(d->skill*2.5f);
             }
         }
         else if(d->ai) destroy(d);
@@ -1125,10 +1125,9 @@ namespace ai
             float yaw, pitch;
             getyawpitch(dp, ep, yaw, pitch);
             fixrange(yaw, pitch);
-            bool insight = cansee(d, dp, ep), hasseen = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*10)+3000,
-                quick = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->gunselect == GUN_MINIGUN ? 300 : skmod)+30;
+            bool insight = cansee(d, dp, ep), hasseen = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*150);
             if(insight) d->ai->enemyseen = lastmillis;
-            if(idle || insight || hasseen || quick)
+            if(idle || insight || hasseen)
             {
                 float sskew = insight || d->skill > 100 ? 1.5f : (hasseen ? 1.f : 0.5f);
                 if(insight && lockon(d, atk, e, 16))
@@ -1139,7 +1138,7 @@ namespace ai
                     d->ai->becareful = false;
                 }
                 scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, sskew);
-                if(insight || quick)
+                if(insight)
                 {
                     if(canshoot(d, atk, e) && hastarget(d, atk, b, e, yaw, pitch, dp.squaredist(ep)))
                     {
@@ -1153,7 +1152,7 @@ namespace ai
             }
             else
             {
-                if(!d->ai->enemyseen || lastmillis-d->ai->enemyseen > (d->skill*50)+3000)
+                if(!d->ai->enemyseen || lastmillis-d->ai->enemyseen > (d->skill*175))
                 {
                     d->ai->enemy = -1;
                     d->ai->enemyseen = d->ai->enemymillis = 0;
