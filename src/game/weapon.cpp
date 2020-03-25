@@ -671,7 +671,7 @@ namespace game
             break;
             case ATK_NUKE_SHOOT:
             {
-                playsound(S_NUKE, &v, 0, 0, 0 , 2000, -1, 3000);
+                playsound(S_NUKE);
                 vec debrisorigin = vec(v).sub(vec(vel).mul(15));
                 adddynlight(safe ? v : debrisorigin, 7*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 300, 40, L_NOSHADOW, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
                 adddynlight(safe ? v : debrisorigin, 5*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 300, 40, L_NOSHADOW|L_VOLUMETRIC, attacks[atk].exprad/2, vec(0.0f, 0.0f, 1.5f));
