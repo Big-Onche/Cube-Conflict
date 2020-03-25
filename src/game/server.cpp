@@ -2015,7 +2015,6 @@ namespace server
             int nbjoueurs = numclients(-1, true, false);
             int nbbots = servjoueursminimum-nbjoueurs;
             if(nbbots>0) loopi(nbbots) aiman::addai(servbotniveauminimum+rnd(servbotniveaumaximum-servbotniveauminimum), -1);
-            loopi(nbjoueurs>servjoueursminimum) aiman::deleteai();
         }
 
         if(m_demo)
