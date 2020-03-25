@@ -585,7 +585,6 @@ namespace game
     string clientmap = "";
 
     int gamemode, nextmode;
-    extern int n_type, n_mode, n_team;
 
     void changemapserv(const char *name, int mode)        // forced map change from the server
     {
@@ -595,13 +594,8 @@ namespace game
             loopi(NUMGAMEMODES) if(m_mp(STARTGAMEMODE + i)) { mode = STARTGAMEMODE + i; break; }
         }
 
-        //if(n_type==0) mode = n_mode+(n_team*4);
-        //else if (n_type==1)  mode = n_mode+8;
-
         gamemode = mode;
         nextmode = mode;
-        //conoutf("MODE %d", mode);
-
         if(editmode) toggleedit();
         if(m_demo) { entities::resetspawns(); return; }
         if((m_edit && !name[0]) || !load_world(name))
@@ -620,17 +614,21 @@ namespace game
             intret(0);
             return;
         }
-        if(n_type==0) mode = n_mode+(n_team*4);
-        else if (n_type==1)  mode = n_mode+8;
         nextmode = mode;
-
         intret(1);
     }
 
-    VARFP(n_mode, -1, 1, 99, setmode(n_mode));
-    VARFP(n_type, 0, 0, 99, setmode(n_mode));
-    VARFP(n_team, 0, 0, 1, setmode(n_mode));
+    VARP(finalmode, -1, 1, 16);
+    VARFP(n_mode, -1, 1, 99, calcmode());
+    VARFP(n_type, 0, 0, 99, calcmode());
+    VARFP(n_team, 0, 0, 1, calcmode());
 
+    void calcmode()
+    {
+        if(n_type==0) finalmode = n_mode+(n_team*4);
+        else if (n_type==1) finalmode = n_mode+8;
+        setmode(finalmode);
+    }
 
     ICOMMAND(mode, "i", (int *val), setmode(*val));
     ICOMMAND(getmode, "", (), intret(gamemode));
@@ -653,16 +651,16 @@ namespace game
     ICOMMANDS("m_lobby", "i", (int *mode), { int gamemode = *mode; intret(m_lobby); });
     ICOMMANDS("m_timed", "i", (int *mode), { int gamemode = *mode; intret(m_timed); });
 
+
     void changemap(const char *name, int mode) // request map change, server may ignore
     {
         if(!remote)
         {
             server::forcemap(name, mode);
-            if(!isconnected()) localconnect();
+            if(!connected) localconnect();
         }
         else if(player1->state!=CS_SPECTATOR || player1->privilege) addmsg(N_MAPVOTE, "rsi", name, mode);
     }
-
     void changemap(const char *name)
     {
         switch(n_map)
@@ -673,16 +671,11 @@ namespace game
             case 3: name = "Dota"; break;
             case 4: name = "Lune"; break;
             case 5: name = "Volcan"; break;
-            case 6: name = "Vaisseau"; break;
             default: newmap(13); break;
         }
-        UI::hideui(NULL);
-        int mode = 0;
-        if(n_type==0) mode = n_mode+(n_team*4);
-        else if (n_type==1) mode = n_mode+8;
-        changemap(name, mode);
+        changemap(name, m_valid(nextmode) ? nextmode : (remote ? 1 : 0));
     }
-    ICOMMAND(map, "siii", (char *name, int n_mode, int n_type, int n_team), changemap(name));
+    ICOMMAND(map, "s", (char *name), changemap(name));
 
     void forceedit(const char *name)
     {
@@ -1476,6 +1469,7 @@ namespace game
                 mapchanged = true;
                 if(getint(p)) entities::spawnitems();
                 else senditemstoserver = false;
+                ai::loadwaypoints();
                 break;
 
             case N_FORCEDEATH:

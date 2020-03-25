@@ -196,8 +196,6 @@ namespace ai
 
     void init(gameent *d, int at, int ocn, int apti, int cape, int tombe, int danse, int sk, int bn, int pm, int col, const char *name, int team)
     {
-        loadwaypoints();
-
         gameent *o = newclient(ocn);
 
         d->aitype = at;

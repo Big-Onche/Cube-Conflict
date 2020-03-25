@@ -1961,6 +1961,11 @@ namespace server
         notgotitems = false;
     }
 
+    VARP(servjoueursminimum, 0, 0, 200);
+    VARP(servbotniveauminimum, 0, 0, 100);
+    VARP(servbotniveaumaximum, 0, 0, 100);
+    VARP(servrandommode, 0, 0, 1);
+
     void changemap(const char *s, int mode)
     {
         stopdemo();
@@ -1968,7 +1973,7 @@ namespace server
         changegamespeed(100);
         if(smode) smode->cleanup();
         aiman::clearai();
-
+        if(servrandommode) mode = rnd(12)+1;
         gamemode = mode;
         gamemillis = 0;
         gamelimit = gamelength*60000;
@@ -2005,6 +2010,13 @@ namespace server
         }
 
         aiman::changemap();
+        if(multiplayer(false))
+        {
+            int nbjoueurs = numclients(-1, true, false);
+            int nbbots = servjoueursminimum-nbjoueurs;
+            if(nbbots>0) loopi(nbbots) aiman::addai(servbotniveauminimum+rnd(servbotniveaumaximum-servbotniveauminimum), -1);
+            loopi(nbjoueurs>servjoueursminimum) aiman::deleteai();
+        }
 
         if(m_demo)
         {
@@ -2971,10 +2983,6 @@ namespace server
         if(servermotd[0]) sendf(ci->clientnum, 1, "ris", N_SERVMSG, servermotd);
     }
 
-    VARP(joueursminimum, 0, 0, 200);
-    VARP(botniveauminimum, 0, 0, 100);
-    VARP(botniveaumaximum, 0, 0, 100);
-
     void parsepacket(int sender, int chan, packetbuf &p)     // has to parse exactly each byte of the packet
     {
         if(sender<0 || p.packet->flags&ENET_PACKET_FLAG_UNSEQUENCED || chan > 2) return;
@@ -3018,9 +3026,9 @@ namespace server
                     if(multiplayer(false))
                     {
                         int nbjoueurs = numclients(-1, true, false);
-                        int nbbots = joueursminimum-nbjoueurs;
-                        if(nbbots>0) loopi(nbbots) aiman::addai(botniveauminimum+rnd(botniveaumaximum-botniveauminimum), -1);
-                        loopi(nbjoueurs>joueursminimum) aiman::deleteai();
+                        int nbbots = servjoueursminimum-nbjoueurs;
+                        if(nbbots>0) loopi(nbbots) aiman::addai(servbotniveauminimum+rnd(servbotniveaumaximum-servbotniveauminimum), -1);
+                        loopi(nbjoueurs>servjoueursminimum) aiman::deleteai();
                     }
                     break;
                 }
@@ -3870,7 +3878,7 @@ namespace server
         }
 
         putint(p, PROTOCOL_VERSION);
-        if(numclients(-1, true, true)<joueursminimum) putint(p, joueursminimum);
+        if(numclients(-1, true, true)<servjoueursminimum) putint(p, servjoueursminimum);
         else putint(p, numclients(-1, false, true));
         putint(p, maxclients);
         putint(p, gamepaused || gamespeed != 100 ? 5 : 3); // number of attrs following

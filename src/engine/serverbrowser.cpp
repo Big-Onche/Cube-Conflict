@@ -407,7 +407,7 @@ void addserver(const char *name, int port, const char *password, bool keep)
     s->keep = keep;
 }
 
-VARP(searchlan, 0, 0, 1);
+VARP(searchlan, 0, 1, 1);
 VARMP(servpingrate, 1, 5, 60, 1000);
 VARMP(servpingdecay, 1, 15, 60, 1000);
 VARP(maxservpings, 0, 10, 1000);
