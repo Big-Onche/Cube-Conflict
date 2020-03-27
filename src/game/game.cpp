@@ -267,7 +267,7 @@ namespace game
                     loopv(players)
                     {
                         gameent *r = players[i];
-                        if(r->o.dist(h->o)/18.f<6 && r->health<r->maxhealth+200 && isteam(h->team, r->team))
+                        if(r->o.dist(h->o)/18.f<6 && r->health<r->maxhealth+200 && isteam(h->team, r->team) && r->state==CS_ALIVE)
                         {
                             switch(rnd(70))
                             {
@@ -278,6 +278,7 @@ namespace game
                                 irays.normalize().mul(1300.0f);
                                 particle_flying_flare(h->o, irays, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
                                 if(r->health>r->maxhealth+150) r->health=r->maxhealth+200;
+                                playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
                             }
                         }
                     }
@@ -358,7 +359,7 @@ namespace game
                     gameent *h = players[i];
                     loopv(players)
                     {
-                        if(players[i]->o.dist(h->o)/18.f<6 && players[i]->health<players[i]->maxhealth+200 && isteam(h->team, players[i]->team))
+                        if(players[i]->o.dist(h->o)/18.f<6 && players[i]->health<players[i]->maxhealth+200 && isteam(h->team, players[i]->team) && h->state==CS_ALIVE)
                         {
                             switch(rnd(70))
                             {
@@ -369,6 +370,7 @@ namespace game
                                 irays.normalize().mul(1300.0f);
                                 particle_flying_flare(h->o, irays, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
                                 if(players[i]->health>players[i]->maxhealth+150) players[i]->health=players[i]->maxhealth+200;
+                                playsound(S_REGENMEDIGUN, &h->o, 0, 0, 0 , 50, -1, 125);
                             }
                         }
                     }
