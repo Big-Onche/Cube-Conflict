@@ -361,7 +361,7 @@ struct ctfclientmode : clientmode
     void drawblip(gameent *d, float x, float y, float s, int i, bool flagblip)
     {
         flag &f = flags[i];
-        setbliptex(f.team, flagblip ? "_flag" : "");
+        setbliptex(player1->team!=f.team ? 2 : 1, flagblip ? "_flag" : "");
         drawblip(d, x, y, s, flagblip ? (f.owner ? f.owner->o : (f.droptime ? f.droploc : f.spawnloc)) : f.spawnloc, flagblip);
     }
 
@@ -689,25 +689,25 @@ struct ctfclientmode : clientmode
 
 	bool aihomerun(gameent *d, ai::aistate &b)
 	{
-            vec pos = d->feetpos();
-            loopk(2)
+        vec pos = d->feetpos();
+        loopk(2)
+        {
+            int goal = -1;
+            loopv(flags)
             {
-                int goal = -1;
-                loopv(flags)
+                flag &g = flags[i];
+                if(g.team == d->team && (k || (!g.owner && !g.droptime)) &&
+                    (!flags.inrange(goal) || g.pos().squaredist(pos) < flags[goal].pos().squaredist(pos)))
                 {
-                    flag &g = flags[i];
-                    if(g.team == d->team && (k || (!g.owner && !g.droptime)) &&
-                        (!flags.inrange(goal) || g.pos().squaredist(pos) < flags[goal].pos().squaredist(pos)))
-                    {
-                        goal = i;
-                    }
-                }
-                if(flags.inrange(goal) && ai::makeroute(d, b, flags[goal].pos()))
-                {
-                    d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, goal);
-                    return true;
+                    goal = i;
                 }
             }
+            if(flags.inrange(goal) && ai::makeroute(d, b, flags[goal].pos()))
+            {
+                d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, goal);
+                return true;
+            }
+        }
 	    if(b.type == ai::AI_S_INTEREST && b.targtype == ai::AI_T_NODE) return true; // we already did this..
 		if(randomnode(d, b, ai::SIGHTMIN, 1e16f))
 		{
@@ -747,7 +747,7 @@ struct ctfclientmode : clientmode
 			{
 				static vector<int> targets; // build a list of others who are interested in this
 				targets.setsize(0);
-				bool home = f.team != d->team;
+				bool home = f.team == d->team;
 				ai::checkothers(targets, d, home ? ai::AI_S_DEFEND : ai::AI_S_PURSUE, ai::AI_T_AFFINITY, j, true);
 				gameent *e = NULL;
 				loopi(numdynents()) if((e = (gameent *)iterdynents(i)) && !e->ai && e->state == CS_ALIVE && isteam(d->team, e->team))
@@ -757,21 +757,9 @@ struct ctfclientmode : clientmode
 						targets.add(e->clientnum);
 				}
 				if(home)
-				{
-					bool guard = false;
-					if((f.owner && f.team != f.owner->team) || f.droptime || targets.empty()) guard = true;
-					else if(d->hasammo(d->ai->weappref))
-					{ // see if we can relieve someone who only has a piece of crap
-						gameent *t;
-						loopvk(targets) if((t = getclient(targets[k])))
-						{
-							if((t->ai && !t->hasammo(t->ai->weappref)) || (!t->ai && (t->gunselect == GUN_GLOCK)))
-							{
-								guard = true;
-								break;
-							}
-						}
-					}
+                {
+                    bool guard = false;
+                    if((f.owner && f.team != f.owner->team) || f.droptime || targets.empty()) guard = true;
 					if(guard)
 					{ // defend the flag
 					    switch(rnd(100))
@@ -781,10 +769,9 @@ struct ctfclientmode : clientmode
                             n.state = ai::AI_S_PURSUE;
                             n.node = ai::closestwaypoint(f.pos(), ai::SIGHTMIN, true);
                             n.target = j;
-                            n.targtype = ai::AI_T_PLAYER;
-                            n.score = pos.squaredist(f.pos())/100.f;
+                            n.targtype = ai::AI_T_AFFINITY;
+                            n.score = pos.squaredist(f.pos());
 					    }
-
 					}
 				}
 				else
@@ -797,19 +784,6 @@ struct ctfclientmode : clientmode
 						n.target = j;
 						n.targtype = ai::AI_T_AFFINITY;
 						n.score = pos.squaredist(f.pos());
-					}
-					else
-					{ // help by defending the attacker
-						gameent *t;
-						loopvk(targets) if((t = getclient(targets[k])))
-						{
-							ai::interest &n = interests.add();
-							n.state = ai::AI_S_PURSUE;
-							n.node = t->lastnode;
-							n.target = t->clientnum;
-							n.targtype = ai::AI_T_PLAYER;
-							n.score = d->o.squaredist(t->o);
-						}
 					}
 				}
 			}

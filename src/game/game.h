@@ -702,10 +702,10 @@ struct gamestate
 };
 
 #define MAXTEAMS 2
+
 static const char * const teamnames[1+MAXTEAMS] = { "", "YORARIEN", "YORAKEKCHOSE" };
-static const char * const teamtextcode[1+MAXTEAMS] = { "\fd", "\fd", "\fc" };
-static const int teamtextcolor[1+MAXTEAMS] = { 0xFFFF22, 0xFFFF22, 0xFF2222 }; // red
-static const int teamscoreboardcolor[1+MAXTEAMS] = { 0xFFFF22, 0xFFFF22, 0xFF2222 };
+static const char * const teamtextcode[1+MAXTEAMS] = { "\fc", "\fd", "\fc" };
+static const int teamtextcolor[1+MAXTEAMS] = { 0xFF2222, 0xFFFF22, 0xFF2222 };
 static const char * const teamblipcolor[1+MAXTEAMS] = { "_neutral", "_blue", "_red" };
 static inline int teamnumber(const char *name) { loopi(MAXTEAMS) if(!strcmp(teamnames[1+i], name)) return 1+i; return 0; }
 #define validteam(n) ((n) >= 1 && (n) <= MAXTEAMS)

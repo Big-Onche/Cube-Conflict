@@ -31,6 +31,9 @@ namespace game
     gameent *player1 = NULL;         // our client
     vector<gameent *> players;       // other clients
 
+    VAR(teamscoreboardcolor, 0, 0, 1);
+    ICOMMAND(getsbcolor, "", (), player1->team == 1 ? teamscoreboardcolor = 1 : teamscoreboardcolor = 0;);
+
     int following = -1;
 
     VARFP(specmode, 0, 0, 2,
@@ -1038,7 +1041,7 @@ namespace game
     const char *teamcolorname(gameent *d, const char *alt)
     {
         if(!teamcolortext || !m_teammode || !validteam(d->team) || d->state == CS_SPECTATOR) return colorname(d, NULL, alt);
-        return colorname(d, NULL, alt, teamtextcode[d->team]);
+        return colorname(d, NULL, alt, d->team!=player1->team ? teamtextcode[2] : teamtextcode[1]);
     }
 
     const char *teamcolor(int team)
@@ -1128,7 +1131,7 @@ namespace game
             {
                 crosshair = 1;
 
-                col = vec::hexcolor(teamtextcolor[d->team]);
+                col = vec::hexcolor(teamtextcolor[player1->team!=d->team ? 2 : 1]);
             }
         }
 

@@ -265,7 +265,7 @@ namespace game
         vec o = d->feetpos();
         int basetime = 0;
         if(animoverride) anim = (animoverride<0 ? ANIM_ALL : animoverride)|ANIM_LOOP;
-        const char *mdlname = mdl.model[validteam(team) ? team : 0];
+        const char *mdlname = mdl.model[validteam(team) ? d->team==player1->team ? 1 : 2 : 0];
 
         if(d->state==CS_ALIVE) {d->skeletonfade = 1.0f; d->tombepop = 0.0f;}
         else if(d->state==CS_DEAD)
@@ -322,7 +322,7 @@ namespace game
         ////////Customisations////////
         if(d->customcape>=1 && d->customcape<=11)
         {
-            a[ai++] = modelattach("tag_cape", team==2 ? customs[d->customcape].capeteam2 : customs[d->customcape].capeteam1, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+            a[ai++] = modelattach("tag_cape", d->team==player1->team ? customs[d->customcape].capeteam1 : customs[d->customcape].capeteam2, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
 
         //////////////////////////////////////////////////////////////////ANIMATIONS//////////////////////////////////////////////////////////////////
@@ -460,8 +460,10 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
             if(d->state!=CS_DEAD)
             {
                 int team = m_teammode && validteam(d->team) ? d->team : 0;
-                if(player1->state!=CS_SPECTATOR)particle_text(d->abovehead(), d->info, PART_TEXT, 1, teamtextcolor[team], 2.0f);
-                //if(player1->state!=CS_SPECTATOR)particle_text(d->abovehead(), d->killstreak, PART_TEXT, 1, teamtextcolor[team], 5.0f);
+
+                if(player1->team==d->team) particle_text(d->abovehead(), d->info, PART_TEXT, 1, teamtextcolor[player1->team!=d->team ? 2 : 1], 2.0f);
+                else if (player1->state==CS_SPECTATOR) particle_text(d->abovehead(), d->info, PART_TEXT, 1, teamtextcolor[player1->team!=d->team ? 2 : 1], 2.0f);
+
                 if(d->health<300) switch(rnd(d->health+30)) {case 0: gibeffect(300, d->o, d);}
                 if(player1->aptitude==APT_MEDECIN && team==1)
                 {

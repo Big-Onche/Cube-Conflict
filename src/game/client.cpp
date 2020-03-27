@@ -84,7 +84,7 @@ namespace game
     {
         if(d->state != CS_ALIVE && d->state != CS_DEAD) return;
         float scale = calcradarscale();
-        setbliptex(d->team, d->state == CS_DEAD ? "_dead" : "_alive");
+        setbliptex(d->team!=player1->team ? 2 : 1, d->state == CS_DEAD ? "_dead" : "_alive");
         gle::defvertex(2);
         gle::deftexcoord0();
         gle::begin(GL_QUADS);
@@ -104,7 +104,7 @@ namespace game
             {
                 if(!alive++)
                 {
-                    setbliptex(d->team, "_alive");
+                    setbliptex(d->team!=player1->team ? 2 : 1, "_alive");
                     gle::defvertex(2);
                     gle::deftexcoord0();
                     gle::begin(GL_QUADS);
@@ -120,7 +120,7 @@ namespace game
             {
                 if(!dead++)
                 {
-                    setbliptex(d->team, "_dead");
+                    setbliptex(d->team!=player1->team ? 2 : 1, "_dead");
                     gle::defvertex(2);
                     gle::deftexcoord0();
                     gle::begin(GL_QUADS);
@@ -1458,7 +1458,7 @@ namespace game
                 if(!t || isignored(t->clientnum)) break;
                 int team = validteam(t->team) ? t->team : 0;
                 if(t->state!=CS_DEAD && t->state!=CS_SPECTATOR)
-                    particle_textcopy(t->abovehead(), text, PART_TEXT, 2000, teamtextcolor[team], 4.0f, -8);
+                    particle_textcopy(t->abovehead(), text, PART_TEXT, 2000, player1->team!=t->team ? 2 : 1, 4.0f, -8);
                 conoutf(CON_TEAMCHAT, "%s:%s %s", chatcolorname(t), teamtextcode[team], text);
                 break;
             }
