@@ -65,7 +65,7 @@ namespace ai
     void bottaunt(gameent *d)
     {
         if(d->state!=CS_ALIVE || d->physstate<PHYS_SLOPE) return;
-        if(lastmillis-d->lasttaunt<20000) return;
+        if(lastmillis-d->lasttaunt<30000) return;
         d->lasttaunt = lastmillis;
         d->dansechan = playsound(S_DANSE1+(d->customdanse-1), d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 150, d->dansechan, 300);
         addmsg(N_TAUNT, "rc", d);

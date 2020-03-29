@@ -393,28 +393,28 @@ static struct itemstat { int add, max, sound; const char *name; int icon, info; 
 static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound, hudsound, farsound1, farsound2, specialsounddelay, attackdelay, damage, spread, nozoomspread, margin, projspeed, kickamount, range, rays, hitpush, exprad, ttl, use; } attacks[NUMATKS] =
 {
     //Armes "normales"
-    { GUN_RAIL,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FELECTRIQUE,  S_FELECTRIQUE,  S_FELECTRIQUE_LOIN, S_NULL,   10,  350,  325,  40, 100, 0,    0,  10, 4000,  1,    30,   0, 0, 0},
-    { GUN_PULSE,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FUSILPLASMA,  S_FUSILPLASMA,  S_FPLASMA_LOIN, S_NULL,       25,  120,  180,  70, 200, 0, 1000,   5, 2000,  1,    50,  25, 0, 0},
-    { GUN_SMAW,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_SMAW,         S_SMAW,         S_LANCEMISSILE_LOIN, S_NULL,   3, 1250,  850,  20, 200, 0,  600,  15, 3000,  1,   750, 100, 0, 0},
-    { GUN_MINIGUN,      ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MINIGUN,      S_MINIGUN,      S_MINIGUN_LOIN, S_ARMESLOIN,  35,   70,  180, 120, 400, 0, 3000,   5, 2000,  1,    15 , 12, 0, 0},
-    { GUN_SPOCKGUN,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_SPOCKGUN,     S_SPOCKGUN,     S_SPOCK_LOIN, S_NULL,         15,  250,  300,  30, 150, 0, 1500,   5,  520,  1,    30,  15, 0, 0},
+    { GUN_RAIL,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FELECTRIQUE,  S_FELECTRIQUE,  S_FELECTRIQUE_LOIN, S_NULL,   10,  350,  325,  40, 100, 0,    0,  10, 8000,  1,    30,   0, 0, 0},
+    { GUN_PULSE,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FUSILPLASMA,  S_FUSILPLASMA,  S_FPLASMA_LOIN, S_NULL,       25,  120,  180,  70, 200, 0, 1000,   5, 8000,  1,    50,  25, 0, 0},
+    { GUN_SMAW,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_SMAW,         S_SMAW,         S_LANCEMISSILE_LOIN, S_NULL,   3, 1250,  850,  20, 200, 0,  600,  15, 8000,  1,   750, 100, 0, 0},
+    { GUN_MINIGUN,      ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MINIGUN,      S_MINIGUN,      S_MINIGUN_LOIN, S_ARMESLOIN,  35,   70,  180, 120, 400, 0, 3000,   5, 8000,  1,    15 , 12, 0, 0},
+    { GUN_SPOCKGUN,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_SPOCKGUN,     S_SPOCKGUN,     S_SPOCK_LOIN, S_NULL,         15,  250,  300,  30, 150, 0, 1500,   5, 8000,  1,    30,  15, 0, 0},
     { GUN_M32,          ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_LANCEGRENADE, S_LANCEGRENADE, S_LANCEGRENADE_LOIN, S_NULL,   3, 1000, 1250,  25, 250, 0,  400,  10, 1000,  1,   600, 150, 1000, 0},
     { GUN_LANCEFLAMMES, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FLAMEATTACK,  S_FLAMEATTACK,  S_NULL, S_NULL,               30,  100,   20, 500, 250, 0,    0,   2,  280, 10,    10 ,  0, 0, 0},
-    { GUN_UZI,          ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_UZI,          S_UZI,          S_UZI_LOIN, S_ARMESLOIN,      35,   75,  150, 130, 300, 0, 3000,   2, 2000,  1,    10,   7, 0, 0},
-    { GUN_FAMAS,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FAMAS,        S_FAMAS,        S_FAMAS_LOIN, S_ARMESLOIN,    30,   90,  140, 100, 250, 0, 3000,   3, 2000,  1,    20,  10, 0, 0},
+    { GUN_UZI,          ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_UZI,          S_UZI,          S_UZI_LOIN, S_ARMESLOIN,      35,   75,  150, 130, 300, 0, 3000,   2, 8000,  1,    10,   7, 0, 0},
+    { GUN_FAMAS,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FAMAS,        S_FAMAS,        S_FAMAS_LOIN, S_ARMESLOIN,    30,   90,  140, 100, 250, 0, 3000,   3, 8000,  1,    20,  10, 0, 0},
     { GUN_MOSSBERG,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MOSSBERG,     S_MOSSBERG,     S_MOSSBERG, S_RIFLELOIN,       3, 1200,   50, 500, 500, 0,    0,  20, 1000, 25,    20,   0, 0, 0},
-    { GUN_HYDRA,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_HYDRA,        S_HYDRA,        S_HYDRA_LOIN, S_RIFLELOIN,     4,  750,   20, 300, 300, 0,    0,  15,  520, 15,    20,   0, 0, 0},
+    { GUN_HYDRA,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_HYDRA,        S_HYDRA,        S_HYDRA_LOIN, S_RIFLELOIN,     4,  750,   32, 300, 300, 0,    0,  15,  600, 15,    20,   0, 0, 0},
     { GUN_SV98,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_SV98,         S_SV98,         S_SV98_LOIN, S_RIFLELOIN,      2, 1500,  900,   1, 600, 0, 3000,  30, 8000,  1,    80,  12, 0, 0},
-    { GUN_SKS,          ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_SKS,          S_SKS,          S_SKS_LOIN, S_RIFLELOIN,      10,  420,  500,   5, 150, 0, 2750,  25, 6000,  1,    50,   7, 0, 0},
-    { GUN_ARBALETE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_ARBALETE,     S_ARBALETE,     S_NULL, S_NULL,                5,  900,  700,  15, 200, 0, 2000,   7, 2000,  1,    20,   3, 0, 0},
-    { GUN_AK47,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_AK47,         S_AK47,         S_AK47_LOIN, S_ARMESLOIN,     30,   92,  170, 125, 300, 0, 3000,   7, 1000,  1,    50,   3, 0, 0},
-    { GUN_GRAP1,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GRAP1,        S_GRAP1,        S_NULL, S_NULL,               12,  230,  200,  30, 400, 0, 1500,  -3,  840,  1,  -400,  20, 0, 0},
+    { GUN_SKS,          ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_SKS,          S_SKS,          S_SKS_LOIN, S_RIFLELOIN,      10,  420,  500,   5, 150, 0, 2750,  25, 8000,  1,    50,   7, 0, 0},
+    { GUN_ARBALETE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_ARBALETE,     S_ARBALETE,     S_NULL, S_NULL,                5,  900,  700,  15, 200, 0, 2000,   7, 8000,  1,    20,   3, 0, 0},
+    { GUN_AK47,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_AK47,         S_AK47,         S_AK47_LOIN, S_ARMESLOIN,     30,   92,  170, 125, 300, 0, 3000,   7, 8000,  1,    50,   3, 0, 0},
+    { GUN_GRAP1,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GRAP1,        S_GRAP1,        S_NULL, S_NULL,               12,  270,  200,  30, 400, 0, 1500,  -3, 8000,  1,  -400,  20, 0, 0},
     { GUN_ARTIFICE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_ARTIFICE,     S_ARTIFICE,     S_ARTIFICE_LOIN, S_NULL,       3, 1000,  800,  50, 600, 0,  900,  60,  520,  1,   500,  80, 0, 0},
-    { GUN_GLOCK,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GLOCK,        S_GLOCK,        S_GLOCK_LOIN, S_ARMESLOIN,    10,  400,  280, 175, 350, 0, 2000,   7, 1000,  1,    30,   3, 0, 0},
+    { GUN_GLOCK,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GLOCK,        S_GLOCK,        S_GLOCK_LOIN, S_ARMESLOIN,    10,  400,  280, 175, 350, 0, 2000,   7, 8000,  1,    30,   3, 0, 0},
     // Super armes
     { GUN_S_NUKE, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_NUKELAUNCH, S_NUKELAUNCH, S_NULL, S_NULL,           1, 3000,  3000,  20, 300, 0,  175,  10, 2000,  1,   400, 1280, 0, 0},
-    { GUN_S_GAU8, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GAU8, S_GAU8, S_NULL, S_NULL,                      90,   13,   350, 150, 250, 0, 4000,   1, 4000,  1,    80,   15, 0, 0},
-    { GUN_S_ROQUETTES, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MINIROQUETTE, S_MINIROQUETTE, S_NULL, S_NULL, 14,  170,  2000,  10, 300, 0,  700,   6, 2000,  1,   500,   70, 0, 0},
+    { GUN_S_GAU8, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GAU8, S_GAU8, S_NULL, S_NULL,                      90,   13,   350, 150, 250, 0, 4000,   1, 8000,  1,    80,   15, 0, 0},
+    { GUN_S_ROQUETTES, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MINIROQUETTE, S_MINIROQUETTE, S_NULL, S_NULL, 14,  170,  2000,  10, 300, 0,  700,   6, 8000,  1,   500,   70, 0, 0},
     { GUN_S_CAMPOUZE, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_CAMPOUZE, S_CAMPOUZE, S_NULL, S_NULL,           8,  500,   500,  50,  50, 0, 5000,   3, 8000, 10,   150,    8, 0, 0},
     // Armes corps à corps
     { GUN_CAC349, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_EPEEATTACK, S_EPEEATTACK, S_NULL, S_NULL,          3, 1000,  20, 400, 400, 0, 0, -12,   60, 20, 50,  0, 0, 0},
@@ -460,6 +460,13 @@ static const struct guninfo { const char *name, *file, *vwep, *armedescFR, *arme
     // Armes spéciales aptitudes
     { "kamikaze", "kamikaze", "worldgun/kamikaze",  "une ceinture d'explosifs !", "an explosives ISIS's made belt !",        4, 3, 95,   { -1, ATK_KAMIKAZE_SHOOT }, },
     { "medigun", "medigun", "worldgun/medigun",  "un médigun (c'est pas normal) !", "a medigun (it's not normal)",          10, 3, 85,   { -1, ATK_MEDIGUN_SHOOT }, },
+};
+
+static const struct aptisortsinfo { const char *tex1, *tex2, *tex3; int mana1, mana2, mana3, duree1, duree2, duree3, reload1, reload2, reload3, sound1, sound2, sound3; } sorts[] =
+{
+    { "media/interface/hud/sortmage1.png", "media/interface/hud/sortmage2.png", "media/interface/hud/sortmage3.png",                    30, 40, 60,  250, 5000, 3000, 2000, 9000, 6000,  S_SORTMAGE1, S_SORTMAGE2, S_SORTMAGE3},        // Magicien
+    { "media/interface/hud/sortphysicien1.png", "media/interface/hud/sortphysicien2.png", "media/interface/hud/sortphysicien3.png",     45, 50, 65, 2000, 4000, 6000, 3000, 5000, 9000,  S_SORTPHY1, S_SORTPHY2, S_SORTPHY3},           // Physicien
+    { "media/interface/hud/sortpretre1.png", "media/interface/hud/sortpretre2.png", "media/interface/hud/sortpretre3.png",              30, 10, 80, 4000, 5000, 4000, 8000, 5000, 10000, S_SORTPRETRE1, S_SORTPRETRE2, S_SORTPRETRE3},  // Prêtre
 };
 
 #include "ai.h"
@@ -720,7 +727,7 @@ struct gameent : dynent, gamestate
     int lastpain;
     int lastaction, lastattack;
     int attacking;
-    int lastfootstep, attacksound, attackchan, idlesound, idlechan, hurtchan, dansechan;
+    int lastfootstep, attacksound, attackchan, hurtchan, dansechan, sortchan;
     int lasttaunt;
     int lastpickup, lastpickupmillis, flagpickup;
     int killstreak, frags, flags, deaths, totaldamage, totalshots;
@@ -739,7 +746,7 @@ struct gameent : dynent, gamestate
 
     vec muzzle, weed, balles;
 
-    gameent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), lastfootstep(0), attacksound(-1), attackchan(-1), dansechan(-1), killstreak(0), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0), customcape(0), customtombe(1), customdanse(0), aptitude(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
+    gameent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), lastfootstep(0), attacksound(-1), attackchan(-1), dansechan(-1), sortchan(-1), killstreak(0), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0), customcape(0), customtombe(1), customdanse(0), aptitude(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
     {
         name[0] = info[0] = 0;
         respawn();
@@ -749,7 +756,6 @@ struct gameent : dynent, gamestate
         freeeditinfo(edit);
         freeeditinfo(edit);
         if(attackchan >= 0) stopsound(attacksound, attackchan);
-        if(idlechan >= 0) stopsound(idlesound, idlechan);
         if(hurtchan >= 0) stopsound(S_HEARTBEAT, hurtchan);
         if(ai) delete ai;
     }
@@ -770,8 +776,16 @@ struct gameent : dynent, gamestate
 
     void stopdansesound(gameent *d)
     {
-        if(dansechan >= 0) stopsound(S_DANSE1+(d->customdanse-1), dansechan, 250);
+        if(dansechan >= 0) stopsound(S_DANSE1+(d->customdanse-1), dansechan, 150);
         dansechan = -1;
+    }
+
+    void stopsortsound(gameent *d)
+    {
+        int neededdata = 0;
+        switch(d->aptitude) {case 8: neededdata++; break; case 11: neededdata+=2;}
+        if(sortchan >= 0) stopsound(d->aptisort1 ? sorts[neededdata].sound1 : d->aptisort2 ? sorts[neededdata].sound2 : sorts[neededdata].sound3, sortchan, 50);
+        sortchan = -1;
     }
 
     void stopheartbeat()

@@ -34,13 +34,6 @@ static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precisio
     { 100,  110,  85,  120, "chapeaux/champignon",  "Junkie", "Junkie"},        //13
 };
 
-static const struct aptisortsinfo { const char *tex1, *tex2, *tex3; int mana1, mana2, mana3, duree1, duree2, duree3, reload1, reload2, reload3, sound1, sound2, sound3; } sorts[] =
-{
-    { "media/interface/hud/sortmage1.png", "media/interface/hud/sortmage2.png", "media/interface/hud/sortmage3.png",                    30, 40, 60,  250, 5000, 3000, 2000, 9000, 6000,  S_SORTMAGE1, S_SORTMAGE2, S_SORTMAGE3},        // Magicien
-    { "media/interface/hud/sortphysicien1.png", "media/interface/hud/sortphysicien2.png", "media/interface/hud/sortphysicien3.png",     45, 50, 65, 2000, 4000, 6000, 3000, 5000, 9000,  S_SORTPHY1, S_SORTPHY2, S_SORTPHY3},           // Physicien
-    { "media/interface/hud/sortpretre1.png", "media/interface/hud/sortpretre2.png", "media/interface/hud/sortpretre3.png",              30, 10, 80, 4000, 5000, 4000, 8000, 5000, 10000, S_SORTPRETRE1, S_SORTPRETRE2, S_SORTPRETRE3},  // Prêtre
-};
-
 //Définition des boucliers
 static const struct shieldsinfo { const char *bois, *fer, *gold, *magnetique, *hudbois, *hudfer, *hudgold, *hudmagnetique; } shields[] =
 {

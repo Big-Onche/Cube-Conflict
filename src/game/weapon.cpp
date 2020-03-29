@@ -1639,6 +1639,19 @@ namespace game
         else d->stopdansesound(d);
     }
 
+    void checksortsound(gameent *d, bool local)
+    {
+        if(d->clientnum >= 0 && d->state == CS_ALIVE)
+        {
+            int neededdata = 0;
+            switch(d->aptitude) {case APT_PHYSICIEN: neededdata++; break; case APT_PRETRE: neededdata+=2;}
+
+            d->sortchan = playsound(d->aptisort1 ? sorts[neededdata].sound1 : d->aptisort2 ? sorts[neededdata].sound2 : sorts[neededdata].sound3, local ? NULL : &d->o, NULL, 0, -1, -1, d->sortchan, 300);
+            if(d->sortchan < 0) d->sortchan = -1;
+        }
+        else d->stopsortsound(d);
+    }
+
     void removeweapons(gameent *d)
     {
         removebouncers(d);
@@ -1657,6 +1670,7 @@ namespace game
             gameent *d = players[i];
             checkattacksound(d, d==following);
             checkdansesound(d, d==following);
+            checksortsound(d, d==following);
         }
     }
 

@@ -77,7 +77,7 @@ int screenw = 0, screenh = 0;
 SDL_Window *screen = NULL;
 SDL_GLContext glcontext = NULL;
 
-int curtime = 0, lastmillis = 1, elapsedtime = 0, totalmillis = 1;
+int curtime = 0, lastmillis = 20000, elapsedtime = 0, totalmillis = 1;
 
 dynent *player = NULL;
 
