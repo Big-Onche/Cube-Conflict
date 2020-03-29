@@ -565,7 +565,7 @@ namespace game
         if(d->health<=0) {if(local) killed(d, actor);}
     }
 
-    VARP(deathscore, 0, 1, 1);
+    VARP(deathscore, 0, 0, 1);
 
     void deathstate(gameent *d, bool restore)
     {

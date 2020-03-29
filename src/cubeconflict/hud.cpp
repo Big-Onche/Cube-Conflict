@@ -347,10 +347,7 @@ namespace game
         flushhudmatrix();
 
         draw_text(infobarrexp, 0, 0);
-        pophudmatrix();
-
 
         pophudmatrix();
-
     }
 }
