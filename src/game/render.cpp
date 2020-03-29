@@ -42,6 +42,7 @@ namespace game
         r->edit = NULL;
         r->ai = NULL;
         r->attackchan = -1;
+        r->dansechan = -1;
         ragdolls.add(r);
         d->ragdoll = NULL;
     }

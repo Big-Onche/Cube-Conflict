@@ -720,7 +720,7 @@ struct gameent : dynent, gamestate
     int lastpain;
     int lastaction, lastattack;
     int attacking;
-    int lastfootstep, attacksound, attackchan, idlesound, idlechan, hurtchan, ragechan;
+    int lastfootstep, attacksound, attackchan, idlesound, idlechan, hurtchan, dansechan;
     int lasttaunt;
     int lastpickup, lastpickupmillis, flagpickup;
     int killstreak, frags, flags, deaths, totaldamage, totalshots;
@@ -739,7 +739,7 @@ struct gameent : dynent, gamestate
 
     vec muzzle, weed, balles;
 
-    gameent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), lastfootstep(0), attacksound(-1), attackchan(-1), killstreak(0), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0), customcape(0), customtombe(1), customdanse(0), aptitude(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
+    gameent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), lastfootstep(0), attacksound(-1), attackchan(-1), dansechan(-1), killstreak(0), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0), customcape(0), customtombe(1), customdanse(0), aptitude(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
     {
         name[0] = info[0] = 0;
         respawn();
@@ -766,6 +766,12 @@ struct gameent : dynent, gamestate
     {
         if(attackchan >= 0) stopsound(attacksound, attackchan, 250);
         attacksound = attackchan = -1;
+    }
+
+    void stopdansesound(gameent *d)
+    {
+        if(dansechan >= 0) stopsound(S_DANSE1+(d->customdanse-1), dansechan, 250);
+        dansechan = -1;
     }
 
     void stopheartbeat()

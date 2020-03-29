@@ -471,8 +471,8 @@ namespace game
 
     bool allowmove(physent *d)
     {
-        if(d->type!=ENT_PLAYER) return true;
-        return !((gameent *)d)->lasttaunt || lastmillis-((gameent *)d)->lasttaunt>=5000;
+        return true;
+        //return !((gameent *)d)->lasttaunt || lastmillis-((gameent *)d)->lasttaunt>=5000;
     }
 
     VARFP(player1_danse, 1, 1, 7,

@@ -1629,6 +1629,16 @@ namespace game
         else d->stopattacksound();
     }
 
+    void checkdansesound(gameent *d, bool local)
+    {
+        if(d->clientnum >= 0 && d->state == CS_ALIVE)
+        {
+            d->dansechan = playsound(S_DANSE1+(d->customdanse-1), local ? NULL : &d->o, NULL, 0, -1, -1, d->dansechan, 300);
+            if(d->dansechan < 0) d->dansechan = -1;
+        }
+        else d->stopdansesound(d);
+    }
+
     void removeweapons(gameent *d)
     {
         removebouncers(d);
@@ -1646,6 +1656,7 @@ namespace game
         {
             gameent *d = players[i];
             checkattacksound(d, d==following);
+            checkdansesound(d, d==following);
         }
     }
 

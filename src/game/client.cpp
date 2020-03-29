@@ -1409,8 +1409,10 @@ namespace game
                     gamepaused = val;
                     player1->attacking = ACT_IDLE;
                 }
-                if(a) conoutf("%s %s the game", colorname(a), val ? "paused" : "resumed");
-                else conoutf("game is %s", val ? "paused" : "resumed");
+                if(a) conoutf(langage ? "Game is paused by administrator." : "La partie a été mise en pause par un administrateur.");
+                else conoutf(langage ? "Game is paused." : "La partie est en pause.");
+                if(val) addpostfx("pause", 1, 1, 1, 1, vec4(1, 1, 1, 1));
+                else clearpostfx();
                 break;
             }
 
@@ -1802,7 +1804,7 @@ namespace game
             {
                 if(!d) return;
                 d->lasttaunt = lastmillis;
-                playsound(S_DANSE1+(d->customdanse-1), &d->o);
+                d->dansechan = playsound(S_DANSE1+(d->customdanse-1), d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 150, d->dansechan, 300);
                 break;
             }
 
