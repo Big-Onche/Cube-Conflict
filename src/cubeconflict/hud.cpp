@@ -27,6 +27,7 @@ namespace game
 
     void drawmessages(int killstreak, string str_pseudovictime, int n_aptitudevictime, string str_pseudoacteur, int n_killstreakacteur, float killdistance)
     {
+        if(ispaused()) return;
         decal_message = 0, need_message1 = true, need_message2 = true;
 
         if(totalmillis-message1<=2500)
@@ -127,6 +128,17 @@ namespace game
 
     void gameplayhud(int w, int h)
     {
+        if(ispaused())
+        {
+            float lh = 0.43f*min(w, h), lw = lh*2,
+                  lx = 0.5f*(w - lw), ly = 0.5f*(h*0.5f - lh);
+
+            settexture((maxtexsize ? min(maxtexsize, hwtexsize) : hwtexsize) >= 1024 && (hudw > 1280 || hudh > 800) ? "<premul>media/interface/logo_1024.png" : "<premul>media/interface/logo.png", 3);
+            bgquad(lx, ly, lw, lh);
+
+            return;
+        }
+
         gameent *d = hudplayer();
         if(d->state==CS_EDITING || d->state==CS_SPECTATOR) return;
         else
