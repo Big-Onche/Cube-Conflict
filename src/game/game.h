@@ -218,7 +218,7 @@ enum
     S_RECHARGEMENT1, S_RECHARGEMENT2, S_RECHARGEMENT3,
 
     // Objets
-    S_ITEMHEALTH, S_COCHON, S_ITEMAMMO, S_ITEMARMOUR, S_ITEMCHAMPIS, S_ITEMJOINT, S_ITEMEPO, S_ITEMSTEROS, S_STEROSTIR, S_WEAPLOAD,
+    S_ITEMHEALTH, S_COCHON, S_ITEMAMMO, S_ITEMBBOIS, S_ITEMBFER, S_ITEMBOR, S_ITEMBMAGNET, S_ITEMARMOUR, S_ITEMCHAMPIS, S_ITEMJOINT, S_ITEMEPO, S_ITEMSTEROS, S_STEROSTIR, S_WEAPLOAD,
     S_HEARTBEAT, S_ALARME,
     S_DESTRUCTION, S_INVENTAIRE,
 
@@ -367,19 +367,18 @@ static struct itemstat { int add, max, sound; const char *name; int icon, info; 
     { 40,   120,    S_ITEMAMMO,   "MINI-ROQUETTES",  HICON_SIZE, GUN_S_ROQUETTES},
     { 20,    60,    S_ITEMAMMO,   "CAMPOUZE 2000",   HICON_SIZE, GUN_S_CAMPOUZE},
     //Objets
-    {250,     1000, S_ITEMHEALTH, "PANACHAY",            HICON_SIZE},
-    {500,     2500, S_COCHON,     "COCHON GRILLAY",      HICON_SIZE},
-    {30000,  45000, S_ITEMSTEROS, "STEROIDES",           HICON_SIZE},
-    {60000, 120000, S_ITEMCHAMPIS,"CHAMPIS",             HICON_SIZE},
-    {45000,  75000, S_ITEMEPO,    "EPO",                 HICON_SIZE},
-    {60000,  90000, S_ITEMJOINT,  "JOINT",               HICON_SIZE},
-    {750,      750, S_ITEMARMOUR, "BOUCLIER EN BOIS",    HICON_SIZE, A_BLUE},
-    {1000,    1250, S_ITEMARMOUR, "BOUCLIER DE FER",     HICON_SIZE, A_GREEN},
-    {2000,    2000, S_ITEMARMOUR, "BOUCLIER D'OR",       HICON_SIZE, A_YELLOW},
-    {1500,    1500, S_ITEMARMOUR, "BOUCLIER MAGNETIQUE", HICON_SIZE, A_MAGNET},
-    {2500,    2500, S_ITEMARMOUR, "ARMURE ASSISTEE",     HICON_SIZE, A_MAGNET}, //Futur bouclier
-
-    {50,       150, S_ITEMHEALTH, "MANA",                HICON_SIZE},
+    {250,     1000, S_ITEMHEALTH,   "PANACHAY",            HICON_SIZE},
+    {500,     2500, S_COCHON,       "COCHON GRILLAY",      HICON_SIZE},
+    {30000,  45000, S_ITEMSTEROS,   "STEROIDES",           HICON_SIZE},
+    {60000, 120000, S_ITEMCHAMPIS,  "CHAMPIS",             HICON_SIZE},
+    {45000,  75000, S_ITEMEPO,      "EPO",                 HICON_SIZE},
+    {60000,  90000, S_ITEMJOINT,    "JOINT",               HICON_SIZE},
+    {750,      750, S_ITEMBBOIS,    "BOUCLIER EN BOIS",    HICON_SIZE, A_BLUE},
+    {1250,    1250, S_ITEMBFER,     "BOUCLIER DE FER",     HICON_SIZE, A_GREEN},
+    {2000,    2000, S_ITEMBOR,      "BOUCLIER D'OR",       HICON_SIZE, A_YELLOW},
+    {1500,    1500, S_ITEMBMAGNET,  "BOUCLIER MAGNETIQUE", HICON_SIZE, A_MAGNET},
+    {2500,    2500, S_ITEMARMOUR,   "ARMURE ASSISTEE",     HICON_SIZE, A_MAGNET}, //Futur bouclier
+    {50,       150, S_ITEMHEALTH,   "MANA",                HICON_SIZE},
 };
 
 #define validitem(n) false
@@ -408,7 +407,7 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound
     { GUN_SKS,          ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_SKS,          S_SKS,          S_SKS_LOIN, S_RIFLELOIN,      10,  420,  500,   5, 150, 0, 2750,  25, 8000,  1,    50,   7, 0, 0},
     { GUN_ARBALETE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_ARBALETE,     S_ARBALETE,     S_NULL, S_NULL,                5,  900,  700,  15, 200, 0, 2000,   7, 8000,  1,    20,   3, 0, 0},
     { GUN_AK47,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_AK47,         S_AK47,         S_AK47_LOIN, S_ARMESLOIN,     30,   92,  170, 125, 300, 0, 3000,   7, 8000,  1,    50,   3, 0, 0},
-    { GUN_GRAP1,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GRAP1,        S_GRAP1,        S_NULL, S_NULL,               12,  270,  200,  30, 400, 0, 1500,  -3, 8000,  1,  -400,  20, 0, 0},
+    { GUN_GRAP1,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GRAP1,        S_GRAP1,        S_NULL, S_NULL,               12,  200,  250,  30, 400, 0, 1500,  -3, 8000,  1,  -600,  20, 0, 0},
     { GUN_ARTIFICE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_ARTIFICE,     S_ARTIFICE,     S_ARTIFICE_LOIN, S_NULL,       3, 1000,  800,  50, 600, 0,  900,  60,  520,  1,   500,  80, 0, 0},
     { GUN_GLOCK,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GLOCK,        S_GLOCK,        S_GLOCK_LOIN, S_ARMESLOIN,    10,  400,  280, 175, 350, 0, 2000,   7, 8000,  1,    30,   3, 0, 0},
     // Super armes
@@ -596,7 +595,6 @@ struct gamestate
         aptisort1 = 0;
         aptisort2 = 0;
         aptisort3 = 0;
-        fullbrightmodels = 0;
         loopi(NUMGUNS) ammo[i] = 0;
     }
 
@@ -935,7 +933,7 @@ namespace game
     extern void clearclients(bool notify = true);
     extern void startgame();
     extern void spawnplayer(gameent *);
-    extern void deathstate(gameent *d, bool restore = false);
+    extern void deathstate(gameent *d, gameent *actor, bool restore = false);
     extern void damaged(int damage, gameent *d, gameent *actor, bool local = true, int atk = 0);
     extern void regened(int damage, gameent *d, gameent *actor, bool local = true);
     extern void killed(gameent *d, gameent *actor);
