@@ -575,7 +575,7 @@ namespace ai
         {
             static vector<int> nearby;
             nearby.setsize(0);
-            findents(I_RAIL, I_BOUCLIERMAGNETIQUE, false, d->feetpos(), vec(32, 32, 24), nearby);
+            findents(I_RAIL, I_MANA, false, d->feetpos(), vec(32, 32, 24), nearby);
             loopv(nearby)
             {
                 int id = nearby[i];
