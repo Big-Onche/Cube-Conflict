@@ -874,19 +874,16 @@ namespace server
         int sec = 0;
         switch(type)
         {
-            case I_GLOCK: sec = np*3; break;
-            case I_UZI: case I_LANCEFLAMMES: case I_ARBALETE: case I_HYDRA: case I_SANTE: case I_MANA: case I_BOUCLIERBOIS: sec = np*4; break;
+            case I_GLOCK: case I_SANTE: case I_MANA: sec = np*3; break;
+            case I_UZI: case I_LANCEFLAMMES: case I_ARBALETE: case I_HYDRA: case I_BOUCLIERBOIS: sec = np*4; break;
             case I_MOSSBERG: case I_SMAW: case I_ARTIFICE: case I_SV98: case I_M32: case I_FAMAS: case I_PULSE: case I_AK47: case I_GRAP1: sec = np*5; break;
             case I_MINIGUN: case I_RAIL: case I_SPOCKGUN: case I_BOUCLIERFER: sec = np*6;
             case I_BOUCLIERMAGNETIQUE: sec = np*7; break;
             case I_BOUCLIEROR: sec = np*8; break;
-            case I_SUPERARME: sec = 45+rnd(45); break;
-
-            case I_BOOSTPV: sec = 30; break;
-            case I_BOOSTPRECISION: sec = 45; break;
-            case I_BOOSTVITESSE: sec = 60; break;
-            case I_BOOSTDEGATS: sec = 75; break;
-            case I_BOOSTGRAVITE: sec = 20; break;
+            case I_SUPERARME: sec = 45+rnd(31); break;
+            case I_BOOSTPV: case I_BOOSTGRAVITE: sec = 30+rnd(21); break;
+            case I_BOOSTPRECISION: case I_BOOSTVITESSE: case I_BOOSTDEGATS: sec = 40+rnd(21); break;
+             break;
         }
         return sec*1000;
     }
