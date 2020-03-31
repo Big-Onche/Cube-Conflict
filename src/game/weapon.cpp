@@ -640,7 +640,7 @@ namespace game
                 vec debrisorigin = vec(v).sub(vec(vel).mul(6));
                 adddynlight(safe ? v : debrisorigin, 2*attacks[atk].exprad, vec(1.5f, 0.0f, 1.5f), 300, 100, L_NODYNSHADOW, attacks[atk].exprad/2, vec(0.5f, 0.0f, 0.5f));
                 particle_splash(PART_SPARK, 30, 175, v, owner->steromillis ? 0xFF0000 : 0xAA4466, 0.5f, 200, 200, 0, player1->champimillis ? true : false);
-                particle_fireball(v, 1.15f*attacks[atk].exprad, PART_ONDECHOC, int(attacks[atk].exprad*25), owner->steromillis ? 0xFF0000 : 0xAA00AA, 1.5f, player1->champimillis ? true : false);
+                loopi(3)particle_fireball(v, 0.8f*attacks[atk].exprad, PART_EXPLOSION, int(attacks[atk].exprad*5), owner->steromillis ? 0xFF0000 : 0x550055, 1.5f, player1->champimillis ? true : false);
             }
             break;
 
@@ -1174,7 +1174,8 @@ namespace game
             case ATK_SV98_SHOOT:
             case ATK_SKS_SHOOT:
             case ATK_CAMPOUZE_SHOOT:
-                spawnbouncer(d->balles, d->muzzle, d, BNC_BIGDOUILLES, bnclifetime+rnd(bnclifetime));
+                if(atk==ATK_CAMPOUZE_SHOOT) {loopi(3)spawnbouncer(d->balles, d->muzzle, d, BNC_BIGDOUILLES, bnclifetime+rnd(bnclifetime));}
+                else spawnbouncer(d->balles, d->muzzle, d, BNC_BIGDOUILLES, bnclifetime+rnd(bnclifetime));
                 particle_splash(PART_SMOKE, 4, 600, d->muzzle, 0x444444, 2.0f, 20, 500, 0, player1->champimillis ? true : false);
                 particle_flare(d->muzzle, d->muzzle, 100, PART_NORMAL_MUZZLE_FLASH, d->steromillis ? 0xFF0000 : 0xFFFFFF, 1.25f, d, player1->champimillis ? true : false);
                 particle_flare(d->muzzle, d->muzzle, 100, PART_SNIPE_MUZZLE_FLASH, d->steromillis ? 0xFF0000 : 0xFFFFFF, 5.0f, d, player1->champimillis ? true : false);
