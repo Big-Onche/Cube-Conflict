@@ -501,7 +501,7 @@ namespace ai
             case I_BOUCLIERFER:
                 if(d->armour <= 750) score = 1e7f;
                 break;
-            case I_BOUCLIEROR: case I_BOUCLIERMAGNETIQUE:
+            case I_BOUCLIEROR: case I_BOUCLIERMAGNETIQUE: case I_ARMUREASSISTEE:
                 if(d->armour <= 1250) score = 1e8f;
                 break;
             default:
@@ -1355,7 +1355,7 @@ namespace ai
             if(!intermission)
             {
                 if(d->ragdoll) cleanragdoll(d); // RAGRAG
-                moveplayer(d, 10, true, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptisort3);
+                moveplayer(d, 10, true, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptisort3, d->armourtype==A_ASSIST ? true : false);
                 if(allowmove && !b.idle) timeouts(d, b);
 				entities::checkitems(d);
 				if(cmode) cmode->checkitems(d);

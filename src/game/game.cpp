@@ -195,7 +195,7 @@ namespace game
         d->roll = d->newroll;
         if(move)
         {
-            moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptisort3);
+            moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptisort3, d->armourtype==A_ASSIST ? true : false);
             d->newpos = d->o;
         }
         float k = 1.0f - float(lastmillis - d->smoothmillis)/smoothmove;
@@ -244,16 +244,13 @@ namespace game
 
             if(curtime>0 && d->ragemillis && d!=player1) d->ragemillis = max(d->ragemillis-curtime, 0);
 
-            if(d==hudplayer())
+            if(d==hudplayer() && d->state==CS_ALIVE)
             {
-                if(d->health<=15 && d->state==CS_ALIVE)
-                {
-                    d->hurtchan = playsound(S_HEARTBEAT, NULL, NULL, 0, -1, 1000, d->hurtchan);
-                }
-                else
-                {
-                    d->stopheartbeat();
-                }
+                if(d->health<=200) d->hurtchan = playsound(S_HEARTBEAT, NULL, NULL, 0, -1, 1000, d->hurtchan);
+                else d->stopheartbeat();
+
+                if(d->armour<=750 && d->armourtype==A_ASSIST && d->armour>0) d->alarmchan = playsound(S_ASSISTALARM, NULL, NULL, 0, -1, 1000, d->alarmchan);
+                else d->stopassit();
             }
 
             if(d->state==CS_ALIVE && !intermission && d!=player1)
@@ -301,9 +298,9 @@ namespace game
             {
                 crouchplayer(d, 10, false);
                 if(smoothmove && d->smoothmillis>0) predictplayer(d, true);
-                else moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptisort3);
+                else moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptisort3, d->armourtype==A_ASSIST ? true : false);
             }
-            else if(d->state==CS_DEAD && !d->ragdoll && lastmillis-d->lastpain<2000) moveplayer(d, 1, true, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptisort3);
+            else if(d->state==CS_DEAD && !d->ragdoll && lastmillis-d->lastpain<2000) moveplayer(d, 1, true, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptisort3, d->armourtype==A_ASSIST ? true : false);
         }
     }
 
@@ -399,7 +396,7 @@ namespace game
             {
                 if(player1->ragdoll) cleanragdoll(player1);
                 crouchplayer(player1, 10, true);
-                moveplayer(player1, 10, true, player1->epomillis, player1->jointmillis, player1->aptitude, player1->aptitude==APT_MAGICIEN ? player1->aptisort1 : player1->aptisort3);
+                moveplayer(player1, 10, true, player1->epomillis, player1->jointmillis, player1->aptitude, player1->aptitude==APT_MAGICIEN ? player1->aptisort1 : player1->aptisort3, player1->armourtype==A_ASSIST ? true : false);
                 swayhudgun(curtime);
                 entities::checkitems(player1);
                 if(cmode) cmode->checkitems(player1);
@@ -525,7 +522,7 @@ namespace game
             lasthit = lastmillis;
         }
 
-        int armoursound = d->armourtype == A_BLUE ? S_BALLEBOUCLIERBOIS : d->armourtype == A_GREEN ? S_BALLEBOUCLIERFER : d->armourtype == A_YELLOW ? S_BALLEBOUCLIEROR : S_BALLEBOUCLIERMAGNETIQUE;
+        int armoursound = d->armourtype == A_BLUE ? S_BALLEBOUCLIERBOIS : d->armourtype == A_GREEN ? S_BALLEBOUCLIERFER : d->armourtype == A_YELLOW ? S_BALLEBOUCLIEROR : d->armourtype == A_ASSIST ? S_BALLEARMUREASSISTENT : S_BALLEBOUCLIERMAGNETIQUE;
 
         if(d==h)
         {
@@ -567,7 +564,7 @@ namespace game
 
     VARP(deathscore, 0, 0, 1);
 
-    void deathstate(gameent *d, bool restore)
+    void deathstate(gameent *d, gameent *actor, bool restore)
     {
         d->state = CS_DEAD;
         d->lastpain = lastmillis;
@@ -764,7 +761,7 @@ namespace game
             }
         }
 
-        deathstate(d);
+        deathstate(d, actor);
         ai::killed(d, actor);
     }
 
@@ -944,6 +941,7 @@ namespace game
     void physicstrigger(physent *d, bool local, int floorlevel, int waterlevel, int material)
     {
         vec o = (d==hudplayer() && !isthirdperson()) ? d->feetpos() : d->o;
+        gameent *pl = (gameent *)d;
         if(waterlevel>0)
         {
             if(material&MAT_WATER)
@@ -967,12 +965,12 @@ namespace game
         if (floorlevel>0)
         {
             particle_splash(PART_SMOKE, 10, 100, d->feetpos(), 0x666666, 7.0f+rnd(5), 400, 20);
-            if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(S_JUMP, d);
+            if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_ASSIST && pl->armour>0 ? S_JUMPASSIST : S_JUMP, d);
         }
         else if(floorlevel<0)
         {
             particle_splash(PART_SMOKE, 15, 120, d->feetpos(), 0x442211, 7.0f+rnd(5), 400, 20);
-            if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(S_LAND, d);
+            if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_ASSIST && pl->armour>0 ? S_LANDASSIST : S_LAND, d);
         }
     }
 
@@ -983,9 +981,9 @@ namespace game
         gameent *pl = (gameent *)d;
         if(d->physstate>=PHYS_SLOPE && moving)
         {
-            int snd = S_PAS;
+            int snd = pl->armourtype==A_ASSIST && pl->armour> 0 ? S_PASASSIST: S_PAS;
             if(lookupmaterial(d->feetpos())&MAT_WATER) snd = S_NAGE;
-            if(lastmillis-pl->lastfootstep < (d->vel.magnitude()*(aptitudes[pl->aptitude].apt_vitesse*3.5f)*(pl->crouched() ? 2 : 1)*(d->inwater ? 2 : 1)/d->vel.magnitude())) return;
+            if(lastmillis-pl->lastfootstep < (d->vel.magnitude()*(aptitudes[pl->aptitude].apt_vitesse*3.5f)*(pl->crouched() ? 2 : 1)*(d->inwater ? 2 : 1)*(pl->armourtype==A_ASSIST && pl->armour> 0 ? 2.5f : 1)/d->vel.magnitude())) return;
             else {playsound(snd, &d->o, 0, 0, 0 , 150, -1, 300); if(pl->epomillis) switch(rnd(4)) {case 0: playsound(S_PASEPO, &d->o, 0, 0, 0 , 500, -1, 1000);}}
         }
         pl->lastfootstep = lastmillis;

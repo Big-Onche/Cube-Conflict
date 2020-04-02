@@ -555,7 +555,7 @@ namespace game
             h.info2 = info2;
             h.dir = f==at ? ivec(0, 0, 0) : ivec(vec(vel).mul(DNF));
 
-            int armoursound = f->armourtype == A_BLUE ? S_BALLEBOUCLIERBOIS : f->armourtype == A_GREEN ? S_BALLEBOUCLIERFER : f->armourtype == A_YELLOW ? S_BALLEBOUCLIEROR : S_BALLEBOUCLIERMAGNETIQUE;
+            int armoursound = f->armourtype == A_BLUE ? S_BALLEBOUCLIERBOIS : f->armourtype == A_GREEN ? S_BALLEBOUCLIERFER : f->armourtype == A_YELLOW ? S_BALLEBOUCLIEROR : f->armourtype == A_ASSIST ? S_BALLEARMUREASSIST : S_BALLEBOUCLIERMAGNETIQUE;
 
             if(at==player1)
             {

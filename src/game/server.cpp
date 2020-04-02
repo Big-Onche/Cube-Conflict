@@ -882,7 +882,7 @@ namespace server
             case I_BOUCLIEROR: sec = np*8; break;
             case I_SUPERARME: sec = 45+rnd(31); break;
             case I_BOOSTPV: case I_BOOSTGRAVITE: sec = 30+rnd(21); break;
-            case I_BOOSTPRECISION: case I_BOOSTVITESSE: case I_BOOSTDEGATS: sec = 40+rnd(21); break;
+            case I_BOOSTPRECISION: case I_BOOSTVITESSE: case I_BOOSTDEGATS: case I_ARMUREASSISTEE: sec = 40+rnd(21); break;
              break;
         }
         return sec*1000;
@@ -895,6 +895,7 @@ namespace server
             case I_BOUCLIERMAGNETIQUE:
             case I_BOUCLIERFER:
             case I_BOUCLIEROR:
+            case I_ARMUREASSISTEE:
             case I_BOOSTDEGATS:
             case I_BOOSTGRAVITE:
             case I_BOOSTPRECISION:
@@ -2521,7 +2522,7 @@ namespace server
                             sents[i].spawned = true;
                             sendf(-1, 1, "ri2", N_ITEMSPAWN, i);
                         }
-                        else if(sents[i].spawntime<=10000 && oldtime>10000 && (sents[i].type==I_BOOSTDEGATS || sents[i].type==I_BOOSTPV || sents[i].type==I_BOOSTGRAVITE || sents[i].type==I_BOOSTPRECISION || sents[i].type==I_BOOSTVITESSE || sents[i].type==I_SUPERARME))
+                        else if(sents[i].spawntime<=10000 && oldtime>10000 && (sents[i].type==I_BOOSTDEGATS || sents[i].type==I_BOOSTPV || sents[i].type==I_BOOSTGRAVITE || sents[i].type==I_BOOSTPRECISION || sents[i].type==I_BOOSTVITESSE || sents[i].type==I_SUPERARME || sents[i].type==I_ARMUREASSISTEE))
                         {
                             sendf(-1, 1, "ri2", N_ANNOUNCE, sents[i].type);
                         }

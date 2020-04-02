@@ -1746,11 +1746,11 @@ FVAR(straferoll, 0, 0.033f, 90);
 FVAR(faderoll, 0, 0.95f, 1);
 VAR(floatspeed, 1, 400, 10000);
 
-void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curtime, int jointmillis, int aptitude)
+void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curtime, int jointmillis, int aptitude, bool assist)
 {
     bool allowmove = game::allowmove(pl);
     int maxjumps = aptitude==APT_NINJA ? 2 : 1;
-    float jumpheight = aptitude==APT_NINJA ? JUMPVEL*1.5f : JUMPVEL;
+    float jumpheight = aptitude==APT_NINJA ? JUMPVEL*1.5f : assist ? JUMPVEL*2.f : JUMPVEL;
 
     if(floating)
     {
@@ -1815,7 +1815,7 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
 //    pl->vel.lerp(pl->vel, d, fpsfric);
 }
 
-void modifygravity(physent *pl, bool water, int curtime, int jointmillis, int aptitude)
+void modifygravity(physent *pl, bool water, int curtime, int jointmillis, int aptitude, bool assist)
 {
     float secs = curtime/1000.0f;
     if(jointmillis>0) secs = (curtime/((jointmillis/(aptitude==13 ? 7.5f : 10)+1000.0f)));
@@ -1848,14 +1848,14 @@ void modifygravity(physent *pl, bool water, int curtime, int jointmillis, int ap
 // moveres indicated the physics precision (which is lower for monsters and multiplayer prediction)
 // local is false for multiplayer prediction
 
-bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis, int jointmillis, int aptitude, int aptisort)
+bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis, int jointmillis, int aptitude, int aptisort, bool assist)
 {
     int material = lookupmaterial(vec(pl->o.x, pl->o.y, pl->o.z + (3*pl->aboveeye - pl->eyeheight)/4));
     bool water = isliquid(material&MATF_VOLUME);
     bool floating = pl->type==ENT_PLAYER && (pl->state==CS_EDITING || pl->state==CS_SPECTATOR);
     if(aptisort && aptitude==APT_PHYSICIEN && pl->type==ENT_PLAYER) floating = true;
 
-    float classespeed = aptitudes[aptitude].apt_vitesse*10.f;
+    float classespeed = assist ? 1300.f : aptitudes[aptitude].apt_vitesse*10.f;
 
     float secs;
     if(epomillis>0) secs = (curtime/(classespeed-(epomillis/(aptitude==13 ? 75 : 100))));
@@ -1864,12 +1864,12 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
     //if(accroupi) secs*=20;
 
     // apply gravity
-    if(!floating) modifygravity(pl, water, curtime, jointmillis, aptitude);
+    if(!floating) modifygravity(pl, water, curtime, jointmillis, aptitude, assist);
 
     if(aptitude==APT_MAGICIEN && aptisort>0) {secs = curtime/200.f;}
 
     // apply any player generated changes in velocity
-    modifyvelocity(pl, local, water, floating, curtime, jointmillis, aptitude);
+    modifyvelocity(pl, local, water, floating, curtime, jointmillis, aptitude, assist);
 
     vec d(pl->vel);
     if(!floating && water) d.mul(0.5f);
@@ -1965,7 +1965,7 @@ void interppos(physent *pl)
     pl->o.add(deltapos);
 }
 
-void moveplayer(physent *pl, int moveres, bool local, int epomillis, int jointmillis, int aptitude, int aptisort)
+void moveplayer(physent *pl, int moveres, bool local, int epomillis, int jointmillis, int aptitude, int aptisort, bool assist)
 {
     if(physsteps <= 0)
     {
@@ -1974,9 +1974,9 @@ void moveplayer(physent *pl, int moveres, bool local, int epomillis, int jointmi
     }
 
     if(local) pl->o = pl->newpos;
-    loopi(physsteps-1) moveplayer(pl, moveres, local, physframetime, epomillis, jointmillis, aptitude, aptisort);
+    loopi(physsteps-1) moveplayer(pl, moveres, local, physframetime, epomillis, jointmillis, aptitude, aptisort, assist);
     if(local) pl->deltapos = pl->o;
-    moveplayer(pl, moveres, local, physframetime, epomillis, jointmillis, aptitude, aptisort);
+    moveplayer(pl, moveres, local, physframetime, epomillis, jointmillis, aptitude, aptisort, assist);
     if(local)
     {
         pl->newpos = pl->o;

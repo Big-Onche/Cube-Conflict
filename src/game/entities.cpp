@@ -49,7 +49,7 @@ namespace entities
             "munitions/supercaisse", "munitions/supercaisse", "munitions/supercaisse", "munitions/supercaisse",
 
             "objets/panachay", "objets/cochongrillay", "objets/steroides", "objets/champis", "objets/epo", "objets/joint",
-            "objets/bouclierbois", "objets/bouclierfer", "objets/bouclieror", "objets/boucliermagnetique", NULL,
+            "objets/bouclierbois", "objets/bouclierfer", "objets/bouclieror", "objets/boucliermagnetique", "objets/armureassistee",
 
             "objets/mana",
 
@@ -81,7 +81,7 @@ namespace entities
                 case I_SKS: case I_ARBALETE: case I_AK47: case I_GRAP1: case I_ARTIFICE: case I_GLOCK:
                 case I_SUPERARME: case I_NULL1: case I_NULL2: case I_NULL3:
                 case I_SANTE: case I_BOOSTPV: case I_BOOSTDEGATS: case I_BOOSTPRECISION: case I_BOOSTVITESSE: case I_BOOSTGRAVITE:
-                case I_BOUCLIERBOIS: case I_BOUCLIERFER: case I_BOUCLIEROR: case I_BOUCLIERMAGNETIQUE:
+                case I_BOUCLIERBOIS: case I_BOUCLIERFER: case I_BOUCLIEROR: case I_BOUCLIERMAGNETIQUE: case I_ARMUREASSISTEE:
                 case I_MANA:
                     break;
             }
@@ -510,7 +510,7 @@ namespace entities
             "supercaisse", "NULL", "NULL", "NULL",
 
             "panache", "cochon_grille", "steroides", "champis", "epo", "joint",
-            "bouclier_bois", "bouclier_fer", "bouclier_or", "bouclier_magnetique", "armure_assitee",
+            "bouclier_bois", "bouclier_fer", "bouclier_or", "bouclier_magnetique", "armure_assistee",
 
             "mana",
 

@@ -1036,7 +1036,7 @@ static inline particle *newparticle(const vec &o, const vec &d, int fade, int ty
     return parts[type]->addpart(o, d, fade, color, size, gravity, expand);
 }
 
-int maxparticledistance = 8192;
+int maxparticledistance = 6000;
 
 static void splash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int expand)
 {

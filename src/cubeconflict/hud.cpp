@@ -245,6 +245,7 @@ namespace game
                 case A_GREEN: settexture("media/interface/hud/bouclier_fer.png"); break;
                 case A_YELLOW: settexture("media/interface/hud/bouclier_or.png"); break;
                 case A_MAGNET: settexture("media/interface/hud/bouclier_magnetique.png"); break;
+                case A_ASSIST: settexture("media/interface/hud/robot.png"); break;
             }
             bgquad(250, h-130, 115, 115);
         }

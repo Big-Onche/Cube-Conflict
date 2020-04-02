@@ -90,7 +90,7 @@ enum { GUN_RAIL = 0, GUN_PULSE, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_M32, GU
        GUN_CAC349, GUN_CACMARTEAU, GUN_CACMASTER, GUN_CACFLEAU,
        GUN_KAMIKAZE, GUN_MEDIGUN,
        NUMGUNS };
-enum { A_BLUE, A_GREEN, A_YELLOW, A_MAGNET };     // armour types... take 20/40/60 % off
+enum { A_BLUE, A_GREEN, A_YELLOW, A_MAGNET, A_ASSIST };     // armour types... take 20/40/60 % off
 enum { ACT_IDLE = 0, ACT_SHOOT, NUMACTS };
 enum {  ATK_RAIL_SHOOT = 0, ATK_PULSE_SHOOT,
         ATK_SMAW_SHOOT, ATK_MINIGUN_SHOOT,
@@ -193,7 +193,7 @@ static const char * const mastermodeicons[] =  { "server", "server", "serverlock
 // hardcoded sounds, defined in sounds.cfg
 enum
 {
-    S_JUMP = 0, S_LAND, S_PAS, S_PASEPO, S_NAGE, S_SPLASH2, S_SPLASH1, S_BURN, S_JUMPPAD, S_TELEPORTEUR, S_SANG, S_ITEMSPAWN, S_NOAMMO,
+    S_JUMP = 0, S_JUMPASSIST, S_LAND, S_LANDASSIST, S_PAS, S_PASASSIST, S_PASEPO, S_NAGE, S_SPLASH2, S_SPLASH1, S_BURN, S_JUMPPAD, S_TELEPORTEUR, S_SANG, S_ITEMSPAWN, S_NOAMMO,
 
     //Armes
     S_GLOCK, S_UZI, S_MINIGUN, S_MOSSBERG, S_EPEEIDLE, S_EPEEATTACK, S_SMAW, S_FAMAS, S_SPOCKGUN, S_SV98, S_FELECTRIQUE, S_LANCEGRENADE,
@@ -208,8 +208,7 @@ enum
 
     //Balles
     S_BALLECORPS,
-    S_BALLEBOUCLIERBOIS, S_BALLEBOUCLIERFER, S_BALLEBOUCLIEROR, S_BALLEBOUCLIERMAGNETIQUE,
-    S_BALLEBOUCLIERBOISENT, S_BALLEBOUCLIERFERENT, S_BALLEBOUCLIERORENT, S_BALLEBOUCLIERMAGNETIQUEENT,
+    S_BALLEBOUCLIERBOIS, S_BALLEBOUCLIERFER, S_BALLEBOUCLIEROR, S_BALLEBOUCLIERMAGNETIQUE, S_BALLEARMUREASSIST, S_BALLEARMUREASSISTENT,
     S_REGENMEDIGUN, S_FLYBY, S_FLYBYSNIPE, S_FLYBYGRAP1, S_FLYBYALIEN, S_FLYBYELEC, S_FLYBYFLAME,
     S_IMPACT, S_IMPACTLOURDLOIN, S_IMPACTGRAP1, S_IMPACTALIEN, S_IMPACTSNIPE, S_IMPACTELEC,
 
@@ -219,7 +218,7 @@ enum
 
     // Objets
     S_ITEMHEALTH, S_COCHON, S_ITEMAMMO, S_ITEMBBOIS, S_ITEMBFER, S_ITEMBOR, S_ITEMBMAGNET, S_ITEMARMOUR, S_ITEMCHAMPIS, S_ITEMJOINT, S_ITEMEPO, S_ITEMSTEROS, S_STEROSTIR, S_WEAPLOAD,
-    S_HEARTBEAT, S_ALARME,
+    S_HEARTBEAT, S_ASSISTALARM, S_ALARME,
     S_DESTRUCTION, S_INVENTAIRE,
 
     //Bruitages physique
@@ -377,7 +376,7 @@ static struct itemstat { int add, max, sound; const char *name; int icon, info; 
     {1250,    1250, S_ITEMBFER,     "BOUCLIER DE FER",     HICON_SIZE, A_GREEN},
     {2000,    2000, S_ITEMBOR,      "BOUCLIER D'OR",       HICON_SIZE, A_YELLOW},
     {1500,    1500, S_ITEMBMAGNET,  "BOUCLIER MAGNETIQUE", HICON_SIZE, A_MAGNET},
-    {2500,    2500, S_ITEMARMOUR,   "ARMURE ASSISTEE",     HICON_SIZE, A_MAGNET}, //Futur bouclier
+    {3000,    3000, S_ITEMARMOUR,   "ARMURE ASSISTEE",     HICON_SIZE, A_ASSIST}, //Futur bouclier
     {50,       150, S_ITEMHEALTH,   "MANA",                HICON_SIZE},
 };
 
@@ -501,7 +500,7 @@ struct gamestate
         if(type<I_RAIL || type>I_MANA) return false;
         itemstat &is = itemstats[type-I_RAIL];
 
-        switch(type)
+            switch(type)
         {
             case I_SANTE:
                 //if(classe==2) return true;
@@ -523,7 +522,9 @@ struct gamestate
                 if(armour>=1250) return false;
             case I_BOUCLIERMAGNETIQUE:
                 if(armourtype==A_YELLOW && armour>=1500) return false;
-            case I_BOUCLIEROR: return !armourtype || armour<is.max;
+            case I_BOUCLIEROR:
+                if(armour>=2000) return false;
+            case I_ARMUREASSISTEE: return !armourtype || armour<is.max;
             default:
                 {
                     float aptboost;
@@ -557,7 +558,9 @@ struct gamestate
             case I_BOUCLIERFER:
             case I_BOUCLIEROR:
             case I_BOUCLIERMAGNETIQUE:
+            case I_ARMUREASSISTEE:
                 armour = min(armour+is.add, is.max);
+                health = min(1000, maxhealth);
                 armourtype = is.info;
                 break;
             case I_BOOSTDEGATS: steromillis = min(steromillis+is.add*(aptitude==13 ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;
@@ -677,7 +680,7 @@ struct gamestate
     // just subtract damage here, can set death, etc. later in code calling this
     int dodamage(int damage, int aptitude, int aptisort)
     {
-        int ad = damage*(armourtype+1)*25/100; // let armour absorb when possible
+        int ad = damage*(armourtype+1)*(armourtype==A_ASSIST ? 18 : 25)/100; // let armour absorb when possible
 
         if(damage>0)
         {
@@ -725,7 +728,7 @@ struct gameent : dynent, gamestate
     int lastpain;
     int lastaction, lastattack;
     int attacking;
-    int lastfootstep, attacksound, attackchan, hurtchan, dansechan, sortchan;
+    int lastfootstep, attacksound, attackchan, hurtchan, dansechan, sortchan, alarmchan;
     int lasttaunt;
     int lastpickup, lastpickupmillis, flagpickup;
     int killstreak, frags, flags, deaths, totaldamage, totalshots;
@@ -742,7 +745,7 @@ struct gameent : dynent, gamestate
     ai::aiinfo *ai;
     int ownernum, lastnode;
 
-    vec muzzle, weed, balles;
+    vec muzzle, weed, balles, assist;
 
     gameent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), lastfootstep(0), attacksound(-1), attackchan(-1), dansechan(-1), sortchan(-1), killstreak(0), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0), customcape(0), customtombe(1), customdanse(0), aptitude(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
     {
@@ -755,6 +758,7 @@ struct gameent : dynent, gamestate
         freeeditinfo(edit);
         if(attackchan >= 0) stopsound(attacksound, attackchan);
         if(hurtchan >= 0) stopsound(S_HEARTBEAT, hurtchan);
+        if(alarmchan >= 0) stopsound(S_ASSISTALARM, alarmchan);
         if(ai) delete ai;
     }
 
@@ -788,8 +792,14 @@ struct gameent : dynent, gamestate
 
     void stopheartbeat()
     {
-        if(hurtchan >= 0) stopsound(S_HEARTBEAT, hurtchan, 4000);
+        if(hurtchan >= 0) stopsound(S_HEARTBEAT, hurtchan, 2500);
         hurtchan = -1;
+    }
+
+    void stopassit()
+    {
+        if(alarmchan >= 0) stopsound(S_ASSISTALARM, alarmchan, 100);
+        alarmchan = -1;
     }
 
     void respawn()

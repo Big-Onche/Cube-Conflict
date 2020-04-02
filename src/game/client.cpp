@@ -297,7 +297,7 @@ namespace game
     void edittoggled(bool on)
     {
         addmsg(N_EDITMODE, "ri", on ? 1 : 0);
-        if(player1->state==CS_DEAD) deathstate(player1, true);
+        if(player1->state==CS_DEAD) deathstate(player1, player1, true);
         else if(player1->state==CS_EDITING && player1->editstate==CS_DEAD) showscores(false);
         disablezoom();
         player1->suicided = player1->respawned = -2;
@@ -671,9 +671,9 @@ namespace game
             case 3: name = "Dota"; break;
             case 4: name = "Lune"; break;
             case 5: name = "Volcan"; break;
-            default: newmap(13); break;
         }
         changemap(name, m_valid(nextmode) ? nextmode : (remote ? 1 : 0));
+        fullbrightmodels = 0;
     }
     ICOMMAND(map, "s", (char *name), changemap(name));
 
@@ -2062,7 +2062,7 @@ namespace game
                 else
                 {
                     d->state = d->editstate;
-                    if(d->state==CS_DEAD) deathstate(d, true);
+                    if(d->state==CS_DEAD) deathstate(d, d, true);
                 }
                 checkfollow();
                 break;
@@ -2089,7 +2089,7 @@ namespace game
                     }
                     s->state = CS_SPECTATOR;
                 }
-                else if(s->state==CS_SPECTATOR) deathstate(s, true);
+                else if(s->state==CS_SPECTATOR) deathstate(s, s, true);
                 checkfollow();
                 break;
             }
@@ -2121,6 +2121,7 @@ namespace game
                     case I_BOOSTVITESSE: conoutf(CON_GAMEINFO, "\faL'EPO ARRIVE POUR LES CYCLISTES !"); break;
                     case I_BOOSTGRAVITE: conoutf(CON_GAMEINFO, "\faQUELQU'UN ROULE UN GROS JOINT !"); break;
                     case I_SUPERARME: conoutf(CON_GAMEINFO, "\faLA SUPER-ARME EST BIENTÔT PRÊTE À ANNIHILER"); break;
+                    case I_ARMUREASSISTEE: conoutf(CON_GAMEINFO, "\faARMURE ASSISTÉE EN COURS DE DÉPLOIMENT"); break;
                     case 50: conoutf(CON_GAMEINFO, "\faCHANGEMENT D'ARME DANS 5 SECONDES !"); break;
                 }
                 break;
