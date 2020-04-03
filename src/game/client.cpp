@@ -1746,7 +1746,6 @@ namespace game
                 actor->armour = armour;
                 actor->health = health;
                 if(actor->state == CS_ALIVE && actor != player1) actor->lastpain = lastmillis;
-                regened(damage, actor, actor, false);
                 actor->vampimillis+=damage*1.5f;
                 break;
             }

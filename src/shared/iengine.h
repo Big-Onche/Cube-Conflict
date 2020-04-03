@@ -303,8 +303,6 @@ extern vec calcmodelpreviewpos(const vec &radius, float &yaw);
 
 extern void damageblend(int n);
 extern void damagecompass(int n, const vec &loc);
-extern void regenblend(int n);
-extern void regencompass(int n, const vec &loc);
 extern void aptiblend(int n, bool lowhp);
 
 extern vec minimapcenter, minimapradius, minimapscale;

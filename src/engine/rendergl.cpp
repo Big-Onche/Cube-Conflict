@@ -2635,13 +2635,6 @@ void damageblend(int n)
     damageblendmillis += clamp(n, damagescreenmin, damagescreenmax)*damagescreenfactor;
 }
 
-void regenblend(int n)
-{
-    if(!damagescreen || minimized) return;
-    if(lastmillis > damageblendmillis) damageblendmillis = lastmillis;
-    damageblendmillis += clamp(n, damagescreenmin, damagescreenmax)*damagescreenfactor;
-}
-
 void drawdamagescreen(int w, int h)
 {
     if(lastmillis >= damageblendmillis) return;
@@ -2650,25 +2643,6 @@ void drawdamagescreen(int w, int h)
 
     static Texture *damagetex = NULL;
     if(!damagetex) damagetex = textureload("media/interface/hud/damage.png", 3);
-
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-    glBindTexture(GL_TEXTURE_2D, damagetex->id);
-    float fade = damagescreenalpha/100.0f;
-    if(damageblendmillis - lastmillis < damagescreenfade)
-        fade *= float(damageblendmillis - lastmillis)/damagescreenfade;
-    gle::colorf(fade, fade, fade, fade);
-
-    hudquad(0, 0, w, h);
-}
-
-void drawregenscreen(int w, int h)
-{
-    if(lastmillis >= damageblendmillis) return;
-
-    hudshader->set();
-
-    static Texture *damagetex = NULL;
-    if(!damagetex) damagetex = textureload("media/interface/hud/regen.png", 3);
 
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     glBindTexture(GL_TEXTURE_2D, damagetex->id);
@@ -2813,8 +2787,6 @@ void gl_drawhud()
     {
         drawdamagescreen(w, h);
         drawdamagecompass(w, h);
-        drawregenscreen(w, h);
-        drawregencompass(w, h);
     }
 
     float conw = w/conscale, conh = h/conscale, abovehud = conh - FONTH;
