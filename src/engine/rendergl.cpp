@@ -2285,6 +2285,7 @@ namespace modelpreview
 
     float oldaspect, oldfovy, oldfov, oldldrscale, oldldrscaleb;
     int oldfarplane, oldvieww, oldviewh;
+    matrix4 oldprojmatrix;
 
     int x, y, w, h;
     bool background, scissor;
@@ -2322,6 +2323,7 @@ namespace modelpreview
         oldfarplane = farplane;
         oldvieww = vieww;
         oldviewh = viewh;
+        oldprojmatrix = projmatrix;
 
         aspect = w/float(h);
         fovy = modelpreviewfov;
@@ -2361,6 +2363,9 @@ namespace modelpreview
 
         camera1 = oldcamera;
         drawtex = 0;
+
+        projmatrix = oldprojmatrix;
+        setcamprojmatrix();
     }
 }
 

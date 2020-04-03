@@ -593,6 +593,7 @@ enum
 
     TEX_SPEC,
     TEX_DEPTH,
+    TEX_ALPHA,
     TEX_UNKNOWN,
 
     TEX_DETAIL = TEX_SPEC
@@ -862,3 +863,4 @@ extern VSlot dummyvslot;
 extern DecalSlot dummydecalslot;
 extern vector<Slot *> slots;
 extern vector<VSlot *> vslots;
+

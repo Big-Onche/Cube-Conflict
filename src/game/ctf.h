@@ -258,7 +258,7 @@ struct ctfclientmode : clientmode
     {
         if(notgotflags || !flags.inrange(i) || ci->state.state!=CS_ALIVE || !ci->team) return;
         flag &f = flags[i];
-        if(!validteam(f.team) || f.owner>=0 || f.version != version || (f.droptime && f.dropper == ci->clientnum && f.dropcount >= 1)) return;
+        if(!validteam(f.team) || f.owner>=0 || f.version != version || (f.droptime && f.dropper == ci->clientnum && f.dropcount >= 3)) return;
         if(f.team!=ci->team)
         {
             loopvj(flags) if(flags[j].owner==ci->clientnum) return;
@@ -502,7 +502,8 @@ struct ctfclientmode : clientmode
                 flag &f = flags[i];
                 f.version = version;
                 f.owner = owner>=0 ? (owner==player1->clientnum ? player1 : newclient(owner)) : NULL;
-                f.droptime = dropped;
+                f.owntime = owner>=0 ? lastmillis : 0;
+                f.droptime = dropped ? lastmillis : 0;
                 f.droploc = dropped ? droploc : f.spawnloc;
                 f.interptime = 0;
 
@@ -533,7 +534,7 @@ struct ctfclientmode : clientmode
         f.version = version;
         f.interploc = interpflagpos(f, f.interpangle);
         f.interptime = lastmillis;
-        dropflag(i, droploc, d->yaw, 1);
+        dropflag(i, droploc, d->yaw, lastmillis);
         d->flagpickup |= 1<<f.id;
         if(!droptofloor(f.droploc.addz(4), 4, 0))
         {
