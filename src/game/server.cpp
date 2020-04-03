@@ -126,7 +126,7 @@ namespace server
         int state, editstate;
         int lastdeath, deadflush, lastspawn, lifesequence;
         int lastshot;
-        projectilestate<8> projs, grenades, kamikaze;
+        projectilestate<8> projs, grenades, kamikaze, assistexpl;
         int killstreak, frags, flags, deaths, teamkills, shotdamage, damage;
         int lasttimeplayed, timeplayed;
         float effectiveness;
@@ -150,6 +150,7 @@ namespace server
             projs.reset();
             grenades.reset();
             kamikaze.reset();
+            assistexpl.reset();
 
             timeplayed = 0;
             effectiveness = 0;
@@ -175,6 +176,7 @@ namespace server
             projs.reset();
             grenades.reset();
             kamikaze.reset();
+            assistexpl.reset();
         }
     };
 
@@ -220,6 +222,7 @@ namespace server
         int clientnum, ownernum, connectmillis, sessionid, overflow;
         string name, mapvote;
         int team, playermodel, playercolor;
+        int customcape, customtombe, customdanse, aptitude;
         int modevote;
         int privilege;
         bool connected, local, timesync;
@@ -242,8 +245,6 @@ namespace server
         void *authchallenge;
         int authkickvictim;
         char *authkickreason;
-
-        int customcape, customtombe, customdanse, aptitude;
 
         clientinfo() : getdemo(NULL), getmap(NULL), clipboard(NULL), authchallenge(NULL), authkickreason(NULL) { reset(); }
         ~clientinfo() { events.deletecontents(); cleanclipboard(); cleanauth(); }
@@ -345,6 +346,10 @@ namespace server
             aptitude = 0;
             playermodel = -1;
             playercolor = 0;
+            aptitude = 0;
+            customcape = 0;
+            customtombe = 0;
+            customdanse = 0;
             privilege = PRIV_NONE;
             connected = local = false;
             connectauth = 0;
@@ -895,7 +900,6 @@ namespace server
             case I_BOUCLIERMAGNETIQUE:
             case I_BOUCLIERFER:
             case I_BOUCLIEROR:
-            case I_ARMUREASSISTEE:
             case I_BOOSTDEGATS:
             case I_BOOSTGRAVITE:
             case I_BOOSTPRECISION:
@@ -1743,6 +1747,9 @@ namespace server
             putint(p, ci->ownernum);
             putint(p, ci->state.aitype);
             putint(p, ci->aptitude);
+            putint(p, ci->customcape);
+            putint(p, ci->customtombe);
+            putint(p, ci->customdanse);
             putint(p, ci->state.skill);
             putint(p, ci->playermodel);
             putint(p, ci->playercolor);
@@ -2157,7 +2164,7 @@ namespace server
 
     void dodamage(clientinfo *target, clientinfo *actor, int damage, int atk, const vec &hitpush = vec(0, 0, 0))
     {
-        if(teamkill==0 && atk!=ATK_MEDIGUN_SHOOT) { if(actor!=target) if(isteam(target->team, actor->team)) return; } //ENLEVE LE TEAMKILL
+        if(teamkill==0) { if(actor!=target) if(isteam(target->team, actor->team)) return; } //ENLEVE LE TEAMKILL
 
         servstate &ts = target->state;
         servstate &as = actor->state;
@@ -2168,7 +2175,6 @@ namespace server
         //Dommages spéciaux d'aptitudes
         switch(actor->aptitude)
         {
-            case APT_MEDECIN: {if(atk==ATK_MEDIGUN_SHOOT) damage = -20;} break;
             case APT_NINJA: {if(atk==ATK_CAC349_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACMASTER_SHOOT) damage *= 3.0f;} break;
             case APT_MAGICIEN: {if(as.aptisort2) damage *= 1.333333f; break;}
             case APT_CAMPEUR: damage += as.o.dist(ts.o)/2.5f; break;
@@ -2179,11 +2185,10 @@ namespace server
         switch(target->aptitude)
         {
             case APT_MAGICIEN: {if(ts.aptisort3) damage = damage/5.0f;} break;
-            case APT_VICKING: {if(actor!=target && atk!=ATK_MEDIGUN_SHOOT) {ts.ragemillis+=damage*5; sendresume(target);}} break; //Ajoute la rage au Vicking et l'envoie au client
+            case APT_VICKING: {if(actor!=target) {ts.ragemillis+=damage*5; sendresume(target);}} break; //Ajoute la rage au Vicking et l'envoie au client
             case APT_PRETRE: { if(ts.aptisort2 && ts.mana>=damage/10) {ts.mana -= damage/10; damage=0; sendresume(target);} } break;
         }
 
-        if(atk==ATK_MEDIGUN_SHOOT) {if(ts.health < ts.maxhealth) ts.dodamage(damage, target->aptitude, 0);} //Le medigun ne regen pas plus que la santé max du joueur, les sorts de dégats ne sont pas pris en compte
         ts.dodamage(damage, target->aptitude, ts.aptisort1);
 
         if(target!=actor && !isteam(target->team, actor->team)) as.damage += damage;
@@ -2302,16 +2307,12 @@ namespace server
             case ATK_GAU8_SHOOT:
             case ATK_ROQUETTES_SHOOT:
             case ATK_CAMPOUZE_SHOOT:
-            case ATK_MEDIGUN_SHOOT:
             case ATK_GRAP1_SHOOT:
                 if(!gs.projs.remove(id)) return;
                 break;
-            case ATK_KAMIKAZE_SHOOT:
-                if(!gs.kamikaze.remove(id)) return;
-                break;
-            case ATK_M32_SHOOT:
-                if(!gs.grenades.remove(id)) return;
-                break;
+            case ATK_ASSISTXPL_SHOOT: if(!gs.assistexpl.remove(id)) return; break;
+            case ATK_KAMIKAZE_SHOOT: if(!gs.kamikaze.remove(id)) return; break;
+            case ATK_M32_SHOOT: if(!gs.grenades.remove(id)) return; break;
             default:
                 return;
         }
@@ -2350,8 +2351,11 @@ namespace server
            !validatk(atk))
             return;
         int gun = attacks[atk].gun;
-        if(gs.ammo[gun]<=0 || (attacks[atk].range && from.dist(to) > attacks[atk].range + 1))
-            return;
+        if(gun!=GUN_ASSISTXPL)
+        {
+            if(gs.ammo[gun]<=0 || (attacks[atk].range && from.dist(to) > attacks[atk].range + 1))
+                return;
+        }
         gs.ammo[gun] -= attacks[atk].use;
         gs.lastshot = millis;
 
@@ -2388,15 +2392,9 @@ namespace server
             case ATK_CAMPOUZE_SHOOT:
             case ATK_GRAP1_SHOOT:
                 loopi(attacks[atk].rays) {gs.projs.add(id);} break;
-            case ATK_M32_SHOOT:
-                gs.grenades.add(id); break;
-            case ATK_KAMIKAZE_SHOOT:
-                gs.kamikaze.add(id); break;
-            case ATK_MEDIGUN_SHOOT:
-            {
-                loopi(attacks[atk].rays) {gs.projs.add(id);}
-                break;
-            }
+            case ATK_M32_SHOOT: gs.grenades.add(id); break;
+            case ATK_ASSISTXPL_SHOOT: gs.assistexpl.add(id); break;
+            case ATK_KAMIKAZE_SHOOT: gs.kamikaze.add(id); break;
             default:
             {
                 int totalrays = 0, maxrays = attacks[atk].rays;
@@ -3020,6 +3018,7 @@ namespace server
                         ci->connectauth = disc;
                     }
                     else connected(ci);
+
                     if(multiplayer(false))
                     {
                         int nbjoueurs = numclients(-1, true, false);
@@ -3171,6 +3170,7 @@ namespace server
                     ci->state.projs.reset();
                     ci->state.grenades.reset();
                     ci->state.kamikaze.reset();
+                    ci->state.assistexpl.reset();
                 }
                 else ci->state.state = ci->state.editstate;
                 QUEUE_MSG;

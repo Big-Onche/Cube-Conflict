@@ -195,7 +195,7 @@ namespace game
         d->roll = d->newroll;
         if(move)
         {
-            moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptisort3, d->armourtype==A_ASSIST ? true : false);
+            moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptisort3, d->armourtype==A_ASSIST && d->armour>0 ? true : false);
             d->newpos = d->o;
         }
         float k = 1.0f - float(lastmillis - d->smoothmillis)/smoothmove;
@@ -249,7 +249,7 @@ namespace game
                 if(d->health<=200) d->hurtchan = playsound(S_HEARTBEAT, NULL, NULL, 0, -1, 1000, d->hurtchan);
                 else d->stopheartbeat();
 
-                if(d->armour<=750 && d->armourtype==A_ASSIST && d->armour>0) d->alarmchan = playsound(S_ASSISTALARM, NULL, NULL, 0, -1, 1000, d->alarmchan);
+                if(d->armour<=1000 && d->armourtype==A_ASSIST && d->armour>0) d->alarmchan = playsound(S_ASSISTALARM, NULL, NULL, 0, -1, 1000, d->alarmchan);
                 else d->stopassit();
             }
 
@@ -274,7 +274,7 @@ namespace game
                                 irays.sub(h->o);
                                 irays.normalize().mul(1300.0f);
                                 particle_flying_flare(h->o, irays, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
-                                if(r->health>r->maxhealth+150) r->health=r->maxhealth+200;
+                                if(r->health>r->maxhealth+200) r->health=r->maxhealth+200;
                                 playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
                             }
                         }
@@ -298,9 +298,9 @@ namespace game
             {
                 crouchplayer(d, 10, false);
                 if(smoothmove && d->smoothmillis>0) predictplayer(d, true);
-                else moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptisort3, d->armourtype==A_ASSIST ? true : false);
+                else moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptisort3, d->armourtype==A_ASSIST && d->armour>0 ? true : false);
             }
-            else if(d->state==CS_DEAD && !d->ragdoll && lastmillis-d->lastpain<2000) moveplayer(d, 1, true, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptisort3, d->armourtype==A_ASSIST ? true : false);
+            else if(d->state==CS_DEAD && !d->ragdoll && lastmillis-d->lastpain<2000) moveplayer(d, 1, true, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptisort3, false);
         }
     }
 
@@ -366,7 +366,7 @@ namespace game
                                 irays.sub(h->o);
                                 irays.normalize().mul(1300.0f);
                                 particle_flying_flare(h->o, irays, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
-                                if(players[i]->health>players[i]->maxhealth+150) players[i]->health=players[i]->maxhealth+200;
+                                if(players[i]->health>players[i]->maxhealth+200) players[i]->health=players[i]->maxhealth+200;
                                 playsound(S_REGENMEDIGUN, &h->o, 0, 0, 0 , 50, -1, 125);
                             }
                         }
@@ -389,14 +389,14 @@ namespace game
                 else
                 {
                     player1->move = player1->strafe = 0;
-                    moveplayer(player1, 10, true, 0, 0, player1->aptitude, 0);
+                    moveplayer(player1, 10, true, 0, 0, player1->aptitude, 0, false);
                 }
             }
             else if(!intermission)
             {
                 if(player1->ragdoll) cleanragdoll(player1);
                 crouchplayer(player1, 10, true);
-                moveplayer(player1, 10, true, player1->epomillis, player1->jointmillis, player1->aptitude, player1->aptitude==APT_MAGICIEN ? player1->aptisort1 : player1->aptisort3, player1->armourtype==A_ASSIST ? true : false);
+                moveplayer(player1, 10, true, player1->epomillis, player1->jointmillis, player1->aptitude, player1->aptitude==APT_MAGICIEN ? player1->aptisort1 : player1->aptisort3, player1->armourtype==A_ASSIST && player1->armour>0 ? true : false);
                 swayhudgun(curtime);
                 entities::checkitems(player1);
                 if(cmode) cmode->checkitems(player1);
@@ -492,22 +492,6 @@ namespace game
 
     VARP(hitsound, 0, 0, 1);
 
-    void regened(int damage, gameent *d, gameent *actor, bool local)
-    {
-        if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission) return;
-        if(local && actor->aptitude==4) damage = actor->doregen(damage);
-
-        gameent *h = hudplayer();
-        if(h!=player1 && actor==h && d!=actor)
-        {
-            if(hitsound && lasthit != lastmillis) playsound(S_HIT);
-            lasthit = lastmillis;
-        }
-        if(d==h) regenblend(damage);
-
-        regeneffect(damage, d, actor, d!=h);
-    }
-
     void damaged(int damage, gameent *d, gameent *actor, bool local, int atk)
     {
         if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission) return;
@@ -522,27 +506,16 @@ namespace game
             lasthit = lastmillis;
         }
 
-        int armoursound = d->armourtype == A_BLUE ? S_BALLEBOUCLIERBOIS : d->armourtype == A_GREEN ? S_BALLEBOUCLIERFER : d->armourtype == A_YELLOW ? S_BALLEBOUCLIEROR : d->armourtype == A_ASSIST ? S_BALLEARMUREASSISTENT : S_BALLEBOUCLIERMAGNETIQUE;
-
         if(d==h)
         {
-            if(actor->gunselect==GUN_MEDIGUN)
-            {
-                regenblend(damage);
-                regencompass(damage, actor->o);
-                playsound(S_REGENMEDIGUN);
-            }
-            else
-            {
-                damageblend(damage);
-                damagecompass(damage, actor->o);
+            damageblend(damage);
+            damagecompass(damage, actor->o);
 
-                switch(rnd(2))
-                {
-                    case 0:
-                        if(d->aptitude==APT_PHYSICIEN && d->aptisort1 && d->armour>0) playsound(S_SORTPHY1);
-                        else if(d->armour>0 && actor->gunselect!=GUN_LANCEFLAMMES) playsound(armoursound);
-                }
+            switch(rnd(2))
+            {
+                case 0:
+                    if(d->aptitude==APT_PHYSICIEN && d->aptisort1 && d->armour>0) playsound(S_SORTPHY1);
+                    else if(d->armour>0 && actor->gunselect!=GUN_LANCEFLAMMES) playsound(d->armourtype == A_BLUE ? S_BALLEBOUCLIERBOIS : d->armourtype == A_GREEN ? S_BALLEBOUCLIERFER : d->armourtype == A_YELLOW ? S_BALLEBOUCLIEROR : d->armourtype == A_ASSIST ? S_BALLEARMUREASSISTENT : S_BALLEBOUCLIERMAGNETIQUE);
             }
         }
         else
@@ -551,9 +524,10 @@ namespace game
             {
                 case 0:
                     if(d->aptitude==APT_PHYSICIEN && d->aptisort1 && d->armour>0) playsound(S_SORTPHY1, &d->o, 0, 0, 0 , 100, -1, 200);
-                    else if(d->armour>0 && actor->gunselect!=GUN_LANCEFLAMMES) playsound(armoursound+4, &d->o, 0, 0, 0 , 100, -1, 200);
+                    else if(d->armour>0 && actor->gunselect!=GUN_LANCEFLAMMES) playsound(d->armourtype == A_BLUE ? S_BALLEBOUCLIERBOIS : d->armourtype == A_GREEN ? S_BALLEBOUCLIERFER : d->armourtype == A_YELLOW ? S_BALLEBOUCLIEROR : d->armourtype == A_ASSIST ? S_BALLEARMUREASSISTENT : S_BALLEBOUCLIERMAGNETIQUE, &d->o, 0, 0, 0 , 100, -1, 200);
             }
         }
+
 
         damageeffect(damage, d, actor, d!=h, atk);
 
@@ -984,7 +958,7 @@ namespace game
             int snd = pl->armourtype==A_ASSIST && pl->armour> 0 ? S_PASASSIST: S_PAS;
             if(lookupmaterial(d->feetpos())&MAT_WATER) snd = S_NAGE;
             if(lastmillis-pl->lastfootstep < (d->vel.magnitude()*(aptitudes[pl->aptitude].apt_vitesse*3.5f)*(pl->crouched() ? 2 : 1)*(d->inwater ? 2 : 1)*(pl->armourtype==A_ASSIST && pl->armour> 0 ? 2.5f : 1)/d->vel.magnitude())) return;
-            else {playsound(snd, &d->o, 0, 0, 0 , 150, -1, 300); if(pl->epomillis) switch(rnd(4)) {case 0: playsound(S_PASEPO, &d->o, 0, 0, 0 , 500, -1, 1000);}}
+            else {playsound(snd, &d->o, 0, 0, 0 ,pl->armourtype==A_ASSIST ? 300 : 150, -1, pl->armourtype==A_ASSIST ? 600 : 300); if(pl->epomillis) switch(rnd(4)) {case 0: playsound(S_PASEPO, &d->o, 0, 0, 0 , 500, -1, 1000);}}
         }
         pl->lastfootstep = lastmillis;
     }

@@ -88,9 +88,9 @@ struct gameentity : extentity
 enum { GUN_RAIL = 0, GUN_PULSE, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_M32, GUN_LANCEFLAMMES, GUN_UZI, GUN_FAMAS, GUN_MOSSBERG, GUN_HYDRA, GUN_SV98, GUN_SKS, GUN_ARBALETE, GUN_AK47, GUN_GRAP1, GUN_ARTIFICE, GUN_GLOCK,
        GUN_S_NUKE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_S_CAMPOUZE,
        GUN_CAC349, GUN_CACMARTEAU, GUN_CACMASTER, GUN_CACFLEAU,
-       GUN_KAMIKAZE, GUN_MEDIGUN,
+       GUN_KAMIKAZE, GUN_ASSISTXPL,
        NUMGUNS };
-enum { A_BLUE, A_GREEN, A_YELLOW, A_MAGNET, A_ASSIST };     // armour types... take 20/40/60 % off
+enum { A_BLUE, A_GREEN, A_YELLOW, A_MAGNET, A_ASSIST };
 enum { ACT_IDLE = 0, ACT_SHOOT, NUMACTS };
 enum {  ATK_RAIL_SHOOT = 0, ATK_PULSE_SHOOT,
         ATK_SMAW_SHOOT, ATK_MINIGUN_SHOOT,
@@ -108,7 +108,7 @@ enum {  ATK_RAIL_SHOOT = 0, ATK_PULSE_SHOOT,
         ATK_CAC349_SHOOT, ATK_CACMARTEAU_SHOOT,
         ATK_CACMASTER_SHOOT, ATK_CACFLEAU_SHOOT,
         //Spéciales aptitudes (2 armes)
-        ATK_KAMIKAZE_SHOOT, ATK_MEDIGUN_SHOOT,
+        ATK_KAMIKAZE_SHOOT, ATK_ASSISTXPL_SHOOT,
         NUMATKS
 };
 
@@ -197,7 +197,7 @@ enum
 
     //Armes
     S_GLOCK, S_UZI, S_MINIGUN, S_MOSSBERG, S_EPEEIDLE, S_EPEEATTACK, S_SMAW, S_FAMAS, S_SPOCKGUN, S_SV98, S_FELECTRIQUE, S_LANCEGRENADE,
-    S_ARTIFICE, S_FLAMEATTACK, S_NUKELAUNCH, S_FUSILPLASMA, S_EXPLOSIONARTIFICE, S_EXPLOSION, S_EXPLOSIONGRENADE, S_NUKE, S_KAMIKAZEBOOM,
+    S_ARTIFICE, S_FLAMEATTACK, S_NUKELAUNCH, S_FUSILPLASMA, S_EXPLOSIONARTIFICE, S_EXPLOSION, S_EXPLOSIONGRENADE, S_NUKE, S_KAMIKAZEBOOM, S_ASSISTBOOM,
     S_ARBALETE, S_AK47, S_GRAP1, S_MARTEAUBAN, S_MASTERSWORD, S_FLEAU, S_GAU8, S_MINIROQUETTE, S_CAMPOUZE, S_MEDIGUN, S_HYDRA, S_SKS,
     S_EAU_GLOCK, S_EAU_UZI, S_EAU_MINIGUN, S_EAU_MOSSBERG, S_EAU_CORPSACORPS, S_EAU_SMAW, S_EAU_FAMAS, S_EAU_SPOCKGUN, S_EAU_SV98, S_EAU_FELECTRIQUE, S_EAU_LANCEGRENADE,
     S_EAU_ARTIFICE, S_EAU_FLAMEATTACK, S_EAU_NUKELAUNCH, S_EAU_FUSILPLASMA, S_EAU_ARBALETE, S_EAU_AK47, S_EAU_GAU8, S_EAU_MINIROQUETTE, S_EAU_MEDIGUN, S_EAU_KAMIKAZE,
@@ -208,7 +208,7 @@ enum
 
     //Balles
     S_BALLECORPS,
-    S_BALLEBOUCLIERBOIS, S_BALLEBOUCLIERFER, S_BALLEBOUCLIEROR, S_BALLEBOUCLIERMAGNETIQUE, S_BALLEARMUREASSIST, S_BALLEARMUREASSISTENT,
+    S_BALLEBOUCLIERBOIS, S_BALLEBOUCLIERFER, S_BALLEBOUCLIEROR, S_BALLEBOUCLIERMAGNETIQUE, S_BALLEARMUREASSISTENT,
     S_REGENMEDIGUN, S_FLYBY, S_FLYBYSNIPE, S_FLYBYGRAP1, S_FLYBYALIEN, S_FLYBYELEC, S_FLYBYFLAME,
     S_IMPACT, S_IMPACTLOURDLOIN, S_IMPACTGRAP1, S_IMPACTALIEN, S_IMPACTSNIPE, S_IMPACTELEC,
 
@@ -283,7 +283,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
 {
     N_CONNECT, 0, N_SERVINFO, 0, N_WELCOME, 1, N_INITCLIENT, 0, N_POS, 0, N_TEXT, 0, N_SOUND, 2, N_CDIS, 2,
     N_SHOOT, 0, N_EXPLODE, 0, N_SUICIDE, 1,
-    N_DIED, 6, N_DAMAGE, 6, N_VAMPIRE, 6, N_HITPUSH, 7, N_SHOTFX, 10, N_EXPLODEFX, 4,
+    N_DIED, 6, N_DAMAGE, 6, N_VAMPIRE, 4, N_HITPUSH, 7, N_SHOTFX, 10, N_EXPLODEFX, 4,
     N_TRYSPAWN, 1, N_SPAWNSTATE, 0, N_SPAWN, 3, N_FORCEDEATH, 2,
     N_GUNSELECT, 2, N_TAUNT, 1,
     N_MAPCHANGE, 0, N_MAPVOTE, 0, N_TEAMINFO, 0, N_ITEMSPAWN, 2, N_ITEMPICKUP, 2, N_ITEMACC, 4,
@@ -376,7 +376,7 @@ static struct itemstat { int add, max, sound; const char *name; int icon, info; 
     {1250,    1250, S_ITEMBFER,     "BOUCLIER DE FER",     HICON_SIZE, A_GREEN},
     {2000,    2000, S_ITEMBOR,      "BOUCLIER D'OR",       HICON_SIZE, A_YELLOW},
     {1500,    1500, S_ITEMBMAGNET,  "BOUCLIER MAGNETIQUE", HICON_SIZE, A_MAGNET},
-    {3000,    3000, S_ITEMARMOUR,   "ARMURE ASSISTEE",     HICON_SIZE, A_ASSIST}, //Futur bouclier
+    {4000,    4000, S_ITEMARMOUR,   "ARMURE ASSISTEE",     HICON_SIZE, A_ASSIST},
     {50,       150, S_ITEMHEALTH,   "MANA",                HICON_SIZE},
 };
 
@@ -421,7 +421,7 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound
     { GUN_CACFLEAU, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FLEAU, S_FLEAU, S_NULL, S_NULL,                  3, 1250,  25, 175, 175, 0, 0,  -9,   80, 20, 50,  0, 0, 0},
     // Armes spéciales aptitudes
     { GUN_KAMIKAZE, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_KAMIKAZEBOOM, S_KAMIKAZEBOOM, S_NULL, S_NULL,    1, 1000, 3000,  1,   1, 0, 1,  10,  120,  1, 250, 425, 1, 0},
-    { GUN_MEDIGUN, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MEDIGUN, S_MEDIGUN, S_NULL, S_NULL,              30,  100, -150, 500, 700, 0,  750,   2,  280,  4,    10,  25, 0, 0},
+    { GUN_ASSISTXPL, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_KAMIKAZEBOOM, S_ASSISTBOOM, S_NULL, S_NULL,   1, 1000, 3000,  1,   1, 0, 1,  10,  120,  1, 250, 425, 1, 0},
 };
 
 static const struct guninfo { const char *name, *file, *vwep, *armedescFR, *armedescEN; int maxweapposside, maxweapposup, maxzoomfov, attacks[NUMACTS]; } guns[NUMGUNS] =
@@ -457,7 +457,7 @@ static const struct guninfo { const char *name, *file, *vwep, *armedescFR, *arme
     { "fleau", "armes_cac/fleau", "worldgun/armes_cac/fleau",                   "une boule piquante !", "a spiky ball.",                         4, 3, 95,   { -1, ATK_CACFLEAU_SHOOT }, },
     // Armes spéciales aptitudes
     { "kamikaze", "kamikaze", "worldgun/kamikaze",  "une ceinture d'explosifs !", "an explosives ISIS's made belt !",        4, 3, 95,   { -1, ATK_KAMIKAZE_SHOOT }, },
-    { "medigun", "medigun", "worldgun/medigun",  "un médigun (c'est pas normal) !", "a medigun (it's not normal)",          10, 3, 85,   { -1, ATK_MEDIGUN_SHOOT }, },
+    { "kamikaze", "kamikaze", "worldgun/kamikaze",  "une armure assistée !", "powered combat armor !",                       4, 3, 95,   { -1, ATK_ASSISTXPL_SHOOT }, },
 };
 
 static const struct aptisortsinfo { const char *tex1, *tex2, *tex3; int mana1, mana2, mana3, duree1, duree2, duree3, reload1, reload2, reload3, sound1, sound2, sound3; } sorts[] =
@@ -521,7 +521,7 @@ struct gamestate
             case I_BOUCLIERFER:
                 if(armour>=1250) return false;
             case I_BOUCLIERMAGNETIQUE:
-                if(armourtype==A_YELLOW && armour>=1500) return false;
+                if(armour>=1500) return false;
             case I_BOUCLIEROR:
                 if(armour>=2000) return false;
             case I_ARMUREASSISTEE: return !armourtype || armour<is.max;
@@ -560,7 +560,7 @@ struct gamestate
             case I_BOUCLIERMAGNETIQUE:
             case I_ARMUREASSISTEE:
                 armour = min(armour+is.add, is.max);
-                health = min(1000, maxhealth);
+                if(type==I_ARMUREASSISTEE)health = min(1500, maxhealth);
                 armourtype = is.info;
                 break;
             case I_BOOSTDEGATS: steromillis = min(steromillis+is.add*(aptitude==13 ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;
@@ -632,7 +632,6 @@ struct gamestate
             case 0: addsweaps(gamemode); break;
             case 6: ammo[GUN_KAMIKAZE] = 1; break;
         }
-
         if(m_random)
         {
             armourtype = A_BLUE;
@@ -680,12 +679,12 @@ struct gamestate
     // just subtract damage here, can set death, etc. later in code calling this
     int dodamage(int damage, int aptitude, int aptisort)
     {
-        int ad = damage*(armourtype+1)*(armourtype==A_ASSIST ? 18 : 25)/100; // let armour absorb when possible
+        int ad = damage*(armourtype+1)*(armourtype==A_ASSIST && armour>0 ? 18 : 25)/100; // let armour absorb when possible
 
         if(damage>0)
         {
             if(ad>armour) ad = armour;
-            if(aptitude==8 && aptisort>0 && armour>0) armour = min(armour+ad, armourtype==A_BLUE ? 750 : armourtype==A_GREEN ? 1250 : armourtype==A_YELLOW ? 2000 : 1500);
+            if(aptitude==8 && aptisort>0 && armour>0) armour = min(armour+ad, armourtype==A_BLUE ? 750 : armourtype==A_GREEN ? 1250 : armourtype==A_YELLOW ? 2000 : armourtype==A_MAGNET ? 1500 : 4000);
             else armour -= ad;
         }
         damage -= ad;
@@ -747,7 +746,7 @@ struct gameent : dynent, gamestate
 
     vec muzzle, weed, balles, assist;
 
-    gameent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), lastfootstep(0), attacksound(-1), attackchan(-1), dansechan(-1), sortchan(-1), killstreak(0), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0), customcape(0), customtombe(1), customdanse(0), aptitude(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
+    gameent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), lastfootstep(0), attacksound(-1), attackchan(-1), dansechan(-1), sortchan(-1), killstreak(0), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0), customcape(0), customtombe(0), customdanse(0), aptitude(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
     {
         name[0] = info[0] = 0;
         respawn();
@@ -758,6 +757,8 @@ struct gameent : dynent, gamestate
         freeeditinfo(edit);
         if(attackchan >= 0) stopsound(attacksound, attackchan);
         if(hurtchan >= 0) stopsound(S_HEARTBEAT, hurtchan);
+        //if(dansechan >= 0) stopsound(S_DANSE1+ai->customdanse, alarmchan);
+        //if(sortchan >= 0) stopsound(S_ASSISTALARM, alarmchan);
         if(alarmchan >= 0) stopsound(S_ASSISTALARM, alarmchan);
         if(ai) delete ai;
     }
@@ -945,7 +946,6 @@ namespace game
     extern void spawnplayer(gameent *);
     extern void deathstate(gameent *d, gameent *actor, bool restore = false);
     extern void damaged(int damage, gameent *d, gameent *actor, bool local = true, int atk = 0);
-    extern void regened(int damage, gameent *d, gameent *actor, bool local = true);
     extern void killed(gameent *d, gameent *actor);
     extern void timeupdate(int timeremain);
     extern void msgsound(int n, physent *d = NULL);

@@ -240,7 +240,7 @@ namespace game
     }
 
     VARP(bnclifetime, 1000, 5000, 30000);
-    enum { BNC_GRENADE, BNC_KAMIKAZE, BNC_GIBS, BNC_DEBRIS, BNC_DOUILLES, BNC_BIGDOUILLES, BNC_CARTOUCHES, BNC_DOUILLESUZI};
+    enum { BNC_GRENADE, BNC_KAMIKAZE, BNC_GIBS, BNC_DEBRIS, BNC_DOUILLES, BNC_BIGDOUILLES, BNC_CARTOUCHES, BNC_DOUILLESUZI, BNC_ASSISTEXPL};
 
     struct bouncer : physent
     {
@@ -373,6 +373,14 @@ namespace game
                     explode(bnc.local, bnc.owner, bnc.o, bnc.o, NULL, 1, ATK_KAMIKAZE_SHOOT); // 1 = qdam
                     if(bnc.local)
                         addmsg(N_EXPLODE, "rci3iv", bnc.owner, lastmillis-maptime, ATK_KAMIKAZE_SHOOT, bnc.id-maptime,
+                                hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
+                }
+                if(bnc.bouncetype==BNC_ASSISTEXPL)
+                {
+                    hits.setsize(0);
+                    explode(bnc.local, bnc.owner, bnc.o, bnc.o, NULL, 1, ATK_ASSISTXPL_SHOOT); // 1 = qdam
+                    if(bnc.local)
+                        addmsg(N_EXPLODE, "rci3iv", bnc.owner, lastmillis-maptime, ATK_ASSISTXPL_SHOOT, bnc.id-maptime,
                                 hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
                 }
                 delete bouncers.remove(i--);
@@ -555,7 +563,7 @@ namespace game
             h.info2 = info2;
             h.dir = f==at ? ivec(0, 0, 0) : ivec(vec(vel).mul(DNF));
 
-            int armoursound = f->armourtype == A_BLUE ? S_BALLEBOUCLIERBOIS : f->armourtype == A_GREEN ? S_BALLEBOUCLIERFER : f->armourtype == A_YELLOW ? S_BALLEBOUCLIEROR : f->armourtype == A_ASSIST ? S_BALLEARMUREASSIST : S_BALLEBOUCLIERMAGNETIQUE;
+            int armoursound = f->armourtype == A_BLUE ? S_BALLEBOUCLIERBOIS : f->armourtype == A_GREEN ? S_BALLEBOUCLIERFER : f->armourtype == A_YELLOW ? S_BALLEBOUCLIEROR : f->armourtype == A_ASSIST ? S_BALLEARMUREASSISTENT : S_BALLEBOUCLIERMAGNETIQUE;
 
             if(at==player1)
             {
@@ -581,7 +589,7 @@ namespace game
                 {
                     case 0:
                         if(f->aptitude==APT_PHYSICIEN && f->aptisort1 && f->armour>0) playsound(S_SORTPHY1, &f->o, 0, 0, 0 , 100, -1, 200);
-                        else if(f->armour>0 && atk!=ATK_LANCEFLAMMES_SHOOT) playsound(armoursound+4, &f->o, 0, 0, 0 , 100, -1, 200);
+                        else if(f->armour>0 && atk!=ATK_LANCEFLAMMES_SHOOT) playsound(armoursound, &f->o, 0, 0, 0 , 100, -1, 200);
                 }
             }
         }
@@ -614,7 +622,7 @@ namespace game
             float damage = attacks[atk].damage*(1-dist/EXP_DISTSCALE/attacks[atk].exprad);
             if(o==at) damage /= EXP_SELFDAMDIV;
             if(damage > 0) hit(max(int(damage), 1), o, at, dir, atk, dist);
-            if((atk==ATK_ARTIFICE_SHOOT || atk==ATK_SMAW_SHOOT || atk==ATK_M32_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_KAMIKAZE_SHOOT) && dist<attacks[atk].exprad*2.0f && o==player1) execfile("config/shake.cfg");
+            if((atk==ATK_ARTIFICE_SHOOT || atk==ATK_SMAW_SHOOT || atk==ATK_M32_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT) && dist<attacks[atk].exprad*2.0f && o==player1) execfile("config/shake.cfg");
         }
     }
 
@@ -655,16 +663,17 @@ namespace game
             case ATK_SMAW_SHOOT:
             case ATK_ROQUETTES_SHOOT:
             case ATK_KAMIKAZE_SHOOT:
+            case ATK_ASSISTXPL_SHOOT:
             {
                 playsound(S_EXPLOSION, &v, 0, 0, 0 , 100, -1, 350);
                 if(camera1->o.dist(v) >= 300) playsound(S_EXPLOSIONLOIN, &v, NULL, 0, 0, 100, -1, 1200);
                 vec debrisorigin = vec(v).sub(vec(vel).mul(15));
                 adddynlight(safe ? v : debrisorigin, 7*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 80, 40, L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
                 adddynlight(safe ? v : debrisorigin, 4*attacks[atk].exprad, vec(1.2f, 0.4f, 0.0f), 80, 40, L_VOLUMETRIC|L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.0f, 0.0f, 1.5f));
-                particle_splash(PART_SMOKE, ATK_ROQUETTES_SHOOT ? 5 : 9, 2000, v, 0x333333, 40.0f,  ATK_KAMIKAZE_SHOOT ? 200+rnd(75) : 150+rnd(50), ATK_KAMIKAZE_SHOOT ? 450 : 300+rnd(100), 0, player1->champimillis ? true : false);
-                particle_splash(PART_SMOKE, ATK_ROQUETTES_SHOOT ? 5 : 9, 1300, v, 0x333333, 25.0f,  ATK_KAMIKAZE_SHOOT ? 200+rnd(75)  : 150+rnd(50), ATK_KAMIKAZE_SHOOT ? 750 : 600+rnd(100), 0, player1->champimillis ? true : false);
+                particle_splash(PART_SMOKE, ATK_ROQUETTES_SHOOT ? 5 : 9, 2000, v, 0x333333, 40.0f,  ATK_KAMIKAZE_SHOOT || ATK_ASSISTXPL_SHOOT ? 200+rnd(75) : 150+rnd(50), ATK_KAMIKAZE_SHOOT || ATK_ASSISTXPL_SHOOT  ? 450 : 300+rnd(100), 0, player1->champimillis ? true : false);
+                particle_splash(PART_SMOKE, ATK_ROQUETTES_SHOOT ? 5 : 9, 1300, v, 0x333333, 25.0f,  ATK_KAMIKAZE_SHOOT || ATK_ASSISTXPL_SHOOT ? 200+rnd(75)  : 150+rnd(50), ATK_KAMIKAZE_SHOOT || ATK_ASSISTXPL_SHOOT  ? 750 : 600+rnd(100), 0, player1->champimillis ? true : false);
                 particle_splash(PART_SPARK, ATK_ROQUETTES_SHOOT ? 7 : 10, 300, v, owner->steromillis ? 0xFF0000 : 0xFFAA44,  1.7f+rnd(2), 3500, 3500, 0, player1->champimillis ? true : false);
-                loopi(3) particle_splash(PART_FLAME1+rnd(2), ATK_ROQUETTES_SHOOT ? 7 : 15, ATK_KAMIKAZE_SHOOT ? 120+rnd(50) : 80+rnd(40), v, owner->steromillis ? 0xFF0000 : ATK_KAMIKAZE_SHOOT ? 0xFF9900 : i==0 ? 0xCC8833 : i==1 ? 0xDD3922 : 0x998800, 7+rnd(5), ATK_KAMIKAZE_SHOOT ? 1200+rnd(700) : ATK_KAMIKAZE_SHOOT ? 1200+rnd(700): ATK_ROQUETTES_SHOOT ? 600+rnd(400) : 800+rnd(400), 800, 1, player1->champimillis ? true : false);
+                loopi(3) particle_splash(PART_FLAME1+rnd(2), ATK_ROQUETTES_SHOOT ? 7 : 15, ATK_KAMIKAZE_SHOOT || ATK_ASSISTXPL_SHOOT  ? 120+rnd(50) : 80+rnd(40), v, owner->steromillis ? 0xFF0000 : ATK_KAMIKAZE_SHOOT || ATK_ASSISTXPL_SHOOT  ? 0xFF9900 : i==0 ? 0xCC8833 : i==1 ? 0xDD3922 : 0x998800, 7+rnd(5), ATK_KAMIKAZE_SHOOT ? 1200+rnd(700) : ATK_KAMIKAZE_SHOOT ? 1200+rnd(700): ATK_ROQUETTES_SHOOT ? 600+rnd(400) : 800+rnd(400), 800, 1, player1->champimillis ? true : false);
                 particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFF5500, 10.0f, player1->champimillis ? true : false);
                 particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFFFFFF, 20.0f, player1->champimillis ? true : false);
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
@@ -821,6 +830,7 @@ namespace game
             case ATK_PULSE_SHOOT: pulsestain(p, v); break;
             case ATK_SMAW_SHOOT:
             case ATK_KAMIKAZE_SHOOT:
+            case ATK_ASSISTXPL_SHOOT:
             case ATK_ROQUETTES_SHOOT: smawstain(p, v); break;
             case ATK_MINIGUN_SHOOT:
             case ATK_SV98_SHOOT:
@@ -854,6 +864,7 @@ namespace game
                     case ATK_PULSE_SHOOT: pulsestain(p, pos); break;
                     case ATK_SMAW_SHOOT:
                     case ATK_KAMIKAZE_SHOOT:
+                    case ATK_ASSISTXPL_SHOOT:
                     case ATK_ROQUETTES_SHOOT: smawstain(p, pos); break;
                     case ATK_MINIGUN_SHOOT:
                     case ATK_SV98_SHOOT:
@@ -1209,20 +1220,6 @@ namespace game
                 if(d!=hudplayer()) sound_nearmiss(S_FLYBY, from, to);
                 if(d==player1) {if(atk!=ATK_GLOCK_SHOOT) mousemove(-3+rnd(7), -3+rnd(7));}
                 break;
-            case ATK_MEDIGUN_SHOOT:
-            {
-                if(d->type==ENT_PLAYER) sound = S_MEDIGUN;
-                loopi(attacks[atk].rays)
-                {
-                    vec irays(rays[i]);
-                    irays.sub(d->muzzle);
-                    irays.normalize().mul(1300.0f);
-                    switch(rnd(2)) { case 1: particle_flying_flare(d->muzzle, irays, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100, 0, player1->champimillis ? true : false); }
-                    newprojectile(from, rays[i], attacks[atk].projspeed, local, id, d, atk);
-                }
-                adddynlight(hudgunorigin(gun, d->o, to, d), 15, vec(1.0f, 0.75f, 0.5f), 100, 100, DL_FLASH, 0, vec(0, 0, 0), d);
-                break;
-            }
             case ATK_LANCEFLAMMES_SHOOT:
             {
                 if(d->type==ENT_PLAYER) sound = S_FLAMEATTACK;
@@ -1265,11 +1262,12 @@ namespace game
                 break;
             }
             case ATK_KAMIKAZE_SHOOT:
+            case ATK_ASSISTXPL_SHOOT:
             {
                 float dist = from.dist(to);
                 vec up = to;
                 up.z += dist/8;
-                newbouncer(d==player1 && !thirdperson ?  d->muzzle : hudgunorigin(gun, d->o, to, d), up, local, id, d, BNC_KAMIKAZE, attacks[atk].ttl, attacks[atk].projspeed);
+                newbouncer(d==player1 && !thirdperson ?  d->muzzle : hudgunorigin(gun, d->o, to, d), up, local, id, d, atk==ATK_KAMIKAZE_SHOOT ? BNC_KAMIKAZE : BNC_ASSISTEXPL, attacks[atk].ttl, attacks[atk].projspeed);
                 break;
             }
             case ATK_CAC349_SHOOT:
@@ -1414,13 +1412,15 @@ namespace game
         int prevaction = d->lastaction, attacktime = lastmillis-prevaction;
         if(attacktime<d->gunwait) return;
         d->gunwait = 0;
+
+        if(d->armour<=0 && d->armourtype==A_ASSIST) {d->gunselect=GUN_ASSISTXPL; d->attacking=true; d->lastattack = -1;}
         if(!d->attacking) return;
         int gun = d->gunselect, act = d->attacking, atk = guns[gun].attacks[act];
 
         d->lastaction = lastmillis;
         d->lastattack = atk;
 
-        if (!d->ammo[gun])
+        if (!d->ammo[gun] && gun!=GUN_ASSISTXPL)
         {
             if(d==player1) msgsound(S_NOAMMO, d);
             d->gunwait = 600;
@@ -1611,9 +1611,6 @@ namespace game
         {
             case S_FLAMEATTACK:
                 atk = ATK_LANCEFLAMMES_SHOOT;
-                break;
-            case S_MEDIGUN:
-                atk = ATK_MEDIGUN_SHOOT;
                 break;
             case S_GAU8:
                 atk = ATK_GAU8_SHOOT;
