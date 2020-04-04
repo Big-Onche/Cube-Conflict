@@ -217,7 +217,7 @@ enum
     S_RECHARGEMENT1, S_RECHARGEMENT2, S_RECHARGEMENT3,
 
     // Objets
-    S_ITEMHEALTH, S_COCHON, S_ITEMAMMO, S_ITEMBBOIS, S_ITEMBFER, S_ITEMBOR, S_ITEMBMAGNET, S_ITEMARMOUR, S_ITEMCHAMPIS, S_ITEMJOINT, S_ITEMEPO, S_ITEMSTEROS, S_STEROSTIR, S_WEAPLOAD,
+    S_ITEMHEALTH, S_COCHON, S_ITEMAMMO, S_ITEMBBOIS, S_ITEMBFER, S_ITEMBOR, S_ITEMBMAGNET, S_ITEMARMOUR, S_ITEMPIECEROBOTIQUE, S_ITEMCHAMPIS, S_ITEMJOINT, S_ITEMEPO, S_ITEMSTEROS, S_STEROSTIR, S_WEAPLOAD,
     S_HEARTBEAT, S_ASSISTALARM, S_ALARME,
     S_DESTRUCTION, S_INVENTAIRE,
 
@@ -376,7 +376,7 @@ static struct itemstat { int add, max, sound; const char *name; int icon, info; 
     {1250,    1250, S_ITEMBFER,     "BOUCLIER DE FER",     HICON_SIZE, A_GREEN},
     {2000,    2000, S_ITEMBOR,      "BOUCLIER D'OR",       HICON_SIZE, A_YELLOW},
     {1500,    1500, S_ITEMBMAGNET,  "BOUCLIER MAGNETIQUE", HICON_SIZE, A_MAGNET},
-    {4000,    4000, S_ITEMARMOUR,   "ARMURE ASSISTEE",     HICON_SIZE, A_ASSIST},
+    {3000,    3000, S_ITEMARMOUR,   "ARMURE ASSISTEE",     HICON_SIZE, A_ASSIST},
     {50,       150, S_ITEMHEALTH,   "MANA",                HICON_SIZE},
 };
 
@@ -421,7 +421,7 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound
     { GUN_CACFLEAU, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FLEAU, S_FLEAU, S_NULL, S_NULL,                  3, 1250,  25, 175, 175, 0, 0,  -9,   80, 20, 50,  0, 0, 0},
     // Armes spéciales aptitudes
     { GUN_KAMIKAZE, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_KAMIKAZEBOOM, S_KAMIKAZEBOOM, S_NULL, S_NULL,    1, 1000, 3000,  1,   1, 0, 1,  10,  120,  1, 250, 425, 1, 0},
-    { GUN_ASSISTXPL, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_KAMIKAZEBOOM, S_ASSISTBOOM, S_NULL, S_NULL,   1, 1000, 3000,  1,   1, 0, 1,  10,  120,  1, 250, 425, 1, 0},
+    { GUN_ASSISTXPL, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_KAMIKAZEBOOM, S_ASSISTBOOM, S_NULL, S_NULL,     1,  180,   90,  1,   1, 0, 1,  10,  120,  1,  50, 300, 1, 0},
 };
 
 static const struct guninfo { const char *name, *file, *vwep, *armedescFR, *armedescEN; int maxweapposside, maxweapposup, maxzoomfov, attacks[NUMACTS]; } guns[NUMGUNS] =
@@ -457,7 +457,7 @@ static const struct guninfo { const char *name, *file, *vwep, *armedescFR, *arme
     { "fleau", "armes_cac/fleau", "worldgun/armes_cac/fleau",                   "une boule piquante !", "a spiky ball.",                         4, 3, 95,   { -1, ATK_CACFLEAU_SHOOT }, },
     // Armes spéciales aptitudes
     { "kamikaze", "kamikaze", "worldgun/kamikaze",  "une ceinture d'explosifs !", "an explosives ISIS's made belt !",        4, 3, 95,   { -1, ATK_KAMIKAZE_SHOOT }, },
-    { "kamikaze", "kamikaze", "worldgun/kamikaze",  "une armure assistée !", "powered combat armor !",                       4, 3, 95,   { -1, ATK_ASSISTXPL_SHOOT }, },
+    { "assistxpl", "assistxpl", "worldgun/assistxpl",  "une armure assistée !", "powered combat armor !",                    4, 3, 95,   { -1, ATK_ASSISTXPL_SHOOT }, },
 };
 
 static const struct aptisortsinfo { const char *tex1, *tex2, *tex3; int mana1, mana2, mana3, duree1, duree2, duree3, reload1, reload2, reload3, sound1, sound2, sound3; } sorts[] =
@@ -494,18 +494,16 @@ struct gamestate
        return ammo[type-I_RAIL+GUN_RAIL]>=is.max;
     }
 
-    bool canpickup(int type, int aptitude)
+    bool canpickup(int type, int aptitude, int parmourtype)
     {
-        //return validitem(type);
         if(type<I_RAIL || type>I_MANA) return false;
         itemstat &is = itemstats[type-I_RAIL];
 
-            switch(type)
+        switch(type)
         {
             case I_SANTE:
-                //if(classe==2) return true;
-                //else
-                return health<maxhealth;
+                if(parmourtype==4) return health<maxhealth;
+                else return health<maxhealth;
                 break;
             case I_MANA:
                 if(aptitude==5 || aptitude==8 || aptitude==11) return mana<is.max;
@@ -517,14 +515,18 @@ struct gamestate
             case I_BOOSTVITESSE:  return epomillis<is.max;
             case I_BOOSTGRAVITE: return jointmillis<is.max;
             case I_BOUCLIERBOIS:
-                if(armour>=750) return false;
+                if(parmourtype==4) return armour<3000;
+                else if(armour>=750) return false;
             case I_BOUCLIERFER:
-                if(armour>=1250) return false;
+                if(parmourtype==4) return armour<3000;
+                else if(armour>=1250) return false;
             case I_BOUCLIERMAGNETIQUE:
-                if(armour>=1500) return false;
+                if(parmourtype==4) return armour<3000;
+                else if(armour>=1500) return false;
             case I_BOUCLIEROR:
-                if(armour>=2000) return false;
-            case I_ARMUREASSISTEE: return !armourtype || armour<is.max;
+                if(parmourtype==4) return armour<3000;
+                else if(armour>=2000) return false;
+            case I_ARMUREASSISTEE: return parmourtype!=4 || armour<is.max;
             default:
                 {
                     float aptboost;
@@ -534,7 +536,7 @@ struct gamestate
         }
     }
 
-    void pickup(int type, int aptitude, int rndsuperweapon, int aptisort)
+    void pickup(int type, int aptitude, int rndsuperweapon, int aptisort, int parmourtype)
     {
         if(type<I_RAIL || type>I_MANA) return;
         itemstat &is = itemstats[type-I_RAIL];
@@ -559,9 +561,9 @@ struct gamestate
             case I_BOUCLIEROR:
             case I_BOUCLIERMAGNETIQUE:
             case I_ARMUREASSISTEE:
-                armour = min(armour+is.add, is.max);
-                if(type==I_ARMUREASSISTEE)health = min(1500, maxhealth);
-                armourtype = is.info;
+                armour = min(parmourtype==4 && type!=I_ARMUREASSISTEE ? armour+500 : armour+is.add, parmourtype==4 ? 3000 : is.max);
+                if(type==I_ARMUREASSISTEE)health = min(health+500, maxhealth);
+                if(parmourtype!=4)armourtype = is.info;
                 break;
             case I_BOOSTDEGATS: steromillis = min(steromillis+is.add*(aptitude==13 ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;
             case I_BOOSTVITESSE: epomillis = min(epomillis+is.add*(aptitude==13 ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;

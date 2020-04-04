@@ -903,6 +903,7 @@ namespace server
             case I_BOOSTDEGATS:
             case I_BOOSTGRAVITE:
             case I_BOOSTPRECISION:
+            case I_ARMUREASSISTEE:
             case I_BOOSTPV:
             case I_BOOSTVITESSE:
             case I_SUPERARME:
@@ -917,13 +918,13 @@ namespace server
         if((m_timed && gamemillis>=gamelimit) || !sents.inrange(i) || !sents[i].spawned) return false;
         clientinfo *ci = getinfo(sender);
 
-        if(!ci || (!ci->local && !ci->state.canpickup(sents[i].type, ci->aptitude))) return false;
+        if(!ci || (!ci->local && !ci->state.canpickup(sents[i].type, ci->aptitude, ci->state.armourtype))) return false;
         sents[i].spawned = false;
         sents[i].spawntime = spawntime(sents[i].type);
 
         int rndsuperweapon = rnd(4);
         sendf(-1, 1, "ri4", N_ITEMACC, i, sender, sents[i].type==I_SUPERARME ? rndsuperweapon : 0);
-        ci->state.pickup(sents[i].type, ci->aptitude, sents[i].type==I_SUPERARME ? rndsuperweapon : 0, ci->state.aptisort1);
+        ci->state.pickup(sents[i].type, ci->aptitude, sents[i].type==I_SUPERARME ? rndsuperweapon : 0, ci->state.aptisort1, ci->state.armourtype);
         return true;
     }
 
@@ -2168,6 +2169,8 @@ namespace server
 
         servstate &ts = target->state;
         servstate &as = actor->state;
+
+        if(ts.armourtype==A_ASSIST && ts.armour==0 && atk!=ATK_ASSISTXPL_SHOOT) return;
 
         //Calcul des dommages de base
         damage = (((damage*aptitudes[actor->aptitude].apt_degats)/100)*100)/aptitudes[target->aptitude].apt_resistance;

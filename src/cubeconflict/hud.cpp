@@ -163,6 +163,11 @@ namespace game
 
             gle::colorf(1, 1, 1, 1);
         }
+        else if(player1->armourtype==A_ASSIST)
+        {
+            settexture("media/interface/hud/armureassistee.png");
+            bgquad(0, 0, w, h);
+        }
 
         if(player1->ragemillis>0)
         {

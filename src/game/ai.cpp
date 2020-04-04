@@ -485,7 +485,7 @@ namespace ai
         switch(e.type)
         {
             case I_SUPERARME:
-                score = 1e10f;
+                score = 1e9f;
                 break;
             case I_BOOSTDEGATS: case I_BOOSTGRAVITE: case I_BOOSTPRECISION: case I_BOOSTPV: case I_BOOSTVITESSE:
                 d->aptitude==APT_JUNKIE ? score = 1e9f : score = 1e7f;
@@ -493,16 +493,24 @@ namespace ai
             case I_SANTE:
                 if(d->health<800){score = d->health < 500 ? 1e5f : 1e3f; }
                 if(d->mana>40 && d->aptitude==APT_PRETRE && d->health<=300) aptitude(d, 1);
+                break;
             case I_MANA:
                 if(d->mana < 101 && d->aptitude!=APT_VAMPIRE) score = 1e6f;
                 else if (d->aptitude==APT_VAMPIRE) score = d->health < 500 ? 1e7f : d->health < 800 ? 1e5f : 1e3f;
-            case I_BOUCLIERBOIS:
-                if(d->armour < 600) score = 1e6f;
-            case I_BOUCLIERFER:
-                if(d->armour <= 750) score = 1e7f;
                 break;
-            case I_BOUCLIEROR: case I_BOUCLIERMAGNETIQUE: case I_ARMUREASSISTEE:
-                if(d->armour <= 1250) score = 1e8f;
+            case I_BOUCLIERBOIS:
+                if(d->armourtype==A_ASSIST && d->armour<2000) score = d->armour<1500 ? 1e6f : 1e4f;
+                else if(d->armour<600) score = 1e5f;
+                break;
+            case I_BOUCLIERFER:
+                if(d->armourtype==A_ASSIST && d->armour<2000) score = d->armour<1500 ? 1e6f : 1e5f;
+                else if(d->armour<900) score = 1e5f;
+                break;
+            case I_BOUCLIEROR: case I_BOUCLIERMAGNETIQUE:
+                if(d->armourtype==A_ASSIST && d->armour<2000) score = d->armour<1500 ? 1e6f : 1e5f;
+                if(d->armour <= 1250) score = 1e6f;
+            case I_ARMUREASSISTEE:
+                if(d->armourtype!=A_ASSIST) score = 1e9f;
                 break;
             default:
             {
@@ -530,7 +538,7 @@ namespace ai
         loopv(entities::ents)
         {
             extentity &e = *(extentity *)entities::ents[i];
-            if(!e.spawned() || !d->canpickup(e.type, d->aptitude)) continue;
+            if(!e.spawned() || !d->canpickup(e.type, d->aptitude, d->armourtype)) continue;
             tryitem(d, e, i, b, interests, force);
         }
     }
@@ -580,7 +588,7 @@ namespace ai
             {
                 int id = nearby[i];
                 extentity &e = *(extentity *)entities::ents[id];
-                if(d->canpickup(e.type, d->aptitude)) tryitem(d, e, id, b, interests);
+                if(d->canpickup(e.type, d->aptitude, d->armourtype)) tryitem(d, e, id, b, interests);
             }
         }
         if(cmode) cmode->aifind(d, b, interests);
@@ -683,7 +691,7 @@ namespace ai
         extentity &e = *entities::ents[ent];
         if(e.type >= I_RAIL && e.type <= I_MANA)
         {
-            loopv(players) if(players[i] && players[i]->ai && players[i]->aitype == AI_BOT && players[i]->canpickup(e.type, players[i]->aptitude))
+            loopv(players) if(players[i] && players[i]->ai && players[i]->aitype == AI_BOT && players[i]->canpickup(e.type, players[i]->aptitude, player1->armourtype))
             {
                 gameent *d = players[i];
                 bool wantsitem = false;

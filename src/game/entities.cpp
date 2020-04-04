@@ -119,11 +119,13 @@ namespace entities
                     break;
             }
             const char *mdlname = entmodel(e);
+            const char *secmdlname = e.type==I_BOUCLIERBOIS || e.type==I_BOUCLIERFER || e.type==I_BOUCLIEROR || e.type==I_BOUCLIERMAGNETIQUE ? "objets/piecerobotique" : entmodel(e);
+
             if(mdlname)
             {
                 vec p = e.o;
                 p.z += 1+sinf(lastmillis/100.0+e.o.x+e.o.y)/20;
-                rendermodel(mdlname, ANIM_MAPMODEL|ANIM_LOOP, p, lastmillis/(float)revs, 0, 0, MDL_CULL_VFC | MDL_CULL_DIST | MDL_CULL_OCCLUDED);
+                rendermodel(game::player1->armourtype==A_ASSIST ? secmdlname : mdlname, ANIM_MAPMODEL|ANIM_LOOP, p, lastmillis/(float)revs, 0, 0, MDL_CULL_VFC | MDL_CULL_DIST | MDL_CULL_OCCLUDED);
             }
         }
     }
@@ -165,7 +167,7 @@ namespace entities
             else if(autowield) gunselect(type-9+rndsuperweapon, player1);
         }
 
-        d->pickup(type+rndsuperweapon, d->aptitude, rndsuperweapon, d->aptisort1);
+        d->pickup(type+rndsuperweapon, d->aptitude, rndsuperweapon, d->aptisort1, d->armourtype);
         if(d->aptisort1 && d->aptitude==APT_PRETRE)
         {
             d->mana-=20;
@@ -173,7 +175,8 @@ namespace entities
             playsound(S_SORTPRETRE1, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, d==hudplayer() ? 0 : 150, -1, 300);
         }
 
-        playsound(itemstats[type-I_RAIL].sound, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, d==hudplayer() ? 0 : 150, -1, 300);
+        playsound((type==I_BOUCLIERBOIS || type==I_BOUCLIERFER || type == I_BOUCLIERMAGNETIQUE || type==I_BOUCLIEROR) && d->armourtype==A_ASSIST ? S_ITEMPIECEROBOTIQUE : itemstats[type-I_RAIL].sound, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, d==hudplayer() ? 0 : 150, -1, 300);
+
         if(d==player1) switch(type)
         {
             case I_BOOSTPV:
@@ -304,7 +307,7 @@ namespace entities
         switch(ents[n]->type)
         {
             default:
-                if(d->canpickup(ents[n]->type, d->aptitude))
+                if(d->canpickup(ents[n]->type, d->aptitude, d->armourtype))
                 {
                     if(d==player1)
                     {

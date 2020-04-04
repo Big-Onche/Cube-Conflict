@@ -502,8 +502,8 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
                 if(d->jointmillis) switch(rnd(5)) {case 1: regularflame(PART_SMOKE, d->abovehead().add(vec(-12, 5, -19)), 2, 3, 0x888888, 1, 1.6f, 50.0f, 1000.0f, -10);}
                 if(d->armourtype==A_ASSIST && d->armour>0)
                 {
-                    if(d->armour<1500) {switch(rnd(d->armour<750 ? 3 : 7)){case 0: regularflame(PART_SMOKE, d->o, 15, 3, d->armour<1000 ? 0x444444 : 0x888888, 1, 3.3f, 50.0f, 1000.0f, -10);}}
-                    if(d->armour<1000) {switch(rnd(d->armour<500 ? 4 : 8)){case 0: particle_splash(PART_FLAME2,  1, 300, d->o, 0x992200, 2.5f, 50, -20);}}
+                    if(d->armour<1500) {switch(rnd(d->armour<1000 ? 8 : 14)){case 0: regularflame(PART_SMOKE, d->o, 15, 3, d->armour<750 ? 0x333333 : 0x888888, 1, 3.3f, 50.0f, 1000.0f, -10);}}
+                    if(d->armour<1250) {switch(rnd(d->armour<600 ? 8 : 14)){case 0: particle_splash(PART_FLAME2,  1, 300, d->o, 0x992200, 2.5f, 50, -20);}}
                 }
 
             }
@@ -631,35 +631,33 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
         if(d->muzzle.x >= 0) d->muzzle = calcavatarpos(d->muzzle, 12);
         if(d->balles.x >= 0) d->balles = calcavatarpos(d->balles, 12);
 
-
-        if(d->armour<=0) return;
-
-        vec sway2;
-        vecfromyawpitch(d->yaw, 0, 0, shieldside, sway2);
-
-        sway2.mul((swayside/3.0f)*cosf(steps));
-        sway2.z += (swayup/3.0f)*(fabs(sinf(steps)) - 1);
-        if(!zoom && d->armourtype) sway2.add(swaydir).add(d->o);
-
-        string bouclier;
-        switch(d->armourtype)
+        if(d->armourtype!=A_ASSIST && d->armour>0)
         {
-            case A_YELLOW: {int shieldvalue = d->armour<=400 ? 4 : d->armour<=800 ? 3 : d->armour<=1200 ? 2 : d->armour<=1600 ? 1 : 0; copystring(bouclier, shields[shieldvalue].hudgold);} break;
-            case A_GREEN: {int shieldvalue = d->armour<=250 ? 4 : d->armour<=500 ? 3 : d->armour<=750 ? 2 : d->armour<=1000 ? 1 : 0; copystring(bouclier, shields[shieldvalue].hudfer);} break;
-            case A_BLUE: {int shieldvalue = d->armour<=150 ? 4 : d->armour<=300 ? 3 : d->armour<=450 ? 2 : d->armour<=600 ? 1 : 0; copystring(bouclier, shields[shieldvalue].hudbois);} break;
-            case A_MAGNET: {int shieldvalue = d->armour<=300 ? 4 : d->armour<=600 ? 3 : d->armour<=900 ? 2 : d->armour<=1200 ? 1 : 0; copystring(bouclier, shields[shieldvalue].hudmagnetique);} break;
-        }
-        rendermodel(bouclier, anim, sway2, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
+            vec sway2;
+            vecfromyawpitch(d->yaw, 0, 0, shieldside, sway2);
 
-        if(d->armourtype==A_ASSIST && d->armour>0)
+            sway2.mul((swayside/3.f)*cosf(steps));
+            sway2.z += (swayup/3.f)*(fabs(sinf(steps)) - 1);
+            if(!zoom) sway2.add(swaydir).add(d->o);
+            string bouclier;
+            switch(d->armourtype)
+            {
+                case A_YELLOW: {int shieldvalue = d->armour<=400 ? 4 : d->armour<=800 ? 3 : d->armour<=1200 ? 2 : d->armour<=1600 ? 1 : 0; copystring(bouclier, shields[shieldvalue].hudgold);} break;
+                case A_GREEN: {int shieldvalue = d->armour<=250 ? 4 : d->armour<=500 ? 3 : d->armour<=750 ? 2 : d->armour<=1000 ? 1 : 0; copystring(bouclier, shields[shieldvalue].hudfer);} break;
+                case A_BLUE: {int shieldvalue = d->armour<=150 ? 4 : d->armour<=300 ? 3 : d->armour<=450 ? 2 : d->armour<=600 ? 1 : 0; copystring(bouclier, shields[shieldvalue].hudbois);} ;break;
+                case A_MAGNET: {int shieldvalue = d->armour<=300 ? 4 : d->armour<=600 ? 3 : d->armour<=900 ? 2 : d->armour<=1200 ? 1 : 0; copystring(bouclier, shields[shieldvalue].hudmagnetique);} break;
+            }
+            rendermodel(bouclier, anim, sway2, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
+        }
+        else if(d->armourtype==A_ASSIST)
         {
             vec sway3;
             vecfromyawpitch(d->yaw, 0, 0, 1, sway3);
-            sway3.mul((swayside/4.f)*cosf(steps));
-            sway3.z += (swayup/4.f)*(fabs(sinf(steps)) - 1);
+            sway3.mul((swayside/6.f)*cosf(steps));
+            sway3.z += (swayup/6.f)*(fabs(sinf(steps)) - 1);
             sway3.add(swaydir).add(d->o);
             string armuremdl;
-            d->armour<=800 ? copystring(armuremdl, "hudshield/armureassistee/rouge") : d->armour<=1600 ? copystring(armuremdl, "hudshield/armureassistee/orange") : d->armour<=2400 ? copystring(armuremdl, "hudshield/armureassistee/jaune") : d->armour<=3200 ? copystring(armuremdl, "hudshield/armureassistee/vert") : copystring(armuremdl, "hudshield/armureassistee/bleu");
+            d->armour<=600 ? copystring(armuremdl, "hudshield/armureassistee/rouge") : d->armour<=1200 ? copystring(armuremdl, "hudshield/armureassistee/orange") : d->armour<=1800 ? copystring(armuremdl, "hudshield/armureassistee/jaune") : d->armour<=2400 ? copystring(armuremdl, "hudshield/armureassistee/vert") : copystring(armuremdl, "hudshield/armureassistee/bleu");
 
             rendermodel(armuremdl, anim, sway3, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
 
@@ -669,8 +667,8 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
             rendermodel("hudshield/armureassistee/tag", anim, sway3, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
             if(d->assist.x >= 0) d->assist = calcavatarpos(d->assist, 12);
 
-            if(d->armour<1500) {switch(rnd(d->armour<750 ? 6 : 10)){case 0: regularflame(PART_SMOKE, d->assist, 15, 3, 0x888888, 1, 3.3f, 50.0f, 1000.0f, -10);}}
-            if(d->armour<1000) {switch(rnd(d->armour<500 ? 6 : 10)){case 0: particle_splash(PART_FLAME2,  1, 500, d->assist.add(vec(rnd(6)-rnd(11), rnd(6)-rnd(11), rnd(6)-rnd(11))), 0x992200, 2.5f, 70, -20);}}
+            if(d->armour<1500) {switch(rnd(d->armour<1000 ? 8 : 14)){case 0: regularflame(PART_SMOKE, d->assist, 15, 3, d->armour<750 ? 0x333333 : 0x888888, 1, 3.3f, 50.0f, 1000.0f, -10);}}
+            if(d->armour<1000) {switch(rnd(d->armour<600 ? 8 : 14)){case 0: particle_splash(PART_FLAME2,  1, 500, d->assist.add(vec(rnd(6)-rnd(11), rnd(6)-rnd(11), rnd(6)-rnd(11))), 0x992200, 2.5f, 70, -20);}}
         }
     }
 
