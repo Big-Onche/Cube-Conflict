@@ -845,7 +845,7 @@ namespace server
         virtual int fragvalue(clientinfo *victim, clientinfo *actor, int atk = -1)
         {
             int value;
-            atk==ATK_KAMIKAZE_SHOOT ? value = 0 : value = -1;
+            atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT ? value = 0 : value = -1;
             if(victim==actor || isteam(victim->team, actor->team)) return value;
             return 1;
         }
@@ -2219,7 +2219,7 @@ namespace server
             target->state.deaths++;
             actor->state.killstreak++;
             target->state.killstreak = 0;
-            int fragvalue = smode ? smode->fragvalue(target, actor, atk) : (target==actor || isteam(target->team, actor->team) ? atk==ATK_KAMIKAZE_SHOOT ? 0 : -1 : 1);
+            int fragvalue = smode ? smode->fragvalue(target, actor, atk) : (target==actor || isteam(target->team, actor->team) ? atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT ? 0 : -1 : 1);
             actor->state.frags += fragvalue;
             target->state.lastdeath = totalmillis;
 

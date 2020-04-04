@@ -684,7 +684,13 @@ namespace game
             aname = colorname(actor, NULL, langage ? "\fdYou" : "\fdTu", "\fc");
         }
 
-        if(d==actor) // Suicide ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        if(d==actor && actor->armourtype==A_ASSIST && actor->armour==0) // Explosion d'armure assistée ///////////////////////////////////////////////////////////////////////
+        {
+            if(langage)conoutf(contype, "%s%s%s", d==player1 ? "\fd" : "", d==player1 ? "Your" : dname, d==player1 ? " \f7powered armor exploded !" : "\f7's powered armor exploded !");
+            else conoutf(contype, "%s%s %s", d==player1 ? "\fd" : "L'armure assistée de ", d==player1 ? "Ton" : dname, d==player1 ? "\f7armure assistée a explosé !" : "\f7a explosé !");
+            if(d==player1) {player1->killstreak=0; copystring(str_armetueur, langage ? partmessageEN[rnd(5)].parttroll : partmessageFR[rnd(9)].parttroll); suicided = true;}
+        }
+        else if(d==actor) // Suicide ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
             conoutf(contype, "%s%s %s%s%s", d==player1 ? "\fd" : "", dname, langage ? "" : d==player1 ? "t'es " : "s'est ", langage ? partmessageEN[rnd(2)].partsuicide : partmessageFR[rnd(5)].partsuicide, d==player1 ? " !" : ".");
             if(d==player1) {player1->killstreak=0; copystring(str_armetueur, langage ? partmessageEN[rnd(5)].parttroll : partmessageFR[rnd(9)].parttroll); suicided = true;}

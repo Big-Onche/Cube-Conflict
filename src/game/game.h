@@ -421,7 +421,7 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound
     { GUN_CACFLEAU, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FLEAU, S_FLEAU, S_NULL, S_NULL,                  3, 1250,  25, 175, 175, 0, 0,  -9,   80, 20, 50,  0, 0, 0},
     // Armes spéciales aptitudes
     { GUN_KAMIKAZE, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_KAMIKAZEBOOM, S_KAMIKAZEBOOM, S_NULL, S_NULL,    1, 1000, 3000,  1,   1, 0, 1,  10,  120,  1, 250, 425, 1, 0},
-    { GUN_ASSISTXPL, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_KAMIKAZEBOOM, S_ASSISTBOOM, S_NULL, S_NULL,     1,  180,   90,  1,   1, 0, 1,  10,  120,  1,  50, 300, 1, 0},
+    { GUN_ASSISTXPL, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_KAMIKAZEBOOM, S_ASSISTBOOM, S_NULL, S_NULL,     1,  220,  150,  1,   1, 0, 1,  10,   50,  1,  50, 200, 1, 0},
 };
 
 static const struct guninfo { const char *name, *file, *vwep, *armedescFR, *armedescEN; int maxweapposside, maxweapposup, maxzoomfov, attacks[NUMACTS]; } guns[NUMGUNS] =
@@ -440,7 +440,7 @@ static const struct guninfo { const char *name, *file, *vwep, *armedescFR, *arme
     { "hydra", "hydra", "worldgun/hydra",                               "un fusil venant d'un autre jeu !", "a gun from another game !", 92,  39, 95,  { -1, ATK_HYDRA_SHOOT }, },
     { "sv_98", "sv_98", "worldgun/sv_98",                               "un sniper de campeur.", "a camper rifle.",                       1,   3, 30,  { -1, ATK_SV98_SHOOT }, },
     { "sks", "sks", "worldgun/sks",                                     "une carabine russe !", "a russian rifle !",                      1,   3, 50,  { -1, ATK_SKS_SHOOT }, },
-    { "arbalete", "arbalete", "worldgun/arbalete",                      "une flèche de merde !", "rotten arrow.",                         1,   3, 45,  { -1, ATK_ARBALETE_SHOOT }, },
+    { "arbalete", "arbalete", "worldgun/arbalete",                      "une flèche de merde !", "a rotten arrow.",                         1,   3, 45,  { -1, ATK_ARBALETE_SHOOT }, },
     { "ak47", "ak47", "worldgun/ak47",                                  "l'arme à Vladimir Poutine !", "Putin's weapon !",               46,  25, 70,  { -1, ATK_AK47_SHOOT }, },
     { "GRAP1", "GRAP1", "worldgun/GRAP1",                               "un projectile rose de tapette !", "a gay ass pink projectile.", 43,  17, 85,  { -1, ATK_GRAP1_SHOOT }, },
     { "feuartifice", "feuartifice", "worldgun/feuartifice",             "une arme de Gilet jaune.", "a yellow vests weapon",             70,  30, 85,  { -1, ATK_ARTIFICE_SHOOT }, },

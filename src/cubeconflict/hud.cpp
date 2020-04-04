@@ -88,7 +88,8 @@ namespace game
         if(player1->state==CS_DEAD)
         {
             string killedbymsg, withmsg, waitmsg;
-            if(suicided) formatstring(killedbymsg, langage ? "You committed suicide !" : "Tu t'es suicidé !");
+            if(player1->armourtype==A_ASSIST && player1->armour==0) formatstring(killedbymsg, langage ? "Your powered armor exploded !" : "Ton armure assistée a explosé !");
+            else if(suicided) formatstring(killedbymsg, langage ? "You committed suicide !" : "Tu t'es suicidé !");
             else formatstring(killedbymsg, "%s %s (%s)", langage ? "Killed by" : "Tué par", str_pseudotueur, langage ? aptitudes[n_aptitudetueur].apt_nomEN : aptitudes[n_aptitudetueur].apt_nomFR);
 
             rendermessage(killedbymsg, 65, 1.5f, 0);
@@ -163,7 +164,7 @@ namespace game
 
             gle::colorf(1, 1, 1, 1);
         }
-        else if(player1->armourtype==A_ASSIST)
+        else if(player1->armourtype==A_ASSIST && player1->state==CS_ALIVE)
         {
             settexture("media/interface/hud/armureassistee.png");
             bgquad(0, 0, w, h);
