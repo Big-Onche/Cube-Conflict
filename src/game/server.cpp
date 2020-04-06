@@ -555,7 +555,7 @@ namespace server
                     if(mode[0] != '?') break;
                 case '?':
                     mode++;
-                    loopk(NUMGAMEMODES) if(searchmodename(gamemodes[k].name, mode))
+                    loopk(NUMGAMEMODES) if(searchmodename(langage ? gamemodes[k].nameEN : gamemodes[k].nameFR, mode))
                     {
                         if(op == '!') modemask &= ~(1<<k);
                         else modemask |= 1<<k;
@@ -564,7 +564,7 @@ namespace server
             }
             int modenum = INT_MAX;
             if(isdigit(mode[0])) modenum = atoi(mode);
-            else loopk(NUMGAMEMODES) if(searchmodename(gamemodes[k].name, mode)) { modenum = k+STARTGAMEMODE; break; }
+            else loopk(NUMGAMEMODES) if(searchmodename(langage ? gamemodes[k].nameEN : gamemodes[k].nameFR, mode)) { modenum = k+STARTGAMEMODE; break; }
             if(!m_valid(modenum)) continue;
             switch(op)
             {
@@ -749,13 +749,13 @@ namespace server
 
     const char *modename(int n, const char *unknown)
     {
-        if(m_valid(n)) return gamemodes[n - STARTGAMEMODE].name;
+        if(m_valid(n)) return langage ? gamemodes[n - STARTGAMEMODE].nameEN : gamemodes[n - STARTGAMEMODE].nameFR;
         return unknown;
     }
 
     const char *modeprettyname(int n, const char *unknown)
     {
-        if(m_valid(n)) return gamemodes[n - STARTGAMEMODE].name;
+        if(m_valid(n)) return langage ? gamemodes[n - STARTGAMEMODE].nameEN : gamemodes[n - STARTGAMEMODE].nameFR;
         return unknown;
     }
 

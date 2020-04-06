@@ -134,28 +134,29 @@ enum
 
 static struct gamemodeinfo
 {
-    const char *name;
+    const char *nameFR;
+    const char *nameEN;
     int flags;
 } gamemodes[] =
 {
-    { "demo", M_DEMO | M_LOCAL },
-    { "Editeur de maps", M_EDIT },
+    { "demo", "demo", M_DEMO | M_LOCAL },
+    { "Editeur de maps", "Map editor", M_EDIT },
 
     //MODE 1, 2, 3, 4
-    { "Tue Les Tous", M_LOBBY },
-    { "Tue Les Tous (Aléatoire)", M_LOBBY | M_RANDOM | M_NOAMMO | M_MUNINFINIE},
-    { "Tue Les Tous (Full stuff)", M_LOBBY | M_FULLSTUFF},
-    { "Tue Les Tous (Identique)", M_LOBBY | M_IDENTIQUE | M_NOAMMO | M_MUNINFINIE},
+    { "Tue Les Tous", "Deathmatch", M_LOBBY },
+    { "Tue Les Tous (Aléatoire)", "Deathmatch (Random)", M_LOBBY | M_RANDOM | M_NOAMMO | M_MUNINFINIE},
+    { "Tue Les Tous (Full stuff)", "Deathmatch (Full stuff)", M_LOBBY | M_FULLSTUFF},
+    { "Tue Les Tous (Identique)", "Deathmatch (Identical)", M_LOBBY | M_IDENTIQUE | M_NOAMMO | M_MUNINFINIE},
     //MODE 5, 6, 7, 8
-    { "Tue Les Tous", M_LOBBY | M_TEAM },
-    { "Tue Les Tous (Aléatoire)", M_LOBBY | M_RANDOM | M_TEAM | M_NOAMMO | M_MUNINFINIE},
-    { "Tue Les Tous (Full stuff)", M_LOBBY | M_FULLSTUFF | M_TEAM},
-    { "Tue Les Tous (Identique)", M_LOBBY | M_IDENTIQUE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
+    { "Tue Les Tous", "Team Deathmatch", M_LOBBY | M_TEAM },
+    { "Tue Les Tous (Aléatoire)", "Team Deathmatch (Random)", M_LOBBY | M_RANDOM | M_TEAM | M_NOAMMO | M_MUNINFINIE},
+    { "Tue Les Tous (Full stuff)", "Team Deathmatch (Full stuff)", M_LOBBY | M_FULLSTUFF | M_TEAM},
+    { "Tue Les Tous (Identique)", "Team Deathmatch (Identical)", M_LOBBY | M_IDENTIQUE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
     //MODE 9, 10, 11, 12
-    { "Capture de drapeau", M_CTF | M_TEAM },
-    { "Capture de drapeau (Aléatoire)", M_RANDOM | M_CTF | M_TEAM | M_NOAMMO | M_MUNINFINIE},
-    { "Capture de drapeau (Full stuff)", M_FULLSTUFF | M_CTF | M_TEAM},
-    { "Capture de drapeau (Identique)", M_IDENTIQUE | M_CTF | M_TEAM | M_NOAMMO | M_MUNINFINIE},
+    { "Capture de drapeau", "Capture the flag", M_CTF | M_TEAM },
+    { "Capture de drapeau (Aléatoire)", "Capture the flag (Random)", M_RANDOM | M_CTF | M_TEAM | M_NOAMMO | M_MUNINFINIE},
+    { "Capture de drapeau (Full stuff)", "Capture the flag (Full stuff)", M_FULLSTUFF | M_CTF | M_TEAM},
+    { "Capture de drapeau (Identique)", "Capture the flag (Identical)", M_IDENTIQUE | M_CTF | M_TEAM | M_NOAMMO | M_MUNINFINIE},
 };
 
 #define STARTGAMEMODE (-1)

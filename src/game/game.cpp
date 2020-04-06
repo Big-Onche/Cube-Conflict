@@ -867,9 +867,9 @@ namespace game
             cmode->setup();
         }
 
-        conoutf(CON_GAMEINFO, "\f2Le mode de jeu est : %s", server::modeprettyname(gamemode));
+        conoutf(CON_GAMEINFO, langage ? "\f2Gamemode is : %s": "\f2Le mode de jeu est : %s", server::modeprettyname(gamemode));
 
-        const char *info = m_valid(gamemode) ? gamemodes[gamemode - STARTGAMEMODE].name : NULL;
+        const char *info = m_valid(gamemode) ? langage ? gamemodes[gamemode - STARTGAMEMODE].nameEN : gamemodes[gamemode - STARTGAMEMODE].nameFR : NULL;
         if(showmodeinfo && info) conoutf(CON_GAMEINFO, "\f0%s", info);
 
         syncplayer();
@@ -896,7 +896,8 @@ namespace game
 
     const char *getmapinfo()
     {
-        return showmodeinfo && m_valid(gamemode) ? gamemodes[gamemode - STARTGAMEMODE].name : NULL;
+        if(langage==1) return showmodeinfo && m_valid(gamemode) ? gamemodes[gamemode - STARTGAMEMODE].nameEN : NULL;
+        else return showmodeinfo && m_valid(gamemode) ? gamemodes[gamemode - STARTGAMEMODE].nameFR : NULL;
     }
 
     vector<char *> astuces;
