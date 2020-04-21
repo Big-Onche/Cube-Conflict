@@ -917,11 +917,9 @@ namespace server
     {
         if((m_timed && gamemillis>=gamelimit) || !sents.inrange(i) || !sents[i].spawned) return false;
         clientinfo *ci = getinfo(sender);
-
         if(!ci || (!ci->local && !ci->state.canpickup(sents[i].type, ci->aptitude, ci->state.armourtype))) return false;
         sents[i].spawned = false;
         sents[i].spawntime = spawntime(sents[i].type);
-
         int rndsuperweapon = rnd(4);
         sendf(-1, 1, "ri4", N_ITEMACC, i, sender, sents[i].type==I_SUPERARME ? rndsuperweapon : 0);
         ci->state.pickup(sents[i].type, ci->aptitude, sents[i].type==I_SUPERARME ? rndsuperweapon : 0, ci->state.aptisort1, ci->state.armourtype);

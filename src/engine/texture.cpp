@@ -2474,6 +2474,12 @@ static void mergealpha(ImageData &c, ImageData &s)
             dst[3] = src[0];
         );
     }
+    else if(s.bpp == 3)
+    {
+        readwritergbatex(c, s,
+            dst[3] = (int(src[0]) + int(src[1]) + int(src[2]))/3;
+        );
+    }
     else
     {
         readwritergbatex(c, s,
@@ -2617,6 +2623,7 @@ void Slot::load()
 
 MatSlot &lookupmaterialslot(int index, bool load)
 {
+    if(materialslots[index].sts.empty() && index&MATF_INDEX) index &= ~MATF_INDEX;
     MatSlot &s = materialslots[index];
     if(load && !s.linked)
     {
