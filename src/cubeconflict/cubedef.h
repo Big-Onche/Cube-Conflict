@@ -55,7 +55,7 @@ static const struct custominfo { const char *smiley, *capeteam1, *capeteam2, *cu
     {"smileys/colere",   "capes/cape_cislattack",   "capes/cape_cislattack/orange",     "tombes/cristal"},
     {"smileys/sournois", "capes/cape_ruinee",       "capes/cape_ruinee/orange",         "tombes/couronne"},
     {"smileys/fou",      "capes/cape_weed",         "capes/cape_weed/orange",           "tombes/merde"},
-    {"smileys/cool",     "capes/cape_larry",        "capes/cape_larry/orange"},
+    {"smileys/cool",     "capes/cape_larry",        "capes/cape_larry/orange",         "tombes/lingots"},
     {"smileys/bug",      "capes/cape_high",         "capes/cape_high/orange"},
     {"",                 "capes/cape_spartiate",    "capes/cape_spartiate/orange"},
     {"",                 "capes/cape_risitasbg",    "capes/cape_risitasbg/orange"},
