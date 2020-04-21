@@ -8,6 +8,11 @@
   #include "SDL_image.h"
 #endif
 
+#ifndef SDL_IMAGE_VERSION_ATLEAST
+#define SDL_IMAGE_VERSION_ATLEAST(X, Y, Z) \
+    (SDL_VERSIONNUM(SDL_IMAGE_MAJOR_VERSION, SDL_IMAGE_MINOR_VERSION, SDL_IMAGE_PATCHLEVEL) >= SDL_VERSIONNUM(X, Y, Z))
+#endif
+
 template<int BPP> static void halvetexture(uchar * RESTRICT src, uint sw, uint sh, uint stride, uchar * RESTRICT dst)
 {
     for(uchar *yend = &src[sh*stride]; src < yend;)
@@ -2254,6 +2259,7 @@ const struct slottex
     {"g", TEX_GLOW},
     {"s", TEX_SPEC},
     {"z", TEX_DEPTH},
+    {"a", TEX_ALPHA},
     {"e", TEX_ENVMAP}
 };
 
@@ -2460,6 +2466,22 @@ static void mergedepth(ImageData &c, ImageData &z)
     );
 }
 
+static void mergealpha(ImageData &c, ImageData &s)
+{
+    if(s.bpp < 3)
+    {
+        readwritergbatex(c, s,
+            dst[3] = src[0];
+        );
+    }
+    else
+    {
+        readwritergbatex(c, s,
+            dst[3] = src[3];
+        );
+    }
+}
+
 static void collapsespec(ImageData &s)
 {
     ImageData d(s.w, s.h, 1);
@@ -2478,8 +2500,8 @@ int Slot::cancombine(int type) const
 {
     switch(type)
     {
-        case TEX_DIFFUSE: return TEX_SPEC;
-        case TEX_NORMAL: return TEX_DEPTH;
+        case TEX_DIFFUSE: return texmask&((1<<TEX_SPEC)|(1<<TEX_NORMAL)) ? TEX_SPEC : TEX_ALPHA;
+        case TEX_NORMAL: return texmask&(1<<TEX_DEPTH) ? TEX_DEPTH : TEX_ALPHA;
         default: return -1;
     }
 }
@@ -2550,6 +2572,7 @@ void Slot::load(int index, Slot::Tex &t)
                     {
                         case TEX_SPEC: mergespec(ts, cs); break;
                         case TEX_DEPTH: mergedepth(ts, cs); break;
+                        case TEX_ALPHA: mergealpha(ts, cs); break;
                     }
                 }
             }
@@ -3817,7 +3840,13 @@ void saveimage(const char *filename, int format, ImageData &image, bool flip = f
             if(f)
             {
                 switch(format) {
-                    case IMG_JPG: IMG_SaveJPG_RW(s, f->rwops(), 1, screenshotquality); break;
+                    case IMG_JPG:
+#if SDL_IMAGE_VERSION_ATLEAST(2, 0, 2)
+                        IMG_SaveJPG_RW(s, f->rwops(), 1, screenshotquality);
+#else
+                        conoutf(CON_ERROR, "JPG screenshot support requires SDL_image 2.0.2");
+#endif
+                        break;
                     default: SDL_SaveBMP_RW(s, f->rwops(), 1); break;
                 }
                 delete f;

@@ -805,7 +805,7 @@ void checkinput()
             case SDL_KEYDOWN:
             case SDL_KEYUP:
                 if(keyrepeatmask || !event.key.repeat)
-                    processkey(event.key.keysym.sym, event.key.state==SDL_PRESSED);
+                    processkey(event.key.keysym.sym, event.key.state==SDL_PRESSED, event.key.keysym.mod | SDL_GetModState());
                 break;
 
             case SDL_WINDOWEVENT:

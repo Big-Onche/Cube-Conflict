@@ -42,12 +42,12 @@ namespace game
         else if(following < 0) nextfollow();
     });
 
-    gameent *followingplayer()
+    gameent *followingplayer(gameent *fallback)
     {
-        if(player1->state!=CS_SPECTATOR || following<0) return NULL;
+        if(player1->state!=CS_SPECTATOR || following<0) return fallback;
         gameent *target = getclient(following);
         if(target && target->state!=CS_SPECTATOR) return target;
-        return NULL;
+        return fallback;
     }
 
     ICOMMAND(getfollow, "", (),
@@ -151,8 +151,7 @@ namespace game
     gameent *hudplayer()
     {
         if(thirdperson || specmode > 1) return player1;
-        gameent *target = followingplayer();
-        return target ? target : player1;
+        return followingplayer(player1);
     }
 
     void setupcamera()
@@ -669,8 +668,7 @@ namespace game
         }
 
         //////////////////////////////MESSAGES//////////////////////////////
-        gameent *h = followingplayer();
-        if(!h) h = player1;
+        gameent *h = followingplayer(player1);
         int contype = d==h || actor==h ? CON_FRAG_SELF : CON_FRAG_OTHER;
         const char *dname = "", *aname = "";
         if(m_teammode && teamcolorfrags)

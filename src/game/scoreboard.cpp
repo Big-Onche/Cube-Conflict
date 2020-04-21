@@ -201,7 +201,7 @@ namespace game
             if(intermission) result("Fin de la partie");
             else
             {
-                int secs = max(maplimit-lastmillis, 0)/1000;
+                int secs = max(maplimit-lastmillis + 999, 0)/1000;
                 result(tempformatstring("%d:%02d", secs/60, secs%60));
             }
         }

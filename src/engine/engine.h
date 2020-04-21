@@ -580,7 +580,7 @@ extern void clearsleep(bool clearoverrides = true);
 // console
 extern float conscale;
 
-extern void processkey(int code, bool isdown);
+extern void processkey(int code, bool isdown, int modstate = 0);
 extern void processtextinput(const char *str, int len);
 extern float rendercommand(float x, float y, float w);
 extern float renderfullconsole(float w, float h);

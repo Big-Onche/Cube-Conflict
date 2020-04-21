@@ -939,7 +939,7 @@ namespace game
     extern const char *teamcolor(int team);
     extern gameent *pointatplayer();
     extern gameent *hudplayer();
-    extern gameent *followingplayer();
+    extern gameent *followingplayer(gameent *fallback = NULL);
     extern void stopfollowing();
     extern void checkfollow();
     extern void nextfollow(int dir = 1);
