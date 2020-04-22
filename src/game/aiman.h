@@ -122,7 +122,7 @@ namespace aiman
         ci->playercolor = rnd(0x8000);
         ci->aptitude = rnd(14);
         ci->customcape = rnd(12);
-        ci->customtombe = rnd(8)+1;
+        ci->customtombe = rnd(9)+1;
         ci->customdanse = rnd(7)+1;
         ci->aireinit = 2;
         ci->connected = true;

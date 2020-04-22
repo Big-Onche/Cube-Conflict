@@ -246,7 +246,7 @@ namespace game
         player1->customcape = player1_cape;
     });
 
-    VARFP(player1_tombe, 1, 1, 8,
+    VARFP(player1_tombe, 1, 1, 9,
         {
         addmsg(N_SENDTOMBE, "ri", player1_tombe);
         player1->customtombe = player1_tombe;
@@ -254,7 +254,7 @@ namespace game
 
     void rendertombeplayer(gameent *d, float fade)
     {
-         rendermodel(customs[d->customtombe].custtombe, ANIM_MAPMODEL, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED, d, NULL, 0, 0, fade); //DEBUG
+         rendermodel(customs[d->customtombe].custtombe, ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED, d, NULL, 0, 0, fade); //DEBUG
     }
 
     string bouclier;
@@ -274,7 +274,7 @@ namespace game
         else if(d->state==CS_DEAD)
         {
             if(d->tombepop<1.0f) d->tombepop += 0.02f;
-            rendermodel(customs[d->customtombe].custtombe, ANIM_MAPMODEL, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, flags, NULL, NULL, 0, 0, d->tombepop, vec4(vec::hexcolor(color), 5));
+            rendermodel(customs[d->customtombe].custtombe, ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, flags, NULL, NULL, 0, 0, d->tombepop, vec4(vec::hexcolor(color), 5));
 
             d->skeletonfade -= 0.015f;
             if(d->skeletonfade<0.015f) return;
