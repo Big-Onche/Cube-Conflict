@@ -25,7 +25,10 @@ void writesave()
 {
     stream *f = openutf8file("config/sauvegarde.cfg", "w");
 
-    f->printf("%s%s", encryptsave(tempformatstring("loadsavepart1 %d %d %d %d %d %d %d %d %d %d; ", ccxp, stat[0], stat[1], stat[2], stat[3], stat[4], stat[5], stat[6], stat[7], stat[8])), encryptsave(tempformatstring("loadsavepart2 %d %d %d %d %d", stat[9], stat[10], stat[11], stat[12], stat[13])));
+    f->printf("%s%s",
+              encryptsave(tempformatstring("loadsavepart1 %d %d %d %d %d %d %d %d %d %d; ", ccxp, stat[0], stat[1], stat[2], stat[3], stat[4], stat[5], stat[6], stat[7], stat[8])),
+              encryptsave(tempformatstring("loadsavepart2 %d %d %d %d %d %d %d %d %d %d; ", stat[9], stat[10], stat[11], stat[12], stat[13], stat[14], stat[15], stat[16], stat[17], stat[18]))
+             );
     //f->printf("%s\n", );
 }
 
@@ -43,17 +46,21 @@ void genlvl() //Calcule le niveau du joueur
     if(pour1!=0) pourcents = pour2/pour1; //Calcul le pourcentage pour prochain niveau
 }
 
-ICOMMAND(loadsavepart1, "iiiiiiiiii", (int *save1, int *save2, int *save3, int *save4, int *save5, int *save6, int *save7, int *save8, int *save9, int *save10),
+ICOMMAND(loadsavepart1, "iiiiiiiiii", (int *asave1, int *asave2, int *asave3, int *asave4, int *asave5, int *asave6, int *asave7, int *asave8, int *asave9, int *asave10),
 {
-    ccxp = *save1; //Xp donc level
-    stat[0] = *save2; stat[1] = *save3; stat[2] = *save4; //Kills, morts, killstrak donc ratio
-    stat[3] = *save5; stat[4] = *save6; stat[5] = *save7; stat[6] = *save8; stat[7] = *save9; stat[8] = *save10; //Objets
+    ccxp = *asave1; //Xp donc level
+    stat[0] = *asave2; stat[1] = *asave3; stat[2] = *asave4; //Kills, morts, killstrak donc ratio
+    stat[3] = *asave5; stat[4] = *asave6; stat[5] = *asave7; stat[6] = *asave8; stat[7] = *asave9; stat[8] = *asave10; //Objets
     genlvl(); //Regénère le niveau afin d'avoir le bon niveau & pourcentage pour prochain niveau
 });
 
-ICOMMAND(loadsavepart2, "iiiiiiiiiiii", (int *save1, int *save2, int *save3, int *save4, int *save5),
+ICOMMAND(loadsavepart2, "iiiiiiiiii", (int *bsave1, int *bsave2, int *bsave3, int *bsave4, int *bsave5, int *bsave6, int *bsave7, int *bsave8, int *bsave9, int *bsave10),
 {
-    stat[9] = *save1; stat[10] = *save2; stat[11] = *save3; stat[12] = *save4; stat[13] = *save5; //Boosts
+    stat[9] = *bsave1; stat[10] = *bsave2; stat[11] = *bsave3; stat[12] = *bsave4; stat[13] = *bsave5; //Boosts
+    stat[14] = *bsave6; stat[15] = *bsave7; //Armes
+    stat[16] = *bsave8; //Drapeaux pris
+    stat[17] = *bsave9; //Parties gagnées
+    stat[18] = *bsave10; //Armures assistée
 });
 
 void addxp(int nbxp) // Ajoute l'xp très simplment

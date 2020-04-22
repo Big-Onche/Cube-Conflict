@@ -628,6 +628,7 @@ struct ctfclientmode : clientmode
         f.interptime = lastmillis;
         conoutf(CON_GAMEINFO, "%s\f7 %s volé le drapeau %s", teamcolorname(d), d==player1 ? "as" : "a", teamcolorflag(f));
         d->team==player1->team ? ctfmessage5=totalmillis : ctfmessage6=totalmillis;
+        if(d==player1) addstat(1, STAT_DRAPEAUX);
         ownflag(i, d, lastmillis);
         playsound(S_DRAPEAUPRIS);
     }
