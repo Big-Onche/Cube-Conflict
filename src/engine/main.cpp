@@ -1298,7 +1298,7 @@ int main(int argc, char **argv)
         lastmillis += curtime;
         totalmillis = millis;
         updatetime();
-        game::dotime();
+        if(!mainmenu) game::dotime();
 
         checkinput();
         UI::update();
