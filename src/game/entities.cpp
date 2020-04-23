@@ -316,20 +316,20 @@ namespace entities
                     {
                         switch(e->type)
                         {
-                            case I_SANTE: addstat(1, STAT_PANACHAY); break;
-                            case I_MANA: addstat(1, STAT_MANA); break;
-                            case I_BOUCLIERBOIS: addstat(1, STAT_BOUCLIERBOIS); break;
-                            case I_BOUCLIERFER: addstat(1, STAT_BOUCLIERFER); break;
-                            case I_BOUCLIEROR: addstat(1, STAT_BOUCLIEROR); break;
-                            case I_BOUCLIERMAGNETIQUE: addstat(1, STAT_BOUCLIERMAGNETIQUE); break;
-                            case I_ARMUREASSISTEE: addstat(1, STAT_ARMUREASSIST); break;
-                            case I_BOOSTPV: addstat(1, STAT_COCHON); break;
-                            case I_BOOSTDEGATS: addstat(1, STAT_STEROS); break;
-                            case I_BOOSTVITESSE: addstat(1, STAT_EPO); break;
-                            case I_BOOSTGRAVITE: addstat(1, STAT_JOINT); break;
-                            case I_BOOSTPRECISION: addstat(1, STAT_CHAMPIS); break;
-                            case I_SUPERARME: addstat(1, STAT_SUPERARMES); break;
-                            default: if(e->type>=I_RAIL && e->type<=I_GLOCK) addstat(1, STAT_ARMES);
+                            case I_SANTE: addstat(1, STAT_PANACHAY); addxp(1); break;
+                            case I_MANA: addstat(1, STAT_MANA); addxp(1); break;
+                            case I_BOUCLIERBOIS: addstat(1, STAT_BOUCLIERBOIS); addxp(2); break;
+                            case I_BOUCLIERFER: addstat(1, STAT_BOUCLIERFER); addxp(3); break;
+                            case I_BOUCLIEROR: addstat(1, STAT_BOUCLIEROR); addxp(4); break;
+                            case I_BOUCLIERMAGNETIQUE: addstat(1, STAT_BOUCLIERMAGNETIQUE); addxp(4); break;
+                            case I_ARMUREASSISTEE: addstat(1, STAT_ARMUREASSIST); addxp(5); break;
+                            case I_BOOSTPV: addstat(1, STAT_COCHON); addxp(5); break;
+                            case I_BOOSTDEGATS: addstat(1, STAT_STEROS); addxp(5); break;
+                            case I_BOOSTVITESSE: addstat(1, STAT_EPO); addxp(5); break;
+                            case I_BOOSTGRAVITE: addstat(1, STAT_JOINT); addxp(5); break;
+                            case I_BOOSTPRECISION: addstat(1, STAT_CHAMPIS); addxp(5); break;
+                            case I_SUPERARME: addstat(1, STAT_SUPERARMES); addxp(7); break;
+                            default: if(e->type>=I_RAIL && e->type<=I_GLOCK) {addstat(1, STAT_ARMES); addxp(1);}
                         }
                     }
                     addmsg(N_ITEMPICKUP, "rci", d, n);
