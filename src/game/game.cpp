@@ -50,6 +50,19 @@ namespace game
         return fallback;
     }
 
+    int lasttimeupdate = 0;
+
+    void dotime()
+    {
+        if(totalmillis >= lasttimeupdate+1000) //1 second interval
+        {
+            addstat(1, STAT_TPSSEC);
+            lasttimeupdate = totalmillis;
+        }
+        if(stat[19]>=60) {stat[19]=0 ; addstat(1, STAT_TPSMIN);}
+        if(stat[20]>=60) {stat[20]=0 ; addstat(1, STAT_TPSH);}
+    }
+
     ICOMMAND(getfollow, "", (),
     {
         gameent *f = followingplayer();

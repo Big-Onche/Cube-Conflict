@@ -25,11 +25,11 @@ void writesave()
 {
     stream *f = openutf8file("config/sauvegarde.cfg", "w");
 
-    f->printf("%s%s",
+    f->printf("%s%s%s",
               encryptsave(tempformatstring("loadsavepart1 %d %d %d %d %d %d %d %d %d %d; ", ccxp, stat[0], stat[1], stat[2], stat[3], stat[4], stat[5], stat[6], stat[7], stat[8])),
-              encryptsave(tempformatstring("loadsavepart2 %d %d %d %d %d %d %d %d %d %d; ", stat[9], stat[10], stat[11], stat[12], stat[13], stat[14], stat[15], stat[16], stat[17], stat[18]))
+              encryptsave(tempformatstring("loadsavepart2 %d %d %d %d %d %d %d %d %d %d; ", stat[9], stat[10], stat[11], stat[12], stat[13], stat[14], stat[15], stat[16], stat[17], stat[18])),
+              encryptsave(tempformatstring("loadsavepart3 %d %d %d; ", stat[19], stat[20], stat[21]))
              );
-    //f->printf("%s\n", );
 }
 
 //////////////////////Gestion de l'xp et autres statistiques//////////////////////
@@ -61,6 +61,11 @@ ICOMMAND(loadsavepart2, "iiiiiiiiii", (int *bsave1, int *bsave2, int *bsave3, in
     stat[16] = *bsave8; //Drapeaux pris
     stat[17] = *bsave9; //Parties gagnées
     stat[18] = *bsave10; //Armures assistée
+});
+
+ICOMMAND(loadsavepart3, "iii", (int *csave1, int *csave2, int *csave3),
+{
+    stat[19] = *csave1; stat[20] = *csave2; stat[21] = *csave3; //Tps de jeu (secondes, minutes, heures)
 });
 
 void addxp(int nbxp) // Ajoute l'xp très simplment
@@ -95,5 +100,4 @@ float menustat(int value)
         }
     }
     else return stat[value];
-
 }

@@ -3363,11 +3363,16 @@ namespace UI
         }
     }
 
-    static inline void buildstattext(float nombre, float scale, float scalemod, const Color &color, float wrap, uint *children, bool needfloat)
+    static inline void buildstattext(float nombre, float scale, float scalemod, const Color &color, float wrap, uint *children, bool needfloat, bool timestat)
     {
         if(scale <= 0) scale = 1;
         scale *= scalemod;
-        if(needfloat)BUILD(TextFloat, o, o->setup(nombre, scale, color, wrap), children);
+        if(needfloat) BUILD(TextFloat, o, o->setup(nombre, scale, color, wrap), children);
+        else if(timestat)
+        {
+            defformatstring(horloge, "%s%d:%s%d:%s%d", stat[21]<10 ? "0" : "", stat[21], stat[20]<10 ? "0" : "", stat[20], stat[19]<10 ? "0" : "", stat[19]);
+            BUILD(TextString, o, o->setup(horloge, scale, color, wrap), children);
+        }
         else BUILD(TextInt, o, o->setup(nombre, scale, color, wrap), children);
     }
 
@@ -3375,8 +3380,7 @@ namespace UI
         buildtext(*text, *scale, uitextscale, Color(*c), -1, children));
 
     ICOMMAND(uistat, "ffe", (float *stat, float *scale, uint *children),
-        if(*stat==-3) buildstattext(menustat(*stat), *scale, uitextscale, Color(0, 0, 0), -1, children, true);
-        else buildstattext(menustat(*stat), *scale, uitextscale, Color(0, 0, 0), -1, children, false));
+        buildstattext(menustat(*stat), *scale, uitextscale, Color(0, 0, 0), -1, children, *stat==-3 ? true : false, *stat==19 ? true : false));
 
     ICOMMAND(uitext, "tfe", (tagval *text, float *scale, uint *children),
         buildtext(*text, *scale, uitextscale, Color(255, 255, 255), -1, children));
