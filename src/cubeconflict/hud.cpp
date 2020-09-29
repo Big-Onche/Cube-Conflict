@@ -207,7 +207,7 @@ namespace game
             gle::colorf(1, 1, 1, 1);
         }
 
-        if(player1->health<500)
+        if(player1->health<500 && !m_oneshoot)
         {
             gle::colorf((-(player1->health)+700)/1000.0f, (-(player1->health)+700)/1000.0f, (-(player1->health)+700)/1000.0f, (-(player1->health)+700)/1000.0f);
             settexture("media/interface/hud/damage.png");

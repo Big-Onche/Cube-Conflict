@@ -256,7 +256,7 @@ namespace game
 
             if(curtime>0 && d->ragemillis && d!=player1) d->ragemillis = max(d->ragemillis-curtime, 0);
 
-            if(d==hudplayer() && d->state==CS_ALIVE)
+            if(d==hudplayer() && d->state==CS_ALIVE && !m_oneshoot)
             {
                 if(d->health<=200) d->hurtchan = playsound(S_HEARTBEAT, NULL, NULL, 0, -1, 1000, d->hurtchan);
                 else d->stopheartbeat();

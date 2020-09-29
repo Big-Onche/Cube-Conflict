@@ -625,8 +625,8 @@ namespace game
 
     void calcmode()
     {
-        if(n_type==0) finalmode = n_mode+(n_team*4);
-        else if (n_type==1) finalmode = n_mode+8;
+        if(n_type==0) finalmode = n_mode+(n_team*5);
+        else if (n_type==1) finalmode = n_mode+10;
         setmode(finalmode);
     }
 
