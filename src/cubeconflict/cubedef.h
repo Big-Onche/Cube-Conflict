@@ -57,7 +57,7 @@ static const struct custominfo { const char *smiley, *capeteam1, *capeteam2, *cu
     {"smileys/fou",      "capes/cape_weed",         "capes/cape_weed/orange",           "tombes/merde"},
     {"smileys/cool",     "capes/cape_larry",        "capes/cape_larry/orange",          "tombes/lingots"},
     {"smileys/bug",      "capes/cape_high",         "capes/cape_high/orange",           "tombes/oeil"},
-    {"",                 "capes/cape_spartiate",    "capes/cape_spartiate/orange"},
+    {"",                 "capes/cape_depardieu",    "capes/cape_depardieu/orange"},
     {"",                 "capes/cape_risitasbg",    "capes/cape_risitasbg/orange"},
 };
 
@@ -88,6 +88,10 @@ enum {STAT_KILLS, STAT_MORTS, STAT_KILLSTREAK, STAT_BOUCLIERBOIS, STAT_BOUCLIERF
         STAT_PANACHAY, STAT_MANA, STAT_COCHON, STAT_STEROS, STAT_EPO, STAT_JOINT, STAT_CHAMPIS, STAT_ARMES, STAT_SUPERARMES,
         STAT_DRAPEAUX, STAT_WINS, STAT_ARMUREASSIST, STAT_TPSSEC, STAT_TPSMIN, STAT_TPSH, NUMSTATS};
 extern int stat[NUMSTATS];
+
+enum {ACH_TRIPLE, ACH_QUINTE, ACH_INVINCIBLE, ACH_COLLECTIONNEUR, ACH_ALCOOLIQUE, ACH_MANAMANIA, ACH_PROTECTION,
+        ACH_JUNKIE, ACH_WINNER, ACH_EPICWINNER, ACH_FLAGRUNNER, ACH_CHEATER, ACH_NEKFEU, NUMSUCCES};
+extern int succes[NUMSUCCES];
 
 extern int ccxp, cclvl, needxp, oldneed, neededxp;
 extern float pourcents;
