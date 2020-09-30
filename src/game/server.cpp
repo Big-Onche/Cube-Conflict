@@ -870,7 +870,7 @@ namespace server
     ctfservmode ctfmode;
     servmode *smode = NULL;
 
-    bool canspawnitem(int type) { return !m_noitems && (type>=I_RAIL && type<=I_MANA && (!m_noammo || type<I_RAIL || type>I_GLOCK)); }
+    bool canspawnitem(int type) { return !m_noitems && (type>=I_RAIL && type<=I_ARMUREASSISTEE && (!m_noammo || type<I_RAIL || type>I_GLOCK)); }
     int spawntime(int type)
     {
         int np = numclients(-1, true, false);
@@ -2207,7 +2207,7 @@ namespace server
         }
         if(ts.health<=0)
         {
-            if(actor->aptitude==APT_FAUCHEUSE) //Augmente la santé maxi de la faucheuse si elle tue un joueur
+            if(actor->aptitude==APT_FAUCHEUSE && !m_oneshoot) //Augmente la santé maxi de la faucheuse si elle tue un joueur
             {
                 if(as.maxhealth >= 1500) as.health = min(as.health+250, as.maxhealth); //Rends juste de la santé si le boost est déjà appliqué
                 if(as.maxhealth < 1500) {as.maxhealth += 500; as.health += 500;} //Augmente la santé max à 150 PV si c'est le premier kill

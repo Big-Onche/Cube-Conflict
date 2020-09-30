@@ -270,7 +270,7 @@ namespace game
                 if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
                 if(d->steromillis || d->epomillis || d->jointmillis || d->champimillis) entities::checkboosts(curtime, d);
                 if(d->ragemillis || d->aptisort1 || d->aptisort2 || d->aptisort3) entities::checkaptiskill(curtime, d);
-                if(players[i]->aptitude==APT_MEDECIN)
+                if(players[i]->aptitude==APT_MEDECIN && !m_oneshoot)
                 {
                     gameent *h = players[i];
                     loopv(players)
@@ -363,7 +363,7 @@ namespace game
 
             loopv(players)
             {
-                if(players[i]->aptitude==APT_MEDECIN)
+                if(players[i]->aptitude==APT_MEDECIN && !m_oneshoot)
                 {
                     gameent *h = players[i];
                     loopv(players)

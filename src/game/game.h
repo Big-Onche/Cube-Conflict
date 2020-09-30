@@ -681,7 +681,7 @@ struct gamestate
             gunselect = aptitude==6 ? GUN_KAMIKAZE : GUN_SV98;
             armourtype = A_BLUE;
             armour = 0;
-            health = 1;
+            health = maxhealth = 1;
             return;
         }
         else
