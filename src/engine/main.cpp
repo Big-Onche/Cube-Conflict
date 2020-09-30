@@ -171,15 +171,10 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
     gle::deftexcoord0();
 
     settexture(backgroundimg, 0);
-    bgquad(0, 0, w*2, h*2);
-
-    //settexture("media/interface/decoration.png", 0);
     bgquad(0, 0, w, h);
 
     glEnable(GL_BLEND);
-
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
 
     if(mapshot || mapname)
     {
@@ -195,15 +190,7 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
         settexture("media/interface/shadow.png", 3);
         bgquad(0, 0, w, h);
 
-        float infowidth = 17.5f*FONTH, sz = 0.35f*min(w, h), x = 0.5f*w, y = (ly+lh - sz/15)/2.1f;
-
-        if(mapshot && mapshot!=notexture)
-        {
-            x -= 0.5f*sz;
-            resethudshader();
-            glBindTexture(GL_TEXTURE_2D, mapshot->id);
-            bgquad(x, y, sz, sz);
-        }
+        float infowidth = 17.5f*FONTH;
 
         if(mapname)
         {
@@ -232,8 +219,6 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
     }
     else
     {
-        copystring(backgroundimg, "media/interface/image_fond.jpg");
-
         if(force) //CubeConflict
         {
             float ilh = 1.1f*min(w, h), ilw = ilh*1.8f,
@@ -241,15 +226,16 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
 
             switch(n_map)
             {
-                case 0: formatstring(backgroundname, "media/map/Village.jpg"); break;
-                case 1: formatstring(backgroundname, "media/map/Usine.jpg"); break;
-                case 2: formatstring(backgroundname, "media/map/Chateaux.jpg"); break;
-                case 3: formatstring(backgroundname, "media/map/Dota.jpg"); break;
-                case 4: formatstring(backgroundname, "media/map/Lune.jpg"); break;
-                case 5: formatstring(backgroundname, "media/map/Volcan.jpg"); break;
+                case 0: formatstring(backgroundimg, "media/map/Village.jpg"); break;
+                case 1: formatstring(backgroundimg, "media/map/Usine.jpg"); break;
+                case 2: formatstring(backgroundimg, "media/map/Chateaux.jpg"); break;
+                case 3: formatstring(backgroundimg, "media/map/Dota.jpg"); break;
+                case 4: formatstring(backgroundimg, "media/map/Lune.jpg"); break;
+                case 5: formatstring(backgroundimg, "media/map/Volcan.jpg"); break;
+                default: formatstring(backgroundimg, "media/interface/image_fond.jpg"); break;
             }
 
-            settexture(backgroundname);
+            settexture(backgroundimg);
             bgquad(ilx-parallaxX/-40, ily-parallaxY/-40, ilw, ilh);
             gle::colorf(1, 1, 1, 0.3f);
 
