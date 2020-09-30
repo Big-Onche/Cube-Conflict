@@ -1351,7 +1351,7 @@ void disablezoom()
 
 void computezoom()
 {
-    if(game::player1->state==CS_DEAD) return;
+    if(game::player1->state==CS_DEAD) zoom = 0;
     if(!zoom) { zoomprogress = 0; curfov = fov; curavatarfov = avatarfov; return; }
     if(zoom > 0) zoomprogress = zoominvel ? min(zoomprogress + float(elapsedtime) / zoominvel, 1.0f) : 1;
     else
