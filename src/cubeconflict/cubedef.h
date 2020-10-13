@@ -19,10 +19,10 @@ enum {APT_SOLDAT = 0, APT_MEDECIN, APT_AMERICAIN, APT_NINJA, APT_VAMPIRE, APT_MA
 static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt_vitesse; const char *apt_tete, *apt_nomFR, *apt_nomEN; } aptitudes[NUMAPTS] =
 {
     { 105,  105, 105,   95, "chapeaux/casquette",   "Soldat", "Soldier"},       //0
-    { 80,   75,  100,  100, "chapeaux/medic",       "Médecin", "Medic"},        //1 ---> Ajouter son regen santé
+    { 80,   75,  100,  100, "chapeaux/medic",       "Médecin", "Medic"},        //1
     { 100,  140,  75,  130, "chapeaux/aventurier",  "Américain", "American"},   //2
     { 80,   80,   75,   80, "chapeaux/bandana",     "Ninja", "Ninja"},          //3
-    { 110,  50,  110,  110, "chapeaux/cornes",      "Vampire", "Vampire"},      //4 ---> OK (Regen screen ?)
+    { 110,  65,  110,  110, "chapeaux/cornes",      "Vampire", "Vampire"},      //4 ---> OK (Regen screen ?)
     { 95,   75,   90,  100, "chapeaux/magicien",    "Magicien", "Magician"},    //5
     { 100,  100,  80,   70, "chapeaux/japonais",    "Kamikaze", "Kamikaze"},    //6
     { 100,  80,   90,  110, "chapeaux/crane",       "Faucheuse", "Reaper"},     //7
