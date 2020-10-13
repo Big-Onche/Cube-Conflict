@@ -424,7 +424,7 @@ void textinput(bool on, int mask)
         }
         textinputmask |= mask;
     }
-    else
+    else if(textinputmask)
     {
         textinputmask &= ~mask;
         if(!textinputmask) SDL_StopTextInput();
