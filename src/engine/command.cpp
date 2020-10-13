@@ -3053,7 +3053,7 @@ bool execfile(const char *cfgfile, bool msg, bool encrypted)
     {
         int i;
 
-        for(i = 0; (i < 100 && buf[i] != '\0'); i++)
+        for(i = 0; (i < 500 && buf[i] != '\0'); i++)
             buf[i] = buf[i] - 10;
     }
 
@@ -4182,7 +4182,7 @@ CMPSCMD(>s, >);
 CMPSCMD(<=s, <=);
 CMPSCMD(>=s, >=);
 
-ICOMMAND(echo, "C", (char *s), conoutf("\f1%s", s));
+ICOMMAND(echo, "C", (char *s), conoutf(CON_ECHO, "\f1%s", s));
 ICOMMAND(error, "C", (char *s), conoutf(CON_ERROR, "%s", s));
 ICOMMAND(strstr, "ss", (char *a, char *b), { char *s = strstr(a, b); intret(s ? s-a : -1); });
 ICOMMAND(strlen, "s", (char *s), intret(strlen(s)));

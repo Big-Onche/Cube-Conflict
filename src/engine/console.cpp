@@ -74,6 +74,34 @@ HVARP(confilter, 0, 0xFFFFFF, 0xFFFFFF);
 HVARP(fullconfilter, 0, 0xFFFFFF, 0xFFFFFF);
 HVARP(miniconfilter, 0, 0, 0xFFFFFF);
 
+extern void updateconfilter();
+
+VARFP(contchat, 0, 1, 1, updateconfilter());
+VARFP(conteamtchat, 0, 1, 1, updateconfilter());
+VARFP(congame, 0, 1, 1, updateconfilter());
+VARFP(conkills, 0, 1, 1, updateconfilter());
+VARFP(conallkills, 0, 0, 1, updateconfilter());
+VARFP(coninfos, 0, 0, 1, updateconfilter());
+VARFP(conwarnings, 0, 0, 1, updateconfilter());
+VARFP(conerrors, 0, 0, 1, updateconfilter());
+VARFP(coninit, 0, 0, 1, updateconfilter());
+VARFP(conscripts, 0, 0, 1, updateconfilter());
+
+void updateconfilter()
+{
+    confilter = 0;
+    if(contchat) confilter+=0x100;
+    if(conteamtchat) confilter+=0x200;
+    if(congame) confilter+=0x400;
+    if(conkills) confilter+=0x800;
+    if(conallkills) confilter+=0x1000;
+    if(coninfos) confilter+=0x01;
+    if(conwarnings) confilter+=0x02;
+    if(conerrors) confilter+=0x04;
+    if(coninit) confilter+=0x10;
+    if(conscripts) confilter+=0x20;
+}
+
 int conskip = 0, miniconskip = 0;
 
 void setconskip(int &skip, int filter, int n)
@@ -639,7 +667,7 @@ void writebinds(stream *f)
 
 // tab-completion of all idents and base maps
 
-enum { FILES_DIR = 0, FILES_LIST };
+enum { FILES_DIR = 0, FILES_VAR, FILES_LIST };
 
 struct fileskey
 {
@@ -649,6 +677,13 @@ struct fileskey
     fileskey() {}
     fileskey(int type, const char *dir, const char *ext) : type(type), dir(dir), ext(ext) {}
 };
+
+static void cleanfilesdir(char *dir)
+{
+    int dirlen = (int)strlen(dir);
+    while(dirlen > 0 && (dir[dirlen-1] == '/' || dir[dirlen-1] == '\\'))
+        dir[--dirlen] = '\0';
+}
 
 struct filesval
 {
@@ -662,9 +697,22 @@ struct filesval
 
     void update()
     {
-        if(type!=FILES_DIR || millis >= commandmillis) return;
+        if((type!=FILES_DIR && type!=FILES_VAR) || millis >= commandmillis) return;
         files.deletearrays();
-        listfiles(dir, ext, files);
+        if(type==FILES_VAR)
+        {
+            string buf;
+            buf[0] = '\0';
+            if(ident *id = readident(dir)) switch(id->type)
+            {
+                case ID_SVAR: copystring(buf, *id->storage.s); break;
+                case ID_ALIAS: copystring(buf, id->getstr()); break;
+            }
+            if(!buf[0]) copystring(buf, ".");
+            cleanfilesdir(buf);
+            listfiles(buf, ext, files);
+        }
+        else listfiles(dir, ext, files);
         files.sort();
         loopv(files) if(i && !strcmp(files[i], files[i-1])) delete[] files.remove(i--);
         millis = totalmillis;
@@ -702,16 +750,11 @@ void addcomplete(char *command, int type, char *dir, char *ext)
         if(hasfiles) *hasfiles = NULL;
         return;
     }
-    if(type==FILES_DIR)
+    if(type==FILES_DIR) cleanfilesdir(dir);
+    if(ext)
     {
-        int dirlen = (int)strlen(dir);
-        while(dirlen > 0 && (dir[dirlen-1] == '/' || dir[dirlen-1] == '\\'))
-            dir[--dirlen] = '\0';
-        if(ext)
-        {
-            if(strchr(ext, '*')) ext[0] = '\0';
-            if(!ext[0]) ext = NULL;
-        }
+        if(strchr(ext, '*')) ext[0] = '\0';
+        if(!ext[0]) ext = NULL;
     }
     fileskey key(type, dir, ext);
     filesval **val = completefiles.access(key);
@@ -732,12 +775,18 @@ void addfilecomplete(char *command, char *dir, char *ext)
     addcomplete(command, FILES_DIR, dir, ext);
 }
 
+void addvarcomplete(char *command, char *var, char *ext)
+{
+    addcomplete(command, FILES_VAR, var, ext);
+}
+
 void addlistcomplete(char *command, char *list)
 {
     addcomplete(command, FILES_LIST, list, NULL);
 }
 
 COMMANDN(complete, addfilecomplete, "sss");
+COMMANDN(varcomplete, addvarcomplete, "sss");
 COMMANDN(listcomplete, addlistcomplete, "ss");
 
 void complete(char *s, int maxlen, const char *cmdprefix)
@@ -804,7 +853,7 @@ void writecompletions(stream *f)
             if(validateblock(v->dir)) f->printf("listcomplete %s [%s]\n", escapeid(k), v->dir);
             else f->printf("listcomplete %s %s\n", escapeid(k), escapestring(v->dir));
         }
-        else f->printf("complete %s %s %s\n", escapeid(k), escapestring(v->dir), escapestring(v->ext ? v->ext : "*"));
+        else f->printf("%s %s %s %s\n", v->type==FILES_VAR ? "varcomplete" : "complete", escapeid(k), escapestring(v->dir), escapestring(v->ext ? v->ext : "*"));
     }
 }
 
