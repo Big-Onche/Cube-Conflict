@@ -74,17 +74,6 @@ namespace entities
     {
         loopi(MAXENTTYPES)
         {
-            switch(i)
-            {
-                case I_RAIL: case I_PULSE: case I_SMAW: case I_MINIGUN: case I_SPOCKGUN: case I_M32:
-                case I_LANCEFLAMMES: case I_UZI: case I_FAMAS: case I_MOSSBERG: case I_HYDRA: case I_SV98:
-                case I_SKS: case I_ARBALETE: case I_AK47: case I_GRAP1: case I_ARTIFICE: case I_GLOCK:
-                case I_SUPERARME: case I_NULL1: case I_NULL2: case I_NULL3:
-                case I_SANTE: case I_BOOSTPV: case I_BOOSTDEGATS: case I_BOOSTPRECISION: case I_BOOSTVITESSE: case I_BOOSTGRAVITE:
-                case I_BOUCLIERBOIS: case I_BOUCLIERFER: case I_BOUCLIEROR: case I_BOUCLIERMAGNETIQUE: case I_ARMUREASSISTEE:
-                case I_MANA:
-                    break;
-            }
             const char *mdl = entmdlname(i);
             if(!mdl) continue;
             preloadmodel(mdl);
@@ -525,7 +514,6 @@ namespace entities
 
             "panache", "cochon_grille", "steroides", "champis", "epo", "joint",
             "bouclier_bois", "bouclier_fer", "bouclier_or", "bouclier_magnetique", "armure_assistee",
-
             "mana",
 
             "teleport", "teledest", "jumppad", "flag",

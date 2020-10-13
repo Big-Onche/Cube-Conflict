@@ -870,7 +870,7 @@ namespace server
     ctfservmode ctfmode;
     servmode *smode = NULL;
 
-    bool canspawnitem(int type) { return !m_noitems && (type>=I_RAIL && type<=I_ARMUREASSISTEE && (!m_noammo || type<I_RAIL || type>I_GLOCK)); }
+    bool canspawnitem(int type) { return !m_noitems && (type>=I_RAIL && type<=I_MANA && (!m_noammo || type<I_RAIL || type>I_GLOCK)); }
     int spawntime(int type)
     {
         int np = numclients(-1, true, false);
