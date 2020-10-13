@@ -16,9 +16,12 @@ VARFP(maxcon, 10, 200, MAXCONLINES, { while(conlines.length() > maxcon) delete[]
 
 #define CONSTRLEN 512
 
+VARP(contags, 0, 1, 1);
+
 void conline(int type, const char *sf)        // add a line to the console buffer
 {
-    char *buf = conlines.length() >= maxcon ? conlines.remove().line : newstring("", CONSTRLEN-1);
+    int prev = conlines.empty() || !contags ? 0 : conlines.added().type;
+    char *buf = type&CON_TAG_MASK && type == prev ? conlines.pop().line : (conlines.length() >= maxcon ? conlines.remove().line : newstring("", CONSTRLEN-1));
     cline &cl = conlines.add();
     cl.line = buf;
     cl.type = type;
@@ -32,22 +35,6 @@ void conoutfv(int type, const char *fmt, va_list args)
     vformatstring(buf, fmt, args, sizeof(buf));
     conline(type, buf);
     logoutf("%s", buf);
-}
-
-void conoutf(const char *fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
-    conoutfv(CON_INFO, fmt, args);
-    va_end(args);
-}
-
-void conoutf(int type, const char *fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
-    conoutfv(type, fmt, args);
-    va_end(args);
 }
 
 ICOMMAND(fullconsole, "iN$", (int *val, int *numargs, ident *id),
@@ -83,43 +70,15 @@ VARP(miniconwidth, 0, 40, 100);
 VARP(confade, 0, 30, 60);
 VARP(miniconfade, 0, 30, 60);
 VARP(fullconsize, 0, 75, 100);
-
-HVARP(confilter, 0, 0x001F00, 0xFFFFFF);
-HVARP(fullconfilter, 0, 0x001F37, 0xFFFFFF);
-HVARP(miniconfilter, 0, 0, 0x000300);
-
-extern void updateconfilter();
-
-VARFP(contchat, 0, 1, 1, updateconfilter());
-VARFP(conteamtchat, 0, 1, 1, updateconfilter());
-VARFP(congame, 0, 1, 1, updateconfilter());
-VARFP(conkills, 0, 1, 1, updateconfilter());
-VARFP(conallkills, 0, 0, 1, updateconfilter());
-VARFP(coninfos, 0, 0, 1, updateconfilter());
-VARFP(conwarnings, 0, 0, 1, updateconfilter());
-VARFP(conerrors, 0, 0, 1, updateconfilter());
-VARFP(coninit, 0, 0, 1, updateconfilter());
-VARFP(conscripts, 0, 0, 1, updateconfilter());
-
-void updateconfilter()
-{
-    confilter = 0;
-    if(contchat) confilter+=0x100;
-    if(conteamtchat) confilter+=0x200;
-    if(congame) confilter+=0x400;
-    if(conkills) confilter+=0x800;
-    if(conallkills) confilter+=0x1000;
-    if(coninfos) confilter+=0x01;
-    if(conwarnings) confilter+=0x02;
-    if(conerrors) confilter+=0x04;
-    if(coninit) confilter+=0x10;
-    if(conscripts) confilter+=0x20;
-}
+HVARP(confilter, 0, 0xFFFFFF, 0xFFFFFF);
+HVARP(fullconfilter, 0, 0xFFFFFF, 0xFFFFFF);
+HVARP(miniconfilter, 0, 0, 0xFFFFFF);
 
 int conskip = 0, miniconskip = 0;
 
 void setconskip(int &skip, int filter, int n)
 {
+    filter &= CON_FLAGS;
     int offset = abs(n), dir = n < 0 ? -1 : 1;
     skip = clamp(skip, 0, conlines.length()-1);
     while(offset)
@@ -141,6 +100,7 @@ ICOMMAND(clearconsole, "", (), { while(conlines.length()) delete[] conlines.pop(
 
 float drawconlines(int conskip, int confade, float conwidth, float conheight, float conoff, int filter, float y = 0, int dir = 1)
 {
+    filter &= CON_FLAGS;
     int numl = conlines.length(), offset = min(conskip, numl);
 
     if(confade)

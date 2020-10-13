@@ -457,7 +457,7 @@ void cleanupmodels()
 void clearmodel(char *name)
 {
     model *m = models.find(name, NULL);
-    if(!m) { conoutf("model %s is not loaded", name); return; }
+    if(!m) { conoutf(CON_WARN, "model %s is not loaded", name); return; }
     loopv(mapmodels)
     {
         mapmodelinfo &mmi = mapmodels[i];

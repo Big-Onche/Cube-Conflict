@@ -205,7 +205,7 @@ namespace ai
 
         if(!d->name[0])
         {
-            if(aidebug) conoutf("%s assigned to %s at skill %d", colorname(d, name), o ? colorname(o) : "?", sk);
+            if(aidebug) conoutf(CON_DEBUG, "%s assigned to %s at skill %d", colorname(d, name), o ? colorname(o) : "?", sk);
             else conoutf("\f7%s\f4 vient de rejoindre la partie", colorname(d, name));
             resetthisguy = true;
         }
@@ -213,10 +213,10 @@ namespace ai
         {
             if(d->ownernum != ocn)
             {
-                if(aidebug) conoutf("%s reassigned to %s", colorname(d, name), o ? colorname(o) : "?");
+                if(aidebug) conoutf(CON_DEBUG, "%s reassigned to %s", colorname(d, name), o ? colorname(o) : "?");
                 resetthisguy = true;
             }
-            if(d->skill != sk && aidebug) conoutf("%s changed skill to %d", colorname(d, name), sk);
+            if(d->skill != sk && aidebug) conoutf(CON_DEBUG, "%s changed skill to %d", colorname(d, name), sk);
         }
 
         d->team = validteam(team) ? team : 0;

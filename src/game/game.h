@@ -70,7 +70,6 @@ enum                            // static entity types
     //OBJETS
     I_SANTE, I_BOOSTPV, I_BOOSTDEGATS, I_BOOSTPRECISION, I_BOOSTVITESSE, I_BOOSTGRAVITE,
     I_BOUCLIERBOIS, I_BOUCLIERFER, I_BOUCLIEROR, I_BOUCLIERMAGNETIQUE, I_ARMUREASSISTEE,
-
     I_MANA,
 
     TELEPORT,                   // attr1 = idx, attr2 = model, attr3 = tag

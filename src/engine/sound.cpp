@@ -713,7 +713,7 @@ int playsound(int n, const vec *loc, extentity *ent, int flags, int loops, int f
     soundslot &slot = sounds.slots[config.chooseslot()];
     if(!slot.sample->chunk && !slot.sample->load(sounds.dir)) return -1;
 
-    if(dbgsound) conoutf("sound: %s%s", sounds.dir, slot.sample->name);
+    if(dbgsound) conoutf(CON_DEBUG, "sound: %s%s", sounds.dir, slot.sample->name);
 
     chanid = -1;
     loopv(channels) if(!channels[i].inuse) { chanid = i; break; }
@@ -747,7 +747,7 @@ void stopsounds()
 bool stopsound(int n, int chanid, int fade)
 {
     if(!gamesounds.configs.inrange(n) || !channels.inrange(chanid) || !gamesounds.playing(channels[chanid], gamesounds.configs[n])) return false;
-    if(dbgsound) conoutf("stopsound: %s%s", gamesounds.dir, channels[chanid].slot->sample->name);
+    if(dbgsound) conoutf(CON_DEBUG, "stopsound: %s%s", gamesounds.dir, channels[chanid].slot->sample->name);
     if(!fade || !Mix_FadeOutChannel(chanid, fade))
     {
         Mix_HaltChannel(chanid);
