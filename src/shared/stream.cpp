@@ -682,7 +682,7 @@ struct filestream : stream
     offset tell()
     {
 #ifdef WIN32
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__MINGW32__)
         offset off = ftello64(file);
 #else
         offset off = _ftelli64(file);
@@ -696,7 +696,7 @@ struct filestream : stream
     bool seek(offset pos, int whence)
     {
 #ifdef WIN32
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__MINGW32__)
         return fseeko64(file, pos, whence) >= 0;
 #else
         return _fseeki64(file, pos, whence) >= 0;

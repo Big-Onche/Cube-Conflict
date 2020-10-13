@@ -628,6 +628,7 @@ namespace server
     VAR(maxdemos, 0, 5, 25);
     VAR(maxdemosize, 0, 16, 31);
     VAR(restrictdemos, 0, 1, 1);
+    VAR(autorecorddemo, 0, 0, 1);
 
     VAR(restrictpausegame, 0, 1, 1);
     VAR(restrictgamespeed, 0, 1, 1);
@@ -946,6 +947,8 @@ namespace server
         return best;
     }
 
+    VAR(persistteams, 0, 0, 1);
+
     void autoteam()
     {
         vector<clientinfo *> team[MAXTEAMS];
@@ -969,12 +972,15 @@ namespace server
             if(!selected) break;
             remaining -= selected;
         }
-        loopi(MAXTEAMS) loopvj(team[i])
+        loopi(MAXTEAMS)
         {
-            clientinfo *ci = team[i][j];
-            if(ci->team == 1+i) continue;
-            ci->team = 1+i;
-            sendf(-1, 1, "riiii", N_SETTEAM, ci->clientnum, ci->team, -1);
+            if(!persistteams) loopvj(team[i])
+            {
+                clientinfo *ci = team[i][j];
+                if(ci->team == 1+i) continue;
+                ci->team = 1+i;
+                sendf(-1, 1, "riiii", N_SETTEAM, ci->clientnum, ci->team, -1);
+            }
         }
     }
 
@@ -2046,10 +2052,10 @@ namespace server
         {
             if(clients.length()) setupdemoplayback();
         }
-        else if(demonextmatch)
+        else
         {
-            demonextmatch = false;
-            setupdemorecord();
+            if(demonextmatch) setupdemorecord();
+            demonextmatch = autorecorddemo!=0;
         }
 
         if(smode) smode->setup();

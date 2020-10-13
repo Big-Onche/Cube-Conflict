@@ -336,9 +336,10 @@ struct vacollect : verthash
     {
         matrix3 orient;
         orient.identity();
-        if(e.attr2) orient.rotate_around_z(sincosmod360(e.attr2));
+        if(e.attr1) orient.rotate_around_z(sincosmod360(e.attr1));
         if(e.attr3) orient.rotate_around_x(sincosmod360(e.attr3));
-        if(e.attr4) orient.rotate_around_y(sincosmod360(-e.attr4));
+        if(e.attr5) orient.rotate_around_y(sincosmod360(-e.attr5));
+        if(e.attr4 > 0) orient.scale(e.attr4/100.0f);
         vec size(max(float(e.attr5), 1.0f));
         size.y *= s.depth;
         if(!s.sts.empty())
@@ -516,6 +517,9 @@ struct vacollect : verthash
         va->ebuf = 0;
         va->edata = 0;
         va->eoffset = 0;
+        va->texmask = 0;
+        va->dyntexs = 0;
+        va->dynalphatexs = 0;
         if(va->texs)
         {
             va->texelems = new elementset[va->texs];
@@ -552,19 +556,20 @@ struct vacollect : verthash
                 else if(k.alpha==ALPHA_BACK) { va->texs--; va->tris -= e.length/3; va->alphaback++; va->alphabacktris += e.length/3; }
                 else if(k.alpha==ALPHA_FRONT) { va->texs--; va->tris -= e.length/3; va->alphafront++; va->alphafronttris += e.length/3; }
                 else if(k.alpha==ALPHA_REFRACT) { va->texs--; va->tris -= e.length/3; va->refract++; va->refracttris += e.length/3; }
+
+                VSlot &vslot = lookupvslot(k.tex, false);
+                if(vslot.isdynamic())
+                {
+                    va->dyntexs++;
+                    if(k.alpha) va->dynalphatexs++;
+                }
+                Slot &slot = *vslot.slot;
+                loopvj(slot.sts) va->texmask |= 1<<slot.sts[j].type;
+                if(slot.shader->type&SHADER_ENVMAP) va->texmask |= 1<<TEX_ENVMAP;
             }
         }
 
-        va->texmask = 0;
-        va->dyntexs = 0;
-        loopi(va->texs+va->blends+va->alphaback+va->alphafront+va->refract)
-        {
-            VSlot &vslot = lookupvslot(va->texelems[i].texture, false);
-            if(vslot.isdynamic()) va->dyntexs++;
-            Slot &slot = *vslot.slot;
-            loopvj(slot.sts) va->texmask |= 1<<slot.sts[j].type;
-            if(slot.shader->type&SHADER_ENVMAP) va->texmask |= 1<<TEX_ENVMAP;
-        }
+        va->alphatris = va->alphabacktris + va->alphafronttris + va->refracttris;
 
         va->decalbuf = 0;
         va->decaldata = 0;
@@ -1068,7 +1073,7 @@ void gencubeedges(cube &c, const ivec &co, int size)
 
 void gencubeedges(cube *c = worldroot, const ivec &co = ivec(0, 0, 0), int size = worldsize>>1)
 {
-    progress("fixation des pixels temps que leurs couilles ne se touchent pas...");
+    progress("fixing t-joints...");
     neighbourstack[++neighbourdepth] = c;
     loopi(8)
     {
@@ -1156,7 +1161,7 @@ vtxarray *newva(const ivec &o, int size)
 
     vc.setupdata(va);
 
-    if(va->alphafronttris || va->alphabacktris || va->refracttris)
+    if(va->alphatris)
     {
         va->alphamin = ivec(vec(vc.alphamin).mul(8)).shr(3);
         va->alphamax = ivec(vec(vc.alphamax).mul(8)).add(7).shr(3);
@@ -1178,7 +1183,7 @@ vtxarray *newva(const ivec &o, int size)
     va->nogimax = vc.nogimax;
 
     wverts += va->verts;
-    wtris  += va->tris + va->blends + va->alphabacktris + va->alphafronttris + va->refracttris + va->decaltris;
+    wtris  += va->tris + va->blends + va->alphatris + va->decaltris;
     allocva++;
     valist.add(va);
 
@@ -1188,7 +1193,7 @@ vtxarray *newva(const ivec &o, int size)
 void destroyva(vtxarray *va, bool reparent)
 {
     wverts -= va->verts;
-    wtris -= va->tris + va->blends + va->alphabacktris + va->alphafronttris + va->refracttris + va->decaltris;
+    wtris -= va->tris + va->blends + va->alphatris + va->decaltris;
     allocva--;
     valist.removeobj(va);
     if(!va->parent) varoot.removeobj(va);
@@ -1545,7 +1550,7 @@ VARF(vacubesize, 32, 128, 0x1000, allchanged());
 
 int updateva(cube *c, const ivec &co, int size, int csi)
 {
-    progress("passage de la 2D à la 3D...");
+    progress("recalculating geometry...");
     int ccount = 0, cmergemax = vamergemax, chasmerges = vahasmerges;
     neighbourstack[++neighbourdepth] = c;
     loopi(8)                                    // counting number of semi-solid/solid children cubes

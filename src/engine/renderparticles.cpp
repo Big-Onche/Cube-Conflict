@@ -891,7 +891,6 @@ static partrenderer *parts[] =
     new quadrenderer("media/particle/minigun_muzzle.png", PT_PART|PT_FEW|PT_FLIP|PT_BRIGHT|PT_TRACK),
     new quadrenderer("media/particle/normal_muzzle.png", PT_PART|PT_FEW|PT_FLIP|PT_BRIGHT|PT_TRACK),
     new quadrenderer("media/particle/sniper_muzzle.png", PT_PART|PT_FEW|PT_BRIGHT|PT_TRACK),
-    new quadrenderer("media/particle/side_muzzle.png", PT_PART|PT_FEW|PT_FLIP|PT_BRIGHT|PT_TRACK),
     new quadrenderer("media/interface/hud/items.png", PT_PART|PT_FEW|PT_ICON),                 // hud icon
     new quadrenderer("<colorify:1/1/1>media/interface/hud/items.png", PT_PART|PT_FEW|PT_ICON), // grey hud icon
     &texts,                                                                                    // text

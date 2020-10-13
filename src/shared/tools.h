@@ -95,7 +95,7 @@ static inline int bitscan(uint mask)
 }
 #else
 static inline int bitscan(uint mask)
-{
+{   
     if(!mask) return -1;
     int i = 1;
     if(!(mask&0xFFFF)) { i += 16; mask >>= 16; }
@@ -1188,6 +1188,23 @@ template <class T, int SIZE> struct queue
         return t;
     }
 
+    T remove(int offset)
+    {
+        T val = removing(offset);
+        if(head+offset >= SIZE) for(int i = head+offset - SIZE + 1; i < tail; i++) data[i-1] = data[i];
+        else if(head < tail) for(int i = head+offset + 1; i < tail; i++) data[i-1] = data[i];
+        else
+        {
+            for(int i = head+offset + 1; i < SIZE; i++) data[i-1] = data[i];
+            data[SIZE-1] = data[0];
+            for(int i = 1; i < tail; i++) data[i-1] = data[i];
+        }
+        tail--;
+        if(tail < 0) tail += SIZE;
+        len--;
+        return val;
+    }
+
     T &operator[](int offset) { return removing(offset); }
     const T &operator[](int offset) const { return removing(offset); }
 };
@@ -1233,7 +1250,7 @@ template<class T> inline void endiansame(T *buf, size_t len) {}
 #define bigswap endianswap
 #else
 #define lilswap endianswap
-#define bigswap endiansame
+#define bigswap endiansame 
 #endif
 #else
 template<class T> inline T lilswap(T n) { return islittleendian() ? n : endianswap(n); }

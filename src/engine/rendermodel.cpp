@@ -104,6 +104,13 @@ void mdlalphatest(float *cutoff)
 }
 COMMAND(mdlalphatest, "f");
 
+void mdldither(int *dither)
+{
+    checkmdl;
+    loadingmodel->setdither(*dither != 0);
+}
+COMMAND(mdldither, "i");
+
 void mdldepthoffset(int *offset)
 {
     checkmdl;

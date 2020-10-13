@@ -3,7 +3,7 @@
 #include "engine.h"
 #include "cubedef.h"
 
-bool hasVAO = false, hasTR = false, hasTSW = false, hasPBO = false, hasFBO = false, hasAFBO = false, hasDS = false, hasTF = false, hasCBF = false, hasS3TC = false, hasFXT1 = false, hasLATC = false, hasRGTC = false, hasAF = false, hasFBB = false, hasFBMS = false, hasTMS = false, hasMSS = false, hasFBMSBS = false, hasUBO = false, hasMBR = false, hasDB2 = false, hasDBB = false, hasTG = false, hasTQ = false, hasPF = false, hasTRG = false, hasTI = false, hasHFV = false, hasHFP = false, hasDBT = false, hasDC = false, hasDBGO = false, hasEGPU4 = false, hasGPU4 = false, hasGPU5 = false, hasBFE = false, hasEAL = false, hasCR = false, hasOQ2 = false, hasES3 = false, hasCB = false, hasCI = false;
+bool hasVAO = false, hasTR = false, hasTSW = false, hasPBO = false, hasFBO = false, hasAFBO = false, hasDS = false, hasTF = false, hasCBF = false, hasS3TC = false, hasFXT1 = false, hasLATC = false, hasRGTC = false, hasAF = false, hasFBB = false, hasFBMS = false, hasTMS = false, hasMSS = false, hasFBMSBS = false, hasUBO = false, hasMBR = false, hasDB2 = false, hasDBB = false, hasTG = false, hasTQ = false, hasPF = false, hasTRG = false, hasTI = false, hasHFV = false, hasHFP = false, hasDBT = false, hasDC = false, hasDBGO = false, hasEGPU4 = false, hasGPU4 = false, hasGPU5 = false, hasBFE = false, hasEAL = false, hasCR = false, hasOQ2 = false, hasES2 = false, hasES3 = false, hasCB = false, hasCI = false, hasTS = false;
 bool mesa = false, intel = false, amd = false, nvidia = false;
 
 int hasstencil = 0;
@@ -26,7 +26,6 @@ PFNGLCHECKFRAMEBUFFERSTATUSPROC     glCheckFramebufferStatus_     = NULL;
 PFNGLBINDFRAMEBUFFERPROC            glBindFramebuffer_            = NULL;
 PFNGLDELETEFRAMEBUFFERSPROC         glDeleteFramebuffers_         = NULL;
 PFNGLGENFRAMEBUFFERSPROC            glGenFramebuffers_            = NULL;
-PFNGLFRAMEBUFFERTEXTURE1DPROC       glFramebufferTexture1D_       = NULL;
 PFNGLFRAMEBUFFERTEXTURE2DPROC       glFramebufferTexture2D_       = NULL;
 PFNGLFRAMEBUFFERTEXTURE3DPROC       glFramebufferTexture3D_       = NULL;
 PFNGLFRAMEBUFFERRENDERBUFFERPROC    glFramebufferRenderbuffer_    = NULL;
@@ -66,16 +65,14 @@ PFNGLCOPYTEXSUBIMAGE3DPROC glCopyTexSubImage3D_ = NULL;
 
 PFNGLCOMPRESSEDTEXIMAGE3DPROC    glCompressedTexImage3D_    = NULL;
 PFNGLCOMPRESSEDTEXIMAGE2DPROC    glCompressedTexImage2D_    = NULL;
-PFNGLCOMPRESSEDTEXIMAGE1DPROC    glCompressedTexImage1D_    = NULL;
 PFNGLCOMPRESSEDTEXSUBIMAGE3DPROC glCompressedTexSubImage3D_ = NULL;
 PFNGLCOMPRESSEDTEXSUBIMAGE2DPROC glCompressedTexSubImage2D_ = NULL;
-PFNGLCOMPRESSEDTEXSUBIMAGE1DPROC glCompressedTexSubImage1D_ = NULL;
 PFNGLGETCOMPRESSEDTEXIMAGEPROC   glGetCompressedTexImage_   = NULL;
 
 PFNGLDRAWRANGEELEMENTSPROC glDrawRangeElements_ = NULL;
 #endif
 
-// OpenGL 2.1
+// OpenGL 2.0
 #ifndef __APPLE__
 PFNGLMULTIDRAWARRAYSPROC   glMultiDrawArrays_   = NULL;
 PFNGLMULTIDRAWELEMENTSPROC glMultiDrawElements_ = NULL;
@@ -171,7 +168,6 @@ PFNGLVERTEXATTRIB4NUSVPROC        glVertexAttrib4Nusv_        = NULL;
 PFNGLVERTEXATTRIBPOINTERPROC      glVertexAttribPointer_      = NULL;
 
 PFNGLDRAWBUFFERSPROC glDrawBuffers_ = NULL;
-
 #endif
 
 // OpenGL 3.0
@@ -246,6 +242,9 @@ PFNGLBINDFRAGDATALOCATIONINDEXEDPROC glBindFragDataLocationIndexed_ = NULL;
 
 // GL_ARB_copy_image
 PFNGLCOPYIMAGESUBDATAPROC glCopyImageSubData_ = NULL;
+
+// GL_ARB_texture_storage
+PFNGLTEXSTORAGE2DPROC glTexStorage2D_ = NULL;
 
 void *getprocaddress(const char *name)
 {
@@ -398,7 +397,7 @@ void gl_checkextensions()
     if(sscanf(version, " %u.%u", &glmajorversion, &glminorversion) != 2) glversion = 100;
     else glversion = glmajorversion*100 + glminorversion*10;
 
-    if(glversion < 200) fatal("OpenGL 2.1 or greater is required!");
+    if(glversion < 200) fatal("OpenGL 2.0 or greater is required!");
 
 #ifdef WIN32
     glActiveTexture_ =            (PFNGLACTIVETEXTUREPROC)            getprocaddress("glActiveTexture");
@@ -412,10 +411,8 @@ void gl_checkextensions()
 
     glCompressedTexImage3D_ =     (PFNGLCOMPRESSEDTEXIMAGE3DPROC)     getprocaddress("glCompressedTexImage3D");
     glCompressedTexImage2D_ =     (PFNGLCOMPRESSEDTEXIMAGE2DPROC)     getprocaddress("glCompressedTexImage2D");
-    glCompressedTexImage1D_ =     (PFNGLCOMPRESSEDTEXIMAGE1DPROC)     getprocaddress("glCompressedTexImage1D");
     glCompressedTexSubImage3D_ =  (PFNGLCOMPRESSEDTEXSUBIMAGE3DPROC)  getprocaddress("glCompressedTexSubImage3D");
     glCompressedTexSubImage2D_ =  (PFNGLCOMPRESSEDTEXSUBIMAGE2DPROC)  getprocaddress("glCompressedTexSubImage2D");
-    glCompressedTexSubImage1D_ =  (PFNGLCOMPRESSEDTEXSUBIMAGE1DPROC)  getprocaddress("glCompressedTexSubImage1D");
     glGetCompressedTexImage_ =    (PFNGLGETCOMPRESSEDTEXIMAGEPROC)    getprocaddress("glGetCompressedTexImage");
 
     glDrawRangeElements_ =        (PFNGLDRAWRANGEELEMENTSPROC)        getprocaddress("glDrawRangeElements");
@@ -516,7 +513,6 @@ void gl_checkextensions()
     glVertexAttribPointer_ =      (PFNGLVERTEXATTRIBPOINTERPROC)      getprocaddress("glVertexAttribPointer");
 
     glDrawBuffers_ =              (PFNGLDRAWBUFFERSPROC)              getprocaddress("glDrawBuffers");
-
 #endif
 
     if(glversion >= 300)
@@ -723,7 +719,6 @@ void gl_checkextensions()
         glBindFramebuffer_                = (PFNGLBINDFRAMEBUFFERPROC)               getprocaddress("glBindFramebuffer");
         glDeleteFramebuffers_             = (PFNGLDELETEFRAMEBUFFERSPROC)            getprocaddress("glDeleteFramebuffers");
         glGenFramebuffers_                = (PFNGLGENFRAMEBUFFERSPROC)               getprocaddress("glGenFramebuffers");
-        glFramebufferTexture1D_           = (PFNGLFRAMEBUFFERTEXTURE1DPROC)          getprocaddress("glFramebufferTexture1D");
         glFramebufferTexture2D_           = (PFNGLFRAMEBUFFERTEXTURE2DPROC)          getprocaddress("glFramebufferTexture2D");
         glFramebufferTexture3D_           = (PFNGLFRAMEBUFFERTEXTURE3DPROC)          getprocaddress("glFramebufferTexture3D");
         glFramebufferRenderbuffer_        = (PFNGLFRAMEBUFFERRENDERBUFFERPROC)       getprocaddress("glFramebufferRenderbuffer");
@@ -745,7 +740,6 @@ void gl_checkextensions()
         glBindFramebuffer_            = (PFNGLBINDFRAMEBUFFERPROC)           getprocaddress("glBindFramebufferEXT");
         glDeleteFramebuffers_         = (PFNGLDELETEFRAMEBUFFERSPROC)        getprocaddress("glDeleteFramebuffersEXT");
         glGenFramebuffers_            = (PFNGLGENFRAMEBUFFERSPROC)           getprocaddress("glGenFramebuffersEXT");
-        glFramebufferTexture1D_       = (PFNGLFRAMEBUFFERTEXTURE1DPROC)      getprocaddress("glFramebufferTexture1DEXT");
         glFramebufferTexture2D_       = (PFNGLFRAMEBUFFERTEXTURE2DPROC)      getprocaddress("glFramebufferTexture2DEXT");
         glFramebufferTexture3D_       = (PFNGLFRAMEBUFFERTEXTURE3DPROC)      getprocaddress("glFramebufferTexture3DEXT");
         glFramebufferRenderbuffer_    = (PFNGLFRAMEBUFFERRENDERBUFFERPROC)   getprocaddress("glFramebufferRenderbufferEXT");
@@ -921,10 +915,6 @@ void gl_checkextensions()
     {
         glBindFragDataLocationIndexed_ = (PFNGLBINDFRAGDATALOCATIONINDEXEDPROC)getprocaddress("glBindFragDataLocationIndexed");
 
-        GLint dualbufs = 0;
-        glGetIntegerv(GL_MAX_DUAL_SOURCE_DRAW_BUFFERS, &dualbufs);
-        maxdualdrawbufs = dualbufs;
-
         if(hasGPU4)
         {
             GLint dualbufs = 0;
@@ -979,6 +969,12 @@ void gl_checkextensions()
     }
     if(hasTG) usetexgather = hasGPU5 && !intel && !nvidia ? 2 : 1;
 
+    if(glversion >= 410 || hasext("GL_ARB_ES2_compatibility"))
+    {
+        hasES2 = true;
+        if(glversion < 410 && dbgexts) conoutf(CON_INIT, "Using GL_ARB_ES2_compatibility extension.");
+    }
+
     if(glversion >= 430 || hasext("GL_ARB_ES3_compatibility"))
     {
         hasES3 = true;
@@ -1021,6 +1017,19 @@ void gl_checkextensions()
         if(dbgexts) conoutf(CON_INIT, "Using GL_NV_copy_image extension.");
     }
 
+    if(glversion >= 420 || hasext("GL_ARB_texture_storage"))
+    {
+        glTexStorage2D_ = (PFNGLTEXSTORAGE2DPROC)getprocaddress("glTexStorage2D");
+        hasTS = true;
+        if(glversion < 420 && dbgexts) conoutf(CON_INIT, "Using GL_ARB_texture_storage extension.");
+    }
+    else if(hasext("GL_EXT_texture_storage"))
+    {
+        glTexStorage2D_ = (PFNGLTEXSTORAGE2DPROC)getprocaddress("glTexStorage2DEXT");
+        hasTS = true;
+        if(dbgexts) conoutf(CON_INIT, "Using GL_EXT_texture_storage extension.");
+    }
+
     extern int gdepthstencil, gstencil, glineardepth, msaadepthstencil, msaalineardepth, batchsunlight, smgather, rhrect, tqaaresolvegather;
     if(amd)
     {
@@ -1042,7 +1051,8 @@ void gl_checkextensions()
         {
             batchsunlight = 0; // causes massive slowdown in linux driver
             if(!checkmesaversion(version, 10, 0, 3))
-                msaalineardepth = 1; // MSAA depth texture access is buggy and resolves are slow
+                mesa_texrectoffset_bug = 1; // mesa i965 driver has buggy textureOffset with texture rectangles
+            msaalineardepth = 1; // MSAA depth texture access is buggy and resolves are slow
         }
         else
         {
@@ -1372,7 +1382,7 @@ VARP(invmouse, 0, 0, 1);
 FVARP(mouseaccel, 0, 0, 1000);
 
 VAR(thirdperson, 0, 0, 2);
-FVAR(thirdpersondistance, 0, 42, 50);
+FVAR(thirdpersondistance, 0, 42, 75);
 FVAR(thirdpersonup, -25, 5, 25);
 FVAR(thirdpersonside, -25, 12, 25);
 physent *camera1 = NULL;
@@ -1404,7 +1414,6 @@ void mousemove(int dx, int dy)
 {
     if(!game::allowmouselook()) return;
     float cursens = sensitivity, curaccel = mouseaccel;
-
     if(zoom)
     {
         if(zoomautosens)
@@ -2060,7 +2069,7 @@ void drawminimap()
     }
 
     GLERROR;
-    renderprogress(0, "recherche de la minimap sur google maps...", !renderedframe);
+    renderprogress(0, "generating mini-map...", !renderedframe);
 
     drawtex = DRAWTEX_MINIMAP;
 
@@ -2155,7 +2164,7 @@ void drawminimap()
     camera1 = oldcamera;
     drawtex = 0;
 
-    createtexture(minimaptex, size, size, NULL, 3, 1, GL_RGB5, GL_TEXTURE_2D);
+    createtexture(minimaptex, size, size, NULL, 3, 1, hasES2 ? GL_RGB565 : GL_RGB5, GL_TEXTURE_2D);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     GLfloat border[4] = { minimapcolour.x/255.0f, minimapcolour.y/255.0f, minimapcolour.z/255.0f, 1.0f };
@@ -2373,12 +2382,6 @@ VAR(playerpreviewyaw, 0, 200, 360);
 
 vec calcmodelpreviewpos(const vec &radius, float &yaw)
 {
-    //switch(yawmodifier)
-    //{
-    //    case -1: yaw = fmod(lastmillis/10000.0f*360.0f, 360.0f); break;
-    //    case 1: yaw = 155; break;
-    //    case 2: yaw = 25;
-    //}
     yaw = playerpreviewyaw;
     float dist = max(radius.magnitude2()/aspect, radius.magnitude())/sinf(fovy/2*RAD);
     return vec(0, dist, 0).rotate_around_x(camera1->pitch*RAD);
@@ -2510,7 +2513,6 @@ VARP(damagecompassmin, 1, 25, 1000);
 VARP(damagecompassmax, 1, 200, 1000);
 
 float damagedirs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-float regendirs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
 void damagecompass(int n, const vec &loc)
 {
@@ -2530,7 +2532,7 @@ void damagecompass(int n, const vec &loc)
     if(damagedirs[dir]>1) damagedirs[dir] = 1;
 
 }
-void drawdamagecompass(int w, int h, bool regen = false)
+void drawdamagecompass(int w, int h)
 {
     hudnotextureshader->set();
 
@@ -2542,62 +2544,6 @@ void drawdamagecompass(int w, int h, bool regen = false)
         {
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             gle::colorf(1, 0, 0, damagecompassalpha/100.0f);
-            gle::defvertex();
-            gle::begin(GL_TRIANGLES);
-        }
-        dirs++;
-
-        float logscale = 32,
-              scale = log(1 + (logscale - 1)*damagedirs[i]) / log(logscale),
-              offset = -size/2.0f-min(h, w)/4.0f;
-        matrix4x3 m;
-        m.identity();
-        m.settranslation(w/2, h/2, 0);
-        m.rotate_around_z(i*45*RAD);
-        m.translate(0, offset, 0);
-        m.scale(size*scale);
-
-        gle::attrib(m.transform(vec2(1, 1)));
-        gle::attrib(m.transform(vec2(-1, 1)));
-        gle::attrib(m.transform(vec2(0, 0)));
-
-        // fade in log space so short blips don't disappear too quickly
-        scale -= float(curtime)/damagecompassfade;
-        damagedirs[i] = scale > 0 ? (pow(logscale, scale) - 1) / (logscale - 1) : 0;
-    }
-    if(dirs) gle::end();
-}
-
-void regencompass(int n, const vec &loc)
-{
-    if(!usedamagecompass || minimized) return;
-    vec delta(loc);
-    delta.sub(camera1->o);
-    float yaw = 0, pitch;
-    if(delta.magnitude() > 4)
-    {
-        vectoyawpitch(delta, yaw, pitch);
-        yaw -= camera1->yaw;
-    }
-    if(yaw >= 360) yaw = fmod(yaw, 360);
-    else if(yaw < 0) yaw = 360 - fmod(-yaw, 360);
-    int dir = (int(yaw+22.5f)%360)/45;
-    regendirs[dir] += max(n, damagecompassmin)/float(damagecompassmax);
-    if(regendirs[dir]>1) regendirs[dir] = 1;
-
-}
-void drawregencompass(int w, int h, bool regen = false)
-{
-    hudnotextureshader->set();
-
-    int dirs = 0;
-    float size = damagecompasssize/100.0f*min(h, w)/2.0f;
-    loopi(8) if(regendirs[i]>0)
-    {
-        if(!dirs)
-        {
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            gle::colorf(0, 1, 0, damagecompassalpha/100.0f);
             gle::defvertex();
             gle::begin(GL_TRIANGLES);
         }
@@ -2759,7 +2705,6 @@ VARP(showfpsrange, 0, 0, 1);
 VAR(statrate, 1, 200, 1000);
 
 FVARP(conscale, 1e-3f, 0.33f, 1e3f);
-
 int nbfps;
 
 void resethudshader()
@@ -2795,7 +2740,6 @@ void gl_drawhud()
     }
 
     float conw = w/conscale, conh = h/conscale, abovehud = conh - FONTH;
-
     if(!hidehud && !mainmenu)
     {
         if(!hidestats)

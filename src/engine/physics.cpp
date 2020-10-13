@@ -53,7 +53,7 @@ void resetclipplanes()
     clipcacheversion += MAXCLIPOFFSET;
     if(!clipcacheversion)
     {
-        memset(clipcache, 0, sizeof(clipcache));
+        memclear(clipcache);
         clipcacheversion = MAXCLIPOFFSET;
     }
 }
@@ -772,8 +772,7 @@ bool mmcollide(physent *d, const vec &dir, float cutoff, octaentities &oc) // co
 
         vec center, radius;
         float rejectradius = m->collisionbox(center, radius), scale = e.attr4 > 0 ? e.attr4/100.0f : 1;
-        center.mul(scale);
-        if(d->o.reject(vec(e.o).add(center), d->radius + rejectradius*scale)) continue;
+        if(d->o.reject(e.o, d->radius + rejectradius*scale)) continue;
 
         int yaw = e.attr1, pitch = e.attr3, roll = e.attr5;
         if(mcol == COLLIDE_TRI || testtricol)

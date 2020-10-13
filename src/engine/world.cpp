@@ -198,7 +198,7 @@ void modifyoctaentity(int flags, int id, extentity &e, cube *c, const ivec &cor,
 }
 
 vector<int> outsideents;
-int spotlights = 0, volumetriclights = 0, nospeclights = 0;
+int spotlights = 0, volumetriclights = 0, nospeclights = 0, smalphalights = 0, volumetricsmalphalights = 0;
 
 static bool modifyoctaent(int flags, int id, extentity &e)
 {
@@ -228,9 +228,13 @@ static bool modifyoctaent(int flags, int id, extentity &e)
     switch(e.type)
     {
         case ET_LIGHT:
-            clearlightcache(id);
             if(e.attr5&L_VOLUMETRIC) { if(flags&MODOE_ADD) volumetriclights++; else --volumetriclights; }
             if(e.attr5&L_NOSPEC) { if(!(flags&MODOE_ADD ? nospeclights++ : --nospeclights)) cleardeferredlightshaders(); }
+            if(e.attr5&L_SMALPHA)
+            {
+                if(!(flags&MODOE_ADD ?  smalphalights++ : --smalphalights)) cleardeferredlightshaders();
+                if(e.attr5&L_VOLUMETRIC) { if(!(flags&MODOE_ADD ?  volumetricsmalphalights++ : --volumetricsmalphalights)) cleanupvolumetric(); }
+            }
             break;
         case ET_SPOTLIGHT: if(!(flags&MODOE_ADD ? spotlights++ : --spotlights)) { cleardeferredlightshaders(); cleanupvolumetric(); } break;
         case ET_PARTICLES: clearparticleemitters(); break;
@@ -798,7 +802,7 @@ void renderentradius(extentity &e, bool color)
         {
             if(color) gle::colorf(0, 1, 1);
             DecalSlot &s = lookupdecalslot(e.attr1, false);
-            float size = max(float(e.attr4), 1.0f);
+            float size = max(float(e.attr5), 1.0f);
             renderentbox(e, vec(0, s.depth * size/2, 0), vec(size/2, s.depth * size/2, size/2), e.attr2, e.attr3, e.attr4);
             break;
         }
@@ -1054,6 +1058,8 @@ void attachent()
 
 COMMAND(attachent, "");
 
+VARP(entcamdir, 0, 1, 1);
+
 static int keepents = 0;
 
 extentity *newentity(bool local, const vec &o, int type, int v1, int v2, int v3, int v4, int v5, int &idx, bool fix = true)
@@ -1077,26 +1083,26 @@ extentity *newentity(bool local, const vec &o, int type, int v1, int v2, int v3,
     e.reserved = 0;
     if(local && fix)
     {
-        switch(type)
+        if(entcamdir) switch(type)
         {
-                case ET_DECAL:
-                    if(!e.attr2 && !e.attr3 && !e.attr4)
-                    {
-                        e.attr2 = (int)camera1->yaw;
-                        e.attr3 = (int)camera1->pitch;
-                        e.attr4 = (int)camera1->roll;
-                    }
-                    break;
-                case ET_MAPMODEL:
-                    if(!e.attr2) e.attr2 = (int)camera1->yaw;
-                    break;
-                case ET_PLAYERSTART:
-                    e.attr5 = e.attr4;
-                    e.attr4 = e.attr3;
-                    e.attr3 = e.attr2;
-                    e.attr2 = e.attr1;
-                    e.attr1 = (int)camera1->yaw;
-                    break;
+            case ET_DECAL:
+                if(!e.attr2 && !e.attr3 && !e.attr4)
+                {
+                    e.attr2 = (int)camera1->yaw;
+                    e.attr3 = (int)camera1->pitch;
+                    e.attr4 = (int)camera1->roll;
+                }
+                break;
+            case ET_MAPMODEL:
+                if(!e.attr1) e.attr1 = (int)camera1->yaw;
+                break;
+            case ET_PLAYERSTART:
+                e.attr5 = e.attr4;
+                e.attr4 = e.attr3;
+                e.attr3 = e.attr2;
+                e.attr2 = e.attr1;
+                e.attr1 = (int)camera1->yaw;
+                break;
         }
         entities::fixentity(e);
     }
@@ -1232,7 +1238,7 @@ void nearestent()
             closedist = dist;
         }
     }
-    if(closest >= 0) entadd(closest);
+    if(closest >= 0 && entgroup.find(closest) < 0) entadd(closest);
 }
 
 ICOMMAND(enthavesel,"",  (), addimplicit(intret(entgroup.length())));
@@ -1391,6 +1397,8 @@ void resetmap()
     spotlights = 0;
     volumetriclights = 0;
     nospeclights = 0;
+    smalphalights = 0;
+    volumetricsmalphalights = 0;
 }
 
 void startmap(const char *name)

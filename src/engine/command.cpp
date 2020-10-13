@@ -677,6 +677,11 @@ int getvarmax(const char *name)
     GETVAR(id, name, 0);
     return id->maxval;
 }
+float getfvar(const char *name)
+{
+    _GETVAR(id, ID_FVAR, name, 0);
+    return *id->storage.f;
+}
 float getfvarmin(const char *name)
 {
     _GETVAR(id, ID_FVAR, name, 0);

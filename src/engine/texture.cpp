@@ -175,12 +175,12 @@ static inline void reorienttexture(uchar * RESTRICT src, int sw, int sh, int str
 }
 
 static void reorienttexture(uchar * RESTRICT src, int sw, int sh, int bpp, int stride, uchar * RESTRICT dst, bool flipx, bool flipy, bool swapxy)
-{
+{   
     switch(bpp)
     {
         case 1: return reorienttexture<1>(src, sw, sh, stride, dst, flipx, flipy, swapxy);
         case 2: return reorienttexture<2>(src, sw, sh, stride, dst, flipx, flipy, swapxy);
-        case 3: return reorienttexture<3>(src, sw, sh, stride, dst, flipx, flipy, swapxy);
+        case 3: return reorienttexture<3>(src, sw, sh, stride, dst, flipx, flipy, swapxy); 
         case 4: return reorienttexture<4>(src, sw, sh, stride, dst, flipx, flipy, swapxy);
     }
 }
@@ -658,7 +658,7 @@ void texblend(ImageData &d, ImageData &s, ImageData &m)
             dst[0] = uchar((dst[0]*dstblend + src[0]*srcblend)/255);
             dst[1] = uchar((dst[1]*dstblend + src[1]*srcblend)/255);
             dst[2] = uchar((dst[2]*dstblend + src[2]*srcblend)/255);
-        );
+        ); 
     }
     else
     {
@@ -672,13 +672,13 @@ void texblend(ImageData &d, ImageData &s, ImageData &m)
             int dstblend = 255 - srcblend;
             dst[0] = uchar((dst[0]*dstblend + src[0]*srcblend)/255);
         );
-        else read2writetex(d, s, src, m, mask,
+        else read2writetex(d, s, src, m, mask, 
             int srcblend = mask[0];
             int dstblend = 255 - srcblend;
             dst[0] = uchar((dst[0]*dstblend + src[0]*srcblend)/255);
             dst[1] = uchar((dst[1]*dstblend + src[1]*srcblend)/255);
             dst[2] = uchar((dst[2]*dstblend + src[2]*srcblend)/255);
-        );
+        ); 
     }
 }
 
@@ -715,6 +715,7 @@ GLenum compressedformat(GLenum format, int w, int h, int force = 0)
 {
     if(usetexcompress && texcompress && force >= 0 && (force || max(w, h) >= texcompress)) switch(format)
     {
+        case GL_R3_G3_B2:
         case GL_RGB5:
         case GL_RGB565:
         case GL_RGB8:
@@ -733,6 +734,36 @@ GLenum compressedformat(GLenum format, int w, int h, int force = 0)
     return format;
 }
 
+GLenum uncompressedformat(GLenum format)
+{
+    switch(format)
+    {
+        case GL_COMPRESSED_ALPHA:
+            return GL_ALPHA;
+        case GL_COMPRESSED_LUMINANCE:
+        case GL_COMPRESSED_LUMINANCE_LATC1_EXT:
+            return GL_LUMINANCE;
+        case GL_COMPRESSED_LUMINANCE_ALPHA:
+        case GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT:
+            return GL_LUMINANCE_ALPHA;
+        case GL_COMPRESSED_RED:
+        case GL_COMPRESSED_RED_RGTC1:
+            return GL_RED;
+        case GL_COMPRESSED_RG:
+        case GL_COMPRESSED_RG_RGTC2:
+            return GL_RG;
+        case GL_COMPRESSED_RGB:
+        case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
+            return GL_RGB;
+        case GL_COMPRESSED_RGBA:
+        case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
+        case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
+        case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+            return GL_RGBA;
+    }
+    return GL_FALSE;
+}
+
 int formatsize(GLenum format)
 {
     switch(format)
@@ -746,6 +777,18 @@ int formatsize(GLenum format)
         case GL_RGBA: return 4;
         default: return 4;
     }
+}
+
+GLenum sizedformat(GLenum format)
+{
+    switch(format)
+    {
+        case GL_RED: return GL_R8;
+        case GL_RG: return GL_RG8;
+        case GL_RGB: return GL_RGB8;
+        case GL_RGBA: return GL_RGBA8;
+    }
+    return format;
 }
 
 VARFP(usenp2, 0, 1, 1, initwarning("texture quality", INIT_LOAD));
@@ -781,7 +824,16 @@ void resizetexture(int w, int h, bool mipmap, bool canreduce, GLenum target, int
     }
 }
 
-void uploadtexture(GLenum target, GLenum internal, int tw, int th, GLenum format, GLenum type, const void *pixels, int pw, int ph, int pitch, bool mipmap)
+static GLuint mipmapfbo[2] = { 0, 0 };
+
+void cleanupmipmaps()
+{
+    if(mipmapfbo[0]) { glDeleteFramebuffers_(2, mipmapfbo); memset(mipmapfbo, 0, sizeof(mipmapfbo)); }
+}
+
+VARFP(gpumipmap, 0, 1, 1, cleanupmipmaps());
+
+void uploadtexture(int tnum, GLenum target, GLenum internal, int tw, int th, GLenum format, GLenum type, const void *pixels, int pw, int ph, int pitch, bool mipmap, bool prealloc)
 {
     int bpp = formatsize(format), row = 0, rowalign = 0;
     if(!pitch) pitch = pw*bpp;
@@ -803,30 +855,57 @@ void uploadtexture(GLenum target, GLenum internal, int tw, int th, GLenum format
             loopi(th) memcpy(&buf[i*tw*bpp], &((uchar *)pixels)[i*pitch], tw*bpp);
         }
     }
-    for(int level = 0, align = 0;; level++)
+    bool shouldgpumipmap = pixels && mipmap && max(tw, th) > 1 && gpumipmap && hasFBB && !uncompressedformat(internal);
+    for(int level = 0, align = 0, mw = tw, mh = th;; level++)
     {
         uchar *src = buf ? buf : (uchar *)pixels;
-        if(buf) pitch = tw*bpp;
+        if(buf) pitch = mw*bpp;
         int srcalign = row > 0 ? rowalign : texalign(src, pitch, 1);
         if(align != srcalign) glPixelStorei(GL_UNPACK_ALIGNMENT, align = srcalign);
         if(row > 0) glPixelStorei(GL_UNPACK_ROW_LENGTH, row);
-        if(target==GL_TEXTURE_1D) glTexImage1D(target, level, internal, tw, 0, format, type, src);
-        else glTexImage2D(target, level, internal, tw, th, 0, format, type, src);
+        if(!prealloc) glTexImage2D(target, level, internal, mw, mh, 0, format, type, src);
+        else if(src) glTexSubImage2D(target, level, 0, 0, mw, mh, format, type, src);
         if(row > 0) glPixelStorei(GL_UNPACK_ROW_LENGTH, row = 0);
-        if(!mipmap || max(tw, th) <= 1) break;
-        int srcw = tw, srch = th;
-        if(tw > 1) tw /= 2;
-        if(th > 1) th /= 2;
+        if(!mipmap || shouldgpumipmap || max(mw, mh) <= 1) break;
+        int srcw = mw, srch = mh;
+        if(mw > 1) mw /= 2;
+        if(mh > 1) mh /= 2;
         if(src)
         {
-            if(!buf) buf = new uchar[tw*th*bpp];
-            scaletexture(src, srcw, srch, bpp, pitch, buf, tw, th);
+            if(!buf) buf = new uchar[mw*mh*bpp];
+            scaletexture(src, srcw, srch, bpp, pitch, buf, mw, mh);
         }
     }
     if(buf) delete[] buf;
+    if(shouldgpumipmap)
+    {
+        GLint fbo = 0;
+        if(!inbetweenframes || drawtex) glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
+        if(!prealloc) for(int level = 1, mw = tw, mh = th; max(mw, mh) > 1; level++)
+        {
+            if(mw > 1) mw /= 2;
+            if(mh > 1) mh /= 2;
+            glTexImage2D(target, level, internal, mw, mh, 0, format, type, NULL);
+        }
+        if(!mipmapfbo[0]) glGenFramebuffers_(2, mipmapfbo);
+        glBindFramebuffer_(GL_READ_FRAMEBUFFER, mipmapfbo[0]);
+        glBindFramebuffer_(GL_DRAW_FRAMEBUFFER, mipmapfbo[1]);
+        for(int level = 1, mw = tw, mh = th; max(mw, mh) > 1; level++)
+        {
+            int srcw = mw, srch = mh;
+            if(mw > 1) mw /= 2;
+            if(mh > 1) mh /= 2;
+            glFramebufferTexture2D_(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, target, tnum, level - 1);
+            glFramebufferTexture2D_(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, target, tnum, level);
+            glBlitFramebuffer_(0, 0, srcw, srch, 0, 0, mw, mh, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+        }
+        glFramebufferTexture2D_(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, target, 0, 0);
+        glFramebufferTexture2D_(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, target, 0, 0);
+        glBindFramebuffer_(GL_FRAMEBUFFER, fbo);
+    }
 }
 
-void uploadcompressedtexture(GLenum target, GLenum subtarget, GLenum format, int w, int h, const uchar *data, int align, int blocksize, int levels, bool mipmap)
+void uploadcompressedtexture(GLenum target, GLenum subtarget, GLenum format, int w, int h, const uchar *data, int align, int blocksize, int levels, bool mipmap, bool prealloc)
 {
     int hwlimit = target==GL_TEXTURE_CUBE_MAP ? hwcubetexsize : hwtexsize,
         sizelimit = levels > 1 && maxtexsize ? min(maxtexsize, hwlimit) : hwlimit;
@@ -836,7 +915,7 @@ void uploadcompressedtexture(GLenum target, GLenum subtarget, GLenum format, int
         int size = ((w + align-1)/align) * ((h + align-1)/align) * blocksize;
         if(w <= sizelimit && h <= sizelimit)
         {
-            if(target==GL_TEXTURE_1D) glCompressedTexImage1D_(subtarget, level, format, w, 0, size, data);
+            if(prealloc) glCompressedTexSubImage2D_(subtarget, level, 0, 0, w, h, format, size, data);
             else glCompressedTexImage2D_(subtarget, level, format, w, h, 0, size, data);
             level++;
             if(!mipmap) break;
@@ -863,36 +942,6 @@ GLenum textarget(GLenum subtarget)
     return subtarget;
 }
 
-GLenum uncompressedformat(GLenum format)
-{
-    switch(format)
-    {
-        case GL_COMPRESSED_ALPHA:
-            return GL_ALPHA;
-        case GL_COMPRESSED_LUMINANCE:
-        case GL_COMPRESSED_LUMINANCE_LATC1_EXT:
-            return GL_LUMINANCE;
-        case GL_COMPRESSED_LUMINANCE_ALPHA:
-        case GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT:
-            return GL_LUMINANCE_ALPHA;
-        case GL_COMPRESSED_RED:
-        case GL_COMPRESSED_RED_RGTC1:
-            return GL_RED;
-        case GL_COMPRESSED_RG:
-        case GL_COMPRESSED_RG_RGTC2:
-            return GL_RG;
-        case GL_COMPRESSED_RGB:
-        case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
-            return GL_RGB;
-        case GL_COMPRESSED_RGBA:
-        case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
-        case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
-        case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
-            return GL_RGBA;
-    }
-    return GL_FALSE;
-}
-
 const GLint *swizzlemask(GLenum format)
 {
     static const GLint luminance[4] = { GL_RED, GL_RED, GL_RED, GL_ONE };
@@ -909,7 +958,7 @@ void setuptexparameters(int tnum, const void *pixels, int clamp, int filter, GLe
 {
     glBindTexture(target, tnum);
     glTexParameteri(target, GL_TEXTURE_WRAP_S, clamp&1 ? GL_CLAMP_TO_EDGE : (clamp&0x100 ? GL_MIRRORED_REPEAT : GL_REPEAT));
-    if(target!=GL_TEXTURE_1D) glTexParameteri(target, GL_TEXTURE_WRAP_T, clamp&2 ? GL_CLAMP_TO_EDGE : (clamp&0x200 ? GL_MIRRORED_REPEAT : GL_REPEAT));
+    glTexParameteri(target, GL_TEXTURE_WRAP_T, clamp&2 ? GL_CLAMP_TO_EDGE : (clamp&0x200 ? GL_MIRRORED_REPEAT : GL_REPEAT));
     if(target==GL_TEXTURE_3D) glTexParameteri(target, GL_TEXTURE_WRAP_R, clamp&4 ? GL_CLAMP_TO_EDGE : (clamp&0x400 ? GL_MIRRORED_REPEAT : GL_REPEAT));
     if(target==GL_TEXTURE_2D && hasAF && min(aniso, hwmaxaniso) > 0 && filter > 1) glTexParameteri(target, GL_TEXTURE_MAX_ANISOTROPY_EXT, min(aniso, hwmaxaniso));
     glTexParameteri(target, GL_TEXTURE_MAG_FILTER, filter && bilinear ? GL_LINEAR : GL_NEAREST);
@@ -982,6 +1031,7 @@ static GLenum textype(GLenum &component, GLenum &format)
             if(!format) format = GL_RG;
             break;
 
+        case GL_R3_G3_B2:
         case GL_RGB5:
         case GL_RGB565:
         case GL_RGB8:
@@ -1064,10 +1114,16 @@ static GLenum textype(GLenum &component, GLenum &format)
     return type;
 }
 
+static int miplevels(int n)
+{
+    int levels = 1;
+    for(; n > 1; n /= 2) levels++;
+    return levels;
+}
+
 void createtexture(int tnum, int w, int h, const void *pixels, int clamp, int filter, GLenum component, GLenum subtarget, int pw, int ph, int pitch, bool resize, GLenum format, bool swizzle)
 {
     GLenum target = textarget(subtarget), type = textype(component, format);
-    if(tnum) setuptexparameters(tnum, pixels, clamp, filter, format, target, swizzle);
     if(!pw) pw = w;
     if(!ph) ph = h;
     int tw = w, th = h;
@@ -1077,23 +1133,33 @@ void createtexture(int tnum, int w, int h, const void *pixels, int clamp, int fi
         resizetexture(w, h, mipmap, false, target, 0, tw, th);
         if(mipmap) component = compressedformat(component, tw, th);
     }
-    uploadtexture(subtarget, component, tw, th, format, type, pixels, pw, ph, pitch, mipmap);
+    bool prealloc = !resize && hasTS && hasTRG && hasTSW && !uncompressedformat(component);
+    if(filter >= 0 && clamp >= 0)
+    {
+        setuptexparameters(tnum, pixels, clamp, filter, format, target, swizzle);
+        if(prealloc) glTexStorage2D_(target, mipmap ? miplevels(max(tw, th)) : 1, sizedformat(component), tw, th);
+    }
+    uploadtexture(tnum, subtarget, component, tw, th, format, type, pixels, pw, ph, pitch, mipmap, prealloc);
 }
 
 void createcompressedtexture(int tnum, int w, int h, const uchar *data, int align, int blocksize, int levels, int clamp, int filter, GLenum format, GLenum subtarget, bool swizzle = false)
 {
     GLenum target = textarget(subtarget);
-    if(tnum) setuptexparameters(tnum, data, clamp, filter, format, target, swizzle);
-    uploadcompressedtexture(target, subtarget, format, w, h, data, align, blocksize, levels, filter > 1);
+    bool mipmap = filter > 1, prealloc = hasTS && hasTRG && hasTSW;
+    if(filter >= 0 && clamp >= 0)
+    {
+        setuptexparameters(tnum, data, clamp, filter, format, target, swizzle);
+        if(prealloc) glTexStorage2D_(target, mipmap ? miplevels(max(w, h)) : 1, format, w, h);
+    }
+    uploadcompressedtexture(target, subtarget, format, w, h, data, align, blocksize, levels, mipmap, prealloc);
 }
 
 void create3dtexture(int tnum, int w, int h, int d, const void *pixels, int clamp, int filter, GLenum component, GLenum target, bool swizzle)
 {
     GLenum format = GL_FALSE, type = textype(component, format);
-    if(tnum) setuptexparameters(tnum, pixels, clamp, filter, format, target, swizzle);
+    if(filter >= 0 && clamp >= 0) setuptexparameters(tnum, pixels, clamp, filter, format, target, swizzle);
     glTexImage3D_(target, 0, component, w, h, d, 0, format, type, pixels);
 }
-
 
 hashnameset<Texture> textures;
 
@@ -1461,7 +1527,7 @@ SDL_Surface *loadsurface(const char *name)
         if(rw)
         {
             const char *ext = strrchr(name, '.');
-            if(ext) ++ext;
+            if(ext) ++ext; 
             s = IMG_LoadTyped_RW(rw, 0, ext);
             SDL_FreeRW(rw);
         }
@@ -2180,13 +2246,13 @@ bool unpackvslot(ucharbuf &buf, VSlot &dst, bool delta)
             }
             default:
                 return false;
-        }
+        } 
         dst.changed |= 1<<changed;
     }
     if(buf.overread()) return false;
-    return true;
+    return true; 
 }
-
+ 
 VSlot *findvslot(Slot &slot, const VSlot &src, const VSlot &delta)
 {
     for(VSlot *dst = slot.variants; dst; dst = dst->next)
@@ -2293,7 +2359,7 @@ void texture(char *type, char *name, int *rot, int *xoffset, int *yoffset, float
     {
         tnum = TEX_DIFFUSE;
         defslot = &materialslots[matslot];
-        defslot->reset();
+        defslot->reset(); 
     }
     else if(!defslot) return;
     else if(tnum < 0) tnum = TEX_UNKNOWN;
@@ -2875,7 +2941,7 @@ Texture *cubemaploadwildcard(Texture *t, const char *name, bool mipit, bool msg,
         component = compressedformat(format, t->w, t->h, compress);
         switch(component)
         {
-            case GL_RGB: component = GL_RGB5; break;
+            case GL_RGB: component = hasES2 ? GL_RGB565 : GL_RGB5; break;
         }
     }
     glGenTextures(1, &t->id);
@@ -2895,11 +2961,11 @@ Texture *cubemaploadwildcard(Texture *t, const char *name, bool mipit, bool msg,
                 if(w > 1) w /= 2;
                 if(h > 1) h /= 2;
             }
-            createcompressedtexture(!i ? t->id : 0, w, h, data, s.align, s.bpp, levels, 3, mipit ? 2 : 1, s.compressed, side.target, true);
+            createcompressedtexture(t->id, w, h, data, s.align, s.bpp, levels, i ? -1 : 3, mipit ? 2 : 1, s.compressed, side.target, true);
         }
         else
         {
-            createtexture(!i ? t->id : 0, t->w, t->h, s.data, 3, mipit ? 2 : 1, component, side.target, s.w, s.h, s.pitch, false, format, true);
+            createtexture(t->id, t->w, t->h, s.data, i ? -1 : 3, mipit ? 2 : 1, component, side.target, s.w, s.h, s.pitch, false, format, true);
         }
     }
     return t;
@@ -2980,7 +3046,7 @@ GLuint genenvmap(const vec &o, int envmapsize, int blur, bool onlysky)
     glGenTextures(1, &tex);
     // workaround for Catalyst bug:
     // all texture levels must be specified before glCopyTexSubImage2D is called, otherwise it crashes
-    loopi(6) createtexture(!i ? tex : 0, texsize, texsize, NULL, 3, 2, GL_RGB5, cubemapsides[i].target);
+    loopi(6) createtexture(tex, texsize, texsize, NULL, i ? -1 : 3, 2, hasES2 ? GL_RGB565 : GL_RGB5, cubemapsides[i].target);
     float yaw = 0, pitch = 0;
     loopi(6)
     {
@@ -3164,6 +3230,7 @@ void cleanuptexture(Texture *t)
 
 void cleanuptextures()
 {
+    cleanupmipmaps();
     clearenvmaps();
     loopv(slots) slots[i]->cleanup();
     loopv(vslots) vslots[i]->cleanup();
