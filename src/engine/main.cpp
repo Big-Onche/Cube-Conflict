@@ -240,7 +240,7 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
             gle::colorf(1, 1, 1, 0.3f);
 
             settexture("media/interface/image_fond.jpg");
-            bgquad(ilx-parallaxX/-40, ily-parallaxY/-40, ilw, ilh);
+            bgquad(ilx+parallaxX/-40, ily+parallaxY/-40, ilw, ilh);
             gle::colorf(1, 1, 1, 1);
 
             float lh = 0.43f*min(w, h), lw = lh*2,

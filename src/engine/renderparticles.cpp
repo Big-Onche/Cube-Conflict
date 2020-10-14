@@ -859,7 +859,7 @@ static partrenderer *parts[] =
     new quadrenderer("<grey>media/particle/fumee.png", PT_PART|PT_FLIP|PT_LERP),               // smoke
     new quadrenderer("<grey>media/particle/mort.png", PT_PART),                                // mort
     new quadrenderer("<grey>media/particle/steam.png", PT_PART|PT_FLIP),                       // steam
-    new quadrenderer("<grey>media/particle/flames.png", PT_PART|PT_HFLIP|PT_RND4|PT_BRIGHT),   // flame
+    new quadrenderer("media/particle/flames.png", PT_PART|PT_HFLIP|PT_RND4|PT_BRIGHT, -1),   // flame
     new taperenderer("media/particle/flare.png", PT_TAPE|PT_BRIGHT),                           // streak
     new taperenderer("media/particle/rail_trail.png", PT_TAPE|PT_FEW|PT_BRIGHT),               // rail trail
     new taperenderer("media/particle/pulse_side.png", PT_TAPE|PT_FEW|PT_BRIGHT),               // pulse side
@@ -1352,8 +1352,16 @@ static void makeparticles(entity &e)
         {
             float radius = e.attr2 ? float(e.attr2)/100.0f : 1.5f,
                   height = e.attr3 ? float(e.attr3)/100.0f : radius/3;
-            regularflame(PART_FLAME, e.o, radius, height, e.attr4 ? colorfromattr(e.attr4) : 0x903020, 3, 2.0f+(rnd(2)));
-            regularflame(PART_SMOKE, vec(e.o.x, e.o.y, e.o.z + 4.0f*min(radius, height)), radius, height, 0x303020, 1, 4.0f+(rnd(3)), 100.0f, 2750.0f, -20);
+            int rndflamecolor, rndsmokecolor;
+            switch(rnd(3))
+            {
+                case 1: rndflamecolor = 0x555533; rndsmokecolor = 0x222222; break;
+                case 2: rndflamecolor = 0x434343; rndsmokecolor = 0x111111; break;
+                default: rndflamecolor = 0x884430; rndsmokecolor = 0x303020; break;
+
+            }
+            regularflame(PART_FLAME, e.o, radius, height, e.attr4 ? colorfromattr(e.attr4) : rndflamecolor, 3, 2.0f+(rnd(2)));
+            regularflame(PART_SMOKE, vec(e.o.x, e.o.y, e.o.z + 4.0f*min(radius, height)), radius, height, 0x303020, 1, 4.0f+(rnd(6)), 100.0f, 2750.0f, -15);
             break;
         }
         case 1: //steam vent - <dir>
