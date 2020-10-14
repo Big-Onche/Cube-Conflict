@@ -1176,6 +1176,12 @@ int main(int argc, char **argv)
     textureload("media/interface/hud/viseurA.png");
     textureload("media/interface/hud/viseurB.png");
     textureload("media/interface/hud/viseurC.png");
+    textureload("media/map/Village.jpg");
+    textureload("media/map/Usine.jpg");
+    textureload("media/map/Chateaux.jpg");
+    textureload("media/map/Dota.jpg");
+    textureload("media/map/Lune.jpg");
+    textureload("media/map/Volcan.jpg");
 
     logoutf("init: console");
     if(!execfile("config/stdlib.cfg", false)) fatal("cannot find data files (you are running from the wrong folder, try .bat file in the main folder)");   // this is the first file we load.
