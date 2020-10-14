@@ -5,7 +5,7 @@
 Shader *particleshader = NULL, *particlenotextureshader = NULL, *particlesoftshader = NULL, *particletextshader = NULL;
 
 VARP(particlelayers, 0, 1, 1);
-FVARP(particlebright, 0, 2, 100);
+FVARP(particlebright, 0, 1.75, 100);
 VARP(particlesize, 20, 100, 500);
 
 VARP(softparticles, 0, 1, 1);
@@ -869,11 +869,11 @@ static partrenderer *parts[] =
     new trailrenderer("media/particle/impact.png", PT_TRAIL|PT_BRIGHT),                          // streak
     new quadrenderer("media/particle/spock_front.png", PT_PART|PT_FEW|PT_BRIGHT),
     new quadrenderer("media/particle/sante.png", PT_PART|PT_BRIGHT),
-    new quadrenderer("media/particle/flames_1.png", PT_PART|PT_FLIP|PT_BRIGHT),
-    new quadrenderer("media/particle/flames_2.png", PT_PART|PT_FLIP|PT_BRIGHT),
+    new quadrenderer("media/particle/flames_1.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_COLLIDE, -1),
+    new quadrenderer("media/particle/flames_2.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_COLLIDE, -1),
     new quadrenderer("media/particle/eau.png", PT_PART|PT_FLIP|PT_BRIGHT),
     new quadrenderer("media/particle/neige.png", PT_PART|PT_FLIP|PT_RND4|PT_COLLIDE, -1),            // colliding snow
-    new trailrenderer("media/particle/pluie.png", PT_TRAIL|PT_LERP|PT_COLLIDE),
+    new trailrenderer("media/particle/pluie.png", PT_TRAIL|PT_LERP|PT_COLLIDE, -1),
     new trailrenderer("media/particle/nuage_1.png", PT_TRAIL),
     new trailrenderer("media/particle/nuage_2.png", PT_TRAIL),
     new trailrenderer("media/particle/nuage_3.png", PT_TRAIL),

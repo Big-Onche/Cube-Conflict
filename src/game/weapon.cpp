@@ -1242,11 +1242,11 @@ namespace game
                     irays.sub(d->muzzle);
                     irays.normalize().mul(1550.0f);
 
-                    switch(rnd(6))
+                    switch(rnd(5))
                     {
-                        case 0: particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0xAA0000 :  0x883322, 1.5f, 100, 1, player1->champimillis ? true : false); flamehit(from, rays[i]); break;
-                        case 1: particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x990000 :  0x992211, 1.5f, 100, 1, player1->champimillis ? true : false); flamehit(from, rays[i]); break;
-                        case 2: particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0xBB0000 :  0x773300, 1.5f, 100, 1, player1->champimillis ? true : false); flamehit(from, rays[i]); break;
+                        case 0: particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x881111 :  0x604930, (7.f+rnd(16))/10.f, 100, 1, player1->champimillis ? true : false); flamehit(from, rays[i]); break;
+                        case 1: particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x770000 :  0x474747, (7.f+rnd(16))/10.f, 100, 1, player1->champimillis ? true : false); flamehit(from, rays[i]); break;
+                        case 2: particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x991111 :  0x383838, (7.f+rnd(16))/10.f, 100, 1, player1->champimillis ? true : false); flamehit(from, rays[i]); break;
                         default:
                             particle_flying_flare(d->muzzle, irays, 1100, PART_SMOKE, 0x111111, 5.0f, -20, 1, player1->champimillis ? true : false);
                             adddynlight(hudgunorigin(gun, d->o, irays, d), 50, vec(0.40f, 0.2f, 0.1f), 100, 100, L_NODYNSHADOW, 10, vec(0.50f, 0, 0), d);
