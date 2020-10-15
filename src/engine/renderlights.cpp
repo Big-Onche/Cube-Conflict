@@ -2591,16 +2591,16 @@ void cleanupvolumetric()
 }
 
 VARFP(volumetric, 0, 1, 1, cleanupvolumetric());
-VARFP(volreduce, 0, 1, 2, cleanupvolumetric());
-VARFP(volbilateral, 0, 1, 3, cleanupvolumetric());
+VARFP(volreduce, 0, 0, 2, cleanupvolumetric());
+VARFP(volbilateral, 0, 2, 3, cleanupvolumetric());
 FVAR(volbilateraldepth, 0, 4, 1e3f);
-VARFP(volblur, 0, 1, 3, cleanupvolumetric());
+VARFP(volblur, 0, 0, 3, cleanupvolumetric());
 VARFP(volsteps, 1, 12, 64, cleanupvolumetric());
 FVAR(volminstep, 0, 0.0625f, 1e3f);
 FVAR(volprefilter, 0, 4, 1e3f);
 FVAR(voldistclamp, 0, 0.99f, 2);
 CVAR1R(volcolour, 0x808080);
-FVARR(volscale, 0, 1, 16);
+FVARR(volscale, 0, 0.75f, 16);
 VAR(volderiv, -1, 1, 1);
 
 static Shader *deferredlightshader = NULL, *deferredminimapshader = NULL, *deferredmsaapixelshader = NULL, *deferredmsaasampleshader = NULL;
