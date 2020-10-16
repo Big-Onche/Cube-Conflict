@@ -833,27 +833,27 @@ void setdecorationlod()
         case 0:
             maxstaintris = 1024;
             stainfade = 15;
-            grassdist = 64;
+            grassdist = 75;
             grass = 0;
             break;
         case 1:
             maxstaintris = 4096;
             stainfade = 30;
-            grassdist = 128;
+            grassdist = 150;
             grassstep = 3.5f;
             grass = 1;
             break;
         case 2:
             maxstaintris = 8192;
             stainfade = 90;
-            grassdist = 256;
+            grassdist = 400;
             grassstep = 2.5f;
             grass = 1;
             break;
         case 3:
             maxstaintris = 20480;
             stainfade = 300;
-            grassdist = 512;
+            grassdist = 750;
             grassstep = 1.5f;
             grass = 1;
             break;
