@@ -5337,7 +5337,7 @@ void setlightlod()
             csmsplits = 1;
             smsize = 8;
             dynlightdist = 128;
-            volumetric = 0;
+            volumetric = 1;
             volsteps = 5;
             break;
         case 1:
