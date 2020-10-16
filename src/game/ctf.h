@@ -697,7 +697,7 @@ struct ctfclientmode : clientmode
         vec pos = d->feetpos();
         loopk(2)
         {
-            int goal = -1;
+            int goal = 2000;
             loopv(flags)
             {
                 flag &g = flags[i];
@@ -753,44 +753,24 @@ struct ctfclientmode : clientmode
 				static vector<int> targets; // build a list of others who are interested in this
 				targets.setsize(0);
 				bool home = f.team == d->team;
-				ai::checkothers(targets, d, home ? ai::AI_S_DEFEND : ai::AI_S_PURSUE, ai::AI_T_AFFINITY, j, true);
+				ai::checkothers(targets, d, home ? ai::AI_S_PURSUE : ai::AI_S_INTEREST, ai::AI_T_AFFINITY, j, true);
 				gameent *e = NULL;
+
 				loopi(numdynents()) if((e = (gameent *)iterdynents(i)) && !e->ai && e->state == CS_ALIVE && isteam(d->team, e->team))
 				{ // try to guess what non ai are doing
 					vec ep = e->feetpos();
 					if(targets.find(e->clientnum) < 0 && (ep.squaredist(f.pos()) <= (FLAGRADIUS*FLAGRADIUS*4) || f.owner == e))
 						targets.add(e->clientnum);
 				}
-				if(home)
-                {
-                    bool guard = false;
-                    if((f.owner && f.team != f.owner->team) || f.droptime || targets.empty()) guard = true;
-					if(guard)
-					{ // defend the flag
-					    switch(rnd(100))
-					    {
-					        case 0:
-                            ai::interest &n = interests.add();
-                            n.state = ai::AI_S_PURSUE;
-                            n.node = ai::closestwaypoint(f.pos(), ai::SIGHTMIN, true);
-                            n.target = j;
-                            n.targtype = ai::AI_T_AFFINITY;
-                            n.score = pos.squaredist(f.pos());
-					    }
-					}
-				}
-				else
-				{
-					if(targets.empty())
-					{ // attack the flag
-						ai::interest &n = interests.add();
-						n.state = ai::AI_S_PURSUE;
-						n.node = ai::closestwaypoint(f.pos(), ai::SIGHTMIN, true);
-						n.target = j;
-						n.targtype = ai::AI_T_AFFINITY;
-						n.score = pos.squaredist(f.pos());
-					}
-				}
+
+
+                    ai::interest &n = interests.add();
+                    n.state = ai::AI_S_PURSUE;
+                    n.node = ai::closestwaypoint(f.pos(), ai::SIGHTMIN, true);
+                    n.target = j;
+                    n.targtype = ai::AI_T_AFFINITY;
+                    n.score = pos.squaredist(f.pos());
+
 			}
 		}
 	}
@@ -808,7 +788,7 @@ struct ctfclientmode : clientmode
 			if(f.droptime) return ai::makeroute(d, b, f.pos());
 			if(f.owner) return ai::violence(d, b, f.owner, 4);
 			int walk = 0;
-			if(lastmillis-b.millis >= (201-d->skill)*33)
+			if(lastmillis-b.millis >= (201-d->skill)*11)
 			{
 				static vector<int> targets; // build a list of others who are interested in this
 				targets.setsize(0);
