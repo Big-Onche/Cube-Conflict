@@ -1,6 +1,7 @@
 // renderparticles.cpp
 
 #include "engine.h"
+#include "cubedef.h"
 
 Shader *particleshader = NULL, *particlenotextureshader = NULL, *particlesoftshader = NULL, *particletextshader = NULL;
 
@@ -213,14 +214,13 @@ struct partrenderer
         }
         else
         {
-            if(p->expand)
+
+            switch(p->expand)
             {
-                switch(p->expand)
-                {
-                    case 1: p->size += 0.16f; break;
-                    case 2: p->size += 0.017f;
-                }
+                case 1: p->size += 19.2f/nbfps; break;
+                case 2: p->size += 2.04f/nbfps;
             }
+
             ts = lastmillis-p->millis;
             blend = max(255 - (ts<<8)/p->fade, 0);
             if(p->gravity)
@@ -869,11 +869,11 @@ static partrenderer *parts[] =
     new trailrenderer("media/particle/impact.png", PT_TRAIL|PT_BRIGHT),                          // streak
     new quadrenderer("media/particle/spock_front.png", PT_PART|PT_FEW|PT_BRIGHT),
     new quadrenderer("media/particle/sante.png", PT_PART|PT_BRIGHT),
-    new quadrenderer("media/particle/flames_1.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_COLLIDE, -1),
-    new quadrenderer("media/particle/flames_2.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_COLLIDE, -1),
+    new quadrenderer("media/particle/flames_1.png", PT_PART|PT_FLIP|PT_BRIGHT),
+    new quadrenderer("media/particle/flames_2.png", PT_PART|PT_FLIP|PT_BRIGHT),
     new quadrenderer("media/particle/eau.png", PT_PART|PT_FLIP|PT_BRIGHT),
     new quadrenderer("media/particle/neige.png", PT_PART|PT_FLIP|PT_RND4|PT_COLLIDE, -1),            // colliding snow
-    new trailrenderer("media/particle/pluie.png", PT_TRAIL|PT_LERP|PT_COLLIDE, -1),
+    new trailrenderer("media/particle/pluie.png", PT_TRAIL|PT_LERP|PT_HFLIP),
     new trailrenderer("media/particle/nuage_1.png", PT_TRAIL),
     new trailrenderer("media/particle/nuage_2.png", PT_TRAIL),
     new trailrenderer("media/particle/nuage_3.png", PT_TRAIL),
@@ -1361,7 +1361,7 @@ static void makeparticles(entity &e)
 
             }
             regularflame(PART_FLAME, e.o, radius, height, e.attr4 ? colorfromattr(e.attr4) : rndflamecolor, 3, 2.0f+(rnd(2)));
-            regularflame(PART_SMOKE, vec(e.o.x, e.o.y, e.o.z + 4.0f*min(radius, height)), radius, height, 0x303020, 1, 4.0f+(rnd(6)), 100.0f, 2750.0f, -15);
+            regularflame(PART_SMOKE, vec(e.o.x, e.o.y, e.o.z + 4.0f*min(radius, height)), radius, height, rndsmokecolor, 1, 4.0f+(rnd(6)), 100.0f, 2750.0f, -15);
             break;
         }
         case 1: //steam vent - <dir>
