@@ -469,7 +469,6 @@ namespace game
 
     void damageeffect(int damage, gameent *d, gameent *actor, bool thirdperson, int atk)
     {
-        if(actor->team==d->team) return;
         vec p = d->o;
         p.z += 0.6f*(d->eyeheight + d->aboveeye) - d->eyeheight;
         if(d->armourtype!=A_MAGNET)
@@ -478,42 +477,47 @@ namespace game
             if(damage>=600) playsound(S_SANG, &d->o, 0, 0, 0 , 100, -1, 250);
             gibeffect(damage, vec(0,0,0), d);
         }
-        if(thirdperson)
+
+        damage = (damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[d->aptitude].apt_resistance); //Dégats de base
+        actor->steromillis > 0 ? damage*=actor->aptitude==13 ? 3 : 2 : damage+=0; //Stéros ou non
+        if(d->aptisort3>0 && d->aptitude==APT_MAGICIEN) damage = damage/5.0f;
+        damage = damage/10.0f;
+
+        if(isteam(d->team, actor->team) && actor!=d)
         {
-            actor->steromillis > 0 ? damage*=actor->aptitude==13 ? 3 : 2 : damage+=0;
-            damage = (((damage*aptitudes[actor->aptitude].apt_degats)/100)*100)/aptitudes[d->aptitude].apt_resistance;
-            if(d->aptisort3>0 && d->aptitude==APT_MAGICIEN) damage = damage/5.0f;
-            damage = damage/10.0f;
-
-            bool normaldamage = true;
-            switch(actor->aptitude)
-            {
-                case APT_NINJA:
-                    if(atk==ATK_CAC349_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACMARTEAU_SHOOT || atk==ATK_CACMASTER_SHOOT) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*3.0f), PART_TEXT, 2500, 0xFF0000, actor==player1 ? 7.0f : 5.0f, -8);  normaldamage = false; }
-                    break;
-                case APT_MAGICIEN:
-                    if(actor->aptisort2) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.3333f), PART_TEXT, 2500, 0xFF5500, actor==player1 ? 5.5f : 4.0f, -8); normaldamage = false; }
-                case APT_CAMPEUR:
-                    {
-                        float campdamage = damage+=actor->o.dist(d->o)/2.5f;
-                        particle_textcopy(d->abovehead(), tempformatstring("%.1f", campdamage), PART_TEXT, actor->steromillis > 0 ? 2500 : 1500, damage<0 ? 0x22FF22 : actor->steromillis > 0 ? 0xFF0000: 0xFF4B19, actor==player1 ? 7.0f : 3.0f, -8);  normaldamage = false;
-                        break;
-                    }
-                case APT_VICKING:
-                    if(actor->ragemillis) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.5f), PART_TEXT, 2500, 0xAA0000, actor==player1 ? 10.0f : 7.0f, -8); normaldamage = false; }
-                    break;
-                case APT_PRETRE:
-                    if(d->aptisort2)
-                    {
-                        adddynlight(d->o, 25, vec(1.0f, 0.0f, 1.0f), 300, 50, L_NOSHADOW|L_VOLUMETRIC);
-                        playsound(S_SORTPRETRE1, d!=player1 ? &d->o : NULL, NULL, 0, 0, 0, -1, 150, 300);
-                        particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.0f), PART_TEXT, 1500, 0xAA00AA, actor==player1 ? 7.0f : 3.0f, -8);
-                        normaldamage = false;
-                    }
-            }
-
-            if(normaldamage) particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.0f), PART_TEXT, actor->steromillis > 0 ? 2500 : 1500, damage<0 ? 0x22FF22 : actor->steromillis > 0 ? 0xFF0000: 0xFF4B19, actor==player1 ? 7.0f : 3.0f, -8);
+            damage/=3.f; //Divisé si allié sauf sois-même
+            particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.0f), PART_TEXT, actor->steromillis > 0 ? 2500 : 1500, 0xFFFF33, actor==player1 ? 5.0f : 2.2f, -8);
+            return;
         }
+
+        bool normaldamage = true;
+
+        switch(actor->aptitude)
+        {
+            case APT_NINJA:
+                if(atk==ATK_CAC349_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACMARTEAU_SHOOT || atk==ATK_CACMASTER_SHOOT) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*3.0f), PART_TEXT, 2500, 0xFF0000, actor==player1 ? 7.0f : 5.0f, -8);  normaldamage = false; }
+                break;
+            case APT_MAGICIEN:
+                if(actor->aptisort2) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.3333f), PART_TEXT, 2500, 0xFF5500, actor==player1 ? 5.5f : 4.0f, -8); normaldamage = false; }
+            case APT_CAMPEUR:
+                {
+                    float campdamage = damage+=actor->o.dist(d->o)/2.5f;
+                    particle_textcopy(d->abovehead(), tempformatstring("%.1f", campdamage), PART_TEXT, actor->steromillis > 0 ? 2500 : 1500, damage<0 ? 0x22FF22 : actor->steromillis > 0 ? 0xFF0000: 0xFF4B19, actor==player1 ? 7.0f : 3.0f, -8);  normaldamage = false;
+                    break;
+                }
+            case APT_VICKING:
+                if(actor->ragemillis) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.5f), PART_TEXT, 2500, 0xAA0000, actor==player1 ? 10.0f : 7.0f, -8); normaldamage = false; }
+                break;
+            case APT_PRETRE:
+                if(d->aptisort2)
+                {
+                    adddynlight(d->o, 25, vec(1.0f, 0.0f, 1.0f), 300, 50, L_NOSHADOW|L_VOLUMETRIC);
+                    playsound(S_SORTPRETRE1, d!=player1 ? &d->o : NULL, NULL, 0, 0, 0, -1, 150, 300);
+                    particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.0f), PART_TEXT, 1500, 0xAA00AA, actor==player1 ? 7.0f : 3.0f, -8);
+                    normaldamage = false;
+                }
+        }
+        if(normaldamage) particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.0f), PART_TEXT, actor->steromillis > 0 ? 2500 : 1500, actor->steromillis > 0 ? 0xFF0000 : 0xFF4400, actor==player1 ? 7.0f : 3.0f, -8);
     }
 
     void regeneffect(int damage, gameent *d, gameent *actor, bool thirdperson)
@@ -524,7 +528,7 @@ namespace game
         if(thirdperson && actor->health<actor->maxhealth)
         {
             actor->steromillis > 0 ? damage*=actor->aptitude==13 ? 3 : 2 : damage+=0;
-            damage = (((damage*aptitudes[actor->aptitude].apt_degats)/100)*100)/aptitudes[d->aptitude].apt_resistance;
+            damage = (damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[d->aptitude].apt_resistance);
             if(d->aptisort3>0 && d->aptitude==APT_MAGICIEN) damage = damage/5.0f;
             damage = damage/10.0f;
 
@@ -1248,7 +1252,7 @@ namespace game
                         case 1: particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x770000 :  0x474747, (7.f+rnd(16))/10.f, 100, 1, player1->champimillis ? true : false); flamehit(from, rays[i]); break;
                         case 2: particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x991111 :  0x383838, (7.f+rnd(16))/10.f, 100, 1, player1->champimillis ? true : false); flamehit(from, rays[i]); break;
                         default:
-                            particle_flying_flare(d->muzzle, irays, 1100, PART_SMOKE, 0x111111, 5.0f, -20, 1, player1->champimillis ? true : false);
+                            particle_flying_flare(d->muzzle, irays, 1100, PART_SMOKE, 0x111111, (10.f+rnd(18))/10.f, -20, 1, player1->champimillis ? true : false);
                             adddynlight(hudgunorigin(gun, d->o, irays, d), 50, vec(0.40f, 0.2f, 0.1f), 100, 100, L_NODYNSHADOW, 10, vec(0.50f, 0, 0), d);
                             switch(rnd(2)){case 0: if(d!=hudplayer()) sound_nearmiss(S_FLYBYFLAME, from, rays[i]);}
                     }

@@ -2192,7 +2192,14 @@ namespace server
 
     void dodamage(clientinfo *target, clientinfo *actor, int damage, int atk, const vec &hitpush = vec(0, 0, 0))
     {
-        if(teamkill==0) { if(actor!=target) if(isteam(target->team, actor->team)) return; } //ENLEVE LE TEAMKILL
+        if(actor!=target)
+        {
+            if(isteam(target->team, actor->team))
+            {
+                if(teamkill) damage/=3;
+                else return;
+            }
+        }
 
         servstate &ts = target->state;
         servstate &as = actor->state;
@@ -2200,7 +2207,7 @@ namespace server
         if(ts.armourtype==A_ASSIST && ts.armour==0 && atk!=ATK_ASSISTXPL_SHOOT) return;
 
         //Calcul des dommages de base
-        damage = (((damage*aptitudes[actor->aptitude].apt_degats)/100)*100)/aptitudes[target->aptitude].apt_resistance;
+        damage = (damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[target->aptitude].apt_resistance);
 
         //Dommages spéciaux d'aptitudes
         switch(actor->aptitude)
@@ -2278,10 +2285,7 @@ namespace server
 
     void doregen(clientinfo *target, clientinfo *actor, int damage, int gun, const vec &hitpush = vec(0, 0, 0))
     {
-        if(actor==target) return;
-        if(teamkill==0) {
-            if(actor!=target) if(isteam(target->team, actor->team)) return; //ENLEVE LE TEAMKILL
-        }
+        if(actor==target || isteam(target->team, actor->team)) return;
 
         damage = ((damage*100)/aptitudes[target->aptitude].apt_resistance)/2.0f;
         if(target->state.aptisort3 && target->aptitude==APT_MAGICIEN) damage = damage/5.0f;
