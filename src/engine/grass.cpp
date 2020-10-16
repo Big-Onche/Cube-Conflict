@@ -6,7 +6,7 @@ VARP(grassdist, 0, 256, 10000);
 FVARP(grasstaper, 0, 0.2, 1);
 FVARP(grassstep, 0.5, 2, 8);
 VAR(grassheight, 1, 7, 64);
-VARP(grassmargin, 0, 8, 32);
+VARP(grassmargin, 0, 0, 32);
 FVAR(grassmarginfade, 0, 1, 1);
 
 #define NUMGRASSWEDGES 8
