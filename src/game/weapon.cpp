@@ -486,7 +486,7 @@ namespace game
         if(isteam(d->team, actor->team) && actor!=d)
         {
             damage/=3.f; //Divisé si allié sauf sois-même
-            particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.0f), PART_TEXT, actor->steromillis > 0 ? 2500 : 1500, 0xFFFF33, actor==player1 ? 5.0f : 2.2f, -8);
+            particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.0f), PART_TEXT, actor->steromillis > 0 ? 2500 : 1500, 0x666666, actor==player1 ? 5.0f : 2.2f, -8);
             return;
         }
 
