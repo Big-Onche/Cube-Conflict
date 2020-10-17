@@ -469,6 +469,7 @@ namespace game
 
     void damageeffect(int damage, gameent *d, gameent *actor, bool thirdperson, int atk)
     {
+        if(d==player1) return;
         vec p = d->o;
         p.z += 0.6f*(d->eyeheight + d->aboveeye) - d->eyeheight;
         if(d->armourtype!=A_MAGNET)
@@ -516,6 +517,11 @@ namespace game
                     particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.0f), PART_TEXT, 1500, 0xAA00AA, actor==player1 ? 7.0f : 3.0f, -8);
                     normaldamage = false;
                 }
+                break;
+            case APT_INDIEN:
+                if(d->aptisort1) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage/1.25f), PART_TEXT, 2500, 0xAAAA00, actor==player1 ? 10.0f : 7.0f, -8); normaldamage = false; }
+                if(actor->aptisort3) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.25f), PART_TEXT, 2500, 0xFF3333, actor==player1 ? 10.0f : 7.0f, -8); normaldamage = false; }
+                break;
         }
         if(normaldamage) particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.0f), PART_TEXT, actor->steromillis > 0 ? 2500 : 1500, actor->steromillis > 0 ? 0xFF0000 : 0xFF4400, actor==player1 ? 7.0f : 3.0f, -8);
     }
@@ -1661,7 +1667,7 @@ namespace game
         if(d->clientnum >= 0 && d->state == CS_ALIVE)
         {
             int neededdata = 0;
-            switch(d->aptitude) {case APT_PHYSICIEN: neededdata++; break; case APT_PRETRE: neededdata+=2;}
+            switch(d->aptitude) {case APT_PHYSICIEN: neededdata++; break; case APT_PRETRE: neededdata+=2; break; case APT_INDIEN: neededdata+=3;}
 
             d->sortchan = playsound(d->aptisort1 ? sorts[neededdata].sound1 : d->aptisort2 ? sorts[neededdata].sound2 : sorts[neededdata].sound3, local ? NULL : &d->o, NULL, 0, -1, -1, d->sortchan, 300);
             if(d->sortchan < 0) d->sortchan = -1;

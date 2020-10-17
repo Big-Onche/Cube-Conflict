@@ -273,11 +273,11 @@ namespace game
         if(d->state==CS_ALIVE) {d->skeletonfade = 1.0f; d->tombepop = 0.0f;}
         else if(d->state==CS_DEAD)
         {
-            if(d->tombepop<1.0f) d->tombepop += 0.02f;
+            if(d->tombepop<1.0f) d->tombepop += 1.1f/nbfps;
             rendermodel(customs[d->customtombe].custtombe, ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, flags, NULL, NULL, 0, 0, d->tombepop, vec4(vec::hexcolor(color), 5));
 
-            d->skeletonfade -= 0.015f;
-            if(d->skeletonfade<0.015f) return;
+            d->skeletonfade -= 0.9f/nbfps;
+            if(d->skeletonfade<0.066f) return;
             rendermodel("mapmodel/smileys/mort", ANIM_MAPMODEL, o, d->yaw+90, 0, 0, flags, NULL, NULL, 0, 0, d->skeletonfade);
             return;
         }
@@ -505,7 +505,13 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
                     if(d->armour<1500) {switch(rnd(d->armour<1000 ? 8 : 14)){case 0: regularflame(PART_SMOKE, d->o, 15, 3, d->armour<750 ? 0x333333 : 0x888888, 1, 3.3f, 50.0f, 1000.0f, -10);}}
                     if(d->armour<1250) {switch(rnd(d->armour<600 ? 8 : 14)){case 0: particle_splash(PART_FLAME2,  1, 300, d->o, 0x992200, 2.5f, 50, -20);}}
                 }
-
+                else if(d->aptitude==APT_INDIEN)
+                {
+                    vec pos = d->abovehead().add(vec(0, 0,-12));
+                    if(d->aptisort1) switch(rnd(2)) {case 0: particle_splash(PART_SPARK,  1,  150, d->o, 0x555555, 1+rnd(2), 200, 150); }
+                    if(d->aptisort2) switch(rnd(2)) {case 0: particle_splash(PART_SPARK,  1,  150, pos, 0x992222, 1+rnd(2), 200, 150); }
+                    if(d->aptisort3) switch(rnd(2)) {case 0: particle_splash(PART_SPARK,  1,  150, d->o, 0xFF0000, 1+rnd(2), 200, 150); }
+                }
             }
         }
         loopv(ragdolls)

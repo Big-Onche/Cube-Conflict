@@ -14,7 +14,7 @@
 //Définition des aptitudes
 
 
-enum {APT_SOLDAT = 0, APT_MEDECIN, APT_AMERICAIN, APT_NINJA, APT_VAMPIRE, APT_MAGICIEN, APT_KAMIKAZE, APT_FAUCHEUSE, APT_PHYSICIEN, APT_CAMPEUR, APT_COMMANDO, APT_PRETRE, APT_VICKING, APT_JUNKIE, NUMAPTS};
+enum {APT_SOLDAT = 0, APT_MEDECIN, APT_AMERICAIN, APT_NINJA, APT_VAMPIRE, APT_MAGICIEN, APT_KAMIKAZE, APT_FAUCHEUSE, APT_PHYSICIEN, APT_CAMPEUR, APT_COMMANDO, APT_PRETRE, APT_VICKING, APT_JUNKIE, APT_INDIEN, NUMAPTS};
 
 static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt_vitesse; const char *apt_tete, *apt_nomFR, *apt_nomEN; } aptitudes[NUMAPTS] =
 {
@@ -22,7 +22,7 @@ static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precisio
     { 80,   75,  100,  100, "chapeaux/medic",       "Médecin", "Medic"},        //1
     { 100,  140,  75,  130, "chapeaux/aventurier",  "Américain", "American"},   //2
     { 80,   80,   75,   80, "chapeaux/bandana",     "Ninja", "Ninja"},          //3
-    { 110,  65,  110,  110, "chapeaux/cornes",      "Vampire", "Vampire"},      //4 ---> OK (Regen screen ?)
+    { 110,  65,  110,  110, "chapeaux/cornes",      "Vampire", "Vampire"},      //4
     { 95,   75,   90,  100, "chapeaux/magicien",    "Magicien", "Magician"},    //5
     { 100,  100,  80,   70, "chapeaux/japonais",    "Kamikaze", "Kamikaze"},    //6
     { 100,  80,   90,  110, "chapeaux/crane",       "Faucheuse", "Reaper"},     //7
@@ -32,6 +32,7 @@ static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precisio
     {  80,  105,  80,   90, "chapeaux/saint",       "Prêtre", "Priest"},        //11
     { 100,  120,  60,  115, "chapeaux/viking",      "Viking", "Viking"},        //12
     { 100,  110,  85,  120, "chapeaux/champignon",  "Junkie", "Junkie"},        //13
+    { 100,  100,  75,  100, "chapeaux/indien",      "Shoshone", "Shoshone"},    //14
 };
 
 //Définition des boucliers

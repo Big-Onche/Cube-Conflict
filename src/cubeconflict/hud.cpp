@@ -260,18 +260,18 @@ namespace game
             decal_icon += 130;
         }
 
-        if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE)
+        if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_INDIEN)
         {
             settexture("media/interface/hud/mana.png");
             bgquad(15, h-260, 115, 115);
             decal_icon += 130;
         }
 
-        if(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE)
+        if(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_INDIEN)
         {
             float positionsorts = 0.5f*(w - 100);
             int neededdata = 0;
-            switch(d->aptitude) {case APT_PHYSICIEN: neededdata++; break; case APT_PRETRE: neededdata+=2;}
+            switch(d->aptitude) {case APT_PHYSICIEN: neededdata++; break; case APT_PRETRE: neededdata+=2; break; case APT_INDIEN: neededdata+=3; }
 
             if(d->aptisort1) gle::colorf(2, 2, 2, 1);
             else if(d->mana<sorts[neededdata].mana1 || !d->sort1pret) gle::colorf(0.2, 0.2, 0.2, 1);
@@ -330,7 +330,7 @@ namespace game
         if(d->armour > 0) draw_textf("%d", 370, h-103, d->armour < 9 ? 1 : d->armour/10);
 
 
-        if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE) {draw_textf("%d", 135, h-233-decal_number, d->mana); decal_number +=130;}
+        if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_INDIEN) {draw_textf("%d", 135, h-233-decal_number, d->mana); decal_number +=130;}
         if(player1->crouching && player1->aptitude==9) decal_number +=130;
         if(player1->ragemillis) {draw_textf("%d", 135, h-233-decal_number, d->ragemillis/1000); decal_number +=130;}
         if(player1->steromillis) {draw_textf("%d", 135, h-233-decal_number, d->steromillis/1000); decal_number +=130;}

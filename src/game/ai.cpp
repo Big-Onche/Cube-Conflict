@@ -110,6 +110,7 @@ namespace ai
     bool targetable(gameent *d, gameent *e)
     {
         if(d == e) return false;
+        switch(rnd(50)) {case 0: if(e->aptitude==APT_PHYSICIEN && e->aptisort2>0) return false;}
         return e->state == CS_ALIVE && !isteam(d->team, e->team);
     }
 
@@ -495,7 +496,7 @@ namespace ai
                 if(d->mana>40 && d->aptitude==APT_PRETRE && d->health<=300) aptitude(d, 1);
                 break;
             case I_MANA:
-                if(d->mana < 101 && d->aptitude!=APT_VAMPIRE) score = 1e6f;
+                if(d->mana < 101 && d->aptitude!=APT_VAMPIRE) score = 1e5f;
                 else if (d->aptitude==APT_VAMPIRE) score = d->health < 500 ? 1e7f : d->health < 800 ? 1e5f : 1e3f;
                 break;
             case I_BOUCLIERBOIS:
@@ -1117,7 +1118,10 @@ namespace ai
                 if(targetable(d, f))
                 {
                     if(!enemyok) violence(d, b, f);
-                    switch(rnd(2)) {case 0: if(d->aptitude==APT_PRETRE && d->mana>=70) aptitude(d, 3); }
+                    switch(rnd(2))
+                    {
+                        case 0: if(d->aptitude==APT_PRETRE || d->aptitude==APT_INDIEN) {if(d->mana>70) aptitude(d, 3);}
+                    }
                     enemyok = true;
                     e = f;
                 }
@@ -1363,7 +1367,7 @@ namespace ai
             if(!intermission)
             {
                 if(d->ragdoll) cleanragdoll(d); // RAGRAG
-                moveplayer(d, 10, true, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptisort3, d->armourtype==A_ASSIST && d->armour>0 ? true : false);
+                moveplayer(d, 10, true, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptitude==APT_INDIEN ? d->aptisort2 : d->aptisort3, d->armourtype==A_ASSIST && d->armour>0 ? true : false);
                 if(allowmove && !b.idle) timeouts(d, b);
 				entities::checkitems(d);
 				if(cmode) cmode->checkitems(d);
@@ -1425,13 +1429,13 @@ namespace ai
                 c.idle = 0;
 
                 if(d->health<250+d->skill*2 && d->aptitude==APT_MAGICIEN && d->mana>=60) aptitude(d, 3);
+                if(d->health<250+d->skill*2 && d->aptitude==APT_INDIEN && d->mana>=50) aptitude(d, 1);
+
                 if(d->aptitude==APT_PHYSICIEN)
                 {
                         switch(rnd(50)) {case 0: if(d->mana>70) aptitude(d, 3);}
                         if(d->health<250+d->skill*2 && d->armour<50 && d->mana>=25) aptitude(d, 1);
                 }
-
-
 
                 switch(c.type)
                 {
@@ -1439,7 +1443,11 @@ namespace ai
                         result = dowait(d, c);
                         if(d->health>80 && !d->steromillis && !d->epomillis && !d->champimillis && !d->attacking) switch(rnd(300)){case 0: bottaunt(d);}
                         break;
-                    case AI_S_DEFEND: result = dodefend(d, c); break;
+                    case AI_S_DEFEND: result = dodefend(d, c);
+                    {
+                        if(d->aptitude==APT_INDIEN && d->mana>99) aptitude(d, 2);
+                        break;
+                    }
                     case AI_S_PURSUE: result = dopursue(d, c);
                     {
                         if((d->mana>80 || d->mana<60)&& d->aptitude==APT_MAGICIEN) aptitude(d, 1);
@@ -1447,7 +1455,11 @@ namespace ai
                         if(d->mana>30 && d->health<500+d->skill && d->aptitude==APT_PRETRE) aptitude(d, 2);
                         break;
                     }
-                    case AI_S_INTEREST: result = dointerest(d, c); break;
+                    case AI_S_INTEREST: result = dointerest(d, c);
+                    {
+                        if(d->aptitude==APT_INDIEN && d->mana>125) aptitude(d, 2);
+                        break;
+                    }
                     default: result = 0; break;
                 }
                 if(result <= 0)

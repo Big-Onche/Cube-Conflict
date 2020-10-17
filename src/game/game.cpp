@@ -9,7 +9,7 @@ bool suicided;
 
 namespace game
 {
-    VARFP(player1_aptitude, 0, 0, 13,
+    VARFP(player1_aptitude, 0, 0, 14,
     {
         if(player1->state != CS_DEAD && isconnected())
         {
@@ -207,7 +207,7 @@ namespace game
         d->roll = d->newroll;
         if(move)
         {
-            moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptisort3, d->armourtype==A_ASSIST && d->armour>0 ? true : false);
+            moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptitude==APT_INDIEN ? d->aptisort2 : d->aptisort3, d->armourtype==A_ASSIST && d->armour>0 ? true : false);
             d->newpos = d->o;
         }
         float k = 1.0f - float(lastmillis - d->smoothmillis)/smoothmove;
@@ -294,7 +294,7 @@ namespace game
                 }
             }
 
-            if(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE) updatespecials(d);
+            if(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_INDIEN) updatespecials(d);
 
             if(d == player1 || d->ai) continue;
             if(d->state==CS_DEAD && d->ragdoll) moveragdoll(d);
@@ -310,9 +310,9 @@ namespace game
             {
                 crouchplayer(d, 10, false);
                 if(smoothmove && d->smoothmillis>0) predictplayer(d, true);
-                else moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptisort3, d->armourtype==A_ASSIST && d->armour>0 ? true : false);
+                else moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptitude==APT_INDIEN ? d->aptisort2 : d->aptisort3, d->armourtype==A_ASSIST && d->armour>0 ? true : false);
             }
-            else if(d->state==CS_DEAD && !d->ragdoll && lastmillis-d->lastpain<2000) moveplayer(d, 1, true, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptisort3, false);
+            else if(d->state==CS_DEAD && !d->ragdoll && lastmillis-d->lastpain<2000) moveplayer(d, 1, true, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptitude==APT_INDIEN ? d->aptisort2 : d->aptisort3, false);
         }
     }
 
@@ -360,7 +360,7 @@ namespace game
             isalive = 1;
             if(player1->steromillis || player1->epomillis || player1->jointmillis || player1->champimillis) entities::checkboosts(curtime, player1);
             if(player1->ragemillis || player1->vampimillis || player1->aptisort1 || player1->aptisort2 || player1->aptisort3) entities::checkaptiskill(curtime, player1);
-            if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE) updatespecials(player1);
+            if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_INDIEN) updatespecials(player1);
 
             loopv(players)
             {
@@ -409,7 +409,7 @@ namespace game
             {
                 if(player1->ragdoll) cleanragdoll(player1);
                 crouchplayer(player1, 10, true);
-                moveplayer(player1, 10, true, player1->epomillis, player1->jointmillis, player1->aptitude, player1->aptitude==APT_MAGICIEN ? player1->aptisort1 : player1->aptisort3, player1->armourtype==A_ASSIST && player1->armour>0 ? true : false);
+                moveplayer(player1, 10, true, player1->epomillis, player1->jointmillis, player1->aptitude, player1->aptitude==APT_MAGICIEN ? player1->aptisort1 : player1->aptitude==APT_INDIEN ? player1->aptisort2 : player1->aptisort3, player1->armourtype==A_ASSIST && player1->armour>0 ? true : false);
                 swayhudgun(curtime);
                 entities::checkitems(player1);
                 if(cmode) cmode->checkitems(player1);

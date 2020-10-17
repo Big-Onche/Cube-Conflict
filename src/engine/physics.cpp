@@ -1806,6 +1806,7 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
     if(aptisort && aptitude==APT_PHYSICIEN && pl->type==ENT_PLAYER) floating = true;
 
     float classespeed = aptitudes[aptitude].apt_vitesse*10.f;
+    if(aptitude==APT_INDIEN && aptisort>0) {classespeed = 750.f;}
 
     float secs;
     if(epomillis>0) secs = (curtime/(classespeed-(epomillis/(aptitude==13 ? 75 : 100))));
