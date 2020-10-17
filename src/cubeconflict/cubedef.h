@@ -16,23 +16,23 @@
 
 enum {APT_SOLDAT = 0, APT_MEDECIN, APT_AMERICAIN, APT_NINJA, APT_VAMPIRE, APT_MAGICIEN, APT_KAMIKAZE, APT_FAUCHEUSE, APT_PHYSICIEN, APT_CAMPEUR, APT_COMMANDO, APT_PRETRE, APT_VICKING, APT_JUNKIE, APT_INDIEN, NUMAPTS};
 
-static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt_vitesse; const char *apt_tete, *apt_nomFR, *apt_nomEN; } aptitudes[NUMAPTS] =
+static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt_vitesse; const char *apt_tete, *apt_nomFR, *apt_nomEN, *apt_logo; } aptitudes[NUMAPTS] =
 {
-    { 105,  105, 105,   95, "chapeaux/casquette",   "Soldat", "Soldier"},       //0
-    { 80,   75,  100,  100, "chapeaux/medic",       "Médecin", "Medic"},        //1
-    { 100,  140,  75,  130, "chapeaux/aventurier",  "Américain", "American"},   //2
-    { 80,   80,   75,   80, "chapeaux/bandana",     "Ninja", "Ninja"},          //3
-    { 110,  65,  110,  110, "chapeaux/cornes",      "Vampire", "Vampire"},      //4
-    { 95,   75,   90,  100, "chapeaux/magicien",    "Magicien", "Magician"},    //5
-    { 100,  100,  80,   70, "chapeaux/japonais",    "Kamikaze", "Kamikaze"},    //6
-    { 100,  80,   90,  110, "chapeaux/crane",       "Faucheuse", "Reaper"},     //7
-    { 90,   80,   80,  110, "chapeaux/graduation",  "Physicien", "Physicist"},  //8
-    { 100,  60,  125,  150, "chapeaux/tente",       "Campeur", "Camper"},       //9
-    { 115,  115, 115,   85, "chapeaux/kepi",        "Commando", "Commando"},    //10
-    {  80,  105,  80,   90, "chapeaux/saint",       "Prêtre", "Priest"},        //11
-    { 100,  120,  60,  115, "chapeaux/viking",      "Viking", "Viking"},        //12
-    { 100,  110,  85,  120, "chapeaux/champignon",  "Junkie", "Junkie"},        //13
-    { 100,  100,  75,  100, "chapeaux/indien",      "Shoshone", "Shoshone"},    //14
+    { 105,  105, 105,   95, "chapeaux/casquette",   "Soldat",       "Soldier",      "media/interface/hud/soldat.jpg"},     //0
+    { 80,   75,  100,  100, "chapeaux/medic",       "Médecin",      "Medic",        "media/interface/hud/medecin.jpg"},    //1
+    { 100,  140,  75,  130, "chapeaux/aventurier",  "Américain",    "American",     "media/interface/hud/americain.jpg"},  //2
+    { 80,   80,   75,   80, "chapeaux/bandana",     "Ninja",        "Ninja",        "media/interface/hud/ninja.jpg"},      //3
+    { 110,  65,  110,  110, "chapeaux/cornes",      "Vampire",      "Vampire",      "media/interface/hud/vampire.jpg"},    //4
+    { 95,   75,   90,  100, "chapeaux/magicien",    "Magicien",     "Magician",     "media/interface/hud/magicien.jpg"},   //5
+    { 100,  100,  80,   70, "chapeaux/japonais",    "Kamikaze",     "Kamikaze",     "media/interface/hud/kamikaze.jpg"},   //6
+    { 100,  80,   90,  110, "chapeaux/crane",       "Faucheuse",    "Reaper",       "media/interface/hud/faucheuse.jpg"},  //7
+    { 90,   80,   80,  110, "chapeaux/graduation",  "Physicien",    "Physicist",    "media/interface/hud/physicien.jpg"},  //8
+    { 100,  60,  125,  150, "chapeaux/tente",       "Campeur",      "Camper",       "media/interface/hud/campeur.jpg"},    //9
+    { 115,  115, 115,   85, "chapeaux/kepi",        "Commando",     "Commando",     "media/interface/hud/commando.jpg"},   //10
+    {  80,  105,  80,   90, "chapeaux/saint",       "Prêtre",       "Priest",       "media/interface/hud/pretre.jpg"},     //11
+    { 100,  120,  60,  115, "chapeaux/viking",      "Viking",       "Viking",       "media/interface/hud/viking.jpg"},     //12
+    { 100,  110,  85,  120, "chapeaux/champignon",  "Junkie",       "Junkie",       "media/interface/hud/dealer.png"},     //13
+    { 100,  100,  75,  100, "chapeaux/indien",      "Shoshone",     "Shoshone",     "media/interface/hud/indien.jpg"},     //14
 };
 
 //Définition des boucliers

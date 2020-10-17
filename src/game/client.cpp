@@ -311,10 +311,24 @@ namespace game
     }
     ICOMMAND(getclientname, "i", (int *cn), result(getclientname(*cn)));
 
-    ICOMMAND(getclientcolorname, "i", (int *cn),
+    const char *getclientaptilogo(int cn)
+    {
+        gameent *d = getclient(cn);
+        return aptitudes[d->aptitude].apt_logo;
+    }
+    ICOMMAND(getclientaptilogo, "i", (int *cn), result(getclientaptilogo(*cn)));
+
+    ICOMMAND(getclientcolornameR, "i", (int *cn),
     {
         gameent *d = getclient(*cn);
-        defformatstring(pseudo_aptitude, "%s \f4(%s)", colorname(d), langage ? aptitudes[d->aptitude].apt_nomEN : aptitudes[d->aptitude].apt_nomFR);
+        defformatstring(pseudo_aptitude, "%s   ", colorname(d));
+        if(d) result(pseudo_aptitude);
+    });
+
+    ICOMMAND(getclientcolornameL, "i", (int *cn),
+    {
+        gameent *d = getclient(*cn);
+        defformatstring(pseudo_aptitude, "   %s", colorname(d));
         if(d) result(pseudo_aptitude);
     });
 
