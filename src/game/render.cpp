@@ -480,6 +480,8 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
                         particle_meter(d->abovehead().add(vec(0,0,4)), d->health/1000.0f, PART_METER, 0.5f, (static_cast<unsigned char>((100-d->health/10)*2.55) << 16) | (static_cast<unsigned char>(d->health/10*2.55) << 8), 2.5f);
                     }
                 }
+                if((player1->aptitude==APT_JUNKIE && team==1)&&(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_INDIEN))
+                    particle_meter(d->abovehead().add(vec(0,0,4)), d->mana/150.0f, PART_METER, 0.5f, 0xFF00FF, 2.5f);
                 if(d->aptitude==APT_MAGICIEN)
                 {
                     vec pos = d->abovehead().add(vec(0, 0,-12));

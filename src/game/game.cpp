@@ -292,6 +292,28 @@ namespace game
                         }
                     }
                 }
+                else if(players[i]->aptitude==APT_JUNKIE)
+                {
+                    gameent *h = players[i];
+                    loopv(players)
+                    {
+                        gameent *r = players[i];
+                        if((r->o.dist(h->o)/18.f<6 && r->mana<150 && isteam(h->team, r->team) && r->state==CS_ALIVE)&&(r->aptitude==APT_INDIEN || r->aptitude==APT_MAGICIEN || r->aptitude==APT_PRETRE || r->aptitude==APT_PHYSICIEN))
+                        {
+                            switch(rnd(70))
+                            {
+                                case 0:
+                                r->mana+=3;
+                                vec irays(r->o);
+                                irays.sub(h->o);
+                                irays.normalize().mul(1300.0f);
+                                particle_flying_flare(h->o, irays, 400, PART_SPARK, 0xFF00FF, 0.5f+rnd(3), 100);
+                                if(r->mana>150) r->mana=150;
+                                playsound(S_REGENJUNKIE, &r->o, 0, 0, 0 , 50, -1, 125);
+                            }
+                        }
+                    }
+                }
             }
 
             if(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_INDIEN) updatespecials(d);
@@ -381,6 +403,27 @@ namespace game
                                 particle_flying_flare(h->o, irays, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
                                 if(players[i]->health>players[i]->maxhealth+200) players[i]->health=players[i]->maxhealth+200;
                                 playsound(S_REGENMEDIGUN, &h->o, 0, 0, 0 , 50, -1, 125);
+                            }
+                        }
+                    }
+                }
+                else if(players[i]->aptitude==APT_JUNKIE)
+                {
+                    gameent *h = players[i];
+                    loopv(players)
+                    {
+                        if((players[i]->o.dist(h->o)/18.f<6 && players[i]->mana<150 && isteam(h->team, players[i]->team) && h->state==CS_ALIVE) && (players[i]->aptitude==APT_INDIEN || players[i]->aptitude==APT_MAGICIEN || players[i]->aptitude==APT_PRETRE || players[i]->aptitude==APT_PHYSICIEN))
+                        {
+                            switch(rnd(70))
+                            {
+                                case 0:
+                                players[i]->mana+=3;
+                                vec irays(players[i]->o);
+                                irays.sub(h->o);
+                                irays.normalize().mul(1300.0f);
+                                particle_flying_flare(h->o, irays, 400, PART_SPARK, 0xFF00FF, 0.5f+rnd(3), 100);
+                                if(players[i]->mana>150) players[i]->mana=150;
+                                playsound(S_REGENJUNKIE, &h->o, 0, 0, 0 , 50, -1, 125);
                             }
                         }
                     }
