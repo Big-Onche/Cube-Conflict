@@ -808,7 +808,7 @@ struct gameent : dynent, gamestate
     void stopsortsound(gameent *d)
     {
         int neededdata = 0;
-        switch(d->aptitude) {case 8: neededdata++; break; case 11: neededdata+=2;}
+        switch(d->aptitude) {case 8: neededdata++; break; case 11: neededdata+=2; case 14: neededdata+=3;}
         if(sortchan >= 0) stopsound(d->aptisort1 ? sorts[neededdata].sound1 : d->aptisort2 ? sorts[neededdata].sound2 : sorts[neededdata].sound3, sortchan, 50);
         sortchan = -1;
     }
