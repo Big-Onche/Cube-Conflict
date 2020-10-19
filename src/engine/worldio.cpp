@@ -3,6 +3,25 @@
 #include "engine.h"
 #include "cubedef.h"
 
+void validmapname(char *dst, const char *src, const char *prefix = NULL, const char *alt = "untitled", size_t maxlen = 100)
+{
+    if(prefix) while(*prefix) *dst++ = *prefix++;
+    const char *start = dst;
+    if(src) loopi(maxlen)
+    {
+        char c = *src++;
+        if(iscubealnum(c) || c == '_' || c == '-' || c == '/' || c == '\\') *dst++ = c;
+        else break;
+    }
+    if(dst > start) *dst = '\0';
+    else if(dst != alt) copystring(dst, alt, maxlen);
+}
+
+void fixmapname(char *name)
+{
+    validmapname(name, name, NULL, "");
+}
+
 static void fixent(entity &e, int version)
 {
     if(version <= 0)
@@ -25,7 +44,7 @@ static bool loadmapheader(stream *f, const char *ogzname, mapheader &hdr, octahe
     }
     else if(!memcmp(hdr.magic, "OCTA", 4))
     {
-        //if(hdr.version!=OCTAVERSION) { conoutf(CON_ERROR, "map %s uses an unsupported map format version", ogzname); return false; }
+        if(hdr.version!=OCTAVERSION) { conoutf(CON_ERROR, "map %s uses an unsupported map format version", ogzname); return false; }
         if(f->read(&ohdr.worldsize, 7*sizeof(int)) != 7*sizeof(int)) { conoutf(CON_ERROR, "map %s has malformatted header", ogzname); return false; }
         lilswap(&ohdr.worldsize, 7);
         if(ohdr.worldsize <= 0|| ohdr.numents < 0) { conoutf(CON_ERROR, "map %s has malformatted header", ogzname); return false; }
@@ -46,7 +65,9 @@ static bool loadmapheader(stream *f, const char *ogzname, mapheader &hdr, octahe
 
 bool loadents(const char *fname, vector<entity> &ents, uint *crc)
 {
-    defformatstring(ogzname, "media/map/%s.ogz", fname);
+    string name;
+    validmapname(name, fname);
+    defformatstring(ogzname, "media/map/%s.ogz", name);
     path(ogzname);
     stream *f = opengzfile(ogzname, "rb");
     if(!f) return false;
@@ -118,40 +139,43 @@ bool loadents(const char *fname, vector<entity> &ents, uint *crc)
 string ogzname, bakname, cfgname, ambname, picname;
 
 VARP(savebak, 0, 2, 2);
-VARR(randomambience, 0, 1, 1); // CubeConflict, ambiances aléatoires
+VARR(randomambience, 0, 1, 1);
 
 void setmapfilenames(const char *fname, const char *cname = NULL)
 {
-    formatstring(ogzname, "media/map/%s.ogz", fname);
-    if(savebak==1) formatstring(bakname, "media/map/%s.BAK", fname);
+    string name;
+    validmapname(name, fname);
+    formatstring(ogzname, "media/map/%s.ogz", name);
+    formatstring(picname, "media/map/%s.png", name);
+    if(savebak==1) formatstring(bakname, "media/map/%s.BAK", name);
     else
     {
         string baktime;
         time_t t = time(NULL);
         size_t len = strftime(baktime, sizeof(baktime), "%Y-%m-%d_%H.%M.%S", localtime(&t));
         baktime[min(len, sizeof(baktime)-1)] = '\0';
-        formatstring(bakname, "media/map/%s_%s.BAK", fname, baktime);
+        formatstring(bakname, "media/map/%s_%s.BAK", name, baktime);
     }
+
     formatstring(cfgname, "media/map/%s.cfg", cname ? cname : fname);
     formatstring(picname, "media/map/%s.png", fname);
 
-    if(n_ambiance == 0) n_ambiance = rnd(7)+1; //Cube Conflict, amabiances aléatoires
+    if(n_ambiance == 0) n_ambiance = rnd(7)+1;
     if(randomambience) formatstring(ambname, "config/ambiances/ambiance_%d.cfg", n_ambiance);
 
     path(ogzname);
     path(bakname);
     path(cfgname);
-    path(ambname); //Cube Conflict
+    path(ambname);
     path(picname);
 }
 
 void mapcfgname()
 {
     const char *mname = game::getclientmap();
-    if(!*mname) mname = "untitled";
-
-    defformatstring(cfgname, "media/map/%s.cfg", mname);
-
+    string name;
+    validmapname(name, mname);
+    defformatstring(cfgname, "media/map/%s.cfg", name);
     path(cfgname);
     result(cfgname);
 }
@@ -182,7 +206,7 @@ static int savemapprogress = 0;
 
 void savec(cube *c, const ivec &o, int size, stream *f, bool nolms)
 {
-    if((savemapprogress++&0xFFF)==0) renderprogress(float(savemapprogress)/allocnodes, "Sauvegarde du terrain...");
+    if((savemapprogress++&0xFFF)==0) renderprogress(float(savemapprogress)/allocnodes, "saving octree...");
 
     loopi(8)
     {
@@ -572,7 +596,7 @@ bool save_world(const char *mname, bool nolms)
     setmapfilenames(*mname ? mname : "untitled");
     if(savebak) backup(ogzname, bakname);
     stream *f = opengzfile(ogzname, "wb");
-    if(!f) { conoutf(CON_WARN, "Impossible de sauvegarder la map sous le nom %s", ogzname); return false; }
+    if(!f) { conoutf(CON_WARN, "could not write map to %s", ogzname); return false; }
 
     int numvslots = vslots.length();
     if(!nolms && !multiplayer(false))
@@ -582,7 +606,7 @@ bool save_world(const char *mname, bool nolms)
     }
 
     savemapprogress = 0;
-    renderprogress(0, "Sauvegarde de la map...");
+    renderprogress(0, "saving map...");
 
     mapheader hdr;
     memcpy(hdr.magic, "TMAP", 4);
@@ -629,7 +653,7 @@ bool save_world(const char *mname, bool nolms)
         }
     });
 
-    if(dbgvars) conoutf(CON_DEBUG, "%d variables écrites", hdr.numvars);
+    if(dbgvars) conoutf(CON_DEBUG, "wrote %d vars", hdr.numvars);
 
     f->putchar((int)strlen(game::gameident()));
     f->write(game::gameident(), (int)strlen(game::gameident())+1);
@@ -658,17 +682,17 @@ bool save_world(const char *mname, bool nolms)
 
     savevslots(f, numvslots);
 
-    renderprogress(0, "Sauvegarde du terrain...");
+    renderprogress(0, "saving octree...");
     savec(worldroot, ivec(0, 0, 0), worldsize>>1, f, nolms);
 
     if(!nolms)
     {
-        if(getnumviewcells()>0) { renderprogress(0, "Sauvegarde du PVS..."); savepvs(f); }
+        if(getnumviewcells()>0) { renderprogress(0, "saving pvs..."); savepvs(f); }
     }
-    if(shouldsaveblendmap()) { renderprogress(0, "Sauvegarde des transitions de textures..."); saveblendmap(f); }
+    if(shouldsaveblendmap()) { renderprogress(0, "saving blendmap..."); saveblendmap(f); }
 
     delete f;
-    conoutf("Map sauvegardée sous le nom %s", ogzname);
+    conoutf("wrote map file %s", ogzname);
     return true;
 }
 
@@ -679,11 +703,11 @@ void clearmapcrc() { mapcrc = 0; }
 
 bool load_world(const char *mname, const char *cname)        // still supports all map formats that have existed since the earliest cube betas!
 {
-    musicmanager(8, true); //Cubeconflict
+    musicmanager(8, true);
     int loadingstart = SDL_GetTicks();
     setmapfilenames(mname, cname);
     stream *f = opengzfile(ogzname, "rb");
-    if(!f) { conoutf(CON_ERROR, "Impossible de charger la map : %s", ogzname); return false; }
+    if(!f) { conoutf(CON_ERROR, "could not read map %s", ogzname); return false; }
 
     mapheader hdr;
     octaheader ohdr;
@@ -829,9 +853,8 @@ bool load_world(const char *mname, const char *cname)        // still supports a
 
     renderprogress(0, "big bang...");
     loadvslots(f, hdr.numvslots);
-
-    renderprogress(0, "big bang...");
     bool failed = false;
+
     worldroot = loadchildren(f, ivec(0, 0, 0), hdr.worldsize>>1, failed);
     if(failed) conoutf(CON_ERROR, "garbage in map");
 
@@ -860,14 +883,12 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     mapcrc = f->getcrc();
     delete f;
 
-    conoutf("Map chargée : %s (%.1f secondes)", ogzname, (SDL_GetTicks()-loadingstart)/1000.0f);
-
     clearmainmenu();
 
     identflags |= IDF_OVERRIDDEN;
     execfile("config/default_map_settings.cfg", false);
     execfile(cfgname, false);
-    if(randomambience) execfile(ambname, false);  //Cube Conflict, amabiances aléatoires
+    if(randomambience) execfile(ambname, false);
     identflags &= ~IDF_OVERRIDDEN;
 
     preloadusedmapmodels(true);
@@ -883,10 +904,7 @@ bool load_world(const char *mname, const char *cname)        // still supports a
 
     renderbackground(langage ? "Loading..." : "Chargement...", mapshot, mname, game::getmapinfo(), game::getastuce());
 
-    //if(maptitle[0] && strcmp(maptitle, "Untitled Map by Unknown")) conoutf(CON_ECHO, "%s", maptitle);
-
     startmap(cname ? cname : mname);
-    //stopmusic(); //CubeConflict, stoppe la musique de chargement
     musicmanager(randomambience==0 ? n_map : n_ambiance, randomambience==0 ? true : false);
     return true;
 }

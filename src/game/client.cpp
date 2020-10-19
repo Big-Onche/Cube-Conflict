@@ -84,7 +84,7 @@ namespace game
     {
         if(d->state != CS_ALIVE && d->state != CS_DEAD) return;
         float scale = calcradarscale();
-        setbliptex(d->team!=player1->team ? 2 : 1, d->state == CS_DEAD ? "_dead" : "_alive");
+        setbliptex(d->team, d->state == CS_DEAD ? "_dead" : "_alive");
         gle::defvertex(2);
         gle::deftexcoord0();
         gle::begin(GL_QUADS);
@@ -104,7 +104,7 @@ namespace game
             {
                 if(!alive++)
                 {
-                    setbliptex(d->team!=player1->team ? 2 : 1, "_alive");
+                    setbliptex(d->team, "_alive");
                     gle::defvertex(2);
                     gle::deftexcoord0();
                     gle::begin(GL_QUADS);
@@ -120,7 +120,7 @@ namespace game
             {
                 if(!dead++)
                 {
-                    setbliptex(d->team!=player1->team ? 2 : 1, "_dead");
+                    setbliptex(d->team, "_dead");
                     gle::defvertex(2);
                     gle::deftexcoord0();
                     gle::begin(GL_QUADS);
@@ -587,6 +587,8 @@ namespace game
     ICOMMAND(sauth, "", (), if(servauth[0]) tryauth(servauth));
     ICOMMAND(dauth, "s", (char *desc), if(desc[0]) tryauth(desc));
 
+    ICOMMAND(getservauth, "", (), result(servauth));
+
     void togglespectator(int val, const char *who)
     {
         int i = who[0] ? parseplayer(who) : player1->clientnum;
@@ -596,9 +598,8 @@ namespace game
 
     ICOMMAND(checkmaps, "", (), addmsg(N_CHECKMAPS, "r"));
 
+    int gamemode = INT_MAX, nextmode = INT_MAX;
     string clientmap = "";
-
-    int gamemode, nextmode;
 
     void changemapserv(const char *name, int mode)        // forced map change from the server
     {
@@ -659,19 +660,17 @@ namespace game
 
     ICOMMANDS("m_ctf", "i", (int *mode), { int gamemode = *mode; intret(m_ctf); });
     ICOMMANDS("m_teammode", "i", (int *mode), { int gamemode = *mode; intret(m_teammode); });
-    ICOMMANDS("m_random", "i", (int *mode), { int gamemode = *mode; intret(m_random); });
     ICOMMANDS("m_demo", "i", (int *mode), { int gamemode = *mode; intret(m_demo); });
     ICOMMANDS("m_edit", "i", (int *mode), { int gamemode = *mode; intret(m_edit); });
     ICOMMANDS("m_lobby", "i", (int *mode), { int gamemode = *mode; intret(m_lobby); });
     ICOMMANDS("m_timed", "i", (int *mode), { int gamemode = *mode; intret(m_timed); });
-
 
     void changemap(const char *name, int mode) // request map change, server may ignore
     {
         if(!remote)
         {
             server::forcemap(name, mode);
-            if(!connected) localconnect();
+            if(!isconnected()) localconnect();
         }
         else if(player1->state!=CS_SPECTATOR || player1->privilege) addmsg(N_MAPVOTE, "rsi", name, mode);
     }
@@ -1021,11 +1020,14 @@ namespace game
         }
     }
 
-    void toserver(char *text) { conoutf(CON_CHAT, "%s:%s %s", colorname(player1), teamtextcode[0], text); addmsg(N_TEXT, "rcs", player1, text); }
     VARP(teamcolorchat, 0, 1, 1);
     const char *chatcolorname(gameent *d) { return teamcolorchat ? teamcolorname(d, NULL) : colorname(d); }
 
+    void toserver(char *text) { conoutf(CON_CHAT, "%s:%s %s", chatcolorname(player1), teamtextcode[0], text); addmsg(N_TEXT, "rcs", player1, text); }
+    COMMANDN(say, toserver, "C");
+
     void sayteam(char *text) { if(!m_teammode || !validteam(player1->team)) return; conoutf(CON_TEAMCHAT, "%s:%s %s", chatcolorname(player1), teamtextcode[player1->team], text); addmsg(N_SAYTEAM, "rcs", player1, text); }
+    COMMAND(sayteam, "C");
 
     ICOMMAND(servcmd, "C", (char *cmd), addmsg(N_SERVCMD, "rs", cmd));
 
@@ -1353,14 +1355,12 @@ namespace game
                 d->aptisort3 = getint(p);
             }
         }
-
         d->lifesequence = getint(p);
         d->health = getint(p);
         d->maxhealth = getint(p);
         d->armour = getint(p);
         d->armourtype = getint(p);
         d->mana = getint(p);
-
         if(resume && d==player1)
         {
             getint(p);
@@ -1375,8 +1375,6 @@ namespace game
     }
 
     extern int deathscore;
-
-    #include "game.h"
 
     void parsemessages(int cn, gameent *d, ucharbuf &p)
     {
@@ -1474,13 +1472,15 @@ namespace game
                 if(!t || isignored(t->clientnum)) break;
                 int team = validteam(t->team) ? t->team : 0;
                 if(t->state!=CS_DEAD && t->state!=CS_SPECTATOR)
-                    particle_textcopy(t->abovehead(), text, PART_TEXT, 2000, player1->team!=t->team ? 2 : 1, 4.0f, -8);
+                    particle_textcopy(t->abovehead(), text, PART_TEXT, 2000, teamtextcolor[team], 4.0f, -8);
                 conoutf(CON_TEAMCHAT, "%s:%s %s", chatcolorname(t), teamtextcode[team], text);
                 break;
             }
 
             case N_MAPCHANGE:
                 getstring(text, p);
+                filtertext(text, text, false);
+                fixmapname(text);
                 changemapserv(text, getint(p));
                 mapchanged = true;
                 if(getint(p)) entities::spawnitems();
@@ -1537,7 +1537,7 @@ namespace game
                 }
                 else                    // new client
                 {
-                    conoutf("\f7%s\f4 vient de rejoindre la partie", colorname(d, text));
+                     conoutf("\f7%s\f4 vient de rejoindre la partie", colorname(d, text));
                     if(needclipboard >= 0) needclipboard++;
                 }
                 copystring(d->name, text, MAXNAMELEN+1);
@@ -1738,16 +1738,16 @@ namespace game
                     health = getint(p),
                     atk = getint(p);
                 gameent *target = getclient(tcn),
-                        *actor = getclient(acn);
+                       *actor = getclient(acn);
                 if(!target || !actor) break;
                 target->armour = armour;
                 target->health = health;
                 if(target->state == CS_ALIVE && actor != player1) target->lastpain = lastmillis;
                 damaged(damage, target, actor, false, atk);
-                //gameent *d = getclient(cn);
                 if(player1->aptitude==12 && target==player1 && actor!=player1) {player1->ragemillis+=damage*5; }
                 break;
             }
+
             case N_VAMPIRE:
             {
                 int acn = getint(p),
@@ -1837,7 +1837,6 @@ namespace game
             {
                 int i = getint(p);
                 if(!entities::ents.inrange(i)) break;
-
                 entities::setspawn(i, true);
                 ai::itemspawned(i);
                 playsound(entities::ents[i]->type==I_SUPERARME ? S_ALARME : S_ITEMSPAWN, &entities::ents[i]->o, NULL, 0, 0, 0, -1, entities::ents[i]->type==I_SUPERARME ? 4000 : 300);
@@ -2137,7 +2136,7 @@ namespace game
                     case I_BOOSTPRECISION: conoutf(CON_GAMEINFO, "\faLES CHAMPIGNONS REPOUSSENT !"); break;
                     case I_BOOSTVITESSE: conoutf(CON_GAMEINFO, "\faL'EPO ARRIVE POUR LES CYCLISTES !"); break;
                     case I_BOOSTGRAVITE: conoutf(CON_GAMEINFO, "\faQUELQU'UN ROULE UN GROS JOINT !"); break;
-                    case I_SUPERARME: conoutf(CON_GAMEINFO, "\faLA SUPER-ARME EST BIENTÔT PRÊTE À ANNIHILER"); break;
+                    case I_SUPERARME: conoutf(CON_GAMEINFO, "\faLA SUPER-ARME EST BIENTÔT PRÊTE Á ANNIHILER"); break;
                     case I_ARMUREASSISTEE: conoutf(CON_GAMEINFO, "\faARMURE ASSISTÉE EN COURS DE DÉPLOIMENT"); break;
                     case 50: conoutf(CON_GAMEINFO, "\faCHANGEMENT D'ARME DANS 5 SECONDES !"); break;
                 }
@@ -2343,7 +2342,7 @@ namespace game
         }
         addmsg(N_GETDEMO, "rii", i, lastdemoreq);
     }
-    ICOMMAND(getdemo, "ss", (char *val, char *name), getdemo(val, name))
+    ICOMMAND(getdemo, "ss", (char *val, char *name), getdemo(val, name));
 
     void listdemos()
     {

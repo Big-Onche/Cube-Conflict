@@ -273,10 +273,10 @@ namespace game
         if(d->state==CS_ALIVE) {d->skeletonfade = 1.0f; d->tombepop = 0.0f;}
         else if(d->state==CS_DEAD)
         {
-            if(d->tombepop<1.0f) d->tombepop += 1.1f/nbfps;
+            if(d->tombepop<1.0f) d->tombepop += 3.f/nbfps;
             rendermodel(customs[d->customtombe].custtombe, ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, flags, NULL, NULL, 0, 0, d->tombepop, vec4(vec::hexcolor(color), 5));
 
-            d->skeletonfade -= 0.9f/nbfps;
+            d->skeletonfade -= 3.f/nbfps;
             if(d->skeletonfade<0.066f) return;
             rendermodel("mapmodel/smileys/mort", ANIM_MAPMODEL, o, d->yaw+90, 0, 0, flags, NULL, NULL, 0, 0, d->skeletonfade);
             return;

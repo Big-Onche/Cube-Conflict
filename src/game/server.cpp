@@ -29,7 +29,7 @@ namespace server
     {
         int type;
         int spawntime;
-        bool spawned;
+        char spawned;
     };
 
     static const int DEATHMILLIS = 300;
@@ -343,13 +343,12 @@ namespace server
         {
             name[0] = 0;
             team = 0;
-            aptitude = 0;
             playermodel = -1;
             playercolor = 0;
-            aptitude = 0;
             customcape = 0;
             customtombe = 0;
             customdanse = 0;
+            aptitude = 0;
             privilege = PRIV_NONE;
             connected = local = false;
             connectauth = 0;
@@ -608,7 +607,7 @@ namespace server
     }
 
     COMMAND(maprotationreset, "");
-            COMMANDN(maprotation, addmaprotations, "ss2V");
+    COMMANDN(maprotation, addmaprotations, "ss2V");
 
     struct demofile
     {
@@ -623,12 +622,9 @@ namespace server
     stream *demotmp = NULL, *demorecord = NULL, *demoplayback = NULL;
     int nextplayback = 0, demomillis = 0;
 
-    VARP(teamkill, 0, 0, 1);
-
     VAR(maxdemos, 0, 5, 25);
-    VAR(maxdemosize, 0, 16, 31);
+    VAR(maxdemosize, 0, 16, 64);
     VAR(restrictdemos, 0, 1, 1);
-    VAR(autorecorddemo, 0, 0, 1);
 
     VAR(restrictpausegame, 0, 1, 1);
     VAR(restrictgamespeed, 0, 1, 1);
@@ -678,6 +674,7 @@ namespace server
         modes.deletearrays();
     }
 
+    VARP(teamkill, 0, 0, 1);
     COMMAND(teamkillkickreset, "");
     COMMANDN(teamkillkick, addteamkillkick, "sii");
 
@@ -815,14 +812,14 @@ namespace server
         return n;
     }
 
-    bool duplicatename(clientinfo *ci, const char *name)
+    bool duplicatename(clientinfo *ci, char *name)
     {
         if(!name) name = ci->name;
         loopv(clients) if(clients[i]!=ci && !strcmp(name, clients[i]->name)) return true;
         return false;
     }
 
-    const char *colorname(clientinfo *ci, const char *name = NULL)
+    const char *colorname(clientinfo *ci, char *name = NULL)
     {
         if(!name) name = ci->name;
         if(name[0] && !duplicatename(ci, name) && ci->state.aitype == AI_NONE) return name;
@@ -872,6 +869,7 @@ namespace server
     servmode *smode = NULL;
 
     bool canspawnitem(int type) { return !m_noitems && (type>=I_RAIL && type<=I_MANA && (!m_noammo || type<I_RAIL || type>I_GLOCK)); }
+
     int spawntime(int type)
     {
         int np = numclients(-1, true, false);
@@ -946,8 +944,6 @@ namespace server
         return best;
     }
 
-    VAR(persistteams, 0, 0, 1);
-
     void autoteam()
     {
         vector<clientinfo *> team[MAXTEAMS];
@@ -971,15 +967,12 @@ namespace server
             if(!selected) break;
             remaining -= selected;
         }
-        loopi(MAXTEAMS)
+        loopi(MAXTEAMS) loopvj(team[i])
         {
-            if(!persistteams) loopvj(team[i])
-            {
-                clientinfo *ci = team[i][j];
-                if(ci->team == 1+i) continue;
-                ci->team = 1+i;
-                sendf(-1, 1, "riiii", N_SETTEAM, ci->clientnum, ci->team, -1);
-            }
+            clientinfo *ci = team[i][j];
+            if(ci->team == 1+i) continue;
+            ci->team = 1+i;
+            sendf(-1, 1, "riiii", N_SETTEAM, ci->clientnum, ci->team, -1);
         }
     }
 
@@ -1144,13 +1137,13 @@ namespace server
         }
     }
 
-    void senddemo(clientinfo *ci, int num, int tag)
+    void senddemo(clientinfo *ci, int num)
     {
         if(ci->getdemo) return;
         if(!num) num = demos.length();
         if(!demos.inrange(num-1)) return;
         demofile &d = demos[num-1];
-        if((ci->getdemo = sendf(ci->clientnum, 2, "riim", N_SENDDEMO, tag, d.len, d.data)))
+        if((ci->getdemo = sendf(ci->clientnum, 2, "rim", N_SENDDEMO, d.len, d.data)))
             ci->getdemo->freeCallback = freegetdemo;
     }
 
@@ -1190,12 +1183,8 @@ namespace server
         demoheader hdr;
         string msg;
         msg[0] = '\0';
-        string file;
-        copystring(file, smapname);
-        int len = strlen(file);
-        if(len < 4 || strcasecmp(&file[len-4], ".dmo")) concatstring(file, ".dmo");
-        if(const char *buf = getdemofile(file, false)) demoplayback = opengzfile(buf, "rb");
-        if(!demoplayback) demoplayback = opengzfile(file, "rb");
+        defformatstring(file, "%s.dmo", smapname);
+        demoplayback = opengzfile(file, "rb");
         if(!demoplayback) formatstring(msg, "could not read demo \"%s\"", file);
         else if(demoplayback->read(&hdr, sizeof(demoheader))!=sizeof(demoheader) || memcmp(hdr.magic, DEMO_MAGIC, sizeof(hdr.magic)))
             formatstring(msg, "\"%s\" is not a demo file", file);
@@ -1339,7 +1328,6 @@ namespace server
         {
             case 'a': case 'A': u.privilege = PRIV_ADMIN; break;
             case 'm': case 'M': default: u.privilege = PRIV_AUTH; break;
-            case 'n': case 'N': u.privilege = PRIV_NONE; break;
         }
     }
     COMMAND(adduser, "ssss");
@@ -1380,7 +1368,10 @@ namespace server
         {
             bool haspass = adminpass[0] && checkpassword(ci, adminpass, pass);
             int wantpriv = ci->local || haspass ? PRIV_ADMIN : authpriv;
-            if(wantpriv <= ci->privilege) return true;
+            if(ci->privilege)
+            {
+                if(wantpriv <= ci->privilege) return true;
+            }
             else if(wantpriv <= PRIV_MASTER && !force)
             {
                 if(ci->state.state==CS_SPECTATOR)
@@ -1422,7 +1413,8 @@ namespace server
         {
             if(authdesc && authdesc[0]) formatstring(msg, "%s claimed %s as '\fs\f5%s\fr' [\fs\f0%s\fr]", colorname(ci), name, authname, authdesc);
             else formatstring(msg, "%s claimed %s as '\fs\f5%s\fr'", colorname(ci), name, authname);
-        }        else formatstring(msg, "%s %s %s", colorname(ci), val ? "claimed" : "relinquished", name);
+        }
+        else formatstring(msg, "%s %s %s", colorname(ci), val ? "claimed" : "relinquished", name);
         packetbuf p(MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
         putint(p, N_SERVMSG);
         sendstring(msg, p);
@@ -1525,8 +1517,14 @@ namespace server
         }
 
         uchar operator[](int msg) const { return msg >= 0 && msg < NUMMSG ? msgmask[msg] : 0; }
-    } msgfilter(-1, N_CONNECT, N_SERVINFO, N_INITCLIENT, N_WELCOME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_VAMPIRE, N_HITPUSH, N_SHOTFX, N_EXPLODEFX, N_DIED, N_IDENTIQUEARME, N_SPAWNSTATE, N_FORCEDEATH, N_TEAMINFO, N_ITEMACC, N_ITEMSPAWN, N_ANNOUNCE, N_TIMEUP, N_CDIS, N_CURRENTMASTER, N_PONG, N_RESUME, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_SENDMAP, N_DROPFLAG, N_SCOREFLAG, N_RETURNFLAG, N_RESETFLAG, N_CLIENT, N_AUTHCHAL, N_INITAI, N_DEMOPACKET, -2, N_CALCLIGHT, N_REMIP, N_NEWMAP, N_GETMAP, N_SENDMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, N_EDITVAR, N_EDITVSLOT, N_UNDO, N_REDO, -4, N_POS, NUMMSG),
-      connectfilter(-1, N_CONNECT, -2, N_AUTHANS, -3, N_PING, NUMMSG);
+
+    } msgfilter(-1, N_CONNECT, N_SERVINFO, N_INITCLIENT, N_WELCOME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_VAMPIRE,
+                N_HITPUSH, N_SHOTFX, N_EXPLODEFX, N_DIED, N_SPAWNSTATE, N_FORCEDEATH, N_TEAMINFO, N_ITEMACC, N_ITEMSPAWN, N_IDENTIQUEARME,
+                N_TIMEUP, N_CDIS, N_CURRENTMASTER, N_PONG, N_RESUME, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_SENDMAP, N_DROPFLAG,
+                N_SCOREFLAG, N_RETURNFLAG, N_RESETFLAG, N_CLIENT, N_AUTHCHAL, N_INITAI, N_DEMOPACKET, -2, N_CALCLIGHT, N_REMIP,
+                N_ANNOUNCE, N_NEWMAP, N_GETMAP, N_SENDMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY,
+                N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, N_EDITVAR, N_EDITVSLOT, N_UNDO, N_REDO, -4, N_POS, NUMMSG),
+                connectfilter(-1, N_CONNECT, -2, N_AUTHANS, -3, N_PING, NUMMSG);
 
     int checktype(int type, clientinfo *ci)
     {
@@ -1931,12 +1929,10 @@ namespace server
                 putint(p, oi->state.aptisort3);
                 sendstate(oi->state, p);
             }
-
             putint(p, -1);
             welcomeinitclient(p, ci ? ci->clientnum : -1);
             if(m_identique) sendf(-1, 1, "ri2", N_IDENTIQUEARME, identiquearme);
         }
-
         if(smode) smode->initclient(ci, p, true);
         return 1;
     }
@@ -1953,7 +1949,7 @@ namespace server
         return false;
     }
 
-    void sendresume(clientinfo *ci) //PARSESTATE
+    void sendresume(clientinfo *ci)
     {
         servstate &gs = ci->state;
         sendf(-1, 1, "ri9i9iiiivi", N_RESUME, ci->clientnum,
@@ -2040,21 +2036,15 @@ namespace server
         }
 
         aiman::changemap();
-        if(multiplayer(false))
-        {
-            int nbjoueurs = numclients(-1, true, false);
-            int nbbots = servjoueursminimum-nbjoueurs;
-            if(nbbots>0) loopi(nbbots) aiman::addai(servbotniveauminimum+rnd(servbotniveaumaximum-servbotniveauminimum), -1);
-        }
 
         if(m_demo)
         {
             if(clients.length()) setupdemoplayback();
         }
-        else
+        else if(demonextmatch)
         {
-            if(demonextmatch) setupdemorecord();
-            demonextmatch = autorecorddemo!=0;
+            demonextmatch = false;
+            setupdemorecord();
         }
 
         if(smode) smode->setup();
@@ -2109,7 +2099,6 @@ namespace server
         loopv(votes) if(!best || votes[i].count > best->count || (votes[i].count == best->count && rnd(2))) best = &votes[i];
         if(force || (best && best->count > maxvotes/2))
         {
-            sendpackets(true);
             if(demorecord) enddemorecord();
             if(best && (best->count > (force ? 1 : maxvotes/2)))
             {
@@ -2155,7 +2144,6 @@ namespace server
         ci->modevote = reqmode;
         if(ci->local || (ci->privilege && mastermode>=MM_VETO))
         {
-            sendpackets(true);
             if(demorecord) enddemorecord();
             if(!ci->local || hasnonlocalclients())
                 sendservmsgf("%s forced %s on map %s", colorname(ci), modeprettyname(ci->modevote), ci->mapvote[0] ? ci->mapvote : "[new map]");
@@ -2168,13 +2156,6 @@ namespace server
         }
     }
 
-    int timerpartie;
-
-    void checkidentique()
-    {
-
-    }
-
     void checkintermission()
     {
         if(gamemillis >= gamelimit && !interm)
@@ -2184,7 +2165,6 @@ namespace server
             changegamespeed(100);
             interm = gamemillis + 10000;
         }
-        if(m_identique) checkidentique();
     }
 
     void startintermission() { gamelimit = min(gamelimit, gamemillis); checkintermission(); }
@@ -2208,7 +2188,7 @@ namespace server
         //Calcul des dommages de base
         damage = (damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[target->aptitude].apt_resistance);
 
-        //Dommages spéciaux d'aptitudes
+        //Dommages spÃ©ciaux d'aptitudes
         switch(actor->aptitude)
         {
             case APT_NINJA: {if(atk==ATK_CAC349_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACMASTER_SHOOT) damage *= 3.0f;} break;
@@ -2218,7 +2198,7 @@ namespace server
             case APT_INDIEN: {if(as.aptisort3) damage *= 1.25f; break;}
         }
 
-        //Absorptions et skills spéciaux d'aptitudes
+        //Absorptions et skills spÃ©ciaux d'aptitudes
         switch(target->aptitude)
         {
             case APT_MAGICIEN: {if(ts.aptisort3) damage = damage/5.0f;} break;
@@ -2247,13 +2227,13 @@ namespace server
         }
         if(ts.health<=0)
         {
-            if(actor->aptitude==APT_FAUCHEUSE && !m_oneshoot) //Augmente la santé maxi de la faucheuse si elle tue un joueur
+            if(actor->aptitude==APT_FAUCHEUSE && !m_oneshoot) //Augmente la santÃ© maxi de la faucheuse si elle tue un joueur
             {
-                if(as.maxhealth >= 1500) as.health = min(as.health+250, as.maxhealth); //Rends juste de la santé si le boost est déjà appliqué
-                if(as.maxhealth < 1500) {as.maxhealth += 500; as.health += 500;} //Augmente la santé max à 150 PV si c'est le premier kill
-                sendresume(actor); //Envoie tout ça au client
+                if(as.maxhealth >= 1500) as.health = min(as.health+250, as.maxhealth); //Rends juste de la santÃ© si le boost est dï¿½jï¿½ appliquï¿½
+                if(as.maxhealth < 1500) {as.maxhealth += 500; as.health += 500;} //Augmente la santÃ© max Ã  150 PV si c'est le premier kill
+                sendresume(actor); //Envoie tout ï¿½a au client
             }
-            else if (target->aptitude==APT_FAUCHEUSE && ts.maxhealth>=1500) { ts.maxhealth = 1000; sendresume(target); } //Si la faucheuse est tué alors la santé redevient normal + envoi au client
+            else if (target->aptitude==APT_FAUCHEUSE && ts.maxhealth>=1500) { ts.maxhealth = 1000; sendresume(target); } //Si la faucheuse est tuï¿½ alors la santï¿½ redevient normal + envoi au client
 
             target->state.deaths++;
             actor->state.killstreak++;
@@ -2358,6 +2338,7 @@ namespace server
         sendf(-1, 1, "ri4x", N_EXPLODEFX, ci->clientnum, atk, id, ci->ownernum);
 
         int nbhits = 0;
+
         loopv(hits)
         {
             hitinfo &h = hits[i];
@@ -2371,7 +2352,6 @@ namespace server
             float damage = attacks[atk].damage*(1-h.dist/EXP_DISTSCALE/attacks[atk].exprad);
             if(gs.steromillis) damage*= ci->aptitude==13 ? 3 : 2;
             if(target==ci) damage /= EXP_SELFDAMDIV;
-
             nbhits++;
             if(damage > 0)
             {
@@ -2504,11 +2484,9 @@ namespace server
             if(curtime>0 && ci->state.jointmillis) ci->state.jointmillis = max(ci->state.jointmillis-curtime, 0);
             if(curtime>0 && ci->state.champimillis) ci->state.champimillis = max(ci->state.champimillis-curtime, 0);
             if(curtime>0 && ci->state.ragemillis) ci->state.ragemillis = max(ci->state.ragemillis-curtime, 0);
-
             if(curtime>0 && ci->state.aptisort1) ci->state.aptisort1 = max(ci->state.aptisort1-curtime, 0);
             if(curtime>0 && ci->state.aptisort2) ci->state.aptisort2 = max(ci->state.aptisort2-curtime, 0);
             if(curtime>0 && ci->state.aptisort3) ci->state.aptisort3 = max(ci->state.aptisort3-curtime, 0);
-
             flushevents(ci, gamemillis);
         }
     }
@@ -2579,7 +2557,6 @@ namespace server
                         }
                     }
                 }
-
                 aiman::checkai();
                 if(smode) smode->update();
             }
@@ -2616,16 +2593,6 @@ namespace server
         shouldstep = clients.length() > 0;
     }
 
-    void forcespectator(clientinfo *ci)
-    {
-        if(ci->state.state==CS_ALIVE) suicide(ci);
-        if(smode) smode->leavegame(ci);
-        ci->state.state = CS_SPECTATOR;
-        ci->state.timeplayed += lastmillis - ci->state.lasttimeplayed;
-        if(!ci->local && (!ci->privilege || ci->warned)) aiman::removeai(ci);
-        sendf(-1, 1, "ri3", N_SPECTATOR, ci->clientnum, 1);
-    }
-
     struct crcinfo
     {
         int crc, matches;
@@ -2635,8 +2602,6 @@ namespace server
 
         static bool compare(const crcinfo &x, const crcinfo &y) { return x.matches > y.matches; }
     };
-
-    VAR(modifiedmapspectator, 0, 1, 2);
 
     void checkmaps(int req = -1)
     {
@@ -2673,7 +2638,8 @@ namespace server
             sendf(req, 1, "ris", N_SERVMSG, msg);
             if(req < 0) ci->warned = true;
         }
-        if(crcs.length() >= 2) loopv(crcs)
+        if(crcs.empty() || crcs.length() < 2) return;
+        loopv(crcs)
         {
             crcinfo &info = crcs[i];
             if(i || info.matches <= crcs[i+1].matches) loopvj(clients)
@@ -2685,28 +2651,6 @@ namespace server
                 if(req < 0) ci->warned = true;
             }
         }
-        if(req < 0 && modifiedmapspectator && (mcrc || modifiedmapspectator > 1)) loopv(clients)
-        {
-            clientinfo *ci = clients[i];
-            if(!ci->local && ci->warned && ci->state.state != CS_SPECTATOR) forcespectator(ci);
-        }
-    }
-
-    bool shouldspectate(clientinfo *ci)
-    {
-        return !ci->local && ci->warned && modifiedmapspectator && (mcrc || modifiedmapspectator > 1);
-    }
-
-    void unspectate(clientinfo *ci)
-    {
-        if(shouldspectate(ci)) return;
-        ci->state.state = CS_DEAD;
-        ci->state.respawn();
-        ci->state.lasttimeplayed = lastmillis;
-        aiman::addclient(ci);
-        sendf(-1, 1, "ri3", N_SPECTATOR, ci->clientnum, 0);
-        if(ci->clientmap[0] || ci->mapcrc) checkmaps();
-        if(!hasmap(ci)) rotatemap(true);
     }
 
     void sendservinfo(clientinfo *ci)
@@ -2772,7 +2716,12 @@ namespace server
 
     int reserveclients() { return 3; }
 
-    vector<ipmask> gbans;
+    struct gbaninfo
+    {
+        enet_uint32 ip, mask;
+    };
+
+    vector<gbaninfo> gbans;
 
     void cleargbans()
     {
@@ -2781,15 +2730,27 @@ namespace server
 
     bool checkgban(uint ip)
     {
-        loopv(gbans) if(gbans[i].check(ip)) return true;
+        loopv(gbans) if((ip & gbans[i].mask) == gbans[i].ip) return true;
         return false;
     }
 
     void addgban(const char *name)
     {
-        ipmask ban;
-        ban.parse(name);
-        gbans.add(ban);
+        union { uchar b[sizeof(enet_uint32)]; enet_uint32 i; } ip, mask;
+        ip.i = 0;
+        mask.i = 0;
+        loopi(4)
+        {
+            char *end = NULL;
+            int n = strtol(name, &end, 10);
+            if(!end) break;
+            if(end > name) { ip.b[i] = n; mask.b[i] = 0xFF; }
+            name = end;
+            while(*name && *name++ != '.');
+        }
+        gbaninfo &ban = gbans.add();
+        ban.ip = ip.i;
+        ban.mask = mask.i;
 
         loopvrev(clients)
         {
@@ -2870,7 +2831,7 @@ namespace server
         ci->cleanauth();
         if(!nextauthreq) nextauthreq = 1;
         ci->authreq = nextauthreq++;
-        filtertext(ci->authname, user, false, false, 100);
+        filtertext(ci->authname, user, false, 100);
         copystring(ci->authdesc, desc);
         if(ci->authdesc[0])
         {
@@ -2954,7 +2915,7 @@ namespace server
             authsucceeded(id);
         else if(sscanf(cmd, "chalauth %u %255s", &id, val) == 2)
             authchallenged(id, val);
-        else if(matchstring(cmd, cmdlen, "cleargbans"))
+        else if(!strncmp(cmd, "cleargbans", cmdlen))
             cleargbans();
         else if(sscanf(cmd, "addgban %100s", val) == 1)
             addgban(val);
@@ -2962,10 +2923,11 @@ namespace server
 
     void receivefile(int sender, uchar *data, int len)
     {
-        if(!m_edit || len <= 0 || len > 4*1024*1024) return;
+        if(!m_edit || len > 4*1024*1024) return;
         clientinfo *ci = getinfo(sender);
         if(ci->state.state==CS_SPECTATOR && !ci->privilege && !ci->local) return;
         if(mapdata) DELETEP(mapdata);
+        if(!len) return;
         mapdata = opentempfile("mapdata", "w+b");
         if(!mapdata) { sendf(sender, 1, "ris", N_SERVMSG, "failed to open temporary file for map"); return; }
         mapdata->write(data, len);
@@ -3032,7 +2994,7 @@ namespace server
                 case N_CONNECT:
                 {
                     getstring(text, p);
-                    filtertext(text, text, false, false, MAXNAMELEN);
+                    filtertext(text, text, false, MAXNAMELEN);
                     if(!text[0]) copystring(text, "Invitay");
                     copystring(ci->name, text, MAXNAMELEN+1);
                     ci->playermodel = getint(p);
@@ -3124,7 +3086,7 @@ namespace server
                 vec pos;
                 loopk(3)
                 {
-                    int n = p.get(); n |= p.get()<<8; if(flags&(1<<k)) { n |= p.get()<<16; if(n&0x800000) n |= ~0U<<24; }
+                    int n = p.get(); n |= p.get()<<8; if(flags&(1<<k)) { n |= p.get()<<16; if(n&0x800000) n |= -1<<24; }
                     pos[k] = n/DMF;
                 }
                 loopk(3) p.get();
@@ -3234,7 +3196,6 @@ namespace server
                 copystring(ci->clientmap, text);
                 ci->mapcrc = text[0] ? crc : 1;
                 checkmaps();
-                if(cq && cq != ci && cq->ownernum != ci->clientnum) cq = NULL;
                 break;
             }
 
@@ -3243,15 +3204,11 @@ namespace server
                 break;
 
             case N_TRYSPAWN:
-                //if(m_battle && gamemillis > 250) return;
-
                 if(!ci || !cq || cq->state.state!=CS_DEAD || cq->state.lastspawn>=0 || (smode && !smode->canspawn(cq))) break;
                 if(!ci->clientmap[0] && !ci->mapcrc)
                 {
                     ci->mapcrc = -1;
                     checkmaps();
-                    if(ci == cq) { if(ci->state.state != CS_DEAD) break; }
-                    else if(cq->ownernum != ci->clientnum) { cq = NULL; break; }
                 }
                 if(cq->state.deadflush)
                 {
@@ -3266,7 +3223,6 @@ namespace server
             {
                 int gunselect = getint(p);
                 if(!cq || cq->state.state!=CS_ALIVE || !validgun(gunselect)) break;
-                cq->state.gunselect = gunselect;
                 QUEUE_AI;
                 QUEUE_MSG;
                 break;
@@ -3275,7 +3231,7 @@ namespace server
             case N_SPAWN:
             {
                 int ls = getint(p), gunselect = getint(p);
-                if(!cq || (cq->state.state!=CS_ALIVE && cq->state.state!=CS_DEAD && cq->state.state!=CS_EDITING) || ls!=cq->state.lifesequence || cq->state.lastspawn<0 || !validgun(gunselect)) break;
+                if(!cq || (cq->state.state!=CS_ALIVE && cq->state.state!=CS_DEAD) || ls!=cq->state.lifesequence || cq->state.lastspawn<0 || !validgun(gunselect)) break;
                 cq->state.lastspawn = -1;
                 cq->state.state = CS_ALIVE;
                 cq->state.gunselect = gunselect;
@@ -3361,7 +3317,7 @@ namespace server
                 QUEUE_AI;
                 QUEUE_MSG;
                 getstring(text, p);
-                filtertext(text, text, true, true);
+                filtertext(text, text);
                 QUEUE_STR(text);
                 if(isdedicatedserver() && cq) logoutf("%s: %s", colorname(cq), text);
                 break;
@@ -3371,7 +3327,6 @@ namespace server
             {
                 getstring(text, p);
                 if(!ci || !cq || (ci->state.state==CS_SPECTATOR && !ci->local && !ci->privilege) || !m_teammode || !validteam(cq->team)) break;
-                filtertext(text, text, true, true);
                 loopv(clients)
                 {
                     clientinfo *t = clients[i];
@@ -3386,7 +3341,7 @@ namespace server
             {
                 QUEUE_MSG;
                 getstring(text, p);
-                filtertext(ci->name, text, false, false, MAXNAMELEN);
+                filtertext(ci->name, text, false, MAXNAMELEN);
                 if(!ci->name[0]) copystring(ci->name, "Invitay");
                 QUEUE_STR(ci->name);
                 break;
@@ -3396,6 +3351,26 @@ namespace server
             {
                 ci->playermodel = getint(p);
                 QUEUE_MSG;
+                break;
+            }
+
+            case N_SWITCHCOLOR:
+            {
+                ci->playercolor = getint(p);
+                QUEUE_MSG;
+                break;
+            }
+
+            case N_SWITCHTEAM:
+            {
+                int team = getint(p);
+                if(m_teammode && validteam(team) && ci->team != team && (!smode || smode->canchangeteam(ci, ci->team, team)))
+                {
+                    if(ci->state.state==CS_ALIVE) suicide(ci);
+                    ci->team = team;
+                    aiman::changeteam(ci);
+                    sendf(-1, 1, "riiii", N_SETTEAM, sender, ci->team, ci->state.state==CS_SPECTATOR ? -1 : 0);
+                }
                 break;
             }
 
@@ -3447,26 +3422,6 @@ namespace server
                 if(!cq) break;
                 cq->state.aptisort3 = getint(p);
                 QUEUE_MSG;
-                break;
-            }
-
-            case N_SWITCHCOLOR:
-            {
-                ci->playercolor = getint(p);
-                QUEUE_MSG;
-                break;
-            }
-
-            case N_SWITCHTEAM:
-            {
-                int team = getint(p);
-                if(m_teammode && validteam(team) && ci->team != team && (!smode || smode->canchangeteam(ci, ci->team, team)))
-                {
-                    if(ci->state.state==CS_ALIVE) suicide(ci);
-                    ci->team = team;
-                    aiman::changeteam(ci);
-                    sendf(-1, 1, "riiii", N_SETTEAM, sender, ci->team, ci->state.state==CS_SPECTATOR ? -1 : 0);
-                }
                 break;
             }
 
@@ -3601,10 +3556,24 @@ namespace server
                 clientinfo *spinfo = (clientinfo *)getclientinfo(spectator); // no bots
                 if(!spinfo || !spinfo->connected || (spinfo->state.state==CS_SPECTATOR ? val : !val)) break;
 
-                if(spinfo->state.state!=CS_SPECTATOR && val) forcespectator(spinfo);
-                else if(spinfo->state.state==CS_SPECTATOR && !val) unspectate(spinfo);
-
-                if(cq && cq != ci && cq->ownernum != ci->clientnum) cq = NULL;
+                if(spinfo->state.state!=CS_SPECTATOR && val)
+                {
+                    if(spinfo->state.state==CS_ALIVE) suicide(spinfo);
+                    if(smode) smode->leavegame(spinfo);
+                    spinfo->state.state = CS_SPECTATOR;
+                    spinfo->state.timeplayed += lastmillis - spinfo->state.lasttimeplayed;
+                    if(!spinfo->local && !spinfo->privilege) aiman::removeai(spinfo);
+                }
+                else if(spinfo->state.state==CS_SPECTATOR && !val)
+                {
+                    spinfo->state.state = CS_DEAD;
+                    spinfo->state.respawn();
+                    spinfo->state.lasttimeplayed = lastmillis;
+                    aiman::addclient(spinfo);
+                    if(spinfo->clientmap[0] || spinfo->mapcrc) checkmaps();
+                }
+                sendf(-1, 1, "ri3", N_SPECTATOR, spectator, val);
+                if(!val && !hasmap(spinfo)) rotatemap(true);
                 break;
             }
 
@@ -3664,9 +3633,9 @@ namespace server
 
             case N_GETDEMO:
             {
-                int n = getint(p), tag = getint(p);
+                int n = getint(p);
                 if(!ci->privilege && !ci->local && ci->state.state==CS_SPECTATOR) break;
-                senddemo(ci, n, tag);
+                senddemo(ci, n);
                 break;
             }
 
@@ -3831,41 +3800,6 @@ namespace server
                 break;
             }
 
-            case N_EDITT:
-            case N_REPLACE:
-            case N_EDITVSLOT:
-            {
-                int size = server::msgsizelookup(type);
-                if(size<=0) { disconnect_client(sender, DISC_MSGERR); return; }
-                loopi(size-1) getint(p);
-                if(p.remaining() < 2) { disconnect_client(sender, DISC_MSGERR); return; }
-                int extra = lilswap(*(const ushort *)p.pad(2));
-                if(p.remaining() < extra) { disconnect_client(sender, DISC_MSGERR); return; }
-                p.pad(extra);
-                if(ci && ci->state.state!=CS_SPECTATOR) QUEUE_MSG;
-                break;
-            }
-
-            case N_UNDO:
-            case N_REDO:
-            {
-                int unpacklen = getint(p), packlen = getint(p);
-                if(!ci || ci->state.state==CS_SPECTATOR || packlen <= 0 || packlen > (1<<16) || unpacklen <= 0)
-                {
-                    if(packlen > 0) p.subbuf(packlen);
-                    break;
-                }
-                if(p.remaining() < packlen) { disconnect_client(sender, DISC_MSGERR); return; }
-                packetbuf q(32 + packlen, ENET_PACKET_FLAG_RELIABLE);
-                putint(q, type);
-                putint(q, ci->clientnum);
-                putint(q, unpacklen);
-                putint(q, packlen);
-                if(packlen > 0) p.get(q.subbuf(packlen).buf, packlen);
-                sendpacket(-1, 1, q.finalize(), ci->clientnum);
-                break;
-            }
-
             case N_SERVCMD:
                 getstring(text, p);
                 break;
@@ -3887,11 +3821,7 @@ namespace server
                 int size = server::msgsizelookup(type);
                 if(size<=0) { disconnect_client(sender, DISC_MSGERR); return; }
                 loopi(size-1) getint(p);
-                if(ci) switch(msgfilter[type])
-                {
-                    case 2: case 3: if(ci->state.state != CS_SPECTATOR) QUEUE_MSG; break;
-                    default: if(cq && (ci != cq || ci->state.state!=CS_SPECTATOR)) { QUEUE_AI; QUEUE_MSG; } break;
-                }
+                if(ci && cq && (ci != cq || ci->state.state!=CS_SPECTATOR)) { QUEUE_AI; QUEUE_MSG; }
                 break;
             }
         }

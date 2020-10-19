@@ -213,7 +213,7 @@ void filtertext(char *dst, const char *src, bool whitespace, bool forcespace, si
 }
 
 void ipmask::parse(const char *name)
-{   
+{
     union { uchar b[sizeof(enet_uint32)]; enet_uint32 i; } ipconv, maskconv;
     ipconv.i = 0;
     maskconv.i = 0;
@@ -223,10 +223,10 @@ void ipmask::parse(const char *name)
         int n = strtol(name, &end, 10);
         if(!end) break;
         if(end > name) { ipconv.b[i] = n; maskconv.b[i] = 0xFF; }
-        name = end; 
+        name = end;
         while(int c = *name)
         {
-            ++name; 
+            ++name;
             if(c == '.') break;
             if(c == '/')
             {

@@ -95,7 +95,7 @@ static inline int bitscan(uint mask)
 }
 #else
 static inline int bitscan(uint mask)
-{   
+{
     if(!mask) return -1;
     int i = 1;
     if(!(mask&0xFFFF)) { i += 16; mask >>= 16; }
@@ -1250,7 +1250,7 @@ template<class T> inline void endiansame(T *buf, size_t len) {}
 #define bigswap endianswap
 #else
 #define lilswap endianswap
-#define bigswap endiansame 
+#define bigswap endiansame
 #endif
 #else
 template<class T> inline T lilswap(T n) { return islittleendian() ? n : endianswap(n); }
