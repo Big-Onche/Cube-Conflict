@@ -103,4 +103,7 @@ extern float menustat(int value);
 extern int langage;
 
 extern void writesave();
+
+extern bool conserveurofficiel;
 extern void addxp(int nbxp);
+extern void DebloqueSucces(const char* ID);

@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include "engine.h"
 #include "cubedef.h"
+#include <steam_api.h>
 
 using namespace std;
 
@@ -102,3 +103,17 @@ ICOMMAND(loadsavepart3, "iii", (int *csave1, int *csave2, int *csave3),
 {
     stat[19] = *csave1; stat[20] = *csave2; stat[21] = *csave3; //Tps de jeu (secondes, minutes, heures)
 });
+
+void DebloqueSucces(const char* ID)
+{
+	// Un appel de Steam a-t-il été reçu ?
+	bool bRet = SteamAPI_Init();
+    //  Notifie du succès si Steam a été initialisé avec succès
+    if (bRet && conserveurofficiel)
+    {
+        SteamUserStats()->SetAchievement(ID);
+        SteamUserStats()->StoreStats();
+    }
+    else conoutf("Succès non déverouillé (Steam non actif ou serveur non officiel)");
+
+}

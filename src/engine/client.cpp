@@ -1,6 +1,7 @@
 // client.cpp, mostly network related client game code
 
 #include "engine.h"
+#include "cubedef.h"
 
 ENetHost *clienthost = NULL;
 ENetPeer *curpeer = NULL, *connpeer = NULL;
@@ -61,6 +62,7 @@ ICOMMAND(connectedport, "", (),
 
 void abortconnect()
 {
+    conserveurofficiel = false;
     if(!connpeer) return;
     game::connectfail();
     if(connpeer->state!=ENET_PEER_STATE_DISCONNECTED) enet_peer_reset(connpeer);
@@ -72,12 +74,14 @@ void abortconnect()
 
 SVARP(connectname, "");
 VARP(connectport, 0, 0, 0xFFFF);
+bool conserveurofficiel = false;
 
 void connectserv(const char *servername, int serverport, const char *serverpassword)
 {
     if(connpeer)
     {
         conoutf("aborting connection attempt");
+        conserveurofficiel = false;
         abortconnect();
     }
 
@@ -92,9 +96,14 @@ void connectserv(const char *servername, int serverport, const char *serverpassw
         if(serverport != connectport) setvar("connectport", serverport);
         addserver(servername, serverport, serverpassword && serverpassword[0] ? serverpassword : NULL);
         conoutf("attempting to connect to %s:%d", servername, serverport);
+
+        if(strcasecmp(servername, "serveur1.cube-conflict.com")==0) conserveurofficiel = true;
+        if(conserveurofficiel) conoutf("Serveur officiel : Les statistiques et succès sont enregistrés");
+
         if(!resolverwait(servername, &address))
         {
             conoutf(CON_ERROR, "\f3could not resolve server %s", servername);
+            conserveurofficiel = false;
             return;
         }
     }
@@ -112,6 +121,7 @@ void connectserv(const char *servername, int serverport, const char *serverpassw
         if(!clienthost)
         {
             conoutf(CON_ERROR, "\f3could not connect to server");
+            conserveurofficiel = false;
             return;
         }
         clienthost->duplicatePeers = 0;
@@ -154,6 +164,7 @@ void disconnect(bool async, bool cleanup)
         curpeer = NULL;
         discmillis = 0;
         conoutf("disconnected");
+        conserveurofficiel = false;
         game::gamedisconnect(cleanup);
         mainmenu = 1;
     }

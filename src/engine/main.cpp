@@ -2,11 +2,13 @@
 
 #include "engine.h"
 #include "cubedef.h"
+#include "steam_api.h"
 
 extern void cleargamma();
 
 void cleanup()
 {
+    SteamAPI_Shutdown();
     recorder::stop();
     cleanupserver();
     SDL_ShowCursor(SDL_TRUE);
@@ -1080,6 +1082,28 @@ void changerlangue()
     else {UI_menutabs = 5; init = false;}
 }
 
+int appID = 0; //ID Steam, à remplacer par la votre en cas de fork.
+
+int initsteam()
+{
+    if(appID==0) return 0;
+
+    SteamAPI_Init();
+
+    if ( SteamAPI_RestartAppIfNecessary( appID ) )
+    {
+        return 1;
+    }
+
+    if ( !SteamAPI_Init() )
+    {
+        printf( "Fatal Error - Steam must be running to play this game (SteamAPI_Init() failed).\n" );
+        return 1;
+    }
+
+    return 0;
+}
+
 int main(int argc, char **argv)
 {
     #ifdef WIN32
@@ -1156,6 +1180,7 @@ int main(int argc, char **argv)
     game::parseoptions(gameargs);
     initserver(dedicated>0, dedicated>1);  // never returns if dedicated
     ASSERT(dedicated <= 1);
+	initsteam();
     game::initclient();
 
     logoutf("init: video");

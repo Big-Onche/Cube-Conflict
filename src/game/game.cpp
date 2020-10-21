@@ -666,6 +666,11 @@ namespace game
         if(actor==player1 && d!=player1)
         {
             addxp(5+player1->killstreak-1);
+
+            if(player1->killstreak==3) DebloqueSucces("ACH_TRIPLETTE");
+            else if(player1->killstreak==5) DebloqueSucces("ACH_PENTAPLETTE");
+            else if(player1->killstreak==10) DebloqueSucces("ACH_DECAPLETTE");
+
             addstat(1, STAT_KILLS);
             if(player1->killstreak>stat[STAT_KILLSTREAK]) addstat(player1->killstreak, STAT_KILLSTREAK);
         }
