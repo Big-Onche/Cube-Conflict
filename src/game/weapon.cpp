@@ -1144,6 +1144,7 @@ namespace game
             case ATK_SMAW_SHOOT:
             case ATK_ROQUETTES_SHOOT:
             case ATK_NUKE_SHOOT:
+                if(d==player1 && atk==ATK_NUKE_SHOOT && conserveurofficiel) DebloqueSucces("ACH_ATOME");
                 particle_flare(d->muzzle, d->muzzle, 250, PART_NORMAL_MUZZLE_FLASH, d->steromillis ? 0xFF2222 : 0xFF7700, ATK_ROQUETTES_SHOOT ? 2.5f : 7.00f, d, player1->champimillis ? true : false);
                 if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 250, PART_NORMAL_MUZZLE_FLASH, 0xFF2222, ATK_ROQUETTES_SHOOT ? 3.0f : 12.00f, d, player1->champimillis ? true : false);
                 adddynlight(hudgunorigin(gun, d->o, to, d), 100, vec(1.25f, 0.75f, 0.3f), 75, 2, DL_FLASH, 0, vec(1.25f, 0.75f, 0.3f), d);
@@ -1656,7 +1657,7 @@ namespace game
     {
         if(d->clientnum >= 0 && d->state == CS_ALIVE)
         {
-            d->dansechan = playsound(S_DANSE1+(d->customdanse-1), local ? NULL : &d->o, NULL, 0, -1, -1, d->dansechan, 300);
+            d->dansechan = playsound(S_CGCORTEX+(d->customdanse-1), local ? NULL : &d->o, NULL, 0, -1, -1, d->dansechan, 300);
             if(d->dansechan < 0) d->dansechan = -1;
         }
         else d->stopdansesound(d);

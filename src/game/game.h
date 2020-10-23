@@ -220,7 +220,7 @@ enum
     S_IMPACT, S_IMPACTLOURDLOIN, S_IMPACTGRAP1, S_IMPACTALIEN, S_IMPACTSNIPE, S_IMPACTELEC,
 
     //Armes autre
-    S_FAMASLOL, S_BLOHBLOH, S_BOOBARL, S_KALASHLOL, S_ARTIFICELOL, S_GRENADELOL,
+    S_FAMASLOL, S_BLOHBLOH, S_ARTIFICELOL, S_GRENADELOL,
     S_RECHARGEMENT1, S_RECHARGEMENT2, S_RECHARGEMENT3,
 
     // Objets
@@ -245,7 +245,7 @@ enum
     S_RISIKILL, S_BIGRISIKILL, S_GIGARISIKILL,
     S_RISIKILLLOIN, S_BIGRISIKILLLOIN, S_GIGARISIKILLLOIN, S_KILL, S_PIXEL, S_DRAPEAUPRIS, S_DRAPEAUTOMBE, S_DRAPEAUSCORE, S_DRAPEAURESET,
 
-    S_DANSE1, S_DANSE2, S_DANSE3, S_DANSE4, S_DANSE5, S_DANSE6, S_DANSE7,
+    S_CGCORTEX, S_CGHENDEK, S_CGDELAVIER, S_CGPRAUD, S_CGRENE,
 
     //Null
     S_NULL, //S_PUPOUT,
@@ -801,7 +801,7 @@ struct gameent : dynent, gamestate
 
     void stopdansesound(gameent *d)
     {
-        if(dansechan >= 0) stopsound(S_DANSE1+(d->customdanse-1), dansechan, 150);
+        if(dansechan >= 0) stopsound(S_CGCORTEX+(d->customdanse-1), dansechan, 150);
         dansechan = -1;
     }
 

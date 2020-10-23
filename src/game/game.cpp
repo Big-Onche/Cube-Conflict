@@ -1,6 +1,7 @@
 #include "game.h"
 #include "engine.h"
 #include "cubedef.h"
+#include "steam_api.h"
 
 string str_pseudovictime, str_pseudotueur, str_armetueur, str_pseudoacteur;
 float killdistance = 0;
@@ -58,6 +59,7 @@ namespace game
         {
             addstat(1, STAT_TPSSEC);
             lasttimeupdate = totalmillis;
+            SteamAPI_RunCallbacks();
         }
         if(stat[19]>=60) {stat[19]=0 ; addstat(1, STAT_TPSMIN);}
         if(stat[20]>=60) {stat[20]=0 ; addstat(1, STAT_TPSH);}
@@ -533,15 +535,15 @@ namespace game
         addmsg(N_SENDDANSE, "ri", player1_danse);
         stopsounds();
         player1->customdanse = player1_danse;
-        playsound(S_DANSE1+(player1_danse-1));
+        playsound(S_CGCORTEX+(player1_danse-1));
     });
 
     void taunt()
     {
         if(player1->state!=CS_ALIVE || player1->physstate<PHYS_SLOPE) return;
-        if(lastmillis-player1->lasttaunt<20000){conoutf(CON_GAMEINFO, "\faTON ENCEINTE BLUETOOTH EST DÉCHARGÉE, PAS DE CHANCE !"); return;}
+        if(lastmillis-player1->lasttaunt<10000){conoutf(CON_GAMEINFO, "\faOn abuse pas des bonnes choses !"); return;}
         player1->lasttaunt = lastmillis;
-        playsound(S_DANSE1+(player1->customdanse-1));
+        playsound(S_CGCORTEX+(player1->customdanse-1));
         addmsg(N_TAUNT, "rc", player1);
     }
     COMMAND(taunt, "");
@@ -710,8 +712,8 @@ namespace game
         {
             case GUN_UZI: playsound(S_BLOHBLOH, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
             case GUN_FAMAS: playsound(S_FAMASLOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
-            case GUN_SMAW: playsound(S_BOOBARL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
-            case GUN_AK47: playsound(S_KALASHLOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
+            //case GUN_SMAW: playsound(S_BOOBARL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
+            //case GUN_AK47: playsound(S_KALASHLOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
             case GUN_ARTIFICE: playsound(S_ARTIFICELOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
             case GUN_M32: playsound(S_GRENADELOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
         }
@@ -804,6 +806,7 @@ namespace game
         ai::killed(d, actor);
     }
 
+
     void timeupdate(int secs)
     {
         if(secs > 0)
@@ -816,6 +819,7 @@ namespace game
             player1->attacking = ACT_IDLE;
             if(cmode) cmode->gameover();
             conoutf(CON_GAMEINFO, "\f2FIN DE LA PARTIE !");
+
             //if(m_ctf) conoutf(CON_GAMEINFO, "\f2player frags: %d, flags: %d, deaths: %d", player1->frags, player1->flags, player1->deaths);
             //else conoutf(CON_GAMEINFO, "\f2player frags: %d, deaths: %d", player1->frags, player1->deaths);
             //int accuracy = (player1->totaldamage*100)/max(player1->totalshots, 1);

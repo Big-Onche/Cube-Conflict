@@ -65,9 +65,9 @@ namespace ai
     void bottaunt(gameent *d)
     {
         if(d->state!=CS_ALIVE || d->physstate<PHYS_SLOPE) return;
-        if(lastmillis-d->lasttaunt<30000) return;
+        if(lastmillis-d->lasttaunt<20000) return;
         d->lasttaunt = lastmillis;
-        d->dansechan = playsound(S_DANSE1+(d->customdanse-1), d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 150, d->dansechan, 300);
+        d->dansechan = playsound(S_CGCORTEX+(d->customdanse-1), d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 150, d->dansechan, 300);
         addmsg(N_TAUNT, "rc", d);
     }
 
@@ -1441,7 +1441,7 @@ namespace ai
                 {
                     case AI_S_WAIT:
                         result = dowait(d, c);
-                        if(d->health>80 && !d->steromillis && !d->epomillis && !d->champimillis && !d->attacking) switch(rnd(300)){case 0: bottaunt(d);}
+                        if(d->health>50 && !d->steromillis && !d->epomillis && !d->champimillis && !d->attacking) switch(rnd(250)){case 0: bottaunt(d);}
                         break;
                     case AI_S_DEFEND: result = dodefend(d, c);
                     {
