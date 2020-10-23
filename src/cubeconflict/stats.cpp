@@ -9,6 +9,7 @@ using namespace std;
 //////////////////////Gestion de l'xp et niveaux//////////////////////
 int ccxp = 0, cclvl = 1, needxp = 40, oldneed = 40, neededxp = 40;
 float pourcents = -1;
+bool noachpost, noachstag, noachsol, noachlieu, noachmaj = true;
 
 void genlvl() //Calcule le niveau du joueur
 {
@@ -19,13 +20,23 @@ void genlvl() //Calcule le niveau du joueur
         needxp += oldneed;
         neededxp += 40;
     }
+
     float pour1 = neededxp, pour2 = ccxp-needxp;
     if(pour1!=0) pourcents = pour2/pour1; //Calcul le pourcentage pour prochain niveau
+
+    switch(cclvl) //Regarde si il y a un succès à déverouiller
+    {
+        case 5: if(noachpost){DebloqueSucces("ACH_POSTULANT"); noachpost = false;} break;
+        case 10: if(noachstag){DebloqueSucces("ACH_STAGIAIRE"); noachstag = false;} break;
+        case 20: if(noachsol){DebloqueSucces("ACH_SOLDAT"); noachsol = false;} break;
+        case 50: if(noachlieu){DebloqueSucces("ACH_LIEUTENANT"); noachlieu = false;} break;
+        case 100: if(noachmaj){DebloqueSucces("ACH_MAJOR"); noachmaj = false;}
+    }
 }
 
 void addxp(int nbxp) // Ajoute l'xp très simplment
 {
-    //if(!con_serveurofficiel) return;
+    if(!conserveurofficiel) return;
     ccxp += nbxp;
     genlvl(); //Recalcule le niveau
 }
@@ -35,7 +46,7 @@ int stat[NUMSTATS], succes[NUMSUCCES];
 
 void addstat(int valeur, int neededstat) // Ajoute la stat très simplement
 {
-    //if(!con_serveurofficiel) return;
+    if(!conserveurofficiel) return;
     stat[neededstat]+= valeur;
 }
 
@@ -104,6 +115,7 @@ ICOMMAND(loadsavepart3, "iii", (int *csave1, int *csave2, int *csave3),
     stat[19] = *csave1; stat[20] = *csave2; stat[21] = *csave3; //Tps de jeu (secondes, minutes, heures)
 });
 
+//////////////////////Gestion des succès//////////////////////
 void DebloqueSucces(const char* ID)
 {
 	// Un appel de Steam a-t-il été reçu ?
@@ -114,6 +126,21 @@ void DebloqueSucces(const char* ID)
         SteamUserStats()->SetAchievement(ID);
         SteamUserStats()->StoreStats();
     }
-    else conoutf("Succès non déverouillé (Steam non actif ou serveur non officiel)");
+    else conoutf("Succès non déverrouillé (Steam non actif ou serveur non officiel)");
 
 }
+
+VARP(testkills, 0, 0, 100);
+ICOMMAND(testsendstat, "", (),
+{
+    SteamUserStats()->SetStat("STAT_KILLS", 10);
+    SteamUserStats()->StoreStats();
+});
+
+int stat_k = 0;
+
+ICOMMAND(testgetstat, "", (),
+{
+    SteamUserStats()->GetStat("STAT_KILLS", &stat_k);
+    conoutf("STAT K = %d", stat_k);
+});
