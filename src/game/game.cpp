@@ -341,6 +341,7 @@ namespace game
     }
 
     VAR(isalive, 0, 1, 1);
+    bool noach2 = true;
 
     void updateworld()        // main game update loop
     {
@@ -382,6 +383,7 @@ namespace game
         if(player1->state != CS_DEAD && !intermission)
         {
             isalive = 1;
+            if(player1->steromillis && player1->epomillis && player1->jointmillis && player1->champimillis && noach2) {DebloqueSucces("ACH_DEFONCE"); noach2 = false; }
             if(player1->steromillis || player1->epomillis || player1->jointmillis || player1->champimillis) entities::checkboosts(curtime, player1);
             if(player1->ragemillis || player1->vampimillis || player1->aptisort1 || player1->aptisort2 || player1->aptisort3) entities::checkaptiskill(curtime, player1);
             if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_INDIEN) updatespecials(player1);
@@ -765,14 +767,19 @@ namespace game
         else // Kill ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
             float distance = actor->o.dist(d->o)/18.f;
-            if(actor==player1) {conoutf(contype, "\fd%s \f7%s%s \fc%s \f7%s %s (%.1fm)",
-                                        aname,
-                                        langage ? "" : "as ",
-                                        langage ? partmessageEN[rnd(7)].partverb : partmessageFR[rnd(15)].partverb,
-                                        dname,
-                                        langage ? "with" : "avec",
-                                        langage ? guns[actor->gunselect].armedescEN : guns[actor->gunselect].armedescFR,
-                                        distance); playsound(S_KILL); message1 = totalmillis; message2 = totalmillis; copystring(str_pseudovictime, dname); n_aptitudevictime = d->aptitude; killdistance = distance;} //TU as tué quelqu'un
+            if(actor==player1) {
+                    conoutf(contype, "\fd%s \f7%s%s \fc%s \f7%s %s (%.1fm)",
+                        aname,
+                        langage ? "" : "as ",
+                        langage ? partmessageEN[rnd(7)].partverb : partmessageFR[rnd(15)].partverb,
+                        dname,
+                        langage ? "with" : "avec",
+                        langage ? guns[actor->gunselect].armedescEN : guns[actor->gunselect].armedescFR,
+                        distance);
+                        playsound(S_KILL); message1 = totalmillis; message2 = totalmillis; copystring(str_pseudovictime, dname); n_aptitudevictime = d->aptitude; killdistance = distance;
+                        if(distance>=100.f) DebloqueSucces("ACH_BEAUTIR");
+
+            } //TU as tué quelqu'un
             else if(d==player1) {conoutf(contype, "\fd%s \f7%s %s %s \fc%s \f7%s %s (%.1fm)",
                                          dname,
                                          langage ? "got" : "as été",

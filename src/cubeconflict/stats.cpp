@@ -9,7 +9,7 @@ using namespace std;
 //////////////////////Gestion de l'xp et niveaux//////////////////////
 int ccxp = 0, cclvl = 1, needxp = 40, oldneed = 40, neededxp = 40;
 float pourcents = -1;
-bool noachpost, noachstag, noachsol, noachlieu, noachmaj = true;
+bool achpost, achstag, achsol, achlieu, achmaj;
 
 void genlvl() //Calcule le niveau du joueur
 {
@@ -26,11 +26,11 @@ void genlvl() //Calcule le niveau du joueur
 
     switch(cclvl) //Regarde si il y a un succès à déverouiller
     {
-        case 5: if(noachpost){DebloqueSucces("ACH_POSTULANT"); noachpost = false;} break;
-        case 10: if(noachstag){DebloqueSucces("ACH_STAGIAIRE"); noachstag = false;} break;
-        case 20: if(noachsol){DebloqueSucces("ACH_SOLDAT"); noachsol = false;} break;
-        case 50: if(noachlieu){DebloqueSucces("ACH_LIEUTENANT"); noachlieu = false;} break;
-        case 100: if(noachmaj){DebloqueSucces("ACH_MAJOR"); noachmaj = false;}
+        case 5: if(!achpost){DebloqueSucces("ACH_POSTULANT"); achpost = true;} break;
+        case 10: if(!achstag){DebloqueSucces("ACH_STAGIAIRE"); achstag = true;} break;
+        case 20: if(!achsol){DebloqueSucces("ACH_SOLDAT"); achsol = true;} break;
+        case 50: if(!achlieu){DebloqueSucces("ACH_LIEUTENANT"); achlieu = true;} break;
+        case 100: if(!achmaj){DebloqueSucces("ACH_MAJOR"); achmaj = true;}
     }
 }
 
