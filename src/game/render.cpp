@@ -259,6 +259,8 @@ namespace game
 
     string bouclier;
 
+    bool noach = true;
+
     void renderplayer(gameent *d, const playermodelinfo &mdl, int color, int team, float fade, int flags = 0, bool mainpass = true)
     {
         int anim = ANIM_IDLE, lastaction = d->lastaction;
@@ -269,6 +271,14 @@ namespace game
         int basetime = 0;
         if(animoverride) anim = (animoverride<0 ? ANIM_ALL : animoverride)|ANIM_LOOP;
         const char *mdlname = d->armourtype==A_ASSIST ? validteam(team) ? d->team==player1->team ? "smileys/armureassistee" : "smileys/armureassistee/red" : "smileys/armureassistee/red" : mdl.model[validteam(team) ? d->team==player1->team ? 1 : 2 : 0];
+
+        if(intermission)
+        {
+            if(validteam(team) ? bestteams.htfind(team)>=0 : bestplayers.find(d)>=0)
+            {
+                if(noach && (bestplayers.find(player1)>=0 || bestteams.htfind(player1->team)>=0)) {DebloqueSucces("ACH_WINNER"); noach = false;}
+            }
+        }
 
         if(d->state==CS_ALIVE) {d->skeletonfade = 1.0f; d->tombepop = 0.0f;}
         else if(d->state==CS_DEAD)
@@ -331,7 +341,7 @@ namespace game
         //////////////////////////////////////////////////////////////////ANIMATIONS//////////////////////////////////////////////////////////////////
         if(d->state==CS_EDITING || d->state==CS_SPECTATOR) anim = ANIM_EDIT|ANIM_LOOP;
         else if(d->state==CS_LAGGED)                       anim = ANIM_LAG|ANIM_LOOP;
-        else if(d->lasttaunt && lastmillis-d->lasttaunt<5000)
+        else if(d->lasttaunt && lastmillis-d->lasttaunt<1000)
         {
             lastaction = d->lasttaunt;
             anim = ANIM_TAUNT|ANIM_LOOP;
