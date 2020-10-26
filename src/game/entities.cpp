@@ -27,35 +27,35 @@ namespace entities
     const char *itemname(int i)
     {
         int t = ents[i]->type;
-        if(t<I_RAIL || t>I_MANA) return NULL;
+        if(!validitem(t)) return NULL;
         return itemstats[t-I_RAIL].name;
     }
 
     int itemicon(int i)
     {
         int t = ents[i]->type;
-        if(t<I_RAIL || t>I_MANA) return -1;
+        if(!validitem(t)) return -1;
         return itemstats[t-I_RAIL].icon;
     }
 
     const char *entmdlname(int type)
     {
-        static const char *entmdlnames[] =
+        static const char * const entmdlnames[MAXENTTYPES] =
         {
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+            //Armes
             "munitions/fusilelectrique", "munitions/fusilplasma", "munitions/smaw", "munitions/minigun", "munitions/spockgun", "munitions/M32",
             "munitions/lanceflammes", "munitions/uzi", "munitions/famas", "munitions/mossberg500", "munitions/hydra", "munitions/SV_98",
             "munitions/sks", "munitions/arbalete", "munitions/ak47", "munitions/GRAP1", "munitions/feuartifice", "munitions/glock",
             "munitions/supercaisse", "munitions/supercaisse", "munitions/supercaisse", "munitions/supercaisse",
-
+            //Objets
             "objets/panachay", "objets/cochongrillay", "objets/steroides", "objets/champis", "objets/epo", "objets/joint",
             "objets/bouclierbois", "objets/bouclierfer", "objets/bouclieror", "objets/boucliermagnetique", "objets/armureassistee",
-
             "objets/mana",
 
             "objets/teleporteur",
 
-            NULL, NULL, NULL, NULL,
+            NULL, NULL, NULL,
         };
         return entmdlnames[type];
     }
@@ -104,12 +104,11 @@ namespace entities
                     if(e.attr2 < 0) continue;
                     break;
                 default:
-                    if(!e.spawned() || e.type < I_RAIL || e.type > I_MANA) continue;
+                    if(!e.spawned() || !validitem(e.type)) continue;
                     break;
             }
             const char *mdlname = entmodel(e);
             const char *secmdlname = e.type==I_BOUCLIERBOIS || e.type==I_BOUCLIERFER || e.type==I_BOUCLIEROR || e.type==I_BOUCLIERMAGNETIQUE ? "objets/piecerobotique" : entmodel(e);
-
             if(mdlname)
             {
                 vec p = e.o;
@@ -119,7 +118,9 @@ namespace entities
         }
     }
 
-    void addammo(int type, int &v, bool local, gameent *d)
+    VAR(autowield, 0, 0, 1);
+
+    void addammo(int type, int &v, bool local)
     {
         itemstat &is = itemstats[type-I_RAIL];
         v += is.add;
@@ -127,30 +128,20 @@ namespace entities
         if(local) msgsound(is.sound);
     }
 
-    void repammo(gameent *d, int type, bool local)
-    {
-        addammo(type, d->ammo[type-I_RAIL+GUN_RAIL], local, d);
-    }
-
     // these two functions are called when the server acknowledges that you really
     // picked up the item (in multiplayer someone may grab it before you).
-
-    VAR(autowield, 0, 0, 1);
 
     void pickupeffects(int n, gameent *d, int rndsuperweapon)
     {
         if(!ents.inrange(n)) return;
         extentity *e = ents[n];
         int type = e->type;
-        if(type<I_RAIL || type>I_MANA) return;
+        if(!validitem(type)) return;
         e->clearspawned();
         e->clearnopickup();
         if(!d) return;
         itemstat &is = itemstats[type-I_RAIL];
-        if(d!=player1 || isthirdperson())
-        {
-            particle_icon(d->abovehead(), is.icon%4, is.icon/4, PART_HUD_ICON_GREY, 2000, 0xFFFFFF, 2.0f, -8);
-        }
+        d->pickup(type+rndsuperweapon, d->aptitude, rndsuperweapon, d->aptisort1, d->armourtype);
 
         if(type>=I_RAIL && type<=I_SUPERARME)
         {
@@ -158,10 +149,8 @@ namespace entities
             else if(autowield) gunselect(type-9+rndsuperweapon, player1);
         }
 
-        d->pickup(type+rndsuperweapon, d->aptitude, rndsuperweapon, d->aptisort1, d->armourtype);
         if(d->aptisort1 && d->aptitude==APT_PRETRE)
         {
-            d->mana-=20;
             adddynlight(d->o, 20, vec(1.5f, 1.5f, 0.0f), 300, 50, L_NOSHADOW|L_VOLUMETRIC);
             playsound(S_SORTPRETRE1, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, d==hudplayer() ? 0 : 150, -1, 300);
         }
@@ -185,17 +174,8 @@ namespace entities
                 playsound(S_ITEMCHAMPIS, NULL, NULL, 0, 0, 0, -1, 0);
                 break;
             case I_BOOSTVITESSE:
-                switch(rnd(20))
-                {
-                    case 0:
-                        suicide(player1);
-                        conoutf(CON_GAMEINFO, "\f8L'EPO vient de faire claquer ton coeur. Ca t'apprendra à te doper sale raclure !");
-                        playsound(S_ITEMEPO, NULL, NULL, 0, 0, 0, -1, 0, 750);
-                        break ;
-                    default:
-                        conoutf(CON_GAMEINFO, "\f8L'EPO commence à te booster...");
-                        playsound(S_ITEMEPO, NULL, NULL, 0, 0, 0, -1, 0);
-                }
+                conoutf(CON_GAMEINFO, "\f8L'EPO commence à te booster...");
+                playsound(S_ITEMEPO, NULL, NULL, 0, 0, 0, -1, 0);
                 break;
             case I_BOOSTGRAVITE:
                 conoutf(CON_GAMEINFO, "\f8Ce putain de royal te rend complètement high :bave:");
@@ -301,6 +281,9 @@ namespace entities
             default:
                 if(d->canpickup(e->type, d->aptitude, d->armourtype))
                 {
+                    addmsg(N_ITEMPICKUP, "rci", d, n);
+                    e->setnopickup(); // even if someone else gets it first
+
                     if(d==player1)
                     {
                         switch(e->type)
@@ -321,8 +304,6 @@ namespace entities
                             default: if(e->type>=I_RAIL && e->type<=I_GLOCK) {addstat(1, STAT_ARMES); addxp(1);}
                         }
                     }
-                    addmsg(N_ITEMPICKUP, "rci", d, n);
-                    e->setnopickup();
                 }
                 break;
 
@@ -367,10 +348,7 @@ namespace entities
             if(e.type==NOTUSED) continue;
             if((!e.spawned() || e.nopickup()) && e.type!=TELEPORT && e.type!=JUMPPAD) continue;
             float dist = e.o.dist(o);
-            if(dist<(e.type==TELEPORT ? 16 : 12))
-            {
-                trypickup(i, d);
-            }
+            if(dist<(e.type==TELEPORT ? 16 : 12)) trypickup(i, d);
         }
     }
 
@@ -416,7 +394,7 @@ namespace entities
     void putitems(packetbuf &p)            // puts items in network stream and also spawns them locally
     {
         putint(p, N_ITEMLIST);
-        loopv(ents) if(ents[i]->type>=I_RAIL && ents[i]->type<=I_MANA && (!m_noammo || ents[i]->type<I_RAIL || ents[i]->type>I_GLOCK))
+        loopv(ents) if(validitem(ents[i]->type))
         {
             putint(p, i);
             putint(p, ents[i]->type);
@@ -428,7 +406,7 @@ namespace entities
 
     void spawnitems(bool force)
     {
-        loopv(ents) if(ents[i]->type>=I_RAIL && ents[i]->type<=I_MANA && (!m_noammo || ents[i]->type<I_RAIL || ents[i]->type>I_GLOCK))
+        loopv(ents)
         {
             extentity *e = ents[i];
             if(validitem(e->type))
