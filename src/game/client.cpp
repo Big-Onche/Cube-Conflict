@@ -3,9 +3,22 @@
 
 int ambiancealeatoire;
 VARP(forceambiance, 0, 0, 6);
-VARR(mapofficielle, 0, 0, 1);
-VAR(n_map, 0, 0, 99);
 VAR(n_ambiance, 0, 0, 99);
+
+VAR(n_map, 0, 0, 99);
+VARR(mapofficielle, 0, 0, 1);
+
+extern void calcmode();
+VAR(n_mode, 0, 0, 16);
+VARFP(n_team, 0, 0, 1, { calcmode(); });
+VARFP(n_type, 0, 0, 1, { calcmode(); });
+VARFP(n_spec, 1, 1, 5, { calcmode(); });
+
+void calcmode()
+{
+    if(!n_type) n_mode = n_spec+(n_team*5);
+    else n_mode = n_spec+10;
+}
 
 int cnidentiquearme = 0;
 
@@ -631,18 +644,6 @@ namespace game
         }
         nextmode = mode;
         intret(1);
-    }
-
-    VARP(finalmode, -1, 1, 16);
-    VARFP(n_mode, -1, 1, 99, calcmode());
-    VARFP(n_type, 0, 0, 99, calcmode());
-    VARFP(n_team, 0, 0, 1, calcmode());
-
-    void calcmode()
-    {
-        if(n_type==0) finalmode = n_mode+(n_team*5);
-        else if (n_type==1) finalmode = n_mode+10;
-        setmode(finalmode);
     }
 
     ICOMMAND(mode, "i", (int *val), setmode(*val));
@@ -2136,7 +2137,7 @@ namespace game
                     case I_BOOSTPRECISION: conoutf(CON_GAMEINFO, "\faLES CHAMPIGNONS REPOUSSENT !"); break;
                     case I_BOOSTVITESSE: conoutf(CON_GAMEINFO, "\faL'EPO ARRIVE POUR LES CYCLISTES !"); break;
                     case I_BOOSTGRAVITE: conoutf(CON_GAMEINFO, "\faQUELQU'UN ROULE UN GROS JOINT !"); break;
-                    case I_SUPERARME: conoutf(CON_GAMEINFO, "\faLA SUPER-ARME EST BIENTÔT PRÊTE Á ANNIHILER"); break;
+                    case I_SUPERARME: conoutf(CON_GAMEINFO, "\faLA SUPER-ARME EST BIENTÔT PRÊTE À ANNIHILER"); break;
                     case I_ARMUREASSISTEE: conoutf(CON_GAMEINFO, "\faARMURE ASSISTÉE EN COURS DE DÉPLOIMENT"); break;
                     case 50: conoutf(CON_GAMEINFO, "\faCHANGEMENT D'ARME DANS 5 SECONDES !"); break;
                 }
