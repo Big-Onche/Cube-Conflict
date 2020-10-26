@@ -1798,15 +1798,18 @@ void modifygravity(physent *pl, bool water, int curtime, int jointmillis, int ap
 // moveres indicated the physics precision (which is lower for monsters and multiplayer prediction)
 // local is false for multiplayer prediction
 
+bool noach = true;
+
 bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis, int jointmillis, int aptitude, int aptisort, bool assist)
 {
+    if(game::player1->timeinair > 7000 && noach) {DebloqueSucces("ACH_ENVOL"); noach = false;}
     int material = lookupmaterial(vec(pl->o.x, pl->o.y, pl->o.z + (3*pl->aboveeye - pl->eyeheight)/4));
     bool water = isliquid(material&MATF_VOLUME);
     bool floating = pl->type==ENT_PLAYER && (pl->state==CS_EDITING || pl->state==CS_SPECTATOR);
     if(aptisort && aptitude==APT_PHYSICIEN && pl->type==ENT_PLAYER) floating = true;
 
     float classespeed = aptitudes[aptitude].apt_vitesse*10.f;
-    if(aptitude==APT_INDIEN && aptisort>0) {classespeed = 750.f;}
+    if(aptitude==APT_INDIEN && aptisort>0) {classespeed = 700.f;}
 
     float secs;
     if(epomillis>0) secs = (curtime/(classespeed-(epomillis/(aptitude==13 ? 75 : 100))));

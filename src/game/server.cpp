@@ -2195,7 +2195,7 @@ namespace server
             case APT_MAGICIEN: {if(as.aptisort2) damage *= 1.333333f; break;}
             case APT_CAMPEUR: damage += as.o.dist(ts.o)/2.5f; break;
             case APT_VICKING: {if(as.ragemillis) damage *=1.25f;} break;
-            case APT_INDIEN: {if(as.aptisort3) damage *= 1.25f; break;}
+            case APT_INDIEN: {if(as.aptisort3) damage *= 1.3f; break;}
         }
 
         //Absorptions et skills spéciaux d'aptitudes
@@ -2206,7 +2206,7 @@ namespace server
             case APT_PRETRE: { if(ts.aptisort2 && ts.mana>=damage/10) {ts.mana -= damage/10; damage=0; sendresume(target);} } break;
             case APT_INDIEN:
             {
-                if(as.aptisort1) damage /= 1.25f;
+                if(as.aptisort1) damage /= 1.3f;
                 if(actor->aptitude==APT_AMERICAIN) damage *= 1.333333f;
             }
         }

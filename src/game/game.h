@@ -391,7 +391,7 @@ static struct itemstat { int add, max, sound; const char *name; int icon, info; 
     {50,       150, S_ITEMHEALTH,   "MANA",                HICON_SIZE},
 };
 
-#define validitem(n) false
+#define validitem(n) true
 
 #define MAXRAYS 50
 #define EXP_SELFDAMDIV 1
