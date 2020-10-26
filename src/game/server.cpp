@@ -1998,8 +1998,6 @@ namespace server
         pausegame(false);
         changegamespeed(100);
         if(smode) smode->cleanup();
-        aiman::clearai();
-        if(servrandommode) mode = rnd(12)+1;
         gamemode = mode;
         gamemillis = 0;
         gamelimit = gamelength*60000;
@@ -2052,6 +2050,8 @@ namespace server
 
     void rotatemap(bool next)
     {
+        if(servrandommode) gamemode = rnd(12)+1;
+
         if(!maprotations.inrange(curmaprotation))
         {
             changemap("", 0);
@@ -2661,7 +2661,7 @@ namespace server
     void noclients()
     {
         bannedips.shrink(0);
-        aiman::clearai();
+        //aiman::clearai();
     }
 
     void localconnect(int n)
