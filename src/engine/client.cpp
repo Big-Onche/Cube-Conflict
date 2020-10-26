@@ -166,6 +166,7 @@ void disconnect(bool async, bool cleanup)
         conoutf("disconnected");
         conserveurofficiel = false;
         game::gamedisconnect(cleanup);
+        clearpostfx();
         mainmenu = 1;
     }
     if(!connpeer && clienthost)
