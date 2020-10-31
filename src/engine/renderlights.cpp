@@ -1,4 +1,5 @@
 #include "engine.h"
+#include "cubedef.h"
 
 int gw = -1, gh = -1, bloomw = -1, bloomh = -1, lasthdraccum = 0;
 GLuint gfbo = 0, gdepthtex = 0, gcolortex = 0, gnormaltex = 0, gglowtex = 0, gdepthrb = 0, gstencilrb = 0;
@@ -3598,8 +3599,12 @@ void collectlights()
             if(pvsoccludedsphere(e->o, e->attr1)) continue;
         }
 
-        lightinfo &l = lights.add(lightinfo(i, *e));
-        if(l.validscissor()) lightorder.add(lights.length()-1);
+        if(n_ambiance==3 && e->attr5 < 0) continue;
+        else
+        {
+            lightinfo &l = lights.add(lightinfo(i, *e));
+            if(l.validscissor()) lightorder.add(lights.length()-1);
+        }
     }
 
     int numdynlights = 0;
