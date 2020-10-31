@@ -675,6 +675,7 @@ namespace game
         }
         else if(player1->state!=CS_SPECTATOR || player1->privilege) addmsg(N_MAPVOTE, "rsi", name, mode);
     }
+
     void changemap(const char *name)
     {
         switch(n_map)

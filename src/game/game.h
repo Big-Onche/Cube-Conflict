@@ -145,16 +145,16 @@ static struct gamemodeinfo
 
     //MODE 1, 2, 3, 4, 5
     { "Tue Les Tous", "Deathmatch", M_LOBBY },
-    { "Tue Les Tous (Aléatoire)", "Deathmatch (Random)", M_LOBBY | M_RANDOM | M_NOAMMO | M_MUNINFINIE},
-    { "Tue Les Tous (Full stuff)", "Deathmatch (Full stuff)", M_LOBBY | M_FULLSTUFF},
-    { "Tue Les Tous (Identique)", "Deathmatch (Identical)", M_LOBBY | M_IDENTIQUE | M_NOAMMO | M_MUNINFINIE},
-    { "Tue Les Tous (One shoot)", "Deathmatch (One shoot)", M_LOBBY | M_ONESHOOT | M_NOAMMO | M_NOITEMS | M_MUNINFINIE},
+    { "Tue Les Tous (Aléatoire)", "Deathmatch (Random)", M_RANDOM | M_NOAMMO | M_MUNINFINIE},
+    { "Tue Les Tous (Full stuff)", "Deathmatch (Full stuff)", M_FULLSTUFF},
+    { "Tue Les Tous (Identique)", "Deathmatch (Identical)", M_IDENTIQUE | M_NOAMMO | M_MUNINFINIE},
+    { "Tue Les Tous (One shoot)", "Deathmatch (One shoot)", M_ONESHOOT | M_NOAMMO | M_NOITEMS | M_MUNINFINIE},
     //MODE 6, 7, 8, 9, 10
-    { "Tue Les Tous", "Team Deathmatch", M_LOBBY | M_TEAM },
-    { "Tue Les Tous (Aléatoire)", "Team Deathmatch (Random)", M_LOBBY | M_RANDOM | M_TEAM | M_NOAMMO | M_MUNINFINIE},
-    { "Tue Les Tous (Full stuff)", "Team Deathmatch (Full stuff)", M_LOBBY | M_FULLSTUFF | M_TEAM},
-    { "Tue Les Tous (Identique)", "Team Deathmatch (Identical)", M_LOBBY | M_IDENTIQUE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
-    { "Tue Les Tous (One shoot)", "Team Deathmatch (One shoot)", M_LOBBY | M_ONESHOOT | M_TEAM | M_NOAMMO | M_NOITEMS | M_MUNINFINIE},
+    { "Tue Les Tous", "Team Deathmatch", M_TEAM },
+    { "Tue Les Tous (Aléatoire)", "Team Deathmatch (Random)", M_RANDOM | M_TEAM | M_NOAMMO | M_MUNINFINIE},
+    { "Tue Les Tous (Full stuff)", "Team Deathmatch (Full stuff)", M_FULLSTUFF | M_TEAM},
+    { "Tue Les Tous (Identique)", "Team Deathmatch (Identical)", M_IDENTIQUE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
+    { "Tue Les Tous (One shoot)", "Team Deathmatch (One shoot)", M_ONESHOOT | M_TEAM | M_NOAMMO | M_NOITEMS | M_MUNINFINIE},
     //MODE 11, 12, 13, 14, 15
     { "Capture de drapeau", "Capture the flag", M_CTF | M_TEAM },
     { "Capture de drapeau (Aléatoire)", "Capture the flag (Random)", M_RANDOM | M_CTF | M_TEAM | M_NOAMMO | M_MUNINFINIE},

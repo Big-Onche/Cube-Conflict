@@ -62,10 +62,6 @@ static const struct custominfo { const char *smiley, *capeteam1, *capeteam2, *cu
     {"",                 "capes/cape_risitasbg",    "capes/cape_risitasbg/orange"},
 };
 
-extern void addxp(int nbxp);
-extern void addstat(int valeur, int stat);
-extern void writesave();
-
 //Messages de kill
 extern bool suicided;
 extern string str_pseudotueur, str_armetueur;
@@ -85,6 +81,8 @@ extern int parallaxX, parallaxY; //Effet parallax des menus
 extern float wateramplitude;
 
 //Statistiques & sauvegarde
+extern int langage;
+
 enum {STAT_KILLS, STAT_MORTS, STAT_KILLSTREAK, STAT_BOUCLIERBOIS, STAT_BOUCLIERFER, STAT_BOUCLIEROR, STAT_BOUCLIERMAGNETIQUE,
         STAT_PANACHAY, STAT_MANA, STAT_COCHON, STAT_STEROS, STAT_EPO, STAT_JOINT, STAT_CHAMPIS, STAT_ARMES, STAT_SUPERARMES,
         STAT_DRAPEAUX, STAT_WINS, STAT_ARMUREASSIST, STAT_TPSSEC, STAT_TPSMIN, STAT_TPSH, NUMSTATS};
@@ -94,16 +92,16 @@ enum {ACH_TRIPLE, ACH_QUINTE, ACH_INVINCIBLE, ACH_COLLECTIONNEUR, ACH_ALCOOLIQUE
         ACH_JUNKIE, ACH_WINNER, ACH_EPICWINNER, ACH_FLAGRUNNER, ACH_CHEATER, ACH_NEKFEU, NUMSUCCES};
 extern int succes[NUMSUCCES];
 
+extern void addxp(int nbxp);
 extern int ccxp, cclvl, needxp, oldneed, neededxp;
 extern float pourcents;
 
 extern void addstat(int valeur, int stat);
 extern float menustat(int value);
-
-extern int langage;
-
 extern void writesave();
 
-extern bool conserveurofficiel;
-extern void addxp(int nbxp);
 extern void DebloqueSucces(const char* ID);
+
+// Autres
+extern bool conserveurofficiel;
+extern int randomambience;
