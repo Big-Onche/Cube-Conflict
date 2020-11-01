@@ -312,9 +312,8 @@ namespace game
         settexture("media/interface/hud/barrexpvide.png", 3);
         bgquad(lxbarvide, h-29, 966, 40);
 
-        dynent *o = intersectclosest(d->o, worldpos, d, zoom ? 50 : 30);
-
-        if(o && o->type==ENT_PLAYER)
+        dynent *o = intersectclosest(d->o, worldpos, d, zoom ? 40 : 25);
+        if(o && o->type==ENT_PLAYER && !isteam(player1->team, ((gameent *)o)->team))
         {
             float pour1 = ((gameent *)o)->health, pour2 = ((gameent *)o)->health > ((gameent *)o)->maxhealth ? ((gameent *)o)->health : ((gameent *)o)->maxhealth;
             float pourcents2 = (pour1/pour2);
