@@ -318,6 +318,7 @@ namespace game
 
         b->bounces++;
         if(b->bouncetype == BNC_GIBS && b->bounces < 2) {switch(rnd(3)) {case 0: addstain(STAIN_BLOOD, vec(b->o).sub(vec(surface).mul(b->radius)), surface, 2.96f/b->bounces, bvec(0x60, 0xFF, 0xFF), rnd(4));}}
+        if(b->bouncetype == BNC_GRENADE) addstain(STAIN_PULSE_GLOW, vec(b->o).sub(vec(surface).mul(b->radius)), surface, 4.f, 0x0000FF);
     }
 
     void updatebouncers(int time)
@@ -796,8 +797,8 @@ namespace game
     void smawstain(const projectile &p, const vec &pos)
     {
         vec dir = vec(p.dir).neg();
-        float rad = attacks[p.atk].exprad*0.75f;
-        addstain(STAIN_PULSE_SCORCH, pos, dir, rad);
+        float rad = attacks[p.atk].exprad*0.35f;
+        addstain(STAIN_EXPL_SCORCH, pos, dir, rad);
     }
 
     void bigballestain(const projectile &p, const vec &pos)

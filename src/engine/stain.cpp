@@ -748,6 +748,7 @@ stainrenderer stains[] =
 {
     stainrenderer("<grey>media/particle/blood.png", SF_RND4|SF_ROTATE|SF_INVMOD),
     stainrenderer("<grey>media/particle/pulse_scorch.png", SF_ROTATE, 250),
+    stainrenderer("<grey>media/particle/expl_scorch.png", SF_ROTATE, 250),
     stainrenderer("<grey>media/particle/rail_hole.png", SF_ROTATE|SF_OVERBRIGHT),
     stainrenderer("<grey>media/particle/pulse_glow.png", SF_ROTATE|SF_GLOW|SF_SATURATE, 250, 1500, 250),
     stainrenderer("<grey>media/particle/rail_glow.png",  SF_ROTATE|SF_GLOW|SF_SATURATE, 100, 1100, 100),
