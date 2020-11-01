@@ -2216,7 +2216,7 @@ namespace server
         if(target!=actor && !isteam(target->team, actor->team)) as.damage += damage;
 
         sendf(-1, 1, "ri7", N_DAMAGE, target->clientnum, actor->clientnum, damage, ts.armour, ts.health, atk);
-        if(actor->aptitude==APT_VAMPIRE && as.health<as.maxhealth) sendf(-1, 1, "ri5", N_VAMPIRE, actor->clientnum, damage, ts.armour, ts.health);
+        if(actor->aptitude==APT_VAMPIRE && as.health<as.maxhealth && actor!=target) sendf(-1, 1, "ri5", N_VAMPIRE, actor->clientnum, damage, ts.armour, ts.health);
 
         if(target==actor) target->setpushed();
         else if(!hitpush.iszero())
