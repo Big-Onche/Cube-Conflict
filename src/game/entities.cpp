@@ -160,7 +160,7 @@ namespace entities
         if(d==player1) switch(type)
         {
             case I_BOOSTPV:
-                conoutf(CON_GAMEINFO, "\f8Le cochon grillay te donne 75 points de vie supplémentaires !");
+                conoutf(CON_GAMEINFO, "\f8Le cochon grillay te donne 50 points de vie supplémentaires !");
                 playsound(S_COCHON, NULL, NULL, 0, 0, 0, -1, 0, 0);
                 break;
             case I_BOOSTDEGATS:
