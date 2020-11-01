@@ -303,11 +303,36 @@ namespace game
 
         float lxbarvide = 0.5f*(w - 966), lxbarpleine = 0.5f*(w - 954);
 
+        settexture("media/interface/hud/fondbarrexp.png", 3);
+        bgquad(lxbarpleine, h-19, 954, 19);
+
         settexture("media/interface/hud/barrexppleine.png", 3);
         bgquad(lxbarpleine, h-19, (pourcents + 1)*954.0f, 19);
 
         settexture("media/interface/hud/barrexpvide.png", 3);
         bgquad(lxbarvide, h-29, 966, 40);
+
+        dynent *o = intersectclosest(d->o, worldpos, d, zoom ? 50 : 30);
+
+        if(o && o->type==ENT_PLAYER)
+        {
+            float pour1 = ((gameent *)o)->health, pour2 = ((gameent *)o)->health > ((gameent *)o)->maxhealth ? ((gameent *)o)->health : ((gameent *)o)->maxhealth;
+            float pourcents2 = (pour1/pour2);
+            float pour3 = ((gameent *)o)->armour, pour4 = ((gameent *)o)->armourtype == A_BLUE ? 750.f : ((gameent *)o)->armourtype == A_GREEN ? 1250.f : ((gameent *)o)->armourtype == A_MAGNET ? 1500.f : ((gameent *)o)->armourtype == A_YELLOW ? 2000.f : 3000.f;
+            float pourcents3 = (pour3/pour4);
+
+            float lxhbarvide = 0.5f*(w - 483), lxhbarpleine = 0.5f*(w - 477);
+
+            settexture("media/interface/hud/fondbarrestats.png", 3);
+            bgquad(lxhbarpleine, h-screenh/1.37f, 477, 19);
+            settexture("media/interface/hud/barresantepleine.png", 3);
+            bgquad(lxhbarpleine, h-screenh/1.37f, pourcents2*477.0f, 19);
+            settexture("media/interface/hud/barrebouclierpleine.png", 3);
+            bgquad(lxhbarpleine, h-screenh/1.37f, pourcents3*477.0f, 19);
+            settexture("media/interface/hud/barrestatsvide.png", 3);
+            bgquad(lxhbarvide, h-screenh/1.37f-10, 483, 40);
+        }
+
 
         //////////////////////////////////////// RENDU DES NOMBRES ////////////////////////////////////////
 

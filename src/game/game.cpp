@@ -1181,7 +1181,6 @@ namespace game
             if(o && o->type==ENT_PLAYER && validteam(d->team) && ((gameent *)o)->team == d->team)
             {
                 crosshair = 1;
-
                 col = vec::hexcolor(teamtextcolor[player1->team!=d->team ? 2 : 1]);
             }
         }
