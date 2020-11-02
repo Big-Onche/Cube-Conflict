@@ -313,7 +313,7 @@ namespace game
         bgquad(lxbarvide, h-29, 966, 40);
 
         dynent *o = intersectclosest(d->o, worldpos, d, zoom ? 40 : 25);
-        if(o && o->type==ENT_PLAYER && !isteam(player1->team, ((gameent *)o)->team))
+        if(o && o->type==ENT_PLAYER && !isteam(player1->team, ((gameent *)o)->team) && totalmillis-lastshoot<=1000)
         {
             float pour1 = ((gameent *)o)->health, pour2 = ((gameent *)o)->health > ((gameent *)o)->maxhealth ? ((gameent *)o)->health : ((gameent *)o)->maxhealth;
             float pourcents2 = (pour1/pour2);

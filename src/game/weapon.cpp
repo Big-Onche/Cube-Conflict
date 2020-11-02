@@ -3,6 +3,8 @@
 #include "engine.h"
 #include "cubedef.h"
 
+int lastshoot;
+
 namespace game
 {
     static const int OFFSETMILLIS = 500;
@@ -1445,6 +1447,11 @@ namespace game
 
         d->lastaction = lastmillis;
         d->lastattack = atk;
+        if(d==player1)
+        {
+            lastshoot = totalmillis;
+            if(atk==ATK_SMAW_SHOOT || atk==ATK_NUKE_SHOOT || atk==ATK_CACMARTEAU_SHOOT || atk == ATK_MOSSBERG_SHOOT || atk == ATK_SV98_SHOOT) lastshoot+=750;
+        }
 
         if (!d->ammo[gun] && gun!=GUN_ASSISTXPL)
         {
