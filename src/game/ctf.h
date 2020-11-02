@@ -615,7 +615,7 @@ struct ctfclientmode : clientmode
         d->flags = dflags;
         conoutf(CON_GAMEINFO, "%s\f7 %s marqué un point pour l'équipe %s !", teamcolorname(d), d==player1 ? "as" : "a", teamcolor(team));
         team==player1->team ? ctfmessage1=totalmillis : ctfmessage2=totalmillis;
-        if(d==player1) addxp(15);
+        if(d==player1) addxp(20);
 
         playsound(team==player1->team ? S_DRAPEAUSCORE : S_DRAPEAUTOMBE);
 
