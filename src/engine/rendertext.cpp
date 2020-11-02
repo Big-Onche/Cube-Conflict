@@ -279,6 +279,7 @@ static void text_color(char c, char *stack, int size, int &sp, bvec color, int a
             case 'e': color = bvec(32, 255,  32); break;    // Super green
             case 'f': color = bvec(75, 100,  255); break;   // Super blue
             case 'g': color = bvec(64, 64, 64); break;      //Super gray
+            case 'h': color = bvec(0, 200,  0); break;     // Menu green
             default: gle::color(color, a); return;          // provided color: everything else
         }
         if(textbright != 100) color.scale(textbright, 100);
