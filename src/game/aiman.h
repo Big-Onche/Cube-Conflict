@@ -123,7 +123,7 @@ namespace aiman
         m_oneshoot ? ci->aptitude = 0 : ci->aptitude = rnd(15);
         ci->customcape = rnd(12);
         ci->customtombe = rnd(9)+1;
-        ci->customdanse = rnd(5)+1;
+        ci->customdanse = rnd(6)+1;
         ci->aireinit = 2;
         ci->connected = true;
 
