@@ -87,7 +87,7 @@ struct gameentity : extentity
 enum { GUN_RAIL = 0, GUN_PULSE, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_M32, GUN_LANCEFLAMMES, GUN_UZI, GUN_FAMAS, GUN_MOSSBERG, GUN_HYDRA, GUN_SV98, GUN_SKS, GUN_ARBALETE, GUN_AK47, GUN_GRAP1, GUN_ARTIFICE, GUN_GLOCK,
        GUN_S_NUKE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_S_CAMPOUZE,
        GUN_CAC349, GUN_CACMARTEAU, GUN_CACMASTER, GUN_CACFLEAU,
-       GUN_KAMIKAZE, GUN_ASSISTXPL,
+       GUN_KAMIKAZE, GUN_ASSISTXPL, GUN_CACNINJA,
        NUMGUNS };
 enum { A_BLUE, A_GREEN, A_YELLOW, A_MAGNET, A_ASSIST };
 enum { ACT_IDLE = 0, ACT_SHOOT, NUMACTS };
@@ -107,7 +107,7 @@ enum {  ATK_RAIL_SHOOT = 0, ATK_PULSE_SHOOT,
         ATK_CAC349_SHOOT, ATK_CACMARTEAU_SHOOT,
         ATK_CACMASTER_SHOOT, ATK_CACFLEAU_SHOOT,
         //Spéciales aptitudes (2 armes)
-        ATK_KAMIKAZE_SHOOT, ATK_ASSISTXPL_SHOOT,
+        ATK_KAMIKAZE_SHOOT, ATK_ASSISTXPL_SHOOT, ATK_CACNINJA_SHOOT,
         NUMATKS
 };
 
@@ -245,7 +245,7 @@ enum
     S_RISIKILL, S_BIGRISIKILL, S_GIGARISIKILL,
     S_RISIKILLLOIN, S_BIGRISIKILLLOIN, S_GIGARISIKILLLOIN, S_KILL, S_PIXEL, S_DRAPEAUPRIS, S_DRAPEAUTOMBE, S_DRAPEAUSCORE, S_DRAPEAURESET,
 
-    S_CGCORTEX, S_CGHENDEK, S_CGDELAVIER, S_CGPRAUD, S_CGRENE,
+    S_CGCORTEX, S_CGHENDEK, S_CGDELAVIER, S_CGPRAUD, S_CGRENE, S_CGVIEILLE,
 
     //Null
     S_NULL, //S_PUPOUT,
@@ -426,13 +426,14 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound
     { GUN_S_ROQUETTES,  ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MINIROQUETTE, S_NULL, S_NULL,               14,  170,  2000,  10, 300, 0,  700,   6, 8000,  1,   500,   70, 0, 0},
     { GUN_S_CAMPOUZE,   ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_CAMPOUZE,     S_NULL, S_RIFLELOIN,           8,  500,   500,  50,  50, 0, 5000,   3, 8000, 10,   150,    8, 0, 0},
     // Armes corps à corps
-    { GUN_CAC349,       ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_EPEEATTACK,   S_NULL, S_NULL,   3, 1000,  20, 400, 400, 0, 0, -12,   60, 20, 50,  0, 0, 0},
-    { GUN_CACMARTEAU,   ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MARTEAUBAN,   S_NULL, S_NULL,   2, 1500,  30, 250, 250, 0, 0,  -7,   70, 20, 50,  0, 0, 0},
-    { GUN_CACMASTER,    ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MASTERSWORD,  S_NULL, S_NULL,   6,  600,  18, 700, 700, 0, 0, -10,   50, 20, 50,  0, 0, 0},
-    { GUN_CACFLEAU,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FLEAU,        S_NULL, S_NULL,   3, 1250,  25, 175, 175, 0, 0,  -9,   80, 20, 50,  0, 0, 0},
+    { GUN_CAC349,       ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_EPEEATTACK,   S_NULL, S_NULL,   90, 1000,  20, 400, 400, 20, 0, -10,  25,  5,  50,  0, 0, 0},
+    { GUN_CACMARTEAU,   ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MARTEAUBAN,   S_NULL, S_NULL,  100, 1500,  30, 250, 250, 15, 0,  -5,  30,  4,  10,  0, 0, 0},
+    { GUN_CACMASTER,    ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MASTERSWORD,  S_NULL, S_NULL,   40, 600,  18, 700, 700, 20, 0,  -8,   25,  5,  30,  0, 0, 0},
+    { GUN_CACFLEAU,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FLEAU,        S_NULL, S_NULL,  100, 1150,  25, 175, 175, 10, 0, -10,  35,  3, 125,  0, 0, 0},
     // Armes spéciales
-    { GUN_KAMIKAZE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_KAMIKAZEBOOM, S_NULL, S_NULL,   1, 1000, 3000,  1,   1, 0, 1,  10,  120,  1, 250, 425, 1, 0},
-    { GUN_ASSISTXPL,    ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_ASSISTBOOM,   S_NULL, S_NULL,   1,  220,  150,  1,   1, 0, 1,  10,   50,  1,  50, 200, 1, 0},
+    { GUN_KAMIKAZE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_KAMIKAZEBOOM, S_NULL, S_NULL,   1, 1000, 3000,   1,   1,  0, 1,  10,  120,  1, 250, 425, 1, 0},
+    { GUN_ASSISTXPL,    ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_ASSISTBOOM,   S_NULL, S_NULL,   1,  220,  150,   1,   1,  0, 1,  10,   50,  1,  50, 200, 1, 0},
+    { GUN_CACNINJA,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_EPEEATTACK,   S_NULL, S_NULL, 150,  400,   30, 325, 325, 30, 0, -10,   40,  6,  25,   0, 0, 0},
 };
 
 static const struct guninfo { const char *name, *file, *vwep, *armedescFR, *armedescEN; int maxweapposside, maxweapposup, maxzoomfov, attacks[NUMACTS]; } guns[NUMGUNS] =
@@ -440,35 +441,36 @@ static const struct guninfo { const char *name, *file, *vwep, *armedescFR, *arme
     //Armes "normales"
     { "fusilelectrique", "fusilelectrique", "worldgun/fusilelectrique", "un fusil électrique !", "an electric rifle.",                   66,  26, 60,  { -1, ATK_RAIL_SHOOT }, },
     { "fusilplasma", "fusilplasma", "worldgun/fusilplasma",             "un fusil du turfu !", "a futuristic rifle.",                    28,  10, 60,  { -1, ATK_PULSE_SHOOT }, },
-    { "smaw", "smaw", "worldgun/smaw",                                  "un lance-roquettes de noob.", "a noob rocket launcher.",        8,   8, 85,  { -1, ATK_SMAW_SHOOT }, },
+    { "smaw", "smaw", "worldgun/smaw",                                  "un lance-roquettes de noob.", "a noob rocket launcher.",         8,   8, 85,  { -1, ATK_SMAW_SHOOT }, },
     { "minigun", "minigun", "worldgun/minigun",                         "un minigun cheaté.", "a cheated minigun.",                      36,  11, 80,  { -1, ATK_MINIGUN_SHOOT }, },
-    { "spockgun", "spockgun", "worldgun/spockgun",                      "un pistolet alien", "an alien gun.",                           52,  20, 70,  { -1, ATK_SPOCKGUN_SHOOT }, },
+    { "spockgun", "spockgun", "worldgun/spockgun",                      "un pistolet alien", "an alien gun.",                            52,  20, 70,  { -1, ATK_SPOCKGUN_SHOOT }, },
     { "m32", "m32", "worldgun/m32",                                     "une grenade imprévisible.", "an unpredictable grenade",         65,  21, 85,  { -1, ATK_M32_SHOOT }, },
-    { "lanceflammes", "lanceflammes", "worldgun/lanceflammes",          "un lance-flammes !", "a flame thrower !",                       40,  15, 95,  { -1, ATK_LANCEFLAMMES_SHOOT }, },
+    { "lanceflammes", "lanceflammes", "worldgun/lanceflammes",          "un lance-flammes !", "a flame thrower!",                        40,  15, 95,  { -1, ATK_LANCEFLAMMES_SHOOT }, },
     { "uzi", "uzi", "worldgun/uzi",                                     "une mitraillette de gangster.", "a gangster's weapon.",         23,  21, 80,  { -1, ATK_UZI_SHOOT }, },
     { "famas", "famas", "worldgun/famas",                               "une arme made in France", "a weapon made in France.",           54,  14, 70,  { -1, ATK_FAMAS_SHOOT }, },
     { "mossberg500", "mossberg500", "worldgun/mossberg500",             "un fusil à pompe de vieux con.", "an old man's shotgun.",       38,  18, 95,  { -1, ATK_MOSSBERG_SHOOT }, },
-    { "hydra", "hydra", "worldgun/hydra",                               "un fusil venant d'un autre jeu !", "a gun from another game !", 92,  39, 95,  { -1, ATK_HYDRA_SHOOT }, },
+    { "hydra", "hydra", "worldgun/hydra",                               "un fusil venant d'un autre jeu !", "a gun from another game!",  92,  39, 95,  { -1, ATK_HYDRA_SHOOT }, },
     { "sv_98", "sv_98", "worldgun/sv_98",                               "un sniper de campeur.", "a camper rifle.",                       1,   3, 30,  { -1, ATK_SV98_SHOOT }, },
-    { "sks", "sks", "worldgun/sks",                                     "une carabine russe !", "a russian rifle !",                      1,   3, 50,  { -1, ATK_SKS_SHOOT }, },
-    { "arbalete", "arbalete", "worldgun/arbalete",                      "une flèche de merde !", "a rotten arrow.",                         1,   3, 45,  { -1, ATK_ARBALETE_SHOOT }, },
-    { "ak47", "ak47", "worldgun/ak47",                                  "l'arme à Vladimir Poutine !", "Putin's weapon !",               46,  25, 70,  { -1, ATK_AK47_SHOOT }, },
+    { "sks", "sks", "worldgun/sks",                                     "une carabine russe !", "a russian rifle!",                       1,   3, 50,  { -1, ATK_SKS_SHOOT }, },
+    { "arbalete", "arbalete", "worldgun/arbalete",                      "une flèche de merde !", "a rotten arrow.",                       1,   3, 45,  { -1, ATK_ARBALETE_SHOOT }, },
+    { "ak47", "ak47", "worldgun/ak47",                                  "l'arme à Vladimir Poutine !", "Putin's weapon!",                46,  25, 70,  { -1, ATK_AK47_SHOOT }, },
     { "GRAP1", "GRAP1", "worldgun/GRAP1",                               "un projectile rose de tapette !", "a gay ass pink projectile.", 43,  17, 85,  { -1, ATK_GRAP1_SHOOT }, },
     { "feuartifice", "feuartifice", "worldgun/feuartifice",             "une arme de Gilet jaune.", "a yellow vests weapon",             70,  30, 85,  { -1, ATK_ARTIFICE_SHOOT }, },
     { "glock", "glock", "worldgun/glock",                               "un pistolet vraiment pourri.", "a very bad gun",                55,  20, 85,  { -1, ATK_GLOCK_SHOOT }, },
     //Super armes
-    { "missilenorko", "missilenorko", "worldgun/missilenorko",          "une putain de bombe nucléaire !", "a fucking nuclear missile !",   8,   3, 85,  { -1, ATK_NUKE_SHOOT }, },
+    { "missilenorko", "missilenorko", "worldgun/missilenorko",          "une putain de bombe nucléaire !", "a fucking nuclear missile!",    8,   3, 85,  { -1, ATK_NUKE_SHOOT }, },
     { "GAU8", "GAU8", "worldgun/GAU8",                                  "un GAU-8 portable !", "a portable GAU-8!",                        57,  10, 85,  { -1, ATK_GAU8_SHOOT }, },
     { "miniroquettes", "miniroquettes", "worldgun/miniroquettes",       "un minigun à roquettes !", "a missiles minigun",                  10,  10, 70,  { -1, ATK_ROQUETTES_SHOOT }, },
     { "campouze2000", "campouze2000", "worldgun/campouze2000",          "el famoso Campouze 2000 !", "the famous Camp-2000!",              10,  10, 60,  { -1, ATK_CAMPOUZE_SHOOT }, },
     //Corps à corps
     { "epee349", "armes_cac/epee349", "worldgun/armes_cac/epee349",             "l'épée collector à 349 euros.", "a 386$ collector sword.",      4, 3, 95,   { -1, ATK_CAC349_SHOOT }, },
     { "marteauban", "armes_cac/marteauban", "worldgun/armes_cac/marteauban",    "un marteau de bannissement !", "the Ban Hammer.",               4, 3, 95,   { -1, ATK_CACMARTEAU_SHOOT }, },
-    { "mastersword", "armes_cac/mastersword", "worldgun/armes_cac/mastersword", "une épée légendaire !", "a legendary sword !",                  4, 3, 95,   { -1, ATK_CACMASTER_SHOOT }, },
+    { "mastersword", "armes_cac/mastersword", "worldgun/armes_cac/mastersword", "une épée légendaire !", "a legendary sword!",                   4, 3, 95,   { -1, ATK_CACMASTER_SHOOT }, },
     { "fleau", "armes_cac/fleau", "worldgun/armes_cac/fleau",                   "une boule piquante !", "a spiky ball.",                         4, 3, 95,   { -1, ATK_CACFLEAU_SHOOT }, },
     // Armes spéciales aptitudes
-    { "kamikaze", "kamikaze", "worldgun/kamikaze",  "une ceinture d'explosifs !", "an explosives ISIS's made belt !",        4, 3, 95,   { -1, ATK_KAMIKAZE_SHOOT }, },
-    { "assistxpl", "assistxpl", "worldgun/assistxpl",  "une armure assistée !", "powered combat armor !",                    4, 3, 95,   { -1, ATK_ASSISTXPL_SHOOT }, },
+    { "kamikaze",   "kamikaze",         "worldgun/kamikaze",        "une ceinture d'explosifs !",   "an explosives ISIS's made belt!",           4, 3, 95,   { -1, ATK_KAMIKAZE_SHOOT }, },
+    { "assistxpl",  "assistxpl",        "worldgun/assistxpl",       "une armure assistée !",        "powered combat armor!",                     4, 3, 95,   { -1, ATK_ASSISTXPL_SHOOT }, },
+    { "sabre",      "armes_cac/sabre",  "worldgun/armes_cac/sabre", "un sabre de ninja !",          "a ninja saber!",                            4, 3, 95,   { -1, ATK_CACNINJA_SHOOT }, },
 };
 
 static const struct aptisortsinfo { const char *tex1, *tex2, *tex3; int mana1, mana2, mana3, duree1, duree2, duree3, reload1, reload2, reload3, sound1, sound2, sound3; } sorts[] =
@@ -640,11 +642,12 @@ struct gamestate
 
     void spawnstate(int gamemode, int aptitude)
     {
-        addcacweaps(gamemode, aptitude);
+        if(aptitude!=3) addcacweaps(gamemode, aptitude);
 
         switch(aptitude)
         {
             case 0: addsweaps(gamemode); break;
+            case 3: ammo[GUN_CACNINJA] = 1; break;
             case 6: ammo[GUN_KAMIKAZE] = 1; break;
         }
         if(m_random)
@@ -652,7 +655,7 @@ struct gamestate
             armourtype = A_BLUE;
             armour = 750;
             int randomarme = rnd(17);
-            gunselect = aptitude==6 ? GUN_KAMIKAZE : randomarme;
+            gunselect = aptitude==6 ? GUN_KAMIKAZE : aptitude==3 ? GUN_CACNINJA : randomarme;
             ammo[randomarme] = aptitude==2 ? 1.5f*itemstats[randomarme].max : itemstats[randomarme].max;
             return;
         }
@@ -667,7 +670,7 @@ struct gamestate
             baseammo(spawngun2, 4);
             do spawngun3 = rnd(17); while(spawngun1==spawngun3 && spawngun2==spawngun3);
             baseammo(spawngun3, 4);
-            gunselect = aptitude==6 ? GUN_KAMIKAZE : spawngun1;
+            gunselect = aptitude==6 ? GUN_KAMIKAZE : aptitude==3 ? GUN_CACNINJA : spawngun1;
             return;
         }
         else if(m_identique)
@@ -675,14 +678,14 @@ struct gamestate
             loopi(17) baseammo(i);
             armourtype = A_BLUE;
             armour = 750;
-            gunselect = aptitude==6 ? GUN_KAMIKAZE : cnidentiquearme;
+            gunselect = aptitude==6 ? GUN_KAMIKAZE : aptitude==3 ? GUN_CACNINJA : cnidentiquearme;
             ammo[cnidentiquearme] = aptitude==2 ? 1.5f*itemstats[cnidentiquearme].max : itemstats[cnidentiquearme].max;
             return;
         }
         else if(m_oneshoot)
         {
             ammo[GUN_SV98] = aptitude==2 ? 45 : 30;
-            gunselect = aptitude==6 ? GUN_KAMIKAZE : GUN_SV98;
+            gunselect = aptitude==6 ? GUN_KAMIKAZE : aptitude==3 ? GUN_CACNINJA : GUN_SV98;
             armourtype = A_BLUE;
             armour = 0;
             health = maxhealth = 1;
@@ -694,14 +697,14 @@ struct gamestate
             armour = 750;
             ammo[GUN_GLOCK] = aptitude==2 ? 45 : 30;
             ammo[GUN_M32] = aptitude==2 ? 3 : 1;
-            gunselect = GUN_GLOCK;
+            gunselect = aptitude==6 ? GUN_KAMIKAZE : aptitude==3 ? GUN_CACNINJA : GUN_GLOCK;
         }
     }
 
     // just subtract damage here, can set death, etc. later in code calling this
     int dodamage(int damage, int aptitude, int aptisort)
     {
-        int ad = damage*(armourtype+1)*(armourtype==A_ASSIST && armour>0 ? 18 : 25)/100; // let armour absorb when possible
+        int ad = damage*(armourtype+1)*(armourtype==A_ASSIST && armour>0 ? 16 : 25)/100; // let armour absorb when possible
 
         if(damage>0)
         {

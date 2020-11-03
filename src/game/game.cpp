@@ -232,11 +232,7 @@ namespace game
                 if(player1->gunselect!=GUN_KAMIKAZE) gunselect(cnidentiquearme, player1);
                 break;
             case APT_NINJA:
-                switch(player1->gunselect)
-                {
-                    case GUN_CAC349: case GUN_CACFLEAU: case GUN_CACMARTEAU: case GUN_CACMASTER: break;
-                    default: gunselect(cnidentiquearme, player1);
-                }
+                if(player1->gunselect!=GUN_CACNINJA) gunselect(cnidentiquearme, player1);
                 break;
             default: gunselect(cnidentiquearme, player1);
         }
@@ -532,7 +528,7 @@ namespace game
         //return !((gameent *)d)->lasttaunt || lastmillis-((gameent *)d)->lasttaunt>=5000;
     }
 
-    VARFP(player1_danse, 1, 1, 7,
+    VARFP(player1_danse, 1, 1, 6,
     {
         addmsg(N_SENDDANSE, "ri", player1_danse);
         stopsounds();
@@ -543,7 +539,7 @@ namespace game
     void taunt()
     {
         if(player1->state!=CS_ALIVE || player1->physstate<PHYS_SLOPE) return;
-        if(lastmillis-player1->lasttaunt<10000){conoutf(CON_GAMEINFO, "\faOn abuse pas des bonnes choses !"); return;}
+        if(lastmillis-player1->lasttaunt<2000){conoutf(CON_GAMEINFO, "\faOn abuse pas des bonnes choses !"); return;}
         player1->lasttaunt = lastmillis;
         playsound(S_CGCORTEX+(player1->customdanse-1));
         addmsg(N_TAUNT, "rc", player1);
@@ -669,7 +665,7 @@ namespace game
         //////////////////////////////GESTION DE ET STATISTIQUES//////////////////////////////
         if(actor==player1 && d!=player1)
         {
-            addxp(5+player1->killstreak-1);
+            addxp(7+player1->killstreak-1);
 
             if(player1->killstreak==3) DebloqueSucces("ACH_TRIPLETTE");
             else if(player1->killstreak==5) DebloqueSucces("ACH_PENTAPLETTE");

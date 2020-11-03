@@ -53,11 +53,11 @@ namespace ai
             case 1: IA_rndlvl = 50; return;
             case 2: IA_rndlvl = 60; return;
             case 3: IA_rndlvl = 80; return;
-            case 4: IA_rndlvl = 90; return;
+            case 4: IA_rndlvl = 92; return;
         }
     );
 
-    ICOMMAND(addbots, "s", (char *s), loopi(IA_number){addmsg(N_ADDBOT, "ri", IA_rndlvl+rnd(10)-rnd(10));} );
+    ICOMMAND(addbots, "s", (char *s), loopi(IA_number){addmsg(N_ADDBOT, "ri", IA_rndlvl+rnd(3)-rnd(3));} );
     ICOMMAND(delbot, "", (), addmsg(N_DELBOT, "r"));
     ICOMMAND(botlimit, "i", (int *n), addmsg(N_BOTLIMIT, "ri", *n));
     ICOMMAND(botbalance, "i", (int *n), addmsg(N_BOTBALANCE, "ri", *n));
@@ -65,7 +65,7 @@ namespace ai
     void bottaunt(gameent *d)
     {
         if(d->state!=CS_ALIVE || d->physstate<PHYS_SLOPE) return;
-        if(lastmillis-d->lasttaunt<20000) return;
+        if(lastmillis-d->lasttaunt<7500) return;
         d->lasttaunt = lastmillis;
         d->dansechan = playsound(S_CGCORTEX+(d->customdanse-1), d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 150, d->dansechan, 300);
         addmsg(N_TAUNT, "rc", d);
@@ -664,7 +664,7 @@ namespace ai
         switch(d->aptitude)
         {
             case APT_KAMIKAZE: d->ai->weappref = GUN_KAMIKAZE; break;
-            case APT_NINJA: d->ai->weappref = d->ammo[GUN_CACMARTEAU]>0 ? GUN_CACMARTEAU : d->ammo[GUN_CACFLEAU]>0 ? GUN_CACFLEAU : d->ammo[GUN_CACMASTER]>0 ? GUN_CACMASTER : GUN_CAC349; break;
+            case APT_NINJA: d->ai->weappref = GUN_CACNINJA; break;
             default:
             {
                 if(m_identique) d->ai->weappref = cnidentiquearme;
@@ -1251,10 +1251,7 @@ namespace ai
                     else gunselect(cnidentiquearme, d);
                     break;
                 case APT_NINJA:
-                    if(hasrange(d, e, GUN_CAC349) && d->hasammo(GUN_CAC349)) gunselect(GUN_CAC349, d);
-                    else if(hasrange(d, e, GUN_CACMASTER) && d->hasammo(GUN_CACMASTER)) gunselect(GUN_CACMASTER, d);
-                    else if(hasrange(d, e, GUN_CACFLEAU) && d->hasammo(GUN_CACFLEAU)) gunselect(GUN_CACFLEAU, d);
-                    else if(hasrange(d, e, GUN_CACMARTEAU) && d->hasammo(GUN_CACMARTEAU)) gunselect(GUN_CACMARTEAU, d);
+                    if(hasrange(d, e, GUN_CACNINJA)) gunselect(GUN_CACNINJA, d);
                     else gunselect(cnidentiquearme, d);
                     break;
                 default:
@@ -1265,7 +1262,7 @@ namespace ai
 
         if(!d->hasammo(d->gunselect) || !hasrange(d, e, d->gunselect) || (d->gunselect != d->ai->weappref && (!isgoodammo(d->gunselect) || d->hasammo(d->ai->weappref))))
         {
-            static const int gunprefs[] = {GUN_S_NUKE, GUN_S_CAMPOUZE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_KAMIKAZE, GUN_CACFLEAU, GUN_CACMARTEAU, GUN_CACMASTER, GUN_CAC349, GUN_MINIGUN, GUN_PULSE, GUN_RAIL, GUN_LANCEFLAMMES, GUN_HYDRA, GUN_SV98, GUN_SMAW, GUN_ARBALETE, GUN_ARTIFICE, GUN_MOSSBERG, GUN_FAMAS, GUN_M32, GUN_SKS, GUN_SPOCKGUN, GUN_UZI };
+            static const int gunprefs[] = {GUN_S_NUKE, GUN_S_CAMPOUZE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_KAMIKAZE, GUN_CACNINJA, GUN_CACFLEAU, GUN_CACMARTEAU, GUN_CACMASTER, GUN_CAC349, GUN_MINIGUN, GUN_PULSE, GUN_RAIL, GUN_LANCEFLAMMES, GUN_HYDRA, GUN_SV98, GUN_SMAW, GUN_ARBALETE, GUN_ARTIFICE, GUN_MOSSBERG, GUN_FAMAS, GUN_M32, GUN_SKS, GUN_SPOCKGUN, GUN_UZI };
 
             int gun = -1;
             if(d->hasammo(d->ai->weappref) && hasrange(d, e, d->ai->weappref)) gun = d->ai->weappref;
@@ -1437,11 +1434,12 @@ namespace ai
                         if(d->health<250+d->skill*2 && d->armour<50 && d->mana>=25) aptitude(d, 1);
                 }
 
+                switch(rnd(150)){case 0: bottaunt(d);}
+
                 switch(c.type)
                 {
                     case AI_S_WAIT:
                         result = dowait(d, c);
-                        if(d->health>50 && !d->steromillis && !d->epomillis && !d->champimillis && !d->attacking) switch(rnd(250)){case 0: bottaunt(d);}
                         break;
                     case AI_S_DEFEND: result = dodefend(d, c);
                     {

@@ -2191,7 +2191,6 @@ namespace server
         //Dommages spéciaux d'aptitudes
         switch(actor->aptitude)
         {
-            case APT_NINJA: {if(atk==ATK_CAC349_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACMASTER_SHOOT) damage *= 3.0f;} break;
             case APT_MAGICIEN: {if(as.aptisort2) damage *= 1.333333f; break;}
             case APT_CAMPEUR: damage += as.o.dist(ts.o)/2.5f; break;
             case APT_VICKING: {if(as.ragemillis) damage *=1.25f;} break;
@@ -2379,7 +2378,7 @@ namespace server
         gs.lastshot = millis;
 
         float waitfactor = 1;
-        if(ci->aptitude==APT_COMMANDO) waitfactor = 0.75f;
+        if(ci->aptitude==APT_COMMANDO) waitfactor = 0.85f;
         if(ci->aptitude==APT_PRETRE && ci->state.aptisort3) waitfactor = 2.5f;
         if(gs.champimillis>0) waitfactor*=1.25f;
         gs.gunwait = attacks[atk].attackdelay/waitfactor;

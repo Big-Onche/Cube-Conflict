@@ -176,6 +176,7 @@ namespace game
         else if(s!=GUN_CACMASTER    && d->ammo[GUN_CACMASTER])      s = GUN_CACMASTER;
         else if(s!=GUN_CACMARTEAU   && d->ammo[GUN_CACMARTEAU])     s = GUN_CACMARTEAU;
         else if(s!=GUN_CACFLEAU     && d->ammo[GUN_CACFLEAU])       s = GUN_CACFLEAU;
+        else if(s!=GUN_CACNINJA     && d->ammo[GUN_CACNINJA])       s = GUN_CACNINJA;
         gunselect(s, d);
     }
 
@@ -477,7 +478,7 @@ namespace game
         p.z += 0.6f*(d->eyeheight + d->aboveeye) - d->eyeheight;
         if(d->armourtype!=A_MAGNET)
         {
-            if(blood) particle_splash(PART_BLOOD, damage/100, 1000, p, 0x60FFFF, 2.96f);
+            if(blood) particle_splash(PART_BLOOD, damage > 300 ? 3 : damage/100, 1000, p, 0x60FFFF, 2.96f);
             if(damage>=600) playsound(S_SANG, &d->o, 0, 0, 0 , 100, -1, 250);
             gibeffect(damage, vec(0,0,0), d);
         }
@@ -499,7 +500,7 @@ namespace game
         switch(actor->aptitude)
         {
             case APT_NINJA:
-                if(atk==ATK_CAC349_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACMARTEAU_SHOOT || atk==ATK_CACMASTER_SHOOT) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*3.0f), PART_TEXT, 2500, 0xFF0000, actor==player1 ? 7.0f : 5.0f, -8);  normaldamage = false; }
+                if(atk==ATK_CACNINJA_SHOOT) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*3.0f), PART_TEXT, 2500, 0xFF0000, actor==player1 ? 7.0f : 5.0f, -8);  normaldamage = false; }
                 break;
             case APT_MAGICIEN:
                 if(actor->aptisort2) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.3333f), PART_TEXT, 2500, 0xFF5500, actor==player1 ? 5.5f : 4.0f, -8); normaldamage = false; }
@@ -1298,16 +1299,6 @@ namespace game
                 newbouncer(d==player1 && !thirdperson ?  d->muzzle : hudgunorigin(gun, d->o, to, d), up, local, id, d, atk==ATK_KAMIKAZE_SHOOT ? BNC_KAMIKAZE : BNC_ASSISTEXPL, attacks[atk].ttl, attacks[atk].projspeed);
                 break;
             }
-            case ATK_CAC349_SHOOT:
-            case ATK_CACMARTEAU_SHOOT:
-            case ATK_CACMASTER_SHOOT:
-            case ATK_CACFLEAU_SHOOT:
-                loopi(attacks[atk].rays)
-                {
-                    if(d!=hudplayer()) sound_nearmiss(S_EPEEATTACK, from, rays[i]);
-                }
-                break;
-
             default:
                 break;
         }
@@ -1462,7 +1453,7 @@ namespace game
             return;
         }
 
-        if(atk==ATK_CAC349_SHOOT || atk==ATK_CACMARTEAU_SHOOT || atk==ATK_CACMASTER_SHOOT || atk==ATK_CACFLEAU_SHOOT);
+        if(atk==ATK_CAC349_SHOOT || atk==ATK_CACMARTEAU_SHOOT || atk==ATK_CACMASTER_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACNINJA_SHOOT);
         else if(atk==ATK_GAU8_SHOOT || atk==ATK_NUKE_SHOOT || atk==ATK_CAMPOUZE_SHOOT ||atk==ATK_ROQUETTES_SHOOT) d->ammo[gun]--;
         else if(!m_muninfinie) d->ammo[gun]--;
 
@@ -1473,7 +1464,6 @@ namespace game
             switch (d->aptitude)
             {
                 case 2: kickfactor = 0; break;
-                case 3: if(d->gunselect==GUN_CAC349 || d->gunselect==GUN_CACFLEAU || d->gunselect==GUN_CACMARTEAU || d->gunselect==GUN_CACMASTER) kickfactor = 15.0f; break;
                 default: kickfactor = 2.5f;
             }
             vec kickback = vec(dir).mul(attacks[atk].kickamount*-kickfactor);
@@ -1506,7 +1496,7 @@ namespace game
                    hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
         }
         float waitfactor = 1;
-        if(d->aptitude==APT_COMMANDO) waitfactor = 0.75f;
+        if(d->aptitude==APT_COMMANDO) waitfactor = 0.85f;
         if(d->aptitude==APT_PRETRE && d->aptisort3) waitfactor = 2.5f;
         if(d->champimillis>0) waitfactor*=1.25f;
         d->gunwait = attacks[atk].attackdelay/waitfactor;
