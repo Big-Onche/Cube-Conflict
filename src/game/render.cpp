@@ -382,8 +382,8 @@ namespace game
         if(d->type==ENT_PLAYER) flags |= MDL_FULLBRIGHT;
         else flags |= MDL_CULL_DIST;
         if(!mainpass) flags &= ~(MDL_FULLBRIGHT | MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY | MDL_CULL_DIST);
-        float trans = d->state == CS_LAGGED ? 0.3f : 1.0f;
-        if(d->aptisort2 && d->aptitude==APT_PHYSICIEN) {trans = 0.1f; }
+        float trans = d->state == CS_LAGGED ? 0.5f : 1.0f;
+        if(d->aptisort2 && d->aptitude==APT_PHYSICIEN) {trans = 0.08f; }
         rendermodel(mdlname, anim, o, yaw, d->pitch>12 ? 12 : d->pitch<-25 ? -25 : pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), trans));
     }
 
@@ -626,7 +626,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
         }
 
         float trans = 1.0f;
-        if(d->aptitude==APT_PHYSICIEN && d->aptisort2) trans = 0.15f;
+        if(player1->aptitude==APT_PHYSICIEN && player1->aptisort2) trans = 0.08f;
 
         if(d->jointmillis)
         {
@@ -649,14 +649,16 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
         if(d->muzzle.x >= 0) d->muzzle = calcavatarpos(d->muzzle, 12);
         if(d->balles.x >= 0) d->balles = calcavatarpos(d->balles, 12);
 
-        if(d->armourtype!=A_ASSIST && d->armour>0)
+        if(d->armour<=0 && d->armourtype!=A_ASSIST) return;
+        else
         {
             vec sway2;
-            vecfromyawpitch(d->yaw, 0, 0, shieldside, sway2);
+            vecfromyawpitch(d->yaw, 0, 0, d->armourtype==A_ASSIST ? 1 : shieldside, sway2);
+            float floatdivfactor = d->armourtype==A_ASSIST ? 6.f : 3.f;
+            sway2.mul((swayside/floatdivfactor)*cosf(steps));
+            sway2.z += (swayup/floatdivfactor)*(fabs(sinf(steps)) - 1);
+            if(d->armourtype==A_ASSIST || !zoom) sway2.add(swaydir).add(d->o);
 
-            sway2.mul((swayside/3.f)*cosf(steps));
-            sway2.z += (swayup/3.f)*(fabs(sinf(steps)) - 1);
-            if(!zoom) sway2.add(swaydir).add(d->o);
             string bouclier;
             switch(d->armourtype)
             {
@@ -664,25 +666,16 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
                 case A_GREEN: {int shieldvalue = d->armour<=250 ? 4 : d->armour<=500 ? 3 : d->armour<=750 ? 2 : d->armour<=1000 ? 1 : 0; copystring(bouclier, shields[shieldvalue].hudfer);} break;
                 case A_BLUE: {int shieldvalue = d->armour<=150 ? 4 : d->armour<=300 ? 3 : d->armour<=450 ? 2 : d->armour<=600 ? 1 : 0; copystring(bouclier, shields[shieldvalue].hudbois);} ;break;
                 case A_MAGNET: {int shieldvalue = d->armour<=300 ? 4 : d->armour<=600 ? 3 : d->armour<=900 ? 2 : d->armour<=1200 ? 1 : 0; copystring(bouclier, shields[shieldvalue].hudmagnetique);} break;
+                case A_ASSIST: {int shieldvalue = d->armour<=600 ? 4 : d->armour<=1200 ? 3 : d->armour<=1800 ? 2 : d->armour<=2400 ? 1 : 0; copystring(bouclier, shields[shieldvalue].hudassistee);} break;
             }
+
             rendermodel(bouclier, anim, sway2, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
-        }
-        else if(d->armourtype==A_ASSIST)
-        {
-            vec sway3;
-            vecfromyawpitch(d->yaw, 0, 0, 1, sway3);
-            sway3.mul((swayside/6.f)*cosf(steps));
-            sway3.z += (swayup/6.f)*(fabs(sinf(steps)) - 1);
-            sway3.add(swaydir).add(d->o);
-            string armuremdl;
-            d->armour<=600 ? copystring(armuremdl, "hudshield/armureassistee/rouge") : d->armour<=1200 ? copystring(armuremdl, "hudshield/armureassistee/orange") : d->armour<=1800 ? copystring(armuremdl, "hudshield/armureassistee/jaune") : d->armour<=2400 ? copystring(armuremdl, "hudshield/armureassistee/vert") : copystring(armuremdl, "hudshield/armureassistee/bleu");
 
-            rendermodel(armuremdl, anim, sway3, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
-
+            if(d->armourtype!=A_ASSIST) return;
             modelattach a[2];
             d->assist = vec(-1, -1, -1);
             a[0] = modelattach("tag_assist", &d->assist);
-            rendermodel("hudshield/armureassistee/tag", anim, sway3, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
+            rendermodel("hudshield/armureassistee/tag", anim, sway2, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
             if(d->assist.x >= 0) d->assist = calcavatarpos(d->assist, 12);
 
             if(d->armour<1500) {switch(rnd(d->armour<1000 ? 8 : 14)){case 0: regularflame(PART_SMOKE, d->assist, 15, 3, d->armour<750 ? 0x333333 : 0x888888, 1, 3.3f, 50.0f, 1000.0f, -10);}}
