@@ -696,15 +696,11 @@ namespace game
                 playsound(S_BIGRISIKILL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300);
                 if(camera1->o.dist(actor->o) >= 250) playsound(S_BIGRISIKILLLOIN, &actor->o, NULL, 0, 0 , 200, -1, 750);
                 break;
-            default:
-                if(actor->killstreak>=10)
-                {
-                    playsound(S_GIGARISIKILL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300);
-                    if(camera1->o.dist(actor->o) >= 250) playsound(S_GIGARISIKILLLOIN, &actor->o, NULL, 0, 0 , 200, -1, 1500);
-                }
+            case 10: case 15: case 20:
+                playsound(S_GIGARISIKILL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300);
+                if(camera1->o.dist(actor->o) >= 250) playsound(S_GIGARISIKILLLOIN, &actor->o, NULL, 0, 0 , 200, -1, 1500);
+                break;
         }
-
-        //if(m_battle && actor==player1) playsound(S_BATTLEKILL);  //Sons de kills pour certaines armes
 
         switch(actor->gunselect)
         {
@@ -743,13 +739,13 @@ namespace game
             aname = colorname(actor, NULL, langage ? "\fdYou" : "\fdTu", "\fc");
         }
 
-        if(d==actor && actor->armourtype==A_ASSIST && actor->armour==0) // Explosion d'armure assistée ///////////////////////////////////////////////////////////////////////
+        if(d==actor && actor->armourtype==A_ASSIST && actor->armour==0) // Explosion d'armure assistée //////////////////////////////////////////////////////////////////////
         {
             if(langage)conoutf(contype, "%s%s%s", d==player1 ? "\fd" : "", d==player1 ? "Your" : dname, d==player1 ? " \f7powered armor exploded !" : "\f7's powered armor exploded !");
             else conoutf(contype, "%s%s %s", d==player1 ? "\fd" : "L'armure assistée de ", d==player1 ? "Ton" : dname, d==player1 ? "\f7armure assistée a explosé !" : "\f7a explosé !");
             if(d==player1) {player1->killstreak=0; copystring(str_armetueur, langage ? partmessageEN[rnd(5)].parttroll : partmessageFR[rnd(9)].parttroll); suicided = true;}
         }
-        else if(d==actor) // Suicide ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        else if(d==actor) // Suicide ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
             conoutf(contype, "%s%s %s%s%s", d==player1 ? "\fd" : "", dname, langage ? "" : d==player1 ? "t'es " : "s'est ", langage ? partmessageEN[rnd(2)].partsuicide : partmessageFR[rnd(5)].partsuicide, d==player1 ? " !" : ".");
             if(d==player1) {player1->killstreak=0; copystring(str_armetueur, langage ? partmessageEN[rnd(5)].parttroll : partmessageFR[rnd(9)].parttroll); suicided = true;}
@@ -763,37 +759,49 @@ namespace game
         else // Kill ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
             float distance = actor->o.dist(d->o)/18.f;
-            if(actor==player1) {
-                    conoutf(contype, "\fd%s \f7%s%s \fc%s \f7%s %s (%.1fm)",
-                        aname,
-                        langage ? "" : "as ",
-                        langage ? partmessageEN[rnd(7)].partverb : partmessageFR[rnd(15)].partverb,
-                        dname,
-                        langage ? "with" : "avec",
-                        langage ? guns[actor->gunselect].armedescEN : guns[actor->gunselect].armedescFR,
-                        distance);
-                        playsound(S_KILL); message1 = totalmillis; message2 = totalmillis; copystring(str_pseudovictime, dname); n_aptitudevictime = d->aptitude; killdistance = distance;
-                        if(distance>=100.f) DebloqueSucces("ACH_BEAUTIR");
+            if(actor==player1) ////////////////////TU as tué quelqu'un////////////////////
+            {
+                conoutf(contype, "\fd%s \f7%s%s \fc%s \f7%s %s (%.1fm)",
+                    aname,
+                    langage ? "" : "as ",
+                    langage ? partmessageEN[rnd(7)].partverb : partmessageFR[rnd(15)].partverb,
+                    dname,
+                    langage ? "with" : "avec",
+                    langage ? guns[actor->gunselect].armedescEN : guns[actor->gunselect].armedescFR,
+                    distance);
+                playsound(S_KILL);
+                message1 = totalmillis; message2 = totalmillis; copystring(str_pseudovictime, dname); n_aptitudevictime = d->aptitude; killdistance = distance;
+                if(distance>=100.f) DebloqueSucces("ACH_BEAUTIR");
 
-            } //TU as tué quelqu'un
-            else if(d==player1) {conoutf(contype, "\fd%s \f7%s %s %s \fc%s \f7%s %s (%.1fm)",
-                                         dname,
-                                         langage ? "got" : "as été",
-                                         langage ? partmessageEN[rnd(7)].partverb : partmessageFR[rnd(15)].partverb,
-                                         langage ? "by" : "par",
-                                         aname,
-                                         langage ? "with" : "avec",
-                                         langage ? guns[actor->gunselect].armedescEN : guns[actor->gunselect].armedescFR,
-                                         distance);  player1->killstreak=0; copystring(str_pseudotueur, aname); n_aptitudetueur = actor->aptitude; copystring(str_armetueur, langage ? guns[actor->gunselect].armedescEN : guns[actor->gunselect].armedescFR);  suicided = false;} //TU as été tué
-            else conoutf(contype, "%s \f7%s%s %s \f7%s %s (%.1fm)",
-                         aname,
-                         langage ? "" : "a ",
-                         langage ? partmessageEN[rnd(7)].partverb : partmessageFR[rnd(15)].partverb,
-                         dname,
-                         langage ? "with" : "avec",
-                         langage ? guns[actor->gunselect].armedescEN : guns[actor->gunselect].armedescFR, distance); //Quelqu'un a tué quelqu'un
+            }
+            else if(d==player1) ////////////////////TU as été tué////////////////////
+            {
+                conoutf(contype, "\fd%s \f7%s %s %s \fc%s \f7%s %s (%.1fm)",
+                    dname,
+                    langage ? "got" : "as été",
+                    langage ? partmessageEN[rnd(7)].partverb : partmessageFR[rnd(15)].partverb,
+                    langage ? "by" : "par",
+                    aname,
+                    langage ? "with" : "avec",
+                    langage ? guns[actor->gunselect].armedescEN : guns[actor->gunselect].armedescFR,
+                    distance);
+                player1->killstreak=0;
+                copystring(str_pseudotueur, aname); n_aptitudetueur = actor->aptitude;
+                copystring(str_armetueur, langage ? guns[actor->gunselect].armedescEN : guns[actor->gunselect].armedescFR);
+                suicided = false;
+            }
+            else ////////////////////Quelqu'un a tué quelqu'un////////////////////
+            {
+                conoutf(contype, "%s \f7%s%s %s \f7%s %s (%.1fm)",
+                    aname,
+                    langage ? "" : "a ",
+                    langage ? partmessageEN[rnd(7)].partverb : partmessageFR[rnd(15)].partverb,
+                    dname,
+                    langage ? "with" : "avec",
+                    langage ? guns[actor->gunselect].armedescEN : guns[actor->gunselect].armedescFR, distance);
+            }
 
-            if(actor!=player1) // Informe que quelqu'un est chaud  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+            if(actor!=player1) ////////////////////Informe que quelqu'un est chaud////////////////////
             {
                 if(actor->killstreak==3 || actor->killstreak==5 || actor->killstreak==10)
                 {
@@ -801,14 +809,11 @@ namespace game
                     n_killstreakacteur = actor->killstreak;
                     message3 = totalmillis;
                 }
-
             }
         }
-
         deathstate(d, actor);
         ai::killed(d, actor);
     }
-
 
     void timeupdate(int secs)
     {
