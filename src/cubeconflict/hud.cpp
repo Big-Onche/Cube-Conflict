@@ -231,7 +231,7 @@ namespace game
             return;
         }
 
-        if(player1->gunselect == GUN_CAC349 || GUN_CACFLEAU || GUN_CACMARTEAU || GUN_CACMASTER || GUN_CACNINJA) settexture("media/interface/hud/epee.png");
+        if(player1->gunselect==GUN_CAC349 || player1->gunselect==GUN_CACFLEAU || player1->gunselect==GUN_CACMARTEAU || player1->gunselect==GUN_CACMASTER || player1->gunselect==GUN_CACNINJA) settexture("media/interface/hud/epee.png");
         else settexture("media/interface/hud/balle.png");
         bgquad(w-130, h-130, 115, 115);
 
