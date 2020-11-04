@@ -555,7 +555,7 @@ static inline void renderbatchedmodel(model *m, const batchedmodel &b)
     m->render(anim, b.basetime, b.basetime2, b.pos, b.yaw, b.pitch, b.roll, b.d, a, b.sizescale, b.colorscale);
 }
 
-VARP(maxmodelradiusdistance, 10, 120, 1000);
+VARP(maxmodelradiusdistance, 10, 100, 1000);
 
 static inline void enablecullmodelquery()
 {
