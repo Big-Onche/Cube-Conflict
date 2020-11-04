@@ -118,29 +118,39 @@ ICOMMAND(loadsavepart3, "iii", (int *csave1, int *csave2, int *csave3),
 //////////////////////Gestion des succès//////////////////////
 void DebloqueSucces(const char* ID)
 {
-	// Un appel de Steam a-t-il été reçu ?
-	bool bRet = SteamAPI_Init();
-    //  Notifie du succès si Steam a été initialisé avec succès
-    if (bRet && conserveurofficiel)
+    if(conserveurofficiel)
     {
-        SteamUserStats()->SetAchievement(ID);
-        SteamUserStats()->StoreStats();
+        bool bRet = SteamAPI_Init(); 	// Un appel de Steam a-t-il été reçu ?
+
+        if(bRet) // Notifie du succès si Steam a été initialisé avec succès
+        {
+            SteamUserStats()->SetAchievement(ID);
+            SteamUserStats()->StoreStats();
+        }
     }
     else conoutf("Succès non déverrouillé (Steam non actif ou serveur non officiel)");
-
 }
 
 VARP(testkills, 0, 0, 100);
 ICOMMAND(testsendstat, "", (),
 {
-    SteamUserStats()->SetStat("STAT_KILLS", 10);
-    SteamUserStats()->StoreStats();
+    bool bRet = SteamAPI_Init();
+    if (bRet)
+    {
+        SteamUserStats()->SetStat("STAT_KILLS", testkills);
+        conoutf("STAT K ENVOYEE (%d)", testkills);
+        SteamUserStats()->StoreStats();
+    }
 });
 
 int stat_k = 0;
 
 ICOMMAND(testgetstat, "", (),
 {
-    SteamUserStats()->GetStat("STAT_KILLS", &stat_k);
-    conoutf("STAT K = %d", stat_k);
+    bool bRet = SteamAPI_Init();
+    if (bRet)
+    {
+        SteamUserStats()->GetStat("STAT_KILLS", &stat_k);
+        conoutf("STAT K = %d", stat_k);
+    }
 });

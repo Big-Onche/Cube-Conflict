@@ -868,7 +868,11 @@ namespace server
     ctfservmode ctfmode;
     servmode *smode = NULL;
 
-    bool canspawnitem(int type) { return !m_noitems && (type>=I_RAIL && type<=I_MANA && (!m_noammo || type<I_RAIL || type>I_GLOCK)); }
+    bool canspawnitem(int type)
+    {
+        if(m_noammo) return (type>=I_SUPERARME && type<=I_MANA);
+        else return (type>=I_RAIL && type<=I_MANA);
+    }
 
     int spawntime(int type)
     {
@@ -1518,8 +1522,8 @@ namespace server
 
         uchar operator[](int msg) const { return msg >= 0 && msg < NUMMSG ? msgmask[msg] : 0; }
 
-    } msgfilter(-1, N_CONNECT, N_SERVINFO, N_INITCLIENT, N_WELCOME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_VAMPIRE,
-                N_HITPUSH, N_SHOTFX, N_EXPLODEFX, N_DIED, N_SPAWNSTATE, N_FORCEDEATH, N_TEAMINFO, N_ITEMACC, N_ITEMSPAWN, N_IDENTIQUEARME,
+    } msgfilter(-1, N_CONNECT, N_SERVINFO, N_INITCLIENT, N_WELCOME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE,
+                N_HITPUSH, N_SHOTFX, N_EXPLODEFX, N_DIED, N_SPAWNSTATE, N_FORCEDEATH, N_TEAMINFO, N_ITEMACC, N_ITEMSPAWN, N_IDENTIQUEARME, N_VAMPIRE,
                 N_TIMEUP, N_CDIS, N_CURRENTMASTER, N_PONG, N_RESUME, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_SENDMAP, N_DROPFLAG,
                 N_SCOREFLAG, N_RETURNFLAG, N_RESETFLAG, N_CLIENT, N_AUTHCHAL, N_INITAI, N_DEMOPACKET, -2, N_CALCLIGHT, N_REMIP,
                 N_ANNOUNCE, N_NEWMAP, N_GETMAP, N_SENDMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY,
@@ -2226,7 +2230,7 @@ namespace server
         }
         if(ts.health<=0)
         {
-            if(actor->aptitude==APT_FAUCHEUSE && !m_oneshoot) //Augmente la santé maxi de la faucheuse si elle tue un joueur
+            if(actor->aptitude==APT_FAUCHEUSE) //Augmente la santé maxi de la faucheuse si elle tue un joueur
             {
                 if(as.maxhealth >= 1500) as.health = min(as.health+250, as.maxhealth); //Rends juste de la santé si le boost est d�j� appliqu�
                 if(as.maxhealth < 1500) {as.maxhealth += 500; as.health += 500;} //Augmente la santé max à 150 PV si c'est le premier kill
