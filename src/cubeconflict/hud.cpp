@@ -153,7 +153,7 @@ namespace game
         else if (crosshairsize<40) crosshairsize += 3;
         zoomfov = guns[player1->gunselect].maxzoomfov;
 
-        if((player1->gunselect == GUN_SKS  || player1->gunselect == GUN_SV98 || player1->gunselect==GUN_ARBALETE || player1->gunselect==GUN_S_CAMPOUZE || player1->gunselect==GUN_S_ROQUETTES) && zoom == 1)
+        if((player1->gunselect==GUN_SKS || player1->gunselect==GUN_SV98 || player1->gunselect==GUN_ARBALETE || player1->gunselect==GUN_S_CAMPOUZE || player1->gunselect==GUN_S_ROQUETTES) && zoom == 1)
         {
             gle::colorf(crosshairalpha, crosshairalpha, crosshairalpha, crosshairalpha);
 
@@ -231,7 +231,7 @@ namespace game
             return;
         }
 
-        if(player1->gunselect == GUN_CAC349 || player1->gunselect == GUN_CACFLEAU || player1->gunselect == GUN_CACMARTEAU || player1->gunselect == GUN_CACMASTER || player1->gunselect == GUN_CACNINJA) settexture("media/interface/hud/epee.png");
+        if(player1->gunselect == GUN_CAC349 || GUN_CACFLEAU || GUN_CACMARTEAU || GUN_CACMASTER || GUN_CACNINJA) settexture("media/interface/hud/epee.png");
         else settexture("media/interface/hud/balle.png");
         bgquad(w-130, h-130, 115, 115);
 
@@ -265,10 +265,7 @@ namespace game
             settexture("media/interface/hud/mana.png");
             bgquad(15, h-260, 115, 115);
             decal_icon += 130;
-        }
 
-        if(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_INDIEN)
-        {
             float positionsorts = 0.5f*(w - 100);
             int neededdata = 0;
             switch(d->aptitude) {case APT_PHYSICIEN: neededdata++; break; case APT_PRETRE: neededdata+=2; break; case APT_INDIEN: neededdata+=3; }
@@ -312,8 +309,8 @@ namespace game
         settexture("media/interface/hud/barrexpvide.png", 3);
         bgquad(lxbarvide, h-29, 966, 40);
 
-        dynent *o = intersectclosest(d->o, worldpos, d, zoom ? 40 : 25);
-        if(o && o->type==ENT_PLAYER && !isteam(player1->team, ((gameent *)o)->team) && totalmillis-lastshoot<=1000)
+        dynent *o = intersectclosest(d->o, worldpos, d, zoom ? 40 : 25); //actor->o.dist(d->o)/18.f;
+        if(o && o->type==ENT_PLAYER && !isteam(player1->team, ((gameent *)o)->team) && totalmillis-lastshoot<=1000 && player1->o.dist(o->o)<guns[d->gunselect].hudrange)
         {
             float pour1 = ((gameent *)o)->health, pour2 = ((gameent *)o)->health > ((gameent *)o)->maxhealth ? ((gameent *)o)->health : ((gameent *)o)->maxhealth;
             float pourcents2 = (pour1/pour2);
