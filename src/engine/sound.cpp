@@ -160,7 +160,7 @@ void stopmusic()
 bool shouldinitaudio = true;
 SVARF(audiodriver, AUDIODRIVER, { shouldinitaudio = true; initwarning("sound configuration", INIT_RESET, CHANGE_SOUND); });
 VARF(sound, 0, 1, 1, { shouldinitaudio = true; initwarning("sound configuration", INIT_RESET, CHANGE_SOUND); });
-VARF(soundchans, 1, 128, 512, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
+VARF(soundchans, 1, 512, 512, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 VARF(soundfreq, 0, 44100, 48000, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 VARF(soundbufferlen, 128, 1024, 4096, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 
