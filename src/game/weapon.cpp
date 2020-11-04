@@ -1324,7 +1324,7 @@ namespace game
         }
 
         if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 300) playsound(attacks[atk].farsound1, &d->muzzle, NULL, 0, 0 , 200, -1, 500);
-        else if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 450 && camera1->o.dist(hudgunorigin(gun, d->o, to, d)) <= 700) playsound(attacks[atk].farsound2, &d->muzzle, NULL, 0, 0 , 200, -1, 700);
+        else if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 450 && camera1->o.dist(hudgunorigin(gun, d->o, to, d)) <= 650) playsound(attacks[atk].farsound2, &d->muzzle, NULL, 0, 0 , 200, -1, 700);
     }
 
     void particletrack(physent *owner, vec &o, vec &d)
