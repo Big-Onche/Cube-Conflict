@@ -9,15 +9,15 @@ VAR(n_map, 0, 0, 99);
 VARR(mapofficielle, 0, 0, 1);
 
 extern void calcmode();
-VAR(n_mode, 0, 0, 16);
+VAR(n_mode, 0, 0, 12);
 VARFP(n_team, 0, 0, 1, { calcmode(); });
 VARFP(n_type, 0, 0, 1, { calcmode(); });
-VARFP(n_spec, 1, 1, 5, { calcmode(); });
+VARFP(n_spec, 1, 1, 4, { calcmode(); });
 
 void calcmode()
 {
-    if(!n_type) n_mode = n_spec+(n_team*5);
-    else n_mode = n_spec+10;
+    if(!n_type) n_mode = n_spec+(n_team*4);
+    else n_mode = n_spec+8;
 }
 
 int cnidentiquearme = 0;

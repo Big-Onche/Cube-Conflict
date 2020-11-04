@@ -129,8 +129,6 @@ enum
     M_IDENTIQUE  = 1<<9,
     M_NOAMMO     = 1<<10,
     M_MUNINFINIE = 1<<11,
-    M_ONESHOOT   = 1<<12,
-    M_NOITEMS    = 1<<13,
 };
 
 static struct gamemodeinfo
@@ -148,19 +146,16 @@ static struct gamemodeinfo
     { "Tue Les Tous (Aléatoire)", "Deathmatch (Random)", M_RANDOM | M_NOAMMO | M_MUNINFINIE},
     { "Tue Les Tous (Full stuff)", "Deathmatch (Full stuff)", M_FULLSTUFF},
     { "Tue Les Tous (Identique)", "Deathmatch (Identical)", M_IDENTIQUE | M_NOAMMO | M_MUNINFINIE},
-    { "Tue Les Tous (One shoot)", "Deathmatch (One shoot)", M_ONESHOOT | M_NOAMMO | M_NOITEMS | M_MUNINFINIE},
     //MODE 6, 7, 8, 9, 10
     { "Tue Les Tous", "Team Deathmatch", M_TEAM },
     { "Tue Les Tous (Aléatoire)", "Team Deathmatch (Random)", M_RANDOM | M_TEAM | M_NOAMMO | M_MUNINFINIE},
     { "Tue Les Tous (Full stuff)", "Team Deathmatch (Full stuff)", M_FULLSTUFF | M_TEAM},
     { "Tue Les Tous (Identique)", "Team Deathmatch (Identical)", M_IDENTIQUE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
-    { "Tue Les Tous (One shoot)", "Team Deathmatch (One shoot)", M_ONESHOOT | M_TEAM | M_NOAMMO | M_NOITEMS | M_MUNINFINIE},
     //MODE 11, 12, 13, 14, 15
     { "Capture de drapeau", "Capture the flag", M_CTF | M_TEAM },
     { "Capture de drapeau (Aléatoire)", "Capture the flag (Random)", M_RANDOM | M_CTF | M_TEAM | M_NOAMMO | M_MUNINFINIE},
     { "Capture de drapeau (Full stuff)", "Capture the flag (Full stuff)", M_FULLSTUFF | M_CTF | M_TEAM},
     { "Capture de drapeau (Identique)", "Capture the flag (Identical)", M_IDENTIQUE | M_CTF | M_TEAM | M_NOAMMO | M_MUNINFINIE},
-    { "Capture de drapeau (One shoot)", "Capture the flag (One shoot)", M_ONESHOOT | M_CTF | M_TEAM | M_NOAMMO | M_NOITEMS | M_MUNINFINIE},
 };
 
 #define STARTGAMEMODE (-1)
@@ -181,8 +176,6 @@ static struct gamemodeinfo
 #define m_identique    (m_check(gamemode, M_IDENTIQUE))
 #define m_noammo       (m_check(gamemode, M_NOAMMO))
 #define m_muninfinie   (m_check(gamemode, M_MUNINFINIE))
-#define m_oneshoot     (m_check(gamemode, M_ONESHOOT))
-#define m_noitems     (m_check(gamemode, M_NOITEMS))
 
 #define m_demo         (m_check(gamemode, M_DEMO))
 #define m_edit         (m_check(gamemode, M_EDIT))
@@ -325,7 +318,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
 #define CC_SERVER_PORT 43000
 #define CC_LANINFO_PORT 42998
 #define CC_MASTER_PORT 42999
-#define PROTOCOL_VERSION 1              // bump when protocol changes
+#define PROTOCOL_VERSION 2              // bump when protocol changes
 #define DEMO_VERSION 1                  // bump when demo format changes
 #define DEMO_MAGIC "CC_DEMO\0\0"
 
@@ -630,7 +623,6 @@ struct gamestate
 
     void addsweaps(int gamemode)
     {
-        if(m_oneshoot)return;
         switch(rnd(200))
         {
             case 0: ammo[GUN_S_ROQUETTES] = 20; gunselect = GUN_S_ROQUETTES; break;
@@ -680,15 +672,6 @@ struct gamestate
             armour = 750;
             gunselect = aptitude==6 ? GUN_KAMIKAZE : aptitude==3 ? GUN_CACNINJA : cnidentiquearme;
             ammo[cnidentiquearme] = aptitude==2 ? 1.5f*itemstats[cnidentiquearme].max : itemstats[cnidentiquearme].max;
-            return;
-        }
-        else if(m_oneshoot)
-        {
-            ammo[GUN_SV98] = aptitude==2 ? 45 : 30;
-            gunselect = aptitude==6 ? GUN_KAMIKAZE : aptitude==3 ? GUN_CACNINJA : GUN_SV98;
-            armourtype = A_BLUE;
-            armour = 0;
-            health = maxhealth = 1;
             return;
         }
         else

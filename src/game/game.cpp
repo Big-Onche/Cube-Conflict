@@ -254,7 +254,7 @@ namespace game
 
             if(curtime>0 && d->ragemillis && d!=player1) d->ragemillis = max(d->ragemillis-curtime, 0);
 
-            if(d==hudplayer() && d->state==CS_ALIVE && !m_oneshoot)
+            if(d==hudplayer() && d->state==CS_ALIVE)
             {
                 if(d->health<=200) d->hurtchan = playsound(S_HEARTBEAT, NULL, NULL, 0, -1, 1000, d->hurtchan);
                 else d->stopheartbeat();
@@ -268,7 +268,7 @@ namespace game
                 if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
                 if(d->steromillis || d->epomillis || d->jointmillis || d->champimillis) entities::checkboosts(curtime, d);
                 if(d->ragemillis || d->aptisort1 || d->aptisort2 || d->aptisort3) entities::checkaptiskill(curtime, d);
-                if(players[i]->aptitude==APT_MEDECIN && !m_oneshoot)
+                if(players[i]->aptitude==APT_MEDECIN)
                 {
                     gameent *h = players[i];
                     loopv(players)
@@ -386,7 +386,7 @@ namespace game
 
             loopv(players)
             {
-                if(players[i]->aptitude==APT_MEDECIN && !m_oneshoot)
+                if(players[i]->aptitude==APT_MEDECIN)
                 {
                     gameent *h = players[i];
                     loopv(players)
