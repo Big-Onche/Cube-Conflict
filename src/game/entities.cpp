@@ -134,11 +134,9 @@ namespace entities
     void pickupeffects(int n, gameent *d, int rndsuperweapon)
     {
         if(!ents.inrange(n)) return;
-        extentity *e = ents[n];
-        int type = e->type;
+        int type = ents[n]->type;
         if(!validitem(type)) return;
-        e->clearspawned();
-        e->clearnopickup();
+        ents[n]->clearspawned();
         if(!d) return;
         itemstat &is = itemstats[type-I_RAIL];
         d->pickup(type+rndsuperweapon, d->aptitude, rndsuperweapon, d->aptisort1, d->armourtype);
@@ -275,18 +273,17 @@ namespace entities
 
     void trypickup(int n, gameent *d)
     {
-        extentity *e = ents[n];
-        switch(e->type)
+        switch(ents[n]->type)
         {
             default:
-                if(d->canpickup(e->type, d->aptitude, d->armourtype))
+                if(d->canpickup(ents[n]->type, d->aptitude, d->armourtype))
                 {
                     addmsg(N_ITEMPICKUP, "rci", d, n);
-                    e->setnopickup(); // even if someone else gets it first
+                    ents[n]->clearspawned(); // even if someone else gets it first
 
                     if(d==player1)
                     {
-                        switch(e->type)
+                        switch(ents[n]->type)
                         {
                             case I_SANTE: addstat(1, STAT_PANACHAY); addxp(1); break;
                             case I_MANA: addstat(1, STAT_MANA); addxp(1); break;
@@ -301,7 +298,7 @@ namespace entities
                             case I_BOOSTGRAVITE: addstat(1, STAT_JOINT); addxp(5); break;
                             case I_BOOSTPRECISION: addstat(1, STAT_CHAMPIS); addxp(5); break;
                             case I_SUPERARME: addstat(1, STAT_SUPERARMES); addxp(7); break;
-                            default: if(e->type>=I_RAIL && e->type<=I_GLOCK) {addstat(1, STAT_ARMES); addxp(1);}
+                            default: if(ents[n]->type>=I_RAIL && ents[n]->type<=I_GLOCK) {addstat(1, STAT_ARMES); addxp(1);}
                         }
                     }
                 }
@@ -309,14 +306,14 @@ namespace entities
 
             case TELEPORT:
             {
-                if(d->lastpickup==e->type && lastmillis-d->lastpickupmillis<500) break;
+                if(d->lastpickup==ents[n]->type && lastmillis-d->lastpickupmillis<500) break;
                 if(!teleteam && m_teammode) break;
-                if(e->attr3 > 0)
+                if(ents[n]->attr3 > 0)
                 {
-                    defformatstring(hookname, "can_teleport_%d", e->attr3);
+                    defformatstring(hookname, "can_teleport_%d", ents[n]->attr3);
                     if(!execidentbool(hookname, true)) break;
                 }
-                d->lastpickup = e->type;
+                d->lastpickup = ents[n]->type;
                 d->lastpickupmillis = lastmillis;
                 teleport(n, d);
                 break;
@@ -324,15 +321,15 @@ namespace entities
 
             case JUMPPAD:
             {
-                if(d->lastpickup==e->type && lastmillis-d->lastpickupmillis<300) break;
-                d->lastpickup = e->type;
+                if(d->lastpickup==ents[n]->type && lastmillis-d->lastpickupmillis<300) break;
+                d->lastpickup = ents[n]->type;
                 d->lastpickupmillis = lastmillis;
                 jumppadeffects(d, n, true);
                 if(d->ai) d->ai->becareful = true;
                 d->falling = vec(0, 0, 0);
                 d->physstate = PHYS_FALL;
                 d->timeinair = 1;
-                d->vel = vec(e->attr3*10.0f, e->attr2*10.0f, e->attr1*12.5f);
+                d->vel = vec(ents[n]->attr3*10.0f, ents[n]->attr2*10.0f, ents[n]->attr1*12.5f);
                 break;
             }
         }
@@ -346,7 +343,7 @@ namespace entities
         {
             extentity &e = *ents[i];
             if(e.type==NOTUSED) continue;
-            if((!e.spawned() || e.nopickup()) && e.type!=TELEPORT && e.type!=JUMPPAD) continue;
+            if(!e.spawned() && e.type!=TELEPORT && e.type!=JUMPPAD) continue;
             float dist = e.o.dist(o);
             if(dist<(e.type==TELEPORT ? 16 : 12)) trypickup(i, d);
         }
@@ -402,22 +399,17 @@ namespace entities
         putint(p, -1);
     }
 
-    void resetspawns() { loopv(ents) { extentity *e = ents[i]; e->clearspawned(); e->clearnopickup(); } }
+    void resetspawns() { loopv(ents) ents[i]->clearspawned(); }
 
     void spawnitems(bool force)
     {
-        loopv(ents)
+        loopv(ents) if(validitem(ents[i]->type) && (!m_noammo || ents[i]->type<I_RAIL || ents[i]->type>I_GLOCK))
         {
-            extentity *e = ents[i];
-            if(validitem(e->type))
-            {
-                e->setspawned(force || !server::delayspawn(e->type));
-                e->clearnopickup();
-            }
+            ents[i]->setspawned(force || !server::delayspawn(ents[i]->type));
         }
     }
 
-    void setspawn(int i, bool on) { if(ents.inrange(i)) { extentity *e = ents[i]; e->setspawned(on); e->clearnopickup(); } }
+    void setspawn(int i, bool on) { if(ents.inrange(i)) ents[i]->setspawned(on); }
 
     extentity *newentity() { return new gameentity(); }
     void deleteentity(extentity *e) { delete (gameentity *)e; }
