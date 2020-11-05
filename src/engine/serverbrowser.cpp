@@ -1,4 +1,5 @@
 #include "engine.h"
+#include "cubedef.h"
 
 struct resolverthread
 {
@@ -332,10 +333,10 @@ struct serverinfo : servinfo, pingattempts
 
     const char *status() const
     {
-        if(address.host == ENET_HOST_ANY) return "IP Invalide";
-        if(ping == WAITING) return "Attente de réponse";
-        if(protocol < currentprotocol) return "Le serveur n'est pas à jour";
-        if(protocol > currentprotocol) return "Votre client n'est pas à jour";
+        if(address.host == ENET_HOST_ANY) return langage ? "Unknown host" : "IP Invalide";
+        if(ping == WAITING) return langage ? "Waiting for response" : "Attente de connexion";
+        if(protocol < currentprotocol) return langage ? "The server needs to be updated" : "Le serveur n'est pas à jour";
+        if(protocol > currentprotocol) return langage ? "The game needs to be updated" : "Votre jeu n'est pas à jour";
         return NULL;
     }
 

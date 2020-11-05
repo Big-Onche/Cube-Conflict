@@ -1956,7 +1956,7 @@ namespace server
     void sendresume(clientinfo *ci)
     {
         servstate &gs = ci->state;
-        sendf(-1, 1, "ri9i9iiiivi", N_RESUME, ci->clientnum,
+        sendf(-1, 1, "ri9i9i3ivi", N_RESUME, ci->clientnum,
             gs.state, gs.killstreak, gs.frags, gs.flags, gs.deaths,
             gs.steromillis, gs.epomillis, gs.jointmillis, gs.champimillis, gs.ragemillis,
             gs.aptisort1, gs.aptisort2, gs.aptisort3,
