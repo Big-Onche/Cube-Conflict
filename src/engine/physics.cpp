@@ -1768,7 +1768,7 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
 void modifygravity(physent *pl, bool water, int curtime, int jointmillis, int aptitude, bool assist)
 {
     float secs = curtime/1000.0f;
-    if(jointmillis>0) secs = (curtime/((jointmillis/(aptitude==13 ? 7.5f : 10)+1000.0f)));
+    if(jointmillis>0) secs = (curtime/((jointmillis/(aptitude==13 ? 12.5f : 25.f)+1000.0f)));
 
     vec g(0, 0, 0);
     if(pl->physstate == PHYS_FALL) g.z -= GRAVITY*secs;
