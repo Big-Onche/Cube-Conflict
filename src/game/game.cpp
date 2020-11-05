@@ -274,18 +274,30 @@ namespace game
                     loopv(players)
                     {
                         gameent *r = players[i];
-                        if(r->o.dist(h->o)/18.f<6 && r->health<r->maxhealth+200 && isteam(h->team, r->team) && r->state==CS_ALIVE)
+                        switch(rnd(70))
                         {
-                            switch(rnd(70))
+                            case 0:
                             {
-                                case 0:
-                                r->health+=30;
-                                vec irays(r->o);
-                                irays.sub(h->o);
-                                irays.normalize().mul(1300.0f);
-                                particle_flying_flare(h->o, irays, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
-                                if(r->health>r->maxhealth+200) r->health=r->maxhealth+200;
-                                playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
+                                if(r->o.dist(h->o)/18.f<6 && r->health<r->maxhealth+200 && h->state==CS_ALIVE && r->state==CS_ALIVE)
+                                {
+                                    if(m_teammode && isteam(h->team, r->team))
+                                    {
+                                        r->health+=30;
+                                        vec irays(r->o);
+                                        irays.sub(h->o);
+                                        irays.normalize().mul(1300.0f);
+                                        particle_flying_flare(h->o, irays, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
+                                        if(r->health>r->maxhealth+200) r->health=r->maxhealth+200;
+                                        playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
+                                    }
+                                    else if(r->health<=r->maxhealth+200 && r->state==CS_ALIVE)
+                                    {
+                                        r->health+=30;
+                                        particle_splash(PART_SANTE, 1, 400, r->o, 0xFFFFFF, 0.5f+rnd(3),  400, 200);
+                                        if(r->health>r->maxhealth+200) r->health=r->maxhealth+200;
+                                        playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
+                                    }
+                                }
                             }
                         }
                     }
@@ -384,6 +396,18 @@ namespace game
             if(player1->ragemillis || player1->vampimillis || player1->aptisort1 || player1->aptisort2 || player1->aptisort3) entities::checkaptiskill(curtime, player1);
             if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_INDIEN) updatespecials(player1);
 
+            if(player1->aptitude==APT_MEDECIN && !m_teammode && player1->health<player1->maxhealth+200 && player1->state==CS_ALIVE)
+            {
+                switch(rnd(70))
+                {
+                    case 0:
+                    player1->health+=30;
+                    particle_splash(PART_SANTE, 1, 400, player1->feetpos(), 0xFFFFFF, 0.5f+rnd(3),  400, 200);
+                    if(player1->health>player1->maxhealth+200) player1->health=player1->maxhealth+200;
+                    playsound(S_REGENMEDIGUN, &player1->o, 0, 0, 0 , 50, -1, 125);
+                }
+            }
+
             loopv(players)
             {
                 if(players[i]->aptitude==APT_MEDECIN)
@@ -391,18 +415,20 @@ namespace game
                     gameent *h = players[i];
                     loopv(players)
                     {
-                        if(players[i]->o.dist(h->o)/18.f<6 && players[i]->health<players[i]->maxhealth+200 && isteam(h->team, players[i]->team) && h->state==CS_ALIVE)
+                        switch(rnd(70))
                         {
-                            switch(rnd(70))
+                            case 0:
                             {
-                                case 0:
-                                players[i]->health+=30;
-                                vec irays(players[i]->o);
-                                irays.sub(h->o);
-                                irays.normalize().mul(1300.0f);
-                                particle_flying_flare(h->o, irays, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
-                                if(players[i]->health>players[i]->maxhealth+200) players[i]->health=players[i]->maxhealth+200;
-                                playsound(S_REGENMEDIGUN, &h->o, 0, 0, 0 , 50, -1, 125);
+                                if(players[i]->o.dist(h->o)/18.f<6 && players[i]->health<players[i]->maxhealth+200 && isteam(h->team, players[i]->team) && h->state==CS_ALIVE && m_teammode)
+                                {
+                                    players[i]->health+=30;
+                                    vec irays(players[i]->o);
+                                    irays.sub(h->o);
+                                    irays.normalize().mul(1300.0f);
+                                    particle_flying_flare(h->o, irays, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
+                                    if(players[i]->health>players[i]->maxhealth+200) players[i]->health=players[i]->maxhealth+200;
+                                    playsound(S_REGENMEDIGUN, &h->o, 0, 0, 0 , 50, -1, 125);
+                                }
                             }
                         }
                     }
