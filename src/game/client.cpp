@@ -1859,7 +1859,11 @@ namespace game
                     gameent *d = getclient(cn);
                     entities::pickupeffects(i, d, rndsuperweapon);
                 }
-                else entities::setspawn(i, true);
+                else if(entities::ents.inrange(i))
+                {
+                    entities::setspawn(i, true);
+                    ai::itemspawned(i);
+                }
                 break;
             }
 
