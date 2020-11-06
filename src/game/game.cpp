@@ -1023,8 +1023,10 @@ namespace game
         if(waterlevel>0)
         {
             if(material&MAT_WATER)
+            {
                 playsound(S_SPLASH1, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 350);
                 particle_splash(PART_EAU, 30, 120, o, 0x18181A, 10.0f+rnd(7), 500, -20);
+            }
         }
         else if(waterlevel<0)
         {

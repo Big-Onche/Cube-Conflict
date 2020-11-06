@@ -1360,9 +1360,9 @@ namespace game
         d->lifesequence = getint(p);
         d->health = getint(p);
         d->maxhealth = getint(p);
+        d->mana = getint(p);
         d->armour = getint(p);
         d->armourtype = getint(p);
-        d->mana = getint(p);
         if(resume && d==player1)
         {
             getint(p);
@@ -1423,7 +1423,7 @@ namespace game
                     gamepaused = val;
                     player1->attacking = ACT_IDLE;
                 }
-                if(a) conoutf(langage ? "Game is paused by administrator." : "La partie a été mise en pause par un administrateur.");
+                if(a) conoutf(langage ? "Game is paused by administrator." : "La partie a ï¿½tï¿½ mise en pause par un administrateur.");
                 else conoutf(langage ? "Game is paused." : "La partie est en pause.");
                 if(val) addpostfx("pause", 1, 1, 1, 1, vec4(1, 1, 1, 1));
                 else clearpostfx();
@@ -1842,28 +1842,18 @@ namespace game
                 entities::setspawn(i, true);
                 ai::itemspawned(i);
                 playsound(entities::ents[i]->type==I_SUPERARME ? S_ALARME : S_ITEMSPAWN, &entities::ents[i]->o, NULL, 0, 0, 0, -1, entities::ents[i]->type==I_SUPERARME ? 4000 : 300);
-                #if 0
-                const char *name = entities::itemname(i);
-                if(name) particle_text(entities::ents[i]->o, name, PART_TEXT, 2000, 0x32FF64, 4.0f, -8);
-                #endif
-                //int icon = entities::itemicon(i);
-                //if(icon >= 0) particle_icon(vec(0.0f, 0.0f, 4.0f).add(entities::ents[i]->o), icon%4, icon/4, PART_HUD_ICON, 2000, 0xFFFFFF, 2.0f, -8);
                 break;
             }
 
             case N_ITEMACC:            // server acknowledges that I picked up this item
             {
-                int i = getint(p), cn = getint(p), rndsuperweapon = getint(p);
+                int rndsuperweapon = getint(p), i = getint(p), cn = getint(p);
                 if(cn >= 0)
                 {
                     gameent *d = getclient(cn);
                     entities::pickupeffects(i, d, rndsuperweapon);
                 }
-                else if(entities::ents.inrange(i))
-                {
-                    entities::setspawn(i, true);
-                    ai::itemspawned(i);
-                }
+                else entities::setspawn(i, true);
                 break;
             }
 
@@ -2137,13 +2127,13 @@ namespace game
                 int t = getint(p);
                 switch(t)
                 {
-                    case I_BOOSTDEGATS: conoutf(CON_GAMEINFO, "\faLES STÉROS SONT BIENTÔT PRÊTS !"); break;
+                    case I_BOOSTDEGATS: conoutf(CON_GAMEINFO, "\faLES STï¿½ROS SONT BIENTï¿½T PRï¿½TS !"); break;
                     case I_BOOSTPV: conoutf(CON_GAMEINFO, "\faLE COCHON GRILLAY EST PRESQUE CUIT !"); break;
                     case I_BOOSTPRECISION: conoutf(CON_GAMEINFO, "\faLES CHAMPIGNONS REPOUSSENT !"); break;
                     case I_BOOSTVITESSE: conoutf(CON_GAMEINFO, "\faL'EPO ARRIVE POUR LES CYCLISTES !"); break;
                     case I_BOOSTGRAVITE: conoutf(CON_GAMEINFO, "\faQUELQU'UN ROULE UN GROS JOINT !"); break;
-                    case I_SUPERARME: conoutf(CON_GAMEINFO, "\faLA SUPER-ARME EST BIENTÔT PRÊTE À ANNIHILER"); break;
-                    case I_ARMUREASSISTEE: conoutf(CON_GAMEINFO, "\faARMURE ASSISTÉE EN COURS DE DÉPLOIMENT"); break;
+                    case I_SUPERARME: conoutf(CON_GAMEINFO, "\faLA SUPER-ARME EST BIENTï¿½T PRï¿½TE ï¿½ ANNIHILER"); break;
+                    case I_ARMUREASSISTEE: conoutf(CON_GAMEINFO, "\faARMURE ASSISTï¿½E EN COURS DE Dï¿½PLOIMENT"); break;
                     case 50: conoutf(CON_GAMEINFO, "\faCHANGEMENT D'ARME DANS 5 SECONDES !"); break;
                 }
                 break;
@@ -2410,4 +2400,3 @@ namespace game
     }
     COMMAND(gotosel, "");
 }
-

@@ -384,8 +384,6 @@ static struct itemstat { int add, max, sound; const char *name; int icon, info; 
     {50,       150, S_ITEMHEALTH,   "MANA",                HICON_SIZE},
 };
 
-#define validitem(n) true
-
 #define MAXRAYS 50
 #define EXP_SELFDAMDIV 1
 #define EXP_SELFPUSH 1.0f
@@ -479,11 +477,10 @@ static const struct aptisortsinfo { const char *tex1, *tex2, *tex3; int mana1, m
 // inherited by gameent and server clients
 struct gamestate
 {
-    int health, maxhealth;
+    int health, maxhealth, mana;
     int armour, armourtype;
     int steromillis, epomillis, jointmillis, champimillis, ragemillis, vampimillis;
     int aptisort1, aptisort2, aptisort3;
-    int mana;
     int gunselect, gunwait;
     int ammo[NUMGUNS];
     int aitype, skill;
@@ -513,9 +510,9 @@ struct gamestate
                 else return health<maxhealth;
                 break;
             case I_MANA:
-                if(aptitude==5 || aptitude==8 || aptitude==11 || aptitude==14) return mana<is.max;
-                else if (aptitude==4) return  health<maxhealth;
-                else return false;
+                if(aptitude==4) return health<maxhealth;
+                else return (aptitude==5 || aptitude==8 || aptitude==11 || aptitude==14) && mana<is.max;
+                break;
             case I_BOOSTPV: return maxhealth<is.max;
             case I_BOOSTDEGATS: return steromillis<is.max;
             case I_BOOSTPRECISION: return champimillis<is.max;
@@ -867,8 +864,6 @@ namespace entities
     extern vector<extentity *> ents;
 
     extern const char *entmdlname(int type);
-    extern const char *itemname(int i);
-    extern int itemicon(int i);
 
     extern void preloadentities();
     extern void renderentities();

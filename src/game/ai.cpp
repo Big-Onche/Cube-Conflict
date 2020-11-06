@@ -118,10 +118,12 @@ namespace ai
     {
         float dist = o.dist(q);
 
-        float x = fmod(fabs(asin((q.z-o.z)/dist)/RAD-pitch), 360);
-        float y = fmod(fabs(-atan2(q.x-o.x, q.y-o.y)/RAD-yaw), 360);
-        if(min(x, 360-x) <= fovx && min(y, 360-y) <= fovy) return raycubelos(o, q, v);
-
+        if(dist<=mdist)
+        {
+            float x = fmod(fabs(asin((q.z-o.z)/dist)/RAD-pitch), 360);
+            float y = fmod(fabs(-atan2(q.x-o.x, q.y-o.y)/RAD-yaw), 360);
+            if(min(x, 360-x) <= fovx && min(y, 360-y) <= fovy) return raycubelos(o, q, v);
+        }
         return false;
     }
 
@@ -164,7 +166,7 @@ namespace ai
         switch(atk)
         {
             case ATK_PULSE_SHOOT: o.z += (e->aboveeye*0.2f)-(0.8f*d->eyeheight); break;
-            case ATK_KAMIKAZE_SHOOT: case ATK_M32_SHOOT: case ATK_SMAW_SHOOT: case ATK_NUKE_SHOOT: case ATK_ROQUETTES_SHOOT: case ATK_ARTIFICE_SHOOT: o.z += (e->aboveeye*0.3f)-(1.0f*e->eyeheight); break;
+            case ATK_KAMIKAZE_SHOOT: case ATK_M32_SHOOT: case ATK_SMAW_SHOOT: case ATK_NUKE_SHOOT: case ATK_ROQUETTES_SHOOT: case ATK_ARTIFICE_SHOOT: o.z += (e->eyeheight/3.f); break;
             default: o.z += (e->aboveeye-e->eyeheight)*0.5f;
         }
 
@@ -527,7 +529,7 @@ namespace ai
         {
             interest &n = interests.add();
             n.state = AI_S_INTEREST;
-            n.node = closestwaypoint(e.o, SIGHTMIN*2, true);
+            n.node = closestwaypoint(e.o, SIGHTMIN, true);
             n.target = id;
             n.targtype = AI_T_ENTITY;
             n.score = d->feetpos().squaredist(e.o)/(force ? -1 : score);
@@ -539,7 +541,7 @@ namespace ai
         loopv(entities::ents)
         {
             extentity &e = *(extentity *)entities::ents[i];
-            if(!e.spawned() || !d->canpickup(e.type, d->aptitude, d->armourtype)) continue;
+            if(!e.spawned() || e.nopickup() || !d->canpickup(e.type, d->aptitude, d->armourtype)) continue;
             tryitem(d, e, i, b, interests, force);
         }
     }
@@ -790,7 +792,7 @@ namespace ai
                 if(entities::ents.inrange(b.target))
                 {
                     extentity &e = *(extentity *)entities::ents[b.target];
-                    if(!e.spawned() || !validitem(e.type)) return 0;
+                    if(!e.spawned() || e.type < I_RAIL || e.type > I_GLOCK || d->hasmaxammo(e.type)) return 0;
                     return makeroute(d, b, e.o) ? 1 : 0;
                 }
                 break;
