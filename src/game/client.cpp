@@ -2127,13 +2127,13 @@ namespace game
                 int t = getint(p);
                 switch(t)
                 {
-                    case I_BOOSTDEGATS: conoutf(CON_GAMEINFO, "\faLES ST�ROS SONT BIENT�T PR�TS !"); break;
+                    case I_BOOSTDEGATS: conoutf(CON_GAMEINFO, "\faLES STÉROS SONT BIENT�T PRÊTS !"); break;
                     case I_BOOSTPV: conoutf(CON_GAMEINFO, "\faLE COCHON GRILLAY EST PRESQUE CUIT !"); break;
                     case I_BOOSTPRECISION: conoutf(CON_GAMEINFO, "\faLES CHAMPIGNONS REPOUSSENT !"); break;
                     case I_BOOSTVITESSE: conoutf(CON_GAMEINFO, "\faL'EPO ARRIVE POUR LES CYCLISTES !"); break;
                     case I_BOOSTGRAVITE: conoutf(CON_GAMEINFO, "\faQUELQU'UN ROULE UN GROS JOINT !"); break;
-                    case I_SUPERARME: conoutf(CON_GAMEINFO, "\faLA SUPER-ARME EST BIENT�T PR�TE � ANNIHILER"); break;
-                    case I_ARMUREASSISTEE: conoutf(CON_GAMEINFO, "\faARMURE ASSIST�E EN COURS DE D�PLOIMENT"); break;
+                    case I_SUPERARME: conoutf(CON_GAMEINFO, "\faLA SUPER-ARME EST BIENTÔT PRÊTE À ANNIHILER"); break;
+                    case I_ARMUREASSISTEE: conoutf(CON_GAMEINFO, "\faARMURE ASSISTÉE EN COURS DE DÉPLOIMENT"); break;
                     case 50: conoutf(CON_GAMEINFO, "\faCHANGEMENT D'ARME DANS 5 SECONDES !"); break;
                 }
                 break;
