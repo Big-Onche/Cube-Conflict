@@ -165,8 +165,8 @@ namespace ai
         vec o = e->o;
         switch(atk)
         {
-            case ATK_PULSE_SHOOT: o.z += (e->aboveeye*0.2f)-(0.8f*d->eyeheight); break;
-            case ATK_KAMIKAZE_SHOOT: case ATK_M32_SHOOT: case ATK_SMAW_SHOOT: case ATK_NUKE_SHOOT: case ATK_ROQUETTES_SHOOT: case ATK_ARTIFICE_SHOOT: o.z += (e->eyeheight/3.f); break;
+            case ATK_PULSE_SHOOT: case ATK_GRAP1_SHOOT: o.z += (e->aboveeye*0.2f)-(0.8f*d->eyeheight); break;
+            case ATK_M32_SHOOT: case ATK_SMAW_SHOOT: case ATK_NUKE_SHOOT: case ATK_ROQUETTES_SHOOT: case ATK_ARTIFICE_SHOOT: o.z += (e->aboveeye*0.2f)-(0.9f*d->eyeheight); break;
             default: o.z += (e->aboveeye-e->eyeheight)*0.5f;
         }
 
@@ -174,12 +174,12 @@ namespace ai
         {
             if(lastmillis >= d->ai->lastaimrnd)
             {
-                const int aiskew[NUMGUNS] = { 125, 1, 1, 30, 30, 1, 1, 15, 40, 1, 1, 3, 25, 10, 25, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+                const int aiskew[NUMGUNS] = { 130, 1, 1, 30, 30, 1, 1, 15, 40, 1, 1, 3, 25, 10, 25, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
                 //int aiskew = 1;
 
                 #define rndaioffset(r) ((rnd(int(r*aiskew[d->gunselect]*2)+1)-(r*aiskew[d->gunselect]))*(1.f/float(max(d->skill, 1))))
                 loopk(3) d->ai->aimrnd[k] = rndaioffset(e->radius);
-                int dur = (d->skill+10)*10;
+                int dur = (d->skill+50)*10;
                 d->ai->lastaimrnd = lastmillis+dur+rnd(dur);
             }
             loopk(3) o[k] += d->ai->aimrnd[k];
@@ -1108,6 +1108,7 @@ namespace ai
             d->crouching = -1;
         }
 
+        if(d->gunselect==GUN_ARTIFICE || d->gunselect==GUN_SMAW || d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_ROQUETTES) d->jumping = true;
         if(d->aptisort3 && d->aptitude==APT_PHYSICIEN) switch(rnd(60)) {case 1: d->jumping = true;}
 		if(!d->ai->dontmove) jumpto(d, b, d->ai->spot);
 
