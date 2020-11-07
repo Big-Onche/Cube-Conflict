@@ -2,8 +2,7 @@
 #include "cubedef.h"
 
 int ambiancealeatoire;
-VARP(forceambiance, 0, 0, 6);
-VAR(n_ambiance, 0, 0, 99);
+VAR(n_ambiance, 0, 0, 7);
 
 VAR(n_map, 0, 0, 99);
 VARR(mapofficielle, 0, 0, 1);
@@ -1423,7 +1422,7 @@ namespace game
                     gamepaused = val;
                     player1->attacking = ACT_IDLE;
                 }
-                if(a) conoutf(langage ? "Game is paused by administrator." : "La partie a ï¿½tï¿½ mise en pause par un administrateur.");
+                if(a) conoutf(langage ? "Game is paused by administrator." : "La partie a été mise en pause par un administrateur.");
                 else conoutf(langage ? "Game is paused." : "La partie est en pause.");
                 if(val) addpostfx("pause", 1, 1, 1, 1, vec4(1, 1, 1, 1));
                 else clearpostfx();
@@ -1618,6 +1617,12 @@ namespace game
             case N_IDENTIQUEARME:
             {
                 cnidentiquearme = getint(p);
+                break;
+            }
+
+            case N_SERVAMBIENT:
+            {
+                n_ambiance = getint(p);
                 break;
             }
 
@@ -2127,13 +2132,13 @@ namespace game
                 int t = getint(p);
                 switch(t)
                 {
-                    case I_BOOSTDEGATS: conoutf(CON_GAMEINFO, "\faLES STÃ‰ROS SONT BIENTï¿½T PRÃŠTS !"); break;
+                    case I_BOOSTDEGATS: conoutf(CON_GAMEINFO, "\faLES STÉROS SONT BIENTÔT PRÊTS !"); break;
                     case I_BOOSTPV: conoutf(CON_GAMEINFO, "\faLE COCHON GRILLAY EST PRESQUE CUIT !"); break;
                     case I_BOOSTPRECISION: conoutf(CON_GAMEINFO, "\faLES CHAMPIGNONS REPOUSSENT !"); break;
                     case I_BOOSTVITESSE: conoutf(CON_GAMEINFO, "\faL'EPO ARRIVE POUR LES CYCLISTES !"); break;
                     case I_BOOSTGRAVITE: conoutf(CON_GAMEINFO, "\faQUELQU'UN ROULE UN GROS JOINT !"); break;
-                    case I_SUPERARME: conoutf(CON_GAMEINFO, "\faLA SUPER-ARME EST BIENTÃ”T PRÃŠTE Ã€ ANNIHILER"); break;
-                    case I_ARMUREASSISTEE: conoutf(CON_GAMEINFO, "\faARMURE ASSISTÃ‰E EN COURS DE DÃ‰PLOIMENT"); break;
+                    case I_SUPERARME: conoutf(CON_GAMEINFO, "\faLA SUPER-ARME EST BIENTÔT PRÊTE À ANNIHILER"); break;
+                    case I_ARMUREASSISTEE: conoutf(CON_GAMEINFO, "\faARMURE ASSISTÉE EN COURS DE DÉPLOIEMENT"); break;
                     case 50: conoutf(CON_GAMEINFO, "\faCHANGEMENT D'ARME DANS 5 SECONDES !"); break;
                 }
                 break;

@@ -1004,7 +1004,10 @@ bool isdedicatedserver() { return dedicatedserver; }
 void rundedicatedserver()
 {
     dedicatedserver = true;
-    logoutf("dedicated server started, waiting for clients...");
+    servambient = rnd(7)+1;
+    logoutf("Server ON, waiting for clients...");
+    logoutf("Serveur ON, en attente de clients...");
+    logoutf("------------------------------------");
 #ifdef WIN32
     SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
     for(;;)
