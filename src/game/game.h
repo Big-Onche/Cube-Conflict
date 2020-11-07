@@ -405,10 +405,10 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound
     { GUN_UZI,          ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_UZI,          S_UZI_LOIN, S_ARMESLOIN,      35,   75,  150, 130, 300, 0, 3000,   2, 8000,  1,    10,   7, 0, 0},
     { GUN_FAMAS,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FAMAS,        S_FAMAS_LOIN, S_ARMESLOIN,    30,   90,  140, 100, 250, 0, 3000,   3, 8000,  1,    20,  10, 0, 0},
     { GUN_MOSSBERG,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MOSSBERG,     S_NULL, S_RIFLELOIN,           3, 1200,   50, 500, 500, 0,    0,  20, 1000, 25,    20,   0, 0, 0},
-    { GUN_HYDRA,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_HYDRA,        S_HYDRA_LOIN, S_RIFLELOIN,     4,  750,   32, 300, 300, 0,    0,  15,  600, 15,    20,   0, 0, 0},
+    { GUN_HYDRA,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_HYDRA,        S_HYDRA_LOIN, S_RIFLELOIN,     4,  666,   35, 300, 300, 0,    0,  15,  600, 15,    20,   0, 0, 0},
     { GUN_SV98,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_SV98,         S_SV98_LOIN, S_RIFLELOIN,      2, 1500,  900,   1, 600, 0, 3000,  30, 8000,  1,    80,  12, 0, 0},
     { GUN_SKS,          ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_SKS,          S_SKS_LOIN, S_RIFLELOIN,      10,  420,  500,   5, 150, 0, 2750,  25, 8000,  1,    50,   7, 0, 0},
-    { GUN_ARBALETE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_ARBALETE,     S_NULL, S_NULL,                5,  900,  700,  15, 200, 0, 2000,   7, 8000,  1,    20,   3, 0, 0},
+    { GUN_ARBALETE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_ARBALETE,     S_NULL, S_NULL,                5,  900,  850,  15, 200, 0, 2000,   7, 8000,  1,    20,   3, 0, 0},
     { GUN_AK47,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_AK47,         S_AK47_LOIN, S_ARMESLOIN,     30,   92,  170, 125, 300, 0, 3000,   7, 8000,  1,    50,   3, 0, 0},
     { GUN_GRAP1,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GRAP1,        S_NULL, S_NULL,               12,  200,  250,  30, 400, 0, 1500,  -3, 8000,  1,  -600,  20, 0, 0},
     { GUN_ARTIFICE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_ARTIFICE,     S_ARTIFICE_LOIN, S_NULL,       3, 1000,  800,  50, 600, 0,  900,  60,  520,  1,   500,  80, 0, 0},
@@ -419,14 +419,14 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound
     { GUN_S_ROQUETTES,  ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MINIROQUETTE, S_NULL, S_NULL,               14,  170,  2000,  10, 300, 0,  700,   6, 8000,  1,   500,   70, 0, 0},
     { GUN_S_CAMPOUZE,   ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_CAMPOUZE,     S_NULL, S_RIFLELOIN,           8,  500,   500,  50,  50, 0, 5000,   3, 8000, 10,   150,    8, 0, 0},
     // Armes corps à corps
-    { GUN_CAC349,       ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_EPEEATTACK,   S_NULL, S_NULL,   90, 1000,  20, 400, 400, 20, 0, -10,  25,  5,  50,  0, 0, 0},
-    { GUN_CACMARTEAU,   ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MARTEAUBAN,   S_NULL, S_NULL,  100, 1500,  30, 250, 250, 15, 0,  -5,  30,  4,  10,  0, 0, 0},
-    { GUN_CACMASTER,    ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MASTERSWORD,  S_NULL, S_NULL,   40, 600,  18, 700, 700, 20, 0,  -8,   25,  5,  30,  0, 0, 0},
-    { GUN_CACFLEAU,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FLEAU,        S_NULL, S_NULL,  100, 1150,  25, 175, 175, 10, 0, -10,  35,  3, 125,  0, 0, 0},
+    { GUN_CAC349,       ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_EPEEATTACK,   S_NULL, S_NULL,   4, 1000,  130, 400, 400, 20, 0, -10,  25,  5,  50,  0, 0, 0},
+    { GUN_CACMARTEAU,   ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MARTEAUBAN,   S_NULL, S_NULL,   3, 1500,  175, 250, 250, 15, 0,  -5,  30,  4,  10,  0, 0, 0},
+    { GUN_CACMASTER,    ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MASTERSWORD,  S_NULL, S_NULL,   5, 600,   100, 700, 700, 20, 0,  -8,  25,  5,  30,  0, 0, 0},
+    { GUN_CACFLEAU,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FLEAU,        S_NULL, S_NULL,   4, 1150,  250, 175, 175, 10, 0, -10,  35,  3, 125,  0, 0, 0},
     // Armes spéciales
     { GUN_KAMIKAZE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_KAMIKAZEBOOM, S_NULL, S_NULL,   1, 1000, 3000,   1,   1,  0, 1,  10,  120,  1, 250, 425, 1, 0},
     { GUN_ASSISTXPL,    ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_ASSISTBOOM,   S_NULL, S_NULL,   1,  220,  150,   1,   1,  0, 1,  10,   50,  1,  50, 200, 1, 0},
-    { GUN_CACNINJA,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_EPEEATTACK,   S_NULL, S_NULL, 150,  400,   30, 325, 325, 30, 0, -10,   40,  6,  25,   0, 0, 0},
+    { GUN_CACNINJA,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_EPEEATTACK,   S_NULL, S_NULL,   8,  400,  140, 325, 325, 30, 0, -10,   40,  6,  25,   0, 0, 0},
 };
 
 static const struct guninfo { const char *name, *file, *vwep, *armedescFR, *armedescEN; int maxweapposside, maxweapposup, maxzoomfov, hudrange, attacks[NUMACTS]; } guns[NUMGUNS] =
@@ -438,7 +438,7 @@ static const struct guninfo { const char *name, *file, *vwep, *armedescFR, *arme
     { "minigun", "minigun", "worldgun/minigun",                         "un minigun cheaté.", "a cheated minigun.",                      36,  11, 80,  750,  { -1, ATK_MINIGUN_SHOOT }, },
     { "spockgun", "spockgun", "worldgun/spockgun",                      "un pistolet alien", "an alien gun.",                            52,  20, 70,  500,  { -1, ATK_SPOCKGUN_SHOOT }, },
     { "m32", "m32", "worldgun/m32",                                     "une grenade imprévisible.", "an unpredictable grenade",         65,  21, 85,  600,  { -1, ATK_M32_SHOOT }, },
-    { "lanceflammes", "lanceflammes", "worldgun/lanceflammes",          "un lance-flammes !", "a flame thrower!",                        40,  15, 95,  250,  { -1, ATK_LANCEFLAMMES_SHOOT }, },
+    { "lanceflammes", "lanceflammes", "worldgun/lanceflammes",          "un lance-flammes !", "a flame thrower!",                        40,  15, 95,  280,  { -1, ATK_LANCEFLAMMES_SHOOT }, },
     { "uzi", "uzi", "worldgun/uzi",                                     "une mitraillette de gangster.", "a gangster's weapon.",         23,  21, 80,  500,  { -1, ATK_UZI_SHOOT }, },
     { "famas", "famas", "worldgun/famas",                               "une arme made in France", "a weapon made in France.",           54,  14, 70,  750,  { -1, ATK_FAMAS_SHOOT }, },
     { "mossberg500", "mossberg500", "worldgun/mossberg500",             "un fusil à pompe de vieux con.", "an old man's shotgun.",       38,  18, 95,  300,  { -1, ATK_MOSSBERG_SHOOT }, },
@@ -620,7 +620,7 @@ struct gamestate
 
     void addsweaps(int gamemode)
     {
-        switch(rnd(200))
+        switch(rnd(50))
         {
             case 0: ammo[GUN_S_ROQUETTES] = 20; gunselect = GUN_S_ROQUETTES; break;
             case 1: ammo[GUN_S_GAU8] = 250; gunselect = GUN_S_GAU8; break;
