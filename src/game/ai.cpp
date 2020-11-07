@@ -541,6 +541,7 @@ namespace ai
         loopv(entities::ents)
         {
             extentity &e = *(extentity *)entities::ents[i];
+
             if(!e.spawned() || e.nopickup() || !d->canpickup(e.type, d->aptitude, d->armourtype)) continue;
             tryitem(d, e, i, b, interests, force);
         }
@@ -792,7 +793,7 @@ namespace ai
                 if(entities::ents.inrange(b.target))
                 {
                     extentity &e = *(extentity *)entities::ents[b.target];
-                    if(!e.spawned() || e.type < I_RAIL || e.type > I_GLOCK || d->hasmaxammo(e.type)) return 0;
+                    if(!e.spawned() || e.type < I_RAIL || e.type > I_MANA || d->hasmaxammo(e.type)) return 0;
                     return makeroute(d, b, e.o) ? 1 : 0;
                 }
                 break;
@@ -1097,7 +1098,7 @@ namespace ai
         }
         else if(hunt(d, b))
         {
-            getyawpitch(dp, vec(d->ai->spot).add(vec(0, 0, d->eyeheight)), d->ai->targyaw, d->ai->targpitch);
+            getyawpitch(dp, vec(d->ai->spot).addz(d->eyeheight), d->ai->targyaw, d->ai->targpitch);
             d->ai->lasthunt = lastmillis;
         }
         else
@@ -1139,9 +1140,10 @@ namespace ai
             float yaw, pitch;
             getyawpitch(dp, ep, yaw, pitch);
             fixrange(yaw, pitch);
-            bool insight = cansee(d, dp, ep), hasseen = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*150);
+            bool insight = cansee(d, dp, ep), hasseen = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*150),
+                quick = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= skmod+30;
             if(insight) d->ai->enemyseen = lastmillis;
-            if(idle || insight || hasseen)
+            if(idle || insight || hasseen || quick)
             {
                 float sskew = insight || d->skill > 100 ? 1.5f : (hasseen ? 1.f : 0.5f);
                 if(insight && lockon(d, atk, e, 16))
@@ -1152,11 +1154,11 @@ namespace ai
                     d->ai->becareful = false;
                 }
                 scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, sskew);
-                if(insight)
+                if(insight || quick)
                 {
                     if(canshoot(d, atk, e) && hastarget(d, atk, b, e, yaw, pitch, dp.squaredist(ep)))
                     {
-                        d->attacking = true;
+                        d->attacking = attacks[atk].action;
                         d->ai->lastaction = lastmillis;
                         result = 3;
                     }
@@ -1166,7 +1168,7 @@ namespace ai
             }
             else
             {
-                if(!d->ai->enemyseen || lastmillis-d->ai->enemyseen > (d->skill*175))
+                if(!d->ai->enemyseen || lastmillis-d->ai->enemyseen > (d->skill*50)+3000)
                 {
                     d->ai->enemy = -1;
                     d->ai->enemyseen = d->ai->enemymillis = 0;

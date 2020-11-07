@@ -186,6 +186,10 @@ namespace entities
                     playsound(snd, &e.o, NULL, flags);
                     if(ents.inrange(td) && ents[td]->type == TELEDEST) playsound(snd, &ents[td]->o, NULL, flags);
                 }
+                gameent *h = followingplayer(player1);
+                playsound(snd, d==h ? NULL : &e.o, NULL, flags);
+                if(d!=h && ents.inrange(td) && ents[td]->type == TELEDEST) playsound(snd, &ents[td]->o, NULL, flags);
+
             }
         }
         if(local && d->clientnum >= 0)
@@ -210,8 +214,7 @@ namespace entities
             {
                 int snd = S_JUMPPAD, flags = 0;
                 if(e.attr4 > 0) { snd = e.attr4; flags = SND_MAP; }
-                if(d == player1) playsound(snd, NULL, NULL, flags);
-                else playsound(snd, &e.o, NULL, flags);
+                playsound(snd, d == followingplayer(player1) ? NULL : &e.o, NULL, flags);
             }
         }
         if(local && d->clientnum >= 0)
@@ -289,6 +292,7 @@ namespace entities
                             default: if(e->type>=I_RAIL && e->type<=I_GLOCK) {addstat(1, STAT_ARMES); addxp(1);}
                         }
                     }
+                    e->setnopickup(); // even if someone else gets it first
                 }
                 break;
 
