@@ -474,8 +474,8 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
             {
                 int team = m_teammode && validteam(d->team) ? d->team : 0;
 
-                if(player1->team==d->team) particle_text(d->abovehead(), d->info, PART_TEXT, 1, teamtextcolor[player1->team!=d->team ? 2 : 1], 2.0f);
-                else if (player1->state==CS_SPECTATOR) particle_text(d->abovehead(), d->info, PART_TEXT, 1, teamtextcolor[player1->team!=d->team ? 2 : 1], 2.0f);
+                //if(player1->team==d->team) particle_text(d->abovehead(), d->info, PART_TEXT, 1, teamtextcolor[player1->team!=d->team ? 2 : 1], 2.0f);
+                //else if (player1->state==CS_SPECTATOR) particle_text(d->abovehead(), d->info, PART_TEXT, 1, teamtextcolor[player1->team!=d->team ? 2 : 1], 2.0f);
 
                 if(d->health<300) switch(rnd(d->health+30)) {case 0: gibeffect(300, d->o, d);}
                 if(player1->aptitude==APT_MEDECIN && team==1)
