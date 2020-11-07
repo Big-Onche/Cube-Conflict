@@ -318,7 +318,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
 #define CC_SERVER_PORT 43000
 #define CC_LANINFO_PORT 42998
 #define CC_MASTER_PORT 42999
-#define PROTOCOL_VERSION 3              // bump when protocol changes
+#define PROTOCOL_VERSION 4              // bump when protocol changes
 #define DEMO_VERSION 1                  // bump when demo format changes
 #define DEMO_MAGIC "CC_DEMO\0\0"
 
@@ -373,7 +373,7 @@ static struct itemstat { int add, max, sound; const char *name; int icon, info; 
     {250,     1000, S_ITEMHEALTH,   "PANACHAY",            HICON_SIZE},
     {500,     2500, S_COCHON,       "COCHON GRILLAY",      HICON_SIZE},
     {30000,  45000, S_ITEMSTEROS,   "STEROIDES",           HICON_SIZE},
-    {60000, 120000, S_ITEMCHAMPIS,  "CHAMPIS",             HICON_SIZE},
+    {40000, 120000, S_ITEMCHAMPIS,  "CHAMPIS",             HICON_SIZE},
     {45000,  75000, S_ITEMEPO,      "EPO",                 HICON_SIZE},
     {60000,  90000, S_ITEMJOINT,    "JOINT",               HICON_SIZE},
     {750,      750, S_ITEMBBOIS,    "BOUCLIER EN BOIS",    HICON_SIZE, A_BLUE},
@@ -382,6 +382,8 @@ static struct itemstat { int add, max, sound; const char *name; int icon, info; 
     {1500,    1500, S_ITEMBMAGNET,  "BOUCLIER MAGNETIQUE", HICON_SIZE, A_MAGNET},
     {3000,    3000, S_ITEMARMOUR,   "ARMURE ASSISTEE",     HICON_SIZE, A_ASSIST},
     {50,       150, S_ITEMHEALTH,   "MANA",                HICON_SIZE},
+
+    {50,       150, S_ITEMHEALTH,   "CHAIN",               HICON_SIZE},
 };
 
 #define MAXRAYS 50
@@ -508,11 +510,9 @@ struct gamestate
             case I_SANTE:
                 if(parmourtype==4) return health<maxhealth;
                 else return health<maxhealth;
-                break;
             case I_MANA:
                 if(aptitude==4) return health<maxhealth;
                 else return (aptitude==5 || aptitude==8 || aptitude==11 || aptitude==14) && mana<is.max;
-                break;
             case I_BOOSTPV: return maxhealth<is.max;
             case I_BOOSTDEGATS: return steromillis<is.max;
             case I_BOOSTPRECISION: return champimillis<is.max;
@@ -566,7 +566,7 @@ struct gamestate
             case I_BOUCLIERMAGNETIQUE:
             case I_ARMUREASSISTEE:
                 armour = min(parmourtype==4 && type!=I_ARMUREASSISTEE ? armour+500 : armour+is.add, parmourtype==4 ? 3000 : is.max);
-                if(type==I_ARMUREASSISTEE)health = min(health+500, maxhealth);
+                if(type==I_ARMUREASSISTEE)health = min(health+300, maxhealth);
                 if(parmourtype!=4)armourtype = is.info;
                 break;
             case I_BOOSTDEGATS: steromillis = min(steromillis+is.add*(aptitude==13 ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;

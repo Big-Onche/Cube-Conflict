@@ -270,7 +270,7 @@ namespace entities
                 if(d->canpickup(e->type, d->aptitude, d->armourtype))
                 {
                     addmsg(N_ITEMPICKUP, "rci", d, n);
-                    //e->setnopickup(); // even if someone else gets it first
+                    e->setnopickup(); // even if someone else gets it first
 
                     if(d==player1)
                     {
@@ -292,7 +292,6 @@ namespace entities
                             default: if(e->type>=I_RAIL && e->type<=I_GLOCK) {addstat(1, STAT_ARMES); addxp(1);}
                         }
                     }
-                    e->setnopickup(); // even if someone else gets it first
                 }
                 break;
 
