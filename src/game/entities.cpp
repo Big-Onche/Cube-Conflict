@@ -104,7 +104,7 @@ namespace entities
         }
     }
 
-    VAR(autowield, 0, 0, 1);
+    VAR(autowield, -1, 0, 1);
 
     void addammo(int type, int &v, bool local)
     {
@@ -131,7 +131,7 @@ namespace entities
         if(type>=I_RAIL && type<=I_SUPERARME)
         {
             if(d!=player1) gunselect(type-9+rndsuperweapon, d);
-            else if(autowield) gunselect(type-9+rndsuperweapon, player1);
+            else if(autowield==1) gunselect(type-9+rndsuperweapon, player1);
         }
 
         if(d->aptisort1 && d->aptitude==APT_PRETRE)
