@@ -1700,7 +1700,7 @@ VAR(floatspeed, 1, 400, 10000);
 void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curtime, int jointmillis, int aptitude, bool assist)
 {
     bool allowmove = game::allowmove(pl);
-    int maxjumps = aptitude==APT_NINJA && assist ? 3 : aptitude==APT_NINJA || assist ? 2 : 1;
+    int maxjumps = jointmillis>4500 ? jointmillis/1500 : (aptitude==APT_NINJA && assist ? 3 : aptitude==APT_NINJA || assist ? 2 : 1);
 
     if(floating)
     {
@@ -1716,7 +1716,7 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
         if(pl->jumping && allowmove)
         {
             pl->jumping = false;
-            pl->vel.z = max(pl->vel.z, (jointmillis/(aptitude==13 ? 150 : 300))+JUMPVEL);  // physics impulse upwards
+            pl->vel.z = max(pl->vel.z, JUMPVEL);  // physics impulse upwards
             if(water) { pl->vel.x /= 8.0f; pl->vel.y /= 8.0f; } // dampen velocity change even harder, gives correct water feel
 
             game::physicstrigger(pl, local, 1, 0);
@@ -1768,7 +1768,7 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
 void modifygravity(physent *pl, bool water, int curtime, int jointmillis, int aptitude, bool assist)
 {
     float secs = curtime/1000.0f;
-    if(jointmillis>0) secs = (curtime/((jointmillis/(aptitude==13 ? 12.5f : 25.f)+1000.0f)));
+    if(jointmillis>0) secs = (curtime/((jointmillis/(aptitude==13 ? 7.5f : 15.f)+1000.0f)));
 
     vec g(0, 0, 0);
     if(pl->physstate == PHYS_FALL) g.z -= GRAVITY*secs;
@@ -1802,7 +1802,6 @@ bool noach = true;
 
 bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis, int jointmillis, int aptitude, int aptisort, bool assist)
 {
-    if(game::player1->timeinair > 7000 && noach) {DebloqueSucces("ACH_ENVOL"); noach = false;}
     int material = lookupmaterial(vec(pl->o.x, pl->o.y, pl->o.z + (3*pl->aboveeye - pl->eyeheight)/4));
     bool water = isliquid(material&MATF_VOLUME);
     bool floating = (pl->type==ENT_PLAYER && (pl->state==CS_EDITING || pl->state==CS_SPECTATOR)) || (aptisort>0 && aptitude==APT_PHYSICIEN);
@@ -1858,6 +1857,7 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
         loopi(moveres) if(!move(pl, d) && ++collisions<5) i--; // discrete steps collision detection & sliding
         if(timeinair > 800 && !pl->timeinair && !water) // if we land after long time must have been a high jump, make thud sound
         {
+            if(game::player1->timeinair > 7000 && noach) {DebloqueSucces("ACH_ENVOL"); noach = false;}
             game::physicstrigger(pl, local, -1, 0);
         }
         game::footsteps(pl);

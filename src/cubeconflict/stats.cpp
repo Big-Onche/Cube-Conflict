@@ -32,6 +32,8 @@ void genlvl() //Calcule le niveau du joueur
         case 50: if(!achlieu){DebloqueSucces("ACH_LIEUTENANT"); achlieu = true;} break;
         case 100: if(!achmaj){DebloqueSucces("ACH_MAJOR"); achmaj = true;}
     }
+
+    game::player1->level = cclvl;
 }
 
 void addxp(int nbxp) // Ajoute l'xp très simplment
