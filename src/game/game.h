@@ -618,7 +618,7 @@ struct gamestate
         }
     }
 
-    void addsweaps(int gamemode)
+    void addsweaps()
     {
         switch(rnd(50))
         {
@@ -635,7 +635,6 @@ struct gamestate
 
         switch(aptitude)
         {
-            case 0: addsweaps(gamemode); break;
             case 3: ammo[GUN_CACNINJA] = 1; break;
             case 6: ammo[GUN_KAMIKAZE] = 1; break;
         }
@@ -646,6 +645,7 @@ struct gamestate
             int randomarme = rnd(17);
             gunselect = aptitude==6 ? GUN_KAMIKAZE : aptitude==3 ? GUN_CACNINJA : randomarme;
             ammo[randomarme] = aptitude==2 ? 1.5f*itemstats[randomarme].max : itemstats[randomarme].max;
+            if(aptitude==0) addsweaps();
             return;
         }
         else if (m_fullstuff)
@@ -660,6 +660,7 @@ struct gamestate
             do spawngun3 = rnd(17); while(spawngun1==spawngun3 && spawngun2==spawngun3);
             baseammo(spawngun3, 4);
             gunselect = aptitude==6 ? GUN_KAMIKAZE : aptitude==3 ? GUN_CACNINJA : spawngun1;
+            if(aptitude==0) addsweaps();
             return;
         }
         else if(m_identique)
@@ -669,6 +670,7 @@ struct gamestate
             armour = 750;
             gunselect = aptitude==6 ? GUN_KAMIKAZE : aptitude==3 ? GUN_CACNINJA : cnidentiquearme;
             ammo[cnidentiquearme] = aptitude==2 ? 1.5f*itemstats[cnidentiquearme].max : itemstats[cnidentiquearme].max;
+            if(aptitude==0) addsweaps();
             return;
         }
         else
@@ -678,6 +680,7 @@ struct gamestate
             ammo[GUN_GLOCK] = aptitude==2 ? 45 : 30;
             ammo[GUN_M32] = aptitude==2 ? 3 : 1;
             gunselect = aptitude==6 ? GUN_KAMIKAZE : aptitude==3 ? GUN_CACNINJA : GUN_GLOCK;
+            if(aptitude==0) addsweaps();
         }
     }
 
