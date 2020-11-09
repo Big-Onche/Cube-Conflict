@@ -21,6 +21,64 @@ void calcmode()
 
 int cnidentiquearme = 0;
 
+string pseudoaleatoire;
+string pseudobasique;
+
+string strpart1, strpart2;
+char choosennamepart1[32], choosennamepart2[32];
+
+char *rndname(bool firstpart, int feminin, int langue)
+   {
+    char buf[50];
+    int names[3];
+
+    if(langue==0)
+    {
+        copystring(strpart1, feminin ? "config/pseudonymes/pseudos_part1_femi_fr.cfg" : "config/pseudonymes/pseudos_part1_masc_fr.cfg");
+        copystring(strpart2, feminin ? "config/pseudonymes/pseudos_part2_femi_fr.cfg" : "config/pseudonymes/pseudos_part2_masc_fr.cfg");
+    }
+    else
+    {
+        copystring(strpart1, "config/pseudonymes/pseudos_part1_en.cfg");
+        copystring(strpart2, "config/pseudonymes/pseudos_part2_en.cfg");
+    }
+
+    stream *namelist = openfile(firstpart ? strpart1 : strpart2, "r");
+
+    while(namelist->getline(buf, sizeof(buf)))
+    {
+        if(sscanf(buf, "NOMBREPSEUDOS: %i", &names[0])==1)
+        {
+            names[1] = rnd(names[0]);
+        }
+        else
+        {
+            sscanf(buf, "NOM %i: %s", &names[2], firstpart ? choosennamepart1 : choosennamepart2);
+            if(names[2] == names[1])
+            {
+                namelist->close();
+                return firstpart ? choosennamepart1 : choosennamepart2;
+            }
+        }
+    }
+    namelist->close();
+    copystring(pseudobasique, firstpart ? "Pseudo" : "Pourri");
+    return pseudobasique;
+}
+
+void genpseudo(bool forcename, int langue)
+{
+    int feminin = rnd(2);
+    formatstring(pseudoaleatoire, "%s%s", rndname(true, feminin, langue), rndname(false, feminin, langue));
+
+    if(forcename)
+    {
+        copystring(game::player1->name, pseudoaleatoire);
+        game::addmsg(N_SWITCHNAME, "rs", game::player1->name);
+    }
+}
+ICOMMAND(genpseudo, "i", (int *langue), {genpseudo(true, *langue);});
+
 namespace game
 {
     VARP(minradarscale, 0, 384, 10000);
@@ -166,7 +224,7 @@ namespace game
     void switchname(const char *name)
     {
         filtertext(player1->name, name, false, false, MAXNAMELEN);
-        if(!player1->name[0]) copystring(player1->name, "Invitay");
+        if(!player1->name[0]) {genpseudo(true, langage) ; copystring(player1->name, pseudoaleatoire);}
         addmsg(N_SWITCHNAME, "rs", player1->name);
     }
     void printname()
@@ -1530,7 +1588,7 @@ namespace game
                 }
                 getstring(text, p);
                 filtertext(text, text, false, false, MAXNAMELEN);
-                if(!text[0]) copystring(text, "Invitay");
+                if(!text[0]) copystring(text, langage ? "BadUsername" : "PseudoPourri");
                 if(d->name[0])          // already connected
                 {
                     if(strcmp(d->name, text) && !isignored(d->clientnum))
@@ -1558,7 +1616,7 @@ namespace game
                 if(d)
                 {
                     filtertext(text, text, false, false, MAXNAMELEN);
-                    if(!text[0]) copystring(text, "Invitay");
+                    if(!text[0]) {genpseudo(false, langage) ; copystring(text, pseudoaleatoire);}
                     if(strcmp(text, d->name))
                     {
                         if(!isignored(d->clientnum)) conoutf("%s is now known as %s", colorname(d), colorname(d, text));

@@ -15,7 +15,7 @@ namespace ai
         char buf[50];
         int names[3];
 
-        stream *namelist = openfile("config/pseudos.cfg", "r");
+        stream *namelist = openfile("config/pseudonymes/pseudos_bots.cfg", "r");
         while(namelist->getline(buf, sizeof(buf)))
         {
             if(sscanf(buf, "NOMBREPSEUDOS: %i", &names[0])==1)
@@ -166,7 +166,7 @@ namespace ai
         switch(atk)
         {
             case ATK_PULSE_SHOOT: case ATK_GRAP1_SHOOT: o.z += (e->aboveeye*0.2f)-(0.8f*d->eyeheight); break;
-            case ATK_M32_SHOOT: case ATK_SMAW_SHOOT: case ATK_NUKE_SHOOT: case ATK_ROQUETTES_SHOOT: case ATK_ARTIFICE_SHOOT: o.z += (e->aboveeye*0.2f)-(0.9f*d->eyeheight); break;
+            case ATK_SMAW_SHOOT: case ATK_NUKE_SHOOT: case ATK_ROQUETTES_SHOOT: case ATK_ARTIFICE_SHOOT: o.z += (e->aboveeye*0.2f)-(0.9f*d->eyeheight); break;
             default: o.z += (e->aboveeye-e->eyeheight)*0.5f;
         }
 

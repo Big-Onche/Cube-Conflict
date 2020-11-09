@@ -60,6 +60,9 @@ static const struct custominfo { const char *smiley, *capeteam1, *capeteam2, *cu
     {"",                 "capes/cape_risitasbg",    "capes/cape_risitasbg/orange"},
 };
 
+extern string pseudoaleatoire;
+extern void genpseudo(bool forcename, int langue);
+
 //Messages de kill
 extern bool suicided;
 extern string str_pseudotueur, str_armetueur;

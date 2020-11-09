@@ -931,7 +931,6 @@ namespace game
     void updateprojectiles(int time)
     {
         if(projs.empty()) return;
-        gameent *noside = followingplayer(player1);
         loopv(projs)
         {
             projectile &p = projs[i];

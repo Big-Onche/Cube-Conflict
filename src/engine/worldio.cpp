@@ -704,7 +704,6 @@ void clearmapcrc() { mapcrc = 0; }
 bool load_world(const char *mname, const char *cname)        // still supports all map formats that have existed since the earliest cube betas!
 {
     musicmanager(8, true);
-    int loadingstart = SDL_GetTicks();
     setmapfilenames(mname, cname);
     stream *f = opengzfile(ogzname, "rb");
     if(!f) { conoutf(CON_ERROR, "could not read map %s", ogzname); return false; }

@@ -328,7 +328,7 @@ struct demoheader
     int version, protocol;
 };
 
-#define MAXNAMELEN 15
+#define MAXNAMELEN 25
 
 enum
 {

@@ -3429,7 +3429,7 @@ namespace server
                 QUEUE_MSG;
                 getstring(text, p);
                 filtertext(ci->name, text, false, false, MAXNAMELEN);
-                if(!ci->name[0]) copystring(ci->name, "Invitay");
+                if(!ci->name[0]) copystring(ci->name, langage ? "BadUsername" : "PseudoPourri");
                 QUEUE_STR(ci->name);
                 break;
             }

@@ -934,7 +934,8 @@ namespace game
     void initclient()
     {
         player1 = spawnstate(new gameent);
-        filtertext(player1->name, "Invitay", false, false, MAXNAMELEN);
+        genpseudo(false, langage);
+        filtertext(player1->name, pseudoaleatoire, false, false, MAXNAMELEN);
         players.add(player1);
         player1->aptitude = player1_aptitude;
     }

@@ -54,6 +54,7 @@ COMMAND(applychanges, "");
 ICOMMAND(pendingchanges, "b", (int *idx), { if(needsapply.inrange(*idx)) result(needsapply[*idx].desc); else if(*idx < 0) intret(needsapply.length()); });
 
 VAR(uimusic, 0, 1, 1);
+VARP(veryfirstlaunch, 0, 1, 1);
 static int lastmainmenu = -1;
 
 void menuprocess()
@@ -66,10 +67,14 @@ void menuprocess()
     if(uimusic) {musicmanager(7, true); uimusic = 0;}
     if(mainmenu && !isconnected(true) && !UI::hascursor())
     {
-        switch(langage)
+        if(veryfirstlaunch) {UI::showui("firstlaunch"); veryfirstlaunch = 0;}
+        else
         {
-            case 0: UI::showui("main_fr"); break;
-            case 1: UI::showui("main_en");
+            switch(langage)
+            {
+                case 0: UI::showui("main_fr"); break;
+                case 1: UI::showui("main_en");
+            }
         }
     }
 }

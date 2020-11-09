@@ -314,9 +314,9 @@ void renderbackground(const char *caption, Texture *mapshot, const char *mapname
     }
 }
 
-void restorebackground(int w, int h)
+void restorebackground(int w, int h, bool force)
 {
-    if(renderedframe) return;
+    if(renderedframe && !force) return;
     renderbackgroundview(w, h, backgroundcaption[0] ? backgroundcaption : NULL, backgroundmapshot, backgroundmapname[0] ? backgroundmapname : NULL, backgroundmapinfo, backgroundastuce);
 }
 
@@ -371,6 +371,8 @@ void renderprogressview(int w, int h, float bar, const char *text)   // also use
     glDisable(GL_BLEND);
 }
 
+VAR(progressbackground, 0, 0, 1);
+
 void renderprogress(float bar, const char *text, bool background)   // also used during loading
 {
     if(!inbetweenframes || drawtex) return;
@@ -397,7 +399,9 @@ void renderprogress(float bar, const char *text, bool background)   // also used
     gettextres(w, h);
 
     extern int mesa_swap_bug, curvsync;
-    if(background || (mesa_swap_bug && curvsync)) restorebackground(w, h);
+    bool forcebackground = progressbackground || (mesa_swap_bug && (curvsync || totalmillis==1));
+    if(background || forcebackground) restorebackground(w, h, forcebackground);
+
     renderprogressview(w, h, bar, text);
     swapbuffers(false);
 }
@@ -1293,12 +1297,6 @@ int main(int argc, char **argv)
 
     inputgrab(grabinput = true);
     ignoremousemotion();
-
-    switch(langage)
-    {
-        case 0: UI::showui("main_fr"); break;
-        case 1: UI::showui("main_en");
-    }
 
     for(;;)
     {

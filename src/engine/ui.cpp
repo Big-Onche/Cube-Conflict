@@ -3605,4 +3605,3 @@ namespace UI
         return world->abovehud();
     }
 }
-
