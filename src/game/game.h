@@ -318,7 +318,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
 #define CC_SERVER_PORT 43000
 #define CC_LANINFO_PORT 42998
 #define CC_MASTER_PORT 42999
-#define PROTOCOL_VERSION 4              // bump when protocol changes
+#define PROTOCOL_VERSION 5              // bump when protocol changes
 #define DEMO_VERSION 1                  // bump when demo format changes
 #define DEMO_MAGIC "CC_DEMO\0\0"
 
@@ -375,7 +375,7 @@ static struct itemstat { int add, max, sound; const char *name; int icon, info; 
     {30000,  45000, S_ITEMSTEROS,   "STEROIDES",           HICON_SIZE},
     {40000, 120000, S_ITEMCHAMPIS,  "CHAMPIS",             HICON_SIZE},
     {45000,  75000, S_ITEMEPO,      "EPO",                 HICON_SIZE},
-    {60000,  90000, S_ITEMJOINT,    "JOINT",               HICON_SIZE},
+    {30000,  90000, S_ITEMJOINT,    "JOINT",               HICON_SIZE},
     {750,      750, S_ITEMBBOIS,    "BOUCLIER EN BOIS",    HICON_SIZE, A_BLUE},
     {1250,    1250, S_ITEMBFER,     "BOUCLIER DE FER",     HICON_SIZE, A_GREEN},
     {2000,    2000, S_ITEMBOR,      "BOUCLIER D'OR",       HICON_SIZE, A_YELLOW},
@@ -747,14 +747,14 @@ struct gameent : dynent, gamestate
     bool sort1pret, sort2pret, sort3pret;
 
     string name, info;
-    int team, playermodel, playercolor, customcape, customtombe, customdanse, aptitude;
+    int team, playermodel, playercolor, customcape, customtombe, customdanse, aptitude, level;
     float skeletonfade, tombepop;
     ai::aiinfo *ai;
     int ownernum, lastnode;
 
     vec muzzle, weed, balles, assist;
 
-    gameent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), lastfootstep(0), attacksound(-1), attackchan(-1), dansechan(-1), sortchan(-1), killstreak(0), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0), customcape(0), customtombe(0), customdanse(0), aptitude(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
+    gameent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), lastfootstep(0), attacksound(-1), attackchan(-1), dansechan(-1), sortchan(-1), killstreak(0), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0), customcape(0), customtombe(0), customdanse(0), aptitude(0), level(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
     {
         name[0] = info[0] = 0;
         respawn();
