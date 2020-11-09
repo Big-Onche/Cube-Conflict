@@ -1805,11 +1805,9 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
     if(game::player1->timeinair > 7000 && noach) {DebloqueSucces("ACH_ENVOL"); noach = false;}
     int material = lookupmaterial(vec(pl->o.x, pl->o.y, pl->o.z + (3*pl->aboveeye - pl->eyeheight)/4));
     bool water = isliquid(material&MATF_VOLUME);
-    bool floating = pl->type==ENT_PLAYER && (pl->state==CS_EDITING || pl->state==CS_SPECTATOR);
-    if(aptisort && aptitude==APT_PHYSICIEN && pl->type==ENT_PLAYER) floating = true;
-
+    bool floating = (pl->type==ENT_PLAYER && (pl->state==CS_EDITING || pl->state==CS_SPECTATOR)) || (aptisort>0 && aptitude==APT_PHYSICIEN);
     float classespeed = aptitudes[aptitude].apt_vitesse*10.f;
-    if(aptitude==APT_INDIEN && aptisort>0) {classespeed = 700.f;}
+    if(aptitude==APT_INDIEN && aptisort) {classespeed = 700.f;}
 
     float secs;
     if(epomillis>0) secs = (curtime/(classespeed-(epomillis/(aptitude==13 ? 75 : 100))));
@@ -1820,7 +1818,7 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
     // apply gravity
     if(!floating) modifygravity(pl, water, curtime, jointmillis, aptitude, assist);
 
-    if(aptitude==APT_MAGICIEN && aptisort>0) {secs = curtime/200.f;}
+    if(aptitude==APT_MAGICIEN && aptisort) {secs = curtime/200.f;}
 
     // apply any player generated changes in velocity
     modifyvelocity(pl, local, water, floating, curtime, jointmillis, aptitude, assist);
@@ -1837,13 +1835,11 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
         if(aptisort && aptitude==APT_PHYSICIEN)
         {
             floatspeed = 150;
-            pl->physstate = PHYS_FLOAT;
             const float f = 1.0f/moveres;
             int collisions = 0;
                     d.mul(f);
             loopi(moveres) if(!move(pl, d) && ++collisions<5) i--; // discrete steps collision detection & sliding
         }
-
         if(pl->physstate != PHYS_FLOAT)
         {
             pl->physstate = PHYS_FLOAT;

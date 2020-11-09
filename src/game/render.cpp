@@ -500,10 +500,8 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
                 }
                 else if(d->aptitude==APT_PHYSICIEN)
                 {
-                    vec pos = d->o.add(vec(-3+rnd(7), -3+rnd(7), -17));
-
                     if(d->aptisort2) switch(rnd(3)) {case 0: particle_splash(PART_SMOKE,  1,  300, d->o, 0x7777FF, 10+rnd(5),  400, 400); }
-                    if(d->aptisort3) switch(rnd(2)) {case 0: particle_splash(PART_SMOKE,  1,  150, pos, 0x8888BB, 7+rnd(4),  100, -200); particle_splash(PART_FLAME1+rnd(2),  5,  100, pos, 0xFF6600, 1+rnd(2),  100, -20); }
+                    if(d->aptisort3) switch(rnd(2)) {case 0: particle_splash(PART_SMOKE,  1,  150, d->feetpos(), 0x8888BB, 7+rnd(4),  100, -200); particle_splash(PART_FLAME1+rnd(2),  5,  100, d->feetpos(), 0xFF6600, 1+rnd(2),  100, -20); }
                 }
                 else if (d->aptitude==APT_PRETRE)
                 {
