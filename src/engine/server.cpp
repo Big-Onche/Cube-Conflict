@@ -291,15 +291,15 @@ const char *disconnectreason(int reason)
     switch(reason)
     {
         case DISC_EOP: return "end of packet";
-        case DISC_LOCAL: return "server is in local mode";
-        case DISC_KICK: return "kicked/banned";
-        case DISC_MSGERR: return "message error";
-        case DISC_IPBAN: return "ip is banned";
-        case DISC_PRIVATE: return "server is in private mode";
-        case DISC_MAXCLIENTS: return "server FULL";
-        case DISC_TIMEOUT: return "connection timed out";
+        case DISC_LOCAL: return "server is in local mode/serveur en mode local";
+        case DISC_KICK: return "kicked-banned/kick-banni";
+        case DISC_MSGERR: return "message error/erreur message";
+        case DISC_IPBAN: return "ip is banned/ip bannie";
+        case DISC_PRIVATE: return "server is in private mode/serveur en mode privé";
+        case DISC_MAXCLIENTS: return "server FULL/ serveur plein";
+        case DISC_TIMEOUT: return "connection timed out/la connexion a expirée";
         case DISC_OVERFLOW: return "overflow";
-        case DISC_PASSWORD: return "invalid password";
+        case DISC_PASSWORD: return "invalid password/mot de passe invalide";
         default: return NULL;
     }
 }
@@ -312,8 +312,8 @@ void disconnect_client(int n, int reason)
     delclient(clients[n]);
     const char *msg = disconnectreason(reason);
     string s;
-    if(msg) formatstring(s, "client (%s) disconnected because: %s", clients[n]->hostname, msg);
-    else formatstring(s, "client (%s) disconnected", clients[n]->hostname);
+    if(msg) formatstring(s, "Disconnected/Hors-ligne : %s | Reason/Cause : %s", clients[n]->hostname, msg);
+    else formatstring(s, "Disconnected/Hors-ligne :%s", clients[n]->hostname);
     logoutf("%s", s);
     server::sendservmsg(s);
 }
@@ -641,10 +641,10 @@ void serverslice(bool dedicated, uint timeout)   // main server update, called f
     if(!lastupdatemaster || totalmillis-lastupdatemaster>60*60*1000)       // send alive signal to masterserver every hour of uptime
         updatemasterserver();
 
-    if(totalmillis-laststatus>60*1000)   // display bandwidth stats, useful for server ops
+    if(totalmillis-laststatus>120*1000)   // display bandwidth stats, useful for server ops
     {
         laststatus = totalmillis;
-        if(nonlocalclients || serverhost->totalSentData || serverhost->totalReceivedData) logoutf("status: %d remote clients, %.1f send, %.1f rec (K/sec)", nonlocalclients, serverhost->totalSentData/60.0f/1024, serverhost->totalReceivedData/60.0f/1024);
+        if(nonlocalclients || serverhost->totalSentData || serverhost->totalReceivedData) logoutf("Status : %d/%d clients | <<<%.1f K/sec UP>>> | >>>%.1f K/sec DOWN<<<", nonlocalclients, maxclients, serverhost->totalSentData/60.0f/1024, serverhost->totalReceivedData/60.0f/1024);
         serverhost->totalSentData = serverhost->totalReceivedData = 0;
     }
 
@@ -665,8 +665,8 @@ void serverslice(bool dedicated, uint timeout)   // main server update, called f
                 c.peer = event.peer;
                 c.peer->data = &c;
                 string hn;
-                copystring(c.hostname, (enet_address_get_host_ip(&c.peer->address, hn, sizeof(hn))==0) ? hn : "unknown");
-                logoutf("client connected (%s)", c.hostname);
+                copystring(c.hostname, (enet_address_get_host_ip(&c.peer->address, hn, sizeof(hn))==0) ? hn : "unknown/inconnue");
+                logoutf("Connected/En ligne : %s", c.hostname);
                 int reason = server::clientconnect(c.num, c.peer->address.host);
                 if(reason) disconnect_client(c.num, reason);
                 break;
@@ -682,7 +682,7 @@ void serverslice(bool dedicated, uint timeout)   // main server update, called f
             {
                 client *c = (client *)event.peer->data;
                 if(!c) break;
-                logoutf("disconnected client (%s)", c->hostname);
+                logoutf("Disconnected/Hors-ligne : (%s)", c->hostname);
                 server::clientdisconnect(c->num);
                 delclient(c);
                 break;

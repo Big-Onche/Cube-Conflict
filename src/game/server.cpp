@@ -3077,7 +3077,7 @@ namespace server
                 {
                     getstring(text, p);
                     filtertext(text, text, false, false, MAXNAMELEN);
-                    if(!text[0]) copystring(text, "unnamed");
+                    if(!text[0]) copystring(text, langage ? "BadUsername" : "PseudoPourri");
                     copystring(ci->name, text, MAXNAMELEN+1);
                     ci->playermodel = getint(p);
                     ci->playercolor = getint(p);
@@ -3109,6 +3109,8 @@ namespace server
                         if(nbbots>0) loopi(nbbots) aiman::addai(servbotniveauminimum+rnd(servbotniveaumaximum-servbotniveauminimum), -1);
                         loopi(nbjoueurs>servjoueursminimum) aiman::deleteai();
                     }
+
+                    logoutf("Username/Pseudonyme : %s", ci->name);
                     break;
                 }
 
