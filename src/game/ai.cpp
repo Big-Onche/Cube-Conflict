@@ -49,15 +49,15 @@ namespace ai
     VARF(IA_lvl, 0, 2, 4,
         switch(IA_lvl)
         {
-            case 0: IA_rndlvl = 40; return;
-            case 1: IA_rndlvl = 50; return;
+            case 0: IA_rndlvl = 30; return;
+            case 1: IA_rndlvl = 45; return;
             case 2: IA_rndlvl = 60; return;
-            case 3: IA_rndlvl = 80; return;
-            case 4: IA_rndlvl = 92; return;
+            case 3: IA_rndlvl = 75; return;
+            case 4: IA_rndlvl = 90; return;
         }
     );
 
-    ICOMMAND(addbots, "s", (char *s), loopi(IA_number){addmsg(N_ADDBOT, "ri", IA_rndlvl+rnd(3)-rnd(3));} );
+    ICOMMAND(addbots, "s", (char *s), loopi(IA_number){addmsg(N_ADDBOT, "ri", IA_rndlvl+rnd(10));} );
     ICOMMAND(delbot, "", (), addmsg(N_DELBOT, "r"));
     ICOMMAND(botlimit, "i", (int *n), addmsg(N_BOTLIMIT, "ri", *n));
     ICOMMAND(botbalance, "i", (int *n), addmsg(N_BOTBALANCE, "ri", *n));
@@ -225,7 +225,7 @@ namespace ai
         d->team = validteam(team) ? team : 0;
         d->ownernum = ocn;
         d->plag = 0;
-        d->skill = sk;
+        d->skill = d->level = sk;
         d->playermodel = chooserandomplayermodel(pm);
         d->playercolor = col;
 
@@ -1108,9 +1108,9 @@ namespace ai
             d->crouching = -1;
         }
 
-        if(d->gunselect==GUN_ARTIFICE || d->gunselect==GUN_SMAW || d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_ROQUETTES) d->jumping = true;
         if(d->aptisort3 && d->aptitude==APT_PHYSICIEN) switch(rnd(60)) {case 1: d->jumping = true;}
-		if(!d->ai->dontmove) jumpto(d, b, d->ai->spot);
+        else if(d->gunselect==GUN_ARTIFICE || d->gunselect==GUN_SMAW || d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_ROQUETTES || d->jointmillis) d->jumping = true;
+		else if(!d->ai->dontmove) jumpto(d, b, d->ai->spot);
 
         gameent *e = getclient(d->ai->enemy);
         bool enemyok = e && targetable(d, e);

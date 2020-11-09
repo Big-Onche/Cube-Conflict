@@ -121,6 +121,7 @@ namespace aiman
         ci->playermodel = rnd(128);
         ci->playercolor = rnd(0x8000);
         ci->aptitude = rnd(15);
+        ci->level = skill;
         ci->customcape = rnd(12);
         ci->customtombe = rnd(9)+1;
         ci->customdanse = rnd(6)+1;

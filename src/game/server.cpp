@@ -222,7 +222,7 @@ namespace server
         int clientnum, ownernum, connectmillis, sessionid, overflow;
         string name, mapvote;
         int team, playermodel, playercolor;
-        int customcape, customtombe, customdanse, aptitude;
+        int customcape, customtombe, customdanse, aptitude, level;
         int modevote;
         int privilege;
         bool connected, local, timesync;
@@ -1796,6 +1796,7 @@ namespace server
             putint(p, ci->customtombe);
             putint(p, ci->customdanse);
             putint(p, ci->aptitude);
+            putint(p, ci->level);
         }
     }
 
@@ -3085,6 +3086,7 @@ namespace server
                     ci->customtombe = getint(p);
                     ci->customdanse = getint(p);
                     ci->aptitude = getint(p);
+                    ci->level = getint(p);
 
                     string password, authdesc, authname;
                     getstring(password, p, sizeof(password));

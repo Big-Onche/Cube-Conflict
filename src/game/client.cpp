@@ -456,6 +456,12 @@ namespace game
         if(d) intret(d->aptitude);
     });
 
+    ICOMMAND(getclientlevel, "i", (int *cn),
+    {
+        gameent *d = getclient(*cn);
+        if(d) intret(d->level);
+    });
+
     bool ismaster(int cn)
     {
         gameent *d = getclient(cn);
@@ -1232,6 +1238,7 @@ namespace game
         putint(p, player1->customtombe);
         putint(p, player1->customdanse);
         putint(p, player1->aptitude);
+        putint(p, player1->level);
         string hash = "";
         if(connectpass[0])
         {
@@ -1592,7 +1599,7 @@ namespace game
                 if(d->name[0])          // already connected
                 {
                     if(strcmp(d->name, text) && !isignored(d->clientnum))
-                        conoutf("%s is now known as %s", colorname(d), colorname(d, text));
+                        conoutf(langage ? "%s is now known as %s" : "%s s'appelle maintenant %s", colorname(d), colorname(d, text));
                 }
                 else                    // new client
                 {
@@ -1608,6 +1615,7 @@ namespace game
                 d->customtombe = getint(p);
                 d->customdanse = getint(p);
                 d->aptitude = getint(p);
+                d->level = getint(p);
                 break;
             }
 
@@ -1619,7 +1627,7 @@ namespace game
                     if(!text[0]) {genpseudo(false, langage) ; copystring(text, pseudoaleatoire);}
                     if(strcmp(text, d->name))
                     {
-                        if(!isignored(d->clientnum)) conoutf("%s is now known as %s", colorname(d), colorname(d, text));
+                        if(!isignored(d->clientnum)) conoutf(langage ? "%s is now known as %s" : "%s s'appelle maintenant %s", colorname(d), colorname(d, text));
                         copystring(d->name, text, MAXNAMELEN+1);
                     }
                 }
