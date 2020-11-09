@@ -268,7 +268,19 @@ namespace game
                 if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
                 if(d->steromillis || d->epomillis || d->jointmillis || d->champimillis) entities::checkboosts(curtime, d);
                 if(d->ragemillis || d->aptisort1 || d->aptisort2 || d->aptisort3) entities::checkaptiskill(curtime, d);
-                if(players[i]->aptitude==APT_MEDECIN)
+
+                if(d->health<=d->maxhealth+200 && d->state==CS_ALIVE && !m_teammode && d->aptitude==APT_MEDECIN)
+                {
+                    switch(rnd(70))
+                    {
+                        case 0:
+                        d->health+=30;
+                        particle_splash(PART_SANTE, 1, 400, d->o, 0xFFFFFF, 0.5f+rnd(3),  400, 200);
+                        if(d->health>d->maxhealth+200) d->health=d->maxhealth+200;
+                        playsound(S_REGENMEDIGUN, &d->o, 0, 0, 0 , 50, -1, 125);
+                    }
+                }
+                else if(players[i]->aptitude==APT_MEDECIN)
                 {
                     gameent *h = players[i];
                     loopv(players)
@@ -280,20 +292,13 @@ namespace game
                             {
                                 if(r->o.dist(h->o)/18.f<6 && r->health<r->maxhealth+200 && h->state==CS_ALIVE && r->state==CS_ALIVE)
                                 {
-                                    if(m_teammode && isteam(h->team, r->team))
+                                    if(isteam(h->team, r->team))
                                     {
                                         r->health+=30;
                                         vec irays(r->o);
                                         irays.sub(h->o);
                                         irays.normalize().mul(1300.0f);
                                         particle_flying_flare(h->o, irays, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
-                                        if(r->health>r->maxhealth+200) r->health=r->maxhealth+200;
-                                        playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
-                                    }
-                                    else if(r->health<=r->maxhealth+200 && r->state==CS_ALIVE)
-                                    {
-                                        r->health+=30;
-                                        particle_splash(PART_SANTE, 1, 400, r->o, 0xFFFFFF, 0.5f+rnd(3),  400, 200);
                                         if(r->health>r->maxhealth+200) r->health=r->maxhealth+200;
                                         playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
                                     }
