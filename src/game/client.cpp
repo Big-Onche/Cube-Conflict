@@ -154,7 +154,7 @@ namespace game
     {
         if(d->state != CS_ALIVE && d->state != CS_DEAD) return;
         float scale = calcradarscale();
-        setbliptex(d->team, d->state == CS_DEAD ? "_dead" : "_alive");
+        setbliptex(player1->team==d->team ? 1 : 2, d->state == CS_DEAD ? "_dead" : "_alive");
         gle::defvertex(2);
         gle::deftexcoord0();
         gle::begin(GL_QUADS);
@@ -174,7 +174,7 @@ namespace game
             {
                 if(!alive++)
                 {
-                    setbliptex(d->team, "_alive");
+                    setbliptex(player1->team==d->team ? 1 : 2, "_alive");
                     gle::defvertex(2);
                     gle::deftexcoord0();
                     gle::begin(GL_QUADS);

@@ -445,7 +445,7 @@ struct ctfclientmode : clientmode
         {
             flag &f = flags[i];
             if(!f.owner && f.droptime && f.droploc.x < 0) continue;
-            const char *flagname = f.team==1 ? "drapeau/jaune" : "drapeau/rouge";
+            const char *flagname = player1->team==f.team ? "drapeau/jaune" : "drapeau/rouge";
             float angle;
             vec pos = interpflagpos(f, angle);
             rendermodel(flagname, ANIM_MAPMODEL|ANIM_LOOP,
