@@ -214,11 +214,13 @@ struct partrenderer
         }
         else
         {
-
-            switch(p->expand)
+            if(!game::ispaused())
             {
-                case 1: p->size += 19.2f/nbfps; break;
-                case 2: p->size += 2.04f/nbfps;
+                switch(p->expand)
+                {
+                    case 1: p->size += 19.2f/nbfps; break;
+                    case 2: p->size += 2.04f/nbfps;
+                }
             }
 
             ts = lastmillis-p->millis;
