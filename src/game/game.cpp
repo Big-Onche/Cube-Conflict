@@ -1050,12 +1050,12 @@ namespace game
         }
         if (floorlevel>0)
         {
-            particle_splash(PART_SMOKE, 10, 100, d->feetpos(), 0x666666, 7.0f+rnd(5), 400, 20);
+            particle_splash(n_ambiance==4 ? PART_EAU : PART_SMOKE, pl->armourtype==A_ASSIST ? 12 : 10, 100, d->feetpos(), n_ambiance==4 ? 0x111111 : 0x666666, 7.0f+rnd(pl->armourtype==A_ASSIST ? 10 : 5), 400, 20);
             if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_ASSIST && pl->armour>0 ? S_JUMPASSIST : S_JUMP, d);
         }
         else if(floorlevel<0)
         {
-            particle_splash(PART_SMOKE, 15, 120, d->feetpos(), 0x442211, 7.0f+rnd(5), 400, 20);
+            particle_splash(n_ambiance==4 ? PART_EAU : PART_SMOKE, pl->armourtype==A_ASSIST ? 20 : 15, 120, d->feetpos(), n_ambiance==4 ? 0x131313 : 0x442211, 7.0f+rnd(pl->armourtype==A_ASSIST ? 10 : 5), 400, 20);
             if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_ASSIST && pl->armour>0 ? S_LANDASSIST : S_LAND, d);
         }
     }

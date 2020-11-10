@@ -263,7 +263,7 @@ namespace game
 
     void renderplayer(gameent *d, const playermodelinfo &mdl, int color, int team, float fade, int flags = 0, bool mainpass = true)
     {
-        int anim = ANIM_IDLE, lastaction = d->lastaction;
+        int anim = ANIM_IDLE|ANIM_LOOP, lastaction = d->lastaction;
 
         float yaw = testanims && d==player1 ? 0 : d->yaw,
               pitch = testpitch && d==player1 ? testpitch : d->pitch;
@@ -341,42 +341,43 @@ namespace game
         //////////////////////////////////////////////////////////////////ANIMATIONS//////////////////////////////////////////////////////////////////
         if(d->state==CS_EDITING || d->state==CS_SPECTATOR) anim = ANIM_EDIT|ANIM_LOOP;
         else if(d->state==CS_LAGGED)                       anim = ANIM_LAG|ANIM_LOOP;
+
+        if(intermission && d->state!=CS_DEAD)
+        {
+            anim = ANIM_LOSE|ANIM_LOOP;
+            if(validteam(team) ? bestteams.htfind(team)>=0 : bestplayers.find(d)>=0) anim = ANIM_WIN|ANIM_LOOP;
+        }
         else if(d->lasttaunt && lastmillis-d->lasttaunt<1000)
         {
             lastaction = d->lasttaunt;
             anim = ANIM_TAUNT|ANIM_LOOP;
         }
-        else
+        else if(!intermission)
         {
-            if(d->inwater && d->physstate<=PHYS_FALL) anim |= (((game::allowmove(d) && (d->move || d->strafe)) || d->vel.z+d->falling.z>0 ? ANIM_SWIM : ANIM_SINK)|ANIM_LOOP)<<ANIM_SECONDARY;
+            if(d->inwater && d->physstate<=PHYS_FALL)
+            {
+                anim |= (((game::allowmove(d) && (d->move || d->strafe)) || d->vel.z+d->falling.z>0 ? ANIM_SWIM : ANIM_SINK)|ANIM_LOOP)<<ANIM_SECONDARY;
+                if(d->move) {switch(rnd(10)){case 0: particle_splash(PART_EAU, d->armourtype==A_ASSIST ? 3 : 2, 120, d->o, 0x222222, 8.0f+rnd(d->armourtype==A_ASSIST ? 8 : 5), 150, 15);}}
+            }
             else
             {
-                if(d->timeinair>50) anim |= (ANIM_JUMP|ANIM_END)<<ANIM_SECONDARY;
-                else
+                static const int dirs[9] =
                 {
-                    if(d->move>0) anim |= (ANIM_FORWARD|ANIM_LOOP)<<ANIM_SECONDARY;
-                    else if(d->strafe) anim |= ((d->strafe>0 ? ANIM_LEFT : ANIM_RIGHT)|ANIM_LOOP)<<ANIM_SECONDARY;
+                    ANIM_LEFT,  ANIM_FORWARD,   ANIM_RIGHT,
+                    ANIM_LEFT,  0,              ANIM_RIGHT,
+                    ANIM_LEFT,  ANIM_BACKWARD,  ANIM_RIGHT
+                };
+                int dir = dirs[(d->move+1)*3 + (d->strafe+1)];
+                if(d->timeinair>50) anim |= ((ANIM_JUMP) | ANIM_END) << ANIM_SECONDARY;
+                else if(dir && game::allowmove(d)) anim |= (dir | ANIM_LOOP) << ANIM_SECONDARY;
 
-                    if(d==player1)
-                    {
-                        if(d->move<0) anim |= (ANIM_FORWARD|ANIM_LOOP)<<ANIM_SECONDARY;
-                    }
-                    else anim |= (ANIM_BACKWARD|ANIM_LOOP)<<ANIM_SECONDARY;
-                }
+                if(d->move && d->physstate==PHYS_FLOOR) {switch(rnd(10)){case 0: particle_splash(lookupmaterial(d->feetpos())==MAT_WATER || n_ambiance==4 ? PART_EAU : PART_SMOKE, d->armourtype==A_ASSIST ? 5 : 3, 120, d->feetpos(), n_ambiance==4 ? 0x131313 : 0x333022, 6.0f+rnd(d->armourtype==A_ASSIST ? 10 : 5), 150, 15);}}
             }
+            if(d->crouching && d->timeinair<50) anim |= (ANIM_CROUCH|ANIM_END)<<ANIM_SECONDARY;
 
-            if(d->crouching) switch((anim>>ANIM_SECONDARY)&ANIM_INDEX)
-            {
-                case ANIM_IDLE: anim &= ~(ANIM_INDEX<<ANIM_SECONDARY); anim |= ANIM_CROUCH<<ANIM_SECONDARY; break;
-                case ANIM_JUMP: anim &= ~(ANIM_INDEX<<ANIM_SECONDARY); anim |= ANIM_CROUCH_JUMP<<ANIM_SECONDARY; break;
-                case ANIM_SWIM: anim &= ~(ANIM_INDEX<<ANIM_SECONDARY); anim |= ANIM_CROUCH_SWIM<<ANIM_SECONDARY; break;
-                case ANIM_SINK: anim &= ~(ANIM_INDEX<<ANIM_SECONDARY); anim |= ANIM_CROUCH_SINK<<ANIM_SECONDARY; break;
-                case 0: anim |= (ANIM_CROUCH|ANIM_LOOP)<<ANIM_SECONDARY; break;
-                case ANIM_FORWARD: case ANIM_BACKWARD: case ANIM_LEFT: case ANIM_RIGHT:
-                    anim += (ANIM_CROUCH_FORWARD - ANIM_FORWARD)<<ANIM_SECONDARY;
-                    break;
-            }
+            if((anim&ANIM_INDEX)==ANIM_IDLE && (anim>>ANIM_SECONDARY)&ANIM_INDEX) anim >>= ANIM_SECONDARY;
         }
+        if(!((anim>>ANIM_SECONDARY)&ANIM_INDEX)) anim |= (ANIM_IDLE|ANIM_LOOP)<<ANIM_SECONDARY;
 
         if(d!=player1) flags |= MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY;
         if(d->type==ENT_PLAYER) flags |= MDL_FULLBRIGHT;
