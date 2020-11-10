@@ -1011,6 +1011,7 @@ namespace game
                             particle_splash(PART_PULSE_FRONT, 1, 1, pos, p.owner->steromillis ? 0xFF4444 : 0xFFBB88, p.owner==player1 ? 0.65f : ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.4f : 0.3f, 150, 20, 0, player1->champimillis ? true : false);
                             break;
                             case ATK_ARBALETE_SHOOT:
+                            particle_splash(PART_SMOKE, 2, 100, pos, 0xAAAAAA, 0.8f, 25, 250, 0, player1->champimillis ? true : false);
                             if(p.owner->steromillis)
                             {
                                 particle_flare(tail, head, 1, PART_BALLE_SIDE, 0xFF4444, 0.30f, p.owner, player1->champimillis ? true : false);
