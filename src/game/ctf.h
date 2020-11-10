@@ -549,8 +549,8 @@ struct ctfclientmode : clientmode
     {
         int fcolor;
         vec color;
-        if(team==1) { fcolor = 0xFFFF22; color = vec(0.25f, 0.25f, 1); }
-        else { fcolor = 0xFF0000; color = vec(1, 0.25f, 0.25f); }
+        if(player1->team==team) { fcolor = 0xFF0000; color = vec(0.25f, 0.25f, 1); }
+        else { fcolor = 0xFFFF22; color = vec(1, 0.25f, 0.25f); }
         particle_fireball(loc, 30, PART_EXPLOSION, -1, fcolor, 4.8f);
         adddynlight(loc, 35, color, 900, 100);
         particle_splash(PART_SPARK, 150, 300, loc, fcolor, 0.24f);
@@ -564,7 +564,7 @@ struct ctfclientmode : clientmode
         if(to.x >= 0)
             flagexplosion(i, team, to);
         if(from.x >= 0 && to.x >= 0)
-            particle_flare(from, to, 600, PART_LIGHTNING, team==1 ? 0xFFFF00 : 0xFF2222, 1.0f);
+            particle_flare(from, to, 600, PART_LIGHTNING, player1->team==team ? 0xFF2222 : 0xFFFF00, 1.0f);
     }
 
     void returnflag(gameent *d, int i, int version)
