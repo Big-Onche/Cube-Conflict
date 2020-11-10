@@ -230,12 +230,12 @@ void gets2c()           // get updates from the server
     if(!clienthost) return;
     if(connpeer && totalmillis/3000 > connmillis/3000)
     {
-        conoutf("attempting to connect...");
+        conoutf(langage ? "Attempting to connect..." : "Connexion au serveur...");
         connmillis = totalmillis;
         ++connattempts;
         if(connattempts > 3)
         {
-            conoutf(CON_ERROR, "\f3could not connect to server");
+            conoutf(CON_ERROR, langage ? "\f3Could not connect to server" : "\f3Connexion au serveur impossible");
             abortconnect();
             return;
         }
@@ -248,14 +248,14 @@ void gets2c()           // get updates from the server
             localdisconnect(false);
             curpeer = connpeer;
             connpeer = NULL;
-            conoutf("connected to server");
+            conoutf(langage ? "Connexion successful" : "Connecté au serveur");
             throttle();
             if(rate) setrate(rate);
             game::gameconnect(true);
             break;
 
         case ENET_EVENT_TYPE_RECEIVE:
-            if(discmillis) conoutf("attempting to disconnect...");
+            if(discmillis) conoutf(langage ? "Disconnecting" : "Déconnexion");
             else localservertoclient(event.channelID, event.packet);
             enet_packet_destroy(event.packet);
             break;
