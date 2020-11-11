@@ -8,7 +8,7 @@ extern void cleargamma();
 
 void cleanup()
 {
-    SteamAPI_Shutdown();
+    if(usesteam)SteamAPI_Shutdown();
     recorder::stop();
     cleanupserver();
     SDL_ShowCursor(SDL_TRUE);
@@ -1271,7 +1271,11 @@ int main(int argc, char **argv)
     addpostfx("sobel", 1, 1, 1, 1, vec4(1, 1, 1, 1));
     clearpostfx();
 
-	if(usesteam)initsteam();
+	if(usesteam)
+    {
+        initsteam();
+        getsteamachievements();
+    }
 
     logoutf("init: mainloop");
 

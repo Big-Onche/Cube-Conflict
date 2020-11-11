@@ -9,7 +9,6 @@ using namespace std;
 //////////////////////Gestion de l'xp et niveaux//////////////////////
 int ccxp = 0, cclvl = 1, needxp = 40, oldneed = 40, neededxp = 40;
 float pourcents = -1;
-bool achpost, achstag, achsol, achlieu, achmaj;
 
 void genlvl() //Calcule le niveau du joueur
 {
@@ -26,11 +25,11 @@ void genlvl() //Calcule le niveau du joueur
 
     switch(cclvl) //Regarde si il y a un succès à déverouiller
     {
-        case 5: if(!achpost){unlockachievement("ACH_POSTULANT"); achpost = true;} break;
-        case 10: if(!achstag){unlockachievement("ACH_STAGIAIRE"); achstag = true;} break;
-        case 20: if(!achsol){unlockachievement("ACH_SOLDAT"); achsol = true;} break;
-        case 50: if(!achlieu){unlockachievement("ACH_LIEUTENANT"); achlieu = true;} break;
-        case 100: if(!achmaj){unlockachievement("ACH_MAJOR"); achmaj = true;}
+        case 5: unlockachievement(ACH_POSTULANT); break;
+        case 10: unlockachievement(ACH_STAGIAIRE); break;
+        case 20: unlockachievement(ACH_SOLDAT); break;
+        case 50: unlockachievement(ACH_LIEUTENANT); break;
+        case 100: unlockachievement(ACH_MAJOR);
     }
 
     game::player1->level = cclvl;
@@ -44,7 +43,7 @@ void addxp(int nbxp) // Ajoute l'xp très simplment
 }
 
 //////////////////////Gestion des statistiques//////////////////////
-int stat[NUMSTATS], succes[NUMSUCCES];
+int stat[NUMSTATS]; bool succes[NUMACHS];
 
 void addstat(int valeur, int neededstat) // Ajoute la stat très simplement
 {
@@ -118,35 +117,25 @@ ICOMMAND(loadsavepart3, "iii", (int *csave1, int *csave2, int *csave3),
 });
 
 //////////////////////Gestion des succès//////////////////////
-void unlockachievement(const char* ID)
+bool achievementlocked(int achID) {return !succes[achID];}
+
+void unlockachievement(int achID)
 {
-    if(conserveurofficiel && usesteam)
+    if(achievementlocked(achID) && usesteam)
     {
-        SteamUserStats()->SetAchievement(ID);
+        SteamUserStats()->SetAchievement(achievements[achID].achname);
         SteamUserStats()->StoreStats();
+        succes[achID] = true;
     }
 }
 
-VARP(testkills, 0, 0, 100);
-ICOMMAND(testsendstat, "", (),
+void getsteamachievements()
 {
-    bool bRet = SteamAPI_Init();
-    if (bRet)
-    {
-        SteamUserStats()->SetStat("STAT_KILLS", testkills);
-        conoutf("STAT K ENVOYEE (%d)", testkills);
-        SteamUserStats()->StoreStats();
-    }
-});
+    int achID = 0;
 
-int stat_k = 0;
-
-ICOMMAND(testgetstat, "", (),
-{
-    bool bRet = SteamAPI_Init();
-    if (bRet)
+    loopi(NUMACHS)
     {
-        SteamUserStats()->GetStat("STAT_KILLS", &stat_k);
-        conoutf("STAT K = %d", stat_k);
+        SteamUserStats()->GetAchievement(achievements[achID].achname, &succes[achID]);
+        achID++;
     }
-});
+}

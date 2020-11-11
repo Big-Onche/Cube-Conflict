@@ -1798,8 +1798,6 @@ void modifygravity(physent *pl, bool water, int curtime, int jointmillis, int ap
 // moveres indicated the physics precision (which is lower for monsters and multiplayer prediction)
 // local is false for multiplayer prediction
 
-bool noach = true;
-
 bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis, int jointmillis, int aptitude, int aptisort, bool assist)
 {
     int material = lookupmaterial(vec(pl->o.x, pl->o.y, pl->o.z + (3*pl->aboveeye - pl->eyeheight)/4));
@@ -1857,7 +1855,7 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
         loopi(moveres) if(!move(pl, d) && ++collisions<5) i--; // discrete steps collision detection & sliding
         if(timeinair > 800 && !pl->timeinair && !water) // if we land after long time must have been a high jump, make thud sound
         {
-            if(game::player1->timeinair > 7000 && noach) {unlockachievement("ACH_ENVOL"); noach = false;}
+            if(game::player1->timeinair > 7000) unlockachievement(ACH_ENVOL);
             game::physicstrigger(pl, local, -1, 0);
         }
         game::footsteps(pl);

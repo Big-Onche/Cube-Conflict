@@ -259,8 +259,6 @@ namespace game
 
     string bouclier;
 
-    bool noach = true;
-
     void renderplayer(gameent *d, const playermodelinfo &mdl, int color, int team, float fade, int flags = 0, bool mainpass = true)
     {
         int anim = ANIM_IDLE|ANIM_LOOP, lastaction = d->lastaction;
@@ -276,7 +274,7 @@ namespace game
         {
             if(validteam(team) ? bestteams.htfind(team)>=0 : bestplayers.find(d)>=0)
             {
-                if(noach && (bestplayers.find(player1)>=0 || bestteams.htfind(player1->team)>=0)) {unlockachievement("ACH_WINNER"); noach = false;}
+                if(bestplayers.find(player1)>=0 || bestteams.htfind(player1->team)>=0) unlockachievement(ACH_WINNER);
             }
         }
 

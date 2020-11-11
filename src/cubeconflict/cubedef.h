@@ -75,17 +75,36 @@ extern string pseudoaleatoire;
 extern void genpseudo(bool forcename, int langue);
 extern bool conserveurofficiel;
 
+extern void addstat(int valeur, int stat);
+extern float menustat(int value);
 enum {STAT_KILLS, STAT_MORTS, STAT_KILLSTREAK, STAT_BOUCLIERBOIS, STAT_BOUCLIERFER, STAT_BOUCLIEROR, STAT_BOUCLIERMAGNETIQUE,
         STAT_PANACHAY, STAT_MANA, STAT_COCHON, STAT_STEROS, STAT_EPO, STAT_JOINT, STAT_CHAMPIS, STAT_ARMES, STAT_SUPERARMES,
         STAT_DRAPEAUX, STAT_WINS, STAT_ARMUREASSIST, STAT_TPSSEC, STAT_TPSMIN, STAT_TPSH, NUMSTATS};
 extern int stat[NUMSTATS];
-extern void addstat(int valeur, int stat);
-extern float menustat(int value);
 
-enum {ACH_TRIPLE, ACH_QUINTE, ACH_INVINCIBLE, ACH_COLLECTIONNEUR, ACH_ALCOOLIQUE, ACH_MANAMANIA, ACH_PROTECTION,
-        ACH_JUNKIE, ACH_WINNER, ACH_EPICWINNER, ACH_FLAGRUNNER, ACH_CHEATER, ACH_NEKFEU, NUMSUCCES};
-extern int succes[NUMSUCCES];
-extern void unlockachievement(const char* ID);
+extern void getsteamachievements();
+extern void unlockachievement(int achID);
+enum {ACH_TRIPLETTE = 0, ACH_PENTAPLETTE, ACH_DECAPLETTE, ACH_ATOME, ACH_WINNER, ACH_ENVOL,
+        ACH_POSTULANT, ACH_STAGIAIRE, ACH_SOLDAT, ACH_LIEUTENANT, ACH_MAJOR, ACH_BEAUTIR,
+        ACH_DEFONCE, NUMACHS};
+extern bool succes[NUMACHS];
+
+static const struct achinfo { int achnameID; const char *achname; } achievements[] =
+{
+    {ACH_TRIPLETTE, "ACH_TRIPLETTE"},
+    {ACH_PENTAPLETTE, "ACH_PENTAPLETTE"},
+    {ACH_DECAPLETTE, "ACH_DECAPLETTE"},
+    {ACH_ATOME, "ACH_ATOME"},
+    {ACH_WINNER, "ACH_WINNER"},
+    {ACH_ENVOL, "ACH_ENVOL"},
+    {ACH_POSTULANT,"ACH_POSTULANT"},
+    {ACH_STAGIAIRE, "ACH_STAGIAIRE"},
+    {ACH_SOLDAT,"ACH_SOLDAT"},
+    {ACH_LIEUTENANT,"ACH_LIEUTENANT"},
+    {ACH_MAJOR,"ACH_MAJOR"},
+    {ACH_BEAUTIR,"ACH_BEAUTIR"},
+    {ACH_DEFONCE,"ACH_DEFONCE"}
+};
 
 extern void addxp(int nbxp);
 extern int ccxp, cclvl, needxp, oldneed, neededxp;
