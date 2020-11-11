@@ -11,4 +11,4 @@ IF EXIST bin64\cubeconflict.exe (
     )
 )
 
-start %CC_BIN%\cubeconflict.exe "-u$HOME\My Games\Cube Conflict" -glog.txt %*
+start %CC_BIN%\cubeconflict.exe "-u$HOME\My Games\Cube Conflict" -glog.txt -s%*

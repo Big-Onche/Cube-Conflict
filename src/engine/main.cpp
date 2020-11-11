@@ -1086,27 +1086,17 @@ void changerlangue()
     else {UI_menutabs = 5; init = false;}
 }
 
-int appID = 0;
-
-int initsteam()
+bool initsteam()
 {
-    if(appID==0) return 0;
-
-    SteamAPI_Init();
-
-    if ( SteamAPI_RestartAppIfNecessary( appID ) )
+    if(!SteamAPI_Init())
     {
-        return 1;
+        conoutf(CON_WARN, langage ? "Steam API failed to start." : "API Steam non démarrée");
+        return false;
     }
-
-    if ( !SteamAPI_Init() )
-    {
-        printf( "Fatal Error - Steam must be running to play this game (SteamAPI_Init() failed).\n" );
-        return 1;
-    }
-
-    return 0;
+    else return true;
 }
+
+bool usesteam = false;
 
 int main(int argc, char **argv)
 {
@@ -1161,6 +1151,7 @@ int main(int argc, char **argv)
                 break;
             }
             case 'x': initscript = &argv[i][2]; break;
+            case 's': usesteam = true;
             default: if(!serveroption(argv[i])) gameargs.add(argv[i]); break;
         }
         else gameargs.add(argv[i]);
@@ -1170,6 +1161,8 @@ int main(int argc, char **argv)
 
     if(dedicated <= 1)
     {
+        if(usesteam && SteamAPI_RestartAppIfNecessary(1454700)) quit();
+
         logoutf("init: sdl");
 
         if(SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO|SDL_INIT_AUDIO)<0) fatal("Unable to initialize SDL: %s", SDL_GetError());
@@ -1184,7 +1177,6 @@ int main(int argc, char **argv)
     game::parseoptions(gameargs);
     initserver(dedicated>0, dedicated>1);  // never returns if dedicated
     ASSERT(dedicated <= 1);
-	initsteam();
     game::initclient();
 
     logoutf("init: video");
@@ -1278,6 +1270,8 @@ int main(int argc, char **argv)
     addpostfx("pause", 1, 1, 1, 1, vec4(1, 1, 1, 1));
     addpostfx("sobel", 1, 1, 1, 1, vec4(1, 1, 1, 1));
     clearpostfx();
+
+	if(usesteam)initsteam();
 
     logoutf("init: mainloop");
 

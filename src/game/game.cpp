@@ -396,7 +396,7 @@ namespace game
         if(player1->state != CS_DEAD && !intermission)
         {
             isalive = 1;
-            if(player1->steromillis && player1->epomillis && player1->jointmillis && player1->champimillis && noach2) {DebloqueSucces("ACH_DEFONCE"); noach2 = false; }
+            if(player1->steromillis && player1->epomillis && player1->jointmillis && player1->champimillis && noach2) {unlockachievement("ACH_DEFONCE"); noach2 = false; }
             if(player1->steromillis || player1->epomillis || player1->jointmillis || player1->champimillis) entities::checkboosts(curtime, player1);
             if(player1->ragemillis || player1->vampimillis || player1->aptisort1 || player1->aptisort2 || player1->aptisort3) entities::checkaptiskill(curtime, player1);
             if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_INDIEN) updatespecials(player1);
@@ -698,9 +698,9 @@ namespace game
         {
             addxp(7+player1->killstreak-1);
 
-            if(player1->killstreak==3) DebloqueSucces("ACH_TRIPLETTE");
-            else if(player1->killstreak==5) DebloqueSucces("ACH_PENTAPLETTE");
-            else if(player1->killstreak==10) DebloqueSucces("ACH_DECAPLETTE");
+            if(player1->killstreak==3) unlockachievement("ACH_TRIPLETTE");
+            else if(player1->killstreak==5) unlockachievement("ACH_PENTAPLETTE");
+            else if(player1->killstreak==10) unlockachievement("ACH_DECAPLETTE");
 
             addstat(1, STAT_KILLS);
             if(player1->killstreak>stat[STAT_KILLSTREAK]) addstat(player1->killstreak, STAT_KILLSTREAK);
@@ -802,7 +802,7 @@ namespace game
                     distance);
                 playsound(S_KILL);
                 message1 = totalmillis; message2 = totalmillis; copystring(str_pseudovictime, dname); n_aptitudevictime = d->aptitude; killdistance = distance;
-                if(distance>=100.f) DebloqueSucces("ACH_BEAUTIR");
+                if(distance>=100.f) unlockachievement("ACH_BEAUTIR");
 
             }
             else if(d==player1) ////////////////////TU as été tué////////////////////

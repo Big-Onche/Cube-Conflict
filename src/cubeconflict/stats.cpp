@@ -26,11 +26,11 @@ void genlvl() //Calcule le niveau du joueur
 
     switch(cclvl) //Regarde si il y a un succès à déverouiller
     {
-        case 5: if(!achpost){DebloqueSucces("ACH_POSTULANT"); achpost = true;} break;
-        case 10: if(!achstag){DebloqueSucces("ACH_STAGIAIRE"); achstag = true;} break;
-        case 20: if(!achsol){DebloqueSucces("ACH_SOLDAT"); achsol = true;} break;
-        case 50: if(!achlieu){DebloqueSucces("ACH_LIEUTENANT"); achlieu = true;} break;
-        case 100: if(!achmaj){DebloqueSucces("ACH_MAJOR"); achmaj = true;}
+        case 5: if(!achpost){unlockachievement("ACH_POSTULANT"); achpost = true;} break;
+        case 10: if(!achstag){unlockachievement("ACH_STAGIAIRE"); achstag = true;} break;
+        case 20: if(!achsol){unlockachievement("ACH_SOLDAT"); achsol = true;} break;
+        case 50: if(!achlieu){unlockachievement("ACH_LIEUTENANT"); achlieu = true;} break;
+        case 100: if(!achmaj){unlockachievement("ACH_MAJOR"); achmaj = true;}
     }
 
     game::player1->level = cclvl;
@@ -118,19 +118,13 @@ ICOMMAND(loadsavepart3, "iii", (int *csave1, int *csave2, int *csave3),
 });
 
 //////////////////////Gestion des succès//////////////////////
-void DebloqueSucces(const char* ID)
+void unlockachievement(const char* ID)
 {
-    if(conserveurofficiel)
+    if(conserveurofficiel && usesteam)
     {
-        bool bRet = SteamAPI_Init(); 	// Un appel de Steam a-t-il été reçu ?
-
-        if(bRet) // Notifie du succès si Steam a été initialisé avec succès
-        {
-            SteamUserStats()->SetAchievement(ID);
-            SteamUserStats()->StoreStats();
-        }
+        SteamUserStats()->SetAchievement(ID);
+        SteamUserStats()->StoreStats();
     }
-    else conoutf("Succès non déverrouillé (Steam non actif ou serveur non officiel)");
 }
 
 VARP(testkills, 0, 0, 100);

@@ -5,7 +5,7 @@ PLATFORM= $(shell uname -s)
 PLATFORM_ARCH= $(shell uname -m)
 PLATFORM_PREFIX= native
 
-INCLUDES= -Ishared -Iengine -Igame -Ienet/include
+INCLUDES= -Ishared -Iengine -Igame -Ienet/include -Isteam
 
 STRIP=
 ifeq (,$(findstring -g,$(CXXFLAGS)))
@@ -45,7 +45,7 @@ override WINDRES+= -F pe-i386
 endif
 CLIENT_INCLUDES= $(INCLUDES) -Iinclude
 STD_LIBS= -static-libgcc -static-libstdc++
-CLIENT_LIBS= -mwindows $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lSDL2 -lSDL2_image -lSDL2_mixer -lzlib1 -lopengl32 -lenet -lws2_32 -lwinmm
+CLIENT_LIBS= -mwindows $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lSDL2 -lSDL2_image -lSDL2_mixer -lzlib1 -lopengl32 -lenet -lws2_32 -lwinmm -lsteam_api
 else	
 CLIENT_INCLUDES= $(INCLUDES) -I/usr/X11R6/include `sdl2-config --cflags`
 CLIENT_LIBS= -Lenet -lenet -L/usr/X11R6/lib -lX11 `sdl2-config --libs` -lSDL2_image -lSDL2_mixer -lz -lGL
@@ -112,9 +112,12 @@ CLIENT_OBJS= \
 	game/scoreboard.o \
 	game/server.o \
 	game/waypoint.o \
-	game/weapon.o
+	game/weapon.o \
+	cubeconflict/aptitudes.o \
+	cubeconflict/hud.o \
+	cubeconflict/stats.o \
 
-CLIENT_PCH= shared/cube.h.gch engine/engine.h.gch game/game.h.gch
+CLIENT_PCH= shared/cube.h.gch engine/engine.h.gch game/game.h.gch cubeconflict/cubedef.h.gch
 
 SERVER_INCLUDES= -DSTANDALONE -Istandalone/shared -Istandalone/engine -Istandalone/game $(INCLUDES)
 ifneq (,$(findstring MINGW,$(PLATFORM)))

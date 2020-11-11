@@ -276,7 +276,7 @@ namespace game
         {
             if(validteam(team) ? bestteams.htfind(team)>=0 : bestplayers.find(d)>=0)
             {
-                if(noach && (bestplayers.find(player1)>=0 || bestteams.htfind(player1->team)>=0)) {DebloqueSucces("ACH_WINNER"); noach = false;}
+                if(noach && (bestplayers.find(player1)>=0 || bestteams.htfind(player1->team)>=0)) {unlockachievement("ACH_WINNER"); noach = false;}
             }
         }
 

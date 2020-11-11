@@ -1,16 +1,5 @@
 #include "../game/game.h"
 
-//enum { APT_SPEC_DURABLE = 0, APT_SPEC_BLINDE, APT_SPEC_DOPE, APT_SPEC_SURARME, APT_SPEC_CHANCEUX, NUMAPTSSPECS };
-
-//static struct aptitudesspecs { int apt_spec; float boostpv, boostarmure, boostbonus, boostmunitions; } aptitspecs[NUMAPTSSPECS] =
-//{
-//    { APT_SPEC_DURABLE,     1.25f,  1.00f,  1.00f,  1.00f},
-//    { APT_SPEC_BLINDE,      1.00f,  1.25f,  1.00f,  1.00f},
-//    { APT_SPEC_DOPE,        1.00f,  1.00f,  1.25f,  1.00f},
-//    { APT_SPEC_SURARME,     1.00f,  1.00f,  1.00f,  1.25f},
-//    { APT_SPEC_CHANCEUX,    1.00f,  1.00f,  1.00f,  1.00f}, // Changés aléatoirement à chaque vie
-//};
-
 //Définition des aptitudes
 enum {APT_SOLDAT = 0, APT_MEDECIN, APT_AMERICAIN, APT_NINJA, APT_VAMPIRE, APT_MAGICIEN, APT_KAMIKAZE, APT_FAUCHEUSE, APT_PHYSICIEN, APT_CAMPEUR, APT_COMMANDO, APT_PRETRE, APT_VICKING, APT_JUNKIE, APT_INDIEN, NUMAPTS};
 
@@ -60,50 +49,47 @@ static const struct custominfo { const char *smiley, *capeteam1, *capeteam2, *cu
     {"",                 "capes/cape_risitasbg",    "capes/cape_risitasbg/orange"},
 };
 
-extern string pseudoaleatoire;
-extern void genpseudo(bool forcename, int langue);
-
-//Messages de kill
+//HUD
 extern bool suicided;
 extern string str_pseudotueur, str_armetueur;
 extern int n_aptitudetueur, n_aptitudevictime;
 
-//HUD
-extern int message1, message2, message3, ctfmessage1, ctfmessage2, ctfmessage3, ctfmessage4, ctfmessage5, ctfmessage6;  //Messages HUD
+extern int message1, message2, message3, ctfmessage1, ctfmessage2, ctfmessage3, ctfmessage4, ctfmessage5, ctfmessage6;
 extern int lastshoot;
-extern int zoomfov, zoom, crosshairsize; //HUD Zoom
+extern int zoomfov, zoom, crosshairsize;
 extern float crosshairalpha, pourcents;
 extern int ccxp, cclvl, needxp, oldneed, neededxp;
 
-extern float weapposside, weapposup, maxweapposside, maxweapposup, shieldside, maxshieldside; //Visée à la mire
+extern float weapposside, weapposup, maxweapposside, maxweapposup, shieldside, maxshieldside;
 extern int nbfps;
 
-extern int parallaxX, parallaxY; //Effet parallax des menus
+extern int parallaxX, parallaxY;
 
+//Ambiances aléatoires
+extern int randomambience;
 extern float wateramplitude;
 
 //Statistiques & sauvegarde
 extern int langage;
+extern string pseudoaleatoire;
+extern void genpseudo(bool forcename, int langue);
+extern bool conserveurofficiel;
 
 enum {STAT_KILLS, STAT_MORTS, STAT_KILLSTREAK, STAT_BOUCLIERBOIS, STAT_BOUCLIERFER, STAT_BOUCLIEROR, STAT_BOUCLIERMAGNETIQUE,
         STAT_PANACHAY, STAT_MANA, STAT_COCHON, STAT_STEROS, STAT_EPO, STAT_JOINT, STAT_CHAMPIS, STAT_ARMES, STAT_SUPERARMES,
         STAT_DRAPEAUX, STAT_WINS, STAT_ARMUREASSIST, STAT_TPSSEC, STAT_TPSMIN, STAT_TPSH, NUMSTATS};
 extern int stat[NUMSTATS];
+extern void addstat(int valeur, int stat);
+extern float menustat(int value);
 
 enum {ACH_TRIPLE, ACH_QUINTE, ACH_INVINCIBLE, ACH_COLLECTIONNEUR, ACH_ALCOOLIQUE, ACH_MANAMANIA, ACH_PROTECTION,
         ACH_JUNKIE, ACH_WINNER, ACH_EPICWINNER, ACH_FLAGRUNNER, ACH_CHEATER, ACH_NEKFEU, NUMSUCCES};
 extern int succes[NUMSUCCES];
+extern void unlockachievement(const char* ID);
 
 extern void addxp(int nbxp);
 extern int ccxp, cclvl, needxp, oldneed, neededxp;
 extern float pourcents;
 
-extern void addstat(int valeur, int stat);
-extern float menustat(int value);
 extern void writesave();
-
-extern void DebloqueSucces(const char* ID);
-
-// Autres
-extern bool conserveurofficiel;
-extern int randomambience;
+extern bool usesteam;
