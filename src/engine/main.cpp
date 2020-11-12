@@ -235,7 +235,7 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
                 case 0: formatstring(backgroundimg, "media/map/Village.jpg"); break;
                 case 1: formatstring(backgroundimg, "media/map/Usine.jpg"); break;
                 case 2: formatstring(backgroundimg, "media/map/Chateaux.jpg"); break;
-                case 3: formatstring(backgroundimg, "media/map/Dota.jpg"); break;
+                //case 3: formatstring(backgroundimg, "media/map/Dota.jpg"); break;
                 case 4: formatstring(backgroundimg, "media/map/Lune.jpg"); break;
                 case 5: formatstring(backgroundimg, "media/map/Volcan.jpg"); break;
                 default: formatstring(backgroundimg, "media/interface/image_fond.jpg"); break;
@@ -1204,7 +1204,7 @@ int main(int argc, char **argv)
     textureload("media/map/Village.jpg");
     textureload("media/map/Usine.jpg");
     textureload("media/map/Chateaux.jpg");
-    textureload("media/map/Dota.jpg");
+    //textureload("media/map/Dota.jpg");
     textureload("media/map/Lune.jpg");
     textureload("media/map/Volcan.jpg");
 

@@ -746,9 +746,9 @@ namespace game
             case 0: name = "Village"; break;
             case 1: name = "Usine"; break;
             case 2: name = "Chateaux"; break;
-            case 3: name = "Dota"; break;
-            case 4: name = "Lune"; break;
-            case 5: name = "Volcan"; break;
+            case 3: name = "Lune"; break;
+            case 4: name = "Volcan"; break;
+            //case 3: name = "Dota"; break;
         }
         changemap(name, m_valid(nextmode) ? nextmode : (remote ? 1 : 0));
         fullbrightmodels = 0;
