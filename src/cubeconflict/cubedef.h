@@ -89,21 +89,21 @@ enum {ACH_TRIPLETTE = 0, ACH_PENTAPLETTE, ACH_DECAPLETTE, ACH_ATOME, ACH_WINNER,
         ACH_DEFONCE, NUMACHS};
 extern bool succes[NUMACHS];
 
-static const struct achinfo { int achnameID; const char *achname; } achievements[] =
+static const struct achinfo { int achnameID; const char *achname, *achnicenameFR, *achnicenameEN, *achdescFR, *achdescEN; } achievements[] =
 {
-    {ACH_TRIPLETTE, "ACH_TRIPLETTE"},
-    {ACH_PENTAPLETTE, "ACH_PENTAPLETTE"},
-    {ACH_DECAPLETTE, "ACH_DECAPLETTE"},
-    {ACH_ATOME, "ACH_ATOME"},
-    {ACH_WINNER, "ACH_WINNER"},
-    {ACH_ENVOL, "ACH_ENVOL"},
-    {ACH_POSTULANT,"ACH_POSTULANT"},
-    {ACH_STAGIAIRE, "ACH_STAGIAIRE"},
-    {ACH_SOLDAT,"ACH_SOLDAT"},
-    {ACH_LIEUTENANT,"ACH_LIEUTENANT"},
-    {ACH_MAJOR,"ACH_MAJOR"},
-    {ACH_BEAUTIR,"ACH_BEAUTIR"},
-    {ACH_DEFONCE,"ACH_DEFONCE"}
+    {ACH_TRIPLETTE,     "ACH_TRIPLETTE",     "Triple menace",               "Triple threat",            "Tuer 3 ennemis sans mourrir",                                              "Kill 3 enemies without dying"},
+    {ACH_PENTAPLETTE,   "ACH_PENTAPLETTE",   "Terreur",                     "Terror",                   "Tuer 5 ennemis sans mourrir",                                              "Kill 5 enemies without dying"},
+    {ACH_DECAPLETTE,    "ACH_DECAPLETTE",    "Invincible !",                "Invincible !",             "Tuer 10 ennemis sans mourrir",                                             "Kill 10 enemies without dying"},
+    {ACH_ATOME,         "ACH_ATOME",         "La puissance de l'atome",     "The power of the atom",    "Balancer un missile nucléaire",                                            "Launch a nuclear missile"},
+    {ACH_WINNER,        "ACH_WINNER",        "Winner",                      "Winner",                   "Remporter 1 partie",                                                       "Win 1 game"},
+    {ACH_ENVOL,         "ACH_ENVOL",         "Envol pour le paradis",       "Fly like an eagle",        "Rester au moins 7 secondes dans les airs",                                 "Stay at least 7 seconds in the air"},
+    {ACH_POSTULANT,     "ACH_POSTULANT",     "Postulant",                   "Applicant",                "Atteindre le niveau 5",                                                    "Reach level 5"},
+    {ACH_STAGIAIRE,     "ACH_STAGIAIRE",     "Stagiaire",                   "Trainee",                  "Atteindre le niveau 10",                                                   "Reach level 10"},
+    {ACH_SOLDAT,        "ACH_SOLDAT",        "Soldat",                      "Soldier",                  "Atteindre le niveau 20",                                                   "Reach level 20"},
+    {ACH_LIEUTENANT,    "ACH_LIEUTENANT",    "Lieutenant",                  "Lieutenant",               "Atteindre le niveau 50 (C'est pas mal !)",                                 "Reach level 50 (Nice !)"},
+    {ACH_MAJOR,         "ACH_MAJOR",         "Major",                       "Major",                    "Atteindre le niveau 100 (Tu as supporté le jeu jusqu'ici !?)",             "Reach level 100 (that's a lot of grind !)"},
+    {ACH_BEAUTIR,       "ACH_BEAUTIR",       "Beau tir !",                  "Nice shoot !",             "Tuer quelqu'un à au moins 100 mètres de distance",                         "Kill someone at least 100 meters away"},
+    {ACH_DEFONCE,       "ACH_DEFONCE",       "Complètement défoncé",        "Completely stoned",        "Utiliser en même temps le joint, l'EPO, les champis et les stéros",        "Use joint, EPO, shrooms and steroids at the same time"},
 };
 
 extern void addxp(int nbxp);

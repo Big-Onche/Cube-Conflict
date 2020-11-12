@@ -1,8 +1,7 @@
 #include <climits>
 #include <cstdlib>
-#include "engine.h"
 #include "cubedef.h"
-#include <steam_api.h>
+#include "steam_api.h"
 
 using namespace std;
 
@@ -117,25 +116,50 @@ ICOMMAND(loadsavepart3, "iii", (int *csave1, int *csave2, int *csave3),
 });
 
 //////////////////////Gestion des succès//////////////////////
-bool achievementlocked(int achID) {return !succes[achID];}
+bool achievementlocked(int achID) {return !succes[achID];} //Succès verrouillé ? OUI = TRUE, NON = FALSE
 
-void unlockachievement(int achID)
+void unlockachievement(int achID) //Débloque le succès
 {
-    if(achievementlocked(achID) && usesteam)
+    if(conserveurofficiel && achievementlocked(achID) && usesteam) //Ne débloque que si succès verrouillé ET Steam activé
     {
-        SteamUserStats()->SetAchievement(achievements[achID].achname);
+        SteamUserStats()->SetAchievement(achievements[achID].achname); //Met le succès à jour côté steam
         SteamUserStats()->StoreStats();
-        succes[achID] = true;
+        succes[achID] = true; //Met le succès à jour côté client
     }
 }
 
-void getsteamachievements()
+void getsteamachievements() //Récupère les succès enregistrés sur steam
 {
     int achID = 0;
-
     loopi(NUMACHS)
     {
         SteamUserStats()->GetAchievement(achievements[achID].achname, &succes[achID]);
         achID++;
     }
 }
+
+string logodir;
+const char *getachievementslogo(int achID) //Récupère le logo d'un succès en particulier
+{
+    formatstring(logodir, "media/interface/achievements/%s%s.jpg", achievements[achID].achname, achievementlocked(achID) ? "_no" : "_yes");
+    return logodir;
+}
+ICOMMAND(getachievementslogo, "i", (int *achID), result(getachievementslogo(*achID)));
+
+const char *getachievementname(int achID) //Récupère le nom d'un succès en particulier
+{
+    return langage ? achievements[achID].achnicenameEN : achievements[achID].achnicenameFR;
+}
+ICOMMAND(getachievementname, "i", (int *achID), result(getachievementname(*achID)));
+
+const char *getachievementinfo(int achID) //Récupère la description d'un succès en particulier
+{
+    return langage ? achievements[achID].achdescEN : achievements[achID].achdescFR;
+}
+ICOMMAND(getachievementinfo, "i", (int *achID), result(getachievementinfo(*achID)));
+
+const char *getachievementcolor(int achID) //Renvoie une couleur pour savoir si le succes est verrouillé ou non
+{
+    return achievementlocked(achID) ? "0xD8AA88" : "0x99D899";
+}
+ICOMMAND(getachievementcolor, "i", (int *achID), result(getachievementcolor(*achID)));

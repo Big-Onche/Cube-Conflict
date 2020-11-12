@@ -220,6 +220,7 @@
 		<Unit filename="../shared/tools.cpp" />
 		<Unit filename="../shared/tools.h" />
 		<Unit filename="../shared/zip.cpp" />
+		<Unit filename="../steam/steam_api.h" />
 		<Unit filename="mingw.rc">
 			<Option compilerVar="WINDRES" />
 			<Option compiler="gcc" use="1" buildCommand="$rescomp -F $WINDRES_TARGET -i $file -J rc -o $resource_output -O coff $res_includes" />
