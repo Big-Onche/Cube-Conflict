@@ -8,7 +8,6 @@ extern void cleargamma();
 
 void cleanup()
 {
-    if(usesteam)SteamAPI_Shutdown();
     recorder::stop();
     cleanupserver();
     SDL_ShowCursor(SDL_TRUE);
@@ -30,15 +29,20 @@ void cleanup()
 
 extern void writeinitcfg();
 
-void quit()                     // normal exit
+void quit(bool savecfgs = true)                     // normal exit
 {
-    writesave();
-    writeinitcfg();
-    writeservercfg();
+    if(savecfgs)
+    {
+        writesave();
+        writeinitcfg();
+        writeservercfg();
+        writecfg();
+    }
+
     abortconnect();
     disconnect();
     localdisconnect();
-    writecfg();
+    if(usesteam) SteamAPI_Shutdown();
     cleanup();
     exit(EXIT_SUCCESS);
 }
@@ -1161,7 +1165,7 @@ int main(int argc, char **argv)
 
     if(dedicated <= 1)
     {
-        if(usesteam && SteamAPI_RestartAppIfNecessary(1454700)) quit();
+        if(usesteam && SteamAPI_RestartAppIfNecessary(1454700)) quit(false);
 
         logoutf("init: sdl");
 
