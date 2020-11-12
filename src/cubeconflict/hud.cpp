@@ -1,5 +1,4 @@
 #include "game.h"
-#include "engine.h"
 #include "cubedef.h"
 
 int message1, message2, message3, ctfmessage1, ctfmessage2, ctfmessage3, ctfmessage4, ctfmessage5, ctfmessage6;

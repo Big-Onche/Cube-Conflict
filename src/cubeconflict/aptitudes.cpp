@@ -1,5 +1,4 @@
 #include "game.h"
-#include "engine.h"
 #include "cubedef.h"
 
 //Commandes d'aptitudes (touches 1, 2 et 3)
