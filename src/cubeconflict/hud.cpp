@@ -358,7 +358,7 @@ namespace game
         if(player1->champimillis) {draw_textf("%d", 135, h-233-decal_number, d->champimillis/1000); decal_number +=130;}
         if(player1->jointmillis) {draw_textf("%d", 135, h-233-decal_number, d->jointmillis/1000); decal_number +=130;}
 
-        defformatstring(infobarrexp, "%d/%d XP - LVL %d", neededxp-(needxp-ccxp), neededxp, cclvl);
+        defformatstring(infobarrexp, "%d/%d XP - LVL %d", neededxp-(needxp-stat[STAT_XP]), neededxp, cclvl);
 
         int tw = text_width(infobarrexp);
         float tsz = 0.4f,

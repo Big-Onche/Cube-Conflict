@@ -3370,7 +3370,7 @@ namespace UI
         if(needfloat) BUILD(TextFloat, o, o->setup(nombre, scale, color, wrap), children);
         else if(timestat)
         {
-            defformatstring(horloge, "%s%d:%s%d:%s%d", stat[21]<10 ? "0" : "", stat[21], stat[20]<10 ? "0" : "", stat[20], stat[19]<10 ? "0" : "", stat[19]);
+            defformatstring(horloge, "%s%d:%s%d:%s%d", stat[23]<10 ? "0" : "", stat[23], stat[22]<10 ? "0" : "", stat[22], stat[21]<10 ? "0" : "", stat[21]);
             BUILD(TextString, o, o->setup(horloge, scale, color, wrap), children);
         }
         else BUILD(TextInt, o, o->setup(nombre, scale, color, wrap), children);
@@ -3380,7 +3380,7 @@ namespace UI
         buildtext(*text, *scale, uitextscale, Color(*c), -1, children));
 
     ICOMMAND(uistat, "ffe", (float *stat, float *scale, uint *children),
-        buildstattext(menustat(*stat), *scale, uitextscale, Color(0, 0, 0), -1, children, *stat==-3 ? true : false, *stat==19 ? true : false));
+        buildstattext(menustat(*stat), *scale, uitextscale, Color(0, 0, 0), -1, children, *stat==-2 ? true : false, *stat==21 ? true : false));
 
     ICOMMAND(uitext, "tfe", (tagval *text, float *scale, uint *children),
         buildtext(*text, *scale, uitextscale, Color(255, 255, 255), -1, children));

@@ -3038,7 +3038,7 @@ bool execidentbool(const char *name, bool noid, bool lookup)
     return id ? executebool(id, NULL, 0, lookup) : noid;
 }
 
-bool execfile(const char *cfgfile, bool msg, bool encrypted)
+bool execfile(const char *cfgfile, bool msg)
 {
     string s;
     copystring(s, cfgfile);
@@ -3053,14 +3053,6 @@ bool execfile(const char *cfgfile, bool msg, bool encrypted)
     const char *oldsourcefile = sourcefile, *oldsourcestr = sourcestr;
     sourcefile = cfgfile;
     sourcestr = buf;
-
-    if(encrypted)
-    {
-        int i;
-
-        for(i = 0; (i < 500 && buf[i] != '\0'); i++)
-            buf[i] = buf[i] - 10;
-    }
 
     execute(buf);
     sourcefile = oldsourcefile;

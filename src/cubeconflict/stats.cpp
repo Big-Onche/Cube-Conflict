@@ -6,12 +6,12 @@
 using namespace std;
 
 //////////////////////Gestion de l'xp et niveaux//////////////////////
-int ccxp = 0, cclvl = 1, needxp = 40, oldneed = 40, neededxp = 40;
+int cclvl = 1, needxp = 40, oldneed = 40, neededxp = 40;
 float pourcents = -1;
 
 void genlvl() //Calcule le niveau du joueur
 {
-    while(ccxp>=needxp) //Ajoute un niveau et augmente l'xp demandé pour le niveau suivant
+    while(stat[STAT_XP]>=needxp) //Ajoute un niveau et augmente l'xp demandé pour le niveau suivant
     {
         cclvl++;
         oldneed += 40;
@@ -19,7 +19,7 @@ void genlvl() //Calcule le niveau du joueur
         neededxp += 40;
     }
 
-    float pour1 = neededxp, pour2 = ccxp-needxp;
+    float pour1 = neededxp, pour2 = stat[STAT_XP]-needxp;
     if(pour1!=0) pourcents = pour2/pour1; //Calcul le pourcentage pour prochain niveau
 
     switch(cclvl) //Regarde si il y a un succès à déverouiller
@@ -34,14 +34,15 @@ void genlvl() //Calcule le niveau du joueur
     game::player1->level = cclvl;
 }
 
+//////////////////////Gestion des statistiques//////////////////////
 void addxp(int nbxp) // Ajoute l'xp très simplment
 {
     if(!conserveurofficiel) return;
-    ccxp += nbxp;
+    stat[STAT_XP] += nbxp;
     genlvl(); //Recalcule le niveau
 }
 
-//////////////////////Gestion des statistiques//////////////////////
+
 int stat[NUMSTATS]; bool succes[NUMACHS];
 
 void addstat(int valeur, int neededstat) // Ajoute la stat très simplement
@@ -50,25 +51,20 @@ void addstat(int valeur, int neededstat) // Ajoute la stat très simplement
     stat[neededstat]+= valeur;
 }
 
-float menustat(int value)
+float menustat(int value) //Récupère les stats pour le menu (float utilisé pour le ratio)
 {
-    if(value<0)
+    switch(value)
     {
-        switch(value)
+        case -2:
         {
-            case -3:
-            {
-                float float_kills = stat[0], float_morts = stat[1];
-                int ratiokd = (float_kills/(float_morts == 0 ? 1 : float_morts))*100;
-                float ratiokdmenu = ratiokd;
-                return ratiokdmenu/100;
-            }
-            case -2: return cclvl;
-            case -1: return ccxp;
-            default: return 0;
+            float fk = stat[STAT_KILLS], fm = stat[STAT_MORTS];
+            int ratiokd = (fk/(fk == 0 ? 1 : fm)*100);
+            return ratiokd/100.f;
         }
+        case -1: return cclvl; break;
+
+        default: return stat[value];
     }
-    else return stat[value];
 }
 
 //////////////////////Gestion des sauvegardes//////////////////////
@@ -77,43 +73,45 @@ char *encryptsave(char savepart[100])
     int i;
 
     for(i = 0; (i < 100 && savepart[i] != '\0'); i++)
-        savepart[i] = savepart[i] + 10;
+        savepart[i] = savepart[i] - 10;
 
     return savepart;
 }
 
 void writesave()
 {
-    stream *f = openutf8file("config/sauvegarde.cfg", "w");
+    stream *f = openutf8file("config/stats.cfg", "w");
 
-    f->printf("%s%s%s",
-              encryptsave(tempformatstring("loadsavepart1 %d %d %d %d %d %d %d %d %d %d; ", ccxp, stat[0], stat[1], stat[2], stat[3], stat[4], stat[5], stat[6], stat[7], stat[8])),
-              encryptsave(tempformatstring("loadsavepart2 %d %d %d %d %d %d %d %d %d %d; ", stat[9], stat[10], stat[11], stat[12], stat[13], stat[14], stat[15], stat[16], stat[17], stat[18])),
-              encryptsave(tempformatstring("loadsavepart3 %d %d %d; ", stat[19], stat[20], stat[21]))
-             );
+    int statID = 0;
+    loopi(NUMSTATS)
+    {
+        f->printf("%s\n", encryptsave(tempformatstring("%d", stat[statID])));
+        statID++;
+    }
 }
 
-ICOMMAND(loadsavepart1, "iiiiiiiiii", (int *asave1, int *asave2, int *asave3, int *asave4, int *asave5, int *asave6, int *asave7, int *asave8, int *asave9, int *asave10),
+void loadsave()
 {
-    ccxp = *asave1; //Xp donc level
-    stat[0] = *asave2; stat[1] = *asave3; stat[2] = *asave4; //Kills, morts, killstrak donc ratio
-    stat[3] = *asave5; stat[4] = *asave6; stat[5] = *asave7; stat[6] = *asave8; stat[7] = *asave9; stat[8] = *asave10; //Objets
-    genlvl(); //Regénère le niveau afin d'avoir le bon niveau & pourcentage pour prochain niveau
-});
+    stream *statlist = openfile("config/stats.cfg", "r");
+    if(!statlist) return;
 
-ICOMMAND(loadsavepart2, "iiiiiiiiii", (int *bsave1, int *bsave2, int *bsave3, int *bsave4, int *bsave5, int *bsave6, int *bsave7, int *bsave8, int *bsave9, int *bsave10),
-{
-    stat[9] = *bsave1; stat[10] = *bsave2; stat[11] = *bsave3; stat[12] = *bsave4; stat[13] = *bsave5; //Boosts
-    stat[14] = *bsave6; stat[15] = *bsave7; //Armes
-    stat[16] = *bsave8; //Drapeaux pris
-    stat[17] = *bsave9; //Parties gagnées
-    stat[18] = *bsave10; //Armures assistée
-});
+    char buf[50];
+    int statID = 0;
 
-ICOMMAND(loadsavepart3, "iii", (int *csave1, int *csave2, int *csave3),
-{
-    stat[19] = *csave1; stat[20] = *csave2; stat[21] = *csave3; //Tps de jeu (secondes, minutes, heures)
-});
+    while(statlist->getline(buf, sizeof(buf)))
+    {
+        int i;
+
+        for(i = 0; (i < 500 && buf[i] != '\0'); i++)
+            buf[i] = buf[i] + 10;
+
+        sscanf(buf, "%i", &stat[statID]);
+        statID++;
+    }
+    statlist->close();
+
+    genlvl();
+}
 
 //////////////////////Gestion des succès//////////////////////
 bool achievementlocked(int achID) {return !succes[achID];} //Succès verrouillé ? OUI = TRUE, NON = FALSE
@@ -163,3 +161,25 @@ const char *getachievementcolor(int achID) //Renvoie une couleur pour savoir si 
     return achievementlocked(achID) ? "0xD8AA88" : "0x99D899";
 }
 ICOMMAND(getachievementcolor, "i", (int *achID), result(getachievementcolor(*achID)));
+
+
+ICOMMAND(testsendstat, "", (),
+{
+    //int statID = 0;
+    SteamUserStats()->RequestCurrentStats();
+    SteamUserStats()->SetStat("STAT_KILLS", 10);
+    conoutf("STAT K ENVOYEE (%d)", 10);
+    SteamUserStats()->StoreStats();
+});
+
+
+ICOMMAND(testgetstat, "", (),
+{
+    if(SteamUser()->BLoggedOn())
+    {
+        int roger = 0;
+        SteamUserStats()->RequestCurrentStats();
+        SteamUserStats()->GetStat("STAT_BITE", &roger);
+        conoutf("STAT K = %d", roger);
+    }
+});

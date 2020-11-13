@@ -1240,7 +1240,7 @@ int main(int argc, char **argv)
 
     execfile("config/heightmap.cfg");
     execfile("config/blendbrush.cfg");
-    execfile("config/sauvegarde.cfg", false, true);
+    loadsave();
 
     if(game::savedservers()) execfile(game::savedservers(), false);
 
@@ -1345,6 +1345,7 @@ int main(int argc, char **argv)
         swapbuffers();
         renderedframe = inbetweenframes = true;
 
+        if(usesteam)SteamAPI_RunCallbacks();
     }
 
     ASSERT(0);

@@ -59,10 +59,9 @@ namespace game
         {
             addstat(1, STAT_TPSSEC);
             lasttimeupdate = totalmillis;
-            if(usesteam)SteamAPI_RunCallbacks();
         }
-        if(stat[19]>=60) {stat[19]=0 ; addstat(1, STAT_TPSMIN);}
-        if(stat[20]>=60) {stat[20]=0 ; addstat(1, STAT_TPSH);}
+        if(stat[21]>=60) {stat[21]=0 ; addstat(1, STAT_TPSMIN);}
+        if(stat[22]>=60) {stat[22]=0 ; addstat(1, STAT_TPSH);}
     }
 
     ICOMMAND(getfollow, "", (),

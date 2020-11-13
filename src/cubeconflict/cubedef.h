@@ -58,7 +58,6 @@ extern int message1, message2, message3, ctfmessage1, ctfmessage2, ctfmessage3, 
 extern int lastshoot;
 extern int zoomfov, zoom, crosshairsize;
 extern float crosshairalpha, pourcents;
-extern int ccxp, cclvl, needxp, oldneed, neededxp;
 
 extern float weapposside, weapposup, maxweapposside, maxweapposup, shieldside, maxshieldside;
 extern int nbfps;
@@ -69,15 +68,23 @@ extern int parallaxX, parallaxY;
 extern int randomambience;
 extern float wateramplitude;
 
-//Statistiques & sauvegarde
-extern int langage;
+//Statistiques & sauvegarde & config élémentaire
+extern bool usesteam;
 extern string pseudoaleatoire;
 extern void genpseudo(bool forcename, int langue);
 extern bool conserveurofficiel;
+extern int langage;
+
+extern void loadsave();
+extern void writesave();
+
+extern void addxp(int nbxp);
+extern int cclvl, needxp, oldneed, neededxp;
+extern float pourcents;
 
 extern void addstat(int valeur, int stat);
 extern float menustat(int value);
-enum {STAT_KILLS, STAT_MORTS, STAT_KILLSTREAK, STAT_BOUCLIERBOIS, STAT_BOUCLIERFER, STAT_BOUCLIEROR, STAT_BOUCLIERMAGNETIQUE,
+enum {STAT_XP, STAT_CC, STAT_KILLS, STAT_MORTS, STAT_KILLSTREAK, STAT_BOUCLIERBOIS, STAT_BOUCLIERFER, STAT_BOUCLIEROR, STAT_BOUCLIERMAGNETIQUE,
         STAT_PANACHAY, STAT_MANA, STAT_COCHON, STAT_STEROS, STAT_EPO, STAT_JOINT, STAT_CHAMPIS, STAT_ARMES, STAT_SUPERARMES,
         STAT_DRAPEAUX, STAT_WINS, STAT_ARMUREASSIST, STAT_TPSSEC, STAT_TPSMIN, STAT_TPSH, NUMSTATS};
 extern int stat[NUMSTATS];
@@ -105,10 +112,3 @@ static const struct achinfo { int achnameID; const char *achname, *achnicenameFR
     {ACH_BEAUTIR,       "ACH_BEAUTIR",       "Beau tir !",                  "Nice shoot !",             "Tuer quelqu'un à au moins 100 mètres de distance",                         "Kill someone at least 100 meters away"},
     {ACH_DEFONCE,       "ACH_DEFONCE",       "Complètement défoncé",        "Completely stoned",        "Utiliser en même temps le joint, l'EPO, les champis et les stéros",        "Use joint, EPO, shrooms and steroids at the same time"},
 };
-
-extern void addxp(int nbxp);
-extern int ccxp, cclvl, needxp, oldneed, neededxp;
-extern float pourcents;
-
-extern void writesave();
-extern bool usesteam;

@@ -154,7 +154,7 @@ extern bool executebool(const uint *code);
 extern bool executebool(const char *p);
 extern bool executebool(ident *id, tagval *args, int numargs, bool lookup = false);
 extern bool execidentbool(const char *name, bool noid = false, bool lookup = false);
-extern bool execfile(const char *cfgfile, bool msg = true, bool encrypted = false);
+extern bool execfile(const char *cfgfile, bool msg = true);
 extern void alias(const char *name, const char *action);
 extern void alias(const char *name, tagval &v);
 extern const char *getalias(const char *name);
