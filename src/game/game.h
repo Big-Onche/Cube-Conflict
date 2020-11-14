@@ -744,7 +744,7 @@ struct gameent : dynent, gamestate
     int smoothmillis;
 
     int lastspecial1update, lastspecial2update, lastspecial3update;
-    bool sort1pret, sort2pret, sort3pret;
+    bool sort1pret = true, sort2pret = true, sort3pret = true;
 
     string name, info;
     int team, playermodel, playercolor, customcape, customtombe, customdanse, aptitude, level;
