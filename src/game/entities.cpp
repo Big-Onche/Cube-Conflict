@@ -346,13 +346,13 @@ namespace entities
         {
             d->steromillis = 0;
             //playsound(S_PUPOUT, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
-            if(d==player1) conoutf(CON_GAMEINFO, "\f8La cure de stéros est terminée !");
+            if(d==player1) conoutf(CON_GAMEINFO, langage ? "\f8The steroid cycle is over." : "\f8La cure de stéros est terminée.");
         }
         if(d->epomillis && (d->epomillis -= time)<=0)
         {
             d->epomillis = 0;
             //playsound(S_PUPOUT, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
-            if(d==player1) conoutf(CON_GAMEINFO, "\f8L'EPO ne fait plus effet !");
+            if(d==player1) conoutf(CON_GAMEINFO, langage ? "\f8EPO no longer works..." : "\f8L'EPO ne fait plus effet.");
         }
         if(d->champimillis && (d->champimillis -= time)<=0)
         {
@@ -360,13 +360,13 @@ namespace entities
             //playsound(S_PUPOUT, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
             fullbrightmodels = 0;
             clearpostfx();
-            if(d==player1) conoutf(CON_GAMEINFO, "\f8Les champignons sont digérés, il est temps d'en reprendre !");
+            if(d==player1) conoutf(CON_GAMEINFO, langage ? "\f8The mushrooms have been digested." : "\f8Les champignons sont digérés.");
         }
         if(d->jointmillis && (d->jointmillis -= time)<=0)
         {
             d->jointmillis = 0;
             //playsound(S_PUPOUT, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
-            if(d==player1) conoutf(CON_GAMEINFO, "\f8La weed ne fait plus effet, il est temps de fumer un autre pétard !");
+            if(d==player1) conoutf(CON_GAMEINFO, langage ? "\f8You no longer feel the effect of weed" : "\f8La weed ne fait plus effet !");
         }
     }
 

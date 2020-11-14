@@ -41,10 +41,8 @@ void addxpandcc(int nbxp, int cc) // Ajoute l'xp et/ou les CC
     stat[STAT_XP] += nbxp;
     genlvl(); //Recalcule le niveau
 
-
     stat[STAT_CC]+=cc;
 }
-
 
 int stat[NUMSTATS]; bool succes[NUMACHS];
 
@@ -71,7 +69,7 @@ float menustat(int value) //Récupère les stats pour le menu (float utilisé pour 
 }
 
 //////////////////////Gestion des sauvegardes//////////////////////
-char *encryptsave(char savepart[100])
+char *encryptsave(char savepart[20])
 {
     int i;
 
@@ -165,25 +163,3 @@ const char *getachievementcolor(int achID) //Renvoie une couleur pour savoir si 
     return achievementlocked(achID) ? "0xD8AA88" : "0x99D899";
 }
 ICOMMAND(getachievementcolor, "i", (int *achID), result(getachievementcolor(*achID)));
-
-
-ICOMMAND(testsendstat, "", (),
-{
-    //int statID = 0;
-    SteamUserStats()->RequestCurrentStats();
-    SteamUserStats()->SetStat("STAT_KILLS", 10);
-    conoutf("STAT K ENVOYEE (%d)", 10);
-    SteamUserStats()->StoreStats();
-});
-
-
-ICOMMAND(testgetstat, "", (),
-{
-    if(SteamUser()->BLoggedOn())
-    {
-        int roger = 0;
-        SteamUserStats()->RequestCurrentStats();
-        SteamUserStats()->GetStat("STAT_BITE", &roger);
-        conoutf("STAT K = %d", roger);
-    }
-});

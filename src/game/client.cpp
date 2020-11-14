@@ -2196,17 +2196,26 @@ namespace game
             case N_ANNOUNCE:
             {
                 int t = getint(p);
-                switch(t)
+                string announcemsg;
+                if(langage)
                 {
-                    case I_BOOSTDEGATS: conoutf(CON_GAMEINFO, "\faLES STÉROS SONT BIENTÔT PRÊTS !"); break;
-                    case I_BOOSTPV: conoutf(CON_GAMEINFO, "\faLE COCHON GRILLAY EST PRESQUE CUIT !"); break;
-                    case I_BOOSTPRECISION: conoutf(CON_GAMEINFO, "\faLES CHAMPIGNONS REPOUSSENT !"); break;
-                    case I_BOOSTVITESSE: conoutf(CON_GAMEINFO, "\faL'EPO ARRIVE POUR LES CYCLISTES !"); break;
-                    case I_BOOSTGRAVITE: conoutf(CON_GAMEINFO, "\faQUELQU'UN ROULE UN GROS JOINT !"); break;
-                    case I_SUPERARME: conoutf(CON_GAMEINFO, "\faLA SUPER-ARME EST BIENTÔT PRÊTE À ANNIHILER"); break;
-                    case I_ARMUREASSISTEE: conoutf(CON_GAMEINFO, "\faARMURE ASSISTÉE EN COURS DE DÉPLOIEMENT"); break;
-                    case 50: conoutf(CON_GAMEINFO, "\faCHANGEMENT D'ARME DANS 5 SECONDES !"); break;
+                    formatstring(announcemsg, t==I_BOOSTDEGATS ? "\faROIDS ARE COMING SOON!" :
+                                              t==I_BOOSTPRECISION ? "\faTHE MUSHROOMS ARE GROWING!" :
+                                              t==I_BOOSTVITESSE ? "\faEPO IS COMING FOR CYCLISTS!" :
+                                              t==I_BOOSTGRAVITE ? "\faSOMEONE ROLLS A BIG JOINT!" :
+                                              t==I_SUPERARME ? "\faTHE SUPER-WEAPON IS BEING DEPLOYED" :
+                                              t==50 ? "\faWEAPON CHANGE IN 5 SECONDS!" : "" );
                 }
+                else
+                {
+                    formatstring(announcemsg, t==I_BOOSTDEGATS ? "\faLES STÉROS SONT BIENTÔT PRÊTS !" :
+                                              t==I_BOOSTPRECISION ? "\faLES CHAMPIGNONS REPOUSSENT !" :
+                                              t==I_BOOSTVITESSE ? "\faL'EPO ARRIVE POUR LES CYCLISTES !" :
+                                              t==I_BOOSTGRAVITE ? "\faQUELQU'UN ROULE UN GROS JOINT !" :
+                                              t==I_SUPERARME ? "\faLA SUPER-ARME EST BIENTÔT PRÊTE À ANNIHILER" :
+                                              t==50 ? "\faCHANGEMENT D'ARME DANS 5 SECONDES !" : "" );
+                }
+                conoutf(CON_GAMEINFO, announcemsg);
                 break;
             }
 
