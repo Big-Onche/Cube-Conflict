@@ -64,6 +64,7 @@ namespace ai
 
     void bottaunt(gameent *d)
     {
+        if(langage) return;
         if(d->state!=CS_ALIVE || d->physstate<PHYS_SLOPE) return;
         if(lastmillis-d->lasttaunt<7500) return;
         d->lasttaunt = lastmillis;

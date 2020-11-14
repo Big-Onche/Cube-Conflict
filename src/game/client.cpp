@@ -2202,7 +2202,7 @@ namespace game
                     formatstring(announcemsg, t==I_BOOSTDEGATS ? "\faROIDS ARE COMING SOON!" :
                                               t==I_BOOSTPRECISION ? "\faTHE MUSHROOMS ARE GROWING!" :
                                               t==I_BOOSTVITESSE ? "\faEPO IS COMING FOR CYCLISTS!" :
-                                              t==I_BOOSTGRAVITE ? "\faSOMEONE ROLLS A BIG JOINT!" :
+                                              t==I_BOOSTGRAVITE ? "\faSOMEONE IS ROLLING A BIG JOINT!" :
                                               t==I_SUPERARME ? "\faTHE SUPER-WEAPON IS BEING DEPLOYED" :
                                               t==50 ? "\faWEAPON CHANGE IN 5 SECONDS!" : "" );
                 }

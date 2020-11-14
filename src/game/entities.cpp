@@ -145,25 +145,20 @@ namespace entities
         if(d==player1) switch(type)
         {
             case I_BOOSTPV:
-                conoutf(CON_GAMEINFO, "\f8Le cochon grillay te donne 50 points de vie supplémentaires !");
                 playsound(S_COCHON, NULL, NULL, 0, 0, 0, -1, 0, 0);
                 break;
             case I_BOOSTDEGATS:
-                conoutf(CON_GAMEINFO, "\f8C'est l'heure de la R-R-R-Roid Rage");
                 playsound(S_ITEMSTEROS, NULL, NULL, 0, 0, 0, -1, 0);
                 break;
             case I_BOOSTPRECISION:
                 addpostfx("sobel", 1, 1, 1, 1, vec4(1, 1, 1, 1));
                 fullbrightmodels = 200;
-                conoutf(CON_GAMEINFO, "\f8Les psilos commencent à te petay à laggle !");
                 playsound(S_ITEMCHAMPIS, NULL, NULL, 0, 0, 0, -1, 0);
                 break;
             case I_BOOSTVITESSE:
-                conoutf(CON_GAMEINFO, "\f8L'EPO commence à te booster...");
                 playsound(S_ITEMEPO, NULL, NULL, 0, 0, 0, -1, 0);
                 break;
             case I_BOOSTGRAVITE:
-                conoutf(CON_GAMEINFO, "\f8Ce putain de royal te rend complètement high :bave:");
                 playsound(S_ITEMJOINT, NULL, NULL, 0, 0, 0, -1, 0);
                 break;
         }

@@ -855,7 +855,7 @@ namespace game
             intermission = true;
             player1->attacking = ACT_IDLE;
             if(cmode) cmode->gameover();
-            conoutf(CON_GAMEINFO, "\f2FIN DE LA PARTIE !");
+            conoutf(CON_GAMEINFO, langage ? "\faGAME OVER !" : "\faFIN DE LA PARTIE !");
 
             //if(m_ctf) conoutf(CON_GAMEINFO, "\f2player frags: %d, flags: %d, deaths: %d", player1->frags, player1->flags, player1->deaths);
             //else conoutf(CON_GAMEINFO, "\f2player frags: %d, deaths: %d", player1->frags, player1->deaths);

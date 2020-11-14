@@ -10,7 +10,7 @@ static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precisio
     { 100,  135,   80,  130, "chapeaux/aventurier", "Américain",    "American",     "media/interface/hud/americain.jpg"},  //2
     {  85,   90,   75,   70, "chapeaux/bandana",    "Ninja",        "Ninja",        "media/interface/hud/ninja.jpg"},      //3
     { 110,   65,  110,  110,  "chapeaux/cornes",    "Vampire",      "Vampire",      "media/interface/hud/vampire.jpg"},    //4
-    { 100,   80,   90,  100, "chapeaux/magicien",   "Magicien",     "Magician",     "media/interface/hud/magicien.jpg"},   //5
+    { 100,   80,   90,  100, "chapeaux/magicien",   "Magicien",     "Wizard",       "media/interface/hud/magicien.jpg"},   //5
     { 100,  100,   70,   75, "chapeaux/japonais",   "Kamikaze",     "Kamikaze",     "media/interface/hud/kamikaze.jpg"},   //6
     { 100,   85,   90,  110, "chapeaux/crane",      "Faucheuse",    "Reaper",       "media/interface/hud/faucheuse.jpg"},  //7
     {  90,   85,   85,  110, "chapeaux/graduation", "Physicien",    "Physicist",    "media/interface/hud/physicien.jpg"},  //8
