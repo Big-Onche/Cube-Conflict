@@ -703,7 +703,6 @@ void clearmapcrc() { mapcrc = 0; }
 
 bool load_world(const char *mname, const char *cname)        // still supports all map formats that have existed since the earliest cube betas!
 {
-    musicmanager(8, true);
     setmapfilenames(mname, cname);
     stream *f = opengzfile(ogzname, "rb");
     if(!f) { conoutf(CON_ERROR, "could not read map %s", ogzname); return false; }
@@ -904,7 +903,7 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     renderbackground(langage ? "Loading..." : "Chargement...", mapshot, mname, game::getmapinfo(), game::getastuce());
 
     startmap(cname ? cname : mname);
-    musicmanager(randomambience==0 ? n_map : n_ambiance, randomambience==0 ? true : false);
+    stopmusic();
     return true;
 }
 

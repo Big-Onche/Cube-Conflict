@@ -64,7 +64,7 @@ void menuprocess()
         lastmainmenu = mainmenu;
         execident("mainmenutoggled");
     }
-    if(uimusic) {musicmanager(7, true); uimusic = 0;}
+    if(uimusic) {musicmanager(0, true); uimusic = 0;}
     if(mainmenu && !isconnected(true) && !UI::hascursor())
     {
         if(veryfirstlaunch) {UI::showui("firstlaunch"); veryfirstlaunch = 0;}

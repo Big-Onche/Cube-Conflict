@@ -1,6 +1,8 @@
 // texture.cpp: texture slot management
 
 #include "engine.h"
+#include "cubedef.h"
+
 
 #ifdef __APPLE__
   #include "SDL2_image/SDL_image.h"
@@ -687,14 +689,14 @@ VAR(hwcubetexsize, 1, 0, 0);
 VAR(hwmaxaniso, 1, 0, 0);
 VAR(hwtexunits, 1, 0, 0);
 VAR(hwvtexunits, 1, 0, 0);
-VARFP(maxtexsize, 0, 0, 1<<12, initwarning("texture quality", INIT_LOAD));
-VARFP(reducefilter, 0, 1, 1, initwarning("texture quality", INIT_LOAD));
-VARFP(texreduce, 0, 0, 12, initwarning("texture quality", INIT_LOAD));
-VARFP(texcompress, 0, 1536, 1<<12, initwarning("texture quality", INIT_LOAD));
+VARFP(maxtexsize, 0, 0, 1<<12, initwarning(langage ? "Texture quality" : "Qualité des textures", INIT_LOAD));
+VARFP(reducefilter, 0, 1, 1, initwarning(langage ? "Texture quality" : "Qualité des textures", INIT_LOAD));
+VARFP(texreduce, 0, 0, 12, initwarning(langage ? "Texture quality" : "Qualité des textures", INIT_LOAD));
+VARFP(texcompress, 0, 1536, 1<<12, initwarning(langage ? "Texture quality" : "Qualité des textures", INIT_LOAD));
 VARFP(texcompressquality, -1, -1, 1, setuptexcompress());
-VARF(trilinear, 0, 1, 1, initwarning("texture filtering", INIT_LOAD));
-VARF(bilinear, 0, 1, 1, initwarning("texture filtering", INIT_LOAD));
-VARFP(aniso, 0, 0, 16, initwarning("texture filtering", INIT_LOAD));
+VARF(trilinear, 0, 1, 1, initwarning(langage ? "Texture filtering" : "Filtrage des textures", INIT_LOAD));
+VARF(bilinear, 0, 1, 1, initwarning(langage ? "Texture filtering" : "Filtrage des textures", INIT_LOAD));
+VARFP(aniso, 0, 0, 16, initwarning(langage ? "Texture filtering" : "Filtrage des textures", INIT_LOAD));
 
 extern int usetexcompress;
 

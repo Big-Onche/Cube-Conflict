@@ -105,8 +105,8 @@ bool initwarning(const char *desc, int level, int type)
 #define SCR_MAXH 10000
 #define SCR_DEFAULTW 1280
 #define SCR_DEFAULTH 720
-VARFN(screenw, scr_w, SCR_MINW, -1, SCR_MAXW, initwarning("Résolution d'écran"));
-VARFN(screenh, scr_h, SCR_MINH, -1, SCR_MAXH, initwarning("Résolution d'écran"));
+VARFN(screenw, scr_w, SCR_MINW, -1, SCR_MAXW, initwarning(langage ? "Screen resolution" : "Résolution d'écran"));
+VARFN(screenh, scr_h, SCR_MINH, -1, SCR_MAXH, initwarning(langage ? "Screen resolution" : "Résolution d'écran"));
 
 void writeinitcfg()
 {
@@ -512,7 +512,7 @@ void screenres(int w, int h)
     }
     else
     {
-        initwarning("Résolution d'écran");
+        initwarning(langage ? "Screen resolution" : "Résolution d'écran");
     }
 }
 

@@ -287,37 +287,12 @@ COMMANDN(music, startmusic, "ss");
 
 static struct songsinfo { string file, looped; } songs[] =
 {
-    {"musiques/soir.ogg", "-1"},
-    {"musiques/nuit.ogg", "-1"},
-    {"musiques/canicule.ogg", "-1"},
-    {"musiques/pluie.ogg", "-1"},
-    {"musiques/apocalypse.ogg", "-1"},
-    {"musiques/matin.ogg", "-1"},
-    {"musiques/crepuscule.ogg", "-1"},
-
     {"musiques/menu.ogg", "0"},
-    {"musiques/chargement1.ogg", "-1"},
-
-    {"musiques/usine.ogg", "-1"},
-    {"musiques/lune.ogg", "-1"},
-    {"musiques/volcan.ogg", "-1"},
-    {"musiques/vaisseau.ogg", "-1"},
 };
 
 void musicmanager(int track, bool noambiance) //CubeConflict, gestion des musiques
 {
-    if(!noambiance) {startmusic(songs[track-1].file, songs[track-1].looped); return; }
-    else
-    {
-        switch(track)
-        {
-            case 1: startmusic(songs[9].file, songs[9].looped); return;
-            case 4: startmusic(songs[10].file, songs[10].looped); return;
-            case 5: startmusic(songs[11].file, songs[11].looped); return;
-            case 6: startmusic(songs[12].file, songs[12].looped); return;
-            default: startmusic(songs[track].file, songs[track].looped);
-        }
-    }
+    startmusic(songs[track].file, songs[track].looped);
 }
 
 static Mix_Chunk *loadwav(const char *name)
