@@ -680,7 +680,7 @@ namespace game
     static const struct partEN { const char *partverb, *parttroll, *partsuicide; } partmessageEN[] =
     {
         {"killed", "with stupidity.", "suicided : Darwin Award"},
-        {"slayed", "ton incompétence.", "committed suicide"},
+        {"slayed", "with determination.", "committed suicide"},
         {"finished", "with success !"},
         {"deleted", "in excruciating pain."},
         {"murdered", "regrets."},
