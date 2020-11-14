@@ -577,7 +577,7 @@ struct ctfclientmode : clientmode
         returnflag(i);
         conoutf(CON_GAMEINFO, "%s\f7 %s récupéré le drapeau %s", teamcolorname(d), d==player1 ? "as" : "a", teamcolorflag(f));
         d->team==player1->team ? ctfmessage3=totalmillis : ctfmessage4=totalmillis;
-        if(d==player1) addxp(10);
+        if(d==player1) addxpandcc(10, 3);
         playsound(S_DRAPEAURESET);
     }
 
@@ -615,7 +615,7 @@ struct ctfclientmode : clientmode
         d->flags = dflags;
         conoutf(CON_GAMEINFO, "%s\f7 %s marqué un point pour l'équipe %s !", teamcolorname(d), d==player1 ? "as" : "a", teamcolor(team));
         team==player1->team ? ctfmessage1=totalmillis : ctfmessage2=totalmillis;
-        if(d==player1) addxp(20);
+        if(d==player1) addxpandcc(20, 10);
 
         playsound(team==player1->team ? S_DRAPEAUSCORE : S_DRAPEAUTOMBE);
 
@@ -631,7 +631,7 @@ struct ctfclientmode : clientmode
         f.interptime = lastmillis;
         conoutf(CON_GAMEINFO, "%s\f7 %s volé le drapeau %s", teamcolorname(d), d==player1 ? "as" : "a", teamcolorflag(f));
         d->team==player1->team ? ctfmessage5=totalmillis : ctfmessage6=totalmillis;
-        if(d==player1) {addstat(1, STAT_DRAPEAUX); addxp(5);}
+        if(d==player1) {addstat(1, STAT_DRAPEAUX); addxpandcc(5, 2);}
         ownflag(i, d, lastmillis);
         playsound(S_DRAPEAUPRIS);
     }

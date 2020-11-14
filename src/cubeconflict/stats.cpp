@@ -35,11 +35,14 @@ void genlvl() //Calcule le niveau du joueur
 }
 
 //////////////////////Gestion des statistiques//////////////////////
-void addxp(int nbxp) // Ajoute l'xp très simplment
+void addxpandcc(int nbxp, int cc) // Ajoute l'xp et/ou les CC
 {
     if(!conserveurofficiel) return;
     stat[STAT_XP] += nbxp;
     genlvl(); //Recalcule le niveau
+
+
+    stat[STAT_CC]+=cc;
 }
 
 
@@ -123,6 +126,7 @@ void unlockachievement(int achID) //Débloque le succès
         SteamUserStats()->SetAchievement(achievements[achID].achname); //Met le succès à jour côté steam
         SteamUserStats()->StoreStats();
         succes[achID] = true; //Met le succès à jour côté client
+        addxpandcc(20, 20);
     }
 }
 

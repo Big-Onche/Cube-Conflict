@@ -78,7 +78,7 @@ extern int langage;
 extern void loadsave();
 extern void writesave();
 
-extern void addxp(int nbxp);
+extern void addxpandcc(int nbxp, int cc = 0);
 extern int cclvl, needxp, oldneed, neededxp;
 extern float pourcents;
 

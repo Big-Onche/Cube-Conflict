@@ -694,7 +694,7 @@ namespace game
         //////////////////////////////GESTION DE ET STATISTIQUES//////////////////////////////
         if(actor==player1 && d!=player1)
         {
-            addxp(7+player1->killstreak-1);
+            addxpandcc(7+player1->killstreak-1, 3);
 
             if(player1->killstreak==3) unlockachievement(ACH_TRIPLETTE);
             else if(player1->killstreak==5) unlockachievement(ACH_PENTAPLETTE);
