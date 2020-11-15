@@ -2283,7 +2283,7 @@ namespace server
         }
         if(ts.health<=0)
         {
-            if(actor->aptitude==APT_FAUCHEUSE) //Augmente la santé maxi de la faucheuse si elle tue un joueur
+            if(actor->aptitude==APT_FAUCHEUSE && !isteam(target->team, actor->team)) //Augmente la santé maxi de la faucheuse si elle tue un joueur
             {
                 if(as.maxhealth >= 1500) as.health = min(as.health+250, as.maxhealth); //Rends juste de la santé si le boost est d�j� appliqu�
                 if(as.maxhealth < 1500) {as.maxhealth += 500; as.health += 500;} //Augmente la santé max à 150 PV si c'est le premier kill
