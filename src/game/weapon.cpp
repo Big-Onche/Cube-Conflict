@@ -1172,6 +1172,7 @@ namespace game
                 break;
             case ATK_GAU8_SHOOT:
                 if(d->type==ENT_PLAYER) sound = S_GAU8;
+                if(d==player1 && player1->aptitude==APT_PRETRE && player1->champimillis && player1->aptisort3) unlockachievement(ACH_CADENCE);
                 spawnbouncer(d->balles, d->balles, d, BNC_BIGDOUILLES,  bnclifetime+rnd(bnclifetime));
                 particle_flare(d->muzzle, d->muzzle, 100, PART_MINIGUN_MUZZLE_FLASH, d->steromillis ? 0xFF2222 : 0xFFFFFF, d==hudplayer() ? zoom ? 1.5f : 2.0f : 5.f, d, player1->champimillis ? true : false);
                 if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 100, PART_MINIGUN_MUZZLE_FLASH, 0xFF2222, d==hudplayer() ? zoom ? 1.5f : 2.5f : 6.f, d, player1->champimillis ? true : false);

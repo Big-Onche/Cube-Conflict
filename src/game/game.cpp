@@ -394,6 +394,7 @@ namespace game
         if(player1->state != CS_DEAD && !intermission)
         {
             isalive = 1;
+            if(player1->health>=2000)unlockachievement(ACH_SACAPV);
             if(player1->steromillis && player1->epomillis && player1->jointmillis && player1->champimillis) unlockachievement(ACH_DEFONCE);
             if(player1->steromillis || player1->epomillis || player1->jointmillis || player1->champimillis) entities::checkboosts(curtime, player1);
             if(player1->ragemillis || player1->vampimillis || player1->aptisort1 || player1->aptisort2 || player1->aptisort3) entities::checkaptiskill(curtime, player1);
@@ -694,6 +695,7 @@ namespace game
         //////////////////////////////GESTION DE ET STATISTIQUES//////////////////////////////
         if(actor==player1 && d!=player1)
         {
+            if(player1->gunselect==GUN_ASSISTXPL && player1->armourtype==A_ASSIST)unlockachievement(ACH_KILLASSIST);
             addxpandcc(7+player1->killstreak-1, 3);
 
             if(player1->killstreak==3) unlockachievement(ACH_TRIPLETTE);
@@ -855,13 +857,13 @@ namespace game
             intermission = true;
             player1->attacking = ACT_IDLE;
             if(cmode) cmode->gameover();
+            int accuracy = (player1->totaldamage*100)/max(player1->totalshots, 1);
             conoutf(CON_GAMEINFO, langage ? "\faGAME OVER !" : "\faFIN DE LA PARTIE !");
-
-            //if(m_ctf) conoutf(CON_GAMEINFO, "\f2player frags: %d, flags: %d, deaths: %d", player1->frags, player1->flags, player1->deaths);
-            //else conoutf(CON_GAMEINFO, "\f2player frags: %d, deaths: %d", player1->frags, player1->deaths);
-            //int accuracy = (player1->totaldamage*100)/max(player1->totalshots, 1);
-            //conoutf(CON_GAMEINFO, "\f2player total damage dealt: %d, damage wasted: %d, accuracy(%%): %d", player1->totaldamage, player1->totalshots-player1->totaldamage, accuracy);
-
+            if(player1->frags>=30) unlockachievement(ACH_KILLER);
+            if(player1->frags>=10 && accuracy>=50) unlockachievement(ACH_PRECIS);
+            defformatstring(flags, "%d", player1->flags);
+            if(langage) conoutf(CON_GAMEINFO, "\f2Kills : %d | Deaths : %d | Total damage : %d | Accuracy : %d% %s %s", player1->frags, player1->deaths, player1->totaldamage, accuracy, m_ctf ? "| Flags :" : "", m_ctf ? flags : "");
+            else conoutf(CON_GAMEINFO, "\f2Éliminations : %d | Morts : %d | Dégats totaux infligés : %d | Précision : %d% %s %s", player1->frags, player1->deaths, player1->totaldamage, accuracy, m_ctf ? "| Drapeaux :" : "", m_ctf ? flags : "");
             showscores(true);
             disablezoom();
 

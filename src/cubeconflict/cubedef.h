@@ -91,9 +91,9 @@ extern int stat[NUMSTATS];
 
 extern void getsteamachievements();
 extern void unlockachievement(int achID);
-enum {ACH_TRIPLETTE = 0, ACH_PENTAPLETTE, ACH_DECAPLETTE, ACH_ATOME, ACH_WINNER, ACH_ENVOL,
-        ACH_POSTULANT, ACH_STAGIAIRE, ACH_SOLDAT, ACH_LIEUTENANT, ACH_MAJOR, ACH_BEAUTIR,
-        ACH_DEFONCE, NUMACHS};
+enum {ACH_TRIPLETTE = 0, ACH_PENTAPLETTE, ACH_DECAPLETTE, ACH_ATOME, ACH_WINNER, ACH_ENVOL, ACH_POSTULANT, ACH_STAGIAIRE,
+        ACH_SOLDAT, ACH_LIEUTENANT, ACH_MAJOR, ACH_BEAUTIR, ACH_DEFONCE, ACH_PRECIS, ACH_KILLASSIST, ACH_KILLER, ACH_SACAPV,
+        ACH_CADENCE, NUMACHS};
 extern bool succes[NUMACHS];
 
 static const struct achinfo { int achnameID; const char *achname, *achnicenameFR, *achnicenameEN, *achdescFR, *achdescEN; } achievements[] =
@@ -107,8 +107,13 @@ static const struct achinfo { int achnameID; const char *achname, *achnicenameFR
     {ACH_POSTULANT,     "ACH_POSTULANT",     "Postulant",                   "Applicant",                "Atteindre le niveau 5",                                                    "Reach level 5"},
     {ACH_STAGIAIRE,     "ACH_STAGIAIRE",     "Stagiaire",                   "Trainee",                  "Atteindre le niveau 10",                                                   "Reach level 10"},
     {ACH_SOLDAT,        "ACH_SOLDAT",        "Soldat",                      "Soldier",                  "Atteindre le niveau 20",                                                   "Reach level 20"},
-    {ACH_LIEUTENANT,    "ACH_LIEUTENANT",    "Lieutenant",                  "Lieutenant",               "Atteindre le niveau 50 (C'est pas mal !)",                                 "Reach level 50 (Nice !)"},
-    {ACH_MAJOR,         "ACH_MAJOR",         "Major",                       "Major",                    "Atteindre le niveau 100 (Tu as supporté le jeu jusqu'ici !?)",             "Reach level 100 (that's a lot of grind !)"},
+    {ACH_LIEUTENANT,    "ACH_LIEUTENANT",    "Lieutenant",                  "Lieutenant",               "Atteindre le niveau 50 (C'est pas mal !)",                                 "Reach level 50 (Nice!)"},
+    {ACH_MAJOR,         "ACH_MAJOR",         "Major",                       "Major",                    "Atteindre le niveau 100 (Tu as supporté le jeu jusqu'ici !?)",             "Reach level 100 (that's a lot of grind!)"},
     {ACH_BEAUTIR,       "ACH_BEAUTIR",       "Beau tir !",                  "Nice shoot !",             "Tuer quelqu'un à au moins 100 mètres de distance",                         "Kill someone at least 100 meters away"},
     {ACH_DEFONCE,       "ACH_DEFONCE",       "Complètement défoncé",        "Completely stoned",        "Utiliser en même temps le joint, l'EPO, les champis et les stéros",        "Use joint, EPO, shrooms and steroids at the same time"},
+    {ACH_PRECIS,        "ACH_PRECIS",        "Et ça fait bim, bam, boum",   "Accurate like a butcher",  "50% de précision sur une partie avec au moins 10 éliminations",            "Achieve 50% accuracy with at least 10 kills in a game"},
+    {ACH_KILLASSIST,    "ACH_KILLASSIST",    "Complètement défoncé",        "Boom, Boom, Boom, Boom",   "Tuer quelqu'un avec l'explosion de ton armure assistée",                   "Kill an enemy with your power armor explosion"},
+    {ACH_KILLER,        "ACH_KILLER",        "Tueur en série",              "Serial killer",            "Tuer 30 ennemis en une seule partie",                                      "Kill 30 enemies in a game"},
+    {ACH_SACAPV,        "ACH_SACAPV",        "Sac à points de vie",         "Too much health points",   "Avoir 200 points de vie (oui c'est possible !)",                           "Have 200 health points (Hint: it's possible!)"},
+    {ACH_CADENCE,       "ACH_CADENCE",       "Le combo ultime !",           "The ultimate combo!",      "Atteindre la cadence de tir la plus élevée possible du jeu",               "Have the highest possible rate of fire in the game"},
 };
