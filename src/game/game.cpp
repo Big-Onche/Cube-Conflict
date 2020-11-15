@@ -862,8 +862,8 @@ namespace game
             if(player1->frags>=30) unlockachievement(ACH_KILLER);
             if(player1->frags>=10 && accuracy>=50) unlockachievement(ACH_PRECIS);
             defformatstring(flags, "%d", player1->flags);
-            if(langage) conoutf(CON_GAMEINFO, "\f2Kills : %d | Deaths : %d | Total damage : %d | Accuracy : %d% %s %s", player1->frags, player1->deaths, player1->totaldamage, accuracy, m_ctf ? "| Flags :" : "", m_ctf ? flags : "");
-            else conoutf(CON_GAMEINFO, "\f2Éliminations : %d | Morts : %d | Dégats totaux infligés : %d | Précision : %d% %s %s", player1->frags, player1->deaths, player1->totaldamage, accuracy, m_ctf ? "| Drapeaux :" : "", m_ctf ? flags : "");
+            if(langage) conoutf(CON_GAMEINFO, "\f2Kills : %d | Deaths : %d | Total damage : %d | Accuracy : %d%% %s %s", player1->frags, player1->deaths, player1->totaldamage, accuracy, m_ctf ? "| Flags :" : "", m_ctf ? flags : "");
+            else conoutf(CON_GAMEINFO, "\f2Éliminations : %d | Morts : %d | Dégats totaux infligés : %d | Précision : %d%% %s %s", player1->frags, player1->deaths, player1->totaldamage, accuracy, m_ctf ? "| Drapeaux :" : "", m_ctf ? flags : "");
             showscores(true);
             disablezoom();
 
