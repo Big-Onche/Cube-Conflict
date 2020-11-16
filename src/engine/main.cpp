@@ -1176,6 +1176,11 @@ int main(int argc, char **argv)
     if(enet_initialize()<0) fatal("Unable to initialise network module");
     atexit(enet_deinitialize);
     enet_time_set(0);
+	if(usesteam)
+    {
+        initsteam();
+        getsteamachievements();
+    }
 
     logoutf("init: game");
     game::parseoptions(gameargs);
@@ -1274,12 +1279,6 @@ int main(int argc, char **argv)
     addpostfx("pause", 1, 1, 1, 1, vec4(1, 1, 1, 1));
     addpostfx("sobel", 1, 1, 1, 1, vec4(1, 1, 1, 1));
     clearpostfx();
-
-	if(usesteam)
-    {
-        initsteam();
-        getsteamachievements();
-    }
 
     logoutf("init: mainloop");
 
