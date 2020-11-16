@@ -93,7 +93,7 @@ extern void getsteamachievements();
 extern void unlockachievement(int achID);
 enum {ACH_TRIPLETTE = 0, ACH_PENTAPLETTE, ACH_DECAPLETTE, ACH_ATOME, ACH_WINNER, ACH_ENVOL, ACH_POSTULANT, ACH_STAGIAIRE,
         ACH_SOLDAT, ACH_LIEUTENANT, ACH_MAJOR, ACH_BEAUTIR, ACH_DEFONCE, ACH_PRECIS, ACH_KILLASSIST, ACH_KILLER, ACH_SACAPV,
-        ACH_CADENCE, NUMACHS};
+        ACH_CADENCE, ACH_1HPKILL, ACH_MAXSPEED, ACH_INCREVABLE, ACH_CHANCE, ACH_CPASBIEN, NUMACHS};
 extern bool succes[NUMACHS];
 
 static const struct achinfo { int achnameID; const char *achname, *achnicenameFR, *achnicenameEN, *achdescFR, *achdescEN; } achievements[] =
@@ -116,4 +116,9 @@ static const struct achinfo { int achnameID; const char *achname, *achnicenameFR
     {ACH_KILLER,        "ACH_KILLER",        "Tueur en série",              "Serial killer",            "Tuer 30 ennemis en une seule partie",                                      "Kill 30 enemies in a game"},
     {ACH_SACAPV,        "ACH_SACAPV",        "Sac à points de vie",         "Too much health points",   "Avoir 200 points de vie (oui c'est possible !)",                           "Have 200 health points (Hint: it's possible!)"},
     {ACH_CADENCE,       "ACH_CADENCE",       "Le combo ultime !",           "The ultimate combo!",      "Atteindre la cadence de tir la plus élevée possible du jeu",               "Have the highest possible rate of fire in the game"},
+    {ACH_1HPKILL,       "ACH_1HPKILL",       "A 1 PV du ragequit !",        "At 1 HP from ragequit",    "Tuer un ennemi en ayant 1 seul point de vie",                              "Kill an enemy with only 1 health point remaining"},
+    {ACH_MAXSPEED,      "ACH_MAXSPEED",      "Speedy Gonzales",             "Speedy Gonzales",          "Se déplacer à la vitesse la plus rapide possible du jeu",                  "Reach the highest speed in the game"},
+    {ACH_INCREVABLE,    "ACH_INCREVABLE",    "Increvable !",                "Indestructible!",          "Ne mourir que 5 fois dans une partie au moins 10 éliminations",            "Only die 5 times in a game with at least 10 kills"},
+    {ACH_CHANCE,        "ACH_CHANCE",        "Larry Silverstein",           "Lucky Larry",              "Avoir la chance d'obtenir une super-arme par hasard, quel bol !)",         "Obtain a superweapon on respawn"},
+    {ACH_CPASBIEN,      "ACH_CPASBIEN",      "C'est pas bien",              "That's not nice",          "Tuer un allié",                                                            "Kill an ally"},
 };

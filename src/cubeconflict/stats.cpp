@@ -119,7 +119,7 @@ bool achievementlocked(int achID) {return !succes[achID];} //Succès verrouillé ?
 
 void unlockachievement(int achID) //Débloque le succès
 {
-    if(conserveurofficiel && achievementlocked(achID) && usesteam) //Ne débloque que si succès verrouillé ET Steam activé
+    if(achievementlocked(achID) && usesteam) //Ne débloque que si succès verrouillé ET Steam activé
     {
         SteamUserStats()->SetAchievement(achievements[achID].achname); //Met le succès à jour côté steam
         SteamUserStats()->StoreStats();
@@ -141,6 +141,7 @@ void getsteamachievements() //Récupère les succès enregistrés sur steam
 string logodir;
 const char *getachievementslogo(int achID) //Récupère le logo d'un succès en particulier
 {
+    if(achID>NUMACHS) return "media/texture/game/notexture.png";
     formatstring(logodir, "media/interface/achievements/%s%s.jpg", achievements[achID].achname, achievementlocked(achID) ? "_no" : "_yes");
     return logodir;
 }
@@ -148,18 +149,21 @@ ICOMMAND(getachievementslogo, "i", (int *achID), result(getachievementslogo(*ach
 
 const char *getachievementname(int achID) //Récupère le nom d'un succès en particulier
 {
+    if(achID>NUMACHS) return langage ? "Invalid ID" : "ID Invalide";
     return langage ? achievements[achID].achnicenameEN : achievements[achID].achnicenameFR;
 }
 ICOMMAND(getachievementname, "i", (int *achID), result(getachievementname(*achID)));
 
 const char *getachievementinfo(int achID) //Récupère la description d'un succès en particulier
 {
+    if(achID>NUMACHS) return langage ? "Invalid ID" : "ID Invalide";
     return langage ? achievements[achID].achdescEN : achievements[achID].achdescFR;
 }
 ICOMMAND(getachievementinfo, "i", (int *achID), result(getachievementinfo(*achID)));
 
 const char *getachievementcolor(int achID) //Renvoie une couleur pour savoir si le succes est verrouillé ou non
 {
+    if(achID>NUMACHS) return "0x777777";
     return achievementlocked(achID) ? "0xD8AA88" : "0x99D899";
 }
 ICOMMAND(getachievementcolor, "i", (int *achID), result(getachievementcolor(*achID)));

@@ -1765,6 +1765,7 @@ namespace game
                 else findplayerspawn(s, -1, m_teammode ? s->team : 0);
                 if(s == player1)
                 {
+                    if(player1->aptitude==APT_SOLDAT && (player1->ammo[GUN_S_NUKE]>0 || player1->ammo[GUN_S_GAU8]>0 || player1->ammo[GUN_S_ROQUETTES]>0 || player1->ammo[GUN_S_CAMPOUZE]>0)) unlockachievement(ACH_CHANCE);
                     showscores(false);
                     lasthit = 0;
                 }
