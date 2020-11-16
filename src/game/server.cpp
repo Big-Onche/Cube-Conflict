@@ -2292,7 +2292,7 @@ namespace server
             else if (target->aptitude==APT_FAUCHEUSE && ts.maxhealth>=1500) { ts.maxhealth = 1000; sendresume(target); } //Si la faucheuse est tu� alors la sant� redevient normal + envoi au client
 
             target->state.deaths++;
-            actor->state.killstreak++;
+            if(!isteam(target->team, actor->team))actor->state.killstreak++;
             target->state.killstreak = 0;
             int fragvalue = smode ? smode->fragvalue(target, actor, atk) : (target==actor || isteam(target->team, actor->team) ? atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT ? 0 : -1 : 1);
             actor->state.frags += fragvalue;
