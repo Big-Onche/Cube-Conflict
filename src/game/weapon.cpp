@@ -1455,7 +1455,7 @@ namespace game
         }
 
         if(atk==ATK_CAC349_SHOOT || atk==ATK_CACMARTEAU_SHOOT || atk==ATK_CACMASTER_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACNINJA_SHOOT);
-        else if(atk==ATK_GAU8_SHOOT || atk==ATK_NUKE_SHOOT || atk==ATK_CAMPOUZE_SHOOT ||atk==ATK_ROQUETTES_SHOOT) d->ammo[gun]--;
+        else if(atk==ATK_GAU8_SHOOT || atk==ATK_NUKE_SHOOT || atk==ATK_CAMPOUZE_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_KAMIKAZE_SHOOT) d->ammo[gun]--;
         else if(!m_muninfinie) d->ammo[gun]--;
 
         vec from = d->o, to = targ, dir = vec(to).sub(from).safenormalize();

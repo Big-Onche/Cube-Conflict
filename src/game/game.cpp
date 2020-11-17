@@ -395,6 +395,7 @@ namespace game
         {
             isalive = 1;
             if(player1->health>=2000)unlockachievement(ACH_SACAPV);
+            if(player1->aptitude==APT_KAMIKAZE && player1->ammo[GUN_KAMIKAZE]<=0 && totalmillis-lastshoot>=500 && totalmillis-lastshoot<=750 && isconnected()) unlockachievement(ACH_SUICIDEFAIL);
             if(player1->steromillis && player1->epomillis && player1->jointmillis && player1->champimillis) unlockachievement(ACH_DEFONCE);
             if(player1->steromillis || player1->epomillis || player1->jointmillis || player1->champimillis) entities::checkboosts(curtime, player1);
             if(player1->ragemillis || player1->vampimillis || player1->aptisort1 || player1->aptisort2 || player1->aptisort3) entities::checkaptiskill(curtime, player1);
@@ -702,7 +703,8 @@ namespace game
                 addxpandcc(7+player1->killstreak-1, 3);
                 if(player1->killstreak>stat[STAT_KILLSTREAK]) addstat(player1->killstreak, STAT_KILLSTREAK);
                 if(player1->gunselect==GUN_ASSISTXPL && player1->armourtype==A_ASSIST)unlockachievement(ACH_KILLASSIST);
-                if(player1->health<=149) unlockachievement(ACH_1HPKILL);
+                if(player1->health<=149 && player1->state==CS_ALIVE) unlockachievement(ACH_1HPKILL);
+                if(player1->aptitude==APT_AMERICAIN && d->aptitude==APT_INDIEN) unlockachievement(ACH_FUCKYEAH);
                 if(player1->killstreak==3) unlockachievement(ACH_TRIPLETTE);
                 else if(player1->killstreak==5) unlockachievement(ACH_PENTAPLETTE);
                 else if(player1->killstreak==10) unlockachievement(ACH_DECAPLETTE);

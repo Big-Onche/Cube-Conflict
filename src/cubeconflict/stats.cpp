@@ -119,12 +119,12 @@ bool achievementlocked(int achID) {return !succes[achID];} //Succès verrouillé ?
 
 void unlockachievement(int achID) //Débloque le succès
 {
-    if(achievementlocked(achID) && usesteam) //Ne débloque que si succès verrouillé ET Steam activé
+    if(conserveurofficiel && achievementlocked(achID) && usesteam) //Ne débloque que si serveur officiel ET succès verrouillé ET Steam activé
     {
         SteamUserStats()->SetAchievement(achievements[achID].achname); //Met le succès à jour côté steam
         SteamUserStats()->StoreStats();
         succes[achID] = true; //Met le succès à jour côté client
-        addxpandcc(20, 20);
+        addxpandcc(25, 25);
     }
 }
 
