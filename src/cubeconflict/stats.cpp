@@ -20,9 +20,9 @@ void genlvl() //Calcule le niveau du joueur
     }
 
     float pour1 = neededxp, pour2 = stat[STAT_XP]-needxp;
-    if(pour1!=0) pourcents = pour2/pour1; //Calcul le pourcentage pour prochain niveau
+    if(pour1!=0) pourcents = pour2/pour1; //Calcul le pourcentage pour prochain niveau et évite une div. par zéro
 
-    switch(cclvl) //Regarde si il y a un succès à déverouiller
+    switch(cclvl) //Regarde si il y a un succès à déverrouiller
     {
         case 5: unlockachievement(ACH_POSTULANT); break;
         case 10: unlockachievement(ACH_STAGIAIRE); break;
@@ -30,8 +30,7 @@ void genlvl() //Calcule le niveau du joueur
         case 50: unlockachievement(ACH_LIEUTENANT); break;
         case 100: unlockachievement(ACH_MAJOR);
     }
-
-    game::player1->level = cclvl;
+    game::player1->level = cclvl; //Actualise le lvl pour l'envoyer en multijoueur
 }
 
 //////////////////////Gestion des statistiques//////////////////////
@@ -39,9 +38,8 @@ void addxpandcc(int nbxp, int cc) // Ajoute l'xp et/ou les CC
 {
     if(!conserveurofficiel) return;
     stat[STAT_XP] += nbxp;
-    genlvl(); //Recalcule le niveau
-
     stat[STAT_CC]+=cc;
+    genlvl(); //Recalcule le niveau
 }
 
 int stat[NUMSTATS]; bool succes[NUMACHS];
@@ -63,7 +61,6 @@ float menustat(int value) //Récupère les stats pour le menu (float utilisé pour 
             return ratiokd/100.f;
         }
         case -1: return cclvl; break;
-
         default: return stat[value];
     }
 }
