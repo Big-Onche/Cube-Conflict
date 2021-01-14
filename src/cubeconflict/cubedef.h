@@ -36,7 +36,7 @@ static const struct shieldsinfo { const char *bois, *fer, *gold, *magnetique, *h
 static const struct custominfo { const char *smiley, *capeteam1, *capeteam2, *custtombe; int smileyprices, capeprices, tombeprices; } customs[] =
 {
     {}, //0 = Rien
-    {"smileys/hap",      "capes/cape_JVC",          "capes/cape_JVC/orange",            "tombes/basique",     0,  100,     0},
+    {"smileys/hap",      "capes/cape_jvc",          "capes/cape_jvc/orange",            "tombes/basique",     0,  100,     0},
     {"smileys/noel",     "capes/cape_cisla",        "capes/cape_cisla/orange",          "tombes/fleur",       0, 2000,   100},
     {"smileys/malade",   "capes/cape_atome",        "capes/cape_atome/orange",          "tombes/fuck",      300,  500,  1000},
     {"smileys/content",  "capes/cape_cubeengine",   "capes/cape_cubeengine/orange",     "tombes/monument",  250,    0,  2500},
@@ -45,7 +45,7 @@ static const struct custominfo { const char *smiley, *capeteam1, *capeteam2, *cu
     {"smileys/fou",      "capes/cape_weed",         "capes/cape_weed/orange",           "tombes/merde",     750,  200,    10},
     {"smileys/cool",     "capes/cape_larry",        "capes/cape_larry/orange",          "tombes/lingots",  1500, 1500, 10000},
     {"smileys/bug",      "capes/cape_high",         "capes/cape_high/orange",           "tombes/oeil",      400, 1500,   200},
-    {"",                 "capes/cape_coroned",      "capes/cape_depardieu/orange"},
+    {"",                 "capes/cape_coroned",      "capes/cape_coroned/orange"},
     {"",                 "capes/cape_risitasbg",    "capes/cape_risitasbg/orange"},
 };
 
