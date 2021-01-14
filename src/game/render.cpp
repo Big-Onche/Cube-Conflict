@@ -558,7 +558,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
         {
             if(d->physstate >= PHYS_SLOPE)
             {
-                swayspeed = min(sqrtf(d->vel.x*d->vel.x + d->vel.y*d->vel.y), 200-aptitudes[d->aptitude].apt_vitesse*1.2f);
+                swayspeed = min(sqrtf(d->vel.x*d->vel.x + d->vel.y*d->vel.y), 200-aptitudes[d->aptitude].apt_vitesse*0.12f);
                 swaydist += swayspeed*curtime/1000.0f;
                 swaydist = fmod(swaydist, 2*swaystep);
                 swayfade = 1;

@@ -5,21 +5,21 @@ enum {APT_SOLDAT = 0, APT_MEDECIN, APT_AMERICAIN, APT_NINJA, APT_VAMPIRE, APT_MA
 
 static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt_vitesse; const char *apt_tete, *apt_nomFR, *apt_nomEN, *apt_logo; } aptitudes[NUMAPTS] =
 {
-    { 105,  105,  105,   95, "chapeaux/casquette",  "Soldat",       "Soldier",      "media/interface/hud/soldat.jpg"},     //0
-    {  90,  110,   95,  105, "chapeaux/medic",      "Médecin",      "Medic",        "media/interface/hud/medecin.jpg"},    //1
-    { 100,  135,   80,  130, "chapeaux/aventurier", "Américain",    "American",     "media/interface/hud/americain.jpg"},  //2
-    {  85,   90,   75,   70, "chapeaux/bandana",    "Ninja",        "Ninja",        "media/interface/hud/ninja.jpg"},      //3
-    { 110,   65,  110,  110,  "chapeaux/cornes",    "Vampire",      "Vampire",      "media/interface/hud/vampire.jpg"},    //4
-    { 100,   80,   90,  100, "chapeaux/magicien",   "Magicien",     "Wizard",       "media/interface/hud/magicien.jpg"},   //5
-    { 100,  100,   70,   75, "chapeaux/japonais",   "Kamikaze",     "Kamikaze",     "media/interface/hud/kamikaze.jpg"},   //6
-    { 100,   85,   90,  110, "chapeaux/crane",      "Faucheuse",    "Reaper",       "media/interface/hud/faucheuse.jpg"},  //7
-    {  90,   85,   85,  110, "chapeaux/graduation", "Physicien",    "Physicist",    "media/interface/hud/physicien.jpg"},  //8
-    { 100,   60,  125,  150, "chapeaux/tente",      "Campeur",      "Camper",       "media/interface/hud/campeur.jpg"},    //9
-    { 110,  110,  110,   90, "chapeaux/kepi",       "Commando",     "Commando",     "media/interface/hud/commando.jpg"},   //10
-    {  85,  105,   85,   90, "chapeaux/saint",      "Prêtre",       "Priest",       "media/interface/hud/pretre.jpg"},     //11
-    { 100,  120,   60,  115, "chapeaux/viking",     "Viking",       "Viking",       "media/interface/hud/viking.jpg"},     //12
-    { 100,  110,   85,  120, "chapeaux/champignon", "Junkie",       "Junkie",       "media/interface/hud/dealer.png"},     //13
-    { 100,  100,   75,  100, "chapeaux/indien",     "Shoshone",     "Shoshone",     "media/interface/hud/indien.jpg"},     //14
+    { 105,  105,  105,   975, "chapeaux/casquette",  "Soldat",       "Soldier",      "media/interface/hud/soldat.jpg"},     //0
+    {  90,  110,   95,  1025, "chapeaux/medic",      "Médecin",      "Medic",        "media/interface/hud/medecin.jpg"},    //1
+    { 100,  135,   80,  1150, "chapeaux/aventurier", "Américain",    "American",     "media/interface/hud/americain.jpg"},  //2
+    {  85,   90,   75,   850, "chapeaux/bandana",    "Ninja",        "Ninja",        "media/interface/hud/ninja.jpg"},      //3
+    { 110,   65,  110,  1050, "chapeaux/cornes",     "Vampire",      "Vampire",      "media/interface/hud/vampire.jpg"},    //4
+    { 100,   80,   90,  1000, "chapeaux/magicien",   "Magicien",     "Wizard",       "media/interface/hud/magicien.jpg"},   //5
+    { 100,  100,   70,   875, "chapeaux/japonais",   "Kamikaze",     "Kamikaze",     "media/interface/hud/kamikaze.jpg"},   //6
+    { 100,   85,   90,  1050, "chapeaux/crane",      "Faucheuse",    "Reaper",       "media/interface/hud/faucheuse.jpg"},  //7
+    {  90,   85,   85,  1050, "chapeaux/graduation", "Physicien",    "Physicist",    "media/interface/hud/physicien.jpg"},  //8
+    { 100,   60,  125,  1250, "chapeaux/tente",      "Campeur",      "Camper",       "media/interface/hud/campeur.jpg"},    //9
+    { 110,  110,  110,   950, "chapeaux/kepi",       "Commando",     "Commando",     "media/interface/hud/commando.jpg"},   //10
+    {  85,  105,   85,   950, "chapeaux/saint",      "Prêtre",       "Priest",       "media/interface/hud/pretre.jpg"},     //11
+    { 100,  120,   60,  1075, "chapeaux/viking",     "Viking",       "Viking",       "media/interface/hud/viking.jpg"},     //12
+    { 100,  110,   85,  1100, "chapeaux/champignon", "Junkie",       "Junkie",       "media/interface/hud/dealer.png"},     //13
+    { 100,  100,   75,  1000, "chapeaux/indien",     "Shoshone",     "Shoshone",     "media/interface/hud/indien.jpg"},     //14
 };
 
 //Définition des boucliers
@@ -33,21 +33,30 @@ static const struct shieldsinfo { const char *bois, *fer, *gold, *magnetique, *h
 };
 
 //Définition des customisations
-static const struct custominfo { const char *smiley, *capeteam1, *capeteam2, *custtombe; } customs[] =
+static const struct custominfo { const char *smiley, *capeteam1, *capeteam2, *custtombe; int smileyprices, capeprices, tombeprices; } customs[] =
 {
     {}, //0 = Rien
-    {"smileys/hap",      "capes/cape_JVC",          "capes/cape_JVC/orange",            "tombes/basique"},
-    {"smileys/noel",     "capes/cape_cisla",        "capes/cape_cisla/orange",          "tombes/fleur"},
-    {"smileys/malade",   "capes/cape_atome",        "capes/cape_atome/orange",          "tombes/fuck"},
-    {"smileys/content",  "capes/cape_cubeengine",   "capes/cape_cubeengine/orange",     "tombes/monument"},
-    {"smileys/colere",   "capes/cape_cislattack",   "capes/cape_cislattack/orange",     "tombes/cristal"},
-    {"smileys/sournois", "capes/cape_ruinee",       "capes/cape_ruinee/orange",         "tombes/couronne"},
-    {"smileys/fou",      "capes/cape_weed",         "capes/cape_weed/orange",           "tombes/merde"},
-    {"smileys/cool",     "capes/cape_larry",        "capes/cape_larry/orange",          "tombes/lingots"},
-    {"smileys/bug",      "capes/cape_high",         "capes/cape_high/orange",           "tombes/oeil"},
-    {"",                 "capes/cape_depardieu",    "capes/cape_depardieu/orange"},
+    {"smileys/hap",      "capes/cape_JVC",          "capes/cape_JVC/orange",            "tombes/basique",     0,  100,     0},
+    {"smileys/noel",     "capes/cape_cisla",        "capes/cape_cisla/orange",          "tombes/fleur",       0, 2000,   100},
+    {"smileys/malade",   "capes/cape_atome",        "capes/cape_atome/orange",          "tombes/fuck",      300,  500,  1000},
+    {"smileys/content",  "capes/cape_cubeengine",   "capes/cape_cubeengine/orange",     "tombes/monument",  250,    0,  2500},
+    {"smileys/colere",   "capes/cape_cislattack",   "capes/cape_cislattack/orange",     "tombes/cristal",   500, 5000,   750},
+    {"smileys/sournois", "capes/cape_ruinee",       "capes/cape_ruinee/orange",         "tombes/couronne", 1000,   50,  5000},
+    {"smileys/fou",      "capes/cape_weed",         "capes/cape_weed/orange",           "tombes/merde",     750,  200,    10},
+    {"smileys/cool",     "capes/cape_larry",        "capes/cape_larry/orange",          "tombes/lingots",  1500, 1500, 10000},
+    {"smileys/bug",      "capes/cape_high",         "capes/cape_high/orange",           "tombes/oeil",      400, 1500,   200},
+    {"",                 "capes/cape_coroned",      "capes/cape_depardieu/orange"},
     {"",                 "capes/cape_risitasbg",    "capes/cape_risitasbg/orange"},
 };
+
+enum {SMI_HAP = 0, NUMSMILEYS};
+extern int buyedsmileys[NUMSMILEYS];
+
+enum {CAP_CUBE = 0, NUMCAPES};
+extern int buyedcapes[NUMCAPES];
+
+enum {TOM_POOP = 0, NUMTOMBES};
+extern int buyedtombes[NUMTOMBES];
 
 //HUD
 extern bool suicided;

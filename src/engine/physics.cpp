@@ -1803,7 +1803,7 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
     int material = lookupmaterial(vec(pl->o.x, pl->o.y, pl->o.z + (3*pl->aboveeye - pl->eyeheight)/4));
     bool water = isliquid(material&MATF_VOLUME);
     bool floating = (pl->type==ENT_PLAYER && (pl->state==CS_EDITING || pl->state==CS_SPECTATOR)) || (aptisort>0 && aptitude==APT_PHYSICIEN);
-    float classespeed = aptitudes[aptitude].apt_vitesse*10.f;
+    float classespeed = aptitudes[aptitude].apt_vitesse;
     if(aptitude==APT_INDIEN && aptisort) {classespeed = 700.f;}
 
     float secs;
