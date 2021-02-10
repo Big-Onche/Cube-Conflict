@@ -211,15 +211,15 @@ namespace game
             spread/=3;
             nozoomspread/=3;
         }
-        if(d->aptitude==APT_CAMPEUR && d->crouching)
+        if(d->crouching)
         {
-            spread/=2;
-            nozoomspread/=2;
+            spread/=d->aptitude==APT_CAMPEUR ? 2.5f : 1.333f;
+            nozoomspread/=d->aptitude==APT_CAMPEUR ? 2.5f : 1.333f;
         }
         if(d->steromillis || d->ragemillis)
         {
-            spread*=2;
-            nozoomspread*=2;
+            spread*=1.75f;
+            nozoomspread*=1.75f;
         }
 
         spread = (spread*100)/aptitudes[d->aptitude].apt_precision;
