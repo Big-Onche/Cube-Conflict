@@ -33,28 +33,53 @@ static const struct shieldsinfo { const char *bois, *fer, *gold, *magnetique, *h
 };
 
 //Définition des customisations
-static const struct custominfo { const char *smiley, *capeteam1, *capeteam2, *custtombe; int smileyprices, capeprices, tombeprices; } customs[] =
+static const struct smileysinfo { const char *smileydir, *smileyname; int smileyprice; } customssmileys[] =
 {
-    {}, //0 = Rien
-    {"smileys/hap",      "capes/cape_jvc",          "capes/cape_jvc/orange",            "tombes/basique",     0,  100,     0},
-    {"smileys/noel",     "capes/cape_cisla",        "capes/cape_cisla/orange",          "tombes/fleur",       0, 2000,   100},
-    {"smileys/malade",   "capes/cape_atome",        "capes/cape_atome/orange",          "tombes/fuck",      300,  500,  1000},
-    {"smileys/content",  "capes/cape_cubeengine",   "capes/cape_cubeengine/orange",     "tombes/monument",  250,    0,  2500},
-    {"smileys/colere",   "capes/cape_cislattack",   "capes/cape_cislattack/orange",     "tombes/cristal",   500, 5000,   750},
-    {"smileys/sournois", "capes/cape_ruinee",       "capes/cape_ruinee/orange",         "tombes/couronne", 1000,   50,  5000},
-    {"smileys/fou",      "capes/cape_weed",         "capes/cape_weed/orange",           "tombes/merde",     750,  200,    10},
-    {"smileys/cool",     "capes/cape_larry",        "capes/cape_larry/orange",          "tombes/lingots",  1500, 1500, 10000},
-    {"smileys/bug",      "capes/cape_high",         "capes/cape_high/orange",           "tombes/oeil",      400, 1500,   200},
-    {"",                 "capes/cape_coroned",      "capes/cape_coroned/orange"},
-    {"",                 "capes/cape_risitasbg",    "capes/cape_risitasbg/orange"},
+    {"smileys/hap",      "Hap",          0},
+    {"smileys/noel",     "Noel",       100},
+    {"smileys/malade",   "Malade",     100},
+    {"smileys/content",  "Content",    100},
+    {"smileys/colere",   "Colère",     250},
+    {"smileys/sournois", "Sournois",   250},
+    {"smileys/fou",      "Fou",        250},
+    {"smileys/cool",     "Cool",       500},
+    {"smileys/bug",      "Bug",        500},
 };
-
-enum {SMI_HAP = 0, NUMSMILEYS};
+enum {SMI_HAP = 0, SMI_NOEL, SMI_MALADE, SMI_CONTENT, SMI_COLERE, SMI_SOURNOIS, SMI_FOU, SMI_COOL, SMI_BUG, NUMSMILEYS};
 extern int buyedsmileys[NUMSMILEYS];
 
+static const struct capesinfo { const char *team1capedir, *team2capedir, *capename; int capeprice; } customscapes[] =
+{
+    {"capes/cape_noob",         "capes/cape_noob/orange",       "Noob",              0},
+    {"capes/cape_jvc",          "capes/cape_jvc/orange",        "JVC",             100},
+    {"capes/cape_coroned",      "capes/cape_coroned/orange",    "Coroned",         100},
+    {"capes/cape_atome",        "capes/cape_atome/orange",      "Atome",           100},
+    {"capes/cape_jesuseco",     "capes/cape_jesuseco/orange",   "Issou ECO+",      100},
+    {"capes/cape_weed",         "capes/cape_weed/orange",       "Weed",            100},
+    {"capes/cape_flames",       "capes/cape_flames/orange",     "Flames",          250},
+    {"capes/cape_boucle",       "capes/cape_boucle/orange",     "Boucle",          250},
+    {"capes/cape_elite",        "capes/cape_elite/orange",      "Elite",           250},
+    {"capes/cape_high",         "capes/cape_high/orange",       "Défoncé",         500},
+    {"capes/cape_rayonsx",      "capes/cape_rayonsx/orange",    "Rayons X",        500},
+    {"capes/cape_risitas",      "capes/cape_risitas/orange",    "Risitas",         500},
+    {"capes/cape_riche",        "capes/cape_riche/orange",      "Riche",          2000},
+};
 enum {CAP_CUBE = 0, NUMCAPES};
 extern int buyedcapes[NUMCAPES];
 
+static const struct tombessinfo { const char *tombedir, *tombename; int tombeprice; } customstombes[] =
+{
+    {"tombes/basique",    "Basique",          0},
+    {"tombes/merde",      "Merde",           50},
+    {"tombes/fleur",      "Fleur",          100},
+    {"tombes/cristal",    "Cristal",        100},
+    {"tombes/ballon",     "Ballon de foot", 100},
+    {"tombes/fuck",       "Fuck",           250},
+    {"tombes/monument",   "Monument",       500},
+    {"tombes/oeil",       "Oeil",           500},
+    {"tombes/couronne",   "Couronne",       500},
+    {"tombes/lingots",    "Lingots",       2000},
+};
 enum {TOM_POOP = 0, NUMTOMBES};
 extern int buyedtombes[NUMTOMBES];
 
@@ -120,14 +145,14 @@ static const struct achinfo { const char *achname, *achnicenameFR, *achnicenameE
     {"ACH_MAJOR",         "Major",                       "Major",                    "Atteindre le niveau 100 (Tu as supporté le jeu jusqu'ici !?)",        "Reach level 100 (that's a lot of grind!)"},
     {"ACH_BEAUTIR",       "Beau tir !",                  "Nice shoot !",             "Tuer quelqu'un à au moins 100 mètres de distance",                    "Kill someone at least 100 meters away"},
     {"ACH_DEFONCE",       "Complètement défoncé",        "Completely stoned",        "Utiliser en même temps le joint, l'EPO, les champis et les stéros",   "Use joint, EPO, shrooms and steroids at the same time"},
-    {"ACH_PRECIS",        "Et ça fait bim, bam, boum",   "Accurate like a butcher",  "50% de précision sur une partie avec au moins 10 éliminations",       "Achieve 50% accuracy with at least 10 kills in a game"},
-    {"ACH_KILLASSIST",    "Complètement défoncé",        "Boom, Boom, Boom, Boom",   "Tuer quelqu'un avec l'explosion de ton armure assistée",              "Kill an enemy with your power armor explosion"},
+    {"ACH_PRECIS",        "Précis comme un boucher",     "Accurate like a butcher",  "50% de précision sur une partie avec au moins 10 éliminations",       "Achieve 50% accuracy with at least 10 kills in a game"},
+    {"ACH_KILLASSIST",    "Et ça fait bim, bam, boum",   "Boom, Boom, Boom, Boom",   "Tuer quelqu'un avec l'explosion de ton armure assistée",              "Kill an enemy with your power armor explosion"},
     {"ACH_KILLER",        "Tueur en série",              "Serial killer",            "Tuer 30 ennemis en une seule partie",                                 "Kill 30 enemies in a game"},
     {"ACH_SACAPV",        "Sac à points de vie",         "Too much health points",   "Avoir 200 points de vie (oui c'est possible !)",                      "Have 200 health points (Hint: it's possible!)"},
     {"ACH_CADENCE",       "Le combo ultime !",           "The ultimate combo!",      "Atteindre la cadence de tir la plus élevée possible du jeu",          "Have the highest possible rate of fire in the game"},
     {"ACH_1HPKILL",       "A 1 PV du ragequit !",        "At 1 HP from ragequit",    "Tuer un ennemi en ayant 1 seul point de vie",                         "Kill an enemy with only 1 health point remaining"},
     {"ACH_MAXSPEED",      "Speedy Gonzales",             "Speedy Gonzales",          "Se déplacer à la vitesse la plus rapide possible du jeu",             "Reach the highest speed in the game"},
-    {"ACH_INCREVABLE",    "Increvable !",                "Indestructible!",          "Ne mourir que 5 fois dans une partie au moins 10 éliminations",       "Only die 5 times in a game with at least 10 kills"},
+    {"ACH_INCREVABLE",    "Increvable !",                "Indestructible!",          "Mourir 5 fois maximum dans une partie avec au moins 10 éliminations",       "Only die 5 times in a game with at least 10 kills"},
     {"ACH_CHANCE",        "Larry Silverstein",           "Lucky Larry",              "Avoir la chance d'obtenir une super-arme par hasard, quel bol !",     "Obtain a superweapon on respawn"},
     {"ACH_CPASBIEN",      "C'est pas bien",              "That's not nice",          "Tuer un allié",                                                       "Kill an ally"},
     {"ACH_SUICIDEFAIL",   "Suicide manqué",              "Failed suicide",           "Rester en vie après avoir utilisé une ceinture d'explosifs",          "Stay alive after using your explosives belt"},

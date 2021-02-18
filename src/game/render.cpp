@@ -254,7 +254,7 @@ namespace game
 
     void rendertombeplayer(gameent *d, float fade)
     {
-         rendermodel(customs[d->customtombe].custtombe, ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED, d, NULL, 0, 0, fade); //DEBUG
+         rendermodel(customstombes[d->customtombe].tombedir, ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED, d, NULL, 0, 0, fade); //DEBUG
     }
 
     string bouclier;
@@ -282,7 +282,7 @@ namespace game
         else if(d->state==CS_DEAD)
         {
             if(d->tombepop<1.0f) d->tombepop += 3.f/nbfps;
-            rendermodel(customs[d->customtombe].custtombe, ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, flags, NULL, NULL, 0, 0, d->tombepop, vec4(vec::hexcolor(color), 5));
+            rendermodel(customstombes[d->customtombe].tombedir, ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, flags, NULL, NULL, 0, 0, d->tombepop, vec4(vec::hexcolor(color), 5));
 
             d->skeletonfade -= 3.f/nbfps;
             if(d->skeletonfade<0.066f) return;
@@ -331,9 +331,9 @@ namespace game
         a[ai++] = modelattach("tag_hat", aptitudes[d->aptitude].apt_tete, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
 
         ////////Customisations////////
-        if(d->customcape>=1 && d->customcape<=11)
+        if(d->customcape>=0 && d->customcape<=12)
         {
-            a[ai++] = modelattach("tag_cape", d->team==player1->team ? customs[d->customcape].capeteam1 : customs[d->customcape].capeteam2, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+            a[ai++] = modelattach("tag_cape", d->team==player1->team ? customscapes[d->customcape].team1capedir : customscapes[d->customcape].team2capedir, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
 
         //////////////////////////////////////////////////////////////////ANIMATIONS//////////////////////////////////////////////////////////////////
@@ -432,12 +432,12 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
 
         a[ai++] = modelattach("tag_hat", aptitudes[player1->aptitude].apt_tete, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
 
-        if(player1->customcape>=1 && player1->customcape<=11)
+        if(player1->customcape>=0 && player1->customcape<=12)
         {
-            a[ai++] = modelattach("tag_cape", customs[player1->customcape].capeteam1, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+            a[ai++] = modelattach("tag_cape", customscapes[player1->customcape].team1capedir, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
 
-        defformatstring(mdlname, customs[player1->playermodel+1].smiley);
+        defformatstring(mdlname, customssmileys[player1->playermodel].smileydir);
 
         rendermodel(mdlname, anim, o.add(vec(0, 10, -5)), yaw, pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), 5));
     }
