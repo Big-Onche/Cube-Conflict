@@ -1,9 +1,9 @@
-LICENSE
+LICENCE
 =======
 
 Cube Conflict, toutes versions confondues.
 
-Copyright (C) 2013-2020 Jean Onche.
+Copyright (C) 2013-2021 Jean Onche.
 
 Ce logiciel est fourni "tel quel", sans aucune garantie formelle ou implicite. 
 En aucun cas, les auteurs ne pourront être tenus responsables de tout dommage
@@ -25,7 +25,7 @@ et le redistribuer librement, sous réserve des restrictions suivantes :
 
 
 NOTES
-======
+=====
 
 Cette licence s'applique au code source, scripts et fichiers de configurations.
 La bibliothèque réseau ENet utilisée par Cube Conflict est couverte par une licence MIT, 
@@ -34,8 +34,8 @@ qui est cependant compatible avec la licence ci-dessus à toute fin pratique.
 Le contenu inclus dans le jeu (maps, textures, sons modèles 3D, etc..) ne sont PAS couverts
 par cette licence !
 
-- Les fichiers 3D liés à Cube Conflict (fichiers .obj, .md3 et maps .ogz)
-  sont sous licence Creative Commons "Partage dans les Mêmes Conditions 4.0" (CC BY-SA)
+- Les fichiers de modèles 3D on chacun leur licence respective
+  Voir licenses/licenses_3Dmodels.txt
 - Les effets sonores et musiques utilisées sont achetés sur SoundSnap.com et
   donc couvert par cette licence :  http://soundsnap.com/licence
 - Les voix utilisées appartiennent au domaine public et/ou ont été
@@ -47,14 +47,14 @@ Voir cc-by-sa.txt ou http://creativecommons.org/licenses/by-sa/4.0/
 
 
 DEPENDANCES
-=============
+===========
 
-Cube Conflict uses Tesseract (http://tesseract.gg) as game engine. 
+Cube Conflict utilise Tesseract (http://tesseract.gg) comme moteur de jeu. 
 Voir licence/readme_tesseract.txt
 
 
 AUTEURS
-======
+=======
 Jean Onche et LordSpock (PixStudio)
 Autres (pour quelques modèles 3D & idées) : 
 Skyser, JoueurZero, JambonBeurreMan, Kara, Harmonyra.

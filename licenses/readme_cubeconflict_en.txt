@@ -3,7 +3,7 @@ LICENSE
 
 Cube Conflict game, any release.
 
-Copyright (C) 2013-2020 Jean Onche
+Copyright (C) 2013-2021 Jean Onche
 
 This software is provided 'as-is', without any express or implied
 warranty.  In no event will the authors be held liable for any damages
@@ -31,8 +31,8 @@ which is however compatible with the above license for all practical purposes.
 Content included in the game (maps, textures, sounds, models etc.) 
 is NOT covered by this license.
 
-- 3D files related to Cube Conflict (3D models .obj, .md3 and maps .ogz) 
-  are covered by the Creative Commons Attribution ShareAlike 4.0+ License.
+- 3D model files have their own licenses
+  See licenses / licenses_3Dmodels.txt
 - Sound effects and music files used in game are buyed from SoundSnap 
   and therefore covered by this license : http://soundsnap.com/licence
 - Voices are in public domain and/or used with express permissions of
