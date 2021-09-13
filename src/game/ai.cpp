@@ -49,11 +49,11 @@ namespace ai
     VARF(IA_lvl, 0, 2, 4,
         switch(IA_lvl)
         {
-            case 0: IA_rndlvl = 30; return;
-            case 1: IA_rndlvl = 45; return;
-            case 2: IA_rndlvl = 60; return;
+            case 0: IA_rndlvl = 38; return;
+            case 1: IA_rndlvl = 50; return;
+            case 2: IA_rndlvl = 62; return;
             case 3: IA_rndlvl = 75; return;
-            case 4: IA_rndlvl = 90; return;
+            case 4: IA_rndlvl = 88; return;
         }
     );
 
