@@ -58,6 +58,7 @@ static const struct capesinfo { const char *team1capedir, *team2capedir, *capena
     {"capes/cape_weed",         "capes/cape_weed/orange",       "Weed",            100},
     {"capes/cape_flames",       "capes/cape_flames/orange",     "Flames",          250},
     {"capes/cape_boucle",       "capes/cape_boucle/orange",     "Boucle",          250},
+    {"capes/cape_vintage",      "capes/cape_vintage/orange",    "Vintage",         250},
     {"capes/cape_elite",        "capes/cape_elite/orange",      "Elite",           250},
     {"capes/cape_high",         "capes/cape_high/orange",       "Défoncé",         500},
     {"capes/cape_rayonsx",      "capes/cape_rayonsx/orange",    "Rayons X",        500},
