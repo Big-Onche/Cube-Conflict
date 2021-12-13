@@ -218,6 +218,7 @@ struct partrenderer
             {
                 switch(p->expand)
                 {
+                    case -1: p->size -= 3.f/nbfps; break;
                     case 1: p->size += 19.2f/nbfps; break;
                     case 2: p->size += 2.04f/nbfps;
                 }
@@ -1333,14 +1334,14 @@ void regularflame(int type, const vec &p, float radius, float height, int color,
 {
     if(!canemitparticles()) return;
 
-    float size = scale * min(radius, height);
+    float size = scale * min(radius, height)*1.5f;
     vec v(0, 0, min(1.0f, height)*speed);
     loopi(density)
     {
         vec s = p;
         s.x += rndscale(radius*2.0f)-radius;
         s.y += rndscale(radius*2.0f)-radius;
-        newparticle(s, v, rnd(max(int(fade*height), 1))+1, type, color, size, gravity);
+        newparticle(s, v, rnd(max(int(fade*height), 1))+1, type, color, size, gravity, -1);
     }
 }
 
@@ -1355,12 +1356,12 @@ static void makeparticles(entity &e)
             int rndflamecolor, rndsmokecolor;
             switch(rnd(3))
             {
-                case 1: rndflamecolor = 0x555533; rndsmokecolor = 0x222222; break;
-                case 2: rndflamecolor = 0x434343; rndsmokecolor = 0x111111; break;
-                default: rndflamecolor = 0x884430; rndsmokecolor = 0x303020; break;
+                case 1: rndflamecolor = 0x444422; rndsmokecolor = 0x222222; break;
+                case 2: rndflamecolor = 0x363636; rndsmokecolor = 0x111111; break;
+                default: rndflamecolor = 0x663515; rndsmokecolor = 0x303020; break;
 
             }
-            regularflame(PART_FLAME, e.o, radius, height, e.attr4 ? colorfromattr(e.attr4) : rndflamecolor, 3, 2.0f+(rnd(2)));
+            regularflame(PART_FLAME, e.o, radius, height, e.attr4 ? colorfromattr(e.attr4) : rndflamecolor, 2, 2.0f+(rnd(2)));
             regularflame(PART_SMOKE, vec(e.o.x, e.o.y, e.o.z + 4.0f*min(radius, height)), radius, height, rndsmokecolor, 1, 4.0f+(rnd(6)), 100.0f, 2750.0f, -15);
             break;
         }
