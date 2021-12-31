@@ -809,12 +809,10 @@ namespace recorder
 
 extern void bgquad(float x, float y, float w, float h, float tx = 0, float ty = 0, float tw = 1, float th = 1);
 
-extern int n_ambiance;  //CubeConflict
+extern int n_ambiance, n_map;  //Config partie Cube Conflict
 
-extern int maxmodelradiusdistance, grassdist, grass, dynlightdist; // LOD  //CubeConflict
+extern int maxmodelradiusdistance, grassdist, grass, dynlightdist; // LOD Cube Conflict
 extern float grassstep;
-
-extern int n_map;
 
 extern int maxsoundradius;
 

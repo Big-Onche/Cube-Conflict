@@ -2740,8 +2740,7 @@ namespace server
 
     void sendservinfo(clientinfo *ci)
     {
-        sendf(ci->clientnum, 1, "ri5ss", N_SERVINFO, ci->clientnum, PROTOCOL_VERSION, ci->sessionid, serverpass[0] ? 1 : 0, serverdesc, serverauth);
-        sendf(ci->clientnum, 1, "ri2", N_SERVAMBIENT, servambient);
+        sendf(ci->clientnum, 1, "ri6ss", N_SERVINFO, ci->clientnum, PROTOCOL_VERSION, ci->sessionid, multiplayer()? servambient : n_ambiance, serverpass[0] ? 1 : 0, serverdesc, serverauth);
     }
 
     void noclients()

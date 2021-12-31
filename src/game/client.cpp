@@ -1,9 +1,7 @@
 #include "game.h"
 #include "cubedef.h"
 
-int ambiancealeatoire;
 VAR(n_ambiance, 0, 0, 7);
-
 VAR(n_map, 0, 0, 99);
 VARR(mapofficielle, 0, 0, 1);
 
@@ -1462,6 +1460,7 @@ namespace game
                     return;
                 }
                 sessionid = getint(p);
+                n_ambiance = getint(p);
                 player1->clientnum = mycn;      // we are now connected
                 if(getint(p) > 0) conoutf("this server is password protected");
                 getstring(servdesc, p, sizeof(servdesc));
