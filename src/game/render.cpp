@@ -240,7 +240,7 @@ namespace game
     VAR(testanims, 0, 0, 1);
     VAR(testpitch, -90, 0, 90);
 
-    VARFP(player1_cape, 0, 0, 12,
+    VARFP(player1_cape, 0, 0, 13,
         {
         addmsg(N_SENDCAPE, "ri", player1_cape);
         player1->customcape = player1_cape;
@@ -331,7 +331,7 @@ namespace game
         a[ai++] = modelattach("tag_hat", aptitudes[d->aptitude].apt_tete, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
 
         ////////Customisations////////
-        if(d->customcape>=0 && d->customcape<=12)
+        if(d->customcape>=0 && d->customcape<=13)
         {
             a[ai++] = modelattach("tag_cape", d->team==player1->team ? customscapes[d->customcape].team1capedir : customscapes[d->customcape].team2capedir, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
@@ -432,7 +432,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
 
         a[ai++] = modelattach("tag_hat", aptitudes[player1->aptitude].apt_tete, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
 
-        if(player1->customcape>=0 && player1->customcape<=12)
+        if(player1->customcape>=0 && player1->customcape<=13)
         {
             a[ai++] = modelattach("tag_cape", customscapes[player1->customcape].team1capedir, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
