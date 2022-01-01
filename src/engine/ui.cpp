@@ -2917,12 +2917,14 @@ namespace UI
 
     struct PlayerPreview : Preview
     {
-        int model, color, team, weapon;
+        int model, smiley, cape, color, team, weapon;
 
-        void setup(int model_, int color_, int team_, int weapon_, float minw_, float minh_)
+        void setup(int model_, int smiley_, int cape_, int color_, int team_, int weapon_, float minw_, float minh_)
         {
             Preview::setup(minw_, minh_);
             model = model_;
+            smiley = smiley_;
+            cape = cape_;
             color = color_;
             team = team_;
             weapon = weapon_;
@@ -2940,7 +2942,7 @@ namespace UI
             int sx1, sy1, sx2, sy2;
             window->calcscissor(sx, sy, sx+w, sy+h, sx1, sy1, sx2, sy2, false);
             modelpreview::start(sx1, sy1, sx2-sx1, sy2-sy1, false, clipstack.length() > 0);
-            game::renderplayerpreview(model, color, team, weapon);
+            game::renderplayerpreview(model, smiley, cape, color, team, weapon);
             if(clipstack.length()) clipstack.last().scissor();
             modelpreview::end();
         }
@@ -3474,8 +3476,8 @@ namespace UI
     ICOMMAND(uimodelpreview, "ssffe", (char *model, char *animspec, float *minw, float *minh, uint *children),
         BUILD(ModelPreview, o, o->setup(model, animspec, *minw, *minh), children));
 
-    ICOMMAND(uiplayerpreview, "iiiiffe", (int *model, int *chapeau, int *cape, int *weapon, float *minw, float *minh, uint *children),
-        BUILD(PlayerPreview, o, o->setup(*model, *chapeau, *cape, *weapon, *minw, *minh), children));
+    ICOMMAND(uiplayerpreview, "iiiiiiffe", (int *model, int *smiley, int *cape, int *color, int *team, int *weapon, float *minw, float *minh, uint *children),
+        BUILD(PlayerPreview, o, o->setup(*model, *smiley, *cape, *color, *team, *weapon, *minw, *minh), children));
 
     ICOMMAND(uiprefabpreview, "siffe", (char *prefab, int *color, float *minw, float *minh, uint *children),
         BUILD(PrefabPreview, o, o->setup(prefab, *color, *minw, *minh), children));

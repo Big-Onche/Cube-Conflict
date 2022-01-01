@@ -6,6 +6,10 @@ float weapposside, weapposup, maxweapposside, maxweapposup, shieldside;
 float maxshieldside = -15;
 float crosshairalpha = 1;
 
+VAR(UI_smiley, 0, 0, 8);
+VAR(UI_cape, 0, 0, 13);
+VAR(UI_tombe, 0, 0, 9);
+
 namespace game
 {
     vector<gameent *> bestplayers;
@@ -386,7 +390,7 @@ namespace game
         rendermodel(mdlname, anim, o, yaw, d->pitch>12 ? 12 : d->pitch<-25 ? -25 : pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), trans));
     }
 
-void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team, float fade, int flags = 0, bool mainpass = true)
+void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape, int color, int team, float fade, int flags = 0, bool mainpass = true)
     {
         int lastaction = d->lastaction, anim = ANIM_IDLE|ANIM_LOOP, attack = 0, delay = 0;
 
@@ -431,13 +435,9 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
         if(!mainpass) flags &= ~(MDL_FULLBRIGHT | MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY | MDL_CULL_DIST);
 
         a[ai++] = modelattach("tag_hat", aptitudes[player1->aptitude].apt_tete, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+        a[ai++] = modelattach("tag_cape", customscapes[cape==-1 ? player1_cape : cape].team1capedir, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
 
-        if(player1->customcape>=0 && player1->customcape<=13)
-        {
-            a[ai++] = modelattach("tag_cape", customscapes[player1->customcape].team1capedir, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-        }
-
-        defformatstring(mdlname, customssmileys[player1->playermodel].smileydir);
+        defformatstring(mdlname, customssmileys[smiley==-1 ? player1->playermodel : smiley].smileydir);
 
         rendermodel(mdlname, anim, o.add(vec(0, 10, -5)), yaw, pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), 5));
     }
@@ -705,7 +705,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
         drawhudgun();
     }
 
-    void renderplayerpreview(int model, int color, int team, int weap)
+    void renderplayerpreview(int model, int smiley, int cape, int color, int team, int weap)
     {
         static gameent *previewent = NULL;
         if(!previewent)
@@ -720,7 +720,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int color, int team,
         previewent->gunselect = validgun(weap) ? weap : GUN_RAIL;
         const playermodelinfo *mdlinfo = getplayermodelinfo(model);
         if(!mdlinfo) return;
-        renderplayerui(previewent, *mdlinfo, getplayercolor(team, color), team, 1, 0, false);
+        renderplayerui(previewent, *mdlinfo, smiley, cape, getplayercolor(team, color), team, 1, 0, false);
     }
 
     vec hudgunorigin(int gun, const vec &from, const vec &to, gameent *d)
