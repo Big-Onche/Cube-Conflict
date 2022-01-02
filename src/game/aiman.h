@@ -123,7 +123,7 @@ namespace aiman
         ci->aptitude = rnd(15);
         ci->level = skill;
         ci->customcape = rnd(14);
-        ci->customtombe = rnd(10);
+        ci->customtombe = rnd(9);
         ci->customdanse = rnd(6)+1;
         ci->aireinit = 2;
         ci->connected = true;

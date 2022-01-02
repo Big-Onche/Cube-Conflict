@@ -8,7 +8,8 @@ float crosshairalpha = 1;
 
 VAR(UI_smiley, 0, 0, 8);
 VAR(UI_cape, 0, 0, 13);
-VAR(UI_tombe, 0, 0, 9);
+VAR(UI_tombe, 0, 0, 8);
+VAR(UI_custtab, 0, 0, 3);
 
 namespace game
 {
@@ -250,7 +251,7 @@ namespace game
         player1->customcape = player1_cape;
     });
 
-    VARFP(player1_tombe, 1, 1, 9,
+    VARFP(player1_tombe, 0, 0, 8,
         {
         addmsg(N_SENDTOMBE, "ri", player1_tombe);
         player1->customtombe = player1_tombe;
