@@ -34,11 +34,11 @@ void genlvl() //Calcule le niveau du joueur
 }
 
 //////////////////////Gestion des statistiques//////////////////////
-void addxpandcc(int nbxp, int cc) // Ajoute l'xp et/ou les CC
+void addxpandcc(int nbxp, int nbcc) // Ajoute l'xp et/ou les CC
 {
     if(!conserveurofficiel) return;
     stat[STAT_XP] += nbxp;
-    stat[STAT_CC]+=cc;
+    stat[STAT_CC] += nbcc;
     genlvl(); //Recalcule le niveau
 }
 
@@ -114,6 +114,8 @@ void loadsave()
 //////////////////////Gestion des succès//////////////////////
 bool achievementlocked(int achID) {return !succes[achID];} //Succès verrouillé ? OUI = TRUE, NON = FALSE
 
+VAR(totalachunlocked, 0, 0, 25);
+
 void unlockachievement(int achID) //Débloque le succès
 {
     if(conserveurofficiel && achievementlocked(achID) && usesteam) //Ne débloque que si serveur officiel ET succès verrouillé ET Steam activé
@@ -122,6 +124,8 @@ void unlockachievement(int achID) //Débloque le succès
         SteamUserStats()->StoreStats();
         succes[achID] = true; //Met le succès à jour côté client
         addxpandcc(25, 25);
+        playsound(S_ACHIEVEMENTUNLOCKED);
+        totalachunlocked++;
     }
 }
 
@@ -131,6 +135,7 @@ void getsteamachievements() //Récupère les succès enregistrés sur steam
     loopi(NUMACHS)
     {
         SteamUserStats()->GetAchievement(achievements[achID].achname, &succes[achID]);
+        if(!achievementlocked(achID)) totalachunlocked++;
         achID++;
     }
 }
