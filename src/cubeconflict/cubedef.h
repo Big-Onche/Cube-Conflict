@@ -68,7 +68,7 @@ static const struct capesinfo { const char *team1capedir, *team2capedir, *capena
 enum {CAP_CUBE = 0, NUMCAPES};
 extern int buyedcapes[NUMCAPES];
 
-static const struct tombessinfo { const char *tombedir, *tombename; int tombeprice; } customstombes[] =
+static const struct tombesinfo { const char *tombedir, *tombename; int tombeprice; } customstombes[] =
 {
     {"tombes/basique",    "Basique",          0},
     {"tombes/merde",      "Merde",           50},
@@ -108,18 +108,18 @@ extern bool usesteam;
 extern string pseudoaleatoire;
 extern void genpseudo(bool forcename, int langue);
 extern bool conserveurofficiel;
-extern int langage;
+extern int langage, UI_menutabs, UI_tombe, UI_custtab;
 
 extern void loadsave();
 extern void writesave();
 
-extern void addxpandcc(int nbxp, int cc = 0);
+extern void addxpandcc(int nbxp, int nbcc = 0);
 extern int cclvl, needxp, oldneed, neededxp;
 extern float pourcents;
 
 extern void addstat(int valeur, int stat);
 extern float menustat(int value);
-enum {STAT_XP, STAT_CC, STAT_KILLS, STAT_MORTS, STAT_KILLSTREAK, STAT_BOUCLIERBOIS, STAT_BOUCLIERFER, STAT_BOUCLIEROR, STAT_BOUCLIERMAGNETIQUE,
+enum {STAT_CC, STAT_XP, STAT_KILLS, STAT_MORTS, STAT_KILLSTREAK, STAT_BOUCLIERBOIS, STAT_BOUCLIERFER, STAT_BOUCLIEROR, STAT_BOUCLIERMAGNETIQUE,
         STAT_PANACHAY, STAT_MANA, STAT_COCHON, STAT_STEROS, STAT_EPO, STAT_JOINT, STAT_CHAMPIS, STAT_ARMES, STAT_SUPERARMES,
         STAT_DRAPEAUX, STAT_WINS, STAT_ARMUREASSIST, STAT_TPSSEC, STAT_TPSMIN, STAT_TPSH, NUMSTATS};
 extern int stat[NUMSTATS];
