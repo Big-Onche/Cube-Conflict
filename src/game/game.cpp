@@ -22,6 +22,8 @@ namespace game
             addmsg(N_SENDAPTITUDE, "ri", player1_aptitude);
             player1->aptitude = player1_aptitude;
             oldapti = player1->aptitude;
+            if(!isconnected())stopsounds();
+            playsound(S_APT_SOLDAT+player1_aptitude);
         }
     });
 
@@ -253,7 +255,7 @@ namespace game
 
             if(curtime>0 && d->ragemillis && d!=player1) d->ragemillis = max(d->ragemillis-curtime, 0);
 
-            if(d==hudplayer() && d->state==CS_ALIVE)
+            if(d==hudplayer() && d->state==CS_ALIVE && isconnected())
             {
                 if(d->health<=200) d->hurtchan = playsound(S_HEARTBEAT, NULL, NULL, 0, -1, 1000, d->hurtchan);
                 else d->stopheartbeat();
@@ -401,7 +403,7 @@ namespace game
             if(player1->ragemillis || player1->vampimillis || player1->aptisort1 || player1->aptisort2 || player1->aptisort3) entities::checkaptiskill(curtime, player1);
             if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_INDIEN) updatespecials(player1);
 
-            if(player1->aptitude==APT_MEDECIN && !m_teammode && player1->health<player1->maxhealth+200 && player1->state==CS_ALIVE)
+            if(player1->aptitude==APT_MEDECIN && !m_teammode && player1->health<player1->maxhealth+200 && player1->state==CS_ALIVE && isconnected())
             {
                 switch(rnd(70))
                 {

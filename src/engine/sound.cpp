@@ -476,6 +476,13 @@ void resetchannels()
     channels.shrink(0);
 }
 
+void soundmenu_cleanup()
+{
+    stopmusic();
+    stopsounds();
+    mapsounds.cleanup();
+}
+
 void clear_sound()
 {
     closemumble();

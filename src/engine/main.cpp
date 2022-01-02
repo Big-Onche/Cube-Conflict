@@ -277,7 +277,7 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
     glDisable(GL_BLEND);
 }
 
-VAR(menumute, 0, 1, 1);
+VAR(menumute, 0, 0, 1);
 
 void renderbackground(const char *caption, Texture *mapshot, const char *mapname, const char *mapinfo, const char *astuce, bool force)
 {
@@ -1071,7 +1071,7 @@ extern void changerlangue();
 
 bool init = true;
 VARFP(langage, 0, 0, 1, changerlangue());
-VAR(UI_menutabs, 0, 4, 8);
+VAR(UI_menutabs, 0, 0, 9);
 
 void changerlangue()
 {
@@ -1087,7 +1087,7 @@ void changerlangue()
             case 1: UI::showui(game::ispaused() ? "pause_en" : "main_en");
         }
     }
-    else {UI_menutabs = 5; init = false;}
+    else {UI_menutabs = 0; init = false;}
 }
 
 bool initsteam()

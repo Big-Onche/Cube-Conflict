@@ -429,6 +429,7 @@ extern void preloadsound(int n);
 extern void preloadmapsound(int n);
 extern bool stopsound(int n, int chanid, int fade = 0);
 extern void stopsounds();
+extern void soundmenu_cleanup();
 extern void initsound();
 
 // rendermodel

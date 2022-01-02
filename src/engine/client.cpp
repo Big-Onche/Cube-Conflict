@@ -178,6 +178,8 @@ void disconnect(bool async, bool cleanup)
 
 void trydisconnect(bool local)
 {
+    soundmenu_cleanup();
+
     if(connpeer)
     {
         conoutf("aborting connection attempt");
