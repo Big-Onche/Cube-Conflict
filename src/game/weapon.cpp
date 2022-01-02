@@ -1656,7 +1656,7 @@ namespace game
     {
         if(d->clientnum >= 0 && d->state == CS_ALIVE)
         {
-            d->dansechan = playsound(S_CGCORTEX+(d->customdanse-1), local ? NULL : &d->o, NULL, 0, -1, -1, d->dansechan, 400);
+            d->dansechan = playsound(S_CGCORTEX+(d->customdanse), local ? NULL : &d->o, NULL, 0, -1, -1, d->dansechan, 400);
             if(d->dansechan < 0) d->dansechan = -1;
         }
         else d->stopdansesound(d);

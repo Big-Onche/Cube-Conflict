@@ -790,7 +790,7 @@ struct gameent : dynent, gamestate
 
     void stopdansesound(gameent *d)
     {
-        if(dansechan >= 0) stopsound(S_CGCORTEX+(d->customdanse-1), dansechan, 150);
+        if(dansechan >= 0) stopsound(S_CGCORTEX+(d->customdanse), dansechan, 150);
         dansechan = -1;
     }
 

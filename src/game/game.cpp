@@ -561,12 +561,12 @@ namespace game
         //return !((gameent *)d)->lasttaunt || lastmillis-((gameent *)d)->lasttaunt>=5000;
     }
 
-    VARFP(player1_danse, 1, 1, 6,
+    VARFP(player1_danse, 0, 0, 6,
     {
         addmsg(N_SENDDANSE, "ri", player1_danse);
         stopsounds();
         player1->customdanse = player1_danse;
-        playsound(S_CGCORTEX+(player1_danse-1));
+        playsound(S_CGCORTEX+(player1_danse));
     });
 
     void taunt()
@@ -574,7 +574,7 @@ namespace game
         if(player1->state!=CS_ALIVE || player1->physstate<PHYS_SLOPE) return;
         if(lastmillis-player1->lasttaunt<2000){conoutf(CON_GAMEINFO, "\faOn abuse pas des bonnes choses !"); return;}
         player1->lasttaunt = lastmillis;
-        playsound(S_CGCORTEX+(player1->customdanse-1));
+        playsound(S_CGCORTEX+(player1->customdanse));
         addmsg(N_TAUNT, "rc", player1);
     }
     COMMAND(taunt, "");
