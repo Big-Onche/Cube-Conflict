@@ -36,14 +36,14 @@ static const struct shieldsinfo { const char *bois, *fer, *gold, *magnetique, *h
 static const struct smileysinfo { const char *smileydir, *smileyname; int smileyprice; } customssmileys[] =
 {
     {"smileys/hap",      "Hap",          0},
-    {"smileys/noel",     "Noel",       100},
+    {"smileys/noel",     "Noel",         0},
     {"smileys/malade",   "Malade",     100},
     {"smileys/content",  "Content",    100},
     {"smileys/colere",   "Colère",     250},
     {"smileys/sournois", "Sournois",   250},
     {"smileys/fou",      "Fou",        250},
     {"smileys/cool",     "Cool",       500},
-    {"smileys/bug",      "Bug",        500},
+    {"smileys/bug",      "Bug",       1500},
 };
 enum {SMI_HAP = 0, SMI_NOEL, SMI_MALADE, SMI_CONTENT, SMI_COLERE, SMI_SOURNOIS, SMI_FOU, SMI_COOL, SMI_BUG, NUMSMILEYS};
 extern int buyedsmileys[NUMSMILEYS];
@@ -51,8 +51,8 @@ extern int buyedsmileys[NUMSMILEYS];
 static const struct capesinfo { const char *team1capedir, *team2capedir, *capename; int capeprice; } customscapes[] =
 {
     {"capes/cape_noob",         "capes/cape_noob/orange",       "Noob",              0},
-    {"capes/cape_jvc",          "capes/cape_jvc/orange",        "JVC",             100},
-    {"capes/cape_coroned",      "capes/cape_coroned/orange",    "Coroned",         100},
+    {"capes/cape_jvc",          "capes/cape_jvc/orange",        "JVC",              50},
+    {"capes/cape_coroned",      "capes/cape_coroned/orange",    "Coroned",          50},
     {"capes/cape_atome",        "capes/cape_atome/orange",      "Atome",           100},
     {"capes/cape_jesuseco",     "capes/cape_jesuseco/orange",   "Issou ECO+",      100},
     {"capes/cape_weed",         "capes/cape_weed/orange",       "Weed",            100},
@@ -63,26 +63,37 @@ static const struct capesinfo { const char *team1capedir, *team2capedir, *capena
     {"capes/cape_high",         "capes/cape_high/orange",       "Défoncé",         500},
     {"capes/cape_rayonsx",      "capes/cape_rayonsx/orange",    "Rayons X",        500},
     {"capes/cape_risitas",      "capes/cape_risitas/orange",    "Risitas",         500},
-    {"capes/cape_riche",        "capes/cape_riche/orange",      "Riche",          2000},
+    {"capes/cape_riche",        "capes/cape_riche/orange",      "Riche",          1500},
 };
 enum {CAP_CUBE = 0, NUMCAPES};
 extern int buyedcapes[NUMCAPES];
 
-static const struct tombesinfo { const char *tombedir, *tombename; int tombeprice; } customstombes[] =
+static const struct tombesinfo { const char *tombedir, *tombemenudir, *tombename; int tombeprice; } customstombes[] =
 {
-    {"tombes/basique",    "Basique",          0},
-    {"tombes/merde",      "Merde",           50},
-    {"tombes/fleur",      "Fleur",          100},
-    {"tombes/cristal",    "Cristal",        100},
-    {"tombes/ballon",     "Ballon de foot", 100},
-    {"tombes/fuck",       "Fuck",           250},
-    {"tombes/monument",   "Monument",       500},
-    {"tombes/oeil",       "Oeil",           500},
-    {"tombes/couronne",   "Couronne",       500},
-    {"tombes/lingots",    "Lingots",       2000},
+    {"tombes/basique",  "tombes/basique",   "Basique",          0},
+    {"tombes/merde",    "tombes/merde",     "Merde",           50},
+    {"tombes/fleur",    "tombes/fleur",     "Fleur",          100},
+    {"tombes/cristal",  "tombes/cristal",   "Cristal",        100},
+    {"tombes/oeil",     "tombes/oeil/menu", "Oeil",           250},
+    {"tombes/couronne", "tombes/couronne",  "Couronne",       250},
+    {"tombes/fuck",     "tombes/fuck",      "Fuck",           500},
+    {"tombes/monument", "tombes/monument",  "Monument",       500},
+    {"tombes/lingots",  "tombes/lingots",   "Lingots",       1500},
 };
 enum {TOM_POOP = 0, NUMTOMBES};
 extern int buyedtombes[NUMTOMBES];
+
+static const struct danceinfo { const char *dancename; int danceprice; } customdance[] =
+{
+    {"Cortex",       0},
+    {"Vieille",     50},
+    {"Hendek",     100},
+    {"Delavier",   250},
+    {"Praud",      250},
+    {"Malleville", 1500},
+};
+enum {VOI_CORTEX = 0, VOI_VIEILLE, VOI_HENDEK, VOI_DELAVIER, VOI_PRAUD, VOI_MALLEVILLE, NUMVOICES};
+extern int buyedvoices[NUMVOICES];
 
 //HUD
 extern bool suicided;
