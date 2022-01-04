@@ -1888,7 +1888,7 @@ namespace game
 
             case N_TAUNT:
             {
-                if(!d) return;
+                if(langage || !d) return;
                 d->lasttaunt = lastmillis;
                 d->dansechan = playsound(S_CGCORTEX+(d->customdanse), d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 150, d->dansechan, 400);
                 break;
