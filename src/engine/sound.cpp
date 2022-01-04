@@ -122,8 +122,8 @@ void stopchannels()
 }
 
 void setmusicvol(int musicvol);
-VARFP(soundvol, 0, 255, 255, if(!soundvol) { stopchannels(); setmusicvol(0); });
-VARFP(musicvol, 0, 60, 255, setmusicvol(soundvol ? musicvol : 0));
+VARFP(soundvol, 0, 80, 100, if(!soundvol) { stopchannels(); setmusicvol(0); });
+VARFP(musicvol, 0, 40, 100, setmusicvol(soundvol ? musicvol : 0));
 
 char *musicfile = NULL, *musicdonecmd = NULL;
 
@@ -134,7 +134,7 @@ stream *musicstream = NULL;
 void setmusicvol(int musicvol)
 {
     if(nosound) return;
-    if(music) Mix_VolumeMusic((musicvol*MIX_MAX_VOLUME)/255);
+    if(music) Mix_VolumeMusic((musicvol*MIX_MAX_VOLUME)/100);
 }
 
 void stopmusic()
@@ -162,7 +162,7 @@ SVARF(audiodriver, AUDIODRIVER, { shouldinitaudio = true; initwarning("sound con
 VARF(sound, 0, 1, 1, { shouldinitaudio = true; initwarning("sound configuration", INIT_RESET, CHANGE_SOUND); });
 VARF(soundchans, 1, 512, 512, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 VARF(soundfreq, 0, 44100, 48000, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
-VARF(soundbufferlen, 128, 1024, 4096, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
+VARF(soundbufferlen, 128, 2048, 4096, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 
 bool initaudio()
 {
@@ -272,7 +272,7 @@ void startmusic(char *name, char *cmd)
             musicfile = newstring(file);
             if(cmd[0]) musicdonecmd = newstring(cmd);
             Mix_PlayMusic(music, cmd[0] ? 0 : -1);
-            Mix_VolumeMusic((musicvol*MIX_MAX_VOLUME)/255);
+            Mix_VolumeMusic((musicvol*MIX_MAX_VOLUME)/100);
             intret(1);
         }
         else
@@ -568,7 +568,7 @@ bool updatechannel(soundchannel &chan)
             pan = int(255.9f*(0.5f - 0.5f*v.x/v.magnitude2())); // range is from 0 (left) to 255 (right)
         }
     }
-    vol = (vol*MIX_MAX_VOLUME*chan.slot->volume)/255/255;
+    vol = (vol*MIX_MAX_VOLUME*chan.slot->volume)/100/100;
     vol = min(vol, MIX_MAX_VOLUME);
     if(vol == chan.volume && pan == chan.pan) return false;
     chan.volume = vol;
@@ -777,7 +777,7 @@ void resetsound()
     if(music && loadmusic(musicfile))
     {
         Mix_PlayMusic(music, musicdonecmd ? 0 : -1);
-        Mix_VolumeMusic((musicvol*MIX_MAX_VOLUME)/255);
+        Mix_VolumeMusic((musicvol*MIX_MAX_VOLUME)/100);
     }
     else
     {
