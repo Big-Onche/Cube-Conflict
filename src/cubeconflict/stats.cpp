@@ -88,10 +88,15 @@ void writesave()
     }
 }
 
+void givecustombase() //Avant tout le joueur a les customisations de base, même en cas de sauvegarde corrompue
+{
+    stat[SMI_HAP] = stat[SMI_NOEL] = stat[CAPE_CUBE] =  stat[TOM_MERDE] =  stat[VOI_CORTEX] = rnd(99)+1;
+}
+
 void loadsave()
 {
     stream *statlist = openfile("config/stats.cfg", "r");
-    if(!statlist) return;
+    if(!statlist) {givecustombase(); return;}
 
     char buf[50];
     int statID = 0;
@@ -108,6 +113,7 @@ void loadsave()
     }
     statlist->close();
 
+    givecustombase();
     genlvl();
 }
 

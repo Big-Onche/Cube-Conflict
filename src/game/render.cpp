@@ -6,9 +6,10 @@ float weapposside, weapposup, maxweapposside, maxweapposup, shieldside;
 float maxshieldside = -15;
 float crosshairalpha = 1;
 
-VAR(UI_smiley, 0, 0, 8);
+VAR(UI_smiley, 0, 0, 9);
 VAR(UI_cape, 0, 0, 13);
-VAR(UI_tombe, 0, 0, 8);
+VAR(UI_tombe, 0, 0, 10);
+VAR(UI_voix, 0, 0, 5);
 VAR(UI_custtab, 0, 0, 3);
 
 namespace game
@@ -106,17 +107,18 @@ namespace game
     VARFP(playercolorazul, 0, 0, sizeof(playercolorsazul)/sizeof(playercolorsazul[0])-1, changedplayercolor());
     VARFP(playercolorrojo, 0, 0, sizeof(playercolorsrojo)/sizeof(playercolorsrojo[0])-1, changedplayercolor());
 
-    static const playermodelinfo playermodels[9] =
+    static const playermodelinfo playermodels[10] =
     {
-        { { "smileys/hap/red", "smileys/hap", "smileys/hap/red" },                  { "hudgun", "hudgun", "hudgun" },   { "hap_red", "hap", "hap_red" }, true },
-        { { "smileys/noel/red", "smileys/noel", "smileys/noel/red" },               { "hudgun", "hudgun", "hudgun" },   { "noel_red", "noel", "noel_red" }, true },
-        { { "smileys/malade/red", "smileys/malade", "smileys/malade/red" },         { "hudgun", "hudgun", "hudgun" },   { "malade_red", "malade", "malade_red" }, true },
-        { { "smileys/content/red", "smileys/content", "smileys/content/red" },      { "hudgun", "hudgun", "hudgun" },   { "content_red", "content", "content_red" }, true },
-        { { "smileys/colere/red", "smileys/colere", "smileys/colere/red" },         { "hudgun", "hudgun", "hudgun" },   { "colere_red", "colere", "colere_red" }, true },
-        { { "smileys/sournois/red", "smileys/sournois", "smileys/sournois/red" },   { "hudgun", "hudgun", "hudgun" },   { "sournois_red", "sournois", "sournois_red" }, true },
-        { { "smileys/fou/red", "smileys/fou", "smileys/fou/red" },                  { "hudgun", "hudgun", "hudgun" },   { "fou_red", "fou", "fou_red" }, true },
-        { { "smileys/cool/red", "smileys/cool", "smileys/cool/red" },               { "hudgun", "hudgun", "hudgun" },   { "cool_red", "cool", "cool_red" }, true },
-        { { "smileys/bug/red", "smileys/bug", "smileys/bug/red" },                  { "hudgun", "hudgun", "hudgun" },   { "bug_red", "bug", "bug_red" }, true },
+        { { "smileys/hap/red", "smileys/hap", "smileys/hap/red" },                      { "hudgun", "hudgun", "hudgun" },   { "hap_red", "hap", "hap_red" }, true },
+        { { "smileys/noel/red", "smileys/noel", "smileys/noel/red" },                   { "hudgun", "hudgun", "hudgun" },   { "noel_red", "noel", "noel_red" }, true },
+        { { "smileys/malade/red", "smileys/malade", "smileys/malade/red" },             { "hudgun", "hudgun", "hudgun" },   { "malade_red", "malade", "malade_red" }, true },
+        { { "smileys/content/red", "smileys/content", "smileys/content/red" },          { "hudgun", "hudgun", "hudgun" },   { "content_red", "content", "content_red" }, true },
+        { { "smileys/colere/red", "smileys/colere", "smileys/colere/red" },             { "hudgun", "hudgun", "hudgun" },   { "colere_red", "colere", "colere_red" }, true },
+        { { "smileys/sournois/red", "smileys/sournois", "smileys/sournois/red" },       { "hudgun", "hudgun", "hudgun" },   { "sournois_red", "sournois", "sournois_red" }, true },
+        { { "smileys/fou/red", "smileys/fou", "smileys/fou/red" },                      { "hudgun", "hudgun", "hudgun" },   { "fou_red", "fou", "fou_red" }, true },
+        { { "smileys/clindoeil/red", "smileys/clindoeil", "smileys/clindoeil/red" },    { "hudgun", "hudgun", "hudgun" },   { "clindoeil_red", "clindoeil", "clindoeil_red" }, true },
+        { { "smileys/cool/red", "smileys/cool", "smileys/cool/red" },                   { "hudgun", "hudgun", "hudgun" },   { "cool_red", "cool", "cool_red" }, true },
+        { { "smileys/bug/red", "smileys/bug", "smileys/bug/red" },                      { "hudgun", "hudgun", "hudgun" },   { "bug_red", "bug", "bug_red" }, true },
     };
 
     extern void changedplayermodel();
@@ -167,6 +169,7 @@ namespace game
 
     void changedplayermodel()
     {
+        if(stat[SMI_HAP+playermodel]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas ce smiley !"); playsound(S_ERROR); return;}
         if(player1->clientnum < 0) player1->playermodel = playermodel;
         if(player1->ragdoll) cleanragdoll(player1);
         loopv(ragdolls)
@@ -246,13 +249,15 @@ namespace game
     VAR(testpitch, -90, 0, 90);
 
     VARFP(player1_cape, 0, 0, 13,
-        {
+    {
+        if(stat[CAPE_CUBE+player1_cape]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette cape !"); playsound(S_ERROR); return;}
         addmsg(N_SENDCAPE, "ri", player1_cape);
         player1->customcape = player1_cape;
     });
 
-    VARFP(player1_tombe, 0, 0, 8,
-        {
+    VARFP(player1_tombe, 0, 0, 10,
+    {
+        if(stat[TOM_MERDE+player1_tombe]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette tombe !"); playsound(S_ERROR); return;}
         addmsg(N_SENDTOMBE, "ri", player1_tombe);
         player1->customtombe = player1_tombe;
     });

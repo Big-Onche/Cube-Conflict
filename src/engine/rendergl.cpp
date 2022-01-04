@@ -2382,8 +2382,11 @@ VAR(playerpreviewyaw, 0, 200, 360);
 
 vec calcmodelpreviewpos(const vec &radius, float &yaw)
 {
-    yaw = playerpreviewyaw;
-    float dist = max(radius.magnitude2()/aspect, radius.magnitude())/sinf(fovy/2*RAD);
+    yaw = UI_menutabs==0 ? fmod(lastmillis/10000.0f*360.0f, 360.0f) : UI_custtab==2 ? fmod(lastmillis/10000.0f*360.0f, 360.0f) : playerpreviewyaw;
+
+    int menudist = UI_menutabs==0 || UI_custtab==2 ? 2.6f : 2;
+
+    float dist = max(radius.magnitude2()/aspect, radius.magnitude())/sinf(fovy/menudist*RAD);
     return vec(0, dist, 0).rotate_around_x(camera1->pitch*RAD);
 }
 

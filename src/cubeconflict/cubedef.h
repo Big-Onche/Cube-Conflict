@@ -35,18 +35,17 @@ static const struct shieldsinfo { const char *bois, *fer, *gold, *magnetique, *h
 //Définition des customisations
 static const struct smileysinfo { const char *smileydir, *smileyname; int smileyprice; } customssmileys[] =
 {
-    {"smileys/hap",      "Hap",          0},
-    {"smileys/noel",     "Noel",         0},
-    {"smileys/malade",   "Malade",     100},
-    {"smileys/content",  "Content",    100},
-    {"smileys/colere",   "Colère",     250},
-    {"smileys/sournois", "Sournois",   250},
-    {"smileys/fou",      "Fou",        250},
-    {"smileys/cool",     "Cool",       500},
-    {"smileys/bug",      "Bug",       1500},
+    {"smileys/hap",         "Hap",           0},
+    {"smileys/noel",        "Noel",          0},
+    {"smileys/malade",      "Malade",      100},
+    {"smileys/content",     "Content",     100},
+    {"smileys/colere",      "Colère",      250},
+    {"smileys/sournois",    "Sournois",    250},
+    {"smileys/fou",         "Fou",         250},
+    {"smileys/clindoeil",   "Clin d'oeil", 500},
+    {"smileys/cool",        "Cool",        500},
+    {"smileys/bug",         "Bug",        1500},
 };
-enum {SMI_HAP = 0, SMI_NOEL, SMI_MALADE, SMI_CONTENT, SMI_COLERE, SMI_SOURNOIS, SMI_FOU, SMI_COOL, SMI_BUG, NUMSMILEYS};
-extern int buyedsmileys[NUMSMILEYS];
 
 static const struct capesinfo { const char *team1capedir, *team2capedir, *capename; int capeprice; } customscapes[] =
 {
@@ -65,25 +64,23 @@ static const struct capesinfo { const char *team1capedir, *team2capedir, *capena
     {"capes/cape_risitas",      "capes/cape_risitas/orange",    "Risitas",         500},
     {"capes/cape_riche",        "capes/cape_riche/orange",      "Riche",          1500},
 };
-enum {CAP_CUBE = 0, NUMCAPES};
-extern int buyedcapes[NUMCAPES];
 
 static const struct tombesinfo { const char *tombedir, *tombemenudir, *tombename; int tombeprice; } customstombes[] =
 {
-    {"tombes/basique",  "tombes/basique",   "Basique",          0},
-    {"tombes/merde",    "tombes/merde",     "Merde",           50},
-    {"tombes/fleur",    "tombes/fleur",     "Fleur",          100},
-    {"tombes/cristal",  "tombes/cristal",   "Cristal",        100},
-    {"tombes/oeil",     "tombes/oeil/menu", "Oeil",           250},
-    {"tombes/couronne", "tombes/couronne",  "Couronne",       250},
-    {"tombes/fuck",     "tombes/fuck",      "Fuck",           500},
-    {"tombes/monument", "tombes/monument",  "Monument",       500},
-    {"tombes/lingots",  "tombes/lingots",   "Lingots",       1500},
+    {"tombes/merde",        "tombes/merde",     "Merde",            0},
+    {"tombes/basique1",     "tombes/basique1",  "Basique 1",       50},
+    {"tombes/basique2",     "tombes/basique2",  "Basique 2",       50},
+    {"tombes/fleur",        "tombes/fleur",     "Fleur",          100},
+    {"tombes/cristal",      "tombes/cristal",   "Cristal",        100},
+    {"tombes/oeil",         "tombes/oeil/menu", "Oeil",           250},
+    {"tombes/excalibur",    "tombes/excalibur", "Excalibur",      250},
+    {"tombes/couronne",     "tombes/couronne",  "Couronne",       250},
+    {"tombes/fuck",         "tombes/fuck",      "Fuck",           500},
+    {"tombes/monument",     "tombes/monument",  "Monument",       500},
+    {"tombes/lingots",      "tombes/lingots",   "Lingots",       1500},
 };
-enum {TOM_POOP = 0, NUMTOMBES};
-extern int buyedtombes[NUMTOMBES];
 
-static const struct danceinfo { const char *dancename; int danceprice; } customdance[] =
+static const struct danceinfo { const char *dancename; int danceprice; } customsdance[] =
 {
     {"Cortex",       0},
     {"Vieille",     50},
@@ -92,8 +89,6 @@ static const struct danceinfo { const char *dancename; int danceprice; } customd
     {"Praud",      250},
     {"Malleville", 1500},
 };
-enum {VOI_CORTEX = 0, VOI_VIEILLE, VOI_HENDEK, VOI_DELAVIER, VOI_PRAUD, VOI_MALLEVILLE, NUMVOICES};
-extern int buyedvoices[NUMVOICES];
 
 //HUD
 extern bool suicided;
@@ -119,7 +114,7 @@ extern bool usesteam;
 extern string pseudoaleatoire;
 extern void genpseudo(bool forcename, int langue);
 extern bool conserveurofficiel;
-extern int langage, UI_menutabs, UI_tombe, UI_custtab;
+extern int langage, UI_menutabs, UI_smiley, UI_cape, UI_tombe, UI_voix, UI_custtab;
 
 extern void loadsave();
 extern void writesave();
@@ -132,7 +127,12 @@ extern void addstat(int valeur, int stat);
 extern float menustat(int value);
 enum {STAT_CC, STAT_XP, STAT_KILLS, STAT_MORTS, STAT_KILLSTREAK, STAT_BOUCLIERBOIS, STAT_BOUCLIERFER, STAT_BOUCLIEROR, STAT_BOUCLIERMAGNETIQUE,
         STAT_PANACHAY, STAT_MANA, STAT_COCHON, STAT_STEROS, STAT_EPO, STAT_JOINT, STAT_CHAMPIS, STAT_ARMES, STAT_SUPERARMES,
-        STAT_DRAPEAUX, STAT_WINS, STAT_ARMUREASSIST, STAT_TPSSEC, STAT_TPSMIN, STAT_TPSH, NUMSTATS};
+        STAT_DRAPEAUX, STAT_WINS, STAT_ARMUREASSIST, STAT_TPSSEC, STAT_TPSMIN, STAT_TPSH,
+        SMI_HAP, SMI_NOEL, SMI_MALADE, SMI_CONTENT, SMI_COLERE, SMI_SOURNOIS, SMI_FOU, SMI_CLINDOEIL, SMI_COOL, SMI_BUG,
+        CAPE_CUBE, CAPE_JVC, CAPE_CORONED, CAPE_ATOME, CAPE_JESUSECO, CAPE_WEED, CAPE_FLAMES, CAPE_BOUCLE, CAPE_VINTAGE, CAPE_ELITE, CAPE_HIGH, CAPE_RAYONSX, CAPE_RISITAS, CAPE_RICHE,
+        TOM_MERDE, TOM_BASIQUE1, TOM_BASIQUE2, TOM_FLEUR, TOM_CRISTAL, TOM_OEIL, TOM_EXCALIBUR, TOM_COURONNE, TOM_FUCK, TOM_MONUMENT, TOM_LINGOT,
+        VOI_CORTEX, VOI_VIEILLE, VOI_HENDEK, VOI_DELAVIER, VOI_PRAUD, VOI_MALLEVILLE,
+        NUMSTATS};
 extern int stat[NUMSTATS];
 
 extern void getsteamachievements();

@@ -563,6 +563,7 @@ namespace game
 
     VARFP(player1_danse, 0, 0, 6,
     {
+        if(stat[VOI_CORTEX+player1_danse]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette voix !"); playsound(S_ERROR); return;}
         addmsg(N_SENDDANSE, "ri", player1_danse);
         stopsounds();
         player1->customdanse = player1_danse;

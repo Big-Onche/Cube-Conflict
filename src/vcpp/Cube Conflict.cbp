@@ -120,6 +120,7 @@
 		</Linker>
 		<Unit filename="../cubeconflict/aptitudes.cpp" />
 		<Unit filename="../cubeconflict/cubedef.h" />
+		<Unit filename="../cubeconflict/customisation.cpp" />
 		<Unit filename="../cubeconflict/hud.cpp" />
 		<Unit filename="../cubeconflict/stats.cpp" />
 		<Unit filename="../engine/aa.cpp" />
