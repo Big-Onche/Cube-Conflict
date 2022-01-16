@@ -19,7 +19,7 @@ namespace game
 
     VARP(ragdoll, 0, 1, 1);
     VARP(ragdollmillis, 0, 10000, 300000);
-    VARP(ragdollfade, 0, 1500, 5000);
+    VARP(ragdollfade, 0, 500, 5000);
     VARP(forceplayermodels, 0, 0, 1);
     VARP(hidedead, 0, 0, 1);
 
@@ -443,7 +443,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape
         a[ai++] = modelattach("tag_hat", aptitudes[player1->aptitude].apt_tete, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         a[ai++] = modelattach("tag_cape", customscapes[cape==-1 ? player1_cape : cape].team1capedir, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
 
-        defformatstring(mdlname, customssmileys[smiley==-1 ? player1->playermodel : smiley].smileydir);
+        defformatstring(mdlname, customssmileys[player1->playermodel].smileydir);
 
         rendermodel(mdlname, anim, o.add(vec(0, 10, -5)), yaw, pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), 5));
     }
