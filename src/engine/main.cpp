@@ -155,11 +155,12 @@ void bgquad(float x, float y, float w, float h, float tx, float ty, float tw, fl
     gle::end();
 }
 
-string backgroundimg = "media/interface/image_fond.jpg", backgroundname;
+string backgroundimg = "media/interface/background.png", backgroundname;
 
 void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, const char *mapname, const char *mapinfo, const char *astuce, bool force = false)
 {
     static int lastupdate = -1, lastw = -1, lasth = -1;
+    bool needlogo = true;
 
     if((renderedframe && !mainmenu && lastupdate != lastmillis) || lastw != w || lasth != h)
     {
@@ -184,10 +185,12 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
 
     if(mapshot || mapname)
     {
+        needlogo = false;
+
         float lh = 0.5f*min(w, h), lw = lh,
               lx = 0.5f*(w - lw), ly = 0.5f*(h - lh);
 
-        defformatstring(mshot,"media/map/%s.jpg", mapname);
+        defformatstring(mshot,"media/map/%s.png", mapname);
         copystring(backgroundimg, mshot);
 
         settexture("media/interface/chargement.png", 3);
@@ -227,27 +230,24 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
     {
         if(force) //CubeConflict
         {
+            needlogo = false;
+
             float ilh = 1.1f*min(w, h), ilw = ilh*1.8f,
                   ilx = 0.5f*(w - ilw), ily = 0.5f*(h - ilh);
 
             switch(n_map)
             {
-                case 0: formatstring(backgroundimg, "media/map/Village.jpg"); break;
-                case 1: formatstring(backgroundimg, "media/map/Usine.jpg"); break;
-                case 2: formatstring(backgroundimg, "media/map/Chateaux.jpg"); break;
+                case 0: formatstring(backgroundimg, "media/map/village.png"); break;
+                case 1: formatstring(backgroundimg, "media/map/usine.png"); break;
+                case 2: formatstring(backgroundimg, "media/map/chateaux.png"); break;
                 //case 3: formatstring(backgroundimg, "media/map/Dota.jpg"); break;
-                case 3: formatstring(backgroundimg, "media/map/Lune.jpg"); break;
-                case 4: formatstring(backgroundimg, "media/map/Volcan.jpg"); break;
-                default: formatstring(backgroundimg, "media/interface/image_fond.jpg"); break;
+                case 3: formatstring(backgroundimg, "media/map/lune.png"); break;
+                case 4: formatstring(backgroundimg, "media/map/volcan.png"); break;
+                default: formatstring(backgroundimg, "media/interface/background.png"); break;
             }
 
             settexture(backgroundimg);
             bgquad(ilx-parallaxX/-40, ily-parallaxY/-40, ilw, ilh);
-            gle::colorf(1, 1, 1, 0.3f);
-
-            settexture("media/interface/image_fond.jpg");
-            bgquad(ilx+parallaxX/-40, ily+parallaxY/-40, ilw, ilh);
-            gle::colorf(1, 1, 1, 1);
 
             float lh = 0.43f*min(w, h), lw = lh*2,
                   lx = 0.5f*(w - lw), ly = 0.5f*(h*0.5f - lh);
@@ -259,8 +259,18 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
         }
     }
 
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    if(needlogo)
+    {
+        float jlh = 0.5f*min(w, h), jlw = jlh,
+              jlx = 0.5f*(w - jlw), jly = 0.5f*(h - jlh);
 
+        settexture("media/interface/intrologo.png", 3);
+        bgquad(jlx, jly, jlw, jlh);
+    }
+
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    if(!needlogo) gle::colorf(1, 1, 1, 1);
     settexture("media/interface/shadow.png", 3);
     bgquad(0, 0, w, h);
 
@@ -656,9 +666,8 @@ void resetgl()
        !reloadtexture("media/interface/mapshot_frame.png") ||
        !reloadtexture("media/interface/loading_frame.png") ||
        !reloadtexture("media/interface/loading_bar.png") ||
-       !reloadtexture("media/interface/image_fond.jpg") ||
-       !reloadtexture("media/interface/sticker1.png") ||
-       !reloadtexture("media/interface/sticker2.png"))
+       !reloadtexture("media/interface/backgroundimg.png") ||
+       !reloadtexture("media/interface/chargement.png"))
         fatal("failed to reload core texture");
     reloadfonts();
     inbetweenframes = true;
@@ -1206,12 +1215,12 @@ int main(int argc, char **argv)
     textureload("media/interface/hud/viseurA.png");
     textureload("media/interface/hud/viseurB.png");
     textureload("media/interface/hud/viseurC.png");
-    textureload("media/map/Village.jpg");
-    textureload("media/map/Usine.jpg");
-    textureload("media/map/Chateaux.jpg");
+    textureload("media/map/village.png");
+    textureload("media/map/usine.png");
+    textureload("media/map/chateaux.png");
     //textureload("media/map/Dota.jpg");
-    textureload("media/map/Lune.jpg");
-    textureload("media/map/Volcan.jpg");
+    textureload("media/map/lune.png");
+    textureload("media/map/volcan.png");
 
     logoutf("init: console");
     if(!execfile("config/stdlib.cfg", false)) fatal("cannot find data files (you are running from the wrong folder, try .bat file in the main folder)");   // this is the first file we load.
@@ -1250,6 +1259,8 @@ int main(int argc, char **argv)
     if(game::savedservers()) execfile(game::savedservers(), false);
 
     identflags |= IDF_PERSIST;
+
+    game::player1->playermodel = 0;
 
     if(!execfile(game::savedconfig(), false))
     {
