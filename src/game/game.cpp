@@ -1046,7 +1046,7 @@ namespace game
             if(material&MAT_WATER)
             {
                 playsound(S_SPLASH1, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 350);
-                particle_splash(PART_EAU, 30, 120, o, 0x18181A, 10.0f+rnd(7), 500, -20);
+                particle_splash(PART_EAU, 30, 120, o, 0x18181A, 10.0f+rnd(9), 500, -20);
             }
         }
         else if(waterlevel<0)
@@ -1054,7 +1054,7 @@ namespace game
             if(material&MAT_WATER)
             {
                 playsound(S_SPLASH2, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 350);
-                particle_splash(PART_EAU, 30, 120, o, 0x18181A, 10.0f+rnd(7), 500, 20);
+                particle_splash(PART_EAU, 40, 150, o, 0x18181A, 10.0f+rnd(12), 600, 30);
             }
             else if(material&MAT_LAVA)
             {
