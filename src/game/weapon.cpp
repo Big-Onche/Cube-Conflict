@@ -1069,9 +1069,10 @@ namespace game
         }
     }
 
-    void railhit(const vec &from, const vec &to, bool stain = true)
+    void railhit(const vec &from, const vec &to, const vec &muzzle, bool stain = false)
     {
         vec dir = vec(from).sub(to).safenormalize();
+        loopi(3)particle_flare(muzzle, to,  50+rnd(50), PART_LIGHTNING, 0x8888FF, 1.5f+rnd(2), NULL, player1->champimillis ? true : false);
         if(stain)
         {
             addstain(STAIN_RAIL_HOLE, to, dir, 2.0f);
@@ -1133,12 +1134,12 @@ namespace game
                 break;
 
             case ATK_RAIL_SHOOT:
-                loopi(3)particle_flare(d->muzzle, to,  50+rnd(50), PART_LIGHTNING, 0x8888FF, 1.5f+rnd(2), d, player1->champimillis ? true : false);
                 playsound(S_IMPACTELEC, &to, 0, 0, 0 , 100, -1, 250);
                 if(d!=hudplayer()) sound_nearmiss(S_FLYBYELEC, from, to);
 
                 particle_flare(d->muzzle, to, 30, PART_POMPE_SIDE, d->steromillis ? 0xFF2222 : 0xFFFF22, 0.2f, d, player1->champimillis ? true : false);
-                railhit(from, to);
+
+                //railhit(from, to);
 
                 particle_flare(d->muzzle, d->muzzle, 140, PART_RAIL_MUZZLE_FLASH, d->steromillis ? 0xFF2222 : 0x50CFFF, zoom ? 1.75f : 3.0f, d, player1->champimillis ? true : false);
                 if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 140, PART_RAIL_MUZZLE_FLASH, 0xFF2222, zoom ? 2.5f : 5.5f, d, player1->champimillis ? true : false);
@@ -1418,11 +1419,11 @@ namespace game
         else if((o = intersectclosest(from, to, d, margin, dist)))
         {
             shorten(from, to, dist);
-            if(atk==ATK_RAIL_SHOOT) railhit(from, to);
+            if(atk==ATK_RAIL_SHOOT) railhit(from, to, d->muzzle);
 
             hitpush(attacks[atk].damage, o, d, from, to, atk, 1);
         }
-        else if(atk==ATK_RAIL_SHOOT) railhit(from, to, true);
+        else if(atk==ATK_RAIL_SHOOT) railhit(from, to, d->muzzle, true);
     }
 
     float kickfactor = 2.5f;
