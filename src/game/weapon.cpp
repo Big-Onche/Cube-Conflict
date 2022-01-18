@@ -341,7 +341,7 @@ namespace game
                     case BNC_DOUILLES: case BNC_DOUILLESUZI: case BNC_BIGDOUILLES: case BNC_CARTOUCHES: regular_particle_splash(PART_SMOKE, 1, 150, pos, 0x404040, BNC_DOUILLES==1 ? 1.0f : BNC_DOUILLESUZI==1 ? 0.75 : 1.75f, 50, -20); break;
                     case BNC_GRENADE: regular_particle_splash(PART_SMOKE, 1, 150, pos, 0x404040, 2.5f, 50, -20); break;
                     case BNC_DEBRIS:
-                        regular_particle_splash(PART_SMOKE, 3, 250, pos, 0x222222, 2.5f, 50, -50);
+                        regular_particle_splash(lookupmaterial(pos)&MAT_WATER ? PART_BULLE : PART_SMOKE, lookupmaterial(pos)&MAT_WATER ? 1 : 3, 250, pos, 0x222222, 2.5f, 50, -50);
                         regular_particle_splash(PART_FLAME1+rnd(2), 2, 75, pos, 0x994400, 0.7f, 30, -30);
 
                         break;
@@ -687,10 +687,17 @@ namespace game
                 particle_splash(PART_SMOKE, ATK_ROQUETTES_SHOOT==1 ? 5 : 9, 2000, v, 0x333333, 40.0f,  ATK_KAMIKAZE_SHOOT==1 || ATK_ASSISTXPL_SHOOT==1 ? 200+rnd(75) : 150+rnd(50), ATK_KAMIKAZE_SHOOT==1 || ATK_ASSISTXPL_SHOOT==1  ? 450 : 300+rnd(100), 0, player1->champimillis ? true : false);
                 particle_splash(PART_SMOKE, ATK_ROQUETTES_SHOOT==1 ? 5 : 9, 1300, v, 0x333333, 25.0f,  ATK_KAMIKAZE_SHOOT==1 || ATK_ASSISTXPL_SHOOT==1 ? 200+rnd(75)  : 150+rnd(50), ATK_KAMIKAZE_SHOOT==1 || ATK_ASSISTXPL_SHOOT==1  ? 750 : 600+rnd(100), 0, player1->champimillis ? true : false);
                 particle_splash(PART_SPARK, ATK_ROQUETTES_SHOOT==1 ? 7 : 10, 300, v, owner->steromillis ? 0xFF4444 : 0xFFBB55,  1.7f+rnd(2), 3500, 3500, 0, player1->champimillis ? true : false);
-                loopi(3) particle_splash(PART_FLAME1+rnd(2), ATK_ROQUETTES_SHOOT==1 ? 9 : 17, ATK_KAMIKAZE_SHOOT==1 || ATK_ASSISTXPL_SHOOT==1 ? 120+rnd(50) : 80+rnd(40), v, owner->steromillis ? 0xFF4444 : ATK_KAMIKAZE_SHOOT==1 || ATK_ASSISTXPL_SHOOT==1 ? 0x6A4A3A : i==0 ? 0x383838: i==1 ? 0x474747: 0x604930, 9.f+rnd(6), ATK_KAMIKAZE_SHOOT==1 ? 1200+rnd(700): ATK_ROQUETTES_SHOOT==1 ? 300+rnd(150) : 400+rnd(200), 800, 1, player1->champimillis ? true : false);
+                loopi(lookupmaterial(v)&MAT_WATER ? 1 : 3) particle_splash(PART_FLAME1+rnd(2), ATK_ROQUETTES_SHOOT==1 ? 9 : 17, ATK_KAMIKAZE_SHOOT==1 || ATK_ASSISTXPL_SHOOT==1 ? 120+rnd(50) : 80+rnd(40), v, owner->steromillis ? 0xFF4444 : ATK_KAMIKAZE_SHOOT==1 || ATK_ASSISTXPL_SHOOT==1 ? 0x6A4A3A : i==0 ? 0x383838: i==1 ? 0x474747: 0x604930, 9.f+rnd(6), ATK_KAMIKAZE_SHOOT==1 ? 1200+rnd(700): ATK_ROQUETTES_SHOOT==1 ? 300+rnd(150) : 400+rnd(200), 800, 1, player1->champimillis ? true : false);
                 particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFF5500, 10.0f, player1->champimillis ? true : false);
                 particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFFFFFF, 20.0f, player1->champimillis ? true : false);
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
+
+                if(lookupmaterial(v)&MAT_WATER)
+                {
+                    particle_splash(PART_EAU, 50, 200, v, 0x18181A, 12.0f+rnd(14), 600, 300);
+                    particle_splash(PART_BULLE, 15, 150, v, 0x18181A, 4.0f+rnd(8), 300, 150);
+                    playsound(S_EXPLOSIONAVECEAU, &v, 0, 0, 0 , 100, -1, 350);
+                }
             }
             break;
             case ATK_NUKE_SHOOT:
@@ -722,6 +729,12 @@ namespace game
                 adddynlight(safe ? v : debrisorigin, 4*attacks[atk].exprad, vec(rnd(15)/10.0f, rnd(15)/10.0f, rnd(15)/10.0f), 80, 40, L_VOLUMETRIC|L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.0f, 0.0f, 1.5f));
                 particle_splash(PART_FLAME1+rnd(2),  5,  40, v, 0xFFC864, 20,  800, 1600, 0, player1->champimillis ? true : false);
                 loopi(4) particle_splash(PART_GLOWSPARK, 16+rnd(10),  200+rnd(200), v, owner->steromillis ? 0xFF0000 : rnd(16777215),  0.2f+(rnd(5)/10.f), 500+rnd(300), 5000+rnd(3000), 2, player1->champimillis ? true : false);
+                if(lookupmaterial(v)&MAT_WATER)
+                {
+                    particle_splash(PART_EAU, 50, 200, v, 0x18181A, 12.0f+rnd(14), 600, 300);
+                    particle_splash(PART_BULLE, 15, 150, v, 0x18181A, 4.0f+rnd(8), 300, 150);
+                    playsound(S_EXPLOSIONAVECEAU, &v, 0, 0, 0 , 100, -1, 350);
+                }
             }
             break;
             case ATK_M32_SHOOT:
@@ -737,6 +750,12 @@ namespace game
                 particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFF5500, 10.0f, player1->champimillis ? true : false);
                 particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFFFFFF, 20.0f, player1->champimillis ? true : false);
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
+                if(lookupmaterial(v)&MAT_WATER)
+                {
+                    particle_splash(PART_EAU, 50, 200, v, 0x18181A, 12.0f+rnd(14), 600, 300);
+                    particle_splash(PART_BULLE, 15, 150, v, 0x18181A, 4.0f+rnd(8), 300, 150);
+                    playsound(S_EXPLOSIONAVECEAU, &v, 0, 0, 0 , 100, -1, 350);
+                }
             }
             break;
             case ATK_MINIGUN_SHOOT:
@@ -979,13 +998,14 @@ namespace game
                         case ATK_PULSE_SHOOT:
                             particle_splash(PART_PULSE_FRONT, 1, 1, pos, p.owner->steromillis ? 0xFF4444 : 0xFF6600, 2.4f, 150, 20, 0, player1->champimillis ? true : false);
                             particle_flare(tail, head, 1, PART_PULSE_SIDE, p.owner->steromillis ? 0xFF4444 : 0xFF6600, 2.0f, p.owner, player1->champimillis ? true : false);
+                            if(lookupmaterial(pos)&MAT_WATER) particle_splash(PART_BULLE, 1, 150, v, 0x18181A, 2.0f+rnd(2), 20, -30);
                             p.projsound = S_FLYBYALIEN;
                             canplaysound = true;
                             break;
                         case ATK_GRAP1_SHOOT:
                             particle_splash(PART_PULSE_FRONT, 1, 1, pos, p.owner->steromillis ? 0xFF4444 : 0xFF33BB, 3.0f, 150, 20, 0, player1->champimillis ? true : false);
                             particle_flare(tail, head, 1, PART_PULSE_SIDE, p.owner->steromillis ? 0xFF4444 : 0xEE22AA, 3.0f, p.owner, player1->champimillis ? true : false);
-                            particle_splash(PART_SMOKE, 1, 300, pos, 0xAAAAAA, 4.0f, 25, 250, 0, player1->champimillis ? true : false);
+                            particle_splash(lookupmaterial(pos)&MAT_WATER ? PART_BULLE : PART_SMOKE, 1, lookupmaterial(pos)&MAT_WATER ? 150 : 300, pos, lookupmaterial(pos)&MAT_WATER ? 0x18181A : 0xAAAAAA, 4.0f, 25, 250, 0, player1->champimillis ? true : false);
                             p.projsound = S_FLYBYGRAP1;
                             canplaysound = true;
                             break;
@@ -999,6 +1019,7 @@ namespace game
                         case ATK_SKS_SHOOT:
                         case ATK_CAMPOUZE_SHOOT:
                         case ATK_GAU8_SHOOT:
+                            if(lookupmaterial(pos)&MAT_WATER) particle_splash(PART_BULLE, 1, 150, v, 0x18181A, 2.0f+rnd(2), 20, -30);
                             particle_flare(tail, head, 1, PART_BALLE_SIDE, p.owner->steromillis ? 0xFF4444 : 0xFFBB88, ATK_GAU8_SHOOT==1 ? 0.8f : 0.65f, p.owner, player1->champimillis ? true : false);
                             particle_splash(PART_PULSE_FRONT, 1, 1, pos, p.owner->steromillis ? 0xFF4444 : 0xFFBB88,  p.owner==player1 ? 0.8f : ATK_GAU8_SHOOT==1 ? 0.65f : 0.45f, 150, 20, 0, player1->champimillis ? true : false);
                             break;
@@ -1007,10 +1028,12 @@ namespace game
                         case ATK_UZI_SHOOT:
                         case ATK_GLOCK_SHOOT:
                         case ATK_FAMAS_SHOOT:
+                            if(lookupmaterial(pos)&MAT_WATER) particle_splash(PART_BULLE, 1, 150, v, 0x18181A, 1.0f+rnd(2), 20, -30);
                             particle_flare(tail, head, 1, PART_BALLE_SIDE, p.owner->steromillis ? 0xFF4444 : 0xFFBB88, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.55f : 0.45f, p.owner, player1->champimillis ? true : false);
                             particle_splash(PART_PULSE_FRONT, 1, 1, pos, p.owner->steromillis ? 0xFF4444 : 0xFFBB88, p.owner==player1 ? 0.65f : ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.4f : 0.3f, 150, 20, 0, player1->champimillis ? true : false);
                             break;
-                            case ATK_ARBALETE_SHOOT:
+                        case ATK_ARBALETE_SHOOT:
+                            if(lookupmaterial(pos)&MAT_WATER) particle_splash(PART_BULLE, 1, 150, v, 0x888888, 1.0f+rnd(2), 20, -30);
                             particle_splash(PART_SMOKE, 2, 100, pos, 0xAAAAAA, 0.8f, 25, 250, 0, player1->champimillis ? true : false);
                             if(p.owner->steromillis)
                             {
@@ -1138,9 +1161,6 @@ namespace game
                 if(d!=hudplayer()) sound_nearmiss(S_FLYBYELEC, from, to);
 
                 particle_flare(d->muzzle, to, 30, PART_POMPE_SIDE, d->steromillis ? 0xFF2222 : 0xFFFF22, 0.2f, d, player1->champimillis ? true : false);
-
-                //railhit(from, to);
-
                 particle_flare(d->muzzle, d->muzzle, 140, PART_RAIL_MUZZLE_FLASH, d->steromillis ? 0xFF2222 : 0x50CFFF, zoom ? 1.75f : 3.0f, d, player1->champimillis ? true : false);
                 if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 140, PART_RAIL_MUZZLE_FLASH, 0xFF2222, zoom ? 2.5f : 5.5f, d, player1->champimillis ? true : false);
                 adddynlight(hudgunorigin(gun, d->o, to, d), 100, vec(0.25f, 0.75f, 2.0f), 40, 2, DL_FLASH, 0, vec(0.25f, 0.75f, 2.0f), d);
@@ -1604,14 +1624,12 @@ namespace game
                 vectoyawpitch(v, yaw, pitch);
                 v.mul(3);
                 v.add(pos);
-                //if(lookupmaterial(pos)==MAT_WATER) regular_particle_splash(PART_BULLE, 4, 2000, pos, 0x666666, rnd(2)+2.0f, 50, 50);
-                //else
                 rendermodel(p.atk==ATK_SMAW_SHOOT ? "projectiles/missile" : p.atk==ATK_ARTIFICE_SHOOT ? "projectiles/feuartifice" : p.atk==ATK_ROQUETTES_SHOOT ? "projectiles/minimissile" : p.atk==ATK_NUKE_SHOOT ? "projectiles/missilenuke" :"projectiles/fleche", ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, MDL_CULL_VFC|MDL_CULL_OCCLUDED);
                 switch(p.atk)
                 {
                     case ATK_NUKE_SHOOT:
                         particle_flare(pos, pos, 1, PART_NORMAL_MUZZLE_FLASH, p.owner->steromillis ? 0xFF0000 : 0xFFC864, 6.0f+rndscale(6), NULL, player1->champimillis ? true : false);
-                        particle_splash(PART_SMOKE, 3, 8000, pos, 0x111111, 7.0f, 25, 100, 0, player1->champimillis ? true : false);
+                        particle_splash(lookupmaterial(pos)&MAT_WATER ? PART_BULLE : PART_SMOKE, 3, lookupmaterial(pos)&MAT_WATER ? 2000 : 8000, pos, lookupmaterial(pos)&MAT_WATER ? 0x18181A : 0x111111, 7.0f, 25, 100, 0, player1->champimillis ? true : false);
                         particle_splash(PART_FLAME1+rnd(2), 1, 100, pos, p.owner->steromillis ? 0xFF0000 : 0xFF6600, 1.0f+rndscale(4), 50, 500, 0, player1->champimillis ? true : false);
                         break;
                     case ATK_SMAW_SHOOT:
@@ -1620,6 +1638,7 @@ namespace game
                         particle_flare(pos, pos, 1, PART_NORMAL_MUZZLE_FLASH, p.owner->steromillis ? 0xFF0000 : 0xFFC864, 3.0f+rndscale(2), NULL, player1->champimillis ? true : false);
                         break;
                     case ATK_ARTIFICE_SHOOT:
+                        if(lookupmaterial(pos)&MAT_WATER)  particle_splash(PART_BULLE, 3, 200, pos, 0x18181A, 2.5f, 25, 100, 0, player1->champimillis ? true : false);
                         particle_splash(PART_SPARK, 8, 100, pos, p.owner->steromillis ? 0xFF0000 : 0xFFC864, 0.4f, 50, 500, 0, player1->champimillis ? true : false);
                         particle_splash(PART_FLAME1+rnd(2), 2, 100, pos, p.owner->steromillis ? 0xFF0000 : 0xFFFFFF, 0.8f, 50, 500, 0, player1->champimillis ? true : false);
                         particle_flare(pos, pos, 1, PART_NORMAL_MUZZLE_FLASH, p.owner->steromillis ? 0xFF0000 : 0xFFC864, 0.5f+rndscale(2), NULL, player1->champimillis ? true : false);
