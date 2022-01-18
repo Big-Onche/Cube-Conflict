@@ -43,7 +43,7 @@ namespace game
                 default : need_message1 = false;
             }
 
-            if(need_message1) {rendermessage(streakmsg, 85, 8.8f, decal_message); decal_message -= 45;}
+            if(need_message1) {rendermessage(streakmsg, 85, 8.8f, decal_message); decal_message -= screenh/24;}
         }
 
         if(totalmillis-message2<=2500)
@@ -52,7 +52,7 @@ namespace game
 
             formatstring(killmsg, "%s \fc%s \f7! (%s à %.1fm)", langage ? "You killed" : "Tu as tué",str_pseudovictime, langage ? aptitudes[n_aptitudevictime].apt_nomEN : aptitudes[n_aptitudevictime].apt_nomFR, killdistance);
             rendermessage(killmsg, 100, 8.8f, decal_message);
-            decal_message -= 40;
+            decal_message -= screenh/27;
         }
 
         if(totalmillis-message3<=2500)
@@ -69,18 +69,18 @@ namespace game
                 default: need_message2 = false;
             }
 
-            if(need_message2) {rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= 40;}
+            if(need_message2) {rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
         }
 
         if(m_ctf)
         {
             string infomsg;
-            if(totalmillis-ctfmessage1<=3000) {formatstring(infomsg, "\f9Notre équipe a marqué un point !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= 40;}
-            if(totalmillis-ctfmessage2<=3000) {formatstring(infomsg, "\f3L'équipe ennemie a marqué un point."); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= 40;}
-            if(totalmillis-ctfmessage3<=3000) {formatstring(infomsg, "\f9Notre équipe a récupéré son drapeau !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= 40;}
-            if(totalmillis-ctfmessage4<=3000) {formatstring(infomsg, "\f3L'équipe ennemie a récupéré son drapeau."); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= 40;}
-            if(totalmillis-ctfmessage5<=3000) {formatstring(infomsg, "\f9Notre équipe a volé le drapeau ennemi !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= 40;}
-            if(totalmillis-ctfmessage6<=3000) {formatstring(infomsg, "\f3L'équipe ennemie a volé notre drapeau !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= 40;}
+            if(totalmillis-ctfmessage1<=3000) {formatstring(infomsg, "\f9Notre équipe a marqué un point !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis-ctfmessage2<=3000) {formatstring(infomsg, "\f3L'équipe ennemie a marqué un point."); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis-ctfmessage3<=3000) {formatstring(infomsg, "\f9Notre équipe a récupéré son drapeau !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis-ctfmessage4<=3000) {formatstring(infomsg, "\f3L'équipe ennemie a récupéré son drapeau."); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis-ctfmessage5<=3000) {formatstring(infomsg, "\f9Notre équipe a volé le drapeau ennemi !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis-ctfmessage6<=3000) {formatstring(infomsg, "\f3L'équipe ennemie a volé notre drapeau !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
         }
 
 
@@ -93,12 +93,12 @@ namespace game
 
             rendermessage(killedbymsg, 65, 1.5f, 0);
             formatstring(withmsg, "%s %s", langage ? "With" : "Avec", str_armetueur);
-            rendermessage(withmsg, 95, 1.5f, -360);
+            rendermessage(withmsg, 95, 1.5f, -screenh/3);
 
             int wait = cmode ? cmode->respawnwait(player1) : (lastmillis < player1->lastpain + 1000) ? 1 : 0 ;
             if(wait>0) formatstring(waitmsg, "%s %d second%s%s", langage ? "Respawn available in" : "Respawn possible dans", wait, langage ? "" : "e", wait<=1?"":"s");
             else formatstring(waitmsg, langage ? "Press any key to respawn !" : "Appuie n'importe où pour revivre !");
-            rendermessage(waitmsg, 95, 1.5f, -580);
+            rendermessage(waitmsg, 95, 1.5f, -screenh/1.862f);
         }
 
         if(player1->state==CS_SPECTATOR)
@@ -319,15 +319,14 @@ namespace game
             float lxhbarvide = 0.5f*(w - 483), lxhbarpleine = 0.5f*(w - 477);
 
             settexture("media/interface/hud/fondbarrestats.png", 3);
-            bgquad(lxhbarpleine, h-screenh/1.37f, 477, 19);
+            bgquad(lxhbarpleine, h-screenh/1.5f, 477, 19);
             settexture("media/interface/hud/barresantepleine.png", 3);
-            bgquad(lxhbarpleine, h-screenh/1.37f, pourcents2*477.0f, 19);
+            bgquad(lxhbarpleine, h-screenh/1.5f, pourcents2*477.0f, 19);
             settexture("media/interface/hud/barrebouclierpleine.png", 3);
-            bgquad(lxhbarpleine, h-screenh/1.37f, pourcents3*477.0f, 19);
+            bgquad(lxhbarpleine, h-screenh/1.5f, pourcents3*477.0f, 19);
             settexture("media/interface/hud/barrestatsvide.png", 3);
-            bgquad(lxhbarvide, h-screenh/1.37f-10, 483, 40);
+            bgquad(lxhbarvide, h-screenh/1.5f-10, 483, 40);
         }
-
 
         //////////////////////////////////////// RENDU DES NOMBRES ////////////////////////////////////////
 
