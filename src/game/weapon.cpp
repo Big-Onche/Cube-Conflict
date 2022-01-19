@@ -414,6 +414,7 @@ namespace game
         int offsetmillis;
         int id;
         int projchan, projsound;
+        bool inwater;
 
         projectile() : projchan(-1), projsound(-1)
         {
@@ -443,6 +444,7 @@ namespace game
         p.atk = atk;
         p.offsetmillis = OFFSETMILLIS;
         p.id = local ? lastmillis : id;
+        p.inwater = false;
     }
 
     void removeprojectiles(gameent *owner)
@@ -461,7 +463,7 @@ namespace game
         switch(type)
         {
             case BNC_GIBS: to.add(vec(rnd(100)-50, rnd(100)-50, rnd(100)-50)); break;
-            case BNC_DEBRIS: to.add(vec(rnd(300)-150, rnd(300)-150, rnd(300)-150)); break;
+            case BNC_DEBRIS: to.add(vec(rnd(100)-50, rnd(100)-50, rnd(100)-50)); break;
             case BNC_DOUILLESUZI: to.add(vec(0, 0, -1)); break;
             default: to.add(vec(0, 0, 1));
         }
@@ -690,7 +692,7 @@ namespace game
                 loopi(lookupmaterial(v)&MAT_WATER ? 1 : 3) particle_splash(PART_FLAME1+rnd(2), ATK_ROQUETTES_SHOOT==1 ? 9 : 17, ATK_KAMIKAZE_SHOOT==1 || ATK_ASSISTXPL_SHOOT==1 ? 120+rnd(50) : 80+rnd(40), v, owner->steromillis ? 0xFF4444 : ATK_KAMIKAZE_SHOOT==1 || ATK_ASSISTXPL_SHOOT==1 ? 0x6A4A3A : i==0 ? 0x383838: i==1 ? 0x474747: 0x604930, 9.f+rnd(6), ATK_KAMIKAZE_SHOOT==1 ? 1200+rnd(700): ATK_ROQUETTES_SHOOT==1 ? 300+rnd(150) : 400+rnd(200), 800, 1, player1->champimillis ? true : false);
                 particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFF5500, 10.0f, player1->champimillis ? true : false);
                 particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFFFFFF, 20.0f, player1->champimillis ? true : false);
-                loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
+                loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS, 5000);
 
                 if(lookupmaterial(v)&MAT_WATER)
                 {
@@ -749,7 +751,7 @@ namespace game
                 loopi(2) particle_splash(PART_SMOKE, 7, 1300+rnd(800), v, 0x555555, 40.0f, 150+rnd(150), 300+rnd(700), 0, player1->champimillis ? true : false);
                 particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFF5500, 10.0f, player1->champimillis ? true : false);
                 particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFFFFFF, 20.0f, player1->champimillis ? true : false);
-                loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
+                loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS, 5000);
                 if(lookupmaterial(v)&MAT_WATER)
                 {
                     particle_splash(PART_EAU, 50, 200, v, 0x18181A, 12.0f+rnd(14), 600, 300);
@@ -992,6 +994,12 @@ namespace game
                         head = vec(dir).mul(2.4f).add(pos);
 
                     bool canplaysound = false;
+                    if(!p.inwater && lookupmaterial(pos)&MAT_WATER)
+                    {
+                        p.inwater = true;
+                        particle_splash(PART_EAU, 15, 100, v, 0x28282A, 0.75f, 50, -300, 1, player1->champimillis ? true : false);
+                        playsound(S_IMPACTEAU, &v, 0, 0, 0 , 100, -1, 250);
+                    }
 
                     switch(p.atk)
                     {
