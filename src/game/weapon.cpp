@@ -243,7 +243,7 @@ namespace game
     }
 
     VARP(bnclifetime, 1000, 5000, 30000);
-    enum { BNC_GRENADE, BNC_KAMIKAZE, BNC_GIBS, BNC_DEBRIS, BNC_DOUILLES, BNC_BIGDOUILLES, BNC_CARTOUCHES, BNC_DOUILLESUZI, BNC_ASSISTEXPL};
+    enum { BNC_GRENADE, BNC_KAMIKAZE, BNC_GIBS, BNC_DEBRIS, BNC_DOUILLES, BNC_BIGDOUILLES, BNC_CARTOUCHES, BNC_DOUILLESUZI, BNC_ASSISTEXPL, BNC_LIGHT};
 
     struct bouncer : physent
     {
@@ -316,6 +316,7 @@ namespace game
                 case BNC_BIGDOUILLES: playsound(S_BIGDOUILLE, &b->o, 0, 0, 0 , 50, -1, 150); break;
                 case BNC_CARTOUCHES: playsound(S_CARTOUCHE, &b->o, 0, 0, 0 , 50, -1, 150); break;
                 case BNC_GRENADE: playsound(S_RGRENADE, &b->o, 0, 0, 0 , 100, -1, 350); break;
+                case BNC_LIGHT: b->lifetime=0;
             }
         }
 
@@ -444,7 +445,7 @@ namespace game
         p.atk = atk;
         p.offsetmillis = OFFSETMILLIS;
         p.id = local ? lastmillis : id;
-        p.inwater = false;
+        p.inwater = owner->inwater ? true : false;
     }
 
     void removeprojectiles(gameent *owner)
@@ -766,7 +767,7 @@ namespace game
             case ATK_FAMAS_SHOOT:
             case ATK_GLOCK_SHOOT:
             {
-                playsound(S_IMPACT, &v, 0, 0, 0 , 100, -1, 250);
+                if(!(lookupmaterial(v)&MAT_WATER)) playsound(S_IMPACT, &v, 0, 0, 0 , 100, -1, 250);
                 particle_splash(PART_SPARK, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 12 : 9, 60, v, owner->steromillis ? 0xFF0000 : 0xFF6600, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.4 : 0.3f, 150, 100, 0, player1->champimillis ? true : false);
                 particle_splash(PART_SMOKE, 3, 600+rnd(300), v, 0x565656, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.35f : 0.3f, 25, 300, 2, player1->champimillis ? true : false);
                 particle_splash(PART_SMOKE, 6, 350+rnd(300), v, 0x552900, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.35f : 0.3f, 15, 300, 2, player1->champimillis ? true : false);
@@ -783,8 +784,11 @@ namespace game
             case ATK_GAU8_SHOOT:
             case ATK_CAMPOUZE_SHOOT:
             {
-                playsound(S_IMPACTLOURDLOIN, &v, 0, 0, 0 , 700, -1, 1000);
-                playsound(S_IMPACTSNIPE, &v, 0, 0, 0 , 100, -1, 300);
+                if(!(lookupmaterial(v)&MAT_WATER))
+                {
+                    playsound(S_IMPACTLOURDLOIN, &v, 0, 0, 0 , 700, -1, 1000);
+                    playsound(S_IMPACTSNIPE, &v, 0, 0, 0 , 100, -1, 300);
+                }
                 particle_splash(PART_SPARK, 12, 85, v, owner->steromillis ? 0xFF0000 : 0xFF5533, 0.7f,  400, 200, 0, player1->champimillis ? true : false);
                 particle_splash(PART_SMOKE,  4, 800+rnd(300), v, 0x414141, 0.4f, 25, 300, 2, player1->champimillis ? true : false);
                 particle_splash(PART_SMOKE,  4, 500+rnd(300), v, 0x442200, 0.4f, 15, 300, 2, player1->champimillis ? true : false);
@@ -1227,7 +1231,7 @@ namespace game
                     adddynlight(hudgunorigin(gun, d->o, to, d), 75, vec(1.25f, 0.25f, 0.f), 40, 2, DL_FLASH, 0, vec(1.25f, 0.25f, 0.f), d);
                     loopi(attacks[atk].rays)
                     {
-                        playsound(S_IMPACT, &rays[i], 0, 0, 0 , 100, -1, 250);
+                        if(!(lookupmaterial(rays[i])&MAT_WATER)) playsound(S_IMPACT, &rays[i], 0, 0, 0 , 100, -1, 250);
                         particle_splash(PART_SPARK, 9, 60, rays[i], d->steromillis ? 0xFF2222 : 0xAA1100, 0.4, 150, 100, 0, player1->champimillis ? true : false);
                         particle_splash(PART_SMOKE, 3, 500+rnd(300), rays[i], 0x797979, 0.2f, 35, 300, 2, player1->champimillis ? true : false);
                         particle_splash(PART_SMOKE, 3, 275+rnd(275), rays[i], 0x553915, 0.15f, 35, 300, 2, player1->champimillis ? true : false);
@@ -1300,6 +1304,12 @@ namespace game
                 }
                 if(d->ragemillis) particle_splash(PART_SPARK,  3, 500, d->muzzle, 0xFF2222, 1.0f,  50,   200, 0, player1->champimillis ? true : false);
                 particle_flare(d->muzzle, d->muzzle, 120, PART_NORMAL_MUZZLE_FLASH, d->steromillis ? 0x880000 : 0x663311,  d==hudplayer() ? zoom ? 2.00f : 3.5f : 4.5f, d, player1->champimillis ? true : false);
+
+                float dist = from.dist(to);
+                vec up = to;
+                up.z += dist/8;
+                newbouncer(d==player1 && !thirdperson ? d->muzzle : hudgunorigin(gun, d->o, to, d), up, local, id, d, BNC_LIGHT, 650, 400);
+
                 break;
             }
             case ATK_GRAP1_SHOOT:
@@ -1333,7 +1343,17 @@ namespace game
                 break;
         }
 
-        switch(rnd(attacks[atk].specialsounddelay)) {case 0: if(d->steromillis) playsound(S_STEROSTIR, d==player1 ? NULL : &d->o, NULL, 0, 0 , 150, -1, 400); }
+        if(d->steromillis>0)
+        {
+            switch(rnd(attacks[atk].specialsounddelay))
+            {
+                case 0:
+                {
+                    playsound(S_STEROSTIR, d==hudplayer() ? NULL : &d->o, NULL, 0, 0 , 300, -1, 500);
+                    if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 400 && d!=player1) playsound(S_STEROTIRLOIN, &d->o, NULL, 0, 0 , 600, -1, 800);
+                }
+            }
+        }
 
         looped = false;
         if(d->attacksound >= 0 && d->attacksound != sound) d->stopattacksound();
@@ -1555,10 +1575,13 @@ namespace game
         loopv(bouncers)
         {
             bouncer &bnc = *bouncers[i];
-            if(bnc.bouncetype!=BNC_GRENADE) continue;
-            vec pos(bnc.o);
-            pos.add(vec(bnc.offset).mul(bnc.offsetmillis/float(OFFSETMILLIS)));
-            adddynlight(pos, 40, vec(0.5f, 0.5f, 2.0f));
+            if(bnc.bouncetype==BNC_GRENADE || bnc.bouncetype==BNC_LIGHT)
+            {
+                vec pos(bnc.o);
+                pos.add(vec(bnc.offset).mul(bnc.offsetmillis/float(OFFSETMILLIS)));
+                if(bnc.bouncetype==BNC_GRENADE) adddynlight(pos, 40, vec(0.5f, 0.5f, 2.0f));
+                else adddynlight(pos, 80+rnd(15), vec(0.2f, 0.09f, 0.0f), 0, 0, L_VOLUMETRIC|L_NODYNSHADOW);
+            }
         }
     }
 
