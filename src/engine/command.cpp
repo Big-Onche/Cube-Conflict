@@ -3508,6 +3508,31 @@ void substr(char *s, int *start, int *count, int *numargs)
 }
 COMMAND(substr, "siiN");
 
+void chopstr(char *s, int *lim, char *ellipsis)
+{
+    int len = strlen(s), maxlen = abs(*lim);
+    if(len > maxlen)
+    {
+        int elen = strlen(ellipsis);
+        maxlen = max(maxlen, elen);
+        char *chopped = newstring(maxlen);
+        if(*lim < 0)
+        {
+            memcpy(chopped, ellipsis, elen);
+            memcpy(&chopped[elen], &s[len - (maxlen - elen)], maxlen - elen);
+        }
+        else
+        {
+            memcpy(chopped, s, maxlen - elen);
+            memcpy(&chopped[maxlen - elen], ellipsis, elen);
+        }
+        chopped[maxlen] = '\0';
+        commandret->setstr(chopped);
+    }
+    else result(s);
+}
+COMMAND(chopstr, "sis");
+
 void sublist(const char *s, int *skip, int *count, int *numargs)
 {
     int offset = max(*skip, 0), len = *numargs >= 3 ? max(*count, 0) : -1;
@@ -3622,6 +3647,20 @@ void looplist(ident *id, const char *list, const uint *body)
     if(n) poparg(*id);
 }
 COMMAND(looplist, "rse");
+
+void loopsublist(ident *id, const char *list, int *skip, int *count, const uint *body)
+{
+    if(id->type!=ID_ALIAS) return;
+    identstack stack;
+    int n = 0, offset = max(*skip, 0), len = *count < 0 ? INT_MAX : offset + *count;
+    for(const char *s = list, *start, *end, *qstart; parselist(s, start, end, qstart) && n < len; n++) if(n >= offset)
+    {
+        setiter(*id, listelem(start, end, qstart), stack);
+        execute(body);
+    }
+    if(n) poparg(*id);
+}
+COMMAND(loopsublist, "rsiie");
 
 void looplist2(ident *id, ident *id2, const char *list, const uint *body)
 {
@@ -4187,6 +4226,32 @@ ICOMMAND(strcode, "si", (char *s, int *i), intret(*i > 0 ? (memchr(s, 0, *i) ? 0
 ICOMMAND(codestr, "i", (int *i), { char *s = newstring(1); s[0] = char(*i); s[1] = '\0'; stringret(s); });
 ICOMMAND(struni, "si", (char *s, int *i), intret(*i > 0 ? (memchr(s, 0, *i) ? 0 : cube2uni(s[*i])) : cube2uni(s[0])));
 ICOMMAND(unistr, "i", (int *i), { char *s = newstring(1); s[0] = uni2cube(*i); s[1] = '\0'; stringret(s); });
+
+int naturalsort(const char *a, const char *b)
+{
+    for(;;)
+    {
+        int ac = *a, bc = *b;
+        if(!ac) return bc ? -1 : 0;
+        else if(!bc) return 1;
+        else if(isdigit(ac) && isdigit(bc))
+        {
+            while(*a == '0') a++;
+            while(*b == '0') b++;
+            const char *a0 = a, *b0 = b;
+            while(isdigit(*a)) a++;
+            while(isdigit(*b)) b++;
+            int alen = a - a0, blen = b - b0;
+            if(alen != blen) return alen - blen;
+            int n = memcmp(a0, b0, alen);
+            if(n < 0) return -1;
+            else if(n > 0) return 1;
+        }
+        else if(ac != bc) return ac - bc;
+        else { ++a; ++b; }
+    }
+}
+ICOMMAND(naturalsort, "ss", (char *a, char *b), intret(naturalsort(a,b)<=0));
 
 #define STRMAPCOMMAND(name, map) \
     ICOMMAND(name, "s", (char *s), \

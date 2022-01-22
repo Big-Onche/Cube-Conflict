@@ -421,7 +421,12 @@ void renderprogress(float bar, const char *text, bool background)   // also used
     swapbuffers(false);
 }
 
+#ifdef WIN32
+// SDL_WarpMouseInWindow behaves erratically on Windows, so force relative mouse instead.
+VARN(relativemouse, userelativemouse, 1, 1, 0);
+#else
 VARNP(relativemouse, userelativemouse, 0, 1, 1);
+#endif
 
 bool shouldgrab = false, grabinput = false, minimized = false, canrelativemouse = true, relativemouse = false;
 int keyrepeatmask = 0, textinputmask = 0;
@@ -458,7 +463,9 @@ VAR(sdl_xgrab_bug, 0, 0, 1);
 
 void inputgrab(bool on, bool delay = false)
 {
+#ifdef SDL_VIDEO_DRIVER_X11
     bool wasrelativemouse = relativemouse;
+#endif
     if(on)
     {
         SDL_ShowCursor(SDL_FALSE);
@@ -707,11 +714,6 @@ void resetgl()
 COMMAND(resetgl, "");
 
 static queue<SDL_Event, 32> events;
-
-static inline void pushevent(const SDL_Event &e)
-{
-    events.add(e);
-}
 
 static inline bool filterevent(const SDL_Event &event)
 {
@@ -1231,7 +1233,7 @@ int main(int argc, char **argv)
 #ifdef SDL_VIDEO_DRIVER_X11
         SDL_version version;
         SDL_GetVersion(&version);
-        if (SDL_VERSIONNUM(version.major, version.minor, version.patch) < SDL_VERSIONNUM(2, 0, 13))
+        if (SDL_VERSIONNUM(version.major, version.minor, version.patch) <= SDL_VERSIONNUM(2, 0, 12))
             sdl_xgrab_bug = 1;
 #endif
     }
