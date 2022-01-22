@@ -49,11 +49,11 @@ namespace ai
     VARF(IA_lvl, 0, 2, 4,
         switch(IA_lvl)
         {
-            case 0: IA_rndlvl = 38; return;
-            case 1: IA_rndlvl = 50; return;
-            case 2: IA_rndlvl = 62; return;
+            case 0: IA_rndlvl = 45; return;
+            case 1: IA_rndlvl = 55; return;
+            case 2: IA_rndlvl = 65; return;
             case 3: IA_rndlvl = 75; return;
-            case 4: IA_rndlvl = 88; return;
+            case 4: IA_rndlvl = 85; return;
         }
     );
 
@@ -176,7 +176,7 @@ namespace ai
         {
             if(lastmillis >= d->ai->lastaimrnd)
             {
-                const int aiskew[NUMGUNS] = { 130, 1, 1, 30, 30, 1, 1, 15, 40, 1, 1, 3, 25, 10, 25, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+                const int aiskew[NUMGUNS] = { 190, 1, 1, 30, 30, 1, 1, 15, 40, 1, 1, 3, 25, 10, 25, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
                 //int aiskew = 1;
 
                 #define rndaioffset(r) ((rnd(int(r*aiskew[d->gunselect]*2)+1)-(r*aiskew[d->gunselect]))*(1.f/float(max(d->skill, 1))))
@@ -245,9 +245,9 @@ namespace ai
             create(d);
             if(d->ai)
             {
-                d->ai->views[0] = viewfieldx(d->skill*2.5f);
-                d->ai->views[1] = viewfieldy(d->skill*2.5f);
-                d->ai->views[2] = viewdist(d->skill*2.5f);
+                d->ai->views[0] = viewfieldx(d->skill*3.6f);
+                d->ai->views[1] = viewfieldy(d->skill*3.6f);
+                d->ai->views[2] = viewdist(d->skill*3.f);
             }
         }
         else if(d->ai) destroy(d);
