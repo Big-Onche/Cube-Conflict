@@ -57,7 +57,7 @@ namespace ai
         }
     );
 
-    ICOMMAND(addbots, "s", (char *s), loopi(IA_number){addmsg(N_ADDBOT, "ri", IA_rndlvl+rnd(10));} );
+    ICOMMAND(addbots, "s", (char *s), loopi(IA_number){addmsg(N_ADDBOT, "ri", IA_rndlvl+rnd(6));} );
     ICOMMAND(delbot, "", (), addmsg(N_DELBOT, "r"));
     ICOMMAND(botlimit, "i", (int *n), addmsg(N_BOTLIMIT, "ri", *n));
     ICOMMAND(botbalance, "i", (int *n), addmsg(N_BOTBALANCE, "ri", *n));
@@ -111,7 +111,6 @@ namespace ai
     bool targetable(gameent *d, gameent *e)
     {
         if(d == e) return false;
-        switch(rnd(50)) {case 0: if(e->aptitude==APT_PHYSICIEN && e->aptisort2>0) return false;}
         return e->state == CS_ALIVE && !isteam(d->team, e->team);
     }
 
@@ -153,6 +152,8 @@ namespace ai
         {
             float skew = clamp(float(lastmillis-d->ai->enemymillis)/float((d->skill*attacks[atk].attackdelay/2000.f)), 0.f, 1e16f),
                 offy = yaw-d->yaw, offp = pitch-d->pitch;
+
+            if(e->aptitude==APT_PHYSICIEN && e->aptisort2>0) return false;
 
             if(offy > 180) offy -= 360;
             else if(offy < -180) offy += 360;
