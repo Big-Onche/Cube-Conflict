@@ -84,9 +84,10 @@ static const struct danceinfo { const char *dancename; int danceprice; } customs
 {
     {"Cortex",       0},
     {"Vieille",     50},
-    {"Hendek",     100},
-    {"Delavier",   250},
-    {"Praud",      250},
+    {"Hendek",      50},
+    {"Mounir",     250},
+    {"Delavier",   500},
+    {"Praud",      500},
     {"Malleville", 1500},
 };
 
@@ -131,7 +132,7 @@ enum {STAT_CC, STAT_XP, STAT_KILLS, STAT_MORTS, STAT_KILLSTREAK, STAT_BOUCLIERBO
         SMI_HAP, SMI_NOEL, SMI_MALADE, SMI_CONTENT, SMI_COLERE, SMI_SOURNOIS, SMI_FOU, SMI_CLINDOEIL, SMI_COOL, SMI_BUG,
         CAPE_CUBE, CAPE_JVC, CAPE_CORONED, CAPE_ATOME, CAPE_JESUSECO, CAPE_WEED, CAPE_FLAMES, CAPE_BOUCLE, CAPE_VINTAGE, CAPE_ELITE, CAPE_HIGH, CAPE_RAYONSX, CAPE_RISITAS, CAPE_RICHE,
         TOM_MERDE, TOM_BASIQUE1, TOM_BASIQUE2, TOM_FLEUR, TOM_CRISTAL, TOM_OEIL, TOM_EXCALIBUR, TOM_COURONNE, TOM_FUCK, TOM_MONUMENT, TOM_LINGOT,
-        VOI_CORTEX, VOI_VIEILLE, VOI_HENDEK, VOI_DELAVIER, VOI_PRAUD, VOI_MALLEVILLE,
+        VOI_CORTEX, VOI_VIEILLE, VOI_HENDEK, VOI_MOUNIR, VOI_DELAVIER, VOI_PRAUD, VOI_MALLEVILLE,
         NUMSTATS};
 extern int stat[NUMSTATS];
 
