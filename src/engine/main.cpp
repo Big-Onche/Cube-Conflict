@@ -33,7 +33,7 @@ void cleanup()
 
 extern void writeinitcfg();
 
-void quit(bool savecfgs = true)                     // normal exit
+void quit(bool savecfgs = true)                      // normal exit
 {
     if(savecfgs)
     {
@@ -244,7 +244,6 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
                 case 0: formatstring(backgroundimg, "media/map/village.png"); break;
                 case 1: formatstring(backgroundimg, "media/map/usine.png"); break;
                 case 2: formatstring(backgroundimg, "media/map/chateaux.png"); break;
-                //case 3: formatstring(backgroundimg, "media/map/Dota.jpg"); break;
                 case 3: formatstring(backgroundimg, "media/map/lune.png"); break;
                 case 4: formatstring(backgroundimg, "media/map/volcan.png"); break;
                 default: formatstring(backgroundimg, "media/interface/background.png"); break;
@@ -407,9 +406,7 @@ void renderprogress(float bar, const char *text, bool background)   // also used
 
     clientkeepalive();      // make sure our connection doesn't time out while loading maps etc.
 
-    #ifdef __APPLE__
-    interceptkey(SDLK_UNKNOWN); // keep the event queue awake to avoid 'beachball' cursor
-    #endif
+    SDL_PumpEvents(); // keep the event queue awake to avoid 'beachball' cursor
 
     int w = hudw, h = hudh;
     if(forceaspect) w = int(ceil(h*forceaspect));
@@ -487,6 +484,7 @@ void inputgrab(bool on, bool delay = false)
         }
     }
     shouldgrab = delay;
+
 #ifdef SDL_VIDEO_DRIVER_X11
     if(relativemouse || wasrelativemouse)
     {
@@ -565,7 +563,8 @@ VARFNP(gamma, reqgamma, 30, 100, 300,
 
 void restoregamma()
 {
-    if(initing || curgamma == 100) return;
+    if(initing || reqgamma == 100) return;
+    curgamma = reqgamma;
     setgamma(curgamma);
 }
 
@@ -636,7 +635,6 @@ void setupscreen()
 #else
     static const int glversions[] = { 40, 33, 32, 31, 30, 20 };
 #endif
-
     loopi(sizeof(glversions)/sizeof(glversions[0]))
     {
         glcompat = glversions[i] <= 30 ? 1 : 0;
@@ -704,14 +702,14 @@ void resetgl()
 
 COMMAND(resetgl, "");
 
-vector<SDL_Event> events;
+static queue<SDL_Event, 32> events;
 
-void pushevent(const SDL_Event &e)
+static inline void pushevent(const SDL_Event &e)
 {
     events.add(e);
 }
 
-static bool filterevent(const SDL_Event &event)
+static inline bool filterevent(const SDL_Event &event)
 {
     switch(event.type)
     {
@@ -730,41 +728,74 @@ static bool filterevent(const SDL_Event &event)
     return true;
 }
 
-static inline bool pollevent(SDL_Event &event)
+template <int SIZE> static inline bool pumpevents(queue<SDL_Event, SIZE> &events)
 {
-    while(SDL_PollEvent(&event))
+    while(events.empty())
     {
-        if(filterevent(event)) return true;
+        SDL_PumpEvents();
+        databuf<SDL_Event> buf = events.reserve(events.capacity());
+        int n = SDL_PeepEvents(buf.getbuf(), buf.remaining(), SDL_GETEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT);
+        if(n <= 0) return false;
+        loopi(n) if(filterevent(buf.buf[i])) buf.put(buf.buf[i]);
+        events.addbuf(buf);
     }
-    return false;
+    return true;
+}
+
+static int interceptkeysym = 0;
+
+static int interceptevents(void *data, SDL_Event *event)
+{
+    switch(event->type)
+    {
+        case SDL_MOUSEMOTION: return 0;
+        case SDL_KEYDOWN:
+            if(event->key.keysym.sym == interceptkeysym)
+            {
+                interceptkeysym = -interceptkeysym;
+                return 0;
+            }
+            break;
+    }
+    return 1;
+}
+
+static void clearinterceptkey()
+{
+    SDL_DelEventWatch(interceptevents, NULL);
+    interceptkeysym = 0;
 }
 
 bool interceptkey(int sym)
 {
-    static int lastintercept = SDLK_UNKNOWN;
-    int len = lastintercept == sym ? events.length() : 0;
-    SDL_Event event;
-    while(pollevent(event))
+    if(!interceptkeysym)
     {
-        switch(event.type)
+        interceptkeysym = sym;
+        SDL_FilterEvents(interceptevents, NULL);
+        if(interceptkeysym < 0)
         {
-            case SDL_MOUSEMOTION: break;
-            default: pushevent(event); break;
+            interceptkeysym = 0;
+            return true;
         }
+        SDL_AddEventWatch(interceptevents, NULL);
     }
-    lastintercept = sym;
-    if(sym != SDLK_UNKNOWN) for(int i = len; i < events.length(); i++)
+    else if(abs(interceptkeysym) != sym) interceptkeysym = sym;
+    SDL_PumpEvents();
+    if(interceptkeysym < 0)
     {
-        if(events[i].type == SDL_KEYDOWN && events[i].key.keysym.sym == sym) { events.remove(i); return true; }
+        clearinterceptkey();
+        interceptkeysym = sym;
+        SDL_FilterEvents(interceptevents, NULL);
+        interceptkeysym = 0;
+        return true;
     }
     return false;
 }
 
 static void ignoremousemotion()
 {
-    SDL_Event e;
     SDL_PumpEvents();
-    while(SDL_PeepEvents(&e, 1, SDL_GETEVENT, SDL_MOUSEMOTION, SDL_MOUSEMOTION));
+    SDL_FlushEvent(SDL_MOUSEMOTION);
 }
 
 static void resetmousemotion()
@@ -777,28 +808,13 @@ static void resetmousemotion()
 
 static void checkmousemotion(int &dx, int &dy)
 {
-    loopv(events)
+    while(pumpevents(events))
     {
-        SDL_Event &event = events[i];
-        if(event.type != SDL_MOUSEMOTION)
-        {
-            if(i > 0) events.remove(0, i);
-            return;
-        }
+        SDL_Event &event = events.removing();
+        if(event.type != SDL_MOUSEMOTION) return;
         dx += event.motion.xrel;
         dy += event.motion.yrel;
-    }
-    events.setsize(0);
-    SDL_Event event;
-    while(pollevent(event))
-    {
-        if(event.type != SDL_MOUSEMOTION)
-        {
-            events.add(event);
-            return;
-        }
-        dx += event.motion.xrel;
-        dy += event.motion.yrel;
+        events.remove();
     }
 }
 
@@ -806,13 +822,13 @@ int parallaxX, parallaxY;
 
 void checkinput()
 {
-    SDL_Event event;
+    if(interceptkeysym) clearinterceptkey();
     //int lasttype = 0, lastbut = 0;
     bool mousemoved = false;
     int focused = 0;
-    while(events.length() || pollevent(event))
+    while(pumpevents(events))
     {
-        if(events.length()) event = events.remove(0);
+        SDL_Event &event = events.remove();
 
         if(focused && event.type!=SDL_WINDOWEVENT) { if(grabinput != (focused>0)) inputgrab(grabinput = focused>0, shouldgrab); focused = 0; }
 
@@ -823,14 +839,13 @@ void checkinput()
                 return;
 
             case SDL_TEXTINPUT:
-            {
                 if(textinputmask && int(event.text.timestamp-textinputtime) >= textinputfilter)
                 {
                     uchar buf[SDL_TEXTINPUTEVENT_TEXT_SIZE+1];
                     size_t len = decodeutf8(buf, sizeof(buf)-1, (const uchar *)event.text.text, strlen(event.text.text));
                     if(len > 0) { buf[len] = '\0'; processtextinput((const char *)buf, len); }
                 }
-            }
+                break;
 
             case SDL_KEYDOWN:
             case SDL_KEYUP:
@@ -969,6 +984,7 @@ __attribute__((dllexport))
 __declspec(dllexport)
 #endif
     DWORD NvOptimusEnablement = 1;
+
 #ifdef __GNUC__
 __attribute__((dllexport))
 #else
@@ -1213,7 +1229,8 @@ int main(int argc, char **argv)
     if(enet_initialize()<0) fatal("Unable to initialise network module");
     atexit(enet_deinitialize);
     enet_time_set(0);
-	if(usesteam)
+
+    if(usesteam)
     {
         initsteam();
         getsteamachievements();
@@ -1239,14 +1256,12 @@ int main(int argc, char **argv)
     gl_init();
     notexture = textureload("media/texture/game/notexture.png");
     if(!notexture) fatal("could not find core textures");
-
     textureload("media/interface/hud/viseurA.png");
     textureload("media/interface/hud/viseurB.png");
     textureload("media/interface/hud/viseurC.png");
     textureload("media/map/village.png");
     textureload("media/map/usine.png");
     textureload("media/map/chateaux.png");
-    //textureload("media/map/Dota.jpg");
     textureload("media/map/lune.png");
     textureload("media/map/volcan.png");
 
@@ -1269,22 +1284,18 @@ int main(int argc, char **argv)
 
     logoutf("init: cfg");
     initing = INIT_LOAD;
-
     execfile("config/stdedit.cfg");
     execfile(game::gameconfig());
     execfile("config/sound.cfg");
-
     switch(langage)
     {
         case 0: execfile("config/keymap_FR.cfg"); execfile("config/ui_FR.cfg"); execfile("config/default_FR.cfg"); execfile("config/astuces_FR.cfg"); break;
         case 1: execfile("config/keymap_EN.cfg"); execfile("config/ui_EN.cfg"); execfile("config/default_EN.cfg"); execfile("config/astuces_EN.cfg");
     }
-
     execfile("config/heightmap.cfg");
     execfile("config/blendbrush.cfg");
-    loadsave();
-
     if(game::savedservers()) execfile(game::savedservers(), false);
+    loadsave();
 
     identflags |= IDF_PERSIST;
 
@@ -1298,6 +1309,7 @@ int main(int argc, char **argv)
     execfile(game::autoexec(), false);
 
     renderbackground(langage ? "Loading..." : "Chargement...");
+
     identflags &= ~IDF_PERSIST;
 
     initing = INIT_GAME;
