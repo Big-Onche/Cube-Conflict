@@ -4,6 +4,10 @@
 #include "cubedef.h"
 #include "steam_api.h"
 
+#ifdef SDL_VIDEO_DRIVER_X11
+#include "SDL_syswm.h"
+#endif
+
 extern void cleargamma();
 
 void cleanup()
@@ -451,8 +455,9 @@ void textinput(bool on, int mask)
     }
 }
 
-void inputgrab(bool on)
+void inputgrab(bool on, bool delay = false)
 {
+    bool wasrelativemouse = relativemouse;
     if(on)
     {
         SDL_ShowCursor(SDL_FALSE);
@@ -476,12 +481,29 @@ void inputgrab(bool on)
         SDL_ShowCursor(SDL_TRUE);
         if(relativemouse)
         {
-            SDL_SetRelativeMouseMode(SDL_FALSE);
             SDL_SetWindowGrab(screen, SDL_FALSE);
+            SDL_SetRelativeMouseMode(SDL_FALSE);
             relativemouse = false;
         }
     }
-    shouldgrab = false;
+    shouldgrab = delay;
+#ifdef SDL_VIDEO_DRIVER_X11
+    if(relativemouse || wasrelativemouse)
+    {
+        // Workaround for buggy SDL X11 pointer grabbing
+        union { SDL_SysWMinfo info; uchar buf[sizeof(SDL_SysWMinfo) + 128]; };
+        SDL_GetVersion(&info.version);
+        if(SDL_GetWindowWMInfo(screen, &info) && info.subsystem == SDL_SYSWM_X11)
+        {
+            if(relativemouse)
+            {
+                uint mask = ButtonPressMask | ButtonReleaseMask | PointerMotionMask | FocusChangeMask;
+                XGrabPointer(info.info.x11.display, info.info.x11.window, True, mask, GrabModeAsync, GrabModeAsync, info.info.x11.window, None, CurrentTime);
+            }
+            else XUngrabPointer(info.info.x11.display, CurrentTime);
+        }
+    }
+#endif
 }
 
 bool initwindowpos = false;
@@ -787,9 +809,12 @@ void checkinput()
     SDL_Event event;
     //int lasttype = 0, lastbut = 0;
     bool mousemoved = false;
+    int focused = 0;
     while(events.length() || pollevent(event))
     {
         if(events.length()) event = events.remove(0);
+
+        if(focused && event.type!=SDL_WINDOWEVENT) { if(grabinput != (focused>0)) inputgrab(grabinput = focused>0, shouldgrab); focused = 0; }
 
         switch(event.type)
         {
@@ -824,12 +849,14 @@ void checkinput()
                         shouldgrab = true;
                         break;
                     case SDL_WINDOWEVENT_ENTER:
-                        inputgrab(grabinput = true);
+                        shouldgrab = false;
+                        focused = 1;
                         break;
 
                     case SDL_WINDOWEVENT_LEAVE:
                     case SDL_WINDOWEVENT_FOCUS_LOST:
-                        inputgrab(grabinput = false);
+                        shouldgrab = false;
+                        focused = -1;
                         break;
 
                     case SDL_WINDOWEVENT_MINIMIZED:
@@ -895,6 +922,7 @@ void checkinput()
                 break;
         }
     }
+    if(focused) { if(grabinput != (focused>0)) inputgrab(grabinput = focused>0, shouldgrab); focused = 0; }
     if(mousemoved) resetmousemotion();
 }
 
