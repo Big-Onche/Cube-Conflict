@@ -452,6 +452,10 @@ void textinput(bool on, int mask)
     }
 }
 
+#ifdef SDL_VIDEO_DRIVER_X11
+VAR(sdl_xgrab_bug, 0, 0, 1);
+#endif
+
 void inputgrab(bool on, bool delay = false)
 {
     bool wasrelativemouse = relativemouse;
@@ -486,7 +490,7 @@ void inputgrab(bool on, bool delay = false)
     shouldgrab = delay;
 
 #ifdef SDL_VIDEO_DRIVER_X11
-    if(relativemouse || wasrelativemouse)
+    if((relativemouse || wasrelativemouse) && sdl_xgrab_bug)
     {
         // Workaround for buggy SDL X11 pointer grabbing
         union { SDL_SysWMinfo info; uchar buf[sizeof(SDL_SysWMinfo) + 128]; };
@@ -1223,6 +1227,13 @@ int main(int argc, char **argv)
         logoutf("init: sdl");
 
         if(SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO|SDL_INIT_AUDIO)<0) fatal("Unable to initialize SDL: %s", SDL_GetError());
+
+#ifdef SDL_VIDEO_DRIVER_X11
+        SDL_version version;
+        SDL_GetVersion(&version);
+        if (SDL_VERSIONNUM(version.major, version.minor, version.patch) < SDL_VERSIONNUM(2, 0, 13))
+            sdl_xgrab_bug = 1;
+#endif
     }
 
     logoutf("init: net");

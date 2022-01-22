@@ -474,6 +474,16 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape
             gameent *d = players[i];
             if(d == player1 || d->state==CS_SPECTATOR || d->state==CS_SPAWNING || d->lifesequence < 0 || d == exclude || (d->state==CS_DEAD && hidedead)) continue;
             renderplayer(d);
+
+            vec dir = vec(d->o).sub(camera1->o);
+            float dist = dir.magnitude();
+            dir.div(dist);
+            if(d->state!=CS_EDITING && raycube(camera1->o, dir, dist, 0) < dist)
+            {
+                d->info[0] = '\0';
+                continue;
+            }
+
             copystring(d->info, colorname(d));
             if(d->state!=CS_DEAD)
             {
