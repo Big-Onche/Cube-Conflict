@@ -182,6 +182,12 @@ namespace game
         }
     }
 
+    bool allowthirdperson(bool msg)
+    {
+        return player1->state==CS_SPECTATOR || player1->state==CS_EDITING || m_edit || !multiplayer(msg);
+    }
+    ICOMMAND(allowthirdperson, "b", (int *msg), intret(allowthirdperson(*msg!=0) ? 1 : 0));
+
     bool detachcamera()
     {
         gameent *d = followingplayer();

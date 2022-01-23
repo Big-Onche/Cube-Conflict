@@ -2608,6 +2608,12 @@ void drawdamagescreen(int w, int h)
     hudquad(0, 0, w, h);
 }
 
+void cleardamagescreen()
+{
+    damageblendmillis = 0;
+    loopi(8) damagedirs[i] = 0;
+}
+
 VAR(hidestats, 0, 0, 1);
 VAR(hidehud, 0, 0, 1);
 

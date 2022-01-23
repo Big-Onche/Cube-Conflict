@@ -625,7 +625,7 @@ namespace server
     VAR(maxdemos, 0, 5, 25);
     VAR(maxdemosize, 0, 16, 31);
     VAR(restrictdemos, 0, 1, 1);
-    VAR(autorecorddemo, 0, 0, 1);
+    VARF(autorecorddemo, 0, 0, 1, demonextmatch = autorecorddemo!=0);
 
     VAR(restrictpausegame, 0, 1, 1);
     VAR(restrictgamespeed, 0, 1, 1);
@@ -976,10 +976,11 @@ namespace server
         }
         loopi(MAXTEAMS)
         {
-            if(!persistteams) loopvj(team[i])
+            loopvj(team[i])
             {
                 clientinfo *ci = team[i][j];
                 if(ci->team == 1+i) continue;
+                if(persistteams && validteam(ci->team) && (!smode || smode->canchangeteam(ci, 1+i, ci->team))) continue;
                 ci->team = 1+i;
                 sendf(-1, 1, "riiii", N_SETTEAM, ci->clientnum, ci->team, -1);
             }
@@ -1288,7 +1289,13 @@ namespace server
             gamemillis = offset;
             readdemo();
         }
-        if(gamemillis > prevmillis && !interm) sendf(-1, 1, "ri2", N_TIMEUP, max((gamelimit - gamemillis)/1000, 1));
+        if(gamemillis > prevmillis)
+        {
+            if(!interm) sendf(-1, 1, "ri2", N_TIMEUP, max((gamelimit - gamemillis)/1000, 1));
+#ifndef STANDALONE
+            cleardamagescreen();
+#endif
+        }
     }
 
     ICOMMAND(seekdemo, "sN$", (char *t, int *numargs, ident *id),
@@ -2064,11 +2071,11 @@ namespace server
 
         sendf(-1, 1, "risii", N_MAPCHANGE, smapname, gamemode, 1);
 
-        clearteaminfo();
-        if(m_teammode) autoteam();
-
         if(m_ctf) smode = &ctfmode;
         else smode = NULL;
+
+        clearteaminfo();
+        if(m_teammode) autoteam();
 
         if(m_timed && smapname[0]) sendf(-1, 1, "ri2", N_TIMEUP, gamemillis < gamelimit && !interm ? max((gamelimit - gamemillis)/1000, 1) : 0);
         loopv(clients)
