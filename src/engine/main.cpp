@@ -1139,7 +1139,7 @@ void changerlangue()
 
     if(!init)
     {
-        game::ispaused() ? UI_menutabs = 3 : UI_menutabs = 7;
+        game::ispaused() ? UI_menutabs = 3 : UI_menutabs = 8;
         switch(langage)
         {
             case 0: UI::showui(game::ispaused() ? "pause_fr" : "main_fr"); break;
