@@ -1,7 +1,6 @@
 #include "game.h"
 #include "engine.h"
 #include "cubedef.h"
-#include "steam_api.h"
 
 string str_pseudovictime, str_pseudotueur, str_armetueur, str_pseudoacteur;
 float killdistance = 0;
