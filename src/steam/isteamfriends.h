@@ -127,17 +127,6 @@ enum EUserRestriction
 	k_nUserRestrictionTrading	= 64,	// user cannot participate in trading (console, mobile)
 };
 
-//-----------------------------------------------------------------------------
-// Purpose: information about user sessions
-//-----------------------------------------------------------------------------
-struct FriendSessionStateInfo_t
-{
-	uint32 m_uiOnlineSessionInstances;
-	uint8 m_uiPublishedToFriendsSessionInstance;
-};
-
-
-
 // size limit on chat room or member metadata
 const uint32 k_cubChatMetadataMax = 8192;
 
@@ -369,7 +358,7 @@ public:
 
 	// Rich invite support.
 	// If the target accepts the invite, a GameRichPresenceJoinRequested_t callback is posted containing the connect string.
-	// (Or you can configure yout game so that it is passed on the command line instead.  This is a deprecated path; ask us if you really need this.)
+	// (Or you can configure your game so that it is passed on the command line instead.  This is a deprecated path; ask us if you really need this.)
 	virtual bool InviteUserToGame( CSteamID steamIDFriend, const char *pchConnectString ) = 0;
 
 	// recently-played-with friends iteration
@@ -425,6 +414,14 @@ public:
 
 	// activates game overlay to open the remote play together invite dialog. Invitations will be sent for remote play together
 	virtual void ActivateGameOverlayRemotePlayTogetherInviteDialog( CSteamID steamIDLobby ) = 0;
+
+	// Call this before calling ActivateGameOverlayToWebPage() to have the Steam Overlay Browser block navigations
+	// to your specified protocol (scheme) uris and instead dispatch a OverlayBrowserProtocolNavigation_t callback to your game.
+	// ActivateGameOverlayToWebPage() must have been called with k_EActivateGameOverlayToWebPageMode_Modal
+	virtual bool RegisterProtocolInOverlayBrowser( const char *pchProtocol ) = 0;
+
+	// Activates the game overlay to open an invite dialog that will send the provided Rich Presence connect string to selected friends
+	virtual void ActivateGameOverlayInviteDialogConnectString( const char *pchConnectString ) = 0;
 };
 
 #define STEAMFRIENDS_INTERFACE_VERSION "SteamFriends017"
@@ -679,6 +676,17 @@ struct UnreadChatMessagesChanged_t
 {
 	enum { k_iCallback = k_iSteamFriendsCallbacks + 48 };
 };
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Dispatched when an overlay browser instance is navigated to a protocol/scheme registered by RegisterProtocolInOverlayBrowser()
+//-----------------------------------------------------------------------------
+struct OverlayBrowserProtocolNavigation_t
+{
+	enum { k_iCallback = k_iSteamFriendsCallbacks + 49 };
+	char rgchURI[ 1024 ];
+};
+
 
 #pragma pack( pop )
 

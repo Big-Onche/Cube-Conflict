@@ -41,6 +41,25 @@ enum EGamepadTextInputLineMode
 	k_EGamepadTextInputLineModeMultipleLines = 1
 };
 
+enum EFloatingGamepadTextInputMode
+{
+	k_EFloatingGamepadTextInputModeModeSingleLine = 0, // Enter dismisses the keyboard
+	k_EFloatingGamepadTextInputModeModeMultipleLines = 1, // User needs to explictly close the keyboard
+	k_EFloatingGamepadTextInputModeModeEmail = 2,
+	k_EFloatingGamepadTextInputModeModeNumeric = 3,
+
+};
+
+// The context where text filtering is being done
+enum ETextFilteringContext
+{
+	k_ETextFilteringContextUnknown = 0,	// Unknown context
+	k_ETextFilteringContextGameContent = 1,	// Game content, only legally required filtering is performed
+	k_ETextFilteringContextChat = 2,	// Chat from another player
+	k_ETextFilteringContextName = 3,	// Character or item name
+};
+
+
 // function prototype for warning message hook
 #if defined( POSIX )
 #define __cdecl
@@ -75,8 +94,8 @@ public:
 	// the destination buffer size should be 4 * height * width * sizeof(char)
 	virtual bool GetImageRGBA( int iImage, uint8 *pubDest, int nDestBufferSize ) = 0;
 
-	// returns the IP of the reporting server for valve - currently only used in Source engine games
-	virtual bool GetCSERIPPort( uint32 *unIP, uint16 *usPort ) = 0;
+	// Deprecated.  Do not call this.
+	STEAM_PRIVATE_API( virtual bool GetCSERIPPort( uint32 *unIP, uint16 *usPort ) = 0; )
 
 	// return the amount of battery power left in the current system in % [0..100], 255 for being on AC power
 	virtual uint8 GetCurrentBatteryPower() = 0;
@@ -135,7 +154,7 @@ public:
 	STEAM_CALL_RESULT( CheckFileSignature_t )
 	virtual SteamAPICall_t CheckFileSignature( const char *szFileName ) = 0;
 
-	// Activates the Big Picture text input dialog which only supports gamepad input
+	// Activates the full-screen text input dialog which takes a initial text string and returns the text the user has typed
 	virtual bool ShowGamepadTextInput( EGamepadTextInputMode eInputMode, EGamepadTextInputLineMode eLineInputMode, const char *pchDescription, uint32 unCharMax, const char *pchExistingText ) = 0;
 
 	// Returns previously entered text & length
@@ -172,24 +191,42 @@ public:
 	// Returns whether this steam client is a Steam China specific client, vs the global client.
 	virtual bool IsSteamChinaLauncher() = 0;
 
-	// Initializes text filtering.
-	//   Returns false if filtering is unavailable for the language the user is currently running in.
-	virtual bool InitFilterText() = 0; 
+	// Initializes text filtering, loading dictionaries for the language the game is running in.
+	//   unFilterOptions are reserved for future use and should be set to 0
+	// Returns false if filtering is unavailable for the game's language, in which case FilterText() will act as a passthrough.
+	//
+	// Users can customize the text filter behavior in their Steam Account preferences:
+	// https://store.steampowered.com/account/preferences#CommunityContentPreferences
+	virtual bool InitFilterText( uint32 unFilterOptions = 0 ) = 0;
 
-	// Filters the provided input message and places the filtered result into pchOutFilteredText.
-	//   pchOutFilteredText is where the output will be placed, even if no filtering or censoring is performed
-	//   nByteSizeOutFilteredText is the size (in bytes) of pchOutFilteredText
+	// Filters the provided input message and places the filtered result into pchOutFilteredText, using legally required filtering and additional filtering based on the context and user settings
+	//   eContext is the type of content in the input string
+	//   sourceSteamID is the Steam ID that is the source of the input string (e.g. the player with the name, or who said the chat text)
 	//   pchInputText is the input string that should be filtered, which can be ASCII or UTF-8
-	//   bLegalOnly should be false if you want profanity and legally required filtering (where required) and true if you want legally required filtering only
-	//   Returns the number of characters (not bytes) filtered.
-	virtual int FilterText( char* pchOutFilteredText, uint32 nByteSizeOutFilteredText, const char * pchInputMessage, bool bLegalOnly ) = 0;
+	//   pchOutFilteredText is where the output will be placed, even if no filtering is performed
+	//   nByteSizeOutFilteredText is the size (in bytes) of pchOutFilteredText, should be at least strlen(pchInputText)+1
+	// Returns the number of characters (not bytes) filtered
+	virtual int FilterText( ETextFilteringContext eContext, CSteamID sourceSteamID, const char *pchInputMessage, char *pchOutFilteredText, uint32 nByteSizeOutFilteredText ) = 0;
 
 	// Return what we believe your current ipv6 connectivity to "the internet" is on the specified protocol.
 	// This does NOT tell you if the Steam client is currently connected to Steam via ipv6.
 	virtual ESteamIPv6ConnectivityState GetIPv6ConnectivityState( ESteamIPv6ConnectivityProtocol eProtocol ) = 0;
+
+	// returns true if currently running on the Steam Deck device
+	virtual bool IsSteamRunningOnSteamDeck() = 0;
+
+	// Opens a floating keyboard over the game content and sends OS keyboard keys directly to the game.
+	// The text field position is specified in pixels relative the origin of the game window and is used to position the floating keyboard in a way that doesn't cover the text field
+	virtual bool ShowFloatingGamepadTextInput( EFloatingGamepadTextInputMode eKeyboardMode, int nTextFieldXPosition, int nTextFieldYPosition, int nTextFieldWidth, int nTextFieldHeight ) = 0;
+
+	// In game launchers that don't have controller support you can call this to have Steam Input translate the controller input into mouse/kb to navigate the launcher
+	virtual void SetGameLauncherMode( bool bLauncherMode ) = 0;
+
+	// Dismisses the floating keyboard.
+	virtual bool DismissFloatingGamepadTextInput() = 0;
 };
 
-#define STEAMUTILS_INTERFACE_VERSION "SteamUtils009"
+#define STEAMUTILS_INTERFACE_VERSION "SteamUtils010"
 
 // Global interface accessor
 inline ISteamUtils *SteamUtils();
@@ -273,7 +310,7 @@ struct CheckFileSignature_t
 
 
 //-----------------------------------------------------------------------------
-// Big Picture gamepad text input has been closed
+// Full Screen gamepad text input has been closed
 //-----------------------------------------------------------------------------
 struct GamepadTextInputDismissed_t
 {
@@ -282,7 +319,20 @@ struct GamepadTextInputDismissed_t
 	uint32 m_unSubmittedText;
 };
 
-// k_iSteamUtilsCallbacks + 15 is taken
+// k_iSteamUtilsCallbacks + 15 through 35 are taken
+
+STEAM_CALLBACK_BEGIN( AppResumingFromSuspend_t, k_iSteamUtilsCallbacks + 36 )
+STEAM_CALLBACK_END(0)
+
+// k_iSteamUtilsCallbacks + 37 is taken
+
+//-----------------------------------------------------------------------------
+// The floating on-screen keyboard has been closed
+//-----------------------------------------------------------------------------
+struct FloatingGamepadTextInputDismissed_t
+{
+	enum { k_iCallback = k_iSteamUtilsCallbacks + 38 };
+};
 
 #pragma pack( pop )
 
