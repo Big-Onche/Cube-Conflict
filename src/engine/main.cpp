@@ -338,6 +338,21 @@ void restorebackground(int w, int h, bool force)
 }
 
 float loadprogress = 0;
+int nbtexte = rnd(8);
+int textetimer, pointstimer = 0;
+
+static const struct loadingtextinfo { const char *loadingtext_FR, *loadingtext_EN; } loadingtext[] =
+{
+    {"élaboration de théories complotistes",                     "sharing conspiracy theories"},
+    {"remise des lunettes rondes aux golems",                    "putting five FFP2 masks on soyjak"},
+    {"invocation du Gigachad",                                   "summoning Gigachad"},
+    {"mise en place du crédit social",                           "setting social credit"},
+    {"swatting des streamers",                                   "swatting streamers"},
+    {"minage de bitcoins",                                       "mining some bitcoins"},
+    {"mise en place des bons pixels aux bons endroits",          "putting the right pixels in the right places"},
+    {"chargement des textures (non je déconne il n'y en a pas)", "loading textures (just kidding, there are no textures)"},
+    {"truquage des élections présidentielles",                   "rigging presidential elections"},
+};
 
 void renderprogressview(int w, int h, float bar, const char *text)   // also used during loading
 {
@@ -381,6 +396,16 @@ void renderprogressview(int w, int h, float bar, const char *text)   // also use
         if(tw*tsz > mw) tsz = mw/tw;
 
         pushhudtranslate(bx+sw, by + (bh - FONTH*tsz)/2, tsz);
+
+        textetimer += curtime;
+        pointstimer += curtime;
+
+        if(textetimer>3000) {nbtexte = rnd(8); textetimer = 0;}
+        if(pointstimer>1000) pointstimer = 0;
+
+        defformatstring(petitpoints, "%s", pointstimer < 250 ? "." : pointstimer < 500 ? ".." : pointstimer < 750 ? "..." : "");
+        defformatstring(text, "%s%s", langage ? loadingtext[nbtexte].loadingtext_EN : loadingtext[nbtexte].loadingtext_FR, petitpoints);
+
         draw_text(text, 0, 0);
         pophudmatrix();
     }
@@ -1362,6 +1387,8 @@ int main(int argc, char **argv)
 
     inputgrab(grabinput = true);
     ignoremousemotion();
+
+    nbtexte = rnd(8);
 
     for(;;)
     {

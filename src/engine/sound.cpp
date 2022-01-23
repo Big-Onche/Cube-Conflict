@@ -483,12 +483,6 @@ void resetchannels()
     channels.shrink(0);
 }
 
-void soundmenu_cleanup()
-{
-    stopmusic();
-    stopsounds();
-    mapsounds.cleanup();
-}
 
 void clear_sound()
 {
@@ -603,6 +597,15 @@ void syncchannels()
 }
 
 VARP(minimizedsounds, 0, 0, 1);
+
+void soundmenu_cleanup()
+{
+    stopmusic();
+    stopsounds();
+    stopmapsounds();
+    checkmapsounds();
+    syncchannels();
+}
 
 void updatesounds()
 {
