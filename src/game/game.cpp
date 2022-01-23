@@ -577,6 +577,7 @@ namespace game
 
     void taunt()
     {
+        if(langage) return;
         if(player1->state!=CS_ALIVE || player1->physstate<PHYS_SLOPE) return;
         if(lastmillis-player1->lasttaunt<2000){conoutf(CON_GAMEINFO, "\faOn abuse pas des bonnes choses !"); return;}
         player1->lasttaunt = lastmillis;
