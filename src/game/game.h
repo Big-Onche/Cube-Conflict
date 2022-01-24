@@ -1044,6 +1044,7 @@ namespace game
 
     // sorts
     extern void aptitude(gameent *d, int skill);
+    extern int getteamfrags(int team);
 }
 
 namespace server

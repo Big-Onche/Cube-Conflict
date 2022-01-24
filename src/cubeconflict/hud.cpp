@@ -24,8 +24,53 @@ namespace game
         pophudmatrix();
     }
 
+    void renderscores(int textsize = 100, float pos = 12.5f)
+    {
+        string infoscores;
+        if(m_ctf) {formatstring(infoscores, "\fd%d \f7- \fc%d", cmode->getteamscore(hudplayer()->team), cmode->getteamscore(hudplayer()->team == 1 ? 2 : 1)); textsize = 50;}
+        else if (!m_teammode) {formatstring(infoscores, "\fd%d \f7éliminations", hudplayer()->frags); textsize = 75;}
+        else {formatstring(infoscores, "\fd%d \f7- \fc%d", getteamfrags(hudplayer()->team), getteamfrags(hudplayer()->team == 1 ? 2 : 1)); textsize = 50;}
+
+        int tw = text_width(infoscores);
+        float tsz = 0.04f*min(screenw, screenh)/textsize,
+              tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*pos*min(screenw, screenh) - textsize*tsz;
+        pushhudmatrix();
+        hudmatrix.translate(tx, ty, 0);
+        hudmatrix.scale(tsz, tsz, 1);
+        flushhudmatrix();
+        draw_text(infoscores, 0, 0);
+        pophudmatrix();
+    }
+
+    void rendertimer(int textsize = 100, float pos = 11.9f)
+    {
+        string infotimer;
+        if(m_timed && getclientmap() && (maplimit >= 0 || intermission))
+        {
+            if(intermission) formatstring(infotimer, "Fin de la partie");
+            else
+            {
+                int secs = max(maplimit-lastmillis + 999, 0)/1000;
+                formatstring(infotimer, "%d:%02d", secs/60, secs%60);
+            }
+        }
+
+        int tw = text_width(infotimer);
+        float tsz = 0.04f*min(screenw, screenh)/textsize,
+              tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*pos*min(screenw, screenh) - textsize*tsz;
+        pushhudmatrix();
+        hudmatrix.translate(tx, ty, 0);
+        hudmatrix.scale(tsz, tsz, 1);
+        flushhudmatrix();
+        draw_text(infotimer, 0, 0);
+        pophudmatrix();
+    }
+
     void drawmessages(int killstreak, string str_pseudovictime, int n_aptitudevictime, string str_pseudoacteur, int n_killstreakacteur, float killdistance)
     {
+        renderscores();
+        rendertimer();
+
         if(ispaused()) return;
         decal_message = 0, need_message1 = true, need_message2 = true;
 

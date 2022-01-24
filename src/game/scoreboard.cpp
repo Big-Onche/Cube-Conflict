@@ -207,6 +207,11 @@ namespace game
         }
     });
 
+    int getteamfrags(int team)
+    {
+        return teaminfos[team-1].frags;
+    }
+
     ICOMMAND(getteamscore, "i", (int *team),
     {
         if(m_teammode && validteam(*team))
@@ -218,4 +223,3 @@ namespace game
 
     void showscores(bool on) { UI::holdui("scoreboard", on); }
 }
-
