@@ -277,15 +277,7 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
     settexture("media/interface/shadow.png", 3);
     bgquad(0, 0, w, h);
 
-    if(caption)
-    {
-        int tw = text_width(caption);
-        float tsz = 0.04f*min(w, h)/FONTH,
-              tx = 0.5f*(w - tw*tsz), ty = h - 0.075f*1.5f*min(w, h) - FONTH*tsz;
-        pushhudtranslate(tx, ty, tsz);
-        draw_text(caption, -1230, 145);
-        pophudmatrix();
-    }
+
 
     glDisable(GL_BLEND);
 }
@@ -338,7 +330,7 @@ void restorebackground(int w, int h, bool force)
 }
 
 float loadprogress = 0;
-int nbtexte = rnd(8);
+int nbtexte = rnd(11);
 int textetimer, pointstimer = 0;
 
 static const struct loadingtextinfo { const char *loadingtext_FR, *loadingtext_EN; } loadingtext[] =
@@ -352,6 +344,8 @@ static const struct loadingtextinfo { const char *loadingtext_FR, *loadingtext_E
     {"mise en place des bons pixels aux bons endroits",          "putting the right pixels in the right places"},
     {"chargement des textures (non je déconne il n'y en a pas)", "loading textures (just kidding, there are no textures)"},
     {"truquage des élections présidentielles",                   "rigging presidential elections"},
+    {"augmentation des dégâts des armes cheatées",               "buffing the most powerful weapons"},
+    {"réduction des dégâts des armes les plus nulles",           "nerfing the most pointless weapons"},
 };
 
 void renderprogressview(int w, int h, float bar, const char *text)   // also used during loading
@@ -400,10 +394,10 @@ void renderprogressview(int w, int h, float bar, const char *text)   // also use
         textetimer += curtime;
         pointstimer += curtime;
 
-        if(textetimer>3000) {nbtexte = rnd(8); textetimer = 0;}
+        if(textetimer>3000) {nbtexte = rnd(11); textetimer = 0;}
         if(pointstimer>1000) pointstimer = 0;
 
-        defformatstring(petitpoints, "%s", pointstimer < 250 ? "." : pointstimer < 500 ? ".." : pointstimer < 750 ? "..." : "");
+        defformatstring(petitpoints, "%s", pointstimer < 250 ? "..." : pointstimer < 500 ? "" : pointstimer < 750 ? "." : "..");
         defformatstring(text, "%s%s", langage ? loadingtext[nbtexte].loadingtext_EN : loadingtext[nbtexte].loadingtext_FR, petitpoints);
 
         draw_text(text, 0, 0);
