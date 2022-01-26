@@ -92,7 +92,7 @@ static const struct danceinfo { const char *dancename; int danceprice; } customs
 };
 
 //HUD
-extern bool suicided;
+extern bool suicided, holdflag;
 extern string str_pseudotueur, str_armetueur;
 extern int n_aptitudetueur, n_aptitudevictime;
 

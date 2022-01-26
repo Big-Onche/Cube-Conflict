@@ -372,6 +372,12 @@ struct ctfclientmode : clientmode
 
     void drawhud(gameent *d, int w, int h)
     {
+        loopv(flags)
+        {
+            if(flags[i].owner == player1) {settexture("media/interface/hud/drapeau.png"); bgquad(w-130, h-260, 115, 115);}
+        }
+
+        pushhudscale(h/1800.0f);
         pushhudscale(2);
         pophudmatrix();
         resethudshader();
@@ -690,7 +696,6 @@ struct ctfclientmode : clientmode
     {
         return max(0, RESPAWNSECS-(lastmillis-d->lastpain)/1000);
     }
-
 
 	bool aihomerun(gameent *d, ai::aistate &b)
 	{

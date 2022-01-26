@@ -28,7 +28,7 @@ namespace game
     {
         string infoscores;
         if(m_ctf) {formatstring(infoscores, "\fd%d \f7- \fc%d", cmode->getteamscore(hudplayer()->team), cmode->getteamscore(hudplayer()->team == 1 ? 2 : 1)); textsize = 50;}
-        else if (!m_teammode) {formatstring(infoscores, "\fd%d \f7éliminations", hudplayer()->frags); textsize = 75;}
+        else if (!m_teammode) {formatstring(infoscores, langage ? "\fd%d \f7frags" : "\fd%d \f7éliminations", hudplayer()->frags); textsize = 75;}
         else {formatstring(infoscores, "\fd%d \f7- \fc%d", getteamfrags(hudplayer()->team), getteamfrags(hudplayer()->team == 1 ? 2 : 1)); textsize = 50;}
 
         int tw = text_width(infoscores);
@@ -47,7 +47,7 @@ namespace game
         string infotimer;
         if(m_timed && getclientmap() && (maplimit >= 0 || intermission))
         {
-            if(intermission) formatstring(infotimer, "Fin de la partie");
+            if(intermission) formatstring(infotimer, langage ? "Time's up !" : "Fin de la partie");
             else
             {
                 int secs = max(maplimit-lastmillis + 999, 0)/1000;
@@ -82,7 +82,7 @@ namespace game
             {
                 case 3: formatstring(streakmsg, "%s \fc(x%d)", langage ? "You are hot !" : "Triplette !", killstreak); break;
                 case 5: formatstring(streakmsg, "%s \fc(x%d)", langage ? "You are on fire !" : "Pentaplette !", killstreak); break;
-                case 10: formatstring(streakmsg, "%s \fc(x%d)", langage ? "YYou are unstoppable !" : "Décaplette !", killstreak); break;
+                case 10: formatstring(streakmsg, "%s \fc(x%d)", langage ? "You are unstoppable !" : "Décaplette !", killstreak); break;
                 case 20: formatstring(streakmsg, "%s \fc(x%d)", langage ? "You are a god !" : "Eicoplette !", killstreak); break;
                 case 30: formatstring(streakmsg, "%s \fc(x%d)", langage ? "Are you cheating ?" : "Triaconplette !", killstreak); break;
                 default : need_message1 = false;
@@ -120,12 +120,12 @@ namespace game
         if(m_ctf)
         {
             string infomsg;
-            if(totalmillis-ctfmessage1<=3000) {formatstring(infomsg, "\f9Notre équipe a marqué un point !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-            if(totalmillis-ctfmessage2<=3000) {formatstring(infomsg, "\f3L'équipe ennemie a marqué un point."); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-            if(totalmillis-ctfmessage3<=3000) {formatstring(infomsg, "\f9Notre équipe a récupéré son drapeau !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-            if(totalmillis-ctfmessage4<=3000) {formatstring(infomsg, "\f3L'équipe ennemie a récupéré son drapeau."); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-            if(totalmillis-ctfmessage5<=3000) {formatstring(infomsg, "\f9Notre équipe a volé le drapeau ennemi !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-            if(totalmillis-ctfmessage6<=3000) {formatstring(infomsg, "\f3L'équipe ennemie a volé notre drapeau !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis-ctfmessage1<=3000) {formatstring(infomsg, langage ? "\f9We scored a point!" : "\f9Notre équipe a marqué un point !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis-ctfmessage2<=3000) {formatstring(infomsg, langage ? "\f3The enemy team has scored a point." : "\f3L'équipe ennemie a marqué un point."); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis-ctfmessage3<=3000) {formatstring(infomsg, langage ? "\f9We recovered our flag!" : "\f9Notre équipe a récupéré son drapeau !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis-ctfmessage4<=3000) {formatstring(infomsg, langage ? "\f3The enemy team has recovered their flag" : "\f3L'équipe ennemie a récupéré son drapeau."); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis-ctfmessage5<=3000) {formatstring(infomsg, langage ? "\f9We stole the enemy flag !" : "\f9Notre équipe a volé le drapeau ennemi !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis-ctfmessage6<=3000) {formatstring(infomsg, langage ? "\f3The enemy team stole our flag." : "\f3L'équipe ennemie a volé notre drapeau !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
         }
 
 
@@ -161,11 +161,11 @@ namespace game
                     f->privilege>=PRIV_ADMIN ? formatstring(color, "\fc") : formatstring(color, "\f7");
                     if(f->state==CS_DEAD) formatstring(color, "\fg") ;
                 }
-                formatstring(spectatormsg, "Spectateur : %s%s (%s)", color, colorname(f), langage ? aptitudes[n_aptitudevictime].apt_nomEN : aptitudes[n_aptitudevictime].apt_nomFR);
+                formatstring(spectatormsg, langage ? "Spectator : %s%s (%s)" : "Spectateur : %s%s (%s)", color, colorname(f), langage ? aptitudes[n_aptitudevictime].apt_nomEN : aptitudes[n_aptitudevictime].apt_nomFR);
             }
             else
             {
-                formatstring(spectatormsg, "Spectateur : Caméra libre");
+                formatstring(spectatormsg, langage ? "Spectator: Free Camera" : "Spectateur : Caméra libre");
             }
             rendermessage(spectatormsg, 75, 1.0f);
         }
@@ -186,10 +186,9 @@ namespace game
 
         gameent *d = hudplayer();
         if(d->state==CS_EDITING || d->state==CS_SPECTATOR) return;
-        else
+        else if(cmode)
         {
-            pushhudscale(h/1800.0f);
-            if(cmode) cmode->drawhud(d, w, h);
+            cmode->drawhud(d, w, h);
             pophudmatrix();
         }
 
