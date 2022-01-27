@@ -369,7 +369,7 @@ static struct itemstat { int add, max, sound; const char *name; int icon, info; 
     {10,    40,    S_ITEMAMMO,   "FEU D'ARTIFICE",   HICON_SIZE, GUN_ARTIFICE},
     {30,   120,    S_ITEMAMMO,   "GLOCK",            HICON_SIZE, GUN_GLOCK},
     //Super armes
-    {  1,     1,    S_ITEMAMMO,   "BOMBE NUCLEAIRE", HICON_SIZE, GUN_S_NUKE},
+    {  2,     2,    S_ITEMAMMO,   "BOMBE NUCLEAIRE", HICON_SIZE, GUN_S_NUKE},
     {300,  1000,    S_ITEMAMMO,   "GAU-8",           HICON_SIZE, GUN_S_GAU8},
     { 40,   120,    S_ITEMAMMO,   "MINI-ROQUETTES",  HICON_SIZE, GUN_S_ROQUETTES},
     { 20,    60,    S_ITEMAMMO,   "CAMPOUZE 2000",   HICON_SIZE, GUN_S_CAMPOUZE},
@@ -569,7 +569,7 @@ struct gamestate
             case I_BOUCLIEROR:
             case I_BOUCLIERMAGNETIQUE:
             case I_ARMUREASSISTEE:
-                armour = min(parmourtype==4 && type!=I_ARMUREASSISTEE ? armour+500 : armour+is.add, parmourtype==4 ? 3000 : is.max);
+                armour = min(parmourtype==4 && type!=I_ARMUREASSISTEE ? armour+(aptitude==11 && aptisort>0 ? 1000 : 500) : armour+is.add, parmourtype==4 ? 3000 : is.max);
                 if(type==I_ARMUREASSISTEE)health = min(health+300, maxhealth);
                 if(parmourtype!=4)armourtype = is.info;
                 break;
