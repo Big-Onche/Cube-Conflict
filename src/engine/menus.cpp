@@ -1,7 +1,6 @@
 #include "engine.h"
 #include "cubedef.h"
 
-
 ICOMMAND(getgravedir, "i", (int *graveID), result(customstombes[*graveID].tombemenudir));
 
 void notifywelcome()
@@ -56,7 +55,7 @@ void applychanges()
 COMMAND(applychanges, "");
 ICOMMAND(pendingchanges, "b", (int *idx), { if(needsapply.inrange(*idx)) result(needsapply[*idx].desc); else if(*idx < 0) intret(needsapply.length()); });
 
-VAR(uimusic, 0, 1, 1);
+bool uimusic = true;
 VARP(veryfirstlaunch, 0, 1, 1);
 static int lastmainmenu = -1;
 
@@ -67,7 +66,7 @@ void menuprocess()
         lastmainmenu = mainmenu;
         execident("mainmenutoggled");
     }
-    if(uimusic) {musicmanager(0, true); uimusic = 0;}
+    if(uimusic) {musicmanager(0); uimusic = false;}
     if(mainmenu && !isconnected(true) && !UI::hascursor())
     {
         if(veryfirstlaunch) {UI::showui("firstlaunch"); veryfirstlaunch = 0;}

@@ -762,7 +762,7 @@ extern void initmumble();
 extern void closemumble();
 extern void updatemumble();
 
-extern void musicmanager(int track, bool noambiance);
+extern void musicmanager(int track);
 extern void stopmusic();
 // grass
 extern void loadgrassshaders();

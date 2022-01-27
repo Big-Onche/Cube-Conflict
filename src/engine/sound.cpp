@@ -1,6 +1,7 @@
 // sound.cpp: basic positional sound using sdl_mixer
 
 #include "engine.h"
+#include "cubedef.h"
 
 #ifdef __APPLE__
   #include "SDL2_mixer/SDL_mixer.h"
@@ -169,7 +170,7 @@ SVARF(audiodriver, AUDIODRIVER, { shouldinitaudio = true; initwarning("sound con
 VARF(sound, 0, 1, 1, { shouldinitaudio = true; initwarning("sound configuration", INIT_RESET, CHANGE_SOUND); });
 VARF(soundchans, 1, 512, 512, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 VARF(soundfreq, 0, 44100, 48000, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
-VARF(soundbufferlen, 128, 2048, 4096, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
+VARF(soundbufferlen, 128, 3072, 4096, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 
 bool initaudio()
 {
@@ -295,10 +296,13 @@ COMMANDN(music, startmusic, "ss");
 static struct songsinfo { string file, looped; } songs[] =
 {
     {"musiques/menu.ogg", "0"},
+    {"musiques/winning.ogg", "0"},
+    {"musiques/loosing.ogg", "0"},
 };
 
-void musicmanager(int track, bool noambiance) //CubeConflict, gestion des musiques
+void musicmanager(int track) //CubeConflict, gestion des musiques
 {
+    if(musicstream) return;
     startmusic(songs[track].file, songs[track].looped);
 }
 
@@ -483,7 +487,6 @@ void resetchannels()
     channels.shrink(0);
 }
 
-
 void clear_sound()
 {
     closemumble();
@@ -526,6 +529,7 @@ void stopmapsound(extentity *e)
 
 void checkmapsounds()
 {
+    if(mainmenu) return;
     const vector<extentity *> &ents = entities::getents();
     loopv(ents)
     {
@@ -597,15 +601,6 @@ void syncchannels()
 }
 
 VARP(minimizedsounds, 0, 0, 1);
-
-void soundmenu_cleanup()
-{
-    stopmusic();
-    stopsounds();
-    stopmapsounds();
-    checkmapsounds();
-    syncchannels();
-}
 
 void updatesounds()
 {
@@ -797,6 +792,13 @@ void resetsound()
 }
 
 COMMAND(resetsound, "");
+
+void soundmenu_cleanup()
+{
+    stopmusic();
+    stopsounds();
+    uimusic = true;
+}
 
 #ifdef WIN32
 

@@ -114,7 +114,7 @@ extern float wateramplitude;
 extern bool usesteam;
 extern string pseudoaleatoire;
 extern void genpseudo(bool forcename, int langue);
-extern bool conserveurofficiel;
+extern bool conserveurofficiel, uimusic;
 extern int langage, UI_menutabs, UI_smiley, UI_cape, UI_tombe, UI_voix, UI_custtab;
 
 extern void loadsave();
