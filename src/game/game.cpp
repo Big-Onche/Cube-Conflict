@@ -1208,7 +1208,7 @@ namespace game
     }
 
     VARP(teamcrosshair, 0, 1, 1);
-    VARP(hitcrosshair, 0, 425, 1000);
+    VARP(hitcrosshair, 0, 200, 1000);
 
     const char *defaultcrosshair(int index)
     {
