@@ -1410,9 +1410,9 @@ void modifyorient(float yaw, float pitch)
     }
 }
 
-void mousemove(int dx, int dy)
+void mousemove(int dx, int dy, bool sortprecision)
 {
-    if(!game::allowmouselook()) return;
+    if(!game::allowmouselook() || sortprecision) return;
     float cursens = sensitivity, curaccel = mouseaccel;
     if(zoom)
     {
@@ -1434,6 +1434,7 @@ void mousemove(int dx, int dy)
 
 void bougersouris()
 {
+    if(game::player1->aptitude==APT_MAGICIEN && game::player1->aptisort2) return;
     mousemove(rnd(60), rnd(60));
     mousemove(-rnd(60), -rnd(60));
 }

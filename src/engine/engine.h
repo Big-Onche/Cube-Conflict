@@ -637,7 +637,7 @@ extern void textinput(bool on, int mask = ~0);
 
 // physics
 extern void modifyorient(float yaw, float pitch);
-extern void mousemove(int dx, int dy);
+extern void mousemove(int dx, int dy, bool sortprecision = false);
 extern bool overlapsdynent(const vec &o, float radius);
 extern void rotatebb(vec &center, vec &radius, int yaw, int pitch, int roll = 0);
 
