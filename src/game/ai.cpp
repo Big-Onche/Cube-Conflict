@@ -1110,7 +1110,7 @@ namespace ai
             d->crouching = -1;
         }
 
-        if(d->aptisort3 && d->aptitude==APT_PHYSICIEN) switch(rnd(60)) {case 1: d->jumping = true;}
+        if(d->aptisort3 && d->aptitude==APT_PHYSICIEN) switch(rnd(30)) {case 1: d->jumping = true;}
         else if(d->gunselect==GUN_ARTIFICE || d->gunselect==GUN_SMAW || d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_ROQUETTES || d->jointmillis) d->jumping = true;
 		else if(!d->ai->dontmove) jumpto(d, b, d->ai->spot);
 
