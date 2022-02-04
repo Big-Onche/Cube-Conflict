@@ -374,7 +374,7 @@ struct ctfclientmode : clientmode
     {
         loopv(flags)
         {
-            if(flags[i].owner == player1) {settexture("media/interface/hud/drapeau.png"); bgquad(w-130, h-260, 115, 115);}
+            if(flags[i].owner == player1) {settexture("media/interface/hud/drapeau_ennemi.png"); bgquad(w-130, h-260, 115, 115);}
         }
 
         pushhudscale(h/1800.0f);
