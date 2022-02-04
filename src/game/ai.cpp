@@ -49,15 +49,15 @@ namespace ai
     VARF(IA_lvl, 0, 2, 4,
         switch(IA_lvl)
         {
-            case 0: IA_rndlvl = 45; return;
-            case 1: IA_rndlvl = 55; return;
-            case 2: IA_rndlvl = 65; return;
+            case 0: IA_rndlvl = 39; return;
+            case 1: IA_rndlvl = 51; return;
+            case 2: IA_rndlvl = 63; return;
             case 3: IA_rndlvl = 75; return;
-            case 4: IA_rndlvl = 85; return;
+            case 4: IA_rndlvl = 88; return;
         }
     );
 
-    ICOMMAND(addbots, "s", (char *s), loopi(IA_number){addmsg(N_ADDBOT, "ri", IA_rndlvl+rnd(6));} );
+    ICOMMAND(addbots, "s", (char *s), loopi(IA_number){addmsg(N_ADDBOT, "ri", IA_rndlvl+rnd(7));} );
     ICOMMAND(delbot, "", (), addmsg(N_DELBOT, "r"));
     ICOMMAND(botlimit, "i", (int *n), addmsg(N_BOTLIMIT, "ri", *n));
     ICOMMAND(botbalance, "i", (int *n), addmsg(N_BOTBALANCE, "ri", *n));
