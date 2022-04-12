@@ -878,10 +878,12 @@ static partrenderer *parts[] =
     new quadrenderer("media/particle/bulles.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_RND4),
     new quadrenderer("media/particle/neige.png", PT_PART|PT_FLIP|PT_RND4|PT_COLLIDE, -1),            // colliding snow
     new trailrenderer("media/particle/pluie.png", PT_TRAIL|PT_LERP|PT_HFLIP),
+    new trailrenderer("media/particle/neige.png", PT_TRAIL|PT_LERP|PT_HFLIP),
     new trailrenderer("media/particle/nuage_1.png", PT_TRAIL),
     new trailrenderer("media/particle/nuage_2.png", PT_TRAIL),
     new trailrenderer("media/particle/nuage_3.png", PT_TRAIL),
     new trailrenderer("media/particle/nuage_4.png", PT_TRAIL),
+    new trailrenderer("media/particle/arcenciel.png", PT_TRAIL),
     &lightnings,                                                                               // lightning
     &fireballs,                                                                                // explosion fireball
     &pulsebursts,                                                                              // pulse burst
@@ -1290,7 +1292,7 @@ void regularshape(int type, int radius, int color, int dir, int num, int fade, c
                 d.sub(from);
                 if(windoffset) d.add(vec(windoffset/2+rnd(windoffset), windoffset/2+rnd(windoffset), 0));
                 d.normalize().mul(to.dist(camera1->o)<=radius*4?-vel:vel);
-                particle *np = newparticle(spawnz, d, 2000, type, color, 5, -70);;
+                particle *np = newparticle(spawnz, d, 3000, type, color, 5, -70);;
                 np->fixedfade = true;
                 np->val = floorHeight;
         }
@@ -1421,6 +1423,9 @@ static void makeparticles(entity &e)
         case 14: //Clouds/Nuages
             newparticle(e.o, offsetvec(e.o, e.attr4, 1000*3+(e.attr5*300)), 1, PART_NUAGE1+e.attr2, partcloudcolour, 100+(e.attr3*10));
             break;
+        case 15: //Rainbow/Arc-en-ciel
+            if(n_ambiance==8) newparticle(e.o, offsetvec(e.o, e.attr4, 1000*3+(e.attr5*300)), 1, PART_RAINBOW, 0xAAAAAA, 100+(e.attr3*10));
+            break;
         case 32: //lens flares - plain/sparkle/sun/sparklesun <red> <green> <blue>
         case 33:
         case 34:
@@ -1432,7 +1437,9 @@ static void makeparticles(entity &e)
             //The new, optimized weather code! :D --Q009
             //Contient quelques modifications pour Cube Conflict
             //see readme_SE.txt
-            if(n_ambiance==4) {loopi((particles_lod*32)+3) regularshape(PART_RAIN, max(1+e.attr2, 1), 0x888888, 44, 50, 0, e.o, 0.6f, 0, -1100, 70, true); }
+            if(n_ambiance==4 || n_ambiance==8) {loopi((particles_lod*32)+3) regularshape(PART_RAIN, max(1+e.attr2, 1), n_ambiance==8 ? 0xAAAAAA : 0x888888, 44, n_ambiance==8 ? 5 : 50, 0, e.o, 0.6f, 0, -1100, 70, true); }
+            if(n_ambiance==8) {loopi((particles_lod*32)+3) regularshape(PART_NEIGE, max(1+e.attr2, 1), n_ambiance==8 ? 0xAAAAAA : 0x888888, 44, 10, 0, e.o, 1.2f, 0, -550, 120, true); }
+            //regularshape(PART_SNOW, max(1+e.attr2, 1), 0x777777, 44, e.attr2>=128?30:20, 0, e.o, e.attr1==77?1:3, e.attr1==77?200:201, e.attr1==77?350:1000, e.attr3, true);
             break;
         }
         default:

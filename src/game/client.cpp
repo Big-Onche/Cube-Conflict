@@ -1,7 +1,7 @@
 #include "game.h"
 #include "cubedef.h"
 
-VAR(n_ambiance, 0, 0, 7);
+VAR(n_ambiance, 0, 0, 8);
 VAR(n_map, 0, 0, 99);
 VARR(mapofficielle, 0, 0, 1);
 
