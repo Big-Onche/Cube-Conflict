@@ -566,7 +566,7 @@ namespace game
         //return !((gameent *)d)->lasttaunt || lastmillis-((gameent *)d)->lasttaunt>=5000;
     }
 
-    VARFP(player1_danse, 0, 0, 7,
+    VARFP(player1_danse, 0, 0, 8,
     {
         if(stat[VOI_CORTEX+player1_danse]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette voix !"); playsound(S_ERROR); return;}
         addmsg(N_SENDDANSE, "ri", player1_danse);

@@ -9,7 +9,7 @@ float crosshairalpha = 1;
 VAR(UI_smiley, 0, 0, 9);
 VAR(UI_cape, 0, 0, 13);
 VAR(UI_tombe, 0, 0, 10);
-VAR(UI_voix, 0, 0, 6);
+VAR(UI_voix, 0, 0, 7);
 VAR(UI_custtab, 0, 0, 3);
 
 namespace game
