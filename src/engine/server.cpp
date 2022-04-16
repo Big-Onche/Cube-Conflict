@@ -644,7 +644,11 @@ void serverslice(bool dedicated, uint timeout)   // main server update, called f
     if(totalmillis-laststatus>120*1000)   // display bandwidth stats, useful for server ops
     {
         laststatus = totalmillis;
-        if(nonlocalclients || serverhost->totalSentData || serverhost->totalReceivedData) logoutf("Status : %d/%d clients | <<<%.1f K/sec UP>>> | >>>%.1f K/sec DOWN<<<", nonlocalclients, maxclients, serverhost->totalSentData/60.0f/1024, serverhost->totalReceivedData/60.0f/1024);
+        string servtime;
+        time_t t = time(NULL);
+        size_t len = strftime(servtime, sizeof(servtime), "%d-%m-%Y, %Hh %Mmin %Ssec", localtime(&t));
+        servtime[min(len, sizeof(servtime)-1)] = '\0';
+        if(nonlocalclients || serverhost->totalSentData || serverhost->totalReceivedData) logoutf("Status : %d/%d clients | <<<%.1f K/sec UP>>> | >>>%.1f K/sec DOWN<<< | %s", nonlocalclients, maxclients, serverhost->totalSentData/60.0f/1024, serverhost->totalReceivedData/60.0f/1024, servtime);
         serverhost->totalSentData = serverhost->totalReceivedData = 0;
     }
 
@@ -666,7 +670,11 @@ void serverslice(bool dedicated, uint timeout)   // main server update, called f
                 c.peer->data = &c;
                 string hn;
                 copystring(c.hostname, (enet_address_get_host_ip(&c.peer->address, hn, sizeof(hn))==0) ? hn : "unknown/inconnue");
-                logoutf("Connected/En ligne : %s", c.hostname);
+                string contime;
+                time_t t = time(NULL);
+                size_t len = strftime(contime, sizeof(contime), "%d-%m-%Y, %Hh %Mmin %Ssec", localtime(&t));
+                contime[min(len, sizeof(contime)-1)] = '\0';
+                logoutf("Connected/En ligne : %s | %s", c.hostname, contime);
                 int reason = server::clientconnect(c.num, c.peer->address.host);
                 if(reason) disconnect_client(c.num, reason);
                 break;
@@ -682,7 +690,11 @@ void serverslice(bool dedicated, uint timeout)   // main server update, called f
             {
                 client *c = (client *)event.peer->data;
                 if(!c) break;
-                logoutf("Disconnected/Hors-ligne : (%s)", c->hostname);
+                string contime;
+                time_t t = time(NULL);
+                size_t len = strftime(contime, sizeof(contime), "%d-%m-%Y, %Hh %Mmin %Ssec", localtime(&t));
+                contime[min(len, sizeof(contime)-1)] = '\0';
+                logoutf("Disconnected/Hors-ligne : %s | %s", c->hostname, contime);
                 server::clientdisconnect(c->num);
                 delclient(c);
                 break;
@@ -1004,9 +1016,14 @@ bool isdedicatedserver() { return dedicatedserver; }
 void rundedicatedserver()
 {
     dedicatedserver = true;
-    servambient = rnd(7)+1;
-    logoutf("Server ON, waiting for clients...");
-    logoutf("Serveur ON, en attente de clients...");
+    servambient = rnd(8)+1;
+    string servtime;
+    time_t t = time(NULL);
+    size_t len = strftime(servtime, sizeof(servtime), "%d-%m-%Y, %Hh %Mmin %Ssec", localtime(&t));
+    servtime[min(len, sizeof(servtime)-1)] = '\0';
+    logoutf("Serveur ON | Server ON | %s", servtime);
+    logoutf("IP : %s | Port : %d", serverip, serverport);
+    logoutf("Version : %s %d", server::devstade(), server::protocolversion());
     logoutf("------------------------------------");
 #ifdef WIN32
     SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);

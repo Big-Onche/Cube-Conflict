@@ -1687,7 +1687,7 @@ namespace game
 
             case N_SERVAMBIENT:
             {
-                if(multiplayer())n_ambiance = getint(p);
+                if(multiplayer(true))n_ambiance = getint(p);
                 break;
             }
 

@@ -115,6 +115,7 @@ namespace server
     extern void serverinforeply(ucharbuf &req, ucharbuf &p);
     extern void serverupdate();
     extern int protocolversion();
+    extern const char *devstade();
     extern int laninfoport();
     extern int serverport();
     extern const char *defaultmaster();

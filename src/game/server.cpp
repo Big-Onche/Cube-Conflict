@@ -2112,7 +2112,7 @@ namespace server
         }
         if(next)
         {
-            servambient = rnd(7)+1;
+            servambient = rnd(8)+1;
             curmaprotation = findmaprotation(gamemode, smapname);
             if(curmaprotation >= 0) nextmaprotation();
             else curmaprotation = smapname[0] ? max(findmaprotation(gamemode, ""), 0) : 0;
@@ -2787,7 +2787,7 @@ namespace server
 
     void sendservinfo(clientinfo *ci)
     {
-        sendf(ci->clientnum, 1, "ri6ss", N_SERVINFO, ci->clientnum, PROTOCOL_VERSION, ci->sessionid, multiplayer()? servambient : n_ambiance, serverpass[0] ? 1 : 0, serverdesc, serverauth);
+        sendf(ci->clientnum, 1, "ri6ss", N_SERVINFO, ci->clientnum, PROTOCOL_VERSION, ci->sessionid, multiplayer(false)? servambient : n_ambiance, serverpass[0] ? 1 : 0, serverdesc, serverauth);
     }
 
     void noclients()
@@ -4025,6 +4025,7 @@ namespace server
     }
 
     int protocolversion() { return PROTOCOL_VERSION; }
+    const char *devstade() { return DEV_STADE; }
 
     #include "aiman.h"
 }
