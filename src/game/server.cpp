@@ -3158,7 +3158,7 @@ namespace server
                         loopi(nbjoueurs>servjoueursminimum) aiman::deleteai();
                     }
 
-                    logoutf("Username/Pseudonyme : %s", ci->name);
+                    logoutf("Infos : %s (%s/%s lvl %d)", ci->name, aptitudes[n_aptitudetueur].apt_nomEN, aptitudes[n_aptitudetueur].apt_nomFR, ci->level);
                     break;
                 }
 

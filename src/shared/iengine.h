@@ -483,7 +483,7 @@ extern void cleanragdoll(dynent *d);
 
 extern int maxclients;
 
-enum { DISC_NONE = 0, DISC_EOP, DISC_LOCAL, DISC_KICK, DISC_MSGERR, DISC_IPBAN, DISC_PRIVATE, DISC_MAXCLIENTS, DISC_TIMEOUT, DISC_OVERFLOW, DISC_PASSWORD, DISC_NUM };
+enum { DISC_NONE = 0, DISC_EOP, DISC_LOCAL, DISC_KICK, DISC_MSGERR, DISC_IPBAN, DISC_PRIVATE, DISC_MAXCLIENTS, DISC_TIMEOUT, DISC_OVERFLOW, DISC_PASSWORD, DISC_NUM, DISC_NORMAL };
 
 extern void *getclientinfo(int i);
 extern ENetPeer *getclientpeer(int i);
@@ -534,7 +534,7 @@ extern servinfo *getservinfo(int i);
 // client
 extern void sendclientpacket(ENetPacket *packet, int chan);
 extern void flushclient();
-extern void disconnect(bool async = false, bool cleanup = true);
+extern void disconnect(bool async = false, bool cleanup = true, bool volontaire = false);
 extern bool isconnected(bool attempt = false, bool local = true);
 extern const ENetAddress *connectedpeer();
 extern bool multiplayer(bool msg = true);

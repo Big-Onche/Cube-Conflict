@@ -146,11 +146,17 @@ void reconnect(const char *serverpassword)
     connectserv(connectname, connectport, serverpassword);
 }
 
-void disconnect(bool async, bool cleanup)
+void disconnect(bool async, bool cleanup, bool volontaire)
 {
     if(curpeer)
     {
-        if(!discmillis)
+        if(volontaire)
+        {
+            enet_peer_disconnect(curpeer, DISC_NORMAL);
+            enet_host_flush(clienthost);
+            discmillis = totalmillis;
+        }
+        else if(!discmillis)
         {
             enet_peer_disconnect(curpeer, DISC_NONE);
             enet_host_flush(clienthost);
@@ -163,7 +169,7 @@ void disconnect(bool async, bool cleanup)
         }
         curpeer = NULL;
         discmillis = 0;
-        conoutf("disconnected");
+        conoutf(langage ? "Disconnected" : "Déconnecté");
         conserveurofficiel = false;
         game::gamedisconnect(cleanup);
         clearpostfx();
@@ -189,7 +195,7 @@ void trydisconnect(bool local)
     else if(curpeer)
     {
         conoutf("attempting to disconnect...");
-        disconnect(!discmillis);
+        disconnect(!discmillis, true, true);
     }
     else if(local && haslocalclients()) localdisconnect();
     else conoutf(CON_WARN, "not connected");

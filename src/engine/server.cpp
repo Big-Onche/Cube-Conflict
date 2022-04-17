@@ -300,7 +300,8 @@ const char *disconnectreason(int reason)
         case DISC_TIMEOUT: return "connection timed out/la connexion a expirée";
         case DISC_OVERFLOW: return "overflow";
         case DISC_PASSWORD: return "invalid password/mot de passe invalide";
-        default: return NULL;
+        case DISC_NORMAL: return "voluntary/volontaire";
+        default: return "crash ?";
     }
 }
 
@@ -313,7 +314,7 @@ void disconnect_client(int n, int reason)
     const char *msg = disconnectreason(reason);
     string s;
     if(msg) formatstring(s, "Disconnected/Hors-ligne : %s | Reason/Cause : %s", clients[n]->hostname, msg);
-    else formatstring(s, "Disconnected/Hors-ligne :%s", clients[n]->hostname);
+    else formatstring(s, "Disconnected/Hors-ligne : %s", clients[n]->hostname);
     logoutf("%s", s);
     server::sendservmsg(s);
 }
@@ -646,7 +647,7 @@ void serverslice(bool dedicated, uint timeout)   // main server update, called f
         laststatus = totalmillis;
         string servtime;
         time_t t = time(NULL);
-        size_t len = strftime(servtime, sizeof(servtime), "%d-%m-%Y, %Hh %Mmin %Ssec", localtime(&t));
+        size_t len = strftime(servtime, sizeof(servtime), "%d-%m-%Y %Hh %Mmin %Ssec", localtime(&t));
         servtime[min(len, sizeof(servtime)-1)] = '\0';
         if(nonlocalclients || serverhost->totalSentData || serverhost->totalReceivedData) logoutf("Status : %d/%d clients | <<<%.1f K/sec UP>>> | >>>%.1f K/sec DOWN<<< | %s", nonlocalclients, maxclients, serverhost->totalSentData/60.0f/1024, serverhost->totalReceivedData/60.0f/1024, servtime);
         serverhost->totalSentData = serverhost->totalReceivedData = 0;
@@ -672,7 +673,7 @@ void serverslice(bool dedicated, uint timeout)   // main server update, called f
                 copystring(c.hostname, (enet_address_get_host_ip(&c.peer->address, hn, sizeof(hn))==0) ? hn : "unknown/inconnue");
                 string contime;
                 time_t t = time(NULL);
-                size_t len = strftime(contime, sizeof(contime), "%d-%m-%Y, %Hh %Mmin %Ssec", localtime(&t));
+                size_t len = strftime(contime, sizeof(contime), "%d-%m-%Y %Hh %Mmin %Ssec", localtime(&t));
                 contime[min(len, sizeof(contime)-1)] = '\0';
                 logoutf("Connected/En ligne : %s | %s", c.hostname, contime);
                 int reason = server::clientconnect(c.num, c.peer->address.host);
@@ -692,9 +693,10 @@ void serverslice(bool dedicated, uint timeout)   // main server update, called f
                 if(!c) break;
                 string contime;
                 time_t t = time(NULL);
-                size_t len = strftime(contime, sizeof(contime), "%d-%m-%Y, %Hh %Mmin %Ssec", localtime(&t));
+                size_t len = strftime(contime, sizeof(contime), "%d-%m-%Y %Hh %Mmin %Ssec", localtime(&t));
                 contime[min(len, sizeof(contime)-1)] = '\0';
-                logoutf("Disconnected/Hors-ligne : %s | %s", c->hostname, contime);
+                const char *msg = disconnectreason(event.data);
+                logoutf("Disconnected/Hors-ligne : %s | %s | %s", c->hostname, contime, msg);
                 server::clientdisconnect(c->num);
                 delclient(c);
                 break;
@@ -1019,14 +1021,16 @@ void rundedicatedserver()
     servambient = rnd(8)+1;
     string servtime;
     time_t t = time(NULL);
-    size_t len = strftime(servtime, sizeof(servtime), "%d-%m-%Y, %Hh %Mmin %Ssec", localtime(&t));
+    size_t len = strftime(servtime, sizeof(servtime), "%d-%m-%Y %Hh %Mmin %Ssec", localtime(&t));
     servtime[min(len, sizeof(servtime)-1)] = '\0';
-    logoutf("Serveur ON | Server ON | %s", servtime);
+    logoutf("ON | %s", servtime);
     logoutf("IP : %s | Port : %d", serverip, serverport);
     logoutf("Version : %s %d", server::devstade(), server::protocolversion());
     logoutf("------------------------------------");
 #ifdef WIN32
     SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
+    setupconsole();
+    if(conwindow) ModifyMenu(appmenu, 0, MF_BYPOSITION|MF_STRING, MENU_HIDECONSOLE, "Hide Console");
     for(;;)
     {
         MSG msg;
