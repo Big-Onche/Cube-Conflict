@@ -346,6 +346,8 @@ static const struct loadingtextinfo { const char *loadingtext_FR, *loadingtext_E
     {"truquage des élections présidentielles",                   "rigging presidential elections"},
     {"augmentation des dégâts des armes cheatées",               "buffing the most powerful weapons"},
     {"réduction des dégâts des armes les plus nulles",           "nerfing the most pointless weapons"},
+    {"ERREUR 410 :D",                                            "Connection lost | Please wait - attempting to reestablish"},
+    {"injection de la 5ème dose de rappel",                      "injection of the fifth booster dose"},
 };
 
 void renderprogressview(int w, int h, float bar, const char *text)   // also used during loading
@@ -394,7 +396,7 @@ void renderprogressview(int w, int h, float bar, const char *text)   // also use
         textetimer += curtime;
         pointstimer += curtime;
 
-        if(textetimer>3000) {nbtexte = rnd(11); textetimer = 0;}
+        if(textetimer>3000) {nbtexte = rnd(13); textetimer = 0;}
         if(pointstimer>1000) pointstimer = 0;
 
         defformatstring(petitpoints, "%s", pointstimer < 250 ? "..." : pointstimer < 500 ? "" : pointstimer < 750 ? "." : "..");
