@@ -1015,17 +1015,44 @@ static bool dedicatedserver = false;
 
 bool isdedicatedserver() { return dedicatedserver; }
 
+string CCversion = "Fichier de version indisponible";
+char tempccver[32];
+
+void getCCversion()
+{
+    stream *versionfile = openfile("config/version", "r");
+    if(!versionfile) return;
+
+    char buf[50];
+    char verpt1[32];
+    int verpt2 = 0;
+
+    while(versionfile->getline(buf, sizeof(buf)))
+    {
+        int i;
+
+        for(i = 0; (i < 500 && buf[i] != '\0'); i++)
+            buf[i] = buf[i];
+
+        sscanf(buf, "%s %d", verpt1, &verpt2);
+    }
+    formatstring(CCversion, "%s %d", verpt1, verpt2);
+
+    versionfile->close();
+}
+
 void rundedicatedserver()
 {
     dedicatedserver = true;
     servambient = rnd(8)+1;
+    getCCversion();
     string servtime;
     time_t t = time(NULL);
     size_t len = strftime(servtime, sizeof(servtime), "%d-%m-%Y %Hh %Mmin %Ssec", localtime(&t));
     servtime[min(len, sizeof(servtime)-1)] = '\0';
     logoutf("ON | %s", servtime);
     logoutf("IP : %s | Port : %d", serverip, serverport);
-    logoutf("Version : %s %d", server::devstade(), server::protocolversion());
+    logoutf("Version : %s", CCversion);
     logoutf("------------------------------------");
 #ifdef WIN32
     SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
