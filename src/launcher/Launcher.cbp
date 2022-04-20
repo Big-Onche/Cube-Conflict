@@ -15,7 +15,6 @@
 				<Option projectLibDirsRelation="0" />
 				<Compiler>
 					<Add option="-O2" />
-					<Add option="-m32" />
 				</Compiler>
 			</Target>
 		</Build>

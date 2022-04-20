@@ -16,8 +16,3 @@ MessageBoxW(
     __in_opt LPCWSTR lpText,
     __in_opt LPCWSTR lpCaption,
     __in UINT uType);
-#ifdef UNICODE
-#define MessageBox  MessageBoxW
-#else
-#define MessageBox  MessageBoxA
-#endif // !UNICODE
