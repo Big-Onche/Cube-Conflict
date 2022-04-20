@@ -1473,7 +1473,12 @@ namespace server
             if(authdesc && authdesc[0]) formatstring(msg, "%s claimed %s as '\fs\f5%s\fr' [\fs\f0%s\fr]", colorname(ci), name, authname, authdesc);
             else formatstring(msg, "%s claimed %s as '\fs\f5%s\fr'", colorname(ci), name, authname);
         }
-        else formatstring(msg, "%s %s %s", colorname(ci), val ? "claimed" : "relinquished", name);
+        else
+        {
+            formatstring(msg, "%s %s %s", colorname(ci), val ? "claimed" : "relinquished", name);
+            logoutf("%s", msg);
+        }
+
         packetbuf p(MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
         putint(p, N_SERVMSG);
         sendstring(msg, p);
@@ -4025,7 +4030,6 @@ namespace server
     }
 
     int protocolversion() { return PROTOCOL_VERSION; }
-    const char *devstade() { return DEV_STADE; }
 
     #include "aiman.h"
 }
