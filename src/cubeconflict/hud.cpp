@@ -24,54 +24,10 @@ namespace game
         pophudmatrix();
     }
 
-    void renderscores(int textsize = 100, float pos = 12.5f)
-    {
-        string infoscores;
-        if(m_ctf) {formatstring(infoscores, "\fd%d \f7- \fc%d", cmode->getteamscore(hudplayer()->team), cmode->getteamscore(hudplayer()->team == 1 ? 2 : 1)); textsize = 50;}
-        else if (!m_teammode) {formatstring(infoscores, langage ? "\fd%d \f7frags" : "\fd%d \f7éliminations", hudplayer()->frags); textsize = 75;}
-        else {formatstring(infoscores, "\fd%d \f7- \fc%d", getteamfrags(hudplayer()->team), getteamfrags(hudplayer()->team == 1 ? 2 : 1)); textsize = 50;}
-
-        int tw = text_width(infoscores);
-        float tsz = 0.04f*min(screenw, screenh)/textsize,
-              tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*pos*min(screenw, screenh) - textsize*tsz;
-        pushhudmatrix();
-        hudmatrix.translate(tx, ty, 0);
-        hudmatrix.scale(tsz, tsz, 1);
-        flushhudmatrix();
-        draw_text(infoscores, 0, 0);
-        pophudmatrix();
-    }
-
-    void rendertimer(int textsize = 100, float pos = 11.9f)
-    {
-        string infotimer;
-        if(m_timed && getclientmap() && (maplimit >= 0 || intermission))
-        {
-            if(intermission) formatstring(infotimer, langage ? "Time's up !" : "Fin de la partie");
-            else
-            {
-                int secs = max(maplimit-lastmillis + 999, 0)/1000;
-                formatstring(infotimer, "%d:%02d", secs/60, secs%60);
-            }
-        }
-
-        int tw = text_width(infotimer);
-        float tsz = 0.04f*min(screenw, screenh)/textsize,
-              tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*pos*min(screenw, screenh) - textsize*tsz;
-        pushhudmatrix();
-        hudmatrix.translate(tx, ty, 0);
-        hudmatrix.scale(tsz, tsz, 1);
-        flushhudmatrix();
-        draw_text(infotimer, 0, 0);
-        pophudmatrix();
-    }
-
     void drawmessages(int killstreak, string str_pseudovictime, int n_aptitudevictime, string str_pseudoacteur, int n_killstreakacteur, float killdistance)
     {
-        renderscores();
-        rendertimer();
-
         if(ispaused()) return;
+
         decal_message = 0, need_message1 = true, need_message2 = true;
 
         if(totalmillis-message1<=2500)
@@ -171,6 +127,8 @@ namespace game
         }
     }
 
+    int colortimer = 0;
+
     void gameplayhud(int w, int h)
     {
         if(ispaused())
@@ -261,7 +219,7 @@ namespace game
 
         pushhudmatrix();
 
-        //////////////////////////////////////// RENDU DES IMAGES ////////////////////////////////////////
+        //////////////////////////////////////////////////////////////// RENDU DES IMAGES ////////////////////////////////////////////////////////////////
 
         if(d->state==CS_DEAD || player1->state==CS_SPECTATOR)
         {
@@ -352,7 +310,7 @@ namespace game
         settexture("media/interface/hud/barrexpvide.png", 3);
         bgquad(lxbarvide, h-29, 966, 40);
 
-        dynent *o = intersectclosest(d->o, worldpos, d, zoom ? 40 : 25); //actor->o.dist(d->o)/18.f;
+        dynent *o = intersectclosest(d->o, worldpos, d, zoom ? 40 : 25);
         if(o && o->type==ENT_PLAYER && !isteam(player1->team, ((gameent *)o)->team) && totalmillis-lastshoot<=1000 && player1->o.dist(o->o)<guns[d->gunselect].hudrange)
         {
             float pour1 = ((gameent *)o)->health, pour2 = ((gameent *)o)->health > ((gameent *)o)->maxhealth ? ((gameent *)o)->health : ((gameent *)o)->maxhealth;
@@ -372,7 +330,17 @@ namespace game
             bgquad(lxhbarvide, h-screenh/1.5f-10, 483, 40);
         }
 
-        //////////////////////////////////////// RENDU DES NOMBRES ////////////////////////////////////////
+        float hudscores = 0.5f*(w - 320);
+        settexture("media/interface/hud/scores.png", 3);
+        bgquad(hudscores, h-screenh, 320, 100);
+
+        if(m_ctf)
+        {
+            settexture("media/interface/hud/scores_ctf.png", 3);
+            bgquad(hudscores, h-screenh, 320, 100);
+        }
+
+        //////////////////////////////////////////////////////////////// RENDU DES NOMBRES ////////////////////////////////////////////////////////////////
 
         int decal_number = 0;
 
@@ -402,7 +370,6 @@ namespace game
         if(player1->jointmillis) {draw_textf("%d", 135, h-233-decal_number, d->jointmillis/1000); decal_number +=130;}
 
         defformatstring(infobarrexp, "%d/%d XP - LVL %d", neededxp-(needxp-stat[STAT_XP]), neededxp, cclvl);
-
         int tw = text_width(infobarrexp);
         float tsz = 0.4f,
               tx = 0.5f*(w - tw*tsz), ty = h - 22;
@@ -410,9 +377,52 @@ namespace game
         hudmatrix.translate(tx, ty, 0);
         hudmatrix.scale(tsz, tsz, 1);
         flushhudmatrix();
-
         draw_text(infobarrexp, 0, 0);
-
         pophudmatrix();
+
+        string infoscores;
+        if(m_ctf) {formatstring(infoscores, "\fd%d \f7- \fc%d", cmode->getteamscore(hudplayer()->team), cmode->getteamscore(hudplayer()->team == 1 ? 2 : 1));}
+        else if (!m_teammode) {formatstring(infoscores, langage ? "\fd%d \f7frags" : "\fd%d \f7éliminations", hudplayer()->frags);}
+        else {formatstring(infoscores, "\fd%d \f7- \fc%d", getteamfrags(hudplayer()->team), getteamfrags(hudplayer()->team == 1 ? 2 : 1));}
+
+        int tw2 = text_width(infoscores);
+        float tsz2 = 0.6f,
+              tx2 = 0.5f*(w - tw2*tsz2);
+        pushhudmatrix();
+        hudmatrix.translate(tx2, 0, 0);
+        hudmatrix.scale(tsz2, tsz2, 1);
+        flushhudmatrix();
+        draw_text(infoscores, 0, +30);
+        pophudmatrix();
+
+        if(m_timed && getclientmap() && (maplimit >= 0 || intermission))
+        {
+            string infotimer, color;
+            if(intermission) formatstring(infotimer, langage ? "\fcEND" : "\fcFINI");
+            else
+            {
+                int secs = max(maplimit-lastmillis + 999, 0)/1000;
+
+                if(secs/60<1 && secs%60<30)
+                {
+                    colortimer += curtime;
+                    if(colortimer>1000) colortimer = 0;
+                    formatstring(color, colortimer > 500 ? "\fc" : "\f7");
+                }
+                else formatstring(color, "\f7");
+                formatstring(infotimer, "%s%d:%02d", color, secs/60, secs%60);
+            }
+
+            int tw3 = text_width(infotimer);
+            float tsz3 = 0.4f,
+                  tx3 = 0.5f*(w - tw3*tsz3);
+            pushhudmatrix();
+            hudmatrix.translate(tx3, 0, 0);
+            hudmatrix.scale(tsz3, tsz3, 1);
+            flushhudmatrix();
+            draw_text(infotimer, 0, +164);
+
+            pophudmatrix();
+        }
     }
 }
