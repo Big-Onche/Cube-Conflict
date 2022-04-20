@@ -10,7 +10,7 @@
 				<Option output="../../Cube Conflict" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Release" />
 				<Option type="0" />
-				<Option compiler="msvc8" />
+				<Option compiler="msvc10" />
 				<Option projectIncludeDirsRelation="0" />
 				<Option projectLibDirsRelation="0" />
 				<Compiler>

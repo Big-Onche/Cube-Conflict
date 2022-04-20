@@ -238,13 +238,13 @@ void AddControls(HWND hWnd)
     if(NeedFrench) UpdateInfo = UpdateAvailable ? " (mise à jour disponible)" : UnableToCheckForUpdate ? " (impossible de vérifier les mises à jour)" : " (à jour)";
     else UpdateInfo = UpdateAvailable ? " (update available)" : UnableToCheckForUpdate ? " (unable to check for update)" : " (up to date)";
 
-    std::string str = (NeedFrench ? "Version du jeu : " : "Game version : ") + InstalledCCversion + UpdateInfo;
+    std::string str = (NeedFrench ? " Version du jeu : " : "Game version : ") + InstalledCCversion + UpdateInfo;
     BSTR b = _com_util::ConvertStringToBSTR(str.c_str());
     LPWSTR BottomInfo = b;
     SysFreeString(b);
 
     //Affichage de la version du jeu installée
-    CreateWindowW(L"static", BottomInfo, WS_VISIBLE | WS_CHILD, 5, 535, 500, 20, hWnd, NULL, NULL, NULL);
+    CreateWindowW(L"static", BottomInfo, WS_VISIBLE | WS_CHILD, 0, 535, 1000, 22, hWnd, NULL, NULL, NULL);
 
     //Affichage du bouton "Jouer"
     hWnd = CreateWindowW(L"Button", NeedFrench ? L"Jouer !" : L"Play !", WS_VISIBLE | WS_CHILD, 614, 320, 200, 40, hWnd, (HMENU)LAUNCH_GAME, NULL, NULL);
