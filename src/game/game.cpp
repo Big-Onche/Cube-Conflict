@@ -333,6 +333,20 @@ namespace game
                                 playsound(S_REGENJUNKIE, &r->o, 0, 0, 0 , 50, -1, 125);
                             }
                         }
+                        else if((r->o.dist(h->o)/18.f<6 && r->health<r->maxhealth+200 && r->state==CS_ALIVE)&&(r->aptitude==APT_VAMPIRE))
+                        {
+                            switch(rnd(35))
+                            {
+                                case 0:
+                                r->health+=30;
+                                vec irays(r->o);
+                                irays.sub(h->o);
+                                irays.normalize().mul(1300.0f);
+                                particle_flying_flare(h->o, irays, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
+                                if(r->health>r->maxhealth+200) r->health=r->maxhealth+200;
+                                playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
+                            }
+                        }
                     }
                 }
             }
@@ -462,6 +476,20 @@ namespace game
                                 particle_flying_flare(h->o, irays, 400, PART_SPARK, 0xFF00FF, 0.5f+rnd(3), 100);
                                 if(players[i]->mana>150) players[i]->mana=150;
                                 playsound(S_REGENJUNKIE, &h->o, 0, 0, 0 , 50, -1, 125);
+                            }
+                        }
+                        else if((players[i]->o.dist(h->o)/18.f<6 && players[i]->health<players[i]->maxhealth+200 && h->state==CS_ALIVE)&&(players[i]->aptitude==APT_VAMPIRE))
+                        {
+                            switch(rnd(35))
+                            {
+                                case 0:
+                                players[i]->health+=30;
+                                vec irays(players[i]->o);
+                                irays.sub(h->o);
+                                irays.normalize().mul(1300.0f);
+                                particle_flying_flare(h->o, irays, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
+                                if(players[i]->health>players[i]->maxhealth+200) players[i]->health=players[i]->maxhealth+200;
+                                playsound(S_REGENMEDIGUN, &h->o, 0, 0, 0 , 50, -1, 125);
                             }
                         }
                     }
@@ -732,20 +760,23 @@ namespace game
         else if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission) return;
 
         //////////////////////////////SONS//////////////////////////////
-        switch (actor->killstreak) //Sons Risitas Killstreak
+        if(!langage)
         {
-            case 3:
-                playsound(S_RISIKILL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300);
-                if(camera1->o.dist(actor->o) >= 250) playsound(S_RISIKILLLOIN, &actor->o, NULL, 0, 0 , 200, -1, 2000);
-                break;
-            case 5: case 7:
-                playsound(S_BIGRISIKILL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300);
-                if(camera1->o.dist(actor->o) >= 250) playsound(S_BIGRISIKILLLOIN, &actor->o, NULL, 0, 0 , 200, -1, 750);
-                break;
-            case 10: case 15: case 20:
-                playsound(S_GIGARISIKILL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300);
-                if(camera1->o.dist(actor->o) >= 250) playsound(S_GIGARISIKILLLOIN, &actor->o, NULL, 0, 0 , 200, -1, 1500);
-                break;
+            switch (actor->killstreak) //Sons Risitas Killstreak
+            {
+                case 3:
+                    playsound(S_RISIKILL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300);
+                    if(camera1->o.dist(actor->o) >= 250) playsound(S_RISIKILLLOIN, &actor->o, NULL, 0, 0 , 200, -1, 2000);
+                    break;
+                case 5: case 7:
+                    playsound(S_BIGRISIKILL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300);
+                    if(camera1->o.dist(actor->o) >= 250) playsound(S_BIGRISIKILLLOIN, &actor->o, NULL, 0, 0 , 200, -1, 750);
+                    break;
+                case 10: case 15: case 20:
+                    playsound(S_GIGARISIKILL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300);
+                    if(camera1->o.dist(actor->o) >= 250) playsound(S_GIGARISIKILLLOIN, &actor->o, NULL, 0, 0 , 200, -1, 1500);
+                    break;
+            }
         }
 
         switch(actor->gunselect)
