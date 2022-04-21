@@ -124,9 +124,11 @@ void CheckCurrentCCVersion(HWND hWnd, bool NeedInfo = false) //Récupération de l
 
     if(!NeedInfo) return;
 
-    if(UnableToCheckForUpdate) MessageBoxW(NULL, L"Impossible de vérifier les mises à jour.", L"Recherche de mise à jour", MB_OK);
-    else if (UpdateAvailable) MessageBoxW(NULL, L"Une mise à jour est disponible !", L"Recherche de mise à jour", MB_OK);
-    else MessageBoxW(NULL, L"Votre version du jeu est à jour.", L"Recherche de mise à jour", MB_OK);
+    LPWSTR PopUpTitle =  (NeedFrench ? L"Recherche de mise à jour" : L"Check For update");
+
+    if(UnableToCheckForUpdate) MessageBoxW(NULL, NeedFrench ? L"Impossible de vérifier les mises à jour." : L"Unable to check for updates", PopUpTitle, MB_OK);
+    else if (UpdateAvailable) MessageBoxW(NULL, NeedFrench ? L"Une mise à jour est disponible !" : L"An update is available!", PopUpTitle, MB_OK);
+    else MessageBoxW(NULL, NeedFrench ? L"Votre version du jeu est à jour." : L"Your game is up to date", PopUpTitle, MB_OK);
 }
 
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
@@ -148,7 +150,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
             break;
             //////////////////////////////////////////////////////////////Menu Aide////////////////////////////////
         case HELP_MENU_ABOUT:
-            MessageBoxW(NULL, L"Launcher Cube Conflict v0.8\n\nCode source libre et disponible via src/launcher", L"A propos", MB_OK);
+            MessageBoxW(NULL, L"Launcher Cube Conflict v0.8.2\n\nCode source libre et disponible via src/launcher", L"A propos", MB_OK);
             break;
         case HELP_MENU_OPENWEBSITE:
             system("start http://www.cube-conflict.com");
@@ -179,7 +181,6 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
         LoadImages();
         mciSendString("open \"media/musiques/launcher.mp3\" type mpegvideo alias mp3", NULL, 0, NULL);
         mciSendString("play mp3", NULL, 0, NULL);
-        //PlaySound("test.wav", NULL, SND_ASYNC | SND_LOOP);
         AddMenus(hWnd);
         AddControls(hWnd);
         break;
