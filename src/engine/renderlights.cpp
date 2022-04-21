@@ -1900,7 +1900,7 @@ FVAR(smprec, 1e-3f, 1, 1e3f);
 FVAR(smcubeprec, 1e-3f, 1, 1e3f);
 FVAR(smspotprec, 1e-3f, 1, 1e3f);
 
-VARFP(smsize, 10, 12, 14, cleanupshadowatlas());
+VARFP(smsize, 8, 12, 14, cleanupshadowatlas());
 VARFP(smdepthprec, 0, 0, 2, cleanupshadowatlas());
 VAR(smsidecull, 0, 1, 1);
 VAR(smviscull, 0, 1, 1);
