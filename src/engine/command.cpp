@@ -3176,7 +3176,6 @@ void writecfg(const char *name)
     f->printf("// automatically written on exit, DO NOT MODIFY\n// delete this file to have %s overwrite these settings\n// modify settings in game, or put settings in %s to override anything\n\n", game::defaultconfig(), game::autoexec());
     game::writeclientinfo(f);
     f->printf("\n");
-    writecrosshairs(f);
     vector<ident *> ids;
     enumerate(idents, ident, id, ids.add(&id));
     ids.sortname();
@@ -3198,9 +3197,6 @@ void writecfg(const char *name)
         ident &id = *ids[i];
         if(id.type==ID_ALIAS && id.flags&IDF_PERSIST && !(id.flags&IDF_OVERRIDDEN)) switch(id.valtype)
         {
-        case VAL_STR:
-            if(!id.val.s[0]) break;
-            if(!validateblock(id.val.s)) { f->printf("%s = %s\n", escapeid(id), escapestring(id.val.s)); break; }
         case VAL_FLOAT:
         case VAL_INT:
             f->printf("%s = [%s]\n", escapeid(id), id.getstr()); break;
