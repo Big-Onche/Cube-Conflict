@@ -3173,7 +3173,7 @@ void writecfg(const char *name)
 {
     stream *f = openutf8file(path(name && name[0] ? name : game::savedconfig(), true), "w");
     if(!f) return;
-    f->printf("// automatically written on exit, DO NOT MODIFY\n// delete this file to have %s overwrite these settings\n// modify settings in game, or put settings in %s to override anything\n\n", game::defaultconfig(), game::autoexec());
+    f->printf("// Sauvegarde de la configuration du jeu.\n// Saved game settings.\n\n");
     game::writeclientinfo(f);
     f->printf("\n");
     vector<ident *> ids;
@@ -3202,7 +3202,6 @@ void writecfg(const char *name)
             f->printf("%s = [%s]\n", escapeid(id), id.getstr()); break;
         }
     }
-    f->printf("\n");
     writecompletions(f);
     delete f;
 }
