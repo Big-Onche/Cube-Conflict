@@ -373,8 +373,8 @@ void gl_checkextensions()
     const char *vendor = (const char *)glGetString(GL_VENDOR);
     const char *renderer = (const char *)glGetString(GL_RENDERER);
     const char *version = (const char *)glGetString(GL_VERSION);
-    conoutf(CON_INIT, "Renderer: %s (%s)", renderer, vendor);
-    conoutf(CON_INIT, "Driver: %s", version);
+    logoutf("Renderer: %s (%s)", renderer, vendor);
+    logoutf("Driver: %s", version);
 
 #ifdef __APPLE__
     // extern int mac_osversion();
@@ -521,7 +521,7 @@ void gl_checkextensions()
     }
 
     const char *glslstr = (const char *)glGetString(GL_SHADING_LANGUAGE_VERSION);
-    conoutf(CON_INIT, "GLSL: %s", glslstr ? glslstr : "unknown");
+    logoutf("GLSL: %s", glslstr ? glslstr : "unknown");
 
     uint glslmajorversion, glslminorversion;
     if(glslstr && sscanf(glslstr, " %u.%u", &glslmajorversion, &glslminorversion) == 2) glslversion = glslmajorversion*100 + glslminorversion;
