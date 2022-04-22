@@ -1020,7 +1020,7 @@ char tempccver[32];
 
 void getCCversion()
 {
-    stream *versionfile = openfile("config/version", "r");
+    stream *versionfile = openfile("config/gameversion.cfg", "r");
     if(!versionfile) return;
 
     char buf[50];
