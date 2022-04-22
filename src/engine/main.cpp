@@ -1180,6 +1180,9 @@ bool initsteam()
     else return true;
 }
 
+bool rewritelangage = false;
+int newlangage;
+
 bool usesteam = false;
 
 int main(int argc, char **argv)
@@ -1226,6 +1229,8 @@ int main(int argc, char **argv)
             case 'w': scr_w = clamp(atoi(&argv[i][2]), SCR_MINW, SCR_MAXW); if(!findarg(argc, argv, "-h")) scr_h = -1; break;
             case 'h': scr_h = clamp(atoi(&argv[i][2]), SCR_MINH, SCR_MAXH); if(!findarg(argc, argv, "-w")) scr_w = -1; break;
             case 'f': fullscreen = atoi(&argv[i][2]); break;
+            case 'a': langage = 0; rewritelangage = true; newlangage = 0; break;
+            case 'b': langage = 1; rewritelangage = true; newlangage = 1; break;
             case 'l':
             {
                 char pkgdir[] = "media/";
@@ -1318,14 +1323,16 @@ int main(int argc, char **argv)
 
     logoutf("init: cfg");
     initing = INIT_LOAD;
+
+    switch(newlangage)
+    {
+        case 0: execfile("config/keymap_FR.cfg"); break;
+        case 1: execfile("config/keymap_EN.cfg");
+    }
+
     execfile("config/stdedit.cfg");
     execfile(game::gameconfig());
     execfile("config/sound.cfg");
-    switch(langage)
-    {
-        case 0: execfile("config/keymap_FR.cfg"); execfile("config/ui_FR.cfg"); execfile("config/default_FR.cfg"); execfile("config/astuces_FR.cfg"); break;
-        case 1: execfile("config/keymap_EN.cfg"); execfile("config/ui_EN.cfg"); execfile("config/default_EN.cfg"); execfile("config/astuces_EN.cfg");
-    }
     execfile("config/heightmap.cfg");
     execfile("config/blendbrush.cfg");
     if(game::savedservers()) execfile(game::savedservers(), false);
@@ -1337,10 +1344,18 @@ int main(int argc, char **argv)
 
     if(!execfile(game::savedconfig(), false))
     {
-        execfile(game::defaultconfig());
+        execfile(newlangage ? "config/default_EN.cfg" : "config/default_FR.cfg");
         writecfg(game::restoreconfig());
     }
     execfile(game::autoexec(), false);
+
+    if(rewritelangage) langage = newlangage;
+
+    switch(langage)
+    {
+        case 0: if(rewritelangage)execfile("config/keymap_FR.cfg"); execfile("config/ui_FR.cfg"); execfile("config/default_FR.cfg"); execfile("config/astuces_FR.cfg"); break;
+        case 1: if(rewritelangage)execfile("config/keymap_EN.cfg"); execfile("config/ui_EN.cfg"); execfile("config/default_EN.cfg"); execfile("config/astuces_EN.cfg");
+    }
 
     renderbackground(langage ? "Loading..." : "Chargement...");
 

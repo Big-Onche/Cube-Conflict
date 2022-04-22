@@ -3,7 +3,7 @@
 
 using namespace std;
 
-string LAUNCHER_VERSION = "0.8.5";
+string LAUNCHER_VERSION = "0.8.6";
 
 int wx = 1000; //Largeur de la fenêtre
 int wh = 600; //Hauteur de la fenêtre
@@ -65,6 +65,25 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
     return 0;
 }
 
+void LaunchGame(HWND hWnd, int ForceBits = 0)
+{
+    string GameBin = ForceBits==1 ? "bin/" : ForceBits==2 ? "bin64/" : Is64BitWindows ? "bin64/" : "bin/";
+    string GamePath = "cubeconflict.exe \"-u$HOME/My Games/Cube Conflict\" -glog.txt ";
+    string GameLang = Language == 0 ? "-a" : "-b";
+
+    string FullPath = GameBin + GamePath + GameLang;
+
+    LPTSTR FullPathLPTSTR = new TCHAR[FullPath.size() + 1];
+    strcpy(FullPathLPTSTR, FullPath.c_str());
+
+    if(WinExec(FullPathLPTSTR, SW_SHOW)>31) DestroyWindow(hWnd);
+    else
+    {
+        MessageBeep(MB_ICONWARNING);
+        MessageBoxW(NULL, Language==0 ? L"Une erreur est survenue, essayez de réinstaller votre jeu." : L"An error as occured, try reinstalling your game.", Language==0 ? L"Erreur" : L"Error", MB_OK);
+    }
+}
+
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
     switch(msg)
@@ -74,10 +93,10 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
         {
             //////////////////////////////////////////////////////////////Menu Launcher////////////////////////////////
         case LAUNCHER_MENU_LAUNCHCCX86:
-            WinExec("bin/cubeconflict.exe \"-u$HOME/My Games/Cube Conflict\" -glog.txt", SW_SHOW);
+            LaunchGame(hWnd, 1);
             break;
             case LAUNCHER_MENU_LAUNCHCCX64:
-            WinExec("bin64/cubeconflict.exe \"-u$HOME/My Games/Cube Conflict\" -glog.txt", SW_SHOW);
+            LaunchGame(hWnd, 2);
             break;
         case LAUNCHER_MENU_EXIT:
             DestroyWindow(hWnd);
@@ -115,9 +134,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
             break;
             //////////////////////////////////////////////////////////////Reste de la fenêtre////////////////////////////////
         case LAUNCH_GAME:
-            if(Is64BitWindows)WinExec("bin64/cubeconflict.exe \"-u$HOME/My Games/Cube Conflict\" -glog.txt", SW_SHOW);
-            else WinExec("bin/cubeconflict.exe \"-u$HOME/My Games/Cube Conflict\" -glog.txt", SW_SHOW);
-            DestroyWindow(hWnd);
+            LaunchGame(hWnd);
             break;
         }
         break;

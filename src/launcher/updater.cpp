@@ -61,7 +61,15 @@ void CheckCurrentCCVersion(HWND hWnd, bool NeedInfo) //Récupération de la derniè
 
     LPWSTR PopUpTitle =  (Language==0 ? L"Recherche de mise à jour" : L"Check For update");
 
-    if(UnableToCheckForUpdate) MessageBoxW(NULL, Language==0 ? L"Impossible de vérifier les mises à jour." : L"Unable to check for updates", PopUpTitle, MB_OK);
-    else if (UpdateAvailable) MessageBoxW(NULL, Language==0 ? L"Une mise à jour est disponible !" : L"An update is available!", PopUpTitle, MB_OK);
+    if(UnableToCheckForUpdate)
+    {
+        MessageBeep(MB_ICONWARNING);
+        MessageBoxW(NULL, Language==0 ? L"Impossible de vérifier les mises à jour." : L"Unable to check for updates", PopUpTitle, MB_OK);
+    }
+    else if (UpdateAvailable)
+    {
+        MessageBeep(MB_ICONWARNING);
+        MessageBoxW(NULL, Language==0 ? L"Une mise à jour est disponible !" : L"An update is available!", PopUpTitle, MB_OK);
+    }
     else MessageBoxW(NULL, Language==0 ? L"Votre version du jeu est à jour." : L"Your game is up to date", PopUpTitle, MB_OK);
 }
