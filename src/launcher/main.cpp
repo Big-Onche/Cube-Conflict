@@ -3,12 +3,12 @@
 
 using namespace std;
 
-string LAUNCHER_VERSION = "0.8.4";
+string LAUNCHER_VERSION = "0.8.5";
 
 int wx = 1000; //Largeur de la fenêtre
 int wh = 600; //Hauteur de la fenêtre
 
-bool NeedFrench = true;
+int Language = 0; //0 = FR, 1 = EN
 
 BOOL Is64BitWindows() //Check l'OS pour lancer la bonne version du jeu
 {
@@ -86,16 +86,16 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
         case HELP_MENU_ABOUT:
             {
                 std::string str;
-                switch(NeedFrench)
+                switch(Language)
                 {
-                    case TRUE: str = "Launcher Cube Conflict v" + LAUNCHER_VERSION + "\n\nCode source libre et disponible via src/launcher"; break;
-                    case FALSE: str = "Cube Conflict Launcher v" + LAUNCHER_VERSION + "\n\nSource code available at src/launcher"; break;
+                    case 0: str = "Launcher Cube Conflict v" + LAUNCHER_VERSION + "\n\nCode source libre et disponible via src/launcher"; break;
+                    case 1: str = "Cube Conflict Launcher v" + LAUNCHER_VERSION + "\n\nSource code available at src/launcher"; break;
                 }
                 BSTR b = _com_util::ConvertStringToBSTR(str.c_str());
                 LPWSTR LauncherInfo = b;
                 SysFreeString(b);
 
-                MessageBoxW(NULL, LauncherInfo, NeedFrench ? L"À propos" : L"About", MB_OK);
+                MessageBoxW(NULL, LauncherInfo, Language==0 ? L"À propos" : L"About", MB_OK);
             }
             break;
         case HELP_MENU_OPENWEBSITE:
@@ -104,8 +104,8 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
         case HELP_MENU_OPENWIKI:
             system("start https://cube-conflict.fandom.com/fr/wiki/Wiki_Cube_Conflict");
             break;
-        case LANG_MENU_SETUPFRENCH: NeedFrench = true; AddMenus(hWnd); AddControls(hWnd); break;
-        case LANG_MENU_SETUPENGLISH: NeedFrench = false; AddMenus(hWnd); AddControls(hWnd); break;
+        case LANG_MENU_SETUPFRENCH: Language = 0; AddMenus(hWnd); AddControls(hWnd); break;
+        case LANG_MENU_SETUPENGLISH: Language = 1; AddMenus(hWnd); AddControls(hWnd); break;
             //////////////////////////////////////////////////////////////Menu Outils////////////////////////////////
         case TOOLS_MENU_CHECKFORUPDATES:
             CheckCurrentCCVersion(hWnd, true);
@@ -122,6 +122,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
         }
         break;
     case WM_CREATE:
+        LoadConfigFile();
         GetInstalledCCVersion();
         CheckCurrentCCVersion(hWnd);
         LoadImages();
@@ -131,6 +132,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
         AddControls(hWnd);
         break;
     case WM_DESTROY:
+        WriteConfigFile();
         PostQuitMessage(0);
         break;
     default:
@@ -144,32 +146,32 @@ void AddMenus(HWND hWnd)
 
     //////////////////////////////////////////////////////////////Menu Launcher////////////////////////////////
     HMENU hLauncherMenu = CreateMenu();
-    AppendMenu(hLauncherMenu, MF_STRING, LAUNCHER_MENU_LAUNCHCCX86, NeedFrench ? "Lancer le jeu (32 bits)" : "Launch game (32 bits)");
-    AppendMenu(hLauncherMenu, MF_STRING, LAUNCHER_MENU_LAUNCHCCX64, NeedFrench ? "Lancer le jeu (64 bits)" : "Launch game (64 bits)");
+    AppendMenu(hLauncherMenu, MF_STRING, LAUNCHER_MENU_LAUNCHCCX86, Language==0 ? "Lancer le jeu (32 bits)" : "Launch game (32 bits)");
+    AppendMenu(hLauncherMenu, MF_STRING, LAUNCHER_MENU_LAUNCHCCX64, Language==0 ? "Lancer le jeu (64 bits)" : "Launch game (64 bits)");
     AppendMenu(hLauncherMenu, MF_SEPARATOR, NULL, NULL);
-    AppendMenu(hLauncherMenu, MF_STRING, LAUNCHER_MENU_EXIT, NeedFrench ? "Quitter" : "Quit");
+    AppendMenu(hLauncherMenu, MF_STRING, LAUNCHER_MENU_EXIT, Language==0 ? "Quitter" : "Quit");
     AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hLauncherMenu, "Launcher");
 
     //////////////////////////////////////////////////////////////Menu langue////////////////////////////////
     HMENU hLangMenu = CreateMenu();
     AppendMenu(hLangMenu, MF_STRING, LANG_MENU_SETUPFRENCH, "Français");
     AppendMenu(hLangMenu, MF_STRING, LANG_MENU_SETUPENGLISH, "English");
-    AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hLangMenu, NeedFrench ? "Langue" : "Language");
+    AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hLangMenu, Language==0 ? "Langue" : "Language");
 
     //////////////////////////////////////////////////////////////Menu outils////////////////////////////////
     HMENU hToolsMenu = CreateMenu();
-    AppendMenu(hToolsMenu, MF_STRING, TOOLS_MENU_CHECKFORUPDATES, NeedFrench ? "Vérifier les mises à jour" : "Check for updates");
+    AppendMenu(hToolsMenu, MF_STRING, TOOLS_MENU_CHECKFORUPDATES, Language==0 ? "Vérifier les mises à jour" : "Check for updates");
     AppendMenu(hToolsMenu, MF_SEPARATOR, NULL, NULL);
-    AppendMenu(hToolsMenu, MF_STRING, TOOLS_MENU_LAUNCHSERVER, NeedFrench ? "Lancer un serveur" : "Start server");
-    AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hToolsMenu, NeedFrench ? "Outils" : "Tools");
+    AppendMenu(hToolsMenu, MF_STRING, TOOLS_MENU_LAUNCHSERVER, Language==0 ? "Lancer un serveur" : "Start server");
+    AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hToolsMenu, Language==0 ? "Outils" : "Tools");
 
     //////////////////////////////////////////////////////////////Menu Aide////////////////////////////////
     HMENU hHelpMenu = CreateMenu();
-    AppendMenu(hHelpMenu, MF_STRING, HELP_MENU_ABOUT, NeedFrench ? "À propos" : "About");
+    AppendMenu(hHelpMenu, MF_STRING, HELP_MENU_ABOUT, Language==0 ? "À propos" : "About");
     AppendMenu(hHelpMenu, MF_SEPARATOR, NULL, NULL);
-    AppendMenu(hHelpMenu, MF_STRING, HELP_MENU_OPENWEBSITE, NeedFrench ? "Site web" : "Website");
+    AppendMenu(hHelpMenu, MF_STRING, HELP_MENU_OPENWEBSITE, Language==0 ? "Site web" : "Website");
     AppendMenu(hHelpMenu, MF_STRING, HELP_MENU_OPENWIKI, "Wiki");
-    AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hHelpMenu, NeedFrench ? "Aide" : "Help");
+    AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hHelpMenu, Language==0 ? "Aide" : "Help");
 
     SetMenu(hWnd, hMenu);
 }
@@ -182,10 +184,10 @@ void AddControls(HWND hWnd)
 
     //Création du texte affiché en bas à gauche (Version du jeu + mise à jour dispo oopah)
     string UpdateInfo;
-    if(NeedFrench) UpdateInfo = UpdateAvailable ? " (mise à jour disponible)" : UnableToCheckForUpdate ? " (impossible de vérifier les mises à jour)" : " (à jour)";
-    else UpdateInfo = UpdateAvailable ? " (update available)" : UnableToCheckForUpdate ? " (unable to check for update)" : " (up to date)";
+    if(Language==0) UpdateInfo = UpdateAvailable ? " (mise à jour disponible)" : UnableToCheckForUpdate ? " (impossible de vérifier les mises à jour)" : " (à jour)";
+    else if(Language==1) UpdateInfo = UpdateAvailable ? " (update available)" : UnableToCheckForUpdate ? " (unable to check for update)" : " (up to date)";
 
-    std::string str = (NeedFrench ? " Version du jeu : " : "Game version : ") + InstalledCCversion + UpdateInfo;
+    std::string str = (Language==0 ? " Version du jeu : " : "Game version : ") + InstalledCCversion + UpdateInfo;
     BSTR b = _com_util::ConvertStringToBSTR(str.c_str());
     LPWSTR BottomInfo = b;
     SysFreeString(b);
@@ -194,7 +196,7 @@ void AddControls(HWND hWnd)
     CreateWindowW(L"static", BottomInfo, WS_VISIBLE | WS_CHILD, 0, 535, 1000, 22, hWnd, NULL, NULL, NULL);
 
     //Affichage du bouton "Jouer"
-    hWnd = CreateWindowW(L"Button", NeedFrench ? L"Jouer !" : L"Play !", WS_VISIBLE | WS_CHILD, 614, 320, 200, 40, hWnd, (HMENU)LAUNCH_GAME, NULL, NULL);
+    hWnd = CreateWindowW(L"Button", Language==0 ? L"Jouer !" : L"Play !", WS_VISIBLE | WS_CHILD, 614, 320, 200, 40, hWnd, (HMENU)LAUNCH_GAME, NULL, NULL);
     hFont = CreateFont (25, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, "Roboto");
     SendMessage (hWnd, WM_SETFONT, WPARAM (hFont), TRUE);
 }

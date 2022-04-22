@@ -17,7 +17,7 @@ void GetInstalledCCVersion() //Récupération de la version installée du jeu (pour
         }
         versionFile.close();
     }
-    else {InstalledCCversion = (NeedFrench ? "Inconnue" : "Unknown");}
+    else {InstalledCCversion = (Language==0 ? "Inconnue" : "Unknown");}
 }
 
 char UpdateCheckerDlDir[256];
@@ -27,17 +27,14 @@ void CheckCurrentCCVersion(HWND hWnd, bool NeedInfo) //Récupération de la derniè
     UpdateCheckerDlDir[0] = '\0';
     if(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, UpdateCheckerDlDir) != S_OK || !UpdateCheckerDlDir[0]);
 
-    int i = 0;
-    while(i<3)
+    for (int i = 0; i < 3; i++)
     {
         switch(i)
         {
             case 0: strcat(UpdateCheckerDlDir, "\\My Games"); CreateDirectoryA(UpdateCheckerDlDir, NULL); break;
             case 1: strcat(UpdateCheckerDlDir, "\\Cube Conflict"); CreateDirectoryA(UpdateCheckerDlDir, NULL); break;
             case 2: strcat(UpdateCheckerDlDir, "\\config"); CreateDirectoryA(UpdateCheckerDlDir, NULL); break;
-
         }
-        i++;
     }
 
     strcat(UpdateCheckerDlDir, "\\lastversion.cfg");
@@ -62,9 +59,9 @@ void CheckCurrentCCVersion(HWND hWnd, bool NeedInfo) //Récupération de la derniè
 
     if(!NeedInfo) return;
 
-    LPWSTR PopUpTitle =  (NeedFrench ? L"Recherche de mise à jour" : L"Check For update");
+    LPWSTR PopUpTitle =  (Language==0 ? L"Recherche de mise à jour" : L"Check For update");
 
-    if(UnableToCheckForUpdate) MessageBoxW(NULL, NeedFrench ? L"Impossible de vérifier les mises à jour." : L"Unable to check for updates", PopUpTitle, MB_OK);
-    else if (UpdateAvailable) MessageBoxW(NULL, NeedFrench ? L"Une mise à jour est disponible !" : L"An update is available!", PopUpTitle, MB_OK);
-    else MessageBoxW(NULL, NeedFrench ? L"Votre version du jeu est à jour." : L"Your game is up to date", PopUpTitle, MB_OK);
+    if(UnableToCheckForUpdate) MessageBoxW(NULL, Language==0 ? L"Impossible de vérifier les mises à jour." : L"Unable to check for updates", PopUpTitle, MB_OK);
+    else if (UpdateAvailable) MessageBoxW(NULL, Language==0 ? L"Une mise à jour est disponible !" : L"An update is available!", PopUpTitle, MB_OK);
+    else MessageBoxW(NULL, Language==0 ? L"Votre version du jeu est à jour." : L"Your game is up to date", PopUpTitle, MB_OK);
 }

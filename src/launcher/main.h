@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <cstdio>
+#include <stdlib.h>
 #include <comutil.h>
 #include <shlobj.h>
 
@@ -23,7 +24,7 @@ extern std::string LAUNCHER_VERSION;
 #define LANG_MENU_SETUPENGLISH 10
 #define LAUNCH_GAME 11
 
-extern bool NeedFrench;
+extern int Language;
 extern int wx, wh;
 
 extern std::string InstalledCCversion, AvailableCCversion;
@@ -31,6 +32,9 @@ extern bool UnableToCheckForUpdate, UpdateAvailable;
 
 extern void CheckCurrentCCVersion(HWND hWnd, bool NeedInfo = false);
 extern void GetInstalledCCVersion();
+
+extern void LoadConfigFile();
+extern void WriteConfigFile();
 
 WINUSERAPI
 int

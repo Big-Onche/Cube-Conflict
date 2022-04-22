@@ -28,6 +28,7 @@
 			<Add library="comctl32" />
 			<Add library="shell32" />
 		</Linker>
+		<Unit filename="config.cpp" />
 		<Unit filename="main.cpp" />
 		<Unit filename="main.h" />
 		<Unit filename="manifest.xml" />
