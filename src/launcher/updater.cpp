@@ -27,7 +27,20 @@ void CheckCurrentCCVersion(HWND hWnd, bool NeedInfo) //Récupération de la derniè
     UpdateCheckerDlDir[0] = '\0';
     if(SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, UpdateCheckerDlDir) != S_OK || !UpdateCheckerDlDir[0]);
 
-    strcat(UpdateCheckerDlDir, "\\My Games\\Cube Conflict\\config\\lastversion.cfg");
+    int i = 0;
+    while(i<3)
+    {
+        switch(i)
+        {
+            case 0: strcat(UpdateCheckerDlDir, "\\My Games"); CreateDirectoryA(UpdateCheckerDlDir, NULL); break;
+            case 1: strcat(UpdateCheckerDlDir, "\\Cube Conflict"); CreateDirectoryA(UpdateCheckerDlDir, NULL); break;
+            case 2: strcat(UpdateCheckerDlDir, "\\config"); CreateDirectoryA(UpdateCheckerDlDir, NULL); break;
+
+        }
+        i++;
+    }
+
+    strcat(UpdateCheckerDlDir, "\\lastversion.cfg");
 
     if (S_OK == URLDownloadToFile(NULL, "http://cube-conflict.com/lastversion.cfg", UpdateCheckerDlDir, 0, NULL))
     {
