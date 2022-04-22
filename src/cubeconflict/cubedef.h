@@ -90,6 +90,7 @@ static const struct danceinfo { const char *dancename; int danceprice; } customs
     {"Delavier",   500},
     {"Praud",      500},
     {"Malleville", 1500},
+    {"Raoult",     1500},
 };
 
 //HUD
