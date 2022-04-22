@@ -1,31 +1,14 @@
-#include <windows.h>
-#include <fstream>
-#include <string>
-#include <cstdio>
-#include <comutil.h>
-
-#pragma comment(lib, "Winmm.lib")
-#pragma comment(lib, "Urlmon.lib")
-#pragma comment(lib, "comsuppw.lib")
-
+#include "main.h"
 #include "resource.h"
-
-#define LAUNCHER_MENU_LAUNCHCCX86 1
-#define LAUNCHER_MENU_LAUNCHCCX64 2
-#define LAUNCHER_MENU_EXIT 3
-#define HELP_MENU_ABOUT 4
-#define HELP_MENU_OPENWEBSITE 5
-#define HELP_MENU_OPENWIKI 6
-#define TOOLS_MENU_CHECKFORUPDATES 7
-#define TOOLS_MENU_LAUNCHSERVER 8
-#define LANG_MENU_SETUPFRENCH 9
-#define LANG_MENU_SETUPENGLISH 10
-#define LAUNCH_GAME 11
 
 using namespace std;
 
+string LAUNCHER_VERSION = "0.8.3";
+
 int wx = 1000; //Largeur de la fenêtre
 int wh = 600; //Hauteur de la fenêtre
+
+bool NeedFrench = true;
 
 BOOL Is64BitWindows() //Check l'OS pour lancer la bonne version du jeu
 {
@@ -38,8 +21,6 @@ BOOL Is64BitWindows() //Check l'OS pour lancer la bonne version du jeu
  return FALSE;
 #endif
 }
-
-bool NeedFrench = true;
 
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
 
@@ -84,53 +65,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
     return 0;
 }
 
-string InstalledCCversion, AvailableCCversion;
-bool UnableToCheckForUpdate, UpdateAvailable;
-
-void GetInstalledCCVersion() //Récupération de la version installée du jeu (pour màj automatiques toussa toussa)
-{
-    fstream versionFile;
-    versionFile.open("config/version", ios::in);
-    if(versionFile.is_open())
-    {
-        string line;
-        while (getline(versionFile, line)) {
-            InstalledCCversion = line;
-        }
-        versionFile.close();
-    }
-    else {InstalledCCversion = (NeedFrench ? "Inconnue" : "Unknown");}
-}
-
-void CheckCurrentCCVersion(HWND hWnd, bool NeedInfo = false) //Récupération de la dernière version du jeu en ligne
-{
-    if (S_OK == URLDownloadToFile(NULL, "http://cube-conflict.com/lastversion", "config/lastversion", 0, NULL))
-    {
-        fstream lastversionFile;
-        lastversionFile.open("config/lastversion", ios::in);
-        if(lastversionFile.is_open())
-        {
-            string line;
-            while (getline(lastversionFile, line)) {
-                AvailableCCversion = line;
-            }
-            lastversionFile.close();
-
-            if(InstalledCCversion != AvailableCCversion) UpdateAvailable = true;
-        }
-        else {UnableToCheckForUpdate = true;}
-    }
-    else {UnableToCheckForUpdate = true;}
-
-    if(!NeedInfo) return;
-
-    LPWSTR PopUpTitle =  (NeedFrench ? L"Recherche de mise à jour" : L"Check For update");
-
-    if(UnableToCheckForUpdate) MessageBoxW(NULL, NeedFrench ? L"Impossible de vérifier les mises à jour." : L"Unable to check for updates", PopUpTitle, MB_OK);
-    else if (UpdateAvailable) MessageBoxW(NULL, NeedFrench ? L"Une mise à jour est disponible !" : L"An update is available!", PopUpTitle, MB_OK);
-    else MessageBoxW(NULL, NeedFrench ? L"Votre version du jeu est à jour." : L"Your game is up to date", PopUpTitle, MB_OK);
-}
-
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
     switch(msg)
@@ -150,7 +84,19 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
             break;
             //////////////////////////////////////////////////////////////Menu Aide////////////////////////////////
         case HELP_MENU_ABOUT:
-            MessageBoxW(NULL, L"Launcher Cube Conflict v0.8.2\n\nCode source libre et disponible via src/launcher", L"A propos", MB_OK);
+            {
+                std::string str;
+                switch(NeedFrench)
+                {
+                    case TRUE: str = "Launcher Cube Conflict v" + LAUNCHER_VERSION + "\n\nCode source libre et disponible via src/launcher"; break;
+                    case FALSE: str = "Cube Conflict Launcher v" + LAUNCHER_VERSION + "\n\nSource code available at src/launcher"; break;
+                }
+                BSTR b = _com_util::ConvertStringToBSTR(str.c_str());
+                LPWSTR LauncherInfo = b;
+                SysFreeString(b);
+
+                MessageBoxW(NULL, LauncherInfo, NeedFrench ? L"À propos" : L"About", MB_OK);
+            }
             break;
         case HELP_MENU_OPENWEBSITE:
             system("start http://www.cube-conflict.com");
