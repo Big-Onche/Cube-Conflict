@@ -39,6 +39,8 @@ void CheckCurrentCCVersion(HWND hWnd, bool NeedInfo) //Récupération de la derniè
 
     strcat(UpdateCheckerDlDir, "\\lastversion.cfg");
 
+    DeleteUrlCacheEntry("http://cube-conflict.com/lastversion.cfg") ;
+
     if (S_OK == URLDownloadToFile(NULL, "http://cube-conflict.com/lastversion.cfg", UpdateCheckerDlDir, 0, NULL))
     {
         fstream lastversionFile;

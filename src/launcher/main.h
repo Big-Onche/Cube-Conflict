@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <comutil.h>
 #include <shlobj.h>
+#include <wininet.h>
 
 #pragma comment(lib, "Winmm.lib")
 #pragma comment(lib, "Urlmon.lib")

@@ -3,7 +3,7 @@
 
 using namespace std;
 
-string LAUNCHER_VERSION = "0.8.7";
+string LAUNCHER_VERSION = "0.8.8";
 
 int wx = 1000; //Largeur de la fenêtre
 int wh = 600; //Hauteur de la fenêtre
@@ -141,15 +141,12 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
         case SOUND_MENU_SOUNDSETUP:
             if(PlayMusic==1)
             {
-                mciSendString("stop mp3", NULL, 0, NULL);
                 PlayMusic = 0;
                 DestroyWindow(hWnd);
                 WinExec("Cube Conflict.exe", SW_SHOW);
             }
             else
             {
-                mciSendString("open \"media/musiques/launcher.mp3\" type mpegvideo alias mp3", NULL, 0, NULL);
-                mciSendString("play mp3", NULL, 0, NULL);
                 PlayMusic = 1;
                 DestroyWindow(hWnd);
                 WinExec("Cube Conflict.exe", SW_SHOW);
