@@ -3,7 +3,7 @@ LICENCE
 
 Cube Conflict, toutes versions confondues.
 
-Copyright (C) 2013-2021 Jean Onche.
+Copyright (C) 2013-2022 Jean Onche.
 
 Ce logiciel est fourni "tel quel", sans aucune garantie formelle ou implicite. 
 En aucun cas, les auteurs ne pourront être tenus responsables de tout dommage
