@@ -30,10 +30,10 @@ void LoadImages();
 void GetNews();
 
 HICON hWindowIcon, hIconSm;
-HWND hBackground, hFavicon;
+HWND hBackground, hFavicon, hButFr, hButEn;
 HMENU hMenu;
 HFONT hFont, hFont2;
-HBITMAP hPlayButton, hBackgroundImg;
+HBITMAP hBackgroundImg, hFrFlag, hEnFlag;
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdshow)
 {
@@ -123,8 +123,8 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
         case HELP_MENU_OPENWIKI:
             system("start https://cube-conflict.fandom.com/fr/wiki/Wiki_Cube_Conflict");
             break;
-        case LANG_MENU_SETUPFRENCH: Language = 0; AddMenus(hWnd); AddControls(hWnd); break;
-        case LANG_MENU_SETUPENGLISH: Language = 1; AddMenus(hWnd); AddControls(hWnd); break;
+        case LANG_MENU_SETUPFRENCH: Language = 0; DestroyWindow(hWnd); WinExec("Cube Conflict.exe", SW_SHOW); break;
+        case LANG_MENU_SETUPENGLISH: Language = 1; DestroyWindow(hWnd); WinExec("Cube Conflict.exe", SW_SHOW); break;
             //////////////////////////////////////////////////////////////Menu Outils////////////////////////////////
         case TOOLS_MENU_CHECKFORUPDATES:
             CheckCurrentCCVersion(hWnd, true);
@@ -193,11 +193,20 @@ void AddMenus(HWND hWnd)
     SetMenu(hWnd, hMenu);
 }
 
+int ActiveBtnParam =  WS_VISIBLE | WS_CHILD | BS_BITMAP | WS_DLGFRAME;
+int InactiveBtnParam = WS_VISIBLE | WS_CHILD | BS_BITMAP | WS_DLGFRAME | WS_DISABLED;
+
 void AddControls(HWND hWnd)
 {
     //Mise en place de l'image de fond
     hBackground = CreateWindowW(L"static", NULL, WS_VISIBLE | WS_CHILD | SS_BITMAP, 0, 0, 1000, 600, hWnd, NULL, NULL, NULL);
     SendMessage(hBackground, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBackgroundImg);
+
+    //Affichage des drapeaux de langues
+    HWND hButFr = CreateWindowW(L"button", NULL, Language==0 ? InactiveBtnParam : ActiveBtnParam, 3, 490, 60, 42, hWnd, (HMENU)LANG_MENU_SETUPFRENCH, NULL, NULL);
+    SendMessageW(hButFr, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hFrFlag);
+    HWND hButEn = CreateWindowW(L"button", NULL, Language==0 ? ActiveBtnParam : InactiveBtnParam, 68, 490, 60, 42, hWnd, (HMENU)LANG_MENU_SETUPENGLISH, NULL, NULL);
+    SendMessageW(hButEn, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hEnFlag);
 
     //Création du texte affiché en bas à gauche (Version du jeu + mise à jour dispo oopah)
     string UpdateInfo;
@@ -220,5 +229,7 @@ void AddControls(HWND hWnd)
 
 void LoadImages()
 {
-    hBackgroundImg = (HBITMAP)LoadImageW(NULL, L"config/background.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    hBackgroundImg = (HBITMAP)LoadImageW(NULL, L"config/launcher/background.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    hFrFlag = (HBITMAP)LoadImageW(NULL, L"config/launcher/flag_fr.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    hEnFlag = (HBITMAP)LoadImageW(NULL, L"config/launcher/flag_en.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 }
