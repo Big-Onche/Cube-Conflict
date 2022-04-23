@@ -487,7 +487,8 @@ namespace game
                                 vec irays(players[i]->o);
                                 irays.sub(h->o);
                                 irays.normalize().mul(1300.0f);
-                                particle_flying_flare(h->o, irays, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
+                                particle_flying_flare(h->o, irays, 400, PART_SPARK, 0xFF00FF, 0.5f+rnd(3), 100);
+                                particle_flying_flare(h->o, irays, 400, PART_SANTE, 0xFF00FF, 0.5f+rnd(3), 100);
                                 if(players[i]->health>players[i]->maxhealth+200) players[i]->health=players[i]->maxhealth+200;
                                 playsound(S_REGENMEDIGUN, &h->o, 0, 0, 0 , 50, -1, 125);
                             }
@@ -849,6 +850,7 @@ namespace game
                 playsound(S_KILL);
                 message1 = totalmillis; message2 = totalmillis; copystring(str_pseudovictime, dname); n_aptitudevictime = d->aptitude; killdistance = distance;
                 if(distance>=100.f) unlockachievement(ACH_BEAUTIR);
+                if(player1->state==CS_DEAD) unlockachievement(ACH_TUEURFANTOME);
 
             }
             else if(d==player1) ////////////////////TU as été tué////////////////////

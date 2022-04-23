@@ -40,6 +40,8 @@ void addxpandcc(int nbxp, int nbcc) // Ajoute l'xp et/ou les CC
     stat[STAT_XP] += nbxp;
     stat[STAT_CC] += nbcc;
     genlvl(); //Recalcule le niveau
+
+    if(stat[STAT_CC] > 1500) unlockachievement(ACH_RICHE);
 }
 
 int stat[NUMSTATS]; bool succes[NUMACHS];

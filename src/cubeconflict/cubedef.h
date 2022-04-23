@@ -142,7 +142,7 @@ extern void getsteamachievements();
 extern void unlockachievement(int achID);
 enum {ACH_TRIPLETTE = 0, ACH_PENTAPLETTE, ACH_DECAPLETTE, ACH_ATOME, ACH_WINNER, ACH_ENVOL, ACH_POSTULANT, ACH_STAGIAIRE,
         ACH_SOLDAT, ACH_LIEUTENANT, ACH_MAJOR, ACH_BEAUTIR, ACH_DEFONCE, ACH_PRECIS, ACH_KILLASSIST, ACH_KILLER, ACH_SACAPV,
-        ACH_CADENCE, ACH_1HPKILL, ACH_MAXSPEED, ACH_INCREVABLE, ACH_CHANCE, ACH_CPASBIEN, ACH_SUICIDEFAIL, ACH_FUCKYEAH, NUMACHS};
+        ACH_CADENCE, ACH_1HPKILL, ACH_MAXSPEED, ACH_INCREVABLE, ACH_CHANCE, ACH_CPASBIEN, ACH_SUICIDEFAIL, ACH_FUCKYEAH, ACH_RICHE, ACH_TUEURFANTOME, NUMACHS};
 extern bool succes[NUMACHS];
 
 static const struct achinfo { const char *achname, *achnicenameFR, *achnicenameEN, *achdescFR, *achdescEN; } achievements[] =
@@ -167,9 +167,11 @@ static const struct achinfo { const char *achname, *achnicenameFR, *achnicenameE
     {"ACH_CADENCE",       "Le combo ultime !",           "The ultimate combo!",      "Atteindre la cadence de tir la plus élevée possible du jeu",          "Have the highest possible rate of fire in the game"},
     {"ACH_1HPKILL",       "A 1 PV du ragequit !",        "At 1 HP from ragequit",    "Tuer un ennemi en ayant 1 seul point de vie",                         "Kill an enemy with only 1 health point remaining"},
     {"ACH_MAXSPEED",      "Speedy Gonzales",             "Speedy Gonzales",          "Se déplacer à la vitesse la plus rapide possible du jeu",             "Reach the highest speed in the game"},
-    {"ACH_INCREVABLE",    "Increvable !",                "Indestructible!",          "Mourir 5 fois maximum dans une partie avec au moins 10 éliminations",       "Only die 5 times in a game with at least 10 kills"},
+    {"ACH_INCREVABLE",    "Increvable !",                "Indestructible!",          "Mourir 5 fois maximum dans une partie avec au moins 10 éliminations", "Only die 5 times in a game with at least 10 kills"},
     {"ACH_CHANCE",        "Larry Silverstein",           "Lucky Larry",              "Avoir la chance d'obtenir une super-arme par hasard, quel bol !",     "Obtain a superweapon on respawn"},
     {"ACH_CPASBIEN",      "C'est pas bien",              "That's not nice",          "Tuer un allié",                                                       "Kill an ally"},
     {"ACH_SUICIDEFAIL",   "Suicide manqué",              "Failed suicide",           "Rester en vie après avoir utilisé une ceinture d'explosifs",          "Stay alive after using your explosives belt"},
     {"ACH_FUCKYEAH",      "Fuck yeah !",                 "Fuck yeah !",              "Tuer un Shoshone en étant Américain",                                 "Kill a Shoshone with the American class"},
+    {"ACH_RICHE",         "Capitaliste",                 "Capitalist",               "Avoir 1500 CC en réserve",                                            "Have 1500 CC in reserve"},
+    {"ACH_TUEURFANTOME",  "Tueur de l'au-delà",          "Slayer from beyond",       "Tuer un ennemi en étant mort",                                        "Kill an enemy while being dead"},
 };
