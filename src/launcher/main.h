@@ -22,9 +22,10 @@ extern std::string LAUNCHER_VERSION;
 #define TOOLS_MENU_LAUNCHSERVER 8
 #define LANG_MENU_SETUPFRENCH 9
 #define LANG_MENU_SETUPENGLISH 10
-#define LAUNCH_GAME 11
+#define SOUND_MENU_SOUNDSETUP 11
+#define LAUNCH_GAME 12
 
-extern int Language;
+extern int Language, PlayMusic;
 extern int wx, wh;
 
 extern std::string InstalledCCversion, AvailableCCversion;

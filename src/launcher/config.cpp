@@ -15,10 +15,13 @@ void LoadConfigFile()
     versionFile.open(ConfigDir, ios::in);
     if(versionFile.is_open())
     {
-        string line;
-        while (getline(versionFile, line)) {
-            Language = std::stoi(line);
-        }
+        string line1;
+        string line2;
+        versionFile >> line1 >> line2;
+
+        Language = std::stoi(line1);
+        PlayMusic = std::stoi(line2);
+
         versionFile.close();
     }
 }
@@ -41,7 +44,7 @@ void WriteConfigFile()
 
     FILE *ConfigFile = fopen(ConfigDir, "w");
 
-    fprintf(ConfigFile, "%d\n", Language);
+    fprintf(ConfigFile, "%d\n%d", Language, PlayMusic);
 
     fclose(ConfigFile);
 }

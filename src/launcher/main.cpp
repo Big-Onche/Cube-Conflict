@@ -3,7 +3,7 @@
 
 using namespace std;
 
-string LAUNCHER_VERSION = "0.8.6";
+string LAUNCHER_VERSION = "0.8.7";
 
 int wx = 1000; //Largeur de la fenêtre
 int wh = 600; //Hauteur de la fenêtre
@@ -30,10 +30,10 @@ void LoadImages();
 void GetNews();
 
 HICON hWindowIcon, hIconSm;
-HWND hBackground, hFavicon, hButFr, hButEn;
+HWND hBackground, hFavicon, hButFr, hButEn, hButSound, hButSound2;
 HMENU hMenu;
 HFONT hFont, hFont2;
-HBITMAP hBackgroundImg, hFrFlag, hEnFlag;
+HBITMAP hBackgroundImg, hFrFlag, hEnFlag, hSpeakerON, hSpeakerOFF;
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdshow)
 {
@@ -44,7 +44,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.hInstance = hInst;
     wc.hIcon = hWindowIcon;
-    wc.lpszClassName = L"myWindowClass";
+    wc.lpszClassName = L"LauncherClass";
     wc.lpfnWndProc = WindowProcedure;
     wc.style = CS_DROPSHADOW;
     wc.hIcon = (HICON) LoadImage(hInst, MAKEINTRESOURCE(CC_ICON), IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), 0);
@@ -52,7 +52,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
     if(!RegisterClassW(&wc))
         return -1;
 
-    CreateWindowW(L"myWindowClass", L"Cube Conflict", WS_SYSMENU | WS_VISIBLE | WS_OVERLAPPED, GetSystemMetrics(SM_CXSCREEN)/2-(wx/2), GetSystemMetrics(SM_CYSCREEN)/2-(wh/2), wx, wh, NULL, NULL, NULL, NULL);
+    CreateWindowW(L"LauncherClass", L"Cube Conflict", WS_SYSMENU | WS_VISIBLE | WS_MINIMIZEBOX, GetSystemMetrics(SM_CXSCREEN)/2-(wx/2), GetSystemMetrics(SM_CYSCREEN)/2-(wh/2), wx, wh, NULL, NULL, NULL, NULL);
 
     MSG msg = {0};
 
@@ -83,6 +83,8 @@ void LaunchGame(HWND hWnd, int ForceBits = 0)
         MessageBoxW(NULL, Language==0 ? L"Une erreur est survenue, essayez de réinstaller votre jeu." : L"An error as occured, try reinstalling your game.", Language==0 ? L"Erreur" : L"Error", MB_OK);
     }
 }
+
+int PlayMusic = 1;
 
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
@@ -136,6 +138,23 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
         case LAUNCH_GAME:
             LaunchGame(hWnd);
             break;
+        case SOUND_MENU_SOUNDSETUP:
+            if(PlayMusic==1)
+            {
+                mciSendString("stop mp3", NULL, 0, NULL);
+                PlayMusic = 0;
+                DestroyWindow(hWnd);
+                WinExec("Cube Conflict.exe", SW_SHOW);
+            }
+            else
+            {
+                mciSendString("open \"media/musiques/launcher.mp3\" type mpegvideo alias mp3", NULL, 0, NULL);
+                mciSendString("play mp3", NULL, 0, NULL);
+                PlayMusic = 1;
+                DestroyWindow(hWnd);
+                WinExec("Cube Conflict.exe", SW_SHOW);
+            }
+            break;
         }
         break;
     case WM_CREATE:
@@ -143,8 +162,11 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
         GetInstalledCCVersion();
         CheckCurrentCCVersion(hWnd);
         LoadImages();
-        mciSendString("open \"media/musiques/launcher.mp3\" type mpegvideo alias mp3", NULL, 0, NULL);
-        mciSendString("play mp3", NULL, 0, NULL);
+        if(PlayMusic==1)
+        {
+            mciSendString("open \"media/musiques/launcher.mp3\" type mpegvideo alias mp3", NULL, 0, NULL);
+            mciSendString("play mp3", NULL, 0, NULL);
+        }
         AddMenus(hWnd);
         AddControls(hWnd);
         break;
@@ -171,9 +193,12 @@ void AddMenus(HWND hWnd)
 
     //////////////////////////////////////////////////////////////Menu langue////////////////////////////////
     HMENU hLangMenu = CreateMenu();
+    if(PlayMusic==1) AppendMenu(hLangMenu, MF_STRING, SOUND_MENU_SOUNDSETUP, Language==0 ? "Couper la musique" : "Stop music");
+    else AppendMenu(hLangMenu, MF_STRING, SOUND_MENU_SOUNDSETUP, Language==0 ? "Activer la musique" : "Play music");
+    AppendMenu(hLangMenu, MF_SEPARATOR, NULL, NULL);
     AppendMenu(hLangMenu, MF_STRING, LANG_MENU_SETUPFRENCH, "Français");
     AppendMenu(hLangMenu, MF_STRING, LANG_MENU_SETUPENGLISH, "English");
-    AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hLangMenu, Language==0 ? "Langue" : "Language");
+    AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hLangMenu, Language==0 ? "Options" : "Settings");
 
     //////////////////////////////////////////////////////////////Menu outils////////////////////////////////
     HMENU hToolsMenu = CreateMenu();
@@ -208,6 +233,10 @@ void AddControls(HWND hWnd)
     HWND hButEn = CreateWindowW(L"button", NULL, Language==0 ? ActiveBtnParam : InactiveBtnParam, 68, 490, 60, 42, hWnd, (HMENU)LANG_MENU_SETUPENGLISH, NULL, NULL);
     SendMessageW(hButEn, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hEnFlag);
 
+    //Affichage du bouton haut parleur
+    HWND hButSound = CreateWindowW(L"button", NULL, ActiveBtnParam, 931, 490, 60, 42, hWnd, (HMENU)SOUND_MENU_SOUNDSETUP, NULL, NULL);
+    SendMessageW(hButSound, BM_SETIMAGE, IMAGE_BITMAP, PlayMusic ? (LPARAM)hSpeakerON : (LPARAM)hSpeakerOFF);
+
     //Création du texte affiché en bas à gauche (Version du jeu + mise à jour dispo oopah)
     string UpdateInfo;
     if(Language==0) UpdateInfo = UpdateAvailable ? " (mise à jour disponible)" : UnableToCheckForUpdate ? " (impossible de vérifier les mises à jour)" : " (à jour)";
@@ -232,4 +261,6 @@ void LoadImages()
     hBackgroundImg = (HBITMAP)LoadImageW(NULL, L"config/launcher/background.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     hFrFlag = (HBITMAP)LoadImageW(NULL, L"config/launcher/flag_fr.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     hEnFlag = (HBITMAP)LoadImageW(NULL, L"config/launcher/flag_en.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    hSpeakerON = (HBITMAP)LoadImageW(NULL, L"config/launcher/speakerON.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    hSpeakerOFF = (HBITMAP)LoadImageW(NULL, L"config/launcher/speakerOFF.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 }
