@@ -3,7 +3,7 @@
 
 using namespace std;
 
-string LAUNCHER_VERSION = "0.8.8";
+string LAUNCHER_VERSION = "0.8.9";
 
 int wx = 1000; //Largeur de la fenêtre
 int wh = 600; //Hauteur de la fenêtre
