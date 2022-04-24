@@ -443,7 +443,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape
         a[ai++] = modelattach("tag_hat", aptitudes[player1->aptitude].apt_tete, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         a[ai++] = modelattach("tag_cape", customscapes[cape==-1 ? player1_cape : cape].team1capedir, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
 
-        defformatstring(mdlname, customssmileys[player1->playermodel].smileydir);
+        defformatstring(mdlname, customssmileys[UI_smiley].smileydir);
 
         rendermodel(mdlname, anim, o.add(vec(0, 10, -5)), yaw, pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), 5));
     }
