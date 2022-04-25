@@ -2,12 +2,7 @@
 
 #include "engine.h"
 #include "cubedef.h"
-
-#ifdef __APPLE__
-  #include "SDL2_image/SDL_image.h"
-#else
-  #include "SDL_image.h"
-#endif
+#include "SDL_image.h"
 
 #ifndef SDL_IMAGE_VERSION_ATLEAST
 #define SDL_IMAGE_VERSION_ATLEAST(X, Y, Z) \
@@ -97,6 +92,7 @@ template<int BPP> static void scaletexture(uchar * RESTRICT src, uint sw, uint s
 
 static void scaletexture(uchar * RESTRICT src, uint sw, uint sh, uint bpp, uint pitch, uchar * RESTRICT dst, uint dw, uint dh)
 {
+    if(!sw || !sh || !dw || !dh) return;
     if(sw == dw*2 && sh == dh*2)
     {
         switch(bpp)

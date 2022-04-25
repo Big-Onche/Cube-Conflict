@@ -3,11 +3,7 @@
 #include "engine.h"
 #include "cubedef.h"
 
-#ifdef __APPLE__
-  #include "SDL2_mixer/SDL_mixer.h"
-#else
-  #include "../include/SDL_mixer.h"
-#endif
+#include "SDL_mixer.h"
 
 bool nosound = true;
 

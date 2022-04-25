@@ -162,22 +162,6 @@ void conoutfv(int type, const char *fmt, va_list args)
     fputc('\n', logfile);
 }
 
-void conoutf(const char *fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
-    conoutfv(CON_INFO, fmt, args);
-    va_end(args);
-}
-
-void conoutf(int type, const char *fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
-    conoutfv(type, fmt, args);
-    va_end(args);
-}
-
 void purgeclient(int n)
 {
     client &c = *clients[n];
@@ -242,12 +226,21 @@ void setupserver(int port, const char *ip = NULL)
     conoutf("*** Starting master server on %s %d at %s ***", ip ? ip : "localhost", port, ct);
 }
 
+SVAR(mastermotd, "");
+
 void genserverlist()
 {
     if(!updateserverlist) return;
     while(gameserverlists.length() && gameserverlists.last()->refs<=0)
         delete gameserverlists.pop();
     messagebuf *l = new messagebuf(gameserverlists);
+    if(mastermotd[0])
+    {
+        const char *cmd = "echo ";
+        l->buf.put(cmd, strlen(cmd));
+        l->buf.put(mastermotd, strlen(mastermotd));
+        l->buf.add('\n');
+    }
     loopv(gameservers)
     {
         gameserver &s = *gameservers[i];
@@ -727,4 +720,3 @@ int main(int argc, char **argv)
 
     return EXIT_SUCCESS;
 }
-

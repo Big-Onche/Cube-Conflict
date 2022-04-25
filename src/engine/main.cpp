@@ -569,8 +569,17 @@ void screenres(int w, int h)
     {
         scr_w = min(scr_w, desktopw);
         scr_h = min(scr_h, desktoph);
-        if(SDL_GetWindowFlags(screen) & SDL_WINDOW_FULLSCREEN) gl_resize();
-        else SDL_SetWindowSize(screen, scr_w, scr_h);
+        if(SDL_GetWindowFlags(screen) & SDL_WINDOW_FULLSCREEN)
+        {
+            gl_resize();
+            initwindowpos = true;
+        }
+        else
+        {
+            SDL_SetWindowSize(screen, scr_w, scr_h);
+            SDL_SetWindowPosition(screen, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+            initwindowpos = false;
+        }
     }
     else
     {
@@ -654,6 +663,11 @@ void setupscreen()
 
     SDL_GL_ResetAttributes();
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+#if !defined(WIN32) && !defined(__APPLE__)
+    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+#endif
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 0);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
     screen = SDL_CreateWindow("Cube Conflict", winx, winy, winw, winh, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS | flags);
@@ -953,6 +967,9 @@ void checkinput()
                     case SDL_BUTTON_RIGHT: processkey(-3, event.button.state==SDL_PRESSED); break;
                     case SDL_BUTTON_X1: processkey(-6, event.button.state==SDL_PRESSED); break;
                     case SDL_BUTTON_X2: processkey(-7, event.button.state==SDL_PRESSED); break;
+                    case SDL_BUTTON_X2 + 1: processkey(-10, event.button.state==SDL_PRESSED); break;
+                    case SDL_BUTTON_X2 + 2: processkey(-11, event.button.state==SDL_PRESSED); break;
+                    case SDL_BUTTON_X2 + 3: processkey(-12, event.button.state==SDL_PRESSED); break;
                 }
                 //lasttype = event.type;
                 //lastbut = event.button.button;
@@ -961,6 +978,8 @@ void checkinput()
             case SDL_MOUSEWHEEL:
                 if(event.wheel.y > 0) { processkey(-4, true); processkey(-4, false); }
                 else if(event.wheel.y < 0) { processkey(-5, true); processkey(-5, false); }
+                else if(event.wheel.x > 0) { processkey(-8, true); processkey(-8, false); }
+                else if(event.wheel.x < 0) { processkey(-9, true); processkey(-9, false); }
                 break;
         }
     }
