@@ -8,7 +8,7 @@ float crosshairalpha = 1;
 
 VAR(UI_smiley, 0, 0, 9);
 VAR(UI_cape, 0, 0, 13);
-VAR(UI_tombe, 0, 0, 10);
+VAR(UI_tombe, 0, 0, 12);
 VAR(UI_voix, 0, 0, 8);
 VAR(UI_custtab, 0, 0, 3);
 
@@ -169,7 +169,7 @@ namespace game
 
     void changedplayermodel()
     {
-        if(stat[SMI_HAP+playermodel]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas ce smiley !"); playsound(S_ERROR); return;}
+        if(stat[SMI_HAP+playermodel]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas ce smiley !"); playsound(S_ERROR); player1->playermodel==0; return;}
         if(player1->clientnum < 0) player1->playermodel = playermodel;
         if(player1->ragdoll) cleanragdoll(player1);
         loopv(ragdolls)
@@ -250,14 +250,14 @@ namespace game
 
     VARFP(player1_cape, 0, 0, 13,
     {
-        if(stat[CAPE_CUBE+player1_cape]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette cape !"); playsound(S_ERROR); return;}
+        if(stat[CAPE_CUBE+player1_cape]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette cape !"); playsound(S_ERROR); player1_cape==0; addmsg(N_SENDCAPE, "ri", player1_cape); return;}
         addmsg(N_SENDCAPE, "ri", player1_cape);
         player1->customcape = player1_cape;
     });
 
-    VARFP(player1_tombe, 0, 0, 10,
+    VARFP(player1_tombe, 0, 0, 12,
     {
-        if(stat[TOM_MERDE+player1_tombe]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette tombe !"); playsound(S_ERROR); return;}
+        if(stat[TOM_MERDE+player1_tombe]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette tombe !"); playsound(S_ERROR); player1_tombe==0; addmsg(N_SENDTOMBE, "ri", player1_tombe); return;}
         addmsg(N_SENDTOMBE, "ri", player1_tombe);
         player1->customtombe = player1_tombe;
     });

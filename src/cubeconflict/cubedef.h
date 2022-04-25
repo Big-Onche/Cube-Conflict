@@ -72,9 +72,11 @@ static const struct tombesinfo { const char *tombedir, *tombemenudir, *tombename
     {"tombes/basique2",     "tombes/basique2",  "Basique 2",       50},
     {"tombes/fleur",        "tombes/fleur",     "Fleur",          100},
     {"tombes/cristal",      "tombes/cristal",   "Cristal",        100},
+    {"tombes/minigolf",     "tombes/minigolf",  "minigolf",       100},
     {"tombes/oeil",         "tombes/oeil/menu", "Oeil",           250},
     {"tombes/excalibur",    "tombes/excalibur", "Excalibur",      250},
     {"tombes/couronne",     "tombes/couronne",  "Couronne",       250},
+    {"tombes/crime",        "tombes/crime",     "Crime",          500},
     {"tombes/fuck",         "tombes/fuck",      "Fuck",           500},
     {"tombes/monument",     "tombes/monument",  "Monument",       500},
     {"tombes/lingots",      "tombes/lingots",   "Lingots",       1500},
@@ -133,7 +135,7 @@ enum {STAT_CC, STAT_XP, STAT_KILLS, STAT_MORTS, STAT_KILLSTREAK, STAT_BOUCLIERBO
         STAT_DRAPEAUX, STAT_WINS, STAT_ARMUREASSIST, STAT_TPSSEC, STAT_TPSMIN, STAT_TPSH,
         SMI_HAP, SMI_NOEL, SMI_MALADE, SMI_CONTENT, SMI_COLERE, SMI_SOURNOIS, SMI_FOU, SMI_CLINDOEIL, SMI_COOL, SMI_BUG,
         CAPE_CUBE, CAPE_JVC, CAPE_CORONED, CAPE_ATOME, CAPE_JESUSECO, CAPE_WEED, CAPE_FLAMES, CAPE_BOUCLE, CAPE_VINTAGE, CAPE_ELITE, CAPE_HIGH, CAPE_RAYONSX, CAPE_RISITAS, CAPE_RICHE,
-        TOM_MERDE, TOM_BASIQUE1, TOM_BASIQUE2, TOM_FLEUR, TOM_CRISTAL, TOM_OEIL, TOM_EXCALIBUR, TOM_COURONNE, TOM_FUCK, TOM_MONUMENT, TOM_LINGOT,
+        TOM_MERDE, TOM_BASIQUE1, TOM_BASIQUE2, TOM_FLEUR, TOM_CRISTAL, TOM_GOLF, TOM_OEIL, TOM_EXCALIBUR, TOM_COURONNE, TOM_CRIME, TOM_FUCK, TOM_MONUMENT, TOM_LINGOT,
         VOI_CORTEX, VOI_VALOCHE, VOI_VIEILLE, VOI_HENDEK, VOI_MOUNIR, VOI_DELAVIER, VOI_PRAUD, VOI_MALLEVILLE,
         NUMSTATS};
 extern int stat[NUMSTATS];
