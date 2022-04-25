@@ -94,7 +94,7 @@ namespace game
     void nextfollow(int dir)
     {
         if(player1->state!=CS_SPECTATOR) return;
-        int cur = following >= 0 ? following : (dir < 0 ? clients.length() - 1 : 0);
+        int cur = following >= 0 ? following : (dir > 0 ? clients.length() - 1 : 0);
         loopv(clients)
         {
             cur = (cur + dir + clients.length()) % clients.length();

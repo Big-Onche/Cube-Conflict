@@ -511,6 +511,8 @@ namespace game
     }
     ICOMMAND(isai, "ii", (int *cn, int *type), intret(isai(*cn, *type) ? 1 : 0));
 
+    VARP(playersearch, 0, 3, 10);
+
     int parseplayer(const char *arg)
     {
         char *end;
@@ -530,7 +532,23 @@ namespace game
         loopv(players)
         {
             gameent *o = players[i];
-            if(!strcasecmp(arg, o->name)) return o->clientnum;
+            if(cubecaseequal(o->name, arg)) return o->clientnum;
+        }
+        int len = strlen(arg);
+        if(playersearch && len >= playersearch)
+        {
+            // try case insensitive prefix
+            loopv(players)
+            {
+                gameent *o = players[i];
+                if(cubecaseequal(o->name, arg, len)) return o->clientnum;
+            }
+            // try case insensitive substring
+            loopv(players)
+            {
+                gameent *o = players[i];
+                if(cubecasefind(o->name, arg)) return o->clientnum;
+            }
         }
         return -1;
     }
@@ -2246,10 +2264,9 @@ namespace game
                 authkey *a = findauthkey(text);
                 uint id = (uint)getint(p);
                 getstring(text, p);
-                if(a && a->lastauth && lastmillis - a->lastauth < 60*1000)
+                vector<char> buf;
+                if(a && a->lastauth && lastmillis - a->lastauth < 60*1000 && answerchallenge(a->key, text, buf))
                 {
-                    vector<char> buf;
-                    answerchallenge(a->key, text, buf);
                     //conoutf(CON_DEBUG, "answering %u, challenge %s with %s", id, text, buf.getbuf());
                     packetbuf p(MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
                     putint(p, N_AUTHANS);

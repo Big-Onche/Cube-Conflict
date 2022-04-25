@@ -1388,6 +1388,9 @@ static inline uchar cubeupper(uchar c)
 }
 extern size_t decodeutf8(uchar *dst, size_t dstlen, const uchar *src, size_t srclen, size_t *carry = NULL);
 extern size_t encodeutf8(uchar *dstbuf, size_t dstlen, const uchar *srcbuf, size_t srclen, size_t *carry = NULL);
+extern int cubecasecmp(const char *s1, const char *s2, int n = INT_MAX);
+static inline bool cubecaseequal(const char *s1, const char *s2, int n = INT_MAX) { return !cubecasecmp(s1, s2, n); }
+extern char *cubecasefind(const char *haystack, const char *needle);
 
 extern string homedir;
 
