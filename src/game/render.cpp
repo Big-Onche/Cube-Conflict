@@ -169,7 +169,7 @@ namespace game
 
     void changedplayermodel()
     {
-        if(stat[SMI_HAP+playermodel]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas ce smiley !"); playsound(S_ERROR); player1->playermodel==0; return;}
+        if(stat[SMI_HAP+playermodel]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas ce smiley !"); playsound(S_ERROR); player1->playermodel=0; return;}
         if(player1->clientnum < 0) player1->playermodel = playermodel;
         if(player1->ragdoll) cleanragdoll(player1);
         loopv(ragdolls)
@@ -250,14 +250,14 @@ namespace game
 
     VARFP(player1_cape, 0, 0, 13,
     {
-        if(stat[CAPE_CUBE+player1_cape]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette cape !"); playsound(S_ERROR); player1_cape==0; addmsg(N_SENDCAPE, "ri", player1_cape); return;}
+        if(stat[CAPE_CUBE+player1_cape]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette cape !"); playsound(S_ERROR); player1_cape=0; return;}
         addmsg(N_SENDCAPE, "ri", player1_cape);
         player1->customcape = player1_cape;
     });
 
     VARFP(player1_tombe, 0, 0, 12,
     {
-        if(stat[TOM_MERDE+player1_tombe]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette tombe !"); playsound(S_ERROR); player1_tombe==0; addmsg(N_SENDTOMBE, "ri", player1_tombe); return;}
+        if(stat[TOM_MERDE+player1_tombe]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette tombe !"); playsound(S_ERROR); player1_tombe=0; return;}
         addmsg(N_SENDTOMBE, "ri", player1_tombe);
         player1->customtombe = player1_tombe;
     });
@@ -392,7 +392,8 @@ namespace game
         else flags |= MDL_CULL_DIST;
         if(!mainpass) flags &= ~(MDL_FULLBRIGHT | MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY | MDL_CULL_DIST);
         float trans = d->state == CS_LAGGED ? 0.5f : 1.0f;
-        if(d->aptisort2 && d->aptitude==APT_PHYSICIEN) {trans = 0.08f; }
+        if(d->aptisort2 && d->aptitude==APT_PHYSICIEN) trans = 0.08f;
+        else if(d->aptisort1 && d->aptitude==APT_MAGICIEN) trans = 0.7f;
         rendermodel(mdlname, anim, o, yaw, d->pitch>12 ? 12 : d->pitch<-25 ? -25 : pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), trans));
     }
 
@@ -510,7 +511,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape
                 if(d->aptitude==APT_MAGICIEN)
                 {
                     vec pos = d->abovehead().add(vec(0, 0,-12));
-                    if(d->aptisort1) particle_splash(PART_SMOKE,  1,  120, d->o, 0xFF33FF, 10+rnd(5),  400, 400);
+                    if(d->aptisort1) particle_splash(PART_SMOKE, 2, 120, d->o, 0xFF33FF, 10+rnd(5), 400,400);
                     if(d->aptisort3) particle_fireball(pos , 15.2f, PART_EXPLOSION, 5,  0x880088, 13.0f);
                 }
                 else if(d->aptitude==APT_PHYSICIEN)
@@ -639,7 +640,8 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape
         }
 
         float trans = 1.0f;
-        if(player1->aptitude==APT_PHYSICIEN && player1->aptisort2) trans = 0.08f;
+        if(d->aptisort2 && d->aptitude==APT_PHYSICIEN) trans = 0.08f;
+        else if(d->aptisort1 && d->aptitude==APT_MAGICIEN) trans = 0.7f;
 
         if(d->jointmillis)
         {

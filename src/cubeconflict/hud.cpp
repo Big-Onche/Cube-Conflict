@@ -152,7 +152,8 @@ namespace game
 
         if(zoom && crosshairsize >= 31) {crosshairsize -= 3; if(crosshairsize<31) crosshairsize = 31;}
         else if (crosshairsize<40) crosshairsize += 3;
-        zoomfov = guns[player1->gunselect].maxzoomfov;
+
+        zoomfov = (guns[player1->gunselect].maxzoomfov);
 
         if((player1->gunselect==GUN_SKS || player1->gunselect==GUN_SV98 || player1->gunselect==GUN_ARBALETE || player1->gunselect==GUN_S_CAMPOUZE || player1->gunselect==GUN_S_ROQUETTES) && zoom == 1)
         {
@@ -188,7 +189,7 @@ namespace game
             gle::colorf(1, 1, 1, 1);
         }
 
-        if(d->aptisort3 && d->aptitude==APT_MAGICIEN)
+        if((d->aptisort3 || d->aptisort1) && d->aptitude==APT_MAGICIEN)
         {
             gle::colorf(1, 1, 1, 0.7f);
 

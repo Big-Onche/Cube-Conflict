@@ -1815,7 +1815,7 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
     // apply gravity
     if(!floating) modifygravity(pl, water, curtime, jointmillis, aptitude, assist);
 
-    if(aptitude==APT_MAGICIEN && aptisort) {secs = curtime/200.f;}
+    if(aptitude==APT_MAGICIEN && aptisort) {secs = curtime/150.f;}
 
     // apply any player generated changes in velocity
     modifyvelocity(pl, local, water, floating, curtime, jointmillis, aptitude, assist);

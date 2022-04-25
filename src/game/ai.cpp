@@ -341,7 +341,7 @@ namespace ai
 
     bool needmana(gameent *d)
     {
-        if(d->mana<=100) return true;
+        if(d->mana<100) return true;
         else return false;
     }
 
@@ -829,6 +829,8 @@ namespace ai
                     gameent *e = getclient(b.target);
                     if(e && e->state == CS_ALIVE)
                     {
+                        if(d->mana>60 && d->aptitude==APT_MAGICIEN && d->o.dist(e->o)<500) aptitude(d, 1);
+                        else if (d->mana>=100 && d->aptitude==APT_MAGICIEN && d->o.dist(e->o)>500) aptitude(d, 2);
                         int atk = guns[d->gunselect].attacks[ACT_SHOOT];
                         float guard = SIGHTMIN, wander = attacks[atk].range;
                         return patrol(d, b, e->feetpos(), guard, wander) ? 1 : 0;
@@ -1455,7 +1457,6 @@ namespace ai
                     }
                     case AI_S_PURSUE: result = dopursue(d, c);
                     {
-                        if((d->mana>80 || d->mana<60)&& d->aptitude==APT_MAGICIEN) aptitude(d, 1);
                         if(d->health<650+d->skill && d->aptitude==APT_PHYSICIEN && d->mana>=50) aptitude(d, 2);
                         if(d->mana>30 && d->health<500+d->skill && d->aptitude==APT_PRETRE) aptitude(d, 2);
                         break;
