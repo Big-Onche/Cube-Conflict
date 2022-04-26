@@ -109,23 +109,24 @@ enum
     PT_LIGHTNING,
     PT_FLARE,
 
-    PT_MOD       = 1<<8,
-    PT_RND4      = 1<<9,
-    PT_LERP      = 1<<10, // use very sparingly - order of blending issues
-    PT_TRACK     = 1<<11,
-    PT_BRIGHT    = 1<<12,
-    PT_SOFT      = 1<<13,
-    PT_HFLIP     = 1<<14,
-    PT_VFLIP     = 1<<15,
-    PT_ROT       = 1<<16,
-    PT_CULL      = 1<<17,
-    PT_FEW       = 1<<18,
-    PT_ICON      = 1<<19,
-    PT_NOTEX     = 1<<20,
-    PT_SHADER    = 1<<21,
-    PT_NOLAYER   = 1<<22,
-    PT_COLLIDE   = 1<<23,
-    PT_FLIP      = PT_HFLIP | PT_VFLIP | PT_ROT
+    PT_MOD          = 1<<8,
+    PT_RND4         = 1<<9,
+    PT_LERP         = 1<<10, // use very sparingly - order of blending issues
+    PT_TRACK        = 1<<11,
+    PT_BRIGHT       = 1<<12,
+    PT_SOFT         = 1<<13,
+    PT_HFLIP        = 1<<14,
+    PT_VFLIP        = 1<<15,
+    PT_ROT          = 1<<16,
+    PT_CULL         = 1<<17,
+    PT_FEW          = 1<<18,
+    PT_ICON         = 1<<19,
+    PT_NOTEX        = 1<<20,
+    PT_SHADER       = 1<<21,
+    PT_NOLAYER      = 1<<22,
+    PT_COLLIDE      = 1<<23,
+    PT_OVERBRIGHT   = 1<<24,
+    PT_FLIP         = PT_HFLIP | PT_VFLIP | PT_ROT
 };
 
 const char *partnames[] = { "part", "tape", "trail", "text", "textup", "meter", "metervs", "fireball", "lightning", "flare" };
@@ -859,6 +860,7 @@ static partrenderer *parts[] =
 {
     new quadrenderer("<grey>media/particle/blood.png", PT_PART|PT_FLIP|PT_MOD|PT_RND4|PT_COLLIDE, STAIN_BLOOD), // blood spats (note: rgb is inverted)
     new trailrenderer("media/particle/base.png", PT_TRAIL|PT_LERP),                            // water, entity
+    new quadrenderer("media/particle/firespark.png", PT_PART|PT_FLIP|PT_RND4|PT_OVERBRIGHT),               // smoke
     new quadrenderer("<grey>media/particle/fumee.png", PT_PART|PT_FLIP|PT_LERP),               // smoke
     new quadrenderer("<grey>media/particle/mort.png", PT_PART),                                // mort
     new quadrenderer("<grey>media/particle/steam.png", PT_PART|PT_FLIP),                       // steam
@@ -1006,7 +1008,7 @@ void renderparticles(int layer)
                 if(changedbits&(PT_MOD|PT_BRIGHT|PT_SOFT|PT_NOTEX|PT_SHADER))
                 {
                     float colorscale = flags&PT_MOD ? 1 : ldrscale;
-                    if(flags&PT_BRIGHT) colorscale *= particlebright;
+                    if(flags&PT_BRIGHT || flags&PT_OVERBRIGHT) colorscale *= particlebright*(PT_OVERBRIGHT ? 1.5f : 1);
                     LOCALPARAMF(colorscale, colorscale, colorscale, colorscale, 1);
                 }
             }
@@ -1132,11 +1134,11 @@ void particle_text(const vec &s, const char *t, int type, int fade, int color, f
     p->text = t;
 }
 
-void particle_textcopy(const vec &s, const char *t, int type, int fade, int color, float size, int gravity)
+void particle_textcopy(const vec &s, const char *t, int type, int fade, int color, float size, int gravity, float relativesize)
 {
     if(!canaddparticles()) return;
     if(!particletext || camera1->o.dist(s) > maxparticletextdistance) return;
-    particle *p = newparticle(s, vec(0, 0, 1), fade, type, color, size, gravity);
+    particle *p = newparticle(s, vec(0, 0, 1), fade, type, color, size*relativesize, gravity);
     p->text = newstring(t);
     p->flags = 1;
 }
@@ -1148,10 +1150,10 @@ void particle_icon(const vec &s, int ix, int iy, int type, int fade, int color, 
     p->flags |= ix | (iy<<2);
 }
 
-void particle_meter(const vec &s, float val, int type, int fade, int color, int color2, float size)
+void particle_meter(const vec &s, float val, int type, float relativesize, int fade, int color, int color2, float size)
 {
     if(!canaddparticles()) return;
-    particle *p = newparticle(s, vec(0, 0, 1), fade, type, color, size);
+    particle *p = newparticle(s, vec(0, 0, 1), fade, type, color, size*relativesize);
     p->color2[0] = color2>>16;
     p->color2[1] = (color2>>8)&0xFF;
     p->color2[2] = color2&0xFF;
@@ -1366,6 +1368,7 @@ static void makeparticles(entity &e)
             }
             regularflame(PART_FLAME, e.o, radius, height, e.attr4 ? colorfromattr(e.attr4) : rndflamecolor, 2, 2.0f+(rnd(2)));
             regularflame(PART_SMOKE, vec(e.o.x, e.o.y, e.o.z + 4.0f*min(radius, height)), radius, height, rndsmokecolor, 1, 4.0f+(rnd(6)), 100.0f, 2750.0f, -15);
+            if(e.attr5==0) switch(rnd(10)){case 0: regularsplash(PART_FIRESPARK, 0xFFFF55, 125, rnd(3)+1, 750+(rnd(750)), offsetvec(e.o, rnd(12)-rnd(24), rnd(12)-rnd(10)), 0.5f+(rnd(18)/12.f), -10);}
             break;
         }
         case 1: //steam vent - <dir>
