@@ -1441,16 +1441,15 @@ namespace game
     {
         dynent *o;
         float dist;
-        int maxrays = attacks[atk].rays, margin = attacks[atk].margin;
+        int margin = attacks[atk].margin;
+
         if(attacks[atk].rays > 1)
         {
             dynent *hits[MAXRAYS];
+            int maxrays = attacks[atk].rays;
             loopi(maxrays)
             {
-                if((hits[i] = intersectclosest(from, rays[i], d, margin, dist)))
-                {
-                    shorten(from, rays[i], dist);
-                }
+                if((hits[i] = intersectclosest(from, rays[i], d, margin, dist))) shorten(from, rays[i], dist);
             }
             loopi(maxrays) if(hits[i])
             {
