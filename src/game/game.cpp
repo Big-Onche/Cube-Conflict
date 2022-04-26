@@ -277,7 +277,7 @@ namespace game
 
                 if(d->health<=d->maxhealth+200 && d->state==CS_ALIVE && !m_teammode && d->aptitude==APT_MEDECIN)
                 {
-                    switch(rnd(70))
+                    switch(rnd(60))
                     {
                         case 0:
                         d->health+=30;
@@ -292,7 +292,7 @@ namespace game
                     loopv(players)
                     {
                         gameent *r = players[i];
-                        switch(rnd(70))
+                        switch(rnd(60))
                         {
                             case 0:
                             {
@@ -321,10 +321,10 @@ namespace game
                         gameent *r = players[i];
                         if((r->o.dist(h->o)/18.f<6 && r->mana<150 && isteam(h->team, r->team) && r->state==CS_ALIVE)&&(r->aptitude==APT_INDIEN || r->aptitude==APT_MAGICIEN || r->aptitude==APT_PRETRE || r->aptitude==APT_PHYSICIEN))
                         {
-                            switch(rnd(70))
+                            switch(rnd(60))
                             {
                                 case 0:
-                                r->mana+=3;
+                                r->mana+=5;
                                 vec irays(r->o);
                                 irays.sub(h->o);
                                 irays.normalize().mul(1300.0f);
@@ -441,7 +441,7 @@ namespace game
                     gameent *h = players[i];
                     loopv(players)
                     {
-                        switch(rnd(70))
+                        switch(rnd(60))
                         {
                             case 0:
                             {
@@ -466,10 +466,10 @@ namespace game
                     {
                         if((players[i]->o.dist(h->o)/18.f<6 && players[i]->mana<150 && isteam(h->team, players[i]->team) && h->state==CS_ALIVE) && (players[i]->aptitude==APT_INDIEN || players[i]->aptitude==APT_MAGICIEN || players[i]->aptitude==APT_PRETRE || players[i]->aptitude==APT_PHYSICIEN))
                         {
-                            switch(rnd(70))
+                            switch(rnd(60))
                             {
                                 case 0:
-                                players[i]->mana+=3;
+                                players[i]->mana+=5;
                                 vec irays(players[i]->o);
                                 irays.sub(h->o);
                                 irays.normalize().mul(1300.0f);
