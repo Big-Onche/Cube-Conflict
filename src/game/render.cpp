@@ -479,35 +479,36 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape
             vec dir = vec(d->o).sub(camera1->o);
             float dist = dir.magnitude();
             dir.div(dist);
-            if(d->state!=CS_EDITING && raycube(camera1->o, dir, dist, 0) < dist)
-            {
-                d->info[0] = '\0';
-                continue;
-            }
 
             copystring(d->info, colorname(d));
             if(d->state!=CS_DEAD)
             {
                 int team = m_teammode && validteam(d->team) ? d->team : 0;
 
-                //if(player1->team==d->team) particle_text(d->abovehead(), d->info, PART_TEXT, 1, teamtextcolor[player1->team!=d->team ? 2 : 1], 2.0f);
-                //else if (player1->state==CS_SPECTATOR) particle_text(d->abovehead(), d->info, PART_TEXT, 1, teamtextcolor[player1->team!=d->team ? 2 : 1], 2.0f);
-
                 if(d->health<300) switch(rnd(d->health+30)) {case 0: gibeffect(300, d->o, d);}
+
+                vec moyer = vec(0.5f, 0.5f, 0.5f);
+                vec moy1 = (d->abovehead().add(camera1->o)).mul(moyer);
+                vec moy2 = (moy1.add(camera1->o)).mul(moyer);
+                vec moy3 = (moy2.add(camera1->o)).mul(moyer);
+                vec moy4 = (moy3.add(camera1->o)).mul(moyer);
+                vec moy5 = (moy4.add(camera1->o)).mul(moyer);
+                vec moy6 = (moy5.add(camera1->o)).mul(moyer);
+
                 if(player1->aptitude==APT_MEDECIN && team==1)
                 {
                     if (d->health > 1000)
                     {
                         unsigned int lifeColor = (d->health/10 > 180) ? 80 : d->health/10-100;
-                        particle_meter(d->abovehead().add(vec(0,0,4)), d->health/1000.0f, PART_METER, 0.5f, (static_cast<unsigned char>((80-lifeColor)*3.18) << 8) | (static_cast<unsigned char>(lifeColor*3.18) << 0), 2.5f);
+                        particle_meter(moy6, d->health/1000.0f, PART_METER, d->o.dist(camera1->o)<250 ? 1.f : d->o.dist(camera1->o)/250.f, 0.5f, (static_cast<unsigned char>((80-lifeColor)*3.18) << 8) | (static_cast<unsigned char>(lifeColor*3.18) << 0), 0x000000, 0.04f);
                     }
-                    else if (d->health > 0)
+                    if (d->health > 0)
                     {
-                        particle_meter(d->abovehead().add(vec(0,0,4)), d->health/1000.0f, PART_METER, 0.5f, (static_cast<unsigned char>((100-d->health/10)*2.55) << 16) | (static_cast<unsigned char>(d->health/10*2.55) << 8), 2.5f);
+                        particle_meter(moy6, d->health/1000.0f, PART_METER, d->o.dist(camera1->o)<250 ? 1.f : d->o.dist(camera1->o)/250.f, 0.5f, (static_cast<unsigned char>((100-d->health/10)*2.55) << 16) | (static_cast<unsigned char>(d->health/10*2.55) << 8), 0x000000, 0.04f);
                     }
                 }
                 if((player1->aptitude==APT_JUNKIE && team==1)&&(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_INDIEN))
-                    particle_meter(d->abovehead().add(vec(0,0,4)), d->mana/150.0f, PART_METER, 0.5f, 0xFF00FF, 2.5f);
+                    particle_meter(moy6, d->mana/150.0f, PART_METER, d->o.dist(camera1->o)<250 ? 1.f : d->o.dist(camera1->o)/250.f, 0.5f, 0xFF00FF, 0x000000, 0.04f);
                 if(d->aptitude==APT_MAGICIEN)
                 {
                     vec pos = d->abovehead().add(vec(0, 0,-12));
