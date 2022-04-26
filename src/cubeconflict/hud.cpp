@@ -117,7 +117,7 @@ namespace game
                     f->privilege>=PRIV_ADMIN ? formatstring(color, "\fc") : formatstring(color, "\f7");
                     if(f->state==CS_DEAD) formatstring(color, "\fg") ;
                 }
-                formatstring(spectatormsg, langage ? "Spectator : %s%s (%s)" : "Spectateur : %s%s (%s)", color, colorname(f), langage ? aptitudes[n_aptitudevictime].apt_nomEN : aptitudes[n_aptitudevictime].apt_nomFR);
+                formatstring(spectatormsg, langage ? "Spectator : %s%s (%s)" : "Spectateur : %s%s (%s)", color, colorname(f), langage ? aptitudes[f->aptitude].apt_nomEN : aptitudes[f->aptitude].apt_nomFR);
             }
             else
             {
