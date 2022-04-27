@@ -487,28 +487,36 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape
 
                 if(d->health<300) switch(rnd(d->health+30)) {case 0: gibeffect(300, d->o, d);}
 
-                vec moyer = vec(0.5f, 0.5f, 0.5f);
-                vec moy1 = (d->abovehead().add(camera1->o)).mul(moyer);
-                vec moy2 = (moy1.add(camera1->o)).mul(moyer);
-                vec moy3 = (moy2.add(camera1->o)).mul(moyer);
-                vec moy4 = (moy3.add(camera1->o)).mul(moyer);
-                vec moy5 = (moy4.add(camera1->o)).mul(moyer);
-                vec moy6 = (moy5.add(camera1->o)).mul(moyer);
+                vec posA = d->abovehead();
+                vec posB = camera1->o;
+                vec posAtofrontofposB = (posA.add((posB.mul(vec(127, 127, 127))))).div(vec(128, 128, 128));
 
                 if(player1->aptitude==APT_MEDECIN && team==1)
                 {
                     if (d->health > 1000)
                     {
                         unsigned int lifeColor = (d->health/10 > 180) ? 80 : d->health/10-100;
-                        particle_meter(moy6, d->health/1000.0f, PART_METER, d->o.dist(camera1->o)<250 ? 1.f : d->o.dist(camera1->o)/250.f, 0.5f, (static_cast<unsigned char>((80-lifeColor)*3.18) << 8) | (static_cast<unsigned char>(lifeColor*3.18) << 0), 0x000000, 0.04f);
+                        particle_meter(d->o.dist(camera1->o)<75 ? (d->abovehead().add(camera1->o)).div(vec(2,2,2)) : posAtofrontofposB,
+                                       d->health/1000.0f, PART_METER,
+                                       d->o.dist(camera1->o)<250 ? 1.f : d->o.dist(camera1->o)/250.f, 0.5f,
+                                       (static_cast<unsigned char>((80-lifeColor)*3.18) << 8) | (static_cast<unsigned char>(lifeColor*3.18) << 0), 0x000000,
+                                       d->o.dist(camera1->o)<75 ? 1.35f : 0.02f);
                     }
                     if (d->health > 0)
                     {
-                        particle_meter(moy6, d->health/1000.0f, PART_METER, d->o.dist(camera1->o)<250 ? 1.f : d->o.dist(camera1->o)/250.f, 0.5f, (static_cast<unsigned char>((100-d->health/10)*2.55) << 16) | (static_cast<unsigned char>(d->health/10*2.55) << 8), 0x000000, 0.04f);
+                        particle_meter(d->o.dist(camera1->o)<75 ? (d->abovehead().add(camera1->o)).div(vec(2,2,2)) : posAtofrontofposB,
+                                       d->health/1000.0f, PART_METER,
+                                       d->o.dist(camera1->o)<250 ? 1.f : d->o.dist(camera1->o)/250.f, 0.5f,
+                                       (static_cast<unsigned char>((100-d->health/10)*2.55) << 16) | (static_cast<unsigned char>(d->health/10*2.55) << 8), 0x000000,
+                                       d->o.dist(camera1->o)<75 ? 1.35f : 0.02f);
                     }
                 }
                 if((player1->aptitude==APT_JUNKIE && team==1)&&(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_INDIEN))
-                    particle_meter(moy6, d->mana/150.0f, PART_METER, d->o.dist(camera1->o)<250 ? 1.f : d->o.dist(camera1->o)/250.f, 0.5f, 0xFF00FF, 0x000000, 0.04f);
+                    particle_meter(d->o.dist(camera1->o)<75 ? (d->abovehead().add(camera1->o)).div(vec(2,2,2)) : posAtofrontofposB,
+                                    d->mana/150.0f, PART_METER,
+                                    d->o.dist(camera1->o)<250 ? 1.f : d->o.dist(camera1->o)/250.f, 0.5f,
+                                    0xFF00FF, 0x000000,
+                                    d->o.dist(camera1->o)<75 ? 1.35f : 0.02f);
                 if(d->aptitude==APT_MAGICIEN)
                 {
                     vec pos = d->abovehead().add(vec(0, 0,-12));
