@@ -1101,6 +1101,7 @@ namespace game
                 playsound(S_BURN, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 350);
                 particle_splash(PART_SMOKE, 25, 100, o, 0x222222, 10.0f+rnd(5), 400, 20);
                 particle_splash(PART_FLAME1+rnd(2), 7, 120, o, 0xCC7744, 10.00f+rnd(5), 400, 300);
+                loopi(5)regularsplash(PART_FIRESPARK, 0xFFBB55, 500, 10, 500+(rnd(500)), d->o, 1.5f+(rnd(18)/5.f), -10, true);
             }
         }
         if (floorlevel>0)

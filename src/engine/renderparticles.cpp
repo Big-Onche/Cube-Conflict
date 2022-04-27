@@ -1008,7 +1008,7 @@ void renderparticles(int layer)
                 if(changedbits&(PT_MOD|PT_BRIGHT|PT_SOFT|PT_NOTEX|PT_SHADER))
                 {
                     float colorscale = flags&PT_MOD ? 1 : ldrscale;
-                    if(flags&PT_BRIGHT || flags&PT_OVERBRIGHT) colorscale *= particlebright*(PT_OVERBRIGHT ? 1.5f : 1);
+                    if(flags&PT_BRIGHT || flags&PT_OVERBRIGHT) colorscale *= particlebright*(flags&PT_OVERBRIGHT ? 1.5f : 1);
                     LOCALPARAMF(colorscale, colorscale, colorscale, colorscale, 1);
                 }
             }
@@ -1043,7 +1043,7 @@ static inline particle *newparticle(const vec &o, const vec &d, int fade, int ty
 
 int maxparticledistance = 6000;
 
-static void splash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int expand)
+static void splash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int expand, bool upsplash = false)
 {
     if(camera1->o.dist(p) > maxparticledistance && !seedemitter) return;
     float collidez = parts[type]->type&PT_COLLIDE ? p.z - raycube(p, vec(0, 0, -1), COLLIDERADIUS, RAY_CLIPMAT) + (parts[type]->stain >= 0 ? COLLIDEERROR : 0) : -1;
@@ -1059,16 +1059,16 @@ static void splash(int type, int color, int radius, int num, int fade, const vec
             z = rnd(radius*2)-radius;
         }
         while(x*x+y*y+z*z>radius*radius);
-        vec tmp = vec((float)x, (float)y, (float)z);
+        vec tmp = vec(upsplash ? (float)x/3.5f : (float)x, upsplash ? (float)y/3.5f : (float)y, (float)z<0 ? (float)z==(float)z/-1 : (float)z);
         int f = (num < 10) ? (fmin + rnd(fmax)) : (fmax - (i*(fmax-fmin))/(num-1)); //help deallocater by using fade distribution rather than random
-        newparticle(p, tmp, f, type, color, size, gravity, expand)->val = collidez;
+        newparticle(p, tmp, f, type, color, size, upsplash ? gravity*3 : gravity, expand)->val = collidez;
     }
 }
 
-static void regularsplash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int delay = 0, int expand = 0)
+void regularsplash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int delay, int expand, bool upsplash)
 {
     if(!canemitparticles() || (delay > 0 && rnd(delay) != 0)) return;
-    splash(type, color, radius, num, fade, p, size, gravity, expand);
+    splash(type, color, radius, num, fade, p, size, gravity, expand, upsplash);
 }
 
 static const struct colors{ int color; } rndcolor[] =
@@ -1429,6 +1429,17 @@ static void makeparticles(entity &e)
         case 15: //Rainbow/Arc-en-ciel
             if(n_ambiance==8) newparticle(e.o, offsetvec(e.o, e.attr4, 1000*3+(e.attr5*300)), 1, PART_RAINBOW, 0xAAAAAA, 100+(e.attr3*10));
             break;
+        case 16:
+            switch(rnd(250))
+            {
+                case 0:
+                    vec pos = e.o;
+                    pos.add(vec(-30+rnd(30), -30+rnd(30), -5));
+                    loopi(6)regularsplash(PART_FIRESPARK, 0xFFBB55, 800+rnd(600), 10, 300+(rnd(500)), offsetvec(pos, rnd(10), rnd(10)), 3.f+(rnd(30)/6.f), 200, 0, -1, true);
+                    loopi(4)regularsplash(PART_SMOKE, 0x333333, 400, 3, 1000+(rnd(1000)), offsetvec(pos, rnd(10), rnd(10)), 8.f+(rnd(8)), -20, 0, 1, true);
+                    loopi(2)particle_fireball(pos, 20, PART_EXPLOSION, 500, 0xFF9900, 2.5f, false);
+                    playsound(S_LAVASPLASH, &pos, 0, 0, 0 , 30, -1, 200);
+            }
         case 32: //lens flares - plain/sparkle/sun/sparklesun <red> <green> <blue>
         case 33:
         case 34:
