@@ -2716,7 +2716,7 @@ VARP(showmyping, 0, 0, 1);
 VAR(statrate, 1, 200, 1000);
 
 FVARP(conscale, 1e-3f, 0.33f, 1e3f);
-int nbfps;
+int nbfps = 60;
 
 void resethudshader()
 {

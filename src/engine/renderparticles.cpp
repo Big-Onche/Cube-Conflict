@@ -1201,7 +1201,7 @@ static inline int colorfromattr(int attr)
  * 24..26 flat plane
  * +32 to inverse direction
  */
-void regularshape(int type, int radius, int color, int dir, int num, int fade, const vec &p, float size, int gravity, float vel = 0, int windoffset = 0, bool enhanced = false)
+void regularshape(int type, int radius, int color, int dir, int num, int fade, const vec &p, float size, int gravity, float vel = 0, int windoffset = 0, bool enhanced = false, int height = 0)
 {
     if(!canemitparticles()) return;
 
@@ -1285,7 +1285,7 @@ void regularshape(int type, int radius, int color, int dir, int num, int fade, c
                 vec toz(to.x, to.y, camera1->o.z);
                 if(camera1->o.dist(toz) > 200*particles_lod && !seedemitter) continue;
 
-                float z = camera1->o.z+300;
+                float z = camera1->o.z+height;
                 vec spawnz(to.x, to.y, z);
                 float distToFloor = -raycube(to, vec(0, 0, -1), 0, RAY_CLIPMAT|RAY_POLY);
                 float floorHeight = (to.z - distToFloor);
@@ -1294,7 +1294,7 @@ void regularshape(int type, int radius, int color, int dir, int num, int fade, c
                 d.sub(from);
                 if(windoffset) d.add(vec(windoffset/2+rnd(windoffset), windoffset/2+rnd(windoffset), 0));
                 d.normalize().mul(to.dist(camera1->o)<=radius*4?-vel:vel);
-                particle *np = newparticle(spawnz, d, 3000, type, color, 5, -70);;
+                particle *np = newparticle(spawnz, d, 3000, type, color, size, -70);;
                 np->fixedfade = true;
                 np->val = floorHeight;
         }
@@ -1430,16 +1430,21 @@ static void makeparticles(entity &e)
             if(n_ambiance==8) newparticle(e.o, offsetvec(e.o, e.attr4, 1000*3+(e.attr5*300)), 1, PART_RAINBOW, 0xAAAAAA, 100+(e.attr3*10));
             break;
         case 16:
-            switch(rnd(250))
+        {
+            switch(rnd(nbfps*5))
             {
                 case 0:
+                {
                     vec pos = e.o;
                     pos.add(vec(-30+rnd(30), -30+rnd(30), -5));
                     loopi(6)regularsplash(PART_FIRESPARK, 0xFFBB55, 800+rnd(600), 10, 300+(rnd(500)), offsetvec(pos, rnd(10), rnd(10)), 3.f+(rnd(30)/6.f), 200, 0, -1, true);
                     loopi(4)regularsplash(PART_SMOKE, 0x333333, 400, 3, 1000+(rnd(1000)), offsetvec(pos, rnd(10), rnd(10)), 8.f+(rnd(8)), -20, 0, 1, true);
                     loopi(2)particle_fireball(pos, 20, PART_EXPLOSION, 500, 0xFF9900, 2.5f, false);
                     playsound(S_LAVASPLASH, &pos, 0, 0, 0 , 30, -1, 200);
+                }
             }
+        }
+        break;
         case 32: //lens flares - plain/sparkle/sun/sparklesun <red> <green> <blue>
         case 33:
         case 34:
@@ -1451,11 +1456,17 @@ static void makeparticles(entity &e)
             //The new, optimized weather code! :D --Q009
             //Contient quelques modifications pour Cube Conflict
             //see readme_SE.txt
-            if(n_ambiance==4 || n_ambiance==8) {loopi((particles_lod*32)+3) regularshape(PART_RAIN, max(1+e.attr2, 1), n_ambiance==8 ? 0xAAAAAA : 0x888888, 44, n_ambiance==8 ? 5 : 50, 0, e.o, 0.6f, 0, -1100, 70, true); }
-            if(n_ambiance==8) {loopi((particles_lod*32)+3) regularshape(PART_NEIGE, max(1+e.attr2, 1), n_ambiance==8 ? 0xAAAAAA : 0x888888, 44, 10, 0, e.o, 1.2f, 0, -550, 120, true); }
+            if(n_ambiance==4 || n_ambiance==8) {loopi((particles_lod*32)+3) regularshape(PART_RAIN, max(1+e.attr2, 1), n_ambiance==8 ? 0xAAAAAA : 0x888888, 44, n_ambiance==8 ? 5 : 50, 0, e.o, 5, 0, -1100, 70, true, 300); }
+            if(n_ambiance==8) {loopi((particles_lod*32)+3) regularshape(PART_NEIGE, max(1+e.attr2, 1), n_ambiance==8 ? 0xAAAAAA : 0x888888, 44, 10, 0, e.o, 5, 0, -550, 120, true, 300); }
             //regularshape(PART_SNOW, max(1+e.attr2, 1), 0x777777, 44, e.attr2>=128?30:20, 0, e.o, e.attr1==77?1:3, e.attr1==77?200:201, e.attr1==77?350:1000, e.attr3, true);
             break;
         }
+        case 51:    //mun dust
+            loopi((particles_lod*13)+3) regularshape(PART_SMOKE, max(1+e.attr2, 1), 0xBBBBBB, 44, 6, 0, e.o, 50.0f, 0, 75, 0, true, -70);
+            break;
+        case 52:    //volcano smoke
+            loopi((particles_lod*13)+3) regularshape(PART_SMOKE, max(1+e.attr2, 1), 0x181818, 44, 6, 0, e.o, 50.0f, 0, 75, 0, true, -70);
+            break;
         default:
             if(!editmode)
             {
