@@ -1067,7 +1067,7 @@ static void splash(int type, int color, int radius, int num, int fade, const vec
 
 void regularsplash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int delay, int expand, bool upsplash)
 {
-    if(!canemitparticles() || (delay > 0 && rnd(delay) != 0)) return;
+    if(minimized || (delay > 0 && rnd(delay) != 0)) return;
     splash(type, color, radius, num, fade, p, size, gravity, expand, upsplash);
 }
 
@@ -1434,14 +1434,13 @@ static void makeparticles(entity &e)
             switch(rnd(nbfps*5))
             {
                 case 0:
-                {
                     vec pos = e.o;
                     pos.add(vec(-30+rnd(30), -30+rnd(30), -5));
-                    loopi(6)regularsplash(PART_FIRESPARK, 0xFFBB55, 800+rnd(600), 10, 300+(rnd(500)), offsetvec(pos, rnd(10), rnd(10)), 3.f+(rnd(30)/6.f), 200, 0, -1, true);
-                    loopi(4)regularsplash(PART_SMOKE, 0x333333, 400, 3, 1000+(rnd(1000)), offsetvec(pos, rnd(10), rnd(10)), 8.f+(rnd(8)), -20, 0, 1, true);
+                    playsound(S_LAVASPLASH, &e.o, 0, 0, 0 , 30, -1, 200);
+                    loopi(6)regularsplash(PART_FIRESPARK, 0xFFBB55, 800+rnd(600), 10, 300+(rnd(500)), pos, 3.f+(rnd(30)/6.f), 200, 0, -1, true);
+                    loopi(4)regularsplash(PART_SMOKE, 0x333333, 400, 3, 1000+(rnd(1000)), pos, 8.f+(rnd(8)), -20, 0, 1, true);
                     loopi(2)particle_fireball(pos, 20, PART_EXPLOSION, 500, 0xFF9900, 2.5f, false);
-                    playsound(S_LAVASPLASH, &pos, 0, 0, 0 , 30, -1, 200);
-                }
+                break;
             }
         }
         break;
