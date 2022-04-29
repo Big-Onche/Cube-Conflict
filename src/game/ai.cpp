@@ -110,6 +110,7 @@ namespace ai
 
     bool targetable(gameent *d, gameent *e)
     {
+        if(e->aptitude==APT_ESPION && e->attacking==ACT_IDLE && e->aptisort2) return false;
         if(d == e) return false;
         return e->state == CS_ALIVE && !isteam(d->team, e->team);
     }
@@ -153,7 +154,7 @@ namespace ai
             float skew = clamp(float(lastmillis-d->ai->enemymillis)/float((d->skill*attacks[atk].attackdelay/2000.f)), 0.f, 1e16f),
                 offy = yaw-d->yaw, offp = pitch-d->pitch;
 
-            if(e->aptitude==APT_PHYSICIEN && e->aptisort2>0) return false;
+            if((e->aptitude==APT_PHYSICIEN && e->aptisort2) || (e->aptitude==APT_ESPION && e->aptisort1)) skew*=3.f;
 
             if(offy > 180) offy -= 360;
             else if(offy < -180) offy += 360;
@@ -829,8 +830,21 @@ namespace ai
                     gameent *e = getclient(b.target);
                     if(e && e->state == CS_ALIVE)
                     {
-                        if(d->mana>60 && d->aptitude==APT_MAGICIEN && d->o.dist(e->o)<500) aptitude(d, 1);
-                        else if (d->mana>=100 && d->aptitude==APT_MAGICIEN && d->o.dist(e->o)>500) aptitude(d, 2);
+                        switch(d->aptitude)
+                        {
+                            case APT_MAGICIEN:
+                                if(d->mana>60 && d->o.dist(e->o)<500) aptitude(d, 1);
+                                else if (d->mana>=100 && d->o.dist(e->o)>500) aptitude(d, 2);
+                                break;
+                            case APT_ESPION:
+                                switch(rnd(2))
+                                {
+                                    case 0: if(d->mana>=40 && d->o.dist(e->o)<700 && !d->aptisort2) aptitude(d, 1); break;
+                                    case 1: if(d->mana>=50 && d->o.dist(e->o)<700 && !d->aptisort1) aptitude(d, 2);
+                                }
+
+                        }
+
                         int atk = guns[d->gunselect].attacks[ACT_SHOOT];
                         float guard = SIGHTMIN, wander = attacks[atk].range;
                         return patrol(d, b, e->feetpos(), guard, wander) ? 1 : 0;
@@ -985,6 +999,8 @@ namespace ai
 
     void jumpto(gameent *d, aistate &b, const vec &pos)
     {
+        if(d->aptitude==APT_ESPION && d->aptisort2) return; // Ne saute pas si déguisé pour ne pas se faire repérer
+
 		vec off = vec(pos).sub(d->feetpos()), dir(off.x, off.y, 0);
         bool sequenced = d->ai->blockseq || d->ai->targseq, offground = d->timeinair && !d->inwater,
             jump = !offground && lastmillis >= d->ai->jumpseed && (sequenced || off.z >= JUMPMIN || lastmillis >= d->ai->jumprand);
@@ -1128,7 +1144,17 @@ namespace ai
                     if(!enemyok) violence(d, b, f);
                     switch(rnd(2))
                     {
-                        case 0: if(d->aptitude==APT_PRETRE || d->aptitude==APT_INDIEN) {if(d->mana>70) aptitude(d, 3);}
+                        case 0:
+                        switch(d->aptitude)
+                        {
+                            case APT_PRETRE: case APT_INDIEN: if(d->mana>70 && d->o.dist(f->o)<750) aptitude(d, 3); break;
+                            case APT_ESPION:
+                            switch(rnd(2))
+                            {
+                                case 0: if(d->mana>=40 && d->o.dist(f->o)<700 && !d->aptisort2) aptitude(d, 1); break;
+                                case 1: if(d->mana>=50 && d->o.dist(f->o)<700 && !d->aptisort1) aptitude(d, 2);
+                            }
+                        }
                     }
                     enemyok = true;
                     e = f;
@@ -1373,7 +1399,7 @@ namespace ai
             if(!intermission)
             {
                 if(d->ragdoll) cleanragdoll(d); // RAGRAG
-                moveplayer(d, 10, true, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptitude==APT_INDIEN ? d->aptisort2 : d->aptisort3, d->armourtype==A_ASSIST && d->armour>0 ? true : false);
+                moveplayer(d, 10, true, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptitude==APT_INDIEN || d->aptitude==APT_ESPION ? d->aptisort2 : d->aptisort3, d->armourtype==A_ASSIST && d->armour>0 ? true : false);
                 if(allowmove && !b.idle) timeouts(d, b);
 				entities::checkitems(d);
 				if(cmode) cmode->checkitems(d);
@@ -1385,7 +1411,7 @@ namespace ai
             else
             {
                 d->move = d->strafe = 0;
-                moveplayer(d, 10, false, 0, 0, 0, 0);
+                moveplayer(d, 10, false, 0, 0, 0, 0, 0, false);
             }
         }
         d->attacking = d->jumping = false;
@@ -1434,13 +1460,13 @@ namespace ai
                 int result = 0;
                 c.idle = 0;
 
-                if(d->health<250+d->skill*2 && d->aptitude==APT_MAGICIEN && d->mana>=60) aptitude(d, 3);
-                if(d->health<250+d->skill*2 && d->aptitude==APT_INDIEN && d->mana>=50) aptitude(d, 1);
-
-                if(d->aptitude==APT_PHYSICIEN)
+                switch(d->aptitude)
                 {
+                    case APT_MAGICIEN: if(d->health<250+d->skill*2 && d->mana>=60) aptitude(d, 3); break;
+                    case APT_INDIEN: if(d->health<250+d->skill*2 && d->mana>=50) aptitude(d, 1); break;
+                    case APT_PHYSICIEN:
                         switch(rnd(50)) {case 0: if(d->mana>70) aptitude(d, 3);}
-                        if(d->health<250+d->skill*2 && d->armour<50 && d->mana>=25) aptitude(d, 1);
+                        if(d->health<750 && d->armour<50 && d->mana>=25) aptitude(d, 1);
                 }
 
                 switch(rnd(150)){case 0: bottaunt(d);}
@@ -1457,8 +1483,11 @@ namespace ai
                     }
                     case AI_S_PURSUE: result = dopursue(d, c);
                     {
-                        if(d->health<650+d->skill && d->aptitude==APT_PHYSICIEN && d->mana>=50) aptitude(d, 2);
-                        if(d->mana>30 && d->health<500+d->skill && d->aptitude==APT_PRETRE) aptitude(d, 2);
+                        switch(d->aptitude)
+                        {
+                            case APT_PHYSICIEN: if(d->health<650+d->skill && d->mana>=50) aptitude(d, 2); break;
+                            case APT_PRETRE: if(d->mana>30 && d->health<500+d->skill) aptitude(d, 2);
+                        }
                         break;
                     }
                     case AI_S_INTEREST: result = dointerest(d, c);

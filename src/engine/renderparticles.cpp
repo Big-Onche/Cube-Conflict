@@ -886,11 +886,13 @@ static partrenderer *parts[] =
     new trailrenderer("media/particle/nuage_3.png", PT_TRAIL),
     new trailrenderer("media/particle/nuage_4.png", PT_TRAIL),
     new trailrenderer("media/particle/arcenciel.png", PT_TRAIL),
+    new quadrenderer("media/particle/viseur.png", PT_PART|PT_LERP),                    // smoke
     &lightnings,                                                                               // lightning
     &fireballs,                                                                                // explosion fireball
     &pulsebursts,                                                                              // pulse burst
     &ondedechoc,
     &plasma,
+    &radar,
     new quadrenderer("media/particle/spark.png", PT_PART|PT_FLIP|PT_BRIGHT),                   // sparks
     new quadrenderer("media/particle/spark.png", PT_PART|PT_FLIP|PT_BRIGHT),                   // sparks
     new quadrenderer("media/particle/base.png",  PT_PART|PT_FLIP|PT_BRIGHT),                   // edit mode entities
@@ -1098,11 +1100,11 @@ void regular_particle_splash(int type, int num, int fade, const vec &p, int colo
     regularsplash(type, color, radius, num, fade, p, size, gravity, delay);
 }
 
-void particle_splash(int type, int num, int fade, const vec &p, int color, float size, int radius, int gravity, int expand, bool randomcolor)
+void particle_splash(int type, int num, int fade, const vec &p, int color, float size, int radius, int gravity, int expand, bool randomcolor, float relativesize)
 {
     if(!canaddparticles()) return;
     if(randomcolor) color = rndcolor[rnd(6)].color;
-    splash(type, color, radius, num, fade, p, size, gravity, expand);
+    splash(type, color, radius, num, fade, p, size*relativesize, gravity, expand);
 }
 
 VARP(maxtrail, 1, 500, 10000);

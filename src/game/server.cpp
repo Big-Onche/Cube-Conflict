@@ -1985,6 +1985,7 @@ namespace server
                 putint(p, oi->state.aptisort1);
                 putint(p, oi->state.aptisort2);
                 putint(p, oi->state.aptisort3);
+                putint(p, oi->state.aptiseed);
                 sendstate(oi->state, p);
             }
             putint(p, -1);
@@ -2010,10 +2011,10 @@ namespace server
     void sendresume(clientinfo *ci)
     {
         servstate &gs = ci->state;
-        sendf(-1, 1, "ri9i9i3ivi", N_RESUME, ci->clientnum, gs.state,
+        sendf(-1, 1, "ri9i9i4ivi", N_RESUME, ci->clientnum, gs.state,
             gs.killstreak, gs.frags, gs.flags, gs.deaths,
             gs.steromillis, gs.epomillis, gs.jointmillis, gs.champimillis, gs.ragemillis,
-            gs.aptisort1, gs.aptisort2, gs.aptisort3,
+            gs.aptisort1, gs.aptisort2, gs.aptisort3, gs.aptiseed,
             gs.lifesequence,
             gs.health, gs.maxhealth, gs.mana,
             gs.armour, gs.armourtype,
@@ -2483,7 +2484,6 @@ namespace server
         gs.lastshot = millis;
 
         float waitfactor = 1;
-        if(ci->aptitude==APT_COMMANDO) waitfactor = 0.85f;
         if(ci->aptitude==APT_PRETRE && ci->state.aptisort3) waitfactor = 2.5f;
         if(gs.champimillis>0) waitfactor*=1.25f;
         gs.gunwait = attacks[atk].attackdelay/waitfactor;

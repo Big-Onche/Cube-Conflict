@@ -1756,7 +1756,6 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
         {
             if(pl==player) d.mul(floatspeed/100.0f);
         }
-        else if(pl->crouching) pl->physstate==PHYS_FALL ? d.mul(2.f) : d.mul(aptitude==APT_NINJA ? 0.8f : aptitude==APT_COMMANDO ? 0.7f : 0.5f);
     }
     float fric = water && !floating ? 20.0f : (pl->physstate >= PHYS_SLOPE || floating ? 6.0f : 30.0f);
     pl->vel.lerp(d, pl->vel, pow(1 - 1/fric, curtime/20.0f));
@@ -1805,7 +1804,12 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
     bool water = isliquid(material&MATF_VOLUME);
     bool floating = (pl->type==ENT_PLAYER && (pl->state==CS_EDITING || pl->state==CS_SPECTATOR)) || (aptisort>0 && aptitude==APT_PHYSICIEN);
     float classespeed = aptitudes[aptitude].apt_vitesse;
-    if(aptitude==APT_INDIEN && aptisort) {classespeed = 700.f;}
+
+    switch(aptitude)
+    {
+        case APT_INDIEN: if(aptisort) classespeed = 700.f; break;
+        case APT_ESPION: if(aptisort) classespeed = 4000.f; break;
+    }
 
     float secs;
     if(epomillis>0) secs = (curtime/(classespeed-(epomillis/(aptitude==13 ? 75 : 100))));

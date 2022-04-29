@@ -1,7 +1,7 @@
 #include "../game/game.h"
 
 //Définition des aptitudes
-enum {APT_SOLDAT = 0, APT_MEDECIN, APT_AMERICAIN, APT_NINJA, APT_VAMPIRE, APT_MAGICIEN, APT_KAMIKAZE, APT_FAUCHEUSE, APT_PHYSICIEN, APT_CAMPEUR, APT_COMMANDO, APT_PRETRE, APT_VICKING, APT_JUNKIE, APT_INDIEN, NUMAPTS};
+enum {APT_SOLDAT = 0, APT_MEDECIN, APT_AMERICAIN, APT_NINJA, APT_VAMPIRE, APT_MAGICIEN, APT_KAMIKAZE, APT_FAUCHEUSE, APT_PHYSICIEN, APT_CAMPEUR, APT_ESPION, APT_PRETRE, APT_VICKING, APT_JUNKIE, APT_INDIEN, NUMAPTS};
 
 static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt_vitesse; const char *apt_tete, *apt_nomFR, *apt_nomEN, *apt_logo; } aptitudes[NUMAPTS] =
 {
@@ -15,7 +15,7 @@ static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precisio
     { 100,   85,   90,  1050, "chapeaux/crane",      "Faucheuse",    "Reaper",       "media/interface/hud/faucheuse.jpg"},  //7
     {  90,   85,   85,  1050, "chapeaux/graduation", "Physicien",    "Physicist",    "media/interface/hud/physicien.jpg"},  //8
     { 100,   60,  125,  1250, "chapeaux/tente",      "Campeur",      "Camper",       "media/interface/hud/campeur.jpg"},    //9
-    { 110,  110,  110,   950, "chapeaux/kepi",       "Commando",     "Commando",     "media/interface/hud/commando.jpg"},   //10
+    {  90,   85,  120,  1100, "chapeaux/melon",      "Espion",       "Espion",       "media/interface/hud/espion.jpg"},     //10
     {  85,  105,   85,   950, "chapeaux/saint",      "Prêtre",       "Priest",       "media/interface/hud/pretre.jpg"},     //11
     { 100,  120,   60,  1075, "chapeaux/viking",     "Viking",       "Viking",       "media/interface/hud/viking.jpg"},     //12
     { 100,  110,   85,  1100, "chapeaux/champignon", "Junkie",       "Junkie",       "media/interface/hud/dealer.png"},     //13
@@ -93,6 +93,15 @@ static const struct danceinfo { const char *dancename; int danceprice; } customs
     {"Praud",      500},
     {"Malleville", 1500},
     {"Raoult",     1500},
+};
+
+//Définition des boucliers
+static const struct costumeinfo { const char *villagechateauxdota, *usine, *lune, *volcan; } costumes[] =
+{
+    {"mapmodel/caisses/caissebois",     "mapmodel/", "mapmodel/caisse2", "mapmodel/"},
+    {"mapmodel/lampadaire",     "mapmodel/", "mapmodel/", "mapmodel/lampadaire"},
+    {"mapmodel/panneau",        "mapmodel/", "mapmodel/", "mapmodel/"},
+    {"mapmodel/arbres/arbre1",  "mapmodel/", "mapmodel/", "mapmodel/"},
 };
 
 //HUD

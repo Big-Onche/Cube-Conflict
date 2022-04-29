@@ -229,12 +229,13 @@ enum
     S_SORTLANCE,
     S_SORTMAGE1, S_SORTMAGE2, S_SORTMAGE3,  S_SORTPRETRE1, S_SORTPRETRE2, S_SORTPRETRE3,
     S_SORTPHY1, S_SORTPHY2, S_SORTPHY3, S_SORTINDIEN1, S_SORTINDIEN2, S_SORTINDIEN3,
+    S_SORTESP1, S_SORTESP2, S_SORTESP3,
     S_SORTIMPOSSIBLE, S_SORTPRET,
     S_FAUCHEUSE,
 
     // Menus
     S_MENUBOUTON, S_CAISSEENREGISTREUSE, S_ERROR,
-    S_APT_SOLDAT, S_APT_MEDECIN, S_APT_AMERICAIN, S_APT_NINJA, S_APT_VAMPIRE, S_APT_MAGICIEN, S_APT_KAMIKAZE, S_APT_FAUCHEUSE, S_APT_PHYSICIEN, S_APT_CAMPEUR, S_APT_COMMANDO, S_APT_PRETRE, S_APT_VIKING, S_APT_JUNKIE, S_APT_SHOSHONE,
+    S_APT_SOLDAT, S_APT_MEDECIN, S_APT_AMERICAIN, S_APT_NINJA, S_APT_VAMPIRE, S_APT_MAGICIEN, S_APT_KAMIKAZE, S_APT_FAUCHEUSE, S_APT_PHYSICIEN, S_APT_CAMPEUR, S_APT_ESPION, S_APT_PRETRE, S_APT_VIKING, S_APT_JUNKIE, S_APT_SHOSHONE,
 
     // Messages
     S_RISIKILL, S_BIGRISIKILL, S_GIGARISIKILL,
@@ -325,7 +326,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
 #define CC_SERVER_PORT 43000
 #define CC_LANINFO_PORT 42998
 #define CC_MASTER_PORT 42999
-#define PROTOCOL_VERSION 3           // bump when protocol changes
+#define PROTOCOL_VERSION 4           // bump when protocol changes
 #define DEMO_VERSION 1                // bump when demo format changes
 #define DEMO_MAGIC "CC_DEMO\0\0"
 
@@ -479,6 +480,7 @@ static const struct aptisortsinfo { const char *tex1, *tex2, *tex3; int mana1, m
     { "media/interface/hud/sortphysicien1.png", "media/interface/hud/sortphysicien2.png", "media/interface/hud/sortphysicien3.png",     45, 50, 65, 2000, 4000, 6000, 3000, 5000, 9000,  S_SORTPHY1, S_SORTPHY2, S_SORTPHY3},           // Physicien
     { "media/interface/hud/sortpretre1.png", "media/interface/hud/sortpretre2.png", "media/interface/hud/sortpretre3.png",              30, 10, 80, 4000, 5000, 4000, 8000, 5000, 10000, S_SORTPRETRE1, S_SORTPRETRE2, S_SORTPRETRE3},  // Prêtre
     { "media/interface/hud/sortindien1.png", "media/interface/hud/sortindien2.png", "media/interface/hud/sortindien3.png",              50, 50, 50, 7500, 7500, 7500, 7500, 7500, 7500,  S_SORTINDIEN1, S_SORTINDIEN2, S_SORTINDIEN3},  // Indien
+    { "media/interface/hud/sortespion1.png", "media/interface/hud/sortespion2.png", "media/interface/hud/sortespion3.png",              40, 50, 60, 4000, 7000, 5000, 7000, 7000, 10000, S_SORTESP1, S_SORTESP2, S_SORTESP3},           // Espion
 };
 
 #include "ai.h"
@@ -489,7 +491,7 @@ struct gamestate
     int health, maxhealth, mana;
     int armour, armourtype;
     int steromillis, epomillis, jointmillis, champimillis, ragemillis, vampimillis;
-    int aptisort1, aptisort2, aptisort3;
+    int aptisort1, aptisort2, aptisort3, aptiseed;
     int gunselect, gunwait;
     int ammo[NUMGUNS];
     int aitype, skill;
@@ -519,7 +521,7 @@ struct gamestate
                 else return health<maxhealth;
             case I_MANA:
                 if(aptitude==4) return health<maxhealth;
-                else return (aptitude==5 || aptitude==8 || aptitude==11 || aptitude==14) && mana<is.max;
+                else return (aptitude==5 || aptitude==8 || aptitude==11 || aptitude==10 || aptitude==14) && mana<is.max;
             case I_BOOSTPV: return maxhealth<is.max;
             case I_BOOSTDEGATS: return steromillis<is.max;
             case I_BOOSTPRECISION: return champimillis<is.max;
@@ -611,6 +613,7 @@ struct gamestate
         aptisort1 = 0;
         aptisort2 = 0;
         aptisort3 = 0;
+        aptiseed = rnd(4);
         loopi(NUMGUNS) ammo[i] = 0;
     }
 

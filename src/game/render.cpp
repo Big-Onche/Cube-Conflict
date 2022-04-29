@@ -267,7 +267,7 @@ namespace game
          rendermodel(customstombes[d->customtombe].tombedir, ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED, d, NULL, 0, 0, fade); //DEBUG
     }
 
-    string bouclier;
+    string bouclier, costumemdlname;
 
     void renderplayer(gameent *d, const playermodelinfo &mdl, int color, int team, float fade, int flags = 0, bool mainpass = true)
     {
@@ -394,7 +394,33 @@ namespace game
         float trans = d->state == CS_LAGGED ? 0.5f : 1.0f;
         if(d->aptisort2 && d->aptitude==APT_PHYSICIEN) trans = 0.08f;
         else if(d->aptisort1 && d->aptitude==APT_MAGICIEN) trans = 0.7f;
+
+        if(d->aptitude==APT_ESPION && d->aptisort1)
+        {
+            vec doublepos = o;
+            int posx = 20, posy = 20;
+            switch(d->aptiseed)
+            {
+                case 1: posx=-20; posy=-20; break;
+                case 2: posx=20; posy=-20; break;
+                case 3: posx=-20; posy=20; break;
+            }
+
+            doublepos.add(vec(posx, posy, 0));
+            copystring(costumemdlname, costumes[d->aptiseed].villagechateauxdota);
+            rendermodel(d->aptisort2 ? costumemdlname : mdlname, anim, doublepos, yaw, d->pitch>12 ? 12 : d->pitch<-25 ? -25 : pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), trans));
+        }
+
+        if(d->aptitude==APT_ESPION && d->aptisort2)
+        {
+            copystring(costumemdlname, costumes[d->aptiseed].villagechateauxdota);
+            rendermodel(costumemdlname, anim, o, yaw, d->pitch>12 ? 12 : d->pitch<-25 ? -25 : pitch, 0, flags, d, NULL, basetime, 0, fade, vec4(vec::hexcolor(color), 1.0f));
+
+            trans = 0.0f;
+        }
+
         rendermodel(mdlname, anim, o, yaw, d->pitch>12 ? 12 : d->pitch<-25 ? -25 : pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), trans));
+
     }
 
 void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape, int color, int team, float fade, int flags = 0, bool mainpass = true)
@@ -485,7 +511,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape
             {
                 int team = m_teammode && validteam(d->team) ? d->team : 0;
 
-                if(d->health<300) switch(rnd(d->health+30)) {case 0: gibeffect(300, d->o, d);}
+                if(d->health<300 && d->health>0) switch(rnd(d->health+nbfps*2)) {case 0: gibeffect(300, d->o, d);}
 
                 vec posA = d->abovehead();
                 vec posB = camera1->o;
@@ -511,12 +537,26 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape
                                        d->o.dist(camera1->o)<75 ? 1.35f : 0.02f);
                     }
                 }
-                if((player1->aptitude==APT_JUNKIE && team==1)&&(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_INDIEN))
+                if((player1->aptitude==APT_JUNKIE && team==1)&&(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_INDIEN || d->aptitude==APT_ESPION))
                     particle_meter(d->o.dist(camera1->o)<75 ? (d->abovehead().add(camera1->o)).div(vec(2,2,2)) : posAtofrontofposB,
                                     d->mana/150.0f, PART_METER,
                                     d->o.dist(camera1->o)<250 ? 1.f : d->o.dist(camera1->o)/250.f, 0.5f,
                                     0xFF00FF, 0x000000,
                                     d->o.dist(camera1->o)<75 ? 1.35f : 0.02f);
+
+                if(d->aptisort2 && d->aptitude==APT_ESPION);
+                else if(player1->aptitude==APT_ESPION && team!=1 && player1->aptisort3 && d!=player1)
+                {
+                    vec posA = d->o;
+                    posA.add(vec(0, 0, -8));
+                    vec posC = posA;
+                    vec posB = camera1->o;
+
+                    vec posAtofrontofposB = (posA.add((posB.mul(vec(127, 127, 127))))).div(vec(128, 128, 128));
+
+                    particle_splash(PART_VISEUR,  1,  1, d->o.dist(camera1->o)<75 ? (posC.add(camera1->o)).div(vec(2,2,2)) : posAtofrontofposB, 0x555555, d->o.dist(camera1->o)<75 ? 3.f : 0.05f, d->o.dist(camera1->o)<250 ? 1.f : d->o.dist(camera1->o)/250.f, 1, 0, false, d->o.dist(camera1->o)<150 ? 1.f : d->o.dist(camera1->o)/150.f);
+                }
+
                 if(d->aptitude==APT_MAGICIEN)
                 {
                     vec pos = d->abovehead().add(vec(0, 0,-12));

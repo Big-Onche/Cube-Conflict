@@ -1546,7 +1546,6 @@ namespace game
                    hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
         }
         float waitfactor = 1;
-        if(d->aptitude==APT_COMMANDO) waitfactor = 0.85f;
         if(d->aptitude==APT_PRETRE && d->aptisort3) waitfactor = 2.5f;
         if(d->champimillis>0) waitfactor*=1.25f;
         d->gunwait = attacks[atk].attackdelay/waitfactor;
@@ -1718,7 +1717,7 @@ namespace game
         if(d->clientnum >= 0 && d->state == CS_ALIVE)
         {
             int neededdata = 0;
-            switch(d->aptitude) {case APT_PHYSICIEN: neededdata++; break; case APT_PRETRE: neededdata+=2; break; case APT_INDIEN: neededdata+=3;}
+            switch(d->aptitude) {case APT_PHYSICIEN: neededdata++; break; case APT_PRETRE: neededdata+=2; break; case APT_INDIEN: neededdata+=3; break; case APT_ESPION: neededdata+=4;}
 
             d->sortchan = playsound(d->aptisort1 ? sorts[neededdata].sound1 : d->aptisort2 ? sorts[neededdata].sound2 : sorts[neededdata].sound3, local ? NULL : &d->o, NULL, 0, -1, -1, d->sortchan, 300);
             if(d->sortchan < 0) d->sortchan = -1;

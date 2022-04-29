@@ -1424,6 +1424,7 @@ namespace game
                 getint(p);
                 getint(p);
                 getint(p);
+                getint(p);
             }
             else
             {
@@ -1435,6 +1436,7 @@ namespace game
                 d->aptisort1 = getint(p);
                 d->aptisort2 = getint(p);
                 d->aptisort3 = getint(p);
+                d->aptiseed = getint(p);
             }
         }
         d->lifesequence = getint(p);
@@ -1693,6 +1695,7 @@ namespace game
                 if(d)
                 {
                     d->aptisort3 = getint(p);
+                    if(d->aptitude==APT_ESPION) loopi(5)particle_fireball(d->o, 500, PART_RADAR, 2000, 0xAAAAAA, 3.f);
                 }
                 break;
             }
