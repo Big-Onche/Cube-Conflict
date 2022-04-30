@@ -1,4 +1,5 @@
 #include "engine.h"
+#include "cubedef.h"
 
 VAR(oqdynent, 0, 1, 1);
 VAR(animationinterpolationtime, 0, 200, 1000);
@@ -410,6 +411,22 @@ void preloadusedmapmodels(bool msg, bool bih)
     }
 
     loadprogress = 0;
+}
+
+void preloadusedplayermodels()
+{
+    loopi(4)
+    {
+        loadmodel(costumes[i].village, NULL, false);
+        loadmodel(costumes[i].usine, NULL, false);
+        loadmodel(costumes[i].faille, NULL, false);
+        loadmodel(costumes[i].lune, NULL, false);
+        loadmodel(costumes[i].chateaux, NULL, false);
+        loadmodel(costumes[i].volcan, NULL, false);
+    }
+
+    loadmodel("smileys/armureassistee", NULL, false);
+    loadmodel("smileys/armureassistee/red", NULL, false);
 }
 
 model *loadmodel(const char *name, int i, bool msg)
