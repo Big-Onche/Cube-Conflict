@@ -1411,7 +1411,7 @@ namespace ai
             else
             {
                 d->move = d->strafe = 0;
-                moveplayer(d, 10, false, 0, 0, 0, 0, 0, false);
+                moveplayer(d, 10, false, 0, 0, 0, 0);
             }
         }
         d->attacking = d->jumping = false;
