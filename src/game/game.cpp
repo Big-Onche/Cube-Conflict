@@ -1125,7 +1125,7 @@ namespace game
         {
             int snd = pl->armourtype==A_ASSIST && pl->armour> 0 ? S_PASASSIST: S_PAS;
             if(lookupmaterial(d->feetpos())&MAT_WATER) snd = S_NAGE;
-            if(lastmillis-pl->lastfootstep < (d->vel.magnitude()*(aptitudes[pl->aptitude].apt_vitesse*0.35f)*(pl->crouched() ? 2 : 1)*(d->inwater ? 2 : 1)*(pl->armourtype==A_ASSIST && pl->armour> 0 ? 2.5f : 1)/d->vel.magnitude())) return;
+            if(lastmillis-pl->lastfootstep < (d->vel.magnitude()*(aptitudes[pl->aptitude].apt_vitesse*0.35f)*(pl->crouched() || (pl->aptisort2 && pl->aptitude==APT_ESPION) ? 2 : 1)*(d->inwater ? 2 : 1)*(pl->armourtype==A_ASSIST && pl->armour> 0 ? 2.5f : 1)/d->vel.magnitude())) return;
             else {playsound(snd, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , pl->armourtype==A_ASSIST ? 300 : 150, -1, pl->armourtype==A_ASSIST ? 600 : 300); if(pl->epomillis) switch(rnd(4)) {case 0: playsound(S_PASEPO, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 500, -1, 1000);}}
         }
         pl->lastfootstep = lastmillis;
