@@ -398,17 +398,17 @@ namespace game
         if(d->aptitude==APT_ESPION && d->aptisort1)
         {
             vec doublepos = o;
-            int posx = 23, posy = 23;
+            float posx = 25, posy = 25;
             switch(d->aptiseed)
             {
-                case 1: posx=-23; posy=-23; break;
-                case 2: posx=23; posy=-23; break;
-                case 3: posx=-23; posy=23; break;
+                case 1: posx=-25; posy=-25; break;
+                case 2: posx=25; posy=-25; break;
+                case 3: posx=-25; posy=25; break;
             }
 
-            doublepos.add(vec(posx+rnd(2), posy+rnd(2), 0));
+            doublepos.add(vec(posx+(rnd(10)/20.f), posy+(rnd(10)/20.f), 0));
 
-            rendermodel(mdlname, anim, doublepos, yaw, d->pitch>12 ? 12 : d->pitch<-25 ? -25 : pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), trans));
+            rendermodel(mdlname, anim, doublepos, yaw, d->pitch>12 ? 12 : d->pitch<-25 ? -25 : pitch, 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), d==player1 ? 0.3f : trans));
         }
 
         if(d->aptitude==APT_ESPION && d->aptisort2)
@@ -789,8 +789,8 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape
             loopi(NUMGUNS) previewent->ammo[i] = 1;
         }
         float height = previewent->eyeheight + previewent->aboveeye,
-              zrad = height/2;
-        vec2 xyrad = vec2(previewent->xradius, previewent->yradius).max(height/4);
+              zrad = height/1.8f;
+        vec2 xyrad = vec2(previewent->xradius, previewent->yradius).max(height/3);
         previewent->o = calcmodelpreviewpos(vec(xyrad, zrad), previewent->yaw).addz(previewent->eyeheight - zrad);
         previewent->gunselect = validgun(weap) ? weap : GUN_RAIL;
         const playermodelinfo *mdlinfo = getplayermodelinfo(model);

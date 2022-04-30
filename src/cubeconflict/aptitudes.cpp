@@ -25,14 +25,14 @@ namespace game
                 else
                 {
                     vec doublepos = d->o;
-                    int posx = 23, posy = 23;
+                    int posx = 25, posy = 25;
                     switch(d->aptiseed)
                     {
-                        case 1: posx=-23; posy=-23; break;
-                        case 2: posx=23; posy=-23; break;
-                        case 3: posx=-23; posy=23; break;
+                        case 1: posx=-25; posy=-25; break;
+                        case 2: posx=25; posy=-25; break;
+                        case 3: posx=-25; posy=25; break;
                     }
-                    doublepos.add(vec(posx+rnd(2), posy+rnd(2), 0));
+                    doublepos.add(vec(posx, posy, 0));
 
                     d->sortchan = playsound(sorts[neededdata].sound1, &doublepos, NULL, 0, 0, 100, d->sortchan, 225);
                 }
