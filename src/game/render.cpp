@@ -398,15 +398,15 @@ namespace game
         if(d->aptitude==APT_ESPION && d->aptisort1)
         {
             vec doublepos = o;
-            int posx = 20, posy = 20;
+            int posx = 23, posy = 23;
             switch(d->aptiseed)
             {
-                case 1: posx=-20; posy=-20; break;
-                case 2: posx=20; posy=-20; break;
-                case 3: posx=-20; posy=20; break;
+                case 1: posx=-23; posy=-23; break;
+                case 2: posx=23; posy=-23; break;
+                case 3: posx=-23; posy=23; break;
             }
 
-            doublepos.add(vec(posx, posy, 0));
+            doublepos.add(vec(posx+rnd(2), posy+rnd(2), 0));
 
             rendermodel(mdlname, anim, doublepos, yaw, d->pitch>12 ? 12 : d->pitch<-25 ? -25 : pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), trans));
         }
