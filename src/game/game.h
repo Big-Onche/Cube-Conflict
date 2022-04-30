@@ -789,15 +789,15 @@ struct gameent : dynent, gamestate
         vel.add(push);
     }
 
-    void stopattacksound()
+    void stopattacksound(gameent *d)
     {
-        if(attackchan >= 0) stopsound(attacksound, attackchan, 250);
+        if(attackchan >= 0) stopsound(attacksound, attackchan, d->gunselect==GUN_S_GAU8 ? 150 : 250);
         attacksound = attackchan = -1;
     }
 
     void stopdansesound(gameent *d)
     {
-        if(dansechan >= 0) stopsound(S_CGCORTEX+(d->customdanse), dansechan, 150);
+        if(dansechan >= 0) stopsound(S_CGCORTEX+(d->customdanse), dansechan, 50);
         dansechan = -1;
     }
 

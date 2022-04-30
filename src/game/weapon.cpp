@@ -1357,7 +1357,7 @@ namespace game
         }
 
         looped = false;
-        if(d->attacksound >= 0 && d->attacksound != sound) d->stopattacksound();
+        if(d->attacksound >= 0 && d->attacksound != sound) d->stopattacksound(d);
         switch(sound)
         {
             case S_FLAMEATTACK:
@@ -1699,7 +1699,7 @@ namespace game
             d->attackchan = playsound(d->attacksound, local ? NULL : &d->o, NULL, 0, -1, -1, d->attackchan, 300);
             if(d->attackchan < 0) d->attacksound = -1;
         }
-        else d->stopattacksound();
+        else d->stopattacksound(d);
     }
 
     void checkdansesound(gameent *d, bool local)
