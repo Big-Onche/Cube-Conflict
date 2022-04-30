@@ -96,12 +96,12 @@ static const struct danceinfo { const char *dancename; int danceprice; } customs
 };
 
 //Définition des boucliers
-static const struct costumeinfo { const char *villagechateauxdota, *usine, *lune, *volcan; } costumes[] =
+static const struct costumeinfo { const char *village, *usine, *faille, *lune, *chateaux, *volcan; } costumes[] =
 {
-    {"mapmodel/caisses/caissebois",     "mapmodel/", "mapmodel/caisse2", "mapmodel/"},
-    {"mapmodel/lampadaire",     "mapmodel/", "mapmodel/", "mapmodel/lampadaire"},
-    {"mapmodel/panneau",        "mapmodel/", "mapmodel/", "mapmodel/"},
-    {"mapmodel/arbres/arbre1",  "mapmodel/", "mapmodel/", "mapmodel/"},
+    {"mapmodel/caisses/caissebois", "mapmodel/caisses/caisse1", "mapmodel/caisses/caissebois",  "mapmodel/rochers/pierre_fonce_esp",     "mapmodel/caisses/caissebois",  "mapmodel/distributeur"},
+    {"mapmodel/tonneau",            "mapmodel/caisses/caisse2", "mapmodel/tonneau",             "mapmodel/caisses/caisse2",     "mapmodel/tonneau",             "mapmodel/rochers/pierre_fonce_esp"},
+    {"mapmodel/panneau",            "mapmodel/caisses/caisse3", "mapmodel/panneau",             "mapmodel/caisses/caisse3",     "mapmodel/panneau",             "mapmodel/lampadaire"},
+    {"mapmodel/arbres/arbre1",      "mapmodel/murjersay",       "mapmodel/arbres/arbre1",       "mapmodel/murjersay",           "mapmodel/arbres/arbre1",       "mapmodel/murjersay"},
 };
 
 //HUD

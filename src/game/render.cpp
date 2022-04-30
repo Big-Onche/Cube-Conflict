@@ -267,7 +267,7 @@ namespace game
          rendermodel(customstombes[d->customtombe].tombedir, ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED, d, NULL, 0, 0, fade); //DEBUG
     }
 
-    string bouclier, costumemdlname;
+    string bouclier, costumemdlname, curmapname;
 
     void renderplayer(gameent *d, const playermodelinfo &mdl, int color, int team, float fade, int flags = 0, bool mainpass = true)
     {
@@ -407,20 +407,28 @@ namespace game
             }
 
             doublepos.add(vec(posx, posy, 0));
-            copystring(costumemdlname, costumes[d->aptiseed].villagechateauxdota);
-            rendermodel(d->aptisort2 ? costumemdlname : mdlname, anim, doublepos, yaw, d->pitch>12 ? 12 : d->pitch<-25 ? -25 : pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), trans));
+
+            rendermodel(mdlname, anim, doublepos, yaw, d->pitch>12 ? 12 : d->pitch<-25 ? -25 : pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), trans));
         }
 
         if(d->aptitude==APT_ESPION && d->aptisort2)
         {
-            copystring(costumemdlname, costumes[d->aptiseed].villagechateauxdota);
+            switch(n_map)
+            {
+                case 0: copystring(costumemdlname, costumes[d->aptiseed].village); break;
+                case 1: copystring(costumemdlname, costumes[d->aptiseed].usine); break;
+                case 2: copystring(costumemdlname, costumes[d->aptiseed].faille); break;
+                case 3: copystring(costumemdlname, costumes[d->aptiseed].lune); break;
+                case 4: copystring(costumemdlname, costumes[d->aptiseed].chateaux); break;
+                case 5: copystring(costumemdlname, costumes[d->aptiseed].volcan); break;
+            }
+
             rendermodel(costumemdlname, anim, o, yaw, d->pitch>12 ? 12 : d->pitch<-25 ? -25 : pitch, 0, flags, d, NULL, basetime, 0, fade, vec4(vec::hexcolor(color), 1.0f));
 
             trans = 0.0f;
         }
 
         rendermodel(mdlname, anim, o, yaw, d->pitch>12 ? 12 : d->pitch<-25 ? -25 : pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), trans));
-
     }
 
 void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape, int color, int team, float fade, int flags = 0, bool mainpass = true)
