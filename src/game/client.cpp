@@ -761,10 +761,10 @@ namespace game
         {
             case 0: name = "Village"; break;
             case 1: name = "Usine"; break;
-            case 2: name = "Chateaux"; break;
+            case 2: name = "Faille"; break;
             case 3: name = "Lune"; break;
-            case 4: name = "Volcan"; break;
-            //case 3: name = "Dota"; break;
+            case 4: name = "Chateaux"; break;
+            case 5: name = "Volcan"; break;
         }
         changemap(name, m_valid(nextmode) ? nextmode : (remote ? 1 : 0));
         fullbrightmodels = 0;
@@ -1567,6 +1567,13 @@ namespace game
                 filtertext(text, text, false);
                 fixmapname(text);
                 changemapserv(text, getint(p));
+                conoutf("%s", text);
+                strcmp(text, "Village")==0 ? n_map = 0 :
+                    strcmp(text, "Usine")==0 ? n_map = 1 :
+                    strcmp(text, "Faille")==0 ? n_map = 2 :
+                    strcmp(text, "Lune")==0 ? n_map = 3 :
+                    strcmp(text, "Chateaux")==0 ? n_map = 4 :
+                    strcmp(text, "Volcan")==0 ? n_map = 5 : n_map = 0;
                 mapchanged = true;
                 if(getint(p)) entities::spawnitems();
                 else senditemstoserver = false;

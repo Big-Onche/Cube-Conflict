@@ -243,10 +243,11 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
             {
                 case 0: formatstring(backgroundimg, "media/map/village.png"); break;
                 case 1: formatstring(backgroundimg, "media/map/usine.png"); break;
-                case 2: formatstring(backgroundimg, "media/map/chateaux.png"); break;
+                case 2: formatstring(backgroundimg, "media/map/faille.png"); break;
                 case 3: formatstring(backgroundimg, "media/map/lune.png"); break;
-                case 4: formatstring(backgroundimg, "media/map/volcan.png"); break;
-                default: formatstring(backgroundimg, "media/interface/background.png"); break;
+                case 4: formatstring(backgroundimg, "media/map/chateaux.png"); break;
+                case 5: formatstring(backgroundimg, "media/map/volcan.png"); break;
+                default: formatstring(backgroundimg, "media/interface/background.png");
             }
 
             settexture(backgroundimg);
