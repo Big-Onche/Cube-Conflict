@@ -4,7 +4,7 @@
 //Commandes d'aptitudes (touches 1, 2 et 3)
 namespace game
 {
-    void aptitude(gameent *d, int skill)
+    void aptitude(gameent *d, int skill, bool send)
     {
         if(d->state==CS_DEAD) return;
 
@@ -14,12 +14,16 @@ namespace game
         switch(skill)
         {
             case 1:
-                if(!d->sort1pret || d->mana<sorts[neededdata].mana1) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
-                d->aptisort1 = sorts[neededdata].duree1;
-                d->lastspecial1update = totalmillis;
-                addmsg(N_SENDSORT1, "rci", d, d->aptisort1);
-                d->mana -= sorts[neededdata].mana1;
-                d->sort1pret = false;
+                if(send)
+                {
+                    if(!d->sort1pret || d->mana<sorts[neededdata].mana1) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
+                    d->aptisort1 = sorts[neededdata].duree1;
+                    d->lastspecial1update = totalmillis;
+                    addmsg(N_SENDSORT1, "rci", d, d->aptisort1);
+                    d->mana -= sorts[neededdata].mana1;
+                    d->sort1pret = false;
+                }
+
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
                 if(d->aptitude!=APT_ESPION) d->sortchan = playsound(sorts[neededdata].sound1, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->sortchan, 275);
                 else
@@ -38,25 +42,42 @@ namespace game
                 }
                 break;
             case 2:
-                if(!d->sort2pret || d->mana<sorts[neededdata].mana2) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
-                d->aptisort2 = sorts[neededdata].duree2;
-                d->lastspecial2update = totalmillis;
-                addmsg(N_SENDSORT2, "rci", d, d->aptisort2);
-                d->mana -= sorts[neededdata].mana2;
-                d->sort2pret = false;
+                if(send)
+                {
+                    if(!d->sort2pret || d->mana<sorts[neededdata].mana2) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
+                    d->aptisort2 = sorts[neededdata].duree2;
+                    d->lastspecial2update = totalmillis;
+                    addmsg(N_SENDSORT2, "rci", d, d->aptisort2);
+                    d->mana -= sorts[neededdata].mana2;
+                    d->sort2pret = false;
+                }
+
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
                 d->sortchan = playsound(sorts[neededdata].sound2, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->sortchan, 275);
+
+                if(d->aptitude==APT_ESPION)
+                {
+                    loopi(1)particle_fireball(d->o,  50, PART_ONDECHOC, 300, 0xBBBBBB, 1.f);
+                    particle_splash(PART_SMOKE, 7, 400, d->o, 0x666666, 15+rnd(5), 200, -10);
+                }
+
+
                 break;
             case 3:
-                if(!d->sort3pret || d->mana<sorts[neededdata].mana3) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
-                d->aptisort3 = sorts[neededdata].duree3;
-                d->lastspecial3update = totalmillis;
-                addmsg(N_SENDSORT3, "rci", d, d->aptisort3);
-                d->mana -= sorts[neededdata].mana3;
-                d->sort3pret = false;
+                if(send)
+                {
+                    if(!d->sort3pret || d->mana<sorts[neededdata].mana3) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
+                    d->aptisort3 = sorts[neededdata].duree3;
+                    d->lastspecial3update = totalmillis;
+                    addmsg(N_SENDSORT3, "rci", d, d->aptisort3);
+                    d->mana -= sorts[neededdata].mana3;
+                    d->sort3pret = false;
+                }
+
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
                 d->sortchan = playsound(sorts[neededdata].sound3, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->sortchan, 275);
-                if(d==player1) if(d->aptitude==APT_ESPION) loopi(3)particle_fireball(d->o, 1000, PART_ONDECHOC, 1000, 0x0000FF, 5.f);
+
+                if(d->aptitude==APT_ESPION) particle_fireball(d->o, 1000, PART_RADAR, 1000, 0xAAAAAA, 20.f);
                 break;
         }
     }

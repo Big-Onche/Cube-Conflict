@@ -1685,6 +1685,7 @@ namespace game
                 if(d)
                 {
                     d->aptisort1 = getint(p);
+                    aptitude(d, 1, false);
                 }
                 break;
             }
@@ -1694,6 +1695,7 @@ namespace game
                 if(d)
                 {
                     d->aptisort2 = getint(p);
+                    aptitude(d, 2, false);
                 }
                 break;
             }
@@ -1702,7 +1704,7 @@ namespace game
                 if(d)
                 {
                     d->aptisort3 = getint(p);
-                    if(d->aptitude==APT_ESPION) loopi(5)particle_fireball(d->o, 500, PART_RADAR, 2000, 0xAAAAAA, 3.f);
+                    aptitude(d, 3, false);
                 }
                 break;
             }

@@ -1007,7 +1007,6 @@ namespace game
         clearprojectiles();
         clearbouncers();
         clearragdolls();
-
         clearteaminfo();
 
         // reset perma-state

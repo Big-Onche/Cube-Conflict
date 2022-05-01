@@ -1054,7 +1054,7 @@ namespace game
     extern vec hudgunorigin(int gun, const vec &from, const vec &to, gameent *d);
 
     // sorts
-    extern void aptitude(gameent *d, int skill);
+    extern void aptitude(gameent *d, int skill, bool send = true);
     extern int getteamfrags(int team);
 }
 
