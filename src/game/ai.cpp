@@ -99,7 +99,7 @@ namespace ai
 
     float attackmaxdist(int atk)
     {
-        return attacks[atk].range*1.5f;
+        return attacks[atk].range*1.1f;
     }
 
     bool attackrange(gameent *d, int atk, float dist)
@@ -142,18 +142,18 @@ namespace ai
 
     bool canshoot(gameent *d, int atk, gameent *e)
     {
-        if(attackrange(d, d->gunselect, e->o.squaredist(d->o)) && targetable(d, e))
-            return d->ammo[d->gunselect] > 0 && lastmillis - d->lastaction >= d->gunwait;
+        if(attackrange(d, atk, e->o.squaredist(d->o)) && targetable(d, e))
+            return d->ammo[attacks[atk].gun] > 0 && lastmillis - d->lastaction >= d->gunwait;
 
         return false;
-        return !d->ai->becareful && d->ammo[d->gunselect] > 0 && lastmillis - d->lastaction >= d->gunwait;
+        return !d->ai->becareful && d->ammo[attacks[atk].gun] > 0 && lastmillis - d->lastaction >= d->gunwait;
     }
 
     bool hastarget(gameent *d, int atk, aistate &b, gameent *e, float yaw, float pitch, float dist)
 	{ // add margins of error
-        if(attackrange(d, d->gunselect, dist) || (d->skill <= 100 && !rnd(d->skill)))
+        if(attackrange(d, atk, dist) || (d->skill <= 100 && !rnd(d->skill)))
         {
-            float skew = clamp(float(lastmillis-d->ai->enemymillis)/float((d->skill*attacks[atk].attackdelay/2000.f)), 0.f, 1e16f),
+            float skew = clamp(float(lastmillis-d->ai->enemymillis)/float((d->skill*attacks[atk].attackdelay/200.f)), 0.f, attacks[atk].projspeed ? 0.25f : 1e16f),
                 offy = yaw-d->yaw, offp = pitch-d->pitch;
 
             if(offy > 180) offy -= 360;
@@ -190,11 +190,11 @@ namespace ai
         {
             if(lastmillis >= d->ai->lastaimrnd)
             {
-                const int aiskew[NUMGUNS] = { 220, 1, 1, 30, 30, 1, 1, 15, 40, 1, 1, 3, 25, 10, 25, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+                const int aiskew[NUMGUNS] = { 150, 1, 1, 30, 30, 1, 1, 15, 40, 1, 1, 3, 25, 10, 25, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 
                 #define rndaioffset(r) ((rnd(int(r*aiskew[d->gunselect]*2)+1)-(r*aiskew[d->gunselect]))*(1.f/float(max(d->skill, 1))))
                 loopk(3) d->ai->aimrnd[k] = rndaioffset(e->radius);
-                int dur = (d->skill+50)*10;
+                int dur = (d->skill+10)*10;
                 d->ai->lastaimrnd = lastmillis+dur+rnd(dur);
             }
             loopk(3) o[k] += d->ai->aimrnd[k];
@@ -611,6 +611,7 @@ namespace ai
             }
         }
         if(cmode) cmode->aifind(d, b, interests);
+        if(m_teammode) assist(d, b, interests);
         return parseinterests(d, b, interests, override);
     }
 
