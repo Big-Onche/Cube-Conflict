@@ -425,7 +425,7 @@ namespace game
 
             rendermodel(costumemdlname, anim, o, yaw, d->pitch>12 ? 12 : d->pitch<-25 ? -25 : pitch, 0, flags, d, NULL, basetime, 0, fade, vec4(vec::hexcolor(color), 1.0f));
 
-            trans = 0.0f;
+            return;
         }
 
         rendermodel(mdlname, anim, o, yaw, d->pitch>12 ? 12 : d->pitch<-25 ? -25 : pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), trans));
@@ -581,7 +581,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape
                     vec pos = d->abovehead().add(vec(0, 0,-12));
                     if(d->aptisort2) particle_fireball(pos , 16.0f, PART_ONDECHOC, 5,  0xFFFF00, 16.0f);
                 }
-                if(d->ragemillis) switch(rnd(2)){case 0: particle_splash(PART_SMOKE, 1, 150, d->o, 0xFF3300, 12+rnd(5),  400, 200);}
+                if(d->ragemillis) switch(rnd(2)){case 0: particle_splash(PART_SMOKE, 2, 150, d->o, 0xFF3300, 12+rnd(5),  400, 200);}
                 if(d->jointmillis) switch(rnd(5)) {case 1: regularflame(PART_SMOKE, d->abovehead().add(vec(-12, 5, -19)), 2, 3, 0x888888, 1, 1.6f, 50.0f, 1000.0f, -10);}
                 if(d->armourtype==A_ASSIST && d->armour>0)
                 {
