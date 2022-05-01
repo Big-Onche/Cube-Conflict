@@ -131,6 +131,7 @@ namespace ai
 
     bool cansee(gameent *d, vec &x, vec &y, vec &targ)
     {
+        if(d->aptitude==APT_ESPION && d->aptisort3) return true;
         aistate &b = d->ai->getstate();
         if(canmove(d) && b.type != AI_S_WAIT)
             return getsight(x, d->yaw, d->pitch, y, targ, d->ai->views[2], d->ai->views[0], d->ai->views[1]);
