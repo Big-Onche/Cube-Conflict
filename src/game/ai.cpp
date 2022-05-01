@@ -110,7 +110,7 @@ namespace ai
 
     bool targetable(gameent *d, gameent *e)
     {
-        if(e->aptitude==APT_ESPION && e->attacking==ACT_IDLE && e->aptisort2) return false;
+        if(e->aptitude==APT_ESPION && e->aptisort2 && e->attacking==ACT_IDLE && e->physstate!=PHYS_FALL) return false;
         if(d == e) return false;
         return e->state == CS_ALIVE && !isteam(d->team, e->team);
     }
@@ -154,8 +154,6 @@ namespace ai
             float skew = clamp(float(lastmillis-d->ai->enemymillis)/float((d->skill*attacks[atk].attackdelay/2000.f)), 0.f, 1e16f),
                 offy = yaw-d->yaw, offp = pitch-d->pitch;
 
-            if((e->aptitude==APT_PHYSICIEN && e->aptisort2) || (e->aptitude==APT_ESPION && e->aptisort1)) skew*=3.f;
-
             if(offy > 180) offy -= 360;
             else if(offy < -180) offy += 360;
             if(fabs(offy) <= d->ai->views[0]*skew && fabs(offp) <= d->ai->views[1]*skew) return true;
@@ -166,6 +164,19 @@ namespace ai
     vec getaimpos(gameent *d, int atk, gameent *e)
     {
         vec o = e->o;
+
+        if(e->aptitude==APT_ESPION && e->aptisort1)
+        {
+            int posx = 25, posy = 25;
+            switch(e->aptiseed)
+            {
+                 case 1: posx=-25; posy=-25; break;
+                 case 2: posx=25; posy=-25; break;
+                 case 3: posx=-25; posy=25; break;
+            }
+            o.add(vec(posx, posy, 0));
+        }
+
         switch(atk)
         {
             case ATK_PULSE_SHOOT: case ATK_GRAP1_SHOOT: o.z += (e->aboveeye*0.2f)-(0.8f*d->eyeheight); break;
@@ -177,8 +188,7 @@ namespace ai
         {
             if(lastmillis >= d->ai->lastaimrnd)
             {
-                const int aiskew[NUMGUNS] = { 190, 1, 1, 30, 30, 1, 1, 15, 40, 1, 1, 3, 25, 10, 25, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
-                //int aiskew = 1;
+                const int aiskew[NUMGUNS] = { 220, 1, 1, 30, 30, 1, 1, 15, 40, 1, 1, 3, 25, 10, 25, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 
                 #define rndaioffset(r) ((rnd(int(r*aiskew[d->gunselect]*2)+1)-(r*aiskew[d->gunselect]))*(1.f/float(max(d->skill, 1))))
                 loopk(3) d->ai->aimrnd[k] = rndaioffset(e->radius);
