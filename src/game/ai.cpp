@@ -111,6 +111,7 @@ namespace ai
     bool targetable(gameent *d, gameent *e)
     {
         if(e->aptitude==APT_ESPION && e->aptisort2 && e->attacking==ACT_IDLE && e->physstate!=PHYS_FALL) return false;
+        if(d->aptitude==APT_INDIEN && d->mana>=50) {aptitude(d, 3); return true;}
         if(d == e) return false;
         return e->state == CS_ALIVE && !isteam(d->team, e->team);
     }
@@ -1473,10 +1474,13 @@ namespace ai
                 switch(d->aptitude)
                 {
                     case APT_MAGICIEN: if(d->health<250+d->skill*2 && d->mana>=60) aptitude(d, 3); break;
-                    case APT_INDIEN: if(d->health<250+d->skill*2 && d->mana>=50) aptitude(d, 1); break;
+                    case APT_INDIEN: if(d->mana>=100) aptitude(d, 2); break;
                     case APT_PHYSICIEN:
                         switch(rnd(50)) {case 0: if(d->mana>70) aptitude(d, 3);}
                         if(d->health<750 && d->armour<50 && d->mana>=25) aptitude(d, 1);
+                        break;
+                    case APT_ESPION:
+                        if(d->mana>100) aptitude(d, 3);
                 }
 
                 switch(rnd(150)){case 0: bottaunt(d);}
