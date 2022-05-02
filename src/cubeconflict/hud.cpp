@@ -84,7 +84,6 @@ namespace game
             if(totalmillis-ctfmessage6<=3000) {formatstring(infomsg, langage ? "\f3The enemy team stole our flag." : "\f3L'équipe ennemie a volé notre drapeau !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
         }
 
-
         if(player1->state==CS_DEAD)
         {
             string killedbymsg, withmsg, waitmsg;

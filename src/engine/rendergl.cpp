@@ -1435,8 +1435,13 @@ void mousemove(int dx, int dy, bool sortprecision)
 void bougersouris()
 {
     if(game::player1->aptitude==APT_MAGICIEN && game::player1->aptisort2) return;
-    mousemove(rnd(60), rnd(60));
-    mousemove(-rnd(60), -rnd(60));
+
+    int movefactor = 1;
+    if(game::player1->aptitude==APT_SOLDAT) movefactor = 2;
+
+    camera1->roll = (rnd(100/movefactor)/(10.f*movefactor))-(rnd(100/movefactor)/(10.f*movefactor));
+    mousemove(rnd(25/movefactor), rnd(25/movefactor));
+    mousemove(-rnd(25/movefactor), -rnd(25/movefactor));
 }
 
 COMMAND(bougersouris, "");
@@ -1502,6 +1507,10 @@ void recomputecamera()
             if(thirdpersonside) camera1->o.add(vec(side).mul(thirdpersonside));
         }
     }
+
+    //if(lastmillis-game::player1->lastpain > 750 && game::player1->state==CS_DEAD)
+    //{
+    //}
 
     setviewcell(camera1->o);
 }
