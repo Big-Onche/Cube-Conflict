@@ -1154,6 +1154,10 @@ namespace game
         //int soundwater = attacks[atk]].soundwater;
         if(player1->aptisort2 && d==player1 && player1->aptitude==APT_MAGICIEN) playsound(S_SORTMAGE2);
         if(d->aptisort3 && d->aptitude==APT_PRETRE)adddynlight(d->muzzle, 6, vec(1.5f, 1.5f, 0.0f), 80, 40, L_NOSHADOW|L_VOLUMETRIC|DL_FLASH);
+
+        int movefactor = 1;
+        if(game::player1->aptitude==APT_SOLDAT) movefactor = 2;
+
         switch(atk)
         {
             case ATK_PULSE_SHOOT:
@@ -1161,7 +1165,7 @@ namespace game
                 if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 140, PART_PULSE_MUZZLE_FLASH, 0xFF4444, zoom ? 1.50f : 5.50f, d, player1->champimillis ? true : false);
                 adddynlight(hudgunorigin(gun, d->o, to, d), 100, vec(1.25f, 0.2f, 0.0f), 40, 2, DL_FLASH, 0, vec(1.25f, 0.2f, 0.0f), d);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
-                if(d==player1) mousemove(-5+rnd(11),-5+rnd(11), player1->aptisort2 && player1->aptitude==APT_MAGICIEN ? true : false);
+                if(d==player1) mousemove((-5+rnd(11))/movefactor, (-5+rnd(11))/movefactor, player1->aptisort2 && player1->aptitude==APT_MAGICIEN ? true : false);
                 break;
 
             case ATK_SPOCKGUN_SHOOT:
@@ -1189,7 +1193,7 @@ namespace game
                 if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 250, PART_NORMAL_MUZZLE_FLASH, 0xFF2222, atk==ATK_ROQUETTES_SHOOT ? 4.0f : 3.00f, d, player1->champimillis ? true : false);
                 adddynlight(hudgunorigin(gun, d->o, to, d), 100, vec(1.25f, 0.75f, 0.3f), 75, 2, DL_FLASH, 0, vec(1.25f, 0.75f, 0.3f), d);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
-                if(d==player1 && atk==ATK_ROQUETTES_SHOOT) mousemove(-7+rnd(15), -7+rnd(15), player1->aptisort2 && player1->aptitude==APT_MAGICIEN ? true : false);
+                if(d==player1 && atk==ATK_ROQUETTES_SHOOT) mousemove((-7+rnd(15))/movefactor, (-7+rnd(15))/movefactor, player1->aptisort2 && player1->aptitude==APT_MAGICIEN ? true : false);
                 break;
             case ATK_ARTIFICE_SHOOT:
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
@@ -1205,7 +1209,7 @@ namespace game
                 adddynlight(hudgunorigin(gun, d->o, to, d), 75, vec(1.25f, 0.75f, 0.3f), 35, 2, DL_FLASH, 0, vec(1.25f, 0.75f, 0.3f), d);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
                 if(d!=hudplayer()) sound_nearmiss(S_FLYBY, from, to);
-                if(d==player1) mousemove(ATK_MINIGUN_SHOOT==1 ? -7+rnd(15) : -3+rnd(7), ATK_MINIGUN_SHOOT==1 ? -7+rnd(15) :  -3+rnd(7), player1->aptisort2 && player1->aptitude==APT_MAGICIEN ? true : false);
+                if(d==player1) mousemove(ATK_MINIGUN_SHOOT==1 ? (-7+rnd(15))/movefactor : (-3+rnd(7))/movefactor, ATK_MINIGUN_SHOOT==1 ? (-7+rnd(15))/movefactor : (-3+rnd(7))/movefactor, player1->aptisort2 && player1->aptitude==APT_MAGICIEN ? true : false);
                 break;
             case ATK_GAU8_SHOOT:
                 if(d->type==ENT_PLAYER) sound = S_GAU8;
@@ -1222,7 +1226,7 @@ namespace game
                 adddynlight(hudgunorigin(gun, d->o, to, d), 100, vec(1.25f, 0.75f, 0.3f), 30, 2, DL_FLASH, 0, vec(1.25f, 0.75f, 0.3f), d);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
                 if(d!=hudplayer()) sound_nearmiss(S_FLYBYSNIPE, from, to);
-                if(d==player1) mousemove(-9+rnd(19), -9+rnd(19), player1->aptisort2 && player1->aptitude==APT_MAGICIEN ? true : false);
+                if(d==player1) mousemove((-9+rnd(19))/movefactor, (-9+rnd(19))/movefactor, player1->aptisort2 && player1->aptitude==APT_MAGICIEN ? true : false);
                 break;
             case ATK_MOSSBERG_SHOOT:
             case ATK_HYDRA_SHOOT:
@@ -1284,7 +1288,7 @@ namespace game
                 adddynlight(hudgunorigin(gun, d->o, to, d), 60, vec(1.25f, 0.75f, 0.3f), 30, 2, DL_FLASH, 0, vec(1.25f, 0.75f, 0.3f), d);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
                 if(d!=hudplayer()) sound_nearmiss(S_FLYBY, from, to);
-                if(d==player1) {if(atk!=ATK_GLOCK_SHOOT) mousemove(-3+rnd(7), -3+rnd(7), player1->aptisort2 && player1->aptitude==APT_MAGICIEN ? true : false);}
+                if(d==player1) {if(atk!=ATK_GLOCK_SHOOT) mousemove((-3+rnd(7))/movefactor, (-3+rnd(7))/movefactor, player1->aptisort2 && player1->aptitude==APT_MAGICIEN ? true : false);}
                 break;
             case ATK_LANCEFLAMMES_SHOOT:
             {

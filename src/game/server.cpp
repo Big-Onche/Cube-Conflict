@@ -2312,7 +2312,7 @@ namespace server
             case APT_AMERICAIN: {if(atk==ATK_NUKE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_CAMPOUZE_SHOOT) damage *= 2; break;}
             case APT_MAGICIEN: {if(as.aptisort2) damage *= 1.333333f; break;}
             case APT_CAMPEUR: damage += as.o.dist(ts.o)/2.5f; break;
-            case APT_VICKING: {if(as.ragemillis) damage *=1.25f;} break;
+            case APT_VIKING: {if(as.ragemillis) damage *=1.25f;} break;
             case APT_INDIEN: {if(as.aptisort3) damage *= 1.3f; break;}
         }
 

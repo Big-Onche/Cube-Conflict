@@ -697,7 +697,18 @@ struct gamestate
     // just subtract damage here, can set death, etc. later in code calling this
     int dodamage(int damage, int aptitude, int aptisort)
     {
-        int ad = damage*(armourtype+1)*(armourtype==A_ASSIST && armour>0 ? 16 : 25)/100; // let armour absorb when possible
+        int absorbfactor = 0;
+        switch(armourtype)
+        {
+            case A_BLUE: absorbfactor=25; break;
+            case A_GREEN: absorbfactor=50; break;
+            case A_YELLOW: absorbfactor=75; break;
+            case A_MAGNET: absorbfactor=100; break;
+            case A_ASSIST: absorbfactor=85; break;
+        }
+        if(aptitude==0 && armour>0) armourtype!=A_MAGNET ? absorbfactor+=25 : damage*=0.75f;
+
+        int ad = damage*(absorbfactor)/100.f; // let armour absorb when possible
 
         if(damage>0)
         {
