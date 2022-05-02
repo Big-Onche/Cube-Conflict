@@ -1815,7 +1815,7 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
         default : classespeed = aptitudes[aptitude].apt_vitesse;
     }
 
-    if(epomillis) classespeed/=(epomillis/(aptitude==APT_JUNKIE ? 15000.f : 20000.f));
+    if(epomillis) classespeed/=((epomillis + (aptitude==APT_JUNKIE ? 20000.f : 30000.f))/(aptitude==APT_JUNKIE ? 20000.f : 30000.f));
 
     float secs = curtime/classespeed;
 
