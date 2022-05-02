@@ -1803,24 +1803,25 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
     int material = lookupmaterial(vec(pl->o.x, pl->o.y, pl->o.z + (3*pl->aboveeye - pl->eyeheight)/4));
     bool water = isliquid(material&MATF_VOLUME);
     bool floating = (pl->type==ENT_PLAYER && (pl->state==CS_EDITING || pl->state==CS_SPECTATOR)) || (aptisort>0 && aptitude==APT_PHYSICIEN);
-    float classespeed = aptitudes[aptitude].apt_vitesse;
+
+    // Application de la vitesse des aptitudes
+    float classespeed = 1000.f;
 
     switch(aptitude)
     {
+        case APT_MAGICIEN: if(aptisort) classespeed = 150.f; break;
         case APT_INDIEN: if(aptisort) classespeed = 700.f; break;
         case APT_ESPION: if(aptisort) classespeed = 4000.f; break;
+        default : classespeed = aptitudes[aptitude].apt_vitesse;
     }
 
-    float secs;
-    if(epomillis>0) secs = (curtime/(classespeed-(epomillis/(aptitude==13 ? 75 : 100))));
-    else secs = curtime/classespeed;
+    if(epomillis) classespeed/=(epomillis/(aptitude==APT_JUNKIE ? 15000.f : 20000.f));
 
-    //if(accroupi) secs*=20;
+    float secs = curtime/classespeed;
 
     // apply gravity
     if(!floating) modifygravity(pl, water, curtime, jointmillis, aptitude, assist);
 
-    if(aptitude==APT_MAGICIEN && aptisort) {secs = curtime/150.f;}
 
     // apply any player generated changes in velocity
     modifyvelocity(pl, local, water, floating, curtime, jointmillis, aptitude, assist);
