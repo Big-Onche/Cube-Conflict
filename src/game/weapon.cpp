@@ -489,11 +489,11 @@ namespace game
         damage = (damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[d->aptitude].apt_resistance); //Dégats de base
         actor->steromillis > 0 ? damage*=actor->aptitude==13 ? 3 : 2 : damage+=0; //Stéros ou non
         if(d->aptisort3>0 && d->aptitude==APT_MAGICIEN) damage = damage/5.0f;
-        damage = damage/10.0f;
+        damage = damage/10.f;
 
         if(isteam(d->team, actor->team) && actor!=d && actor->aptitude!=APT_MEDECIN)
         {
-            damage/=(APT_JUNKIE ? 1.5f : 3.f); //Divisé si allié sauf sois-même
+            damage/=(actor->aptitude==APT_JUNKIE ? 1.5f : 3.f); //Divisé si allié sauf sois-même
             particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.0f), PART_TEXT, actor->steromillis > 0 ? 2500 : 1500, 0x666666, actor==player1 ? 5.0f : 2.2f, -8);
             return;
         }
@@ -504,7 +504,7 @@ namespace game
         {
             case APT_AMERICAIN:
                 if(atk==ATK_NUKE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_CAMPOUZE_SHOOT)
-                    {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*2), PART_TEXT, 2500, 0xFF5500, actor==player1 ? 5.5f : 4.0f, -8); normaldamage = false; }
+                    {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*2.f), PART_TEXT, 2500, 0xFF5500, actor==player1 ? 5.5f : 4.0f, -8); normaldamage = false; }
             case APT_NINJA:
                 if(atk==ATK_CACNINJA_SHOOT) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*3.0f), PART_TEXT, 2500, 0xFF0000, actor==player1 ? 7.0f : 5.0f, -8);  normaldamage = false; }
                 break;
