@@ -382,7 +382,7 @@ static struct itemstat { int add, max, sound; const char *name; int icon, info; 
     {500,     2500, S_COCHON,       "COCHON GRILLAY",      HICON_SIZE},
     {30000,  45000, S_ITEMSTEROS,   "STEROIDES",           HICON_SIZE},
     {40000, 120000, S_ITEMCHAMPIS,  "CHAMPIS",             HICON_SIZE},
-    {45000,  75000, S_ITEMEPO,      "EPO",                 HICON_SIZE},
+    {40000,  60000, S_ITEMEPO,      "EPO",                 HICON_SIZE},
     {30000,  90000, S_ITEMJOINT,    "JOINT",               HICON_SIZE},
     {750,      750, S_ITEMBBOIS,    "BOUCLIER EN BOIS",    HICON_SIZE, A_BLUE},
     {1250,    1250, S_ITEMBFER,     "BOUCLIER DE FER",     HICON_SIZE, A_GREEN},

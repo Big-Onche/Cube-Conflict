@@ -2285,7 +2285,15 @@ namespace server
         {
             if(isteam(target->team, actor->team))
             {
-                if(teamkill) damage/=3;
+                if(teamkill)
+                {
+                    switch(actor->aptitude)
+                    {
+                        case APT_MEDECIN: damage=0;
+                        case APT_JUNKIE: damage/=1.5f;
+                        default: damage/=3;
+                    }
+                }
                 else return;
             }
         }
@@ -2301,6 +2309,7 @@ namespace server
         //Dommages spéciaux d'aptitudes
         switch(actor->aptitude)
         {
+            case APT_AMERICAIN: {if(atk==ATK_NUKE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_CAMPOUZE_SHOOT) damage *= 2; break;}
             case APT_MAGICIEN: {if(as.aptisort2) damage *= 1.333333f; break;}
             case APT_CAMPEUR: damage += as.o.dist(ts.o)/2.5f; break;
             case APT_VICKING: {if(as.ragemillis) damage *=1.25f;} break;
@@ -2311,7 +2320,7 @@ namespace server
         switch(target->aptitude)
         {
             case APT_MAGICIEN: {if(ts.aptisort3) damage = damage/5.0f;} break;
-            case APT_VICKING: {if(actor!=target) {ts.ragemillis+=damage*5; sendresume(target);}} break; //Ajoute la rage au Vicking et l'envoie au client
+            case APT_VIKING: {if(actor!=target) {ts.ragemillis+=damage*5; sendresume(target);}} break; //Ajoute la rage au Vicking et l'envoie au client
             case APT_PRETRE: { if(ts.aptisort2 && ts.mana>=damage/10) {ts.mana -= damage/10; damage=0; sendresume(target);} } break;
             case APT_INDIEN:
             {
