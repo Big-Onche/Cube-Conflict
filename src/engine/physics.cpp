@@ -1701,7 +1701,7 @@ VAR(floatspeed, 1, 400, 10000);
 void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curtime, int jointmillis, int aptitude, bool assist)
 {
     bool allowmove = game::allowmove(pl);
-    int maxjumps = jointmillis>4500 ? jointmillis/1500 : (aptitude==APT_NINJA && assist ? 3 : aptitude==APT_NINJA || assist ? 2 : 1);
+    int maxjumps = jointmillis>4500 ? jointmillis/1500 : (assist ? 3 : aptitude==APT_NINJA ? 4 : 1);
 
     if(floating)
     {
@@ -1713,12 +1713,13 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
     }
     else if(((pl->physstate >= PHYS_FALL || lastmillis-pl->lastjump < 280) || water) && pl->jumps<maxjumps)
     {
-        if(water && !pl->inwater) pl->vel.div(8);
+        if(water && !pl->inwater && aptitude!=APT_NINJA) pl->vel.div(8);
         if(pl->jumping && allowmove)
         {
             pl->jumping = false;
+            if(pl->timeinair && (aptitude==APT_NINJA || assist)) pl->falling = vec(0, 0, 0);
             pl->vel.z = max(pl->vel.z, JUMPVEL);  // physics impulse upwards
-            if(water) { pl->vel.x /= 8.0f; pl->vel.y /= 8.0f; } // dampen velocity change even harder, gives correct water feel
+            if(water && aptitude!=APT_NINJA) { pl->vel.x /= 8.f; pl->vel.y /= 8.f; } // dampen velocity change even harder, gives correct water feel
 
             game::physicstrigger(pl, local, 1, 0);
             pl->jumps++;
