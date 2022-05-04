@@ -9,7 +9,7 @@ namespace game
         if(d->state==CS_DEAD) return;
 
         int neededdata = 0;
-        switch(d->aptitude) {case APT_PHYSICIEN: neededdata++; break; case APT_PRETRE: neededdata+=2; break; case APT_SHOSHONE: neededdata+=3; break;  case APT_ESPION: neededdata+=4; break; case APT_KAMIKAZE: neededdata+=5;}
+        switch(d->aptitude) {case APT_PHYSICIEN: neededdata++; break; case APT_PRETRE: neededdata+=2; break; case APT_SHOSHONE: neededdata+=3; break; case APT_ESPION: neededdata+=4; break; case APT_KAMIKAZE: neededdata+=5;}
 
         switch(skill)
         {
@@ -25,7 +25,7 @@ namespace game
                 }
 
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
-                if(d->aptitude!=APT_ESPION) d->sortchan = playsound(sorts[neededdata].sound1, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->sortchan, 275);
+                if(d->aptitude!=APT_ESPION) d->sortchan = playsound(sorts[neededdata].sound1, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->sortchan, 300);
                 else
                 {
                     vec doublepos = d->o;
@@ -101,7 +101,7 @@ namespace game
                 }
                 break;
             default:
-                if(player1->aptitude==APT_PRETRE || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || player1->aptitude==APT_KAMIKAZE) aptitude(player1, skill);
+                if(player1->aptitude==APT_PRETRE || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || player1->aptitude==APT_KAMIKAZE) aptitude(player1, player1->aptitude==APT_KAMIKAZE ? 2 : skill);
         }
     }
 
