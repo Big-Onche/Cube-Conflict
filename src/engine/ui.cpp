@@ -3302,9 +3302,6 @@ namespace UI
     ICOMMAND(uivgradient, "iiffe", (int *c, int *c2, float *minw, float *minh, uint *children),
         BUILD(Gradient, o, o->setup(Gradient::SOLID, Gradient::VERTICAL, Color(*c), Color(*c2), *minw, *minh), children));
 
-    ICOMMAND(uivgradient2, "iiffe", (int *c, int *c2, float *minw, float *minh, uint *children),
-        BUILD(Gradient, o, o->setup(Gradient::MODULATE, Gradient::VERTICAL, Color(0x5588CC), Color(0x77BBFF), *minw, *minh), children));
-
     ICOMMAND(uimodvgradient, "iiffe", (int *c, int *c2, float *minw, float *minh, uint *children),
         BUILD(Gradient, o, o->setup(Gradient::MODULATE, Gradient::VERTICAL, Color(*c), Color(*c2), *minw, *minh), children));
 
