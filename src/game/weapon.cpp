@@ -1739,7 +1739,7 @@ namespace game
         if(d->clientnum >= 0 && d->state == CS_ALIVE)
         {
             int neededdata = 0;
-            switch(d->aptitude) {case APT_PHYSICIEN: neededdata++; break; case APT_PRETRE: neededdata+=2; break; case APT_SHOSHONE: neededdata+=3; break; case APT_ESPION: neededdata+=4;}
+            switch(d->aptitude) {case APT_PHYSICIEN: neededdata++; break; case APT_PRETRE: neededdata+=2; break; case APT_SHOSHONE: neededdata+=3; break; case APT_ESPION: neededdata+=4; case APT_KAMIKAZE: neededdata+=5;}
 
             d->sortchan = playsound(d->aptisort1 ? sorts[neededdata].sound1 : d->aptisort2 ? sorts[neededdata].sound2 : sorts[neededdata].sound3, local ? NULL : &d->o, NULL, 0, -1, -1, d->sortchan, 300);
             if(d->sortchan < 0) d->sortchan = -1;

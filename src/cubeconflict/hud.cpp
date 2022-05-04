@@ -265,10 +265,13 @@ namespace game
 
         if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || player1->aptitude==APT_KAMIKAZE)
         {
-            if(player1->aptitude==APT_KAMIKAZE && player1->aptisort2) settexture("media/interface/hud/chrono.png");
-            else if(player1->aptitude!=APT_KAMIKAZE) settexture("media/interface/hud/mana.png");
-            bgquad(15, h-260, 115, 115);
-            decal_icon += 130;
+            if(player1->aptitude!=APT_KAMIKAZE) settexture("media/interface/hud/mana.png");
+            else if(player1->aptitude==APT_KAMIKAZE && player1->aptisort2) settexture("media/interface/hud/chrono.png");
+            if(player1->aptisort2)
+            {
+                bgquad(15, h-260, 115, 115);
+                decal_icon += 130;
+            }
 
             float positionsorts = 0.5f*(w - 100);
             int neededdata = 0;

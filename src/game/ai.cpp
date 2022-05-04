@@ -476,7 +476,7 @@ namespace ai
 
     bool hasgoodammo(gameent *d)
     {
-        static const int goodguns[] = { GUN_S_CAMPOUZE, GUN_S_NUKE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_CACNINJA, GUN_KAMIKAZE,GUN_PULSE, GUN_RAIL, GUN_FAMAS, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_AK47, GUN_SV98, GUN_SKS, GUN_ARTIFICE, GUN_ARBALETE, GUN_LANCEFLAMMES };
+        static const int goodguns[] = { GUN_S_CAMPOUZE, GUN_S_NUKE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_CACNINJA, GUN_KAMIKAZE, GUN_PULSE, GUN_RAIL, GUN_FAMAS, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_AK47, GUN_SV98, GUN_SKS, GUN_ARTIFICE, GUN_ARBALETE, GUN_LANCEFLAMMES };
         loopi(sizeof(goodguns)/sizeof(goodguns[0])) if(d->hasammo(goodguns[0])) return true;
         if(d->ammo[GUN_M32] > 5) return true;
         return false;
@@ -1148,7 +1148,14 @@ namespace ai
 
         gameent *e = getclient(d->ai->enemy);
         bool enemyok = e && targetable(d, e);
-        if(!enemyok || d->skill >= 50)
+
+        if(d->aptitude==APT_KAMIKAZE && d->aptisort2 > 0 && enemyok)
+        {
+            makeroute(d, b, e->o);
+            if(d->aptisort2<750) d->gunselect=GUN_KAMIKAZE;
+        }
+
+        if(!enemyok || d->skill >= 30)
         {
             gameent *f = (gameent *)intersectclosest(dp, d->ai->target, d);
             if(f)
@@ -1156,18 +1163,18 @@ namespace ai
                 if(targetable(d, f))
                 {
                     if(!enemyok) violence(d, b, f);
-                    switch(rnd(2))
+
+                    switch(d->aptitude)
                     {
-                        case 0:
-                        switch(d->aptitude)
+                        case APT_PRETRE: case APT_SHOSHONE: if(d->mana>70 && d->o.dist(f->o)<750) aptitude(d, 3); break;
+                        case APT_KAMIKAZE:
+                            if(d->o.dist(f->o)<500) aptitude(d, 2);
+                            break;
+                        case APT_ESPION:
+                        switch(rnd(2))
                         {
-                            case APT_PRETRE: case APT_SHOSHONE: if(d->mana>70 && d->o.dist(f->o)<750) aptitude(d, 3); break;
-                            case APT_ESPION:
-                            switch(rnd(2))
-                            {
-                                case 0: if(d->mana>=40 && d->o.dist(f->o)<700 && !d->aptisort2) aptitude(d, 1); break;
-                                case 1: if(d->mana>=50 && d->o.dist(f->o)<700 && !d->aptisort1) aptitude(d, 2);
-                            }
+                            case 0: if(d->mana>=40 && d->o.dist(f->o)<700 && !d->aptisort2) aptitude(d, 1); break;
+                            case 1: if(d->mana>=50 && d->o.dist(f->o)<700 && !d->aptisort1) aptitude(d, 2);
                         }
                     }
                     enemyok = true;
@@ -1290,6 +1297,7 @@ namespace ai
     {
         gameent *e = getclient(d->ai->enemy);
         loopi(4) if(hasrange(d, e, GUN_S_NUKE+i) && d->hasammo(GUN_S_NUKE+i)){gunselect(GUN_S_NUKE+i, d); return process(d, b) >= 2;} //Super armes sélectionnées en priorité
+        if(d->aptitude==APT_KAMIKAZE && hasrange(d, e, GUN_KAMIKAZE)) {gunselect(GUN_KAMIKAZE, d); return process(d, b) >= 2;}
 
         if(m_identique)
         {
