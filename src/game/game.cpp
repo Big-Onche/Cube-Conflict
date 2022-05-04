@@ -13,7 +13,8 @@ namespace game
     {
         if(player1->state != CS_DEAD && isconnected())
         {
-            conoutf(CON_GAMEINFO, "\fcImpossible de changer d'aptitude en étant vivant !");
+            conoutf(CON_GAMEINFO, langage ? "\fcCannot change class while alive!" : "\fcImpossible de changer d'aptitude en étant vivant !");
+            playsound(S_ERROR);
             player1_aptitude = oldapti;
         }
         else
@@ -215,7 +216,7 @@ namespace game
         d->roll = d->newroll;
         if(move)
         {
-            moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptitude==APT_INDIEN || d->aptitude==APT_ESPION ? d->aptisort2 : d->aptisort3, d->armourtype==A_ASSIST && d->armour>0 ? true : false);
+            moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION || d->aptitude==APT_KAMIKAZE ? d->aptisort2 : d->aptisort3, d->armourtype==A_ASSIST && d->armour>0 ? true : false);
             d->newpos = d->o;
         }
         float k = 1.0f - float(lastmillis - d->smoothmillis)/smoothmove;
@@ -319,7 +320,7 @@ namespace game
                     loopv(players)
                     {
                         gameent *r = players[i];
-                        if((r->o.dist(h->o)/18.f<6 && r->mana<150 && isteam(h->team, r->team) && r->state==CS_ALIVE)&&(r->aptitude==APT_INDIEN || r->aptitude==APT_MAGICIEN || r->aptitude==APT_PRETRE || r->aptitude==APT_PHYSICIEN))
+                        if((r->o.dist(h->o)/18.f<6 && r->mana<150 && isteam(h->team, r->team) && r->state==CS_ALIVE)&&(r->aptitude==APT_SHOSHONE || r->aptitude==APT_MAGICIEN || r->aptitude==APT_PRETRE || r->aptitude==APT_PHYSICIEN || r->aptitude==APT_ESPION))
                         {
                             switch(rnd(60))
                             {
@@ -351,7 +352,7 @@ namespace game
                 }
             }
 
-            if(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_INDIEN || d->aptitude==APT_ESPION) updatespecials(d);
+            if(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION) updatespecials(d);
 
             if(d == player1 || d->ai) continue;
             if(d->state==CS_DEAD && d->ragdoll) moveragdoll(d);
@@ -367,9 +368,9 @@ namespace game
             {
                 crouchplayer(d, 10, false);
                 if(smoothmove && d->smoothmillis>0) predictplayer(d, true);
-                else moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptitude==APT_INDIEN || d->aptitude==APT_ESPION ? d->aptisort2 : d->aptisort3, d->armourtype==A_ASSIST && d->armour>0 ? true : false);
+                else moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION || d->aptitude==APT_KAMIKAZE ? d->aptisort2 : d->aptisort3, d->armourtype==A_ASSIST && d->armour>0 ? true : false);
             }
-            else if(d->state==CS_DEAD && !d->ragdoll && lastmillis-d->lastpain<2000) moveplayer(d, 1, true, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptitude==APT_INDIEN || d->aptitude==APT_ESPION ? d->aptisort2 : d->aptisort3, false);
+            else if(d->state==CS_DEAD && !d->ragdoll && lastmillis-d->lastpain<2000) moveplayer(d, 1, true, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION  || d->aptitude==APT_KAMIKAZE ? d->aptisort2 : d->aptisort3, false);
         }
     }
 
@@ -420,7 +421,7 @@ namespace game
             if(player1->steromillis && player1->epomillis && player1->jointmillis && player1->champimillis) unlockachievement(ACH_DEFONCE);
             if(player1->steromillis || player1->epomillis || player1->jointmillis || player1->champimillis) entities::checkboosts(curtime, player1);
             if(player1->ragemillis || player1->vampimillis || player1->aptisort1 || player1->aptisort2 || player1->aptisort3) entities::checkaptiskill(curtime, player1);
-            if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_INDIEN || player1->aptitude==APT_ESPION) updatespecials(player1);
+            if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION) updatespecials(player1);
 
             if(player1->aptitude==APT_MEDECIN && !m_teammode && player1->health<player1->maxhealth+200 && player1->state==CS_ALIVE && isconnected())
             {
@@ -464,7 +465,7 @@ namespace game
                     gameent *h = players[i];
                     loopv(players)
                     {
-                        if((players[i]->o.dist(h->o)/18.f<6 && players[i]->mana<150 && isteam(h->team, players[i]->team) && h->state==CS_ALIVE) && (players[i]->aptitude==APT_INDIEN || players[i]->aptitude==APT_MAGICIEN || players[i]->aptitude==APT_PRETRE || players[i]->aptitude==APT_PHYSICIEN))
+                        if((players[i]->o.dist(h->o)/18.f<6 && players[i]->mana<150 && isteam(h->team, players[i]->team) && h->state==CS_ALIVE) && (players[i]->aptitude==APT_SHOSHONE || players[i]->aptitude==APT_MAGICIEN || players[i]->aptitude==APT_PRETRE || players[i]->aptitude==APT_PHYSICIEN || players[i]->aptitude==APT_ESPION))
                         {
                             switch(rnd(60))
                             {
@@ -519,7 +520,7 @@ namespace game
             {
                 if(player1->ragdoll) cleanragdoll(player1);
                 crouchplayer(player1, 10, true);
-                moveplayer(player1, 10, true, player1->epomillis, player1->jointmillis, player1->aptitude, player1->aptitude==APT_MAGICIEN ? player1->aptisort1 : player1->aptitude==APT_INDIEN || player1->aptitude==APT_ESPION ? player1->aptisort2 : player1->aptisort3, player1->armourtype==A_ASSIST && player1->armour>0 ? true : false);
+                moveplayer(player1, 10, true, player1->epomillis, player1->jointmillis, player1->aptitude, player1->aptitude==APT_MAGICIEN ? player1->aptisort1 : player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || player1->aptitude==APT_KAMIKAZE ? player1->aptisort2 : player1->aptisort3, player1->armourtype==A_ASSIST && player1->armour>0 ? true : false);
                 swayhudgun(curtime);
                 entities::checkitems(player1);
                 if(cmode) cmode->checkitems(player1);
@@ -742,7 +743,7 @@ namespace game
                 if(player1->killstreak>stat[STAT_KILLSTREAK]) addstat(player1->killstreak, STAT_KILLSTREAK);
                 if(player1->gunselect==GUN_ASSISTXPL && player1->armourtype==A_ASSIST)unlockachievement(ACH_KILLASSIST);
                 if(player1->health<=149 && player1->state==CS_ALIVE) unlockachievement(ACH_1HPKILL);
-                if(player1->aptitude==APT_AMERICAIN && d->aptitude==APT_INDIEN) unlockachievement(ACH_FUCKYEAH);
+                if(player1->aptitude==APT_AMERICAIN && d->aptitude==APT_SHOSHONE) unlockachievement(ACH_FUCKYEAH);
                 if(player1->killstreak==3) unlockachievement(ACH_TRIPLETTE);
                 else if(player1->killstreak==5) unlockachievement(ACH_PENTAPLETTE);
                 else if(player1->killstreak==10) unlockachievement(ACH_DECAPLETTE);
@@ -817,13 +818,13 @@ namespace game
             aname = colorname(actor, NULL, langage ? "\fdYou" : "\fdTu", "\fc");
         }
 
-        if(d==actor && actor->armourtype==A_ASSIST && actor->armour==0) // Explosion d'armure assistée //////////////////////////////////////////////////////////////////////
-        {
-            if(langage)conoutf(contype, "%s%s%s", d==player1 ? "\fd" : "", d==player1 ? "Your" : dname, d==player1 ? " \f7powered armor exploded !" : "\f7's powered armor exploded !");
-            else conoutf(contype, "%s%s %s", d==player1 ? "\fd" : "L'armure assistée de ", d==player1 ? "Ton" : dname, d==player1 ? "\f7armure assistée a explosé !" : "\f7a explosé !");
-            if(d==player1) {player1->killstreak=0; copystring(str_armetueur, langage ? partmessageEN[rnd(5)].parttroll : partmessageFR[rnd(9)].parttroll); suicided = true;}
-        }
-        else if(d==actor) // Suicide ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //if(d==actor && actor->armourtype==A_ASSIST && actor->armour==0) // Explosion d'armure assistée //////////////////////////////////////////////////////////////////////
+        //{
+        //    if(langage)conoutf(contype, "%s%s%s", d==player1 ? "\fd" : "", d==player1 ? "Your" : dname, d==player1 ? " \f7powered armor exploded !" : "\f7's powered armor exploded !");
+        //    else conoutf(contype, "%s%s %s", d==player1 ? "\fd" : "L'armure assistée de ", d==player1 ? "Ton" : dname, d==player1 ? "\f7armure assistée a explosé !" : "\f7a explosé !");
+        //    if(d==player1) {player1->killstreak=0; copystring(str_armetueur, langage ? partmessageEN[rnd(5)].parttroll : partmessageFR[rnd(9)].parttroll); suicided = true;}
+        //}
+        if(d==actor) // Suicide ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
             conoutf(contype, "%s%s %s%s%s", d==player1 ? "\fd" : "", dname, langage ? "" : d==player1 ? "t'es " : "s'est ", langage ? partmessageEN[rnd(2)].partsuicide : partmessageFR[rnd(5)].partsuicide, d==player1 ? " !" : ".");
             if(d==player1) {player1->killstreak=0; copystring(str_armetueur, langage ? partmessageEN[rnd(5)].parttroll : partmessageFR[rnd(9)].parttroll); suicided = true;}

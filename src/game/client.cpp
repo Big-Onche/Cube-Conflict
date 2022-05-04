@@ -381,10 +381,88 @@ namespace game
 
     const char *getclientaptilogo(int cn)
     {
+        if(cn == -1) return aptitudes[player1->aptitude].apt_logo;
+
         gameent *d = getclient(cn);
         return aptitudes[d->aptitude].apt_logo;
     }
     ICOMMAND(getclientaptilogo, "i", (int *cn), result(getclientaptilogo(*cn)));
+
+    string tempprefix;
+    const char *prefix(int value, bool needplus = true)
+    {
+        if(value>=15) formatstring(tempprefix, "\fh");
+        else if(value>=5) formatstring(tempprefix, "\fj");
+        else if(value<=-15) formatstring(tempprefix, "\f3");
+        else if (value<=-5) formatstring(tempprefix, "\f6");
+        else formatstring(tempprefix, "\f2");
+
+        if(value > 0) formatstring(tempprefix, "%s%s", tempprefix, needplus ? "+" : "");
+
+        return tempprefix;
+    }
+
+    string tempstat;
+    const char *getaptistat(int stat)
+    {
+        switch(stat)
+        {
+            case 0: formatstring(tempstat, "\fb %s %s%d%%", langage ? "Damage :" : "Dégâts :", prefix(aptitudes[player1->aptitude].apt_degats-100), aptitudes[player1->aptitude].apt_degats-100); break;
+            case 1: formatstring(tempstat, "\fb %s %s%d%%", langage ? "Resistance :" : "Résistance :", prefix(aptitudes[player1->aptitude].apt_resistance-100), aptitudes[player1->aptitude].apt_resistance-100); break;
+            case 2: formatstring(tempstat, "\fb %s %s%d%%", langage ? "Accuracy :" : "Précision :", prefix(aptitudes[player1->aptitude].apt_precision-100), aptitudes[player1->aptitude].apt_precision-100); break;
+            case 3:
+            {
+                int realspeedspec = (aptitudes[player1->aptitude].apt_vitesse-1000)*-0.1f;
+                formatstring(tempstat, "\fb %s %s%d%%", langage ? "Speed :" : "Vitesse :", prefix(realspeedspec), realspeedspec);
+            }
+        }
+
+        return tempstat;
+    }
+    ICOMMAND(getaptistat, "i", (int *stat), result(getaptistat(*stat)));
+
+    string tempapti;
+    const char *getaptiname()
+    {
+        formatstring(tempapti, "%s%s", "\fb", langage ? aptitudes[player1->aptitude].apt_nomEN : aptitudes[player1->aptitude].apt_nomFR);
+        return tempapti;
+    }
+    ICOMMAND(getaptiname, "", (), result(getaptiname()));
+
+    string tempbars = "";
+    const char *getaptistatbars(int stat)
+    {
+        int value = 0;
+        switch(stat)
+        {
+            case 0: value = aptitudes[player1->aptitude].apt_degats-100; break;
+            case 1: value = aptitudes[player1->aptitude].apt_resistance-100; break;
+            case 2: value = aptitudes[player1->aptitude].apt_precision-100; break;
+            case 3: value = (aptitudes[player1->aptitude].apt_vitesse-1000)*-0.1f;
+        }
+
+        formatstring(tempbars, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s", prefix(value, false), "|",
+                     value>-40 ? "|" : "\f4|",
+                     value>-35 ? "|" : "\f4|",
+                     value>-30 ? "|" : "\f4|",
+                     value>-25 ? "|" : "\f4|",
+                     value>-20 ? "|" : "\f4|",
+                     value>-15 ? "|" : "\f4|",
+                     value>-10 ? "|" : "\f4|",
+                     value>-5 ?  "|" : "\f4|",
+                     value>0 ?   "|" : "\f4|",
+                     value>5 ?   "|" : "\f4|",
+                     value>10 ?  "|" : "\f4|",
+                     value>15 ?  "|" : "\f4|",
+                     value>20 ?  "|" : "\f4|",
+                     value>25 ?  "|" : "\f4|",
+                     value>30 ?  "|" : "\f4|",
+                     value>35 ?  "|" : "\f4|",
+                     value>40 ?  "|" : "\f4|");
+
+        return tempbars;
+    }
+    ICOMMAND(getaptistatbars, "i", (int *stat), result(getaptistatbars(*stat)));
 
     ICOMMAND(getclientcolornameR, "i", (int *cn),
     {
@@ -1871,10 +1949,11 @@ namespace game
             {
                 int tcn = getint(p), atk = getint(p), damage = getint(p);
                 gameent *target = getclient(tcn);
+
                 vec dir;
                 loopk(3) dir[k] = getint(p)/DNF;
                 if(!target || !validatk(atk)) break;
-                target->hitpush(damage * (target->health<=0 ? deadpush : 1), dir, NULL, atk);
+                target->hitpush(damage * (target->health<=0 ? deadpush : 1), dir, NULL, atk, target);
                 break;
             }
 

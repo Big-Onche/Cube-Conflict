@@ -9,7 +9,7 @@ namespace game
         if(d->state==CS_DEAD) return;
 
         int neededdata = 0;
-        switch(d->aptitude) {case APT_PHYSICIEN: neededdata++; break; case APT_PRETRE: neededdata+=2; break; case APT_INDIEN: neededdata+=3; break;  case APT_ESPION: neededdata+=4;}
+        switch(d->aptitude) {case APT_PHYSICIEN: neededdata++; break; case APT_PRETRE: neededdata+=2; break; case APT_SHOSHONE: neededdata+=3; break;  case APT_ESPION: neededdata+=4; break; case APT_KAMIKAZE: neededdata+=5;}
 
         switch(skill)
         {
@@ -78,6 +78,12 @@ namespace game
                 d->sortchan = playsound(sorts[neededdata].sound3, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->sortchan, 275);
 
                 if(d->aptitude==APT_ESPION) particle_fireball(d->o, 1000, PART_RADAR, 1000, 0xAAAAAA, 20.f);
+
+                if(isteam(player1->team, d->team) && d->aptitude==APT_ESPION && d!=player1)
+                {
+                    getsort = totalmillis;
+                    playsound(S_SORTESP3);
+                }
                 break;
         }
     }
@@ -90,12 +96,12 @@ namespace game
                 switch(player1->aptitude)
                 {
                     case APT_KAMIKAZE: player1->gunselect = GUN_KAMIKAZE; playsound(S_WEAPLOAD); return;
-                    case APT_PRETRE: case APT_PHYSICIEN: case APT_MAGICIEN: case APT_INDIEN: case APT_ESPION: aptitude(player1, skill);
+                    case APT_PRETRE: case APT_PHYSICIEN: case APT_MAGICIEN: case APT_SHOSHONE: case APT_ESPION: aptitude(player1, skill);
                     default: return;
                 }
                 break;
             default:
-                if(player1->aptitude==APT_PRETRE || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_INDIEN || player1->aptitude==APT_ESPION) aptitude(player1, skill);
+                if(player1->aptitude==APT_PRETRE || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || player1->aptitude==APT_KAMIKAZE) aptitude(player1, skill);
         }
     }
 
@@ -106,7 +112,7 @@ namespace game
     void updatespecials(gameent *d) //Permet de réarmer les sorts en fonction de la durée de rechargement de ceux-ci
     {
         int neededdata = 0;
-        switch(d->aptitude) {case APT_PHYSICIEN: neededdata++; break; case APT_PRETRE: neededdata+=2; break; case APT_INDIEN: neededdata+=3; break; case APT_ESPION: neededdata+=4;}
+        switch(d->aptitude) {case APT_PHYSICIEN: neededdata++; break; case APT_PRETRE: neededdata+=2; break; case APT_SHOSHONE: neededdata+=3; break; case APT_ESPION: neededdata+=4;}
 
         if(totalmillis-d->lastspecial1update >= sorts[neededdata].reload1 && !d->sort1pret) {if(d==player1)playsound(S_SORTPRET); d->sort1pret = true; }
         if(totalmillis-d->lastspecial2update >= sorts[neededdata].reload2 && !d->sort2pret) {if(d==player1)playsound(S_SORTPRET); d->sort2pret = true; }

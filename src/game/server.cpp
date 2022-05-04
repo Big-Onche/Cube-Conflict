@@ -2301,19 +2301,18 @@ namespace server
         servstate &ts = target->state;
         servstate &as = actor->state;
 
-        if(ts.armourtype==A_ASSIST && ts.armour==0 && atk!=ATK_ASSISTXPL_SHOOT) return;
-
         //Calcul des dommages de base
         damage = (damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[target->aptitude].apt_resistance);
 
         //Dommages spéciaux d'aptitudes
+        float campdeg = (as.o.dist(ts.o)/1800.f)+1.f;
         switch(actor->aptitude)
         {
-            case APT_AMERICAIN: {if(atk==ATK_NUKE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_CAMPOUZE_SHOOT) damage *= 2; break;}
-            case APT_MAGICIEN: {if(as.aptisort2) damage *= 1.333333f; break;}
-            case APT_CAMPEUR: damage += as.o.dist(ts.o)/2.5f; break;
+            case APT_AMERICAIN: {if(atk==ATK_NUKE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_CAMPOUZE_SHOOT) damage *= 1.5f; break;}
+            case APT_MAGICIEN: {if(as.aptisort2) damage *= 1.25f; break;}
+            case APT_CAMPEUR: damage *= campdeg; break;
             case APT_VIKING: {if(as.ragemillis) damage *=1.25f;} break;
-            case APT_INDIEN: {if(as.aptisort3) damage *= 1.3f; break;}
+            case APT_SHOSHONE: {if(as.aptisort3) damage *= 1.3f; break;}
         }
 
         //Absorptions et skills spéciaux d'aptitudes
@@ -2322,10 +2321,10 @@ namespace server
             case APT_MAGICIEN: {if(ts.aptisort3) damage = damage/5.0f;} break;
             case APT_VIKING: {if(actor!=target) {ts.ragemillis+=damage*5; sendresume(target);}} break; //Ajoute la rage au Vicking et l'envoie au client
             case APT_PRETRE: { if(ts.aptisort2 && ts.mana>=damage/10) {ts.mana -= damage/10; damage=0; sendresume(target);} } break;
-            case APT_INDIEN:
+            case APT_SHOSHONE:
             {
                 if(as.aptisort1) damage /= 1.3f;
-                if(actor->aptitude==APT_AMERICAIN) damage *= 1.333333f;
+                if(actor->aptitude==APT_AMERICAIN) damage *= 1.25f;
             }
         }
 
@@ -2336,18 +2335,22 @@ namespace server
         sendf(-1, 1, "ri7", N_DAMAGE, target->clientnum, actor->clientnum, damage, ts.armour, ts.health, atk);
         if(actor->aptitude==APT_VAMPIRE && as.health<as.maxhealth && actor!=target) sendf(-1, 1, "ri5", N_VAMPIRE, actor->clientnum, damage, ts.armour, ts.health);
 
-        if(target==actor) target->setpushed();
-        else if(!hitpush.iszero())
+        if(target->aptitude!=APT_AMERICAIN)
         {
-            ivec v(vec(hitpush).rescale(DNF));
-            sendf(ts.health<=0 ? -1 : target->ownernum, 1, "ri7", N_HITPUSH, target->clientnum, atk, damage, v.x, v.y, v.z);
-            target->setpushed();
+            if(target==actor) target->setpushed();
+            else if(!hitpush.iszero())
+            {
+                ivec v(vec(hitpush).rescale(DNF));
+                sendf(ts.health<=0 ? -1 : target->ownernum, 1, "ri7", N_HITPUSH, target->clientnum, atk, damage, v.x, v.y, v.z);
+                target->setpushed();
+            }
         }
+
         if(ts.health<=0)
         {
             if(actor->aptitude==APT_FAUCHEUSE && !isteam(target->team, actor->team)) //Augmente la santé maxi de la faucheuse si elle tue un joueur
             {
-                if(as.maxhealth >= 1500) as.health = min(as.health+250, as.maxhealth); //Rends juste de la santé si le boost est d�j� appliqu�
+                if(as.maxhealth >= 1500) as.health = min(as.health+300, as.maxhealth); //Rends juste de la santé si le boost est d�j� appliqu�
                 if(as.maxhealth < 1500) {as.maxhealth += 500; as.health += 500;} //Augmente la santé max à 150 PV si c'est le premier kill
                 sendresume(actor); //Envoie tout �a au client
             }
@@ -2466,7 +2469,7 @@ namespace server
 
             float damage = attacks[atk].damage*(1-h.dist/EXP_DISTSCALE/attacks[atk].exprad);
             if(gs.steromillis) damage*= ci->aptitude==13 ? 3 : 2;
-            if(target==ci) damage /= EXP_SELFDAMDIV;
+            if(target==ci && atk==ATK_ASSISTXPL_SHOOT) damage = 0;
             if(damage > 0)
             {
                 dodamage(target, ci, max(int(damage), 1), atk, h.dir);
@@ -2484,11 +2487,10 @@ namespace server
            !validatk(atk))
             return;
         int gun = attacks[atk].gun;
-        if(gun!=GUN_ASSISTXPL)
-        {
-            if(gs.ammo[gun]<=0 || (attacks[atk].range && from.dist(to) > attacks[atk].range + 1))
-                return;
-        }
+
+        if(gs.ammo[gun]<=0 || (attacks[atk].range && from.dist(to) > attacks[atk].range + 1))
+            return;
+
         gs.ammo[gun] -= attacks[atk].use;
         gs.lastshot = millis;
 

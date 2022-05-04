@@ -111,7 +111,7 @@ namespace ai
     bool targetable(gameent *d, gameent *e)
     {
         if(e->aptitude==APT_ESPION && e->aptisort2 && e->attacking==ACT_IDLE && e->physstate!=PHYS_FALL) return false;
-        if(d->aptitude==APT_INDIEN && d->mana>=50) {aptitude(d, 3); return true;}
+        if(d->aptitude==APT_SHOSHONE && d->mana>=50) {aptitude(d, 3); return true;}
         if(d == e) return false;
         return e->state == CS_ALIVE && !isteam(d->team, e->team);
     }
@@ -476,7 +476,7 @@ namespace ai
 
     bool hasgoodammo(gameent *d)
     {
-        static const int goodguns[] = { GUN_S_CAMPOUZE, GUN_S_NUKE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_PULSE, GUN_RAIL, GUN_FAMAS, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_AK47, GUN_SV98, GUN_SKS, GUN_ARTIFICE, GUN_ARBALETE, GUN_LANCEFLAMMES };
+        static const int goodguns[] = { GUN_S_CAMPOUZE, GUN_S_NUKE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_CACNINJA, GUN_KAMIKAZE,GUN_PULSE, GUN_RAIL, GUN_FAMAS, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_AK47, GUN_SV98, GUN_SKS, GUN_ARTIFICE, GUN_ARBALETE, GUN_LANCEFLAMMES };
         loopi(sizeof(goodguns)/sizeof(goodguns[0])) if(d->hasammo(goodguns[0])) return true;
         if(d->ammo[GUN_M32] > 5) return true;
         return false;
@@ -1161,7 +1161,7 @@ namespace ai
                         case 0:
                         switch(d->aptitude)
                         {
-                            case APT_PRETRE: case APT_INDIEN: if(d->mana>70 && d->o.dist(f->o)<750) aptitude(d, 3); break;
+                            case APT_PRETRE: case APT_SHOSHONE: if(d->mana>70 && d->o.dist(f->o)<750) aptitude(d, 3); break;
                             case APT_ESPION:
                             switch(rnd(2))
                             {
@@ -1323,7 +1323,7 @@ namespace ai
                     break;
                 }
             }
-            if(gun >= 0 && gun != d->gunselect) gunselect(gun, d);
+            if(gun >= 0 && gun != d->gunselect && gun!=GUN_ASSISTXPL) gunselect(gun, d);
         }
         return process(d, b) >= 2;
     }
@@ -1413,7 +1413,7 @@ namespace ai
             if(!intermission)
             {
                 if(d->ragdoll) cleanragdoll(d); // RAGRAG
-                moveplayer(d, 10, true, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptitude==APT_INDIEN || d->aptitude==APT_ESPION ? d->aptisort2 : d->aptisort3, d->armourtype==A_ASSIST && d->armour>0 ? true : false);
+                moveplayer(d, 10, true, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION || d->aptitude==APT_KAMIKAZE ? d->aptisort2 : d->aptisort3, d->armourtype==A_ASSIST && d->armour>0 ? true : false);
                 if(allowmove && !b.idle) timeouts(d, b);
 				entities::checkitems(d);
 				if(cmode) cmode->checkitems(d);
@@ -1477,7 +1477,7 @@ namespace ai
                 switch(d->aptitude)
                 {
                     case APT_MAGICIEN: if(d->health<250+d->skill*2 && d->mana>=60) aptitude(d, 3); break;
-                    case APT_INDIEN: if(d->mana>=100) aptitude(d, 2); break;
+                    case APT_SHOSHONE: if(d->mana>=100) aptitude(d, 2); break;
                     case APT_PHYSICIEN:
                         switch(rnd(50)) {case 0: if(d->mana>70) aptitude(d, 3);}
                         if(d->health<750 && d->armour<50 && d->mana>=25) aptitude(d, 1);
@@ -1495,7 +1495,7 @@ namespace ai
                         break;
                     case AI_S_DEFEND: result = dodefend(d, c);
                     {
-                        if(d->aptitude==APT_INDIEN && d->mana>99) aptitude(d, 2);
+                        if(d->aptitude==APT_SHOSHONE && d->mana>99) aptitude(d, 2);
                         break;
                     }
                     case AI_S_PURSUE: result = dopursue(d, c);
@@ -1509,7 +1509,7 @@ namespace ai
                     }
                     case AI_S_INTEREST: result = dointerest(d, c);
                     {
-                        if(d->aptitude==APT_INDIEN && d->mana>125) aptitude(d, 2);
+                        if(d->aptitude==APT_SHOSHONE && d->mana>125) aptitude(d, 2);
                         break;
                     }
                     default: result = 0; break;

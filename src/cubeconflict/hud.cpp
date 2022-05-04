@@ -4,6 +4,8 @@
 int message1, message2, message3, ctfmessage1, ctfmessage2, ctfmessage3, ctfmessage4, ctfmessage5, ctfmessage6;
 int message_streak1;
 
+int getsort;
+
 string strclassetueur, straptitudevictime;
 
 int decal_message = 0;
@@ -87,8 +89,8 @@ namespace game
         if(player1->state==CS_DEAD)
         {
             string killedbymsg, withmsg, waitmsg;
-            if(player1->armourtype==A_ASSIST && player1->armour==0) formatstring(killedbymsg, langage ? "Your powered armor exploded !" : "Ton armure assistée a explosé !");
-            else if(suicided) formatstring(killedbymsg, langage ? "You committed suicide !" : "Tu t'es suicidé !");
+            //if(player1->armourtype==A_ASSIST && player1->armour==0) formatstring(killedbymsg, langage ? "Your powered armor exploded !" : "Ton armure assistée a explosé !");
+            if(suicided) formatstring(killedbymsg, langage ? "You committed suicide !" : "Tu t'es suicidé !");
             else formatstring(killedbymsg, "%s %s (%s)", langage ? "Killed by" : "Tué par", str_pseudotueur, langage ? aptitudes[n_aptitudetueur].apt_nomEN : aptitudes[n_aptitudetueur].apt_nomFR);
 
             rendermessage(killedbymsg, 65, 1.5f, 0);
@@ -261,22 +263,33 @@ namespace game
             decal_icon += 130;
         }
 
-        if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_INDIEN || player1->aptitude==APT_ESPION)
+        if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || player1->aptitude==APT_KAMIKAZE)
         {
-            settexture("media/interface/hud/mana.png");
+            if(player1->aptitude==APT_KAMIKAZE && player1->aptisort2) settexture("media/interface/hud/chrono.png");
+            else if(player1->aptitude!=APT_KAMIKAZE) settexture("media/interface/hud/mana.png");
             bgquad(15, h-260, 115, 115);
             decal_icon += 130;
 
             float positionsorts = 0.5f*(w - 100);
             int neededdata = 0;
-            switch(d->aptitude) {case APT_PHYSICIEN: neededdata++; break; case APT_PRETRE: neededdata+=2; break; case APT_INDIEN: neededdata+=3;  break; case APT_ESPION: neededdata+=4;}
+            switch(d->aptitude) {case APT_PHYSICIEN: neededdata++; break; case APT_PRETRE: neededdata+=2; break; case APT_SHOSHONE: neededdata+=3; break; case APT_ESPION: neededdata+=4; break; case APT_KAMIKAZE: neededdata+=5;}
 
-            if(d->aptisort1) gle::colorf(2, 2, 2, 1);
-            else if(d->mana<sorts[neededdata].mana1 || !d->sort1pret) gle::colorf(0.2, 0.2, 0.2, 1);
-            else gle::colorf(1, 1, 1, 1);
-            settexture(sorts[neededdata].tex1, 3);
-            bgquad(positionsorts-85, h-114, 100, 100);
-            gle::colorf(1, 1, 1, 1);
+            if(player1->aptitude!=APT_KAMIKAZE)
+            {
+                if(d->aptisort1) gle::colorf(2, 2, 2, 1);
+                else if(d->mana<sorts[neededdata].mana1 || !d->sort1pret) gle::colorf(0.2, 0.2, 0.2, 1);
+                else gle::colorf(1, 1, 1, 1);
+                settexture(sorts[neededdata].tex1, 3);
+                bgquad(positionsorts-85, h-114, 100, 100);
+                gle::colorf(1, 1, 1, 1);
+
+                if(d->aptisort3) gle::colorf(2, 2, 2, 1);
+                else if(d->mana<sorts[neededdata].mana3 || !d->sort3pret) gle::colorf(0.2, 0.2, 0.2, 1);
+                else gle::colorf(1, 1, 1, 1);
+                settexture(sorts[neededdata].tex3, 3);
+                bgquad(positionsorts+85, h-114, 100, 100);
+                gle::colorf(1, 1, 1, 1);
+            }
 
             if(d->aptisort2) gle::colorf(2, 2, 2, 1);
             else if(d->mana<sorts[neededdata].mana2 || !d->sort2pret) gle::colorf(0.2, 0.2, 0.2, 1);
@@ -285,12 +298,7 @@ namespace game
             bgquad(positionsorts, h-114, 100, 100);
             gle::colorf(1, 1, 1, 1);
 
-            if(d->aptisort3) gle::colorf(2, 2, 2, 1);
-            else if(d->mana<sorts[neededdata].mana3 || !d->sort3pret) gle::colorf(0.2, 0.2, 0.2, 1);
-            else gle::colorf(1, 1, 1, 1);
-            settexture(sorts[neededdata].tex3, 3);
-            bgquad(positionsorts+85, h-114, 100, 100);
-            gle::colorf(1, 1, 1, 1);
+
         }
 
         if(player1->ragemillis){settexture("media/interface/hud/rage.png"); bgquad(15, h-260, 115, 115); decal_icon += 130;}
@@ -361,7 +369,9 @@ namespace game
         if(d->armour > 0) draw_textf("%d", 370, h-103, d->armour < 9 ? 1 : d->armour/10);
 
 
-        if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_INDIEN || player1->aptitude==APT_ESPION) {draw_textf("%d", 135, h-233-decal_number, d->mana); decal_number +=130;}
+        if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || (player1->aptitude==APT_KAMIKAZE && player1->aptisort2>0))
+           {draw_textf("%d", 135, h-233-decal_number, player1->aptitude==APT_KAMIKAZE && player1->aptisort2>0 ? player1->aptisort2/1000 : player1->mana); decal_number +=130;}
+
         if(player1->crouching && player1->aptitude==9) decal_number +=130;
         if(player1->ragemillis) {draw_textf("%d", 135, h-233-decal_number, d->ragemillis/1000); decal_number +=130;}
         if(player1->steromillis) {draw_textf("%d", 135, h-233-decal_number, d->steromillis/1000); decal_number +=130;}

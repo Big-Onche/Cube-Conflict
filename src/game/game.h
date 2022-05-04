@@ -326,8 +326,8 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
 #define CC_SERVER_PORT 43000
 #define CC_LANINFO_PORT 42998
 #define CC_MASTER_PORT 42999
-#define PROTOCOL_VERSION 4           // bump when protocol changes
-#define DEMO_VERSION 1                // bump when demo format changes
+#define PROTOCOL_VERSION 5           // bump when protocol changes
+#define DEMO_VERSION 1               // bump when demo format changes
 #define DEMO_MAGIC "CC_DEMO\0\0"
 
 struct demoheader
@@ -420,7 +420,7 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound
     { GUN_AK47,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_AK47,         S_AK47_LOIN, S_ARMESLOIN,     30,   92,  170,  60, 180, 0, 3000,   7, 8000,  1,    50,   5, 0, 0},
     { GUN_GRAP1,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GRAP1,        S_NULL, S_NULL,               12,  200,  250,  30, 300, 3, 1500,  -4, 8000,  1,  -600,  20, 0, 0},
     { GUN_ARTIFICE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_ARTIFICE,     S_ARTIFICE_LOIN, S_NULL,       3, 1100,  800,  35, 200, 0, 1200,  45,  520,  1,   500,  80, 0, 0},
-    { GUN_GLOCK,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GLOCK,        S_GLOCK_LOIN, S_ARMESLOIN,    10,  400,  280,   5, 150, 0, 2000,   7, 8000,  1,    30,   3, 0, 0},
+    { GUN_GLOCK,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GLOCK,        S_GLOCK_LOIN, S_ARMESLOIN,    10,  100,  280,   5, 150, 0, 2000,   7, 8000,  1,    30,   3, 0, 0},
     // Super armes
     { GUN_S_NUKE,       ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_NUKELAUNCH,   S_NULL, S_NULL,                1, 3000,  3250,  20, 300, 2,  175,  10, 2000,  1,   400, 1500, 0, 0},
     { GUN_S_GAU8,       ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GAU8,         S_RIFLELOIN, S_RIFLELOIN,     90,   14,   370, 150, 250, 3, 6000,   1, 8000,  1,    80,   20, 0, 0},
@@ -433,7 +433,7 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound
     { GUN_CACFLEAU,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FLEAU,        S_NULL, S_NULL,   4, 1150,  750, 1, 1, 10, 0, -10,  32,  1, 125,  0, 0, 0},
     // Armes spéciales
     { GUN_KAMIKAZE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_KAMIKAZEBOOM, S_NULL, S_NULL,   1, 1000, 3000, 1, 1,  0, 1,  10, 120,  1, 250, 425, 1, 0},
-    { GUN_ASSISTXPL,    ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_ASSISTBOOM,   S_NULL, S_NULL,   1,  220,  150, 1, 1,  0, 1,  10,  50,  1,  50, 350, 1, 0},
+    { GUN_ASSISTXPL,    ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_ASSISTBOOM,   S_NULL, S_NULL,   1,  220, 1500, 1, 1,  0, 1,  10,  50,  1, 100, 350, 1, 0},
     { GUN_CACNINJA,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_EPEEATTACK,   S_NULL, S_NULL,   8,  400,  900, 1, 1, 30, 0, -10,  36,  1,  25,   0, 0, 0},
 };
 
@@ -476,11 +476,12 @@ static const struct guninfo { const char *name, *file, *vwep, *armedescFR, *arme
 
 static const struct aptisortsinfo { const char *tex1, *tex2, *tex3; int mana1, mana2, mana3, duree1, duree2, duree3, reload1, reload2, reload3, sound1, sound2, sound3; } sorts[] =
 {
-    { "media/interface/hud/sortmage1.png", "media/interface/hud/sortmage2.png", "media/interface/hud/sortmage3.png",                    30, 40, 60,  250, 4000, 3000, 2000, 5000, 6000,  S_SORTMAGE1, S_SORTMAGE2, S_SORTMAGE3},        // Magicien
-    { "media/interface/hud/sortphysicien1.png", "media/interface/hud/sortphysicien2.png", "media/interface/hud/sortphysicien3.png",     45, 50, 65, 2000, 4000, 6000, 3000, 5000, 9000,  S_SORTPHY1, S_SORTPHY2, S_SORTPHY3},           // Physicien
-    { "media/interface/hud/sortpretre1.png", "media/interface/hud/sortpretre2.png", "media/interface/hud/sortpretre3.png",              30, 10, 80, 4000, 5000, 4000, 8000, 5000, 10000, S_SORTPRETRE1, S_SORTPRETRE2, S_SORTPRETRE3},  // Prêtre
-    { "media/interface/hud/sortindien1.png", "media/interface/hud/sortindien2.png", "media/interface/hud/sortindien3.png",              50, 50, 50, 7500, 7500, 7500, 7500, 7500, 7500,  S_SORTINDIEN1, S_SORTINDIEN2, S_SORTINDIEN3},  // Indien
-    { "media/interface/hud/sortespion1.png", "media/interface/hud/sortespion2.png", "media/interface/hud/sortespion3.png",              40, 50, 60, 4000, 7000, 5000, 7000, 7000, 10000, S_SORTESP1, S_SORTESP2, S_SORTESP3},           // Espion
+    { "media/interface/hud/sortmage1.png",      "media/interface/hud/sortmage2.png",        "media/interface/hud/sortmage3.png",        30, 40, 60,  250, 4000, 3000, 2000, 5000,  6000, S_SORTMAGE1, S_SORTMAGE2, S_SORTMAGE3},        // Magicien
+    { "media/interface/hud/sortphysicien1.png", "media/interface/hud/sortphysicien2.png",   "media/interface/hud/sortphysicien3.png",   45, 50, 65, 4000, 5000, 6000, 3000, 5000,  9000, S_SORTPHY1, S_SORTPHY2, S_SORTPHY3},           // Physicien
+    { "media/interface/hud/sortpretre1.png",    "media/interface/hud/sortpretre2.png",      "media/interface/hud/sortpretre3.png",      30, 10, 80, 4000, 5000, 4000, 8000, 5000, 10000, S_SORTPRETRE1, S_SORTPRETRE2, S_SORTPRETRE3},  // Prêtre
+    { "media/interface/hud/sortindien1.png",    "media/interface/hud/sortindien2.png",      "media/interface/hud/sortindien3.png",      50, 50, 50, 7500, 7500, 7500, 7500, 7500,  7500, S_SORTINDIEN1, S_SORTINDIEN2, S_SORTINDIEN3},  // Indien
+    { "media/interface/hud/sortespion1.png",    "media/interface/hud/sortespion2.png",      "media/interface/hud/sortespion3.png",      40, 50, 60, 4000, 7000, 5000, 7000, 7000, 10000, S_SORTESP1, S_SORTESP2, S_SORTESP3},           // Espion
+    { "",                                       "media/interface/hud/sortkamikaze.png",     "",                                         0, 100,  0,    0, 3500,    0,    0, 3500,     0, S_NULL, S_NULL, S_NULL},                       // Kamikaze
 };
 
 #include "ai.h"
@@ -574,9 +575,16 @@ struct gamestate
             case I_BOUCLIEROR:
             case I_BOUCLIERMAGNETIQUE:
             case I_ARMUREASSISTEE:
-                armour = min(parmourtype==4 && type!=I_ARMUREASSISTEE ? armour+(aptitude==11 && aptisort>0 ? 1000 : 500) : armour+is.add, parmourtype==4 ? 3000 : is.max);
-                if(type==I_ARMUREASSISTEE)health = min(health+300, maxhealth);
-                if(parmourtype!=4)armourtype = is.info;
+                if(parmourtype==4 && armour>0) armourtype = A_ASSIST;
+                else armourtype = is.info;
+
+                armour = min(parmourtype==4 && type!=I_ARMUREASSISTEE && armour>0 ? armour+(aptitude==11 && aptisort>0 ? 1000 : 500) : armour+is.add, parmourtype==4 ? 3000 : is.max);
+                if(type==I_ARMUREASSISTEE)
+                {
+                    health = min(health+300, maxhealth);
+                    if(ammo[GUN_ASSISTXPL]<1) ammo[GUN_ASSISTXPL] = 1;
+                }
+
                 break;
             case I_BOOSTDEGATS: steromillis = min(steromillis+is.add*(aptitude==13 ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;
             case I_BOOSTVITESSE: epomillis = min(epomillis+is.add*(aptitude==13 ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;
@@ -765,7 +773,7 @@ struct gameent : dynent, gamestate
     int smoothmillis;
 
     int lastspecial1update, lastspecial2update, lastspecial3update;
-    bool sort1pret = true, sort2pret = true, sort3pret = true;
+    bool sort1pret = true, sort2pret = true, sort3pret = true, playerexploded = false;
 
     string name, info;
     int team, playermodel, playercolor, customcape, customtombe, customdanse, aptitude, level;
@@ -792,11 +800,11 @@ struct gameent : dynent, gamestate
         if(ai) delete ai;
     }
 
-    void hitpush(int damage, const vec &dir, gameent *actor, int atk)
+    void hitpush(int damage, const vec &dir, gameent *actor, int atk, gameent *target)
     {
+        if(target->aptitude==2) return;
         vec push(dir);
         push.mul((actor==this && attacks[atk].exprad ? EXP_SELFPUSH : 1.0f)*attacks[atk].hitpush*(damage/10)/weight);
-        //if(actor->aptitude==2) push.mul(0);
         vel.add(push);
     }
 
@@ -850,6 +858,10 @@ struct gameent : dynent, gamestate
         lastpickupmillis = 0;
         flagpickup = 0;
         lastnode = -1;
+        sort1pret = true;
+        sort2pret = true;
+        sort3pret = true;
+        playerexploded = false;
     }
 
     void startgame()

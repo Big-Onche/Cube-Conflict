@@ -278,7 +278,7 @@ namespace game
         vec o = d->feetpos();
         int basetime = 0;
         if(animoverride) anim = (animoverride<0 ? ANIM_ALL : animoverride)|ANIM_LOOP;
-        const char *mdlname = d->armourtype==A_ASSIST ? validteam(team) ? d->team==player1->team ? "smileys/armureassistee" : "smileys/armureassistee/red" : "smileys/armureassistee/red" : mdl.model[validteam(team) ? d->team==player1->team ? 1 : 2 : 0];
+        const char *mdlname = d->armourtype==A_ASSIST && d->armour>0 ? validteam(team) ? d->team==player1->team ? "smileys/armureassistee" : "smileys/armureassistee/red" : "smileys/armureassistee/red" : mdl.model[validteam(team) ? d->team==player1->team ? 1 : 2 : 0];
 
         if(intermission)
         {
@@ -545,7 +545,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape
                                        d->o.dist(camera1->o)<75 ? 1.35f : 0.02f);
                     }
                 }
-                if((player1->aptitude==APT_JUNKIE && team==1)&&(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_INDIEN || d->aptitude==APT_ESPION))
+                if((player1->aptitude==APT_JUNKIE && team==1)&&(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION))
                     particle_meter(d->o.dist(camera1->o)<75 ? (d->abovehead().add(camera1->o)).div(vec(2,2,2)) : posAtofrontofposB,
                                     d->mana/150.0f, PART_METER,
                                     d->o.dist(camera1->o)<250 ? 1.f : d->o.dist(camera1->o)/250.f, 0.5f,
@@ -553,7 +553,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape
                                     d->o.dist(camera1->o)<75 ? 1.35f : 0.02f);
 
                 if(d->aptisort2 && d->aptitude==APT_ESPION);
-                else if(player1->aptitude==APT_ESPION && team!=1 && player1->aptisort3 && d!=player1)
+                else if(((player1->aptitude==APT_ESPION && player1->aptisort3 && d!=player1) || (totalmillis-getsort<2000)) && team!=1)
                 {
                     vec posA = d->o;
                     posA.add(vec(0, 0, -8));
@@ -588,7 +588,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape
                     if(d->armour<1500) {switch(rnd(d->armour<1000 ? 8 : 14)){case 0: regularflame(PART_SMOKE, d->o, 15, 3, d->armour<750 ? 0x333333 : 0x888888, 1, 3.3f, 50.0f, 1000.0f, -10);}}
                     if(d->armour<1250) {switch(rnd(d->armour<600 ? 8 : 14)){case 0: particle_splash(PART_FLAME2,  1, 300, d->o, 0x992200, 2.5f, 50, -20);}}
                 }
-                else if(d->aptitude==APT_INDIEN)
+                else if(d->aptitude==APT_SHOSHONE)
                 {
                     vec pos = d->abovehead().add(vec(0, 0,-12));
                     if(d->aptisort1) switch(rnd(2)) {case 0: particle_splash(PART_SPARK,  1,  150, d->o, 0x555555, 1+rnd(2), 200, 150); }
@@ -721,7 +721,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape
         if(d->muzzle.x >= 0) d->muzzle = calcavatarpos(d->muzzle, 12);
         if(d->balles.x >= 0) d->balles = calcavatarpos(d->balles, 12);
 
-        if(d->armour<=0 && d->armourtype!=A_ASSIST) return;
+        if(d->armour<=0) return;
         else
         {
             vec sway2;

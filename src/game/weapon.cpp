@@ -94,6 +94,7 @@ namespace game
         loopi(NUMGUNS)
         {
             gun = (gun + dir)%NUMGUNS;
+            if(gun==GUN_ASSISTXPL)gun = (gun + dir)%NUMGUNS;
             if(force || player1->ammo[gun]) break;
         }
         if(gun != player1->gunselect) {gunselect(gun, player1); weapposup=40; }
@@ -115,7 +116,7 @@ namespace game
     void setweapon(const char *name, bool force = false)
     {
         int gun = getweapon(name);
-        if(player1->state!=CS_ALIVE || !validgun(gun)) return;
+        if(player1->state!=CS_ALIVE || !validgun(gun) || gun==GUN_ASSISTXPL) return;
         if(force || player1->ammo[gun]) gunselect(gun, player1);
         else playsound(S_NOAMMO);
     }
@@ -129,7 +130,7 @@ namespace game
         loopi(numguns)
         {
             int gun = guns[(i+offset)%numguns];
-            if(gun>=0 && gun<NUMGUNS && (force || player1->ammo[gun]))
+            if(gun>=0 && gun<NUMGUNS && (force || player1->ammo[gun]) && gun!=GUN_ASSISTXPL)
             {
                 gunselect(gun, player1);
                 return;
@@ -509,7 +510,7 @@ namespace game
                 if(atk==ATK_CACNINJA_SHOOT) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*3.0f), PART_TEXT, 2500, 0xFF0000, actor==player1 ? 7.0f : 5.0f, -8);  normaldamage = false; }
                 break;
             case APT_MAGICIEN:
-                if(actor->aptisort2) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.3333f), PART_TEXT, 2500, 0xFF5500, actor==player1 ? 5.5f : 4.0f, -8); normaldamage = false; }
+                if(actor->aptisort2) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.3333f), PART_TEXT, 2500, 0xFF00FF, actor==player1 ? 5.5f : 4.0f, -8); normaldamage = false; }
             case APT_CAMPEUR:
                 {
                     float campdamage = damage+=actor->o.dist(d->o)/2.5f;
@@ -528,7 +529,7 @@ namespace game
                     normaldamage = false;
                 }
                 break;
-            case APT_INDIEN:
+            case APT_SHOSHONE:
                 if(d->aptisort1) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage/1.3f), PART_TEXT, 2500, 0xAAAA00, actor==player1 ? 10.0f : 7.0f, -8); normaldamage = false; }
                 if(actor->aptisort3) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.3f), PART_TEXT, 2500, 0xFF3333, actor==player1 ? 10.0f : 7.0f, -8); normaldamage = false; }
                 break;
@@ -572,7 +573,7 @@ namespace game
         f->lastpain = lastmillis;
         if(at->type==ENT_PLAYER && !isteam(at->team, f->team)) at->totaldamage += damage;
 
-        if(!m_mp(gamemode) || f==at) f->hitpush(damage, vel, at, atk);
+        if(!m_mp(gamemode) || f==at) f->hitpush(damage, vel, at, atk, f);
         if(!m_mp(gamemode)) damaged(damage, f, at, false, atk);
         else
         {
@@ -640,7 +641,7 @@ namespace game
         if(dist<attacks[atk].exprad)
         {
             float damage = attacks[atk].damage*(1-dist/EXP_DISTSCALE/attacks[atk].exprad);
-            if(o==at) damage /= EXP_SELFDAMDIV;
+            if(o==at && atk==ATK_ASSISTXPL_SHOOT) damage = 0;
             if(damage > 0) hit(max(int(damage), 1), o, at, dir, atk, dist);
             if((atk==ATK_ARTIFICE_SHOOT || atk==ATK_SMAW_SHOOT || atk==ATK_M32_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT) && dist<attacks[atk].exprad*2.0f && o==player1) execfile("config/shake.cfg");
         }
@@ -1486,10 +1487,21 @@ namespace game
     void shoot(gameent *d, const vec &targ)
     {
         int prevaction = d->lastaction, attacktime = lastmillis-prevaction;
+
+        if(d->aitype==AI_BOT && d->gunselect==GUN_GLOCK) d->gunwait=300-(d->skill*2)+rnd(50);
         if(attacktime<d->gunwait) return;
         d->gunwait = 0;
 
-        if(d->armour<=0 && d->armourtype==A_ASSIST) {d->gunselect=GUN_ASSISTXPL; d->attacking=true; d->lastattack = -1;}
+        if(d->aptitude==APT_KAMIKAZE)
+        {
+            if(d->aptisort2>0 && d->aptisort2<500 && d->ammo[GUN_KAMIKAZE]>0 && !d->playerexploded)
+                {d->gunselect=GUN_KAMIKAZE; d->attacking=true; d->lastattack = -1; d->playerexploded = true;}
+        }
+
+        if(d->armour<=0 && d->armourtype==A_ASSIST && !d->playerexploded && d->ammo[GUN_ASSISTXPL]>0)
+            {d->gunselect=GUN_ASSISTXPL; d->attacking=true; d->lastattack = -1; d->playerexploded = true;}
+
+
         if(!d->attacking) return;
         int gun = d->gunselect, act = d->attacking, atk = guns[gun].attacks[act];
 
@@ -1501,7 +1513,7 @@ namespace game
             if(atk==ATK_SMAW_SHOOT || atk==ATK_NUKE_SHOOT || atk==ATK_CACMARTEAU_SHOOT || atk == ATK_MOSSBERG_SHOOT || atk == ATK_SV98_SHOOT) lastshoot+=750;
         }
 
-        if (!d->ammo[gun] && gun!=GUN_ASSISTXPL)
+        if (!d->ammo[gun])
         {
             if(d==player1) msgsound(S_NOAMMO, d);
             d->gunwait = 600;
@@ -1558,6 +1570,9 @@ namespace game
         d->gunwait = attacks[atk].attackdelay/waitfactor;
         //if(d->ai) d->gunwait += int(d->gunwait*(((101-d->skill)+rnd(111-d->skill))/100.f));
         d->steromillis ? d->totalshots += (attacks[atk].damage*attacks[atk].rays)*2: d->totalshots += attacks[atk].damage*attacks[atk].rays;
+
+        if(d->playerexploded){d->attacking = ACT_IDLE; d->playerexploded=false; weaponswitch(d);}
+        if(atk==ATK_GLOCK_SHOOT) d->attacking = ACT_IDLE;
     }
 
     void adddynlights()
@@ -1724,7 +1739,7 @@ namespace game
         if(d->clientnum >= 0 && d->state == CS_ALIVE)
         {
             int neededdata = 0;
-            switch(d->aptitude) {case APT_PHYSICIEN: neededdata++; break; case APT_PRETRE: neededdata+=2; break; case APT_INDIEN: neededdata+=3; break; case APT_ESPION: neededdata+=4;}
+            switch(d->aptitude) {case APT_PHYSICIEN: neededdata++; break; case APT_PRETRE: neededdata+=2; break; case APT_SHOSHONE: neededdata+=3; break; case APT_ESPION: neededdata+=4;}
 
             d->sortchan = playsound(d->aptisort1 ? sorts[neededdata].sound1 : d->aptisort2 ? sorts[neededdata].sound2 : sorts[neededdata].sound3, local ? NULL : &d->o, NULL, 0, -1, -1, d->sortchan, 300);
             if(d->sortchan < 0) d->sortchan = -1;

@@ -1698,10 +1698,10 @@ FVAR(straferoll, 0, 0.033f, 90);
 FVAR(faderoll, 0, 0.95f, 1);
 VAR(floatspeed, 1, 400, 10000);
 
-void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curtime, int jointmillis, int aptitude, bool assist)
+void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curtime, int jointmillis, int aptitude, bool assist, int aptisort)
 {
     bool allowmove = game::allowmove(pl);
-    int maxjumps = jointmillis>4500 ? jointmillis/1500 : (assist ? 3 : aptitude==APT_NINJA ? 4 : 1);
+    int maxjumps = jointmillis>4500 ? jointmillis/1500 : (assist || aptitude==APT_NINJA || (aptitude==APT_KAMIKAZE && aptisort) ? 2 : 1);
 
     if(floating)
     {
@@ -1717,7 +1717,7 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
         if(pl->jumping && allowmove)
         {
             pl->jumping = false;
-            if(pl->timeinair && (aptitude==APT_NINJA || assist)) pl->falling = vec(0, 0, 0);
+            if(pl->timeinair && (aptitude==APT_NINJA || assist || (aptitude==APT_KAMIKAZE && aptisort))) pl->falling = vec(0, 0, 0);
             pl->vel.z = max(pl->vel.z, JUMPVEL);  // physics impulse upwards
             if(water && aptitude!=APT_NINJA) { pl->vel.x /= 8.f; pl->vel.y /= 8.f; } // dampen velocity change even harder, gives correct water feel
 
@@ -1810,9 +1810,10 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
 
     switch(aptitude)
     {
-        case APT_MAGICIEN: if(aptisort) classespeed = 150.f; break;
-        case APT_INDIEN: if(aptisort) classespeed = 700.f; break;
-        case APT_ESPION: if(aptisort) classespeed = 4000.f; break;
+        case APT_MAGICIEN: if(aptisort) classespeed = 150.f;  break;
+        case APT_SHOSHONE: if(aptisort) classespeed = 700.f;  break;
+        case APT_ESPION:   if(aptisort) classespeed = 4000.f; break;
+        case APT_KAMIKAZE: if(aptisort) classespeed = 425.f;  break;
         default : classespeed = aptitudes[aptitude].apt_vitesse;
     }
 
@@ -1825,7 +1826,7 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
 
 
     // apply any player generated changes in velocity
-    modifyvelocity(pl, local, water, floating, curtime, jointmillis, aptitude, assist);
+    modifyvelocity(pl, local, water, floating, curtime, jointmillis, aptitude, assist, aptisort);
 
     vec d(pl->vel);
     if(pl==game::player1 && game::player1->aptitude==APT_MAGICIEN && game::player1->epomillis>40000 && aptisort) unlockachievement(ACH_MAXSPEED);
