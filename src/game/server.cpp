@@ -2372,7 +2372,7 @@ namespace server
             }
             teaminfo *t = m_teammode && validteam(actor->team) ? &teaminfos[actor->team-1] : NULL;
             if(t) t->frags += fragvalue;
-            sendf(-1, 1, "ri6", N_DIED, target->clientnum, actor->clientnum, actor->state.frags, actor->state.killstreak, t ? t->frags : 0);
+            sendf(-1, 1, "ri7", N_DIED, target->clientnum, actor->clientnum, actor->state.frags, actor->state.killstreak, t ? t->frags : 0, atk);
 
             target->position.setsize(0);
             if(smode) smode->died(target, actor);
@@ -2413,7 +2413,7 @@ namespace server
         ci->state.deaths++;
         teaminfo *t = m_teammode && validteam(ci->team) ? &teaminfos[ci->team-1] : NULL;
         if(t) t->frags += fragvalue;
-        sendf(-1, 1, "ri6", N_DIED, ci->clientnum, ci->clientnum, gs.frags, gs.killstreak, t ? t->frags : 0);
+        sendf(-1, 1, "ri7", N_DIED, ci->clientnum, ci->clientnum, gs.frags, gs.killstreak, t ? t->frags : 0, -1);
         ci->position.setsize(0);
         if(smode) smode->died(ci, NULL);
         gs.state = CS_DEAD;

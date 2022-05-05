@@ -1959,7 +1959,7 @@ namespace game
 
             case N_DIED:
             {
-                int vcn = getint(p), acn = getint(p), frags = getint(p), killstreak = getint(p), tfrags = getint(p);
+                int vcn = getint(p), acn = getint(p), frags = getint(p), killstreak = getint(p), tfrags = getint(p), atk = getint(p);
                 gameent *victim = getclient(vcn),
                        *actor = getclient(acn);
                 if(!actor) break;
@@ -1973,7 +1973,7 @@ namespace game
                     particle_textcopy(actor->abovehead(), tempformatstring("%d", actor->frags), PART_TEXT, 2000, 0x32FF64, 4.0f, -8);
 #endif
                 if(!victim) break;
-                killed(victim, actor);
+                killed(victim, actor, atk);
                 break;
             }
 

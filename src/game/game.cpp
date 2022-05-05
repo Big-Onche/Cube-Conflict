@@ -658,7 +658,7 @@ namespace game
 
         ai::damaged(d, actor);
 
-        if(d->health<=0) {if(local) killed(d, actor);}
+        if(d->health<=0) {if(local) killed(d, actor, atk);}
     }
 
     VARP(deathscore, 0, 0, 1);
@@ -729,7 +729,7 @@ namespace game
         {"annihilated"},
     };
 
-    void killed(gameent *d, gameent *actor)
+    void killed(gameent *d, gameent *actor, int atk)
     {
         d->killstreak = 0;
         //////////////////////////////GESTION DE ET STATISTIQUES//////////////////////////////
@@ -741,7 +741,7 @@ namespace game
                 addstat(1, STAT_KILLS);
                 addxpandcc(7+player1->killstreak-1, 3);
                 if(player1->killstreak>stat[STAT_KILLSTREAK]) addstat(player1->killstreak, STAT_KILLSTREAK);
-                if(player1->gunselect==GUN_ASSISTXPL && player1->armourtype==A_ASSIST)unlockachievement(ACH_KILLASSIST);
+                if(actor==player1 && atk==ATK_ASSISTXPL_SHOOT && player1->armourtype==A_ASSIST)unlockachievement(ACH_KILLASSIST);
                 if(player1->health<=149 && player1->state==CS_ALIVE) unlockachievement(ACH_1HPKILL);
                 if(player1->aptitude==APT_AMERICAIN && d->aptitude==APT_SHOSHONE) unlockachievement(ACH_FUCKYEAH);
                 if(player1->killstreak==3) unlockachievement(ACH_TRIPLETTE);
@@ -781,14 +781,14 @@ namespace game
             }
         }
 
-        switch(actor->gunselect)
+        switch(atk)
         {
-            case GUN_UZI: playsound(S_BLOHBLOH, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
-            case GUN_FAMAS: playsound(S_FAMASLOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
+            case ATK_UZI_SHOOT: playsound(S_BLOHBLOH, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
+            //case ATK_FAMAS_SHOOT: playsound(S_FAMASLOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
             //case GUN_SMAW: playsound(S_BOOBARL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
             //case GUN_AK47: playsound(S_KALASHLOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
-            case GUN_ARTIFICE: playsound(S_ARTIFICELOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
-            case GUN_M32: playsound(S_GRENADELOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
+            case ATK_ARTIFICE_SHOOT: playsound(S_ARTIFICELOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
+            case ATK_M32_SHOOT: playsound(S_GRENADELOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
         }
 
         //////////////////////////////GRAPHISMES//////////////////////////////
@@ -824,7 +824,7 @@ namespace game
         //    else conoutf(contype, "%s%s %s", d==player1 ? "\fd" : "L'armure assistée de ", d==player1 ? "Ton" : dname, d==player1 ? "\f7armure assistée a explosé !" : "\f7a explosé !");
         //    if(d==player1) {player1->killstreak=0; copystring(str_armetueur, langage ? partmessageEN[rnd(5)].parttroll : partmessageFR[rnd(9)].parttroll); suicided = true;}
         //}
-        if(d==actor) // Suicide ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        if(d==actor || atk==-1) // Suicide ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
             conoutf(contype, "%s%s %s%s%s", d==player1 ? "\fd" : "", dname, langage ? "" : d==player1 ? "t'es " : "s'est ", langage ? partmessageEN[rnd(2)].partsuicide : partmessageFR[rnd(5)].partsuicide, d==player1 ? " !" : ".");
             if(d==player1) {player1->killstreak=0; copystring(str_armetueur, langage ? partmessageEN[rnd(5)].parttroll : partmessageFR[rnd(9)].parttroll); suicided = true;}
@@ -846,7 +846,7 @@ namespace game
                     langage ? partmessageEN[rnd(7)].partverb : partmessageFR[rnd(15)].partverb,
                     dname,
                     langage ? "with" : "avec",
-                    langage ? guns[actor->gunselect].armedescEN : guns[actor->gunselect].armedescFR,
+                    langage ? guns[atk].armedescEN : guns[atk].armedescFR,
                     distance);
                 playsound(S_KILL);
                 message1 = totalmillis; message2 = totalmillis; copystring(str_pseudovictime, dname); n_aptitudevictime = d->aptitude; killdistance = distance;
@@ -863,11 +863,11 @@ namespace game
                     langage ? "by" : "par",
                     aname,
                     langage ? "with" : "avec",
-                    langage ? guns[actor->gunselect].armedescEN : guns[actor->gunselect].armedescFR,
+                    langage ? guns[atk].armedescEN : guns[atk].armedescFR,
                     distance);
                 player1->killstreak=0;
                 copystring(str_pseudotueur, aname); n_aptitudetueur = actor->aptitude;
-                copystring(str_armetueur, langage ? guns[actor->gunselect].armedescEN : guns[actor->gunselect].armedescFR);
+                copystring(str_armetueur, langage ? guns[atk].armedescEN : guns[atk].armedescFR);
                 suicided = false;
             }
             else ////////////////////Quelqu'un a tué quelqu'un////////////////////
@@ -878,7 +878,7 @@ namespace game
                     langage ? partmessageEN[rnd(7)].partverb : partmessageFR[rnd(15)].partverb,
                     dname,
                     langage ? "with" : "avec",
-                    langage ? guns[actor->gunselect].armedescEN : guns[actor->gunselect].armedescFR, distance);
+                    langage ? guns[atk].armedescEN : guns[atk].armedescFR, distance);
             }
 
             if(actor!=player1) ////////////////////Informe que quelqu'un est chaud////////////////////
@@ -1197,7 +1197,7 @@ namespace game
         {
             if(d->state!=CS_ALIVE) return;
             gameent *pl = (gameent *)d;
-            if(!m_mp(gamemode)) killed(pl, pl);
+            if(!m_mp(gamemode)) killed(pl, pl, -1);
             else
             {
                 int seq = (pl->lifesequence<<16)|((lastmillis/1000)&0xFFFF);

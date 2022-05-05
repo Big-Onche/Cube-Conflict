@@ -295,7 +295,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
 {
     N_CONNECT, 0, N_SERVINFO, 0, N_WELCOME, 1, N_INITCLIENT, 0, N_POS, 0, N_TEXT, 0, N_SOUND, 2, N_CDIS, 2,
     N_SHOOT, 0, N_EXPLODE, 0, N_SUICIDE, 1,
-    N_DIED, 6, N_DAMAGE, 6, N_VAMPIRE, 4, N_HITPUSH, 7, N_SHOTFX, 10, N_EXPLODEFX, 4,
+    N_DIED, 7, N_DAMAGE, 6, N_VAMPIRE, 4, N_HITPUSH, 7, N_SHOTFX, 10, N_EXPLODEFX, 4,
     N_TRYSPAWN, 1, N_SPAWNSTATE, 0, N_SPAWN, 3, N_FORCEDEATH, 2,
     N_GUNSELECT, 2, N_TAUNT, 1,
     N_MAPCHANGE, 0, N_MAPVOTE, 0, N_TEAMINFO, 0, N_ITEMSPAWN, 2, N_ITEMPICKUP, 2, N_ITEMACC, 4,
@@ -432,7 +432,7 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound
     { GUN_CACMASTER,    ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MASTERSWORD,  S_NULL, S_NULL,   5, 600,   430, 1, 1, 20, 0,  -8,  26,  1,  30,  0, 0, 0},
     { GUN_CACFLEAU,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FLEAU,        S_NULL, S_NULL,   4, 1150,  750, 1, 1, 10, 0, -10,  32,  1, 125,  0, 0, 0},
     // Armes spéciales
-    { GUN_KAMIKAZE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_KAMIKAZEBOOM, S_NULL, S_NULL,   1, 1000, 3000, 1, 1,  0, 1,  10, 120,  1, 250, 425, 1, 0},
+    { GUN_KAMIKAZE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_KAMIKAZEBOOM, S_NULL, S_NULL,   1, 1000, 4000, 1, 1,  0, 1,  10, 120,  1, 250, 500, 1, 0},
     { GUN_ASSISTXPL,    ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_ASSISTBOOM,   S_NULL, S_NULL,   1,  220, 1500, 1, 1,  0, 1,  10,  50,  1, 100, 350, 1, 0},
     { GUN_CACNINJA,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_EPEEATTACK,   S_NULL, S_NULL,   8,  400,  900, 1, 1, 30, 0, -10,  36,  1,  25,   0, 0, 0},
 };
@@ -990,7 +990,7 @@ namespace game
     extern void spawnplayer(gameent *);
     extern void deathstate(gameent *d, gameent *actor, bool restore = false);
     extern void damaged(int damage, gameent *d, gameent *actor, bool local = true, int atk = 0);
-    extern void killed(gameent *d, gameent *actor);
+    extern void killed(gameent *d, gameent *actor, int atk);
     extern void timeupdate(int timeremain);
     extern void msgsound(int n, physent *d = NULL);
     extern void drawicon(int icon, float x, float y, float sz = 120);
