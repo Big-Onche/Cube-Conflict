@@ -120,7 +120,7 @@ namespace aiman
         ci->team = team;
         ci->playermodel = rnd(128);
         ci->playercolor = rnd(0x8000);
-        ci->aptitude = rnd(15);
+        ci->aptitude = rnd(151)/15;
         ci->level = skill;
         ci->customcape = rnd(14);
         ci->customtombe = rnd(13);

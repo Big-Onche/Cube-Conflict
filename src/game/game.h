@@ -481,7 +481,7 @@ static const struct aptisortsinfo { const char *tex1, *tex2, *tex3; int mana1, m
     { "media/interface/hud/sortpretre1.png",    "media/interface/hud/sortpretre2.png",      "media/interface/hud/sortpretre3.png",      30, 10, 80, 4000, 5000, 4000, 8000, 5000, 10000, S_SORTPRETRE1, S_SORTPRETRE2, S_SORTPRETRE3},  // Prêtre
     { "media/interface/hud/sortindien1.png",    "media/interface/hud/sortindien2.png",      "media/interface/hud/sortindien3.png",      50, 50, 50, 7500, 7500, 7500, 7500, 7500,  7500, S_SORTINDIEN1, S_SORTINDIEN2, S_SORTINDIEN3},  // Indien
     { "media/interface/hud/sortespion1.png",    "media/interface/hud/sortespion2.png",      "media/interface/hud/sortespion3.png",      40, 50, 60, 4000, 7000, 5000, 7000, 7000, 10000, S_SORTESP1, S_SORTESP2, S_SORTESP3},           // Espion
-    { "",                                       "media/interface/hud/sortkamikaze.png",     "",                                         0, 100,  0,    0, 3500,    0,    0, 3500,     0, S_NULL, S_SORTKAMIKAZE, S_NULL},                       // Kamikaze
+    { "",                                       "media/interface/hud/sortkamikaze.png",     "",                                         0, 100,  0,    0, 5000,    0,    0, 5000,     0, S_NULL, S_SORTKAMIKAZE, S_NULL},                       // Kamikaze
 };
 
 #include "ai.h"
@@ -1045,7 +1045,7 @@ namespace game
     extern void preloadbouncers();
     extern void removeweapons(gameent *owner);
     extern void updateweapons(int curtime);
-    extern void gunselect(int gun, gameent *d);
+    extern void gunselect(int gun, gameent *d, bool force = false);
     extern void weaponswitch(gameent *d);
     extern void avoidweapons(ai::avoidset &obstacles, float radius);
 

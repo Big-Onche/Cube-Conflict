@@ -1153,7 +1153,7 @@ namespace ai
         if(d->aptitude==APT_KAMIKAZE && d->aptisort2 > 0)
         {
             if(enemyok)makeroute(d, b, e->o);
-            if(d->aptisort2<750) d->gunselect=GUN_KAMIKAZE;
+            if(d->aptisort2<2250) d->gunselect=GUN_KAMIKAZE;
         }
 
         if(!enemyok || d->skill >= 30)
@@ -1332,7 +1332,7 @@ namespace ai
                     break;
                 }
             }
-            if(gun >= 0 && gun != d->gunselect && gun!=GUN_ASSISTXPL) gunselect(gun, d);
+            if(gun >= 0 && gun != d->gunselect) gunselect(gun, d);
         }
         return process(d, b) >= 2;
     }

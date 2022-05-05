@@ -25,12 +25,13 @@ namespace game
 
     ICOMMAND(getweapon, "", (), intret(player1->gunselect));
 
-    void gunselect(int gun, gameent *d)
+    void gunselect(int gun, gameent *d, bool force)
     {
+        if(gun==GUN_ASSISTXPL && !force) return;
         if(gun!=d->gunselect)
         {
             addmsg(N_GUNSELECT, "rci", d, gun);
-            playsound(S_WEAPLOAD, &d->o, 0, 0, 0 , 100, -1, 300);
+            playsound(S_WEAPLOAD, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
         }
         d->gunselect = gun;
     }
@@ -177,6 +178,8 @@ namespace game
         else if(s!=GUN_CACMASTER    && d->ammo[GUN_CACMASTER])      s = GUN_CACMASTER;
         else if(s!=GUN_CACMARTEAU   && d->ammo[GUN_CACMARTEAU])     s = GUN_CACMARTEAU;
         else if(s!=GUN_CACFLEAU     && d->ammo[GUN_CACFLEAU])       s = GUN_CACFLEAU;
+
+        else if(s!=GUN_KAMIKAZE     && d->ammo[GUN_KAMIKAZE])       s = GUN_KAMIKAZE;
         else if(s!=GUN_CACNINJA     && d->ammo[GUN_CACNINJA])       s = GUN_CACNINJA;
         gunselect(s, d);
     }
@@ -190,7 +193,7 @@ namespace game
             if(name[0])
             {
                 int gun = getweapon(name);
-                if(validgun(gun) && gun != player1->gunselect && player1->ammo[gun]) { gunselect(gun, player1); return; }
+                if(validgun(gun) && gun != player1->gunselect && player1->ammo[gun] && gun!=GUN_ASSISTXPL) { gunselect(gun, player1); return; }
             } else { weaponswitch(player1); return; }
         }
         playsound(S_NOAMMO);
@@ -691,10 +694,10 @@ namespace game
                 vec debrisorigin = vec(v).sub(vec(vel).mul(15));
                 adddynlight(safe ? v : debrisorigin, 7*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 80, 40, L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
                 adddynlight(safe ? v : debrisorigin, 4*attacks[atk].exprad, vec(1.2f, 0.4f, 0.0f), 80, 40, L_VOLUMETRIC|L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.0f, 0.0f, 1.5f));
-                particle_splash(PART_SMOKE, ATK_ROQUETTES_SHOOT==1 ? 5 : 9, 2000, v, 0x333333, 40.0f,  ATK_KAMIKAZE_SHOOT==1 || ATK_ASSISTXPL_SHOOT==1 ? 200+rnd(75) : 150+rnd(50), ATK_KAMIKAZE_SHOOT==1 || ATK_ASSISTXPL_SHOOT==1  ? 450 : 300+rnd(100), 0, player1->champimillis ? true : false);
-                particle_splash(PART_SMOKE, ATK_ROQUETTES_SHOOT==1 ? 5 : 9, 1300, v, 0x333333, 25.0f,  ATK_KAMIKAZE_SHOOT==1 || ATK_ASSISTXPL_SHOOT==1 ? 200+rnd(75)  : 150+rnd(50), ATK_KAMIKAZE_SHOOT==1 || ATK_ASSISTXPL_SHOOT==1  ? 750 : 600+rnd(100), 0, player1->champimillis ? true : false);
-                particle_splash(PART_SPARK, ATK_ROQUETTES_SHOOT==1 ? 7 : 10, 300, v, owner->steromillis ? 0xFF4444 : 0xFFBB55,  1.7f+rnd(2), 3500, 3500, 0, player1->champimillis ? true : false);
-                loopi(lookupmaterial(v)&MAT_WATER ? 1 : 3) particle_splash(PART_FLAME1+rnd(2), ATK_ROQUETTES_SHOOT==1 ? 9 : 17, ATK_KAMIKAZE_SHOOT==1 || ATK_ASSISTXPL_SHOOT==1 ? 120+rnd(50) : 80+rnd(40), v, owner->steromillis ? 0xFF4444 : ATK_KAMIKAZE_SHOOT==1 || ATK_ASSISTXPL_SHOOT==1 ? 0x6A4A3A : i==0 ? 0x383838: i==1 ? 0x474747: 0x604930, 9.f+rnd(6), ATK_KAMIKAZE_SHOOT==1 ? 1200+rnd(700): ATK_ROQUETTES_SHOOT==1 ? 300+rnd(150) : 400+rnd(200), 800, 1, player1->champimillis ? true : false);
+                particle_splash(PART_SMOKE, atk==ATK_ROQUETTES_SHOOT ? 5 : 9, 2000, v, 0x333333, 40.0f,  atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT ? 250+rnd(75) : 150+rnd(50), atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT  ? 500 : 300+rnd(100), 0, player1->champimillis ? true : false);
+                particle_splash(PART_SMOKE, atk==ATK_ROQUETTES_SHOOT ? 5 : 9, 1300, v, 0x333333, 25.0f,  atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT ? 250+rnd(75) : 150+rnd(50), atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT  ? 800 : 600+rnd(100), 0, player1->champimillis ? true : false);
+                particle_splash(PART_SPARK, atk==ATK_ROQUETTES_SHOOT ? 7 : 10, 300, v, owner->steromillis ? 0xFF4444 : 0xFFBB55,  1.7f+rnd(2), 3500, 3500, 0, player1->champimillis ? true : false);
+                loopi(lookupmaterial(v)&MAT_WATER ? 1 : 3) particle_splash(PART_FLAME1+rnd(2), atk==ATK_ROQUETTES_SHOOT ? 9 : 17, atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT ? 130+rnd(50) : 80+rnd(40), v, owner->steromillis ? 0xFF4444 : atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT ? 0x6A4A3A : i==0 ? 0x383838: i==1 ? 0x474747: 0x604930, 9.f+rnd(6), atk==ATK_KAMIKAZE_SHOOT ? 1200+rnd(700): atk==ATK_ROQUETTES_SHOOT ? 300+rnd(150) : 400+rnd(200), atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT ? 1200 : 800, 1, player1->champimillis ? true : false);
                 particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFF5500, 10.0f, player1->champimillis ? true : false);
                 particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFFFFFF, 20.0f, player1->champimillis ? true : false);
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS, 5000);
@@ -1494,13 +1497,22 @@ namespace game
 
         if(d->aptitude==APT_KAMIKAZE)
         {
-            if(d->aptisort2>0 && d->aptisort2<500 && d->ammo[GUN_KAMIKAZE]>0 && !d->playerexploded)
-                {d->gunselect=GUN_KAMIKAZE; d->attacking=true; d->lastattack = -1; d->playerexploded = true;}
+            if(d->aptisort2>0 && d->aptisort2<2000 && d->ammo[GUN_KAMIKAZE]>0 && !d->playerexploded)
+            {
+                gunselect(GUN_KAMIKAZE, d);
+                d->attacking = ACT_SHOOT;
+                d->lastattack = -1;
+                d->playerexploded = true;
+            }
         }
 
-        if(d->armour<=0 && d->armourtype==A_ASSIST && !d->playerexploded && d->ammo[GUN_ASSISTXPL]>0)
-            {d->gunselect=GUN_ASSISTXPL; d->attacking=true; d->lastattack = -1; d->playerexploded = true;}
-
+        if(d->armour==0 && !d->playerexploded && d->ammo[GUN_ASSISTXPL]>0)
+        {
+            gunselect(GUN_ASSISTXPL, d, true);
+            d->attacking = ACT_SHOOT;
+            d->lastattack = -1;
+            d->playerexploded = true;
+        }
 
         if(!d->attacking) return;
         int gun = d->gunselect, act = d->attacking, atk = guns[gun].attacks[act];
@@ -1523,7 +1535,7 @@ namespace game
         }
 
         if(atk==ATK_CAC349_SHOOT || atk==ATK_CACMARTEAU_SHOOT || atk==ATK_CACMASTER_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACNINJA_SHOOT);
-        else if(atk==ATK_GAU8_SHOOT || atk==ATK_NUKE_SHOOT || atk==ATK_CAMPOUZE_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_KAMIKAZE_SHOOT) d->ammo[gun]--;
+        else if(atk==ATK_GAU8_SHOOT || atk==ATK_NUKE_SHOOT || atk==ATK_CAMPOUZE_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT) d->ammo[gun]--;
         else if(!m_muninfinie) d->ammo[gun]--;
 
         vec from = d->o, to = targ, dir = vec(to).sub(from).safenormalize();
@@ -1571,7 +1583,7 @@ namespace game
         //if(d->ai) d->gunwait += int(d->gunwait*(((101-d->skill)+rnd(111-d->skill))/100.f));
         d->steromillis ? d->totalshots += (attacks[atk].damage*attacks[atk].rays)*2: d->totalshots += attacks[atk].damage*attacks[atk].rays;
 
-        if(d->playerexploded){d->attacking = ACT_IDLE; d->playerexploded=false; weaponswitch(d);}
+        if(d->playerexploded){d->attacking = ACT_IDLE; d->playerexploded = false; weaponswitch(d);}
         if(atk==ATK_GLOCK_SHOOT) d->attacking = ACT_IDLE;
     }
 
