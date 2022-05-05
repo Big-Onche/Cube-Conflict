@@ -582,7 +582,7 @@ struct gamestate
                 if(type==I_ARMUREASSISTEE)
                 {
                     health = min(health+300, maxhealth);
-                    if(ammo[GUN_ASSISTXPL]<1) ammo[GUN_ASSISTXPL] = 1;
+                    if(ammo[GUN_ASSISTXPL]<=1) ammo[GUN_ASSISTXPL] = 1;
                 }
 
                 break;
@@ -823,7 +823,7 @@ struct gameent : dynent, gamestate
     void stopsortsound(gameent *d)
     {
         int neededdata = 0;
-        switch(d->aptitude) {case 8: neededdata++; break; case 11: neededdata+=2; case 14: neededdata+=3; case 10: neededdata+=4;}
+        switch(d->aptitude) {case 8: neededdata++; break; case 11: neededdata+=2; case 14: neededdata+=3; case 10: neededdata+=4; case 6: neededdata+=5;}
         if(sortchan >= 0)
         {
             if(d->aptisort1)stopsound(sorts[neededdata].sound1, sortchan, 50);
