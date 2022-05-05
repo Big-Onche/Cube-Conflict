@@ -714,6 +714,7 @@ namespace ai
             loopv(players) if(players[i] && players[i]->ai && players[i]->aitype == AI_BOT && players[i]->canpickup(e.type, players[i]->aptitude, player1->armourtype))
             {
                 gameent *d = players[i];
+                if(d->aptitude==APT_KAMIKAZE && d->aptisort2) return;  //Le kamikaze s'en fout de chopper un objet juste avant de mourrir
                 bool wantsitem = false;
                 switch(e.type)
                 {
@@ -1149,9 +1150,9 @@ namespace ai
         gameent *e = getclient(d->ai->enemy);
         bool enemyok = e && targetable(d, e);
 
-        if(d->aptitude==APT_KAMIKAZE && d->aptisort2 > 0 && enemyok)
+        if(d->aptitude==APT_KAMIKAZE && d->aptisort2 > 0)
         {
-            makeroute(d, b, e->o);
+            if(enemyok)makeroute(d, b, e->o);
             if(d->aptisort2<750) d->gunselect=GUN_KAMIKAZE;
         }
 
