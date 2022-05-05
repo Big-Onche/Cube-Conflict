@@ -1491,7 +1491,20 @@ namespace game
     {
         int prevaction = d->lastaction, attacktime = lastmillis-prevaction;
 
-        if(d->aitype==AI_BOT && d->gunselect==GUN_GLOCK) d->gunwait=300-(d->skill*2)+rnd(50);
+        if(d->aitype==AI_BOT && (d->gunselect==GUN_GLOCK || d->gunselect==GUN_SPOCKGUN || d->gunselect==GUN_HYDRA || d->gunselect==GUN_SKS || d->gunselect==GUN_S_CAMPOUZE))
+        {
+            switch(d->gunselect)
+            {
+                case GUN_GLOCK: d->gunwait=250; break;
+                case GUN_SPOCKGUN: d->gunwait=325; break;
+                case GUN_HYDRA: d->gunwait=570; break;
+                case GUN_SKS: d->gunwait=570; break;
+                case GUN_S_CAMPOUZE: d->gunwait=650; break;
+            }
+            if(d->aptisort3 && d->aptitude==APT_PRETRE) d->gunwait/=2.5f;
+            d->gunwait-=(d->skill*1.5f)+rnd(50); //+ Le bot est skillé + il tire vite + petit facteur aléatoire
+        }
+
         if(attacktime<d->gunwait) return;
         d->gunwait = 0;
 
@@ -1600,7 +1613,7 @@ namespace game
         d->steromillis ? d->totalshots += (attacks[atk].damage*attacks[atk].rays)*2: d->totalshots += attacks[atk].damage*attacks[atk].rays;
 
         if(d->playerexploded){d->attacking = ACT_IDLE; d->playerexploded = false; weaponswitch(d);}
-        if(atk==ATK_GLOCK_SHOOT) d->attacking = ACT_IDLE;
+        if(atk==ATK_GLOCK_SHOOT || atk==ATK_SPOCKGUN_SHOOT || atk==ATK_HYDRA_SHOOT || d->gunselect==GUN_SKS || d->gunselect==GUN_S_CAMPOUZE) d->attacking = ACT_IDLE;
     }
 
     void adddynlights()
