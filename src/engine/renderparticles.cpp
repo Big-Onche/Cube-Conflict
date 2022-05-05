@@ -1061,7 +1061,7 @@ static void splash(int type, int color, int radius, int num, int fade, const vec
             z = rnd(radius*2)-radius;
         }
         while(x*x+y*y+z*z>radius*radius);
-        vec tmp = vec(upsplash ? (float)x/3.5f : (float)x, upsplash ? (float)y/3.5f : (float)y, (float)z<0 ? (float)z==(float)z/-1 : (float)z);
+        vec tmp = vec(upsplash ? (float)x/3.5f : (float)x, upsplash ? (float)y/3.5f : (float)y, (float)z<0 && upsplash ? (float)z==(float)z/-1 : (float)z);
         int f = (num < 10) ? (fmin + rnd(fmax)) : (fmax - (i*(fmax-fmin))/(num-1)); //help deallocater by using fade distribution rather than random
         newparticle(p, tmp, f, type, color, size, upsplash ? gravity*3 : gravity, expand)->val = collidez;
     }

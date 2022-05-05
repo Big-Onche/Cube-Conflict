@@ -738,7 +738,7 @@ namespace game
                 adddynlight(safe ? v : debrisorigin, 7*attacks[atk].exprad, vec(1+rnd(4), 1+rnd(4), 1+rnd(4)), 80, 40, 0, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
                 adddynlight(safe ? v : debrisorigin, 4*attacks[atk].exprad, vec(rnd(15)/10.0f, rnd(15)/10.0f, rnd(15)/10.0f), 80, 40, L_VOLUMETRIC|L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.0f, 0.0f, 1.5f));
                 particle_splash(PART_FLAME1+rnd(2),  5,  40, v, 0xFFC864, 20,  800, 1600, 0, player1->champimillis ? true : false);
-                loopi(4) particle_splash(PART_GLOWSPARK, 16+rnd(10),  200+rnd(200), v, owner->steromillis ? 0xFF0000 : rnd(16777215),  0.2f+(rnd(5)/10.f), 500+rnd(300), 5000+rnd(3000), 2, player1->champimillis ? true : false);
+                loopi(4) particle_splash(PART_GLOWSPARK, 16+rnd(10), 200+rnd(200), v, owner->steromillis ? 0xFF0000 : rnd(16777215),  0.2f+(rnd(5)/10.f), 500+rnd(300), 5000+rnd(3000), 2, player1->champimillis ? true : false);
                 if(lookupmaterial(v)&MAT_WATER)
                 {
                     particle_splash(PART_EAU, 50, 200, v, 0x18181A, 12.0f+rnd(14), 600, 300);
@@ -1381,7 +1381,7 @@ namespace game
             default:
                 {
                     if(d==hudplayer()) playsound(attacks[atk].sound, NULL);
-                    else playsound(attacks[atk].sound, &d->o, NULL, 0, 0 , 50, -1, 350);
+                    else playsound(attacks[atk].sound, &d->o, NULL, 0, 0 , 50, -1, atk==ATK_ASSISTXPL_SHOOT || atk==ATK_KAMIKAZE_SHOOT ? 600 : 350);
                 }
         }
 
