@@ -11,7 +11,7 @@ struct ctfclientmode : clientmode
     static const int MAXFLAGS = 20;
     static const int FLAGRADIUS = 20;
     static const int FLAGLIMIT = 10;
-    static const int RESPAWNSECS = 5;
+    static const int RESPAWNSECS = 7;
 
     struct flag
     {
