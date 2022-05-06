@@ -353,8 +353,19 @@ namespace ai
 
     bool needmana(gameent *d)
     {
-        if(d->mana<100) return true;
-        else return false;
+        switch(d->aptitude)
+        {
+            case APT_ESPION:
+            case APT_MAGICIEN:
+            case APT_SHOSHONE:
+            case APT_PRETRE:
+            case APT_PHYSICIEN:
+                if(d->mana<100) return true;
+                else return false;
+            break;
+            default:
+                return false;
+        }
     }
 
     bool enemy(gameent *d, aistate &b, const vec &pos, float guard = SIGHTMIN, int pursue = 0)
@@ -498,6 +509,7 @@ namespace ai
 
     static void tryitem(gameent *d, extentity &e, int id, aistate &b, vector<interest> &interests, bool force = false)
     {
+        if(d->aptitude==APT_KAMIKAZE && d->aptisort2) return; //Le kamikaze s'en fout de chopper un item une fois la bombe activée
         float score = 0;
         switch(e.type)
         {
@@ -516,15 +528,15 @@ namespace ai
                 else if (d->aptitude==APT_VAMPIRE) score = d->health < 500 ? 1e7f : d->health < 800 ? 1e5f : 1e3f;
                 break;
             case I_BOUCLIERBOIS:
-                if(d->armourtype==A_ASSIST && d->armour<2000) score = d->armour<1500 ? 1e6f : 1e4f;
+                if(d->armourtype==A_ASSIST && d->armour<1500) score = d->armour<1500 ? 1e6f : 1e4f;
                 else if(d->armour<600) score = 1e5f;
                 break;
             case I_BOUCLIERFER:
-                if(d->armourtype==A_ASSIST && d->armour<2000) score = d->armour<1500 ? 1e6f : 1e5f;
+                if(d->armourtype==A_ASSIST && d->armour<1500) score = d->armour<1500 ? 1e6f : 1e5f;
                 else if(d->armour<900) score = 1e5f;
                 break;
             case I_BOUCLIEROR: case I_BOUCLIERMAGNETIQUE:
-                if(d->armourtype==A_ASSIST && d->armour<2000) score = d->armour<1500 ? 1e6f : 1e5f;
+                if(d->armourtype==A_ASSIST && d->armour<1500) score = d->armour<1500 ? 1e6f : 1e5f;
                 if(d->armour <= 1250) score = 1e6f;
             case I_ARMUREASSISTEE:
                 if(d->armourtype!=A_ASSIST) score = 1e9f;
@@ -625,16 +637,7 @@ namespace ai
             loopi(interests.length()-1) if(interests[i].score < interests[q].score) q = i;
             interest n = interests.removeunordered(q);
             bool proceed = true;
-            switch(n.state)
-            {
-                case AI_S_DEFEND: // don't get into herds
-                {
-                    int members = 0;
-                    proceed = !checkothers(targets, d, n.state, n.targtype, n.target, true, &members) && members > 1;
-                    break;
-                }
-                default: break;
-            }
+
             if(proceed && makeroute(d, b, n.node))
             {
                 d->ai->switchstate(b, n.state, n.targtype, n.target);
@@ -1149,10 +1152,10 @@ namespace ai
         gameent *e = getclient(d->ai->enemy);
         bool enemyok = e && targetable(d, e);
 
-        if(d->aptitude==APT_KAMIKAZE && d->aptisort2 > 0)
+        if(enemyok && (d->aptitude==APT_KAMIKAZE || d->aptitude==APT_NINJA))
         {
-            if(enemyok)makeroute(d, b, e->o);
-            if(d->aptisort2<2250) d->gunselect=GUN_KAMIKAZE;
+            makeroute(d, b, e->o);
+            if(d->aptisort2<2250 && d->aptisort2 && d->aptitude==APT_KAMIKAZE) d->gunselect=GUN_KAMIKAZE;
         }
 
         if(!enemyok || d->skill >= 30)
@@ -1171,11 +1174,13 @@ namespace ai
                             if(d->o.dist(f->o)<500) aptitude(d, 2);
                             break;
                         case APT_ESPION:
-                        switch(rnd(2))
-                        {
-                            case 0: if(d->mana>=40 && d->o.dist(f->o)<700 && !d->aptisort2) aptitude(d, 1); break;
-                            case 1: if(d->mana>=50 && d->o.dist(f->o)<700 && !d->aptisort1) aptitude(d, 2);
-                        }
+                            switch(rnd(2))
+                            {
+                                case 0: if(d->mana>=40 && d->o.dist(f->o)<700 && !d->aptisort2) aptitude(d, 1); break;
+                                case 1: if(d->mana>=50 && d->o.dist(f->o)<700 && !d->aptisort1) aptitude(d, 2);
+                            }
+                            break;
+                        case APT_NINJA: makeroute(d, b, f->o); break;
                     }
                     enemyok = true;
                     e = f;
@@ -1461,7 +1466,7 @@ namespace ai
         // others spawn new commands to the stack the ai reads the top command from the stack and executes
         // it or pops the stack and goes back along the history until it finds a suitable command to execute
         bool cleannext = false;
-        if(d->ai->state.empty()) d->ai->addstate(AI_S_WAIT);
+        if(d->ai->state.empty()) d->ai->addstate(AI_T_NODE);
         loopvrev(d->ai->state)
         {
             aistate &c = d->ai->state[i];
@@ -1503,11 +1508,11 @@ namespace ai
                     case AI_S_WAIT:
                         result = dowait(d, c);
                         break;
-                    case AI_S_DEFEND: result = dodefend(d, c);
-                    {
-                        if(d->aptitude==APT_SHOSHONE && d->mana>99) aptitude(d, 2);
-                        break;
-                    }
+                    //case AI_S_DEFEND: result = dodefend(d, c);
+                    //{
+                    //    if(d->aptitude==APT_SHOSHONE && d->mana>99) aptitude(d, 2);
+                    //    break;
+                    //}
                     case AI_S_PURSUE: result = dopursue(d, c); break;
                     case AI_S_INTEREST: result = dointerest(d, c); break;
                     default: result = 0; break;
