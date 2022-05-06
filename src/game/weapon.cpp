@@ -418,6 +418,7 @@ namespace game
         bool local;
         int offsetmillis;
         int id;
+        int lifetime;
         int projchan, projsound;
         bool inwater;
 
@@ -447,6 +448,7 @@ namespace game
         p.local = local;
         p.owner = owner;
         p.atk = atk;
+        p.lifetime = attacks[atk].ttl;
         p.offsetmillis = OFFSETMILLIS;
         p.id = local ? lastmillis : id;
         p.inwater = owner->inwater ? true : false;
@@ -973,6 +975,13 @@ namespace game
             vec v = vec(p.o).add(dv);
             bool exploded = false;
             hits.setsize(0);
+
+            if((p.lifetime -= time)<0 && (p.atk==ATK_ARTIFICE_SHOOT || p.atk==ATK_NUKE_SHOOT))
+            {
+                projsplash(p, v, NULL);
+                exploded = true;
+            }
+
             if(p.local)
             {
                 vec halfdv = vec(dv).mul(0.5f), bo = vec(p.o).add(halfdv);
