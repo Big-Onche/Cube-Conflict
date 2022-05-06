@@ -285,11 +285,11 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
 
 VAR(menumute, 0, 0, 1);
 
-void renderbackground(const char *caption, Texture *mapshot, const char *mapname, const char *mapinfo, const char *astuce, bool force)
+void renderbackground(const char *caption, Texture *mapshot, const char *mapname, const char *mapinfo, const char *astuce, bool force, bool needsound)
 {
     if(!inbetweenframes && !force) return;
 
-    if(menumute) stopsounds(); // stop sounds while loading
+    if(menumute || !needsound) stopsounds(); // stop sounds while loading
 
     int w = hudw, h = hudh;
     if(forceaspect) w = int(ceil(h*forceaspect));
