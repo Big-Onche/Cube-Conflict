@@ -1354,6 +1354,7 @@ void regularflame(int type, const vec &p, float radius, float height, int color,
 
 static void makeparticles(entity &e)
 {
+    if(!isconnected()) return;
     switch(e.attr1)
     {
         case 0: //fire and smoke -  <radius> <height> <rgb> - 0 values default to compat for old maps
