@@ -31,7 +31,7 @@ namespace game
         if(gun!=d->gunselect)
         {
             addmsg(N_GUNSELECT, "rci", d, gun);
-            playsound(S_WEAPLOAD, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
+            playsound(S_WEAPLOAD, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 50, -1, 150);
         }
         d->gunselect = gun;
     }
