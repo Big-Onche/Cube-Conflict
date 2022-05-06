@@ -1599,11 +1599,7 @@ namespace game
 
         hits.setsize(0);
 
-        if(!attacks[atk].projspeed)
-        {
-            if(attacks[atk].rays>1) {loopi(attacks[atk].rays) raydamage(from, rays[i], d, atk);}
-            else raydamage(from, to, d, atk);
-        }
+        if(!attacks[atk].projspeed) raydamage(from, to, d, atk);
 
         shoteffects(atk, from, to, d, true, 0, prevaction);
 
