@@ -110,8 +110,7 @@ namespace ai
 
     bool targetable(gameent *d, gameent *e)
     {
-        if(e->aptitude==APT_ESPION && e->aptisort2 && e->attacking==ACT_IDLE && e->physstate!=PHYS_FALL) return false;
-        if(d->aptitude==APT_SHOSHONE && d->mana>=50) {aptitude(d, 3); return true;}
+        if((e->aptitude==APT_ESPION && e->aptisort2 && e->attacking==ACT_IDLE && e->physstate!=PHYS_FALL)||(e->aptitude==APT_PHYSICIEN && e->aptisort2)) return false;
         if(d == e) return false;
         return e->state == CS_ALIVE && !isteam(d->team, e->team);
     }
@@ -1486,10 +1485,12 @@ namespace ai
                 switch(d->aptitude)
                 {
                     case APT_MAGICIEN: if(d->health<250+d->skill*2 && d->mana>=60) aptitude(d, 3); break;
+                    case APT_PRETRE: if(d->mana>30 && d->health<200+d->skill) aptitude(d, 2); break;
                     case APT_SHOSHONE: if(d->mana>=100) aptitude(d, 2); break;
                     case APT_PHYSICIEN:
-                        switch(rnd(50)) {case 0: if(d->mana>70) aptitude(d, 3);}
-                        if(d->health<750 && d->armour<50 && d->mana>=25) aptitude(d, 1);
+                        switch(rnd(100)) {case 0: if(d->mana>70) aptitude(d, 3);}
+                        if(d->health<400+d->skill && d->mana>=50) aptitude(d, 2);
+                        if(d->health<700 && d->armour<50 && d->mana>=25) aptitude(d, 1);
                         break;
                     case APT_ESPION:
                         if(d->mana>100) aptitude(d, 3);
@@ -1507,20 +1508,8 @@ namespace ai
                         if(d->aptitude==APT_SHOSHONE && d->mana>99) aptitude(d, 2);
                         break;
                     }
-                    case AI_S_PURSUE: result = dopursue(d, c);
-                    {
-                        switch(d->aptitude)
-                        {
-                            case APT_PHYSICIEN: if(d->health<650+d->skill && d->mana>=50) aptitude(d, 2); break;
-                            case APT_PRETRE: if(d->mana>30 && d->health<500+d->skill) aptitude(d, 2);
-                        }
-                        break;
-                    }
-                    case AI_S_INTEREST: result = dointerest(d, c);
-                    {
-                        if(d->aptitude==APT_SHOSHONE && d->mana>125) aptitude(d, 2);
-                        break;
-                    }
+                    case AI_S_PURSUE: result = dopursue(d, c); break;
+                    case AI_S_INTEREST: result = dointerest(d, c); break;
                     default: result = 0; break;
                 }
                 if(result <= 0)

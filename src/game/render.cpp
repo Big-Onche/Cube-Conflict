@@ -392,7 +392,7 @@ namespace game
         else flags |= MDL_CULL_DIST;
         if(!mainpass) flags &= ~(MDL_FULLBRIGHT | MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY | MDL_CULL_DIST);
         float trans = d->state == CS_LAGGED ? 0.5f : 1.0f;
-        if(d->aptisort2 && d->aptitude==APT_PHYSICIEN) trans = 0.08f;
+        if(d->aptisort2 && d->aptitude==APT_PHYSICIEN) trans = 0.f;
         else if(d->aptisort1 && d->aptitude==APT_MAGICIEN) trans = 0.7f;
 
         if(d->aptitude==APT_ESPION && d->aptisort1)
@@ -433,29 +433,13 @@ namespace game
 
 void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape, int color, int team, float fade, int flags = 0, bool mainpass = true)
     {
-        int lastaction = d->lastaction, anim = ANIM_IDLE|ANIM_LOOP, attack = 0, delay = 0;
+        int anim = ANIM_IDLE|ANIM_LOOP;
 
-        if(intermission && d->state!=CS_DEAD)
-        {
-            anim = attack = ANIM_LOSE|ANIM_LOOP;
-            if(validteam(team) ? bestteams.htfind(team)>=0 : bestplayers.find(d)>=0) anim = attack = ANIM_WIN|ANIM_LOOP;
-        }
-        else if(d->state==CS_ALIVE && d->lasttaunt && lastmillis-d->lasttaunt<1000 && lastmillis-d->lastaction>delay)
-        {
-            lastaction = d->lasttaunt;
-            anim = attack = ANIM_TAUNT;
-            delay = 1000;
-        }
         modelattach a[6];
         int ai = 0;
         if(guns[d->gunselect].vwep)
         {
             int vanim = ANIM_VWEP_IDLE|ANIM_LOOP, vtime = 0;
-            if(lastaction && d->lastattack >= 0 && attacks[d->lastattack].gun==d->gunselect && lastmillis < lastaction + delay)
-            {
-                vanim = attacks[d->lastattack].vwepanim;
-                vtime = lastaction;
-            }
             a[ai++] = modelattach("tag_weapon", guns[d->gunselect].vwep, vanim, vtime);
         }
 
@@ -469,7 +453,6 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape
         vec o = d->feetpos();
         int basetime = 0;
 
-        if(!((anim>>ANIM_SECONDARY)&ANIM_INDEX)) anim |= (ANIM_IDLE|ANIM_LOOP)<<ANIM_SECONDARY;
         if(d!=player1) flags |= MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY;
         if(d->type==ENT_PLAYER) flags |= MDL_FULLBRIGHT;
         else flags |= MDL_CULL_DIST;
@@ -480,7 +463,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape
 
         defformatstring(mdlname, customssmileys[UI_smiley].smileydir);
 
-        rendermodel(mdlname, anim, o.add(vec(0, 10, -5)), yaw, pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), 5));
+        rendermodel(mdlname, anim, o, yaw, pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), 5));
     }
 
 
