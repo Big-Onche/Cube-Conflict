@@ -419,6 +419,7 @@ namespace game
         int offsetmillis;
         int id;
         int lifetime;
+        bool exploded;
         int projchan, projsound;
         bool inwater;
 
@@ -448,7 +449,13 @@ namespace game
         p.local = local;
         p.owner = owner;
         p.atk = atk;
-        p.lifetime = attacks[atk].ttl;
+        switch(p.atk)
+        {
+            case ATK_ARTIFICE_SHOOT: p.lifetime=attacks[atk].ttl+rnd(400); break;
+            case ATK_ARBALETE_SHOOT: p.lifetime=attacks[atk].ttl*decoration_lod; break;
+            default: p.lifetime = attacks[atk].ttl;
+        }
+        p.exploded = false;
         p.offsetmillis = OFFSETMILLIS;
         p.id = local ? lastmillis : id;
         p.inwater = owner->inwater ? true : false;
@@ -964,6 +971,8 @@ namespace game
 
     void updateprojectiles(int time)
     {
+        bool removearrow = false;
+
         if(projs.empty()) return;
         loopv(projs)
         {
@@ -990,9 +999,10 @@ namespace game
                 {
                     dynent *o = iterdynents(j);
                     if(p.owner==o || o->o.reject(bo, o->radius + br)) continue;
-                    if(projdamage(o, p, v)) { exploded = true; break; }
+                    if(projdamage(o, p, v)) {exploded = true; removearrow = true; break; }
                 }
             }
+
             if(!exploded)
             {
                 if(dist<4)
@@ -1001,7 +1011,7 @@ namespace game
                     {
                         if(raycubepos(p.o, p.dir, p.to, 0, RAY_CLIPMAT|RAY_ALPHAPOLY)>=4) continue;
                     }
-                    projsplash(p, v, NULL);
+                    if(!p.exploded) projsplash(p, v, NULL);
                     exploded = true;
                 }
                 else
@@ -1061,12 +1071,15 @@ namespace game
                             particle_splash(PART_PULSE_FRONT, 1, 1, pos, p.owner->steromillis ? 0xFF4444 : 0xFFBB88, p.owner==player1 ? 0.65f : ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.4f : 0.3f, 150, 20, 0, player1->champimillis ? true : false);
                             break;
                         case ATK_ARBALETE_SHOOT:
-                            if(lookupmaterial(pos)&MAT_WATER) particle_splash(PART_BULLE, 1, 150, v, 0x888888, 1.0f+rnd(2), 20, -30);
-                            particle_splash(PART_SMOKE, 2, 100, pos, 0xAAAAAA, 0.8f, 25, 250, 0, player1->champimillis ? true : false);
-                            if(p.owner->steromillis)
+                            if(!p.exploded)
                             {
-                                particle_flare(tail, head, 1, PART_BALLE_SIDE, 0xFF4444, 0.30f, p.owner, player1->champimillis ? true : false);
-                                particle_splash(PART_PULSE_FRONT, 1, 1, pos, 0xFF4444, p.owner==player1 ? 0.5f : 0.25f, 150, 20, 0, player1->champimillis ? true : false);
+                                if(lookupmaterial(pos)&MAT_WATER) particle_splash(PART_BULLE, 1, 150, v, 0x888888, 1.0f+rnd(2), 20, -30);
+                                particle_splash(PART_SMOKE, 2, 100, pos, 0xAAAAAA, 0.8f, 25, 250, 0, player1->champimillis ? true : false);
+                                if(p.owner->steromillis)
+                                {
+                                    particle_flare(tail, head, 1, PART_BALLE_SIDE, 0xFF4444, 0.30f, p.owner, player1->champimillis ? true : false);
+                                    particle_splash(PART_PULSE_FRONT, 1, 1, pos, 0xFF4444, p.owner==player1 ? 0.5f : 0.25f, 150, 20, 0, player1->champimillis ? true : false);
+                                }
                             }
                             break;
                         case ATK_SMAW_SHOOT:
@@ -1091,10 +1104,11 @@ namespace game
             }
             if(exploded)
             {
-                if(p.local)
-                    addmsg(N_EXPLODE, "rci3iv", p.owner, lastmillis-maptime, p.atk, p.id-maptime,
-                            hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
-                projs.remove(i--);
+                if(p.local && !p.exploded) addmsg(N_EXPLODE, "rci3iv", p.owner, lastmillis-maptime, p.atk, p.id-maptime, hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
+                p.exploded = true;
+
+                if((p.lifetime -= time)<0 || removearrow) projs.remove(i--);
+                else if(p.atk!=ATK_ARBALETE_SHOOT) projs.remove(i--);
             }
             else p.o = v;
         }
@@ -1244,6 +1258,7 @@ namespace game
             case ATK_MOSSBERG_SHOOT:
             case ATK_HYDRA_SHOOT:
                 {
+                    if(!local) createrays(gun, from, to, d);
                     loopi(atk==ATK_HYDRA_SHOOT ? 3 : 2) spawnbouncer(d->balles, d->balles, d, BNC_CARTOUCHES, bnclifetime+rnd(bnclifetime));
                     particle_flare(d->muzzle, d->muzzle, 140, PART_NORMAL_MUZZLE_FLASH, d->steromillis ? 0xFF2222 : d->aptisort2 && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xCCAAAA,  d==hudplayer() ? zoom ? 1.25f : 3.50f : 4.5f, d, player1->champimillis ? true : false);
                     if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 140, PART_NORMAL_MUZZLE_FLASH, 0xFF2222, d==hudplayer() ? zoom ? 2.00f : 5.5f : 6.5f, d, player1->champimillis ? true : false);
@@ -1305,6 +1320,7 @@ namespace game
                 break;
             case ATK_LANCEFLAMMES_SHOOT:
             {
+                if(!local) createrays(gun, from, to, d);
                 if(d->type==ENT_PLAYER) sound = S_FLAMEATTACK;
                 loopi(attacks[atk].rays)
                 {

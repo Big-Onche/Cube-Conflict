@@ -825,6 +825,8 @@ extern void clearpostfx();
 
 extern int fullbrightmodels;
 extern int cnidentiquearme, servambient;
+
+extern int decoration_lod;
 #endif
 #endif
 
