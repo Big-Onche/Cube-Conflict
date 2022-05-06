@@ -84,15 +84,17 @@ static const struct tombesinfo { const char *tombedir, *tombemenudir, *tombename
 
 static const struct danceinfo { const char *dancename; int danceprice; } customsdance[] =
 {
-    {"Cortex",       0},
-    {"Valoche",     50},
-    {"Vieille",     50},
-    {"Hendek",      50},
-    {"Mounir",     250},
-    {"Delavier",   500},
-    {"Praud",      500},
-    {"Malleville", 1500},
-    {"Raoult",     1500},
+    {"Cortex",        0},
+    {"Valoche",      50},
+    {"Vieille",     100},
+    {"Hendek",      100},
+    {"Militaire 1", 250},
+    {"Militaire 2", 250},
+    {"Mounir",      250},
+    {"Delavier",    500},
+    {"Praud",       500},
+    {"Malleville",  1500},
+    {"Raoult",      1500},
 };
 
 //Définition des boucliers
