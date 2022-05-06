@@ -596,7 +596,7 @@ namespace game
         //return !((gameent *)d)->lasttaunt || lastmillis-((gameent *)d)->lasttaunt>=5000;
     }
 
-    VARFP(player1_danse, 0, 0, 9,
+    VARFP(player1_danse, 0, 0, 11,
     {
         if(stat[VOI_CORTEX+player1_danse]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette voix !"); playsound(S_ERROR); player1_danse=0; return;}
         addmsg(N_SENDDANSE, "ri", player1_danse);
@@ -615,6 +615,13 @@ namespace game
         addmsg(N_TAUNT, "rc", player1);
     }
     COMMAND(taunt, "");
+
+    void showvoice()
+    {
+        if(langage) return;
+        playsound(S_CGCORTEX+UI_voix);
+    }
+    COMMAND(showvoice, "");
 
     VARP(hitsound, 0, 0, 1);
 
