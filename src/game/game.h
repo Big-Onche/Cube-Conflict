@@ -404,9 +404,9 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound
 {
     //Armes "normales"
     { GUN_RAIL,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FELECTRIQUE,  S_FELECTRIQUE_LOIN, S_NULL,   10,  350,  325,  35, 105, 0,    0,  10, 8000,  1,    30,   0, 0, 0},
-    { GUN_PULSE,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FUSILPLASMA,  S_FPLASMA_LOIN, S_NULL,       25,  120,  180,  45, 135, 0, 1500,   5, 8000,  1,    50,  25, 0, 0},
+    { GUN_PULSE,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FUSILPLASMA,  S_FPLASMA_LOIN, S_NULL,       25,   90,  180,  45, 135, 0, 1500,   5, 8000,  1,    50,  25, 0, 0},
     { GUN_SMAW,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_SMAW,         S_LANCEMISSILE_LOIN, S_NULL,   3, 1250,  850,  20,  60, 2,  600,  15, 8000,  1,   750, 125, 0, 0},
-    { GUN_MINIGUN,      ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MINIGUN,      S_MINIGUN_LOIN, S_ARMESLOIN,  35,   70,  180,  60, 180, 0, 3500,   5, 8000,  1,    15 ,  7, 0, 0},
+    { GUN_MINIGUN,      ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MINIGUN,      S_MINIGUN_LOIN, S_ARMESLOIN,  35,   60,  180,  60, 180, 0, 3500,   5, 8000,  1,    15 ,  7, 0, 0},
     { GUN_SPOCKGUN,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_SPOCKGUN,     S_SPOCK_LOIN, S_NULL,         15,  175,  250,  15, 150, 3, 1750,   5, 8000,  1,    30,  15, 0, 0},
     { GUN_M32,          ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_LANCEGRENADE, S_LANCEGRENADE_LOIN, S_NULL,   3, 1000, 1250,  20,  50, 0,  400,  10, 1000,  1,   600, 160, 1000, 0},
     { GUN_LANCEFLAMMES, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_FLAMEATTACK,  S_NULL, S_NULL,               30,  100,   38, 500, 500, 9,    0,   2,  280, 10,    10 ,  0, 0, 0},
@@ -763,7 +763,7 @@ struct gameent : dynent, gamestate
     int respawned, suicided;
     int lastpain;
     int lastaction, lastattack;
-    int attacking;
+    int attacking, gunaccel;
     int lastfootstep, attacksound, attackchan, hurtchan, dansechan, sortchan, alarmchan;
     int lasttaunt;
     int lastpickup, lastpickupmillis, flagpickup;
@@ -861,6 +861,7 @@ struct gameent : dynent, gamestate
         sort1pret = true;
         sort2pret = true;
         sort3pret = true;
+        gunaccel = 0;
         playerexploded = false;
     }
 

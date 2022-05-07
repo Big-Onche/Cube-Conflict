@@ -1530,7 +1530,17 @@ namespace game
             d->gunwait-=(d->skill*1.5f)+rnd(50); //+ Le bot est skillé + il tire vite + petit facteur aléatoire
         }
 
-        if(attacktime<d->gunwait) return;
+        switch(d->gunselect)
+        {
+            case GUN_MINIGUN:
+            case GUN_PULSE:
+            case GUN_S_ROQUETTES:
+                if(!d->attacking) d->gunselect==GUN_PULSE ? d->gunaccel=4 : d->gunselect == GUN_S_ROQUETTES ? d->gunaccel=3 : d->gunaccel=12;
+                break;
+            default: d->gunaccel=0;
+        }
+
+        if(attacktime < d->gunwait + d->gunaccel*(d->gunselect==GUN_PULSE ? 50 : d->gunselect== GUN_S_ROQUETTES ? 150 : 8)) return;
         d->gunwait = 0;
 
         if(d->aptitude==APT_KAMIKAZE)
@@ -1555,8 +1565,10 @@ namespace game
         if(!d->attacking) return;
         int gun = d->gunselect, act = d->attacking, atk = guns[gun].attacks[act];
 
+        if(d->gunaccel>0)d->gunaccel-=1;
         d->lastaction = lastmillis;
         d->lastattack = atk;
+
         if(d==player1)
         {
             lastshoot = totalmillis;
