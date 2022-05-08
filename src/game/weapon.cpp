@@ -1540,7 +1540,7 @@ namespace game
             default: d->gunaccel=0;
         }
 
-        if(attacktime < d->gunwait + d->gunaccel*(d->gunselect==GUN_PULSE ? 50 : d->gunselect== GUN_S_ROQUETTES ? 150 : 8)) return;
+        if(attacktime < d->gunwait + d->gunaccel*(d->gunselect==GUN_PULSE ? 50 : d->gunselect== GUN_S_ROQUETTES ? 150 : 8) + (d==player1 ? 0 : attacks[d->gunselect].attackdelay)) return;
         d->gunwait = 0;
 
         if(d->aptitude==APT_KAMIKAZE)

@@ -142,10 +142,10 @@ namespace ai
     bool canshoot(gameent *d, int atk, gameent *e)
     {
         if(attackrange(d, atk, e->o.squaredist(d->o)) && targetable(d, e))
-            return d->ammo[attacks[atk].gun] > 0 && lastmillis - d->lastaction >= d->gunwait;
+            return d->ammo[attacks[atk].gun] > 0 && lastmillis - d->lastaction + 1000 >= d->gunwait + d->gunaccel*(d->gunselect==GUN_PULSE ? 50 : d->gunselect== GUN_S_ROQUETTES ? 150 : 8) + attacks[d->gunselect].attackdelay; //
 
         return false;
-        return !d->ai->becareful && d->ammo[attacks[atk].gun] > 0 && lastmillis - d->lastaction >= d->gunwait;
+        //return !d->ai->becareful && d->ammo[attacks[atk].gun] > 0 && lastmillis - d->lastaction >= d->gunwait;
     }
 
     bool hastarget(gameent *d, int atk, aistate &b, gameent *e, float yaw, float pitch, float dist)
