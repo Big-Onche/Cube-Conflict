@@ -693,22 +693,24 @@ namespace game
                 adddynlight(safe ? v : debrisorigin, 2*attacks[atk].exprad, vec(0.0f, 2.5f, 0.0f), 250, 40, 0, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
             }
             break;
+
             case ATK_SMAW_SHOOT:
             case ATK_ROQUETTES_SHOOT:
-            case ATK_KAMIKAZE_SHOOT:
-            case ATK_ASSISTXPL_SHOOT:
             {
                 playsound(S_EXPLOSION, &v, 0, 0, 0 , 100, -1, 350);
                 if(camera1->o.dist(v) >= 300) playsound(S_EXPLOSIONLOIN, &v, NULL, 0, 0, 100, -1, 1200);
-                vec debrisorigin = vec(v).sub(vec(vel).mul(15));
+
                 adddynlight(safe ? v : debrisorigin, 7*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 80, 40, L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
                 adddynlight(safe ? v : debrisorigin, 4*attacks[atk].exprad, vec(1.2f, 0.4f, 0.0f), 80, 40, L_VOLUMETRIC|L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.0f, 0.0f, 1.5f));
-                particle_splash(PART_SMOKE, atk==ATK_ROQUETTES_SHOOT ? 5 : 9, 2000, v, 0x333333, 40.0f,  atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT ? 250+rnd(75) : 150+rnd(50), atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT  ? 500 : 300+rnd(100), 0, player1->champimillis ? true : false);
-                particle_splash(PART_SMOKE, atk==ATK_ROQUETTES_SHOOT ? 5 : 9, 1300, v, 0x333333, 25.0f,  atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT ? 250+rnd(75) : 150+rnd(50), atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT  ? 800 : 600+rnd(100), 0, player1->champimillis ? true : false);
+                particle_splash(PART_SMOKE, atk==ATK_ROQUETTES_SHOOT ? 5 : 9, 2000, v, 0x333333, 40.0f, 150+rnd(50), 300+rnd(100), 0, player1->champimillis ? true : false);
+                particle_splash(PART_SMOKE, atk==ATK_ROQUETTES_SHOOT ? 5 : 9, 1300, v, 0x333333, 25.0f, 150+rnd(50), 600+rnd(100), 0, player1->champimillis ? true : false);
                 particle_splash(PART_SPARK, atk==ATK_ROQUETTES_SHOOT ? 7 : 10, 300, v, owner->steromillis ? 0xFF4444 : 0xFFBB55,  1.7f+rnd(2), 3500, 3500, 0, player1->champimillis ? true : false);
-                loopi(lookupmaterial(v)&MAT_WATER ? 1 : 3) particle_splash(PART_FLAME1+rnd(2), atk==ATK_ROQUETTES_SHOOT ? 9 : 17, atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT ? 130+rnd(50) : 80+rnd(40), v, owner->steromillis ? 0xFF4444 : atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT ? 0x6A4A3A : i==0 ? 0x383838: i==1 ? 0x474747: 0x604930, 9.f+rnd(6), atk==ATK_KAMIKAZE_SHOOT ? 1200+rnd(700): atk==ATK_ROQUETTES_SHOOT ? 300+rnd(150) : 400+rnd(200), atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT ? 1200 : 800, 1, player1->champimillis ? true : false);
+                loopi(lookupmaterial(v)&MAT_WATER ? 1 : 3) particle_splash(PART_FLAME1+rnd(2), atk==ATK_ROQUETTES_SHOOT ? 9 : 17, 80+rnd(40), v, owner->steromillis ? 0xFF4444 : i==0 ? 0x383838 : i==1 ? 0x474747: 0x604930, 9.f+rnd(6), atk==ATK_ROQUETTES_SHOOT ? 300+rnd(150) : 400+rnd(200), 800, 1, player1->champimillis ? true : false);
+
                 particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFF5500, 10.0f, player1->champimillis ? true : false);
                 particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFFFFFF, 20.0f, player1->champimillis ? true : false);
+
+                vec debrisorigin = vec(v).sub(vec(vel).mul(15));
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS, 5000);
 
                 if((lookupmaterial(v)&MAT_WATER) == MAT_WATER)
@@ -719,16 +721,45 @@ namespace game
                 }
             }
             break;
+
+            case ATK_KAMIKAZE_SHOOT:
+            case ATK_ASSISTXPL_SHOOT:
+            {
+                if(camera1->o.dist(v) >= 300) playsound(S_EXPLOSIONLOIN, &v, NULL, 0, 0, 100, -1, 1200);
+
+                loopi(10)
+                {
+                    vec pos = vec(v).add(vec(rnd(35)-rnd(70), rnd(35)-rnd(70), rnd(35)-rnd(70)));
+                    particle_splash(PART_SMOKE, 4, atk==ATK_KAMIKAZE_SHOOT ? 5000 : 3000, pos, 0x333333, 60.f, 200+rnd(75), 100, 0, player1->champimillis ? true : false);
+                    particle_splash(PART_SMOKE, 3, atk==ATK_KAMIKAZE_SHOOT ? 3000 : 2000, pos, 0x151515, 40.f, 200+rnd(75), 250, 0, player1->champimillis ? true : false);
+                    particle_splash(PART_SPARK, 6, 300, pos, owner->steromillis ? 0xFF4444 : 0xFFBB55,  1.7f+rnd(2), 3500, 3500, 0, player1->champimillis ? true : false);
+                    loopi(lookupmaterial(v)&MAT_WATER ? 1 : 3) particle_splash(PART_FLAME1+rnd(2), 6, 130+rnd(50), pos, owner->steromillis ? 0xFF4444 : i==0 ? 0x383838: i==1 ? 0x474747 : 0x6A4A3A, 9.f+rnd(6), 1200+rnd(700), 1200, 1, player1->champimillis ? true : false);
+                }
+
+                particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFF5500, 10.0f, player1->champimillis ? true : false);
+                particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFFFFFF, 20.0f, player1->champimillis ? true : false);
+
+                vec debrisorigin = vec(v).sub(vec(vel).mul(15));
+                loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS, 5000);
+                adddynlight(safe ? v : debrisorigin, 7*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 80, 40, L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
+                adddynlight(safe ? v : debrisorigin, 4*attacks[atk].exprad, vec(1.2f, 0.4f, 0.0f), 80, 40, L_VOLUMETRIC|L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.0f, 0.0f, 1.5f));
+
+                if((lookupmaterial(v)&MAT_WATER) == MAT_WATER)
+                {
+                    particle_splash(PART_EAU, 50, 200, v, 0x18181A, 12.0f+rnd(14), 600, 300);
+                    particle_splash(PART_BULLE, 15, 150, v, 0x18181A, 4.0f+rnd(8), 300, 150);
+                    playsound(S_EXPLOSIONAVECEAU, &v, 0, 0, 0 , 100, -1, 350);
+                }
+            }
+            break;
+
             case ATK_NUKE_SHOOT:
             {
                 playsound(S_NUKE);
-                vec debrisorigin = vec(v).sub(vec(vel).mul(15));
-                adddynlight(safe ? v : debrisorigin, 7*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 300, 40, L_NOSHADOW, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
-                adddynlight(safe ? v : debrisorigin, 5*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 300, 40, L_NOSHADOW|L_VOLUMETRIC, attacks[atk].exprad/2, vec(0.0f, 0.0f, 1.5f));
+
                 loopi(50)
                 {
-                    vec pos = vec(v).add(vec(rnd(200), rnd(200), rnd(200)));
-                    pos.sub(vec(rnd(200), rnd(200), rnd(200)));
+                    vec pos = vec(v).add(vec(rnd(200)-rnd(400), rnd(200)-rnd(400), rnd(200)-rnd(400)));
                     particle_splash(PART_SMOKE, 1, 2000,  pos, 0x212121, 150.0f, 700, 70, 0, player1->champimillis ? true : false);
                     particle_splash(PART_SMOKE, 1, 15000, pos, 0x222222, 200.0f,  35, 300, 0, player1->champimillis ? true : false);
                     particle_splash(PART_SMOKE, 2, 5000,  pos, 0x333333, 250.0f, 1000, 500, 0, player1->champimillis ? true : false);
@@ -736,18 +767,27 @@ namespace game
                     particle_splash(PART_FLAME1+rnd(2),  3, 1000, pos, owner->steromillis ? 0xFF0000 : 0x224400, 35+rnd(15), 800, 300, 0, player1->champimillis ? true : false);
                     particle_splash(PART_FLAME1+rnd(2),  3, 1000, pos, owner->steromillis ? 0xFF0000 : 0xFF2222, 35+rnd(15), 800, 300, 0, player1->champimillis ? true : false);
                 }
+
                 loopi(3) particle_fireball(v, 350, PART_ONDECHOC, 300, 0xFFCCAA, 800.0f, player1->champimillis ? true : false);
+
+                vec debrisorigin = vec(v).sub(vec(vel).mul(15));
+                adddynlight(safe ? v : debrisorigin, 7*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 300, 40, L_NOSHADOW, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
+                adddynlight(safe ? v : debrisorigin, 5*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 300, 40, L_NOSHADOW|L_VOLUMETRIC, attacks[atk].exprad/2, vec(0.0f, 0.0f, 1.5f));
             }
             break;
+
             case ATK_ARTIFICE_SHOOT:
             {
                 playsound(S_EXPLOSIONARTIFICE, &v, 0, 0, 0 , 100, -1, 350);
                 if(camera1->o.dist(v) >= 300) playsound(S_ARTIFICELOIN, &v, NULL, 0, 0, 100, -1, 1000);
+
+                particle_splash(PART_FLAME1+rnd(2), 5, 40, v, 0xFFC864, 5, 800, 1600, 0, player1->champimillis ? true : false);
+                loopi(4) particle_splash(PART_GLOWSPARK, 16+rnd(10), 200+rnd(200), v, owner->steromillis ? 0xFF0000 : rnd(16777215),  0.4f+(rnd(5)/10.f), 500+rnd(300), 5000+rnd(3000), 2, player1->champimillis ? true : false);
+
                 vec debrisorigin = vec(v).sub(vec(vel).mul(5));
                 adddynlight(safe ? v : debrisorigin, 7*attacks[atk].exprad, vec(1+rnd(4), 1+rnd(4), 1+rnd(4)), 80, 40, 0, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
                 adddynlight(safe ? v : debrisorigin, 4*attacks[atk].exprad, vec(rnd(15)/10.0f, rnd(15)/10.0f, rnd(15)/10.0f), 80, 40, L_VOLUMETRIC|L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.0f, 0.0f, 1.5f));
-                particle_splash(PART_FLAME1+rnd(2),  5,  40, v, 0xFFC864, 20,  800, 1600, 0, player1->champimillis ? true : false);
-                loopi(4) particle_splash(PART_GLOWSPARK, 16+rnd(10), 200+rnd(200), v, owner->steromillis ? 0xFF0000 : rnd(16777215),  0.2f+(rnd(5)/10.f), 500+rnd(300), 5000+rnd(3000), 2, player1->champimillis ? true : false);
+
                 if(lookupmaterial(v)&MAT_WATER)
                 {
                     particle_splash(PART_EAU, 50, 200, v, 0x18181A, 12.0f+rnd(14), 600, 300);
@@ -756,19 +796,23 @@ namespace game
                 }
             }
             break;
+
             case ATK_M32_SHOOT:
             {
                 playsound(S_EXPLOSIONGRENADE, &v, 0, 0, 0 , 100, -1, 350);
                 if(camera1->o.dist(v) >= 300) playsound(S_EXPLOSIONLOIN, &v, NULL, NULL, 0, 0, 100, -1, 1200);
-                vec debrisorigin = vec(v).sub(vec(vel).mul(5));
-                adddynlight(v, 7*attacks[atk].exprad, vec(0.0f, 3.0f, 9.0f), 80, 40, L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
-                adddynlight(v, 5*attacks[atk].exprad, vec(0.0f, 0.4f, 1.2f), 80, 40, L_VOLUMETRIC|L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.0f, 0.0f, 1.5f));
+
                 loopi(3) particle_fireball(v, 40+rnd(50), PART_PLASMA, 300, owner->steromillis ? 0xFF0000 : 0xFFFFFF, 1.0f, player1->champimillis ? true : false);
                 loopi(3) particle_splash(PART_SPARK, 8, 150+rnd(150), v, owner->steromillis ? 0xFF0000 : 0xFFFFFF,  2.0f+rnd(2), 1500+rnd(2250), 1500+rnd(2250), 0, player1->champimillis ? true : false);
                 loopi(2) particle_splash(PART_SMOKE, 7, 1300+rnd(800), v, 0x555555, 40.0f, 150+rnd(150), 300+rnd(700), 0, player1->champimillis ? true : false);
                 particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFF5500, 10.0f, player1->champimillis ? true : false);
                 particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFFFFFF, 20.0f, player1->champimillis ? true : false);
+
+                vec debrisorigin = vec(v).sub(vec(vel).mul(5));
+                adddynlight(v, 7*attacks[atk].exprad, vec(0.0f, 3.0f, 9.0f), 80, 40, L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
+                adddynlight(v, 5*attacks[atk].exprad, vec(0.0f, 0.4f, 1.2f), 80, 40, L_VOLUMETRIC|L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.0f, 0.0f, 1.5f));
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS, 5000);
+
                 if(lookupmaterial(v)&MAT_WATER)
                 {
                     particle_splash(PART_EAU, 50, 200, v, 0x18181A, 12.0f+rnd(14), 600, 300);
@@ -777,6 +821,7 @@ namespace game
                 }
             }
             break;
+
             case ATK_MINIGUN_SHOOT:
             case ATK_AK47_SHOOT:
             case ATK_UZI_SHOOT:
@@ -1188,6 +1233,7 @@ namespace game
         switch(atk)
         {
             case ATK_PULSE_SHOOT:
+                if(d->type==ENT_PLAYER) sound = S_DEMARRAGEPLASMA;
                 particle_flare(d->muzzle, d->muzzle, 140, PART_PULSE_MUZZLE_FLASH, d->steromillis ? 0xFF4444 : d->aptisort2 && d->aptitude==APT_MAGICIEN ? 0xFF44FF : 0xFF7911, d==hudplayer() ? zoom ? 1.0f : 2.25f : 3.f, d, player1->champimillis ? true : false);
                 if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 140, PART_PULSE_MUZZLE_FLASH, 0xFF4444, zoom ? 1.50f : 5.50f, d, player1->champimillis ? true : false);
                 adddynlight(hudgunorigin(gun, d->o, to, d), 100, vec(1.25f, 0.2f, 0.0f), 40, 2, DL_FLASH, 0, vec(1.25f, 0.2f, 0.0f), d);
@@ -1397,16 +1443,16 @@ namespace game
         switch(sound)
         {
             case S_FLAMEATTACK:
-            case S_MEDIGUN:
             case S_GAU8:
+            case S_DEMARRAGEPLASMA:
                 if(d->attacksound >= 0) looped = true;
                 d->attacksound = sound;
-                d->attackchan = playsound(sound, d==hudplayer() ? NULL : &d->o, NULL, 0, -1, 100, d->attackchan, 300);
-                return;
+                d->attackchan = playsound(sound, d==hudplayer() ? NULL : &d->o, NULL, 0, -1, atk==ATK_GAU8_SHOOT ? 75 : 50, d->attackchan, atk==ATK_GAU8_SHOOT ? 600 : 350);
+                if(sound==S_GAU8 || sound==S_FLAMEATTACK) return;
             default:
                 {
                     if(d==hudplayer()) playsound(attacks[atk].sound, NULL);
-                    else playsound(attacks[atk].sound, &d->o, NULL, 0, 0 , 50, -1, atk==ATK_ASSISTXPL_SHOOT || atk==ATK_KAMIKAZE_SHOOT ? 600 : 350);
+                    else playsound(attacks[atk].sound, &d->o, NULL, 0, 0, atk==ATK_ASSISTXPL_SHOOT || atk==ATK_KAMIKAZE_SHOOT ? 75 : 50, -1, atk==ATK_ASSISTXPL_SHOOT || atk==ATK_KAMIKAZE_SHOOT ? 600 : 350);
                 }
         }
 
@@ -1520,14 +1566,14 @@ namespace game
         {
             switch(d->gunselect)
             {
-                case GUN_GLOCK: d->gunwait=250; break;
-                case GUN_SPOCKGUN: d->gunwait=325; break;
-                case GUN_HYDRA: d->gunwait=570; break;
-                case GUN_SKS: d->gunwait=570; break;
-                case GUN_S_CAMPOUZE: d->gunwait=650; break;
+                case GUN_GLOCK: d->gunwait=300; break;
+                case GUN_SPOCKGUN: d->gunwait=375; break;
+                case GUN_HYDRA: d->gunwait=515; break;
+                case GUN_SKS: d->gunwait=620; break;
+                case GUN_S_CAMPOUZE: d->gunwait=700; break;
             }
             if(d->aptisort3 && d->aptitude==APT_PRETRE) d->gunwait/=2.5f;
-            d->gunwait-=(d->skill*1.5f)+rnd(50); //+ Le bot est skillé + il tire vite + petit facteur aléatoire
+            d->gunwait-=(d->skill*2); //+ Le bot est skillé + il tire vite + petit facteur aléatoire
         }
 
         switch(d->gunselect)
@@ -1784,6 +1830,9 @@ namespace game
                 break;
             case S_GAU8:
                 atk = ATK_GAU8_SHOOT;
+                break;
+            case S_DEMARRAGEPLASMA:
+                atk = ATK_PULSE_SHOOT;
                 break;
             default:
                 return;

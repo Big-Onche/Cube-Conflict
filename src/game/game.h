@@ -197,7 +197,7 @@ enum
 
     //Armes
     S_GLOCK, S_UZI, S_MINIGUN, S_MOSSBERG, S_EPEEIDLE, S_EPEEATTACK, S_SMAW, S_FAMAS, S_SPOCKGUN, S_SV98, S_FELECTRIQUE, S_LANCEGRENADE,
-    S_ARTIFICE, S_FLAMEATTACK, S_NUKELAUNCH, S_FUSILPLASMA, S_EXPLOSIONARTIFICE, S_EXPLOSION, S_EXPLOSIONGRENADE, S_NUKE, S_KAMIKAZEBOOM, S_ASSISTBOOM,
+    S_ARTIFICE, S_FLAMEATTACK, S_NUKELAUNCH, S_FUSILPLASMA, S_DEMARRAGEPLASMA, S_EXPLOSIONARTIFICE, S_EXPLOSION, S_EXPLOSIONGRENADE, S_NUKE, S_KAMIKAZEBOOM, S_ASSISTBOOM,
     S_EXPLOSIONAVECEAU,
     S_ARBALETE, S_AK47, S_GRAP1, S_MARTEAUBAN, S_MASTERSWORD, S_FLEAU, S_GAU8, S_MINIROQUETTE, S_CAMPOUZE, S_MEDIGUN, S_HYDRA, S_SKS,
     S_EAU_GLOCK, S_EAU_UZI, S_EAU_MINIGUN, S_EAU_MOSSBERG, S_EAU_CORPSACORPS, S_EAU_SMAW, S_EAU_FAMAS, S_EAU_SPOCKGUN, S_EAU_SV98, S_EAU_FELECTRIQUE, S_EAU_LANCEGRENADE,
@@ -355,9 +355,9 @@ enum
 static struct itemstat { int add, max, sound; const char *name; int icon, info; } itemstats[] =
 {
     {15,    60,    S_ITEMAMMO,   "FUSIL ELECTRIQUE", HICON_SIZE, GUN_RAIL},
-    {25,   100,    S_ITEMAMMO,   "FUSIL PLASMA",     HICON_SIZE, GUN_PULSE},
+    {32,   128,    S_ITEMAMMO,   "FUSIL PLASMA",     HICON_SIZE, GUN_PULSE},
     {5,     20,    S_ITEMAMMO,   "SMAW",             HICON_SIZE, GUN_SMAW},
-    {75,   300,    S_ITEMAMMO,   "MINIGUN",          HICON_SIZE, GUN_MINIGUN},
+    {80,   320,    S_ITEMAMMO,   "MINIGUN",          HICON_SIZE, GUN_MINIGUN},
     {20,    80,    S_ITEMAMMO,   "SPOCKGUN",         HICON_SIZE, GUN_SPOCKGUN},
     {7,     28,    S_ITEMAMMO,   "M32",              HICON_SIZE, GUN_M32},
     {50,   200,    S_ITEMAMMO,   "LANCE-FLAMMES",    HICON_SIZE, GUN_LANCEFLAMMES},
@@ -794,8 +794,6 @@ struct gameent : dynent, gamestate
         freeeditinfo(edit);
         if(attackchan >= 0) stopsound(attacksound, attackchan);
         if(hurtchan >= 0) stopsound(S_HEARTBEAT, hurtchan);
-        //if(dansechan >= 0) stopsound(S_DANSE1+ai->customdanse, alarmchan);
-        //if(sortchan >= 0) stopsound(S_ASSISTALARM, alarmchan);
         if(alarmchan >= 0) stopsound(S_ASSISTALARM, alarmchan);
         if(ai) delete ai;
     }
