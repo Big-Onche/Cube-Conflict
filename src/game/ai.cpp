@@ -131,8 +131,8 @@ namespace ai
     bool cansee(gameent *d, vec &x, vec &y, vec &targ)
     {
         if(d->aptitude==APT_ESPION && d->aptisort3) return true;
-        aistate &b = d->ai->getstate();
-        if(canmove(d) && b.type != AI_S_WAIT)
+        //aistate &b = d->ai->getstate();
+        if(canmove(d))
             return getsight(x, d->yaw, d->pitch, y, targ, d->ai->views[2], d->ai->views[0], d->ai->views[1]);
         return false;
     }
@@ -141,11 +141,14 @@ namespace ai
 
     bool canshoot(gameent *d, int atk, gameent *e)
     {
-        if(attackrange(d, atk, e->o.squaredist(d->o)) && targetable(d, e))
-            return d->ammo[attacks[atk].gun] > 0 && lastmillis - d->lastaction + 1000 >= d->gunwait + d->gunaccel*(d->gunselect==GUN_PULSE ? 50 : d->gunselect== GUN_S_ROQUETTES ? 150 : 8) + attacks[d->gunselect].attackdelay; //
+        if(d->gunselect==GUN_MINIGUN || d->gunselect==GUN_PULSE || d->gunselect==GUN_S_ROQUETTES)
+        {
+            if(attackrange(d, atk, e->o.squaredist(d->o)) && targetable(d, e))
+                return d->ammo[attacks[atk].gun] > 0;
+        }
+        else if(attackrange(d, atk, e->o.squaredist(d->o)) && targetable(d, e)) return d->ammo[attacks[atk].gun] > 0 && lastmillis - d->lastaction >= d->gunwait;
 
         return false;
-        //return !d->ai->becareful && d->ammo[attacks[atk].gun] > 0 && lastmillis - d->lastaction >= d->gunwait;
     }
 
     bool hastarget(gameent *d, int atk, aistate &b, gameent *e, float yaw, float pitch, float dist)
@@ -1197,10 +1200,9 @@ namespace ai
             float yaw, pitch;
             getyawpitch(dp, ep, yaw, pitch);
             fixrange(yaw, pitch);
-            bool insight = cansee(d, dp, ep), hasseen = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*150),
-                quick = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= skmod+30;
+            bool insight = cansee(d, dp, ep), hasseen = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*15);
             if(insight) d->ai->enemyseen = lastmillis;
-            if(idle || insight || hasseen || quick)
+            if(idle || insight || hasseen)
             {
                 float sskew = insight || d->skill > 100 ? 1.5f : (hasseen ? 1.f : 0.5f);
                 if(insight && lockon(d, atk, e, 16))
@@ -1211,7 +1213,7 @@ namespace ai
                     d->ai->becareful = false;
                 }
                 scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, sskew);
-                if(insight || quick)
+                if(insight || (hasseen && (d->gunselect==GUN_PULSE || d->gunselect==GUN_MINIGUN)))
                 {
                     if(canshoot(d, atk, e) && hastarget(d, atk, b, e, yaw, pitch, dp.squaredist(ep)))
                     {
