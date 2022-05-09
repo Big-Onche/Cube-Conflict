@@ -1564,16 +1564,7 @@ namespace game
 
         if(d->aitype==AI_BOT && (d->gunselect==GUN_GLOCK || d->gunselect==GUN_SPOCKGUN || d->gunselect==GUN_HYDRA || d->gunselect==GUN_SKS || d->gunselect==GUN_S_CAMPOUZE))
         {
-            switch(d->gunselect)
-            {
-                case GUN_GLOCK: d->gunwait=300; break;
-                case GUN_SPOCKGUN: d->gunwait=375; break;
-                case GUN_HYDRA: d->gunwait=515; break;
-                case GUN_SKS: d->gunwait=620; break;
-                case GUN_S_CAMPOUZE: d->gunwait=700; break;
-            }
-            if(d->aptisort3 && d->aptitude==APT_PRETRE) d->gunwait/=2.5f;
-            d->gunwait-=(d->skill*2); //+ Le bot est skillé + il tire vite + petit facteur aléatoire
+            switch(rnd(d->gunselect==GUN_GLOCK || d->gunselect==GUN_SPOCKGUN || d->gunselect==GUN_HYDRA ? 5 : 15)) {case 0: d->gunwait+=(d->aptitude==APT_PRETRE && d->aptisort3 ? 500 : 1200)/nbfps;}
         }
 
         switch(d->gunselect)
@@ -1581,12 +1572,12 @@ namespace game
             case GUN_MINIGUN:
             case GUN_PULSE:
             case GUN_S_ROQUETTES:
-                if(!d->attacking) d->gunselect==GUN_PULSE ? d->gunaccel=4 : d->gunselect == GUN_S_ROQUETTES ? d->gunaccel=3 : d->gunaccel=12;
+                if(!d->attacking) d->gunselect==GUN_PULSE ? d->gunaccel=4 : d->gunselect==GUN_S_ROQUETTES ? d->gunaccel=3 : d->gunaccel=12;
                 break;
             default: d->gunaccel=0;
         }
 
-        if(attacktime < d->gunwait + d->gunaccel*(d->gunselect==GUN_PULSE ? 50 : d->gunselect== GUN_S_ROQUETTES ? 150 : 8) + (d==player1 ? 0 : attacks[d->gunselect].attackdelay)) return;
+        if(attacktime < d->gunwait + d->gunaccel*(d->gunselect==GUN_PULSE ? 50 : d->gunselect==GUN_S_ROQUETTES ? 150 : 8) + (d==player1 ? 0 : attacks[d->gunselect].attackdelay)) return;
         d->gunwait = 0;
 
         if(d->aptitude==APT_KAMIKAZE)

@@ -141,13 +141,23 @@ namespace ai
 
     bool canshoot(gameent *d, int atk, gameent *e)
     {
-        if(d->gunselect==GUN_MINIGUN || d->gunselect==GUN_PULSE || d->gunselect==GUN_S_ROQUETTES)
+        if(attackrange(d, atk, e->o.squaredist(d->o)) && targetable(d, e))
         {
-            if(attackrange(d, atk, e->o.squaredist(d->o)) && targetable(d, e))
-                return d->ammo[attacks[atk].gun] > 0;
+            switch(d->gunselect)
+            {
+                case GUN_MINIGUN:
+                case GUN_PULSE:
+                case GUN_S_ROQUETTES:
+                case GUN_GLOCK:
+                case GUN_SPOCKGUN:
+                case GUN_SKS:
+                case GUN_HYDRA:
+                case GUN_S_CAMPOUZE:
+                    return d->ammo[attacks[atk].gun] > 0;
+                    break;
+                default: return d->ammo[attacks[atk].gun] > 0 && lastmillis - d->lastaction >= d->gunwait;
+            }
         }
-        else if(attackrange(d, atk, e->o.squaredist(d->o)) && targetable(d, e)) return d->ammo[attacks[atk].gun] > 0 && lastmillis - d->lastaction >= d->gunwait;
-
         return false;
     }
 
@@ -350,7 +360,7 @@ namespace ai
 
     bool badhealth(gameent *d)
     {
-        if(d->health<85 && d->health-d->skill<60) return true;
+        if(d->health < 750) return true;
         else return false;
     }
 
@@ -369,6 +379,22 @@ namespace ai
             default:
                 return false;
         }
+    }
+
+    bool needshield(gameent *d)
+    {
+        switch(d->aptitude)
+        {
+            case APT_VAMPIRE:
+            case APT_FAUCHEUSE:
+            case APT_NINJA:
+            case APT_CAMPEUR:
+                if(d->armour<1500) return true;
+            break;
+            default:
+                if(d->armour<750) return true;
+        }
+        return false;
     }
 
     bool enemy(gameent *d, aistate &b, const vec &pos, float guard = SIGHTMIN, int pursue = 0)
@@ -612,7 +638,7 @@ namespace ai
 
         if(!hasgoodammo(d) || d->health < 750)
             items(d, b, interests);
-        else
+        else if(needshield(d) || needmana(d))
         {
             static vector<int> nearby;
             nearby.setsize(0);
@@ -624,8 +650,8 @@ namespace ai
                 if(d->canpickup(e.type, d->aptitude, d->armourtype)) tryitem(d, e, id, b, interests);
             }
         }
+        if(m_teammode && (d->aptitude==APT_MEDECIN || d->aptitude==APT_JUNKIE)) assist(d, b, interests);
         if(cmode) cmode->aifind(d, b, interests);
-        if(m_teammode) assist(d, b, interests);
         return parseinterests(d, b, interests, override);
     }
 
