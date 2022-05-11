@@ -1304,7 +1304,7 @@ namespace game
             case ATK_MOSSBERG_SHOOT:
             case ATK_HYDRA_SHOOT:
                 {
-                    if(!local) createrays(gun, from, to, d);
+                    if(!local) createrays(gun, d->aptitude==APT_ESPION && d->aptisort2 ? hudgunorigin(gun, d->o, to, d) : from, to, d);
                     loopi(atk==ATK_HYDRA_SHOOT ? 3 : 2) spawnbouncer(d->balles, d->balles, d, BNC_CARTOUCHES, bnclifetime+rnd(bnclifetime));
                     particle_flare(d->muzzle, d->muzzle, 140, PART_NORMAL_MUZZLE_FLASH, d->steromillis ? 0xFF2222 : d->aptisort2 && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xCCAAAA,  d==hudplayer() ? zoom ? 1.25f : 3.50f : 4.5f, d, player1->champimillis ? true : false);
                     if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 140, PART_NORMAL_MUZZLE_FLASH, 0xFF2222, d==hudplayer() ? zoom ? 2.00f : 5.5f : 6.5f, d, player1->champimillis ? true : false);
@@ -1317,7 +1317,7 @@ namespace game
                         particle_splash(PART_SPARK, 9, 60, rays[i], d->steromillis ? 0xFF2222 : 0xAA1100, 0.4, 150, 100, 0, player1->champimillis ? true : false);
                         particle_splash(PART_SMOKE, 3, 500+rnd(300), rays[i], 0x797979, 0.2f, 35, 300, 2, player1->champimillis ? true : false);
                         particle_splash(PART_SMOKE, 3, 275+rnd(275), rays[i], 0x553915, 0.15f, 35, 300, 2, player1->champimillis ? true : false);
-                        particle_flare(d->muzzle, rays[i], 30, PART_POMPE_SIDE, d->steromillis ? 0xFF2222 : 0xFFFF22, 0.2f, d, player1->champimillis ? true : false);
+                        particle_flare(d->aptitude==APT_ESPION && d->aptisort2 ? hudgunorigin(gun, d->o, to, d) : d->muzzle, rays[i], 30, PART_POMPE_SIDE, d->steromillis ? 0xFF2222 : 0xFFFF22, 0.2f, d, player1->champimillis ? true : false);
                         pompehit(from, rays[i]);
                         if(d!=hudplayer()) sound_nearmiss(S_FLYBY, from, rays[i]);
                     }
@@ -1370,17 +1370,19 @@ namespace game
                 if(d->type==ENT_PLAYER) sound = S_FLAMEATTACK;
                 loopi(attacks[atk].rays)
                 {
+                    vec origin = d->aptitude==APT_ESPION && d->aptisort2 ? hudgunorigin(gun, d->o, to, d) : d->muzzle;
+
                     vec irays(rays[i]);
-                    irays.sub(d->muzzle);
+                    irays.sub(origin);
                     irays.normalize().mul(1550.0f);
 
                     switch(rnd(5))
                     {
-                        case 0: particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x881111 :  0x604930, (7.f+rnd(16))/10.f, 100, 1, player1->champimillis ? true : false); flamehit(from, rays[i]); break;
-                        case 1: particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x770000 :  0x474747, (7.f+rnd(16))/10.f, 100, 1, player1->champimillis ? true : false); flamehit(from, rays[i]); break;
-                        case 2: particle_flying_flare(d->muzzle, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x991111 :  0x383838, (7.f+rnd(16))/10.f, 100, 1, player1->champimillis ? true : false); flamehit(from, rays[i]); break;
+                        case 0: particle_flying_flare(origin, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x881111 :  0x604930, (7.f+rnd(16))/10.f, 100, 1, player1->champimillis ? true : false); flamehit(from, rays[i]); break;
+                        case 1: particle_flying_flare(origin, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x770000 :  0x474747, (7.f+rnd(16))/10.f, 100, 1, player1->champimillis ? true : false); flamehit(from, rays[i]); break;
+                        case 2: particle_flying_flare(origin, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x991111 :  0x383838, (7.f+rnd(16))/10.f, 100, 1, player1->champimillis ? true : false); flamehit(from, rays[i]); break;
                         default:
-                            particle_flying_flare(d->muzzle, irays, 1100, PART_SMOKE, 0x111111, (10.f+rnd(18))/10.f, -20, 1, player1->champimillis ? true : false);
+                            particle_flying_flare(origin, irays, 1100, PART_SMOKE, 0x111111, (10.f+rnd(18))/10.f, -20, 1, player1->champimillis ? true : false);
                             adddynlight(hudgunorigin(gun, d->o, irays, d), 50, vec(0.40f, 0.2f, 0.1f), 100, 100, L_NODYNSHADOW, 10, vec(0.50f, 0, 0), d);
                             switch(rnd(2)){case 0: if(d!=hudplayer()) sound_nearmiss(S_FLYBYFLAME, from, rays[i]);}
                     }
@@ -1549,11 +1551,11 @@ namespace game
         else if((o = intersectclosest(from, to, d, margin, dist)))
         {
             shorten(from, to, dist);
-            if(atk==ATK_RAIL_SHOOT) railhit(from, to, d->muzzle);
+            if(atk==ATK_RAIL_SHOOT) railhit(from, to, d->aptitude==APT_ESPION && d->aptisort2 ? hudgunorigin(GUN_RAIL, d->o, to, d) : d->muzzle);
 
             hitpush(attacks[atk].damage, o, d, from, to, atk, 1);
         }
-        else if(atk==ATK_RAIL_SHOOT) railhit(from, to, d->muzzle, true);
+        else if(atk==ATK_RAIL_SHOOT) railhit(from, to, d->aptitude==APT_ESPION && d->aptisort2 ? hudgunorigin(GUN_RAIL, d->o, to, d) : d->muzzle, true);
     }
 
     float kickfactor = 2.5f;
