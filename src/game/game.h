@@ -416,7 +416,7 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound
     { GUN_HYDRA,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_HYDRA,        S_HYDRA_LOIN, S_RIFLELOIN,     4,  315,   75, 300, 300, 0,    0,  15,  600, 15,    20,   0, 0, 0},
     { GUN_SV98,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_SV98,         S_SV98_LOIN, S_RIFLELOIN,      2, 1500,  900,   1, 200, 0, 4500,  30, 8000,  1,    80,   7, 0, 0},
     { GUN_SKS,          ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_SKS,          S_SKS_LOIN, S_RIFLELOIN,      10,  420,  500,   5, 125, 0, 3500,  25, 8000,  1,    50,   7, 0, 0},
-    { GUN_ARBALETE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_ARBALETE,     S_NULL, S_NULL,                5,  900,  850,  10,  90, 0, 2000,   7, 8000,  1,    20,   3, 20000, 0},
+    { GUN_ARBALETE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_ARBALETE,     S_NULL, S_NULL,                5,  900,  850,  10,  90, 0, 2000,   7, 8000,  1,    20,   3, 45000, 0},
     { GUN_AK47,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_AK47,         S_AK47_LOIN, S_ARMESLOIN,     30,   92,  170,  60, 180, 0, 3000,   7, 8000,  1,    50,   5, 0, 0},
     { GUN_GRAP1,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GRAP1,        S_NULL, S_NULL,               12,  200,  250,  30, 300, 3, 1500,  -4, 8000,  1,  -600,  20, 0, 0},
     { GUN_ARTIFICE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_ARTIFICE,     S_ARTIFICE_LOIN, S_NULL,       3, 1100,  800,  35, 200, 0, 1200,  45,  520,  1,   500,  80, 250, 0},
