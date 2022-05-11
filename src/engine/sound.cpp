@@ -556,7 +556,7 @@ int maxsoundradius = 1000;
 bool updatechannel(soundchannel &chan)
 {
     if(!chan.slot) return false;
-    int vol = soundvol, pan = 255/2;
+    float volf = 1.0f, panf = 0.5f;
     if(chan.hasloc())
     {
         vec v;
@@ -572,15 +572,15 @@ bool updatechannel(soundchannel &chan)
             }
         }
         else if(chan.radius > 0) rad = maxsoundradius ? min(maxsoundradius, chan.radius) : chan.radius;
-        if(rad > 0) vol -= int(clamp(dist/rad, 0.0f, 1.0f)*soundvol); // simple mono distance attenuation
+        if(rad > 0) volf -= clamp(dist/rad, 0.0f, 1.0f); // simple mono distance attenuation
         if(stereo && (v.x != 0 || v.y != 0) && dist>0)
         {
             v.rotate_around_z(-camera1->yaw*RAD);
-            pan = int(255.9f*(0.5f - 0.5f*v.x/v.magnitude2())); // range is from 0 (left) to 255 (right)
+            panf = 0.5f - 0.5f*v.x/v.magnitude2(); // range is from 0 (left) to 1 (right)
         }
     }
-    vol = (vol*MIX_MAX_VOLUME*chan.slot->volume)/100/100;
-    vol = min(vol, MIX_MAX_VOLUME);
+    int vol = clamp(int(volf*soundvol*chan.slot->volume*(MIX_MAX_VOLUME/float(255*255)) + 0.5f), 0, MIX_MAX_VOLUME);
+    int pan = clamp(int(panf*255.9f), 0, 100);
     if(vol == chan.volume && pan == chan.pan) return false;
     chan.volume = vol;
     chan.pan = pan;
