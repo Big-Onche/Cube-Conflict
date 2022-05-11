@@ -751,8 +751,14 @@ namespace ai
                 {
                     case I_SANTE: wantsitem = badhealth(d); break;
                     case I_MANA:
-                        if(d->aptitude==APT_VAMPIRE) wantsitem = badhealth(d);
-                        else wantsitem = needmana(d);
+                        d->aptitude==APT_VAMPIRE ? wantsitem = badhealth(d) : wantsitem = needmana(d);
+                        break;
+                    case I_ARMUREASSISTEE:
+                    case I_BOUCLIEROR:
+                    case I_BOUCLIERMAGNETIQUE:
+                    case I_BOUCLIERFER:
+                    case I_BOUCLIERBOIS:
+                        wantsitem = needshield(d);
                         break;
                     default:
                         wantsitem = true;
@@ -1518,7 +1524,7 @@ namespace ai
                 switch(d->aptitude)
                 {
                     case APT_MAGICIEN: if(d->health<250+d->skill*2 && d->mana>=60) aptitude(d, 3); break;
-                    case APT_PRETRE: if(d->mana>30 && d->health<200+d->skill) aptitude(d, 2); break;
+                    case APT_PRETRE: if(d->mana>30 && d->health<(d->skill/3)) aptitude(d, 2); break;
                     case APT_SHOSHONE: if(d->mana>=100) aptitude(d, 2); break;
                     case APT_PHYSICIEN:
                         switch(rnd(100)) {case 0: if(d->mana>70) aptitude(d, 3);}

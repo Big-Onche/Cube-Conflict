@@ -768,14 +768,15 @@ struct ctfclientmode : clientmode
 						targets.add(e->clientnum);
 				}
 
-
+                if(targets.empty())
+                { // attack the flag
                     ai::interest &n = interests.add();
                     n.state = ai::AI_S_PURSUE;
                     n.node = ai::closestwaypoint(f.pos(), ai::SIGHTMIN, true);
                     n.target = j;
                     n.targtype = ai::AI_T_AFFINITY;
                     n.score = pos.squaredist(f.pos());
-
+                }
 			}
 		}
 	}
