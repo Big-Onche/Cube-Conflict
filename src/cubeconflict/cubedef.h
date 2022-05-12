@@ -15,21 +15,11 @@ static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precisio
     { 115,   85,   90,  1050, "chapeaux/crane",      "Faucheuse",    "Reaper",       "media/interface/hud/faucheuse.jpg"},  //7     APT_FAUCHEUSE
     {  90,   85,   85,  1050, "chapeaux/graduation", "Physicien",    "Physicist",    "media/interface/hud/physicien.jpg"},  //8     APT_PHYSICIEN
     { 100,   60,  130,  1250, "chapeaux/tente",      "Campeur",      "Camper",       "media/interface/hud/campeur.jpg"},    //9     APT_CAMPEUR
-    {  90,   85,  120,  1100, "chapeaux/melon",      "Espion",       "Espion",       "media/interface/hud/espion.jpg"},     //10    APT_ESPION
+    {  90,   85,  120,  1100, "chapeaux/melon",      "Espion",       "Spy",          "media/interface/hud/espion.jpg"},     //10    APT_ESPION
     {  85,  105,   85,   950, "chapeaux/saint",      "Prêtre",       "Priest",       "media/interface/hud/pretre.jpg"},     //11    APT_PRETRE
     { 100,  120,   60,  1050, "chapeaux/viking",     "Viking",       "Viking",       "media/interface/hud/viking.jpg"},     //12    APT_VIKING
     { 100,  110,   85,  1100, "chapeaux/champignon", "Junkie",       "Junkie",       "media/interface/hud/dealer.png"},     //13    APT_JUNKIE
     { 100,  100,   75,  1000, "chapeaux/indien",     "Shoshone",     "Shoshone",     "media/interface/hud/indien.jpg"},     //14    APT_SHOSHONE
-};
-
-//Définition des boucliers
-static const struct shieldsinfo { const char *bois, *fer, *gold, *magnetique, *hudbois, *hudfer, *hudgold, *hudmagnetique, *hudassistee; } shields[] =
-{
-    {"worldshield/bois/100", "worldshield/fer/100", "worldshield/or/100", "worldshield/magnetique/100", "hudshield/bois/100", "hudshield/fer/100", "hudshield/or/100", "hudshield/magnetique/100",  "hudshield/armureassistee/bleu"},
-    {"worldshield/bois/80",  "worldshield/fer/80",  "worldshield/or/80",  "worldshield/magnetique/80",  "hudshield/bois/80",  "hudshield/fer/80",  "hudshield/or/80",  "hudshield/magnetique/80",   "hudshield/armureassistee/vert"},
-    {"worldshield/bois/60",  "worldshield/fer/60",  "worldshield/or/60",  "worldshield/magnetique/60",  "hudshield/bois/60",  "hudshield/fer/60",  "hudshield/or/60",  "hudshield/magnetique/60",   "hudshield/armureassistee/jaune"},
-    {"worldshield/bois/40",  "worldshield/fer/40",  "worldshield/or/40",  "worldshield/magnetique/40",  "hudshield/bois/40",  "hudshield/fer/40",  "hudshield/or/40",  "hudshield/magnetique/40",   "hudshield/armureassistee/orange"},
-    {"worldshield/bois/20",  "worldshield/fer/20",  "worldshield/or/20",  "worldshield/magnetique/20",  "hudshield/bois/20",  "hudshield/fer/20",  "hudshield/or/20",  "hudshield/magnetique/20",   "hudshield/armureassistee/rouge"},
 };
 
 //Définition des customisations
@@ -97,7 +87,6 @@ static const struct danceinfo { const char *dancename; int danceprice; } customs
     {"Raoult",      1500},
 };
 
-//Définition des boucliers
 static const struct costumeinfo { const char *village, *usine, *faille, *lune, *chateaux, *volcan; } costumes[] =
 {
     {"mapmodel/caisses/caissebois", "mapmodel/caisses/caisse1", "mapmodel/caisses/caissebois",  "mapmodel/rochers/pierre_fonce_esp",     "mapmodel/caisses/caissebois",  "mapmodel/distributeur"},
@@ -105,6 +94,8 @@ static const struct costumeinfo { const char *village, *usine, *faille, *lune, *
     {"mapmodel/panneau",            "mapmodel/caisses/caisse3", "mapmodel/panneau",             "mapmodel/caisses/caisse3",     "mapmodel/panneau",             "mapmodel/lampadaire"},
     {"mapmodel/arbres/arbre1",      "mapmodel/murjersay",       "mapmodel/arbres/arbre1",       "mapmodel/murjersay",           "mapmodel/arbres/arbre1",       "mapmodel/murjersay"},
 };
+//GFX
+extern const char *getshielddir(gameent *d, bool hud = false);
 
 //HUD
 extern bool suicided, holdflag;

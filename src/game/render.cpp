@@ -267,7 +267,7 @@ namespace game
          rendermodel(customstombes[d->customtombe].tombedir, ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED, d, NULL, 0, 0, fade); //DEBUG
     }
 
-    string bouclier, costumemdlname, curmapname;
+    string costumemdlname, curmapname;
 
     void renderplayer(gameent *d, const playermodelinfo &mdl, int color, int team, float fade, int flags = 0, bool mainpass = true)
     {
@@ -324,14 +324,7 @@ namespace game
         ////////Boucliers////////
         if(d->armour && d->state == CS_ALIVE && camera1->o.dist(d->o) <= maxmodelradiusdistance*10)
         {
-            switch(d->armourtype)
-            {
-                case A_YELLOW: {int shieldvalue = d->armour<=400 ? 4 : d->armour<=800 ? 3 : d->armour<=1200 ? 2 : d->armour<=1600 ? 1 : 0; formatstring(bouclier, shields[shieldvalue].gold);} break;
-                case A_GREEN: {int shieldvalue = d->armour<=250 ? 4 : d->armour<=500 ? 3 : d->armour<=750 ? 2 : d->armour<=1000 ? 1 : 0; formatstring(bouclier, shields[shieldvalue].fer);} break;
-                case A_BLUE: {int shieldvalue = d->armour<=150 ? 4 : d->armour<=300 ? 3 : d->armour<=450 ? 2 : d->armour<=600 ? 1 : 0; formatstring(bouclier, shields[shieldvalue].bois);} break;
-                case A_MAGNET: {int shieldvalue = d->armour<=300 ? 4 : d->armour<=600 ? 3 : d->armour<=900 ? 2 : d->armour<=1200 ? 1 : 0; formatstring(bouclier, shields[shieldvalue].magnetique);} break;
-            }
-            a[ai++] = modelattach("tag_shield", bouclier, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+            a[ai++] = modelattach("tag_shield", getshielddir(d), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
         ////////Boosts////////
         if(d->jointmillis) a[ai++] = modelattach("tag_boost1", "boosts/joint", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
@@ -714,17 +707,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape
             sway2.z += (swayup/floatdivfactor)*(fabs(sinf(steps)) - 1);
             if(d->armourtype==A_ASSIST || !zoom) sway2.add(swaydir).add(d->o);
 
-            string bouclier;
-            switch(d->armourtype)
-            {
-                case A_YELLOW: {int shieldvalue = d->armour<=400 ? 4 : d->armour<=800 ? 3 : d->armour<=1200 ? 2 : d->armour<=1600 ? 1 : 0; copystring(bouclier, shields[shieldvalue].hudgold);} break;
-                case A_GREEN: {int shieldvalue = d->armour<=250 ? 4 : d->armour<=500 ? 3 : d->armour<=750 ? 2 : d->armour<=1000 ? 1 : 0; copystring(bouclier, shields[shieldvalue].hudfer);} break;
-                case A_BLUE: {int shieldvalue = d->armour<=150 ? 4 : d->armour<=300 ? 3 : d->armour<=450 ? 2 : d->armour<=600 ? 1 : 0; copystring(bouclier, shields[shieldvalue].hudbois);} ;break;
-                case A_MAGNET: {int shieldvalue = d->armour<=300 ? 4 : d->armour<=600 ? 3 : d->armour<=900 ? 2 : d->armour<=1200 ? 1 : 0; copystring(bouclier, shields[shieldvalue].hudmagnetique);} break;
-                case A_ASSIST: {int shieldvalue = d->armour<=600 ? 4 : d->armour<=1200 ? 3 : d->armour<=1800 ? 2 : d->armour<=2400 ? 1 : 0; copystring(bouclier, shields[shieldvalue].hudassistee);} break;
-            }
-
-            rendermodel(bouclier, anim, sway2, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
+            rendermodel(getshielddir(d, true), anim, sway2, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
 
             if(d->armourtype!=A_ASSIST) return;
             modelattach a[2];
