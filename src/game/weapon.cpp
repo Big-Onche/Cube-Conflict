@@ -707,6 +707,7 @@ namespace game
                 if((lookupmaterial(v)&MAT_WATER)) playsound(S_EXPLOSIONAVECEAU, &v, 0, 0, 0 , 100, -1, 350);
                 if(camera1->o.dist(v) >= 300) playsound(S_EXPLOSIONLOIN, &v, NULL, NULL, 0, 0, 400, -1, 1200);
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS, 5000);
+                gfx::projexplosion(owner, v, vel, safe, atk);
                 break;
 
             case ATK_MINIGUN_SHOOT:
