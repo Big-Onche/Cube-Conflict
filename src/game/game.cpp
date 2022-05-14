@@ -1,6 +1,6 @@
 #include "game.h"
 #include "engine.h"
-#include "cubedef.h"
+#include "ccheader.h"
 
 string str_pseudovictime, str_pseudotueur, str_armetueur, str_pseudoacteur;
 float killdistance = 0;
@@ -791,12 +791,12 @@ namespace game
 
         switch(atk)
         {
-            case ATK_UZI_SHOOT: playsound(S_BLOHBLOH, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
+            //case ATK_UZI_SHOOT: playsound(S_BLOHBLOH, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
             //case ATK_FAMAS_SHOOT: playsound(S_FAMASLOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
             //case GUN_SMAW: playsound(S_BOOBARL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
             //case GUN_AK47: playsound(S_KALASHLOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
-            case ATK_ARTIFICE_SHOOT: playsound(S_ARTIFICELOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
-            case ATK_M32_SHOOT: playsound(S_GRENADELOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
+            //case ATK_ARTIFICE_SHOOT: playsound(S_ARTIFICELOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
+            //case ATK_M32_SHOOT: playsound(S_GRENADELOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
         }
 
         //////////////////////////////GRAPHISMES//////////////////////////////

@@ -1,5 +1,5 @@
 #include "game.h"
-#include "cubedef.h"
+#include "ccheader.h"
 
 VAR(n_ambiance, 0, 0, 8);
 VAR(n_map, 0, 0, 99);
@@ -843,6 +843,7 @@ namespace game
             case 3: name = "Lune"; break;
             case 4: name = "Chateaux"; break;
             case 5: name = "Volcan"; break;
+            case 77: name = "Entrainement"; break;
         }
         changemap(name, m_valid(nextmode) ? nextmode : (remote ? 1 : 0));
         fullbrightmodels = 0;

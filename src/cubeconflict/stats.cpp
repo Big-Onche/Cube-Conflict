@@ -1,6 +1,6 @@
-#include <climits>
-#include <cstdlib>
-#include "cubedef.h"
+//stats.cpp: where we manage stats, achievements and local saves
+
+#include "ccheader.h"
 #include "steam_api.h"
 
 using namespace std;

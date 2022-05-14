@@ -1,7 +1,7 @@
 // weapon.cpp: all shooting and effects code, projectile management
 #include "game.h"
 #include "engine.h"
-#include "cubedef.h"
+#include "ccheader.h"
 
 int lastshoot;
 
@@ -670,7 +670,7 @@ namespace game
             case ATK_GRAP1_SHOOT:
             case ATK_SPOCKGUN_SHOOT:
                 playsound(atk==ATK_GRAP1_SHOOT ? S_IMPACTGRAP1 : S_IMPACTALIEN, &v, 0, 0, 0 , 75, -1, 225);
-                gfx::energygunexplosion(owner, v, vel, safe, atk);
+                gfx::projgunexplosion(owner, v, vel, safe, atk);
                 break;
 
             case ATK_SMAW_SHOOT:
@@ -715,19 +715,11 @@ namespace game
             case ATK_UZI_SHOOT:
             case ATK_FAMAS_SHOOT:
             case ATK_GLOCK_SHOOT:
-            {
-                if(!(lookupmaterial(v)&MAT_WATER)) playsound(S_IMPACT, &v, 0, 0, 0 , 100, -1, 250);
-                particle_splash(PART_SPARK, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 12 : 9, 60, v, owner->steromillis ? 0xFF0000 : 0xFF6600, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.4 : 0.3f, 150, 100, 0, player1->champimillis ? true : false);
-                particle_splash(PART_SMOKE, 3, 600+rnd(300), v, 0x565656, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.35f : 0.3f, 25, 300, 2, player1->champimillis ? true : false);
-                particle_splash(PART_SMOKE, 6, 350+rnd(300), v, 0x552900, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.35f : 0.3f, 15, 300, 2, player1->champimillis ? true : false);
-            }
             case ATK_ARBALETE_SHOOT:
-            {
-                //playsound(S_IMPACT, &v, 0, 0, 0 , 100, -1, 250);
-                particle_splash(PART_SMOKE, 3, 600+rnd(300), v, 0x565656, 0.3f, 25, 300, 2, player1->champimillis ? true : false);
-                particle_splash(PART_SMOKE, 6, 350+rnd(300), v, 0x552900, 0.3f, 15, 300, 2, player1->champimillis ? true : false);
-            }
-            break;
+                if(!(lookupmaterial(v)&MAT_WATER) && atk!=ATK_ARBALETE_SHOOT) playsound(S_IMPACT, &v, 0, 0, 0 , 100, -1, 250);
+                gfx::projgunhit(owner, v, vel, safe, atk);
+                break;
+
             case ATK_SV98_SHOOT:
             case ATK_SKS_SHOOT:
             case ATK_GAU8_SHOOT:
@@ -738,11 +730,8 @@ namespace game
                     playsound(S_IMPACTLOURDLOIN, &v, 0, 0, 0 , 700, -1, 1000);
                     playsound(S_IMPACTSNIPE, &v, 0, 0, 0 , 100, -1, 300);
                 }
-                particle_splash(PART_SPARK, 12, 85, v, owner->steromillis ? 0xFF0000 : 0xFF5533, 0.7f,  400, 200, 0, player1->champimillis ? true : false);
-                particle_splash(PART_SMOKE,  4, 800+rnd(300), v, 0x414141, 0.4f, 25, 300, 2, player1->champimillis ? true : false);
-                particle_splash(PART_SMOKE,  4, 500+rnd(300), v, 0x442200, 0.4f, 15, 300, 2, player1->champimillis ? true : false);
+                gfx::projgunhit(owner, v, vel, safe, atk);
             }
-            break;
         }
 
         if(!local) return;

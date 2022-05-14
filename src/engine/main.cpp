@@ -1,7 +1,7 @@
 // main.cpp: initialisation & main loop
 
 #include "engine.h"
-#include "cubedef.h"
+#include "ccheader.h"
 #include "steam_api.h"
 
 #ifdef SDL_VIDEO_DRIVER_X11

@@ -1,5 +1,5 @@
 #include "game.h"
-#include "cubedef.h"
+#include "ccheader.h"
 
 extern int fog;
 

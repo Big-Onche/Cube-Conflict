@@ -1,10 +1,11 @@
-#include "game.h"
-#include "cubedef.h"
+//aptitudes.cpp: management of special abilities from certain classes
 
-//Commandes d'aptitudes (touches 1, 2 et 3)
+#include "game.h"
+#include "ccheader.h"
+
 namespace game
 {
-    void aptitude(gameent *d, int skill, bool send)
+    void aptitude(gameent *d, int skill, bool send) //Commandes d'aptitudes
     {
         if(d->state==CS_DEAD) return;
 
@@ -14,7 +15,7 @@ namespace game
         switch(skill)
         {
             case 1:
-                if(send)
+                if(send) //We send the shit to the server
                 {
                     if(!d->sort1pret || d->mana<sorts[neededdata].mana1) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
                     d->aptisort1 = sorts[neededdata].duree1;
@@ -23,7 +24,7 @@ namespace game
                     d->mana -= sorts[neededdata].mana1;
                     d->sort1pret = false;
                 }
-
+                //We recieve some shit from the server
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
                 if(d->aptitude!=APT_ESPION) d->sortchan = playsound(sorts[neededdata].sound1, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->sortchan, 300);
                 else
@@ -40,7 +41,8 @@ namespace game
 
                     d->sortchan = playsound(sorts[neededdata].sound1, &doublepos, NULL, 0, 0, 100, d->sortchan, 225);
                 }
-                break;
+                return;
+
             case 2:
                 if(send)
                 {
@@ -60,9 +62,8 @@ namespace game
                     loopi(1)particle_fireball(d->o,  50, PART_ONDECHOC, 300, 0xBBBBBB, 1.f);
                     particle_splash(PART_SMOKE, 7, 400, d->o, 0x666666, 15+rnd(5), 200, -10);
                 }
+                return;
 
-
-                break;
             case 3:
                 if(send)
                 {
@@ -84,30 +85,28 @@ namespace game
                     getsort = totalmillis;
                     playsound(S_SORTESP3);
                 }
-                break;
+                return;
         }
     }
 
-    void player1aptitude(int skill)
+    void player1aptitude(int ability)
     {
-        switch(skill)
+        switch(ability)
         {
             case 1:
                 switch(player1->aptitude)
                 {
                     case APT_KAMIKAZE: player1->gunselect = GUN_KAMIKAZE; playsound(S_WEAPLOAD); return;
-                    case APT_PRETRE: case APT_PHYSICIEN: case APT_MAGICIEN: case APT_SHOSHONE: case APT_ESPION: aptitude(player1, skill);
+                    case APT_PRETRE: case APT_PHYSICIEN: case APT_MAGICIEN: case APT_SHOSHONE: case APT_ESPION: aptitude(player1, ability);
                     default: return;
                 }
                 break;
             default:
-                if(player1->aptitude==APT_PRETRE || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || player1->aptitude==APT_KAMIKAZE) aptitude(player1, player1->aptitude==APT_KAMIKAZE ? 2 : skill);
+                if(player1->aptitude==APT_PRETRE || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || player1->aptitude==APT_KAMIKAZE) aptitude(player1, player1->aptitude==APT_KAMIKAZE ? 2 : ability);
         }
     }
 
-    ICOMMAND(aptitude1, "i", (), player1aptitude(1));
-    ICOMMAND(aptitude2, "i", (), player1aptitude(2));
-    ICOMMAND(aptitude3, "i", (), player1aptitude(3));
+    ICOMMAND(aptitude, "i", (int *ability), player1aptitude(*ability));
 
     void updatespecials(gameent *d) //Permet de réarmer les sorts en fonction de la durée de rechargement de ceux-ci
     {

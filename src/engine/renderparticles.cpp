@@ -1,7 +1,7 @@
 // renderparticles.cpp
 
 #include "engine.h"
-#include "cubedef.h"
+#include "ccheader.h"
 
 Shader *particleshader = NULL, *particlenotextureshader = NULL, *particlesoftshader = NULL, *particletextshader = NULL;
 

@@ -1,7 +1,7 @@
 // texture.cpp: texture slot management
 
 #include "engine.h"
-#include "cubedef.h"
+#include "ccheader.h"
 #include "SDL_image.h"
 
 #ifndef SDL_IMAGE_VERSION_ATLEAST

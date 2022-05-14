@@ -1,5 +1,7 @@
+//hud.cpp: not responsive hud
+
 #include "game.h"
-#include "cubedef.h"
+#include "ccheader.h"
 
 int message1, message2, message3, ctfmessage1, ctfmessage2, ctfmessage3, ctfmessage4, ctfmessage5, ctfmessage6;
 int message_streak1;

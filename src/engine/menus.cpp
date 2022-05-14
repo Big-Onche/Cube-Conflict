@@ -1,5 +1,5 @@
 #include "engine.h"
-#include "cubedef.h"
+#include "ccheader.h"
 
 ICOMMAND(getgravedir, "i", (int *graveID), result(customstombes[*graveID].tombemenudir));
 

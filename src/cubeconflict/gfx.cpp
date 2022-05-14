@@ -1,4 +1,6 @@
-#include "cubedef.h"
+//gfx.cpp: fancy and laggy graphics effects
+
+#include "ccheader.h"
 
 VARP(epilepsyfriendly, 0, 0, 1);
 
@@ -6,7 +8,7 @@ namespace gfx
 {
     bool champicolor = isconnected() ? game::hudplayer()->champimillis : false;
 
-    void energygunexplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk)
+    void projgunexplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk)
     {
         vec lightloc = vec(v).sub(vec(vel).mul(10));
 
@@ -146,7 +148,32 @@ namespace gfx
                     adddynlight(safe ? v : lightloc, 9*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 300, 40, L_NOSHADOW, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
                     adddynlight(safe ? v : lightloc, 6*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 300, 40, L_NOSHADOW|L_VOLUMETRIC, attacks[atk].exprad/2, vec(0.0f, 0.0f, 1.5f));
                 }
+                return;
+        }
+    }
 
+    void projgunhit(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk)
+    {
+        switch(atk)
+        {
+            case ATK_MINIGUN_SHOOT:
+            case ATK_AK47_SHOOT:
+            case ATK_UZI_SHOOT:
+            case ATK_FAMAS_SHOOT:
+            case ATK_GLOCK_SHOOT:
+            case ATK_ARBALETE_SHOOT:
+                if(atk!=ATK_ARBALETE_SHOOT)particle_splash(PART_GLOWSPARK, atk==ATK_MINIGUN_SHOOT || atk==ATK_AK47_SHOOT ? 12 : 9, 50, v, owner->steromillis ? 0xFF0000 : 0xFF8800, atk==ATK_MINIGUN_SHOOT || atk==ATK_AK47_SHOOT ? 0.3 : 0.2f, 150, 200, 0, champicolor);
+                particle_splash(PART_SMOKE, 3, 600+rnd(300), v, 0x565656, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.35f : 0.3f, 25, 300, 2, champicolor);
+                particle_splash(PART_SMOKE, 6, 350+rnd(300), v, 0x552900, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.35f : 0.3f, 15, 300, 2, champicolor);
+                return;
+
+            case ATK_SV98_SHOOT:
+            case ATK_SKS_SHOOT:
+            case ATK_GAU8_SHOOT:
+            case ATK_CAMPOUZE_SHOOT:
+                particle_splash(PART_SPARK, 12, 80, v, owner->steromillis ? 0xFF0000 : 0xFF5533, 0.6f,  400, 250, 0, champicolor);
+                particle_splash(PART_SMOKE,  4, 800+rnd(300), v, 0x414141, 0.4f, 25, 300, 2, champicolor);
+                particle_splash(PART_SMOKE,  4, 500+rnd(300), v, 0x442200, 0.4f, 15, 300, 2, champicolor);
                 return;
         }
     }

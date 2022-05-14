@@ -1,6 +1,6 @@
 #include "game.h"
 #include "engine.h"
-#include "cubedef.h"
+#include "ccheader.h"
 
 VARP(gamelength, 1, 10, 60);
 

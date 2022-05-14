@@ -1,7 +1,7 @@
 // client.cpp, mostly network related client game code
 
 #include "engine.h"
-#include "cubedef.h"
+#include "ccheader.h"
 
 ENetHost *clienthost = NULL;
 ENetPeer *curpeer = NULL, *connpeer = NULL;

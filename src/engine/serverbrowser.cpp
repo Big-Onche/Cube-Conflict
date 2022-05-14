@@ -1,5 +1,5 @@
 #include "engine.h"
-#include "cubedef.h"
+#include "ccheader.h"
 
 struct resolverthread
 {
