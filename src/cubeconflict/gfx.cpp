@@ -151,6 +151,37 @@ namespace gfx
         }
     }
 
+    void instantrayhit(const vec &from, const vec &to, const vec &muzzle, int atk)
+    {
+        vec dir = vec(from).sub(to).safenormalize();
+
+        switch(atk)
+        {
+            case ATK_RAIL_SHOOT:
+                particle_splash(PART_SPARK, 50, 150, to, 0xFF4400, 0.45f, 300, 30, 0, champicolor);
+                addstain(STAIN_RAIL_HOLE, to, dir, 2.0f);
+                addstain(STAIN_RAIL_GLOW, to, dir, 1.5f, 0xFF2200);
+                addstain(STAIN_RAIL_GLOW, to, dir, 2.5f, 0xFF8800);
+                adddynlight(vec(to).madd(dir, 4), 10, vec(1.00f, 0.5f, 0.0f), 225, 75);
+                return;
+
+            case ATK_MOSSBERG_SHOOT:
+            case ATK_HYDRA_SHOOT:
+                switch(rnd(3))
+                {
+                    case 0: addstain(STAIN_BALLE_1, to, dir, 0.4f); break;
+                    case 1: addstain(STAIN_BALLE_2, to, dir, 0.4f); break;
+                    case 2: addstain(STAIN_BALLE_3, to, dir, 0.4f); break;
+                }
+                addstain(STAIN_BALLE_GLOW, to, dir, 0.8f, 0x991100);
+                return;
+
+            case ATK_LANCEFLAMMES_SHOOT:
+                switch(rnd(2)){case 0: addstain(STAIN_BRULAGE, to, dir, 20.0f);}
+                return;
+        }
+    }
+
     string bouclier;
     const char *getshielddir(gameent *d, bool hud) //récupère l'id d'un bouclier
     {

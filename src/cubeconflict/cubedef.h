@@ -111,6 +111,7 @@ namespace gfx
 
     extern void energygunexplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk);
     extern void projexplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk);
+    extern void instantrayhit(const vec &from, const vec &to, const vec &muzzle, int atk);
     extern const char *getshielddir(gameent *d, bool hud = false);
 }
 
