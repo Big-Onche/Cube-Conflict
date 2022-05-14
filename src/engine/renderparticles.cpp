@@ -1073,20 +1073,9 @@ void regularsplash(int type, int color, int radius, int num, int fade, const vec
     splash(type, color, radius, num, fade, p, size, gravity, expand, upsplash);
 }
 
-static const struct colors{ int color; } rndcolor[] =
-{
-    {0xFF0000},
-    {0x00FF00},
-    {0x0000FF},
-    {0xFFFF00},
-    {0x00FFFF},
-    {0xFF00FF}
-};
-
 void particle_flying_flare(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity, int expand, bool randomcolor)
 {
-    if(randomcolor) color = rndcolor[rnd(6)].color;
-    newparticle(o, d, fade, type, color, size, gravity, expand);
+    newparticle(o, d, fade, type, randomcolor ? gfx::rndcolor[rnd(6)].color : color, size, gravity, expand);
 }
 
 bool canaddparticles()
@@ -1103,8 +1092,7 @@ void regular_particle_splash(int type, int num, int fade, const vec &p, int colo
 void particle_splash(int type, int num, int fade, const vec &p, int color, float size, int radius, int gravity, int expand, bool randomcolor, float relativesize)
 {
     if(!canaddparticles()) return;
-    if(randomcolor) color = rndcolor[rnd(6)].color;
-    splash(type, color, radius, num, fade, p, size*relativesize, gravity, expand);
+    splash(type, randomcolor ? gfx::rndcolor[rnd(6)].color : color, radius, num, fade, p, size*relativesize, gravity, expand);
 }
 
 VARP(maxtrail, 1, 500, 10000);
@@ -1165,17 +1153,15 @@ void particle_meter(const vec &s, float val, int type, float relativesize, int f
 void particle_flare(const vec &p, const vec &dest, int fade, int type, int color, float size, physent *owner, bool randomcolor)
 {
     if(!canaddparticles()) return;
-    if(randomcolor) color = rndcolor[rnd(6)].color;
-    newparticle(p, dest, fade, type, color, size)->owner = owner;
+    newparticle(p, dest, fade, type, randomcolor ? gfx::rndcolor[rnd(6)].color : color, size)->owner = owner;
 }
 
 void particle_fireball(const vec &dest, float maxsize, int type, int fade, int color, float size, bool randomcolor)
 {
     if(!canaddparticles()) return;
-    if(randomcolor) color = rndcolor[rnd(6)].color;
     float growth = maxsize - size;
     if(fade < 0) fade = int(growth*20);
-    newparticle(dest, vec(0, 0, 1), fade, type, color, size)->val = growth;
+    newparticle(dest, vec(0, 0, 1), fade, type, randomcolor ? gfx::rndcolor[rnd(6)].color : color, size)->val = growth;
 }
 
 //dir = 0..6 where 0=up

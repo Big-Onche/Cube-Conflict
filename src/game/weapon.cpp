@@ -662,165 +662,52 @@ namespace game
     void explode(bool local, gameent *owner, const vec &v, const vec &vel, dynent *safe, int damage, int atk)
     {
         vec debrisvel = owner->o==v ? vec(0, 0, 0) : vec(owner->o).sub(v).normalize(), debrisorigin(v);
+        debrisorigin = vec(v).sub(vec(vel).mul(10)).add(vec(5-rnd(10), 5-rnd(10), 5-rnd(10)));
 
         switch(atk)
         {
             case ATK_PULSE_SHOOT:
-            {
-                playsound(S_IMPACTALIEN, &v, 0, 0, 0 , 100, -1, 250);
-                vec debrisorigin = vec(v).sub(vec(vel).mul(6));
-                particle_splash(PART_SPARK, 20, 150, v, owner->steromillis ? 0xFF0000 : 0xFF4400, 0.45f, 150, 150, 10, player1->champimillis ? true : false);
-                adddynlight(safe ? v : debrisorigin, 2*attacks[atk].exprad, vec(1.5f, 0.75f, 0.0f), 150, 50, 0, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
-                particle_fireball(v, 0.6f*attacks[atk].exprad, PART_PULSE_BURST, int(attacks[atk].exprad*15), owner->steromillis ? 0xFF0000 : 0xFF9900, 2.5f, player1->champimillis ? true : false);
-            }
-            break;
-
             case ATK_GRAP1_SHOOT:
-            {
-                playsound(S_IMPACTGRAP1, &v, 0, 0, 0 , 100, -1, 250);
-                vec debrisorigin = vec(v).sub(vec(vel).mul(6));
-                adddynlight(safe ? v : debrisorigin, 2*attacks[atk].exprad, vec(1.5f, 0.0f, 1.5f), 300, 100, L_NODYNSHADOW, attacks[atk].exprad/2, vec(0.5f, 0.0f, 0.5f));
-                particle_splash(PART_SPARK, 30, 175, v, owner->steromillis ? 0xFF0000 : 0xAA4466, 0.5f, 200, 200, 0, player1->champimillis ? true : false);
-                loopi(3)particle_fireball(v, 0.8f*attacks[atk].exprad, PART_EXPLOSION, int(attacks[atk].exprad*5), owner->steromillis ? 0xFF0000 : 0x550055, 1.5f, player1->champimillis ? true : false);
-            }
-            break;
-
             case ATK_SPOCKGUN_SHOOT:
-            {
-                playsound(S_IMPACTALIEN, &v, 0, 0, 0 , 100, -1, 250);
-                particle_splash(PART_SPOCK_FRONT, 30, 150, v, owner->steromillis ? 0xFF0000 : 0x22FF22, 1.25f, 150, 150, 200, player1->champimillis ? true : false);
-                vec debrisorigin = vec(v).sub(vec(vel).mul(6));
-                adddynlight(safe ? v : debrisorigin, 2*attacks[atk].exprad, vec(0.0f, 2.5f, 0.0f), 250, 40, 0, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
-            }
-            break;
+                playsound(atk==ATK_GRAP1_SHOOT ? S_IMPACTGRAP1 : S_IMPACTALIEN, &v, 0, 0, 0 , 75, -1, 225);
+                gfx::energygunexplosion(owner, v, vel, safe, atk);
+                break;
 
             case ATK_SMAW_SHOOT:
             case ATK_ROQUETTES_SHOOT:
-            {
                 playsound(S_EXPLOSION, &v, 0, 0, 0 , 100, -1, 350);
-                if(camera1->o.dist(v) >= 300) playsound(S_EXPLOSIONLOIN, &v, NULL, 0, 0, 100, -1, 1200);
-
-                adddynlight(safe ? v : debrisorigin, 7*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 80, 40, L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
-                adddynlight(safe ? v : debrisorigin, 4*attacks[atk].exprad, vec(1.2f, 0.4f, 0.0f), 80, 40, L_VOLUMETRIC|L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.0f, 0.0f, 1.5f));
-                particle_splash(PART_SMOKE, atk==ATK_ROQUETTES_SHOOT ? 5 : 9, 2000, v, 0x333333, 40.0f, 150+rnd(50), 300+rnd(100), 0, player1->champimillis ? true : false);
-                particle_splash(PART_SMOKE, atk==ATK_ROQUETTES_SHOOT ? 5 : 9, 1300, v, 0x333333, 25.0f, 150+rnd(50), 600+rnd(100), 0, player1->champimillis ? true : false);
-                particle_splash(PART_SPARK, atk==ATK_ROQUETTES_SHOOT ? 7 : 10, 300, v, owner->steromillis ? 0xFF4444 : 0xFFBB55,  1.7f+rnd(2), 3500, 3500, 0, player1->champimillis ? true : false);
-                loopi(lookupmaterial(v)&MAT_WATER ? 1 : 3) particle_splash(PART_FLAME1+rnd(2), atk==ATK_ROQUETTES_SHOOT ? 9 : 17, 80+rnd(40), v, owner->steromillis ? 0xFF4444 : i==0 ? 0x383838 : i==1 ? 0x474747: 0x604930, 9.f+rnd(6), atk==ATK_ROQUETTES_SHOOT ? 300+rnd(150) : 400+rnd(200), 800, 1, player1->champimillis ? true : false);
-
-                particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFF5500, 10.0f, player1->champimillis ? true : false);
-                particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFFFFFF, 20.0f, player1->champimillis ? true : false);
-
-                vec debrisorigin = vec(v).sub(vec(vel).mul(15));
+                if((lookupmaterial(v)&MAT_WATER)) playsound(S_EXPLOSIONAVECEAU, &v, 0, 0, 0 , 100, -1, 350);
+                if(camera1->o.dist(v) >= 300) playsound(S_EXPLOSIONLOIN, &v, NULL, 0, 0, 400, -1, 1200);
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS, 5000);
-
-                if((lookupmaterial(v)&MAT_WATER) == MAT_WATER)
-                {
-                    particle_splash(PART_EAU, 50, 200, v, 0x18181A, 12.0f+rnd(14), 600, 300);
-                    particle_splash(PART_BULLE, 15, 150, v, 0x18181A, 4.0f+rnd(8), 300, 150);
-                    playsound(S_EXPLOSIONAVECEAU, &v, 0, 0, 0 , 100, -1, 350);
-                }
-            }
-            break;
+                gfx::projexplosion(owner, v, vel, safe, atk);
+                break;
 
             case ATK_KAMIKAZE_SHOOT:
             case ATK_ASSISTXPL_SHOOT:
-            {
-                if(camera1->o.dist(v) >= 300) playsound(S_EXPLOSIONLOIN, &v, NULL, 0, 0, 100, -1, 1200);
-
-                loopi(10)
-                {
-                    vec pos = vec(v).add(vec(rnd(35)-rnd(70), rnd(35)-rnd(70), rnd(35)-rnd(70)));
-                    particle_splash(PART_SMOKE, 4, atk==ATK_KAMIKAZE_SHOOT ? 5000 : 3000, pos, 0x333333, 60.f, 200+rnd(75), 100, 0, player1->champimillis ? true : false);
-                    particle_splash(PART_SMOKE, 3, atk==ATK_KAMIKAZE_SHOOT ? 3000 : 2000, pos, 0x151515, 40.f, 200+rnd(75), 250, 0, player1->champimillis ? true : false);
-                    particle_splash(PART_SPARK, 6, 300, pos, owner->steromillis ? 0xFF4444 : 0xFFBB55,  1.7f+rnd(2), 3500, 3500, 0, player1->champimillis ? true : false);
-                    loopi(lookupmaterial(v)&MAT_WATER ? 1 : 3) particle_splash(PART_FLAME1+rnd(2), 6, 130+rnd(50), pos, owner->steromillis ? 0xFF4444 : i==0 ? 0x383838: i==1 ? 0x474747 : 0x6A4A3A, 9.f+rnd(6), 1200+rnd(700), 1200, 1, player1->champimillis ? true : false);
-                }
-
-                particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFF5500, 10.0f, player1->champimillis ? true : false);
-                particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFFFFFF, 20.0f, player1->champimillis ? true : false);
-
-                vec debrisorigin = vec(v).sub(vec(vel).mul(15));
+                if(camera1->o.dist(v) >= 300) playsound(S_EXPLOSIONLOIN, &v, NULL, 0, 0, 400, -1, 1200);
+                if((lookupmaterial(v)&MAT_WATER)) playsound(S_EXPLOSIONAVECEAU, &v, 0, 0, 0 , 100, -1, 350);
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS, 5000);
-                adddynlight(safe ? v : debrisorigin, 7*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 80, 40, L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
-                adddynlight(safe ? v : debrisorigin, 4*attacks[atk].exprad, vec(1.2f, 0.4f, 0.0f), 80, 40, L_VOLUMETRIC|L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.0f, 0.0f, 1.5f));
-
-                if((lookupmaterial(v)&MAT_WATER) == MAT_WATER)
-                {
-                    particle_splash(PART_EAU, 50, 200, v, 0x18181A, 12.0f+rnd(14), 600, 300);
-                    particle_splash(PART_BULLE, 15, 150, v, 0x18181A, 4.0f+rnd(8), 300, 150);
-                    playsound(S_EXPLOSIONAVECEAU, &v, 0, 0, 0 , 100, -1, 350);
-                }
-            }
-            break;
+                gfx::projexplosion(owner, v, vel, safe, atk);
+                break;
 
             case ATK_NUKE_SHOOT:
-            {
                 playsound(S_NUKE);
-
-                loopi(50)
-                {
-                    vec pos = vec(v).add(vec(rnd(200)-rnd(400), rnd(200)-rnd(400), rnd(200)-rnd(400)));
-                    particle_splash(PART_SMOKE, 1, 2000,  pos, 0x212121, 150.0f, 700, 70, 0, player1->champimillis ? true : false);
-                    particle_splash(PART_SMOKE, 1, 15000, pos, 0x222222, 200.0f,  35, 300, 0, player1->champimillis ? true : false);
-                    particle_splash(PART_SMOKE, 2, 5000,  pos, 0x333333, 250.0f, 1000, 500, 0, player1->champimillis ? true : false);
-                    particle_splash(PART_FLAME1+rnd(2),  3, 1000, pos, owner->steromillis ? 0xFF0000 : 0xFFFF00, 35+rnd(15), 800, 300, 0, player1->champimillis ? true : false);
-                    particle_splash(PART_FLAME1+rnd(2),  3, 1000, pos, owner->steromillis ? 0xFF0000 : 0x224400, 35+rnd(15), 800, 300, 0, player1->champimillis ? true : false);
-                    particle_splash(PART_FLAME1+rnd(2),  3, 1000, pos, owner->steromillis ? 0xFF0000 : 0xFF2222, 35+rnd(15), 800, 300, 0, player1->champimillis ? true : false);
-                }
-
-                loopi(3) particle_fireball(v, 350, PART_ONDECHOC, 300, 0xFFCCAA, 800.0f, player1->champimillis ? true : false);
-
-                vec debrisorigin = vec(v).sub(vec(vel).mul(15));
-                adddynlight(safe ? v : debrisorigin, 7*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 300, 40, L_NOSHADOW, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
-                adddynlight(safe ? v : debrisorigin, 5*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 300, 40, L_NOSHADOW|L_VOLUMETRIC, attacks[atk].exprad/2, vec(0.0f, 0.0f, 1.5f));
-            }
-            break;
+                gfx::projexplosion(owner, v, vel, safe, atk);
+                break;
 
             case ATK_ARTIFICE_SHOOT:
-            {
-                playsound(S_EXPLOSIONARTIFICE, &v, 0, 0, 0 , 100, -1, 350);
-                if(camera1->o.dist(v) >= 300) playsound(S_ARTIFICELOIN, &v, NULL, 0, 0, 100, -1, 1000);
-
-                particle_splash(PART_FLAME1+rnd(2), 5, 40, v, 0xFFC864, 5, 800, 1600, 0, player1->champimillis ? true : false);
-                loopi(4) particle_splash(PART_GLOWSPARK, 16+rnd(10), 200+rnd(200), v, owner->steromillis ? 0xFF0000 : rnd(16777215),  0.4f+(rnd(5)/10.f), 500+rnd(300), 5000+rnd(3000), 2, player1->champimillis ? true : false);
-
-                vec debrisorigin = vec(v).sub(vec(vel).mul(5));
-                adddynlight(safe ? v : debrisorigin, 7*attacks[atk].exprad, vec(1+rnd(4), 1+rnd(4), 1+rnd(4)), 80, 40, 0, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
-                adddynlight(safe ? v : debrisorigin, 4*attacks[atk].exprad, vec(rnd(15)/10.0f, rnd(15)/10.0f, rnd(15)/10.0f), 80, 40, L_VOLUMETRIC|L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.0f, 0.0f, 1.5f));
-
-                if(lookupmaterial(v)&MAT_WATER)
-                {
-                    particle_splash(PART_EAU, 50, 200, v, 0x18181A, 12.0f+rnd(14), 600, 300);
-                    particle_splash(PART_BULLE, 15, 150, v, 0x18181A, 4.0f+rnd(8), 300, 150);
-                    playsound(S_EXPLOSIONAVECEAU, &v, 0, 0, 0 , 100, -1, 350);
-                }
-            }
-            break;
+                playsound(S_EXPLOSIONARTIFICE, &v, 0, 0, 0 , 100, -1, 300);
+                if((lookupmaterial(v)&MAT_WATER)) playsound(S_EXPLOSIONAVECEAU, &v, 0, 0, 0 , 100, -1, 350);
+                if(camera1->o.dist(v) >= 300) playsound(S_ARTIFICELOIN, &v, NULL, 0, 0, 400, -1, 1000);
+                gfx::projexplosion(owner, v, vel, safe, atk);
+                break;
 
             case ATK_M32_SHOOT:
-            {
                 playsound(S_EXPLOSIONGRENADE, &v, 0, 0, 0 , 100, -1, 350);
-                if(camera1->o.dist(v) >= 300) playsound(S_EXPLOSIONLOIN, &v, NULL, NULL, 0, 0, 100, -1, 1200);
-
-                loopi(3) particle_fireball(v, 40+rnd(50), PART_PLASMA, 300, owner->steromillis ? 0xFF0000 : 0xFFFFFF, 1.0f, player1->champimillis ? true : false);
-                loopi(3) particle_splash(PART_SPARK, 8, 150+rnd(150), v, owner->steromillis ? 0xFF0000 : 0xFFFFFF,  2.0f+rnd(2), 1500+rnd(2250), 1500+rnd(2250), 0, player1->champimillis ? true : false);
-                loopi(2) particle_splash(PART_SMOKE, 7, 1300+rnd(800), v, 0x555555, 40.0f, 150+rnd(150), 300+rnd(700), 0, player1->champimillis ? true : false);
-                particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFF5500, 10.0f, player1->champimillis ? true : false);
-                particle_fireball(v, 350, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFFFFFF, 20.0f, player1->champimillis ? true : false);
-
-                vec debrisorigin = vec(v).sub(vec(vel).mul(5));
-                adddynlight(v, 7*attacks[atk].exprad, vec(0.0f, 3.0f, 9.0f), 80, 40, L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
-                adddynlight(v, 5*attacks[atk].exprad, vec(0.0f, 0.4f, 1.2f), 80, 40, L_VOLUMETRIC|L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(0.0f, 0.0f, 1.5f));
+                if((lookupmaterial(v)&MAT_WATER)) playsound(S_EXPLOSIONAVECEAU, &v, 0, 0, 0 , 100, -1, 350);
+                if(camera1->o.dist(v) >= 300) playsound(S_EXPLOSIONLOIN, &v, NULL, NULL, 0, 0, 400, -1, 1200);
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS, 5000);
-
-                if(lookupmaterial(v)&MAT_WATER)
-                {
-                    particle_splash(PART_EAU, 50, 200, v, 0x18181A, 12.0f+rnd(14), 600, 300);
-                    particle_splash(PART_BULLE, 15, 150, v, 0x18181A, 4.0f+rnd(8), 300, 150);
-                    playsound(S_EXPLOSIONAVECEAU, &v, 0, 0, 0 , 100, -1, 350);
-                }
-            }
-            break;
+                break;
 
             case ATK_MINIGUN_SHOOT:
             case ATK_AK47_SHOOT:
@@ -867,85 +754,66 @@ namespace game
         }
     }
 
-    void pulsestain(const projectile &p, const vec &pos)
+    void projstain(const projectile &p, const vec &pos, int atk)
     {
         vec dir = vec(p.dir).neg();
-        float rad = attacks[p.atk].exprad*0.5f;
-        addstain(STAIN_PULSE_SCORCH, pos, dir, rad);
-        addstain(STAIN_PULSE_GLOW, pos, dir, rad, 0xAA3300);
-    }
 
-    void spockstain(const projectile &p, const vec &pos)
-    {
-        vec dir = vec(p.dir).neg();
-        float rad = attacks[p.atk].exprad*0.5f;
-        addstain(STAIN_PULSE_SCORCH, pos, dir, rad);
-        addstain(STAIN_SPOCK_GLOW, pos, dir, rad, 0x22FF22);
-    }
-
-    void smawstain(const projectile &p, const vec &pos)
-    {
-        vec dir = vec(p.dir).neg();
-        float rad = attacks[p.atk].exprad*0.35f;
-        addstain(STAIN_EXPL_SCORCH, pos, dir, rad);
-    }
-
-    void bigballestain(const projectile &p, const vec &pos)
-    {
-        vec dir = vec(p.dir).neg();
-        switch(rnd(3))
+        switch(atk)
         {
-            case 0: addstain(STAIN_BALLE_1, pos, dir, 1.5f+(rnd(2))); break;
-            case 1: addstain(STAIN_BALLE_2, pos, dir, 1.5f+(rnd(2))); break;
-            case 2: addstain(STAIN_BALLE_3, pos, dir, 1.5f+(rnd(2))); break;
-        }
-        addstain(STAIN_BALLE_GLOW, pos, dir, 2.0f+(rnd(2)), 0x883300);
-    }
-
-    void littleballestain(const projectile &p, const vec &pos)
-    {
-        vec dir = vec(p.dir).neg();
-        switch(rnd(3))
-        {
-            case 0: addstain(STAIN_BALLE_1, pos, dir, 0.5f); break;
-            case 1: addstain(STAIN_BALLE_2, pos, dir, 0.5f); break;
-            case 2: addstain(STAIN_BALLE_3, pos, dir, 0.5f); break;
-        }
-        addstain(STAIN_BALLE_GLOW, pos, dir, 1.0f, 0x883300);
-    }
-
-    void grap1stain(const projectile &p, const vec &pos)
-    {
-        vec dir = vec(p.dir).neg();
-        addstain(STAIN_RAIL_GLOW, pos, dir, 5.0f, 0xFF4455);
-        adddynlight(vec(pos).madd(dir, 4), 30, vec(1.5f, 0.2f, 0.2f), 50, 75);
-        addstain(STAIN_PULSE_SCORCH, pos, dir, 10);
-    }
-
-    void projsplash(projectile &p, const vec &v, dynent *safe)
-    {
-        explode(p.local, p.owner, v, p.dir, safe, attacks[p.atk].damage, p.atk);
-        switch(p.atk)
-        {
-            case ATK_PULSE_SHOOT: pulsestain(p, v); break;
+            case ATK_PULSE_SHOOT:
+                addstain(STAIN_PULSE_SCORCH, pos, dir, 7.5f);
+                addstain(STAIN_PULSE_GLOW, pos, dir, 7.5f, 0x882200);
+                return;
             case ATK_SMAW_SHOOT:
             case ATK_KAMIKAZE_SHOOT:
             case ATK_ASSISTXPL_SHOOT:
-            case ATK_ROQUETTES_SHOOT: smawstain(p, v); break;
+            case ATK_ROQUETTES_SHOOT:
+            {
+                float rad = attacks[p.atk].exprad*0.35f;
+                addstain(STAIN_EXPL_SCORCH, pos, dir, rad);
+                return;
+            }
             case ATK_MINIGUN_SHOOT:
             case ATK_SV98_SHOOT:
             case ATK_AK47_SHOOT:
             case ATK_GAU8_SHOOT:
             case ATK_CAMPOUZE_SHOOT:
-            case ATK_SKS_SHOOT: bigballestain(p, v); break;
-            case ATK_SPOCKGUN_SHOOT: spockstain(p, v); break;
+            case ATK_SKS_SHOOT:
+                switch(rnd(3))
+                {
+                    case 0: addstain(STAIN_BALLE_1, pos, dir, 1.5f+(rnd(2))); break;
+                    case 1: addstain(STAIN_BALLE_2, pos, dir, 1.5f+(rnd(2))); break;
+                    case 2: addstain(STAIN_BALLE_3, pos, dir, 1.5f+(rnd(2))); break;
+                }
+                addstain(STAIN_BALLE_GLOW, pos, dir, 2.0f+(rnd(2)), 0x883300);
+                return;
+            case ATK_SPOCKGUN_SHOOT:
+                addstain(STAIN_PULSE_SCORCH, pos, dir, 5);
+                addstain(STAIN_SPOCK_GLOW, pos, dir, 5, 0x22FF22);
+                return;
             case ATK_UZI_SHOOT:
             case ATK_ARBALETE_SHOOT:
             case ATK_GLOCK_SHOOT:
-            case ATK_FAMAS_SHOOT: littleballestain(p, v); break;
-            case ATK_GRAP1_SHOOT: grap1stain(p, v); break;
+            case ATK_FAMAS_SHOOT:
+                switch(rnd(3))
+                {
+                    case 0: addstain(STAIN_BALLE_1, pos, dir, 0.5f); break;
+                    case 1: addstain(STAIN_BALLE_2, pos, dir, 0.5f); break;
+                    case 2: addstain(STAIN_BALLE_3, pos, dir, 0.5f); break;
+                }
+                addstain(STAIN_BALLE_GLOW, pos, dir, 1.0f, 0x883300);
+                return;
+            case ATK_GRAP1_SHOOT:
+                addstain(STAIN_RAIL_GLOW, pos, dir, 5.f, 0x992299);
+                addstain(STAIN_PULSE_SCORCH, pos, dir, 5);
+                return;
         }
+    }
 
+    void projsplash(projectile &p, const vec &v, dynent *safe)
+    {
+        explode(p.local, p.owner, v, p.dir, safe, attacks[p.atk].damage, p.atk);
+        projstain(p, v, p.atk);
     }
 
     void explodeeffects(int atk, gameent *d, bool local, int id)
@@ -959,28 +827,7 @@ namespace game
             {
                 vec pos = vec(p.offset).mul(p.offsetmillis/float(OFFSETMILLIS)).add(p.o);
                 explode(p.local, p.owner, pos, p.dir, NULL, 0, atk);
-                switch(atk)
-                {
-                    case ATK_PULSE_SHOOT: pulsestain(p, pos); break;
-                    case ATK_SMAW_SHOOT:
-                    case ATK_KAMIKAZE_SHOOT:
-                    case ATK_ASSISTXPL_SHOOT:
-                    case ATK_ROQUETTES_SHOOT: smawstain(p, pos); break;
-                    case ATK_MINIGUN_SHOOT:
-                    case ATK_SV98_SHOOT:
-                    case ATK_AK47_SHOOT:
-                    case ATK_GAU8_SHOOT:
-                    case ATK_CAMPOUZE_SHOOT:
-                    case ATK_SKS_SHOOT: bigballestain(p, pos); break;
-                    case ATK_ARBALETE_SHOOT:
-                    case ATK_UZI_SHOOT:
-                    case ATK_MOSSBERG_SHOOT:
-                    case ATK_HYDRA_SHOOT:
-                    case ATK_GLOCK_SHOOT:
-                    case ATK_FAMAS_SHOOT: littleballestain(p, pos); break;
-                    case ATK_GRAP1_SHOOT: grap1stain(p, pos); break;
-                    default: break;
-                }
+                projstain(p, pos, atk);
                 projs.remove(i);
                 break;
             }
@@ -1093,7 +940,7 @@ namespace game
                             canplaysound = true;
                             break;
                         case ATK_SPOCKGUN_SHOOT:
-                            particle_splash(PART_SPOCK_FRONT, 1, 1, pos, p.owner->steromillis ? 0xFF4444 : 0x00FF00, 6.0f, 150, 20, 0, player1->champimillis ? true : false);
+                            particle_splash(PART_SPOCK_FRONT, 1, 1, pos, p.owner->steromillis ? 0xFF4444 : 0x00FF00, 4.f, 150, 20, 0, player1->champimillis ? true : false);
                             particle_flare(tail, head, 1, PART_PULSE_SIDE, p.owner->steromillis ? 0xFF4444 : 0x22FF22, 2.5f, p.owner, player1->champimillis ? true : false);
                             p.projsound = S_FLYBYALIEN;
                             canplaysound = true;

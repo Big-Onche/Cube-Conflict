@@ -324,7 +324,7 @@ namespace game
         ////////Boucliers////////
         if(d->armour && d->state == CS_ALIVE && camera1->o.dist(d->o) <= maxmodelradiusdistance*10)
         {
-            a[ai++] = modelattach("tag_shield", getshielddir(d), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+            a[ai++] = modelattach("tag_shield", gfx::getshielddir(d), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
         ////////Boosts////////
         if(d->jointmillis) a[ai++] = modelattach("tag_boost1", "boosts/joint", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
@@ -707,7 +707,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape
             sway2.z += (swayup/floatdivfactor)*(fabs(sinf(steps)) - 1);
             if(d->armourtype==A_ASSIST || !zoom) sway2.add(swaydir).add(d->o);
 
-            rendermodel(getshielddir(d, true), anim, sway2, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
+            rendermodel(gfx::getshielddir(d, true), anim, sway2, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
 
             if(d->armourtype!=A_ASSIST) return;
             modelattach a[2];

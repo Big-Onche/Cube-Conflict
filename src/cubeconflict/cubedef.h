@@ -94,8 +94,25 @@ static const struct costumeinfo { const char *village, *usine, *faille, *lune, *
     {"mapmodel/panneau",            "mapmodel/caisses/caisse3", "mapmodel/panneau",             "mapmodel/caisses/caisse3",     "mapmodel/panneau",             "mapmodel/lampadaire"},
     {"mapmodel/arbres/arbre1",      "mapmodel/murjersay",       "mapmodel/arbres/arbre1",       "mapmodel/murjersay",           "mapmodel/arbres/arbre1",       "mapmodel/murjersay"},
 };
-//GFX
-extern const char *getshielddir(gameent *d, bool hud = false);
+
+namespace gfx
+{
+    static const struct colors{ int color; } rndcolor[] =
+    {
+        {0xFF0000},
+        {0x00FF00},
+        {0x0000FF},
+        {0xFFFF00},
+        {0x00FFFF},
+        {0xFF00FF}
+    };
+
+    extern bool champicolor;
+
+    extern void energygunexplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk);
+    extern void projexplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk);
+    extern const char *getshielddir(gameent *d, bool hud = false);
+}
 
 //HUD
 extern bool suicided, holdflag;
