@@ -3124,6 +3124,17 @@ namespace server
         if(servermotd[0]) sendf(ci->clientnum, 1, "ris", N_SERVMSG, servermotd);
     }
 
+    bool validability(int ability, int reqduration, int aptitude, int mana) //server-sided abilities check
+    {
+        switch(ability)
+        {
+            case 1: if(reqduration > sorts[abilitydata(aptitude)].duree1 || mana < sorts[abilitydata(aptitude)].mana1) return false; break;
+            case 2: if(reqduration > sorts[abilitydata(aptitude)].duree2 || mana < sorts[abilitydata(aptitude)].mana2) return false; break;
+            case 3: if(reqduration > sorts[abilitydata(aptitude)].duree3 || mana < sorts[abilitydata(aptitude)].mana3) return false; break;
+        }
+        return true;
+    }
+
     void parsepacket(int sender, int chan, packetbuf &p)     // has to parse exactly each byte of the packet
     {
         if(sender<0 || p.packet->flags&ENET_PACKET_FLAG_UNSEQUENCED || chan > 2) return;
@@ -3560,17 +3571,21 @@ namespace server
                 if(!cq) break;
 
                 int ability = getint(p);
-                bool valid = true;
+                int duration = getint(p);
+                bool valid = validability(ability, duration, cq->aptitude, cq->state.mana);
 
-                switch(ability)
+                if(valid)
                 {
-                    case 1: cq->state.aptisort1 = getint(p); break;
-                    case 2: cq->state.aptisort2 = getint(p); break;
-                    case 3: cq->state.aptisort3 = getint(p); break;
-                    default: valid = false;
+                    switch(ability)
+                    {
+                        case 1: cq->state.aptisort1 = duration; cq->state.mana-=sorts[abilitydata(ci->aptitude)].mana1; break;
+                        case 2: cq->state.aptisort2 = duration; cq->state.mana-=sorts[abilitydata(ci->aptitude)].mana2; break;
+                        case 3: cq->state.aptisort3 = duration; cq->state.mana-=sorts[abilitydata(ci->aptitude)].mana3; break;
+                        default: valid = false;
+                    }
+                    if(valid) QUEUE_MSG;
                 }
-
-                if(valid) QUEUE_MSG;
+                else disconnect_client(sender, DISC_GAMEERR); //if not valid (mostly by cheating) disconnect the client
                 break;
             }
 

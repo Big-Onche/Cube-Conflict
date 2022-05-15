@@ -25,9 +25,9 @@ namespace game
         switch(ability)
         {
             case 1:
-                if(send) //We send the shit to the server
+                if(send) //We send the shit to the server: client send to the server, then the server checks if it's valid or not
                 {
-                    if(!d->sort1pret || d->mana < sorts[abilitydata(d->aptitude)].mana1) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
+                    if(!d->sort1pret || d->mana < sorts[abilitydata(d->aptitude)].mana1) {if(d==player1)playsound(S_SORTIMPOSSIBLE); return; }
                     d->aptisort1 = sorts[abilitydata(d->aptitude)].duree1;
                     d->lastspecial1update = totalmillis;
                     addmsg(N_SENDABILITY, "rcii", d, ability, d->aptisort1);
@@ -56,7 +56,7 @@ namespace game
             case 2:
                 if(send)
                 {
-                    if(!d->sort2pret || d->mana<sorts[abilitydata(d->aptitude)].mana2) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
+                    if(!d->sort2pret || d->mana<sorts[abilitydata(d->aptitude)].mana2) {if(d==player1)playsound(S_SORTIMPOSSIBLE); return; }
                     d->aptisort2 = sorts[abilitydata(d->aptitude)].duree2;
                     d->lastspecial2update = totalmillis;
                     addmsg(N_SENDABILITY, "rcii", d, ability, d->aptisort2);
@@ -77,7 +77,7 @@ namespace game
             case 3:
                 if(send)
                 {
-                    if(!d->sort3pret || d->mana<sorts[abilitydata(d->aptitude)].mana3) {if(d==player1)playsound(S_SORTIMPOSSIBLE); break; }
+                    if(!d->sort3pret || d->mana<sorts[abilitydata(d->aptitude)].mana3) {if(d==player1)playsound(S_SORTIMPOSSIBLE); return; }
                     d->aptisort3 = sorts[abilitydata(d->aptitude)].duree3;
                     d->lastspecial3update = totalmillis;
                     addmsg(N_SENDABILITY, "rcii", d, ability, d->aptisort3);

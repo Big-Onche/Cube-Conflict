@@ -290,17 +290,18 @@ const char *disconnectreason(int reason)
 {
     switch(reason)
     {
-        case DISC_EOP: return "end of packet";
-        case DISC_LOCAL: return "server is in local mode/serveur en mode local";
-        case DISC_KICK: return "kicked-banned/kick-banni";
-        case DISC_MSGERR: return "message error/erreur message";
-        case DISC_IPBAN: return "ip is banned/ip bannie";
-        case DISC_PRIVATE: return "server is in private mode/serveur en mode privé";
-        case DISC_MAXCLIENTS: return "server FULL/ serveur plein";
-        case DISC_TIMEOUT: return "connection timed out/la connexion a expirée";
-        case DISC_OVERFLOW: return "overflow";
-        case DISC_PASSWORD: return "invalid password/mot de passe invalide";
-        case DISC_NORMAL: return "voluntary/volontaire";
+        case DISC_EOP:          return "end of packet";
+        case DISC_LOCAL:        return "server is in local mode/serveur en mode local";
+        case DISC_KICK:         return "kicked-banned/kick-banni";
+        case DISC_MSGERR:       return "message error/erreur message";
+        case DISC_GAMEERR:      return "game error (modified client ?)/erreur de jeu (client modifié ?)";
+        case DISC_IPBAN:        return "ip is banned/ip bannie";
+        case DISC_PRIVATE:      return "server is in private mode/serveur en mode privé";
+        case DISC_MAXCLIENTS:   return "server FULL/ serveur plein";
+        case DISC_TIMEOUT:      return "connection timed out/la connexion a expirée";
+        case DISC_OVERFLOW:     return "overflow";
+        case DISC_PASSWORD:     return "invalid password/mot de passe invalide";
+        case DISC_NORMAL:       return "voluntary/volontaire";
         default: return "crash ?";
     }
 }
