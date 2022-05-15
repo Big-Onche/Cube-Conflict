@@ -122,7 +122,7 @@ void loadsave()
 //////////////////////Gestion des succès//////////////////////
 bool achievementlocked(int achID) {return !succes[achID];} //Succès verrouillé ? OUI = TRUE, NON = FALSE
 
-VAR(totalachunlocked, 0, 0, 25);
+VAR(totalachunlocked, 0, 0, 27);
 
 void unlockachievement(int achID) //Débloque le succès
 {

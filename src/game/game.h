@@ -5,7 +5,6 @@
 #include "engine.h"
 
 // animations
-
 enum
 {
     ANIM_DEAD = ANIM_GAMESPECIFIC, ANIM_DYING, ANIM_IDLE,
@@ -37,7 +36,6 @@ static const char * const animnames[] =
 };
 
 // console message types
-
 enum
 {
     CON_CHAT       = 1<<8,
@@ -49,7 +47,7 @@ enum
 };
 
 // network quantization scale
-#define DMF 16.0f                // for world locations
+#define DMF 16.0f               // for world locations
 #define DNF 100.0f              // for normalized vectors
 #define DVELF 1.0f              // for playerspeed based velocity vectors
 
@@ -103,10 +101,10 @@ enum {  ATK_RAIL_SHOOT = 0, ATK_PULSE_SHOOT,
         //Super armes (4 armes)
         ATK_NUKE_SHOOT, ATK_GAU8_SHOOT,
         ATK_ROQUETTES_SHOOT, ATK_CAMPOUZE_SHOOT,
-        //Corps à corps (X armes)
+        //Corps à corps (4 armes)
         ATK_CAC349_SHOOT, ATK_CACMARTEAU_SHOOT,
         ATK_CACMASTER_SHOOT, ATK_CACFLEAU_SHOOT,
-        //Spéciales aptitudes (2 armes)
+        //Spéciales aptitudes/objets (3 armes)
         ATK_KAMIKAZE_SHOOT, ATK_ASSISTXPL_SHOOT, ATK_CACNINJA_SHOOT,
         NUMATKS
 };
@@ -256,7 +254,6 @@ enum
 };
 
 // network messages codes, c2s, c2c, s2c
-
 enum { PRIV_NONE = 0, PRIV_MASTER, PRIV_AUTH, PRIV_ADMIN };
 
 enum
@@ -286,7 +283,7 @@ enum
     N_DEMOPACKET,
     N_SENDCAPE, N_SENDTOMBE, N_SENDDANSE, N_SENDAPTITUDE,
     N_ANNOUNCE,
-    N_SENDSORT1, N_SENDSORT2, N_SENDSORT3,
+    N_SENDABILITY,
     N_IDENTIQUEARME, N_SERVAMBIENT,
     NUMMSG
 };
@@ -318,7 +315,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_DEMOPACKET, 0,
     N_SENDCAPE, 2, N_SENDTOMBE, 2, N_SENDDANSE, 2, N_SENDAPTITUDE, 2,
     N_ANNOUNCE, 2,
-    N_SENDSORT1, 2, N_SENDSORT2, 2, N_SENDSORT3, 2,
+    N_SENDABILITY, 3,
     N_IDENTIQUEARME, 2, N_SERVAMBIENT, 2,
     -1
 };
@@ -350,7 +347,6 @@ enum
     HICON_SIZE    = 120,
     HICON_SPACE   = 40
 };
-
 
 static struct itemstat { int add, max, sound; const char *name; int icon, info; } itemstats[] =
 {
@@ -398,7 +394,6 @@ static struct itemstat { int add, max, sound; const char *name; int icon, info; 
 #define EXP_SELFDAMDIV 1
 #define EXP_SELFPUSH 1.0f
 #define EXP_DISTSCALE 0.5f
-
 
 static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound, farsound1, farsound2, specialsounddelay, attackdelay, damage, spread, nozoomspread, margin, projspeed, kickamount, range, rays, hitpush, exprad, ttl, use; } attacks[NUMATKS] =
 {
@@ -483,6 +478,8 @@ static const struct aptisortsinfo { const char *tex1, *tex2, *tex3; int mana1, m
     { "media/interface/hud/sortespion1.png",    "media/interface/hud/sortespion2.png",      "media/interface/hud/sortespion3.png",      40, 50, 60, 4000, 7000, 5000, 7000, 7000, 10000, S_SORTESP1, S_SORTESP2, S_SORTESP3},           // Espion
     { "",                                       "media/interface/hud/sortkamikaze.png",     "",                                         0, 100,  0,    0, 5000,    0,    0, 5000,     0, S_NULL, S_SORTKAMIKAZE, S_NULL},               // Kamikaze
 };
+
+extern int abilitydata(int aptitude);
 
 #include "ai.h"
 
@@ -820,13 +817,11 @@ struct gameent : dynent, gamestate
 
     void stopsortsound(gameent *d)
     {
-        int neededdata = 0;
-        switch(d->aptitude) {case 8: neededdata++; break; case 11: neededdata+=2; case 14: neededdata+=3; case 10: neededdata+=4; case 6: neededdata+=5;}
         if(sortchan >= 0)
         {
-            if(d->aptisort1)stopsound(sorts[neededdata].sound1, sortchan, 50);
-            if(d->aptisort2)stopsound(sorts[neededdata].sound2, sortchan, 50);
-            if(d->aptisort3)stopsound(sorts[neededdata].sound3, sortchan, 50);
+            if(d->aptisort1)stopsound(sorts[abilitydata(d->aptitude)].sound1, sortchan, 50);
+            if(d->aptisort2)stopsound(sorts[abilitydata(d->aptitude)].sound2, sortchan, 50);
+            if(d->aptisort3)stopsound(sorts[abilitydata(d->aptitude)].sound3, sortchan, 50);
         }
         sortchan = -1;
     }
@@ -927,9 +922,8 @@ namespace game
     //Fonctions Cube Conflict
     extern void drawmessages(int killstreak, string str_pseudovictime, int n_aptitudevictime, string str_pseudoacteur, int n_killstreakacteur, float killdistance);
     extern void updatespecials(gameent *d);
-    //
 
-    extern int gamemode, battlevivants;
+    extern int gamemode;
 
     struct clientmode
     {

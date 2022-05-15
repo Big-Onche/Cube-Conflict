@@ -3555,26 +3555,22 @@ namespace server
                 break;
             }
 
-            case N_SENDSORT1:
+            case N_SENDABILITY:
             {
                 if(!cq) break;
-                cq->state.aptisort1 = getint(p);
-                QUEUE_MSG;
-                break;
-            }
 
-            case N_SENDSORT2:
-            {
-                if(!cq) break;
-                cq->state.aptisort2 = getint(p);
-                QUEUE_MSG;
-                break;
-            }
-            case N_SENDSORT3:
-            {
-                if(!cq) break;
-                cq->state.aptisort3 = getint(p);
-                QUEUE_MSG;
+                int ability = getint(p);
+                bool valid = true;
+
+                switch(ability)
+                {
+                    case 1: cq->state.aptisort1 = getint(p); break;
+                    case 2: cq->state.aptisort2 = getint(p); break;
+                    case 3: cq->state.aptisort3 = getint(p); break;
+                    default: valid = false;
+                }
+
+                if(valid) QUEUE_MSG;
                 break;
             }
 

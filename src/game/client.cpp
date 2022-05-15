@@ -1759,31 +1759,20 @@ namespace game
                 break;
             }
 
-            case N_SENDSORT1:
+            case N_SENDABILITY:
             {
                 if(d)
                 {
-                    d->aptisort1 = getint(p);
-                    aptitude(d, 1, false);
-                }
-                break;
-            }
+                    int ability = getint(p);
+                    switch(ability)
+                    {
+                        case 1: d->aptisort1 = getint(p); break;
+                        case 2: d->aptisort2 = getint(p); break;
+                        case 3: d->aptisort3 = getint(p); break;
+                        default: return;
+                    }
 
-            case N_SENDSORT2:
-            {
-                if(d)
-                {
-                    d->aptisort2 = getint(p);
-                    aptitude(d, 2, false);
-                }
-                break;
-            }
-            case N_SENDSORT3:
-            {
-                if(d)
-                {
-                    d->aptisort3 = getint(p);
-                    aptitude(d, 3, false);
+                    aptitude(d, ability, false);
                 }
                 break;
             }

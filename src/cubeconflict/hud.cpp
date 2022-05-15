@@ -281,34 +281,30 @@ namespace game
             }
 
             float positionsorts = 0.5f*(w - 100);
-            int neededdata = 0;
-            switch(d->aptitude) {case APT_PHYSICIEN: neededdata++; break; case APT_PRETRE: neededdata+=2; break; case APT_SHOSHONE: neededdata+=3; break; case APT_ESPION: neededdata+=4; break; case APT_KAMIKAZE: neededdata+=5;}
 
             if(player1->aptitude!=APT_KAMIKAZE)
             {
                 if(d->aptisort1) gle::colorf(2, 2, 2, 1);
-                else if(d->mana<sorts[neededdata].mana1 || !d->sort1pret) gle::colorf(0.2, 0.2, 0.2, 1);
+                else if(d->mana<sorts[abilitydata(d->aptitude)].mana1 || !d->sort1pret) gle::colorf(0.2, 0.2, 0.2, 1);
                 else gle::colorf(1, 1, 1, 1);
-                settexture(sorts[neededdata].tex1, 3);
+                settexture(sorts[abilitydata(d->aptitude)].tex1, 3);
                 bgquad(positionsorts-85, h-114, 100, 100);
                 gle::colorf(1, 1, 1, 1);
 
                 if(d->aptisort3) gle::colorf(2, 2, 2, 1);
-                else if(d->mana<sorts[neededdata].mana3 || !d->sort3pret) gle::colorf(0.2, 0.2, 0.2, 1);
+                else if(d->mana<sorts[abilitydata(d->aptitude)].mana3 || !d->sort3pret) gle::colorf(0.2, 0.2, 0.2, 1);
                 else gle::colorf(1, 1, 1, 1);
-                settexture(sorts[neededdata].tex3, 3);
+                settexture(sorts[abilitydata(d->aptitude)].tex3, 3);
                 bgquad(positionsorts+85, h-114, 100, 100);
                 gle::colorf(1, 1, 1, 1);
             }
 
             if(d->aptisort2) gle::colorf(2, 2, 2, 1);
-            else if(d->mana<sorts[neededdata].mana2 || !d->sort2pret) gle::colorf(0.2, 0.2, 0.2, 1);
+            else if(d->mana<sorts[abilitydata(d->aptitude)].mana2 || !d->sort2pret) gle::colorf(0.2, 0.2, 0.2, 1);
             else gle::colorf(1, 1, 1, 1);
-            settexture(sorts[neededdata].tex2, 3);
+            settexture(sorts[abilitydata(d->aptitude)].tex2, 3);
             bgquad(positionsorts, h-114, 100, 100);
             gle::colorf(1, 1, 1, 1);
-
-
         }
 
         if(player1->ragemillis){settexture("media/interface/hud/rage.png"); bgquad(15, h-260, 115, 115); decal_icon += 130;}
