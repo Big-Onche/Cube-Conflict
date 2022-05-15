@@ -273,7 +273,7 @@ namespace game
                 else d->stopheartbeat();
 
                 if(d->armour<=1000 && d->armourtype==A_ASSIST && d->armour>0) d->alarmchan = playsound(S_ASSISTALARM, NULL, NULL, 0, -1, 1000, d->alarmchan);
-                else d->stopassit();
+                else d->stopassist();
             }
 
             if(d->state==CS_ALIVE && !intermission && d!=player1)
@@ -297,6 +297,10 @@ namespace game
                     {
                         gameent *r = players[i];
 
+                        vec effectpos(r->o);
+                        effectpos.sub(h->o);
+                        effectpos.normalize().mul(1300.0f);
+
                         switch(h->aptitude)
                         {
                             case APT_MEDECIN:
@@ -304,33 +308,31 @@ namespace game
                                 {
                                     r->health+=30;
                                     if(r->health>r->maxhealth+250) r->health=r->maxhealth+250;
-                                    vec irays(r->o);
-                                    irays.sub(h->o);
-                                    irays.normalize().mul(1300.0f);
-                                    particle_flying_flare(h->o, irays, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
+                                    particle_flying_flare(h->o, r==h ? h->o : effectpos, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
                                     playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
+                                    addmsg(N_PUSHSTAT, "rci", r, 0);
                                 }
                                 break;
 
                             case APT_JUNKIE:
-                                if(r->o.dist(h->o)/18.f<7.5f && r->mana<150 && r->state==CS_ALIVE && randomevent(0.5f*nbfps) && (r->aptitude==APT_SHOSHONE || r->aptitude==APT_MAGICIEN || r->aptitude==APT_PRETRE || r->aptitude==APT_PHYSICIEN || r->aptitude==APT_ESPION || r->aptitude==APT_VAMPIRE))
+                                if(r->o.dist(h->o)/18.f<7.5f && r->state==CS_ALIVE && randomevent(0.5f*nbfps) && (r->aptitude==APT_SHOSHONE || r->aptitude==APT_MAGICIEN || r->aptitude==APT_PRETRE || r->aptitude==APT_PHYSICIEN || r->aptitude==APT_ESPION || r->aptitude==APT_VAMPIRE))
                                 {
                                     if(r->aptitude==APT_VAMPIRE && r->health<r->maxhealth+250)
                                     {
                                         r->health+=30;
                                         if(r->health>r->maxhealth+250) r->health=r->maxhealth+250;
+                                        particle_flying_flare(h->o, r==h ? h->o : effectpos, 400, PART_SANTE, 0xFF00FF, 2.5f, 100);
+                                        playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
+                                        addmsg(N_PUSHSTAT, "rci", r, 0);
                                     }
-                                    else
+                                    else if(r->mana<150)
                                     {
                                         r->mana+=5;
                                         if(r->mana>150) r->mana=150;
+                                        particle_flying_flare(h->o, r==h ? h->o : effectpos, 400, PART_SPARK, 0xFF00FF, 2.5f, 100);
+                                        playsound(S_REGENJUNKIE, &r->o, 0, 0, 0 , 50, -1, 125);
+                                        addmsg(N_PUSHSTAT, "rci", r, 1);
                                     }
-
-                                    vec irays(r->o);
-                                    irays.sub(h->o);
-                                    irays.normalize().mul(1300.0f);
-                                    particle_flying_flare(h->o, irays, 400, PART_SPARK, 0xFF00FF, 2.5f, 100);
-                                    playsound(r->aptitude==APT_VAMPIRE ? S_REGENMEDIGUN : S_REGENJUNKIE, &r->o, 0, 0, 0 , 50, -1, 125);
                                 }
                                 break;
                         }
@@ -415,12 +417,17 @@ namespace game
                 particle_splash(PART_SANTE, 1, 400, player1->o, 0xFFFFFF, 0.5f+rnd(3), 400, 200);
                 if(player1->health > player1->maxhealth+250) player1->health = player1->maxhealth+250;
                 playsound(S_REGENMEDIGUN);
+                addmsg(N_PUSHSTAT, "rci", player1, 0);
             }
             else if((player1->aptitude==APT_MEDECIN || player1->aptitude==APT_JUNKIE) && isconnected())
             {
                 loopv(players)
                 {
                     gameent *r = players[i];
+
+                    vec effectpos(r->o);
+                    effectpos.sub(player1->o);
+                    effectpos.normalize().mul(1300.0f);
 
                     switch(player1->aptitude)
                     {
@@ -429,33 +436,29 @@ namespace game
                             {
                                 r->health+=30;
                                 if(r->health>r->maxhealth+250) r->health=r->maxhealth+250;
-                                vec irays(r->o);
-                                irays.sub(player1->o);
-                                irays.normalize().mul(1300.0f);
-                                particle_flying_flare(player1->o, irays, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
+
+                                particle_flying_flare(player1->o, r==player1 ? player1->o : effectpos, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
                                 playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
                             }
                             break;
 
                         case APT_JUNKIE:
-                            if(r->o.dist(player1->o)/18.f<7.5f && r->mana<150 && r->state==CS_ALIVE && randomevent(0.5f*nbfps) && (r->aptitude==APT_SHOSHONE || r->aptitude==APT_MAGICIEN || r->aptitude==APT_PRETRE || r->aptitude==APT_PHYSICIEN || r->aptitude==APT_ESPION || r->aptitude==APT_VAMPIRE))
+                            if(r->o.dist(player1->o)/18.f<7.5f && r->state==CS_ALIVE && randomevent(0.5f*nbfps) && (r->aptitude==APT_SHOSHONE || r->aptitude==APT_MAGICIEN || r->aptitude==APT_PRETRE || r->aptitude==APT_PHYSICIEN || r->aptitude==APT_ESPION || r->aptitude==APT_VAMPIRE))
                             {
                                 if(r->aptitude==APT_VAMPIRE && r->health<r->maxhealth+250)
                                 {
                                     r->health+=30;
                                     if(r->health>r->maxhealth+250) r->health=r->maxhealth+250;
+                                    particle_flying_flare(player1->o, effectpos, 400, PART_SANTE, 0xFF00FF, 2.5f, 100);
+                                    playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
                                 }
-                                else
+                                else if(r->mana<150)
                                 {
                                     r->mana+=5;
                                     if(r->mana>150) r->mana=150;
+                                    particle_flying_flare(player1->o, effectpos, 400, PART_SPARK, 0xFF00FF, 2.5f, 100);
+                                    playsound(S_REGENJUNKIE, &r->o, 0, 0, 0 , 50, -1, 125);
                                 }
-
-                                vec irays(r->o);
-                                irays.sub(player1->o);
-                                irays.normalize().mul(1300.0f);
-                                particle_flying_flare(player1->o, irays, 400, PART_SPARK, 0xFF00FF, 2.5f, 100);
-                                playsound(r->aptitude==APT_VAMPIRE ? S_REGENMEDIGUN : S_REGENJUNKIE, &r->o, 0, 0, 0 , 50, -1, 125);
                             }
                             break;
                     }

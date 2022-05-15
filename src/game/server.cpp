@@ -3589,6 +3589,26 @@ namespace server
                 break;
             }
 
+            case N_PUSHSTAT:
+            {
+                if(!cq) break;
+
+                int stat = getint(p);
+
+                switch(stat)
+                {
+                    case 0:
+                        cq->state.health+=30;
+                        if(cq->state.health>cq->state.maxhealth+250) cq->state.health=cq->state.maxhealth+250;
+                        break;
+                    case 1:
+                        cq->state.mana+=5;
+                        if(cq->state.mana>150) cq->state.mana=150;
+                        break;
+                }
+                break;
+            }
+
             case N_MAPVOTE:
             {
                 getstring(text, p);

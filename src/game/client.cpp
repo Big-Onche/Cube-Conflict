@@ -1766,12 +1766,11 @@ namespace game
                     int ability = getint(p);
                     switch(ability)
                     {
-                        case 1: d->aptisort1 = getint(p); break;
-                        case 2: d->aptisort2 = getint(p); break;
-                        case 3: d->aptisort3 = getint(p); break;
+                        case 1: d->aptisort1 = getint(p); d->mana-=sorts[abilitydata(d->aptitude)].mana1; break;
+                        case 2: d->aptisort2 = getint(p); d->mana-=sorts[abilitydata(d->aptitude)].mana2; break;
+                        case 3: d->aptisort3 = getint(p); d->mana-=sorts[abilitydata(d->aptitude)].mana3; break;
                         default: return;
                     }
-
                     aptitude(d, ability, false);
                 }
                 break;

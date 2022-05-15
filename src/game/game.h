@@ -281,7 +281,7 @@ enum
     N_SWITCHNAME, N_SWITCHMODEL, N_SWITCHCOLOR, N_SWITCHTEAM,
     N_SERVCMD,
     N_DEMOPACKET,
-    N_SENDCAPE, N_SENDTOMBE, N_SENDDANSE, N_SENDAPTITUDE,
+    N_SENDCAPE, N_SENDTOMBE, N_SENDDANSE, N_SENDAPTITUDE, N_PUSHSTAT,
     N_ANNOUNCE,
     N_SENDABILITY,
     N_IDENTIQUEARME, N_SERVAMBIENT,
@@ -313,7 +313,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_SWITCHNAME, 0, N_SWITCHMODEL, 2, N_SWITCHCOLOR, 2, N_SWITCHTEAM, 2,
     N_SERVCMD, 0,
     N_DEMOPACKET, 0,
-    N_SENDCAPE, 2, N_SENDTOMBE, 2, N_SENDDANSE, 2, N_SENDAPTITUDE, 2,
+    N_SENDCAPE, 2, N_SENDTOMBE, 2, N_SENDDANSE, 2, N_SENDAPTITUDE, 2, N_PUSHSTAT, 2,
     N_ANNOUNCE, 2,
     N_SENDABILITY, 3,
     N_IDENTIQUEARME, 2, N_SERVAMBIENT, 2,
@@ -832,7 +832,7 @@ struct gameent : dynent, gamestate
         hurtchan = -1;
     }
 
-    void stopassit()
+    void stopassist()
     {
         if(alarmchan >= 0) stopsound(S_ASSISTALARM, alarmchan, 100);
         alarmchan = -1;
