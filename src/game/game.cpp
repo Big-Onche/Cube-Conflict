@@ -7,6 +7,12 @@ float killdistance = 0;
 int n_aptitudetueur, n_aptitudevictime, n_killstreakacteur, oldapti;
 bool suicided;
 
+bool randomevent(int probability)
+{
+    switch(rnd(probability)){case 0: return true;}
+    return false;
+}
+
 namespace game
 {
     VARFP(player1_aptitude, 0, 0, 14,
@@ -425,7 +431,7 @@ namespace game
 
             if(player1->aptitude==APT_MEDECIN && !m_teammode && player1->health<player1->maxhealth+200 && player1->state==CS_ALIVE && isconnected())
             {
-                switch(rnd(70))
+                switch(rnd(50))
                 {
                     case 0:
                     player1->health+=30;
@@ -643,22 +649,17 @@ namespace game
         {
             damageblend(damage);
             damagecompass(damage, actor->o);
-
-            switch(rnd(2))
-            {
-                case 0:
-                    if(d->aptitude==APT_PHYSICIEN && d->aptisort1 && d->armour>0) playsound(S_SORTPHY1);
-                    else if(d->armour>0 && actor->gunselect!=GUN_LANCEFLAMMES) playsound(d->armourtype == A_BLUE ? S_BALLEBOUCLIERBOIS : d->armourtype == A_GREEN ? S_BALLEBOUCLIERFER : d->armourtype == A_YELLOW ? S_BALLEBOUCLIEROR : d->armourtype == A_ASSIST ? S_BALLEARMUREASSISTENT : S_BALLEBOUCLIERMAGNETIQUE);
-            }
         }
-        else
+
+        if(randomevent(2))
         {
-            switch(rnd(2))
-            {
-                case 0:
-                    if(d->aptitude==APT_PHYSICIEN && d->aptisort1 && d->armour>0) playsound(S_SORTPHY1, &d->o, 0, 0, 0 , 100, -1, 200);
-                    else if(d->armour>0 && actor->gunselect!=GUN_LANCEFLAMMES) playsound(d->armourtype == A_BLUE ? S_BALLEBOUCLIERBOIS : d->armourtype == A_GREEN ? S_BALLEBOUCLIERFER : d->armourtype == A_YELLOW ? S_BALLEBOUCLIEROR : d->armourtype == A_ASSIST ? S_BALLEARMUREASSISTENT : S_BALLEBOUCLIERMAGNETIQUE, &d->o, 0, 0, 0 , 100, -1, 200);
-            }
+            if(d->aptitude==APT_PHYSICIEN && d->aptisort1 && d->armour>0) playsound(S_SORTPHY1, d==h ? NULL : &d->o, 0, 0, 0 , 100, -1, 200);
+            else if(d->armour>0 && actor->gunselect!=GUN_LANCEFLAMMES)
+                playsound(d->armourtype == A_BLUE ? S_BALLEBOUCLIERBOIS :
+                          d->armourtype == A_GREEN ? S_BALLEBOUCLIERFER :
+                          d->armourtype == A_YELLOW ? S_BALLEBOUCLIEROR :
+                          d->armourtype == A_ASSIST ? S_BALLEARMUREASSISTENT : S_BALLEBOUCLIERMAGNETIQUE,
+                          d==h ? NULL : &d->o, 0, 0, 0 , 100, -1, 200);
         }
 
         damageeffect(damage, d, actor, d!=h, atk);

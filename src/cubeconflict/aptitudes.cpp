@@ -20,7 +20,7 @@ namespace game
 {
     void aptitude(gameent *d, int ability, bool send) //Commandes d'aptitudes
     {
-        if(d->state==CS_DEAD) return;
+        if(d->state==CS_DEAD && !isconnected()) return;
 
         switch(ability)
         {

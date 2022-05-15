@@ -888,12 +888,8 @@ namespace ai
                                 else if (d->mana>=100 && d->o.dist(e->o)>500) aptitude(d, 2);
                                 break;
                             case APT_ESPION:
-                                switch(rnd(2))
-                                {
-                                    case 0: if(d->mana>=40 && d->o.dist(e->o)<700 && !d->aptisort2) aptitude(d, 1); break;
-                                    case 1: if(d->mana>=50 && d->o.dist(e->o)<700 && !d->aptisort1) aptitude(d, 2);
-                                }
-
+                                if(randomevent(2) && d->mana>=40 && d->o.dist(e->o)<700 && !d->aptisort2) aptitude(d, 1);
+                                else if(d->mana>=50 && d->o.dist(e->o)<700 && !d->aptisort1) aptitude(d, 2);
                         }
 
                         int atk = guns[d->gunselect].attacks[ACT_SHOOT];
@@ -1181,7 +1177,6 @@ namespace ai
 
         if(d->aptisort3 && d->aptitude==APT_PHYSICIEN) switch(rnd(30)) {case 1: d->jumping = true;}
         else if(d->gunselect==GUN_ARTIFICE || d->gunselect==GUN_SMAW || d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_ROQUETTES || d->jointmillis) d->jumping = true;
-        else if(d->aptitude==APT_NINJA) switch(rnd(30)) {case 1: d->jumping = true;}
 		else if(!d->ai->dontmove) jumpto(d, b, d->ai->spot);
 
         gameent *e = getclient(d->ai->enemy);
@@ -1209,12 +1204,8 @@ namespace ai
                             if(d->o.dist(f->o)<500) aptitude(d, 2);
                             break;
                         case APT_ESPION:
-                            switch(rnd(2))
-                            {
-                                case 0: if(d->mana>=40 && d->o.dist(f->o)<700 && !d->aptisort2) aptitude(d, 1); break;
-                                case 1: if(d->mana>=50 && d->o.dist(f->o)<700 && !d->aptisort1) aptitude(d, 2);
-                            }
-                            break;
+                            if(randomevent(2) && d->mana>=40 && d->o.dist(e->o)<700 && !d->aptisort2) aptitude(d, 1);
+                            else if(d->mana>=50 && d->o.dist(e->o)<700 && !d->aptisort1) aptitude(d, 2);
                         case APT_NINJA: makeroute(d, b, f->o); break;
                     }
                     enemyok = true;
@@ -1527,7 +1518,7 @@ namespace ai
                     case APT_PRETRE: if(d->mana>30 && d->health<(d->skill/3)) aptitude(d, 2); break;
                     case APT_SHOSHONE: if(d->mana>=100) aptitude(d, 2); break;
                     case APT_PHYSICIEN:
-                        switch(rnd(100)) {case 0: if(d->mana>70) aptitude(d, 3);}
+                        if(randomevent(70) && d->mana>70) aptitude(d, 3);
                         if(d->health<400+d->skill && d->mana>=50) aptitude(d, 2);
                         if(d->health<700 && d->armour<50 && d->mana>=25) aptitude(d, 1);
                         break;
@@ -1535,7 +1526,7 @@ namespace ai
                         if(d->mana>100) aptitude(d, 3);
                 }
 
-                switch(rnd(150)){case 0: bottaunt(d);}
+                if(randomevent(2.5f*nbfps)) bottaunt(d);
 
                 switch(c.type)
                 {

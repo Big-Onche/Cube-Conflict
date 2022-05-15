@@ -605,24 +605,21 @@ namespace game
                 {
                     damageblend(damage);
                     damagecompass(damage, at ? at->o : f->o);
-                    switch(rnd(2))
+
+                    if(randomevent(2))
                     {
-                        case 0:
-                            if(player1->aptitude==APT_PHYSICIEN && player1->aptisort1 && player1->armour>0) playsound(S_SORTPHY1);
-                            else if(player1->armour>0 && atk!=ATK_LANCEFLAMMES_SHOOT) playsound(armoursound);
-                            break;
-                        case 1:
-                            playsound(S_BALLECORPS);
+                        if(player1->aptitude==APT_PHYSICIEN && player1->aptisort1 && player1->armour>0) playsound(S_SORTPHY1);
+                        else if(player1->armour>0 && atk!=ATK_LANCEFLAMMES_SHOOT) playsound(armoursound);
                     }
+                    else playsound(S_BALLECORPS);
                 }
             }
             else
             {
-                switch(rnd(2))
+                if(randomevent(2))
                 {
-                    case 0:
-                        if(f->aptitude==APT_PHYSICIEN && f->aptisort1 && f->armour>0) playsound(S_SORTPHY1, &f->o, 0, 0, 0 , 100, -1, 200);
-                        else if(f->armour>0 && atk!=ATK_LANCEFLAMMES_SHOOT) playsound(armoursound, &f->o, 0, 0, 0 , 100, -1, 200);
+                    if(f->aptitude==APT_PHYSICIEN && f->aptisort1 && f->armour>0) playsound(S_SORTPHY1, &f->o, 0, 0, 0 , 100, -1, 200);
+                    else if(f->armour>0 && atk!=ATK_LANCEFLAMMES_SHOOT) playsound(armoursound, &f->o, 0, 0, 0 , 100, -1, 200);
                 }
             }
         }
@@ -1090,11 +1087,10 @@ namespace game
                 spawnbouncer(d->balles, d->balles, d, BNC_BIGDOUILLES,  bnclifetime+rnd(bnclifetime));
                 particle_flare(d->muzzle, d->muzzle, 100, PART_MINIGUN_MUZZLE_FLASH, d->steromillis ? 0xFF2222 : d->aptisort2 && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFFFFFF, d==hudplayer() ? zoom ? 1.5f : 2.0f : 5.f, d, player1->champimillis ? true : false);
                 if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 100, PART_MINIGUN_MUZZLE_FLASH, 0xFF2222, d==hudplayer() ? zoom ? 1.5f : 2.5f : 6.f, d, player1->champimillis ? true : false);
-                switch(rnd(7))
+                if(randomevent(7))
                 {
-                    case 0:
-                        particle_splash(PART_SMOKE, d==hudplayer() ? 4 : 6, d==hudplayer() ? 350 : 600, d->muzzle, 0x222222, d==hudplayer() ? 3.5f : 6.5f, 40, 500, 0, player1->champimillis ? true : false);
-                        particle_splash(PART_SPARK, d==hudplayer() ? 4 : 7, 40, d->muzzle, 0xFF4400, 0.5f, 300, 500, 0, player1->champimillis ? true : false);
+                    particle_splash(PART_SMOKE, d==hudplayer() ? 4 : 6, d==hudplayer() ? 350 : 600, d->muzzle, 0x222222, d==hudplayer() ? 3.5f : 6.5f, 40, 500, 0, player1->champimillis ? true : false);
+                    particle_splash(PART_SPARK, d==hudplayer() ? 4 : 7, 40, d->muzzle, 0xFF4400, 0.5f, 300, 500, 0, player1->champimillis ? true : false);
                 }
                 adddynlight(hudgunorigin(gun, d->o, to, d), 100, vec(1.25f, 0.75f, 0.3f), 30, 2, DL_FLASH, 0, vec(1.25f, 0.75f, 0.3f), d);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);

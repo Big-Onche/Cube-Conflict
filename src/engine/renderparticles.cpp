@@ -1357,7 +1357,7 @@ static void makeparticles(entity &e)
             }
             regularflame(PART_FLAME, e.o, radius, height, e.attr4 ? colorfromattr(e.attr4) : rndflamecolor, 2, 2.0f+(rnd(2)));
             regularflame(PART_SMOKE, vec(e.o.x, e.o.y, e.o.z + 4.0f*min(radius, height)), radius, height, rndsmokecolor, 1, 4.0f+(rnd(6)), 100.0f, 2750.0f, -15);
-            if(e.attr5==0) switch(rnd(10)){case 0: regularsplash(PART_FIRESPARK, 0xFFFF55, 125, rnd(3)+1, 750+(rnd(750)), offsetvec(e.o, rnd(12)-rnd(24), rnd(12)-rnd(10)), 0.5f+(rnd(18)/12.f), -10);}
+            if(e.attr5==0 && randomevent(0.16f*nbfps)) regularsplash(PART_FIRESPARK, 0xFFFF55, 125, rnd(3)+1, 750+(rnd(750)), offsetvec(e.o, rnd(12)-rnd(24), rnd(12)-rnd(10)), 0.5f+(rnd(18)/12.f), -10);
             break;
         }
         case 1: //steam vent - <dir>
@@ -1420,16 +1420,14 @@ static void makeparticles(entity &e)
             break;
         case 16:
         {
-            switch(rnd(nbfps*5))
+            if(randomevent(5*nbfps))
             {
-                case 0:
-                    vec pos = e.o;
-                    pos.add(vec(-30+rnd(30), -30+rnd(30), -5));
-                    playsound(S_LAVASPLASH, &e.o, 0, 0, 0 , 30, -1, 200);
-                    loopi(6)regularsplash(PART_FIRESPARK, 0xFFBB55, 800+rnd(600), 10, 300+(rnd(500)), pos, 3.f+(rnd(30)/6.f), 200, 0, -1, true);
-                    loopi(4)regularsplash(PART_SMOKE, 0x333333, 400, 3, 1000+(rnd(1000)), pos, 8.f+(rnd(8)), -20, 0, 1, true);
-                    loopi(2)particle_fireball(pos, 20, PART_EXPLOSION, 500, 0xFF9900, 2.5f, false);
-                break;
+                vec pos = e.o;
+                pos.add(vec(-30+rnd(30), -30+rnd(30), -5));
+                playsound(S_LAVASPLASH, &e.o, 0, 0, 0 , 30, -1, 200);
+                loopi(6)regularsplash(PART_FIRESPARK, 0xFFBB55, 800+rnd(600), 10, 300+(rnd(500)), pos, 3.f+(rnd(30)/6.f), 200, 0, -1, true);
+                loopi(4)regularsplash(PART_SMOKE, 0x333333, 400, 3, 1000+(rnd(1000)), pos, 8.f+(rnd(8)), -20, 0, 1, true);
+                loopi(2)particle_fireball(pos, 20, PART_EXPLOSION, 500, 0xFF9900, 2.5f, false);
             }
         }
         break;

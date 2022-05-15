@@ -358,7 +358,7 @@ namespace game
             if(d->inwater && d->physstate<=PHYS_FALL)
             {
                 anim |= (((game::allowmove(d) && (d->move || d->strafe)) || d->vel.z+d->falling.z>0 ? ANIM_SWIM : ANIM_SINK)|ANIM_LOOP)<<ANIM_SECONDARY;
-                if(d->move) {switch(rnd(10)){case 0: particle_splash(PART_EAU, d->armourtype==A_ASSIST ? 3 : 2, 120, d->o, 0x222222, 8.0f+rnd(d->armourtype==A_ASSIST ? 8 : 5), 150, 15);}}
+                if(d->move && randomevent(0.16f*nbfps)) particle_splash(PART_EAU, d->armourtype==A_ASSIST ? 3 : 2, 120, d->o, 0x222222, 8.0f+rnd(d->armourtype==A_ASSIST ? 8 : 5), 150, 15);
             }
             else
             {
@@ -372,7 +372,7 @@ namespace game
                 if(d->timeinair>50) anim |= ((ANIM_JUMP) | ANIM_END) << ANIM_SECONDARY;
                 else if(dir && game::allowmove(d)) anim |= (dir | ANIM_LOOP) << ANIM_SECONDARY;
 
-                if(d->move && d->physstate==PHYS_FLOOR) {switch(rnd(10)){case 0: particle_splash(randomambience && (lookupmaterial(d->feetpos())==MAT_WATER || n_ambiance==4) ? PART_EAU : PART_SMOKE, d->armourtype==A_ASSIST ? 5 : 3, 120, d->feetpos(), randomambience && n_ambiance==4 ? 0x131313 : 0x333022, 6.0f+rnd(d->armourtype==A_ASSIST ? 10 : 5), 150, 15);}}
+                if(d->move && d->physstate==PHYS_FLOOR && randomevent(0.16f*nbfps)) particle_splash(randomambience && (lookupmaterial(d->feetpos())==MAT_WATER || n_ambiance==4) ? PART_EAU : PART_SMOKE, d->armourtype==A_ASSIST ? 5 : 3, 120, d->feetpos(), randomambience && n_ambiance==4 ? 0x131313 : 0x333022, 6.0f+rnd(d->armourtype==A_ASSIST ? 10 : 5), 150, 15);
             }
             if(d->crouching && d->timeinair<50) anim |= (ANIM_CROUCH|ANIM_END)<<ANIM_SECONDARY;
 
@@ -689,7 +689,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape
             a[0] = modelattach("tag_joint", &d->weed);
             rendermodel("hudboost/joint", anim, sway3, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
             if(d->weed.x >= 0) d->weed = calcavatarpos(d->weed, 12);
-            switch(rnd(10)) {case 1: regularflame(PART_SMOKE, d->weed, 2, 3, 0x888888, 1, 1.3f, 50.0f, 1000.0f, -10); particle_splash(PART_FLAME2,  4, 50, d->weed, 0xFF6600, 0.6f, 20, 150);}
+            if(randomevent(10)) {regularflame(PART_SMOKE, d->weed, 2, 3, 0x888888, 1, 1.3f, 50.0f, 1000.0f, -10); particle_splash(PART_FLAME2,  4, 50, d->weed, 0xFF6600, 0.6f, 20, 150);}
         }
 
         rendermodel(gunname, anim, weapzoom.add(sway), d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
