@@ -9,7 +9,7 @@ bool suicided;
 
 bool randomevent(int probability)
 {
-    switch(rnd(probability)){case 0: return true;}
+    switch(rnd(probability==0 ? 1 : probability)){case 0: return true;}
     return false;
 }
 

@@ -325,7 +325,7 @@ namespace game
         }
 
         b->bounces++;
-        if(b->bouncetype == BNC_GIBS && b->bounces < 2) {switch(rnd(3)) {case 0: addstain(STAIN_BLOOD, vec(b->o).sub(vec(surface).mul(b->radius)), surface, 2.96f/b->bounces, bvec(0x60, 0xFF, 0xFF), rnd(4));}}
+        if(b->bouncetype == BNC_GIBS && b->bounces < 2 && randomevent(3)) addstain(STAIN_BLOOD, vec(b->o).sub(vec(surface).mul(b->radius)), surface, 2.96f/b->bounces, bvec(0x60, 0xFF, 0xFF), rnd(4));
         if(b->bouncetype == BNC_GRENADE) addstain(STAIN_PULSE_GLOW, vec(b->o).sub(vec(surface).mul(b->radius)), surface, 4.f, 0x0000FF);
     }
 
@@ -348,9 +348,8 @@ namespace game
                     case BNC_DEBRIS:
                         regular_particle_splash(lookupmaterial(pos)&MAT_WATER ? PART_BULLE : PART_SMOKE, lookupmaterial(pos)&MAT_WATER ? 1 : 3, 250, pos, 0x222222, 2.5f, 50, -50);
                         regular_particle_splash(PART_FLAME1+rnd(2), 2, 75, pos, 0x994400, 0.7f, 30, -30);
-
                         break;
-                    case BNC_GIBS: {switch(rnd(40)) {case 1: regular_particle_splash(PART_BLOOD, 1, 9999, pos, 0x60FFFF, 1.0f, 50);}}
+                    case BNC_GIBS: if(randomevent(40)) regular_particle_splash(PART_BLOOD, 1, 9999, pos, 0x60FFFF, 1.0f, 50);
                 }
             }
 
@@ -1211,16 +1210,10 @@ namespace game
                 break;
         }
 
-        if(d->steromillis>0)
+        if(d->steromillis && randomevent(attacks[atk].specialsounddelay))
         {
-            switch(rnd(attacks[atk].specialsounddelay))
-            {
-                case 0:
-                {
-                    playsound(S_STEROSTIR, d==hudplayer() ? NULL : &d->o, NULL, 0, 0 , 300, -1, 500);
-                    if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 400 && d!=player1) playsound(S_STEROTIRLOIN, &d->o, NULL, 0, 0 , 600, -1, 800);
-                }
-            }
+            playsound(S_STEROSTIR, d==hudplayer() ? NULL : &d->o, NULL, 0, 0 , 300, -1, 500);
+            if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 400 && d!=player1) playsound(S_STEROTIRLOIN, &d->o, NULL, 0, 0 , 600, -1, 800);
         }
 
         looped = false;

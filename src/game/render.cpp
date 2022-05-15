@@ -521,6 +521,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape
                                        d->o.dist(camera1->o)<75 ? 1.35f : 0.02f);
                     }
                 }
+
                 if((player1->aptitude==APT_JUNKIE && team==1)&&(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION))
                     particle_meter(d->o.dist(camera1->o)<75 ? (d->abovehead().add(camera1->o)).div(vec(2,2,2)) : posAtofrontofposB,
                                     d->mana/150.0f, PART_METER,
@@ -541,35 +542,40 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape
                     particle_splash(PART_VISEUR,  1,  1, d->o.dist(camera1->o)<75 ? (posC.add(camera1->o)).div(vec(2,2,2)) : posAtofrontofposB, 0x555555, d->o.dist(camera1->o)<75 ? 3.f : 0.05f, d->o.dist(camera1->o)<250 ? 1.f : d->o.dist(camera1->o)/250.f, 1, 0, false, d->o.dist(camera1->o)<150 ? 1.f : d->o.dist(camera1->o)/150.f);
                 }
 
-                if(d->aptitude==APT_MAGICIEN)
+                vec pos = d->abovehead().add(vec(0, 0,-12));
+
+                switch(d->aptitude)
                 {
-                    vec pos = d->abovehead().add(vec(0, 0,-12));
-                    if(d->aptisort1) particle_splash(PART_SMOKE, 2, 120, d->o, 0xFF33FF, 10+rnd(5), 400,400);
-                    if(d->aptisort3) particle_fireball(pos , 15.2f, PART_EXPLOSION, 5,  0x880088, 13.0f);
+                    case APT_MAGICIEN:
+                        if(d->aptisort1) particle_splash(PART_SMOKE, 2, 120, d->o, 0xFF33FF, 10+rnd(5), 400,400);
+                        if(d->aptisort3) particle_fireball(pos , 15.2f, PART_EXPLOSION, 5,  0x880088, 13.0f);
+                        break;
+                    case APT_PHYSICIEN:
+                        if(d->aptisort2 && randomevent(0.05f*nbfps)) particle_splash(PART_SMOKE, 1, 300, d->o, 0x7777FF, 10+rnd(5), 400, 400);
+                        if(d->aptisort3 && randomevent(0.03f*nbfps))
+                        {
+                            particle_splash(PART_SMOKE,  1,  150, d->feetpos(), 0x8888BB, 7+rnd(4),  100, -200);
+                            particle_splash(PART_FLAME1+rnd(2),  5,  100, d->feetpos(), 0xFF6600, 1+rnd(2),  100, -20);
+                        }
+                        break;
+                    case APT_PRETRE:
+                        if(d->aptisort2) particle_fireball(pos , 16.0f, PART_ONDECHOC, 5, 0xFFFF00, 16.0f);
+                        break;
+                    case APT_SHOSHONE:
+                        if(d->aptisort1 && randomevent(0.03f*nbfps)) particle_splash(PART_SPARK, 1, 150, d->o, 0x555555, 1+rnd(2), 200, 150);
+                        if(d->aptisort2 && randomevent(0.03f*nbfps)) particle_splash(PART_SPARK, 1, 150, d->o, 0x992222, 1+rnd(2), 200, 150);
+                        if(d->aptisort3 && randomevent(0.03f*nbfps)) particle_splash(PART_SPARK, 1, 150, d->o, 0xFF0000, 1+rnd(2), 200, 150);
                 }
-                else if(d->aptitude==APT_PHYSICIEN)
-                {
-                    if(d->aptisort2) switch(rnd(3)) {case 0: particle_splash(PART_SMOKE,  1,  300, d->o, 0x7777FF, 10+rnd(5),  400, 400); }
-                    if(d->aptisort3) switch(rnd(2)) {case 0: particle_splash(PART_SMOKE,  1,  150, d->feetpos(), 0x8888BB, 7+rnd(4),  100, -200); particle_splash(PART_FLAME1+rnd(2),  5,  100, d->feetpos(), 0xFF6600, 1+rnd(2),  100, -20); }
-                }
-                else if (d->aptitude==APT_PRETRE)
-                {
-                    vec pos = d->abovehead().add(vec(0, 0,-12));
-                    if(d->aptisort2) particle_fireball(pos , 16.0f, PART_ONDECHOC, 5,  0xFFFF00, 16.0f);
-                }
-                if(d->ragemillis) switch(rnd(2)){case 0: particle_splash(PART_SMOKE, 2, 150, d->o, 0xFF3300, 12+rnd(5),  400, 200);}
-                if(d->jointmillis) switch(rnd(5)) {case 1: regularflame(PART_SMOKE, d->abovehead().add(vec(-12, 5, -19)), 2, 3, 0x888888, 1, 1.6f, 50.0f, 1000.0f, -10);}
+
+                if(d->ragemillis && randomevent(0.03f*nbfps)) particle_splash(PART_SMOKE, 2, 150, d->o, 0xFF3300, 12+rnd(5), 400, 200);
+                if(d->jointmillis && randomevent(0.085f*nbfps)) regularflame(PART_SMOKE, d->abovehead().add(vec(-12, 5, -19)), 2, 3, 0x888888, 1, 1.6f, 50.0f, 1000.0f, -10);
                 if(d->armourtype==A_ASSIST && d->armour>0)
                 {
-                    if(d->armour<1500) {switch(rnd(d->armour<1000 ? 8 : 14)){case 0: regularflame(PART_SMOKE, d->o, 15, 3, d->armour<750 ? 0x333333 : 0x888888, 1, 3.3f, 50.0f, 1000.0f, -10);}}
-                    if(d->armour<1250) {switch(rnd(d->armour<600 ? 8 : 14)){case 0: particle_splash(PART_FLAME2,  1, 300, d->o, 0x992200, 2.5f, 50, -20);}}
-                }
-                else if(d->aptitude==APT_SHOSHONE)
-                {
-                    vec pos = d->abovehead().add(vec(0, 0,-12));
-                    if(d->aptisort1) switch(rnd(2)) {case 0: particle_splash(PART_SPARK,  1,  150, d->o, 0x555555, 1+rnd(2), 200, 150); }
-                    if(d->aptisort2) switch(rnd(2)) {case 0: particle_splash(PART_SPARK,  1,  150, pos, 0x992222, 1+rnd(2), 200, 150); }
-                    if(d->aptisort3) switch(rnd(2)) {case 0: particle_splash(PART_SPARK,  1,  150, d->o, 0xFF0000, 1+rnd(2), 200, 150); }
+                    if(d->armour<1500 && randomevent(0.13f*nbfps))
+                    {
+                        regularflame(PART_SMOKE, d->o, 15, 3, d->armour<750 ? 0x222222 : 0x888888, 1, d->armour<750 ? 7.f : 5.f, 50.0f, 1500.0f, -10);
+                        if(d->armour<1000) particle_splash(PART_FLAME2, d->armour<500 ? 2 : 1, 500, d->o, 0x992200, d->armour<500 ? 5.f : 3.f, 50, -20);
+                    }
                 }
             }
         }
