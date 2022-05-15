@@ -541,28 +541,15 @@ namespace game
                     normaldamage = false;
                 }
                 break;
+            case APT_VAMPIRE:
+                particle_textcopy(actor->abovehead(), tempformatstring("%.1f", damage*0.5f), PART_TEXT, actor->steromillis > 0 ? 2500 : 1500, 0xBBDDBB, 3.5f, -8);
+                break;
             case APT_SHOSHONE:
                 if(d->aptisort1) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage/1.3f), PART_TEXT, 2500, 0xAAAA00, actor==player1 ? 10.0f : 7.0f, -8); normaldamage = false; }
                 if(actor->aptisort3) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.3f), PART_TEXT, 2500, 0xFF3333, actor==player1 ? 10.0f : 7.0f, -8); normaldamage = false; }
                 break;
         }
         if(normaldamage) particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.0f), PART_TEXT, actor->steromillis > 0 ? 2500 : 1500, actor->steromillis > 0 ? 0xFF0000 : 0xFF4400, actor==player1 ? 7.0f : 3.0f, -8);
-    }
-
-    void regeneffect(int damage, gameent *d, gameent *actor, bool thirdperson)
-    {
-        vec p = d->o;
-        p.z += 0.6f*(d->eyeheight + d->aboveeye) - d->eyeheight;
-
-        if(thirdperson && actor->health<actor->maxhealth)
-        {
-            actor->steromillis > 0 ? damage*=actor->aptitude==13 ? 3 : 2 : damage+=0;
-            damage = (damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[d->aptitude].apt_resistance);
-            if(d->aptisort3>0 && d->aptitude==APT_MAGICIEN) damage = damage/5.0f;
-            damage = damage/10.0f;
-
-            particle_textcopy(actor->abovehead(), tempformatstring("%.1f", damage*1.0f), PART_TEXT, actor->steromillis > 0 ? 2500 : 1500, 0xBBDDBB, 3.5f, -8);
-        }
     }
 
     void gibeffect(int damage, const vec &vel, gameent *d)

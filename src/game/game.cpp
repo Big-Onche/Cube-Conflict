@@ -624,7 +624,6 @@ namespace game
         }
 
         damageeffect(damage, d, actor, d!=h, atk);
-        if(d->aptitude==APT_VAMPIRE) regeneffect(damage, d, actor);
 
         ai::damaged(d, actor);
 

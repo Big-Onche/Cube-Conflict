@@ -1022,7 +1022,6 @@ namespace game
     extern void explode(bool local, gameent *owner, const vec &v, const vec &vel, dynent *safe, int dam, int atk);
     extern void explodeeffects(int atk, gameent *d, bool local, int id = 0);
     extern void damageeffect(int damage, gameent *d, gameent *actor, bool thirdperson = true, int atk = 0);
-    extern void regeneffect(int damage, gameent *d, gameent *actor, bool thirdperson = true);
     extern void gibeffect(int damage, const vec &vel, gameent *d);
     extern float intersectdist;
     extern bool intersect(dynent *d, const vec &from, const vec &to, float margin = 0, float &dist = intersectdist);
