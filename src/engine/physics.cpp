@@ -1717,7 +1717,7 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
         if(pl->jumping && allowmove)
         {
             pl->jumping = false;
-            if(pl->timeinair && (aptitude==APT_NINJA || assist || (aptitude==APT_KAMIKAZE && aptisort))) pl->falling = vec(0, 0, 0);
+            if(pl->timeinair && (aptitude==APT_NINJA || assist || jointmillis || (aptitude==APT_KAMIKAZE && aptisort))) pl->falling = vec(0, 0, 0);
             pl->vel.z = max(pl->vel.z, JUMPVEL);  // physics impulse upwards
             if(water && aptitude!=APT_NINJA) { pl->vel.x /= 8.f; pl->vel.y /= 8.f; } // dampen velocity change even harder, gives correct water feel
 
