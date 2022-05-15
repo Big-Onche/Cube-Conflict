@@ -1204,9 +1204,8 @@ namespace ai
                             if(d->o.dist(f->o)<500) aptitude(d, 2);
                             break;
                         case APT_ESPION:
-                            if(randomevent(2) && d->mana>=40 && d->o.dist(e->o)<700 && !d->aptisort2) aptitude(d, 1);
-                            else if(d->mana>=50 && d->o.dist(e->o)<700 && !d->aptisort1) aptitude(d, 2);
-                        case APT_NINJA: makeroute(d, b, f->o); break;
+                            if(randomevent(2) && d->mana>=40 && d->o.dist(f->o)<700 && !d->aptisort2) aptitude(d, 1);
+                            else if(d->mana>=50 && d->o.dist(f->o)<700 && !d->aptisort1) aptitude(d, 2);
                     }
                     enemyok = true;
                     e = f;
