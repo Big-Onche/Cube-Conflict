@@ -282,77 +282,57 @@ namespace game
                 if(d->steromillis || d->epomillis || d->jointmillis || d->champimillis) entities::checkboosts(curtime, d);
                 if(d->ragemillis || d->aptisort1 || d->aptisort2 || d->aptisort3) entities::checkaptiskill(curtime, d);
 
-                if(d->health<=d->maxhealth+200 && d->state==CS_ALIVE && !m_teammode && d->aptitude==APT_MEDECIN)
+                if(!m_teammode && d->aptitude==APT_MEDECIN && d->health<d->maxhealth+250 && randomevent(0.7f*nbfps))
                 {
-                    switch(rnd(60))
-                    {
-                        case 0:
-                        d->health+=30;
-                        particle_splash(PART_SANTE, 1, 400, d->o, 0xFFFFFF, 0.5f+rnd(3),  400, 200);
-                        if(d->health>d->maxhealth+200) d->health=d->maxhealth+200;
-                        playsound(S_REGENMEDIGUN, &d->o, 0, 0, 0 , 50, -1, 125);
-                    }
+                    d->health+=30;
+                    particle_splash(PART_SANTE, 1, 400, d->o, 0xFFFFFF, 0.5f+rnd(3), 400, 200);
+                    if(d->health>d->maxhealth+250) d->health=d->maxhealth+250;
+                    playsound(S_REGENMEDIGUN, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 50, -1, 125);
                 }
-                else if(players[i]->aptitude==APT_MEDECIN)
+                else if(players[i]->aptitude==APT_MEDECIN || players[i]->aptitude==APT_JUNKIE)
                 {
                     gameent *h = players[i];
+
                     loopv(players)
                     {
                         gameent *r = players[i];
-                        switch(rnd(60))
+
+                        switch(h->aptitude)
                         {
-                            case 0:
-                            {
-                                if(r->o.dist(h->o)/18.f<6 && r->health<r->maxhealth+200 && h->state==CS_ALIVE && r->state==CS_ALIVE)
+                            case APT_MEDECIN:
+                                if(r->o.dist(h->o)/18.f<7.5f && r->health<r->maxhealth+250 && h->state==CS_ALIVE && r->state==CS_ALIVE && isteam(h->team, r->team) && randomevent(0.7f*nbfps))
                                 {
-                                    if(isteam(h->team, r->team))
+                                    r->health+=30;
+                                    if(r->health>r->maxhealth+250) r->health=r->maxhealth+250;
+                                    vec irays(r->o);
+                                    irays.sub(h->o);
+                                    irays.normalize().mul(1300.0f);
+                                    particle_flying_flare(h->o, irays, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
+                                    playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
+                                }
+                                break;
+
+                            case APT_JUNKIE:
+                                if(r->o.dist(h->o)/18.f<7.5f && r->mana<150 && r->state==CS_ALIVE && randomevent(0.5f*nbfps) && (r->aptitude==APT_SHOSHONE || r->aptitude==APT_MAGICIEN || r->aptitude==APT_PRETRE || r->aptitude==APT_PHYSICIEN || r->aptitude==APT_ESPION || r->aptitude==APT_VAMPIRE))
+                                {
+                                    if(r->aptitude==APT_VAMPIRE && r->health<r->maxhealth+250)
                                     {
                                         r->health+=30;
-                                        vec irays(r->o);
-                                        irays.sub(h->o);
-                                        irays.normalize().mul(1300.0f);
-                                        particle_flying_flare(h->o, irays, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
-                                        if(r->health>r->maxhealth+200) r->health=r->maxhealth+200;
-                                        playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
+                                        if(r->health>r->maxhealth+250) r->health=r->maxhealth+250;
                                     }
+                                    else
+                                    {
+                                        r->mana+=5;
+                                        if(r->mana>150) r->mana=150;
+                                    }
+
+                                    vec irays(r->o);
+                                    irays.sub(h->o);
+                                    irays.normalize().mul(1300.0f);
+                                    particle_flying_flare(h->o, irays, 400, PART_SPARK, 0xFF00FF, 2.5f, 100);
+                                    playsound(r->aptitude==APT_VAMPIRE ? S_REGENMEDIGUN : S_REGENJUNKIE, &r->o, 0, 0, 0 , 50, -1, 125);
                                 }
-                            }
-                        }
-                    }
-                }
-                else if(players[i]->aptitude==APT_JUNKIE)
-                {
-                    gameent *h = players[i];
-                    loopv(players)
-                    {
-                        gameent *r = players[i];
-                        if((r->o.dist(h->o)/18.f<6 && r->mana<150 && isteam(h->team, r->team) && r->state==CS_ALIVE)&&(r->aptitude==APT_SHOSHONE || r->aptitude==APT_MAGICIEN || r->aptitude==APT_PRETRE || r->aptitude==APT_PHYSICIEN || r->aptitude==APT_ESPION))
-                        {
-                            switch(rnd(60))
-                            {
-                                case 0:
-                                r->mana+=5;
-                                vec irays(r->o);
-                                irays.sub(h->o);
-                                irays.normalize().mul(1300.0f);
-                                particle_flying_flare(h->o, irays, 400, PART_SPARK, 0xFF00FF, 0.5f+rnd(3), 100);
-                                if(r->mana>150) r->mana=150;
-                                playsound(S_REGENJUNKIE, &r->o, 0, 0, 0 , 50, -1, 125);
-                            }
-                        }
-                        else if((r->o.dist(h->o)/18.f<6 && r->health<r->maxhealth+200 && r->state==CS_ALIVE)&&(r->aptitude==APT_VAMPIRE))
-                        {
-                            switch(rnd(35))
-                            {
-                                case 0:
-                                r->health+=30;
-                                vec irays(r->o);
-                                irays.sub(h->o);
-                                irays.normalize().mul(1300.0f);
-                                particle_flying_flare(h->o, irays, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
-                                if(r->health>r->maxhealth+200) r->health=r->maxhealth+200;
-                                playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
-                            }
+                                break;
                         }
                     }
                 }
@@ -429,77 +409,55 @@ namespace game
             if(player1->ragemillis || player1->vampimillis || player1->aptisort1 || player1->aptisort2 || player1->aptisort3) entities::checkaptiskill(curtime, player1);
             if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION) updatespecials(player1);
 
-            if(player1->aptitude==APT_MEDECIN && !m_teammode && player1->health<player1->maxhealth+200 && player1->state==CS_ALIVE && isconnected())
+            if(!m_teammode && player1->aptitude==APT_MEDECIN && player1->health<player1->maxhealth+250 && randomevent(0.7f*nbfps) && isconnected())
             {
-                switch(rnd(50))
-                {
-                    case 0:
-                    player1->health+=30;
-                    particle_splash(PART_SANTE, 1, 400, player1->feetpos(), 0xFFFFFF, 0.5f+rnd(3),  400, 200);
-                    if(player1->health>player1->maxhealth+200) player1->health=player1->maxhealth+200;
-                    playsound(S_REGENMEDIGUN, &player1->o, 0, 0, 0 , 50, -1, 125);
-                }
+                player1->health+=30;
+                particle_splash(PART_SANTE, 1, 400, player1->o, 0xFFFFFF, 0.5f+rnd(3), 400, 200);
+                if(player1->health > player1->maxhealth+250) player1->health = player1->maxhealth+250;
+                playsound(S_REGENMEDIGUN);
             }
-
-            loopv(players)
+            else if((player1->aptitude==APT_MEDECIN || player1->aptitude==APT_JUNKIE) && isconnected())
             {
-                if(players[i]->aptitude==APT_MEDECIN)
+                loopv(players)
                 {
-                    gameent *h = players[i];
-                    loopv(players)
+                    gameent *r = players[i];
+
+                    switch(player1->aptitude)
                     {
-                        switch(rnd(60))
-                        {
-                            case 0:
+                        case APT_MEDECIN:
+                            if(r->o.dist(player1->o)/18.f<7.5f && r->health<r->maxhealth+250 && player1->state==CS_ALIVE && r->state==CS_ALIVE && isteam(player1->team, r->team) && randomevent(0.7f*nbfps))
                             {
-                                if(players[i]->o.dist(h->o)/18.f<6 && players[i]->health<players[i]->maxhealth+200 && isteam(h->team, players[i]->team) && h->state==CS_ALIVE && m_teammode)
+                                r->health+=30;
+                                if(r->health>r->maxhealth+250) r->health=r->maxhealth+250;
+                                vec irays(r->o);
+                                irays.sub(player1->o);
+                                irays.normalize().mul(1300.0f);
+                                particle_flying_flare(player1->o, irays, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
+                                playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
+                            }
+                            break;
+
+                        case APT_JUNKIE:
+                            if(r->o.dist(player1->o)/18.f<7.5f && r->mana<150 && r->state==CS_ALIVE && randomevent(0.5f*nbfps) && (r->aptitude==APT_SHOSHONE || r->aptitude==APT_MAGICIEN || r->aptitude==APT_PRETRE || r->aptitude==APT_PHYSICIEN || r->aptitude==APT_ESPION || r->aptitude==APT_VAMPIRE))
+                            {
+                                if(r->aptitude==APT_VAMPIRE && r->health<r->maxhealth+250)
                                 {
-                                    players[i]->health+=30;
-                                    vec irays(players[i]->o);
-                                    irays.sub(h->o);
-                                    irays.normalize().mul(1300.0f);
-                                    particle_flying_flare(h->o, irays, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
-                                    if(players[i]->health>players[i]->maxhealth+200) players[i]->health=players[i]->maxhealth+200;
-                                    playsound(S_REGENMEDIGUN, &h->o, 0, 0, 0 , 50, -1, 125);
+                                    r->health+=30;
+                                    if(r->health>r->maxhealth+250) r->health=r->maxhealth+250;
                                 }
-                            }
-                        }
-                    }
-                }
-                else if(players[i]->aptitude==APT_JUNKIE)
-                {
-                    gameent *h = players[i];
-                    loopv(players)
-                    {
-                        if((players[i]->o.dist(h->o)/18.f<6 && players[i]->mana<150 && isteam(h->team, players[i]->team) && h->state==CS_ALIVE) && (players[i]->aptitude==APT_SHOSHONE || players[i]->aptitude==APT_MAGICIEN || players[i]->aptitude==APT_PRETRE || players[i]->aptitude==APT_PHYSICIEN || players[i]->aptitude==APT_ESPION))
-                        {
-                            switch(rnd(60))
-                            {
-                                case 0:
-                                players[i]->mana+=5;
-                                vec irays(players[i]->o);
-                                irays.sub(h->o);
+                                else
+                                {
+                                    r->mana+=5;
+                                    if(r->mana>150) r->mana=150;
+                                }
+
+                                vec irays(r->o);
+                                irays.sub(player1->o);
                                 irays.normalize().mul(1300.0f);
-                                particle_flying_flare(h->o, irays, 400, PART_SPARK, 0xFF00FF, 0.5f+rnd(3), 100);
-                                if(players[i]->mana>150) players[i]->mana=150;
-                                playsound(S_REGENJUNKIE, &h->o, 0, 0, 0 , 50, -1, 125);
+                                particle_flying_flare(player1->o, irays, 400, PART_SPARK, 0xFF00FF, 2.5f, 100);
+                                playsound(r->aptitude==APT_VAMPIRE ? S_REGENMEDIGUN : S_REGENJUNKIE, &r->o, 0, 0, 0 , 50, -1, 125);
                             }
-                        }
-                        else if((players[i]->o.dist(h->o)/18.f<6 && players[i]->health<players[i]->maxhealth+200 && h->state==CS_ALIVE)&&(players[i]->aptitude==APT_VAMPIRE))
-                        {
-                            switch(rnd(35))
-                            {
-                                case 0:
-                                players[i]->health+=30;
-                                vec irays(players[i]->o);
-                                irays.sub(h->o);
-                                irays.normalize().mul(1300.0f);
-                                particle_flying_flare(h->o, irays, 400, PART_SPARK, 0xFF00FF, 0.5f+rnd(3), 100);
-                                particle_flying_flare(h->o, irays, 400, PART_SANTE, 0xFF00FF, 0.5f+rnd(3), 100);
-                                if(players[i]->health>players[i]->maxhealth+200) players[i]->health=players[i]->maxhealth+200;
-                                playsound(S_REGENMEDIGUN, &h->o, 0, 0, 0 , 50, -1, 125);
-                            }
-                        }
+                            break;
                     }
                 }
             }
