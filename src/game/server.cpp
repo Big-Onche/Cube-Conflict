@@ -2281,21 +2281,18 @@ namespace server
 
     void dodamage(clientinfo *target, clientinfo *actor, int damage, int atk, const vec &hitpush = vec(0, 0, 0))
     {
-        if(actor!=target)
+        if(actor!=target && isteam(target->team, actor->team))
         {
-            if(isteam(target->team, actor->team))
+            if(teamkill)
             {
-                if(teamkill)
+                switch(actor->aptitude)
                 {
-                    switch(actor->aptitude)
-                    {
-                        case APT_MEDECIN: damage=0;
-                        case APT_JUNKIE: damage/=1.5f;
-                        default: damage/=3;
-                    }
+                    case APT_MEDECIN: return;
+                    case APT_JUNKIE: damage/=1.5f;
+                    default: damage/=3;
                 }
-                else return;
             }
+            else return;
         }
 
         servstate &ts = target->state;
@@ -2305,12 +2302,11 @@ namespace server
         damage = (damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[target->aptitude].apt_resistance);
 
         //Dommages spéciaux d'aptitudes
-        float campdeg = (as.o.dist(ts.o)/1800.f)+1.f;
         switch(actor->aptitude)
         {
             case APT_AMERICAIN: {if(atk==ATK_NUKE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_CAMPOUZE_SHOOT) damage *= 1.5f; break;}
             case APT_MAGICIEN: {if(as.aptisort2) damage *= 1.25f; break;}
-            case APT_CAMPEUR: damage *= campdeg; break;
+            case APT_CAMPEUR: damage *= ((as.o.dist(ts.o)/1800.f)+1.f); break;
             case APT_VIKING: {if(as.ragemillis) damage *=1.25f;} break;
             case APT_SHOSHONE: {if(as.aptisort3) damage *= 1.3f; break;}
         }

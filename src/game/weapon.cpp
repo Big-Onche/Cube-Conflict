@@ -491,20 +491,22 @@ namespace game
         if(d==player1) return;
         vec p = d->o;
         p.z += 0.6f*(d->eyeheight + d->aboveeye) - d->eyeheight;
-        if(d->armourtype!=A_MAGNET)
-        {
-            if(blood) particle_splash(PART_BLOOD, damage > 300 ? 3 : damage/100, 1000, p, 0x60FFFF, 2.96f);
-            if(damage>=600) playsound(S_SANG, &d->o, 0, 0, 0 , 100, -1, 250);
-            gibeffect(damage, vec(0,0,0), d);
-        }
 
         damage = (damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[d->aptitude].apt_resistance); //Dégats de base
         actor->steromillis > 0 ? damage*=actor->aptitude==13 ? 3 : 2 : damage+=0; //Stéros ou non
         if(d->aptisort3>0 && d->aptitude==APT_MAGICIEN) damage = damage/5.0f;
         damage = damage/10.f;
 
-        if(isteam(d->team, actor->team) && actor!=d && actor->aptitude!=APT_MEDECIN)
+        if(d->armourtype!=A_MAGNET)
         {
+            if(blood) particle_splash(PART_BLOOD, damage > 300 ? 3 : damage/100, 1000, p, 0x60FFFF, 2.96f);
+            if(damage>=750) playsound(S_SANG, &d->o, 0, 0, 0 , 100, -1, 250);
+            gibeffect(!isteam(d->team, actor->team) ? damage : actor->aptitude==APT_MEDECIN ? 0 : actor->aptitude==APT_JUNKIE ? damage/=1.5f : damage/=3.f, vec(0,0,0), d);
+        }
+
+        if(isteam(d->team, actor->team) && actor!=d)
+        {
+            if(actor->aptitude==APT_MEDECIN) return;
             damage/=(actor->aptitude==APT_JUNKIE ? 1.5f : 3.f); //Divisé si allié sauf sois-même
             particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.0f), PART_TEXT, actor->steromillis > 0 ? 2500 : 1500, 0x666666, actor==player1 ? 5.0f : 2.2f, -8);
             return;
@@ -553,7 +555,7 @@ namespace game
 
     void gibeffect(int damage, const vec &vel, gameent *d)
     {
-        if(damage < 0) return;
+        if(damage <= 0) return;
         loopi(damage/300) spawnbouncer(d->o, vec(0,0,0), d, BNC_GIBS);
     }
 
