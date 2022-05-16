@@ -224,6 +224,37 @@ namespace game
 
     void preloadplayermodel()
     {
+        loopi(5)
+        {
+            preloadmodel(gfx::getshielddir(i, 20*(i+1), false, true));
+            preloadmodel(gfx::getshielddir(i, 20*(i+1), true, true));
+            conoutf("%s", gfx::getshielddir(i, 20*(i+1), true, true));
+        }
+
+        loopi(13)
+        {
+            preloadmodel(customscapes[i].team1capedir);
+            preloadmodel(customscapes[i].team2capedir);
+        }
+
+        loopi(15)
+        {
+            preloadmodel(aptitudes[i].apt_tete);
+        }
+
+        loopi(4)
+        {
+            loadmodel(costumes[i].village, NULL, false);
+            loadmodel(costumes[i].usine, NULL, false);
+            loadmodel(costumes[i].faille, NULL, false);
+            loadmodel(costumes[i].lune, NULL, false);
+            loadmodel(costumes[i].chateaux, NULL, false);
+            loadmodel(costumes[i].volcan, NULL, false);
+        }
+
+        loadmodel("smileys/armureassistee", NULL, false);
+        loadmodel("smileys/armureassistee/red", NULL, false);
+
         loopi(sizeof(playermodels)/sizeof(playermodels[0]))
         {
             const playermodelinfo *mdl = getplayermodelinfo(i);
@@ -324,7 +355,7 @@ namespace game
         ////////Boucliers////////
         if(d->armour && d->state == CS_ALIVE && camera1->o.dist(d->o) <= maxmodelradiusdistance*10)
         {
-            a[ai++] = modelattach("tag_shield", gfx::getshielddir(d), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+            a[ai++] = modelattach("tag_shield", gfx::getshielddir(d->armourtype, d->armour), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
         ////////Boosts////////
         if(d->jointmillis) a[ai++] = modelattach("tag_boost1", "boosts/joint", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
@@ -713,7 +744,7 @@ void renderplayerui(gameent *d, const playermodelinfo &mdl, int smiley, int cape
             sway2.z += (swayup/floatdivfactor)*(fabs(sinf(steps)) - 1);
             if(d->armourtype==A_ASSIST || !zoom) sway2.add(swaydir).add(d->o);
 
-            rendermodel(gfx::getshielddir(d, true), anim, sway2, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
+            rendermodel(gfx::getshielddir(d->armourtype, d->armour, true), anim, sway2, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
 
             if(d->armourtype!=A_ASSIST) return;
             modelattach a[2];

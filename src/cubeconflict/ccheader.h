@@ -114,7 +114,7 @@ namespace gfx
     extern void projexplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk);
     extern void projgunhit(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk);
     extern void instantrayhit(const vec &from, const vec &to, const vec &muzzle, int atk);
-    extern const char *getshielddir(gameent *d, bool hud = false);
+    extern const char *getshielddir(int armourtype, int armourval, bool hud = false, bool preload = false);
 }
 
 //HUD

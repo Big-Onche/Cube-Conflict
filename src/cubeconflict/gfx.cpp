@@ -85,6 +85,7 @@ namespace gfx
                 return;
 
             case ATK_M32_SHOOT:
+
                 loopi(3) particle_splash(PART_SPARK, 8, 150+rnd(150), v, owner->steromillis ? 0xFF0000 : 0xFFFFFF,  2.0f+rnd(2), 1500+rnd(2250), 1500+rnd(2250), 0, champicolor);
                 loopi(2) particle_splash(PART_SMOKE, 7, 1300+rnd(800), v, 0x555555, 40.0f, 150+rnd(150), 300+rnd(700), 0, champicolor);
 
@@ -204,21 +205,36 @@ namespace gfx
                 return;
 
             case ATK_LANCEFLAMMES_SHOOT:
-                switch(rnd(2)){case 0: addstain(STAIN_BRULAGE, to, dir, 20.0f);}
+                if(randomevent(2)) addstain(STAIN_BRULAGE, to, dir, 20.0f);
                 return;
         }
     }
 
-    string bouclier;
-    const char *getshielddir(gameent *d, bool hud) //récupère l'id d'un bouclier
+    void shooteffects(const vec &from, const vec &to, const vec &muzzle, int atk)
     {
-        switch(d->armourtype)
+
+    }
+
+    string bouclier;
+    const char *getshielddir(int armourtype, int armourval, bool hud, bool preload) //récupère l'id d'un bouclier
+    {
+        switch(armourtype)
         {
-            case A_BLUE:    {int shieldvalue = d->armour<=150 ? 20 : d->armour<=300  ? 40 : d->armour<=450  ? 60 : d->armour<=600  ? 80 : 100; formatstring(bouclier, "%s%s%d", hud ? "hudshield/" : "worldshield/", "bois/", shieldvalue);} break;
-            case A_GREEN:   {int shieldvalue = d->armour<=250 ? 20 : d->armour<=500  ? 40 : d->armour<=750  ? 60 : d->armour<=1000 ? 80 : 100; formatstring(bouclier, "%s%s%d", hud ? "hudshield/" : "worldshield/", "fer/", shieldvalue);} break;
-            case A_MAGNET:  {int shieldvalue = d->armour<=300 ? 20 : d->armour<=600  ? 40 : d->armour<=900  ? 60 : d->armour<=1200 ? 80 : 100; formatstring(bouclier, "%s%s%d", hud ? "hudshield/" : "worldshield/", "magnetique/", shieldvalue);} break;
-            case A_YELLOW:  {int shieldvalue = d->armour<=400 ? 20 : d->armour<=800  ? 40 : d->armour<=1200 ? 60 : d->armour<=1600 ? 80 : 100; formatstring(bouclier, "%s%s%d", hud ? "hudshield/" : "worldshield/", "or/", shieldvalue);} break;
-            case A_ASSIST:  {int shieldvalue = d->armour<=600 ? 20 : d->armour<=1200 ? 40 : d->armour<=1800 ? 60 : d->armour<=2400 ? 80 : 100; formatstring(bouclier, "%s%d", "hudshield/armureassistee/", shieldvalue);} break;
+            case A_BLUE:
+                {int shieldvalue = armourval<=150 ? 20 : armourval<=300  ? 40 : armourval<=450  ? 60 : armourval<=600  ? 80 : 100; formatstring(bouclier, "%s%s%d", hud ? "hudshield/" : "worldshield/", "bois/", preload ? armourval : shieldvalue);}
+                break;
+            case A_GREEN:
+                {int shieldvalue = armourval<=250 ? 20 : armourval<=500  ? 40 : armourval<=750  ? 60 : armourval<=1000 ? 80 : 100; formatstring(bouclier, "%s%s%d", hud ? "hudshield/" : "worldshield/", "fer/", preload ? armourval : shieldvalue);}
+                break;
+            case A_MAGNET:
+                {int shieldvalue = armourval<=300 ? 20 : armourval<=600  ? 40 : armourval<=900  ? 60 : armourval<=1200 ? 80 : 100; formatstring(bouclier, "%s%s%d", hud ? "hudshield/" : "worldshield/", "magnetique/", preload ? armourval : shieldvalue);}
+                break;
+            case A_YELLOW:
+                {int shieldvalue = armourval<=400 ? 20 : armourval<=800  ? 40 : armourval<=1200 ? 60 : armourval<=1600 ? 80 : 100; formatstring(bouclier, "%s%s%d", hud ? "hudshield/" : "worldshield/", "or/", preload ? armourval : shieldvalue);}
+                break;
+            case A_ASSIST:
+                {int shieldvalue = armourval<=600 ? 20 : armourval<=1200 ? 40 : armourval<=1800 ? 60 : armourval<=2400 ? 80 : 100; formatstring(bouclier, "%s%d", "hudshield/armureassistee/", preload ? armourval : shieldvalue);}
+                break;
         }
         return bouclier;
     }
