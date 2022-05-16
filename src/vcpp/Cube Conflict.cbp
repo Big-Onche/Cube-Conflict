@@ -13,6 +13,7 @@
 				<Option type="0" />
 				<Option compiler="gcc" />
 				<Option parameters="-t0 -w640 -h480 -qhome" />
+				<Option projectCompilerOptionsRelation="1" />
 				<Compiler>
 					<Add option="-fomit-frame-pointer" />
 					<Add option="-O3" />
@@ -61,6 +62,7 @@
 				<Option type="0" />
 				<Option compiler="gcc" />
 				<Option parameters="-t0 -w640 -h480 -qhome" />
+				<Option projectCompilerOptionsRelation="1" />
 				<Compiler>
 					<Add option="-fomit-frame-pointer" />
 					<Add option="-O3" />
@@ -119,8 +121,9 @@
 			<Add option="-s" />
 		</Linker>
 		<Unit filename="../cubeconflict/aptitudes.cpp" />
-		<Unit filename="../cubeconflict/cubedef.h" />
+		<Unit filename="../cubeconflict/ccheader.h" />
 		<Unit filename="../cubeconflict/customisation.cpp" />
+		<Unit filename="../cubeconflict/gfx.cpp" />
 		<Unit filename="../cubeconflict/hud.cpp" />
 		<Unit filename="../cubeconflict/stats.cpp" />
 		<Unit filename="../engine/aa.cpp" />
