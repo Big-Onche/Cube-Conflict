@@ -224,25 +224,24 @@ namespace game
 
     void preloadplayermodel()
     {
-        loopi(5)
+        loopi(5) //Preloading all shields
         {
             preloadmodel(gfx::getshielddir(i, 20*(i+1), false, true));
             preloadmodel(gfx::getshielddir(i, 20*(i+1), true, true));
-            conoutf("%s", gfx::getshielddir(i, 20*(i+1), true, true));
         }
 
-        loopi(13)
+        loopi(13) //Preloading all capes
         {
             preloadmodel(customscapes[i].team1capedir);
             preloadmodel(customscapes[i].team2capedir);
         }
 
-        loopi(15)
+        loopi(15) //Preloading all classe's hats
         {
             preloadmodel(aptitudes[i].apt_tete);
         }
 
-        loopi(4)
+        loopi(4) //Preloading all spy's disguisement
         {
             loadmodel(costumes[i].village, NULL, false);
             loadmodel(costumes[i].usine, NULL, false);
@@ -252,7 +251,7 @@ namespace game
             loadmodel(costumes[i].volcan, NULL, false);
         }
 
-        loadmodel("smileys/armureassistee", NULL, false);
+        loadmodel("smileys/armureassistee", NULL, false); //Preloading powered armor playermodel
         loadmodel("smileys/armureassistee/red", NULL, false);
 
         loopi(sizeof(playermodels)/sizeof(playermodels[0]))

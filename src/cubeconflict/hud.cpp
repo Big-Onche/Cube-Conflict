@@ -335,13 +335,13 @@ namespace game
             float lxhbarvide = 0.5f*(w - 483), lxhbarpleine = 0.5f*(w - 477);
 
             settexture("media/interface/hud/fondbarrestats.png", 3);
-            bgquad(lxhbarpleine, h-screenh/1.5f, 477, 19);
+            bgquad(lxhbarpleine, h-screenh/1.57f, 477, 19);
             settexture("media/interface/hud/barresantepleine.png", 3);
-            bgquad(lxhbarpleine, h-screenh/1.5f, pourcents2*477.0f, 19);
+            bgquad(lxhbarpleine, h-screenh/1.57f, pourcents2*477.0f, 19);
             settexture("media/interface/hud/barrebouclierpleine.png", 3);
-            bgquad(lxhbarpleine, h-screenh/1.5f, pourcents3*477.0f, 19);
+            bgquad(lxhbarpleine, h-screenh/1.57f, pourcents3*477.0f, 19);
             settexture("media/interface/hud/barrestatsvide.png", 3);
-            bgquad(lxhbarvide, h-screenh/1.5f-10, 483, 40);
+            bgquad(lxhbarvide, h-screenh/1.57f-10, 483, 40);
         }
 
         float hudscores = 0.5f*(w - 320);
