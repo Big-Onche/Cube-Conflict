@@ -1381,10 +1381,10 @@ FVARP(sensitivityscale, 1e-4f, 100, 1e4f);
 VARP(invmouse, 0, 0, 1);
 FVARP(mouseaccel, 0, 0, 1000);
 
-VAR(thirdperson, 0, 0, 2);
-FVAR(thirdpersondistance, 0, 42, 75);
-FVAR(thirdpersonup, -25, 5, 25);
-FVAR(thirdpersonside, -25, 12, 25);
+VARP(thirdperson, 0, 0, 2);
+FVARP(thirdpersondistance, 0, 55, 75);
+FVARP(thirdpersonup, -25, 6, 25);
+FVARP(thirdpersonside, -25, 17, 25);
 physent *camera1 = NULL;
 bool detachedcamera = false;
 bool isthirdperson() { return player!=camera1 || detachedcamera; }
