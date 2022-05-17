@@ -29,70 +29,66 @@ namespace game
 
         if(totalmillis - message[MSG_LEVELUP] <=2500)
         {
-            string lvlupmsg;
-            formatstring(lvlupmsg, langage ? "\f1LEVEL UP! \fi(Lvl %d)" : "\f1NIVEAU SUPÉRIEUR ! \fi(Niveau %d)", cclvl);
-            rendermessage(lvlupmsg, 85, 8.8f, decal_message); decal_message -= screenh/24;
+            string msg;
+            formatstring(msg, langage ? "\f1LEVEL UP! \fi(Lvl %d)" : "\f1NIVEAU SUPÉRIEUR ! \fi(Niveau %d)", cclvl);
+            rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/24;
         }
 
         if(totalmillis - message[MSG_ACHUNLOCKED] <=3000)
         {
-            string lvlupmsg;
-            formatstring(lvlupmsg, langage ? "\f1ACHIEVEMENT UNLOCKED! \fi(%s)" : "\f1SUCCES DÉBLOQUÉ ! \fi(%s)", tempachname);
-            rendermessage(lvlupmsg, 85, 8.8f, decal_message); decal_message -= screenh/24;
+            string msg;
+            formatstring(msg, langage ? "\f1ACHIEVEMENT UNLOCKED! \fi(%s)" : "\f1SUCCES DÉBLOQUÉ ! \fi(%s)", tempachname);
+            rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/24;
         }
-
 
         if(totalmillis- message[MSG_OWNKILLSTREAK] <=2500)
         {
-            string streakmsg;
+            string msg;
             switch(killstreak)
             {
-                case 3: formatstring(streakmsg, "%s \fc(x%d)", langage ? "You are hot !" : "Triplette !", killstreak); break;
-                case 5: formatstring(streakmsg, "%s \fc(x%d)", langage ? "You are on fire !" : "Pentaplette !", killstreak); break;
-                case 10: formatstring(streakmsg, "%s \fc(x%d)", langage ? "You are unstoppable !" : "Décaplette !", killstreak); break;
-                case 20: formatstring(streakmsg, "%s \fc(x%d)", langage ? "You are a god !" : "Eicoplette !", killstreak); break;
-                case 30: formatstring(streakmsg, "%s \fc(x%d)", langage ? "Are you cheating ?" : "Triaconplette !", killstreak); break;
+                case 3: formatstring(msg, "%s \fc(x%d)", langage ? "You are hot !" : "Triplette !", killstreak); break;
+                case 5: formatstring(msg, "%s \fc(x%d)", langage ? "You are on fire !" : "Pentaplette !", killstreak); break;
+                case 10: formatstring(msg, "%s \fc(x%d)", langage ? "You are unstoppable !" : "Décaplette !", killstreak); break;
+                case 20: formatstring(msg, "%s \fc(x%d)", langage ? "You are a god !" : "Eicoplette !", killstreak); break;
+                case 30: formatstring(msg, "%s \fc(x%d)", langage ? "Are you cheating ?" : "Triaconplette !", killstreak); break;
                 default : need_message1 = false;
             }
 
-            if(need_message1) {rendermessage(streakmsg, 85, 8.8f, decal_message); decal_message -= screenh/24;}
+            if(need_message1) {rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/24;}
         }
 
         if(totalmillis - message[MSG_YOUKILLED] <=2500)
         {
-            string killmsg;
-
-            formatstring(killmsg, "%s \fc%s \f7! (%s à %.1fm)", langage ? "You killed" : "Tu as tué",str_pseudovictime, langage ? aptitudes[n_aptitudevictime].apt_nomEN : aptitudes[n_aptitudevictime].apt_nomFR, killdistance);
-            rendermessage(killmsg, 100, 8.8f, decal_message);
+            string msg;
+            formatstring(msg, "%s \fc%s \f7! (%s à %.1fm)", langage ? "You killed" : "Tu as tué",str_pseudovictime, langage ? aptitudes[n_aptitudevictime].apt_nomEN : aptitudes[n_aptitudevictime].apt_nomFR, killdistance);
+            rendermessage(msg, 100, 8.8f, decal_message);
             decal_message -= screenh/27;
         }
 
         if(totalmillis - message[MSG_OTHERKILLSTREAK] <=2500)
         {
-            string infomsg;
-
+            string msg;
             switch(n_killstreakacteur)
             {
-                case 3: formatstring(infomsg, "\fc%s\f7 %s %s", str_pseudoacteur, langage ? "is hot !" : "est chaud !", langage ? "(Triple kill)" : "(Triplette)"); break;
-                case 5: formatstring(infomsg, "\fc%s\f7 %s %s", str_pseudoacteur, langage ? "dominate !" : "est chaud !", langage ? "(Pentakill)" : "(Pentaplette)"); break;
-                case 10: formatstring(infomsg, "\fc%s\f7 %s %s", str_pseudoacteur, langage ? "is instoppable !" : "est chaud !", langage ? "(x10 !)" : "(Décaplette)"); break;
-                case 20: formatstring(infomsg, "\fc%s\f7 %s %s", str_pseudoacteur, langage ? "is invincible !" : "est chaud !", langage ? "(x20 !)" : "(Eicoplette)"); break;
-                case 30: formatstring(infomsg, "\fc%s\f7 %s %s", str_pseudoacteur, langage ? "is as god !" : "est chaud !", langage ? "(x30 !)" : "(Triaconplette)"); break;
+                case 3: formatstring(msg, "\fc%s\f7 %s %s", str_pseudoacteur, langage ? "is hot !" : "est chaud !", langage ? "(Triple kill)" : "(Triplette)"); break;
+                case 5: formatstring(msg, "\fc%s\f7 %s %s", str_pseudoacteur, langage ? "dominate !" : "est chaud !", langage ? "(Pentakill)" : "(Pentaplette)"); break;
+                case 10: formatstring(msg, "\fc%s\f7 %s %s", str_pseudoacteur, langage ? "is instoppable !" : "est chaud !", langage ? "(x10 !)" : "(Décaplette)"); break;
+                case 20: formatstring(msg, "\fc%s\f7 %s %s", str_pseudoacteur, langage ? "is invincible !" : "est chaud !", langage ? "(x20 !)" : "(Eicoplette)"); break;
+                case 30: formatstring(msg, "\fc%s\f7 %s %s", str_pseudoacteur, langage ? "is as god !" : "est chaud !", langage ? "(x30 !)" : "(Triaconplette)"); break;
                 default: need_message2 = false;
             }
-
-            if(need_message2) {rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(need_message2) {rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
         }
 
         if(m_ctf)
         {
-            string infomsg;
-            if(totalmillis - message[MSG_CTF_TEAMPOINT]      <=3000) {formatstring(infomsg, langage ? "\f9We scored a point!" : "\f9Notre équipe a marqué un point !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-            if(totalmillis - message[MSG_CTF_ENNEMYPOINT]    <=3000) {formatstring(infomsg, langage ? "\f3The enemy team has scored a point." : "\f3L'équipe ennemie a marqué un point."); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-            if(totalmillis - message[MSG_CTF_TEAMFLAGRECO]   <=3000) {formatstring(infomsg, langage ? "\f9We recovered our flag!" : "\f9Notre équipe a récupéré son drapeau !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-            if(totalmillis - message[MSG_CTF_ENNEMYFLAGRECO] <=3000) {formatstring(infomsg, langage ? "\f3The enemy team has recovered their flag" : "\f3L'équipe ennemie a récupéré son drapeau."); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-            if(totalmillis - message[MSG_CTF_TEAMSTOLE]      <=3000) {formatstring(infomsg, langage ? "\f9We stole the enemy flag !" : "\f9Notre équipe a volé le drapeau ennemi !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-            if(totalmillis - message[MSG_CTF_ENNEMYSTOLE]    <=3000) {formatstring(infomsg, langage ? "\f3The enemy team stole our flag." : "\f3L'équipe ennemie a volé notre drapeau !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            string msg;
+            if(totalmillis - message[MSG_CTF_TEAMPOINT]      <=3000) {formatstring(msg, langage ? "\f9We scored a point!" : "\f9Notre équipe a marqué un point !"); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis - message[MSG_CTF_ENNEMYPOINT]    <=3000) {formatstring(msg, langage ? "\f3The enemy team has scored a point." : "\f3L'équipe ennemie a marqué un point."); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis - message[MSG_CTF_TEAMFLAGRECO]   <=3000) {formatstring(msg, langage ? "\f9We recovered our flag!" : "\f9Notre équipe a récupéré son drapeau !"); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis - message[MSG_CTF_ENNEMYFLAGRECO] <=3000) {formatstring(msg, langage ? "\f3The enemy team has recovered their flag" : "\f3L'équipe ennemie a récupéré son drapeau."); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis - message[MSG_CTF_TEAMSTOLE]      <=3000) {formatstring(msg, langage ? "\f9We stole the enemy flag !" : "\f9Notre équipe a volé le drapeau ennemi !"); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis - message[MSG_CTF_ENNEMYSTOLE]    <=3000) {formatstring(msg, langage ? "\f3The enemy team stole our flag." : "\f3L'équipe ennemie a volé notre drapeau !"); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
         }
 
         if(player1->state==CS_DEAD)

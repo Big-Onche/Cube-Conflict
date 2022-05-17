@@ -3577,7 +3577,7 @@ namespace server
 
                 int ability = getint(p);
                 int duration = getint(p);
-                bool valid = validability(ability, duration, cq->aptitude, cq->state.mana);
+                bool valid = ci->state.aitype==AI_BOT ? true : validability(ability, duration, cq->aptitude, cq->state.mana);
 
                 if(valid)
                 {
