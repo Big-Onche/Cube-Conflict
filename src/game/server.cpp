@@ -1612,7 +1612,7 @@ namespace server
             // no overflow check
             case 4: return type;
         }
-        if(ci && ++ci->overflow >= 200) return -2;
+        if(ci && ++ci->overflow >= 300) return -2;
         return type;
     }
 
@@ -3131,6 +3131,15 @@ namespace server
         return true;
     }
 
+    void generrlog(clientinfo *ci)
+    {
+        logoutf("Net : ping %d, overflow %d\nAbilities : classe %d, ability1 %d, ability2 %d, ability 3 %d\nBoosts : rage %d, epo %d, joint %d, stero %d\nOther : health %d, mana %d, lastspawn %d, lastdeath %d, lastshot %d",
+                ci->ping, ci->overflow,
+                ci->aptitude, ci->state.aptisort1, ci->state.aptisort2, ci->state.aptisort3,
+                ci->state.ragemillis, ci->state.epomillis, ci->state.jointmillis, ci->state.steromillis,
+                ci->state.health, ci->state.mana, ci->state.lastspawn, ci->state.lastdeath, ci->state.lastshot);
+    }
+
     void parsepacket(int sender, int chan, packetbuf &p)     // has to parse exactly each byte of the packet
     {
         if(sender<0 || p.packet->flags&ENET_PACKET_FLAG_UNSEQUENCED || chan > 2) return;
@@ -4011,10 +4020,12 @@ namespace server
             #undef PARSEMESSAGES
 
             case -1:
+                generrlog(ci);
                 disconnect_client(sender, DISC_MSGERR);
                 return;
 
             case -2:
+                generrlog(ci);
                 disconnect_client(sender, DISC_OVERFLOW);
                 return;
 
