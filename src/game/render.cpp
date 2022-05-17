@@ -241,16 +241,8 @@ namespace game
             preloadmodel(customscapes[i].team2capedir);
         }
 
-        loopi(15) //Preloading all classe's hats
-        {
-            preloadmodel(aptitudes[i].apt_tete);
-            logoutf("%s", aptitudes[i].apt_tete); //DBG
-        }
-
-        loopi(13) //Preloading all graves
-        {
-            preloadmodel(customstombes[i].tombedir);
-        }
+        loopi(15) preloadmodel(aptitudes[i].apt_tete); //Preloading all classe's hats
+        loopi(13) preloadmodel(customstombes[i].tombedir); //Preloading all graves
 
         loopi(4) //Preloading all spy's disguisement
         {

@@ -12,7 +12,7 @@
 				<Option object_output="../../../../GitHub" />
 				<Option type="0" />
 				<Option compiler="gcc" />
-				<Option parameters="-t0 -w640 -h480 -qhome" />
+				<Option parameters="-w1280 -h720 -glog.txt" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Compiler>
 					<Add option="-fomit-frame-pointer" />
@@ -61,7 +61,7 @@
 				<Option object_output="../../../../GitHub" />
 				<Option type="0" />
 				<Option compiler="gcc" />
-				<Option parameters="-t0 -w640 -h480 -qhome" />
+				<Option parameters="w1280 -h720 -glog.txt" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Compiler>
 					<Add option="-fomit-frame-pointer" />
