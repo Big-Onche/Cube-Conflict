@@ -924,7 +924,7 @@ namespace game
     extern void drawmessages(int killstreak, string str_pseudovictime, int n_aptitudevictime, string str_pseudoacteur, int n_killstreakacteur, float killdistance);
     extern void updatespecials(gameent *d);
 
-    extern int gamemode;
+    extern int gamemode, mixedspawns;
 
     struct clientmode
     {
@@ -938,7 +938,7 @@ namespace game
         virtual void setup() {}
         virtual void checkitems(gameent *d) {}
         virtual int respawnwait(gameent *d) { return 0; }
-        virtual void pickspawn(gameent *d) { findplayerspawn(d, -1, m_teammode ? d->team : 0); }
+        virtual void pickspawn(gameent *d) { findplayerspawn(d, -1, mixedspawns ? 0 : m_teammode ? d->team : 0); }
         virtual void senditems(packetbuf &p) {}
         virtual void removeplayer(gameent *d) {}
         virtual void gameover() {}

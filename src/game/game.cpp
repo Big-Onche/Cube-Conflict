@@ -497,10 +497,12 @@ namespace game
 
     }
 
+    VARP(mixedspawns, 0, 0, 1);
+
     void spawnplayer(gameent *d)   // place at random spawn
     {
         if(cmode) cmode->pickspawn(d);
-        else findplayerspawn(d, -1, m_teammode ? d->team : 0);
+        else findplayerspawn(d, -1, mixedspawns ? 0 : m_teammode ? d->team : 0);
         spawnstate(d);
         if(d==player1)
         {
@@ -803,8 +805,8 @@ namespace game
         else if(isteam(d->team, actor->team)) // Tir allié /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
             contype |= CON_TEAMKILL;
-            if(d==player1) conoutf(contype, "\f6%s %s (%s)", dname, langage ? "got fragged by a teammate" : "as été tué par un allié", aname); //TU as été tué par un allié
-            else conoutf(contype, "\f2%s %s %s (%s)", aname, langage ? "" : d==player1 ? "as" : "a", langage ? "fragged a teammate" : "tué un allié" , dname); //Quelqu'un a ou TU as tué un de ses alliés
+            if(d==player1) conoutf(contype, "\f6%s %s \fd(%s)", dname, langage ? "got fragged by a teammate" : "as été tué par un allié", aname); //TU as été tué par un allié
+            else conoutf(contype, "\f2%s %s%s \fd(%s)", aname, langage ? "" : actor==player1 ? "as " : "a ", langage ? "fragged a teammate" : "tué un allié" , dname); //Quelqu'un a ou TU as tué un de ses alliés
         }
         else // Kill ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
@@ -1016,7 +1018,7 @@ namespace game
         ai::clearwaypoints(true);
 
         if(!m_mp(gamemode)) spawnplayer(player1);
-        else findplayerspawn(player1, -1, m_teammode ? player1->team : 0);
+        else findplayerspawn(player1, -1, mixedspawns ? 0 : m_teammode ? player1->team : 0);
         entities::resetspawns();
         copystring(clientmap, name ? name : "");
 
