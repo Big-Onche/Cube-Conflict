@@ -261,9 +261,6 @@ namespace ai
         d->customtombe = tombe;
         d->customdanse = danse;
 
-        d->tombepop = 0;
-        d->skeletonfade = 1.0f;
-
         if(resetthisguy) removeweapons(d);
         if(d->ownernum >= 0 && player1->clientnum == d->ownernum)
         {

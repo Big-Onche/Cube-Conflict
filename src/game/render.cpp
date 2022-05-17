@@ -224,13 +224,18 @@ namespace game
 
     void preloadplayermodel()
     {
+        int loadshield = 1;
         loopi(5) //Preloading all shields
         {
-            preloadmodel(gfx::getshielddir(i, 20*(i+1), false, true));
-            preloadmodel(gfx::getshielddir(i, 20*(i+1), true, true));
+            loopi(5)
+            {
+                preloadmodel(gfx::getshielddir(i, 20*(loadshield), false, true));
+                preloadmodel(gfx::getshielddir(i, 20*(loadshield), true, true));
+            }
+            loadshield++;
         }
 
-        loopi(13) //Preloading all capes
+        loopi(14) //Preloading all capes
         {
             preloadmodel(customscapes[i].team1capedir);
             preloadmodel(customscapes[i].team2capedir);
@@ -239,20 +244,30 @@ namespace game
         loopi(15) //Preloading all classe's hats
         {
             preloadmodel(aptitudes[i].apt_tete);
+            logoutf("%s", aptitudes[i].apt_tete); //DBG
+        }
+
+        loopi(13) //Preloading all graves
+        {
+            preloadmodel(customstombes[i].tombedir);
         }
 
         loopi(4) //Preloading all spy's disguisement
         {
-            loadmodel(costumes[i].village, NULL, false);
-            loadmodel(costumes[i].usine, NULL, false);
-            loadmodel(costumes[i].faille, NULL, false);
-            loadmodel(costumes[i].lune, NULL, false);
-            loadmodel(costumes[i].chateaux, NULL, false);
-            loadmodel(costumes[i].volcan, NULL, false);
+            preloadmodel(costumes[i].village);
+            preloadmodel(costumes[i].usine);
+            preloadmodel(costumes[i].faille);
+            preloadmodel(costumes[i].lune);
+            preloadmodel(costumes[i].chateaux);
+            preloadmodel(costumes[i].volcan);
         }
 
-        loadmodel("smileys/armureassistee", NULL, false); //Preloading powered armor playermodel
-        loadmodel("smileys/armureassistee/red", NULL, false);
+        preloadmodel("smileys/armureassistee"); //Preloading powered armor playermodel
+        preloadmodel("smileys/armureassistee/red");
+        preloadmodel("boosts/epo"); //Preloading boosts models
+        preloadmodel("boosts/joint");
+        preloadmodel("boosts/steros");
+        preloadmodel("hudboost/joint");
 
         loopi(sizeof(playermodels)/sizeof(playermodels[0]))
         {
@@ -318,9 +333,10 @@ namespace game
             }
         }
 
-        if(d->state==CS_ALIVE) {d->skeletonfade = 1.0f; d->tombepop = 0.0f;}
-        else if(d->state==CS_DEAD)
+        if(d->state==CS_DEAD && d->lastpain)
         {
+            flags |= MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY;
+
             if(d->tombepop<1.0f) d->tombepop += 3.f/nbfps;
             rendermodel(customstombes[d->customtombe].tombedir, ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, flags, NULL, NULL, 0, 0, d->tombepop, vec4(vec::hexcolor(color), 5));
 
@@ -332,7 +348,7 @@ namespace game
 
         //////////////////////////////////////////////////////////////////MODELES//////////////////////////////////////////////////////////////////
 
-        modelattach a[12];
+        modelattach a[10];
         int ai = 0;
         if(guns[d->gunselect].vwep)
         {
@@ -458,7 +474,7 @@ namespace game
     {
         int anim = ANIM_IDLE|ANIM_LOOP;
 
-        modelattach a[6];
+        modelattach a[4];
         int ai = 0;
         if(guns[d->gunselect].vwep)
         {

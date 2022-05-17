@@ -636,6 +636,8 @@ namespace game
     {
         d->state = CS_DEAD;
         d->lastpain = lastmillis;
+        d->skeletonfade = 1.0f;
+        d->tombepop = 0.0f;
 
         d->deaths++;
         d->killstreak = 0;
