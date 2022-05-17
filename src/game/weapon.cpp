@@ -471,6 +471,8 @@ namespace game
 
     void spawnbouncer(const vec &p, const vec &vel, gameent *d, int type, int lifetime = rnd(1000)+1000)
     {
+        if(camera1->o.dist(p)>200 && (type==BNC_DOUILLES || type==BNC_CARTOUCHES || type==BNC_DOUILLESUZI)) return;
+
         vec to(0, 0, 0);
 
         switch(type)
