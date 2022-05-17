@@ -1063,7 +1063,7 @@ namespace game
     extern void moveragdolls();
     extern const playermodelinfo &getplayermodelinfo(gameent *d);
     extern int getplayercolor(gameent *d, int team);
-    extern int chooserandomplayermodel(int seed);
+    extern int chooserandomtraits(int seed, int trait);
     extern void syncplayer();
     extern void swayhudgun(int curtime);
     extern vec hudgunorigin(int gun, const vec &from, const vec &to, gameent *d);

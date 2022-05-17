@@ -124,9 +124,17 @@ namespace game
     extern void changedplayermodel();
     VARFP(playermodel, 0, 0, sizeof(playermodels)/sizeof(playermodels[0])-1, changedplayermodel());
 
-    int chooserandomplayermodel(int seed)
+    int chooserandomtraits(int seed, int trait)
     {
-        return (seed&0xFFFF)%(sizeof(playermodels)/sizeof(playermodels[0]));
+        switch(trait)
+        {
+            case 0: return (seed&0xFFFF)%(sizeof(aptitudes)/sizeof(aptitudes[0])); //Classe
+            case 1: return (seed&0xFFFF)%(sizeof(playermodels)/sizeof(playermodels[0])); //Smiley
+            case 2: return (seed&0xFFFF)%(sizeof(customscapes)/sizeof(customscapes[0])); //Cape
+            case 3: return (seed&0xFFFF)%(sizeof(customstombes)/sizeof(customstombes[0])); //Tombe
+            case 4: return (seed&0xFFFF)%(sizeof(customsdance)/sizeof(customsdance[0])); //Voice
+            default: return 0;
+        }
     }
 
     const playermodelinfo *getplayermodelinfo(int n)
@@ -285,14 +293,14 @@ namespace game
     VAR(testanims, 0, 0, 1);
     VAR(testpitch, -90, 0, 90);
 
-    VARFP(player1_cape, 0, 0, 13,
+    VARFP(player1_cape, 0, 0, sizeof(customscapes)/sizeof(customscapes[0])-1,
     {
         if(stat[CAPE_CUBE+player1_cape]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette cape !"); playsound(S_ERROR); player1_cape=0; return;}
         addmsg(N_SENDCAPE, "ri", player1_cape);
         player1->customcape = player1_cape;
     });
 
-    VARFP(player1_tombe, 0, 0, 12,
+    VARFP(player1_tombe, 0, 0, sizeof(customstombes)/sizeof(customstombes[0])-1,
     {
         if(stat[TOM_MERDE+player1_tombe]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette tombe !"); playsound(S_ERROR); player1_tombe=0; return;}
         addmsg(N_SENDTOMBE, "ri", player1_tombe);

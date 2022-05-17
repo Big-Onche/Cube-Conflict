@@ -25,7 +25,7 @@ static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precisio
 };
 
 //Définition des customisations
-static const struct smileysinfo { const char *smileydir, *smileyname; int smileyprice; } customssmileys[] =
+static const struct smileysinfo { const char *smileydir, *smileyname; int smileyprice; } customssmileys[10] =
 {
     {"smileys/hap",         "Hap",           0},
     {"smileys/noel",        "Noel",          0},
@@ -39,7 +39,7 @@ static const struct smileysinfo { const char *smileydir, *smileyname; int smiley
     {"smileys/bug",         "Bug",        1500},
 };
 
-static const struct capesinfo { const char *team1capedir, *team2capedir, *capename; int capeprice; } customscapes[] =
+static const struct capesinfo { const char *team1capedir, *team2capedir, *capename; int capeprice; } customscapes[14] =
 {
     {"capes/cape_noob",         "capes/cape_noob/orange",       "Noob",              0},
     {"capes/cape_jvc",          "capes/cape_jvc/orange",        "JVC",              50},
@@ -57,7 +57,7 @@ static const struct capesinfo { const char *team1capedir, *team2capedir, *capena
     {"capes/cape_riche",        "capes/cape_riche/orange",      "Riche",          1500},
 };
 
-static const struct tombesinfo { const char *tombedir, *tombemenudir, *tombename; int tombeprice; } customstombes[] =
+static const struct tombesinfo { const char *tombedir, *tombemenudir, *tombename; int tombeprice; } customstombes[13] =
 {
     {"tombes/merde",        "tombes/merde",     "Merde",            0},
     {"tombes/basique1",     "tombes/basique1",  "Basique 1",       50},
@@ -74,7 +74,7 @@ static const struct tombesinfo { const char *tombedir, *tombemenudir, *tombename
     {"tombes/lingots",      "tombes/lingots",   "Lingots",       1500},
 };
 
-static const struct danceinfo { const char *dancename; int danceprice; } customsdance[] =
+static const struct danceinfo { const char *dancename; int danceprice; } customsdance[11] =
 {
     {"Cortex",        0},
     {"Valoche",      50},
@@ -89,7 +89,7 @@ static const struct danceinfo { const char *dancename; int danceprice; } customs
     {"Raoult",      1500},
 };
 
-static const struct costumeinfo { const char *village, *usine, *faille, *lune, *chateaux, *volcan; } costumes[] =
+static const struct costumeinfo { const char *village, *usine, *faille, *lune, *chateaux, *volcan; } costumes[4] =
 {
     {"mapmodel/caisses/caissebois", "mapmodel/caisses/caisse1", "mapmodel/caisses/caissebois",  "mapmodel/rochers/pierre_fonce_esp",     "mapmodel/caisses/caissebois",  "mapmodel/distributeur"},
     {"mapmodel/tonneau",            "mapmodel/caisses/caisse2", "mapmodel/tonneau",             "mapmodel/caisses/caisse2",     "mapmodel/tonneau",             "mapmodel/rochers/pierre_fonce_esp"},
@@ -166,36 +166,43 @@ extern void getsteamachievements();
 extern void unlockachievement(int achID);
 enum {ACH_TRIPLETTE = 0, ACH_PENTAPLETTE, ACH_DECAPLETTE, ACH_ATOME, ACH_WINNER, ACH_ENVOL, ACH_POSTULANT, ACH_STAGIAIRE,
         ACH_SOLDAT, ACH_LIEUTENANT, ACH_MAJOR, ACH_BEAUTIR, ACH_DEFONCE, ACH_PRECIS, ACH_KILLASSIST, ACH_KILLER, ACH_SACAPV,
-        ACH_CADENCE, ACH_1HPKILL, ACH_MAXSPEED, ACH_INCREVABLE, ACH_CHANCE, ACH_CPASBIEN, ACH_SUICIDEFAIL, ACH_FUCKYEAH, ACH_RICHE, ACH_TUEURFANTOME, NUMACHS};
+        ACH_CADENCE, ACH_1HPKILL, ACH_MAXSPEED, ACH_INCREVABLE, ACH_CHANCE, ACH_CPASBIEN, ACH_SUICIDEFAIL, ACH_FUCKYEAH, ACH_RICHE,
+        ACH_TUEURFANTOME, ACH_EPOFLAG, ACH_M32SUICIDE, ACH_ESPIONDEGUISE, ACH_FUCKYOU, ACH_ABUS, NUMACHS};
 extern bool succes[NUMACHS];
 
 static const struct achinfo { const char *achname, *achnicenameFR, *achnicenameEN, *achdescFR, *achdescEN; } achievements[] =
 {
-    {"ACH_TRIPLETTE",     "Triple menace",               "Triple threat",            "Tuer 3 ennemis sans mourrir",                                         "Kill 3 enemies without dying"},
-    {"ACH_PENTAPLETTE",   "Terreur",                     "Terror",                   "Tuer 5 ennemis sans mourrir",                                         "Kill 5 enemies without dying"},
-    {"ACH_DECAPLETTE",    "Invincible !",                "Invincible !",             "Tuer 10 ennemis sans mourrir",                                        "Kill 10 enemies without dying"},
-    {"ACH_ATOME",         "La puissance de l'atome",     "The power of the atom",    "Balancer un missile nucléaire",                                       "Launch a nuclear missile"},
-    {"ACH_WINNER",        "Winner",                      "Winner",                   "Remporter 1 partie",                                                  "Win 1 game"},
-    {"ACH_ENVOL",         "Envol pour le paradis",       "Fly like an eagle",        "Rester au moins 7 secondes dans les airs",                            "Stay at least 7 seconds in the air"},
-    {"ACH_POSTULANT",     "Postulant",                   "Applicant",                "Atteindre le niveau 5",                                               "Reach level 5"},
-    {"ACH_STAGIAIRE",     "Stagiaire",                   "Trainee",                  "Atteindre le niveau 10",                                              "Reach level 10"},
-    {"ACH_SOLDAT",        "Soldat",                      "Soldier",                  "Atteindre le niveau 20",                                              "Reach level 20"},
-    {"ACH_LIEUTENANT",    "Lieutenant",                  "Lieutenant",               "Atteindre le niveau 50 (C'est pas mal !)",                            "Reach level 50 (Nice!)"},
-    {"ACH_MAJOR",         "Major",                       "Major",                    "Atteindre le niveau 100 (Tu as supporté le jeu jusqu'ici !?)",        "Reach level 100 (that's a lot of grind!)"},
-    {"ACH_BEAUTIR",       "Beau tir !",                  "Nice shoot !",             "Tuer quelqu'un à au moins 100 mètres de distance",                    "Kill someone at least 100 meters away"},
-    {"ACH_DEFONCE",       "Complètement défoncé",        "Completely stoned",        "Utiliser en même temps le joint, l'EPO, les champis et les stéros",   "Use joint, EPO, shrooms and steroids at the same time"},
-    {"ACH_PRECIS",        "Précis comme un boucher",     "Accurate like a butcher",  "50% de précision sur une partie avec au moins 10 éliminations",       "Achieve 50% accuracy with at least 10 kills in a game"},
-    {"ACH_KILLASSIST",    "Et ça fait bim, bam, boum",   "Boom, Boom, Boom, Boom",   "Tuer quelqu'un avec l'explosion de ton armure assistée",              "Kill an enemy with your power armor explosion"},
-    {"ACH_KILLER",        "Tueur en série",              "Serial killer",            "Tuer 30 ennemis en une seule partie",                                 "Kill 30 enemies in a game"},
-    {"ACH_SACAPV",        "Sac à points de vie",         "Too much health points",   "Avoir 200 points de vie (oui c'est possible !)",                      "Have 200 health points (Hint: it's possible!)"},
-    {"ACH_CADENCE",       "Le combo ultime !",           "The ultimate combo!",      "Atteindre la cadence de tir la plus élevée possible du jeu",          "Have the highest possible rate of fire in the game"},
-    {"ACH_1HPKILL",       "A 1 PV du ragequit !",        "At 1 HP from ragequit",    "Tuer un ennemi en ayant 1 seul point de vie",                         "Kill an enemy with only 1 health point remaining"},
-    {"ACH_MAXSPEED",      "Speedy Gonzales",             "Speedy Gonzales",          "Se déplacer à la vitesse la plus rapide possible du jeu",             "Reach the highest speed in the game"},
-    {"ACH_INCREVABLE",    "Increvable !",                "Indestructible!",          "Mourir 5 fois maximum dans une partie avec au moins 10 éliminations", "Only die 5 times in a game with at least 10 kills"},
-    {"ACH_CHANCE",        "Larry Silverstein",           "Lucky Larry",              "Avoir la chance d'obtenir une super-arme par hasard, quel bol !",     "Obtain a superweapon on respawn"},
-    {"ACH_CPASBIEN",      "C'est pas bien",              "That's not nice",          "Tuer un allié",                                                       "Kill an ally"},
-    {"ACH_SUICIDEFAIL",   "Suicide manqué",              "Failed suicide",           "Rester en vie après avoir utilisé une ceinture d'explosifs",          "Stay alive after using your explosives belt"},
-    {"ACH_FUCKYEAH",      "Fuck yeah !",                 "Fuck yeah !",              "Tuer un Shoshone en étant Américain",                                 "Kill a Shoshone with the American class"},
-    {"ACH_RICHE",         "Capitaliste",                 "Capitalist",               "Avoir 1500 CC en réserve",                                            "Have 1500 CC in reserve"},
-    {"ACH_TUEURFANTOME",  "Tueur de l'au-delà",          "Slayer from beyond",       "Tuer un ennemi en étant mort",                                        "Kill an enemy while being dead"},
+    {"ACH_TRIPLETTE",     "Triple menace",               "Triple threat",               "Tuer 3 ennemis sans mourrir",                                          "Kill 3 enemies without dying"},
+    {"ACH_PENTAPLETTE",   "Terreur",                     "Terror",                      "Tuer 5 ennemis sans mourrir",                                          "Kill 5 enemies without dying"},
+    {"ACH_DECAPLETTE",    "Invincible !",                "Invincible !",                "Tuer 10 ennemis sans mourrir",                                         "Kill 10 enemies without dying"},
+    {"ACH_ATOME",         "La puissance de l'atome",     "The power of the atom",       "Balancer un missile nucléaire",                                        "Launch a nuclear missile"},
+    {"ACH_WINNER",        "Winner",                      "Winner",                      "Remporter 1 partie",                                                   "Win 1 game"},
+    {"ACH_ENVOL",         "Envol pour le paradis",       "Fly like an eagle",           "Rester au moins 7 secondes dans les airs",                             "Stay at least 7 seconds in the air"},
+    {"ACH_POSTULANT",     "Postulant",                   "Applicant",                   "Atteindre le niveau 5",                                                "Reach level 5"},
+    {"ACH_STAGIAIRE",     "Stagiaire",                   "Trainee",                     "Atteindre le niveau 10",                                               "Reach level 10"},
+    {"ACH_SOLDAT",        "Soldat",                      "Soldier",                     "Atteindre le niveau 20",                                               "Reach level 20"},
+    {"ACH_LIEUTENANT",    "Lieutenant",                  "Lieutenant",                  "Atteindre le niveau 50 (C'est pas mal !)",                             "Reach level 50 (Nice!)"},
+    {"ACH_MAJOR",         "Major",                       "Major",                       "Atteindre le niveau 100 (Tu as supporté le jeu jusqu'ici !?)",         "Reach level 100 (that's a lot of grind!)"},
+    {"ACH_BEAUTIR",       "Beau tir !",                  "Nice shoot!",                 "Tuer quelqu'un à au moins 100 mètres de distance",                     "Kill someone at least 100 meters away"},
+    {"ACH_DEFONCE",       "Complètement défoncé",        "Completely stoned",           "Utiliser en même temps le joint, l'EPO, les champis et les stéros",    "Use joint, EPO, shrooms and steroids at the same time"},
+    {"ACH_PRECIS",        "Précis comme un boucher",     "Accurate like a butcher",     "50% de précision sur une partie avec au moins 10 éliminations",        "Achieve 50% accuracy with at least 10 kills in a game"},
+    {"ACH_KILLASSIST",    "Armure.exe ne répond pas",    "Armor.exe is not responding", "Tuer quelqu'un avec l'explosion de ton armure assistée",               "Kill an enemy with your power armor explosion"},
+    {"ACH_KILLER",        "Tueur en série",              "Serial killer",               "Tuer 30 ennemis en une seule partie",                                  "Kill 30 enemies in a game"},
+    {"ACH_SACAPV",        "Sac à points de vie",         "Too much health points",      "Avoir 200 points de vie (oui c'est possible !)",                       "Have 200 health points (Hint: it's possible!)"},
+    {"ACH_CADENCE",       "Le combo ultime !",           "The ultimate combo!",         "Atteindre la cadence de tir la plus élevée possible du jeu",           "Have the highest possible rate of fire in the game"},
+    {"ACH_1HPKILL",       "A 1 PV du ragequit !",        "At 1 HP from ragequit",       "Tuer un ennemi en ayant 1 seul point de vie",                          "Kill an enemy with only 1 health point remaining"},
+    {"ACH_MAXSPEED",      "Speedy Gonzales",             "Speedy Gonzales",             "Se déplacer à la vitesse la plus rapide possible du jeu",              "Reach the highest speed in the game"},
+    {"ACH_INCREVABLE",    "Increvable !",                "Indestructible!",             "Mourir 5 fois maximum dans une partie avec au moins 10 éliminations",  "Only die 5 times in a game with at least 10 kills"},
+    {"ACH_CHANCE",        "Larry Silverstein",           "Lucky Larry",                 "Avoir la chance d'obtenir une super-arme par hasard, quel bol !",      "Obtain a superweapon on respawn"},
+    {"ACH_CPASBIEN",      "C'est pas bien",              "That's not nice",             "Tuer un allié",                                                        "Kill an ally"},
+    {"ACH_SUICIDEFAIL",   "Suicide manqué",              "Failed suicide",              "Rester en vie après avoir utilisé une ceinture d'explosifs",           "Stay alive after using your explosives belt"},
+    {"ACH_FUCKYEAH",      "Fuck yeah !",                 "Fuck yeah !",                 "Tuer un Shoshone en étant Américain",                                  "Kill a Shoshone with the American class"},
+    {"ACH_RICHE",         "Capitaliste",                 "Capitalist",                  "Avoir 1500 CC en réserve",                                             "Have 1500 CC in reserve"},
+    {"ACH_TUEURFANTOME",  "Tueur de l'au-delà",          "Slayer from beyond",          "Tuer un ennemi en étant mort",                                         "Kill an enemy while being dead"},
+
+    {"ACH_EPOFLAG",       "C'est à ça que ça sert !",    "That's what it's made for!",  "Ramenez un drapeau ennemi en étant boosté par l'EPO",                  "Bring back an ennemy flag while being boosted by EPO"},
+    {"ACH_M32SUICIDE",    "Erreur de calcul",            "Miscalculation",              "Se tuer avec sa propre grenade",                                       "Kill yourself with your own grenade"},
+    {"ACH_ESPIONDEGUISE", "Pas vu, pas pris !",          "Not seen, not caught!",       "Tuer un ennemi en étant déguisé",                                      "Kill an enemy while disguised"},
+    {"ACH_FUCKYOU",       "Ils vont adorer !",           "They will love it!",          "Equiper la tombe \"fuck\"",                                            "Equip the grave \"fuck\""},
+    {"ACH_ABUS",          "Toujours dans l'abus",        "Never enough",                "Avoir une armure assitée, une super-arme et des stéros",               "Have a power armor, superweapon, and steroids at the same time"},
 };

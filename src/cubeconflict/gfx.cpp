@@ -215,7 +215,7 @@ namespace gfx
 
     }
 
-    string bouclier;
+    string bouclier = "";
     const char *getshielddir(int armourtype, int armourval, bool hud, bool preload) //récupère l'id d'un bouclier
     {
         switch(armourtype)

@@ -118,13 +118,13 @@ namespace aiman
         copystring(ci->name, "bot", MAXNAMELEN+1);
         ci->state.state = CS_DEAD;
         ci->team = team;
-        ci->playermodel = rnd(128);
         ci->playercolor = rnd(0x8000);
         ci->level = skill;
-        ci->aptitude = rnd(15);
-        ci->customcape = rnd(14);
-        ci->customtombe = rnd(13);
-        ci->customdanse = rnd(11);
+        ci->aptitude = rnd(NUMAPTS);
+        ci->playermodel = rnd(128);
+        ci->customcape = rnd(128);
+        ci->customtombe = rnd(128);
+        ci->customdanse = rnd(128);
         ci->aireinit = 2;
         ci->connected = true;
 

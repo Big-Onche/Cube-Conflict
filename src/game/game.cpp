@@ -15,7 +15,7 @@ bool randomevent(int probability)
 
 namespace game
 {
-    VARFP(player1_aptitude, 0, 0, 14,
+    VARFP(player1_aptitude, 0, 0, sizeof(aptitudes)/sizeof(aptitudes[0])-1,
     {
         if(player1->state != CS_DEAD && isconnected())
         {
@@ -563,7 +563,7 @@ namespace game
         //return !((gameent *)d)->lasttaunt || lastmillis-((gameent *)d)->lasttaunt>=5000;
     }
 
-    VARFP(player1_danse, 0, 0, 11,
+    VARFP(player1_danse, 0, 0, sizeof(customsdance)/sizeof(customsdance[0])-1,
     {
         if(stat[VOI_CORTEX+player1_danse]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette voix !"); playsound(S_ERROR); player1_danse=0; return;}
         addmsg(N_SENDDANSE, "ri", player1_danse);

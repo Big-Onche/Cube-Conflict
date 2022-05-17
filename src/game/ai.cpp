@@ -253,13 +253,12 @@ namespace ai
         d->ownernum = ocn;
         d->plag = 0;
         d->skill = d->level = sk;
-        d->playermodel = chooserandomplayermodel(pm);
         d->playercolor = col;
-
         d->aptitude = apti;
-        d->customcape = cape;
-        d->customtombe = tombe;
-        d->customdanse = danse;
+        d->playermodel = chooserandomtraits(pm, 1);
+        d->customcape = chooserandomtraits(cape, 2);
+        d->customtombe = chooserandomtraits(tombe, 3);
+        d->customdanse = chooserandomtraits(danse, 4);
 
         if(resetthisguy) removeweapons(d);
         if(d->ownernum >= 0 && player1->clientnum == d->ownernum)
