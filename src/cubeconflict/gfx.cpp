@@ -6,9 +6,9 @@ VARP(epilepsyfriendly, 0, 0, 1);
 
 namespace gfx
 {
-    bool champicolor = isconnected() ? game::hudplayer()->champimillis : false;
+    bool champicolor = isconnected() ? game::hudplayer()->champimillis : false; //checks if player 1 or observed player is on shrooms.
 
-    void projgunexplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk)
+    void projgunexplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk) //particles and light effects on impact for slow projectiles
     {
         vec lightloc = vec(v).sub(vec(vel).mul(10));
 
@@ -153,7 +153,7 @@ namespace gfx
         }
     }
 
-    void projgunhit(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk)
+    void projgunhit(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk) //particles and light effects on impact for fast projectiles
     {
         switch(atk)
         {
@@ -179,7 +179,7 @@ namespace gfx
         }
     }
 
-    void instantrayhit(const vec &from, const vec &to, const vec &muzzle, int atk)
+    void instantrayhit(const vec &from, const vec &to, const vec &muzzle, int atk) //particles and light effects on impact for instant projectiles
     {
         vec dir = vec(from).sub(to).safenormalize();
 

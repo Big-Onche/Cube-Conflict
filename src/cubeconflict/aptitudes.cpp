@@ -101,7 +101,7 @@ namespace game
         }
     }
 
-    void player1aptitude(int ability)
+    void player1aptitude(int ability) //Player1 abilities commands
     {
         switch(ability)
         {
@@ -117,7 +117,6 @@ namespace game
                 if(player1->aptitude==APT_PRETRE || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || player1->aptitude==APT_KAMIKAZE) aptitude(player1, player1->aptitude==APT_KAMIKAZE ? 2 : ability);
         }
     }
-
     ICOMMAND(aptitude, "i", (int *ability), player1aptitude(*ability));
 
     void updatespecials(gameent *d) //Permet de réarmer les sorts en fonction de la durée de rechargement de ceux-ci

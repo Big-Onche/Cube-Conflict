@@ -27,21 +27,21 @@ namespace game
         int decal_message = 0;
         bool need_message1 = true, need_message2 = true;
 
-        if(totalmillis - message[MSG_LEVELUP] <=2500)
+        if(totalmillis - message[MSG_LEVELUP] <=2500) //////////////////////////////////////////////////////////////// LVL UP MESSAGE
         {
             string msg;
             formatstring(msg, langage ? "\f1LEVEL UP! \fi(Lvl %d)" : "\f1NIVEAU SUPÉRIEUR ! \fi(Niveau %d)", cclvl);
             rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/24;
         }
 
-        if(totalmillis - message[MSG_ACHUNLOCKED] <=3000)
+        if(totalmillis - message[MSG_ACHUNLOCKED] <=3000)//////////////////////////////////////////////////////////////// ACHIEVEMENT UNLOCKED MESSAGE
         {
             string msg;
             formatstring(msg, langage ? "\f1ACHIEVEMENT UNLOCKED! \fi(%s)" : "\f1SUCCES DÉBLOQUÉ ! \fi(%s)", tempachname);
             rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/24;
         }
 
-        if(totalmillis- message[MSG_OWNKILLSTREAK] <=2500)
+        if(totalmillis - message[MSG_OWNKILLSTREAK] <=2500) //////////////////////////////////////////////////////////////// PLAYER1 KILLSTREAK MESSAGE
         {
             string msg;
             switch(killstreak)
@@ -57,7 +57,7 @@ namespace game
             if(need_message1) {rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/24;}
         }
 
-        if(totalmillis - message[MSG_YOUKILLED] <=2500)
+        if(totalmillis - message[MSG_YOUKILLED] <=2500)//////////////////////////////////////////////////////////////// PLAYER 1 KILL MESSAGE
         {
             string msg;
             formatstring(msg, "%s \fc%s \f7! (%s à %.1fm)", langage ? "You killed" : "Tu as tué",str_pseudovictime, langage ? aptitudes[n_aptitudevictime].apt_nomEN : aptitudes[n_aptitudevictime].apt_nomFR, killdistance);
@@ -65,7 +65,7 @@ namespace game
             decal_message -= screenh/27;
         }
 
-        if(totalmillis - message[MSG_OTHERKILLSTREAK] <=2500)
+        if(totalmillis - message[MSG_OTHERKILLSTREAK] <=2500) //////////////////////////////////////////////////////////////// OTHER PLAYER KILLSTREAK MESSAGE
         {
             string msg;
             switch(n_killstreakacteur)
@@ -80,7 +80,7 @@ namespace game
             if(need_message2) {rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
         }
 
-        if(m_ctf)
+        if(m_ctf) ////////////////////////////////////////////////////////////////////////////////////////////////// CAPTURE THE FLAG MESSAGES
         {
             string msg;
             if(totalmillis - message[MSG_CTF_TEAMPOINT]      <=3000) {formatstring(msg, langage ? "\f9We scored a point!" : "\f9Notre équipe a marqué un point !"); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
@@ -91,7 +91,7 @@ namespace game
             if(totalmillis - message[MSG_CTF_ENNEMYSTOLE]    <=3000) {formatstring(msg, langage ? "\f3The enemy team stole our flag." : "\f3L'équipe ennemie a volé notre drapeau !"); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
         }
 
-        if(player1->state==CS_DEAD)
+        if(player1->state==CS_DEAD)///////////////////////////////////////////////////////////////////////////////// DEATH SCREEN TEXT
         {
             string killedbymsg, withmsg, waitmsg;
             if(suicided) formatstring(killedbymsg, langage ? "You committed suicide !" : "Tu t'es suicidé !");
@@ -108,7 +108,7 @@ namespace game
             return;
         }
 
-        if(player1->state==CS_SPECTATOR)
+        if(player1->state==CS_SPECTATOR) //////////////////////////////////////////////////////////////// SPECTATOR SCREEN TEXT
         {
             string spectatormsg, color;
 
