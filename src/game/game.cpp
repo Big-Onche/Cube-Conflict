@@ -820,7 +820,7 @@ namespace game
                     langage ? guns[atk].armedescEN : guns[atk].armedescFR,
                     distance);
                 playsound(S_KILL);
-                message1 = totalmillis; message2 = totalmillis; copystring(str_pseudovictime, dname); n_aptitudevictime = d->aptitude; killdistance = distance;
+                message[MSG_YOUKILLED] = totalmillis; message[MSG_OWNKILLSTREAK] = totalmillis; copystring(str_pseudovictime, dname); n_aptitudevictime = d->aptitude; killdistance = distance;
                 if(distance>=100.f) unlockachievement(ACH_BEAUTIR);
                 if(player1->state==CS_DEAD) unlockachievement(ACH_TUEURFANTOME);
 
@@ -858,7 +858,7 @@ namespace game
                 {
                     copystring(str_pseudoacteur, aname);
                     n_killstreakacteur = actor->killstreak;
-                    message3 = totalmillis;
+                    message[MSG_OTHERKILLSTREAK] = totalmillis;
                 }
             }
         }

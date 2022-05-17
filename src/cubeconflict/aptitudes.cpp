@@ -3,6 +3,8 @@
 #include "game.h"
 #include "ccheader.h"
 
+int getsort;
+
 int abilitydata(int aptitude)
 {
     switch(aptitude)

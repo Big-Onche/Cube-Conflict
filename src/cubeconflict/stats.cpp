@@ -17,6 +17,7 @@ void genlvl() //Calcule le niveau du joueur
         oldneed += 40;
         needxp += oldneed;
         neededxp += 40;
+        if(isconnected()) {playsound(S_LEVELUP); message[MSG_LEVELUP]=totalmillis;}
     }
 
     float pour1 = neededxp, pour2 = stat[STAT_XP]-needxp;
@@ -92,7 +93,7 @@ void writesave()
 
 void givecustombase() //Avant tout le joueur a les customisations de base, même en cas de sauvegarde corrompue
 {
-    stat[SMI_HAP] = stat[SMI_NOEL] = stat[CAPE_CUBE] =  stat[TOM_MERDE] =  stat[VOI_CORTEX] = rnd(99)+1;
+    stat[SMI_HAP] = stat[SMI_NOEL] = stat[CAPE_CUBE] = stat[TOM_MERDE] = stat[VOI_CORTEX] = rnd(99)+1;
 }
 
 void loadsave()
@@ -124,6 +125,7 @@ bool achievementlocked(int achID) {return !succes[achID];} //Succès verrouillé ?
 
 VAR(totalachunlocked, 0, 0, 32);
 
+string tempachname;
 void unlockachievement(int achID) //Débloque le succès
 {
     if(conserveurofficiel && achievementlocked(achID) && usesteam) //Ne débloque que si serveur officiel ET succès verrouillé ET Steam activé
@@ -133,6 +135,8 @@ void unlockachievement(int achID) //Débloque le succès
         succes[achID] = true; //Met le succès à jour côté client
         addxpandcc(25, 25);
         playsound(S_ACHIEVEMENTUNLOCKED);
+        formatstring(tempachname, "%s", langage ? achievements[achID].achnicenameEN : achievements[achID].achnicenameFR);
+        message[MSG_ACHUNLOCKED] = totalmillis;
         totalachunlocked++;
     }
 }

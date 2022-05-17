@@ -119,10 +119,14 @@ namespace gfx
 
 //HUD
 extern bool suicided, holdflag;
-extern string str_pseudotueur, str_armetueur;
+extern string str_pseudotueur, str_armetueur, tempachname;
 extern int n_aptitudetueur, n_aptitudevictime;
 
-extern int message1, message2, message3, ctfmessage1, ctfmessage2, ctfmessage3, ctfmessage4, ctfmessage5, ctfmessage6;
+enum {MSG_OWNKILLSTREAK = 0, MSG_YOUKILLED, MSG_OTHERKILLSTREAK,
+        MSG_CTF_TEAMPOINT, MSG_CTF_ENNEMYPOINT, MSG_CTF_TEAMFLAGRECO, MSG_CTF_ENNEMYFLAGRECO, MSG_CTF_TEAMSTOLE, MSG_CTF_ENNEMYSTOLE,
+        MSG_LEVELUP, MSG_ACHUNLOCKED, NUMMESSAGE};
+extern int message[NUMMESSAGE];
+
 extern int lastshoot, getsort;
 extern int zoomfov, zoom, crosshairsize;
 extern float crosshairalpha, pourcents;

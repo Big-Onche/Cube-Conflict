@@ -3,15 +3,7 @@
 #include "game.h"
 #include "ccheader.h"
 
-int message1, message2, message3, ctfmessage1, ctfmessage2, ctfmessage3, ctfmessage4, ctfmessage5, ctfmessage6;
-int message_streak1;
-
-int getsort;
-
-string strclassetueur, straptitudevictime;
-
-int decal_message = 0;
-bool need_message1, need_message2;
+int message[NUMMESSAGE];
 
 namespace game
 {
@@ -32,12 +24,27 @@ namespace game
     {
         if(ispaused()) return;
 
-        decal_message = 0, need_message1 = true, need_message2 = true;
+        int decal_message = 0;
+        bool need_message1 = true, need_message2 = true;
 
-        if(totalmillis-message1<=2500)
+        if(totalmillis - message[MSG_LEVELUP] <=2500)
+        {
+            string lvlupmsg;
+            formatstring(lvlupmsg, langage ? "\f1LEVEL UP! \fi(Lvl %d)" : "\f1NIVEAU SUPÉRIEUR ! \fi(Niveau %d)", cclvl);
+            rendermessage(lvlupmsg, 85, 8.8f, decal_message); decal_message -= screenh/24;
+        }
+
+        if(totalmillis - message[MSG_ACHUNLOCKED] <=3000)
+        {
+            string lvlupmsg;
+            formatstring(lvlupmsg, langage ? "\f1ACHIEVEMENT UNLOCKED! \fi(%s)" : "\f1SUCCES DÉBLOQUÉ ! \fi(%s)", tempachname);
+            rendermessage(lvlupmsg, 85, 8.8f, decal_message); decal_message -= screenh/24;
+        }
+
+
+        if(totalmillis- message[MSG_OWNKILLSTREAK] <=2500)
         {
             string streakmsg;
-
             switch(killstreak)
             {
                 case 3: formatstring(streakmsg, "%s \fc(x%d)", langage ? "You are hot !" : "Triplette !", killstreak); break;
@@ -51,7 +58,7 @@ namespace game
             if(need_message1) {rendermessage(streakmsg, 85, 8.8f, decal_message); decal_message -= screenh/24;}
         }
 
-        if(totalmillis-message2<=2500)
+        if(totalmillis - message[MSG_YOUKILLED] <=2500)
         {
             string killmsg;
 
@@ -60,7 +67,7 @@ namespace game
             decal_message -= screenh/27;
         }
 
-        if(totalmillis-message3<=2500)
+        if(totalmillis - message[MSG_OTHERKILLSTREAK] <=2500)
         {
             string infomsg;
 
@@ -80,18 +87,17 @@ namespace game
         if(m_ctf)
         {
             string infomsg;
-            if(totalmillis-ctfmessage1<=3000) {formatstring(infomsg, langage ? "\f9We scored a point!" : "\f9Notre équipe a marqué un point !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-            if(totalmillis-ctfmessage2<=3000) {formatstring(infomsg, langage ? "\f3The enemy team has scored a point." : "\f3L'équipe ennemie a marqué un point."); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-            if(totalmillis-ctfmessage3<=3000) {formatstring(infomsg, langage ? "\f9We recovered our flag!" : "\f9Notre équipe a récupéré son drapeau !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-            if(totalmillis-ctfmessage4<=3000) {formatstring(infomsg, langage ? "\f3The enemy team has recovered their flag" : "\f3L'équipe ennemie a récupéré son drapeau."); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-            if(totalmillis-ctfmessage5<=3000) {formatstring(infomsg, langage ? "\f9We stole the enemy flag !" : "\f9Notre équipe a volé le drapeau ennemi !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-            if(totalmillis-ctfmessage6<=3000) {formatstring(infomsg, langage ? "\f3The enemy team stole our flag." : "\f3L'équipe ennemie a volé notre drapeau !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis - message[MSG_CTF_TEAMPOINT]      <=3000) {formatstring(infomsg, langage ? "\f9We scored a point!" : "\f9Notre équipe a marqué un point !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis - message[MSG_CTF_ENNEMYPOINT]    <=3000) {formatstring(infomsg, langage ? "\f3The enemy team has scored a point." : "\f3L'équipe ennemie a marqué un point."); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis - message[MSG_CTF_TEAMFLAGRECO]   <=3000) {formatstring(infomsg, langage ? "\f9We recovered our flag!" : "\f9Notre équipe a récupéré son drapeau !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis - message[MSG_CTF_ENNEMYFLAGRECO] <=3000) {formatstring(infomsg, langage ? "\f3The enemy team has recovered their flag" : "\f3L'équipe ennemie a récupéré son drapeau."); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis - message[MSG_CTF_TEAMSTOLE]      <=3000) {formatstring(infomsg, langage ? "\f9We stole the enemy flag !" : "\f9Notre équipe a volé le drapeau ennemi !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis - message[MSG_CTF_ENNEMYSTOLE]    <=3000) {formatstring(infomsg, langage ? "\f3The enemy team stole our flag." : "\f3L'équipe ennemie a volé notre drapeau !"); rendermessage(infomsg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
         }
 
         if(player1->state==CS_DEAD)
         {
             string killedbymsg, withmsg, waitmsg;
-            //if(player1->armourtype==A_ASSIST && player1->armour==0) formatstring(killedbymsg, langage ? "Your powered armor exploded !" : "Ton armure assistée a explosé !");
             if(suicided) formatstring(killedbymsg, langage ? "You committed suicide !" : "Tu t'es suicidé !");
             else formatstring(killedbymsg, "%s %s (%s)", langage ? "Killed by" : "Tué par", str_pseudotueur, langage ? aptitudes[n_aptitudetueur].apt_nomEN : aptitudes[n_aptitudetueur].apt_nomFR);
 
@@ -103,6 +109,7 @@ namespace game
             if(wait>0) formatstring(waitmsg, "%s %d second%s%s", langage ? "Respawn available in" : "Respawn possible dans", wait, langage ? "" : "e", wait<=1?"":"s");
             else formatstring(waitmsg, langage ? "Press any key to respawn !" : "Appuie n'importe où pour revivre !");
             rendermessage(waitmsg, 95, 1.5f, -screenh/1.862f);
+            return;
         }
 
         if(player1->state==CS_SPECTATOR)
