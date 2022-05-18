@@ -621,7 +621,7 @@ struct ctfclientmode : clientmode
         d->flags = dflags;
         conoutf(CON_GAMEINFO, "%s\f7 %s marqué un point pour l'équipe %s !", teamcolorname(d), d==player1 ? "as" : "a", teamcolor(team));
         team==player1->team ? message[MSG_CTF_TEAMPOINT]=totalmillis : message[MSG_CTF_ENNEMYPOINT]=totalmillis;
-        if(d==player1) addxpandcc(20, 10);
+        if(d==player1) {addxpandcc(20, 10); if(player1->epomillis) unlockachievement(ACH_EPOFLAG);}
 
         playsound(team==player1->team ? S_DRAPEAUSCORE : S_DRAPEAUTOMBE);
 

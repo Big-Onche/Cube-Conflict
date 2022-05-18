@@ -128,10 +128,14 @@ VAR(totalachunlocked, 0, 0, 32);
 string tempachname;
 void unlockachievement(int achID) //Débloque le succès
 {
-    if(conserveurofficiel && achievementlocked(achID) && usesteam) //Ne débloque que si serveur officiel ET succès verrouillé ET Steam activé
+    if(conserveurofficiel && achievementlocked(achID)) //Ne débloque que si serveur officiel ET succès verrouillé
     {
-        SteamUserStats()->SetAchievement(achievements[achID].achname); //Met le succès à jour côté steam
-        SteamUserStats()->StoreStats();
+        if(usesteam)
+        {
+            if(usesteam) SteamUserStats()->SetAchievement(achievements[achID].achname); //Met le succès à jour côté steam
+            if(usesteam) SteamUserStats()->StoreStats();
+        }
+
         succes[achID] = true; //Met le succès à jour côté client
         addxpandcc(25, 25);
         playsound(S_ACHIEVEMENTUNLOCKED);

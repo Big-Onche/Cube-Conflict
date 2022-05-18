@@ -305,6 +305,7 @@ namespace game
         if(stat[TOM_MERDE+player1_tombe]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette tombe !"); playsound(S_ERROR); player1_tombe=0; return;}
         addmsg(N_SENDTOMBE, "ri", player1_tombe);
         player1->customtombe = player1_tombe;
+        if(player1->customtombe==10) unlockachievement(ACH_FUCKYOU);
     });
 
     void rendertombeplayer(gameent *d, float fade)

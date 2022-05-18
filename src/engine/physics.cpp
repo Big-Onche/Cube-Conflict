@@ -1829,7 +1829,7 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
     modifyvelocity(pl, local, water, floating, curtime, jointmillis, aptitude, assist, aptisort);
 
     vec d(pl->vel);
-    if(pl==game::player1 && game::player1->aptitude==APT_MAGICIEN && game::player1->epomillis>40000 && aptisort) unlockachievement(ACH_MAXSPEED);
+    if(pl==game::player1 && game::player1->aptitude==APT_MAGICIEN && game::player1->epomillis>30000 && aptisort) unlockachievement(ACH_MAXSPEED);
     if(!floating && water) d.mul(0.5f);
     d.add(pl->falling);
     d.mul(secs);

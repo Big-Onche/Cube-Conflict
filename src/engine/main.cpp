@@ -1310,10 +1310,6 @@ int main(int argc, char **argv)
     SDL_ShowCursor(SDL_FALSE);
     SDL_StopTextInput(); // workaround for spurious text-input events getting sent on first text input toggle?
 
-    logoutf("init: sound");
-    initsound();
-    if(uimusic) {musicmanager(0); uimusic = false;}
-
     logoutf("init: gl");
     gl_checkextensions();
     gl_init();
@@ -1358,6 +1354,10 @@ int main(int argc, char **argv)
     execfile("config/blendbrush.cfg");
     if(game::savedservers()) execfile(game::savedservers(), false);
     loadsave();
+
+    logoutf("init: sound");
+    initsound();
+    if(uimusic) {musicmanager(0); uimusic = false;}
 
     identflags |= IDF_PERSIST;
 

@@ -174,7 +174,7 @@ enum {ACH_TRIPLETTE = 0, ACH_PENTAPLETTE, ACH_DECAPLETTE, ACH_ATOME, ACH_WINNER,
         ACH_TUEURFANTOME, ACH_EPOFLAG, ACH_M32SUICIDE, ACH_ESPIONDEGUISE, ACH_FUCKYOU, ACH_ABUS, NUMACHS};
 extern bool succes[NUMACHS];
 
-static const struct achinfo { const char *achname, *achnicenameFR, *achnicenameEN, *achdescFR, *achdescEN; } achievements[] =
+static const struct achinfo { const char *achname, *achnicenameFR, *achnicenameEN, *achdescFR, *achdescEN; } achievements[NUMACHS] =
 {
     {"ACH_TRIPLETTE",     "Triple menace",               "Triple threat",               "Tuer 3 ennemis sans mourrir",                                          "Kill 3 enemies without dying"},
     {"ACH_PENTAPLETTE",   "Terreur",                     "Terror",                      "Tuer 5 ennemis sans mourrir",                                          "Kill 5 enemies without dying"},
@@ -203,7 +203,6 @@ static const struct achinfo { const char *achname, *achnicenameFR, *achnicenameE
     {"ACH_FUCKYEAH",      "Fuck yeah !",                 "Fuck yeah !",                 "Tuer un Shoshone en étant Américain",                                  "Kill a Shoshone with the American class"},
     {"ACH_RICHE",         "Capitaliste",                 "Capitalist",                  "Avoir 1500 CC en réserve",                                             "Have 1500 CC in reserve"},
     {"ACH_TUEURFANTOME",  "Tueur de l'au-delà",          "Slayer from beyond",          "Tuer un ennemi en étant mort",                                         "Kill an enemy while being dead"},
-
     {"ACH_EPOFLAG",       "C'est à ça que ça sert !",    "That's what it's made for!",  "Ramenez un drapeau ennemi en étant boosté par l'EPO",                  "Bring back an ennemy flag while being boosted by EPO"},
     {"ACH_M32SUICIDE",    "Erreur de calcul",            "Miscalculation",              "Se tuer avec sa propre grenade",                                       "Kill yourself with your own grenade"},
     {"ACH_ESPIONDEGUISE", "Pas vu, pas pris !",          "Not seen, not caught!",       "Tuer un ennemi en étant déguisé",                                      "Kill an enemy while disguised"},

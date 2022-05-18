@@ -407,6 +407,11 @@ namespace game
             if(player1->health>=2000)unlockachievement(ACH_SACAPV);
             if(player1->aptitude==APT_KAMIKAZE && player1->ammo[GUN_KAMIKAZE]<=0 && totalmillis-lastshoot>=500 && totalmillis-lastshoot<=750 && isconnected()) unlockachievement(ACH_SUICIDEFAIL);
             if(player1->steromillis && player1->epomillis && player1->jointmillis && player1->champimillis) unlockachievement(ACH_DEFONCE);
+
+            bool p1hassuperweapon = false;
+            loopi(4) if(player1->ammo[GUN_S_NUKE+i]>0) p1hassuperweapon = true;
+            if(p1hassuperweapon && player1->steromillis && player1->armour>0 && player1->armourtype==A_ASSIST) unlockachievement(ACH_ABUS);
+
             if(player1->steromillis || player1->epomillis || player1->jointmillis || player1->champimillis) entities::checkboosts(curtime, player1);
             if(player1->ragemillis || player1->vampimillis || player1->aptisort1 || player1->aptisort2 || player1->aptisort3) entities::checkaptiskill(curtime, player1);
             if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION) updatespecials(player1);
@@ -708,21 +713,23 @@ namespace game
         //////////////////////////////GESTION DE ET STATISTIQUES//////////////////////////////
         if(actor==player1 && d!=player1)
         {
-
             if(!isteam(player1->team, d->team))
             {
                 addstat(1, STAT_KILLS);
                 addxpandcc(7+player1->killstreak-1, 3);
                 if(player1->killstreak>stat[STAT_KILLSTREAK]) addstat(player1->killstreak, STAT_KILLSTREAK);
                 if(actor==player1 && atk==ATK_ASSISTXPL_SHOOT && player1->armourtype==A_ASSIST)unlockachievement(ACH_KILLASSIST);
-                if(player1->health<=149 && player1->state==CS_ALIVE) unlockachievement(ACH_1HPKILL);
-                if(player1->aptitude==APT_AMERICAIN && d->aptitude==APT_SHOSHONE) unlockachievement(ACH_FUCKYEAH);
-                if(player1->killstreak==3) unlockachievement(ACH_TRIPLETTE);
-                else if(player1->killstreak==5) unlockachievement(ACH_PENTAPLETTE);
-                else if(player1->killstreak==10) unlockachievement(ACH_DECAPLETTE);
+                if(player1->health<=100 && player1->state==CS_ALIVE) unlockachievement(ACH_1HPKILL);
+                switch(player1->aptitude)
+                {
+                    case APT_AMERICAIN: if(d->aptitude==APT_SHOSHONE) unlockachievement(ACH_FUCKYEAH); break;
+                    case APT_ESPION: if(player1->aptisort2) unlockachievement(ACH_ESPIONDEGUISE);
+                }
+                switch(player1->killstreak) {case 3: unlockachievement(ACH_TRIPLETTE); break; case 5: unlockachievement(ACH_PENTAPLETTE); break; case 10: unlockachievement(ACH_DECAPLETTE);}
             }
             else unlockachievement(ACH_CPASBIEN);
         }
+        else if(actor==player1 && d==player1 && atk==ATK_M32_SHOOT) unlockachievement(ACH_M32SUICIDE);
         else if (d==player1) addstat(1, STAT_MORTS);
 
         if(d->state==CS_EDITING)
@@ -791,12 +798,6 @@ namespace game
             aname = colorname(actor, NULL, langage ? "\fdYou" : "\fdTu", "\fc");
         }
 
-        //if(d==actor && actor->armourtype==A_ASSIST && actor->armour==0) // Explosion d'armure assistée //////////////////////////////////////////////////////////////////////
-        //{
-        //    if(langage)conoutf(contype, "%s%s%s", d==player1 ? "\fd" : "", d==player1 ? "Your" : dname, d==player1 ? " \f7powered armor exploded !" : "\f7's powered armor exploded !");
-        //    else conoutf(contype, "%s%s %s", d==player1 ? "\fd" : "L'armure assistée de ", d==player1 ? "Ton" : dname, d==player1 ? "\f7armure assistée a explosé !" : "\f7a explosé !");
-        //    if(d==player1) {player1->killstreak=0; copystring(str_armetueur, langage ? partmessageEN[rnd(5)].parttroll : partmessageFR[rnd(9)].parttroll); suicided = true;}
-        //}
         if(d==actor || atk==-1) // Suicide ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
             conoutf(contype, "%s%s %s%s%s", d==player1 ? "\fd" : "", dname, langage ? "" : d==player1 ? "t'es " : "s'est ", langage ? partmessageEN[rnd(2)].partsuicide : partmessageFR[rnd(5)].partsuicide, d==player1 ? " !" : ".");
