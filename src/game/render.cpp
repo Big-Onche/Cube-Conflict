@@ -11,6 +11,7 @@ VAR(UI_cape, 0, 0, 13);
 VAR(UI_tombe, 0, 0, 12);
 VAR(UI_voix, 0, 0, 10);
 VAR(UI_custtab, 0, 0, 3);
+VAR(UI_showsteamnamebtn, 0, 0, 1);
 
 namespace game
 {

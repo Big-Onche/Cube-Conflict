@@ -69,7 +69,12 @@ void menuprocess()
     if(uimusic) {musicmanager(0); uimusic = false;}
     if(mainmenu && !isconnected(true) && !UI::hascursor())
     {
-        if(veryfirstlaunch) {UI::showui("firstlaunch"); veryfirstlaunch = 0;}
+        if(veryfirstlaunch)
+        {
+            if(usesteam) {getsteamname(); UI_showsteamnamebtn = 0;}
+            UI::showui("firstlaunch");
+            veryfirstlaunch = 0;
+        }
         else
         {
             switch(langage)

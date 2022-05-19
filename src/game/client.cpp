@@ -1,15 +1,17 @@
 #include "game.h"
 #include "ccheader.h"
+#include "steam_api.h"
 
 VAR(n_ambiance, 0, 0, 8);
 VAR(n_map, 0, 0, 99);
 VARR(mapofficielle, 0, 0, 1);
 
-extern void calcmode();
+extern void calcmode();     //Gestion des modes de jeux
 VAR(n_mode, 0, 0, 12);
 VARFP(n_team, 0, 0, 1, { calcmode(); });
 VARFP(n_type, 0, 0, 1, { calcmode(); });
 VARFP(n_spec, 1, 1, 4, { calcmode(); });
+int cnidentiquearme = 0;
 
 void calcmode()
 {
@@ -17,16 +19,12 @@ void calcmode()
     else n_mode = n_spec+8;
 }
 
-int cnidentiquearme = 0;
-
-string pseudoaleatoire;
 string pseudobasique;
-
-string strpart1, strpart2;
-char choosennamepart1[32], choosennamepart2[32];
-
 char *rndname(bool firstpart, int feminin, int langue)
    {
+    string strpart1, strpart2;
+    char choosennamepart1[32], choosennamepart2[32];
+
     char buf[50];
     int names[3];
 
@@ -64,6 +62,7 @@ char *rndname(bool firstpart, int feminin, int langue)
     return pseudobasique;
 }
 
+string pseudoaleatoire;
 void genpseudo(bool forcename, int langue)
 {
     int feminin = rnd(2);
@@ -73,9 +72,22 @@ void genpseudo(bool forcename, int langue)
     {
         copystring(game::player1->name, pseudoaleatoire);
         game::addmsg(N_SWITCHNAME, "rs", game::player1->name);
+        if(usesteam) UI_showsteamnamebtn = 1;
     }
 }
 ICOMMAND(genpseudo, "i", (int *langue), {genpseudo(true, *langue);});
+
+VARP(usesteamname, 0, 1, 1);
+void getsteamname()
+{
+    if(usesteam && usesteamname)
+    {
+        copystring(game::player1->name, SteamFriends()->GetPersonaName());
+        game::addmsg(N_SWITCHNAME, "rs", game::player1->name);
+        UI_showsteamnamebtn = 0;
+    }
+}
+ICOMMAND(getsteamname, "", (), {getsteamname();});
 
 namespace game
 {
@@ -224,6 +236,7 @@ namespace game
         filtertext(player1->name, name, false, false, MAXNAMELEN);
         if(!player1->name[0]) {genpseudo(true, langage) ; copystring(player1->name, pseudoaleatoire);}
         addmsg(N_SWITCHNAME, "rs", player1->name);
+        if(usesteam) UI_showsteamnamebtn = 1;
     }
     void printname()
     {

@@ -145,7 +145,7 @@ extern bool usesteam;
 extern string pseudoaleatoire;
 extern void genpseudo(bool forcename, int langue);
 extern bool conserveurofficiel, uimusic;
-extern int langage, UI_menutabs, UI_smiley, UI_cape, UI_tombe, UI_voix, UI_custtab;
+extern int langage, UI_menutabs, UI_smiley, UI_cape, UI_tombe, UI_voix, UI_custtab, UI_showsteamnamebtn;
 
 extern void loadsave();
 extern void writesave();
@@ -166,6 +166,7 @@ enum {STAT_CC, STAT_XP, STAT_KILLS, STAT_MORTS, STAT_KILLSTREAK, STAT_BOUCLIERBO
         NUMSTATS};
 extern int stat[NUMSTATS];
 
+extern void getsteamname();
 extern void getsteamachievements();
 extern void unlockachievement(int achID);
 enum {ACH_TRIPLETTE = 0, ACH_PENTAPLETTE, ACH_DECAPLETTE, ACH_ATOME, ACH_WINNER, ACH_ENVOL, ACH_POSTULANT, ACH_STAGIAIRE,
@@ -208,4 +209,9 @@ static const struct achinfo { const char *achname, *achnicenameFR, *achnicenameE
     {"ACH_ESPIONDEGUISE", "Pas vu, pas pris !",          "Not seen, not caught!",       "Tuer un ennemi en étant déguisé",                                      "Kill an enemy while disguised"},
     {"ACH_FUCKYOU",       "Ils vont adorer !",           "They will love it!",          "Equiper la tombe \"fuck\"",                                            "Equip the grave \"fuck\""},
     {"ACH_ABUS",          "Toujours dans l'abus",        "Never enough",                "Avoir une armure assitée, une super-arme et des stéros",               "Have a power armor, superweapon, and steroids at the same time"},
+};
+
+static const struct statsinfo { const char *statname, *statnicenameFR, *statnicenameEN; } stats[1] =
+{
+    {"STAT_KILLS", "Eliminations", "Frags"},
 };
