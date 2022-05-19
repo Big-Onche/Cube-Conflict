@@ -1,5 +1,6 @@
 #include "engine.h"
 #include "ccheader.h"
+#include "steam_api.h"
 
 ICOMMAND(getgravedir, "i", (int *graveID), result(customstombes[*graveID].tombemenudir));
 
@@ -61,6 +62,7 @@ static int lastmainmenu = -1;
 
 void menuprocess()
 {
+    if(usesteam && strcasecmp(SteamFriends()->GetPersonaName(), game::player1->name)==0) UI_showsteamnamebtn = 0;
     if(lastmainmenu != mainmenu)
     {
         lastmainmenu = mainmenu;
