@@ -3190,7 +3190,7 @@ namespace server
                         loopi(nbjoueurs>servjoueursminimum) aiman::deleteai();
                     }
 
-                    logoutf("Infos : %s (%s/%s lvl %d)", ci->name, aptitudes[n_aptitudetueur].apt_nomEN, aptitudes[n_aptitudetueur].apt_nomFR, ci->level);
+                    logoutf("Infos : %s (%s/%s lvl %d)", ci->name, aptitudes[cq->aptitude].apt_nomEN, aptitudes[cq->aptitude].apt_nomFR, ci->level);
                     break;
                 }
 
@@ -3577,15 +3577,15 @@ namespace server
 
                 int ability = getint(p);
                 int duration = getint(p);
-                bool valid = ci->state.aitype==AI_BOT ? true : validability(ability, duration, cq->aptitude, cq->state.mana);
+                bool valid = cq->state.aitype==AI_BOT ? true : validability(ability, duration, cq->aptitude, cq->state.mana);
 
                 if(valid)
                 {
                     switch(ability)
                     {
-                        case 1: cq->state.aptisort1 = duration; cq->state.mana-=sorts[abilitydata(ci->aptitude)].mana1; break;
-                        case 2: cq->state.aptisort2 = duration; cq->state.mana-=sorts[abilitydata(ci->aptitude)].mana2; break;
-                        case 3: cq->state.aptisort3 = duration; cq->state.mana-=sorts[abilitydata(ci->aptitude)].mana3; break;
+                        case 1: cq->state.aptisort1 = duration; cq->state.mana-=sorts[abilitydata(cq->aptitude)].mana1; break;
+                        case 2: cq->state.aptisort2 = duration; cq->state.mana-=sorts[abilitydata(cq->aptitude)].mana2; break;
+                        case 3: cq->state.aptisort3 = duration; cq->state.mana-=sorts[abilitydata(cq->aptitude)].mana3; break;
                         default: valid = false;
                     }
                     if(valid) QUEUE_MSG;
