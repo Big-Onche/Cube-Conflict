@@ -1197,7 +1197,11 @@ bool initsteam()
         conoutf(CON_WARN, langage ? "Steam API failed to start." : "API Steam non démarrée");
         return false;
     }
-    else return true;
+    else
+    {
+        SteamAPI_ManualDispatch_Init();
+        return true;
+    }
 }
 
 bool rewritelangage = false;
@@ -1466,8 +1470,6 @@ int main(int argc, char **argv)
         gl_drawframe();
         swapbuffers();
         renderedframe = inbetweenframes = true;
-
-        if(usesteam)SteamAPI_RunCallbacks();
     }
 
     ASSERT(0);
