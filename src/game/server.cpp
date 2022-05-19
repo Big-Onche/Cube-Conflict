@@ -3590,7 +3590,11 @@ namespace server
                     }
                     if(valid) QUEUE_MSG;
                 }
-                else disconnect_client(sender, DISC_GAMEERR); //if not valid (mostly by cheating) disconnect the client
+                else
+                {
+                    disconnect_client(sender, DISC_GAMEERR); //if not valid (mostly by cheating) disconnect the client
+                    generrlog(ci); //gen a log of playerstats just in case of some shit happen
+                }
                 break;
             }
 
