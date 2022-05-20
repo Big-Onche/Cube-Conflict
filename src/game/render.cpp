@@ -438,6 +438,8 @@ namespace game
 
         if(d->aptitude==APT_ESPION && d->aptisort1)
         {
+            flags = NULL;
+
             vec doublepos = o;
             float posx = 25, posy = 25;
             switch(d->aptiseed)
