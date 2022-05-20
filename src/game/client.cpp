@@ -20,12 +20,12 @@ void calcmode()
 }
 
 string pseudobasique;
-char *rndname(bool firstpart, int feminin, int langue)
+char *playerrndname(bool firstpart, int feminin, int langue)
    {
     string strpart1, strpart2;
-    char choosennamepart1[32], choosennamepart2[32];
+    char choosennamepart1[16], choosennamepart2[16];
 
-    char buf[50];
+    char buf[32];
     int names[3];
 
     if(langue==0)
@@ -63,19 +63,16 @@ char *rndname(bool firstpart, int feminin, int langue)
 }
 
 string pseudoaleatoire;
-void genpseudo(bool forcename, int langue)
+void genpseudo()
 {
     int feminin = rnd(2);
-    formatstring(pseudoaleatoire, "%s%s", rndname(true, feminin, langue), rndname(false, feminin, langue));
+    formatstring(pseudoaleatoire, "%s%s", playerrndname(true, feminin, langage), playerrndname(false, feminin, langage));
 
-    if(forcename)
-    {
-        copystring(game::player1->name, pseudoaleatoire);
-        game::addmsg(N_SWITCHNAME, "rs", game::player1->name);
-        if(IS_USING_STEAM) UI_showsteamnamebtn = 1;
-    }
+    copystring(game::player1->name, pseudoaleatoire);
+    game::addmsg(N_SWITCHNAME, "rs", game::player1->name);
+    if(IS_USING_STEAM) UI_showsteamnamebtn = 1;
 }
-ICOMMAND(genpseudo, "i", (int *langue), {genpseudo(true, *langue);});
+ICOMMAND(genpseudo, "", (int *forcename), {genpseudo();});
 
 VARP(usesteamname, 0, 1, 1);
 void getsteamname()
@@ -234,7 +231,7 @@ namespace game
     void switchname(const char *name)
     {
         filtertext(player1->name, name, false, false, MAXNAMELEN);
-        if(!player1->name[0]) {genpseudo(true, langage) ; copystring(player1->name, pseudoaleatoire);}
+        if(!player1->name[0]) {genpseudo() ; copystring(player1->name, pseudoaleatoire);}
         addmsg(N_SWITCHNAME, "rs", player1->name);
         if(IS_USING_STEAM) UI_showsteamnamebtn = 1;
     }
@@ -1742,7 +1739,7 @@ namespace game
                 if(d)
                 {
                     filtertext(text, text, false, false, MAXNAMELEN);
-                    if(!text[0]) {genpseudo(false, langage) ; copystring(text, pseudoaleatoire);}
+                    if(!text[0]) {genpseudo() ; copystring(text, pseudoaleatoire);}
                     if(strcmp(text, d->name))
                     {
                         if(!isignored(d->clientnum)) conoutf(langage ? "%s is now known as %s" : "%s s'appelle maintenant %s", colorname(d), colorname(d, text));

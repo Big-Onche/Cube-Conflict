@@ -143,7 +143,7 @@ extern float wateramplitude;
 //Statistiques & sauvegarde & config élémentaire
 extern bool IS_USING_STEAM, IS_ON_OFFICIAL_SERV, UI_PLAYMUSIC;
 extern void getsteamname();
-extern void genpseudo(bool forcename, int langue);
+extern void genpseudo();
 
 extern void loadsave();
 extern void writesave();
