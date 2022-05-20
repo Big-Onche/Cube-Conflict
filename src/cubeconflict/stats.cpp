@@ -139,6 +139,13 @@ void writesave() //we write the poorly encrypted value for all stat
         statID++;
     }
 
+    int achID = 0;
+    loopi(NUMACHS)
+    {
+        savefile->printf("%s\n", encryptsave(tempformatstring("%d", succes[achID])));
+        achID++;
+    }
+
     savefile->close();
 }
 
@@ -163,11 +170,11 @@ void loadsave() //we read the poorly encrypted value for all stat
         for(i = 0; (i < 500 && buf[i] != '\0'); i++)
             buf[i] = buf[i] + SUPERCRYPTKEY;
 
-        sscanf(buf, "%i", &stat[statID]);
+        if(statID >= NUMSTATS) sscanf(buf, "%i", &succes[statID-NUMSTATS]); //triggers warning but achievements are saved in 0 or 1 so it works with bool without problems
+        else sscanf(buf, "%i", &stat[statID]);
         statID++;
     }
     savefile->close();
-
     genlvl(); //Génère le niveau après le chargement des statistiques
 }
 
