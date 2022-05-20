@@ -803,7 +803,7 @@ void soundmenu_cleanup()
 {
     stopmusic();
     stopsounds();
-    uimusic = true;
+    UI_PLAYMUSIC = true;
 }
 
 #ifdef WIN32

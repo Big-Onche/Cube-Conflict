@@ -56,24 +56,24 @@ void applychanges()
 COMMAND(applychanges, "");
 ICOMMAND(pendingchanges, "b", (int *idx), { if(needsapply.inrange(*idx)) result(needsapply[*idx].desc); else if(*idx < 0) intret(needsapply.length()); });
 
-bool uimusic = true;
+bool UI_PLAYMUSIC = true;
 VARP(veryfirstlaunch, 0, 1, 1);
 static int lastmainmenu = -1;
 
 void menuprocess()
 {
-    if(usesteam && strcasecmp(SteamFriends()->GetPersonaName(), game::player1->name)==0) UI_showsteamnamebtn = 0;
+    if(IS_USING_STEAM && strcasecmp(SteamFriends()->GetPersonaName(), game::player1->name)==0) UI_showsteamnamebtn = 0;
     if(lastmainmenu != mainmenu)
     {
         lastmainmenu = mainmenu;
         execident("mainmenutoggled");
     }
-    if(uimusic) {musicmanager(0); uimusic = false;}
+    if(UI_PLAYMUSIC) {musicmanager(0); UI_PLAYMUSIC = false;}
     if(mainmenu && !isconnected(true) && !UI::hascursor())
     {
         if(veryfirstlaunch)
         {
-            if(usesteam) {getsteamname(); UI_showsteamnamebtn = 0;}
+            if(IS_USING_STEAM) {getsteamname(); UI_showsteamnamebtn = 0;}
             UI::showui("firstlaunch");
             veryfirstlaunch = 0;
         }

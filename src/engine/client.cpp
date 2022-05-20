@@ -62,7 +62,7 @@ ICOMMAND(connectedport, "", (),
 
 void abortconnect()
 {
-    conserveurofficiel = false;
+    IS_ON_OFFICIAL_SERV = false;
     if(!connpeer) return;
     game::connectfail();
     if(connpeer->state!=ENET_PEER_STATE_DISCONNECTED) enet_peer_reset(connpeer);
@@ -74,14 +74,13 @@ void abortconnect()
 
 SVARP(connectname, "");
 VARP(connectport, 0, 0, 0xFFFF);
-bool conserveurofficiel = false;
 
 void connectserv(const char *servername, int serverport, const char *serverpassword)
 {
     if(connpeer)
     {
         conoutf("aborting connection attempt");
-        conserveurofficiel = false;
+        IS_ON_OFFICIAL_SERV = false;
         abortconnect();
     }
 
@@ -97,13 +96,13 @@ void connectserv(const char *servername, int serverport, const char *serverpassw
         addserver(servername, serverport, serverpassword && serverpassword[0] ? serverpassword : NULL);
         conoutf("attempting to connect to %s:%d", servername, serverport);
 
-        if(strcasecmp(servername, "serveur1.cube-conflict.com")==0) conserveurofficiel = true;
-        if(conserveurofficiel) conoutf("Serveur officiel : Les statistiques et succès sont enregistrés");
+        if(strcasecmp(servername, "serveur1.cube-conflict.com")==0) IS_ON_OFFICIAL_SERV = true;
+        if(IS_ON_OFFICIAL_SERV) conoutf("Serveur officiel : Les statistiques et succès sont enregistrés");
 
         if(!resolverwait(servername, &address))
         {
             conoutf(CON_ERROR, "\f3could not resolve server %s", servername);
-            conserveurofficiel = false;
+            IS_ON_OFFICIAL_SERV = false;
             return;
         }
     }
@@ -121,7 +120,7 @@ void connectserv(const char *servername, int serverport, const char *serverpassw
         if(!clienthost)
         {
             conoutf(CON_ERROR, "\f3could not connect to server");
-            conserveurofficiel = false;
+            IS_ON_OFFICIAL_SERV = false;
             return;
         }
         clienthost->duplicatePeers = 0;
@@ -170,11 +169,12 @@ void disconnect(bool async, bool cleanup, bool volontaire)
         curpeer = NULL;
         discmillis = 0;
         conoutf(langage ? "Disconnected" : "Déconnecté");
-        conserveurofficiel = false;
+        IS_ON_OFFICIAL_SERV = false;
         game::gamedisconnect(cleanup);
         clearpostfx();
         soundmenu_cleanup();
         mainmenu = 1;
+        if(stat[STAT_DAMMAGERECORD] < game::player1->totaldamage/10) addstat(game::player1->totaldamage/10, STAT_DAMMAGERECORD, true);
     }
     if(!connpeer && clienthost)
     {

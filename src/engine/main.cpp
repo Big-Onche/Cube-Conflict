@@ -46,8 +46,8 @@ void quit(bool savecfgs = true)                      // normal exit
     abortconnect();
     disconnect();
     localdisconnect();
-    if(usesteam) SteamAPI_Shutdown();
     cleanup();
+    if(IS_USING_STEAM) SteamAPI_Shutdown();
     exit(EXIT_SUCCESS);
 }
 
@@ -1207,7 +1207,8 @@ bool initsteam()
 bool rewritelangage = false;
 int newlangage;
 
-bool usesteam = false;
+bool IS_USING_STEAM = false;
+bool IS_ON_OFFICIAL_SERV = false;
 
 int main(int argc, char **argv)
 {
@@ -1264,7 +1265,7 @@ int main(int argc, char **argv)
                 break;
             }
             case 'x': initscript = &argv[i][2]; break;
-            case 's': usesteam = true; break;
+            case 's': IS_USING_STEAM = true; break;
             default: if(!serveroption(argv[i])) gameargs.add(argv[i]); break;
         }
         else gameargs.add(argv[i]);
@@ -1274,7 +1275,7 @@ int main(int argc, char **argv)
 
     if(dedicated <= 1)
     {
-        if(usesteam && SteamAPI_RestartAppIfNecessary(1454700)) quit(false);
+        if(IS_USING_STEAM && SteamAPI_RestartAppIfNecessary(1454700)) quit(false);
 
         logoutf("init: sdl");
 
@@ -1293,7 +1294,7 @@ int main(int argc, char **argv)
     atexit(enet_deinitialize);
     enet_time_set(0);
 
-    if(usesteam)
+    if(IS_USING_STEAM)
     {
         initsteam();
         getsteamachievements();
@@ -1361,7 +1362,7 @@ int main(int argc, char **argv)
 
     logoutf("init: sound");
     initsound();
-    if(uimusic) {musicmanager(0); uimusic = false;}
+    if(UI_PLAYMUSIC) { musicmanager(0); UI_PLAYMUSIC = false; }
 
     identflags |= IDF_PERSIST;
 
@@ -1441,7 +1442,7 @@ int main(int argc, char **argv)
         lastmillis += curtime;
         totalmillis = millis;
         updatetime();
-        if(!mainmenu) game::dotime();
+        game::dotime();
 
         checkinput();
         UI::update();
