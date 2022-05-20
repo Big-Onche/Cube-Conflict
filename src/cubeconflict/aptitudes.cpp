@@ -35,6 +35,7 @@ namespace game
                     addmsg(N_SENDABILITY, "rcii", d, ability, d->aptisort1);
                     d->mana -= sorts[abilitydata(d->aptitude)].mana1;
                     d->sort1pret = false;
+                    if(d==player1) stat[STAT_ABILITES]++;
                 }
                 //We recieve some shit from the server
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
@@ -64,6 +65,7 @@ namespace game
                     addmsg(N_SENDABILITY, "rcii", d, ability, d->aptisort2);
                     d->mana -= sorts[abilitydata(d->aptitude)].mana2;
                     d->sort2pret = false;
+                    if(d==player1) stat[STAT_ABILITES]++;
                 }
 
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
@@ -85,6 +87,7 @@ namespace game
                     addmsg(N_SENDABILITY, "rcii", d, ability, d->aptisort3);
                     d->mana -= sorts[abilitydata(d->aptitude)].mana3;
                     d->sort3pret = false;
+                    if(d==player1) stat[STAT_ABILITES]++;
                 }
 
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);

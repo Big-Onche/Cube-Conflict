@@ -583,7 +583,7 @@ struct ctfclientmode : clientmode
         returnflag(i);
         conoutf(CON_GAMEINFO, "%s\f7 %s récupéré le drapeau %s", teamcolorname(d), d==player1 ? "as" : "a", teamcolorflag(f));
         d->team==player1->team ? message[MSG_CTF_TEAMFLAGRECO]=totalmillis : message[MSG_CTF_ENNEMYFLAGRECO]=totalmillis;
-        if(d==player1) addxpandcc(10, 3);
+        if(d==player1) {addstat(1, STAT_DRAPEAUXALYREC); addxpandcc(10, 3);}
         playsound(S_DRAPEAURESET);
     }
 
@@ -621,7 +621,7 @@ struct ctfclientmode : clientmode
         d->flags = dflags;
         conoutf(CON_GAMEINFO, "%s\f7 %s marqué un point pour l'équipe %s !", teamcolorname(d), d==player1 ? "as" : "a", teamcolor(team));
         team==player1->team ? message[MSG_CTF_TEAMPOINT]=totalmillis : message[MSG_CTF_ENNEMYPOINT]=totalmillis;
-        if(d==player1) {addxpandcc(20, 10); if(player1->epomillis) unlockachievement(ACH_EPOFLAG);}
+        if(d==player1) {addstat(1, STAT_DRAPEAUXENRAP); addxpandcc(20, 10); if(player1->epomillis) unlockachievement(ACH_EPOFLAG);}
 
         playsound(team==player1->team ? S_DRAPEAUSCORE : S_DRAPEAUTOMBE);
 
@@ -637,7 +637,7 @@ struct ctfclientmode : clientmode
         f.interptime = lastmillis;
         conoutf(CON_GAMEINFO, "%s\f7 %s volé le drapeau %s", teamcolorname(d), d==player1 ? "as" : "a", teamcolorflag(f));
         d->team==player1->team ? message[MSG_CTF_TEAMSTOLE]=totalmillis : message[MSG_CTF_ENNEMYSTOLE]=totalmillis;
-        if(d==player1) {addstat(1, STAT_DRAPEAUX); addxpandcc(5, 2);}
+        if(d==player1) {addstat(1, STAT_DRAPEAUXENVOL); addxpandcc(5, 2);}
         ownflag(i, d, lastmillis);
         playsound(S_DRAPEAUPRIS);
     }

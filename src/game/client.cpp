@@ -72,7 +72,7 @@ void genpseudo(bool forcename, int langue)
     {
         copystring(game::player1->name, pseudoaleatoire);
         game::addmsg(N_SWITCHNAME, "rs", game::player1->name);
-        if(usesteam) UI_showsteamnamebtn = 1;
+        if(IS_USING_STEAM) UI_showsteamnamebtn = 1;
     }
 }
 ICOMMAND(genpseudo, "i", (int *langue), {genpseudo(true, *langue);});
@@ -80,7 +80,7 @@ ICOMMAND(genpseudo, "i", (int *langue), {genpseudo(true, *langue);});
 VARP(usesteamname, 0, 1, 1);
 void getsteamname()
 {
-    if(usesteam && usesteamname)
+    if(IS_USING_STEAM && usesteamname)
     {
         copystring(game::player1->name, SteamFriends()->GetPersonaName());
         game::addmsg(N_SWITCHNAME, "rs", game::player1->name);
@@ -236,7 +236,7 @@ namespace game
         filtertext(player1->name, name, false, false, MAXNAMELEN);
         if(!player1->name[0]) {genpseudo(true, langage) ; copystring(player1->name, pseudoaleatoire);}
         addmsg(N_SWITCHNAME, "rs", player1->name);
-        if(usesteam) UI_showsteamnamebtn = 1;
+        if(IS_USING_STEAM) UI_showsteamnamebtn = 1;
     }
     void printname()
     {

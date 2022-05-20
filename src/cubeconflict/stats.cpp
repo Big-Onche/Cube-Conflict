@@ -32,12 +32,15 @@ void genlvl() //Calcule le niveau du joueur
         case 100: unlockachievement(ACH_MAJOR);
     }
     game::player1->level = cclvl; //Actualise le lvl pour l'envoyer en multijoueur
+    stat[STAT_LEVEL] = cclvl;
 }
 
 //////////////////////Gestion des statistiques//////////////////////
+int stat[NUMSTATS];
+
 void addxpandcc(int nbxp, int nbcc) // Ajoute l'xp et/ou les CC
 {
-    if(!conserveurofficiel) return;
+    if(!IS_ON_OFFICIAL_SERV) return;
     stat[STAT_XP] += nbxp;
     stat[STAT_CC] += nbcc;
     genlvl(); //Recalcule le niveau
@@ -45,82 +48,131 @@ void addxpandcc(int nbxp, int nbcc) // Ajoute l'xp et/ou les CC
     if(stat[STAT_CC] > 1500) unlockachievement(ACH_RICHE);
 }
 
-int stat[NUMSTATS]; bool succes[NUMACHS];
-
-void addstat(int valeur, int neededstat) // Ajoute la stat très simplement
+int savejustincase = 0;
+void addstat(int valeur, int statID, bool rewrite) // Ajoute la stat très simplement
 {
-    if(!conserveurofficiel) return;
-    stat[neededstat]+= valeur;
+    if(!IS_ON_OFFICIAL_SERV) return;
+    if(rewrite) stat[statID] = valeur;
+    else stat[statID] += valeur;
+
+    savejustincase++;
+    if(savejustincase==100) {writesave(); savejustincase=0;} //Sauvegarde toutes les 100 stats ajoutés (ça monte vite avec les munitions tirées), ça limite la casse en cas de crash
 }
 
-float menustat(int value) //Récupère les stats pour le menu (float utilisé pour le ratio)
+float kdratio = 0.f;
+void calcratio() //Calcule le ratio pour l'afficher dans le menu (non sauvegardé)
 {
-    switch(value)
+    float fk = stat[STAT_KILLS], fm = stat[STAT_MORTS];
+    kdratio = (fk/(fm == 0 ? 1 : fm)*1.f);
+}
+
+string statlogodir;
+const char *getstatlogo(int statID) //Récupère le logo d'un succès en particulier
+{
+    if(statID>NUMSTATS) return "media/texture/game/notexture.png";
+    formatstring(statlogodir, "%s", statslist[statID].statlogo);
+    return statlogodir;
+}
+ICOMMAND(getstatlogo, "i", (int *statID), result(getstatlogo(*statID)));
+
+string tmp;
+const char *getstatinfo(int statID, bool onlyvalue) //Récupère la description d'une statistique
+{
+    if(statID>NUMSTATS) return langage ? "Invalid ID" : "ID Invalide";
+    switch(statID)
     {
-        case -2:
+        //Based on STAT_KILLS & STAT_MORTS, STAT_KDRATIO not saved.
+        case STAT_KDRATIO:
         {
-            float fk = stat[STAT_KILLS], fm = stat[STAT_MORTS];
-            int ratiokd = (fk/(fk == 0 ? 1 : fm)*100);
-            return ratiokd/100.f;
+            calcratio();
+            formatstring(tmp, "%s%s%.1f", onlyvalue ? "" : langage ? statslist[statID].statnicenameEN : statslist[statID].statnicenameFR, onlyvalue ? "" : " : ", kdratio);
+            break;
         }
-        case -1: return cclvl; break;
-        default: return stat[value];
+        //Easy secs to HH:MM:SS converter and displayer
+        case STAT_TIMEPLAYED:
+        {
+            int tmpsec = stat[STAT_TIMEPLAYED], tmpmin = 0, tmphr = 0;
+            while(tmpsec > 59) { tmpmin++ ; tmpsec-=60; }
+            while(tmpmin > 59) { tmphr++ ; tmpmin-=60; }
+
+            formatstring(tmp, "%s : %d %s%s %d %s%s %d %s%s",  langage ? statslist[statID].statnicenameEN : statslist[statID].statnicenameFR,
+                        tmphr, langage ? "hour" : "heure", tmphr>1 ? "s" : "",
+                        tmpmin, "min", tmpmin>1 ? "s" : "",
+                        tmpsec, "sec", tmpsec>1 ? "s" : "");
+        }
+        break;
+        //when we need to display the stat after description (rare cases)
+        case STAT_DAMMAGERECORD:
+        case STAT_MAXKILLDIST:
+        case STAT_LEVEL:
+            formatstring(tmp, "%s%s%d%s", onlyvalue ? "" : langage ? statslist[statID].statnicenameEN : statslist[statID].statnicenameFR, onlyvalue ? "" : " : ", stat[statID], statID!=STAT_MAXKILLDIST ? "" : langage ? " meters" : " mètres");
+            break;
+        //otherwise, we put the stat value before the description by default
+        default: formatstring(tmp, "%d%s%s", stat[statID], onlyvalue ? "" : " ", onlyvalue ? "" : langage ? statslist[statID].statnicenameEN : statslist[statID].statnicenameFR);
     }
+
+    return tmp;
 }
+ICOMMAND(getstatinfo, "ii", (int *statID, bool *onlyvalue), result(getstatinfo(*statID, *onlyvalue)));
 
 //////////////////////Gestion des sauvegardes//////////////////////
-char *encryptsave(char savepart[20])
+#define SUPERCRYPTKEY 10;
+char *encryptsave(char savepart[20]) //simple and easily crackable encryption
 {
     int i;
 
     for(i = 0; (i < 100 && savepart[i] != '\0'); i++)
-        savepart[i] = savepart[i] - 10;
+        savepart[i] = savepart[i] - SUPERCRYPTKEY;
 
     return savepart;
 }
 
-void writesave()
+void writesave() //we write the poorly encrypted value for all stat
 {
-    stream *f = openutf8file("config/stats.cfg", "w");
+    stream *savefile = openutf8file("config/stats.cfg", "w");
+    if(!savefile) { conoutf(langage ? "\fcUnable to write your save file !" : "\fcUnable d'écrite votre fichier de sauvegarde !"); return; }
 
     int statID = 0;
     loopi(NUMSTATS)
     {
-        f->printf("%s\n", encryptsave(tempformatstring("%d", stat[statID])));
+        savefile->printf("%s\n", encryptsave(tempformatstring("%d", stat[statID])));
         statID++;
     }
+
+    savefile->close();
 }
 
-void givecustombase() //Avant tout le joueur a les customisations de base, même en cas de sauvegarde corrompue
+void givestarterkit() //Avant tout le joueur a les customisations de base et le niveau 1, même en cas de sauvegarde corrompue
 {
+    stat[STAT_LEVEL]++;
     stat[SMI_HAP] = stat[SMI_NOEL] = stat[CAPE_CUBE] = stat[TOM_MERDE] = stat[VOI_CORTEX] = rnd(99)+1;
 }
 
-void loadsave()
+void loadsave() //we read the poorly encrypted value for all stat
 {
-    stream *statlist = openfile("config/stats.cfg", "r");
-    if(!statlist) {givecustombase(); return;}
+    stream *savefile = openfile("config/stats.cfg", "r");
+    if(!savefile) {givestarterkit(); return;} //Si le fichier de stats n'existe pas -> on donne le kit de départ
 
     char buf[50];
     int statID = 0;
 
-    while(statlist->getline(buf, sizeof(buf)))
+    while(savefile->getline(buf, sizeof(buf)))
     {
         int i;
-
+        //we decrypt the line
         for(i = 0; (i < 500 && buf[i] != '\0'); i++)
-            buf[i] = buf[i] + 10;
+            buf[i] = buf[i] + SUPERCRYPTKEY;
 
         sscanf(buf, "%i", &stat[statID]);
         statID++;
     }
-    statlist->close();
+    savefile->close();
 
-    givecustombase();
-    genlvl();
+    genlvl(); //Génère le niveau après le chargement des statistiques
 }
 
 //////////////////////Gestion des succès//////////////////////
+bool succes[NUMACHS];
 bool achievementlocked(int achID) {return !succes[achID];} //Succès verrouillé ? OUI = TRUE, NON = FALSE
 
 VAR(totalachunlocked, 0, 0, 32);
@@ -128,12 +180,12 @@ VAR(totalachunlocked, 0, 0, 32);
 string tempachname;
 void unlockachievement(int achID) //Débloque le succès
 {
-    if(conserveurofficiel && achievementlocked(achID)) //Ne débloque que si serveur officiel ET succès verrouillé
+    if(IS_ON_OFFICIAL_SERV && achievementlocked(achID)) //Ne débloque que si serveur officiel ET succès verrouillé
     {
-        if(usesteam)
+        if(IS_USING_STEAM)
         {
-            if(usesteam) SteamUserStats()->SetAchievement(achievements[achID].achname); //Met le succès à jour côté steam
-            if(usesteam) SteamUserStats()->StoreStats();
+            SteamUserStats()->SetAchievement(achievements[achID].achname); //Met le succès à jour côté steam
+            SteamUserStats()->StoreStats();
         }
 
         succes[achID] = true; //Met le succès à jour côté client

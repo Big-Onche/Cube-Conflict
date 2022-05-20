@@ -490,7 +490,6 @@ namespace game
 
     void damageeffect(int damage, gameent *d, gameent *actor, bool thirdperson, int atk)
     {
-        if(d==player1) return;
         vec p = d->o;
         p.z += 0.6f*(d->eyeheight + d->aboveeye) - d->eyeheight;
 
@@ -514,45 +513,82 @@ namespace game
             return;
         }
 
+
+        float draweddmg = damage;
         bool normaldamage = true;
 
         switch(actor->aptitude)
         {
             case APT_AMERICAIN:
                 if(atk==ATK_NUKE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_CAMPOUZE_SHOOT)
-                    {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*2.f), PART_TEXT, 2500, 0xFF5500, actor==player1 ? 5.5f : 4.0f, -8); normaldamage = false; }
-            case APT_NINJA:
-                if(atk==ATK_CACNINJA_SHOOT) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*3.0f), PART_TEXT, 2500, 0xFF0000, actor==player1 ? 7.0f : 5.0f, -8);  normaldamage = false; }
+                {
+                    draweddmg*=1.5f;
+                    if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 2500, 0xFF5500, actor==player1 ? 5.5f : 4.0f, -8);
+                    normaldamage = false;
+                }
                 break;
+
+            case APT_NINJA:
+                if(atk==ATK_CACNINJA_SHOOT && d!=player1){particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 2500, 0xFF0000, actor==player1 ? 7.0f : 5.0f, -8); normaldamage = false; }
+                break;
+
             case APT_MAGICIEN:
-                if(actor->aptisort2) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.3333f), PART_TEXT, 2500, 0xFF00FF, actor==player1 ? 5.5f : 4.0f, -8); normaldamage = false; }
+                if(actor->aptisort2)
+                {
+                    draweddmg*=1.25f;
+                    if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 2500, 0xFF00FF, actor==player1 ? 5.5f : 4.0f, -8);
+                    normaldamage = false;
+                }
+                break;
+
             case APT_CAMPEUR:
                 {
-                    float campdeg = (actor->o.dist(d->o)/1800.f)+1.f;
-                    particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*campdeg), PART_TEXT, actor->steromillis > 0 ? 2500 : 1500, damage<0 ? 0x22FF22 : actor->steromillis > 0 ? 0xFF0000: 0xFF4B19, actor==player1 ? 7.0f : 3.0f, -8);  normaldamage = false;
-                    break;
+                    draweddmg *= ((actor->o.dist(d->o)/1800.f)+1.f);
+                    if(d!=player1) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, actor->steromillis > 0 ? 2500 : 1500, draweddmg<0 ? 0x22FF22 : actor->steromillis > 0 ? 0xFF0000: 0xFF4B19, actor==player1 ? 7.0f : 3.0f, -8);  normaldamage = false;}
                 }
-            case APT_VIKING:
-                if(actor->ragemillis) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.5f), PART_TEXT, 2500, 0xAA0000, actor==player1 ? 10.0f : 7.0f, -8); normaldamage = false; }
                 break;
+
+            case APT_VIKING:
+                if(actor->ragemillis)
+                {
+                    draweddmg*=1.25f;
+                    if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 2500, 0xAA0000, actor==player1 ? 10.0f : 7.0f, -8);
+                    normaldamage = false;
+                }
+                break;
+
             case APT_PRETRE:
                 if(d->aptisort2)
                 {
                     adddynlight(d->o, 25, vec(1.0f, 0.0f, 1.0f), 300, 50, L_NOSHADOW|L_VOLUMETRIC);
                     playsound(S_SORTPRETRE1, d!=player1 ? &d->o : NULL, NULL, 0, 0, 0, -1, 150, 300);
-                    particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.0f), PART_TEXT, 1500, 0xAA00AA, actor==player1 ? 7.0f : 3.0f, -8);
+                    if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 1500, 0xAA00AA, actor==player1 ? 7.0f : 3.0f, -8);
                     normaldamage = false;
                 }
                 break;
+
             case APT_VAMPIRE:
-                particle_textcopy(actor->abovehead(), tempformatstring("%.1f", damage*0.5f), PART_TEXT, actor->steromillis > 0 ? 2500 : 1500, 0xBBDDBB, 3.5f, -8);
+                if(d!=player1) particle_textcopy(actor->abovehead(), tempformatstring("%.1f", draweddmg*0.5f), PART_TEXT, actor->steromillis > 0 ? 2500 : 1500, 0xBBDDBB, 3.5f, -8);
                 break;
             case APT_SHOSHONE:
-                if(d->aptisort1) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage/1.3f), PART_TEXT, 2500, 0xAAAA00, actor==player1 ? 10.0f : 7.0f, -8); normaldamage = false; }
-                if(actor->aptisort3) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.3f), PART_TEXT, 2500, 0xFF3333, actor==player1 ? 10.0f : 7.0f, -8); normaldamage = false; }
+                if(d->aptisort1)
+                {
+                    draweddmg/=1.3f;
+                    if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 2500, 0xAAAA00, actor==player1 ? 10.0f : 7.0f, -8);
+                    normaldamage = false;
+                }
+                if(actor->aptisort3)
+                {
+                    draweddmg*=1.3f;
+                    if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 2500, 0xFF3333, actor==player1 ? 10.0f : 7.0f, -8);
+                    normaldamage = false;
+                }
                 break;
         }
-        if(normaldamage) particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.0f), PART_TEXT, actor->steromillis > 0 ? 2500 : 1500, actor->steromillis > 0 ? 0xFF0000 : 0xFF4400, actor==player1 ? 7.0f : 3.0f, -8);
+        if(normaldamage && d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, actor->steromillis > 0 ? 2500 : 1500, actor->steromillis > 0 ? 0xFF0000 : 0xFF4400, actor==player1 ? 7.0f : 3.0f, -8);
+
+        if(actor==player1) addstat(draweddmg, STAT_TOTALDAMAGEDEALT);
+        else if(d==player1) addstat(draweddmg, STAT_TOTALDAMAGERECIE);
     }
 
     void gibeffect(int damage, const vec &vel, gameent *d)
@@ -1007,6 +1043,8 @@ namespace game
 
     void shoteffects(int atk, const vec &from, const vec &to, gameent *d, bool local, int id, int prevaction)     // create visual effect from a shot
     {
+        if(d==player1) addstat(1, STAT_MUNSHOOTED);
+
         int gun = attacks[atk].gun;
         int sound = attacks[atk].sound;
         //int soundwater = attacks[atk]].soundwater;
@@ -1048,7 +1086,11 @@ namespace game
             case ATK_SMAW_SHOOT:
             case ATK_ROQUETTES_SHOOT:
             case ATK_NUKE_SHOOT:
-                if(d==player1 && atk==ATK_NUKE_SHOOT) unlockachievement(ACH_ATOME);
+                if(d==player1 && atk==ATK_NUKE_SHOOT)
+                {
+                    unlockachievement(ACH_ATOME);
+                    addstat(1, STAT_ATOM);
+                }
                 particle_flare(d->muzzle, d->muzzle, 250, PART_NORMAL_MUZZLE_FLASH, d->steromillis ? 0xFF2222 : d->aptisort2 && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFF7700, atk==ATK_ROQUETTES_SHOOT ? 2.5f : 7.00f, d, player1->champimillis ? true : false);
                 if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 250, PART_NORMAL_MUZZLE_FLASH, 0xFF2222, atk==ATK_ROQUETTES_SHOOT ? 4.0f : 3.00f, d, player1->champimillis ? true : false);
                 adddynlight(hudgunorigin(gun, d->o, to, d), 100, vec(1.25f, 0.75f, 0.3f), 75, 2, DL_FLASH, 0, vec(1.25f, 0.75f, 0.3f), d);

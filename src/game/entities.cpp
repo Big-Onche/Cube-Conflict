@@ -271,13 +271,20 @@ namespace entities
                     {
                         switch(e->type)
                         {
-                            case I_SANTE: addstat(1, STAT_PANACHAY); addxpandcc(1); break;
-                            case I_MANA: addstat(1, STAT_MANA); addxpandcc(1); break;
-                            case I_BOUCLIERBOIS: addstat(1, STAT_BOUCLIERBOIS); addxpandcc(2); break;
-                            case I_BOUCLIERFER: addstat(1, STAT_BOUCLIERFER); addxpandcc(3); break;
-                            case I_BOUCLIEROR: addstat(1, STAT_BOUCLIEROR); addxpandcc(4); break;
-                            case I_BOUCLIERMAGNETIQUE: addstat(1, STAT_BOUCLIERMAGNETIQUE); addxpandcc(4); break;
-                            case I_ARMUREASSISTEE: addstat(1, STAT_ARMUREASSIST); addxpandcc(5); break;
+                            case I_SANTE:               addstat(1, STAT_PANACHAY); addxpandcc(1); break;
+                            case I_MANA:                addstat(1, STAT_MANA); addxpandcc(1); break;
+                            case I_BOUCLIERBOIS:
+                            case I_BOUCLIERFER:
+                            case I_BOUCLIEROR:
+                            case I_BOUCLIERMAGNETIQUE:
+                                if(player1->armourtype==A_ASSIST) addstat(1, STAT_REPASSIST);
+                                else
+                                {
+                                    addstat(1, e->type==I_BOUCLIERBOIS ? STAT_BOUCLIERBOIS : e->type==I_BOUCLIERFER ? STAT_BOUCLIERFER : e->type==I_BOUCLIERMAGNETIQUE ? STAT_BOUCLIERMAGNETIQUE : STAT_BOUCLIEROR);
+                                    addxpandcc(e->type==I_BOUCLIERBOIS ? 2 : e->type==I_BOUCLIERFER ? 3 : 4);
+                                }
+                                break;
+                            case I_ARMUREASSISTEE:      addstat(1, STAT_ARMUREASSIST); addxpandcc(5); break;
                             case I_BOOSTPV: addstat(1, STAT_COCHON); addxpandcc(5); break;
                             case I_BOOSTDEGATS: addstat(1, STAT_STEROS); addxpandcc(5); break;
                             case I_BOOSTVITESSE: addstat(1, STAT_EPO); addxpandcc(5); break;

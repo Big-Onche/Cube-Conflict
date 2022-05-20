@@ -3377,9 +3377,6 @@ namespace UI
     ICOMMAND(uicolortext, "tife", (tagval *text, int *c, float *scale, uint *children),
         buildtext(*text, *scale, uitextscale, Color(*c), -1, children));
 
-    ICOMMAND(uistat, "ffe", (float *stat, float *scale, uint *children),
-        buildstattext(menustat(*stat), *scale, uitextscale, Color(0, 0, 0), -1, children, *stat==-2 ? true : false, *stat==21 ? true : false));
-
     ICOMMAND(uitext, "tfe", (tagval *text, float *scale, uint *children),
         buildtext(*text, *scale, uitextscale, Color(255, 255, 255), -1, children));
 

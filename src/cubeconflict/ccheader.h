@@ -91,10 +91,10 @@ static const struct danceinfo { const char *dancename; int danceprice; } customs
 
 static const struct costumeinfo { const char *village, *usine, *faille, *lune, *chateaux, *volcan; } costumes[4] =
 {
-    {"mapmodel/caisses/caissebois", "mapmodel/caisses/caisse1", "mapmodel/caisses/caissebois",  "mapmodel/rochers/pierre_fonce_esp",     "mapmodel/caisses/caissebois",  "mapmodel/distributeur"},
-    {"mapmodel/tonneau",            "mapmodel/caisses/caisse2", "mapmodel/tonneau",             "mapmodel/caisses/caisse2",     "mapmodel/tonneau",             "mapmodel/rochers/pierre_fonce_esp"},
-    {"mapmodel/panneau",            "mapmodel/caisses/caisse3", "mapmodel/panneau",             "mapmodel/caisses/caisse3",     "mapmodel/panneau",             "mapmodel/lampadaire"},
-    {"mapmodel/arbres/arbre1",      "mapmodel/murjersay",       "mapmodel/arbres/arbre1",       "mapmodel/murjersay",           "mapmodel/arbres/arbre1",       "mapmodel/murjersay"},
+    {"mapmodel/caisses/caissebois", "mapmodel/caisses/caisse1", "mapmodel/caisses/caissebois",  "mapmodel/rochers/pierre_fonce_esp",    "mapmodel/caisses/caissebois",  "mapmodel/distributeur"},
+    {"mapmodel/tonneau",            "mapmodel/caisses/caisse2", "mapmodel/tonneau",             "mapmodel/caisses/caisse2",             "mapmodel/tonneau",             "mapmodel/rochers/pierre_fonce_esp"},
+    {"mapmodel/panneau",            "mapmodel/caisses/caisse3", "mapmodel/panneau",             "mapmodel/caisses/caisse3",             "mapmodel/panneau",             "mapmodel/lampadaire"},
+    {"mapmodel/arbres/arbre1",      "mapmodel/murjersay",       "mapmodel/arbres/arbre1",       "mapmodel/murjersay",                   "mapmodel/arbres/arbre1",       "mapmodel/murjersay"},
 };
 
 namespace gfx
@@ -117,7 +117,7 @@ namespace gfx
     extern const char *getshielddir(int armourtype, int armourval, bool hud = false, bool preload = false);
 }
 
-//HUD
+//HUD and MENUS
 extern bool suicided, holdflag;
 extern string str_pseudotueur, str_armetueur, tempachname;
 extern int n_aptitudetueur, n_aptitudevictime;
@@ -134,31 +134,31 @@ extern float crosshairalpha, pourcents;
 extern float weapposside, weapposup, maxweapposside, maxweapposup, shieldside, maxshieldside;
 extern int nbfps;
 
-extern int parallaxX, parallaxY;
+extern int parallaxX, parallaxY, langage, UI_menutabs, UI_smiley, UI_cape, UI_tombe, UI_voix, UI_custtab, UI_showsteamnamebtn; //Menu
 
 //Ambiances aléatoires
 extern int randomambience;
 extern float wateramplitude;
 
 //Statistiques & sauvegarde & config élémentaire
-extern bool usesteam;
-extern string pseudoaleatoire;
+extern bool IS_USING_STEAM, IS_ON_OFFICIAL_SERV, UI_PLAYMUSIC;
+extern void getsteamname();
 extern void genpseudo(bool forcename, int langue);
-extern bool conserveurofficiel, uimusic;
-extern int langage, UI_menutabs, UI_smiley, UI_cape, UI_tombe, UI_voix, UI_custtab, UI_showsteamnamebtn;
 
 extern void loadsave();
 extern void writesave();
 
-extern void addxpandcc(int nbxp, int nbcc = 0);
-extern int cclvl, needxp, oldneed, neededxp;
+extern int needxp, oldneed, neededxp;
 extern float pourcents;
 
-extern void addstat(int valeur, int stat);
-extern float menustat(int value);
-enum {STAT_CC, STAT_XP, STAT_KILLS, STAT_MORTS, STAT_KILLSTREAK, STAT_BOUCLIERBOIS, STAT_BOUCLIERFER, STAT_BOUCLIEROR, STAT_BOUCLIERMAGNETIQUE,
-        STAT_PANACHAY, STAT_MANA, STAT_COCHON, STAT_STEROS, STAT_EPO, STAT_JOINT, STAT_CHAMPIS, STAT_ARMES, STAT_SUPERARMES,
-        STAT_DRAPEAUX, STAT_WINS, STAT_ARMUREASSIST, STAT_TPSSEC, STAT_TPSMIN, STAT_TPSH,
+extern void addstat(int valeur, int stat, bool rewrite = false);
+extern void addxpandcc(int nbxp, int nbcc = 0);
+
+enum {STAT_CC, STAT_XP, STAT_LEVEL, STAT_KILLS, STAT_MORTS, STAT_KDRATIO, STAT_DAMMAGERECORD, STAT_KILLSTREAK, STAT_MAXKILLDIST, STAT_WINS, STAT_ABILITES, STAT_SUICIDES, STAT_ALLIESTUES, STAT_TIMEPLAYED, STAT_DRAPEAUXENVOL, STAT_DRAPEAUXENRAP, STAT_DRAPEAUXALYREC, //Main game stats
+        STAT_BOUCLIERBOIS, STAT_BOUCLIERFER, STAT_BOUCLIEROR, STAT_BOUCLIERMAGNETIQUE, STAT_ARMUREASSIST, STAT_REPASSIST, //Shields
+        STAT_PANACHAY, STAT_MANA, STAT_COCHON, STAT_STEROS, STAT_EPO, STAT_JOINT, STAT_CHAMPIS, STAT_ARMES, STAT_SUPERARMES, //Objects
+        STAT_ATOM, STAT_MUNSHOOTED, STAT_TOTALDAMAGEDEALT, STAT_TOTALDAMAGERECIE, //Stupid statistics
+
         SMI_HAP, SMI_NOEL, SMI_MALADE, SMI_CONTENT, SMI_COLERE, SMI_SOURNOIS, SMI_FOU, SMI_CLINDOEIL, SMI_COOL, SMI_BUG,
         CAPE_CUBE, CAPE_JVC, CAPE_CORONED, CAPE_ATOME, CAPE_JESUSECO, CAPE_WEED, CAPE_FLAMES, CAPE_BOUCLE, CAPE_VINTAGE, CAPE_ELITE, CAPE_HIGH, CAPE_RAYONSX, CAPE_RISITAS, CAPE_RICHE,
         TOM_MERDE, TOM_BASIQUE1, TOM_BASIQUE2, TOM_FLEUR, TOM_CRISTAL, TOM_GOLF, TOM_OEIL, TOM_EXCALIBUR, TOM_COURONNE, TOM_CRIME, TOM_FUCK, TOM_MONUMENT, TOM_LINGOT,
@@ -166,9 +166,55 @@ enum {STAT_CC, STAT_XP, STAT_KILLS, STAT_MORTS, STAT_KILLSTREAK, STAT_BOUCLIERBO
         NUMSTATS};
 extern int stat[NUMSTATS];
 
-extern void getsteamname();
+static const struct statsinfo { const char *statname, *statnicenameFR, *statnicenameEN, *statlogo; } statslist[] =
+{
+    //Steam name                //French description                //English description               //Stat logo
+    //Main game stats
+    {"STAT_CC",                 "CubeCoins",                        "CubeCoins",                        "media/interface/hud/cislacoins.png"},  //0
+    {"STAT_XP",                 "XP",                               "XP",                               "media/interface/hud/stats.png"},
+    {"STAT_LEVEL",              "Niveau",                           "Level",                            "media/interface/hud/stats.png"},
+    {"STAT_KILLS",              "Éliminations",                     "Frags",                            "media/interface/hud/flingue.jpg"},
+    {"STAT_MORTS",              "Morts",                            "Deaths",                           "media/interface/hud/mort.png"},
+    {"STAT_KDRATIO",            "Ratio morts/éliminations",         "Kills/Deaths ratio",               "media/interface/hud/stats.png"},       //Calculated in calcratio() with STAT_KILLS & STAT_MORTS then called in getstatinfo() STAT_KDRATIO not saved because float shit.
+    {"STAT_DAMMAGERECORD",      "Record de dommages en une partie", "Damage record in a single match",  "media/interface/hud/stats.png"},
+    {"STAT_KILLSTREAK",         "Meilleure série d'éliminations",   "Best killstreak",                  "media/interface/hud/rage.png"},
+    {"STAT_MAXKILLDIST",        "Elimination la plus éloignée",     "Farthest frag",                    "media/interface/hud/campeur.png"},
+    {"STAT_WINS",               "Victoires",                        "Victories",                        "media/interface/hud/cool.jpg"},
+    {"STAT_ABILITES",           "Abilitées utilisées",              "Iron shields",                     "media/interface/hud/stats.png"},       //10
+    {"STAT_SUICIDES",           "Suicides",                         "Suicides",                         "media/interface/hud/fou.jpg"},
+    {"STAT_ALLIESTUES",         "Alliés tués",                      "Killed allies",                    "media/interface/hud/sournois_red.jpg"},
+    {"STAT_TIMEPLAYED",         "Temps de jeu",                     "Time played",                      "media/interface/hud/chrono.png"},      //Calculated in secs dotime with STAT_TIMEPLAYED, calculated in HH:MM:SS for display in getstatinfo()
+    {"STAT_DRAPEAUXENVOL",      "Drapeaux ennemis volés",           "Stolen enemy flags",               "media/interface/hud/drapeau_ennemi.png"},
+    {"STAT_DRAPEAUXENRAP",      "Drapeaux ennemis remportés",       "Enemy flags won",                  "media/interface/hud/drapeau_ennemi.png"},
+    {"STAT_DRAPEAUXALYREC",     "Drapeaux alliés récupérés",        "Allied flags recovered",           "media/interface/hud/drapeau_allie.png"},
+    //Shields
+    {"STAT_BOUCLIERBOIS",       "Boucliers en bois utilisés",       "Wooden shields used",              "media/interface/hud/bouclier_bois.png"},
+    {"STAT_BOUCLIERFER",        "Boucliers en fer utilisés",        "Iron shields used",                "media/interface/hud/bouclier_fer.png"},
+    {"STAT_BOUCLIEROR",         "Boucliers en or utilisés",         "Gold shields used",                "media/interface/hud/bouclier_or.png"},
+    {"STAT_BOUCLIERMAGNETIQUE", "Boucliers magnétiques utilisés",   "Magnetic shields used",            "media/interface/hud/bouclier_magnetique.png"},       //20
+    {"STAT_ARMUREASSIST",       "Armures assistées utilisés",       "Power armors used",                "media/interface/hud/robot.png"},
+    {"STAT_REPASSIST",          "Réparations d'armure assistée",    "Power armor repairs",              "media/interface/hud/options.jpg"},
+    //Objects
+    {"STAT_PANACHAY",           "Panachays consommés",              "Beers drunk",                      "media/interface/hud/coeur.png"},
+    {"STAT_MANA",               "Potions de mana consommées",       "Mana potions consumed",            "media/interface/hud/mana.png"},
+    {"STAT_COCHON",             "Cochons grillés mangés",           "Grilled pigs eaten",               "media/interface/hud/stats.png"},
+    {"STAT_STEROS",             "Cures de stéroïdes",               "Steroids cycles",                  "media/interface/hud/steros.png"},
+    {"STAT_EPO",                "Piqures d'EPO",                    "EPO shots",                        "media/interface/hud/epo.png"},
+    {"STAT_JOINT",              "Joints fumés",                     "Smoked joints",                    "media/interface/hud/joint.png"},
+    {"STAT_CHAMPIS",            "Champignons mangés",               "Shrooms eaten",                    "media/interface/hud/champis.png"},
+    {"STAT_ARMES",              "Armes ramassées",                  "Picked up weapons",                "media/interface/hud/chargeur.png"},                    //30
+    {"STAT_SUPERARMES",         "Super-caisses ramassées",          "Picked Up Super Crates",           "media/interface/hud/stats.png"},
+    //Stupid statistics
+    {"STAT_ATOM",               "Bombes atomiques tirées",          "Amount of atom bomb fired",        "media/interface/hud/stats.png"},
+    {"STAT_MUNSHOOTED",         "Munitions tirées au total",        "Amount of ammo fired",             "media/interface/hud/stats.png"},
+    {"STAT_TOTALDAMAGEDEALT",   "Dommages infligés au total",       "Amount of damage dealt",           "media/interface/hud/stats.png"},
+    {"STAT_TOTALDAMAGERECIE",   "Dommages reçus au total",          "Amount of damage recieved",        "media/interface/hud/stats.png"},
+};
+
+//////////////////////////////////////// Succès | Achievements ////////////////////////////////////////
 extern void getsteamachievements();
 extern void unlockachievement(int achID);
+
 enum {ACH_TRIPLETTE = 0, ACH_PENTAPLETTE, ACH_DECAPLETTE, ACH_ATOME, ACH_WINNER, ACH_ENVOL, ACH_POSTULANT, ACH_STAGIAIRE,
         ACH_SOLDAT, ACH_LIEUTENANT, ACH_MAJOR, ACH_BEAUTIR, ACH_DEFONCE, ACH_PRECIS, ACH_KILLASSIST, ACH_KILLER, ACH_SACAPV,
         ACH_CADENCE, ACH_1HPKILL, ACH_MAXSPEED, ACH_INCREVABLE, ACH_CHANCE, ACH_CPASBIEN, ACH_SUICIDEFAIL, ACH_FUCKYEAH, ACH_RICHE,
@@ -177,6 +223,7 @@ extern bool succes[NUMACHS];
 
 static const struct achinfo { const char *achname, *achnicenameFR, *achnicenameEN, *achdescFR, *achdescEN; } achievements[NUMACHS] =
 {
+    //Steam name          //French name                  //English name                 //French description                                                    //English description
     {"ACH_TRIPLETTE",     "Triple menace",               "Triple threat",               "Tuer 3 ennemis sans mourrir",                                          "Kill 3 enemies without dying"},
     {"ACH_PENTAPLETTE",   "Terreur",                     "Terror",                      "Tuer 5 ennemis sans mourrir",                                          "Kill 5 enemies without dying"},
     {"ACH_DECAPLETTE",    "Invincible !",                "Invincible !",                "Tuer 10 ennemis sans mourrir",                                         "Kill 10 enemies without dying"},
@@ -209,9 +256,4 @@ static const struct achinfo { const char *achname, *achnicenameFR, *achnicenameE
     {"ACH_ESPIONDEGUISE", "Pas vu, pas pris !",          "Not seen, not caught!",       "Tuer un ennemi en étant déguisé",                                      "Kill an enemy while disguised"},
     {"ACH_FUCKYOU",       "Ils vont adorer !",           "They will love it!",          "Equiper la tombe \"fuck\"",                                            "Equip the grave \"fuck\""},
     {"ACH_ABUS",          "Toujours dans l'abus",        "Never enough",                "Avoir une armure assitée, une super-arme et des stéros",               "Have a power armor, superweapon, and steroids at the same time"},
-};
-
-static const struct statsinfo { const char *statname, *statnicenameFR, *statnicenameEN; } stats[1] =
-{
-    {"STAT_KILLS", "Eliminations", "Frags"},
 };

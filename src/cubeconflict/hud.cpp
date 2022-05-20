@@ -30,7 +30,7 @@ namespace game
         if(totalmillis - message[MSG_LEVELUP] <=2500) //////////////////////////////////////////////////////////////// LVL UP MESSAGE
         {
             string msg;
-            formatstring(msg, langage ? "\f1LEVEL UP! \fi(Lvl %d)" : "\f1NIVEAU SUPÉRIEUR ! \fi(Niveau %d)", cclvl);
+            formatstring(msg, langage ? "\f1LEVEL UP! \fi(Lvl %d)" : "\f1NIVEAU SUPÉRIEUR ! \fi(Niveau %d)", stat[STAT_LEVEL]);
             rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/24;
         }
 
@@ -388,7 +388,7 @@ namespace game
         if(player1->champimillis) {draw_textf("%d", 135, h-233-decal_number, d->champimillis/1000); decal_number +=130;}
         if(player1->jointmillis) {draw_textf("%d", 135, h-233-decal_number, d->jointmillis/1000); decal_number +=130;}
 
-        defformatstring(infobarrexp, "%d/%d XP - LVL %d", neededxp-(needxp-stat[STAT_XP]), neededxp, cclvl);
+        defformatstring(infobarrexp, "%d/%d XP - LVL %d", neededxp-(needxp-stat[STAT_XP]), neededxp, stat[STAT_LEVEL]);
         int tw = text_width(infobarrexp);
         float tsz = 0.4f,
               tx = 0.5f*(w - tw*tsz), ty = h - 22;

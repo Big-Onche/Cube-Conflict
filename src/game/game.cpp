@@ -65,11 +65,9 @@ namespace game
     {
         if(totalmillis >= lasttimeupdate+1000) //1 second interval
         {
-            addstat(1, STAT_TPSSEC);
+            addstat(1, STAT_TIMEPLAYED);
             lasttimeupdate = totalmillis;
         }
-        if(stat[21]>=60) {stat[21]=0 ; addstat(1, STAT_TPSMIN);}
-        if(stat[22]>=60) {stat[22]=0 ; addstat(1, STAT_TPSH);}
     }
 
     ICOMMAND(getfollow, "", (),
@@ -717,7 +715,7 @@ namespace game
             {
                 addstat(1, STAT_KILLS);
                 addxpandcc(7+player1->killstreak-1, 3);
-                if(player1->killstreak>stat[STAT_KILLSTREAK]) addstat(player1->killstreak, STAT_KILLSTREAK);
+                if(player1->killstreak > stat[STAT_KILLSTREAK]) addstat(player1->killstreak, STAT_KILLSTREAK, true);
                 if(actor==player1 && atk==ATK_ASSISTXPL_SHOOT && player1->armourtype==A_ASSIST)unlockachievement(ACH_KILLASSIST);
                 if(player1->health<=100 && player1->state==CS_ALIVE) unlockachievement(ACH_1HPKILL);
                 switch(player1->aptitude)
@@ -727,9 +725,17 @@ namespace game
                 }
                 switch(player1->killstreak) {case 3: unlockachievement(ACH_TRIPLETTE); break; case 5: unlockachievement(ACH_PENTAPLETTE); break; case 10: unlockachievement(ACH_DECAPLETTE);}
             }
-            else unlockachievement(ACH_CPASBIEN);
+            else
+            {
+                addstat(1, STAT_ALLIESTUES);
+                unlockachievement(ACH_CPASBIEN);
+            }
         }
-        else if(actor==player1 && d==player1 && atk==ATK_M32_SHOOT) unlockachievement(ACH_M32SUICIDE);
+        else if(actor==player1 && d==player1)
+        {
+            addstat(1, STAT_SUICIDES);
+            if(atk==ATK_M32_SHOOT)unlockachievement(ACH_M32SUICIDE);
+        }
         else if (d==player1) addstat(1, STAT_MORTS);
 
         if(d->state==CS_EDITING)
@@ -825,6 +831,7 @@ namespace game
                 playsound(S_KILL);
                 message[MSG_YOUKILLED] = totalmillis; message[MSG_OWNKILLSTREAK] = totalmillis; copystring(str_pseudovictime, dname); n_aptitudevictime = d->aptitude; killdistance = distance;
                 if(distance>=100.f) unlockachievement(ACH_BEAUTIR);
+                if(stat[STAT_MAXKILLDIST]<distance) addstat(distance, STAT_MAXKILLDIST, true);
                 if(player1->state==CS_DEAD) unlockachievement(ACH_TUEURFANTOME);
 
             }
@@ -892,8 +899,9 @@ namespace game
 
             defformatstring(flags, "%d", player1->flags);
             conoutf(CON_GAMEINFO, langage ? "\faGAME OVER !" : "\faFIN DE LA PARTIE !");
-            if(langage) conoutf(CON_GAMEINFO, "\f2Kills : %d | Deaths : %d | Total damage : %d | Accuracy : %d%% %s %s", player1->frags, player1->deaths, player1->totaldamage, accuracy, m_ctf ? "| Flags :" : "", m_ctf ? flags : "");
-            else conoutf(CON_GAMEINFO, "\f2Éliminations : %d | Morts : %d | Dégats infligés : %d | Précision : %d%% %s %s", player1->frags, player1->deaths, player1->totaldamage, accuracy, m_ctf ? "| Drapeaux :" : "", m_ctf ? flags : "");
+            if(langage) conoutf(CON_GAMEINFO, "\f2Kills : %d | Deaths : %d | Total damage : %d | Accuracy : %d%% %s %s", player1->frags, player1->deaths, player1->totaldamage/10, accuracy, m_ctf ? "| Flags :" : "", m_ctf ? flags : "");
+            else conoutf(CON_GAMEINFO, "\f2Éliminations : %d | Morts : %d | Dégats infligés : %d | Précision : %d%% %s %s", player1->frags, player1->deaths, player1->totaldamage/10, accuracy, m_ctf ? "| Drapeaux :" : "", m_ctf ? flags : "");
+            if(stat[STAT_DAMMAGERECORD] < player1->totaldamage/10) addstat(player1->totaldamage/10, STAT_DAMMAGERECORD, true);
             showscores(true);
             disablezoom();
 
@@ -969,8 +977,8 @@ namespace game
     void initclient()
     {
         player1 = spawnstate(new gameent);
-        genpseudo(false, langage);
-        filtertext(player1->name, pseudoaleatoire, false, false, MAXNAMELEN);
+        filtertext(player1->name, langage ? "BadUsername" : "PseudoPourri", false, false, MAXNAMELEN);
+        genpseudo(true, langage);
         players.add(player1);
         player1->aptitude = player1_aptitude;
     }
