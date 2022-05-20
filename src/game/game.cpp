@@ -302,9 +302,9 @@ namespace game
                         switch(h->aptitude)
                         {
                             case APT_MEDECIN:
-                                if(r->o.dist(h->o)/18.f<7.5f && r->health<r->maxhealth+250 && h->state==CS_ALIVE && r->state==CS_ALIVE && isteam(h->team, r->team) && randomevent(0.7f*nbfps))
+                                if(r->o.dist(h->o)/18.f<7.5f && r->health<r->maxhealth+250 && h->state==CS_ALIVE && r->state==CS_ALIVE && isteam(h->team, r->team) && randomevent(h==r ? 0.75*nbfps : 0.5f*nbfps))
                                 {
-                                    r->health+=30;
+                                    r->health+=50;
                                     if(r->health>r->maxhealth+250) r->health=r->maxhealth+250;
                                     particle_flying_flare(h->o, r==h ? h->o : effectpos, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
                                     playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
@@ -317,7 +317,7 @@ namespace game
                                 {
                                     if(r->aptitude==APT_VAMPIRE && r->health<r->maxhealth+250)
                                     {
-                                        r->health+=30;
+                                        r->health+=50;
                                         if(r->health>r->maxhealth+250) r->health=r->maxhealth+250;
                                         particle_flying_flare(h->o, r==h ? h->o : effectpos, 400, PART_SANTE, 0xFF00FF, 2.5f, 100);
                                         playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
@@ -435,13 +435,14 @@ namespace game
                     switch(player1->aptitude)
                     {
                         case APT_MEDECIN:
-                            if(r->o.dist(player1->o)/18.f<7.5f && r->health<r->maxhealth+250 && player1->state==CS_ALIVE && r->state==CS_ALIVE && isteam(player1->team, r->team) && randomevent(0.7f*nbfps))
+                            if(r->o.dist(player1->o)/18.f<7.5f && r->health<r->maxhealth+250 && player1->state==CS_ALIVE && r->state==CS_ALIVE && isteam(player1->team, r->team) && randomevent(r==player1 ? 0.75*nbfps : 0.5f*nbfps))
                             {
-                                r->health+=30;
+                                r->health+=50;
                                 if(r->health>r->maxhealth+250) r->health=r->maxhealth+250;
 
                                 particle_flying_flare(player1->o, r==player1 ? player1->o : effectpos, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
                                 playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
+                                if(r!=player1) addstat(3, STAT_HEALTHREGEN);
                             }
                             break;
 
@@ -450,7 +451,7 @@ namespace game
                             {
                                 if(r->aptitude==APT_VAMPIRE && r->health<r->maxhealth+250)
                                 {
-                                    r->health+=30;
+                                    r->health+=50;
                                     if(r->health>r->maxhealth+250) r->health=r->maxhealth+250;
                                     particle_flying_flare(player1->o, effectpos, 400, PART_SANTE, 0xFF00FF, 2.5f, 100);
                                     playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
@@ -461,6 +462,7 @@ namespace game
                                     if(r->mana>150) r->mana=150;
                                     particle_flying_flare(player1->o, effectpos, 400, PART_SPARK, 0xFF00FF, 2.5f, 100);
                                     playsound(S_REGENJUNKIE, &r->o, 0, 0, 0 , 50, -1, 125);
+                                    if(r!=player1) addstat(5, STAT_MANAREGEN);
                                 }
                             }
                             break;

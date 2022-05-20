@@ -3607,7 +3607,7 @@ namespace server
                 switch(stat)
                 {
                     case 0:
-                        cq->state.health+=30;
+                        cq->state.health+=50;
                         if(cq->state.health>cq->state.maxhealth+250) cq->state.health=cq->state.maxhealth+250;
                         break;
                     case 1:
