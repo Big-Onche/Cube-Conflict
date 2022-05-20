@@ -1156,7 +1156,7 @@ namespace game
         bool dup = !name[0] || duplicatename(d, name, alt) || d->aitype != AI_NONE;
         if(dup || color[0])
         {
-            if(dup) return tempformatstring(d->aitype == AI_NONE ? "\fs%s%s \f5(%d)\fr" : "\fs%s[BOT]%s", color, name, d->clientnum);
+            if(dup) return tempformatstring(d->aitype == AI_NONE ? "\fs%s%s \f5(%d)\fr" : langage ? "\fs%s[AI]%s" : "\fs%s[IA]%s", color, name, d->clientnum);
             return tempformatstring("\fs%s%s\fr", color, name);
         }
         return name;
