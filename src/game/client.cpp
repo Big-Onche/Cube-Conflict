@@ -63,16 +63,16 @@ char *playerrndname(bool firstpart, int feminin, int langue)
 }
 
 string pseudoaleatoire;
-void genpseudo()
+void genpseudo(int forcelang)
 {
     int feminin = rnd(2);
-    formatstring(pseudoaleatoire, "%s%s", playerrndname(true, feminin, langage), playerrndname(false, feminin, langage));
+    formatstring(pseudoaleatoire, "%s%s", playerrndname(true, feminin, forcelang<2 ? langage : forcelang-2), playerrndname(false, feminin, forcelang<2 ? langage : forcelang-2));
 
     copystring(game::player1->name, pseudoaleatoire);
     game::addmsg(N_SWITCHNAME, "rs", game::player1->name);
     if(IS_USING_STEAM) UI_showsteamnamebtn = 1;
 }
-ICOMMAND(genpseudo, "", (int *forcename), {genpseudo();});
+ICOMMAND(genpseudo, "i", (int *forcelang), {genpseudo(*forcelang);});
 
 VARP(usesteamname, 0, 1, 1);
 void getsteamname()
