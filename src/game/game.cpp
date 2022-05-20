@@ -323,7 +323,7 @@ namespace game
                                         playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
                                         addmsg(N_PUSHSTAT, "rci", r, 0);
                                     }
-                                    else if(r->mana<150)
+                                    else if(r->aptitude!=APT_VAMPIRE && r->mana<150)
                                     {
                                         r->mana+=5;
                                         if(r->mana>150) r->mana=150;
