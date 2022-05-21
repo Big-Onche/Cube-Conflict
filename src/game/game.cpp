@@ -815,6 +815,7 @@ namespace game
         else if(isteam(d->team, actor->team)) // Tir allié /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
             contype |= CON_TEAMKILL;
+            copystring(str_pseudotueur, aname); n_aptitudetueur = actor->aptitude;
             if(d==player1) conoutf(contype, "\f6%s %s \fd(%s)", dname, langage ? "got fragged by a teammate" : "as été tué par un allié", aname); //TU as été tué par un allié
             else conoutf(contype, "\f2%s %s%s \fd(%s)", aname, langage ? "" : actor==player1 ? "as " : "a ", langage ? "fragged a teammate" : "tué un allié" , dname); //Quelqu'un a ou TU as tué un de ses alliés
         }
