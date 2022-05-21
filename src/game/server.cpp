@@ -4,7 +4,7 @@
 
 VARP(gamelength, 1, 10, 60);
 
-int identiquearme = rnd(17), servambient = 1;
+int identiquearme = rnd(17), servambient = rnd(9);
 
 namespace game
 {

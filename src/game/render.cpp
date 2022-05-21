@@ -371,7 +371,7 @@ namespace game
         }
 
         ////////Boucliers////////
-        if(d->armour && d->state == CS_ALIVE && camera1->o.dist(d->o) <= maxmodelradiusdistance*10)
+        if(d->armour && d->state == CS_ALIVE && camera1->o.dist(d->o))
         {
             a[ai++] = modelattach("tag_shield", gfx::getshielddir(d->armourtype, d->armour), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }

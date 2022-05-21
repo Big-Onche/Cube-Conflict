@@ -1045,7 +1045,6 @@ void getCCversion()
 void rundedicatedserver()
 {
     dedicatedserver = true;
-    servambient = rnd(8)+1;
     getCCversion();
     string servtime;
     time_t t = time(NULL);

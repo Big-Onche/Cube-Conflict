@@ -810,22 +810,15 @@ extern void bgquad(float x, float y, float w, float h, float tx = 0, float ty = 
 
 extern int n_ambiance, n_map;  //Config partie Cube Conflict
 
-extern int maxmodelradiusdistance, grassdist, grass, dynlightdist; // LOD Cube Conflict
+extern int grassdist, grass, dynlightdist, decoration_lod; // LOD Cube Conflict
 extern float grassstep;
 
-extern int maxsoundradius;
-
-extern void sendresume(int ci);
-
-extern float menustat(int value);
-
+//Used for shrooms gfx
 extern bool addpostfx(const char *name, int outputbind, int outputscale, uint inputs, uint freeinputs, const vec4 &params);
 extern void clearpostfx();
-
 extern int fullbrightmodels;
-extern int cnidentiquearme, servambient;
 
-extern int decoration_lod;
 #endif
+
 #endif
 

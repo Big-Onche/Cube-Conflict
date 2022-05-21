@@ -67,14 +67,6 @@ static const struct danceinfo { const char *dancename; int danceprice; } customs
     {"Raoult",      1500},
 };
 
-static const struct costumeinfo { const char *village, *usine, *faille, *lune, *chateaux, *volcan; } costumes[4] =
-{
-    {"mapmodel/caisses/caissebois", "mapmodel/caisses/caisse1", "mapmodel/caisses/caissebois",  "mapmodel/rochers/pierre_fonce_esp",    "mapmodel/caisses/caissebois",  "mapmodel/distributeur"},
-    {"mapmodel/tonneau",            "mapmodel/caisses/caisse2", "mapmodel/tonneau",             "mapmodel/caisses/caisse2",             "mapmodel/tonneau",             "mapmodel/rochers/pierre_fonce_esp"},
-    {"mapmodel/panneau",            "mapmodel/caisses/caisse3", "mapmodel/panneau",             "mapmodel/caisses/caisse3",             "mapmodel/panneau",             "mapmodel/lampadaire"},
-    {"mapmodel/arbres/arbre1",      "mapmodel/murjersay",       "mapmodel/arbres/arbre1",       "mapmodel/murjersay",                   "mapmodel/arbres/arbre1",       "mapmodel/murjersay"},
-};
-
 namespace gfx
 {
     static const struct colors{ int color; } rndcolor[] =

@@ -4,6 +4,8 @@
 #include "cube.h"
 #include "engine.h"
 
+extern int cnidentiquearme, servambient;
+
 // animations
 enum
 {
@@ -500,6 +502,14 @@ static const struct aptisortsinfo { const char *tex1, *tex2, *tex3; int mana1, m
     { "media/interface/hud/sortindien1.png",    "media/interface/hud/sortindien2.png",      "media/interface/hud/sortindien3.png",      50, 50, 50, 7500, 7500, 7500, 7500, 7500,  7500, S_SORTINDIEN1, S_SORTINDIEN2, S_SORTINDIEN3},  // Indien
     { "media/interface/hud/sortespion1.png",    "media/interface/hud/sortespion2.png",      "media/interface/hud/sortespion3.png",      40, 50, 60, 4000, 7000, 5000, 7000, 7000, 10000, S_SORTESP1, S_SORTESP2, S_SORTESP3},           // Espion
     { "",                                       "media/interface/hud/sortkamikaze.png",     "",                                         0, 100,  0,    0, 5000,    0,    0, 5000,     0, S_NULL, S_SORTKAMIKAZE, S_NULL},               // Kamikaze
+};
+
+static const struct costumeinfo { const char *village, *usine, *faille, *lune, *chateaux, *volcan; } costumes[4] =  //Needed for spy classe
+{
+    {"mapmodel/caisses/caissebois", "mapmodel/caisses/caisse1", "mapmodel/caisses/caissebois",  "mapmodel/rochers/pierre_fonce_esp",    "mapmodel/caisses/caissebois",  "mapmodel/distributeur"},
+    {"mapmodel/tonneau",            "mapmodel/caisses/caisse2", "mapmodel/tonneau",             "mapmodel/caisses/caisse2",             "mapmodel/tonneau",             "mapmodel/rochers/pierre_fonce_esp"},
+    {"mapmodel/panneau",            "mapmodel/caisses/caisse3", "mapmodel/panneau",             "mapmodel/caisses/caisse3",             "mapmodel/panneau",             "mapmodel/lampadaire"},
+    {"mapmodel/arbres/arbre1",      "mapmodel/murjersay",       "mapmodel/arbres/arbre1",       "mapmodel/murjersay",                   "mapmodel/arbres/arbre1",       "mapmodel/murjersay"},
 };
 
 extern int abilitydata(int aptitude);
