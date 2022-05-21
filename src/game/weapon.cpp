@@ -740,7 +740,7 @@ namespace game
             case ATK_FAMAS_SHOOT:
             case ATK_GLOCK_SHOOT:
             case ATK_ARBALETE_SHOOT:
-                if(!(lookupmaterial(v)&MAT_WATER) && atk!=ATK_ARBALETE_SHOOT) playsound(S_IMPACT, &v, 0, 0, 0 , 100, -1, 250);
+                if(!(lookupmaterial(v)&MAT_WATER)) playsound(atk==ATK_ARBALETE_SHOOT ? S_IMPACTARROW : S_IMPACT, &v, 0, 0, 0 , 100, -1, 250);
                 gfx::projgunhit(owner, v, vel, safe, atk);
                 break;
 
