@@ -117,13 +117,14 @@ namespace ai
 
     bool attackrange(gameent *d, int atk, float dist)
     {
+        if(d->gunselect==GUN_S_NUKE) return true; // Balance la nuke le plus vite possible comme n'importe-quel joueur le ferait
         float mindist = attackmindist(atk), maxdist = attackmaxdist(atk);
         return dist >= mindist*mindist && dist <= maxdist*maxdist;
     }
 
     bool targetable(gameent *d, gameent *e)
     {
-        if((e->aptitude==APT_ESPION && e->aptisort2 && e->attacking==ACT_IDLE && e->physstate!=PHYS_FALL)||(e->aptitude==APT_PHYSICIEN && e->aptisort2)) return false;
+        if((e->aptitude==APT_ESPION && e->aptisort2 && e->attacking==ACT_IDLE && e->physstate!=PHYS_FALL) || (e->aptitude==APT_PHYSICIEN && e->aptisort2)) return false;
         if(d == e) return false;
         return e->state == CS_ALIVE && !isteam(d->team, e->team);
     }
@@ -178,6 +179,8 @@ namespace ai
 	{ // add margins of error
         if(attackrange(d, atk, dist) || (d->skill <= 100 && !rnd(d->skill)))
         {
+            if(d->gunselect==GUN_CAC349 || d->gunselect==GUN_CACFLEAU || d->gunselect==GUN_CACMARTEAU || d->gunselect==GUN_CACMASTER || d->gunselect==GUN_CACNINJA) return true;
+
             float skew = clamp(float(lastmillis-d->ai->enemymillis)/float((d->skill*attacks[atk].attackdelay/200.f)), 0.f, attacks[atk].projspeed ? 0.25f : 1e16f),
                 offy = yaw-d->yaw, offp = pitch-d->pitch;
 
@@ -192,7 +195,7 @@ namespace ai
     {
         vec o = e->o;
 
-        if(e->aptitude==APT_ESPION && e->aptisort1)
+        if(e->aptitude==APT_ESPION && e->aptisort1 && randomevent(2))
         {
             int posx = 25, posy = 25;
             switch(e->aptiseed)
@@ -369,6 +372,12 @@ namespace ai
     bool randomnode(gameent *d, aistate &b, float guard, float wander)
     {
         return randomnode(d, b, d->feetpos(), guard, wander);
+    }
+
+    int needpursue(gameent *d)
+    {
+        if(d->gunselect==GUN_CAC349 || d->gunselect==GUN_CACFLEAU || d->gunselect==GUN_CACMARTEAU || d->gunselect==GUN_CACMASTER || d->gunselect==GUN_CACNINJA) return 1;
+        else return 0;
     }
 
     bool badhealth(gameent *d)
@@ -698,7 +707,7 @@ namespace ai
         if(d->ai && canmove(d) && targetable(d, e)) // see if this ai is interested in a grudge
         {
             aistate &b = d->ai->getstate();
-            if(violence(d, b, e)) return;
+            if(violence(d, b, e, needpursue(d))) return;
         }
         if(checkothers(targets, d, AI_S_DEFEND, AI_T_PLAYER, d->clientnum, true))
         {
@@ -707,7 +716,7 @@ namespace ai
                 gameent *t = getclient(targets[i]);
                 if(!t->ai || !canmove(t) || !targetable(t, e)) continue;
                 aistate &c = t->ai->getstate();
-                if(violence(t, c, e)) return;
+                if(violence(t, c, e, needpursue(d))) return;
             }
         }
     }
@@ -911,6 +920,7 @@ namespace ai
 
                         int atk = guns[d->gunselect].attacks[ACT_SHOOT];
                         float guard = SIGHTMIN, wander = attacks[atk].range;
+                        if(d->gunselect==GUN_CAC349 || d->gunselect==GUN_CACFLEAU || d->gunselect==GUN_CACMARTEAU || d->gunselect==GUN_CACMASTER || d->gunselect==GUN_CACNINJA) guard = 0.f;
                         return patrol(d, b, e->feetpos(), guard, wander) ? 1 : 0;
                     }
                     break;
@@ -1157,7 +1167,7 @@ namespace ai
 
     bool lockon(gameent *d, int atk, gameent *e, float maxdist)
     {
-        if(!d->blocked && !d->timeinair)
+        if((d->gunselect==GUN_CAC349 || d->gunselect==GUN_CACFLEAU || d->gunselect==GUN_CACMARTEAU || d->gunselect==GUN_CACMASTER || d->gunselect==GUN_CACNINJA) && !d->blocked && !d->timeinair)
         {
             vec dir = vec(e->o).sub(d->o);
             float xydist = dir.x*dir.x+dir.y*dir.y, zdist = dir.z*dir.z, mdist = maxdist*maxdist, ddist = d->radius*d->radius+e->radius*e->radius;
@@ -1212,7 +1222,7 @@ namespace ai
             {
                 if(targetable(d, f))
                 {
-                    if(!enemyok) violence(d, b, f);
+                    if(!enemyok) violence(d, b, f, needpursue(d));
 
                     switch(d->aptitude)
                     {
@@ -1549,11 +1559,9 @@ namespace ai
                     case AI_S_WAIT:
                         result = dowait(d, c);
                         break;
-                    //case AI_S_DEFEND: result = dodefend(d, c);
-                    //{
-                    //    if(d->aptitude==APT_SHOSHONE && d->mana>99) aptitude(d, 2);
-                    //    break;
-                    //}
+                    case AI_S_DEFEND:
+                        result = dodefend(d, c);
+                        break;
                     case AI_S_PURSUE: result = dopursue(d, c); break;
                     case AI_S_INTEREST: result = dointerest(d, c); break;
                     default: result = 0; break;

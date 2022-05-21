@@ -16,10 +16,10 @@ namespace ai
     const float FARDIST         = 128.f;   // too far to remap close
     const float JUMPMIN         = 4.f;     // decides to jump
     const float JUMPMAX         = 32.f;    // max jump
-    const float SIGHTMIN        = 64.f;    // minimum line of sight
+    const float SIGHTMIN        = 128.f;   // minimum line of sight
     const float SIGHTMAX        = 1024.f;  // maximum line of sight
-    const float VIEWMIN         = 90.f;    // minimum field of view
-    const float VIEWMAX         = 180.f;   // maximum field of view
+    const float VIEWMIN         = 130.f;   // minimum field of view
+    const float VIEWMAX         = 210.f;   // maximum field of view
 
     struct waypoint
     {
@@ -301,7 +301,7 @@ namespace ai
     extern bool makeroute(gameent *d, aistate &b, const vec &pos, bool changed = true, int retries = 0);
     extern bool randomnode(gameent *d, aistate &b, const vec &pos, float guard = SIGHTMIN, float wander = SIGHTMAX);
     extern bool randomnode(gameent *d, aistate &b, float guard = SIGHTMIN, float wander = SIGHTMAX);
-    extern bool violence(gameent *d, aistate &b, gameent *e, int pursue = 0);
+    extern bool violence(gameent *d, aistate &b, gameent *e, int pursue);
     extern bool patrol(gameent *d, aistate &b, const vec &pos, float guard = SIGHTMIN, float wander = SIGHTMAX, int walk = 1, bool retry = false);
     extern bool defend(gameent *d, aistate &b, const vec &pos, float guard = SIGHTMIN, float wander = SIGHTMAX, int walk = 1);
     extern void assist(gameent *d, aistate &b, vector<interest> &interests, bool all = false, bool force = false);
