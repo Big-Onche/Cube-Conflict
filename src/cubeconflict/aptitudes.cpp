@@ -1,4 +1,5 @@
-//aptitudes.cpp: management of special abilities from certain classes
+//aptitudes.cpp: management of special abilities from certain classes.
+//Classes specs (such as speed, damage, etc...) and abilities are declared in game.h, cuz game.h is always included where we need classes specs and abilities's data.
 
 #include "game.h"
 #include "ccheader.h"

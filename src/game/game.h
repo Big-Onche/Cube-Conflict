@@ -470,6 +470,28 @@ static const struct guninfo { const char *name, *file, *vwep, *armedescFR, *arme
     { "sabre",      "armes_cac/sabre",  "worldgun/armes_cac/sabre", "un sabre de ninja !",          "a ninja saber!",                            4, 3, 95, 120,  { -1, ATK_CACNINJA_SHOOT }, },
 };
 
+//Définition des aptitudes
+enum {APT_SOLDAT = 0, APT_MEDECIN, APT_AMERICAIN, APT_NINJA, APT_VAMPIRE, APT_MAGICIEN, APT_KAMIKAZE, APT_FAUCHEUSE, APT_PHYSICIEN, APT_CAMPEUR, APT_ESPION, APT_PRETRE, APT_VIKING, APT_JUNKIE, APT_SHOSHONE, NUMAPTS};
+
+static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt_vitesse; const char *apt_tete, *apt_nomFR, *apt_nomEN, *apt_logo; } aptitudes[NUMAPTS] =
+{
+    { 105,  105,  105,   950, "chapeaux/casquette",  "Soldat",       "Soldier",      "media/interface/hud/soldat.jpg"},     //0     APT_SOLDAT
+    {  90,  110,   95,   950, "chapeaux/medic",      "Médecin",      "Medic",        "media/interface/hud/medecin.jpg"},    //1     APT_MEDECIN
+    { 100,  135,   80,  1300, "chapeaux/aventurier", "Américain",    "American",     "media/interface/hud/americain.jpg"},  //2     APT_AMERICAIN
+    {  85,   90,   75,   750, "chapeaux/bandana",    "Ninja",        "Ninja",        "media/interface/hud/ninja.jpg"},      //3     APT_NINJA
+    { 110,   65,  110,   950, "chapeaux/cornes",     "Vampire",      "Vampire",      "media/interface/hud/vampire.jpg"},    //4     APT_VAMPIRE
+    { 100,   85,   90,  1000, "chapeaux/magicien",   "Magicien",     "Wizard",       "media/interface/hud/magicien.jpg"},   //5     APT_MAGICIEN
+    { 100,  100,   70,   850, "chapeaux/japonais",   "Kamikaze",     "Kamikaze",     "media/interface/hud/kamikaze.jpg"},   //6     APT_KAMIKAZE
+    { 115,   85,   90,  1050, "chapeaux/crane",      "Faucheuse",    "Reaper",       "media/interface/hud/faucheuse.jpg"},  //7     APT_FAUCHEUSE
+    {  90,   85,   85,  1050, "chapeaux/graduation", "Physicien",    "Physicist",    "media/interface/hud/physicien.jpg"},  //8     APT_PHYSICIEN
+    { 100,   60,  130,  1250, "chapeaux/tente",      "Campeur",      "Camper",       "media/interface/hud/campeur.jpg"},    //9     APT_CAMPEUR
+    {  90,   85,  120,  1100, "chapeaux/melon",      "Espion",       "Spy",          "media/interface/hud/espion.jpg"},     //10    APT_ESPION
+    {  85,  105,   85,   950, "chapeaux/saint",      "Prêtre",       "Priest",       "media/interface/hud/pretre.jpg"},     //11    APT_PRETRE
+    { 100,  120,   60,  1050, "chapeaux/viking",     "Viking",       "Viking",       "media/interface/hud/viking.jpg"},     //12    APT_VIKING
+    { 100,  110,   85,  1100, "chapeaux/champignon", "Junkie",       "Junkie",       "media/interface/hud/dealer.png"},     //13    APT_JUNKIE
+    { 100,  100,   75,  1000, "chapeaux/indien",     "Shoshone",     "Shoshone",     "media/interface/hud/indien.jpg"},     //14    APT_SHOSHONE
+};
+
 static const struct aptisortsinfo { const char *tex1, *tex2, *tex3; int mana1, mana2, mana3, duree1, duree2, duree3, reload1, reload2, reload3, sound1, sound2, sound3; } sorts[] =
 {
     { "media/interface/hud/sortmage1.png",      "media/interface/hud/sortmage2.png",        "media/interface/hud/sortmage3.png",        30, 40, 60,  250, 4000, 3000, 2000, 5000,  6000, S_SORTMAGE1, S_SORTMAGE2, S_SORTMAGE3},        // Magicien
