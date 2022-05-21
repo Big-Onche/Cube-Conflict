@@ -2,25 +2,26 @@
 
 #include "ccheader.h"
 #include "steam_api.h"
+#include "stats.h"
 
 using namespace std;
 
 //////////////////////Gestion de l'xp et niveaux//////////////////////
-int cclvl = 1, needxp = 40, oldneed = 40, neededxp = 40;
+int cclvl = 1, xpneededfornextlvl = 50, xpneededforprevlvl = 50, totalneededxp = 50;
 float pourcents = -1;
 
 void genlvl() //Calcule le niveau du joueur
 {
-    while(stat[STAT_XP]>=needxp) //Ajoute un niveau et augmente l'xp demandé pour le niveau suivant
+    while(stat[STAT_XP] >= xpneededfornextlvl) //Ajoute un niveau et augmente l'xp demandé pour le niveau suivant
     {
         cclvl++;
-        oldneed += 40;
-        needxp += oldneed;
-        neededxp += 40;
+        xpneededforprevlvl += cclvl*2;
+        xpneededfornextlvl += xpneededforprevlvl;
+        totalneededxp += cclvl*2;
         if(isconnected()) {playsound(S_LEVELUP); message[MSG_LEVELUP]=totalmillis;}
     }
 
-    float pour1 = neededxp, pour2 = stat[STAT_XP]-needxp;
+    float pour1 = totalneededxp, pour2 = stat[STAT_XP]-xpneededfornextlvl;
     if(pour1!=0) pourcents = pour2/pour1; //Calcul le pourcentage pour prochain niveau et évite une div. par zéro
 
     switch(cclvl) //Regarde si il y a un succès à déverrouiller
@@ -182,8 +183,6 @@ void loadsave() //we read the poorly encrypted value for all stat
 bool succes[NUMACHS];
 bool achievementlocked(int achID) {return !succes[achID];} //Succès verrouillé ? OUI = TRUE, NON = FALSE
 
-VAR(totalachunlocked, 0, 0, 32);
-
 string tempachname;
 void unlockachievement(int achID) //Débloque le succès
 {
@@ -200,7 +199,6 @@ void unlockachievement(int achID) //Débloque le succès
         playsound(S_ACHIEVEMENTUNLOCKED);
         formatstring(tempachname, "%s", langage ? achievements[achID].achnicenameEN : achievements[achID].achnicenameFR);
         message[MSG_ACHUNLOCKED] = totalmillis;
-        totalachunlocked++;
     }
 }
 
@@ -210,10 +208,25 @@ void getsteamachievements() //Récupère les succès enregistrés sur steam
     loopi(NUMACHS)
     {
         SteamUserStats()->GetAchievement(achievements[achID].achname, &succes[achID]);
-        if(!achievementlocked(achID)) totalachunlocked++;
         achID++;
     }
 }
+
+string achcount;
+const char *getachievementcount() //Récupère le nombre de succès déverrouillés
+{
+    int totalachunlocked = 0, achID = 0;
+
+    loopi(NUMACHS)
+    {
+        if(!achievementlocked(achID)) totalachunlocked++;
+        achID++;
+    }
+
+    formatstring(achcount, "%d/%d", 5, NUMACHS);
+    return achcount;
+}
+ICOMMAND(getachievementcount, "", (), result(getachievementcount()));
 
 string logodir;
 const char *getachievementslogo(int achID) //Récupère le logo d'un succès en particulier

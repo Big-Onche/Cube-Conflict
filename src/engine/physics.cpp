@@ -6,6 +6,7 @@
 #include "engine.h"
 #include "mpr.h"
 #include "ccheader.h"
+#include "stats.h"
 
 const int MAXCLIPOFFSET = 4;
 const int MAXCLIPPLANES = 1024;

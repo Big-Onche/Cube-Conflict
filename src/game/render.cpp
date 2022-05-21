@@ -1,6 +1,7 @@
 #include "game.h"
 #include "engine.h"
 #include "ccheader.h"
+#include "stats.h"
 
 float weapposside, weapposup, maxweapposside, maxweapposup, shieldside;
 float maxshieldside = -15;

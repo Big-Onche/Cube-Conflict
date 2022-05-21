@@ -1,6 +1,7 @@
 //customisations.cpp: where we buy skins on the store (hopefully in NFT in the future so I can be rich)
 
 #include "ccheader.h"
+#include "stats.h"
 
 using namespace std;
 

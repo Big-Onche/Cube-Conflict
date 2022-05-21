@@ -7,15 +7,28 @@ namespace ai
 {
     using namespace game;
 
-    string ia;
-    char choosenname[32];
+    string pseudobasique;
+    char *botrndname(bool firstpart, int feminin, int langue)
+       {
+        string strpart1, strpart2;
+        char choosennamepart1[16], choosennamepart2[16];
 
-    char *rndname()
-    {
-        char buf[50];
+        char buf[32];
         int names[3];
 
-        stream *namelist = openfile("config/pseudonymes/pseudos_bots.cfg", "r");
+        if(langue==0)
+        {
+            copystring(strpart1, feminin ? "config/pseudonymes/pseudos_part1_femi_fr.cfg" : "config/pseudonymes/pseudos_part1_masc_fr.cfg");
+            copystring(strpart2, feminin ? "config/pseudonymes/pseudos_part2_femi_fr.cfg" : "config/pseudonymes/pseudos_part2_masc_fr.cfg");
+        }
+        else
+        {
+            copystring(strpart1, "config/pseudonymes/pseudos_part1_en.cfg");
+            copystring(strpart2, "config/pseudonymes/pseudos_part2_en.cfg");
+        }
+
+        stream *namelist = openfile(firstpart ? strpart1 : strpart2, "r");
+
         while(namelist->getline(buf, sizeof(buf)))
         {
             if(sscanf(buf, "NOMBREPSEUDOS: %i", &names[0])==1)
@@ -24,17 +37,17 @@ namespace ai
             }
             else
             {
-                sscanf(buf, "NOM %i: %s", &names[2], choosenname);
+                sscanf(buf, "NOM %i: %s", &names[2], firstpart ? choosennamepart1 : choosennamepart2);
                 if(names[2] == names[1])
                 {
                     namelist->close();
-                    return choosenname;
+                    return firstpart ? choosennamepart1 : choosennamepart2;
                 }
             }
         }
         namelist->close();
-        copystring(ia, "bot");
-        return ia;
+        copystring(pseudobasique, firstpart ? "Pseudo" : "Pourri");
+        return pseudobasique;
     }
 
     avoidset obstacles;
@@ -224,6 +237,7 @@ namespace ai
         if(d->ai) DELETEP(d->ai);
     }
 
+    string pseudobot;
     void init(gameent *d, int at, int ocn, int apti, int cape, int tombe, int danse, int sk, int bn, int pm, int col, const char *name, int team)
     {
         gameent *o = newclient(ocn);
@@ -231,7 +245,10 @@ namespace ai
         d->aitype = at;
 
         bool resetthisguy = false;
-        copystring(d->name, rndname(), MAXNAMELEN+1);
+
+        int feminin = rnd(2);
+        formatstring(pseudobot, "%s%s", botrndname(true, feminin, langage), botrndname(false, feminin, langage));
+        copystring(d->name, pseudobot, MAXNAMELEN+1);
 
         if(!d->name[0])
         {
@@ -511,9 +528,13 @@ namespace ai
 
     bool hasgoodammo(gameent *d)
     {
-        static const int goodguns[] = { GUN_S_CAMPOUZE, GUN_S_NUKE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_CACNINJA, GUN_KAMIKAZE, GUN_PULSE, GUN_RAIL, GUN_FAMAS, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_AK47, GUN_SV98, GUN_SKS, GUN_ARTIFICE, GUN_ARBALETE, GUN_LANCEFLAMMES };
+        if(m_identique || m_random) return true;
+
+        static const int goodguns[] = { GUN_S_CAMPOUZE, GUN_S_NUKE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_PULSE, GUN_RAIL, GUN_FAMAS, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_AK47, GUN_SV98, GUN_SKS, GUN_ARTIFICE, GUN_ARBALETE, GUN_LANCEFLAMMES };
         loopi(sizeof(goodguns)/sizeof(goodguns[0])) if(d->hasammo(goodguns[0])) return true;
+
         if(d->ammo[GUN_M32] > 5) return true;
+
         return false;
     }
 
@@ -568,10 +589,10 @@ namespace ai
                 break;
             default:
             {
-                if(e.type >= I_RAIL && e.type <= I_GLOCK && !d->hasmaxammo(e.type))
+                if(e.type >= I_RAIL && e.type <= I_GLOCK && !d->hasmaxammo(e.type)/2)
                 {
                     int gun = e.type - I_RAIL + GUN_RAIL;
-                    if(isgoodammo(gun)) score = hasgoodammo(d) ? 1e2f : 1e3f;
+                    if(isgoodammo(gun)) score = hasgoodammo(d) ? 1e2f : 1e4f;
                 }
                 break;
             }
@@ -632,7 +653,7 @@ namespace ai
         static vector<interest> interests;
         interests.setsize(0);
 
-        if(!hasgoodammo(d) || d->health < 750)
+        if(!hasgoodammo(d) || d->health < 750 || d->mana<50)
             items(d, b, interests);
         else if(needshield(d) || needmana(d))
         {

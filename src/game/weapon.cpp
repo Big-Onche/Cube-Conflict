@@ -2,6 +2,7 @@
 #include "game.h"
 #include "engine.h"
 #include "ccheader.h"
+#include "stats.h"
 
 int lastshoot;
 

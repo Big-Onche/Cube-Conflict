@@ -3,6 +3,7 @@
 #include "engine.h"
 #include "ccheader.h"
 #include "steam_api.h"
+#include "stats.h"
 
 #ifdef SDL_VIDEO_DRIVER_X11
 #include "SDL_syswm.h"

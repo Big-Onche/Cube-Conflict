@@ -2,6 +2,7 @@
 
 #include "game.h"
 #include "ccheader.h"
+#include "stats.h"
 
 int getsort;
 

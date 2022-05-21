@@ -1,6 +1,7 @@
 #include "game.h"
 #include "engine.h"
 #include "ccheader.h"
+#include "stats.h"
 
 string str_pseudovictime, str_pseudotueur, str_armetueur, str_pseudoacteur;
 float killdistance = 0;

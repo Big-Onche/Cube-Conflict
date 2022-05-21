@@ -1,6 +1,7 @@
+#include "steam_api.h"
 #include "game.h"
 #include "ccheader.h"
-#include "steam_api.h"
+#include "stats.h"
 
 VAR(n_ambiance, 0, 0, 8);
 VAR(n_map, 0, 0, 99);

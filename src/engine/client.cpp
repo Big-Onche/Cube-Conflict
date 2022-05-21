@@ -2,6 +2,7 @@
 
 #include "engine.h"
 #include "ccheader.h"
+#include "stats.h"
 
 ENetHost *clienthost = NULL;
 ENetPeer *curpeer = NULL, *connpeer = NULL;
