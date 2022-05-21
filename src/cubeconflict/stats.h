@@ -8,16 +8,11 @@ extern void addxpandcc(int nbxp, int nbcc = 0);
 
 //////////////////////////////////////// Statistiques | Player stats ////////////////////////////////////////
 enum {STAT_CC, STAT_XP, STAT_LEVEL, STAT_KILLS, STAT_MORTS, STAT_KDRATIO, STAT_DAMMAGERECORD, STAT_KILLSTREAK, STAT_MAXKILLDIST, STAT_WINS, STAT_SUICIDES, STAT_ALLIESTUES, STAT_TIMEPLAYED, STAT_DRAPEAUXENVOL, STAT_DRAPEAUXENRAP, STAT_DRAPEAUXALYREC, //Main game stats
-        STAT_ABILITES, STAT_HEALTHREGEN, STAT_MANAREGEN, //Classes
+        STAT_ABILITES, STAT_HEALTHREGEN, STAT_HEALTHREGAIN, STAT_MANAREGEN, STAT_MANAREGAIN, //Classes
         STAT_BOUCLIERBOIS, STAT_BOUCLIERFER, STAT_BOUCLIEROR, STAT_BOUCLIERMAGNETIQUE, STAT_ARMUREASSIST, STAT_REPASSIST, //Shields
         STAT_PANACHAY, STAT_MANA, STAT_COCHON, STAT_STEROS, STAT_EPO, STAT_JOINT, STAT_CHAMPIS, STAT_ARMES, STAT_SUPERARMES, //Objects
         STAT_ATOM, STAT_MUNSHOOTED, STAT_TOTALDAMAGEDEALT, STAT_TOTALDAMAGERECIE, //Stupid statistics
         STAT_EMPTY1, STAT_EMPTY2, STAT_EMPTY3, STAT_EMPTY4, STAT_EMPTY5, STAT_EMPTY6, STAT_EMPTY7, STAT_EMPTY8, STAT_EMPTY9, STAT_EMPTY10, //If we need to add new stat without destroying all user's saves
-
-        SMI_HAP, SMI_NOEL, SMI_MALADE, SMI_CONTENT, SMI_COLERE, SMI_SOURNOIS, SMI_FOU, SMI_CLINDOEIL, SMI_COOL, SMI_BUG,
-        CAPE_CUBE, CAPE_JVC, CAPE_CORONED, CAPE_ATOME, CAPE_JESUSECO, CAPE_WEED, CAPE_FLAMES, CAPE_BOUCLE, CAPE_VINTAGE, CAPE_ELITE, CAPE_HIGH, CAPE_RAYONSX, CAPE_RISITAS, CAPE_RICHE,
-        TOM_MERDE, TOM_BASIQUE1, TOM_BASIQUE2, TOM_FLEUR, TOM_CRISTAL, TOM_GOLF, TOM_OEIL, TOM_EXCALIBUR, TOM_COURONNE, TOM_CRIME, TOM_FUCK, TOM_MONUMENT, TOM_LINGOT,
-        VOI_CORTEX, VOI_VALOCHE, VOI_VIEILLE, VOI_HENDEK, VOI_MILI1, VOI_MILI2, VOI_MOUNIR, VOI_DELAVIER, VOI_PRAUD, VOI_MALLEVILLE,
         NUMSTATS};
 extern int stat[NUMSTATS];
 
@@ -44,10 +39,12 @@ static const struct statsinfo { const char *statname, *statnicenameFR, *statnice
     //Classes
     {"STAT_ABILITES",           "Abilitées utilisées",              "Used abilities",                   "media/interface/hud/stats.png"},
     {"STAT_HEALTHREGEN",        "Santé redonnée aux alliés",        "Health restored to allies",        "media/interface/hud/medecin.jpg"},
+    {"STAT_HEALTHREGAIN",       "Santé récupérée grâce aux médecins", "Health recovered with medics",   "media/interface/hud/coeur.png"},
     {"STAT_MANAREGEN",          "Mana redonné aux alliés",          "Mana restored to allies",          "media/interface/hud/mana.png"},
+    {"STAT_MANAREGAIN",         "Mana récupéré grâce aux junkies",  "Mana recovered with junkies",      "media/interface/hud/dealer.png"},           //20
     //Shields
     {"STAT_BOUCLIERBOIS",       "Boucliers en bois utilisés",       "Wooden shields used",              "media/interface/hud/bouclier_bois.png"},
-    {"STAT_BOUCLIERFER",        "Boucliers en fer utilisés",        "Iron shields used",                "media/interface/hud/bouclier_fer.png"},    //20
+    {"STAT_BOUCLIERFER",        "Boucliers en fer utilisés",        "Iron shields used",                "media/interface/hud/bouclier_fer.png"},
     {"STAT_BOUCLIEROR",         "Boucliers en or utilisés",         "Gold shields used",                "media/interface/hud/bouclier_or.png"},
     {"STAT_BOUCLIERMAGNETIQUE", "Boucliers magnétiques utilisés",   "Magnetic shields used",            "media/interface/hud/bouclier_magnetique.png"},
     {"STAT_ARMUREASSIST",       "Armures assistées utilisés",       "Power armors used",                "media/interface/hud/robot.png"},
@@ -56,9 +53,9 @@ static const struct statsinfo { const char *statname, *statnicenameFR, *statnice
     {"STAT_PANACHAY",           "Panachays consommés",              "Beers drunk",                      "media/interface/hud/coeur.png"},
     {"STAT_MANA",               "Potions de mana consommées",       "Mana potions consumed",            "media/interface/hud/mana.png"},
     {"STAT_COCHON",             "Cochons grillés mangés",           "Grilled pigs eaten",               "media/interface/hud/stats.png"},
-    {"STAT_STEROS",             "Cures de stéroïdes",               "Steroids cycles",                  "media/interface/hud/steros.png"},
+    {"STAT_STEROS",             "Cures de stéroïdes",               "Steroids cycles",                  "media/interface/hud/steros.png"},           //30
     {"STAT_EPO",                "Piqures d'EPO",                    "EPO shots",                        "media/interface/hud/epo.png"},
-    {"STAT_JOINT",              "Joints fumés",                     "Smoked joints",                    "media/interface/hud/joint.png"},           //30
+    {"STAT_JOINT",              "Joints fumés",                     "Smoked joints",                    "media/interface/hud/joint.png"},
     {"STAT_CHAMPIS",            "Champignons mangés",               "Shrooms eaten",                    "media/interface/hud/champis.png"},
     {"STAT_ARMES",              "Armes ramassées",                  "Picked up weapons",                "media/interface/hud/chargeur.png"},
     {"STAT_SUPERARMES",         "Super-caisses ramassées",          "Picked Up Super Crates",           "media/interface/hud/stats.png"},

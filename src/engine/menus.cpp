@@ -1,6 +1,7 @@
 #include "engine.h"
-#include "ccheader.h"
 #include "steam_api.h"
+#include "ccheader.h"
+#include "customisation.h"
 
 ICOMMAND(getgravedir, "i", (int *graveID), result(customstombes[*graveID].tombemenudir));
 

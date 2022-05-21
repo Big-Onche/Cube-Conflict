@@ -1,8 +1,9 @@
 //stats.cpp: where we manage stats, achievements and local saves
 
-#include "ccheader.h"
 #include "steam_api.h"
+#include "ccheader.h"
 #include "stats.h"
+#include "customisation.h"
 
 using namespace std;
 
@@ -133,18 +134,11 @@ void writesave() //we write the poorly encrypted value for all stat
     stream *savefile = openutf8file("config/stats.cfg", "w");
     if(!savefile) { conoutf(langage ? "\fcUnable to write your save file !" : "\fcUnable d'écrite votre fichier de sauvegarde !"); return; }
 
-    int statID = 0;
-    loopi(NUMSTATS)
+    int saveID = 0;
+    loopi(NUMSTATS + NUMCUST + NUMACHS)
     {
-        savefile->printf("%s\n", encryptsave(tempformatstring("%d", stat[statID])));
-        statID++;
-    }
-
-    int achID = 0;
-    loopi(NUMACHS)
-    {
-        savefile->printf("%s\n", encryptsave(tempformatstring("%d", succes[achID])));
-        achID++;
+        savefile->printf("%s\n", encryptsave(tempformatstring("%d", saveID >= NUMSTATS + NUMCUST ? succes[saveID-NUMCUST-NUMSTATS] : saveID >= NUMSTATS ? cust[saveID-NUMSTATS] : stat[saveID])));
+        saveID++;
     }
 
     savefile->close();
@@ -153,16 +147,17 @@ void writesave() //we write the poorly encrypted value for all stat
 void givestarterkit() //Avant tout le joueur a les customisations de base et le niveau 1, même en cas de sauvegarde corrompue
 {
     stat[STAT_LEVEL]++;
-    stat[SMI_HAP] = stat[SMI_NOEL] = stat[CAPE_CUBE] = stat[TOM_MERDE] = stat[VOI_CORTEX] = rnd(99)+1;
+    cust[SMI_HAP] = cust[SMI_NOEL] = cust[CAPE_CUBE] = cust[TOM_MERDE] = cust[VOI_CORTEX] = rnd(99)+1;
 }
 
 void loadsave() //we read the poorly encrypted value for all stat
 {
+    givestarterkit(); //-> on donne toujours le kit de départ
     stream *savefile = openfile("config/stats.cfg", "r");
-    if(!savefile) {givestarterkit(); return;} //Si le fichier de stats n'existe pas -> on donne le kit de départ
+    if(!savefile) return;
 
     char buf[50];
-    int statID = 0;
+    int saveID = 0;
 
     while(savefile->getline(buf, sizeof(buf)))
     {
@@ -171,9 +166,11 @@ void loadsave() //we read the poorly encrypted value for all stat
         for(i = 0; (i < 500 && buf[i] != '\0'); i++)
             buf[i] = buf[i] + SUPERCRYPTKEY;
 
-        if(statID >= NUMSTATS) sscanf(buf, "%i", &succes[statID-NUMSTATS]); //triggers warning but achievements are saved in 0 or 1 so it works with bool without problems
-        else sscanf(buf, "%i", &stat[statID]);
-        statID++;
+        if(saveID < NUMSTATS) sscanf(buf, "%i", &stat[saveID]);
+        else if(saveID < NUMCUST + NUMSTATS) sscanf(buf, "%i", &cust[saveID-NUMSTATS]);
+        else sscanf(buf, "%i", &succes[saveID-NUMSTATS-NUMCUST]); //triggers warning but achievements are saved in 0 or 1 so it works with bool without problems
+
+        saveID++;
     }
     savefile->close();
     genlvl(); //Génère le niveau après le chargement des statistiques
@@ -223,7 +220,7 @@ const char *getachievementcount() //Récupère le nombre de succès déverrouillés
         achID++;
     }
 
-    formatstring(achcount, "%d/%d", 5, NUMACHS);
+    formatstring(achcount, "%d/%d", totalachunlocked, NUMACHS);
     return achcount;
 }
 ICOMMAND(getachievementcount, "", (), result(getachievementcount()));

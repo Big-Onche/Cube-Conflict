@@ -1,6 +1,7 @@
 #include "game.h"
 #include "engine.h"
 #include "ccheader.h"
+#include "customisation.h"
 #include "stats.h"
 
 string str_pseudovictime, str_pseudotueur, str_armetueur, str_pseudoacteur;
@@ -310,6 +311,7 @@ namespace game
                                     particle_flying_flare(h->o, r==h ? h->o : effectpos, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
                                     playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
                                     addmsg(N_PUSHSTAT, "rci", r, 0);
+                                    if(r==player1) addstat(5, STAT_HEALTHREGAIN);
                                 }
                                 break;
 
@@ -323,6 +325,7 @@ namespace game
                                         particle_flying_flare(h->o, r==h ? h->o : effectpos, 400, PART_SANTE, 0xFF00FF, 2.5f, 100);
                                         playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
                                         addmsg(N_PUSHSTAT, "rci", r, 0);
+                                        if(r==player1) addstat(5, STAT_MANAREGAIN);
                                     }
                                     else if(r->aptitude!=APT_VAMPIRE && r->mana<150)
                                     {
@@ -443,7 +446,7 @@ namespace game
 
                                 particle_flying_flare(player1->o, r==player1 ? player1->o : effectpos, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
                                 playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
-                                if(r!=player1) addstat(3, STAT_HEALTHREGEN);
+                                if(r!=player1) addstat(5, STAT_HEALTHREGEN);
                             }
                             break;
 
@@ -573,7 +576,7 @@ namespace game
 
     VARFP(player1_danse, 0, 0, sizeof(customsdance)/sizeof(customsdance[0])-1,
     {
-        if(stat[VOI_CORTEX+player1_danse]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette voix !"); playsound(S_ERROR); player1_danse=0; return;}
+        if(cust[VOI_CORTEX+player1_danse]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette voix !"); playsound(S_ERROR); player1_danse=0; return;}
         addmsg(N_SENDDANSE, "ri", player1_danse);
         stopsounds();
         player1->customdanse = player1_danse;
