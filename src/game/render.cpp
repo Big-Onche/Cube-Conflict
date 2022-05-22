@@ -571,7 +571,7 @@ namespace game
                                     d->o.dist(camera1->o)<75 ? 1.35f : 0.02f);
 
                 if(d->aptisort2 && d->aptitude==APT_ESPION);
-                else if(((player1->aptitude==APT_ESPION && player1->aptisort3 && d!=player1) || (totalmillis-getsort<2000)) && (!isteam(player1->team, d->team)))
+                else if(((player1->aptitude==APT_ESPION && player1->aptisort3 && d!=player1) || (totalmillis-getspyability<2000)) && (!isteam(player1->team, d->team)))
                 {
                     vec posA = d->o;
                     posA.add(vec(0, 0, -8));

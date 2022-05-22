@@ -5,6 +5,7 @@
 #include "engine.h"
 
 extern int cnidentiquearme, servambient;
+extern int lastshoot, getspyability;
 
 // animations
 enum
@@ -225,13 +226,13 @@ enum
     //Bruitages physique
     S_MISSILE, S_FUSEE, S_MISSILENUKE, S_MINIMISSILE, S_FLECHE, S_DOUILLE, S_BIGDOUILLE, S_CARTOUCHE, S_RGRENADE, S_ECLAIRPROCHE, S_ECLAIRLOIN,
 
-    // Sorts
+    // Aptitudes
     S_SORTLANCE,
     S_SORTMAGE1, S_SORTMAGE2, S_SORTMAGE3,  S_SORTPRETRE1, S_SORTPRETRE2, S_SORTPRETRE3,
     S_SORTPHY1, S_SORTPHY2, S_SORTPHY3, S_SORTINDIEN1, S_SORTINDIEN2, S_SORTINDIEN3,
     S_SORTESP1, S_SORTESP2, S_SORTESP3, S_SORTKAMIKAZE,
     S_SORTIMPOSSIBLE, S_SORTPRET,
-    S_FAUCHEUSE,
+    S_FAUCHEUSE, S_RAGETIR,
 
     // Menus
     S_MENUBOUTON, S_CAISSEENREGISTREUSE, S_ERROR,
@@ -497,7 +498,7 @@ static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precisio
 static const struct aptisortsinfo { const char *tex1, *tex2, *tex3; int mana1, mana2, mana3, duree1, duree2, duree3, reload1, reload2, reload3, sound1, sound2, sound3; } sorts[] =
 {
     { "media/interface/hud/sortmage1.png",      "media/interface/hud/sortmage2.png",        "media/interface/hud/sortmage3.png",        30, 40, 60,  250, 4000, 3000, 2000, 5000,  6000, S_SORTMAGE1, S_SORTMAGE2, S_SORTMAGE3},        // Magicien
-    { "media/interface/hud/sortphysicien1.png", "media/interface/hud/sortphysicien2.png",   "media/interface/hud/sortphysicien3.png",   45, 50, 65, 4000, 5000, 6000, 3000, 5000,  9000, S_SORTPHY1, S_SORTPHY2, S_SORTPHY3},           // Physicien
+    { "media/interface/hud/sortphysicien1.png", "media/interface/hud/sortphysicien2.png",   "media/interface/hud/sortphysicien3.png",   45, 50, 65, 4000, 5000, 6000, 3000, 7000,  9000, S_SORTPHY1, S_SORTPHY2, S_SORTPHY3},           // Physicien
     { "media/interface/hud/sortpretre1.png",    "media/interface/hud/sortpretre2.png",      "media/interface/hud/sortpretre3.png",      30, 10, 80, 4000, 5000, 4000, 8000, 5000, 10000, S_SORTPRETRE1, S_SORTPRETRE2, S_SORTPRETRE3},  // Prêtre
     { "media/interface/hud/sortindien1.png",    "media/interface/hud/sortindien2.png",      "media/interface/hud/sortindien3.png",      50, 50, 50, 7500, 7500, 7500, 7500, 7500,  7500, S_SORTINDIEN1, S_SORTINDIEN2, S_SORTINDIEN3},  // Indien
     { "media/interface/hud/sortespion1.png",    "media/interface/hud/sortespion2.png",      "media/interface/hud/sortespion3.png",      40, 50, 60, 4000, 7000, 5000, 7000, 7000, 10000, S_SORTESP1, S_SORTESP2, S_SORTESP3},           // Espion

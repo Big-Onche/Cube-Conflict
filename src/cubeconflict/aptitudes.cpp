@@ -5,7 +5,7 @@
 #include "ccheader.h"
 #include "stats.h"
 
-int getsort;
+int getspyability;
 
 int abilitydata(int aptitude)
 {
@@ -99,7 +99,7 @@ namespace game
 
                 if(isteam(player1->team, d->team) && d->aptitude==APT_ESPION && d!=player1)
                 {
-                    getsort = totalmillis;
+                    getspyability = totalmillis;
                     playsound(S_SORTESP3);
                 }
                 return;

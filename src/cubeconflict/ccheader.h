@@ -32,7 +32,6 @@ enum {MSG_OWNKILLSTREAK = 0, MSG_YOUKILLED, MSG_OTHERKILLSTREAK,
         MSG_LEVELUP, MSG_ACHUNLOCKED, NUMMESSAGE};
 extern int message[NUMMESSAGE];
 
-extern int lastshoot, getsort;
 extern int zoomfov, zoom, crosshairsize;
 extern float crosshairalpha, pourcents;
 

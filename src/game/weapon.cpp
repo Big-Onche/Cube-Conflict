@@ -1262,6 +1262,7 @@ namespace game
             playsound(S_STEROSTIR, d==hudplayer() ? NULL : &d->o, NULL, 0, 0 , 300, -1, 500);
             if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 400 && d!=player1) playsound(S_STEROTIRLOIN, &d->o, NULL, 0, 0 , 600, -1, 800);
         }
+        else if(d->ragemillis && randomevent(attacks[atk].specialsounddelay)) playsound(S_RAGETIR, d==hudplayer() ? NULL : &d->o, NULL, 0, 0 , 300, -1, 500);
 
         looped = false;
         if(d->attacksound >= 0 && d->attacksound != sound) d->stopattacksound(d);
