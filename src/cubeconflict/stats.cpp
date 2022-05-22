@@ -168,7 +168,7 @@ void loadsave() //we read the poorly encrypted value for all stat
 
         if(saveID < NUMSTATS) sscanf(buf, "%i", &stat[saveID]);
         else if(saveID < NUMCUST + NUMSTATS) sscanf(buf, "%i", &cust[saveID-NUMSTATS]);
-        else sscanf(buf, "%i", &succes[saveID-NUMSTATS-NUMCUST]); //triggers warning but achievements are saved in 0 or 1 so it works with bool without problems
+        else {int j = 0; sscanf(buf, "%i", &j); succes[saveID-NUMSTATS-NUMCUST] = j;}
 
         saveID++;
     }
