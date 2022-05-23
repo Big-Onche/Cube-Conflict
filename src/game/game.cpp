@@ -406,7 +406,8 @@ namespace game
         if(player1->state != CS_DEAD && !intermission)
         {
             isalive = 1;
-            if(player1->health>=2000)unlockachievement(ACH_SACAPV);
+            if(player1->health>=2000) unlockachievement(ACH_SACAPV);
+            if(lookupmaterial(player1->o)==MAT_NOCLIP && n_map==3) unlockachievement(ACH_SPAAACE);
             if(player1->aptitude==APT_KAMIKAZE && player1->ammo[GUN_KAMIKAZE]<=0 && totalmillis-lastshoot>=500 && totalmillis-lastshoot<=750 && isconnected()) unlockachievement(ACH_SUICIDEFAIL);
             if(player1->steromillis && player1->epomillis && player1->jointmillis && player1->champimillis) unlockachievement(ACH_DEFONCE);
 
@@ -414,7 +415,11 @@ namespace game
             loopi(4) if(player1->ammo[GUN_S_NUKE+i]>0) p1hassuperweapon = true;
             if(p1hassuperweapon && player1->steromillis && player1->armour>0 && player1->armourtype==A_ASSIST) unlockachievement(ACH_ABUS);
 
-            if(player1->steromillis || player1->epomillis || player1->jointmillis || player1->champimillis) entities::checkboosts(curtime, player1);
+            if(player1->steromillis || player1->epomillis || player1->jointmillis || player1->champimillis)
+            {
+                if(player1->epomillis && player1->aptitude==APT_JUNKIE) unlockachievement(ACH_LANCEEPO);
+                entities::checkboosts(curtime, player1);
+            }
             if(player1->ragemillis || player1->vampimillis || player1->aptisort1 || player1->aptisort2 || player1->aptisort3) entities::checkaptiskill(curtime, player1);
             if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION) updatespecials(player1);
 
@@ -625,7 +630,10 @@ namespace game
 
         if(randomevent(2))
         {
-            if(d->aptitude==APT_PHYSICIEN && d->aptisort1 && d->armour>0) playsound(S_SORTPHY1, d==h ? NULL : &d->o, 0, 0, 0 , 100, -1, 200);
+            if(d->aptitude==APT_PHYSICIEN && d->aptisort1 && d->armour>0)
+            {
+                playsound(S_SORTPHY1, d==h ? NULL : &d->o, 0, 0, 0 , 100, -1, 200);
+            }
             else if(d->armour>0 && actor->gunselect!=GUN_LANCEFLAMMES)
                 playsound(d->armourtype == A_BLUE ? S_BALLEBOUCLIERBOIS :
                           d->armourtype == A_GREEN ? S_BALLEBOUCLIERFER :
@@ -715,34 +723,6 @@ namespace game
     {
         d->killstreak = 0;
         //////////////////////////////GESTION DE ET STATISTIQUES//////////////////////////////
-        if(actor==player1 && d!=player1)
-        {
-            if(!isteam(player1->team, d->team))
-            {
-                addstat(1, STAT_KILLS);
-                addxpandcc(7+player1->killstreak-1, 3);
-                if(player1->killstreak > stat[STAT_KILLSTREAK]) addstat(player1->killstreak, STAT_KILLSTREAK, true);
-                if(actor==player1 && atk==ATK_ASSISTXPL_SHOOT && player1->armourtype==A_ASSIST)unlockachievement(ACH_KILLASSIST);
-                if(player1->health<=100 && player1->state==CS_ALIVE) unlockachievement(ACH_1HPKILL);
-                switch(player1->aptitude)
-                {
-                    case APT_AMERICAIN: if(d->aptitude==APT_SHOSHONE) unlockachievement(ACH_FUCKYEAH); break;
-                    case APT_ESPION: if(player1->aptisort2) unlockachievement(ACH_ESPIONDEGUISE);
-                }
-                switch(player1->killstreak) {case 3: unlockachievement(ACH_TRIPLETTE); break; case 5: unlockachievement(ACH_PENTAPLETTE); break; case 10: unlockachievement(ACH_DECAPLETTE);}
-            }
-            else
-            {
-                addstat(1, STAT_ALLIESTUES);
-                unlockachievement(ACH_CPASBIEN);
-            }
-        }
-        else if(actor==player1 && d==player1)
-        {
-            addstat(1, STAT_SUICIDES);
-            if(atk==ATK_M32_SHOOT)unlockachievement(ACH_M32SUICIDE);
-        }
-        else if (d==player1) addstat(1, STAT_MORTS);
 
         if(d->state==CS_EDITING)
         {
@@ -773,15 +753,15 @@ namespace game
             }
         }
 
-        switch(atk)
-        {
+        //switch(atk)
+        //{
             //case ATK_UZI_SHOOT: playsound(S_BLOHBLOH, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
             //case ATK_FAMAS_SHOOT: playsound(S_FAMASLOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
             //case GUN_SMAW: playsound(S_BOOBARL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
             //case GUN_AK47: playsound(S_KALASHLOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
             //case ATK_ARTIFICE_SHOOT: playsound(S_ARTIFICELOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
             //case ATK_M32_SHOOT: playsound(S_GRENADELOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
-        }
+        //}
 
         //////////////////////////////GRAPHISMES//////////////////////////////
         if(actor->aptitude==7) //Eclair aptitude faucheuse
@@ -813,14 +793,24 @@ namespace game
         if(d==actor || atk==-1) // Suicide ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
             conoutf(contype, "%s%s %s%s%s", d==player1 ? "\fd" : "", dname, langage ? "" : d==player1 ? "t'es " : "s'est ", langage ? partmessageEN[rnd(2)].partsuicide : partmessageFR[rnd(5)].partsuicide, d==player1 ? " !" : ".");
-            if(d==player1) {player1->killstreak=0; copystring(str_armetueur, langage ? partmessageEN[rnd(5)].parttroll : partmessageFR[rnd(9)].parttroll); suicided = true;}
+            if(d==player1)
+            {
+                copystring(str_armetueur, langage ? partmessageEN[rnd(5)].parttroll : partmessageFR[rnd(9)].parttroll);
+                suicided = true;
+                addstat(1, STAT_MORTS); addstat(1, STAT_SUICIDES);
+                if(atk==ATK_M32_SHOOT)unlockachievement(ACH_M32SUICIDE);
+            }
         }
         else if(isteam(d->team, actor->team)) // Tir allié /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
             contype |= CON_TEAMKILL;
             copystring(str_pseudotueur, aname); n_aptitudetueur = actor->aptitude;
-            if(d==player1) conoutf(contype, "\f6%s %s \fd(%s)", dname, langage ? "got fragged by a teammate" : "as été tué par un allié", aname); //TU as été tué par un allié
-            else conoutf(contype, "\f2%s %s%s \fd(%s)", aname, langage ? "" : actor==player1 ? "as " : "a ", langage ? "fragged a teammate" : "tué un allié" , dname); //Quelqu'un a ou TU as tué un de ses alliés
+            if(d==player1) {conoutf(contype, "\f6%s %s \fd(%s)", dname, langage ? "got fragged by a teammate" : "as été tué par un allié", aname); addstat(1, STAT_MORTS);} //TU as été tué par un allié
+            else
+            {
+                conoutf(contype, "\f2%s %s%s \fd(%s)", aname, langage ? "" : actor==player1 ? "as " : "a ", langage ? "fragged a teammate" : "tué un allié" , dname); //Quelqu'un a ou TU as tué un de ses alliés
+                if(actor==player1) {addstat(1, STAT_ALLIESTUES); unlockachievement(ACH_CPASBIEN);}
+            }
         }
         else // Kill ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
@@ -837,9 +827,35 @@ namespace game
                     distance);
                 playsound(S_KILL);
                 message[MSG_YOUKILLED] = totalmillis; message[MSG_OWNKILLSTREAK] = totalmillis; copystring(str_pseudovictime, dname); n_aptitudevictime = d->aptitude; killdistance = distance;
+
+                //now let's check for shittons of achievements
                 if(distance>=100.f) unlockachievement(ACH_BEAUTIR);
-                if(stat[STAT_MAXKILLDIST]<distance) addstat(distance, STAT_MAXKILLDIST, true);
                 if(player1->state==CS_DEAD) unlockachievement(ACH_TUEURFANTOME);
+                if(player1->health<=100 && player1->state==CS_ALIVE) unlockachievement(ACH_1HPKILL);
+
+                switch(atk)
+                {
+                    case ATK_ASSISTXPL_SHOOT: if(player1->armourtype==A_ASSIST) unlockachievement(ACH_KILLASSIST); break;
+                    case ATK_LANCEFLAMMES_SHOOT: if(lookupmaterial(d->feetpos())==MAT_WATER) unlockachievement(ACH_THUGPHYSIQUE); break;
+                    case ATK_SV98_SHOOT: if(zoom==0) unlockachievement(ACH_NOSCOPE); break;
+                    case ATK_GLOCK_SHOOT: if(d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_CAMPOUZE || d->gunselect==GUN_S_GAU8 || d->gunselect==GUN_S_ROQUETTES) unlockachievement(ACH_DAVIDGOLIATH); break;
+                    case ATK_CAC349_SHOOT: case ATK_CACFLEAU_SHOOT: case ATK_CACMARTEAU_SHOOT: case ATK_CACMASTER_SHOOT: if(d->aptitude==APT_NINJA) unlockachievement(ACH_PASLOGIQUE); break;
+                    case ATK_NUKE_SHOOT: case ATK_CAMPOUZE_SHOOT: case ATK_GAU8_SHOOT: case ATK_ROQUETTES_SHOOT: if(player1->aptitude==APT_AMERICAIN && player1->steromillis) unlockachievement(ACH_JUSTEPOUR);
+                }
+
+                switch(player1->aptitude)
+                {
+                    case APT_AMERICAIN: if(d->aptitude==APT_SHOSHONE) unlockachievement(ACH_FUCKYEAH); break;
+                    case APT_ESPION: if(player1->aptisort2) unlockachievement(ACH_ESPIONDEGUISE);
+                }
+
+                switch(player1->killstreak) {case 3: unlockachievement(ACH_TRIPLETTE); break; case 5: unlockachievement(ACH_PENTAPLETTE); break; case 10: unlockachievement(ACH_DECAPLETTE);}
+
+                //now let's add player stats
+                addstat(1, STAT_KILLS);
+                addxpandcc(7+player1->killstreak-1, 3+player1->killstreak-1);
+                if(player1->killstreak > stat[STAT_KILLSTREAK]) addstat(player1->killstreak, STAT_KILLSTREAK, true);
+                if(stat[STAT_MAXKILLDIST]<distance) addstat(distance, STAT_MAXKILLDIST, true);
 
             }
             else if(d==player1) ////////////////////TU as été tué////////////////////
@@ -853,10 +869,10 @@ namespace game
                     langage ? "with" : "avec",
                     langage ? guns[atk].armedescEN : guns[atk].armedescFR,
                     distance);
-                player1->killstreak=0;
                 copystring(str_pseudotueur, aname); n_aptitudetueur = actor->aptitude;
                 copystring(str_armetueur, langage ? guns[atk].armedescEN : guns[atk].armedescFR);
                 suicided = false;
+                addstat(1, STAT_MORTS);
             }
             else ////////////////////Quelqu'un a tué quelqu'un////////////////////
             {
@@ -897,12 +913,13 @@ namespace game
             if(cmode) cmode->gameover();
             int accuracy = (player1->totaldamage*100)/max(player1->totalshots, 1);
 
-            if(player1->frags>=30) unlockachievement(ACH_KILLER);
             if(player1->frags>=10)
             {
                 if(accuracy>=50) unlockachievement(ACH_PRECIS);
                 if(player1->deaths<=5) unlockachievement(ACH_INCREVABLE);
+                if(player1->frags>=30) unlockachievement(ACH_KILLER);
             }
+            if(player1->totaldamage/10 > 10000) unlockachievement(ACH_DESTRUCTEUR);
 
             defformatstring(flags, "%d", player1->flags);
             conoutf(CON_GAMEINFO, langage ? "\faGAME OVER !" : "\faFIN DE LA PARTIE !");
@@ -1113,7 +1130,7 @@ namespace game
         if(d->physstate>=PHYS_SLOPE && moving)
         {
             int snd = pl->armourtype==A_ASSIST && pl->armour> 0 ? S_PASASSIST: S_PAS;
-            if(lookupmaterial(d->feetpos())&MAT_WATER) snd = S_NAGE;
+            if(lookupmaterial(d->feetpos())==MAT_WATER) snd = S_NAGE;
             if(lastmillis-pl->lastfootstep < (d->vel.magnitude()*(aptitudes[pl->aptitude].apt_vitesse*0.35f)*(pl->crouched() || (pl->aptisort2 && pl->aptitude==APT_ESPION) ? 2 : 1)*(d->inwater ? 2 : 1)*(pl->armourtype==A_ASSIST && pl->armour> 0 ? 2.f : 1)/d->vel.magnitude())) return;
             else {playsound(snd, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , pl->armourtype==A_ASSIST ? 300 : 150, -1, pl->armourtype==A_ASSIST ? 600 : 300); if(pl->epomillis) switch(rnd(4)) {case 0: playsound(S_PASEPO, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 500, -1, 1000);}}
         }
