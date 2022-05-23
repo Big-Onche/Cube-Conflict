@@ -176,6 +176,7 @@ void disconnect(bool async, bool cleanup, bool volontaire)
         soundmenu_cleanup();
         mainmenu = 1;
         if(stat[STAT_DAMMAGERECORD] < game::player1->totaldamage/10) addstat(game::player1->totaldamage/10, STAT_DAMMAGERECORD, true);
+        if(game::player1->totaldamage/10 > 10000) unlockachievement(ACH_DESTRUCTEUR);
     }
     if(!connpeer && clienthost)
     {
