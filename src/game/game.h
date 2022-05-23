@@ -373,10 +373,10 @@ static struct itemstat { int add, max, sound; const char *name; int icon, info; 
     {10,    40,    S_ITEMAMMO,   "FEU D'ARTIFICE",   HICON_SIZE, GUN_ARTIFICE},
     {30,   120,    S_ITEMAMMO,   "GLOCK",            HICON_SIZE, GUN_GLOCK},
     //Super armes
-    {  1,     1,    S_ITEMAMMO,   "BOMBE NUCLEAIRE", HICON_SIZE, GUN_S_NUKE},
-    {300,  1000,    S_ITEMAMMO,   "GAU-8",           HICON_SIZE, GUN_S_GAU8},
-    { 40,   120,    S_ITEMAMMO,   "MINI-ROQUETTES",  HICON_SIZE, GUN_S_ROQUETTES},
-    { 20,    60,    S_ITEMAMMO,   "CAMPOUZE 2000",   HICON_SIZE, GUN_S_CAMPOUZE},
+    {  1,    4,    S_ITEMAMMO,   "BOMBE NUCLEAIRE", HICON_SIZE, GUN_S_NUKE},
+    {300, 1200,    S_ITEMAMMO,   "GAU-8",           HICON_SIZE, GUN_S_GAU8},
+    { 40,  120,    S_ITEMAMMO,   "MINI-ROQUETTES",  HICON_SIZE, GUN_S_ROQUETTES},
+    { 15,   60,    S_ITEMAMMO,   "CAMPOUZE 2000",   HICON_SIZE, GUN_S_CAMPOUZE},
     //Objets
     {250,     1000, S_ITEMHEALTH,   "PANACHAY",            HICON_SIZE},
     {500,     2500, S_COCHON,       "COCHON GRILLAY",      HICON_SIZE},
@@ -581,24 +581,24 @@ struct gamestate
         }
     }
 
-    void pickup(int type, int aptitude, int rndsuperweapon, int aptisort, int parmourtype)
+    void pickup(int type, int aptitude, int aptisort, int parmourtype, int rndsweap)
     {
         if(type<I_RAIL || type>I_MANA) return;
-        itemstat &is = itemstats[type-I_RAIL];
+        itemstat &is = itemstats[type-I_RAIL+rndsweap];
 
         int boostitem = 1;
-        if(aptitude==11 && aptisort>0) boostitem++;
+        if(aptitude==APT_PRETRE && aptisort>0) boostitem++;
 
         switch(type)
         {
             case I_BOOSTPV:
-                health = min(health+is.add*(aptitude==1 ? 1.5f : boostitem), 2500.0f);
+                health = min(health+is.add*(aptitude==APT_MEDECIN ? 1.5f : boostitem), 2500.0f);
                 break;
             case I_SANTE:
-                health = min(health+is.add*(aptitude==1 ? 2 : boostitem), maxhealth);
+                health = min(health+is.add*(aptitude==APT_MEDECIN ? 2 : boostitem), maxhealth);
                 break;
             case I_MANA:
-                if(aptitude!=4) mana = min(mana+is.add, is.max);
+                if(aptitude!=APT_VAMPIRE) mana = min(mana+is.add, is.max);
                 else health = min(health+250, maxhealth);
                 break;
             case I_BOUCLIERBOIS:
@@ -609,7 +609,7 @@ struct gamestate
                 if(parmourtype==4 && armour>0) armourtype = A_ASSIST;
                 else armourtype = is.info;
 
-                armour = min(parmourtype==4 && type!=I_ARMUREASSISTEE && armour>0 ? armour+(aptitude==11 && aptisort>0 ? 1000 : 500) : armour+is.add, parmourtype==4 ? 3000 : is.max);
+                armour = min(parmourtype==4 && type!=I_ARMUREASSISTEE && armour>0 ? armour+(aptitude==APT_PRETRE && aptisort>0 ? 1000 : 500) : armour+is.add, parmourtype==4 ? 3000 : is.max);
                 if(type==I_ARMUREASSISTEE)
                 {
                     health = min(health+300, maxhealth);
@@ -617,21 +617,15 @@ struct gamestate
                 }
 
                 break;
-            case I_BOOSTDEGATS: steromillis = min(steromillis+is.add*(aptitude==13 ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;
-            case I_BOOSTVITESSE: epomillis = min(epomillis+is.add*(aptitude==13 ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;
-            case I_BOOSTGRAVITE: jointmillis = min(jointmillis+is.add*(aptitude==13 ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;
-            case I_BOOSTPRECISION: champimillis = min(champimillis+is.add*(aptitude==13 ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;
+            case I_BOOSTDEGATS: steromillis = min(steromillis+is.add*(aptitude==APT_JUNKIE ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;
+            case I_BOOSTVITESSE: epomillis = min(epomillis+is.add*(aptitude==APT_JUNKIE ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;
+            case I_BOOSTGRAVITE: jointmillis = min(jointmillis+is.add*(aptitude==APT_JUNKIE ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;
+            case I_BOOSTPRECISION: champimillis = min(champimillis+is.add*(aptitude==APT_JUNKIE ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;
                 break;
-            case I_SUPERARME:
-                {
-                    float aptboost;
-                    aptitude == 2 ? aptboost = 2 : aptboost = 1;
-                    ammo[is.info+rndsuperweapon] = min(ammo[is.info+rndsuperweapon]+is.add*boostitem*aptboost, is.max*aptboost);
-                }
             default:
                 {
                     float aptboost;
-                    aptitude == 2 ? aptboost = 1.5f : aptboost = 1;
+                    aptitude == APT_AMERICAIN ? aptboost = 1.5f : aptboost = 1;
                     ammo[is.info] = min(ammo[is.info]+is.add*boostitem*aptboost, is.max*aptboost);
                 }
                 break;
@@ -946,7 +940,7 @@ namespace entities
     extern void putitems(packetbuf &p);
     extern void setspawn(int i, bool on);
     extern void teleport(int n, gameent *d);
-    extern void pickupeffects(int n, gameent *d, int rndsuperweapon);
+    extern void pickupeffects(int n, gameent *d, int rndsweap);
     extern void teleporteffects(gameent *d, int tp, int td, bool local = true);
     extern void jumppadeffects(gameent *d, int jp, bool local = true);
 }

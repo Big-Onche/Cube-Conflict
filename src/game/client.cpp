@@ -2031,11 +2031,11 @@ namespace game
 
             case N_ITEMACC:            // server acknowledges that I picked up this item
             {
-                int rndsuperweapon = getint(p), i = getint(p), cn = getint(p);
+                int i = getint(p), cn = getint(p), rndsweap = getint(p);
                 if(cn >= 0)
                 {
                     gameent *d = getclient(cn);
-                    entities::pickupeffects(i, d, rndsuperweapon);
+                    entities::pickupeffects(i, d, rndsweap);
                 }
                 else entities::setspawn(i, true);
                 break;

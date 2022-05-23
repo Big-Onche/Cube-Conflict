@@ -917,14 +917,14 @@ namespace server
 
     bool pickup(int i, int sender)         // server side item pickup, acknowledge first client that gets it
     {
-        int rndsuperweapon = rnd(4);
+        int rndsweap = sents[i].type==I_SUPERARME ? rnd(4) : 0;
         if((m_timed && gamemillis>=gamelimit) || !sents.inrange(i) || !sents[i].spawned) return false;
         clientinfo *ci = getinfo(sender);
         if(!ci) return false;
         sents[i].spawned = false;
         sents[i].spawntime = spawntime(sents[i].type);
-        sendf(-1, 1, "ri4", N_ITEMACC, sents[i].type==I_SUPERARME ? rndsuperweapon : 0, i, sender);
-        ci->state.pickup(sents[i].type, ci->aptitude, sents[i].type==I_SUPERARME ? rndsuperweapon : 0, ci->state.aptisort1, ci->state.armourtype);
+        sendf(-1, 1, "ri4", N_ITEMACC, i, sender, rndsweap);
+        ci->state.pickup(sents[i].type, ci->aptitude, ci->state.aptisort1, ci->state.armourtype, rndsweap);
         return true;
     }
 

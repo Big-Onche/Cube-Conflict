@@ -222,7 +222,7 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
         {
             int tw = infowidth+2;
             float tsz = 0.04f*min(screenw, screenh)/100,
-                  tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*7.3f*min(screenw, screenh) - 100*tsz;
+                  tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*7.4f*min(screenw, screenh) - 100*tsz;
             pushhudmatrix();
             hudmatrix.translate(tx, ty, 0);
             hudmatrix.scale(tsz, tsz, 1);

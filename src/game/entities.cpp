@@ -118,7 +118,7 @@ namespace entities
     // these two functions are called when the server acknowledges that you really
     // picked up the item (in multiplayer someone may grab it before you).
 
-    void pickupeffects(int n, gameent *d, int rndsuperweapon)
+    void pickupeffects(int n, gameent *d, int rndsweap)
     {
         if(!ents.inrange(n)) return;
         extentity *e = ents[n];
@@ -127,12 +127,13 @@ namespace entities
         e->clearspawned();
         e->clearnopickup();
         if(!d) return;
-        d->pickup(type+rndsuperweapon, d->aptitude, rndsuperweapon, d->aptisort1, d->armourtype);
+        d->pickup(type, d->aptitude, d->aptisort1, d->armourtype, rndsweap);
+        if(type==I_SUPERARME) conoutf("%d N, %d G, %d, C %d, R, RND %d", d->ammo[GUN_S_NUKE], d->ammo[GUN_S_GAU8], d->ammo[GUN_S_CAMPOUZE], d->ammo[GUN_S_ROQUETTES], rndsweap);
 
         if(type>=I_RAIL && type<=I_SUPERARME)
         {
-            if(d!=player1) gunselect(type-9+rndsuperweapon, d);
-            else if(autowield==1) gunselect(type-9+rndsuperweapon, player1);
+            if(d!=player1) gunselect(type-9+rndsweap, d);
+            else if(autowield==1) gunselect(type-9+rndsweap, player1);
         }
 
         if(d->aptisort1 && d->aptitude==APT_PRETRE)
@@ -272,8 +273,8 @@ namespace entities
                     {
                         switch(e->type)
                         {
-                            case I_SANTE:               addstat(1, STAT_PANACHAY); addxpandcc(1); break;
-                            case I_MANA:                addstat(1, STAT_MANA); addxpandcc(1); break;
+                            case I_SANTE: addstat(1, STAT_PANACHAY); addxpandcc(1); break;
+                            case I_MANA:  addstat(1, STAT_MANA); addxpandcc(1); break;
                             case I_BOUCLIERBOIS:
                             case I_BOUCLIERFER:
                             case I_BOUCLIEROR:
@@ -285,13 +286,13 @@ namespace entities
                                     addxpandcc(e->type==I_BOUCLIERBOIS ? 2 : e->type==I_BOUCLIERFER ? 3 : 4);
                                 }
                                 break;
-                            case I_ARMUREASSISTEE:      addstat(1, STAT_ARMUREASSIST); addxpandcc(5); break;
-                            case I_BOOSTPV: addstat(1, STAT_COCHON); addxpandcc(5); break;
-                            case I_BOOSTDEGATS: addstat(1, STAT_STEROS); addxpandcc(5); break;
-                            case I_BOOSTVITESSE: addstat(1, STAT_EPO); addxpandcc(5); break;
-                            case I_BOOSTGRAVITE: addstat(1, STAT_JOINT); addxpandcc(5); break;
-                            case I_BOOSTPRECISION: addstat(1, STAT_CHAMPIS); addxpandcc(5); break;
-                            case I_SUPERARME: addstat(1, STAT_SUPERARMES); addxpandcc(7); break;
+                            case I_ARMUREASSISTEE:  addstat(1, STAT_ARMUREASSIST); addxpandcc(5); break;
+                            case I_BOOSTPV:         addstat(1, STAT_COCHON); addxpandcc(5); break;
+                            case I_BOOSTDEGATS:     addstat(1, STAT_STEROS); addxpandcc(5); break;
+                            case I_BOOSTVITESSE:    addstat(1, STAT_EPO); addxpandcc(5); break;
+                            case I_BOOSTGRAVITE:    addstat(1, STAT_JOINT); addxpandcc(5); break;
+                            case I_BOOSTPRECISION:  addstat(1, STAT_CHAMPIS); addxpandcc(5); break;
+                            case I_SUPERARME:       addstat(1, STAT_SUPERARMES); addxpandcc(7); break;
                             default: if(e->type>=I_RAIL && e->type<=I_GLOCK) {addstat(1, STAT_ARMES); addxpandcc(1);}
                         }
                     }
