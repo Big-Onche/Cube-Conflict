@@ -900,8 +900,6 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     attachentities();
     allchanged(true);
 
-    renderbackground(langage ? "Loading..." : "Chargement...", mapshot, mname, game::getmapinfo(), game::getastuce());
-
     startmap(cname ? cname : mname);
     stopmusic();
     return true;

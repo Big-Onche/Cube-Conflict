@@ -1064,17 +1064,18 @@ namespace game
         else return showmodeinfo && m_valid(gamemode) ? gamemodes[gamemode - STARTGAMEMODE].nameFR : NULL;
     }
 
-    vector<char *> astuces;
-    ICOMMAND(astucetxt, "s", (char *astuce), { astuces.add(newstring(astuce)); });
+    vector<char *> astuces_en;
+    ICOMMAND(astuce_en, "s", (char *astuce_en), { astuces_en.add(newstring(astuce_en)); });
+    vector<char *> astuces_fr;
+    ICOMMAND(astuce_fr, "s", (char *astuce_fr), { astuces_fr.add(newstring(astuce_fr)); });
 
     const char *getastuce()
     {
         static char astuce[1000];
         astuce[0] = '\0';
-        if(!astuces.empty())
-        {
-            strcat(astuce, astuces[rnd(astuces.length())]);
-        }
+        if((langage) && !astuces_en.empty()) strcat(astuce, astuces_en[rnd(astuces_en.length())]);
+        else if (!astuces_fr.empty()) strcat(astuce, astuces_fr[rnd(astuces_fr.length())]);
+
         return astuce;
     }
 
