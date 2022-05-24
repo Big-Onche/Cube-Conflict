@@ -1,0 +1,328 @@
+List of licenses applied to 3D models | Liste des licences appliquées aux modèles 3D
+
+The following files are protected by TurboSquid's license you CANNOT use them for your personal projects unless you buy the models.
+Les fichiers suivants sont protégés par licence TurboSquid vous ne POUVEZ PAS les utiliser pour vos projets personnels à moins d'acheter les modèles.
+
+See / Voir https://blog.turbosquid.com/turbosquid-3d-model-license
+
+Medieval City Pack & Pirate Village Pack "denbru" 
+Order number : 3860549
+Files :	palette.png
+	media/model/mapmodel/cannon
+	media/model/mapmodel/brouette
+	media/model/mapmodel/boulescannon
+	media/model/mapmodel/table
+	media/model/mapmodel/chaise
+	media/model/mapmodel/lampadaire
+	media/model/mapmodel/bibliotheque
+	media/model/mapmodel/sac
+	media/model/mapmodel/banc
+	media/model/mapmodel/puits
+	media/model/mapmodel/montagne2
+	media/model/mapmodel/tente/toile1
+	media/model/mapmodel/tente/toile2
+	media/model/mapmodel/barrieres/brune2x
+	media/model/mapmodel/barrieres/brune4x
+	media/model/mapmodel/batiments/maison1
+	media/model/mapmodel/batiments/maison2
+	media/model/mapmodel/batiments/maison3
+	media/model/mapmodel/batiments/maison4
+	media/model/mapmodel/batiments/maison5
+	media/model/mapmodel/batiments/moulin_part1
+	media/model/mapmodel/batiments/chateau_part1
+	media/model/mapmodel/batiments/chateau_part2
+	media/model/mapmodel/batiments/toit1
+	media/model/mapmodel/batiments/toit2
+	media/model/mapmodel/batiments/tour
+	media/model/mapmodel/rochers/longue
+	media/model/mapmodel/briques/1
+	media/model/mapmodel/briques/2
+	media/model/mapmodel/briques/3
+	media/model/tombes/excalibur
+	media/model/objets/mana
+	media/model/mapmodel/objets/mana
+	media/model/mapmodel/ballot
+	media/model/mapmodel/banc
+	media/model/mapmodel/barrieres/brune2x
+	media/model/mapmodel/barrieres/brune4x
+	media/model/mapmodel/bois
+	media/model/mapmodel/branches
+	media/model/mapmodel/cage
+	media/model/mapmodel/montagne
+	media/model/mapmodel/montagne2
+	media/model/mapmodel/panneau
+	media/model/mapmodel/tonneau
+
+cartoon shit by "ale_xey"
+Order number : 3539306
+	media/model/tombes/merde
+
+Low Poly UFO by "ptrusted"
+Order number : (free)
+	media/model/mapmodel/vaisseaux/ufo
+
+Forest Pack by "limestudios"
+Order number : (free)
+	media/model/mapmodel/arbres/arbre1
+	media/model/mapmodel/arbres/arbre2
+	media/model/mapmodel/arbres/arbre3
+
+LowPoly Trees & Carrot & Crystal 3D model by "Ada_King"
+Order number : (free)
+	media/model/tombes/cristal
+	media/model/objets/souche
+
+
+-------------------------------------------------------------------------------------------------------
+The following files were not created by the developers of Cube Conflict.
+However, they have specific licenses making their use possible in compliance with their respective licenses.
+
+Les fichiers suivants n'ont pas été créés par les développeurs de Cube Conflict.
+Cependant, ils possèdent des licences spécifiques rendant leur utilisation possible dans le respect de leur licences respectives.
+
+Provided by Nobiax
+	CC0 1.0 Universal (CC0 1.0) - Public Domain Dedication 
+	See / Voir licenses_certificates/readme (nobiax).txt)
+	media/model/mapmodel/rochers/longue
+	media/model/mapmodel/rochers/pierre
+	media/model/mapmodel/rochers/pierre_fonce
+	media/model/mapmodel/rochers/pierre_fonce_esp
+	media/model/mapmodel/rochers/rocher1
+	media/model/mapmodel/rochers/rochet2
+	
+
+-------------------------------------------------------------------------------------------------------
+
+The following files were created expressly for Cube Conflict by its developers. The CC-BY-SA 4.0 license is applied here.
+Les fichiers suivants ont été crées expressément pour Cube Conflict par ses développeurs. La licence CC-BY-SA 4.0 y est appliquée.
+
+See / Voir licenses_certificates/cc-by-sa.txt
+
+Created by "Jean Onche" for Cube Conflict | Réalisé par "Jean Onche" pour Cube Conflict
+Files :	media/model/boosts/epo
+	media/model/boosts/joint
+	media/model/hudboost/joint
+	media/model/boosts/steros
+	media/model/chapteaux/aventurier
+	media/model/chapteaux/bandana
+	media/model/chapteaux/casquette
+	media/model/chapteaux/champignon
+	media/model/chapteaux/cornes
+	media/model/chapteaux/crane
+	media/model/chapteaux/graduation
+	media/model/chapteaux/indien
+	media/model/chapteaux/japonais
+	media/model/chapteaux/magicien
+	media/model/chapteaux/medic
+	media/model/chapteaux/melon
+	media/model/chapteaux/saint
+	media/model/chapteaux/tente
+	media/model/chapteaux/viking
+	media/model/douilles/cartouche
+	media/model/douilles/grosse
+	media/model/douilles/normale
+	media/model/drapeau/jaune
+	media/model/drapeau/rouge
+	media/model/hudgun/ak47
+	media/model/worldgun/ak47
+	media/model/hudgun/arbalete
+	media/model/worldgun/arbalete
+	media/model/hudgun/armes_cac/epee349
+	media/model/worldgun/armes_cac/epee349
+	media/model/hudgun/armes_cac/fleau
+	media/model/worldgun/armes_cac/fleau
+	media/model/hudgun/armes_cac/marteauban
+	media/model/worldgun/armes_cac/marteauban
+	media/model/hudgun/armes_cac/mastersword
+	media/model/worldgun/armes_cac/mastersword
+	media/model/hudgun/armes_cac/sabre
+	media/model/worldgun/armes_cac/sabre
+	media/model/hudgun/assistxpl
+	media/model/worldgun/assistxpl
+	media/model/hudgun/campouze2000
+	media/model/worldgun/campouze2000
+	media/model/hudgun/famas
+	media/model/worldgun/famas
+	media/model/hudgun/feuartifice
+	media/model/worldgun/feuartifice
+	media/model/hudgun/fusilelectrique
+	media/model/worldgun/fusilelectrique
+	media/model/hudgun/fusilplasma
+	media/model/worldgun/fusilplasma
+	media/model/hudgun/GAU8
+	media/model/worldgun/GAU8
+	media/model/hudgun/glock
+	media/model/worldgun/glock
+	media/model/hudgun/GRAP1
+	media/model/worldgun/GRAP1
+	media/model/hudgun/hydra
+	media/model/worldgun/hydra
+	media/model/hudgun/kamikaze
+	media/model/worldgun/kamikaze
+	media/model/hudgun/lanceflammes
+	media/model/worldgun/lanceflammes
+	media/model/hudgun/M32
+	media/model/worldgun/M32
+	media/model/hudgun/minigun
+	media/model/worldgun/minigun
+	media/model/hudgun/miniroquettes
+	media/model/worldgun/miniroquettes
+	media/model/hudgun/missilenorko
+	media/model/worldgun/missilenorko
+	media/model/hudgun/mossberg500
+	media/model/worldgun/mossberg500
+	media/model/hudgun/sks
+	media/model/worldgun/sks
+	media/model/hudgun/smaw
+	media/model/worldgun/smaw
+	media/model/hudgun/spockgun
+	media/model/worldgun/spockgun
+	media/model/hudgun/SV_98
+	media/model/worldgun/SV_98
+	media/model/hudgun/uzi
+	media/model/worldgun/uzi
+	media/model/hudshield/armureassistee
+	media/model/hudshield/bois
+	media/model/worldshield/bois
+	media/model/hudshield/fer
+	media/model/worldshield/fer
+	media/model/hudshield/magnetique
+	media/model/worldshield/magnetique
+	media/model/hudshield/or
+	media/model/worldshield/or
+	media/model/tombes/basique1
+	media/model/tombes/basique2
+	media/model/tombes/couronne
+	media/model/tombes/crime
+	media/model/tombes/fuck
+	media/model/tombes/lingots
+	media/model/tombes/minigolf
+	media/model/tombes/monument
+	media/model/tombes/oeil
+	media/model/tombes/fleur
+	
+	Note : The smileys are designed by "lag-it" (public domain) | Note : Les smileys sont designés par "lag-it" (public domain)
+	media/model/smileys/armureassistee
+	media/model/smileys/bug
+	media/model/smileys/clindoeil
+	media/model/smileys/colere
+	media/model/smileys/content
+	media/model/smileys/cool
+	media/model/smileys/fou
+	media/model/smileys/hap
+	media/model/smileys/malade
+	media/model/smileys/noel
+	media/model/smileys/sournois
+	media/model/mapmodels/smileys/mort
+	media/model/mapmodels/smileys/smiley
+
+	media/model/projectiles/feuartifice
+	media/model/projectiles/fleche
+	media/model/projectiles/grenade
+	media/model/projectiles/minimissile
+	media/model/projectiles/missile
+	media/model/projectiles/missilenuke
+	media/model/pixels/jaune
+	media/model/pixels/jauneglow
+	media/model/pixels/noir
+	media/model/pixels/rouge
+	media/model/pixels/rougeglow
+	media/model/objets/armureassistee
+	media/model/objets/bouclierbois
+	media/model/objets/bouclierfer
+	media/model/objets/boucliermagnetique
+	media/model/objets/bouclieror
+	media/model/objets/champis
+	media/model/objets/cochongrillay
+	media/model/objets/epo
+	media/model/objets/joint
+	media/model/objets/panachay
+	media/model/objets/piecerobotique
+	media/model/objets/steroides
+	media/model/objets/teleporteur
+	media/model/munitions/ak47
+	media/model/munitions/arbalete
+	media/model/munutions/famas
+	media/model/munutions/feuartifice
+	media/model/munutions/fusilelectrique
+	media/model/munutions/fusilplasma
+	media/model/munutions/glock
+	media/model/munutions/GRAP1
+	media/model/munutions/hydra
+	media/model/munutions/lanceflammes
+	media/model/munutions/M32
+	media/model/munutions/minigun
+	media/model/munutions/mossberg500
+	media/model/munutions/sks
+	media/model/munutions/smaw
+	media/model/munutions/spockgun
+	media/model/munutions/supercaisse
+	media/model/munutions/SV_98
+	media/model/munutions/uzi
+	media/model/antennes/antenne1
+	media/model/antennes/antenne2
+	media/model/antennes/antenne3
+	media/model/mapmodel/bancmoderne
+	media/model/mapmodel/bannieres/banniere1
+	media/model/mapmodel/bannieres/banniere2
+	media/model/mapmodel/barricades
+	media/model/mapmodel/barrieres/grise2x
+	media/model/mapmodel/barrieres/grise4x
+	media/model/mapmodel/batiments/moulin_part2
+	media/model/mapmodel/ble
+	media/model/mapmodel/caisses/caisse1
+	media/model/mapmodel/caisses/caisse2
+	media/model/mapmodel/caisses/caisse3
+	media/model/mapmodel/caisses/caissebois
+	media/model/mapmodel/caisses/caissependue
+	media/model/mapmodel/champignons/champi1
+	media/model/mapmodel/champignons/champi2
+	media/model/mapmodel/champignons/champi3
+	media/model/mapmodel/constructions/pont
+	media/model/mapmodel/constructions/tente1x1
+	media/model/mapmodel/constructions/tente2x1
+	media/model/mapmodel/constructions/tour
+	media/model/mapmodel/distributeur
+	media/model/mapmodel/drapeaux/bleu
+	media/model/mapmodel/drapeaux/orange
+	media/model/mapmodel/fleurs/1
+	media/model/mapmodel/fleurs/2
+	media/model/mapmodel/fleurs/3
+	media/model/mapmodel/gyrophare
+	media/model/mapmodel/herbes
+	media/model/mapmodel/herbes/alien
+	media/model/mapmodel/joint
+	media/model/mapmodel/menus/menus1
+	media/model/mapmodel/menus/menus2
+	media/model/mapmodel/menus/menus3
+	media/model/mapmodel/murjersey
+	media/model/mapmodel/panneaucontrole1
+	media/model/mapmodel/panneaucontrole2
+	media/model/mapmodel/planche
+	media/model/mapmodel/portes/bois
+	media/model/mapmodel/portes/futuriste
+	media/model/mapmodel/rotor
+	media/model/mapmodel/roue
+	media/model/mapmodel/ruines
+	media/model/mapmodel/stalactite
+	media/model/mapmodel/tablemoderne
+	media/model/mapmodel/tente/baton
+	media/model/mapmodel/tente/toile1
+	media/model/mapmodel/tente/toile2
+	media/model/mapmodel/tombes/1
+	media/model/mapmodel/tombes/2
+	media/model/mapmodel/vehicules/jeep1
+	media/model/mapmodel/vehicules/jeep2
+	media/model/mapmodel/vehicules/jeep3
+	media/model/mapmodel/vehicules/jeep4
+	media/model/mapmodel/vehicules/jeep5
+	media/model/mapmodel/vehicules/jeep6
+	media/model/mapmodel/ventilateur
+	media/model/mapmodel/vaisseaux/1
+	media/model/mapmodel/vaisseaux/2
+
+Created by "Skyser" for Cube Conflict | Réalisé par "Skyser" pour Cube Conflict
+Files : media/model/skyser/casiers1
+	media/model/skyser/casiers2
+	media/model/skyser/poubelle
+	media/model/skyser/tiroirs
