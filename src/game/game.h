@@ -77,6 +77,7 @@ enum                            // static entity types
     TELEDEST,                   // attr1 = angle, attr2 = idx
     JUMPPAD,                    // attr1 = zpush, attr2 = ypush, attr3 = xpush
     FLAG,                       // attr1 = angle, attr2 = team
+    BASE,                       // attr2 = name alias
 
     MAXENTTYPES,
 };
@@ -130,6 +131,9 @@ enum
     M_IDENTIQUE  = 1<<9,
     M_NOAMMO     = 1<<10,
     M_MUNINFINIE = 1<<11,
+    M_CAPTURE    = 1<<12,
+    M_REGEN      = 1<<13,
+    M_NOITEMS    = 1<<14,
 };
 
 static struct gamemodeinfo
@@ -143,20 +147,26 @@ static struct gamemodeinfo
     { "Editeur de maps", "Map editor", M_EDIT },
 
     //MODE 1, 2, 3, 4, 5
-    { "Tue Les Tous", "Deathmatch", M_LOBBY },
-    { "Tue Les Tous (Aléatoire)", "Deathmatch (Random)", M_RANDOM | M_NOAMMO | M_MUNINFINIE},
-    { "Tue Les Tous (Full stuff)", "Deathmatch (Full stuff)", M_FULLSTUFF},
-    { "Tue Les Tous (Identique)", "Deathmatch (Identical)", M_IDENTIQUE | M_NOAMMO | M_MUNINFINIE},
+    { "Tue Les Tous (Collecte)",    "Deathmatch (Weapon pickup)",   M_LOBBY },
+    { "Tue Les Tous (Aléatoire)",   "Deathmatch (Random weapon)",   M_RANDOM | M_NOAMMO | M_MUNINFINIE},
+    { "Tue Les Tous (Full stuff)",  "Deathmatch (Full stuff)",      M_FULLSTUFF},
+    { "Tue Les Tous (Identique)",   "Deathmatch (Identical)",       M_IDENTIQUE | M_NOAMMO | M_MUNINFINIE},
     //MODE 6, 7, 8, 9, 10
-    { "Tue Les Tous", "Team Deathmatch", M_TEAM },
-    { "Tue Les Tous (Aléatoire)", "Team Deathmatch (Random)", M_RANDOM | M_TEAM | M_NOAMMO | M_MUNINFINIE},
-    { "Tue Les Tous (Full stuff)", "Team Deathmatch (Full stuff)", M_FULLSTUFF | M_TEAM},
-    { "Tue Les Tous (Identique)", "Team Deathmatch (Identical)", M_IDENTIQUE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
+    { "Tue Les Tous (Collecte)",    "Team Deathmatch (Weapon pickup)",  M_TEAM },
+    { "Tue Les Tous (Aléatoire)",   "Team Deathmatch (Random weapon)",  M_RANDOM | M_TEAM | M_NOAMMO | M_MUNINFINIE},
+    { "Tue Les Tous (Full stuff)",  "Team Deathmatch (Full stuff)",     M_FULLSTUFF | M_TEAM},
+    { "Tue Les Tous (Identique)",   "Team Deathmatch (Identical)",      M_IDENTIQUE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
     //MODE 11, 12, 13, 14, 15
-    { "Capture de drapeau", "Capture the flag", M_CTF | M_TEAM },
-    { "Capture de drapeau (Aléatoire)", "Capture the flag (Random)", M_RANDOM | M_CTF | M_TEAM | M_NOAMMO | M_MUNINFINIE},
-    { "Capture de drapeau (Full stuff)", "Capture the flag (Full stuff)", M_FULLSTUFF | M_CTF | M_TEAM},
-    { "Capture de drapeau (Identique)", "Capture the flag (Identical)", M_IDENTIQUE | M_CTF | M_TEAM | M_NOAMMO | M_MUNINFINIE},
+    { "Capture de drapeau (Collecte)",      "Capture the flag (Weapon pickup)", M_CTF | M_TEAM },
+    { "Capture de drapeau (Aléatoire)",     "Capture the flag (Random weapon)", M_RANDOM | M_CTF | M_TEAM | M_NOAMMO | M_MUNINFINIE},
+    { "Capture de drapeau (Full stuff)",    "Capture the flag (Full stuff)",    M_FULLSTUFF | M_CTF | M_TEAM},
+    { "Capture de drapeau (Identique)",     "Capture the flag (Identical)",     M_IDENTIQUE | M_CTF | M_TEAM | M_NOAMMO | M_MUNINFINIE},
+    //MODE 16, 17, 18, 19, 20
+    { "Capture de base (Collecte)",     "Capture the flag (Identical)",     M_CAPTURE | M_TEAM},
+    { "Capture de base (Aléatoire)",    "Capture the flag (Random weapon)", M_RANDOM | M_CAPTURE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
+    { "Capture de base (Full stuff)",   "Capture the flag (Full stuff)",    M_FULLSTUFF | M_CAPTURE | M_TEAM},
+    { "Capture de base (Identique)",    "Capture the flag (Identical)",     M_IDENTIQUE | M_CAPTURE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
+    { "Capture de base (Régénération)", "Capture the flag (Regeneration)",  M_NOITEMS | M_CAPTURE | M_TEAM | M_REGEN},
 };
 
 #define STARTGAMEMODE (-1)
@@ -167,7 +177,6 @@ static struct gamemodeinfo
 #define m_checknot(mode, flag) (m_valid(mode) && !(gamemodes[(mode) - STARTGAMEMODE].flags&(flag)))
 #define m_checkall(mode, flag) (m_valid(mode) && (gamemodes[(mode) - STARTGAMEMODE].flags&(flag)) == (flag))
 
-#define m_ctf          (m_check(gamemode, M_CTF))
 #define m_teammode     (m_check(gamemode, M_TEAM))
 #define m_overtime     (m_check(gamemode, M_OVERTIME))
 #define isteam(a,b)    (m_teammode && a==b)
@@ -175,8 +184,14 @@ static struct gamemodeinfo
 #define m_random       (m_check(gamemode, M_RANDOM))
 #define m_fullstuff    (m_check(gamemode, M_FULLSTUFF))
 #define m_identique    (m_check(gamemode, M_IDENTIQUE))
-#define m_noammo       (m_check(gamemode, M_NOAMMO))
 #define m_muninfinie   (m_check(gamemode, M_MUNINFINIE))
+
+#define m_noitems      (m_check(gamemode, M_NOITEMS))
+#define m_noammo       (m_check(gamemode, M_NOAMMO))
+
+#define m_ctf          (m_check(gamemode, M_CTF))
+#define m_capture      (m_check(gamemode, M_CAPTURE))
+#define m_regencapture (m_checkall(gamemode, M_CAPTURE | M_REGEN))
 
 #define m_demo         (m_check(gamemode, M_DEMO))
 #define m_edit         (m_check(gamemode, M_EDIT))
@@ -289,6 +304,7 @@ enum
     N_ANNOUNCE,
     N_SENDABILITY,
     N_IDENTIQUEARME, N_SERVAMBIENT,
+    N_BASES, N_BASEINFO, N_BASESCORE, N_REPAMMO, N_BASEREGEN,
     NUMMSG
 };
 
@@ -321,6 +337,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_ANNOUNCE, 2,
     N_SENDABILITY, 3,
     N_IDENTIQUEARME, 2, N_SERVAMBIENT, 2,
+    N_BASES, 0, N_BASEINFO, 0, N_BASESCORE, 0, N_REPAMMO, 1, N_BASEREGEN, 7,
     -1
 };
 
@@ -535,6 +552,12 @@ struct gamestate
         ammo[gun] = (itemstats[gun-GUN_RAIL].add*k);
     }
 
+    void addammo(int gun, int k = 1, int scale = 1)
+    {
+        itemstat &is = itemstats[gun-GUN_RAIL];
+        ammo[gun] = min(ammo[gun] + (is.add*k)/scale, is.max);
+    }
+
     bool hasmaxammo(int type)
     {
        const itemstat &is = itemstats[type-I_RAIL];
@@ -716,6 +739,16 @@ struct gamestate
             if(aptitude==0) addsweaps();
             return;
         }
+        else if(m_capture)
+        {
+            armourtype = A_BLUE;
+            armour = m_regencapture ? 300 : 750;
+            ammo[GUN_GLOCK] = aptitude==2 ? 45 : 30;
+            ammo[GUN_M32] = aptitude==2 ? 3 : 1;
+            gunselect = aptitude==6 ? GUN_KAMIKAZE : aptitude==3 ? GUN_CACNINJA : GUN_GLOCK;
+            if(aptitude==0) addsweaps();
+            return;
+        }
         else
         {
             armourtype = A_BLUE;
@@ -791,7 +824,7 @@ struct gameent : dynent, gamestate
     int attacking, gunaccel;
     int lastfootstep, attacksound, attackchan, hurtchan, dansechan, sortchan, alarmchan;
     int lasttaunt;
-    int lastpickup, lastpickupmillis, flagpickup;
+    int lastpickup, lastpickupmillis, flagpickup, lastbase, lastrepammo;
     int killstreak, frags, flags, deaths, totaldamage, totalshots;
     editinfo *edit;
     float deltayaw, deltapitch, deltaroll, newyaw, newpitch, newroll;
@@ -878,6 +911,7 @@ struct gameent : dynent, gamestate
         lastpickup = -1;
         lastpickupmillis = 0;
         flagpickup = 0;
+        lastbase = lastrepammo = -1;
         lastnode = -1;
         sort1pret = true;
         sort2pret = true;
@@ -943,6 +977,8 @@ namespace entities
     extern void pickupeffects(int n, gameent *d, int rndsweap);
     extern void teleporteffects(gameent *d, int tp, int td, bool local = true);
     extern void jumppadeffects(gameent *d, int jp, bool local = true);
+
+    extern void repammo(gameent *d, int type, bool local = true);
 }
 
 namespace game
@@ -1008,6 +1044,7 @@ namespace game
     extern void clientdisconnected(int cn, bool notify = true);
     extern void clearclients(bool notify = true);
     extern void startgame();
+    extern float proximityscore(float x, float lower, float upper);
     extern void spawnplayer(gameent *);
     extern void deathstate(gameent *d, gameent *actor, bool restore = false);
     extern void damaged(int damage, gameent *d, gameent *actor, bool local = true, int atk = 0);

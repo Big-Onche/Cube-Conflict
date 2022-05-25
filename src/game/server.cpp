@@ -873,7 +873,8 @@ namespace server
 
     bool canspawnitem(int type)
     {
-        if(m_noammo) return (type>=I_SUPERARME && type<=I_MANA);
+        if(m_noitems) return type==I_SUPERARME || (type>=I_BOOSTPV && type<=I_BOOSTGRAVITE);
+        else if(m_noammo) return (type>=I_SUPERARME && type<=I_MANA);
         else return (type>=I_RAIL && type<=I_MANA);
     }
 

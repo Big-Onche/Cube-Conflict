@@ -406,6 +406,7 @@ namespace entities
         loopv(ents)
         {
             extentity *e = ents[i];
+            if(m_noitems && ((e->type!=I_SUPERARME) || (e->type>I_BOOSTPV && e->type<I_BOOSTGRAVITE))) return;
             if(e->type>=I_RAIL && e->type<=I_MANA && (!m_noammo || e->type<I_RAIL || e->type>I_GLOCK))
             {
                 e->setspawned(force || !server::delayspawn(e->type));
@@ -485,13 +486,13 @@ namespace entities
             "fusil_electrique", "fusil_plasma", "smaw", "minigun", "spockgun", "m32",
             "lanceflammes", "uzi", "famas", "mossberg", "hydra", "SV98",
             "sks", "arbalete", "ak47", "grap1", "feu_artifice", "glock",
-            "supercaisse", "base", "NULL", "NULL",
+            "supercaisse", "NULL", "NULL", "NULL",
 
             "panache", "cochon_grille", "steroides", "champis", "epo", "joint",
             "bouclier_bois", "bouclier_fer", "bouclier_or", "bouclier_magnetique", "armure_assistee",
             "mana",
 
-            "teleport", "teledest", "jumppad", "flag",
+            "teleport", "teledest", "jumppad", "flag", "base",
         };
         return i>=0 && size_t(i)<sizeof(entnames)/sizeof(entnames[0]) ? entnames[i] : "";
     }

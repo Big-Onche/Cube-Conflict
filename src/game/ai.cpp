@@ -662,18 +662,21 @@ namespace ai
         static vector<interest> interests;
         interests.setsize(0);
 
-        if(!hasgoodammo(d) || d->health < 750 || d->mana<50)
-            items(d, b, interests);
-        else if(needshield(d) || needmana(d))
+        if(!m_noitems)
         {
-            static vector<int> nearby;
-            nearby.setsize(0);
-            findents(I_RAIL, I_MANA, false, d->feetpos(), vec(32, 32, 24), nearby);
-            loopv(nearby)
+            if(!hasgoodammo(d) || d->health < 750 || d->mana<50)
+                items(d, b, interests);
+            else if(needshield(d) || needmana(d))
             {
-                int id = nearby[i];
-                extentity &e = *(extentity *)entities::ents[id];
-                if(d->canpickup(e.type, d->aptitude, d->armourtype)) tryitem(d, e, id, b, interests);
+                static vector<int> nearby;
+                nearby.setsize(0);
+                findents(I_RAIL, I_MANA, false, d->feetpos(), vec(32, 32, 24), nearby);
+                loopv(nearby)
+                {
+                    int id = nearby[i];
+                    extentity &e = *(extentity *)entities::ents[id];
+                    if(d->canpickup(e.type, d->aptitude, d->armourtype)) tryitem(d, e, id, b, interests);
+                }
             }
         }
         if(m_teammode && (d->aptitude==APT_MEDECIN || d->aptitude==APT_JUNKIE)) assist(d, b, interests);

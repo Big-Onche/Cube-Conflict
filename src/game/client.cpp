@@ -8,16 +8,24 @@ VAR(n_map, 0, 0, 99);
 VARR(mapofficielle, 0, 0, 1);
 
 extern void calcmode();     //Gestion des modes de jeux
-VAR(n_mode, 0, 0, 12);
+VAR(n_mode, 0, 0, 17);
 VARFP(n_team, 0, 0, 1, { calcmode(); });
-VARFP(n_type, 0, 0, 1, { calcmode(); });
-VARFP(n_spec, 1, 1, 4, { calcmode(); });
+VARFP(n_type, 0, 0, 2, { calcmode(); });
+VARFP(n_spec, 1, 1, 5, { calcmode(); });
 int cnidentiquearme = 0;
 
 void calcmode()
 {
-    if(!n_type) n_mode = n_spec+(n_team*4);
-    else n_mode = n_spec+8;
+    switch(n_type)
+    {
+        case 1: n_mode = n_spec+8; //ctf
+            if(n_spec >= 5) n_spec = 1;
+            break;
+        case 2: n_mode = n_spec+12; break; //base capture
+        default:
+            n_mode = n_spec+(n_team*4); //deathmatch
+            if(n_spec >= 5) n_spec = 1;
+    }
 }
 
 string pseudobasique;

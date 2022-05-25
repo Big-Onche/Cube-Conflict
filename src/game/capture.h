@@ -200,7 +200,6 @@ struct captureclientmode : clientmode
         b.ammotype = rnd(I_ARTIFICE-I_RAIL+1);
 
         b.o = o;
-        conoutf("Je spawn des %d", b.ammotype);
         if(b.ammogroup)
         {
             loopi(bases.length()-1) if(b.ammogroup == bases[i].ammogroup)
@@ -264,7 +263,7 @@ struct captureclientmode : clientmode
 
     void replenishammo()
     {
-        if(!m_capture || m_regencapture) return;
+        if(m_regencapture) return;
         loopv(bases)
         {
             baseinfo &b = bases[i];
@@ -316,19 +315,19 @@ struct captureclientmode : clientmode
                 baseinfo &b = bases[i];
                 if(!b.valid() || !insidebase(b, d->feetpos()) || (strcmp(b.owner, tmpteam) && strcmp(b.enemy, tmpteam))) continue;
                 if(d->lastbase < 0 && (lookupmaterial(d->feetpos())&MATF_CLIP) == MAT_GAMECLIP) break;
-                particle_flare(pos, vec(b.ammopos.x, b.ammopos.y, b.ammopos.z - AMMOHEIGHT - 4.4f), 0, PART_LIGHTNING, isteam(player1->team, d->team) ? 0xFF2222 : 0x2222FF, 1.0f);
+                particle_flare(pos, vec(b.ammopos.x, b.ammopos.y, b.ammopos.z - AMMOHEIGHT - 4.4f), 0, PART_LIGHTNING, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.5f);
                 if(oldbase < 0)
                 {
-                    particle_fireball(pos, 4.8f, PART_EXPLOSION, 250, isteam(player1->team, d->team) ? 0x802020 : 0x2020FF, 4.8f);
-                    particle_splash(PART_SPARK, 50, 250, pos, isteam(player1->team, d->team) ? 0x802020 : 0x2020FF, 0.24f);
+                    particle_fireball(pos, 4.8f, PART_EXPLOSION, 250, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 4.8f);
+                    particle_splash(PART_SPARK, 50, 250, pos, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.24f);
                 }
                 d->lastbase = i;
             }
         }
         if(d->lastbase < 0 && oldbase >= 0)
         {
-            particle_fireball(pos, 4.8f, PART_EXPLOSION, 250, isteam(player1->team, d->team) ? 0x802020 : 0x2020FF, 4.8f);
-            particle_splash(PART_SPARK, 50, 250, pos, isteam(player1->team, d->team) ? 0x802020 : 0x2020FF, 0.24f);
+            particle_fireball(pos, 4.8f, PART_EXPLOSION, 250, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 4.8f);
+            particle_splash(PART_SPARK, 50, 250, pos, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.24f);
         }
     }
 
@@ -374,35 +373,29 @@ struct captureclientmode : clientmode
                 ammopos.z -= height.z/2 + sinf(lastmillis/100.0f)/20;
                 rendermodel(ammoname, ANIM_MAPMODEL|ANIM_LOOP, ammopos, lastmillis/10.0f, 0, 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED);
             }
-            else loopj(b.ammo)
-            {
-                float angle = 2*M_PI*(lastmillis/4000.0f + j/float(MAXAMMO));
-                vec ammopos(b.o);
-                ammopos.x += 10*cosf(angle);
-                ammopos.y += 10*sinf(angle);
-                ammopos.z += 4;
-                rendermodel(entities::entmdlname(I_RAIL+b.ammotype), ANIM_MAPMODEL|ANIM_LOOP, ammopos, 0, 0, 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED);
-            }
 
-            int tcolor = 0x1EC850, mtype = -1, mcolor = 0xFFFFFF, mcolor2 = 0;
+            int tcolor = 0x888888, mtype = -1, mcolor = 0xFFFFFF, mcolor2 = 0;
             if(b.owner[0])
             {
+                string termnalally, termnalenemy;
+                formatstring(termnalally, "%s", langage ? "Ellied" : "Allié");
+                formatstring(termnalenemy, "%s", langage ? "Enemy" : "Ennemi");
                 bool isowner = !strcmp(b.owner, tmpteam);
-                if(b.enemy[0]) { mtype = PART_METER_VS; mcolor = 0xFF1932; mcolor2 = 0x3219FF; if(!isowner) swap(mcolor, mcolor2); }
-                if(!b.name[0]) formatstring(b.info, "base %d: %s", b.tag, b.owner);
-                else if(basenumbers) formatstring(b.info, "%s (%d): %s", b.name, b.tag, b.owner);
-                else formatstring(b.info, "%s: %s", b.name, b.owner);
-                tcolor = isowner ? 0x6496FF : 0xFF4B19;
+                if(b.enemy[0]) { mtype = PART_METER_VS; mcolor = 0xFF0000; mcolor2 = 0xFFFF00; if(!isowner) swap(mcolor, mcolor2); }
+                if(!b.name[0]) formatstring(b.info, "Terminal %d - %s", b.tag, !b.converted ? strcmp(b.owner, tmpteam) ? termnalenemy : termnalally : langage ? "Disputed !" : "Contesté !");
+                else if(basenumbers) formatstring(b.info, "%s (%d) - %s", b.name, b.tag, !b.converted ? strcmp(b.owner, tmpteam) ? termnalenemy : termnalally : langage ? "Disputed !" : "Contesté !");
+                else formatstring(b.info, "%s - %s", b.name, !b.converted ? strcmp(b.owner, tmpteam) ? termnalenemy : termnalally : langage ? "Disputed !" : "Contesté !");
+                tcolor = isowner ? 0xFFFF00 : 0xFF0000;
             }
             else if(b.enemy[0])
             {
-                if(!b.name[0]) formatstring(b.info, "base %d: %s", b.tag, b.enemy);
-                else if(basenumbers) formatstring(b.info, "%s (%d): %s", b.name, b.tag, b.enemy);
-                else formatstring(b.info, "%s: %s", b.name, b.enemy);
-                if(strcmp(b.enemy, tmpteam)) { tcolor = 0xFF4B19; mtype = PART_METER; mcolor = 0xFF1932; }
-                else { tcolor = 0x6496FF; mtype = PART_METER; mcolor = 0x3219FF; }
+                if(!b.name[0]) formatstring(b.info, "Terminal %d - %s", b.tag, langage ? "Hack in progress..." : "Hack en cours... ");
+                else if(basenumbers) formatstring(b.info, "%s (%d) - %s", b.name, b.tag,  langage ? "Hack in progress..." : "Hack en cours... ");
+                else formatstring(b.info, "%s - %s", b.name,  langage ? "Hack in progress..." : "Hack en cours... ");
+                if(strcmp(b.enemy, tmpteam)) { tcolor = 0xFF0000; mtype = PART_METER; mcolor = 0xFF0000; }
+                else { tcolor = 0xFFFF00; mtype = PART_METER; mcolor = 0xFFFF00; }
             }
-            else if(!b.name[0]) formatstring(b.info, "base %d", b.tag);
+            else if(!b.name[0]) formatstring(b.info, "Terminal %d", b.tag);
             else if(basenumbers) formatstring(b.info, "%s (%d)", b.name, b.tag);
             else copystring(b.info, b.name);
 
@@ -412,7 +405,7 @@ struct captureclientmode : clientmode
             if(mtype>=0)
             {
                 above.z += 3.0f;
-                particle_meter(above, b.converted/float((b.owner[0] ? int(OCCUPYENEMYLIMIT) : int(OCCUPYNEUTRALLIMIT))), mtype, 1, 1, mcolor, mcolor2, 2.0f);
+                particle_meter(above, b.converted/float((b.owner[0] ? int(OCCUPYENEMYLIMIT) : int(OCCUPYNEUTRALLIMIT))), mtype, 1, 1, mcolor, mcolor2, 3.0f);
             }
         }
     }
@@ -540,7 +533,7 @@ struct captureclientmode : clientmode
             abovemodel(b.ammopos, "base/neutral");
             b.ammopos.z += AMMOHEIGHT-2;
             b.ammotype = e->attr1;
-            defformatstring(alias, "base_%d", e->attr2);
+            defformatstring(alias, langage ? "base_en_%d" : "base_fr_%d", e->attr2);
             const char *name = getalias(alias);
             copystring(b.name, name);
             b.tag = e->attr2>0 ? e->attr2 : bases.length();
@@ -855,6 +848,12 @@ ICOMMAND(insidebases, "", (),
                     notify = true;
                 }
 
+                if(ci->state.mana < 150)
+                {
+                    ci->state.mana = min(ci->state.mana + ticks*REGENHEALTH/10, 150);
+                    notify = true;
+                }
+
                 if(ci->state.armour==0) ci->state.armourtype = A_BLUE;
 
                 switch(ci->state.armourtype)
@@ -898,7 +897,7 @@ ICOMMAND(insidebases, "", (),
                     }
                 }
                 if(notify)
-                    sendf(-1, 1, "ri6", N_BASEREGEN, ci->clientnum, ci->state.health, ci->state.armour, b.ammotype, b.valid() ? ci->state.ammo[b.ammotype] : 0);
+                    sendf(-1, 1, "ri7", N_BASEREGEN, ci->clientnum, ci->state.health, ci->state.armour, ci->state.mana, b.ammotype, b.valid() ? ci->state.ammo[b.ammotype] : 0);
             }
         }
     }
@@ -929,11 +928,6 @@ ICOMMAND(insidebases, "", (),
                 {
                     int regen = b.capturetime/REGENSECS - (b.capturetime-t)/REGENSECS;
                     if(regen) regenowners(b, regen);
-                }
-                else
-                {
-                    int ammo = b.capturetime/AMMOSECS - (b.capturetime-t)/AMMOSECS;
-                    if(ammo && b.addammo(ammo)) sendbaseinfo(i);
                 }
             }
         }
@@ -1108,11 +1102,12 @@ case N_BASEINFO:
 
 case N_BASEREGEN:
 {
-    int rcn = getint(p), health = getint(p), armour = getint(p), ammotype = getint(p), ammo = getint(p);
+    int rcn = getint(p), health = getint(p), armour = getint(p), mana = getint(p), ammotype = getint(p), ammo = getint(p);
     gameent *regen = rcn==player1->clientnum ? player1 : getclient(rcn);
     if(regen && m_capture)
     {
         regen->health = health;
+        regen->mana = mana;
         if(regen->armour==0)  regen->armourtype=A_BLUE;
         switch(regen->armourtype)
         {
