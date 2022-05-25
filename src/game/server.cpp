@@ -864,8 +864,10 @@ namespace server
     };
 
     #define SERVMODE 1
+    #include "capture.h"
     #include "ctf.h"
 
+    captureservmode capturemode;
     ctfservmode ctfmode;
     servmode *smode = NULL;
 
@@ -2078,6 +2080,7 @@ namespace server
         sendf(-1, 1, "risii", N_MAPCHANGE, smapname, gamemode, 1);
 
         if(m_ctf) smode = &ctfmode;
+        else if(m_capture) smode = &capturemode;
         else smode = NULL;
 
         clearteaminfo();

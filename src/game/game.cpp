@@ -508,7 +508,14 @@ namespace game
             }
         }
         if(player1->clientnum>=0) c2sinfo();   // do this last, to reduce the effective frame lag
+    }
 
+    float proximityscore(float x, float lower, float upper)
+    {
+        if(x <= lower) return 1.0f;
+        if(x >= upper) return 0.0f;
+        float a = x - lower, b = x - upper;
+        return (b * b) / (a * a + b * b);
     }
 
     VARP(mixedspawns, 0, 0, 1);
@@ -1214,7 +1221,7 @@ namespace game
     }
     ICOMMAND(suicide, "", (), suicide(player1));
 
-    bool needminimap() { return m_ctf; }
+    bool needminimap() { return m_ctf || m_capture; }
 
     void drawicon(int icon, float x, float y, float sz)
     {

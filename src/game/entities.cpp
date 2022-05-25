@@ -34,7 +34,7 @@ namespace entities
             "munitions/fusilelectrique", "munitions/fusilplasma", "munitions/smaw", "munitions/minigun", "munitions/spockgun", "munitions/M32",
             "munitions/lanceflammes", "munitions/uzi", "munitions/famas", "munitions/mossberg500", "munitions/hydra", "munitions/SV_98",
             "munitions/sks", "munitions/arbalete", "munitions/ak47", "munitions/GRAP1", "munitions/feuartifice", "munitions/glock",
-            "munitions/supercaisse", "munitions/supercaisse", "munitions/supercaisse", "munitions/supercaisse",
+            "munitions/supercaisse", NULL, "munitions/supercaisse", "munitions/supercaisse",
             //Objets
             "objets/panachay", "objets/cochongrillay", "objets/steroides", "objets/champis", "objets/epo", "objets/joint",
             "objets/bouclierbois", "objets/bouclierfer", "objets/bouclieror", "objets/boucliermagnetique", "objets/armureassistee",
@@ -113,6 +113,11 @@ namespace entities
         v += is.add;
         if(v>is.max) v = is.max;
         if(local) msgsound(is.sound);
+    }
+
+    void repammo(gameent *d, int type, bool local)
+    {
+        addammo(type, d->ammo[type-I_RAIL+GUN_RAIL], local);
     }
 
     // these two functions are called when the server acknowledges that you really
@@ -480,7 +485,7 @@ namespace entities
             "fusil_electrique", "fusil_plasma", "smaw", "minigun", "spockgun", "m32",
             "lanceflammes", "uzi", "famas", "mossberg", "hydra", "SV98",
             "sks", "arbalete", "ak47", "grap1", "feu_artifice", "glock",
-            "supercaisse", "NULL", "NULL", "NULL",
+            "supercaisse", "base", "NULL", "NULL",
 
             "panache", "cochon_grille", "steroides", "champis", "epo", "joint",
             "bouclier_bois", "bouclier_fer", "bouclier_or", "bouclier_magnetique", "armure_assistee",

@@ -210,13 +210,16 @@ namespace game
     }
 
     #include "ctf.h"
+    #include "capture.h"
 
     clientmode *cmode = NULL;
+    captureclientmode capturemode;
     ctfclientmode ctfmode;
 
     void setclientmode()
     {
         if(m_ctf) cmode = &ctfmode;
+        else if(m_capture) cmode = &capturemode;
         else cmode = NULL;
     }
 
@@ -2303,6 +2306,7 @@ namespace game
             }
 
             #define PARSEMESSAGES 1
+            #include "capture.h"
             #include "ctf.h"
             #undef PARSEMESSAGES
 
