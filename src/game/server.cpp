@@ -4,7 +4,7 @@
 
 VARP(gamelength, 1, 10, 60);
 
-int identiquearme = rnd(17), servambient = rnd(9);
+int identiquearme = rnd(17), servambient = rnd(9), gamemode = rnd(12)+1;
 
 namespace game
 {
@@ -2052,6 +2052,7 @@ namespace server
     VARP(servbotniveauminimum, 0, 0, 100);
     VARP(servbotniveaumaximum, 0, 0, 100);
     VARP(servrandommode, 0, 0, 1);
+    VARP(servforcemode, -1, 0, 17);
 
     void changemap(const char *s, int mode)
     {
@@ -2113,7 +2114,8 @@ namespace server
 
     void rotatemap(bool next)
     {
-        if(servrandommode) gamemode = rnd(12)+1;
+        if(servrandommode || !servforcemode) gamemode = rnd(12)+1;
+        if(servforcemode>-1) gamemode = servforcemode;
 
         if(!maprotations.inrange(curmaprotation))
         {

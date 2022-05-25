@@ -510,15 +510,7 @@ namespace game
         if(player1->clientnum>=0) c2sinfo();   // do this last, to reduce the effective frame lag
     }
 
-    float proximityscore(float x, float lower, float upper)
-    {
-        if(x <= lower) return 1.0f;
-        if(x >= upper) return 0.0f;
-        float a = x - lower, b = x - upper;
-        return (b * b) / (a * a + b * b);
-    }
-
-    VARP(mixedspawns, 0, 0, 1);
+    VARP(mixedspawns, 0, 0, 2);
 
     void spawnplayer(gameent *d)   // place at random spawn
     {
@@ -1202,7 +1194,7 @@ namespace game
 
     const char *teamcolor(int team)
     {
-        return tempformatstring("\fs%s%s\fr", teamtextcode[team], teamnames[team]);
+        return tempformatstring("\fs%s%s\fr", team!=player1->team ? teamtextcode[2] : teamtextcode[1], teamnames[team]);
     }
 
     void suicide(physent *d)

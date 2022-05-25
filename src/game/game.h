@@ -805,7 +805,7 @@ struct gamestate
 
 #define MAXTEAMS 2
 
-static const char * const teamnames[1+MAXTEAMS] = { "", "YORARIEN", "YORAKEKCHOSE" };
+static const char * const teamnames[1+MAXTEAMS] = { "", langage ? "Democrats" : "Yorarien", langage ? "Republicans" : "Yakekchose" };
 static const char * const teamtextcode[1+MAXTEAMS] = { "\fc", "\fd", "\fc" };
 static const int teamtextcolor[1+MAXTEAMS] = { 0xFF2222, 0xFFFF22, 0xFF2222 };
 static const char * const teamblipcolor[1+MAXTEAMS] = { "_neutral", "_blue", "_red" };
@@ -1044,7 +1044,6 @@ namespace game
     extern void clientdisconnected(int cn, bool notify = true);
     extern void clearclients(bool notify = true);
     extern void startgame();
-    extern float proximityscore(float x, float lower, float upper);
     extern void spawnplayer(gameent *);
     extern void deathstate(gameent *d, gameent *actor, bool restore = false);
     extern void damaged(int damage, gameent *d, gameent *actor, bool local = true, int atk = 0);

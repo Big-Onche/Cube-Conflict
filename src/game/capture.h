@@ -20,9 +20,9 @@ struct captureclientmode : clientmode
     static const int SCORESECS = 20;
     static const int AMMOSECS = 15;
     static const int REGENSECS = 2;
-    static const int REGENHEALTH = 50;
-    static const int REGENARMOUR = 50;
-    static const int REGENAMMO = 20;
+    static const int REGENHEALTH = 100;
+    static const int REGENARMOUR = 100;
+    static const int REGENAMMO = 15;
     static const int MAXAMMO = 5;
     static const int REPAMMODIST = 32;
     static const int RESPAWNSECS = 5;
@@ -315,19 +315,27 @@ struct captureclientmode : clientmode
                 baseinfo &b = bases[i];
                 if(!b.valid() || !insidebase(b, d->feetpos()) || (strcmp(b.owner, tmpteam) && strcmp(b.enemy, tmpteam))) continue;
                 if(d->lastbase < 0 && (lookupmaterial(d->feetpos())&MATF_CLIP) == MAT_GAMECLIP) break;
-                particle_flare(pos, vec(b.ammopos.x, b.ammopos.y, b.ammopos.z - AMMOHEIGHT - 4.4f), 0, PART_LIGHTNING, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.5f);
+
+
+                vec basepos(b.o);
+                basepos.add(vec(-10+rnd(20), -10+rnd(20), -10+rnd(20)));
+                basepos.sub(pos);
+                basepos.normalize().mul(1300.0f);
+
+                if(randomevent(0.2f*nbfps)) particle_flying_flare(pos, basepos, 500, randomevent(2) ? PART_ZERO : PART_ONE, isteam(player1->team, d->team) ? 0x00FF00 : 0xFF0000, 0.8f, 100);
+
                 if(oldbase < 0)
                 {
-                    particle_fireball(pos, 4.8f, PART_EXPLOSION, 250, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 4.8f);
-                    particle_splash(PART_SPARK, 50, 250, pos, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.24f);
+                    particle_splash(PART_ZERO, 12, 250, pos, isteam(player1->team, d->team) ? 0x00FF00 : 0xFF0000, 0.8f, 200, 50);
+                    particle_splash(PART_ONE, 12, 250, pos, isteam(player1->team, d->team) ? 0x00FF00 : 0xFF0000, 0.8f, 200, 50);
                 }
                 d->lastbase = i;
             }
         }
         if(d->lastbase < 0 && oldbase >= 0)
         {
-            particle_fireball(pos, 4.8f, PART_EXPLOSION, 250, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 4.8f);
-            particle_splash(PART_SPARK, 50, 250, pos, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.24f);
+            particle_splash(PART_ZERO, 12, 200, pos, isteam(player1->team, d->team) ? 0x00FF00 : 0xFF0000, 0.8f, 200, 50);
+            particle_splash(PART_ONE, 12, 200, pos, isteam(player1->team, d->team) ? 0x00FF00 : 0xFF0000, 0.8f, 200, 50);
         }
     }
 
@@ -456,9 +464,9 @@ struct captureclientmode : clientmode
         if(blips && !basenumbers) gle::end();
     }
 
-    int respawnwait(gameent *d, int delay = 0)
+    int respawnwait(gameent *d)
     {
-        return -1;
+        return max(0, RESPAWNSECS-(lastmillis-d->lastpain)/1000);
     }
 
     int clipconsole(int w, int h)
@@ -565,21 +573,24 @@ struct captureclientmode : clientmode
             if(strcmp(b.owner, owner))
             {
                 int iowner = atoi(owner);
-                if(!b.name[0]) conoutf(CON_GAMEINFO, "%s captured base %d", teamcolor(iowner), b.tag);
-                else if(basenumbers) conoutf(CON_GAMEINFO, "%s captured %s (%d)", teamcolor(iowner), b.name, b.tag);
-                else conoutf(CON_GAMEINFO, "%s captured %s", teamcolor(iowner), b.name);
+                if(!b.name[0]) conoutf(CON_GAMEINFO, langage ? "%s team hacked \"%d\" terminal." : "L'équipe %s a hacké le terminal \"%d\".", teamcolor(iowner), b.tag);
+                else conoutf(CON_GAMEINFO, langage ? "%s team hacked \"%s\" terminal." : "L'équipe %s a hacké le terminal \"%s\".", teamcolor(iowner), b.name);
                 if(!strcmp(owner, tmpteam)) playsound(S_NULL);
             }
         }
         else if(b.owner[0])
         {
             int ibowner = atoi(b.owner);
-            if(!b.name[0]) conoutf(CON_GAMEINFO, "%s lost base %d", teamcolor(ibowner), b.tag);
-            else if(basenumbers) conoutf(CON_GAMEINFO, "%s lost %s (%d)", teamcolor(ibowner), b.name, b.tag);
-            else conoutf(CON_GAMEINFO, "%s lost %s", teamcolor(ibowner), b.name);
+            if(!b.name[0]) conoutf(CON_GAMEINFO, langage ? "%s team lost the \"%d\" terminal." : "L'équipe %s a perdu le terminal \"%d\".", teamcolor(ibowner), b.tag);
+            else conoutf(CON_GAMEINFO, langage ? "%s team lost the \"%s\" terminal." : "L'équipe %s a perdu le terminal \"%s\".", teamcolor(ibowner), b.name);
             if(!strcmp(b.owner, tmpteam)) playsound(S_NULL);
         }
-        if(strcmp(b.owner, owner)) particle_splash(PART_SPARK, 200, 250, b.ammopos, owner[0] ? (strcmp(owner, tmpteam) ? 0x802020 : 0x2020FF) : 0x208020, 0.24f);
+        if(strcmp(b.owner, owner))
+        {
+            particle_splash(PART_ZERO, 25, 500, b.ammopos, owner[0] ? (strcmp(owner, tmpteam) ? 0x00FF00 : 0xFFFF00) : 0x777777, 1.f, 300, -50);
+            particle_splash(PART_ONE, 25, 500, b.ammopos, owner[0] ? (strcmp(owner, tmpteam) ? 0x00FF00 : 0xFFFF00) : 0x777777, 1.f, 300, -50);
+        }
+
         copystring(b.owner, owner);
         copystring(b.enemy, enemy);
         b.converted = converted;
@@ -591,7 +602,7 @@ struct captureclientmode : clientmode
     {
         findscore(team).total = total;
         int iteam = atoi(team);
-        if(total>=10000) conoutf(CON_GAMEINFO, "%s captured all bases", teamcolor(iteam));
+        if(total>=10000) conoutf(CON_GAMEINFO, langage ? "%s team hacked all terminals!" : "L'équipe %s a hacké tous les terminaux !", teamcolor(iteam));
         else if(bases.inrange(base))
         {
             baseinfo &b = bases[base];
@@ -603,21 +614,6 @@ struct captureclientmode : clientmode
                 particle_textcopy(above, msg, PART_TEXT, 2000, isteam(iteam, player1->team) ? 0x6496FF : 0xFF4B19, 4.0f, -8);
             }
         }
-    }
-
-    // prefer spawning near friendly base
-    float ratespawn(gameent *d, const extentity &e)
-    {
-        string tmpteam;
-        formatstring(tmpteam, "%d", d->team);
-        float minbasedist = 1e16f;
-        loopv(bases)
-        {
-            baseinfo &b = bases[i];
-            if(!b.owner[0] || strcmp(b.owner, tmpteam)) continue;
-            minbasedist = min(minbasedist, e.o.dist(b.o));
-        }
-        return minbasedist < 1e16f ? proximityscore(minbasedist, 128.0f, 512.0f) : 1.0f;
     }
 
 	bool aicheck(gameent *d, ai::aistate &b)
@@ -882,6 +878,7 @@ ICOMMAND(insidebases, "", (),
                     case A_ASSIST:
                     {
                         ci->state.armour = min(ci->state.armour + ticks*REGENARMOUR, 3000);
+                        ci->state.ammo[GUN_ASSISTXPL] = 1;
                         notify = true;
                         break;
                     }
@@ -1107,15 +1104,16 @@ case N_BASEREGEN:
     if(regen && m_capture)
     {
         regen->health = health;
-        regen->mana = mana;
         if(regen->armour==0)  regen->armourtype=A_BLUE;
         switch(regen->armourtype)
         {
             case A_BLUE: if(regen->armour>=750) regen->armourtype=A_GREEN; break;
             case A_GREEN: if(regen->armour>=1250) regen->armourtype=A_YELLOW; break;
             case A_YELLOW: if(regen->armour>=2000) regen->armourtype=A_ASSIST;
+            case A_ASSIST: regen->ammo[GUN_ASSISTXPL] = 1;
         }
         regen->armour = armour;
+        regen->mana = mana;
         if(ammotype>=GUN_RAIL && ammotype<=GUN_GLOCK) regen->ammo[ammotype] = ammo;
     }
     break;

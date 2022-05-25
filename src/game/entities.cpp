@@ -357,7 +357,7 @@ namespace entities
             //playsound(S_PUPOUT, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
             if(d==player1) conoutf(CON_GAMEINFO, langage ? "\f8The steroid cycle is over." : "\f8La cure de stéros est terminée.");
         }
-        if((d->epomillis -= time)<=0)
+        if(d->epomillis && (d->epomillis -= time)<=0)
         {
             d->epomillis = 0;
             //playsound(S_PUPOUT, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
