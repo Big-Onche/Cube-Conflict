@@ -146,22 +146,22 @@ static struct gamemodeinfo
     { "demo", "demo", M_DEMO | M_LOCAL },
     { "Editeur de maps", "Map editor", M_EDIT },
 
-    //MODE 1, 2, 3, 4, 5
+    //MODE 1, 2, 3, 4
     { "Tue Les Tous (Collecte)",    "Deathmatch (Weapon pickup)",   M_LOBBY },
     { "Tue Les Tous (Aléatoire)",   "Deathmatch (Random weapon)",   M_RANDOM | M_NOAMMO | M_MUNINFINIE},
     { "Tue Les Tous (Full stuff)",  "Deathmatch (Full stuff)",      M_FULLSTUFF},
     { "Tue Les Tous (Identique)",   "Deathmatch (Identical)",       M_IDENTIQUE | M_NOAMMO | M_MUNINFINIE},
-    //MODE 6, 7, 8, 9, 10
+    //MODE 5, 6, 7, 8
     { "Tue Les Tous (Collecte)",    "Team Deathmatch (Weapon pickup)",  M_TEAM },
     { "Tue Les Tous (Aléatoire)",   "Team Deathmatch (Random weapon)",  M_RANDOM | M_TEAM | M_NOAMMO | M_MUNINFINIE},
     { "Tue Les Tous (Full stuff)",  "Team Deathmatch (Full stuff)",     M_FULLSTUFF | M_TEAM},
     { "Tue Les Tous (Identique)",   "Team Deathmatch (Identical)",      M_IDENTIQUE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
-    //MODE 11, 12, 13, 14, 15
+    //MODE 9, 10, 11, 12
     { "Capture de drapeau (Collecte)",      "Capture the flag (Weapon pickup)", M_CTF | M_TEAM },
     { "Capture de drapeau (Aléatoire)",     "Capture the flag (Random weapon)", M_RANDOM | M_CTF | M_TEAM | M_NOAMMO | M_MUNINFINIE},
     { "Capture de drapeau (Full stuff)",    "Capture the flag (Full stuff)",    M_FULLSTUFF | M_CTF | M_TEAM},
     { "Capture de drapeau (Identique)",     "Capture the flag (Identical)",     M_IDENTIQUE | M_CTF | M_TEAM | M_NOAMMO | M_MUNINFINIE},
-    //MODE 16, 17, 18, 19, 20
+    //MODE 13, 14, 15, 16, 17
     { "Capture de base (Collecte)",     "Capture the flag (Identical)",     M_CAPTURE | M_TEAM},
     { "Capture de base (Aléatoire)",    "Capture the flag (Random weapon)", M_RANDOM | M_CAPTURE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
     { "Capture de base (Full stuff)",   "Capture the flag (Full stuff)",    M_FULLSTUFF | M_CAPTURE | M_TEAM},
@@ -258,7 +258,9 @@ enum
     S_RISIKILLLOIN, S_BIGRISIKILLLOIN, S_GIGARISIKILLLOIN,
     S_ACHIEVEMENTUNLOCKED, S_LEVELUP,
 
-    S_KILL, S_PIXEL, S_DRAPEAUPRIS, S_DRAPEAUTOMBE, S_DRAPEAUSCORE, S_DRAPEAURESET,
+    S_KILL, S_PIXEL,
+    S_DRAPEAUPRIS, S_DRAPEAUTOMBE, S_DRAPEAUSCORE, S_DRAPEAURESET, // ctf gamemode
+    S_TERMINAL, S_TERMINAL_HACKED, S_TERMINAL_LOST, S_TERMINAL_HACKED_E, S_TERMINAL_LOST_E, S_TERMINAL_ALARM, S_TERMINAL_ENTER, // hack gamemode
 
     // Autres
     S_LAVASPLASH,

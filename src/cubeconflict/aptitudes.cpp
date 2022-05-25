@@ -69,7 +69,7 @@ namespace game
                     if(d==player1) stat[STAT_ABILITES]++;
                 }
 
-                playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
+                playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0, 100, -1, 250);
                 d->sortchan = playsound(sorts[abilitydata(d->aptitude)].sound2, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->sortchan, 275);
 
                 if(d->aptitude==APT_ESPION)

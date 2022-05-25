@@ -401,7 +401,7 @@ namespace game
         pophudmatrix();
 
         string infoscores;
-        if(m_ctf) {formatstring(infoscores, "\fd%d \f7- \fc%d", cmode->getteamscore(hudplayer()->team), cmode->getteamscore(hudplayer()->team == 1 ? 2 : 1));}
+        if(m_ctf || m_capture) {formatstring(infoscores, "\fd%d \f7- \fc%d", cmode->getteamscore(hudplayer()->team), cmode->getteamscore(hudplayer()->team == 1 ? 2 : 1));}
         else if (!m_teammode) {formatstring(infoscores, langage ? "\fd%d \f7frags" : "\fd%d \f7éliminations", hudplayer()->frags);}
         else {formatstring(infoscores, "\fd%d \f7- \fc%d", getteamfrags(hudplayer()->team), getteamfrags(hudplayer()->team == 1 ? 2 : 1));}
 
