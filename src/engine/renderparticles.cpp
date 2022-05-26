@@ -886,7 +886,7 @@ static partrenderer *parts[] =
     new trailrenderer("media/particle/nuage_3.png", PT_TRAIL),
     new trailrenderer("media/particle/nuage_4.png", PT_TRAIL),
     new trailrenderer("media/particle/arcenciel.png", PT_TRAIL),
-    new quadrenderer("media/particle/viseur.png", PT_PART|PT_LERP),
+    new quadrenderer("media/particle/viseur.png", PT_PART|PT_LERP|PT_BRIGHT),
     new quadrenderer("media/particle/zero.png", PT_PART|PT_BRIGHT),
     new quadrenderer("media/particle/one.png", PT_PART|PT_BRIGHT),
     new quadrenderer("media/particle/blip.png", PT_PART|PT_LERP),

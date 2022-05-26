@@ -571,7 +571,7 @@ namespace game
                                     d->o.dist(camera1->o)<75 ? 1.35f : 0.02f);
 
                 if(d->aptisort2 && d->aptitude==APT_ESPION);
-                else if(((player1->aptitude==APT_ESPION && player1->aptisort3 && d!=player1) || (totalmillis-getspyability<2000)) && (!isteam(player1->team, d->team)))
+                else if(((player1->aptitude==APT_ESPION && player1->aptisort3 && d!=player1) || (totalmillis-getspyability<2000)) && (!isteam(player1->team, d->team)) && d->o.dist(camera1->o) > 32)
                 {
                     vec posA = d->o;
                     posA.add(vec(0, 0, -8));
@@ -579,8 +579,9 @@ namespace game
                     vec posB = camera1->o;
 
                     vec posAtofrontofposB = (posA.add((posB.mul(vec(127, 127, 127))))).div(vec(128, 128, 128));
-
-                    particle_splash(PART_VISEUR,  1,  1, d->o.dist(camera1->o)<75 ? (posC.add(camera1->o)).div(vec(2,2,2)) : posAtofrontofposB, 0x555555, d->o.dist(camera1->o)<75 ? 3.f*(zoom ? (guns[player1->gunselect].maxzoomfov)/100.f : 1.f) : 0.05f*(zoom ? (guns[player1->gunselect].maxzoomfov)/100.f : 1.f), d->o.dist(camera1->o)<250 ? 1.f : d->o.dist(camera1->o)/250.f, 1, 0, false, d->o.dist(camera1->o)<150 ? 1.f : d->o.dist(camera1->o)/150.f);
+                    int nearsize = 1.f;
+                    if(d->o.dist(camera1->o) < 132) nearsize = (d->o.dist(camera1->o)-32)/100.f;
+                    particle_splash(PART_VISEUR, 1, 1, d->o.dist(camera1->o)<75 ? (posC.add(camera1->o)).div(vec(2,2,2)) : posAtofrontofposB, 0xFF0000, d->o.dist(camera1->o)<75 ? 2.f*(zoom ? (guns[player1->gunselect].maxzoomfov)/100.f*nearsize : nearsize) : 0.038f*(zoom ? (guns[player1->gunselect].maxzoomfov)/100.f*nearsize : nearsize), 1, 1, 0, false, d->o.dist(camera1->o)<150 ? 1.f : d->o.dist(camera1->o)/150.f);
                 }
 
                 vec pos = d->abovehead().add(vec(0, 0,-12));
