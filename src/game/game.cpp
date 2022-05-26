@@ -843,8 +843,12 @@ namespace game
         else if(isteam(d->team, actor->team)) // Tir allié /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
             contype |= CON_TEAMKILL;
-            copystring(str_pseudotueur, aname); n_aptitudetueur = actor->aptitude;
-            if(d==player1) {conoutf(contype, "\f6%s %s \fd(%s)", dname, langage ? "got fragged by a teammate" : "as été tué par un allié", aname); addstat(1, STAT_MORTS);} //TU as été tué par un allié
+            if(d==player1) //TU as été tué par un allié
+            {
+                copystring(str_pseudotueur, aname); n_aptitudetueur = actor->aptitude;
+                conoutf(contype, "\f6%s %s \fd(%s)", dname, langage ? "got fragged by a teammate" : "as été tué par un allié", aname);
+                addstat(1, STAT_MORTS);
+            }
             else
             {
                 conoutf(contype, "\f2%s %s%s \fd(%s)", aname, langage ? "" : actor==player1 ? "as " : "a ", langage ? "fragged a teammate" : "tué un allié" , dname); //Quelqu'un a ou TU as tué un de ses alliés
@@ -867,35 +871,36 @@ namespace game
                 playsound(S_KILL);
                 message[MSG_YOUKILLED] = totalmillis; message[MSG_OWNKILLSTREAK] = totalmillis; copystring(str_pseudovictime, dname); n_aptitudevictime = d->aptitude; killdistance = distance;
 
-                //now let's check for shittons of achievements
-                if(distance>=100.f) unlockachievement(ACH_BEAUTIR);
-                if(player1->state==CS_DEAD) unlockachievement(ACH_TUEURFANTOME);
-                if(player1->health<=100 && player1->state==CS_ALIVE) unlockachievement(ACH_1HPKILL);
-
-                switch(atk)
+                if(IS_ON_OFFICIAL_SERV) //now let's check for shittons of achievements if playing online
                 {
-                    case ATK_ASSISTXPL_SHOOT: if(player1->armourtype==A_ASSIST) unlockachievement(ACH_KILLASSIST); break;
-                    case ATK_LANCEFLAMMES_SHOOT: if(lookupmaterial(d->feetpos())==MAT_WATER) unlockachievement(ACH_THUGPHYSIQUE); break;
-                    case ATK_SV98_SHOOT: if(zoom==0) unlockachievement(ACH_NOSCOPE); break;
-                    case ATK_GLOCK_SHOOT: if(d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_CAMPOUZE || d->gunselect==GUN_S_GAU8 || d->gunselect==GUN_S_ROQUETTES) unlockachievement(ACH_DAVIDGOLIATH); break;
-                    case ATK_CAC349_SHOOT: case ATK_CACFLEAU_SHOOT: case ATK_CACMARTEAU_SHOOT: case ATK_CACMASTER_SHOOT: if(d->aptitude==APT_NINJA) unlockachievement(ACH_PASLOGIQUE); break;
-                    case ATK_NUKE_SHOOT: case ATK_CAMPOUZE_SHOOT: case ATK_GAU8_SHOOT: case ATK_ROQUETTES_SHOOT: if(player1->aptitude==APT_AMERICAIN && player1->steromillis) unlockachievement(ACH_JUSTEPOUR);
+                    if(distance>=100.f) unlockachievement(ACH_BEAUTIR);
+                    if(player1->state==CS_DEAD) unlockachievement(ACH_TUEURFANTOME);
+                    if(player1->health<=100 && player1->state==CS_ALIVE) unlockachievement(ACH_1HPKILL);
+
+                    switch(atk)
+                    {
+                        case ATK_ASSISTXPL_SHOOT: if(player1->armourtype==A_ASSIST) unlockachievement(ACH_KILLASSIST); break;
+                        case ATK_LANCEFLAMMES_SHOOT: if(lookupmaterial(d->feetpos())==MAT_WATER) unlockachievement(ACH_THUGPHYSIQUE); break;
+                        case ATK_SV98_SHOOT: if(zoom==0) unlockachievement(ACH_NOSCOPE); break;
+                        case ATK_GLOCK_SHOOT: if(d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_CAMPOUZE || d->gunselect==GUN_S_GAU8 || d->gunselect==GUN_S_ROQUETTES) unlockachievement(ACH_DAVIDGOLIATH); break;
+                        case ATK_CAC349_SHOOT: case ATK_CACFLEAU_SHOOT: case ATK_CACMARTEAU_SHOOT: case ATK_CACMASTER_SHOOT: if(d->aptitude==APT_NINJA) unlockachievement(ACH_PASLOGIQUE); break;
+                        case ATK_NUKE_SHOOT: case ATK_CAMPOUZE_SHOOT: case ATK_GAU8_SHOOT: case ATK_ROQUETTES_SHOOT: if(player1->aptitude==APT_AMERICAIN && player1->steromillis) unlockachievement(ACH_JUSTEPOUR);
+                    }
+
+                    switch(player1->aptitude)
+                    {
+                        case APT_AMERICAIN: if(d->aptitude==APT_SHOSHONE) unlockachievement(ACH_FUCKYEAH); break;
+                        case APT_ESPION: if(player1->aptisort2) unlockachievement(ACH_ESPIONDEGUISE);
+                    }
+
+                    switch(player1->killstreak) {case 3: unlockachievement(ACH_TRIPLETTE); break; case 5: unlockachievement(ACH_PENTAPLETTE); break; case 10: unlockachievement(ACH_DECAPLETTE);}
+
+                    //now let's add player stats
+                    addstat(1, STAT_KILLS);
+                    addxpandcc(7+player1->killstreak-1, 3+player1->killstreak-1);
+                    if(player1->killstreak > stat[STAT_KILLSTREAK]) addstat(player1->killstreak, STAT_KILLSTREAK, true);
+                    if(stat[STAT_MAXKILLDIST]<distance) addstat(distance, STAT_MAXKILLDIST, true);
                 }
-
-                switch(player1->aptitude)
-                {
-                    case APT_AMERICAIN: if(d->aptitude==APT_SHOSHONE) unlockachievement(ACH_FUCKYEAH); break;
-                    case APT_ESPION: if(player1->aptisort2) unlockachievement(ACH_ESPIONDEGUISE);
-                }
-
-                switch(player1->killstreak) {case 3: unlockachievement(ACH_TRIPLETTE); break; case 5: unlockachievement(ACH_PENTAPLETTE); break; case 10: unlockachievement(ACH_DECAPLETTE);}
-
-                //now let's add player stats
-                addstat(1, STAT_KILLS);
-                addxpandcc(7+player1->killstreak-1, 3+player1->killstreak-1);
-                if(player1->killstreak > stat[STAT_KILLSTREAK]) addstat(player1->killstreak, STAT_KILLSTREAK, true);
-                if(stat[STAT_MAXKILLDIST]<distance) addstat(distance, STAT_MAXKILLDIST, true);
-
             }
             else if(d==player1) ////////////////////TU as été tué////////////////////
             {
