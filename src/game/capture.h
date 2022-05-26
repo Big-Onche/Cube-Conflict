@@ -15,11 +15,11 @@ struct captureclientmode : clientmode
     static const int CAPTUREHEIGHT = 96;
     static const int OCCUPYBONUS = 1;
     static const int OCCUPYPOINTS = 1;
-    static const int OCCUPYENEMYLIMIT = 30;
-    static const int OCCUPYNEUTRALLIMIT = 20;
+    static const int OCCUPYENEMYLIMIT = 15;
+    static const int OCCUPYNEUTRALLIMIT = 10;
     static const int SCORESECS = 20;
     static const int AMMOSECS = 15;
-    static const int REGENSECS = 2;
+    static const int REGENSECS = 1;
     static const int REGENHEALTH = 100;
     static const int REGENARMOUR = 100;
     static const int REGENAMMO = 20;
@@ -112,7 +112,6 @@ struct captureclientmode : clientmode
         int occupy(const char *team, int units)
         {
             if(strcmp(enemy, team)) return -1;
-
             converted += units;
             if(units<0)
             {
@@ -323,7 +322,7 @@ struct captureclientmode : clientmode
                 basepos.normalize().mul(1300.0f);
 
                 if(randomevent(0.1f*nbfps)) particle_flying_flare(pos, basepos, 500, randomevent(2) ? PART_ZERO : PART_ONE, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.7f+(rnd(5)/10.f), 100);
-                //if(randomevent(0.7*nbfps)) playsound(S_TERMINAL, d==hudplayer() ? 0 : &pos, NULL, 0, 0, 64, -1, 128);
+
                 if(oldbase < 0)
                 {
                     if(strcmp(b.owner, tmpteam) && b.owner[0]) playsound(S_TERMINAL_ALARM, &b.o, NULL, 0, 0, 128, -1, 256);
@@ -344,10 +343,9 @@ struct captureclientmode : clientmode
 
     void preload()
     {
-        static const char * const basemodels[3] = { "base/neutral", "base/red", "base/blue" };
+        static const char * const basemodels[3] = { "base/neutral", "base/red", "base/yellow" };
         loopi(3) preloadmodel(basemodels[i]);
-        preloadsound(S_NULL);
-        preloadsound(S_NULL);
+        loopi(6) preloadsound(S_TERMINAL+i);
     }
 
     void rendergame()
@@ -368,7 +366,7 @@ struct captureclientmode : clientmode
         {
             baseinfo &b = bases[i];
             if(!b.valid()) continue;
-            const char *basename = b.owner[0] ? (strcmp(b.owner, tmpteam) ? "base/red" : "base/blue") : "base/neutral";
+            const char *basename = b.owner[0] ? (strcmp(b.owner, tmpteam) ? "base/red" : "base/yellow") : "base/neutral";
             rendermodel(basename, ANIM_MAPMODEL|ANIM_LOOP, b.o, 0, 0, 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED);
             //float fradius = 1.0f, fheight = 0.5f;
             //regular_particle_flame(PART_FLAME, vec(b.ammopos.x, b.ammopos.y, b.ammopos.z - 4.5f), fradius, fheight, b.owner[0] ? isteam(d->team, player1->team) ? 0x802020 : 0x2020FF) : 0x208020, 3, 2.0f);
@@ -412,10 +410,10 @@ struct captureclientmode : clientmode
 
             vec above(b.ammopos);
             above.z += AMMOHEIGHT;
-            if(b.info[0]) particle_text(above, b.info, PART_TEXT, 1, tcolor, 2.0f);
+            if(b.info[0]) particle_text(above, b.info, PART_TEXT, 1, tcolor, 3.0f);
             if(mtype>=0)
             {
-                above.z += 3.0f;
+                above.z += 3.5f;
                 particle_meter(above, b.converted/float((b.owner[0] ? int(OCCUPYENEMYLIMIT) : int(OCCUPYNEUTRALLIMIT))), mtype, 1, 1, mcolor, mcolor2, 3.0f);
             }
         }
@@ -614,7 +612,7 @@ struct captureclientmode : clientmode
                 defformatstring(msg, "%d", total);
                 vec above(b.ammopos);
                 above.z += AMMOHEIGHT+1.0f;
-                particle_textcopy(above, msg, PART_TEXT, 2000, isteam(iteam, player1->team) ? 0x6496FF : 0xFF4B19, 4.0f, -8);
+                particle_textcopy(above, msg, PART_TEXT, 1500, isteam(iteam, player1->team) ? 0xFFFF00 : 0xFF0000, 5.0f, -5);
             }
         }
     }
@@ -775,7 +773,7 @@ ICOMMAND(insidebases, "", (),
         loopv(clients)
         {
             clientinfo *ci = clients[i];
-            if(ci->state.state==CS_ALIVE && ci->team != team && insidebase(b, ci->state.o))
+            if(ci->state.state==CS_ALIVE && ci->team>0 && ci->team != team && insidebase(b, ci->state.o))
                 b.enter(ci->team);
         }
         sendbaseinfo(n);
@@ -908,7 +906,7 @@ ICOMMAND(insidebases, "", (),
     {
         if(gamemillis>=gamelimit) return;
         endcheck();
-        int t = gamemillis/500 - (gamemillis-curtime)/500;
+        int t = gamemillis/1000 - (gamemillis-curtime)/1000;
         if(t<1) return;
         loopv(bases)
         {
