@@ -889,6 +889,7 @@ static partrenderer *parts[] =
     new quadrenderer("media/particle/viseur.png", PT_PART|PT_LERP),
     new quadrenderer("media/particle/zero.png", PT_PART|PT_BRIGHT),
     new quadrenderer("media/particle/one.png", PT_PART|PT_BRIGHT),
+    new quadrenderer("media/particle/blip.png", PT_PART|PT_LERP),
     &lightnings,                                                                               // lightning
     &fireballs,                                                                                // explosion fireball
     &pulsebursts,                                                                              // pulse burst

@@ -510,6 +510,46 @@ namespace game
         if(player1->clientnum>=0) c2sinfo();   // do this last, to reduce the effective frame lag
     }
 
+    float proximityscore(float x, float lower, float upper)
+    {
+        if(x <= lower) return 1.0f;
+        if(x >= upper) return 0.0f;
+        float a = x - lower, b = x - upper;
+        return (b * b) / (a * a + b * b);
+    }
+
+    static inline float harmonicmean(float a, float b) { return a + b > 0 ? 2 * a * b / (a + b) : 0.0f; }
+
+    // avoid spawning near other players
+    float ratespawn(dynent *d, const extentity &e)
+    {
+        gameent *p = (gameent *)d;
+        vec loc = vec(e.o).addz(p->eyeheight);
+        float maxrange = !m_noitems ? 400.0f : (cmode ? 300.0f : 110.0f);
+        float minplayerdist = maxrange;
+        loopv(players)
+        {
+            const gameent *o = players[i];
+            if(o == p)
+            {
+                if(m_noitems || (o->state != CS_ALIVE && lastmillis - o->lastpain > 3000)) continue;
+            }
+            else if(o->state != CS_ALIVE || isteam(o->team, p->team)) continue;
+
+            vec dir = vec(o->o).sub(loc);
+            float dist = dir.squaredlen();
+            if(dist >= minplayerdist*minplayerdist) continue;
+            dist = sqrtf(dist);
+            dir.mul(1/dist);
+
+            // scale actual distance if not in line of sight
+            if(raycube(loc, dir, dist) < dist) dist *= 1.5f;
+            minplayerdist = min(minplayerdist, dist);
+        }
+        float rating = 1.0f - proximityscore(minplayerdist, 80.0f, maxrange);
+        return cmode ? harmonicmean(rating, cmode->ratespawn(p, e)) : rating;
+    }
+
     VARP(mixedspawns, 0, 0, 2);
 
     void spawnplayer(gameent *d)   // place at random spawn

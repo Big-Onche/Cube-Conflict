@@ -702,7 +702,7 @@ struct ctfclientmode : clientmode
         vec pos = d->feetpos();
         loopk(2)
         {
-            int goal = 2000;
+            int goal = 3000;
             loopv(flags)
             {
                 flag &g = flags[i];

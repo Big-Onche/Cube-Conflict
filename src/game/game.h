@@ -1003,6 +1003,7 @@ namespace game
         virtual void setup() {}
         virtual void checkitems(gameent *d) {}
         virtual int respawnwait(gameent *d) { return 0; }
+        virtual float ratespawn(gameent *d, const extentity &e) { return 1.0f; }
         virtual void pickspawn(gameent *d) { findplayerspawn(d, -1, mixedspawns ? 0 : m_teammode ? d->team : 0); }
         virtual void senditems(packetbuf &p) {}
         virtual void removeplayer(gameent *d) {}
@@ -1046,6 +1047,7 @@ namespace game
     extern void clientdisconnected(int cn, bool notify = true);
     extern void clearclients(bool notify = true);
     extern void startgame();
+    extern float proximityscore(float x, float lower, float upper);
     extern void spawnplayer(gameent *);
     extern void deathstate(gameent *d, gameent *actor, bool restore = false);
     extern void damaged(int damage, gameent *d, gameent *actor, bool local = true, int atk = 0);

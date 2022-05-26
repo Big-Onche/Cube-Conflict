@@ -36,7 +36,7 @@ struct captureclientmode : clientmode
         vec ammopos;
         string name, info;
 #endif
-        int ammogroup, ammotype, tag, ammo, owners, enemies, converted, capturetime;
+        int ammogroup, ammotype, tag, ammo, owners, enemies, converted, capturetime, bliptimer;
 
         baseinfo() { reset(); }
 
@@ -262,7 +262,7 @@ struct captureclientmode : clientmode
 
     void replenishammo()
     {
-        if(m_regencapture) return;
+        if(!m_capture || m_regencapture) return;
         loopv(bases)
         {
             baseinfo &b = bases[i];
@@ -348,6 +348,8 @@ struct captureclientmode : clientmode
         loopi(6) preloadsound(S_TERMINAL+i);
     }
 
+    int bliptimer = 0;
+
     void rendergame()
     {
         string tmpteam;
@@ -395,6 +397,23 @@ struct captureclientmode : clientmode
                 else if(basenumbers) formatstring(b.info, "%s (%d) - %s", b.name, b.tag, !b.converted ? strcmp(b.owner, tmpteam) ? termnalenemy : termnalally : langage ? "Disputed !" : "Contesté !");
                 else formatstring(b.info, "%s - %s", b.name, !b.converted ? strcmp(b.owner, tmpteam) ? termnalenemy : termnalally : langage ? "Disputed !" : "Contesté !");
                 tcolor = isowner ? 0xFFFF00 : 0xFF0000;
+
+                if(!strcmp(b.owner, tmpteam) && b.o.dist(camera1->o) > 128)
+                {
+                    if(b.converted)
+                    {
+                        b.bliptimer += curtime;
+                        if(b.bliptimer>1000) b.bliptimer = 0;
+                    }
+                    else b.bliptimer = 0;
+
+                    vec posA = b.o;
+                    posA.add(vec(0, 0, 7));
+                    vec posB = camera1->o;
+                    vec posAtofrontofposB = (posA.add((posB.mul(vec(127, 127, 127))))).div(vec(128, 128, 128));
+                    particle_splash(PART_BLIP, 1, 1, posAtofrontofposB, b.bliptimer < 500 ? 0xFFFF00 : 0xFF0000, 0.03f*(zoom ? (guns[player1->gunselect].maxzoomfov)/100.f : b.o.dist(camera1->o) > 228 ? 1.f : (b.o.dist(camera1->o)-128)/100.f), 1, 1, 0, false, b.o.dist(camera1->o)/170.f);
+                }
+
             }
             else if(b.enemy[0])
             {
@@ -617,6 +636,22 @@ struct captureclientmode : clientmode
         }
     }
 
+    // prefer spawning near friendly base
+    float ratespawn(gameent *d, const extentity &e)
+    {
+        string tmpteam;
+        formatstring(tmpteam, "%d", d->team);
+
+        float minbasedist = 1e16f;
+        loopv(bases)
+        {
+            baseinfo &b = bases[i];
+            if(!b.owner[0] || strcmp(b.owner, tmpteam)) continue;
+            minbasedist = min(minbasedist, e.o.dist(b.o));
+        }
+        return minbasedist < 1e16f ? proximityscore(minbasedist, 128.0f, 512.0f) : 1.0f;
+    }
+
 	bool aicheck(gameent *d, ai::aistate &b)
 	{
 		return false;
@@ -773,7 +808,7 @@ ICOMMAND(insidebases, "", (),
         loopv(clients)
         {
             clientinfo *ci = clients[i];
-            if(ci->state.state==CS_ALIVE && ci->team>0 && ci->team != team && insidebase(b, ci->state.o))
+            if(ci->state.state==CS_ALIVE && ci->team>0 && ci->team == team && insidebase(b, ci->state.o))
                 b.enter(ci->team);
         }
         sendbaseinfo(n);
@@ -838,7 +873,7 @@ ICOMMAND(insidebases, "", (),
             string tmpteam;
             formatstring(tmpteam, "%d", ci->team);
 
-            if(ci->state.state==CS_ALIVE && !strcmp(tmpteam, b.owner) && insidebase(b, ci->state.o))
+            if(ci->state.state==CS_ALIVE && ci->team>0 && !strcmp(tmpteam, b.owner) && insidebase(b, ci->state.o))
             {
                 bool notify = false;
                 if(ci->state.health < ci->state.maxhealth)
@@ -1157,5 +1192,3 @@ case N_REPAMMO:
 }
 
 #endif
-
-
