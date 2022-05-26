@@ -52,6 +52,8 @@ Files :	palette.png
 	media/model/mapmodel/montagne2
 	media/model/mapmodel/panneau
 	media/model/mapmodel/tonneau
+	media/model/mapmodel/tonneau_vin
+	media/model/mapmodel/tresor
 
 cartoon shit by "ale_xey"
 Order number : 3539306
@@ -320,6 +322,7 @@ Files :	media/model/boosts/epo
 	media/model/mapmodel/ventilateur
 	media/model/mapmodel/vaisseaux/1
 	media/model/mapmodel/vaisseaux/2
+	media/model/mapmodel/trone
 
 Created by "Skyser" for Cube Conflict | Réalisé par "Skyser" pour Cube Conflict
 Files : media/model/skyser/casiers1
