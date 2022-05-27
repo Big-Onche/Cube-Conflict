@@ -249,7 +249,7 @@ namespace game
     }
     void printname()
     {
-        conoutf("your name is: %s", colorname(player1));
+        conoutf(langage ? "your name is: %s" : "Ton pseudo est : %s", colorname(player1));
     }
     ICOMMAND(name, "sN", (char *s, int *numargs),
     {
@@ -268,17 +268,17 @@ namespace game
     }
     void printteam()
     {
-        if((player1->clientnum >= 0 && !m_teammode) || !validteam(player1->team)) conoutf("you are not in a team");
-        else conoutf("your team is: \fs%s%s\fr", teamtextcode[player1->team], teamnames[player1->team]);
+        if((player1->clientnum >= 0 && !m_teammode) || !validteam(player1->team)) conoutf(langage ? "You are not in a team." : "Tu n'est pas dans une équipe.");
+        else conoutf(langage ? "Your team is: \fs%s%s\fr" : "Tu es désormais dans l'équipe \fs%s%s\fr", teamtextcode[player1->team], langage ? teamnames_EN[player1->team] : teamnames_FR[player1->team]);
     }
     ICOMMAND(team, "sN", (char *s, int *numargs),
     {
         if(*numargs > 0) switchteam(s);
         else if(!*numargs) printteam();
-        else if((player1->clientnum < 0 || m_teammode) && validteam(player1->team)) result(tempformatstring("\fs%s%s\fr", teamtextcode[player1->team], teamnames[player1->team]));
+        else if((player1->clientnum < 0 || m_teammode) && validteam(player1->team)) result(tempformatstring("\fs%s%s\fr", teamtextcode[player1->team], langage ? teamnames_EN[player1->team] : teamnames_FR[player1->team]));
     });
     ICOMMAND(getteam, "", (), intret((player1->clientnum < 0 || m_teammode) && validteam(player1->team) ? player1->team : 0));
-    ICOMMAND(getteamname, "i", (int *num), result(teamname(*num)));
+    ICOMMAND(getteamname, "i", (int *num), result(langage ?  teamname_EN(*num) : teamname_FR(*num)));
 
     struct authkey
     {
@@ -2307,9 +2307,9 @@ namespace game
                 gameent *w = getclient(wn);
                 if(!w) return;
                 w->team = validteam(team) ? team : 0;
-                static const char * const fmt[2] = { "%s switched to team %s", "%s forced to team %s"};
+                static const char * const fmt[2] = { langage ? "%s switched to team %s" : "%s a retourné sa veste pour l'équipe %s", langage ? "%s forced to team %s" : "%s a été forcé de rejoindre l'équipe %s"};
                 if(reason >= 0 && size_t(reason) < sizeof(fmt)/sizeof(fmt[0]))
-                    conoutf(fmt[reason], colorname(w), teamnames[w->team]);
+                    conoutf(fmt[reason], colorname(w), langage ? teamnames_EN[w->team] : teamnames_FR[w->team]);
                 break;
             }
 

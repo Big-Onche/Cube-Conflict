@@ -162,11 +162,11 @@ static struct gamemodeinfo
     { "Capture de drapeau (Full stuff)",    "Capture the flag (Full stuff)",    M_FULLSTUFF | M_CTF | M_TEAM},
     { "Capture de drapeau (Identique)",     "Capture the flag (Identical)",     M_IDENTIQUE | M_CTF | M_TEAM | M_NOAMMO | M_MUNINFINIE},
     //MODE 13, 14, 15, 16, 17
-    { "Capture de base (Collecte)",     "Capture the flag (Identical)",     M_CAPTURE | M_TEAM},
-    { "Capture de base (Aléatoire)",    "Capture the flag (Random weapon)", M_RANDOM | M_CAPTURE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
-    { "Capture de base (Full stuff)",   "Capture the flag (Full stuff)",    M_FULLSTUFF | M_CAPTURE | M_TEAM},
-    { "Capture de base (Identique)",    "Capture the flag (Identical)",     M_IDENTIQUE | M_CAPTURE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
-    { "Capture de base (Régénération)", "Capture the flag (Regeneration)",  M_NOITEMS | M_CAPTURE | M_TEAM | M_REGEN},
+    { "Conquête (Collecte)",     "Domination (Identical)",     M_CAPTURE | M_TEAM},
+    { "Conquête (Aléatoire)",    "Domination (Random weapon)", M_RANDOM | M_CAPTURE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
+    { "Conquête (Full stuff)",   "Domination (Full stuff)",    M_FULLSTUFF | M_CAPTURE | M_TEAM},
+    { "Conquête (Identique)",    "Domination (Identical)",     M_IDENTIQUE | M_CAPTURE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
+    { "Conquête (Régénération)", "Domination (Regeneration)",  M_NOITEMS | M_CAPTURE | M_TEAM | M_REGEN},
 };
 
 #define STARTGAMEMODE (-1)
@@ -745,7 +745,7 @@ struct gamestate
         {
             armourtype = A_BLUE;
             armour = m_regencapture ? 300 : 750;
-            ammo[GUN_GLOCK] = aptitude==2 ? 45 : 30;
+            ammo[GUN_GLOCK] = aptitude==2 ? m_regencapture ? 15 : 45 : m_regencapture ? 10 : 30;
             ammo[GUN_M32] = aptitude==2 ? 3 : 1;
             gunselect = aptitude==6 ? GUN_KAMIKAZE : aptitude==3 ? GUN_CACNINJA : GUN_GLOCK;
             if(aptitude==0) addsweaps();
@@ -807,13 +807,15 @@ struct gamestate
 
 #define MAXTEAMS 2
 
-static const char * const teamnames[1+MAXTEAMS] = { "", langage ? "Democrats" : "Yorarien", langage ? "Republicans" : "Yakekchose" };
+static const char * const teamnames_FR[1+MAXTEAMS] = { "", "Yorarien", "Yakekchose" };
+static const char * const teamnames_EN[1+MAXTEAMS] = { "", "Democrats", "Republicans" };
 static const char * const teamtextcode[1+MAXTEAMS] = { "\fc", "\fd", "\fc" };
 static const int teamtextcolor[1+MAXTEAMS] = { 0xFF2222, 0xFFFF22, 0xFF2222 };
 static const char * const teamblipcolor[1+MAXTEAMS] = { "_neutral", "_blue", "_red" };
-static inline int teamnumber(const char *name) { loopi(MAXTEAMS) if(!strcmp(teamnames[1+i], name)) return 1+i; return 0; }
+static inline int teamnumber(const char *name) { loopi(MAXTEAMS) if(!strcmp(langage ? teamnames_EN[1+i] : teamnames_FR[1+i], name)) return 1+i; return 0; }
 #define validteam(n) ((n) >= 1 && (n) <= MAXTEAMS)
-#define teamname(n) (teamnames[validteam(n) ? (n) : 0])
+#define teamname_FR(n) (teamnames_FR[validteam(n) ? (n) : 0])
+#define teamname_EN(n) (teamnames_EN[validteam(n) ? (n) : 0])
 
 struct gameent : dynent, gamestate
 {
