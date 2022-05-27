@@ -235,25 +235,25 @@ void cleanupao()
 VARFP(ao, 0, 1, 1, { cleanupao(); cleardeferredlightshaders(); });
 FVARR(aoradius, 0, 7, 256);
 FVAR(aocutoff, 0, 2.0f, 1e3f);
-FVARR(aodark, 1e-3f, 11.0f, 1e3f);
-FVARR(aosharp, 1e-3f, 1, 1e3f);
+FVARR(aodark, 1e-3f, 20.0f, 1e3f);
+FVAR(aosharp, 1e-3f, 3, 1e3f);
 FVAR(aoprefilterdepth, 0, 1, 1e3f);
-FVARR(aomin, 0, 0.25f, 1);
+FVAR(aomin, 0, 0.3f, 1);
 VARFR(aosun, 0, 1, 1, cleardeferredlightshaders());
 FVARR(aosunmin, 0, 0.5f, 1);
 VARP(aoblur, 0, 4, 7);
 VARP(aoiter, 0, 0, 4);
-VARFP(aoreduce, 0, 1, 2, cleanupao());
+VARFP(aoreduce, 0, 0, 2, cleanupao());
 VARF(aoreducedepth, 0, 1, 2, cleanupao());
 VARFP(aofloatdepth, 0, 1, 2, initwarning("AO setup", INIT_LOAD, CHANGE_SHADERS));
 VARFP(aoprec, 0, 1, 1, cleanupao());
 VAR(aodepthformat, 1, 0, 0);
 VARF(aonoise, 0, 5, 8, cleanupao());
-VARFP(aobilateral, 0, 5, 10, cleanupao());
+VARFP(aobilateral, 0, 7, 10, cleanupao());
 FVARP(aobilateraldepth, 0, 4, 1e3f);
 VARFP(aobilateralupscale, 0, 0, 1, cleanupao());
 VARF(aopackdepth, 0, 1, 1, cleanupao());
-VARFP(aotaps, 1, 5, 12, cleanupao());
+VARFP(aotaps, 1, 3, 12, cleanupao());
 VARF(aoderivnormal, 0, 0, 1, cleanupao());
 VAR(aoderiv, -1, 1, 1);
 VAR(debugao, 0, 0, 1);
@@ -1529,7 +1529,7 @@ VARFP(rhtaps, 0, 20, 32, cleanupradiancehints());
 VAR(rhdyntex, 0, 0, 1);
 VAR(rhdynmm, 0, 0, 1);
 VARFR(gidist, 0, 384, 1024, { clearradiancehintscache(); cleardeferredlightshaders(); if(!gidist) cleanupradiancehints(); });
-FVARFR(giscale, 0, 1.5f, 1e3f, { cleardeferredlightshaders(); if(!giscale) cleanupradiancehints(); });
+FVARF(giscale, 0, 3.0f, 1e3f, { cleardeferredlightshaders(); if(!giscale) cleanupradiancehints(); });
 FVARR(giaoscale, 0, 3, 1e3f);
 VARFP(gi, 0, 1, 1, { cleardeferredlightshaders(); cleanupradiancehints(); });
 
@@ -3599,7 +3599,7 @@ void collectlights()
             if(pvsoccludedsphere(e->o, e->attr1)) continue;
         }
 
-        if(n_ambiance==3 && e->attr5 < 0) continue;
+        if((n_ambiance==3 || n_ambiance==6) && e->attr5 < 0) continue;
         else
         {
             lightinfo &l = lights.add(lightinfo(i, *e));
@@ -5336,44 +5336,60 @@ void setlightlod()
     switch(light_lod)
     {
         case 0:
+            csmfarplane = 512;
+            csmnearplane = 2;
             smfilter = 0;
             smdynshadow = 0;
             smnoshadow = 1;
             csmsplits = 1;
             smsize = 8;
+            rhfarplane = 512;
             dynlightdist = 128;
             volumetric = 1;
             volsteps = 5;
+            aocutoff = 4;
             break;
         case 1:
+            csmfarplane = 512;
+            csmnearplane = 4;
             smfilter = 2;
             smdynshadow = 0;
             smnoshadow = 0;
             csmsplits = 2;
             smsize = 9;
+            rhfarplane = 512;
             dynlightdist = 256;
             volumetric = 1;
             volsteps = 10;
+            aocutoff = 8;
             break;
         case 2:
+            csmfarplane = 1024;
+            csmnearplane = 8;
             smfilter = 3;
             smdynshadow = 1;
             smnoshadow = 0;
             csmsplits = 3;
             smsize = 11;
+            rhfarplane = 1024;
             dynlightdist = 512;
             volumetric = 1;
             volsteps = 20;
+            aocutoff = 16;
             break;
         case 3:
+            csmfarplane = 2048;
+            csmnearplane = 16;
             smfilter = 3;
             smdynshadow = 1;
             smnoshadow = 0;
             csmsplits = 4;
             smsize = 13;
+            rhfarplane = 2048;
             dynlightdist = 1024;
             volumetric = 1;
             volsteps = 40;
+            aocutoff = 32;
             break;
     }
     cleardeferredlightshaders();
