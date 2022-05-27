@@ -346,7 +346,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
 #define CC_SERVER_PORT 43000
 #define CC_LANINFO_PORT 42998
 #define CC_MASTER_PORT 42999
-#define PROTOCOL_VERSION 6           // bump when protocol changes
+#define PROTOCOL_VERSION 7           // bump when protocol changes
 #define DEMO_VERSION 1               // bump when demo format changes
 #define DEMO_MAGIC "CC_DEMO\0\0"
 
@@ -991,7 +991,7 @@ namespace game
     extern void drawmessages(int killstreak, string str_pseudovictime, int n_aptitudevictime, string str_pseudoacteur, int n_killstreakacteur, float killdistance);
     extern void updatespecials(gameent *d);
 
-    extern int gamemode, mixedspawns;
+    extern int gamemode;
 
     struct clientmode
     {
@@ -1006,7 +1006,7 @@ namespace game
         virtual void checkitems(gameent *d) {}
         virtual int respawnwait(gameent *d) { return 0; }
         virtual float ratespawn(gameent *d, const extentity &e) { return 1.0f; }
-        virtual void pickspawn(gameent *d) { findplayerspawn(d, -1, mixedspawns ? 0 : m_teammode ? d->team : 0); }
+        virtual void pickspawn(gameent *d) { findplayerspawn(d, -1, m_teammode && !m_capture ? d->team : 0); }
         virtual void senditems(packetbuf &p) {}
         virtual void removeplayer(gameent *d) {}
         virtual void gameover() {}

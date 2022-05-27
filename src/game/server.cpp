@@ -2114,7 +2114,7 @@ namespace server
 
     void rotatemap(bool next)
     {
-        if(servrandommode || !servforcemode) gamemode = rnd(12)+1;
+        if(servrandommode || !servforcemode) gamemode = rnd(17)+1;
         if(servforcemode>-1) gamemode = servforcemode;
 
         if(!maprotations.inrange(curmaprotation))
@@ -2805,7 +2805,11 @@ namespace server
 
     void sendservinfo(clientinfo *ci)
     {
-        sendf(ci->clientnum, 1, "ri6ss", N_SERVINFO, ci->clientnum, PROTOCOL_VERSION, ci->sessionid, multiplayer(false)? servambient : n_ambiance, serverpass[0] ? 1 : 0, serverdesc, serverauth);
+        #ifdef SERVMODE
+        sendf(ci->clientnum, 1, "ri6ss", N_SERVINFO, ci->clientnum, PROTOCOL_VERSION, ci->sessionid, servambient, serverpass[0] ? 1 : 0, serverdesc, serverauth);
+        #else
+        sendf(ci->clientnum, 1, "ri6ss", N_SERVINFO, ci->clientnum, PROTOCOL_VERSION, ci->sessionid, n_ambiance, serverpass[0] ? 1 : 0, serverdesc, serverauth);
+        #endif
     }
 
     void noclients()

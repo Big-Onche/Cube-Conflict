@@ -1880,7 +1880,7 @@ namespace game
                 parsestate(s, p);
                 s->state = CS_ALIVE;
                 if(cmode) cmode->pickspawn(s);
-                else findplayerspawn(s, -1, mixedspawns ? 0 : m_teammode ? s->team : 0);
+                else findplayerspawn(s, -1, m_teammode && !m_capture ? s->team : 0);
                 if(s == player1)
                 {
                     if(player1->aptitude==APT_SOLDAT && (player1->ammo[GUN_S_NUKE]>0 || player1->ammo[GUN_S_GAU8]>0 || player1->ammo[GUN_S_ROQUETTES]>0 || player1->ammo[GUN_S_CAMPOUZE]>0)) unlockachievement(ACH_CHANCE);

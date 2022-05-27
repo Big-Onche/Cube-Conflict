@@ -550,12 +550,10 @@ namespace game
         return cmode ? harmonicmean(rating, cmode->ratespawn(p, e)) : rating;
     }
 
-    VARP(mixedspawns, 0, 0, 2);
-
     void spawnplayer(gameent *d)   // place at random spawn
     {
         if(cmode) cmode->pickspawn(d);
-        else findplayerspawn(d, -1, mixedspawns ? 0 : m_teammode ? d->team : 0);
+        else findplayerspawn(d, -1, m_teammode && !m_capture  ? d->team : 0);
         spawnstate(d);
         if(d==player1)
         {
@@ -1095,7 +1093,7 @@ namespace game
         ai::clearwaypoints(true);
 
         if(!m_mp(gamemode)) spawnplayer(player1);
-        else findplayerspawn(player1, -1, mixedspawns ? 0 : m_teammode ? player1->team : 0);
+        else findplayerspawn(player1, -1, m_teammode && !m_capture ? player1->team : 0);
         entities::resetspawns();
         copystring(clientmap, name ? name : "");
 
