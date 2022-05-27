@@ -325,8 +325,8 @@ struct captureclientmode : clientmode
 
                 if(oldbase < 0)
                 {
-                    if(strcmp(b.owner, tmpteam) && b.owner[0]) playsound(S_TERMINAL_ALARM, &b.o, NULL, 0, 0, 128, -1, 256);
-                    playsound(S_TERMINAL_ENTER, d==hudplayer() ? 0 : &pos, NULL, 0, 0, 128, -1, 256);
+                    if(strcmp(b.owner, tmpteam) && b.owner[0]) playsound(S_TERMINAL_ALARM, &b.o, NULL, 0, 0, 50, -1, 300);
+                    playsound(S_TERMINAL_ENTER, d==hudplayer() ? 0 : &pos, NULL, 0, 0, 50, -1, 150);
                     particle_splash(PART_ZERO, 12, 250, pos, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.8f, 200, 50);
                     particle_splash(PART_ONE, 12, 250, pos, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.8f, 200, 50);
                 }
@@ -335,7 +335,7 @@ struct captureclientmode : clientmode
         }
         if(d->lastbase < 0 && oldbase >= 0)
         {
-            playsound(S_TERMINAL_ENTER, d==hudplayer() ? 0 : &pos, NULL, 0, 0, 128, -1, 256);
+            playsound(S_TERMINAL_ENTER, d==hudplayer() ? 0 : &pos, NULL, 0, 0, 50, -1, 150);
             particle_splash(PART_ZERO, 12, 200, pos, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.8f, 200, 50);
             particle_splash(PART_ONE, 12, 200, pos, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.8f, 200, 50);
         }
@@ -595,7 +595,7 @@ struct captureclientmode : clientmode
                 int iowner = atoi(owner);
                 if(!b.name[0]) conoutf(CON_GAMEINFO, langage ? "%s team hacked \"\fe%d\f7\" terminal." : "L'équipe %s a hacké le terminal \"\fe%d\f7\".", teamcolor(iowner), b.tag);
                 else conoutf(CON_GAMEINFO, langage ? "%s team hacked \"\fe%s\f7\" terminal." : "L'équipe %s a hacké le terminal \"\fe%s\f7\".", teamcolor(iowner), b.name);
-                playsound(!strcmp(owner, tmpteam) ? S_TERMINAL_HACKED : S_TERMINAL_HACKED_E, &b.o, NULL, 0, 0, 200, -1, 2000);
+                playsound(!strcmp(owner, tmpteam) ? S_TERMINAL_HACKED : S_TERMINAL_HACKED_E, &b.o, NULL, 0, 0, 200, -1, 2500);
             }
         }
         else if(b.owner[0])
@@ -603,7 +603,7 @@ struct captureclientmode : clientmode
             int ibowner = atoi(b.owner);
             if(!b.name[0]) conoutf(CON_GAMEINFO, langage ? "%s team lost the \"\fe%d\f7\" terminal." : "L'équipe %s a perdu le terminal \"\fe%d\f7\".", teamcolor(ibowner), b.tag);
             else conoutf(CON_GAMEINFO, langage ? "%s team lost the \"\fe%s\f7\" terminal." : "L'équipe %s a perdu le terminal \"\fe%s\f7\".", teamcolor(ibowner), b.name);
-            playsound(!strcmp(owner, tmpteam) ? S_TERMINAL_LOST : S_TERMINAL_LOST_E, &b.o, NULL, 0, 0, 200, -1, 2000);
+            playsound(!strcmp(owner, tmpteam) ? S_TERMINAL_LOST : S_TERMINAL_LOST_E, &b.o, NULL, 0, 0, 200, -1, 2500);
         }
         if(strcmp(b.owner, owner))
         {
@@ -668,13 +668,12 @@ struct captureclientmode : clientmode
 			targets.setsize(0);
 			ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, j, true);
 			gameent *e = NULL;
-			int regen = !m_regencapture || d->health >= 750 || d->armour >= 1000+d->skill*10 ? 0 : 1;
+			int regen = !m_regencapture || d->health >= 750 || d->armour >= 1000+d->skill*10 ? 0 : 16;
 			if(m_regencapture)
 			{
-			    if(d->armour < 1000+d->skill*10) regen = true;
+			    if(d->armour < 1000+d->skill*10) regen = 64;
 				int gun = f.ammotype-1+I_RAIL;
-				if(f.ammo > 0 && !d->hasmaxammo(gun))
-					regen = gun != d->ai->weappref ? 2 : 4;
+				if(f.ammo > 0 && !d->hasmaxammo(gun)/1.5f) regen = 32;
 			}
 			loopi(numdynents()) if((e = (gameent *)iterdynents(i)) && !e->ai && e->state == CS_ALIVE && isteam(d->team, e->team))
 			{ // try to guess what non ai are doing
@@ -684,7 +683,7 @@ struct captureclientmode : clientmode
 			}
             string tmpteam;
             formatstring(tmpteam, "%d", d->team);
-			if((regen && f.owner[0] && !strcmp(f.owner, tmpteam)) || (targets.empty() && (!f.owner[0] || strcmp(f.owner, tmpteam) || f.enemy[0])))
+			if((regen) || (targets.empty() && (!f.owner[0] || strcmp(f.owner, tmpteam) || f.enemy[0])))
 			{
 				ai::interest &n = interests.add();
 				n.state = ai::AI_S_DEFEND;
