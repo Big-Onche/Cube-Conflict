@@ -16,7 +16,7 @@ Available here and soon on Steam https://store.steampowered.com/app/1454700/Cube
 - Achievements and player stats tracking when playing online. Saved locally and/or on Steam.
 - Lot of skins to customize your character (capes, graves, smileys).
 
-# Planned content:
+# Planned content
 - More maps!
 - Advanced tools for e-sport such as better server management, and better spectator experience.
 - Single-player campaign with a quest system in a semi-opened world.
