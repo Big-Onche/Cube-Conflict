@@ -257,7 +257,7 @@ namespace server
 
         enum
         {
-            PUSHMILLIS = 3000
+            PUSHMILLIS = 5000
         };
 
         int calcpushrange()
@@ -1615,7 +1615,7 @@ namespace server
             // no overflow check
             case 4: return type;
         }
-        if(ci && ++ci->overflow >= 300) return -2;
+        if(ci && ++ci->overflow >= 500) return -2;
         return type;
     }
 
@@ -4026,6 +4026,7 @@ namespace server
                 break;
 
             #define PARSEMESSAGES 1
+            #include "capture.h"
             #include "ctf.h"
             #undef PARSEMESSAGES
 
