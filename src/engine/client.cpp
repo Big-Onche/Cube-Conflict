@@ -96,8 +96,8 @@ void connectserv(const char *servername, int serverport, const char *serverpassw
         if(serverport != connectport) setvar("connectport", serverport);
         addserver(servername, serverport, serverpassword && serverpassword[0] ? serverpassword : NULL);
         conoutf("attempting to connect to %s:%d", servername, serverport);
-
-        if(strcasecmp(servername, "serveur1.cube-conflict.com")==0) IS_ON_OFFICIAL_SERV = true;
+        //if((strcasecmp(servername, "serveur1.cube-conflict.com")==0) || ((servername, "serveur2.cube-conflict.com")==0)) IS_ON_OFFICIAL_SERV = true;
+        if(strcasecmp(servername, "serveur1.cube-conflict.com")==0 || strcasecmp(servername, "serveur2.cube-conflict.com")==0) IS_ON_OFFICIAL_SERV = true;
         if(IS_ON_OFFICIAL_SERV) conoutf("Serveur officiel : Les statistiques et succès sont enregistrés");
 
         if(!resolverwait(servername, &address))
