@@ -69,7 +69,7 @@ void calcratio() //Calcule le ratio pour l'afficher dans le menu (non sauvegardé
 }
 
 string statlogodir;
-const char *getstatlogo(int statID) //Récupère le logo d'un succès en particulier
+const char *getstatlogo(int statID) //Récupère le logo d'une statistique en particulier
 {
     if(statID>NUMSTATS) return "media/texture/game/notexture.png";
     formatstring(statlogodir, "%s", statslist[statID].statlogo);

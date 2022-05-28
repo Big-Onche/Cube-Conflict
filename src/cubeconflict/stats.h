@@ -32,7 +32,7 @@ static const struct statsinfo { const char *statname, *statnicenameFR, *statnice
     {"STAT_WINS",               "Victoires",                        "Victories",                        "media/interface/hud/cool.jpg"},
     {"STAT_SUICIDES",           "Suicides",                         "Suicides",                         "media/interface/hud/fou.jpg"},             //10
     {"STAT_ALLIESTUES",         "Alliés tués",                      "Killed allies",                    "media/interface/hud/sournois_red.jpg"},
-    {"STAT_TIMEPLAYED",         "Temps de jeu",                     "Time played",                      "media/interface/hud/chrono.png"},      //Calculated in secs dotime with STAT_TIMEPLAYED, calculated in HH:MM:SS for display in getstatinfo()
+    {"STAT_TIMEPLAYED",         "Temps de jeu",                     "Time played",                      "media/interface/hud/chrono.png"},      //Calculated in secs with STAT_TIMEPLAYED in dotime(), calculated in HH:MM:SS for display in getstatinfo()
     {"STAT_DRAPEAUXENVOL",      "Drapeaux ennemis volés",           "Stolen enemy flags",               "media/interface/hud/drapeau_ennemi.png"},
     {"STAT_DRAPEAUXENRAP",      "Drapeaux ennemis remportés",       "Enemy flags won",                  "media/interface/hud/drapeau_ennemi.png"},
     {"STAT_DRAPEAUXALYREC",     "Drapeaux alliés récupérés",        "Allied flags recovered",           "media/interface/hud/drapeau_allie.png"},

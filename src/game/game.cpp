@@ -759,7 +759,6 @@ namespace game
     void killed(gameent *d, gameent *actor, int atk)
     {
         d->killstreak = 0;
-        //////////////////////////////GESTION DE ET STATISTIQUES//////////////////////////////
 
         if(d->state==CS_EDITING)
         {

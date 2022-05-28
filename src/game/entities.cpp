@@ -133,7 +133,6 @@ namespace entities
         e->clearnopickup();
         if(!d) return;
         d->pickup(type, d->aptitude, d->aptisort1, d->armourtype, rndsweap);
-        if(type==I_SUPERARME) conoutf("%d N, %d G, %d, C %d, R, RND %d", d->ammo[GUN_S_NUKE], d->ammo[GUN_S_GAU8], d->ammo[GUN_S_CAMPOUZE], d->ammo[GUN_S_ROQUETTES], rndsweap);
 
         if(type>=I_RAIL && type<=I_SUPERARME)
         {

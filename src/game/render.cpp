@@ -333,7 +333,7 @@ namespace game
         {
             if(validteam(team) ? bestteams.htfind(team)>=0 : bestplayers.find(d)>=0)
             {
-                if(bestplayers.find(player1)>=0 || bestteams.htfind(player1->team)>=0) unlockachievement(ACH_WINNER);
+                if(bestplayers.find(player1)>=0 || bestteams.htfind(player1->team)>=0) {unlockachievement(ACH_WINNER); addstat(1, STAT_WINS);}
             }
         }
 
