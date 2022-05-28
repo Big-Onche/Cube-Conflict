@@ -107,7 +107,8 @@ const char *getstatinfo(int statID, bool onlyvalue) //Récupère la description d'
         case STAT_DAMMAGERECORD:
         case STAT_MAXKILLDIST:
         case STAT_LEVEL:
-            formatstring(tmp, "%s%s%d%s", onlyvalue ? "" : langage ? statslist[statID].statnicenameEN : statslist[statID].statnicenameFR, onlyvalue ? "" : " : ", stat[statID], statID!=STAT_MAXKILLDIST ? "" : langage ? " meters" : " mètres");
+        case STAT_BASEHACK:
+            formatstring(tmp, "%s%s%d%s", onlyvalue ? "" : langage ? statslist[statID].statnicenameEN : statslist[statID].statnicenameFR, onlyvalue ? "" : " : ", stat[statID], statID!=STAT_MAXKILLDIST ? statID==STAT_BASEHACK ? langage ? " seconds" : " secondes" : "" : langage ? " meters" : " mètres");
             break;
         //otherwise, we put the stat value before the description by default
         default: formatstring(tmp, "%d%s%s", stat[statID], onlyvalue ? "" : " ", onlyvalue ? "" : langage ? statslist[statID].statnicenameEN : statslist[statID].statnicenameFR);

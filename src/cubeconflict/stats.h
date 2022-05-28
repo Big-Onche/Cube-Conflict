@@ -7,7 +7,7 @@ extern void addstat(int valeur, int stat, bool rewrite = false);
 extern void addxpandcc(int nbxp, int nbcc = 0);
 
 //////////////////////////////////////// Statistiques | Player stats ////////////////////////////////////////
-enum {STAT_CC, STAT_XP, STAT_LEVEL, STAT_KILLS, STAT_MORTS, STAT_KDRATIO, STAT_DAMMAGERECORD, STAT_KILLSTREAK, STAT_MAXKILLDIST, STAT_WINS, STAT_SUICIDES, STAT_ALLIESTUES, STAT_TIMEPLAYED, STAT_DRAPEAUXENVOL, STAT_DRAPEAUXENRAP, STAT_DRAPEAUXALYREC, //Main game stats
+enum {STAT_CC, STAT_XP, STAT_LEVEL, STAT_KILLS, STAT_MORTS, STAT_KDRATIO, STAT_DAMMAGERECORD, STAT_KILLSTREAK, STAT_MAXKILLDIST, STAT_WINS, STAT_SUICIDES, STAT_ALLIESTUES, STAT_TIMEPLAYED, STAT_DRAPEAUXENVOL, STAT_DRAPEAUXENRAP, STAT_DRAPEAUXALYREC, STAT_BASEHACK, //Main game stats
         STAT_ABILITES, STAT_HEALTHREGEN, STAT_HEALTHREGAIN, STAT_MANAREGEN, STAT_MANAREGAIN, //Classes
         STAT_BOUCLIERBOIS, STAT_BOUCLIERFER, STAT_BOUCLIEROR, STAT_BOUCLIERMAGNETIQUE, STAT_ARMUREASSIST, STAT_REPASSIST, //Shields
         STAT_PANACHAY, STAT_MANA, STAT_COCHON, STAT_STEROS, STAT_EPO, STAT_JOINT, STAT_CHAMPIS, STAT_ARMES, STAT_SUPERARMES, //Objects
@@ -36,6 +36,7 @@ static const struct statsinfo { const char *statname, *statnicenameFR, *statnice
     {"STAT_DRAPEAUXENVOL",      "Drapeaux ennemis volés",           "Stolen enemy flags",               "media/interface/hud/drapeau_ennemi.png"},
     {"STAT_DRAPEAUXENRAP",      "Drapeaux ennemis remportés",       "Enemy flags won",                  "media/interface/hud/drapeau_ennemi.png"},
     {"STAT_DRAPEAUXALYREC",     "Drapeaux alliés récupérés",        "Allied flags recovered",           "media/interface/hud/drapeau_allie.png"},
+    {"STAT_BASEHACK",           "Temps passé à hacker",             "Time spent hacking",               "media/interface/hud/radio_off.jpg"},
     //Classes
     {"STAT_ABILITES",           "Abilitées utilisées",              "Used abilities",                   "media/interface/hud/stats.png"},
     {"STAT_HEALTHREGEN",        "Santé redonnée aux alliés",        "Health restored to allies",        "media/interface/hud/medecin.jpg"},

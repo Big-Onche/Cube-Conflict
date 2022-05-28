@@ -300,6 +300,8 @@ struct captureclientmode : clientmode
         d->lastrepammo = -1;
     }
 
+    int insidebasetimer = 0;
+
     void rendertether(gameent *d)
     {
         int oldbase = d->lastbase;
@@ -312,9 +314,16 @@ struct captureclientmode : clientmode
             loopv(bases)
             {
                 baseinfo &b = bases[i];
+
+                if(insidebase(bases[i], player1->feetpos()) && d==player1 && totalmillis >= insidebasetimer+1000 && (b.converted || !b.owner[0]))
+                {
+                    addxpandcc(1, 1);
+                    addstat(1, STAT_BASEHACK);
+                    insidebasetimer = totalmillis;
+                }
+
                 if(!b.valid() || !insidebase(b, d->feetpos()) || (strcmp(b.owner, tmpteam) && strcmp(b.enemy, tmpteam))) continue;
                 if(d->lastbase < 0 && (lookupmaterial(d->feetpos())&MATF_CLIP) == MAT_GAMECLIP) break;
-
 
                 vec basepos(b.o);
                 basepos.add(vec(-10+rnd(20), -10+rnd(20), -10+rnd(20)));
