@@ -389,7 +389,7 @@ struct captureclientmode : clientmode
             if(b.owner[0])
             {
                 string termnalally, termnalenemy;
-                formatstring(termnalally, "%s", langage ? "Ellied" : "Allié");
+                formatstring(termnalally, "%s", langage ? "Allied" : "Allié");
                 formatstring(termnalenemy, "%s", langage ? "Enemy" : "Ennemi");
                 bool isowner = !strcmp(b.owner, tmpteam);
                 if(b.enemy[0]) { mtype = PART_METER_VS; mcolor = 0xFF0000; mcolor2 = 0xFFFF00; if(!isowner) swap(mcolor, mcolor2); }

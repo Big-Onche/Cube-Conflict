@@ -2805,11 +2805,7 @@ namespace server
 
     void sendservinfo(clientinfo *ci)
     {
-        #ifdef SERVMODE
-        sendf(ci->clientnum, 1, "ri6ss", N_SERVINFO, ci->clientnum, PROTOCOL_VERSION, ci->sessionid, servambient, serverpass[0] ? 1 : 0, serverdesc, serverauth);
-        #else
-        sendf(ci->clientnum, 1, "ri6ss", N_SERVINFO, ci->clientnum, PROTOCOL_VERSION, ci->sessionid, n_ambiance, serverpass[0] ? 1 : 0, serverdesc, serverauth);
-        #endif
+        sendf(ci->clientnum, 1, "ri6ss", N_SERVINFO, ci->clientnum, PROTOCOL_VERSION, ci->sessionid, multiplayer(false) ? servambient : n_ambiance , serverpass[0] ? 1 : 0, serverdesc, serverauth);
     }
 
     void noclients()
