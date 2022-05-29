@@ -1939,7 +1939,7 @@ namespace game
                 if(player1->aptitude==12 && target==player1 && actor!=player1)
                 {
                     player1->ragemillis+=damage*5;
-                    if(player1->ragemillis>8000 && target->health>0) unlockachievement(ACH_RAGE);
+                    if(player1->ragemillis>8000 && player1->health>0) unlockachievement(ACH_RAGE);
                 }
                 break;
             }
