@@ -1257,20 +1257,6 @@ namespace game
 
     bool needminimap() { return m_ctf || m_capture; }
 
-    void drawicon(int icon, float x, float y, float sz)
-    {
-        settexture("media/interface/hud/items.png");
-        float tsz = 0.25f, tx = tsz*(icon%4), ty = tsz*(icon/4);
-        gle::defvertex(2);
-        gle::deftexcoord0();
-        gle::begin(GL_TRIANGLE_STRIP);
-        gle::attribf(x,    y);    gle::attribf(tx,     ty);
-        gle::attribf(x+sz, y);    gle::attribf(tx+tsz, ty);
-        gle::attribf(x,    y+sz); gle::attribf(tx,     ty+tsz);
-        gle::attribf(x+sz, y+sz); gle::attribf(tx+tsz, ty+tsz);
-        gle::end();
-    }
-
     float abovegameplayhud(int w, int h)
     {
         switch(hudplayer()->state)
@@ -1379,7 +1365,6 @@ namespace game
     const char *gameconfig() { return "config/game.cfg"; }
     const char *savedconfig() { return "config/saved.cfg"; }
     const char *restoreconfig() { return "config/restore.cfg"; }
-    const char *defaultconfig() { return "config/default_FR.cfg"; }
     const char *autoexec() { return "config/autoexec.cfg"; }
     const char *savedservers() { return "config/servers.cfg"; }
 

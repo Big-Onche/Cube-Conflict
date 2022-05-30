@@ -1056,7 +1056,6 @@ namespace game
     extern void killed(gameent *d, gameent *actor, int atk);
     extern void timeupdate(int timeremain);
     extern void msgsound(int n, physent *d = NULL);
-    extern void drawicon(int icon, float x, float y, float sz = 120);
     const char *mastermodecolor(int n, const char *unknown);
     const char *mastermodeicon(int n, const char *unknown);
 
