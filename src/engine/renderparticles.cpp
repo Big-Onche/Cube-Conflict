@@ -138,7 +138,6 @@ struct particle
     bvec color;
     uchar flags;
     float size;
-    bool fixedfade;
     union
     {
         const char *text;
@@ -221,7 +220,8 @@ struct partrenderer
                 {
                     case -1: p->size -= 3.f/nbfps; break;
                     case 1: p->size += 19.2f/nbfps; break;
-                    case 2: p->size += 2.04f/nbfps;
+                    case 2: p->size += 2.04f/nbfps; break;
+                    case 3: p->size += 5.f/nbfps; break;
                 }
             }
 
@@ -245,7 +245,20 @@ struct partrenderer
                         p->val = collidez+COLLIDEERROR;
                     else
                     {
-                        addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), 2*p->size, p->color, type&PT_RND4 ? (p->flags>>5)&3 : 0);
+                        switch(stain)
+                        {
+                            case STAIN_RAIN:
+                                addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size/1.5f, 0xFFFFFF, type&PT_RND4 ? (p->flags>>5)&3 : 0);
+                                regularsplash(PART_EAU, 0x18181A, 50, 3, 120, vec(o.x, o.y, collidez), 0.08f, 500, 0, 3, true);
+                                break;
+                            case STAIN_SNOW:
+                                addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size, p->color, type&PT_RND4 ? (p->flags>>5)&3 : 0);
+                                break;
+                            case STAIN_BRULAGE:
+                                addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size*1.5f, 0x222222, type&PT_RND4 ? (p->flags>>5)&3 : 0);
+                                addstain(STAIN_BALLE_GLOW, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size, 0xFF6622, type&PT_RND4 ? (p->flags>>5)&3 : 0);
+                                break;
+                        }
                         blend = 0;
                     }
                 }
@@ -859,8 +872,8 @@ struct softquadrenderer : quadrenderer
 static partrenderer *parts[] =
 {
     new quadrenderer("<grey>media/particle/blood.png", PT_PART|PT_FLIP|PT_MOD|PT_RND4|PT_COLLIDE, STAIN_BLOOD), // blood spats (note: rgb is inverted)
-    new trailrenderer("media/particle/base.png", PT_TRAIL|PT_LERP),                            // water, entity
-    new quadrenderer("media/particle/firespark.png", PT_PART|PT_FLIP|PT_RND4|PT_OVERBRIGHT),               // smoke
+    new trailrenderer("media/particle/base.png", PT_TRAIL|PT_LERP|PT_COLLIDE, STAIN_BALLE_1),                        // water, entity
+    new quadrenderer("media/particle/firespark.png", PT_PART|PT_FLIP|PT_RND4|PT_OVERBRIGHT|PT_COLLIDE, STAIN_BRULAGE),               // smoke
     new quadrenderer("<grey>media/particle/fumee.png", PT_PART|PT_FLIP|PT_LERP),               // smoke
     new quadrenderer("<grey>media/particle/mort.png", PT_PART),                                // mort
     new quadrenderer("<grey>media/particle/steam.png", PT_PART|PT_FLIP),                       // steam
@@ -878,9 +891,8 @@ static partrenderer *parts[] =
     new quadrenderer("media/particle/flames_2.png", PT_PART|PT_FLIP|PT_BRIGHT),
     new quadrenderer("media/particle/eau.png", PT_PART|PT_FLIP|PT_BRIGHT),
     new quadrenderer("media/particle/bulles.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_RND4),
-    new quadrenderer("media/particle/neige.png", PT_PART|PT_FLIP|PT_RND4|PT_COLLIDE, -1),            // colliding snow
-    new trailrenderer("media/particle/pluie.png", PT_TRAIL|PT_LERP|PT_HFLIP),
-    new trailrenderer("media/particle/neige.png", PT_TRAIL|PT_LERP|PT_HFLIP),
+    new quadrenderer("media/particle/neige.png", PT_PART|PT_FLIP|PT_RND4|PT_COLLIDE, STAIN_SNOW),            // colliding snow
+    new trailrenderer("media/particle/pluie.png", PT_PART|PT_COLLIDE, STAIN_RAIN),
     new trailrenderer("media/particle/nuage_1.png", PT_TRAIL),
     new trailrenderer("media/particle/nuage_2.png", PT_TRAIL),
     new trailrenderer("media/particle/nuage_3.png", PT_TRAIL),
@@ -1192,7 +1204,7 @@ static inline int colorfromattr(int attr)
  * 24..26 flat plane
  * +32 to inverse direction
  */
-void regularshape(int type, int radius, int color, int dir, int num, int fade, const vec &p, float size, int gravity, float vel = 0, int windoffset = 0, bool enhanced = false, int height = 0)
+void regularshape(int type, int radius, int color, int dir, int num, int fade, const vec &p, float size, int gravity, float vel = 0, int windoffset = 0, bool weather = false, int height = 0, int expand = 0)
 {
     if(!canemitparticles()) return;
 
@@ -1268,28 +1280,21 @@ void regularshape(int type, int radius, int color, int dir, int num, int fade, c
 
         if(inv) swap(from, to);
 
-        if(enhanced)
+        if(weather)
         {
-            //The new, optimized weather code! :D --Q009
-            //Contient quelques modifications pour Cube Conflict
-            //see readme_SE.txt
-                vec toz(to.x, to.y, camera1->o.z);
-                if(camera1->o.dist(toz) > 200*particles_lod && !seedemitter) continue;
+            vec toz(to.x, to.y, camera1->o.z);
+            if(camera1->o.dist(toz) > 256*particles_lod && !seedemitter) continue;
 
-                float z = camera1->o.z+height;
-                vec spawnz(to.x, to.y, z);
-                float distToFloor = -raycube(to, vec(0, 0, -1), 0, RAY_CLIPMAT|RAY_POLY);
-                float floorHeight = (to.z - distToFloor);
-                if(z<=floorHeight) continue;
-                vec d(spawnz);
-                d.sub(from);
-                if(windoffset) d.add(vec(windoffset/2+rnd(windoffset), windoffset/2+rnd(windoffset), 0));
-                d.normalize().mul(to.dist(camera1->o)<=radius*4?-vel:vel);
-                particle *np = newparticle(spawnz, d, 3000, type, color, size, -70);;
-                np->fixedfade = true;
-                np->val = floorHeight;
+            float z = camera1->o.z + height;
+            vec spawnz(to.x, to.y, z);
+
+            vec d(spawnz);
+            d.sub(from);
+            if(windoffset) d.add(vec(windoffset/2+rnd(windoffset), windoffset/2+rnd(windoffset), 0));
+            d.normalize().mul(-vel); //velocity
+            particle *np = newparticle(spawnz, d, fade, type, color, size, gravity, expand);
+            np->val = (spawnz.z) - raycube(spawnz, vec(0, 0, -1), COLLIDERADIUS/2, RAY_CLIPMAT);
         }
-
         else
         {
 			if(taper)
@@ -1386,18 +1391,8 @@ static void makeparticles(entity &e)
         case 7:  //lightning
         case 9:  //steam
         case 10: //water
-        case 13: //snow
-        {
-            static const int typemap[]   = { PART_STREAK, -1, -1, PART_LIGHTNING, -1, PART_STEAM, PART_WATER, -1, -1, PART_SNOW };
-            static const float sizemap[] = { 0.28f, 0.0f, 0.0f, 1.0f, 0.0f, 2.4f, 0.60f, 0.0f, 0.0f, 0.5f };
-            static const int gravmap[] = { 0, 0, 0, 0, 0, -20, 2, 0, 0, 20 };
-            int type = typemap[e.attr1-4];
-            float size = sizemap[e.attr1-4];
-            int gravity = gravmap[e.attr1-4];
-            if(e.attr2 >= 256) regularshape(type, max(1+e.attr3, 1), colorfromattr(e.attr4), e.attr2-256, 5, e.attr5 > 0 ? min(int(e.attr5), 10000) : 200, e.o, size, gravity);
-            else newparticle(e.o, offsetvec(e.o, e.attr2, max(1+e.attr3, 0)), 1, type, colorfromattr(e.attr4), size, gravity);
             break;
-        }
+
         case 5: //meter, metervs - <percent> <rgb> <rgb2>
         case 6:
         {
@@ -1434,28 +1429,37 @@ static void makeparticles(entity &e)
             }
         }
         break;
+
+        case 17: //rain
+            if(n_ambiance==4 || n_ambiance==8) regularshape(PART_RAIN, max(1+e.attr2, 1), n_ambiance==8 ? 0xEEEEEE : colorfromattr(e.attr4), 44, n_ambiance==8 ? e.attr3/2 : e.attr3, 10000, e.o, 1+(rnd(2)), 200, -900, e.attr5, true, 200);
+            break;
+        case 18: //snow
+            if(n_ambiance!=8) return;
+            regularshape(PART_SNOW, max(1+e.attr2, 1), colorfromattr(e.attr4), 44, e.attr3, 10000, e.o, 2+(rnd(3)), 200, -400, e.attr5, true, 300);
+            break;
+        case 19: //apocalypse
+            if(n_map==5);
+            else if(n_ambiance!=5) return;
+
+            regularshape(PART_SMOKE, max(1+e.attr2, 1), n_map==5 ? 0x352412 : 0x184418, 44, 3, 10000, e.o, 0.5f, 200, -200, -2500, true, 500, 1);
+            regularshape(PART_FIRESPARK, max(1+e.attr2, 1), colorfromattr(e.attr4), 44, e.attr3, 10000, e.o, 2+(rnd(3)), 200, -400, e.attr5, true, 300);
+            break;
+
+
         case 32: //lens flares - plain/sparkle/sun/sparklesun <red> <green> <blue>
         case 33:
         case 34:
         case 35:
             flares.addflare(e.o, e.attr2, e.attr3, e.attr4, (e.attr1&0x02)!=0, (e.attr1&0x01)!=0);
             break;
-        case 50:    //rain
-        {
-            //The new, optimized weather code! :D --Q009
-            //Contient quelques modifications pour Cube Conflict
-            //see readme_SE.txt
-            if(n_ambiance==4 || n_ambiance==8) {loopi((particles_lod*32)+3) regularshape(PART_RAIN, max(1+e.attr2, 1), n_ambiance==8 ? 0xAAAAAA : 0x888888, 44, n_ambiance==8 ? 5 : 50, 0, e.o, 5, 0, -1100, 70, true, 300); }
-            if(n_ambiance==8) {loopi((particles_lod*32)+3) regularshape(PART_NEIGE, max(1+e.attr2, 1), n_ambiance==8 ? 0xAAAAAA : 0x888888, 44, 10, 0, e.o, 5, 0, -550, 120, true, 300); }
-            //regularshape(PART_SNOW, max(1+e.attr2, 1), 0x777777, 44, e.attr2>=128?30:20, 0, e.o, e.attr1==77?1:3, e.attr1==77?200:201, e.attr1==77?350:1000, e.attr3, true);
-            break;
-        }
+
         case 51:    //mun dust
-            loopi((particles_lod*13)+3) regularshape(PART_SMOKE, max(1+e.attr2, 1), 0xBBBBBB, 44, 6, 0, e.o, 50.0f, 0, 75, 0, true, -70);
+            loopi((particles_lod*13)+3) regularshape(PART_SMOKE, max(1+e.attr2, 1), 0xBBBBBB, 44, 6, 4000, e.o, 0.5f, -50, 30, 0, true, -60, 1);
             break;
         case 52:    //volcano smoke
-            loopi((particles_lod*13)+3) regularshape(PART_SMOKE, max(1+e.attr2, 1), 0x181818, 44, 6, 0, e.o, 50.0f, 0, 75, 0, true, -70);
+            loopi((particles_lod*13)+3) regularshape(PART_SMOKE, max(1+e.attr2, 1), 0x181818, 44, 6, 4000, e.o, 0.5f, -50, 30, 0, true, -30, 1);
             break;
+
         default:
             if(!editmode)
             {

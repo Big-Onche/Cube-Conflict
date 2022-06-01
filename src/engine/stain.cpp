@@ -757,7 +757,9 @@ stainrenderer stains[] =
     stainrenderer("<grey>media/particle/bullet_hole_2.png", SF_ROTATE|SF_OVERBRIGHT),
     stainrenderer("<grey>media/particle/bullet_hole_3.png", SF_ROTATE|SF_OVERBRIGHT),
     stainrenderer("<grey>media/particle/rail_glow.png",  SF_ROTATE|SF_GLOW|SF_SATURATE, 200, 400, 100),
-    stainrenderer("<grey>media/particle/brulage.png", SF_ROTATE, 250),
+    stainrenderer("<grey>media/particle/brulage.png", SF_ROTATE, 500),
+    stainrenderer("media/particle/neige_sol.png", SF_ROTATE, 25, 2500, 5000),
+    stainrenderer("media/particle/pluie_sol.png", SF_ROTATE, 25, 750, 750),
 };
 
 void initstains()
