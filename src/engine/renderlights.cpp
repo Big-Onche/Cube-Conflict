@@ -1909,7 +1909,6 @@ VAR(smborder2, 0, 4, 16);
 VAR(smminradius, 0, 16, 10000);
 VAR(smminsize, 1, 96, 1024);
 VAR(smmaxsize, 1, 384, 1024);
-//VAR(smmaxsize, 1, 4096, 4096);
 VAR(smused, 1, 0, 0);
 VAR(smquery, 0, 1, 1);
 VARF(smcullside, 0, 1, 1, cleanupshadowatlas());
@@ -5344,7 +5343,6 @@ void setlightlod()
             csmsplits = 1;
             smsize = 8;
             rhfarplane = 512;
-            dynlightdist = 128;
             volumetric = 1;
             volsteps = 5;
             aocutoff = 4;
@@ -5358,7 +5356,6 @@ void setlightlod()
             csmsplits = 2;
             smsize = 9;
             rhfarplane = 512;
-            dynlightdist = 256;
             volumetric = 1;
             volsteps = 10;
             aocutoff = 8;
@@ -5372,7 +5369,6 @@ void setlightlod()
             csmsplits = 3;
             smsize = 11;
             rhfarplane = 1024;
-            dynlightdist = 512;
             volumetric = 1;
             volsteps = 20;
             aocutoff = 16;
@@ -5386,7 +5382,6 @@ void setlightlod()
             csmsplits = 4;
             smsize = 13;
             rhfarplane = 2048;
-            dynlightdist = 1024;
             volumetric = 1;
             volsteps = 40;
             aocutoff = 32;

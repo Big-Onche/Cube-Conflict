@@ -810,7 +810,7 @@ extern void bgquad(float x, float y, float w, float h, float tx = 0, float ty = 
 
 extern int n_ambiance, n_map;  //Config partie Cube Conflict
 
-extern int grassdist, grass, dynlightdist, decoration_lod; // LOD Cube Conflict
+extern int grassdist, grass, decoration_lod; // LOD Cube Conflict
 extern float grassstep;
 
 //Used for shrooms gfx
