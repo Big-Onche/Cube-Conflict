@@ -441,7 +441,7 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, sound
     { GUN_GLOCK,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GLOCK,        S_GLOCK_LOIN, S_ARMESLOIN,    10,  100,  280,   5, 150, 0, 2000,   7, 8000,  1,    30,   3, 0, 0},
     // Super armes
     { GUN_S_NUKE,       ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_NUKELAUNCH,   S_NULL, S_NULL,                1, 3000,  3250,  20, 300, 2,  175,  10, 2000,  1,   400, 1500, 6000, 0},
-    { GUN_S_GAU8,       ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GAU8,         S_RIFLELOIN, S_RIFLELOIN,     90,   14,   370, 150, 250, 3, 6000,   1, 8000,  1,    80,   20, 0, 0},
+    { GUN_S_GAU8,       ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_GAU8,         S_RIFLELOIN, S_RIFLELOIN,     90,   14,   370, 150, 250, 3, 6000,   9, 8000,  1,    80,   20, 0, 0},
     { GUN_S_ROQUETTES,  ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_MINIROQUETTE, S_NULL, S_NULL,               14,  170,  2000,  10, 300, 2,  700,   6, 8000,  1,   500,  100, 0, 0},
     { GUN_S_CAMPOUZE,   ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_CAMPOUZE,     S_NULL, S_RIFLELOIN,           8,  500,   500,  50,  50, 5, 5000,   3, 8000, 10,   150,    8, 0, 0},
     // Armes corps à corps
