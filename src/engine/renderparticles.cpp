@@ -134,10 +134,10 @@ const char *partnames[] = { "part", "tape", "trail", "text", "textup", "meter", 
 struct particle
 {
     vec o, d;
-    int gravity, fade, millis, expand;
+    int gravity, fade, millis;
     bvec color;
     uchar flags;
-    float size;
+    float size, sizemod;
     union
     {
         const char *text;
@@ -185,7 +185,7 @@ struct partrenderer
     virtual void init(int n) { }
     virtual void reset() = 0;
     virtual void resettracked(physent *owner) { }
-    virtual particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity = 0, int expand = 0) = 0;
+    virtual particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity = 0, float sizemod = 0) = 0;
     virtual void update() { }
     virtual void render() = 0;
     virtual bool haswork() = 0;
@@ -214,16 +214,7 @@ struct partrenderer
         }
         else
         {
-            if(!game::ispaused())
-            {
-                switch(p->expand)
-                {
-                    case -1: p->size -= 3.f/nbfps; break;
-                    case 1: p->size += 19.2f/nbfps; break;
-                    case 2: p->size += 2.04f/nbfps; break;
-                    case 3: p->size += 5.f/nbfps; break;
-                }
-            }
+            if(!game::ispaused()) p->size += p->sizemod/nbfps;
 
             ts = lastmillis-p->millis;
             blend = max(255 - (ts<<8)/p->fade, 0);
@@ -345,7 +336,7 @@ struct listrenderer : partrenderer
         }
     }
 
-    particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity, int expand)
+    particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity, float sizemod)
     {
         if(!parempty)
         {
@@ -702,7 +693,7 @@ struct varenderer : partrenderer
         return (numparts > 0);
     }
 
-    particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity, int expand)
+    particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity, float sizemod)
     {
         particle *p = parts + (numparts < maxparts ? numparts++ : rnd(maxparts)); //next free slot, or kill a random kitten
         p->o = o;
@@ -714,7 +705,7 @@ struct varenderer : partrenderer
         p->size = size;
         p->owner = NULL;
         p->flags = 0x80 | (rndmask ? rnd(0x80) & rndmask : 0);
-        p->expand = expand;
+        p->sizemod = sizemod;
         lastupdate = -1;
         return p;
     }
@@ -1045,7 +1036,7 @@ void renderparticles(int layer)
 
 static int addedparticles = 0;
 
-static inline particle *newparticle(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity = 0, int expand = 0)
+static inline particle *newparticle(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity = 0, float sizemod = 0)
 {
     static particle dummy;
     if(seedemitter)
@@ -1055,12 +1046,12 @@ static inline particle *newparticle(const vec &o, const vec &d, int fade, int ty
     }
     if(fade + emitoffset < 0) return &dummy;
     addedparticles++;
-    return parts[type]->addpart(o, d, fade, color, size, gravity, expand);
+    return parts[type]->addpart(o, d, fade, color, size, gravity, sizemod);
 }
 
 int maxparticledistance = 6000;
 
-static void splash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int expand, bool upsplash = false)
+static void splash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, float sizemod, bool upsplash = false)
 {
     if(camera1->o.dist(p) > maxparticledistance && !seedemitter) return;
     float collidez = parts[type]->type&PT_COLLIDE ? p.z - raycube(p, vec(0, 0, -1), COLLIDERADIUS, RAY_CLIPMAT) + (parts[type]->stain >= 0 ? COLLIDEERROR : 0) : -1;
@@ -1078,19 +1069,19 @@ static void splash(int type, int color, int radius, int num, int fade, const vec
         while(x*x+y*y+z*z>radius*radius);
         vec tmp = vec(upsplash ? (float)x/3.5f : (float)x, upsplash ? (float)y/3.5f : (float)y, (float)z<0 && upsplash ? (float)z==(float)z/-1 : (float)z);
         int f = (num < 10) ? (fmin + rnd(fmax)) : (fmax - (i*(fmax-fmin))/(num-1)); //help deallocater by using fade distribution rather than random
-        newparticle(p, tmp, f, type, color, size, upsplash ? gravity*3 : gravity, expand)->val = collidez;
+        newparticle(p, tmp, f, type, color, size, upsplash ? gravity*3 : gravity, sizemod)->val = collidez;
     }
 }
 
-void regularsplash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int delay, int expand, bool upsplash)
+void regularsplash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int delay, float sizemod, bool upsplash)
 {
     if(minimized || (delay > 0 && rnd(delay) != 0)) return;
-    splash(type, color, radius, num, fade, p, size, gravity, expand, upsplash);
+    splash(type, color, radius, num, fade, p, size, gravity, sizemod, upsplash);
 }
 
-void particle_flying_flare(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity, int expand, bool randomcolor)
+void particle_flying_flare(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity, float sizemod, bool randomcolor)
 {
-    newparticle(o, d, fade, type, randomcolor ? gfx::rndcolor[rnd(6)].color : color, size, gravity, expand);
+    newparticle(o, d, fade, type, randomcolor ? gfx::rndcolor[rnd(6)].color : color, size, gravity, sizemod);
 }
 
 bool canaddparticles()
@@ -1104,10 +1095,10 @@ void regular_particle_splash(int type, int num, int fade, const vec &p, int colo
     regularsplash(type, color, radius, num, fade, p, size, gravity, delay);
 }
 
-void particle_splash(int type, int num, int fade, const vec &p, int color, float size, int radius, int gravity, int expand, bool randomcolor, float relativesize)
+void particle_splash(int type, int num, int fade, const vec &p, int color, float size, int radius, int gravity, float sizemod, bool randomcolor, float relativesize)
 {
     if(!canaddparticles()) return;
-    splash(type, randomcolor ? gfx::rndcolor[rnd(6)].color : color, radius, num, fade, p, size*relativesize, gravity, expand);
+    splash(type, randomcolor ? gfx::rndcolor[rnd(6)].color : color, radius, num, fade, p, size*relativesize, gravity, sizemod);
 }
 
 VARP(maxtrail, 1, 500, 10000);
@@ -1204,7 +1195,7 @@ static inline int colorfromattr(int attr)
  * 24..26 flat plane
  * +32 to inverse direction
  */
-void regularshape(int type, int radius, int color, int dir, int num, int fade, const vec &p, float size, int gravity, float vel = 0, int windoffset = 0, bool weather = false, int height = 0, int expand = 0)
+void regularshape(int type, int radius, int color, int dir, int num, int fade, const vec &p, float size, int gravity, float vel = 0, int windoffset = 0, bool weather = false, int height = 0, float sizemod = 0)
 {
     if(!canemitparticles()) return;
 
@@ -1283,7 +1274,7 @@ void regularshape(int type, int radius, int color, int dir, int num, int fade, c
         if(weather)
         {
             vec toz(to.x, to.y, camera1->o.z);
-            if(camera1->o.dist(toz) > 256*particles_lod && !seedemitter) continue;
+            if(camera1->o.dist(toz) > 192*(particles_lod+1) && !seedemitter) continue;
 
             float z = camera1->o.z + height;
             vec spawnz(to.x, to.y, z);
@@ -1292,7 +1283,7 @@ void regularshape(int type, int radius, int color, int dir, int num, int fade, c
             d.sub(from);
             if(windoffset) d.add(vec(windoffset/2+rnd(windoffset), windoffset/2+rnd(windoffset), 0));
             d.normalize().mul(-vel); //velocity
-            particle *np = newparticle(spawnz, d, fade, type, color, size, gravity, expand);
+            particle *np = newparticle(spawnz, d, fade, type, color, size, gravity, sizemod);
             np->val = (spawnz.z) - raycube(spawnz, vec(0, 0, -1), COLLIDERADIUS/2, RAY_CLIPMAT);
         }
         else
@@ -1342,7 +1333,7 @@ void regularflame(int type, const vec &p, float radius, float height, int color,
         vec s = p;
         s.x += rndscale(radius*2.0f)-radius;
         s.y += rndscale(radius*2.0f)-radius;
-        newparticle(s, v, rnd(max(int(fade*height), 1))+1, type, color, size, gravity, -1);
+        newparticle(s, v, rnd(max(int(fade*height), 1))+1, type, color, size, gravity, -3.f);
     }
 }
 
@@ -1361,7 +1352,6 @@ static void makeparticles(entity &e)
                 case 1: rndflamecolor = 0x444422; rndsmokecolor = 0x222222; break;
                 case 2: rndflamecolor = 0x363636; rndsmokecolor = 0x111111; break;
                 default: rndflamecolor = 0x663515; rndsmokecolor = 0x303020; break;
-
             }
             regularflame(PART_FLAME, e.o, radius, height, e.attr4 ? colorfromattr(e.attr4) : rndflamecolor, 2, 2.0f+(rnd(2)));
             regularflame(PART_SMOKE, vec(e.o.x, e.o.y, e.o.z + 4.0f*min(radius, height)), radius, height, rndsmokecolor, 1, 4.0f+(rnd(6)), 100.0f, 2750.0f, -15);
@@ -1423,28 +1413,65 @@ static void makeparticles(entity &e)
                 vec pos = e.o;
                 pos.add(vec(-30+rnd(30), -30+rnd(30), -5));
                 playsound(S_LAVASPLASH, &e.o, 0, 0, 0 , 30, -1, 200);
-                loopi(6)regularsplash(PART_FIRESPARK, 0xFFBB55, 800+rnd(600), 10, 300+(rnd(500)), pos, 3.f+(rnd(30)/6.f), 200, 0, -1, true);
-                loopi(4)regularsplash(PART_SMOKE, 0x333333, 400, 3, 1000+(rnd(1000)), pos, 8.f+(rnd(8)), -20, 0, 1, true);
+                loopi(6)regularsplash(PART_FIRESPARK, 0xFFBB55, 800+rnd(600), 10, 300+(rnd(500)), pos, 3.f+(rnd(30)/6.f), 200, 0, -3.f, true);
+                loopi(4)regularsplash(PART_SMOKE, 0x333333, 400, 3, 1000+(rnd(1000)), pos, 8.f+(rnd(8)), -20, 0, 18.f, true);
                 loopi(2)particle_fireball(pos, 20, PART_EXPLOSION, 500, 0xFF9900, 2.5f, false);
             }
         }
         break;
 
         case 17: //rain
-            if(n_ambiance==4 || n_ambiance==8) regularshape(PART_RAIN, max(1+e.attr2, 1), n_ambiance==8 ? 0xEEEEEE : colorfromattr(e.attr4), 44, n_ambiance==8 ? e.attr3/2 : e.attr3, 10000, e.o, 1+(rnd(2)), 200, -900, e.attr5, true, 200);
+            {
+                if(n_ambiance==4 || n_ambiance==8) regularshape(PART_RAIN, max(1+e.attr2, 1), n_ambiance==8 ? 0xEEEEEE : colorfromattr(e.attr4), 44, n_ambiance==8 ? e.attr3/2 : e.attr3, 10000, e.o, 1+(rnd(2)), 200, -900, e.attr5, true, 200);
+                if(randomevent(20*nbfps) && n_ambiance == 4 && isconnected())
+                {
+                    vec possky = e.o; vec posground = e.o;
+                    int posx = -750+rnd(1500), posy = -750+rnd(1500);
+                    possky.add(vec(posx+(-200+(rnd(400))), posy+(-200+(rnd(400))), 800));
+                    posground.add(vec(posx, posy, -50));
+                    loopi(2)particle_flare(possky, posground, 750, PART_LIGHTNING, 0x8888FF, 15.f+rnd(10), NULL, gfx::champicolor);
+
+                    playsound(S_ECLAIRPROCHE, &posground, 0, 0, 0 , 50, -1, 500);
+
+                    vec posA = possky;
+                    vec posB = camera1->o;
+                    vec flashloc = (posA.add((posB.mul(vec(3, 3, 3))))).div(vec(4, 4, 4));
+
+                    if(camera1->o.dist(posground) >= 250) playsound(S_ECLAIRLOIN, &flashloc, 0, 0, 0 , 500, -1, 1500);
+                    adddynlight(flashloc, 4000, vec(1.5f, 1.5f, 2.0f), 200, 40, L_NOSHADOW, 2000, vec(0.5f, 0.5f, 1.0f));
+                }
+            }
             break;
         case 18: //snow
             if(n_ambiance!=8) return;
-            regularshape(PART_SNOW, max(1+e.attr2, 1), colorfromattr(e.attr4), 44, e.attr3, 10000, e.o, 2+(rnd(3)), 200, -400, e.attr5, true, 300);
+            regularshape(PART_SNOW, max(1+e.attr2, 1), colorfromattr(e.attr4), 44, e.attr3, 10000, e.o, 2+(rnd(3)), 200, -400, e.attr5, true, 200);
             break;
         case 19: //apocalypse
-            if(n_map==5);
-            else if(n_ambiance!=5) return;
+            {
+                if(n_map==5);
+                else if(n_ambiance!=5) return;
 
-            regularshape(PART_SMOKE, max(1+e.attr2, 1), n_map==5 ? 0x352412 : 0x184418, 44, 3, 10000, e.o, 0.5f, 200, -200, -2500, true, 500, 1);
-            regularshape(PART_FIRESPARK, max(1+e.attr2, 1), colorfromattr(e.attr4), 44, e.attr3, 10000, e.o, 2+(rnd(3)), 200, -400, e.attr5, true, 300);
+                regularshape(PART_SMOKE, max(1+e.attr2, 1), n_map==5 ? 0x352412 : 0x184418, 44, 3, 10000, e.o, 0.5f, 200, -200, -2500, true, 500, 22.f);
+                regularshape(PART_FIRESPARK, max(1+e.attr2, 1), colorfromattr(e.attr4), 44, e.attr3, 10000, e.o, 2+(rnd(3)), 200, -400, e.attr5, true, 300);
+
+                if(randomevent(6*nbfps) && n_map!=5 && isconnected())
+                {
+                    vec possky = e.o; vec posground = e.o;
+                    int posx = -750+rnd(1500), posy = -750+rnd(1500);
+                    possky.add(vec(posx+(-200+(rnd(400))), posy+(-200+(rnd(400))), 800));
+                    posground.add(vec(posx, posy, -50));
+                    particle_flare(possky, posground, 1000, PART_LIGHTNING, 0xFF6622, 15.f+rnd(10), NULL, gfx::champicolor);
+                    playsound(S_ECLAIRPROCHE, &posground, 0, 0, 0 , 50, -1, 500);
+
+                    vec posA = possky;
+                    vec posB = camera1->o;
+                    vec flashloc = (posA.add((posB.mul(vec(3, 3, 3))))).div(vec(4, 4, 4));
+
+                    if(camera1->o.dist(posground) >= 250) playsound(S_ECLAIRLOIN, &flashloc, 0, 0, 0 , 500, -1, 1500);
+                    if(camera1->o.dist(posground) < 1500) adddynlight(flashloc, 4000, vec(1.5f, 0.5f, 0.0f), 200, 40, L_NOSHADOW, 1000, vec(0.5f, 1.0f, 0.5f));
+                }
+            }
             break;
-
 
         case 32: //lens flares - plain/sparkle/sun/sparklesun <red> <green> <blue>
         case 33:
@@ -1454,10 +1481,10 @@ static void makeparticles(entity &e)
             break;
 
         case 51:    //mun dust
-            loopi((particles_lod*13)+3) regularshape(PART_SMOKE, max(1+e.attr2, 1), 0xBBBBBB, 44, 6, 4000, e.o, 0.5f, -50, 30, 0, true, -60, 1);
+            loopi((particles_lod*13)+3) regularshape(PART_SMOKE, max(1+e.attr2, 1), 0xBBBBBB, 44, 6, 4000, e.o, 0.5f, -50, 30, 0, true, -50, 18.f);
             break;
         case 52:    //volcano smoke
-            loopi((particles_lod*13)+3) regularshape(PART_SMOKE, max(1+e.attr2, 1), 0x181818, 44, 6, 4000, e.o, 0.5f, -50, 30, 0, true, -30, 1);
+            loopi((particles_lod*13)+3) regularshape(PART_SMOKE, max(1+e.attr2, 1), 0x181818, 44, 6, 4000, e.o, 0.5f, -50, 30, 500, true, -30, 18.f);
             break;
 
         default:
