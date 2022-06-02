@@ -860,11 +860,11 @@ namespace game
         switch(n_map)
         {
             case 0: name = "Village"; break;
-            case 1: name = "Usine"; break;
+            case 1: name = "Usine"; n_ambiance = 1; break;
             case 2: name = "Faille"; break;
-            case 3: name = "Lune"; break;
+            case 3: name = "Lune"; n_ambiance = 1; break;
             case 4: name = "Chateaux"; break;
-            case 5: name = "Volcan"; break;
+            case 5: name = "Volcan"; n_ambiance = 1; break;
             case 77: name = "Entrainement"; break;
         }
         changemap(name, m_valid(nextmode) ? nextmode : (remote ? 1 : 0));
