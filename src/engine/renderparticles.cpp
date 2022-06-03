@@ -134,10 +134,10 @@ const char *partnames[] = { "part", "tape", "trail", "text", "textup", "meter", 
 struct particle
 {
     vec o, d;
-    int gravity, fade, millis;
+    int gravity, fade, millis, sizemod;
     bvec color;
     uchar flags;
-    float size, sizemod;
+    float size;
     union
     {
         const char *text;
@@ -185,7 +185,7 @@ struct partrenderer
     virtual void init(int n) { }
     virtual void reset() = 0;
     virtual void resettracked(physent *owner) { }
-    virtual particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity = 0, float sizemod = 0) = 0;
+    virtual particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity = 0, int sizemod = 0) = 0;
     virtual void update() { }
     virtual void render() = 0;
     virtual bool haswork() = 0;
@@ -214,7 +214,11 @@ struct partrenderer
         }
         else
         {
-            if(!game::ispaused()) p->size += p->sizemod/nbfps;
+            if(p->sizemod && !game::ispaused() && p->sizemod > -25 && p->sizemod < 25)
+            {
+                float mod = p->sizemod;
+                p->size += mod/nbfps;
+            }
 
             ts = lastmillis-p->millis;
             blend = max(255 - (ts<<8)/p->fade, 0);
@@ -336,7 +340,7 @@ struct listrenderer : partrenderer
         }
     }
 
-    particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity, float sizemod)
+    particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity, int sizemod)
     {
         if(!parempty)
         {
@@ -693,7 +697,7 @@ struct varenderer : partrenderer
         return (numparts > 0);
     }
 
-    particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity, float sizemod)
+    particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity, int sizemod)
     {
         particle *p = parts + (numparts < maxparts ? numparts++ : rnd(maxparts)); //next free slot, or kill a random kitten
         p->o = o;
@@ -862,13 +866,12 @@ struct softquadrenderer : quadrenderer
 
 static partrenderer *parts[] =
 {
-    new quadrenderer("<grey>media/particle/blood.png", PT_PART|PT_FLIP|PT_MOD|PT_RND4|PT_COLLIDE, STAIN_BLOOD), // blood spats (note: rgb is inverted)
-    new trailrenderer("media/particle/base.png", PT_TRAIL|PT_LERP|PT_COLLIDE, STAIN_BALLE_1),                        // water, entity
-    new quadrenderer("media/particle/firespark.png", PT_PART|PT_FLIP|PT_RND4|PT_OVERBRIGHT|PT_COLLIDE, STAIN_BRULAGE),               // smoke
-    new quadrenderer("<grey>media/particle/fumee.png", PT_PART|PT_FLIP|PT_LERP),               // smoke
-    new quadrenderer("<grey>media/particle/mort.png", PT_PART),                                // mort
-    new quadrenderer("<grey>media/particle/steam.png", PT_PART|PT_FLIP),                       // steam
-    new quadrenderer("media/particle/flames.png", PT_PART|PT_HFLIP|PT_RND4|PT_BRIGHT, -1),   // flame
+    new quadrenderer("<grey>media/particle/blood.png", PT_PART|PT_FLIP|PT_MOD|PT_RND4|PT_COLLIDE, STAIN_BLOOD),         // blood spats (note: rgb is inverted)
+    new trailrenderer("media/particle/base.png", PT_TRAIL|PT_LERP),                                                     // water
+    new quadrenderer("media/particle/firespark.png", PT_PART|PT_FLIP|PT_RND4|PT_OVERBRIGHT|PT_COLLIDE, STAIN_BRULAGE),  // fire sparks
+    new quadrenderer("<grey>media/particle/fumee.png", PT_PART|PT_FLIP|PT_LERP),                                        // smoke
+    new quadrenderer("<grey>media/particle/steam.png", PT_PART|PT_FLIP),                                                // steam
+    new quadrenderer("media/particle/flames.png", PT_PART|PT_HFLIP|PT_RND4|PT_BRIGHT),   // flame
     new taperenderer("media/particle/flare.png", PT_TAPE|PT_BRIGHT),                           // streak
     new taperenderer("media/particle/rail_trail.png", PT_TAPE|PT_FEW|PT_BRIGHT),               // rail trail
     new taperenderer("media/particle/pulse_side.png", PT_TAPE|PT_FEW|PT_BRIGHT),               // pulse side
@@ -893,20 +896,18 @@ static partrenderer *parts[] =
     new quadrenderer("media/particle/zero.png", PT_PART|PT_BRIGHT),
     new quadrenderer("media/particle/one.png", PT_PART|PT_BRIGHT),
     new quadrenderer("media/particle/blip.png", PT_PART|PT_LERP),
-    &lightnings,                                                                               // lightning
-    &fireballs,                                                                                // explosion fireball
-    &pulsebursts,                                                                              // pulse burst
-    &ondedechoc,
-    &plasma,
-    &radar,
     new quadrenderer("media/particle/spark.png", PT_PART|PT_FLIP|PT_BRIGHT),                   // sparks
-    new quadrenderer("media/particle/spark.png", PT_PART|PT_FLIP|PT_BRIGHT),                   // sparks
-    new quadrenderer("media/particle/base.png",  PT_PART|PT_FLIP|PT_BRIGHT),                   // edit mode entities
     new quadrenderer("media/particle/rail_muzzle.png", PT_PART|PT_FEW|PT_FLIP|PT_BRIGHT|PT_TRACK),  // rail muzzle flash
     new quadrenderer("media/particle/pulse_muzzle.png", PT_PART|PT_FEW|PT_FLIP|PT_BRIGHT|PT_TRACK), // pulse muzzle flash
     new quadrenderer("media/particle/minigun_muzzle.png", PT_PART|PT_FEW|PT_FLIP|PT_BRIGHT|PT_TRACK),
     new quadrenderer("media/particle/normal_muzzle.png", PT_PART|PT_FEW|PT_FLIP|PT_BRIGHT|PT_TRACK),
     new quadrenderer("media/particle/sniper_muzzle.png", PT_PART|PT_FEW|PT_BRIGHT|PT_TRACK),
+    &lightnings,                                                                               // lightning
+    &fireballs,                                                                                // explosion fireball
+    &plasmabursts,                                                                             // pulse burst
+    &ondedechoc,                                                                               // shock wave
+    &plasmagrenade,                                                                            // grenade explosion
+    &radar,                                                                                    // spy ability 3
     &texts,                                                                                    // text
     &meters,                                                                                   // meter
     &metervs,                                                                                  // meter vs.
@@ -1036,7 +1037,7 @@ void renderparticles(int layer)
 
 static int addedparticles = 0;
 
-static inline particle *newparticle(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity = 0, float sizemod = 0)
+static inline particle *newparticle(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity = 0, int sizemod = 0)
 {
     static particle dummy;
     if(seedemitter)
@@ -1051,7 +1052,7 @@ static inline particle *newparticle(const vec &o, const vec &d, int fade, int ty
 
 int maxparticledistance = 6000;
 
-static void splash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, float sizemod, bool upsplash = false)
+static void splash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int sizemod, bool upsplash = false)
 {
     if(camera1->o.dist(p) > maxparticledistance && !seedemitter) return;
     float collidez = parts[type]->type&PT_COLLIDE ? p.z - raycube(p, vec(0, 0, -1), COLLIDERADIUS, RAY_CLIPMAT) + (parts[type]->stain >= 0 ? COLLIDEERROR : 0) : -1;
@@ -1073,13 +1074,13 @@ static void splash(int type, int color, int radius, int num, int fade, const vec
     }
 }
 
-void regularsplash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int delay, float sizemod, bool upsplash)
+void regularsplash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int delay, int sizemod, bool upsplash)
 {
     if(minimized || (delay > 0 && rnd(delay) != 0)) return;
     splash(type, color, radius, num, fade, p, size, gravity, sizemod, upsplash);
 }
 
-void particle_flying_flare(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity, float sizemod, bool randomcolor)
+void particle_flying_flare(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity, int sizemod, bool randomcolor)
 {
     newparticle(o, d, fade, type, randomcolor ? gfx::rndcolor[rnd(6)].color : color, size, gravity, sizemod);
 }
@@ -1095,7 +1096,7 @@ void regular_particle_splash(int type, int num, int fade, const vec &p, int colo
     regularsplash(type, color, radius, num, fade, p, size, gravity, delay);
 }
 
-void particle_splash(int type, int num, int fade, const vec &p, int color, float size, int radius, int gravity, float sizemod, bool randomcolor, float relativesize)
+void particle_splash(int type, int num, int fade, const vec &p, int color, float size, int radius, int gravity, int sizemod, bool randomcolor, float relativesize)
 {
     if(!canaddparticles()) return;
     splash(type, randomcolor ? gfx::rndcolor[rnd(6)].color : color, radius, num, fade, p, size*relativesize, gravity, sizemod);
@@ -1195,7 +1196,7 @@ static inline int colorfromattr(int attr)
  * 24..26 flat plane
  * +32 to inverse direction
  */
-void regularshape(int type, int radius, int color, int dir, int num, int fade, const vec &p, float size, int gravity, float vel = 0, int windoffset = 0, bool weather = false, int height = 0, float sizemod = 0)
+void regularshape(int type, int radius, int color, int dir, int num, int fade, const vec &p, float size, int gravity, float vel = 0, int windoffset = 0, bool weather = false, int height = 0, int sizemod = 0)
 {
     if(!canemitparticles()) return;
 
@@ -1359,7 +1360,7 @@ static void makeparticles(entity &e)
             break;
         }
         case 1: //steam vent - <dir>
-            regularsplash(PART_STEAM, 0x897661, 50, 1, 200, offsetvec(e.o, e.attr2, rnd(10)), 2.4f, -20);
+            regularsplash(PART_STEAM, colorfromattr(e.attr3), 50, 1, 200, offsetvec(e.o, e.attr2, rnd(10)), 2.4f, -20);
             break;
         case 2: //water fountain - <dir>
         {
@@ -1407,26 +1408,26 @@ static void makeparticles(entity &e)
             if(n_ambiance==8) newparticle(e.o, offsetvec(e.o, e.attr4, 1000*3+(e.attr5*300)), 1, PART_RAINBOW, 0xAAAAAA, 100+(e.attr3*10));
             break;
         case 16:
-        {
-            if(randomevent(5*nbfps))
             {
-                vec pos = e.o;
-                pos.add(vec(-30+rnd(30), -30+rnd(30), -5));
-                playsound(S_LAVASPLASH, &e.o, 0, 0, 0 , 30, -1, 200);
-                loopi(6)regularsplash(PART_FIRESPARK, 0xFFBB55, 800+rnd(600), 10, 300+(rnd(500)), pos, 3.f+(rnd(30)/6.f), 200, 0, -3.f, true);
-                loopi(4)regularsplash(PART_SMOKE, 0x333333, 400, 3, 1000+(rnd(1000)), pos, 8.f+(rnd(8)), -20, 0, 18.f, true);
-                loopi(2)particle_fireball(pos, 20, PART_EXPLOSION, 500, 0xFF9900, 2.5f, false);
+                if(randomevent(5*nbfps))
+                {
+                    vec pos = e.o;
+                    pos.add(vec(-30+rnd(30), -30+rnd(30), -5));
+                    playsound(S_LAVASPLASH, &e.o, 0, 0, 0 , 30, -1, 200);
+                    loopi(6)regularsplash(PART_FIRESPARK, 0xFFBB55, 800+rnd(600), 10, 300+(rnd(500)), pos, 3.f+(rnd(30)/6.f), 200, 0, -3.f, true);
+                    loopi(4)regularsplash(PART_SMOKE, 0x333333, 400, 3, 1000+(rnd(1000)), pos, 8.f+(rnd(8)), -20, 0, 18.f, true);
+                    loopi(2)particle_fireball(pos, 20, PART_EXPLOSION, 500, 0xFF9900, 2.5f, false);
+                }
             }
-        }
-        break;
+            break;
 
         case 17: //rain
             {
                 if(n_ambiance==4 || n_ambiance==8) regularshape(PART_RAIN, max(1+e.attr2, 1), n_ambiance==8 ? 0xEEEEEE : colorfromattr(e.attr4), 44, n_ambiance==8 ? e.attr3/2 : e.attr3, 10000, e.o, 1+(rnd(2)), 200, -900, e.attr5, true, 200);
-                if(randomevent(20*nbfps) && n_ambiance == 4 && isconnected())
+                if(randomevent(25*nbfps) && n_ambiance == 4 && isconnected())
                 {
                     vec possky = e.o; vec posground = e.o;
-                    int posx = -750+rnd(1500), posy = -750+rnd(1500);
+                    int posx = -1250+rnd(2500), posy = -1250+rnd(2500);
                     possky.add(vec(posx+(-200+(rnd(400))), posy+(-200+(rnd(400))), 800));
                     posground.add(vec(posx, posy, -50));
                     loopi(2)particle_flare(possky, posground, 750, PART_LIGHTNING, 0x8888FF, 15.f+rnd(10), NULL, gfx::champicolor);
@@ -1442,10 +1443,12 @@ static void makeparticles(entity &e)
                 }
             }
             break;
+
         case 18: //snow
             if(n_ambiance!=8) return;
             regularshape(PART_SNOW, max(1+e.attr2, 1), colorfromattr(e.attr4), 44, e.attr3, 10000, e.o, 2+(rnd(3)), 200, -400, e.attr5, true, 200);
             break;
+
         case 19: //apocalypse
             {
                 if(n_map==5);
@@ -1457,7 +1460,7 @@ static void makeparticles(entity &e)
                 if(randomevent(6*nbfps) && n_map!=5 && isconnected())
                 {
                     vec possky = e.o; vec posground = e.o;
-                    int posx = -750+rnd(1500), posy = -750+rnd(1500);
+                    int posx = -1250+rnd(2500), posy = -1250+rnd(2500);
                     possky.add(vec(posx+(-200+(rnd(400))), posy+(-200+(rnd(400))), 800));
                     posground.add(vec(posx, posy, -50));
                     particle_flare(possky, posground, 1000, PART_LIGHTNING, 0xFF6622, 15.f+rnd(10), NULL, gfx::champicolor);
@@ -1593,7 +1596,7 @@ void updateparticles()
             entity &e = *ents[i];
             if(e.type==ET_EMPTY) continue;
             particle_textcopy(e.o, entname(e), PART_TEXT, 1, 0x1EC850, 2.5f);
-            regular_particle_splash(PART_EDIT, 2, 60, e.o, 0x3232FF, 1.00f*particlesize/100.0f);
+            regular_particle_splash(PART_SPARK, 2, 60, e.o, 0x3232FF, 1.00f*particlesize/100.0f);
         }
     }
 }

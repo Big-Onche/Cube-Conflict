@@ -17,20 +17,20 @@ namespace gfx
             case ATK_PULSE_SHOOT:
             {
                 particle_splash(PART_FIRESPARK, 15, 150, v, owner->steromillis ? 0xFF0000 : 0xFF6600, 1.f, 150, 500, 2, champicolor);
-                particle_fireball(v, 7, PART_PULSE_BURST, 300, owner->steromillis ? 0xFF0000 : 0xCC9900, 3, champicolor);
+                particle_fireball(v, 9.f, PART_PLASMABURST, 300, owner->steromillis ? 0xFF0000 : 0xCC9900, 3, champicolor);
                 adddynlight(safe ? v : lightloc, 2*attacks[atk].exprad, vec(1.5f, 0.75f, 0.0f), 150, 50, 0, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
                 return;
             }
             case ATK_GRAP1_SHOOT:
             {
-                particle_splash(PART_GLOWSPARK, 20, 100, v, owner->steromillis ? 0xFF0000 : 0xAA4466, 0.5f, 400, 400, 0, champicolor);
-                loopi(2)particle_fireball(v, 5, PART_EXPLOSION, 200, owner->steromillis ? 0xFF0000 : 0x550055, 1.f, champicolor);
+                particle_splash(PART_SPARK, 20, 100, v, owner->steromillis ? 0xFF0000 : 0xAA4466, 0.5f, 400, 400, 0, champicolor);
+                loopi(2)particle_fireball(v, 7.f, PART_EXPLOSION, 200, owner->steromillis ? 0xFF0000 : 0x550055, 1.f, champicolor);
                 adddynlight(safe ? v : lightloc, 2*attacks[atk].exprad, vec(1.5f, 0.0f, 1.5f), 200, 100, L_NODYNSHADOW, attacks[atk].exprad/2, vec(0.5f, 0.0f, 0.5f));
                 return;
             }
             case ATK_SPOCKGUN_SHOOT:
             {
-                particle_splash(PART_GLOWSPARK, 15, 100, v, owner->steromillis ? 0xFF0000 : 0x00FF66, 0.5f, 250, 250, 0, champicolor);
+                particle_splash(PART_SPARK, 15, 100, v, owner->steromillis ? 0xFF0000 : 0x00FF66, 0.5f, 250, 250, 0, champicolor);
                 adddynlight(safe ? v : lightloc, 1.25f*attacks[atk].exprad, vec(0.0f, 1.5f, 0.0f), 200, 50, 0, attacks[atk].exprad/2, vec(1.f, 1.f, 1.f));
                 return;
             }
@@ -69,7 +69,7 @@ namespace gfx
             case ATK_ARTIFICE_SHOOT:
 
                 particle_splash(PART_FLAME1+rnd(2), 5, 40, v, 0xFFC864, 5, 800, 1600, 0, champicolor);
-                loopi(4) particle_splash(PART_GLOWSPARK, 16+rnd(10), 200+rnd(200), v, owner->steromillis ? 0xFF0000 : rndcolor[rnd(6)].color, 0.2f+(rnd(5)/10.f), 500+rnd(300), 5000+rnd(3000), 2.f, champicolor);
+                loopi(4) particle_splash(PART_SPARK, 16+rnd(10), 200+rnd(200), v, owner->steromillis ? 0xFF0000 : rndcolor[rnd(6)].color, 0.2f+(rnd(5)/10.f), 500+rnd(300), 5000+rnd(3000), 2.f, champicolor);
 
                 if(lookupmaterial(v)==MAT_WATER)
                 {
@@ -89,7 +89,7 @@ namespace gfx
                 loopi(3) particle_splash(PART_SPARK, 8, 150+rnd(150), v, owner->steromillis ? 0xFF0000 : 0xFFFFFF,  2.0f+rnd(2), 1500+rnd(2250), 1500+rnd(2250), 0, champicolor);
                 loopi(2) particle_splash(PART_SMOKE, 7, 1300+rnd(800), v, 0x555555, 40.0f, 150+rnd(150), 300+rnd(700), 0, champicolor);
 
-                loopi(3) particle_fireball(v, 40+rnd(50), PART_PLASMA, 300, owner->steromillis ? 0xFF0000 : 0xFFFFFF, 1.0f, champicolor);
+                loopi(3) particle_fireball(v, 40+rnd(50), PART_PLASMAGRENADE, 300, owner->steromillis ? 0xFF0000 : 0xFFFFFF, 1.0f, champicolor);
                 particle_fireball(v, 400, PART_ONDECHOC, 300, owner->steromillis ? 0xFF0000 : 0xFFFFFF, 20.0f, champicolor);
 
                 if(lookupmaterial(v)==MAT_WATER)
@@ -137,9 +137,9 @@ namespace gfx
                 loopi(50)
                 {
                     vec pos = vec(v).add(vec(rnd(200)-rnd(400), rnd(200)-rnd(400), rnd(200)-rnd(400)));
-                    particle_splash(PART_SMOKE, 1, 2000,  pos, 0x212121, 150.0f, 700,   70, 1.2f, champicolor);
-                    particle_splash(PART_SMOKE, 1, 15000, pos, 0x222222, 200.0f,  35,  300, 1.2f, champicolor);
-                    particle_splash(PART_SMOKE, 2, 5000,  pos, 0x333333, 250.0f, 1000, 500, 1.2f, champicolor);
+                    particle_splash(PART_SMOKE, 1, 2000,  pos, 0x212121, 150.0f, 700,   70, 1, champicolor);
+                    particle_splash(PART_SMOKE, 1, 15000, pos, 0x222222, 200.0f,  35,  300, 1, champicolor);
+                    particle_splash(PART_SMOKE, 2, 5000,  pos, 0x333333, 250.0f, 1000, 500, 1, champicolor);
                     particle_splash(i>25 ? PART_FLAME1 : PART_FLAME2, 3, 750+(i*10), pos, owner->steromillis ? 0xFF0000 : i>16 ? 0xFFFF00 : i>32 ? 0x224400 : 0xFF2222, 28+rnd(15), 700, 300, 2.f, champicolor);
                 }
 
@@ -163,7 +163,7 @@ namespace gfx
             case ATK_FAMAS_SHOOT:
             case ATK_GLOCK_SHOOT:
             case ATK_ARBALETE_SHOOT:
-                if(atk!=ATK_ARBALETE_SHOOT)particle_splash(PART_GLOWSPARK, atk==ATK_MINIGUN_SHOOT || atk==ATK_AK47_SHOOT ? 12 : 9, 50, v, owner->steromillis ? 0xFF0000 : 0xFF8800, atk==ATK_MINIGUN_SHOOT || atk==ATK_AK47_SHOOT ? 0.3 : 0.2f, 150, 200, 0, champicolor);
+                if(atk!=ATK_ARBALETE_SHOOT)particle_splash(PART_SPARK, atk==ATK_MINIGUN_SHOOT || atk==ATK_AK47_SHOOT ? 12 : 9, 50, v, owner->steromillis ? 0xFF0000 : 0xFF8800, atk==ATK_MINIGUN_SHOOT || atk==ATK_AK47_SHOOT ? 0.3 : 0.2f, 150, 200, 0, champicolor);
                 particle_splash(PART_SMOKE, 3, 600+rnd(300), v, 0x565656, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.35f : 0.3f, 25, 300, 2, champicolor);
                 particle_splash(PART_SMOKE, 6, 350+rnd(300), v, 0x552900, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.35f : 0.3f, 15, 300, 2, champicolor);
                 return;

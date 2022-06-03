@@ -1212,11 +1212,11 @@ namespace game
 
                     switch(rnd(5))
                     {
-                        case 0: particle_flying_flare(origin, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x881111 :  0x604930, (7.f+rnd(16))/10.f, 100, 18.f, player1->champimillis ? true : false); break;
-                        case 1: particle_flying_flare(origin, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x770000 :  0x474747, (7.f+rnd(16))/10.f, 100, 18.f, player1->champimillis ? true : false); break;
-                        case 2: particle_flying_flare(origin, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x991111 :  0x383838, (7.f+rnd(16))/10.f, 100, 18.f, player1->champimillis ? true : false); break;
+                        case 0: particle_flying_flare(origin, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x881111 :  0x604930, (7.f+rnd(16))/10.f, 100, 10+rnd(5), player1->champimillis ? true : false); break;
+                        case 1: particle_flying_flare(origin, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x770000 :  0x474747, (7.f+rnd(16))/10.f, 100, 10+rnd(5), player1->champimillis ? true : false); break;
+                        case 2: particle_flying_flare(origin, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x991111 :  0x383838, (7.f+rnd(16))/10.f, 100, 10+rnd(5), player1->champimillis ? true : false); break;
                         default:
-                            particle_flying_flare(origin, irays, 1100, PART_SMOKE, 0x111111, (10.f+rnd(18))/10.f, -20, 22.f, player1->champimillis ? true : false);
+                            particle_flying_flare(origin, irays, 1100, PART_SMOKE, 0x111111, (10.f+rnd(18))/10.f, -20, 15+rnd(5), player1->champimillis ? true : false);
                             adddynlight(hudgunorigin(gun, d->o, irays, d), 50, vec(0.40f, 0.2f, 0.1f), 100, 100, L_NODYNSHADOW, 10, vec(0.50f, 0, 0), d);
                             gfx::instantrayhit(from, rays[i], d->aptitude==APT_ESPION && d->aptisort2 ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle, atk);
                             switch(rnd(2)){case 0: if(d!=hudplayer()) sound_nearmiss(S_FLYBYFLAME, from, rays[i]);}
