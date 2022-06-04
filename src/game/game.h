@@ -524,12 +524,12 @@ static const struct aptisortsinfo { const char *tex1, *tex2, *tex3; int mana1, m
     { "",                                       "media/interface/hud/sortkamikaze.png",     "",                                         0, 100,  0,    0, 5000,    0,    0, 5000,     0, S_NULL, S_SORTKAMIKAZE, S_NULL},               // Kamikaze
 };
 
-static const struct costumeinfo { const char *village, *usine, *faille, *lune, *chateaux, *volcan; } costumes[4] =  //Needed for spy classe
+static const struct costumeinfo { const char *entrainement_village_chateaux, *usine, *lune, *volcan; } costumes[4] =  //Needed for spy classe
 {
-    {"mapmodel/caisses/caissebois", "mapmodel/caisses/caisse1", "mapmodel/caisses/caissebois",  "mapmodel/rochers/pierre_fonce_esp",    "mapmodel/caisses/caissebois",  "mapmodel/distributeur"},
-    {"mapmodel/tonneau",            "mapmodel/caisses/caisse2", "mapmodel/tonneau",             "mapmodel/caisses/caisse2",             "mapmodel/tonneau",             "mapmodel/rochers/pierre_fonce_esp"},
-    {"mapmodel/panneau",            "mapmodel/caisses/caisse3", "mapmodel/panneau",             "mapmodel/caisses/caisse3",             "mapmodel/panneau",             "mapmodel/lampadaire"},
-    {"mapmodel/arbres/arbre1",      "mapmodel/murjersay",       "mapmodel/arbres/arbre1",       "mapmodel/murjersay",                   "mapmodel/arbres/arbre1",       "mapmodel/murjersay"},
+    {"mapmodel/caisses/caissebois", "mapmodel/caisses/caisse1",  "mapmodel/rochers/pierre_fonce_esp",   "mapmodel/distributeur"},
+    {"mapmodel/tonneau",            "mapmodel/caisses/caisse2",  "mapmodel/caisses/caisse2",            "mapmodel/rochers/pierre_fonce_esp"},
+    {"mapmodel/panneau",            "mapmodel/caisses/caisse3",  "mapmodel/caisses/caisse3",            "mapmodel/lampadaire"},
+    {"mapmodel/arbres/arbre1",      "mapmodel/murjersay",        "mapmodel/murjersay",                  "mapmodel/murjersay"},
 };
 
 extern int abilitydata(int aptitude);

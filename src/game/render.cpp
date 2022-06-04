@@ -257,11 +257,9 @@ namespace game
 
         loopi(4) //Preloading all spy's disguisement
         {
-            preloadmodel(costumes[i].village);
+            preloadmodel(costumes[i].entrainement_village_chateaux);
             preloadmodel(costumes[i].usine);
-            preloadmodel(costumes[i].faille);
             preloadmodel(costumes[i].lune);
-            preloadmodel(costumes[i].chateaux);
             preloadmodel(costumes[i].volcan);
         }
 
@@ -460,11 +458,11 @@ namespace game
         {
             switch(n_map)
             {
-                case 0: copystring(costumemdlname, costumes[d->aptiseed].village); break;
-                case 1: copystring(costumemdlname, costumes[d->aptiseed].usine); break;
-                case 2: copystring(costumemdlname, costumes[d->aptiseed].faille); break;
+                case 0: case 1: case 4:
+                    copystring(costumemdlname, costumes[d->aptiseed].entrainement_village_chateaux);
+                    break;
+                case 2: copystring(costumemdlname, costumes[d->aptiseed].usine); break;
                 case 3: copystring(costumemdlname, costumes[d->aptiseed].lune); break;
-                case 4: copystring(costumemdlname, costumes[d->aptiseed].chateaux); break;
                 case 5: copystring(costumemdlname, costumes[d->aptiseed].volcan); break;
             }
 

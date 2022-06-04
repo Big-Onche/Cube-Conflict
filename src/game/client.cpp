@@ -4,11 +4,11 @@
 #include "stats.h"
 
 VAR(n_ambiance, 0, 0, 8);
-VAR(n_map, 0, 0, 99);
+VARP(n_map, 0, 1, 99);
 VARR(mapofficielle, 0, 0, 1);
 
 extern void calcmode();     //Gestion des modes de jeux
-VAR(n_mode, 0, 0, 17);
+VARP(n_mode, 0, 0, 17);
 VARFP(n_team, 0, 0, 1, { calcmode(); });
 VARFP(n_type, 0, 0, 2, { calcmode(); });
 VARFP(n_spec, 1, 1, 5, { calcmode(); });
@@ -857,17 +857,9 @@ namespace game
 
     void changemap(const char *name)
     {
-        switch(n_map)
-        {
-            case 0: name = "Village"; break;
-            case 1: name = "Usine"; n_ambiance = 1; break;
-            case 2: name = "Faille"; break;
-            case 3: name = "Lune"; n_ambiance = 1; break;
-            case 4: name = "Chateaux"; break;
-            case 5: name = "Volcan"; n_ambiance = 1; break;
-            case 77: name = "Entrainement"; break;
-        }
-        changemap(name, m_valid(nextmode) ? nextmode : (remote ? 1 : 0));
+        string mapnum;
+        formatstring(mapnum, "%d", n_map);
+        changemap(mapnum, m_valid(nextmode) ? nextmode : (remote ? 1 : 0));
         fullbrightmodels = 0;
     }
     ICOMMAND(map, "s", (char *name), changemap(name));
@@ -1668,13 +1660,7 @@ namespace game
                 filtertext(text, text, false);
                 fixmapname(text);
                 changemapserv(text, getint(p));
-                conoutf("%s", text);
-                strcmp(text, "Village")==0 ? n_map = 0 :
-                    strcmp(text, "Usine")==0 ? n_map = 1 :
-                    strcmp(text, "Faille")==0 ? n_map = 2 :
-                    strcmp(text, "Lune")==0 ? n_map = 3 :
-                    strcmp(text, "Chateaux")==0 ? n_map = 4 :
-                    strcmp(text, "Volcan")==0 ? n_map = 5 : n_map = 0;
+                n_map = atoi(text);
                 mapchanged = true;
                 if(getint(p)) entities::spawnitems();
                 else senditemstoserver = false;

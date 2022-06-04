@@ -49,3 +49,12 @@ extern bool IS_USING_STEAM, IS_ON_OFFICIAL_SERV, UI_PLAYMUSIC;
 extern void getsteamname();
 extern void genpseudo(int forcelang = 0);
 
+static const struct mapinfo { const char *mapname_en, *mapname_fr; } mapnames[] =
+{
+    {"Training",    "Entrainement"},
+    {"Village",     "Village"},
+    {"Factory",     "Usine"},
+    {"Moon",        "Lune"},
+    {"Castle",      "Chateau"},
+    {"Volcano",     "Volcan"},
+};

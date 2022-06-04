@@ -208,16 +208,18 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
 
         if(mapname)
         {
-            int tw = text_width(mapname);
+            defformatstring(mapprettyname, "%s", langage ? mapnames[n_map].mapname_en : mapnames[n_map].mapname_fr);
+            int tw = text_width(mapprettyname);
             float tsz = 0.04f*min(screenw, screenh)/70,
                   tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*8.0f*min(screenw, screenh) - 70*tsz;
             pushhudmatrix();
             hudmatrix.translate(tx, ty, 0);
             hudmatrix.scale(tsz, tsz, 1);
             flushhudmatrix();
-            draw_text(mapname, 0, 0, 0x01, 0x01, 0x01, 0xFF, -1);
+            draw_text(mapprettyname, 0, 0, 0x01, 0x01, 0x01, 0xFF, -1);
             pophudmatrix();
         }
+
         if(astuce)
         {
             int tw = infowidth+2;
@@ -240,16 +242,7 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
             float ilh = 1.1f*min(w, h), ilw = ilh*1.8f,
                   ilx = 0.5f*(w - ilw), ily = 0.5f*(h - ilh);
 
-            switch(n_map)
-            {
-                case 0: formatstring(backgroundimg, "media/map/village.png"); break;
-                case 1: formatstring(backgroundimg, "media/map/usine.png"); break;
-                case 2: formatstring(backgroundimg, "media/map/faille.png"); break;
-                case 3: formatstring(backgroundimg, "media/map/lune.png"); break;
-                case 4: formatstring(backgroundimg, "media/map/chateaux.png"); break;
-                case 5: formatstring(backgroundimg, "media/map/volcan.png"); break;
-                default: formatstring(backgroundimg, "media/interface/background.png");
-            }
+            formatstring(backgroundimg, "media/map/%d.png", n_map);
 
             settexture(backgroundimg);
             bgquad(ilx-parallaxX/-40, ily-parallaxY/-40, ilw, ilh);
@@ -1324,11 +1317,11 @@ int main(int argc, char **argv)
     textureload("media/interface/hud/viseurA.png");
     textureload("media/interface/hud/viseurB.png");
     textureload("media/interface/hud/viseurC.png");
-    textureload("media/map/village.png");
-    textureload("media/map/usine.png");
-    textureload("media/map/chateaux.png");
-    textureload("media/map/lune.png");
-    textureload("media/map/volcan.png");
+    textureload("media/map/1.png");
+    textureload("media/map/2.png");
+    textureload("media/map/3.png");
+    textureload("media/map/4.png");
+    textureload("media/map/5.png");
 
     logoutf("init: console");
     if(!execfile("config/stdlib.cfg", false)) fatal("cannot find data files (you are running from the wrong folder, try .bat file in the main folder)");   // this is the first file we load.
