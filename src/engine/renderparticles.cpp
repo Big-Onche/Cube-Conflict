@@ -1,6 +1,5 @@
 // renderparticles.cpp
 
-#include "engine.h"
 #include "ccheader.h"
 
 Shader *particleshader = NULL, *particlenotextureshader = NULL, *particlesoftshader = NULL, *particletextshader = NULL;
@@ -1423,7 +1422,7 @@ static void makeparticles(entity &e)
 
         case 17: //rain
             {
-                if(n_ambiance==4 || n_ambiance==8) regularshape(PART_RAIN, max(1+e.attr2, 1), n_ambiance==8 ? 0xEEEEEE : colorfromattr(e.attr4), 44, n_ambiance==8 ? e.attr3/2 : e.attr3, 10000, e.o, 1+(rnd(2)), 200, -900, e.attr5, true, 200);
+                if(n_ambiance==4 || n_ambiance==8) regularshape(PART_RAIN, max(1+e.attr2, 1), 0x555566, 44, n_ambiance==8 ? e.attr3/2 : e.attr3, 10000, e.o, 1+(rnd(2)), 200, -900, e.attr5, true, 200);
                 if(randomevent(25*nbfps) && n_ambiance == 4 && isconnected())
                 {
                     vec possky = e.o; vec posground = e.o;
