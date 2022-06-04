@@ -32,14 +32,16 @@ Content included in the game (maps, textures, sounds, models etc.)
 is NOT covered by this license.
 
 - 3D model files have their own licenses
-  See licenses / licenses_3Dmodels.txt
-- Sound effects and music files used in game are buyed from SoundSnap 
-  and therefore covered by this license : http://soundsnap.com/licence
-- Voices are in public domain and/or used with express permissions of
-  their author or purely created for the game.
+  See licenses/licenses_3Dmodels.txt
+
+- Images, icons and font used have their own licenses
+  Voir licenses/licenses_images.txt
+
+- Sound effects have their own licenses
+  Voir licenses/licenses_sounds.txt
 
 In the absence of an explicit license, any content is considered 
-to be covered by the CC-BY-SA license.
+to be covered by the CC-BY-SA license and created for Cube Conflict.
 See cc-by-sa.txt or http://creativecommons.org/licenses/by-sa/4.0/
 
 
@@ -47,13 +49,13 @@ DEPENDENCIES
 =============
 
 Cube Conflict uses Tesseract (http://tesseract.gg) as game engine. 
-See licence/readme_tesseract.txt
+See licences/readme_tesseract.txt
 
 
 AUTHORS
 ======
-Jean Onche and LordSpock (PixStudio)
-Others (for some 3D models and concepts) : 
-Skyser, JoueurZero, JambonBeurreMan, Kara, Harmonyra.
+Jean Onche
+Others (for some 3D models: Skyser
+Special thanks to : The creators of Cube Engine 2 / Tesseract, "Lordspock" (PixStudio) and "lag-it".
 
 

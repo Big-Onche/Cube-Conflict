@@ -1,1 +1,0 @@
-damage.png by nieb

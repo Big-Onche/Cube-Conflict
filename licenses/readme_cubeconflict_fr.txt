@@ -7,7 +7,7 @@ Copyright (C) 2013-2022 Jean Onche.
 
 Ce logiciel est fourni "tel quel", sans aucune garantie formelle ou implicite. 
 En aucun cas, les auteurs ne pourront être tenus responsables de tout dommage
- résultant de l'utilisation de ce logiciel.
+résultant de l'utilisation de ce logiciel.
 
 La permission est accordée à quiconque d'utiliser ce logiciel à quelque fin 
 que ce soit, y compris les applications commerciales, à le modifier
@@ -34,29 +34,29 @@ qui est cependant compatible avec la licence ci-dessus à toute fin pratique.
 Le contenu inclus dans le jeu (maps, textures, sons modèles 3D, etc..) ne sont PAS couverts
 par cette licence !
 
-- Les fichiers de modèles 3D on chacun leur licence respective
+- Les fichiers de modèles 3D ont chacun leur licence respective
   Voir licenses/licenses_3Dmodels.txt
-- Les effets sonores et musiques utilisées sont achetés sur SoundSnap.com et
-  donc couvert par cette licence :  http://soundsnap.com/licence
-- Les voix utilisées appartiennent au domaine public et/ou ont été
-  utilisées avec l'accord de leurs auteurs ou purement créées pour le jeu.
+
+- Les fichiers d'images, icones et polices ont chacun leur licence respective
+  Voir licenses/licenses_images.txt
+
+- Les effets sonores ont chacun leur licence respective
+  Voir licenses/licenses_sounds.txt
 
 En absence d'une licence explicite, tout fichier est considéré comme couvert
-par la licence CC-BY-SA.
-Voir cc-by-sa.txt ou http://creativecommons.org/licenses/by-sa/4.0/
+par la licence CC-BY-SA et créé specifiquement pour Cube Conflict.
+Voir licenses_certificates/cc-by-sa.txt ou http://creativecommons.org/licenses/by-sa/4.0/
 
 
 DEPENDANCES
 ===========
 
 Cube Conflict utilise Tesseract (http://tesseract.gg) comme moteur de jeu. 
-Voir licence/readme_tesseract.txt
+Voir licences/readme_tesseract.txt
 
 
 AUTEURS
 =======
-Jean Onche et LordSpock (PixStudio)
-Autres (pour quelques modèles 3D & idées) : 
-Skyser, JoueurZero, JambonBeurreMan, Kara, Harmonyra.
-
-
+Jean Onche
+Autres (pour quelques modèles 3D) : Skyser
+Remerciement spéciaux à : Aux créateurs de Cube Engine 2 / Tesseract, "LordSpock" (PixStudio) et "lag-it".

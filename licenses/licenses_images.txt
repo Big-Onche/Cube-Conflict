@@ -1,0 +1,221 @@
+List of licenses applied to images (icons, font, hud and textures) | Liste des licences appliquées aux images (icônes, police, hud et textures)
+
+The following files are protected by Envato Elements license, you CANNOT use them for your personal projects unless you buy the images
+Les fichiers suivants sont protégés par licence Envato Elements vous ne POUVEZ PAS les utiliser pour vos projets personnels à moins d'acheter les images
+
+See / Voir licenses_certificates/license_certificate_LICENCEID (name of the file).txt
+
+
+
+
+-------------------------------------------------------------------------------------------------------
+
+Font used in the game / Police utilisée dans le jeu
+	Bitstream Vera Fonts
+	See / Voir lisences_certificates/font.txt
+
+Files :	media/interface/font/* 		//All files in the directory
+
+-------------------------------------------------------------------------------------------------------
+
+The following files were not created by the developers of Cube Conflict.
+However, they have specific licenses making their use possible in compliance with their respective licenses.
+
+Les fichiers suivants n'ont pas été créés par les développeurs de Cube Conflict.
+Cependant, ils possèdent des licences spécifiques rendant leur utilisation possible dans le respect de leur licences respectives.
+
+Provided by Nobiax
+	CC0 1.0 Universal (CC0 1.0) - Public Domain Dedication 
+	See / Voir licenses_certificates/readme (Nobiax).txt
+	media/interface/damage.png
+
+Provided by Remus
+	See / Voir licenses_certificates/readme (Remus).txt
+	media/sky/ciel/7_*.jpg //And all subnames
+
+Provided by Nieb
+	See / Voir licenses_certificates/readme (Nieb).txt
+	media/texture/base/* 			//All files in the directory
+	media/texture/game/* 			//All files in the directory
+	media/texture/mat_glass/nieb/* 		//All files in the directory
+	media/texture/mat_water/nieb/* 		//All files in the directory
+
+Provided by appleflap
+	See / Voir licenses_certificates/readme (Appleflap).txt
+	media/texture/mat_water/appleflap/water_normal.png 	//All files in the directory
+
+Provided by Cube Engine 2
+	See / Voir readme_sauerbraten.txt
+	media/texture/mat_water/caustic/* 	//All files in the directory
+	media/blendbrush/* 			//All files in the directory
+
+-------------------------------------------------------------------------------------------------------
+
+The following files were created expressly for Cube Conflict by its developers. The CC-BY-SA 4.0 license is applied here.
+Les fichiers suivants ont été crées expressément pour Cube Conflict par ses développeurs. La licence CC-BY-SA 4.0 y est appliquée.
+
+See / Voir licenses_certificates/cc-by-sa.txt
+
+Created by "Jean Onche" for Cube Conflict | Réalisé par "Jean Onche" pour Cube Conflict
+Files :	media/interface/cclogo.png
+	media/interface/intrologo.png
+	media/interface/logo.png
+	media/interface/logo_1024.png
+	media/interface/loading_bar.png
+	media/interface/loading_frame.png
+	media/interface/background.png
+	media/interface/achievements/* 		//All files in the directory
+	media/interface/crosshair/* 		//All files in the directory
+	media/interface/hud/action.jp
+	media/interface/hud/americain.jpg
+	media/interface/hud/attention.jpg
+	media/interface/hud/barrebouclierpleine.png
+	media/interface/hud/barresantepleine.png
+	media/interface/hud/barresantevide.png
+	media/interface/hud/barrestatsvide.png
+	media/interface/hud/barrexppleine.png
+	media/interface/hud/barrexpvide.png
+	media/interface/hud/blip_blue.png
+	media/interface/hud/blip_blue_alive.png
+	media/interface/hud/blip_blue_dead.png
+	media/interface/hud/blip_blue_flag.png
+	media/interface/hud/blip_blue_skull.png
+	media/interface/hud/blip_grey.png
+	media/interface/hud/blip_red.png
+	media/interface/hud/blip_red_alive.png
+	media/interface/hud/blip_red_dead.png
+	media/interface/hud/blip_red_flag.png
+	media/interface/hud/blip_red_skull.png
+	media/interface/hud/bouclier_bois.png
+	media/interface/hud/bouclier_fer.png
+	media/interface/hud/bouclier_magnetique.png
+	media/interface/hud/bouclier_or.png
+	media/interface/hud/boussole.png
+	media/interface/hud/campeur.jpg
+	media/interface/hud/campeur.png
+	media/interface/hud/cape.png
+	media/interface/hud/champis.png
+	media/interface/hud/chargeur.png
+	media/interface/hud/checkbox_off.jpg
+	media/interface/hud/checkbox_ong.jpg
+	media/interface/hud/chrono.png
+	media/interface/hud/cislacoin.jpg
+	media/interface/hud/cislacoins.png
+	media/interface/hud/coeur.png
+	media/interface/hud/comp.jpg
+	media/interface/hud/drapeau_allie.png
+	media/interface/hud/drapeau_ennemi.png
+	media/interface/hud/epee.png
+	media/interface/hud/epo.png
+	media/interface/hud/exit.jpg
+	media/interface/hud/flongue.jpg
+	media/interface/hud/fondbarrestats.png
+	media/interface/hud/fondbarrexp.png
+	media/interface/hud/hp.png
+	media/interface/hud/indien.jpg
+	media/interface/hud/inf.png
+	media/interface/hud/info.jpg
+	media/interface/hud/joint.jpg
+	media/interface/hud/kamikaze.jpg
+	media/interface/hud/mageprotectionscreen.png
+	media/interface/hud/magicien.jpg
+	media/interface/hud/mana.png
+	media/interface/hud/medecin.jpg
+	media/interface/hud/ninja.jpg
+	media/interface/hud/null.jpg
+	media/interface/hud/options.jpg
+	media/interface/hud/physicien.jpg
+	media/interface/hud/pixel.png
+	media/interface/hud/pretre.jpg
+	media/interface/hud/radar.png
+	media/interface/hud/radio_off.jpg
+	media/interface/hud/radio_on.jpg
+	media/interface/hud/ragescreen.png
+	media/interface/hud/robot.png
+	media/interface/hud/sauer.jpg
+	media/interface/hud/scores.png
+	media/interface/hud/scores_ctf.png
+	media/interface/hud/soldat.jpg
+	media/interface/hud/sortespion1.png
+	media/interface/hud/sortespion2.png
+	media/interface/hud/sortespion3.png
+	media/interface/hud/sortindien1.png
+	media/interface/hud/sortindien2.png
+	media/interface/hud/sortindien3.png
+	media/interface/hud/sortkamikaze.png
+	media/interface/hud/sortmage1.png
+	media/interface/hud/sortmage2.png
+	media/interface/hud/sortmage3.png
+	media/interface/hud/sortphysicien1.png
+	media/interface/hud/sortphysicien2.png
+	media/interface/hud/sortphysicien3.png
+	media/interface/hud/sortpretre1.png
+	media/interface/hud/sortpretre2.png
+	media/interface/hud/sortpretre3.png
+	media/interface/hud/souris.png
+	media/interface/hud/stats.png
+	media/interface/hud/steros.png
+	media/interface/hud/tombe.png
+	media/interface/hud/vampire.jpg
+	media/interface/hud/vampire.png
+	media/interface/hud/viking.jpg
+	media/interface/hud/viseurA.png
+	media/interface/hud/viseurB.png
+	media/interface/hud/viseurC.png
+	media/sky/ciel/1_*.jpg 		//And all subnames
+	media/sky/ciel/2_*.jpg 		//And all subnames
+	media/sky/ciel/3_*.jpg 		//And all subnames
+	media/sky/ciel/4_*.jpg 		//And all subnames
+	media/sky/ciel/5_*.jpg 		//And all subnames
+	media/sky/ciel/6_*.jpg 		//And all subnames
+	media/sky/ciel/galaxie.png
+	media/sky/ciel/Nuages1.png
+	media/sky/ciel/Nuages2.png
+	media/texture/mat_lava/*	//All files in the directory
+	media/texture/*			//All files in the directory but not the subfolders !
+
+	Note : The smileys are designed by "lag-it" (public domain) | Note : Les smileys sont designés par "lag-it" (public domain)
+	media/interface/chargement.png
+	media/interface/hud/cursor.png
+	media/interface/hud/bave.jpg
+	media/interface/hud/ananas.png
+	media/interface/hud/arrow_bw.jpg
+	media/interface/hud/arrow_bw_g.jpg
+	media/interface/hud/arrow_dn.jpg
+	media/interface/hud/arrow_fw.jpg
+	media/interface/hud/arrow_fw_g.jpg
+	media/interface/hud/blip_blue_ananas.png
+	media/interface/hud/blip_grey_ananas.png
+	media/interface/hud/bug.jpg
+	media/interface/hud/bug_red.jpg
+	media/interface/hud/chat.jpg
+	media/interface/hud/colere.jpg
+	media/interface/hud/colere_red.jpg
+	media/interface/hud/content.jpg
+	media/interface/hud/content_red.jpg
+	media/interface/hud/cool.jpg
+	media/interface/hud/cool_red.jpg
+	media/interface/hud/dealer.png
+	media/interface/hud/espion.jpg
+	media/interface/hud/faucheuse.jpg
+	media/interface/hud/fou.jpg
+	media/interface/hud/fou_red.jpg
+	media/interface/hud/hap.jpg
+	media/interface/hud/hap_red.jpg
+	media/interface/hud/malade.jpg
+	media/interface/hud/malade_red.jpg
+	media/interface/hud/map.jpg
+	media/interface/hud/mapeditor.jpg
+	media/interface/hud/menu.jpg
+	media/interface/hud/mort.png
+	media/interface/hud/noel.jpg
+	media/interface/hud/noel_red.jpg
+	media/interface/hud/rage.png
+	media/interface/hud/server.jpg
+	media/interface/hud/serverfull.jpg
+	media/interface/hud/serverlock.jpg
+	media/interface/hud/serverpriv.jpg
+	media/interface/hud/serverunk.jpg
+	media/interface/hud/sournois.jpg
+	media/interface/hud/sournois_red.jpg
+	media/interface/hud/spectateur.jpg
