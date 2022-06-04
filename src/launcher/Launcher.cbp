@@ -27,6 +27,7 @@
 			<Add library="kernel32" />
 			<Add library="comctl32" />
 			<Add library="shell32" />
+			<Add library="wininet" />
 		</Linker>
 		<Unit filename="config.cpp" />
 		<Unit filename="main.cpp" />

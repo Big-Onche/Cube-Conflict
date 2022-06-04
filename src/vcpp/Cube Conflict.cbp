@@ -123,9 +123,11 @@
 		<Unit filename="../cubeconflict/aptitudes.cpp" />
 		<Unit filename="../cubeconflict/ccheader.h" />
 		<Unit filename="../cubeconflict/customisation.cpp" />
+		<Unit filename="../cubeconflict/customisation.h" />
 		<Unit filename="../cubeconflict/gfx.cpp" />
 		<Unit filename="../cubeconflict/hud.cpp" />
 		<Unit filename="../cubeconflict/stats.cpp" />
+		<Unit filename="../cubeconflict/stats.h" />
 		<Unit filename="../engine/aa.cpp" />
 		<Unit filename="../engine/animmodel.h" />
 		<Unit filename="../engine/bih.cpp" />
@@ -192,6 +194,7 @@
 		<Unit filename="../game/ai.h" />
 		<Unit filename="../game/aiman.h" />
 		<Unit filename="../game/camera.cpp" />
+		<Unit filename="../game/capture.h" />
 		<Unit filename="../game/client.cpp" />
 		<Unit filename="../game/ctf.h" />
 		<Unit filename="../game/entities.cpp" />
