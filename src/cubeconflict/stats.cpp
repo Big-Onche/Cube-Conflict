@@ -80,14 +80,14 @@ ICOMMAND(getstatlogo, "i", (int *statID), result(getstatlogo(*statID)));
 string tmp;
 const char *getstatinfo(int statID, bool onlyvalue) //Récupère la description d'une statistique
 {
-    if(statID>NUMSTATS) return langage ? "Invalid ID" : "ID Invalide";
+    if(statID>NUMSTATS) return GAME_LANG ? "Invalid ID" : "ID Invalide";
     switch(statID)
     {
         //Based on STAT_KILLS & STAT_MORTS, STAT_KDRATIO not saved.
         case STAT_KDRATIO:
         {
             calcratio();
-            formatstring(tmp, "%s%s%.1f", onlyvalue ? "" : langage ? statslist[statID].statnicenameEN : statslist[statID].statnicenameFR, onlyvalue ? "" : " : ", kdratio);
+            formatstring(tmp, "%s%s%.1f", onlyvalue ? "" : GAME_LANG ? statslist[statID].statnicenameEN : statslist[statID].statnicenameFR, onlyvalue ? "" : " : ", kdratio);
             break;
         }
         //Easy secs to HH:MM:SS converter and displayer
@@ -97,8 +97,8 @@ const char *getstatinfo(int statID, bool onlyvalue) //Récupère la description d'
             while(tmpsec > 59) { tmpmin++ ; tmpsec-=60; }
             while(tmpmin > 59) { tmphr++ ; tmpmin-=60; }
 
-            formatstring(tmp, "%s : %d %s%s %d %s%s %d %s%s",  langage ? statslist[statID].statnicenameEN : statslist[statID].statnicenameFR,
-                        tmphr, langage ? "hour" : "heure", tmphr>1 ? "s" : "",
+            formatstring(tmp, "%s : %d %s%s %d %s%s %d %s%s",  GAME_LANG ? statslist[statID].statnicenameEN : statslist[statID].statnicenameFR,
+                        tmphr, GAME_LANG ? "hour" : "heure", tmphr>1 ? "s" : "",
                         tmpmin, "min", tmpmin>1 ? "s" : "",
                         tmpsec, "sec", tmpsec>1 ? "s" : "");
         }
@@ -108,10 +108,10 @@ const char *getstatinfo(int statID, bool onlyvalue) //Récupère la description d'
         case STAT_MAXKILLDIST:
         case STAT_LEVEL:
         case STAT_BASEHACK:
-            formatstring(tmp, "%s%s%d%s", onlyvalue ? "" : langage ? statslist[statID].statnicenameEN : statslist[statID].statnicenameFR, onlyvalue ? "" : " : ", stat[statID], statID!=STAT_MAXKILLDIST ? statID==STAT_BASEHACK ? langage ? " seconds" : " secondes" : "" : langage ? " meters" : " mètres");
+            formatstring(tmp, "%s%s%d%s", onlyvalue ? "" : GAME_LANG ? statslist[statID].statnicenameEN : statslist[statID].statnicenameFR, onlyvalue ? "" : " : ", stat[statID], statID!=STAT_MAXKILLDIST ? statID==STAT_BASEHACK ? GAME_LANG ? " seconds" : " secondes" : "" : GAME_LANG ? " meters" : " mètres");
             break;
         //otherwise, we put the stat value before the description by default
-        default: formatstring(tmp, "%d%s%s", stat[statID], onlyvalue ? "" : " ", onlyvalue ? "" : langage ? statslist[statID].statnicenameEN : statslist[statID].statnicenameFR);
+        default: formatstring(tmp, "%d%s%s", stat[statID], onlyvalue ? "" : " ", onlyvalue ? "" : GAME_LANG ? statslist[statID].statnicenameEN : statslist[statID].statnicenameFR);
     }
 
     return tmp;
@@ -133,7 +133,7 @@ char *encryptsave(char savepart[20]) //simple and easily crackable encryption
 void writesave() //we write the poorly encrypted value for all stat
 {
     stream *savefile = openutf8file("config/stats.cfg", "w");
-    if(!savefile) { conoutf(langage ? "\fcUnable to write your save file !" : "\fcUnable d'écrite votre fichier de sauvegarde !"); return; }
+    if(!savefile) { conoutf(GAME_LANG ? "\fcUnable to write your save file !" : "\fcUnable d'écrite votre fichier de sauvegarde !"); return; }
 
     int saveID = 0;
     loopi(NUMSTATS + NUMCUST + NUMACHS)
@@ -195,7 +195,7 @@ void unlockachievement(int achID) //Débloque le succès
         succes[achID] = true; //Met le succès à jour côté client
         addxpandcc(25, 25);
         playsound(S_ACHIEVEMENTUNLOCKED);
-        formatstring(tempachname, "%s", langage ? achievements[achID].achnicenameEN : achievements[achID].achnicenameFR);
+        formatstring(tempachname, "%s", GAME_LANG ? achievements[achID].achnicenameEN : achievements[achID].achnicenameFR);
         message[MSG_ACHUNLOCKED] = totalmillis;
     }
 }
@@ -237,15 +237,15 @@ ICOMMAND(getachievementslogo, "i", (int *achID), result(getachievementslogo(*ach
 
 const char *getachievementname(int achID) //Récupère le nom d'un succès en particulier
 {
-    if(achID>NUMACHS) return langage ? "Invalid ID" : "ID Invalide";
-    return langage ? achievements[achID].achnicenameEN : achievements[achID].achnicenameFR;
+    if(achID>NUMACHS) return GAME_LANG ? "Invalid ID" : "ID Invalide";
+    return GAME_LANG ? achievements[achID].achnicenameEN : achievements[achID].achnicenameFR;
 }
 ICOMMAND(getachievementname, "i", (int *achID), result(getachievementname(*achID)));
 
 const char *getachievementinfo(int achID) //Récupère la description d'un succès en particulier
 {
-    if(achID>NUMACHS) return langage ? "Invalid ID" : "ID Invalide";
-    return langage ? achievements[achID].achdescEN : achievements[achID].achdescFR;
+    if(achID>NUMACHS) return GAME_LANG ? "Invalid ID" : "ID Invalide";
+    return GAME_LANG ? achievements[achID].achdescEN : achievements[achID].achdescFR;
 }
 ICOMMAND(getachievementinfo, "i", (int *achID), result(getachievementinfo(*achID)));
 

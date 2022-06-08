@@ -77,7 +77,7 @@ namespace ai
 
     void bottaunt(gameent *d)
     {
-        if(langage) return;
+        if(GAME_LANG) return;
         if(d->state!=CS_ALIVE || d->physstate<PHYS_SLOPE) return;
         if(lastmillis-d->lasttaunt<7500) return;
         d->lasttaunt = lastmillis;
@@ -250,7 +250,7 @@ namespace ai
         bool resetthisguy = false;
 
         int feminin = rnd(2);
-        formatstring(pseudobot, "%s%s", botrndname(true, feminin, langage), botrndname(false, feminin, langage));
+        formatstring(pseudobot, "%s%s", botrndname(true, feminin, GAME_LANG), botrndname(false, feminin, GAME_LANG));
         copystring(d->name, pseudobot, MAXNAMELEN+1);
 
         if(!d->name[0])

@@ -169,7 +169,7 @@ void disconnect(bool async, bool cleanup, bool volontaire)
         }
         curpeer = NULL;
         discmillis = 0;
-        conoutf(langage ? "Disconnected" : "Déconnecté");
+        conoutf(GAME_LANG ? "Disconnected" : "Déconnecté");
         IS_ON_OFFICIAL_SERV = false;
         game::gamedisconnect(cleanup);
         clearpostfx();
@@ -241,12 +241,12 @@ void gets2c()           // get updates from the server
     if(!clienthost) return;
     if(connpeer && totalmillis/3000 > connmillis/3000)
     {
-        conoutf(langage ? "Attempting to connect..." : "Connexion au serveur...");
+        conoutf(GAME_LANG ? "Attempting to connect..." : "Connexion au serveur...");
         connmillis = totalmillis;
         ++connattempts;
         if(connattempts > 3)
         {
-            conoutf(CON_ERROR, langage ? "\f3Could not connect to server" : "\f3Connexion au serveur impossible");
+            conoutf(CON_ERROR, GAME_LANG ? "\f3Could not connect to server" : "\f3Connexion au serveur impossible");
             abortconnect();
             return;
         }
@@ -259,14 +259,14 @@ void gets2c()           // get updates from the server
             localdisconnect(false);
             curpeer = connpeer;
             connpeer = NULL;
-            conoutf(langage ? "Connexion successful" : "Connecté au serveur");
+            conoutf(GAME_LANG ? "Connexion successful." : "Connecté au serveur.");
             throttle();
             if(rate) setrate(rate);
             game::gameconnect(true);
             break;
 
         case ENET_EVENT_TYPE_RECEIVE:
-            if(discmillis) conoutf(langage ? "Disconnecting" : "Déconnexion");
+            if(discmillis) conoutf(GAME_LANG ? "Disconnecting..." : "Déconnexion...");
             else localservertoclient(event.channelID, event.packet);
             enet_packet_destroy(event.packet);
             break;
@@ -275,7 +275,7 @@ void gets2c()           // get updates from the server
             if(event.data>=DISC_NUM) event.data = DISC_NONE;
             if(event.peer==connpeer)
             {
-                conoutf(CON_ERROR, "\f3could not connect to server");
+                conoutf(CON_ERROR, GAME_LANG ? "\f3Could not connect to server." : "\f3Impossible de se connecter au serveur.");
                 abortconnect();
             }
             else
@@ -283,8 +283,8 @@ void gets2c()           // get updates from the server
                 if(!discmillis || event.data)
                 {
                     const char *msg = disconnectreason(event.data);
-                    if(msg) conoutf(CON_ERROR, "\f3server network error, disconnecting (%s) ...", msg);
-                    else conoutf(CON_ERROR, "\f3server network error, disconnecting...");
+                    if(msg) conoutf(CON_ERROR, GAME_LANG ? "\f3Server network error, disconnecting (%s) ..." : "\f3Erreur de serveur, déconnexion (%s)", msg);
+                    else conoutf(CON_ERROR, GAME_LANG ? "\f3Server network error, disconnecting." : "\f3Erreur de serveur, déconnexion.");
                 }
                 disconnect();
             }

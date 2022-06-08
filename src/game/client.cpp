@@ -75,7 +75,7 @@ string pseudoaleatoire;
 void genpseudo(int forcelang)
 {
     int feminin = rnd(2);
-    formatstring(pseudoaleatoire, "%s%s", playerrndname(true, feminin, forcelang<2 ? langage : forcelang-2), playerrndname(false, feminin, forcelang<2 ? langage : forcelang-2));
+    formatstring(pseudoaleatoire, "%s%s", playerrndname(true, feminin, forcelang<2 ? GAME_LANG : forcelang-2), playerrndname(false, feminin, forcelang<2 ? GAME_LANG : forcelang-2));
 
     copystring(game::player1->name, pseudoaleatoire);
     game::addmsg(N_SWITCHNAME, "rs", game::player1->name);
@@ -249,7 +249,7 @@ namespace game
     }
     void printname()
     {
-        conoutf(langage ? "your name is: %s" : "Ton pseudo est : %s", colorname(player1));
+        conoutf(GAME_LANG ? "Your name is: %s" : "Ton pseudo est : %s", colorname(player1));
     }
     ICOMMAND(name, "sN", (char *s, int *numargs),
     {
@@ -268,17 +268,17 @@ namespace game
     }
     void printteam()
     {
-        if((player1->clientnum >= 0 && !m_teammode) || !validteam(player1->team)) conoutf(langage ? "You are not in a team." : "Tu n'est pas dans une équipe.");
-        else conoutf(langage ? "Your team is: \fs%s%s\fr" : "Tu es désormais dans l'équipe \fs%s%s\fr", teamtextcode[player1->team], langage ? teamnames_EN[player1->team] : teamnames_FR[player1->team]);
+        if((player1->clientnum >= 0 && !m_teammode) || !validteam(player1->team)) conoutf(GAME_LANG ? "You are not in a team." : "Tu n'est pas dans une équipe.");
+        else conoutf(GAME_LANG ? "Your team is: \fs%s%s\fr" : "Tu es désormais dans l'équipe \fs%s%s\fr", teamtextcode[player1->team], GAME_LANG ? teamnames_EN[player1->team] : teamnames_FR[player1->team]);
     }
     ICOMMAND(team, "sN", (char *s, int *numargs),
     {
         if(*numargs > 0) switchteam(s);
         else if(!*numargs) printteam();
-        else if((player1->clientnum < 0 || m_teammode) && validteam(player1->team)) result(tempformatstring("\fs%s%s\fr", teamtextcode[player1->team], langage ? teamnames_EN[player1->team] : teamnames_FR[player1->team]));
+        else if((player1->clientnum < 0 || m_teammode) && validteam(player1->team)) result(tempformatstring("\fs%s%s\fr", teamtextcode[player1->team], GAME_LANG ? teamnames_EN[player1->team] : teamnames_FR[player1->team]));
     });
     ICOMMAND(getteam, "", (), intret((player1->clientnum < 0 || m_teammode) && validteam(player1->team) ? player1->team : 0));
-    ICOMMAND(getteamname, "i", (int *num), result(langage ?  teamname_EN(*num) : teamname_FR(*num)));
+    ICOMMAND(getteamname, "i", (int *num), result(GAME_LANG ?  teamname_EN(*num) : teamname_FR(*num)));
 
     struct authkey
     {
@@ -429,13 +429,13 @@ namespace game
     {
         switch(stat)
         {
-            case 0: formatstring(tempstat, "\fb %s %s%d%%", langage ? "Damage :" : "Dégâts :", prefix(aptitudes[player1->aptitude].apt_degats-100), aptitudes[player1->aptitude].apt_degats-100); break;
-            case 1: formatstring(tempstat, "\fb %s %s%d%%", langage ? "Resistance :" : "Résistance :", prefix(aptitudes[player1->aptitude].apt_resistance-100), aptitudes[player1->aptitude].apt_resistance-100); break;
-            case 2: formatstring(tempstat, "\fb %s %s%d%%", langage ? "Accuracy :" : "Précision :", prefix(aptitudes[player1->aptitude].apt_precision-100), aptitudes[player1->aptitude].apt_precision-100); break;
+            case 0: formatstring(tempstat, "\fb %s %s%d%%", GAME_LANG ? "Damage :" : "Dégâts :", prefix(aptitudes[player1->aptitude].apt_degats-100), aptitudes[player1->aptitude].apt_degats-100); break;
+            case 1: formatstring(tempstat, "\fb %s %s%d%%", GAME_LANG ? "Resistance :" : "Résistance :", prefix(aptitudes[player1->aptitude].apt_resistance-100), aptitudes[player1->aptitude].apt_resistance-100); break;
+            case 2: formatstring(tempstat, "\fb %s %s%d%%", GAME_LANG ? "Accuracy :" : "Précision :", prefix(aptitudes[player1->aptitude].apt_precision-100), aptitudes[player1->aptitude].apt_precision-100); break;
             case 3:
             {
                 int realspeedspec = (aptitudes[player1->aptitude].apt_vitesse-1000)*-0.1f;
-                formatstring(tempstat, "\fb %s %s%d%%", langage ? "Speed :" : "Vitesse :", prefix(realspeedspec), realspeedspec);
+                formatstring(tempstat, "\fb %s %s%d%%", GAME_LANG ? "Speed :" : "Vitesse :", prefix(realspeedspec), realspeedspec);
             }
         }
 
@@ -446,7 +446,7 @@ namespace game
     string tempapti;
     const char *getaptiname()
     {
-        formatstring(tempapti, "%s%s", "\fb", langage ? aptitudes[player1->aptitude].apt_nomEN : aptitudes[player1->aptitude].apt_nomFR);
+        formatstring(tempapti, "%s%s", "\fb", GAME_LANG ? aptitudes[player1->aptitude].apt_nomEN : aptitudes[player1->aptitude].apt_nomFR);
         return tempapti;
     }
     ICOMMAND(getaptiname, "", (), result(getaptiname()));
@@ -1600,8 +1600,8 @@ namespace game
                     gamepaused = val;
                     player1->attacking = ACT_IDLE;
                 }
-                if(a) conoutf(langage ? "Game is paused by administrator." : "La partie a été mise en pause par un administrateur.");
-                else conoutf(langage ? "Game is paused." : "La partie est en pause.");
+                if(a) conoutf(GAME_LANG ? "Game is paused by administrator." : "La partie a été mise en pause par un administrateur.");
+                else conoutf(GAME_LANG ? "Game is paused." : "La partie est en pause.");
                 if(val) {addpostfx("pause", 1, 1, 1, 1, vec4(1, 1, 1, 1)); stopsounds();}
                 else clearpostfx();
                 break;
@@ -1709,11 +1709,11 @@ namespace game
                 }
                 getstring(text, p);
                 filtertext(text, text, false, false, MAXNAMELEN);
-                if(!text[0]) copystring(text, langage ? "BadUsername" : "PseudoPourri");
+                if(!text[0]) copystring(text, GAME_LANG ? "BadUsername" : "PseudoPourri");
                 if(d->name[0])          // already connected
                 {
                     if(strcmp(d->name, text) && !isignored(d->clientnum))
-                        conoutf(langage ? "%s is now known as %s" : "%s s'appelle maintenant %s", colorname(d), colorname(d, text));
+                        conoutf(GAME_LANG ? "%s is now known as %s" : "%s s'appelle maintenant %s", colorname(d), colorname(d, text));
                 }
                 else                    // new client
                 {
@@ -1741,7 +1741,7 @@ namespace game
                     if(!text[0]) {genpseudo() ; copystring(text, pseudoaleatoire);}
                     if(strcmp(text, d->name))
                     {
-                        if(!isignored(d->clientnum)) conoutf(langage ? "%s is now known as %s" : "%s s'appelle maintenant %s", colorname(d), colorname(d, text));
+                        if(!isignored(d->clientnum)) conoutf(GAME_LANG ? "%s is now known as %s" : "%s s'appelle maintenant %s", colorname(d), colorname(d, text));
                         copystring(d->name, text, MAXNAMELEN+1);
                     }
                 }
@@ -1999,7 +1999,7 @@ namespace game
 
             case N_TAUNT:
             {
-                if(langage || !d) return;
+                if(GAME_LANG || !d) return;
                 d->lasttaunt = lastmillis;
                 d->dansechan = playsound(S_CGCORTEX+(d->customdanse), d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 150, d->dansechan, 400);
                 break;
@@ -2294,9 +2294,9 @@ namespace game
                 gameent *w = getclient(wn);
                 if(!w) return;
                 w->team = validteam(team) ? team : 0;
-                static const char * const fmt[2] = { langage ? "%s switched to team %s" : "%s a retourné sa veste pour l'équipe %s", langage ? "%s forced to team %s" : "%s a été forcé de rejoindre l'équipe %s"};
+                static const char * const fmt[2] = { GAME_LANG ? "%s switched to team %s" : "%s a retourné sa veste pour l'équipe %s", GAME_LANG ? "%s forced to team %s" : "%s a été forcé de rejoindre l'équipe %s"};
                 if(reason >= 0 && size_t(reason) < sizeof(fmt)/sizeof(fmt[0]))
-                    conoutf(fmt[reason], colorname(w), langage ? teamnames_EN[w->team] : teamnames_FR[w->team]);
+                    conoutf(fmt[reason], colorname(w), GAME_LANG ? teamnames_EN[w->team] : teamnames_FR[w->team]);
                 break;
             }
 
@@ -2309,7 +2309,7 @@ namespace game
             {
                 int t = getint(p);
                 string announcemsg;
-                if(langage)
+                if(GAME_LANG)
                 {
                     formatstring(announcemsg, t==I_BOOSTDEGATS ? "\faROIDS ARE COMING SOON!" :
                                               t==I_BOOSTPRECISION ? "\faTHE MUSHROOMS ARE GROWING!" :

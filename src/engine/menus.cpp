@@ -80,7 +80,7 @@ void menuprocess()
         }
         else
         {
-            switch(langage)
+            switch(GAME_LANG)
             {
                 case 0: UI::showui("main_fr"); break;
                 case 1: UI::showui("main_en");

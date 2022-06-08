@@ -21,7 +21,7 @@ namespace game
     {
         if(player1->state != CS_DEAD && isconnected())
         {
-            conoutf(CON_GAMEINFO, langage ? "\fcCannot change class while alive!" : "\fcImpossible de changer d'aptitude en étant vivant !");
+            conoutf(CON_GAMEINFO, GAME_LANG ? "\fcCannot change class while alive!" : "\fcImpossible de changer d'aptitude en étant vivant !");
             playsound(S_ERROR);
             player1_aptitude = oldapti;
         }
@@ -627,7 +627,7 @@ namespace game
 
     void taunt()
     {
-        if(langage) return;
+        if(GAME_LANG) return;
         if(player1->state!=CS_ALIVE) return;
         if(lastmillis-player1->lasttaunt<2000){conoutf(CON_GAMEINFO, "\faOn abuse pas des bonnes choses !"); return;}
         player1->lasttaunt = lastmillis;
@@ -638,7 +638,7 @@ namespace game
 
     void showvoice()
     {
-        if(langage) return;
+        if(GAME_LANG) return;
         playsound(S_CGCORTEX+UI_voix);
     }
     COMMAND(showvoice, "");
@@ -770,7 +770,7 @@ namespace game
         else if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission) return;
 
         //////////////////////////////SONS//////////////////////////////
-        if(!langage)
+        if(!GAME_LANG)
         {
             switch (actor->killstreak) //Sons Risitas Killstreak
             {
@@ -817,21 +817,21 @@ namespace game
         const char *dname = "", *aname = "";
         if(m_teammode && teamcolorfrags)
         {
-            dname = teamcolorname(d, langage ? "You" : "Tu");
-            aname = teamcolorname(actor, langage ? "You" : "Tu");
+            dname = teamcolorname(d, GAME_LANG ? "You" : "Tu");
+            aname = teamcolorname(actor, GAME_LANG ? "You" : "Tu");
         }
         else
         {
-            dname = colorname(d, NULL, langage ? "\fdYou" : "\fdTu", "\fc");
-            aname = colorname(actor, NULL, langage ? "\fdYou" : "\fdTu", "\fc");
+            dname = colorname(d, NULL, GAME_LANG ? "\fdYou" : "\fdTu", "\fc");
+            aname = colorname(actor, NULL, GAME_LANG ? "\fdYou" : "\fdTu", "\fc");
         }
 
         if(d==actor || atk==-1) // Suicide ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
-            conoutf(contype, "%s%s %s%s%s", d==player1 ? "\fd" : "", dname, langage ? "" : d==player1 ? "t'es " : "s'est ", langage ? partmessageEN[rnd(2)].partsuicide : partmessageFR[rnd(5)].partsuicide, d==player1 ? " !" : ".");
+            conoutf(contype, "%s%s %s%s%s", d==player1 ? "\fd" : "", dname, GAME_LANG ? "" : d==player1 ? "t'es " : "s'est ", GAME_LANG ? partmessageEN[rnd(2)].partsuicide : partmessageFR[rnd(5)].partsuicide, d==player1 ? " !" : ".");
             if(d==player1)
             {
-                copystring(str_armetueur, langage ? partmessageEN[rnd(5)].parttroll : partmessageFR[rnd(9)].parttroll);
+                copystring(str_armetueur, GAME_LANG ? partmessageEN[rnd(5)].parttroll : partmessageFR[rnd(9)].parttroll);
                 suicided = true;
                 addstat(1, STAT_MORTS); addstat(1, STAT_SUICIDES);
                 if(atk==ATK_M32_SHOOT)unlockachievement(ACH_M32SUICIDE);
@@ -843,12 +843,12 @@ namespace game
             if(d==player1) //TU as été tué par un allié
             {
                 copystring(str_pseudotueur, aname); n_aptitudetueur = actor->aptitude;
-                conoutf(contype, "\f6%s %s \fd(%s)", dname, langage ? "got fragged by a teammate" : "as été tué par un allié", aname);
+                conoutf(contype, "\f6%s %s \fd(%s)", dname, GAME_LANG ? "got fragged by a teammate" : "as été tué par un allié", aname);
                 addstat(1, STAT_MORTS);
             }
             else
             {
-                conoutf(contype, "\f2%s %s%s \fd(%s)", aname, langage ? "" : actor==player1 ? "as " : "a ", langage ? "fragged a teammate" : "tué un allié" , dname); //Quelqu'un a ou TU as tué un de ses alliés
+                conoutf(contype, "\f2%s %s%s \fd(%s)", aname, GAME_LANG ? "" : actor==player1 ? "as " : "a ", GAME_LANG ? "fragged a teammate" : "tué un allié" , dname); //Quelqu'un a ou TU as tué un de ses alliés
                 if(actor==player1) {addstat(1, STAT_ALLIESTUES); unlockachievement(ACH_CPASBIEN);}
             }
         }
@@ -859,11 +859,11 @@ namespace game
             {
                 conoutf(contype, "\fd%s \f7%s%s \fc%s \f7%s %s (%.1fm)",
                     aname,
-                    langage ? "" : "as ",
-                    langage ? partmessageEN[rnd(7)].partverb : partmessageFR[rnd(15)].partverb,
+                    GAME_LANG ? "" : "as ",
+                    GAME_LANG ? partmessageEN[rnd(7)].partverb : partmessageFR[rnd(15)].partverb,
                     dname,
-                    langage ? "with" : "avec",
-                    langage ? guns[atk].armedescEN : guns[atk].armedescFR,
+                    GAME_LANG ? "with" : "avec",
+                    GAME_LANG ? guns[atk].armedescEN : guns[atk].armedescFR,
                     distance);
                 playsound(S_KILL);
                 message[MSG_YOUKILLED] = totalmillis; message[MSG_OWNKILLSTREAK] = totalmillis; copystring(str_pseudovictime, dname); n_aptitudevictime = d->aptitude; killdistance = distance;
@@ -903,15 +903,15 @@ namespace game
             {
                 conoutf(contype, "\fd%s \f7%s %s %s \fc%s \f7%s %s (%.1fm)",
                     dname,
-                    langage ? "got" : "as été",
-                    langage ? partmessageEN[rnd(7)].partverb : partmessageFR[rnd(15)].partverb,
-                    langage ? "by" : "par",
+                    GAME_LANG ? "got" : "as été",
+                    GAME_LANG ? partmessageEN[rnd(7)].partverb : partmessageFR[rnd(15)].partverb,
+                    GAME_LANG ? "by" : "par",
                     aname,
-                    langage ? "with" : "avec",
-                    langage ? guns[atk].armedescEN : guns[atk].armedescFR,
+                    GAME_LANG ? "with" : "avec",
+                    GAME_LANG ? guns[atk].armedescEN : guns[atk].armedescFR,
                     distance);
                 copystring(str_pseudotueur, aname); n_aptitudetueur = actor->aptitude;
-                copystring(str_armetueur, langage ? guns[atk].armedescEN : guns[atk].armedescFR);
+                copystring(str_armetueur, GAME_LANG ? guns[atk].armedescEN : guns[atk].armedescFR);
                 suicided = false;
                 addstat(1, STAT_MORTS);
             }
@@ -919,11 +919,11 @@ namespace game
             {
                 conoutf(contype, "%s \f7%s%s %s \f7%s %s (%.1fm)",
                     aname,
-                    langage ? "" : "a ",
-                    langage ? partmessageEN[rnd(7)].partverb : partmessageFR[rnd(15)].partverb,
+                    GAME_LANG ? "" : "a ",
+                    GAME_LANG ? partmessageEN[rnd(7)].partverb : partmessageFR[rnd(15)].partverb,
                     dname,
-                    langage ? "with" : "avec",
-                    langage ? guns[atk].armedescEN : guns[atk].armedescFR, distance);
+                    GAME_LANG ? "with" : "avec",
+                    GAME_LANG ? guns[atk].armedescEN : guns[atk].armedescFR, distance);
             }
 
             if(actor!=player1) ////////////////////Informe que quelqu'un est chaud////////////////////
@@ -963,8 +963,8 @@ namespace game
             if(player1->totaldamage/10 > 10000) unlockachievement(ACH_DESTRUCTEUR);
 
             defformatstring(flags, "%d", player1->flags);
-            conoutf(CON_GAMEINFO, langage ? "\faGAME OVER !" : "\faFIN DE LA PARTIE !");
-            if(langage) conoutf(CON_GAMEINFO, "\f2Kills : %d | Deaths : %d | Total damage : %d | Accuracy : %d%% %s %s", player1->frags, player1->deaths, player1->totaldamage/10, accuracy, m_ctf ? "| Flags :" : "", m_ctf ? flags : "");
+            conoutf(CON_GAMEINFO, GAME_LANG ? "\faGAME OVER !" : "\faFIN DE LA PARTIE !");
+            if(GAME_LANG) conoutf(CON_GAMEINFO, "\f2Kills : %d | Deaths : %d | Total damage : %d | Accuracy : %d%% %s %s", player1->frags, player1->deaths, player1->totaldamage/10, accuracy, m_ctf ? "| Flags :" : "", m_ctf ? flags : "");
             else conoutf(CON_GAMEINFO, "\f2Éliminations : %d | Morts : %d | Dégats infligés : %d | Précision : %d%% %s %s", player1->frags, player1->deaths, player1->totaldamage/10, accuracy, m_ctf ? "| Drapeaux :" : "", m_ctf ? flags : "");
             if(stat[STAT_DAMMAGERECORD] < player1->totaldamage/10) addstat(player1->totaldamage/10, STAT_DAMMAGERECORD, true);
             showscores(true);
@@ -1042,7 +1042,7 @@ namespace game
     void initclient()
     {
         player1 = spawnstate(new gameent);
-        filtertext(player1->name, langage ? "BadUsername" : "PseudoPourri", false, false, MAXNAMELEN);
+        filtertext(player1->name, GAME_LANG ? "BadUsername" : "PseudoPourri", false, false, MAXNAMELEN);
         genpseudo(3);
         players.add(player1);
         player1->aptitude = player1_aptitude;
@@ -1072,9 +1072,9 @@ namespace game
             cmode->setup();
         }
 
-        conoutf(CON_GAMEINFO, langage ? "\f2Gamemode is : %s": "\f2Le mode de jeu est : %s", server::modeprettyname(gamemode));
+        conoutf(CON_GAMEINFO, GAME_LANG ? "\f2Gamemode is : %s": "\f2Le mode de jeu est : %s", server::modeprettyname(gamemode));
 
-        const char *info = m_valid(gamemode) ? langage ? gamemodes[gamemode - STARTGAMEMODE].nameEN : gamemodes[gamemode - STARTGAMEMODE].nameFR : NULL;
+        const char *info = m_valid(gamemode) ? GAME_LANG ? gamemodes[gamemode - STARTGAMEMODE].nameEN : gamemodes[gamemode - STARTGAMEMODE].nameFR : NULL;
         if(showmodeinfo && info) conoutf(CON_GAMEINFO, "\f0%s", info);
 
         syncplayer();
@@ -1101,7 +1101,7 @@ namespace game
 
     const char *getmapinfo()
     {
-        if(langage==1) return showmodeinfo && m_valid(gamemode) ? gamemodes[gamemode - STARTGAMEMODE].nameEN : NULL;
+        if(GAME_LANG) return showmodeinfo && m_valid(gamemode) ? gamemodes[gamemode - STARTGAMEMODE].nameEN : NULL;
         else return showmodeinfo && m_valid(gamemode) ? gamemodes[gamemode - STARTGAMEMODE].nameFR : NULL;
     }
 
@@ -1114,7 +1114,7 @@ namespace game
     {
         static char astuce[1000];
         astuce[0] = '\0';
-        if((langage) && !astuces_en.empty()) strcat(astuce, astuces_en[rnd(astuces_en.length())]);
+        if((GAME_LANG) && !astuces_en.empty()) strcat(astuce, astuces_en[rnd(astuces_en.length())]);
         else if (!astuces_fr.empty()) strcat(astuce, astuces_fr[rnd(astuces_fr.length())]);
 
         return astuce;
@@ -1220,7 +1220,7 @@ namespace game
         bool dup = !name[0] || duplicatename(d, name, alt) || d->aitype != AI_NONE;
         if(dup || color[0])
         {
-            if(dup) return tempformatstring(d->aitype == AI_NONE ? "\fs%s%s \f5(%d)\fr" : langage ? "\fs%s[AI]%s" : "\fs%s[IA]%s", color, name, d->clientnum);
+            if(dup) return tempformatstring(d->aitype == AI_NONE ? "\fs%s%s \f5(%d)\fr" : GAME_LANG ? "\fs%s[AI]%s" : "\fs%s[IA]%s", color, name, d->clientnum);
             return tempformatstring("\fs%s%s\fr", color, name);
         }
         return name;
@@ -1236,7 +1236,7 @@ namespace game
 
     const char *teamcolor(int team)
     {
-        return tempformatstring("\fs%s%s\fr", team!=player1->team ? teamtextcode[2] : teamtextcode[1], langage ? teamnames_EN[team] : teamnames_FR[team]);
+        return tempformatstring("\fs%s%s\fr", team!=player1->team ? teamtextcode[2] : teamtextcode[1], GAME_LANG ? teamnames_EN[team] : teamnames_FR[team]);
     }
 
     void suicide(physent *d)

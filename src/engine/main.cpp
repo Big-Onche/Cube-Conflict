@@ -110,8 +110,8 @@ bool initwarning(const char *desc, int level, int type)
 #define SCR_MAXH 10000
 #define SCR_DEFAULTW 1280
 #define SCR_DEFAULTH 720
-VARFN(screenw, scr_w, SCR_MINW, -1, SCR_MAXW, initwarning(langage ? "Screen resolution" : "Résolution d'écran"));
-VARFN(screenh, scr_h, SCR_MINH, -1, SCR_MAXH, initwarning(langage ? "Screen resolution" : "Résolution d'écran"));
+VARFN(screenw, scr_w, SCR_MINW, -1, SCR_MAXW, initwarning(GAME_LANG ? "Screen resolution" : "Résolution d'écran"));
+VARFN(screenh, scr_h, SCR_MINH, -1, SCR_MAXH, initwarning(GAME_LANG ? "Screen resolution" : "Résolution d'écran"));
 
 void writeinitcfg()
 {
@@ -208,7 +208,7 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
 
         if(mapname)
         {
-            defformatstring(mapprettyname, "%s", langage ? mapnames[n_map].mapname_en : mapnames[n_map].mapname_fr);
+            defformatstring(mapprettyname, "%s", GAME_LANG ? mapnames[n_map].mapname_en : mapnames[n_map].mapname_fr);
             int tw = text_width(mapprettyname);
             float tsz = 0.04f*min(screenw, screenh)/70,
                   tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*8.0f*min(screenw, screenh) - 70*tsz;
@@ -395,7 +395,7 @@ void renderprogressview(int w, int h, float bar, const char *text)   // also use
         if(pointstimer>1000) pointstimer = 0;
 
         defformatstring(petitpoints, "%s", pointstimer < 250 ? "..." : pointstimer < 500 ? "" : pointstimer < 750 ? "." : "..");
-        defformatstring(text, "%s%s", langage ? loadingtext[nbtexte].loadingtext_EN : loadingtext[nbtexte].loadingtext_FR, petitpoints);
+        defformatstring(text, "%s%s", GAME_LANG ? loadingtext[nbtexte].loadingtext_EN : loadingtext[nbtexte].loadingtext_FR, petitpoints);
 
         draw_text(text, 0, 0);
         pophudmatrix();
@@ -578,7 +578,7 @@ void screenres(int w, int h)
     }
     else
     {
-        initwarning(langage ? "Screen resolution" : "Résolution d'écran");
+        initwarning(GAME_LANG ? "Screen resolution" : "Résolution d'écran");
     }
 }
 
@@ -732,7 +732,7 @@ void resetgl()
         fatal("failed to reload core texture");
     reloadfonts();
     inbetweenframes = true;
-    renderbackground(langage ? "Loading..." : "Chargement...");
+    renderbackground(GAME_LANG ? "Loading..." : "Chargement...");
     restoregamma();
     restorevsync();
     initgbuffer();
@@ -1164,18 +1164,18 @@ VAR(numcpus, 1, 1, 16);
 extern void changerlangue();
 
 bool init = true;
-VARFP(langage, 0, 0, 1, changerlangue());
+VARFP(GAME_LANG, 0, 0, 1, changerlangue());
 VAR(UI_menutabs, 0, 0, 9);
 
 void changerlangue()
 {
-    if(langage) {execfile("config/keymap_EN.cfg"); execfile("config/ui_EN.cfg"); execfile("config/default_EN.cfg"); execfile("config/astuces_EN.cfg");}
+    if(GAME_LANG) {execfile("config/keymap_EN.cfg"); execfile("config/ui_EN.cfg"); execfile("config/default_EN.cfg"); execfile("config/astuces_EN.cfg");}
     else {execfile("config/keymap_FR.cfg"); execfile("config/ui_FR.cfg"); execfile("config/default_FR.cfg"); execfile("config/astuces_FR.cfg");}
 
     if(!init)
     {
         game::ispaused() ? UI_menutabs = 3 : UI_menutabs = 8;
-        switch(langage)
+        switch(GAME_LANG)
         {
             case 0: UI::showui(game::ispaused() ? "pause_fr" : "main_fr"); break;
             case 1: UI::showui(game::ispaused() ? "pause_en" : "main_en");
@@ -1188,7 +1188,7 @@ bool initsteam()
 {
     if(!SteamAPI_Init())
     {
-        conoutf(CON_WARN, langage ? "Steam API failed to start." : "API Steam non démarrée");
+        conoutf(CON_WARN, GAME_LANG ? "Steam API failed to start." : "API Steam non démarrée");
         return false;
     }
     else
@@ -1248,8 +1248,8 @@ int main(int argc, char **argv)
             case 'w': scr_w = clamp(atoi(&argv[i][2]), SCR_MINW, SCR_MAXW); if(!findarg(argc, argv, "-h")) scr_h = -1; break;
             case 'h': scr_h = clamp(atoi(&argv[i][2]), SCR_MINH, SCR_MAXH); if(!findarg(argc, argv, "-w")) scr_w = -1; break;
             case 'f': fullscreen = atoi(&argv[i][2]); break;
-            case 'a': langage = 0; rewritelangage = true; newlangage = 0; break;
-            case 'b': langage = 1; rewritelangage = true; newlangage = 1; break;
+            case 'a': GAME_LANG = 0; rewritelangage = true; newlangage = 0; break;
+            case 'b': GAME_LANG = 1; rewritelangage = true; newlangage = 1; break;
             case 'l':
             {
                 char pkgdir[] = "media/";
@@ -1369,15 +1369,15 @@ int main(int argc, char **argv)
     }
     execfile(game::autoexec(), false);
 
-    if(rewritelangage) langage = newlangage;
+    if(rewritelangage) GAME_LANG = newlangage;
 
-    switch(langage)
+    switch(GAME_LANG)
     {
         case 0: if(rewritelangage)execfile("config/keymap_FR.cfg"); execfile("config/ui_FR.cfg"); execfile("config/default_FR.cfg"); execfile("config/astuces_FR.cfg"); break;
         case 1: if(rewritelangage)execfile("config/keymap_EN.cfg"); execfile("config/ui_EN.cfg"); execfile("config/default_EN.cfg"); execfile("config/astuces_EN.cfg");
     }
 
-    renderbackground(langage ? "Loading..." : "Chargement...");
+    renderbackground(GAME_LANG ? "Loading..." : "Chargement...");
 
     identflags &= ~IDF_PERSIST;
 

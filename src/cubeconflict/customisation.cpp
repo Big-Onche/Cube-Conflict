@@ -41,33 +41,33 @@ void buyitem(int itemtype) //Achète un objet
     switch(itemtype)
     {
         case 0:
-            if(customssmileys[UI_smiley].smileyprice > stat[STAT_CC]) {conoutf(CON_GAMEINFO, langage ? "\f3This smiley is too expensive for you!" : "\f3Ce smiley est trop cher pour toi !"); playsound(S_ERROR); return;}
-            else if(cust[SMI_HAP+UI_smiley]>0) {conoutf(CON_GAMEINFO, langage ? "\f3You already own this smiley!" : "\f3Vous possédez déjà ce smiley !"); playsound(S_ERROR); return;}
+            if(customssmileys[UI_smiley].smileyprice > stat[STAT_CC]) {conoutf(CON_GAMEINFO, GAME_LANG ? "\f3This smiley is too expensive for you!" : "\f3Ce smiley est trop cher pour toi !"); playsound(S_ERROR); return;}
+            else if(cust[SMI_HAP+UI_smiley]>0) {conoutf(CON_GAMEINFO, GAME_LANG ? "\f3You already own this smiley!" : "\f3Vous possédez déjà ce smiley !"); playsound(S_ERROR); return;}
             else
             {
-                conoutf(CON_GAMEINFO, langage ? "\f9You bought an \"%s\" smiley!" : "\f9Smiley \"%s\" acheté !", customssmileys[UI_smiley].smileyname);
+                conoutf(CON_GAMEINFO, GAME_LANG ? "\f9You bought an \"%s\" smiley!" : "\f9Smiley \"%s\" acheté !", customssmileys[UI_smiley].smileyname);
                 stat[STAT_CC] = stat[STAT_CC]-customssmileys[UI_smiley].smileyprice;
                 cust[SMI_HAP+UI_smiley] = rnd(99)+1;
                 playsound(S_CAISSEENREGISTREUSE);
                 return;
             }
         case 1:
-            if(customscapes[UI_cape].capeprice > stat[STAT_CC]) {conoutf(CON_GAMEINFO, langage ? "\f3This cape is too expensive for you!" : "\f3Cette cape est trop chère pour toi !"); playsound(S_ERROR); return;}
-            else if(cust[CAPE_CUBE+UI_cape]>0) {conoutf(CON_GAMEINFO, langage ? "\f3You already own this cape!" : "\f3Vous possédez déjà cette cape !"); playsound(S_ERROR); return;}
+            if(customscapes[UI_cape].capeprice > stat[STAT_CC]) {conoutf(CON_GAMEINFO, GAME_LANG ? "\f3This cape is too expensive for you!" : "\f3Cette cape est trop chère pour toi !"); playsound(S_ERROR); return;}
+            else if(cust[CAPE_CUBE+UI_cape]>0) {conoutf(CON_GAMEINFO, GAME_LANG ? "\f3You already own this cape!" : "\f3Vous possédez déjà cette cape !"); playsound(S_ERROR); return;}
             else
             {
-                conoutf(CON_GAMEINFO, langage ? "\f9You bought an \"%s\" cape!" : "\f9Cape \"%s\" achetée !", customscapes[UI_cape].capename);
+                conoutf(CON_GAMEINFO, GAME_LANG ? "\f9You bought an \"%s\" cape!" : "\f9Cape \"%s\" achetée !", customscapes[UI_cape].capename);
                 stat[STAT_CC] = stat[STAT_CC]-customscapes[UI_cape].capeprice;
                 cust[CAPE_CUBE+UI_cape] = rnd(99)+1;
                 playsound(S_CAISSEENREGISTREUSE);
                 return;
             }
         case 2:
-            if(customstombes[UI_tombe].tombeprice > stat[STAT_CC]) {conoutf(CON_GAMEINFO, langage ? "\f3This grave is too expensive for you!" : "\f3Cette tombe est trop chère pour toi !"); playsound(S_ERROR); return;}
-            else if(cust[TOM_MERDE+UI_tombe]>0) {conoutf(CON_GAMEINFO, langage ? "\f3You already own this grave!" : "\f3Vous possédez déjà cette tombe !"); playsound(S_ERROR); return;}
+            if(customstombes[UI_tombe].tombeprice > stat[STAT_CC]) {conoutf(CON_GAMEINFO, GAME_LANG ? "\f3This grave is too expensive for you!" : "\f3Cette tombe est trop chère pour toi !"); playsound(S_ERROR); return;}
+            else if(cust[TOM_MERDE+UI_tombe]>0) {conoutf(CON_GAMEINFO, GAME_LANG ? "\f3You already own this grave!" : "\f3Vous possédez déjà cette tombe !"); playsound(S_ERROR); return;}
             else
             {
-                conoutf(CON_GAMEINFO, langage ? "\f9You bought an \"%s\" grave!" : "\f9Tombe \"%s\" achetée !", customstombes[UI_tombe].tombename);
+                conoutf(CON_GAMEINFO, GAME_LANG ? "\f9You bought an \"%s\" grave!" : "\f9Tombe \"%s\" achetée !", customstombes[UI_tombe].tombename);
                 stat[STAT_CC] = stat[STAT_CC]-customstombes[UI_tombe].tombeprice;
                 cust[TOM_MERDE+UI_tombe] = rnd(99)+1;
                 playsound(S_CAISSEENREGISTREUSE);

@@ -398,13 +398,13 @@ struct captureclientmode : clientmode
             if(b.owner[0])
             {
                 string termnalally, termnalenemy;
-                formatstring(termnalally, "%s", langage ? "Allied" : "Allié");
-                formatstring(termnalenemy, "%s", langage ? "Enemy" : "Ennemi");
+                formatstring(termnalally, "%s", GAME_LANG ? "Allied" : "Allié");
+                formatstring(termnalenemy, "%s", GAME_LANG ? "Enemy" : "Ennemi");
                 bool isowner = !strcmp(b.owner, tmpteam);
                 if(b.enemy[0]) { mtype = PART_METER_VS; mcolor = 0xFF0000; mcolor2 = 0xFFFF00; if(!isowner) swap(mcolor, mcolor2); }
-                if(!b.name[0]) formatstring(b.info, "Terminal %d - %s", b.tag, !b.converted ? strcmp(b.owner, tmpteam) ? termnalenemy : termnalally : langage ? "Disputed !" : "Contesté !");
-                else if(basenumbers) formatstring(b.info, "%s (%d) - %s", b.name, b.tag, !b.converted ? strcmp(b.owner, tmpteam) ? termnalenemy : termnalally : langage ? "Disputed !" : "Contesté !");
-                else formatstring(b.info, "%s - %s", b.name, !b.converted ? strcmp(b.owner, tmpteam) ? termnalenemy : termnalally : langage ? "Disputed !" : "Contesté !");
+                if(!b.name[0]) formatstring(b.info, "Terminal %d - %s", b.tag, !b.converted ? strcmp(b.owner, tmpteam) ? termnalenemy : termnalally : GAME_LANG ? "Disputed !" : "Contesté !");
+                else if(basenumbers) formatstring(b.info, "%s (%d) - %s", b.name, b.tag, !b.converted ? strcmp(b.owner, tmpteam) ? termnalenemy : termnalally : GAME_LANG ? "Disputed !" : "Contesté !");
+                else formatstring(b.info, "%s - %s", b.name, !b.converted ? strcmp(b.owner, tmpteam) ? termnalenemy : termnalally : GAME_LANG ? "Disputed !" : "Contesté !");
                 tcolor = isowner ? 0xFFFF00 : 0xFF0000;
 
                 if(!strcmp(b.owner, tmpteam) && b.o.dist(camera1->o) > 128)
@@ -426,9 +426,9 @@ struct captureclientmode : clientmode
             }
             else if(b.enemy[0])
             {
-                if(!b.name[0]) formatstring(b.info, "Terminal %d - %s", b.tag, langage ? "Hack in progress..." : "Hack en cours... ");
-                else if(basenumbers) formatstring(b.info, "%s (%d) - %s", b.name, b.tag,  langage ? "Hack in progress..." : "Hack en cours... ");
-                else formatstring(b.info, "%s - %s", b.name,  langage ? "Hack in progress..." : "Hack en cours... ");
+                if(!b.name[0]) formatstring(b.info, "Terminal %d - %s", b.tag, GAME_LANG ? "Hack in progress..." : "Hack en cours... ");
+                else if(basenumbers) formatstring(b.info, "%s (%d) - %s", b.name, b.tag,  GAME_LANG ? "Hack in progress..." : "Hack en cours... ");
+                else formatstring(b.info, "%s - %s", b.name,  GAME_LANG ? "Hack in progress..." : "Hack en cours... ");
                 if(strcmp(b.enemy, tmpteam)) { tcolor = 0xFF0000; mtype = PART_METER; mcolor = 0xFF0000; }
                 else { tcolor = 0xFFFF00; mtype = PART_METER; mcolor = 0xFFFF00; }
             }
@@ -570,7 +570,7 @@ struct captureclientmode : clientmode
             abovemodel(b.ammopos, "base/neutral");
             b.ammopos.z += AMMOHEIGHT-2;
             b.ammotype = e->attr1;
-            defformatstring(alias, langage ? "base_en_%d" : "base_fr_%d", e->attr2);
+            defformatstring(alias, GAME_LANG ? "base_en_%d" : "base_fr_%d", e->attr2);
             const char *name = getalias(alias);
             copystring(b.name, name);
             b.tag = e->attr2>0 ? e->attr2 : bases.length();
@@ -602,16 +602,16 @@ struct captureclientmode : clientmode
             if(strcmp(b.owner, owner))
             {
                 int iowner = atoi(owner);
-                if(!b.name[0]) conoutf(CON_GAMEINFO, langage ? "%s team hacked \"\fe%d\f7\" terminal." : "L'équipe %s a hacké le terminal \"\fe%d\f7\".", teamcolor(iowner), b.tag);
-                else conoutf(CON_GAMEINFO, langage ? "%s team hacked \"\fe%s\f7\" terminal." : "L'équipe %s a hacké le terminal \"\fe%s\f7\".", teamcolor(iowner), b.name);
+                if(!b.name[0]) conoutf(CON_GAMEINFO, GAME_LANG ? "%s team hacked \"\fe%d\f7\" terminal." : "L'équipe %s a hacké le terminal \"\fe%d\f7\".", teamcolor(iowner), b.tag);
+                else conoutf(CON_GAMEINFO, GAME_LANG ? "%s team hacked \"\fe%s\f7\" terminal." : "L'équipe %s a hacké le terminal \"\fe%s\f7\".", teamcolor(iowner), b.name);
                 playsound(!strcmp(owner, tmpteam) ? S_TERMINAL_HACKED : S_TERMINAL_HACKED_E, &b.o, NULL, 0, 0, 200, -1, 2500);
             }
         }
         else if(b.owner[0])
         {
             int ibowner = atoi(b.owner);
-            if(!b.name[0]) conoutf(CON_GAMEINFO, langage ? "%s team lost the \"\fe%d\f7\" terminal." : "L'équipe %s a perdu le terminal \"\fe%d\f7\".", teamcolor(ibowner), b.tag);
-            else conoutf(CON_GAMEINFO, langage ? "%s team lost the \"\fe%s\f7\" terminal." : "L'équipe %s a perdu le terminal \"\fe%s\f7\".", teamcolor(ibowner), b.name);
+            if(!b.name[0]) conoutf(CON_GAMEINFO, GAME_LANG ? "%s team lost the \"\fe%d\f7\" terminal." : "L'équipe %s a perdu le terminal \"\fe%d\f7\".", teamcolor(ibowner), b.tag);
+            else conoutf(CON_GAMEINFO, GAME_LANG ? "%s team lost the \"\fe%s\f7\" terminal." : "L'équipe %s a perdu le terminal \"\fe%s\f7\".", teamcolor(ibowner), b.name);
             playsound(!strcmp(owner, tmpteam) ? S_TERMINAL_LOST : S_TERMINAL_LOST_E, &b.o, NULL, 0, 0, 200, -1, 2500);
         }
         if(strcmp(b.owner, owner))
@@ -631,7 +631,7 @@ struct captureclientmode : clientmode
     {
         findscore(team).total = total;
         int iteam = atoi(team);
-        if(total>=10000) conoutf(CON_GAMEINFO, langage ? "%s team hacked all terminals!" : "L'équipe %s a hacké tous les terminaux !", teamcolor(iteam));
+        if(total>=10000) conoutf(CON_GAMEINFO, GAME_LANG ? "%s team hacked all terminals!" : "L'équipe %s a hacké tous les terminaux !", teamcolor(iteam));
         else if(bases.inrange(base))
         {
             baseinfo &b = bases[base];

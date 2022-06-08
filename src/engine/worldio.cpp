@@ -715,7 +715,7 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     resetmap();
 
     Texture *mapshot = textureload(picname, 3, true, false);
-    renderbackground(langage ? "Loading..." : "Chargement...", mapshot, mname, game::getmapinfo(), game::getastuce());
+    renderbackground(GAME_LANG ? "Loading..." : "Chargement...", mapshot, mname, game::getmapinfo(), game::getastuce());
 
     setvar("mapversion", hdr.version, true, false);
 

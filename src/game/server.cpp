@@ -554,7 +554,7 @@ namespace server
                     if(mode[0] != '?') break;
                 case '?':
                     mode++;
-                    loopk(NUMGAMEMODES) if(searchmodename(langage ? gamemodes[k].nameEN : gamemodes[k].nameFR, mode))
+                    loopk(NUMGAMEMODES) if(searchmodename(GAME_LANG ? gamemodes[k].nameEN : gamemodes[k].nameFR, mode))
                     {
                         if(op == '!') modemask &= ~(1<<k);
                         else modemask |= 1<<k;
@@ -563,7 +563,7 @@ namespace server
             }
             int modenum = INT_MAX;
             if(isdigit(mode[0])) modenum = atoi(mode);
-            else loopk(NUMGAMEMODES) if(searchmodename(langage ? gamemodes[k].nameEN : gamemodes[k].nameFR, mode)) { modenum = k+STARTGAMEMODE; break; }
+            else loopk(NUMGAMEMODES) if(searchmodename(GAME_LANG ? gamemodes[k].nameEN : gamemodes[k].nameFR, mode)) { modenum = k+STARTGAMEMODE; break; }
             if(!m_valid(modenum)) continue;
             switch(op)
             {
@@ -748,13 +748,13 @@ namespace server
 
     const char *modename(int n, const char *unknown)
     {
-        if(m_valid(n)) return langage ? gamemodes[n - STARTGAMEMODE].nameEN : gamemodes[n - STARTGAMEMODE].nameFR;
+        if(m_valid(n)) return GAME_LANG ? gamemodes[n - STARTGAMEMODE].nameEN : gamemodes[n - STARTGAMEMODE].nameFR;
         return unknown;
     }
 
     const char *modeprettyname(int n, const char *unknown)
     {
-        if(m_valid(n)) return langage ? gamemodes[n - STARTGAMEMODE].nameEN : gamemodes[n - STARTGAMEMODE].nameFR;
+        if(m_valid(n)) return GAME_LANG ? gamemodes[n - STARTGAMEMODE].nameEN : gamemodes[n - STARTGAMEMODE].nameFR;
         return unknown;
     }
 
@@ -3162,7 +3162,7 @@ namespace server
                 {
                     getstring(text, p);
                     filtertext(text, text, false, false, MAXNAMELEN);
-                    if(!text[0]) copystring(text, langage ? "BadUsername" : "PseudoPourri");
+                    if(!text[0]) copystring(text, GAME_LANG ? "BadUsername" : "PseudoPourri");
                     copystring(ci->name, text, MAXNAMELEN+1);
                     ci->playermodel = getint(p);
                     ci->playercolor = getint(p);
@@ -3508,7 +3508,7 @@ namespace server
                     if(t==cq || t->state.state==CS_SPECTATOR || t->state.aitype != AI_NONE || cq->team != t->team) continue;
                     sendf(t->clientnum, 1, "riis", N_SAYTEAM, cq->clientnum, text);
                 }
-                if(isdedicatedserver() && cq) logoutf("%s <%s>: %s", colorname(cq), langage ? teamnames_EN[cq->team] : teamnames_FR[cq->team], text);
+                if(isdedicatedserver() && cq) logoutf("%s <%s>: %s", colorname(cq), GAME_LANG ? teamnames_EN[cq->team] : teamnames_FR[cq->team], text);
                 break;
             }
 
@@ -3517,7 +3517,7 @@ namespace server
                 QUEUE_MSG;
                 getstring(text, p);
                 filtertext(ci->name, text, false, false, MAXNAMELEN);
-                if(!ci->name[0]) copystring(ci->name, langage ? "BadUsername" : "PseudoPourri");
+                if(!ci->name[0]) copystring(ci->name, GAME_LANG ? "BadUsername" : "PseudoPourri");
                 QUEUE_STR(ci->name);
                 break;
             }
