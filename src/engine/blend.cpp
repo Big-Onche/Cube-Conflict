@@ -1158,4 +1158,3 @@ uchar shouldsaveblendmap()
 {
     return blendmap.solid!=&bmsolids[0xFF] ? 1 : 0;
 }
-

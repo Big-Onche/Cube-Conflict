@@ -349,4 +349,3 @@ void cleanupgrass()
 
     cleargrassshaders();
 }
-

@@ -1,5 +1,4 @@
 #include "engine.h"
-#include "ccheader.h"
 
 struct resolverthread
 {
@@ -751,4 +750,3 @@ void writeservercfg()
     }
     delete f;
 }
-

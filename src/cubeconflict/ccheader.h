@@ -22,6 +22,31 @@ namespace gfx
     extern const char *getshielddir(int armourtype, int armourval, bool hud = false, bool preload = false);
 }
 
+//Config élémentaire
+extern bool IS_USING_STEAM, IS_ON_OFFICIAL_SERV, UI_PLAYMUSIC;
+extern int GAME_LANG; // 0 = FR, 1 = EN
+
+//Config
+extern int dynlightdist;
+
+//Maps & ambiances
+extern int randomambience;
+extern float wateramplitude;
+
+static const struct mapinfo { const char *mapname_en, *mapname_fr; } mapnames[] =
+{
+    {"Training",    "Entrainement"},
+    {"Village",     "Village"},
+    {"Factory",     "Usine"},
+    {"Moon",        "Lune"},
+    {"Castle",      "Chateau"},
+    {"Volcano",     "Volcan"},
+};
+
+//Stats & sauvegarde
+extern void getsteamname();
+extern void genpseudo(int forcelang = 0);
+
 //HUD and MENUS
 extern bool suicided;
 extern string str_pseudotueur, str_armetueur, tempachname;
@@ -38,23 +63,4 @@ extern float crosshairalpha, pourcents;
 extern float weapposside, weapposup, maxweapposside, maxweapposup, shieldside, maxshieldside;
 extern int nbfps;
 
-extern int parallaxX, parallaxY, langage, UI_menutabs, UI_smiley, UI_cape, UI_tombe, UI_voix, UI_custtab, UI_showsteamnamebtn; //Menu
-
-//Ambiances aléatoires
-extern int randomambience;
-extern float wateramplitude;
-
-//Statistiques & sauvegarde & config élémentaire
-extern bool IS_USING_STEAM, IS_ON_OFFICIAL_SERV, UI_PLAYMUSIC;
-extern void getsteamname();
-extern void genpseudo(int forcelang = 0);
-
-static const struct mapinfo { const char *mapname_en, *mapname_fr; } mapnames[] =
-{
-    {"Training",    "Entrainement"},
-    {"Village",     "Village"},
-    {"Factory",     "Usine"},
-    {"Moon",        "Lune"},
-    {"Castle",      "Chateau"},
-    {"Volcano",     "Volcan"},
-};
+extern int parallaxX, parallaxY, UI_menutabs, UI_smiley, UI_cape, UI_tombe, UI_voix, UI_custtab, UI_showsteamnamebtn; //Menu

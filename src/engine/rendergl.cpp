@@ -1508,10 +1508,6 @@ void recomputecamera()
         }
     }
 
-    //if(lastmillis-game::player1->lastpain > 750 && game::player1->state==CS_DEAD)
-    //{
-    //}
-
     setviewcell(camera1->o);
 }
 
