@@ -5346,6 +5346,7 @@ void setlightlod()
             volumetric = 1;
             volsteps = 5;
             aocutoff = 4;
+            dynlightdist = 512;
             break;
         case 1:
             csmfarplane = 512;
@@ -5359,6 +5360,7 @@ void setlightlod()
             volumetric = 1;
             volsteps = 10;
             aocutoff = 8;
+            dynlightdist = 1024;
             break;
         case 2:
             csmfarplane = 1024;
@@ -5372,6 +5374,7 @@ void setlightlod()
             volumetric = 1;
             volsteps = 20;
             aocutoff = 16;
+            dynlightdist = 1536;
             break;
         case 3:
             csmfarplane = 2048;
@@ -5385,6 +5388,7 @@ void setlightlod()
             volumetric = 1;
             volsteps = 40;
             aocutoff = 32;
+            dynlightdist = 3072;
             break;
     }
     cleardeferredlightshaders();
