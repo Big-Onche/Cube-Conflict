@@ -1574,6 +1574,7 @@ namespace game
                 }
                 sessionid = getint(p);
                 n_ambiance = getint(p);
+                n_map = getint(p);
                 player1->clientnum = mycn;      // we are now connected
                 if(getint(p) > 0) conoutf("this server is password protected");
                 getstring(servdesc, p, sizeof(servdesc));
