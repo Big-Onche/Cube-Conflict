@@ -3,8 +3,14 @@ List of licenses applied to images (icons, font, hud and textures) | Liste des l
 The following files are protected by Envato Elements license, you CANNOT use them for your personal projects unless you buy the images
 Les fichiers suivants sont protégés par licence Envato Elements vous ne POUVEZ PAS les utiliser pour vos projets personnels à moins d'acheter les images
 
-See / Voir licenses_certificates/license_certificate_LICENCEID (name of the file).txt
 
+Files : media/model/capes/cape_weed/img.jpg
+	media/model/capes/cape_weed/orange/img.jpg 
+	license_certificate_HJ7WGXVNE2 (weed cape).txt
+
+	media/model/capes/cape_coroned/img.jpg
+	media/model/capes/cape_coroned/orange/img.jpg 
+	license_certificate_BXPJHGTS9Q (cape coroned).txt
 
 
 

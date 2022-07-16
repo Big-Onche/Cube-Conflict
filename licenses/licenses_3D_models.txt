@@ -84,7 +84,7 @@ Cependant, ils possèdent des licences spécifiques rendant leur utilisation pos
 
 Provided by Nobiax
 	CC0 1.0 Universal (CC0 1.0) - Public Domain Dedication 
-	See / Voir licenses_certificates/readme (nobiax).txt)
+	See / Voir licenses_certificates/readme (nobiax).txt
 	media/model/mapmodel/rochers/longue
 	media/model/mapmodel/rochers/pierre
 	media/model/mapmodel/rochers/pierre_fonce
