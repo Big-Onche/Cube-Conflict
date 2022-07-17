@@ -41,7 +41,7 @@ D'UTILISER TESSERACT COMME BASE (http://tesseract.gg) ET DE NE PAS UTILISER CUBE
 Cela vous évitera d'enfreindre des licenses acquises expressément pour Cube Conflict.
 
 - La conception des maps, gameplay et logos de Cube Conflict sont sous liscence CC-BY-NC.
-  Cela signifie que toute utilisation a des fins lucrative de ce jeu en l'état est strictement interdite.
+  Cela signifie que toute utilisation à des fins lucratives de ce jeu en l'état est strictement interdite.
   Voir "licenses_certificates/cc-by-nc.txt"
 
 - Les fichiers de modèles 3D ont chacun leur licence respective

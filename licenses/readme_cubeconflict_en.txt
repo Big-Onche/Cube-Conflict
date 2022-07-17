@@ -74,5 +74,3 @@ AUTHORS
 Jean Onche
 Others (for some 3D models): Skyser
 Special thanks to: The creators of Cube Engine 2 / Tesseract, "Lordspock" (PixStudio) and "lag-it".
-
-

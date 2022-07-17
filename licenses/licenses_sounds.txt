@@ -1,0 +1,26 @@
+List of licenses applied to sound effects and songs | Liste des licences appliquées aux effets sonores et musiques
+
+The following files are protected by Envato Elements license, you CANNOT use them for your personal projects unless you buy the sounds.
+Les fichiers suivants sont protégés par licence Envato Elements vous ne POUVEZ PAS les utiliser pour vos projets personnels à moins d'acheter les sons.
+
+Files :	media/sound/mapsound/indoor1.ogg 	licenses_certificates/license_certificate_R3FY29ABTJ (indoor1.ogg).txt
+	media/sound/mapsound/indoor2.ogg 	licenses_certificates/license_certificate_M6YEV3H785 (indoor2.ogg).txt
+	media/sound/mapsound/reactor.ogg 	licenses_certificates/license_certificate_9Q6WDAHN2Y (reactor.ogg).txt
+	media/sound/mapsound/buzz.ogg 		licenses_certificates/license_certificate_9WUQDBHCL5 (buzz.ogg).txt
+
+
+
+
+	
+
+
+
+-------------------------------------------------------------------------------------------------------
+
+The following files were created expressly for Cube Conflict by its developers. The CC-BY-SA 4.0 license is applied here.
+Les fichiers suivants ont été crées expressément pour Cube Conflict par ses développeurs. La licence CC-BY-SA 4.0 y est appliquée.
+
+See / Voir licenses_certificates/cc-by-sa.txt
+
+Created by "Jean Onche" for Cube Conflict | Réalisé par "Jean Onche" pour Cube Conflict
+Files :	
