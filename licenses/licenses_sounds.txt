@@ -3,17 +3,20 @@ List of licenses applied to sound effects and songs | Liste des licences appliqu
 The following files are protected by Envato Elements license, you CANNOT use them for your personal projects unless you buy the sounds.
 Les fichiers suivants sont protégés par licence Envato Elements vous ne POUVEZ PAS les utiliser pour vos projets personnels à moins d'acheter les sons.
 
-Files :	media/sound/mapsound/indoor1.ogg 	licenses_certificates/license_certificate_R3FY29ABTJ (indoor1.ogg).txt
-	media/sound/mapsound/indoor2.ogg 	licenses_certificates/license_certificate_M6YEV3H785 (indoor2.ogg).txt
-	media/sound/mapsound/reactor.ogg 	licenses_certificates/license_certificate_9Q6WDAHN2Y (reactor.ogg).txt
-	media/sound/mapsound/buzz.ogg 		licenses_certificates/license_certificate_9WUQDBHCL5 (buzz.ogg).txt
+See "licenses_certificates" folder for every licences / Voir dossier "licenses_certificates" pour chaque licences.
 
-
-
-
+Files :	media/sound/mapsound/indoor1.ogg 	license_certificate_R3FY29ABTJ (indoor1.ogg).txt
+	media/sound/mapsound/indoor2.ogg 	license_certificate_M6YEV3H785 (indoor2.ogg).txt
+	media/sound/mapsound/reactor.ogg 	license_certificate_9Q6WDAHN2Y (reactor.ogg).txt
+	media/sound/mapsound/buzz.ogg 		license_certificate_9WUQDBHCL5 (buzz.ogg).txt
+	media/sound/mapsound/birds.ogg 		license_certificate_XTMR3LZ4JN (birds.ogg).txt
+	media/sound/mapsound/rain.ogg 		license_certificate_BY38M9AHN4 (rain.ogg).txt
+	media/sound/mapsound/coldwind.ogg 	license_certificate_QDH4WYEPNU (coldwind.ogg).txt
+	media/sound/mapsound/lightwind.ogg 	license_certificate_FSKE6LAH9D (lightwind.ogg).txt
+	media/sound/mapsound/apocalypse.ogg 	license_certificate_S8WK43UC6A (apocalypse.ogg).txt	
+	media/sound/mapsound/heatwave.ogg 	license_certificate_HLSCJ8YT95 (heatwave.ogg).txt
+	media/sound/mapsound/bigfire.ogg 	license_certificate_F6Y4TAGBPJ (bigfire.ogg).txt
 	
-
-
 
 -------------------------------------------------------------------------------------------------------
 
