@@ -45,7 +45,33 @@ Files :	media/sound/game/ent_player/jump_basic_1.ogg
 	media/sound/game/ent_player/land_parmour_1.ogg
 	media/sound/game/ent_player/land_parmour_2.ogg
 	media/sound/game/ent_player/land_parmour_3.ogg	license_certificates (land_parmour_X).txt
-
+	media/sound/game/ent_player/move_1.ogg
+	media/sound/game/ent_player/move_2.ogg
+	media/sound/game/ent_player/move_3.ogg
+	media/sound/game/ent_player/move_4.ogg
+	media/sound/game/ent_player/move_5.ogg		license_certificate_8TWUD9CBAR (move_X).txt
+	media/sound/game/ent_player/move_parmour_1.ogg
+	media/sound/game/ent_player/move_parmour_2.ogg
+	media/sound/game/ent_player/move_parmour_3.ogg	license_certificates (move_parmour_X).txt
+	media/sound/game/ent_player/swim_1.ogg
+	media/sound/game/ent_player/swim_2.ogg
+	media/sound/game/ent_player/swim_3.ogg
+	media/sound/game/ent_player/swim_4.ogg
+	media/sound/game/ent_player/swim_5.ogg		license_certificate_XPW6FS9DZA (swim_X).txt
+	media/sound/game/ent_player/splash_1.ogg
+	media/sound/game/ent_player/splash_2.ogg
+	media/sound/game/ent_player/splash_3.ogg	license_certificates (splash_X).txt
+	media/sound/game/ent_player/water_1.ogg
+	media/sound/game/ent_player/water_2.ogg
+	media/sound/game/ent_player/water_3.ogg		license_certificates (water_X).txt
+	media/sound/game/ent_player/jumppad_1.ogg
+	media/sound/game/ent_player/jumppad_2.ogg
+	media/sound/game/ent_player/jumppad_3.ogg	license_certificate_SYF6G82QEM (jumppad_X).txt
+	media/sound/game/ent_player/teleport_1.ogg
+	media/sound/game/ent_player/teleport_2.ogg	license_certificates (teleport_X).txt
+	media/sound/game/ent_player/splash_lava_1.ogg
+	media/sound/game/ent_player/splash_lava_2.ogg
+	media/sound/game/ent_player/splash_lava_3.ogg	license_certificate_EHS6CTBZY2 (splash_lava_X).txt
 
 -------------------------------------------------------------------------------------------------------
 

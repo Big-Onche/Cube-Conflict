@@ -209,11 +209,14 @@ static const char * const mastermodeicons[] =  { "server", "server", "serverlock
 // hardcoded sounds, defined in sounds.cfg
 enum
 {
-    S_JUMP_BASIC = 0, S_JUMP_NINJA,
+    // player movements sounds
+    S_JUMP_BASIC = 0, S_JUMP_NINJA, S_JUMP_ASSIST, S_LAND_BASIC, S_LAND_ASSIST, S_FOOTSTEP, // 0-5
+    S_FOOTSTEP_ASSIST, S_SWIM, S_SPLASH, S_WATER, S_JUMPPAD, // 6-10
+    S_TELEPORT, S_SPLASH_LAVA,
 
+    // shields
 
-
-    S_JUMPASSIST, S_LAND, S_LANDASSIST, S_PAS, S_PASASSIST, S_PASEPO, S_NAGE, S_SPLASH2, S_SPLASH1, S_BURN, S_JUMPPAD, S_TELEPORTEUR, S_SANG, S_ITEMSPAWN, S_NOAMMO,
+    S_PASEPO, S_SANG, S_ITEMSPAWN, S_NOAMMO,
 
     //Armes
     S_GLOCK, S_UZI, S_MINIGUN, S_MOSSBERG, S_EPEEIDLE, S_EPEEATTACK, S_SMAW, S_FAMAS, S_SPOCKGUN, S_SV98, S_FELECTRIQUE, S_LANCEGRENADE,
