@@ -1155,7 +1155,7 @@ namespace game
         if (floorlevel>0)
         {
             particle_splash(n_ambiance==4 && randomambience  ? PART_EAU : PART_SMOKE, pl->armourtype==A_ASSIST ? 12 : 10, 100, d->feetpos(), n_ambiance==4 && randomambience  ? 0x111111 : 0x666666, 7.0f+rnd(pl->armourtype==A_ASSIST ? 10 : 5), 400, 20);
-            if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_ASSIST && pl->armour>0 ? S_JUMPASSIST : S_JUMP, d);
+            if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_ASSIST && pl->armour>0 ? S_JUMPASSIST : pl->aptitude==APT_NINJA || (pl->aptitude==APT_KAMIKAZE && pl->aptisort2) ? S_JUMP_NINJA : S_JUMP_BASIC, d);
         }
         else if(floorlevel<0)
         {
