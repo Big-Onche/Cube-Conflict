@@ -563,9 +563,13 @@ int listzipfiles(const char *dir, const char *ext, vector<char *> &files)
             if(strncmp(f.name, dir, dirsize)) continue;
             const char *name = f.name + dirsize;
             if(name[0] == PATHDIV) name++;
-            if(strchr(name, PATHDIV)) continue;
-            if(!ext) files.add(newstring(name));
-            else
+            const char *div = strchr(name, PATHDIV);
+            if(!ext)
+            {
+                if(!div) files.add(newstring(name));
+                else if(files.empty() || !matchstring(files.last(), strlen(files.last()), name, div - name)) files.add(newstring(name, div - name));
+            }
+            else if(!div)
             {
                 size_t namelen = strlen(name);
                 if(namelen > extsize)
@@ -585,4 +589,3 @@ int listzipfiles(const char *dir, const char *ext, vector<char *> &files)
 ICOMMAND(addzip, "sss", (const char *name, const char *mount, const char *strip), addzip(name, mount[0] ? mount : NULL, strip[0] ? strip : NULL));
 ICOMMAND(removezip, "s", (const char *name), removezip(name));
 #endif
-
