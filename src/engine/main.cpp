@@ -325,7 +325,7 @@ void restorebackground(int w, int h, bool force)
 }
 
 float loadprogress = 0;
-int nbtexte = rnd(11);
+int nbtexte = rnd(13);
 int textetimer, pointstimer = 0;
 
 static const struct loadingtextinfo { const char *loadingtext_FR, *loadingtext_EN; } loadingtext[] =
@@ -341,8 +341,10 @@ static const struct loadingtextinfo { const char *loadingtext_FR, *loadingtext_E
     {"truquage des élections présidentielles",                   "rigging presidential elections"},
     {"augmentation des dégâts des armes cheatées",               "buffing the most powerful weapons"},
     {"réduction des dégâts des armes les plus nulles",           "nerfing the most pointless weapons"},
-    {"ERREUR 410 :D",                                            "Connection lost | Please wait - attempting to reestablish"},
     {"injection de la 5ème dose de rappel",                      "injection of the fifth booster dose"},
+    {"ERREUR 410 :D",                                            "Connection lost | Please wait - attempting to reestablish"},
+    {"réglage du chauffage à 19° (pas plus)",                    "saving the planet by firing carbon neutral rockets"},
+    {"corruption de votre sauvegarde",                           "deleting your saved game"},
 };
 
 void renderprogressview(int w, int h, float bar, const char *text)   // also used during loading
