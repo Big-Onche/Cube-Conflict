@@ -1319,6 +1319,7 @@ int main(int argc, char **argv)
     textureload("media/interface/hud/viseurA.png");
     textureload("media/interface/hud/viseurB.png");
     textureload("media/interface/hud/viseurC.png");
+    textureload("media/interface/hud/shrooms.png");
     textureload("media/map/1.png");
     textureload("media/map/2.png");
     textureload("media/map/3.png");

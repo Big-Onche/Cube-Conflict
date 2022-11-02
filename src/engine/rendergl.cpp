@@ -1344,6 +1344,7 @@ int farplane;
 VARP(zoominvel, 0, 40, 500);
 VARP(zoomoutvel, 0, 50, 500);
 int zoomfov = 50;
+float champifov = 0;
 VARP(fov, 10, 100, 150);
 int avatarzoomfov = 40;
 VAR(avatarfov, 10, 40, 100);
@@ -1362,15 +1363,15 @@ void disablezoom()
 void computezoom()
 {
     if(game::player1->state==CS_DEAD) zoom = 0;
-    if(!zoom) { zoomprogress = 0; curfov = fov; curavatarfov = avatarfov; return; }
+    if(!zoom) { zoomprogress = 0; curfov = fov+champifov; curavatarfov = avatarfov+champifov; return; }
     if(zoom > 0) zoomprogress = zoominvel ? min(zoomprogress + float(elapsedtime) / zoominvel, 1.0f) : 1;
     else
     {
         zoomprogress = zoomoutvel ? max(zoomprogress - float(elapsedtime) / zoomoutvel, 0.0f) : 0;
         if(zoomprogress <= 0) zoom = 0;
     }
-    curfov = zoomfov*zoomprogress + fov*(1 - zoomprogress);
-    curavatarfov = avatarzoomfov*zoomprogress + avatarfov*(1 - zoomprogress);
+    curfov = zoomfov*zoomprogress + fov*(1 - zoomprogress) + champifov;
+    curavatarfov = avatarzoomfov*zoomprogress + avatarfov*(1 - zoomprogress) + champifov;;
 }
 
 FVARP(zoomsens, 1e-4f, 4.5f, 1e4f);

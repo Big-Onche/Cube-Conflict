@@ -135,6 +135,7 @@ namespace game
     }
 
     int colortimer = 0;
+    bool enlargefov = true;
 
     void gameplayhud(int w, int h)
     {
@@ -169,6 +170,30 @@ namespace game
             if(player1->gunselect==GUN_S_ROQUETTES) settexture("media/interface/hud/viseurA.png");
             if(player1->gunselect==GUN_SKS) settexture("media/interface/hud/viseurC.png");
             else settexture("media/interface/hud/viseurB.png");
+            bgquad(0, 0, w, h);
+
+            gle::colorf(1, 1, 1, 1);
+        }
+
+        if(player1->champimillis>0)
+        {
+            if(player1->champimillis>5000) gle::colorf(1, 1, 1, 1);
+            else gle::colorf(player1->champimillis/5000.0f, player1->champimillis/5000.0f, player1->champimillis/5000.0f, player1->champimillis/5000.0f);
+
+            if(enlargefov)
+            {
+                champifov+=0.006f*nbfps;
+                if(champifov>player1->champimillis/1500) enlargefov = false;
+            }
+            else
+            {
+                champifov-=0.006f*nbfps;
+                if(champifov<-player1->champimillis/1500) enlargefov = true;
+            }
+
+            conoutf("%f", champifov);
+
+            settexture("media/interface/hud/shrooms.png");
             bgquad(0, 0, w, h);
 
             gle::colorf(1, 1, 1, 1);
