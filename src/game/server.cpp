@@ -1615,7 +1615,7 @@ namespace server
             // no overflow check
             case 4: return type;
         }
-        if(ci && ++ci->overflow >= 500) return -2;
+        if(ci && ++ci->overflow >= 200) return -2;
         return type;
     }
 
@@ -2322,7 +2322,7 @@ namespace server
         {
             case APT_MAGICIEN: {if(ts.aptisort3) damage = damage/5.0f;} break;
             case APT_VIKING: {if(actor!=target) {ts.ragemillis+=damage*5; sendresume(target);}} break; //Ajoute la rage au Vicking et l'envoie au client
-            case APT_PRETRE: { if(ts.aptisort2 && ts.mana>=damage/10) {ts.mana -= damage/10; damage=0; sendresume(target);} } break;
+            case APT_PRETRE: { if(ts.aptisort2 && ts.mana>0) {ts.mana -= damage/10; damage=0; {if(ts.mana<0)ts.mana=0;}; sendresume(target);} } break;
             case APT_SHOSHONE:
             {
                 if(as.aptisort1) damage /= 1.3f;
@@ -2497,8 +2497,9 @@ namespace server
         gs.lastshot = millis;
 
         float waitfactor = 1;
-        if(ci->aptitude==APT_PRETRE && ci->state.aptisort3) waitfactor = 2.5f;
-        if(gs.champimillis>0) waitfactor*=1.25f;
+        if(ci->aptitude==APT_PRETRE && ci->state.aptisort3) waitfactor = 2.5f + ((4000 - ci->state.aptisort3)/1000);
+        conoutf("%f", 2.5f + ((4000 - ci->state.aptisort3)/1000));
+        if(gs.champimillis>0) waitfactor*=1.5f;
         gs.gunwait = attacks[atk].attackdelay/waitfactor;
 
         sendf(-1, 1, "rii9x", N_SHOTFX, ci->clientnum, atk, id,
@@ -3139,11 +3140,11 @@ namespace server
 
     void generrlog(clientinfo *ci)
     {
-        logoutf("Net : ping %d, overflow %d\nAbilities : classe %d, ability1 %d, ability2 %d, ability 3 %d\nBoosts : rage %d, epo %d, joint %d, stero %d\nOther : health %d, mana %d, lastspawn %d, lastdeath %d, lastshot %d",
+        logoutf("Net : ping %d, overflow %d | Abilities : classe %s, a1 %d, a2 %d, a3 %d | Boosts : rage %d, epo %d, joint %d, stero %d, shrooms %d | Other : health %d, mana %d",
                 ci->ping, ci->overflow,
-                ci->aptitude, ci->state.aptisort1, ci->state.aptisort2, ci->state.aptisort3,
-                ci->state.ragemillis, ci->state.epomillis, ci->state.jointmillis, ci->state.steromillis,
-                ci->state.health, ci->state.mana, ci->state.lastspawn, ci->state.lastdeath, ci->state.lastshot);
+                aptitudes[ci->aptitude].apt_nomEN, ci->state.aptisort1, ci->state.aptisort2, ci->state.aptisort3,
+                ci->state.ragemillis, ci->state.epomillis, ci->state.jointmillis, ci->state.steromillis, ci->state.champimillis,
+                ci->state.health, ci->state.mana);
     }
 
     void parsepacket(int sender, int chan, packetbuf &p)     // has to parse exactly each byte of the packet
