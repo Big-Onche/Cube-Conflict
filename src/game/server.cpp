@@ -2498,7 +2498,7 @@ namespace server
 
         float waitfactor = 1;
         if(ci->aptitude==APT_PRETRE && ci->state.aptisort3) waitfactor = 2.5f + ((4000 - ci->state.aptisort3)/1000);
-        conoutf("%f", 2.5f + ((4000 - ci->state.aptisort3)/1000));
+
         if(gs.champimillis>0) waitfactor*=1.5f;
         gs.gunwait = attacks[atk].attackdelay/waitfactor;
 
