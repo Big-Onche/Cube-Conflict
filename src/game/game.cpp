@@ -269,11 +269,8 @@ namespace game
 
             if(d==hudplayer() && d->state==CS_ALIVE && isconnected())
             {
-                if(d->health<=200) d->hurtchan = playsound(S_HEARTBEAT, NULL, NULL, 0, -1, 1000, d->hurtchan);
-                else d->stopheartbeat();
-
                 if(d->armour<=1000 && d->armourtype==A_ASSIST && d->armour>0) d->alarmchan = playsound(S_ASSISTALARM, NULL, NULL, 0, -1, 1000, d->alarmchan);
-                else d->stopassist();
+                else d->stoppowerarmorsound();
             }
 
             if(d->state==CS_ALIVE && !intermission && d!=player1)
@@ -669,13 +666,13 @@ namespace game
         {
             if(d->aptitude==APT_PHYSICIEN && d->aptisort1 && d->armour>0)
             {
-                playsound(S_SORTPHY1, d==h ? NULL : &d->o, 0, 0, 0 , 100, -1, 200);
+                playsound(S_PHY_1, d==h ? NULL : &d->o, 0, 0, 0 , 100, -1, 200);
             }
             else if(d->armour>0 && actor->gunselect!=GUN_LANCEFLAMMES)
-                playsound(d->armourtype == A_BLUE ? S_BALLEBOUCLIERBOIS :
-                          d->armourtype == A_GREEN ? S_BALLEBOUCLIERFER :
-                          d->armourtype == A_YELLOW ? S_BALLEBOUCLIEROR :
-                          d->armourtype == A_ASSIST ? S_BALLEARMUREASSISTENT : S_BALLEBOUCLIERMAGNETIQUE,
+                playsound(d->armourtype == A_BLUE ? S_IMPACTWOOD :
+                          d->armourtype == A_GREEN ? S_IMPACTIRON :
+                          d->armourtype == A_YELLOW ? S_IMPACTGOLD :
+                          d->armourtype == A_ASSIST ? S_IMPACTPOWERARMOR : S_IMPACTMAGNET,
                           d==h ? NULL : &d->o, 0, 0, 0 , 100, -1, 200);
         }
 
@@ -710,17 +707,19 @@ namespace game
             if(deathscore) showscores(true);
             disablezoom();
             d->attacking = ACT_IDLE;
+            d->champimillis = 0;
+            champifov = 0;
             clearpostfx();
             fullbrightmodels = 0;
             d->roll = 0;
-            playsound(S_DIE2);
+            playsound(S_DIE_P1);
         }
         else
         {
             d->move = d->strafe = 0;
             d->resetinterp();
             d->smoothmillis = 0;
-            playsound(S_DIE1, &d->o, 0, 0, 0 , 100, -1, 300);
+            playsound(S_DIE, &d->o, 0, 0, 0 , 100, -1, 300);
         }
     }
 
@@ -770,34 +769,21 @@ namespace game
         else if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission) return;
 
         //////////////////////////////SONS//////////////////////////////
-        if(!GAME_LANG)
+        switch(actor->killstreak) //Sons Killstreak
         {
-            switch (actor->killstreak) //Sons Risitas Killstreak
-            {
-                case 3:
-                    playsound(S_RISIKILL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300);
-                    if(camera1->o.dist(actor->o) >= 250) playsound(S_RISIKILLLOIN, &actor->o, NULL, 0, 0 , 200, -1, 2000);
-                    break;
-                case 5: case 7:
-                    playsound(S_BIGRISIKILL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300);
-                    if(camera1->o.dist(actor->o) >= 250) playsound(S_BIGRISIKILLLOIN, &actor->o, NULL, 0, 0 , 200, -1, 750);
-                    break;
-                case 10: case 15: case 20:
-                    playsound(S_GIGARISIKILL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300);
-                    if(camera1->o.dist(actor->o) >= 250) playsound(S_GIGARISIKILLLOIN, &actor->o, NULL, 0, 0 , 200, -1, 1500);
-                    break;
-            }
+            case 3:
+                playsound(S_KS_X3, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300);
+                if(camera1->o.dist(actor->o) >= 250) playsound(S_KS_X3_FAR, &actor->o, NULL, 0, 0 , 200, -1, 2000);
+                break;
+            case 5:
+                playsound(S_KS_X5, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300);
+                if(camera1->o.dist(actor->o) >= 250) playsound(S_KS_X5_FAR, &actor->o, NULL, 0, 0 , 200, -1, 750);
+                break;
+            case 7:
+                playsound(S_KS_X7, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300);
+                if(camera1->o.dist(actor->o) >= 250) playsound(S_KS_X7_FAR, &actor->o, NULL, 0, 0 , 200, -1, 1500);
+                break;
         }
-
-        //switch(atk)
-        //{
-            //case ATK_UZI_SHOOT: playsound(S_BLOHBLOH, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
-            //case ATK_FAMAS_SHOOT: playsound(S_FAMASLOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
-            //case GUN_SMAW: playsound(S_BOOBARL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
-            //case GUN_AK47: playsound(S_KALASHLOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
-            //case ATK_ARTIFICE_SHOOT: playsound(S_ARTIFICELOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
-            //case ATK_M32_SHOOT: playsound(S_GRENADELOL, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300); break;
-        //}
 
         //////////////////////////////GRAPHISMES//////////////////////////////
         if(actor->aptitude==7) //Eclair aptitude faucheuse
@@ -1174,7 +1160,7 @@ namespace game
             int snd = pl->armourtype==A_ASSIST && pl->armour> 0 ? S_FOOTSTEP_ASSIST : S_FOOTSTEP;
             if(lookupmaterial(d->feetpos())==MAT_WATER) snd = S_SWIM;
             if(lastmillis-pl->lastfootstep < (d->vel.magnitude()*(aptitudes[pl->aptitude].apt_vitesse*0.35f)*(pl->crouched() || (pl->aptisort2 && pl->aptitude==APT_ESPION) ? 2 : 1)*(d->inwater ? 2 : 1)*(pl->armourtype==A_ASSIST && pl->armour> 0 ? 2.f : 1)/d->vel.magnitude())) return;
-            else {playsound(snd, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , pl->armourtype==A_ASSIST ? 300 : 150, -1, pl->armourtype==A_ASSIST ? 600 : 300); if(pl->epomillis) switch(rnd(4)) {case 0: playsound(S_PASEPO, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 500, -1, 1000);}}
+            else {playsound(snd, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , pl->armourtype==A_ASSIST ? 300 : 150, -1, pl->armourtype==A_ASSIST ? 600 : 300); if(pl->epomillis) if(randomevent(4)) playsound(S_EPO_RUN, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 500, -1, 1000);}
         }
         pl->lastfootstep = lastmillis;
     }

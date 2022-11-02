@@ -424,7 +424,7 @@ extern void findplayerspawn(dynent *d, int forceent = -1, int tag = 0);
 // sound
 enum
 {
-    SND_MAP = 1<<0
+    SND_MAP     = 1<<0,
 };
 
 extern int playsound(int n, const vec *loc = NULL, extentity *ent = NULL, int flags = 0, int loops = 0, int fade = 0, int chanid = -1, int radius = 0, int expire = -1);

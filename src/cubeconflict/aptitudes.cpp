@@ -99,7 +99,7 @@ namespace game
                 if(isteam(player1->team, d->team) && d->aptitude==APT_ESPION && d!=player1)
                 {
                     getspyability = totalmillis;
-                    playsound(S_SORTESP3);
+                    playsound(S_SPY_3);
                 }
                 return;
         }
@@ -112,7 +112,7 @@ namespace game
             case 1:
                 switch(player1->aptitude)
                 {
-                    case APT_KAMIKAZE: player1->gunselect = GUN_KAMIKAZE; playsound(S_WEAPLOAD); return;
+                    case APT_KAMIKAZE: player1->gunselect = GUN_KAMIKAZE; playsound(S_WPLOADFASTWOOSH); return;
                     case APT_PRETRE: case APT_PHYSICIEN: case APT_MAGICIEN: case APT_SHOSHONE: case APT_ESPION: aptitude(player1, ability);
                     default: return;
                 }
@@ -121,7 +121,7 @@ namespace game
                 if(player1->aptitude==APT_PRETRE || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || player1->aptitude==APT_KAMIKAZE) aptitude(player1, player1->aptitude==APT_KAMIKAZE ? 2 : ability);
         }
     }
-    ICOMMAND(aptitude, "i", (int *ability), player1aptitude(*ability));
+    ICOMMAND(aptitude, "i", (int *ability), if(isconnected()) player1aptitude(*ability));
 
     void updatespecials(gameent *d) //Permet de réarmer les sorts en fonction de la durée de rechargement de ceux-ci
     {

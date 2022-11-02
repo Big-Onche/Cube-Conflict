@@ -1993,7 +1993,7 @@ namespace game
                 int gun = getint(p);
                 if(!validgun(gun)) return;
                 d->gunselect = gun;
-                playsound(S_WEAPLOAD, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 50, -1, 150);
+                playsound(attacks[gun-GUN_RAIL].picksound, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 50, -1, 150);
                 break;
             }
 

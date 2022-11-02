@@ -1215,7 +1215,7 @@ namespace ai
         if(enemyok && (d->aptitude==APT_KAMIKAZE || d->aptitude==APT_NINJA))
         {
             makeroute(d, b, e->o);
-            if(d->aptisort2<2250 && d->aptisort2 && d->aptitude==APT_KAMIKAZE) d->gunselect=GUN_KAMIKAZE;
+            if(d->aptisort2<500 && d->aptisort2 && d->aptitude==APT_KAMIKAZE) d->gunselect=GUN_KAMIKAZE;
         }
 
         if(!enemyok || d->skill >= 30)

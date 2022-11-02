@@ -143,7 +143,7 @@ namespace entities
         if(d->aptisort1 && d->aptitude==APT_PRETRE)
         {
             adddynlight(d->o, 20, vec(1.5f, 1.5f, 0.0f), 300, 50, L_NOSHADOW|L_VOLUMETRIC);
-            playsound(S_SORTPRETRE1, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, d==hudplayer() ? 0 : 150, -1, 300);
+            playsound(S_PRI_1, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, d==hudplayer() ? 0 : 150, -1, 300);
         }
 
         playsound((type==I_BOUCLIERBOIS || type==I_BOUCLIERFER || type == I_BOUCLIERMAGNETIQUE || type==I_BOUCLIEROR) && d->armourtype==A_ASSIST ? S_ITEMPIECEROBOTIQUE : itemstats[type-I_RAIL].sound, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, d==hudplayer() ? 0 : 150, -1, 300);
@@ -348,24 +348,32 @@ namespace entities
         }
     }
 
+    bool shroomsplayed;
+
     void checkboosts(int time, gameent *d)
     {
+        if(d==hudplayer() && d->champimillis > 4000) shroomsplayed = false;
+        else if(!shroomsplayed && d==hudplayer() && d->champimillis && d->champimillis < 4000)
+        {
+            playsound(S_SHROOMS_PUPOUT, NULL);
+            shroomsplayed = true;
+        }
+
         if(d->steromillis && (d->steromillis -= time)<=0)
         {
             d->steromillis = 0;
-            //playsound(S_PUPOUT, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
+            playsound(S_ROIDS_PUPOUT, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
             if(d==player1) conoutf(CON_GAMEINFO, GAME_LANG ? "\f8The steroid cycle is over." : "\f8La cure de stéros est terminée.");
         }
         if(d->epomillis && (d->epomillis -= time)<=0)
         {
             d->epomillis = 0;
-            //playsound(S_PUPOUT, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
+            playsound(S_EPO_PUPOUT, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
             if(d==player1) conoutf(CON_GAMEINFO, GAME_LANG ? "\f8EPO no longer works..." : "\f8L'EPO ne fait plus effet.");
         }
         if(d->champimillis && (d->champimillis -= time)<=0)
         {
             d->champimillis = 0;
-            //playsound(S_PUPOUT, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
             fullbrightmodels = 0;
             clearpostfx();
             if(d==player1) conoutf(CON_GAMEINFO, GAME_LANG ? "\f8The mushrooms have been digested." : "\f8Les champignons sont digérés.");

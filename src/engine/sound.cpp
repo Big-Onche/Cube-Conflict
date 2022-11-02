@@ -2,7 +2,6 @@
 
 #include "engine.h"
 #include "ccheader.h"
-
 #include "SDL_mixer.h"
 
 bool nosound = true;
@@ -121,13 +120,13 @@ void stopchannels()
 void setmusicvol(int musicvol);
 extern int musicvol;
 static int curvol = 0;
-VARFP(soundvol, 0, 80, 100,
+VARFP(soundvol, 0, 255, 255,
 {
     if(!soundvol) { stopchannels(); setmusicvol(0); }
     else if(!curvol) setmusicvol(musicvol);
     curvol = soundvol;
 });
-VARFP(musicvol, 0, 40, 100, setmusicvol(soundvol ? musicvol : 0));
+VARFP(musicvol, 0, 60, 255, setmusicvol(soundvol ? musicvol : 0));
 
 char *musicfile = NULL, *musicdonecmd = NULL;
 
@@ -138,7 +137,7 @@ stream *musicstream = NULL;
 void setmusicvol(int musicvol)
 {
     if(nosound) return;
-    if(music) Mix_VolumeMusic((musicvol*MIX_MAX_VOLUME)/100);
+    if(music) Mix_VolumeMusic((musicvol*MIX_MAX_VOLUME)/255);
 }
 
 void stopmusic()
@@ -165,8 +164,8 @@ bool shouldinitaudio = true;
 SVARF(audiodriver, AUDIODRIVER, { shouldinitaudio = true; initwarning("sound configuration", INIT_RESET, CHANGE_SOUND); });
 VARF(sound, 0, 1, 1, { shouldinitaudio = true; initwarning("sound configuration", INIT_RESET, CHANGE_SOUND); });
 VARF(soundchans, 1, 512, 512, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
-VARF(soundfreq, 0, 44100, 48000, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
-VARF(soundbufferlen, 128, 3072, 4096, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
+VARF(soundfreq, 0, MIX_DEFAULT_FREQUENCY, 48000, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
+VARF(soundbufferlen, 128, 4096, 4096, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
 
 bool initaudio()
 {
@@ -229,6 +228,7 @@ void initsound()
             return;
         }
     }
+
     if(Mix_OpenAudio(soundfreq, MIX_DEFAULT_FORMAT, 2, soundbufferlen)<0)
     {
         nosound = true;
@@ -286,7 +286,7 @@ void startmusic(char *name, char *cmd)
             musicfile = newstring(file);
             if(cmd[0]) musicdonecmd = newstring(cmd);
             Mix_PlayMusic(music, cmd[0] ? 0 : -1);
-            Mix_VolumeMusic((musicvol*MIX_MAX_VOLUME)/100);
+            Mix_VolumeMusic((musicvol*MIX_MAX_VOLUME)/255);
             intret(1);
         }
         else
@@ -302,8 +302,6 @@ COMMANDN(music, startmusic, "ss");
 static struct songsinfo { string file, looped; } songs[] =
 {
     {"musiques/menu.ogg", "0"},
-    {"musiques/winning.ogg", "0"},
-    {"musiques/loosing.ogg", "0"},
 };
 
 void musicmanager(int track) //CubeConflict, gestion des musiques
@@ -458,12 +456,12 @@ static struct soundtype
     {
         return chan.inuse && config.hasslot(chan.slot, slots);
     }
-} gamesounds("game/"), mapsounds("mapsound/");
+} gamesounds(""), mapsounds("mapsound/");
 
 void registersound(char *name, int *vol) { intret(gamesounds.addsound(name, *vol, 0)); }
 COMMAND(registersound, "si");
 
-void mapsound(char *name, int *vol, int *maxuses) { intret(mapsounds.addsound(name, *vol/2, *maxuses < 0 ? 0 : max(1, *maxuses))); }
+void mapsound(char *name, int *vol, int *maxuses) { intret(mapsounds.addsound(name, *vol, *maxuses < 0 ? 0 : max(1, *maxuses))); }
 COMMAND(mapsound, "sii");
 
 void altsound(char *name, int *vol) { gamesounds.addalt(name, *vol); }
@@ -551,7 +549,7 @@ void checkmapsounds()
 
 VAR(stereo, 0, 1, 1);
 
-int maxsoundradius = 1000;
+int maxsoundradius = 340;
 
 bool updatechannel(soundchannel &chan)
 {
@@ -561,7 +559,7 @@ bool updatechannel(soundchannel &chan)
     {
         vec v;
         float dist = chan.loc.dist(camera1->o, v);
-        int rad = maxsoundradius;
+        int rad = 0;
         if(chan.ent)
         {
             rad = chan.ent->attr2;
@@ -571,7 +569,7 @@ bool updatechannel(soundchannel &chan)
                 dist -= chan.ent->attr3;
             }
         }
-        else if(chan.radius > 0) rad = maxsoundradius ? min(maxsoundradius, chan.radius) : chan.radius;
+        else if(chan.radius > 0) rad = chan.radius;
         if(rad > 0) volf -= clamp(dist/rad, 0.0f, 1.0f); // simple mono distance attenuation
         if(stereo && (v.x != 0 || v.y != 0) && dist>0)
         {
@@ -580,7 +578,7 @@ bool updatechannel(soundchannel &chan)
         }
     }
     int vol = clamp(int(volf*soundvol*chan.slot->volume*(MIX_MAX_VOLUME/float(255*255)) + 0.5f), 0, MIX_MAX_VOLUME);
-    int pan = clamp(int(panf*255.9f), 0, 100);
+    int pan = clamp(int(panf*255.9f), 0, 255);
     if(vol == chan.volume && pan == chan.pan) return false;
     chan.volume = vol;
     chan.pan = pan;
@@ -617,7 +615,7 @@ void updatesounds()
     {
         reclaimchannels();
         if(mainmenu) stopmapsounds();
-        checkmapsounds();
+        else checkmapsounds();
         syncchannels();
     }
     if(music)
@@ -659,13 +657,10 @@ int playsound(int n, const vec *loc, extentity *ent, int flags, int loops, int f
     if(!sounds.configs.inrange(n)) { conoutf(CON_WARN, "unregistered sound: %d", n); return -1; }
     soundconfig &config = sounds.configs[n];
 
-    //if(loc && (maxsoundradius || radius > 0))
     if(loc && radius > 0)
     {
         // cull sounds that are unlikely to be heard
-        //int rad = radius > 0 ? radius : maxsoundradius;
-        int rad = radius;
-        if(camera1->o.dist(*loc) > 1.5f*rad)
+        if(camera1->o.dist(*loc) > 1.5f*radius)
         {
             if(channels.inrange(chanid) && sounds.playing(channels[chanid], config))
             {
@@ -788,7 +783,7 @@ void resetsound()
     if(music && loadmusic(musicfile))
     {
         Mix_PlayMusic(music, musicdonecmd ? 0 : -1);
-        Mix_VolumeMusic((musicvol*MIX_MAX_VOLUME)/100);
+        Mix_VolumeMusic((musicvol*MIX_MAX_VOLUME)/255);
     }
     else
     {
