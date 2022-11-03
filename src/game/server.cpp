@@ -2652,7 +2652,7 @@ namespace server
     {
         regentimer += curtime;
 
-        if(regentimer>500+(rnd(250)))   //slightly random ticks for regeneration
+        if(regentimer > 1000)   //ticked regeneration to spare bandwidth
         {
             loopv(clients)
             {
@@ -2666,7 +2666,7 @@ namespace server
                         {
                             if((giver.state.o.dist(receiver.state.o)/18.f < 7.5f && receiver.state.health < receiver.state.maxhealth+250 && giver.state.state==CS_ALIVE && receiver.state.state==CS_ALIVE) && (m_teammode ? isteam(receiver.team, giver.team) : giver.clientnum==receiver.clientnum))
                             {
-                                receiver.state.health += 50;
+                                receiver.state.health += 100;
                                 if(receiver.state.health > receiver.state.maxhealth+250) receiver.state.health = receiver.state.maxhealth+250;
                                 loopv(clients) sendf(clients[i]->clientnum, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, 0, receiver.state.health);
                             }
@@ -2676,17 +2676,18 @@ namespace server
                         {
                             if(needmana(receiver.aptitude) && giver.state.o.dist(receiver.state.o)/18.f < 7.5f && receiver.state.mana < 150 && giver.state.state==CS_ALIVE && receiver.state.state==CS_ALIVE)
                             {
-                                if(receiver.aptitude==APT_VAMPIRE)
+                                if(receiver.aptitude==APT_VAMPIRE && receiver.state.health < receiver.state.maxhealth+250)
                                 {
-                                    receiver.state.health += 50;
+                                    receiver.state.health += 100;
                                     if(receiver.state.health > receiver.state.maxhealth+250) receiver.state.health = receiver.state.maxhealth+250;
+                                    loopv(clients) sendf(clients[i]->clientnum, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, 0, receiver.state.health); //vampire gets health instead of mana
                                 }
-                                else
+                                else //other classes needing mana : receive mana
                                 {
-                                    receiver.state.mana += 5;
+                                    receiver.state.mana += 10;
                                     if(receiver.state.mana > 150) receiver.state.mana = 150;
+                                    loopv(clients) sendf(clients[i]->clientnum, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum,  1, receiver.state.mana);
                                 }
-                                loopv(clients) sendf(clients[i]->clientnum, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, receiver.aptitude==APT_VAMPIRE ? 0 : 1, receiver.aptitude==APT_VAMPIRE ? receiver.state.health : receiver.state.mana);
                             }
                         }
                         break;
