@@ -326,7 +326,8 @@ namespace game
         vec o = d->feetpos();
         int basetime = 0;
         if(animoverride) anim = (animoverride<0 ? ANIM_ALL : animoverride)|ANIM_LOOP;
-        const char *mdlname = d->armourtype==A_ASSIST && d->armour>0 ? validteam(team) ? d->team==player1->team ? "smileys/armureassistee" : "smileys/armureassistee/red" : "smileys/armureassistee/red" : mdl.model[validteam(team) ? d->team==player1->team ? 1 : 2 : 0];
+        const char *mdlname = d->armourtype==A_ASSIST && d->armour>0 ? validteam(team) ? d->team==player1->team ? "smileys/armureassistee" : "smileys/armureassistee/red" : "smileys/armureassistee/red" :
+                              d->aptisort2 && d->aptitude==APT_PHYSICIEN ? "smileys/phy_2" : mdl.model[validteam(team) ? d->team==player1->team ? 1 : 2 : 0];
 
         if(intermission && updatestat && (validteam(team) ? bestteams.htfind(player1->team)>=0 : bestplayers.find(player1)>=0))
         {
