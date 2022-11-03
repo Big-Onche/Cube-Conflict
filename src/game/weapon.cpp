@@ -1283,8 +1283,8 @@ namespace game
                 }
         }
 
-        if(attacks[atk].middistsnd!=S_NULL && camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 300) playsound(attacks[atk].middistsnd, &d->muzzle, NULL, 0, 0 , 300, -1, 550);
-        if(attacks[atk].fardistsnd!=S_NULL && camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 500) playsound(attacks[atk].fardistsnd, &d->muzzle, NULL, 0, 0 , 500, -1, 800);
+        if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 300) playsound(attacks[atk].middistsnd, &d->muzzle, NULL, 0, 0 , 300, -1, 550);
+        if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 500) playsound(attacks[atk].fardistsnd, &d->muzzle, NULL, 0, 0 , 500, -1, 800);
     }
 
     void particletrack(physent *owner, vec &o, vec &d)
