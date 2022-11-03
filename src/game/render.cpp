@@ -865,7 +865,7 @@ namespace game
 
     void preloadsounds()
     {
-        for(int i = S_JUMP_BASIC; i <= S_NULL; i++) preloadsound(i);
+        for(int i = S_JUMP_BASIC; i <= S_CGRAOULT; i++) preloadsound(i);
     }
 
     void preload()
