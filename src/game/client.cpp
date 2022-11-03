@@ -1785,6 +1785,28 @@ namespace game
                 break;
             }
 
+            case N_REGENALLIES:
+            {
+                int giver = getint(p);
+                gameent *g = getclient(giver);
+
+                int receiver = getint(p);
+                gameent *r = getclient(receiver);
+
+                int stat = getint(p); //0 = health, 1 = mana
+
+                stat ? r->mana = getint(p) : r->health = getint(p);
+
+                vec effectpos(r->o);
+                effectpos.sub(g->o);
+                effectpos.normalize().mul(1300.0f);
+
+                particle_flying_flare(g->o, r->clientnum==g->clientnum ? g->o : effectpos, 400, stat ? PART_MANA : PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
+                playsound(stat ? S_REGENJUNKIE : S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
+
+                break;
+            }
+
             case N_IDENTIQUEARME:
             {
                 cnidentiquearme = getint(p);

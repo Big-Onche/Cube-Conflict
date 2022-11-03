@@ -257,7 +257,7 @@ namespace server
 
         enum
         {
-            PUSHMILLIS = 5000
+            PUSHMILLIS = 3000
         };
 
         int calcpushrange()
@@ -1584,7 +1584,7 @@ namespace server
         }
 
         uchar operator[](int msg) const { return msg >= 0 && msg < NUMMSG ? msgmask[msg] : 0; }
-    } msgfilter(-1, N_CONNECT, N_SERVINFO, N_INITCLIENT, N_WELCOME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_HITPUSH, N_SHOTFX, N_EXPLODEFX, N_DIED, N_SPAWNSTATE, N_FORCEDEATH, N_TEAMINFO, N_ITEMACC, N_ITEMSPAWN, N_TIMEUP, N_CDIS, N_CURRENTMASTER, N_PONG, N_RESUME, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_SENDMAP, N_DROPFLAG, N_SCOREFLAG, N_RETURNFLAG, N_RESETFLAG, N_CLIENT, N_AUTHCHAL, N_INITAI, N_DEMOPACKET, -2, N_CALCLIGHT, N_REMIP, N_NEWMAP, N_GETMAP, N_SENDMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, N_EDITVAR, N_EDITVSLOT, N_UNDO, N_REDO, -4, N_POS, NUMMSG),
+    } msgfilter(-1, N_CONNECT, N_SERVINFO, N_INITCLIENT, N_WELCOME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_HITPUSH, N_SHOTFX, N_EXPLODEFX, N_DIED, N_SPAWNSTATE, N_FORCEDEATH, N_TEAMINFO, N_ITEMACC, N_ITEMSPAWN, N_TIMEUP, N_CDIS, N_CURRENTMASTER, N_PONG, N_RESUME, N_BASESCORE, N_BASEINFO, N_BASEREGEN, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_SENDMAP, N_DROPFLAG, N_SCOREFLAG, N_RETURNFLAG, N_RESETFLAG, N_CLIENT, N_AUTHCHAL, N_INITAI, N_DEMOPACKET, -2, N_CALCLIGHT, N_REMIP, N_NEWMAP, N_GETMAP, N_SENDMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, N_EDITVAR, N_EDITVSLOT, N_UNDO, N_REDO, -4, N_POS, N_IDENTIQUEARME, N_SERVAMBIENT, NUMMSG),
       connectfilter(-1, N_CONNECT, -2, N_AUTHANS, -3, N_PING, NUMMSG);
 
     int checktype(int type, clientinfo *ci)
@@ -1607,7 +1607,7 @@ namespace server
         switch(msgfilter[type])
         {
             // server-only messages
-            case 1: return ci ? -1 : type;
+            case 1: return ci ? -3 : type;
             // only allowed in coop-edit
             case 2: if(m_edit) break; return -1;
             // only allowed in coop-edit, no overflow check
@@ -1765,6 +1765,7 @@ namespace server
             addmessages(ws, wsbuf, mtu, ci, ci);
             loopvj(ci.bots) addmessages(ws, wsbuf, mtu, *ci.bots[j], ci);
         }
+
         sendmessages(ws, wsbuf);
         reliablemessages = false;
         if(ws.uses) return true;
@@ -2630,6 +2631,72 @@ namespace server
         ci->timesync = false;
     }
 
+    bool needmana(int aptitude)
+    {
+        switch(aptitude)
+        {
+            case APT_MAGICIEN:
+            case APT_PHYSICIEN:
+            case APT_PRETRE:
+            case APT_ESPION:
+            case APT_SHOSHONE:
+            case APT_VAMPIRE:
+                return true;
+            default: return false;
+        }
+    }
+
+    int regentimer = 0;
+
+    void regenallies()
+    {
+        regentimer += curtime;
+
+        if(regentimer>500+(rnd(250)))   //slightly random ticks for regeneration
+        {
+            loopv(clients)
+            {
+                clientinfo &receiver = *clients[i];     //every body can receive
+                loopv(clients)
+                {
+                    clientinfo &giver = *clients[i];        //every body can give
+                    switch(giver.aptitude)
+                    {
+                        case APT_MEDECIN: //medic regen allie's health (including himself)
+                        {
+                            if((giver.state.o.dist(receiver.state.o)/18.f < 7.5f && receiver.state.health < receiver.state.maxhealth+250 && giver.state.state==CS_ALIVE && receiver.state.state==CS_ALIVE) && (m_teammode ? isteam(receiver.team, giver.team) : giver.clientnum==receiver.clientnum))
+                            {
+                                receiver.state.health += 50;
+                                if(receiver.state.health > receiver.state.maxhealth+250) receiver.state.health = receiver.state.maxhealth+250;
+                                loopv(clients) sendf(clients[i]->clientnum, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, 0, receiver.state.health);
+                            }
+                        }
+                        break;
+                        case APT_JUNKIE: //junkie regen allie's mana and vampire's health
+                        {
+                            if(needmana(receiver.aptitude) && giver.state.o.dist(receiver.state.o)/18.f < 7.5f && receiver.state.mana < 150 && giver.state.state==CS_ALIVE && receiver.state.state==CS_ALIVE)
+                            {
+                                if(receiver.aptitude==APT_VAMPIRE)
+                                {
+                                    receiver.state.health += 50;
+                                    if(receiver.state.health > receiver.state.maxhealth+250) receiver.state.health = receiver.state.maxhealth+250;
+                                }
+                                else
+                                {
+                                    receiver.state.mana += 5;
+                                    if(receiver.state.mana > 150) receiver.state.mana = 150;
+                                }
+                                loopv(clients) sendf(clients[i]->clientnum, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, receiver.aptitude==APT_VAMPIRE ? 0 : 1, receiver.aptitude==APT_VAMPIRE ? receiver.state.health : receiver.state.mana);
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+            regentimer = 0;
+        }
+    }
+
     int identiquetimer;
     bool announced = false, firstlaunch = true;
 
@@ -2645,6 +2712,8 @@ namespace server
                 processevents();
                 if(curtime)
                 {
+                    regenallies();
+
                     loopv(sents) if(sents[i].spawntime) // spawn entities when timer reached
                     {
                         int oldtime = sents[i].spawntime;
@@ -3605,26 +3674,6 @@ namespace server
                 break;
             }
 
-            case N_PUSHSTAT:
-            {
-                if(!cq) break;
-
-                int stat = getint(p);
-
-                switch(stat)
-                {
-                    case 0:
-                        cq->state.health+=50;
-                        if(cq->state.health>cq->state.maxhealth+250) cq->state.health=cq->state.maxhealth+250;
-                        break;
-                    case 1:
-                        cq->state.mana+=5;
-                        if(cq->state.mana>150) cq->state.mana=150;
-                        break;
-                }
-                break;
-            }
-
             case N_MAPVOTE:
             {
                 getstring(text, p);
@@ -4039,6 +4088,11 @@ namespace server
             case -2:
                 generrlog(ci);
                 disconnect_client(sender, DISC_OVERFLOW);
+                return;
+
+            case -3:
+                generrlog(ci);
+                disconnect_client(sender, DISC_MSGERR_SERVMSG);
                 return;
 
             default: genericmsg:

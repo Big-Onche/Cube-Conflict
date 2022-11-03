@@ -296,6 +296,7 @@ const char *disconnectreason(int reason)
         case DISC_MSGERR:           return "message error/erreur message";
         case DISC_MSGERR_DEF:       return "message error/erreur message (genericmsg)";
         case DISC_MSGERR_MINUS1:    return "message error/erreur message (checktype -1)";
+        case DISC_MSGERR_SERVMSG:   return "message error/erreur message (illegal client message)";
         case DISC_DESYNC:           return "synchronization error/erreur de synchronisation";
         case DISC_UNK:              return "unknown network message/message réseau inconnu";
         case DISC_GAMEERR:          return "game error (modified client ?)/erreur de jeu (client modifié ?)";

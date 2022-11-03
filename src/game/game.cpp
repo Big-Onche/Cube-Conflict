@@ -278,65 +278,6 @@ namespace game
                 if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
                 if(d->steromillis || d->epomillis || d->jointmillis || d->champimillis) entities::checkboosts(curtime, d);
                 if(d->ragemillis || d->aptisort1 || d->aptisort2 || d->aptisort3) entities::checkaptiskill(curtime, d);
-
-                if(!m_teammode && d->aptitude==APT_MEDECIN && d->health<d->maxhealth+250 && randomevent(0.7f*nbfps))
-                {
-                    d->health+=30;
-                    particle_splash(PART_SANTE, 1, 400, d->o, 0xFFFFFF, 0.5f+rnd(3), 400, 200);
-                    if(d->health>d->maxhealth+250) d->health=d->maxhealth+250;
-                    playsound(S_REGENMEDIGUN, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 50, -1, 125);
-                }
-                else if(players[i]->aptitude==APT_MEDECIN || players[i]->aptitude==APT_JUNKIE)
-                {
-                    gameent *h = players[i];
-
-                    loopv(players)
-                    {
-                        gameent *r = players[i];
-
-                        vec effectpos(r->o);
-                        effectpos.sub(h->o);
-                        effectpos.normalize().mul(1300.0f);
-
-                        switch(h->aptitude)
-                        {
-                            case APT_MEDECIN:
-                                if(r->o.dist(h->o)/18.f<7.5f && r->health<r->maxhealth+250 && h->state==CS_ALIVE && r->state==CS_ALIVE && isteam(h->team, r->team) && randomevent(h==r ? 0.75*nbfps : 0.5f*nbfps))
-                                {
-                                    r->health+=50;
-                                    if(r->health>r->maxhealth+250) r->health=r->maxhealth+250;
-                                    particle_flying_flare(h->o, r==h ? h->o : effectpos, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
-                                    playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
-                                    addmsg(N_PUSHSTAT, "rci", r, 0);
-                                    if(r==player1) addstat(5, STAT_HEALTHREGAIN);
-                                }
-                                break;
-
-                            case APT_JUNKIE:
-                                if(r->o.dist(h->o)/18.f<7.5f && r->state==CS_ALIVE && randomevent(0.5f*nbfps) && (r->aptitude==APT_SHOSHONE || r->aptitude==APT_MAGICIEN || r->aptitude==APT_PRETRE || r->aptitude==APT_PHYSICIEN || r->aptitude==APT_ESPION || r->aptitude==APT_VAMPIRE))
-                                {
-                                    if(r->aptitude==APT_VAMPIRE && r->health<r->maxhealth+250)
-                                    {
-                                        r->health+=50;
-                                        if(r->health>r->maxhealth+250) r->health=r->maxhealth+250;
-                                        particle_flying_flare(h->o, r==h ? h->o : effectpos, 400, PART_SANTE, 0xFF00FF, 2.5f, 100);
-                                        playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
-                                        addmsg(N_PUSHSTAT, "rci", r, 0);
-                                        if(r==player1) addstat(5, STAT_MANAREGAIN);
-                                    }
-                                    else if(r->aptitude!=APT_VAMPIRE && r->mana<150)
-                                    {
-                                        r->mana+=5;
-                                        if(r->mana>150) r->mana=150;
-                                        particle_flying_flare(h->o, r==h ? h->o : effectpos, 400, PART_SPARK, 0xFF00FF, 2.5f, 100);
-                                        playsound(S_REGENJUNKIE, &r->o, 0, 0, 0 , 50, -1, 125);
-                                        addmsg(N_PUSHSTAT, "rci", r, 1);
-                                    }
-                                }
-                                break;
-                        }
-                    }
-                }
             }
 
             if(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION) updatespecials(d);
@@ -419,62 +360,6 @@ namespace game
             }
             if(player1->ragemillis || player1->vampimillis || player1->aptisort1 || player1->aptisort2 || player1->aptisort3) entities::checkaptiskill(curtime, player1);
             if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION) updatespecials(player1);
-
-            if(!m_teammode && player1->aptitude==APT_MEDECIN && player1->health<player1->maxhealth+250 && randomevent(0.7f*nbfps) && isconnected())
-            {
-                player1->health+=30;
-                particle_splash(PART_SANTE, 1, 400, player1->o, 0xFFFFFF, 0.5f+rnd(3), 400, 200);
-                if(player1->health > player1->maxhealth+250) player1->health = player1->maxhealth+250;
-                playsound(S_REGENMEDIGUN);
-                addmsg(N_PUSHSTAT, "rci", player1, 0);
-            }
-            else if((player1->aptitude==APT_MEDECIN || player1->aptitude==APT_JUNKIE) && isconnected())
-            {
-                loopv(players)
-                {
-                    gameent *r = players[i];
-
-                    vec effectpos(r->o);
-                    effectpos.sub(player1->o);
-                    effectpos.normalize().mul(1300.0f);
-
-                    switch(player1->aptitude)
-                    {
-                        case APT_MEDECIN:
-                            if(r->o.dist(player1->o)/18.f<7.5f && r->health<r->maxhealth+250 && player1->state==CS_ALIVE && r->state==CS_ALIVE && isteam(player1->team, r->team) && randomevent(r==player1 ? 0.75*nbfps : 0.5f*nbfps))
-                            {
-                                r->health+=50;
-                                if(r->health>r->maxhealth+250) r->health=r->maxhealth+250;
-
-                                particle_flying_flare(player1->o, r==player1 ? player1->o : effectpos, 400, PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
-                                playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
-                                if(r!=player1) addstat(5, STAT_HEALTHREGEN);
-                            }
-                            break;
-
-                        case APT_JUNKIE:
-                            if(r->o.dist(player1->o)/18.f<7.5f && r->state==CS_ALIVE && randomevent(0.5f*nbfps) && (r->aptitude==APT_SHOSHONE || r->aptitude==APT_MAGICIEN || r->aptitude==APT_PRETRE || r->aptitude==APT_PHYSICIEN || r->aptitude==APT_ESPION || r->aptitude==APT_VAMPIRE))
-                            {
-                                if(r->aptitude==APT_VAMPIRE && r->health<r->maxhealth+250)
-                                {
-                                    r->health+=50;
-                                    if(r->health>r->maxhealth+250) r->health=r->maxhealth+250;
-                                    particle_flying_flare(player1->o, effectpos, 400, PART_SANTE, 0xFF00FF, 2.5f, 100);
-                                    playsound(S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
-                                }
-                                else if(r->mana<150)
-                                {
-                                    r->mana+=5;
-                                    if(r->mana>150) r->mana=150;
-                                    particle_flying_flare(player1->o, effectpos, 400, PART_SPARK, 0xFF00FF, 2.5f, 100);
-                                    playsound(S_REGENJUNKIE, &r->o, 0, 0, 0 , 50, -1, 125);
-                                    if(r!=player1) addstat(5, STAT_MANAREGEN);
-                                }
-                            }
-                            break;
-                    }
-                }
-            }
         }
         else if (player1->state == CS_DEAD) isalive = 0;
 

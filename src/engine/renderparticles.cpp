@@ -880,6 +880,7 @@ static partrenderer *parts[] =
     new trailrenderer("media/particle/impact.png", PT_TRAIL|PT_BRIGHT),                          // streak
     new quadrenderer("media/particle/spock_front.png", PT_PART|PT_FEW|PT_BRIGHT),
     new quadrenderer("media/particle/sante.png", PT_PART|PT_BRIGHT),
+    new quadrenderer("media/particle/mana.png", PT_PART|PT_BRIGHT),
     new quadrenderer("media/particle/flames_1.png", PT_PART|PT_FLIP|PT_BRIGHT),
     new quadrenderer("media/particle/flames_2.png", PT_PART|PT_FLIP|PT_BRIGHT),
     new quadrenderer("media/particle/eau.png", PT_PART|PT_FLIP|PT_BRIGHT),
