@@ -2690,7 +2690,7 @@ namespace server
             {
                 clientinfo &c = *clients[i];
                 if(c.state.aitype != AI_NONE) continue;
-                if(c.checkexceeded()) disconnect_client(c.clientnum, DISC_MSGERR);
+                if(c.checkexceeded()) disconnect_client(c.clientnum, DISC_DESYNC);
                 else c.scheduleexceeded();
             }
         }
@@ -3220,7 +3220,7 @@ namespace server
                     break;
 
                 default:
-                    disconnect_client(sender, DISC_MSGERR);
+                    disconnect_client(sender, DISC_UNK);
                     return;
             }
             return;
@@ -4033,7 +4033,7 @@ namespace server
 
             case -1:
                 generrlog(ci);
-                disconnect_client(sender, DISC_MSGERR);
+                disconnect_client(sender, DISC_MSGERR_MINUS1);
                 return;
 
             case -2:
@@ -4044,7 +4044,7 @@ namespace server
             default: genericmsg:
             {
                 int size = server::msgsizelookup(type);
-                if(size<=0) { disconnect_client(sender, DISC_MSGERR); return; }
+                if(size<=0) { disconnect_client(sender, DISC_MSGERR_DEF); return; }
                 loopi(size-1) getint(p);
                 if(ci) switch(msgfilter[type])
                 {
