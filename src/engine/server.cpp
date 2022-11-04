@@ -299,7 +299,6 @@ const char *disconnectreason(int reason)
         case DISC_MSGERR_SERVMSG:   return "message error/erreur message (illegal client message)";
         case DISC_DESYNC:           return "synchronization error/erreur de synchronisation";
         case DISC_UNK:              return "unknown network message/message réseau inconnu";
-        case DISC_GAMEERR:          return "game error (modified client ?)/erreur de jeu (client modifié ?)";
         case DISC_IPBAN:            return "ip is banned/ip bannie";
         case DISC_PRIVATE:          return "server is in private mode/serveur en mode privé";
         case DISC_MAXCLIENTS:       return "server FULL/ serveur plein";

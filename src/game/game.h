@@ -313,7 +313,7 @@ enum
     N_DEMOPACKET,
     N_SENDCAPE, N_SENDTOMBE, N_SENDDANSE, N_SENDAPTITUDE, N_REGENALLIES,
     N_ANNOUNCE,
-    N_SENDABILITY,
+    N_REQABILITY, N_GETABILITY,
     N_IDENTIQUEARME, N_SERVAMBIENT,
     N_BASES, N_BASEINFO, N_BASESCORE, N_REPAMMO, N_BASEREGEN,
     NUMMSG
@@ -344,7 +344,8 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_SWITCHNAME, 0, N_SWITCHMODEL, 2, N_SWITCHCOLOR, 2, N_SWITCHTEAM, 2,
     N_SERVCMD, 0,
     N_DEMOPACKET, 0,
-    N_SENDCAPE, 2, N_SENDTOMBE, 2, N_SENDDANSE, 2, N_SENDAPTITUDE, 2, N_REGENALLIES, 4, N_SENDABILITY, 3,
+    N_SENDCAPE, 2, N_SENDTOMBE, 2, N_SENDDANSE, 2, N_SENDAPTITUDE, 2, N_REGENALLIES, 4,
+    N_REQABILITY, 2, N_GETABILITY, 4,
     N_ANNOUNCE, 2,
     N_IDENTIQUEARME, 2, N_SERVAMBIENT, 2,
     N_BASES, 0, N_BASEINFO, 0, N_BASESCORE, 0, N_REPAMMO, 1, N_BASEREGEN, 7,
@@ -841,8 +842,8 @@ struct gameent : dynent, gamestate
     float deltayaw, deltapitch, deltaroll, newyaw, newpitch, newroll;
     int smoothmillis;
 
-    int lastspecial1update, lastspecial2update, lastspecial3update;
-    bool sort1pret = true, sort2pret = true, sort3pret = true, playerexploded = false;
+    int lastability1, lastability2, lastability3;
+    bool canability1 = true, canability2 = true, canability3 = true, playerexploded = false;
 
     string name, info;
     int team, playermodel, playercolor, customcape, customtombe, customdanse, aptitude, level;
@@ -917,9 +918,9 @@ struct gameent : dynent, gamestate
         flagpickup = 0;
         lastbase = lastrepammo = -1;
         lastnode = -1;
-        sort1pret = true;
-        sort2pret = true;
-        sort3pret = true;
+        canability1 = true;
+        canability2 = true;
+        canability3 = true;
         gunaccel = 0;
         playerexploded = false;
     }
@@ -1138,7 +1139,7 @@ namespace game
     extern vec hudgunorigin(int gun, const vec &from, const vec &to, gameent *d);
 
     // sorts
-    extern void aptitude(gameent *d, int skill, bool send = true);
+    extern void aptitude(gameent *d, int skill, bool request = true);
     extern int getteamfrags(int team);
 }
 

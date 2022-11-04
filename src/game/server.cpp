@@ -3197,13 +3197,13 @@ namespace server
         if(servermotd[0]) sendf(ci->clientnum, 1, "ris", N_SERVMSG, servermotd);
     }
 
-    bool validability(int ability, int reqduration, int aptitude, int mana) //server-sided abilities check
+    bool validability(int ability, int aptitude, int mana) //server-sided abilities check
     {
         switch(ability)
         {
-            case 1: if(reqduration > sorts[abilitydata(aptitude)].duree1 || mana < sorts[abilitydata(aptitude)].mana1) return false; break;
-            case 2: if(reqduration > sorts[abilitydata(aptitude)].duree2 || mana < sorts[abilitydata(aptitude)].mana2) return false; break;
-            case 3: if(reqduration > sorts[abilitydata(aptitude)].duree3 || mana < sorts[abilitydata(aptitude)].mana3) return false; break;
+            case 1: if(mana < sorts[abilitydata(aptitude)].mana1) return false; break;
+            case 2: if(mana < sorts[abilitydata(aptitude)].mana2) return false; break;
+            case 3: if(mana < sorts[abilitydata(aptitude)].mana3) return false; break;
         }
         return true;
     }
@@ -3648,30 +3648,39 @@ namespace server
                 break;
             }
 
-            case N_SENDABILITY:
+            case N_REQABILITY:
             {
+                int ability = getint(p);
                 if(!cq) break;
 
-                int ability = getint(p);
-                int duration = getint(p);
-                bool valid = cq->state.aitype==AI_BOT ? true : validability(ability, duration, cq->aptitude, cq->state.mana);
-
-                if(valid)
+                switch(ability)
                 {
-                    switch(ability)
+                    case 1:
                     {
-                        case 1: cq->state.aptisort1 = duration; cq->state.mana-=sorts[abilitydata(cq->aptitude)].mana1; break;
-                        case 2: cq->state.aptisort2 = duration; cq->state.mana-=sorts[abilitydata(cq->aptitude)].mana2; break;
-                        case 3: cq->state.aptisort3 = duration; cq->state.mana-=sorts[abilitydata(cq->aptitude)].mana3; break;
-                        default: valid = false;
+                        if(cq->state.mana < sorts[abilitydata(cq->aptitude)].mana1) return;
+                        cq->state.aptisort1 = sorts[abilitydata(cq->aptitude)].duree1;
+                        cq->state.mana -= sorts[abilitydata(cq->aptitude)].mana1;
+                        break;
                     }
-                    if(valid) QUEUE_MSG;
+
+                    case 2:
+                    {
+                        if(cq->state.mana < sorts[abilitydata(cq->aptitude)].mana2) return;
+                        cq->state.aptisort2 = sorts[abilitydata(cq->aptitude)].duree2;
+                        cq->state.mana -= sorts[abilitydata(cq->aptitude)].mana2;
+                        break;
+                    }
+
+                    case 3:
+                    {
+                        if(cq->state.mana < sorts[abilitydata(cq->aptitude)].mana3) return;
+                        cq->state.aptisort3 = sorts[abilitydata(cq->aptitude)].duree3;
+                        cq->state.mana -= sorts[abilitydata(cq->aptitude)].mana3;
+                        break;
+                    }
+                    default: return;
                 }
-                else
-                {
-                    disconnect_client(sender, DISC_GAMEERR); //if not valid (mostly by cheating) disconnect the client
-                    generrlog(ci); //gen a log of playerstats just in case of some shit happen
-                }
+                loopv(clients) sendf(clients[i]->clientnum, 1, "ri4", N_GETABILITY, cq->clientnum, ability, ability == 1 ? cq->state.aptisort1 : ability == 2 ? cq->state.aptisort2 : cq->state.aptisort3);
                 break;
             }
 

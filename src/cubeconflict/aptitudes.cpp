@@ -21,24 +21,22 @@ int abilitydata(int aptitude)
 
 namespace game
 {
-    void aptitude(gameent *d, int ability, bool send) //Commandes d'aptitudes
+    void aptitude(gameent *d, int ability, bool request) //Commandes d'aptitudes
     {
         if(d->state==CS_DEAD && !isconnected()) return;
 
         switch(ability)
         {
             case 1:
-                if(send) //We send the shit to the server: client send to the server, then the server checks if it's valid or not
+                if(request) //We send the shit to the server: client send to the server, then the server checks if it's valid or not
                 {
-                    if(!d->sort1pret || d->mana < sorts[abilitydata(d->aptitude)].mana1) {if(d==player1)playsound(S_SORTIMPOSSIBLE); return; }
-                    d->aptisort1 = sorts[abilitydata(d->aptitude)].duree1;
-                    d->lastspecial1update = totalmillis;
-                    addmsg(N_SENDABILITY, "rcii", d, ability, d->aptisort1);
-                    d->mana -= sorts[abilitydata(d->aptitude)].mana1;
-                    d->sort1pret = false;
-                    if(d==player1) stat[STAT_ABILITES]++;
+                    if(!d->canability1 || d->mana < sorts[abilitydata(d->aptitude)].mana1) {if(d==player1)playsound(S_SORTIMPOSSIBLE); return; }
+                    addmsg(N_REQABILITY, "rci", d, ability);
+                    return;
                 }
                 //We recieve some shit from the server
+                d->canability1 = false; d->lastability1 = totalmillis; if(d==player1) stat[STAT_ABILITES]++;
+                //Sounds and graphics effects
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
                 if(d->aptitude!=APT_ESPION) d->sortchan = playsound(sorts[abilitydata(d->aptitude)].sound1, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->sortchan, 300);
                 else
@@ -58,16 +56,14 @@ namespace game
                 return;
 
             case 2:
-                if(send)
+                if(request)
                 {
-                    if(!d->sort2pret || d->mana<sorts[abilitydata(d->aptitude)].mana2) {if(d==player1)playsound(S_SORTIMPOSSIBLE); return; }
-                    d->aptisort2 = sorts[abilitydata(d->aptitude)].duree2;
-                    d->lastspecial2update = totalmillis;
-                    addmsg(N_SENDABILITY, "rcii", d, ability, d->aptisort2);
-                    d->mana -= sorts[abilitydata(d->aptitude)].mana2;
-                    d->sort2pret = false;
-                    if(d==player1) stat[STAT_ABILITES]++;
+                    if(!d->canability2 || d->mana<sorts[abilitydata(d->aptitude)].mana2) {if(d==player1)playsound(S_SORTIMPOSSIBLE); return; }
+                    addmsg(N_REQABILITY, "rci", d, ability);
+                    return;
                 }
+
+                d->canability2 = false; d->lastability2 = totalmillis; if(d==player1) stat[STAT_ABILITES]++;
 
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0, 100, -1, 250);
                 d->sortchan = playsound(sorts[abilitydata(d->aptitude)].sound2, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->sortchan, 275);
@@ -80,16 +76,14 @@ namespace game
                 return;
 
             case 3:
-                if(send)
+                if(request)
                 {
-                    if(!d->sort3pret || d->mana<sorts[abilitydata(d->aptitude)].mana3) {if(d==player1)playsound(S_SORTIMPOSSIBLE); return; }
-                    d->aptisort3 = sorts[abilitydata(d->aptitude)].duree3;
-                    d->lastspecial3update = totalmillis;
-                    addmsg(N_SENDABILITY, "rcii", d, ability, d->aptisort3);
-                    d->mana -= sorts[abilitydata(d->aptitude)].mana3;
-                    d->sort3pret = false;
-                    if(d==player1) stat[STAT_ABILITES]++;
+                    if(!d->canability3 || d->mana<sorts[abilitydata(d->aptitude)].mana3) {if(d==player1)playsound(S_SORTIMPOSSIBLE); return; }
+                    addmsg(N_REQABILITY, "rci", d, ability);
+                    return;
                 }
+
+                d->canability3 = false; d->lastability3 = totalmillis; if(d==player1) stat[STAT_ABILITES]++;
 
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
                 d->sortchan = playsound(sorts[abilitydata(d->aptitude)].sound3, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->sortchan, 275);
@@ -101,7 +95,6 @@ namespace game
                     getspyability = totalmillis;
                     playsound(S_SPY_3);
                 }
-                return;
         }
     }
 
@@ -125,8 +118,8 @@ namespace game
 
     void updatespecials(gameent *d) //Permet de réarmer les sorts en fonction de la durée de rechargement de ceux-ci
     {
-        if(totalmillis-d->lastspecial1update >= sorts[abilitydata(d->aptitude)].reload1 && !d->sort1pret) {if(d==player1)playsound(S_SORTPRET); d->sort1pret = true; }
-        if(totalmillis-d->lastspecial2update >= sorts[abilitydata(d->aptitude)].reload2 && !d->sort2pret) {if(d==player1)playsound(S_SORTPRET); d->sort2pret = true; }
-        if(totalmillis-d->lastspecial3update >= sorts[abilitydata(d->aptitude)].reload3 && !d->sort3pret) {if(d==player1)playsound(S_SORTPRET); d->sort3pret = true; }
+        if(totalmillis-d->lastability1 >= sorts[abilitydata(d->aptitude)].reload1 && !d->canability1) {if(d==player1)playsound(S_SORTPRET); d->canability1 = true; }
+        if(totalmillis-d->lastability2 >= sorts[abilitydata(d->aptitude)].reload2 && !d->canability2) {if(d==player1)playsound(S_SORTPRET); d->canability2 = true; }
+        if(totalmillis-d->lastability3 >= sorts[abilitydata(d->aptitude)].reload3 && !d->canability3) {if(d==player1)playsound(S_SORTPRET); d->canability3 = true; }
     }
 }

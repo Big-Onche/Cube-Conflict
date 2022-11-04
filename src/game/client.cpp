@@ -1768,20 +1768,20 @@ namespace game
                 break;
             }
 
-            case N_SENDABILITY:
+            case N_GETABILITY:
             {
-                if(d)
+                int player = getint(p);
+                gameent *pl = getclient(player);
+
+                int ability = getint(p);
+                switch(ability)
                 {
-                    int ability = getint(p);
-                    switch(ability)
-                    {
-                        case 1: d->aptisort1 = getint(p); d->mana-=sorts[abilitydata(d->aptitude)].mana1; break;
-                        case 2: d->aptisort2 = getint(p); d->mana-=sorts[abilitydata(d->aptitude)].mana2; break;
-                        case 3: d->aptisort3 = getint(p); d->mana-=sorts[abilitydata(d->aptitude)].mana3; break;
-                        default: return;
-                    }
-                    aptitude(d, ability, false);
+                    case 1: pl->aptisort1 = getint(p); pl->mana-=sorts[abilitydata(pl->aptitude)].mana1; break;
+                    case 2: pl->aptisort2 = getint(p); pl->mana-=sorts[abilitydata(pl->aptitude)].mana2; break;
+                    case 3: pl->aptisort3 = getint(p); pl->mana-=sorts[abilitydata(pl->aptitude)].mana3; break;
+                    default: return;
                 }
+                aptitude(pl, ability, false);
                 break;
             }
 

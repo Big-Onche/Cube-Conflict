@@ -312,14 +312,14 @@ namespace game
             if(player1->aptitude!=APT_KAMIKAZE)
             {
                 if(d->aptisort1) gle::colorf(2, 2, 2, 1);
-                else if(d->mana<sorts[abilitydata(d->aptitude)].mana1 || !d->sort1pret) gle::colorf(0.2, 0.2, 0.2, 1);
+                else if(d->mana<sorts[abilitydata(d->aptitude)].mana1 || !d->canability1) gle::colorf(0.2, 0.2, 0.2, 1);
                 else gle::colorf(1, 1, 1, 1);
                 settexture(sorts[abilitydata(d->aptitude)].tex1, 3);
                 bgquad(positionsorts-85, h-114, 100, 100);
                 gle::colorf(1, 1, 1, 1);
 
                 if(d->aptisort3) gle::colorf(2, 2, 2, 1);
-                else if(d->mana<sorts[abilitydata(d->aptitude)].mana3 || !d->sort3pret) gle::colorf(0.2, 0.2, 0.2, 1);
+                else if(d->mana<sorts[abilitydata(d->aptitude)].mana3 || !d->canability3) gle::colorf(0.2, 0.2, 0.2, 1);
                 else gle::colorf(1, 1, 1, 1);
                 settexture(sorts[abilitydata(d->aptitude)].tex3, 3);
                 bgquad(positionsorts+85, h-114, 100, 100);
@@ -327,7 +327,7 @@ namespace game
             }
 
             if(d->aptisort2) gle::colorf(2, 2, 2, 1);
-            else if(d->mana<sorts[abilitydata(d->aptitude)].mana2 || !d->sort2pret) gle::colorf(0.2, 0.2, 0.2, 1);
+            else if(d->mana<sorts[abilitydata(d->aptitude)].mana2 || !d->canability2) gle::colorf(0.2, 0.2, 0.2, 1);
             else gle::colorf(1, 1, 1, 1);
             settexture(sorts[abilitydata(d->aptitude)].tex2, 3);
             bgquad(positionsorts, h-114, 100, 100);
