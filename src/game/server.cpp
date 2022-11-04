@@ -2682,7 +2682,7 @@ namespace server
                                     if(receiver.state.health > receiver.state.maxhealth+250) receiver.state.health = receiver.state.maxhealth+250;
                                     loopv(clients) sendf(clients[i]->clientnum, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, 0, receiver.state.health); //vampire gets health instead of mana
                                 }
-                                else //other classes needing mana : receive mana
+                                else if(receiver.aptitude!=APT_VAMPIRE) //other classes needing mana : receive mana
                                 {
                                     receiver.state.mana += 10;
                                     if(receiver.state.mana > 150) receiver.state.mana = 150;
