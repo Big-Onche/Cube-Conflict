@@ -665,6 +665,8 @@ namespace game
                 if(camera1->o.dist(actor->o) >= 250) playsound(S_KS_X5_FAR, &actor->o, NULL, 0, 0 , 200, -1, 750);
                 break;
             case 7:
+            case 10:
+            case 15:
                 playsound(S_KS_X7, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300);
                 if(camera1->o.dist(actor->o) >= 250) playsound(S_KS_X7_FAR, &actor->o, NULL, 0, 0 , 200, -1, 1500);
                 break;

@@ -73,9 +73,9 @@ namespace game
             {
                 case 3: formatstring(msg, "\fc%s\f7 %s %s", str_pseudoacteur, GAME_LANG ? "is hot !" : "est chaud !", GAME_LANG ? "(Triple kill)" : "(Triplette)"); break;
                 case 5: formatstring(msg, "\fc%s\f7 %s %s", str_pseudoacteur, GAME_LANG ? "dominate !" : "est chaud !", GAME_LANG ? "(Pentakill)" : "(Pentaplette)"); break;
-                case 10: formatstring(msg, "\fc%s\f7 %s %s", str_pseudoacteur, GAME_LANG ? "is instoppable !" : "est chaud !", GAME_LANG ? "(x10 !)" : "(Décaplette)"); break;
-                case 20: formatstring(msg, "\fc%s\f7 %s %s", str_pseudoacteur, GAME_LANG ? "is invincible !" : "est chaud !", GAME_LANG ? "(x20 !)" : "(Eicoplette)"); break;
-                case 30: formatstring(msg, "\fc%s\f7 %s %s", str_pseudoacteur, GAME_LANG ? "is as god !" : "est chaud !", GAME_LANG ? "(x30 !)" : "(Triaconplette)"); break;
+                case 10: formatstring(msg, "\fc%s\f7 %s %s", str_pseudoacteur, GAME_LANG ? "is instoppable !" : "est chaud !", GAME_LANG ? "(x7 !)" : "(Heptaplette)"); break;
+                case 20: formatstring(msg, "\fc%s\f7 %s %s", str_pseudoacteur, GAME_LANG ? "is invincible !" : "est chaud !", GAME_LANG ? "(x10 !)" : "(Décaplette)"); break;
+                case 30: formatstring(msg, "\fc%s\f7 %s %s", str_pseudoacteur, GAME_LANG ? "is as god !" : "est chaud !", GAME_LANG ? "(x15 !)" : "(Pentakaidecaplette)"); break;
                 default: need_message2 = false;
             }
             if(need_message2) {rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
