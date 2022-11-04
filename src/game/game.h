@@ -162,7 +162,7 @@ static struct gamemodeinfo
     { "Capture de drapeau (Full stuff)",    "Capture the flag (Full stuff)",    M_FULLSTUFF | M_CTF | M_TEAM},
     { "Capture de drapeau (Identique)",     "Capture the flag (Identical)",     M_IDENTIQUE | M_CTF | M_TEAM | M_NOAMMO | M_MUNINFINIE},
     //MODE 13, 14, 15, 16, 17
-    { "Conquête (Collecte)",     "Domination (Identical)",     M_CAPTURE | M_TEAM},
+    { "Conquête (Collecte)",     "Domination (Weapon pickup)", M_CAPTURE | M_TEAM},
     { "Conquête (Aléatoire)",    "Domination (Random weapon)", M_RANDOM | M_CAPTURE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
     { "Conquête (Full stuff)",   "Domination (Full stuff)",    M_FULLSTUFF | M_CAPTURE | M_TEAM},
     { "Conquête (Identique)",    "Domination (Identical)",     M_IDENTIQUE | M_CAPTURE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
