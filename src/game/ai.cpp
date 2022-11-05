@@ -56,7 +56,7 @@ namespace ai
 
     VAR(aidebug, 0, 0, 6);
     VAR(aiforcegun, -1, -1, NUMGUNS-1);
-    VAR(IA_number, 0, 5, 49);
+    VARP(IA_number, 0, 5, 49);
 
     int IA_rndlvl;
     VARFP(IA_lvl, 0, 2, 4,

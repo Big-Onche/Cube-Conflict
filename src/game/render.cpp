@@ -524,8 +524,8 @@ namespace game
         loopv(players)
         {
             gameent *d = players[i];
-            if(d == player1 || d->state==CS_SPECTATOR || d->state==CS_SPAWNING || d->lifesequence < 0 || d == exclude || (d->state==CS_DEAD && hidedead)) continue;
-            renderplayer(d);
+            if(d->state==CS_SPECTATOR || d->state==CS_SPAWNING || d->lifesequence < 0 || d == exclude || (d->state==CS_DEAD && hidedead) || d->aptitude==APT_VIKING || (d->aptitude==APT_MAGICIEN && d->aptisort3)) continue;
+            if(d!=player1) renderplayer(d);
 
             vec dir = vec(d->o).sub(camera1->o);
             float dist = dir.magnitude();
@@ -590,7 +590,7 @@ namespace game
                 {
                     case APT_MAGICIEN:
                         if(d->aptisort1) particle_splash(PART_SMOKE, 2, 120, d->o, 0xFF33FF, 10+rnd(5), 400,400);
-                        if(d->aptisort3) particle_fireball(pos , 15.2f, PART_EXPLOSION, 5,  0x880088, 13.0f);
+                        if(d->aptisort3) particle_fireball(pos, 15.2f, PART_EXPLOSION, 5,  0x880088, 13.0f);
                         break;
                     case APT_PHYSICIEN:
                         if(d->aptisort2 && randomevent(0.05f*nbfps)) particle_splash(PART_SMOKE, 1, 300, d->o, 0x7777FF, 10+rnd(5), 400, 400);
@@ -604,9 +604,12 @@ namespace game
                         if(d->aptisort2) particle_fireball(pos , 16.0f, PART_ONDECHOC, 5, 0xFFFF00, 16.0f);
                         break;
                     case APT_SHOSHONE:
-                        if(d->aptisort1 && randomevent(0.03f*nbfps)) particle_splash(PART_SPARK, 1, 150, d->o, 0x555555, 1+rnd(2), 200, 150);
-                        if(d->aptisort2 && randomevent(0.03f*nbfps)) particle_splash(PART_SPARK, 1, 150, d->o, 0x992222, 1+rnd(2), 200, 150);
-                        if(d->aptisort3 && randomevent(0.03f*nbfps)) particle_splash(PART_SPARK, 1, 150, d->o, 0xFF0000, 1+rnd(2), 200, 150);
+                        if(randomevent(0.03f*nbfps))
+                        {
+                            if(d->aptisort1) regularflame(PART_SPARK, d->feetpos(), 12, 2, 0xAAAAAA, 2, 0.04f, 10.f, 300);
+                            if(d->aptisort2) regularflame(PART_SPARK, d->feetpos(), 12, 2, 0xFF33FF, 2, 0.04f, 10.f, 300);
+                            if(d->aptisort3) regularflame(PART_SPARK, d->feetpos(), 12, 2, 0xFF3333, 2, 0.04f, 10.f, 300);
+                        }
                 }
 
                 if(d->ragemillis && randomevent(0.03f*nbfps)) particle_splash(PART_SMOKE, 2, 150, d->o, 0xFF3300, 12+rnd(5), 400, 200);

@@ -1797,13 +1797,16 @@ namespace game
 
                 stat ? r->mana = getint(p) : r->health = getint(p);
 
-                vec effectpos(r->o);
-                effectpos.sub(g->o);
-                effectpos.normalize().mul(1300.0f);
+                if(stat == 0 && r->clientnum == g->clientnum) regularflame(PART_SANTE, r->o, 15, 2, 0xFFFFFF, 1, 1.f);
+                else
+                {
+                    vec effectpos(r->o);
+                    effectpos.sub(g->o);
+                    effectpos.normalize().mul(1300.0f);
+                    particle_flying_flare(g->o, r->clientnum==g->clientnum ? g->o : effectpos, 400, stat ? PART_MANA : PART_SANTE, 0xFFFFFF, 1.2f+rnd(2), 100);
+                }
 
-                particle_flying_flare(g->o, r->clientnum==g->clientnum ? g->o : effectpos, 400, stat ? PART_MANA : PART_SANTE, 0xFFFFFF, 0.5f+rnd(3), 100);
-                playsound(stat ? S_REGENJUNKIE : S_REGENMEDIGUN, &r->o, 0, 0, 0 , 50, -1, 125);
-
+                playsound(stat ? S_REGENJUNKIE : S_REGENMEDIGUN, r==hudplayer() ? NULL : &r->o, 0, 0, 0 , 50, -1, 125);
                 break;
             }
 
