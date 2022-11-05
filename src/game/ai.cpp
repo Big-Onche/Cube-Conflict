@@ -59,7 +59,7 @@ namespace ai
     VAR(IA_number, 0, 5, 49);
 
     int IA_rndlvl;
-    VARF(IA_lvl, 0, 2, 4,
+    VARFP(IA_lvl, 0, 2, 4,
         switch(IA_lvl)
         {
             case 0: IA_rndlvl = 39; return;
@@ -107,7 +107,7 @@ namespace ai
 
     float attackmindist(int atk)
     {
-        return max(int(attacks[atk].exprad/3), 2);
+        return max(int(attacks[atk].exprad/4), 2);
     }
 
     float attackmaxdist(int atk)
@@ -376,13 +376,13 @@ namespace ai
 
     int needpursue(gameent *d)
     {
-        if(d->gunselect==GUN_CAC349 || d->gunselect==GUN_CACFLEAU || d->gunselect==GUN_CACMARTEAU || d->gunselect==GUN_CACMASTER || d->gunselect==GUN_CACNINJA) return 1;
+        if(d->gunselect==GUN_CAC349 || d->gunselect==GUN_CACFLEAU || d->gunselect==GUN_CACMARTEAU || d->gunselect==GUN_CACMASTER || d->gunselect==GUN_CACNINJA || (d->aptitude==APT_KAMIKAZE && d->aptisort2)) return 1;
         else return 0;
     }
 
     bool badhealth(gameent *d)
     {
-        if(d->health < 750) return true;
+        if(d->health < 300 + d->skill*3) return true;
         else return false;
     }
 
@@ -403,19 +403,22 @@ namespace ai
         }
     }
 
-    bool needshield(gameent *d)
+    bool needshield(gameent *d, bool powerarmor)
     {
+        if(powerarmor && d->armour<1250) return true;
+
         switch(d->aptitude)
         {
             case APT_VAMPIRE:
             case APT_FAUCHEUSE:
             case APT_NINJA:
             case APT_CAMPEUR:
-                if(d->armour<1500) return true;
+                if(d->armour < 1500) return true;
             break;
             default:
-                if(d->armour<750) return true;
+                if(d->armour < 750) return true;
         }
+
         return false;
     }
 
@@ -469,7 +472,7 @@ namespace ai
 
     bool defend(gameent *d, aistate &b, const vec &pos, float guard, float wander, int walk)
     {
-        bool hasenemy = enemy(d, b, pos, wander);
+        bool hasenemy = enemy(d, b, pos, wander, needpursue(d));
         if(!walk)
         {
             if(d->feetpos().squaredist(pos) <= guard*guard)
@@ -566,42 +569,43 @@ namespace ai
     {
         if(d->aptitude==APT_KAMIKAZE && d->aptisort2) return; //Le kamikaze s'en fout de chopper un item une fois la bombe activée
         float score = 0;
+
         switch(e.type)
         {
             case I_SUPERARME:
-                score = 1e9f;
+                score = m_ctf ? 1e3f : 1e9f;
                 break;
             case I_BOOSTDEGATS: case I_BOOSTGRAVITE: case I_BOOSTPRECISION: case I_BOOSTPV: case I_BOOSTVITESSE:
-                d->aptitude==APT_JUNKIE ? score = 1e9f : score = 1e7f;
+                d->aptitude==APT_JUNKIE ? score = 1e9f : score = m_ctf ? 1e2f : 1e7f;
                 break;
             case I_SANTE:
-                if(d->health<800){score = d->health < 500 ? 1e5f : 1e3f; }
+                if(d->health<800){score = m_ctf || d->health > 400 ? 1e2f : 1e5f; }
                 if(d->mana>40 && d->aptitude==APT_PRETRE && d->health<=300) aptitude(d, 1);
                 break;
             case I_MANA:
-                if(d->mana < 101 && d->aptitude!=APT_VAMPIRE) score = 1e5f;
-                else if (d->aptitude==APT_VAMPIRE) score = d->health < 500 ? 1e7f : d->health < 800 ? 1e5f : 1e3f;
+                if(d->mana < 100 && d->aptitude!=APT_VAMPIRE) score = m_ctf ? 1e2f : 1e5f;
+                else if (d->aptitude==APT_VAMPIRE) score = d->health < 600 ? 1e4f : 1e3f;
                 break;
             case I_BOUCLIERBOIS:
-                if(d->armourtype==A_ASSIST && d->armour<1500) score = d->armour<1500 ? 1e6f : 1e4f;
-                else if(d->armour<600) score = 1e5f;
+                if(d->armourtype==A_ASSIST && d->armour<1500) score = m_ctf ? 1e2f : 1e4f;
+                else if(d->armour<600) score = m_ctf ? 1e3f : 1e5f;
                 break;
             case I_BOUCLIERFER:
-                if(d->armourtype==A_ASSIST && d->armour<1500) score = d->armour<1500 ? 1e6f : 1e5f;
-                else if(d->armour<900) score = 1e5f;
+                if(d->armourtype==A_ASSIST && d->armour<1500) score = m_ctf ? 1e2f : 1e4f;
+                else if(d->armour<900) score =  m_ctf ? 1e3f : 1e5f;
                 break;
             case I_BOUCLIEROR: case I_BOUCLIERMAGNETIQUE:
-                if(d->armourtype==A_ASSIST && d->armour<1500) score = d->armour<1500 ? 1e6f : 1e5f;
-                if(d->armour <= 1250) score = 1e6f;
+                if(d->armourtype==A_ASSIST && d->armour<1500) score = m_ctf ? 1e2f : 1e4f;
+                if(d->armour <= 1250) score =  m_ctf ? 1e2f : 1e6f;
             case I_ARMUREASSISTEE:
-                if(d->armourtype!=A_ASSIST) score = 1e9f;
+                if(d->armourtype!=A_ASSIST) score =  m_ctf ? 1e2f : 1e9f;
                 break;
             default:
             {
                 if(e.type >= I_RAIL && e.type <= I_GLOCK && !d->hasmaxammo(e.type)/2)
                 {
                     int gun = e.type - I_RAIL + GUN_RAIL;
-                    if(isgoodammo(gun)) score = hasgoodammo(d) ? 1e2f : 1e4f;
+                    if(isgoodammo(gun)) score = hasgoodammo(d) ? m_ctf ? 1e1f : 1e2f : m_ctf ? 1e2f : 1e4f;
                 }
                 break;
             }
@@ -666,7 +670,7 @@ namespace ai
         {
             if(!hasgoodammo(d) || d->health < 750 || d->mana<50)
                 items(d, b, interests);
-            else if(needshield(d) || needmana(d))
+            else if(needshield(d, false) || needmana(d))
             {
                 static vector<int> nearby;
                 nearby.setsize(0);
@@ -778,19 +782,22 @@ namespace ai
                 bool wantsitem = false;
                 switch(e.type)
                 {
-                    case I_SANTE: wantsitem = badhealth(d); break;
+                case I_SANTE: case I_BOOSTPV: wantsitem = badhealth(d); break;
                     case I_MANA:
                         d->aptitude==APT_VAMPIRE ? wantsitem = badhealth(d) : wantsitem = needmana(d);
                         break;
                     case I_ARMUREASSISTEE:
+                        wantsitem = needshield(d, true);
+                        break;
                     case I_BOUCLIEROR:
                     case I_BOUCLIERMAGNETIQUE:
                     case I_BOUCLIERFER:
                     case I_BOUCLIERBOIS:
-                        wantsitem = needshield(d);
+                        wantsitem = needshield(d, false);
                         break;
-                    default:
+                    case I_SUPERARME: case I_BOOSTDEGATS: case I_BOOSTGRAVITE: case I_BOOSTPRECISION: case I_BOOSTVITESSE:
                         wantsitem = true;
+                        break;
                 }
                 if(wantsitem)
                 {

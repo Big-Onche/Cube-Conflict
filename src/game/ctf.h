@@ -341,7 +341,6 @@ struct ctfclientmode : clientmode
     {
         preloadmodel("drapeau/jaune");
         preloadmodel("drapeau/rouge");
-        for(int i = S_DRAPEAUPRIS; i <= S_DRAPEAUTOMBE; i++) preloadsound(i);
     }
 
     void drawblip(gameent *d, float x, float y, float s, const vec &pos, bool flagblip)
@@ -747,24 +746,26 @@ struct ctfclientmode : clientmode
 		return false;
 	}
 
-	void aifind(gameent *d, ai::aistate &b, vector<ai::interest> &interests)
-	{
-		vec pos = d->feetpos();
-		loopvj(flags)
-		{
-			flag &f = flags[j];
-			if(f.owner != d)
-			{
-                ai::interest &n = interests.add();
-                n.state = ai::AI_S_PURSUE;
-                n.node = ai::closestwaypoint(f.pos(), ai::SIGHTMIN, true);
-                n.target = j;
-                n.targtype = ai::AI_T_AFFINITY;
-                n.score = pos.squaredist(f.pos());
-
-			}
-		}
-	}
+    void aifind(gameent *d, ai::aistate &b, vector<ai::interest> &interests)
+    {
+        vec pos = d->feetpos();
+        loopvj(flags)
+        {
+            flag &f = flags[j];
+            if(f.owner != d)
+            {
+                if(d->health > 500 && d->armour > 500)
+                {
+                    ai::interest &n = interests.add();
+                    n.state = ai::AI_S_PURSUE;
+                    n.node = ai::closestwaypoint(f.pos(), ai::SIGHTMIN, true);
+                    n.target = j;
+                    n.targtype = ai::AI_T_AFFINITY;
+                    n.score = pos.squaredist(f.pos());
+                }
+            }
+        }
+    }
 
 	bool aidefend(gameent *d, ai::aistate &b)
 	{
