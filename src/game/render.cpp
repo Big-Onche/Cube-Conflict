@@ -252,7 +252,12 @@ namespace game
             preloadmodel(customscapes[i].team2capedir);
         }
 
-        loopi(15) preloadmodel(aptitudes[i].apt_tete); //Preloading all classe's hats
+        loopi(NUMAPTS) //Preloading all classe's hats
+        {
+            defformatstring(mdldir, "hats/%s", aptitudes[i].apt_nomEN);
+            preloadmodel(mdldir);
+        }
+
         loopi(13) preloadmodel(customstombes[i].tombedir); //Preloading all graves
 
         loopi(4) //Preloading all spy's disguisement
@@ -381,7 +386,9 @@ namespace game
         if(d->steromillis) a[ai++] = modelattach("tag_boost1", "boosts/steros", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         if(d->epomillis)   a[ai++] = modelattach("tag_boost2", "boosts/epo", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
 
-        a[ai++] = modelattach("tag_hat", aptitudes[d->aptitude].apt_tete, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+        ////////Hats////////
+        defformatstring(mdldir, "hats/%s", aptitudes[d->aptitude].apt_nomEN);
+        a[ai++] = modelattach("tag_hat", mdldir, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
 
         ////////Customisations////////
         if(d->customcape>=0 && d->customcape<=13)
@@ -494,7 +501,9 @@ namespace game
               pitch = testpitch && d==player1 ? testpitch : d->pitch;
 
         const char *mdlname = mdl.model[validteam(team) ? team : 0];
-        a[ai++] = modelattach("tag_hat", aptitudes[player1->aptitude].apt_tete, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+
+        defformatstring(mdldir, "hats/%s", aptitudes[player1->aptitude].apt_nomEN);
+        a[ai++] = modelattach("tag_hat", mdldir, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         a[ai++] = modelattach("tag_cape", customscapes[cape].team1capedir, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
 
         rendermodel(mdlname, anim, o, yaw, pitch, 0, NULL, d, a[0].tag ? a : NULL, 0, 0, 1, vec4(vec::hexcolor(color), 5));

@@ -1825,7 +1825,6 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
     // apply gravity
     if(!floating) modifygravity(pl, water, curtime, jointmillis, aptitude, assist);
 
-
     // apply any player generated changes in velocity
     modifyvelocity(pl, local, water, floating, curtime, jointmillis, aptitude, assist, aptisort);
 
