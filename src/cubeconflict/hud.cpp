@@ -309,19 +309,22 @@ namespace game
 
             float positionsorts = 0.5f*(w - 100);
 
+            defformatstring(logodir, "media/interface/hud/abilities/%s_1.png", aptitudes[player1->aptitude].apt_nomEN);
+
             if(player1->aptitude!=APT_KAMIKAZE)
             {
                 if(d->aptisort1) gle::colorf(2, 2, 2, 1);
                 else if(d->mana<sorts[abilitydata(d->aptitude)].mana1 || !d->canability1) gle::colorf(0.2, 0.2, 0.2, 1);
                 else gle::colorf(1, 1, 1, 1);
-                settexture(sorts[abilitydata(d->aptitude)].tex1, 3);
+                settexture(logodir, 3);
                 bgquad(positionsorts-85, h-114, 100, 100);
                 gle::colorf(1, 1, 1, 1);
 
                 if(d->aptisort3) gle::colorf(2, 2, 2, 1);
                 else if(d->mana<sorts[abilitydata(d->aptitude)].mana3 || !d->canability3) gle::colorf(0.2, 0.2, 0.2, 1);
                 else gle::colorf(1, 1, 1, 1);
-                settexture(sorts[abilitydata(d->aptitude)].tex3, 3);
+                formatstring(logodir, "media/interface/hud/abilities/%s_3.png", aptitudes[player1->aptitude].apt_nomEN);
+                settexture(logodir, 3);
                 bgquad(positionsorts+85, h-114, 100, 100);
                 gle::colorf(1, 1, 1, 1);
             }
@@ -329,7 +332,8 @@ namespace game
             if(d->aptisort2) gle::colorf(2, 2, 2, 1);
             else if(d->mana<sorts[abilitydata(d->aptitude)].mana2 || !d->canability2) gle::colorf(0.2, 0.2, 0.2, 1);
             else gle::colorf(1, 1, 1, 1);
-            settexture(sorts[abilitydata(d->aptitude)].tex2, 3);
+            formatstring(logodir, "media/interface/hud/abilities/%s_2.png", aptitudes[player1->aptitude].apt_nomEN);
+            settexture(logodir, 3);
             bgquad(positionsorts, h-114, 100, 100);
             gle::colorf(1, 1, 1, 1);
         }

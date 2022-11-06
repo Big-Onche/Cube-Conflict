@@ -466,7 +466,7 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, picks
 static const struct guninfo { const char *name, *file, *vwep, *armedescFR, *armedescEN; int maxweapposside, maxweapposup, maxzoomfov, hudrange, attacks[NUMACTS]; } guns[NUMGUNS] =
 {
     //Armes "normales"
-    { "fusilelectrique", "fusilelectrique", "worldgun/fusilelectrique", "un fusil électrique !", "an electric rifle.",                   66,  26, 60,  1000, { -1, ATK_RAIL_SHOOT }, },
+    { "fusilelectrique", "fusilelectrique", "worldgun/fusilelectrique", "un fusil électrique !", "an electric rifle.",                   66,  26, 60, 1000,  { -1, ATK_RAIL_SHOOT }, },
     { "fusilplasma", "fusilplasma", "worldgun/fusilplasma",             "un fusil du turfu !", "a futuristic rifle.",                    28,  10, 60,  750,  { -1, ATK_PULSE_SHOOT }, },
     { "smaw", "smaw", "worldgun/smaw",                                  "un lance-roquettes de noob.", "a noob rocket launcher.",         8,   8, 85,  500,  { -1, ATK_SMAW_SHOOT }, },
     { "minigun", "minigun", "worldgun/minigun",                         "un minigun cheaté.", "a cheated minigun.",                      36,  11, 80,  750,  { -1, ATK_MINIGUN_SHOOT }, },
@@ -522,14 +522,14 @@ static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precisio
     { 100,  100,   75,  1000, "Shoshone",     "Shoshone"},      //14    APT_SHOSHONE
 };
 
-static const struct aptisortsinfo { const char *tex1, *tex2, *tex3; int mana1, mana2, mana3, duree1, duree2, duree3, reload1, reload2, reload3, sound1, sound2, sound3; } sorts[] =
+static const struct aptisortsinfo { int mana1, mana2, mana3, duree1, duree2, duree3, reload1, reload2, reload3, sound1, sound2, sound3; } sorts[] =
 {
-    { "media/interface/hud/sortmage1.png",      "media/interface/hud/sortmage2.png",        "media/interface/hud/sortmage3.png",        30, 40, 60,  250, 4000, 3000, 2000, 5000,  6000, S_WIZ_1, S_WIZ_2, S_WIZ_3},    // Magicien
-    { "media/interface/hud/sortphysicien1.png", "media/interface/hud/sortphysicien2.png",   "media/interface/hud/sortphysicien3.png",   45, 50, 65, 4000, 5000, 6000, 3000, 7000,  9000, S_PHY_1, S_PHY_2, S_PHY_3},    // Physicien
-    { "media/interface/hud/sortpretre1.png",    "media/interface/hud/sortpretre2.png",      "media/interface/hud/sortpretre3.png",      30, 10, 80, 4000, 8000, 4000, 8000, 8000, 10000, S_PRI_1, S_PRI_2, S_PRI_3},    // Prêtre
-    { "media/interface/hud/sortindien1.png",    "media/interface/hud/sortindien2.png",      "media/interface/hud/sortindien3.png",      50, 50, 50, 7500, 7500, 7500, 7500, 7500,  7500, S_SHO_1, S_SHO_2, S_SHO_3},    // Indien
-    { "media/interface/hud/sortespion1.png",    "media/interface/hud/sortespion2.png",      "media/interface/hud/sortespion3.png",      40, 50, 60, 4000, 7000, 5000, 7000, 7000, 10000, S_SPY_1, S_SPY_2, S_SPY_3},    // Espion
-    { "",                                       "media/interface/hud/sortkamikaze.png",     "",                                         0, 100,  0,    0, 5000,    0,    0, 5000,     0, S_NULL, S_KAMIKAZE, S_NULL},   // Kamikaze
+    { 30, 40, 60,  250, 4000, 3000, 2000, 5000,  6000, S_WIZ_1, S_WIZ_2, S_WIZ_3},    // APT_MAGICIEN
+    { 45, 50, 65, 4000, 5000, 6000, 3000, 7000,  9000, S_PHY_1, S_PHY_2, S_PHY_3},    // APT_PHYSICIEN
+    { 30, 10, 80, 4000, 8000, 4000, 8000, 8000, 10000, S_PRI_1, S_PRI_2, S_PRI_3},    // APT_PRETRE
+    { 50, 50, 50, 7500, 7500, 7500, 7500, 7500,  7500, S_SHO_1, S_SHO_2, S_SHO_3},    // APT_SHOSHONE
+    { 40, 50, 60, 4000, 7000, 5000, 7000, 7000, 10000, S_SPY_1, S_SPY_2, S_SPY_3},    // APT_SPY
+    { 0, 100,  0,    0, 5000,    0,    0, 5000,     0, S_NULL, S_KAMIKAZE, S_NULL},   // APT_KAMIKAZE
 };
 
 static const struct costumeinfo { const char *entrainement_village_chateaux, *usine, *lune, *volcan; } costumes[4] =  //Needed for spy classe
