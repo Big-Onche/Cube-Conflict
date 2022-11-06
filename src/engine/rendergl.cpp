@@ -2603,7 +2603,7 @@ void drawdamagescreen(int w, int h)
     hudshader->set();
 
     static Texture *damagetex = NULL;
-    if(!damagetex) damagetex = textureload("media/interface/hud/damage.png", 3);
+    if(!damagetex) damagetex = textureload("media/interface/hud/fullscreen/damage.png", 3);
 
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     glBindTexture(GL_TEXTURE_2D, damagetex->id);

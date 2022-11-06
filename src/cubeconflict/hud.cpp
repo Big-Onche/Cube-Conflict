@@ -167,9 +167,9 @@ namespace game
         {
             gle::colorf(crosshairalpha, crosshairalpha, crosshairalpha, crosshairalpha);
 
-            if(player1->gunselect==GUN_S_ROQUETTES) settexture("media/interface/hud/viseurA.png");
-            if(player1->gunselect==GUN_SKS) settexture("media/interface/hud/viseurC.png");
-            else settexture("media/interface/hud/viseurB.png");
+            if(player1->gunselect==GUN_S_ROQUETTES) settexture("media/interface/hud/fullscreen/scope_1.png");
+            if(player1->gunselect==GUN_SKS) settexture("media/interface/hud/fullscreen/scope_3.png");
+            else settexture("media/interface/hud/fullscreen/scope_2.png");
             bgquad(0, 0, w, h);
 
             gle::colorf(1, 1, 1, 1);
@@ -202,7 +202,7 @@ namespace game
             if(player1->ragemillis>1000) gle::colorf(1, 1, 1, 1);
             else gle::colorf(player1->ragemillis/1000.0f, player1->ragemillis/1000.0f, player1->ragemillis/1000.0f, player1->ragemillis/1000.0f);
 
-            settexture("media/interface/hud/ragescreen.png");
+            settexture("media/interface/hud/fullscreen/rage.png");
             bgquad(0, 0, w, h);
 
             gle::colorf(1, 1, 1, 1);
@@ -213,7 +213,7 @@ namespace game
             if(player1->vampimillis>1000) gle::colorf(1, 1, 1, 1);
             else gle::colorf(player1->vampimillis/1000.0f, player1->vampimillis/1000.0f, player1->vampimillis/1000.0f, player1->vampimillis/1000.0f);
 
-            settexture("media/interface/hud/vampire.png");
+            settexture("media/interface/hud/fullscreen/vampire.png");
             bgquad(0, 0, w, h);
 
             gle::colorf(1, 1, 1, 1);
@@ -223,7 +223,7 @@ namespace game
         {
             gle::colorf(1, 1, 1, 0.7f);
 
-            settexture("media/interface/hud/mageprotectionscreen.png");
+            settexture("media/interface/hud/fullscreen/ability.png");
             bgquad(0, 0, w, h);
 
             gle::colorf(1, 1, 1, 1);
@@ -233,7 +233,7 @@ namespace game
         {
             gle::colorf(0.3, 0.6, 1, 0.7f);
 
-            settexture("media/interface/hud/mageprotectionscreen.png");
+            settexture("media/interface/hud/fullscreen/ability.png");
             bgquad(0, 0, w, h);
 
             gle::colorf(1, 1, 1, 1);
@@ -242,7 +242,7 @@ namespace game
         if(player1->health<500 && player1->state==CS_ALIVE)
         {
             gle::colorf((-(player1->health)+700)/1000.0f, (-(player1->health)+700)/1000.0f, (-(player1->health)+700)/1000.0f, (-(player1->health)+700)/1000.0f);
-            settexture("media/interface/hud/damage.png");
+            settexture("media/interface/hud/fullscreen/damage.png");
             bgquad(0, 0, w, h);
 
             gle::colorf(1, 1, 1, 1);
@@ -338,7 +338,7 @@ namespace game
             gle::colorf(1, 1, 1, 1);
         }
 
-        if(player1->ragemillis){settexture("media/interface/hud/rage.png"); bgquad(15, h-260, 115, 115); decal_icon += 130;}
+        if(player1->ragemillis){settexture("media/interface/hud/fullscreen/rage.png"); bgquad(15, h-260, 115, 115); decal_icon += 130;}
         if(player1->steromillis){settexture("media/interface/hud/steros.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
         if(player1->epomillis){settexture("media/interface/hud/epo.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
         if(player1->champimillis){settexture("media/interface/hud/champis.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}

@@ -1316,10 +1316,13 @@ int main(int argc, char **argv)
     gl_init();
     notexture = textureload("media/texture/game/notexture.png");
     if(!notexture) fatal("could not find core textures");
-    textureload("media/interface/hud/viseurA.png");
-    textureload("media/interface/hud/viseurB.png");
-    textureload("media/interface/hud/viseurC.png");
-    textureload("media/interface/hud/shrooms.png");
+    textureload("media/interface/hud/fullscreen/scope_1.png");
+    textureload("media/interface/hud/fullscreen/scope_2.png");
+    textureload("media/interface/hud/fullscreen/scope_3.png");
+    textureload("media/interface/hud/fullscreen/ability.png");
+    textureload("media/interface/hud/fullscreen/vampire.png");
+    textureload("media/interface/hud/fullscreen/rage.png");
+    textureload("media/interface/hud/fullscreen/shrooms.png");
     textureload("media/map/1.png");
     textureload("media/map/2.png");
     textureload("media/map/3.png");
