@@ -401,12 +401,12 @@ namespace game
     }
     ICOMMAND(getclientname, "i", (int *cn), result(getclientname(*cn)));
 
-    const char *getclientaptilogo(int cn)
+    string logodir;
+    const char *getclientaptilogo(int cn)   //retrieve the logo for requested classes (scoreboard and menu)
     {
-        if(cn == -1) return aptitudes[player1->aptitude].apt_logo;
-
         gameent *d = getclient(cn);
-        return aptitudes[d->aptitude].apt_logo;
+        formatstring(logodir, "media/interface/apt_logo/%s.png", aptitudes[cn==-1 ? player1->aptitude : d->aptitude].apt_nomEN);
+        return logodir;
     }
     ICOMMAND(getclientaptilogo, "i", (int *cn), result(getclientaptilogo(*cn)));
 
