@@ -3,7 +3,7 @@ List of licenses applied to sound effects and songs | Liste des licences appliqu
 The following files are protected by Envato Elements license, you CANNOT use them for your personal projects unless you buy the sounds.
 Les fichiers suivants sont protégés par licence Envato Elements vous ne POUVEZ PAS les utiliser pour vos projets personnels à moins d'acheter les sons.
 
-See "mapsounds/licenses_certificates" folder for every licences / Voir dossier "mapsounds/licenses_certificates" pour chaque licences.
+See "sounds/licenses_certificates" folder for every licences / Voir dossier "mapsounds/licenses_certificates" pour chaque licences.
 Files :	media/sound/mapsound/indoor1.ogg 	license_certificate_R3FY29ABTJ (indoor1.ogg).txt
 	media/sound/mapsound/indoor2.ogg 	license_certificate_M6YEV3H785 (indoor2.ogg).txt
 	media/sound/mapsound/reactor.ogg 	license_certificate_9Q6WDAHN2Y (reactor.ogg).txt
@@ -25,53 +25,61 @@ Files :	media/sound/mapsound/indoor1.ogg 	license_certificate_R3FY29ABTJ (indoor
 	media/sound/mapsound/lava.ogg 		license_certificate_GJF3C9D4YR (lava.ogg).txt
 	media/sound/mapsound/littlefire.ogg 	license_certificate_KJ8FGTW3P5 (littlefire.ogg).txt
 	media/sound/mapsound/ufo.ogg 		license_certificate_2UYCTV5PRW (ufo.ogg).txt
+	media/sound/mapsound/mouettes.ogg 	license_certificate_E4U3BSCKXH (mouettes.ogg).txt
+	media/sound/mapsound/plage.ogg 		license_certificate_GNEYCPD97J (plage.ogg).txt
+	media/sound/ent_player/jump_basic_1.ogg
+	media/sound/ent_player/jump_basic_2.ogg
+	media/sound/ent_player/jump_basic_3.ogg
+	media/sound/ent_player/jump_basic_4.ogg
+	media/sound/ent_player/jump_basic_5.ogg		license_certificates (jump_basic_X).txt
+	media/sound/ent_player/jump_ninja_1.ogg
+	media/sound/ent_player/jump_ninja_2.ogg
+	media/sound/ent_player/jump_ninja_3.ogg		license_certificates (jump_ninja_X).txt
+	media/sound/ent_player/jump_parmour_1.ogg
+	media/sound/ent_player/jump_parmour_2.ogg
+	media/sound/ent_player/jump_parmour_3.ogg	license_certificates (jump_parmour_X).txt
+	media/sound/ent_player/land_basic_1.ogg
+	media/sound/ent_player/land_basic_2.ogg
+	media/sound/ent_player/land_basic_3.ogg		license_certificates (land_basic_X).txt
+	media/sound/ent_player/land_parmour_1.ogg
+	media/sound/ent_player/land_parmour_2.ogg
+	media/sound/ent_player/land_parmour_3.ogg	license_certificates (land_parmour_X).txt
+	media/sound/ent_player/move_1.ogg
+	media/sound/ent_player/move_2.ogg
+	media/sound/ent_player/move_3.ogg
+	media/sound/ent_player/move_4.ogg
+	media/sound/ent_player/move_5.ogg		license_certificate_8TWUD9CBAR (move_X).txt
+	media/sound/ent_player/move_parmour_1.ogg
+	media/sound/ent_player/move_parmour_2.ogg
+	media/sound/ent_player/move_parmour_3.ogg	license_certificates (move_parmour_X).txt
+	media/sound/ent_player/swim_1.ogg
+	media/sound/ent_player/swim_2.ogg
+	media/sound/ent_player/swim_3.ogg
+	media/sound/ent_player/swim_4.ogg
+	media/sound/ent_player/swim_5.ogg		license_certificate_XPW6FS9DZA (swim_X).txt
+	media/sound/ent_player/splash_1.ogg
+	media/sound/ent_player/splash_2.ogg
+	media/sound/ent_player/splash_3.ogg		license_certificates (splash_X).txt
+	media/sound/ent_player/water_1.ogg
+	media/sound/ent_player/water_2.ogg
+	media/sound/ent_player/water_3.ogg		license_certificates (water_X).txt
+	media/sound/ent_player/jumppad_1.ogg
+	media/sound/ent_player/jumppad_2.ogg
+	media/sound/ent_player/jumppad_3.ogg		license_certificate_SYF6G82QEM (jumppad_X).txt
+	media/sound/ent_player/teleport_1.ogg
+	media/sound/ent_player/teleport_2.ogg		license_certificates (teleport_X).txt
+	media/sound/ent_player/splash_lava_1.ogg
+	media/sound/ent_player/splash_lava_2.ogg
+	media/sound/ent_player/splash_lava_3.ogg	license_certificate_EHS6CTBZY2 (splash_lava_X).txt
 
 
-See "gamesounds/licenses_certificates" folder for every licences / Voir dossier "gamesounds/licenses_certificates" pour chaque licences.
-Files :	media/sound/game/ent_player/jump_basic_1.ogg
-	media/sound/game/ent_player/jump_basic_2.ogg
-	media/sound/game/ent_player/jump_basic_3.ogg
-	media/sound/game/ent_player/jump_basic_4.ogg
-	media/sound/game/ent_player/jump_basic_5.ogg	license_certificates (jump_basic_X).txt
-	media/sound/game/ent_player/jump_ninja_1.ogg
-	media/sound/game/ent_player/jump_ninja_2.ogg
-	media/sound/game/ent_player/jump_ninja_3.ogg	license_certificates (jump_ninja_X).txt
-	media/sound/game/ent_player/jump_parmour_1.ogg
-	media/sound/game/ent_player/jump_parmour_2.ogg
-	media/sound/game/ent_player/jump_parmour_3.ogg	license_certificates (jump_parmour_X).txt
-	media/sound/game/ent_player/land_basic_1.ogg
-	media/sound/game/ent_player/land_basic_2.ogg
-	media/sound/game/ent_player/land_basic_3.ogg	license_certificates (land_basic_X).txt
-	media/sound/game/ent_player/land_parmour_1.ogg
-	media/sound/game/ent_player/land_parmour_2.ogg
-	media/sound/game/ent_player/land_parmour_3.ogg	license_certificates (land_parmour_X).txt
-	media/sound/game/ent_player/move_1.ogg
-	media/sound/game/ent_player/move_2.ogg
-	media/sound/game/ent_player/move_3.ogg
-	media/sound/game/ent_player/move_4.ogg
-	media/sound/game/ent_player/move_5.ogg		license_certificate_8TWUD9CBAR (move_X).txt
-	media/sound/game/ent_player/move_parmour_1.ogg
-	media/sound/game/ent_player/move_parmour_2.ogg
-	media/sound/game/ent_player/move_parmour_3.ogg	license_certificates (move_parmour_X).txt
-	media/sound/game/ent_player/swim_1.ogg
-	media/sound/game/ent_player/swim_2.ogg
-	media/sound/game/ent_player/swim_3.ogg
-	media/sound/game/ent_player/swim_4.ogg
-	media/sound/game/ent_player/swim_5.ogg		license_certificate_XPW6FS9DZA (swim_X).txt
-	media/sound/game/ent_player/splash_1.ogg
-	media/sound/game/ent_player/splash_2.ogg
-	media/sound/game/ent_player/splash_3.ogg	license_certificates (splash_X).txt
-	media/sound/game/ent_player/water_1.ogg
-	media/sound/game/ent_player/water_2.ogg
-	media/sound/game/ent_player/water_3.ogg		license_certificates (water_X).txt
-	media/sound/game/ent_player/jumppad_1.ogg
-	media/sound/game/ent_player/jumppad_2.ogg
-	media/sound/game/ent_player/jumppad_3.ogg	license_certificate_SYF6G82QEM (jumppad_X).txt
-	media/sound/game/ent_player/teleport_1.ogg
-	media/sound/game/ent_player/teleport_2.ogg	license_certificates (teleport_X).txt
-	media/sound/game/ent_player/splash_lava_1.ogg
-	media/sound/game/ent_player/splash_lava_2.ogg
-	media/sound/game/ent_player/splash_lava_3.ogg	license_certificate_EHS6CTBZY2 (splash_lava_X).txt
+	media/sound/weap_shoot/plasma_rifle_sfx.ogg	license_certificate_XXXXXXXX (plasma_rifle_sfx).txt
+	media/sound/weap_shoot/spockgun_1.ogg
+	media/sound/weap_shoot/spockgun_2.ogg
+	media/sound/weap_shoot/spockgun_3.ogg		license_certificate_XXXXXXXX (spockgun_X).txt
+	media/sound/weap_shoot/m32_1.ogg
+	media/sound/weap_shoot/m32_2.ogg
+	media/sound/weap_shoot/m32_3.ogg		license_certificate_XXXXXXXX (m32_X).txt
 
 -------------------------------------------------------------------------------------------------------
 
@@ -81,4 +89,16 @@ Les fichiers suivants ont été crées expressément pour Cube Conflict par ses 
 See / Voir licenses_certificates/cc-by-sa.txt
 
 Created by "Jean Onche" for Cube Conflict | Réalisé par "Jean Onche" pour Cube Conflict
-Files :	
+Files :	media/sound/game/weap_shoot/electricrifle_1.ogg
+	media/sound/game/weap_shoot/electricrifle_2.ogg
+	media/sound/game/weap_shoot/electricrifle_3.ogg
+	media/sound/game/weap_shoot/plasmarifle_1.ogg
+	media/sound/game/weap_shoot/plasmarifle_2.ogg
+	media/sound/game/weap_shoot/plasmarifle_3.ogg
+	media/sound/game/weap_shoot/smaw_1.ogg
+	media/sound/game/weap_shoot/smaw_2.ogg
+	media/sound/game/weap_shoot/smaw_3.ogg
+	media/sound/game/weap_shoot/minigun_1.ogg
+	media/sound/game/weap_shoot/minigun_2.ogg
+	media/sound/game/weap_shoot/minigun_3.ogg
+	media/sound/game/weap_shoot/lanceflammes.ogg
