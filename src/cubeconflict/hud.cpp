@@ -191,7 +191,7 @@ namespace game
                 if(champifov<-player1->champimillis/1500) enlargefov = true;
             }
 
-            settexture("media/interface/hud/shrooms.png");
+            settexture("media/interface/hud/fullscreen/shrooms.png");
             bgquad(0, 0, w, h);
 
             gle::colorf(1, 1, 1, 1);
