@@ -73,7 +73,6 @@ Files :	media/interface/cclogo.png
 	media/interface/achievements/* 		//All files in the directory
 	media/interface/crosshair/* 		//All files in the directory
 	media/interface/hud/action.jp
-	media/interface/hud/americain.jpg
 	media/interface/hud/attention.jpg
 	media/interface/hud/barrebouclierpleine.png
 	media/interface/hud/barresantepleine.png
@@ -97,7 +96,6 @@ Files :	media/interface/cclogo.png
 	media/interface/hud/bouclier_magnetique.png
 	media/interface/hud/bouclier_or.png
 	media/interface/hud/boussole.png
-	media/interface/hud/campeur.jpg
 	media/interface/hud/campeur.png
 	media/interface/hud/cape.png
 	media/interface/hud/champis.png
@@ -114,60 +112,66 @@ Files :	media/interface/cclogo.png
 	media/interface/hud/epee.png
 	media/interface/hud/epo.png
 	media/interface/hud/exit.jpg
-	media/interface/hud/flongue.jpg
+	media/interface/hud/flingue.jpg
 	media/interface/hud/fondbarrestats.png
 	media/interface/hud/fondbarrexp.png
 	media/interface/hud/hp.png
-	media/interface/hud/indien.jpg
 	media/interface/hud/inf.png
 	media/interface/hud/info.jpg
 	media/interface/hud/joint.jpg
-	media/interface/hud/kamikaze.jpg
-	media/interface/hud/mageprotectionscreen.png
-	media/interface/hud/magicien.jpg
 	media/interface/hud/mana.png
-	media/interface/hud/medecin.jpg
-	media/interface/hud/ninja.jpg
 	media/interface/hud/null.jpg
 	media/interface/hud/options.jpg
-	media/interface/hud/physicien.jpg
 	media/interface/hud/pixel.png
-	media/interface/hud/pretre.jpg
 	media/interface/hud/radar.png
 	media/interface/hud/radio_off.jpg
 	media/interface/hud/radio_on.jpg
-	media/interface/hud/ragescreen.png
 	media/interface/hud/robot.png
 	media/interface/hud/sauer.jpg
 	media/interface/hud/scores.png
 	media/interface/hud/scores_ctf.png
-	media/interface/hud/soldat.jpg
-	media/interface/hud/sortespion1.png
-	media/interface/hud/sortespion2.png
-	media/interface/hud/sortespion3.png
-	media/interface/hud/sortindien1.png
-	media/interface/hud/sortindien2.png
-	media/interface/hud/sortindien3.png
-	media/interface/hud/sortkamikaze.png
-	media/interface/hud/sortmage1.png
-	media/interface/hud/sortmage2.png
-	media/interface/hud/sortmage3.png
-	media/interface/hud/sortphysicien1.png
-	media/interface/hud/sortphysicien2.png
-	media/interface/hud/sortphysicien3.png
-	media/interface/hud/sortpretre1.png
-	media/interface/hud/sortpretre2.png
-	media/interface/hud/sortpretre3.png
+	media/interface/hud/abilities/spy_1.png
+	media/interface/hud/abilities/spy_2.png
+	media/interface/hud/abilities/spy_3.png
+	media/interface/hud/abilities/shoshone_1.png
+	media/interface/hud/abilities/shoshone_2.png
+	media/interface/hud/abilities/shoshone_3.png
+	media/interface/hud/abilities/kamikaze_2.png
+	media/interface/hud/abilities/wizard_1.png
+	media/interface/hud/abilities/wizard_2.png
+	media/interface/hud/abilities/wizard_3.png
+	media/interface/hud/abilities/physicist_1.png
+	media/interface/hud/abilities/physicist_2.png
+	media/interface/hud/abilities/physicist_3.png
+	media/interface/hud/abilities/priest_1.png
+	media/interface/hud/abilities/priest_2.png
+	media/interface/hud/abilities/priest_3.png
 	media/interface/hud/souris.png
 	media/interface/hud/stats.png
 	media/interface/hud/steros.png
 	media/interface/hud/tombe.png
-	media/interface/hud/vampire.jpg
-	media/interface/hud/vampire.png
-	media/interface/hud/viking.jpg
-	media/interface/hud/viseurA.png
-	media/interface/hud/viseurB.png
-	media/interface/hud/viseurC.png
+	media/interface/hud/fullscreen/vampire.png
+	media/interface/hud/fullscreen/scope_1.png
+	media/interface/hud/fullscreen/scope_2.png
+	media/interface/hud/fullscreen/scope_3.png
+	media/interface/hud/fullscreen/shrooms.png
+	media/interface/hud/fullscreen/ability.png
+	media/interface/hud/fullscreen/ragen.png
+	media/interface/apt_logo/american.jpg
+	media/interface/apt_logo/soldier.png
+	media/interface/apt_logo/wizard.png
+	media/interface/apt_logo/vampire.png
+	media/interface/apt_logo/viking.png
+	media/interface/apt_logo/priest.png
+	media/interface/apt_logo/physicist.png
+	media/interface/apt_logo/medic.png
+	media/interface/apt_logo/ninja.png
+	media/interface/apt_logo/kamikaze.png
+	media/interface/apt_logo/reaper.png
+	media/interface/apt_logo/shoshone.png
+	media/interface/apt_logo/camper.png
+	media/interface/apt_logo/spy.png
+	media/interface/apt_logo/junkie.png
 	media/sky/ciel/1_*.jpg 		//And all subnames
 	media/sky/ciel/2_*.jpg 		//And all subnames
 	media/sky/ciel/3_*.jpg 		//And all subnames

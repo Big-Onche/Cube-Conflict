@@ -323,6 +323,7 @@ Files :	media/model/boosts/epo
 	media/model/mapmodel/vaisseaux/1
 	media/model/mapmodel/vaisseaux/2
 	media/model/mapmodel/trone
+	media/model/mapmodel/cible
 
 Created by "Skyser" for Cube Conflict | Réalisé par "Skyser" pour Cube Conflict
 Files : media/model/skyser/casiers1
