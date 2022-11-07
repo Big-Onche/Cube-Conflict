@@ -23,7 +23,7 @@ ce logiciel sous réserve des restrictions suivantes :
    dans le nom de votre projet qu'il s'agit d'un "mod" d'un "fork" de Cube Conflict
    ou qu'il s'agit d'un tout autre projet sans aucun rapport avec Cube Conflict.
 
-4. L'utilisation à des fins lucratives de Cube Conflict n'est pas autorisée.
+4. La distribution à des fins lucratives de Cube Conflict n'est pas autorisée.
    Cela signifie que la vente, la redistribution via des liens contenant des
    publicités forcées, la distribution d'un installateur pour ce jeu contenant
    des publicitiés ou logiciels tiers est strictement interdite.

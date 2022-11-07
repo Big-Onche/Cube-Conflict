@@ -23,7 +23,7 @@ freely, subject to the following restrictions:
    that it is a "mod" or a "fork" of Cube Conflict, or that it's another
    project unrelated to Cube Conflict.
 
-4. Use of Cube Conflict for profit is not permitted. This means that the sale,
+4. Redistribution of Cube Conflict for profit is not permitted. This means that the sale,
    redistribution via links containing forced advertisements, and distribution
    of an installer for this game containing advertisements or third-party
    software are strictly prohibited.
