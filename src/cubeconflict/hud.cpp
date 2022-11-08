@@ -338,7 +338,7 @@ namespace game
             gle::colorf(1, 1, 1, 1);
         }
 
-        if(player1->ragemillis){settexture("media/interface/hud/fullscreen/rage.png"); bgquad(15, h-260, 115, 115); decal_icon += 130;}
+        if(player1->ragemillis){settexture("media/interface/hud/rage.png"); bgquad(15, h-260, 115, 115); decal_icon += 130;}
         if(player1->steromillis){settexture("media/interface/hud/steros.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
         if(player1->epomillis){settexture("media/interface/hud/epo.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
         if(player1->champimillis){settexture("media/interface/hud/champis.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
