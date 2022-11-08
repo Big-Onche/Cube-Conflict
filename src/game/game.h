@@ -20,6 +20,7 @@ enum
     ANIM_EDIT, ANIM_LAG, ANIM_TAUNT, ANIM_WIN, ANIM_LOSE,
     ANIM_GUN_IDLE, ANIM_GUN_SHOOT, ANIM_GUN_MELEE,
     ANIM_VWEP_IDLE, ANIM_VWEP_SHOOT, ANIM_VWEP_MELEE,
+    ANIM_TRIGGER,
     NUMANIMS
 };
 
@@ -35,7 +36,8 @@ static const char * const animnames[] =
     "pain",
     "edit", "lag", "taunt", "win", "lose",
     "gun idle", "gun shoot", "gun melee",
-    "vwep idle", "vwep shoot", "vwep melee"
+    "vwep idle", "vwep shoot", "vwep melee",
+    "trigger"
 };
 
 // console message types
@@ -78,12 +80,27 @@ enum                            // static entity types
     JUMPPAD,                    // attr1 = zpush, attr2 = ypush, attr3 = xpush
     FLAG,                       // attr1 = angle, attr2 = team
     BASE,                       // attr2 = name alias
+    //SOLO
+    MONSTER,                    // attr1 = angle, attr2 = monstertype
+    RESPAWNPOINT,
 
     MAXENTTYPES,
 };
 
+enum
+{
+    TRIGGER_RESET = 0,
+    TRIGGERING,
+    TRIGGERED,
+    TRIGGER_RESETTING,
+    TRIGGER_DISAPPEARED
+};
+
 struct gameentity : extentity
 {
+    int triggerstate, lasttrigger;
+
+    gameentity() : triggerstate(TRIGGER_RESET), lasttrigger(0) {}
 };
 
 enum { GUN_RAIL = 0, GUN_PULSE, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_M32, GUN_LANCEFLAMMES, GUN_UZI, GUN_FAMAS, GUN_MOSSBERG, GUN_HYDRA, GUN_SV98, GUN_SKS, GUN_ARBALETE, GUN_AK47, GUN_GRAP1, GUN_ARTIFICE, GUN_GLOCK,
@@ -112,6 +129,7 @@ enum {  ATK_RAIL_SHOOT = 0, ATK_PULSE_SHOOT,
         ATK_KAMIKAZE_SHOOT, ATK_ASSISTXPL_SHOOT, ATK_CACNINJA_SHOOT,
         NUMATKS
 };
+enum { M_NONE = 0, M_SEARCH, M_HOME, M_ATTACKING, M_PAIN, M_SLEEP, M_AIMING };  // monster states
 
 #define validgun(n) ((n) >= 0 && (n) < NUMGUNS)
 #define validact(n) ((n) >= 0 && (n) < NUMACTS)
@@ -134,6 +152,8 @@ enum
     M_CAPTURE    = 1<<12,
     M_REGEN      = 1<<13,
     M_NOITEMS    = 1<<14,
+    M_DMSP       = 1<<15,
+    M_CLASSICSP  = 1<<16,
 };
 
 static struct gamemodeinfo
@@ -143,8 +163,10 @@ static struct gamemodeinfo
     int flags;
 } gamemodes[] =
 {
-    { "demo", "demo", M_DEMO | M_LOCAL },
-    { "Editeur de maps", "Map editor", M_EDIT },
+    { "DMSP", "DMSP", M_DMSP | M_LOCAL },           // -3
+    { "SP", "SP", M_CLASSICSP | M_LOCAL },          // -2
+    { "demo", "demo", M_DEMO | M_LOCAL },           // -1
+    { "Editeur de maps", "Map editor", M_EDIT },    // 0
 
     //MODE 1, 2, 3, 4
     { "Tue Les Tous (Collecte)",    "Deathmatch (Weapon pickup)",   M_LOBBY },
@@ -169,13 +191,14 @@ static struct gamemodeinfo
     { "Conquête (Régénération)", "Domination (Regeneration)",  M_NOITEMS | M_CAPTURE | M_TEAM | M_REGEN},
 };
 
-#define STARTGAMEMODE (-1)
+#define STARTGAMEMODE (-3)
 #define NUMGAMEMODES ((int)(sizeof(gamemodes)/sizeof(gamemodes[0])))
 
 #define m_valid(mode)          ((mode) >= STARTGAMEMODE && (mode) < STARTGAMEMODE + NUMGAMEMODES)
 #define m_check(mode, flag)    (m_valid(mode) && gamemodes[(mode) - STARTGAMEMODE].flags&(flag))
 #define m_checknot(mode, flag) (m_valid(mode) && !(gamemodes[(mode) - STARTGAMEMODE].flags&(flag)))
 #define m_checkall(mode, flag) (m_valid(mode) && (gamemodes[(mode) - STARTGAMEMODE].flags&(flag)) == (flag))
+#define m_checkonly(mode, flag, exclude) (m_valid(mode) && (gamemodes[(mode) - STARTGAMEMODE].flags&((flag)|(exclude))) == (flag))
 
 #define m_teammode     (m_check(gamemode, M_TEAM))
 #define m_overtime     (m_check(gamemode, M_OVERTIME))
@@ -199,6 +222,10 @@ static struct gamemodeinfo
 #define m_timed        (m_checknot(gamemode, M_DEMO|M_EDIT|M_LOCAL))
 #define m_botmode      (m_checknot(gamemode, M_DEMO|M_LOCAL))
 #define m_mp(mode)     (m_checknot(mode, M_LOCAL))
+
+#define m_sp           (m_check(gamemode, M_DMSP | M_CLASSICSP))
+#define m_dmsp         (m_check(gamemode, M_DMSP))
+#define m_classicsp    (m_check(gamemode, M_CLASSICSP))
 
 enum { MM_AUTH = -1, MM_OPEN = 0, MM_VETO, MM_LOCKED, MM_PRIVATE, MM_PASSWORD, MM_START = MM_AUTH, MM_INVALID = MM_START - 1 };
 
@@ -759,6 +786,18 @@ struct gamestate
             if(aptitude==0) addsweaps();
             return;
         }
+        else if(m_sp)
+        {
+            armourtype = A_BLUE;
+            armour = 0;
+            health = 1000;
+
+            if(m_dmsp)
+            {
+                armour = 750;
+                ammo[GUN_GLOCK] = 40;
+            }
+        }
         else
         {
             armourtype = A_BLUE;
@@ -969,6 +1008,8 @@ namespace entities
 
     extern void preloadentities();
     extern void renderentities();
+    extern void resettriggers();
+    extern void checktriggers();
     extern void checkitems(gameent *d);
 
     extern void checkboosts(int time, gameent *d);
@@ -1032,6 +1073,7 @@ namespace game
     extern vector<gameent *> players, clients;
     extern int lastspawnattempt;
     extern int lasthit;
+    extern int respawnent;
     extern int following;
     extern int smoothmove, smoothdist;
 
@@ -1084,6 +1126,21 @@ namespace game
     extern void calcmode();
     extern void c2sinfo(bool force = false);
     extern void sendposition(gameent *d, bool reliable = false);
+
+    // solo
+    struct monster;
+    extern vector<monster *> monsters;
+
+    extern void clearmonsters();
+    extern void preloadmonsters();
+    extern void stackmonster(monster *d, physent *o);
+    extern void updatemonsters(int curtime);
+    extern void rendermonsters();
+    extern void suicidemonster(monster *m);
+    extern void hitmonster(int damage, monster *m, gameent *at, const vec &vel, int atk);
+    extern void monsterkilled();
+    extern void endsp(bool allkilled);
+    extern void spsummary(int accuracy);
 
     // weapon
     extern int getweapon(const char *name);

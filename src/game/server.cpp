@@ -880,6 +880,7 @@ namespace server
 
     int spawntime(int type)
     {
+        if(m_classicsp) return INT_MAX;
         int np = numclients(-1, true, false);
         np = np<3 ? 4 : (np>4 ? 2 : 3);         // spawn times are dependent on number of players
         int sec = 0;

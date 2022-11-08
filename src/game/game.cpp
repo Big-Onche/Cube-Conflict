@@ -38,6 +38,7 @@ namespace game
     bool intermission = false;
     int maptime = 0, maprealtime = 0, maplimit = -1;
     int lasthit = 0, lastspawnattempt = 0;
+    int respawnent = -1;
 
     gameent *player1 = NULL;         // our client
     vector<gameent *> players;       // other clients
@@ -136,6 +137,11 @@ namespace game
 
     void resetgamestate()
     {
+        if(m_classicsp)
+        {
+            clearmonsters();                 // all monsters back at their spawns for editing
+            entities::resettriggers();
+        }
         clearprojectiles();
         clearbouncers();
     }
@@ -368,6 +374,7 @@ namespace game
         ai::update();
         moveragdolls();
         gets2c();
+        updatemonsters(curtime);
         if(connected)
         {
             if(player1->state == CS_DEAD)
@@ -386,7 +393,8 @@ namespace game
                 moveplayer(player1, 10, true, player1->epomillis, player1->jointmillis, player1->aptitude, player1->aptitude==APT_MAGICIEN ? player1->aptisort1 : player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || player1->aptitude==APT_KAMIKAZE ? player1->aptisort2 : player1->aptisort3, player1->armourtype==A_ASSIST && player1->armour>0 ? true : false);
                 swayhudgun(curtime);
                 entities::checkitems(player1);
-                if(cmode) cmode->checkitems(player1);
+                if(m_sp || m_classicsp) entities::checktriggers();
+                else if(cmode) cmode->checkitems(player1);
             }
         }
         if(player1->clientnum>=0) c2sinfo();   // do this last, to reduce the effective frame lag
@@ -434,8 +442,10 @@ namespace game
 
     void spawnplayer(gameent *d)   // place at random spawn
     {
+        int ent = m_classicsp && d == player1 && respawnent >= 0 ? respawnent : -1;
+
         if(cmode) cmode->pickspawn(d);
-        else findplayerspawn(d, -1, m_teammode && !m_capture  ? d->team : 0);
+        else findplayerspawn(d, ent, m_teammode && !m_capture  ? d->team : 0);
         spawnstate(d);
         if(d==player1)
         {
@@ -461,6 +471,7 @@ namespace game
                 return;
             }
             if(lastmillis < player1->lastpain + spawnwait) return;
+            if(m_dmsp) { changemap(clientmap, gamemode); return; }    // if we die in SP we try the same map again
             respawnself();
         }
     }
@@ -688,6 +699,7 @@ namespace game
         gameent *h = followingplayer(player1);
         int contype = d==h || actor==h ? CON_FRAG_SELF : CON_FRAG_OTHER;
         const char *dname = "", *aname = "";
+
         if(m_teammode && teamcolorfrags)
         {
             dname = teamcolorname(d, GAME_LANG ? "You" : "Tu");
@@ -698,6 +710,8 @@ namespace game
             dname = colorname(d, NULL, GAME_LANG ? "\fdYou" : "\fdTu", "\fc");
             aname = colorname(actor, NULL, GAME_LANG ? "\fdYou" : "\fdTu", "\fc");
         }
+
+        if(actor->type==ENT_AI) conoutf(contype, "\f2%s got killed by %s!", dname, aname);
 
         if(d==actor || atk==-1) // Suicide ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
@@ -826,6 +840,7 @@ namespace game
             player1->attacking = ACT_IDLE;
             if(cmode) cmode->gameover();
             int accuracy = (player1->totaldamage*100)/max(player1->totalshots, 1);
+            if(m_sp) spsummary(accuracy);
 
             if(player1->frags>=10)
             {
@@ -925,6 +940,8 @@ namespace game
 
     void startgame()
     {
+
+        clearmonsters();
         clearprojectiles();
         clearbouncers();
         clearragdolls();
@@ -964,6 +981,7 @@ namespace game
         ai::savewaypoints();
         ai::clearwaypoints(true);
 
+        respawnent = -1; // so we don't respawn at an old spot
         if(!m_mp(gamemode)) spawnplayer(player1);
         else findplayerspawn(player1, -1, m_teammode && !m_capture ? player1->team : 0);
         entities::resetspawns();
@@ -1054,6 +1072,11 @@ namespace game
 
     void dynentcollide(physent *d, physent *o, const vec &dir)
     {
+        switch(d->type)
+        {
+            case ENT_AI: if(dir.z > 0) stackmonster((monster *)d, o); break;
+
+        }
     }
 
     void msgsound(int n, physent *d)
@@ -1071,11 +1094,14 @@ namespace game
         }
     }
 
-    int numdynents() { return players.length(); }
+    int numdynents() { return players.length()+monsters.length(); }
 
     dynent *iterdynents(int i)
     {
         if(i<players.length()) return players[i];
+        i -= players.length();
+        if(i<monsters.length()) return (dynent *)monsters[i];
+        i -= monsters.length();
         return NULL;
     }
 
@@ -1125,6 +1151,7 @@ namespace game
                 if(pl->suicided!=seq) { addmsg(N_SUICIDE, "rc", pl); pl->suicided = seq; }
             }
         }
+        else if(d->type==ENT_AI) suicidemonster((monster *)d);
     }
     ICOMMAND(suicide, "", (), suicide(player1));
 

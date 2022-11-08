@@ -424,13 +424,13 @@ bool ellipseboxcollide(physent *d, const vec &dir, const vec &o, const vec &cent
         }
         if(yo.z < 0)
         {
-            if(dir.iszero() || (dir.z > 0 && (d->type!=ENT_PLAYER || below >= d->zmargin-(d->eyeheight+d->aboveeye)/4.0f)))
+            if(dir.iszero() || (dir.z > 0 && (d->type>=ENT_CAMERA || below >= d->zmargin-(d->eyeheight+d->aboveeye)/4.0f)))
             {
                 collidewall = vec(0, 0, -1);
                 return true;
             }
         }
-        else if(dir.iszero() || (dir.z < 0 && (d->type!=ENT_PLAYER || above >= d->zmargin-(d->eyeheight+d->aboveeye)/3.0f)))
+        else if(dir.iszero() || (dir.z < 0 && (d->type>=ENT_CAMERA || above >= d->zmargin-(d->eyeheight+d->aboveeye)/3.0f)))
         {
             collidewall = vec(0, 0, 1);
             return true;
@@ -462,13 +462,13 @@ bool ellipsecollide(physent *d, const vec &dir, const vec &o, const vec &center,
         }
         if(d->o.z < yo.z)
         {
-            if(dir.iszero() || (dir.z > 0 && (d->type!=ENT_PLAYER || below >= d->zmargin-(d->eyeheight+d->aboveeye)/4.0f)))
+            if(dir.iszero() || (dir.z > 0 && (d->type>=ENT_CAMERA || below >= d->zmargin-(d->eyeheight+d->aboveeye)/4.0f)))
             {
                 collidewall = vec(0, 0, -1);
                 return true;
             }
         }
-        else if(dir.iszero() || (dir.z < 0 && (d->type!=ENT_PLAYER || above >= d->zmargin-(d->eyeheight+d->aboveeye)/3.0f)))
+        else if(dir.iszero() || (dir.z < 0 && (d->type>=ENT_CAMERA || above >= d->zmargin-(d->eyeheight+d->aboveeye)/3.0f)))
         {
             collidewall = vec(0, 0, 1);
             return true;
@@ -1056,7 +1056,7 @@ static inline bool octacollide(physent *d, const vec &dir, float cutoff, const i
             switch(c[i].material&MATF_CLIP)
             {
                 case MAT_NOCLIP: continue;
-                case MAT_CLIP: if(isclipped(c[i].material&MATF_VOLUME) || d->type==ENT_PLAYER) solid = true; break;
+                case MAT_CLIP: if(isclipped(c[i].material&MATF_VOLUME) || d->type==ENT_PLAYER || d->type==ENT_AI) solid = true; break;
             }
             if(!solid && isempty(c[i])) continue;
             if(cubecollide(d, dir, cutoff, c[i], o, size, solid)) return true;
@@ -1085,7 +1085,7 @@ static inline bool octacollide(physent *d, const vec &dir, float cutoff, const i
     switch(c->material&MATF_CLIP)
     {
         case MAT_NOCLIP: return false;
-        case MAT_CLIP: if(isclipped(c->material&MATF_VOLUME) || d->type==ENT_PLAYER) solid = true; break;
+        case MAT_CLIP: if(isclipped(c->material&MATF_VOLUME) || d->type==ENT_PLAYER || d->type==ENT_AI) solid = true; break;
     }
     if(!solid && isempty(*c)) return false;
     int csize = 2<<scale, cmask = ~(csize-1);
@@ -1409,7 +1409,7 @@ bool move(physent *d, vec &dir)
     bool collided = false, slidecollide = false;
     vec obstacle;
     d->o.add(dir);
-    if(collide(d, dir))
+    if(collide(d, dir) || ((d->type==ENT_AI) && !collide(d, vec(0, 0, 0), 0, false)))
     {
         obstacle = collidewall;
         /* check to see if there is an obstacle that would prevent this one from being used as a floor (or ceiling bump) */

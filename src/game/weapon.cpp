@@ -617,6 +617,18 @@ namespace game
         f->lastpain = lastmillis;
         if(at->type==ENT_PLAYER && !isteam(at->team, f->team)) at->totaldamage += damage;
 
+        if(m_dmsp || m_sp)
+        {
+            if(f->type==ENT_AI || !m_mp(gamemode) || f==at) f->hitpush(damage, vel, at, atk, f);
+            if(f->type==ENT_AI) hitmonster(damage, (monster *)f, at, vel, atk);
+
+            if(f==player1)
+            {
+                damaged(damage, f, at, true, atk);
+                f->hitpush(damage, vel, at, atk, f);
+            }
+        }
+
         if(!m_mp(gamemode) || f==at) f->hitpush(damage, vel, at, atk, f);
         if(!m_mp(gamemode)) damaged(damage, f, at, false, atk);
         else
@@ -1289,7 +1301,7 @@ namespace game
 
     void particletrack(physent *owner, vec &o, vec &d)
     {
-        if(owner->type!=ENT_PLAYER) return;
+        if(owner->type!=ENT_PLAYER && owner->type!=ENT_AI) return;
         gameent *pl = (gameent *)owner;
         if(pl->muzzle.x < 0 || pl->lastattack < 0 || attacks[pl->lastattack].gun != pl->gunselect) return;
         float dist = o.dist(d);
@@ -1305,7 +1317,7 @@ namespace game
 
     void dynlighttrack(physent *owner, vec &o, vec &hud)
     {
-        if(owner->type!=ENT_PLAYER) return;
+        if(owner->type!=ENT_PLAYER && owner->type!=ENT_AI) return;
         gameent *pl = (gameent *)owner;
         if(pl->muzzle.x < 0 || pl->lastattack < 0 || attacks[pl->lastattack].gun != pl->gunselect) return;
         o = pl->muzzle;
@@ -1415,7 +1427,7 @@ namespace game
             }
         }
 
-        if(d->armour==0 && !d->playerexploded && d->ammo[GUN_ASSISTXPL]>0)
+        if(d->armour==0 && !d->playerexploded && d->ammo[GUN_ASSISTXPL]>0 && d->type!=ENT_AI)
         {
             gunselect(GUN_ASSISTXPL, d, true);
             d->attacking = ACT_SHOOT;
@@ -1492,7 +1504,7 @@ namespace game
 
         shoteffects(atk, from, to, d, true, 0, prevaction);
 
-        if(d==player1 || d->ai)
+        if(d==player1 || d->ai || d->type==ENT_AI)
         {
             addmsg(N_SHOOT, "rci2i6iv", d, lastmillis-maptime, atk,
                    (int)(from.x*DMF), (int)(from.y*DMF), (int)(from.z*DMF),

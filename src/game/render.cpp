@@ -645,6 +645,8 @@ namespace game
             renderplayer(exclude, 1, MDL_ONLYSHADOW);
         else if(!f && (player1->state==CS_ALIVE || (player1->state==CS_EDITING && third) || (player1->state==CS_DEAD && !hidedead)))
             renderplayer(player1, 1, third ? 0 : MDL_ONLYSHADOW);
+        rendermonsters();
+
         entities::renderentities();
         renderbouncers();
         renderprojectiles();
@@ -833,10 +835,13 @@ namespace game
             vec front, right;
             vecfromyawpitch(d->yaw, d->pitch, 1, 0, front);
             offset.add(front.mul(d->radius));
-            offset.z += (d->aboveeye + d->eyeheight)*0.75f - d->eyeheight;
-            vecfromyawpitch(d->yaw, 0, 0, -1, right);
-            offset.add(right.mul(0.5f*d->radius));
-            offset.add(front);
+            if(d->type!=ENT_AI)
+            {
+                offset.z += (d->aboveeye + d->eyeheight)*0.75f - d->eyeheight;
+                vecfromyawpitch(d->yaw, 0, 0, -1, right);
+                offset.add(right.mul(0.5f*d->radius));
+                offset.add(front);
+            }
             return offset;
         }
         offset.add(vec(to).sub(from).normalize().mul(2));
@@ -872,6 +877,7 @@ namespace game
             }
             formatstring(fname, "worldgun/%s", file);
             preloadmodel(fname);
+            if(m_sp) preloadmonsters();
         }
     }
 
