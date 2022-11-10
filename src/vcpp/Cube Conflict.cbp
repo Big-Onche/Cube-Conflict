@@ -126,6 +126,7 @@
 		<Unit filename="../cubeconflict/customisation.h" />
 		<Unit filename="../cubeconflict/gfx.cpp" />
 		<Unit filename="../cubeconflict/hud.cpp" />
+		<Unit filename="../cubeconflict/pnj.cpp" />
 		<Unit filename="../cubeconflict/stats.cpp" />
 		<Unit filename="../cubeconflict/stats.h" />
 		<Unit filename="../engine/aa.cpp" />

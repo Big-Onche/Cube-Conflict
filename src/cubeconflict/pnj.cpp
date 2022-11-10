@@ -13,16 +13,16 @@ namespace game
 
     struct pnjtype      // see docs for how these values modify behaviour
     {
-        short gun, speed, health, freq, lag, rate, pain, loyalty, bscale, weight;
+        short gun, speed, health, freq, lag, rate, pain, triggerdist, loyalty, bscale, weight;
         bool friendly;
         short painsound, diesound;
         const char *name, *mdlname, *shieldname, *boost1modelname, *boost2modelname;
     };
 
     static const pnjtype pnjtypes[NUMMONSTERTYPES] =
-    {   //weapon      speed  healthx10  freq  lag  rate  painlag  loyality  bscale  weight  friendly  painsound   diesound   name           modeldir      shieldmodeldir          boost1modeldir   boost2modeldir
-        { GUN_S_NUKE, 18,    2500,      2,    30,   5,   100,     100,      12,     85,     true,     S_NULL,     S_NULL,    "Jean Onche",  "pnj/jo",     "worldshield/or/100",   NULL,            NULL},
-        { GUN_GLOCK,  10,    1000,      1,     5,  10,   200,     1,         5,     30,     false,    S_NULL,     S_NULL,    "un Kévin",    "pnj/kevin",  "worldshield/bois/20",  NULL,            NULL},
+    {   //weapon      speed  healthx10  freq  lag  rate  painlag  triggerdist  loyality  bscale  weight  friendly  painsound   diesound   name           modeldir      shieldmodeldir          boost1modeldir   boost2modeldir
+        { GUN_S_NUKE, 18,    2500,      2,    30,   5,   100,     128,          100,      12,     85,     true,     S_NULL,     S_NULL,    "Jean Onche",  "pnj/jo",     "worldshield/or/100",   NULL,            NULL},
+        { GUN_GLOCK,  10,    1000,      1,     5,  10,   200,     128,          1,         5,     30,     false,    S_NULL,     S_NULL,    "un Kévin",    "pnj/kevin",  "worldshield/bois/20",  NULL,            NULL},
     };
 
     VAR(skill, 1, 3, 10);
@@ -38,6 +38,7 @@ namespace game
         int mtype, tag;                     // see monstertypes table
         gameent *enemy;                     // monster wants to kill this entity
         float targetyaw;                    // monster wants to look in this direction
+        float targetpitch;
         int trigger;                        // millis at which transition to another monsterstate takes place
         vec attacktarget;                   // delayed attacks
         int anger;                          // how many times already hit by fellow monster
@@ -46,7 +47,7 @@ namespace game
         physent *stacked;
         vec stackpos;
 
-        monster(int _type, int _yaw, int _tag, int _state, int _trigger, int _move) :
+        monster(int _type, int _yaw, int _pitch, int _tag, int _state, int _trigger, int _move) :
             monsterstate(_state), tag(_tag),
             stacked(NULL),
             stackpos(0, 0, 0)
@@ -70,6 +71,7 @@ namespace game
             if(_state!=M_SLEEP) spawnplayer(this);
             trigger = lastmillis+_trigger;
             targetyaw = yaw = (float)_yaw;
+            targetpitch = pitch = (float)_pitch;
             move = _move;
             enemy = player1;
             gunselect = t.gun;
@@ -91,6 +93,12 @@ namespace game
             while(yaw>angle+180.0f) yaw -= 360.0f;
         }
 
+        void normalize_pitch(float angle)
+        {
+            while(pitch<angle-180.0f) pitch += 360.0f;
+            while(pitch>angle+180.0f) pitch -= 360.0f;
+        }
+
         // monster AI is sequenced using transitions: they are in a particular state where
         // they execute a particular behaviour until the trigger time is hit, and then they
         // reevaluate their situation based on the current state, the environment etc., and
@@ -108,42 +116,56 @@ namespace game
         void monsteraction(int curtime)           // main AI thinking routine, called every frame for every monster
         {
             if(enemy->state==CS_DEAD) { enemy = player1; anger = 0; }
-            normalize_yaw(targetyaw);
-            if(targetyaw>yaw)             // slowly turn monster towards his target
-            {
-                yaw += curtime*0.5f;
-                if(targetyaw<yaw) yaw = targetyaw;
-            }
-            else
-            {
-                yaw -= curtime*0.5f;
-                if(targetyaw>yaw) yaw = targetyaw;
-            }
+
             float dist = enemy->o.dist(o);
+
+            if(dist < pnjtypes[mtype].triggerdist*(friendly ? 4 : 0))
+            {
+                normalize_yaw(targetyaw);
+                if(targetyaw>yaw)             // slowly turn monster towards his target
+                {
+                    yaw += curtime*(friendly ? 0.15f : 0.4f);
+                    if(targetyaw<yaw) yaw = targetyaw;
+                }
+                else
+                {
+                    yaw -= curtime*(friendly ? 0.15f : 0.4f);
+                    if(targetyaw>yaw) yaw = targetyaw;
+                }
+
+                targetpitch < -45 ? targetpitch = -45 : targetpitch > 45 ? targetpitch = 45 : targetpitch;
+                normalize_pitch(targetpitch);
+                if(targetpitch>pitch)             // slowly turn monster towards his target
+                {
+                    pitch += curtime*0.3f;
+                    if(targetpitch<pitch) pitch = targetpitch;
+                }
+                else
+                {
+                    pitch -= curtime*0.3f;
+                    if(targetpitch>pitch) pitch = targetpitch;
+                }
+            }
 
             switch(monsterstate)
             {
-                case M_FRIENDLY:
-                case M_SEARCH:
-                case M_ATTACKING:
-                case M_AIMING:
-                    pitch = asin((enemy->o.z - o.z) / dist) / RAD;
-                    pitch < -45 ? pitch = -45 : pitch > 45 ? pitch = 45 : pitch;
-                    break;
+                case M_SLEEP: targetpitch = 0; break;
                 default:
-                    pitch < 0 ? pitch++ : pitch > 0 ? pitch-- : pitch;
+                    int trigdist = dist*(player1->crouched() ? 2 : 1);
+                    if(trigdist < pnjtypes[mtype].triggerdist) targetpitch = asin((enemy->o.z - o.z) / dist) / RAD;            // if player1 is close to pnj, pnj look at the player
+                    else targetpitch = 0;
             }
 
-            if(blocked)                                                              // special case: if we run into scenery
+            if(blocked)                                                             // special case: if we run into scenery
             {
                 blocked = false;
-                if(!rnd(20000/pnjtypes[mtype].speed))                            // try to jump over obstackle (rare)
+                if(!rnd(20000/pnjtypes[mtype].speed))                               // try to jump over obstackle (rare)
                 {
                     jumping = true;
                 }
-                else if(trigger<lastmillis && (monsterstate!=M_HOME || !rnd(5)))  // search for a way around (common)
+                else if(trigger<lastmillis && (monsterstate!=M_HOME || !rnd(5)))    // search for a way around (common)
                 {
-                    targetyaw += 90+rnd(180);                                        // patented "random walk" AI pathfinding (tm) ;)
+                    targetyaw += 90+rnd(180);                                       // patented "random walk" AI pathfinding (tm) ;)
                     transition(M_SEARCH, 1, 100, 1000);
                 }
             }
@@ -152,16 +174,19 @@ namespace game
 
             switch(monsterstate)
             {
-                case M_FRIENDLY: targetyaw = enemyyaw; break;
-
-                case M_NEUTRAL: if(trigger+10000<lastmillis) transition(M_FRIENDLY, 1, 100, 200); break;
-
                 case M_ANGRY:
                     {
                         targetyaw = enemyyaw;
                         transition(M_ATTACKING, 0, 200, 200);
                         if(trigger+5000<lastmillis) transition(M_NEUTRAL, 1, 100, 200);
                     }
+                    break;
+
+                case M_NEUTRAL: if(trigger+10000<lastmillis) transition(M_FRIENDLY, 1, 100, 200);
+
+                case M_FRIENDLY:
+                    if(dist < pnjtypes[mtype].triggerdist) targetyaw = enemyyaw;
+                    else targetyaw = 0;
                     break;
 
                 case M_PAIN:
@@ -175,12 +200,13 @@ namespace game
                     if(editmode) break;
                     normalize_yaw(enemyyaw);
                     float angle = (float)fabs(enemyyaw-yaw);
-                    if(dist<32                   // the better the angle to the player, the further the monster can see/hear
-                    ||(dist<64 && angle<135)
-                    ||(dist<128 && angle<90)
-                    ||(dist<256 && angle<45)
+                    int trigdist = dist*(player1->crouched() ? 2 : 1);            // if player1 is crouched, minimal trigger distance is reduced by 2
+                    if(trigdist < pnjtypes[mtype].triggerdist/8                   // the better the angle to the player, the further the monster can see/hear
+                    ||(trigdist < pnjtypes[mtype].triggerdist/4 && angle<135)
+                    ||(trigdist < pnjtypes[mtype].triggerdist/2 && angle<90)
+                    ||(trigdist < pnjtypes[mtype].triggerdist && angle<45)
                     || angle<10
-                    || (monsterhurt && o.dist(monsterhurtpos)<128))
+                    || (monsterhurt && o.dist(monsterhurtpos) < pnjtypes[mtype].triggerdist/2))
                     {
                         vec target;
                         if(raycubelos(o, enemy->o, target))
@@ -325,7 +351,7 @@ namespace game
     {
         int n = rnd(TOTMFREQ), type;
         for(int i = 0; ; i++) if((n -= pnjtypes[i].freq)<0) { type = i; break; }
-        monsters.add(new monster(type, rnd(360), 0, M_SEARCH, 1000, 1));
+        monsters.add(new monster(type, rnd(360), 0, 0, M_SEARCH, 1000, 1));
     }
 
     void clearmonsters()     // called after map start or when toggling edit mode to reset/spawn all monsters to initial state
@@ -352,7 +378,7 @@ namespace game
             {
                 extentity &e = *entities::ents[i];
                 if(e.type!=MONSTER) continue;
-                monster *m = new monster(e.attr1, e.attr2, e.attr3, M_SLEEP, 100, 0);
+                monster *m = new monster(e.attr1, e.attr2, e.attr3, e.attr4, M_SLEEP, 100, 0);
                 monsters.add(m);
                 m->o = e.o;
                 entinmap(m);
