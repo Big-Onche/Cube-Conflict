@@ -325,7 +325,7 @@ namespace entities
                 if(d!=player1) break;
                 if(n==respawnent) break;
                 respawnent = n;
-                conoutf(CON_GAMEINFO, "\f2respawn point set!");
+                conoutf(CON_GAMEINFO, GAME_LANG ? "\f2Respawn point set!" : "\f2Point de réapparition mis à jour !");
                 playsound(S_NULL);
                 break;
 

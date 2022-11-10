@@ -1056,7 +1056,8 @@ static inline bool octacollide(physent *d, const vec &dir, float cutoff, const i
             switch(c[i].material&MATF_CLIP)
             {
                 case MAT_NOCLIP: continue;
-                case MAT_CLIP: if(isclipped(c[i].material&MATF_VOLUME) || d->type==ENT_PLAYER || d->type==ENT_AI) solid = true; break;
+                case MAT_GAMECLIP: if(d->type==ENT_AI) solid = true; break;
+                case MAT_CLIP: if(isclipped(c[i].material&MATF_VOLUME) || d->type==ENT_PLAYER) solid = true; break;
             }
             if(!solid && isempty(c[i])) continue;
             if(cubecollide(d, dir, cutoff, c[i], o, size, solid)) return true;
@@ -1085,6 +1086,7 @@ static inline bool octacollide(physent *d, const vec &dir, float cutoff, const i
     switch(c->material&MATF_CLIP)
     {
         case MAT_NOCLIP: return false;
+        case MAT_GAMECLIP: if(d->type==ENT_AI) solid = true; break;
         case MAT_CLIP: if(isclipped(c->material&MATF_VOLUME) || d->type==ENT_PLAYER || d->type==ENT_AI) solid = true; break;
     }
     if(!solid && isempty(*c)) return false;
@@ -1409,7 +1411,7 @@ bool move(physent *d, vec &dir)
     bool collided = false, slidecollide = false;
     vec obstacle;
     d->o.add(dir);
-    if(collide(d, dir) || ((d->type==ENT_AI) && !collide(d, vec(0, 0, 0), 0, false)))
+    if(collide(d, dir) || (d->type==ENT_AI && !collide(d, vec(0, 0, 0), 0, false)))
     {
         obstacle = collidewall;
         /* check to see if there is an obstacle that would prevent this one from being used as a floor (or ceiling bump) */

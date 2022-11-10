@@ -1,5 +1,6 @@
-// monster.h: implements AI for single player monsters, currently client only
+// pimped old monster.h from sauerbraten: implements AI for single player monsters, currently client only
 #include "game.h"
+#include "ccheader.h"
 
 extern int physsteps;
 
@@ -15,13 +16,13 @@ namespace game
         short gun, speed, health, freq, lag, rate, pain, loyalty, bscale, weight;
         bool friendly;
         short painsound, diesound;
-        const char *name, *mdlname, *vwepname;
+        const char *name, *mdlname, *shieldname, *boost1modelname, *boost2modelname;
     };
 
     static const pnjtype pnjtypes[NUMMONSTERTYPES] =
-    {   //weapon   speed  health  freq  lag  rate  painlag  loyality  bscale  weight  friendly  painsound     diesound      name        modeldir    gunmodeldir
-        { GUN_SMAW, 18,   70,     2,    70,  10,  400,      2,        10,     50,     true,     S_FAUCHEUSE,  S_FIREWORKS,  "un test",  "pnj/hap",  ""},
-        { GUN_SMAW, 18,   70,     2,    70,  10,  400,      2,        10,     50,     false,    S_FAUCHEUSE,  S_FIREWORKS,  "un test",  "pnj/hap",  ""},
+    {   //weapon      speed  healthx10  freq  lag  rate  painlag  loyality  bscale  weight  friendly  painsound   diesound   name           modeldir      shieldmodeldir          boost1modeldir   boost2modeldir
+        { GUN_S_NUKE, 18,    2500,      2,    30,   5,   100,     100,      12,     85,     true,     S_NULL,     S_NULL,    "Jean Onche",  "pnj/jo",     "worldshield/or/100",   NULL,            NULL},
+        { GUN_GLOCK,  10,    1000,      1,     5,  10,   200,     1,         5,     30,     false,    S_NULL,     S_NULL,    "un Kévin",    "pnj/kevin",  "worldshield/bois/20",  NULL,            NULL},
     };
 
     VAR(skill, 1, 3, 10);
@@ -119,7 +120,19 @@ namespace game
                 if(targetyaw>yaw) yaw = targetyaw;
             }
             float dist = enemy->o.dist(o);
-            if(monsterstate!=M_SLEEP) pitch = asin((enemy->o.z - o.z) / dist) / RAD;
+
+            switch(monsterstate)
+            {
+                case M_FRIENDLY:
+                case M_SEARCH:
+                case M_ATTACKING:
+                case M_AIMING:
+                    pitch = asin((enemy->o.z - o.z) / dist) / RAD;
+                    pitch < -45 ? pitch = -45 : pitch > 45 ? pitch = 45 : pitch;
+                    break;
+                default:
+                    pitch < 0 ? pitch++ : pitch > 0 ? pitch-- : pitch;
+            }
 
             if(blocked)                                                              // special case: if we run into scenery
             {
@@ -139,9 +152,15 @@ namespace game
 
             switch(monsterstate)
             {
-                case M_FRIEND:
+                case M_FRIENDLY: targetyaw = enemyyaw; break;
+
+                case M_NEUTRAL: if(trigger+10000<lastmillis) transition(M_FRIENDLY, 1, 100, 200); break;
+
+                case M_ANGRY:
                     {
                         targetyaw = enemyyaw;
+                        transition(M_ATTACKING, 0, 200, 200);
+                        if(trigger+5000<lastmillis) transition(M_NEUTRAL, 1, 100, 200);
                     }
                     break;
 
@@ -166,7 +185,7 @@ namespace game
                         vec target;
                         if(raycubelos(o, enemy->o, target))
                         {
-                            transition(friendly ? M_FRIEND : M_HOME, 1, 500, 200); //
+                            transition(friendly ? M_FRIENDLY : M_SEARCH, 1, 500, 200); //
                             playsound(S_NULL, &o);
                         }
                     }
@@ -229,7 +248,7 @@ namespace game
                 }
 
                 if(physsteps > 0) stacked = NULL;
-                moveplayer(this, 1, true, curtime, 0, 0, 0, 0, 0);        // use physics to move monster
+                moveplayer(this, 1, true, curtime, 0, 0, 0, 0, false);        // use physics to move monster
             }
         }
 
@@ -237,6 +256,7 @@ namespace game
         {
             if(d->type==ENT_AI)     // a monster hit us
             {
+                if(friendly) return;
                 if(this!=d)            // guard for RL guys shooting themselves :)
                 {
                     anger++;     // don't attack straight away, first get angry
@@ -246,6 +266,13 @@ namespace game
             }
             else if(d->type==ENT_PLAYER) // player hit us
             {
+                if(friendly)
+                {
+                    if(this->monsterstate==M_FRIENDLY) transition(M_NEUTRAL, 1, pnjtypes[mtype].rate, 200);       //if you mess with a friendly pnj, he gets neutral for a moment
+                    else if(this->monsterstate==M_NEUTRAL) transition(M_ANGRY, 1, pnjtypes[mtype].rate, 200);    //if you mess with a neutral pnj, he gets aggressive
+                    return;
+                }
+
                 anger = 0;
                 enemy = d;
                 monsterhurt = true;
@@ -388,7 +415,7 @@ namespace game
     }
 
     const char *stnames[M_MAX] = {
-        "none", "searching", "home", "attacking", "in pain", "sleeping", "aiming", "friendly"
+        "none", "searching", "home", "attacking", "in pain", "sleeping", "aiming", "friendly", "neutral", "angry"
     };
 
     VAR(dbgpnj, 0, 0, 1);
@@ -406,18 +433,6 @@ namespace game
         particle_textcopy(pos, s2, PART_TEXT, 1);
     }
 
-    void renderpnj(gameent *d, const char *mdl, int basetime, int flags = 0, bool mainpass = true)
-    {
-        modelattach a[2];
-        //int ai = 0;
-
-        float yaw = d->yaw,
-              pitch = d->pitch;
-        vec o = d->feetpos();
-
-        rendermodel(mdl, ANIM_SHOOT, o, yaw, pitch, 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY, d, a[0].tag ? a : NULL, basetime, 0, 1.f);
-    }
-
     void rendermonsters()
     {
         loopv(monsters)
@@ -425,11 +440,34 @@ namespace game
             monster &m = *monsters[i];
             if(m.state!=CS_DEAD || lastmillis-m.lastpain<10000)
             {
-                modelattach vwep[2];
-                vwep[0] = modelattach("tag_weapon", pnjtypes[m.mtype].vwepname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+                float yaw = m.yaw,
+                      pitch = m.pitch;
+                vec o = m.feetpos();
+
                 float fade = 1;
-                if(m.state==CS_DEAD) fade -= clamp(float(lastmillis - (m.lastpain + 9000))/1000, 0.0f, 1.0f);
-                renderpnj(&m, pnjtypes[m.mtype].mdlname, m.lastaction, 0);
+                if(m.state==CS_DEAD)
+                {
+                    o.add(vec(0, 0, -1.5f/nbfps));
+                    fade -= clamp(float(lastmillis - (m.lastpain + 9000))/1000, 0.0f, 1.0f);
+                }
+
+                modelattach a[10];
+                int ai = 0;
+
+                a[ai++] = modelattach("tag_weapon", guns[m.gunselect].vwep, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+
+                if(guns[m.gunselect].vwep)
+                {
+                    m.muzzle = vec(-1, -1, -1);
+                    a[ai++] = modelattach("tag_muzzle", &m.muzzle);
+                    a[ai++] = modelattach("tag_balles", &m.balles);
+                }
+
+                if(pnjtypes[m.mtype].shieldname) a[ai++] = modelattach("tag_shield", pnjtypes[m.mtype].shieldname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+                if(pnjtypes[m.mtype].boost1modelname) a[ai++] = modelattach("tag_boost1", pnjtypes[m.mtype].boost1modelname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+                if(pnjtypes[m.mtype].boost2modelname) a[ai++] = modelattach("tag_boost2", pnjtypes[m.mtype].boost2modelname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+
+                rendermodel(pnjtypes[m.mtype].mdlname, ANIM_SHOOT, o, yaw, pitch, 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY, &m, a[0].tag ? a : NULL, 0, 0, fade);
                 if(dbgpnj) debugpnj(&m);
             }
         }
@@ -442,7 +480,7 @@ namespace game
 
     void hitmonster(int damage, monster *m, gameent *at, const vec &vel, int atk)
     {
-        if(m->friendly) return;
+        //if(m->friendly) return;
         m->monsterpain(damage, at, atk);
     }
 
