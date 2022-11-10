@@ -711,8 +711,6 @@ namespace game
             aname = colorname(actor, NULL, GAME_LANG ? "\fdYou" : "\fdTu", "\fc");
         }
 
-        if(actor->type==ENT_AI) conoutf(contype, "\f2%s got killed by %s!", dname, aname);
-
         if(d==actor || atk==-1) // Suicide ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
             conoutf(contype, "%s%s %s%s%s", d==player1 ? "\fd" : "", dname, GAME_LANG ? "" : d==player1 ? "t'es " : "s'est ", GAME_LANG ? partmessageEN[rnd(2)].partsuicide : partmessageFR[rnd(5)].partsuicide, d==player1 ? " !" : ".");

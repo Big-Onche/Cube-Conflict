@@ -1411,7 +1411,7 @@ bool move(physent *d, vec &dir)
     bool collided = false, slidecollide = false;
     vec obstacle;
     d->o.add(dir);
-    if(collide(d, dir) || (d->type==ENT_AI && !collide(d, vec(0, 0, 0), 0, false)))
+    if(collide(d, dir) || (d->type==ENT_AI && collide(d, vec(0, 0, 0), 0, false)))
     {
         obstacle = collidewall;
         /* check to see if there is an obstacle that would prevent this one from being used as a floor (or ceiling bump) */
@@ -1459,6 +1459,7 @@ bool move(physent *d, vec &dir)
     if(slide || (!collided && floor.z > 0 && floor.z < WALLZ))
     {
         slideagainst(d, dir, slide ? obstacle : floor, found, slidecollide);
+        //if(d->type == ENT_AI || d->type == ENT_INANIMATE)
         d->blocked = true;
     }
     if(found) landing(d, dir, floor, collided);

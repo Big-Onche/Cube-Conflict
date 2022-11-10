@@ -22,7 +22,7 @@ namespace game
     static const pnjtype pnjtypes[NUMMONSTERTYPES] =
     {   //weapon      speed  healthx10  freq  lag  rate  painlag  triggerdist  loyality  bscale  weight  friendly  painsound   diesound   name           modeldir      shieldmodeldir          boost1modeldir   boost2modeldir
         { GUN_S_NUKE, 18,    2500,      2,    30,   5,   100,     128,          100,      12,     85,     true,     S_NULL,     S_NULL,    "Jean Onche",  "pnj/jo",     "worldshield/or/100",   NULL,            NULL},
-        { GUN_GLOCK,  10,    1000,      1,     5,  10,   200,     128,          1,         5,     30,     false,    S_NULL,     S_NULL,    "un Kévin",    "pnj/kevin",  "worldshield/bois/20",  NULL,            NULL},
+        { GUN_CAC349, 10,    1000,      1,     5,  10,   200,     128,          1,         5,     30,     false,    S_NULL,     S_NULL,    "un Kévin",    "pnj/kevin",  "worldshield/bois/20",  NULL,            NULL},
     };
 
     VAR(skill, 1, 3, 10);
@@ -46,6 +46,8 @@ namespace game
 
         physent *stacked;
         vec stackpos;
+        vec spawnpos;
+        int spawnyaw;
 
         monster(int _type, int _yaw, int _pitch, int _tag, int _state, int _trigger, int _move) :
             monsterstate(_state), tag(_tag),
@@ -70,7 +72,7 @@ namespace game
             weight = t.weight;
             if(_state!=M_SLEEP) spawnplayer(this);
             trigger = lastmillis+_trigger;
-            targetyaw = yaw = (float)_yaw;
+            targetyaw = spawnyaw = yaw = (float)_yaw;
             targetpitch = pitch = (float)_pitch;
             move = _move;
             enemy = player1;
@@ -119,7 +121,7 @@ namespace game
 
             float dist = enemy->o.dist(o);
 
-            if(dist < pnjtypes[mtype].triggerdist*(friendly ? 4 : 0))
+            if(dist < pnjtypes[mtype].triggerdist*(friendly ? 4 : 2))
             {
                 normalize_yaw(targetyaw);
                 if(targetyaw>yaw)             // slowly turn monster towards his target
@@ -163,7 +165,7 @@ namespace game
                 {
                     jumping = true;
                 }
-                else if(trigger<lastmillis && (monsterstate!=M_HOME || !rnd(5)))    // search for a way around (common)
+                else if(trigger<lastmillis && (monsterstate!=M_AGGRO || !rnd(5)) && (monsterstate!=M_RETREAT || !rnd(5)))    // search for a way around (common)
                 {
                     targetyaw += 90+rnd(180);                                       // patented "random walk" AI pathfinding (tm) ;)
                     transition(M_SEARCH, 1, 100, 1000);
@@ -186,18 +188,19 @@ namespace game
 
                 case M_FRIENDLY:
                     if(dist < pnjtypes[mtype].triggerdist) targetyaw = enemyyaw;
-                    else targetyaw = 0;
+                    else targetyaw = spawnyaw;
                     break;
 
                 case M_PAIN:
                 case M_ATTACKING:
                 case M_SEARCH:
-                    if(trigger<lastmillis) transition(M_HOME, 1, 100, 200);
+                    if(trigger<lastmillis) transition(M_AGGRO, 1, 100, 200);
                     break;
 
                 case M_SLEEP:                       // state classic sp monster start in, wait for visual contact
                 {
                     if(editmode) break;
+
                     normalize_yaw(enemyyaw);
                     float angle = (float)fabs(enemyyaw-yaw);
                     int trigdist = dist*(player1->crouched() ? 2 : 1);            // if player1 is crouched, minimal trigger distance is reduced by 2
@@ -205,7 +208,6 @@ namespace game
                     ||(trigdist < pnjtypes[mtype].triggerdist/4 && angle<135)
                     ||(trigdist < pnjtypes[mtype].triggerdist/2 && angle<90)
                     ||(trigdist < pnjtypes[mtype].triggerdist && angle<45)
-                    || angle<10
                     || (monsterhurt && o.dist(monsterhurtpos) < pnjtypes[mtype].triggerdist/2))
                     {
                         vec target;
@@ -228,14 +230,26 @@ namespace game
                     }
                     break;
 
-                case M_HOME:                        // monster has visual contact, heads straight for player and may want to shoot at any time
+                case M_RETREAT:
+                    if(trigger<lastmillis)
+                    {
+                        targetyaw = -atan2(spawnpos.x - o.x, spawnpos.y - o.y)/RAD;
+                        transition(M_RETREAT, 1, pnjtypes[mtype].rate, 0);
+                        if(o.dist(spawnpos)<10) {targetyaw = spawnyaw; transition(M_SLEEP, 0, 600, 0);}
+                    }
+                    break;
+
+                case M_AGGRO:                        // monster has visual contact, heads straight for player and may want to shoot at any time
                     targetyaw = enemyyaw;
+
+                    if(dist > pnjtypes[mtype].triggerdist) {transition(friendly ? M_NEUTRAL : M_RETREAT, 0, 600, 0); break;}
+
                     if(trigger<lastmillis)
                     {
                         vec target;
                         if(!raycubelos(o, enemy->o, target))    // no visual contact anymore, let monster get as close as possible then search for player
                         {
-                            transition(M_HOME, 1, 800, 500);
+                            transition(M_AGGRO, 1, 800, 500);
                         }
                         else
                         {
@@ -253,7 +267,7 @@ namespace game
                             }
                             else                                                        // track player some more
                             {
-                                transition(M_HOME, 1, pnjtypes[mtype].rate, 0);
+                                transition(M_AGGRO, 1, pnjtypes[mtype].rate, 0);
                             }
                         }
                     }
@@ -263,8 +277,6 @@ namespace game
 
             if(move || maymove() || (stacked && (stacked->state!=CS_ALIVE || stackpos != stacked->o)))
             {
-                if(this->friendly) return;
-
                 vec pos = feetpos();
                 loopv(teleports) // equivalent of player entity touch, but only teleports are used
                 {
@@ -274,7 +286,8 @@ namespace game
                 }
 
                 if(physsteps > 0) stacked = NULL;
-                moveplayer(this, 1, true, curtime, 0, 0, 0, 0, false);        // use physics to move monster
+                if(this->monsterstate==M_FRIENDLY || this->monsterstate==M_NEUTRAL) return;
+                moveplayer(this, 10, true, curtime, 0, 0, 0, 0, false);        // use physics to move monster
             }
         }
 
@@ -294,7 +307,7 @@ namespace game
             {
                 if(friendly)
                 {
-                    if(this->monsterstate==M_FRIENDLY) transition(M_NEUTRAL, 1, pnjtypes[mtype].rate, 200);       //if you mess with a friendly pnj, he gets neutral for a moment
+                    if(this->monsterstate==M_FRIENDLY) transition(M_NEUTRAL, 1, pnjtypes[mtype].rate, 200);      //if you mess with a friendly pnj, he gets neutral for a moment
                     else if(this->monsterstate==M_NEUTRAL) transition(M_ANGRY, 1, pnjtypes[mtype].rate, 200);    //if you mess with a neutral pnj, he gets aggressive
                     return;
                 }
@@ -381,6 +394,7 @@ namespace game
                 monster *m = new monster(e.attr1, e.attr2, e.attr3, e.attr4, M_SLEEP, 100, 0);
                 monsters.add(m);
                 m->o = e.o;
+                m->spawnpos = e.o;
                 entinmap(m);
                 updatedynentcache(m);
                 monstertotal++;
@@ -407,7 +421,6 @@ namespace game
         numkilled++;
         player1->frags = numkilled;
         remain = monstertotal-numkilled;
-        if(remain>0 && remain<=5) conoutf(CON_GAMEINFO, "\f2only %d monster(s) remaining", remain);
     }
 
     void updatemonsters(int curtime)
@@ -430,9 +443,9 @@ namespace game
             {
                 if(lastmillis-monsters[i]->lastpain<2000)
                 {
-                    //monsters[i]->move = 0;
                     monsters[i]->move = monsters[i]->strafe = 0;
-                    moveplayer(monsters[i], 1, true, curtime, 0, 0, 0 , 0, false);
+                    if(monsters[i]->monsterstate==M_FRIENDLY || monsters[i]->monsterstate==M_NEUTRAL) return;
+                    moveplayer(monsters[i], 10, true, curtime, 0, 0, 0 , 0, false);
                 }
             }
         }
@@ -441,7 +454,7 @@ namespace game
     }
 
     const char *stnames[M_MAX] = {
-        "none", "searching", "home", "attacking", "in pain", "sleeping", "aiming", "friendly", "neutral", "angry"
+        "none", "searching", "aggro", "retreat", "attacking", "in pain", "sleeping", "aiming", "friendly", "neutral", "angry"
     };
 
     VAR(dbgpnj, 0, 0, 1);
@@ -451,12 +464,16 @@ namespace game
         vec pos = m->abovehead();
 
         pos.z += 2;
-        defformatstring(s1, "friendly? %s", m->friendly ? "yes" : "no");
+        defformatstring(s1, "health: %d - %s", m->health, m->health>0 ? "alive" : "dead");
         particle_textcopy(pos, s1, PART_TEXT, 1);
 
         pos.z += 2;
         defformatstring(s2, "state: %s", stnames[m->monsterstate]);
         particle_textcopy(pos, s2, PART_TEXT, 1);
+
+        pos.z += 2;
+        defformatstring(s3, "friendly? %s", m->friendly ? "yes" : "no");
+        particle_textcopy(pos, s3, PART_TEXT, 1);
     }
 
     void rendermonsters()
@@ -471,16 +488,19 @@ namespace game
                 vec o = m.feetpos();
 
                 float fade = 1;
-                if(m.state==CS_DEAD)
-                {
-                    o.add(vec(0, 0, -1.5f/nbfps));
-                    fade -= clamp(float(lastmillis - (m.lastpain + 9000))/1000, 0.0f, 1.0f);
-                }
+                if(m.state==CS_DEAD) fade -= clamp(float(lastmillis - (m.lastpain + 9000))/1000, 0.0f, 1.0f);
 
                 modelattach a[10];
                 int ai = 0;
 
-                a[ai++] = modelattach("tag_weapon", guns[m.gunselect].vwep, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+                int vanim = ANIM_VWEP_IDLE|ANIM_LOOP, vtime = 0;
+                if(m.lastaction && m.lastattack >= 0 && attacks[m.lastattack].gun==m.gunselect && lastmillis < m.lastaction+250)
+                {
+                    vanim = attacks[m.lastattack].vwepanim;
+                    vtime = m.lastaction;
+                }
+
+                a[ai++] = modelattach("tag_weapon", guns[m.gunselect].vwep, vanim, vtime);
 
                 if(guns[m.gunselect].vwep)
                 {
