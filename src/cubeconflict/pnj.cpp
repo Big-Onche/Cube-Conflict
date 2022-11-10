@@ -8,18 +8,20 @@ namespace game
     static vector<int> teleports;
 
     static const int TOTMFREQ = 14;
-    static const int NUMMONSTERTYPES = 1;
+    static const int NUMMONSTERTYPES = 2;
 
-    struct monstertype      // see docs for how these values modify behaviour
+    struct pnjtype      // see docs for how these values modify behaviour
     {
         short gun, speed, health, freq, lag, rate, pain, loyalty, bscale, weight;
+        bool friendly;
         short painsound, diesound;
         const char *name, *mdlname, *vwepname;
     };
 
-    static const monstertype monstertypes[NUMMONSTERTYPES] =
-    {
-        { GUN_SMAW,        18,  70, 2, 70,   10, 400, 2, 10,  50, S_FAUCHEUSE, S_FIREWORKS,   "un test",     "pnj/burger",       ""},
+    static const pnjtype pnjtypes[NUMMONSTERTYPES] =
+    {   //weapon   speed  health  freq  lag  rate  painlag  loyality  bscale  weight  friendly  painsound     diesound      name        modeldir    gunmodeldir
+        { GUN_SMAW, 18,   70,     2,    70,  10,  400,      2,        10,     50,     true,     S_FAUCHEUSE,  S_FIREWORKS,  "un test",  "pnj/hap",  ""},
+        { GUN_SMAW, 18,   70,     2,    70,  10,  400,      2,        10,     50,     false,    S_FAUCHEUSE,  S_FIREWORKS,  "un test",  "pnj/hap",  ""},
     };
 
     VAR(skill, 1, 3, 10);
@@ -33,11 +35,13 @@ namespace game
         int monsterstate;                   // one of M_*, M_NONE means human
 
         int mtype, tag;                     // see monstertypes table
-        gameent *enemy;                      // monster wants to kill this entity
+        gameent *enemy;                     // monster wants to kill this entity
         float targetyaw;                    // monster wants to look in this direction
         int trigger;                        // millis at which transition to another monsterstate takes place
         vec attacktarget;                   // delayed attacks
         int anger;                          // how many times already hit by fellow monster
+        bool friendly;
+
         physent *stacked;
         vec stackpos;
 
@@ -54,7 +58,7 @@ namespace game
                 _type = 0;
             }
             mtype = _type;
-            const monstertype &t = monstertypes[mtype];
+            const pnjtype &t = pnjtypes[mtype];
             eyeheight = 8.0f;
             aboveeye = 7.0f;
             radius *= t.bscale/10.0f;
@@ -76,6 +80,7 @@ namespace game
             roll = 0;
             state = CS_ALIVE;
             anger = 0;
+            friendly = t.friendly;
             copystring(name, t.name);
         }
 
@@ -119,7 +124,7 @@ namespace game
             if(blocked)                                                              // special case: if we run into scenery
             {
                 blocked = false;
-                if(!rnd(20000/monstertypes[mtype].speed))                            // try to jump over obstackle (rare)
+                if(!rnd(20000/pnjtypes[mtype].speed))                            // try to jump over obstackle (rare)
                 {
                     jumping = true;
                 }
@@ -134,6 +139,12 @@ namespace game
 
             switch(monsterstate)
             {
+                case M_FRIEND:
+                    {
+                        targetyaw = enemyyaw;
+                    }
+                    break;
+
                 case M_PAIN:
                 case M_ATTACKING:
                 case M_SEARCH:
@@ -155,7 +166,7 @@ namespace game
                         vec target;
                         if(raycubelos(o, enemy->o, target))
                         {
-                            transition(M_HOME, 1, 500, 200);
+                            transition(friendly ? M_FRIEND : M_HOME, 1, 500, 200); //
                             playsound(S_NULL, &o);
                         }
                     }
@@ -184,7 +195,7 @@ namespace game
                         else
                         {
                             bool melee = false, longrange = false;
-                            switch(monstertypes[mtype].gun)
+                            switch(pnjtypes[mtype].gun)
                             {
                                 case GUN_CAC349: case GUN_CACFLEAU: case GUN_CACMARTEAU: case GUN_CACMASTER: case GUN_CACNINJA:
                                 case GUN_SV98: case GUN_SKS: case GUN_ARBALETE: longrange = true; break;
@@ -193,11 +204,11 @@ namespace game
                             if((!melee || dist<20) && !rnd(longrange ? (int)dist/12+1 : min((int)dist/12+1,6)) && enemy->state==CS_ALIVE)      // get ready to fire
                             {
                                 attacktarget = target;
-                                transition(M_AIMING, 0, monstertypes[mtype].lag, 10);
+                                transition(M_AIMING, 0, pnjtypes[mtype].lag, 10);
                             }
                             else                                                        // track player some more
                             {
-                                transition(M_HOME, 1, monstertypes[mtype].rate, 0);
+                                transition(M_HOME, 1, pnjtypes[mtype].rate, 0);
                             }
                         }
                     }
@@ -207,6 +218,8 @@ namespace game
 
             if(move || maymove() || (stacked && (stacked->state!=CS_ALIVE || stackpos != stacked->o)))
             {
+                if(this->friendly) return;
+
                 vec pos = feetpos();
                 loopv(teleports) // equivalent of player entity touch, but only teleports are used
                 {
@@ -228,7 +241,7 @@ namespace game
                 {
                     anger++;     // don't attack straight away, first get angry
                     int _anger = d->type==ENT_AI && mtype==((monster *)d)->mtype ? anger/2 : anger;
-                    if(_anger>=monstertypes[mtype].loyalty) enemy = d;     // monster infight if very angry
+                    if(_anger>=pnjtypes[mtype].loyalty) enemy = d;     // monster infight if very angry
                 }
             }
             else if(d->type==ENT_PLAYER) // player hit us
@@ -243,7 +256,7 @@ namespace game
             {
                 state = CS_DEAD;
                 lastpain = lastmillis;
-                playsound(monstertypes[mtype].diesound, &o);
+                playsound(pnjtypes[mtype].diesound, &o);
                 monsterkilled();
                 gibeffect(max(-health, 0), vel, this);
 
@@ -252,8 +265,8 @@ namespace game
             }
             else
             {
-                transition(M_PAIN, 0, monstertypes[mtype].pain, 200);      // in this state monster won't attack
-                playsound(monstertypes[mtype].painsound, &o);
+                transition(M_PAIN, 0, pnjtypes[mtype].pain, 200);      // in this state monster won't attack
+                playsound(pnjtypes[mtype].painsound, &o);
             }
         }
     };
@@ -274,7 +287,7 @@ namespace game
 
     void preloadmonsters()
     {
-        loopi(NUMMONSTERTYPES) preloadmodel(monstertypes[i].mdlname);
+        loopi(NUMMONSTERTYPES) preloadmodel(pnjtypes[i].mdlname);
     }
 
     vector<monster *> monsters;
@@ -284,7 +297,7 @@ namespace game
     void spawnmonster()     // spawn a random monster according to freq distribution in DMSP
     {
         int n = rnd(TOTMFREQ), type;
-        for(int i = 0; ; i++) if((n -= monstertypes[i].freq)<0) { type = i; break; }
+        for(int i = 0; ; i++) if((n -= pnjtypes[i].freq)<0) { type = i; break; }
         monsters.add(new monster(type, rnd(360), 0, M_SEARCH, 1000, 1));
     }
 
@@ -312,7 +325,7 @@ namespace game
             {
                 extentity &e = *entities::ents[i];
                 if(e.type!=MONSTER) continue;
-                monster *m = new monster(e.attr2, e.attr1, e.attr3, M_SLEEP, 100, 0);
+                monster *m = new monster(e.attr1, e.attr2, e.attr3, M_SLEEP, 100, 0);
                 monsters.add(m);
                 m->o = e.o;
                 entinmap(m);
@@ -374,6 +387,25 @@ namespace game
         if(monsterwashurt) monsterhurt = false;
     }
 
+    const char *stnames[M_MAX] = {
+        "none", "searching", "home", "attacking", "in pain", "sleeping", "aiming", "friendly"
+    };
+
+    VAR(dbgpnj, 0, 0, 1);
+
+    void debugpnj(monster *m)
+    {
+        vec pos = m->abovehead();
+
+        pos.z += 2;
+        defformatstring(s1, "friendly? %s", m->friendly ? "yes" : "no");
+        particle_textcopy(pos, s1, PART_TEXT, 1);
+
+        pos.z += 2;
+        defformatstring(s2, "state: %s", stnames[m->monsterstate]);
+        particle_textcopy(pos, s2, PART_TEXT, 1);
+    }
+
     void renderpnj(gameent *d, const char *mdl, int basetime, int flags = 0, bool mainpass = true)
     {
         modelattach a[2];
@@ -394,10 +426,11 @@ namespace game
             if(m.state!=CS_DEAD || lastmillis-m.lastpain<10000)
             {
                 modelattach vwep[2];
-                vwep[0] = modelattach("tag_weapon", monstertypes[m.mtype].vwepname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+                vwep[0] = modelattach("tag_weapon", pnjtypes[m.mtype].vwepname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
                 float fade = 1;
                 if(m.state==CS_DEAD) fade -= clamp(float(lastmillis - (m.lastpain + 9000))/1000, 0.0f, 1.0f);
-                renderpnj(&m, monstertypes[m.mtype].mdlname, m.lastaction, 0);
+                renderpnj(&m, pnjtypes[m.mtype].mdlname, m.lastaction, 0);
+                if(dbgpnj) debugpnj(&m);
             }
         }
     }
@@ -409,6 +442,7 @@ namespace game
 
     void hitmonster(int damage, monster *m, gameent *at, const vec &vel, int atk)
     {
+        if(m->friendly) return;
         m->monsterpain(damage, at, atk);
     }
 
