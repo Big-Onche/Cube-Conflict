@@ -597,16 +597,16 @@ namespace entities
                 case TRIGGER_RESET:
                     if(e.lasttrigger)
                     {
-                        if(checktriggertype(e.attr2, TRIG_AUTO_RESET|TRIG_MANY|TRIG_LOCKED) && e.o.dist(o)-player1->radius >= e.attr3)
+                        if(checktriggertype(e.attr2, TRIG_AUTO_RESET|TRIG_MANY|TRIG_LOCKED) && e.o.dist(o)-player1->radius>=(checktriggertype(e.attr2, TRIG_COLLIDE) ? 20 : e.attr3))
                             e.lasttrigger = 0;
+                        if(e.o.dist(o)-player1->radius>=(checktriggertype(e.attr2, TRIG_COLLIDE) ? 20 : e.attr3))
+                        {
+                            defformatstring(s, "trigger_leave_%d", e.attr1);
+                            execute(s);
+                        }
                         break;
                     }
-                    else if(e.o.dist(o)-player1->radius >= e.attr3)
-                    {
-                        if(lastmillis-e.lasttrigger>100 && checktriggertype(e.attr2, TRIG_OVER)) execute("dial_close");
-                        break;
-                    }
-
+                    else if(e.o.dist(o)-player1->radius>=(checktriggertype(e.attr2, TRIG_COLLIDE) ? 20 : e.attr3)) break;
                     else if(checktriggertype(e.attr2, TRIG_LOCKED))
                     {
                         if(!e.attr1) break;
@@ -622,7 +622,7 @@ namespace entities
                     if(e.attr1) doleveltrigger(e.attr1, 1);
                     break;
                 case TRIGGERED:
-                    if(e.o.dist(o)-player1->radius < e.attr3)
+                    if(e.o.dist(o)-player1->radius<(checktriggertype(e.attr2, TRIG_COLLIDE) ? 20 : e.attr3))
                     {
                         if(e.lasttrigger) break;
                     }
@@ -636,7 +636,7 @@ namespace entities
                         break;
                     }
                     else break;
-                    if(checktriggertype(e.attr2, TRIG_COLLIDE) && overlapsdynent(e.o, e.attr3)) break;
+                    if(checktriggertype(e.attr2, TRIG_COLLIDE) && overlapsdynent(e.o, 20)) break;
                     e.triggerstate = TRIGGER_RESETTING;
                     e.lasttrigger = lastmillis;
                     setuptriggerflags(e);

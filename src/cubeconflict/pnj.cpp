@@ -4,6 +4,8 @@
 
 extern int physsteps;
 
+VAR(pissoffnpc, 0, 0, 1);
+
 namespace game
 {
     static vector<int> teleports;
@@ -121,20 +123,20 @@ namespace game
 
             float dist = enemy->o.dist(o);
 
+            normalize_yaw(targetyaw);
+            if(targetyaw>yaw)             // slowly turn monster towards his target
+            {
+                yaw += curtime*(friendly ? 0.2f : 0.4f);
+                if(targetyaw<yaw) yaw = targetyaw;
+            }
+            else
+            {
+                yaw -= curtime*(friendly ? 0.2f : 0.4f);
+                if(targetyaw>yaw) yaw = targetyaw;
+            }
+
             if(dist < pnjtypes[mtype].triggerdist*(friendly ? 4 : 2))
             {
-                normalize_yaw(targetyaw);
-                if(targetyaw>yaw)             // slowly turn monster towards his target
-                {
-                    yaw += curtime*(friendly ? 0.15f : 0.4f);
-                    if(targetyaw<yaw) yaw = targetyaw;
-                }
-                else
-                {
-                    yaw -= curtime*(friendly ? 0.15f : 0.4f);
-                    if(targetyaw>yaw) yaw = targetyaw;
-                }
-
                 targetpitch < -45 ? targetpitch = -45 : targetpitch > 45 ? targetpitch = 45 : targetpitch;
                 normalize_pitch(targetpitch);
                 if(targetpitch>pitch)             // slowly turn monster towards his target
@@ -187,6 +189,11 @@ namespace game
                 case M_NEUTRAL: if(trigger+10000<lastmillis) transition(M_FRIENDLY, 1, 100, 200);
 
                 case M_FRIENDLY:
+                    if(pissoffnpc)
+                    {
+                        transition(M_ANGRY, 1, 100, 200);
+                        pissoffnpc = 0;
+                    }
                     if(dist < pnjtypes[mtype].triggerdist) targetyaw = enemyyaw;
                     else targetyaw = spawnyaw;
                     break;
@@ -286,7 +293,7 @@ namespace game
                 }
 
                 if(physsteps > 0) stacked = NULL;
-                if(this->monsterstate==M_FRIENDLY || this->monsterstate==M_NEUTRAL) return;
+                if(this->monsterstate!=M_SLEEP) return;
                 moveplayer(this, 10, true, curtime, 0, 0, 0, 0, false);        // use physics to move monster
             }
         }
@@ -444,7 +451,7 @@ namespace game
                 if(lastmillis-monsters[i]->lastpain<2000)
                 {
                     monsters[i]->move = monsters[i]->strafe = 0;
-                    if(monsters[i]->monsterstate==M_FRIENDLY || monsters[i]->monsterstate==M_NEUTRAL) return;
+                    if(monsters[i]->monsterstate!=M_SLEEP) return;
                     moveplayer(monsters[i], 10, true, curtime, 0, 0, 0 , 0, false);
                 }
             }
@@ -526,7 +533,6 @@ namespace game
 
     void hitmonster(int damage, monster *m, gameent *at, const vec &vel, int atk)
     {
-        //if(m->friendly) return;
         m->monsterpain(damage, at, atk);
     }
 
