@@ -42,7 +42,7 @@ namespace entities
 
             "objets/teleporteur",
 
-            NULL, NULL, NULL, NULL, NULL,
+            NULL, NULL, NULL, NULL, NULL, NULL, NULL,
         };
         return entmdlnames[type];
     }
@@ -87,10 +87,11 @@ namespace entities
         loopv(ents)
         {
             extentity &e = *ents[i];
-            int revs = 10;
+            int revs = player1->champimillis ? 2 : 10;
             switch(e.type)
             {
                 case TELEPORT:
+                case RESPAWNPOINT:
                     if(e.attr2 < 0) continue;
                     break;
                 default:
@@ -322,8 +323,7 @@ namespace entities
             }
 
             case RESPAWNPOINT:
-                if(d!=player1) break;
-                if(n==respawnent) break;
+                if(!m_classicsp || d!=player1 || n==respawnent) break;
                 respawnent = n;
                 conoutf(CON_GAMEINFO, GAME_LANG ? "\f2Respawn point set!" : "\f2Point de réapparition mis à jour !");
                 playsound(S_NULL);
@@ -453,7 +453,8 @@ namespace entities
         TRIG_AUTO_RESET = 1<<4,
         TRIG_RUMBLE     = 1<<5,
         TRIG_LOCKED     = 1<<6,
-        TRIG_ENDSP      = 1<<7
+        TRIG_OVER       = 1<<7,
+        TRIG_ENDSP      = 1<<8
     };
 
     static const int NUMTRIGGERTYPES = 32;
@@ -475,7 +476,7 @@ namespace entities
         TRIG_DISAPPEAR,               // 12
         TRIG_DISAPPEAR | TRIG_RUMBLE, // 13
         TRIG_DISAPPEAR | TRIG_COLLIDE | TRIG_LOCKED, // 14
-        -1 /* reserved 15 */,
+        TRIG_AUTO_RESET | TRIG_OVER,        // 15
         -1 /* reserved 16 */,
         -1 /* reserved 17 */,
         -1 /* reserved 18 */,
@@ -497,18 +498,24 @@ namespace entities
     #define validtrigger(type) (triggertypes[(type) & (NUMTRIGGERTYPES-1)]>=0)
     #define checktriggertype(type, flag) (triggertypes[(type) & (NUMTRIGGERTYPES-1)] & (flag))
 
+    static inline void cleartriggerflags(extentity &e)
+    {
+        e.flags &= ~(EF_ANIM | EF_NOVIS | EF_NOSHADOW | EF_NOCOLLIDE);
+    }
+
     static inline void setuptriggerflags(gameentity &e)
     {
+        cleartriggerflags(e);
         e.flags = EF_ANIM;
-        if(checktriggertype(e.attr3, TRIG_COLLIDE|TRIG_DISAPPEAR)) e.flags |= EF_NOSHADOW;
-        if(!checktriggertype(e.attr3, TRIG_COLLIDE)) e.flags |= EF_NOCOLLIDE;
+        if(checktriggertype(e.attr2, TRIG_COLLIDE|TRIG_DISAPPEAR)) e.flags |= EF_NOSHADOW;
+        if(!checktriggertype(e.attr2, TRIG_COLLIDE)) e.flags |= EF_NOCOLLIDE;
         switch(e.triggerstate)
         {
             case TRIGGERING:
-                if(checktriggertype(e.attr3, TRIG_COLLIDE) && lastmillis-e.lasttrigger >= 500) e.flags |= EF_NOCOLLIDE;
+                if(checktriggertype(e.attr2, TRIG_COLLIDE) && lastmillis-e.lasttrigger >= 500) e.flags |= EF_NOCOLLIDE;
                 break;
             case TRIGGERED:
-                if(checktriggertype(e.attr3, TRIG_COLLIDE)) e.flags |= EF_NOCOLLIDE;
+                if(checktriggertype(e.attr2, TRIG_COLLIDE)) e.flags |= EF_NOCOLLIDE;
                 break;
             case TRIGGER_DISAPPEARED:
                 e.flags |= EF_NOVIS | EF_NOCOLLIDE;
@@ -521,7 +528,7 @@ namespace entities
         loopv(ents)
         {
             gameentity &e = *(gameentity *)ents[i];
-            if(e.type != ET_MAPMODEL || !validtrigger(e.attr3)) continue;
+            if(e.type != TRIGGER_ZONE || !validtrigger(e.attr2)) continue;
             e.triggerstate = TRIGGER_RESET;
             e.lasttrigger = 0;
             setuptriggerflags(e);
@@ -533,13 +540,13 @@ namespace entities
         loopv(ents)
         {
             gameentity &e = *(gameentity *)ents[i];
-            if(e.type != ET_MAPMODEL || !validtrigger(e.attr3)) continue;
-            if(e.attr4 == tag && e.triggerstate == oldstate && checktriggertype(e.attr3, TRIG_LOCKED))
+            if(e.type != TRIGGER_ZONE || !validtrigger(e.attr2)) continue;
+            if(e.attr1 == tag && e.triggerstate == oldstate && checktriggertype(e.attr2, TRIG_LOCKED))
             {
-                if(newstate == TRIGGER_RESETTING && checktriggertype(e.attr3, TRIG_COLLIDE) && overlapsdynent(e.o, 20)) continue;
+                if(newstate == TRIGGER_RESETTING && checktriggertype(e.attr2, TRIG_COLLIDE) && overlapsdynent(e.o, 20)) continue;
                 e.triggerstate = newstate;
                 e.lasttrigger = lastmillis;
-                if(checktriggertype(e.attr3, TRIG_RUMBLE)) playsound(S_NULL, &e.o);
+                if(checktriggertype(e.attr2, TRIG_RUMBLE)) playsound(S_NULL, &e.o);
             }
         }
     }
@@ -569,20 +576,20 @@ namespace entities
         loopv(ents)
         {
             gameentity &e = *(gameentity *)ents[i];
-            if(e.type != ET_MAPMODEL || !validtrigger(e.attr3)) continue;
+            if(e.type != TRIGGER_ZONE || !validtrigger(e.attr2)) continue;
             switch(e.triggerstate)
             {
                 case TRIGGERING:
                 case TRIGGER_RESETTING:
                     if(lastmillis-e.lasttrigger>=1000)
                     {
-                        if(e.attr4)
+                        if(e.attr1)
                         {
-                            if(e.triggerstate == TRIGGERING) unlocktriggers(e.attr4);
-                            else unlocktriggers(e.attr4, TRIGGERED, TRIGGER_RESETTING);
+                            if(e.triggerstate == TRIGGERING) unlocktriggers(e.attr1);
+                            else unlocktriggers(e.attr1, TRIGGERED, TRIGGER_RESETTING);
                         }
-                        if(checktriggertype(e.attr3, TRIG_DISAPPEAR)) e.triggerstate = TRIGGER_DISAPPEARED;
-                        else if(e.triggerstate==TRIGGERING && checktriggertype(e.attr3, TRIG_TOGGLE)) e.triggerstate = TRIGGERED;
+                        if(checktriggertype(e.attr2, TRIG_DISAPPEAR)) e.triggerstate = TRIGGER_DISAPPEARED;
+                        else if(e.triggerstate==TRIGGERING && checktriggertype(e.attr2, TRIG_TOGGLE)) e.triggerstate = TRIGGERED;
                         else e.triggerstate = TRIGGER_RESET;
                     }
                     setuptriggerflags(e);
@@ -590,47 +597,52 @@ namespace entities
                 case TRIGGER_RESET:
                     if(e.lasttrigger)
                     {
-                        if(checktriggertype(e.attr3, TRIG_AUTO_RESET|TRIG_MANY|TRIG_LOCKED) && e.o.dist(o)-player1->radius>=(checktriggertype(e.attr3, TRIG_COLLIDE) ? 20 : 12))
+                        if(checktriggertype(e.attr2, TRIG_AUTO_RESET|TRIG_MANY|TRIG_LOCKED) && e.o.dist(o)-player1->radius >= e.attr3)
                             e.lasttrigger = 0;
                         break;
                     }
-                    else if(e.o.dist(o)-player1->radius>=(checktriggertype(e.attr3, TRIG_COLLIDE) ? 20 : 12)) break;
-                    else if(checktriggertype(e.attr3, TRIG_LOCKED))
+                    else if(e.o.dist(o)-player1->radius >= e.attr3)
                     {
-                        if(!e.attr4) break;
-                        doleveltrigger(e.attr4, -1);
+                        if(lastmillis-e.lasttrigger>100 && checktriggertype(e.attr2, TRIG_OVER)) execute("dial_close");
+                        break;
+                    }
+
+                    else if(checktriggertype(e.attr2, TRIG_LOCKED))
+                    {
+                        if(!e.attr1) break;
+                        doleveltrigger(e.attr1, -1);
                         e.lasttrigger = lastmillis;
                         break;
                     }
                     e.triggerstate = TRIGGERING;
                     e.lasttrigger = lastmillis;
                     setuptriggerflags(e);
-                    if(checktriggertype(e.attr3, TRIG_RUMBLE)) playsound(S_NULL, &e.o);
-                    if(checktriggertype(e.attr3, TRIG_ENDSP)) endsp(false);
-                    if(e.attr4) doleveltrigger(e.attr4, 1);
+                    if(checktriggertype(e.attr2, TRIG_RUMBLE)) playsound(S_NULL, &e.o);
+                    if(checktriggertype(e.attr2, TRIG_ENDSP)) endsp(false);
+                    if(e.attr1) doleveltrigger(e.attr1, 1);
                     break;
                 case TRIGGERED:
-                    if(e.o.dist(o)-player1->radius<(checktriggertype(e.attr3, TRIG_COLLIDE) ? 20 : 12))
+                    if(e.o.dist(o)-player1->radius < e.attr3)
                     {
                         if(e.lasttrigger) break;
                     }
-                    else if(checktriggertype(e.attr3, TRIG_AUTO_RESET))
+                    else if(checktriggertype(e.attr2, TRIG_AUTO_RESET))
                     {
                         if(lastmillis-e.lasttrigger<6000) break;
                     }
-                    else if(checktriggertype(e.attr3, TRIG_MANY))
+                    else if(checktriggertype(e.attr2, TRIG_MANY))
                     {
                         e.lasttrigger = 0;
                         break;
                     }
                     else break;
-                    if(checktriggertype(e.attr3, TRIG_COLLIDE) && overlapsdynent(e.o, 20)) break;
+                    if(checktriggertype(e.attr2, TRIG_COLLIDE) && overlapsdynent(e.o, e.attr3)) break;
                     e.triggerstate = TRIGGER_RESETTING;
                     e.lasttrigger = lastmillis;
                     setuptriggerflags(e);
-                    if(checktriggertype(e.attr3, TRIG_RUMBLE)) playsound(S_NULL, &e.o);
-                    if(checktriggertype(e.attr3, TRIG_ENDSP)) endsp(false);
-                    if(e.attr4) doleveltrigger(e.attr4, 0);
+                    if(checktriggertype(e.attr2, TRIG_RUMBLE)) playsound(S_NULL, &e.o);
+                    if(checktriggertype(e.attr2, TRIG_ENDSP)) endsp(false);
+                    if(e.attr1) doleveltrigger(e.attr1, 0);
                     break;
             }
         }
@@ -639,7 +651,7 @@ namespace entities
     void animatemapmodel(const extentity &e, int &anim, int &basetime)
     {
         const gameentity &f = (const gameentity &)e;
-        if(validtrigger(f.attr3)) switch(f.triggerstate)
+        if(validtrigger(f.attr2)) switch(f.triggerstate)
         {
             case TRIGGER_RESET: anim = ANIM_TRIGGER|ANIM_START; break;
             case TRIGGERING: anim = ANIM_TRIGGER; basetime = f.lasttrigger; break;
@@ -687,6 +699,9 @@ namespace entities
                 renderentarrow(e, dir, 4);
                 break;
             }
+            case TRIGGER_ZONE:
+                if(validtrigger(e.attr2)) renderentring(e, e.attr3);
+                break;
         }
     }
 
@@ -713,7 +728,7 @@ namespace entities
 
             "teleport", "teledest", "jumppad", "flag", "base",
 
-            "pnj", "respawn"
+            "pnj", "respawn", "trigger",
         };
         return i>=0 && size_t(i)<sizeof(entnames)/sizeof(entnames[0]) ? entnames[i] : "";
     }
@@ -721,14 +736,14 @@ namespace entities
     void editent(int i, bool local)
     {
         extentity &e = *ents[i];
-        //if(e.type == ET_MAPMODEL && validtrigger(e.attr3))
-        //{
-        //    gameentity &f = (gameentity &)e;
-        //    f.triggerstate = TRIGGER_RESET;
-        //    f.lasttrigger = 0;
-        //    setuptriggerflags(f);
-        //}
-        //else e.flags = 0;
+        if(e.type == TRIGGER_ZONE && validtrigger(e.attr2))
+        {
+            gameentity &f = (gameentity &)e;
+            f.triggerstate = TRIGGER_RESET;
+            f.lasttrigger = 0;
+            setuptriggerflags(f);
+        }
+        else cleartriggerflags(e);
         if(local) addmsg(N_EDITENT, "rii3ii5", i, (int)(e.o.x*DMF), (int)(e.o.y*DMF), (int)(e.o.z*DMF), e.type, e.attr1, e.attr2, e.attr3, e.attr4, e.attr5);
     }
 

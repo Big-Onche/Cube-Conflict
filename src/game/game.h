@@ -81,8 +81,9 @@ enum                            // static entity types
     FLAG,                       // attr1 = angle, attr2 = team
     BASE,                       // attr2 = name alias
     //SOLO
-    MONSTER,                    // attr1 = angle, attr2 = monstertype
+    MONSTER,                    // attr1 = monstertype, attr2 = yaw, attr3 = pitch, attr4 = tag
     RESPAWNPOINT,
+    TRIGGER_ZONE,               // attr1 = tag, attr2 = type, attr3 = radius
 
     MAXENTTYPES,
 };

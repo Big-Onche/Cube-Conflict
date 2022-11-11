@@ -9,7 +9,7 @@ SVARR(maptitle, "Untitled Map by Unknown");
 VARNR(emptymap, _emptymap, 1, 0, 0);
 
 VAR(octaentsize, 0, 64, 1024);
-VAR(entselradius, 0, 2, 10);
+VAR(entselradius, 0, 3, 10);
 
 static inline void transformbb(const entity &e, vec &center, vec &radius)
 {
@@ -90,7 +90,7 @@ void modifyoctaentity(int flags, int id, extentity &e, cube *c, const ivec &cor,
         if(c[i].children != NULL && size > leafsize)
             modifyoctaentity(flags, id, e, c[i].children, o, size>>1, bo, br, leafsize, va);
         else if(flags&MODOE_ADD)
-        {
+            {
             if(!c[i].ext || !c[i].ext->ents) ext(c[i]).ents = new octaentities(o, size);
             octaentities &oe = *c[i].ext->ents;
             switch(e.type)
