@@ -874,7 +874,7 @@ struct gameent : dynent, gamestate
     int lastpain;
     int lastaction, lastattack;
     int attacking, gunaccel;
-    int lastfootstep, attacksound, attackchan, dansechan, sortchan, alarmchan;
+    int lastfootstep, attacksound, attackchan, dansesound, dansechan, sortsound, sortchan, alarmchan;
     int lasttaunt;
     int lastpickup, lastpickupmillis, flagpickup, lastbase, lastrepammo;
     int killstreak, frags, flags, deaths, totaldamage, totalshots;
@@ -893,7 +893,7 @@ struct gameent : dynent, gamestate
 
     vec muzzle, weed, balles, assist;
 
-    gameent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), lastfootstep(0), attacksound(-1), attackchan(-1), dansechan(-1), sortchan(-1), killstreak(0), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0), customcape(0), customtombe(0), customdanse(0), aptitude(0), level(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
+    gameent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), lastfootstep(0), attacksound(-1), attackchan(-1), dansesound(-1), dansechan(-1), sortsound(-1), sortchan(-1), killstreak(0), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0), customcape(0), customtombe(0), customdanse(0), aptitude(0), level(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
     {
         name[0] = info[0] = 0;
         respawn();
@@ -903,6 +903,8 @@ struct gameent : dynent, gamestate
         freeeditinfo(edit);
         freeeditinfo(edit);
         if(attackchan >= 0) stopsound(attacksound, attackchan);
+        if(dansesound >= 0) stopsound(dansesound, dansechan);
+        if(sortsound >= 0) stopsound(sortsound, sortchan);
         if(alarmchan >= 0) stopsound(S_ASSISTALARM, alarmchan);
         if(ai) delete ai;
     }
@@ -924,18 +926,13 @@ struct gameent : dynent, gamestate
     void stopdansesound(gameent *d)
     {
         if(dansechan >= 0) stopsound(S_CGCORTEX+(d->customdanse), dansechan, 50);
-        dansechan = -1;
+        dansesound = dansechan = -1;
     }
 
     void stopsortsound(gameent *d)
     {
-        if(sortchan >= 0)
-        {
-            if(d->aptisort1)stopsound(sorts[abilitydata(d->aptitude)].sound1, sortchan, 50);
-            if(d->aptisort2)stopsound(sorts[abilitydata(d->aptitude)].sound2, sortchan, 50);
-            if(d->aptisort3)stopsound(sorts[abilitydata(d->aptitude)].sound3, sortchan, 50);
-        }
-        sortchan = -1;
+        if(sortchan >= 0) stopsound(sortsound, sortchan, 50);
+        sortsound = sortchan = -1;
     }
 
     void stoppowerarmorsound()

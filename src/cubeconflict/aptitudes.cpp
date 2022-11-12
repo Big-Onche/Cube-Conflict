@@ -24,10 +24,12 @@ namespace game
     void aptitude(gameent *d, int ability, bool request) //Commandes d'aptitudes
     {
         if(d->state==CS_DEAD && !isconnected()) return;
+        int sound = -1;
 
         switch(ability)
         {
             case 1:
+            {
                 if(request) //We send the shit to the server: client send to the server, then the server checks if it's valid or not
                 {
                     if(!d->canability1 || d->mana < sorts[abilitydata(d->aptitude)].mana1) {if(d==player1)playsound(S_SORTIMPOSSIBLE); return; }
@@ -37,8 +39,13 @@ namespace game
                 //We recieve some shit from the server
                 d->canability1 = false; d->lastability1 = totalmillis; if(d==player1) stat[STAT_ABILITES]++;
                 //Sounds and graphics effects
+                sound = sorts[abilitydata(d->aptitude)].sound1;
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
-                if(d->aptitude!=APT_ESPION) d->sortchan = playsound(sorts[abilitydata(d->aptitude)].sound1, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->sortchan, 300);
+                if(d->aptitude!=APT_ESPION)
+                {
+                    d->sortchan = playsound(sound, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->sortchan, 300);
+                    d->sortsound = sound;
+                }
                 else
                 {
                     vec doublepos = d->o;
@@ -51,11 +58,14 @@ namespace game
                     }
                     doublepos.add(vec(posx, posy, 0));
 
-                    d->sortchan = playsound(sorts[abilitydata(d->aptitude)].sound1, &doublepos, NULL, 0, 0, 100, d->sortchan, 225);
+                    d->sortchan = playsound(sound, &doublepos, NULL, 0, 0, 100, d->sortchan, 225);
+                    d->sortsound = sound;
                 }
-                return;
+            }
+            break;
 
             case 2:
+            {
                 if(request)
                 {
                     if(!d->canability2 || d->mana<sorts[abilitydata(d->aptitude)].mana2) {if(d==player1)playsound(S_SORTIMPOSSIBLE); return; }
@@ -65,17 +75,20 @@ namespace game
 
                 d->canability2 = false; d->lastability2 = totalmillis; if(d==player1) stat[STAT_ABILITES]++;
 
+                sound = sorts[abilitydata(d->aptitude)].sound2;
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0, 100, -1, 250);
-                d->sortchan = playsound(sorts[abilitydata(d->aptitude)].sound2, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->sortchan, 275);
+                d->sortchan = playsound(sound, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->sortchan, 275);
 
                 if(d->aptitude==APT_ESPION)
                 {
                     loopi(1)particle_fireball(d->o,  50, PART_ONDECHOC, 300, 0xBBBBBB, 1.f);
                     particle_splash(PART_SMOKE, 7, 400, d->o, 0x666666, 15+rnd(5), 200, -10);
                 }
-                return;
+            }
+            break;
 
             case 3:
+            {
                 if(request)
                 {
                     if(!d->canability3 || d->mana<sorts[abilitydata(d->aptitude)].mana3) {if(d==player1)playsound(S_SORTIMPOSSIBLE); return; }
@@ -85,8 +98,9 @@ namespace game
 
                 d->canability3 = false; d->lastability3 = totalmillis; if(d==player1) stat[STAT_ABILITES]++;
 
+                sound = sorts[abilitydata(d->aptitude)].sound3;
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
-                d->sortchan = playsound(sorts[abilitydata(d->aptitude)].sound3, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->sortchan, 275);
+                d->sortchan = playsound(sound, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->sortchan, 275);
 
                 if(d->aptitude==APT_ESPION) particle_fireball(d->o, 1000, PART_RADAR, 1000, 0xAAAAAA, 20.f);
 
@@ -95,7 +109,9 @@ namespace game
                     getspyability = totalmillis;
                     playsound(S_SPY_3);
                 }
+            }
         }
+        d->sortsound = sound;
     }
 
     void player1aptitude(int ability) //Player1 abilities commands

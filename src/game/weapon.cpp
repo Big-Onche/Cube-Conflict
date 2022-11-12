@@ -1676,20 +1676,20 @@ namespace game
 
     void checkdansesound(gameent *d, bool local)
     {
-        if(d->clientnum >= 0 && d->state == CS_ALIVE)
+        if(d->clientnum >= 0 && d->state == CS_ALIVE && lastmillis - d->lasttaunt < 5000)
         {
             d->dansechan = playsound(S_CGCORTEX+(d->customdanse), local ? NULL : &d->o, NULL, 0, -1, -1, d->dansechan, 400);
-            if(d->dansechan < 0) d->dansechan = -1;
+            if(d->dansechan < 0) d->dansesound = -1;
         }
         else d->stopdansesound(d);
     }
 
     void checksortsound(gameent *d, bool local)
     {
-        if(d->clientnum >= 0 && d->state == CS_ALIVE)
+        if(d->clientnum >= 0 && d->state == CS_ALIVE && d->sortsound >= 0)
         {
-            d->sortchan = playsound(d->aptisort1 ? sorts[abilitydata(d->aptitude)].sound1 : d->aptisort2 ? sorts[abilitydata(d->aptitude)].sound2 : sorts[abilitydata(d->aptitude)].sound3, local ? NULL : &d->o, NULL, 0, -1, -1, d->sortchan, 300);
-            if(d->sortchan < 0) d->sortchan = -1;
+            d->sortchan = playsound(d->sortsound, local ? NULL : &d->o, NULL, 0, -1, -1, d->sortchan, 300);
+            if(d->sortchan < 0) d->sortsound = -1;
         }
         else d->stopsortsound(d);
     }

@@ -39,6 +39,8 @@ namespace game
         r->ai = NULL;
         if(d==player1) r->playermodel = playermodel;
         r->attackchan = -1;
+        r->dansechan = -1;
+        r->sortchan = -1;
         ragdolls.add(r);
         d->ragdoll = NULL;
     }
