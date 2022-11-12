@@ -746,13 +746,15 @@ bool stopsound(int n, int chanid, int fade)
 
 int playsoundname(const char *s, const vec *loc, int vol, int flags, int loops, int fade, int chanid, int radius, int expire)
 {
-    if(!vol) vol = 100;
+    if(!vol) vol = 400;
     int id = gamesounds.findsound(s, vol);
     if(id < 0) id = gamesounds.addsound(s, vol);
     return playsound(id, loc, NULL, flags, loops, fade, chanid, radius, expire);
 }
 
 ICOMMAND(playsound, "i", (int *n), playsound(*n));
+
+ICOMMAND(playsnd, "s", (const char *s), playsoundname(s));
 
 void resetsound()
 {
