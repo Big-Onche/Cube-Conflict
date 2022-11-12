@@ -86,7 +86,7 @@ static const struct achinfo { const char *achname, *achnicenameFR, *achnicenameE
     {"ACH_DECAPLETTE",    "Invincible !",                "Invincible !",                "Tuer 10 ennemis sans mourrir.",                                         "Kill 10 enemies without dying."},
     {"ACH_ATOME",         "La puissance de l'atome",     "The power of the atom",       "Balancer un missile nucléaire.",                                        "Launch a nuclear missile."},
     {"ACH_WINNER",        "Winner",                      "Winner",                      "Remporter 1 partie.",                                                   "Win 1 game."},
-    {"ACH_ENVOL",         "Envol pour le paradis",       "Fly like an eagle",           "Rester au moins 7 secondes dans les airs.",                             "Stay at least 7 seconds in the air."},
+    {"ACH_ENVOL",         "Envol pour le paradis",       "Fly like an eagle",           "Rester au moins 10 secondes dans les airs.",                            "Stay at least 10 seconds in the air."},
     {"ACH_POSTULANT",     "Postulant",                   "Applicant",                   "Atteindre le niveau 5.",                                                "Reach level 5."},
     {"ACH_STAGIAIRE",     "Stagiaire",                   "Trainee",                     "Atteindre le niveau 10.",                                               "Reach level 10."},
     {"ACH_SOLDAT",        "Soldat",                      "Soldier",                     "Atteindre le niveau 20.",                                               "Reach level 20."},
