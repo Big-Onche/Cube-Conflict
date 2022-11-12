@@ -15,16 +15,16 @@ namespace game
 
     struct pnjtype      // see docs for how these values modify behaviour
     {
-        short gun, speed, health, freq, lag, rate, pain, triggerdist, loyalty, bscale, weight;
+        short gun, speed, health, freq, lag, rate, pain, triggerdist, loyalty, bscale, weight, respawntime;
         bool friendly;
         short painsound, diesound;
         const char *name, *mdlname, *shieldname, *boost1modelname, *boost2modelname;
     };
 
     static const pnjtype pnjtypes[NUMMONSTERTYPES] =
-    {   //weapon      speed  healthx10  freq  lag  rate  painlag  triggerdist  loyality  bscale  weight  friendly  painsound   diesound   name           modeldir      shieldmodeldir          boost1modeldir   boost2modeldir
-        { GUN_S_NUKE, 18,    2500,      2,    30,   5,   100,     128,          100,      12,     85,     true,     S_NULL,     S_NULL,    "Jean Onche",  "pnj/jo",     "worldshield/or/100",   NULL,            NULL},
-        { GUN_CAC349, 10,    1000,      1,     5,  10,   200,     128,          1,         5,     30,     false,    S_NULL,     S_NULL,    "un Kévin",    "pnj/kevin",  "worldshield/bois/20",  NULL,            NULL},
+    {   //weapon      speed  healthx10  freq  lag  rate  painlag  triggerdist  loyality  bscale  weight  respawntime friendly  painsound   diesound   name           modeldir      shieldmodeldir          boost1modeldir   boost2modeldir
+        { GUN_S_NUKE, 18,    2500,      2,    30,   5,   100,      90,         100,      12,     85,         1,      true,     S_NULL,     S_NULL,    "Jean Onche",  "pnj/jo",     "worldshield/or/100",   NULL,            NULL},
+        { GUN_CAC349, 10,    1000,      1,     5,  10,   200,     128,         1,         5,     30,     20000,      false,    S_NULL,     S_NULL,    "un Kévin",    "pnj/kevin",  "worldshield/bois/20",  NULL,            NULL},
     };
 
     VAR(skill, 1, 3, 10);
@@ -49,7 +49,7 @@ namespace game
         physent *stacked;
         vec stackpos;
         vec spawnpos;
-        int spawnyaw;
+        int spawnyaw, monsterlastdeath;
 
         monster(int _type, int _yaw, int _pitch, int _tag, int _state, int _trigger, int _move) :
             monsterstate(_state), tag(_tag),
@@ -88,6 +88,7 @@ namespace game
             state = CS_ALIVE;
             anger = 0;
             friendly = t.friendly;
+            monsterlastdeath = 0;
             copystring(name, t.name);
         }
 
@@ -115,6 +116,20 @@ namespace game
             move = _moving;
             n = n*130/100;
             trigger = lastmillis+n-skill*(n/16)+rnd(r+1);
+        }
+
+        bool canmove()
+        {
+            switch(monsterstate)
+            {
+                case M_FRIENDLY:
+                case M_NEUTRAL:
+                case M_ANGRY:
+                    return false;
+                    break;
+                default:
+                    return true;
+            }
         }
 
         void monsteraction(int curtime)           // main AI thinking routine, called every frame for every monster
@@ -160,16 +175,13 @@ namespace game
                     else targetpitch = 0;
             }
 
-            if(blocked)                                                             // special case: if we run into scenery
+            if(blocked)                                                            // special case: if we run into scenery
             {
                 blocked = false;
-                if(!rnd(20000/pnjtypes[mtype].speed))                               // try to jump over obstackle (rare)
+                if(!rnd(2500/pnjtypes[mtype].speed)) jumping = true;               // try to jump over obstackle (rare)
+                else if(trigger<lastmillis && (((monsterstate!=M_AGGRO) && (monsterstate!=M_RETREAT)) || !rnd(5)))    // search for a way around (common)
                 {
-                    jumping = true;
-                }
-                else if(trigger<lastmillis && (monsterstate!=M_AGGRO || !rnd(5)) && (monsterstate!=M_RETREAT || !rnd(5)))    // search for a way around (common)
-                {
-                    targetyaw += 90+rnd(180);                                       // patented "random walk" AI pathfinding (tm) ;)
+                    targetyaw += 90+rnd(180);                                      // patented "random walk" AI pathfinding (tm) ;)
                     transition(M_SEARCH, 1, 100, 1000);
                 }
             }
@@ -189,11 +201,8 @@ namespace game
                 case M_NEUTRAL: if(trigger+10000<lastmillis) transition(M_FRIENDLY, 1, 100, 200);
 
                 case M_FRIENDLY:
-                    if(pissoffnpc)
-                    {
-                        transition(M_ANGRY, 1, 100, 200);
-                        pissoffnpc = 0;
-                    }
+                    if(pissoffnpc) {transition(M_ANGRY, 1, 250, 250); pissoffnpc = 0;}
+
                     if(dist < pnjtypes[mtype].triggerdist) targetyaw = enemyyaw;
                     else targetyaw = spawnyaw;
                     break;
@@ -211,16 +220,16 @@ namespace game
                     normalize_yaw(enemyyaw);
                     float angle = (float)fabs(enemyyaw-yaw);
                     int trigdist = dist*(player1->crouched() ? 2 : 1);            // if player1 is crouched, minimal trigger distance is reduced by 2
-                    if(trigdist < pnjtypes[mtype].triggerdist/8                   // the better the angle to the player, the further the monster can see/hear
+                    if(trigdist < pnjtypes[mtype].triggerdist/6                   // the better the angle to the player, the further the monster can see/hear
                     ||(trigdist < pnjtypes[mtype].triggerdist/4 && angle<135)
                     ||(trigdist < pnjtypes[mtype].triggerdist/2 && angle<90)
                     ||(trigdist < pnjtypes[mtype].triggerdist && angle<45)
-                    || (monsterhurt && o.dist(monsterhurtpos) < pnjtypes[mtype].triggerdist/2))
+                    || (monsterhurt && o.dist(monsterhurtpos) < pnjtypes[mtype].triggerdist/1.5f))
                     {
                         vec target;
                         if(raycubelos(o, enemy->o, target))
                         {
-                            transition(friendly ? M_FRIENDLY : M_SEARCH, 1, 500, 200); //
+                            transition(friendly ? M_FRIENDLY : M_SEARCH, 1, 500, 200);
                             playsound(S_NULL, &o);
                         }
                     }
@@ -279,10 +288,9 @@ namespace game
                         }
                     }
                     break;
-
             }
 
-            if(move || maymove() || (stacked && (stacked->state!=CS_ALIVE || stackpos != stacked->o)))
+            if((move || maymove() || (stacked && (stacked->state!=CS_ALIVE || stackpos != stacked->o))) && canmove())
             {
                 vec pos = feetpos();
                 loopv(teleports) // equivalent of player entity touch, but only teleports are used
@@ -293,8 +301,18 @@ namespace game
                 }
 
                 if(physsteps > 0) stacked = NULL;
-                if(this->monsterstate!=M_SLEEP) return;
                 moveplayer(this, 10, true, curtime, 0, 0, 0, 0, false);        // use physics to move monster
+            }
+        }
+
+        void checkmonstersrespawns()
+        {
+            if(totalmillis - monsterlastdeath > pnjtypes[this->type].respawntime)
+            {
+                targetyaw = spawnyaw;
+                o = spawnpos;
+                state = CS_ALIVE;
+                health = pnjtypes[this->type].health;
             }
         }
 
@@ -332,7 +350,7 @@ namespace game
                 playsound(pnjtypes[mtype].diesound, &o);
                 monsterkilled();
                 gibeffect(max(-health, 0), vel, this);
-
+                monsterlastdeath = totalmillis;
                 defformatstring(id, "monster_dead_%d", tag);
                 if(identexists(id)) execute(id);
             }
@@ -451,9 +469,9 @@ namespace game
                 if(lastmillis-monsters[i]->lastpain<2000)
                 {
                     monsters[i]->move = monsters[i]->strafe = 0;
-                    if(monsters[i]->monsterstate!=M_SLEEP) return;
-                    moveplayer(monsters[i], 10, true, curtime, 0, 0, 0 , 0, false);
+                    moveplayer(monsters[i], 5, true, curtime, 0, 0, 0 , 0, false);
                 }
+                monsters[i]->checkmonstersrespawns();
             }
         }
 
