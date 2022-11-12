@@ -18,13 +18,13 @@ namespace game
         short gun, speed, health, freq, lag, rate, pain, triggerdist, loyalty, bscale, weight, respawntime;
         bool friendly;
         short painsound, diesound;
-        const char *name, *mdlname, *shieldname, *boost1modelname, *boost2modelname;
+        const char *namefr, *nameen, *mdlname, *shieldname, *hatname, *boost1modelname, *boost2modelname;
     };
 
     static const pnjtype pnjtypes[NUMMONSTERTYPES] =
-    {   //weapon      speed  healthx10  freq  lag  rate  painlag  triggerdist  loyality  bscale  weight  respawntime friendly  painsound   diesound   name           modeldir      shieldmodeldir          boost1modeldir   boost2modeldir
-        { GUN_S_NUKE, 18,    2500,      2,    30,   5,   100,      90,         100,      12,     85,         1,      true,     S_NULL,     S_NULL,    "Jean Onche",  "pnj/jo",     "worldshield/or/100",   NULL,            NULL},
-        { GUN_CAC349, 10,    1000,      1,     5,  10,   200,     128,         1,         5,     30,     20000,      false,    S_NULL,     S_NULL,    "un Kévin",    "pnj/kevin",  "worldshield/bois/20",  NULL,            NULL},
+    {   //weapon      sp. hea.  freq  lag  rate  pain  trigdist. loy. size  weight  res.   fri.   painsnd. diesnd.  namefr        nameen         mdlldir       shielddir              hatdir          boost1dir   boost2dir
+        { GUN_S_NUKE, 18, 2500, 2,    30,  5,    100,  90,       100, 12,   85,     1,     true,  S_NULL,  S_NULL,  "Jean Onche", "Jean Onche",  "npcs/jo",    "worldshield/or/100",  "hats/viking",  NULL,       NULL},
+        { GUN_CAC349, 10, 1000, 1,    5,   10,   200,  128,      1,   5,    30,     20000, false, S_NULL,  S_NULL,  "un Kévin",   "a fag",       "npcs/kevin", "worldshield/bois/20", NULL,           NULL,       NULL},
     };
 
     VAR(skill, 1, 3, 10);
@@ -89,7 +89,7 @@ namespace game
             anger = 0;
             friendly = t.friendly;
             monsterlastdeath = 0;
-            copystring(name, t.name);
+            copystring(name, GAME_LANG ? t.nameen : t.namefr);
         }
 
         void normalize_yaw(float angle)
@@ -471,7 +471,7 @@ namespace game
                     monsters[i]->move = monsters[i]->strafe = 0;
                     moveplayer(monsters[i], 5, true, curtime, 0, 0, 0 , 0, false);
                 }
-                monsters[i]->checkmonstersrespawns();
+                if(!m_dmsp) monsters[i]->checkmonstersrespawns();
             }
         }
 
@@ -535,6 +535,7 @@ namespace game
                 }
 
                 if(pnjtypes[m.mtype].shieldname) a[ai++] = modelattach("tag_shield", pnjtypes[m.mtype].shieldname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+                if(pnjtypes[m.mtype].hatname) a[ai++] = modelattach("tag_hat", pnjtypes[m.mtype].hatname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
                 if(pnjtypes[m.mtype].boost1modelname) a[ai++] = modelattach("tag_boost1", pnjtypes[m.mtype].boost1modelname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
                 if(pnjtypes[m.mtype].boost2modelname) a[ai++] = modelattach("tag_boost2", pnjtypes[m.mtype].boost2modelname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
 
