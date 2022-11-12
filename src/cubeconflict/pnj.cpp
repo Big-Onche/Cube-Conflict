@@ -22,10 +22,10 @@ namespace game
     };
 
     static const pnjtype pnjtypes[NUMMONSTERTYPES] =
-    {   //weapon        sp. hea.  freq  lag  rate  pain  trigdist. loy. size  weight  res.   fri.   hellosnd.  painsnd.   angrysnd.  diesnd.    namefr          nameen            mdlldir            shielddir                      hatdir             boost1dir   boost2dir
-        { GUN_S_NUKE,   18, 2500, 2,    30,  5,    100,  90,       100, 12,   85,     1,     true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Jean Onche",   "Jean Onche",     "npcs/jo",         "worldshield/or/100",          "hats/crown",      NULL,       NULL},
-        { GUN_CAC349,   10, 1000, 1,    5,   10,   200,  128,      1,   5,    30,     20000, false, S_NULL,    S_NULL,    S_NULL,    S_NULL,    "un Kévin",     "a fag",          "npcs/kevin",      "worldshield/bois/20",         NULL,              NULL,       NULL},
-        { GUN_SPOCKGUN, 18, 2500, 2,    30,  5,    100,  90,       1,   12,   70,     1,     true,  S_ALIEN_H, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D, "le roi alien", "the alien king", "npcs/alien_king", "worldshield/magnetique/100",  "hats/crown/big",  NULL,       NULL},
+    {   //weapon        sp. hea.  freq  lag  rate pain  trigdist. loy. size  weight  res. fri.   hellosnd.  painsnd.   angrysnd.  diesnd.    namefr          nameen            mdlldir            shielddir                      hatdir             boost1dir   boost2dir
+        { GUN_S_NUKE,    1, 5000, 2,    30,  5,   100,  100,      100, 12,   85,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Jean Onche",   "Jean Onche",     "npcs/jo",         "worldshield/or/100",          "hats/crown",      NULL,       NULL},
+        { GUN_CACFLEAU,  1, 2000, 1,    30,  5,    50,  100,      100, 12,   90,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Bjorn",        "Bjorn",          "npcs/bjorn",      "worldshield/bois/60",         NULL,              NULL,       NULL},
+        { GUN_SPOCKGUN,  1, 2500, 2,    10,  2,   150,  100,      1,   10,   70,     1,   true,  S_ALIEN_H, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D, "le roi alien", "the alien king", "npcs/alien_king", "worldshield/magnetique/100",  "hats/crown/big",  NULL,       NULL},
     };
 
     VAR(skill, 1, 3, 10);
@@ -226,10 +226,10 @@ namespace game
 
                     normalize_yaw(enemyyaw);
                     float angle = (float)fabs(enemyyaw-yaw);
-                    int trigdist = dist*(player1->crouched() ? 2 : 1);            // if player1 is crouched, minimal trigger distance is reduced by 2
-                    if(trigdist < pnjtypes[mtype].triggerdist/6                   // the better the angle to the player, the further the monster can see/hear
-                    ||(trigdist < pnjtypes[mtype].triggerdist/4 && angle<135)
-                    ||(trigdist < pnjtypes[mtype].triggerdist/2 && angle<90)
+                    int trigdist = dist*(player1->crouched() ? 2 : 1);                           // if player1 is crouched, minimal trigger distance is reduced by 2
+                    if(trigdist < pnjtypes[mtype].triggerdist/(friendly ? 2 : 4)                   // the better the angle to the player, the further the monster can see/hear
+                    ||(trigdist < pnjtypes[mtype].triggerdist/(friendly ? 1.5f : 3) && angle<135)
+                    ||(trigdist < pnjtypes[mtype].triggerdist/(friendly ? 1 : 2) && angle<90)
                     ||(trigdist < pnjtypes[mtype].triggerdist && angle<45)
                     || (monsterhurt && o.dist(monsterhurtpos) < pnjtypes[mtype].triggerdist/1.5f))
                     {
