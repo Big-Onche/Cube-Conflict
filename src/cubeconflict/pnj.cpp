@@ -11,20 +11,21 @@ namespace game
     static vector<int> teleports;
 
     static const int TOTMFREQ = 14;
-    static const int NUMMONSTERTYPES = 2;
+    static const int NUMMONSTERTYPES = 3;
 
     struct pnjtype      // see docs for how these values modify behaviour
     {
         short gun, speed, health, freq, lag, rate, pain, triggerdist, loyalty, bscale, weight, respawntime;
         bool friendly;
-        short painsound, diesound;
+        short hellosound, painsound, angrysound, diesound;
         const char *namefr, *nameen, *mdlname, *shieldname, *hatname, *boost1modelname, *boost2modelname;
     };
 
     static const pnjtype pnjtypes[NUMMONSTERTYPES] =
-    {   //weapon      sp. hea.  freq  lag  rate  pain  trigdist. loy. size  weight  res.   fri.   painsnd. diesnd.  namefr        nameen         mdlldir       shielddir              hatdir          boost1dir   boost2dir
-        { GUN_S_NUKE, 18, 2500, 2,    30,  5,    100,  90,       100, 12,   85,     1,     true,  S_NULL,  S_NULL,  "Jean Onche", "Jean Onche",  "npcs/jo",    "worldshield/or/100",  "hats/viking",  NULL,       NULL},
-        { GUN_CAC349, 10, 1000, 1,    5,   10,   200,  128,      1,   5,    30,     20000, false, S_NULL,  S_NULL,  "un Kévin",   "a fag",       "npcs/kevin", "worldshield/bois/20", NULL,           NULL,       NULL},
+    {   //weapon        sp. hea.  freq  lag  rate  pain  trigdist. loy. size  weight  res.   fri.   hellosnd.  painsnd.   angrysnd.  diesnd.    namefr          nameen            mdlldir            shielddir                      hatdir             boost1dir   boost2dir
+        { GUN_S_NUKE,   18, 2500, 2,    30,  5,    100,  90,       100, 12,   85,     1,     true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Jean Onche",   "Jean Onche",     "npcs/jo",         "worldshield/or/100",          "hats/crown",      NULL,       NULL},
+        { GUN_CAC349,   10, 1000, 1,    5,   10,   200,  128,      1,   5,    30,     20000, false, S_NULL,    S_NULL,    S_NULL,    S_NULL,    "un Kévin",     "a fag",          "npcs/kevin",      "worldshield/bois/20",         NULL,              NULL,       NULL},
+        { GUN_SPOCKGUN, 18, 2500, 2,    30,  5,    100,  90,       1,   12,   70,     1,     true,  S_ALIEN_H, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D, "le roi alien", "the alien king", "npcs/alien_king", "worldshield/magnetique/100",  "hats/crown/big",  NULL,       NULL},
     };
 
     VAR(skill, 1, 3, 10);
@@ -201,9 +202,15 @@ namespace game
                 case M_NEUTRAL: if(trigger+10000<lastmillis) transition(M_FRIENDLY, 1, 100, 200);
 
                 case M_FRIENDLY:
-                    if(pissoffnpc) {transition(M_ANGRY, 1, 250, 250); pissoffnpc = 0;}
-
-                    if(dist < pnjtypes[mtype].triggerdist) targetyaw = enemyyaw;
+                    if(dist < pnjtypes[mtype].triggerdist)
+                    {
+                        targetyaw = enemyyaw;
+                        if(pissoffnpc)
+                        {
+                            transition(M_ANGRY, 1, 250, 1000);
+                            pissoffnpc = 0;
+                        }
+                    }
                     else targetyaw = spawnyaw;
                     break;
 
@@ -230,7 +237,7 @@ namespace game
                         if(raycubelos(o, enemy->o, target))
                         {
                             transition(friendly ? M_FRIENDLY : M_SEARCH, 1, 500, 200);
-                            playsound(S_NULL, &o);
+                            playsound(pnjtypes[mtype].hellosound, &o);
                         }
                     }
                     break;
@@ -318,6 +325,8 @@ namespace game
 
         void monsterpain(int damage, gameent *d, int atk)
         {
+            playsound(pnjtypes[mtype].painsound, &o);
+
             if(d->type==ENT_AI)     // a monster hit us
             {
                 if(friendly) return;
@@ -333,7 +342,11 @@ namespace game
                 if(friendly)
                 {
                     if(this->monsterstate==M_FRIENDLY) transition(M_NEUTRAL, 1, pnjtypes[mtype].rate, 200);      //if you mess with a friendly pnj, he gets neutral for a moment
-                    else if(this->monsterstate==M_NEUTRAL) transition(M_ANGRY, 1, pnjtypes[mtype].rate, 200);    //if you mess with a neutral pnj, he gets aggressive
+                    else if(this->monsterstate==M_NEUTRAL)
+                    {
+                        transition(M_ANGRY, 1, pnjtypes[mtype].rate, 200);    //if you mess with a neutral pnj, he gets aggressive
+                        playsound(pnjtypes[mtype].angrysound, &o);
+                    }
                     return;
                 }
 
