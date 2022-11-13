@@ -619,14 +619,13 @@ namespace game
 
         if(m_dmsp || m_sp)
         {
-            if(f->type==ENT_AI || !m_mp(gamemode) || f==at) f->hitpush(damage, vel, at, atk, f);
-            if(f->type==ENT_AI) hitmonster(damage, (monster *)f, at, vel, atk);
-
             if(f==player1)
             {
                 damaged(damage, f, at, true, atk);
-                f->hitpush(damage, vel, at, atk, f);
+                if(!m_mp(gamemode)) f->hitpush(damage, vel, at, atk, f);
             }
+            else if(at==player1) hitmonster(damage, (monster *)f, at, vel, atk);
+
         }
 
         if(!m_mp(gamemode) || f==at) f->hitpush(damage, vel, at, atk, f);

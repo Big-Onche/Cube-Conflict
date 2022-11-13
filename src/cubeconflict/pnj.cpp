@@ -11,21 +11,23 @@ namespace game
     static vector<int> teleports;
 
     static const int TOTMFREQ = 14;
-    static const int NUMMONSTERTYPES = 3;
+    static const int NUMMONSTERTYPES = 5;
 
     struct pnjtype      // see docs for how these values modify behaviour
     {
         short gun, speed, health, freq, lag, rate, pain, triggerdist, loyalty, bscale, weight, respawntime;
         bool friendly;
         short hellosound, painsound, angrysound, diesound;
-        const char *namefr, *nameen, *mdlname, *shieldname, *hatname, *boost1modelname, *boost2modelname;
+        const char *namefr, *nameen, *mdlname, *shieldname, *hatname, *capename, *boost1modelname, *boost2modelname;
     };
 
     static const pnjtype pnjtypes[NUMMONSTERTYPES] =
-    {   //weapon        sp. hea.  freq  lag  rate pain  trigdist. loy. size  weight  res. fri.   hellosnd.  painsnd.   angrysnd.  diesnd.    namefr          nameen            mdlldir            shielddir                      hatdir             boost1dir   boost2dir
-        { GUN_S_NUKE,    1, 5000, 2,    30,  5,   100,  100,      100, 12,   85,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Jean Onche",   "Jean Onche",     "npcs/jo",         "worldshield/or/100",          "hats/crown",      NULL,       NULL},
-        { GUN_CACFLEAU,  1, 2000, 1,    30,  5,    50,  100,      100, 12,   90,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Bjorn",        "Bjorn",          "npcs/bjorn",      "worldshield/bois/60",         NULL,              NULL,       NULL},
-        { GUN_SPOCKGUN,  1, 2500, 2,    10,  2,   150,  100,      1,   10,   70,     1,   true,  S_ALIEN_H, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D, "le roi alien", "the alien king", "npcs/alien_king", "worldshield/magnetique/100",  "hats/crown/big",  NULL,       NULL},
+    {   //weapon        sp. hea.  freq  lag  rate pain  trigdist. loy. size  weight  res. fri.   hellosnd.  painsnd.   angrysnd.  diesnd.    namefr          nameen            mdlldir            shielddir                      hatdir             capedir             boost1dir        boost2dir
+        { GUN_S_NUKE,    1, 5000, 2,    30,  5,   100,  100,      5,   12,   85,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Jean Onche",   "Jean Onche",     "npcs/jo",         "worldshield/or/100",          "hats/crown",      "capes/cape_elite", NULL,            NULL},
+        { GUN_CACFLEAU,  1, 2000, 1,    30,  5,    50,  100,      5,   12,   90,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Bjorn",        "Bjorn",          "npcs/bjorn",      "worldshield/bois/60",         NULL,              NULL,               NULL,            NULL},
+        { GUN_SPOCKGUN,  1, 2500, 2,     5,  2,   150,  100,      1,   10,   70,     1,   true,  S_ALIEN_H, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D, "le roi alien", "the alien king", "npcs/alien_king", "worldshield/magnetique/100",  "hats/crown/big",  NULL,               NULL,            NULL},
+        { GUN_ARTIFICE,  1, 1500, 2,    75, 10,    50,  100,      5,   10,   60,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Spike",        "Spike",          "npcs/spike",      NULL,                          NULL,              "boosts/steros",               "boosts/steros", "boosts/epo"},
+        { GUN_GLOCK,     1,  750, 2,     5,  2,   150,  100,      1,   10,   70,     1,   false, S_ALIEN_H, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D, "le roi alien", "the alien king", "npcs/kevin",      "worldshield/bois/20",         NULL,              NULL,               NULL,            NULL},
     };
 
     VAR(skill, 1, 3, 10);
@@ -129,7 +131,8 @@ namespace game
                     return false;
                     break;
                 default:
-                    return true;
+                    if(physstate == PHYS_FLOOR && friendly) return false;
+                    else return true;
             }
         }
 
@@ -195,7 +198,6 @@ namespace game
                     {
                         targetyaw = enemyyaw;
                         transition(M_ATTACKING, 0, 200, 200);
-                        if(trigger+5000<lastmillis) transition(M_NEUTRAL, 1, 100, 200);
                     }
                     break;
 
@@ -207,7 +209,7 @@ namespace game
                         targetyaw = enemyyaw;
                         if(pissoffnpc)
                         {
-                            transition(M_ANGRY, 1, 250, 1000);
+                            transition(M_ANGRY, 1, pnjtypes[mtype].lag, 10);
                             pissoffnpc = 0;
                         }
                     }
@@ -231,13 +233,16 @@ namespace game
                     ||(trigdist < pnjtypes[mtype].triggerdist/(friendly ? 1.5f : 3) && angle<135)
                     ||(trigdist < pnjtypes[mtype].triggerdist/(friendly ? 1 : 2) && angle<90)
                     ||(trigdist < pnjtypes[mtype].triggerdist && angle<45)
-                    || (monsterhurt && o.dist(monsterhurtpos) < pnjtypes[mtype].triggerdist/1.5f))
+                    ||(monsterhurt && o.dist(player1->o) < pnjtypes[mtype].triggerdist*(friendly ? 4 : 2)))
                     {
                         vec target;
                         if(raycubelos(o, enemy->o, target))
                         {
                             transition(friendly ? M_FRIENDLY : M_SEARCH, 1, 500, 200);
                             playsound(pnjtypes[mtype].hellosound, &o);
+                            //transition(monsterhurt ? M_NEUTRAL : friendly ? M_FRIENDLY : M_SEARCH, 1, 500, 200);
+                            //if(monsterhurt) break;
+                            //if(this->state==M_FRIENDLY) playsound(pnjtypes[mtype].hellosound, &o, 0, 0, 0, 250, -1, 500);
                         }
                     }
                     break;
@@ -250,6 +255,7 @@ namespace game
                         attacking = true;
                         shoot(this, attacktarget);
                         transition(M_ATTACKING, 0, 600, 0);
+                        if(friendly) transition(M_NEUTRAL, 1, 100, 200);
                     }
                     break;
 
@@ -265,8 +271,7 @@ namespace game
                 case M_AGGRO:                        // monster has visual contact, heads straight for player and may want to shoot at any time
                     targetyaw = enemyyaw;
 
-                    if(dist > pnjtypes[mtype].triggerdist) {transition(friendly ? M_NEUTRAL : M_RETREAT, 0, 600, 0); break;}
-
+                    if(dist > pnjtypes[mtype].triggerdist*2) {transition(friendly ? M_NEUTRAL : M_RETREAT, 0, 600, 0); break;}
                     if(trigger<lastmillis)
                     {
                         vec target;
@@ -325,16 +330,19 @@ namespace game
 
         void monsterpain(int damage, gameent *d, int atk)
         {
-            playsound(pnjtypes[mtype].painsound, &o);
+            playsound(pnjtypes[mtype].painsound, &o, 0, 0, 0, 250, -1, 500);
 
-            if(d->type==ENT_AI)     // a monster hit us
+            if(d->type==ENT_AI && !friendly)     // a monster hit us
             {
-                if(friendly) return;
                 if(this!=d)            // guard for RL guys shooting themselves :)
                 {
                     anger++;     // don't attack straight away, first get angry
                     int _anger = d->type==ENT_AI && mtype==((monster *)d)->mtype ? anger/2 : anger;
-                    if(_anger>=pnjtypes[mtype].loyalty) enemy = d;     // monster infight if very angry
+                    if(_anger >= pnjtypes[mtype].loyalty)
+                    {
+                        transition(M_AGGRO, 1, pnjtypes[mtype].rate, 200);
+                        enemy = d;     // monster infight if very angry
+                    }
                 }
             }
             else if(d->type==ENT_PLAYER) // player hit us
@@ -344,7 +352,7 @@ namespace game
                     if(this->monsterstate==M_FRIENDLY) transition(M_NEUTRAL, 1, pnjtypes[mtype].rate, 200);      //if you mess with a friendly pnj, he gets neutral for a moment
                     else if(this->monsterstate==M_NEUTRAL)
                     {
-                        transition(M_ANGRY, 1, pnjtypes[mtype].rate, 200);    //if you mess with a neutral pnj, he gets aggressive
+                        transition(M_ANGRY, 1, pnjtypes[mtype].lag, 10);    //if you mess with a neutral pnj, he gets aggressive
                         playsound(pnjtypes[mtype].angrysound, &o);
                     }
                     return;
@@ -360,7 +368,7 @@ namespace game
             {
                 state = CS_DEAD;
                 lastpain = lastmillis;
-                playsound(pnjtypes[mtype].diesound, &o);
+                playsound(pnjtypes[mtype].diesound, &o, 0, 0, 0, 250, -1, 500);
                 monsterkilled();
                 gibeffect(max(-health, 0), vel, this);
                 monsterlastdeath = totalmillis;
@@ -370,7 +378,7 @@ namespace game
             else
             {
                 transition(M_PAIN, 0, pnjtypes[mtype].pain, 200);      // in this state monster won't attack
-                playsound(pnjtypes[mtype].painsound, &o);
+                playsound(pnjtypes[mtype].painsound, &o, 0, 0, 0, 250, -1, 500);
             }
         }
     };
@@ -549,6 +557,7 @@ namespace game
 
                 if(pnjtypes[m.mtype].shieldname) a[ai++] = modelattach("tag_shield", pnjtypes[m.mtype].shieldname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
                 if(pnjtypes[m.mtype].hatname) a[ai++] = modelattach("tag_hat", pnjtypes[m.mtype].hatname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+                if(pnjtypes[m.mtype].capename) a[ai++] = modelattach("tag_cape", pnjtypes[m.mtype].capename, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
                 if(pnjtypes[m.mtype].boost1modelname) a[ai++] = modelattach("tag_boost1", pnjtypes[m.mtype].boost1modelname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
                 if(pnjtypes[m.mtype].boost2modelname) a[ai++] = modelattach("tag_boost2", pnjtypes[m.mtype].boost2modelname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
 
