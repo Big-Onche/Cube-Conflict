@@ -11,7 +11,7 @@ namespace game
     static vector<int> teleports;
 
     static const int TOTMFREQ = 14;
-    static const int NUMMONSTERTYPES = 5;
+    static const int NUMMONSTERTYPES = 6;
 
     struct pnjtype      // see docs for how these values modify behaviour
     {
@@ -23,10 +23,11 @@ namespace game
 
     static const pnjtype pnjtypes[NUMMONSTERTYPES] =
     {   //weapon        sp. hea.  freq  lag  rate pain  trigdist. loy. size  weight  res. fri.   hellosnd.  painsnd.   angrysnd.  diesnd.    namefr          nameen            mdlldir            shielddir                      hatdir             capedir             boost1dir        boost2dir
-        { GUN_S_NUKE,    1, 5000, 2,    30,  5,   100,  100,      5,   12,   85,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Jean Onche",   "Jean Onche",     "npcs/jo",         "worldshield/or/100",          "hats/crown",      "capes/cape_elite", NULL,            NULL},
-        { GUN_CACFLEAU,  1, 2000, 1,    30,  5,    50,  100,      5,   12,   90,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Bjorn",        "Bjorn",          "npcs/bjorn",      "worldshield/bois/60",         NULL,              NULL,               NULL,            NULL},
-        { GUN_SPOCKGUN,  1, 2500, 2,     5,  2,   150,  100,      1,   10,   70,     1,   true,  S_ALIEN_H, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D, "le roi alien", "the alien king", "npcs/alien_king", "worldshield/magnetique/100",  "hats/crown/big",  NULL,               NULL,            NULL},
-        { GUN_ARTIFICE,  1, 1500, 2,    75, 10,    50,  100,      5,   10,   60,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Spike",        "Spike",          "npcs/spike",      NULL,                          NULL,              "boosts/steros",               "boosts/steros", "boosts/epo"},
+        { GUN_S_NUKE,    1, 5000, 2,    30,  5,   100,  100,      5,   12,   85,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Jean Onche",   "Jean Onche",     "smileys/hap",     "worldshield/or/100",          "hats/crown",      "capes/cape_elite", NULL,            NULL},
+        { GUN_CACFLEAU,  1, 2500, 1,    30,  5,    50,  100,      5,   12,   90,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Bjorn",        "Bjorn",          "npcs/bjorn",      "worldshield/bois/60",         NULL,              NULL,               NULL,            NULL},
+        { GUN_SPOCKGUN,  1, 2000, 2,     5,  2,   150,  100,      1,   10,   70,     1,   true,  S_ALIEN_H, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D, "le roi alien", "the alien king", "npcs/alien_king", "worldshield/magnetique/100",  "hats/crown/big",  NULL,               NULL,            NULL},
+        { GUN_ARTIFICE,  1, 1500, 2,    75, 10,    50,  100,      5,   10,   60,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Spike",        "Spike",          "smileys/content", NULL,                          NULL,              "boosts/steros",    "boosts/steros", "boosts/epo"},
+        { GUN_ARBALETE,  1, 2000, 2,     5,  2,    25,  100,      5,   10,   70,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Boing",        "Boing",          "smileys/fou",     NULL,                          "hats/ninja",      NULL,               NULL,            NULL},
         { GUN_GLOCK,     1,  750, 2,     5,  2,   150,  100,      1,   10,   70,     1,   false, S_ALIEN_H, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D, "le roi alien", "the alien king", "npcs/kevin",      "worldshield/bois/20",         NULL,              NULL,               NULL,            NULL},
     };
 

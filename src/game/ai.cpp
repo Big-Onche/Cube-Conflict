@@ -766,7 +766,12 @@ namespace ai
 
     void killed(gameent *d, gameent *e)
     {
-        if(d->ai) d->ai->reset();
+        if(d->ai)
+        {
+            d->ai->reset();
+            return;
+        }
+        if(d==player1 && m_sp) execute("reset_needed_triggers");
     }
 
     void itemspawned(int ent)

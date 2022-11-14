@@ -453,7 +453,6 @@ namespace entities
         TRIG_AUTO_RESET = 1<<4,
         TRIG_RUMBLE     = 1<<5,
         TRIG_LOCKED     = 1<<6,
-        TRIG_OVER       = 1<<7,
         TRIG_ENDSP      = 1<<8
     };
 
@@ -476,7 +475,7 @@ namespace entities
         TRIG_DISAPPEAR,               // 12
         TRIG_DISAPPEAR | TRIG_RUMBLE, // 13
         TRIG_DISAPPEAR | TRIG_COLLIDE | TRIG_LOCKED, // 14
-        TRIG_AUTO_RESET | TRIG_OVER,        // 15
+        TRIG_AUTO_RESET,              // 15
         -1 /* reserved 16 */,
         -1 /* reserved 17 */,
         -1 /* reserved 18 */,
