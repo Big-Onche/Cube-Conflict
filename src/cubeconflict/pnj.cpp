@@ -431,7 +431,7 @@ namespace game
             nextmonster = mtimestart = lastmillis+2000;
             monstertotal = spawnremain = skill*10;
         }
-        else if(m_classicsp)
+        else if(m_classicsp || m_tutorial)
         {
             mtimestart = lastmillis;
             loopv(entities::ents)
@@ -448,7 +448,7 @@ namespace game
             }
         }
         teleports.setsize(0);
-        if(m_dmsp || m_classicsp)
+        if(m_dmsp || m_classicsp || m_tutorial)
         {
             loopv(entities::ents) if(entities::ents[i]->type==TELEPORT) teleports.add(i);
         }

@@ -617,7 +617,7 @@ namespace game
         f->lastpain = lastmillis;
         if(at->type==ENT_PLAYER && !isteam(at->team, f->team)) at->totaldamage += damage;
 
-        if(m_dmsp || m_sp)
+        if(m_dmsp || m_classicsp || m_tutorial)
         {
             if(f==player1)
             {

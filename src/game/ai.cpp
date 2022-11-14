@@ -771,7 +771,7 @@ namespace ai
             d->ai->reset();
             return;
         }
-        if(d==player1 && m_sp) execute("reset_needed_triggers");
+        if(d==player1 && (m_sp || m_tutorial)) execute("reset_needed_triggers");
     }
 
     void itemspawned(int ent)

@@ -8,7 +8,7 @@ VARP(n_map, 0, 1, 99);
 VARR(mapofficielle, 0, 0, 1);
 
 extern void calcmode();     //Gestion des modes de jeux
-VARP(n_mode,  -3, 0, 17);
+VARP(n_mode,  -4, 0, 17);
 VARFP(n_team, 0, 0, 1, { calcmode(); });
 VARFP(n_type, 0, 0, 3, { calcmode(); });
 VARFP(n_spec, 1, 1, 5, { calcmode(); });
@@ -22,7 +22,8 @@ void calcmode()
             if(n_spec >= 5) n_spec = 1;
             break;
         case 2: n_mode = n_spec+12; break; //base capture
-        case 3: n_mode = -3; break; //solo
+        case 3: n_mode = -3; break; //tutorial
+        case 4: n_mode = -4; break; //dmsp
         default:
             n_mode = n_spec+(n_team*4); //deathmatch
             if(n_spec >= 5) n_spec = 1;

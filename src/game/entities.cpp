@@ -42,7 +42,7 @@ namespace entities
 
             "objets/teleporteur",
 
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+            NULL, NULL, NULL, NULL, NULL, "objets/respawn", NULL,
         };
         return entmdlnames[type];
     }
@@ -74,9 +74,6 @@ namespace entities
                     if(e.attr2 > 0) preloadmodel(mapmodelname(e.attr2));
                 case JUMPPAD:
                     if(e.attr4 > 0) preloadmapsound(e.attr4);
-                    break;
-                case RESPAWNPOINT:
-                    if(!m_classicsp) continue;
                     break;
             }
         }
@@ -323,10 +320,13 @@ namespace entities
             }
 
             case RESPAWNPOINT:
-                if(!m_classicsp || d!=player1 || n==respawnent) break;
-                respawnent = n;
-                conoutf(CON_GAMEINFO, GAME_LANG ? "\f2Respawn point set!" : "\f2Point de réapparition mis à jour !");
-                playsound(S_NULL);
+                if(d!=player1 || n==respawnent) break;
+                if(m_classicsp || m_tutorial)
+                {
+                    respawnent = n;
+                    conoutf(CON_GAMEINFO, GAME_LANG ? "\f2Respawn point set!" : "\f2Point de réapparition mis à jour !");
+                    playsound(S_NULL);
+                }
                 break;
 
             case JUMPPAD:
@@ -580,7 +580,7 @@ namespace entities
             {
                 case TRIGGERING:
                 case TRIGGER_RESETTING:
-                    if(lastmillis-e.lasttrigger>=1000)
+                    if(lastmillis-e.lasttrigger>=500)
                     {
                         if(e.attr1)
                         {
@@ -671,6 +671,8 @@ namespace entities
                 e.attr2 = e.attr1;
                 e.attr1 = (int)player1->yaw;
                 break;
+            case RESPAWNPOINT:
+                e.attr1 = (int)player1->yaw;
         }
     }
 

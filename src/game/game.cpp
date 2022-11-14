@@ -137,7 +137,7 @@ namespace game
 
     void resetgamestate()
     {
-        if(m_classicsp)
+        if(m_classicsp || m_tutorial)
         {
             clearmonsters();                 // all monsters back at their spawns for editing
             entities::resettriggers();
@@ -393,7 +393,7 @@ namespace game
                 moveplayer(player1, 10, true, player1->epomillis, player1->jointmillis, player1->aptitude, player1->aptitude==APT_MAGICIEN ? player1->aptisort1 : player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || player1->aptitude==APT_KAMIKAZE ? player1->aptisort2 : player1->aptisort3, player1->armourtype==A_ASSIST && player1->armour>0 ? true : false);
                 swayhudgun(curtime);
                 entities::checkitems(player1);
-                if(m_sp || m_classicsp) entities::checktriggers();
+                if(m_sp || m_classicsp || m_tutorial) entities::checktriggers();
                 else if(cmode) cmode->checkitems(player1);
             }
         }
@@ -442,7 +442,7 @@ namespace game
 
     void spawnplayer(gameent *d)   // place at random spawn
     {
-        int ent = m_classicsp && d == player1 && respawnent >= 0 ? respawnent : -1;
+        int ent = (m_classicsp || m_tutorial) && d == player1 && respawnent >= 0 ? respawnent : -1;
 
         if(cmode) cmode->pickspawn(d);
         else findplayerspawn(d, ent, m_teammode && !m_capture  ? d->team : 0);

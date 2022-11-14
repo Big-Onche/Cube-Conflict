@@ -879,7 +879,7 @@ namespace game
             }
             formatstring(fname, "worldgun/%s", file);
             preloadmodel(fname);
-            if(m_sp) preloadmonsters();
+            if(m_tutorial || m_sp || m_dmsp) preloadmonsters();
         }
     }
 

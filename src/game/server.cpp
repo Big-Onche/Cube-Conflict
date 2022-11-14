@@ -882,7 +882,7 @@ namespace server
     {
         if(m_classicsp) return INT_MAX;
         int np = numclients(-1, true, false);
-        np = np<3 ? 4 : (np>4 ? 2 : 3);         // spawn times are dependent on number of players
+        np = m_tutorial ? 1 : np<3 ? 4 : (np>4 ? 2 : 3);         // spawn times are dependent on number of players
         int sec = 0;
         switch(type)
         {

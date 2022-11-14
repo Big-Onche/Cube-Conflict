@@ -155,6 +155,7 @@ enum
     M_NOITEMS    = 1<<14,
     M_DMSP       = 1<<15,
     M_CLASSICSP  = 1<<16,
+    M_TUTORIAL   = 1<<17,
 };
 
 static struct gamemodeinfo
@@ -164,10 +165,11 @@ static struct gamemodeinfo
     int flags;
 } gamemodes[] =
 {
-    { "DMSP", "DMSP", M_DMSP | M_LOCAL },           // -3
-    { "SP", "SP", M_CLASSICSP | M_LOCAL },          // -2
-    { "demo", "demo", M_DEMO | M_LOCAL },           // -1
-    { "Editeur de maps", "Map editor", M_EDIT },    // 0
+    { "DMSP", "DMSP", M_DMSP | M_LOCAL },               // -4
+    { "Tutoriel", "Tutorial", M_TUTORIAL | M_LOCAL },   // -3
+    { "SP", "SP", M_CLASSICSP | M_LOCAL },              // -2
+    { "demo", "demo", M_DEMO | M_LOCAL },               // -1
+    { "Editeur de maps", "Map editor", M_EDIT },        // 0
 
     //MODE 1, 2, 3, 4
     { "Tue Les Tous (Collecte)",    "Deathmatch (Weapon pickup)",   M_LOBBY },
@@ -227,6 +229,7 @@ static struct gamemodeinfo
 #define m_sp           (m_check(gamemode, M_DMSP | M_CLASSICSP))
 #define m_dmsp         (m_check(gamemode, M_DMSP))
 #define m_classicsp    (m_check(gamemode, M_CLASSICSP))
+#define m_tutorial     (m_check(gamemode, M_TUTORIAL))
 
 enum { MM_AUTH = -1, MM_OPEN = 0, MM_VETO, MM_LOCKED, MM_PRIVATE, MM_PASSWORD, MM_START = MM_AUTH, MM_INVALID = MM_START - 1 };
 
@@ -790,7 +793,7 @@ struct gamestate
             if(aptitude==0) addsweaps();
             return;
         }
-        else if(m_sp)
+        else if(m_sp || m_tutorial)
         {
             armourtype = A_BLUE;
             armour = 0;
