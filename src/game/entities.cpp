@@ -453,6 +453,7 @@ namespace entities
         TRIG_AUTO_RESET = 1<<4,
         TRIG_RUMBLE     = 1<<5,
         TRIG_LOCKED     = 1<<6,
+        TRIG_LOOP       = 1<<7,
         TRIG_ENDSP      = 1<<8
     };
 
@@ -465,8 +466,8 @@ namespace entities
         TRIG_RUMBLE,                  // 2
         TRIG_TOGGLE,                  // 3
         TRIG_TOGGLE | TRIG_RUMBLE,    // 4
-        TRIG_MANY,                    // 5
-        TRIG_MANY | TRIG_RUMBLE,      // 6
+        TRIG_MANY | TRIG_LOOP,        // 5
+        TRIG_MANY,                    // 6
         TRIG_MANY | TRIG_TOGGLE,      // 7
         TRIG_MANY | TRIG_TOGGLE | TRIG_RUMBLE,    // 8
         TRIG_COLLIDE | TRIG_TOGGLE | TRIG_RUMBLE, // 9
@@ -579,6 +580,11 @@ namespace entities
             switch(e.triggerstate)
             {
                 case TRIGGERING:
+                    if(checktriggertype(e.attr2, TRIG_LOOP) && e.o.dist(o)-player1->radius<=(checktriggertype(e.attr2, TRIG_COLLIDE) ? 20 : e.attr3))
+                    {
+                        doleveltrigger(e.attr1, 1);
+                        break;
+                    }
                 case TRIGGER_RESETTING:
                     if(lastmillis-e.lasttrigger>=500)
                     {

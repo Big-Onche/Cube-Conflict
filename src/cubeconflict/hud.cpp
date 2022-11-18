@@ -6,12 +6,18 @@
 
 int message[NUMMESSAGE];
 
-string custommsg;
+string custommsg, helpmsg;
 ICOMMAND(popupmsg, "s", (char *msg),
 {
     formatstring(custommsg, "%s", msg);
     message[MSG_CUSTOM]=totalmillis;
     playsound(S_NOTIFICATION);
+});
+
+ICOMMAND(helpmsg, "s", (char *msg),
+{
+    formatstring(helpmsg, "%s", msg);
+    message[MSG_HELP]=totalmillis;
 });
 
 namespace game
@@ -66,11 +72,18 @@ namespace game
             if(need_message1) {rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/24;}
         }
 
-        if(totalmillis - message[MSG_CUSTOM] <=5000) //////////////////////////////////////////////////////////////// LVL UP MESSAGE
+        if(totalmillis - message[MSG_CUSTOM] <=5000) //////////////////////////////////////////////////////////////// CUSTOM MSG
         {
             string msg;
             formatstring(msg, custommsg);
             rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/24;
+        }
+
+        if(totalmillis - message[MSG_HELP] <= 1) //////////////////////////////////////////////////////////////// CUSTOM MSG
+        {
+            string msg;
+            formatstring(msg, helpmsg);
+            rendermessage(msg, 80, 2.75f, 0);
         }
 
         if(totalmillis - message[MSG_YOUKILLED] <=2500)//////////////////////////////////////////////////////////////// PLAYER 1 KILL MESSAGE
