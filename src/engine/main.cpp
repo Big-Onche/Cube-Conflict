@@ -146,7 +146,6 @@ static void getbackgroundres(int &w, int &h)
 
 string backgroundcaption = "";
 Texture *backgroundmapshot = NULL;
-string backgroundmapname = "";
 char *backgroundmapinfo = NULL;
 char *backgroundastuce = NULL;
 
@@ -208,7 +207,7 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
 
         if(mapname)
         {
-            defformatstring(mapprettyname, "%s", GAME_LANG ? mapnames[n_map].mapname_en : mapnames[n_map].mapname_fr);
+            defformatstring(mapprettyname, "%s", GAME_LANG ? maptitle_en : maptitle_fr);
             int tw = text_width(mapprettyname);
             float tsz = 0.04f*min(screenw, screenh)/70,
                   tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*8.0f*min(screenw, screenh) - 70*tsz;
@@ -305,7 +304,6 @@ void renderbackground(const char *caption, Texture *mapshot, const char *mapname
     renderedframe = false;
     copystring(backgroundcaption, caption ? caption : "");
     backgroundmapshot = mapshot;
-    copystring(backgroundmapname, mapname ? mapname : "");
     if(mapinfo != backgroundmapinfo)
     {
         DELETEA(backgroundmapinfo);
@@ -321,7 +319,7 @@ void renderbackground(const char *caption, Texture *mapshot, const char *mapname
 void restorebackground(int w, int h, bool force)
 {
     if(renderedframe && !force) return;
-    renderbackgroundview(w, h, backgroundcaption[0] ? backgroundcaption : NULL, backgroundmapshot, backgroundmapname[0] ? backgroundmapname : NULL, backgroundmapinfo, backgroundastuce);
+    renderbackgroundview(w, h, backgroundcaption[0] ? backgroundcaption : NULL, backgroundmapshot, GAME_LANG ? maptitle_en : maptitle_fr, backgroundmapinfo, backgroundastuce);
 }
 
 float loadprogress = 0;

@@ -715,21 +715,6 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     resetmap();
 
     Texture *mapshot = textureload(picname, 3, true, false);
-    renderbackground(GAME_LANG ? "Loading..." : "Chargement...", mapshot, mname, game::getmapinfo(), game::getastuce());
-
-    setvar("mapversion", hdr.version, true, false);
-
-    renderprogress(0, "410 du monde...");
-
-    freeocta(worldroot);
-    worldroot = NULL;
-
-    int worldscale = 0;
-    while(1<<worldscale < hdr.worldsize) worldscale++;
-    setvar("mapsize", 1<<worldscale, true, false);
-    setvar("mapscale", worldscale, true, false);
-
-    renderprogress(0, "swatting des modérateurs...");
 
     loopi(hdr.numvars)
     {
@@ -786,6 +771,18 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     }
     if(dbgvars) conoutf(CON_DEBUG, "read %d vars", hdr.numvars);
 
+    renderbackground(GAME_LANG ? "Loading..." : "Chargement...", mapshot, mname, game::getmapinfo(), game::getastuce());
+
+    setvar("mapversion", hdr.version, true, false);
+
+    freeocta(worldroot);
+    worldroot = NULL;
+
+    int worldscale = 0;
+    while(1<<worldscale < hdr.worldsize) worldscale++;
+    setvar("mapsize", 1<<worldscale, true, false);
+    setvar("mapscale", worldscale, true, false);
+
     string gametype;
     bool samegame = true;
     int len = f->getchar();
@@ -805,8 +802,6 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     texmru.shrink(0);
     ushort nummru = f->getlil<ushort>();
     loopi(nummru) texmru.add(f->getlil<ushort>());
-
-    renderprogress(0, "loading entities...");
 
     vector<extentity *> &ents = entities::getents();
     int einfosize = entities::extraentinfosize();
@@ -849,14 +844,12 @@ bool load_world(const char *mname, const char *cname)        // still supports a
         f->seek((hdr.numents-MAXENTS)*(samegame ? sizeof(entity) + einfosize : eif), SEEK_CUR);
     }
 
-    renderprogress(0, "big bang...");
     loadvslots(f, hdr.numvslots);
     bool failed = false;
 
     worldroot = loadchildren(f, ivec(0, 0, 0), hdr.worldsize>>1, failed);
     if(failed) conoutf(CON_ERROR, "garbage in map");
 
-    renderprogress(0, "premier feuillet...");
     validatec(worldroot, hdr.worldsize>>1);
 
     if(!failed)

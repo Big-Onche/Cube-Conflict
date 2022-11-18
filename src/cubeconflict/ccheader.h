@@ -33,16 +33,6 @@ extern int dynlightdist;
 extern int randomambience;
 extern float wateramplitude;
 
-static const struct mapinfo { const char *mapname_en, *mapname_fr; } mapnames[] =
-{
-    {"Training",    "Entrainement"},
-    {"Village",     "Village"},
-    {"Factory",     "Usine"},
-    {"Moon",        "Lune"},
-    {"Castle",      "Chateau"},
-    {"Volcano",     "Volcan"},
-};
-
 //Stats & sauvegarde
 extern void getsteamname();
 extern void genpseudo(int forcelang = 0);

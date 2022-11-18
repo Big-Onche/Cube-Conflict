@@ -22,8 +22,7 @@ void calcmode()
             if(n_spec >= 5) n_spec = 1;
             break;
         case 2: n_mode = n_spec+12; break; //base capture
-        case 3: n_mode = -3; break; //tutorial
-        case 4: n_mode = -4; break; //dmsp
+        case 3: n_mode = -2; break; //tutorial
         default:
             n_mode = n_spec+(n_team*4); //deathmatch
             if(n_spec >= 5) n_spec = 1;
@@ -859,9 +858,7 @@ namespace game
 
     void changemap(const char *name)
     {
-        string mapnum;
-        formatstring(mapnum, "%d", n_map);
-        changemap(mapnum, m_valid(nextmode) ? nextmode : (remote ? 1 : 0));
+        changemap(name, m_valid(nextmode) ? nextmode : (remote ? 1 : 0));
         fullbrightmodels = 0;
     }
     ICOMMAND(map, "s", (char *name), changemap(name));
