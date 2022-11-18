@@ -15,11 +15,19 @@ bool randomevent(int probability)
     return false;
 }
 
+VAR(examresult, 0, 0, 4);
+ICOMMAND(calcexamresult, "iiii", (int *a, int *b, int *c, int *d),
+    if(max(max(*a, *b), max(*c, *d)) == *b) examresult = 2;
+    else if(max(max(*a, *b), max(*c, *d)) == *d) examresult = 4;
+    else if(max(max(*a, *b), max(*c, *d)) == *a) examresult = 1;
+    else if(max(max(*a, *b), max(*c, *d)) == *c) examresult = 3;
+);
+
 namespace game
 {
     VARFP(player1_aptitude, 0, 0, sizeof(aptitudes)/sizeof(aptitudes[0])-1,
     {
-        if(player1->state != CS_DEAD && isconnected())
+        if(player1->state != CS_DEAD && isconnected() && !m_tutorial)
         {
             conoutf(CON_GAMEINFO, GAME_LANG ? "\fcCannot change class while alive!" : "\fcImpossible de changer d'aptitude en étant vivant !");
             playsound(S_ERROR);
