@@ -72,7 +72,7 @@ string statlogodir;
 const char *getstatlogo(int statID) //Récupère le logo d'une statistique en particulier
 {
     if(statID>NUMSTATS) return "media/texture/game/notexture.png";
-    formatstring(statlogodir, "%s", statslist[statID].statlogo);
+    formatstring(statlogodir, "%s%s", "media/interface/" ,statslist[statID].statlogo);
     return statlogodir;
 }
 ICOMMAND(getstatlogo, "i", (int *statID), result(getstatlogo(*statID)));
@@ -181,10 +181,12 @@ void loadsave() //we read the poorly encrypted value for all stat
 bool succes[NUMACHS];
 bool achievementlocked(int achID) {return !succes[achID];} //Succès verrouillé ? OUI = TRUE, NON = FALSE
 
+ICOMMAND(unlockach, "i", (int *achID), if(*achID==ACH_PARKOUR || *achID==ACH_EXAM) unlockachievement(*achID));
+
 string tempachname;
 void unlockachievement(int achID) //Débloque le succès
 {
-    if(IS_ON_OFFICIAL_SERV && achievementlocked(achID)) //Ne débloque que si serveur officiel ET succès verrouillé
+    if(achievementlocked(achID) && (achID==ACH_PARKOUR || achID==ACH_FUCKYOU || achID==ACH_EXAM || IS_ON_OFFICIAL_SERV)) //Ne débloque que si serveur officiel ET succès verrouillé sauf exception
     {
         if(IS_USING_STEAM)
         {

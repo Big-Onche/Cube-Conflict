@@ -20,51 +20,51 @@ static const struct statsinfo { const char *statname, *statnicenameFR, *statnice
 {
     //Steam name                //French description                //English description               //Stat logo
     //Main game stats
-    {"STAT_CC",                 "CubeCoins",                        "CubeCoins",                        "media/interface/hud/cislacoins.png"},  //0
-    {"STAT_XP",                 "XP",                               "XP",                               "media/interface/hud/stats.png"},
-    {"STAT_LEVEL",              "Niveau",                           "Level",                            "media/interface/hud/stats.png"},
-    {"STAT_KILLS",              "Éliminations",                     "Frags",                            "media/interface/hud/flingue.jpg"},
-    {"STAT_MORTS",              "Morts",                            "Deaths",                           "media/interface/hud/tombe.png"},
-    {"STAT_KDRATIO",            "Ratio morts/éliminations",         "Kills/Deaths ratio",               "media/interface/hud/stats.png"},       //Calculated in calcratio() with STAT_KILLS & STAT_MORTS then called in getstatinfo() STAT_KDRATIO not saved because float shit.
-    {"STAT_DAMMAGERECORD",      "Record de dommages en une partie", "Damage record in a single match",  "media/interface/hud/stats.png"},
-    {"STAT_KILLSTREAK",         "Meilleure série d'éliminations",   "Best killstreak",                  "media/interface/hud/rage.png"},
-    {"STAT_MAXKILLDIST",        "Elimination la plus éloignée",     "Farthest frag",                    "media/interface/hud/campeur.png"},
-    {"STAT_WINS",               "Victoires",                        "Victories",                        "media/interface/hud/cool.jpg"},
-    {"STAT_SUICIDES",           "Suicides",                         "Suicides",                         "media/interface/hud/fou.jpg"},             //10
-    {"STAT_ALLIESTUES",         "Alliés tués",                      "Killed allies",                    "media/interface/hud/sournois_red.jpg"},
-    {"STAT_TIMEPLAYED",         "Temps de jeu",                     "Time played",                      "media/interface/hud/chrono.png"},      //Calculated in secs with STAT_TIMEPLAYED in dotime(), calculated in HH:MM:SS for display in getstatinfo()
-    {"STAT_DRAPEAUXENVOL",      "Drapeaux ennemis volés",           "Stolen enemy flags",               "media/interface/hud/drapeau_ennemi.png"},
-    {"STAT_DRAPEAUXENRAP",      "Drapeaux ennemis remportés",       "Enemy flags won",                  "media/interface/hud/drapeau_ennemi.png"},
-    {"STAT_DRAPEAUXALYREC",     "Drapeaux alliés récupérés",        "Allied flags recovered",           "media/interface/hud/drapeau_allie.png"},
-    {"STAT_BASEHACK",           "Temps passé à hacker",             "Time spent hacking",               "media/interface/hud/radio_off.jpg"},
+    {"STAT_CC",                 "CubeCoins",                        "CubeCoins",                        "hud/cislacoins.png"},  //0
+    {"STAT_XP",                 "XP",                               "XP",                               "hud/stats.png"},
+    {"STAT_LEVEL",              "Niveau",                           "Level",                            "hud/stats.png"},
+    {"STAT_KILLS",              "Éliminations",                     "Frags",                            "hud/flingue.jpg"},
+    {"STAT_MORTS",              "Morts",                            "Deaths",                           "hud/tombe.png"},
+    {"STAT_KDRATIO",            "Ratio morts/éliminations",         "Kills/Deaths ratio",               "hud/stats.png"},       //Calculated in calcratio() with STAT_KILLS & STAT_MORTS then called in getstatinfo() STAT_KDRATIO not saved because float shit.
+    {"STAT_DAMMAGERECORD",      "Record de dommages en une partie", "Damage record in a single match",  "hud/stats.png"},
+    {"STAT_KILLSTREAK",         "Meilleure série d'éliminations",   "Best killstreak",                  "hud/rage.png"},
+    {"STAT_MAXKILLDIST",        "Elimination la plus éloignée",     "Farthest frag",                    "hud/campeur.png"},
+    {"STAT_WINS",               "Victoires",                        "Victories",                        "hud/cool.jpg"},
+    {"STAT_SUICIDES",           "Suicides",                         "Suicides",                         "hud/fou.jpg"},             //10
+    {"STAT_ALLIESTUES",         "Alliés tués",                      "Killed allies",                    "hud/sournois_red.jpg"},
+    {"STAT_TIMEPLAYED",         "Temps de jeu",                     "Time played",                      "hud/chrono.png"},      //Calculated in secs with STAT_TIMEPLAYED in dotime(), calculated in HH:MM:SS for display in getstatinfo()
+    {"STAT_DRAPEAUXENVOL",      "Drapeaux ennemis volés",           "Stolen enemy flags",               "hud/drapeau_ennemi.png"},
+    {"STAT_DRAPEAUXENRAP",      "Drapeaux ennemis remportés",       "Enemy flags won",                  "hud/drapeau_ennemi.png"},
+    {"STAT_DRAPEAUXALYREC",     "Drapeaux alliés récupérés",        "Allied flags recovered",           "hud/drapeau_allie.png"},
+    {"STAT_BASEHACK",           "Temps passé à hacker",             "Time spent hacking",               "hud/radio_off.jpg"},
     //Classes
-    {"STAT_ABILITES",           "Abilitées utilisées",              "Used abilities",                   "media/interface/hud/stats.png"},
-    {"STAT_HEALTHREGEN",        "Santé redonnée aux alliés",        "Health restored to allies",        "media/interface/hud/medecin.jpg"},
-    {"STAT_HEALTHREGAIN",       "Santé récupérée grâce aux médecins", "Health recovered with medics",   "media/interface/hud/coeur.png"},
-    {"STAT_MANAREGEN",          "Mana redonné aux alliés",          "Mana restored to allies",          "media/interface/hud/mana.png"},
-    {"STAT_MANAREGAIN",         "Mana récupéré grâce aux junkies",  "Mana recovered with junkies",      "media/interface/hud/dealer.png"},           //20
+    {"STAT_ABILITES",           "Abilitées utilisées",              "Used abilities",                   "hud/stats.png"},
+    {"STAT_HEALTHREGEN",        "Santé redonnée aux alliés",        "Health restored to allies",        "apt_logo/medic.png"},
+    {"STAT_HEALTHREGAIN",       "Santé récupérée grâce aux médecins", "Health recovered with medics",   "hud/coeur.png"},
+    {"STAT_MANAREGEN",          "Mana redonné aux alliés",          "Mana restored to allies",          "hud/mana.png"},
+    {"STAT_MANAREGAIN",         "Mana récupéré grâce aux junkies",  "Mana recovered with junkies",      "apt_logo/junkie.png"},           //20
     //Shields
-    {"STAT_BOUCLIERBOIS",       "Boucliers en bois utilisés",       "Wooden shields used",              "media/interface/hud/bouclier_bois.png"},
-    {"STAT_BOUCLIERFER",        "Boucliers en fer utilisés",        "Iron shields used",                "media/interface/hud/bouclier_fer.png"},
-    {"STAT_BOUCLIEROR",         "Boucliers en or utilisés",         "Gold shields used",                "media/interface/hud/bouclier_or.png"},
-    {"STAT_BOUCLIERMAGNETIQUE", "Boucliers magnétiques utilisés",   "Magnetic shields used",            "media/interface/hud/bouclier_magnetique.png"},
-    {"STAT_ARMUREASSIST",       "Armures assistées utilisés",       "Power armors used",                "media/interface/hud/robot.png"},
-    {"STAT_REPASSIST",          "Réparations d'armure assistée",    "Power armor repairs",              "media/interface/hud/options.jpg"},
+    {"STAT_BOUCLIERBOIS",       "Boucliers en bois utilisés",       "Wooden shields used",              "hud/bouclier_bois.png"},
+    {"STAT_BOUCLIERFER",        "Boucliers en fer utilisés",        "Iron shields used",                "hud/bouclier_fer.png"},
+    {"STAT_BOUCLIEROR",         "Boucliers en or utilisés",         "Gold shields used",                "hud/bouclier_or.png"},
+    {"STAT_BOUCLIERMAGNETIQUE", "Boucliers magnétiques utilisés",   "Magnetic shields used",            "hud/bouclier_magnetique.png"},
+    {"STAT_ARMUREASSIST",       "Armures assistées utilisés",       "Power armors used",                "hud/robot.png"},
+    {"STAT_REPASSIST",          "Réparations d'armure assistée",    "Power armor repairs",              "hud/options.jpg"},
     //Objects
-    {"STAT_PANACHAY",           "Panachays consommés",              "Beers drunk",                      "media/interface/hud/coeur.png"},
-    {"STAT_MANA",               "Potions de mana consommées",       "Mana potions consumed",            "media/interface/hud/mana.png"},
-    {"STAT_COCHON",             "Cochons grillés mangés",           "Grilled pigs eaten",               "media/interface/hud/stats.png"},
-    {"STAT_STEROS",             "Cures de stéroïdes",               "Steroids cycles",                  "media/interface/hud/steros.png"},           //30
-    {"STAT_EPO",                "Piqures d'EPO",                    "EPO shots",                        "media/interface/hud/epo.png"},
-    {"STAT_JOINT",              "Joints fumés",                     "Smoked joints",                    "media/interface/hud/joint.png"},
-    {"STAT_CHAMPIS",            "Champignons mangés",               "Shrooms eaten",                    "media/interface/hud/champis.png"},
-    {"STAT_ARMES",              "Armes ramassées",                  "Picked up weapons",                "media/interface/hud/chargeur.png"},
-    {"STAT_SUPERARMES",         "Super-caisses ramassées",          "Picked Up Super Crates",           "media/interface/hud/stats.png"},
+    {"STAT_PANACHAY",           "Panachays consommés",              "Beers drunk",                      "hud/coeur.png"},
+    {"STAT_MANA",               "Potions de mana consommées",       "Mana potions consumed",            "hud/mana.png"},
+    {"STAT_COCHON",             "Cochons grillés mangés",           "Grilled pigs eaten",               "hud/stats.png"},
+    {"STAT_STEROS",             "Cures de stéroïdes",               "Steroids cycles",                  "hud/steros.png"},           //30
+    {"STAT_EPO",                "Piqures d'EPO",                    "EPO shots",                        "hud/epo.png"},
+    {"STAT_JOINT",              "Joints fumés",                     "Smoked joints",                    "hud/joint.png"},
+    {"STAT_CHAMPIS",            "Champignons mangés",               "Shrooms eaten",                    "hud/champis.png"},
+    {"STAT_ARMES",              "Armes ramassées",                  "Picked up weapons",                "hud/chargeur.png"},
+    {"STAT_SUPERARMES",         "Super-caisses ramassées",          "Picked Up Super Crates",           "hud/stats.png"},
     //Stupid statistics
-    {"STAT_ATOM",               "Bombes atomiques tirées",          "Amount of atom bomb fired",        "media/interface/hud/stats.png"},
-    {"STAT_MUNSHOOTED",         "Munitions tirées au total",        "Amount of ammo fired",             "media/interface/hud/stats.png"},
-    {"STAT_TOTALDAMAGEDEALT",   "Dommages infligés au total",       "Amount of damage dealt",           "media/interface/hud/stats.png"},
-    {"STAT_TOTALDAMAGERECIE",   "Dommages reçus au total",          "Amount of damage recieved",        "media/interface/hud/stats.png"},
+    {"STAT_ATOM",               "Bombes atomiques tirées",          "Amount of atom bomb fired",        "hud/stats.png"},
+    {"STAT_MUNSHOOTED",         "Munitions tirées au total",        "Amount of ammo fired",             "hud/stats.png"},
+    {"STAT_TOTALDAMAGEDEALT",   "Dommages infligés au total",       "Amount of damage dealt",           "hud/stats.png"},
+    {"STAT_TOTALDAMAGERECIE",   "Dommages reçus au total",          "Amount of damage recieved",        "hud/stats.png"},
 };
 
 //////////////////////////////////////// Succès | Achievements ////////////////////////////////////////
@@ -75,7 +75,8 @@ enum {ACH_TRIPLETTE = 0, ACH_PENTAPLETTE, ACH_DECAPLETTE, ACH_ATOME, ACH_WINNER,
         ACH_SOLDAT, ACH_LIEUTENANT, ACH_MAJOR, ACH_BEAUTIR, ACH_DEFONCE, ACH_PRECIS, ACH_KILLASSIST, ACH_KILLER, ACH_SACAPV,
         ACH_CADENCE, ACH_1HPKILL, ACH_MAXSPEED, ACH_INCREVABLE, ACH_CHANCE, ACH_CPASBIEN, ACH_SUICIDEFAIL, ACH_FUCKYEAH, ACH_RICHE,
         ACH_TUEURFANTOME, ACH_EPOFLAG, ACH_M32SUICIDE, ACH_ESPIONDEGUISE, ACH_FUCKYOU, ACH_ABUS, ACH_DESTRUCTEUR, ACH_RAGE,
-        ACH_DAVIDGOLIATH, ACH_LANCEEPO, ACH_PASLOGIQUE, ACH_JUSTEPOUR, ACH_BRICOLEUR, ACH_NOSCOPE, ACH_THUGPHYSIQUE, ACH_SPAAACE, NUMACHS};
+        ACH_DAVIDGOLIATH, ACH_LANCEEPO, ACH_PASLOGIQUE, ACH_JUSTEPOUR, ACH_BRICOLEUR, ACH_NOSCOPE, ACH_THUGPHYSIQUE, ACH_SPAAACE,
+        ACH_PARKOUR, ACH_EXAM, NUMACHS};
 extern bool succes[NUMACHS];
 
 static const struct achinfo { const char *achname, *achnicenameFR, *achnicenameEN, *achdescFR, *achdescEN; } achievements[NUMACHS] =
@@ -123,4 +124,6 @@ static const struct achinfo { const char *achname, *achnicenameFR, *achnicenameE
     {"ACH_NOSCOPE",       "No scope",                    "No scope",                    "Tuer un ennemi à la SV-98 sans viser.",                                 "Kill an enemy with a SV-98 without aiming."},
     {"ACH_THUGPHYSIQUE",  "Thug de la physique",         "Physics thug",                "Tuer un ennemi au lance-flammes alors qu'il se trouve dans l'eau.",     "Kill an enemy with a flamethrower while they are in water."},
     {"ACH_SPAAACE",       "Aller plus haut",             "Spaaaaaace",                  "Atteindre la limite de hauteur sur la Lune.",                           "Reach the height limit on the Moon."},
+    {"ACH_PARKOUR",       "Le patron du parkour",        "The parkour master",          "Réussir le parkour sur la lave.",                                       "Finish the lava parkour."},
+    {"ACH_EXAM",          "Examen surprise !",           "Surprise exam!",              "Passer l'examen du Sergent Hartman",                                    "Pass the exam of Sergeant Hartman."},
 };
