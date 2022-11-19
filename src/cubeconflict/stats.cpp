@@ -244,13 +244,6 @@ const char *getachievementname(int achID) //Récupère le nom d'un succès en parti
 }
 ICOMMAND(getachievementname, "i", (int *achID), result(getachievementname(*achID)));
 
-const char *getachievementinfo(int achID) //Récupère la description d'un succès en particulier
-{
-    if(achID>NUMACHS) return GAME_LANG ? "Invalid ID" : "ID Invalide";
-    return GAME_LANG ? achievements[achID].achdescEN : achievements[achID].achdescFR;
-}
-ICOMMAND(getachievementinfo, "i", (int *achID), result(getachievementinfo(*achID)));
-
 const char *getachievementcolor(int achID) //Renvoie une couleur pour savoir si le succes est verrouillé ou non
 {
     if(achID>NUMACHS) return "0x777777";
