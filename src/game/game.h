@@ -165,11 +165,11 @@ static struct gamemodeinfo
     int flags;
 } gamemodes[] =
 {
-    { "DMSP", "DMSP", M_DMSP | M_LOCAL },               // -4
-    { "Tutoriel", "Tutorial", M_TUTORIAL | M_LOCAL },   // -3
-    { "SP", "SP", M_CLASSICSP | M_LOCAL },              // -2
-    { "demo", "demo", M_DEMO | M_LOCAL },               // -1
-    { "Editeur de maps", "Map editor", M_EDIT },        // 0
+    { "DMSP", "DMSP", M_DMSP | M_LOCAL },               // -3
+    { "Tutoriel", "Tutorial", M_TUTORIAL | M_LOCAL },   // -2
+    { "SP", "SP", M_CLASSICSP | M_LOCAL },              // -1
+    { "demo", "demo", M_DEMO | M_LOCAL },               // 0
+    { "Editeur de maps", "Map editor", M_EDIT },        // 1
 
     //MODE 1, 2, 3, 4
     { "Tue Les Tous (Collecte)",    "Deathmatch (Weapon pickup)",   M_LOBBY },

@@ -3,31 +3,10 @@
 #include "ccheader.h"
 #include "stats.h"
 
-VAR(n_ambiance, 0, 0, 8);
-VARP(n_map, 0, 1, 99);
+VAR(map_atmo, 0, 0, 8);
 VARR(mapofficielle, 0, 0, 1);
 
-extern void calcmode();     //Gestion des modes de jeux
-VARP(n_mode,  -4, 0, 17);
-VARFP(n_team, 0, 0, 1, { calcmode(); });
-VARFP(n_type, 0, 0, 3, { calcmode(); });
-VARFP(n_spec, 1, 1, 5, { calcmode(); });
 int cnidentiquearme = 0;
-
-void calcmode()
-{
-    switch(n_type)
-    {
-        case 1: n_mode = n_spec+8; //ctf
-            if(n_spec >= 5) n_spec = 1;
-            break;
-        case 2: n_mode = n_spec+12; break; //base capture
-        case 3: n_mode = -2; break; //tutorial
-        default:
-            n_mode = n_spec+(n_team*4); //deathmatch
-            if(n_spec >= 5) n_spec = 1;
-    }
-}
 
 string pseudobasique;
 char *playerrndname(bool firstpart, int feminin, int langue)
@@ -1572,8 +1551,8 @@ namespace game
                     return;
                 }
                 sessionid = getint(p);
-                n_ambiance = getint(p);
-                n_map = getint(p);
+                map_atmo = getint(p);
+                map_sel = getint(p);
                 player1->clientnum = mycn;      // we are now connected
                 if(getint(p) > 0) conoutf("this server is password protected");
                 getstring(servdesc, p, sizeof(servdesc));
@@ -1660,7 +1639,7 @@ namespace game
                 filtertext(text, text, false);
                 fixmapname(text);
                 changemapserv(text, getint(p));
-                n_map = atoi(text);
+                map_sel = atoi(text);
                 mapchanged = true;
                 if(getint(p)) entities::spawnitems();
                 else senditemstoserver = false;
@@ -1817,7 +1796,7 @@ namespace game
 
             case N_SERVAMBIENT:
             {
-                if(multiplayer(true))n_ambiance = getint(p);
+                if(multiplayer(true)) map_atmo = getint(p);
                 break;
             }
 

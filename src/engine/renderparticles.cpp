@@ -1405,7 +1405,7 @@ static void makeparticles(entity &e)
             newparticle(e.o, offsetvec(e.o, e.attr4, 1000*3+(e.attr5*300)), 1, PART_NUAGE1+e.attr2, partcloudcolour, 100+(e.attr3*10));
             break;
         case 15: //Rainbow/Arc-en-ciel
-            if(n_ambiance==8) newparticle(e.o, offsetvec(e.o, e.attr4, 1000*3+(e.attr5*300)), 1, PART_RAINBOW, 0xAAAAAA, 100+(e.attr3*10));
+            if(map_atmo==8) newparticle(e.o, offsetvec(e.o, e.attr4, 1000*3+(e.attr5*300)), 1, PART_RAINBOW, 0xAAAAAA, 100+(e.attr3*10));
             break;
         case 16:
             {
@@ -1423,8 +1423,8 @@ static void makeparticles(entity &e)
 
         case 17: //rain
             {
-                if(n_ambiance==4 || n_ambiance==8) regularshape(PART_RAIN, max(1+e.attr2, 1), 0x555566, 44, n_ambiance==8 ? e.attr3/2 : e.attr3, 10000, e.o, 1+(rnd(2)), 200, -900, e.attr5, true, 200);
-                if(randomevent(25*nbfps) && n_ambiance == 4 && isconnected())
+                if(map_atmo==4 || map_atmo==8) regularshape(PART_RAIN, max(1+e.attr2, 1), 0x555566, 44, map_atmo==8 ? e.attr3/2 : e.attr3, 10000, e.o, 1+(rnd(2)), 200, -900, e.attr5, true, 200);
+                if(randomevent(25*nbfps) && map_atmo == 4 && isconnected())
                 {
                     vec possky = e.o; vec posground = e.o;
                     int posx = -1250+rnd(2500), posy = -1250+rnd(2500);
@@ -1445,19 +1445,19 @@ static void makeparticles(entity &e)
             break;
 
         case 18: //snow
-            if(n_ambiance!=8) return;
+            if(map_atmo!=8) return;
             regularshape(PART_SNOW, max(1+e.attr2, 1), colorfromattr(e.attr4), 44, e.attr3, 10000, e.o, 2+(rnd(3)), 200, -400, e.attr5, true, 200);
             break;
 
         case 19: //apocalypse
             {
-                if(n_map==5);
-                else if(n_ambiance!=5) return;
+                if(map_sel==5);
+                else if(map_atmo!=5) return;
 
-                regularshape(PART_SMOKE, max(1+e.attr2, 1), n_map==5 ? 0x352412 : 0x184418, 44, 3, 10000, e.o, 0.5f, 200, -200, -2500, true, 500, 22.f);
+                regularshape(PART_SMOKE, max(1+e.attr2, 1), map_sel==5 ? 0x352412 : 0x184418, 44, 3, 10000, e.o, 0.5f, 200, -200, -2500, true, 500, 22.f);
                 regularshape(PART_FIRESPARK, max(1+e.attr2, 1), colorfromattr(e.attr4), 44, e.attr3, 10000, e.o, 2+(rnd(3)), 200, -400, e.attr5, true, 300);
 
-                if(randomevent(6*nbfps) && n_map!=5 && isconnected())
+                if(randomevent(6*nbfps) && map_sel!=5 && isconnected())
                 {
                     vec possky = e.o; vec posground = e.o;
                     int posx = -1250+rnd(2500), posy = -1250+rnd(2500);

@@ -808,7 +808,7 @@ namespace recorder
 
 extern void bgquad(float x, float y, float w, float h, float tx = 0, float ty = 0, float tw = 1, float th = 1);
 
-extern int n_ambiance, n_map;  //Config partie Cube Conflict
+extern int map_atmo, map_sel;  //Config partie Cube Conflict
 
 extern int grassdist, grass, decoration_lod; // LOD Cube Conflict
 extern float grassstep;

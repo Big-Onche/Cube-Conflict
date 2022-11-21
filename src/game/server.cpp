@@ -2877,7 +2877,7 @@ namespace server
 
     void sendservinfo(clientinfo *ci)
     {
-        sendf(ci->clientnum, 1, "ri7ss", N_SERVINFO, ci->clientnum, PROTOCOL_VERSION, ci->sessionid, multiplayer(false) ? servambient : n_ambiance, atoi(smapname), serverpass[0] ? 1 : 0, serverdesc, serverauth);
+        sendf(ci->clientnum, 1, "ri7ss", N_SERVINFO, ci->clientnum, PROTOCOL_VERSION, ci->sessionid, multiplayer(false) ? servambient : map_atmo, atoi(smapname), serverpass[0] ? 1 : 0, serverdesc, serverauth);
     }
 
     void noclients()

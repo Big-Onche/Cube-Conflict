@@ -241,7 +241,7 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
             float ilh = 1.1f*min(w, h), ilw = ilh*1.8f,
                   ilx = 0.5f*(w - ilw), ily = 0.5f*(h - ilh);
 
-            formatstring(backgroundimg, "media/map/%d.png", n_map);
+            formatstring(backgroundimg, "media/map/%d.png", map_sel);
 
             settexture(backgroundimg);
             bgquad(ilx-parallaxX/-40, ily-parallaxY/-40, ilw, ilh);

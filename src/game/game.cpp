@@ -23,6 +23,8 @@ ICOMMAND(calcexamresult, "iiii", (int *a, int *b, int *c, int *d),
     else if(max(max(*a, *b), max(*c, *d)) == *c) examresult = 3;
 );
 
+VARP(map_sel, 0, 1, 99);
+
 namespace game
 {
     VARFP(player1_aptitude, 0, 0, sizeof(aptitudes)/sizeof(aptitudes[0])-1,
@@ -359,7 +361,7 @@ namespace game
         {
             isalive = 1;
             if(player1->health>=2000) unlockachievement(ACH_SACAPV);
-            if(lookupmaterial(player1->o)==MAT_NOCLIP && n_map==3) unlockachievement(ACH_SPAAACE);
+            if(lookupmaterial(player1->o)==MAT_NOCLIP && map_sel==3) unlockachievement(ACH_SPAAACE);
             if(player1->aptitude==APT_KAMIKAZE && player1->ammo[GUN_KAMIKAZE]<=0 && totalmillis-lastshoot>=500 && totalmillis-lastshoot<=750 && isconnected()) unlockachievement(ACH_SUICIDEFAIL);
             if(player1->steromillis && player1->epomillis && player1->jointmillis && player1->champimillis) unlockachievement(ACH_DEFONCE);
 
@@ -1051,12 +1053,12 @@ namespace game
         }
         if (floorlevel>0)
         {
-            particle_splash(n_ambiance==4 && randomambience  ? PART_EAU : PART_SMOKE, pl->armourtype==A_ASSIST ? 12 : 10, 100, d->feetpos(), n_ambiance==4 && randomambience  ? 0x111111 : 0x666666, 7.0f+rnd(pl->armourtype==A_ASSIST ? 10 : 5), 400, 20);
+            particle_splash(map_atmo==4 && randomambience  ? PART_EAU : PART_SMOKE, pl->armourtype==A_ASSIST ? 12 : 10, 100, d->feetpos(), map_atmo==4 && randomambience  ? 0x111111 : 0x666666, 7.0f+rnd(pl->armourtype==A_ASSIST ? 10 : 5), 400, 20);
             if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_ASSIST && pl->armour>0 ? S_JUMP_ASSIST : pl->aptitude==APT_NINJA || (pl->aptitude==APT_KAMIKAZE && pl->aptisort2) ? S_JUMP_NINJA : S_JUMP_BASIC, d);
         }
         else if(floorlevel<0)
         {
-            particle_splash(n_ambiance==4 && randomambience ? PART_EAU : PART_SMOKE, pl->armourtype==A_ASSIST ? 20 : 15, 120, d->feetpos(), n_ambiance==4 && randomambience  ? 0x131313 : 0x442211, 7.0f+rnd(pl->armourtype==A_ASSIST ? 10 : 5), 400, 20);
+            particle_splash(map_atmo==4 && randomambience ? PART_EAU : PART_SMOKE, pl->armourtype==A_ASSIST ? 20 : 15, 120, d->feetpos(), map_atmo==4 && randomambience  ? 0x131313 : 0x442211, 7.0f+rnd(pl->armourtype==A_ASSIST ? 10 : 5), 400, 20);
             if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_ASSIST && pl->armour>0 ? S_LAND_ASSIST : S_LAND_BASIC, d);
         }
     }
