@@ -518,7 +518,7 @@ namespace game
         loopv(players)
         {
             gameent *d = players[i];
-            if(d->state==CS_SPECTATOR || d->state==CS_SPAWNING || d->lifesequence < 0 || d == exclude || (d->state==CS_DEAD && hidedead) || d->aptitude==APT_VIKING || (d->aptitude==APT_MAGICIEN && d->aptisort3)) continue;
+            if(d->state==CS_SPECTATOR || d->state==CS_SPAWNING || d->lifesequence < 0 || d == exclude || (d->state==CS_DEAD && hidedead) || d->aptitude==APT_VIKING || (d==hudplayer() && d->aptitude==APT_MAGICIEN && d->aptisort3)) continue;
             if(d!=player1) renderplayer(d);
 
             vec dir = vec(d->o).sub(camera1->o);
