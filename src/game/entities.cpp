@@ -124,14 +124,13 @@ namespace entities
     // these two functions are called when the server acknowledges that you really
     // picked up the item (in multiplayer someone may grab it before you).
 
+
     void pickupeffects(int n, gameent *d, int rndsweap)
     {
         if(!ents.inrange(n)) return;
-        extentity *e = ents[n];
-        int type = e->type;
+        int type = ents[n]->type;
         if(type<I_RAIL || type>I_MANA) return;
-        e->clearspawned();
-        e->clearnopickup();
+        ents[n]->clearspawned();
         if(!d) return;
         d->pickup(type, d->aptitude, d->aptisort1, d->armourtype, rndsweap);
 
@@ -269,10 +268,10 @@ namespace entities
         switch(e->type)
         {
             default:
-                if(d->canpickup(e->type, d->aptitude, d->armourtype))
+                if(d->canpickup(ents[n]->type, d->aptitude, d->armourtype))
                 {
                     addmsg(N_ITEMPICKUP, "rci", d, n);
-                    e->setnopickup(); // even if someone else gets it first
+                    ents[n]->clearspawned(); // even if someone else gets it first
 
                     if(d==player1)
                     {

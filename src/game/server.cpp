@@ -921,10 +921,10 @@ namespace server
 
     bool pickup(int i, int sender)         // server side item pickup, acknowledge first client that gets it
     {
-        int rndsweap = sents[i].type==I_SUPERARME ? rnd(4) : 0;
         if((m_timed && gamemillis>=gamelimit) || !sents.inrange(i) || !sents[i].spawned) return false;
+        int rndsweap = sents[i].type==I_SUPERARME ? rnd(4) : 0;
         clientinfo *ci = getinfo(sender);
-        if(!ci) return false;
+        if(!ci || (!ci->local && !ci->state.canpickup(sents[i].type, ci->aptitude, ci->state.armourtype))) return false;
         sents[i].spawned = false;
         sents[i].spawntime = spawntime(sents[i].type);
         sendf(-1, 1, "ri4", N_ITEMACC, i, sender, rndsweap);
