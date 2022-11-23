@@ -4,8 +4,6 @@
 #include "game.h"
 #include "stats.h"
 
-int getspyability;
-
 int abilitydata(int aptitude)
 {
     switch(aptitude)
@@ -19,12 +17,13 @@ int abilitydata(int aptitude)
     }
 }
 
+int getspyability;
+
 namespace game
 {
     void aptitude(gameent *d, int ability, bool request) //Commandes d'aptitudes
     {
         if(d->state==CS_DEAD && !isconnected()) return;
-        int sound = -1;
 
         switch(ability)
         {
@@ -38,17 +37,11 @@ namespace game
                 }
                 //We recieve some shit from the server
                 d->canability1 = false; d->lastability1 = totalmillis; if(d==player1) stat[STAT_ABILITES]++;
-                //Sounds and graphics effects
-                sound = sorts[abilitydata(d->aptitude)].sound1;
+
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
-                if(d->aptitude!=APT_ESPION)
+                vec soundpos = d->o;
+                if(d->aptitude==APT_ESPION)
                 {
-                    d->sortchan = playsound(sound, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->sortchan, 300);
-                    d->sortsound = sound;
-                }
-                else
-                {
-                    vec doublepos = d->o;
                     int posx = 25, posy = 25;
                     switch(d->aptiseed)
                     {
@@ -56,11 +49,11 @@ namespace game
                         case 2: posx=25; posy=-25; break;
                         case 3: posx=-25; posy=25; break;
                     }
-                    doublepos.add(vec(posx, posy, 0));
-
-                    d->sortchan = playsound(sound, &doublepos, NULL, 0, 0, 100, d->sortchan, 225);
-                    d->sortsound = sound;
+                    soundpos.add(vec(posx, posy, 0));
                 }
+
+                d->abi1chan = playsound(sorts[abilitydata(d->aptitude)].sound1, &soundpos, NULL, 0, 0, 100, d->abi1chan, 225);
+                d->abi1snd = sorts[abilitydata(d->aptitude)].sound1;
             }
             break;
 
@@ -75,9 +68,9 @@ namespace game
 
                 d->canability2 = false; d->lastability2 = totalmillis; if(d==player1) stat[STAT_ABILITES]++;
 
-                sound = sorts[abilitydata(d->aptitude)].sound2;
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0, 100, -1, 250);
-                d->sortchan = playsound(sound, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->sortchan, 275);
+                d->abi2chan = playsound(sorts[abilitydata(d->aptitude)].sound2, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->abi2chan, 275);
+                d->abi2snd = sorts[abilitydata(d->aptitude)].sound2;
 
                 if(d->aptitude==APT_ESPION)
                 {
@@ -98,9 +91,9 @@ namespace game
 
                 d->canability3 = false; d->lastability3 = totalmillis; if(d==player1) stat[STAT_ABILITES]++;
 
-                sound = sorts[abilitydata(d->aptitude)].sound3;
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
-                d->sortchan = playsound(sound, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->sortchan, 275);
+                d->abi3chan = playsound(sorts[abilitydata(d->aptitude)].sound3, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->abi3chan, 275);
+                d->abi3snd = sorts[abilitydata(d->aptitude)].sound3;
 
                 if(d->aptitude==APT_ESPION) particle_fireball(d->o, 1000, PART_RADAR, 1000, 0xAAAAAA, 20.f);
 
@@ -111,7 +104,6 @@ namespace game
                 }
             }
         }
-        d->sortsound = sound;
     }
 
     void player1aptitude(int ability) //Player1 abilities commands

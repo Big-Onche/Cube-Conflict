@@ -30,21 +30,6 @@ namespace game
 
     vector<gameent *> ragdolls;
 
-    void saveragdoll(gameent *d)
-    {
-        if(!d->ragdoll || !ragdollmillis || (!ragdollfade && lastmillis > d->lastpain + ragdollmillis)) return;
-        gameent *r = new gameent(*d);
-        r->lastupdate = ragdollfade && lastmillis > d->lastpain + max(ragdollmillis - ragdollfade, 0) ? lastmillis - max(ragdollmillis - ragdollfade, 0) : d->lastpain;
-        r->edit = NULL;
-        r->ai = NULL;
-        if(d==player1) r->playermodel = playermodel;
-        r->attackchan = -1;
-        r->dansechan = -1;
-        r->sortchan = -1;
-        ragdolls.add(r);
-        d->ragdoll = NULL;
-    }
-
     void savetombe(gameent *d)
     {
         if(!ragdollmillis || (!ragdollfade && lastmillis > d->lastpain + ragdollmillis)) return;
@@ -52,9 +37,7 @@ namespace game
         r->lastupdate = ragdollfade && lastmillis > d->lastpain + max(ragdollmillis - ragdollfade, 0) ? lastmillis - max(ragdollmillis - ragdollfade, 0) : d->lastpain;
         r->edit = NULL;
         r->ai = NULL;
-        r->attackchan = -1;
-        r->dansechan = -1;
-        r->sortchan = -1;
+        r->attackchan = r->dansechan = r->abi1chan = r->abi2chan = r->abi3chan = -1;
         ragdolls.add(r);
         d->ragdoll = NULL;
     }

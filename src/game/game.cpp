@@ -948,7 +948,6 @@ namespace game
 
     void startgame()
     {
-
         clearmonsters();
         clearprojectiles();
         clearbouncers();

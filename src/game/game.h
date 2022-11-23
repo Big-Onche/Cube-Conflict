@@ -798,6 +798,7 @@ struct gamestate
             armourtype = A_BLUE;
             armour = 0;
             health = 1000;
+            mana = 100;
 
             if(m_dmsp)
             {
@@ -880,7 +881,7 @@ struct gameent : dynent, gamestate
     int lastpain;
     int lastaction, lastattack;
     int attacking, gunaccel;
-    int lastfootstep, attacksound, attackchan, dansesound, dansechan, sortsound, sortchan, alarmchan;
+    int lastfootstep, attacksound, attackchan, dansesound, dansechan, abi1snd, abi2snd, abi3snd, abi1chan, abi2chan, abi3chan, alarmchan;
     int lasttaunt;
     int lastpickup, lastpickupmillis, flagpickup, lastbase, lastrepammo;
     int killstreak, frags, flags, deaths, totaldamage, totalshots;
@@ -899,7 +900,7 @@ struct gameent : dynent, gamestate
 
     vec muzzle, weed, balles, assist;
 
-    gameent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), lastfootstep(0), attacksound(-1), attackchan(-1), dansesound(-1), dansechan(-1), sortsound(-1), sortchan(-1), killstreak(0), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0), customcape(0), customtombe(0), customdanse(0), aptitude(0), level(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
+    gameent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), lastfootstep(0), attacksound(-1), attackchan(-1), dansesound(-1), dansechan(-1), abi1snd(-1), abi2snd(-1), abi3snd(-1), abi1chan(-1), abi2chan(-1), abi3chan(-1), killstreak(0), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0), customcape(0), customtombe(0), customdanse(0), aptitude(0), level(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
     {
         name[0] = info[0] = 0;
         respawn();
@@ -908,9 +909,12 @@ struct gameent : dynent, gamestate
     {
         freeeditinfo(edit);
         freeeditinfo(edit);
+
         if(attackchan >= 0) stopsound(attacksound, attackchan);
         if(dansesound >= 0) stopsound(dansesound, dansechan);
-        if(sortsound >= 0) stopsound(sortsound, sortchan);
+        if(abi1snd >= 0) stopsound(abi1snd, abi1chan);
+        if(abi2snd >= 0) stopsound(abi2snd, abi2chan);
+        if(abi3snd >= 0) stopsound(abi3snd, abi3chan);
         if(alarmchan >= 0) stopsound(S_ASSISTALARM, alarmchan);
         if(ai) delete ai;
     }
@@ -935,10 +939,11 @@ struct gameent : dynent, gamestate
         dansesound = dansechan = -1;
     }
 
-    void stopsortsound(gameent *d)
+    void stopabisound(gameent *d)
     {
-        if(sortchan >= 0) stopsound(sortsound, sortchan, 50);
-        sortsound = sortchan = -1;
+        if(abi1chan >= 0) {stopsound(abi1snd, abi1chan, 50); abi1snd = abi1chan = -1;}
+        if(abi2chan >= 0) {stopsound(abi2snd, abi2chan, 50); abi2snd = abi2chan = -1;}
+        if(abi3chan >= 0) {stopsound(abi3snd, abi3chan, 50); abi3snd = abi3chan = -1;}
     }
 
     void stoppowerarmorsound()
@@ -1188,7 +1193,6 @@ namespace game
         bool ragdoll;
     };
 
-    extern void saveragdoll(gameent *d);
     extern void savetombe(gameent *d);
     extern void clearragdolls();
     extern void moveragdolls();

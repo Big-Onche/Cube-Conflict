@@ -1683,14 +1683,15 @@ namespace game
         else d->stopdansesound(d);
     }
 
-    void checksortsound(gameent *d, bool local)
+    void checkabiounds(gameent *d, bool local)
     {
-        if(d->clientnum >= 0 && d->state == CS_ALIVE && d->sortsound >= 0)
+        if(d->clientnum >= 0 && d->state == CS_ALIVE)
         {
-            d->sortchan = playsound(d->sortsound, local ? NULL : &d->o, NULL, 0, -1, -1, d->sortchan, 300);
-            if(d->sortchan < 0) d->sortsound = -1;
+            if(d->abi1snd >= 0) {d->abi1chan = playsound(d->abi1snd, local ? NULL : &d->o, NULL, 0, -1, -1, d->abi1chan, 300); if(d->abi1chan < 0) d->abi1snd = -1;}
+            if(d->abi2snd >= 0) {d->abi2chan = playsound(d->abi2snd, local ? NULL : &d->o, NULL, 0, -1, -1, d->abi2chan, 300); if(d->abi2chan < 0) d->abi2snd = -1;}
+            if(d->abi3snd >= 0) {d->abi3chan = playsound(d->abi3snd, local ? NULL : &d->o, NULL, 0, -1, -1, d->abi3chan, 300); if(d->abi3chan < 0) d->abi3snd = -1;}
         }
-        else d->stopsortsound(d);
+        else d->stopabisound(d);
     }
 
     void removeweapons(gameent *d)
@@ -1711,7 +1712,7 @@ namespace game
             gameent *d = players[i];
             checkattacksound(d, d==following);
             checkdansesound(d, d==following);
-            checksortsound(d, d==following);
+            checkabiounds(d, d==following);
         }
     }
 
