@@ -389,7 +389,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
 #define CC_SERVER_PORT 43000
 #define CC_LANINFO_PORT 42998
 #define CC_MASTER_PORT 42999
-#define PROTOCOL_VERSION 9           // bump when protocol changes
+#define PROTOCOL_VERSION 10          // bump when protocol changes
 #define DEMO_VERSION 1               // bump when demo format changes
 #define DEMO_MAGIC "CC_DEMO\0\0"
 

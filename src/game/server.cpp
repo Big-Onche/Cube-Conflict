@@ -4,7 +4,7 @@
 
 VARP(gamelength, 1, 10, 60);
 
-int identiquearme = rnd(17), servambient = rnd(9), gamemode = rnd(12)+1;
+int identiquearme = rnd(17), servambient = rnd(9);
 
 namespace game
 {
@@ -403,7 +403,7 @@ namespace server
     #define MM_COOPSERV (MM_AUTOAPPROVE | MM_PUBSERV | (1<<MM_LOCKED))
 
     bool notgotitems = true;        // true when map has changed and waiting for clients to send item
-    int gamemode = 0;
+    int gamemode = 2;
     int gamemillis = 0, gamelimit = 0, nextexceeded = 0, gamespeed = 100;
     bool gamepaused = false, shouldstep = true;
 
@@ -2054,7 +2054,7 @@ namespace server
     VARP(servbotniveauminimum, 0, 0, 100);
     VARP(servbotniveaumaximum, 0, 0, 100);
     VARP(servrandommode, 0, 0, 1);
-    VARP(servforcemode, -1, 0, 17);
+    VARP(servforcemode, -1, 0, 18);
 
     void changemap(const char *s, int mode)
     {
@@ -2116,7 +2116,7 @@ namespace server
 
     void rotatemap(bool next)
     {
-        if(servrandommode || !servforcemode) gamemode = rnd(17)+1;
+        if(servrandommode || !servforcemode) gamemode = rnd(17)+2;
         if(servforcemode>-1) gamemode = servforcemode;
 
         if(!maprotations.inrange(curmaprotation))
@@ -2132,6 +2132,7 @@ namespace server
             else curmaprotation = smapname[0] ? max(findmaprotation(gamemode, ""), 0) : 0;
         }
 
+        logoutf("Gamemode: %s", m_valid(gamemode) ? gamemodes[gamemode - STARTGAMEMODE].nameEN : "Unknown");
         sendf(-1, 1, "ri2", N_SERVAMBIENT, servambient);
 
         maprotation &rot = maprotations[curmaprotation];
