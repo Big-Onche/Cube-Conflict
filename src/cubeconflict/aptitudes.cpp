@@ -36,7 +36,7 @@ namespace game
                     return;
                 }
                 //We recieve some shit from the server
-                d->canability1 = false; d->lastability1 = totalmillis; if(d==player1) stat[STAT_ABILITES]++;
+                d->canability1 = false; d->lastability1 = totalmillis;
 
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
                 vec soundpos = d->o;
@@ -66,7 +66,7 @@ namespace game
                     return;
                 }
 
-                d->canability2 = false; d->lastability2 = totalmillis; if(d==player1) stat[STAT_ABILITES]++;
+                d->canability2 = false; d->lastability2 = totalmillis;
 
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0, 100, -1, 250);
                 d->abi2chan = playsound(sorts[abilitydata(d->aptitude)].sound2, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->abi2chan, 275);
@@ -89,7 +89,7 @@ namespace game
                     return;
                 }
 
-                d->canability3 = false; d->lastability3 = totalmillis; if(d==player1) stat[STAT_ABILITES]++;
+                d->canability3 = false; d->lastability3 = totalmillis;
 
                 playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
                 d->abi3chan = playsound(sorts[abilitydata(d->aptitude)].sound3, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->abi3chan, 275);
@@ -103,6 +103,7 @@ namespace game
                     playsound(S_SPY_3);
                 }
             }
+            if(d==player1) addstat(1, STAT_ABILITES);
         }
     }
 
