@@ -247,6 +247,6 @@ ICOMMAND(getachievementname, "i", (int *achID), result(getachievementname(*achID
 const char *getachievementcolor(int achID) //Renvoie une couleur pour savoir si le succes est verrouillé ou non
 {
     if(achID>NUMACHS) return "0x777777";
-    return achievementlocked(achID) ? "0xD8AA88" : "0x99D899";
+    return achievementlocked(achID) ? "0xE8BB99" : "0xAAE8AA";
 }
 ICOMMAND(getachievementcolor, "i", (int *achID), result(getachievementcolor(*achID)));

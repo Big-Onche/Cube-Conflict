@@ -169,12 +169,14 @@ namespace game
     {
         if(ispaused())
         {
-            float lh = 0.43f*min(w, h), lw = lh*2,
-                  lx = 0.5f*(w - lw), ly = 0.5f*(h*0.5f - lh);
+            if(UI::uivisible("pause_fr") || UI::uivisible("pause_en"))
+            {
+                float lh = 0.43f*min(w, h), lw = lh*2,
+                      lx = 0.5f*(w - lw), ly = 0.5f*(h*0.5f - lh);
 
-            settexture((maxtexsize ? min(maxtexsize, hwtexsize) : hwtexsize) >= 1024 && (hudw > 1280 || hudh > 800) ? "<premul>media/interface/logo_1024.png" : "<premul>media/interface/logo.png", 3);
-            bgquad(lx, ly, lw, lh);
-
+                settexture((maxtexsize ? min(maxtexsize, hwtexsize) : hwtexsize) >= 1024 && (hudw > 1280 || hudh > 800) ? "<premul>media/interface/logo_1024.png" : "<premul>media/interface/logo.png", 3);
+                bgquad(lx, ly, lw, lh);
+            }
             return;
         }
 
