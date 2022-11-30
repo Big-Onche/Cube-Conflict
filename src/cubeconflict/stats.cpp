@@ -213,7 +213,7 @@ void getsteamachievements() //Récupère les succès enregistrés sur steam
 }
 
 string achcount;
-const char *getachievementcount() //Récupère le nombre de succès déverrouillés
+const char *getachievementcount(bool numach = false) //Récupère le nombre de succès déverrouillés
 {
     int totalachunlocked = 0, achID = 0;
 
@@ -223,10 +223,10 @@ const char *getachievementcount() //Récupère le nombre de succès déverrouillés
         achID++;
     }
 
-    formatstring(achcount, "%d/%d", totalachunlocked, NUMACHS);
+    formatstring(achcount, "%d", numach ? NUMACHS : totalachunlocked);
     return achcount;
 }
-ICOMMAND(getachievementcount, "", (), result(getachievementcount()));
+ICOMMAND(getachievementcount, "i", (bool *numach), result(getachievementcount(*numach)));
 
 string logodir;
 const char *getachievementslogo(int achID) //Récupère le logo d'un succès en particulier
@@ -247,6 +247,6 @@ ICOMMAND(getachievementname, "i", (int *achID), result(getachievementname(*achID
 const char *getachievementcolor(int achID) //Renvoie une couleur pour savoir si le succes est verrouillé ou non
 {
     if(achID>NUMACHS) return "0x777777";
-    return achievementlocked(achID) ? "0xE8BB99" : "0xAAE8AA";
+    return achievementlocked(achID) ? "0xF5C0C0" : "0xD0F3D0";
 }
 ICOMMAND(getachievementcolor, "i", (int *achID), result(getachievementcolor(*achID)));
