@@ -3334,6 +3334,10 @@ namespace UI
     ICOMMAND(uimodcircle, "ife", (int *c, float *size, uint *children),
         BUILD(Circle, o, o->setup(Color(*c), *size, Circle::MODULATE), children));
 
+    ICOMMAND(uirggradient, "iif", (int *val, int *maxval, float *brightness),
+        intret(((static_cast<unsigned char>((100-(100/(*maxval))**val)**brightness) << 16) | (static_cast<unsigned char>((*val*(100/(*maxval)))**brightness) << 8)) + 0x556622)
+    );
+
     static inline void buildtext(tagval &t, float scale, float scalemod, const Color &color, float wrap, uint *children)
     {
         if(scale <= 0) scale = 1;

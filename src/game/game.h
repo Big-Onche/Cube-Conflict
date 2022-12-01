@@ -540,15 +540,15 @@ enum {APT_SOLDAT = 0, APT_MEDECIN, APT_AMERICAIN, APT_NINJA, APT_VAMPIRE, APT_MA
 static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt_vitesse; const char *apt_nomFR, *apt_nomEN, *apt_logo; } aptitudes[NUMAPTS] =
 {
     { 105,  105,  105,   950, "Soldat",       "Soldier"},       //0     APT_SOLDAT
-    {  90,  110,   95,   950, "Médecin",      "Medic"},         //1     APT_MEDECIN
+    {  90,  115,   95,   950, "Médecin",      "Medic"},         //1     APT_MEDECIN
     { 100,  135,   80,  1300, "Américain",    "American"},      //2     APT_AMERICAIN
     {  85,   90,   75,   750, "Ninja",        "Ninja"},         //3     APT_NINJA
     { 110,   65,  110,   950, "Vampire",      "Vampire"},       //4     APT_VAMPIRE
     { 100,   85,   90,  1000, "Magicien",     "Wizard"},        //5     APT_MAGICIEN
     { 100,  100,   70,   850, "Kamikaze",     "Kamikaze"},      //6     APT_KAMIKAZE
-    { 115,   85,   90,  1050, "Faucheuse",    "Reaper"},        //7     APT_FAUCHEUSE
+    { 120,   85,   90,  1050, "Faucheuse",    "Reaper"},        //7     APT_FAUCHEUSE
     {  90,   85,   85,  1050, "Physicien",    "Physicist"},     //8     APT_PHYSICIEN
-    { 100,   60,  130,  1250, "Campeur",      "Camper"},        //9     APT_CAMPEUR
+    { 100,   60,  135,  1250, "Campeur",      "Camper"},        //9     APT_CAMPEUR
     {  90,   85,  120,  1100, "Espion",       "Spy"},           //10    APT_ESPION
     {  85,  105,   85,   950, "Prêtre",       "Priest"},        //11    APT_PRETRE
     { 100,  120,   60,  1050, "Viking",       "Viking"},        //12    APT_VIKING

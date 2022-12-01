@@ -382,13 +382,13 @@ namespace game
     ICOMMAND(getclientname, "i", (int *cn), result(getclientname(*cn)));
 
     string logodir;
-    const char *getclientaptilogo(int cn)   //retrieve the logo for requested classes (scoreboard and menu)
+    const char *getclientaptilogo(int cn, bool force = false, int numapt = 0)   //retrieve the logo for requested classes (scoreboard and menu)
     {
         gameent *d = getclient(cn);
-        formatstring(logodir, "media/interface/apt_logo/%s.png", aptitudes[cn==-1 ? player1->aptitude : d->aptitude].apt_nomEN);
+        formatstring(logodir, "media/interface/apt_logo/%s.png", aptitudes[force ? numapt : cn==-1 ? player1->aptitude : d->aptitude].apt_nomEN);
         return logodir;
     }
-    ICOMMAND(getclientaptilogo, "i", (int *cn), result(getclientaptilogo(*cn)));
+    ICOMMAND(getclientaptilogo, "iii", (int *cn, bool *force, int *numapt), result(getclientaptilogo(*cn, *force, *numapt)));
 
     string tempprefix;
     const char *prefix(int value, bool needplus = true)
@@ -423,48 +423,27 @@ namespace game
     }
     ICOMMAND(getaptistat, "i", (int *stat), result(getaptistat(*stat)));
 
-    string tempapti;
-    const char *getaptiname()
+    string tmp_apt;
+    const char *getaptiname(bool forceapt = false, int aptnum = 0)
     {
-        formatstring(tempapti, "%s%s", "\fb", GAME_LANG ? aptitudes[player1->aptitude].apt_nomEN : aptitudes[player1->aptitude].apt_nomFR);
-        return tempapti;
+        formatstring(tmp_apt, "%s", GAME_LANG ? aptitudes[forceapt ? aptnum : player1->aptitude].apt_nomEN : aptitudes[forceapt ? aptnum : player1->aptitude].apt_nomFR);
+        return tmp_apt;
     }
-    ICOMMAND(getaptiname, "", (), result(getaptiname()));
+    ICOMMAND(getaptiname, "ii", (bool *forceapt, int *aptnum), result(getaptiname(*forceapt, *aptnum)));
 
-    string tempbars = "";
-    const char *getaptistatbars(int stat)
+    int getaptistatval(int apt, int stat)
     {
         int value = 0;
         switch(stat)
         {
-            case 0: value = aptitudes[player1->aptitude].apt_degats-100; break;
-            case 1: value = aptitudes[player1->aptitude].apt_resistance-100; break;
-            case 2: value = aptitudes[player1->aptitude].apt_precision-100; break;
-            case 3: value = (aptitudes[player1->aptitude].apt_vitesse-1000)*-0.1f;
+            case 0: value = aptitudes[apt].apt_degats-100; break;
+            case 1: value = aptitudes[apt].apt_resistance-100; break;
+            case 2: value = aptitudes[apt].apt_precision-100; break;
+            case 3: value = (aptitudes[apt].apt_vitesse-1000)*-0.1f;
         }
-
-        formatstring(tempbars, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s", prefix(value, false), "|",
-                     value>-40 ? "|" : "\f4|",
-                     value>-35 ? "|" : "\f4|",
-                     value>-30 ? "|" : "\f4|",
-                     value>-25 ? "|" : "\f4|",
-                     value>-20 ? "|" : "\f4|",
-                     value>-15 ? "|" : "\f4|",
-                     value>-10 ? "|" : "\f4|",
-                     value>-5 ?  "|" : "\f4|",
-                     value>0 ?   "|" : "\f4|",
-                     value>5 ?   "|" : "\f4|",
-                     value>10 ?  "|" : "\f4|",
-                     value>15 ?  "|" : "\f4|",
-                     value>20 ?  "|" : "\f4|",
-                     value>25 ?  "|" : "\f4|",
-                     value>30 ?  "|" : "\f4|",
-                     value>35 ?  "|" : "\f4|",
-                     value>40 ?  "|" : "\f4|");
-
-        return tempbars;
+        return (value/5)+9;
     }
-    ICOMMAND(getaptistatbars, "i", (int *stat), result(getaptistatbars(*stat)));
+    ICOMMAND(getaptistatval, "ii", (int *apt, int *stat), intret(getaptistatval(*apt, *stat)));
 
     ICOMMAND(getclientcolornameR, "i", (int *cn),
     {
