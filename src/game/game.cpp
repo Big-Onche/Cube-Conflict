@@ -11,8 +11,7 @@ bool suicided;
 
 bool randomevent(int probability)
 {
-    switch(rnd(probability==0 ? 1 : probability)){case 0: return true;}
-    return false;
+    return rnd(probability)==0;
 }
 
 VAR(examresult, 0, 0, 4);
