@@ -456,10 +456,10 @@ VARF(gstencil, 0, 0, 1, initwarning("g-buffer setup", INIT_LOAD, CHANGE_SHADERS)
 VARF(gdepthstencil, 0, 2, 2, initwarning("g-buffer setup", INIT_LOAD, CHANGE_SHADERS));
 VAR(ghasstencil, 1, 0, 0);
 VARFP(msaa, 0, 0, 16, initwarning("MSAA setup", INIT_LOAD, CHANGE_SHADERS));
-VARF(msaadepthstencil, 0, 2, 2, initwarning("MSAA setup", INIT_LOAD, CHANGE_SHADERS));
-VARF(msaastencil, 0, 0, 1, initwarning("MSAA setup", INIT_LOAD, CHANGE_SHADERS));
+VARF(msaadepthstencil, 0, 2, 2, initwarning(GAME_LANG ? "MSAA setup" : "Configuration du MSAA", INIT_LOAD, CHANGE_SHADERS));
+VARF(msaastencil, 0, 0, 1, initwarning(GAME_LANG ? "MSAA setup" : "Configuration du MSAA", INIT_LOAD, CHANGE_SHADERS));
 VARF(msaaedgedetect, 0, 1, 1, cleanupgbuffer());
-VARFP(msaalineardepth, -1, -1, 3, initwarning("MSAA setup", INIT_LOAD, CHANGE_SHADERS));
+VARFP(msaalineardepth, -1, -1, 3, initwarning(GAME_LANG ? "MSAA setup" : "Configuration du MSAA", INIT_LOAD, CHANGE_SHADERS));
 VARFP(msaatonemap, 0, 0, 1, cleanupgbuffer());
 VARF(msaatonemapblit, 0, 0, 1, cleanupgbuffer());
 VAR(msaamaxsamples, 1, 0, 0);
@@ -468,7 +468,7 @@ VAR(msaamaxcolortexsamples, 1, 0, 0);
 VAR(msaaminsamples, 1, 0, 0);
 VAR(msaasamples, 1, 0, 0);
 VAR(msaalight, 1, 0, 0);
-VARF(msaapreserve, -1, 0, 1, initwarning("MSAA setup", INIT_LOAD, CHANGE_SHADERS));
+VARF(msaapreserve, -1, 0, 1, initwarning(GAME_LANG ? "MSAA setup" : "Configuration du MSAA", INIT_LOAD, CHANGE_SHADERS));
 
 void checkmsaasamples()
 {
