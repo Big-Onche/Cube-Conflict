@@ -13,8 +13,7 @@ VARP(softparticleblend, 1, 8, 64);
 
 VARR(partcloudcolour, 0, 8947848, 16777215);
 
-extern void setparticleslod();
-VARFP(particles_lod, 0, 2, 3, {setparticleslod();});
+VARFP(particleslod, 0, 2, 3, initparticles());
 
 // Check canemitparticles() to limit the rate that paricles can be emitted for models/sparklies
 // Automatically stops particles being emitted when paused or in reflective drawing
@@ -1275,7 +1274,7 @@ void regularshape(int type, int radius, int color, int dir, int num, int fade, c
         if(weather)
         {
             vec toz(to.x, to.y, camera1->o.z);
-            if(camera1->o.dist(toz) > 192*(particles_lod+1) && !seedemitter) continue;
+            if(camera1->o.dist(toz) > 192*(particleslod+1) && !seedemitter) continue;
 
             float z = camera1->o.z + height;
             vec spawnz(to.x, to.y, z);
@@ -1484,10 +1483,10 @@ static void makeparticles(entity &e)
             break;
 
         case 51:    //mun dust
-            loopi((particles_lod*13)+3) regularshape(PART_SMOKE, max(1+e.attr2, 1), 0xBBBBBB, 44, 6, 4000, e.o, 0.5f, -50, 30, 0, true, -50, 18.f);
+            loopi((particleslod*13)+3) regularshape(PART_SMOKE, max(1+e.attr2, 1), 0xBBBBBB, 44, 6, 4000, e.o, 0.5f, -50, 30, 0, true, -50, 18.f);
             break;
         case 52:    //volcano smoke
-            loopi((particles_lod*13)+3) regularshape(PART_SMOKE, max(1+e.attr2, 1), 0x181818, 44, 6, 4000, e.o, 0.5f, -50, 30, 500, true, -30, 18.f);
+            loopi((particleslod*13)+3) regularshape(PART_SMOKE, max(1+e.attr2, 1), 0x181818, 44, 6, 4000, e.o, 0.5f, -50, 30, 500, true, -30, 18.f);
             break;
 
         default:
@@ -1599,28 +1598,4 @@ void updateparticles()
             regular_particle_splash(PART_SPARK, 2, 60, e.o, 0x3232FF, 1.00f*particlesize/100.0f);
         }
     }
-}
-
-void setparticleslod()
-{
-    switch(particles_lod)
-    {
-        case 0:
-            maxparticles = 512;
-            softparticles = 0;
-            break;
-        case 1:
-            maxparticles = 2048;
-            softparticles = 1;
-            break;
-        case 2:
-            maxparticles = 8192;
-            softparticles = 1;
-            break;
-        case 3:
-            maxparticles = 16384;
-            softparticles = 1;
-            break;
-    }
-    initparticles();
 }

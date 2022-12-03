@@ -161,11 +161,11 @@ void stopmusic()
 #define AUDIODRIVER ""
 #endif
 bool shouldinitaudio = true;
-SVARF(audiodriver, AUDIODRIVER, { shouldinitaudio = true; initwarning("sound configuration", INIT_RESET, CHANGE_SOUND); });
-VARF(sound, 0, 1, 1, { shouldinitaudio = true; initwarning("sound configuration", INIT_RESET, CHANGE_SOUND); });
-VARF(soundchans, 1, 512, 512, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
-VARF(soundfreq, 0, MIX_DEFAULT_FREQUENCY, 48000, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
-VARF(soundbufferlen, 128, 4096, 4096, initwarning("sound configuration", INIT_RESET, CHANGE_SOUND));
+SVARF(audiodriver, AUDIODRIVER, { shouldinitaudio = true; initwarning(GAME_LANG ? "Sound configuration" : "Configuration des sons", INIT_RESET, CHANGE_SOUND); });
+VARF(sound, 0, 1, 1, { shouldinitaudio = true; initwarning(GAME_LANG ? "Audio reset" : "Réinitialisation audio", INIT_RESET, CHANGE_SOUND); });
+VARF(soundchans, 1, 256, 512, initwarning(GAME_LANG ? "Sound channels" : "Canaux des sons", INIT_RESET, CHANGE_SOUND));
+VARF(soundfreq, 0, MIX_DEFAULT_FREQUENCY, 48000, initwarning(GAME_LANG ? "Sampling frequency" : "Fréquence d'échantillonnage", INIT_RESET, CHANGE_SOUND));
+VARF(soundbufferlen, 128, 2048, 4096, initwarning(GAME_LANG ? "Sound buffer" : "Mémoire tampon des sons", INIT_RESET, CHANGE_SOUND));
 
 bool initaudio()
 {

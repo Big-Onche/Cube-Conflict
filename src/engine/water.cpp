@@ -691,39 +691,3 @@ void renderwater()
         }
     }
 }
-
-extern void setwaterlod();
-VARFP(water_lod, 0, 2, 3, {setwaterlod();});
-
-void setwaterlod()
-{
-    switch(water_lod)
-    {
-        case 0:
-            vertwater = 0;
-            caustics = 0;
-            waterreflect = 0;
-            break;
-        case 1:
-            vertwater = 0;
-            caustics = 1;
-            waterreflect = 0;
-            break;
-        case 2:
-            vertwater = 1;
-            caustics = 1;
-            waterreflect = 0;
-            waterlod = 2;
-            watersubdiv = 2;
-            break;
-        case 3:
-            vertwater = 1;
-            caustics = 1;
-            waterreflect = 1;
-            waterlod = 3;
-            watersubdiv = 3;
-            break;
-    }
-    allchanged();
-    preloadwatershaders();
-}

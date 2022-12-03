@@ -6,6 +6,8 @@
 
 int lastshoot;
 
+VARP(temptrisfade, 5000, 15000, 120000);
+
 namespace game
 {
     static const int OFFSETMILLIS = 500;
@@ -453,7 +455,7 @@ namespace game
         switch(p.atk)
         {
             case ATK_ARTIFICE_SHOOT: p.lifetime=attacks[atk].ttl+rnd(400); break;
-            case ATK_ARBALETE_SHOOT: p.lifetime=attacks[atk].ttl*decoration_lod; break;
+            case ATK_ARBALETE_SHOOT: p.lifetime=temptrisfade; break;
             default: p.lifetime = attacks[atk].ttl;
         }
         p.exploded = false;

@@ -810,9 +810,6 @@ extern void bgquad(float x, float y, float w, float h, float tx = 0, float ty = 
 
 extern int map_atmo, map_sel;  //Config partie Cube Conflict
 
-extern int grassdist, grass, decoration_lod; // LOD Cube Conflict
-extern float grassstep;
-
 //Used for shrooms gfx
 extern bool addpostfx(const char *name, int outputbind, int outputscale, uint inputs, uint freeinputs, const vec4 &params);
 extern void clearpostfx();
