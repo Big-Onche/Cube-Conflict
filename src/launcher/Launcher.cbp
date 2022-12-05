@@ -14,12 +14,15 @@
 				<Option projectIncludeDirsRelation="0" />
 				<Option projectLibDirsRelation="0" />
 				<Compiler>
+					<Add option="/ML" />
+					<Add option="/GA" />
+					<Add option="/Ot" />
 					<Add option="-O2" />
 				</Compiler>
 			</Target>
 		</Build>
 		<Compiler>
-			<Add option="-Wall" />
+			<Add option="-w" />
 		</Compiler>
 		<Linker>
 			<Add library="gdi32" />

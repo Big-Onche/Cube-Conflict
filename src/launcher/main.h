@@ -1,3 +1,6 @@
+#ifndef MAIN_H
+#define MAIN_H
+
 #include <windows.h>
 #include <fstream>
 #include <string>
@@ -54,3 +57,5 @@ MessageBoxW(
     __in_opt LPCWSTR lpText,
     __in_opt LPCWSTR lpCaption,
     __in UINT uType);
+
+#endif //MAIN_H

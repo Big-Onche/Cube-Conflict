@@ -3,7 +3,7 @@
 
 using namespace std;
 
-string LAUNCHER_VERSION = "0.8.9";
+string LAUNCHER_VERSION = "0.9.1";
 
 int wx = 1000; //Largeur de la fenêtre
 int wh = 600; //Hauteur de la fenêtre
@@ -67,7 +67,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
 
 void LaunchGame(HWND hWnd, int ForceBits = 0)
 {
-    string GameBin = ForceBits==1 ? "bin/" : ForceBits==2 ? "bin64/" : Is64BitWindows ? "bin64/" : "bin/";
+    string GameBin = (ForceBits==1 || !Is64BitWindows) ? "bin/" : (ForceBits==2 || Is64BitWindows) ? "bin64/" : "bin/";
     string GamePath = "cubeconflict.exe \"-u$HOME/My Games/Cube Conflict\" -glog.txt ";
     string GameLang = Language == 0 ? "-a" : "-b";
 
@@ -84,7 +84,25 @@ void LaunchGame(HWND hWnd, int ForceBits = 0)
     }
 }
 
+void Redraw(HWND hWnd)
+{
+    AddMenus(hWnd);
+    AddControls(hWnd);
+}
+
 int PlayMusic = 1;
+
+BOOL CALLBACK DestoryChildCallback(
+  HWND   hwnd,
+  LPARAM lParam
+)
+{
+  if (hwnd != NULL) {
+    DestroyWindow(hwnd);
+  }
+
+  return TRUE;
+}
 
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
@@ -125,8 +143,16 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
         case HELP_MENU_OPENWIKI:
             system("start https://cube-conflict.fandom.com/fr/wiki/Wiki_Cube_Conflict");
             break;
-        case LANG_MENU_SETUPFRENCH: Language = 0; DestroyWindow(hWnd); WinExec("Cube Conflict.exe", SW_SHOW); break;
-        case LANG_MENU_SETUPENGLISH: Language = 1; DestroyWindow(hWnd); WinExec("Cube Conflict.exe", SW_SHOW); break;
+        case LANG_MENU_SETUPFRENCH:
+            Language = 0;
+            EnumChildWindows(hWnd, DestoryChildCallback, NULL);
+            Redraw(hWnd);
+            break;
+        case LANG_MENU_SETUPENGLISH:
+            Language = 1;
+            EnumChildWindows(hWnd, DestoryChildCallback, NULL);
+            Redraw(hWnd);
+            break;
             //////////////////////////////////////////////////////////////Menu Outils////////////////////////////////
         case TOOLS_MENU_CHECKFORUPDATES:
             CheckCurrentCCVersion(hWnd, true);
@@ -139,34 +165,45 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
             LaunchGame(hWnd);
             break;
         case SOUND_MENU_SOUNDSETUP:
-            if(PlayMusic==1)
+            if(PlayMusic)
             {
                 PlayMusic = 0;
-                DestroyWindow(hWnd);
-                WinExec("Cube Conflict.exe", SW_SHOW);
+                mciSendString("stop mp3", NULL, 0, NULL);
             }
             else
             {
                 PlayMusic = 1;
-                DestroyWindow(hWnd);
-                WinExec("Cube Conflict.exe", SW_SHOW);
+                mciSendString("open \"media/musiques/launcher.mp3\" type mpegvideo alias mp3", NULL, 0, NULL);
+                mciSendString("play mp3", NULL, 0, NULL);
             }
+            EnumChildWindows(hWnd, DestoryChildCallback, NULL);
+            AddControls(hWnd);
             break;
         }
         break;
     case WM_CREATE:
-        LoadConfigFile();
-        GetInstalledCCVersion();
-        CheckCurrentCCVersion(hWnd);
-        LoadImages();
-        if(PlayMusic==1)
         {
-            mciSendString("open \"media/musiques/launcher.mp3\" type mpegvideo alias mp3", NULL, 0, NULL);
-            mciSendString("play mp3", NULL, 0, NULL);
+            LoadConfigFile();
+            GetInstalledCCVersion();
+            CheckCurrentCCVersion(hWnd);
+            LoadImages();
+            if(PlayMusic==1)
+            {
+                mciSendString("open \"media/musiques/launcher.mp3\" type mpegvideo alias mp3", NULL, 0, NULL);
+                mciSendString("play mp3", NULL, 0, NULL);
+            }
+            AddMenus(hWnd);
+            AddControls(hWnd);
         }
-        AddMenus(hWnd);
-        AddControls(hWnd);
-        break;
+    break;
+    case WM_PAINT:
+        {
+            PAINTSTRUCT ps;
+            HDC hdc = BeginPaint(hWnd, &ps);
+
+         EndPaint(hWnd, &ps);
+        }
+    break;
     case WM_DESTROY:
         WriteConfigFile();
         PostQuitMessage(0);
@@ -182,35 +219,35 @@ void AddMenus(HWND hWnd)
 
     //////////////////////////////////////////////////////////////Menu Launcher////////////////////////////////
     HMENU hLauncherMenu = CreateMenu();
-    AppendMenu(hLauncherMenu, MF_STRING, LAUNCHER_MENU_LAUNCHCCX86, Language==0 ? "Lancer le jeu (32 bits)" : "Launch game (32 bits)");
-    AppendMenu(hLauncherMenu, MF_STRING, LAUNCHER_MENU_LAUNCHCCX64, Language==0 ? "Lancer le jeu (64 bits)" : "Launch game (64 bits)");
+    AppendMenu(hLauncherMenu, MF_STRING, LAUNCHER_MENU_LAUNCHCCX86, !Language ? "Lancer le jeu (32 bits)" : "Launch game (32 bits)");
+    AppendMenu(hLauncherMenu, MF_STRING, LAUNCHER_MENU_LAUNCHCCX64, !Language ? "Lancer le jeu (64 bits)" : "Launch game (64 bits)");
     AppendMenu(hLauncherMenu, MF_SEPARATOR, NULL, NULL);
-    AppendMenu(hLauncherMenu, MF_STRING, LAUNCHER_MENU_EXIT, Language==0 ? "Quitter" : "Quit");
+    AppendMenu(hLauncherMenu, MF_STRING, LAUNCHER_MENU_EXIT, !Language ? "Quitter" : "Quit");
     AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hLauncherMenu, "Launcher");
 
     //////////////////////////////////////////////////////////////Menu langue////////////////////////////////
     HMENU hLangMenu = CreateMenu();
-    if(PlayMusic==1) AppendMenu(hLangMenu, MF_STRING, SOUND_MENU_SOUNDSETUP, Language==0 ? "Couper la musique" : "Stop music");
-    else AppendMenu(hLangMenu, MF_STRING, SOUND_MENU_SOUNDSETUP, Language==0 ? "Activer la musique" : "Play music");
+    if(PlayMusic==1) AppendMenu(hLangMenu, MF_STRING, SOUND_MENU_SOUNDSETUP, !Language ? "Couper la musique" : "Stop music");
+    else AppendMenu(hLangMenu, MF_STRING, SOUND_MENU_SOUNDSETUP, !Language ? "Activer la musique" : "Play music");
     AppendMenu(hLangMenu, MF_SEPARATOR, NULL, NULL);
     AppendMenu(hLangMenu, MF_STRING, LANG_MENU_SETUPFRENCH, "Français");
     AppendMenu(hLangMenu, MF_STRING, LANG_MENU_SETUPENGLISH, "English");
-    AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hLangMenu, Language==0 ? "Options" : "Settings");
+    AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hLangMenu, !Language ? "Options" : "Settings");
 
     //////////////////////////////////////////////////////////////Menu outils////////////////////////////////
     HMENU hToolsMenu = CreateMenu();
-    AppendMenu(hToolsMenu, MF_STRING, TOOLS_MENU_CHECKFORUPDATES, Language==0 ? "Vérifier les mises à jour" : "Check for updates");
+    AppendMenu(hToolsMenu, MF_STRING, TOOLS_MENU_CHECKFORUPDATES, !Language ? "Vérifier les mises à jour" : "Check for updates");
     AppendMenu(hToolsMenu, MF_SEPARATOR, NULL, NULL);
-    AppendMenu(hToolsMenu, MF_STRING, TOOLS_MENU_LAUNCHSERVER, Language==0 ? "Lancer un serveur" : "Start server");
-    AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hToolsMenu, Language==0 ? "Outils" : "Tools");
+    AppendMenu(hToolsMenu, MF_STRING, TOOLS_MENU_LAUNCHSERVER, !Language ? "Lancer un serveur" : "Start server");
+    AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hToolsMenu, !Language ? "Outils" : "Tools");
 
     //////////////////////////////////////////////////////////////Menu Aide////////////////////////////////
     HMENU hHelpMenu = CreateMenu();
-    AppendMenu(hHelpMenu, MF_STRING, HELP_MENU_ABOUT, Language==0 ? "À propos" : "About");
+    AppendMenu(hHelpMenu, MF_STRING, HELP_MENU_ABOUT, !Language ? "À propos" : "About");
     AppendMenu(hHelpMenu, MF_SEPARATOR, NULL, NULL);
-    AppendMenu(hHelpMenu, MF_STRING, HELP_MENU_OPENWEBSITE, Language==0 ? "Site web" : "Website");
+    AppendMenu(hHelpMenu, MF_STRING, HELP_MENU_OPENWEBSITE, !Language ? "Site web" : "Website");
     AppendMenu(hHelpMenu, MF_STRING, HELP_MENU_OPENWIKI, "Wiki");
-    AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hHelpMenu, Language==0 ? "Aide" : "Help");
+    AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hHelpMenu, !Language ? "Aide" : "Help");
 
     SetMenu(hWnd, hMenu);
 }
@@ -225,9 +262,9 @@ void AddControls(HWND hWnd)
     SendMessage(hBackground, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBackgroundImg);
 
     //Affichage des drapeaux de langues
-    HWND hButFr = CreateWindowW(L"button", NULL, Language==0 ? InactiveBtnParam : ActiveBtnParam, 3, 490, 60, 42, hWnd, (HMENU)LANG_MENU_SETUPFRENCH, NULL, NULL);
+    HWND hButFr = CreateWindowW(L"button", NULL, !Language ? InactiveBtnParam : ActiveBtnParam, 3, 490, 60, 42, hWnd, (HMENU)LANG_MENU_SETUPFRENCH, NULL, NULL);
     SendMessageW(hButFr, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hFrFlag);
-    HWND hButEn = CreateWindowW(L"button", NULL, Language==0 ? ActiveBtnParam : InactiveBtnParam, 68, 490, 60, 42, hWnd, (HMENU)LANG_MENU_SETUPENGLISH, NULL, NULL);
+    HWND hButEn = CreateWindowW(L"button", NULL, !Language ? ActiveBtnParam : InactiveBtnParam, 68, 490, 60, 42, hWnd, (HMENU)LANG_MENU_SETUPENGLISH, NULL, NULL);
     SendMessageW(hButEn, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hEnFlag);
 
     //Affichage du bouton haut parleur
@@ -236,10 +273,10 @@ void AddControls(HWND hWnd)
 
     //Création du texte affiché en bas à gauche (Version du jeu + mise à jour dispo oopah)
     string UpdateInfo;
-    if(Language==0) UpdateInfo = UpdateAvailable ? " (mise à jour disponible)" : UnableToCheckForUpdate ? " (impossible de vérifier les mises à jour)" : " (à jour)";
-    else if(Language==1) UpdateInfo = UpdateAvailable ? " (update available)" : UnableToCheckForUpdate ? " (unable to check for update)" : " (up to date)";
+    if(!Language) UpdateInfo = UpdateAvailable ? " (mise à jour disponible)" : UnableToCheckForUpdate ? " (impossible de vérifier les mises à jour)" : " (à jour)";
+    else UpdateInfo = UpdateAvailable ? " (update available)" : UnableToCheckForUpdate ? " (unable to check for update)" : " (up to date)";
 
-    std::string str = (Language==0 ? " Version du jeu : " : "Game version : ") + InstalledCCversion + UpdateInfo;
+    std::string str = (!Language ? " Version du jeu : " : " Game version : ") + InstalledCCversion + UpdateInfo;
     BSTR b = _com_util::ConvertStringToBSTR(str.c_str());
     LPWSTR BottomInfo = b;
     SysFreeString(b);
@@ -248,7 +285,7 @@ void AddControls(HWND hWnd)
     CreateWindowW(L"static", BottomInfo, WS_VISIBLE | WS_CHILD, 0, 535, 1000, 22, hWnd, NULL, NULL, NULL);
 
     //Affichage du bouton "Jouer"
-    hWnd = CreateWindowW(L"Button", Language==0 ? L"Jouer !" : L"Play !", WS_VISIBLE | WS_CHILD, 614, 320, 200, 40, hWnd, (HMENU)LAUNCH_GAME, NULL, NULL);
+    hWnd = CreateWindowW(L"Button", !Language ? L"Jouer !" : L"Play !", WS_VISIBLE | WS_CHILD, 614, 320, 200, 40, hWnd, (HMENU)LAUNCH_GAME, NULL, NULL);
     hFont = CreateFont (25, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, "Roboto");
     SendMessage (hWnd, WM_SETFONT, WPARAM (hFont), TRUE);
 }
