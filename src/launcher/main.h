@@ -14,8 +14,6 @@
 #pragma comment(lib, "Urlmon.lib")
 #pragma comment(lib, "comsuppw.lib")
 
-extern std::string LAUNCHER_VERSION;
-
 #define LAUNCHER_MENU_LAUNCHCCX86 1
 #define LAUNCHER_MENU_LAUNCHCCX64 2
 #define LAUNCHER_MENU_EXIT 3
@@ -29,33 +27,25 @@ extern std::string LAUNCHER_VERSION;
 #define SOUND_MENU_SOUNDSETUP 11
 #define LAUNCH_GAME 12
 
+//config
+extern std::string LAUNCHER_VERSION;
 extern int Language, PlayMusic;
 extern int wx, wh;
-
-extern std::string InstalledCCversion, AvailableCCversion;
-extern bool UnableToCheckForUpdate, UpdateAvailable;
-
-extern void CheckCurrentCCVersion(HWND hWnd, bool NeedInfo = false);
-extern void GetInstalledCCVersion();
-
 extern void LoadConfigFile();
 extern void WriteConfigFile();
 
-WINUSERAPI
-int
-WINAPI
-MessageBoxA(
-    __in_opt HWND hWnd,
-    __in_opt LPCSTR lpText,
-    __in_opt LPCSTR lpCaption,
-    __in UINT uType);
-WINUSERAPI
-int
-WINAPI
-MessageBoxW(
-    __in_opt HWND hWnd,
-    __in_opt LPCWSTR lpText,
-    __in_opt LPCWSTR lpCaption,
-    __in UINT uType);
+//launcher
+extern void LaunchGame(HWND hWnd, int ForceBits = 0);
+
+//main
+extern void AddMenus(HWND);
+extern void AddControls(HWND);
+extern void LoadImages();
+
+//updater
+extern std::string InstalledCCversion, AvailableCCversion;
+extern bool UnableToCheckForUpdate, UpdateAvailable;
+extern void CheckCurrentCCVersion(HWND hWnd, bool NeedInfo = false);
+extern void GetInstalledCCVersion();
 
 #endif //MAIN_H

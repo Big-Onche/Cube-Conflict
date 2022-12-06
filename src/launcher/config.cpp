@@ -3,6 +3,12 @@
 
 using namespace std;
 
+int PlayMusic = 1;
+int Language = 0; //0 = FR, 1 = EN
+
+int wx = 1000; //Largeur de la fenêtre
+int wh = 600;  //Hauteur de la fenêtre
+
 char ConfigDir[256];
 
 void LoadConfigFile()

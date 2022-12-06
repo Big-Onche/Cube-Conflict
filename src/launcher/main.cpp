@@ -3,31 +3,7 @@
 
 using namespace std;
 
-string LAUNCHER_VERSION = "0.9.1";
-
-int wx = 1000; //Largeur de la fenêtre
-int wh = 600; //Hauteur de la fenêtre
-
-int Language = 0; //0 = FR, 1 = EN
-
-BOOL Is64BitWindows() //Check l'OS pour lancer la bonne version du jeu
-{
-#if defined(_WIN64)
- return TRUE;
-#elif defined(_WIN32)
- BOOL f64 = FALSE;
- return IsWow64Process(GetCurrentProcess(), &f64) && f64;
-#else
- return FALSE;
-#endif
-}
-
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
-
-void AddMenus(HWND);
-void AddControls(HWND);
-void LoadImages();
-void GetNews();
 
 HICON hWindowIcon, hIconSm;
 HWND hBackground, hFavicon, hButFr, hButEn, hButSound, hButSound2;
@@ -65,33 +41,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdsho
     return 0;
 }
 
-void LaunchGame(HWND hWnd, int ForceBits = 0)
-{
-    string GameBin = (ForceBits==1 || !Is64BitWindows) ? "bin/" : (ForceBits==2 || Is64BitWindows) ? "bin64/" : "bin/";
-    string GamePath = "cubeconflict.exe \"-u$HOME/My Games/Cube Conflict\" -glog.txt ";
-    string GameLang = Language == 0 ? "-a" : "-b";
-
-    string FullPath = GameBin + GamePath + GameLang;
-
-    LPTSTR FullPathLPTSTR = new TCHAR[FullPath.size() + 1];
-    strcpy(FullPathLPTSTR, FullPath.c_str());
-
-    if(WinExec(FullPathLPTSTR, SW_SHOW)>31) DestroyWindow(hWnd);
-    else
-    {
-        MessageBeep(MB_ICONWARNING);
-        MessageBoxW(NULL, Language==0 ? L"Une erreur est survenue, essayez de réinstaller votre jeu." : L"An error as occured, try reinstalling your game.", Language==0 ? L"Erreur" : L"Error", MB_OK);
-    }
-}
-
-void Redraw(HWND hWnd)
-{
-    AddMenus(hWnd);
-    AddControls(hWnd);
-}
-
-int PlayMusic = 1;
-
 BOOL CALLBACK DestoryChildCallback(
   HWND   hwnd,
   LPARAM lParam
@@ -102,6 +51,13 @@ BOOL CALLBACK DestoryChildCallback(
   }
 
   return TRUE;
+}
+
+void Redraw(HWND hWnd)
+{
+    EnumChildWindows(hWnd, DestoryChildCallback, NULL);
+    AddMenus(hWnd);
+    AddControls(hWnd);
 }
 
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
@@ -138,19 +94,17 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
             }
             break;
         case HELP_MENU_OPENWEBSITE:
-            system("start http://www.cube-conflict.com");
+            ShellExecute(NULL, "open", "http://www.cube-conflict.com", NULL, NULL, SW_SHOW);
             break;
         case HELP_MENU_OPENWIKI:
-            system("start https://cube-conflict.fandom.com/fr/wiki/Wiki_Cube_Conflict");
+            ShellExecute(NULL, "open", "https://cube-conflict.fandom.com/fr/wiki/Wiki_Cube_Conflict", NULL, NULL, SW_SHOW);
             break;
         case LANG_MENU_SETUPFRENCH:
             Language = 0;
-            EnumChildWindows(hWnd, DestoryChildCallback, NULL);
             Redraw(hWnd);
             break;
         case LANG_MENU_SETUPENGLISH:
             Language = 1;
-            EnumChildWindows(hWnd, DestoryChildCallback, NULL);
             Redraw(hWnd);
             break;
             //////////////////////////////////////////////////////////////Menu Outils////////////////////////////////
@@ -158,7 +112,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
             CheckCurrentCCVersion(hWnd, true);
             break;
         case TOOLS_MENU_LAUNCHSERVER:
-            WinExec("bin/cubeconflict.exe \"-u$HOME/My Games/Cube Conflict\" -glog_serveur.txt -d", SW_SHOW);
+            ShellExecute(hWnd, "open", "bin\\cubeconflict.exe", "\"-u$HOME/My Games/Cube Conflict\" -glog_serveur.txt -d", NULL, SW_SHOW);
             break;
             //////////////////////////////////////////////////////////////Reste de la fenêtre////////////////////////////////
         case LAUNCH_GAME:
@@ -194,14 +148,6 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
             }
             AddMenus(hWnd);
             AddControls(hWnd);
-        }
-    break;
-    case WM_PAINT:
-        {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-
-         EndPaint(hWnd, &ps);
         }
     break;
     case WM_DESTROY:
