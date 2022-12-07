@@ -232,7 +232,7 @@ struct partrenderer
                 if(stain >= 0)
                 {
                     vec surface;
-                    float floorz = rayfloor(vec(o.x, o.y, p->val), surface, RAY_CLIPMAT, COLLIDERADIUS);
+                    float floorz = rayfloor(vec(o.x, o.y, p->val), surface, RAY_CLIPMAT|RAY_LIQUIDMAT, COLLIDERADIUS);
                     float collidez = floorz<0 ? o.z-COLLIDERADIUS : p->val - floorz;
                     if(o.z >= collidez+COLLIDEERROR)
                         p->val = collidez+COLLIDEERROR;
@@ -1284,7 +1284,7 @@ void regularshape(int type, int radius, int color, int dir, int num, int fade, c
             if(windoffset) d.add(vec(windoffset/2+rnd(windoffset), windoffset/2+rnd(windoffset), 0));
             d.normalize().mul(-vel); //velocity
             particle *np = newparticle(spawnz, d, fade, type, color, size, gravity, sizemod);
-            np->val = (spawnz.z) - raycube(spawnz, vec(0, 0, -1), COLLIDERADIUS/2, RAY_CLIPMAT);
+            np->val = spawnz.z;
         }
         else
         {

@@ -287,6 +287,7 @@ float raycube(const vec &o, const vec &ray, float radius, int mode, int size, ex
         if((dist>0 || !(mode&RAY_SKIPFIRST)) &&
            (((mode&RAY_CLIPMAT) && isclipped(c.material&MATF_VOLUME)) ||
             ((mode&RAY_EDITMAT) && c.material != MAT_AIR) ||
+            ((mode&RAY_LIQUIDMAT) && isliquid(c.material&MATF_VOLUME)) ||
             (!(mode&RAY_PASS) && lsize==size && !isempty(c)) ||
             isentirelysolid(c) ||
             dent < dist) &&
