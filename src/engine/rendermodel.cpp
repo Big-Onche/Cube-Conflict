@@ -119,6 +119,20 @@ void mdldepthoffset(int *offset)
 }
 COMMAND(mdldepthoffset, "i");
 
+void mdllod(int *i)
+{
+    checkmdl;
+    loadingmodel->lod = *i;
+}
+COMMAND(mdllod, "i");
+
+void mdlloddist(int *i)
+{
+    checkmdl;
+    loadingmodel->loddist = *i;
+}
+COMMAND(mdlloddist, "i");
+
 void mdlglow(float *percent, float *delta, float *pulse)
 {
     checkmdl;
@@ -902,11 +916,16 @@ void clearbatchedmapmodels()
     }
 }
 
+VARP(lodmodels, 0, 0, 1);
+VARP(loddistfactor, 1, 3, 4);
+
 void rendermapmodel(int idx, int anim, const vec &o, float yaw, float pitch, float roll, int flags, int basetime, float size)
 {
     if(!mapmodels.inrange(idx)) return;
     mapmodelinfo &mmi = mapmodels[idx];
+
     model *m = mmi.m ? mmi.m : loadmodel(mmi.name);
+
     if(!m) return;
 
     vec center, bbradius;
@@ -919,6 +938,10 @@ void rendermapmodel(int idx, int anim, const vec &o, float yaw, float pitch, flo
     center.add(o);
     radius *= size;
 
+    defformatstring(lod, "%s%s", mmi.name, "/lod");
+    model *j = (center.dist(camera1->o) > m->loddist*loddistfactor && lodmodels && m->lod) ? loadmodel(lod) : mmi.m;
+    if(!j) return;
+
     int visible = 0;
     if(shadowmapping)
     {
@@ -926,7 +949,7 @@ void rendermapmodel(int idx, int anim, const vec &o, float yaw, float pitch, flo
         visible = shadowmaskmodel(center, radius);
         if(!visible) return;
     }
-    else if(flags&(MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED) && cullmodel(m, center, radius, flags))
+    else if(flags&(MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED) && cullmodel(j, center, radius, flags))
         return;
 
     batchedmodel &b = batchedmodels.add();
@@ -945,7 +968,7 @@ void rendermapmodel(int idx, int anim, const vec &o, float yaw, float pitch, flo
     b.visible = visible;
     b.d = NULL;
     b.attached = -1;
-    addbatchedmodel(m, b, batchedmodels.length()-1);
+    addbatchedmodel(j, b, batchedmodels.length()-1);
 }
 
 void rendermodel(const char *mdl, int anim, const vec &o, float yaw, float pitch, float roll, int flags, dynent *d, modelattach *a, int basetime, int basetime2, float size, const vec4 &color)

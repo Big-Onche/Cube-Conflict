@@ -1033,7 +1033,7 @@ void writecollideobj(char *name)
     model *m = loadmapmodel(mm->attr2);
     if(!m)
     {
-        mapmodelinfo *mmi = getmminfo(mm->attr1);
+        mapmodelinfo *mmi = getmminfo(mm->attr2);
         if(mmi) conoutf(CON_ERROR, "could not load map model: %s", mmi->name);
         else conoutf(CON_ERROR, "could not find map model: %d", mm->attr2);
         return;
