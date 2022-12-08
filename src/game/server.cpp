@@ -126,7 +126,7 @@ namespace server
         int state, editstate;
         int lastdeath, deadflush, lastspawn, lifesequence;
         int lastshot;
-        projectilestate<8> projs, grenades, kamikaze, assistexpl;
+        projectilestate<8> projs, grenades;
         int killstreak, frags, flags, deaths, teamkills, shotdamage, damage;
         int lasttimeplayed, timeplayed;
         float effectiveness;
@@ -149,8 +149,6 @@ namespace server
             maxhealth = 1000;
             projs.reset();
             grenades.reset();
-            kamikaze.reset();
-            assistexpl.reset();
 
             timeplayed = 0;
             effectiveness = 0;
@@ -175,8 +173,6 @@ namespace server
             respawn();
             projs.reset();
             grenades.reset();
-            kamikaze.reset();
-            assistexpl.reset();
         }
     };
 
@@ -844,7 +840,7 @@ namespace server
         virtual int fragvalue(clientinfo *victim, clientinfo *actor, int atk = -1)
         {
             int value;
-            atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT ? value = 0 : value = -1;
+            atk==ATK_KAMIKAZE_SHOOT ? value = 0 : value = -1;
             if(victim==actor || isteam(victim->team, actor->team)) return value;
             return 1;
         }
@@ -2364,7 +2360,7 @@ namespace server
             target->state.deaths++;
             if(!isteam(target->team, actor->team))actor->state.killstreak++;
             target->state.killstreak = 0;
-            int fragvalue = smode ? smode->fragvalue(target, actor, atk) : (target==actor || isteam(target->team, actor->team) ? atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT ? 0 : -1 : 1);
+            int fragvalue = smode ? smode->fragvalue(target, actor, atk) : (target==actor || isteam(target->team, actor->team) ? atk==ATK_KAMIKAZE_SHOOT ? 0 : -1 : 1);
             actor->state.frags += fragvalue;
             target->state.lastdeath = totalmillis;
 
@@ -2453,10 +2449,10 @@ namespace server
             case ATK_ROQUETTES_SHOOT:
             case ATK_CAMPOUZE_SHOOT:
             case ATK_GRAP1_SHOOT:
+            case ATK_ASSISTXPL_SHOOT:
+            case ATK_KAMIKAZE_SHOOT:
                 if(!gs.projs.remove(id)) return;
                 break;
-            case ATK_ASSISTXPL_SHOOT: if(!gs.assistexpl.remove(id)) return; break;
-            case ATK_KAMIKAZE_SHOOT: if(!gs.kamikaze.remove(id)) return; break;
             case ATK_M32_SHOOT: if(!gs.grenades.remove(id)) return; break;
             default:
                 return;
@@ -2531,10 +2527,10 @@ namespace server
             case ATK_ROQUETTES_SHOOT:
             case ATK_CAMPOUZE_SHOOT:
             case ATK_GRAP1_SHOOT:
+            case ATK_ASSISTXPL_SHOOT:
+            case ATK_KAMIKAZE_SHOOT:
                 loopi(attacks[atk].rays) {gs.projs.add(id);} break;
             case ATK_M32_SHOOT: gs.grenades.add(id); break;
-            case ATK_ASSISTXPL_SHOOT: gs.assistexpl.add(id); break;
-            case ATK_KAMIKAZE_SHOOT: gs.kamikaze.add(id); break;
             default:
             {
                 int totalrays = 0, maxrays = attacks[atk].rays;
@@ -3413,8 +3409,6 @@ namespace server
                     ci->events.deletecontents();
                     ci->state.projs.reset();
                     ci->state.grenades.reset();
-                    ci->state.kamikaze.reset();
-                    ci->state.assistexpl.reset();
                 }
                 else ci->state.state = ci->state.editstate;
                 QUEUE_MSG;

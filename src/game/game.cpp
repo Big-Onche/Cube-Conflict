@@ -9,7 +9,7 @@ float killdistance = 0;
 int n_aptitudetueur, n_aptitudevictime, n_killstreakacteur, oldapti;
 bool suicided;
 
-bool randomevent(int probability) {return rnd(probability)==0;}
+bool randomevent(int probability) {if(probability <= 1) return true; else return rnd(probability)==0;}
 
 VAR(examresult, 0, 0, 4);
 ICOMMAND(calcexamresult, "iiii", (int *a, int *b, int *c, int *d),

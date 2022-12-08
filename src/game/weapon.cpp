@@ -250,8 +250,7 @@ namespace game
         loopi(attacks[atk].rays) offsetray(from, to, attacks[atk].spread, attacks[atk].nozoomspread, attacks[atk].range, rays[i], d);
     }
 
-    VARP(bnclifetime, 1000, 5000, 30000);
-    enum { BNC_GRENADE, BNC_KAMIKAZE, BNC_GIBS, BNC_DEBRIS, BNC_DOUILLES, BNC_BIGDOUILLES, BNC_CARTOUCHES, BNC_DOUILLESUZI, BNC_ASSISTEXPL, BNC_LIGHT};
+    enum { BNC_GRENADE, BNC_GIBS, BNC_DEBRIS, BNC_DOUILLES, BNC_BIGDOUILLES, BNC_CARTOUCHES, BNC_DOUILLESUZI, BNC_LIGHT, BNC_ROBOT};
 
     struct bouncer : physent
     {
@@ -287,9 +286,12 @@ namespace game
 
         switch(type)
         {
-            case BNC_GIBS: bnc.variant = rnd(3); break;
-            default:  bnc.collidetype = COLLIDE_ELLIPSE;
+            case BNC_ROBOT: bnc.variant = rnd(3); break;
+            case BNC_DEBRIS: bnc.variant = rnd(4); break;
+            case BNC_GIBS: bnc.variant = rnd(6); break;
         }
+
+        bnc.collidetype = COLLIDE_ELLIPSE;
 
         vec dir(to);
         dir.sub(from).safenormalize();
@@ -329,7 +331,7 @@ namespace game
         }
 
         b->bounces++;
-        if(b->bouncetype == BNC_GIBS && b->bounces < 2 && randomevent(3)) addstain(STAIN_BLOOD, vec(b->o).sub(vec(surface).mul(b->radius)), surface, 2.96f/b->bounces, bvec(0x60, 0xFF, 0xFF), rnd(4));
+        if(b->bouncetype == BNC_GIBS && b->bounces < 2 && randomevent(0.05*nbfps)) addstain(STAIN_BLOOD, vec(b->o).sub(vec(surface).mul(b->radius)), surface, 2.96f/b->bounces, bvec(0x60, 0xFF, 0xFF), rnd(4));
         if(b->bouncetype == BNC_GRENADE) addstain(STAIN_PULSE_GLOW, vec(b->o).sub(vec(surface).mul(b->radius)), surface, 4.f, 0x0000FF);
     }
 
@@ -340,7 +342,7 @@ namespace game
             bouncer &bnc = *bouncers[i];
             vec old(bnc.o);
 
-            if(bnc.vel.magnitude() > 25.0f)
+            if(bnc.vel.magnitude() > 25.0f && bnc.bounces<=5)
             {
                 vec pos(bnc.o);
                 pos.add(vec(bnc.offset).mul(bnc.offsetmillis/float(OFFSETMILLIS)));
@@ -353,7 +355,7 @@ namespace game
                         regular_particle_splash(lookupmaterial(pos)==MAT_WATER ? PART_BULLE : PART_SMOKE, lookupmaterial(pos)==MAT_WATER ? 1 : 3, 250, pos, 0x222222, 2.5f, 50, -50);
                         regular_particle_splash(PART_FLAME1+rnd(2), 2, 75, pos, 0x994400, 0.7f, 30, -30);
                         break;
-                    case BNC_GIBS: if(randomevent(40)) regular_particle_splash(PART_BLOOD, 1, 9999, pos, 0x60FFFF, 1.0f, 50);
+                    case BNC_GIBS: if(randomevent(0.6f*nbfps)) regular_particle_splash(PART_BLOOD, 1, 9999, pos, 0x60FFFF, 1.0f, 50);
                 }
             }
 
@@ -365,7 +367,8 @@ namespace game
                 {
                     int qtime = min(30, rtime);
                     rtime -= qtime;
-                    if((bnc.lifetime -= qtime)<0 || bounce(&bnc, qtime/1000.0f, 0.6f, 0.5f, 1)) { stopped = true; break; }
+                    if(bnc.bounces<=5) bounce(&bnc, qtime/1000.0f, 0.6f, 0.5f, 1);
+                    if((bnc.lifetime -= qtime)<0) { stopped = true; break; }
                 }
             }
 
@@ -374,25 +377,9 @@ namespace game
                 if(bnc.bouncetype==BNC_GRENADE)
                 {
                     hits.setsize(0);
-                    explode(bnc.local, bnc.owner, bnc.o, bnc.o, NULL, 1, ATK_M32_SHOOT); // 1 = qdam
+                    explode(bnc.local, bnc.owner, bnc.o, bnc.o, NULL, 1, ATK_M32_SHOOT);
                     if(bnc.local)
                         addmsg(N_EXPLODE, "rci3iv", bnc.owner, lastmillis-maptime, ATK_M32_SHOOT, bnc.id-maptime,
-                                hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
-                }
-                if(bnc.bouncetype==BNC_KAMIKAZE)
-                {
-                    hits.setsize(0);
-                    explode(bnc.local, bnc.owner, bnc.o, bnc.o, NULL, 1, ATK_KAMIKAZE_SHOOT); // 1 = qdam
-                    if(bnc.local)
-                        addmsg(N_EXPLODE, "rci3iv", bnc.owner, lastmillis-maptime, ATK_KAMIKAZE_SHOOT, bnc.id-maptime,
-                                hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
-                }
-                if(bnc.bouncetype==BNC_ASSISTEXPL)
-                {
-                    hits.setsize(0);
-                    explode(bnc.local, bnc.owner, bnc.o, bnc.o, NULL, 1, ATK_ASSISTXPL_SHOOT); // 1 = qdam
-                    if(bnc.local)
-                        addmsg(N_EXPLODE, "rci3iv", bnc.owner, lastmillis-maptime, ATK_ASSISTXPL_SHOOT, bnc.id-maptime,
                                 hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
                 }
                 delete bouncers.remove(i--);
@@ -455,7 +442,7 @@ namespace game
         switch(p.atk)
         {
             case ATK_ARTIFICE_SHOOT: p.lifetime=attacks[atk].ttl+rnd(400); break;
-            case ATK_ARBALETE_SHOOT: p.lifetime=temptrisfade; break;
+            case ATK_ARBALETE_SHOOT: p.lifetime=temptrisfade+rnd(5000); break;
             default: p.lifetime = attacks[atk].ttl;
         }
         p.exploded = false;
@@ -473,18 +460,23 @@ namespace game
 
     VARP(blood, 0, 1, 1);
 
-    void spawnbouncer(const vec &p, const vec &vel, gameent *d, int type, int lifetime = rnd(1000)+1000)
+    void spawnbouncer(const vec &p, const vec &vel, gameent *d, int type, int lifetime = rnd(temptrisfade)+rnd(5000))
     {
-        if(camera1->o.dist(p)>200 && (type==BNC_DOUILLES || type==BNC_CARTOUCHES || type==BNC_DOUILLESUZI)) return;
+        if(camera1->o.dist(p)>temptrisfade/10 && (type==BNC_DOUILLES || type==BNC_CARTOUCHES || type==BNC_DOUILLESUZI)) return;
 
         vec to(0, 0, 0);
 
         switch(type)
         {
-            case BNC_GIBS: to.add(vec(rnd(100)-50, rnd(100)-50, rnd(100)-50)); break;
-            case BNC_DEBRIS: to.add(vec(rnd(100)-50, rnd(100)-50, rnd(100)-50)); break;
-            case BNC_DOUILLESUZI: to.add(vec(0, 0, -1)); break;
-            default: to.add(vec(0, 0, 1));
+            case BNC_GIBS:
+            case BNC_ROBOT:
+            case BNC_DEBRIS:
+                to.add(vec(rnd(100)-50, rnd(100)-50, rnd(100)-50));
+                break;
+            case BNC_DOUILLESUZI:
+                to.add(vec(0, 0, -1)); break;
+            default:
+                to.add(vec(0, 0, 1));
         }
         if(to.iszero()) to.z += 1;
         to.normalize();
@@ -717,7 +709,7 @@ namespace game
                 playsound(S_EXPL_MISSILE, &v, 0, 0, 0 , 100, -1, 350);
                 if(lookupmaterial(v)==MAT_WATER) playsound(S_EXPL_INWATER, &v, 0, 0, 0 , 100, -1, 350);
                 if(camera1->o.dist(v) >= 300) playsound(S_EXPL_FAR, &v, NULL, 0, 0, 400, -1, 1500);
-                loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS, 5000);
+                loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
                 gfx::projexplosion(owner, v, vel, safe, atk);
                 break;
 
@@ -725,7 +717,8 @@ namespace game
             case ATK_ASSISTXPL_SHOOT:
                 if(camera1->o.dist(v) >= 300) playsound(S_BIGEXPL_FAR, &v, NULL, 0, 0, 400, -1, 2000);
                 if((lookupmaterial(v)==MAT_WATER)) playsound(S_EXPL_INWATER, &v, 0, 0, 0 , 100, -1, 350);
-                loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS, 5000);
+                loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
+                if(atk==ATK_ASSISTXPL_SHOOT) loopi(10+rnd(5)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_ROBOT);
                 gfx::projexplosion(owner, v, vel, safe, atk);
                 break;
 
@@ -745,7 +738,7 @@ namespace game
                 playsound(S_EXPL_GRENADE, &v, 0, 0, 0 , 100, -1, 350);
                 if(lookupmaterial(v)==MAT_WATER) playsound(S_EXPL_INWATER, &v, 0, 0, 0 , 100, -1, 350);
                 if(camera1->o.dist(v) >= 300) playsound(S_EXPL_FAR, &v, NULL, 0, 0, 400, -1, 1500);
-                loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS, 5000);
+                loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
                 gfx::projexplosion(owner, v, vel, safe, atk);
                 break;
 
@@ -906,7 +899,7 @@ namespace game
             bool exploded = false;
             hits.setsize(0);
 
-            if((p.lifetime -= time)<0 && (p.atk==ATK_ARTIFICE_SHOOT || p.atk==ATK_NUKE_SHOOT))
+            if((p.lifetime -= time)<0 && (p.atk==ATK_ARTIFICE_SHOOT || p.atk==ATK_NUKE_SHOOT || p.atk==ATK_KAMIKAZE_SHOOT || p.atk==ATK_ASSISTXPL_SHOOT))
             {
                 projsplash(p, v, NULL);
                 exploded = true;
@@ -1118,7 +1111,7 @@ namespace game
                 break;
             case ATK_MINIGUN_SHOOT:
             case ATK_AK47_SHOOT:
-                spawnbouncer(d->aptitude==APT_ESPION && d->aptisort2 ? d->o : d->balles, vec(0, 0, 0), d, BNC_DOUILLES, bnclifetime+rnd(bnclifetime));
+                spawnbouncer(d->aptitude==APT_ESPION && d->aptisort2 ? d->o : d->balles, vec(0, 0, 0), d, BNC_DOUILLES);
                 particle_flare(d->muzzle, d->muzzle, 100, PART_MINIGUN_MUZZLE_FLASH, d->steromillis ? 0xFF2222 : d->aptisort2 && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xCCAAAA, d==hudplayer() ? zoom ? 1.3f : 3.f : 3.6f, d, player1->champimillis ? true : false);
                 if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 100, PART_MINIGUN_MUZZLE_FLASH, 0xFF2222, d==hudplayer() ? zoom ? 2.f : 5.5f : 6.5f, d, player1->champimillis ? true : false);
                 particle_splash(PART_SMOKE, d==hudplayer() ? 3 : 5, d==hudplayer() ? 350 : 500, d->muzzle, 0x444444, d==hudplayer() ? 3.5f : 4.5f, 20, 500, 0, player1->champimillis ? true : false);
@@ -1131,7 +1124,7 @@ namespace game
             case ATK_GAU8_SHOOT:
                 if(d->type==ENT_PLAYER) sound = S_GAU8;
                 if(d==player1 && player1->aptitude==APT_PRETRE && player1->champimillis && player1->aptisort3) unlockachievement(ACH_CADENCE);
-                spawnbouncer(d->aptitude==APT_ESPION && d->aptisort2 ? d->o : d->balles, vec(0, 0, 0), d, BNC_BIGDOUILLES,  bnclifetime+rnd(bnclifetime));
+                spawnbouncer(d->aptitude==APT_ESPION && d->aptisort2 ? d->o : d->balles, vec(0, 0, 0), d, BNC_BIGDOUILLES);
                 particle_flare(d->muzzle, d->muzzle, 100, PART_MINIGUN_MUZZLE_FLASH, d->steromillis ? 0xFF2222 : d->aptisort2 && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFFFFFF, d==hudplayer() ? zoom ? 1.5f : 2.0f : 5.f, d, player1->champimillis ? true : false);
                 if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 100, PART_MINIGUN_MUZZLE_FLASH, 0xFF2222, d==hudplayer() ? zoom ? 1.5f : 2.5f : 6.f, d, player1->champimillis ? true : false);
                 if(randomevent(7))
@@ -1148,7 +1141,7 @@ namespace game
             case ATK_HYDRA_SHOOT:
                 {
                     if(!local) createrays(gun, d->aptitude==APT_ESPION && d->aptisort2 ? d->o : from, to, d);
-                    loopi(atk==ATK_HYDRA_SHOOT ? 3 : 2) spawnbouncer(d->aptitude==APT_ESPION && d->aptisort2 ? hudgunorigin(gun, d->o, to, d) : d->balles, vec(0, 0, 0), d, BNC_CARTOUCHES, bnclifetime+rnd(bnclifetime));
+                    loopi(atk==ATK_HYDRA_SHOOT ? 3 : 2) spawnbouncer(d->aptitude==APT_ESPION && d->aptisort2 ? hudgunorigin(gun, d->o, to, d) : d->balles, vec(0, 0, 0), d, BNC_CARTOUCHES);
                     particle_flare(d->muzzle, d->muzzle, 140, PART_NORMAL_MUZZLE_FLASH, d->steromillis ? 0xFF2222 : d->aptisort2 && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xCCAAAA,  d==hudplayer() ? zoom ? 1.25f : 3.50f : 4.5f, d, player1->champimillis ? true : false);
                     if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 140, PART_NORMAL_MUZZLE_FLASH, 0xFF2222, d==hudplayer() ? zoom ? 2.00f : 5.5f : 6.5f, d, player1->champimillis ? true : false);
                     particle_splash(PART_SMOKE,  4, 500, d->muzzle, 0x443333, 3.5f, 20, 500, 0, player1->champimillis ? true : false);
@@ -1169,8 +1162,8 @@ namespace game
             case ATK_SV98_SHOOT:
             case ATK_SKS_SHOOT:
             case ATK_CAMPOUZE_SHOOT:
-                if(atk==ATK_CAMPOUZE_SHOOT) {loopi(3)spawnbouncer(d->aptitude==APT_ESPION && d->aptisort2 ? d->o : d->balles, vec(0, 0, 0), d, BNC_BIGDOUILLES, bnclifetime+rnd(bnclifetime));}
-                else spawnbouncer(d->aptitude==APT_ESPION && d->aptisort2 ? d->o : d->balles, vec(0, 0, 0), d, BNC_BIGDOUILLES, bnclifetime+rnd(bnclifetime));
+                if(atk==ATK_CAMPOUZE_SHOOT) {loopi(3)spawnbouncer(d->aptitude==APT_ESPION && d->aptisort2 ? d->o : d->balles, vec(0, 0, 0), d, BNC_BIGDOUILLES);}
+                else spawnbouncer(d->aptitude==APT_ESPION && d->aptisort2 ? d->o : d->balles, vec(0, 0, 0), d, BNC_BIGDOUILLES);
                 particle_splash(PART_SMOKE, d==hudplayer() ? 4 : 6, d==hudplayer() ? 350 : 600, d->muzzle, 0x222222, d==hudplayer() ? 3.5f : 6.5f, 40, 500, 0, player1->champimillis ? true : false);
                 particle_splash(PART_SPARK, d==hudplayer() ? 4 : 7, 40, d->muzzle, 0xFFFFFF, 0.5f, 300, 500, 0, player1->champimillis ? true : false);
                 particle_flare(d->muzzle, d->muzzle, 100, PART_NORMAL_MUZZLE_FLASH, d->steromillis ? 0xFF2222 : d->aptisort2 && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFFFFFF, 1.25f, d, player1->champimillis ? true : false);
@@ -1196,7 +1189,7 @@ namespace game
             case ATK_UZI_SHOOT:
             case ATK_FAMAS_SHOOT:
             case ATK_GLOCK_SHOOT:
-                spawnbouncer(d->aptitude==APT_ESPION && d->aptisort2 ? d->o : d->balles, vec(0, 0, 0), d, atk==ATK_UZI_SHOOT ? BNC_DOUILLESUZI : BNC_DOUILLES, bnclifetime+rnd(bnclifetime));
+                spawnbouncer(d->aptitude==APT_ESPION && d->aptisort2 ? d->o : d->balles, vec(0, 0, 0), d, atk==ATK_UZI_SHOOT ? BNC_DOUILLESUZI : BNC_DOUILLES);
                 particle_flare(d->muzzle, d->muzzle, 125, PART_NORMAL_MUZZLE_FLASH, d->steromillis ? 0xFF2222 : d->aptisort2 && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFFFFFF, d==hudplayer() ? zoom ? 0.5f : 0.75f : 1.75f, d, player1->champimillis ? true : false);
                 particle_flare(d->muzzle, d->muzzle, 75, PART_MINIGUN_MUZZLE_FLASH, d->steromillis ? 0xFF2222 : d->aptisort2 && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFFAA55, d==hudplayer() ? zoom ? 0.75f : 2.f : 3.f, d, player1->champimillis ? true : false);
                 if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 80, PART_MINIGUN_MUZZLE_FLASH, 0xFF2222, d==hudplayer() ? zoom ? 1.5f : 4.f : 5.f, d, player1->champimillis ? true : false);
@@ -1264,7 +1257,7 @@ namespace game
                 float dist = from.dist(to);
                 vec up = to;
                 up.z += dist/8;
-                newbouncer(d==player1 && !thirdperson ?  d->muzzle : hudgunorigin(gun, d->o, to, d), up, local, id, d, atk==ATK_KAMIKAZE_SHOOT ? BNC_KAMIKAZE : BNC_ASSISTEXPL, attacks[atk].ttl, attacks[atk].projspeed);
+                newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
                 break;
             }
             default:
@@ -1554,11 +1547,12 @@ namespace game
         }
     }
 
-    static const char * const gibnames[3] = { "pixels/noir", "pixels/jaune", "pixels/rouge" };
-    static const char * const douillesnames[1] = { "douilles/normale" };
-    static const char * const bigdouillesnames[1] = { "douilles/grosse" };
-    static const char * const cartouchessnames[1] = { "douilles/cartouche" };
-    static const char * const debrisnames[1] = { "pixels/noir" };
+    static const char * const gibnames[6] = { "bouncers/pix_noir", "bouncers/pix_jaune", "bouncers/pix_rouge", "bouncers/pix_noir_alt", "bouncers/pix_jaune_alt", "bouncers/pix_rouge_alt" };
+    static const char * const douillesnames[1] = { "bouncers/douille" };
+    static const char * const bigdouillesnames[1] = { "bouncers/douille_big" };
+    static const char * const cartouchessnames[1] = { "bouncers/cartouche" };
+    static const char * const debrisnames[4] = { "bouncers/pierre_1", "bouncers/pierre_2", "bouncers/pierre_3", "bouncers/pierre_4" };
+    static const char * const robotnames[3] = { "bouncers/robot_1", "bouncers/robot_2", "bouncers/robot_3" };
 
     void preloadbouncers()
     {
@@ -1567,8 +1561,8 @@ namespace game
         loopi(sizeof(bigdouillesnames)/sizeof(bigdouillesnames[0])) preloadmodel(bigdouillesnames[i]);
         loopi(sizeof(cartouchessnames)/sizeof(cartouchessnames[0])) preloadmodel(cartouchessnames[i]);
         loopi(sizeof(debrisnames)/sizeof(debrisnames[0])) preloadmodel(debrisnames[i]);
+        loopi(sizeof(robotnames)/sizeof(robotnames[0])) preloadmodel(robotnames[i]);
     }
-
 
     void renderbouncers()
     {
@@ -1580,29 +1574,30 @@ namespace game
             pos.add(vec(bnc.offset).mul(bnc.offsetmillis/float(OFFSETMILLIS)));
             vec vel(bnc.vel);
             pitch = -bnc.roll;
-            if(vel.magnitude() <= 25.0f) {yaw = bnc.lastyaw; pitch = bnc.lastpitch;}
+            if(vel.magnitude() <= 10.0f) {yaw = bnc.lastyaw; pitch = bnc.lastpitch;}
             else
             {
                 vectoyawpitch(vel, yaw, pitch);
-                yaw += 90;
+                yaw += bnc.bounces < 5 ? 75+rnd(31) : 90;
                 bnc.lastyaw = yaw;
                 bnc.lastpitch = pitch;
             }
-			int cull = MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED;
+			int cull = MDL_CULL_VFC|MDL_CULL_EXTDIST|MDL_CULL_OCCLUDED;
 
             if(bnc.bouncetype==BNC_GRENADE) rendermodel("projectiles/grenade", ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, cull);
             else
             {
                 const char *mdl = NULL;
                 float fade = 1;
-                if(bnc.lifetime < 250) fade = bnc.lifetime/250.0f;
+                if(bnc.lifetime < 500) fade = bnc.lifetime/500.0f;
                 switch(bnc.bouncetype)
                 {
                     case BNC_GIBS: mdl = gibnames[bnc.variant]; break;
-                    case BNC_DEBRIS: mdl = "pixels/noir"; break;
-                    case BNC_DOUILLES: case BNC_DOUILLESUZI: mdl = "douilles/normale"; break;
-                    case BNC_BIGDOUILLES: mdl = "douilles/grosse"; break;
-                    case BNC_CARTOUCHES: mdl = "douilles/cartouche"; break;
+                    case BNC_DEBRIS: mdl = debrisnames[bnc.variant]; break;
+                    case BNC_ROBOT: mdl = robotnames[bnc.variant]; break;
+                    case BNC_DOUILLES: case BNC_DOUILLESUZI: mdl = "bouncers/douille"; break;
+                    case BNC_BIGDOUILLES: mdl = "bouncers/douille_big"; break;
+                    case BNC_CARTOUCHES: mdl = "bouncers/cartouche"; break;
                     default: return;
                 }
                 rendermodel(mdl, ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, 0, cull, NULL, NULL, 0, 0, fade);
