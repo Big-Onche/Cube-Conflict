@@ -336,9 +336,18 @@ static const int mmprefixlen = strlen(mmprefix);
 void mapmodel(char *name)
 {
     mapmodelinfo &mmi = mapmodels.add();
-    if(name[0]) formatstring(mmi.name, "%s%s", mmprefix, name);
-    else mmi.name[0] = '\0';
-    mmi.m = mmi.collide = NULL;
+    if(name[0])
+    {
+        formatstring(mmi.name, "%s%s", mmprefix, name);
+        formatstring(mmi.lodname, "%s%s/lod", mmprefix, name);
+    }
+    else
+    {
+        mmi.name[0] = '\0';
+        mmi.lodname[0] = '\0';
+    }
+
+    mmi.m = mmi.mlod = mmi.collide = NULL;
 }
 
 void mapmodelreset(int *n)
@@ -403,7 +412,7 @@ void preloadusedmapmodels(bool msg, bool bih)
         int mmindex = used[i];
         if(!mapmodels.inrange(mmindex)) { if(msg) conoutf(CON_WARN, "could not find map model: %d", mmindex); continue; }
         mapmodelinfo &mmi = mapmodels[mmindex];
-        if(!mmi.name[0]) continue;
+        if(!mmi.name[0] || !mmi.lodname[0]) continue;
         model *m = loadmodel(NULL, mmindex, msg);
         if(!m) { if(msg) conoutf(CON_WARN, "could not load map model: %s", mmi.name); }
         else
@@ -603,6 +612,7 @@ static inline void disablecullmodelquery()
 static inline int cullmodel(model *m, const vec &center, float radius, int flags, dynent *d = NULL)
 {
     if(flags&MDL_CULL_DIST && center.dist(camera1->o)/radius>maxmodelradiusdistance) return MDL_CULL_DIST;
+    if(flags&MDL_CULL_EXTDIST && center.dist(camera1->o)/radius>maxmodelradiusdistance*3) return MDL_CULL_EXTDIST;
     if(flags&MDL_CULL_VFC && isfoggedsphere(radius, center)) return MDL_CULL_VFC;
     if(flags&MDL_CULL_OCCLUDED && modeloccluded(center, radius)) return MDL_CULL_OCCLUDED;
     else if(flags&MDL_CULL_QUERY && d->query && d->query->owner==d && checkquery(d->query)) return MDL_CULL_QUERY;
@@ -924,8 +934,10 @@ void rendermapmodel(int idx, int anim, const vec &o, float yaw, float pitch, flo
     if(!mapmodels.inrange(idx)) return;
     mapmodelinfo &mmi = mapmodels[idx];
 
-    model *m = mmi.m ? mmi.m : loadmodel(mmi.name);
+    model *tmp = mmi.m ? mmi.m : loadmodel(mmi.name);
+    if(!tmp) return;
 
+    model *m = (o.dist(camera1->o) > tmp->loddist*loddistfactor && lodmodels && tmp->lod) ? (mmi.mlod ? mmi.mlod : loadmodel(mmi.lodname)) : mmi.m;
     if(!m) return;
 
     vec center, bbradius;
@@ -938,10 +950,6 @@ void rendermapmodel(int idx, int anim, const vec &o, float yaw, float pitch, flo
     center.add(o);
     radius *= size;
 
-    defformatstring(lod, "%s%s", mmi.name, "/lod");
-    model *j = (center.dist(camera1->o) > m->loddist*loddistfactor && lodmodels && m->lod) ? loadmodel(lod) : mmi.m;
-    if(!j) return;
-
     int visible = 0;
     if(shadowmapping)
     {
@@ -949,7 +957,7 @@ void rendermapmodel(int idx, int anim, const vec &o, float yaw, float pitch, flo
         visible = shadowmaskmodel(center, radius);
         if(!visible) return;
     }
-    else if(flags&(MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED) && cullmodel(j, center, radius, flags))
+    else if(flags&(MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED) && cullmodel(m, center, radius, flags))
         return;
 
     batchedmodel &b = batchedmodels.add();
@@ -968,7 +976,7 @@ void rendermapmodel(int idx, int anim, const vec &o, float yaw, float pitch, flo
     b.visible = visible;
     b.d = NULL;
     b.attached = -1;
-    addbatchedmodel(j, b, batchedmodels.length()-1);
+    addbatchedmodel(m, b, batchedmodels.length()-1);
 }
 
 void rendermodel(const char *mdl, int anim, const vec &o, float yaw, float pitch, float roll, int flags, dynent *d, modelattach *a, int basetime, int basetime2, float size, const vec4 &color)
