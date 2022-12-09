@@ -179,7 +179,7 @@ namespace ai
 	{ // add margins of error
         if(attackrange(d, atk, dist) || (d->skill <= 100 && !rnd(d->skill)))
         {
-            if(d->gunselect==GUN_CAC349 || d->gunselect==GUN_CACFLEAU || d->gunselect==GUN_CACMARTEAU || d->gunselect==GUN_CACMASTER || d->gunselect==GUN_CACNINJA) return true;
+            if((d->gunselect>=GUN_CAC349 && d->gunselect<=GUN_CACFLEAU) || d->gunselect==GUN_CACNINJA) return true;
 
             float skew = clamp(float(lastmillis-d->ai->enemymillis)/float((d->skill*attacks[atk].attackdelay/200.f)), 0.f, attacks[atk].projspeed ? 0.25f : 1e16f),
                 offy = yaw-d->yaw, offp = pitch-d->pitch;
@@ -376,7 +376,7 @@ namespace ai
 
     int needpursue(gameent *d)
     {
-        if(d->gunselect==GUN_CAC349 || d->gunselect==GUN_CACFLEAU || d->gunselect==GUN_CACMARTEAU || d->gunselect==GUN_CACMASTER || d->gunselect==GUN_CACNINJA || (d->aptitude==APT_KAMIKAZE && d->aptisort2)) return 1;
+        if((d->gunselect>=GUN_CAC349 && d->gunselect<=GUN_CACFLEAU) || d->gunselect==GUN_CACNINJA || (d->aptitude==APT_KAMIKAZE && d->aptisort2)) return 1;
         else return 0;
     }
 
@@ -935,7 +935,7 @@ namespace ai
 
                         int atk = guns[d->gunselect].attacks[ACT_SHOOT];
                         float guard = SIGHTMIN, wander = attacks[atk].range;
-                        if(d->gunselect==GUN_CAC349 || d->gunselect==GUN_CACFLEAU || d->gunselect==GUN_CACMARTEAU || d->gunselect==GUN_CACMASTER || d->gunselect==GUN_CACNINJA) guard = 0.f;
+                        if((d->gunselect>=GUN_CAC349 && d->gunselect<=GUN_CACFLEAU) || d->gunselect==GUN_CACNINJA) guard = 0.f;
                         return patrol(d, b, e->feetpos(), guard, wander) ? 1 : 0;
                     }
                     break;
@@ -1182,7 +1182,7 @@ namespace ai
 
     bool lockon(gameent *d, int atk, gameent *e, float maxdist)
     {
-        if((d->gunselect==GUN_CAC349 || d->gunselect==GUN_CACFLEAU || d->gunselect==GUN_CACMARTEAU || d->gunselect==GUN_CACMASTER || d->gunselect==GUN_CACNINJA) && !d->blocked && !d->timeinair)
+        if(((d->gunselect>=GUN_CAC349 && d->gunselect<=GUN_CACFLEAU) || d->gunselect==GUN_CACNINJA) && !d->blocked && !d->timeinair)
         {
             vec dir = vec(e->o).sub(d->o);
             float xydist = dir.x*dir.x+dir.y*dir.y, zdist = dir.z*dir.z, mdist = maxdist*maxdist, ddist = d->radius*d->radius+e->radius*e->radius;
@@ -1190,6 +1190,17 @@ namespace ai
         }
         return false;
     }
+
+    const int aimdirs[8][2] = {
+      { 1, 0 },
+      { 1, -1 },
+      { 0, -1 },
+      { -1, -1 },
+      { -1, 0 },
+      { -1, 1 },
+      { 0, 1 },
+      { 1, 1 }
+    };
 
     int process(gameent *d, aistate &b)
     {
@@ -1328,24 +1339,13 @@ namespace ai
         if(d->ai->dontmove) d->move = d->strafe = 0;
         else
         { // our guys move one way.. but turn another?! :)
-            const struct aimdir { int move, strafe, offset; } aimdirs[8] =
-            {
-                {  1,  0,   0 },
-                {  1,  -1,  45 },
-                {  0,  -1,  90 },
-                { -1,  -1, 135 },
-                { -1,  0, 180 },
-                { -1, 1, 225 },
-                {  0, 1, 270 },
-                {  1, 1, 315 }
-            };
-            float yaw = d->ai->targyaw-d->yaw;
-            if(yaw < 0.0f) yaw = 360.0f - fmodf(-yaw, 360.0f);
-            else if(yaw >= 360.0f) yaw = fmodf(yaw, 360.0f);
-            int r = clamp(((int)floor((yaw+22.5f)/45.0f))&7, 0, 7);
-            const aimdir &ad = aimdirs[r];
-            d->move = ad.move;
-            d->strafe = ad.strafe;
+            float yaw = d->ai->targyaw - d->yaw;
+            if (yaw < 0.0f) yaw += 360.0f;
+            if (yaw >= 360.0f) yaw -= 360.0f;
+            int r = clamp((int)(yaw + 22.5f) / 45, 0, 7);
+
+            d->move = aimdirs[r][0];
+            d->strafe = aimdirs[r][1];
         }
         findorientation(dp, d->yaw, d->pitch, d->ai->target);
         return result;
