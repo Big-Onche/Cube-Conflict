@@ -1156,27 +1156,16 @@ namespace ai
     {
         if(yaw < targyaw-180.0f) yaw += 360.0f;
         if(yaw > targyaw+180.0f) yaw -= 360.0f;
-        float offyaw = fabs(targyaw-yaw)*frame, offpitch = fabs(targpitch-pitch)*frame*scale;
-        if(targyaw > yaw)
-        {
-            yaw += offyaw;
-            if(targyaw < yaw) yaw = targyaw;
-        }
-        else if(targyaw < yaw)
-        {
-            yaw -= offyaw;
-            if(targyaw > yaw) yaw = targyaw;
-        }
-        if(targpitch > pitch)
-        {
-            pitch += offpitch;
-            if(targpitch < pitch) pitch = targpitch;
-        }
-        else if(targpitch < pitch)
-        {
-            pitch -= offpitch;
-            if(targpitch > pitch) pitch = targpitch;
-        }
+
+        int signYaw = (targyaw - yaw > 0) ? 1 : -1;
+        int signPitch = (targpitch - pitch > 0) ? 1 : -1;
+
+        float offyaw = fabs(targyaw - yaw) * frame * signYaw;
+        float offpitch = fabs(targpitch - pitch) * frame * scale * signPitch;
+
+        yaw += offyaw;
+        pitch += offpitch;
+
         fixrange(yaw, pitch);
     }
 
