@@ -585,7 +585,7 @@ namespace game
 
         //Effet graphique de mort
         vec pos(d->o.x, d->o.y, d->o.z-9);
-        gibeffect(10000, d->vel, d);
+        gibeffect(4000, d->vel, d);
         particle_splash(PART_SMOKE,  8, 1500, pos, 0x333333, 12.0f,  125, 400);
         particle_splash(PART_SMOKE,  5, 900, pos, 0x440000, 10.0f,  125, 200);
 
