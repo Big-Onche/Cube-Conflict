@@ -26,9 +26,6 @@ namespace gfx
 extern bool IS_USING_STEAM, IS_ON_OFFICIAL_SERV, UI_PLAYMUSIC;
 extern int GAME_LANG; // 0 = FR, 1 = EN
 
-//Config
-extern int dynlightdist;
-
 //Maps & ambiances
 extern int randomambience;
 extern float wateramplitude;
@@ -47,10 +44,9 @@ enum {MSG_OWNKILLSTREAK = 0, MSG_YOUKILLED, MSG_OTHERKILLSTREAK,
         MSG_LEVELUP, MSG_ACHUNLOCKED, MSG_CUSTOM, MSG_HELP, NUMMESSAGE};
 extern int message[NUMMESSAGE];
 
-extern int zoomfov, zoom, crosshairsize;
-extern float champifov, crosshairalpha, pourcents;
+extern int zoomfov, zoom, crosshairsize, weapposside, weapposup;
+extern float champifov, pourcents;
 
-extern float weapposside, weapposup, maxweapposside, maxweapposup, shieldside, maxshieldside;
 extern int nbfps;
 
 extern int parallaxX, parallaxY, UI_menutabs, UI_smiley, UI_cape, UI_tombe, UI_voix, UI_custtab, UI_showsteamnamebtn; //Menu

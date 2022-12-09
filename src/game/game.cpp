@@ -318,32 +318,17 @@ namespace game
 
     void updateworld()        // main game update loop
     {
-        //CubeConflict
-        //Bon ce code fonctionne mais il est à chier on est d'accord, amélioration à faire à l'avenir.
-        //(Toujours mieux codé que Fallout 76)
-        int nbmove = nbfps<30 ? 6 : nbfps<60 ? 4: nbfps < 120 ? 3 : nbfps < 200 ? 2 : 1;
-        if(player1->gunselect == GUN_HYDRA) nbmove*=2;
-        loopi(nbmove)
+        loopi(250/nbfps)
         {
-            if(zoom==1)
+            if(zoom)
             {
-                if(weapposside<guns[player1->gunselect].maxweapposside) weapposside += 2;
-                else if(weapposside>guns[player1->gunselect].maxweapposside) weapposside -= 1;
-
+                weapposside = min(weapposside + 2, guns[player1->gunselect].maxweapposside);
                 if(weapposup>1) weapposup -= 1;
-
-                if(shieldside>maxshieldside) shieldside -= 1;
-                else if(shieldside<maxshieldside) shieldside += 1;
             }
             else
             {
-                if(weapposside>1) weapposside -= 1;
-
-                if(weapposup<guns[player1->gunselect].maxweapposup) weapposup += 1;
-                else if(weapposup>guns[player1->gunselect].maxweapposup) weapposup -= 1;
-
-                if(maxshieldside<-7)maxshieldside=-7;
-                if(shieldside<1) shieldside += 1;
+                weapposup = min(weapposup + 1, guns[player1->gunselect].maxweapposup);
+                if(weapposside>1) weapposside -= 2;
             }
         }
 

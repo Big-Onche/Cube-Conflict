@@ -4,9 +4,7 @@
 #include "customisation.h"
 #include "stats.h"
 
-float weapposside, weapposup, maxweapposside, maxweapposup, shieldside;
-float maxshieldside = -15;
-float crosshairalpha = 1;
+int weapposside, weapposup;
 
 VAR(UI_smiley, 0, 0, 9);
 VAR(UI_cape, 0, 0, 13);
@@ -501,6 +499,24 @@ namespace game
         renderplayer(d, getplayermodelinfo(d), getplayercolor(d, team), team, fade, flags);
     }
 
+    int genrygbcolorgradient(int val)
+    {
+        double t = min(1.0f, max(0.0f, val / 150.0f));
+        int r = (int)round(255 * (1 - t));
+        int g = (int)round(255 * t);
+        int b = 0;
+        if (t > 0.5f)
+        {
+            r = 0;
+            g = (int)round(255 * (1 - (t - 0.5f) / 0.5f));
+            b = (int)round(255 * (t - 0.5f) / 0.5f);
+        }
+        else {
+            g *= 1.5f;
+        }
+        return (r << 16) | (g << 8) | b;
+    }
+
     void rendergame()
     {
         ai::render();
@@ -518,7 +534,7 @@ namespace game
         loopv(players)
         {
             gameent *d = players[i];
-            if(d->state==CS_SPECTATOR || d->state==CS_SPAWNING || d->lifesequence < 0 || d == exclude || (d->state==CS_DEAD && hidedead) || d->aptitude==APT_VIKING || (d==hudplayer() && d->aptitude==APT_MAGICIEN && d->aptisort3)) continue;
+            if(d->state==CS_SPECTATOR || d->state==CS_SPAWNING || d->lifesequence < 0 || d == exclude || (d->state==CS_DEAD && hidedead) || (d->aptitude==APT_VIKING && d==hudplayer()) || (d==hudplayer() && d->aptitude==APT_MAGICIEN && d->aptisort3)) continue;
             if(d!=player1) renderplayer(d);
 
             vec dir = vec(d->o).sub(camera1->o);
@@ -538,23 +554,14 @@ namespace game
 
                 if(player1->aptitude==APT_MEDECIN && team==1)
                 {
-                    if (d->health > 1000)
-                    {
-                        unsigned int lifeColor = (d->health/10 > 180) ? 80 : d->health/10-100;
+
                         particle_meter(d->o.dist(camera1->o)<75 ? (d->abovehead().add(camera1->o)).div(vec(2,2,2)) : posAtofrontofposB,
                                        d->health/1000.0f, PART_METER,
                                        d->o.dist(camera1->o)<250 ? 1.f : d->o.dist(camera1->o)/250.f, 0.5f,
-                                       (static_cast<unsigned char>((80-lifeColor)*3.18) << 8) | (static_cast<unsigned char>(lifeColor*3.18) << 0), 0x000000,
+                                       genrygbcolorgradient(d->health/10),
+                                       0x000000,
                                        d->o.dist(camera1->o)<75 ? 1.35f : 0.02f);
-                    }
-                    if (d->health > 0)
-                    {
-                        particle_meter(d->o.dist(camera1->o)<75 ? (d->abovehead().add(camera1->o)).div(vec(2,2,2)) : posAtofrontofposB,
-                                       d->health/1000.0f, PART_METER,
-                                       d->o.dist(camera1->o)<250 ? 1.f : d->o.dist(camera1->o)/250.f, 0.5f,
-                                       (static_cast<unsigned char>((100-d->health/10)*2.55) << 16) | (static_cast<unsigned char>(d->health/10*2.55) << 8), 0x000000,
-                                       d->o.dist(camera1->o)<75 ? 1.35f : 0.02f);
-                    }
+
                 }
 
                 if((player1->aptitude==APT_JUNKIE && team==1)&&(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION))
@@ -748,7 +755,7 @@ namespace game
         else
         {
             vec sway2;
-            vecfromyawpitch(d->yaw, 0, 0, d->armourtype==A_ASSIST ? 1 : shieldside, sway2);
+            vecfromyawpitch(d->yaw, 0, 0, 1, sway2);
             float floatdivfactor = d->armourtype==A_ASSIST ? 6.f : 3.f;
             sway2.mul((swayside/floatdivfactor)*cosf(steps));
             sway2.z += (swayup/floatdivfactor)*(fabs(sinf(steps)) - 1);

@@ -188,15 +188,13 @@ namespace game
             pophudmatrix();
         }
 
-        if(zoom && crosshairsize >= 31) {crosshairsize -= 3; if(crosshairsize<31) crosshairsize = 31;}
-        else if (crosshairsize<40) crosshairsize += 3;
+        if(zoom && crosshairsize >= 31) {crosshairsize -= 180/nbfps; if(crosshairsize<31) crosshairsize = 31;}
+        else if (crosshairsize<40) crosshairsize += 180/nbfps;
 
         zoomfov = (guns[player1->gunselect].maxzoomfov);
 
         if((player1->gunselect==GUN_SKS || player1->gunselect==GUN_SV98 || player1->gunselect==GUN_ARBALETE || player1->gunselect==GUN_S_CAMPOUZE || player1->gunselect==GUN_S_ROQUETTES) && zoom == 1)
         {
-            gle::colorf(crosshairalpha, crosshairalpha, crosshairalpha, crosshairalpha);
-
             if(player1->gunselect==GUN_S_ROQUETTES) settexture("media/interface/hud/fullscreen/scope_1.png");
             if(player1->gunselect==GUN_SKS) settexture("media/interface/hud/fullscreen/scope_3.png");
             else settexture("media/interface/hud/fullscreen/scope_2.png");
@@ -212,12 +210,12 @@ namespace game
 
             if(enlargefov)
             {
-                champifov+=0.006f*nbfps;
+                champifov+=22.f/nbfps;
                 if(champifov>player1->champimillis/1500) enlargefov = false;
             }
             else
             {
-                champifov-=0.006f*nbfps;
+                champifov-=22.f/nbfps;
                 if(champifov<-player1->champimillis/1500) enlargefov = true;
             }
 

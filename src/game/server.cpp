@@ -920,7 +920,7 @@ namespace server
         if((m_timed && gamemillis>=gamelimit) || !sents.inrange(i) || !sents[i].spawned) return false;
         int rndsweap = sents[i].type==I_SUPERARME ? rnd(4) : 0;
         clientinfo *ci = getinfo(sender);
-        if(!ci || (!ci->local && !ci->state.canpickup(sents[i].type, ci->aptitude, ci->state.armourtype))) return false;
+        if(!ci || (!ci->local && !ci->state.canpickup(sents[i].type+rndsweap, ci->aptitude, ci->state.armourtype))) return false;
         sents[i].spawned = false;
         sents[i].spawntime = spawntime(sents[i].type);
         sendf(-1, 1, "ri4", N_ITEMACC, i, sender, rndsweap);
@@ -1094,7 +1094,7 @@ namespace server
         demorecord = f;
 
         demoheader hdr;
-        memcpy(hdr.magic, DEMO_MAGIC, sizeof(hdr.magic));
+        strncpy(hdr.magic, DEMO_MAGIC, sizeof(hdr.magic));
         hdr.version = DEMO_VERSION;
         hdr.protocol = PROTOCOL_VERSION;
         lilswap(&hdr.version, 2);
@@ -1201,7 +1201,7 @@ namespace server
         if(const char *buf = getdemofile(file, false)) demoplayback = opengzfile(buf, "rb");
         if(!demoplayback) demoplayback = opengzfile(file, "rb");
         if(!demoplayback) formatstring(msg, "could not read demo \"%s\"", file);
-        else if(demoplayback->read(&hdr, sizeof(demoheader))!=sizeof(demoheader) || memcmp(hdr.magic, DEMO_MAGIC, sizeof(hdr.magic)))
+        else if(demoplayback->read(&hdr, sizeof(demoheader))!=sizeof(demoheader) || strncmp(hdr.magic, DEMO_MAGIC, sizeof(hdr.magic)))
             formatstring(msg, "\"%s\" is not a demo file", file);
         else
         {
