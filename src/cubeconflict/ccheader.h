@@ -49,4 +49,4 @@ extern float champifov, pourcents;
 
 extern int nbfps;
 
-extern int parallaxX, parallaxY, UI_menutabs, UI_smiley, UI_cape, UI_tombe, UI_voix, UI_custtab, UI_showsteamnamebtn; //Menu
+extern int UI_menutabs, UI_smiley, UI_cape, UI_tombe, UI_voix, UI_custtab, UI_showsteamnamebtn; //Menu

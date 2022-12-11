@@ -1521,13 +1521,15 @@ bool bounce(physent *d, float secs, float elasticity, float waterfric, float gra
         d->vel.mul(max(1.0f - secs/waterfric, 0.0f));
     }
     else d->vel.z -= grav*GRAVITY*secs;
-    vec old(d->o);
+    vec old = d->o;
+    bool collided = false;
     loopi(2)
     {
         vec dir(d->vel);
         dir.mul(secs);
         d->o.add(dir);
-        if(!collide(d, dir, 0, true, true))
+        collided = collide(d, dir, 0, true, true);
+        if(!collided)
         {
             if(collideinside)
             {

@@ -159,6 +159,7 @@ void bgquad(float x, float y, float w, float h, float tx, float ty, float tw, fl
     gle::end();
 }
 
+int parallaxX, parallaxY;
 string backgroundimg = "media/interface/background.png", backgroundname;
 
 void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, const char *mapname, const char *mapinfo, const char *astuce, bool force = false)
@@ -856,8 +857,6 @@ static void checkmousemotion(int &dx, int &dy)
         events.remove();
     }
 }
-
-int parallaxX, parallaxY;
 
 void checkinput()
 {
