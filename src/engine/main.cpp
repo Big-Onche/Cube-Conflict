@@ -246,17 +246,6 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
 
             settexture(backgroundimg);
             bgquad(ilx-parallaxX/-40, ily-parallaxY/-40, ilw, ilh);
-
-            float lh = 0.43f*min(w, h), lw = lh*2,
-                  lx = 0.5f*(w - lw), ly = 0.5f*(h*0.5f - lh);
-
-            if(UI::uivisible("main_fr") || UI::uivisible("main_en") || UI::uivisible("pause_fr") || UI::uivisible("pause_en"))
-            {
-                settexture((maxtexsize ? min(maxtexsize, hwtexsize) : hwtexsize) >= 1024 && (hudw > 1280 || hudh > 800) ? "<premul>media/interface/logo_1024.png" : "<premul>media/interface/logo.png", 3);
-                bgquad(lx, ly, lw, lh);
-            }
-
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         }
     }
 
@@ -943,11 +932,11 @@ void checkinput()
                     checkmousemotion(dx, dy);
                     if(!UI::movecursor(dx, dy)) mousemove(dx, dy);
 
-                    if(parallaxX>=-700 && parallaxX<=700) parallaxX = parallaxX+dx; //CubeConflict
-                    else parallaxX < 0 ? parallaxX = -700 : parallaxX = 700;
+                    parallaxX = parallaxX + dx;
+                    parallaxX = max(-700, min(parallaxX, 700));
 
-                    if(parallaxY>=-430 && parallaxY<=430) parallaxY = parallaxY+dy;
-                    else parallaxY < 0 ? parallaxY = -430 : parallaxY = 430;
+                    parallaxY = parallaxY + dy;
+                    parallaxY = max(-430, min(parallaxY, 430));
 
                     mousemoved = true;
                 }
@@ -1165,25 +1154,13 @@ VAR(numcpus, 1, 1, 16);
 
 extern void changerlangue();
 
-bool init = true;
 VARFP(GAME_LANG, 0, 0, 1, changerlangue());
 VAR(UI_menutabs, 0, 0, 9);
 
 void changerlangue()
 {
-    if(GAME_LANG) {execfile("config/keymap_EN.cfg"); execfile("config/ui_EN.cfg"); execfile("config/default_EN.cfg"); execfile("config/astuces_EN.cfg");}
-    else {execfile("config/keymap_FR.cfg"); execfile("config/ui_FR.cfg"); execfile("config/default_FR.cfg"); execfile("config/astuces_FR.cfg");}
-
-    if(!init)
-    {
-        game::ispaused() ? UI_menutabs = 3 : UI_menutabs = 8;
-        switch(GAME_LANG)
-        {
-            case 0: UI::showui(game::ispaused() ? "pause_fr" : "main_fr"); break;
-            case 1: UI::showui(game::ispaused() ? "pause_en" : "main_en");
-        }
-    }
-    else {UI_menutabs = 0; init = false;}
+    if(GAME_LANG) {execfile("config/keymap_EN.cfg"); execfile("config/default_EN.cfg"); execfile("config/astuces_EN.cfg");}
+    else {execfile("config/keymap_FR.cfg"); execfile("config/default_FR.cfg"); execfile("config/astuces_FR.cfg");}
 }
 
 bool initsteam()
@@ -1379,9 +1356,11 @@ int main(int argc, char **argv)
 
     switch(GAME_LANG)
     {
-        case 0: if(rewritelangage)execfile("config/keymap_FR.cfg"); execfile("config/ui_FR.cfg"); execfile("config/default_FR.cfg"); execfile("config/astuces_FR.cfg"); break;
-        case 1: if(rewritelangage)execfile("config/keymap_EN.cfg"); execfile("config/ui_EN.cfg"); execfile("config/default_EN.cfg"); execfile("config/astuces_EN.cfg");
+        case 0: if(rewritelangage)execfile("config/keymap_FR.cfg"); execfile("config/default_FR.cfg"); execfile("config/astuces_FR.cfg"); break;
+        case 1: if(rewritelangage)execfile("config/keymap_EN.cfg"); execfile("config/default_EN.cfg"); execfile("config/astuces_EN.cfg");
     }
+
+    execfile("config/ui/main.cfg");
 
     renderbackground(GAME_LANG ? "Loading..." : "Chargement...");
 

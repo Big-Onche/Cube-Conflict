@@ -78,14 +78,7 @@ void menuprocess()
             UI::showui("firstlaunch");
             veryfirstlaunch = 0;
         }
-        else
-        {
-            switch(GAME_LANG)
-            {
-                case 0: UI::showui("main_fr"); break;
-                case 1: UI::showui("main_en");
-            }
-        }
+        else UI::showui("main");
     }
 }
 
