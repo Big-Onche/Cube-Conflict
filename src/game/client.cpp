@@ -8,56 +8,38 @@ VARR(mapofficielle, 0, 0, 1);
 
 int cnidentiquearme = 0;
 
-string pseudobasique;
-char *playerrndname(bool firstpart, int feminin, int langue)
-   {
-    string strpart1, strpart2;
-    char choosennamepart1[16], choosennamepart2[16];
-
-    char buf[32];
+char namesparts[2][16], trash[16];
+char *rndname(bool firstpart, bool fem, int lang)
+{
+    char buf[64];
     int names[3];
 
-    if(langue==0)
-    {
-        copystring(strpart1, feminin ? "config/pseudonymes/pseudos_part1_femi_fr.cfg" : "config/pseudonymes/pseudos_part1_masc_fr.cfg");
-        copystring(strpart2, feminin ? "config/pseudonymes/pseudos_part2_femi_fr.cfg" : "config/pseudonymes/pseudos_part2_masc_fr.cfg");
-    }
-    else
-    {
-        copystring(strpart1, "config/pseudonymes/pseudos_part1_en.cfg");
-        copystring(strpart2, "config/pseudonymes/pseudos_part2_en.cfg");
-    }
+    defformatstring(filepath, "config/names/names_part%s_%s.cfg", firstpart ? "1" : "2", GAME_LANG ? "en" : "fr");
 
-    stream *namelist = openfile(firstpart ? strpart1 : strpart2, "r");
+    stream *namelist = openfile(filepath, "r");
 
     while(namelist->getline(buf, sizeof(buf)))
     {
-        if(sscanf(buf, "NOMBREPSEUDOS: %i", &names[0])==1)
-        {
-            names[1] = rnd(names[0]);
-        }
+        if(sscanf(buf, "nbnames = %i", &names[0])==1) names[1] = rnd(names[0]);
         else
         {
-            sscanf(buf, "NOM %i: %s", &names[2], firstpart ? choosennamepart1 : choosennamepart2);
+            sscanf(buf, "name %i = %s %s", &names[2], namesparts[firstpart], fem && !GAME_LANG ? namesparts[firstpart] : trash);
             if(names[2] == names[1])
             {
                 namelist->close();
-                return firstpart ? choosennamepart1 : choosennamepart2;
+                return namesparts[firstpart];
             }
         }
     }
     namelist->close();
-    copystring(pseudobasique, firstpart ? "Pseudo" : "Pourri");
-    return pseudobasique;
+    copystring(trash, GAME_LANG ? firstpart ? "Bad" : "Username" : firstpart ? "Pseudo" : "Pourri");
+    return trash;
 }
 
-string pseudoaleatoire;
 void genpseudo(int forcelang)
 {
     int feminin = rnd(2);
-    formatstring(pseudoaleatoire, "%s%s", playerrndname(true, feminin, forcelang<2 ? GAME_LANG : forcelang-2), playerrndname(false, feminin, forcelang<2 ? GAME_LANG : forcelang-2));
-
-    copystring(game::player1->name, pseudoaleatoire);
+    formatstring(game::player1->name, "%s%s", rndname(true, feminin, forcelang<2 ? GAME_LANG : forcelang-2), rndname(false, feminin, forcelang<2 ? GAME_LANG : forcelang-2));
     game::addmsg(N_SWITCHNAME, "rs", game::player1->name);
     if(IS_USING_STEAM) UI_showsteamnamebtn = 1;
 }
@@ -223,7 +205,7 @@ namespace game
     void switchname(const char *name)
     {
         filtertext(player1->name, name, false, false, MAXNAMELEN);
-        if(!player1->name[0]) {genpseudo() ; copystring(player1->name, pseudoaleatoire);}
+        if(!player1->name[0]) genpseudo();
         addmsg(N_SWITCHNAME, "rs", player1->name);
         if(IS_USING_STEAM) UI_showsteamnamebtn = 1;
     }
@@ -1695,7 +1677,11 @@ namespace game
                 if(d)
                 {
                     filtertext(text, text, false, false, MAXNAMELEN);
-                    if(!text[0]) {genpseudo() ; copystring(text, pseudoaleatoire);}
+                    if(!text[0])
+                    {
+                        int feminin = rnd(2);
+                        formatstring(text, "%s%s", rndname(true, feminin, GAME_LANG), rndname(false, feminin, GAME_LANG));
+                    }
                     if(strcmp(text, d->name))
                     {
                         if(!isignored(d->clientnum)) conoutf(GAME_LANG ? "%s is now known as %s" : "%s s'appelle maintenant %s", colorname(d), colorname(d, text));

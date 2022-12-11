@@ -7,49 +7,6 @@ namespace ai
 {
     using namespace game;
 
-    string pseudobasique;
-    char *botrndname(bool firstpart, int feminin, int langue)
-       {
-        string strpart1, strpart2;
-        char choosennamepart1[16], choosennamepart2[16];
-
-        char buf[32];
-        int names[3];
-
-        if(langue==0)
-        {
-            copystring(strpart1, feminin ? "config/pseudonymes/pseudos_part1_femi_fr.cfg" : "config/pseudonymes/pseudos_part1_masc_fr.cfg");
-            copystring(strpart2, feminin ? "config/pseudonymes/pseudos_part2_femi_fr.cfg" : "config/pseudonymes/pseudos_part2_masc_fr.cfg");
-        }
-        else
-        {
-            copystring(strpart1, "config/pseudonymes/pseudos_part1_en.cfg");
-            copystring(strpart2, "config/pseudonymes/pseudos_part2_en.cfg");
-        }
-
-        stream *namelist = openfile(firstpart ? strpart1 : strpart2, "r");
-
-        while(namelist->getline(buf, sizeof(buf)))
-        {
-            if(sscanf(buf, "NOMBREPSEUDOS: %i", &names[0])==1)
-            {
-                names[1] = rnd(names[0]);
-            }
-            else
-            {
-                sscanf(buf, "NOM %i: %s", &names[2], firstpart ? choosennamepart1 : choosennamepart2);
-                if(names[2] == names[1])
-                {
-                    namelist->close();
-                    return firstpart ? choosennamepart1 : choosennamepart2;
-                }
-            }
-        }
-        namelist->close();
-        copystring(pseudobasique, firstpart ? "Pseudo" : "Pourri");
-        return pseudobasique;
-    }
-
     avoidset obstacles;
     int updatemillis = 0, iteration = 0, itermillis = 0, forcegun = -1;
     vec aitarget(0, 0, 0);
@@ -135,9 +92,9 @@ namespace ai
 
         if(dist<=mdist)
         {
-            float x = fmod(fabs((dist > 0 ? asin((q.z-o.z)/dist)/RAD : 0) - pitch), 360);
-            float y = fmod(fabs(-atan2(q.x-o.x, q.y-o.y)/RAD-yaw), 360);
-            if(min(x, 360-x) <= fovx && min(y, 360-y) <= fovy) return raycubelos(o, q, v);
+            float x = fmod(fabs((dist > 0 ? asin((q.z-o.z)/dist) / RAD : 0) - pitch), 360);
+            float y = fmod(fabs(-atan2(q.x-o.x, q.y-o.y) / RAD - yaw), 360);
+            return (min(x, 360-x) <= fovx && min(y, 360-y) <= fovy) ? raycubelos(o, q, v) : 0;
         }
         return false;
     }
@@ -240,7 +197,6 @@ namespace ai
         if(d->ai) DELETEP(d->ai);
     }
 
-    string pseudobot;
     void init(gameent *d, int at, int ocn, int apti, int cape, int tombe, int danse, int sk, int bn, int pm, int col, const char *name, int team)
     {
         gameent *o = newclient(ocn);
@@ -250,8 +206,7 @@ namespace ai
         bool resetthisguy = false;
 
         int feminin = rnd(2);
-        formatstring(pseudobot, "%s%s", botrndname(true, feminin, GAME_LANG), botrndname(false, feminin, GAME_LANG));
-        copystring(d->name, pseudobot, MAXNAMELEN+1);
+        formatstring(d->name, "%s%s", rndname(true, feminin, GAME_LANG), rndname(false, feminin, GAME_LANG));
 
         if(!d->name[0])
         {
@@ -1121,22 +1076,22 @@ namespace ai
 
     void fixfullrange(float &yaw, float &pitch, float &roll, bool full)
     {
-        if(full)
+        if (full)
         {
-            if(pitch < -180.0f) pitch = 180.0f - fmodf(-180.0f - pitch, 360.0f);
-            else if(pitch >= 180.0f) pitch = fmodf(pitch + 180.0f, 360.0f) - 180.0f;
-            if(roll < -180.0f) roll = 180.0f - fmodf(-180.0f - roll, 360.0f);
-            else if(roll >= 180.0f) roll = fmodf(roll + 180.0f, 360.0f) - 180.0f;
+            if (pitch < -180.0f) pitch = 180.0f - fmod(180.0f - pitch, 360.0f);
+            else if (pitch >= 180.0f) pitch = fmod(pitch + 180.0f, 360.0f) - 180.0f;
+            if (roll < -180.0f) roll = 180.0f - fmod(180.0f - roll, 360.0f);
+            else if (roll >= 180.0f) roll = fmod(roll + 180.0f, 360.0f) - 180.0f;
         }
         else
         {
-            if(pitch > 89.9f) pitch = 89.9f;
-            else if(pitch < -89.9f) pitch = -89.9f;
-            if(roll > 89.9f) roll = 89.9f;
-            else if(roll < -89.9f) roll = -89.9f;
+            if (pitch > 89.9f) pitch = 89.9f;
+            else if (pitch < -89.9f) pitch = -89.9f;
+            if (roll > 89.9f) roll = 89.9f;
+            else if (roll < -89.9f) roll = -89.9f;
         }
-        if(yaw < 0.0f) yaw = 360.0f - fmodf(-yaw, 360.0f);
-        else if(yaw >= 360.0f) yaw = fmodf(yaw, 360.0f);
+        if (yaw < 0.0f) yaw = 360.0f - fmod(360.0f - yaw, 360.0f);
+        else if (yaw >= 360.0f) yaw = fmod(yaw, 360.0f);
     }
 
     void fixrange(float &yaw, float &pitch)
