@@ -21,14 +21,12 @@ struct change
 static vector<change> needsapply;
 
 VARP(applydialog, 0, 1, 1);
-VAR(hidechanges, 0, 0, 1);
 
 void addchange(const char *desc, int type)
 {
     if(!applydialog) return;
     loopv(needsapply) if(!strcmp(needsapply[i].desc, desc)) return;
     needsapply.add(change(type, desc));
-    if(!hidechanges) UI::showui("changes");
 }
 
 void clearchanges(int type)
@@ -44,6 +42,8 @@ void clearchanges(int type)
     }
     if(needsapply.empty()) UI::hideui("changes");
 }
+
+ICOMMAND(clearchanges, "", (), clearchanges(CHANGE_GFX|CHANGE_SHADERS|CHANGE_SOUND));
 
 void applychanges()
 {
@@ -86,7 +86,6 @@ VAR(mainmenu, 1, 1, 0);
 
 void clearmainmenu()
 {
-    hidechanges = 0;
     if(mainmenu && isconnected())
     {
         mainmenu = 0;

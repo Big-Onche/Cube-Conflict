@@ -714,8 +714,6 @@ void resetgl()
 
     inbetweenframes = false;
     if(!reloadtexture(*notexture) ||
-       !reloadtexture("<premul>media/interface/logo.png") ||
-       !reloadtexture("<premul>media/interface/logo_1024.png") ||
        !reloadtexture("media/interface/shadow.png") ||
        !reloadtexture("media/interface/mapshot_frame.png") ||
        !reloadtexture("media/interface/loading_frame.png") ||
@@ -1381,7 +1379,6 @@ int main(int argc, char **argv)
 
     identflags |= IDF_PERSIST;
 
-    addpostfx("pause", 1, 1, 1, 1, vec4(1, 1, 1, 1));
     addpostfx("sobel", 1, 1, 1, 1, vec4(1, 1, 1, 1));
     clearpostfx();
 

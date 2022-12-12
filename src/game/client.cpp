@@ -525,12 +525,13 @@ namespace game
     ICOMMAND(getmastermode, "", (), intret(mastermode));
     ICOMMAND(getmastermodename, "i", (int *mm), result(server::mastermodename(*mm, "")));
 
-    bool isspectator(int cn)
+    bool isspectator(int cn, bool pl)
     {
+        if(pl) return player1->state==CS_SPECTATOR;
         gameent *d = getclient(cn);
         return d && d->state==CS_SPECTATOR;
     }
-    ICOMMAND(isspectator, "i", (int *cn), intret(isspectator(*cn) ? 1 : 0));
+    ICOMMAND(isspectator, "ii", (int *cn, bool *pl), intret(isspectator(*cn, *pl) ? 1 : 0));
 
     ICOMMAND(islagged, "i", (int *cn),
     {
@@ -1541,8 +1542,6 @@ namespace game
                 }
                 if(a) conoutf(GAME_LANG ? "Game is paused by administrator." : "La partie a été mise en pause par un administrateur.");
                 else conoutf(GAME_LANG ? "Game is paused." : "La partie est en pause.");
-                if(val) {addpostfx("pause", 1, 1, 1, 1, vec4(1, 1, 1, 1)); stopsounds();}
-                else clearpostfx();
                 break;
             }
 

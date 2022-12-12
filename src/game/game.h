@@ -500,7 +500,7 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, picks
 static const struct guninfo { const char *name, *file, *vwep, *armedescFR, *armedescEN; int maxweapposside, maxweapposup, maxzoomfov, hudrange, attacks[NUMACTS]; } guns[NUMGUNS] =
 {
     //Armes "normales"
-    { "fusilelectrique", "fusilelectrique", "worldgun/fusilelectrique", "un fusil électrique !", "an electric rifle.",                   66,  26, 60, 1000,  { -1, ATK_RAIL_SHOOT }, },
+    { "fusilelectrique", "fusilelectrique", "worldgun/fusilelectrique", "un fusil électrique !", "an electric rifle.",                   65,  26, 60, 1000,  { -1, ATK_RAIL_SHOOT }, },
     { "fusilplasma", "fusilplasma", "worldgun/fusilplasma",             "un fusil du turfu !", "a futuristic rifle.",                    28,  10, 60,  750,  { -1, ATK_PULSE_SHOOT }, },
     { "smaw", "smaw", "worldgun/smaw",                                  "un lance-roquettes de noob.", "a noob rocket launcher.",         8,   8, 85,  500,  { -1, ATK_SMAW_SHOOT }, },
     { "minigun", "minigun", "worldgun/minigun",                         "un minigun cheaté.", "a cheated minigun.",                      36,  11, 80,  750,  { -1, ATK_MINIGUN_SHOOT }, },
@@ -510,7 +510,7 @@ static const struct guninfo { const char *name, *file, *vwep, *armedescFR, *arme
     { "uzi", "uzi", "worldgun/uzi",                                     "une mitraillette de gangster.", "a gangster's weapon.",         23,  21, 80,  500,  { -1, ATK_UZI_SHOOT }, },
     { "famas", "famas", "worldgun/famas",                               "une arme made in France", "a weapon made in France.",           54,  14, 70,  750,  { -1, ATK_FAMAS_SHOOT }, },
     { "mossberg500", "mossberg500", "worldgun/mossberg500",             "un fusil à pompe de vieux con.", "an old man's shotgun.",       38,  18, 95,  300,  { -1, ATK_MOSSBERG_SHOOT }, },
-    { "hydra", "hydra", "worldgun/hydra",                               "un fusil venant d'un autre jeu !", "a gun from another game!",  92,  39, 95,  300,  { -1, ATK_HYDRA_SHOOT }, },
+    { "hydra", "hydra", "worldgun/hydra",                               "un fusil venant d'un autre jeu !", "a gun from another game!",  44,  20, 95,  300,  { -1, ATK_HYDRA_SHOOT }, },
     { "sv_98", "sv_98", "worldgun/sv_98",                               "un sniper de campeur.", "a camper rifle.",                       1,   3, 30, 2000,  { -1, ATK_SV98_SHOOT }, },
     { "sks", "sks", "worldgun/sks",                                     "une carabine russe !", "a russian rifle!",                       1,   3, 50, 1500,  { -1, ATK_SKS_SHOOT }, },
     { "arbalete", "arbalete", "worldgun/arbalete",                      "une flèche de merde !", "a rotten arrow.",                       1,   3, 45, 1000,  { -1, ATK_ARBALETE_SHOOT }, },
@@ -1226,6 +1226,8 @@ namespace server
     extern bool delayspawn(int type);
     extern bool pickup(int i, int sender);
 }
+
+extern char *rndname(bool firstpart, bool fem, int lang);
 
 #endif
 
