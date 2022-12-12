@@ -756,7 +756,7 @@ namespace server
 
     const char *mastermodename(int n, const char *unknown)
     {
-        return (n>=MM_START && size_t(n-MM_START)<sizeof(mastermodenames)/sizeof(mastermodenames[0])) ? mastermodenames[n-MM_START] : unknown;
+        return (n>=MM_START && size_t(n-MM_START)<sizeof(mastermodenames)/sizeof(mastermodenames[0])) ? GAME_LANG ? mastermodenames[n-MM_START] : mastermodenames_fr[n-MM_START] : unknown;
     }
 
     const char *privname(int type)

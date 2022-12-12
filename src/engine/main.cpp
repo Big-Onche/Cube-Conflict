@@ -45,7 +45,7 @@ void quit(bool savecfgs = true)                      // normal exit
     }
 
     abortconnect();
-    disconnect();
+    disconnect(false, true, true);
     localdisconnect();
     cleanup();
     if(IS_USING_STEAM) SteamAPI_Shutdown();
