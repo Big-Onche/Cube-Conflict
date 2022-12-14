@@ -169,12 +169,6 @@ namespace game
     {
         gameent *d = hudplayer();
         if(d->state==CS_EDITING || d->state==CS_SPECTATOR) return;
-        else if (ispaused())
-        {
-            settexture("media/interface/shadow.png", 3);
-            bgquad(0, 0, w, h);
-            return;
-        }
         else if(cmode)
         {
             cmode->drawhud(d, w, h);
@@ -201,22 +195,16 @@ namespace game
             if(player1->champimillis>5000) gle::colorf(1, 1, 1, 1);
             else gle::colorf(player1->champimillis/5000.0f, player1->champimillis/5000.0f, player1->champimillis/5000.0f, player1->champimillis/5000.0f);
 
-            if(enlargefov)
-            {
-                champifov+=22.f/nbfps;
-                if(champifov>player1->champimillis/1500) enlargefov = false;
-            }
-            else
-            {
-                champifov-=22.f/nbfps;
-                if(champifov<-player1->champimillis/1500) enlargefov = true;
-            }
+            if(enlargefov && !ispaused()){champifov+=22.f/nbfps; if(champifov>player1->champimillis/1500) enlargefov = false;}
+            else if (!ispaused()) {champifov-=22.f/nbfps; if(champifov<-player1->champimillis/1500) enlargefov = true;}
 
             settexture("media/interface/hud/fullscreen/shrooms.png");
             bgquad(0, 0, w, h);
 
             gle::colorf(1, 1, 1, 1);
         }
+
+        if(ispaused()) return;
 
         if(player1->ragemillis>0)
         {
@@ -240,19 +228,9 @@ namespace game
             gle::colorf(1, 1, 1, 1);
         }
 
-        if((d->aptisort3 || d->aptisort1) && d->aptitude==APT_MAGICIEN)
+        if(((d->aptisort3 || d->aptisort1) && d->aptitude==APT_MAGICIEN) || (d->aptisort2 && d->aptitude==APT_PHYSICIEN))
         {
-            gle::colorf(1, 1, 1, 0.7f);
-
-            settexture("media/interface/hud/fullscreen/ability.png");
-            bgquad(0, 0, w, h);
-
-            gle::colorf(1, 1, 1, 1);
-        }
-
-        if(d->aptisort2 && d->aptitude==APT_PHYSICIEN)
-        {
-            gle::colorf(0.3, 0.6, 1, 0.7f);
+            d->aptitude==APT_MAGICIEN ? gle::colorf(1, 1, 1, 0.7f) : gle::colorf(0.3, 0.6, 1, 0.7f);
 
             settexture("media/interface/hud/fullscreen/ability.png");
             bgquad(0, 0, w, h);
@@ -284,7 +262,7 @@ namespace game
             return;
         }
 
-        if(player1->gunselect==GUN_CAC349 || player1->gunselect==GUN_CACFLEAU || player1->gunselect==GUN_CACMARTEAU || player1->gunselect==GUN_CACMASTER || player1->gunselect==GUN_CACNINJA) settexture("media/interface/hud/epee.png");
+        if((player1->gunselect>=GUN_CAC349 && player1->gunselect<=GUN_CACFLEAU) || player1->gunselect==GUN_CACNINJA) settexture("media/interface/hud/epee.png");
         else settexture("media/interface/hud/balle.png");
         bgquad(w-130, h-130, 115, 115);
 

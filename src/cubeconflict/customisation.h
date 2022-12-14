@@ -19,22 +19,22 @@ static const struct smileysinfo { const char *smileydir, *smileyname; int smiley
     {"smileys/bug",         "Bug",        1500},
 };
 
-static const struct capesinfo { const char *team1capedir, *team2capedir, *capename; int capeprice; } customscapes[14] =
+static const struct capesinfo { const char *capedir; int capeprice; } customscapes[14] =
 {
-    {"capes/cape_noob",         "capes/cape_noob/orange",       "Noob",              0},
-    {"capes/cape_jvc",          "capes/cape_jvc/orange",        "JVC",              50},
-    {"capes/cape_coroned",      "capes/cape_coroned/orange",    "Coroned",          50},
-    {"capes/cape_atome",        "capes/cape_atome/orange",      "Atome",           100},
-    {"capes/cape_jesuseco",     "capes/cape_jesuseco/orange",   "Issou ECO+",      100},
-    {"capes/cape_weed",         "capes/cape_weed/orange",       "Weed",            100},
-    {"capes/cape_flames",       "capes/cape_flames/orange",     "Flames",          250},
-    {"capes/cape_boucle",       "capes/cape_boucle/orange",     "Boucle",          250},
-    {"capes/cape_vintage",      "capes/cape_vintage/orange",    "Vintage",         250},
-    {"capes/cape_elite",        "capes/cape_elite/orange",      "Elite",           250},
-    {"capes/cape_high",         "capes/cape_high/orange",       "Défoncé",         500},
-    {"capes/cape_rayonsx",      "capes/cape_rayonsx/orange",    "Rayons X",        500},
-    {"capes/cape_risitas",      "capes/cape_risitas/orange",    "Risitas",         500},
-    {"capes/cape_riche",        "capes/cape_riche/orange",      "Riche",          1500},
+    {"noob",        0},
+    {"jvc",        50},
+    {"coroned",    50},
+    {"atome",     100},
+    {"jesuseco",  100},
+    {"weed",      100},
+    {"flames",    250},
+    {"boucle",    250},
+    {"vintage",   250},
+    {"elite",     250},
+    {"high",      500},
+    {"rayonsx",   500},
+    {"risitas",   500},
+    {"riche",    1500},
 };
 
 static const struct tombesinfo { const char *tombedir, *tombemenudir, *tombename; int tombeprice; } customstombes[13] =

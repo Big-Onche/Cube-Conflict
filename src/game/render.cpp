@@ -231,8 +231,10 @@ namespace game
 
         loopi(14) //Preloading all capes
         {
-            preloadmodel(customscapes[i].team1capedir);
-            preloadmodel(customscapes[i].team2capedir);
+            defformatstring(capedir, "capes/%s", customscapes[i].capedir);
+            preloadmodel(customscapes[i].capedir);
+            formatstring(capedir, "capes/%s/orange", customscapes[i].capedir);
+            preloadmodel(customscapes[i].capedir);
         }
 
         loopi(NUMAPTS) //Preloading all classe's hats
@@ -376,7 +378,7 @@ namespace game
         ////////Customisations////////
         if(d->customcape>=0 && d->customcape<=13)
         {
-            a[ai++] = modelattach("tag_cape", d->team==player1->team ? customscapes[d->customcape].team1capedir : customscapes[d->customcape].team2capedir, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+            a[ai++] = modelattach("tag_cape", d->team==player1->team ? custom::getcapedir(d->customcape) : custom::getcapedir(d->customcape, true), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
 
         //////////////////////////////////////////////////////////////////ANIMATIONS//////////////////////////////////////////////////////////////////
@@ -487,7 +489,7 @@ namespace game
 
         defformatstring(mdldir, "hats/%s", aptitudes[player1->aptitude].apt_nomEN);
         a[ai++] = modelattach("tag_hat", mdldir, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-        a[ai++] = modelattach("tag_cape", customscapes[cape].team1capedir, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+        a[ai++] = modelattach("tag_cape", custom::getcapedir(cape, false), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
 
         rendermodel(mdlname, anim, o, yaw, pitch, 0, NULL, d, a[0].tag ? a : NULL, 0, 0, 1, vec4(vec::hexcolor(color), 5));
     }

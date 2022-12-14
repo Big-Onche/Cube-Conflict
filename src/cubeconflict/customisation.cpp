@@ -8,6 +8,16 @@ using namespace std;
 
 int cust[NUMCUST];
 
+namespace custom
+{
+    string capedir;
+    const char *getcapedir(int cape, bool enemy)
+    {
+        formatstring(capedir, "capes/%s%s", customscapes[cape].capedir, enemy ? "/enemy" : "");
+        return capedir;
+    }
+}
+
 const int itemprice(int itemtype, int itemID) // Récupère le prix d'un objet
 {
     int price = 0;
@@ -56,7 +66,7 @@ void buyitem(int itemtype) //Achète un objet
             else if(cust[CAPE_CUBE+UI_cape]>0) {conoutf(CON_GAMEINFO, GAME_LANG ? "\f3You already own this cape!" : "\f3Vous possédez déjà cette cape !"); playsound(S_ERROR); return;}
             else
             {
-                conoutf(CON_GAMEINFO, GAME_LANG ? "\f9You bought an \"%s\" cape!" : "\f9Cape \"%s\" achetée !", customscapes[UI_cape].capename);
+                //conoutf(CON_GAMEINFO, GAME_LANG ? "\f9You bought an \"%s\" cape!" : "\f9Cape \"%s\" achetée !", customscapes[UI_cape].capename);
                 stat[STAT_CC] = stat[STAT_CC]-customscapes[UI_cape].capeprice;
                 cust[CAPE_CUBE+UI_cape] = rnd(99)+1;
                 playsound(S_CAISSEENREGISTREUSE);

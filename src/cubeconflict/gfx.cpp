@@ -223,19 +223,19 @@ namespace gfx
         switch(armourtype)
         {
             case A_BLUE:
-                {int shieldvalue = armourval<=150 ? 20 : armourval<=300  ? 40 : armourval<=450  ? 60 : armourval<=600  ? 80 : 100; formatstring(bouclier, "%s%s%d", hud ? "hudshield/" : "worldshield/", "bois/", preload ? armourval : shieldvalue);}
+                formatstring(bouclier, "%s%s%d", hud ? "hudshield/" : "shields/", "wood/", preload ? armourval : armourval<150 ? 20 : armourval<300 ? 40 : armourval<450 ? 60 : armourval<600  ? 80 : 100);
                 break;
             case A_GREEN:
-                {int shieldvalue = armourval<=250 ? 20 : armourval<=500  ? 40 : armourval<=750  ? 60 : armourval<=1000 ? 80 : 100; formatstring(bouclier, "%s%s%d", hud ? "hudshield/" : "worldshield/", "fer/", preload ? armourval : shieldvalue);}
+                formatstring(bouclier, "%s%s%d", hud ? "hudshield/" : "shields/", "iron/", preload ? armourval : armourval<250 ? 20 : armourval<500 ? 40 : armourval<750 ? 60 : armourval<1000 ? 80 : 100);
                 break;
             case A_MAGNET:
-                {int shieldvalue = armourval<=300 ? 20 : armourval<=600  ? 40 : armourval<=900  ? 60 : armourval<=1200 ? 80 : 100; formatstring(bouclier, "%s%s%d", hud ? "hudshield/" : "worldshield/", "magnetique/", preload ? armourval : shieldvalue);}
+                formatstring(bouclier, "%s%s%d", hud ? "hudshield/" : "shields/", "magnet/", preload ? armourval : armourval<300 ? 20 : armourval<600 ? 40 : armourval<900 ? 60 : armourval<1200 ? 80 : 100);
                 break;
             case A_YELLOW:
-                {int shieldvalue = armourval<=400 ? 20 : armourval<=800  ? 40 : armourval<=1200 ? 60 : armourval<=1600 ? 80 : 100; formatstring(bouclier, "%s%s%d", hud ? "hudshield/" : "worldshield/", "or/", preload ? armourval : shieldvalue);}
+                formatstring(bouclier, "%s%s%d", hud ? "hudshield/" : "shields/", "gold/", preload ? armourval : armourval<400 ? 20 : armourval<800 ? 40 : armourval<1200 ? 60 : armourval<1600 ? 80 : 100);
                 break;
             case A_ASSIST:
-                {int shieldvalue = armourval<=600 ? 20 : armourval<=1200 ? 40 : armourval<=1800 ? 60 : armourval<=2400 ? 80 : 100; formatstring(bouclier, "%s%d", "hudshield/armureassistee/", preload ? armourval : shieldvalue);}
+                formatstring(bouclier, "%s%d", "hudshield/power/", preload ? armourval : armourval<600 ? 20 : armourval<1200 ? 40 : armourval<1800 ? 60 : armourval<2400 ? 80 : 100);
                 break;
         }
         return bouclier;
