@@ -525,12 +525,12 @@ namespace game
     }
     COMMAND(taunt, "");
 
-    void showvoice()
-    {
-        if(GAME_LANG) return;
-        playsound(S_CGCORTEX+UI_voix);
-    }
-    COMMAND(showvoice, "");
+    //void showvoice()
+    //{
+    //    if(GAME_LANG) return;
+    //    playsound(S_CGCORTEX+UI_voix);
+    //}
+    //COMMAND(showvoice, "");
 
     VARP(hitsound, 0, 0, 1);
 

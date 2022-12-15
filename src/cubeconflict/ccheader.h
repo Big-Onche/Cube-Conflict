@@ -22,6 +22,11 @@ namespace gfx
     extern const char *getshielddir(int armourtype, int armourval, bool hud = false, bool preload = false);
 }
 
+namespace custom
+{
+    extern const char *getcapedir(int cape, bool enemy = false);
+}
+
 //Config élémentaire
 extern bool IS_USING_STEAM, IS_ON_OFFICIAL_SERV, UI_PLAYMUSIC;
 extern int GAME_LANG; // 0 = FR, 1 = EN
@@ -48,5 +53,3 @@ extern int zoomfov, zoom, crosshairsize, weapposside, weapposup;
 extern float champifov, pourcents;
 
 extern int nbfps;
-
-extern int UI_menutabs, UI_smiley, UI_cape, UI_tombe, UI_voix, UI_custtab, UI_showsteamnamebtn; //Menu

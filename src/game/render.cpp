@@ -6,13 +6,6 @@
 
 int weapposside, weapposup;
 
-VAR(UI_smiley, 0, 0, 9);
-VAR(UI_cape, 0, 0, 13);
-VAR(UI_tombe, 0, 0, 12);
-VAR(UI_voix, 0, 0, 10);
-VAR(UI_custtab, 0, 0, 3);
-VAR(UI_showsteamnamebtn, 0, 0, 1);
-
 namespace game
 {
     vector<gameent *> bestplayers;
@@ -95,16 +88,16 @@ namespace game
 
     static const playermodelinfo playermodels[10] =
     {
-        { { "smileys/hap/red", "smileys/hap", "smileys/hap/red" },                      { "hudgun", "hudgun", "hudgun" },   { "hap_red", "hap", "hap_red" }, true },
-        { { "smileys/noel/red", "smileys/noel", "smileys/noel/red" },                   { "hudgun", "hudgun", "hudgun" },   { "noel_red", "noel", "noel_red" }, true },
-        { { "smileys/malade/red", "smileys/malade", "smileys/malade/red" },             { "hudgun", "hudgun", "hudgun" },   { "malade_red", "malade", "malade_red" }, true },
-        { { "smileys/content/red", "smileys/content", "smileys/content/red" },          { "hudgun", "hudgun", "hudgun" },   { "content_red", "content", "content_red" }, true },
-        { { "smileys/colere/red", "smileys/colere", "smileys/colere/red" },             { "hudgun", "hudgun", "hudgun" },   { "colere_red", "colere", "colere_red" }, true },
-        { { "smileys/sournois/red", "smileys/sournois", "smileys/sournois/red" },       { "hudgun", "hudgun", "hudgun" },   { "sournois_red", "sournois", "sournois_red" }, true },
-        { { "smileys/fou/red", "smileys/fou", "smileys/fou/red" },                      { "hudgun", "hudgun", "hudgun" },   { "fou_red", "fou", "fou_red" }, true },
-        { { "smileys/clindoeil/red", "smileys/clindoeil", "smileys/clindoeil/red" },    { "hudgun", "hudgun", "hudgun" },   { "clindoeil_red", "clindoeil", "clindoeil_red" }, true },
-        { { "smileys/cool/red", "smileys/cool", "smileys/cool/red" },                   { "hudgun", "hudgun", "hudgun" },   { "cool_red", "cool", "cool_red" }, true },
-        { { "smileys/bug/red", "smileys/bug", "smileys/bug/red" },                      { "hudgun", "hudgun", "hudgun" },   { "bug_red", "bug", "bug_red" }, true },
+        { { "smileys/hap/red", "smileys/hap", "smileys/hap/red" },                   { "hudgun" },   true},
+        { { "smileys/noel/red", "smileys/noel", "smileys/noel/red" },                { "hudgun" },   true},
+        { { "smileys/malade/red", "smileys/malade", "smileys/malade/red" },          { "hudgun" },   true},
+        { { "smileys/content/red", "smileys/content", "smileys/content/red" },       { "hudgun" },   true},
+        { { "smileys/colere/red", "smileys/colere", "smileys/colere/red" },          { "hudgun" },   true},
+        { { "smileys/sournois/red", "smileys/sournois", "smileys/sournois/red" },    { "hudgun" },   true},
+        { { "smileys/fou/red", "smileys/fou", "smileys/fou/red" },                   { "hudgun" },   true},
+        { { "smileys/clindoeil/red", "smileys/clindoeil", "smileys/clindoeil/red" }, { "hudgun" },   true},
+        { { "smileys/cool/red", "smileys/cool", "smileys/cool/red" },                { "hudgun" },   true},
+        { { "smileys/bug/red", "smileys/bug", "smileys/bug/red" },                   { "hudgun" },   true},
     };
 
     extern void changedplayermodel();
@@ -378,7 +371,7 @@ namespace game
         ////////Customisations////////
         if(d->customcape>=0 && d->customcape<=13)
         {
-            a[ai++] = modelattach("tag_cape", d->team==player1->team ? custom::getcapedir(d->customcape) : custom::getcapedir(d->customcape, true), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+            a[ai++] = modelattach("tag_cape", custom::getcapedir(d->customcape, d->team==player1->team ? true : false), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
 
         //////////////////////////////////////////////////////////////////ANIMATIONS//////////////////////////////////////////////////////////////////
@@ -489,7 +482,7 @@ namespace game
 
         defformatstring(mdldir, "hats/%s", aptitudes[player1->aptitude].apt_nomEN);
         a[ai++] = modelattach("tag_hat", mdldir, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-        a[ai++] = modelattach("tag_cape", custom::getcapedir(cape, false), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+        a[ai++] = modelattach("tag_cape", custom::getcapedir(cape, !team), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
 
         rendermodel(mdlname, anim, o, yaw, pitch, 0, NULL, d, a[0].tag ? a : NULL, 0, 0, 1, vec4(vec::hexcolor(color), 5));
     }
@@ -716,7 +709,7 @@ namespace game
         const playermodelinfo &mdl = getplayermodelinfo(d);
         int team = m_teammode && validteam(d->team) ? d->team : 0,
             color = getplayercolor(d, team);
-        defformatstring(gunname, "%s/%s", mdl.hudguns[team], file);
+        defformatstring(gunname, "%s/%s", mdl.hudgun, file);
         modelattach a[3];
         int ai = 0;
         d->muzzle = d->balles = vec(-1, -1, -1);
@@ -856,19 +849,10 @@ namespace game
             const char *file = guns[i].file;
             if(!file) continue;
             string fname;
-            if(m_teammode)
-            {
-                loopj(MAXTEAMS)
-                {
-                    formatstring(fname, "%s/%s", mdl.hudguns[1+j], file);
-                    preloadmodel(fname);
-                }
-            }
-            else
-            {
-                formatstring(fname, "%s/%s", mdl.hudguns[0], file);
-                preloadmodel(fname);
-            }
+
+            formatstring(fname, "%s/%s", mdl.hudgun, file);
+            preloadmodel(fname);
+
             formatstring(fname, "worldgun/%s", file);
             preloadmodel(fname);
             if(m_tutorial || m_sp || m_dmsp) preloadmonsters();

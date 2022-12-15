@@ -1,57 +1,46 @@
 //Définition des customisations
+
 enum {SMI_HAP, SMI_NOEL, SMI_MALADE, SMI_CONTENT, SMI_COLERE, SMI_SOURNOIS, SMI_FOU, SMI_CLINDOEIL, SMI_COOL, SMI_BUG, SMI_11, SMI_12, SMI_13, SMI_14, SMI_15, SMI_16, SMI_17, SMI_18, SMI_19, SMI_20,
         CAPE_CUBE, CAPE_JVC, CAPE_CORONED, CAPE_ATOME, CAPE_JESUSECO, CAPE_WEED, CAPE_FLAMES, CAPE_BOUCLE, CAPE_VINTAGE, CAPE_ELITE, CAPE_HIGH, CAPE_RAYONSX, CAPE_RISITAS, CAPE_RICHE, CAPE_15, CAPE_16, CAPE_17, CAPE_18, CAPE_19, CAPE_20,
         TOM_MERDE, TOM_BASIQUE1, TOM_BASIQUE2, TOM_FLEUR, TOM_CRISTAL, TOM_GOLF, TOM_OEIL, TOM_EXCALIBUR, TOM_COURONNE, TOM_CRIME, TOM_FUCK, TOM_MONUMENT, TOM_LINGOT, TOM_14, TOM_15, TOM_16, TOM_17, TOM_18, TOM_19, TOM_20,
         VOI_CORTEX, VOI_VALOCHE, VOI_VIEILLE, VOI_HENDEK, VOI_MILI1, VOI_MILI2, VOI_MOUNIR, VOI_DELAVIER, VOI_PRAUD, VOI_MALLEVILLE, VOI_11, VOI_12, VOI_13, VOI_14, VOI_15, VOI_16, VOI_17, VOI_18, VOI_19, VOI_20, NUMCUST};
 extern int cust[NUMCUST];
 
-static const struct smileysinfo { const char *smileydir, *smileyname; int smileyprice; } customssmileys[10] =
-{
-    {"smileys/hap",         "Hap",           0},
-    {"smileys/noel",        "Noel",          0},
-    {"smileys/malade",      "Malade",      100},
-    {"smileys/content",     "Content",     100},
-    {"smileys/colere",      "Colère",      250},
-    {"smileys/sournois",    "Sournois",    250},
-    {"smileys/fou",         "Fou",         250},
-    {"smileys/clindoeil",   "Clin d'oeil", 500},
-    {"smileys/cool",        "Cool",        500},
-    {"smileys/bug",         "Bug",        1500},
-};
+static const struct smileysinfo { int smileyprice; } customsmileys[10] = { {0}, {0}, {100}, {100}, {250}, {250}, {250}, {500}, {500}, {1500}, };
 
 static const struct capesinfo { const char *capedir; int capeprice; } customscapes[14] =
 {
     {"noob",        0},
-    {"jvc",        50},
-    {"coroned",    50},
-    {"atome",     100},
-    {"jesuseco",  100},
-    {"weed",      100},
-    {"flames",    250},
-    {"boucle",    250},
-    {"vintage",   250},
-    {"elite",     250},
-    {"high",      500},
-    {"rayonsx",   500},
-    {"risitas",   500},
-    {"riche",    1500},
+    {"triggered",   50},
+    {"coroned",     50},
+    {"nuclear",     100},
+    {"paint",       100},
+    {"weed",        100},
+    {"flames",      250},
+    {"time",        250},
+    {"vintage",     250},
+    {"elite",       250},
+    {"psych",       500},
+    {"xrays",       500},
+    {"risitas3d",   500},
+    {"rich",        1500},
 };
 
-static const struct tombesinfo { const char *tombedir, *tombemenudir, *tombename; int tombeprice; } customstombes[13] =
+static const struct tombesinfo { const char *tombedir; int tombeprice; } customstombes[13] =
 {
-    {"tombes/merde",        "tombes/merde",     "Merde",            0},
-    {"tombes/basique1",     "tombes/basique1",  "Basique 1",       50},
-    {"tombes/basique2",     "tombes/basique2",  "Basique 2",       50},
-    {"tombes/fleur",        "tombes/fleur",     "Fleur",          100},
-    {"tombes/cristal",      "tombes/cristal",   "Cristal",        100},
-    {"tombes/minigolf",     "tombes/minigolf",  "minigolf",       100},
-    {"tombes/oeil",         "tombes/oeil/menu", "Oeil",           250},
-    {"tombes/excalibur",    "tombes/excalibur", "Excalibur",      250},
-    {"tombes/couronne",     "tombes/couronne",  "Couronne",       250},
-    {"tombes/crime",        "tombes/crime",     "Crime",          500},
-    {"tombes/fuck",         "tombes/fuck",      "Fuck",           500},
-    {"tombes/monument",     "tombes/monument",  "Monument",       500},
-    {"tombes/lingots",      "tombes/lingots",   "Lingots",       1500},
+    {"tombes/merde",     0},
+    {"tombes/basique1",  50},
+    {"tombes/basique2",  50},
+    {"tombes/fleur",     100},
+    {"tombes/cristal",   100},
+    {"tombes/minigolf",  100},
+    {"tombes/oeil",      250},
+    {"tombes/excalibur", 250},
+    {"tombes/couronne",  250},
+    {"tombes/crime",     500},
+    {"tombes/fuck",      500},
+    {"tombes/monument",  500},
+    {"tombes/lingots",   1500},
 };
 
 static const struct danceinfo { const char *dancename; int danceprice; } customsdance[11] =

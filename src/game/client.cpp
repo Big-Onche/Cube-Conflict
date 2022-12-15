@@ -41,18 +41,17 @@ void genpseudo(int forcelang)
     int feminin = rnd(2);
     formatstring(game::player1->name, "%s%s", rndname(true, feminin, forcelang<2 ? GAME_LANG : forcelang-2), rndname(false, feminin, forcelang<2 ? GAME_LANG : forcelang-2));
     game::addmsg(N_SWITCHNAME, "rs", game::player1->name);
-    if(IS_USING_STEAM) UI_showsteamnamebtn = 1;
 }
 ICOMMAND(genpseudo, "i", (int *forcelang), {genpseudo(*forcelang);});
 
 VARP(usesteamname, 0, 1, 1);
 void getsteamname()
 {
-    if(IS_USING_STEAM && usesteamname)
+    if(!IS_USING_STEAM) {conoutf(CON_ERROR, GAME_LANG ? "Steam API not initialized" : "API Steam non initialisée"); return;}
+    else if(usesteamname)
     {
         copystring(game::player1->name, SteamFriends()->GetPersonaName());
         game::addmsg(N_SWITCHNAME, "rs", game::player1->name);
-        UI_showsteamnamebtn = 0;
     }
 }
 ICOMMAND(getsteamname, "", (), {getsteamname();});
@@ -207,7 +206,6 @@ namespace game
         filtertext(player1->name, name, false, false, MAXNAMELEN);
         if(!player1->name[0]) genpseudo();
         addmsg(N_SWITCHNAME, "rs", player1->name);
-        if(IS_USING_STEAM) UI_showsteamnamebtn = 1;
     }
     void printname()
     {
@@ -454,15 +452,6 @@ namespace game
         return d ? d->playermodel : -1;
     }
     ICOMMAND(getclientmodel, "i", (int *cn), intret(getclientmodel(*cn)));
-
-    const char *getclienticon(int cn)
-    {
-        gameent *d = getclient(cn);
-        if(!d || d->state==CS_SPECTATOR) return "spectator";
-        const playermodelinfo &mdl = getplayermodelinfo(d);
-        return m_teammode && validteam(d->team) ? mdl.icon[d->team] : mdl.icon[0];
-    }
-    ICOMMAND(getclienticon, "i", (int *cn), result(getclienticon(*cn)));
 
     int getclientcolor(int cn)
     {

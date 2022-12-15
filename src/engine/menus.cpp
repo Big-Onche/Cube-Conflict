@@ -3,8 +3,6 @@
 #include "ccheader.h"
 #include "customisation.h"
 
-ICOMMAND(getgravedir, "i", (int *graveID), result(customstombes[*graveID].tombemenudir));
-
 void notifywelcome()
 {
     UI::hideui("servers");
@@ -60,10 +58,10 @@ ICOMMAND(pendingchanges, "b", (int *idx), { if(needsapply.inrange(*idx)) result(
 bool UI_PLAYMUSIC = true;
 VARP(veryfirstlaunch, 0, 1, 1);
 static int lastmainmenu = -1;
+ICOMMAND(usingsteam, "", (), intret(IS_USING_STEAM));
 
 void menuprocess()
 {
-    if(IS_USING_STEAM && strcasecmp(SteamFriends()->GetPersonaName(), game::player1->name)==0) UI_showsteamnamebtn = 0;
     if(lastmainmenu != mainmenu)
     {
         lastmainmenu = mainmenu;
@@ -74,7 +72,7 @@ void menuprocess()
     {
         if(veryfirstlaunch)
         {
-            if(IS_USING_STEAM) {getsteamname(); UI_showsteamnamebtn = 0;}
+            if(IS_USING_STEAM) {getsteamname();}
             UI::showui("firstlaunch");
             veryfirstlaunch = 0;
         }

@@ -145,7 +145,7 @@ void renderwaterfog(int mat, float surface)
 
 /* vertex water */
 VARP(watersubdiv, 0, 2, 3);
-VARP(waterlod, 0, 1, 3);
+VARP(waterlod, 0, 2, 3);
 
 static int wx1, wy1, wx2, wy2, wz, wsize, wsubdiv;
 static float whoffset, whphase;

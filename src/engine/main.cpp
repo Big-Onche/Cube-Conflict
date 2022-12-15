@@ -1153,7 +1153,6 @@ VAR(numcpus, 1, 1, 16);
 extern void changerlangue();
 
 VARFP(GAME_LANG, 0, 0, 1, changerlangue());
-VAR(UI_menutabs, 0, 0, 9);
 
 void changerlangue()
 {

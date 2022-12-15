@@ -101,8 +101,8 @@ const char *getstatinfo(int statID, bool onlyvalue) //Récupère la description d'
                         tmphr, GAME_LANG ? "hour" : "heure", tmphr>1 ? "s" : "",
                         tmpmin, "min", tmpmin>1 ? "s" : "",
                         tmpsec, "sec", tmpsec>1 ? "s" : "");
+            break;
         }
-        break;
         //when we need to display the stat after description (rare cases)
         case STAT_DAMMAGERECORD:
         case STAT_MAXKILLDIST:

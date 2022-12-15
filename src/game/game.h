@@ -1189,8 +1189,7 @@ namespace game
     // render
     struct playermodelinfo
     {
-        const char *model[1+MAXTEAMS], *hudguns[1+MAXTEAMS],
-                   *icon[1+MAXTEAMS];
+        const char *model[1+MAXTEAMS], *hudgun;
         bool ragdoll;
     };
 

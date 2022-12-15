@@ -2385,15 +2385,13 @@ namespace modelpreview
     }
 }
 
-VAR(playerpreviewyaw, 0, 200, 360);
+VAR(mdlpreviewyaw, 0, 200, 360);
 
 vec calcmodelpreviewpos(const vec &radius, float &yaw)
 {
-    yaw = UI_menutabs==0 ? fmod(lastmillis/10000.0f*360.0f, 360.0f) : UI_custtab==2 ? fmod(lastmillis/10000.0f*360.0f, 360.0f) : playerpreviewyaw;
+    yaw = UI::uivisible("skins") ? mdlpreviewyaw : fmod(lastmillis/20000.0f*360.0f, 360.0f);
 
-    int menudist = UI_menutabs==0 || UI_custtab==2 ? 2.6f : 2;
-
-    float dist = max(radius.magnitude2()/aspect, radius.magnitude())/sinf(fovy/menudist*RAD);
+    float dist = max(radius.magnitude2()/aspect, radius.magnitude())/sinf(fovy/2*RAD);
     return vec(0, dist, 0).rotate_around_x(camera1->pitch*RAD);
 }
 
