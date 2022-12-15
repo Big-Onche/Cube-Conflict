@@ -30,6 +30,7 @@ namespace custom
 //Config élémentaire
 extern bool IS_USING_STEAM, IS_ON_OFFICIAL_SERV, UI_PLAYMUSIC;
 extern int GAME_LANG; // 0 = FR, 1 = EN
+extern int servlang;  // 0 = FR, 1 = EN
 
 //Maps & ambiances
 extern int randomambience;

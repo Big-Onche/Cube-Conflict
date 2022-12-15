@@ -191,16 +191,16 @@ void trydisconnect(bool local)
 
     if(connpeer)
     {
-        conoutf("aborting connection attempt");
+        conoutf(GAME_LANG ? "Aborting connection attempt" : "Annulation de la connexion");
         abortconnect();
     }
     else if(curpeer)
     {
-        conoutf("attempting to disconnect...");
+        conoutf(GAME_LANG ? "Attempting to disconnect..." : "Déconnexion en cours...");
         disconnect(!discmillis, true, true);
     }
     else if(local && haslocalclients()) localdisconnect();
-    else conoutf(CON_WARN, "not connected");
+    else conoutf(CON_WARN, GAME_LANG ? "Not connected" : "Non connecté");
 }
 
 ICOMMAND(connect, "sis", (char *name, int *port, char *pw), connectserv(name, *port, pw));

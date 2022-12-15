@@ -1311,7 +1311,8 @@ namespace ai
     bool request(gameent *d, aistate &b)
     {
         gameent *e = getclient(d->ai->enemy);
-        loopi(4) if(hasrange(d, e, GUN_S_NUKE+i) && d->hasammo(GUN_S_NUKE+i)){gunselect(GUN_S_NUKE+i, d); return process(d, b) >= 2;} //Super armes sélectionnées en priorité
+        if(d->armourtype==A_ASSIST && d->armour==0 && d->hasammo(GUN_ASSISTXPL)){gunselect(GUN_ASSISTXPL, d); return process(d, b) >= 2;}
+        loopi(4) if(d->hasammo(GUN_S_NUKE+i)){gunselect(GUN_S_NUKE+i, d); return process(d, b) >= 2;} //Super armes sélectionnées en priorité
         if(d->aptitude==APT_KAMIKAZE && hasrange(d, e, GUN_KAMIKAZE)) {gunselect(GUN_KAMIKAZE, d); return process(d, b) >= 2;}
 
         if(m_identique)

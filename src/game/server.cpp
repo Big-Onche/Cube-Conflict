@@ -2047,9 +2047,9 @@ namespace server
         notgotitems = false;
     }
 
-    VARP(servjoueursminimum, 0, 0, 200);
-    VARP(servbotniveauminimum, 0, 0, 100);
-    VARP(servbotniveaumaximum, 0, 0, 100);
+    VARP(servaddbots, 0, 0, 200);
+    VARP(servbotminskill, 0, 0, 100);
+    VARP(servbotmaxskill, 0, 0, 100);
     VARP(servrandommode, 0, 0, 1);
     VARP(servforcemode, -1, 0, 18);
 
@@ -2129,7 +2129,7 @@ namespace server
             else curmaprotation = smapname[0] ? max(findmaprotation(gamemode, ""), 0) : 0;
         }
 
-        logoutf("Gamemode: %s", m_valid(gamemode) ? gamemodes[gamemode - STARTGAMEMODE].nameEN : "Unknown");
+        logoutf("%s %s", servlang ? "Gamemode:" : "Mode de jeu :", m_valid(gamemode) ? servlang ? gamemodes[gamemode - STARTGAMEMODE].nameEN : gamemodes[gamemode - STARTGAMEMODE].nameFR : "Unknown");
         sendf(-1, 1, "ri2", N_SERVAMBIENT, servambient);
 
         maprotation &rot = maprotations[curmaprotation];
@@ -3263,13 +3263,12 @@ namespace server
 
                     if(multiplayer(false))
                     {
-                        int nbjoueurs = numclients(-1, true, false);
-                        int nbbots = servjoueursminimum-nbjoueurs;
-                        if(nbbots>0) loopi(nbbots) aiman::addai(servbotniveauminimum+rnd(servbotniveaumaximum-servbotniveauminimum), -1);
-                        loopi(nbjoueurs>servjoueursminimum) aiman::deleteai();
+                        int botamount = servaddbots - numclients(-1, true, false);
+                        if(botamount>0) {loopi(botamount) aiman::addai(servbotminskill+rnd(servbotmaxskill-servbotminskill), -1);}
+                        loopi(numclients(-1, true, false) > servaddbots) aiman::deleteai();
                     }
 
-                    logoutf("Infos : %s (%s/%s lvl %d)", ci->name, aptitudes[cq->aptitude].apt_nomEN, aptitudes[cq->aptitude].apt_nomFR, ci->level);
+                    logoutf("Infos%s: %s (%s %s %d)", servlang ? "" : " ", ci->name, servlang ? aptitudes[cq->aptitude].apt_nomEN : aptitudes[cq->aptitude].apt_nomFR, servlang ? "level" : "niveau", ci->level);
                     break;
                 }
 
@@ -4137,7 +4136,7 @@ namespace server
         }
 
         putint(p, PROTOCOL_VERSION);
-        if(numclients(-1, true, true)<servjoueursminimum) putint(p, servjoueursminimum);
+        if(numclients(-1, true, true)<servaddbots) putint(p, servaddbots);
         else putint(p, numclients(-1, false, true));
         putint(p, maxclients);
         putint(p, gamepaused || gamespeed != 100 ? 5 : 3); // number of attrs following

@@ -3,6 +3,8 @@
 
 #include "engine.h"
 
+VARP(servlang, 0, 0, 1);
+
 #define LOGSTRLEN 512
 
 static FILE *logfile = NULL;
@@ -318,8 +320,8 @@ void disconnect_client(int n, int reason)
     delclient(clients[n]);
     const char *msg = disconnectreason(reason);
     string s;
-    if(msg) formatstring(s, "Disconnected/Hors-ligne : %s | Reason/Cause : %s", clients[n]->hostname, msg);
-    else formatstring(s, "Disconnected/Hors-ligne : %s", clients[n]->hostname);
+    if(msg) formatstring(s, "%s %s | Reason/Cause : %s", servlang ? "Disconnected:" : "Hors-ligne :", clients[n]->hostname, msg);
+    else formatstring(s, "%s %s", servlang ? "Disconnected:" : "Hors-ligne :", clients[n]->hostname);
     logoutf("%s", s);
     server::sendservmsg(s);
 }
@@ -654,7 +656,7 @@ void serverslice(bool dedicated, uint timeout)   // main server update, called f
         time_t t = time(NULL);
         size_t len = strftime(servtime, sizeof(servtime), "%d-%m-%Y %Hh %Mmin %Ssec", localtime(&t));
         servtime[min(len, sizeof(servtime)-1)] = '\0';
-        if(nonlocalclients || serverhost->totalSentData || serverhost->totalReceivedData) logoutf("Status : %d/%d clients | <<<%.1f K/sec UP>>> | >>>%.1f K/sec DOWN<<< | %s", nonlocalclients, maxclients, serverhost->totalSentData/60.0f/1024, serverhost->totalReceivedData/60.0f/1024, servtime);
+        if(nonlocalclients || serverhost->totalSentData || serverhost->totalReceivedData) logoutf("Status%s: %d/%d clients | <<<%.1f K/sec UP>>> | >>>%.1f K/sec DOWN<<< | %s", servlang ? "" : " ", nonlocalclients, maxclients, serverhost->totalSentData/60.0f/1024, serverhost->totalReceivedData/60.0f/1024, servtime);
         serverhost->totalSentData = serverhost->totalReceivedData = 0;
     }
 
@@ -675,12 +677,12 @@ void serverslice(bool dedicated, uint timeout)   // main server update, called f
                 c.peer = event.peer;
                 c.peer->data = &c;
                 string hn;
-                copystring(c.hostname, (enet_address_get_host_ip(&c.peer->address, hn, sizeof(hn))==0) ? hn : "unknown/inconnue");
+                copystring(c.hostname, (enet_address_get_host_ip(&c.peer->address, hn, sizeof(hn))==0) ? hn : servlang ? "unknown" : "inconnue");
                 string contime;
                 time_t t = time(NULL);
                 size_t len = strftime(contime, sizeof(contime), "%d-%m-%Y %Hh %Mmin %Ssec", localtime(&t));
                 contime[min(len, sizeof(contime)-1)] = '\0';
-                logoutf("Connected/En ligne : %s | %s", c.hostname, contime);
+                logoutf("%s %s | %s", servlang ? "Connected:" : "En ligne :", c.hostname, contime);
                 int reason = server::clientconnect(c.num, c.peer->address.host);
                 if(reason) disconnect_client(c.num, reason);
                 break;
@@ -701,7 +703,7 @@ void serverslice(bool dedicated, uint timeout)   // main server update, called f
                 size_t len = strftime(contime, sizeof(contime), "%d-%m-%Y %Hh %Mmin %Ssec", localtime(&t));
                 contime[min(len, sizeof(contime)-1)] = '\0';
                 const char *msg = disconnectreason(event.data);
-                logoutf("Disconnected/Hors-ligne : %s | %s | %s", c->hostname, contime, msg);
+                logoutf("%s %s | %s | %s", servlang ? "Disconnected:" : "Hors-ligne :", c->hostname, contime, msg);
                 server::clientdisconnect(c->num);
                 delclient(c);
                 break;
@@ -1054,10 +1056,10 @@ void rundedicatedserver()
     time_t t = time(NULL);
     size_t len = strftime(servtime, sizeof(servtime), "%d-%m-%Y %Hh %Mmin %Ssec", localtime(&t));
     servtime[min(len, sizeof(servtime)-1)] = '\0';
-    logoutf("ON | %s", servtime);
-    logoutf("IP : %s | Port : %d", serverip, serverport);
-    logoutf("Version : %s", CCversion);
-    logoutf("------------------------------------");
+    logoutf("%s | %s", servlang ? "Server started" : "Serveur en ligne", servtime);
+    logoutf("IP%s: %s | Port: %d", servlang ? "" : " ", strcmp(serverip, " ") ? "LAN" : serverip, serverport);
+    logoutf("Version%s: %s", servlang ? "" : " ", CCversion);
+    logoutf("--------------------------------------------------------------");
 #ifdef WIN32
     SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
     setupconsole();
@@ -1122,7 +1124,7 @@ void initserver(bool listen, bool dedicated)
     if(dedicated)
     {
 #ifdef WIN32
-        setupwindow("Serveur Cube Conflict v1.0");
+        setupwindow("Cube Conflict");
 #endif
     }
 
