@@ -224,10 +224,8 @@ namespace game
 
         loopi(14) //Preloading all capes
         {
-            defformatstring(capedir, "capes/%s", customscapes[i].capedir);
-            preloadmodel(customscapes[i].capedir);
-            formatstring(capedir, "capes/%s/orange", customscapes[i].capedir);
-            preloadmodel(customscapes[i].capedir);
+            preloadmodel(custom::getcapedir(i, true));
+            preloadmodel(custom::getcapedir(i, false));
         }
 
         loopi(NUMAPTS) //Preloading all classe's hats
@@ -371,7 +369,7 @@ namespace game
         ////////Customisations////////
         if(d->customcape>=0 && d->customcape<=13)
         {
-            a[ai++] = modelattach("tag_cape", custom::getcapedir(d->customcape, d->team==player1->team ? true : false), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+            a[ai++] = modelattach("tag_cape", custom::getcapedir(d->customcape, d->team==player1->team ? false : true), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
 
         //////////////////////////////////////////////////////////////////ANIMATIONS//////////////////////////////////////////////////////////////////
