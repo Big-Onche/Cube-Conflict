@@ -282,6 +282,8 @@ namespace game
                 }
             }
 
+            if(d->armourtype==A_ASSIST && d->ammo[GUN_ASSISTXPL]>0 && d->armour==0) {gunselect(GUN_ASSISTXPL, d, true); d->gunwait=0;}
+
             if(curtime>0 && d->ragemillis && d!=player1) d->ragemillis = max(d->ragemillis-curtime, 0);
 
             if(d==hudplayer() && d->state==CS_ALIVE && isconnected())

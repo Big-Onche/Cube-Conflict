@@ -1422,9 +1422,8 @@ namespace game
             }
         }
 
-        if(d->armour==0 && !d->playerexploded && d->ammo[GUN_ASSISTXPL]>0 && d->type!=ENT_AI)
+        if(!d->armour && !d->playerexploded && d->ammo[GUN_ASSISTXPL] && d->type!=ENT_AI)
         {
-            gunselect(GUN_ASSISTXPL, d, true);
             d->attacking = ACT_SHOOT;
             d->lastattack = -1;
             d->playerexploded = true;

@@ -527,7 +527,7 @@ namespace game
         loopv(players)
         {
             gameent *d = players[i];
-            if(d->state==CS_SPECTATOR || d->state==CS_SPAWNING || d->lifesequence < 0 || d == exclude || (d->state==CS_DEAD && hidedead) || (d->aptitude==APT_VIKING && d==hudplayer()) || (d==hudplayer() && d->aptitude==APT_MAGICIEN && d->aptisort3)) continue;
+            if(d->state==CS_SPECTATOR || d->state==CS_SPAWNING || d->lifesequence < 0 || d == exclude || (d->state==CS_DEAD && hidedead)) continue;
             if(d!=player1) renderplayer(d);
 
             vec dir = vec(d->o).sub(camera1->o);
@@ -584,7 +584,7 @@ namespace game
                 {
                     case APT_MAGICIEN:
                         if(d->aptisort1) particle_splash(PART_SMOKE, 2, 120, d->o, 0xFF33FF, 10+rnd(5), 400,400);
-                        if(d->aptisort3) particle_fireball(pos, 15.2f, PART_EXPLOSION, 5,  0x880088, 13.0f);
+                        if(d->aptisort3  && (d!=hudplayer() || thirdperson)) particle_fireball(pos, 15.2f, PART_EXPLOSION, 5,  0x880088, 13.0f);
                         break;
                     case APT_PHYSICIEN:
                         if(d->aptisort2 && randomevent(0.05f*nbfps)) particle_splash(PART_SMOKE, 1, 300, d->o, 0x7777FF, 10+rnd(5), 400, 400);
@@ -597,6 +597,9 @@ namespace game
                     case APT_PRETRE:
                         if(d->aptisort2) particle_fireball(pos , 16.0f, PART_ONDECHOC, 5, 0xFFFF00, 16.0f);
                         break;
+                    case APT_VIKING:
+                        if(d->ragemillis && randomevent(0.03f*nbfps) && (d!=hudplayer() || thirdperson)) particle_splash(PART_SMOKE, 2, 150, d->o, 0xFF3300, 12+rnd(5), 400, 200);
+                        break;
                     case APT_SHOSHONE:
                         if(randomevent(0.03f*nbfps))
                         {
@@ -606,7 +609,7 @@ namespace game
                         }
                 }
 
-                if(d->ragemillis && randomevent(0.03f*nbfps)) particle_splash(PART_SMOKE, 2, 150, d->o, 0xFF3300, 12+rnd(5), 400, 200);
+
                 if(d->jointmillis && randomevent(0.085f*nbfps)) regularflame(PART_SMOKE, d->abovehead().add(vec(-12, 5, -19)), 2, 3, 0x888888, 1, 1.6f, 50.0f, 1000.0f, -10);
                 if(d->armourtype==A_ASSIST && d->armour>0)
                 {

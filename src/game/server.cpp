@@ -140,7 +140,8 @@ namespace server
 
         bool waitexpired(int gamemillis)
         {
-            return gamemillis - lastshot >= gunwait;
+            if(armour==0 && armourtype==GUN_ASSISTXPL && ammo[GUN_ASSISTXPL]) return true;
+            else return gamemillis - lastshot >= gunwait;
         }
 
         void reset()
@@ -2483,6 +2484,9 @@ namespace server
     {
         servstate &gs = ci->state;
         int wait = millis - gs.lastshot;
+
+        if(ci->state.armourtype==A_ASSIST && ci->state.armour==0 && ci->state.ammo[GUN_ASSISTXPL] && ci->state.gunselect==GUN_ASSISTXPL) gs.gunwait=0;
+
         if(!gs.isalive(gamemillis) ||
            wait<gs.gunwait ||
            !validatk(atk))
