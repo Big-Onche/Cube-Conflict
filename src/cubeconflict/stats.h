@@ -24,9 +24,9 @@ static const struct statsinfo { const char *statname, *statnicenameFR, *statnice
     {"STAT_XP",                 "XP",                               "XP",                               "hud/stats.png"},
     {"STAT_LEVEL",              "Niveau",                           "Level",                            "hud/stats.png"},
     {"STAT_KILLS",              "Éliminations",                     "Frags",                            "hud/flingue.jpg"},
-    {"STAT_MORTS",              "Morts",                            "Deaths",                           "hud/tombe.png"},
+    {"STAT_MORTS",              "Morts",                            "Deaths",                           "hud/grave.png"},
     {"STAT_KDRATIO",            "Ratio morts/éliminations",         "Kills/Deaths ratio",               "hud/stats.png"},       //Calculated in calcratio() with STAT_KILLS & STAT_MORTS then called in getstatinfo() STAT_KDRATIO not saved because float shit.
-    {"STAT_DAMMAGERECORD",      "Record de dommages en une partie", "Damage record in a single match",  "hud/stats.png"},
+    {"STAT_DAMMAGERECORD",      "Record de dommages en une partie", "Damage record in a single match",  "hud/checkbox_on.jpg"},
     {"STAT_KILLSTREAK",         "Meilleure série d'éliminations",   "Best killstreak",                  "hud/rage.png"},
     {"STAT_MAXKILLDIST",        "Elimination la plus éloignée",     "Farthest frag",                    "hud/campeur.png"},
     {"STAT_WINS",               "Victoires",                        "Victories",                        "hud/cool.jpg"},

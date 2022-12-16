@@ -175,9 +175,6 @@ namespace game
             pophudmatrix();
         }
 
-        if(zoom && crosshairsize >= 31) {crosshairsize -= 180/nbfps; if(crosshairsize<31) crosshairsize = 31;}
-        else if (crosshairsize<40) crosshairsize += 180/nbfps;
-
         zoomfov = (guns[player1->gunselect].maxzoomfov);
 
         if((player1->gunselect==GUN_SKS || player1->gunselect==GUN_SV98 || player1->gunselect==GUN_ARBALETE || player1->gunselect==GUN_S_CAMPOUZE || player1->gunselect==GUN_S_ROQUETTES) && zoom == 1)

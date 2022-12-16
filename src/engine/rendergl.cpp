@@ -1433,19 +1433,18 @@ void mousemove(int dx, int dy, bool sortprecision)
     modifyorient(dx*cursens, dy*cursens*(invmouse ? 1 : -1));
 }
 
-void bougersouris()
+void screenshake(int shakereduce)
 {
-    if(game::player1->aptitude==APT_MAGICIEN && game::player1->aptisort2) return;
-
-    int movefactor = 1;
-    if(game::player1->aptitude==APT_SOLDAT) movefactor = 2;
-
-    camera1->roll = (rnd(100/movefactor)/(10.f*movefactor))-(rnd(100/movefactor)/(10.f*movefactor));
-    mousemove(rnd(25/movefactor), rnd(25/movefactor));
-    mousemove(-rnd(25/movefactor), -rnd(25/movefactor));
+    int factor = 1 + shakereduce;
+    switch(game::hudplayer()->aptitude)
+    {
+        case APT_SOLDAT: factor*=2; break;
+        case APT_MAGICIEN: if(game::player1->aptisort2) return;
+    }
+    camera1->roll = (rnd(100/factor)/(10.f*factor))-(rnd(100/factor)/(10.f*factor));
+    mousemove(rnd(25/factor)+(-rnd(25/factor)), rnd(25/factor)+(-rnd(25/factor)));
 }
-
-COMMAND(bougersouris, "");
+ICOMMAND(screenshake, "i", (int *shakereduce), screenshake(*shakereduce));
 
 void recomputecamera()
 {
@@ -2622,7 +2621,7 @@ void cleardamagescreen()
 VAR(hidestats, 0, 0, 1);
 VAR(hidehud, 0, 0, 1);
 
-VARP(crosshairsize, 31, 40, 40);
+VARP(crosshairsize, 20, 30, 50);
 VARP(cursorsize, 0, 15, 30);
 VARP(crosshairfx, 0, 1, 1);
 VARP(crosshaircolors, 0, 1, 1);
@@ -2667,6 +2666,8 @@ void writecrosshairs(stream *f)
     f->printf("\n");
 }
 
+float chmod = 1000.f;
+
 void drawcrosshair(int w, int h)
 {
     bool windowhit = UI::hascursor();
@@ -2695,7 +2696,9 @@ void drawcrosshair(int w, int h)
             loadcrosshair(NULL, index);
             crosshair = crosshairs[index];
         }
-        chsize = crosshairsize*w/900.0f;
+
+        zoom ? chmod = max(chmod - 1, 1000.f) : chmod = min(chmod + 1, 600.f);
+        chsize = crosshairsize*w/chmod;
     }
     if(crosshair->type&Texture::ALPHA) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     else glBlendFunc(GL_ONE, GL_ONE);

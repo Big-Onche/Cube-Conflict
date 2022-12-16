@@ -6,7 +6,7 @@
 
 int lastshoot;
 
-VARP(temptrisfade, 5000, 15000, 120000);
+VARP(temptrisfade, 2500, 15000, 120000);
 
 namespace game
 {
@@ -684,11 +684,19 @@ namespace game
         float dist = projdist(o, dir, v, vel);
         if(dist<attacks[atk].exprad)
         {
-            float damage = attacks[atk].damage*(1-dist/EXP_DISTSCALE/attacks[atk].exprad);
-            if(o==at && atk==ATK_ASSISTXPL_SHOOT) damage = 0;
+            float damage = o==at && atk==ATK_ASSISTXPL_SHOOT ? 0 : attacks[atk].damage*(1-dist/EXP_DISTSCALE/attacks[atk].exprad);
             if(damage > 0) hit(max(int(damage), 1), o, at, dir, atk, dist);
-            if((atk==ATK_ARTIFICE_SHOOT || atk==ATK_SMAW_SHOOT || atk==ATK_M32_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT) && dist<attacks[atk].exprad*2.0f && o==player1) execfile("config/shake.cfg");
         }
+    }
+
+    void startshake(const vec &v, int maxdist, int atk)
+    {
+        if(camera1->o.dist(v) > maxdist) return;
+
+        int shakereduce = atk==ATK_NUKE_SHOOT ? 0 : camera1->o.dist(v) < 75 ? 0 : camera1->o.dist(v) < 125 ? 1 : 2;
+
+        defformatstring(cmd, "%s %d", "screenshake", shakereduce);
+        int sleep = 0; loopi(16){addsleep(&sleep, cmd); sleep +=25;}
     }
 
     void explode(bool local, gameent *owner, const vec &v, const vec &vel, dynent *safe, int damage, int atk)
@@ -712,6 +720,7 @@ namespace game
                 if(camera1->o.dist(v) >= 300) playsound(S_EXPL_FAR, &v, NULL, 0, 0, 400, -1, 1500);
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
                 gfx::projexplosion(owner, v, vel, safe, atk);
+                startshake(v, 150, atk);
                 break;
 
             case ATK_KAMIKAZE_SHOOT:
@@ -721,11 +730,13 @@ namespace game
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
                 if(atk==ATK_ASSISTXPL_SHOOT) loopi(10+rnd(5)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_ROBOT);
                 gfx::projexplosion(owner, v, vel, safe, atk);
+                startshake(v, 225, atk);
                 break;
 
             case ATK_NUKE_SHOOT:
                 playsound(S_EXPL_NUKE);
                 gfx::projexplosion(owner, v, vel, safe, atk);
+                startshake(v, 5000, atk);
                 break;
 
             case ATK_ARTIFICE_SHOOT:
@@ -733,6 +744,7 @@ namespace game
                 if(lookupmaterial(v)==MAT_WATER) playsound(S_EXPL_INWATER, &v, 0, 0, 0 , 100, -1, 350);
                 if(camera1->o.dist(v) >= 300) playsound(S_FIREWORKSEXPL_FAR, &v, NULL, 0, 0, 400, -1, 1500);
                 gfx::projexplosion(owner, v, vel, safe, atk);
+                startshake(v, 100, atk);
                 break;
 
             case ATK_M32_SHOOT:
@@ -741,6 +753,7 @@ namespace game
                 if(camera1->o.dist(v) >= 300) playsound(S_EXPL_FAR, &v, NULL, 0, 0, 400, -1, 1500);
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
                 gfx::projexplosion(owner, v, vel, safe, atk);
+                startshake(v, 150, atk);
                 break;
 
             case ATK_MINIGUN_SHOOT:

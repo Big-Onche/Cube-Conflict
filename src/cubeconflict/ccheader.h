@@ -1,6 +1,7 @@
 #include <game.h>
 
 extern bool randomevent(int probability);
+extern void addsleep(int *msec, char *cmd);
 
 namespace gfx
 {
