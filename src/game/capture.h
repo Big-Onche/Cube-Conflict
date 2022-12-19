@@ -616,8 +616,7 @@ struct captureclientmode : clientmode
         }
         if(strcmp(b.owner, owner))
         {
-            particle_splash(PART_ZERO, 25, 500, b.ammopos, owner[0] ? (!strcmp(owner, tmpteam) ? 0xFFFF00 : 0xFF0000) : 0x777777, 1.f, 400, -50);
-            particle_splash(PART_ONE, 25, 500, b.ammopos, owner[0] ? (!strcmp(owner, tmpteam) ? 0xFFFF00 : 0xFF0000) : 0x777777, 1.f, 400, -50);
+            particle_splash(rnd(2) ? PART_ZERO : PART_ONE, 25, 500, b.ammopos, owner[0] ? (!strcmp(owner, tmpteam) ? 0xFFFF00 : 0xFF0000) : 0x777777, 1.f, 400, -50);
         }
 
         copystring(b.owner, owner);
@@ -643,6 +642,11 @@ struct captureclientmode : clientmode
                 particle_textcopy(above, msg, PART_TEXT, 1500, isteam(iteam, player1->team) ? 0xFFFF00 : 0xFF0000, 5.0f, -5);
             }
         }
+    }
+
+    void cnbasescore(gameent *d, int score)
+    {
+        d->flags = score;
     }
 
     // prefer spawning near friendly base
@@ -873,6 +877,22 @@ ICOMMAND(insidebases, "", (),
         sendf(-1, 1, "riisi", N_BASESCORE, base, team, cs.total);
     }
 
+    void addciscore(baseinfo &b)
+    {
+        loopv(clients)
+        {
+            clientinfo *ci = clients[i];
+            string tmpteam;
+            formatstring(tmpteam, "%d", ci->team);
+
+            if(ci->state.state==CS_ALIVE && ci->team>0 && insidebase(b, ci->state.o))
+            {
+                !strcmp(tmpteam, b.owner) ? ci->state.flags++ : ci->state.flags+=2;
+                sendf(-1, 1, "ri3", N_CNBASESCORE, ci->clientnum, ci->state.flags);
+            }
+        }
+    }
+
     void regenowners(baseinfo &b, int ticks)
     {
         loopv(clients)
@@ -955,6 +975,7 @@ ICOMMAND(insidebases, "", (),
         {
             baseinfo &b = bases[i];
             if(!b.valid()) continue;
+            addciscore(b);
             if(b.enemy[0])
             {
                 if(!b.owners || !b.enemies) b.occupy(b.enemy, OCCUPYBONUS*(b.enemies ? 1 : -1) + OCCUPYPOINTS*(b.enemies ? b.enemies : -(1+b.owners))*t);
@@ -1140,6 +1161,14 @@ case N_BASEINFO:
     copystring(enemy, text);
     int converted = getint(p), ammo = getint(p);
     if(m_capture) capturemode.updatebase(base, owner, enemy, converted, ammo);
+    break;
+}
+
+case N_CNBASESCORE:
+{
+    int ocn = getint(p), score = getint(p);
+    gameent *o = ocn==player1->clientnum ? player1 : newclient(ocn);
+    if(o && m_capture) capturemode.cnbasescore(o, score);
     break;
 }
 

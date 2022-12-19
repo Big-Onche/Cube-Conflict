@@ -34,7 +34,7 @@ namespace game
             else return false;
         }
         else if(b->state==CS_SPECTATOR) return true;
-        if(m_ctf)
+        if(m_ctf || m_capture)
         {
             if(a->flags > b->flags) return true;
             if(a->flags < b->flags) return false;
