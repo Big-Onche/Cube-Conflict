@@ -302,6 +302,7 @@ COMMANDN(music, startmusic, "ss");
 static struct songsinfo { string file, looped; } songs[] =
 {
     {"musiques/menu.ogg", "0"},
+    {"musiques/pause.ogg", "0"},
 };
 
 void musicmanager(int track) //CubeConflict, gestion des musiques

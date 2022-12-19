@@ -1524,6 +1524,7 @@ namespace game
                 }
                 if(a) conoutf(GAME_LANG ? "Game is paused by administrator." : "La partie a été mise en pause par un administrateur.");
                 else conoutf(GAME_LANG ? "Game is paused." : "La partie est en pause.");
+                val ? musicmanager(1) : stopmusic();
                 break;
             }
 
