@@ -144,6 +144,7 @@ static void getbackgroundres(int &w, int &h)
     h = int(ceil(h*hk));
 }
 
+string backgroundmapname = "";
 string backgroundcaption = "";
 Texture *backgroundmapshot = NULL;
 char *backgroundmapinfo = NULL;
@@ -161,11 +162,11 @@ void bgquad(float x, float y, float w, float h, float tx, float ty, float tw, fl
 
 int parallaxX, parallaxY;
 string backgroundimg = "media/interface/background.png", backgroundname;
+bool needlogo = true;
 
 void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, const char *mapname, const char *mapinfo, const char *astuce, bool force = false)
 {
     static int lastupdate = -1, lastw = -1, lasth = -1;
-    bool needlogo = true;
 
     if((renderedframe && !mainmenu && lastupdate != lastmillis) || lastw != w || lasth != h)
     {
@@ -271,6 +272,19 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
 
 VAR(menumute, 0, 0, 1);
 
+void setbackgroundinfo(const char *caption = NULL, Texture *mapshot = NULL, const char *mapname = NULL, const char *mapinfo = NULL)
+{
+    renderedframe = false;
+    copystring(backgroundcaption, caption ? caption : "");
+    backgroundmapshot = mapshot;
+    copystring(backgroundmapname, mapname ? mapname : "");
+    if(mapinfo != backgroundmapinfo)
+    {
+        DELETEA(backgroundmapinfo);
+        if(mapinfo) backgroundmapinfo = newstring(mapinfo);
+    }
+}
+
 void renderbackground(const char *caption, Texture *mapshot, const char *mapname, const char *mapinfo, const char *astuce, bool force, bool needsound)
 {
     if(!inbetweenframes && !force) return;
@@ -307,12 +321,14 @@ void renderbackground(const char *caption, Texture *mapshot, const char *mapname
         DELETEA(backgroundastuce);
         if(astuce) backgroundastuce = newstring(astuce);
     }
+    setbackgroundinfo(caption, mapshot, mapname, mapinfo);
 }
 
 void restorebackground(int w, int h, bool force)
 {
     if(renderedframe && !force) return;
-    renderbackgroundview(w, h, backgroundcaption[0] ? backgroundcaption : NULL, backgroundmapshot, GAME_LANG ? maptitle_en : maptitle_fr, backgroundmapinfo, backgroundastuce);
+    setbackgroundinfo();
+    renderbackgroundview(w, h, backgroundcaption[0] ? backgroundcaption : NULL, backgroundmapshot, backgroundmapname[0] ? backgroundmapname : NULL, backgroundmapinfo, backgroundastuce);
 }
 
 float loadprogress = 0;
