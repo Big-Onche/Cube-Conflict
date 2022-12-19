@@ -125,6 +125,17 @@ namespace game
         loopend(id, stack);
     });
 
+    ICOMMAND(hasspectator, "", (),
+    {
+        bool hasspectator = false;
+        loopv(players)
+        {
+            gameent *d = players[i];
+            if (d->state==CS_SPECTATOR) hasspectator = true;
+        }
+        intret(hasspectator);
+    });
+
     ICOMMAND(scoreboardstatus, "i", (int *cn),
     {
         gameent *d = getclient(*cn);

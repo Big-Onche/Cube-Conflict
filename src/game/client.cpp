@@ -425,17 +425,10 @@ namespace game
     }
     ICOMMAND(getaptistatval, "ii", (int *apt, int *stat), intret(getaptistatval(*apt, *stat)));
 
-    ICOMMAND(getclientcolornameR, "i", (int *cn),
+    ICOMMAND(getclientcolorname, "i", (int *cn),
     {
         gameent *d = getclient(*cn);
-        defformatstring(pseudo_aptitude, "%s   ", colorname(d));
-        if(d) result(pseudo_aptitude);
-    });
-
-    ICOMMAND(getclientcolornameL, "i", (int *cn),
-    {
-        gameent *d = getclient(*cn);
-        defformatstring(pseudo_aptitude, "   %s", colorname(d));
+        defformatstring(pseudo_aptitude, "%s", colorname(d));
         if(d) result(pseudo_aptitude);
     });
 

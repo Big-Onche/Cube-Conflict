@@ -273,6 +273,8 @@ VAR(menumute, 0, 0, 1);
 
 void renderbackground(const char *caption, Texture *mapshot, const char *mapname, const char *mapinfo, const char *astuce, bool force, bool needsound)
 {
+
+
     if(!inbetweenframes && !force) return;
 
     if(menumute || !needsound) stopsounds(); // stop sounds while loading
@@ -715,7 +717,6 @@ void resetgl()
     inbetweenframes = false;
     if(!reloadtexture(*notexture) ||
        !reloadtexture("media/interface/shadow.png") ||
-       !reloadtexture("media/interface/mapshot_frame.png") ||
        !reloadtexture("media/interface/loading_frame.png") ||
        !reloadtexture("media/interface/loading_bar.png") ||
        !reloadtexture("media/interface/backgroundimg.png") ||
