@@ -282,7 +282,7 @@ namespace game
                 }
             }
 
-            if(d->armourtype==A_ASSIST && d->ammo[GUN_ASSISTXPL]>0 && d->armour==0) {gunselect(GUN_ASSISTXPL, d, true); d->gunwait=0;}
+            if(d->armourtype==A_ASSIST && d->ammo[GUN_ASSISTXPL]>0 && d->armour==0 && d->state==CS_ALIVE) {gunselect(GUN_ASSISTXPL, d, true); d->gunwait=0;}
 
             if(curtime>0 && d->ragemillis && d!=player1) d->ragemillis = max(d->ragemillis-curtime, 0);
 
@@ -352,6 +352,8 @@ namespace game
             if(lookupmaterial(player1->o)==MAT_NOCLIP && map_sel==3) unlockachievement(ACH_SPAAACE);
             if(player1->aptitude==APT_KAMIKAZE && player1->ammo[GUN_KAMIKAZE]<=0 && totalmillis-lastshoot>=500 && totalmillis-lastshoot<=750 && isconnected()) unlockachievement(ACH_SUICIDEFAIL);
             if(player1->steromillis && player1->epomillis && player1->jointmillis && player1->champimillis) unlockachievement(ACH_DEFONCE);
+
+            if(player1->armourtype==A_ASSIST && player1->ammo[GUN_ASSISTXPL]>0 && player1->armour==0 && player1->state==CS_ALIVE) {gunselect(GUN_ASSISTXPL, player1, true); player1->gunwait=0;}
 
             bool p1hassuperweapon = false;
             loopi(4) if(player1->ammo[GUN_S_NUKE+i]>0) p1hassuperweapon = true;

@@ -2496,7 +2496,26 @@ namespace server
         if(gs.ammo[gun]<=0 || (attacks[atk].range && from.dist(to) > attacks[atk].range + 1))
             return;
 
-        gs.ammo[gun] -= attacks[atk].use;
+        switch(atk)
+        {
+            case ATK_GAU8_SHOOT:
+            case ATK_NUKE_SHOOT:
+            case ATK_CAMPOUZE_SHOOT:
+            case ATK_ROQUETTES_SHOOT:
+            case ATK_KAMIKAZE_SHOOT:
+            case ATK_ASSISTXPL_SHOOT:
+                gs.ammo[gun] -= attacks[atk].use;
+                break;
+            case ATK_CAC349_SHOOT:
+            case ATK_CACMARTEAU_SHOOT:
+            case ATK_CACMASTER_SHOOT:
+            case ATK_CACFLEAU_SHOOT:
+            case ATK_CACNINJA_SHOOT:
+                break;
+            default:
+                if(!m_muninfinie) gs.ammo[gun] -= attacks[atk].use;
+        }
+
         gs.lastshot = millis;
 
         float waitfactor = 1;
