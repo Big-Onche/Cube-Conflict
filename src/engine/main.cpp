@@ -273,8 +273,6 @@ VAR(menumute, 0, 0, 1);
 
 void renderbackground(const char *caption, Texture *mapshot, const char *mapname, const char *mapinfo, const char *astuce, bool force, bool needsound)
 {
-
-
     if(!inbetweenframes && !force) return;
 
     if(menumute || !needsound) stopsounds(); // stop sounds while loading

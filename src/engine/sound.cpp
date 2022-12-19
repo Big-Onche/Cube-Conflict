@@ -609,8 +609,9 @@ VARP(minimizedsounds, 0, 0, 1);
 void updatesounds()
 {
     updatemumble();
+
     if(nosound) return;
-    if(minimized && !minimizedsounds) stopsounds();
+    if((minimized && !minimizedsounds) || game::ispaused()) stopsounds();
     else
     {
         reclaimchannels();
