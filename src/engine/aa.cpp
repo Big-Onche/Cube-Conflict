@@ -169,7 +169,7 @@ void cleanupfxaa()
 }
 
 VARFP(fxaa, 0, 0, 1, cleanupfxaa());
-VARFP(fxaaquality, 0, 1, 3, cleanupfxaa());
+VARFP(fxaaquality, 0, 0, 3, cleanupfxaa());
 VARFP(fxaagreenluma, 0, 0, 1, cleanupfxaa());
 
 void dofxaa(GLuint outfbo = 0)

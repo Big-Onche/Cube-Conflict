@@ -11,7 +11,7 @@ int connmillis = 0, connattempts = 0, discmillis = 0;
 bool multiplayer(bool msg)
 {
     bool val = curpeer || hasnonlocalclients();
-    if(val && msg) conoutf(CON_ERROR, "operation not available in multiplayer");
+    if(val && msg) conoutf(CON_ERROR, GAME_LANG ? "Operation not available in multiplayer." : "Opération non disponible en multijoueur.");
     return val;
 }
 
@@ -80,7 +80,7 @@ void connectserv(const char *servername, int serverport, const char *serverpassw
 {
     if(connpeer)
     {
-        conoutf("aborting connection attempt");
+        conoutf(GAME_LANG ? "Aborting connection attempt." : "Abandon de la tentative de connexion.");
         IS_ON_OFFICIAL_SERV = false;
         abortconnect();
     }
@@ -95,14 +95,13 @@ void connectserv(const char *servername, int serverport, const char *serverpassw
         if(strcmp(servername, connectname)) setsvar("connectname", servername);
         if(serverport != connectport) setvar("connectport", serverport);
         addserver(servername, serverport, serverpassword && serverpassword[0] ? serverpassword : NULL);
-        conoutf("attempting to connect to %s:%d", servername, serverport);
-        //if((strcasecmp(servername, "serveur1.cube-conflict.com")==0) || ((servername, "serveur2.cube-conflict.com")==0)) IS_ON_OFFICIAL_SERV = true;
+        conoutf("%s %s:%d", GAME_LANG ? "Attempting to connect to" : "Connexion en cours à", servername, serverport);
         if(strcasecmp(servername, "serveur1.cube-conflict.com")==0 || strcasecmp(servername, "serveur2.cube-conflict.com")==0) IS_ON_OFFICIAL_SERV = true;
-        if(IS_ON_OFFICIAL_SERV) conoutf("Serveur officiel : Les statistiques et succès sont enregistrés");
+        if(IS_ON_OFFICIAL_SERV) conoutf(GAME_LANG ? "Official server: Stats and achievements are saved." : "Serveur officiel : Les statistiques et succès sont enregistrés.");
 
         if(!resolverwait(servername, &address))
         {
-            conoutf(CON_ERROR, "\f3could not resolve server %s", servername);
+            conoutf(CON_ERROR, "\f3%s %s", GAME_LANG ? "Could not resolve server": "Impossible de trouver le serveur", servername);
             IS_ON_OFFICIAL_SERV = false;
             return;
         }
@@ -111,7 +110,7 @@ void connectserv(const char *servername, int serverport, const char *serverpassw
     {
         setsvar("connectname", "");
         setvar("connectport", 0);
-        conoutf("attempting to connect over LAN");
+        conoutf(GAME_LANG ? "Attempting to connect over LAN" : "Connexion en cours au réseau LAN");
         address.host = ENET_HOST_BROADCAST;
     }
 
@@ -120,7 +119,7 @@ void connectserv(const char *servername, int serverport, const char *serverpassw
         clienthost = enet_host_create(NULL, 2, server::numchannels(), rate*1024, rate*1024);
         if(!clienthost)
         {
-            conoutf(CON_ERROR, "\f3could not connect to server");
+            conoutf(CON_ERROR, GAME_LANG ? "\f3Could not connect to server." : "\f3La connexion au serveur a échoué.");
             IS_ON_OFFICIAL_SERV = false;
             return;
         }
@@ -139,7 +138,7 @@ void reconnect(const char *serverpassword)
 {
     if(!connectname[0] || connectport <= 0)
     {
-        conoutf(CON_ERROR, "no previous connection");
+        conoutf(CON_ERROR, GAME_LANG ? "No previous connection." : "Aucune connexion précédente.");
         return;
     }
 
@@ -223,7 +222,7 @@ void flushclient()
 
 void neterr(const char *s, bool disc)
 {
-    conoutf(CON_ERROR, "\f3illegal network message (%s)", s);
+    conoutf(CON_ERROR, "\f3%s (%s)", GAME_LANG ? "Illegal network message" : "Message réseau erroné", s);
     if(disc) disconnect();
 }
 
