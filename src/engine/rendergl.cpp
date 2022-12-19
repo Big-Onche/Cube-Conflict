@@ -2595,7 +2595,7 @@ void damageblend(int n)
 
 void drawdamagescreen(int w, int h)
 {
-    if(lastmillis >= damageblendmillis) return;
+    if(lastmillis >= damageblendmillis || game::ispaused()) return;
 
     hudshader->set();
 
