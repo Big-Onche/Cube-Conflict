@@ -42,7 +42,7 @@ namespace entities
 
             "objets/teleporteur",
 
-            NULL, NULL, NULL, NULL, NULL, "objets/respawn", NULL,
+            NULL, NULL, NULL, NULL, NULL, "objets/respawn", NULL, NULL,
         };
         return entmdlnames[type];
     }
@@ -694,15 +694,15 @@ namespace entities
                 break;
 
             case JUMPPAD:
-                renderentarrow(e, vec((int)(char)e.attr3*10.0f, (int)(char)e.attr2*10.0f, e.attr1*12.5f).normalize(), 4);
+                renderentarrow(e, vec((int)(char)e.attr3*10.0f, (int)(char)e.attr2*10.0f, e.attr1*12.5f).normalize(), 6);
                 break;
-
+            case CAMERA_POS:
             case FLAG:
             case TELEDEST:
             {
                 vec dir;
-                vecfromyawpitch(e.attr1, 0, 1, 0, dir);
-                renderentarrow(e, dir, 4);
+                vecfromyawpitch(e.attr2, e.type==CAMERA_POS ? e.attr3 : 0, 1, 0, dir);
+                renderentarrow(e, dir, 6);
                 break;
             }
             case TRIGGER_ZONE:
@@ -734,7 +734,7 @@ namespace entities
 
             "teleport", "teledest", "jumppad", "flag", "base",
 
-            "pnj", "respawn", "trigger",
+            "pnj", "respawn", "trigger", "camera",
         };
         return i>=0 && size_t(i)<sizeof(entnames)/sizeof(entnames[0]) ? entnames[i] : "";
     }

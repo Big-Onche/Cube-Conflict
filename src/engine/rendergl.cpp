@@ -1446,12 +1446,12 @@ void screenshake(int shakereduce)
 }
 ICOMMAND(screenshake, "i", (int *shakereduce), screenshake(*shakereduce));
 
-void recomputecamera()
+void recomputecamera(int campostag)
 {
     game::setupcamera();
     computezoom();
 
-    bool shoulddetach = thirdperson > 1 || game::detachcamera();
+    bool shoulddetach = thirdperson > 1 || game::detachcamera() || campostag>=0;
     if(!thirdperson && !shoulddetach)
     {
         camera1 = player;
@@ -1479,7 +1479,20 @@ void recomputecamera()
         orient.rotate_around_y(camera1->roll*-RAD);
         vec dir = vec(orient.b).neg(), side = vec(orient.a).neg(), up = orient.c;
 
-        if(game::collidecamera())
+        if(campostag>=0)
+        {
+            loopv(entities::ents)
+            {
+                extentity &e = *entities::ents[i];
+                if(e.type==CAMERA_POS && campostag==e.attr1)
+                {
+                    camera1->o = e.o;
+                    camera1->yaw = e.attr2;
+                    camera1->pitch = e.attr3;
+                }
+            }
+        }
+        else if(game::collidecamera())
         {
             movecamera(camera1, dir, thirdpersondistance, 1);
             movecamera(camera1, dir, clamp(thirdpersondistance - camera1->o.dist(player->o), 0.0f, 1.0f), 0.1f);

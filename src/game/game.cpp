@@ -386,7 +386,7 @@ namespace game
                     moveplayer(player1, 10, true, 0, 0, player1->aptitude, 0, false);
                 }
             }
-            else if(!intermission)
+            else if(!intermission && forcecampos<0)
             {
                 if(player1->ragdoll) cleanragdoll(player1);
                 crouchplayer(player1, 10, true);
@@ -482,7 +482,7 @@ namespace game
 
     void doaction(int act)
     {
-        if(!connected || intermission) return;
+        if(!connected || intermission || forcecampos>=0) return;
         if((player1->attacking = act) && attackspawn) respawn();
     }
 
@@ -492,14 +492,14 @@ namespace game
 
     bool canjump()
     {
-        if(!connected || intermission) return false;
+        if(!connected || intermission || forcecampos>=0) return false;
         if(jumpspawn) respawn();
         return player1->state!=CS_DEAD;
     }
 
     bool cancrouch()
     {
-        if(!connected || intermission) return false;
+        if(!connected || intermission || forcecampos>=0) return false;
         return player1->state!=CS_DEAD;
     }
 
@@ -1152,7 +1152,7 @@ namespace game
     }
     ICOMMAND(suicide, "", (), suicide(player1));
 
-    bool needminimap() { return m_ctf || m_capture; }
+    bool needminimap() { return m_ctf || m_capture || m_tutorial; }
 
     float abovegameplayhud(int w, int h)
     {

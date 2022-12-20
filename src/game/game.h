@@ -85,6 +85,8 @@ enum                            // static entity types
     RESPAWNPOINT,
     TRIGGER_ZONE,               // attr1 = tag, attr2 = type, attr3 = radius
 
+    //Utility
+    CAMERA_POS,                 // attr1 = tag, attr2 = yaw, attr3 = pitch, attr4 = roll
     MAXENTTYPES,
 };
 
@@ -1042,6 +1044,7 @@ namespace game
     //Fonctions Cube Conflict
     extern void drawmessages(int killstreak, string str_pseudovictime, int n_aptitudevictime, string str_pseudoacteur, int n_killstreakacteur, float killdistance);
     extern void updatespecials(gameent *d);
+    extern void drawcampaignmap(gameent *d, int w, int h);
 
     extern int gamemode;
 

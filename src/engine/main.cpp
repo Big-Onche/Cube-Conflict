@@ -1195,6 +1195,8 @@ int newlangage;
 bool IS_USING_STEAM = false;
 bool IS_ON_OFFICIAL_SERV = false;
 
+VAR(forcecampos, -1, -1, 1000);
+
 int main(int argc, char **argv)
 {
     #ifdef WIN32
@@ -1449,7 +1451,7 @@ int main(int argc, char **argv)
         frames++;
 
         // miscellaneous general game effects
-        recomputecamera();
+        recomputecamera(forcecampos);
         updateparticles();
         updatesounds();
 
