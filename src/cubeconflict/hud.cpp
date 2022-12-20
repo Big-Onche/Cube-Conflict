@@ -7,10 +7,10 @@
 int message[NUMMESSAGE];
 
 string custommsg, helpmsg;
-ICOMMAND(popupmsg, "s", (char *msg),
+ICOMMAND(popupmsg, "si", (char *msg, int *duration),
 {
     formatstring(custommsg, "%s", msg);
-    message[MSG_CUSTOM]=totalmillis;
+    message[MSG_CUSTOM] = totalmillis + *duration;
     playsound(S_NOTIFICATION);
 });
 
@@ -72,7 +72,7 @@ namespace game
             if(need_message1) {rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/24;}
         }
 
-        if(totalmillis - message[MSG_CUSTOM] <=5000) //////////////////////////////////////////////////////////////// CUSTOM MSG
+        if(totalmillis < message[MSG_CUSTOM]) //////////////////////////////////////////////////////////////// CUSTOM MSG
         {
             string msg;
             formatstring(msg, custommsg);
@@ -174,6 +174,7 @@ namespace game
             cmode->drawhud(d, w, h);
             pophudmatrix();
         }
+        else if(m_tutorial) drawcampaignmap(d, w, h);
 
         zoomfov = (guns[player1->gunselect].maxzoomfov);
 

@@ -51,7 +51,7 @@ enum {MSG_OWNKILLSTREAK = 0, MSG_YOUKILLED, MSG_OTHERKILLSTREAK,
         MSG_LEVELUP, MSG_ACHUNLOCKED, MSG_CUSTOM, MSG_HELP, NUMMESSAGE};
 extern int message[NUMMESSAGE];
 
-extern int zoomfov, zoom, crosshairsize, weapposside, weapposup;
+extern int zoomfov, zoom, crosshairsize, weapposside, weapposup, forcecampos;
 extern float champifov, pourcents;
 
 extern int nbfps;
