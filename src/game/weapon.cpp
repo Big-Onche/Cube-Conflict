@@ -1244,7 +1244,7 @@ namespace game
                 float dist = from.dist(to);
                 vec up = to;
                 up.z += dist/8;
-                newbouncer(d==player1 && !thirdperson ? d->muzzle : hudgunorigin(gun, d->o, to, d), up, local, id, d, BNC_LIGHT, 650, 400);
+                if(randomevent(2))newbouncer(d==player1 && !thirdperson ? d->muzzle : hudgunorigin(gun, d->o, to, d), up, local, id, d, BNC_LIGHT, 650, 400);
                 break;
             }
             case ATK_GRAP1_SHOOT:
@@ -1556,7 +1556,7 @@ namespace game
                 vec pos(bnc.o);
                 pos.add(vec(bnc.offset).mul(bnc.offsetmillis/float(OFFSETMILLIS)));
                 if(bnc.bouncetype==BNC_GRENADE) adddynlight(pos, 40, vec(0.5f, 0.5f, 2.0f));
-                else adddynlight(pos, 80+rnd(15), vec(0.2f, 0.09f, 0.0f), 0, 0, L_VOLUMETRIC|L_NODYNSHADOW);
+                else adddynlight(pos, 80, vec(0.3f, 0.15f, 0.0f), 0, 0, L_VOLUMETRIC|L_NODYNSHADOW|L_NOSHADOW|L_NOSPEC);
             }
         }
     }
@@ -1592,7 +1592,7 @@ namespace game
             else
             {
                 vectoyawpitch(vel, yaw, pitch);
-                yaw += bnc.bounces < 5 ? 75+rnd(31) : 90;
+                if(!ispaused()) yaw += bnc.bounces < 5 ? 75+rnd(31) : 90;
                 bnc.lastyaw = yaw;
                 bnc.lastpitch = pitch;
             }
@@ -1634,6 +1634,7 @@ namespace game
                 v.mul(3);
                 v.add(pos);
                 rendermodel(p.atk==ATK_SMAW_SHOOT ? "projectiles/missile" : p.atk==ATK_ARTIFICE_SHOOT ? "projectiles/feuartifice" : p.atk==ATK_ROQUETTES_SHOOT ? "projectiles/minimissile" : p.atk==ATK_NUKE_SHOOT ? "projectiles/missilenuke" :"projectiles/fleche", ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, MDL_CULL_VFC|MDL_CULL_OCCLUDED);
+                if(ispaused()) return;
                 switch(p.atk)
                 {
                     case ATK_NUKE_SHOOT:
