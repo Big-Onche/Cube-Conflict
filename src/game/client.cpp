@@ -813,7 +813,7 @@ namespace game
     void changemap(const char *name)
     {
         changemap(name, m_valid(nextmode) ? nextmode : (remote ? 1 : 0));
-        fullbrightmodels = 0;
+        resetshroomsgfx();
     }
     ICOMMAND(map, "s", (char *name), changemap(name));
 
@@ -1618,6 +1618,7 @@ namespace game
                 if(getint(p)) entities::spawnitems();
                 else senditemstoserver = false;
                 ai::loadwaypoints();
+                updatewinstat = true;
                 break;
 
             case N_FORCEDEATH:
@@ -1774,7 +1775,7 @@ namespace game
 
             case N_SERVAMBIENT:
             {
-                if(multiplayer(true)) map_atmo = getint(p);
+                if(multiplayer(false)) map_atmo = getint(p);
                 break;
             }
 
@@ -2163,6 +2164,11 @@ namespace game
 
             case N_TIMEUP:
                 timeupdate(getint(p));
+                break;
+
+            case N_PREMISSION:
+                premission = getint(p);
+                if(premission) {execute("premission"); message[MSG_PREMISSION] = totalmillis; musicmanager(2);}
                 break;
 
             case N_SERVMSG:

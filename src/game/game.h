@@ -174,26 +174,26 @@ static struct gamemodeinfo
     { "Editeur de maps", "Map editor", M_EDIT },        // 1
 
     //MODE 1, 2, 3, 4
-    { "Tue Les Tous (Collecte)",    "Deathmatch (Weapon pickup)",   M_LOBBY },
-    { "Tue Les Tous (Aléatoire)",   "Deathmatch (Random weapon)",   M_RANDOM | M_NOAMMO | M_MUNINFINIE},
-    { "Tue Les Tous (Full stuff)",  "Deathmatch (Full stuff)",      M_FULLSTUFF},
-    { "Tue Les Tous (Identique)",   "Deathmatch (Identical)",       M_IDENTIQUE | M_NOAMMO | M_MUNINFINIE},
+    { "Tue Les Tous (Collecte d'armes)",   "Deathmatch (Weapon pickup)",        M_LOBBY },
+    { "Tue Les Tous (Armes aléatoire)",   "Deathmatch (Random weapons)",        M_RANDOM | M_NOAMMO | M_MUNINFINIE},
+    { "Tue Les Tous (Armes multiples)",    "Deathmatch (Multiple weapons)",     M_FULLSTUFF},
+    { "Tue Les Tous (Armes identiques)",   "Deathmatch (Identical weapons)",    M_IDENTIQUE | M_NOAMMO | M_MUNINFINIE},
     //MODE 5, 6, 7, 8
-    { "Tue Les Tous (Collecte)",    "Team Deathmatch (Weapon pickup)",  M_TEAM },
-    { "Tue Les Tous (Aléatoire)",   "Team Deathmatch (Random weapon)",  M_RANDOM | M_TEAM | M_NOAMMO | M_MUNINFINIE},
-    { "Tue Les Tous (Full stuff)",  "Team Deathmatch (Full stuff)",     M_FULLSTUFF | M_TEAM},
-    { "Tue Les Tous (Identique)",   "Team Deathmatch (Identical)",      M_IDENTIQUE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
+    { "Tue Les Tous (Collecte d'armes)",   "Team Deathmatch (Weapon pickup)",          M_TEAM },
+    { "Tue Les Tous (Arme aléatoire)",     "Team Deathmatch (Random weapon)",          M_RANDOM | M_TEAM | M_NOAMMO | M_MUNINFINIE},
+    { "Tue Les Tous (Armes multiples)",    "Team Deathmatch (Multiple weapons)",       M_FULLSTUFF | M_TEAM},
+    { "Tue Les Tous (Armes identiques)",   "Team Deathmatch (Identical weapons)",      M_IDENTIQUE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
     //MODE 9, 10, 11, 12
-    { "Capture de drapeau (Collecte)",      "Capture the flag (Weapon pickup)", M_CTF | M_TEAM },
-    { "Capture de drapeau (Aléatoire)",     "Capture the flag (Random weapon)", M_RANDOM | M_CTF | M_TEAM | M_NOAMMO | M_MUNINFINIE},
-    { "Capture de drapeau (Full stuff)",    "Capture the flag (Full stuff)",    M_FULLSTUFF | M_CTF | M_TEAM},
-    { "Capture de drapeau (Identique)",     "Capture the flag (Identical)",     M_IDENTIQUE | M_CTF | M_TEAM | M_NOAMMO | M_MUNINFINIE},
+    { "Capture de drapeau (Collecte d'armes)",  "Capture the flag (Weapon pickup)",       M_CTF | M_TEAM },
+    { "Capture de drapeau (Arme aléatoire)",    "Capture the flag (Random weapon)",       M_RANDOM | M_CTF | M_TEAM | M_NOAMMO | M_MUNINFINIE},
+    { "Capture de drapeau (Full stuff)",        "Capture the flag (Multiple weapons)",    M_FULLSTUFF | M_CTF | M_TEAM},
+    { "Capture de drapeau (Identique)",         "Capture the flag (Identical)",           M_IDENTIQUE | M_CTF | M_TEAM | M_NOAMMO | M_MUNINFINIE},
     //MODE 13, 14, 15, 16, 17
-    { "Conquête (Collecte)",     "Domination (Weapon pickup)", M_CAPTURE | M_TEAM},
-    { "Conquête (Aléatoire)",    "Domination (Random weapon)", M_RANDOM | M_CAPTURE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
-    { "Conquête (Full stuff)",   "Domination (Full stuff)",    M_FULLSTUFF | M_CAPTURE | M_TEAM},
-    { "Conquête (Identique)",    "Domination (Identical)",     M_IDENTIQUE | M_CAPTURE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
-    { "Conquête (Régénération)", "Domination (Regeneration)",  M_NOITEMS | M_CAPTURE | M_TEAM | M_REGEN},
+    { "Conquête (Collecte d'armes)",        "Domination (Weapon pickup)",       M_CAPTURE | M_TEAM},
+    { "Conquête (Arme aléatoire)",          "Domination (Random weapon)",       M_RANDOM | M_CAPTURE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
+    { "Conquête (Armes multiples)",         "Domination (Multiple weapons)",    M_FULLSTUFF | M_CAPTURE | M_TEAM},
+    { "Conquête (Armes identiques)",        "Domination (Identical weapons)",   M_IDENTIQUE | M_CAPTURE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
+    { "Conquête (Régénération)",            "Domination (Regeneration)",        M_NOITEMS | M_CAPTURE | M_TEAM | M_REGEN},
 };
 
 #define STARTGAMEMODE (-3)
@@ -332,7 +332,7 @@ enum
     N_GUNSELECT, N_TAUNT,
     N_MAPCHANGE, N_MAPVOTE, N_TEAMINFO, N_ITEMSPAWN, N_ITEMPICKUP, N_ITEMACC, N_TELEPORT, N_JUMPPAD,
     N_PING, N_PONG, N_CLIENTPING,
-    N_TIMEUP, N_FORCEINTERMISSION,
+    N_TIMEUP, N_PREMISSION, N_FORCEINTERMISSION,
     N_SERVMSG, N_ITEMLIST, N_RESUME,
     N_EDITMODE, N_EDITENT, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, N_CALCLIGHT, N_REMIP, N_EDITVSLOT, N_UNDO, N_REDO, N_NEWMAP, N_GETMAP, N_SENDMAP, N_CLIPBOARD, N_EDITVAR,
     N_MASTERMODE, N_KICK, N_CLEARBANS, N_CURRENTMASTER, N_SPECTATOR, N_SETMASTER, N_SETTEAM,
@@ -365,7 +365,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_GUNSELECT, 2, N_TAUNT, 1,
     N_MAPCHANGE, 0, N_MAPVOTE, 0, N_TEAMINFO, 0, N_ITEMSPAWN, 2, N_ITEMPICKUP, 2, N_ITEMACC, 4,
     N_PING, 2, N_PONG, 2, N_CLIENTPING, 2,
-    N_TIMEUP, 2, N_FORCEINTERMISSION, 1,
+    N_TIMEUP, 2, N_PREMISSION, 2, N_FORCEINTERMISSION, 1,
     N_SERVMSG, 0, N_ITEMLIST, 0, N_RESUME, 0,
     N_EDITMODE, 2, N_EDITENT, 11, N_EDITF, 16, N_EDITT, 16, N_EDITM, 16, N_FLIP, 14, N_COPY, 14, N_PASTE, 14, N_ROTATE, 15, N_REPLACE, 17, N_DELCUBE, 14, N_CALCLIGHT, 1, N_REMIP, 1, N_EDITVSLOT, 16, N_UNDO, 0, N_REDO, 0, N_NEWMAP, 2, N_GETMAP, 1, N_SENDMAP, 0, N_EDITVAR, 0,
     N_MASTERMODE, 2, N_KICK, 0, N_CLEARBANS, 1, N_CURRENTMASTER, 0, N_SPECTATOR, 3, N_SETMASTER, 0, N_SETTEAM, 0,
@@ -832,7 +832,7 @@ struct gamestate
             case A_MAGNET: absorbfactor=100; break;
             case A_ASSIST: absorbfactor=85; break;
         }
-        if(aptitude==0 && armour>0) armourtype!=A_MAGNET ? absorbfactor+=25 : damage*=0.75f;
+        if(aptitude==0 && armour>0) armourtype==A_ASSIST || armourtype==A_MAGNET ? absorbfactor==100 : absorbfactor+=25;
 
         int ad = damage*(absorbfactor)/100.f; // let armour absorb when possible
 
@@ -842,7 +842,7 @@ struct gamestate
             if(aptitude==8 && aptisort>0 && armour>0) armour = min(armour+ad, armourtype==A_BLUE ? 750 : armourtype==A_GREEN ? 1250 : armourtype==A_YELLOW ? 2000 : armourtype==A_MAGNET ? 1500 : 3000);
             else armour -= ad;
         }
-        damage -= ad;
+        damage -= aptitude==0 ? ad*1.25f : ad;
         health -= damage;
         return damage;
     }
@@ -1081,6 +1081,7 @@ namespace game
     extern int nextmode;
     extern string clientmap;
     extern bool intermission;
+    extern bool premission;
     extern int maptime, maprealtime, maplimit;
     extern gameent *player1;
     extern vector<gameent *> players, clients;

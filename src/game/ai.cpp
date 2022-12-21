@@ -59,7 +59,7 @@ namespace ai
 
     bool canmove(gameent *d)
     {
-        return d->state != CS_DEAD && !intermission;
+        return d->state != CS_DEAD && !intermission && !premission;
     }
 
     float attackmindist(int atk)
@@ -1434,9 +1434,9 @@ namespace ai
                 if(!request(d, b)) target(d, b, 0, b.idle ? true : false);
                 shoot(d, d->ai->target);
             }
-            if(!intermission)
+            if(!intermission || !premission)
             {
-                if(d->ragdoll) cleanragdoll(d); // RAGRAG
+                if(d->ragdoll) cleanragdoll(d);
                 moveplayer(d, 10, true, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION || d->aptitude==APT_KAMIKAZE ? d->aptisort2 : d->aptisort3, d->armourtype==A_ASSIST && d->armour>0 ? true : false);
                 if(allowmove && !b.idle) timeouts(d, b);
 				entities::checkitems(d);

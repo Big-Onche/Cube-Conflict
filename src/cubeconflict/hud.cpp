@@ -42,6 +42,24 @@ namespace game
         int decal_message = 0;
         bool need_message1 = true, need_message2 = true;
 
+        if(totalmillis - message[MSG_PREMISSION] <= 10000)
+        {
+            string msg;
+            if(totalmillis - message[MSG_PREMISSION] <= 6900)
+            {
+                formatstring(msg, GAME_LANG ? "\fcThe game is about to begin" : "\fcLa partie va commencer !");
+                rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/23;
+                formatstring(msg, GAME_LANG ? "\fdThe game mode is: %s" : "\fdLe mode de jeu est : %s", server::modeprettyname(gamemode));
+                rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/23;
+            }
+            else
+            {
+                formatstring(msg, GAME_LANG ? "\fd%.1f" : "\fd%.1f", (10000 - (totalmillis - message[MSG_PREMISSION]))/1000.f);
+                rendermessage(msg, 60, 8.8f, decal_message); decal_message -= screenh/23;
+            }
+
+        }
+
         if(totalmillis - message[MSG_LEVELUP] <=2500) //////////////////////////////////////////////////////////////// LVL UP MESSAGE
         {
             string msg;

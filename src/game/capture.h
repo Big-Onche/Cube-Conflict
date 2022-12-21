@@ -967,7 +967,7 @@ ICOMMAND(insidebases, "", (),
 
     void update()
     {
-        if(gamemillis>=gamelimit) return;
+        if(gamemillis>=gamelimit || gamemillis<10000) return;
         endcheck();
         int t = gamemillis/1000 - (gamemillis-curtime)/1000;
         if(t<1) return;

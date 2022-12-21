@@ -1582,7 +1582,7 @@ namespace server
         }
 
         uchar operator[](int msg) const { return msg >= 0 && msg < NUMMSG ? msgmask[msg] : 0; }
-    } msgfilter(-1, N_CONNECT, N_SERVINFO, N_INITCLIENT, N_WELCOME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_HITPUSH, N_SHOTFX, N_EXPLODEFX, N_DIED, N_SPAWNSTATE, N_FORCEDEATH, N_TEAMINFO, N_ITEMACC, N_ITEMSPAWN, N_TIMEUP, N_CDIS, N_CURRENTMASTER, N_PONG, N_RESUME, N_BASESCORE, N_BASEINFO, N_BASEREGEN, N_CNBASESCORE, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_SENDMAP, N_DROPFLAG, N_SCOREFLAG, N_RETURNFLAG, N_RESETFLAG, N_CLIENT, N_AUTHCHAL, N_INITAI, N_DEMOPACKET, -2, N_CALCLIGHT, N_REMIP, N_NEWMAP, N_GETMAP, N_SENDMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, N_EDITVAR, N_EDITVSLOT, N_UNDO, N_REDO, -4, N_POS, N_IDENTIQUEARME, N_SERVAMBIENT, NUMMSG),
+    } msgfilter(-1, N_CONNECT, N_SERVINFO, N_INITCLIENT, N_WELCOME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_HITPUSH, N_SHOTFX, N_EXPLODEFX, N_DIED, N_SPAWNSTATE, N_FORCEDEATH, N_TEAMINFO, N_ITEMACC, N_ITEMSPAWN, N_TIMEUP, N_PREMISSION, N_CDIS, N_CURRENTMASTER, N_PONG, N_RESUME, N_BASESCORE, N_BASEINFO, N_BASEREGEN, N_CNBASESCORE, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_SENDMAP, N_DROPFLAG, N_SCOREFLAG, N_RETURNFLAG, N_RESETFLAG, N_CLIENT, N_AUTHCHAL, N_INITAI, N_DEMOPACKET, -2, N_CALCLIGHT, N_REMIP, N_NEWMAP, N_GETMAP, N_SENDMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, N_EDITVAR, N_EDITVSLOT, N_UNDO, N_REDO, -4, N_POS, N_IDENTIQUEARME, N_SERVAMBIENT, NUMMSG),
       connectfilter(-1, N_CONNECT, -2, N_AUTHANS, -3, N_PING, NUMMSG);
 
     int checktype(int type, clientinfo *ci)
@@ -1968,6 +1968,8 @@ namespace server
         }
         if(!ci || clients.length()>1)
         {
+            if(m_identique) sendf(-1, 1, "ri2", N_IDENTIQUEARME, identiquearme);
+            if(gamemillis>10000) sendf(-1, 1, "ri2", N_PREMISSION, game::premission);
             putint(p, N_RESUME);
             loopv(clients)
             {
@@ -1992,7 +1994,6 @@ namespace server
             }
             putint(p, -1);
             welcomeinitclient(p, ci ? ci->clientnum : -1);
-            if(m_identique) sendf(-1, 1, "ri2", N_IDENTIQUEARME, identiquearme);
         }
         if(smode) smode->initclient(ci, p, true);
         return 1;
@@ -2053,6 +2054,8 @@ namespace server
     VARP(servrandommode, 0, 0, 1);
     VARP(servforcemode, -1, 0, 18);
 
+    bool startpremission = false, stoppremission = false;
+
     void changemap(const char *s, int mode)
     {
         stopdemo();
@@ -2062,7 +2065,8 @@ namespace server
 
         gamemode = mode;
         gamemillis = 0;
-        gamelimit = gamelength*60000;
+        gamelimit = gamelength*60000+10000;
+        startpremission = false;
         interm = 0;
         nextexceeded = 0;
         copystring(smapname, s);
@@ -2115,6 +2119,7 @@ namespace server
     {
         if(servrandommode || !servforcemode) gamemode = rnd(17)+2;
         if(servforcemode>-1) gamemode = servforcemode;
+        game::premission = true;
 
         if(!maprotations.inrange(curmaprotation))
         {
@@ -2274,6 +2279,21 @@ namespace server
 
     void checkintermission(bool force = false)
     {
+        if(gamemillis<=10000 && !startpremission)
+        {
+            game::premission = true;
+            sendf(-1, 1, "ri2", N_PREMISSION, 1);
+            startpremission = true;
+            stoppremission = false;
+        }
+        else if(gamemillis>10000 && !stoppremission)
+        {
+            game::premission = false;
+            sendf(-1, 1, "ri2", N_PREMISSION, 0);
+            stoppremission = true;
+            startpremission = false;
+        }
+
         if(gamemillis >= gamelimit && !interm && (force || !checkovertime()))
         {
             sendf(-1, 1, "ri2", N_TIMEUP, 0);
@@ -2734,7 +2754,7 @@ namespace server
                 processevents();
                 if(curtime)
                 {
-                    regenallies();
+                    if(!game::premission)regenallies();
 
                     loopv(sents) if(sents[i].spawntime) // spawn entities when timer reached
                     {

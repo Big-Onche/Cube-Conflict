@@ -3,6 +3,11 @@
 extern bool randomevent(int probability);
 extern void addsleep(int *msec, char *cmd);
 
+namespace game
+{
+    extern void resetshroomsgfx();
+}
+
 namespace gfx
 {
     static const struct colors{ int color; } rndcolor[] =
@@ -48,7 +53,7 @@ extern int n_aptitudetueur, n_aptitudevictime;
 
 enum {MSG_OWNKILLSTREAK = 0, MSG_YOUKILLED, MSG_OTHERKILLSTREAK,
         MSG_CTF_TEAMPOINT, MSG_CTF_ENNEMYPOINT, MSG_CTF_TEAMFLAGRECO, MSG_CTF_ENNEMYFLAGRECO, MSG_CTF_TEAMSTOLE, MSG_CTF_ENNEMYSTOLE,
-        MSG_LEVELUP, MSG_ACHUNLOCKED, MSG_CUSTOM, MSG_HELP, NUMMESSAGE};
+        MSG_LEVELUP, MSG_ACHUNLOCKED, MSG_CUSTOM, MSG_HELP, MSG_PREMISSION, NUMMESSAGE};
 extern int message[NUMMESSAGE];
 
 extern int zoomfov, zoom, crosshairsize, weapposside, weapposup, forcecampos;

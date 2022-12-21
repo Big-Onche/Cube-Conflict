@@ -47,6 +47,7 @@ namespace game
     });
 
     bool intermission = false;
+    bool premission = false;
     int maptime = 0, maprealtime = 0, maplimit = -1;
     int lasthit = 0, lastspawnattempt = 0;
     int respawnent = -1;
@@ -292,7 +293,7 @@ namespace game
                 else d->stoppowerarmorsound();
             }
 
-            if(d->state==CS_ALIVE && !intermission && d!=player1)
+            if(d->state==CS_ALIVE && !intermission && !premission && d!=player1)
             {
                 if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
                 if(d->steromillis || d->epomillis || d->jointmillis || d->champimillis) entities::checkboosts(curtime, d);
@@ -305,7 +306,7 @@ namespace game
             if(d->state==CS_DEAD && d->ragdoll) moveragdoll(d);
 
             const int lagtime = totalmillis-d->lastupdate;
-            if(!lagtime || intermission) continue;
+            if(!lagtime || intermission || premission) continue;
             else if(lagtime>1000 && d->state==CS_ALIVE)
             {
                 d->state = CS_LAGGED;
@@ -345,19 +346,19 @@ namespace game
         physicsframe();
         ai::navigate();
 
-        if(player1->state != CS_DEAD && !intermission)
+        if(player1->state != CS_DEAD && !intermission && !premission)
         {
             isalive = 1;
-            if(player1->health>=2000) unlockachievement(ACH_SACAPV);
-            if(lookupmaterial(player1->o)==MAT_NOCLIP && map_sel==3) unlockachievement(ACH_SPAAACE);
-            if(player1->aptitude==APT_KAMIKAZE && player1->ammo[GUN_KAMIKAZE]<=0 && totalmillis-lastshoot>=500 && totalmillis-lastshoot<=750 && isconnected()) unlockachievement(ACH_SUICIDEFAIL);
-            if(player1->steromillis && player1->epomillis && player1->jointmillis && player1->champimillis) unlockachievement(ACH_DEFONCE);
 
             if(player1->armourtype==A_ASSIST && player1->ammo[GUN_ASSISTXPL]>0 && player1->armour==0) {gunselect(GUN_ASSISTXPL, player1, true); player1->gunwait=0;}
 
             bool p1hassuperweapon = false;
             loopi(4) if(player1->ammo[GUN_S_NUKE+i]>0) p1hassuperweapon = true;
+            if(player1->health>=2000) unlockachievement(ACH_SACAPV);
+            if(player1->steromillis && player1->epomillis && player1->jointmillis && player1->champimillis) unlockachievement(ACH_DEFONCE);
+            if(lookupmaterial(player1->o)==MAT_NOCLIP && map_sel==3) unlockachievement(ACH_SPAAACE);
             if(p1hassuperweapon && player1->steromillis && player1->armour>0 && player1->armourtype==A_ASSIST) unlockachievement(ACH_ABUS);
+            if(player1->aptitude==APT_KAMIKAZE && player1->ammo[GUN_KAMIKAZE]<=0 && totalmillis-lastshoot>=500 && totalmillis-lastshoot<=750 && isconnected()) unlockachievement(ACH_SUICIDEFAIL);
 
             if(player1->steromillis || player1->epomillis || player1->jointmillis || player1->champimillis)
             {
@@ -386,7 +387,7 @@ namespace game
                     moveplayer(player1, 10, true, 0, 0, player1->aptitude, 0, false);
                 }
             }
-            else if(!intermission && forcecampos<0)
+            else if(!intermission && !premission && forcecampos<0)
             {
                 if(player1->ragdoll) cleanragdoll(player1);
                 crouchplayer(player1, 10, true);
@@ -476,13 +477,20 @@ namespace game
         }
     }
 
+    void resetshroomsgfx()
+    {
+        clearpostfx();
+        champifov = 0;
+        fullbrightmodels = 0;
+    }
+
     // inputs
 
     VARP(attackspawn, 0, 1, 1);
 
     void doaction(int act)
     {
-        if(!connected || intermission || forcecampos>=0) return;
+        if(!connected || intermission || premission || forcecampos>=0) return;
         if((player1->attacking = act) && attackspawn) respawn();
     }
 
@@ -492,14 +500,14 @@ namespace game
 
     bool canjump()
     {
-        if(!connected || intermission || forcecampos>=0) return false;
+        if(!connected || intermission || premission || forcecampos>=0) return false;
         if(jumpspawn) respawn();
         return player1->state!=CS_DEAD;
     }
 
     bool cancrouch()
     {
-        if(!connected || intermission || forcecampos>=0) return false;
+        if(!connected || intermission || premission || forcecampos>=0) return false;
         return player1->state!=CS_DEAD;
     }
 
@@ -540,7 +548,7 @@ namespace game
 
     void damaged(int damage, gameent *d, gameent *actor, bool local, int atk)
     {
-        if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission) return;
+        if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission || premission) return;
 
         if(local) damage = d->dodamage(damage, d->aptitude, d->aptisort1);
         else if(actor==player1) return;
@@ -604,9 +612,7 @@ namespace game
             disablezoom();
             d->attacking = ACT_IDLE;
             d->champimillis = 0;
-            champifov = 0;
-            clearpostfx();
-            fullbrightmodels = 0;
+            resetshroomsgfx();
             d->roll = 0;
             playsound(S_DIE_P1);
         }
@@ -662,7 +668,7 @@ namespace game
             if(d!=player1) d->resetinterp();
             return;
         }
-        else if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission) return;
+        else if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission || premission) return;
 
         //////////////////////////////SONS//////////////////////////////
         switch(actor->killstreak) //Sons Killstreak
@@ -950,6 +956,7 @@ namespace game
         setclientmode();
 
         intermission = false;
+
         maptime = maprealtime = 0;
         maplimit = -1;
 

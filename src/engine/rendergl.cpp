@@ -1362,7 +1362,7 @@ void disablezoom()
 
 void computezoom()
 {
-    if(game::player1->state==CS_DEAD) zoom = 0;
+    if(game::player1->state==CS_DEAD || game::premission || game::intermission) zoom = 0;
     if(!zoom) { zoomprogress = 0; curfov = fov+champifov; curavatarfov = avatarfov+champifov; return; }
     if(zoom > 0) zoomprogress = zoominvel ? min(zoomprogress + float(elapsedtime) / zoominvel, 1.0f) : 1;
     else
@@ -2684,7 +2684,7 @@ float chmod = 1000.f;
 void drawcrosshair(int w, int h)
 {
     bool windowhit = UI::hascursor();
-    if(!windowhit && (hidehud || mainmenu)) return; //(hidehud || player->state==CS_SPECTATOR || player->state==CS_DEAD)) return;
+    if(!windowhit && (hidehud || mainmenu)) return;
 
     vec color(1, 1, 1);
     float cx = 0.5f, cy = 0.5f, chsize;
@@ -2721,7 +2721,7 @@ void drawcrosshair(int w, int h)
     float y = cy*h - (windowhit ? 0 : chsize/2.0f);
     glBindTexture(GL_TEXTURE_2D, crosshair->id);
 
-    hudquad(x, y, chsize, chsize);
+    if(windowhit || forcecampos<0) hudquad(x, y, chsize, chsize);
 }
 
 VARP(wallclock, 0, 0, 1);

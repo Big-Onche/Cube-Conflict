@@ -1,6 +1,8 @@
 extern int xpneededfornextlvl, totalneededxp;
 extern float pourcents;
 
+extern bool updatewinstat;
+
 extern void loadsave();
 extern void writesave();
 extern void addstat(int valeur, int stat, bool rewrite = false);

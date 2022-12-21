@@ -296,7 +296,6 @@ namespace game
     }
 
     string costumemdlname, curmapname;
-    bool updatestat = true;
 
     void renderplayer(gameent *d, const playermodelinfo &mdl, int color, int team, float fade, int flags = 0, bool mainpass = true)
     {
@@ -307,16 +306,16 @@ namespace game
         vec o = d->feetpos();
         int basetime = 0;
         if(animoverride) anim = (animoverride<0 ? ANIM_ALL : animoverride)|ANIM_LOOP;
-        const char *mdlname = d->armourtype==A_ASSIST && d->armour>0 ? validteam(team) ? d->team==player1->team ? "smileys/armureassistee" : "smileys/armureassistee/red" : "smileys/armureassistee/red" :
+        const char *mdlname = m_tutorial ? mdl.model[1] :
+                              d->armourtype==A_ASSIST && d->armour>0 ? validteam(team) ? d->team==player1->team ? "smileys/armureassistee" : "smileys/armureassistee/red" : "smileys/armureassistee/red" :
                               d->aptisort2 && d->aptitude==APT_PHYSICIEN ? "smileys/phy_2" : mdl.model[validteam(team) ? d->team==player1->team ? 1 : 2 : 0];
 
-        if(intermission && updatestat && (validteam(team) ? bestteams.htfind(player1->team)>=0 : bestplayers.find(player1)>=0))
+        if(intermission && updatewinstat && (validteam(team) ? bestteams.htfind(player1->team)>=0 : bestplayers.find(player1)>=0))
         {
             unlockachievement(ACH_WINNER);
             addstat(1, STAT_WINS);
-            updatestat = false;
+            updatewinstat = false;
         }
-        else updatestat = true;
 
         if(d->state==CS_DEAD && d->lastpain)
         {
@@ -386,7 +385,7 @@ namespace game
             lastaction = d->lasttaunt;
             anim = ANIM_TAUNT|ANIM_LOOP;
         }
-        else if(!intermission)
+        else if(!intermission && forcecampos<0)
         {
             if(d->inwater && d->physstate<=PHYS_FALL)
             {

@@ -384,8 +384,7 @@ namespace entities
         if(d->champimillis && (d->champimillis -= time)<=0)
         {
             d->champimillis = 0;
-            fullbrightmodels = 0;
-            clearpostfx();
+            resetshroomsgfx();
             if(d==player1) conoutf(CON_GAMEINFO, GAME_LANG ? "\f8The mushrooms have been digested." : "\f8Les champignons sont digérés.");
         }
         if(d->jointmillis && (d->jointmillis -= time)<=0)
@@ -702,7 +701,7 @@ namespace entities
             {
                 vec dir;
                 vecfromyawpitch(e.attr2, e.type==CAMERA_POS ? e.attr3 : 0, 1, 0, dir);
-                renderentarrow(e, dir, 6);
+                renderentarrow(e, dir, e.type==CAMERA_POS ? 100 : 10);
                 break;
             }
             case TRIGGER_ZONE:

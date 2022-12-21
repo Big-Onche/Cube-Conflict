@@ -3,6 +3,7 @@
 
 #include "game.h"
 #include "stats.h"
+#include "ccheader.h"
 
 int abilitydata(int aptitude)
 {
@@ -23,7 +24,7 @@ namespace game
 {
     void aptitude(gameent *d, int ability, bool request) //Commandes d'aptitudes
     {
-        if(d->state==CS_DEAD && !isconnected()) return;
+        if(d->state==CS_DEAD || !isconnected() || forcecampos>=0 || intermission || premission) return;
 
         switch(ability)
         {

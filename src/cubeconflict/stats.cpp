@@ -11,6 +11,8 @@ using namespace std;
 int cclvl = 1, xpneededfornextlvl = 50, xpneededforprevlvl = 50, totalneededxp = 50;
 float pourcents = -1;
 
+bool updatewinstat = true;
+
 void genlvl() //Calcule le niveau du joueur
 {
     while(stat[STAT_XP] >= xpneededfornextlvl) //Ajoute un niveau et augmente l'xp demandé pour le niveau suivant
