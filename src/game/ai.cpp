@@ -102,7 +102,6 @@ namespace ai
     bool cansee(gameent *d, vec &x, vec &y, vec &targ)
     {
         if(d->aptitude==APT_ESPION && d->aptisort3) return true;
-        //aistate &b = d->ai->getstate();
         if(canmove(d))
             return getsight(x, d->yaw, d->pitch, y, targ, d->ai->views[2], d->ai->views[0], d->ai->views[1]);
         return false;
@@ -148,6 +147,8 @@ namespace ai
         return false;
 	}
 
+	const int aiskew[NUMGUNS] = { 150, 1, 1, 30, 30, 1, 1, 15, 40, 1, 1, 3, 25, 10, 25, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+
     vec getaimpos(gameent *d, int atk, gameent *e)
     {
         vec o = e->o;
@@ -175,8 +176,6 @@ namespace ai
         {
             if(lastmillis >= d->ai->lastaimrnd)
             {
-                const int aiskew[NUMGUNS] = { 150, 1, 1, 30, 30, 1, 1, 15, 40, 1, 1, 3, 25, 10, 25, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
-
                 #define rndaioffset(r) ((rnd(int(r*aiskew[d->gunselect]*2)+1)-(r*aiskew[d->gunselect]))*(1.f/float(max(d->skill, 1))))
                 loopk(3) d->ai->aimrnd[k] = rndaioffset(e->radius);
                 int dur = (d->skill+10)*10;
@@ -335,11 +334,7 @@ namespace ai
         else return 0;
     }
 
-    bool badhealth(gameent *d)
-    {
-        if(d->health < 300 + d->skill*3) return true;
-        else return false;
-    }
+    bool badhealth(gameent *d) { return d->health < 300+d->skill*5; }
 
     bool needmana(gameent *d)
     {
@@ -350,17 +345,16 @@ namespace ai
             case APT_SHOSHONE:
             case APT_PRETRE:
             case APT_PHYSICIEN:
-                if(d->mana<100) return true;
-                else return false;
+                 return d->mana<=100;
             break;
             default:
                 return false;
         }
     }
 
-    bool needshield(gameent *d, bool powerarmor)
+    bool needshield(gameent *d, bool powerarmour)
     {
-        if(powerarmor && d->armour<1250) return true;
+        if(powerarmour && d->armour < 1000) return true;
 
         switch(d->aptitude)
         {
@@ -368,12 +362,10 @@ namespace ai
             case APT_FAUCHEUSE:
             case APT_NINJA:
             case APT_CAMPEUR:
-                if(d->armour < 1500) return true;
-            break;
+                return d->armour < 1500;
             default:
-                if(d->armour < 750) return true;
+                return d->armour < 750;
         }
-
         return false;
     }
 
@@ -493,14 +485,13 @@ namespace ai
 
     int isgoodammo(int gun) { return gun >= GUN_RAIL && gun <= GUN_S_CAMPOUZE; } //Toutes les armes sont bonnes à prendre :/
 
+    static const int goodguns[] = { GUN_S_CAMPOUZE, GUN_S_NUKE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_PULSE, GUN_RAIL, GUN_FAMAS, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_AK47, GUN_SV98, GUN_SKS, GUN_ARTIFICE, GUN_ARBALETE, GUN_LANCEFLAMMES };
+
     bool hasgoodammo(gameent *d)
     {
-        if(m_identique || m_random) return true;
+        if(m_identique || m_random || d->ammo[GUN_M32] > 5) return true;
 
-        static const int goodguns[] = { GUN_S_CAMPOUZE, GUN_S_NUKE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_PULSE, GUN_RAIL, GUN_FAMAS, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_AK47, GUN_SV98, GUN_SKS, GUN_ARTIFICE, GUN_ARBALETE, GUN_LANCEFLAMMES };
         loopi(sizeof(goodguns)/sizeof(goodguns[0])) if(d->hasammo(goodguns[0])) return true;
-
-        if(d->ammo[GUN_M32] > 5) return true;
 
         return false;
     }
@@ -541,19 +532,15 @@ namespace ai
                 if(d->mana < 100 && d->aptitude!=APT_VAMPIRE) score = m_ctf ? 1e2f : 1e5f;
                 else if (d->aptitude==APT_VAMPIRE) score = d->health < 600 ? 1e4f : 1e3f;
                 break;
-            case I_BOUCLIERBOIS:
+            case I_BOUCLIERBOIS: case I_BOUCLIERFER:
                 if(d->armourtype==A_ASSIST && d->armour<1500) score = m_ctf ? 1e2f : 1e4f;
                 else if(d->armour<600) score = m_ctf ? 1e3f : 1e5f;
                 break;
-            case I_BOUCLIERFER:
-                if(d->armourtype==A_ASSIST && d->armour<1500) score = m_ctf ? 1e2f : 1e4f;
-                else if(d->armour<900) score =  m_ctf ? 1e3f : 1e5f;
-                break;
             case I_BOUCLIEROR: case I_BOUCLIERMAGNETIQUE:
                 if(d->armourtype==A_ASSIST && d->armour<1500) score = m_ctf ? 1e2f : 1e4f;
-                if(d->armour <= 1250) score =  m_ctf ? 1e2f : 1e6f;
+                if(d->armour <= 1250) score =  m_ctf ? 1e3f : 1e6f;
             case I_ARMUREASSISTEE:
-                if(d->armourtype!=A_ASSIST) score =  m_ctf ? 1e2f : 1e9f;
+                if(d->armourtype!=A_ASSIST) score =  m_ctf ? 1e3f : 1e9f;
                 break;
             default:
             {
@@ -742,22 +729,19 @@ namespace ai
                 bool wantsitem = false;
                 switch(e.type)
                 {
-                case I_SANTE: case I_BOOSTPV: wantsitem = badhealth(d); break;
+                    case I_SANTE: case I_BOOSTPV: wantsitem = badhealth(d); break;
                     case I_MANA:
                         d->aptitude==APT_VAMPIRE ? wantsitem = badhealth(d) : wantsitem = needmana(d);
-                        break;
-                    case I_ARMUREASSISTEE:
-                        wantsitem = needshield(d, true);
                         break;
                     case I_BOUCLIEROR:
                     case I_BOUCLIERMAGNETIQUE:
                     case I_BOUCLIERFER:
                     case I_BOUCLIERBOIS:
-                        wantsitem = needshield(d, false);
+                    case I_ARMUREASSISTEE:
+                        wantsitem = needshield(d, e.type==I_ARMUREASSISTEE ? true : false);
                         break;
                     case I_SUPERARME: case I_BOOSTDEGATS: case I_BOOSTGRAVITE: case I_BOOSTPRECISION: case I_BOOSTVITESSE:
                         wantsitem = true;
-                        break;
                 }
                 if(wantsitem)
                 {
@@ -1308,6 +1292,8 @@ namespace ai
         return false;
     }
 
+    static const int gunprefs[] = {GUN_S_NUKE, GUN_S_CAMPOUZE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_KAMIKAZE, GUN_CACNINJA, GUN_CACFLEAU, GUN_CACMARTEAU, GUN_CACMASTER, GUN_CAC349, GUN_MINIGUN, GUN_PULSE, GUN_RAIL, GUN_LANCEFLAMMES, GUN_HYDRA, GUN_SV98, GUN_SMAW, GUN_ARBALETE, GUN_ARTIFICE, GUN_MOSSBERG, GUN_FAMAS, GUN_M32, GUN_SKS, GUN_SPOCKGUN, GUN_UZI };
+
     bool request(gameent *d, aistate &b)
     {
         gameent *e = getclient(d->ai->enemy);
@@ -1335,8 +1321,6 @@ namespace ai
 
         if(!d->hasammo(d->gunselect) || !hasrange(d, e, d->gunselect) || (d->gunselect != d->ai->weappref && (!isgoodammo(d->gunselect) || d->hasammo(d->ai->weappref))))
         {
-            static const int gunprefs[] = {GUN_S_NUKE, GUN_S_CAMPOUZE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_KAMIKAZE, GUN_CACNINJA, GUN_CACFLEAU, GUN_CACMARTEAU, GUN_CACMASTER, GUN_CAC349, GUN_MINIGUN, GUN_PULSE, GUN_RAIL, GUN_LANCEFLAMMES, GUN_HYDRA, GUN_SV98, GUN_SMAW, GUN_ARBALETE, GUN_ARTIFICE, GUN_MOSSBERG, GUN_FAMAS, GUN_M32, GUN_SKS, GUN_SPOCKGUN, GUN_UZI };
-
             int gun = -1;
             if(d->hasammo(d->ai->weappref) && hasrange(d, e, d->ai->weappref)) gun = d->ai->weappref;
             else
@@ -1445,7 +1429,7 @@ namespace ai
         }
         else if(d->state == CS_DEAD)
         {
-            if(d->ragdoll) moveragdoll(d); // RAGRAG
+            if(d->ragdoll) moveragdoll(d);
             else
             {
                 d->move = d->strafe = 0;
