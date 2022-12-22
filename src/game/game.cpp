@@ -274,33 +274,24 @@ namespace game
         loopv(players)
         {
             gameent *d = players[i];
-            if(m_identique && d==player1)
+
+            if(d!=player1 && d->state==CS_ALIVE && !intermission && !premission)
             {
-                switch(player1->gunselect)
-                {
-                    case GUN_S_NUKE: case GUN_S_GAU8: case GUN_S_CAMPOUZE: case GUN_S_ROQUETTES: break;
-                    default: getaptiweap();
-                }
+                if(d->armourtype==A_ASSIST && d->ammo[GUN_ASSISTXPL]>0 && d->armour==0 && d->state==CS_ALIVE) {gunselect(GUN_ASSISTXPL, d, true); d->gunwait=0;}
+
+                if(curtime>0 && d->ragemillis) d->ragemillis = max(d->ragemillis-curtime, 0);
+
+                if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
+                if(d->steromillis || d->epomillis || d->jointmillis || d->champimillis) entities::checkboosts(curtime, d);
+                if(d->ragemillis || d->aptisort1 || d->aptisort2 || d->aptisort3) entities::checkaptiskill(curtime, d);
+                if(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION) updatespecials(d);
             }
-
-            if(d->armourtype==A_ASSIST && d->ammo[GUN_ASSISTXPL]>0 && d->armour==0 && d->state==CS_ALIVE) {gunselect(GUN_ASSISTXPL, d, true); d->gunwait=0;}
-
-            if(curtime>0 && d->ragemillis && d!=player1) d->ragemillis = max(d->ragemillis-curtime, 0);
 
             if(d==hudplayer() && d->state==CS_ALIVE && isconnected())
             {
                 if(d->armour<=1000 && d->armourtype==A_ASSIST && d->armour>0) d->alarmchan = playsound(S_ASSISTALARM, NULL, NULL, 0, -1, 1000, d->alarmchan);
                 else d->stoppowerarmorsound();
             }
-
-            if(d->state==CS_ALIVE && !intermission && !premission && d!=player1)
-            {
-                if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
-                if(d->steromillis || d->epomillis || d->jointmillis || d->champimillis) entities::checkboosts(curtime, d);
-                if(d->ragemillis || d->aptisort1 || d->aptisort2 || d->aptisort3) entities::checkaptiskill(curtime, d);
-            }
-
-            if(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION) updatespecials(d);
 
             if(d == player1 || d->ai) continue;
             if(d->state==CS_DEAD && d->ragdoll) moveragdoll(d);
@@ -346,25 +337,33 @@ namespace game
         physicsframe();
         ai::navigate();
 
-        if(player1->state != CS_DEAD && !intermission && !premission)
+        if(player1->state==CS_ALIVE && !intermission && !premission)   // checking player1's shits
         {
             isalive = 1;
 
             if(player1->armourtype==A_ASSIST && player1->ammo[GUN_ASSISTXPL]>0 && player1->armour==0) {gunselect(GUN_ASSISTXPL, player1, true); player1->gunwait=0;}
-
-            bool p1hassuperweapon = false;
-            loopi(4) if(player1->ammo[GUN_S_NUKE+i]>0) p1hassuperweapon = true;
-            if(player1->health>=2000) unlockachievement(ACH_SACAPV);
-            if(player1->steromillis && player1->epomillis && player1->jointmillis && player1->champimillis) unlockachievement(ACH_DEFONCE);
-            if(lookupmaterial(player1->o)==MAT_NOCLIP && map_sel==3) unlockachievement(ACH_SPAAACE);
-            if(p1hassuperweapon && player1->steromillis && player1->armour>0 && player1->armourtype==A_ASSIST) unlockachievement(ACH_ABUS);
-            if(player1->aptitude==APT_KAMIKAZE && player1->ammo[GUN_KAMIKAZE]<=0 && totalmillis-lastshoot>=500 && totalmillis-lastshoot<=750 && isconnected()) unlockachievement(ACH_SUICIDEFAIL);
-
-            if(player1->steromillis || player1->epomillis || player1->jointmillis || player1->champimillis)
+            else if(m_identique)
             {
-                if(player1->epomillis && player1->aptitude==APT_JUNKIE) unlockachievement(ACH_LANCEEPO);
-                entities::checkboosts(curtime, player1);
+                switch(player1->gunselect)
+                {
+                    case GUN_S_NUKE: case GUN_S_GAU8: case GUN_S_CAMPOUZE: case GUN_S_ROQUETTES: break;
+                    default: getaptiweap();
+                }
             }
+
+            if(IS_ON_OFFICIAL_SERV) // checking for achievements
+            {
+                bool p1hassuperweapon = false;
+                loopi(4) if(player1->ammo[GUN_S_NUKE+i]>0) p1hassuperweapon = true;
+                if(player1->health>=2000) unlockachievement(ACH_SACAPV);
+                if(player1->steromillis && player1->epomillis && player1->jointmillis && player1->champimillis) unlockachievement(ACH_DEFONCE);
+                if(lookupmaterial(player1->o)==MAT_NOCLIP && map_sel==3) unlockachievement(ACH_SPAAACE);
+                if(p1hassuperweapon && player1->steromillis && player1->armour>0 && player1->armourtype==A_ASSIST) unlockachievement(ACH_ABUS);
+                if(player1->aptitude==APT_KAMIKAZE && player1->ammo[GUN_KAMIKAZE]<=0 && totalmillis-lastshoot>=500 && totalmillis-lastshoot<=750 && isconnected()) unlockachievement(ACH_SUICIDEFAIL);
+                if(player1->epomillis && player1->aptitude==APT_JUNKIE) unlockachievement(ACH_LANCEEPO);
+            }
+
+            if(player1->steromillis || player1->epomillis || player1->jointmillis || player1->champimillis) entities::checkboosts(curtime, player1);
             if(player1->ragemillis || player1->vampimillis || player1->aptisort1 || player1->aptisort2 || player1->aptisort3) entities::checkaptiskill(curtime, player1);
             if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION) updatespecials(player1);
         }

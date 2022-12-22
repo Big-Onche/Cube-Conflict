@@ -790,7 +790,7 @@ struct ctfclientmode : clientmode
                         n.node = ai::closestwaypoint(f.pos(), ai::SIGHTMIN, true);
                         n.target = j;
                         n.targtype = ai::AI_T_AFFINITY;
-                        n.score = pos.squaredist(f.pos())/100.f;
+                        n.score = 1e9f;
                     }
                 }
                 else

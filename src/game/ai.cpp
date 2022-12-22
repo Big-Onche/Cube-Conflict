@@ -101,8 +101,9 @@ namespace ai
 
     bool cansee(gameent *d, vec &x, vec &y, vec &targ)
     {
+        aistate &b = d->ai->getstate();
         if(d->aptitude==APT_ESPION && d->aptisort3) return true;
-        if(canmove(d))
+        if(canmove(d) && b.type != AI_S_WAIT)
             return getsight(x, d->yaw, d->pitch, y, targ, d->ai->views[2], d->ai->views[0], d->ai->views[1]);
         return false;
     }
@@ -625,7 +626,7 @@ namespace ai
                 }
             }
         }
-        if(m_teammode && (d->aptitude==APT_MEDECIN || d->aptitude==APT_JUNKIE)) assist(d, b, interests);
+        if(m_teammode) assist(d, b, interests);
         if(cmode) cmode->aifind(d, b, interests);
         return parseinterests(d, b, interests, override);
     }
@@ -881,8 +882,7 @@ namespace ai
 
                         int atk = guns[d->gunselect].attacks[ACT_SHOOT];
                         float guard = SIGHTMIN, wander = attacks[atk].range;
-                        if((d->gunselect>=GUN_CAC349 && d->gunselect<=GUN_CACFLEAU) || d->gunselect==GUN_CACNINJA) guard = 0.f;
-                        return patrol(d, b, e->feetpos(), guard, wander) ? 1 : 0;
+                        return patrol(d, b, e->feetpos(), needpursue(d) ? 0.f : guard, wander) ? 1 : 0;
                     }
                     break;
                 }
@@ -1656,7 +1656,6 @@ namespace ai
                      particle_flare(w.o, waypoints[link].o, 1, PART_STREAK, 0x0000FF);
                 }
             }
-
         }
     }
 }
