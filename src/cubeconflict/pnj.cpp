@@ -327,6 +327,7 @@ namespace game
             {
                 targetyaw = spawnyaw;
                 o = spawnpos;
+                o.addz(4);
                 state = CS_ALIVE;
                 health = pnjtypes[mtype].health;
             }
