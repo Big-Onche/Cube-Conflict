@@ -192,7 +192,7 @@ namespace game
             cmode->drawhud(d, w, h);
             pophudmatrix();
         }
-        else if(m_tutorial) drawcampaignmap(d, w, h);
+        else if(m_tutorial) drawrpgminimap(d, w, h);
 
         zoomfov = (guns[player1->gunselect].maxzoomfov);
 

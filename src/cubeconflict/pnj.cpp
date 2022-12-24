@@ -505,6 +505,27 @@ namespace game
         if(monsterwashurt) monsterhurt = false;
     }
 
+    void drawfriends(gameent *d, float x, float y, float s)
+    {
+        float scale = calcradarscale();
+
+        loopv(monsters)
+        {
+            monster *o = monsters[i];
+
+            if(pnjtypes[o->mtype].friendly)
+            {
+                setbliptex(1, "");
+                gle::defvertex(2);
+                gle::deftexcoord0();
+                gle::begin(GL_QUADS);
+
+                drawteammate(d, x, y, s, o, scale);
+            }
+        }
+        gle::end();
+    }
+
     const char *stnames[M_MAX] = {
         "none", "searching", "aggro", "retreat", "attacking", "in pain", "sleeping", "aiming", "friendly", "neutral", "angry"
     };

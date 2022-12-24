@@ -1044,7 +1044,7 @@ namespace game
     //Fonctions Cube Conflict
     extern void drawmessages(int killstreak, string str_pseudovictime, int n_aptitudevictime, string str_pseudoacteur, int n_killstreakacteur, float killdistance);
     extern void updatespecials(gameent *d);
-    extern void drawcampaignmap(gameent *d, int w, int h);
+    extern void drawrpgminimap(gameent *d, int w, int h);
 
     extern int gamemode;
 
@@ -1144,6 +1144,17 @@ namespace game
     // solo
     struct monster;
     extern vector<monster *> monsters;
+
+    // minimap
+    extern float minimapalpha;
+    extern float calcradarscale();
+    extern void setradartex();
+    extern void drawradar(float x, float y, float s);
+    extern void drawminimap(gameent *d, float x, float y, float s);
+    extern void drawplayerblip(gameent *d, float x, float y, float s, float blipsize = 1);
+    extern void drawfriends(gameent *d, float x, float y, float s);
+    extern void setbliptex(int team, const char *type = "");
+    extern void drawteammate(gameent *d, float x, float y, float s, gameent *o, float scale, float blipsize = 1);
 
     extern void clearmonsters();
     extern void preloadmonsters();

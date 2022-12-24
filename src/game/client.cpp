@@ -103,7 +103,7 @@ namespace game
         gle::end();
     }
 
-    void drawteammate(gameent *d, float x, float y, float s, gameent *o, float scale, float blipsize = 1)
+    void drawteammate(gameent *d, float x, float y, float s, gameent *o, float scale, float blipsize)
     {
         vec dir = d->o;
         dir.sub(o->o).div(scale);
@@ -121,13 +121,13 @@ namespace game
         gle::attribf(bx - bs*v.y, by + bs*v.x); gle::attribf(0, 1);
     }
 
-    void setbliptex(int team, const char *type = "")
+    void setbliptex(int team, const char *type)
     {
         defformatstring(blipname, "media/interface/hud/blip%s%s.png", teamblipcolor[validteam(team) ? team : 0], type);
         settexture(blipname, 3);
     }
 
-    void drawplayerblip(gameent *d, float x, float y, float s, float blipsize = 1)
+    void drawplayerblip(gameent *d, float x, float y, float s, float blipsize)
     {
         if(d->state != CS_ALIVE && d->state != CS_DEAD) return;
         float scale = calcradarscale();
@@ -176,37 +176,6 @@ namespace game
             }
         }
         if(dead) gle::end();
-    }
-
-    void drawcampaignmap(gameent *d, int w, int h)
-    {
-        pushhudscale(h/1800.0f);
-        pushhudscale(2);
-        pophudmatrix();
-        resethudshader();
-
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        int s = 1800/4, x = 1800*w/h - s - s/10, y = s/10;
-
-        gle::colorf(1, 1, 1, minimapalpha);
-        if(minimapalpha >= 1) glDisable(GL_BLEND);
-        bindminimap();
-        drawminimap(d, x, y, s);
-        if(minimapalpha >= 1) glEnable(GL_BLEND);
-        gle::colorf(1, 1, 1);
-        float margin = 0.04f, roffset = s*margin, rsize = s + 2*roffset;
-        setradartex();
-        drawradar(x - roffset, y - roffset, rsize);
-        settexture("media/interface/hud/boussole.png", 3);
-        pushhudmatrix();
-        hudmatrix.translate(x - roffset + 0.5f*rsize, y - roffset + 0.5f*rsize, 0);
-        hudmatrix.rotate_around_z((camera1->yaw + 180)*-RAD);
-        flushhudmatrix();
-        drawradar(-0.5f*rsize, -0.5f*rsize, rsize);
-        pophudmatrix();
-        drawplayerblip(d, x, y, s, 1.5f);
-        pophudmatrix();
-        drawteammates(d, x, y, s);
     }
 
     #include "ctf.h"
