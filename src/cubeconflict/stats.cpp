@@ -150,7 +150,7 @@ void writesave() //we write the poorly encrypted value for all stat
 void givestarterkit() //Avant tout le joueur a les customisations de base et le niveau 1, même en cas de sauvegarde corrompue
 {
     stat[STAT_LEVEL]++;
-    cust[SMI_HAP] = cust[SMI_NOEL] = cust[CAPE_CUBE] = cust[TOM_MERDE] = cust[VOI_CORTEX] = rnd(99)+1;
+    cust[SMI_HAP] = cust[CAPE_CUBE] = cust[TOM_MERDE] = cust[VOI_CORTEX] = rnd(99)+1;
 }
 
 void loadsave() //we read the poorly encrypted value for all stat

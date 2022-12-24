@@ -11,7 +11,7 @@ namespace game
     static vector<int> teleports;
 
     static const int TOTMFREQ = 14;
-    static const int NUMMONSTERTYPES = 8;
+    static const int NUMMONSTERTYPES = 9;
 
     struct pnjtype      // see docs for how these values modify behaviour
     {
@@ -22,15 +22,16 @@ namespace game
     };
 
     static const pnjtype pnjtypes[NUMMONSTERTYPES] =
-    {   //weapon        sp. hea.  freq  lag  rate pain  trigdist. loy. size  weight  res. fri.   hellosnd.  painsnd.   angrysnd.  diesnd.    namefr            nameen              mdlldir             shielddir                      hatdir             capedir             boost1dir        boost2dir
-        { GUN_S_NUKE,    1, 5000, 2,    30,  5,   100,  100,      5,   12,   85,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Jean Onche",     "Jean Onche",       "smileys/hap",      "worldshield/or/100",          "hats/crown",      "capes/cape_elite", NULL,            NULL},
-        { GUN_CACFLEAU,  1, 2500, 1,    30,  5,    50,  100,      5,   12,   90,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Bjorn",          "Bjorn",            "npcs/bjorn",       "worldshield/bois/60",         NULL,              NULL,               NULL,            NULL},
-        { GUN_SPOCKGUN,  1, 2000, 2,     5,  2,   150,  100,      1,   10,   70,     1,   true,  S_ALIEN_H, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D, "le roi alien",   "the alien king",   "npcs/alien_king",  "worldshield/magnetique/100",  "hats/crown/big",  NULL,               NULL,            NULL},
-        { GUN_ARTIFICE,  1, 1500, 2,    75, 10,    50,  100,      5,   10,   60,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Spike",          "Spike",            "smileys/content",  NULL,                          NULL,              "boosts/steros",    "boosts/steros", "boosts/epo"},
-        { GUN_ARBALETE,  1, 2000, 2,     5,  2,    25,  100,      5,   10,   70,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Boing",          "Boing",            "smileys/fou",      NULL,                          "hats/ninja",      NULL,               NULL,            NULL},
-        { GUN_MOSSBERG,  1, 2000, 2,     5,  2,    25,  100,      5,   12,   80,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Sergent Harman", "Sergeant Hartman", "smileys/colere",   NULL,                          "hats/green",      NULL,               NULL,            NULL},
-        { GUN_RAIL,      1, 1500, 2,    15,  2,    50,  100,      5,   12,   80,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Switch",         "Switch",           "smileys/sournois", "worldshield/fer/100",         "hats/wizard",     NULL,               NULL,            NULL},
-        { GUN_GLOCK,     1,  750, 2,     5,  2,   150,  100,      1,   10,   70,     1,   false, S_ALIEN_H, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D, "le roi alien",   "the alien king",   "npcs/kevin",       "worldshield/bois/20",         NULL,              NULL,               NULL,            NULL},
+    {   //weapon        sp. hea.  freq  lag  rate pain  trigdist. loy. size  weight  res. fri.   hellosnd.  painsnd.   angrysnd.  diesnd.    namefr            nameen              mdlldir             shielddir              hatdir             capedir             boost1dir        boost2dir
+        { GUN_S_NUKE,    1, 5000, 0,    30,  5,   100,  100,      5,   12,   85,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Jean Onche",     "Jean Onche",       "smileys/hap",      "shields/gold/100",    "hats/crown",      "capes/cape_elite", NULL,            NULL},
+        { GUN_CACFLEAU,  1, 2500, 0,    30,  5,    50,  100,      5,   12,   90,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Bjorn",          "Bjorn",            "npcs/bjorn",       "shields/wood/60",     NULL,              NULL,               NULL,            NULL},
+        { GUN_SPOCKGUN,  1, 2000, 0,     5,  2,   150,  100,      1,   10,   70,     1,   true,  S_ALIEN_H, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D, "le roi alien",   "the alien king",   "npcs/alien_king",  "shields/magnet/100",  "hats/crown/big",  NULL,               NULL,            NULL},
+        { GUN_ARTIFICE,  1, 1500, 0,    75, 10,    50,  100,      5,   10,   60,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Spike",          "Spike",            "smileys/content",  NULL,                  NULL,              "boosts/steros",    "boosts/steros", "boosts/epo"},
+        { GUN_ARBALETE,  1, 2000, 0,     5,  2,    25,  100,      5,   10,   70,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Boing",          "Boing",            "smileys/fou",      NULL,                  "hats/ninja",      NULL,               NULL,            NULL},
+        { GUN_MOSSBERG,  1, 2000, 0,     5,  2,    25,  100,      5,   12,   80,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Sergent Harman", "Sergeant Hartman", "smileys/colere",   NULL,                  "hats/green",      NULL,               NULL,            NULL},
+        { GUN_RAIL,      1, 1500, 0,    15,  2,    50,  100,      5,   12,   80,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Switch",         "Switch",           "smileys/sournois", "shields/iron/100",    "hats/wizard",     NULL,               NULL,            NULL},
+        { GUN_SMAW,      1, 1250, 0,    15,  2,    50,  100,      5,   12,   80,     1,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Larry",          "Larry",            "smileys/cool",     NULL,                  "hats/soldier",    NULL,               NULL,            NULL},
+        { GUN_CAC349,    5,  500, 1,     5,  2,   150,  125,      1,   10,   40,     60,  false, S_NULL,    S_NULL,    S_NULL,    S_NULL,    "un Kévin",       "a Moron",          "npcs/kevin",       "shields/bois/20",     NULL,              NULL,               NULL,            NULL},
     };
 
     VAR(skill, 1, 3, 10);
@@ -322,12 +323,12 @@ namespace game
 
         void checkmonstersrespawns()
         {
-            if(totalmillis - monsterlastdeath > pnjtypes[this->type].respawntime)
+            if(totalmillis - monsterlastdeath > pnjtypes[mtype].respawntime*1000)
             {
                 targetyaw = spawnyaw;
                 o = spawnpos;
                 state = CS_ALIVE;
-                health = pnjtypes[this->type].health;
+                health = pnjtypes[mtype].health;
             }
         }
 
@@ -474,6 +475,7 @@ namespace game
 
     void updatemonsters(int curtime)
     {
+        if(!isconnected()) return;
         if(m_dmsp && spawnremain && lastmillis>nextmonster)
         {
             if(spawnremain--==monstertotal) { conoutf(CON_GAMEINFO, "\f2The invasion has begun!"); playsound(S_DRAPEAUPRIS); }
@@ -525,46 +527,87 @@ namespace game
         particle_textcopy(pos, s3, PART_TEXT, 1);
     }
 
+    static const int dirs[9] =
+    {
+        ANIM_LEFT,  ANIM_FORWARD,   ANIM_RIGHT,
+        ANIM_LEFT,  0,              ANIM_RIGHT,
+        ANIM_LEFT,  ANIM_BACKWARD,  ANIM_RIGHT
+    };
+
     void rendermonsters()
     {
         loopv(monsters)
         {
             monster &m = *monsters[i];
+
             if(m.state!=CS_DEAD || lastmillis-m.lastpain<10000)
             {
                 float yaw = m.yaw,
                       pitch = m.pitch;
+                float fade = 1;
                 vec o = m.feetpos();
 
-                float fade = 1;
-                if(m.state==CS_DEAD) fade -= clamp(float(lastmillis - (m.lastpain + 9000))/1000, 0.0f, 1.0f);
+                int anim = ANIM_IDLE|ANIM_LOOP; int basetime = 0;
 
                 modelattach a[10];
                 int ai = 0;
 
-                int vanim = ANIM_VWEP_IDLE|ANIM_LOOP, vtime = 0;
-                if(m.lastaction && m.lastattack >= 0 && attacks[m.lastattack].gun==m.gunselect && lastmillis < m.lastaction+250)
+                if(m.state==CS_DEAD)
                 {
-                    vanim = attacks[m.lastattack].vwepanim;
-                    vtime = m.lastaction;
+                    fade -= clamp(float(lastmillis - (m.lastpain + 9000))/1000, 0.0f, 1.0f);
+                    anim = ANIM_DYING;
+                    basetime = m.lastpain;
+                    if(lastmillis-basetime>1000) anim = ANIM_DEAD|ANIM_LOOP;
+                }
+                else
+                {
+                    //////////////////////////////////// Npc's anims ////////////////////////////////////////////////////////////////////////
+                    if(!pnjtypes[m.mtype].friendly)
+                    {
+                        if(m.inwater && m.physstate<=PHYS_FALL)
+                        {
+                            anim |= (((m.move || m.strafe) || m.vel.z + m.falling.z>0 ? ANIM_SWIM : ANIM_SINK)|ANIM_LOOP)<<ANIM_SECONDARY;
+                            if(m.move && randomevent(0.16f*nbfps)) particle_splash(PART_EAU, 2, 120, m.o, 0x222222, 8.0f+rnd(5), 150, 15);
+                        }
+                        else
+                        {
+                            int dir = dirs[(m.move+1)*3 + (m.strafe+1)];
+                            if(m.timeinair>50) anim |= ((ANIM_JUMP) | ANIM_END) << ANIM_SECONDARY;
+                            else if(dir) anim |= (dir | ANIM_LOOP) << ANIM_SECONDARY;
+
+                            if(m.move && m.physstate==PHYS_FLOOR && randomevent(0.16f*nbfps)) particle_splash(randomambience && (lookupmaterial(m.feetpos())==MAT_WATER || map_atmo==4 || map_atmo==8) ? PART_EAU : PART_SMOKE, 3, 120, m.feetpos(), randomambience && map_atmo==4 ? 0x131313 : 0x333022, 6.0f+rnd(5), 150, 15);
+                        }
+                    }
+
+                    if((anim&ANIM_INDEX)==ANIM_IDLE && (anim>>ANIM_SECONDARY)&ANIM_INDEX) anim >>= ANIM_SECONDARY;
+                    if(!((anim>>ANIM_SECONDARY)&ANIM_INDEX)) anim |= (ANIM_IDLE|ANIM_LOOP)<<ANIM_SECONDARY;
+
+                    //////////////////////////////////// Weapon rendering ////////////////////////////////////////////////////////////////////////
+                    int vanim = ANIM_VWEP_IDLE|ANIM_LOOP, vtime = 0;
+                    if(m.lastaction && m.lastattack >= 0 && attacks[m.lastattack].gun==m.gunselect && lastmillis < m.lastaction+250)
+                    {
+                        vanim = attacks[m.lastattack].vwepanim;
+                        vtime = m.lastaction;
+                    }
+
+                    a[ai++] = modelattach("tag_weapon", guns[m.gunselect].vwep, vanim, vtime);
+
+                    if(guns[m.gunselect].vwep)
+                    {
+                        m.muzzle = vec(-1, -1, -1);
+                        a[ai++] = modelattach("tag_muzzle", &m.muzzle);
+                        a[ai++] = modelattach("tag_balles", &m.balles);
+                    }
+
+                    //////////////////////////////////// Other mdls rendering ////////////////////////////////////////////////////////////////////////
+                    if(pnjtypes[m.mtype].shieldname) a[ai++] = modelattach("tag_shield", pnjtypes[m.mtype].shieldname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+                    if(pnjtypes[m.mtype].hatname) a[ai++] = modelattach("tag_hat", pnjtypes[m.mtype].hatname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+                    if(pnjtypes[m.mtype].capename) a[ai++] = modelattach("tag_cape", pnjtypes[m.mtype].capename, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+                    if(pnjtypes[m.mtype].boost1modelname) a[ai++] = modelattach("tag_boost1", pnjtypes[m.mtype].boost1modelname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+                    if(pnjtypes[m.mtype].boost2modelname) a[ai++] = modelattach("tag_boost2", pnjtypes[m.mtype].boost2modelname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
                 }
 
-                a[ai++] = modelattach("tag_weapon", guns[m.gunselect].vwep, vanim, vtime);
-
-                if(guns[m.gunselect].vwep)
-                {
-                    m.muzzle = vec(-1, -1, -1);
-                    a[ai++] = modelattach("tag_muzzle", &m.muzzle);
-                    a[ai++] = modelattach("tag_balles", &m.balles);
-                }
-
-                if(pnjtypes[m.mtype].shieldname) a[ai++] = modelattach("tag_shield", pnjtypes[m.mtype].shieldname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-                if(pnjtypes[m.mtype].hatname) a[ai++] = modelattach("tag_hat", pnjtypes[m.mtype].hatname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-                if(pnjtypes[m.mtype].capename) a[ai++] = modelattach("tag_cape", pnjtypes[m.mtype].capename, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-                if(pnjtypes[m.mtype].boost1modelname) a[ai++] = modelattach("tag_boost1", pnjtypes[m.mtype].boost1modelname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-                if(pnjtypes[m.mtype].boost2modelname) a[ai++] = modelattach("tag_boost2", pnjtypes[m.mtype].boost2modelname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-
-                rendermodel(pnjtypes[m.mtype].mdlname, ANIM_SHOOT, o, yaw, pitch, 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY, &m, a[0].tag ? a : NULL, 0, 0, fade);
+                rendermodel(pnjtypes[m.mtype].mdlname, anim, o, yaw, pitch, 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY, &m, a[0].tag ? a : NULL, basetime, 0, fade);
                 if(dbgpnj) debugpnj(&m);
             }
         }

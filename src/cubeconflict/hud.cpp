@@ -7,9 +7,9 @@
 int message[NUMMESSAGE];
 
 string custommsg, helpmsg;
-ICOMMAND(popupmsg, "si", (char *msg, int *duration),
+ICOMMAND(popupmsg, "ssi", (char *msg_fr, char *msg_en, int *duration),
 {
-    formatstring(custommsg, "%s", msg);
+    formatstring(custommsg, "%s", GAME_LANG ? msg_en : msg_fr);
     message[MSG_CUSTOM] = totalmillis + *duration;
     playsound(S_NOTIFICATION);
 });

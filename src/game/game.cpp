@@ -16,14 +16,6 @@ bool randomevent(int probability)
     else return rnd(probability)==0;
 }
 
-VAR(examresult, 0, 0, 4);
-ICOMMAND(calcexamresult, "iiii", (int *a, int *b, int *c, int *d),
-    if(max(max(*a, *b), max(*c, *d)) == *b) examresult = 2;
-    else if(max(max(*a, *b), max(*c, *d)) == *d) examresult = 4;
-    else if(max(max(*a, *b), max(*c, *d)) == *a) examresult = 1;
-    else if(max(max(*a, *b), max(*c, *d)) == *c) examresult = 3;
-);
-
 VARP(map_sel, 0, 1, 99);
 
 namespace game

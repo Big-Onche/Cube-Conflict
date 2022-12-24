@@ -6,7 +6,7 @@ enum {SMI_HAP, SMI_NOEL, SMI_MALADE, SMI_CONTENT, SMI_COLERE, SMI_SOURNOIS, SMI_
         VOI_CORTEX, VOI_VALOCHE, VOI_VIEILLE, VOI_HENDEK, VOI_MILI1, VOI_MILI2, VOI_MOUNIR, VOI_DELAVIER, VOI_PRAUD, VOI_MALLEVILLE, VOI_11, VOI_12, VOI_13, VOI_14, VOI_15, VOI_16, VOI_17, VOI_18, VOI_19, VOI_20, NUMCUST};
 extern int cust[NUMCUST];
 
-static const struct smileysinfo { int smileyprice; } customsmileys[10] = { {0}, {0}, {100}, {100}, {250}, {250}, {250}, {500}, {500}, {1500}, };
+static const struct smileysinfo { int smileyprice; } customsmileys[10] = { {0}, {50}, {100}, {100}, {250}, {250}, {250}, {500}, {500}, {1500}, };
 
 static const struct capesinfo { const char *capedir; int capeprice; } customscapes[14] =
 {

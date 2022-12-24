@@ -695,6 +695,7 @@ namespace entities
             case JUMPPAD:
                 renderentarrow(e, vec((int)(char)e.attr3*10.0f, (int)(char)e.attr2*10.0f, e.attr1*12.5f).normalize(), 6);
                 break;
+            case MONSTER:
             case CAMERA_POS:
             case FLAG:
             case TELEDEST:

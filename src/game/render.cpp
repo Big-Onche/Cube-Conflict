@@ -296,6 +296,12 @@ namespace game
     }
 
     string costumemdlname, curmapname;
+    static const int dirs[9] =
+    {
+        ANIM_LEFT,  ANIM_FORWARD,   ANIM_RIGHT,
+        ANIM_LEFT,  0,              ANIM_RIGHT,
+        ANIM_LEFT,  ANIM_BACKWARD,  ANIM_RIGHT
+    };
 
     void renderplayer(gameent *d, const playermodelinfo &mdl, int color, int team, float fade, int flags = 0, bool mainpass = true)
     {
@@ -394,12 +400,6 @@ namespace game
             }
             else
             {
-                static const int dirs[9] =
-                {
-                    ANIM_LEFT,  ANIM_FORWARD,   ANIM_RIGHT,
-                    ANIM_LEFT,  0,              ANIM_RIGHT,
-                    ANIM_LEFT,  ANIM_BACKWARD,  ANIM_RIGHT
-                };
                 int dir = dirs[(d->move+1)*3 + (d->strafe+1)];
                 if(d->timeinair>50) anim |= ((ANIM_JUMP) | ANIM_END) << ANIM_SECONDARY;
                 else if(dir && game::allowmove(d)) anim |= (dir | ANIM_LOOP) << ANIM_SECONDARY;
