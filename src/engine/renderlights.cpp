@@ -1915,7 +1915,7 @@ VARF(smcullside, 0, 1, 1, cleanupshadowatlas());
 VARF(smcache, 0, 1, 2, cleanupshadowatlas());
 VARFP(smfilter, 0, 2, 3, { cleardeferredlightshaders(); cleanupshadowatlas(); cleanupvolumetric(); });
 VARFP(smgather, 0, 0, 1, { cleardeferredlightshaders(); cleanupshadowatlas(); cleanupvolumetric(); });
-VAR(smnoshadow, 0, 0, 1);
+VARP(smnoshadow, 0, 0, 1);
 VAR(smdynshadow, 0, 1, 1);
 VARF(smalpha, 0, 2, 2, { cleardeferredlightshaders(); cleanupshadowatlas(); });
 VARFP(smalphaprec, 0, 0, 2, cleanupshadowatlas());
@@ -2059,7 +2059,7 @@ static shadowmapinfo *addshadowmap(ushort x, ushort y, int size, int &idx, int l
 #define CSM_MAXSPLITS 8
 
 VARF(csmmaxsize, 256, 1024, 2048, clearshadowcache());
-VARF(csmsplits, 1, 3, CSM_MAXSPLITS, { cleardeferredlightshaders(); clearshadowcache(); });
+VARFP(csmsplits, 1, 3, CSM_MAXSPLITS, { cleardeferredlightshaders(); clearshadowcache(); });
 FVAR(csmsplitweight, 0.20f, 0.75f, 0.95f);
 VARF(csmshadowmap, 0, 1, 1, { cleardeferredlightshaders(); clearshadowcache(); });
 
@@ -2103,8 +2103,8 @@ void cascadedshadowmap::setup()
     gencullplanes();
 }
 
-VAR(csmnearplane, 1, 8, 16);
-VAR(csmfarplane, 64, 1024, 16384);
+VARP(csmnearplane, 1, 8, 16);
+VARP(csmfarplane, 64, 1024, 16384);
 FVAR(csmpradiustweak, 1e-3f, 1, 1e3f);
 FVAR(csmdepthrange, 0, 1024, 1e6f);
 FVAR(csmdepthmargin, 0, 0.1f, 1e3f);
