@@ -149,15 +149,9 @@ void disconnect(bool async, bool cleanup, bool volontaire)
 {
     if(curpeer)
     {
-        if(volontaire)
+        if(!discmillis || volontaire)
         {
-            enet_peer_disconnect(curpeer, DISC_NORMAL);
-            enet_host_flush(clienthost);
-            discmillis = totalmillis;
-        }
-        else if(!discmillis)
-        {
-            enet_peer_disconnect(curpeer, DISC_NONE);
+            enet_peer_disconnect(curpeer, volontaire ? DISC_NORMAL : DISC_NONE);
             enet_host_flush(clienthost);
             discmillis = totalmillis;
         }
@@ -254,7 +248,7 @@ void gets2c()           // get updates from the server
     switch(event.type)
     {
         case ENET_EVENT_TYPE_CONNECT:
-            disconnect(false, false);
+            disconnect(false, false, true);
             localdisconnect(false);
             curpeer = connpeer;
             connpeer = NULL;
