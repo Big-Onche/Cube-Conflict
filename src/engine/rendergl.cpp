@@ -2051,6 +2051,7 @@ void clearminimap()
 }
 
 VARR(minimapheight, 0, 0, 2<<16);
+VARR(minimapzoom, 1, 1, 4);
 CVARR(minimapcolour, 0);
 VARR(minimapclip, 0, 0, 1);
 VARFP(minimapsize, 7, 10, 10, { if(minimaptex) drawminimap(); });
@@ -2120,7 +2121,7 @@ void drawminimap()
 
     minimapradius = vec(bbmax).sub(vec(bbmin)).mul(0.5f);
     minimapcenter = vec(bbmin).add(minimapradius);
-    minimapradius.x = minimapradius.y = max(minimapradius.x, minimapradius.y);
+    minimapradius.x = minimapradius.y = max(minimapradius.x/minimapzoom, minimapradius.y/minimapzoom);
     minimapscale = vec((0.5f - 1.0f/size)/minimapradius.x, (0.5f - 1.0f/size)/minimapradius.y, 1.0f);
 
     physent *oldcamera = camera1;
