@@ -94,7 +94,7 @@ namespace ai
         {
             float x = fmod(fabs((dist > 0 ? asin((q.z-o.z)/dist) / RAD : 0) - pitch), 360);
             float y = fmod(fabs(-atan2(q.x-o.x, q.y-o.y) / RAD - yaw), 360);
-            return (min(x, 360-x) <= fovx && min(y, 360-y) <= fovy) ? raycubelos(o, q, v) : 0;
+            if(min(x, 360-x) <= fovx && min(y, 360-y) <= fovy) return raycubelos(o, q, v);
         }
         return false;
     }
@@ -723,7 +723,7 @@ namespace ai
             d->ai->reset();
             return;
         }
-        if(d==player1 && (m_sp || m_tutorial)) execute("reset_needed_triggers");
+        if(d==player1 && (m_tutorial)) execute("reset_needed_triggers");
     }
 
     void itemspawned(int ent)
@@ -1068,12 +1068,12 @@ namespace ai
     void fixfullrange(float &yaw, float &pitch, float roll = 0.f)
     {
         if(pitch > 89.9f) pitch = 89.9f;
-        if(pitch < -89.9f) pitch = -89.9f;
+        else if(pitch < -89.9f) pitch = -89.9f;
         if(roll > 89.9f) roll = 89.9f;
-        if(roll < -89.9f) roll = -89.9f;
+        else if(roll < -89.9f) roll = -89.9f;
 
-        while(yaw < 0.0f) yaw += 360.0f;
-        while(yaw >= 360.0f) yaw -= 360.0f;
+        if(yaw < 0.0f) yaw = 360.0f - fmodf(-yaw, 360.0f);
+        else if(yaw >= 360.0f) yaw = fmodf(yaw, 360.0f);
     }
 
     void getyawpitch(const vec &from, const vec &pos, float &yaw, float &pitch)
@@ -1273,7 +1273,6 @@ namespace ai
             if (yaw < 0.0f) yaw += 360.0f;
             if (yaw >= 360.0f) yaw -= 360.0f;
             int r = clamp((int)(yaw + 22.5f) / 45, 0, 7);
-
             d->move = aimdirs[r][0];
             d->strafe = aimdirs[r][1];
         }

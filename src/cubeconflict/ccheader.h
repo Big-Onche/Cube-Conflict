@@ -60,3 +60,6 @@ extern int zoomfov, zoom, crosshairsize, weapposside, weapposup, forcecampos;
 extern float champifov, pourcents;
 
 extern int nbfps;
+
+//rpg
+extern void npcdrop(const vec *o, int type);

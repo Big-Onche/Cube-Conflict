@@ -309,7 +309,7 @@ namespace game
 
     void updateworld()        // main game update loop
     {
-        loopi(250/nbfps)
+        loopi(nbfps > 250 ? 1 : 250/nbfps)
         {
             if(zoom)
             {

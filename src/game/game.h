@@ -299,7 +299,7 @@ enum
     S_DRAPEAUTOMBE, S_DRAPEAUSCORE, S_DRAPEAURESET, S_TERMINAL, S_TERMINAL_HACKED,
     S_TERMINAL_LOST, S_TERMINAL_HACKED_E, S_TERMINAL_LOST_E, S_TERMINAL_ALARM, S_TERMINAL_ENTER,
     S_KS_X3, S_KS_X5, S_KS_X7, S_KS_X3_FAR, S_KS_X5_FAR,
-    S_KS_X7_FAR, S_NOTIFICATION,
+    S_KS_X7_FAR, S_NOTIFICATION, S_INVASION,
 
     // ui
     S_CLICK, S_SCROLLUP, S_SCROLLDOWN, S_CAISSEENREGISTREUSE, S_ERROR,
@@ -806,7 +806,8 @@ struct gamestate
             if(m_dmsp)
             {
                 armour = 750;
-                ammo[GUN_GLOCK] = 40;
+                ammo[GUN_GLOCK] = aptitude==2 ? 100 : 50;
+                gunselect = GUN_GLOCK;
             }
         }
         else
@@ -820,6 +821,8 @@ struct gamestate
         }
     }
 
+    bool soldierfullarmour(int armour, int armourtype) { return armour>0 && (armourtype==A_ASSIST || armourtype==A_MAGNET || armourtype==A_YELLOW); }
+
     // just subtract damage here, can set death, etc. later in code calling this
     int dodamage(int damage, int aptitude, int aptisort)
     {
@@ -832,7 +835,7 @@ struct gamestate
             case A_MAGNET: absorbfactor=100; break;
             case A_ASSIST: absorbfactor=85; break;
         }
-        if(aptitude==0 && armour>0) armourtype==A_ASSIST || armourtype==A_MAGNET ? absorbfactor==100 : absorbfactor+=25;
+        if(aptitude==0 && armour>0) soldierfullarmour(armour, armourtype) ? absorbfactor==100 : absorbfactor+=25;
 
         int ad = damage*(absorbfactor)/100.f; // let armour absorb when possible
 
@@ -842,7 +845,7 @@ struct gamestate
             if(aptitude==8 && aptisort>0 && armour>0) armour = min(armour+ad, armourtype==A_BLUE ? 750 : armourtype==A_GREEN ? 1250 : armourtype==A_YELLOW ? 2000 : armourtype==A_MAGNET ? 1500 : 3000);
             else armour -= ad;
         }
-        damage -= aptitude==0 ? ad*1.25f : ad;
+        damage -= aptitude==0 ? ad*(soldierfullarmour(armour, armourtype) ? 1 : 1.25f) : ad;
         health -= damage;
         return damage;
     }
@@ -1164,7 +1167,7 @@ namespace game
     extern void suicidemonster(monster *m);
     extern void hitmonster(int damage, monster *m, gameent *at, const vec &vel, int atk);
     extern void monsterkilled();
-    extern void endsp(bool allkilled);
+    extern void endsp();
     extern void spsummary(int accuracy);
 
     // weapon

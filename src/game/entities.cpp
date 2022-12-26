@@ -425,7 +425,7 @@ namespace entities
             if(m_noitems && ((e->type!=I_SUPERARME) || (e->type>I_BOOSTPV && e->type<I_BOOSTGRAVITE))) return;
             if(e->type>=I_RAIL && e->type<=I_MANA && (!m_noammo || e->type<I_RAIL || e->type>I_GLOCK))
             {
-                e->setspawned(force || m_sp || !server::delayspawn(e->type));
+                e->setspawned(force || m_tutorial || !server::delayspawn(e->type));
                 e->clearnopickup();
             }
         }
@@ -621,7 +621,7 @@ namespace entities
                     e.lasttrigger = lastmillis;
                     setuptriggerflags(e);
                     if(checktriggertype(e.attr2, TRIG_RUMBLE)) playsound(S_NULL, &e.o);
-                    if(checktriggertype(e.attr2, TRIG_ENDSP)) endsp(false);
+                    if(checktriggertype(e.attr2, TRIG_ENDSP)) endsp();
                     if(e.attr1) doleveltrigger(e.attr1, 1);
                     break;
                 case TRIGGERED:
@@ -644,7 +644,7 @@ namespace entities
                     e.lasttrigger = lastmillis;
                     setuptriggerflags(e);
                     if(checktriggertype(e.attr2, TRIG_RUMBLE)) playsound(S_NULL, &e.o);
-                    if(checktriggertype(e.attr2, TRIG_ENDSP)) endsp(false);
+                    if(checktriggertype(e.attr2, TRIG_ENDSP)) endsp();
                     if(e.attr1) doleveltrigger(e.attr1, 0);
                     break;
             }

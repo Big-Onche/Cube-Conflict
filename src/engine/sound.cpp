@@ -271,7 +271,7 @@ Mix_Music *loadmusic(const char *name)
     return music;
 }
 
-void startmusic(char *name, char *cmd)
+void startmusic(char *name, int loops = 0)
 {
     if(nosound) return;
     stopmusic();
@@ -284,8 +284,7 @@ void startmusic(char *name, char *cmd)
             DELETEA(musicfile);
             DELETEA(musicdonecmd);
             musicfile = newstring(file);
-            if(cmd[0]) musicdonecmd = newstring(cmd);
-            Mix_PlayMusic(music, cmd[0] ? 0 : -1);
+            Mix_PlayMusic(music, loops);
             Mix_VolumeMusic((musicvol*MIX_MAX_VOLUME)/255);
             intret(1);
         }
@@ -299,17 +298,19 @@ void startmusic(char *name, char *cmd)
 
 COMMANDN(music, startmusic, "ss");
 
-static struct songsinfo { string file, looped; } songs[] =
+static struct songsinfo { string file; int loops; } songs[] =
 {
-    {"musiques/menu.ogg", "0"},
-    {"musiques/pause.ogg", "0"},
-    {"musiques/premission.ogg", "0"},
+    {"musiques/menu.ogg", 0},
+    {"musiques/pause.ogg", 9},
+    {"musiques/premission.ogg", 0},
+    {"musiques/dmsp_1.ogg", 9},
+    {"musiques/dmsp_2.ogg", 9},
 };
 
 void musicmanager(int track) //CubeConflict, gestion des musiques
 {
     if(musicstream) return;
-    startmusic(songs[track].file, songs[track].looped);
+    startmusic(songs[track].file, songs[track].loops);
 }
 
 static Mix_Chunk *loadwav(const char *name)

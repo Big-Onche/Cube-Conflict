@@ -42,10 +42,15 @@ namespace game
         int decal_message = 0;
         bool need_message1 = true, need_message2 = true;
 
-        if(totalmillis - message[MSG_PREMISSION] <= 10000)
+        if(totalmillis - message[MSG_PREMISSION] <= (m_dmsp ? 5000 : 10000))
         {
             string msg;
-            if(totalmillis - message[MSG_PREMISSION] <= 6900)
+            if(m_dmsp)
+            {
+                formatstring(msg, GAME_LANG ? "\fcThe invasion has begun!" : "\fcL'invasion commence !");
+                rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/23;
+            }
+            else if(totalmillis - message[MSG_PREMISSION] <= 6900)
             {
                 formatstring(msg, GAME_LANG ? "\fcThe game is about to begin" : "\fcLa partie va commencer !");
                 rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/23;

@@ -877,7 +877,7 @@ namespace server
 
     int spawntime(int type)
     {
-        if(m_classicsp) return INT_MAX;
+        if(m_dmsp) return INT_MAX;
         int np = numclients(-1, true, false);
         np = m_tutorial ? 1 : np<3 ? 4 : (np>4 ? 2 : 3);         // spawn times are dependent on number of players
         int sec = 0;
@@ -898,6 +898,7 @@ namespace server
 
     bool delayspawn(int type)
     {
+        if(m_dmsp) return true;
         switch(type)
         {
             case I_BOUCLIERMAGNETIQUE:
@@ -2042,7 +2043,7 @@ namespace server
             server_entity se = { NOTUSED, 0, false };
             while(sents.length()<=i) sents.add(se);
             sents[i].type = ments[i].type;
-            if(m_mp(gamemode) && delayspawn(sents[i].type)) sents[i].spawntime = spawntime(sents[i].type);
+            if((m_mp(gamemode) || m_dmsp) && delayspawn(sents[i].type)) sents[i].spawntime = spawntime(sents[i].type);
             else sents[i].spawned = true;
         }
         notgotitems = false;
@@ -3743,7 +3744,7 @@ namespace server
                     sents[n].type = getint(p);
                     if(canspawnitem(sents[n].type))
                     {
-                        if(m_mp(gamemode) && delayspawn(sents[n].type)) sents[n].spawntime = spawntime(sents[n].type);
+                        if((m_mp(gamemode) || m_dmsp) && delayspawn(sents[n].type)) sents[n].spawntime = spawntime(sents[n].type);
                         else sents[n].spawned = true;
                     }
                 }

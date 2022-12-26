@@ -616,10 +616,10 @@ namespace game
         {
             if(f==player1)
             {
-                damaged(damage, f, at, true, atk);
+                damaged(m_dmsp ? damage/4 : damage, f, at, true, atk);
                 if(!m_mp(gamemode)) f->hitpush(damage, vel, at, atk, f);
             }
-            else if(at==player1) hitmonster(damage, (monster *)f, at, vel, atk);
+            else if(at==player1 || m_dmsp) hitmonster(damage, (monster *)f, at, vel, atk);
 
         }
 

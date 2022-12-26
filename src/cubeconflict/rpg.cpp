@@ -1,5 +1,4 @@
 // rpg for cube conflict
-
 #include "game.h"
 #include "customisation.h"
 
@@ -17,6 +16,7 @@ namespace game
         if(m_tutorial) cust[TOM_BASIQUE1] = cust[CAPE_JVC] = cust[SMI_NOEL] = rnd(99)+1;
     );
 
+    //////////////////////////////////// HUD minimap ////////////////////////////////////////////////////////////////////////
     void drawrpgminimap(gameent *d, int w, int h)
     {
         pushhudscale(h/1800.0f);
