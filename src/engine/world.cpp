@@ -1125,11 +1125,11 @@ void newentity(int type, int a1, int a2, int a3, int a4, int a5, bool fix = true
     commitchanges();
 }
 
-void npcdrop(const vec *o, int type)
+void createdrop(const vec *o, int type)
 {
     int idx;
     vec droppos = *o;
-    droppos.add(vec(-15+rnd(31), 0, 0));
+    droppos.add(vec(-18+rnd(36), 0, 0));
     extentity *t = newentity(true, droppos, type, 0, 0, 0, 0, 0, idx);
     if(!t) return;
     dropentity(*t, 1);

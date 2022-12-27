@@ -1,6 +1,7 @@
 // rpg for cube conflict
 #include "game.h"
 #include "customisation.h"
+#include "ccheader.h"
 
 namespace game
 {
@@ -15,6 +16,74 @@ namespace game
     ICOMMAND(getfreecust, "", (), //free customs from treasure
         if(m_tutorial) cust[TOM_BASIQUE1] = cust[CAPE_JVC] = cust[SMI_NOEL] = rnd(99)+1;
     );
+
+    //////////////////////////////////// Drops ////////////////////////////////////////////////////////////////////////
+    void utilitydrop(const vec *o, bool hightier = false) //always roll'd
+    {
+        loopi(hightier ? 2 : 1)
+        {
+            switch(rnd(6))
+            {
+                case 0: createdrop(o, hightier ? I_BOOSTPV : I_SANTE); break;
+                case 1: createdrop(o, I_MANA); break;
+                case 2: createdrop(o, hightier ? I_BOUCLIERFER : I_BOUCLIERBOIS);
+            }
+        }
+    }
+
+    void npcdrop(const vec *o, int type)
+    {
+        loopi(type==0 ? 1 : type) utilitydrop(o, type>D_RARE ? true : false);
+
+        switch(type)
+        {
+            case D_COMMON:
+                switch(rnd(4))
+                {
+                    case 0: createdrop(o, I_GLOCK); break;
+                    case 1: createdrop(o, I_RAIL+rnd(17)); break;
+                }
+                break;
+
+            case D_UNCOMMON:
+                switch(rnd(6))
+                {
+                    case 0: createdrop(o, I_BOUCLIERFER); break;
+                    case 1: loopi(2) createdrop(o, I_RAIL+rnd(17)); break;
+                    case 2: createdrop(o, I_BOOSTPV); break;
+                }
+                break;
+
+            case D_RARE:
+                switch(rnd(6))
+                {
+                    case 0: createdrop(o, I_BOUCLIERMAGNETIQUE); break;
+                    case 1: loopi(2) createdrop(o, I_RAIL+rnd(17)); break;
+                    case 2: createdrop(o, I_BOOSTPV); break;
+                }
+                break;
+
+            case D_LEGENDARY:
+                switch(rnd(6))
+                {
+                    case 0: createdrop(o, I_BOUCLIEROR); break;
+                    case 1: createdrop(o, I_BOOSTVITESSE); break;
+                    case 2: createdrop(o, I_BOOSTPRECISION); break;
+                    case 3: loopi(3) createdrop(o, I_RAIL+rnd(17)); break;
+                }
+                break;
+
+            case D_GODLY:
+                switch(rnd(6))
+                {
+                    case 0: createdrop(o, I_ARMUREASSISTEE); break;
+                    case 1: createdrop(o, I_SUPERARME); break;
+                    case 2: createdrop(o, I_BOOSTDEGATS); break;
+                    case 3: loopi(4) createdrop(o, I_RAIL+rnd(17)); break;
+                }
+                break;
+        }
+    }
 
     //////////////////////////////////// HUD minimap ////////////////////////////////////////////////////////////////////////
     void drawrpgminimap(gameent *d, int w, int h)
@@ -44,7 +113,7 @@ namespace game
         drawradar(-0.5f*rsize, -0.5f*rsize, rsize);
         pophudmatrix();
         drawplayerblip(d, x, y, s, 1.5f);
-        drawfriends(d, x, y, s);
+        drawnpcs(d, x, y, s);
         pophudmatrix();
     }
 }

@@ -2,10 +2,15 @@
 
 extern bool randomevent(int probability);
 extern void addsleep(int *msec, char *cmd);
+extern void createdrop(const vec *o, int type);
+extern void trydisconnect(bool local);
 
 namespace game
 {
     extern void resetshroomsgfx();
+
+    enum {D_COMMON = 0, D_UNCOMMON, D_RARE, D_LEGENDARY, D_GODLY, NUMDROPS};
+    extern void npcdrop(const vec *o, int type);
 }
 
 namespace gfx
@@ -49,7 +54,7 @@ extern void genpseudo(int forcelang = 0);
 //HUD and MENUS
 extern bool suicided;
 extern string str_pseudotueur, str_armetueur, tempachname;
-extern int n_aptitudetueur, n_aptitudevictime;
+extern int n_aptitudetueur, n_aptitudevictime, gamesecs;
 
 enum {MSG_OWNKILLSTREAK = 0, MSG_YOUKILLED, MSG_OTHERKILLSTREAK,
         MSG_CTF_TEAMPOINT, MSG_CTF_ENNEMYPOINT, MSG_CTF_TEAMFLAGRECO, MSG_CTF_ENNEMYFLAGRECO, MSG_CTF_TEAMSTOLE, MSG_CTF_ENNEMYSTOLE,
@@ -60,6 +65,3 @@ extern int zoomfov, zoom, crosshairsize, weapposside, weapposup, forcecampos;
 extern float champifov, pourcents;
 
 extern int nbfps;
-
-//rpg
-extern void npcdrop(const vec *o, int type);

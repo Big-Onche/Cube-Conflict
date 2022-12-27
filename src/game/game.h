@@ -167,7 +167,7 @@ static struct gamemodeinfo
     int flags;
 } gamemodes[] =
 {
-    { "DMSP", "DMSP", M_DMSP | M_LOCAL },               // -3
+    { "Invasion", "Invasion", M_DMSP | M_LOCAL },               // -3
     { "Tutoriel", "Tutorial", M_TUTORIAL | M_LOCAL },   // -2
     { "SP", "SP", M_CLASSICSP | M_LOCAL },              // -1
     { "demo", "demo", M_DEMO | M_LOCAL },               // 0
@@ -299,7 +299,7 @@ enum
     S_DRAPEAUTOMBE, S_DRAPEAUSCORE, S_DRAPEAURESET, S_TERMINAL, S_TERMINAL_HACKED,
     S_TERMINAL_LOST, S_TERMINAL_HACKED_E, S_TERMINAL_LOST_E, S_TERMINAL_ALARM, S_TERMINAL_ENTER,
     S_KS_X3, S_KS_X5, S_KS_X7, S_KS_X3_FAR, S_KS_X5_FAR,
-    S_KS_X7_FAR, S_NOTIFICATION, S_INVASION,
+    S_KS_X7_FAR, S_NOTIFICATION, S_INVASION, S_ALIEN_INVASION,
 
     // ui
     S_CLICK, S_SCROLLUP, S_SCROLLDOWN, S_CAISSEENREGISTREUSE, S_ERROR,
@@ -1155,7 +1155,7 @@ namespace game
     extern void drawradar(float x, float y, float s);
     extern void drawminimap(gameent *d, float x, float y, float s);
     extern void drawplayerblip(gameent *d, float x, float y, float s, float blipsize = 1);
-    extern void drawfriends(gameent *d, float x, float y, float s);
+    extern void drawnpcs(gameent *d, float x, float y, float s);
     extern void setbliptex(int team, const char *type = "");
     extern void drawteammate(gameent *d, float x, float y, float s, gameent *o, float scale, float blipsize = 1);
 

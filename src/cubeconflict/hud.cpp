@@ -197,7 +197,7 @@ namespace game
             cmode->drawhud(d, w, h);
             pophudmatrix();
         }
-        else if(m_tutorial) drawrpgminimap(d, w, h);
+        else if(m_tutorial || m_dmsp) drawrpgminimap(d, w, h);
 
         zoomfov = (guns[player1->gunselect].maxzoomfov);
 
@@ -462,15 +462,15 @@ namespace game
         draw_text(infoscores, 0, +30);
         pophudmatrix();
 
-        if(m_timed && getclientmap() && (maplimit >= 0 || intermission))
+        if(((m_timed && getclientmap()) && (maplimit >= 0 || intermission)) || m_dmsp)
         {
             string infotimer, color;
             if(intermission) formatstring(infotimer, GAME_LANG ? "\fcEND" : "\fcFINI");
             else
             {
-                int secs = max(maplimit-lastmillis + 999, 0)/1000;
+                int secs = m_dmsp ? gamesecs : max(maplimit-lastmillis + 999, 0)/1000;
 
-                if(secs/60<1 && secs%60<30)
+                if(secs/60<1 && secs%60<30 && !m_dmsp)
                 {
                     colortimer += curtime;
                     if(colortimer>1000) colortimer = 0;

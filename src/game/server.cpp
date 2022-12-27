@@ -2304,7 +2304,7 @@ namespace server
         }
     }
 
-    void startintermission() { gamelimit = min(gamelimit, gamemillis); checkintermission(true); }
+    void startintermission() { if(m_timed) gamelimit = min(gamelimit, gamemillis); checkintermission(true); }
 
     void dodamage(clientinfo *target, clientinfo *actor, int damage, int atk, const vec &hitpush = vec(0, 0, 0))
     {

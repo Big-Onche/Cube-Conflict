@@ -3,6 +3,7 @@
 #include "ccheader.h"
 
 extern int physsteps;
+int gamesecs;
 
 VAR(pissoffnpc, 0, 0, 1);
 
@@ -10,43 +11,45 @@ namespace game
 {
     static vector<int> teleports;
 
-    static const int TOTMFREQ = 23;
-    static const int NUMMONSTERTYPES = 17;
+    static const int TOTMFREQ = 24;
+    static const int NUMMONSTERTYPES = 19;
 
     struct pnjtype      // see docs for how these values modify behaviour
     {
-        short gun, speed, health, freq, lag, rate, pain, triggerdist, loyalty, bscale, weight, respawntime, dropluck;
-        bool friendly;
+        short gun, speed, health, freq, lag, rate, pain, triggerdist, loyalty, bscale, weight, respawntime, dropvalue;
+        bool friendly, fly;
         short hellosound, painsound, angrysound, diesound;
         const char *namefr, *nameen, *mdlname, *shieldname, *hatname, *capename, *boost1modelname, *boost2modelname;
     };
 
     enum { NPC_JO = 0, NPC_BJO, NPC_ALIENK, NPC_SPIKE, NPC_BOING, NPC_HARTM, NPC_SWITCH, NPC_LARRY, NPC_KEVIN, //npcs for rpg
-         M_KEVIN, M_DYLAN, M_YALIEN, M_B_ALIENK, M_ARMOR, M_NINJA, M_B_GIANT, M_CAMPER, NUMMONSTERS};  // monsters for dmsp
+         M_KEVIN, M_DYLAN, M_YALIEN, M_B_ALIENK, M_ARMOR, M_NINJA, M_B_GIANT, M_CAMPER, M_ALIENS, M_UFO, NUMMONSTERS};  // monsters for dmsp
 
     static const pnjtype pnjtypes[NUMMONSTERTYPES] =
-    {   //weapon        sp. hea.  freq  lag  rate pain  trigdist. loy. size  weight  res. drop fri.   hellosnd.  painsnd.   angrysnd.  diesnd.    namefr            nameen              mdlldir              shielddir              hatdir             capedir             boost1dir        boost2dir
-        { GUN_S_NUKE,   10, 5000, 0,    30,  5,   100,  100,      5,   12,   85,     1,   0,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Jean Onche",     "Jean Onche",       "smileys/hap/jo",    "shields/gold/100",    "hats/crown",      "capes/cape_elite", NULL,            NULL},
-        { GUN_CACFLEAU, 15, 2500, 0,    30,  5,    50,  100,      5,   12,   90,     1,   0,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Bjorn",          "Bjorn",            "npcs/bjorn",        "shields/wood/60",     NULL,              NULL,               NULL,            NULL},
-        { GUN_SPOCKGUN, 10, 2000, 0,     5,  2,   150,  100,      1,   10,   70,     1,   0,   true,  S_ALIEN_H, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D, "le roi alien",   "the alien king",   "npcs/alien_king",   "shields/magnet/100",  "hats/crown/big",  NULL,               NULL,            NULL},
-        { GUN_ARTIFICE,  5, 1500, 0,    75, 10,    50,  100,      5,   10,   60,     1,   0,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Spike",          "Spike",            "smileys/content",   NULL,                  NULL,              "boosts/steros",    "boosts/steros", "boosts/epo"},
-        { GUN_ARBALETE, 20, 2000, 0,     5,  2,    25,  100,      5,    8,   70,     1,   0,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Boing",          "Boing",            "smileys/fou/b",     NULL,                  "hats/ninja",      NULL,               NULL,            NULL},
-        { GUN_MOSSBERG,  8, 2000, 0,     5,  2,    25,  100,      5,   12,   80,     1,   0,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Sergent Hartman", "Sergeant Hartman", "smileys/colere/sh", NULL,                  "hats/green",      NULL,               NULL,            NULL},
-        { GUN_RAIL,     10, 1500, 0,    15,  2,    50,  100,      5,   10,   80,     1,   0,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Switch",         "Switch",           "smileys/sournois",  "shields/iron/100",    "hats/wizard",     NULL,               NULL,            NULL},
-        { GUN_SMAW,      8, 1250, 0,    15,  2,    50,  100,      5,   10,   80,     1,   0,   true,  S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Larry",          "Larry",            "smileys/cool",      NULL,                  "hats/soldier",    NULL,               NULL,            NULL},
-        { GUN_CAC349,    5,  500, 0,     5,  2,   150,  125,      1,    6,   40,     60,  0,   false, S_NULL,    S_NULL,    S_NULL,    S_NULL,    "un Kévin",       "a Moron",          "npcs/kevin",        "shields/bois/20",     NULL,              NULL,               NULL,            NULL},
+    {   //weapon        sp. hea.  freq  lag  rate pain  trigdist. loy. size  weight  res. drop fri.   fly.  hellosnd.  painsnd.   angrysnd.  diesnd.    namefr             nameen              mdlldir              shielddir              hatdir             capedir             boost1dir        boost2dir
+        { GUN_S_NUKE,   10, 5000, 0,    30,  5,   100,  100,      5,   12,   85,     1,   0,   true,  false, S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Jean Onche",      "Jean Onche",       "smileys/hap/jo",    "shields/gold/100",    "hats/crown",      "capes/cape_elite", NULL,            NULL},
+        { GUN_CACFLEAU, 15, 2500, 0,    30,  5,    50,  100,      5,   12,   90,     1,   0,   true,  false, S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Bjorn",           "Bjorn",            "npcs/bjorn",        "shields/wood/60",     NULL,              NULL,               NULL,            NULL},
+        { GUN_SPOCKGUN, 10, 2000, 0,     5,  2,   150,  100,      1,   10,   70,     1,   0,   true,  false, S_ALIEN_H, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D, "le roi alien",    "the alien king",   "npcs/alien_king",   "shields/magnet/100",  "hats/crown/big",  NULL,               NULL,            NULL},
+        { GUN_ARTIFICE,  5, 1500, 0,    75, 10,    50,  100,      5,   10,   60,     1,   0,   true,  false, S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Spike",           "Spike",            "smileys/content",   NULL,                  NULL,              "boosts/steros",    "boosts/steros", "boosts/epo"},
+        { GUN_ARBALETE, 20, 2000, 0,     5,  2,    25,  100,      5,    8,   70,     1,   0,   true,  false, S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Boing",           "Boing",            "smileys/fou/b",     NULL,                  "hats/ninja",      NULL,               NULL,            NULL},
+        { GUN_MOSSBERG,  8, 2000, 0,     5,  2,    25,  100,      5,   12,   80,     1,   0,   true,  false, S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Sergent Hartman", "Sergeant Hartman", "smileys/colere/sh", NULL,                  "hats/green",      NULL,               NULL,            NULL},
+        { GUN_RAIL,     10, 1500, 0,    15,  2,    50,  100,      5,   10,   80,     1,   0,   true,  false, S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Switch",          "Switch",           "smileys/sournois",  "shields/iron/100",    "hats/wizard",     NULL,               NULL,            NULL},
+        { GUN_SMAW,      8, 1250, 0,    15,  2,    50,  100,      5,   10,   80,     1,   0,   true,  false, S_NULL,    S_NULL,    S_NULL,    S_NULL,    "Larry",           "Larry",            "smileys/cool",      NULL,                  "hats/soldier",    NULL,               NULL,            NULL},
+        { GUN_CAC349,    5,  500, 0,     5,  2,   150,  125,      1,    6,   40,     60,  0,   false, false, S_NULL,    S_NULL,    S_NULL,    S_NULL,    "un Kévin",        "a Moron",          "npcs/kevin",        "shields/bois/20",     NULL,              NULL,               NULL,            NULL},
         // DMSP
-        { GUN_CAC349,   10,  400, 9,    10,  5,   250,  300,      1,    6,   40,     60,  70,  false, S_NULL,    S_NULL,    S_NULL,    S_NULL,    "un Kévin",       "a moron",          "npcs/kevin",        "shields/bois/20",     NULL,              NULL,               NULL,            NULL},
-        { GUN_GLOCK,     8,  400, 9,    10,  5,   250,  300,      1,    6,   40,     60,  70,  false, S_NULL,    S_NULL,    S_NULL,    S_NULL,    "un Dylan",       "a fool",           "npcs/dylan",        "shields/bois/20",     NULL,              NULL,               NULL,            NULL},
-        { GUN_SPOCKGUN, 15,  800, 4,     5,  5,   100,  500,      5,    6,   40,     60,  90,  false, S_NULL, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D,    "un jeune alien", "a young alien",    "npcs/alien_king/y", NULL,                  NULL,              NULL,               NULL,            NULL},
-        { GUN_GRAP1,    20, 3000, 0,     0,  0,    25,  150,      5,   10,   70,     1,  300,  false, S_NULL, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D,    "le roi alien",   "the alien king",   "npcs/alien_king",   "shields/magnet/100",  "hats/crown/big",  NULL,               NULL,            NULL},
-        { GUN_MOSSBERG, 15, 1500, 0,     0,  0,    50,  150,      5,   10,  150,     1,  120,  false, S_NULL,   S_NULL, S_NULL, S_EXPL_PARMOR, "une armure hantée", "a haunted armor",  "smileys/armureassistee/red",  NULL,        "hats/reaper",     NULL,               NULL,            NULL},
-        { GUN_CACNINJA, 35, 1000, 0,     5,  2,    25,  150,      5,    8,   70,     1,  100,  false,  S_NULL,    S_NULL,    S_NULL,    S_NULL,   "un Ninja",       "a Ninja",          "smileys/fou/b",     NULL,                  "hats/ninja",      NULL,               NULL,            NULL},
-        { GUN_S_ROQUETTES, 10, 5000, 0, 50, 50,    50,  300,     10,   20,  750,     1,  500,  false,  S_NULL,    S_NULL,    S_NULL,    S_NULL,   "un Géant",       "a Giant",          "smileys/content/g", "shields/gold/100",    "hats/physicist",  NULL,               NULL,            NULL},
-        { GUN_SV98,     5, 600,   2,    30,  1,   300,  200,      1,   10,   85,     1,   90,  false,  S_NULL,    S_NULL,    S_NULL,    S_NULL,   "un campeur",     "a camper",         "smileys/bug",       NULL,                  "hats/camper",     NULL,               NULL,            NULL},
+        { GUN_CAC349,   10,  350, 9,    10,  5,     1,  300,      1,    6,   40,     60,  0,   false, false, S_NULL,    S_NULL,    S_NULL,    S_NULL,    "un Kévin",        "a moron",          "npcs/kevin",        "shields/bois/20",     NULL,              NULL,               NULL,            NULL},
+        { GUN_GLOCK,     8,  350, 9,    10,  5,     1,  300,      1,    6,   40,     60,  0,   false, false, S_NULL,    S_NULL,    S_NULL,    S_NULL,    "un Dylan",        "a fool",           "npcs/dylan",        "shields/bois/20",     NULL,              NULL,               NULL,            NULL},
+        { GUN_SPOCKGUN, 15,  550, 4,     5,  5,     1,  500,      5,    6,   40,     60,  1,   false, false, S_NULL, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D,    "un jeune alien",  "a young alien",    "npcs/alien_king/y", NULL,                  NULL,              NULL,               NULL,            NULL},
+        { GUN_GRAP1,    20, 3000, 0,     0,  0,     1,  150,      5,   10,   70,     90,  4,   false, false, S_NULL, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D,    "le roi alien",    "the alien king",   "npcs/alien_king",   "shields/magnet/100",  "hats/crown/big",  NULL,               NULL,            NULL},
+        { GUN_MOSSBERG, 15, 1500, 0,     0,  0,     1,  150,      5,   10,  150,     90,  3,   false, false, S_NULL,   S_NULL, S_NULL, S_EXPL_PARMOR,  "une armure hantée", "a haunted armor",  "smileys/armureassistee/red",  NULL,        "hats/reaper",     NULL,               NULL,            NULL},
+        { GUN_CACNINJA, 35, 1000, 0,     5,  2,     1,  150,      5,    8,   70,     90,  2,   false, false, S_NULL,    S_NULL,    S_NULL,    S_NULL,    "un Ninja",        "a Ninja",          "smileys/fou/b",     NULL,                  "hats/ninja",      "boosts/epo",       NULL,            NULL},
+        { GUN_S_ROQUETTES, 10, 5000, 0, 50, 50,     1,  300,     10,   20,  750,     60,  4,   false, false, S_NULL,    S_NULL,    S_NULL,    S_NULL,    "un Géant",        "a Giant",          "smileys/content/g", "shields/gold/100",    "hats/physicist",  NULL,               NULL,            NULL},
+        { GUN_SV98,      5,  600, 2,    30,  1,     1,  200,      1,   10,   85,     60,  2,   false, false, S_NULL,    S_NULL,    S_NULL,    S_NULL,    "un campeur",      "a camper",         "smileys/bug",       NULL,                  "hats/camper",     NULL,               NULL,            NULL},
+        { GUN_PULSE,    12, 1200, 1,     0,  0,     1,  500,      5,   10,   80,     60,  1,   false, false, S_NULL, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D,    "un soldat alien", "a alien soldier",  "npcs/alien_king",  "shields/magnet/40",    "hats/soldier",    NULL,               NULL,            NULL},
+        { GUN_SMAW,     12, 4000, 0,     0,  0,     1,  500,      5,   50, 3000,     60,  4,   false, true,  S_NULL, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D,    "une soucoupe volante", "an alien ship",  "mapmodel/vaisseaux/ufo",  NULL,         NULL,              NULL,               NULL,            NULL},
     };
 
-    VAR(skill, 1, 3, 10);
+    VAR(skill, 1, 10, 10);
     VAR(killsendsp, 0, 1, 1);
 
     bool monsterhurt;
@@ -195,6 +198,8 @@ namespace game
                     else targetpitch = 0;
             }
 
+            if(pnjtypes[mtype].fly && !rnd(25)) jumping = true;
+
             if(blocked)                                                            // special case: if we run into scenery
             {
                 blocked = false;
@@ -329,7 +334,7 @@ namespace game
                 }
 
                 if(physsteps > 0) stacked = NULL;
-                moveplayer(this, m_dmsp ? 1 : 10, true, curtime, 0, 0, 0, 0, false);        // use physics to move monster
+                moveplayer(this, m_dmsp ? 1 : 10, true, curtime, 0, pnjtypes[mtype].fly ? 999999 : 0, pnjtypes[mtype].fly ? APT_PHYSICIEN : 0, 999999, false);        // use physics to move monster
             }
         }
 
@@ -360,60 +365,6 @@ namespace game
                 o.addz(4);
                 state = CS_ALIVE;
                 health = pnjtypes[mtype].health;
-            }
-        }
-
-        void createdrop(const vec *o, monster *d)
-        {
-            int dropval = rnd(pnjtypes[mtype].dropluck);
-
-            loopi(dropval < 50 ? 1 : dropval < 100 ? 2 : 3)
-            {
-                switch(rnd(6))  //always roll'd
-                {
-                    case 0: case 1: npcdrop(&d->o, I_SANTE); break;
-                    case 2: npcdrop(&d->o, I_MANA); break;
-                    case 3: npcdrop(&d->o, I_BOUCLIERBOIS);
-                }
-            }
-
-            if(dropval<40)
-            {
-                switch(rnd(6))
-                {
-                    case 1: npcdrop(&d->o, I_GLOCK); break;
-                    case 2: npcdrop(&d->o, I_RAIL+rnd(17)); break;
-                    case 3: npcdrop(&d->o, I_BOUCLIERFER); break;
-                }
-            }
-            else if(dropval<70)
-            {
-                switch(rnd(6))
-                {
-                    case 0: npcdrop(&d->o, I_BOUCLIERMAGNETIQUE); break;
-                    case 1: loopi(2)npcdrop(&d->o, I_RAIL+rnd(17)); break;
-                    case 6: npcdrop(&d->o, I_BOOSTPV); break;
-                }
-            }
-            else if(dropval<90)
-            {
-                switch(rnd(6))
-                {
-                    case 0: npcdrop(&d->o, I_BOUCLIEROR); break;
-                    case 1: npcdrop(&d->o, I_BOOSTVITESSE); break;
-                    case 2: npcdrop(&d->o, I_BOOSTPRECISION); break;
-                    case 3: loopi(3)npcdrop(&d->o, I_RAIL+rnd(17)); break;
-                }
-            }
-            else
-            {
-                switch(rnd(6))
-                {
-                    case 1: npcdrop(&d->o, I_ARMUREASSISTEE); break;
-                    case 2: npcdrop(&d->o, I_SUPERARME); break;
-                    case 3: npcdrop(&d->o, I_BOOSTDEGATS); break;
-                    case 4: loopi(4)npcdrop(&d->o, I_RAIL+rnd(17)); break;
-                }
             }
         }
 
@@ -463,7 +414,7 @@ namespace game
                 monsterlastdeath = totalmillis;
                 defformatstring(id, "monster_dead_%d", tag);
                 if(identexists(id)) execute(id);
-                createdrop(&monsterhurtpos, this);
+                npcdrop(&monsterhurtpos, pnjtypes[mtype].dropvalue);
             }
             else
             {
@@ -494,7 +445,7 @@ namespace game
 
     vector<monster *> monsters;
 
-    int nextmonster, spawnremain, numkilled, monstertotal, mtimestart, remain, gamesecs;
+    int nextmonster, spawnremain, numkilled, monstertotal, mtimestart, remain;
 
     void spawnmonster(bool boss = false, int type = 0)     // spawn a random monster according to freq distribution in DMSP
     {
@@ -550,9 +501,14 @@ namespace game
 
     void endsp()
     {
+        loopv(monsters)
+        {
+            monsters[i]->lastpain = lastmillis;
+            monsters[i]->state = CS_DEAD;
+        }
         conoutf(CON_GAMEINFO, GAME_LANG ? "\f2You survived, well done!" : "\f2Tu as survécu, bravo !");
-        monstertotal = 0;
-        game::addmsg(N_FORCEINTERMISSION, "r");
+        intermission = true;
+        server::startintermission();
     }
     ICOMMAND(endsp, "", (), endsp());
 
@@ -572,24 +528,37 @@ namespace game
             if(spawnremain--==monstertotal) { message[MSG_PREMISSION]=lastmillis; playsound(S_INVASION); musicmanager(3+rnd(2));}
             nextmonster = lastmillis+1000;
             gamesecs++;
-            if(spawn) {spawnmonster(); spawn=false;}
+            if(spawn && !intermission)
+            {
+                gamesecs > 270 && gamesecs < 330 ? spawnmonster(true, M_YALIEN) : spawnmonster();
+                spawn = gamesecs > 450 ? true : false;
+            }
             else spawn = true;
 
             switch(gamesecs)
             {
-                case 60: loopi(3) spawnmonster(true, M_NINJA); break;
-                case 90: loopi(3) spawnmonster(true, M_ARMOR); break;
-                case 150: loopi(3) spawnmonster(true, M_B_ALIENK); break;
-                case 180: loopi(5) spawnmonster(true, M_NINJA); break;
+                case 60: case 180: loopi(gamesecs==180 ? 5 : 3) spawnmonster(true, M_NINJA); break;
+                case 90: case 240: loopi(gamesecs==240 ? 5 : 3) spawnmonster(true, M_ARMOR); break;
+                case 150: case 300:
+                    spawnmonster(true, M_UFO);
+                    loopi(5) spawnmonster(true, gamesecs== 300 ? M_B_ALIENK : M_ALIENS);
+                    if(gamesecs==300) playsound(S_ALIEN_INVASION);
+                    break;
+
                 case 210: loopi(3) spawnmonster(true, M_B_GIANT); break;
-                case 240: loopi(5) spawnmonster(true, M_ARMOR); break;
-                case 270: loopi(30) spawnmonster(true, M_YALIEN); break;
-                case 300: loopi(7) spawnmonster(true, M_B_ALIENK); break;
-                case 330: loopi(30) spawnmonster(true, M_YALIEN); break;
+
+                case 270: case 330:
+                    loopi(3) spawnmonster(true, M_UFO);
+                    loopi(15) spawnmonster(true, gamesecs==330 ? M_ALIENS : M_YALIEN);
+                    playsound(S_ALIEN_INVASION);
+                    break;
                 case 360: loopi(10) spawnmonster(true, M_CAMPER); break;
-                case 400: loopi(15) spawnmonster(true, 12+rnd(4)); break;
-                case 500: loopi(20) spawnmonster(true, 12+rnd(4)); break;
+                case 400: loopi(10) spawnmonster(true, 12+rnd(4)); break;
+                case 480: loopi(10) spawnmonster(true, 12+rnd(4)); break;
+                case 525: loopi(15) spawnmonster(true, 12+rnd(4)); break;
+                case 575: loopi(20) spawnmonster(true, 12+rnd(4)); break;
                 case 600: endsp(); break;
+                case 610: trydisconnect(true);
             }
         }
 
@@ -618,7 +587,7 @@ namespace game
         if(monsterwashurt) monsterhurt = false;
     }
 
-    void drawfriends(gameent *d, float x, float y, float s)
+    void drawnpcs(gameent *d, float x, float y, float s)
     {
         float scale = calcradarscale();
 
@@ -626,9 +595,9 @@ namespace game
         {
             monster *o = monsters[i];
 
-            if(pnjtypes[o->mtype].friendly)
+            if(m_dmsp ? o->state==CS_ALIVE : pnjtypes[o->mtype].friendly)
             {
-                setbliptex(1, "");
+                setbliptex(m_dmsp ? 2 : 1, "");
                 gle::defvertex(2);
                 gle::deftexcoord0();
                 gle::begin(GL_QUADS);

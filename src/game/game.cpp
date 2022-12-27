@@ -1150,7 +1150,7 @@ namespace game
     }
     ICOMMAND(suicide, "", (), suicide(player1));
 
-    bool needminimap() { return m_ctf || m_capture || m_tutorial; }
+    bool needminimap() { return m_ctf || m_capture || m_tutorial || m_dmsp; }
 
     float abovegameplayhud(int w, int h)
     {
