@@ -2280,7 +2280,7 @@ namespace server
 
     void checkintermission(bool force = false)
     {
-        if(gamemillis<=10000 && !startpremission)
+        if(gamemillis<=10000 && !startpremission && !m_dmsp && !m_tutorial)
         {
             game::premission = true;
             sendf(-1, 1, "ri2", N_PREMISSION, 1);
@@ -2304,7 +2304,7 @@ namespace server
         }
     }
 
-    void startintermission() { if(m_timed) gamelimit = min(gamelimit, gamemillis); checkintermission(true); }
+    void startintermission() { gamelimit = min(gamelimit, gamemillis); checkintermission(true); }
 
     void dodamage(clientinfo *target, clientinfo *actor, int damage, int atk, const vec &hitpush = vec(0, 0, 0))
     {

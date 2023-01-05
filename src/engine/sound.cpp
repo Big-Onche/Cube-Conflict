@@ -300,11 +300,14 @@ COMMANDN(music, startmusic, "ss");
 
 static struct songsinfo { string file; int loops; } songs[] =
 {
-    {"musiques/menu.ogg", 0},
-    {"musiques/pause.ogg", 9},
-    {"musiques/premission.ogg", 0},
-    {"musiques/dmsp_1.ogg", 9},
-    {"musiques/dmsp_2.ogg", 9},
+    {"songs/menu.ogg", 0},
+    {"songs/pause.ogg", 9},
+    {"songs/premission.ogg", 0},
+    {"songs/village.ogg", 5},
+    {"songs/factory.ogg", 5},
+    {"songs/moon.ogg", 5},
+    {"songs/castle.ogg", 5},
+    {"songs/volcano.ogg", 5},
 };
 
 void musicmanager(int track) //CubeConflict, gestion des musiques

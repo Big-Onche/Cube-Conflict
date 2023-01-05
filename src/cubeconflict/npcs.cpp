@@ -507,8 +507,6 @@ namespace game
             monsters[i]->state = CS_DEAD;
         }
         conoutf(CON_GAMEINFO, GAME_LANG ? "\f2You survived, well done!" : "\f2Tu as survécu, bravo !");
-        intermission = true;
-        server::startintermission();
     }
     ICOMMAND(endsp, "", (), endsp());
 
@@ -525,7 +523,7 @@ namespace game
         if(!isconnected()) return;
         if(m_dmsp && spawnremain && lastmillis>nextmonster)
         {
-            if(spawnremain--==monstertotal) { message[MSG_PREMISSION]=lastmillis; playsound(S_INVASION); musicmanager(3+rnd(2));}
+            if(spawnremain--==monstertotal) { message[MSG_PREMISSION]=lastmillis; playsound(S_INVASION); musicmanager(2+map_sel);}
             nextmonster = lastmillis+1000;
             gamesecs++;
             if(spawn && !intermission)
@@ -561,8 +559,6 @@ namespace game
                 case 610: trydisconnect(true);
             }
         }
-
-        //if(killsendsp && monstertotal && !spawnremain && numkilled==monstertotal) endsp(true);
 
         bool monsterwashurt = monsterhurt;
 
