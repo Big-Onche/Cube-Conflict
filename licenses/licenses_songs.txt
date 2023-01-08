@@ -1,0 +1,12 @@
+List of licenses applied to sound effects and songs | Liste des licences appliquées aux effets sonores et musiques
+
+The following files are protected by Envato Elements license, you CANNOT use them for your personal projects unless you buy the sounds.
+Les fichiers suivants sont protégés par licence Envato Elements vous ne POUVEZ PAS les utiliser pour vos projets personnels à moins d'acheter les sons.
+
+See "licenses_certificates" folder for every licences / Voir dossier "licenses_certificates" pour chaque licences.
+Files :	media/songs/launcher.ogg 	license_certificate_R3FY29ABTJ (indoor1.ogg).txt
+	media/sound/menu.ogg 		license_certificate_M6YEV3H785 (indoor2.ogg).txt
+	media/sound/premission.ogg 	license_certificate_9Q6WDAHN2Y (reactor.ogg).txt
+	media/sound/pause.ogg 		license_certificate_9WUQDBHCL5 (buzz.ogg).txt
+	media/sound/mapsound/birds.ogg 		license_certificate_XTMR3LZ4JN (birds.ogg).txt
+	media/sound/mapsound/rain.ogg 		license_certificate_BY38M9AHN4 (rain.ogg).txt
