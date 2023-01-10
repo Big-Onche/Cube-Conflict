@@ -177,21 +177,7 @@ namespace entities
         if(ents.inrange(tp) && ents[tp]->type == TELEPORT)
         {
             extentity &e = *ents[tp];
-            if(e.attr4 >= 0)
-            {
-                int snd = S_TELEPORT, flags = 0;
-                if(e.attr4 > 0) { snd = e.attr4; flags = SND_MAP; }
-                if(d == player1) playsound(snd, NULL, NULL, flags);
-                else
-                {
-                    playsound(snd, &e.o, NULL, flags);
-                    if(ents.inrange(td) && ents[td]->type == TELEDEST) playsound(snd, &ents[td]->o, NULL, flags);
-                }
-                gameent *h = followingplayer(player1);
-                playsound(snd, d==h ? NULL : &e.o, NULL, flags);
-                if(d!=h && ents.inrange(td) && ents[td]->type == TELEDEST) playsound(snd, &ents[td]->o, NULL, flags);
-
-            }
+            if(e.attr4 >= 0) playsound(S_TELEPORT, d==hudplayer() ? NULL : &e.o, 0, 0, 0 , 100, -1, 350);
         }
         if(local && d->clientnum >= 0)
         {
@@ -211,12 +197,7 @@ namespace entities
         if(ents.inrange(jp) && ents[jp]->type == JUMPPAD)
         {
             extentity &e = *ents[jp];
-            if(e.attr4 >= 0)
-            {
-                int snd = S_JUMPPAD, flags = 0;
-                if(e.attr4 > 0) { snd = e.attr4; flags = SND_MAP; }
-                playsound(snd, d == followingplayer(player1) ? NULL : &e.o, NULL, flags);
-            }
+            playsound(S_JUMPPAD, d==hudplayer() ? NULL : &e.o, 0, 0, 0 , 100, -1, 350);
         }
         if(local && d->clientnum >= 0)
         {
