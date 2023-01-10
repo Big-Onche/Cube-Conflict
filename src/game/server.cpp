@@ -140,7 +140,7 @@ namespace server
 
         bool waitexpired(int gamemillis)
         {
-            if(armour==0 && armourtype==GUN_ASSISTXPL && ammo[GUN_ASSISTXPL]) return true;
+            if(armourtype==A_ASSIST && armour==0 && gunselect==GUN_ASSISTXPL && ammo[GUN_ASSISTXPL]) return true;
             else return gamemillis - lastshot >= gunwait;
         }
 
