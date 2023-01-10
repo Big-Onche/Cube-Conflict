@@ -14,7 +14,7 @@ namespace game
     );
 
     ICOMMAND(getfreecust, "", (), //free customs from treasure
-        if(m_tutorial) cust[TOM_BASIQUE1] = cust[CAPE_JVC] = cust[SMI_NOEL] = rnd(99)+1;
+        if(m_tutorial) cust[TOM_BASIQUE1] = cust[CAPE_PAINT1] = cust[SMI_NOEL] = rnd(99)+1;
     );
 
     //////////////////////////////////// Drops ////////////////////////////////////////////////////////////////////////
