@@ -54,6 +54,8 @@ Files :	palette.png
 	media/model/mapmodel/tonneau
 	media/model/mapmodel/tonneau_vin
 	media/model/mapmodel/tresor
+	media/model/mapmodel/batiments/plage1
+	media/model/mapmodel/batiments/plage1
 
 cartoon shit by "ale_xey"
 Order number : 3539306
