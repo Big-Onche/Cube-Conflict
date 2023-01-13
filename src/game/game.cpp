@@ -624,7 +624,7 @@ namespace game
         {"owned", "ton incompétence.", "tué tout seul"},
         {"niqué", "ta débilité !", "niqué comme un con"},
         {"tué", "ton manque de chance.", "annihilé bêtement"},
-        {"butté", "avec la meilleure volonté du monde.", "exterminé sans ennemis"},
+        {"butté", "la meilleure volonté du monde.", "exterminé sans ennemis"},
         {"troué", "succès."},
         {"dézingué", "détermination."},
         {"annihilé", "une précision sans précédent."},
@@ -639,7 +639,7 @@ namespace game
 
     static const struct partEN { const char *partverb, *parttroll, *partsuicide; } partmessageEN[] =
     {
-        {"killed", "stupidity.", "suicided : Darwin Award"},
+        {"killed", "stupidity.", "suicided: Darwin Award"},
         {"slayed", "determination.", "committed suicide"},
         {"finished", "success!"},
         {"deleted", "excruciating pain."},
@@ -725,6 +725,7 @@ namespace game
             if(d==player1) //TU as été tué par un allié
             {
                 copystring(str_pseudotueur, aname); n_aptitudetueur = actor->aptitude;
+                copystring(str_armetueur, GAME_LANG ? guns[atk].armedescEN : guns[atk].armedescFR);
                 conoutf(contype, "\f6%s %s \fd(%s)", dname, GAME_LANG ? "got fragged by a teammate" : "as été tué par un allié", aname);
                 addstat(1, STAT_MORTS);
             }
