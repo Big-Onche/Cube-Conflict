@@ -20,3 +20,6 @@ Available here and soon on Steam https://store.steampowered.com/app/1454700/Cube
 - More maps!
 - Advanced tools for e-sport such as better server management, and better spectator experience.
 - Single-player campaign with a quest system in a semi-opened world.
+
+# License
+- "/licenses" folder for more information.

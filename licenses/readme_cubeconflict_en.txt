@@ -3,7 +3,7 @@ LICENSE
 
 Cube Conflict game, any release.
 
-Copyright (C) 2013-2022 Jean Onche
+Copyright (C) 2013-2023 Jean Onche
 
 This software is provided 'as-is', without any express or implied
 warranty. In no event will the authors be held liable for any damages
@@ -40,22 +40,15 @@ by this license. IF YOU WANT TO CREATE YOUR PROJECT, IT IS HIGHLY RECOMMENDED
 TO USE TESSERACT ALONE (http://tesseract.gg) AND NOT USE CUBE CONFLICT.
 This will prevent you from infringing licenses acquired expressly for Cube Conflict.
 
-- The design of the maps, gameplay and logos of Cube Conflict are under CC-BY-NC license.
-  This means that any use for profit of this game is strictly prohibited.
-  See "licenses_certificates/cc-by-nc.txt"
+Every licences are in "licenses" folder.
 
-- 3D model files have their own licenses
-  See "licenses_3Dmodels.txt"
+"licenses/libraries" are for every libraries used in the game.
+"licenses/licenses_3dmodels.txt" contains a database of each 3D asset used in the game and a ref to it's respective license.
+"licenses/licenses_images.txt" contains a database of each image/texture used in the game and a ref to it's respective license.
+"licenses/licenses_songs.txt" contains a database of each music used in the game and a ref to its respective license.
+"licenses/licenses_sounds.txt" contains a database of each sound effect used in the game and a ref to it's respective license.
 
-- Images, icons and font used have their own licenses
-  See "licenses_images.txt"
-
-- Sound effects have their own licenses
-  See "licenses_sounds.txt"
-
-In the absence of an explicit license, any content is considered 
-to be covered by the CC-BY-SA license and created for Cube Conflict.
-See "licenses_certificates/cc-by-sa.txt" or http://creativecommons.org/licenses/by-sa/4.0/
+"licenses/licenses_certificates" contains every license certificates for any content used in the game, refered in each database.
 
 
 DEPENDENCIES

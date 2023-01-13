@@ -3,7 +3,7 @@ LICENCE
 
 Cube Conflict, toutes versions confondues.
 
-Copyright (C) 2013-2022 Jean Onche.
+Copyright (C) 2013-2023 Jean Onche.
 
 Ce logiciel est fourni "tel quel", sans aucune garantie formelle ou implicite. 
 En aucun cas, les auteurs ne pourront être tenus responsables de tout dommage
@@ -40,22 +40,15 @@ par cette licence ! SI VOUS SOUHAITEZ CRÉER VOTRE PROPRE PROJET, IL EST VIVEMEN
 D'UTILISER TESSERACT COMME BASE (http://tesseract.gg) ET DE NE PAS UTILISER CUBE CONFLICT.
 Cela vous évitera d'enfreindre des licenses acquises expressément pour Cube Conflict.
 
-- La conception des maps, gameplay et logos de Cube Conflict sont sous liscence CC-BY-NC.
-  Cela signifie que toute utilisation à des fins lucratives de ce jeu en l'état est strictement interdite.
-  Voir "licenses_certificates/cc-by-nc.txt"
+Chaque licenses se trouve dans le dossier "licenses"
 
-- Les fichiers de modèles 3D ont chacun leur licence respective
-  Voir "licenses_3Dmodels.txt"
+"licenses/libraries" contient toutes les liscenses liées aux librairies utilisées pour le jeu..
+"licenses/licenses_3dmodels.txt" contient une base de donnée de tous les modèles 3D utilisés et une référence pour leurs licenses respectives.
+"licenses/licenses_images.txt" contient une base de donnée de tous les images/textures utilisées et une référence pour leurs licenses respectives.
+"licenses/licenses_songs.txt" contient une base de donnée de toutes les musiques utilisées et une référence pour leurs licenses respectives.
+"licenses/licenses_sounds.txt" contient une base de donnée de tous les effets sonores utilisés et une référence pour leurs licenses respectives.
 
-- Les fichiers d'images, icones et polices ont chacun leur licence respective
-  Voir "licenses_images.txt"
-
-- Les effets sonores ont chacun leur licence respective
-  Voir "licenses_sounds.txt"
-
-En absence d'une licence explicite, tout fichier est considéré comme couvert
-par la licence CC-BY-SA et créé specifiquement pour Cube Conflict.
-Voir "licenses_certificates/cc-by-sa.txt" ou http://creativecommons.org/licenses/by-sa/4.0/
+"licenses/licenses_certificates" contient tous les certificats de license pour l'entièreté des fichiers du jeu, référé dans chaque base de donnée.
 
 
 DEPENDANCES
