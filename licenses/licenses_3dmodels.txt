@@ -3,7 +3,7 @@ List of licenses applied to 3D models | Liste des licences appliquées aux modè
 The following files are protected by TurboSquid's license you CANNOT use them for your personal projects unless you buy the models.
 Les fichiers suivants sont protégés par licence TurboSquid vous ne POUVEZ PAS les utiliser pour vos projets personnels à moins d'acheter les modèles.
 
-See / Voir https://blog.turbosquid.com/turbosquid-3d-model-license
+See / Voir licenses_certificates/license (turbosquid).txt
 
 Medieval City Pack & Pirate Village Pack "denbru" 
 Order number : 3860549
@@ -74,6 +74,18 @@ Order number : (free)
 	media/model/tombes/cristal
 	media/model/objets/souche
 
+Low-poly cartoon bridge kit Poly Style model by "Tykryk"
+Order number : 5314842
+	media/model/mapmodel/constructions/pont
+
+customizable jeep car Low-poly 3D model by "Hard poly"
+Order number : 5314842
+	media/model/mapmodel/vehicules/jeep1
+	media/model/mapmodel/vehicules/jeep2
+	media/model/mapmodel/vehicules/jeep3
+	media/model/mapmodel/vehicules/jeep4
+	media/model/mapmodel/vehicules/jeep5
+	media/model/mapmodel/vehicules/jeep6
 
 -------------------------------------------------------------------------------------------------------
 The following files were not created by the developers of Cube Conflict.
@@ -91,7 +103,6 @@ Provided by Nobiax
 	media/model/mapmodel/rochers/pierre_fonce_esp
 	media/model/mapmodel/rochers/rocher1
 	media/model/mapmodel/rochers/rochet2
-	
 
 -------------------------------------------------------------------------------------------------------
 
@@ -120,9 +131,6 @@ Files :	media/model/boosts/epo
 	media/model/chapteaux/saint
 	media/model/chapteaux/tente
 	media/model/chapteaux/viking
-	media/model/douilles/cartouche
-	media/model/douilles/grosse
-	media/model/douilles/normale
 	media/model/drapeau/jaune
 	media/model/drapeau/rouge
 	media/model/hudgun/ak47
@@ -224,11 +232,17 @@ Files :	media/model/boosts/epo
 	media/model/projectiles/minimissile
 	media/model/projectiles/missile
 	media/model/projectiles/missilenuke
-	media/model/pixels/jaune
-	media/model/pixels/jauneglow
-	media/model/pixels/noir
-	media/model/pixels/rouge
-	media/model/pixels/rougeglow
+	media/model/bouncers/cartouche
+	media/model/bouncers/douille
+	media/model/bouncers/douille_big
+	media/model/bouncers/pierre_*
+	media/model/bouncers/pix_jaune
+	media/model/bouncers/pix_jaune_alt
+	media/model/bouncers/pix_noir
+	media/model/bouncers/pix_noir_alt
+	media/model/bouncers/pix_rouge
+	media/model/bouncers/pix_rouge_alt
+	media/model/bouncers/robot_*
 	media/model/objets/armureassistee
 	media/model/objets/bouclierbois
 	media/model/objets/bouclierfer
@@ -280,7 +294,6 @@ Files :	media/model/boosts/epo
 	media/model/mapmodel/champignons/champi1
 	media/model/mapmodel/champignons/champi2
 	media/model/mapmodel/champignons/champi3
-	media/model/mapmodel/constructions/pont
 	media/model/mapmodel/constructions/tente1x1
 	media/model/mapmodel/constructions/tente2x1
 	media/model/mapmodel/constructions/tour
@@ -313,12 +326,6 @@ Files :	media/model/boosts/epo
 	media/model/mapmodel/tente/toile2
 	media/model/mapmodel/tombes/1
 	media/model/mapmodel/tombes/2
-	media/model/mapmodel/vehicules/jeep1
-	media/model/mapmodel/vehicules/jeep2
-	media/model/mapmodel/vehicules/jeep3
-	media/model/mapmodel/vehicules/jeep4
-	media/model/mapmodel/vehicules/jeep5
-	media/model/mapmodel/vehicules/jeep6
 	media/model/mapmodel/ventilateur
 	media/model/mapmodel/vaisseaux/1
 	media/model/mapmodel/vaisseaux/2

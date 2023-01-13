@@ -4,17 +4,13 @@ The following files are protected by Envato Elements license, you CANNOT use the
 Les fichiers suivants sont protégés par licence Envato Elements vous ne POUVEZ PAS les utiliser pour vos projets personnels à moins d'acheter les images
 
 
-Files : 
-
-
+Files : media/sky/2_lf.jpg		license_certificate_XN6YJZL7D5
+	media/sky/5_rt.jpg 		license_certificate_PMZGXRT286
 
 -------------------------------------------------------------------------------------------------------
 
 Font used in the game / Police utilisée dans le jeu
-	Bitstream Vera Fonts
-	See / Voir licenses_certificates/font.txt
-
-Files :	media/interface/font/* 		//All files in the directory
+Files :	media/interface/font/* 		//All files in the directory Bitstream Vera Fonts See / Voir licenses_certificates/font.txt
 
 -------------------------------------------------------------------------------------------------------
 
@@ -27,7 +23,7 @@ Cependant, ils possèdent des licences spécifiques rendant leur utilisation pos
 Provided by ESO
 	Creative Commons Attribution 4.0 International License
 	See / Voir licenses_certificates/license (ESO).txt
-	media/sky/ciel/galaxie.png
+	media/sky/galaxie.png
 
 Provided by Nobiax
 	CC0 1.0 Universal (CC0 1.0) - Public Domain Dedication 
@@ -36,14 +32,14 @@ Provided by Nobiax
 
 Provided by Remus
 	See / Voir licenses_certificates/readme (Remus).txt
-	media/sky/ciel/7_*.jpg //And all subnames
+	media/sky/ciel/7_*.jpg 					//And all subnames
 
 Provided by Nieb
 	See / Voir licenses_certificates/readme (Nieb).txt
-	media/texture/base/* 			//All files in the directory
-	media/texture/game/* 			//All files in the directory
-	media/texture/mat_glass/nieb/* 		//All files in the directory
-	media/texture/mat_water/nieb/* 		//All files in the directory
+	media/texture/base/* 					//All files in the directory
+	media/texture/game/* 					//All files in the directory
+	media/texture/mat_glass/nieb/* 				//All files in the directory
+	media/texture/mat_water/nieb/* 				//All files in the directory
 
 Provided by appleflap
 	See / Voir licenses_certificates/readme (Appleflap).txt
@@ -51,13 +47,13 @@ Provided by appleflap
 
 Provided by Cube Engine 2
 	See / Voir readme_sauerbraten.txt
-	media/texture/mat_water/caustic/* 	//All files in the directory
-	media/blendbrush/* 			//All files in the directory
+	media/texture/mat_water/caustic/* 			//All files in the directory
+	media/blendbrush/* 					//All files in the directory
 
 -------------------------------------------------------------------------------------------------------
 
-The following files were created expressly for Cube Conflict by its developers. The CC-BY-SA 4.0 license is applied here.
-Les fichiers suivants ont été crées expressément pour Cube Conflict par ses développeurs. La licence CC-BY-SA 4.0 y est appliquée.
+The following files were created expressly for Cube Conflict by its developers. The CC-BY-SA 4.0 license is applied here unless an exception is mentioned.
+Les fichiers suivants ont été crées expressément pour Cube Conflict par ses développeurs. La licence CC-BY-SA 4.0 y est appliquée sauf si une exception est indiquée.
 
 See / Voir licenses_certificates/cc-by-sa.txt
 
@@ -69,8 +65,8 @@ Files :	media/interface/cclogo.png
 	media/interface/loading_bar.png
 	media/interface/loading_frame.png
 	media/interface/background.png
-	media/interface/achievements/* 		//All files in the directory
-	media/interface/crosshair/* 		//All files in the directory
+	media/interface/achievements/* 				//All files in the directory | Tous les fichiers du dossier
+	media/interface/crosshair/* 				//All files in the directory | Tous les fichiers du dossier
 	media/interface/hud/action.jp
 	media/interface/hud/attention.jpg
 	media/interface/hud/barrebouclierpleine.png
@@ -171,18 +167,18 @@ Files :	media/interface/cclogo.png
 	media/interface/apt_logo/camper.png
 	media/interface/apt_logo/spy.png
 	media/interface/apt_logo/junkie.png
-	media/sky/ciel/1_*.jpg 		//And all subnames
-	media/sky/ciel/2_*.jpg 		//And all subnames
-	media/sky/ciel/3_*.jpg 		//And all subnames
-	media/sky/ciel/4_*.jpg 		//And all subnames
-	media/sky/ciel/5_*.jpg 		//And all subnames
-	media/sky/ciel/6_*.jpg 		//And all subnames
+	media/sky/ciel/1_*.jpg 					//And all subnames
+	media/sky/ciel/2_*.jpg* 				//And all subnames 	*except moon image from license_certificate_XN6YJZL7D5 | *excepté l'image de lune de license_certificate_XN6YJZL7D5
+	media/sky/ciel/3_*.jpg 					//And all subnames
+	media/sky/ciel/4_*.jpg 					//And all subnames
+	media/sky/ciel/5_*.jpg* 				//And all subnames 	*except earth image from license_certificate_XN6YJZL7D5 | *excepté l'image de terre de license_certificate_PMZGXRT286
+	media/sky/ciel/6_*.jpg 					//And all subnames
 	media/sky/ciel/Nuages1.png
 	media/sky/ciel/Nuages2.png
-	media/texture/mat_lava/*	//All files in the directory
-	media/texture/*			//All files in the directory but not the subfolders !
+	media/texture/mat_lava/*				//All files in the directory | Tous les fichiers du dossier
+	media/texture/*						//All files in the directory but not the subfolders! | Tous les fichiers du dossier mais pas les sous-dossiers !
 
-	Note : The smileys are designed by "lag-it" (public domain) | Note : Les smileys sont designés par "lag-it" (public domain)
+	Note: The smileys are designed by "lag-it" (public domain) | Note : Les smileys sont designés par "lag-it" (public domain)
 	media/interface/chargement.png
 	media/interface/hud/cursor.png
 	media/interface/hud/bave.jpg

@@ -1,0 +1,31 @@
+https://blog.turbosquid.com/turbosquid-3d-model-license
+
+Permitted Uses in Creations of Computer Games and Software. Subject to the following restrictions,
+you may incorporate 3D Models in Creations of Computer Games, virtual worlds, simulation and training environments;
+mobile, desktop and web applications; and interactive electronic publications of literature such as e-books and electronic textbooks.
+
+Restrictions on Permitted Uses of 3D Models in Creations of Games and Software.
+
+a. Interactivity. Your inclusion of 3D Models within any such Creation is limited to uses where 3D Model
+is contained in an interactive experience for the user and not made available outside of the interactive experience.
+Such a permitted example of this use would be to include a 3D Model of human anatomy in a medical training application
+in a way that the 3D Model or its environment may be manipulated or interacted with.
+
+b. Access to 3D Models. You must take all reasonable and industry standard measures to incorporate 3D Models
+within Creations to prevent other parties from gaining access to 3D Models. 3D Models must be contained in proprietary
+formats so that they cannot be opened or imported in a publicly available software application or framework,
+or extracted without reverse engineering. WebGL exports from Unity, Unreal, and Lumberyard are permitted. 
+Any other open format or format encrypted with decryptable open standards
+(such as an encrypted compression archive or other WebGL programs not listed here) are prohibited from using 3D Models.
+If your Creation uses WebGL and you are not sure if it qualifies, please contact us and describe your
+Creation in detail if this is your desired use.
+
+c. Open Systems. You typically may NOT include 3D Models in Creations that have the general functionality
+for importing and/or exporting 3D Models. Please contact us and describe your Creation in detail if this is your desired use.
+An example of such a prohibited use is to include 3D Models as a starter library within a standard retail Software Creation
+that allows users to generally work with 3D Models, even if the 3D Model itself is somehow protected and is not capable of being exported.
+An allowed use is for custom or enterprise software in certain circumstances.
+
+d. Virtual Good Sales. You may NOT import, upload, reproduce, make available, publish, transmit, distribute,
+or sublicense 3D Models in Creations of virtual goods or worlds for any 3D community (“Virtual World”),
+unless you or your Client owns the Virtual World platform and it complies with the previous restrictions.

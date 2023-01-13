@@ -90,7 +90,7 @@ Files :	media/sound/mapsound/indoor1.ogg 			license_certificate_R3FY29ABTJ (indo
 	media/sound/weap_shoot/mastersword_1			license_certificate_ZTC23VUL5F (mastersword_x.ogg).txt	license_certificate_BVM4N63X9Y (mastersword_x.ogg).txt
 	media/sound/weap_shoot/mastersword_2
 	media/sound/weap_shoot/mastersword_3
-	media/sound/weap_shoot/flail_1				license_certificate_FBLHYNE6XJ (flail_x.ogg).txt
+	media/sound/weap_shoot/flail_1				license_certificate_FBLHYNE6XJ (flail_x.ogg).txt	license_certificate_NH4ABGPE2D (chains.ogg - flail_X.ogg).txt
 	media/sound/weap_shoot/flail_2
 	media/sound/weap_shoot/flail_3
 	media/sound/weap_shoot/saber_1				license_certificate_4A63FU2JQX (saber_x.ogg).txt
@@ -99,7 +99,21 @@ Files :	media/sound/mapsound/indoor1.ogg 			license_certificate_R3FY29ABTJ (indo
 	media/sound/items/mana_1.ogg				license_certificate_W2D56JCRMY (mana_X.ogg).txt
 	media/sound/items/mana_2.ogg
 	media/sound/items/mana_3.ogg
+	media/sound/items/weapons/pickup.ogg			license_certificate_Q8GBJLPA57 (pickup.ogg).txt
 	media/sound/items/roids.ogg 				license_certificate_NGCHKBR5DE (roids.ogg).txt
+	media/sound/items/spawn_1.ogg 				license_certificate_XQ2SNTA8M6 (spawn_x.ogg).txt
+	media/sound/items/spawn_2.ogg 
+	media/sound/items/spawn_3.ogg 
+	media/sound/items/weapons/small.ogg 			license_certificate_PL5UX738YF (small.ogg).txt
+	media/sound/items/weapons/medium.ogg 			license_certificate_JK3UGY8Z2Q (medium.ogg).txt
+	media/sound/items/weapons/big.ogg 			license_certificate_X7M5SZGAUE (big.ogg).txt
+	media/sound/items/weapons/futuristic.ogg 		license_certificate_FMN6HKJYXP (futuristic.ogg).txt
+	media/sound/items/weapons/alien.ogg 			license_certificate_9MSAXDY76R (alien.ogg).txt
+	media/sound/items/weapons/sword.ogg 			license_certificate_7RC3H9UT8J (sword.ogg).txt
+	media/sound/items/weapons/chains.ogg 			license_certificate_NH4ABGPE2D (chains.ogg - flail_X.ogg).txt
+	media/sound/items/weapons/fastwoosh.ogg 		license_certificate_GVJ72HFN85 (fastwoosh.ogg - slowwoosh.ogg).txt
+	media/sound/items/weapons/slowwoosh.ogg 		license_certificate_GVJ72HFN85 (fastwoosh.ogg - slowwoosh.ogg).txt
+	media/sound/items/weapons/noammo.ogg			license_certificate_5B8UPMRDLY (noammo.ogg).txt
 	media/sound/classes/spell.ogg				license_certificate_4BDV7WXLKP (spell.ogg).txt
 	media/sound/classes/spell_impossible.ogg		license_certificate_UE9JT63SM8 (spell_impossible.ogg).txt
 	media/sound/classes/spell_ready.ogg			license_certificate_SJWH495N7U (spell_ready.ogg).txt
@@ -125,7 +139,6 @@ Files :	media/sound/mapsound/indoor1.ogg 			license_certificate_R3FY29ABTJ (indo
 	media/sound/classes/sho_1.ogg				license_certificate_QTD7LJFYGW (sho_1.ogg).txt
 	media/sound/classes/sho_2.ogg				license_certificate_QP3D9G64ZM (sho_2.ogg).txt
 	media/sound/classes/sho_3.ogg				license_certificate_MNZPR2G76C (sho_3.ogg).txt
-
 	media/sound/notifications/killstreaks/x3_1"		license_certificates (killstreaks).txt
 	media/sound/notifications/killstreaks/x3_2"
 	media/sound/notifications/killstreaks/x3_3"
