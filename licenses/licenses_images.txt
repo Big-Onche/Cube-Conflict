@@ -12,7 +12,7 @@ Files :
 
 Font used in the game / Police utilisée dans le jeu
 	Bitstream Vera Fonts
-	See / Voir lisences_certificates/font.txt
+	See / Voir licenses_certificates/font.txt
 
 Files :	media/interface/font/* 		//All files in the directory
 
@@ -23,6 +23,11 @@ However, they have specific licenses making their use possible in compliance wit
 
 Les fichiers suivants n'ont pas été créés par les développeurs de Cube Conflict.
 Cependant, ils possèdent des licences spécifiques rendant leur utilisation possible dans le respect de leur licences respectives.
+
+Provided by ESO
+	Creative Commons Attribution 4.0 International License
+	See / Voir licenses_certificates/license (ESO).txt
+	media/sky/ciel/galaxie.png
 
 Provided by Nobiax
 	CC0 1.0 Universal (CC0 1.0) - Public Domain Dedication 
@@ -172,7 +177,6 @@ Files :	media/interface/cclogo.png
 	media/sky/ciel/4_*.jpg 		//And all subnames
 	media/sky/ciel/5_*.jpg 		//And all subnames
 	media/sky/ciel/6_*.jpg 		//And all subnames
-	media/sky/ciel/galaxie.png
 	media/sky/ciel/Nuages1.png
 	media/sky/ciel/Nuages2.png
 	media/texture/mat_lava/*	//All files in the directory
