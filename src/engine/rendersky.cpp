@@ -76,7 +76,7 @@ VARR(yawcloudlayer, 0, 0, 360);
 FVARR(cloudheight, -1, 0.2f, 1);
 FVARR(cloudfade, 0, 0.2f, 1);
 FVARR(cloudalpha, 0, 1, 1);
-VARR(cloudsubdiv, 4, 16, 64);
+VARR(cloudsubdiv, 1, 16, 64);
 CVARR(cloudcolour, 0xFFFFFF);
 
 void drawenvboxface(float s0, float t0, int x0, int y0, int z0,
