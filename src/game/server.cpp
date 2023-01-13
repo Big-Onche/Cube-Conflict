@@ -2326,7 +2326,7 @@ namespace server
         servstate &as = actor->state;
 
         //Calcul des dommages de base
-        damage = (damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[target->aptitude].apt_resistance);
+        damage = (damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[target->aptitude].apt_resistance)/(as.jointmillis ? 1.25f : 1.f);
 
         //Dommages spéciaux d'aptitudes
         switch(actor->aptitude)
@@ -2542,7 +2542,7 @@ namespace server
         float waitfactor = 1;
         if(ci->aptitude==APT_PRETRE && ci->state.aptisort3) waitfactor = 2.5f + ((4000 - ci->state.aptisort3)/1000);
 
-        if(gs.champimillis>0) waitfactor*=1.5f;
+        if(gs.champimillis>0) waitfactor*=ci->aptitude==APT_JUNKIE ? 2 : 1.5f;
         gs.gunwait = attacks[atk].attackdelay/waitfactor;
 
         sendf(-1, 1, "rii9x", N_SHOTFX, ci->clientnum, atk, id,
@@ -2550,8 +2550,9 @@ namespace server
                 int(to.x*DMF), int(to.y*DMF), int(to.z*DMF),
                 ci->ownernum);
         gs.shotdamage += attacks[atk].damage*attacks[atk].rays;
-        if(gs.steromillis) gs.shotdamage*=ci->aptitude==13 ? 3 : 2;
-        if(gs.ragemillis) gs.shotdamage*=3;
+        if(gs.steromillis) gs.shotdamage*=ci->aptitude==APT_JUNKIE ? 3 : 2;
+        if(gs.ragemillis) gs.shotdamage*=1.25f;
+
         switch(atk)
         {
             case ATK_PULSE_SHOOT:
@@ -2587,9 +2588,9 @@ namespace server
                     totalrays += h.rays;
                     if(totalrays>maxrays) continue;
                     int damage = h.rays*attacks[atk].damage;
-                    if(gs.steromillis) damage*=ci->aptitude==13 ? 3 : 2;
+                    if(gs.steromillis) damage*=ci->aptitude==APT_JUNKIE ? 3 : 2;
                     dodamage(target, ci, damage, atk, h.dir);
-                    if(ci->aptitude==4) doregen(target, ci, damage, atk, h.dir);
+                    if(ci->aptitude==APT_VAMPIRE) doregen(target, ci, damage, atk, h.dir);
                 }
                 break;
             }

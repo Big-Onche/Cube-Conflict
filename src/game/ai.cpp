@@ -1145,9 +1145,9 @@ namespace ai
             d->ai->spot = vec(0, 0, 0);
         }
 
-        if((d->aptisort3 && d->aptitude==APT_PHYSICIEN && randomevent(17)) || (d->jointmillis && randomevent(3))) d->jumping = true;
+        if(d->aptisort3 && d->aptitude==APT_PHYSICIEN && randomevent(17)) d->jumping = true;
         else if(d->gunselect==GUN_ARTIFICE || d->gunselect==GUN_SMAW || d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_ROQUETTES) d->jumping = true;
-		else if(!d->ai->dontmove) jumpto(d, b, d->ai->spot);
+		else if(!d->ai->dontmove || (d->jointmillis && randomevent(17))) jumpto(d, b, d->ai->spot);
 
         gameent *e = getclient(d->ai->enemy);
         bool enemyok = e && targetable(d, e);
@@ -1205,9 +1205,9 @@ namespace ai
                     d->ai->becareful = false;
                 }
                 scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, sskew);
-                if(insight || quick || (hasseen && (d->gunselect==GUN_PULSE || d->gunselect==GUN_MINIGUN)))
+                if(insight || quick || (hasseen && (d->gunselect==GUN_PULSE || d->gunselect==GUN_MINIGUN || d->gunselect==GUN_S_ROQUETTES)))
                 {
-                    if(canshoot(d, atk, e) && hastarget(d, atk, b, e, yaw, pitch, dp.squaredist(ep)))
+                    if((canshoot(d, atk, e) && hastarget(d, atk, b, e, yaw, pitch, dp.squaredist(ep))) || (d->aptitude==APT_PRETRE && d->aptisort3))
                     {
                         d->attacking = attacks[atk].action;
                         d->ai->lastaction = lastmillis;

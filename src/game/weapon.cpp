@@ -491,7 +491,7 @@ namespace game
         p.z += 0.6f*(d->eyeheight + d->aboveeye) - d->eyeheight;
 
         damage = (damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[d->aptitude].apt_resistance); //Dégats de base
-        actor->steromillis > 0 ? damage*=actor->aptitude==13 ? 3 : 2 : damage+=0; //Stéros ou non
+        actor->steromillis > 0 ? damage*=actor->aptitude==APT_JUNKIE ? 3 : 2 : damage+=0; //Stéros ou non
         if(d->aptisort3>0 && d->aptitude==APT_MAGICIEN) damage = damage/5.0f;
         damage = damage/10.f;
 
@@ -1073,8 +1073,7 @@ namespace game
         if(player1->aptisort2 && d==player1 && player1->aptitude==APT_MAGICIEN) playsound(S_WIZ_2);
         if(d->aptisort3 && d->aptitude==APT_PRETRE)adddynlight(d->muzzle, 6, vec(1.5f, 1.5f, 0.0f), 80, 40, L_NOSHADOW|L_VOLUMETRIC|DL_FLASH);
 
-        int movefactor = 1;
-        if(game::player1->aptitude==APT_SOLDAT) movefactor = 2;
+        int movefactor = game::player1->aptitude==APT_SOLDAT ? 2 : 1;
 
         switch(atk)
         {
