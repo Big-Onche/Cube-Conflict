@@ -11,7 +11,7 @@ VARP(particlesize, 20, 100, 500);
 VARP(softparticles, 0, 1, 1);
 VARP(softparticleblend, 1, 8, 64);
 
-VARR(partcloudcolour, 0, 8947848, 16777215);
+VARR(partcloudcolour, 0, 0x888888, 0xFFFFFF);
 
 VARFP(particleslod, 0, 2, 3, initparticles());
 
@@ -124,6 +124,7 @@ enum
     PT_NOLAYER      = 1<<22,
     PT_COLLIDE      = 1<<23,
     PT_OVERBRIGHT   = 1<<24,
+    PT_NOMAXDIST    = 1<<25,
     PT_FLIP         = PT_HFLIP | PT_VFLIP | PT_ROT
 };
 
@@ -232,7 +233,7 @@ struct partrenderer
                 if(stain >= 0)
                 {
                     vec surface;
-                    float floorz = rayfloor(vec(o.x, o.y, p->val), surface, RAY_CLIPMAT|RAY_LIQUIDMAT, COLLIDERADIUS);
+                    float floorz = rayfloor(vec(o.x, o.y, p->val), surface, RAY_CLIPMAT|RAY_LIQUIDMAT|RAY_POLY, COLLIDERADIUS);
                     float collidez = floorz<0 ? o.z-COLLIDERADIUS : p->val - floorz;
                     if(o.z >= collidez+COLLIDEERROR)
                         p->val = collidez+COLLIDEERROR;
@@ -869,7 +870,7 @@ static partrenderer *parts[] =
     new quadrenderer("media/particle/firespark.png", PT_PART|PT_FLIP|PT_RND4|PT_OVERBRIGHT|PT_COLLIDE, STAIN_BRULAGE),  // fire sparks
     new quadrenderer("<grey>media/particle/fumee.png", PT_PART|PT_FLIP|PT_LERP),                                        // smoke
     new quadrenderer("<grey>media/particle/steam.png", PT_PART|PT_FLIP),                                                // steam
-    new quadrenderer("media/particle/flames.png", PT_PART|PT_HFLIP|PT_RND4|PT_BRIGHT),   // flame
+    new quadrenderer("media/particle/flames.png", PT_PART|PT_HFLIP|PT_RND4|PT_OVERBRIGHT),   // flame
     new taperenderer("media/particle/flare.png", PT_TAPE|PT_BRIGHT),                           // streak
     new taperenderer("media/particle/rail_trail.png", PT_TAPE|PT_FEW|PT_BRIGHT),               // rail trail
     new taperenderer("media/particle/pulse_side.png", PT_TAPE|PT_FEW|PT_BRIGHT),               // pulse side
@@ -886,10 +887,10 @@ static partrenderer *parts[] =
     new quadrenderer("media/particle/bulles.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_RND4),
     new quadrenderer("media/particle/neige.png", PT_PART|PT_FLIP|PT_RND4|PT_COLLIDE, STAIN_SNOW),            // colliding snow
     new trailrenderer("media/particle/pluie.png", PT_PART|PT_COLLIDE, STAIN_RAIN),
-    new trailrenderer("media/particle/nuage_1.png", PT_TRAIL),
-    new trailrenderer("media/particle/nuage_2.png", PT_TRAIL),
-    new trailrenderer("media/particle/nuage_3.png", PT_TRAIL),
-    new trailrenderer("media/particle/nuage_4.png", PT_TRAIL),
+    new trailrenderer("media/particle/nuage_1.png", PT_TRAIL|PT_NOMAXDIST),
+    new trailrenderer("media/particle/nuage_2.png", PT_TRAIL|PT_NOMAXDIST),
+    new trailrenderer("media/particle/nuage_3.png", PT_TRAIL|PT_NOMAXDIST),
+    new trailrenderer("media/particle/nuage_4.png", PT_TRAIL|PT_NOMAXDIST),
     new trailrenderer("media/particle/arcenciel.png", PT_TRAIL),
     new quadrenderer("media/particle/viseur.png", PT_PART|PT_LERP|PT_BRIGHT),
     new quadrenderer("media/particle/zero.png", PT_PART|PT_BRIGHT),
@@ -1049,12 +1050,12 @@ static inline particle *newparticle(const vec &o, const vec &d, int fade, int ty
     return parts[type]->addpart(o, d, fade, color, size, gravity, sizemod);
 }
 
-int maxparticledistance = 6000;
+VARP(maxparticledistance, 256, 1024, 4092);
 
 static void splash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int sizemod, bool upsplash = false)
 {
-    if(camera1->o.dist(p) > maxparticledistance && !seedemitter) return;
-    float collidez = parts[type]->type&PT_COLLIDE ? p.z - raycube(p, vec(0, 0, -1), COLLIDERADIUS, RAY_CLIPMAT) + (parts[type]->stain >= 0 ? COLLIDEERROR : 0) : -1;
+    if(camera1->o.dist(p) > (parts[type]->type&PT_NOMAXDIST ? 9999 : maxparticledistance) && !seedemitter) return;
+    float collidez = parts[type]->type&PT_COLLIDE ? p.z - raycube(p, vec(0, 0, -1), COLLIDERADIUS, RAY_CLIPMAT|RAY_POLY) + (parts[type]->stain >= 0 ? COLLIDEERROR : 0) : -1;
     int fmin = 1;
     int fmax = fade*3;
     loopi(num)
@@ -1290,7 +1291,7 @@ void regularshape(int type, int radius, int color, int dir, int num, int fade, c
         {
 			if(taper)
 			{
-				float dist = clamp(from.dist2(camera1->o)/maxparticledistance, 0.0f, 1.0f);
+				float dist = clamp(from.dist2(camera1->o)/(parts[type]->type&PT_NOMAXDIST ? 9999 : maxparticledistance), 0.0f, 1.0f);
 				if(dist > 0.2f)
 				{
 					dist = 1 - (dist - 0.2f)/0.8f;
@@ -1335,6 +1336,12 @@ void regularflame(int type, const vec &p, float radius, float height, int color,
         s.y += rndscale(radius*2.0f)-radius;
         newparticle(s, v, rnd(max(int(fade*height), 1))+1, type, color, size, gravity, -3.f);
     }
+}
+
+void regularflare(const vec &p, int color, int flaresize, int viewdist)
+{
+    vec pos = p;
+    flares.addflare(pos, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, flaresize, viewdist, false, true);
 }
 
 static void makeparticles(entity &e)
@@ -1475,11 +1482,11 @@ static void makeparticles(entity &e)
             }
             break;
 
-        case 32: //lens flares - plain/sparkle/sun/sparklesun <red> <green> <blue>
+        case 32: //lens flares - plain/sparkle/sun/sparklesun <red> <green> <blue> <size>
         case 33:
         case 34:
         case 35:
-            flares.addflare(e.o, e.attr2, e.attr3, e.attr4, (e.attr1&0x02)!=0, (e.attr1&0x01)!=0);
+            flares.addflare(e.o, e.attr2, e.attr3, e.attr4, e.attr5, e.attr5, (e.attr1&0x02)!=0, (e.attr1&0x01)!=0);
             break;
 
         case 51:    //mun dust
@@ -1534,6 +1541,12 @@ void seedparticles()
     }
 }
 
+VARR(sunflarex, -1000, -400, 1000);
+VARR(sunflarey, -1000, 360, 1000);
+VARR(sunflarez, -1000, 135, 1000);
+VARR(sunflarecolour, 0x000000, 0x888888, 0xFFFFFF);
+VARR(sunflare, 0, 0, 1);
+
 void updateparticles()
 {
     if(regenemitters) addparticleemitters();
@@ -1560,7 +1573,7 @@ void updateparticles()
         {
             particleemitter &pe = emitters[i];
             extentity &e = *pe.ent;
-            if(e.o.dist(camera1->o) > maxparticledistance) { pe.lastemit = lastmillis; continue; }
+            if(e.o.dist(camera1->o) > (e.attr1==14 || e.attr1==15 ? 9999 : maxparticledistance)) { pe.lastemit = lastmillis; continue; }
             if(cullparticles && pe.maxfade >= 0)
             {
                 if(isfoggedsphere(pe.radius, pe.center)) { pe.lastcull = lastmillis; continue; }
@@ -1579,6 +1592,14 @@ void updateparticles()
             }
             pe.lastemit = lastmillis;
         }
+
+        if(sunflare) //map sunflare
+        {
+            vec flarepos = camera1->o; //the sun is closer than you think ;)
+            flarepos.add(vec(sunflarex, sunflarey, sunflarez)); //flare is near the camera but always aligned with sun
+            flares.addflare(flarepos, (sunflarecolour >> 16) & 0xFF, (sunflarecolour >> 8) & 0xFF, sunflarecolour & 0xFF, 125, 1250, true, true);
+        }
+
         if(dbgpcull && (canemit || replayed) && addedparticles) conoutf(CON_DEBUG, "%d emitters, %d particles", emitted, addedparticles);
     }
     if(editmode) // show sparkly thingies for map entities in edit mode

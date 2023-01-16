@@ -7,16 +7,17 @@ static const struct flaretype
 } flaretypes[] =
 {
     {2,  1.30f, 0.04f, 153}, //flares
-    {3,  1.00f, 0.10f, 102},
+    {0,  1.00f, 0.10f, 102},
     {1,  0.50f, 0.20f, 77},
-    {3,  0.20f, 0.05f, 77},
-    {0,  0.00f, 0.04f, 77},
-    {5, -0.25f, 0.07f, 127},
-    {5, -0.40f, 0.02f, 153},
-    {5, -0.60f, 0.04f, 102},
+    {2,  0.20f, 0.05f, 77},
+    {1,  0.00f, 0.10f, 150},
+    {5, -0.25f, 0.07f, 75},
+    {5, -0.40f, 0.02f, 100},
+    {1, -0.50f, 0.03f, 105},
+    {2, -0.60f, 0.04f, 102},
     {5, -1.00f, 0.03f, 51},
-    {-1, 1.00f, 0.30f, 255}, //shine - red, green, blue
-    {-2, 1.00f, 0.20f, 255},
+    {-1, 1.00f, 0.25f, 255}, //shine - red, green, blue
+    {-2, 1.00f, 0.25f, 255},
     {-3, 1.00f, 0.25f, 255}
 };
 
@@ -27,9 +28,6 @@ struct flare
     bvec color;
     bool sparkle;
 };
-
-VARP(flarecutoff, 0, 1000, 10000);
-VARP(flaresize, 20, 100, 500);
 
 struct flarerenderer : partrenderer
 {
@@ -52,6 +50,8 @@ struct flarerenderer : partrenderer
         numflares = 0;
     }
 
+    float flarefade = 0.f;
+
     void newflare(vec &o,  const vec &center, uchar r, uchar g, uchar b, float mod, float size, bool sun, bool sparkle)
     {
         if(numflares >= maxflares) return;
@@ -59,16 +59,22 @@ struct flarerenderer : partrenderer
         vec dir = vec(camera1->o).sub(o);
         float dist = dir.magnitude();
         dir.mul(1/dist);
-        if(raycube(o, dir, dist, RAY_CLIPMAT|RAY_POLY) < dist) return;
+        if(raycube(o, dir, dist, RAY_CLIPMAT|RAY_POLY) < dist) //simple fade in/out when flare position (=sun) is occluded
+        {
+            flarefade-=flarefade>0 ? 0.1f : 0;
+            if(flarefade<=0) return;
+        }
+        else if (flarefade<1.f) flarefade+=0.1f;
+
         flare &f = flares[numflares++];
         f.o = o;
         f.center = center;
         f.size = size;
-        f.color = bvec(uchar(r*mod), uchar(g*mod), uchar(b*mod));
+        f.color = bvec(uchar(r*mod*flarefade), uchar(g*mod*flarefade), uchar(b*mod*flarefade));
         f.sparkle = sparkle;
     }
 
-    void addflare(vec &o, uchar r, uchar g, uchar b, bool sun, bool sparkle)
+    void addflare(vec &o, uchar r, uchar g, uchar b, int flaresize, int viewdist, bool sun, bool sparkle)
     {
         //frustrum + fog check
         if(isvisiblesphere(0.0f, o) > (sun?VFC_FOGGED:VFC_FULL_VISIBLE)) return;
@@ -76,25 +82,18 @@ struct flarerenderer : partrenderer
         vec flaredir = vec(o).sub(camera1->o);
         vec center = vec(camdir).mul(flaredir.dot(camdir)).add(camera1->o);
         float mod, size;
-        if(sun) //fixed size
-        {
-            mod = 1.0;
-            size = flaredir.magnitude() * flaresize / 100.0f;
-        }
-        else
-        {
-            mod = (flarecutoff-vec(o).sub(center).squaredlen())/flarecutoff;
-            if(mod < 0.0f) return;
-            size = flaresize / 5.0f;
-        }
-        mod = 1.0;
+
+        mod = ((viewdist*100)-vec(o).sub(center).squaredlen())/(viewdist*100);
+        if(mod < 0.0f) return;
+        size = sun ? flaredir.magnitude() * flaresize / 100.0f : flaresize / 5.0f; //fixed size for sun
+
         newflare(o, center, r, g, b, mod, size, sun, sparkle);
     }
 
     void update()
     {
         numflares = 0; //regenerate flarelist each frame
-        shinetime = lastmillis/10;
+        //shinetime = 0;
     }
 
     int count()
@@ -129,8 +128,8 @@ struct flarerenderer : partrenderer
                 int tex = ft.type;
                 if(ft.type < 0) //sparkles - always done last
                 {
-                    shinetime = (shinetime + 1) % 10;
-                    tex = 6+shinetime;
+                    //shinetime = (shinetime + 1) % 10; //removed old ugly shine effect
+                    tex = 6;
                     color.r = 0;
                     color.g = 0;
                     color.b = 0;
