@@ -17,7 +17,6 @@
 					<Add option="/ML" />
 					<Add option="/GA" />
 					<Add option="/Ot" />
-					<Add option="-O2" />
 				</Compiler>
 			</Target>
 		</Build>
@@ -33,6 +32,7 @@
 			<Add library="wininet" />
 		</Linker>
 		<Unit filename="config.cpp" />
+		<Unit filename="launcher.cpp" />
 		<Unit filename="main.cpp" />
 		<Unit filename="main.h" />
 		<Unit filename="manifest.xml" />
