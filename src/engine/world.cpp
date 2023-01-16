@@ -625,15 +625,15 @@ void entdrag(const vec &ray)
 
 VAR(showentradius, 0, 1, 1);
 
-void renderentring(const extentity &e, float radius, int axis)
+void renderentring(const vec &o, float radius, int axis)
 {
     if(radius <= 0) return;
     gle::defvertex();
     gle::begin(GL_LINE_LOOP);
-    loopi(15)
+    loopi(16)
     {
-        vec p(e.o);
-        const vec2 &sc = sincos360[i*(360/15)];
+        vec p(o);
+        const vec2 &sc = sincos360[i*(360/16)];
         p[axis>=2 ? 1 : 0] += radius*sc.x;
         p[axis>=1 ? 2 : 1] += radius*sc.y;
         gle::attrib(p);
@@ -644,7 +644,7 @@ void renderentring(const extentity &e, float radius, int axis)
 void renderentsphere(const extentity &e, float radius)
 {
     if(radius <= 0) return;
-    loopk(3) renderentring(e, radius, k);
+    loopk(3) renderentring(e.o, radius, k);
 }
 
 void renderentattachment(const extentity &e)
@@ -660,7 +660,7 @@ void renderentattachment(const extentity &e)
 void renderentarrow(const extentity &e, const vec &dir, float radius)
 {
     if(radius <= 0) return;
-    float arrowsize = min(radius/8, 0.5f);
+    float arrowsize = min(radius/4, 1.f);
     vec target = vec(dir).mul(radius).add(e.o), arrowbase = vec(dir).mul(radius - arrowsize).add(e.o), spoke;
     spoke.orthogonal(dir);
     spoke.normalize();
@@ -679,7 +679,7 @@ void renderentarrow(const extentity &e, const vec &dir, float radius)
     xtraverts += gle::end();
 }
 
-void renderentcone(const extentity &e, const vec &dir, float radius, float angle)
+void renderentcone(const extentity &e, const vec &dir, float radius, float angle, bool camera)
 {
     if(radius <= 0) return;
     vec spot = vec(dir).mul(radius*cosf(angle*RAD)).add(e.o), spoke;
@@ -690,15 +690,15 @@ void renderentcone(const extentity &e, const vec &dir, float radius, float angle
     gle::defvertex();
 
     gle::begin(GL_LINES);
-    loopi(8)
+    loopi(camera ? 4 : 12)
     {
         gle::attrib(e.o);
-        gle::attrib(vec(spoke).rotate(2*M_PI*i/8.0f, dir).add(spot));
+        gle::attrib(vec(spoke).rotate(2*M_PI*i/(camera ? 4.0f : 12.0f), dir).add(spot));
     }
     xtraverts += gle::end();
 
     gle::begin(GL_LINE_LOOP);
-    loopi(8) gle::attrib(vec(spoke).rotate(2*M_PI*i/8.0f, dir).add(spot));
+    loopi(camera ? 4 : 12) gle::attrib(vec(spoke).rotate(2*M_PI*i/(camera ? 4.0f : 12.0f), dir).add(spot));
     xtraverts += gle::end();
 }
 
@@ -785,7 +785,7 @@ void renderentradius(extentity &e, bool color)
             entities::entradius(e, color);
             vec dir;
             vecfromyawpitch(e.attr1, e.attr3, 1, 0, dir);
-            renderentarrow(e, dir, 4);
+            renderentarrow(e, dir, 16);
             break;
         }
 
@@ -795,7 +795,8 @@ void renderentradius(extentity &e, bool color)
             entities::entradius(e, color);
             vec dir;
             vecfromyawpitch(e.attr1, 0, 1, 0, dir);
-            renderentarrow(e, dir, 4);
+            renderentarrow(e, dir, 16);;
+            renderentring(e.o, 16);
             break;
         }
 

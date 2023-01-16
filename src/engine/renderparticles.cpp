@@ -865,12 +865,13 @@ struct softquadrenderer : quadrenderer
 
 static partrenderer *parts[] =
 {
+    new quadrenderer("media/particle/base.png", PT_PART|PT_FLIP|PT_BRIGHT),                                             // simple part for editmode
     new quadrenderer("<grey>media/particle/blood.png", PT_PART|PT_FLIP|PT_MOD|PT_RND4|PT_COLLIDE, STAIN_BLOOD),         // blood spats (note: rgb is inverted)
     new trailrenderer("media/particle/base.png", PT_TRAIL|PT_LERP),                                                     // water
     new quadrenderer("media/particle/firespark.png", PT_PART|PT_FLIP|PT_RND4|PT_OVERBRIGHT|PT_COLLIDE, STAIN_BRULAGE),  // fire sparks
     new quadrenderer("<grey>media/particle/fumee.png", PT_PART|PT_FLIP|PT_LERP),                                        // smoke
     new quadrenderer("<grey>media/particle/steam.png", PT_PART|PT_FLIP),                                                // steam
-    new quadrenderer("media/particle/flames.png", PT_PART|PT_HFLIP|PT_RND4|PT_OVERBRIGHT),   // flame
+    new quadrenderer("media/particle/flames.png", PT_PART|PT_HFLIP|PT_RND4|PT_OVERBRIGHT),     // flame
     new taperenderer("media/particle/flare.png", PT_TAPE|PT_BRIGHT),                           // streak
     new taperenderer("media/particle/rail_trail.png", PT_TAPE|PT_FEW|PT_BRIGHT),               // rail trail
     new taperenderer("media/particle/pulse_side.png", PT_TAPE|PT_FEW|PT_BRIGHT),               // pulse side
@@ -1606,17 +1607,47 @@ void updateparticles()
     {
         const vector<extentity *> &ents = entities::getents();
         // note: order matters in this case as particles of the same type are drawn in the reverse order that they are added
-        loopv(entgroup)
-        {
-            entity &e = *ents[entgroup[i]];
-            particle_textcopy(e.o, entname(e), PART_TEXT, 1, 0xFF4B19, 2.5f);
-        }
+        //loopv(entgroup)
+        //{
+        //    entity &e = *ents[entgroup[i]];
+        //    particle_textcopy(e.o, entname(e), PART_TEXT, 1, 0xFF4B19, 2.5f);
+        //}
         loopv(ents)
         {
             entity &e = *ents[i];
             if(e.type==ET_EMPTY) continue;
-            particle_textcopy(e.o, entname(e), PART_TEXT, 1, 0x1EC850, 2.5f);
-            regular_particle_splash(PART_SPARK, 2, 60, e.o, 0x3232FF, 1.00f*particlesize/100.0f);
+
+            vec entpos = e.o;
+            vec campos = camera1->o;
+            vec partpos = (entpos.add((campos.mul(vec(1, 1, 1))))).div(vec(2, 2, 2));
+
+            switch(e.type)
+            {
+                case ET_LIGHT:
+                {
+                    unsigned int color = ((e.attr2 & 0xff) << 16) + ((e.attr3 & 0xff) << 8) + (e.attr4 & 0xff);
+                    particle_textcopy(partpos.addz(1), GAME_LANG ? entname(e) : "Lumière", PART_TEXT, 1, color, 2);
+                    break;
+                }
+                case ET_PLAYERSTART: case FLAG:
+                {
+                    defformatstring(txt, "%s%s", e.attr2==0 ? "\f4" : e.attr2==1? "\fd" : "\fc", GAME_LANG ? entname(e) : e.type==FLAG ? "Drapeau" : "Point de réapparition");
+                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 2);
+                    break;
+                }
+                case BASE:
+                {
+                    defformatstring(alias, GAME_LANG ? "base_en_%d" : "base_fr_%d", e.attr2);
+                    const char *name = getalias(alias);
+                    defformatstring(basename, name);
+                    defformatstring(txt, "%s - %s", entname(e), basename);
+                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 2);
+                    break;
+                }
+                default: particle_textcopy(partpos.addz(1), entname(e), PART_TEXT, 1, 0xFFFFFF, 2);
+
+            }
+            newparticle(partpos.addz(-3), partpos.addz(-3), 1, PART_BASIC, 0x3333FF, 1.25f);
         }
     }
 }

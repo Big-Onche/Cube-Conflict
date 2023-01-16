@@ -335,7 +335,7 @@ namespace entities
             if(e.type==NOTUSED) continue;
             if((!e.spawned() || e.nopickup()) && e.type!=TELEPORT && e.type!=JUMPPAD && e.type!=RESPAWNPOINT) continue;
             float dist = e.o.dist(o);
-            if(dist<(e.type==TELEPORT ? 16 : 12)) trypickup(i, d);
+            if(dist<(e.type==TELEPORT || e.type==I_SUPERARME ? 20 : 16)) trypickup(i, d);
         }
     }
 
@@ -674,7 +674,7 @@ namespace entities
                 break;
 
             case JUMPPAD:
-                renderentarrow(e, vec((int)(char)e.attr3*10.0f, (int)(char)e.attr2*10.0f, e.attr1*12.5f).normalize(), 6);
+                renderentarrow(e, vec((int)(char)e.attr3*10.0f, (int)(char)e.attr2*10.0f, e.attr1*12.5f).normalize(), 16);
                 break;
             case MONSTER:
             case CAMERA_POS:
@@ -683,12 +683,18 @@ namespace entities
             {
                 vec dir;
                 vecfromyawpitch(e.attr2, e.type==CAMERA_POS ? e.attr3 : 0, 1, 0, dir);
-                renderentarrow(e, dir, e.type==CAMERA_POS ? 100 : 10);
+                renderentarrow(e, dir, e.type==CAMERA_POS ? 48 : 16);
+                if(e.type==CAMERA_POS) renderentcone(e, dir, 128, 32, true);
                 break;
             }
             case TRIGGER_ZONE:
-                if(validtrigger(e.attr2)) renderentring(e, e.attr3);
+                if(validtrigger(e.attr2)) renderentring(e.o, e.attr3);
                 break;
+            default:
+            {
+                if(e.type==I_SUPERARME) renderentring(e.o, 20);
+                else if(e.type>=I_RAIL && e.type<=I_MANA) renderentring(e.o, 16);
+            }
         }
     }
 
@@ -702,20 +708,20 @@ namespace entities
     {
         static const char * const entnames[MAXENTTYPES] =
         {
-            "none?", "light", "mapmodel", "playerstart", "envmap", "particles", "sound", "spotlight", "decal",
+            "none?", "Light", "mapmodel", "Respawn point", "envmap", "particles", "sound", "spotlight", "decal",
 
             "fusil_electrique", "fusil_plasma", "smaw", "minigun", "spockgun", "m32",
             "lanceflammes", "uzi", "famas", "mossberg", "hydra", "SV98",
             "sks", "arbalete", "ak47", "grap1", "feu_artifice", "glock",
-            "supercaisse", "NULL", "NULL", "NULL",
+            "Superweapon", "NULL", "NULL", "NULL",
 
             "panache", "cochon_grille", "steroides", "champis", "epo", "joint",
             "bouclier_bois", "bouclier_fer", "bouclier_or", "bouclier_magnetique", "armure_assistee",
             "mana",
 
-            "teleport", "teledest", "jumppad", "flag", "base",
+            "teleport", "teledest", "jumppad", "Flag", "Base",
 
-            "pnj", "respawn", "trigger", "camera",
+            "pnj", "Respawn point [SP]", "trigger", "camera",
         };
         return i>=0 && size_t(i)<sizeof(entnames)/sizeof(entnames[0]) ? entnames[i] : "";
     }

@@ -230,11 +230,11 @@ extern void mpeditent(int i, const vec &o, int type, int attr1, int attr2, int a
 extern vec getselpos();
 extern int getworldsize();
 extern int getmapversion();
-extern void renderentcone(const extentity &e, const vec &dir, float radius, float angle);
+extern void renderentcone(const extentity &e, const vec &dir, float radius, float angle, bool camera = false);
 extern void renderentarrow(const extentity &e, const vec &dir, float radius);
 extern void renderentattachment(const extentity &e);
 extern void renderentsphere(const extentity &e, float radius);
-extern void renderentring(const extentity &e, float radius, int axis = 0);
+extern void renderentring(const vec &o, float radius, int axis = 0);
 
 // main
 extern void fatal(const char *s, ...) PRINTFARGS(1, 2);
@@ -324,7 +324,8 @@ extern void resethudshader();
 // renderparticles
 enum
 {
-    PART_BLOOD = 0,
+    PART_BASIC = 0,
+    PART_BLOOD,
     PART_WATER, PART_FIRESPARK,
     PART_SMOKE,
     PART_STEAM,
