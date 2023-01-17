@@ -4,8 +4,8 @@ The following files are protected by Envato Elements license, you CANNOT use the
 Les fichiers suivants sont protégés par licence Envato Elements vous ne POUVEZ PAS les utiliser pour vos projets personnels à moins d'acheter les sons.
 
 See "licenses_certificates" folder for every licences / Voir dossier "licenses_certificates" pour chaque licences.
-Files :	media/sound/mapsound/indoor1.ogg 			license_certificate_R3FY29ABTJ (indoor1.ogg).txt
-	media/sound/mapsound/indoor2.ogg 			license_certificate_M6YEV3H785 (indoor2.ogg).txt
+Files :	media/sound/mapsound/indoor_1.ogg 			license_certificate_R3FY29ABTJ (indoor1.ogg).txt
+	media/sound/mapsound/indoor_2.ogg 			license_certificate_M6YEV3H785 (indoor2.ogg).txt
 	media/sound/mapsound/reactor.ogg 			license_certificate_9Q6WDAHN2Y (reactor.ogg).txt
 	media/sound/mapsound/buzz.ogg 				license_certificate_9WUQDBHCL5 (buzz.ogg).txt
 	media/sound/mapsound/birds.ogg 				license_certificate_XTMR3LZ4JN (birds.ogg).txt
@@ -25,8 +25,8 @@ Files :	media/sound/mapsound/indoor1.ogg 			license_certificate_R3FY29ABTJ (indo
 	media/sound/mapsound/lava.ogg 				license_certificate_GJF3C9D4YR (lava.ogg).txt
 	media/sound/mapsound/littlefire.ogg 			license_certificate_KJ8FGTW3P5 (littlefire.ogg).txt
 	media/sound/mapsound/ufo.ogg 				license_certificate_2UYCTV5PRW (ufo.ogg).txt
-	media/sound/mapsound/mouettes.ogg 			license_certificate_E4U3BSCKXH (mouettes.ogg).txt
-	media/sound/mapsound/plage.ogg 				license_certificate_GNEYCPD97J (plage.ogg).txt
+	media/sound/mapsound/seagulls.ogg 			license_certificate_E4U3BSCKXH (seagulls.ogg).txt
+	media/sound/mapsound/waterwaves.ogg 			license_certificate_GNEYCPD97J (waterwaves.ogg).txt
 	media/sound/ent_player/jump_basic_1.ogg			license_certificates (jump_basic_X).txt
 	media/sound/ent_player/jump_basic_2.ogg
 	media/sound/ent_player/jump_basic_3.ogg

@@ -1617,6 +1617,11 @@ void updateparticles()
             entity &e = *ents[i];
             if(e.type==ET_EMPTY) continue;
 
+            vec dir = vec(camera1->o).sub(e.o);
+            float dist = dir.magnitude();
+            dir.mul(1/dist);
+            if(raycube(e.o, dir, dist, RAY_CLIPMAT|RAY_POLY) < dist) continue;
+
             vec entpos = e.o;
             vec campos = camera1->o;
             vec partpos = (entpos.add((campos.mul(vec(1, 1, 1))))).div(vec(2, 2, 2));
@@ -1627,11 +1632,14 @@ void updateparticles()
                 {
                     unsigned int color = ((e.attr2 & 0xff) << 16) + ((e.attr3 & 0xff) << 8) + (e.attr4 & 0xff);
                     particle_textcopy(partpos.addz(1), GAME_LANG ? entname(e) : "Lumière", PART_TEXT, 1, color, 2);
+                    particle_textcopy(partpos.addz(2), "-  ", PART_TEXT, 1, ((e.attr2 & 0xff) << 16), 4);
+                    particle_textcopy(partpos, " - ", PART_TEXT, 1, ((e.attr3 & 0xff) << 8), 4);
+                    particle_textcopy(partpos, "  -", PART_TEXT, 1, (e.attr4 & 0xff), 4);
                     break;
                 }
                 case ET_PLAYERSTART: case FLAG:
                 {
-                    defformatstring(txt, "%s%s", e.attr2==0 ? "\f4" : e.attr2==1? "\fd" : "\fc", GAME_LANG ? entname(e) : e.type==FLAG ? "Drapeau" : "Point de réapparition");
+                    defformatstring(txt, "%s%s", e.attr2==0 ? "\fe" : e.attr2==1? "\fd" : "\fc", GAME_LANG ? entname(e) : e.type==FLAG ? "Drapeau" : "Point de réapparition");
                     particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 2);
                     break;
                 }
@@ -1644,10 +1652,16 @@ void updateparticles()
                     particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 2);
                     break;
                 }
+                case MAPSOUND:
+                {
+                    defformatstring(txt, "%s (%s\f7)", GAME_LANG ? entname(e) : "Son", getmapsoundname(e.attr1));
+                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 2);
+                    break;
+                }
                 default: particle_textcopy(partpos.addz(1), entname(e), PART_TEXT, 1, 0xFFFFFF, 2);
-
             }
-            newparticle(partpos.addz(-3), partpos.addz(-3), 1, PART_BASIC, 0x3333FF, 1.25f);
+
+            newparticle(partpos.addz(-1), partpos.addz(-1), 1, PART_BASIC, 0x3333FF, 1.f);
         }
     }
 }

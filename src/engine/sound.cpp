@@ -810,6 +810,16 @@ void soundmenu_cleanup()
     UI_PLAYMUSIC = true;
 }
 
+const char *getmapsoundname(int n)
+{
+    soundslot &slot = mapsounds.slots[mapsounds.configs[n].chooseslot()];
+    if(!mapsounds.configs.inrange(n))
+    {
+        return GAME_LANG ? "\fcInvalid ID" : "\fcID Invalide";
+    }
+    else return slot.sample->name;
+}
+
 #ifdef WIN32
 
 #include <wchar.h>
