@@ -708,20 +708,20 @@ namespace entities
     {
         static const char * const entnames[MAXENTTYPES] =
         {
-            "none?", "Light", "mapmodel", "Respawn point", "envmap", "particles", "sound", "spotlight", "decal",
+            "none?", "Light", "3D_model", "Respawn_point", "Environment_map", "Particles", "Sound", "Spotlight", "Decal",
 
-            "fusil_electrique", "fusil_plasma", "smaw", "minigun", "spockgun", "m32",
-            "lanceflammes", "uzi", "famas", "mossberg", "hydra", "SV98",
-            "sks", "arbalete", "ak47", "grap1", "feu_artifice", "glock",
-            "Superweapon", "NULL", "NULL", "NULL",
+            "electricrifle", "plasmarifle", "smaw", "minigun", "spockgun", "m32",
+            "flamethrower", "uzi", "famas", "mossberg500", "hydra", "sv98",
+            "sks", "crossbow", "ak47", "grap1", "fireworks", "glock",
+            "Superweapon", "none?", "none?", "none?",
 
-            "panache", "cochon_grille", "steroides", "champis", "epo", "joint",
-            "bouclier_bois", "bouclier_fer", "bouclier_or", "bouclier_magnetique", "armure_assistee",
-            "mana",
+            "Health[25]", "Health[50]", "Roids[Damage]", "Shrooms[Cadency]", "Epo[Speed]", "Joint[Resistance]",
+            "Wood_shield[75]", "Iron_shield[125]", "Gold_shield[200]", "Magnet_shield[150]", "Power_armor[300]",
+            "Mana[25]",
 
-            "teleport", "teledest", "jumppad", "Flag", "Base",
+            "Teleport[In]", "Teleport[Out]", "Jump_pad", "Flag", "Base",
 
-            "pnj", "Respawn point [SP]", "trigger", "camera",
+            "Npc[SP]", "Respawn_point[SP]", "Trigger_zone[SP]", "Camera",
         };
         return i>=0 && size_t(i)<sizeof(entnames)/sizeof(entnames[0]) ? entnames[i] : "";
     }

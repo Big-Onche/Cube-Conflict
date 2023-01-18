@@ -1626,21 +1626,27 @@ void updateparticles()
             vec campos = camera1->o;
             vec partpos = (entpos.add((campos.mul(vec(1, 1, 1))))).div(vec(2, 2, 2));
 
+            int partcol = 0xBBBBBB;
+
             switch(e.type)
             {
+                case MAPMODEL:
+                {
+                    defformatstring(txt, "%s (\fg%s\f7)", GAME_LANG ? entname(e) : "Modèle 3D", mapmodelname(e.attr2));
+                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.5f);
+                    break;
+                }
                 case ET_LIGHT:
                 {
                     unsigned int color = ((e.attr2 & 0xff) << 16) + ((e.attr3 & 0xff) << 8) + (e.attr4 & 0xff);
-                    particle_textcopy(partpos.addz(1), GAME_LANG ? entname(e) : "Lumière", PART_TEXT, 1, color, 2);
-                    particle_textcopy(partpos.addz(2), "-  ", PART_TEXT, 1, ((e.attr2 & 0xff) << 16), 4);
-                    particle_textcopy(partpos, " - ", PART_TEXT, 1, ((e.attr3 & 0xff) << 8), 4);
-                    particle_textcopy(partpos, "  -", PART_TEXT, 1, (e.attr4 & 0xff), 4);
+                    particle_textcopy(partpos.addz(1), GAME_LANG ? entname(e) : "Lumière", PART_TEXT, 1, color, 1.5f);
                     break;
                 }
                 case ET_PLAYERSTART: case FLAG:
                 {
                     defformatstring(txt, "%s%s", e.attr2==0 ? "\fe" : e.attr2==1? "\fd" : "\fc", GAME_LANG ? entname(e) : e.type==FLAG ? "Drapeau" : "Point de réapparition");
-                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 2);
+                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.5f);
+                    partcol = e.attr2==0 ? 0x00FF00 : e.attr2==1? 0xFFFF00 : 0xFF0000;
                     break;
                 }
                 case BASE:
@@ -1649,19 +1655,29 @@ void updateparticles()
                     const char *name = getalias(alias);
                     defformatstring(basename, name);
                     defformatstring(txt, "%s - %s", entname(e), basename);
-                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 2);
+                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.5f);
+                    partcol = 0x00FF00;
                     break;
                 }
                 case MAPSOUND:
                 {
-                    defformatstring(txt, "%s (%s\f7)", GAME_LANG ? entname(e) : "Son", getmapsoundname(e.attr1));
-                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 2);
+                    defformatstring(txt, "%s (\fg%s\f7)", GAME_LANG ? entname(e) : "Son", getmapsoundname(e.attr1));
+                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.5f);
                     break;
                 }
-                default: particle_textcopy(partpos.addz(1), entname(e), PART_TEXT, 1, 0xFFFFFF, 2);
+                default:
+                {
+                    string gameenttype = "";
+                    if(e.type >= I_RAIL && e.type <= I_SUPERARME) formatstring(gameenttype, "%s", GAME_LANG ? "Weapon" : "Arme");
+                    else if(e.type==I_SANTE || e.type==I_BOOSTPV || e.type==I_MANA) formatstring(gameenttype, "%s", GAME_LANG ? "Item" : "Objet");
+                    else if(e.type >= I_BOUCLIERBOIS && e.type <= I_ARMUREASSISTEE) formatstring(gameenttype, "%s", GAME_LANG ? "Shield" : "Bouclier");
+                    else if(e.type >= I_BOOSTDEGATS && e.type <= I_BOOSTGRAVITE) formatstring(gameenttype, "%s", GAME_LANG ? "Boost" : "Boost");
+                    defformatstring(txt, "%s%s%s%s", gameenttype, strcmp(gameenttype, "") ? " (\ff" : "", entname(e), strcmp(gameenttype, "") ? "\f7)" : "");
+                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.5f);
+                    if(strcmp(gameenttype, "")) partcol = 0x0000FF;
+                }
             }
-
-            newparticle(partpos.addz(-1), partpos.addz(-1), 1, PART_BASIC, 0x3333FF, 1.f);
+            newparticle(partpos.addz(-1), partpos.addz(-1), 1, PART_BASIC, partcol, 1.f);
         }
     }
 }
