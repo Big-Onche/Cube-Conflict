@@ -784,7 +784,7 @@ struct DecalSlot : Slot, VSlot
 
     int type() const { return DECAL; }
     const char *name() const;
-    const char *texturedir() const { return "media/decal"; }
+    const char *texturedir() const { return "media/decals"; }
 
     VSlot &emptyvslot() { return *this; }
 

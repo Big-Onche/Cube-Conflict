@@ -3,7 +3,8 @@
 #include "ccheader.h"
 #include "stats.h"
 
-VAR(map_atmo, 0, 0, 8);
+bool launch = true;
+VARF(map_atmo, 0, 0, 8, if(!launch) {execfile("config/default_map_decals.cfg");} else launch = false;);
 VARR(mapofficielle, 0, 0, 1);
 
 int cnidentiquearme = 0;

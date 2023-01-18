@@ -336,10 +336,9 @@ struct vacollect : verthash
     {
         matrix3 orient;
         orient.identity();
-        if(e.attr1) orient.rotate_around_z(sincosmod360(e.attr1));
+        if(e.attr2) orient.rotate_around_z(sincosmod360(e.attr2));
         if(e.attr3) orient.rotate_around_x(sincosmod360(e.attr3));
-        if(e.attr5) orient.rotate_around_y(sincosmod360(-e.attr5));
-        if(e.attr4 > 0) orient.scale(e.attr4/100.0f);
+        if(e.attr4) orient.rotate_around_y(sincosmod360(-e.attr4));
         vec size(max(float(e.attr5), 1.0f));
         size.y *= s.depth;
         if(!s.sts.empty())
