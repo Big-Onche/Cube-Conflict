@@ -1620,11 +1620,11 @@ void updateparticles()
             vec dir = vec(camera1->o).sub(e.o);
             float dist = dir.magnitude();
             dir.mul(1/dist);
-            if(raycube(e.o, dir, dist, RAY_CLIPMAT|RAY_POLY) < dist) continue;
+            if(raycube(e.o, dir, dist, RAY_CLIPMAT|RAY_POLY) < dist) continue;          //occlusion check
 
             vec entpos = e.o;
             vec campos = camera1->o;
-            vec partpos = (entpos.add((campos.mul(vec(1, 1, 1))))).div(vec(2, 2, 2));
+            vec partpos = (entpos.add((campos.mul(vec(1, 1, 1))))).div(vec(2, 2, 2));   //bring ent info closer to camera
 
             int partcol = 0xBBBBBB;
 

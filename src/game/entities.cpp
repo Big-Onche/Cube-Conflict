@@ -684,7 +684,7 @@ namespace entities
                 vec dir;
                 vecfromyawpitch(e.attr2, e.type==CAMERA_POS ? e.attr3 : 0, 1, 0, dir);
                 renderentarrow(e, dir, e.type==CAMERA_POS ? 48 : 16);
-                if(e.type==CAMERA_POS) renderentcone(e, dir, 128, 32, true);
+                if(e.type==CAMERA_POS) renderentbox(e, vec(0, 0, 0), vec(92, 92, 52), e.attr2, e.attr3, 0, true);
                 break;
             }
             case TRIGGER_ZONE:

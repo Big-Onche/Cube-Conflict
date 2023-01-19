@@ -679,7 +679,7 @@ void renderentarrow(const extentity &e, const vec &dir, float radius)
     xtraverts += gle::end();
 }
 
-void renderentcone(const extentity &e, const vec &dir, float radius, float angle, bool camera)
+void renderentcone(const extentity &e, const vec &dir, float radius, float angle)
 {
     if(radius <= 0) return;
     vec spot = vec(dir).mul(radius*cosf(angle*RAD)).add(e.o), spoke;
@@ -690,19 +690,19 @@ void renderentcone(const extentity &e, const vec &dir, float radius, float angle
     gle::defvertex();
 
     gle::begin(GL_LINES);
-    loopi(camera ? 4 : 12)
+    loopi(8)
     {
         gle::attrib(e.o);
-        gle::attrib(vec(spoke).rotate(2*M_PI*i/(camera ? 4.0f : 12.0f), dir).add(spot));
+        gle::attrib(vec(spoke).rotate(2*M_PI*i/8.0f, dir).add(spot));
     }
     xtraverts += gle::end();
 
     gle::begin(GL_LINE_LOOP);
-    loopi(camera ? 4 : 12) gle::attrib(vec(spoke).rotate(2*M_PI*i/(camera ? 4.0f : 12.0f), dir).add(spot));
+    loopi(8) gle::attrib(vec(spoke).rotate(2*M_PI*i/8.0f, dir).add(spot));
     xtraverts += gle::end();
 }
 
-void renderentbox(const extentity &e, const vec &center, const vec &radius, int yaw, int pitch, int roll)
+void renderentbox(const extentity &e, const vec &center, const vec &radius, int yaw, int pitch, int roll, bool camera)
 {
     matrix4x3 orient;
     orient.identity();
@@ -718,6 +718,7 @@ void renderentbox(const extentity &e, const vec &center, const vec &radius, int 
         back[4] = { vec(-radius.x, radius.y, -radius.z), vec( radius.x, radius.y, -radius.z), vec( radius.x, radius.y,  radius.z), vec(-radius.x, radius.y,  radius.z) };
     loopi(4)
     {
+        if(camera) front[i].div(vec(12, 12, 12));
         front[i] = orient.transform(front[i]);
         back[i] = orient.transform(back[i]);
     }
