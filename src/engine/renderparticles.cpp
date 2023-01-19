@@ -1626,26 +1626,26 @@ void updateparticles()
             vec campos = camera1->o;
             vec partpos = (entpos.add((campos.mul(vec(1, 1, 1))))).div(vec(2, 2, 2));   //bring ent info closer to camera
 
-            int partcol = 0xBBBBBB;
+            int partcol = e.type == TRIGGER_ZONE || e.type == RESPAWNPOINT || e.type == MONSTER ? 0xCCCC00 : 0xBBBBBB;
 
             switch(e.type)
             {
                 case MAPMODEL:
                 {
-                    defformatstring(txt, "%s (\fg%s\f7)", GAME_LANG ? entname(e) : "Modèle 3D", mapmodelname(e.attr2));
-                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.5f);
+                    defformatstring(txt, "%s (\fg%s\f7)", enthudnames[(e.type*2)+GAME_LANG], mapmodelname(e.attr2));
+                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);
                     break;
                 }
                 case ET_LIGHT:
                 {
                     unsigned int color = ((e.attr2 & 0xff) << 16) + ((e.attr3 & 0xff) << 8) + (e.attr4 & 0xff);
-                    particle_textcopy(partpos.addz(1), GAME_LANG ? entname(e) : "Lumière", PART_TEXT, 1, color, 1.5f);
+                    particle_textcopy(partpos.addz(1), enthudnames[(e.type*2)+GAME_LANG], PART_TEXT, 1, color, 1.25f);
                     break;
                 }
                 case ET_PLAYERSTART: case FLAG:
                 {
-                    defformatstring(txt, "%s%s", e.attr2==0 ? "\fe" : e.attr2==1? "\fd" : "\fc", GAME_LANG ? entname(e) : e.type==FLAG ? "Drapeau" : "Point de réapparition");
-                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.5f);
+                    defformatstring(txt, "%s%s", e.attr2==0 ? "\fe" : e.attr2==1? "\fd" : "\fc", enthudnames[(e.type*2)+GAME_LANG]);
+                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);
                     partcol = e.attr2==0 ? 0x00FF00 : e.attr2==1? 0xFFFF00 : 0xFF0000;
                     break;
                 }
@@ -1654,26 +1654,26 @@ void updateparticles()
                     defformatstring(alias, GAME_LANG ? "base_en_%d" : "base_fr_%d", e.attr2);
                     const char *name = getalias(alias);
                     defformatstring(basename, name);
-                    defformatstring(txt, "%s - %s", entname(e), basename);
-                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.5f);
+                    defformatstring(txt, "%s - %s", enthudnames[(e.type*2)+GAME_LANG], basename);
+                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);
                     partcol = 0x00FF00;
                     break;
                 }
                 case MAPSOUND:
                 {
-                    defformatstring(txt, "%s (\fg%s\f7)", GAME_LANG ? entname(e) : "Son", getmapsoundname(e.attr1));
-                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.5f);
+                    defformatstring(txt, "%s (\fg%s\f7)", enthudnames[(e.type*2)+GAME_LANG], getmapsoundname(e.attr1));
+                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);
                     break;
                 }
                 default:
                 {
                     string gameenttype = "";
                     if(e.type >= I_RAIL && e.type <= I_SUPERARME) formatstring(gameenttype, "%s", GAME_LANG ? "Weapon" : "Arme");
-                    else if(e.type==I_SANTE || e.type==I_BOOSTPV || e.type==I_MANA) formatstring(gameenttype, "%s", GAME_LANG ? "Item" : "Objet");
+                    else if(e.type==I_SANTE || e.type==I_MANA) formatstring(gameenttype, "%s", GAME_LANG ? "Item" : "Objet");
                     else if(e.type >= I_BOUCLIERBOIS && e.type <= I_ARMUREASSISTEE) formatstring(gameenttype, "%s", GAME_LANG ? "Shield" : "Bouclier");
-                    else if(e.type >= I_BOOSTDEGATS && e.type <= I_BOOSTGRAVITE) formatstring(gameenttype, "%s", GAME_LANG ? "Boost" : "Boost");
-                    defformatstring(txt, "%s%s%s%s", gameenttype, strcmp(gameenttype, "") ? " (\ff" : "", entname(e), strcmp(gameenttype, "") ? "\f7)" : "");
-                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.5f);
+                    else if(e.type >= I_BOOSTPV && e.type <= I_BOOSTGRAVITE) formatstring(gameenttype, "%s", GAME_LANG ? "Boost" : "Boost");
+                    defformatstring(txt, "%s%s%s%s", gameenttype, strcmp(gameenttype, "") ? " (\ff" : "", enthudnames[(e.type*2)+GAME_LANG], strcmp(gameenttype, "") ? "\f7)" : "");
+                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);
                     if(strcmp(gameenttype, "")) partcol = 0x0000FF;
                 }
             }

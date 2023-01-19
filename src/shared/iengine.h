@@ -230,11 +230,12 @@ extern void mpeditent(int i, const vec &o, int type, int attr1, int attr2, int a
 extern vec getselpos();
 extern int getworldsize();
 extern int getmapversion();
-extern void renderentcone(const extentity &e, const vec &dir, float radius, float angle, bool camera = false);
+extern void renderentcone(const extentity &e, const vec &dir, float radius, float angle);
 extern void renderentarrow(const extentity &e, const vec &dir, float radius);
 extern void renderentattachment(const extentity &e);
 extern void renderentsphere(const extentity &e, float radius);
 extern void renderentring(const vec &o, float radius, int axis = 0);
+extern void renderentbox(const extentity &e, const vec &center, const vec &radius, int yaw, int pitch, int roll, bool camera = false);
 
 // main
 extern void fatal(const char *s, ...) PRINTFARGS(1, 2);

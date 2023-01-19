@@ -684,7 +684,7 @@ namespace entities
                 vec dir;
                 vecfromyawpitch(e.attr2, e.type==CAMERA_POS ? e.attr3 : 0, 1, 0, dir);
                 renderentarrow(e, dir, e.type==CAMERA_POS ? 48 : 16);
-                if(e.type==CAMERA_POS) renderentbox(e, vec(0, 0, 0), vec(92, 92, 52), e.attr2, e.attr3, 0, true);
+                if(e.type==CAMERA_POS) renderentbox(e, vec(0, 0, 0), vec(92, 92, 52), e.attr2, e.attr3, e.attr4, true);
                 break;
             }
             case TRIGGER_ZONE:
@@ -708,20 +708,21 @@ namespace entities
     {
         static const char * const entnames[MAXENTTYPES] =
         {
-            "none?", "Light", "3D_model", "Respawn_point", "Environment_map", "Particles", "Sound", "Spotlight", "Decal",
+            //ent name (edit)
+            "none?", "light", "mapmodel", "playerstart", "envmap", "particles", "sound", "spotlight", "decal",
 
             "electricrifle", "plasmarifle", "smaw", "minigun", "spockgun", "m32",
             "flamethrower", "uzi", "famas", "mossberg500", "hydra", "sv98",
             "sks", "crossbow", "ak47", "grap1", "fireworks", "glock",
             "Superweapon", "none?", "none?", "none?",
 
-            "Health[25]", "Health[50]", "Roids[Damage]", "Shrooms[Cadency]", "Epo[Speed]", "Joint[Resistance]",
-            "Wood_shield[75]", "Iron_shield[125]", "Gold_shield[200]", "Magnet_shield[150]", "Power_armor[300]",
-            "Mana[25]",
+            "health25", "healthboost", "roids", "shrooms", "epo", "joint",
+            "woodshield", "ironshield", "goldshield", "magnetshield", "powerarmor",
+            "mana",
 
-            "Teleport[In]", "Teleport[Out]", "Jump_pad", "Flag", "Base",
+            "teleport", "teledest", "jumppad", "flag", "base",
 
-            "Npc[SP]", "Respawn_point[SP]", "Trigger_zone[SP]", "Camera",
+            "npc", "respawnpoint", "trigger", "camera",
         };
         return i>=0 && size_t(i)<sizeof(entnames)/sizeof(entnames[0]) ? entnames[i] : "";
     }

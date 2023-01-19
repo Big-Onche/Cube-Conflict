@@ -67,25 +67,24 @@ enum                            // static entity types
     MAPSOUND = ET_SOUND,
     SPOTLIGHT = ET_SPOTLIGHT,
     DECAL = ET_DECAL,
-    //ARMES
+    // weapons
     I_RAIL, I_PULSE, I_SMAW, I_MINIGUN, I_SPOCKGUN, I_M32, I_LANCEFLAMMES, I_UZI, I_FAMAS, I_MOSSBERG, I_HYDRA, I_SV98, I_SKS, I_ARBALETE, I_AK47, I_GRAP1, I_ARTIFICE, I_GLOCK,
     I_SUPERARME, I_NULL1, I_NULL2, I_NULL3,
-    //OBJETS
+    // items
     I_SANTE, I_BOOSTPV, I_BOOSTDEGATS, I_BOOSTPRECISION, I_BOOSTVITESSE, I_BOOSTGRAVITE,
     I_BOUCLIERBOIS, I_BOUCLIERFER, I_BOUCLIEROR, I_BOUCLIERMAGNETIQUE, I_ARMUREASSISTEE,
     I_MANA,
-
+    // other
     TELEPORT,                   // attr1 = idx, attr2 = model, attr3 = tag
     TELEDEST,                   // attr1 = angle, attr2 = idx
     JUMPPAD,                    // attr1 = zpush, attr2 = ypush, attr3 = xpush
     FLAG,                       // attr1 = angle, attr2 = team
     BASE,                       // attr2 = name alias
-    //SOLO
+    // singler player
     MONSTER,                    // attr1 = monstertype, attr2 = yaw, attr3 = pitch, attr4 = tag
     RESPAWNPOINT,
     TRIGGER_ZONE,               // attr1 = tag, attr2 = type, attr3 = radius
-
-    //Utility
+    // utility
     CAMERA_POS,                 // attr1 = tag, attr2 = yaw, attr3 = pitch, attr4 = roll
     MAXENTTYPES,
 };

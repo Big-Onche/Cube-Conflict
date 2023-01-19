@@ -1489,6 +1489,7 @@ void recomputecamera(int campostag)
                     camera1->o = e.o;
                     camera1->yaw = e.attr2;
                     camera1->pitch = e.attr3;
+                    camera1->roll = e.attr4;
                 }
             }
         }
