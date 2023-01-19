@@ -751,7 +751,7 @@ static bool fuzzycollideellipse(physent *d, const vec &dir, float cutoff, const 
     return true;
 }
 
-VAR(testtricol, 0, 0, 2);
+VAR(testtricol, 0, 2, 2);
 
 bool mmcollide(physent *d, const vec &dir, float cutoff, octaentities &oc) // collide with a mapmodel
 {
