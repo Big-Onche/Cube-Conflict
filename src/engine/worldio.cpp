@@ -161,7 +161,7 @@ void setmapfilenames(const char *fname, const char *cname = NULL)
     formatstring(picname, "media/map/%s.png", fname);
 
     if(map_atmo == 0) map_atmo = rnd(8)+1;  //+1 cuz map_atmo 0 = random
-    if(randomambience) formatstring(ambname, "config/ambiences/amb_%d.cfg", map_atmo);
+    if(randomambience) formatstring(ambname, "config/atmos/atmo_%d.cfg", map_atmo);
 
     path(ogzname);
     path(bakname);
