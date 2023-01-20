@@ -716,7 +716,7 @@ namespace entities
             "sks", "crossbow", "ak47", "grap1", "fireworks", "glock",
             "Superweapon", "none?", "none?", "none?",
 
-            "health25", "healthboost", "roids", "shrooms", "epo", "joint",
+            "health", "healthboost", "roids", "shrooms", "epo", "joint",
             "woodshield", "ironshield", "goldshield", "magnetshield", "powerarmor",
             "mana",
 
