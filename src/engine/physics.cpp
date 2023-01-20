@@ -1700,8 +1700,8 @@ void vectoyawpitch(const vec &v, float &yaw, float &pitch)
 
 #define PHYSFRAMETIME 8
 
-VARP(maxroll, 0, 0, 20);
-FVAR(straferoll, 0, 0.033f, 90);
+VARP(maxroll, 0, 1, 20);
+FVAR(straferoll, 0, 0.01f, 90);
 FVAR(faderoll, 0, 0.95f, 1);
 VAR(floatspeed, 1, 400, 10000);
 
@@ -1762,15 +1762,11 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
     {
         if(floating)
         {
-            if(pl==player) d.mul(floatspeed/100.0f);
+            if(pl==player) d.mul((aptitude==APT_PHYSICIEN ? 150 : floatspeed)/100.0f);
         }
     }
     float fric = water && !floating ? 20.0f : (pl->physstate >= PHYS_SLOPE || floating ? 6.0f : 30.0f);
     pl->vel.lerp(d, pl->vel, pow(1 - 1/fric, curtime/20.0f));
-// old fps friction
-//    float friction = water && !floating ? 20.0f : (pl->physstate >= PHYS_SLOPE || floating ? 6.0f : 30.0f);
-//    float fpsfric = min(curtime/(20.0f*friction), 1.0f);
-//    pl->vel.lerp(pl->vel, d, fpsfric);
 }
 
 void modifygravity(physent *pl, bool water, int curtime, int jointmillis, int aptitude, bool assist)
@@ -1846,7 +1842,6 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
     {
         if(aptisort && aptitude==APT_PHYSICIEN)
         {
-            floatspeed = 150;
             const float f = 1.0f/moveres;
             int collisions = 0;
                     d.mul(f);
