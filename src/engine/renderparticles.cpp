@@ -1452,8 +1452,7 @@ static void makeparticles(entity &e)
             break;
 
         case 18: //snow
-            if(map_atmo!=8) return;
-            regularshape(PART_SNOW, max(1+e.attr2, 1), colorfromattr(e.attr4), 44, e.attr3, 10000, e.o, 2+(rnd(3)), 200, -400, e.attr5, true, 200);
+            if(map_atmo==8 || map_atmo==9) regularshape(PART_SNOW, max(1+e.attr2, 1), colorfromattr(e.attr4), 44, map_atmo==9 ? e.attr3/1.75f : e.attr3, 10000, e.o, 2+(rnd(3)), 200, -400, e.attr5, true, 200);
             break;
 
         case 19: //apocalypse

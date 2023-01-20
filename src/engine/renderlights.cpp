@@ -3598,7 +3598,7 @@ void collectlights()
             if(pvsoccludedsphere(e->o, e->attr1)) continue;
         }
 
-        if((map_atmo==3 || map_atmo==6) && e->attr5 < 0) continue;
+        if((map_atmo==3 || map_atmo==6 || map_atmo==9) && e->attr5 < 0) continue;
         else
         {
             lightinfo &l = lights.add(lightinfo(i, *e));
