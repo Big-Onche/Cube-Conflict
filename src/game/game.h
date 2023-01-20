@@ -610,7 +610,7 @@ struct gamestate
        return ammo[type-I_RAIL+GUN_RAIL]>=is.max;
     }
 
-    bool canpickup(int type, int aptitude, int parmourtype)
+    bool canpickup(int type, int aptitude, int playerarmourtype)
     {
         if(type<I_RAIL || type>I_MANA) return false;
         itemstat &is = itemstats[type-I_RAIL];
@@ -618,8 +618,7 @@ struct gamestate
         switch(type)
         {
             case I_SANTE:
-                if(parmourtype==4) return health<maxhealth;
-                else return health<maxhealth;
+                return health<maxhealth;
             case I_MANA:
                 if(aptitude==4) return health<maxhealth;
                 else return (aptitude==5 || aptitude==8 || aptitude==11 || aptitude==10 || aptitude==14) && mana<is.max;
@@ -629,18 +628,18 @@ struct gamestate
             case I_BOOSTVITESSE:  return epomillis<is.max;
             case I_BOOSTGRAVITE: return jointmillis<is.max;
             case I_BOUCLIERBOIS:
-                if(parmourtype==4) return armour<3000;
+                if(playerarmourtype==4) return armour<3000;
                 else if(armour>=750) return false;
             case I_BOUCLIERFER:
-                if(parmourtype==4) return armour<3000;
+                if(playerarmourtype==4) return armour<3000;
                 else if(armour>=1250) return false;
             case I_BOUCLIERMAGNETIQUE:
-                if(parmourtype==4) return armour<3000;
+                if(playerarmourtype==4) return armour<3000;
                 else if(armour>=1500) return false;
             case I_BOUCLIEROR:
-                if(parmourtype==4) return armour<3000;
+                if(playerarmourtype==4) return armour<3000;
                 else if(armour>=2000) return false;
-            case I_ARMUREASSISTEE: return parmourtype!=4 || armour<is.max;
+            case I_ARMUREASSISTEE: return playerarmourtype!=4 || armour<is.max;
             default:
                 {
                     float aptboost;
@@ -650,7 +649,7 @@ struct gamestate
         }
     }
 
-    void pickup(int type, int aptitude, int aptisort, int parmourtype, int rndsweap)
+    void pickup(int type, int aptitude, int aptisort, int playerarmourtype, int rndsweap)
     {
         if(type<I_RAIL || type>I_MANA) return;
         itemstat &is = itemstats[type-I_RAIL+rndsweap];
@@ -675,10 +674,10 @@ struct gamestate
             case I_BOUCLIEROR:
             case I_BOUCLIERMAGNETIQUE:
             case I_ARMUREASSISTEE:
-                if(parmourtype==4 && armour>0) armourtype = A_ASSIST;
+                if(playerarmourtype==4 && armour>0) armourtype = A_ASSIST;
                 else armourtype = is.info;
 
-                armour = min(parmourtype==4 && type!=I_ARMUREASSISTEE && armour>0 ? armour+(aptitude==APT_PRETRE && aptisort>0 ? 1000 : 500) : armour+is.add, parmourtype==4 ? 3000 : is.max);
+                armour = min(playerarmourtype==4 && type!=I_ARMUREASSISTEE && armour>0 ? armour+(aptitude==APT_PRETRE && aptisort>0 ? 1000 : 500) : armour+is.add+(aptitude==APT_SOLDAT && type!=I_ARMUREASSISTEE ? 250*(armourtype+1) : 0), playerarmourtype==4 ? 3000 : aptitude==APT_SOLDAT ? is.max+(250*(armourtype+1)) : is.max);
                 if(type==I_ARMUREASSISTEE)
                 {
                     health = min(health+300, maxhealth);
@@ -753,7 +752,7 @@ struct gamestate
         if(m_random)
         {
             armourtype = A_BLUE;
-            armour = 750;
+            armour = aptitude==APT_SOLDAT ? 1000 : 750;
             int randomarme = rnd(17);
             gunselect = aptitude==6 ? GUN_KAMIKAZE : aptitude==3 ? GUN_CACNINJA : randomarme;
             ammo[randomarme] = aptitude==2 ? 1.5f*itemstats[randomarme].max : itemstats[randomarme].max;
@@ -763,7 +762,7 @@ struct gamestate
         else if (m_fullstuff)
         {
             armourtype = A_GREEN;
-            armour = 1250;
+            armour = aptitude==APT_SOLDAT ? 1750 : 1250;
             int spawngun1 = rnd(17), spawngun2, spawngun3;
             gunselect = spawngun1;
             baseammo(spawngun1, 4);
@@ -779,7 +778,7 @@ struct gamestate
         {
             loopi(17) baseammo(i);
             armourtype = A_BLUE;
-            armour = 750;
+            armour = aptitude==APT_SOLDAT ? 1000 : 750;
             gunselect = aptitude==6 ? GUN_KAMIKAZE : aptitude==3 ? GUN_CACNINJA : cnidentiquearme;
             ammo[cnidentiquearme] = aptitude==2 ? 1.5f*itemstats[cnidentiquearme].max : itemstats[cnidentiquearme].max;
             if(aptitude==0) addsweaps();
@@ -788,7 +787,7 @@ struct gamestate
         else if(m_capture)
         {
             armourtype = A_BLUE;
-            armour = m_regencapture ? 300 : 750;
+            armour = m_regencapture ? aptitude==APT_SOLDAT ? 550 : 300 : 750;
             ammo[GUN_GLOCK] = aptitude==2 ? m_regencapture ? 15 : 45 : m_regencapture ? 10 : 30;
             ammo[GUN_M32] = aptitude==2 ? 3 : 1;
             gunselect = aptitude==6 ? GUN_KAMIKAZE : aptitude==3 ? GUN_CACNINJA : GUN_GLOCK;
@@ -812,15 +811,13 @@ struct gamestate
         else
         {
             armourtype = A_BLUE;
-            armour = 750;
+            armour = aptitude==APT_SOLDAT ? 1000 : 750;
             ammo[GUN_GLOCK] = aptitude==2 ? 45 : 30;
             ammo[GUN_M32] = aptitude==2 ? 3 : 1;
             gunselect = aptitude==6 ? GUN_KAMIKAZE : aptitude==3 ? GUN_CACNINJA : GUN_GLOCK;
             if(aptitude==0) addsweaps();
         }
     }
-
-    bool soldierfullarmour(int armour, int armourtype) { return armour>0 && (armourtype==A_ASSIST || armourtype==A_MAGNET || armourtype==A_YELLOW); }
 
     // just subtract damage here, can set death, etc. later in code calling this
     int dodamage(int damage, int aptitude, int aptisort)
@@ -834,7 +831,6 @@ struct gamestate
             case A_MAGNET: absorbfactor=100; break;
             case A_ASSIST: absorbfactor=85; break;
         }
-        if(aptitude==0 && armour>0) soldierfullarmour(armour, armourtype) ? absorbfactor==100 : absorbfactor+=25;
 
         int ad = damage*(absorbfactor)/100.f; // let armour absorb when possible
 
@@ -844,7 +840,7 @@ struct gamestate
             if(aptitude==8 && aptisort>0 && armour>0) armour = min(armour+ad, armourtype==A_BLUE ? 750 : armourtype==A_GREEN ? 1250 : armourtype==A_YELLOW ? 2000 : armourtype==A_MAGNET ? 1500 : 3000);
             else armour -= ad;
         }
-        damage -= aptitude==0 ? ad*(soldierfullarmour(armour, armourtype) ? 1 : 1.25f) : ad;
+        damage -= ad;
         health -= damage;
         return damage;
     }
