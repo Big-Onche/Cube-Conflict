@@ -922,11 +922,11 @@ namespace server
         if((m_timed && gamemillis>=gamelimit) || !sents.inrange(i) || !sents[i].spawned) return false;
         int rndsweap = sents[i].type==I_SUPERARME ? rnd(4) : 0;
         clientinfo *ci = getinfo(sender);
-        if(!ci || (!ci->local && !ci->state.canpickup(sents[i].type+rndsweap, ci->aptitude, ci->state.armourtype))) return false;
+        if(!ci || (!ci->local && !ci->state.canpickupitem(sents[i].type+rndsweap, ci->aptitude, ci->state.armourtype==A_ASSIST))) return false;
         sents[i].spawned = false;
         sents[i].spawntime = spawntime(sents[i].type);
         sendf(-1, 1, "ri4", N_ITEMACC, i, sender, rndsweap);
-        ci->state.pickup(sents[i].type, ci->aptitude, ci->state.aptisort1, ci->state.armourtype, rndsweap);
+        ci->state.pickupitem(sents[i].type, ci->aptitude, ci->state.aptisort1, ci->state.armourtype==A_ASSIST, rndsweap);
         return true;
     }
 

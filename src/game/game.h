@@ -610,7 +610,7 @@ struct gamestate
        return ammo[type-I_RAIL+GUN_RAIL]>=is.max;
     }
 
-    bool canpickup(int type, int aptitude, int playerarmourtype)
+    bool canpickupitem(int type, int aptitude, bool haspowerarmor)
     {
         if(type<I_RAIL || type>I_MANA) return false;
         itemstat &is = itemstats[type-I_RAIL];
@@ -628,34 +628,25 @@ struct gamestate
             case I_BOOSTVITESSE:  return epomillis<is.max;
             case I_BOOSTGRAVITE: return jointmillis<is.max;
             case I_BOUCLIERBOIS:
-                if(playerarmourtype==4) return armour<3000;
-                else if(armour>=750) return false;
+                return haspowerarmor ?  armour<3000 : armour < (aptitude==APT_SOLDAT ? 1000 : is.max);
             case I_BOUCLIERFER:
-                if(playerarmourtype==4) return armour<3000;
-                else if(armour>=1250) return false;
+                return haspowerarmor ?  armour<3000 : armour < (aptitude==APT_SOLDAT ? 1750 : is.max);
             case I_BOUCLIERMAGNETIQUE:
-                if(playerarmourtype==4) return armour<3000;
-                else if(armour>=1500) return false;
+                return haspowerarmor ?  armour<3000 : armour < (aptitude==APT_SOLDAT ? 2500 : is.max);
             case I_BOUCLIEROR:
-                if(playerarmourtype==4) return armour<3000;
-                else if(armour>=2000) return false;
-            case I_ARMUREASSISTEE: return playerarmourtype!=4 || armour<is.max;
+                return haspowerarmor ?  armour<3000 : armour < (aptitude==APT_SOLDAT ? 2750 : is.max);
+            case I_ARMUREASSISTEE: return !haspowerarmor;
             default:
-                {
-                    float aptboost;
-                    aptitude == 2 ? aptboost = 1.5f : aptboost = 1;
-                    return ammo[is.info]<is.max*aptboost;
-                }
+                return ammo[is.info]<is.max*(aptitude==APT_AMERICAIN ? 1.5f : 1);
         }
     }
 
-    void pickup(int type, int aptitude, int aptisort, int playerarmourtype, int rndsweap)
+    void pickupitem(int type, int aptitude, int aptisort, bool haspowerarmor, int rndsweap)
     {
         if(type<I_RAIL || type>I_MANA) return;
         itemstat &is = itemstats[type-I_RAIL+rndsweap];
 
-        int boostitem = 1;
-        if(aptitude==APT_PRETRE && aptisort>0) boostitem++;
+        int boostitem = aptitude==APT_PRETRE && aptisort>0 ? 2 : 1;
 
         switch(type)
         {
@@ -674,27 +665,30 @@ struct gamestate
             case I_BOUCLIEROR:
             case I_BOUCLIERMAGNETIQUE:
             case I_ARMUREASSISTEE:
-                if(playerarmourtype==4 && armour>0) armourtype = A_ASSIST;
-                else armourtype = is.info;
-
-                armour = min(playerarmourtype==4 && type!=I_ARMUREASSISTEE && armour>0 ? armour+(aptitude==APT_PRETRE && aptisort>0 ? 1000 : 500) : armour+is.add+(aptitude==APT_SOLDAT && type!=I_ARMUREASSISTEE ? 250*(armourtype+1) : 0), playerarmourtype==4 ? 3000 : aptitude==APT_SOLDAT ? is.max+(250*(armourtype+1)) : is.max);
                 if(type==I_ARMUREASSISTEE)
                 {
+                    armourtype = A_ASSIST;
+                    armour = min(armour+is.add, is.max);
                     health = min(health+300, maxhealth);
                     if(ammo[GUN_ASSISTXPL]<=1) ammo[GUN_ASSISTXPL] = 1;
+                    break;
                 }
-
-                break;
-            case I_BOOSTDEGATS: steromillis = min(steromillis+is.add*(aptitude==APT_JUNKIE ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;
-            case I_BOOSTVITESSE: epomillis = min(epomillis+is.add*(aptitude==APT_JUNKIE ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;
-            case I_BOOSTGRAVITE: jointmillis = min(jointmillis+is.add*(aptitude==APT_JUNKIE ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;
-            case I_BOOSTPRECISION: champimillis = min(champimillis+is.add*(aptitude==APT_JUNKIE ? 1.5f : boostitem), is.max*(aptitude==13 ? 1.5f : 1)); break;
+                else
+                {
+                    armourtype = haspowerarmor ? A_ASSIST : is.info;
+                    int armourval = haspowerarmor && armour> 0 ? 500*boostitem : aptitude==APT_SOLDAT ? is.max+(250*(armourtype+1)) : is.max;
+                    armour = min(armour+armourval, haspowerarmor ? 3000 : armourval);
+                    break;
+                }
+            case I_BOOSTDEGATS: steromillis = min(steromillis+is.add*(aptitude==APT_JUNKIE ? 1.5f : boostitem), is.max*(aptitude==APT_JUNKIE ? 1.5f : 1)); break;
+            case I_BOOSTVITESSE: epomillis = min(epomillis+is.add*(aptitude==APT_JUNKIE ? 1.5f : boostitem), is.max*(aptitude==APT_JUNKIE ? 1.5f : 1)); break;
+            case I_BOOSTGRAVITE: jointmillis = min(jointmillis+is.add*(aptitude==APT_JUNKIE ? 1.5f : boostitem), is.max*(aptitude==APT_JUNKIE ? 1.5f : 1)); break;
+            case I_BOOSTPRECISION: champimillis = min(champimillis+is.add*(aptitude==APT_JUNKIE ? 1.5f : boostitem), is.max*(aptitude==APT_JUNKIE ? 1.5f : 1)); break;
                 break;
             default:
                 {
-                    float aptboost;
-                    aptitude == APT_AMERICAIN ? aptboost = 1.5f : aptboost = 1;
-                    ammo[is.info] = min(ammo[is.info]+is.add*boostitem*aptboost, is.max*aptboost);
+                    float ammoboost = aptitude==APT_AMERICAIN ? 1.5f : 1;
+                    ammo[is.info] = min(ammo[is.info]+is.add*boostitem*ammoboost, is.max*ammoboost);
                 }
                 break;
         }

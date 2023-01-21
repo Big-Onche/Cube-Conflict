@@ -349,7 +349,7 @@ namespace ai
     }
     bool needshield(gameent *d, bool powerarmour)
     {
-        if(powerarmour && d->armour < 1000) return true;
+        if(powerarmour && d->armour < 1000+d->skill*5 && d->armourtype!=A_ASSIST) return true;
         switch(d->aptitude)
         {
             case APT_VAMPIRE:
@@ -558,7 +558,7 @@ namespace ai
         loopv(entities::ents)
         {
             extentity &e = *(extentity *)entities::ents[i];
-            if(!e.spawned() || e.nopickup() || !d->canpickup(e.type, d->aptitude, d->armourtype)) continue;
+            if(!e.spawned() || e.nopickup() || !d->canpickupitem(e.type, d->aptitude, d->armourtype==A_ASSIST)) continue;
             tryitem(d, e, i, b, interests, force);
         }
     }
@@ -609,7 +609,7 @@ namespace ai
                 {
                     int id = nearby[i];
                     extentity &e = *(extentity *)entities::ents[id];
-                    if(d->canpickup(e.type, d->aptitude, d->armourtype)) tryitem(d, e, id, b, interests);
+                    if(d->canpickupitem(e.type, d->aptitude, d->armourtype==A_ASSIST)) tryitem(d, e, id, b, interests);
                 }
             }
         }
@@ -714,7 +714,7 @@ namespace ai
         extentity &e = *entities::ents[ent];
         if(validitem(e.type))
         {
-            loopv(players) if(players[i] && players[i]->ai && players[i]->aitype == AI_BOT && players[i]->canpickup(e.type, players[i]->aptitude, players[i]->armourtype))
+            loopv(players) if(players[i] && players[i]->ai && players[i]->aitype == AI_BOT && players[i]->canpickupitem(e.type, players[i]->aptitude, players[i]->armourtype==A_ASSIST))
             {
                 gameent *d = players[i];
                 bool wantsitem = false;
