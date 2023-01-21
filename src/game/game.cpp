@@ -589,7 +589,7 @@ namespace game
 
         d->deaths++;
         d->killstreak = 0;
-        d->canability1 = d->canability2 = d->canability3 = true; //Si le joueur meurt les sorts sont réarmés
+        loopi(3) d->abilityready[i] = true;
 
         //Effet graphique de mort
         vec pos(d->o.x, d->o.y, d->o.z-9);

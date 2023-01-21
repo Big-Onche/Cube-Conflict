@@ -3695,7 +3695,7 @@ namespace server
 
                 switch(ability)
                 {
-                    case 1:
+                    case game::ABILITY_1:
                     {
                         if(cq->state.mana < sorts[abilitydata(cq->aptitude)].mana1) return;
                         cq->state.aptisort1 = sorts[abilitydata(cq->aptitude)].duree1;
@@ -3703,7 +3703,7 @@ namespace server
                         break;
                     }
 
-                    case 2:
+                    case game::ABILITY_2:
                     {
                         if(cq->state.mana < sorts[abilitydata(cq->aptitude)].mana2) return;
                         cq->state.aptisort2 = sorts[abilitydata(cq->aptitude)].duree2;
@@ -3711,7 +3711,7 @@ namespace server
                         break;
                     }
 
-                    case 3:
+                    case game::ABILITY_3:
                     {
                         if(cq->state.mana < sorts[abilitydata(cq->aptitude)].mana3) return;
                         cq->state.aptisort3 = sorts[abilitydata(cq->aptitude)].duree3;
@@ -3720,7 +3720,7 @@ namespace server
                     }
                     default: return;
                 }
-                loopv(clients) sendf(clients[i]->clientnum, 1, "ri4", N_GETABILITY, cq->clientnum, ability, ability == 1 ? cq->state.aptisort1 : ability == 2 ? cq->state.aptisort2 : cq->state.aptisort3);
+                loopv(clients) sendf(clients[i]->clientnum, 1, "ri4", N_GETABILITY, cq->clientnum, ability, ability == game::ABILITY_1 ? cq->state.aptisort1 : ability == game::ABILITY_2 ? cq->state.aptisort2 : cq->state.aptisort3);
                 break;
             }
 

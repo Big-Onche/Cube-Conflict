@@ -22,24 +22,33 @@ int getspyability;
 
 namespace game
 {
-    void aptitude(gameent *d, int ability, bool request) //Commandes d'aptitudes
+    bool canlaunchability(gameent *d, int ability)
     {
-        if(d->state==CS_DEAD || !isconnected() || forcecampos>=0 || intermission || premission) return;
+        if(d->state==CS_DEAD || !isconnected() || forcecampos>=0 || intermission || premission || (ability<ABILITY_1 && ability>ABILITY_3)) return false;
+        else return d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_ESPION || d->aptitude==APT_PRETRE || d->aptitude==APT_SHOSHONE || d->aptitude==APT_KAMIKAZE;
+    }
+
+    void aptitude(gameent *d, int ability, bool request) //abilities commands
+    {
+        if(!canlaunchability(d, ability)) return; //first check
+
+        if(request) //player is requesting ability
+        {
+            int neededmana = ability==ABILITY_1 ? sorts[abilitydata(d->aptitude)].mana1 : ability==ABILITY_2 ? sorts[abilitydata(d->aptitude)].mana2 : sorts[abilitydata(d->aptitude)].mana3;
+            if(!d->abilityready[ability] || d->mana < neededmana) {if(d==hudplayer())playsound(S_SORTIMPOSSIBLE); return; } //second check (client sided)
+            addmsg(N_REQABILITY, "rci", d, ability); //third check (server sided)
+            return; //can stop after this, cuz server call this func with !request
+        }
+
+        //if all good, we let the ability begin
+        d->abilityready[ability] = false; d->lastability[ability] = totalmillis;
+        playsound(S_SORTLANCE, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
+        if(d==player1) addstat(1, STAT_ABILITES);
 
         switch(ability)
         {
-            case 1:
+            case ABILITY_1:
             {
-                if(request) //We send the shit to the server: client send to the server, then the server checks if it's valid or not
-                {
-                    if(!d->canability1 || d->mana < sorts[abilitydata(d->aptitude)].mana1) {if(d==player1)playsound(S_SORTIMPOSSIBLE); return; }
-                    addmsg(N_REQABILITY, "rci", d, ability);
-                    return;
-                }
-                //We recieve some shit from the server
-                d->canability1 = false; d->lastability1 = totalmillis;
-
-                playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
                 vec soundpos = d->o;
                 if(d->aptitude==APT_ESPION)
                 {
@@ -58,18 +67,8 @@ namespace game
             }
             break;
 
-            case 2:
+            case ABILITY_2:
             {
-                if(request)
-                {
-                    if(!d->canability2 || d->mana<sorts[abilitydata(d->aptitude)].mana2) {if(d==player1)playsound(S_SORTIMPOSSIBLE); return; }
-                    addmsg(N_REQABILITY, "rci", d, ability);
-                    return;
-                }
-
-                d->canability2 = false; d->lastability2 = totalmillis;
-
-                playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0, 100, -1, 250);
                 d->abi2chan = playsound(sorts[abilitydata(d->aptitude)].sound2, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->abi2chan, 275);
                 d->abi2snd = sorts[abilitydata(d->aptitude)].sound2;
 
@@ -81,18 +80,8 @@ namespace game
             }
             break;
 
-            case 3:
+            case ABILITY_3:
             {
-                if(request)
-                {
-                    if(!d->canability3 || d->mana<sorts[abilitydata(d->aptitude)].mana3) {if(d==player1)playsound(S_SORTIMPOSSIBLE); return; }
-                    addmsg(N_REQABILITY, "rci", d, ability);
-                    return;
-                }
-
-                d->canability3 = false; d->lastability3 = totalmillis;
-
-                playsound(S_SORTLANCE, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
                 d->abi3chan = playsound(sorts[abilitydata(d->aptitude)].sound3, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->abi3chan, 275);
                 d->abi3snd = sorts[abilitydata(d->aptitude)].sound3;
 
@@ -104,32 +93,26 @@ namespace game
                     playsound(S_SPY_3);
                 }
             }
-            if(d==player1) addstat(1, STAT_ABILITES);
         }
     }
 
     void player1aptitude(int ability) //Player1 abilities commands
     {
-        switch(ability)
-        {
-            case 1:
-                switch(player1->aptitude)
-                {
-                    case APT_KAMIKAZE: player1->gunselect = GUN_KAMIKAZE; playsound(S_WPLOADFASTWOOSH); return;
-                    case APT_PRETRE: case APT_PHYSICIEN: case APT_MAGICIEN: case APT_SHOSHONE: case APT_ESPION: aptitude(player1, ability);
-                    default: return;
-                }
-                break;
-            default:
-                if(player1->aptitude==APT_PRETRE || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || player1->aptitude==APT_KAMIKAZE) aptitude(player1, player1->aptitude==APT_KAMIKAZE ? 2 : ability);
-        }
+        if(player1->aptitude==APT_KAMIKAZE && ability==ABILITY_1) gunselect(GUN_KAMIKAZE, player1);
+        else aptitude(player1, player1->aptitude==APT_KAMIKAZE ? ABILITY_2 : ability);
     }
-    ICOMMAND(aptitude, "i", (int *ability), if(isconnected()) player1aptitude(*ability));
+    ICOMMAND(aptitude, "i", (int *ability), player1aptitude(*ability));
 
     void updatespecials(gameent *d) //Permet de réarmer les sorts en fonction de la durée de rechargement de ceux-ci
     {
-        if(totalmillis-d->lastability1 >= sorts[abilitydata(d->aptitude)].reload1 && !d->canability1) {if(d==player1)playsound(S_SORTPRET); d->canability1 = true; }
-        if(totalmillis-d->lastability2 >= sorts[abilitydata(d->aptitude)].reload2 && !d->canability2) {if(d==player1)playsound(S_SORTPRET); d->canability2 = true; }
-        if(totalmillis-d->lastability3 >= sorts[abilitydata(d->aptitude)].reload3 && !d->canability3) {if(d==player1)playsound(S_SORTPRET); d->canability3 = true; }
+        loopi(3)
+        {
+            int abilityreload = i==ABILITY_1 ? sorts[abilitydata(d->aptitude)].reload1 : i==ABILITY_2 ? sorts[abilitydata(d->aptitude)].reload2 : sorts[abilitydata(d->aptitude)].reload3;
+            if(totalmillis-d->lastability[i] >= abilityreload && !d->abilityready[i])
+            {
+                if(d==hudplayer()) playsound(S_SORTPRET);
+                d->abilityready[i] = true;
+            }
+        }
     }
 }

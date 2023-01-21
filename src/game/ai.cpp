@@ -516,7 +516,7 @@ namespace ai
                 break;
             case I_SANTE:
                 if(d->health<800){score = m_ctf || d->health > 400 ? 1e2f : 1e5f; }
-                if(d->mana>40 && d->aptitude==APT_PRETRE && d->health<=300) aptitude(d, 1);
+                if(d->mana>40 && d->aptitude==APT_PRETRE && d->health<=300) aptitude(d, ABILITY_1);
                 break;
             case I_MANA:
                 if(d->mana < 100 && d->aptitude!=APT_VAMPIRE) score = m_ctf ? 1e2f : 1e5f;
@@ -856,12 +856,12 @@ namespace ai
                         switch(d->aptitude)
                         {
                             case APT_MAGICIEN:
-                                if(d->mana>60 && d->o.dist(e->o)<500) aptitude(d, 1);
-                                else if (d->mana>=100 && d->o.dist(e->o)>500) aptitude(d, 2);
+                                if(d->mana>60 && d->o.dist(e->o)<500) aptitude(d, ABILITY_1);
+                                else if (d->mana>=100 && d->o.dist(e->o)>500) aptitude(d, ABILITY_2);
                                 break;
                             case APT_ESPION:
-                                if(randomevent(2) && d->mana>=40 && d->o.dist(e->o)<700 && !d->aptisort2) aptitude(d, 1);
-                                else if(d->mana>=50 && d->o.dist(e->o)<700 && !d->aptisort1) aptitude(d, 2);
+                                if(randomevent(2) && d->mana>=40 && d->o.dist(e->o)<700 && !d->aptisort2) aptitude(d, ABILITY_1);
+                                else if(d->mana>=50 && d->o.dist(e->o)<700 && !d->aptisort1) aptitude(d, ABILITY_2);
                         }
 
                         int atk = guns[d->gunselect].attacks[ACT_SHOOT];
@@ -1168,13 +1168,13 @@ namespace ai
                     if(!enemyok) violence(d, b, f, needpursue(d));
                     switch(d->aptitude)
                     {
-                        case APT_PRETRE: case APT_SHOSHONE: if(d->mana>70 && d->o.dist(f->o)<750) aptitude(d, 3); break;
+                        case APT_PRETRE: case APT_SHOSHONE: if(d->mana>70 && d->o.dist(f->o)<750) aptitude(d, ABILITY_3); break;
                         case APT_KAMIKAZE:
-                            if(d->o.dist(f->o)<500) aptitude(d, 2);
+                            if(d->o.dist(f->o)<500) aptitude(d, ABILITY_2);
                             break;
                         case APT_ESPION:
-                            if(randomevent(2) && d->mana>=40 && d->o.dist(f->o)<700 && !d->aptisort2) aptitude(d, 1);
-                            else if(d->mana>=50 && d->o.dist(f->o)<700 && !d->aptisort1) aptitude(d, 2);
+                            if(randomevent(2) && d->mana>=40 && d->o.dist(f->o)<700 && !d->aptisort2) aptitude(d, ABILITY_1);
+                            else if(d->mana>=50 && d->o.dist(f->o)<700 && !d->aptisort1) aptitude(d, ABILITY_2);
                     }
                     enemyok = true;
                     e = f;
@@ -1475,16 +1475,16 @@ namespace ai
 
                 switch(d->aptitude)
                 {
-                    case APT_MAGICIEN: if(d->health<250+d->skill*2 && d->mana>=60) aptitude(d, 3); break;
-                    case APT_PRETRE: if(d->mana>30 && d->health<(d->skill/3)) aptitude(d, 2); break;
-                    case APT_SHOSHONE: if(d->mana>=100) aptitude(d, 2); break;
+                    case APT_MAGICIEN: if(d->health<250+d->skill*2 && d->mana>=60) aptitude(d, ABILITY_3); break;
+                    case APT_PRETRE: if(d->mana>30 && d->health<(d->skill/3)) aptitude(d, ABILITY_2); break;
+                    case APT_SHOSHONE: if(d->mana>=100) aptitude(d, ABILITY_2); break;
                     case APT_PHYSICIEN:
-                        if(randomevent(70) && d->mana>70) aptitude(d, 3);
-                        if(d->health<400+d->skill && d->mana>=50) aptitude(d, 2);
-                        if(d->health<700 && d->armour<50 && d->mana>=25) aptitude(d, 1);
+                        if(randomevent(70) && d->mana>70) aptitude(d, ABILITY_3);
+                        if(d->health<400+d->skill && d->mana>=50) aptitude(d, ABILITY_2);
+                        if(d->health<700 && d->armour<50 && d->mana>=25) aptitude(d, ABILITY_1);
                         break;
                     case APT_ESPION:
-                        if(d->mana>100) aptitude(d, 3);
+                        if(d->mana>100) aptitude(d, ABILITY_3);
                 }
                 if(randomevent(2.5f*nbfps)) bottaunt(d);
 

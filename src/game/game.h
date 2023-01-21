@@ -884,8 +884,8 @@ struct gameent : dynent, gamestate
     float deltayaw, deltapitch, deltaroll, newyaw, newpitch, newroll;
     int smoothmillis;
 
-    int lastability1, lastability2, lastability3;
-    bool canability1 = true, canability2 = true, canability3 = true, playerexploded = false;
+    int lastability[3];
+    bool abilityready[3], playerexploded;
 
     string name, info;
     int team, playermodel, playercolor, customcape, customtombe, customdanse, aptitude, level;
@@ -961,9 +961,7 @@ struct gameent : dynent, gamestate
         flagpickup = 0;
         lastbase = lastrepammo = -1;
         lastnode = -1;
-        canability1 = true;
-        canability2 = true;
-        canability3 = true;
+        loopi(3) abilityready[i] = true;
         gunaccel = 0;
         playerexploded = false;
     }
@@ -1211,6 +1209,7 @@ namespace game
     extern vec hudgunorigin(int gun, const vec &from, const vec &to, gameent *d);
 
     // sorts
+    enum abilities {ABILITY_1 = 0, ABILITY_2, ABILITY_3};
     extern void aptitude(gameent *d, int skill, bool request = true);
     extern int getteamfrags(int team);
 }
