@@ -112,7 +112,7 @@ namespace game
         if(totalmillis - message[MSG_YOUKILLED] <=2500)//////////////////////////////////////////////////////////////// PLAYER 1 KILL MESSAGE
         {
             string msg;
-            formatstring(msg, "%s \fc%s \f7! (%s à %.1fm)", GAME_LANG ? "You killed" : "Tu as tué",str_pseudovictime, GAME_LANG ? aptitudes[n_aptitudevictime].apt_nomEN : aptitudes[n_aptitudevictime].apt_nomFR, killdistance);
+            formatstring(msg, "%s \fc%s \f7! (%s à %.1fm)", GAME_LANG ? "You killed" : "Tu as tué", str_pseudovictime, GAME_LANG ? aptitudes[n_aptitudevictime].apt_nomEN : aptitudes[n_aptitudevictime].apt_nomFR, killdistance);
             rendermessage(msg, 100, 8.8f, decal_message);
             decal_message -= screenh/27;
         }
@@ -249,7 +249,7 @@ namespace game
             gle::colorf(1, 1, 1, 1);
         }
 
-        if(((d->aptisort3 || d->aptisort1) && d->aptitude==APT_MAGICIEN) || (d->aptisort2 && d->aptitude==APT_PHYSICIEN))
+        if(((d->abilitymillis[ABILITY_1] || d->abilitymillis[ABILITY_3]) && d->aptitude==APT_MAGICIEN) || (d->abilitymillis[ABILITY_2] && d->aptitude==APT_PHYSICIEN))
         {
             d->aptitude==APT_MAGICIEN ? gle::colorf(1, 1, 1, 0.7f) : gle::colorf(0.3, 0.6, 1, 0.7f);
 
@@ -314,7 +314,7 @@ namespace game
 
         if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || player1->aptitude==APT_KAMIKAZE)
         {
-            if(player1->aptisort2 && player1->aptitude==APT_KAMIKAZE && player1->ammo[GUN_KAMIKAZE]>0)
+            if(player1->abilitymillis[ABILITY_2] && player1->aptitude==APT_KAMIKAZE && player1->ammo[GUN_KAMIKAZE]>0)
             {
                 settexture("media/interface/hud/chrono.png");
                 bgquad(15, h-260, 115, 115);
@@ -333,15 +333,15 @@ namespace game
 
             if(player1->aptitude!=APT_KAMIKAZE)
             {
-                if(d->aptisort1) gle::colorf(2, 2, 2, 1);
-                else if(d->mana<sorts[abilitydata(d->aptitude)].mana1 || !d->canability1) gle::colorf(0.2, 0.2, 0.2, 1);
+                if(d->abilitymillis[ABILITY_1]) gle::colorf(2, 2, 2, 1);
+                else if(d->mana<sorts[abilitydata(d->aptitude)].mana1 || !d->abilityready[ABILITY_1]) gle::colorf(0.2, 0.2, 0.2, 1);
                 else gle::colorf(1, 1, 1, 1);
                 settexture(logodir, 3);
                 bgquad(positionsorts-85, h-114, 100, 100);
                 gle::colorf(1, 1, 1, 1);
 
-                if(d->aptisort3) gle::colorf(2, 2, 2, 1);
-                else if(d->mana<sorts[abilitydata(d->aptitude)].mana3 || !d->canability3) gle::colorf(0.2, 0.2, 0.2, 1);
+                if(d->abilitymillis[ABILITY_3]) gle::colorf(2, 2, 2, 1);
+                else if(d->mana<sorts[abilitydata(d->aptitude)].mana3 || !d->abilityready[ABILITY_3]) gle::colorf(0.2, 0.2, 0.2, 1);
                 else gle::colorf(1, 1, 1, 1);
                 formatstring(logodir, "media/interface/hud/abilities/%s_3.png", aptitudes[player1->aptitude].apt_nomEN);
                 settexture(logodir, 3);
@@ -349,8 +349,8 @@ namespace game
                 gle::colorf(1, 1, 1, 1);
             }
 
-            if(d->aptisort2) gle::colorf(2, 2, 2, 1);
-            else if(d->mana<sorts[abilitydata(d->aptitude)].mana2 || !d->canability2) gle::colorf(0.2, 0.2, 0.2, 1);
+            if(d->abilitymillis[ABILITY_2]) gle::colorf(2, 2, 2, 1);
+            else if(d->mana<sorts[abilitydata(d->aptitude)].mana2 || !d->abilityready[ABILITY_2]) gle::colorf(0.2, 0.2, 0.2, 1);
             else gle::colorf(1, 1, 1, 1);
             formatstring(logodir, "media/interface/hud/abilities/%s_2.png", aptitudes[player1->aptitude].apt_nomEN);
             settexture(logodir, 3);
@@ -426,8 +426,8 @@ namespace game
         if(d->armour > 0) draw_textf("%d", 370, h-103, d->armour < 9 ? 1 : d->armour/10);
 
 
-        if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || (player1->aptitude==APT_KAMIKAZE && player1->aptisort2>0 && player1->ammo[GUN_KAMIKAZE]>0))
-           {draw_textf("%d", 135, h-233-decal_number, player1->aptitude==APT_KAMIKAZE ? (player1->aptisort2-1500)/1000 : player1->mana); decal_number +=130;}
+        if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || (player1->aptitude==APT_KAMIKAZE && player1->abilitymillis[ABILITY_2] && player1->ammo[GUN_KAMIKAZE]>0))
+           {draw_textf("%d", 135, h-233-decal_number, player1->aptitude==APT_KAMIKAZE ? (player1->abilitymillis[ABILITY_2]-1500)/1000 : player1->mana); decal_number +=130;}
 
         if(player1->crouching && player1->aptitude==9) decal_number +=130;
         if(player1->ragemillis) {draw_textf("%d", 135, h-233-decal_number, d->ragemillis/1000); decal_number +=130;}

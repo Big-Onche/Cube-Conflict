@@ -314,7 +314,7 @@ namespace game
         if(animoverride) anim = (animoverride<0 ? ANIM_ALL : animoverride)|ANIM_LOOP;
         const char *mdlname = m_tutorial ? mdl.model[1] :
                               d->armourtype==A_ASSIST && d->armour>0 ? validteam(team) ? d->team==player1->team ? "smileys/armureassistee" : "smileys/armureassistee/red" : "smileys/armureassistee/red" :
-                              d->aptisort2 && d->aptitude==APT_PHYSICIEN ? "smileys/phy_2" : mdl.model[validteam(team) ? d->team==player1->team ? 1 : 2 : 0];
+                              d->abilitymillis[ABILITY_2] && d->aptitude==APT_PHYSICIEN ? "smileys/phy_2" : mdl.model[validteam(team) ? d->team==player1->team ? 1 : 2 : 0];
 
         if(intermission && updatewinstat && (validteam(team) ? bestteams.htfind(player1->team)>=0 : bestplayers.find(player1)>=0))
         {
@@ -417,10 +417,10 @@ namespace game
         else flags |= MDL_CULL_DIST;
         if(!mainpass) flags &= ~(MDL_FULLBRIGHT | MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY | MDL_CULL_DIST);
         float trans = d->state == CS_LAGGED ? 0.5f : 1.0f;
-        if(d->aptisort2 && d->aptitude==APT_PHYSICIEN) trans = 0.f;
-        else if(d->aptisort1 && d->aptitude==APT_MAGICIEN) trans = 0.7f;
+        if(d->abilitymillis[ABILITY_2] && d->aptitude==APT_PHYSICIEN) trans = 0.f;
+        else if(d->abilitymillis[ABILITY_1] && d->aptitude==APT_MAGICIEN) trans = 0.7f;
 
-        if(d->aptitude==APT_ESPION && d->aptisort1)
+        if(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_1])
         {
             if(d!=hudplayer()) flags = NULL;
 
@@ -438,7 +438,7 @@ namespace game
             rendermodel(mdlname, anim, doublepos, yaw, d->pitch>12 ? 12 : d->pitch<-25 ? -25 : pitch, 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), d==player1 ? 0.3f : trans));
         }
 
-        if(d->aptitude==APT_ESPION && d->aptisort2)
+        if(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2])
         {
             switch(map_sel)
             {
@@ -563,8 +563,8 @@ namespace game
                                     0xFF00FF, 0x000000,
                                     d->o.dist(camera1->o)<75 ? 1.35f : 0.02f);
 
-                if(d->aptisort2 && d->aptitude==APT_ESPION);
-                else if(((player1->aptitude==APT_ESPION && player1->aptisort3 && d!=player1) || (totalmillis-getspyability<2000)) && (!isteam(player1->team, d->team)) && d->o.dist(camera1->o) > 32)
+                if(d->abilitymillis[ABILITY_2] && d->aptitude==APT_ESPION);
+                else if(((player1->aptitude==APT_ESPION && player1->abilitymillis[ABILITY_3] && d!=player1) || (totalmillis-getspyability<2000)) && (!isteam(player1->team, d->team)) && d->o.dist(camera1->o) > 32)
                 {
                     vec posA = d->o;
                     posA.add(vec(0, 0, -8));
@@ -582,19 +582,19 @@ namespace game
                 switch(d->aptitude)
                 {
                     case APT_MAGICIEN:
-                        if(d->aptisort1) particle_splash(PART_SMOKE, 2, 120, d->o, 0xFF33FF, 10+rnd(5), 400,400);
-                        if(d->aptisort3  && (d!=hudplayer() || thirdperson)) particle_fireball(pos, 15.2f, PART_EXPLOSION, 5,  0x880088, 13.0f);
+                        if(d->abilitymillis[ABILITY_1]) particle_splash(PART_SMOKE, 2, 120, d->o, 0xFF33FF, 10+rnd(5), 400,400);
+                        if(d->abilitymillis[ABILITY_3]  && (d!=hudplayer() || thirdperson)) particle_fireball(pos, 15.2f, PART_EXPLOSION, 5,  0x880088, 13.0f);
                         break;
                     case APT_PHYSICIEN:
-                        if(d->aptisort2 && randomevent(0.05f*nbfps)) particle_splash(PART_SMOKE, 1, 300, d->o, 0x7777FF, 10+rnd(5), 400, 400);
-                        if(d->aptisort3 && randomevent(0.03f*nbfps))
+                        if(d->abilitymillis[ABILITY_2] && randomevent(0.05f*nbfps)) particle_splash(PART_SMOKE, 1, 300, d->o, 0x7777FF, 10+rnd(5), 400, 400);
+                        if(d->abilitymillis[ABILITY_3] && randomevent(0.03f*nbfps))
                         {
                             particle_splash(PART_SMOKE,  1,  150, d->feetpos(), 0x8888BB, 7+rnd(4),  100, -200);
                             particle_splash(PART_FLAME1+rnd(2),  5,  100, d->feetpos(), 0xFF6600, 1+rnd(2),  100, -20);
                         }
                         break;
                     case APT_PRETRE:
-                        if(d->aptisort2) particle_fireball(pos , 16.0f, PART_ONDECHOC, 5, 0xFFFF00, 16.0f);
+                        if(d->abilitymillis[ABILITY_2]) particle_fireball(pos , 16.0f, PART_ONDECHOC, 5, 0xFFFF00, 16.0f);
                         break;
                     case APT_VIKING:
                         if(d->ragemillis && randomevent(0.03f*nbfps) && (d!=hudplayer() || thirdperson)) particle_splash(PART_SMOKE, 2, 150, d->o, 0xFF3300, 12+rnd(5), 400, 200);
@@ -602,9 +602,9 @@ namespace game
                     case APT_SHOSHONE:
                         if(randomevent(0.03f*nbfps))
                         {
-                            if(d->aptisort1) regularflame(PART_SPARK, d->feetpos(), 12, 2, 0xAAAAAA, 2, 0.04f, 10.f, 300);
-                            if(d->aptisort2) regularflame(PART_SPARK, d->feetpos(), 12, 2, 0xFF33FF, 2, 0.04f, 10.f, 300);
-                            if(d->aptisort3) regularflame(PART_SPARK, d->feetpos(), 12, 2, 0xFF3333, 2, 0.04f, 10.f, 300);
+                            if(d->abilitymillis[ABILITY_1]) regularflame(PART_SPARK, d->feetpos(), 12, 2, 0xAAAAAA, 2, 0.04f, 10.f, 300);
+                            if(d->abilitymillis[ABILITY_2]) regularflame(PART_SPARK, d->feetpos(), 12, 2, 0xFF33FF, 2, 0.04f, 10.f, 300);
+                            if(d->abilitymillis[ABILITY_3]) regularflame(PART_SPARK, d->feetpos(), 12, 2, 0xFF3333, 2, 0.04f, 10.f, 300);
                         }
                 }
 
@@ -721,8 +721,8 @@ namespace game
         }
 
         float trans = 1.0f;
-        if(d->aptisort2 && d->aptitude==APT_PHYSICIEN) trans = 0.08f;
-        else if(d->aptisort1 && d->aptitude==APT_MAGICIEN) trans = 0.7f;
+        if(d->abilitymillis[ABILITY_2] && d->aptitude==APT_PHYSICIEN) trans = 0.08f;
+        else if(d->abilitymillis[ABILITY_1] && d->aptitude==APT_MAGICIEN) trans = 0.7f;
 
         if(d->jointmillis)
         {

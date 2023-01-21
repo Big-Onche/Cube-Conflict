@@ -1439,7 +1439,7 @@ void screenshake(int shakereduce)
     switch(game::hudplayer()->aptitude)
     {
         case APT_SOLDAT: factor*=2; break;
-        case APT_MAGICIEN: if(game::player1->aptisort2) return;
+        case APT_MAGICIEN: if(game::player1->abilitymillis[game::ABILITY_2]) return;
     }
     camera1->roll = (rnd(100/factor)/(10.f*factor))-(rnd(100/factor)/(10.f*factor));
     mousemove(rnd(25/factor)+(-rnd(25/factor)), rnd(25/factor)+(-rnd(25/factor)));

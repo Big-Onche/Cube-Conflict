@@ -62,7 +62,7 @@ namespace ai
 
     float attackmindist(int atk)
     {
-        return max(int(attacks[atk].exprad/4), 2);
+        return atk==ATK_KAMIKAZE_SHOOT ? true : max(int(attacks[atk].exprad/4), 2);
     }
 
     float attackmaxdist(int atk)
@@ -84,7 +84,7 @@ namespace ai
     bool targetable(gameent *d, gameent *e)
     {
         if(d == e || !canmove(d)) return false;
-        else if((e->aptitude==APT_ESPION && e->aptisort2 && e->attacking==ACT_IDLE && e->physstate!=PHYS_FALL) || (e->aptitude==APT_PHYSICIEN && e->aptisort2)) return false;
+        else if((e->aptitude==APT_ESPION && e->abilitymillis[ABILITY_2] && e->attacking==ACT_IDLE && e->physstate!=PHYS_FALL) || (e->aptitude==APT_PHYSICIEN && e->abilitymillis[ABILITY_2])) return false;
         else return e->state == CS_ALIVE && !isteam(d->team, e->team);
     }
 
@@ -150,7 +150,7 @@ namespace ai
     {
         vec o = e->o;
 
-        if(e->aptitude==APT_ESPION && e->aptisort1 && randomevent(2))
+        if(e->aptitude==APT_ESPION && e->abilitymillis[ABILITY_1] && randomevent(2))
         {
             int posx = 25, posy = 25;
             switch(e->aptiseed)
@@ -326,7 +326,7 @@ namespace ai
 
     int needpursue(gameent *d)
     {
-        if((d->gunselect>=GUN_CAC349 && d->gunselect<=GUN_CACFLEAU) || d->gunselect==GUN_CACNINJA || (d->aptitude==APT_KAMIKAZE && d->aptisort2)) return 1;
+        if((d->gunselect>=GUN_CAC349 && d->gunselect<=GUN_CACFLEAU) || d->gunselect==GUN_CACNINJA || (d->aptitude==APT_KAMIKAZE && d->abilitymillis[ABILITY_2])) return 1;
         else return 0;
     }
 
@@ -503,7 +503,7 @@ namespace ai
 
     static void tryitem(gameent *d, extentity &e, int id, aistate &b, vector<interest> &interests, bool force = false)
     {
-        if(d->aptitude==APT_KAMIKAZE && d->aptisort2) return; //Le kamikaze s'en fout de chopper un item une fois la bombe activée
+        if(d->aptitude==APT_KAMIKAZE && d->abilitymillis[ABILITY_2]) return; //Le kamikaze s'en fout de chopper un item une fois la bombe activée
         float score = 0;
 
         switch(e.type)
@@ -860,8 +860,8 @@ namespace ai
                                 else if (d->mana>=100 && d->o.dist(e->o)>500) aptitude(d, ABILITY_2);
                                 break;
                             case APT_ESPION:
-                                if(randomevent(2) && d->mana>=40 && d->o.dist(e->o)<700 && !d->aptisort2) aptitude(d, ABILITY_1);
-                                else if(d->mana>=50 && d->o.dist(e->o)<700 && !d->aptisort1) aptitude(d, ABILITY_2);
+                                if(randomevent(2) && d->mana>=40 && d->o.dist(e->o)<700 && !d->abilitymillis[ABILITY_2]) aptitude(d, ABILITY_1);
+                                else if(d->mana>=50 && d->o.dist(e->o)<700 && !d->abilitymillis[ABILITY_1]) aptitude(d, ABILITY_2);
                         }
 
                         int atk = guns[d->gunselect].attacks[ACT_SHOOT];
@@ -1018,7 +1018,7 @@ namespace ai
 
     void jumpto(gameent *d, aistate &b, const vec &pos)
     {
-        if(d->aptitude==APT_ESPION && d->aptisort2) return;
+        if(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2]) return;
         vec off = vec(pos).sub(d->feetpos()), dir(off.x, off.y, 0);
         bool sequenced = d->ai->blockseq || d->ai->targseq, offground = d->timeinair && !d->inwater,
             jump = !offground && lastmillis >= d->ai->jumpseed && (sequenced || off.z >= JUMPMIN || lastmillis >= d->ai->jumprand);
@@ -1145,7 +1145,7 @@ namespace ai
             d->ai->spot = vec(0, 0, 0);
         }
 
-        if(d->aptisort3 && d->aptitude==APT_PHYSICIEN && randomevent(17)) d->jumping = true;
+        if(d->abilitymillis[ABILITY_3] && d->aptitude==APT_PHYSICIEN && randomevent(17)) d->jumping = true;
         else if(d->gunselect==GUN_ARTIFICE || d->gunselect==GUN_SMAW || d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_ROQUETTES) d->jumping = true;
 		else if(!d->ai->dontmove || (d->jointmillis && randomevent(17))) jumpto(d, b, d->ai->spot);
 
@@ -1155,7 +1155,7 @@ namespace ai
         if(enemyok && (d->aptitude==APT_KAMIKAZE || d->aptitude==APT_NINJA))
         {
             makeroute(d, b, e->o);
-            if(d->aptisort2<500 && d->aptisort2 && d->aptitude==APT_KAMIKAZE) d->gunselect=GUN_KAMIKAZE;
+            if(d->abilitymillis[ABILITY_2]<500 && d->abilitymillis[ABILITY_2] && d->aptitude==APT_KAMIKAZE) d->gunselect=GUN_KAMIKAZE;
         }
 
         if(!enemyok || d->skill >= 50)
@@ -1173,8 +1173,8 @@ namespace ai
                             if(d->o.dist(f->o)<500) aptitude(d, ABILITY_2);
                             break;
                         case APT_ESPION:
-                            if(randomevent(2) && d->mana>=40 && d->o.dist(f->o)<700 && !d->aptisort2) aptitude(d, ABILITY_1);
-                            else if(d->mana>=50 && d->o.dist(f->o)<700 && !d->aptisort1) aptitude(d, ABILITY_2);
+                            if(randomevent(2) && d->mana>=40 && d->o.dist(f->o)<700 && !d->abilitymillis[ABILITY_2]) aptitude(d, ABILITY_1);
+                            else if(d->mana>=50 && d->o.dist(f->o)<700 && !d->abilitymillis[ABILITY_1]) aptitude(d, ABILITY_2);
                     }
                     enemyok = true;
                     e = f;
@@ -1207,7 +1207,7 @@ namespace ai
                 scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, sskew);
                 if(insight || quick || (hasseen && (d->gunselect==GUN_PULSE || d->gunselect==GUN_MINIGUN || d->gunselect==GUN_S_ROQUETTES)))
                 {
-                    if((canshoot(d, atk, e) && hastarget(d, atk, b, e, yaw, pitch, dp.squaredist(ep))) || (d->aptitude==APT_PRETRE && d->aptisort3))
+                    if((canshoot(d, atk, e) && hastarget(d, atk, b, e, yaw, pitch, dp.squaredist(ep))) || (d->aptitude==APT_PRETRE && d->abilitymillis[ABILITY_3]))
                     {
                         d->attacking = attacks[atk].action;
                         d->ai->lastaction = lastmillis;
@@ -1412,7 +1412,7 @@ namespace ai
             if(!intermission || !premission)
             {
                 if(d->ragdoll) cleanragdoll(d);
-                moveplayer(d, 10, true, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->aptisort1 : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION || d->aptitude==APT_KAMIKAZE ? d->aptisort2 : d->aptisort3, d->armourtype==A_ASSIST && d->armour>0 ? true : false);
+                moveplayer(d, 10, true, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->abilitymillis[ABILITY_1] : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION || d->aptitude==APT_KAMIKAZE ? d->abilitymillis[ABILITY_2] : d->abilitymillis[ABILITY_3], d->armourtype==A_ASSIST && d->armour>0 ? true : false);
                 if(allowmove && !b.idle) timeouts(d, b);
                 entities::checkitems(d);
                 if(cmode) cmode->checkitems(d);

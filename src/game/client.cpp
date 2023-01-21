@@ -1432,15 +1432,7 @@ namespace game
             d->deaths = getint(p);
             if(d==player1)
             {
-                getint(p);
-                getint(p);
-                getint(p);
-                getint(p);
-                getint(p);
-                getint(p);
-                getint(p);
-                getint(p);
-                getint(p);
+                loopi(9) getint(p);
             }
             else
             {
@@ -1449,9 +1441,7 @@ namespace game
                 d->jointmillis = getint(p);
                 d->champimillis = getint(p);
                 d->ragemillis = getint(p);
-                d->aptisort1 = getint(p);
-                d->aptisort2 = getint(p);
-                d->aptisort3 = getint(p);
+                loopi(3) d->abilitymillis[getint(p)];
                 d->aptiseed = getint(p);
             }
         }
@@ -1699,15 +1689,10 @@ namespace game
             {
                 int player = getint(p);
                 gameent *pl = getclient(player);
-
                 int ability = getint(p);
-                switch(ability)
-                {
-                    case ABILITY_1: pl->aptisort1 = getint(p); pl->mana-=sorts[abilitydata(pl->aptitude)].mana1; break;
-                    case ABILITY_2: pl->aptisort2 = getint(p); pl->mana-=sorts[abilitydata(pl->aptitude)].mana2; break;
-                    case ABILITY_3: pl->aptisort3 = getint(p); pl->mana-=sorts[abilitydata(pl->aptitude)].mana3; break;
-                    default: return;
-                }
+                pl->abilitymillis[ability] = getint(p);
+
+                ability==ABILITY_1 ? pl->mana-=sorts[abilitydata(pl->aptitude)].mana1 : ability==ABILITY_2 ? pl->mana-=sorts[abilitydata(pl->aptitude)].mana2 : pl->mana-=sorts[abilitydata(pl->aptitude)].mana3;
                 aptitude(pl, ability, false);
                 break;
             }

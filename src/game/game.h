@@ -586,7 +586,7 @@ struct gamestate
     int health, maxhealth, mana;
     int armour, armourtype;
     int steromillis, epomillis, jointmillis, champimillis, ragemillis, vampimillis;
-    int aptisort1, aptisort2, aptisort3, aptiseed;
+    int abilitymillis[3], aptiseed;
     int gunselect, gunwait;
     int ammo[NUMGUNS];
     int aitype, skill;
@@ -705,9 +705,7 @@ struct gamestate
         ragemillis = 0;
         vampimillis = 0;
         gunwait = 0;
-        aptisort1 = 0;
-        aptisort2 = 0;
-        aptisort3 = 0;
+        loopi(3) abilitymillis[i] = 0;
         aptiseed = rnd(4);
         loopi(NUMGUNS) ammo[i] = 0;
     }

@@ -132,7 +132,7 @@ namespace entities
         if(type<I_RAIL || type>I_MANA) return;
         ents[n]->clearspawned();
         if(!d) return;
-        d->pickupitem(type, d->aptitude, d->aptisort1, d->armourtype==A_ASSIST, rndsweap);
+        d->pickupitem(type, d->aptitude, d->abilitymillis[ABILITY_1], d->armourtype==A_ASSIST, rndsweap);
 
         if(type>=I_RAIL && type<=I_SUPERARME)
         {
@@ -140,7 +140,7 @@ namespace entities
             else if(autowield==1) gunselect(type-9+rndsweap, player1);
         }
 
-        if(d->aptisort1 && d->aptitude==APT_PRETRE)
+        if(d->abilitymillis[ABILITY_1] && d->aptitude==APT_PRETRE)
         {
             adddynlight(d->o, 20, vec(1.5f, 1.5f, 0.0f), 300, 50, L_NOSHADOW|L_VOLUMETRIC);
             playsound(S_PRI_1, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, d==hudplayer() ? 0 : 150, -1, 300);
@@ -380,9 +380,7 @@ namespace entities
     {
         if(d->ragemillis && (d->ragemillis -= time)<=0) d->ragemillis = 0;
         if(d->vampimillis && (d->vampimillis -= time)<=0) d->vampimillis = 0;
-        if(d->aptisort1 && (d->aptisort1 -= time)<=0) d->aptisort1 = 0;
-        if(d->aptisort2 && (d->aptisort2 -= time)<=0) d->aptisort2 = 0;
-        if(d->aptisort3 && (d->aptisort3 -= time)<=0) d->aptisort3 = 0;
+        loopi(3) { if(d->abilitymillis[i] && (d->abilitymillis[i] -= time)<=0) d->abilitymillis[i] = 0; }
     }
 
     void putitems(packetbuf &p)            // puts items in network stream and also spawns them locally

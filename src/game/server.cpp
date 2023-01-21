@@ -926,7 +926,7 @@ namespace server
         sents[i].spawned = false;
         sents[i].spawntime = spawntime(sents[i].type);
         sendf(-1, 1, "ri4", N_ITEMACC, i, sender, rndsweap);
-        ci->state.pickupitem(sents[i].type, ci->aptitude, ci->state.aptisort1, ci->state.armourtype==A_ASSIST, rndsweap);
+        ci->state.pickupitem(sents[i].type, ci->aptitude, ci->state.abilitymillis[game::ABILITY_1], ci->state.armourtype==A_ASSIST, rndsweap);
         return true;
     }
 
@@ -1987,9 +1987,7 @@ namespace server
                 putint(p, oi->state.jointmillis);
                 putint(p, oi->state.champimillis);
                 putint(p, oi->state.ragemillis);
-                putint(p, oi->state.aptisort1);
-                putint(p, oi->state.aptisort2);
-                putint(p, oi->state.aptisort3);
+                loopi(3) putint(p, oi->state.abilitymillis[i]);
                 putint(p, oi->state.aptiseed);
                 sendstate(oi->state, p);
             }
@@ -2018,7 +2016,7 @@ namespace server
         sendf(-1, 1, "ri9i9i4ivi", N_RESUME, ci->clientnum, gs.state,
             gs.killstreak, gs.frags, gs.flags, gs.deaths,
             gs.steromillis, gs.epomillis, gs.jointmillis, gs.champimillis, gs.ragemillis,
-            gs.aptisort1, gs.aptisort2, gs.aptisort3, gs.aptiseed,
+            gs.abilitymillis[game::ABILITY_1], gs.abilitymillis[game::ABILITY_2], gs.abilitymillis[game::ABILITY_3], gs.aptiseed,
             gs.lifesequence,
             gs.health, gs.maxhealth, gs.mana,
             gs.armour, gs.armourtype,
@@ -2332,26 +2330,26 @@ namespace server
         switch(actor->aptitude)
         {
             case APT_AMERICAIN: {if(atk==ATK_NUKE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_CAMPOUZE_SHOOT) damage *= 1.5f; break;}
-            case APT_MAGICIEN: {if(as.aptisort2) damage *= 1.25f; break;}
+            case APT_MAGICIEN: {if(as.abilitymillis[game::ABILITY_2]) damage *= 1.25f; break;}
             case APT_CAMPEUR: damage *= ((as.o.dist(ts.o)/1800.f)+1.f); break;
             case APT_VIKING: {if(as.ragemillis) damage *=1.25f;} break;
-            case APT_SHOSHONE: {if(as.aptisort3) damage *= 1.3f; break;}
+            case APT_SHOSHONE: {if(as.abilitymillis[game::ABILITY_3]) damage *= 1.3f; break;}
         }
 
         //Absorptions et skills spéciaux d'aptitudes
         switch(target->aptitude)
         {
-            case APT_MAGICIEN: {if(ts.aptisort3) damage = damage/5.0f;} break;
+            case APT_MAGICIEN: {if(ts.abilitymillis[game::ABILITY_3]) damage = damage/5.0f;} break;
             case APT_VIKING: {if(actor!=target) {ts.ragemillis+=damage*5; sendresume(target);}} break; //Ajoute la rage au Vicking et l'envoie au client
-            case APT_PRETRE: { if(ts.aptisort2 && ts.mana>0) {ts.mana -= damage/10; damage=0; {if(ts.mana<0)ts.mana=0;}; sendresume(target);} } break;
+            case APT_PRETRE: { if(ts.abilitymillis[game::ABILITY_2] && ts.mana>0) {ts.mana -= damage/10; damage=0; {if(ts.mana<0)ts.mana=0;}; sendresume(target);} } break;
             case APT_SHOSHONE:
             {
-                if(as.aptisort1) damage /= 1.3f;
+                if(as.abilitymillis[game::ABILITY_1]) damage /= 1.3f;
                 if(actor->aptitude==APT_AMERICAIN) damage *= 1.25f;
             }
         }
 
-        ts.dodamage(damage, target->aptitude, ts.aptisort1);
+        ts.dodamage(damage, target->aptitude, ts.abilitymillis[game::ABILITY_1]);
 
         if(target!=actor && !isteam(target->team, actor->team)) as.damage += damage;
 
@@ -2417,7 +2415,7 @@ namespace server
         if(actor==target || isteam(target->team, actor->team)) return;
 
         damage = ((damage*100)/aptitudes[target->aptitude].apt_resistance)/2.0f;
-        if(target->state.aptisort3 && target->aptitude==APT_MAGICIEN) damage = damage/5.0f;
+        if(target->state.abilitymillis[game::ABILITY_3] && target->aptitude==APT_MAGICIEN) damage = damage/5.0f;
 
         gamestate &as = actor->state;
         as.doregen(damage);
@@ -2540,7 +2538,7 @@ namespace server
         gs.lastshot = millis;
 
         float waitfactor = 1;
-        if(ci->aptitude==APT_PRETRE && ci->state.aptisort3) waitfactor = 2.5f + ((4000 - ci->state.aptisort3)/1000);
+        if(ci->aptitude==APT_PRETRE && ci->state.abilitymillis[game::ABILITY_3]) waitfactor = 2.5f + ((4000 - ci->state.abilitymillis[game::ABILITY_3])/1000);
 
         if(gs.champimillis>0) waitfactor*=ci->aptitude==APT_JUNKIE ? 2 : 1.5f;
         gs.gunwait = attacks[atk].attackdelay/waitfactor;
@@ -2641,14 +2639,15 @@ namespace server
         loopv(clients)
         {
             clientinfo *ci = clients[i];
-            if(curtime>0 && ci->state.steromillis) ci->state.steromillis = max(ci->state.steromillis-curtime, 0);
-            if(curtime>0 && ci->state.epomillis) ci->state.epomillis = max(ci->state.epomillis-curtime, 0);
-            if(curtime>0 && ci->state.jointmillis) ci->state.jointmillis = max(ci->state.jointmillis-curtime, 0);
-            if(curtime>0 && ci->state.champimillis) ci->state.champimillis = max(ci->state.champimillis-curtime, 0);
-            if(curtime>0 && ci->state.ragemillis) ci->state.ragemillis = max(ci->state.ragemillis-curtime, 0);
-            if(curtime>0 && ci->state.aptisort1) ci->state.aptisort1 = max(ci->state.aptisort1-curtime, 0);
-            if(curtime>0 && ci->state.aptisort2) ci->state.aptisort2 = max(ci->state.aptisort2-curtime, 0);
-            if(curtime>0 && ci->state.aptisort3) ci->state.aptisort3 = max(ci->state.aptisort3-curtime, 0);
+            if(curtime>0)
+            {
+                if(ci->state.steromillis) ci->state.steromillis = max(ci->state.steromillis-curtime, 0);
+                if(ci->state.epomillis) ci->state.epomillis = max(ci->state.epomillis-curtime, 0);
+                if(ci->state.jointmillis) ci->state.jointmillis = max(ci->state.jointmillis-curtime, 0);
+                if(ci->state.champimillis) ci->state.champimillis = max(ci->state.champimillis-curtime, 0);
+                if(ci->state.ragemillis) ci->state.ragemillis = max(ci->state.ragemillis-curtime, 0);
+                loopi(3) if(ci->state.abilitymillis[i]) ci->state.abilitymillis[i] = max(ci->state.abilitymillis[i]-curtime, 0);
+            }
             flushevents(ci, gamemillis);
         }
     }
@@ -3255,7 +3254,7 @@ namespace server
     {
         logoutf("Net : ping %d, overflow %d | Abilities : classe %s, a1 %d, a2 %d, a3 %d | Boosts : rage %d, epo %d, joint %d, stero %d, shrooms %d | Other : health %d, mana %d",
                 ci->ping, ci->overflow,
-                aptitudes[ci->aptitude].apt_nomEN, ci->state.aptisort1, ci->state.aptisort2, ci->state.aptisort3,
+                aptitudes[ci->aptitude].apt_nomEN, ci->state.abilitymillis[game::ABILITY_1], ci->state.abilitymillis[game::ABILITY_2], ci->state.abilitymillis[game::ABILITY_3],
                 ci->state.ragemillis, ci->state.epomillis, ci->state.jointmillis, ci->state.steromillis, ci->state.champimillis,
                 ci->state.health, ci->state.mana);
     }
@@ -3693,34 +3692,13 @@ namespace server
                 int ability = getint(p);
                 if(!cq) break;
 
-                switch(ability)
-                {
-                    case game::ABILITY_1:
-                    {
-                        if(cq->state.mana < sorts[abilitydata(cq->aptitude)].mana1) return;
-                        cq->state.aptisort1 = sorts[abilitydata(cq->aptitude)].duree1;
-                        cq->state.mana -= sorts[abilitydata(cq->aptitude)].mana1;
-                        break;
-                    }
+                int manacost = ability==game::ABILITY_1 ? sorts[abilitydata(cq->aptitude)].mana1 : ability==game::ABILITY_2 ? sorts[abilitydata(cq->aptitude)].mana2 : cq->state.mana < sorts[abilitydata(cq->aptitude)].mana3;
+                int duration = ability==game::ABILITY_1 ? sorts[abilitydata(cq->aptitude)].duree1 : ability==game::ABILITY_2 ? sorts[abilitydata(cq->aptitude)].duree2 : sorts[abilitydata(cq->aptitude)].duree3;
 
-                    case game::ABILITY_2:
-                    {
-                        if(cq->state.mana < sorts[abilitydata(cq->aptitude)].mana2) return;
-                        cq->state.aptisort2 = sorts[abilitydata(cq->aptitude)].duree2;
-                        cq->state.mana -= sorts[abilitydata(cq->aptitude)].mana2;
-                        break;
-                    }
-
-                    case game::ABILITY_3:
-                    {
-                        if(cq->state.mana < sorts[abilitydata(cq->aptitude)].mana3) return;
-                        cq->state.aptisort3 = sorts[abilitydata(cq->aptitude)].duree3;
-                        cq->state.mana -= sorts[abilitydata(cq->aptitude)].mana3;
-                        break;
-                    }
-                    default: return;
-                }
-                loopv(clients) sendf(clients[i]->clientnum, 1, "ri4", N_GETABILITY, cq->clientnum, ability, ability == game::ABILITY_1 ? cq->state.aptisort1 : ability == game::ABILITY_2 ? cq->state.aptisort2 : cq->state.aptisort3);
+                if(cq->state.mana < manacost) return;
+                cq->state.mana -= manacost;
+                cq->state.abilitymillis[ability] = duration;
+                loopv(clients) sendf(clients[i]->clientnum, 1, "ri4", N_GETABILITY, cq->clientnum, ability, cq->state.abilitymillis[ability]);
                 break;
             }
 
