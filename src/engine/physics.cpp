@@ -5,7 +5,7 @@
 
 #include "engine.h"
 #include "mpr.h"
-#include "ccheader.h"
+#include "game.h"
 #include "stats.h"
 
 const int MAXCLIPOFFSET = 4;

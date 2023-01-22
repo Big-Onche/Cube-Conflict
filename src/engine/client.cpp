@@ -1,7 +1,8 @@
 // client.cpp, mostly network related client game code
 
 #include "engine.h"
-#include "ccheader.h"
+#include "game.h"
+#include "gfx.h"
 #include "stats.h"
 
 ENetHost *clienthost = NULL;

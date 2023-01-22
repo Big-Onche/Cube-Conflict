@@ -1,7 +1,7 @@
 #include "engine.h"
 #include "textedit.h"
-#include "ccheader.h"
 #include "stats.h"
+
 namespace UI
 {
     float cursorx = 0.499f, cursory = 0.499f;

@@ -1,9 +1,8 @@
 //aptitudes.cpp: management of special abilities from certain classes.
 //Classes specs (such as speed, damage, etc...) and abilities are declared in game.h, cuz game.h is always included where we need classes specs and abilities's data.
 
-#include "game.h"
+#include "gfx.h"
 #include "stats.h"
-#include "ccheader.h"
 
 int abilitydata(int aptitude)
 {
@@ -24,7 +23,7 @@ namespace game
 {
     bool canlaunchability(gameent *d, int ability)
     {
-        if(d->state==CS_DEAD || !isconnected() || forcecampos>=0 || intermission || premission || (ability<ABILITY_1 && ability>ABILITY_3)) return false;
+        if(d->state==CS_DEAD || !isconnected() || gfx::forcecampos>=0 || intermission || premission || (ability<ABILITY_1 && ability>ABILITY_3)) return false;
         else return d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_ESPION || d->aptitude==APT_PRETRE || d->aptitude==APT_SHOSHONE || d->aptitude==APT_KAMIKAZE;
     }
 

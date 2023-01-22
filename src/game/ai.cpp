@@ -1,5 +1,4 @@
-#include "game.h"
-#include "ccheader.h"
+#include "gfx.h"
 
 extern int fog;
 
@@ -1486,7 +1485,7 @@ namespace ai
                     case APT_ESPION:
                         if(d->mana>100) aptitude(d, ABILITY_3);
                 }
-                if(randomevent(2.5f*nbfps)) bottaunt(d);
+                if(randomevent(2.5f*gfx::nbfps)) bottaunt(d);
 
                 switch(c.type)
                 {

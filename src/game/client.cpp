@@ -1,6 +1,5 @@
 #include "steam_api.h"
-#include "game.h"
-#include "ccheader.h"
+#include "gfx.h"
 #include "stats.h"
 
 bool launch = true;
@@ -2120,7 +2119,7 @@ namespace game
 
             case N_PREMISSION:
                 premission = getint(p);
-                if(premission) {execute("premission"); message[MSG_PREMISSION] = totalmillis; musicmanager(2);}
+                if(premission) {execute("premission"); hudmsg[MSG_PREMISSION] = totalmillis; musicmanager(2);}
                 break;
 
             case N_SERVMSG:

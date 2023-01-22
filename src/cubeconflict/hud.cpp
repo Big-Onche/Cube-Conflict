@@ -1,27 +1,28 @@
 //hud.cpp: not responsive hud
 
-#include "game.h"
-#include "ccheader.h"
+#include "gfx.h"
 #include "stats.h"
 
-int message[NUMMESSAGE];
-
-string custommsg, helpmsg;
-ICOMMAND(popupmsg, "ssi", (char *msg_fr, char *msg_en, int *duration),
-{
-    formatstring(custommsg, "%s", GAME_LANG ? msg_en : msg_fr);
-    message[MSG_CUSTOM] = totalmillis + *duration;
-    playsound(S_NOTIFICATION);
-});
-
-ICOMMAND(helpmsg, "s", (char *msg),
-{
-    formatstring(helpmsg, "%s", msg);
-    message[MSG_HELP]=totalmillis;
-});
+int hudmsg[NUMMSGS];
+int n_aptitudetueur, n_aptitudevictime, n_killstreakacteur;
+string str_pseudovictime, str_pseudotueur, str_armetueur, str_pseudoacteur;
 
 namespace game
 {
+    string custommsg, helpmsg;
+    ICOMMAND(popupmsg, "ssi", (char *msg_fr, char *msg_en, int *duration),
+    {
+        formatstring(custommsg, "%s", GAME_LANG ? msg_en : msg_fr);
+        hudmsg[MSG_CUSTOM] = totalmillis + *duration;
+        playsound(S_NOTIFICATION);
+    });
+
+    ICOMMAND(helpmsg, "s", (char *msg),
+    {
+        formatstring(helpmsg, "%s", msg);
+        hudmsg[MSG_HELP]=totalmillis;
+    });
+
     void rendermessage(string message, int textsize = 100, float pos = 8.8f, int decal = 0)
     {
         int tw = text_width(message);
@@ -42,7 +43,7 @@ namespace game
         int decal_message = 0;
         bool need_message1 = true, need_message2 = true;
 
-        if(totalmillis - message[MSG_PREMISSION] <= (m_dmsp ? 5000 : 10000))
+        if(totalmillis - hudmsg[MSG_PREMISSION] <= (m_dmsp ? 5000 : 10000))
         {
             string msg;
             if(m_dmsp)
@@ -50,7 +51,7 @@ namespace game
                 formatstring(msg, GAME_LANG ? "\fcThe invasion has begun!" : "\fcL'invasion commence !");
                 rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/23;
             }
-            else if(totalmillis - message[MSG_PREMISSION] <= 6900)
+            else if(totalmillis - hudmsg[MSG_PREMISSION] <= 6900)
             {
                 formatstring(msg, GAME_LANG ? "\fcThe game is about to begin" : "\fcLa partie va commencer !");
                 rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/23;
@@ -59,27 +60,27 @@ namespace game
             }
             else
             {
-                formatstring(msg, GAME_LANG ? "\fd%.1f" : "\fd%.1f", (10000 - (totalmillis - message[MSG_PREMISSION]))/1000.f);
+                formatstring(msg, GAME_LANG ? "\fd%.1f" : "\fd%.1f", (10000 - (totalmillis - hudmsg[MSG_PREMISSION]))/1000.f);
                 rendermessage(msg, 60, 8.8f, decal_message); decal_message -= screenh/23;
             }
 
         }
 
-        if(totalmillis - message[MSG_LEVELUP] <=2500) //////////////////////////////////////////////////////////////// LVL UP MESSAGE
+        if(totalmillis - hudmsg[MSG_LEVELUP] <=2500) //////////////////////////////////////////////////////////////// LVL UP MESSAGE
         {
             string msg;
             formatstring(msg, GAME_LANG ? "\f1LEVEL UP! \fi(Lvl %d)" : "\f1NIVEAU SUPÉRIEUR ! \fi(Niveau %d)", stat[STAT_LEVEL]);
             rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/24;
         }
 
-        if(totalmillis - message[MSG_ACHUNLOCKED] <=3000)//////////////////////////////////////////////////////////////// ACHIEVEMENT UNLOCKED MESSAGE
+        if(totalmillis - hudmsg[MSG_ACHUNLOCKED] <=3000)//////////////////////////////////////////////////////////////// ACHIEVEMENT UNLOCKED MESSAGE
         {
             string msg;
             formatstring(msg, GAME_LANG ? "\f1ACHIEVEMENT UNLOCKED! \fi(%s)" : "\f1SUCCES DÉBLOQUÉ ! \fi(%s)", tempachname);
             rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/24;
         }
 
-        if(totalmillis - message[MSG_OWNKILLSTREAK] <=2500) //////////////////////////////////////////////////////////////// PLAYER1 KILLSTREAK MESSAGE
+        if(totalmillis - hudmsg[MSG_OWNKILLSTREAK] <=2500) //////////////////////////////////////////////////////////////// PLAYER1 KILLSTREAK MESSAGE
         {
             string msg;
             switch(killstreak)
@@ -95,21 +96,21 @@ namespace game
             if(need_message1) {rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/24;}
         }
 
-        if(totalmillis < message[MSG_CUSTOM]) //////////////////////////////////////////////////////////////// CUSTOM MSG
+        if(totalmillis < hudmsg[MSG_CUSTOM]) //////////////////////////////////////////////////////////////// CUSTOM MSG
         {
             string msg;
             formatstring(msg, custommsg);
             rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/24;
         }
 
-        if(totalmillis - message[MSG_HELP] <= 1) //////////////////////////////////////////////////////////////// CUSTOM MSG
+        if(totalmillis - hudmsg[MSG_HELP] <= 1) //////////////////////////////////////////////////////////////// CUSTOM MSG
         {
             string msg;
             formatstring(msg, helpmsg);
             rendermessage(msg, 80, 2.75f, 0);
         }
 
-        if(totalmillis - message[MSG_YOUKILLED] <=2500)//////////////////////////////////////////////////////////////// PLAYER 1 KILL MESSAGE
+        if(totalmillis - hudmsg[MSG_YOUKILLED] <=2500)//////////////////////////////////////////////////////////////// PLAYER 1 KILL MESSAGE
         {
             string msg;
             formatstring(msg, "%s \fc%s \f7! (%s à %.1fm)", GAME_LANG ? "You killed" : "Tu as tué", str_pseudovictime, GAME_LANG ? aptitudes[n_aptitudevictime].apt_nomEN : aptitudes[n_aptitudevictime].apt_nomFR, killdistance);
@@ -117,7 +118,7 @@ namespace game
             decal_message -= screenh/27;
         }
 
-        if(totalmillis - message[MSG_OTHERKILLSTREAK] <=2500) //////////////////////////////////////////////////////////////// OTHER PLAYER KILLSTREAK MESSAGE
+        if(totalmillis - hudmsg[MSG_OTHERKILLSTREAK] <=2500) //////////////////////////////////////////////////////////////// OTHER PLAYER KILLSTREAK MESSAGE
         {
             string msg;
             switch(n_killstreakacteur)
@@ -135,18 +136,18 @@ namespace game
         if(m_ctf) ////////////////////////////////////////////////////////////////////////////////////////////////// CAPTURE THE FLAG MESSAGES
         {
             string msg;
-            if(totalmillis - message[MSG_CTF_TEAMPOINT]      <=3000) {formatstring(msg, GAME_LANG ? "\f9We scored a point!" : "\f9Notre équipe a marqué un point !"); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-            if(totalmillis - message[MSG_CTF_ENNEMYPOINT]    <=3000) {formatstring(msg, GAME_LANG ? "\f3The enemy team has scored a point." : "\f3L'équipe ennemie a marqué un point."); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-            if(totalmillis - message[MSG_CTF_TEAMFLAGRECO]   <=3000) {formatstring(msg, GAME_LANG ? "\f9We recovered our flag!" : "\f9Notre équipe a récupéré son drapeau !"); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-            if(totalmillis - message[MSG_CTF_ENNEMYFLAGRECO] <=3000) {formatstring(msg, GAME_LANG ? "\f3The enemy team has recovered their flag" : "\f3L'équipe ennemie a récupéré son drapeau."); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-            if(totalmillis - message[MSG_CTF_TEAMSTOLE]      <=3000) {formatstring(msg, GAME_LANG ? "\f9We stole the enemy flag !" : "\f9Notre équipe a volé le drapeau ennemi !"); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-            if(totalmillis - message[MSG_CTF_ENNEMYSTOLE]    <=3000) {formatstring(msg, GAME_LANG ? "\f3The enemy team stole our flag." : "\f3L'équipe ennemie a volé notre drapeau !"); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis - hudmsg[MSG_CTF_TEAMPOINT]      <=3000) {formatstring(msg, GAME_LANG ? "\f9We scored a point!" : "\f9Notre équipe a marqué un point !"); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis - hudmsg[MSG_CTF_ENNEMYPOINT]    <=3000) {formatstring(msg, GAME_LANG ? "\f3The enemy team has scored a point." : "\f3L'équipe ennemie a marqué un point."); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis - hudmsg[MSG_CTF_TEAMFLAGRECO]   <=3000) {formatstring(msg, GAME_LANG ? "\f9We recovered our flag!" : "\f9Notre équipe a récupéré son drapeau !"); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis - hudmsg[MSG_CTF_ENNEMYFLAGRECO] <=3000) {formatstring(msg, GAME_LANG ? "\f3The enemy team has recovered their flag" : "\f3L'équipe ennemie a récupéré son drapeau."); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis - hudmsg[MSG_CTF_TEAMSTOLE]      <=3000) {formatstring(msg, GAME_LANG ? "\f9We stole the enemy flag !" : "\f9Notre équipe a volé le drapeau ennemi !"); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+            if(totalmillis - hudmsg[MSG_CTF_ENNEMYSTOLE]    <=3000) {formatstring(msg, GAME_LANG ? "\f3The enemy team stole our flag." : "\f3L'équipe ennemie a volé notre drapeau !"); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
         }
 
         if(player1->state==CS_DEAD)///////////////////////////////////////////////////////////////////////////////// DEATH SCREEN TEXT
         {
             string killedbymsg, withmsg, waitmsg;
-            if(suicided) formatstring(killedbymsg, GAME_LANG ? "You committed suicide !" : "Tu t'es suicidé !");
+            if(hassuicided) formatstring(killedbymsg, GAME_LANG ? "You committed suicide !" : "Tu t'es suicidé !");
             else formatstring(killedbymsg, "%s %s (%s)", GAME_LANG ? "Killed by" : "Tué par", str_pseudotueur, GAME_LANG ? aptitudes[n_aptitudetueur].apt_nomEN : aptitudes[n_aptitudetueur].apt_nomFR);
 
             rendermessage(killedbymsg, 65, 1.5f, 0);
@@ -199,9 +200,9 @@ namespace game
         }
         else if(m_tutorial || m_dmsp) drawrpgminimap(d, w, h);
 
-        zoomfov = (guns[player1->gunselect].maxzoomfov);
+        gfx::zoomfov = (guns[player1->gunselect].maxzoomfov);
 
-        if((player1->gunselect==GUN_SKS || player1->gunselect==GUN_SV98 || player1->gunselect==GUN_ARBALETE || player1->gunselect==GUN_S_CAMPOUZE || player1->gunselect==GUN_S_ROQUETTES) && zoom == 1)
+        if((player1->gunselect==GUN_SKS || player1->gunselect==GUN_SV98 || player1->gunselect==GUN_ARBALETE || player1->gunselect==GUN_S_CAMPOUZE || player1->gunselect==GUN_S_ROQUETTES) && gfx::zoom)
         {
             if(player1->gunselect==GUN_S_ROQUETTES) settexture("media/interface/hud/fullscreen/scope_1.png");
             if(player1->gunselect==GUN_SKS) settexture("media/interface/hud/fullscreen/scope_3.png");
@@ -215,8 +216,8 @@ namespace game
         {
             if(!ispaused())
             {
-                if(enlargefov) {champifov+=22.f/nbfps; if(champifov>hudplayer()->boostmillis[B_SHROOMS]/1500) enlargefov = false;}
-                else {champifov-=22.f/nbfps; if(champifov<-hudplayer()->boostmillis[B_SHROOMS]/1500) enlargefov = true;}
+                if(enlargefov) {gfx::champifov+=22.f/gfx::nbfps; if(gfx::champifov>hudplayer()->boostmillis[B_SHROOMS]/1500) enlargefov = false;}
+                else {gfx::champifov-=22.f/gfx::nbfps; if(gfx::champifov<-hudplayer()->boostmillis[B_SHROOMS]/1500) enlargefov = true;}
             }
 
             float alphatex = hudplayer()->boostmillis[B_SHROOMS]>5000 ? 1 : hudplayer()->boostmillis[B_SHROOMS]/5000;
@@ -378,7 +379,7 @@ namespace game
         settexture("media/interface/hud/barrexpvide.png", 3);
         bgquad(lxbarvide, h-29, 966, 40);
 
-        dynent *o = intersectclosest(d->o, worldpos, d, zoom ? 40 : 25);
+        dynent *o = intersectclosest(d->o, worldpos, d, gfx::zoom ? 40 : 25);
         if(o && o->type==ENT_PLAYER && !isteam(player1->team, ((gameent *)o)->team) && totalmillis-lastshoot<=1000 && player1->o.dist(o->o)<guns[d->gunselect].hudrange)
         {
             float pour1 = ((gameent *)o)->health, pour2 = ((gameent *)o)->health > ((gameent *)o)->maxhealth ? ((gameent *)o)->health : ((gameent *)o)->maxhealth;

@@ -1,13 +1,11 @@
-#include "game.h"
-#include "engine.h"
-#include "ccheader.h"
-#include "customisation.h"
+
+#include "gfx.h"
+#include "customs.h"
 #include "stats.h"
 
-string str_pseudovictime, str_pseudotueur, str_armetueur, str_pseudoacteur;
 float killdistance = 0;
-int n_aptitudetueur, n_aptitudevictime, n_killstreakacteur, oldapti;
-bool suicided;
+int oldapti;
+bool hassuicided;
 
 bool randomevent(int probability)
 {
@@ -321,17 +319,17 @@ namespace game
 
     void updateworld()        // main game update loop
     {
-        loopi(nbfps > 250 ? 1 : 250/nbfps)
+        loopi(gfx::nbfps > 250 ? 1 : 250/gfx::nbfps)
         {
-            if(zoom)
+            if(gfx::zoom)
             {
-                weapposside = min(weapposside + 2, guns[player1->gunselect].maxweapposside);
-                if(weapposup>1) weapposup -= 1;
+                gfx::weapposside = min(gfx::weapposside + 2, guns[player1->gunselect].maxweapposside);
+                if(gfx::weapposup>1) gfx::weapposup -= 1;
             }
             else
             {
-                weapposup = min(weapposup + 1, guns[player1->gunselect].maxweapposup);
-                if(weapposside>1) weapposside -= 2;
+                gfx::weapposup = min(gfx::weapposup + 1, guns[player1->gunselect].maxweapposup);
+                if(gfx::weapposside>1) gfx::weapposside -= 2;
             }
         }
 
@@ -390,7 +388,7 @@ namespace game
                     moveplayer(player1, 10, true, 0, 0, player1->aptitude, 0, false);
                 }
             }
-            else if(!intermission && !premission && forcecampos<0)
+            else if(!intermission && !premission && gfx::forcecampos<0)
             {
                 if(player1->ragdoll) cleanragdoll(player1);
                 crouchplayer(player1, 10, true);
@@ -486,7 +484,7 @@ namespace game
 
     void doaction(int act)
     {
-        if(!connected || intermission || premission || forcecampos>=0) return;
+        if(!connected || intermission || premission || gfx::forcecampos>=0) return;
         if((player1->attacking = act) && attackspawn) respawn();
     }
 
@@ -496,14 +494,14 @@ namespace game
 
     bool canjump()
     {
-        if(!connected || intermission || premission || forcecampos>=0) return false;
+        if(!connected || intermission || premission || gfx::forcecampos>=0) return false;
         if(jumpspawn) respawn();
         return player1->state!=CS_DEAD;
     }
 
     bool cancrouch()
     {
-        if(!connected || intermission || premission || forcecampos>=0) return false;
+        if(!connected || intermission || premission || gfx::forcecampos>=0) return false;
         return player1->state!=CS_DEAD;
     }
 
@@ -718,7 +716,7 @@ namespace game
             if(d==player1)
             {
                 copystring(str_armetueur, GAME_LANG ? partmessageEN[rnd(5)].parttroll : partmessageFR[rnd(9)].parttroll);
-                suicided = true;
+                hassuicided = true;
                 addstat(1, STAT_MORTS); addstat(1, STAT_SUICIDES);
                 if(atk==ATK_M32_SHOOT)unlockachievement(ACH_M32SUICIDE);
             }
@@ -753,7 +751,7 @@ namespace game
                     GAME_LANG ? guns[atk].armedescEN : guns[atk].armedescFR,
                     distance);
                 playsound(S_KILL);
-                message[MSG_YOUKILLED] = totalmillis; message[MSG_OWNKILLSTREAK] = totalmillis; copystring(str_pseudovictime, dname); n_aptitudevictime = d->aptitude; killdistance = distance;
+                hudmsg[MSG_YOUKILLED] = totalmillis; hudmsg[MSG_OWNKILLSTREAK] = totalmillis; copystring(str_pseudovictime, dname); n_aptitudevictime = d->aptitude; killdistance = distance;
 
                 if(IS_ON_OFFICIAL_SERV) //now let's check for shittons of achievements if playing online
                 {
@@ -765,7 +763,7 @@ namespace game
                     {
                         case ATK_ASSISTXPL_SHOOT: if(player1->armourtype==A_ASSIST) unlockachievement(ACH_KILLASSIST); break;
                         case ATK_LANCEFLAMMES_SHOOT: if(lookupmaterial(d->feetpos())==MAT_WATER) unlockachievement(ACH_THUGPHYSIQUE); break;
-                        case ATK_SV98_SHOOT: if(zoom==0) unlockachievement(ACH_NOSCOPE); break;
+                        case ATK_SV98_SHOOT: if(gfx::zoom==0) unlockachievement(ACH_NOSCOPE); break;
                         case ATK_GLOCK_SHOOT: if(d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_CAMPOUZE || d->gunselect==GUN_S_GAU8 || d->gunselect==GUN_S_ROQUETTES) unlockachievement(ACH_DAVIDGOLIATH); break;
                         case ATK_CAC349_SHOOT: case ATK_CACFLEAU_SHOOT: case ATK_CACMARTEAU_SHOOT: case ATK_CACMASTER_SHOOT: if(d->aptitude==APT_NINJA) unlockachievement(ACH_PASLOGIQUE); break;
                         case ATK_NUKE_SHOOT: case ATK_CAMPOUZE_SHOOT: case ATK_GAU8_SHOOT: case ATK_ROQUETTES_SHOOT: if(player1->aptitude==APT_AMERICAIN && player1->boostmillis[B_ROIDS]) unlockachievement(ACH_JUSTEPOUR);
@@ -799,7 +797,7 @@ namespace game
                     distance);
                 copystring(str_pseudotueur, aname); n_aptitudetueur = actor->aptitude;
                 copystring(str_armetueur, GAME_LANG ? guns[atk].armedescEN : guns[atk].armedescFR);
-                suicided = false;
+                hassuicided = false;
                 addstat(1, STAT_MORTS);
             }
             else ////////////////////Quelqu'un a tué quelqu'un////////////////////
@@ -819,7 +817,7 @@ namespace game
                 {
                     copystring(str_pseudoacteur, aname);
                     n_killstreakacteur = actor->killstreak;
-                    message[MSG_OTHERKILLSTREAK] = totalmillis;
+                    hudmsg[MSG_OTHERKILLSTREAK] = totalmillis;
                 }
             }
         }

@@ -1,10 +1,7 @@
-#include "game.h"
+#include "gfx.h"
 #include "engine.h"
-#include "ccheader.h"
-#include "customisation.h"
+#include "customs.h"
 #include "stats.h"
-
-int weapposside, weapposup;
 
 namespace game
 {
@@ -327,10 +324,10 @@ namespace game
         {
             flags |= MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY;
 
-            if(d->tombepop<1.0f) d->tombepop += 3.f/nbfps;
+            if(d->tombepop<1.0f) d->tombepop += 3.f/gfx::nbfps;
             rendermodel(customstombes[d->customtombe].tombedir, ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, flags, NULL, NULL, 0, 0, d->tombepop, vec4(vec::hexcolor(color), 5));
 
-            d->skeletonfade -= 3.f/nbfps;
+            d->skeletonfade -= 3.f/gfx::nbfps;
             if(d->skeletonfade<0.066f) return;
             rendermodel("mapmodel/smileys/mort", ANIM_MAPMODEL, o, d->yaw+90, 0, 0, flags, NULL, NULL, 0, 0, d->skeletonfade);
             return;
@@ -391,12 +388,12 @@ namespace game
             lastaction = d->lasttaunt;
             anim = ANIM_TAUNT|ANIM_LOOP;
         }
-        else if(!intermission && forcecampos<0)
+        else if(!intermission && gfx::forcecampos<0)
         {
             if(d->inwater && d->physstate<=PHYS_FALL)
             {
                 anim |= (((game::allowmove(d) && (d->move || d->strafe)) || d->vel.z+d->falling.z>0 ? ANIM_SWIM : ANIM_SINK)|ANIM_LOOP)<<ANIM_SECONDARY;
-                if(d->move && randomevent(0.16f*nbfps)) particle_splash(PART_EAU, d->armourtype==A_ASSIST ? 3 : 2, 120, d->o, 0x222222, 8.0f+rnd(d->armourtype==A_ASSIST ? 8 : 5), 150, 15);
+                if(d->move && randomevent(0.16f*gfx::nbfps)) particle_splash(PART_EAU, d->armourtype==A_ASSIST ? 3 : 2, 120, d->o, 0x222222, 8.0f+rnd(d->armourtype==A_ASSIST ? 8 : 5), 150, 15);
             }
             else
             {
@@ -404,7 +401,7 @@ namespace game
                 if(d->timeinair>50) anim |= ((ANIM_JUMP) | ANIM_END) << ANIM_SECONDARY;
                 else if(dir && game::allowmove(d)) anim |= (dir | ANIM_LOOP) << ANIM_SECONDARY;
 
-                if(d->move && d->physstate==PHYS_FLOOR && randomevent(0.16f*nbfps)) particle_splash(randomambience && (lookupmaterial(d->feetpos())==MAT_WATER || map_atmo==4 || map_atmo==8) ? PART_EAU : PART_SMOKE, d->armourtype==A_ASSIST ? 5 : 3, 120, d->feetpos(), map_atmo==4 && randomambience ? 0x131313 : map_atmo==9 ? 0xFFFFFF : 0x333022, 6.0f+rnd(d->armourtype==A_ASSIST ? 10 : 5), 150, 15);
+                if(d->move && d->physstate==PHYS_FLOOR && randomevent(0.16f*gfx::nbfps)) particle_splash(randomambience && (lookupmaterial(d->feetpos())==MAT_WATER || map_atmo==4 || map_atmo==8) ? PART_EAU : PART_SMOKE, d->armourtype==A_ASSIST ? 5 : 3, 120, d->feetpos(), map_atmo==4 && randomambience ? 0x131313 : map_atmo==9 ? 0xFFFFFF : 0x333022, 6.0f+rnd(d->armourtype==A_ASSIST ? 10 : 5), 150, 15);
             }
             if(d->crouching && d->timeinair<50) anim |= (ANIM_CROUCH|ANIM_END)<<ANIM_SECONDARY;
 
@@ -538,7 +535,7 @@ namespace game
             {
                 int team = m_teammode && validteam(d->team) ? d->team : 0;
 
-                if(d->health<300 && d->health>0) switch(rnd(d->health+nbfps*2)) {case 0: gibeffect(300, d->o, d);}
+                if(d->health<300 && d->health>0) switch(rnd(d->health+gfx::nbfps*2)) {case 0: gibeffect(300, d->o, d);}
 
                 vec posA = d->abovehead();
                 vec posB = camera1->o;
@@ -574,7 +571,7 @@ namespace game
                     vec posAtofrontofposB = (posA.add((posB.mul(vec(127, 127, 127))))).div(vec(128, 128, 128));
                     int nearsize = 1.f;
                     if(d->o.dist(camera1->o) < 132) nearsize = (d->o.dist(camera1->o)-32)/100.f;
-                    particle_splash(PART_VISEUR, 1, 1, d->o.dist(camera1->o)<75 ? (posC.add(camera1->o)).div(vec(2,2,2)) : posAtofrontofposB, 0xFF0000, d->o.dist(camera1->o)<75 ? 2.f*(zoom ? (guns[player1->gunselect].maxzoomfov)/100.f*nearsize : nearsize) : 0.038f*(zoom ? (guns[player1->gunselect].maxzoomfov)/100.f*nearsize : nearsize), 1, 1, 0, false, d->o.dist(camera1->o)<150 ? 1.f : d->o.dist(camera1->o)/150.f);
+                    particle_splash(PART_VISEUR, 1, 1, d->o.dist(camera1->o)<75 ? (posC.add(camera1->o)).div(vec(2,2,2)) : posAtofrontofposB, 0xFF0000, d->o.dist(camera1->o)<75 ? 2.f*(gfx::zoom ? (guns[player1->gunselect].maxzoomfov)/100.f*nearsize : nearsize) : 0.038f*(gfx::zoom ? (guns[player1->gunselect].maxzoomfov)/100.f*nearsize : nearsize), 1, 1, 0, false, d->o.dist(camera1->o)<150 ? 1.f : d->o.dist(camera1->o)/150.f);
                 }
 
                 vec pos = d->abovehead().add(vec(0, 0,-12));
@@ -586,8 +583,8 @@ namespace game
                         if(d->abilitymillis[ABILITY_3]  && (d!=hudplayer() || thirdperson)) particle_fireball(pos, 15.2f, PART_EXPLOSION, 5,  0x880088, 13.0f);
                         break;
                     case APT_PHYSICIEN:
-                        if(d->abilitymillis[ABILITY_2] && randomevent(0.05f*nbfps)) particle_splash(PART_SMOKE, 1, 300, d->o, 0x7777FF, 10+rnd(5), 400, 400);
-                        if(d->abilitymillis[ABILITY_3] && randomevent(0.03f*nbfps))
+                        if(d->abilitymillis[ABILITY_2] && randomevent(0.05f*gfx::nbfps)) particle_splash(PART_SMOKE, 1, 300, d->o, 0x7777FF, 10+rnd(5), 400, 400);
+                        if(d->abilitymillis[ABILITY_3] && randomevent(0.03f*gfx::nbfps))
                         {
                             particle_splash(PART_SMOKE,  1,  150, d->feetpos(), 0x8888BB, 7+rnd(4),  100, -200);
                             particle_splash(PART_FLAME1+rnd(2),  5,  100, d->feetpos(), 0xFF6600, 1+rnd(2),  100, -20);
@@ -597,10 +594,10 @@ namespace game
                         if(d->abilitymillis[ABILITY_2]) particle_fireball(pos , 16.0f, PART_ONDECHOC, 5, 0xFFFF00, 16.0f);
                         break;
                     case APT_VIKING:
-                        if(d->ragemillis && randomevent(0.03f*nbfps) && (d!=hudplayer() || thirdperson)) particle_splash(PART_SMOKE, 2, 150, d->o, 0xFF3300, 12+rnd(5), 400, 200);
+                        if(d->ragemillis && randomevent(0.03f*gfx::nbfps) && (d!=hudplayer() || thirdperson)) particle_splash(PART_SMOKE, 2, 150, d->o, 0xFF3300, 12+rnd(5), 400, 200);
                         break;
                     case APT_SHOSHONE:
-                        if(randomevent(0.03f*nbfps))
+                        if(randomevent(0.03f*gfx::nbfps))
                         {
                             if(d->abilitymillis[ABILITY_1]) regularflame(PART_SPARK, d->feetpos(), 12, 2, 0xAAAAAA, 2, 0.04f, 10.f, 300);
                             if(d->abilitymillis[ABILITY_2]) regularflame(PART_SPARK, d->feetpos(), 12, 2, 0xFF33FF, 2, 0.04f, 10.f, 300);
@@ -608,10 +605,10 @@ namespace game
                         }
                 }
 
-                if(d->boostmillis[B_JOINT] && randomevent(0.085f*nbfps)) regularflame(PART_SMOKE, d->abovehead().add(vec(-12, 5, -19)), 2, 3, 0x888888, 1, 1.6f, 50.0f, 1000.0f, -10);
+                if(d->boostmillis[B_JOINT] && randomevent(0.085f*gfx::nbfps)) regularflame(PART_SMOKE, d->abovehead().add(vec(-12, 5, -19)), 2, 3, 0x888888, 1, 1.6f, 50.0f, 1000.0f, -10);
                 if(d->armourtype==A_ASSIST && d->armour>0)
                 {
-                    if(d->armour<1500 && randomevent(0.13f*nbfps))
+                    if(d->armour<1500 && randomevent(0.13f*gfx::nbfps))
                     {
                         regularflame(PART_SMOKE, d->o, 15, 3, d->armour<750 ? 0x222222 : 0x888888, 1, d->armour<750 ? 7.f : 5.f, 50.0f, 1500.0f, -10);
                         if(d->armour<1000) particle_splash(PART_FLAME2, d->armour<500 ? 2 : 1, 500, d->o, 0x992200, d->armour<500 ? 5.f : 3.f, 50, -20);
@@ -692,18 +689,18 @@ namespace game
         sway.mul((swayside)*cosf(steps));
         vec weapzoom;
 
-        if(zoom==1) sway.z = -weapposup-2; //CubeConflict, permet de faire bouger l'arme en fonction du zoom ou non
+        if(gfx::zoom==1) sway.z = -gfx::weapposup-2; //CubeConflict, permet de faire bouger l'arme en fonction du zoom ou non
         else
         {
-            sway.z = -weapposup;
-            vecfromyawpitch(d->yaw, 0, -10, weapposside, weapzoom);
+            sway.z = -gfx::weapposup;
+            vecfromyawpitch(d->yaw, 0, -10, gfx::weapposside, weapzoom);
         }
 
         sway.z += swayup*(fabs(sinf(steps)) - 1);
         sway.add(swaydir).add(d->o);
         if(!hudgunsway) sway = d->o;
 
-        vecfromyawpitch(d->yaw, 0, 0, weapposside, weapzoom);
+        vecfromyawpitch(d->yaw, 0, 0, gfx::weapposside, weapzoom);
 
         const playermodelinfo &mdl = getplayermodelinfo(d);
         int team = m_teammode && validteam(d->team) ? d->team : 0,
@@ -753,7 +750,7 @@ namespace game
             float floatdivfactor = d->armourtype==A_ASSIST ? 6.f : 3.f;
             sway2.mul((swayside/floatdivfactor)*cosf(steps));
             sway2.z += (swayup/floatdivfactor)*(fabs(sinf(steps)) - 1);
-            if(d->armourtype==A_ASSIST || !zoom) sway2.add(swaydir).add(d->o);
+            if(d->armourtype==A_ASSIST || !gfx::zoom) sway2.add(swaydir).add(d->o);
 
             rendermodel(gfx::getshielddir(d->armourtype, d->armour, true), anim, sway2, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
 

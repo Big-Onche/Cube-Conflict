@@ -1132,8 +1132,10 @@ namespace game
     extern void sendposition(gameent *d, bool reliable = false);
 
     // single player
+    enum {D_COMMON = 0, D_UNCOMMON, D_RARE, D_LEGENDARY, D_GODLY, NUMDROPS};
     struct monster;
     extern vector<monster *> monsters;
+    extern void npcdrop(const vec *o, int type);
 
     // minimap
     extern float minimapalpha;
@@ -1229,6 +1231,10 @@ namespace server
 }
 
 extern char *rndname(bool firstpart, bool fem, int lang);
+extern bool randomevent(int probability);
+extern void addsleep(int *msec, char *cmd);
+extern void createdrop(const vec *o, int type);
+extern void trydisconnect(bool local);
 
 #endif
 

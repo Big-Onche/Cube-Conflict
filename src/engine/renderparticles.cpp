@@ -1,6 +1,6 @@
 // renderparticles.cpp
 
-#include "ccheader.h"
+#include "gfx.h"
 
 Shader *particleshader = NULL, *particlenotextureshader = NULL, *particlesoftshader = NULL, *particletextshader = NULL;
 
@@ -216,7 +216,7 @@ struct partrenderer
             if(p->sizemod && !game::ispaused() && p->sizemod > -25 && p->sizemod < 25)
             {
                 float mod = p->sizemod;
-                p->size += mod/nbfps;
+                p->size += mod/gfx::nbfps;
             }
 
             ts = lastmillis-p->millis;
@@ -1363,7 +1363,7 @@ static void makeparticles(entity &e)
             }
             regularflame(PART_FLAME, e.o, radius, height, e.attr4 ? colorfromattr(e.attr4) : rndflamecolor, 2, 2.0f+(rnd(2)));
             regularflame(PART_SMOKE, vec(e.o.x, e.o.y, e.o.z + 4.0f*min(radius, height)), radius, height, rndsmokecolor, 1, 4.0f+(rnd(6)), 100.0f, 2750.0f, -15);
-            if(e.attr5==0 && randomevent(0.16f*nbfps)) regularsplash(PART_FIRESPARK, 0xFFFF55, 125, rnd(3)+1, 750+(rnd(750)), offsetvec(e.o, rnd(12)-rnd(24), rnd(12)-rnd(10)), 0.5f+(rnd(18)/12.f), -10);
+            if(e.attr5==0 && randomevent(0.16f*gfx::nbfps)) regularsplash(PART_FIRESPARK, 0xFFFF55, 125, rnd(3)+1, 750+(rnd(750)), offsetvec(e.o, rnd(12)-rnd(24), rnd(12)-rnd(10)), 0.5f+(rnd(18)/12.f), -10);
             break;
         }
         case 1: //steam vent - <dir>
@@ -1416,7 +1416,7 @@ static void makeparticles(entity &e)
             break;
         case 16:
             {
-                if(randomevent(5*nbfps))
+                if(randomevent(5*gfx::nbfps))
                 {
                     vec pos = e.o;
                     pos.add(vec(-30+rnd(30), -30+rnd(30), -5));
@@ -1431,7 +1431,7 @@ static void makeparticles(entity &e)
         case 17: //rain
             {
                 if(map_atmo==4 || map_atmo==8) regularshape(PART_RAIN, max(1+e.attr2, 1), 0x555566, 44, map_atmo==8 ? e.attr3/2 : e.attr3, 10000, e.o, 1+(rnd(2)), 200, -900, e.attr5, true, 200);
-                if(randomevent(25*nbfps) && map_atmo == 4 && isconnected())
+                if(randomevent(25*gfx::nbfps) && map_atmo == 4 && isconnected())
                 {
                     vec possky = e.o; vec posground = e.o;
                     int posx = -1250+rnd(2500), posy = -1250+rnd(2500);
@@ -1463,7 +1463,7 @@ static void makeparticles(entity &e)
                 regularshape(PART_SMOKE, max(1+e.attr2, 1), map_sel==5 ? 0x352412 : 0x184418, 44, 3, 10000, e.o, 0.5f, 200, -200, -2500, true, 500, 22.f);
                 regularshape(PART_FIRESPARK, max(1+e.attr2, 1), colorfromattr(e.attr4), 44, e.attr3, 10000, e.o, 2+(rnd(3)), 200, -400, e.attr5, true, 300);
 
-                if(randomevent(6*nbfps) && map_sel!=5 && isconnected())
+                if(randomevent(6*gfx::nbfps) && map_sel!=5 && isconnected())
                 {
                     vec possky = e.o; vec posground = e.o;
                     int posx = -1250+rnd(2500), posy = -1250+rnd(2500);
@@ -1546,6 +1546,24 @@ VARR(sunflarey, -1000, 360, 1000);
 VARR(sunflarez, -1000, 135, 1000);
 VARR(sunflarecolour, 0x000000, 0x888888, 0xFFFFFF);
 VARR(sunflare, 0, 0, 1);
+
+static const char * const enthudnames[] =
+{
+    "invalide?", "none?", "Lumière", "Light", "Modèle 3D", "3D model", "Point de réapparition","Respawn point",
+    "Placage d'environnement", "Environment map", "Effet de particules", "Particles effect", "Son", "Sound", "Spot de lumière", "Spotlight", "Projection", "Decal",
+
+    "Fusil électrique", "Electric Rifle", "Fusil plasma", "Plasma rifle", "SMAW", "SMAW", "Minigun", "Minigun", "Pistolet spock", "Spockgun",
+    "M32", "M32", "Lance-flammes", "Flamethrower", "UZI", "UZI", "FAMAS", "FAMAS", "Mossberg 500", "Mossberg 500", "Hydra", "Hydra",
+    "SV-98", "SV-98", "SKS", "SKS", "Arbalète", "Crossbow", "AK-47", "AK-47", "GAPB-1", "GAPB-1", "Feux d'artifice", "Fireworks", "Glock 45", "Glock 45",
+    "Super-arme", "Superweapon", "invalide?", "none?", "invalide?", "none?", "invalide?", "none?",
+
+    "Santé [25]", "Health [25]", "Boost de santé [50]", "Health boost [50]", "Stéroïdes [Dégâts]", "Steroïds [Damages]", "Champis [Cadence]", "Shrooms [Cadency]",
+    "EPO [Vitesse]", "EPO [Speed]", "Joint [Résistance]", "Joint [Resistance]", "Bois [75]", "Wood [75]", "Fer [125]", "Iron [125]", "Or [200]", "Gold [200]",
+    "Magnétique [150]", "Magnetic [150]", "Armure assistée [300]", "Power armor [300]", "Mana [25]", "Mana [25]",
+
+    "Téléporation [Entrée]", "Teleport [In]", "Téléportation [Destination]", "Téléportation [Destination]", "Trampoline", "Jump pad", "Drapeau", "Flag",
+    "Base", "Base", "PNJ [Solo]", "NPC [SP]", "Point de réapparition [Solo]", "Respawn point [SP]", "Zone de déclencheur [Solo]", "Trigger zone [SP]", "Caméra", "Camera",
+};
 
 void updateparticles()
 {

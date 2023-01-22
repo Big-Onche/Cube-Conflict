@@ -1,6 +1,5 @@
-#include "game.h"
+#include "gfx.h"
 #include "engine.h"
-#include "ccheader.h"
 #include "stats.h"
 
 namespace entities

@@ -330,7 +330,7 @@ struct captureclientmode : clientmode
                 basepos.sub(pos);
                 basepos.normalize().mul(1300.0f);
 
-                if(randomevent(0.1f*nbfps)) particle_flying_flare(pos, basepos, 500, randomevent(2) ? PART_ZERO : PART_ONE, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.7f+(rnd(5)/10.f), 100);
+                if(randomevent(0.1f*gfx::nbfps)) particle_flying_flare(pos, basepos, 500, randomevent(2) ? PART_ZERO : PART_ONE, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.7f+(rnd(5)/10.f), 100);
 
                 if(oldbase < 0)
                 {
@@ -420,7 +420,7 @@ struct captureclientmode : clientmode
                     posA.add(vec(0, 0, 7));
                     vec posB = camera1->o;
                     vec posAtofrontofposB = (posA.add((posB.mul(vec(127, 127, 127))))).div(vec(128, 128, 128));
-                    particle_splash(PART_BLIP, 1, 1, posAtofrontofposB, b.bliptimer < 500 ? 0xFFFF00 : 0xFF0000, 0.03f*(zoom ? (guns[player1->gunselect].maxzoomfov)/100.f : b.o.dist(camera1->o) > 228 ? 1.f : (b.o.dist(camera1->o)-128)/100.f), 1, 1, 0, false, b.o.dist(camera1->o)/170.f);
+                    particle_splash(PART_BLIP, 1, 1, posAtofrontofposB, b.bliptimer < 500 ? 0xFFFF00 : 0xFF0000, 0.03f*(gfx::zoom ? (guns[player1->gunselect].maxzoomfov)/100.f : b.o.dist(camera1->o) > 228 ? 1.f : (b.o.dist(camera1->o)-128)/100.f), 1, 1, 0, false, b.o.dist(camera1->o)/170.f);
                 }
 
             }

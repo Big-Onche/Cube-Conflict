@@ -1,5 +1,5 @@
 #include "engine.h"
-#include "ccheader.h"
+#include "gfx.h"
 
 VAR(oqdynent, 0, 1, 1);
 VAR(animationinterpolationtime, 0, 200, 1000);
@@ -944,7 +944,7 @@ void rendermapmodel(int idx, int anim, const vec &o, float yaw, float pitch, flo
     model *tmp = mmi.m ? mmi.m : loadmodel(mmi.name);
     if(!tmp) return;
 
-    model *m = (o.dist(camera1->o) > (tmp->loddist*(loddistfactor+(zoom ? (zoomfov-100)/-20.f : 0))) && lodmodels && tmp->lod) ? (mmi.mlod ? mmi.mlod : loadmodel(mmi.lodname)) : mmi.m;
+    model *m = (o.dist(camera1->o) > (tmp->loddist*(loddistfactor+(gfx::zoom ? (gfx::zoomfov-100)/-20.f : 0))) && lodmodels && tmp->lod) ? (mmi.mlod ? mmi.mlod : loadmodel(mmi.lodname)) : mmi.m;
     if(!m) return;
 
     vec center, bbradius;

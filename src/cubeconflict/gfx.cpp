@@ -1,11 +1,18 @@
 //gfx.cpp: fancy and laggy graphics effects
 
-#include "ccheader.h"
+#include "gfx.h"
 
 VARP(epilepsyfriendly, 0, 0, 1);
 
 namespace gfx
 {
+    VAR(forcecampos, -1, -1, 1000);
+    VAR(zoom, -1, 0, 1);
+
+    int weapposside, weapposup, nbfps = 60;
+    int zoomfov = 50;
+
+    float champifov = 0;
     bool champicolor = isconnected() ? game::hudplayer()->boostmillis[game::B_SHROOMS] : false; //checks if player 1 or observed player is on shrooms.
     bool hasroids(gameent *owner) { return owner->boostmillis[game::B_ROIDS]; }
 

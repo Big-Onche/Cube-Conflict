@@ -1,7 +1,6 @@
 // worldio.cpp: loading & saving of maps and savegames
 
 #include "engine.h"
-#include "ccheader.h"
 
 void validmapname(char *dst, const char *src, const char *prefix = NULL, const char *alt = "untitled", size_t maxlen = 100)
 {

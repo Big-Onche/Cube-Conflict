@@ -1,6 +1,5 @@
 // pimped old monster.h from sauerbraten: implements AI for single player monsters, currently client only
-#include "game.h"
-#include "ccheader.h"
+#include "gfx.h"
 
 extern int physsteps;
 int gamesecs;
@@ -523,7 +522,7 @@ namespace game
         if(!isconnected()) return;
         if(m_dmsp && spawnremain && lastmillis>nextmonster)
         {
-            if(spawnremain--==monstertotal) { message[MSG_PREMISSION]=lastmillis; playsound(S_INVASION); musicmanager(2+map_sel);}
+            if(spawnremain--==monstertotal) { hudmsg[MSG_PREMISSION]=lastmillis; playsound(S_INVASION); musicmanager(2+map_sel);}
             nextmonster = lastmillis+1000;
             gamesecs++;
             if(spawn && !intermission)
@@ -666,7 +665,7 @@ namespace game
                         if(m.inwater && m.physstate<=PHYS_FALL)
                         {
                             anim |= (((m.move || m.strafe) || m.vel.z + m.falling.z>0 ? ANIM_SWIM : ANIM_SINK)|ANIM_LOOP)<<ANIM_SECONDARY;
-                            if(m.move && randomevent(0.16f*nbfps)) particle_splash(PART_EAU, 2, 120, m.o, 0x222222, 8.0f+rnd(5), 150, 15);
+                            if(m.move && randomevent(0.16f*gfx::nbfps)) particle_splash(PART_EAU, 2, 120, m.o, 0x222222, 8.0f+rnd(5), 150, 15);
                         }
                         else
                         {
@@ -674,7 +673,7 @@ namespace game
                             if(m.timeinair>50) anim |= ((ANIM_JUMP) | ANIM_END) << ANIM_SECONDARY;
                             else if(dir) anim |= (dir | ANIM_LOOP) << ANIM_SECONDARY;
 
-                            if(m.move && m.physstate==PHYS_FLOOR && randomevent(0.16f*nbfps)) particle_splash(randomambience && (lookupmaterial(m.feetpos())==MAT_WATER || map_atmo==4 || map_atmo==8) ? PART_EAU : PART_SMOKE, 3, 120, m.feetpos(), randomambience && map_atmo==4 ? 0x131313 : 0x333022, 6.0f+rnd(5), 150, 15);
+                            if(m.move && m.physstate==PHYS_FLOOR && randomevent(0.16f*gfx::nbfps)) particle_splash(randomambience && (lookupmaterial(m.feetpos())==MAT_WATER || map_atmo==4 || map_atmo==8) ? PART_EAU : PART_SMOKE, 3, 120, m.feetpos(), randomambience && map_atmo==4 ? 0x131313 : 0x333022, 6.0f+rnd(5), 150, 15);
                         }
                     }
 

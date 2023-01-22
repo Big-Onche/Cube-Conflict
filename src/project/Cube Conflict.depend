@@ -1,0 +1,1108 @@
+# depslib dependency file v1.0
+1674410721 source:c:\users\frtst\documents\github\cube-conflict\src\engine\engine.h
+	"cube.h"
+	"world.h"
+	"octa.h"
+	"light.h"
+	"texture.h"
+	"bih.h"
+	"model.h"
+
+1671025379 c:\users\frtst\documents\github\cube-conflict\src\shared\cube.h
+	<math.h>
+	<string.h>
+	<stdio.h>
+	<stdlib.h>
+	<ctype.h>
+	<stdarg.h>
+	<limits.h>
+	<float.h>
+	<assert.h>
+	<time.h>
+	"windows.h"
+	<eh.h>
+	<dbghelp.h>
+	<intrin.h>
+	"SDL.h"
+	<OpenGL/gl.h>
+	<SDL.h>
+	<SDL_opengl.h>
+	<enet/enet.h>
+	<zlib.h>
+	"tools.h"
+	"geom.h"
+	"ents.h"
+	"command.h"
+	"glexts.h"
+	"glemu.h"
+	"iengine.h"
+	"igame.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl.h
+	"SDL_main.h"
+	"SDL_stdinc.h"
+	"SDL_assert.h"
+	"SDL_atomic.h"
+	"SDL_audio.h"
+	"SDL_clipboard.h"
+	"SDL_cpuinfo.h"
+	"SDL_endian.h"
+	"SDL_error.h"
+	"SDL_events.h"
+	"SDL_filesystem.h"
+	"SDL_gamecontroller.h"
+	"SDL_guid.h"
+	"SDL_haptic.h"
+	"SDL_hidapi.h"
+	"SDL_hints.h"
+	"SDL_joystick.h"
+	"SDL_loadso.h"
+	"SDL_log.h"
+	"SDL_messagebox.h"
+	"SDL_metal.h"
+	"SDL_mutex.h"
+	"SDL_power.h"
+	"SDL_render.h"
+	"SDL_rwops.h"
+	"SDL_sensor.h"
+	"SDL_shape.h"
+	"SDL_system.h"
+	"SDL_thread.h"
+	"SDL_timer.h"
+	"SDL_version.h"
+	"SDL_video.h"
+	"SDL_locale.h"
+	"SDL_misc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325709 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_main.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325709 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_stdinc.h
+	"SDL_config.h"
+	<sys/types.h>
+	<stdio.h>
+	<stdlib.h>
+	<stddef.h>
+	<stdarg.h>
+	<stdlib.h>
+	<malloc.h>
+	<stddef.h>
+	<stdarg.h>
+	<memory.h>
+	<string.h>
+	<strings.h>
+	<wchar.h>
+	<inttypes.h>
+	<stdint.h>
+	<ctype.h>
+	<math.h>
+	<float.h>
+	<alloca.h>
+	<malloc.h>
+	<malloc.h>
+	<malloc.h>
+	<stdlib.h>
+	<sal.h>
+	"begin_code.h"
+	"close_code.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_config.h
+	"SDL_platform.h"
+	"SDL_config_windows.h"
+	"SDL_config_winrt.h"
+	"SDL_config_wingdk.h"
+	"SDL_config_xbox.h"
+	"SDL_config_macosx.h"
+	"SDL_config_iphoneos.h"
+	"SDL_config_android.h"
+	"SDL_config_os2.h"
+	"SDL_config_emscripten.h"
+	"SDL_config_ngage.h"
+	"SDL_config_minimal.h"
+
+1667325709 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_platform.h
+	<AvailabilityMacros.h>
+	<TargetConditionals.h>
+	<winapifamily.h>
+	"begin_code.h"
+	"close_code.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\begin_code.h
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\close_code.h
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_config_windows.h
+	"SDL_platform.h"
+	<winsdkver.h>
+	<sdkddkver.h>
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_config_winrt.h
+	"SDL_platform.h"
+	<sdkddkver.h>
+
+1667325706 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_config_wingdk.h
+	"SDL_platform.h"
+
+1667325706 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_config_xbox.h
+	"SDL_platform.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_config_macosx.h
+	"SDL_platform.h"
+	<AvailabilityMacros.h>
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_config_iphoneos.h
+	"SDL_platform.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_config_android.h
+	"SDL_platform.h"
+	<stdarg.h>
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_config_os2.h
+	"SDL_platform.h"
+
+1667325706 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_config_emscripten.h
+	"SDL_platform.h"
+
+1667325706 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_config_ngage.h
+	"SDL_platform.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_config_minimal.h
+	"SDL_platform.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_assert.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	<signal.h>
+	"close_code.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_atomic.h
+	"SDL_stdinc.h"
+	"SDL_platform.h"
+	"begin_code.h"
+	<sys/cpuinline.h>
+	<mbarrier.h>
+	"close_code.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_audio.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_endian.h"
+	"SDL_mutex.h"
+	"SDL_thread.h"
+	"SDL_rwops.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_error.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_endian.h
+	"SDL_stdinc.h"
+	<intrin.h>
+	<endian.h>
+	<endian.h>
+	<sys/endian.h>
+	"begin_code.h"
+	"close_code.h"
+
+1667325709 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_mutex.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_thread.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_atomic.h"
+	"SDL_mutex.h"
+	<process.h>
+	<process.h>
+	<stdlib.h>
+	"begin_code.h"
+	"close_code.h"
+
+1667325709 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_rwops.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_clipboard.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_cpuinfo.h
+	"SDL_stdinc.h"
+	<intrin.h>
+	<intrin.h>
+	<arm_neon.h>
+	<altivec.h>
+	<arm_neon.h>
+	<armintr.h>
+	<arm_neon.h>
+	<arm64intr.h>
+	<arm64_neon.h>
+	<mm3dnow.h>
+	<lsxintrin.h>
+	<lasxintrin.h>
+	<immintrin.h>
+	<mmintrin.h>
+	<xmmintrin.h>
+	<emmintrin.h>
+	<pmmintrin.h>
+	"begin_code.h"
+	"close_code.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_events.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_video.h"
+	"SDL_keyboard.h"
+	"SDL_mouse.h"
+	"SDL_joystick.h"
+	"SDL_gamecontroller.h"
+	"SDL_quit.h"
+	"SDL_gesture.h"
+	"SDL_touch.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_video.h
+	"SDL_stdinc.h"
+	"SDL_pixels.h"
+	"SDL_rect.h"
+	"SDL_surface.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325709 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_pixels.h
+	"SDL_stdinc.h"
+	"SDL_endian.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325709 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_rect.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_pixels.h"
+	"SDL_rwops.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325709 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_surface.h
+	"SDL_stdinc.h"
+	"SDL_pixels.h"
+	"SDL_rect.h"
+	"SDL_blendmode.h"
+	"SDL_rwops.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_blendmode.h
+	"begin_code.h"
+	"close_code.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_keyboard.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_keycode.h"
+	"SDL_video.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325709 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_keycode.h
+	"SDL_stdinc.h"
+	"SDL_scancode.h"
+
+1667325709 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_scancode.h
+	"SDL_stdinc.h"
+
+1667325709 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_mouse.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_video.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_joystick.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_guid.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325706 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_guid.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_gamecontroller.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_rwops.h"
+	"SDL_sensor.h"
+	"SDL_joystick.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325709 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_sensor.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325709 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_quit.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_gesture.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_video.h"
+	"SDL_touch.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_touch.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_video.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_filesystem.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_haptic.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_joystick.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325706 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_hidapi.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_hints.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325709 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_loadso.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325709 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_log.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325709 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_messagebox.h
+	"SDL_stdinc.h"
+	"SDL_video.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325709 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_metal.h
+	"SDL_video.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325709 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_power.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325709 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_render.h
+	"SDL_stdinc.h"
+	"SDL_rect.h"
+	"SDL_video.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325709 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_shape.h
+	"SDL_stdinc.h"
+	"SDL_pixels.h"
+	"SDL_rect.h"
+	"SDL_surface.h"
+	"SDL_video.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325709 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_system.h
+	"SDL_stdinc.h"
+	"SDL_keyboard.h"
+	"SDL_render.h"
+	"SDL_video.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_timer.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_version.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325706 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_locale.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325706 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_misc.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1667325709 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_opengl.h
+	"SDL_config.h"
+	"gl_mangle.h"
+	<windows.h>
+	"SDL_opengl_glext.h"
+
+1667325709 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_opengl_glext.h
+	<windows.h>
+	<stddef.h>
+	<inttypes.h>
+	<inttypes.h>
+	<inttypes.h>
+	<stdint.h>
+	<stdint.h>
+	<inttypes.h>
+
+1642867398 c:\users\frtst\documents\github\cube-conflict\src\enet\include\enet\enet.h
+	<stdlib.h>
+	"enet/win32.h"
+	"enet/unix.h"
+	"enet/types.h"
+	"enet/protocol.h"
+	"enet/list.h"
+	"enet/callbacks.h"
+
+1604696835 c:\users\frtst\documents\github\cube-conflict\src\enet\include\enet\win32.h
+	<stdlib.h>
+	<winsock2.h>
+
+1604696835 c:\users\frtst\documents\github\cube-conflict\src\enet\include\enet\unix.h
+	<stdlib.h>
+	<sys/time.h>
+	<sys/types.h>
+	<sys/socket.h>
+	<arpa/inet.h>
+	<netinet/in.h>
+	<unistd.h>
+
+1604696835 c:\users\frtst\documents\github\cube-conflict\src\enet\include\enet\types.h
+
+1604696835 c:\users\frtst\documents\github\cube-conflict\src\enet\include\enet\protocol.h
+	"enet/types.h"
+
+1604696835 c:\users\frtst\documents\github\cube-conflict\src\enet\include\enet\list.h
+	<stdlib.h>
+
+1604696835 c:\users\frtst\documents\github\cube-conflict\src\enet\include\enet\callbacks.h
+	<stdlib.h>
+
+1370438864 c:\users\frtst\documents\github\cube-conflict\src\include\zlib.h
+	"zconf.h"
+
+1370438864 c:\users\frtst\documents\github\cube-conflict\src\include\zconf.h
+	<windows.h>
+	<sys/types.h>
+	<unistd.h>
+	<unixio.h>
+
+1666957352 c:\users\frtst\documents\github\cube-conflict\src\shared\tools.h
+
+1654685111 c:\users\frtst\documents\github\cube-conflict\src\shared\geom.h
+
+1674147429 c:\users\frtst\documents\github\cube-conflict\src\shared\ents.h
+
+1642947695 c:\users\frtst\documents\github\cube-conflict\src\shared\command.h
+
+1654685085 c:\users\frtst\documents\github\cube-conflict\src\shared\glexts.h
+
+1654685061 c:\users\frtst\documents\github\cube-conflict\src\shared\glemu.h
+
+1674410368 c:\users\frtst\documents\github\cube-conflict\src\shared\iengine.h
+
+1667065337 c:\users\frtst\documents\github\cube-conflict\src\shared\igame.h
+
+1670520641 c:\users\frtst\documents\github\cube-conflict\src\engine\world.h
+
+1589615018 c:\users\frtst\documents\github\cube-conflict\src\engine\octa.h
+
+1590211185 c:\users\frtst\documents\github\cube-conflict\src\engine\light.h
+
+1674071252 c:\users\frtst\documents\github\cube-conflict\src\engine\texture.h
+
+1550080460 c:\users\frtst\documents\github\cube-conflict\src\engine\bih.h
+
+1674332609 c:\users\frtst\documents\github\cube-conflict\src\engine\model.h
+
+1674413460 source:c:\users\frtst\documents\github\cube-conflict\src\game\game.h
+	"cube.h"
+	"engine.h"
+	"ai.h"
+
+1674410721 c:\users\frtst\documents\github\cube-conflict\src\engine\engine.h
+	"cube.h"
+	"world.h"
+	"octa.h"
+	"light.h"
+	"texture.h"
+	"bih.h"
+	"model.h"
+
+1673368924 c:\users\frtst\documents\github\cube-conflict\src\game\ai.h
+
+1671025379 source:c:\users\frtst\documents\github\cube-conflict\src\shared\cube.h
+	<math.h>
+	<string.h>
+	<stdio.h>
+	<stdlib.h>
+	<ctype.h>
+	<stdarg.h>
+	<limits.h>
+	<float.h>
+	<assert.h>
+	<time.h>
+	"windows.h"
+	<eh.h>
+	<dbghelp.h>
+	<intrin.h>
+	"SDL.h"
+	<OpenGL/gl.h>
+	<SDL.h>
+	<SDL_opengl.h>
+	<enet/enet.h>
+	<zlib.h>
+	"tools.h"
+	"geom.h"
+	"ents.h"
+	"command.h"
+	"glexts.h"
+	"glemu.h"
+	"iengine.h"
+	"igame.h"
+
+1674406139 source:c:\users\frtst\documents\github\cube-conflict\src\cubeconflict\aptitudes.cpp
+	"gfx.h"
+	"stats.h"
+
+1674413605 c:\users\frtst\documents\github\cube-conflict\src\cubeconflict\gfx.h
+	"game.h"
+
+1674413460 c:\users\frtst\documents\github\cube-conflict\src\game\game.h
+	"cube.h"
+	"engine.h"
+	"ai.h"
+
+1674413605 c:\users\frtst\documents\github\cube-conflict\src\cubeconflict\stats.h
+
+1674411555 source:c:\users\frtst\documents\github\cube-conflict\src\cubeconflict\customs.cpp
+	"game.h"
+	"stats.h"
+	"customs.h"
+
+1674405398 c:\users\frtst\documents\github\cube-conflict\src\cubeconflict\customs.h
+
+1674410457 source:c:\users\frtst\documents\github\cube-conflict\src\cubeconflict\gfx.cpp
+	"gfx.h"
+
+1674410457 source:c:\users\frtst\documents\github\cube-conflict\src\cubeconflict\hud.cpp
+	"gfx.h"
+	"stats.h"
+
+1674410457 source:c:\users\frtst\documents\github\cube-conflict\src\cubeconflict\npcs.cpp
+	"gfx.h"
+
+1674407061 source:c:\users\frtst\documents\github\cube-conflict\src\cubeconflict\rpg.cpp
+	"game.h"
+	"customs.h"
+
+1674410501 source:c:\users\frtst\documents\github\cube-conflict\src\cubeconflict\stats.cpp
+	"steam_api.h"
+	"game.h"
+	"stats.h"
+	"customs.h"
+
+1673385325 c:\users\frtst\documents\github\cube-conflict\src\steam\steam_api.h
+	"steam_api_common.h"
+	"isteamclient.h"
+	"isteamuser.h"
+	"isteamfriends.h"
+	"isteamutils.h"
+	"isteammatchmaking.h"
+	"isteamuserstats.h"
+	"isteamapps.h"
+	"isteamnetworking.h"
+	"isteamremotestorage.h"
+	"isteamscreenshots.h"
+	"isteammusic.h"
+	"isteammusicremote.h"
+	"isteamhttp.h"
+	"isteamcontroller.h"
+	"isteamugc.h"
+	"isteamapplist.h"
+	"isteamhtmlsurface.h"
+	"isteaminventory.h"
+	"isteamvideo.h"
+	"isteamparentalsettings.h"
+	"isteaminput.h"
+	"isteamremoteplay.h"
+	"isteamnetworkingmessages.h"
+	"isteamnetworkingsockets.h"
+	"isteamnetworkingutils.h"
+
+1673385325 c:\users\frtst\documents\github\cube-conflict\src\steam\steam_api_common.h
+	"steamtypes.h"
+	"steamclientpublic.h"
+	"steam_api_internal.h"
+
+1673385325 c:\users\frtst\documents\github\cube-conflict\src\steam\steamtypes.h
+
+1673385325 c:\users\frtst\documents\github\cube-conflict\src\steam\steamclientpublic.h
+	"steamtypes.h"
+	"steamuniverse.h"
+
+1673385325 c:\users\frtst\documents\github\cube-conflict\src\steam\steamuniverse.h
+
+1673385325 c:\users\frtst\documents\github\cube-conflict\src\steam\steam_api_internal.h
+	<string.h>
+	"../../clientdll/steam_api_callback_inspection.h"
+
+1673385324 c:\users\frtst\documents\github\cube-conflict\src\steam\isteamclient.h
+	"steam_api_common.h"
+
+1673385325 c:\users\frtst\documents\github\cube-conflict\src\steam\isteamuser.h
+	"steam_api_common.h"
+
+1673385324 c:\users\frtst\documents\github\cube-conflict\src\steam\isteamfriends.h
+	"steam_api_common.h"
+
+1673385325 c:\users\frtst\documents\github\cube-conflict\src\steam\isteamutils.h
+	"steam_api_common.h"
+
+1673385324 c:\users\frtst\documents\github\cube-conflict\src\steam\isteammatchmaking.h
+	"steam_api_common.h"
+	"matchmakingtypes.h"
+	"isteamfriends.h"
+
+1673385325 c:\users\frtst\documents\github\cube-conflict\src\steam\matchmakingtypes.h
+	<stdio.h>
+	<string.h>
+
+1673385325 c:\users\frtst\documents\github\cube-conflict\src\steam\isteamuserstats.h
+	"steam_api_common.h"
+	"isteamremotestorage.h"
+
+1673385325 c:\users\frtst\documents\github\cube-conflict\src\steam\isteamremotestorage.h
+	"steam_api_common.h"
+
+1673385324 c:\users\frtst\documents\github\cube-conflict\src\steam\isteamapps.h
+	"steam_api_common.h"
+
+1673385324 c:\users\frtst\documents\github\cube-conflict\src\steam\isteamnetworking.h
+	"steam_api_common.h"
+
+1673385325 c:\users\frtst\documents\github\cube-conflict\src\steam\isteamscreenshots.h
+	"steam_api_common.h"
+
+1673385324 c:\users\frtst\documents\github\cube-conflict\src\steam\isteammusic.h
+	"steam_api_common.h"
+
+1673385324 c:\users\frtst\documents\github\cube-conflict\src\steam\isteammusicremote.h
+	"steam_api_common.h"
+	"isteammusic.h"
+
+1673385324 c:\users\frtst\documents\github\cube-conflict\src\steam\isteamhttp.h
+	"steam_api_common.h"
+	"steamhttpenums.h"
+
+1673385325 c:\users\frtst\documents\github\cube-conflict\src\steam\steamhttpenums.h
+
+1673385324 c:\users\frtst\documents\github\cube-conflict\src\steam\isteamcontroller.h
+	"steam_api_common.h"
+	"isteaminput.h"
+
+1673385324 c:\users\frtst\documents\github\cube-conflict\src\steam\isteaminput.h
+	"steam_api_common.h"
+
+1673385325 c:\users\frtst\documents\github\cube-conflict\src\steam\isteamugc.h
+	"steam_api_common.h"
+	"isteamremotestorage.h"
+
+1673385324 c:\users\frtst\documents\github\cube-conflict\src\steam\isteamapplist.h
+	"steam_api_common.h"
+
+1673385324 c:\users\frtst\documents\github\cube-conflict\src\steam\isteamhtmlsurface.h
+	"steam_api_common.h"
+
+1673385324 c:\users\frtst\documents\github\cube-conflict\src\steam\isteaminventory.h
+	"steam_api_common.h"
+
+1673385325 c:\users\frtst\documents\github\cube-conflict\src\steam\isteamvideo.h
+	"steam_api_common.h"
+
+1673385325 c:\users\frtst\documents\github\cube-conflict\src\steam\isteamparentalsettings.h
+	"steam_api_common.h"
+
+1673385325 c:\users\frtst\documents\github\cube-conflict\src\steam\isteamremoteplay.h
+	"steam_api_common.h"
+
+1673385325 c:\users\frtst\documents\github\cube-conflict\src\steam\isteamnetworkingmessages.h
+	"steamnetworkingtypes.h"
+	"steam_api_common.h"
+
+1673385325 c:\users\frtst\documents\github\cube-conflict\src\steam\steamnetworkingtypes.h
+	<string.h>
+	<stdint.h>
+	"steamtypes.h"
+	"steamclientpublic.h"
+
+1673385325 c:\users\frtst\documents\github\cube-conflict\src\steam\isteamnetworkingsockets.h
+	"steamnetworkingtypes.h"
+	"steam_api_common.h"
+
+1673385325 c:\users\frtst\documents\github\cube-conflict\src\steam\isteamnetworkingutils.h
+	"steamnetworkingtypes.h"
+	"steam_api_common.h"
+
+1671468970 source:c:\users\frtst\documents\github\cube-conflict\src\engine\aa.cpp
+	"engine.h"
+
+1674338439 source:c:\users\frtst\documents\github\cube-conflict\src\engine\bih.cpp
+	"engine.h"
+
+1654684811 source:c:\users\frtst\documents\github\cube-conflict\src\engine\blend.cpp
+	"engine.h"
+
+1674405518 source:c:\users\frtst\documents\github\cube-conflict\src\engine\client.cpp
+	"engine.h"
+	"game.h"
+	"gfx.h"
+	"stats.h"
+
+1650565163 source:c:\users\frtst\documents\github\cube-conflict\src\engine\command.cpp
+	"engine.h"
+
+1670094102 source:c:\users\frtst\documents\github\cube-conflict\src\engine\console.cpp
+	"engine.h"
+
+1654684069 source:c:\users\frtst\documents\github\cube-conflict\src\engine\dynlight.cpp
+	"engine.h"
+
+1654684791 source:c:\users\frtst\documents\github\cube-conflict\src\engine\grass.cpp
+	"engine.h"
+
+1654684777 source:c:\users\frtst\documents\github\cube-conflict\src\engine\light.cpp
+	"engine.h"
+
+1674409791 source:c:\users\frtst\documents\github\cube-conflict\src\engine\main.cpp
+	"engine.h"
+	"gfx.h"
+	"steam_api.h"
+	"stats.h"
+	"SDL_syswm.h"
+
+1667325709 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_syswm.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_video.h"
+	"SDL_version.h"
+	<windows.h>
+	<Inspectable.h>
+	<X11/Xlib.h>
+	<X11/Xatom.h>
+	<directfb.h>
+	<UIKit/UIKit.h>
+	"SDL_egl.h"
+	<os2.h>
+	"begin_code.h"
+	"close_code.h"
+
+1667325708 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_egl.h
+	<psp2/types.h>
+	<EGL/egl.h>
+	<EGL/eglext.h>
+	<stdint.h>
+	<inttypes.h>
+	<stdint.h>
+	<windows.h>
+	<X11/Xlib.h>
+	<X11/Xutil.h>
+	<kernel/image.h>
+
+1674310540 source:c:\users\frtst\documents\github\cube-conflict\src\engine\material.cpp
+	"engine.h"
+
+1674410732 source:c:\users\frtst\documents\github\cube-conflict\src\engine\menus.cpp
+	"engine.h"
+	"steam_api.h"
+	"customs.h"
+
+1650906439 source:c:\users\frtst\documents\github\cube-conflict\src\engine\movie.cpp
+	"engine.h"
+	"SDL_mixer.h"
+
+1667324625 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_mixer.h
+	"SDL_stdinc.h"
+	"SDL_rwops.h"
+	"SDL_audio.h"
+	"SDL_endian.h"
+	"SDL_version.h"
+	"begin_code.h"
+	"close_code.h"
+
+1550080460 source:c:\users\frtst\documents\github\cube-conflict\src\engine\normal.cpp
+	"engine.h"
+
+1550080460 source:c:\users\frtst\documents\github\cube-conflict\src\engine\octa.cpp
+	"engine.h"
+
+1673653100 source:c:\users\frtst\documents\github\cube-conflict\src\engine\octaedit.cpp
+	"engine.h"
+
+1674075417 source:c:\users\frtst\documents\github\cube-conflict\src\engine\octarender.cpp
+	"engine.h"
+
+1674405589 source:c:\users\frtst\documents\github\cube-conflict\src\engine\physics.cpp
+	"engine.h"
+	"mpr.h"
+	"game.h"
+	"stats.h"
+
+1550080460 c:\users\frtst\documents\github\cube-conflict\src\engine\mpr.h
+
+1550080460 source:c:\users\frtst\documents\github\cube-conflict\src\engine\pvs.cpp
+	"engine.h"
+
+1674407930 source:c:\users\frtst\documents\github\cube-conflict\src\engine\rendergl.cpp
+	"engine.h"
+	"gfx.h"
+
+1674405596 source:c:\users\frtst\documents\github\cube-conflict\src\engine\renderlights.cpp
+	"engine.h"
+
+1674406037 source:c:\users\frtst\documents\github\cube-conflict\src\engine\rendermodel.cpp
+	"engine.h"
+	"gfx.h"
+	"ragdoll.h"
+	"animmodel.h"
+	"vertmodel.h"
+	"skelmodel.h"
+	"hitzone.h"
+	"md2.h"
+	"md3.h"
+	"md5.h"
+	"obj.h"
+	"smd.h"
+	"iqm.h"
+
+1583344417 c:\users\frtst\documents\github\cube-conflict\src\engine\ragdoll.h
+
+1674335346 c:\users\frtst\documents\github\cube-conflict\src\engine\animmodel.h
+
+1602592576 c:\users\frtst\documents\github\cube-conflict\src\engine\vertmodel.h
+
+1587509979 c:\users\frtst\documents\github\cube-conflict\src\engine\skelmodel.h
+
+1602594947 c:\users\frtst\documents\github\cube-conflict\src\engine\hitzone.h
+
+1587509979 c:\users\frtst\documents\github\cube-conflict\src\engine\md2.h
+
+1650908702 c:\users\frtst\documents\github\cube-conflict\src\engine\md3.h
+
+1650908363 c:\users\frtst\documents\github\cube-conflict\src\engine\md5.h
+
+1587509979 c:\users\frtst\documents\github\cube-conflict\src\engine\obj.h
+
+1550080460 c:\users\frtst\documents\github\cube-conflict\src\engine\smd.h
+
+1587509979 c:\users\frtst\documents\github\cube-conflict\src\engine\iqm.h
+
+1674410457 source:c:\users\frtst\documents\github\cube-conflict\src\engine\renderparticles.cpp
+	"gfx.h"
+	"explosion.h"
+	"lensflare.h"
+	"lightning.h"
+
+1654263237 c:\users\frtst\documents\github\cube-conflict\src\engine\explosion.h
+
+1673888824 c:\users\frtst\documents\github\cube-conflict\src\engine\lensflare.h
+
+1605022067 c:\users\frtst\documents\github\cube-conflict\src\engine\lightning.h
+
+1673568065 source:c:\users\frtst\documents\github\cube-conflict\src\engine\rendersky.cpp
+	"engine.h"
+
+1671207290 source:c:\users\frtst\documents\github\cube-conflict\src\engine\rendertext.cpp
+	"engine.h"
+
+1674385505 source:c:\users\frtst\documents\github\cube-conflict\src\engine\renderva.cpp
+	"engine.h"
+
+1671135838 source:c:\users\frtst\documents\github\cube-conflict\src\engine\server.cpp
+	"engine.h"
+	"shellapi.h"
+
+1670879920 source:c:\users\frtst\documents\github\cube-conflict\src\engine\serverbrowser.cpp
+	"engine.h"
+
+1642970931 source:c:\users\frtst\documents\github\cube-conflict\src\engine\shader.cpp
+	"engine.h"
+
+1674406365 source:c:\users\frtst\documents\github\cube-conflict\src\engine\sound.cpp
+	"engine.h"
+	"game.h"
+	"SDL_mixer.h"
+	<wchar.h>
+	<unistd.h>
+	<sys/types.h>
+	<sys/stat.h>
+	<sys/mman.h>
+	<fcntl.h>
+	<wchar.h>
+
+1674385625 source:c:\users\frtst\documents\github\cube-conflict\src\engine\stain.cpp
+	"engine.h"
+
+1674406370 source:c:\users\frtst\documents\github\cube-conflict\src\engine\texture.cpp
+	"engine.h"
+	"SDL_image.h"
+
+1667326489 c:\users\frtst\documents\github\cube-conflict\src\include\sdl_image.h
+	"SDL.h"
+	"SDL_version.h"
+	"begin_code.h"
+	"close_code.h"
+
+1674406380 source:c:\users\frtst\documents\github\cube-conflict\src\engine\ui.cpp
+	"engine.h"
+	"textedit.h"
+	"stats.h"
+
+1550080460 c:\users\frtst\documents\github\cube-conflict\src\engine\textedit.h
+
+1671123289 source:c:\users\frtst\documents\github\cube-conflict\src\engine\water.cpp
+	"engine.h"
+
+1674386386 source:c:\users\frtst\documents\github\cube-conflict\src\engine\world.cpp
+	"engine.h"
+
+1674406391 source:c:\users\frtst\documents\github\cube-conflict\src\engine\worldio.cpp
+	"engine.h"
+
+1674406424 source:c:\users\frtst\documents\github\cube-conflict\src\game\ai.cpp
+	"gfx.h"
+
+1550080461 source:c:\users\frtst\documents\github\cube-conflict\src\game\camera.cpp
+	"game.h"
+	"engine.h"
+
+1674409429 source:c:\users\frtst\documents\github\cube-conflict\src\game\client.cpp
+	"steam_api.h"
+	"gfx.h"
+	"stats.h"
+	"ctf.h"
+	"capture.h"
+	"capture.h"
+	"ctf.h"
+
+1674410457 c:\users\frtst\documents\github\cube-conflict\src\game\ctf.h
+
+1674406712 c:\users\frtst\documents\github\cube-conflict\src\game\capture.h
+
+1674406446 source:c:\users\frtst\documents\github\cube-conflict\src\game\entities.cpp
+	"gfx.h"
+	"engine.h"
+	"stats.h"
+
+1674410463 source:c:\users\frtst\documents\github\cube-conflict\src\game\game.cpp
+	"engine.h"
+	"gfx.h"
+	"customs.h"
+	"stats.h"
+
+1674407582 source:c:\users\frtst\documents\github\cube-conflict\src\game\render.cpp
+	"gfx.h"
+	"engine.h"
+	"customs.h"
+	"stats.h"
+
+1671463267 source:c:\users\frtst\documents\github\cube-conflict\src\game\scoreboard.cpp
+	"game.h"
+
+1674406719 source:c:\users\frtst\documents\github\cube-conflict\src\game\server.cpp
+	"game.h"
+	"engine.h"
+	"capture.h"
+	"ctf.h"
+	"capture.h"
+	"ctf.h"
+	"extinfo.h"
+	"aiman.h"
+
+1654686466 c:\users\frtst\documents\github\cube-conflict\src\game\extinfo.h
+
+1673296215 c:\users\frtst\documents\github\cube-conflict\src\game\aiman.h
+
+1604752304 source:c:\users\frtst\documents\github\cube-conflict\src\game\waypoint.cpp
+	"game.h"
+
+1674406265 source:c:\users\frtst\documents\github\cube-conflict\src\game\weapon.cpp
+	"game.h"
+	"engine.h"
+	"gfx.h"
+	"stats.h"
+
+1650908740 source:c:\users\frtst\documents\github\cube-conflict\src\shared\crypto.cpp
+	"cube.h"
+
+1604748498 source:c:\users\frtst\documents\github\cube-conflict\src\shared\geom.cpp
+	"cube.h"
+
+1654685000 source:c:\users\frtst\documents\github\cube-conflict\src\shared\glemu.cpp
+	"cube.h"
+
+1650909549 source:c:\users\frtst\documents\github\cube-conflict\src\shared\stream.cpp
+	"cube.h"
+	<shlobj.h>
+	<unistd.h>
+	<sys/stat.h>
+	<sys/types.h>
+	<dirent.h>
+
+1654684953 source:c:\users\frtst\documents\github\cube-conflict\src\shared\tools.cpp
+	"cube.h"
+
+1666957352 source:c:\users\frtst\documents\github\cube-conflict\src\shared\zip.cpp
+	"cube.h"
+
+1603288642 source:c:\users\frtst\documents\github\cube-conflict\src\project\mingw.rc
+	"cubeconflict.rc"
+
+1603288642 c:\users\frtst\documents\github\cube-conflict\src\project\cubeconflict.rc
+	"winresrc.h"
+

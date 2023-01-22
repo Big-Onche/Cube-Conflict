@@ -1,7 +1,7 @@
 // rendergl.cpp: core opengl rendering stuff
 
 #include "engine.h"
-#include "ccheader.h"
+#include "gfx.h"
 
 bool hasVAO = false, hasTR = false, hasTSW = false, hasPBO = false, hasFBO = false, hasAFBO = false, hasDS = false, hasTF = false, hasCBF = false, hasS3TC = false, hasFXT1 = false, hasLATC = false, hasRGTC = false, hasAF = false, hasFBB = false, hasFBMS = false, hasTMS = false, hasMSS = false, hasFBMSBS = false, hasUBO = false, hasMBR = false, hasDB2 = false, hasDBB = false, hasTG = false, hasTQ = false, hasPF = false, hasTRG = false, hasTI = false, hasHFV = false, hasHFP = false, hasDBT = false, hasDC = false, hasDBGO = false, hasEGPU4 = false, hasGPU4 = false, hasGPU5 = false, hasBFE = false, hasEAL = false, hasCR = false, hasOQ2 = false, hasES2 = false, hasES3 = false, hasCB = false, hasCI = false, hasTS = false;
 bool mesa = false, intel = false, amd = false, nvidia = false;
@@ -1343,8 +1343,6 @@ float curfov, curavatarfov, fovy, aspect;
 int farplane;
 VARP(zoominvel, 0, 40, 500);
 VARP(zoomoutvel, 0, 50, 500);
-int zoomfov = 50;
-float champifov = 0;
 VARP(fov, 10, 100, 150);
 int avatarzoomfov = 40;
 VAR(avatarfov, 10, 40, 100);
@@ -1352,26 +1350,25 @@ FVAR(avatardepth, 0, 0.7f, 1);
 FVARNP(aspect, forceaspect, 0, 0, 1e3f);
 
 static float zoomprogress = 0;
-VAR(zoom, -1, 0, 1);
 
 void disablezoom()
 {
-    zoom = 0;
+    gfx::zoom = 0;
     zoomprogress = 0;
 }
 
 void computezoom()
 {
-    if(game::player1->state==CS_DEAD || game::premission || game::intermission) zoom = 0;
-    if(!zoom) { zoomprogress = 0; curfov = fov+champifov; curavatarfov = avatarfov+champifov; return; }
-    if(zoom > 0) zoomprogress = zoominvel ? min(zoomprogress + float(elapsedtime) / zoominvel, 1.0f) : 1;
+    if(game::player1->state==CS_DEAD || game::premission || game::intermission) gfx::zoom = 0;
+    if(!gfx::zoom) { zoomprogress = 0; curfov = fov+gfx::champifov; curavatarfov = avatarfov+gfx::champifov; return; }
+    if(gfx::zoom > 0) zoomprogress = zoominvel ? min(zoomprogress + float(elapsedtime) / zoominvel, 1.0f) : 1;
     else
     {
         zoomprogress = zoomoutvel ? max(zoomprogress - float(elapsedtime) / zoomoutvel, 0.0f) : 0;
-        if(zoomprogress <= 0) zoom = 0;
+        if(zoomprogress <= 0) gfx::zoom = 0;
     }
-    curfov = zoomfov*zoomprogress + fov*(1 - zoomprogress) + champifov;
-    curavatarfov = avatarzoomfov*zoomprogress + avatarfov*(1 - zoomprogress) + champifov;;
+    curfov = gfx::zoomfov*zoomprogress + fov*(1 - zoomprogress) + gfx::champifov;
+    curavatarfov = avatarzoomfov*zoomprogress + avatarfov*(1 - zoomprogress) + gfx::champifov;;
 }
 
 FVARP(zoomsens, 1e-4f, 4.5f, 1e4f);
@@ -1415,12 +1412,12 @@ void mousemove(int dx, int dy, bool sortprecision)
 {
     if(!game::allowmouselook() || sortprecision) return;
     float cursens = sensitivity, curaccel = mouseaccel;
-    if(zoom)
+    if(gfx::zoom)
     {
         if(zoomautosens)
         {
-            cursens = float(sensitivity*zoomfov)/fov;
-            curaccel = float(mouseaccel*zoomfov)/fov;
+            cursens = float(sensitivity*gfx::zoomfov)/fov;
+            curaccel = float(mouseaccel*gfx::zoomfov)/fov;
         }
         else
         {
@@ -2712,7 +2709,7 @@ void drawcrosshair(int w, int h)
             crosshair = crosshairs[index];
         }
 
-        zoom ? chmod = max(chmod - 1, 1000.f) : chmod = min(chmod + 1, 600.f);
+        gfx::zoom ? chmod = max(chmod - 1, 1000.f) : chmod = min(chmod + 1, 600.f);
         chsize = crosshairsize*w/chmod;
     }
     if(crosshair->type&Texture::ALPHA) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -2723,7 +2720,7 @@ void drawcrosshair(int w, int h)
     float y = cy*h - (windowhit ? 0 : chsize/2.0f);
     glBindTexture(GL_TEXTURE_2D, crosshair->id);
 
-    if(windowhit || forcecampos<0) hudquad(x, y, chsize, chsize);
+    if(windowhit || gfx::forcecampos<0) hudquad(x, y, chsize, chsize);
 }
 
 VARP(wallclock, 0, 0, 1);
@@ -2738,7 +2735,6 @@ VARP(showmyping, 0, 0, 1);
 VAR(statrate, 1, 200, 1000);
 
 FVARP(conscale, 1e-3f, 0.33f, 1e3f);
-int nbfps = 60;
 
 void resethudshader()
 {
@@ -2789,7 +2785,7 @@ void gl_drawhud()
             int nextfps[3];
             getfps(nextfps[0], nextfps[1], nextfps[2]);
             loopi(3) if(prevfps[i]==curfps[i]) curfps[i] = nextfps[i];
-            nbfps = curfps[0];
+            gfx::nbfps = curfps[0];
             if(multiplayer(false) && showmyping) draw_textf("%s%sPING : %d", conw-(showfps ? 10 : 5)*FONTH, conh-FONTH*3/3.2f, "", game::player1->ping>100 ? "\f3" : game::player1->ping>75 ? "\f9" : game::player1->ping>40 ? "\f0" : "\f8", game::player1->ping);
             draw_textf("%s%sFPS : %d", conw-5*FONTH, conh-FONTH*3/3.2f, showfps ? "" : "            ", curfps[0]<29 ? "\f3" : curfps[0]<38 ? "\f9" :  curfps[0]<59 ? "\f0" : "\f8", curfps[0]);
             roffset += FONTH;

@@ -1,7 +1,7 @@
 // main.cpp: initialisation & main loop
 
 #include "engine.h"
-#include "ccheader.h"
+#include "gfx.h"
 #include "steam_api.h"
 #include "stats.h"
 
@@ -1195,8 +1195,6 @@ int newlangage;
 bool IS_USING_STEAM = false;
 bool IS_ON_OFFICIAL_SERV = false;
 
-VAR(forcecampos, -1, -1, 1000);
-
 int main(int argc, char **argv)
 {
     #ifdef WIN32
@@ -1355,9 +1353,9 @@ int main(int argc, char **argv)
     initsound();
     if(UI_PLAYMUSIC) { musicmanager(0); UI_PLAYMUSIC = false; }
 
-    identflags |= IDF_PERSIST;
-
     game::player1->playermodel = 0;
+
+    identflags |= IDF_PERSIST;
 
     if(!execfile(game::savedconfig(), false))
     {
@@ -1451,7 +1449,7 @@ int main(int argc, char **argv)
         frames++;
 
         // miscellaneous general game effects
-        recomputecamera(forcecampos);
+        recomputecamera(gfx::forcecampos);
         updateparticles();
         updatesounds();
 

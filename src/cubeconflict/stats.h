@@ -1,3 +1,6 @@
+#ifndef __STATS_H__
+#define __STATS_H__
+
 extern int xpneededfornextlvl, totalneededxp;
 extern float pourcents;
 
@@ -129,3 +132,5 @@ static const struct achinfo { const char *achname, *achnicenameFR, *achnicenameE
     {"ACH_PARKOUR",       "Le patron du parkour",        "The parkour master"},
     {"ACH_EXAM",          "Examen surprise !",           "Surprise exam!"},
 };
+
+#endif

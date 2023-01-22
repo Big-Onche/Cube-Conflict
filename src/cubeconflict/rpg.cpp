@@ -1,7 +1,6 @@
 // rpg for cube conflict
 #include "game.h"
-#include "customisation.h"
-#include "ccheader.h"
+#include "customs.h"
 
 namespace game
 {

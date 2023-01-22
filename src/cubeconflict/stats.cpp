@@ -1,9 +1,9 @@
 //stats.cpp: where we manage stats, achievements and local saves
 
 #include "steam_api.h"
-#include "ccheader.h"
+#include "game.h"
 #include "stats.h"
-#include "customisation.h"
+#include "customs.h"
 
 using namespace std;
 
@@ -21,7 +21,7 @@ void genlvl() //Calcule le niveau du joueur
         xpneededforprevlvl += cclvl*2;
         xpneededfornextlvl += xpneededforprevlvl;
         totalneededxp += cclvl*2;
-        if(isconnected()) {playsound(S_LEVELUP); message[MSG_LEVELUP]=totalmillis;}
+        if(isconnected()) {playsound(S_LEVELUP); hudmsg[MSG_LEVELUP]=totalmillis;}
     }
 
     float pour1 = totalneededxp, pour2 = stat[STAT_XP]-xpneededfornextlvl;
@@ -200,7 +200,7 @@ void unlockachievement(int achID) //Débloque le succès
         addxpandcc(25, 25);
         playsound(S_ACHIEVEMENTUNLOCKED);
         formatstring(tempachname, "%s", GAME_LANG ? achievements[achID].achnicenameEN : achievements[achID].achnicenameFR);
-        message[MSG_ACHUNLOCKED] = totalmillis;
+        hudmsg[MSG_ACHUNLOCKED] = totalmillis;
     }
 }
 
