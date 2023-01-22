@@ -209,12 +209,12 @@ namespace game
         do offset = vec(rndscale(1), rndscale(1), rndscale(1)).sub(0.5f);
         while(offset.squaredlen() > 0.5f*0.5f);
 
-        if(d->champimillis>0)
+        if(d->boostmillis[B_SHROOMS])
         {
             spread/= 1.5f;
             nozoomspread*= 1.5f;
         }
-        if(d->aptitude==APT_MAGICIEN && d->aptisort2)
+        if(d->aptitude==APT_MAGICIEN && d->abilitymillis[ABILITY_2])
         {
             spread/=3;
             nozoomspread/=3;
@@ -224,7 +224,7 @@ namespace game
             spread/=d->aptitude==APT_CAMPEUR ? 2.5f : 1.333f;
             nozoomspread/=d->aptitude==APT_CAMPEUR ? 2.5f : 1.333f;
         }
-        if(d->steromillis || d->ragemillis)
+        if(d->boostmillis[B_ROIDS] || d->ragemillis)
         {
             spread*=1.75f;
             nozoomspread*=1.75f;
@@ -491,8 +491,9 @@ namespace game
         p.z += 0.6f*(d->eyeheight + d->aboveeye) - d->eyeheight;
 
         damage = (damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[d->aptitude].apt_resistance); //Dégats de base
-        actor->steromillis > 0 ? damage*=actor->aptitude==APT_JUNKIE ? 3 : 2 : damage+=0; //Stéros ou non
-        if(d->aptisort3>0 && d->aptitude==APT_MAGICIEN) damage = damage/5.0f;
+        actor->boostmillis[B_ROIDS] ? damage*=actor->aptitude==APT_JUNKIE ? 3 : 2 : 1; //Stéros ou non
+        if(d->abilitymillis[ABILITY_3] && d->aptitude==APT_MAGICIEN) damage = damage/5.0f;
+        if(d->boostmillis[B_JOINT]) damage = damage/1.25f;
         damage = damage/10.f;
 
         if(d->armourtype!=A_MAGNET)
@@ -505,7 +506,7 @@ namespace game
         {
             if(actor->aptitude==APT_MEDECIN) return;
             damage/=(actor->aptitude==APT_JUNKIE ? 1.5f : 3.f); //Divisé si allié sauf sois-même
-            particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.0f), PART_TEXT, actor->steromillis > 0 ? 2500 : 1500, 0x666666, actor==player1 ? 5.0f : 2.2f, -8);
+            particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.0f), PART_TEXT, actor->boostmillis[B_ROIDS] ? 2500 : 1500, 0x666666, actor==player1 ? 5.0f : 2.2f, -8);
             return;
         }
 
@@ -529,7 +530,7 @@ namespace game
                 break;
 
             case APT_MAGICIEN:
-                if(actor->aptisort2)
+                if(actor->abilitymillis[ABILITY_2])
                 {
                     draweddmg*=1.25f;
                     if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 2500, 0xFF00FF, actor==player1 ? 5.5f : 4.0f, -8);
@@ -540,7 +541,7 @@ namespace game
             case APT_CAMPEUR:
                 {
                     draweddmg *= ((actor->o.dist(d->o)/1800.f)+1.f);
-                    if(d!=player1) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, actor->steromillis > 0 ? 2500 : 1500, draweddmg<0 ? 0x22FF22 : actor->steromillis > 0 ? 0xFF0000: 0xFF4B19, actor==player1 ? 7.0f : 3.0f, -8);  normaldamage = false;}
+                    if(d!=player1) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, actor->boostmillis[B_ROIDS] ? 2500 : 1500, draweddmg<0 ? 0x22FF22 : actor->boostmillis[B_ROIDS] ? 0xFF0000: 0xFF4B19, actor==player1 ? 7.0f : 3.0f, -8);  normaldamage = false;}
                 }
                 break;
 
@@ -554,7 +555,7 @@ namespace game
                 break;
 
             case APT_PRETRE:
-                if(d->aptisort2)
+                if(d->abilitymillis[ABILITY_2] && d->aptitude==APT_PRETRE)
                 {
                     adddynlight(d->o, 25, vec(1.0f, 0.0f, 1.0f), 300, 50, L_NOSHADOW|L_VOLUMETRIC);
                     playsound(S_PRI_2_2, d!=player1 ? &d->o : NULL, NULL, 0, 0, 0, -1, 150, 300);
@@ -564,17 +565,17 @@ namespace game
                 break;
 
             case APT_VAMPIRE:
-                if(d!=player1) particle_textcopy(actor->abovehead(), tempformatstring("%.1f", draweddmg*0.5f), PART_TEXT, actor->steromillis > 0 ? 2500 : 1500, 0xBBDDBB, 3.5f, -8);
+                if(d!=player1) particle_textcopy(actor->abovehead(), tempformatstring("%.1f", draweddmg*0.5f), PART_TEXT, actor->boostmillis[B_ROIDS] ? 2500 : 1500, 0xBBDDBB, 3.5f, -8);
                 break;
 
             case APT_SHOSHONE:
-                if(d->aptisort1)
+                if(d->abilitymillis[ABILITY_1])
                 {
                     draweddmg/=1.3f;
                     if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 2500, 0xAAAA00, actor==player1 ? 10.0f : 7.0f, -8);
                     normaldamage = false;
                 }
-                if(actor->aptisort3)
+                if(actor->abilitymillis[ABILITY_3])
                 {
                     draweddmg*=1.3f;
                     if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 2500, 0xFF3333, actor==player1 ? 10.0f : 7.0f, -8);
@@ -583,10 +584,10 @@ namespace game
                 break;
 
             case APT_PHYSICIEN:
-                if(d==player1 && actor==player1 && player1->armour > 0 && player1->aptisort1) unlockachievement(ACH_BRICOLEUR);
+                if(d==player1 && actor==player1 && player1->armour > 0 && player1->abilitymillis[ABILITY_1]) unlockachievement(ACH_BRICOLEUR);
                 break;
         }
-        if(normaldamage && d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, actor->steromillis > 0 ? 2500 : 1500, actor->steromillis > 0 ? 0xFF0000 : 0xFF4400, actor==player1 ? 7.0f : 3.0f, -8);
+        if(normaldamage && d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, actor->boostmillis[B_ROIDS] > 0 ? 2500 : 1500, actor->boostmillis[B_ROIDS] > 0 ? 0xFF0000 : 0xFF4400, actor==player1 ? 7.0f : 3.0f, -8);
 
         if(actor==player1) addstat(draweddmg, STAT_TOTALDAMAGEDEALT);
         else if(d==player1) addstat(draweddmg, STAT_TOTALDAMAGERECIE);
@@ -644,7 +645,7 @@ namespace game
                     damageblend(damage);
                     damagecompass(damage, at ? at->o : f->o);
 
-                    if(player1->aptitude==APT_PHYSICIEN && player1->aptisort1 && player1->armour>0) {playsound(S_PHY_1); playsound(armoursound+70);}
+                    if(player1->aptitude==APT_PHYSICIEN && player1->abilitymillis[ABILITY_1] && player1->armour>0) {playsound(S_PHY_1); playsound(armoursound+70);}
                     else if(player1->armour>0 && atk!=ATK_LANCEFLAMMES_SHOOT && randomevent(2)) playsound(armoursound);
                     else playsound(S_IMPACTBODY);
                 }
@@ -653,7 +654,7 @@ namespace game
             {
                 if(randomevent(2))
                 {
-                    if(f->aptitude==APT_PHYSICIEN && f->aptisort1 && f->armour>0) playsound(S_PHY_1, &f->o, 0, 0, 0 , 100, -1, 200);
+                    if(f->aptitude==APT_PHYSICIEN && f->abilitymillis[ABILITY_1] && f->armour>0) playsound(S_PHY_1, &f->o, 0, 0, 0 , 100, -1, 200);
                     else if(f->armour>0 && atk!=ATK_LANCEFLAMMES_SHOOT) playsound(armoursound, &f->o, 0, 0, 0 , 100, -1, 200);
                 }
             }
@@ -955,29 +956,29 @@ namespace game
                     if(!p.inwater && lookupmaterial(pos)==MAT_WATER)
                     {
                         p.inwater = true;
-                        particle_splash(PART_EAU, 15, 100, v, 0x28282A, 0.75f, 50, -300, 1, player1->champimillis ? true : false);
+                        particle_splash(PART_EAU, 15, 100, v, 0x28282A, 0.75f, 50, -300, 1, gfx::champicolor);
                         playsound(S_IMPACTWATER, &v, NULL, 0, 0 , 150, -1, 250);
                     }
 
                     switch(p.atk)
                     {
                         case ATK_PULSE_SHOOT:
-                            particle_splash(PART_PULSE_FRONT, 1, 1, pos, p.owner->steromillis ? 0xFF4444 : 0xFF6600, 2.4f, 150, 20, 0, player1->champimillis ? true : false);
-                            particle_flare(tail, head, 1, PART_PULSE_SIDE, p.owner->steromillis ? 0xFF4444 : 0xFF6600, 2.0f, p.owner, player1->champimillis ? true : false);
+                            particle_splash(PART_PULSE_FRONT, 1, 1, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFF6600, 2.4f, 150, 20, 0, gfx::champicolor);
+                            particle_flare(tail, head, 1, PART_PULSE_SIDE, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFF6600, 2.0f, p.owner, gfx::champicolor);
                             if(lookupmaterial(pos)==MAT_WATER) particle_splash(PART_BULLE, 1, 150, v, 0x18181A, 2.0f+rnd(2), 20, -30);
                             p.projsound = S_FLYBYSPOCK;
                             canplaysound = true;
                             break;
                         case ATK_GRAP1_SHOOT:
-                            particle_splash(PART_PULSE_FRONT, 1, 1, pos, p.owner->steromillis ? 0xFF4444 : 0xFF33BB, 3.0f, 150, 20, 0, player1->champimillis ? true : false);
-                            particle_flare(tail, head, 1, PART_PULSE_SIDE, p.owner->steromillis ? 0xFF4444 : 0xEE22AA, 3.0f, p.owner, player1->champimillis ? true : false);
-                            particle_splash(lookupmaterial(pos)==MAT_WATER ? PART_BULLE : PART_SMOKE, 1, lookupmaterial(pos)==MAT_WATER ? 150 : 300, pos, lookupmaterial(pos)&MAT_WATER ? 0x18181A : 0xAAAAAA, 4.0f, 25, 250, 0, player1->champimillis ? true : false);
+                            particle_splash(PART_PULSE_FRONT, 1, 1, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFF33BB, 3.0f, 150, 20, 0, gfx::champicolor);
+                            particle_flare(tail, head, 1, PART_PULSE_SIDE, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xEE22AA, 3.0f, p.owner, gfx::champicolor);
+                            particle_splash(lookupmaterial(pos)==MAT_WATER ? PART_BULLE : PART_SMOKE, 1, lookupmaterial(pos)==MAT_WATER ? 150 : 300, pos, lookupmaterial(pos)&MAT_WATER ? 0x18181A : 0xAAAAAA, 4.0f, 25, 250, 0, gfx::champicolor);
                             p.projsound = S_FLYBYGRAP1;
                             canplaysound = true;
                             break;
                         case ATK_SPOCKGUN_SHOOT:
-                            particle_splash(PART_SPOCK_FRONT, 1, 1, pos, p.owner->steromillis ? 0xFF4444 : 0x00FF00, 4.f, 150, 20, 0, player1->champimillis ? true : false);
-                            particle_flare(tail, head, 1, PART_PULSE_SIDE, p.owner->steromillis ? 0xFF4444 : 0x22FF22, 2.5f, p.owner, player1->champimillis ? true : false);
+                            particle_splash(PART_SPOCK_FRONT, 1, 1, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0x00FF00, 4.f, 150, 20, 0, gfx::champicolor);
+                            particle_flare(tail, head, 1, PART_PULSE_SIDE, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0x22FF22, 2.5f, p.owner, gfx::champicolor);
                             p.projsound = S_FLYBYSPOCK;
                             canplaysound = true;
                             break;
@@ -986,8 +987,8 @@ namespace game
                         case ATK_CAMPOUZE_SHOOT:
                         case ATK_GAU8_SHOOT:
                             if(lookupmaterial(pos)==MAT_WATER) particle_splash(PART_BULLE, 1, 150, v, 0x18181A, 2.0f+rnd(2), 20, -30);
-                            particle_flare(tail, head, 1, PART_BALLE_SIDE, p.owner->steromillis ? 0xFF4444 : 0xFFBB88, ATK_GAU8_SHOOT==1 ? 0.8f : 0.65f, p.owner, player1->champimillis ? true : false);
-                            particle_splash(PART_PULSE_FRONT, 1, 1, pos, p.owner->steromillis ? 0xFF4444 : 0xFFBB88,  p.owner==player1 ? 0.8f : ATK_GAU8_SHOOT==1 ? 0.65f : 0.45f, 150, 20, 0, player1->champimillis ? true : false);
+                            particle_flare(tail, head, 1, PART_BALLE_SIDE, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFFBB88, ATK_GAU8_SHOOT==1 ? 0.8f : 0.65f, p.owner, gfx::champicolor);
+                            particle_splash(PART_PULSE_FRONT, 1, 1, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFFBB88,  p.owner==player1 ? 0.8f : ATK_GAU8_SHOOT==1 ? 0.65f : 0.45f, 150, 20, 0, gfx::champicolor);
                             break;
                         case ATK_MINIGUN_SHOOT:
                         case ATK_AK47_SHOOT:
@@ -995,18 +996,18 @@ namespace game
                         case ATK_GLOCK_SHOOT:
                         case ATK_FAMAS_SHOOT:
                             if(lookupmaterial(pos)==MAT_WATER) particle_splash(PART_BULLE, 1, 150, v, 0x18181A, 1.0f+rnd(2), 20, -30);
-                            particle_flare(tail, head, 1, PART_BALLE_SIDE, p.owner->steromillis ? 0xFF4444 : 0xFFBB88, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.55f : 0.45f, p.owner, player1->champimillis ? true : false);
-                            particle_splash(PART_PULSE_FRONT, 1, 1, pos, p.owner->steromillis ? 0xFF4444 : 0xFFBB88, p.owner==player1 ? 0.65f : ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.4f : 0.3f, 150, 20, 0, player1->champimillis ? true : false);
+                            particle_flare(tail, head, 1, PART_BALLE_SIDE, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFFBB88, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.55f : 0.45f, p.owner, gfx::champicolor);
+                            particle_splash(PART_PULSE_FRONT, 1, 1, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFFBB88, p.owner==player1 ? 0.65f : ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.4f : 0.3f, 150, 20, 0, gfx::champicolor);
                             break;
                         case ATK_ARBALETE_SHOOT:
                             if(!p.exploded)
                             {
                                 if(lookupmaterial(pos)==MAT_WATER) particle_splash(PART_BULLE, 1, 150, v, 0x888888, 1.0f+rnd(2), 20, -30);
-                                particle_splash(PART_SMOKE, 2, 100, pos, 0xAAAAAA, 0.8f, 25, 250, 0, player1->champimillis ? true : false);
-                                if(p.owner->steromillis)
+                                particle_splash(PART_SMOKE, 2, 100, pos, 0xAAAAAA, 0.8f, 25, 250, 0, gfx::champicolor);
+                                if(p.owner->boostmillis[B_ROIDS])
                                 {
-                                    particle_flare(tail, head, 1, PART_BALLE_SIDE, 0xFF4444, 0.30f, p.owner, player1->champimillis ? true : false);
-                                    particle_splash(PART_PULSE_FRONT, 1, 1, pos, 0xFF4444, p.owner==player1 ? 0.5f : 0.25f, 150, 20, 0, player1->champimillis ? true : false);
+                                    particle_flare(tail, head, 1, PART_BALLE_SIDE, 0xFF4444, 0.30f, p.owner, gfx::champicolor);
+                                    particle_splash(PART_PULSE_FRONT, 1, 1, pos, 0xFF4444, p.owner==player1 ? 0.5f : 0.25f, 150, 20, 0, gfx::champicolor);
                                 }
                             }
                             break;
@@ -1070,104 +1071,72 @@ namespace game
         int gun = attacks[atk].gun;
         int sound = attacks[atk].sound;
         //int soundwater = attacks[atk]].soundwater;
-        if(player1->aptisort2 && d==player1 && player1->aptitude==APT_MAGICIEN) playsound(S_WIZ_2);
-        if(d->aptisort3 && d->aptitude==APT_PRETRE)adddynlight(d->muzzle, 6, vec(1.5f, 1.5f, 0.0f), 80, 40, L_NOSHADOW|L_VOLUMETRIC|DL_FLASH);
+        if(player1->abilitymillis[ABILITY_2] && d==player1 && player1->aptitude==APT_MAGICIEN) playsound(S_WIZ_2);
+        if(d->abilitymillis[ABILITY_3] && d->aptitude==APT_PRETRE)adddynlight(d->muzzle, 6, vec(1.5f, 1.5f, 0.0f), 80, 40, L_NOSHADOW|L_VOLUMETRIC|DL_FLASH);
 
         int movefactor = game::player1->aptitude==APT_SOLDAT ? 2 : 1;
 
         switch(atk)
         {
-            case ATK_PULSE_SHOOT:
-                if(d->type==ENT_PLAYER) sound = S_PLASMARIFLE_SFX;
-                particle_flare(d->muzzle, d->muzzle, 140, PART_PULSE_MUZZLE_FLASH, d->steromillis ? 0xFF4444 : d->aptisort2 && d->aptitude==APT_MAGICIEN ? 0xFF44FF : 0xFF7911, d==hudplayer() ? zoom ? 1.0f : 2.25f : 3.f, d, player1->champimillis ? true : false);
-                if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 140, PART_PULSE_MUZZLE_FLASH, 0xFF4444, zoom ? 1.50f : 5.50f, d, player1->champimillis ? true : false);
-                adddynlight(hudgunorigin(gun, d->o, to, d), 100, vec(1.25f, 0.2f, 0.0f), 40, 2, DL_FLASH, 0, vec(1.25f, 0.2f, 0.0f), d);
+            case ATK_PULSE_SHOOT: case ATK_SPOCKGUN_SHOOT:
+                if(d->type==ENT_PLAYER && atk==ATK_PULSE_SHOOT) sound = S_PLASMARIFLE_SFX;
+                gfx::shootgfx(from, to, d, atk);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
-                if(d==player1) mousemove((-5+rnd(11))/movefactor, (-5+rnd(11))/movefactor, player1->aptisort2 && player1->aptitude==APT_MAGICIEN ? true : false);
-                break;
-
-            case ATK_SPOCKGUN_SHOOT:
-                particle_flare(d->muzzle, d->muzzle, 140, PART_PULSE_MUZZLE_FLASH, d->steromillis ? 0xFF2222 : d->aptisort2 && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0x22FF22, zoom ? 1.0f : 2.25f, d, player1->champimillis ? true : false);
-                if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 140, PART_PULSE_MUZZLE_FLASH, 0xFF2222, zoom ? 1.5f : 4.00f, d, player1->champimillis ? true : false);
-                adddynlight(hudgunorigin(gun, d->o, to, d), 75, vec(0.0f, 1.25f, 0.0f), 35, 2, DL_FLASH, 0, vec(0.0f, 1.25f, 0.0f), d);
-                newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
+                if(d==player1) mousemove((-5+rnd(11))/movefactor, (-5+rnd(11))/movefactor, player1->abilitymillis[ABILITY_2] && player1->aptitude==APT_MAGICIEN ? true : false);
                 break;
 
             case ATK_RAIL_SHOOT:
                 playsound(S_IMPACTELEC, &to, 0, 0, 0 , 100, -1, 250);
                 if(d!=hudplayer()) sound_nearmiss(S_FLYBYELEC, from, to);
-                loopi(3)particle_flare(d->muzzle, to, 50+rnd(50), PART_LIGHTNING, 0x8888FF, 1.5f+rnd(2), NULL, gfx::champicolor);
-                particle_flare(d->muzzle, to, 30, PART_POMPE_SIDE, d->steromillis ? 0xFF2222 : 0xFFFF22, 0.2f, d, player1->champimillis ? true : false);
-                particle_flare(d->muzzle, d->muzzle, 140, PART_RAIL_MUZZLE_FLASH, d->steromillis ? 0xFF2222 : d->aptisort2 && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0x50CFFF, zoom ? 1.75f : 3.0f, d, player1->champimillis ? true : false);
-                if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 140, PART_RAIL_MUZZLE_FLASH, 0xFF2222, zoom ? 2.5f : 5.5f, d, player1->champimillis ? true : false);
-                adddynlight(hudgunorigin(gun, d->o, to, d), 100, vec(0.25f, 0.75f, 2.0f), 40, 2, DL_FLASH, 0, vec(0.25f, 0.75f, 2.0f), d);
-                gfx::instantrayhit(from, to, d->aptitude==APT_ESPION && d->aptisort2 ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle, atk);
+                gfx::shootgfx(from, to, d, atk);
+                gfx::instantrayhit(from, to, d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle, atk);
                 break;
 
             case ATK_SMAW_SHOOT:
             case ATK_ROQUETTES_SHOOT:
             case ATK_NUKE_SHOOT:
+            case ATK_ARTIFICE_SHOOT:
                 if(d==player1 && atk==ATK_NUKE_SHOOT)
                 {
                     unlockachievement(ACH_ATOME);
                     addstat(1, STAT_ATOM);
                 }
-                particle_flare(d->muzzle, d->muzzle, 250, PART_NORMAL_MUZZLE_FLASH, d->steromillis ? 0xFF2222 : d->aptisort2 && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFF7700, atk==ATK_ROQUETTES_SHOOT ? 2.5f : 7.00f, d, player1->champimillis ? true : false);
-                if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 250, PART_NORMAL_MUZZLE_FLASH, 0xFF2222, atk==ATK_ROQUETTES_SHOOT ? 4.0f : 3.00f, d, player1->champimillis ? true : false);
-                adddynlight(hudgunorigin(gun, d->o, to, d), 100, vec(1.25f, 0.75f, 0.3f), 75, 2, DL_FLASH, 0, vec(1.25f, 0.75f, 0.3f), d);
+                gfx::shootgfx(from, to, d, atk);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
-                if(d==player1 && atk==ATK_ROQUETTES_SHOOT) mousemove((-7+rnd(15))/movefactor, (-7+rnd(15))/movefactor, player1->aptisort2 && player1->aptitude==APT_MAGICIEN ? true : false);
-                break;
-            case ATK_ARTIFICE_SHOOT:
-                newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
-                if(d->ragemillis) particle_splash(PART_SPARK,  6, 500, d->muzzle, 0xFF5555, 1.0f, 50, 200, 0, player1->champimillis ? true : false);
+                if(d==player1 && atk==ATK_ROQUETTES_SHOOT) mousemove((-7+rnd(15))/movefactor, (-7+rnd(15))/movefactor, player1->abilitymillis[ABILITY_2] && player1->aptitude==APT_MAGICIEN ? true : false);
                 break;
             case ATK_MINIGUN_SHOOT:
             case ATK_AK47_SHOOT:
-                spawnbouncer(d->aptitude==APT_ESPION && d->aptisort2 ? d->o : d->balles, vec(0, 0, 0), d, BNC_DOUILLES);
-                particle_flare(d->muzzle, d->muzzle, 100, PART_MINIGUN_MUZZLE_FLASH, d->steromillis ? 0xFF2222 : d->aptisort2 && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xCCAAAA, d==hudplayer() ? zoom ? 1.3f : 3.f : 3.6f, d, player1->champimillis ? true : false);
-                if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 100, PART_MINIGUN_MUZZLE_FLASH, 0xFF2222, d==hudplayer() ? zoom ? 2.f : 5.5f : 6.5f, d, player1->champimillis ? true : false);
-                particle_splash(PART_SMOKE, d==hudplayer() ? 3 : 5, d==hudplayer() ? 350 : 500, d->muzzle, 0x444444, d==hudplayer() ? 3.5f : 4.5f, 20, 500, 0, player1->champimillis ? true : false);
-                particle_splash(PART_SPARK, d==hudplayer() ? 3 : 5, 35, d->muzzle, 0xFF4400, 0.35f, 300, 500, 0, player1->champimillis ? true : false);
-                adddynlight(hudgunorigin(gun, d->o, to, d), 75, vec(1.25f, 0.75f, 0.3f), 35, 2, DL_FLASH, 0, vec(1.25f, 0.75f, 0.3f), d);
-                newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
-                if(d!=hudplayer()) sound_nearmiss(S_BULLETFLYBY, from, to);
-                if(d==player1) mousemove(ATK_MINIGUN_SHOOT==1 ? (-7+rnd(15))/movefactor : (-3+rnd(7))/movefactor, ATK_MINIGUN_SHOOT==1 ? (-7+rnd(15))/movefactor : (-3+rnd(7))/movefactor, player1->aptisort2 && player1->aptitude==APT_MAGICIEN ? true : false);
-                break;
             case ATK_GAU8_SHOOT:
-                if(d->type==ENT_PLAYER) sound = S_GAU8;
-                if(d==player1 && player1->aptitude==APT_PRETRE && player1->champimillis && player1->aptisort3) unlockachievement(ACH_CADENCE);
-                spawnbouncer(d->aptitude==APT_ESPION && d->aptisort2 ? d->o : d->balles, vec(0, 0, 0), d, BNC_BIGDOUILLES);
-                particle_flare(d->muzzle, d->muzzle, 100, PART_MINIGUN_MUZZLE_FLASH, d->steromillis ? 0xFF2222 : d->aptisort2 && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFFFFFF, d==hudplayer() ? zoom ? 1.5f : 2.0f : 5.f, d, player1->champimillis ? true : false);
-                if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 100, PART_MINIGUN_MUZZLE_FLASH, 0xFF2222, d==hudplayer() ? zoom ? 1.5f : 2.5f : 6.f, d, player1->champimillis ? true : false);
-                if(randomevent(7))
+                if(atk==ATK_GAU8_SHOOT)
                 {
-                    particle_splash(PART_SMOKE, d==hudplayer() ? 4 : 6, d==hudplayer() ? 350 : 600, d->muzzle, 0x222222, d==hudplayer() ? 3.5f : 6.5f, 40, 500, 0, player1->champimillis ? true : false);
-                    particle_splash(PART_SPARK, d==hudplayer() ? 4 : 7, 40, d->muzzle, 0xFF4400, 0.5f, 300, 500, 0, player1->champimillis ? true : false);
+                    if(d->type==ENT_PLAYER) sound = S_GAU8;
+                     if(d==player1 && player1->aptitude==APT_PRETRE && player1->boostmillis[B_SHROOMS] && player1->abilitymillis[ABILITY_3]) unlockachievement(ACH_CADENCE);
                 }
-                adddynlight(hudgunorigin(gun, d->o, to, d), 100, vec(1.25f, 0.75f, 0.3f), 30, 2, DL_FLASH, 0, vec(1.25f, 0.75f, 0.3f), d);
+                spawnbouncer(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? d->o : d->balles, vec(0, 0, 0), d, atk==ATK_GAU8_SHOOT ? BNC_BIGDOUILLES : BNC_DOUILLES);
+                gfx::shootgfx(from, to, d, atk);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
-                if(d!=hudplayer()) sound_nearmiss(S_BIGBULLETFLYBY, from, to);
-                if(d==player1) mousemove((-9+rnd(19))/movefactor, (-9+rnd(19))/movefactor, player1->aptisort2 && player1->aptitude==APT_MAGICIEN ? true : false);
+                if(d!=hudplayer()) sound_nearmiss(atk==ATK_GAU8_SHOOT ? S_BIGBULLETFLYBY : S_BULLETFLYBY, from, to);
+                if(d==player1) mousemove(atk==ATK_MINIGUN_SHOOT ? (-7+rnd(15))/movefactor : (-3+rnd(7))/movefactor, atk==ATK_MINIGUN_SHOOT ? (-7+rnd(15))/movefactor : (-3+rnd(7))/movefactor, player1->abilitymillis[ABILITY_2] && player1->aptitude==APT_MAGICIEN ? true : false);
                 break;
             case ATK_MOSSBERG_SHOOT:
             case ATK_HYDRA_SHOOT:
                 {
-                    if(!local) createrays(gun, d->aptitude==APT_ESPION && d->aptisort2 ? d->o : from, to, d);
-                    loopi(atk==ATK_HYDRA_SHOOT ? 3 : 2) spawnbouncer(d->aptitude==APT_ESPION && d->aptisort2 ? hudgunorigin(gun, d->o, to, d) : d->balles, vec(0, 0, 0), d, BNC_CARTOUCHES);
-                    particle_flare(d->muzzle, d->muzzle, 140, PART_NORMAL_MUZZLE_FLASH, d->steromillis ? 0xFF2222 : d->aptisort2 && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xCCAAAA,  d==hudplayer() ? zoom ? 1.25f : 3.50f : 4.5f, d, player1->champimillis ? true : false);
-                    if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 140, PART_NORMAL_MUZZLE_FLASH, 0xFF2222, d==hudplayer() ? zoom ? 2.00f : 5.5f : 6.5f, d, player1->champimillis ? true : false);
-                    particle_splash(PART_SMOKE,  4, 500, d->muzzle, 0x443333, 3.5f, 20, 500, 0, player1->champimillis ? true : false);
-                    particle_splash(PART_SPARK, d==hudplayer() ? 4 : 7, 40, d->muzzle, 0xFF2200, 0.5f, 300, 500, 0, player1->champimillis ? true : false);
+                    if(!local) createrays(gun, d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? d->o : from, to, d);
+                    loopi(atk==ATK_HYDRA_SHOOT ? 3 : 2) spawnbouncer(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(gun, d->o, to, d) : d->balles, vec(0, 0, 0), d, BNC_CARTOUCHES);
+                    particle_flare(d->muzzle, d->muzzle, 140, PART_NORMAL_MUZZLE_FLASH, d->boostmillis[B_ROIDS] ? 0xFF2222 : d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xCCAAAA,  d==hudplayer() ? zoom ? 1.25f : 3.50f : 4.5f, d, gfx::champicolor);
+                    if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 140, PART_NORMAL_MUZZLE_FLASH, 0xFF2222, d==hudplayer() ? zoom ? 2.00f : 5.5f : 6.5f, d, gfx::champicolor);
+                    particle_splash(PART_SMOKE,  4, 500, d->muzzle, 0x443333, 3.5f, 20, 500, 0, gfx::champicolor);
+                    particle_splash(PART_SPARK, d==hudplayer() ? 4 : 7, 40, d->muzzle, 0xFF2200, 0.5f, 300, 500, 0, gfx::champicolor);
                     adddynlight(hudgunorigin(gun, d->o, to, d), 75, vec(1.25f, 0.25f, 0.f), 40, 2, DL_FLASH, 0, vec(1.25f, 0.25f, 0.f), d);
                     loopi(attacks[atk].rays)
                     {
                         if(!(lookupmaterial(rays[i])==MAT_WATER)) playsound(S_LITTLERICOCHET, &rays[i], 0, 0, 0 , 100, -1, 250);
-                        particle_splash(PART_SPARK, 9, 60, rays[i], d->steromillis ? 0xFF2222 : 0xAA1100, 0.4, 150, 100, 0, player1->champimillis ? true : false);
-                        particle_splash(PART_SMOKE, 3, 500+rnd(300), rays[i], 0x797979, 0.2f, 35, 300, 2, player1->champimillis ? true : false);
-                        particle_splash(PART_SMOKE, 3, 275+rnd(275), rays[i], 0x553915, 0.15f, 35, 300, 2, player1->champimillis ? true : false);
-                        particle_flare(d->aptitude==APT_ESPION && d->aptisort2 ? hudgunorigin(gun, d->o, to, d) : d->muzzle, rays[i], 30, PART_POMPE_SIDE, d->steromillis ? 0xFF2222 : 0xFFFF22, 0.2f, d, player1->champimillis ? true : false);
-                        gfx::instantrayhit(from, rays[i], d->aptitude==APT_ESPION && d->aptisort2 ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle, atk);
+                        particle_splash(PART_SPARK, 9, 60, rays[i], d->boostmillis[B_ROIDS] ? 0xFF2222 : 0xAA1100, 0.4, 150, 100, 0, gfx::champicolor);
+                        particle_splash(PART_SMOKE, 3, 500+rnd(300), rays[i], 0x797979, 0.2f, 35, 300, 2, gfx::champicolor);
+                        particle_splash(PART_SMOKE, 3, 275+rnd(275), rays[i], 0x553915, 0.15f, 35, 300, 2, gfx::champicolor);
+                        particle_flare(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(gun, d->o, to, d) : d->muzzle, rays[i], 30, PART_POMPE_SIDE, d->boostmillis[B_ROIDS] ? 0xFF2222 : 0xFFFF22, 0.2f, d, gfx::champicolor);
+                        gfx::instantrayhit(from, rays[i], d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle, atk);
                         if(d!=hudplayer()) sound_nearmiss(S_BULLETFLYBY, from, rays[i]);
                     }
                 }
@@ -1175,13 +1144,13 @@ namespace game
             case ATK_SV98_SHOOT:
             case ATK_SKS_SHOOT:
             case ATK_CAMPOUZE_SHOOT:
-                if(atk==ATK_CAMPOUZE_SHOOT) {loopi(3)spawnbouncer(d->aptitude==APT_ESPION && d->aptisort2 ? d->o : d->balles, vec(0, 0, 0), d, BNC_BIGDOUILLES);}
-                else spawnbouncer(d->aptitude==APT_ESPION && d->aptisort2 ? d->o : d->balles, vec(0, 0, 0), d, BNC_BIGDOUILLES);
-                particle_splash(PART_SMOKE, d==hudplayer() ? 4 : 6, d==hudplayer() ? 350 : 600, d->muzzle, 0x222222, d==hudplayer() ? 3.5f : 6.5f, 40, 500, 0, player1->champimillis ? true : false);
-                particle_splash(PART_SPARK, d==hudplayer() ? 4 : 7, 40, d->muzzle, 0xFFFFFF, 0.5f, 300, 500, 0, player1->champimillis ? true : false);
-                particle_flare(d->muzzle, d->muzzle, 100, PART_NORMAL_MUZZLE_FLASH, d->steromillis ? 0xFF2222 : d->aptisort2 && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFFFFFF, 1.25f, d, player1->champimillis ? true : false);
-                particle_flare(d->muzzle, d->muzzle, 100, PART_SNIPE_MUZZLE_FLASH, d->steromillis ? 0xFF2222 : d->aptisort2 && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFFFFFF, 5.0f, d, player1->champimillis ? true : false);
-                if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 75, PART_SNIPE_MUZZLE_FLASH, 0xFF2222, 8.0f, d, player1->champimillis ? true : false);
+                if(atk==ATK_CAMPOUZE_SHOOT) {loopi(3)spawnbouncer(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? d->o : d->balles, vec(0, 0, 0), d, BNC_BIGDOUILLES);}
+                else spawnbouncer(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? d->o : d->balles, vec(0, 0, 0), d, BNC_BIGDOUILLES);
+                particle_splash(PART_SMOKE, d==hudplayer() ? 4 : 6, d==hudplayer() ? 350 : 600, d->muzzle, 0x222222, d==hudplayer() ? 3.5f : 6.5f, 40, 500, 0, gfx::champicolor);
+                particle_splash(PART_SPARK, d==hudplayer() ? 4 : 7, 40, d->muzzle, 0xFFFFFF, 0.5f, 300, 500, 0, gfx::champicolor);
+                particle_flare(d->muzzle, d->muzzle, 100, PART_NORMAL_MUZZLE_FLASH, d->boostmillis[B_ROIDS] ? 0xFF2222 : d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFFFFFF, 1.25f, d, gfx::champicolor);
+                particle_flare(d->muzzle, d->muzzle, 100, PART_SNIPE_MUZZLE_FLASH, d->boostmillis[B_ROIDS] ? 0xFF2222 : d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFFFFFF, 5.0f, d, gfx::champicolor);
+                if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 75, PART_SNIPE_MUZZLE_FLASH, 0xFF2222, 8.0f, d, gfx::champicolor);
                 adddynlight(hudgunorigin(gun, d->o, to, d), 50, vec(1.25f, 0.75f, 0.3f), 37, 2, DL_FLASH, 0, vec(1.25f, 0.75f, 0.3f), d);
                 if(atk==ATK_CAMPOUZE_SHOOT)
                 {
@@ -1196,22 +1165,22 @@ namespace game
                 break;
             case ATK_ARBALETE_SHOOT:
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
-                if(d->ragemillis) particle_splash(PART_SPARK,  8, 500, d->muzzle, 0xFF2222, 1.0f,  50,   200, 0, player1->champimillis ? true : false);
+                if(d->ragemillis) particle_splash(PART_SPARK,  8, 500, d->muzzle, 0xFF2222, 1.0f,  50,   200, 0, gfx::champicolor);
                 if(d!=hudplayer()) sound_nearmiss(S_FLYBYARROW, from, to);
                 break;
             case ATK_UZI_SHOOT:
             case ATK_FAMAS_SHOOT:
             case ATK_GLOCK_SHOOT:
-                spawnbouncer(d->aptitude==APT_ESPION && d->aptisort2 ? d->o : d->balles, vec(0, 0, 0), d, atk==ATK_UZI_SHOOT ? BNC_DOUILLESUZI : BNC_DOUILLES);
-                particle_flare(d->muzzle, d->muzzle, 125, PART_NORMAL_MUZZLE_FLASH, d->steromillis ? 0xFF2222 : d->aptisort2 && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFFFFFF, d==hudplayer() ? zoom ? 0.5f : 0.75f : 1.75f, d, player1->champimillis ? true : false);
-                particle_flare(d->muzzle, d->muzzle, 75, PART_MINIGUN_MUZZLE_FLASH, d->steromillis ? 0xFF2222 : d->aptisort2 && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFFAA55, d==hudplayer() ? zoom ? 0.75f : 2.f : 3.f, d, player1->champimillis ? true : false);
-                if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 80, PART_MINIGUN_MUZZLE_FLASH, 0xFF2222, d==hudplayer() ? zoom ? 1.5f : 4.f : 5.f, d, player1->champimillis ? true : false);
-                particle_splash(PART_SMOKE, d==hudplayer() ? 3 : 5, d==hudplayer() ? 350 : 500, d->muzzle, 0x444444, d==hudplayer() ? 3.5f : 4.5f, 20, 500, 0, player1->champimillis ? true : false);
-                particle_splash(PART_SPARK, d==hudplayer() ? 3 : 5, 35, d->muzzle, 0xFF4400, 0.35f, 300, 500, 0, player1->champimillis ? true : false);
+                spawnbouncer(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? d->o : d->balles, vec(0, 0, 0), d, atk==ATK_UZI_SHOOT ? BNC_DOUILLESUZI : BNC_DOUILLES);
+                particle_flare(d->muzzle, d->muzzle, 125, PART_NORMAL_MUZZLE_FLASH, d->boostmillis[B_ROIDS] ? 0xFF2222 : d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFFFFFF, d==hudplayer() ? zoom ? 0.5f : 0.75f : 1.75f, d, gfx::champicolor);
+                particle_flare(d->muzzle, d->muzzle, 75, PART_MINIGUN_MUZZLE_FLASH, d->boostmillis[B_ROIDS] ? 0xFF2222 : d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFFAA55, d==hudplayer() ? zoom ? 0.75f : 2.f : 3.f, d, gfx::champicolor);
+                if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 80, PART_MINIGUN_MUZZLE_FLASH, 0xFF2222, d==hudplayer() ? zoom ? 1.5f : 4.f : 5.f, d, gfx::champicolor);
+                particle_splash(PART_SMOKE, d==hudplayer() ? 3 : 5, d==hudplayer() ? 350 : 500, d->muzzle, 0x444444, d==hudplayer() ? 3.5f : 4.5f, 20, 500, 0, gfx::champicolor);
+                particle_splash(PART_SPARK, d==hudplayer() ? 3 : 5, 35, d->muzzle, 0xFF4400, 0.35f, 300, 500, 0, gfx::champicolor);
                 adddynlight(hudgunorigin(gun, d->o, to, d), 60, vec(1.25f, 0.75f, 0.3f), 30, 2, DL_FLASH, 0, vec(1.25f, 0.75f, 0.3f), d);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
                 if(d!=hudplayer()) sound_nearmiss(S_BULLETFLYBY, from, to);
-                if(d==player1) {if(atk!=ATK_GLOCK_SHOOT) mousemove((-3+rnd(7))/movefactor, (-3+rnd(7))/movefactor, player1->aptisort2 && player1->aptitude==APT_MAGICIEN ? true : false);}
+                if(d==player1) {if(atk!=ATK_GLOCK_SHOOT) mousemove((-3+rnd(7))/movefactor, (-3+rnd(7))/movefactor, player1->abilitymillis[ABILITY_2] && player1->aptitude==APT_MAGICIEN ? true : false);}
                 break;
             case ATK_LANCEFLAMMES_SHOOT:
             {
@@ -1219,7 +1188,7 @@ namespace game
                 if(d->type==ENT_PLAYER) sound = S_FLAMETHROWER;
                 loopi(attacks[atk].rays)
                 {
-                    vec origin = d->aptitude==APT_ESPION && d->aptisort2 ? hudgunorigin(gun, d->o, to, d) : d->muzzle;
+                    vec origin = d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(gun, d->o, to, d) : d->muzzle;
 
                     vec irays(rays[i]);
                     irays.sub(origin);
@@ -1227,18 +1196,18 @@ namespace game
 
                     switch(rnd(5))
                     {
-                        case 0: particle_flying_flare(origin, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x881111 :  0x604930, (7.f+rnd(16))/10.f, 100, 10+rnd(5), player1->champimillis ? true : false); break;
-                        case 1: particle_flying_flare(origin, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x770000 :  0x474747, (7.f+rnd(16))/10.f, 100, 10+rnd(5), player1->champimillis ? true : false); break;
-                        case 2: particle_flying_flare(origin, irays, 700, PART_FLAME1+rnd(2), d->steromillis ? 0x991111 :  0x383838, (7.f+rnd(16))/10.f, 100, 10+rnd(5), player1->champimillis ? true : false); break;
+                        case 0: particle_flying_flare(origin, irays, 700, PART_FLAME1+rnd(2), d->boostmillis[B_ROIDS] ? 0x881111 :  0x604930, (7.f+rnd(16))/10.f, 100, 10+rnd(5), gfx::champicolor); break;
+                        case 1: particle_flying_flare(origin, irays, 700, PART_FLAME1+rnd(2), d->boostmillis[B_ROIDS] ? 0x770000 :  0x474747, (7.f+rnd(16))/10.f, 100, 10+rnd(5), gfx::champicolor); break;
+                        case 2: particle_flying_flare(origin, irays, 700, PART_FLAME1+rnd(2), d->boostmillis[B_ROIDS] ? 0x991111 :  0x383838, (7.f+rnd(16))/10.f, 100, 10+rnd(5), gfx::champicolor); break;
                         default:
-                            particle_flying_flare(origin, irays, 1100, PART_SMOKE, 0x111111, (10.f+rnd(18))/10.f, -20, 15+rnd(5), player1->champimillis ? true : false);
+                            particle_flying_flare(origin, irays, 1100, PART_SMOKE, 0x111111, (10.f+rnd(18))/10.f, -20, 15+rnd(5), gfx::champicolor);
                             adddynlight(hudgunorigin(gun, d->o, irays, d), 50, vec(0.40f, 0.2f, 0.1f), 100, 100, L_NODYNSHADOW, 10, vec(0.50f, 0, 0), d);
-                            gfx::instantrayhit(from, rays[i], d->aptitude==APT_ESPION && d->aptisort2 ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle, atk);
+                            gfx::instantrayhit(from, rays[i], d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle, atk);
                             switch(rnd(2)){case 0: if(d!=hudplayer()) sound_nearmiss(S_FLYBYFLAME, from, rays[i]);}
                     }
                 }
-                if(d->ragemillis) particle_splash(PART_SPARK,  3, 500, d->muzzle, 0xFF2222, 1.0f, 50, 200, 0, player1->champimillis ? true : false);
-                particle_flare(d->muzzle, d->muzzle, 120, PART_NORMAL_MUZZLE_FLASH, d->steromillis ? 0x880000 : d->aptisort2 && d->aptitude==APT_MAGICIEN ? 0x440044 : 0x663311,  d==hudplayer() ? zoom ? 2.00f : 3.5f : 4.5f, d, player1->champimillis ? true : false);
+                if(d->ragemillis) particle_splash(PART_SPARK,  3, 500, d->muzzle, 0xFF2222, 1.0f, 50, 200, 0, gfx::champicolor);
+                particle_flare(d->muzzle, d->muzzle, 120, PART_NORMAL_MUZZLE_FLASH, d->boostmillis[B_ROIDS] ? 0x880000 : d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0x440044 : 0x663311,  d==hudplayer() ? zoom ? 2.00f : 3.5f : 4.5f, d, gfx::champicolor);
 
                 float dist = from.dist(to);
                 vec up = to;
@@ -1249,8 +1218,8 @@ namespace game
             case ATK_GRAP1_SHOOT:
             {
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
-                particle_flare(d->muzzle, d->muzzle, 150, PART_RAIL_MUZZLE_FLASH, d->steromillis ? 0xFF4444 : d->aptisort2 && d->aptitude==APT_MAGICIEN ? 0xFF00FF : 0xFF55FF, 2.5f, d, player1->champimillis ? true : false);
-                if(d->ragemillis) particle_splash(PART_SPARK,  3, 500, d->muzzle, 0xFF4444, 1.0f, 50, 200, 0, player1->champimillis ? true : false);
+                particle_flare(d->muzzle, d->muzzle, 150, PART_RAIL_MUZZLE_FLASH, d->boostmillis[B_ROIDS] ? 0xFF4444 : d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF00FF : 0xFF55FF, 2.5f, d, gfx::champicolor);
+                if(d->ragemillis) particle_splash(PART_SPARK,  3, 500, d->muzzle, 0xFF4444, 1.0f, 50, 200, 0, gfx::champicolor);
                 adddynlight(hudgunorigin(gun, d->o, to, d), 70, vec(1.0f, 0.0f, 1.0f), 80, 100, DL_FLASH, 0, vec(0, 0, 0), d);
                 break;
             }
@@ -1259,8 +1228,8 @@ namespace game
                 float dist = from.dist(to);
                 vec up = to;
                 up.z += dist/8;
-                particle_splash(PART_SMOKE,  10, 600, d->muzzle, d->aptisort2 && d->aptitude==APT_MAGICIEN ? 0x550044 : 0x444444, 4.0f, 20, 500, 0, player1->champimillis ? true : false);
-                if(d->ragemillis) particle_splash(PART_SPARK,  8, 500, d->muzzle, 0xFF4444, 1.0f, 50, 200, 0, player1->champimillis ? true : false);
+                particle_splash(PART_SMOKE,  10, 600, d->muzzle, d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0x550044 : 0x444444, 4.0f, 20, 500, 0, gfx::champicolor);
+                if(d->ragemillis) particle_splash(PART_SPARK,  8, 500, d->muzzle, 0xFF4444, 1.0f, 50, 200, 0, gfx::champicolor);
                 newbouncer(d==player1 && !thirdperson ? d->muzzle : hudgunorigin(gun, d->o, to, d), up, local, id, d, BNC_GRENADE, attacks[atk].ttl, attacks[atk].projspeed);
                 break;
             }
@@ -1277,7 +1246,7 @@ namespace game
                 break;
         }
 
-        if(d->steromillis && randomevent(attacks[atk].specialsounddelay))
+        if(d->boostmillis[B_ROIDS] && randomevent(attacks[atk].specialsounddelay))
         {
             playsound(S_ROIDS_SHOOT, d==hudplayer() ? NULL : &d->o, NULL, 0, 0 , 300, -1, 500);
             if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 400 && d!=player1) playsound(S_ROIDS_SHOOT_FAR, &d->o, NULL, 0, 0 , 600, -1, 800);
@@ -1407,7 +1376,7 @@ namespace game
 
         if(d->aitype==AI_BOT && (d->gunselect==GUN_GLOCK || d->gunselect==GUN_SPOCKGUN || d->gunselect==GUN_HYDRA || d->gunselect==GUN_SKS || d->gunselect==GUN_S_CAMPOUZE))
         {
-            switch(rnd(d->gunselect==GUN_GLOCK || d->gunselect==GUN_SPOCKGUN || d->gunselect==GUN_HYDRA ? 5 : 15)) {case 0: d->gunwait+=(d->aptitude==APT_PRETRE && d->aptisort3 ? 500 : 1200)/nbfps;}
+            switch(rnd(d->gunselect==GUN_GLOCK || d->gunselect==GUN_SPOCKGUN || d->gunselect==GUN_HYDRA ? 5 : 15)) {case 0: d->gunwait+=(d->aptitude==APT_PRETRE && d->abilitymillis[ABILITY_3] ? 500 : 1200)/nbfps;}
         }
 
         switch(d->gunselect)
@@ -1420,12 +1389,12 @@ namespace game
             default: d->gunaccel=0;
         }
 
-        if(attacktime < d->gunwait + d->gunaccel*(d->gunselect==GUN_PULSE ? 50 : d->gunselect==GUN_S_ROQUETTES ? 150 : 8) + (d==player1 || (d->aptitude==APT_PRETRE && d->aptisort3) ? 0 : attacks[d->gunselect].attackdelay)) return;
+        if(attacktime < d->gunwait + d->gunaccel*(d->gunselect==GUN_PULSE ? 50 : d->gunselect==GUN_S_ROQUETTES ? 150 : 8) + (d==player1 || (d->aptitude==APT_PRETRE && d->abilitymillis[ABILITY_3]) ? 0 : attacks[d->gunselect].attackdelay)) return;
         d->gunwait = 0;
 
         if(d->aptitude==APT_KAMIKAZE)
         {
-            if(d->aptisort2>0 && d->aptisort2<2000 && d->ammo[GUN_KAMIKAZE]>0 && !d->playerexploded)
+            if(d->abilitymillis[ABILITY_2]>0 && d->abilitymillis[ABILITY_2]<2000 && d->ammo[GUN_KAMIKAZE]>0 && !d->playerexploded)
             {
                 gunselect(GUN_KAMIKAZE, d);
                 d->attacking = ACT_SHOOT;
@@ -1519,11 +1488,11 @@ namespace game
                    hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
         }
         float waitfactor = 1;
-        if(d->aptitude==APT_PRETRE && d->aptisort3) waitfactor = 2.5f + ((4000.f - d->aptisort3)/1000.f);
-        if(d->champimillis>0) waitfactor*=1.5f;
+        if(d->aptitude==APT_PRETRE && d->abilitymillis[ABILITY_3]) waitfactor = 2.5f + ((4000.f - d->abilitymillis[ABILITY_3])/1000.f);
+        if(d->boostmillis[B_SHROOMS]>0) waitfactor*=1.5f;
         d->gunwait = attacks[atk].attackdelay/waitfactor;
         //if(d->ai) d->gunwait += int(d->gunwait*(((101-d->skill)+rnd(111-d->skill))/100.f));
-        d->steromillis ? d->totalshots += (attacks[atk].damage*attacks[atk].rays)*2: d->totalshots += attacks[atk].damage*attacks[atk].rays;
+        d->boostmillis[B_ROIDS] ? d->totalshots += (attacks[atk].damage*attacks[atk].rays)*2: d->totalshots += attacks[atk].damage*attacks[atk].rays;
 
         if(d->playerexploded){d->attacking = ACT_IDLE; d->playerexploded = false; weaponswitch(d);}
         if(atk==ATK_GLOCK_SHOOT || atk==ATK_SPOCKGUN_SHOOT || atk==ATK_HYDRA_SHOOT || d->gunselect==GUN_SKS || d->gunselect==GUN_S_CAMPOUZE) d->attacking = ACT_IDLE;
@@ -1637,20 +1606,21 @@ namespace game
                 switch(p.atk)
                 {
                     case ATK_NUKE_SHOOT:
-                        particle_flare(pos, pos, 1, PART_NORMAL_MUZZLE_FLASH, p.owner->steromillis ? 0xFF0000 : 0xFFC864, 6.0f+rndscale(6), NULL, player1->champimillis ? true : false);
-                        particle_splash(lookupmaterial(pos)==MAT_WATER ? PART_BULLE : PART_SMOKE, 3, lookupmaterial(pos)==MAT_WATER ? 2000 : 8000, pos, lookupmaterial(pos)&MAT_WATER ? 0x18181A : 0x111111, 7.0f, 25, 100, 0, player1->champimillis ? true : false);
-                        particle_splash(PART_FLAME1+rnd(2), 1, 100, pos, p.owner->steromillis ? 0xFF0000 : 0xFF6600, 1.0f+rndscale(4), 50, 500, 0, player1->champimillis ? true : false);
+                        particle_flare(pos, pos, 1, PART_NORMAL_MUZZLE_FLASH, p.owner->boostmillis[B_ROIDS] ? 0xFF0000 : 0xFFC864, 6.0f+rndscale(6), NULL, gfx::champicolor);
+                        particle_splash(lookupmaterial(pos)==MAT_WATER ? PART_BULLE : PART_SMOKE, 3, lookupmaterial(pos)==MAT_WATER ? 2000 : 8000, pos, lookupmaterial(pos)&MAT_WATER ? 0x18181A : 0x111111, 7.0f, 25, 100, 0, gfx::champicolor);
+                        particle_splash(PART_FLAME1+rnd(2), 1, 100, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF0000 : 0xFF6600, 1.0f+rndscale(4), 50, 500, 0, gfx::champicolor);
+                        regularflare(pos, 0x552500, 500+rnd(300), 75);
                         break;
                     case ATK_SMAW_SHOOT:
                     case ATK_ROQUETTES_SHOOT:
-                        particle_splash(PART_SMOKE, 1, 2000, pos, 0x666666, 6.0f, 25, 250, 0, player1->champimillis ? true : false);
-                        particle_flare(pos, pos, 1, PART_NORMAL_MUZZLE_FLASH, p.owner->steromillis ? 0xFF0000 : 0xFFC864, 3.0f+rndscale(2), NULL, player1->champimillis ? true : false);
+                        particle_splash(lookupmaterial(pos)==MAT_WATER ? PART_BULLE : PART_SMOKE, 1, 2000, pos, 0x666666, lookupmaterial(pos)==MAT_WATER ? 3.f : 6.f, 25, 250, 0, gfx::champicolor);
+                        particle_flare(pos, pos, 1, PART_NORMAL_MUZZLE_FLASH, p.owner->boostmillis[B_ROIDS] ? 0xFF0000 : 0xFFC864, 3.0f+rndscale(2), NULL, gfx::champicolor);
+                        regularflare(pos, 0x331200, 300+rnd(300), 50);
                         break;
                     case ATK_ARTIFICE_SHOOT:
-                        if(lookupmaterial(pos)==MAT_WATER)  particle_splash(PART_BULLE, 3, 200, pos, 0x18181A, 2.5f, 25, 100, 0, player1->champimillis ? true : false);
-                        particle_splash(PART_SPARK, 8, 100, pos, p.owner->steromillis ? 0xFF0000 : 0xFFC864, 0.4f, 50, 500, 0, player1->champimillis ? true : false);
-                        particle_splash(PART_FLAME1+rnd(2), 2, 100, pos, p.owner->steromillis ? 0xFF0000 : 0xFFFFFF, 0.8f, 50, 500, 0, player1->champimillis ? true : false);
-                        particle_flare(pos, pos, 1, PART_NORMAL_MUZZLE_FLASH, p.owner->steromillis ? 0xFF0000 : 0xFFC864, 0.5f+rndscale(2), NULL, player1->champimillis ? true : false);
+                        if(lookupmaterial(pos)==MAT_WATER)  particle_splash(PART_BULLE, 3, 200, pos, 0x18181A, 2.5f, 25, 100, 0, gfx::champicolor);
+                        particle_splash(PART_SPARK, 8, 100, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF0000 : 0xFFC864, rnd(4)/10.f+0.1f, 50, 500, 0, gfx::champicolor);
+                        particle_flare(pos, pos, 1, PART_NORMAL_MUZZLE_FLASH, p.owner->boostmillis[B_ROIDS] ? 0xFF0000 : 0xFFC864, 0.5f+rndscale(2), NULL, gfx::champicolor);
                         break;
                 }
             }
