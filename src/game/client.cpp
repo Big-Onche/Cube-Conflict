@@ -783,7 +783,7 @@ namespace game
     void changemap(const char *name)
     {
         changemap(name, m_valid(nextmode) ? nextmode : (remote ? 1 : 0));
-        resetshroomsgfx();
+        gfx::resetshroomsgfx();
     }
     ICOMMAND(map, "s", (char *name), changemap(name));
 
@@ -1436,12 +1436,9 @@ namespace game
             }
             else
             {
-                d->steromillis = getint(p);
-                d->epomillis = getint(p);
-                d->jointmillis = getint(p);
-                d->champimillis = getint(p);
+                loopi(NUMBOOSTS) d->boostmillis[i] = getint(p);
                 d->ragemillis = getint(p);
-                loopi(3) d->abilitymillis[getint(p)];
+                loopi(NUMABILITIES) d->abilitymillis[getint(p)];
                 d->aptiseed = getint(p);
             }
         }

@@ -1982,10 +1982,7 @@ namespace server
                 putint(p, oi->state.frags);
                 putint(p, oi->state.flags);
                 putint(p, oi->state.deaths);
-                putint(p, oi->state.steromillis);
-                putint(p, oi->state.epomillis);
-                putint(p, oi->state.jointmillis);
-                putint(p, oi->state.champimillis);
+                loopi(4) putint(p, oi->state.boostmillis[i]);
                 putint(p, oi->state.ragemillis);
                 loopi(3) putint(p, oi->state.abilitymillis[i]);
                 putint(p, oi->state.aptiseed);
@@ -2015,8 +2012,8 @@ namespace server
         servstate &gs = ci->state;
         sendf(-1, 1, "ri9i9i4ivi", N_RESUME, ci->clientnum, gs.state,
             gs.killstreak, gs.frags, gs.flags, gs.deaths,
-            gs.steromillis, gs.epomillis, gs.jointmillis, gs.champimillis, gs.ragemillis,
-            gs.abilitymillis[game::ABILITY_1], gs.abilitymillis[game::ABILITY_2], gs.abilitymillis[game::ABILITY_3], gs.aptiseed,
+            gs.boostmillis[game::B_ROIDS], gs.boostmillis[game::B_EPO], gs.boostmillis[game::B_JOINT], gs.boostmillis[game::B_SHROOMS],
+            gs.ragemillis, gs.abilitymillis[game::ABILITY_1], gs.abilitymillis[game::ABILITY_2], gs.abilitymillis[game::ABILITY_3], gs.aptiseed,
             gs.lifesequence,
             gs.health, gs.maxhealth, gs.mana,
             gs.armour, gs.armourtype,
@@ -2324,7 +2321,7 @@ namespace server
         servstate &as = actor->state;
 
         //Calcul des dommages de base
-        damage = (damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[target->aptitude].apt_resistance)/(as.jointmillis ? 1.25f : 1.f);
+        damage = ((damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[target->aptitude].apt_resistance))/(ts.boostmillis[game::B_JOINT] ? 1.25f : 1.f);
 
         //Dommages spéciaux d'aptitudes
         switch(actor->aptitude)
@@ -2415,7 +2412,8 @@ namespace server
         if(actor==target || isteam(target->team, actor->team)) return;
 
         damage = ((damage*100)/aptitudes[target->aptitude].apt_resistance)/2.0f;
-        if(target->state.abilitymillis[game::ABILITY_3] && target->aptitude==APT_MAGICIEN) damage = damage/5.0f;
+        if(target->state.abilitymillis[game::ABILITY_3] && target->aptitude==APT_MAGICIEN) damage /= 5.0f;
+        if(target->state.boostmillis[game::B_JOINT]) damage /= 1.25f;
 
         gamestate &as = actor->state;
         as.doregen(damage);
@@ -2489,7 +2487,7 @@ namespace server
             if(dup) continue;
 
             float damage = attacks[atk].damage*(1-h.dist/EXP_DISTSCALE/attacks[atk].exprad);
-            if(gs.steromillis) damage*= ci->aptitude==13 ? 3 : 2;
+            if(gs.boostmillis[game::B_ROIDS]) damage*= ci->aptitude==13 ? 3 : 2;
             if(target==ci && atk==ATK_ASSISTXPL_SHOOT) damage = 0;
             if(damage > 0)
             {
@@ -2540,7 +2538,7 @@ namespace server
         float waitfactor = 1;
         if(ci->aptitude==APT_PRETRE && ci->state.abilitymillis[game::ABILITY_3]) waitfactor = 2.5f + ((4000 - ci->state.abilitymillis[game::ABILITY_3])/1000);
 
-        if(gs.champimillis>0) waitfactor*=ci->aptitude==APT_JUNKIE ? 2 : 1.5f;
+        if(gs.boostmillis[game::B_SHROOMS]) waitfactor*=ci->aptitude==APT_JUNKIE ? 2 : 1.5f;
         gs.gunwait = attacks[atk].attackdelay/waitfactor;
 
         sendf(-1, 1, "rii9x", N_SHOTFX, ci->clientnum, atk, id,
@@ -2548,7 +2546,7 @@ namespace server
                 int(to.x*DMF), int(to.y*DMF), int(to.z*DMF),
                 ci->ownernum);
         gs.shotdamage += attacks[atk].damage*attacks[atk].rays;
-        if(gs.steromillis) gs.shotdamage*=ci->aptitude==APT_JUNKIE ? 3 : 2;
+        if(gs.boostmillis[game::B_ROIDS]) gs.shotdamage*=ci->aptitude==APT_JUNKIE ? 3 : 2;
         if(gs.ragemillis) gs.shotdamage*=1.25f;
 
         switch(atk)
@@ -2586,7 +2584,8 @@ namespace server
                     totalrays += h.rays;
                     if(totalrays>maxrays) continue;
                     int damage = h.rays*attacks[atk].damage;
-                    if(gs.steromillis) damage*=ci->aptitude==APT_JUNKIE ? 3 : 2;
+                    if(gs.boostmillis[game::B_ROIDS]) damage*=ci->aptitude==APT_JUNKIE ? 3 : 2;
+                    if(gs.ragemillis) gs.shotdamage*=1.25f;
                     dodamage(target, ci, damage, atk, h.dir);
                     if(ci->aptitude==APT_VAMPIRE) doregen(target, ci, damage, atk, h.dir);
                 }
@@ -2641,10 +2640,7 @@ namespace server
             clientinfo *ci = clients[i];
             if(curtime>0)
             {
-                if(ci->state.steromillis) ci->state.steromillis = max(ci->state.steromillis-curtime, 0);
-                if(ci->state.epomillis) ci->state.epomillis = max(ci->state.epomillis-curtime, 0);
-                if(ci->state.jointmillis) ci->state.jointmillis = max(ci->state.jointmillis-curtime, 0);
-                if(ci->state.champimillis) ci->state.champimillis = max(ci->state.champimillis-curtime, 0);
+                loopi(game::NUMBOOSTS) if(ci->state.boostmillis[i]) ci->state.boostmillis[i] = max(ci->state.boostmillis[i]-curtime, 0);
                 if(ci->state.ragemillis) ci->state.ragemillis = max(ci->state.ragemillis-curtime, 0);
                 loopi(3) if(ci->state.abilitymillis[i]) ci->state.abilitymillis[i] = max(ci->state.abilitymillis[i]-curtime, 0);
             }
@@ -3252,10 +3248,10 @@ namespace server
 
     void generrlog(clientinfo *ci)
     {
-        logoutf("Net : ping %d, overflow %d | Abilities : classe %s, a1 %d, a2 %d, a3 %d | Boosts : rage %d, epo %d, joint %d, stero %d, shrooms %d | Other : health %d, mana %d",
+        logoutf("Net : ping %d, overflow %d | Abilities : classe %s, a1 %d, a2 %d, a3 %d | Boosts : rage %d, roids %d, epo %d, joint %d, shrooms %d | Other : health %d, mana %d",
                 ci->ping, ci->overflow,
                 aptitudes[ci->aptitude].apt_nomEN, ci->state.abilitymillis[game::ABILITY_1], ci->state.abilitymillis[game::ABILITY_2], ci->state.abilitymillis[game::ABILITY_3],
-                ci->state.ragemillis, ci->state.epomillis, ci->state.jointmillis, ci->state.steromillis, ci->state.champimillis,
+                ci->state.ragemillis, ci->state.boostmillis[game::B_ROIDS], ci->state.boostmillis[game::B_EPO], ci->state.boostmillis[game::B_JOINT], ci->state.boostmillis[game::B_SHROOMS],
                 ci->state.health, ci->state.mana);
     }
 

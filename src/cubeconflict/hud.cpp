@@ -211,13 +211,16 @@ namespace game
             gle::colorf(1, 1, 1, 1);
         }
 
-        if(player1->champimillis>0)
+        if(hudplayer()->boostmillis[B_SHROOMS])
         {
-            if(player1->champimillis>5000) gle::colorf(1, 1, 1, 1);
-            else gle::colorf(player1->champimillis/5000.0f, player1->champimillis/5000.0f, player1->champimillis/5000.0f, player1->champimillis/5000.0f);
+            if(!ispaused())
+            {
+                if(enlargefov) {champifov+=22.f/nbfps; if(champifov>hudplayer()->boostmillis[B_SHROOMS]/1500) enlargefov = false;}
+                else {champifov-=22.f/nbfps; if(champifov<-hudplayer()->boostmillis[B_SHROOMS]/1500) enlargefov = true;}
+            }
 
-            if(enlargefov && !ispaused()){champifov+=22.f/nbfps; if(champifov>player1->champimillis/1500) enlargefov = false;}
-            else if (!ispaused()) {champifov-=22.f/nbfps; if(champifov<-player1->champimillis/1500) enlargefov = true;}
+            float alphatex = hudplayer()->boostmillis[B_SHROOMS]>5000 ? 1 : hudplayer()->boostmillis[B_SHROOMS]/5000;
+            gle::colorf(alphatex, alphatex, alphatex, alphatex);
 
             settexture("media/interface/hud/fullscreen/shrooms.png");
             bgquad(0, 0, w, h);
@@ -358,11 +361,11 @@ namespace game
             gle::colorf(1, 1, 1, 1);
         }
 
-        if(player1->ragemillis){settexture("media/interface/hud/rage.png"); bgquad(15, h-260, 115, 115); decal_icon += 130;}
-        if(player1->steromillis){settexture("media/interface/hud/steros.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
-        if(player1->epomillis){settexture("media/interface/hud/epo.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
-        if(player1->champimillis){settexture("media/interface/hud/champis.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
-        if(player1->jointmillis){settexture("media/interface/hud/joint.png"); bgquad(15, h-260-decal_icon, 115, 115);}
+        if(player1->ragemillis)                 {settexture("media/interface/hud/rage.png"); bgquad(15, h-260, 115, 115); decal_icon += 130;}
+        if(hudplayer()->boostmillis[B_ROIDS])   {settexture("media/interface/hud/steros.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
+        if(hudplayer()->boostmillis[B_EPO])     {settexture("media/interface/hud/epo.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
+        if(hudplayer()->boostmillis[B_SHROOMS]) {settexture("media/interface/hud/champis.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
+        if(hudplayer()->boostmillis[B_JOINT])   {settexture("media/interface/hud/joint.png"); bgquad(15, h-260-decal_icon, 115, 115);}
 
         float lxbarvide = 0.5f*(w - 966), lxbarpleine = 0.5f*(w - 954);
 
@@ -429,12 +432,10 @@ namespace game
         if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || (player1->aptitude==APT_KAMIKAZE && player1->abilitymillis[ABILITY_2] && player1->ammo[GUN_KAMIKAZE]>0))
            {draw_textf("%d", 135, h-233-decal_number, player1->aptitude==APT_KAMIKAZE ? (player1->abilitymillis[ABILITY_2]-1500)/1000 : player1->mana); decal_number +=130;}
 
-        if(player1->crouching && player1->aptitude==9) decal_number +=130;
+        if(player1->crouching && player1->aptitude==APT_CAMPEUR) decal_number +=130;
         if(player1->ragemillis) {draw_textf("%d", 135, h-233-decal_number, d->ragemillis/1000); decal_number +=130;}
-        if(player1->steromillis) {draw_textf("%d", 135, h-233-decal_number, d->steromillis/1000); decal_number +=130;}
-        if(player1->epomillis) {draw_textf("%d", 135, h-233-decal_number, d->epomillis/1000); decal_number +=130;}
-        if(player1->champimillis) {draw_textf("%d", 135, h-233-decal_number, d->champimillis/1000); decal_number +=130;}
-        if(player1->jointmillis) {draw_textf("%d", 135, h-233-decal_number, d->jointmillis/1000); decal_number +=130;}
+
+        loopi(NUMBOOSTS) { if(hudplayer()->boostmillis[i]) { draw_textf("%d", 135, h-233-decal_number, hudplayer()->boostmillis[i]/1000); decal_number +=130; } }
 
         defformatstring(infobarrexp, "%d/%d XP - LVL %d", totalneededxp - (xpneededfornextlvl - stat[STAT_XP]), totalneededxp, stat[STAT_LEVEL]);
         int tw = text_width(infobarrexp);

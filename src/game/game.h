@@ -585,7 +585,7 @@ struct gamestate
 {
     int health, maxhealth, mana;
     int armour, armourtype;
-    int steromillis, epomillis, jointmillis, champimillis, ragemillis, vampimillis;
+    int boostmillis[4], ragemillis, vampimillis;
     int abilitymillis[3], aptiseed;
     int gunselect, gunwait;
     int ammo[NUMGUNS];
@@ -617,27 +617,28 @@ struct gamestate
 
         switch(type)
         {
-            case I_SANTE:
-                return health<maxhealth;
-            case I_MANA:
-                if(aptitude==4) return health<maxhealth;
-                else return (aptitude==5 || aptitude==8 || aptitude==11 || aptitude==10 || aptitude==14) && mana<is.max;
+            case I_SANTE: return health<maxhealth;
+
             case I_BOOSTPV: return maxhealth<is.max;
-            case I_BOOSTDEGATS: return steromillis<is.max;
-            case I_BOOSTPRECISION: return champimillis<is.max;
-            case I_BOOSTVITESSE:  return epomillis<is.max;
-            case I_BOOSTGRAVITE: return jointmillis<is.max;
-            case I_BOUCLIERBOIS:
-                return haspowerarmor ?  armour<3000 : armour < (aptitude==APT_SOLDAT ? 1000 : is.max);
-            case I_BOUCLIERFER:
-                return haspowerarmor ?  armour<3000 : armour < (aptitude==APT_SOLDAT ? 1750 : is.max);
-            case I_BOUCLIERMAGNETIQUE:
-                return haspowerarmor ?  armour<3000 : armour < (aptitude==APT_SOLDAT ? 2500 : is.max);
-            case I_BOUCLIEROR:
-                return haspowerarmor ?  armour<3000 : armour < (aptitude==APT_SOLDAT ? 2750 : is.max);
+
+            case I_MANA:
+                if(aptitude==APT_VAMPIRE) return health<maxhealth;
+                else return (aptitude==APT_MAGICIEN || aptitude==APT_PHYSICIEN || aptitude==APT_PRETRE || aptitude==APT_ESPION || aptitude==APT_SHOSHONE) && mana<is.max;
+
+            case I_BOOSTDEGATS: case I_BOOSTVITESSE: case I_BOOSTGRAVITE: case I_BOOSTPRECISION:
+                return boostmillis[type-I_BOOSTDEGATS]<is.max;
+
+            case I_BOUCLIERBOIS: return haspowerarmor ? armour<3000 : armour < (aptitude==APT_SOLDAT ? 1000 : is.max);
+
+            case I_BOUCLIERFER: return haspowerarmor ? armour<3000 : armour < (aptitude==APT_SOLDAT ? 1750 : is.max);
+
+            case I_BOUCLIERMAGNETIQUE: return haspowerarmor ? armour<3000 : armour < (aptitude==APT_SOLDAT ? 2500 : is.max);
+
+            case I_BOUCLIEROR: return haspowerarmor ? armour<3000 : armour < (aptitude==APT_SOLDAT ? 2750 : is.max);
+
             case I_ARMUREASSISTEE: return !haspowerarmor;
-            default:
-                return ammo[is.info]<is.max*(aptitude==APT_AMERICAIN ? 1.5f : 1);
+
+            default: return ammo[is.info]<is.max*(aptitude==APT_AMERICAIN ? 1.5f : 1);
         }
     }
 
@@ -646,51 +647,50 @@ struct gamestate
         if(type<I_RAIL || type>I_MANA) return;
         itemstat &is = itemstats[type-I_RAIL+rndsweap];
 
-        int boostitem = aptitude==APT_PRETRE && aptisort>0 ? 2 : 1;
+        int itemboost = aptitude==APT_PRETRE && aptisort>0 ? 2 : 1;
 
         switch(type)
         {
             case I_BOOSTPV:
-                health = min(health+is.add*(aptitude==APT_MEDECIN ? 1.5f : boostitem), 2500.0f);
-                break;
+                health = min(health+is.add*(aptitude==APT_MEDECIN ? 1.5f : itemboost), 2500.0f);
+                return;
+
             case I_SANTE:
-                health = min(health+is.add*(aptitude==APT_MEDECIN ? 2 : boostitem), maxhealth);
-                break;
+                health = min(health+is.add*(aptitude==APT_MEDECIN ? 2 : itemboost), maxhealth);
+                return;
+
             case I_MANA:
                 if(aptitude!=APT_VAMPIRE) mana = min(mana+is.add, is.max);
                 else health = min(health+250, maxhealth);
-                break;
-            case I_BOUCLIERBOIS:
-            case I_BOUCLIERFER:
-            case I_BOUCLIEROR:
-            case I_BOUCLIERMAGNETIQUE:
-            case I_ARMUREASSISTEE:
+                return;
+
+            case I_BOUCLIERBOIS: case I_BOUCLIERFER: case I_BOUCLIEROR: case I_BOUCLIERMAGNETIQUE: case I_ARMUREASSISTEE:
                 if(type==I_ARMUREASSISTEE)
                 {
                     armourtype = A_ASSIST;
                     armour = min(armour+is.add, is.max);
                     health = min(health+300, maxhealth);
                     if(ammo[GUN_ASSISTXPL]<=1) ammo[GUN_ASSISTXPL] = 1;
-                    break;
+                    return;
                 }
                 else
                 {
                     armourtype = haspowerarmor ? A_ASSIST : is.info;
-                    int armourval = haspowerarmor && armour> 0 ? 500*boostitem : aptitude==APT_SOLDAT ? is.max+(250*(armourtype+1)) : is.max;
+                    int armourval = haspowerarmor && armour> 0 ? 500*itemboost : aptitude==APT_SOLDAT ? is.max+(250*(armourtype+1)) : is.max;
                     armour = min(armour+armourval, haspowerarmor ? 3000 : armourval);
-                    break;
+                    return;
                 }
-            case I_BOOSTDEGATS: steromillis = min(steromillis+is.add*(aptitude==APT_JUNKIE ? 1.5f : boostitem), is.max*(aptitude==APT_JUNKIE ? 1.5f : 1)); break;
-            case I_BOOSTVITESSE: epomillis = min(epomillis+is.add*(aptitude==APT_JUNKIE ? 1.5f : boostitem), is.max*(aptitude==APT_JUNKIE ? 1.5f : 1)); break;
-            case I_BOOSTGRAVITE: jointmillis = min(jointmillis+is.add*(aptitude==APT_JUNKIE ? 1.5f : boostitem), is.max*(aptitude==APT_JUNKIE ? 1.5f : 1)); break;
-            case I_BOOSTPRECISION: champimillis = min(champimillis+is.add*(aptitude==APT_JUNKIE ? 1.5f : boostitem), is.max*(aptitude==APT_JUNKIE ? 1.5f : 1)); break;
-                break;
-            default:
+
+            case I_BOOSTDEGATS: case I_BOOSTVITESSE: case I_BOOSTGRAVITE: case I_BOOSTPRECISION:
                 {
-                    float ammoboost = aptitude==APT_AMERICAIN ? 1.5f : 1;
-                    ammo[is.info] = min(ammo[is.info]+is.add*boostitem*ammoboost, is.max*ammoboost);
+                    int boostboost = aptitude==APT_JUNKIE ? 1.5f : itemboost; //cannot find a better var name :)
+                    boostmillis[type-I_BOOSTDEGATS] = min(boostmillis[type-I_BOOSTDEGATS]+is.add*boostboost, is.max*boostboost);
+                    return;
                 }
-                break;
+
+            default:
+                float ammoboost = aptitude==APT_AMERICAIN ? 1.5f : 1;
+                ammo[is.info] = min(ammo[is.info]+is.add*itemboost*ammoboost, is.max*ammoboost);
         }
     }
 
@@ -698,10 +698,7 @@ struct gamestate
     {
         health = maxhealth;
         mana = 100;
-        steromillis = 0;
-        epomillis = 0;
-        jointmillis = 0;
-        champimillis = 0;
+        loopi(4) boostmillis[i] = 0;
         ragemillis = 0;
         vampimillis = 0;
         gunwait = 0;
@@ -1029,11 +1026,18 @@ namespace entities
 
 namespace game
 {
-    //Fonctions Cube Conflict
+    //hud
     extern void drawmessages(int killstreak, string str_pseudovictime, int n_aptitudevictime, string str_pseudoacteur, int n_killstreakacteur, float killdistance);
-    extern void updatespecials(gameent *d);
     extern void drawrpgminimap(gameent *d, int w, int h);
+    extern int getteamfrags(int team);
 
+    // abilities and boosts
+    enum abilities {ABILITY_1 = 0, ABILITY_2, ABILITY_3, NUMABILITIES};
+    enum boosts {B_ROIDS = 0, B_SHROOMS, B_EPO, B_JOINT, NUMBOOSTS};
+    extern void aptitude(gameent *d, int skill, bool request = true);
+    extern void updatespecials(gameent *d);
+
+    // game
     extern int gamemode;
 
     struct clientmode
@@ -1064,8 +1068,6 @@ namespace game
 
     extern clientmode *cmode;
     extern void setclientmode();
-
-    // game
     extern int nextmode;
     extern string clientmap;
     extern bool intermission;
@@ -1129,7 +1131,7 @@ namespace game
     extern void c2sinfo(bool force = false);
     extern void sendposition(gameent *d, bool reliable = false);
 
-    // solo
+    // single player
     struct monster;
     extern vector<monster *> monsters;
 
@@ -1205,11 +1207,6 @@ namespace game
     extern void syncplayer();
     extern void swayhudgun(int curtime);
     extern vec hudgunorigin(int gun, const vec &from, const vec &to, gameent *d);
-
-    // sorts
-    enum abilities {ABILITY_1 = 0, ABILITY_2, ABILITY_3};
-    extern void aptitude(gameent *d, int skill, bool request = true);
-    extern int getteamfrags(int team);
 }
 
 namespace server

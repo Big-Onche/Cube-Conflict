@@ -165,7 +165,7 @@ void disconnect(bool async, bool cleanup, bool volontaire)
         conoutf(GAME_LANG ? "Disconnected" : "Déconnecté");
         IS_ON_OFFICIAL_SERV = false;
         game::gamedisconnect(cleanup);
-        game::resetshroomsgfx();
+        gfx::resetshroomsgfx();
         soundmenu_cleanup();
         mainmenu = 1;
         if(stat[STAT_DAMMAGERECORD] < game::player1->totaldamage/10) addstat(game::player1->totaldamage/10, STAT_DAMMAGERECORD, true);

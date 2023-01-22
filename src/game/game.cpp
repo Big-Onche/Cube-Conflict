@@ -232,7 +232,7 @@ namespace game
         d->roll = d->newroll;
         if(move)
         {
-            moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->abilitymillis[ABILITY_1] : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION || d->aptitude==APT_KAMIKAZE ? d->abilitymillis[ABILITY_2] : d->abilitymillis[ABILITY_3], d->armourtype==A_ASSIST && d->armour>0 ? true : false);
+            moveplayer(d, 1, false, d->boostmillis[B_EPO], d->boostmillis[B_JOINT], d->aptitude, d->aptitude==APT_MAGICIEN ? d->abilitymillis[ABILITY_1] : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION || d->aptitude==APT_KAMIKAZE ? d->abilitymillis[ABILITY_2] : d->abilitymillis[ABILITY_3], d->armourtype==A_ASSIST && d->armour>0 ? true : false);
             d->newpos = d->o;
         }
         float k = 1.0f - float(lastmillis - d->smoothmillis)/smoothmove;
@@ -263,7 +263,13 @@ namespace game
 
     bool hasabilityon(gameent *d)
     {
-        loopi(3) { if(d->abilitymillis[i]) return true; }
+        loopi(NUMABILITIES) { if(d->abilitymillis[i]) return true; }
+        return false;
+    }
+
+    bool hasboost(gameent *d)
+    {
+        loopi(NUMBOOSTS) { if(d->boostmillis[i]) return true; }
         return false;
     }
 
@@ -280,7 +286,7 @@ namespace game
                 if(curtime>0 && d->ragemillis) d->ragemillis = max(d->ragemillis-curtime, 0);
 
                 if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
-                if(d->steromillis || d->epomillis || d->jointmillis || d->champimillis) entities::checkboosts(curtime, d);
+                if(hasboost(d)) entities::checkboosts(curtime, d);
                 if(d->ragemillis || d->vampimillis || hasabilityon(d)) entities::checkaptiskill(curtime, d);
                 if(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION) updatespecials(d);
             }
@@ -305,9 +311,9 @@ namespace game
             {
                 crouchplayer(d, 10, false);
                 if(smoothmove && d->smoothmillis>0) predictplayer(d, true);
-                else moveplayer(d, 1, false, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->abilitymillis[ABILITY_1] : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION || d->aptitude==APT_KAMIKAZE ? d->abilitymillis[ABILITY_2] : d->abilitymillis[ABILITY_3], d->armourtype==A_ASSIST && d->armour>0 ? true : false);
+                else moveplayer(d, 1, false, d->boostmillis[B_EPO], d->boostmillis[B_JOINT], d->aptitude, d->aptitude==APT_MAGICIEN ? d->abilitymillis[ABILITY_1] : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION || d->aptitude==APT_KAMIKAZE ? d->abilitymillis[ABILITY_2] : d->abilitymillis[ABILITY_3], d->armourtype==A_ASSIST && d->armour>0 ? true : false);
             }
-            else if(d->state==CS_DEAD && !d->ragdoll && lastmillis-d->lastpain<2000) moveplayer(d, 1, true, d->epomillis, d->jointmillis, d->aptitude, d->aptitude==APT_MAGICIEN ? d->abilitymillis[ABILITY_1] : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION  || d->aptitude==APT_KAMIKAZE ? d->abilitymillis[ABILITY_2] : d->abilitymillis[ABILITY_3], false);
+            else if(d->state==CS_DEAD && !d->ragdoll && lastmillis-d->lastpain<2000) moveplayer(d, 1, true, d->boostmillis[B_EPO], d->boostmillis[B_JOINT], d->aptitude, d->aptitude==APT_MAGICIEN ? d->abilitymillis[ABILITY_1] : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION  || d->aptitude==APT_KAMIKAZE ? d->abilitymillis[ABILITY_2] : d->abilitymillis[ABILITY_3], false);
         }
     }
 
@@ -354,14 +360,14 @@ namespace game
                 bool p1hassuperweapon = false;
                 loopi(4) if(player1->ammo[GUN_S_NUKE+i]>0) p1hassuperweapon = true;
                 if(player1->health>=2000) unlockachievement(ACH_SACAPV);
-                if(player1->steromillis && player1->epomillis && player1->jointmillis && player1->champimillis) unlockachievement(ACH_DEFONCE);
+                if(player1->boostmillis[B_ROIDS] && player1->boostmillis[B_EPO] && player1->boostmillis[B_JOINT] && player1->boostmillis[B_SHROOMS]) unlockachievement(ACH_DEFONCE);
                 if(lookupmaterial(player1->o)==MAT_NOCLIP && map_sel==3) unlockachievement(ACH_SPAAACE);
-                if(p1hassuperweapon && player1->steromillis && player1->armour>0 && player1->armourtype==A_ASSIST) unlockachievement(ACH_ABUS);
+                if(p1hassuperweapon && player1->boostmillis[B_ROIDS] && player1->armour>0 && player1->armourtype==A_ASSIST) unlockachievement(ACH_ABUS);
                 if(player1->aptitude==APT_KAMIKAZE && player1->ammo[GUN_KAMIKAZE]<=0 && totalmillis-lastshoot>=500 && totalmillis-lastshoot<=750 && isconnected()) unlockachievement(ACH_SUICIDEFAIL);
-                if(player1->epomillis && player1->aptitude==APT_JUNKIE) unlockachievement(ACH_LANCEEPO);
+                if(player1->boostmillis[B_EPO] && player1->aptitude==APT_JUNKIE) unlockachievement(ACH_LANCEEPO);
             }
 
-            if(player1->steromillis || player1->epomillis || player1->jointmillis || player1->champimillis) entities::checkboosts(curtime, player1);
+            if(hasboost(player1)) entities::checkboosts(curtime, player1);
             if(player1->ragemillis || player1->vampimillis || hasabilityon(player1)) entities::checkaptiskill(curtime, player1);
             if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION) updatespecials(player1);
         }
@@ -388,7 +394,7 @@ namespace game
             {
                 if(player1->ragdoll) cleanragdoll(player1);
                 crouchplayer(player1, 10, true);
-                moveplayer(player1, 10, true, player1->epomillis, player1->jointmillis, player1->aptitude, player1->aptitude==APT_MAGICIEN ? player1->abilitymillis[ABILITY_1] : player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || player1->aptitude==APT_KAMIKAZE ? player1->abilitymillis[ABILITY_2] : player1->abilitymillis[ABILITY_3], player1->armourtype==A_ASSIST && player1->armour>0 ? true : false);
+                moveplayer(player1, 10, true, player1->boostmillis[B_EPO], player1->boostmillis[B_JOINT], player1->aptitude, player1->aptitude==APT_MAGICIEN ? player1->abilitymillis[ABILITY_1] : player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || player1->aptitude==APT_KAMIKAZE ? player1->abilitymillis[ABILITY_2] : player1->abilitymillis[ABILITY_3], player1->armourtype==A_ASSIST && player1->armour>0 ? true : false);
                 swayhudgun(curtime);
                 entities::checkitems(player1);
                 if(m_sp || m_classicsp || m_tutorial) entities::checktriggers();
@@ -472,13 +478,6 @@ namespace game
             if(m_dmsp) { changemap(clientmap, gamemode); return; }    // if we die in SP we try the same map again
             respawnself();
         }
-    }
-
-    void resetshroomsgfx()
-    {
-        clearpostfx();
-        champifov = 0;
-        fullbrightmodels = 0;
     }
 
     // inputs
@@ -595,7 +594,7 @@ namespace game
 
         d->deaths++;
         d->killstreak = 0;
-        loopi(3) d->abilityready[i] = true;
+        loopi(NUMABILITIES) d->abilityready[i] = true;
 
         //Effet graphique de mort
         vec pos(d->o.x, d->o.y, d->o.z-9);
@@ -608,8 +607,7 @@ namespace game
             if(deathscore) showscores(true);
             disablezoom();
             d->attacking = ACT_IDLE;
-            d->champimillis = 0;
-            resetshroomsgfx();
+            gfx::resetshroomsgfx();
             d->roll = 0;
             playsound(S_DIE_P1);
         }
@@ -770,7 +768,7 @@ namespace game
                         case ATK_SV98_SHOOT: if(zoom==0) unlockachievement(ACH_NOSCOPE); break;
                         case ATK_GLOCK_SHOOT: if(d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_CAMPOUZE || d->gunselect==GUN_S_GAU8 || d->gunselect==GUN_S_ROQUETTES) unlockachievement(ACH_DAVIDGOLIATH); break;
                         case ATK_CAC349_SHOOT: case ATK_CACFLEAU_SHOOT: case ATK_CACMARTEAU_SHOOT: case ATK_CACMASTER_SHOOT: if(d->aptitude==APT_NINJA) unlockachievement(ACH_PASLOGIQUE); break;
-                        case ATK_NUKE_SHOOT: case ATK_CAMPOUZE_SHOOT: case ATK_GAU8_SHOOT: case ATK_ROQUETTES_SHOOT: if(player1->aptitude==APT_AMERICAIN && player1->steromillis) unlockachievement(ACH_JUSTEPOUR);
+                        case ATK_NUKE_SHOOT: case ATK_CAMPOUZE_SHOOT: case ATK_GAU8_SHOOT: case ATK_ROQUETTES_SHOOT: if(player1->aptitude==APT_AMERICAIN && player1->boostmillis[B_ROIDS]) unlockachievement(ACH_JUSTEPOUR);
                     }
 
                     switch(player1->aptitude)
@@ -1067,7 +1065,7 @@ namespace game
             int snd = pl->armourtype==A_ASSIST && pl->armour> 0 ? S_FOOTSTEP_ASSIST : S_FOOTSTEP;
             if(lookupmaterial(d->feetpos())==MAT_WATER) snd = S_SWIM;
             if(lastmillis-pl->lastfootstep < (d->vel.magnitude()*(aptitudes[pl->aptitude].apt_vitesse*0.35f)*(pl->crouched() || (pl->abilitymillis[ABILITY_2] && pl->aptitude==APT_ESPION) ? 2 : 1)*(d->inwater ? 2 : 1)*(pl->armourtype==A_ASSIST && pl->armour> 0 ? 2.f : 1)/d->vel.magnitude())) return;
-            else {playsound(snd, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , pl->armourtype==A_ASSIST ? 300 : 150, -1, pl->armourtype==A_ASSIST ? 600 : 300); if(pl->epomillis) if(randomevent(4)) playsound(S_EPO_RUN, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 500, -1, 1000);}
+            else {playsound(snd, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , pl->armourtype==A_ASSIST ? 300 : 150, -1, pl->armourtype==A_ASSIST ? 600 : 300); if(pl->boostmillis[B_EPO]) if(randomevent(4)) playsound(S_EPO_RUN, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 500, -1, 1000);}
         }
         pl->lastfootstep = lastmillis;
     }

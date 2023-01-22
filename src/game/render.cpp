@@ -363,9 +363,9 @@ namespace game
             a[ai++] = modelattach("tag_shield", gfx::getshielddir(d->armourtype, d->armour), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
         ////////Boosts////////
-        if(d->jointmillis) a[ai++] = modelattach("tag_boost1", "boosts/joint", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-        if(d->steromillis) a[ai++] = modelattach("tag_boost1", "boosts/steros", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-        if(d->epomillis)   a[ai++] = modelattach("tag_boost2", "boosts/epo", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+        if(d->boostmillis[B_JOINT]) a[ai++] = modelattach("tag_boost1", "boosts/joint", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+        if(d->boostmillis[B_ROIDS]) a[ai++] = modelattach("tag_boost1", "boosts/steros", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+        if(d->boostmillis[B_EPO])   a[ai++] = modelattach("tag_boost2", "boosts/epo", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
 
         ////////Hats////////
         defformatstring(mdldir, "hats/%s", aptitudes[d->aptitude].apt_nomEN);
@@ -608,7 +608,7 @@ namespace game
                         }
                 }
 
-                if(d->jointmillis && randomevent(0.085f*nbfps)) regularflame(PART_SMOKE, d->abovehead().add(vec(-12, 5, -19)), 2, 3, 0x888888, 1, 1.6f, 50.0f, 1000.0f, -10);
+                if(d->boostmillis[B_JOINT] && randomevent(0.085f*nbfps)) regularflame(PART_SMOKE, d->abovehead().add(vec(-12, 5, -19)), 2, 3, 0x888888, 1, 1.6f, 50.0f, 1000.0f, -10);
                 if(d->armourtype==A_ASSIST && d->armour>0)
                 {
                     if(d->armour<1500 && randomevent(0.13f*nbfps))
@@ -724,7 +724,7 @@ namespace game
         if(d->abilitymillis[ABILITY_2] && d->aptitude==APT_PHYSICIEN) trans = 0.08f;
         else if(d->abilitymillis[ABILITY_1] && d->aptitude==APT_MAGICIEN) trans = 0.7f;
 
-        if(d->jointmillis)
+        if(d->boostmillis[B_JOINT])
         {
             vec sway3;
             vecfromyawpitch(d->yaw, 0, 0, 1, sway3);

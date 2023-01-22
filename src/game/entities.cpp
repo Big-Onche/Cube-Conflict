@@ -84,7 +84,7 @@ namespace entities
         loopv(ents)
         {
             extentity &e = *ents[i];
-            int revs = player1->champimillis ? 2 : 10;
+            int revs = hudplayer()->boostmillis[B_SHROOMS] ? 2 : 10;
             switch(e.type)
             {
                 case TELEPORT:
@@ -339,40 +339,42 @@ namespace entities
         }
     }
 
-    bool shroomsplayed;
+    bool playendshrooms;
 
     void checkboosts(int time, gameent *d)
     {
-        if(d==hudplayer() && d->champimillis > 4000) shroomsplayed = false;
-        else if(!shroomsplayed && d==hudplayer() && d->champimillis && d->champimillis < 4000)
+        if(d->boostmillis[B_ROIDS] && (d->boostmillis[B_ROIDS] -= time)<=0)
         {
-            playsound(S_SHROOMS_PUPOUT, NULL);
-            shroomsplayed = true;
-        }
-
-        if(d->steromillis && (d->steromillis -= time)<=0)
-        {
-            d->steromillis = 0;
+            d->boostmillis[B_ROIDS] = 0;
             playsound(S_ROIDS_PUPOUT, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
             if(d==player1) conoutf(CON_GAMEINFO, GAME_LANG ? "\f8The steroid cycle is over." : "\f8La cure de stéros est terminée.");
         }
-        if(d->epomillis && (d->epomillis -= time)<=0)
+
+        if(d->boostmillis[B_EPO] && (d->boostmillis[B_EPO] -= time)<=0)
         {
-            d->epomillis = 0;
+            d->boostmillis[B_EPO] = 0;
             playsound(S_EPO_PUPOUT, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
             if(d==player1) conoutf(CON_GAMEINFO, GAME_LANG ? "\f8EPO no longer works..." : "\f8L'EPO ne fait plus effet.");
         }
-        if(d->champimillis && (d->champimillis -= time)<=0)
+
+        if(d->boostmillis[B_JOINT] && (d->boostmillis[B_JOINT] -= time)<=0)
         {
-            d->champimillis = 0;
-            resetshroomsgfx();
-            if(d==player1) conoutf(CON_GAMEINFO, GAME_LANG ? "\f8The mushrooms have been digested." : "\f8Les champignons sont digérés.");
+            d->boostmillis[B_JOINT] = 0;
+            if(d==player1) conoutf(CON_GAMEINFO, GAME_LANG ? "\f8You smoked the joint to the filter!" : "\f8Tu as fumé le joint jusqu'au carton !");
         }
-        if(d->jointmillis && (d->jointmillis -= time)<=0)
+
+        if(d==hudplayer() && d->boostmillis[B_SHROOMS] > 4000) playendshrooms = false;
+        else if(!playendshrooms && d==hudplayer() && d->boostmillis[B_SHROOMS] && d->boostmillis[B_SHROOMS] < 4000)
         {
-            d->jointmillis = 0;
-            //playsound(S_PUPOUT, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
-            if(d==player1) conoutf(CON_GAMEINFO, GAME_LANG ? "\f8You no longer feel the effect of weed" : "\f8La weed ne fait plus effet !");
+            playsound(S_SHROOMS_PUPOUT, NULL);
+            playendshrooms = true;
+        }
+
+        if(d->boostmillis[B_SHROOMS] && (d->boostmillis[B_SHROOMS] -= time)<=0)
+        {
+            d->boostmillis[B_SHROOMS] = 0;
+            gfx::resetshroomsgfx();
+            if(d==player1) conoutf(CON_GAMEINFO, GAME_LANG ? "\f8The mushrooms have been digested." : "\f8Les champignons sont digérés.");
         }
     }
 
@@ -380,7 +382,7 @@ namespace entities
     {
         if(d->ragemillis && (d->ragemillis -= time)<=0) d->ragemillis = 0;
         if(d->vampimillis && (d->vampimillis -= time)<=0) d->vampimillis = 0;
-        loopi(3) { if(d->abilitymillis[i] && (d->abilitymillis[i] -= time)<=0) d->abilitymillis[i] = 0; }
+        loopi(NUMABILITIES) { if(d->abilitymillis[i] && (d->abilitymillis[i] -= time)<=0) d->abilitymillis[i] = 0; }
     }
 
     void putitems(packetbuf &p)            // puts items in network stream and also spawns them locally

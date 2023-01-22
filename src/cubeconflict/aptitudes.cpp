@@ -105,7 +105,7 @@ namespace game
 
     void updatespecials(gameent *d) //Permet de réarmer les sorts en fonction de la durée de rechargement de ceux-ci
     {
-        loopi(3)
+        loopi(NUMABILITIES)
         {
             int abilityreload = i==ABILITY_1 ? sorts[abilitydata(d->aptitude)].reload1 : i==ABILITY_2 ? sorts[abilitydata(d->aptitude)].reload2 : sorts[abilitydata(d->aptitude)].reload3;
             if(totalmillis-d->lastability[i] >= abilityreload && !d->abilityready[i])
