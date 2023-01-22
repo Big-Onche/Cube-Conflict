@@ -1033,16 +1033,16 @@ void writecollideobj(char *name)
     model *m = loadmapmodel(mm->attr2);
     if(!m)
     {
-        mapmodelinfo *mmi = getmminfo(mm->attr2);
+        mapmodelinfo *mmi = getmminfo(mm->attr1);
         if(mmi) conoutf(CON_ERROR, "could not load map model: %s", mmi->name);
-        else conoutf(CON_ERROR, "could not find map model: %d", mm->attr2);
+        else conoutf(CON_ERROR, "could not find map model: %d", mm->attr1);
         return;
     }
 
     matrix4x3 xform;
     m->calctransform(xform);
-    float scale = mm->attr4 > 0 ? mm->attr4/100.0f : 1;
-    int yaw = mm->attr1, pitch = mm->attr3, roll = mm->attr5;
+    float scale = mm->attr5 > 0 ? mm->attr5/100.0f : 1;
+    int yaw = mm->attr2, pitch = mm->attr3, roll = mm->attr4;
     matrix3 orient;
     orient.identity();
     if(scale != 1) orient.scale(scale);

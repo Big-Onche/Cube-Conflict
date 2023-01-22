@@ -310,15 +310,15 @@ BIH::~BIH()
 
 bool mmintersect(const extentity &e, const vec &o, const vec &ray, float maxdist, int mode, float &dist)
 {
-    model *m = loadmapmodel(e.attr2);
+    model *m = loadmapmodel(e.attr1);
     if(!m) return false;
     if((mode&RAY_ENTS)!=RAY_ENTS && (!m->collide || e.flags&EF_NOCOLLIDE)) return false;
     if(!m->bih && !m->setBIH()) return false;
-    float scale = e.attr4 ? 100.0f/e.attr4 : 1.0f;
+    float scale = e.attr5 ? 100.0f/e.attr5 : 1.0f;
     vec mo = vec(o).sub(e.o).mul(scale), mray(ray);
     float v = mo.dot(mray), inside = m->bih->entradius - mo.squaredlen();
     if((inside < 0 && v > 0) || inside + v*v < 0) return false;
-    int yaw = e.attr1, pitch = e.attr3, roll = e.attr5;
+    int yaw = e.attr2, pitch = e.attr3, roll = e.attr4;
     if(yaw != 0)
     {
         const vec2 &rot = sincosmod360(-yaw);

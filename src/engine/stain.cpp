@@ -689,18 +689,17 @@ struct stainrenderer
         loopv(oe.mapmodels)
         {
             extentity &e = *ents[oe.mapmodels[i]];
-            model *m = loadmapmodel(e.attr2);
+            model *m = loadmapmodel(e.attr1);
             if(!m) continue;
 
             vec center, radius;
-            float rejectradius = m->collisionbox(center, radius), scale = e.attr4 > 0 ? e.attr4/100.0f : 1;
+            float rejectradius = m->collisionbox(center, radius), scale = e.attr5 > 0 ? e.attr5/100.0f : 1;
             center.mul(scale);
             if(staincenter.reject(vec(e.o).add(center), stainradius + rejectradius*scale)) continue;
 
             if(m->animated() || (!m->bih && !m->setBIH())) continue;
 
-            int yaw = e.attr1, pitch = e.attr3, roll = e.attr5;
-//rendermapmodel(e.attr2, anim, e.o, e.attr1, e.attr3, e.attr5, MDL_CULL_VFC | MDL_CULL_DIST, basetime, e.attr4 > 0 ? e.attr4/100.0f : 1.0f);
+            int yaw = e.attr2, pitch = e.attr3, roll = e.attr4;
             m->bih->genstaintris(this, staincenter, stainradius, e.o, yaw, pitch, roll, scale);
         }
     }

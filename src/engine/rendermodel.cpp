@@ -133,6 +133,13 @@ void mdlloddist(int *i)
 }
 COMMAND(mdlloddist, "i");
 
+void mdlparticles(int *i)
+{
+    checkmdl;
+    loadingmodel->attachparticles = *i;
+}
+COMMAND(mdlparticles, "i");
+
 void mdlglow(float *percent, float *delta, float *pulse)
 {
     checkmdl;
@@ -402,7 +409,7 @@ void preloadusedmapmodels(bool msg, bool bih)
     loopv(ents)
     {
         extentity &e = *ents[i];
-        if(e.type==ET_MAPMODEL && e.attr2 >= 0 && used.find(e.attr2) < 0) used.add(e.attr2);
+        if(e.type==ET_MAPMODEL && e.attr1 >= 0 && used.find(e.attr1) < 0) used.add(e.attr1);
     }
 
     vector<const char *> col;
@@ -515,7 +522,7 @@ struct batchedmodel
     vec pos, center;
     float radius, yaw, pitch, roll, sizescale;
     vec4 colorscale;
-    int anim, basetime, basetime2, flags, attached;
+    int anim, basetime, basetime2, flags, attached, attachparticles;
     union
     {
         int visible;
@@ -577,7 +584,7 @@ static inline void renderbatchedmodel(model *m, const batchedmodel &b)
         if(b.flags&MDL_FULLBRIGHT) anim |= ANIM_FULLBRIGHT;
     }
 
-    m->render(anim, b.basetime, b.basetime2, b.pos, b.yaw, b.pitch, b.roll, b.d, a, b.sizescale, b.colorscale);
+    m->render(anim, b.basetime, b.basetime2, b.pos, b.yaw, b.pitch, b.roll, b.d, a, b.sizescale, b.colorscale, b.attachparticles);
 }
 
 VARP(maxmodelradiusdistance, 10, 100, 1000);
@@ -974,6 +981,7 @@ void rendermapmodel(int idx, int anim, const vec &o, float yaw, float pitch, flo
     b.colorscale = vec4(1, 1, 1, 1);
     b.flags = flags | MDL_MAPMODEL;
     b.visible = visible;
+    b.attachparticles = m->attachparticles;
     b.d = NULL;
     b.attached = -1;
     addbatchedmodel(m, b, batchedmodels.length()-1);

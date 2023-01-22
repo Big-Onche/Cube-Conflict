@@ -1631,7 +1631,7 @@ void updateparticles()
             {
                 case MAPMODEL:
                 {
-                    defformatstring(txt, "%s (\fg%s\f7)", enthudnames[(e.type*2)+GAME_LANG], mapmodelname(e.attr2));
+                    defformatstring(txt, "%s (\fg%s\f7)", enthudnames[(e.type*2)+GAME_LANG], mapmodelname(e.attr1));
                     particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);
                     break;
                 }
