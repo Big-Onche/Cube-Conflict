@@ -433,7 +433,7 @@ static struct itemstat { int add, max, sound; const char *name; int icon, info; 
     {14,    56,    S_ITEMAMMO,  "SKS",              HICON_SIZE, GUN_SKS},
     {12,    48,    S_ITEMAMMO,  "ARBALETE",         HICON_SIZE, GUN_ARBALETE},
     {40,   160,    S_ITEMAMMO,  "AK-47",            HICON_SIZE, GUN_AK47},
-    {70,   280,    S_ITEMAMMO,  "GRAP-1",           HICON_SIZE, GUN_GRAP1},
+    {70,   280,    S_ITEMAMMO,  "GAPB-1",           HICON_SIZE, GUN_GRAP1},
     {10,    40,    S_ITEMAMMO,  "FEU D'ARTIFICE",   HICON_SIZE, GUN_ARTIFICE},
     {30,   120,    S_ITEMAMMO,  "GLOCK",            HICON_SIZE, GUN_GLOCK},
     //Super armes
