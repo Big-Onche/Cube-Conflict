@@ -7,7 +7,7 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="client64">
-				<Option output="..\..\bin64/cubeconflict.exe" prefix_auto="0" extension_auto="0" />
+				<Option output="../../bin64/cubeconflict.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="../../" />
 				<Option object_output="obj64" />
 				<Option type="0" />
@@ -55,7 +55,7 @@
 				</Environment>
 			</Target>
 			<Target title="client32">
-				<Option output="..\..\bin/cubeconflict.exe" prefix_auto="0" extension_auto="0" />
+				<Option output="../../bin/cubeconflict.exe" prefix_auto="0" extension_auto="0" />
 				<Option working_dir="../../" />
 				<Option object_output="obj32" />
 				<Option type="0" />
