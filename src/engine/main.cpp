@@ -2,8 +2,11 @@
 
 #include "engine.h"
 #include "gfx.h"
-#include "steam_api.h"
 #include "stats.h"
+
+#ifdef _WIN32
+    #include "steam_api.h"
+#endif
 
 #ifdef SDL_VIDEO_DRIVER_X11
 #include "SDL_syswm.h"
@@ -48,7 +51,9 @@ void quit(bool savecfgs = true)                      // normal exit
     disconnect(false, true, true);
     localdisconnect();
     cleanup();
-    if(IS_USING_STEAM) SteamAPI_Shutdown();
+    #ifdef _WIN32
+        if(IS_USING_STEAM) SteamAPI_Shutdown();
+    #endif
     exit(EXIT_SUCCESS);
 }
 
@@ -1177,16 +1182,20 @@ void changerlangue()
 
 bool initsteam()
 {
-    if(!SteamAPI_Init())
-    {
-        conoutf(CON_WARN, GAME_LANG ? "Steam API failed to start." : "API Steam non démarrée");
+    #ifdef _WIN32
+        if(!SteamAPI_Init())
+        {
+            conoutf(CON_WARN, GAME_LANG ? "Steam API failed to start." : "API Steam non démarrée");
+            return false;
+        }
+        else
+        {
+            SteamAPI_ManualDispatch_Init();
+            return true;
+        }
+    #elif __linux__
         return false;
-    }
-    else
-    {
-        SteamAPI_ManualDispatch_Init();
-        return true;
-    }
+    #endif
 }
 
 bool rewritelangage = false;
@@ -1260,7 +1269,9 @@ int main(int argc, char **argv)
 
     if(dedicated <= 1)
     {
-        if(IS_USING_STEAM && SteamAPI_RestartAppIfNecessary(1454700)) quit(false);
+        #ifdef _WIN32
+            if(IS_USING_STEAM && SteamAPI_RestartAppIfNecessary(1454700)) quit(false);
+        #endif
 
         logoutf("init: sdl");
 

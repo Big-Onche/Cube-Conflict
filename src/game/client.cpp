@@ -1,6 +1,9 @@
-#include "steam_api.h"
 #include "gfx.h"
 #include "stats.h"
+
+#ifdef _WIN32
+    #include "steam_api.h"
+#endif
 
 bool launch = true;
 VARF(map_atmo, 0, 0, 9, if(!launch) {execfile("config/default_map_settings.cfg");} else launch = false;);
@@ -47,12 +50,17 @@ ICOMMAND(genpseudo, "i", (int *forcelang), {genpseudo(*forcelang);});
 VARP(usesteamname, 0, 1, 1);
 void getsteamname()
 {
-    if(!IS_USING_STEAM) {conoutf(CON_ERROR, GAME_LANG ? "Steam API not initialized" : "API Steam non initialisée"); return;}
-    else if(usesteamname)
-    {
-        copystring(game::player1->name, SteamFriends()->GetPersonaName());
-        game::addmsg(N_SWITCHNAME, "rs", game::player1->name);
-    }
+    #ifdef _WIN32
+        if(!IS_USING_STEAM) {conoutf(CON_ERROR, GAME_LANG ? "Steam API not initialized" : "API Steam non initialisée"); return;}
+        else if(usesteamname)
+        {
+            copystring(game::player1->name, SteamFriends()->GetPersonaName());
+            game::addmsg(N_SWITCHNAME, "rs", game::player1->name);
+        }
+    #elif __linux__
+        conoutf(CON_ERROR, GAME_LANG ? "Steam API currently not supported." : "API Steam non supportée pour l'instant");
+    #endif
+
 }
 ICOMMAND(getsteamname, "", (), {getsteamname();});
 

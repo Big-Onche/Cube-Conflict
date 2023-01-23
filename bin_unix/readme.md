@@ -1,8 +1,6 @@
 # How to compile the game?
 
-*nix versions of Cube Conflict client.
-The clients function identical to the win32 client, see config.html for more
-information about command-line options if necessary.
+Linux version of Cube Conflict client.
 
 Please run "native_client" from the root Cube Conflict dir (NOT from inside the "bin_unix"
 directory) to launch these, or set the CC_DATA variable at the top of the "ccunix.sh" 
@@ -31,6 +29,8 @@ it must be run from the root Tesseract directory. If you run a server with the
 run the standalone servers instead, then you may need to write an appropriate wrapper 
 script to change to the appropriate data directory before running the standalone
 server binary, as described below in the packaging guide.
+
+For more informations about compilation please read "src/README.md".
 
 # Running a server for Cube Conflict
 Open "ccunix.sh" with a text editor and go to line 12 and put this line instead: 

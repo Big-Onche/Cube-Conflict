@@ -1,9 +1,12 @@
 //stats.cpp: where we manage stats, achievements and local saves
 
-#include "steam_api.h"
 #include "game.h"
 #include "stats.h"
 #include "customs.h"
+
+#ifdef _WIN32
+    #include "steam_api.h"
+#endif
 
 using namespace std;
 
@@ -190,11 +193,13 @@ void unlockachievement(int achID) //Débloque le succès
 {
     if(achievementlocked(achID) && (achID==ACH_PARKOUR || achID==ACH_FUCKYOU || achID==ACH_EXAM || IS_ON_OFFICIAL_SERV)) //Ne débloque que si serveur officiel ET succès verrouillé sauf exception
     {
-        if(IS_USING_STEAM)
-        {
-            SteamUserStats()->SetAchievement(achievements[achID].achname); //Met le succès à jour côté steam
-            SteamUserStats()->StoreStats();
-        }
+        #ifdef _WIN32
+            if(IS_USING_STEAM)
+            {
+                SteamUserStats()->SetAchievement(achievements[achID].achname); //Met le succès à jour côté steam
+                SteamUserStats()->StoreStats();
+            }
+        #endif
 
         succes[achID] = true; //Met le succès à jour côté client
         addxpandcc(25, 25);
