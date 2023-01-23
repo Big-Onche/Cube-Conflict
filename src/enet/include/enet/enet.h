@@ -62,7 +62,8 @@ typedef enum _ENetSocketOption
    ENET_SOCKOPT_RCVTIMEO  = 6,
    ENET_SOCKOPT_SNDTIMEO  = 7,
    ENET_SOCKOPT_ERROR     = 8,
-   ENET_SOCKOPT_NODELAY   = 9
+   ENET_SOCKOPT_NODELAY   = 9,
+   ENET_SOCKOPT_TTL       = 10
 } ENetSocketOption;
 
 typedef enum _ENetSocketShutdown
@@ -575,6 +576,7 @@ ENET_API void       enet_host_channel_limit (ENetHost *, size_t);
 ENET_API void       enet_host_bandwidth_limit (ENetHost *, enet_uint32, enet_uint32);
 extern   void       enet_host_bandwidth_throttle (ENetHost *);
 extern  enet_uint32 enet_host_random_seed (void);
+extern  enet_uint32 enet_host_random (ENetHost *);
 
 ENET_API int                 enet_peer_send (ENetPeer *, enet_uint8, ENetPacket *);
 ENET_API ENetPacket *        enet_peer_receive (ENetPeer *, enet_uint8 * channelID);

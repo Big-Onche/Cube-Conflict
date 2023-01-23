@@ -9,7 +9,7 @@
 #include "enet/time.h"
 #include "enet/enet.h"
 
-static size_t commandSizes [ENET_PROTOCOL_COMMAND_COUNT] =
+static const size_t commandSizes [ENET_PROTOCOL_COMMAND_COUNT] =
 {
     0,
     sizeof (ENetProtocolAcknowledge),
@@ -1390,8 +1390,8 @@ enet_protocol_check_outgoing_commands (ENetHost * host, ENetPeer * peer)
     ENetBuffer * buffer = & host -> buffers [host -> bufferCount];
     ENetOutgoingCommand * outgoingCommand;
     ENetListIterator currentCommand;
-    ENetChannel *channel;
-    enet_uint16 reliableWindow;
+    ENetChannel *channel = NULL;
+    enet_uint16 reliableWindow = 0;
     size_t commandSize;
     int windowExceeded = 0, windowWrap = 0, canPing = 1;
 
