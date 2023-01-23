@@ -211,12 +211,14 @@ void unlockachievement(int achID) //Débloque le succès
 
 void getsteamachievements() //Récupère les succès enregistrés sur steam
 {
-    int achID = 0;
-    loopi(NUMACHS)
-    {
-        SteamUserStats()->GetAchievement(achievements[achID].achname, &succes[achID]);
-        achID++;
-    }
+    #ifdef _WIN32
+        int achID = 0;
+        loopi(NUMACHS)
+        {
+            SteamUserStats()->GetAchievement(achievements[achID].achname, &succes[achID]);
+            achID++;
+        }
+    #endif
 }
 
 string achcount;

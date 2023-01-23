@@ -1,6 +1,6 @@
 #include "gfx.h"
-#include "engine.h"
 #include "stats.h"
+#include "engine.h"
 
 namespace entities
 {

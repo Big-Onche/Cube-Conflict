@@ -9,8 +9,7 @@ bool hassuicided;
 bool randomevent(int probability)
 {
     if(game::ispaused()) return false;
-    else if(probability <= 1) return true;
-    else return rnd(probability)==0;
+    return probability <= 1 ? true : rnd(probability)==0;
 }
 
 VARP(map_sel, 0, 1, 99);
