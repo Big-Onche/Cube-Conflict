@@ -9,7 +9,8 @@ Option 1 : Code::Blocks :
 # Linux
 - If not already installed: Install lastest SDL2 dev libs (libsdl2-dev, libsdl2-mixer-dev, and libsdl2-image-dev), OpenGL toolkit (freeglut3-dev) and also zlib (lib32z1)
 - Go inside "/src" folder then "make"
-- When compilation has ended: "make-install" to put the executable inside "/bin_unix"
+- When compilation has ended: "make install" to put the executable inside "/bin_unix"
+- Do "chmod +x ccunix.sh" to enable ccunix.sh to run as a program.
 - Launch game in the main folder with "ccunix.sh" (right click->run as a program) and that's all!
 
 # Mac
@@ -27,7 +28,8 @@ Option 1 : Code::Blocks :
 # Linux
 - Si ce n'est pas fait: Installer les librairies SDL2 (libsdl2-dev, libsdl2-mixer-dev et libsdl2-image-dev), l'outil OpenGL (freeglut3-dev) ainsi que la librairie zlib (lib32z1)
 - Allez dans le dossier "/src" et faites "make"
-- Une fois que la compilation est terminée (avec un peu de chance) faites "make-install" afin de placer l'exécutale dans "/bin_unix"
+- Une fois que la compilation est terminée faites "make install" afin de placer l'exécutale dans "/bin_unix"
+- Faites "chmod +x ccunix.sh" pour permettre à ccunix.sh de s'exécuter en tant que programme.
 - Lancer le jeu dans le dossier principal avec "ccunix.sh" (clic droit->Exécuter en tant que programme) et c'est tout !
 
 # Mac
