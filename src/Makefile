@@ -111,13 +111,13 @@ CLIENT_OBJS= \
         engine/water.o \
         engine/world.o \
         engine/worldio.o \
-		cubeconflict/gfx.o \
-		cubeconflict/customs.o \
-		cubeconflict/aptitudes.o \
-		cubeconflict/hud.o \
-		cubeconflict/stats.o \
-		cubeconflict/npcs.o \
-		cubeconflict/rpg.o \
+	cubeconflict/gfx.o \
+	cubeconflict/customs.o \
+	cubeconflict/aptitudes.o \
+	cubeconflict/hud.o \
+	cubeconflict/stats.o \
+	cubeconflict/npcs.o \
+	cubeconflict/rpg.o \
         game/ai.o \
         game/client.o \
         game/entities.o \
@@ -128,127 +128,69 @@ CLIENT_OBJS= \
         game/waypoint.o \
         game/weapon.o
 
-CLIENT_PCH= shared/cube.h.gch engine/engine.h.gch game/game.h.gch game/gfx.h.gch game/stats.h.gch game/customs.h.gch
-
-SERVER_INCLUDES= -DSTANDALONE -Istandalone/shared -Istandalone/engine -Istandalone/game $(INCLUDES)
-ifneq (,$(findstring MINGW,$(PLATFORM)))
-SERVER_INCLUDES+= -Iinclude
-SERVER_LIBS= -mwindows $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lzlib1 -lenet -lws2_32 -lwinmm
-MASTER_LIBS= $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lzlib1 -lenet -lws2_32 -lwinmm
-else
-SERVER_LIBS= -Lenet -lenet -lz
-MASTER_LIBS= $(SERVER_LIBS)
-endif
-
-SERVER_OBJS= \
-        standalone/shared/crypto.o \
-        standalone/shared/stream.o \
-        standalone/shared/tools.o \
-        standalone/engine/command.o \
-        standalone/engine/server.o \
-        standalone/engine/worldio.o \
-        standalone/game/entities.o \
-        standalone/game/server.o
-
-SERVER_PCH= standalone/shared/cube.h.gch standalone/engine/engine.h.gch standalone/game/game.h.gch
-
-MASTER_OBJS= \
-        standalone/shared/crypto.o \
-        standalone/shared/stream.o \
-        standalone/shared/tools.o \
-        standalone/engine/command.o \
-        standalone/engine/master.o
-
-SERVER_MASTER_OBJS= $(SERVER_OBJS) $(filter-out $(SERVER_OBJS),$(MASTER_OBJS))
+CLIENT_PCH= shared/cube.h.gch engine/engine.h.gch game/game.h.gch cubeconflict/gfx.h.gch cubeconflict/stats.h.gch cubeconflict/customs.h.gch
 
 default: all
 
-all: client server
+all: client
 
 clean:
-        -$(RM) $(CLIENT_PCH) $(CLIENT_OBJS) $(SERVER_PCH) $(SERVER_MASTER_OBJS) cc_client cc_server cc_master
+	-$(RM) $(CLIENT_PCH) $(CLIENT_OBJS) cc_client
 
 fixspace:
-        sed -i 's/[ \t]*$$//; :rep; s/^\([ ]*\)\t/\1    /g; trep' shared/*.c shared/*.cpp shared/*.h engine/*.cpp engine/*.h game/*.cpp game/*.h  cubeconflict/*.cpp cubeconflict/*.h
+	sed -i 's/[ \t]*$$//; :rep; s/^\([ ]*\)\t/\1    /g; trep' shared/*.c shared/*.cpp shared/*.h cubeconflict/*.cpp cubeconflict/*.h engine/*.cpp engine/*.h game/*.cpp game/*.h
 
 $(filter-out shared/%,$(CLIENT_PCH)): $(filter shared/%,$(CLIENT_PCH))
 $(CLIENT_PCH): %.h.gch: %.h
-        $(CXX) $(CXXFLAGS) -x c++-header -o $@.tmp $<
-        $(MV) $@.tmp $@
+	$(CXX) $(CXXFLAGS) -x c++-header -o $@.tmp $<
+	$(MV) $@.tmp $@
 
 $(CLIENT_OBJS): CXXFLAGS += $(CLIENT_INCLUDES)
 $(filter shared/%,$(CLIENT_OBJS)): $(filter shared/%,$(CLIENT_PCH))
+$(filter cubeconflict/%,$(CLIENT_OBJS)): $(filter cubeconflict/%,$(CLIENT_PCH))
 $(filter engine/%,$(CLIENT_OBJS)): $(filter engine/%,$(CLIENT_PCH))
 $(filter game/%,$(CLIENT_OBJS)): $(filter game/%,$(CLIENT_PCH))
 
-$(filter-out standalone/shared/%,$(SERVER_PCH)): $(filter standalone/shared/%,$(SERVER_PCH))
-$(SERVER_PCH): standalone/%.h.gch: %.h
-        $(CXX) $(CXXFLAGS) -x c++-header -o $@.tmp $<
-        $(MV) $@.tmp $@
-
-$(SERVER_MASTER_OBJS): CXXFLAGS += $(SERVER_INCLUDES)
-$(filter standalone/shared/%,$(SERVER_MASTER_OBJS)): $(filter standalone/shared/%,$(SERVER_PCH))
-$(filter standalone/engine/%,$(SERVER_MASTER_OBJS)): $(filter standalone/engine/%,$(SERVER_PCH))
-$(filter standalone/game/%,$(SERVER_MASTER_OBJS)): $(filter standalone/game/%,$(SERVER_PCH))
-
-$(SERVER_MASTER_OBJS): standalone/%.o: %.cpp
-        $(CXX) $(CXXFLAGS) -c -o $@ $<
-
 ifneq (,$(findstring MINGW,$(PLATFORM)))
 client: $(CLIENT_OBJS)
-        $(WINDRES) -I vcpp -i vcpp/mingw.rc -J rc -o vcpp/mingw.res -O coff 
-        $(CXX) $(CXXFLAGS) -o $(WINBIN)/cc_client.exe vcpp/mingw.res $(CLIENT_OBJS) $(CLIENT_LIBS)
-
-server: $(SERVER_OBJS)
-        $(WINDRES) -I vcpp -i vcpp/mingw.rc -J rc -o vcpp/mingw.res -O coff
-        $(CXX) $(CXXFLAGS) -o $(WINBIN)/cc_server.exe vcpp/mingw.res $(SERVER_OBJS) $(SERVER_LIBS)
-
-master: $(MASTER_OBJS)
-        $(CXX) $(CXXFLAGS) -o $(WINBIN)/cc_master.exe $(MASTER_OBJS) $(MASTER_LIBS)
+	$(WINDRES) -I vcpp -i vcpp/mingw.rc -J rc -o vcpp/mingw.res -O coff 
+	$(CXX) $(CXXFLAGS) -o $(WINBIN)/cc_client.exe vcpp/mingw.res $(CLIENT_OBJS) $(CLIENT_LIBS)
 
 install: all
 else
 client: libenet $(CLIENT_OBJS)
-        $(CXX) $(CXXFLAGS) -o cc_client $(CLIENT_OBJS) $(CLIENT_LIBS)
+	$(CXX) $(CXXFLAGS) -o cc_client $(CLIENT_OBJS) $(CLIENT_LIBS)
 ifneq (,$(findstring DARWIN,$(PLATFORM)))
-        install_name_tool -add_rpath @executable_path/../Frameworks cc_client
+	install_name_tool -add_rpath @executable_path/../Frameworks cc_client
 endif
 
-server: libenet $(SERVER_OBJS)
-        $(CXX) $(CXXFLAGS) -o cc_server $(SERVER_OBJS) $(SERVER_LIBS)  
-        
-master: libenet $(MASTER_OBJS)
-        $(CXX) $(CXXFLAGS) -o cc_master $(MASTER_OBJS) $(MASTER_LIBS)  
-
 shared/tessfont.o: shared/tessfont.c
-        $(CXX) $(CXXFLAGS) -c -o $@ $< `freetype-config --cflags`
+	$(CXX) $(CXXFLAGS) -c -o $@ $< `freetype-config --cflags`
 
 tessfont: shared/tessfont.o
-        $(CXX) $(CXXFLAGS) -o tessfont shared/tessfont.o `freetype-config --libs` -lz
+	$(CXX) $(CXXFLAGS) -o tessfont shared/tessfont.o `freetype-config --libs` -lz
 
 ifneq (,$(findstring DARWIN,$(PLATFORM)))
 install: client
-        cp sauer_client ../sauerbraten.app/Contents/MacOS/sauerbraten_universal
+	cp sauer_client ../sauerbraten.app/Contents/MacOS/sauerbraten_universal
 else
 install: all
-        cp -f cc_client       ../bin_unix/$(PLATFORM_PREFIX)_client
-        cp -f cc_server       ../bin_unix/$(PLATFORM_PREFIX)_server
+	cp -f cc_client       ../bin_unix/$(PLATFORM_PREFIX)_client
 ifneq (,$(STRIP))
-        $(STRIP) ../bin_unix/$(PLATFORM_PREFIX)_client
-        $(STRIP) ../bin_unix/$(PLATFORM_PREFIX)_server
+	$(STRIP) ../bin_unix/$(PLATFORM_PREFIX)_client
 endif
 endif
 endif
 
 enet/libenet.a:
-        $(MAKE) -C enet
+	$(MAKE) -C enet
 libenet: enet/libenet.a
 
 depend:
-        makedepend -Y -Ishared -Iengine -Igame -Icubeconflict $(CLIENT_OBJS:.o=.cpp)
-        makedepend -a -o.h.gch -Y -Ishared -Iengine -Igame -Icubeconflict $(CLIENT_PCH:.h.gch=.h)
-        makedepend -a -pstandalone/ -Y -DSTANDALONE -Ishared -Iengine -Igame -Icubeconflict $(SERVER_MASTER_OBJS:standalone/%.o=%.cpp)
-        makedepend -a -pstandalone/ -o.h.gch -Y -DSTANDALONE -Ishared -Iengine -Igame -Icubeconflict $(SERVER_PCH:standalone/%.h.gch=%.h)
+	makedepend -Y -Ishared -Iengine -Igame -Icubeconflict $(CLIENT_OBJS:.o=.cpp)
+	makedepend -a -o.h.gch -Y -Ishared -Icubeconflict -Iengine -Igame $(CLIENT_PCH:.h.gch=.h)
+	makedepend -a -pstandalone/ -Y -DSTANDALONE -Ishared -Icubeconflict -Iengine -Igame $(SERVER_MASTER_OBJS:standalone/%.o=%.cpp)
+	makedepend -a -pstandalone/ -o.h.gch -Y -DSTANDALONE -Ishared -Iengine -Igame -Icubeconflict $(SERVER_PCH:standalone/%.h.gch=%.h)
 
 # DO NOT DELETE
 
