@@ -184,6 +184,7 @@ static void gengrassquads(grassgroup *&group, const grasswedge &w, const grasstr
         #define GRASSVERT(n, tcv, modify) { \
             grassvert &gv = grassverts.add(); \
             gv.pos = p##n; \
+            gv.pos.subz(-1.25f); \
             gv.color = color; \
             gv.tc = vec2(tc##n, tcv); \
             gv.bounds = w.vertbounds; \
