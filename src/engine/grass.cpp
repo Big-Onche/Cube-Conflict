@@ -3,13 +3,13 @@
 VARP(grass, 0, 1, 1);
 VAR(dbggrass, 0, 0, 1);
 VARP(grassdist, 0, 256, 10000);
-FVARP(grasstaper, 0, 0.2, 1);
+FVARP(grasstaper, 0, 0.3, 1);
 FVARP(grassstep, 0.5, 2, 8);
 VAR(grassheight, 1, 7, 64);
-VARP(grassmargin, 0, 0, 32);
-FVAR(grassmarginfade, 0, 1, 1);
+VARP(grassmargin, 0, 32, 32);
+FVAR(grassmarginfade, 0, 0, 1);
 
-#define NUMGRASSWEDGES 8
+#define NUMGRASSWEDGES 9
 
 static struct grasswedge
 {
@@ -31,7 +31,7 @@ static struct grasswedge
         vertbounds = bvec4(vertbound1.x, vertbound1.y, vertbound2.x, vertbound2.y);
         vertbounds.flip();
     }
-} grasswedges[NUMGRASSWEDGES] = { 0, 1, 2, 3, 4, 5, 6, 7 };
+} grasswedges[NUMGRASSWEDGES] = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
 
 struct grassvert
 {
@@ -71,7 +71,7 @@ static void animategrass()
 
 VARR(grassscale, 1, 2, 64);
 CVAR0R(grasscolour, 0xFFFFFF);
-FVARR(grasstest, 0, 0.6f, 1);
+FVARR(grasstest, 0, 0.7f, 1);
 
 static void gengrassquads(grassgroup *&group, const grasswedge &w, const grasstri &g, Texture *tex)
 {
@@ -184,7 +184,7 @@ static void gengrassquads(grassgroup *&group, const grasswedge &w, const grasstr
         #define GRASSVERT(n, tcv, modify) { \
             grassvert &gv = grassverts.add(); \
             gv.pos = p##n; \
-            gv.pos.subz(-1.25f); \
+            gv.pos.subz(0.197f*grassheight); \
             gv.color = color; \
             gv.tc = vec2(tc##n, tcv); \
             gv.bounds = w.vertbounds; \

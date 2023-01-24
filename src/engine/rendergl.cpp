@@ -2450,16 +2450,15 @@ void gl_drawview()
     if(wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     else if(limitsky() && editmode && showsky) renderexplicitsky(true);
 
+    generategrass();
+    rendergrass();
+    GLERROR;
+
     renderao();
     GLERROR;
 
     // render avatar after AO to avoid weird contact shadows
     renderavatar();
-    GLERROR;
-
-    // render grass after AO to avoid disturbing shimmering patterns
-    generategrass();
-    rendergrass();
     GLERROR;
 
     glFlush();

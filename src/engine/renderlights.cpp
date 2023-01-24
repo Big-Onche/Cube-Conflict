@@ -233,14 +233,14 @@ void cleanupao()
 }
 
 VARFP(ao, 0, 1, 1, { cleanupao(); cleardeferredlightshaders(); });
-FVARR(aoradius, 0, 7, 256);
-FVAR(aocutoff, 0, 2.0f, 1e3f);
-FVARR(aodark, 1e-3f, 20.0f, 1e3f);
+FVAR(aoradius, 0, 20, 256);
+FVAR(aocutoff, 0, 20.0f, 1e3f);
+FVAR(aodark, 1e-3f, 30.0f, 1e3f);
 FVAR(aosharp, 1e-3f, 3, 1e3f);
 FVAR(aoprefilterdepth, 0, 1, 1e3f);
-FVAR(aomin, 0, 0.3f, 1);
+FVAR(aomin, 0, 0.35f, 1);
 VARFR(aosun, 0, 1, 1, cleardeferredlightshaders());
-FVARR(aosunmin, 0, 0.5f, 1);
+FVAR(aosunmin, 0, 0.6f, 1);
 VARP(aoblur, 0, 4, 7);
 VARP(aoiter, 0, 0, 4);
 VARFP(aoreduce, 0, 0, 2, cleanupao());
@@ -253,7 +253,7 @@ VARFP(aobilateral, 0, 7, 10, cleanupao());
 FVARP(aobilateraldepth, 0, 4, 1e3f);
 VARFP(aobilateralupscale, 0, 0, 1, cleanupao());
 VARF(aopackdepth, 0, 1, 1, cleanupao());
-VARFP(aotaps, 1, 3, 12, cleanupao());
+VARFP(aotaps, 1, 6, 12, cleanupao());
 VARF(aoderivnormal, 0, 0, 1, cleanupao());
 VAR(aoderiv, -1, 1, 1);
 VAR(debugao, 0, 0, 1);
