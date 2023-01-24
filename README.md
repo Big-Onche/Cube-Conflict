@@ -1,8 +1,8 @@
 # Cube Conflict
 
-Cube Conflict is a fork of Tesseract (http://tesseract.gg) which is a fork of the Cube 2: Sauerbraten engine (http://sauerbraten.org/).
+Cube Conflict is a fork of Tesseract (http://tesseract.gg) which is a fork of the Cube 2: Sauerbraten (http://sauerbraten.org/).
 
-Our goal is to make a free, open-source, fun, and complete game able to run smoothly even on low-end computers.
+The goal is to make a free, open-source, fun, and complete game able to run smoothly even on low-end computers.
 Available here and soon on Steam https://store.steampowered.com/app/1454700/Cube_Conflict/
 
 # Current Content
@@ -18,8 +18,20 @@ Available here and soon on Steam https://store.steampowered.com/app/1454700/Cube
 
 # Planned content
 - More maps!
-- Advanced tools for e-sport such as better server management, and better spectator experience.
+- Advanced tools for e-sports such as better server management, and better spectator experience.
 - Single-player campaign with a quest system in a semi-opened world.
+
+# Platforms
+Available on Windows and Linux.
+
+Note that Linux's executables will be updated only at major releases. If you want to try the
+very last version of the game, it is preferable to build the binary by yourself
+("make -C src install" in the main folder)
+
+# Contribute
+Opened to any contriutions: Submitting a patch to GitHub, post suggestions/bugs on the [GitHub tracker](https://github.com/CubeConflict/Cube-Conflict/issues), 
+[Fork the project](https://github.com/CubeConflict/Cube-Conflict/fork) and [push your changes](https://github.com/CubeConflict/Cube-Conflict/pulls),
+create some cool maps and ask for bigger guns!
 
 # License
 - "/licenses" folder for more information.
