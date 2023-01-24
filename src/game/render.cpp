@@ -227,7 +227,7 @@ namespace game
 
         loopi(NUMAPTS) //Preloading all classe's hats
         {
-            defformatstring(mdldir, "hats/%s", aptitudes[i].apt_nomEN);
+            defformatstring(mdldir, "hats/%d", i);
             preloadmodel(mdldir);
         }
 
@@ -365,7 +365,7 @@ namespace game
         if(d->boostmillis[B_EPO])   a[ai++] = modelattach("tag_boost2", "boosts/epo", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
 
         ////////Hats////////
-        defformatstring(mdldir, "hats/%s", aptitudes[d->aptitude].apt_nomEN);
+        defformatstring(mdldir, "hats/%d", d->aptitude);
         a[ai++] = modelattach("tag_hat", mdldir, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
 
         ////////Customisations////////
