@@ -233,7 +233,7 @@ void cleanupao()
 }
 
 VARFP(ao, 0, 1, 1, { cleanupao(); cleardeferredlightshaders(); });
-FVAR(aoradius, 0, 20, 256);
+FVAR(aoradius, 0, 30, 256);
 FVAR(aocutoff, 0, 20.0f, 1e3f);
 FVAR(aodark, 1e-3f, 30.0f, 1e3f);
 FVAR(aosharp, 1e-3f, 3, 1e3f);
