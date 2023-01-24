@@ -1,6 +1,6 @@
 # Cube Conflict
 
-Cube Conflict is a fork of Tesseract (http://tesseract.gg) which is a fork of the Cube 2: Sauerbraten (http://sauerbraten.org/).
+Cube Conflict is a fork of Tesseract (http://tesseract.gg) which is a fork of the Cube 2: Sauerbraten (http://sauerbraten.org).
 
 The goal is to make a free, open-source, fun, and complete game able to run smoothly even on low-end computers.
 Available here and soon on Steam https://store.steampowered.com/app/1454700/Cube_Conflict/
