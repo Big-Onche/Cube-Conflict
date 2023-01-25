@@ -1021,7 +1021,7 @@ namespace game
             if(material&MAT_WATER)
             {
                 playsound(S_WATER, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 350);
-                particle_splash(PART_EAU, 30, 120, o, 0x18181A, 10.0f+rnd(9), 500, -20);
+                particle_splash(PART_WATER, 30, 120, o, 0x18181A, 10.0f+rnd(9), 500, -20);
             }
         }
         else if(waterlevel<0)
@@ -1029,24 +1029,24 @@ namespace game
             if(material&MAT_WATER)
             {
                 playsound(S_SPLASH, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 350);
-                particle_splash(PART_EAU, 40, 150, o, 0x18181A, 10.0f+rnd(12), 600, 30);
+                particle_splash(PART_WATER, 40, 150, o, 0x18181A, 10.0f+rnd(12), 600, 30);
             }
             else if(material&MAT_LAVA)
             {
                 playsound(S_SPLASH_LAVA, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 350);
                 particle_splash(PART_SMOKE, 25, 100, o, 0x222222, 10.0f+rnd(5), 400, 20);
-                particle_splash(PART_FLAME1+rnd(2), 7, 120, o, 0xCC7744, 10.00f+rnd(5), 400, 300);
+                particle_splash(PART_FIRE_BALL, 7, 120, o, 0xCC7744, 10.00f+rnd(5), 400, 300);
                 loopi(5)regularsplash(PART_FIRESPARK, 0xFFBB55, 500, 10, 500+(rnd(500)), d->o, 1.5f+(rnd(18)/5.f), -10, true);
             }
         }
         if (floorlevel>0)
         {
-            particle_splash(map_atmo==4 && randomambience  ? PART_EAU : PART_SMOKE, pl->armourtype==A_ASSIST ? 12 : 10, 100, d->feetpos(), map_atmo==4 && randomambience ? 0x111111 : map_atmo==9 ? 0xFFFFFF : 0x666666, 7.0f+rnd(pl->armourtype==A_ASSIST ? 10 : 5), 400, 20);
+            particle_splash(map_atmo==4 && randomambience  ? PART_WATER : PART_SMOKE, pl->armourtype==A_ASSIST ? 12 : 10, 100, d->feetpos(), map_atmo==4 && randomambience ? 0x111111 : map_atmo==9 ? 0xFFFFFF : 0x666666, 7.0f+rnd(pl->armourtype==A_ASSIST ? 10 : 5), 400, 20);
             if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_ASSIST && pl->armour>0 ? S_JUMP_ASSIST : pl->aptitude==APT_NINJA || (pl->aptitude==APT_KAMIKAZE && pl->abilitymillis[ABILITY_2]) ? S_JUMP_NINJA : S_JUMP_BASIC, d);
         }
         else if(floorlevel<0)
         {
-            particle_splash(map_atmo==4 && randomambience ? PART_EAU : PART_SMOKE, pl->armourtype==A_ASSIST ? 20 : 15, 120, d->feetpos(), map_atmo==4 && randomambience ? 0x131313 : map_atmo==9 ? 0xFFFFFF : 0x442211, 7.0f+rnd(pl->armourtype==A_ASSIST ? 10 : 5), 400, 20);
+            particle_splash(map_atmo==4 && randomambience ? PART_WATER : PART_SMOKE, pl->armourtype==A_ASSIST ? 20 : 15, 120, d->feetpos(), map_atmo==4 && randomambience ? 0x131313 : map_atmo==9 ? 0xFFFFFF : 0x442211, 7.0f+rnd(pl->armourtype==A_ASSIST ? 10 : 5), 400, 20);
             if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_ASSIST && pl->armour>0 ? S_LAND_ASSIST : S_LAND_BASIC, d);
         }
     }

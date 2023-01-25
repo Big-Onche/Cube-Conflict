@@ -242,15 +242,15 @@ struct partrenderer
                         switch(stain)
                         {
                             case STAIN_RAIN:
-                                addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size/1.5f, 0xFFFFFF, type&PT_RND4 ? (p->flags>>5)&3 : 0);
-                                regularsplash(PART_EAU, 0x18181A, 50, 3, 120, vec(o.x, o.y, collidez), 0.08f, 500, 0, 3, true);
+                                addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size/7.5f, 0xFFFFFF, type&PT_RND4 ? (p->flags>>5)&3 : 0);
+                                regularsplash(PART_WATER, 0x18181A, 50, 3, 120, vec(o.x, o.y, collidez), 0.08f, 500, 0, 3, true);
                                 break;
                             case STAIN_SNOW:
                                 addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size, p->color, type&PT_RND4 ? (p->flags>>5)&3 : 0);
                                 break;
-                            case STAIN_BRULAGE:
+                            case STAIN_BURN:
                                 addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size*1.5f, 0x222222, type&PT_RND4 ? (p->flags>>5)&3 : 0);
-                                addstain(STAIN_BALLE_GLOW, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size, 0xFF6622, type&PT_RND4 ? (p->flags>>5)&3 : 0);
+                                addstain(STAIN_BULLET_GLOW, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size, 0xFF6622, type&PT_RND4 ? (p->flags>>5)&3 : 0);
                                 break;
                         }
                         blend = 0;
@@ -865,58 +865,63 @@ struct softquadrenderer : quadrenderer
 
 static partrenderer *parts[] =
 {
-    new quadrenderer("media/particle/base.png", PT_PART|PT_FLIP|PT_BRIGHT),                                             // simple part for editmode
-    new quadrenderer("<grey>media/particle/blood.png", PT_PART|PT_FLIP|PT_MOD|PT_RND4|PT_COLLIDE, STAIN_BLOOD),         // blood spats (note: rgb is inverted)
-    new trailrenderer("media/particle/base.png", PT_TRAIL|PT_LERP),                                                     // water
-    new quadrenderer("media/particle/firespark.png", PT_PART|PT_FLIP|PT_RND4|PT_OVERBRIGHT|PT_COLLIDE, STAIN_BRULAGE),  // fire sparks
-    new quadrenderer("<grey>media/particle/fumee.png", PT_PART|PT_FLIP|PT_LERP),                                        // smoke
-    new quadrenderer("<grey>media/particle/steam.png", PT_PART|PT_FLIP),                                                // steam
-    new quadrenderer("media/particle/flames.png", PT_PART|PT_HFLIP|PT_RND4|PT_OVERBRIGHT),     // flame
-    new taperenderer("media/particle/flare.png", PT_TAPE|PT_BRIGHT),                           // streak
-    new taperenderer("media/particle/rail_trail.png", PT_TAPE|PT_FEW|PT_BRIGHT),               // rail trail
-    new taperenderer("media/particle/pulse_side.png", PT_TAPE|PT_FEW|PT_BRIGHT),               // pulse side
-    new quadrenderer("media/particle/pulse_front.png", PT_PART|PT_FLIP|PT_FEW|PT_BRIGHT),      // pulse front
-    new taperenderer("media/particle/balle_side.png", PT_TAPE|PT_FEW|PT_BRIGHT),
-    new taperenderer("media/particle/pompe_side.png", PT_TAPE|PT_FEW|PT_BRIGHT),
-    new trailrenderer("media/particle/impact.png", PT_TRAIL|PT_BRIGHT),                          // streak
-    new quadrenderer("media/particle/spock_front.png", PT_PART|PT_FEW|PT_BRIGHT),
-    new quadrenderer("media/particle/sante.png", PT_PART|PT_BRIGHT),
-    new quadrenderer("media/particle/mana.png", PT_PART|PT_BRIGHT),
-    new quadrenderer("media/particle/flames_1.png", PT_PART|PT_FLIP|PT_BRIGHT),
-    new quadrenderer("media/particle/flames_2.png", PT_PART|PT_FLIP|PT_BRIGHT),
-    new quadrenderer("media/particle/eau.png", PT_PART|PT_FLIP|PT_BRIGHT),
-    new quadrenderer("media/particle/bulles.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_RND4),
-    new quadrenderer("media/particle/neige.png", PT_PART|PT_FLIP|PT_RND4|PT_COLLIDE, STAIN_SNOW),            // colliding snow
-    new trailrenderer("media/particle/pluie.png", PT_PART|PT_COLLIDE, STAIN_RAIN),
-    new trailrenderer("media/particle/nuage_1.png", PT_TRAIL|PT_NOMAXDIST),
-    new trailrenderer("media/particle/nuage_2.png", PT_TRAIL|PT_NOMAXDIST),
-    new trailrenderer("media/particle/nuage_3.png", PT_TRAIL|PT_NOMAXDIST),
-    new trailrenderer("media/particle/nuage_4.png", PT_TRAIL|PT_NOMAXDIST),
-    new trailrenderer("media/particle/arcenciel.png", PT_TRAIL),
-    new quadrenderer("media/particle/viseur.png", PT_PART|PT_LERP|PT_BRIGHT),
-    new quadrenderer("media/particle/zero.png", PT_PART|PT_BRIGHT),
-    new quadrenderer("media/particle/one.png", PT_PART|PT_BRIGHT),
-    new quadrenderer("media/particle/blip.png", PT_PART|PT_LERP),
-    new quadrenderer("media/particle/spark.png", PT_PART|PT_FLIP|PT_BRIGHT),                   // sparks
-    new quadrenderer("media/particle/rail_muzzle.png", PT_PART|PT_FEW|PT_FLIP|PT_BRIGHT|PT_TRACK),  // rail muzzle flash
-    new quadrenderer("media/particle/pulse_muzzle.png", PT_PART|PT_FEW|PT_FLIP|PT_BRIGHT|PT_TRACK), // pulse muzzle flash
-    new quadrenderer("media/particle/minigun_muzzle.png", PT_PART|PT_FEW|PT_FLIP|PT_BRIGHT|PT_TRACK),
-    new quadrenderer("media/particle/normal_muzzle.png", PT_PART|PT_FEW|PT_FLIP|PT_BRIGHT|PT_TRACK),
-    new quadrenderer("media/particle/sniper_muzzle.png", PT_PART|PT_FEW|PT_BRIGHT|PT_TRACK),
-    &lightnings,                                                                               // lightning
-    &fireballs,                                                                                // explosion fireball
-    &plasmabursts,                                                                             // pulse burst
-    &ondedechoc,                                                                               // shock wave
-    &plasmagrenade,                                                                            // grenade explosion
-    &radar,                                                                                    // spy ability 3
-    &texts,                                                                                    // text
-    &meters,                                                                                   // meter
-    &metervs,                                                                                  // meter vs.
-    &flares                                                                                    // lens flares - must be done last
+    new quadrenderer("media/particles/game/basic.png", PT_PART|PT_FLIP|PT_BRIGHT),                                           // PART_BASIC
+    // guns muzzle flashes
+    new quadrenderer("media/particles/flashes/little.png", PT_PART|PT_FEW|PT_FLIP|PT_BRIGHT|PT_TRACK),                       // PART_MF_LITTLE
+    new quadrenderer("media/particles/flashes/big.png", PT_PART|PT_FEW|PT_FLIP|PT_BRIGHT|PT_TRACK),                          // PART_MF_BIG
+    new quadrenderer("media/particles/flashes/electric.png", PT_PART|PT_FEW|PT_FLIP|PT_BRIGHT|PT_TRACK),                     // PART_MF_ELEC
+    new quadrenderer("media/particles/flashes/plasma.png", PT_PART|PT_FEW|PT_FLIP|PT_BRIGHT|PT_TRACK),                       // PART_MF_PLASMA
+    new quadrenderer("media/particles/flashes/rocket.png", PT_PART|PT_FEW|PT_FLIP|PT_BRIGHT|PT_TRACK),                       // PART_MF_ROCKET
+    new quadrenderer("media/particles/flashes/shotgun.png", PT_PART|PT_FEW|PT_BRIGHT|PT_TRACK),                              // PART_MF_SHOTGUN
+    new quadrenderer("media/particles/flashes/sniper.png", PT_PART|PT_FEW|PT_BRIGHT|PT_TRACK),                               // PART_MF_SNIPER
+    // bullets flares
+    new taperenderer("media/particles/trails/bullet_side.png", PT_TAPE|PT_FEW|PT_BRIGHT),                                    // PART_F_BULLET
+    new taperenderer("media/particles/trails/shotgun_side.png", PT_TAPE|PT_FEW|PT_BRIGHT),                                   // PART_F_SHOTGUN
+    new taperenderer("media/particles/trails/plasma_side.png", PT_TAPE|PT_FEW|PT_BRIGHT),                                    // PART_F_PLASMA
+    new quadrenderer("media/particles/trails/spock_front.png", PT_PART|PT_FEW|PT_HFLIP|PT_BRIGHT),                           // PART_SPOCK_FRONT
+    new quadrenderer("media/particles/trails/plasma_front.png", PT_PART|PT_FLIP|PT_FEW|PT_BRIGHT),                           // PART_PLASMA_FRONT
+    // flames and smokes
+    new quadrenderer("media/particles/fire/smoke.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_LERP|PT_RND4),                           // PART_SMOKE
+    new quadrenderer("media/particles/fire/flames.png", PT_PART|PT_HFLIP|PT_RND4|PT_OVERBRIGHT),                             // PART_FLAME
+    new quadrenderer("media/particles/fire/fire_ball.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_RND4),                               // PART_FIRE_BALL
+    new quadrenderer("media/particles/fire/firespark.png", PT_PART|PT_FLIP|PT_RND4|PT_OVERBRIGHT|PT_COLLIDE, STAIN_BURN),    // PART_FIRESPARK
+    // water
+    new quadrenderer("media/particles/water/water.png", PT_PART|PT_FLIP|PT_RND4|PT_BRIGHT),                                  // PART_WATER
+    new quadrenderer("media/particles/water/bubbles.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_RND4|PT_COLLIDE),                     // PART_BUBBLE
+    new quadrenderer("<grey>media/particles/water/steam.png", PT_PART|PT_FLIP|PT_RND4),                                      // PART_STEAM
+    // weather
+    new quadrenderer("media/particles/weather/snow.png", PT_PART|PT_FLIP|PT_RND4|PT_COLLIDE, STAIN_SNOW),                    // PART_SNOW
+    new trailrenderer("media/particles/weather/rain.png", PT_PART|PT_COLLIDE, STAIN_RAIN),                                   // PART_RAIN
+    new trailrenderer("media/particles/weather/cloud_1.png", PT_TRAIL|PT_NOMAXDIST),                                         // PART_CLOUD1
+    new trailrenderer("media/particles/weather/cloud_2.png", PT_TRAIL|PT_NOMAXDIST),                                         // PART_CLOUD2
+    new trailrenderer("media/particles/weather/cloud_3.png", PT_TRAIL|PT_NOMAXDIST),                                         // PART_CLOUD3
+    new trailrenderer("media/particles/weather/cloud_4.png", PT_TRAIL|PT_NOMAXDIST),                                         // PART_CLOUD4
+    new trailrenderer("media/particles/weather/rainbow.png", PT_TRAIL),                                                      // PART_RAINBOW
+    &lightnings,                                                                                                             // PART_LIGHTNING
+    // game specific
+    new quadrenderer("media/particles/game/target.png", PT_PART|PT_LERP|PT_BRIGHT),                                          // PART_TARGET
+    new quadrenderer("media/particles/game/zero.png", PT_PART|PT_BRIGHT),                                                    // PART_ZERO
+    new quadrenderer("media/particles/game/one.png", PT_PART|PT_BRIGHT),                                                     // PART_ONE
+    new quadrenderer("media/particles/game/blip.png", PT_PART|PT_LERP),                                                      // PART_BLIP
+    new quadrenderer("media/particles/game/health.png", PT_PART|PT_BRIGHT),                                                  // PART_HEALTH
+    new quadrenderer("media/particles/game/mana.png", PT_PART|PT_BRIGHT),                                                    // PART_MANA
+    &radar,                                                                                                                  // PART_RADAR
+    &meters,                                                                                                                 // PART_METER
+    &metervs,                                                                                                                // PART_METER_VS
+    // explosions
+    &ondedechoc,                                                                                                             // PART_SHOCKWAVE
+    &plasmabursts,                                                                                                           // PART_PLASMABURST
+    &plasmagrenade,                                                                                                          // PART_PLASMAGRENADE
+    &fireballs,                                                                                                              // PART_EXPLOSION
+    // misc
+    new quadrenderer("<grey>media/particles/misc/blood.png", PT_PART|PT_FLIP|PT_MOD|PT_RND4|PT_COLLIDE, STAIN_BLOOD),        // PART_BLOOD (note: rgb is inverted)
+    new quadrenderer("media/particles/misc/spark.png", PT_PART|PT_FLIP|PT_BRIGHT),                                           // PART_SPARK
+    &texts,                                                                                                                  // PART_TEXT
+    &flares                                                                                                                  // PART_LENS_FLARE - must be done last
 };
 
-VARFP(maxparticles, 10, 4000, 20000, initparticles());
-VARFP(fewparticles, 10, 100, 10000, initparticles());
+VARFP(maxparticles, 10, 8000, 20000, initparticles());
+VARFP(fewparticles, 10, 200, 10000, initparticles());
 
 void initparticles()
 {
@@ -1409,7 +1414,7 @@ static void makeparticles(entity &e)
             regularflame(PART_SMOKE, e.o, float(e.attr2)/100.0f, float(e.attr3)/100.0f, colorfromattr(e.attr4), 1, 4.0f, 100.0f, 2000.0f, -20);
             break;
         case 14: //Clouds/Nuages
-            newparticle(e.o, offsetvec(e.o, e.attr4, 1000*3+(e.attr5*300)), 1, PART_NUAGE1+e.attr2, partcloudcolour, 100+(e.attr3*10));
+            newparticle(e.o, offsetvec(e.o, e.attr4, 1000*3+(e.attr5*300)), 1, PART_CLOUD1+e.attr2, partcloudcolour, 100+(e.attr3*10));
             break;
         case 15: //Rainbow/Arc-en-ciel
             if(map_atmo==8) newparticle(e.o, offsetvec(e.o, e.attr4, 1000*3+(e.attr5*300)), 1, PART_RAINBOW, 0xAAAAAA, 100+(e.attr3*10));
@@ -1430,7 +1435,7 @@ static void makeparticles(entity &e)
 
         case 17: //rain
             {
-                if(map_atmo==4 || map_atmo==8) regularshape(PART_RAIN, max(1+e.attr2, 1), 0x555566, 44, map_atmo==8 ? e.attr3/2 : e.attr3, 10000, e.o, 1+(rnd(2)), 200, -900, e.attr5, true, 200);
+                if(map_atmo==4 || map_atmo==8) regularshape(PART_RAIN, max(1+e.attr2, 1), 0x555566, 44, map_atmo==8 ? e.attr3/2 : e.attr3, 10000, e.o, 5+(rnd(3)), 200, -900, e.attr5, true, 200);
                 if(randomevent(25*gfx::nbfps) && map_atmo == 4 && isconnected())
                 {
                     vec possky = e.o; vec posground = e.o;

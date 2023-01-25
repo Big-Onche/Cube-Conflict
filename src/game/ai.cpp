@@ -1528,7 +1528,7 @@ namespace ai
                     waypoint &e = waypoints[index], &f = waypoints[prev];
                     vec fr = f.o, dr = e.o;
                     fr.z += amt; dr.z += amt;
-                    particle_flare(fr, dr, 1, PART_STREAK, 0xFFFFFF);
+                    particle_flare(fr, dr, 1, PART_F_SHOTGUN, 0xFFFFFF);
                 }
             }
             last = i;
@@ -1646,7 +1646,7 @@ namespace ai
                 {
                      int link = w.links[j];
                      if(!link) break;
-                     particle_flare(w.o, waypoints[link].o, 1, PART_STREAK, 0x0000FF);
+                     particle_flare(w.o, waypoints[link].o, 1, PART_F_SHOTGUN, 0x0000FF);
                 }
             }
         }

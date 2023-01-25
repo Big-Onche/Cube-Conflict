@@ -745,20 +745,18 @@ struct stainrenderer
 
 stainrenderer stains[] =
 {
-    stainrenderer("<grey>media/particle/blood.png", SF_RND4|SF_ROTATE|SF_INVMOD),
-    stainrenderer("<grey>media/particle/pulse_scorch.png", SF_ROTATE, 250),
-    stainrenderer("<grey>media/particle/expl_scorch.png", SF_ROTATE, 250),
-    stainrenderer("<grey>media/particle/rail_hole.png", SF_ROTATE|SF_OVERBRIGHT),
-    stainrenderer("<grey>media/particle/pulse_glow.png", SF_ROTATE|SF_GLOW|SF_SATURATE, 250, 1500, 250),
-    stainrenderer("<grey>media/particle/rail_glow.png",  SF_ROTATE|SF_GLOW|SF_SATURATE, 100, 1100, 100),
-    stainrenderer("<grey>media/particle/spock_glow.png",  SF_ROTATE|SF_GLOW|SF_SATURATE, 100, 1100, 100),
-    stainrenderer("<grey>media/particle/bullet_hole_1.png", SF_ROTATE|SF_OVERBRIGHT),
-    stainrenderer("<grey>media/particle/bullet_hole_2.png", SF_ROTATE|SF_OVERBRIGHT),
-    stainrenderer("<grey>media/particle/bullet_hole_3.png", SF_ROTATE|SF_OVERBRIGHT),
-    stainrenderer("<grey>media/particle/rail_glow.png",  SF_ROTATE|SF_GLOW|SF_SATURATE, 200, 400, 100),
-    stainrenderer("<grey>media/particle/brulage.png", SF_ROTATE, 500),
-    stainrenderer("media/particle/neige_sol.png", SF_ROTATE, 25, 2500, 5000),
-    stainrenderer("media/particle/pluie_sol.png", SF_ROTATE, 25, 750, 750),
+    stainrenderer("<grey>media/particles/misc/blood.png", SF_RND4|SF_ROTATE|SF_INVMOD),
+    stainrenderer("<grey>media/stains/scorch_little.png", SF_ROTATE, 100),
+    stainrenderer("<grey>media/stains/scorch_big.png", SF_ROTATE, 250),
+    stainrenderer("<grey>media/stains/lightning_hole.png", SF_ROTATE|SF_OVERBRIGHT),
+    stainrenderer("<grey>media/stains/plasma_glow.png", SF_ROTATE|SF_GLOW|SF_SATURATE, 250, 1500, 250),
+    stainrenderer("<grey>media/stains/bullet_glow.png",  SF_ROTATE|SF_GLOW|SF_SATURATE, 100, 1100, 100),
+    stainrenderer("<grey>media/stains/spock.png",  SF_ROTATE|SF_GLOW|SF_SATURATE, 100, 1100, 100),
+    stainrenderer("<grey>media/stains/bullet_hole.png", SF_RND4|SF_ROTATE|SF_OVERBRIGHT),
+    stainrenderer("<grey>media/stains/bullet_glow.png",  SF_ROTATE|SF_GLOW|SF_SATURATE, 200, 400, 100),
+    stainrenderer("<grey>media/stains/burn.png", SF_ROTATE, 500),
+    stainrenderer("<grey>media/stains/snow.png", SF_ROTATE|SF_SATURATE, 50, 2500, 5000),
+    stainrenderer("<grey>media/stains/rain.png", SF_ROTATE, 10, 750, 750),
 };
 
 void initstains()
