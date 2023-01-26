@@ -455,7 +455,7 @@ namespace game
         rendermodel(mdlname, anim, o, yaw, d->pitch>12 ? 12 : d->pitch<-25 ? -25 : pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), trans));
 
         //////////////////////////////////////////////////////////////////FIRST PERSON BODY//////////////////////////////////////////////////////////////////
-        if(d==hudplayer() && gfx::forcecampos<0)
+        if(d==hudplayer() && gfx::forcecampos<0 && !thirdperson)
         {
             vec pos = o;
             rendermodel(mdlname, anim, pos.addz(3.5f), yaw, 28, 0, MDL_NOSHADOW, d, NULL, basetime, 0, 1.f, vec4(vec::hexcolor(color), trans));
