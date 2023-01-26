@@ -692,7 +692,7 @@ namespace game
 
                     if(guns[m.gunselect].vwep)
                     {
-                        m.muzzle = vec(-1, -1, -1);
+                        m.muzzle = m.balles = vec(-1, -1, -1);
                         a[ai++] = modelattach("tag_muzzle", &m.muzzle);
                         a[ai++] = modelattach("tag_balles", &m.balles);
                     }

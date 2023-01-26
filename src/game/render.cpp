@@ -154,7 +154,7 @@ namespace game
 
     void changedplayermodel()
     {
-        if(cust[SMI_HAP+playermodel]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas ce smiley !"); playsound(S_ERROR); player1->playermodel=0; return;}
+        if(cust[SMI_HAP+playermodel]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas ce smiley !"); playsound(S_ERROR); playermodel = 0; return;}
         if(player1->clientnum < 0) player1->playermodel = playermodel;
         if(player1->ragdoll) cleanragdoll(player1);
         loopv(ragdolls)
@@ -310,7 +310,7 @@ namespace game
         vec o = d->feetpos();
         int basetime = 0;
         if(animoverride) anim = (animoverride<0 ? ANIM_ALL : animoverride)|ANIM_LOOP;
-        const char *mdlname = m_tutorial ? mdl.model[1] :
+        const char *mdlname = m_tutorial || d==player1 ? mdl.model[1] :
                               d->armourtype==A_ASSIST && d->armour>0 ? validteam(team) ? d->team==player1->team ? "smileys/armureassistee" : "smileys/armureassistee/red" : "smileys/armureassistee/red" :
                               d->abilitymillis[ABILITY_2] && d->aptitude==APT_PHYSICIEN ? "smileys/phy_2" : mdl.model[validteam(team) ? d->team==player1->team ? 1 : 2 : 0];
 
@@ -335,7 +335,6 @@ namespace game
         }
 
         //////////////////////////////////////////////////////////////////MODELES//////////////////////////////////////////////////////////////////
-
         modelattach a[10];
         int ai = 0;
         if(guns[d->gunselect].vwep)
@@ -350,7 +349,7 @@ namespace game
         }
         if(mainpass && !(flags&MDL_ONLYSHADOW))
         {
-            d->muzzle = vec(-1, -1, -1);
+            d->muzzle = d->balles = vec(-1, -1, -1);
             if(guns[d->gunselect].vwep) a[ai++] = modelattach("tag_muzzle", &d->muzzle);
             if(guns[d->gunselect].vwep) a[ai++] = modelattach("tag_balles", &d->balles);
         }
@@ -454,6 +453,13 @@ namespace game
         }
 
         rendermodel(mdlname, anim, o, yaw, d->pitch>12 ? 12 : d->pitch<-25 ? -25 : pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), trans));
+
+        //////////////////////////////////////////////////////////////////FIRST PERSON BODY//////////////////////////////////////////////////////////////////
+        if(d==hudplayer() && gfx::forcecampos<0)
+        {
+            vec pos = o;
+            rendermodel(mdlname, anim, pos.addz(3.5f), yaw, 28, 0, MDL_NOSHADOW, d, NULL, basetime, 0, 1.f, vec4(vec::hexcolor(color), trans));
+        }
     }
 
     void renderplayerui(gameent *d, const playermodelinfo &mdl, int cape, int color, int team)
