@@ -25,7 +25,8 @@ namespace game
         r->lastupdate = ragdollfade && lastmillis > d->lastpain + max(ragdollmillis - ragdollfade, 0) ? lastmillis - max(ragdollmillis - ragdollfade, 0) : d->lastpain;
         r->edit = NULL;
         r->ai = NULL;
-        r->attackchan = r->dansechan = r->abi1chan = r->abi2chan = r->abi3chan = -1;
+        r->attackchan = r->dansechan = -1;
+        loopi(3) r->abichan[i] = -1;
         ragdolls.add(r);
         d->ragdoll = NULL;
     }

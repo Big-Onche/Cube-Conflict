@@ -1657,9 +1657,7 @@ namespace game
     {
         if(d->clientnum >= 0 && d->state == CS_ALIVE)
         {
-            if(d->abi1snd >= 0) {d->abi1chan = playsound(d->abi1snd, local ? NULL : &d->o, NULL, 0, -1, -1, d->abi1chan, 300); if(d->abi1chan < 0) d->abi1snd = -1;}
-            if(d->abi2snd >= 0) {d->abi2chan = playsound(d->abi2snd, local ? NULL : &d->o, NULL, 0, -1, -1, d->abi2chan, 300); if(d->abi2chan < 0) d->abi2snd = -1;}
-            if(d->abi3snd >= 0) {d->abi3chan = playsound(d->abi3snd, local ? NULL : &d->o, NULL, 0, -1, -1, d->abi3chan, 300); if(d->abi3chan < 0) d->abi3snd = -1;}
+            loopi(3) if(d->abisnd[i] >= 0) {d->abichan[i] = playsound(d->abisnd[i], local ? NULL : &d->o, NULL, 0, -1, -1, d->abichan[i], 300); if(d->abichan[i] < 0) d->abisnd[i] = -1;}
         }
         else d->stopabisound(d);
     }

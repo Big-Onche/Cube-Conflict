@@ -862,7 +862,7 @@ struct gameent : dynent, gamestate
     int lastpain;
     int lastaction, lastattack;
     int attacking, gunaccel;
-    int lastfootstep, attacksound, attackchan, dansesound, dansechan, abi1snd, abi2snd, abi3snd, abi1chan, abi2chan, abi3chan, alarmchan;
+    int lastfootstep, attacksound, attackchan, dansesound, dansechan, alarmchan;
     int lasttaunt;
     int lastpickup, lastpickupmillis, flagpickup, lastbase, lastrepammo;
     int killstreak, frags, flags, deaths, totaldamage, totalshots;
@@ -870,6 +870,7 @@ struct gameent : dynent, gamestate
     float deltayaw, deltapitch, deltaroll, newyaw, newpitch, newroll;
     int smoothmillis;
 
+    int abisnd[3], abichan[3];
     int lastability[3];
     bool abilityready[3], playerexploded;
 
@@ -881,8 +882,14 @@ struct gameent : dynent, gamestate
 
     vec muzzle, weed, balles, assist;
 
-    gameent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), lastfootstep(0), attacksound(-1), attackchan(-1), dansesound(-1), dansechan(-1), abi1snd(-1), abi2snd(-1), abi3snd(-1), abi1chan(-1), abi2chan(-1), abi3chan(-1), killstreak(0), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0), customcape(0), customtombe(0), customdanse(0), aptitude(0), level(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
+    gameent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), lastfootstep(0), attacksound(-1), attackchan(-1), dansesound(-1), dansechan(-1), killstreak(0), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0), customcape(0), customtombe(0), customdanse(0), aptitude(0), level(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
     {
+        loopi(3)
+        {
+            abisnd[i] = -1;
+            abichan[i] = -1;
+            lastability[i] = -1;
+        }
         name[0] = info[0] = 0;
         respawn();
     }
@@ -893,9 +900,7 @@ struct gameent : dynent, gamestate
 
         if(attackchan >= 0) stopsound(attacksound, attackchan);
         if(dansesound >= 0) stopsound(dansesound, dansechan);
-        if(abi1snd >= 0) stopsound(abi1snd, abi1chan);
-        if(abi2snd >= 0) stopsound(abi2snd, abi2chan);
-        if(abi3snd >= 0) stopsound(abi3snd, abi3chan);
+        loopi(3) if(abisnd[i] >= 0) stopsound(abisnd[i], abisnd[i]);
         if(alarmchan >= 0) stopsound(S_ASSISTALARM, alarmchan);
         if(ai) delete ai;
     }
@@ -910,27 +915,22 @@ struct gameent : dynent, gamestate
 
     void stopattacksound(gameent *d)
     {
-        if(attackchan >= 0) stopsound(attacksound, attackchan, d->gunselect==GUN_S_GAU8 ? 150 : 250);
-        attacksound = attackchan = -1;
+        if(attackchan >= 0) { stopsound(attacksound, attackchan, d->gunselect==GUN_S_GAU8 ? 150 : 250); attacksound = attackchan = -1; }
     }
 
     void stopdansesound(gameent *d)
     {
-        if(dansechan >= 0) stopsound(S_CGCORTEX+(d->customdanse), dansechan, 50);
-        dansesound = dansechan = -1;
+        if(dansechan >= 0) { stopsound(S_CGCORTEX+(d->customdanse), dansechan, 50); dansesound = dansechan = -1; }
     }
 
     void stopabisound(gameent *d)
     {
-        if(abi1chan >= 0) {stopsound(abi1snd, abi1chan, 50); abi1snd = abi1chan = -1;}
-        if(abi2chan >= 0) {stopsound(abi2snd, abi2chan, 50); abi2snd = abi2chan = -1;}
-        if(abi3chan >= 0) {stopsound(abi3snd, abi3chan, 50); abi3snd = abi3chan = -1;}
+        loopi(3) if(abichan[i] >= 0) { stopsound(abisnd[i], abichan[i], 50); abisnd[i] = abichan[i] = -1; }
     }
 
     void stoppowerarmorsound()
     {
-        if(alarmchan >= 0) stopsound(S_ASSISTALARM, alarmchan, 100);
-        alarmchan = -1;
+        if(alarmchan >= 0) { stopsound(S_ASSISTALARM, alarmchan, 100); alarmchan = -1; }
     }
 
     void respawn()

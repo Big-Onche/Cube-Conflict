@@ -31,6 +31,34 @@ namespace game
         else return d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_ESPION || d->aptitude==APT_PRETRE || d->aptitude==APT_SHOSHONE || d->aptitude==APT_KAMIKAZE;
     }
 
+    void abilityeffect(gameent *d, int ability)
+    {
+        switch(ability)
+        {
+            //case ABILITY_1:
+            //break;
+
+            case ABILITY_2:
+                if(d->aptitude==APT_ESPION)
+                {
+                    loopi(1)particle_fireball(d->o,  50, PART_SHOCKWAVE, 300, 0xBBBBBB, 1.f);
+                    particle_splash(PART_SMOKE, 7, 400, d->o, 0x666666, 15+rnd(5), 200, -10);
+                }
+                break;
+
+            case ABILITY_3:
+            {
+                if(d->aptitude==APT_ESPION) particle_fireball(d->o, 1000, PART_RADAR, 1000, 0xAAAAAA, 20.f);
+
+                if(isteam(player1->team, d->team) && d->aptitude==APT_ESPION && d!=player1)
+                {
+                    getspyability = totalmillis;
+                    playsound(S_SPY_3);
+                }
+            }
+        }
+    }
+
     void aptitude(gameent *d, int ability, bool request) //abilities commands
     {
         if(!canlaunchability(d, ability)) return; //first check
@@ -47,55 +75,10 @@ namespace game
         playsound(S_SORTLANCE, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
         if(d==player1) addstat(1, STAT_ABILITES);
 
-        switch(ability)
-        {
-            case ABILITY_1:
-            {
-                vec soundpos = d->o;
-                if(d->aptitude==APT_ESPION)
-                {
-                    int posx = 25, posy = 25;
-                    switch(d->aptiseed)
-                    {
-                        case 1: posx=-25; posy=-25; break;
-                        case 2: posx=25; posy=-25; break;
-                        case 3: posx=-25; posy=25; break;
-                    }
-                    soundpos.add(vec(posx, posy, 0));
-                }
+        d->abichan[ability] = playsound(aptitudes[d->aptitude].abilities[ability].snd, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->abichan[ability], 225);
+        d->abisnd[ability] = aptitudes[d->aptitude].abilities[ability].snd;
 
-                d->abi1chan = playsound(aptitudes[d->aptitude].abilities[ability].snd, &soundpos, NULL, 0, 0, 100, d->abi1chan, 225);
-                d->abi1snd = aptitudes[d->aptitude].abilities[ability].snd;
-            }
-            break;
-
-            case ABILITY_2:
-            {
-                d->abi2chan = playsound(aptitudes[d->aptitude].abilities[ability].snd, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->abi2chan, 275);
-                d->abi2snd = aptitudes[d->aptitude].abilities[ability].snd;
-
-                if(d->aptitude==APT_ESPION)
-                {
-                    loopi(1)particle_fireball(d->o,  50, PART_SHOCKWAVE, 300, 0xBBBBBB, 1.f);
-                    particle_splash(PART_SMOKE, 7, 400, d->o, 0x666666, 15+rnd(5), 200, -10);
-                }
-            }
-            break;
-
-            case ABILITY_3:
-            {
-                d->abi3chan = playsound(aptitudes[d->aptitude].abilities[ability].snd, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->abi3chan, 275);
-                d->abi3snd = aptitudes[d->aptitude].abilities[ability].snd;
-
-                if(d->aptitude==APT_ESPION) particle_fireball(d->o, 1000, PART_RADAR, 1000, 0xAAAAAA, 20.f);
-
-                if(isteam(player1->team, d->team) && d->aptitude==APT_ESPION && d!=player1)
-                {
-                    getspyability = totalmillis;
-                    playsound(S_SPY_3);
-                }
-            }
-        }
+        abilityeffect(d, ability);
     }
 
     void player1aptitude(int ability) //Player1 abilities commands
