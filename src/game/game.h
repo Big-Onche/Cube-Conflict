@@ -286,7 +286,7 @@ enum
     S_ECLAIRLOIN, S_LAVASPLASH,
 
     // classes & spells
-    S_SORTLANCE, S_SORTIMPOSSIBLE, S_SORTPRET, S_KAMIKAZE, S_FAUCHEUSE,
+    S_SORTLANCE, S_SORTIMPOSSIBLE, S_SORTPRET, S_TIMER, S_FAUCHEUSE,
     S_RAGETIR, S_REGENMEDIGUN, S_REGENJUNKIE, S_WIZ_1, S_WIZ_2,
     S_WIZ_3, S_PHY_1, S_PHY_1_WOOD, S_PHY_1_IRON,  S_PHY_1_GOLD,
     S_PHY_1_MAGNET, S_PHY_1_POWERARMOR, S_PHY_2, S_PHY_3, S_SPY_1,
@@ -314,9 +314,7 @@ enum
     S_CGCORTEX, S_CGVALOCHE, S_CGVIEILLE, S_CGHENDEK, S_CGMILITAIREA, S_CGMILITAIREB, S_CGMOUNIR, S_CGDELAVIER, S_CGPRAUD, S_CGRENE, S_CGRAOULT,
 
     //npcs
-    S_ALIEN_H, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D,
-
-    S_NULL
+    S_ALIEN_H, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D
 };
 
 // network messages codes, c2s, c2c, s2c
@@ -467,36 +465,36 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, picks
     //Armes "normales"
     { GUN_RAIL,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADFUTUR,     S_ELECRIFLE,    S_ELECRIFLE_FAR,    S_FAR_LIGHT, 10,  350,  325,  35, 105, 0,    0,  10, 8000,  1,    30,   0, 0, 0},
     { GUN_PULSE,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADFUTUR,     S_PLASMARIFLE,  S_PLASMARIFLE_FAR,  S_FAR_LIGHT, 25,   90,  180,  45, 135, 0, 1500,   5, 8000,  1,    50,  25, 0, 0},
-    { GUN_SMAW,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADBIG,       S_SMAW,         S_SMAW_FAR,              S_NULL,  3, 1250,  850,  20,  60, 2,  600,  15, 8000,  1,   750, 125, 0, 0},
+    { GUN_SMAW,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADBIG,       S_SMAW,         S_SMAW_FAR,                  -1,  3, 1250,  850,  20,  60, 2,  600,  15, 8000,  1,   750, 125, 0, 0},
     { GUN_MINIGUN,      ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADMID,       S_MINIGUN,      S_MINIGUN_FAR,      S_FAR_LIGHT, 35,   60,  180,  60, 180, 0, 3500,   5, 8000,  1,    15 ,  7, 0, 0},
     { GUN_SPOCKGUN,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADALIEN,     S_SPOCKGUN,     S_SPOCKGUN_FAR,     S_FAR_LIGHT, 15,  175,  250,  15, 150, 3, 1750,   5, 8000,  1,    30,  15, 0, 0},
-    { GUN_M32,          ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADMID,       S_M32,          S_M32_FAR,               S_NULL,  3, 1000, 1250,  20,  50, 0,  400,  10, 1000,  1,   600, 160, 1000, 0},
-    { GUN_LANCEFLAMMES, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADMID,       S_FLAMETHROWER, S_FLAMETHROWER_FAR,      S_NULL, 30,  100,   38, 500, 500, 9,    0,   2,  280, 10,    10 ,  0, 0, 0},
+    { GUN_M32,          ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADMID,       S_M32,          S_M32_FAR,                   -1,  3, 1000, 1250,  20,  50, 0,  400,  10, 1000,  1,   600, 160, 1000, 0},
+    { GUN_LANCEFLAMMES, ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADMID,       S_FLAMETHROWER, S_FLAMETHROWER_FAR,          -1, 30,  100,   38, 500, 500, 9,    0,   2,  280, 10,    10 ,  0, 0, 0},
     { GUN_UZI,          ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADSMALL,     S_UZI,          S_UZI_FAR,          S_FAR_LIGHT, 35,   75,  150,  50, 150, 0, 3000,   2, 8000,  1,    10,   5, 0, 0},
     { GUN_FAMAS,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADSMALL,     S_FAMAS,        S_FAMAS_FAR,        S_FAR_LIGHT, 30,   90,  140,  40, 120, 0, 3500,   3, 8000,  1,    20,   5, 0, 0},
     { GUN_MOSSBERG,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADMID,       S_MOSSBERG,     S_MOSSBERG_FAR, S_FAR_VERYHEAVY,  3, 1200,  115, 500, 500, 0,    0,  20, 1000, 25,    20,   0, 0, 0},
     { GUN_HYDRA,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADSMALL,     S_HYDRA,        S_HYDRA_FAR,    S_FAR_VERYHEAVY,  4,  315,   75, 300, 300, 0,    0,  15,  600, 15,    20,   0, 0, 0},
     { GUN_SV98,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADMID,       S_SV98,         S_SV98_FAR,         S_FAR_HEAVY,  2, 1500,  900,   1, 200, 0, 4500,  30, 8000,  1,    80,   7, 0, 0},
     { GUN_SKS,          ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADMID,       S_SKS,          S_SKS_FAR,          S_FAR_HEAVY, 10,  420,  500,   5, 125, 0, 3500,  25, 8000,  1,    50,   7, 0, 0},
-    { GUN_ARBALETE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADMID,       S_CROSSBOW,     S_CROSSBOW_FAR,          S_NULL,  5,  900,  850,  10,  90, 0, 2000,   7, 8000,  1,    20,   3, 45000, 0},
+    { GUN_ARBALETE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADMID,       S_CROSSBOW,     S_CROSSBOW_FAR,              -1,  5,  900,  850,  10,  90, 0, 2000,   7, 8000,  1,    20,   3, 45000, 0},
     { GUN_AK47,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADMID,       S_AK47,         S_AK47_FAR,         S_FAR_LIGHT, 30,   92,  170,  60, 180, 0, 3000,   7, 8000,  1,    50,   5, 0, 0},
-    { GUN_GRAP1,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADFUTUR,     S_GRAP1,        S_GRAP1_FAR,             S_NULL, 12,  200,  250,  30, 300, 3, 1500,  -4, 8000,  1,  -600,  20, 0, 0},
-    { GUN_ARTIFICE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADSMALL,     S_FIREWORKS,    S_FIREWORKS_FAR,         S_NULL,  3, 1100,  800,  35, 200, 0, 1200,  45,  520,  1,   500,  80, 250, 0},
-    { GUN_GLOCK,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADSMALL,     S_GLOCK,        S_GLOCK_FAR,        S_FAR_LIGHT,  10,  100,  280,   5, 150, 0, 2000,   7, 8000,  1,    30,   3, 0, 0},
+    { GUN_GRAP1,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADFUTUR,     S_GRAP1,        S_GRAP1_FAR,                 -1, 12,  200,  250,  30, 300, 3, 1500,  -4, 8000,  1,  -600,  20, 0, 0},
+    { GUN_ARTIFICE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADSMALL,     S_FIREWORKS,    S_FIREWORKS_FAR,             -1,  3, 1100,  800,  35, 200, 0, 1200,  45,  520,  1,   500,  80, 250, 0},
+    { GUN_GLOCK,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADSMALL,     S_GLOCK,        S_GLOCK_FAR,        S_FAR_LIGHT, 10,  100,  280,   5, 150, 0, 2000,   7, 8000,  1,    30,   3, 0, 0},
     // Super armes
-    { GUN_S_NUKE,       ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADBIG,       S_NUKE,         S_NUKE_FAR,             S_NUKE_FAR,    1, 3000,  3250,  20, 300, 2,  175,  10, 2000,  1,   400, 1500, 6000, 0},
-    { GUN_S_GAU8,       ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADBIG,       S_GAU8,         S_NULL,                     S_NULL,   90,   14,   370, 150, 250, 3, 6000,   9, 8000,  1,    80,   20, 0, 0},
+    { GUN_S_NUKE,       ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADBIG,       S_NUKE,         S_NUKE_FAR,          S_NUKE_FAR,   1, 3000,  3250,  20, 300, 2,  175,  10, 2000,  1,   400, 1500, 6000, 0},
+    { GUN_S_GAU8,       ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADBIG,       S_GAU8,         -1,                           -1, 90,   14,   370, 150, 250, 3, 6000,   9, 8000,  1,    80,   20, 0, 0},
     { GUN_S_ROQUETTES,  ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADBIG,       S_MINIROCKETS,  S_MINIROCKETS_FAR, S_FAR_VERYHEAVY,   14,  170,  2000,  10, 300, 2,  700,   6, 8000,  1,   500,  100, 0, 0},
     { GUN_S_CAMPOUZE,   ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADBIG,       S_CAMPOUZE,     S_CAMPOUZE_FAR,    S_FAR_VERYHEAVY,    8,  500,   500,  50,  50, 5, 5000,   3, 8000, 10,   150,    8, 0, 0},
     // Armes corps à corps
-    { GUN_CAC349,       ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADSWORD,     S_SWORD349,     S_NULL, S_NULL,   4, 1000,  600, 1, 1, 20, 0, -10,  28,  1,  50,  0, 0, 0},
-    { GUN_CACMARTEAU,   ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADSLOWWOOSH, S_BANHAMMER,    S_NULL, S_NULL,   3, 1500, 1000, 1, 1, 15, 0,  -5,  30,  1,  10,  0, 0, 0},
-    { GUN_CACMASTER,    ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADSWORD,     S_MASTERSWORD,  S_NULL, S_NULL,   5, 600,   430, 1, 1, 20, 0,  -8,  26,  1,  30,  0, 0, 0},
-    { GUN_CACFLEAU,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADCHAINS,    S_FLAIL,        S_NULL, S_NULL,   4, 1150,  750, 1, 1, 10, 0, -10,  32,  1, 125,  0, 0, 0},
+    { GUN_CAC349,       ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADSWORD,     S_SWORD349,     -1, -1,   4, 1000,  600, 1, 1, 20, 0, -10,  28,  1,  50,  0, 0, 0},
+    { GUN_CACMARTEAU,   ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADSLOWWOOSH, S_BANHAMMER,    -1, -1,   3, 1500, 1000, 1, 1, 15, 0,  -5,  30,  1,  10,  0, 0, 0},
+    { GUN_CACMASTER,    ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADSWORD,     S_MASTERSWORD,  -1, -1,   5, 600,   430, 1, 1, 20, 0,  -8,  26,  1,  30,  0, 0, 0},
+    { GUN_CACFLEAU,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADCHAINS,    S_FLAIL,        -1, -1,   4, 1150,  750, 1, 1, 10, 0, -10,  32,  1, 125,  0, 0, 0},
     // Armes spéciales
     { GUN_KAMIKAZE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADFASTWOOSH, S_EXPL_KAMIKAZE, S_EXPL_FAR, S_EXPL_FAR,   1, 1000, 4000, 1, 1,  0, 1,  10, 120,  1, 250, 500, 5, 0},
     { GUN_ASSISTXPL,    ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADBIG,       S_EXPL_PARMOR,   S_EXPL_FAR, S_EXPL_FAR,   1,  220, 1500, 1, 1,  0, 1,  10,  50,  1, 100, 350, 5, 0},
-    { GUN_CACNINJA,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADSWORD,     S_NINJASABER,    S_NULL,     S_NULL,       8,  400,  900, 1, 1, 30, 0, -10,  36,  1,  25,   0, 0, 0}
+    { GUN_CACNINJA,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADSWORD,     S_NINJASABER,            -1,         -1,   8,  400,  900, 1, 1, 30, 0, -10,  36,  1,  25,   0, 0, 0}
 };
 
 static const struct guninfo { const char *name, *file, *vwep, *armedescFR, *armedescEN; int maxweapposside, maxweapposup, maxzoomfov, hudrange, attacks[NUMACTS]; } guns[NUMGUNS] =
@@ -541,22 +539,22 @@ enum {APT_SOLDAT = 0, APT_MEDECIN, APT_AMERICAIN, APT_NINJA, APT_VAMPIRE, APT_MA
 
 struct ability { const int manacost, duration, cooldown, snd; };
 static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt_vitesse; const char *apt_nomFR, *apt_nomEN; ability abilities[3];} aptitudes[NUMAPTS] =
-{
-    { 105,  105,  105,   950, "Soldat",     "Soldier",   { {0,     0,    0, S_NULL},  {0,      0,    0, S_NULL},     {0,     0,     0, S_NULL}  } },  // 0 APT_SOLDAT
-    {  90,  115,   95,   950, "Médecin",    "Medic",     { {0,     0,    0, S_NULL},  {0,      0,    0, S_NULL},     {0,     0,     0, S_NULL}  } },  // 1 APT_MEDECIN
-    { 100,  135,   80,  1300, "Américain",  "American",  { {0,     0,    0, S_NULL},  {0,      0,    0, S_NULL},     {0,     0,     0, S_NULL}  } },  // 2 APT_AMERICAIN
-    {  85,   90,   75,   750, "Ninja",      "Ninja",     { {0,     0,    0, S_NULL},  {0,      0,    0, S_NULL},     {0,     0,     0, S_NULL}  } },  // 3 APT_NINJA
-    { 110,   65,  110,   950, "Vampire",    "Vampire",   { {0,     0,    0, S_NULL},  {0,      0,    0, S_NULL},     {0,     0,     0, S_NULL}  } },  // 4 APT_VAMPIRE
-    { 100,   85,   90,  1000, "Magicien",   "Wizard",    { {30,  250, 2000, S_WIZ_1}, {40,  4000, 5000, S_WIZ_2},    {60, 3000,  6000, S_WIZ_3} } },  // 5 APT_MAGICIEN
-    { 100,  100,   70,   850, "Kamikaze",   "Kamikaze",  { {0,     0,    0, S_NULL},  {100, 5000, 5000, S_KAMIKAZE}, {0,     0,     0, S_NULL}  } },  // 6 APT_KAMIKAZE
-    { 120,   85,   90,  1050, "Faucheuse",  "Reaper",    { {0,     0,    0, S_NULL},  {0,      0,    0, S_NULL},     {0,     0,     0, S_NULL}  } },  // 7 APT_FAUCHEUSE
-    {  90,   85,   85,  1050, "Physicien",  "Physicist", { {45, 4000, 3000, S_PHY_1}, {50,  5000, 7000, S_PHY_2},    {65, 6000,  9000, S_PHY_3} } },  // 8 APT_PHYSICIEN
-    { 100,   60,  135,  1250, "Campeur",    "Camper",    { {0,     0,    0, S_NULL},  {0,      0,    0, S_NULL},     {0,     0,     0, S_NULL}  } },  // 9 APT_CAMPEUR
-    {  90,   85,  120,  1100, "Espion",     "Spy",       { {40, 4000, 7000, S_SPY_1}, {50,  7000, 7000, S_SPY_2},    {60, 5000, 10000, S_SPY_3} } },  // 10 APT_ESPION
-    {  85,  105,   85,   950, "Prêtre",     "Priest",    { {30, 4000, 8000, S_PRI_1}, {10,  8000, 8000, S_PRI_2},    {80, 4000, 10000, S_PRI_3} } },  // 11 APT_PRETRE
-    { 100,  120,   60,  1050, "Viking",     "Viking",    { {0,     0,    0, S_NULL},  {0,      0,    0, S_NULL},     {0,     0,     0, S_NULL}  } },  // 12 APT_VIKING
-    { 100,  110,   85,  1100, "Junkie",     "Junkie",    { {0,     0,    0, S_NULL},  {0,      0,    0, S_NULL},     {0,     0,     0, S_NULL}  } },  // 13 APT_JUNKIE
-    { 100,  100,   75,  1000, "Shoshone",   "Shoshone",  { {50, 7500, 7500, S_SHO_1}, {50,  7500, 7500, S_SHO_2},    {50, 7500,  7500, S_SHO_3} } }   // 14 APT_SHOSHONE
+{   // classe stats           // classe name               // ability 1               // ability 2                // ability 3
+    { 105,  105,  105,   950, "Soldat",     "Soldier",   { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 0 APT_SOLDAT
+    {  90,  115,   95,   950, "Médecin",    "Medic",     { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 1 APT_MEDECIN
+    { 100,  135,   80,  1300, "Américain",  "American",  { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 2 APT_AMERICAIN
+    {  85,   90,   75,   750, "Ninja",      "Ninja",     { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 3 APT_NINJA
+    { 110,   65,  110,   950, "Vampire",    "Vampire",   { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 4 APT_VAMPIRE
+    { 100,   85,   90,  1000, "Magicien",   "Wizard",    { {30,  250, 2000, S_WIZ_1}, {40,  4000, 5000, S_WIZ_2}, {60, 3000,  6000, S_WIZ_3} } },  // 5 APT_MAGICIEN
+    { 100,  100,   70,   850, "Kamikaze",   "Kamikaze",  { {0,     0,    0,      -1}, {100, 5000, 5000, S_TIMER}, {0,     0,     0,      -1} } },  // 6 APT_KAMIKAZE
+    { 120,   85,   90,  1050, "Faucheuse",  "Reaper",    { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 7 APT_FAUCHEUSE
+    {  90,   85,   85,  1050, "Physicien",  "Physicist", { {45, 4000, 3000, S_PHY_1}, {50,  5000, 7000, S_PHY_2}, {65, 6000,  9000, S_PHY_3} } },  // 8 APT_PHYSICIEN
+    { 100,   60,  135,  1250, "Campeur",    "Camper",    { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 9 APT_CAMPEUR
+    {  90,   85,  120,  1100, "Espion",     "Spy",       { {40, 4000, 7000, S_SPY_1}, {50,  7000, 7000, S_SPY_2}, {60, 5000, 10000, S_SPY_3} } },  // 10 APT_ESPION
+    {  85,  105,   85,   950, "Prêtre",     "Priest",    { {30, 4000, 8000, S_PRI_1}, {10,  8000, 8000, S_PRI_2}, {80, 4000, 10000, S_PRI_3} } },  // 11 APT_PRETRE
+    { 100,  120,   60,  1050, "Viking",     "Viking",    { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 12 APT_VIKING
+    { 100,  110,   85,  1100, "Junkie",     "Junkie",    { {0,     0,    0,     - 1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 13 APT_JUNKIE
+    { 100,  100,   75,  1000, "Shoshone",   "Shoshone",  { {50, 7500, 7500, S_SHO_1}, {50,  7500, 7500, S_SHO_2}, {50, 7500,  7500, S_SHO_3} } }   // 14 APT_SHOSHONE
 };
 
 static const struct costumeinfo { const char *entrainement_village_chateaux, *usine, *lune, *volcan; } costumes[4] =  //Needed for spy classe

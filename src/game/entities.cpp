@@ -304,7 +304,7 @@ namespace entities
                 {
                     respawnent = n;
                     conoutf(CON_GAMEINFO, GAME_LANG ? "\f2Respawn point set!" : "\f2Point de réapparition mis à jour !");
-                    playsound(S_NULL);
+                    //playsound(-1);
                 }
                 break;
 
@@ -524,7 +524,7 @@ namespace entities
                 if(newstate == TRIGGER_RESETTING && checktriggertype(e.attr2, TRIG_COLLIDE) && overlapsdynent(e.o, 20)) continue;
                 e.triggerstate = newstate;
                 e.lasttrigger = lastmillis;
-                if(checktriggertype(e.attr2, TRIG_RUMBLE)) playsound(S_NULL, &e.o);
+                //if(checktriggertype(e.attr2, TRIG_RUMBLE)) playsound(-1, &e.o);
             }
         }
     }
@@ -600,7 +600,7 @@ namespace entities
                     e.triggerstate = TRIGGERING;
                     e.lasttrigger = lastmillis;
                     setuptriggerflags(e);
-                    if(checktriggertype(e.attr2, TRIG_RUMBLE)) playsound(S_NULL, &e.o);
+                    //if(checktriggertype(e.attr2, TRIG_RUMBLE)) playsound(-1, &e.o);
                     if(checktriggertype(e.attr2, TRIG_ENDSP)) endsp();
                     if(e.attr1) doleveltrigger(e.attr1, 1);
                     break;
@@ -623,7 +623,7 @@ namespace entities
                     e.triggerstate = TRIGGER_RESETTING;
                     e.lasttrigger = lastmillis;
                     setuptriggerflags(e);
-                    if(checktriggertype(e.attr2, TRIG_RUMBLE)) playsound(S_NULL, &e.o);
+                    //if(checktriggertype(e.attr2, TRIG_RUMBLE)) playsound(-1, &e.o);
                     if(checktriggertype(e.attr2, TRIG_ENDSP)) endsp();
                     if(e.attr1) doleveltrigger(e.attr1, 0);
                     break;
