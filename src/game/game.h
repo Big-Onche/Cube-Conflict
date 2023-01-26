@@ -316,7 +316,7 @@ enum
     //npcs
     S_ALIEN_H, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D,
 
-    S_NULL,
+    S_NULL
 };
 
 // network messages codes, c2s, c2c, s2c
@@ -454,7 +454,7 @@ static struct itemstat { int add, max, sound; const char *name; int icon, info; 
     {1500,    1500, S_ITEMBMAGNET,  "BOUCLIER MAGNETIQUE", HICON_SIZE, A_MAGNET},
     {3000,    3000, S_ITEMARMOUR,   "ARMURE ASSISTEE",     HICON_SIZE, A_ASSIST},
     {50,       150, S_ITEMMANA,     "MANA",                HICON_SIZE},
-    {50,       150, S_ITEMHEALTH,   "CHAIN",               HICON_SIZE},
+    {50,       150, S_ITEMHEALTH,   "CHAIN",               HICON_SIZE}
 };
 
 #define MAXRAYS 25
@@ -496,7 +496,7 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, picks
     // Armes spéciales
     { GUN_KAMIKAZE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADFASTWOOSH, S_EXPL_KAMIKAZE, S_EXPL_FAR, S_EXPL_FAR,   1, 1000, 4000, 1, 1,  0, 1,  10, 120,  1, 250, 500, 5, 0},
     { GUN_ASSISTXPL,    ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADBIG,       S_EXPL_PARMOR,   S_EXPL_FAR, S_EXPL_FAR,   1,  220, 1500, 1, 1,  0, 1,  10,  50,  1, 100, 350, 5, 0},
-    { GUN_CACNINJA,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADSWORD,     S_NINJASABER,    S_NULL,     S_NULL,       8,  400,  900, 1, 1, 30, 0, -10,  36,  1,  25,   0, 0, 0},
+    { GUN_CACNINJA,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADSWORD,     S_NINJASABER,    S_NULL,     S_NULL,       8,  400,  900, 1, 1, 30, 0, -10,  36,  1,  25,   0, 0, 0}
 };
 
 static const struct guninfo { const char *name, *file, *vwep, *armedescFR, *armedescEN; int maxweapposside, maxweapposup, maxzoomfov, hudrange, attacks[NUMACTS]; } guns[NUMGUNS] =
@@ -533,39 +533,30 @@ static const struct guninfo { const char *name, *file, *vwep, *armedescFR, *arme
     // Armes spéciales aptitudes
     { "kamikaze",   "kamikaze",         "worldgun/kamikaze",        "une ceinture d'explosifs !",   "an explosives ISIS's made belt!",           4, 3, 95, 0,  { -1, ATK_KAMIKAZE_SHOOT }, },
     { "assistxpl",  "assistxpl",        "worldgun/assistxpl",       "une armure assistée !",        "powered combat armor!",                     4, 3, 95, 0,  { -1, ATK_ASSISTXPL_SHOOT }, },
-    { "sabre",      "armes_cac/sabre",  "worldgun/armes_cac/sabre", "un sabre de ninja !",          "a ninja saber!",                            4, 3, 95, 120,  { -1, ATK_CACNINJA_SHOOT }, },
+    { "sabre",      "armes_cac/sabre",  "worldgun/armes_cac/sabre", "un sabre de ninja !",          "a ninja saber!",                            4, 3, 95, 120,  { -1, ATK_CACNINJA_SHOOT }, }
 };
 
 //Définition des aptitudes
 enum {APT_SOLDAT = 0, APT_MEDECIN, APT_AMERICAIN, APT_NINJA, APT_VAMPIRE, APT_MAGICIEN, APT_KAMIKAZE, APT_FAUCHEUSE, APT_PHYSICIEN, APT_CAMPEUR, APT_ESPION, APT_PRETRE, APT_VIKING, APT_JUNKIE, APT_SHOSHONE, NUMAPTS};
 
-static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt_vitesse; const char *apt_nomFR, *apt_nomEN, *apt_logo; } aptitudes[NUMAPTS] =
+struct ability { const int manacost, duration, cooldown, snd; };
+static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt_vitesse; const char *apt_nomFR, *apt_nomEN; ability abilities[3];} aptitudes[NUMAPTS] =
 {
-    { 105,  105,  105,   950, "Soldat",       "Soldier"},       //0     APT_SOLDAT
-    {  90,  115,   95,   950, "Médecin",      "Medic"},         //1     APT_MEDECIN
-    { 100,  135,   80,  1300, "Américain",    "American"},      //2     APT_AMERICAIN
-    {  85,   90,   75,   750, "Ninja",        "Ninja"},         //3     APT_NINJA
-    { 110,   65,  110,   950, "Vampire",      "Vampire"},       //4     APT_VAMPIRE
-    { 100,   85,   90,  1000, "Magicien",     "Wizard"},        //5     APT_MAGICIEN
-    { 100,  100,   70,   850, "Kamikaze",     "Kamikaze"},      //6     APT_KAMIKAZE
-    { 120,   85,   90,  1050, "Faucheuse",    "Reaper"},        //7     APT_FAUCHEUSE
-    {  90,   85,   85,  1050, "Physicien",    "Physicist"},     //8     APT_PHYSICIEN
-    { 100,   60,  135,  1250, "Campeur",      "Camper"},        //9     APT_CAMPEUR
-    {  90,   85,  120,  1100, "Espion",       "Spy"},           //10    APT_ESPION
-    {  85,  105,   85,   950, "Prêtre",       "Priest"},        //11    APT_PRETRE
-    { 100,  120,   60,  1050, "Viking",       "Viking"},        //12    APT_VIKING
-    { 100,  110,   85,  1100, "Junkie",       "Junkie"},        //13    APT_JUNKIE
-    { 100,  100,   75,  1000, "Shoshone",     "Shoshone"},      //14    APT_SHOSHONE
-};
-
-static const struct aptisortsinfo { int mana1, mana2, mana3, duree1, duree2, duree3, reload1, reload2, reload3, sound1, sound2, sound3; } sorts[] =
-{
-    { 30, 40, 60,  250, 4000, 3000, 2000, 5000,  6000, S_WIZ_1, S_WIZ_2, S_WIZ_3},    // APT_MAGICIEN
-    { 45, 50, 65, 4000, 5000, 6000, 3000, 7000,  9000, S_PHY_1, S_PHY_2, S_PHY_3},    // APT_PHYSICIEN
-    { 30, 10, 80, 4000, 8000, 4000, 8000, 8000, 10000, S_PRI_1, S_PRI_2, S_PRI_3},    // APT_PRETRE
-    { 50, 50, 50, 7500, 7500, 7500, 7500, 7500,  7500, S_SHO_1, S_SHO_2, S_SHO_3},    // APT_SHOSHONE
-    { 40, 50, 60, 4000, 7000, 5000, 7000, 7000, 10000, S_SPY_1, S_SPY_2, S_SPY_3},    // APT_SPY
-    { 0, 100,  0,    0, 5000,    0,    0, 5000,     0, S_NULL, S_KAMIKAZE, S_NULL},   // APT_KAMIKAZE
+    { 105,  105,  105,   950, "Soldat",     "Soldier",   { {0,     0,    0, S_NULL},  {0,      0,    0, S_NULL},     {0,     0,     0, S_NULL}  } },  // 0 APT_SOLDAT
+    {  90,  115,   95,   950, "Médecin",    "Medic",     { {0,     0,    0, S_NULL},  {0,      0,    0, S_NULL},     {0,     0,     0, S_NULL}  } },  // 1 APT_MEDECIN
+    { 100,  135,   80,  1300, "Américain",  "American",  { {0,     0,    0, S_NULL},  {0,      0,    0, S_NULL},     {0,     0,     0, S_NULL}  } },  // 2 APT_AMERICAIN
+    {  85,   90,   75,   750, "Ninja",      "Ninja",     { {0,     0,    0, S_NULL},  {0,      0,    0, S_NULL},     {0,     0,     0, S_NULL}  } },  // 3 APT_NINJA
+    { 110,   65,  110,   950, "Vampire",    "Vampire",   { {0,     0,    0, S_NULL},  {0,      0,    0, S_NULL},     {0,     0,     0, S_NULL}  } },  // 4 APT_VAMPIRE
+    { 100,   85,   90,  1000, "Magicien",   "Wizard",    { {30,  250, 2000, S_WIZ_1}, {40,  4000, 5000, S_WIZ_2},    {60, 3000,  6000, S_WIZ_3} } },  // 5 APT_MAGICIEN
+    { 100,  100,   70,   850, "Kamikaze",   "Kamikaze",  { {0,     0,    0, S_NULL},  {100, 5000, 5000, S_KAMIKAZE}, {0,     0,     0, S_NULL}  } },  // 6 APT_KAMIKAZE
+    { 120,   85,   90,  1050, "Faucheuse",  "Reaper",    { {0,     0,    0, S_NULL},  {0,      0,    0, S_NULL},     {0,     0,     0, S_NULL}  } },  // 7 APT_FAUCHEUSE
+    {  90,   85,   85,  1050, "Physicien",  "Physicist", { {45, 4000, 3000, S_PHY_1}, {50,  5000, 7000, S_PHY_2},    {65, 6000,  9000, S_PHY_3} } },  // 8 APT_PHYSICIEN
+    { 100,   60,  135,  1250, "Campeur",    "Camper",    { {0,     0,    0, S_NULL},  {0,      0,    0, S_NULL},     {0,     0,     0, S_NULL}  } },  // 9 APT_CAMPEUR
+    {  90,   85,  120,  1100, "Espion",     "Spy",       { {40, 4000, 7000, S_SPY_1}, {50,  7000, 7000, S_SPY_2},    {60, 5000, 10000, S_SPY_3} } },  // 10 APT_ESPION
+    {  85,  105,   85,   950, "Prêtre",     "Priest",    { {30, 4000, 8000, S_PRI_1}, {10,  8000, 8000, S_PRI_2},    {80, 4000, 10000, S_PRI_3} } },  // 11 APT_PRETRE
+    { 100,  120,   60,  1050, "Viking",     "Viking",    { {0,     0,    0, S_NULL},  {0,      0,    0, S_NULL},     {0,     0,     0, S_NULL}  } },  // 12 APT_VIKING
+    { 100,  110,   85,  1100, "Junkie",     "Junkie",    { {0,     0,    0, S_NULL},  {0,      0,    0, S_NULL},     {0,     0,     0, S_NULL}  } },  // 13 APT_JUNKIE
+    { 100,  100,   75,  1000, "Shoshone",   "Shoshone",  { {50, 7500, 7500, S_SHO_1}, {50,  7500, 7500, S_SHO_2},    {50, 7500,  7500, S_SHO_3} } }   // 14 APT_SHOSHONE
 };
 
 static const struct costumeinfo { const char *entrainement_village_chateaux, *usine, *lune, *volcan; } costumes[4] =  //Needed for spy classe
@@ -573,7 +564,7 @@ static const struct costumeinfo { const char *entrainement_village_chateaux, *us
     {"mapmodel/caisses/caissebois", "mapmodel/caisses/caisse1",  "mapmodel/rochers/pierre_fonce_esp",   "mapmodel/distributeur"},
     {"mapmodel/tonneau",            "mapmodel/caisses/caisse2",  "mapmodel/caisses/caisse2",            "mapmodel/rochers/pierre_fonce_esp"},
     {"mapmodel/panneau",            "mapmodel/caisses/caisse3",  "mapmodel/caisses/caisse3",            "mapmodel/lampadaire"},
-    {"mapmodel/arbres/arbre1",      "mapmodel/murjersay",        "mapmodel/murjersay",                  "mapmodel/murjersay"},
+    {"mapmodel/arbres/arbre1",      "mapmodel/murjersay",        "mapmodel/murjersay",                  "mapmodel/murjersay"}
 };
 
 extern int abilitydata(int aptitude);

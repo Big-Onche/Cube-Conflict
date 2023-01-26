@@ -3234,17 +3234,6 @@ namespace server
         if(servermotd[0]) sendf(ci->clientnum, 1, "ris", N_SERVMSG, servermotd);
     }
 
-    bool validability(int ability, int aptitude, int mana) //server-sided abilities check
-    {
-        switch(ability)
-        {
-            case 1: if(mana < sorts[abilitydata(aptitude)].mana1) return false; break;
-            case 2: if(mana < sorts[abilitydata(aptitude)].mana2) return false; break;
-            case 3: if(mana < sorts[abilitydata(aptitude)].mana3) return false; break;
-        }
-        return true;
-    }
-
     void generrlog(clientinfo *ci)
     {
         logoutf("Net : ping %d, overflow %d | Abilities : classe %s, a1 %d, a2 %d, a3 %d | Boosts : rage %d, roids %d, epo %d, joint %d, shrooms %d | Other : health %d, mana %d",
@@ -3687,12 +3676,9 @@ namespace server
                 int ability = getint(p);
                 if(!cq) break;
 
-                int manacost = ability==game::ABILITY_1 ? sorts[abilitydata(cq->aptitude)].mana1 : ability==game::ABILITY_2 ? sorts[abilitydata(cq->aptitude)].mana2 : cq->state.mana < sorts[abilitydata(cq->aptitude)].mana3;
-                int duration = ability==game::ABILITY_1 ? sorts[abilitydata(cq->aptitude)].duree1 : ability==game::ABILITY_2 ? sorts[abilitydata(cq->aptitude)].duree2 : sorts[abilitydata(cq->aptitude)].duree3;
-
-                if(cq->state.mana < manacost) return;
-                cq->state.mana -= manacost;
-                cq->state.abilitymillis[ability] = duration;
+                if(cq->state.mana < aptitudes[cq->aptitude].abilities[ability].manacost) return;
+                cq->state.mana -= aptitudes[cq->aptitude].abilities[ability].manacost;
+                cq->state.abilitymillis[ability] = aptitudes[cq->aptitude].abilities[ability].duration;
                 loopv(clients) sendf(clients[i]->clientnum, 1, "ri4", N_GETABILITY, cq->clientnum, ability, cq->state.abilitymillis[ability]);
                 break;
             }

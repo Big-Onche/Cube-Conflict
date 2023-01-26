@@ -1695,8 +1695,7 @@ namespace game
                 gameent *pl = getclient(player);
                 int ability = getint(p);
                 pl->abilitymillis[ability] = getint(p);
-
-                ability==ABILITY_1 ? pl->mana-=sorts[abilitydata(pl->aptitude)].mana1 : ability==ABILITY_2 ? pl->mana-=sorts[abilitydata(pl->aptitude)].mana2 : pl->mana-=sorts[abilitydata(pl->aptitude)].mana3;
+                pl->mana-=aptitudes[pl->aptitude].abilities[ability].manacost;
                 aptitude(pl, ability, false);
                 break;
             }

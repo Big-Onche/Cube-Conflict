@@ -331,35 +331,20 @@ namespace game
                 decal_icon += 130;
             }
 
-            float positionsorts = 0.5f*(w - 100);
+            float abbilityiconpos = (0.5f*(w-270));
 
-            defformatstring(logodir, "media/interface/hud/abilities/%s_1.png", aptitudes[player1->aptitude].apt_nomEN);
-
-            if(player1->aptitude!=APT_KAMIKAZE)
+            loopi(NUMABILITIES)
             {
-                if(d->abilitymillis[ABILITY_1]) gle::colorf(2, 2, 2, 1);
-                else if(d->mana<sorts[abilitydata(d->aptitude)].mana1 || !d->abilityready[ABILITY_1]) gle::colorf(0.2, 0.2, 0.2, 1);
+                defformatstring(logodir, "media/interface/hud/abilities/%d_%d.png", hudplayer()->aptitude, i);
+                if(hudplayer()->aptitude==APT_KAMIKAZE && i!=1) continue;
+                if(d->abilitymillis[i]) gle::colorf(2, 2, 2, 1);
+                else if(d->mana<aptitudes[d->aptitude].abilities[i].manacost || !d->abilityready[i]) gle::colorf(0.2, 0.2, 0.2, 1);
                 else gle::colorf(1, 1, 1, 1);
                 settexture(logodir, 3);
-                bgquad(positionsorts-85, h-114, 100, 100);
+                bgquad(abbilityiconpos, h-114, 100, 100);
                 gle::colorf(1, 1, 1, 1);
-
-                if(d->abilitymillis[ABILITY_3]) gle::colorf(2, 2, 2, 1);
-                else if(d->mana<sorts[abilitydata(d->aptitude)].mana3 || !d->abilityready[ABILITY_3]) gle::colorf(0.2, 0.2, 0.2, 1);
-                else gle::colorf(1, 1, 1, 1);
-                formatstring(logodir, "media/interface/hud/abilities/%s_3.png", aptitudes[player1->aptitude].apt_nomEN);
-                settexture(logodir, 3);
-                bgquad(positionsorts+85, h-114, 100, 100);
-                gle::colorf(1, 1, 1, 1);
+                abbilityiconpos+=85;
             }
-
-            if(d->abilitymillis[ABILITY_2]) gle::colorf(2, 2, 2, 1);
-            else if(d->mana<sorts[abilitydata(d->aptitude)].mana2 || !d->abilityready[ABILITY_2]) gle::colorf(0.2, 0.2, 0.2, 1);
-            else gle::colorf(1, 1, 1, 1);
-            formatstring(logodir, "media/interface/hud/abilities/%s_2.png", aptitudes[player1->aptitude].apt_nomEN);
-            settexture(logodir, 3);
-            bgquad(positionsorts, h-114, 100, 100);
-            gle::colorf(1, 1, 1, 1);
         }
 
         if(player1->ragemillis)                 {settexture("media/interface/hud/rage.png"); bgquad(15, h-260, 115, 115); decal_icon += 130;}

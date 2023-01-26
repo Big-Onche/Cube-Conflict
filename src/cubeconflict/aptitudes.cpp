@@ -4,6 +4,7 @@
 #include "gfx.h"
 #include "stats.h"
 
+enum {WIZ_ABILITIES = 0, PHY_ABILITIES, PRI_ABILITIES, SPY_ABILITIES, SHO_ABILITIES, KAM_ABILITIES};
 int abilitydata(int aptitude)
 {
     switch(aptitude)
@@ -21,6 +22,9 @@ int getspyability;
 
 namespace game
 {
+
+    ICOMMAND(getabi, "ii", (int *classe, int *ability), conoutf("Manacost: %d Duration: %d Cooldown: %d Classe: %s", aptitudes[*classe].abilities[*ability].manacost, aptitudes[*classe].abilities[*ability].duration, aptitudes[*classe].abilities[*ability].cooldown, aptitudes[*classe].apt_nomFR););
+
     bool canlaunchability(gameent *d, int ability)
     {
         if(d->state==CS_DEAD || !isconnected() || gfx::forcecampos>=0 || intermission || premission || (ability<ABILITY_1 && ability>ABILITY_3)) return false;
@@ -33,8 +37,7 @@ namespace game
 
         if(request) //player is requesting ability
         {
-            int neededmana = ability==ABILITY_1 ? sorts[abilitydata(d->aptitude)].mana1 : ability==ABILITY_2 ? sorts[abilitydata(d->aptitude)].mana2 : sorts[abilitydata(d->aptitude)].mana3;
-            if(!d->abilityready[ability] || d->mana < neededmana) {if(d==hudplayer())playsound(S_SORTIMPOSSIBLE); return; } //second check (client sided)
+            if(!d->abilityready[ability] || d->mana < aptitudes[d->aptitude].abilities[ability].manacost) {if(d==hudplayer())playsound(S_SORTIMPOSSIBLE); return; } //second check (client sided)
             addmsg(N_REQABILITY, "rci", d, ability); //third check (server sided)
             return; //can stop after this, cuz server call this func with !request
         }
@@ -61,15 +64,15 @@ namespace game
                     soundpos.add(vec(posx, posy, 0));
                 }
 
-                d->abi1chan = playsound(sorts[abilitydata(d->aptitude)].sound1, &soundpos, NULL, 0, 0, 100, d->abi1chan, 225);
-                d->abi1snd = sorts[abilitydata(d->aptitude)].sound1;
+                d->abi1chan = playsound(aptitudes[d->aptitude].abilities[ability].snd, &soundpos, NULL, 0, 0, 100, d->abi1chan, 225);
+                d->abi1snd = aptitudes[d->aptitude].abilities[ability].snd;
             }
             break;
 
             case ABILITY_2:
             {
-                d->abi2chan = playsound(sorts[abilitydata(d->aptitude)].sound2, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->abi2chan, 275);
-                d->abi2snd = sorts[abilitydata(d->aptitude)].sound2;
+                d->abi2chan = playsound(aptitudes[d->aptitude].abilities[ability].snd, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->abi2chan, 275);
+                d->abi2snd = aptitudes[d->aptitude].abilities[ability].snd;
 
                 if(d->aptitude==APT_ESPION)
                 {
@@ -81,8 +84,8 @@ namespace game
 
             case ABILITY_3:
             {
-                d->abi3chan = playsound(sorts[abilitydata(d->aptitude)].sound3, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->abi3chan, 275);
-                d->abi3snd = sorts[abilitydata(d->aptitude)].sound3;
+                d->abi3chan = playsound(aptitudes[d->aptitude].abilities[ability].snd, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->abi3chan, 275);
+                d->abi3snd = aptitudes[d->aptitude].abilities[ability].snd;
 
                 if(d->aptitude==APT_ESPION) particle_fireball(d->o, 1000, PART_RADAR, 1000, 0xAAAAAA, 20.f);
 
@@ -106,8 +109,7 @@ namespace game
     {
         loopi(NUMABILITIES)
         {
-            int abilityreload = i==ABILITY_1 ? sorts[abilitydata(d->aptitude)].reload1 : i==ABILITY_2 ? sorts[abilitydata(d->aptitude)].reload2 : sorts[abilitydata(d->aptitude)].reload3;
-            if(totalmillis-d->lastability[i] >= abilityreload && !d->abilityready[i])
+            if(totalmillis-d->lastability[i] >= aptitudes[d->aptitude].abilities[i].cooldown && !d->abilityready[i])
             {
                 if(d==hudplayer()) playsound(S_SORTPRET);
                 d->abilityready[i] = true;
