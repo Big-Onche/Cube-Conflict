@@ -6,10 +6,10 @@ VARP(grassdist, 0, 256, 10000);
 FVARP(grasstaper, 0, 0.3, 1);
 FVARP(grassstep, 0.5, 2, 8);
 VAR(grassheight, 1, 7, 64);
-VARP(grassmargin, 0, 32, 32);
+VARP(grassmargin, 0, 4, 32);
 FVAR(grassmarginfade, 0, 0, 1);
 
-#define NUMGRASSWEDGES 9
+#define NUMGRASSWEDGES 7
 
 static struct grasswedge
 {
@@ -31,7 +31,7 @@ static struct grasswedge
         vertbounds = bvec4(vertbound1.x, vertbound1.y, vertbound2.x, vertbound2.y);
         vertbounds.flip();
     }
-} grasswedges[NUMGRASSWEDGES] = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+} grasswedges[NUMGRASSWEDGES] = { 0, 1, 2, 3, 4, 5, 6 };
 
 struct grassvert
 {
@@ -45,7 +45,7 @@ static vector<grassvert> grassverts;
 static GLuint grassvbo = 0;
 static int grassvbosize = 0;
 
-VAR(maxgrass, 10, 20000, 20000);
+#define MAXGRASS 131072
 
 struct grassgroup
 {
@@ -160,7 +160,7 @@ static void gengrassquads(grassgroup *&group, const grasswedge &w, const grasstr
             p2.sub(vec(across).mul(rightb - grassmargin));
         }
 
-        if(grassverts.length() >= 4*maxgrass) break;
+        if(grassverts.length() >= MAXGRASS) break;
 
         if(!group)
         {
