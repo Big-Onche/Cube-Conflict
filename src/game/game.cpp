@@ -287,10 +287,13 @@ namespace game
                 if(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION) updatespecials(d);
             }
 
-            if(d==hudplayer() && d->state==CS_ALIVE && isconnected())
+            if(isconnected() && !editmode)
             {
-                if(d->armour<=1000 && d->armourtype==A_ASSIST && d->armour>0) d->alarmchan = playsound(S_ASSISTALARM, NULL, NULL, 0, -1, 1000, d->alarmchan);
-                else d->stoppowerarmorsound();
+                if(d->state==CS_ALIVE)
+                {
+                    if(d->armour<=1000 && d->armourtype==A_ASSIST && d->armour>0) d->alarmchan = playsound(S_ASSISTALARM, d==hudplayer() ? NULL : &d->o, NULL, 0, -1, 500, d->alarmchan, 250);
+                    else d->stoppowerarmorsound();
+                }
             }
 
             if(d == player1 || d->ai) continue;
@@ -368,6 +371,9 @@ namespace game
             if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION) updatespecials(player1);
         }
         else if (player1->state == CS_DEAD) isalive = 0;
+
+        if(lookupmaterial(camera1->o)==MAT_WATER)  hudplayer()->waterchan = playsound(S_UNDERWATER, NULL, NULL, 0, -1, 100, hudplayer()->waterchan);
+        else hudplayer()->stopunderwatersound();
 
         updateweapons(curtime);
         otherplayers(curtime);

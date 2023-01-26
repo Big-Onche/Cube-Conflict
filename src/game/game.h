@@ -244,7 +244,7 @@ enum
 {
     // player movements sounds
     S_JUMP_BASIC = 0, S_JUMP_NINJA, S_JUMP_ASSIST, S_LAND_BASIC, S_LAND_ASSIST, S_FOOTSTEP,     // 0-5
-    S_FOOTSTEP_ASSIST, S_SWIM, S_SPLASH, S_WATER, S_JUMPPAD,                                    // 6-10
+    S_FOOTSTEP_ASSIST, S_SWIM, S_SPLASH, S_WATER, S_UNDERWATER, S_JUMPPAD,                      // 6-10
     S_TELEPORT, S_SPLASH_LAVA, S_DIE_P1, S_DIE,                                                 // 11-12
 
     // close weapon shoot sounds
@@ -860,7 +860,7 @@ struct gameent : dynent, gamestate
     int lastpain;
     int lastaction, lastattack;
     int attacking, gunaccel;
-    int lastfootstep, attacksound, attackchan, dansesound, dansechan, alarmchan;
+    int lastfootstep, attacksound, attackchan, dansesound, dansechan, alarmchan, waterchan;
     int lasttaunt;
     int lastpickup, lastpickupmillis, flagpickup, lastbase, lastrepammo;
     int killstreak, frags, flags, deaths, totaldamage, totalshots;
@@ -930,6 +930,12 @@ struct gameent : dynent, gamestate
     {
         if(alarmchan >= 0) { stopsound(S_ASSISTALARM, alarmchan, 100); alarmchan = -1; }
     }
+
+    void stopunderwatersound()
+    {
+        if(waterchan >= 0) { stopsound(S_UNDERWATER, waterchan, 200); waterchan = -1; }
+    }
+
 
     void respawn()
     {
