@@ -3214,7 +3214,6 @@ void writecfg(const char *name)
     f->printf(GAME_LANG ? "// Saved game settings.\n\n" : "// Sauvegarde de la configuration du jeu.\n\n");
     game::writeclientinfo(f);
     f->printf("\n");
-    writecrosshairs(f);
     vector<ident *> ids;
     enumerate(idents, ident, id, ids.add(&id));
     ids.sortname();
@@ -3236,15 +3235,11 @@ void writecfg(const char *name)
         ident &id = *ids[i];
         if(id.type==ID_ALIAS && id.flags&IDF_PERSIST && !(id.flags&IDF_OVERRIDDEN)) switch(id.valtype)
         {
-        case VAL_STR:
-            if(!id.val.s[0]) break;
-            if(!validateblock(id.val.s)) { f->printf("%s = %s\n", escapeid(id), escapestring(id.val.s)); break; }
         case VAL_FLOAT:
         case VAL_INT:
             f->printf("%s = [%s]\n", escapeid(id), id.getstr()); break;
         }
     }
-    f->printf("\n");
     writecompletions(f);
     delete f;
 }

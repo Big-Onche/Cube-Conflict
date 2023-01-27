@@ -1223,18 +1223,39 @@ void entset(char *what, int *a1, int *a2, int *a3, int *a4, int *a5)
                   e.attr5=*a5);
 }
 
-#if 0
-void mmrepair() //used to repair my old mess
+
+void mmswap(int m1, int m2) // mapmodels swapping
 {
     const vector<extentity *> &ents = entities::getents();
+    int numswaps = 0;
     loopv(ents)
     {
         const extentity &e = *ents[i];
-        if(e.type==ET_MAPMODEL) mpeditent(i, e.o, ET_MAPMODEL, e.attr2, e.attr1, e.attr3, e.attr5, e.attr4, true);
+        if(e.type==ET_MAPMODEL)
+        {
+            if(e.attr1==m1) { mpeditent(i, e.o, ET_MAPMODEL, m2, e.attr2, e.attr3, e.attr4, e.attr5, true); numswaps++; }
+        }
     }
+    conoutf("swapped %d models (%d - %d)", numswaps, m1, m2);
 }
-COMMAND(mmrepair, "");
-#endif
+ICOMMAND(mmswap, "ii", (int *m1, int *m2), mmswap(*m1, *m2));
+
+void mmpush(int from, int to) // mapmodels ID pushing
+{
+    const vector<extentity *> &ents = entities::getents();
+    int numpush = 0;
+    loopv(ents)
+    {
+        const extentity &e = *ents[i];
+        if(e.type==ET_MAPMODEL)
+        {
+            if(e.attr1>=from) { mpeditent(i, e.o, ET_MAPMODEL, e.attr1+to, e.attr2, e.attr3, e.attr4, e.attr5, true); numpush++; }
+        }
+    }
+    conoutf("pushed %d models (from %d to %d)", numpush, from, to);
+}
+ICOMMAND(mmpush, "ii", (int *from, int *to), mmpush(*from, *to));
+
 
 void printent(extentity &e, char *buf, int len)
 {
