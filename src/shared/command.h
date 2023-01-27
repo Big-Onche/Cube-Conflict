@@ -188,11 +188,7 @@ struct ident
         val = v.val;
     }
 
-    void forcenull()
-    {
-        if(valtype==VAL_STR) delete[] val.s;
-        valtype = VAL_NULL;
-    }
+    void forcenull();
 
     float getfloat() const;
     int getint() const;
@@ -407,4 +403,3 @@ inline void ident::getcval(tagval &v) const
 #define ICOMMANDN(name, cmdname, nargs, proto, b) ICOMMANDNS(#name, cmdname, nargs, proto, b)
 #define ICOMMAND(name, nargs, proto, b) ICOMMANDN(name, ICOMMANDNAME(name), nargs, proto, b)
 #define ICOMMANDS(name, nargs, proto, b) ICOMMANDNS(name, ICOMMANDSNAME, nargs, proto, b)
-
