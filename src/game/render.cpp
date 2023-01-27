@@ -234,13 +234,7 @@ namespace game
 
         loopi(13) preloadmodel(customstombes[i].tombedir); //Preloading all graves
 
-        loopi(4) //Preloading all spy's disguisement
-        {
-            preloadmodel(costumes[i].entrainement_village_chateaux);
-            preloadmodel(costumes[i].usine);
-            preloadmodel(costumes[i].lune);
-            preloadmodel(costumes[i].volcan);
-        }
+        loopi(4) gfx::getdisguisement(i); //Preloading all spy's disguisement
 
         preloadmodel("smileys/armureassistee"); //Preloading powered armor playermodel
         preloadmodel("smileys/armureassistee/red");
@@ -428,18 +422,7 @@ namespace game
 
         if(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2])
         {
-            switch(map_sel)
-            {
-                case 0: case 1: case 4:
-                    copystring(costumemdlname, costumes[d->aptiseed].entrainement_village_chateaux);
-                    break;
-                case 2: copystring(costumemdlname, costumes[d->aptiseed].usine); break;
-                case 3: copystring(costumemdlname, costumes[d->aptiseed].lune); break;
-                case 5: copystring(costumemdlname, costumes[d->aptiseed].volcan); break;
-            }
-
-            rendermodel(costumemdlname, anim, o, yaw, d->pitch>12 ? 12 : d->pitch<-25 ? -25 : pitch, 0, flags, d, NULL, basetime, 0, fade, vec4(vec::hexcolor(color), 1.0f));
-
+            rendermodel(gfx::getdisguisement(d->aptiseed), anim, o, yaw, d->pitch>12 ? 12 : d->pitch<-25 ? -25 : pitch, 0, flags, d, NULL, basetime, 0, fade, vec4(vec::hexcolor(color), 1.0f));
             return;
         }
 

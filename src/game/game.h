@@ -557,16 +557,6 @@ static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precisio
     { 100,  100,   75,  1000, "Shoshone",   "Shoshone",  { {50, 7500, 7500, S_SHO_1}, {50,  7500, 7500, S_SHO_2}, {50, 7500,  7500, S_SHO_3} } }   // 14 APT_SHOSHONE
 };
 
-static const struct costumeinfo { const char *entrainement_village_chateaux, *usine, *lune, *volcan; } costumes[4] =  //Needed for spy classe
-{
-    {"mapmodel/caisses/caissebois", "mapmodel/caisses/caisse1",  "mapmodel/rochers/pierre_fonce_esp",   "mapmodel/distributeur"},
-    {"mapmodel/tonneau",            "mapmodel/caisses/caisse2",  "mapmodel/caisses/caisse2",            "mapmodel/rochers/pierre_fonce_esp"},
-    {"mapmodel/panneau",            "mapmodel/caisses/caisse3",  "mapmodel/caisses/caisse3",            "mapmodel/lampadaire"},
-    {"mapmodel/arbres/arbre1",      "mapmodel/murjersay",        "mapmodel/murjersay",                  "mapmodel/murjersay"}
-};
-
-extern int abilitydata(int aptitude);
-
 #include "ai.h"
 
 // inherited by gameent and server clients

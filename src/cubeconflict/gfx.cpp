@@ -19,6 +19,7 @@ namespace gfx
     void projgunexplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk) //particles and light effects on impact for slow projectiles
     {
         vec lightloc = vec(v).sub(vec(vel).mul(10));
+
         switch(atk)
         {
             case ATK_PULSE_SHOOT:
@@ -304,5 +305,15 @@ namespace gfx
                 break;
         }
         return bouclier;
+    }
+
+    string mdldir = "";
+    char *getdisguisement(int seed)
+    {
+        defformatstring(alias, "disguise_%d", seed);
+        const char *name = getalias(alias);
+        if(seed<0 || seed>3) name = "mapmodel/caisses/caissebois";
+        formatstring(mdldir, "%s", name);
+        return mdldir;
     }
 }
