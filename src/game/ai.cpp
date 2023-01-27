@@ -151,14 +151,8 @@ namespace ai
 
         if(e->aptitude==APT_ESPION && e->abilitymillis[ABILITY_1] && randomevent(2))
         {
-            int posx = 25, posy = 25;
-            switch(e->aptiseed)
-            {
-                 case 1: posx=-25; posy=-25; break;
-                 case 2: posx=25; posy=-25; break;
-                 case 3: posx=-25; posy=25; break;
-            }
-            o.add(vec(posx, posy, 0));
+            const int positions[4][2] = { {25, 25}, {-25, -25}, {25, -25}, {-25, 25} };
+            o.add(vec(positions[d->aptiseed][0], positions[d->aptiseed][1], 0));
         }
         switch(atk)
         {

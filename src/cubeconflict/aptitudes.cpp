@@ -16,7 +16,21 @@ namespace game
 
     void abilityeffect(gameent *d, int ability)
     {
-        switch(ability)
+        vec sndpos = d->o;
+        bool nullsndpos = d==hudplayer();
+
+        if(d->aptitude==APT_ESPION && ability==ABILITY_1) //for spy's ability 1, we play the sound at the decoy's position
+        {
+            const int positions[4][2] = { {25, 25}, {-25, -25}, {25, -25}, {-25, 25} };
+            sndpos.add(vec(positions[d->aptiseed][0], positions[d->aptiseed][1], 0));
+            nullsndpos = false;
+        }
+
+        playsound(S_SORTLANCE, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
+        d->abichan[ability] = playsound(aptitudes[d->aptitude].abilities[ability].snd, nullsndpos ? NULL : &sndpos, NULL, 0, 0, 100, d->abichan[ability], 225);
+        d->abisnd[ability] = aptitudes[d->aptitude].abilities[ability].snd;
+
+        switch(ability) //here we play some one shot gfx effects
         {
             //case ABILITY_1:
             //break;
@@ -31,12 +45,14 @@ namespace game
 
             case ABILITY_3:
             {
-                if(d->aptitude==APT_ESPION) particle_fireball(d->o, 1000, PART_RADAR, 1000, 0xAAAAAA, 20.f);
-
-                if(isteam(player1->team, d->team) && d->aptitude==APT_ESPION && d!=player1)
+                if(d->aptitude==APT_ESPION)
                 {
-                    getspyability = totalmillis;
-                    playsound(S_SPY_3);
+                    particle_fireball(d->o, 1000, PART_RADAR, 1000, 0xAAAAAA, 20.f);
+                    if(isteam(hudplayer()->team, d->team))
+                    {
+                        getspyability = totalmillis;
+                        playsound(S_SPY_3, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 0, -1, 4000);
+                    }
                 }
             }
         }
@@ -54,12 +70,9 @@ namespace game
         }
 
         //if all good, we let the ability begin
-        d->abilityready[ability] = false; d->lastability[ability] = totalmillis;
-        playsound(S_SORTLANCE, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
+        d->abilityready[ability] = false;
+        d->lastability[ability] = totalmillis;
         if(d==player1) addstat(1, STAT_ABILITES);
-
-        d->abichan[ability] = playsound(aptitudes[d->aptitude].abilities[ability].snd, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 100, d->abichan[ability], 225);
-        d->abisnd[ability] = aptitudes[d->aptitude].abilities[ability].snd;
 
         abilityeffect(d, ability);
     }
