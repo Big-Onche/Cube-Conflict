@@ -283,28 +283,26 @@ namespace gfx
         fullbrightmodels = 0;
     }
 
-    string bouclier = "";
+    static const struct armourinfo { int armoursteps; const char *armournames;} armours[] = { { 150, "wood/"}, { 250, "iron/"}, { 400, "gold/"}, { 300, "magnet/"}, { 600, "power/"} };
+
+    string shielddir = "";
     char *getshielddir(int armourtype, int armourval, bool hud, bool preload) //récupère l'id d'un bouclier
     {
-        switch(armourtype)
+        int armourvaldir = 20;
+
+        if(!preload)
         {
-            case A_BLUE:
-                formatstring(bouclier, "%s%s%d", hud ? "hudshield/" : "shields/", "wood/", preload ? armourval : armourval<150 ? 20 : armourval<300 ? 40 : armourval<450 ? 60 : armourval<600  ? 80 : 100);
-                break;
-            case A_GREEN:
-                formatstring(bouclier, "%s%s%d", hud ? "hudshield/" : "shields/", "iron/", preload ? armourval : armourval<250 ? 20 : armourval<500 ? 40 : armourval<750 ? 60 : armourval<1000 ? 80 : 100);
-                break;
-            case A_MAGNET:
-                formatstring(bouclier, "%s%s%d", hud ? "hudshield/" : "shields/", "magnet/", preload ? armourval : armourval<300 ? 20 : armourval<600 ? 40 : armourval<900 ? 60 : armourval<1200 ? 80 : 100);
-                break;
-            case A_YELLOW:
-                formatstring(bouclier, "%s%s%d", hud ? "hudshield/" : "shields/", "gold/", preload ? armourval : armourval<400 ? 20 : armourval<800 ? 40 : armourval<1200 ? 60 : armourval<1600 ? 80 : 100);
-                break;
-            case A_ASSIST:
-                formatstring(bouclier, "%s%d", "hudshield/power/", preload ? armourval : armourval<600 ? 20 : armourval<1200 ? 40 : armourval<1800 ? 60 : armourval<2400 ? 80 : 100);
-                break;
+            loopi(4)
+            {
+                if(armourval < armours[armourtype].armoursteps) break;
+                armourval -= armours[armourtype].armoursteps;
+                armourvaldir += 20;
+            }
         }
-        return bouclier;
+
+        if(armourtype==A_ASSIST && hud) formatstring(shielddir, "%s%d", "hudshield/power/", preload ? armourval : armourvaldir);
+        else if(armourtype!=A_ASSIST) formatstring(shielddir, "%s%s%d", hud ? "hudshield/" : "shields/", armours[armourtype].armournames, preload ? armourval : armourvaldir);
+        return shielddir;
     }
 
     string mdldir = "";

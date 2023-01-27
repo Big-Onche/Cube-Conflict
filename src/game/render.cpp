@@ -209,15 +209,15 @@ namespace game
 
     void preloadplayermodel()
     {
-        int loadshield = 1;
+        int value = 1;
         loopi(5) //Preloading all shields
         {
             loopi(5)
             {
-                preloadmodel(gfx::getshielddir(i, 20*(loadshield), false, true));
-                preloadmodel(gfx::getshielddir(i, 20*(loadshield), true, true));
+                preloadmodel(gfx::getshielddir(i, 20*value, false, true));
+                preloadmodel(gfx::getshielddir(i, 20*value, true, true));
             }
-            loadshield++;
+            value++;
         }
 
         loopi(14) //Preloading all capes
