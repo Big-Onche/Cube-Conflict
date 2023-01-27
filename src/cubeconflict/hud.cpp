@@ -369,7 +369,7 @@ namespace game
         {
             float pour1 = ((gameent *)o)->health, pour2 = ((gameent *)o)->health > ((gameent *)o)->maxhealth ? ((gameent *)o)->health : ((gameent *)o)->maxhealth;
             float pourcents2 = (pour1/pour2);
-            float pour3 = ((gameent *)o)->armour, pour4 = ((gameent *)o)->armourtype == A_BLUE ? 750.f : ((gameent *)o)->armourtype == A_GREEN ? 1250.f : ((gameent *)o)->armourtype == A_MAGNET ? 1500.f : ((gameent *)o)->armourtype == A_YELLOW ? 2000.f : 3000.f;
+            float pour3 = ((gameent *)o)->armour, pour4 = ((gfx::armours[((gameent *)o)->armourtype].armoursteps)*5.f) + (((gameent *)o)->aptitude==APT_SOLDAT ? (((gameent *)o)->armourtype+1)*250.f : 0);
             float pourcents3 = (pour3/pour4);
 
             float lxhbarvide = 0.5f*(w - 483), lxhbarpleine = 0.5f*(w - 477);
