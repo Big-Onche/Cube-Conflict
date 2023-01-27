@@ -4,27 +4,10 @@
 #include "gfx.h"
 #include "stats.h"
 
-enum {WIZ_ABILITIES = 0, PHY_ABILITIES, PRI_ABILITIES, SPY_ABILITIES, SHO_ABILITIES, KAM_ABILITIES};
-int abilitydata(int aptitude)
-{
-    switch(aptitude)
-    {
-        case APT_PHYSICIEN: return 1;
-        case APT_PRETRE:    return 2;
-        case APT_SHOSHONE:  return 3;
-        case APT_ESPION:    return 4;
-        case APT_KAMIKAZE:  return 5;
-        default: return 0; //APT_MAGICIEN
-    }
-}
-
 int getspyability;
 
 namespace game
 {
-
-    ICOMMAND(getabi, "ii", (int *classe, int *ability), conoutf("Manacost: %d Duration: %d Cooldown: %d Classe: %s", aptitudes[*classe].abilities[*ability].manacost, aptitudes[*classe].abilities[*ability].duration, aptitudes[*classe].abilities[*ability].cooldown, aptitudes[*classe].apt_nomFR););
-
     bool canlaunchability(gameent *d, int ability)
     {
         if(d->state==CS_DEAD || !isconnected() || gfx::forcecampos>=0 || intermission || premission || (ability<ABILITY_1 && ability>ABILITY_3)) return false;
