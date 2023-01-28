@@ -9,7 +9,7 @@ VAR(grassheight, 1, 7, 64);
 VARP(grassmargin, 0, 4, 32);
 FVAR(grassmarginfade, 0, 0, 1);
 
-#define NUMGRASSWEDGES 7
+#define NUMGRASSWEDGES 8
 
 static struct grasswedge
 {
@@ -31,7 +31,7 @@ static struct grasswedge
         vertbounds = bvec4(vertbound1.x, vertbound1.y, vertbound2.x, vertbound2.y);
         vertbounds.flip();
     }
-} grasswedges[NUMGRASSWEDGES] = { 0, 1, 2, 3, 4, 5, 6 };
+} grasswedges[NUMGRASSWEDGES] = { 0, 1, 2, 3, 4, 5, 6, 7 };
 
 struct grassvert
 {
