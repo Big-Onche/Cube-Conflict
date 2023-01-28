@@ -1896,7 +1896,7 @@ FVAR(smbias, -1e6f, 0.01f, 1e6f);
 FVAR(smpolyfactor2, -1e3f, 1.5f, 1e3f);
 FVAR(smpolyoffset2, -1e3f, 0, 1e3f);
 FVAR(smbias2, -1e6f, 0.02f, 1e6f);
-FVAR(smprec, 1e-3f, 1, 1e3f);
+FVAR(smprec, 1e-3f, 1.5f, 1e3f);
 FVAR(smcubeprec, 1e-3f, 1, 1e3f);
 FVAR(smspotprec, 1e-3f, 1, 1e3f);
 
@@ -1912,7 +1912,7 @@ VAR(smmaxsize, 1, 384, 1024);
 VAR(smused, 1, 0, 0);
 VAR(smquery, 0, 1, 1);
 VARF(smcullside, 0, 1, 1, cleanupshadowatlas());
-VARF(smcache, 0, 1, 2, cleanupshadowatlas());
+VARF(smcache, 0, 2, 2, cleanupshadowatlas());
 VARFP(smfilter, 0, 2, 3, { cleardeferredlightshaders(); cleanupshadowatlas(); cleanupvolumetric(); });
 VARFP(smgather, 0, 0, 1, { cleardeferredlightshaders(); cleanupshadowatlas(); cleanupvolumetric(); });
 VARP(smnoshadow, 0, 0, 1);
