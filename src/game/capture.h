@@ -391,7 +391,7 @@ struct captureclientmode : clientmode
                 abovemodel(height, ammoname);
                 vec ammopos(b.ammopos);
                 ammopos.z -= height.z/2 + sinf(lastmillis/100.0f)/20;
-                rendermodel(ammoname, ANIM_MAPMODEL|ANIM_LOOP, ammopos, lastmillis/10.0f, 0, 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED);
+                rendermodel(ammoname, ANIM_MAPMODEL|ANIM_LOOP, ammopos, lastmillis/10.0f, 0, 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_FORCESHADOW);
             }
 
             int tcolor = 0x888888, mtype = -1, mcolor = 0xFFFFFF, mcolor2 = 0;

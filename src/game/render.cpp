@@ -295,6 +295,8 @@ namespace game
         ANIM_LEFT,  ANIM_BACKWARD,  ANIM_RIGHT
     };
 
+    bool haspowerarmor(gameent *d) { return d->armour && d->armourtype==A_ASSIST; }
+
     void renderplayer(gameent *d, const playermodelinfo &mdl, int color, int team, float fade, int flags = 0, bool mainpass = true)
     {
         int anim = ANIM_IDLE|ANIM_LOOP, lastaction = d->lastaction;
@@ -304,9 +306,14 @@ namespace game
         vec o = d->feetpos();
         int basetime = 0;
         if(animoverride) anim = (animoverride<0 ? ANIM_ALL : animoverride)|ANIM_LOOP;
-        const char *mdlname = m_tutorial || d==player1 ? mdl.model[1] :
-                              d->armourtype==A_ASSIST && d->armour>0 ? validteam(team) ? d->team==player1->team ? "smileys/armureassistee" : "smileys/armureassistee/red" : "smileys/armureassistee/red" :
-                              d->abilitymillis[ABILITY_2] && d->aptitude==APT_PHYSICIEN ? "smileys/phy_2" : mdl.model[validteam(team) ? d->team==player1->team ? 1 : 2 : 0];
+
+        const char *mdlname;
+        if(d==player1 || m_tutorial) mdlname = (haspowerarmor(player1) ? "smileys/armureassistee" : mdl.model[1]); //player1 always yellow
+        else
+        {
+            if(haspowerarmor(d)) mdlname = d->team==player1->team && validteam(team) ? "smileys/armureassistee" : "smileys/armureassistee/red";
+            else mdlname =  d->abilitymillis[ABILITY_2] && d->aptitude==APT_PHYSICIEN ? "smileys/phy_2" : mdl.model[validteam(team) && d->team==player1->team ? 1 : 0];
+        }
 
         if(intermission && updatewinstat && (validteam(team) ? bestteams.htfind(player1->team)>=0 : bestplayers.find(player1)>=0))
         {
@@ -432,7 +439,7 @@ namespace game
         if(d==hudplayer() && gfx::forcecampos<0 && !thirdperson)
         {
             vec pos = o;
-            rendermodel(mdlname, anim, pos.addz(3.5f), yaw, 28, 0, NULL, d, NULL, basetime, 0, 1.f, vec4(vec::hexcolor(color), trans));
+            rendermodel(mdlname, anim, pos.addz(3.5f), yaw, 28, 0, MDL_NOSHADOW, d, NULL, basetime, 0, 1.f, vec4(vec::hexcolor(color), trans));
         }
     }
 
