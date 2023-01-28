@@ -432,7 +432,7 @@ namespace game
         if(d==hudplayer() && gfx::forcecampos<0 && !thirdperson)
         {
             vec pos = o;
-            rendermodel(mdlname, anim, pos.addz(3.5f), yaw, 28, 0, MDL_NOSHADOW, d, NULL, basetime, 0, 1.f, vec4(vec::hexcolor(color), trans));
+            rendermodel(mdlname, anim, pos.addz(3.5f), yaw, 28, 0, NULL, d, NULL, basetime, 0, 1.f, vec4(vec::hexcolor(color), trans));
         }
     }
 
