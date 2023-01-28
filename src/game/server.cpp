@@ -2114,7 +2114,7 @@ namespace server
     {
         if(servrandommode || !servforcemode) gamemode = rnd(17)+2;
         if(servforcemode>-1) gamemode = servforcemode;
-        game::premission = true;
+        if(!m_tutorial) game::premission = true;
 
         if(!maprotations.inrange(curmaprotation))
         {
