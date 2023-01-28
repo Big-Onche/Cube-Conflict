@@ -1708,7 +1708,7 @@ VAR(floatspeed, 1, 400, 10000);
 void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curtime, int jointmillis, int aptitude, bool assist, int aptisort)
 {
     bool allowmove = game::allowmove(pl);
-    int maxjumps = (assist || aptitude==APT_NINJA || (aptitude==APT_KAMIKAZE && aptisort) ? 2 : 1) + jointmillis ? 4 : 0;
+    int maxjumps = jointmillis ? 4 : (assist || aptitude==APT_NINJA || (aptitude==APT_KAMIKAZE && aptisort) ? 2 : 1);
 
     if(floating)
     {
