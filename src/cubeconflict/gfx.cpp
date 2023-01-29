@@ -141,14 +141,16 @@ namespace gfx
                 return;
 
             case ATK_NUKE_SHOOT:
-
                 loopi(50)
                 {
-                    vec pos = vec(v).add(vec(rnd(200)-rnd(400), rnd(200)-rnd(400), rnd(200)-rnd(400)));
+                    vec pos = v;
+                    int o = (i % 2 == 0) ? -1 : 1;
+                    pos.add(vec(rnd(5*i+1)*o, rnd(5*i+1)*o, rnd(5*i+1)*o));
                     particle_splash(PART_SMOKE, 1, 2000,  pos, 0x212121, 150.0f, 700,   70, 1, champicolor);
                     particle_splash(PART_SMOKE, 1, 15000, pos, 0x222222, 200.0f,  35,  300, 1, champicolor);
                     particle_splash(PART_SMOKE, 2, 5000,  pos, 0x333333, 250.0f, 1000, 500, 1, champicolor);
-                    particle_splash(PART_FIRE_BALL, 3, 750+(i*10), pos, hasroids(owner) ? 0xFF0000 : i>16 ? 0xFFFF00 : i>32 ? 0x224400 : 0xFF2222, 28+rnd(15), 700, 300, 2.f, champicolor);
+                    particle_splash(PART_FIRE_BALL, 4, 750+(i*10), pos, hasroids(owner) ? 0xFF0000 : i<16 ? 0xFFFF00 : i<32 ? 0x224400 : 0xFFAA22, 25+rnd(20), 350, 150, 2.5f, champicolor);
+                    if(i>40) particle_fireball(pos, 150, PART_EXPLOSION, 500, hasroids(owner) ? 0xFF0000 : i<37 ? 0xFFFF00 : i<43 ? 0x224400 : 0xFFAA22, 10+rnd(15), champicolor);
                 }
 
                 if(!epilepsyfriendly)
