@@ -177,6 +177,8 @@ namespace entities
         {
             extentity &e = *ents[tp];
             if(e.attr4 >= 0) playsound(S_TELEPORT, d==hudplayer() ? NULL : &e.o, 0, 0, 0 , 100, -1, 350);
+
+            if(d==hudplayer()) { defformatstring(cmd, "%s %d", "screenshake", 2); int sleep = 0; loopi(16){addsleep(&sleep, cmd); sleep +=25;} }
         }
         if(local && d->clientnum >= 0)
         {
