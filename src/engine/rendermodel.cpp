@@ -927,7 +927,7 @@ void clearbatchedmapmodels()
 }
 
 VARP(lodmodels, 0, 1, 1);
-VARP(loddistfactor, 1, 6, 10);
+VARP(loddistfactor, 1, 6, 12);
 
 void rendermapmodel(int idx, int anim, const vec &o, float yaw, float pitch, float roll, int flags, int basetime, float size)
 {

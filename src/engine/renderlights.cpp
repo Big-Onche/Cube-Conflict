@@ -1896,11 +1896,11 @@ FVAR(smbias, -1e6f, 0.01f, 1e6f);
 FVAR(smpolyfactor2, -1e3f, 1.5f, 1e3f);
 FVAR(smpolyoffset2, -1e3f, 0, 1e3f);
 FVAR(smbias2, -1e6f, 0.02f, 1e6f);
-FVAR(smprec, 1e-3f, 1.5f, 1e3f);
+FVAR(smprec, 1e-3f, 1, 1e3f);
 FVAR(smcubeprec, 1e-3f, 1, 1e3f);
 FVAR(smspotprec, 1e-3f, 1, 1e3f);
 
-VARFP(smsize, 8, 12, 14, cleanupshadowatlas());
+VARFP(smsize, 9, 12, 14, cleanupshadowatlas());
 VARFP(smdepthprec, 0, 0, 2, cleanupshadowatlas());
 VAR(smsidecull, 0, 1, 1);
 VAR(smviscull, 0, 1, 1);
@@ -1912,7 +1912,7 @@ VAR(smmaxsize, 1, 384, 1024);
 VAR(smused, 1, 0, 0);
 VAR(smquery, 0, 1, 1);
 VARF(smcullside, 0, 1, 1, cleanupshadowatlas());
-VARF(smcache, 0, 2, 2, cleanupshadowatlas());
+VARFP(smcache, 0, 1, 2, cleanupshadowatlas());
 VARFP(smfilter, 0, 2, 3, { cleardeferredlightshaders(); cleanupshadowatlas(); cleanupvolumetric(); });
 VARFP(smgather, 0, 0, 1, { cleardeferredlightshaders(); cleanupshadowatlas(); cleanupvolumetric(); });
 VARP(smnoshadow, 0, 0, 1);
@@ -2059,7 +2059,7 @@ static shadowmapinfo *addshadowmap(ushort x, ushort y, int size, int &idx, int l
 #define CSM_MAXSPLITS 8
 
 VARF(csmmaxsize, 256, 1024, 2048, clearshadowcache());
-VARFP(csmsplits, 1, 3, CSM_MAXSPLITS, { cleardeferredlightshaders(); clearshadowcache(); });
+VARF(csmsplits, 1, 3, CSM_MAXSPLITS, { cleardeferredlightshaders(); clearshadowcache(); });
 FVAR(csmsplitweight, 0.20f, 0.75f, 0.95f);
 VARF(csmshadowmap, 0, 1, 1, { cleardeferredlightshaders(); clearshadowcache(); });
 
@@ -2103,7 +2103,7 @@ void cascadedshadowmap::setup()
     gencullplanes();
 }
 
-VARP(csmnearplane, 1, 8, 16);
+VARP(csmnearplane, 1, 1, 16);
 VARP(csmfarplane, 64, 1024, 16384);
 FVAR(csmpradiustweak, 1e-3f, 1, 1e3f);
 FVAR(csmdepthrange, 0, 1024, 1e6f);
