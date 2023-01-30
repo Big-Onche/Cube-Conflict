@@ -916,38 +916,20 @@ ICOMMAND(insidebases, "", (),
                     notify = true;
                 }
 
-                if(ci->state.armour==0) ci->state.armourtype = A_BLUE;
+                if(ci->state.armour<3000)
+                {
+                    if(!ci->state.armour) ci->state.armourtype = A_BLUE;
+                    ci->state.armour = min(ci->state.armour + ticks*REGENARMOUR, 3000);
+                    notify = true;
+                }
 
                 switch(ci->state.armourtype)
                 {
-                    case A_BLUE:
-                    {
-                        if(ci->state.armour<750) ci->state.armour = min(ci->state.armour + ticks*REGENARMOUR, 750);
-                        else ci->state.armourtype = A_GREEN;
-                        notify = true;
-                        break;
-                    }
-                    case A_GREEN:
-                    {
-                        if(ci->state.armour<1250) ci->state.armour = min(ci->state.armour + ticks*REGENARMOUR, 1250);
-                        else ci->state.armourtype = A_YELLOW;
-                        notify = true;
-                        break;
-                    }
-                    case A_YELLOW:
-                    {
-                        if(ci->state.armour<2000) ci->state.armour = min(ci->state.armour + ticks*REGENARMOUR, 2000);
-                        else ci->state.armourtype = A_ASSIST;
-                        notify = true;
-                        break;
-                    }
-                    case A_ASSIST:
-                    {
-                        ci->state.armour = min(ci->state.armour + ticks*REGENARMOUR, 3000);
-                        ci->state.ammo[GUN_ASSISTXPL] = 1;
-                        notify = true;
-                        break;
-                    }
+                    case A_BLUE: if(ci->state.armour>750) ci->state.armourtype = A_GREEN; break;
+
+                    case A_GREEN: if(ci->state.armour>1250) ci->state.armourtype = A_YELLOW; break;
+
+                    case A_YELLOW: if(ci->state.armour>2000) {ci->state.armourtype = A_ASSIST; if(!ci->state.ammo[GUN_ASSISTXPL]) ci->state.ammo[GUN_ASSISTXPL] = 1;}
                 }
 
                 if(b.valid())
@@ -1179,7 +1161,10 @@ case N_BASEREGEN:
     if(regen && m_capture)
     {
         regen->health = health;
+        regen->mana = mana;
+        if(ammotype>=GUN_RAIL && ammotype<=GUN_GLOCK) regen->ammo[ammotype] = ammo;
         if(regen->armour==0) {regen->armourtype=A_BLUE; playsound(S_ITEMBBOIS, regen==hudplayer() ? NULL : &regen->o, 0, 0, 0, 150, -1, 300);}
+        regen->armour = armour;
         switch(regen->armourtype)
         {
             case A_BLUE: if(regen->armour>=750) {regen->armourtype=A_GREEN; playsound(S_ITEMBFER, regen==hudplayer() ? NULL : &regen->o, 0, 0, 0, 150, -1, 300);} break;
@@ -1187,9 +1172,6 @@ case N_BASEREGEN:
             case A_YELLOW: if(regen->armour>=2000) {regen->armourtype=A_ASSIST; playsound(S_ITEMARMOUR, regen==hudplayer() ? NULL : &regen->o, 0, 0, 0, 150, -1, 300);}
             case A_ASSIST: regen->ammo[GUN_ASSISTXPL] = 1;
         }
-        regen->armour = armour;
-        regen->mana = mana;
-        if(ammotype>=GUN_RAIL && ammotype<=GUN_GLOCK) regen->ammo[ammotype] = ammo;
     }
     break;
 }
