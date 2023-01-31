@@ -462,7 +462,7 @@ namespace game
 
         const char *mdlname = mdl.model[validteam(team) ? team : 0];
 
-        defformatstring(mdldir, "hats/%s", aptitudes[player1->aptitude].apt_nomEN);
+        defformatstring(mdldir, "hats/%d", player1->aptitude);
         a[ai++] = modelattach("tag_hat", mdldir, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         a[ai++] = modelattach("tag_cape", custom::getcapedir(cape, !team), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
 
