@@ -139,7 +139,6 @@ void writesave() //we write the poorly encrypted value for all stat
         savefile->printf("%s\n", encryptsave(tempformatstring("%d", saveID >= NUMSTATS + NUMCUST ? succes[saveID-NUMCUST-NUMSTATS] : saveID >= NUMSTATS ? cust[saveID-NUMSTATS] : stat[saveID])));
         saveID++;
     }
-
     savefile->close();
 }
 
@@ -233,7 +232,7 @@ ICOMMAND(getachievementcount, "i", (bool *numach), result(getachievementcount(*n
 string logodir;
 const char *getachievementslogo(int achID) //Récupère le logo d'un succès en particulier
 {
-    if(achID>NUMACHS) return "media/texture/game/notexture.png";
+    if(achID>NUMACHS || achID<0) return "media/texture/game/notexture.png";
     formatstring(logodir, "media/interface/achievements/%s%s.jpg", achievements[achID].achname, achievementlocked(achID) ? "_no" : "_yes");
     return logodir;
 }
@@ -241,14 +240,14 @@ ICOMMAND(getachievementslogo, "i", (int *achID), result(getachievementslogo(*ach
 
 const char *getachievementname(int achID) //Récupère le nom d'un succès en particulier
 {
-    if(achID>NUMACHS) return GAME_LANG ? "Invalid ID" : "ID Invalide";
+    if(achID>NUMACHS || achID<0) return GAME_LANG ? "Invalid ID" : "ID Invalide";
     return GAME_LANG ? achievements[achID].achnicenameEN : achievements[achID].achnicenameFR;
 }
 ICOMMAND(getachievementname, "i", (int *achID), result(getachievementname(*achID)));
 
 const char *getachievementcolor(int achID) //Renvoie une couleur pour savoir si le succes est verrouillé ou non
 {
-    if(achID>NUMACHS) return "0x777777";
+    if(achID>NUMACHS || achID<0) return "0x777777";
     return achievementlocked(achID) ? "0xFFC6C6" : "0xD0F3D0";
 }
 ICOMMAND(getachievementcolor, "i", (int *achID), result(getachievementcolor(*achID)));
