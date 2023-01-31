@@ -25,7 +25,7 @@ static const struct statsinfo { const char *statname, *statnicenameFR, *statnice
 {
     //Steam name                //French description                //English description               //Stat logo
     //Main game stats
-    {"STAT_CC",                 "CubeCoins",                        "CubeCoins",                        "hud/cislacoins.png"},  //0
+    {"STAT_CC",                 "Cube Coins",                       "Cube Coins",                       "hud/cislacoins.png"},  //0
     {"STAT_XP",                 "XP",                               "XP",                               "hud/stats.png"},
     {"STAT_LEVEL",              "Niveau",                           "Level",                            "hud/stats.png"},
     {"STAT_KILLS",              "Éliminations",                     "Frags",                            "hud/flingue.jpg"},
