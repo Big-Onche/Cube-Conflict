@@ -9,7 +9,7 @@ bool launch = true;
 VARF(map_atmo, 0, 0, 9, if(!launch) {execfile("config/default_map_settings.cfg");} else launch = false;);
 VARR(mapofficielle, 0, 0, 1);
 
-int cnidentiquearme = 0;
+int cnidentiquearme, nextcnweapon = 0;
 
 char namesparts[2][16], trash[16];
 char *rndname(bool firstpart, bool fem, int lang)
@@ -2249,6 +2249,8 @@ namespace game
             case N_ANNOUNCE:
             {
                 int t = getint(p);
+                int weap = getint(p);
+
                 string announcemsg;
                 if(GAME_LANG)
                 {
@@ -2268,6 +2270,7 @@ namespace game
                                               t==I_SUPERARME ? "\faLA SUPER-ARME EST BIENTÔT PRÊTE À ANNIHILER" :
                                               t==50 ? "\faCHANGEMENT D'ARME DANS 5 SECONDES !" : "" );
                 }
+                if(t==50) {hudmsg[MSG_IDENTICAL] = totalmillis; nextcnweapon = weap;}
                 conoutf(CON_GAMEINFO, announcemsg);
                 break;
             }

@@ -4,7 +4,7 @@
 #include "cube.h"
 #include "engine.h"
 
-extern int cnidentiquearme, servambient;
+extern int cnidentiquearme, nextcnweapon, servambient;
 extern int lastshoot, getspyability;
 
 // animations
@@ -346,8 +346,8 @@ enum
     N_SERVCMD,
     N_DEMOPACKET,
     N_SENDCAPE, N_SENDTOMBE, N_SENDDANSE, N_SENDAPTITUDE, N_REGENALLIES,
-    N_ANNOUNCE,
     N_REQABILITY, N_GETABILITY,
+    N_ANNOUNCE,
     N_IDENTIQUEARME, N_SERVAMBIENT,
     N_BASES, N_BASEINFO, N_BASESCORE, N_CNBASESCORE, N_REPAMMO, N_BASEREGEN,
     NUMMSG
@@ -380,7 +380,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_DEMOPACKET, 0,
     N_SENDCAPE, 2, N_SENDTOMBE, 2, N_SENDDANSE, 2, N_SENDAPTITUDE, 2, N_REGENALLIES, 4,
     N_REQABILITY, 2, N_GETABILITY, 4,
-    N_ANNOUNCE, 2,
+    N_ANNOUNCE, 3,
     N_IDENTIQUEARME, 2, N_SERVAMBIENT, 2,
     N_BASES, 0, N_BASEINFO, 0, N_BASESCORE, 0, N_CNBASESCORE, 3, N_REPAMMO, 1, N_BASEREGEN, 7,
     -1
@@ -414,45 +414,45 @@ enum
     HICON_SPACE   = 40
 };
 
-static struct itemstat { int add, max, sound; const char *name; int icon, info; } itemstats[] =
-{
-    {15,    60,    S_ITEMAMMO,  "FUSIL ELECTRIQUE", HICON_SIZE, GUN_RAIL},
-    {32,   128,    S_ITEMAMMO,  "FUSIL PLASMA",     HICON_SIZE, GUN_PULSE},
-    {5,     20,    S_ITEMAMMO,  "SMAW",             HICON_SIZE, GUN_SMAW},
-    {80,   320,    S_ITEMAMMO,  "MINIGUN",          HICON_SIZE, GUN_MINIGUN},
-    {20,    80,    S_ITEMAMMO,  "SPOCKGUN",         HICON_SIZE, GUN_SPOCKGUN},
-    {7,     28,    S_ITEMAMMO,  "M32",              HICON_SIZE, GUN_M32},
-    {50,   200,    S_ITEMAMMO,  "LANCE-FLAMMES",    HICON_SIZE, GUN_LANCEFLAMMES},
-    {50,   200,    S_ITEMAMMO,  "UZI",              HICON_SIZE, GUN_UZI},
-    {60,   240,    S_ITEMAMMO,  "FAMAS",            HICON_SIZE, GUN_FAMAS},
-    {10,    40,    S_ITEMAMMO,  "MOSSBERG 500",     HICON_SIZE, GUN_MOSSBERG},
-    {15,    60,    S_ITEMAMMO,  "HYDRA",            HICON_SIZE, GUN_HYDRA},
-    {8,     32,    S_ITEMAMMO,  "SV-98",            HICON_SIZE, GUN_SV98},
-    {14,    56,    S_ITEMAMMO,  "SKS",              HICON_SIZE, GUN_SKS},
-    {12,    48,    S_ITEMAMMO,  "ARBALETE",         HICON_SIZE, GUN_ARBALETE},
-    {40,   160,    S_ITEMAMMO,  "AK-47",            HICON_SIZE, GUN_AK47},
-    {70,   280,    S_ITEMAMMO,  "GAPB-1",           HICON_SIZE, GUN_GRAP1},
-    {10,    40,    S_ITEMAMMO,  "FEU D'ARTIFICE",   HICON_SIZE, GUN_ARTIFICE},
-    {30,   120,    S_ITEMAMMO,  "GLOCK",            HICON_SIZE, GUN_GLOCK},
-    //Super armes
-    {  1,    4,    S_ITEMSUPERAMMO, "BOMBE NUCLEAIRE", HICON_SIZE, GUN_S_NUKE},
-    {300, 1200,    S_ITEMSUPERAMMO, "GAU-8",           HICON_SIZE, GUN_S_GAU8},
-    { 40,  120,    S_ITEMSUPERAMMO, "MINI-ROQUETTES",  HICON_SIZE, GUN_S_ROQUETTES},
-    { 15,   60,    S_ITEMSUPERAMMO, "CAMPOUZE 2000",   HICON_SIZE, GUN_S_CAMPOUZE},
-    //Objets
-    {250,     1000, S_ITEMHEALTH,   "PANACHAY",            HICON_SIZE},
-    {500,     2500, S_COCHON,       "COCHON GRILLAY",      HICON_SIZE},
-    {30000,  45000, S_ITEMSTEROS,   "STEROIDES",           HICON_SIZE},
-    {40000, 120000, S_ITEMCHAMPIS,  "CHAMPIS",             HICON_SIZE},
-    {40000,  60000, S_ITEMEPO,      "EPO",                 HICON_SIZE},
-    {30000,  90000, S_ITEMJOINT,    "JOINT",               HICON_SIZE},
-    {750,      750, S_ITEMBBOIS,    "BOUCLIER EN BOIS",    HICON_SIZE, A_BLUE},
-    {1250,    1250, S_ITEMBFER,     "BOUCLIER DE FER",     HICON_SIZE, A_GREEN},
-    {2000,    2000, S_ITEMBOR,      "BOUCLIER D'OR",       HICON_SIZE, A_YELLOW},
-    {1500,    1500, S_ITEMBMAGNET,  "BOUCLIER MAGNETIQUE", HICON_SIZE, A_MAGNET},
-    {3000,    3000, S_ITEMARMOUR,   "ARMURE ASSISTEE",     HICON_SIZE, A_ASSIST},
-    {50,       150, S_ITEMMANA,     "MANA",                HICON_SIZE},
-    {50,       150, S_ITEMHEALTH,   "CHAIN",               HICON_SIZE}
+static struct itemstat { int add, max, sound; const char *name_fr, *name_en; int icon, info; } itemstats[] =
+{   // weapons
+    {15,    60,    S_ITEMAMMO,  "FUSIL ELECTRIQUE", "ELECTRIC RIFLE",   HICON_SIZE, GUN_RAIL},
+    {32,   128,    S_ITEMAMMO,  "FUSIL PLASMA",     "PLASMA RIFLE",     HICON_SIZE, GUN_PULSE},
+    {5,     20,    S_ITEMAMMO,  "SMAW",             "SMAW",             HICON_SIZE, GUN_SMAW},
+    {80,   320,    S_ITEMAMMO,  "MINIGUN",          "MINIGUN",          HICON_SIZE, GUN_MINIGUN},
+    {20,    80,    S_ITEMAMMO,  "SPOCKGUN",         "SPOCKGUN",         HICON_SIZE, GUN_SPOCKGUN},
+    {7,     28,    S_ITEMAMMO,  "M32",              "M32",              HICON_SIZE, GUN_M32},
+    {50,   200,    S_ITEMAMMO,  "LANCE-FLAMMES",    "FLAMETHROWER",     HICON_SIZE, GUN_LANCEFLAMMES},
+    {50,   200,    S_ITEMAMMO,  "UZI",              "UZI",              HICON_SIZE, GUN_UZI},
+    {60,   240,    S_ITEMAMMO,  "FAMAS",            "FAMAS",            HICON_SIZE, GUN_FAMAS},
+    {10,    40,    S_ITEMAMMO,  "MOSSBERG 500",     "MOSSBERG 500",     HICON_SIZE, GUN_MOSSBERG},
+    {15,    60,    S_ITEMAMMO,  "HYDRA",            "HYDRA",            HICON_SIZE, GUN_HYDRA},
+    {8,     32,    S_ITEMAMMO,  "SV-98",            "SV-98",            HICON_SIZE, GUN_SV98},
+    {14,    56,    S_ITEMAMMO,  "SKS",              "SKS",              HICON_SIZE, GUN_SKS},
+    {12,    48,    S_ITEMAMMO,  "ARBALETE",         "CROSSBOW",         HICON_SIZE, GUN_ARBALETE},
+    {40,   160,    S_ITEMAMMO,  "AK-47",            "AK-47",            HICON_SIZE, GUN_AK47},
+    {70,   280,    S_ITEMAMMO,  "GAPB-1",           "GAPB-1",           HICON_SIZE, GUN_GRAP1},
+    {10,    40,    S_ITEMAMMO,  "FEU D'ARTIFICE",   "FIREWORKS",        HICON_SIZE, GUN_ARTIFICE},
+    {30,   120,    S_ITEMAMMO,  "GLOCK",            "GLOCK",            HICON_SIZE, GUN_GLOCK},
+    // superweapons
+    {  1,    4,    S_ITEMSUPERAMMO, "BOMBE NUCLEAIRE", "NUCLEAR MISSLE",    HICON_SIZE, GUN_S_NUKE},
+    {300, 1200,    S_ITEMSUPERAMMO, "GAU-8",           "GAU-8",             HICON_SIZE, GUN_S_GAU8},
+    { 40,  120,    S_ITEMSUPERAMMO, "MINI-ROQUETTES",  "ROCKETS MINIGUN",   HICON_SIZE, GUN_S_ROQUETTES},
+    { 15,   60,    S_ITEMSUPERAMMO, "CAMPOUZE 2000",   "CAMPER 2000",       HICON_SIZE, GUN_S_CAMPOUZE},
+    // items
+    {250,     1000, S_ITEMHEALTH,   "PANACHAY",            "HEALTH",         HICON_SIZE},
+    {500,     2500, S_COCHON,       "COCHON GRILLAY",      "HEALTH BOOST",   HICON_SIZE},
+    {30000,  45000, S_ITEMSTEROS,   "STEROIDES",           "ROIDS",          HICON_SIZE},
+    {40000, 120000, S_ITEMCHAMPIS,  "CHAMPIS",             "SHROOMS",        HICON_SIZE},
+    {40000,  60000, S_ITEMEPO,      "EPO",                 "EPO",            HICON_SIZE},
+    {30000,  90000, S_ITEMJOINT,    "JOINT",               "JOINT",          HICON_SIZE},
+    {750,      750, S_ITEMBBOIS,    "BOUCLIER EN BOIS",    "WOOD SHIELD",    HICON_SIZE, A_BLUE},
+    {1250,    1250, S_ITEMBFER,     "BOUCLIER DE FER",     "IRON SHIELD",    HICON_SIZE, A_GREEN},
+    {2000,    2000, S_ITEMBOR,      "BOUCLIER D'OR",       "GOLD SHIELD",    HICON_SIZE, A_YELLOW},
+    {1500,    1500, S_ITEMBMAGNET,  "BOUCLIER MAGNETIQUE", "MAGNET SHIELD",  HICON_SIZE, A_MAGNET},
+    {3000,    3000, S_ITEMARMOUR,   "ARMURE ASSISTEE",     "POWERARMOR",     HICON_SIZE, A_ASSIST},
+    {50,       150, S_ITEMMANA,     "MANA",                "MANA",           HICON_SIZE},
+    {50,       150, S_ITEMHEALTH,   "CHAIN",               "CHAIN",          HICON_SIZE}
 };
 
 #define MAXRAYS 25

@@ -47,7 +47,6 @@ void logoutf(const char *fmt, ...)
     va_end(args);
 }
 
-
 static void writelog(FILE *file, const char *buf)
 {
     static uchar ubuf[512];

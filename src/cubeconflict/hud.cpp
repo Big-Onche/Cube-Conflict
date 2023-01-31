@@ -133,6 +133,12 @@ namespace game
             if(need_message2) {rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
         }
 
+        if(m_identique) ////////////////////////////////////////////////////////////////////////////////////////////////// IDENTICAL WEAPON MESSAGE
+        {
+            string msg;
+            if(totalmillis - hudmsg[MSG_IDENTICAL] <= 3000) {formatstring(msg, GAME_LANG ? "\fdNext weapon: \fc%s" : "\fdArme suivante : \fc%s", GAME_LANG ? itemstats[nextcnweapon].name_en : itemstats[nextcnweapon].name_fr); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
+        }
+
         if(m_ctf) ////////////////////////////////////////////////////////////////////////////////////////////////// CAPTURE THE FLAG MESSAGES
         {
             string msg;

@@ -232,6 +232,7 @@ struct partrenderer
             {
                 if(stain >= 0)
                 {
+                    if((stain==STAIN_RAIN || stain==STAIN_SNOW) && p->o.dist(camera1->o) > 320) return;
                     vec surface;
                     float floorz = rayfloor(vec(o.x, o.y, p->val), surface, RAY_CLIPMAT|RAY_LIQUIDMAT|RAY_POLY, COLLIDERADIUS);
                     float collidez = floorz<0 ? o.z-COLLIDERADIUS : p->val - floorz;
@@ -1202,7 +1203,7 @@ static inline int colorfromattr(int attr)
  * 24..26 flat plane
  * +32 to inverse direction
  */
-void regularshape(int type, int radius, int color, int dir, int num, int fade, const vec &p, float size, int gravity, float vel = 0, int windoffset = 0, bool weather = false, int height = 0, int sizemod = 0)
+void regularshape(int type, int radius, int color, int dir, int num, int fade, const vec &p, float size, int gravity, float vel, int windoffset, bool weather, int height, int sizemod)
 {
     if(!canemitparticles()) return;
 

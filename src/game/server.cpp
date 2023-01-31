@@ -3,7 +3,7 @@
 
 VARP(gamelength, 1, 10, 60);
 
-int identiquearme = rnd(17), servambient = rnd(9);
+int nextweapon, curweapon, servambient = rnd(9);
 
 namespace game
 {
@@ -1968,8 +1968,6 @@ namespace server
         }
         if(!ci || clients.length()>1)
         {
-            if(m_identique) sendf(-1, 1, "ri2", N_IDENTIQUEARME, identiquearme);
-            if(gamemillis>10000) sendf(-1, 1, "ri2", N_PREMISSION, game::premission);
             putint(p, N_RESUME);
             loopv(clients)
             {
@@ -1989,6 +1987,21 @@ namespace server
             }
             putint(p, -1);
             welcomeinitclient(p, ci ? ci->clientnum : -1);
+        }
+        if(!ci)
+        {
+            if(m_identique)
+            {
+                putint(p, N_IDENTIQUEARME);
+                putint(p, curweapon);
+                sendf(-1, 1, "ri2", N_IDENTIQUEARME, curweapon);
+            }
+            if(gamemillis>10000)
+            {
+                putint(p, N_PREMISSION);
+                putint(p, 0);
+                sendf(-1, 1, "ri2", N_PREMISSION, 0);
+            }
         }
         if(smode) smode->initclient(ci, p, true);
         return 1;
@@ -2124,13 +2137,13 @@ namespace server
         if(next)
         {
             servambient = rnd(8)+1;
+            sendf(-1, 1, "ri2", N_SERVAMBIENT, servambient);
             curmaprotation = findmaprotation(gamemode, smapname);
             if(curmaprotation >= 0) nextmaprotation();
             else curmaprotation = smapname[0] ? max(findmaprotation(gamemode, ""), 0) : 0;
         }
 
         logoutf("%s %s", servlang ? "Gamemode:" : "Mode de jeu :", m_valid(gamemode) ? servlang ? gamemodes[gamemode - STARTGAMEMODE].nameEN : gamemodes[gamemode - STARTGAMEMODE].nameFR : "Unknown");
-        sendf(-1, 1, "ri2", N_SERVAMBIENT, servambient);
 
         maprotation &rot = maprotations[curmaprotation];
         changemap(rot.map, rot.findmode(gamemode));
@@ -2764,19 +2777,24 @@ namespace server
                         }
                         else if(sents[i].spawntime<=10000 && oldtime>10000 && (sents[i].type==I_BOOSTDEGATS || sents[i].type==I_BOOSTGRAVITE || sents[i].type==I_BOOSTPRECISION || sents[i].type==I_BOOSTVITESSE || sents[i].type==I_SUPERARME))
                         {
-                            sendf(-1, 1, "ri2", N_ANNOUNCE, sents[i].type);
+                            sendf(-1, 1, "ri3", N_ANNOUNCE, sents[i].type, -1);
                         }
                     }
 
                     if(m_identique)
                     {
-                        if(firstlaunch) {identiquearme = rnd(17); sendf(-1, 1, "ri2", N_IDENTIQUEARME, identiquearme); firstlaunch = false;}
+                        if(firstlaunch) {curweapon = rnd(17); sendf(-1, 1, "ri2", N_IDENTIQUEARME, curweapon); firstlaunch = false;}
                         identiquetimer += curtime;
-                        if(identiquetimer>=15000 && identiquetimer<=16000 && announced==false) {sendf(-1, 1, "ri2", N_ANNOUNCE, 50); announced = true;}
+                        if(identiquetimer>=15000 && announced==false)
+                        {
+                            while(nextweapon==curweapon) nextweapon = rnd(17);
+                            sendf(-1, 1, "ri3", N_ANNOUNCE, 50, nextweapon);
+                            announced = true;
+                        }
                         else if(identiquetimer>20000)
                         {
-                            identiquearme = rnd(17);
-                            sendf(-1, 1, "ri2", N_IDENTIQUEARME, identiquearme);
+                            curweapon = nextweapon;
+                            sendf(-1, 1, "ri2", N_IDENTIQUEARME, curweapon);
                             identiquetimer = 0;
                             announced = false;
                         }
