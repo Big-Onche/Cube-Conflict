@@ -8,13 +8,9 @@
     #include "steam_api.h"
 #endif
 
-using namespace std;
-
 //////////////////////Gestion de l'xp et niveaux//////////////////////
 int cclvl = 1, xpneededfornextlvl = 50, xpneededforprevlvl = 50, totalneededxp = 50;
 float pourcents = -1;
-
-bool updatewinstat = true;
 
 void genlvl() //Calcule le niveau du joueur
 {
@@ -27,8 +23,7 @@ void genlvl() //Calcule le niveau du joueur
         if(isconnected()) {playsound(S_LEVELUP); hudmsg[MSG_LEVELUP]=totalmillis;}
     }
 
-    float pour1 = totalneededxp, pour2 = stat[STAT_XP]-xpneededfornextlvl;
-    if(pour1!=0) pourcents = pour2/pour1; //Calcul le pourcentage pour prochain niveau et évite une div. par zéro
+    if(stat[STAT_XP]-xpneededfornextlvl!=0 && totalneededxp!=0) pourcents = float(stat[STAT_XP]-xpneededfornextlvl)/float(totalneededxp);
 
     switch(cclvl) //Regarde si il y a un succès à déverrouiller
     {
@@ -44,6 +39,7 @@ void genlvl() //Calcule le niveau du joueur
 
 //////////////////////Gestion des statistiques//////////////////////
 int stat[NUMSTATS];
+bool updatewinstat = true;
 
 void addxpandcc(int nbxp, int nbcc) // Ajoute l'xp et/ou les CC
 {
@@ -66,11 +62,9 @@ void addstat(int valeur, int statID, bool rewrite) // Ajoute la stat très simple
     if(savejustincase==100) {writesave(); savejustincase=0;} //Sauvegarde toutes les 100 stats ajoutés (ça monte vite avec les munitions tirées), ça limite la casse en cas de crash
 }
 
-float kdratio = 0.f;
-void calcratio() //Calcule le ratio pour l'afficher dans le menu (non sauvegardé)
+float kdratio() // kill/death ratio calculation
 {
-    float fk = stat[STAT_KILLS], fm = stat[STAT_MORTS];
-    kdratio = (fk/(fm == 0 ? 1 : fm)*1.f);
+    return (float(stat[STAT_KILLS])/(float(stat[STAT_MORTS]) == 0.f ? 1.f : float(stat[STAT_MORTS])));
 }
 
 string statlogodir;
@@ -91,8 +85,7 @@ const char *getstatinfo(int statID, bool onlyvalue) //Récupère la description d'
         //Based on STAT_KILLS & STAT_MORTS, STAT_KDRATIO not saved.
         case STAT_KDRATIO:
         {
-            calcratio();
-            formatstring(tmp, "%s%s%.1f", onlyvalue ? "" : GAME_LANG ? statslist[statID].statnicenameEN : statslist[statID].statnicenameFR, onlyvalue ? "" : " : ", kdratio);
+            formatstring(tmp, "%s%s%.1f", onlyvalue ? "" : GAME_LANG ? statslist[statID].statnicenameEN : statslist[statID].statnicenameFR, onlyvalue ? "" : " : ", kdratio());
             break;
         }
         //Easy secs to HH:MM:SS converter and displayer
