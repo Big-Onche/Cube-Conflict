@@ -1583,6 +1583,7 @@ namespace game
                 else senditemstoserver = false;
                 ai::loadwaypoints();
                 updatewinstat = true;
+                gfx::resetshroomsgfx();
                 break;
 
             case N_FORCEDEATH:
