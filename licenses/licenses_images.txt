@@ -4,8 +4,20 @@ The following files are protected by Envato Elements license, you CANNOT use the
 Les fichiers suivants sont protégés par licence Envato Elements vous ne POUVEZ PAS les utiliser pour vos projets personnels à moins d'acheter les images
 
 
-Files : media/sky/2_lf.jpg		license_certificate_XN6YJZL7D5
-	media/sky/5_rt.jpg 		license_certificate_PMZGXRT286
+Files : media/sky/2_lf.jpg				license_certificate_XN6YJZL7D5.txt
+	media/sky/5_rt.jpg 				license_certificate_PMZGXRT286.txt
+	media/particles/explosions/explosion.png	license_certificate_ZMKYVGW687 (explosion.png).txt
+	media/particles/fire/fire_ball.png 		license_certificate_Y76M9ZUL3K (fire_ball.png).txt
+	media/particles/fire/firespark.png 		license_certificate_GRZJ63UNEY (firespark.png).txt
+	media/particles/fire/flames.png 		license_certificate_TX4PFRYQKM (flames.png) 1.txt 	license_certificate_6YJ5GFHTBM (flames.png) 2.txt
+	media/particles/fire/smoke.png 			license_certificate_NA5927WBER (smoke.png).txt
+	media/particles/flashes/rocket.png 		license_certificate_GLUTH7Q2VB (rocket.png - little.png).txt
+	media/particles/flashes/little.png
+	media/particles/flashes/electric.png 		license_certificate_297WBDQUX8 (electric.png).txt
+	media/particles/flashes/big.png 		license_certificate_W7QM6G5SDH (big.png - shotgun.png - sniper.png).txt
+	media/particles/flashes/shotgun.png
+	media/particles/flashes/sniper.png
+	media/particles/flashes/plasma.png		license_certificate_8VAYEBFGMN (plasma.png).txt
 
 -------------------------------------------------------------------------------------------------------
 
@@ -177,6 +189,17 @@ Files :	media/interface/cclogo.png
 	media/sky/ciel/Nuages2.png
 	media/texture/mat_lava/*				//All files in the directory | Tous les fichiers du dossier
 	media/texture/*						//All files in the directory but not the subfolders! | Tous les fichiers du dossier mais pas les sous-dossiers !
+	media/particles/explosions/grenade.png
+	media/particles/explosions/plasma.png
+	media/particles/explosions/shockwave.png
+	media/particles/game/basic.png
+	media/particles/game/blip.png
+	media/particles/game/health.png
+	media/particles/game/mana.png
+	media/particles/game/one.png
+	media/particles/game/radar.png
+	media/particles/game/targer.png
+	media/particles/game/zero.png
 
 	Note: The smileys are designed by "lag-it" (public domain) | Note : Les smileys sont designés par "lag-it" (public domain)
 	media/interface/chargement.png

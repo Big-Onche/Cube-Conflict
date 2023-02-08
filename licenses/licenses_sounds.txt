@@ -15,6 +15,7 @@ Files :	media/sound/mapsound/indoor_1.ogg 			license_certificate_R3FY29ABTJ (ind
 	media/sound/mapsound/apocalypse.ogg 			license_certificate_S8WK43UC6A (apocalypse.ogg).txt	
 	media/sound/mapsound/heatwave.ogg 			license_certificate_HLSCJ8YT95 (heatwave.ogg).txt
 	media/sound/mapsound/crickets.ogg 			license_certificate_C8BV2TWUKS (crickets.ogg).txt
+	media/sound/mapsound/calm.ogg				license_certificate_A257RKVWJS (calm.ogg).txt
 	media/sound/mapsound/bigfire.ogg 			license_certificate_F6Y4TAGBPJ (bigfire.ogg).txt
 	media/sound/mapsound/steam.ogg 				license_certificate_4BZU5KSJCY (steam.ogg).txt
 	media/sound/mapsound/bigfan.ogg 			license_certificate_9GVP3Y5TRM (bigfan.ogg).txt
@@ -63,6 +64,7 @@ Files :	media/sound/mapsound/indoor_1.ogg 			license_certificate_R3FY29ABTJ (ind
 	media/sound/ent_player/water_1.ogg			license_certificates (water_X).txt
 	media/sound/ent_player/water_2.ogg
 	media/sound/ent_player/water_3.ogg
+	media/sound/ent_player/underwater.ogg 			license_certificate_5D8YBU6VJP (underwater.ogg).txt
 	media/sound/ent_player/jumppad_1.ogg			license_certificate_SYF6G82QEM (jumppad_X).txt
 	media/sound/ent_player/jumppad_2.ogg
 	media/sound/ent_player/jumppad_3.ogg
