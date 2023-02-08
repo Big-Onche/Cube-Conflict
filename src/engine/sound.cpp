@@ -302,16 +302,11 @@ static struct songsinfo { string file; int loops; } songs[] =
     {"songs/menu.ogg", 0},
     {"songs/pause.ogg", 9},
     {"songs/premission.ogg", 0},
-    {"songs/village.ogg", 5},
-    {"songs/factory.ogg", 5},
-    {"songs/moon.ogg", 5},
-    {"songs/castle.ogg", 5},
-    {"songs/volcano.ogg", 5},
 };
 
 void musicmanager(int track) //CubeConflict, gestion des musiques
 {
-    if(musicstream) return;
+    if(musicstream || track < 0 || track > 2) return;
     startmusic(songs[track].file, songs[track].loops);
 }
 
