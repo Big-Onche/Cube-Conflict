@@ -10,14 +10,23 @@ Files : media/sky/2_lf.jpg				license_certificate_XN6YJZL7D5.txt
 	media/particles/fire/fire_ball.png 		license_certificate_Y76M9ZUL3K (fire_ball.png).txt
 	media/particles/fire/firespark.png 		license_certificate_GRZJ63UNEY (firespark.png).txt
 	media/particles/fire/flames.png 		license_certificate_TX4PFRYQKM (flames.png) 1.txt 	license_certificate_6YJ5GFHTBM (flames.png) 2.txt
-	media/particles/fire/smoke.png 			license_certificate_NA5927WBER (smoke.png).txt
+	media/particles/fire/smoke.png 			license_certificate_NA5927WBER (smoke.png - steam.png).txt
+	media/particles/fire/steam.png
 	media/particles/flashes/rocket.png 		license_certificate_GLUTH7Q2VB (rocket.png - little.png).txt
 	media/particles/flashes/little.png
-	media/particles/flashes/electric.png 		license_certificate_297WBDQUX8 (electric.png).txt
+	media/particles/flashes/electric.png 		license_certificate_35MXLJ47DA (electric.png).txt
 	media/particles/flashes/big.png 		license_certificate_W7QM6G5SDH (big.png - shotgun.png - sniper.png).txt
 	media/particles/flashes/shotgun.png
 	media/particles/flashes/sniper.png
-	media/particles/flashes/plasma.png		license_certificate_8VAYEBFGMN (plasma.png).txt
+	media/particles/flashes/plasma.png		license_certificate_297WBDQUX8 (plasma.png).txt
+	media/particles/water/bubbles.png		license_certificate_LWPXSFJDGZ (bubbles.png).txt
+	media/particles/water/water.png			license_certificate_95N6WE3RAY (water.png).txt
+	media/particles/weather/rainbow.png		license_certificate_BL2JVM8FXK (rainbow.png).txt
+	media/particles/weather/lightning.png		license_certificate_EUACVLSGWZ (lightning.png).txt
+	media/particles/weather/cloud_1.png		license_certificate_AFL82Z6V9T (cloud_X.png).txt
+	media/particles/weather/cloud_2.png
+	media/particles/weather/cloud_3.png
+	media/particles/weather/cloud_4.png
 
 -------------------------------------------------------------------------------------------------------
 
@@ -137,22 +146,22 @@ Files :	media/interface/cclogo.png
 	media/interface/hud/sauer.jpg
 	media/interface/hud/scores.png
 	media/interface/hud/scores_ctf.png
-	media/interface/hud/abilities/spy_1.png
-	media/interface/hud/abilities/spy_2.png
-	media/interface/hud/abilities/spy_3.png
-	media/interface/hud/abilities/shoshone_1.png
-	media/interface/hud/abilities/shoshone_2.png
-	media/interface/hud/abilities/shoshone_3.png
-	media/interface/hud/abilities/kamikaze_2.png
-	media/interface/hud/abilities/wizard_1.png
-	media/interface/hud/abilities/wizard_2.png
-	media/interface/hud/abilities/wizard_3.png
-	media/interface/hud/abilities/physicist_1.png
-	media/interface/hud/abilities/physicist_2.png
-	media/interface/hud/abilities/physicist_3.png
-	media/interface/hud/abilities/priest_1.png
-	media/interface/hud/abilities/priest_2.png
-	media/interface/hud/abilities/priest_3.png
+	media/interface/hud/abilities/5_0.png
+	media/interface/hud/abilities/5_1.png
+	media/interface/hud/abilities/5_2.png
+	media/interface/hud/abilities/6_1.png
+	media/interface/hud/abilities/8_0.png
+	media/interface/hud/abilities/8_1.png
+	media/interface/hud/abilities/8_2.png
+	media/interface/hud/abilities/10_0.png
+	media/interface/hud/abilities/10_1.png
+	media/interface/hud/abilities/10_2.png
+	media/interface/hud/abilities/11_0.png
+	media/interface/hud/abilities/11_1.png
+	media/interface/hud/abilities/11_2.png
+	media/interface/hud/abilities/14_0.png
+	media/interface/hud/abilities/14_1.png
+	media/interface/hud/abilities/14_2.png
 	media/interface/hud/souris.png
 	media/interface/hud/stats.png
 	media/interface/hud/steros.png
@@ -163,7 +172,7 @@ Files :	media/interface/cclogo.png
 	media/interface/hud/fullscreen/scope_3.png
 	media/interface/hud/fullscreen/shrooms.png
 	media/interface/hud/fullscreen/ability.png
-	media/interface/hud/fullscreen/ragen.png
+	media/interface/hud/fullscreen/regen.png
 	media/interface/apt_logo/american.jpg
 	media/interface/apt_logo/soldier.png
 	media/interface/apt_logo/wizard.png
@@ -200,6 +209,17 @@ Files :	media/interface/cclogo.png
 	media/particles/game/radar.png
 	media/particles/game/targer.png
 	media/particles/game/zero.png
+	media/particles/misc/spark.png
+	media/particles/misc/lensflares.png
+	media/particles/misc/blood.png
+	media/particles/trails/bullet_side.png
+	media/particles/trails/plasma_front.png
+	media/particles/trails/plasma_side.png
+	media/particles/trails/shotgun_side.png
+	media/particles/trails/spock_front.png
+	media/particles/weather/rain.png
+	media/particles/weather/snow.png
+
 
 	Note: The smileys are designed by "lag-it" (public domain) | Note : Les smileys sont designés par "lag-it" (public domain)
 	media/interface/chargement.png
