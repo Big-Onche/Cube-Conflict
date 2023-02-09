@@ -384,7 +384,7 @@ namespace game
             anim = ANIM_LOSE|ANIM_LOOP;
             if(validteam(team) ? bestteams.htfind(team)>=0 : bestplayers.find(d)>=0) anim = ANIM_WIN|ANIM_LOOP;
         }
-        else if(d->lasttaunt && lastmillis-d->lasttaunt<1000)
+        else if(packtaunt && d->lasttaunt && lastmillis-d->lasttaunt<1000)
         {
             lastaction = d->lasttaunt;
             anim = ANIM_TAUNT|ANIM_LOOP;

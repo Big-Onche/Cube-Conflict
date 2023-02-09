@@ -31,7 +31,7 @@ namespace ai
 
     void bottaunt(gameent *d)
     {
-        if(GAME_LANG) return;
+        if(!packtaunt) return;
         if(d->state!=CS_ALIVE || d->physstate<PHYS_SLOPE) return;
         if(lastmillis-d->lasttaunt<7500) return;
         d->lasttaunt = lastmillis;
@@ -1479,7 +1479,7 @@ namespace ai
                     case APT_ESPION:
                         if(d->mana>100) aptitude(d, ABILITY_3);
                 }
-                if(randomevent(2.5f*gfx::nbfps)) bottaunt(d);
+                if(randomevent(2.5f*gfx::nbfps) && packtaunt) bottaunt(d);
 
                 switch(c.type)
                 {

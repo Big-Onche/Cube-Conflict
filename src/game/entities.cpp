@@ -423,7 +423,7 @@ namespace entities
         while(ents.length()) deleteentity(ents.pop());
     }
 
- enum
+    enum
     {
         TRIG_COLLIDE    = 1<<0,
         TRIG_TOGGLE     = 1<<1,

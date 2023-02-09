@@ -13,6 +13,7 @@ bool randomevent(int probability)
 }
 
 VARP(map_sel, 0, 1, 99);
+VARP(packtaunt, 0, 0, 1);
 
 namespace game
 {
@@ -34,8 +35,7 @@ namespace game
         }
     });
 
-    bool intermission = false;
-    bool premission = false;
+    bool intermission = false, premission = false;
     int maptime = 0, maprealtime = 0, maplimit = -1;
     int lasthit = 0, lastspawnattempt = 0;
     int respawnent = -1;
@@ -517,6 +517,7 @@ namespace game
 
     VARFP(player1_danse, 0, 0, sizeof(customsdance)/sizeof(customsdance[0])-1,
     {
+        if(!packtaunt) return;
         if(cust[VOI_CORTEX+player1_danse]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette voix !"); playsound(S_ERROR); player1_danse=0; return;}
         addmsg(N_SENDDANSE, "ri", player1_danse);
         stopsounds();
@@ -526,11 +527,11 @@ namespace game
 
     void taunt()
     {
-        if(GAME_LANG) return;
+        if(!packtaunt) return;
         if(player1->state!=CS_ALIVE) return;
         if(lastmillis-player1->lasttaunt<2000){conoutf(CON_GAMEINFO, "\faOn abuse pas des bonnes choses !"); return;}
         player1->lasttaunt = lastmillis;
-        playsound(S_CGCORTEX+(player1->customdanse));
+        playsound(S_CGCORTEX+(player1->customdanse), gfx::forcecampos>=0 ? &player1->o : NULL, NULL, 0, -1, -1, -1, 400);
         addmsg(N_TAUNT, "rc", player1);
     }
     COMMAND(taunt, "");
