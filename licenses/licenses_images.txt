@@ -27,6 +27,10 @@ Files : media/sky/2_lf.jpg				license_certificate_XN6YJZL7D5.txt
 	media/particles/weather/cloud_2.png
 	media/particles/weather/cloud_3.png
 	media/particles/weather/cloud_4.png
+	media/decals/warn_hottemperature.png		license_certificate_B7SE9FQGUX (warn_XXXXX.png).txt
+	media/decals/warn_overheardload.png
+	media/decals/warn_radioactivity.png
+	media/decals/warn_rotatingparts.png
 
 -------------------------------------------------------------------------------------------------------
 
@@ -220,7 +224,6 @@ Files :	media/interface/cclogo.png
 	media/particles/weather/rain.png
 	media/particles/weather/snow.png
 
-
 	Note: The smileys are designed by "lag-it" (public domain) | Note : Les smileys sont designés par "lag-it" (public domain)
 	media/interface/chargement.png
 	media/interface/hud/cursor.png
@@ -266,3 +269,8 @@ Files :	media/interface/cclogo.png
 	media/interface/hud/sournois.jpg
 	media/interface/hud/sournois_red.jpg
 	media/interface/hud/spectateur.jpg
+
+	media/decals/norender.png
+	media/decals/puddle1.png
+	media/decals/puddle2.png
+	media/decals/puddle3.png
