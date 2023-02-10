@@ -138,7 +138,7 @@ bool loadents(const char *fname, vector<entity> &ents, uint *crc)
 string ogzname, bakname, cfgname, ambname, picname;
 
 VARP(savebak, 0, 2, 2);
-VARR(randomambience, 0, 1, 1);
+VARR(atmos, 0, 1, 1);
 
 void setmapfilenames(const char *fname, const char *cname = NULL)
 {
@@ -159,13 +159,9 @@ void setmapfilenames(const char *fname, const char *cname = NULL)
     formatstring(cfgname, "media/map/%s.cfg", cname ? cname : fname);
     formatstring(picname, "media/map/%s.png", fname);
 
-    if(map_atmo == 0) map_atmo = rnd(9)+1;  //+1 cuz map_atmo 0 = random
-    if(randomambience) formatstring(ambname, "config/atmos/atmo_%d.cfg", map_atmo);
-
     path(ogzname);
     path(bakname);
     path(cfgname);
-    path(ambname);
     path(picname);
 }
 
@@ -876,9 +872,17 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     clearmainmenu();
 
     identflags |= IDF_OVERRIDDEN;
+
     execfile("config/default_map_settings.cfg", false);
     execfile(cfgname, false);
-    if(randomambience) execfile(ambname, false);
+    if(!map_atmo) map_atmo = rnd(9)+1;  //+1 cuz map_atmo 0 = random
+    if(atmos)
+    {
+        formatstring(ambname, "config/atmos/atmo_%d.cfg", map_atmo);
+        execfile(ambname, false);
+    }
+    else map_atmo = 0;
+
     identflags &= ~IDF_OVERRIDDEN;
 
     preloadusedmapmodels(true);

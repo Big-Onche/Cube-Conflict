@@ -673,7 +673,7 @@ namespace game
                             if(m.timeinair>50) anim |= ((ANIM_JUMP) | ANIM_END) << ANIM_SECONDARY;
                             else if(dir) anim |= (dir | ANIM_LOOP) << ANIM_SECONDARY;
 
-                            if(m.move && m.physstate==PHYS_FLOOR && randomevent(0.16f*gfx::nbfps)) particle_splash(randomambience && (lookupmaterial(m.feetpos())==MAT_WATER || map_atmo==4 || map_atmo==8) ? PART_WATER : PART_SMOKE, 3, 120, m.feetpos(), randomambience && map_atmo==4 ? 0x131313 : 0x333022, 6.0f+rnd(5), 150, 15);
+                            if(m.move && m.physstate==PHYS_FLOOR && randomevent(0.16f*gfx::nbfps)) particle_splash(atmos && (lookupmaterial(m.feetpos())==MAT_WATER || map_atmo==4 || map_atmo==8) ? PART_WATER : PART_SMOKE, 3, 120, m.feetpos(), atmos && map_atmo==4 ? 0x131313 : 0x333022, 6.0f+rnd(5), 150, 15);
                         }
                     }
 

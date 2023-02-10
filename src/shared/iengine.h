@@ -566,7 +566,7 @@ extern void getsteamname();
 extern void genpseudo(int forcelang = 0);
 
 // maps & atmos
-extern int randomambience;
+extern int atmos;
 extern float wateramplitude;
 
 // hud and menus

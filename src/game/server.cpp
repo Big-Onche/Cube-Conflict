@@ -1988,21 +1988,25 @@ namespace server
             putint(p, -1);
             welcomeinitclient(p, ci ? ci->clientnum : -1);
         }
-        if(!ci)
+
+        if(m_identique)
         {
-            if(m_identique)
-            {
-                putint(p, N_IDENTIQUEARME);
-                putint(p, curweapon);
-                sendf(-1, 1, "ri2", N_IDENTIQUEARME, curweapon);
-            }
-            if(gamemillis>10000)
-            {
-                putint(p, N_PREMISSION);
-                putint(p, 0);
-                sendf(-1, 1, "ri2", N_PREMISSION, 0);
-            }
+            putint(p, N_IDENTIQUEARME);
+            putint(p, curweapon);
+            sendf(-1, 1, "ri2", N_IDENTIQUEARME, curweapon);
         }
+
+        if(gamemillis>10000)
+        {
+            putint(p, N_PREMISSION);
+            putint(p, 0);
+            sendf(-1, 1, "ri2", N_PREMISSION, 0);
+        }
+
+        putint(p, N_SERVAMBIENT);
+        putint(p, servambient);
+        sendf(-1, 1, "ri2", N_SERVAMBIENT, servambient);
+
         if(smode) smode->initclient(ci, p, true);
         return 1;
     }
@@ -2125,6 +2129,8 @@ namespace server
 
     void rotatemap(bool next)
     {
+        servambient = rnd(9)+1;
+        sendf(-1, 1, "ri2", N_SERVAMBIENT, servambient);
         if(servrandommode || !servforcemode) gamemode = rnd(17)+2;
         if(servforcemode>-1) gamemode = servforcemode;
         if(!m_tutorial) game::premission = true;
@@ -2136,8 +2142,6 @@ namespace server
         }
         if(next)
         {
-            servambient = rnd(8)+1;
-            sendf(-1, 1, "ri2", N_SERVAMBIENT, servambient);
             curmaprotation = findmaprotation(gamemode, smapname);
             if(curmaprotation >= 0) nextmaprotation();
             else curmaprotation = smapname[0] ? max(findmaprotation(gamemode, ""), 0) : 0;
