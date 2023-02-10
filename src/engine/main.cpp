@@ -1172,13 +1172,11 @@ VAR(numcpus, 1, 1, 16);
 
 extern void changerlangue();
 
-VARFP(GAME_LANG, 0, 0, 1, changerlangue());
-
-void changerlangue()
-{
-    if(GAME_LANG) {execfile("config/keymap_EN.cfg"); execfile("config/default_EN.cfg"); execfile("config/astuces_EN.cfg");}
-    else {execfile("config/keymap_FR.cfg"); execfile("config/default_FR.cfg"); execfile("config/astuces_FR.cfg");}
-}
+VARFP(GAME_LANG, 0, 0, 1,
+    GAME_LANG ? execfile("config/astuces_EN.cfg") : execfile("config/astuces_FR.cfg");
+    execfile("config/keymap.cfg");
+    execfile("config/default_binds.cfg");
+);
 
 bool initsteam()
 {
@@ -1198,9 +1196,7 @@ bool initsteam()
     #endif
 }
 
-bool rewritelangage = false;
-int newlangage;
-
+int newlang = -1;
 bool IS_USING_STEAM = false;
 bool IS_ON_OFFICIAL_SERV = false;
 
@@ -1248,8 +1244,8 @@ int main(int argc, char **argv)
             case 'w': scr_w = clamp(atoi(&argv[i][2]), SCR_MINW, SCR_MAXW); if(!findarg(argc, argv, "-h")) scr_h = -1; break;
             case 'h': scr_h = clamp(atoi(&argv[i][2]), SCR_MINH, SCR_MAXH); if(!findarg(argc, argv, "-w")) scr_w = -1; break;
             case 'f': fullscreen = atoi(&argv[i][2]); break;
-            case 'a': GAME_LANG = 0; rewritelangage = true; newlangage = 0; break;
-            case 'b': GAME_LANG = 1; rewritelangage = true; newlangage = 1; break;
+            case 'a': newlang = 0; break;
+            case 'b': newlang = 1; break;
             case 'l':
             {
                 char pkgdir[] = "media/";
@@ -1323,6 +1319,7 @@ int main(int argc, char **argv)
     textureload("media/interface/hud/fullscreen/vampire.png");
     textureload("media/interface/hud/fullscreen/rage.png");
     textureload("media/interface/hud/fullscreen/shrooms.png");
+    textureload("media/map/0.png");
     textureload("media/map/1.png");
     textureload("media/map/2.png");
     textureload("media/map/3.png");
@@ -1345,13 +1342,6 @@ int main(int argc, char **argv)
 
     logoutf("init: cfg");
     initing = INIT_LOAD;
-
-    switch(newlangage)
-    {
-        case 0: execfile("config/keymap_FR.cfg"); break;
-        case 1: execfile("config/keymap_EN.cfg");
-    }
-
     execfile("config/stdedit.cfg");
     execfile(game::gameconfig());
     execfile("config/sound.cfg");
@@ -1367,22 +1357,18 @@ int main(int argc, char **argv)
     game::player1->playermodel = 0;
 
     identflags |= IDF_PERSIST;
-
     if(!execfile(game::savedconfig(), false))
     {
-        execfile(newlangage ? "config/default_EN.cfg" : "config/default_FR.cfg");
-        writecfg(game::restoreconfig());
+        execfile("config/keymap.cfg");
+        execfile("config/default_binds.cfg");
     }
+
+    if(newlang>-1) GAME_LANG = newlang;
+    execfile("config/keymap.cfg");
+
+    GAME_LANG ? execfile("config/astuces_EN.cfg") : execfile("config/astuces_FR.cfg");
+
     execfile(game::autoexec(), false);
-
-    if(rewritelangage) GAME_LANG = newlangage;
-
-    switch(GAME_LANG)
-    {
-        case 0: if(rewritelangage)execfile("config/keymap_FR.cfg"); execfile("config/default_FR.cfg"); execfile("config/astuces_FR.cfg"); break;
-        case 1: if(rewritelangage)execfile("config/keymap_EN.cfg"); execfile("config/default_EN.cfg"); execfile("config/astuces_EN.cfg");
-    }
-
     execfile("config/ui/main.cfg");
 
     renderbackground(GAME_LANG ? "Loading..." : "Chargement...");

@@ -196,16 +196,16 @@ struct keym
 
 hashtable<int, keym> keyms(128);
 
-void keymap(int *code, char *key)
+void keymap(int *code, char *keyen, char *keyfr)
 {
     if(identflags&IDF_OVERRIDDEN) { conoutf(CON_ERROR, "cannot override keymap %d", *code); return; }
     keym &km = keyms[*code];
     km.code = *code;
     DELETEA(km.name);
-    km.name = newstring(key);
+    km.name = newstring(GAME_LANG ? keyen : keyfr);
 }
 
-COMMAND(keymap, "is");
+COMMAND(keymap, "iss");
 
 keym *keypressed = NULL;
 char *keyaction = NULL;

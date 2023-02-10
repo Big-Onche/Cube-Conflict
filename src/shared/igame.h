@@ -44,7 +44,6 @@ namespace game
     extern const char *gameident();
     extern const char *gameconfig();
     extern const char *savedconfig();
-    extern const char *restoreconfig();
     extern const char *autoexec();
     extern const char *savedservers();
     extern void loadconfigs();
