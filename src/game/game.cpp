@@ -738,7 +738,7 @@ namespace game
             }
             else
             {
-                conoutf(contype, "\f2%s %s%s \fd(%s)", aname, GAME_LANG ? "" : actor==player1 ? "as " : "a ", GAME_LANG ? "fragged a teammate" : "tué un allié" , dname); //Quelqu'un a ou TU as tué un de ses alliés
+                conoutf(contype, "\f2%s %s%s (%s)", aname, GAME_LANG ? "" : actor==player1 ? "as " : "a ", GAME_LANG ? "fragged a teammate" : "tué un allié" , dname); //Quelqu'un a ou TU as tué un de ses alliés
                 if(actor==player1) {addstat(1, STAT_ALLIESTUES); unlockachievement(ACH_CPASBIEN);}
             }
         }
