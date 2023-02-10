@@ -83,6 +83,25 @@ Files :	media/sound/mapsound/indoor_1.ogg 			license_certificate_R3FY29ABTJ (ind
 	media/sound/weap_shoot/m32_1.ogg			license_certificate_XXXXXXXX (m32_X).txt
 	media/sound/weap_shoot/m32_2.ogg
 	media/sound/weap_shoot/m32_3.ogg
+	media/sound/weap_shoot/flamethrower.ogg			license_certificate_34LXWTZKMH (flamethrower.ogg).txt
+	media/sound/weap_shoot/mossberg_1.ogg			license_certificate_R5NUYGE39X (mossberg_X.ogg).txt
+	media/sound/weap_shoot/mossberg_2.ogg
+	media/sound/weap_shoot/mossberg_3.ogg
+	media/sound/weap_shoot/hydra_1.ogg			license_certificate_RS6MJUL27Z (hydra_X.ogg).txt
+	media/sound/weap_shoot/hydra_2.ogg
+	media/sound/weap_shoot/hydra_3.ogg
+	media/sound/weap_shoot/sv98_1.ogg			license_certificate_6GRVES9MBF (sv98_X.ogg).txt		license_certificate_73PBJWM9FA (sv98_X.ogg).txt
+	media/sound/weap_shoot/sv98_2.ogg
+	media/sound/weap_shoot/sv98_3.ogg
+	media/sound/weap_shoot/crossbow_1.ogg			license_certificate_LUDF2Y94MP (crossbow_X.ogg).txt
+	media/sound/weap_shoot/crossbow_2.ogg
+	media/sound/weap_shoot/crossbow_3.ogg
+	media/sound/weap_shoot/grap1_1.ogg			license_certificate_3HZ27XQG4D (grap1_X.ogg).txt
+	media/sound/weap_shoot/grap1_2.ogg
+	media/sound/weap_shoot/grap1_3.ogg
+	media/sound/weap_shoot/fireworks_1.ogg			license_certificate_7HKFRUX9Z8 (fireworks_X.ogg).txt	license_certificate_YR56VAHWJL (fireworks_X.ogg).txt
+	media/sound/weap_shoot/fireworks_2.ogg
+	media/sound/weap_shoot/fireworks_3.ogg
 	media/sound/weap_shoot/sword_1				license_certificate_8JTVGMWZKA (sword_x.ogg).txt
 	media/sound/weap_shoot/sword_2
 	media/sound/weap_shoot/sword_3
@@ -183,4 +202,18 @@ Files :	media/sound/game/weap_shoot/electricrifle_1.ogg
 	media/sound/game/weap_shoot/minigun_1.ogg
 	media/sound/game/weap_shoot/minigun_2.ogg
 	media/sound/game/weap_shoot/minigun_3.ogg
-	media/sound/game/weap_shoot/lanceflammes.ogg
+	media/sound/game/weap_shoot/uzi_1.ogg
+	media/sound/game/weap_shoot/uzi_2.ogg
+	media/sound/game/weap_shoot/uzi_3.ogg
+	media/sound/game/weap_shoot/famas_1.ogg
+	media/sound/game/weap_shoot/famas_2.ogg
+	media/sound/game/weap_shoot/famas_3.ogg
+	media/sound/game/weap_shoot/sks_1.ogg
+	media/sound/game/weap_shoot/sks_2.ogg
+	media/sound/game/weap_shoot/sks_3.ogg
+	media/sound/game/weap_shoot/ak47_1.ogg
+	media/sound/game/weap_shoot/ak47_2.ogg
+	media/sound/game/weap_shoot/ak47_3.ogg
+	media/sound/game/weap_shoot/glock_1.ogg
+	media/sound/game/weap_shoot/glock_2.ogg
+	media/sound/game/weap_shoot/glock_3.ogg
