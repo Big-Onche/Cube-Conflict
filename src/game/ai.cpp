@@ -1640,7 +1640,7 @@ namespace ai
                 {
                      int link = w.links[j];
                      if(!link) break;
-                     particle_flare(w.o, waypoints[link].o, 1, PART_F_SHOTGUN, 0x0000FF);
+                     particle_flare(w.o, waypoints[link].o, 1, PART_F_SHOTGUN, 0x4444FF, 0.35);
                 }
             }
         }

@@ -877,7 +877,7 @@ static partrenderer *parts[] =
     new quadrenderer("media/particles/flashes/sniper.png", PT_PART|PT_FEW|PT_BRIGHT|PT_TRACK),                               // PART_MF_SNIPER
     // bullets flares
     new taperenderer("media/particles/trails/bullet_side.png", PT_TAPE|PT_FEW|PT_BRIGHT),                                    // PART_F_BULLET
-    new taperenderer("media/particles/trails/shotgun_side.png", PT_TAPE|PT_FEW|PT_BRIGHT),                                   // PART_F_SHOTGUN
+    new taperenderer("media/particles/trails/shotgun_side.png", PT_TAPE|PT_BRIGHT),                                          // PART_F_SHOTGUN
     new taperenderer("media/particles/trails/plasma_side.png", PT_TAPE|PT_FEW|PT_BRIGHT),                                    // PART_F_PLASMA
     new quadrenderer("media/particles/trails/spock_front.png", PT_PART|PT_FEW|PT_HFLIP|PT_BRIGHT),                           // PART_SPOCK_FRONT
     new quadrenderer("media/particles/trails/plasma_front.png", PT_PART|PT_FLIP|PT_FEW|PT_BRIGHT),                           // PART_PLASMA_FRONT
@@ -922,7 +922,7 @@ static partrenderer *parts[] =
 };
 
 VARFP(maxparticles, 10, 8000, 20000, initparticles());
-VARFP(fewparticles, 10, 200, 10000, initparticles());
+VARFP(fewparticles, 10, 500, 10000, initparticles());
 
 void initparticles()
 {
