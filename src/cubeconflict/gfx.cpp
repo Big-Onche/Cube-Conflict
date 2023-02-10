@@ -236,7 +236,7 @@ namespace gfx
                 break;
             case ATK_RAIL_SHOOT:
                 loopi(2) particle_flare(muzzlepos, to, 50+rnd(50), PART_LIGHTNING, 0x8888FF, 1.5f+rnd(2), NULL, gfx::champicolor);
-                particle_flare(muzzlepos, muzzlepos, 140, PART_MF_ELEC, d->ragemillis || hasroids(d) ? 0xFF2222 : d->abilitymillis[game::ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0x50CFFF, 2.f/adaptpartsize(d), d, champicolor);
+                particle_flare(muzzlepos, muzzlepos, 140, PART_MF_ELEC, d->ragemillis || hasroids(d) ? 0xFF2222 : d->abilitymillis[game::ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0x50CFFF, 4.f/adaptpartsize(d), d, champicolor);
                 adddynlight(muzzlepos, 100, vec(0.25f, 0.75f, 2.0f), 40, 2, lightflags, 0, vec(0.25f, 0.75f, 2.0f), d);
                 break;
             case ATK_SMAW_SHOOT:
