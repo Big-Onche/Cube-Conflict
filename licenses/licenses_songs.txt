@@ -9,8 +9,8 @@ Files :	media/songs/launcher.mp3 	license_certificate_7XNJRLTEZ8 (launcher.mp3).
 	media/songs/premission.ogg 	license_certificate_LRNY9GTZ4K (premission.ogg).txt
 	media/songs/pause.ogg 		license_certificate_BJ9VEKD8ZW (pause.ogg).txt
 	media/songs/tutorial.ogg 	license_certificate_ZKMUR95SEL (tutorial.ogg).txt
-
-
-license_certificate_NJQE2MPDLF (factory.ogg).txt
-license_certificate_W4EJKVSR2A (moon.ogg).txt
-license_certificate_UXJSGYRMNC (volcano.ogg).txt
+	media/songs/village.ogg 	license_certificate_6349XQ8FBL (village.ogg).txt
+	media/songs/factory.ogg		license_certificate_NJQE2MPDLF (factory.ogg).txt
+	media/songs/moon.ogg		license_certificate_W4EJKVSR2A (moon.ogg).txt
+	media/songs/castle.ogg		license_certificate_W4EJKVSR2A (moon.ogg).txt
+	media/songs/volcano.ogg		license_certificate_UXJSGYRMNC (volcano.ogg).txt
