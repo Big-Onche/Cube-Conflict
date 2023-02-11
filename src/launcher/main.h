@@ -29,7 +29,7 @@
 
 //config
 extern std::string LAUNCHER_VERSION;
-extern int Language, PlayMusic;
+extern int Language, PlayMusic, ChangedLang;
 extern int wx, wh;
 extern void LoadConfigFile();
 extern void WriteConfigFile();

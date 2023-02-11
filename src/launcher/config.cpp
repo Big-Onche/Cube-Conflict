@@ -5,6 +5,7 @@ using namespace std;
 
 int PlayMusic = 1;
 int Language = 0; //0 = FR, 1 = EN
+int ChangedLang = 1;
 
 int wx = 1000; //Largeur de la fenêtre
 int wh = 600;  //Hauteur de la fenêtre
@@ -21,12 +22,12 @@ void LoadConfigFile()
     versionFile.open(ConfigDir, ios::in);
     if(versionFile.is_open())
     {
-        string line1;
-        string line2;
-        versionFile >> line1 >> line2;
+        string line1, line2, line3;
+        versionFile >> line1 >> line2 >> line3;
 
         Language = std::stoi(line1);
         PlayMusic = std::stoi(line2);
+        ChangedLang = std::stoi(line3);
 
         versionFile.close();
     }
@@ -50,7 +51,7 @@ void WriteConfigFile()
 
     FILE *ConfigFile = fopen(ConfigDir, "w");
 
-    fprintf(ConfigFile, "%d\n%d", Language, PlayMusic);
+    fprintf(ConfigFile, "%d\n%d\n%d", Language, PlayMusic, ChangedLang);
 
     fclose(ConfigFile);
 }

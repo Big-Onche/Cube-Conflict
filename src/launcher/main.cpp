@@ -100,11 +100,11 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
             ShellExecute(NULL, "open", "https://cube-conflict.fandom.com/fr/wiki/Wiki_Cube_Conflict", NULL, NULL, SW_SHOW);
             break;
         case LANG_MENU_SETUPFRENCH:
-            Language = 0;
+            Language = 0, ChangedLang = 1;
             Redraw(hWnd);
             break;
         case LANG_MENU_SETUPENGLISH:
-            Language = 1;
+            Language = 1, ChangedLang = 1;
             Redraw(hWnd);
             break;
             //////////////////////////////////////////////////////////////Menu Outils////////////////////////////////
@@ -151,6 +151,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
         }
     break;
     case WM_DESTROY:
+        ChangedLang = 0;
         WriteConfigFile();
         PostQuitMessage(0);
         break;
