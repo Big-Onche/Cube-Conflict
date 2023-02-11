@@ -341,12 +341,12 @@ namespace game
         f->printf("name %s\n", escapestring(player1->name));
     }
 
-    bool allowedittoggle()
+    bool allowedittoggle(bool msg)
     {
         if(editmode) return true;
         if(isconnected() && multiplayer(false) && !m_edit)
         {
-            conoutf(CON_ERROR, GAME_LANG ? "Editing in multiplayer requires edit mode" : "Editer la map en multijoueurs requiert le mode édition de map.");
+            if(msg) conoutf(CON_ERROR, GAME_LANG ? "Editing in multiplayer requires edit mode" : "Editer la map en multijoueurs requiert le mode édition de map.");
             return false;
         }
         return execidentbool("allowedittoggle", true);
