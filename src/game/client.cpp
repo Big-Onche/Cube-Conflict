@@ -346,7 +346,7 @@ namespace game
         if(editmode) return true;
         if(isconnected() && multiplayer(false) && !m_edit)
         {
-            conoutf(CON_ERROR, "editing in multiplayer requires edit mode");
+            conoutf(CON_ERROR, GAME_LANG ? "Editing in multiplayer requires edit mode" : "Editer la map en multijoueurs requiert le mode édition de map.");
             return false;
         }
         return execidentbool("allowedittoggle", true);
@@ -377,47 +377,6 @@ namespace game
         return logodir;
     }
     ICOMMAND(getclientaptilogo, "iii", (int *cn, bool *force, int *numapt), result(getclientaptilogo(*cn, *force, *numapt)));
-
-    string tempprefix;
-    const char *prefix(int value, bool needplus = true)
-    {
-        if(value>=15) formatstring(tempprefix, "\fh");
-        else if(value>=5) formatstring(tempprefix, "\fj");
-        else if(value<=-15) formatstring(tempprefix, "\f3");
-        else if (value<=-5) formatstring(tempprefix, "\f6");
-        else formatstring(tempprefix, "\f2");
-
-        if(value > 0) formatstring(tempprefix, "%s%s", tempprefix, needplus ? "+" : "");
-
-        return tempprefix;
-    }
-
-    string tempstat;
-    const char *getaptistat(int stat)
-    {
-        switch(stat)
-        {
-            case 0: formatstring(tempstat, "\fb %s %s%d%%", GAME_LANG ? "Damage :" : "Dégâts :", prefix(aptitudes[player1->aptitude].apt_degats-100), aptitudes[player1->aptitude].apt_degats-100); break;
-            case 1: formatstring(tempstat, "\fb %s %s%d%%", GAME_LANG ? "Resistance :" : "Résistance :", prefix(aptitudes[player1->aptitude].apt_resistance-100), aptitudes[player1->aptitude].apt_resistance-100); break;
-            case 2: formatstring(tempstat, "\fb %s %s%d%%", GAME_LANG ? "Accuracy :" : "Précision :", prefix(aptitudes[player1->aptitude].apt_precision-100), aptitudes[player1->aptitude].apt_precision-100); break;
-            case 3:
-            {
-                int realspeedspec = (aptitudes[player1->aptitude].apt_vitesse-1000)*-0.1f;
-                formatstring(tempstat, "\fb %s %s%d%%", GAME_LANG ? "Speed :" : "Vitesse :", prefix(realspeedspec), realspeedspec);
-            }
-        }
-
-        return tempstat;
-    }
-    ICOMMAND(getaptistat, "i", (int *stat), result(getaptistat(*stat)));
-
-    string tmp_apt;
-    const char *getaptiname(bool forceapt = false, int aptnum = 0)
-    {
-        formatstring(tmp_apt, "%s", GAME_LANG ? aptitudes[forceapt ? aptnum : player1->aptitude].apt_nomEN : aptitudes[forceapt ? aptnum : player1->aptitude].apt_nomFR);
-        return tmp_apt;
-    }
-    ICOMMAND(getaptiname, "ii", (bool *forceapt, int *aptnum), result(getaptiname(*forceapt, *aptnum)));
 
     int getaptistatval(int apt, int stat)
     {
