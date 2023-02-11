@@ -872,17 +872,15 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     clearmainmenu();
 
     identflags |= IDF_OVERRIDDEN;
-
     execfile("config/default_map_settings.cfg", false);
     execfile(cfgname, false);
-    if(!map_atmo) map_atmo = rnd(9)+1;  //+1 cuz map_atmo 0 = random
+    if(!map_atmo) map_atmo = rnd(9)+1;
     if(atmos)
     {
         formatstring(ambname, "config/atmos/atmo_%d.cfg", map_atmo);
         execfile(ambname, false);
     }
     else map_atmo = 0;
-
     identflags &= ~IDF_OVERRIDDEN;
 
     preloadusedmapmodels(true);

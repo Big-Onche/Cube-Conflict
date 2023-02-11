@@ -131,7 +131,7 @@ namespace entities
         if(type<I_RAIL || type>I_MANA) return;
         ents[n]->clearspawned();
         if(!d) return;
-        d->pickupitem(type, d->aptitude, d->abilitymillis[ABILITY_1], d->armourtype==A_ASSIST, rndsweap);
+        d->pickupitem(type, d->aptitude, d->abilitymillis[ABILITY_1], d->armourtype==A_ASSIST && d->armour, rndsweap);
 
         if(type>=I_RAIL && type<=I_SUPERARME)
         {
@@ -250,7 +250,7 @@ namespace entities
         switch(e->type)
         {
             default:
-                if(d->canpickupitem(ents[n]->type, d->aptitude, d->armourtype==A_ASSIST))
+                if(d->canpickupitem(ents[n]->type, d->aptitude, d->armourtype==A_ASSIST && d->armour))
                 {
                     addmsg(N_ITEMPICKUP, "rci", d, n);
                     ents[n]->clearspawned(); // even if someone else gets it first
