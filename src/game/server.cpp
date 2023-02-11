@@ -3,7 +3,8 @@
 
 VARP(gamelength, 1, 10, 60);
 
-int nextweapon, curweapon, servambient = rnd(9);
+int nextweapon, curweapon;
+int servambient = rnd(9)+1;
 
 namespace game
 {
@@ -1989,23 +1990,26 @@ namespace server
             welcomeinitclient(p, ci ? ci->clientnum : -1);
         }
 
-        if(m_identique)
+        if(!ci)
         {
-            putint(p, N_IDENTIQUEARME);
-            putint(p, curweapon);
-            sendf(-1, 1, "ri2", N_IDENTIQUEARME, curweapon);
-        }
+            if(m_identique)
+            {
+                putint(p, N_IDENTIQUEARME);
+                putint(p, curweapon);
+                sendf(-1, 1, "ri2", N_IDENTIQUEARME, curweapon);
+            }
 
-        if(gamemillis>10000)
-        {
-            putint(p, N_PREMISSION);
-            putint(p, 0);
-            sendf(-1, 1, "ri2", N_PREMISSION, 0);
-        }
+            if(gamemillis>10000)
+            {
+                putint(p, N_PREMISSION);
+                putint(p, 0);
+                sendf(-1, 1, "ri2", N_PREMISSION, 0);
+            }
 
-        putint(p, N_SERVAMBIENT);
-        putint(p, servambient);
-        sendf(-1, 1, "ri2", N_SERVAMBIENT, servambient);
+            putint(p, N_SERVAMBIENT);
+            putint(p, servambient);
+            sendf(-1, 1, "ri2", N_SERVAMBIENT, servambient);
+        }
 
         if(smode) smode->initclient(ci, p, true);
         return 1;
