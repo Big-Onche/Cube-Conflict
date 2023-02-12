@@ -762,7 +762,7 @@ namespace game
                 {
                     if(distance>=100.f) unlockachievement(ACH_BEAUTIR);
                     if(player1->state==CS_DEAD) unlockachievement(ACH_TUEURFANTOME);
-                    if(player1->health<=100 && player1->state==CS_ALIVE) unlockachievement(ACH_1HPKILL);
+                    if(player1->health<=10 && player1->state==CS_ALIVE) unlockachievement(ACH_1HPKILL);
 
                     switch(atk)
                     {
