@@ -761,7 +761,7 @@ namespace game
                 if(IS_ON_OFFICIAL_SERV) //now let's check for shittons of achievements if playing online
                 {
                     if(distance>=100.f) unlockachievement(ACH_BEAUTIR);
-                    if(player1->state==CS_DEAD) unlockachievement(ACH_TUEURFANTOME);
+                    if(player1->state==CS_DEAD && player1->lastpain > 200) unlockachievement(ACH_TUEURFANTOME);
                     if(player1->health<=10 && player1->state==CS_ALIVE) unlockachievement(ACH_1HPKILL);
 
                     switch(atk)
