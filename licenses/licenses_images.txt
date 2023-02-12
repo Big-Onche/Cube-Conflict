@@ -31,6 +31,11 @@ Files : media/sky/2_lf.jpg				license_certificate_XN6YJZL7D5.txt
 	media/decals/warn_overheardload.png
 	media/decals/warn_radioactivity.png
 	media/decals/warn_rotatingparts.png
+	media/model/objets/panachay/bouteille.jpg	license_certificate_YZCXB9QG6D (bouteille.jpg - capsule.jpg - panachay.jpg).txt
+	media/model/objets/panachay/capsule.jpg
+	media/model/mapmodel/panachay.jpg
+	media/model/mapmodel/panachay.jpg		license_certificate_ZMK8XC6EVT (panachay.jpg)
+
 
 -------------------------------------------------------------------------------------------------------
 
