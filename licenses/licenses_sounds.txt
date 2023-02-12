@@ -76,6 +76,7 @@ Files :	media/sound/mapsound/indoor_1.ogg 			license_certificate_R3FY29ABTJ (ind
 	media/sound/ent_player/die_p1.ogg 			license_certificate_4B5ACNP78M (die_p1.ogg).txt
 	media/sound/ent_player/die_1.ogg			license_certificate_TX3ZEW784D (die_1.ogg).txt
 	media/sound/ent_player/die_2.ogg			license_certificate_LUX4WVGB6J (die_2.ogg).txt
+	note: licenses are identical for media/sound/weap_shoot/mid_dist* too
 	media/sound/weap_shoot/plasma_rifle_sfx.ogg		license_certificate_XXXXXXXX (plasma_rifle_sfx).txt
 	media/sound/weap_shoot/spockgun_1.ogg			license_certificate_XXXXXXXX (spockgun_X).txt
 	media/sound/weap_shoot/spockgun_2.ogg
@@ -102,6 +103,7 @@ Files :	media/sound/mapsound/indoor_1.ogg 			license_certificate_R3FY29ABTJ (ind
 	media/sound/weap_shoot/fireworks_1.ogg			license_certificate_7HKFRUX9Z8 (fireworks_X.ogg).txt	license_certificate_YR56VAHWJL (fireworks_X.ogg).txt
 	media/sound/weap_shoot/fireworks_2.ogg
 	media/sound/weap_shoot/fireworks_3.ogg
+	media/sound/weap_shoot/nuke.ogg				license_certificate_2968HCARTU (nuke.ogg).txt
 	media/sound/weap_shoot/sword_1				license_certificate_8JTVGMWZKA (sword_x.ogg).txt
 	media/sound/weap_shoot/sword_2
 	media/sound/weap_shoot/sword_3
@@ -117,6 +119,10 @@ Files :	media/sound/mapsound/indoor_1.ogg 			license_certificate_R3FY29ABTJ (ind
 	media/sound/weap_shoot/saber_1				license_certificate_4A63FU2JQX (saber_x.ogg).txt
 	media/sound/weap_shoot/saber_2
 	media/sound/weap_shoot/saber_3
+	
+	media/sound/bullets/impactbody_1.ogg			license_certificate_V3B84XDQGL (impactbody_X.ogg).txt
+	media/sound/bullets/impactbody_2.ogg
+	media/sound/bullets/impactbody_3.ogg
 	media/sound/items/mana_1.ogg				license_certificate_W2D56JCRMY (mana_X.ogg).txt
 	media/sound/items/mana_2.ogg
 	media/sound/items/mana_3.ogg
@@ -180,7 +186,44 @@ Files :	media/sound/mapsound/indoor_1.ogg 			license_certificate_R3FY29ABTJ (ind
 	media/sound/quests/notification.ogg			license_certificate_U6KFYCWMXQ (notification.ogg).txt
 	media/sound/notifications/invasion.ogg			license_certificate_C7A2NEKVZH (invasion.ogg).txt
 	media/sound/notification/alien_invasion.ogg		license_certificate_5HPAN6MYVQ (alien_invasion.ogg).txt
+	media/sound/ui/click_1.ogg				license_certificate_T7V86YNQZ2 (click_X.ogg).txt
+	media/sound/ui/click_2.ogg
+	media/sound/ui/click_3.ogg
+	media/sound/ui/scroll_up.ogg				license_certificate_JVF3TH7CL2 (scroll_up.ogg - scroll_down.ogg).txt
+	media/sound/ui/scroll_down.ogg				license_certificate_JVF3TH7CL2 (scroll_up.ogg - scroll_down.ogg).txt
 	media/sound/ui/cashregister.ogg				license_certificate_KLWBHPY438 (cashregister.ogg).txt
+	media/sound/ui/error.ogg				license_certificate_FC4ANJMZSY (error.ogg).txt
+	media/sound/ui/soldier.ogg				license_certificate_LBF2UD8TJ4 (soldier.ogg).txt
+	media/sound/ui/medic.ogg				license_certificate_FADJWG9Y7K (medic.ogg).txt
+	media/sound/ui/american.ogg				license_certificate_FADJWG9Y7K (american.ogg).txt
+	media/sound/ui/ninja.ogg				license_certificate_8TWUD9CBAR (ninja.ogg).txt
+	media/sound/ui/vampire.ogg				license_certificate_CSJLUAPHXW (vampire.ogg).txt
+	media/sound/ui/wizard.ogg				license_certificate_SF96J3YDLA (wizard.ogg).txt
+	media/sound/ui/kamikaze.ogg				license_certificate_4N6PCLD3XQ (kamikaze.ogg).txt
+	media/sound/ui/reaper.ogg				license_certificate_FVYASHCZPU (reaper.ogg).txt
+	media/sound/ui/physicist.ogg				license_certificate_6HA5EBNU4Q (physicist.ogg).txt
+	media/sound/ui/camper.ogg				license_certificate_N4D9YAVB2U (camper.ogg).txt
+	media/sound/ui/spy.ogg					license_certificate_BSZ9HC6Y3Q (spy.ogg).txt
+	media/sound/ui/priest.ogg				license_certificate_RT456HS8C2 (priest.ogg).txt
+	media/sound/ui/viking.ogg				license_certificate_2FDS7XT6CW (viking.ogg - roids_X.ogg - roids_pupout.ogg).txt
+	media/sound/ui/junkie.ogg				license_certificate_5JT983UKL2 (junkie.ogg).txt
+	media/sound/ui/shoshone.ogg				license_certificate_AHRM9Z2N7V (shoshone.ogg).txt
+	media/sound/items_sounds/roids_1.ogg			license_certificate_2FDS7XT6CW (viking.ogg - roids_X.ogg - roids_pupout.ogg).txt
+	media/sound/items_sounds/roids_2.ogg
+	media/sound/items_sounds/roids_3.ogg
+	media/sound/items_sounds/roids_4.ogg
+	media/sound/items_sounds/roids_5.ogg
+	media/sound/items_sounds/roids_6.ogg
+	media/sound/items_sounds/roids_7.ogg
+	media/sound/items_sounds/roids_far_1.ogg
+	media/sound/items_sounds/roids_far_2.ogg
+	media/sound/items_sounds/roids_far_3.ogg
+	media/sound/items_sounds/roids_far_4.ogg
+	media/sound/items_sounds/roids_far_5.ogg
+	media/sound/items_sounds/roids_far_6.ogg
+	media/sound/items_sounds/roids_far_7.ogg
+	media/sound/items_sounds/roids_pupout.ogg
+
 
 -------------------------------------------------------------------------------------------------------
 
@@ -190,7 +233,8 @@ Les fichiers suivants ont été crées expressément pour Cube Conflict par ses 
 See / Voir licenses_certificates/cc-by-sa.txt
 
 Created by "Jean Onche" for Cube Conflict | Réalisé par "Jean Onche" pour Cube Conflict
-Files :	media/sound/game/weap_shoot/electricrifle_1.ogg
+Files :	note: licenses are identical for media/sound/weap_shoot/mid_dist* too
+	media/sound/game/weap_shoot/electricrifle_1.ogg
 	media/sound/game/weap_shoot/electricrifle_2.ogg
 	media/sound/game/weap_shoot/electricrifle_3.ogg
 	media/sound/game/weap_shoot/plasmarifle_1.ogg
@@ -217,3 +261,20 @@ Files :	media/sound/game/weap_shoot/electricrifle_1.ogg
 	media/sound/game/weap_shoot/glock_1.ogg
 	media/sound/game/weap_shoot/glock_2.ogg
 	media/sound/game/weap_shoot/glock_3.ogg
+	media/sound/game/weap_shoot/gau8.ogg
+	media/sound/game/weap_shoot/minirockets_1
+	media/sound/game/weap_shoot/minirockets_2
+	media/sound/game/weap_shoot/minirockets_3
+	media/sound/game/weap_shoot/campouze2000_1
+	media/sound/game/weap_shoot/campouze2000_2
+	media/sound/game/weap_shoot/campouze2000_3
+
+	media/sound/weap_shoot/far_dist/lightshoot_1
+	media/sound/weap_shoot/far_dist/lightshoot_2
+	media/sound/weap_shoot/far_dist/lightshoot_3
+	media/sound/weap_shoot/far_dist/heavyshoot_1
+	media/sound/weap_shoot/far_dist/heavyshoot_2
+	media/sound/weap_shoot/far_dist/heavyshoot_3
+	media/sound/weap_shoot/far_dist/veryheavyshoot_1
+	media/sound/weap_shoot/far_dist/veryheavyshoot_2
+	media/sound/weap_shoot/far_dist/veryheavyshoot_3
