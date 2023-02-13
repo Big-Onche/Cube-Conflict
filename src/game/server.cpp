@@ -898,7 +898,6 @@ namespace server
 
     bool delayspawn(int type)
     {
-        if(m_dmsp) return true;
         switch(type)
         {
             case I_BOUCLIERMAGNETIQUE:
@@ -2897,7 +2896,7 @@ namespace server
         {
             clientinfo *ci = clients[i];
             if(ci->state.state==CS_SPECTATOR || ci->state.aitype != AI_NONE || ci->clientmap[0] || ci->mapcrc >= 0 || (req < 0 && ci->warned)) continue;
-            formatstring(msg, "%s has modified map \"%s\"", colorname(ci), smapname);
+            formatstring(msg, GAME_LANG ? "%s has a modified version of the map." : "%s a une version modifiée de la map.", colorname(ci));
             sendf(req, 1, "ris", N_SERVMSG, msg);
             if(req < 0) ci->warned = true;
         }
@@ -2908,7 +2907,7 @@ namespace server
             {
                 clientinfo *ci = clients[j];
                 if(ci->state.state==CS_SPECTATOR || ci->state.aitype != AI_NONE || !ci->clientmap[0] || ci->mapcrc != info.crc || (req < 0 && ci->warned)) continue;
-                formatstring(msg, "%s has modified map \"%s\"", colorname(ci), smapname);
+                formatstring(msg, GAME_LANG ? "%s has a modified version of the map." : "%s a une version modifiée de la map.", colorname(ci));
                 sendf(req, 1, "ris", N_SERVMSG, msg);
                 if(req < 0) ci->warned = true;
             }
