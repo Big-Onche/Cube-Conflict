@@ -610,16 +610,16 @@ namespace game
                 fade -= clamp(float(lastmillis - (d->lastupdate + max(ragdollmillis - ragdollfade, 0)))/min(ragdollmillis, ragdollfade), 0.0f, 1.0f);
             rendertombeplayer(d, fade);
         }
-        if(exclude)
-            renderplayer(exclude, 1, MDL_ONLYSHADOW);
-        else if(!f && (player1->state==CS_ALIVE || (player1->state==CS_EDITING && third) || (player1->state==CS_DEAD && !hidedead)))
-            renderplayer(player1, 1, third ? 0 : MDL_ONLYSHADOW);
         rendermonsters();
-
         entities::renderentities();
         renderbouncers();
         renderprojectiles();
         if(cmode) cmode->rendergame();
+
+        if(exclude)
+            renderplayer(exclude, 1, MDL_ONLYSHADOW);
+        else if(!f && (player1->state==CS_ALIVE || (player1->state==CS_EDITING && third) || (player1->state==CS_DEAD && !hidedead)))
+            renderplayer(player1, 1, third ? 0 : MDL_ONLYSHADOW);
     }
 
     VARP(hudgun, 0, 1, 1);
