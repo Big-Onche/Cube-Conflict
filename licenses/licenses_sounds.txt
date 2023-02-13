@@ -131,12 +131,32 @@ Files :	media/sound/mapsound/indoor_1.ogg 			license_certificate_R3FY29ABTJ (ind
 	media/sound/bullets/bigricochet_1.ogg			license_certificate_2YTRKMX75H (bigricochet_X.ogg).txt
 	media/sound/bullets/bigricochet_2.ogg
 	media/sound/bullets/bigricochet_3.ogg
+	media/sound/bullets/impactarrow_1.ogg			license_certificate_LD3BQWEF8K (impactarrow_X.ogg).txt
+	media/sound/bullets/impactarrow_2.ogg
+	media/sound/bullets/impactarrow_3.ogg					
+	media/sound/bullets/bulletflyby_1.ogg			license_certificate_GVBDHU5E9Q (bulletflyby_X.ogg).txt
+	media/sound/bullets/bulletflyby_2.ogg
+	media/sound/bullets/bulletflyby_3.ogg
+	media/sound/bullets/bulletflyby_4.ogg
+	media/sound/bullets/bulletflyby_5.ogg								
 	media/sound/bullets/projectiles/rocket_1.ogg		license_certificate_P2JKHM9A6G (rocket_1.ogg).txt
 	media/sound/bullets/projectiles/rocket_2.ogg		license_certificate_U346AHRTBQ (rocket_2.ogg).txt
 	media/sound/bullets/projectiles/rocket_3.ogg		license_certificate_EXZDGR9HU5 (rocket_3.ogg).txt
 	media/sound/bullets/projectiles/minirocket.ogg		license_certificate_FJH54SBL7W (minirocket.ogg).txt
-	media/sound/bullets/impactelectric_1.ogg		license_certificate_AKSDT82L3W (impactelectric_X.ogg).txt
 	media/sound/bullets/projectiles/fireworks.ogg		license_certificate_5LWT2A96BN (fireworks.ogg).txt
+	media/sound/bullets/projectiles/flames_1.ogg		license_certificate_QNGJMUBD5R (flames_X.ogg).txt
+	media/sound/bullets/projectiles/flames_2.ogg
+	media/sound/bullets/projectiles/flames_3.ogg
+	media/sound/bullets/projectiles/arrow_1.ogg		license_certificate_RU264Q8NSA (arrow_X.ogg).txt
+	media/sound/bullets/projectiles/arrow_2.ogg
+	media/sound/bullets/projectiles/arrow_3.ogg
+	media/sound/bullets/projectiles/grap1_1.ogg		license_certificate_PDEB5K7V2U (plasma_X.ogg - grap1_X.ogg).txt
+	media/sound/bullets/projectiles/grap1_2.ogg
+	media/sound/bullets/projectiles/grap1_3.ogg
+	media/sound/bullets/projectiles/plasma_1.ogg
+	media/sound/bullets/projectiles/plasma_2.ogg
+	media/sound/bullets/projectiles/plasma_3.ogg
+	media/sound/bullets/impactelectric_1.ogg		license_certificate_AKSDT82L3W (impactelectric_X.ogg).txt
 	media/sound/bullets/impactelectric_2.ogg
 	media/sound/bullets/impactelectric_3.ogg
 	media/sound/items/mana_1.ogg				license_certificate_W2D56JCRMY (mana_X.ogg).txt
@@ -191,6 +211,14 @@ Files :	media/sound/mapsound/indoor_1.ogg 			license_certificate_R3FY29ABTJ (ind
 	media/sound/classes/sho_1.ogg				license_certificate_QTD7LJFYGW (sho_1.ogg).txt
 	media/sound/classes/sho_2.ogg				license_certificate_QP3D9G64ZM (sho_2.ogg).txt
 	media/sound/classes/sho_3.ogg				license_certificate_MNZPR2G76C (sho_3.ogg).txt
+	media/sound/notifications/terminal_hacked.ogg		license_certificate_BCNHRTWDX6 (terminal_hacked.ogg - terminal_lost.ogg).txt
+	media/sound/notifications/terminal_lost.ogg
+	media/sound/notifications/enemy_terminal_hacked.ogg
+	media/sound/notifications/enemy_terminal_lost.ogg
+	media/sound/notifications/terminal_alarm.ogg		license_certificate_N7A4CMR3QY (terminal_alarm.ogg).txt
+	media/sound/notifications/terminal_enter_1.ogg		license_certificate_R2MKYUJAZP (terminal_enter_1.ogg).txt
+	media/sound/notifications/terminal_enter_2.ogg		license_certificate_JRTZL5PAQU (terminal_enter_3.ogg - terminal_enter_2.ogg).txt
+	media/sound/notifications/terminal_enter_3.ogg
 	media/sound/notifications/killstreaks.ogg		license_certificate_NAZYU8Q2P6 (levelup.ogg).txt	license_certificate_L36YTMBPWH (levelup.ogg)
 	media/sound/notifications/killstreaks/x3_1.ogg		license_certificates (killstreaks).txt
 	media/sound/notifications/killstreaks/x3_2.ogg
