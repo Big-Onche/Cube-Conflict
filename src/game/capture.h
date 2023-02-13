@@ -354,7 +354,7 @@ struct captureclientmode : clientmode
     {
         static const char * const basemodels[3] = { "base/neutral", "base/red", "base/yellow" };
         loopi(3) preloadmodel(basemodels[i]);
-        loopi(6) preloadsound(S_TERMINAL+i);
+        loopi(6) preloadsound(S_TERMINAL_HACKED+i);
     }
 
     int bliptimer = 0;
