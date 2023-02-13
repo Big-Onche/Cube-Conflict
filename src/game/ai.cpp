@@ -61,7 +61,7 @@ namespace ai
 
     float attackmindist(int atk)
     {
-        return atk==ATK_KAMIKAZE_SHOOT ? true : max(int(attacks[atk].exprad/4), 2);
+        return atk==ATK_KAMIKAZE_SHOOT || atk==ATK_NUKE_SHOOT ? true : max(int(attacks[atk].exprad/4), 2);
     }
 
     float attackmaxdist(int atk)
@@ -1145,7 +1145,7 @@ namespace ai
         gameent *e = getclient(d->ai->enemy);
         bool enemyok = e && targetable(d, e);
 
-        if(enemyok && (d->aptitude==APT_KAMIKAZE || d->aptitude==APT_NINJA))
+        if(enemyok && (d->aptitude==APT_KAMIKAZE || d->aptitude==APT_NINJA || d->gunselect==GUN_LANCEFLAMMES))
         {
             makeroute(d, b, e->o);
             if(d->abilitymillis[ABILITY_2]<500 && d->abilitymillis[ABILITY_2] && d->aptitude==APT_KAMIKAZE) d->gunselect=GUN_KAMIKAZE;
