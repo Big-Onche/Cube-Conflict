@@ -711,6 +711,8 @@ bool load_world(const char *mname, const char *cname)        // still supports a
 
     Texture *mapshot = textureload(picname, 3, true, false);
 
+    if(!map_atmo) map_atmo = rnd(9)+1;
+
     loopi(hdr.numvars)
     {
         int type = f->getchar(), ilen = f->getlil<ushort>();
@@ -874,7 +876,6 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     identflags |= IDF_OVERRIDDEN;
     execfile("config/default_map_settings.cfg", false);
     execfile(cfgname, false);
-    if(!map_atmo) map_atmo = rnd(9)+1;
     if(atmos)
     {
         formatstring(ambname, "config/atmos/atmo_%d.cfg", map_atmo);

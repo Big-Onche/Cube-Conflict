@@ -94,7 +94,6 @@ namespace aiman
             clientinfo *ci = bots[cn];
             if(ci)
             { // reuse a slot that was going to removed
-
                 clientinfo *owner = findaiclient();
                 ci->ownernum = owner ? owner->clientnum : -1;
                 if(owner) owner->bots.add(ci);
