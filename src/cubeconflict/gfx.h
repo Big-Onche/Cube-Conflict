@@ -17,7 +17,7 @@ namespace gfx
 
     static const struct armourinfo { int armoursteps; const char *armournames;} armours[] = { { 150, "wood/"}, { 250, "iron/"}, { 400, "gold/"}, { 300, "magnet/"}, { 600, "power/"} };
 
-    extern bool champicolor;
+    extern bool champicolor();
     extern void resetshroomsgfx();
     extern void projgunexplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk);
     extern void projexplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk);

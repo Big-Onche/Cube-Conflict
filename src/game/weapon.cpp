@@ -952,22 +952,22 @@ namespace game
                     switch(p.atk)
                     {
                         case ATK_PULSE_SHOOT:
-                            particle_splash(PART_PLASMA_FRONT, 1, 1, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFF6600, 2.4f, 150, 20, 0, gfx::champicolor);
-                            particle_flare(tail, head, 1, PART_F_PLASMA, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFF6600, 2.0f, p.owner, gfx::champicolor);
+                            particle_splash(PART_PLASMA_FRONT, 1, 1, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFF6600, 2.4f, 150, 20, 0, gfx::champicolor());
+                            particle_flare(tail, head, 1, PART_F_PLASMA, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFF6600, 2.0f, p.owner, gfx::champicolor());
                             if(lookupmaterial(pos)==MAT_WATER) particle_splash(PART_BUBBLE, 1, 150, v, 0x18181A, 2.0f+rnd(2), 20, -30);
-                            p.projsound = S_FLYBYSPOCK;
+                            p.projsound = S_FLYBYPLASMA;
                             canplaysound = true;
                             break;
                         case ATK_GRAP1_SHOOT:
-                            particle_splash(PART_PLASMA_FRONT, 1, 1, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFF33BB, 3.0f, 150, 20, 0, gfx::champicolor);
-                            particle_flare(tail, head, 1, PART_F_PLASMA, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xEE22AA, 3.0f, p.owner, gfx::champicolor);
-                            particle_splash(lookupmaterial(pos)==MAT_WATER ? PART_BUBBLE : PART_SMOKE, 1, lookupmaterial(pos)==MAT_WATER ? 150 : 300, pos, lookupmaterial(pos)&MAT_WATER ? 0x18181A : 0xAAAAAA, 4.0f, 25, 250, 0, gfx::champicolor);
+                            particle_splash(PART_PLASMA_FRONT, 1, 1, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFF33BB, 3.0f, 150, 20, 0, gfx::champicolor());
+                            particle_flare(tail, head, 1, PART_F_PLASMA, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xEE22AA, 3.0f, p.owner, gfx::champicolor());
+                            particle_splash(lookupmaterial(pos)==MAT_WATER ? PART_BUBBLE : PART_SMOKE, 1, lookupmaterial(pos)==MAT_WATER ? 150 : 300, pos, lookupmaterial(pos)&MAT_WATER ? 0x18181A : 0xAAAAAA, 4.0f, 25, 250, 0, gfx::champicolor());
                             p.projsound = S_FLYBYGRAP1;
                             canplaysound = true;
                             break;
                         case ATK_SPOCKGUN_SHOOT:
-                            particle_splash(PART_SPOCK_FRONT, 1, 1, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0x00FF00, 4.f, 150, 20, 0, gfx::champicolor);
-                            particle_flare(tail, head, 1, PART_F_PLASMA, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0x22FF22, 2.5f, p.owner, gfx::champicolor);
+                            particle_splash(PART_SPOCK_FRONT, 1, 1, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0x00FF00, 4.f, 150, 20, 0, gfx::champicolor());
+                            particle_flare(tail, head, 1, PART_F_PLASMA, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0x22FF22, 2.5f, p.owner, gfx::champicolor());
                             p.projsound = S_FLYBYSPOCK;
                             canplaysound = true;
                             break;
@@ -1114,19 +1114,19 @@ namespace game
                     if(!local) createrays(gun, d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? d->o : from, to, d);
                     loopi(atk==ATK_HYDRA_SHOOT ? 3 : 2) spawnbouncer(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(gun, d->o, to, d) : d->balles, vec(0, 0, 0), d, BNC_CARTOUCHES);
                     particle_flare(d->muzzle, d->muzzle, 140, PART_MF_SHOTGUN, d->boostmillis[B_ROIDS] ? 0xFF2222 : d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xCCAAAA, d==hudplayer() ? gfx::zoom ? 1.25f : 3.50f : 4.5f, d, gfx::champicolor);
-                    if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 140, PART_MF_SHOTGUN, 0xFF2222, d==hudplayer() ? gfx::zoom ? 2.00f : 5.5f : 6.5f, d, gfx::champicolor);
-                    particle_splash(PART_SMOKE,  4, 500, d->muzzle, 0x443333, 3.5f, 20, 500, 0, gfx::champicolor);
-                    particle_splash(PART_SPARK, d==hudplayer() ? 4 : 7, 40, d->muzzle, 0xFF2200, 0.5f, 300, 500, 0, gfx::champicolor);
+                    if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 140, PART_MF_SHOTGUN, 0xFF2222, d==hudplayer() ? gfx::zoom ? 2.00f : 5.5f : 6.5f, d, gfx::champicolor());
+                    particle_splash(PART_SMOKE,  4, 500, d->muzzle, 0x443333, 3.5f, 20, 500, 0, gfx::champicolor());
+                    particle_splash(PART_SPARK, d==hudplayer() ? 4 : 7, 40, d->muzzle, 0xFF2200, 0.5f, 300, 500, 0, gfx::champicolor());
                     adddynlight(hudgunorigin(gun, d->o, to, d), 75, vec(1.25f, 0.25f, 0.f), 40, 2, DL_FLASH, 0, vec(1.25f, 0.25f, 0.f), d);
                     loopi(attacks[atk].rays)
                     {
                         if(!(lookupmaterial(rays[i])==MAT_WATER)) playsound(S_LITTLERICOCHET, &rays[i], 0, 0, 0 , 100, -1, 250);
-                        particle_splash(PART_SPARK, 9, 60, rays[i], d->boostmillis[B_ROIDS] ? 0xFF2222 : 0xAA1100, 0.4, 150, 100, 0, gfx::champicolor);
-                        particle_splash(PART_SMOKE, 3, 500+rnd(300), rays[i], 0x797979, 0.2f, 35, 300, 2, gfx::champicolor);
-                        particle_splash(PART_SMOKE, 3, 275+rnd(275), rays[i], 0x553915, 0.15f, 35, 300, 2, gfx::champicolor);
+                        particle_splash(PART_SPARK, 9, 60, rays[i], d->boostmillis[B_ROIDS] ? 0xFF2222 : 0xAA1100, 0.4, 150, 100, 0, gfx::champicolor());
+                        particle_splash(PART_SMOKE, 3, 500+rnd(300), rays[i], 0x797979, 0.2f, 35, 300, 2, gfx::champicolor());
+                        particle_splash(PART_SMOKE, 3, 275+rnd(275), rays[i], 0x553915, 0.15f, 35, 300, 2, gfx::champicolor());
                         vec origin = d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(gun, d->o, to, d) : d->muzzle;
                         origin.add(vec(0.2f-(rnd(5)/10.f), 0.2f-(rnd(5)/10.f), 0.2f-(rnd(5)/10.f)));
-                        particle_flare(origin, rays[i], 30, PART_F_SHOTGUN, d->boostmillis[B_ROIDS] ? 0xFF2222 : atk==ATK_HYDRA_SHOOT ? 0xFF8800 : 0xFFFF22, atk==ATK_HYDRA_SHOOT ? 0.15f : 0.2f, d, gfx::champicolor);
+                        particle_flare(origin, rays[i], 30, PART_F_SHOTGUN, d->boostmillis[B_ROIDS] ? 0xFF2222 : atk==ATK_HYDRA_SHOOT ? 0xFF8800 : 0xFFFF22, atk==ATK_HYDRA_SHOOT ? 0.15f : 0.2f, d, gfx::champicolor());
                         gfx::instantrayhit(from, rays[i], d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle, atk);
                         if(d!=hudplayer()) sound_nearmiss(S_BULLETFLYBY, from, rays[i]);
                     }
@@ -1197,7 +1197,7 @@ namespace game
                             switch(rnd(2)){case 0: if(d!=hudplayer()) sound_nearmiss(S_FLYBYFLAME, from, rays[i]);}
                     }
                 }
-                if(d->ragemillis) particle_splash(PART_SPARK,  3, 500, d->muzzle, 0xFF2222, 1.0f, 50, 200, 0, gfx::champicolor);
+                if(d->ragemillis) particle_splash(PART_SPARK,  3, 500, d->muzzle, 0xFF2222, 1.0f, 50, 200, 0, gfx::champicolor());
                 particle_flare(d->muzzle, d->muzzle, 150, PART_MF_ROCKET, d->boostmillis[B_ROIDS] ? 0x880000 : d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0x440044 : 0x663311,  d==hudplayer() ? gfx::zoom ? 2.00f : 3.5f : 4.5f, d, gfx::champicolor);
 
                 float dist = from.dist(to);
@@ -1210,7 +1210,7 @@ namespace game
             {
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
                 particle_flare(d->muzzle, d->muzzle, 150, PART_MF_PLASMA, d->boostmillis[B_ROIDS] ? 0xFF4444 : d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF00FF : 0xFF55FF, 1.75f, d, gfx::champicolor);
-                if(d->ragemillis) particle_splash(PART_SPARK,  3, 500, d->muzzle, 0xFF4444, 1.0f, 50, 200, 0, gfx::champicolor);
+                if(d->ragemillis) particle_splash(PART_SPARK,  3, 500, d->muzzle, 0xFF4444, 1.0f, 50, 200, 0, gfx::champicolor());
                 adddynlight(hudgunorigin(gun, d->o, to, d), 70, vec(1.0f, 0.0f, 1.0f), 80, 100, DL_FLASH, 0, vec(0, 0, 0), d);
                 break;
             }
@@ -1219,8 +1219,8 @@ namespace game
                 float dist = from.dist(to);
                 vec up = to;
                 up.z += dist/8;
-                particle_splash(PART_SMOKE,  10, 600, d->muzzle, d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0x550044 : 0x444444, 4.0f, 20, 500, 0, gfx::champicolor);
-                if(d->ragemillis) particle_splash(PART_SPARK,  8, 500, d->muzzle, 0xFF4444, 1.0f, 50, 200, 0, gfx::champicolor);
+                particle_splash(PART_SMOKE,  10, 600, d->muzzle, d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0x550044 : 0x444444, 4.0f, 20, 500, 0, gfx::champicolor());
+                if(d->ragemillis) particle_splash(PART_SPARK,  8, 500, d->muzzle, 0xFF4444, 1.0f, 50, 200, 0, gfx::champicolor());
                 newbouncer(d==player1 && !thirdperson ? d->muzzle : hudgunorigin(gun, d->o, to, d), up, local, id, d, BNC_GRENADE, attacks[atk].ttl, attacks[atk].projspeed);
                 break;
             }
@@ -1597,21 +1597,21 @@ namespace game
                 switch(p.atk)
                 {
                     case ATK_NUKE_SHOOT:
-                        particle_flare(pos, pos, 1, PART_MF_LITTLE, p.owner->boostmillis[B_ROIDS] ? 0xFF0000 : 0xFFC864, 10.f+rndscale(8), NULL, gfx::champicolor);
-                        particle_splash(lookupmaterial(pos)==MAT_WATER ? PART_BUBBLE : PART_SMOKE, 3, lookupmaterial(pos)==MAT_WATER ? 2000 : 5000, pos, lookupmaterial(pos)&MAT_WATER ? 0x18181A : 0x222222, 4.0f+rnd(5), 25, 200, 0, gfx::champicolor);
-                        particle_splash(PART_FIRE_BALL, 1, 100, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF0000 : 0xFF6600, 1.0f+rndscale(4), 50, 500, 0, gfx::champicolor);
+                        particle_flare(pos, pos, 1, PART_MF_LITTLE, p.owner->boostmillis[B_ROIDS] ? 0xFF0000 : 0xFFC864, 10.f+rndscale(8), NULL, gfx::champicolor());
+                        particle_splash(lookupmaterial(pos)==MAT_WATER ? PART_BUBBLE : PART_SMOKE, 3, lookupmaterial(pos)==MAT_WATER ? 2000 : 5000, pos, lookupmaterial(pos)&MAT_WATER ? 0x18181A : 0x222222, 4.0f+rnd(5), 25, 200, 0, gfx::champicolor());
+                        particle_splash(PART_FIRE_BALL, 1, 100, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF0000 : 0xFF6600, 1.0f+rndscale(4), 50, 500, 0, gfx::champicolor());
                         regularflare(pos, 0x552500, 600+rnd(400), 75);
                         break;
                     case ATK_SMAW_SHOOT:
                     case ATK_ROQUETTES_SHOOT:
-                        particle_splash(lookupmaterial(pos)==MAT_WATER ? PART_BUBBLE : PART_SMOKE, 1, 2000, pos, 0x666666, lookupmaterial(pos)==MAT_WATER ? 3.f : 6.f, 25, 250, 0, gfx::champicolor);
-                        particle_flare(pos, pos, 1, PART_MF_LITTLE, p.owner->boostmillis[B_ROIDS] ? 0xFF0000 : 0xFFC864, 3.0f+rndscale(2), NULL, gfx::champicolor);
+                        particle_splash(lookupmaterial(pos)==MAT_WATER ? PART_BUBBLE : PART_SMOKE, 1, 2000, pos, 0x666666, lookupmaterial(pos)==MAT_WATER ? 3.f : 6.f, 25, 250, 0, gfx::champicolor());
+                        particle_flare(pos, pos, 1, PART_MF_LITTLE, p.owner->boostmillis[B_ROIDS] ? 0xFF0000 : 0xFFC864, 3.0f+rndscale(2), NULL, gfx::champicolor());
                         regularflare(pos, 0x331200, 300+rnd(300), 50);
                         break;
                     case ATK_ARTIFICE_SHOOT:
-                        if(lookupmaterial(pos)==MAT_WATER)  particle_splash(PART_BUBBLE, 3, 200, pos, 0x18181A, 2.5f, 25, 100, 0, gfx::champicolor);
-                        particle_splash(PART_SPARK, 8, 100, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF0000 : 0xFFC864, rnd(4)/10.f+0.1f, 50, 500, 0, gfx::champicolor);
-                        particle_flare(pos, pos, 1, PART_MF_LITTLE, p.owner->boostmillis[B_ROIDS] ? 0xFF0000 : 0xFFC864, 0.5f+rndscale(2), NULL, gfx::champicolor);
+                        if(lookupmaterial(pos)==MAT_WATER)  particle_splash(PART_BUBBLE, 3, 200, pos, 0x18181A, 2.5f, 25, 100, 0, gfx::champicolor());
+                        particle_splash(PART_SPARK, 8, 100, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF0000 : 0xFFC864, rnd(4)/10.f+0.1f, 50, 500, 0, gfx::champicolor());
+                        particle_flare(pos, pos, 1, PART_MF_LITTLE, p.owner->boostmillis[B_ROIDS] ? 0xFF0000 : 0xFFC864, 0.5f+rndscale(2), NULL, gfx::champicolor());
                         break;
                 }
             }
