@@ -1443,7 +1443,7 @@ static void makeparticles(entity &e)
                     int posx = -1250+rnd(2500), posy = -1250+rnd(2500);
                     possky.add(vec(posx+(-200+(rnd(400))), posy+(-200+(rnd(400))), 800));
                     posground.add(vec(posx, posy, -50));
-                    loopi(2)particle_flare(possky, posground, 750, PART_LIGHTNING, 0x8888FF, 15.f+rnd(10), NULL, gfx::champicolor);
+                    loopi(2)particle_flare(possky, posground, 750, PART_LIGHTNING, 0x8888FF, 15.f+rnd(10), NULL, gfx::champicolor());
 
                     playsound(S_ECLAIRPROCHE, &posground, 0, 0, 0 , 50, -1, 500);
 
@@ -1475,7 +1475,7 @@ static void makeparticles(entity &e)
                     int posx = -1250+rnd(2500), posy = -1250+rnd(2500);
                     possky.add(vec(posx+(-200+(rnd(400))), posy+(-200+(rnd(400))), 800));
                     posground.add(vec(posx, posy, -50));
-                    particle_flare(possky, posground, 1000, PART_LIGHTNING, 0xFF6622, 15.f+rnd(10), NULL, gfx::champicolor);
+                    particle_flare(possky, posground, 1000, PART_LIGHTNING, 0xFF6622, 15.f+rnd(10), NULL, gfx::champicolor());
                     playsound(S_ECLAIRPROCHE, &posground, 0, 0, 0 , 50, -1, 500);
 
                     vec posA = possky;
