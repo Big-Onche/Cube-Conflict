@@ -1766,7 +1766,7 @@ const char *DecalSlot::name() const { return tempformatstring("decal slot %d", S
 
 void texturereset(int *n)
 {
-    if(!(identflags&IDF_OVERRIDDEN) && !game::allowedittoggle()) return;
+    if(!(identflags&IDF_OVERRIDDEN) && !game::allowedittoggle(false)) return;
     defslot = NULL;
     resetslotshader();
     int limit = clamp(*n, 0, slots.length());
@@ -1789,7 +1789,7 @@ COMMAND(texturereset, "i");
 
 void materialreset()
 {
-    if(!(identflags&IDF_OVERRIDDEN) && !game::allowedittoggle()) return;
+    if(!(identflags&IDF_OVERRIDDEN) && !game::allowedittoggle(false)) return;
     defslot = NULL;
     loopi((MATF_VOLUME|MATF_INDEX)+1) materialslots[i].reset();
 }
@@ -1798,7 +1798,7 @@ COMMAND(materialreset, "");
 
 void decalreset(int *n)
 {
-    if(!(identflags&IDF_OVERRIDDEN) && !game::allowedittoggle()) return;
+    if(!(identflags&IDF_OVERRIDDEN) && !game::allowedittoggle(false)) return;
     defslot = NULL;
     resetslotshader();
     decalslots.deletecontents(*n);
