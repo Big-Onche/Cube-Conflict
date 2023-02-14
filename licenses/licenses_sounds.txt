@@ -123,6 +123,23 @@ Files :	media/sound/mapsound/indoor_1.ogg 			license_certificate_R3FY29ABTJ (ind
 	media/sound/bullets/impactbody_1.ogg			license_certificate_V3B84XDQGL (impactbody_X.ogg).txt
 	media/sound/bullets/impactbody_2.ogg
 	media/sound/bullets/impactbody_3.ogg
+	media/sound/bullets/shields/impactwood_1.ogg		license_certificate_XN3SUH86JY (impactwood_X.ogg).txt
+	media/sound/bullets/shields/impactwood_2.ogg
+	media/sound/bullets/shields/impactwood_3.ogg
+	media/sound/bullets/shields/impactiron_1.ogg		license_certificate_NX28HEGMQL (impactiron_X.ogg).txt
+	media/sound/bullets/shields/impactiron_2.ogg
+	media/sound/bullets/shields/impactiron_3.ogg
+	media/sound/bullets/shields/impactiron_4.ogg
+	media/sound/bullets/shields/impactiron_5.ogg
+	media/sound/bullets/shields/impactgold_1.ogg		license_certificate_NTKZYACR3L (impactgold_X).txt
+	media/sound/bullets/shields/impactgold_2.ogg
+	media/sound/bullets/shields/impactgold_3.ogg
+	media/sound/bullets/shields/impactmagnet_1.ogg		license_certificate_8WCUZMJRYG (impactmagnet_X.ogg).txt
+	media/sound/bullets/shields/impactmagnet_2.ogg
+	media/sound/bullets/shields/impactmagnet_3.ogg
+	media/sound/bullets/shields/impactpowerarmor_1.ogg	license_certificate_PH3CJVEDYS (impactpowerarmor_X.ogg).txt
+	media/sound/bullets/shields/impactpowerarmor_2.ogg
+	media/sound/bullets/shields/impactpowerarmor_3.ogg
 	media/sound/bullets/littlericochet_1.ogg		license_certificate_LE94ASW5MN (littlericohet_X.ogg).txt
 	media/sound/bullets/littlericochet_2.ogg
 	media/sound/bullets/littlericochet_3.ogg
@@ -133,7 +150,12 @@ Files :	media/sound/mapsound/indoor_1.ogg 			license_certificate_R3FY29ABTJ (ind
 	media/sound/bullets/bigricochet_3.ogg
 	media/sound/bullets/impactarrow_1.ogg			license_certificate_LD3BQWEF8K (impactarrow_X.ogg).txt
 	media/sound/bullets/impactarrow_2.ogg
-	media/sound/bullets/impactarrow_3.ogg					
+	media/sound/bullets/impactarrow_3.ogg
+	media/sound/bullets/impactwater_1.ogg			license_certificate_EJ8V3UGN45 (impactwater_X.ogg).txt		license_certificate_SNGUP35LE4 (impactwater_X.ogg).txt
+	media/sound/bullets/impactwater_2.ogg
+	media/sound/bullets/impactwater_3.ogg
+	media/sound/bullets/impactwater_4.ogg
+	media/sound/bullets/impactwater_5.ogg
 	media/sound/bullets/bulletflyby_1.ogg			license_certificate_GVBDHU5E9Q (bulletflyby_X.ogg).txt
 	media/sound/bullets/bulletflyby_2.ogg
 	media/sound/bullets/bulletflyby_3.ogg
@@ -150,15 +172,18 @@ Files :	media/sound/mapsound/indoor_1.ogg 			license_certificate_R3FY29ABTJ (ind
 	media/sound/bullets/projectiles/arrow_1.ogg		license_certificate_RU264Q8NSA (arrow_X.ogg).txt
 	media/sound/bullets/projectiles/arrow_2.ogg
 	media/sound/bullets/projectiles/arrow_3.ogg
-	media/sound/bullets/projectiles/grap1_1.ogg		license_certificate_PDEB5K7V2U (plasma_X.ogg - grap1_X.ogg).txt
+	media/sound/bullets/projectiles/grap1_1.ogg		license_certificate_3HZ27XQG4D (grap1_X.ogg).txt
 	media/sound/bullets/projectiles/grap1_2.ogg
 	media/sound/bullets/projectiles/grap1_3.ogg
-	media/sound/bullets/projectiles/plasma_1.ogg
+	media/sound/bullets/projectiles/plasma_1.ogg		license_certificate_PDEB5K7V2U (plasma_X.ogg).txt
 	media/sound/bullets/projectiles/plasma_2.ogg
 	media/sound/bullets/projectiles/plasma_3.ogg
 	media/sound/bullets/impactelectric_1.ogg		license_certificate_AKSDT82L3W (impactelectric_X.ogg).txt
 	media/sound/bullets/impactelectric_2.ogg
 	media/sound/bullets/impactelectric_3.ogg
+	media/sound/items/health_1.ogg				license_certificate_7X3HQE4VJB (health_X.ogg).txt	license_certificate_H8KDA2F5LC (health_X.ogg).txt	license_certificate_U4GF7YPWE6 (health_X.ogg).txt
+	media/sound/items/health_2.ogg
+	media/sound/items/health_3.ogg
 	media/sound/items/mana_1.ogg				license_certificate_W2D56JCRMY (mana_X.ogg).txt
 	media/sound/items/mana_2.ogg
 	media/sound/items/mana_3.ogg
@@ -277,6 +302,12 @@ Files :	media/sound/mapsound/indoor_1.ogg 			license_certificate_R3FY29ABTJ (ind
 	media/sound/items_sounds/roids_far_6.ogg
 	media/sound/items_sounds/roids_far_7.ogg
 	media/sound/items_sounds/roids_pupout.ogg
+	media/sound/npcs/alien_hello
+	media/sound/npcs/alien_pain_1				license_certificate_D3L57YMCHF (alien_hello.ogg - alien_pain_X.ogg - alien_angry.ogg - alien_dead.ogg).txt
+	media/sound/npcs/alien_pain_2
+	media/sound/npcs/alien_pain_3
+	media/sound/npcs/alien_angry
+	media/sound/npcs/alien_dead
 
 
 -------------------------------------------------------------------------------------------------------
