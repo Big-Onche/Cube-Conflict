@@ -63,8 +63,7 @@ struct captureclientmode : clientmode
 
         bool enter(int team)
         {
-            string tmpteam;
-            formatstring(tmpteam, "%d", team);
+            defformatstring(tmpteam, "%d", team);
 
             if(!strcmp(owner, tmpteam))
             {
@@ -88,16 +87,14 @@ struct captureclientmode : clientmode
 
         bool steal(int team)
         {
-            string tmpteam;
-            formatstring(tmpteam, "%d", team);
+            defformatstring(tmpteam, "%d", team);
 
             return !enemies && strcmp(owner, tmpteam);
         }
 
         bool leave(int team)
         {
-            string tmpteam;
-            formatstring(tmpteam, "%d", team);
+            defformatstring(tmpteam, "%d", team);
 
             if(!strcmp(owner, tmpteam) && owners > 0)
             {
@@ -161,8 +158,7 @@ struct captureclientmode : clientmode
 
     int getteamscore(int team)
     {
-        string tmpteam;
-        formatstring(tmpteam, "%d", team);
+        defformatstring(tmpteam, "%d", team);
         loopv(scores)
         {
             score &cs = scores[i];
@@ -282,8 +278,7 @@ struct captureclientmode : clientmode
     {
         if(m_regencapture || !autorepammo || d!=player1 || d->state!=CS_ALIVE) return;
         vec o = d->feetpos();
-        string tmpteam;
-        formatstring(tmpteam, "%d", d->team);
+        defformatstring(tmpteam, "%d", d->team);
         loopv(bases)
         {
             baseinfo &b = bases[i];
@@ -307,8 +302,7 @@ struct captureclientmode : clientmode
         int oldbase = d->lastbase;
         d->lastbase = -1;
         vec pos(d->o.x, d->o.y, d->o.z + (d->aboveeye - d->eyeheight)/2);
-        string tmpteam;
-        formatstring(tmpteam, "%d", d->team);
+        defformatstring(tmpteam, "%d", d->team);
         if(d->state==CS_ALIVE)
         {
             loopv(bases)
@@ -361,8 +355,7 @@ struct captureclientmode : clientmode
 
     void rendergame()
     {
-        string tmpteam;
-        formatstring(tmpteam, "%d", player1->team);
+        defformatstring(tmpteam, "%d", player1->team);
 
         if(capturetether && canaddparticles())
         {
@@ -449,8 +442,7 @@ struct captureclientmode : clientmode
 
     void drawblips(gameent *d, float blipsize, int fw, int fh, int type, bool skipenemy = false)
     {
-        string tmpteam;
-        formatstring(tmpteam, "%d", player1->team);
+        defformatstring(tmpteam, "%d", player1->team);
 
         float scale = calcradarscale();
         int blips = 0;
@@ -595,8 +587,7 @@ struct captureclientmode : clientmode
     {
         if(!bases.inrange(i)) return;
         baseinfo &b = bases[i];
-        string tmpteam;
-        formatstring(tmpteam, "%d", player1->team);
+        defformatstring(tmpteam, "%d", player1->team);
         if(owner[0])
         {
             if(strcmp(b.owner, owner))
@@ -652,8 +643,7 @@ struct captureclientmode : clientmode
     // prefer spawning near friendly base
     float ratespawn(gameent *d, const extentity &e)
     {
-        string tmpteam;
-        formatstring(tmpteam, "%d", d->team);
+        defformatstring(tmpteam, "%d", d->team);
 
         float minbasedist = 1e16f;
         loopv(bases)
@@ -694,8 +684,7 @@ struct captureclientmode : clientmode
 				if(targets.find(e->clientnum) < 0 && ep.squaredist(f.o) <= (CAPTURERADIUS*CAPTURERADIUS))
 					targets.add(e->clientnum);
 			}
-            string tmpteam;
-            formatstring(tmpteam, "%d", d->team);
+            defformatstring(tmpteam, "%d", d->team);
 			if((regen) || (targets.empty() && (!f.owner[0] || strcmp(f.owner, tmpteam) || f.enemy[0])))
 			{
 				ai::interest &n = interests.add();
@@ -722,8 +711,7 @@ struct captureclientmode : clientmode
 				regen = true;
 		}
 		int walk = 0;
-		string tmpteam;
-		formatstring(tmpteam, "%d", d->team);
+		defformatstring(tmpteam, "%d", d->team);
 		if(!regen && !f.enemy[0] && f.owner[0] && !strcmp(f.owner, tmpteam))
 		{
 			static vector<int> targets; // build a list of others who are interested in this
@@ -829,8 +817,7 @@ ICOMMAND(insidebases, "", (),
     void replenishammo(clientinfo *ci)
     {
         if(notgotbases || ci->state.state!=CS_ALIVE) return;
-        string tmpteam;
-        formatstring(tmpteam, "%d", ci->team);
+        defformatstring(tmpteam, "%d", ci->team);
         loopv(bases)
         {
             baseinfo &b = bases[i];
@@ -882,8 +869,7 @@ ICOMMAND(insidebases, "", (),
         loopv(clients)
         {
             clientinfo *ci = clients[i];
-            string tmpteam;
-            formatstring(tmpteam, "%d", ci->team);
+            defformatstring(tmpteam, "%d", ci->team);
 
             if(ci->state.state==CS_ALIVE && ci->team>0 && insidebase(b, ci->state.o))
             {
@@ -898,8 +884,7 @@ ICOMMAND(insidebases, "", (),
         loopv(clients)
         {
             clientinfo *ci = clients[i];
-            string tmpteam;
-            formatstring(tmpteam, "%d", ci->team);
+            defformatstring(tmpteam, "%d", ci->team);
 
             if(ci->state.state==CS_ALIVE && ci->team>0 && !strcmp(tmpteam, b.owner) && insidebase(b, ci->state.o))
             {
@@ -941,8 +926,7 @@ ICOMMAND(insidebases, "", (),
                         notify = true;
                     }
                 }
-                if(notify)
-                    sendf(-1, 1, "ri7", N_BASEREGEN, ci->clientnum, ci->state.health, ci->state.armour, ci->state.mana, b.ammotype, b.valid() ? ci->state.ammo[b.ammotype] : 0);
+                if(notify) sendf(-1, 1, "ri7", N_BASEREGEN, ci->clientnum, ci->state.health, ci->state.armour, ci->state.mana, b.ammotype, b.valid() ? ci->state.ammo[b.ammotype] : 0);
             }
         }
     }
