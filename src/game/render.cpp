@@ -338,7 +338,7 @@ namespace game
         //////////////////////////////////////////////////////////////////MODELES//////////////////////////////////////////////////////////////////
         modelattach a[10];
         int ai = 0;
-        if(guns[d->gunselect].vwep)
+        if(d->gunselect>=GUN_RAIL && d->gunselect<=GUN_CACNINJA)
         {
             int vanim = ANIM_VWEP_IDLE|ANIM_LOOP, vtime = 0;
             if(lastaction && d->lastattack >= 0 && attacks[d->lastattack].gun==d->gunselect && lastmillis < lastaction+250)
@@ -346,17 +346,17 @@ namespace game
                 vanim = attacks[d->lastattack].vwepanim;
                 vtime = lastaction;
             }
-            a[ai++] = modelattach("tag_weapon", guns[d->gunselect].vwep, vanim, vtime);
+            a[ai++] = modelattach("tag_weapon", guns[d->gunselect].vwep , vanim, vtime);
         }
         if(mainpass && !(flags&MDL_ONLYSHADOW))
         {
             d->muzzle = d->balles = vec(-1, -1, -1);
-            if(guns[d->gunselect].vwep) a[ai++] = modelattach("tag_muzzle", &d->muzzle);
-            if(guns[d->gunselect].vwep) a[ai++] = modelattach("tag_balles", &d->balles);
+            if(d->gunselect>=GUN_RAIL && d->gunselect<=GUN_CACNINJA) a[ai++] = modelattach("tag_muzzle", &d->muzzle);
+            if(d->gunselect>=GUN_RAIL && d->gunselect<=GUN_CACNINJA) a[ai++] = modelattach("tag_balles", &d->balles);
         }
 
         ////////Boucliers////////
-        if(d->armour && d->state == CS_ALIVE && camera1->o.dist(d->o))
+        if(d->armour && d->state == CS_ALIVE && camera1->o.dist(d->o) && d->armourtype>=A_BLUE && d->armourtype<=A_ASSIST)
         {
             a[ai++] = modelattach("tag_shield", gfx::getshielddir(d->armourtype, d->armour), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
@@ -614,12 +614,13 @@ namespace game
         entities::renderentities();
         renderbouncers();
         renderprojectiles();
-        if(cmode) cmode->rendergame();
 
         if(exclude)
             renderplayer(exclude, 1, MDL_ONLYSHADOW);
         else if(!f && (player1->state==CS_ALIVE || (player1->state==CS_EDITING && third) || (player1->state==CS_DEAD && !hidedead)))
             renderplayer(player1, 1, third ? 0 : MDL_ONLYSHADOW);
+
+        if(cmode) cmode->rendergame();
     }
 
     VARP(hudgun, 0, 1, 1);
@@ -728,7 +729,7 @@ namespace game
         if(d->muzzle.x >= 0) d->muzzle = calcavatarpos(d->muzzle, 12);
         if(d->balles.x >= 0) d->balles = calcavatarpos(d->balles, 12);
 
-        if(d->armour<=0) return;
+        if(!d->armour || d->armourtype<A_BLUE || d->armourtype>A_ASSIST) return;
         else
         {
             vec sway2;
