@@ -17,7 +17,7 @@ struct captureclientmode : clientmode
     static const int OCCUPYPOINTS = 1;
     static const int OCCUPYENEMYLIMIT = 15;
     static const int OCCUPYNEUTRALLIMIT = 10;
-    static const int SCORESECS = 20;
+    static const int SCORESECS = 10;
     static const int AMMOSECS = 15;
     static const int REGENSECS = 1;
     static const int REGENHEALTH = 100;
@@ -88,7 +88,6 @@ struct captureclientmode : clientmode
         bool steal(int team)
         {
             defformatstring(tmpteam, "%d", team);
-
             return !enemies && strcmp(owner, tmpteam);
         }
 
@@ -169,9 +168,7 @@ struct captureclientmode : clientmode
 
     void getteamscores(vector<teamscore> &teamscores)
     {
-        int iteamA = atoi(scores[0].team), iteamB = atoi(scores[1].team);
-        teamscores.add(teamscore(iteamA, scores[0].total));
-        teamscores.add(teamscore(iteamB, scores[1].total));
+        loopv(scores) teamscores.add(teamscore(atoi(scores[i].team), scores[i].total));
     }
 
     score &findscore(const char *team)
@@ -808,7 +805,7 @@ ICOMMAND(insidebases, "", (),
         loopv(clients)
         {
             clientinfo *ci = clients[i];
-            if(ci->state.state==CS_ALIVE && ci->team>0 && ci->team == team && insidebase(b, ci->state.o))
+            if(ci->state.state==CS_ALIVE && ci->team>0 && ci->team<=2 && ci->team==team && insidebase(b, ci->state.o))
                 b.enter(ci->team);
         }
         sendbaseinfo(n);
@@ -833,7 +830,7 @@ ICOMMAND(insidebases, "", (),
 
     void movebases(int team, const vec &oldpos, bool oldclip, const vec &newpos, bool newclip)
     {
-        if(gamemillis>=gamelimit) return;
+        if(gamemillis>=gamelimit || game::premission || team<1 || team>2) return;
         loopv(bases)
         {
             baseinfo &b = bases[i];
@@ -869,10 +866,10 @@ ICOMMAND(insidebases, "", (),
         loopv(clients)
         {
             clientinfo *ci = clients[i];
-            defformatstring(tmpteam, "%d", ci->team);
 
-            if(ci->state.state==CS_ALIVE && ci->team>0 && insidebase(b, ci->state.o))
+            if(ci->state.state==CS_ALIVE && ci->team>0 && ci->team<=2 && insidebase(b, ci->state.o))
             {
+                defformatstring(tmpteam, "%d", ci->team);
                 !strcmp(tmpteam, b.owner) ? ci->state.flags++ : ci->state.flags+=2;
                 sendf(-1, 1, "ri3", N_CNBASESCORE, ci->clientnum, ci->state.flags);
             }
@@ -886,7 +883,7 @@ ICOMMAND(insidebases, "", (),
             clientinfo *ci = clients[i];
             defformatstring(tmpteam, "%d", ci->team);
 
-            if(ci->state.state==CS_ALIVE && ci->team>0 && !strcmp(tmpteam, b.owner) && insidebase(b, ci->state.o))
+            if(ci->state.state==CS_ALIVE && ci->team>0 && ci->team<=2 && !strcmp(tmpteam, b.owner) && insidebase(b, ci->state.o))
             {
                 bool notify = false;
                 if(ci->state.health < ci->state.maxhealth)
@@ -933,7 +930,7 @@ ICOMMAND(insidebases, "", (),
 
     void update()
     {
-        if(gamemillis>=gamelimit || gamemillis<10000) return;
+        if(gamemillis>=gamelimit || game::premission) return;
         endcheck();
         int t = gamemillis/1000 - (gamemillis-curtime)/1000;
         if(t<1) return;
@@ -941,7 +938,6 @@ ICOMMAND(insidebases, "", (),
         {
             baseinfo &b = bases[i];
             if(!b.valid()) continue;
-            addciscore(b);
             if(b.enemy[0])
             {
                 if(!b.owners || !b.enemies) b.occupy(b.enemy, OCCUPYBONUS*(b.enemies ? 1 : -1) + OCCUPYPOINTS*(b.enemies ? b.enemies : -(1+b.owners))*t);
@@ -960,6 +956,7 @@ ICOMMAND(insidebases, "", (),
                     if(regen) regenowners(b, regen);
                 }
             }
+            addciscore(b);
         }
     }
 
