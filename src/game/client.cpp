@@ -744,6 +744,7 @@ namespace game
             if(!isconnected()) localconnect();
         }
         else if(player1->state!=CS_SPECTATOR || player1->privilege) addmsg(N_MAPVOTE, "rsi", name, mode);
+        if(m_dmsp || m_tutorial || m_edit) {premission = false; gfx::forcecampos = -1;}
     }
 
     void changemap(const char *name)

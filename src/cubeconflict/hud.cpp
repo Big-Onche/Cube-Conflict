@@ -51,14 +51,14 @@ namespace game
                 formatstring(msg, GAME_LANG ? "\fcThe invasion has begun!" : "\fcL'invasion commence !");
                 rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/23;
             }
-            else if(totalmillis - hudmsg[MSG_PREMISSION] <= 6900)
+            else if(totalmillis - hudmsg[MSG_PREMISSION] <= 6900 && premission)
             {
                 formatstring(msg, GAME_LANG ? "\fcThe game is about to begin" : "\fcLa partie va commencer !");
                 rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/23;
                 formatstring(msg, GAME_LANG ? "\fdThe game mode is: %s" : "\fdLe mode de jeu est : %s", server::modeprettyname(gamemode));
                 rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/23;
             }
-            else
+            else if(premission)
             {
                 formatstring(msg, GAME_LANG ? "\fd%.1f" : "\fd%.1f", (10000 - (totalmillis - hudmsg[MSG_PREMISSION]))/1000.f);
                 rendermessage(msg, 60, 8.8f, decal_message); decal_message -= screenh/23;

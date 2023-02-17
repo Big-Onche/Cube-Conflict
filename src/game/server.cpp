@@ -2136,7 +2136,7 @@ namespace server
         sendf(-1, 1, "ri2", N_SERVAMBIENT, servambient);
         if(servrandommode || !servforcemode) gamemode = rnd(17)+2;
         if(servforcemode>-1) gamemode = servforcemode;
-        if(!m_tutorial) game::premission = true;
+        game::premission = true;
 
         if(!maprotations.inrange(curmaprotation))
         {
@@ -2294,7 +2294,7 @@ namespace server
 
     void checkintermission(bool force = false)
     {
-        if(gamemillis<=10000 && !startpremission && !m_dmsp && !m_tutorial)
+        if(gamemillis<=10000 && !startpremission)
         {
             game::premission = true;
             sendf(-1, 1, "ri2", N_PREMISSION, 1);
