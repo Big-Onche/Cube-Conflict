@@ -1183,12 +1183,16 @@ bool initsteam()
     #ifdef _WIN32
         if(!SteamAPI_Init())
         {
-            conoutf(CON_WARN, GAME_LANG ? "Steam API failed to start." : "API Steam non démarrée");
+            conoutf(CON_WARN, GAME_LANG ? "Steam API failed to start." : "API Steam non démarrée.");
+            IS_USING_STEAM = false;
             return false;
         }
         else
         {
+            logoutf("init: steam api");
             SteamAPI_ManualDispatch_Init();
+            SteamUserStats()->RequestCurrentStats();
+            getsteamachievements();
             return true;
         }
     #elif __linux__
@@ -1286,11 +1290,7 @@ int main(int argc, char **argv)
     atexit(enet_deinitialize);
     enet_time_set(0);
 
-    if(IS_USING_STEAM)
-    {
-        initsteam();
-        getsteamachievements();
-    }
+    if(IS_USING_STEAM) initsteam();
 
     logoutf("init: game");
     game::parseoptions(gameargs);
