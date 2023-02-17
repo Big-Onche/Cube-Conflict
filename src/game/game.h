@@ -1070,7 +1070,7 @@ namespace game
     extern gameent *getclient(int cn);
     extern gameent *newclient(int cn);
     extern const char *colorname(gameent *d, const char *name = NULL, const char *alt = NULL, const char *color = "");
-    extern const char *teamcolorname(gameent *d, const char *alt = "Tu");
+    extern const char *teamcolorname(gameent *d, const char *alt = GAME_LANG ? "You" : "Tu");
     extern const char *teamcolor(int team);
     extern gameent *pointatplayer();
     extern gameent *hudplayer();

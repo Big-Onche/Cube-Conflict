@@ -733,7 +733,7 @@ namespace game
             }
             else
             {
-                conoutf(contype, "\f2%s %s%s (%s)", aname, GAME_LANG ? "" : actor==player1 ? "as " : "a ", GAME_LANG ? "fragged a teammate" : "tué un allié" , dname); //Quelqu'un a ou TU as tué un de ses alliés
+                conoutf(contype, "\f2%s %s%s%s (%s)", aname, d->team==player1->team ? "\fd" : "\fc", GAME_LANG ? "" : actor==player1 ? "as " : "a ", GAME_LANG ? "fragged a teammate" : "tué un allié" , dname); //Quelqu'un a ou TU as tué un de ses alliés
                 if(actor==player1) {addstat(1, STAT_ALLIESTUES); unlockachievement(ACH_CPASBIEN);}
             }
         }
@@ -960,7 +960,7 @@ namespace game
             cmode->setup();
         }
 
-        conoutf(CON_GAMEINFO, GAME_LANG ? "\f2Gamemode is : %s": "\f2Le mode de jeu est : %s", server::modeprettyname(gamemode));
+        conoutf(CON_GAMEINFO, GAME_LANG ? "\f2Gamemode is: %s": "\f2Le mode de jeu est : %s", server::modeprettyname(gamemode));
 
         const char *info = m_valid(gamemode) ? GAME_LANG ? gamemodes[gamemode - STARTGAMEMODE].nameEN : gamemodes[gamemode - STARTGAMEMODE].nameFR : NULL;
         if(showmodeinfo && info) conoutf(CON_GAMEINFO, "\f0%s", info);

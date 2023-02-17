@@ -546,7 +546,7 @@ struct ctfclientmode : clientmode
             f.droploc = vec(-1, -1, -1);
             f.interptime = 0;
         }
-        conoutf(CON_GAMEINFO, "%s\f7 %s perdu le drapeau %s", teamcolorname(d), d==player1 ? "as" : "a", teamcolorflag(f));
+        conoutf(CON_GAMEINFO, GAME_LANG ? "%s\f7 %sdropped %s's flag." : "%s\f7 %s perdu le drapeau %s", teamcolorname(d), GAME_LANG ? "" : d==player1 ? "as" : "a", teamcolorflag(f));
         playsound(S_DRAPEAUTOMBE);
     }
 
@@ -580,7 +580,7 @@ struct ctfclientmode : clientmode
         flageffect(i, f.team, interpflagpos(f), vec(f.spawnloc).addz(FLAGFLOAT+FLAGCENTER));
         f.interptime = 0;
         returnflag(i);
-        conoutf(CON_GAMEINFO, "%s\f7 %s récupéré le drapeau %s", teamcolorname(d), d==player1 ? "as" : "a", teamcolorflag(f));
+        conoutf(CON_GAMEINFO, GAME_LANG ? "%s\f7 %srecovered the %s's flag." : "%s\f7 %s récupéré le drapeau %s", teamcolorname(d), GAME_LANG ? "" : d==player1 ? "as" : "a", teamcolorflag(f));
         d->team==player1->team ? hudmsg[MSG_CTF_TEAMFLAGRECO]=totalmillis : hudmsg[MSG_CTF_ENNEMYFLAGRECO]=totalmillis;
         if(d==player1) {addstat(1, STAT_DRAPEAUXALYREC); addxpandcc(10, 3);}
         playsound(S_DRAPEAURESET);
@@ -594,7 +594,7 @@ struct ctfclientmode : clientmode
         flageffect(i, f.team, interpflagpos(f), vec(f.spawnloc).addz(FLAGFLOAT+FLAGCENTER));
         f.interptime = 0;
         returnflag(i);
-        conoutf(CON_GAMEINFO, "Le drapeau %s\f7 a été replacé.", teamcolorflag(f));
+        conoutf(CON_GAMEINFO, GAME_LANG ? "The %s's flag has been reset." : "Le drapeau %s\f7 a été replacé.", teamcolorflag(f));
         playsound(S_DRAPEAURESET);
     }
 
@@ -634,7 +634,7 @@ struct ctfclientmode : clientmode
         f.version = version;
         f.interploc = interpflagpos(f, f.interpangle);
         f.interptime = lastmillis;
-        conoutf(CON_GAMEINFO, "%s\f7 %s volé le drapeau %s", teamcolorname(d), d==player1 ? "as" : "a", teamcolorflag(f));
+        conoutf(CON_GAMEINFO, GAME_LANG ? "%s\f7 %sstole the %s's flag!" : "%s\f7 %s volé le drapeau %s !", teamcolorname(d), GAME_LANG ? "" : d==player1 ? "as" : "a", teamcolorflag(f));
         d->team==player1->team ? hudmsg[MSG_CTF_TEAMSTOLE]=totalmillis : hudmsg[MSG_CTF_ENNEMYSTOLE]=totalmillis;
         if(d==player1) {addstat(1, STAT_DRAPEAUXENVOL); addxpandcc(5, 2);}
         ownflag(i, d, lastmillis);
