@@ -670,6 +670,7 @@ namespace game
     ICOMMAND(sauth, "", (), if(servauth[0]) tryauth(servauth));
     ICOMMAND(dauth, "s", (char *desc), if(desc[0]) tryauth(desc));
 
+    ICOMMAND(getservdesc, "", (), result(servdesc));
     ICOMMAND(getservauth, "", (), result(servauth));
 
     void togglespectator(int val, const char *who)
@@ -1062,6 +1063,8 @@ namespace game
         ignores.setsize(0);
         connected = remote = false;
         player1->clientnum = -1;
+        servdesc[0] = '\0';
+        servauth[0] = '\0';
         if(editmode) toggleedit();
         sessionid = 0;
         mastermode = MM_OPEN;
