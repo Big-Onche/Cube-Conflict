@@ -31,7 +31,7 @@ namespace game
         { GUN_SPOCKGUN, 10, 2000, 0,     5,  2,   150,  100,      1,   10,   70,     1,   0,   true,  false, S_ALIEN_H, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D, "le roi alien",    "the alien king",   "npcs/alien_king",   "shields/magnet/100",  "hats/crown/big",  NULL,               NULL,            NULL},
         { GUN_ARTIFICE,  5, 1500, 0,    75, 10,    50,  100,      5,   10,   60,     1,   0,   true,  false,        -1,        -1,        -1,        -1, "Spike",           "Spike",            "smileys/content",   NULL,                  NULL,              NULL,               "boosts/steros", "boosts/epo"},
         { GUN_ARBALETE, 20, 2000, 0,     5,  2,    25,  100,      5,    8,   70,     1,   0,   true,  false,        -1,        -1,        -1,        -1, "Boing",           "Boing",            "smileys/fou/b",     NULL,                  "hats/3",          NULL,               NULL,            NULL},
-        { GUN_MOSSBERG,  8, 2000, 0,     5,  2,    25,  100,      5,   12,   80,     1,   0,   true,  false,        -1,        -1,        -1,        -1, "Sergent Hartman", "Sergeant Hartman", "smileys/colere/sh", NULL,                  "hats/green",      NULL,               NULL,            NULL},
+        { GUN_MOSSBERG,  8, 2000, 0,     5,  2,    25,  100,      5,   12,   80,     1,   0,   true,  false,        -1,        -1,        -1,        -1, "Sergent Fartman", "Sergeant Fartman", "smileys/colere/sh", NULL,                  "hats/green",      NULL,               NULL,            NULL},
         { GUN_RAIL,     10, 1500, 0,    15,  2,    50,  100,      5,   10,   80,     1,   0,   true,  false,        -1,        -1,        -1,        -1, "Switch",          "Switch",           "smileys/sournois",  "shields/iron/100",    "hats/5",          NULL,               NULL,            NULL},
         { GUN_SMAW,      8, 1250, 0,    15,  2,    50,  100,      5,   10,   80,     1,   0,   true,  false,        -1,        -1,        -1,        -1, "Larry",           "Larry",            "smileys/cool",      NULL,                  "hats/0",          NULL,               NULL,            NULL},
         { GUN_CAC349,    5,  500, 0,     5,  2,   150,  125,      1,    6,   40,     60,  0,   false, false,        -1,        -1,        -1,        -1, "un Kévin",        "a Moron",          "npcs/kevin",        "shields/bois/20",     NULL,              NULL,               NULL,            NULL},
@@ -522,7 +522,7 @@ namespace game
         if(!isconnected()) return;
         if(m_dmsp && spawnremain && lastmillis>nextmonster)
         {
-            if(spawnremain--==monstertotal) { hudmsg[MSG_PREMISSION]=lastmillis; playsound(S_INVASION); musicmanager(2+map_sel);}
+            if(spawnremain--==monstertotal) { hudmsg[MSG_PREMISSION]=lastmillis; playsound(S_INVASION); musicmanager(2+map_sel); execute("playmapsong"); }
             nextmonster = lastmillis+1000;
             gamesecs++;
             if(spawn && !intermission)
