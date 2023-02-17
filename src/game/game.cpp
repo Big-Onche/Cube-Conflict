@@ -603,6 +603,7 @@ namespace game
         {
             if(deathscore) showscores(true);
             disablezoom();
+            game::player1->boostmillis[game::B_SHROOMS] = 0;
             d->attacking = ACT_IDLE;
             gfx::resetshroomsgfx();
             d->roll = 0;
