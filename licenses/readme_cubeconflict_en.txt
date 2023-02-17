@@ -40,15 +40,15 @@ by this license. IF YOU WANT TO CREATE YOUR PROJECT, IT IS HIGHLY RECOMMENDED
 TO USE TESSERACT ALONE (http://tesseract.gg) AND NOT USE CUBE CONFLICT.
 This will prevent you from infringing licenses acquired expressly for Cube Conflict.
 
-Every licences are in "licenses" folder.
+Every license is in "licenses" folder.
 
-"licenses/libraries" are for every libraries used in the game.
-"licenses/licenses_3dmodels.txt" contains a database of each 3D asset used in the game and a ref to it's respective license.
-"licenses/licenses_images.txt" contains a database of each image/texture used in the game and a ref to it's respective license.
+"licenses/libraries" are for every library used in the game.
+"licenses/licenses_3dmodels.txt" contains a database of each 3D asset used in the game and a ref to its respective license.
+"licenses/licenses_images.txt" contains a database of each image/texture used in the game and a ref to its respective license.
 "licenses/licenses_songs.txt" contains a database of each music used in the game and a ref to its respective license.
-"licenses/licenses_sounds.txt" contains a database of each sound effect used in the game and a ref to it's respective license.
+"licenses/licenses_sounds.txt" contains a database of each sound effect used in the game and a ref to its respective license.
 
-"licenses/licenses_certificates" contains every license certificates for any content used in the game, refered in each database.
+"licenses/licenses_certificates" contains every license certificate for any content used in the game, referred to in each database.
 
 
 DEPENDENCIES

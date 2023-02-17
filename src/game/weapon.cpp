@@ -709,7 +709,7 @@ namespace game
             case ATK_PULSE_SHOOT:
             case ATK_GRAP1_SHOOT:
             case ATK_SPOCKGUN_SHOOT:
-                playsound(atk==ATK_GRAP1_SHOOT ? S_IMPACTGRAP1 : S_IMPACTSPOCK, &v, 0, 0, 0 , 75, -1, 225);
+                playsound(atk==ATK_GRAP1_SHOOT ? S_IMPACTGRAP1 : atk==ATK_PULSE_SHOOT ? S_IMPACTPLASMA : S_IMPACTSPOCK, &v, 0, 0, 0 , 75, -1, 225);
                 gfx::projgunexplosion(owner, v, vel, safe, atk);
                 break;
 

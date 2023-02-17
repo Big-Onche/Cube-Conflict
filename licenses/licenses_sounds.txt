@@ -181,6 +181,9 @@ Files :	media/sound/mapsound/indoor_1.ogg 			license_certificate_R3FY29ABTJ (ind
 	media/sound/bullets/impactelectric_1.ogg		license_certificate_AKSDT82L3W (impactelectric_X.ogg).txt
 	media/sound/bullets/impactelectric_2.ogg
 	media/sound/bullets/impactelectric_3.ogg
+	media/sound/bullets/impactplasma_1.ogg			license_certificate_DEL9H423VG (impactplasma_X.ogg).txt
+	media/sound/bullets/impactplasma_2.ogg
+	media/sound/bullets/impactplasma_3.ogg
 	media/sound/items/health_1.ogg				license_certificate_7X3HQE4VJB (health_X.ogg).txt	license_certificate_H8KDA2F5LC (health_X.ogg).txt	license_certificate_U4GF7YPWE6 (health_X.ogg).txt
 	media/sound/items/health_2.ogg
 	media/sound/items/health_3.ogg
