@@ -392,9 +392,9 @@ struct captureclientmode : clientmode
                 formatstring(termnalenemy, "%s", GAME_LANG ? "Enemy" : "Ennemi");
                 bool isowner = !strcmp(b.owner, tmpteam);
                 if(b.enemy[0]) { mtype = PART_METER_VS; mcolor = 0xFF0000; mcolor2 = 0xFFFF00; if(!isowner) swap(mcolor, mcolor2); }
-                if(!b.name[0]) formatstring(b.info, "Terminal %d - %s", b.tag, !b.converted ? strcmp(b.owner, tmpteam) ? termnalenemy : termnalally : GAME_LANG ? "Disputed !" : "Contesté !");
+                if(!b.name[0]) formatstring(b.info, "Terminal %d - %s", b.tag, !b.converted ? strcmp(b.owner, tmpteam) ? termnalenemy : termnalally : GAME_LANG ? "Disputed!" : "Contesté !");
                 else if(basenumbers) formatstring(b.info, "%s (%d) - %s", b.name, b.tag, !b.converted ? strcmp(b.owner, tmpteam) ? termnalenemy : termnalally : GAME_LANG ? "Disputed !" : "Contesté !");
-                else formatstring(b.info, "%s - %s", b.name, !b.converted ? strcmp(b.owner, tmpteam) ? termnalenemy : termnalally : GAME_LANG ? "Disputed !" : "Contesté !");
+                else formatstring(b.info, "%s - %s", b.name, !b.converted ? strcmp(b.owner, tmpteam) ? termnalenemy : termnalally : GAME_LANG ? "Disputed!" : "Contesté !");
                 tcolor = isowner ? 0xFFFF00 : 0xFF0000;
 
                 if(!strcmp(b.owner, tmpteam) && b.o.dist(camera1->o) > 128)

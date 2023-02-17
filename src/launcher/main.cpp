@@ -232,7 +232,7 @@ void AddControls(HWND hWnd)
     CreateWindowW(L"static", BottomInfo, WS_VISIBLE | WS_CHILD, 0, 535, 1000, 22, hWnd, NULL, NULL, NULL);
 
     //Affichage du bouton "Jouer"
-    hWnd = CreateWindowW(L"Button", !Language ? L"Jouer !" : L"Play !", WS_VISIBLE | WS_CHILD, 614, 320, 200, 40, hWnd, (HMENU)LAUNCH_GAME, NULL, NULL);
+    hWnd = CreateWindowW(L"Button", !Language ? L"Jouer !" : L"Play!", WS_VISIBLE | WS_CHILD, 614, 320, 200, 40, hWnd, (HMENU)LAUNCH_GAME, NULL, NULL);
     hFont = CreateFont (25, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, "Roboto");
     SendMessage (hWnd, WM_SETFONT, WPARAM (hFont), TRUE);
 }
