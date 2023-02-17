@@ -183,7 +183,8 @@ ICOMMAND(unlockach, "i", (int *achID), if(*achID==ACH_PARKOUR || *achID==ACH_EXA
 string tempachname;
 void unlockachievement(int achID) //Débloque le succès
 {
-    if(achievementlocked(achID) && (achID==ACH_PARKOUR || achID==ACH_FUCKYOU || achID==ACH_EXAM || IS_ON_OFFICIAL_SERV)) //Ne débloque que si serveur officiel ET succès verrouillé sauf exception
+    bool newach = achievementlocked(achID);
+    if(achID==ACH_PARKOUR || achID==ACH_FUCKYOU || achID==ACH_EXAM || IS_ON_OFFICIAL_SERV) //Ne débloque que si serveur officiel sauf succès en solo
     {
         #ifdef _WIN32
             if(IS_USING_STEAM)
@@ -193,11 +194,14 @@ void unlockachievement(int achID) //Débloque le succès
             }
         #endif
 
-        succes[achID] = true; //Met le succès à jour côté client
-        addxpandcc(25, 25);
-        playsound(S_ACHIEVEMENTUNLOCKED);
-        formatstring(tempachname, "%s", GAME_LANG ? achievements[achID].achnicenameEN : achievements[achID].achnicenameFR);
-        hudmsg[MSG_ACHUNLOCKED] = totalmillis;
+        if(newach)
+        {
+            succes[achID] = true; //Met le succès à jour côté client
+            addxpandcc(25, 25);
+            playsound(S_ACHIEVEMENTUNLOCKED);
+            formatstring(tempachname, "%s", GAME_LANG ? achievements[achID].achnicenameEN : achievements[achID].achnicenameFR);
+            hudmsg[MSG_ACHUNLOCKED] = totalmillis;
+        }
     }
 }
 
