@@ -20,19 +20,23 @@ void genlvl() //Calcule le niveau du joueur
         xpneededforprevlvl += cclvl*2;
         xpneededfornextlvl += xpneededforprevlvl;
         totalneededxp += cclvl*2;
-        if(isconnected()) {playsound(S_LEVELUP); hudmsg[MSG_LEVELUP]=totalmillis;}
+        if(isconnected())
+        {
+            switch(cclvl) //Regarde si il y a un succès à déverrouiller
+            {
+                case 5: unlockachievement(ACH_POSTULANT); break;
+                case 10: unlockachievement(ACH_STAGIAIRE); break;
+                case 20: unlockachievement(ACH_SOLDAT); break;
+                case 50: unlockachievement(ACH_LIEUTENANT); break;
+                case 100: unlockachievement(ACH_MAJOR);
+            }
+            playsound(S_LEVELUP); hudmsg[MSG_LEVELUP]=totalmillis;
+        }
     }
 
     if(stat[STAT_XP]-xpneededfornextlvl!=0 && totalneededxp!=0) pourcents = float(stat[STAT_XP]-xpneededfornextlvl)/float(totalneededxp);
 
-    switch(cclvl) //Regarde si il y a un succès à déverrouiller
-    {
-        case 5: unlockachievement(ACH_POSTULANT); break;
-        case 10: unlockachievement(ACH_STAGIAIRE); break;
-        case 20: unlockachievement(ACH_SOLDAT); break;
-        case 50: unlockachievement(ACH_LIEUTENANT); break;
-        case 100: unlockachievement(ACH_MAJOR);
-    }
+
     game::player1->level = cclvl; //Actualise le lvl pour l'envoyer en multijoueur
     stat[STAT_LEVEL] = cclvl;
 }
