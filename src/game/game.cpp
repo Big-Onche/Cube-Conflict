@@ -582,7 +582,7 @@ namespace game
 
     VARP(deathscore, 0, 1, 1);
 
-    void deathstate(gameent *d, gameent *actor, bool restore)
+    void deathstate(gameent *d, bool restore)
     {
         d->state = CS_DEAD;
         d->lastpain = lastmillis;
@@ -821,7 +821,7 @@ namespace game
                 }
             }
         }
-        deathstate(d, actor);
+        deathstate(d);
         ai::killed(d, actor);
     }
 
@@ -849,7 +849,7 @@ namespace game
             if(player1->totaldamage/10 > 10000) unlockachievement(ACH_DESTRUCTEUR);
 
             defformatstring(flags, "%d", player1->flags);
-            conoutf(CON_GAMEINFO, GAME_LANG ? "\faGAME OVER !" : "\faFIN DE LA PARTIE !");
+            conoutf(CON_GAMEINFO, GAME_LANG ? "\faGAME OVER!" : "\faFIN DE LA PARTIE !");
             if(GAME_LANG) conoutf(CON_GAMEINFO, "\f2Kills : %d | Deaths : %d | Total damage : %d | Accuracy : %d%% %s %s", player1->frags, player1->deaths, player1->totaldamage/10, accuracy, m_ctf ? "| Flags :" : "", m_ctf ? flags : "");
             else conoutf(CON_GAMEINFO, "\f2Éliminations : %d | Morts : %d | Dégats infligés : %d | Précision : %d%% %s %s", player1->frags, player1->deaths, player1->totaldamage/10, accuracy, m_ctf ? "| Drapeaux :" : "", m_ctf ? flags : "");
             if(stat[STAT_DAMMAGERECORD] < player1->totaldamage/10) addstat(player1->totaldamage/10, STAT_DAMMAGERECORD, true);

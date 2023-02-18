@@ -1083,7 +1083,7 @@ namespace game
     extern void startgame();
     extern float proximityscore(float x, float lower, float upper);
     extern void spawnplayer(gameent *);
-    extern void deathstate(gameent *d, gameent *actor, bool restore = false);
+    extern void deathstate(gameent *d, bool restore = false);
     extern void damaged(int damage, gameent *d, gameent *actor, bool local = true, int atk = 0);
     extern void killed(gameent *d, gameent *actor, int atk);
     extern void timeupdate(int timeremain);

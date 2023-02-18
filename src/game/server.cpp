@@ -140,7 +140,7 @@ namespace server
 
         bool waitexpired(int gamemillis)
         {
-            if(armourtype==A_ASSIST && armour==0 && gunselect==GUN_ASSISTXPL && ammo[GUN_ASSISTXPL]) return true;
+            if(armourtype==A_ASSIST && !armour && gunselect==GUN_ASSISTXPL && ammo[GUN_ASSISTXPL]) return true;
             else return gamemillis - lastshot >= gunwait;
         }
 
@@ -840,10 +840,8 @@ namespace server
         virtual void spawned(clientinfo *ci) {}
         virtual int fragvalue(clientinfo *victim, clientinfo *actor, int atk = -1)
         {
-            int value;
-            atk==ATK_KAMIKAZE_SHOOT ? value = 0 : value = -1;
-            if(victim==actor || isteam(victim->team, actor->team)) return value;
-            return 1;
+            if(victim==actor || isteam(victim->team, actor->team)) return atk==ATK_KAMIKAZE_SHOOT ? 0 : -1;
+            else return 1;
         }
         virtual void died(clientinfo *victim, clientinfo *actor) {}
         virtual bool canchangeteam(clientinfo *ci, int oldteam, int newteam) { return true; }
@@ -2057,7 +2055,7 @@ namespace server
             server_entity se = { NOTUSED, 0, false };
             while(sents.length()<=i) sents.add(se);
             sents[i].type = ments[i].type;
-            if((m_mp(gamemode) || m_dmsp) && delayspawn(sents[i].type)) sents[i].spawntime = spawntime(sents[i].type);
+            if(m_mp(gamemode) && delayspawn(sents[i].type)) sents[i].spawntime = spawntime(sents[i].type);
             else sents[i].spawned = true;
         }
         notgotitems = false;
@@ -2374,13 +2372,9 @@ namespace server
 
         if(target->aptitude!=APT_AMERICAIN)
         {
-            if(target==actor) target->setpushed();
-            else if(!hitpush.iszero())
-            {
-                ivec v(vec(hitpush).rescale(DNF));
-                sendf(ts.health<=0 ? -1 : target->ownernum, 1, "ri7", N_HITPUSH, target->clientnum, atk, damage, v.x, v.y, v.z);
-                target->setpushed();
-            }
+            ivec v(vec(hitpush).rescale(DNF));
+            sendf(ts.health<=0 ? -1 : target->ownernum, 1, "ri7", N_HITPUSH, target->clientnum, atk, damage, v.x, v.y, v.z);
+            target->setpushed();
         }
 
         if(ts.health<=0)
@@ -3729,7 +3723,7 @@ namespace server
                     sents[n].type = getint(p);
                     if(canspawnitem(sents[n].type))
                     {
-                        if((m_mp(gamemode) || m_dmsp) && delayspawn(sents[n].type)) sents[n].spawntime = spawntime(sents[n].type);
+                        if(m_mp(gamemode) && delayspawn(sents[n].type)) sents[n].spawntime = spawntime(sents[n].type);
                         else sents[n].spawned = true;
                     }
                 }
@@ -4161,8 +4155,7 @@ namespace server
         }
 
         putint(p, PROTOCOL_VERSION);
-        if(numclients(-1, true, true)<servaddbots) putint(p, servaddbots);
-        else putint(p, numclients(-1, false, true));
+        putint(p, numclients(-1, true, true)<servaddbots ? servaddbots : numclients(-1, false, true));
         putint(p, maxclients);
         putint(p, gamepaused || gamespeed != 100 ? 5 : 3); // number of attrs following
         putint(p, gamemode);

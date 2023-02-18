@@ -355,7 +355,7 @@ namespace game
     void edittoggled(bool on)
     {
         addmsg(N_EDITMODE, "ri", on ? 1 : 0);
-        if(player1->state==CS_DEAD) deathstate(player1, player1, true);
+        if(player1->state==CS_DEAD) deathstate(player1, true);
         else if(player1->state==CS_EDITING && player1->editstate==CS_DEAD) showscores(false);
         disablezoom();
         player1->suicided = player1->respawned = -2;
@@ -2161,7 +2161,7 @@ namespace game
                 else
                 {
                     d->state = d->editstate;
-                    if(d->state==CS_DEAD) deathstate(d, d, true);
+                    if(d->state==CS_DEAD) deathstate(d, true);
                 }
                 checkfollow();
                 break;
@@ -2188,7 +2188,7 @@ namespace game
                     }
                     s->state = CS_SPECTATOR;
                 }
-                else if(s->state==CS_SPECTATOR) deathstate(s, s, true);
+                else if(s->state==CS_SPECTATOR) deathstate(s, true);
                 checkfollow();
                 break;
             }
