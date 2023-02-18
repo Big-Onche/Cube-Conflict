@@ -1056,7 +1056,7 @@ void rundedicatedserver()
     size_t len = strftime(servtime, sizeof(servtime), "%d-%m-%Y %Hh %Mmin %Ssec", localtime(&t));
     servtime[min(len, sizeof(servtime)-1)] = '\0';
     logoutf("%s | %s", servlang ? "Server started" : "Serveur en ligne", servtime);
-    logoutf("IP%s: %s | Port: %d", servlang ? "" : " ", strcmp(serverip, " ") ? "LAN" : serverip, serverport);
+    logoutf("IP%s: %s | Port: %d", servlang ? "" : " ", !strcmp(serverip, "") ? "LAN" : serverip, serverport);
     logoutf("Version%s: %s", servlang ? "" : " ", CCversion);
     logoutf("--------------------------------------------------------------");
 #ifdef WIN32
