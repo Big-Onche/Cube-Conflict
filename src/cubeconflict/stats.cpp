@@ -36,7 +36,6 @@ void genlvl() //Calcule le niveau du joueur
 
     if(stat[STAT_XP]-xpneededfornextlvl!=0 && totalneededxp!=0) pourcents = float(stat[STAT_XP]-xpneededfornextlvl)/float(totalneededxp);
 
-
     game::player1->level = cclvl; //Actualise le lvl pour l'envoyer en multijoueur
     stat[STAT_LEVEL] = cclvl;
 }

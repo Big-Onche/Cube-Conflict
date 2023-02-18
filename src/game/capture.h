@@ -31,7 +31,7 @@ struct captureclientmode : clientmode
     struct baseinfo
     {
         vec o;
-        string owner, enemy;
+        int owner, enemy;
 #ifndef SERVMODE
         vec ammopos;
         string name, info;
@@ -44,7 +44,7 @@ struct captureclientmode : clientmode
 
         void noenemy()
         {
-            enemy[0] = '\0';
+            enemy = 0;
             enemies = 0;
             converted = 0;
         }
@@ -52,7 +52,7 @@ struct captureclientmode : clientmode
         void reset()
         {
             noenemy();
-            owner[0] = '\0';
+            owner = 0;
             capturetime = -1;
             ammogroup = 0;
             ammotype = 0;
@@ -63,60 +63,55 @@ struct captureclientmode : clientmode
 
         bool enter(int team)
         {
-            defformatstring(tmpteam, "%d", team);
-
-            if(!strcmp(owner, tmpteam))
+            if(team==owner)
             {
                 owners++;
                 return false;
             }
             if(!enemies)
             {
-                if(strcmp(enemy, tmpteam))
+                if(enemy!=team)
                 {
                     converted = 0;
-                    copystring(enemy, tmpteam);
+                    enemy = team;
                 }
                 enemies++;
                 return true;
             }
-            else if(strcmp(enemy, tmpteam)) return false;
+            else if(enemy!=team) return false;
             else enemies++;
             return false;
         }
 
         bool steal(int team)
         {
-            defformatstring(tmpteam, "%d", team);
-            return !enemies && strcmp(owner, tmpteam);
+            return !enemies && owner!=team;
         }
 
         bool leave(int team)
         {
-            defformatstring(tmpteam, "%d", team);
-
-            if(!strcmp(owner, tmpteam) && owners > 0)
+            if(team==owner && owners > 0)
             {
                 owners--;
                 return false;
             }
-            if(strcmp(enemy, tmpteam) || enemies <= 0) return false;
+            if(enemy!=team || enemies <= 0) return false;
             enemies--;
             return !enemies;
         }
 
-        int occupy(const char *team, int units)
+        int occupy(int team, int units)
         {
-            if(strcmp(enemy, team)) return -1;
+            if(enemy!=team) return -1;
             converted += units;
             if(units<0)
             {
                 if(converted<=0) noenemy();
                 return -1;
             }
-            else if(converted<(owner[0] ? int(OCCUPYENEMYLIMIT) : int(OCCUPYNEUTRALLIMIT))) return -1;
-            if(owner[0]) { owner[0] = '\0'; converted = 0; copystring(enemy, team); return 0; }
-            else { copystring(owner, team); ammo = 0; capturetime = 0; owners = enemies; noenemy(); return 1; }
+            else if(converted<(owner ? int(OCCUPYENEMYLIMIT) : int(OCCUPYNEUTRALLIMIT))) return -1;
+            if(owner) { owner = 0; converted = 0; enemy = team; return 0; }
+            else { owner = team; ammo = 0; capturetime = 0; owners = enemies; noenemy(); return 1; }
         }
 
         bool addammo(int i)
@@ -126,9 +121,9 @@ struct captureclientmode : clientmode
             return true;
         }
 
-        bool takeammo(const char *team)
+        bool takeammo(int team)
         {
-            if(strcmp(owner, team) || ammo<=0) return false;
+            if(owner!=team || ammo<=0) return false;
             ammo--;
             return true;
         }
@@ -138,8 +133,7 @@ struct captureclientmode : clientmode
 
     struct score
     {
-        string team;
-        int total;
+        int team, total;
     };
 
     vector<score> scores;
@@ -157,29 +151,28 @@ struct captureclientmode : clientmode
 
     int getteamscore(int team)
     {
-        defformatstring(tmpteam, "%d", team);
         loopv(scores)
         {
             score &cs = scores[i];
-            if(!strcmp(cs.team, tmpteam)) return cs.total;
+            if(cs.team==team) return cs.total;
         }
         return 0;
     }
 
     void getteamscores(vector<teamscore> &teamscores)
     {
-        loopv(scores) teamscores.add(teamscore(atoi(scores[i].team), scores[i].total));
+        loopv(scores) teamscores.add(teamscore(scores[i].team, scores[i].total));
     }
 
-    score &findscore(const char *team)
+    score &findscore(int team)
     {
         loopv(scores)
         {
             score &cs = scores[i];
-            if(!strcmp(cs.team, team)) return cs;
+            if(cs.team==team) return cs;
         }
         score &cs = scores.add();
-        copystring(cs.team, team);
+        cs.team = team;
         cs.total = 0;
         return cs;
     }
@@ -215,23 +208,23 @@ struct captureclientmode : clientmode
         }
     }
 
-    void initbase(int i, int ammotype, const char *owner, const char *enemy, int converted, int ammo)
+    void initbase(int i, int ammotype, int owner, int enemy, int converted, int ammo)
     {
         if(!bases.inrange(i)) return;
         baseinfo &b = bases[i];
         b.ammotype = ammotype;
-        copystring(b.owner, owner);
-        copystring(b.enemy, enemy);
+        b.owner = owner;
+        b.enemy = enemy;
         b.converted = converted;
         b.ammo = ammo;
     }
 
-    bool hasbases(const char *team)
+    bool hasbases(int team)
     {
         loopv(bases)
         {
             baseinfo &b = bases[i];
-            if(b.owner[0] && !strcmp(b.owner, team)) return true;
+            if(b.owner && b.owner==team) return true;
         }
         return false;
     }
@@ -275,11 +268,10 @@ struct captureclientmode : clientmode
     {
         if(m_regencapture || !autorepammo || d!=player1 || d->state!=CS_ALIVE) return;
         vec o = d->feetpos();
-        defformatstring(tmpteam, "%d", d->team);
         loopv(bases)
         {
             baseinfo &b = bases[i];
-            if(b.valid() && insidebase(b, d->feetpos()) && !strcmp(b.owner, tmpteam) && b.o.dist(o) < 12)
+            if(b.valid() && insidebase(b, d->feetpos()) && b.owner==d->team && b.o.dist(o) < 12)
             {
                 if(d->lastrepammo!=i)
                 {
@@ -299,21 +291,20 @@ struct captureclientmode : clientmode
         int oldbase = d->lastbase;
         d->lastbase = -1;
         vec pos(d->o.x, d->o.y, d->o.z + (d->aboveeye - d->eyeheight)/2);
-        defformatstring(tmpteam, "%d", d->team);
         if(d->state==CS_ALIVE)
         {
             loopv(bases)
             {
                 baseinfo &b = bases[i];
 
-                if(insidebase(bases[i], player1->feetpos()) && d==player1 && totalmillis >= insidebasetimer+1000 && (b.converted || !b.owner[0]))
+                if(insidebase(bases[i], player1->feetpos()) && d==player1 && totalmillis >= insidebasetimer+1000 && (b.converted || !b.owner))
                 {
                     addxpandcc(1, 1);
                     addstat(1, STAT_BASEHACK);
                     insidebasetimer = totalmillis;
                 }
 
-                if(!b.valid() || !insidebase(b, d->feetpos()) || (strcmp(b.owner, tmpteam) && strcmp(b.enemy, tmpteam))) continue;
+                if(!b.valid() || !insidebase(b, d->feetpos()) || (b.owner!=d->team && b.enemy!=d->team)) continue;
                 if(d->lastbase < 0 && (lookupmaterial(d->feetpos())&MATF_CLIP) == MAT_GAMECLIP) break;
 
                 vec basepos(b.o);
@@ -325,7 +316,7 @@ struct captureclientmode : clientmode
 
                 if(oldbase < 0)
                 {
-                    if(strcmp(b.owner, tmpteam) && b.owner[0]) playsound(S_TERMINAL_ALARM, &b.o, NULL, 0, 0, 50, -1, 300);
+                    if(b.owner!=d->team && b.owner) playsound(S_TERMINAL_ALARM, &b.o, NULL, 0, 0, 50, -1, 300);
                     playsound(S_TERMINAL_ENTER, d==hudplayer() ? 0 : &pos, NULL, 0, 0, 50, -1, 150);
                     particle_splash(PART_ZERO, 12, 250, pos, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.8f, 200, 50);
                     particle_splash(PART_ONE, 12, 250, pos, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.8f, 200, 50);
@@ -352,8 +343,6 @@ struct captureclientmode : clientmode
 
     void rendergame()
     {
-        defformatstring(tmpteam, "%d", player1->team);
-
         if(capturetether && canaddparticles())
         {
             loopv(players)
@@ -367,12 +356,8 @@ struct captureclientmode : clientmode
         {
             baseinfo &b = bases[i];
             if(!b.valid()) continue;
-            const char *basename = b.owner[0] ? (strcmp(b.owner, tmpteam) ? "base/red" : "base/yellow") : "base/neutral";
+            const char *basename = b.owner ? (b.owner!=hudplayer()->team ? "base/red" : "base/yellow") : "base/neutral";
             rendermodel(basename, ANIM_MAPMODEL|ANIM_LOOP, b.o, 0, 0, 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED);
-            //float fradius = 1.0f, fheight = 0.5f;
-            //regular_particle_flame(PART_FLAME, vec(b.ammopos.x, b.ammopos.y, b.ammopos.z - 4.5f), fradius, fheight, b.owner[0] ? isteam(d->team, player1->team) ? 0x802020 : 0x2020FF) : 0x208020, 3, 2.0f);
-            //regular_particle_flame(PART_SMOKE, vec(b.ammopos.x, b.ammopos.y, b.ammopos.z - 4.5f + 4.0f*min(fradius, fheight)), fradius, fheight, 0x303020, 1, 4.0f, 100.0f, 2000.0f, -20);
-            //particle_fireball(b.ammopos, 4.8f, PART_EXPLOSION, 0, b.owner[0] ? (strcmp(b.owner, player1->team) ? 0x802020 : 0x2020FF) : 0x208020, 4.8f);
 
             const char *ammoname = entities::entmdlname(I_RAIL+b.ammotype);
             if(m_regencapture)
@@ -385,19 +370,17 @@ struct captureclientmode : clientmode
             }
 
             int tcolor = 0x888888, mtype = -1, mcolor = 0xFFFFFF, mcolor2 = 0;
-            if(b.owner[0])
+            if(b.owner)
             {
-                string termnalally, termnalenemy;
-                formatstring(termnalally, "%s", GAME_LANG ? "Allied" : "Allié");
-                formatstring(termnalenemy, "%s", GAME_LANG ? "Enemy" : "Ennemi");
-                bool isowner = !strcmp(b.owner, tmpteam);
-                if(b.enemy[0]) { mtype = PART_METER_VS; mcolor = 0xFF0000; mcolor2 = 0xFFFF00; if(!isowner) swap(mcolor, mcolor2); }
-                if(!b.name[0]) formatstring(b.info, "Terminal %d - %s", b.tag, !b.converted ? strcmp(b.owner, tmpteam) ? termnalenemy : termnalally : GAME_LANG ? "Disputed!" : "Contesté !");
-                else if(basenumbers) formatstring(b.info, "%s (%d) - %s", b.name, b.tag, !b.converted ? strcmp(b.owner, tmpteam) ? termnalenemy : termnalally : GAME_LANG ? "Disputed!" : "Contesté !");
-                else formatstring(b.info, "%s - %s", b.name, !b.converted ? strcmp(b.owner, tmpteam) ? termnalenemy : termnalally : GAME_LANG ? "Disputed!" : "Contesté !");
+                defformatstring(baseteam, "%s", b.converted ? (GAME_LANG ? "Disputed!" : "Contesté !") : (b.owner==hudplayer()->team ? (GAME_LANG ? "Allied" : "Allié") : (GAME_LANG ? "Enemy" : "Ennemi")));
+                bool isowner = b.owner==hudplayer()->team;
+                if(b.enemy) { mtype = PART_METER_VS; mcolor = 0xFF0000; mcolor2 = 0xFFFF00; if(!isowner) swap(mcolor, mcolor2); }
+                if(!b.name[0]) formatstring(b.info, "Terminal %d - %s", b.tag, baseteam);
+                else if(basenumbers) formatstring(b.info, "%s (%d) - %s", b.name, b.tag, baseteam);
+                else formatstring(b.info, "%s - %s", b.name, baseteam);
                 tcolor = isowner ? 0xFFFF00 : 0xFF0000;
 
-                if(!strcmp(b.owner, tmpteam) && b.o.dist(camera1->o) > 128)
+                if(b.owner==hudplayer()->team && b.o.dist(camera1->o) > 128)
                 {
                     if(b.converted)
                     {
@@ -414,12 +397,12 @@ struct captureclientmode : clientmode
                 }
 
             }
-            else if(b.enemy[0])
+            else if(b.enemy)
             {
                 if(!b.name[0]) formatstring(b.info, "Terminal %d - %s", b.tag, GAME_LANG ? "Hack in progress..." : "Hack en cours... ");
                 else if(basenumbers) formatstring(b.info, "%s (%d) - %s", b.name, b.tag,  GAME_LANG ? "Hack in progress..." : "Hack en cours... ");
                 else formatstring(b.info, "%s - %s", b.name,  GAME_LANG ? "Hack in progress..." : "Hack en cours... ");
-                if(strcmp(b.enemy, tmpteam)) { tcolor = 0xFF0000; mtype = PART_METER; mcolor = 0xFF0000; }
+                if(b.enemy!=hudplayer()->team) { tcolor = 0xFF0000; mtype = PART_METER; mcolor = 0xFF0000; }
                 else { tcolor = 0xFFFF00; mtype = PART_METER; mcolor = 0xFFFF00; }
             }
             else if(!b.name[0]) formatstring(b.info, "Terminal %d", b.tag);
@@ -432,28 +415,26 @@ struct captureclientmode : clientmode
             if(mtype>=0)
             {
                 above.z += 3.5f;
-                particle_meter(above, b.converted/float((b.owner[0] ? int(OCCUPYENEMYLIMIT) : int(OCCUPYNEUTRALLIMIT))), mtype, 1, 1, mcolor, mcolor2, 3.0f);
+                particle_meter(above, b.converted/float((b.owner ? int(OCCUPYENEMYLIMIT) : int(OCCUPYNEUTRALLIMIT))), mtype, 1, 1, mcolor, mcolor2, 3.0f);
             }
         }
     }
 
     void drawblips(gameent *d, float blipsize, int fw, int fh, int type, bool skipenemy = false)
     {
-        defformatstring(tmpteam, "%d", player1->team);
-
         float scale = calcradarscale();
         int blips = 0;
         loopv(bases)
         {
             baseinfo &b = bases[i];
             if(!b.valid()) continue;
-            if(skipenemy && b.enemy[0]) continue;
+            if(skipenemy && b.enemy) continue;
             switch(type)
             {
-                case 1: if(!b.owner[0] || strcmp(b.owner, tmpteam)) continue; break;
-                case 0: if(b.owner[0]) continue; break;
-                case -1: if(!b.owner[0] || !strcmp(b.owner, tmpteam)) continue; break;
-                case -2: if(!b.enemy[0] || !strcmp(b.enemy, tmpteam)) continue; break;
+                case 1: if(!b.owner || b.owner!=hudplayer()->team) continue; break;
+                case 0: if(b.owner) continue; break;
+                case -1: if(!b.owner || b.owner==hudplayer()->team) continue; break;
+                case -2: if(!b.enemy || b.enemy==hudplayer()->team) continue; break;
             }
             vec dir(d->o);
             dir.sub(b.o).div(scale);
@@ -580,54 +561,50 @@ struct captureclientmode : clientmode
         }
     }
 
-    void updatebase(int i, const char *owner, const char *enemy, int converted, int ammo)
+    void updatebase(int i, int owner, int enemy, int converted, int ammo)
     {
         if(!bases.inrange(i)) return;
         baseinfo &b = bases[i];
-        defformatstring(tmpteam, "%d", player1->team);
-        if(owner[0])
+        if(owner)
         {
-            if(strcmp(b.owner, owner))
+            if(b.owner!=owner)
             {
-                int iowner = atoi(owner);
-                if(!b.name[0]) conoutf(CON_GAMEINFO, GAME_LANG ? "%s team hacked \"\fe%d\f7\" terminal." : "L'équipe %s a hacké le terminal \"\fe%d\f7\".", teamcolor(iowner), b.tag);
-                else conoutf(CON_GAMEINFO, GAME_LANG ? "%s team hacked \"\fe%s\f7\" terminal." : "L'équipe %s a hacké le terminal \"\fe%s\f7\".", teamcolor(iowner), b.name);
-                playsound(!strcmp(owner, tmpteam) ? S_TERMINAL_HACKED : S_TERMINAL_HACKED_E, &b.o, NULL, 0, 0, 200, -1, 2500);
+                if(!b.name[0]) conoutf(CON_GAMEINFO, GAME_LANG ? "%s team hacked \"\fe%d\f7\" terminal." : "L'équipe %s a hacké le terminal \"\fe%d\f7\".", teamcolor(owner), b.tag);
+                else conoutf(CON_GAMEINFO, GAME_LANG ? "%s team hacked \"\fe%s\f7\" terminal." : "L'équipe %s a hacké le terminal \"\fe%s\f7\".", teamcolor(owner), b.name);
+                playsound(owner==hudplayer()->team ? S_TERMINAL_HACKED : S_TERMINAL_HACKED_E, &b.o, NULL, 0, 0, 200, -1, 2500);
             }
         }
-        else if(b.owner[0])
+        else if(b.owner)
         {
-            int ibowner = atoi(b.owner);
-            if(!b.name[0]) conoutf(CON_GAMEINFO, GAME_LANG ? "%s team lost the \"\fe%d\f7\" terminal." : "L'équipe %s a perdu le terminal \"\fe%d\f7\".", teamcolor(ibowner), b.tag);
-            else conoutf(CON_GAMEINFO, GAME_LANG ? "%s team lost the \"\fe%s\f7\" terminal." : "L'équipe %s a perdu le terminal \"\fe%s\f7\".", teamcolor(ibowner), b.name);
-            playsound(!strcmp(owner, tmpteam) ? S_TERMINAL_LOST : S_TERMINAL_LOST_E, &b.o, NULL, 0, 0, 200, -1, 2500);
+            if(!b.name[0]) conoutf(CON_GAMEINFO, GAME_LANG ? "%s team lost the \"\fe%d\f7\" terminal." : "L'équipe %s a perdu le terminal \"\fe%d\f7\".", teamcolor(owner), b.tag);
+            else conoutf(CON_GAMEINFO, GAME_LANG ? "%s team lost the \"\fe%s\f7\" terminal." : "L'équipe %s a perdu le terminal \"\fe%s\f7\".", teamcolor(owner), b.name);
+            playsound(owner==hudplayer()->team ? S_TERMINAL_LOST : S_TERMINAL_LOST_E, &b.o, NULL, 0, 0, 200, -1, 2500);
         }
-        if(strcmp(b.owner, owner))
+        if(b.owner!=owner)
         {
-            particle_splash(rnd(2) ? PART_ZERO : PART_ONE, 25, 500, b.ammopos, owner[0] ? (!strcmp(owner, tmpteam) ? 0xFFFF00 : 0xFF0000) : 0x777777, 1.f, 400, -50);
+            particle_splash(rnd(2) ? PART_ZERO : PART_ONE, 25, 500, b.ammopos, owner ? (owner==hudplayer()->team ? 0xFFFF00 : 0xFF0000) : 0x777777, 1.f, 400, -50);
         }
 
-        copystring(b.owner, owner);
-        copystring(b.enemy, enemy);
+        b.owner = owner;
+        b.enemy = enemy;
         b.converted = converted;
         if(ammo>b.ammo) playsound(S_ITEMSPAWN, &b.o);
         b.ammo = ammo;
     }
 
-    void setscore(int base, const char *team, int total)
+    void setscore(int base, int team, int total)
     {
         findscore(team).total = total;
-        int iteam = atoi(team);
-        if(total>=10000) conoutf(CON_GAMEINFO, GAME_LANG ? "%s team hacked all terminals!" : "L'équipe %s a hacké tous les terminaux !", teamcolor(iteam));
+        if(total>=10000) conoutf(CON_GAMEINFO, GAME_LANG ? "%s team hacked all terminals!" : "L'équipe %s a hacké tous les terminaux !", teamcolor(team));
         else if(bases.inrange(base))
         {
             baseinfo &b = bases[base];
-            if(!strcmp(b.owner, team))
+            if(b.owner==team)
             {
                 defformatstring(msg, "%d", total);
                 vec above(b.ammopos);
                 above.z += AMMOHEIGHT+1.0f;
-                particle_textcopy(above, msg, PART_TEXT, 1500, isteam(iteam, player1->team) ? 0xFFFF00 : 0xFF0000, 5.0f, -5);
+                particle_textcopy(above, msg, PART_TEXT, 1500, isteam(team, player1->team) ? 0xFFFF00 : 0xFF0000, 5.0f, -5);
             }
         }
     }
@@ -640,13 +617,11 @@ struct captureclientmode : clientmode
     // prefer spawning near friendly base
     float ratespawn(gameent *d, const extentity &e)
     {
-        defformatstring(tmpteam, "%d", d->team);
-
         float minbasedist = 1e16f;
         loopv(bases)
         {
             baseinfo &b = bases[i];
-            if(!b.owner[0] || strcmp(b.owner, tmpteam)) continue;
+            if(!b.owner || b.owner!=d->team) continue;
             minbasedist = min(minbasedist, e.o.dist(b.o));
         }
         return minbasedist < 1e16f ? proximityscore(minbasedist, 128.0f, 512.0f) : 1.0f;
@@ -681,8 +656,7 @@ struct captureclientmode : clientmode
 				if(targets.find(e->clientnum) < 0 && ep.squaredist(f.o) <= (CAPTURERADIUS*CAPTURERADIUS))
 					targets.add(e->clientnum);
 			}
-            defformatstring(tmpteam, "%d", d->team);
-			if((regen) || (targets.empty() && (!f.owner[0] || strcmp(f.owner, tmpteam) || f.enemy[0])))
+			if((regen) || (targets.empty() && (!f.owner || f.owner!=d->team || f.enemy)))
 			{
 				ai::interest &n = interests.add();
 				n.state = ai::AI_S_DEFEND;
@@ -708,8 +682,7 @@ struct captureclientmode : clientmode
 				regen = true;
 		}
 		int walk = 0;
-		defformatstring(tmpteam, "%d", d->team);
-		if(!regen && !f.enemy[0] && f.owner[0] && !strcmp(f.owner, tmpteam))
+		if(!regen && !f.enemy && f.owner && f.owner==d->team)
 		{
 			static vector<int> targets; // build a list of others who are interested in this
 			targets.setsize(0);
@@ -814,11 +787,10 @@ ICOMMAND(insidebases, "", (),
     void replenishammo(clientinfo *ci)
     {
         if(notgotbases || ci->state.state!=CS_ALIVE) return;
-        defformatstring(tmpteam, "%d", ci->team);
         loopv(bases)
         {
             baseinfo &b = bases[i];
-            if(b.valid() && insidebase(b, ci->state.o) && !ci->state.hasmaxammo(b.ammotype-1+I_RAIL) && b.takeammo(tmpteam))
+            if(b.valid() && insidebase(b, ci->state.o) && !ci->state.hasmaxammo(b.ammotype-1+I_RAIL) && b.takeammo(ci->team))
             {
                 sendbaseinfo(i);
                 sendf(-1, 1, "riii", N_REPAMMO, ci->clientnum, b.ammotype);
@@ -853,12 +825,12 @@ ICOMMAND(insidebases, "", (),
         movebases(team, vec(-1e10f, -1e10f, -1e10f), true, o, false);
     }
 
-    void addscore(int base, const char *team, int n)
+    void addscore(int base, int team, int n)
     {
         if(!n) return;
         score &cs = findscore(team);
         cs.total += n;
-        sendf(-1, 1, "riisi", N_BASESCORE, base, team, cs.total);
+        sendf(-1, 1, "riiii", N_BASESCORE, base, team, cs.total);
     }
 
     void addciscore(baseinfo &b)
@@ -869,8 +841,7 @@ ICOMMAND(insidebases, "", (),
 
             if(ci->state.state==CS_ALIVE && ci->team>0 && ci->team<=2 && insidebase(b, ci->state.o))
             {
-                defformatstring(tmpteam, "%d", ci->team);
-                !strcmp(tmpteam, b.owner) ? ci->state.flags++ : ci->state.flags+=2;
+                b.owner==ci->team ? ci->state.flags++ : ci->state.flags+=2;
                 sendf(-1, 1, "ri3", N_CNBASESCORE, ci->clientnum, ci->state.flags);
             }
         }
@@ -881,9 +852,7 @@ ICOMMAND(insidebases, "", (),
         loopv(clients)
         {
             clientinfo *ci = clients[i];
-            defformatstring(tmpteam, "%d", ci->team);
-
-            if(ci->state.state==CS_ALIVE && ci->team>0 && ci->team<=2 && !strcmp(tmpteam, b.owner) && insidebase(b, ci->state.o))
+            if(ci->state.state==CS_ALIVE && b.owner==ci->team && insidebase(b, ci->state.o) && (ci->team==1 || ci->team==2))
             {
                 bool notify = false;
                 if(ci->state.health < ci->state.maxhealth)
@@ -938,12 +907,12 @@ ICOMMAND(insidebases, "", (),
         {
             baseinfo &b = bases[i];
             if(!b.valid()) continue;
-            if(b.enemy[0])
+            if(b.enemy)
             {
                 if(!b.owners || !b.enemies) b.occupy(b.enemy, OCCUPYBONUS*(b.enemies ? 1 : -1) + OCCUPYPOINTS*(b.enemies ? b.enemies : -(1+b.owners))*t);
                 sendbaseinfo(i);
             }
-            else if(b.owner[0])
+            else if(b.owner)
             {
                 b.capturetime += t;
 
@@ -963,7 +932,7 @@ ICOMMAND(insidebases, "", (),
     void sendbaseinfo(int i)
     {
         baseinfo &b = bases[i];
-        sendf(-1, 1, "riissii", N_BASEINFO, i, b.owner, b.enemy, b.enemy[0] ? b.converted : 0, b.owner[0] ? b.ammo : 0);
+        sendf(-1, 1, "riiiiii", N_BASEINFO, i, b.owner, b.enemy, b.enemy ? b.converted : 0, b.owner ? b.ammo : 0);
     }
 
     void sendbases()
@@ -982,7 +951,7 @@ ICOMMAND(insidebases, "", (),
                 score &cs = scores[i];
                 putint(p, N_BASESCORE);
                 putint(p, -1);
-                sendstring(cs.team, p);
+                putint(p, cs.team);
                 putint(p, cs.total);
             }
         }
@@ -992,8 +961,8 @@ ICOMMAND(insidebases, "", (),
         {
             baseinfo &b = bases[i];
             putint(p, b.ammotype);
-            sendstring(b.owner, p);
-            sendstring(b.enemy, p);
+            putint(p, b.owner);
+            putint(p, b.enemy);
             putint(p, b.converted);
             putint(p, b.ammo);
         }
@@ -1001,31 +970,31 @@ ICOMMAND(insidebases, "", (),
 
     void endcheck()
     {
-        const char *lastteam = NULL;
+        int lastteam = 0;
 
         loopv(bases)
         {
             baseinfo &b = bases[i];
             if(!b.valid()) continue;
-            if(b.owner[0])
+            if(b.owner)
             {
                 if(!lastteam) lastteam = b.owner;
-                else if(strcmp(lastteam, b.owner))
+                else if(lastteam!=b.owner)
                 {
-                    lastteam = NULL;
+                    lastteam = 0;
                     break;
                 }
             }
             else
             {
-                lastteam = NULL;
+                lastteam = 0;
                 break;
             }
         }
 
         if(!lastteam) return;
         findscore(lastteam).total = 10000;
-        sendf(-1, 1, "riisi", N_BASESCORE, -1, lastteam, 10000);
+        sendf(-1, 1, "riiii", N_BASESCORE, -1, lastteam, 10000);
         startintermission();
     }
 
@@ -1090,12 +1059,12 @@ ICOMMAND(insidebases, "", (),
         }
     }
 
-    bool extinfoteam(const char *team, ucharbuf &p)
+    bool extinfoteam(int team, ucharbuf &p)
     {
         int numbases = 0;
-        loopvj(bases) if(!strcmp(bases[j].owner, team)) numbases++;
+        loopvj(bases) if(bases[j].owner==team) numbases++;
         putint(p, numbases);
-        loopvj(bases) if(!strcmp(bases[j].owner, team)) putint(p, j);
+        loopvj(bases) if(bases[j].owner==team) putint(p, j);
         return true;
     }
 };
@@ -1117,11 +1086,7 @@ case N_REPAMMO:
 case N_BASEINFO:
 {
     int base = getint(p);
-    string owner, enemy;
-    getstring(text, p);
-    copystring(owner, text);
-    getstring(text, p);
-    copystring(enemy, text);
+    int owner = getint(p), enemy = getint(p);
     int converted = getint(p), ammo = getint(p);
     if(m_capture) capturemode.updatebase(base, owner, enemy, converted, ammo);
     break;
@@ -1163,11 +1128,7 @@ case N_BASES:
     loopi(numbases)
     {
         int ammotype = getint(p);
-        string owner, enemy;
-        getstring(text, p);
-        copystring(owner, text);
-        getstring(text, p);
-        copystring(enemy, text);
+        int owner = getint(p), enemy = getint(p);
         int converted = getint(p), ammo = getint(p);
         capturemode.initbase(i, ammotype, owner, enemy, converted, ammo);
     }
@@ -1176,10 +1137,8 @@ case N_BASES:
 
 case N_BASESCORE:
 {
-    int base = getint(p);
-    getstring(text, p);
-    int total = getint(p);
-    if(m_capture) capturemode.setscore(base, text, total);
+    int base = getint(p), team = getint(p), total = getint(p);
+    if(m_capture) capturemode.setscore(base, team, total);
     break;
 }
 
