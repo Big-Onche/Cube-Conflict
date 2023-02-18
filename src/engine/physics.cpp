@@ -1737,7 +1737,7 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
         pl->jumps = 0;
         pl->jumping = false;
     }
-    if(pl->physstate == PHYS_FALL || pl->physstate == PHYS_FLOAT) pl->timeinair = min(pl->timeinair + curtime, 8000);
+    if(pl->physstate == PHYS_FALL || pl->physstate == PHYS_FLOAT) pl->timeinair = min(pl->timeinair + curtime, 12000);
 
     vec m(0.0f, 0.0f, 0.0f);
     if((pl->move || pl->strafe) && allowmove)
@@ -1862,13 +1862,14 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
 
         d.mul(f);
         loopi(moveres) if(!move(pl, d) && ++collisions<5) i--; // discrete steps collision detection & sliding
-        if(game::player1->timeinair > 10000) unlockachievement(ACH_ENVOL);
         if(timeinair > 800 && !pl->timeinair && !water) // if we land after long time must have been a high jump, make thud sound
         {
             game::physicstrigger(pl, local, -1, 0);
         }
         game::footsteps(pl);
     }
+
+    if(game::player1->timeinair > 10000 && !game::premission) {unlockachievement(ACH_ENVOL);}
 
     if(pl->state==CS_ALIVE) updatedynentcache(pl);
 
