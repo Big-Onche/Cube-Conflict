@@ -2699,8 +2699,7 @@ namespace server
                         {
                             if((giver.state.o.dist(receiver.state.o)/18.f < 7.5f && receiver.state.health < receiver.state.maxhealth+250 && giver.state.state==CS_ALIVE && receiver.state.state==CS_ALIVE) && (m_teammode ? isteam(receiver.team, giver.team) : giver.clientnum==receiver.clientnum))
                             {
-                                receiver.state.health += 100;
-                                if(receiver.state.health > receiver.state.maxhealth+250) receiver.state.health = receiver.state.maxhealth+250;
+                                receiver.state.health = min(receiver.state.health + 100, receiver.state.maxhealth + 250);
                                 loopv(clients) sendf(clients[i]->clientnum, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, 0, receiver.state.health);
                             }
                         }
@@ -2711,14 +2710,12 @@ namespace server
                             {
                                 if(receiver.aptitude==APT_VAMPIRE && receiver.state.health < receiver.state.maxhealth+250)
                                 {
-                                    receiver.state.health += 100;
-                                    if(receiver.state.health > receiver.state.maxhealth+250) receiver.state.health = receiver.state.maxhealth+250;
+                                    receiver.state.health = min(receiver.state.health + 100, receiver.state.maxhealth + 250);
                                     loopv(clients) sendf(clients[i]->clientnum, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, 0, receiver.state.health); //vampire gets health instead of mana
                                 }
                                 else if(receiver.aptitude!=APT_VAMPIRE) //other classes needing mana : receive mana
                                 {
-                                    receiver.state.mana += 10;
-                                    if(receiver.state.mana > 150) receiver.state.mana = 150;
+                                    receiver.state.mana = min(receiver.state.mana + 10, 150);
                                     loopv(clients) sendf(clients[i]->clientnum, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum,  1, receiver.state.mana);
                                 }
                             }
