@@ -728,12 +728,13 @@ namespace game
             {
                 copystring(str_pseudotueur, aname); n_aptitudetueur = actor->aptitude;
                 copystring(str_armetueur, GAME_LANG ? guns[atk].armedescEN : guns[atk].armedescFR);
-                conoutf(contype, "\f6%s %s \fd(%s)", dname, GAME_LANG ? "got fragged by a teammate" : "as été tué par un allié", aname);
+                conoutf(contype, "\f6%s %s (%s\f6)", dname, GAME_LANG ? "got fragged by a teammate" : "as été tué par un allié", aname);
+                hassuicided = false;
                 addstat(1, STAT_MORTS);
             }
             else
             {
-                conoutf(contype, "\f2%s %s%s%s (%s)", aname, d->team==player1->team ? "\fd" : "\fc", GAME_LANG ? "" : actor==player1 ? "as " : "a ", GAME_LANG ? "fragged a teammate" : "tué un allié" , dname); //Quelqu'un a ou TU as tué un de ses alliés
+                conoutf(contype, "\f2%s \f6%s%s (%s\f6)", aname, GAME_LANG ? "" : actor==player1 ? "as " : "a ", GAME_LANG ? "fragged a teammate" : "tué un allié" , dname); //Quelqu'un a ou TU as tué un de ses alliés
                 if(actor==player1) {addstat(1, STAT_ALLIESTUES); unlockachievement(ACH_CPASBIEN);}
             }
         }
