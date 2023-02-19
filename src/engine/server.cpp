@@ -1022,16 +1022,13 @@ static bool dedicatedserver = false;
 bool isdedicatedserver() { return dedicatedserver; }
 
 string CCversion = "Fichier de version indisponible";
-char tempccver[32];
 
 void getCCversion()
 {
     stream *versionfile = openfile("config/gameversion.cfg", "r");
     if(!versionfile) return;
 
-    char buf[50];
-    char verpt1[32];
-    int verpt2 = 0;
+    char buf[32], verpt1[16], verpt2[16];
 
     while(versionfile->getline(buf, sizeof(buf)))
     {
@@ -1040,9 +1037,9 @@ void getCCversion()
         for(i = 0; (i < 500 && buf[i] != '\0'); i++)
             buf[i] = buf[i];
 
-        sscanf(buf, "%s %d", verpt1, &verpt2);
+        sscanf(buf, "%s %s", verpt1, verpt2);
     }
-    formatstring(CCversion, "%s %d", verpt1, verpt2);
+    formatstring(CCversion, "%s %s", verpt1, verpt2);
 
     versionfile->close();
 }
