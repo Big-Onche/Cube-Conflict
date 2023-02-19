@@ -341,7 +341,7 @@ namespace game
 
         void checkmonsterstriggers()
         {
-            if(pnjtypes[mtype].friendly && player1->o.dist(this->o) < 40 && (this->monsterstate==M_FRIENDLY || this->monsterstate==M_NEUTRAL))
+            if(pnjtypes[mtype].friendly && player1->o.dist(this->o) < 40 && (this->monsterstate==M_FRIENDLY || this->monsterstate==M_NEUTRAL) && gfx::forcecampos==-1)
             {
                 defformatstring(id, "npc_dial_%d", tag);
                 if(identexists(id)) execute(id);
