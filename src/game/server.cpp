@@ -1616,7 +1616,7 @@ namespace server
             // no overflow check
             case 4: return type;
         }
-        if(ci && ++ci->overflow >= 200) return -2;
+        if(ci && ++ci->overflow >= 250) return -2;
         return type;
     }
 
