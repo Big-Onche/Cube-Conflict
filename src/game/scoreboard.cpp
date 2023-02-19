@@ -141,7 +141,7 @@ namespace game
         gameent *d = getclient(*cn);
         if(d)
         {
-            int status = d->state!=CS_DEAD ? 0xFFFFFF : 0x505050;
+            int status = d->state!=CS_DEAD ? 0xFFFFFF : 0x7D6666;
             if(d->privilege)
             {
                 status = d->privilege>=PRIV_ADMIN ? 0xFF8000 : 0x40FF80;
