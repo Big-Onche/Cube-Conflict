@@ -289,25 +289,25 @@ ENetPacket *sendfile(int cn, int chan, stream *file, const char *format, ...)
 
 const char *disconnectreason(int reason)
 {
+    bool lang = GAME_LANG || servlang;
     switch(reason)
     {
-        case DISC_EOP:              return "end of packet";
-        case DISC_LOCAL:            return "server is in local mode/serveur en mode local";
-        case DISC_KICK:             return "kicked-banned/kick-banni";
-        case DISC_MSGERR:           return "message error/erreur message";
-        case DISC_MSGERR_DEF:       return "message error/erreur message (genericmsg)";
-        case DISC_MSGERR_MINUS1:    return "message error/erreur message (checktype -1)";
-        case DISC_MSGERR_SERVMSG:   return "message error/erreur message (illegal client message)";
-        case DISC_DESYNC:           return "synchronization error/erreur de synchronisation";
-        case DISC_UNK:              return "unknown network message/message réseau inconnu";
-        case DISC_IPBAN:            return "ip is banned/ip bannie";
-        case DISC_PRIVATE:          return "server is in private mode/serveur en mode privé";
-        case DISC_MAXCLIENTS:       return "server FULL/ serveur plein";
-        case DISC_TIMEOUT:          return "connection timed out/la connexion a expirée";
-        case DISC_OVERFLOW:         return "overflow";
-        case DISC_PASSWORD:         return "invalid password/mot de passe invalide";
-        case DISC_NORMAL:           return "voluntary/volontaire";
-        default: return "crash ?";
+        case DISC_EOP:              return lang ? "end of packet" : "fin de paquet";
+        case DISC_LOCAL:            return lang ? "server in local mode" : "serveur en mode local";
+        case DISC_KICK:             return lang ? "kicked or banned" : "kické ou banni";
+        case DISC_MSGERR:           return lang ? "network message error" : "erreur message réseau (non spécifié)";
+        case DISC_MSGERR_SERVMSG:   return lang ? "network message error (illegal server message)" : "erreur message (message serveur illégal)";
+        case DISC_MSGERR_EDIT:      return lang ? "network message error (illegal client message)" : "erreur message (message client illégal)";
+        case DISC_DESYNC:           return lang ? "synchronization error" : "erreur de synchronisation";
+        case DISC_UNK:              return lang ? "unknown network message" : "message réseau inconnu";
+        case DISC_IPBAN:            return lang ? "ip banned" : "ip bannie";
+        case DISC_PRIVATE:          return lang ? "server in private mode" : "serveur en mode privé";
+        case DISC_MAXCLIENTS:       return lang ? "server full" : "serveur plein";
+        case DISC_TIMEOUT:          return lang ? "connection timed out" : "la connexion a expirée";
+        case DISC_OVERFLOW:         return lang ? "connection overflow" : "connexion débordée";
+        case DISC_PASSWORD:         return lang ? "invalid password" : "mot de passe invalide";
+        case DISC_NORMAL:           return lang ? "voluntary" : "volontaire";
+        default:                    return lang ? "crash?" : "crash ?";
     }
 }
 

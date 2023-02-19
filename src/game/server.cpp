@@ -1992,27 +1992,6 @@ namespace server
             welcomeinitclient(p, ci ? ci->clientnum : -1);
         }
 
-        if(ci)
-        {
-            if(m_identique)
-            {
-                putint(p, N_IDENTIQUEARME);
-                putint(p, curweapon);
-                sendf(-1, 1, "ri2", N_IDENTIQUEARME, curweapon);
-            }
-
-            if(gamemillis>10000)
-            {
-                putint(p, N_PREMISSION);
-                putint(p, 0);
-                sendf(-1, 1, "ri2", N_PREMISSION, 0);
-            }
-
-            putint(p, N_SERVAMBIENT);
-            putint(p, servambient);
-            sendf(-1, 1, "ri2", N_SERVAMBIENT, servambient);
-        }
-
         if(smode) smode->initclient(ci, p, true);
         return 1;
     }
@@ -3260,7 +3239,7 @@ namespace server
 
     void generrlog(clientinfo *ci)
     {
-        logoutf("Net : ping %d, overflow %d | Abilities : classe %s, a1 %d, a2 %d, a3 %d | Boosts : rage %d, roids %d, epo %d, joint %d, shrooms %d | Other : health %d, mana %d",
+        logoutf("Net : ping %d, overflow %d | %s, %d, %d, %d | rage %d, roids %d, epo %d, joint %d, shrooms %d | health %d, mana %d",
                 ci->ping, ci->overflow,
                 aptitudes[ci->aptitude].apt_nomEN, ci->state.abilitymillis[game::ABILITY_1], ci->state.abilitymillis[game::ABILITY_2], ci->state.abilitymillis[game::ABILITY_3],
                 ci->state.ragemillis, ci->state.boostmillis[game::B_ROIDS], ci->state.boostmillis[game::B_EPO], ci->state.boostmillis[game::B_JOINT], ci->state.boostmillis[game::B_SHROOMS],
@@ -3314,6 +3293,10 @@ namespace server
                         int botamount = servaddbots - numclients(-1, true, false);
                         if(botamount>0) {loopi(botamount) aiman::addai(servbotminskill+rnd(servbotmaxskill-servbotminskill), -1);}
                         loopi(numclients(-1, true, false) > servaddbots) aiman::deleteai();
+
+                        if(gamemillis>10000) sendf(-1, 1, "ri2", N_PREMISSION, 0);
+                        if(m_identique) sendf(-1, 1, "ri2", N_IDENTIQUEARME, curweapon);
+                        sendf(-1, 1, "ri2", N_SERVAMBIENT, servambient);
                     }
 
                     logoutf("Infos%s: %s (%s %s %d)", servlang ? "" : " ", ci->name, servlang ? aptitudes[cq->aptitude].apt_nomEN : aptitudes[cq->aptitude].apt_nomFR, servlang ? "level" : "niveau", ci->level);
@@ -4113,25 +4096,15 @@ namespace server
             #include "ctf.h"
             #undef PARSEMESSAGES
 
-            case -1:
+            case -1: case -2: case -3:
                 generrlog(ci);
-                disconnect_client(sender, DISC_MSGERR_MINUS1);
-                return;
-
-            case -2:
-                generrlog(ci);
-                disconnect_client(sender, DISC_OVERFLOW);
-                return;
-
-            case -3:
-                generrlog(ci);
-                disconnect_client(sender, DISC_MSGERR_SERVMSG);
+                disconnect_client(sender, msgfilter[type]==-1 ? DISC_MSGERR_SERVMSG : msgfilter[type]==-2 ? DISC_OVERFLOW : DISC_MSGERR_EDIT);
                 return;
 
             default: genericmsg:
             {
                 int size = server::msgsizelookup(type);
-                if(size<=0) { disconnect_client(sender, DISC_MSGERR_DEF); return; }
+                if(size<=0) { disconnect_client(sender, DISC_MSGERR); return; }
                 loopi(size-1) getint(p);
                 if(ci) switch(msgfilter[type])
                 {
