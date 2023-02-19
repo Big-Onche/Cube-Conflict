@@ -1585,7 +1585,7 @@ namespace server
         }
 
         uchar operator[](int msg) const { return msg >= 0 && msg < NUMMSG ? msgmask[msg] : 0; }
-    } msgfilter(-1, N_CONNECT, N_SERVINFO, N_INITCLIENT, N_WELCOME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_HITPUSH, N_SHOTFX, N_EXPLODEFX, N_DIED, N_SPAWNSTATE, N_FORCEDEATH, N_TEAMINFO, N_ITEMACC, N_ITEMSPAWN, N_TIMEUP, N_PREMISSION, N_CDIS, N_CURRENTMASTER, N_PONG, N_RESUME, N_BASESCORE, N_BASEINFO, N_BASEREGEN, N_CNBASESCORE, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_SENDMAP, N_DROPFLAG, N_SCOREFLAG, N_RETURNFLAG, N_RESETFLAG, N_CLIENT, N_AUTHCHAL, N_INITAI, N_DEMOPACKET, N_IDENTIQUEARME, N_SERVAMBIENT, -2, N_CALCLIGHT, N_REMIP, N_NEWMAP, N_GETMAP, N_SENDMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, N_EDITVAR, N_EDITVSLOT, N_UNDO, N_REDO, -4, N_POS, NUMMSG),
+    } msgfilter(-1, N_CONNECT, N_SERVINFO, N_INITCLIENT, N_WELCOME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_HITPUSH, N_SHOTFX, N_EXPLODEFX, N_DIED, N_SPAWNSTATE, N_FORCEDEATH, N_TEAMINFO, N_ITEMACC, N_ITEMSPAWN, N_TIMEUP, N_PREMISSION, N_CDIS, N_CURRENTMASTER, N_PONG, N_RESUME, N_BASESCORE, N_BASEINFO, N_BASEREGEN, N_CNBASESCORE, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_SENDMAP, N_DROPFLAG, N_SCOREFLAG, N_RETURNFLAG, N_RESETFLAG, N_CLIENT, N_AUTHCHAL, N_INITAI, N_DEMOPACKET, N_IDENTIQUEARME, -2, N_CALCLIGHT, N_REMIP, N_NEWMAP, N_GETMAP, N_SENDMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, N_EDITVAR, N_EDITVSLOT, N_UNDO, N_REDO, -4, N_POS, NUMMSG),
       connectfilter(-1, N_CONNECT, -2, N_AUTHANS, -3, N_PING, NUMMSG);
 
     int checktype(int type, clientinfo *ci)
@@ -1878,6 +1878,7 @@ namespace server
     {
         putint(p, N_WELCOME);
         putint(p, N_MAPCHANGE);
+        putint(p, servambient);
         sendstring(smapname, p);
         putint(p, gamemode);
         putint(p, notgotitems ? 1 : 0);
@@ -2060,6 +2061,7 @@ namespace server
         changegamespeed(100);
         if(smode) smode->cleanup();
 
+        game::premission = true;
         gamemode = mode;
         gamemillis = 0;
         gamelimit = gamelength*60000+10000;
@@ -2078,8 +2080,7 @@ namespace server
         }
 
         if(!m_mp(gamemode)) kicknonlocalclients(DISC_LOCAL);
-
-        sendf(-1, 1, "risii", N_MAPCHANGE, smapname, gamemode, 1);
+        sendf(-1, 1, "riisii", N_MAPCHANGE, servambient, smapname, gamemode, 1);
 
         if(m_ctf) smode = &ctfmode;
         else if(m_capture) smode = &capturemode;
@@ -2115,10 +2116,8 @@ namespace server
     void rotatemap(bool next)
     {
         servambient = rnd(9)+1;
-        sendf(-1, 1, "ri2", N_SERVAMBIENT, servambient);
         if(servrandommode || !servforcemode) gamemode = rnd(17)+2;
         if(servforcemode>-1) gamemode = servforcemode;
-        game::premission = true;
 
         if(!maprotations.inrange(curmaprotation))
         {
@@ -2916,7 +2915,7 @@ namespace server
 
     void sendservinfo(clientinfo *ci)
     {
-        sendf(ci->clientnum, 1, "ri7ss", N_SERVINFO, ci->clientnum, PROTOCOL_VERSION, ci->sessionid, multiplayer(false) ? servambient : map_atmo, atoi(smapname), serverpass[0] ? 1 : 0, serverdesc, serverauth);
+        sendf(ci->clientnum, 1, "ri6ss", N_SERVINFO, ci->clientnum, PROTOCOL_VERSION, ci->sessionid, atoi(smapname), serverpass[0] ? 1 : 0, serverdesc, serverauth);
     }
 
     void noclients()
@@ -3296,7 +3295,6 @@ namespace server
 
                         if(gamemillis>10000) sendf(-1, 1, "ri2", N_PREMISSION, 0);
                         if(m_identique) sendf(-1, 1, "ri2", N_IDENTIQUEARME, curweapon);
-                        sendf(-1, 1, "ri2", N_SERVAMBIENT, servambient);
                     }
 
                     logoutf("Infos%s: %s (%s %s %d)", servlang ? "" : " ", ci->name, servlang ? aptitudes[cq->aptitude].apt_nomEN : aptitudes[cq->aptitude].apt_nomFR, servlang ? "level" : "niveau", ci->level);

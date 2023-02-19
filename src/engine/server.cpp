@@ -306,7 +306,7 @@ const char *disconnectreason(int reason)
         case DISC_TIMEOUT:          return lang ? "connection timed out" : "la connexion a expirée";
         case DISC_OVERFLOW:         return lang ? "connection overflow" : "connexion débordée";
         case DISC_PASSWORD:         return lang ? "invalid password" : "mot de passe invalide";
-        case DISC_NORMAL:           return lang ? "voluntary" : "volontaire";
+        case DISC_NORMAL:           return lang ? "normal" : "normal";
         default:                    return lang ? "crash?" : "crash ?";
     }
 }
@@ -319,7 +319,7 @@ void disconnect_client(int n, int reason)
     delclient(clients[n]);
     const char *msg = disconnectreason(reason);
     string s;
-    if(msg) formatstring(s, "%s %s | Reason/Cause : %s", servlang ? "Disconnected:" : "Hors-ligne :", clients[n]->hostname, msg);
+    if(msg) formatstring(s, "%s %s (%s)", servlang ? "Disconnected:" : "Hors-ligne :", clients[n]->hostname, msg);
     else formatstring(s, "%s %s", servlang ? "Disconnected:" : "Hors-ligne :", clients[n]->hostname);
     logoutf("%s", s);
     server::sendservmsg(s);

@@ -4,7 +4,7 @@
 #include "cube.h"
 #include "engine.h"
 
-extern int cnidentiquearme, nextcnweapon, servambient;
+extern int cnidentiquearme, nextcnweapon;
 extern int lastshoot, getspyability;
 
 // animations
@@ -348,7 +348,7 @@ enum
     N_SENDCAPE, N_SENDTOMBE, N_SENDDANSE, N_SENDAPTITUDE, N_REGENALLIES,
     N_REQABILITY, N_GETABILITY,
     N_ANNOUNCE,
-    N_IDENTIQUEARME, N_SERVAMBIENT,
+    N_IDENTIQUEARME,
     N_BASES, N_BASEINFO, N_BASESCORE, N_CNBASESCORE, N_REPAMMO, N_BASEREGEN,
     NUMMSG
 };
@@ -381,7 +381,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_SENDCAPE, 2, N_SENDTOMBE, 2, N_SENDDANSE, 2, N_SENDAPTITUDE, 2, N_REGENALLIES, 4,
     N_REQABILITY, 2, N_GETABILITY, 4,
     N_ANNOUNCE, 3,
-    N_IDENTIQUEARME, 2, N_SERVAMBIENT, 2,
+    N_IDENTIQUEARME, 2,
     N_BASES, 0, N_BASEINFO, 0, N_BASESCORE, 0, N_CNBASESCORE, 3, N_REPAMMO, 1, N_BASEREGEN, 7,
     -1
 };

@@ -5,8 +5,6 @@
     #include "steam_api.h"
 #endif
 
-bool launch = true;
-VARF(map_atmo, 0, 0, 9, if(!launch) {execfile("config/default_map_settings.cfg");} else launch = false;);
 VARR(mapofficielle, 0, 0, 1);
 
 int cnidentiquearme, nextcnweapon = 0;
@@ -63,6 +61,9 @@ void getsteamname()
 
 }
 ICOMMAND(getsteamname, "", (), {getsteamname();});
+
+bool launch = true;
+VARF(map_atmo, 0, 0, 9, if(!launch && !isconnected()) {execfile("config/default_map_settings.cfg");} else launch = false;);
 
 namespace game
 {
@@ -1453,7 +1454,6 @@ namespace game
                     return;
                 }
                 sessionid = getint(p);
-                map_atmo = getint(p);
                 map_sel = getint(p);
                 player1->clientnum = mycn;      // we are now connected
                 if(getint(p) > 0) conoutf("this server is password protected");
@@ -1536,6 +1536,9 @@ namespace game
             }
 
             case N_MAPCHANGE:
+            {
+                int atmofromserv = getint(p);
+                if(multiplayer(false)) map_atmo = atmofromserv;
                 getstring(text, p);
                 filtertext(text, text, false);
                 fixmapname(text);
@@ -1548,6 +1551,7 @@ namespace game
                 updatewinstat = true;
                 gfx::resetshroomsgfx();
                 break;
+            }
 
             case N_FORCEDEATH:
             {
@@ -1692,12 +1696,6 @@ namespace game
             case N_IDENTIQUEARME:
             {
                 cnidentiquearme = getint(p);
-                break;
-            }
-
-            case N_SERVAMBIENT:
-            {
-                if(multiplayer(false)) map_atmo = getint(p);
                 break;
             }
 
