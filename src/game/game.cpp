@@ -19,7 +19,7 @@ namespace game
 {
     VARFP(player1_aptitude, 0, 0, sizeof(aptitudes)/sizeof(aptitudes[0])-1,
     {
-        if(player1->state != CS_DEAD && isconnected() && !m_tutorial)
+        if(player1->state != CS_DEAD && isconnected()&& !premission && !intermission && !m_tutorial)
         {
             conoutf(CON_GAMEINFO, GAME_LANG ? "\fcCannot change class while alive!" : "\fcImpossible de changer d'aptitude en étant vivant !");
             playsound(S_ERROR);
