@@ -7,8 +7,6 @@
 
 VARR(mapofficielle, 0, 0, 1);
 
-int cnidentiquearme, nextcnweapon = 0;
-
 char namesparts[2][16], trash[16];
 char *rndname(bool firstpart, bool fem, int lang)
 {
@@ -67,6 +65,8 @@ VAR(map_atmo, 0, 0, 9);
 
 namespace game
 {
+    int cncurweapon, nextcnweapon = 0;
+
     VARP(minradarscale, 0, 384, 10000);
     VARP(maxradarscale, 1, 1024, 10000);
     VARP(radarteammates, 0, 1, 1);
@@ -1693,9 +1693,21 @@ namespace game
                 break;
             }
 
-            case N_IDENTIQUEARME:
+            case N_CURWEAPON:
             {
-                cnidentiquearme = getint(p);
+                cncurweapon = getint(p);
+                switch(player1->gunselect)
+                {
+                    case GUN_CACNINJA:
+                    case GUN_KAMIKAZE:
+                    case GUN_ASSISTXPL:
+                    case GUN_S_NUKE:
+                    case GUN_S_GAU8:
+                    case GUN_S_CAMPOUZE:
+                    case GUN_S_ROQUETTES:
+                        break;
+                    default: gunselect(cncurweapon, player1);
+                }
                 break;
             }
 

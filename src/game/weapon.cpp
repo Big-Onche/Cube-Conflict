@@ -68,7 +68,7 @@ namespace game
     void getsweap()
     {
          if(!m_identique) return;
-         int gun = cnidentiquearme;
+         int gun = cncurweapon;
          loopi(4) if(player1->ammo[GUN_S_CAMPOUZE-i]>0) gun = GUN_S_CAMPOUZE-i;
          gunselect(gun, player1);
     }
@@ -81,16 +81,16 @@ namespace game
             switch(player1->aptitude)
             {
                 case APT_KAMIKAZE:
-                    if(player1->gunselect==cnidentiquearme) {dir-1 ? gunselect(GUN_KAMIKAZE, player1) : getsweap();}
-                    else gunselect(cnidentiquearme, player1);
+                    if(player1->gunselect==cncurweapon) {dir-1 ? gunselect(GUN_KAMIKAZE, player1) : getsweap();}
+                    else gunselect(cncurweapon, player1);
                     return;
                 case APT_NINJA:
-                    if(player1->gunselect==cnidentiquearme){dir-1 ? gunselect(GUN_CACNINJA, player1) : getsweap();}
-                    else gunselect(cnidentiquearme, player1);
+                    if(player1->gunselect==cncurweapon){dir-1 ? gunselect(GUN_CACNINJA, player1) : getsweap();}
+                    else gunselect(cncurweapon, player1);
                     return;
                 default:
-                    if(player1->gunselect==cnidentiquearme) getsweap();
-                    else gunselect(cnidentiquearme, player1);
+                    if(player1->gunselect==cncurweapon) getsweap();
+                    else gunselect(cncurweapon, player1);
                     return;
             }
         }

@@ -3,7 +3,6 @@
 
 VARP(gamelength, 1, 10, 60);
 
-int nextweapon, curweapon;
 int servambient = rnd(9)+1;
 
 namespace game
@@ -1585,7 +1584,7 @@ namespace server
         }
 
         uchar operator[](int msg) const { return msg >= 0 && msg < NUMMSG ? msgmask[msg] : 0; }
-    } msgfilter(-1, N_CONNECT, N_SERVINFO, N_INITCLIENT, N_WELCOME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_HITPUSH, N_SHOTFX, N_EXPLODEFX, N_DIED, N_SPAWNSTATE, N_FORCEDEATH, N_TEAMINFO, N_ITEMACC, N_ITEMSPAWN, N_TIMEUP, N_PREMISSION, N_CDIS, N_CURRENTMASTER, N_PONG, N_RESUME, N_BASESCORE, N_BASEINFO, N_BASEREGEN, N_CNBASESCORE, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_SENDMAP, N_DROPFLAG, N_SCOREFLAG, N_RETURNFLAG, N_RESETFLAG, N_CLIENT, N_AUTHCHAL, N_INITAI, N_DEMOPACKET, N_IDENTIQUEARME, -2, N_CALCLIGHT, N_REMIP, N_NEWMAP, N_GETMAP, N_SENDMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, N_EDITVAR, N_EDITVSLOT, N_UNDO, N_REDO, -4, N_POS, NUMMSG),
+    } msgfilter(-1, N_CONNECT, N_SERVINFO, N_INITCLIENT, N_WELCOME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_HITPUSH, N_SHOTFX, N_EXPLODEFX, N_DIED, N_SPAWNSTATE, N_FORCEDEATH, N_TEAMINFO, N_ITEMACC, N_ITEMSPAWN, N_TIMEUP, N_PREMISSION, N_CDIS, N_CURRENTMASTER, N_PONG, N_RESUME, N_BASESCORE, N_BASEINFO, N_BASEREGEN, N_CNBASESCORE, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_SENDMAP, N_DROPFLAG, N_SCOREFLAG, N_RETURNFLAG, N_RESETFLAG, N_CLIENT, N_AUTHCHAL, N_INITAI, N_DEMOPACKET, N_CURWEAPON, -2, N_CALCLIGHT, N_REMIP, N_NEWMAP, N_GETMAP, N_SENDMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, N_EDITVAR, N_EDITVSLOT, N_UNDO, N_REDO, -4, N_POS, NUMMSG),
       connectfilter(-1, N_CONNECT, -2, N_AUTHANS, -3, N_PING, NUMMSG);
 
     int checktype(int type, clientinfo *ci)
@@ -2732,7 +2731,7 @@ namespace server
         }
     }
 
-    int identiquetimer;
+    int identiquetimer, nextweapon, curweapon;
     bool announced = false, firstlaunch = true;
 
     void serverupdate()
@@ -2767,18 +2766,18 @@ namespace server
 
                     if(m_identique)
                     {
-                        if(firstlaunch) {curweapon = rnd(17); sendf(-1, 1, "ri2", N_IDENTIQUEARME, curweapon); firstlaunch = false;}
+                        if(firstlaunch) {curweapon = rnd(17); nextweapon = rnd(17); sendf(-1, 1, "ri2", N_CURWEAPON, curweapon); firstlaunch = false;}
                         identiquetimer += curtime;
-                        if(identiquetimer>=15000 && announced==false)
+                        if(identiquetimer>=25000 && !announced)
                         {
                             while(nextweapon==curweapon) nextweapon = rnd(17);
                             sendf(-1, 1, "ri3", N_ANNOUNCE, 50, nextweapon);
                             announced = true;
                         }
-                        else if(identiquetimer>20000)
+                        else if(identiquetimer>30000)
                         {
                             curweapon = nextweapon;
-                            sendf(-1, 1, "ri2", N_IDENTIQUEARME, curweapon);
+                            sendf(-1, 1, "ri2", N_CURWEAPON, curweapon);
                             identiquetimer = 0;
                             announced = false;
                         }
@@ -3294,7 +3293,7 @@ namespace server
                         loopi(numclients(-1, true, false) > servaddbots) aiman::deleteai();
 
                         if(gamemillis>10000) sendf(-1, 1, "ri2", N_PREMISSION, 0);
-                        if(m_identique) sendf(-1, 1, "ri2", N_IDENTIQUEARME, curweapon);
+                        if(m_identique) sendf(-1, 1, "ri2", N_CURWEAPON, curweapon);
                     }
 
                     logoutf("Infos%s: %s (%s %s %d)", servlang ? "" : " ", ci->name, servlang ? aptitudes[cq->aptitude].apt_nomEN : aptitudes[cq->aptitude].apt_nomFR, servlang ? "level" : "niveau", ci->level);

@@ -4,7 +4,6 @@
 #include "cube.h"
 #include "engine.h"
 
-extern int cnidentiquearme, nextcnweapon;
 extern int lastshoot, getspyability;
 
 // animations
@@ -348,7 +347,7 @@ enum
     N_SENDCAPE, N_SENDTOMBE, N_SENDDANSE, N_SENDAPTITUDE, N_REGENALLIES,
     N_REQABILITY, N_GETABILITY,
     N_ANNOUNCE,
-    N_IDENTIQUEARME,
+    N_CURWEAPON,
     N_BASES, N_BASEINFO, N_BASESCORE, N_CNBASESCORE, N_REPAMMO, N_BASEREGEN,
     NUMMSG
 };
@@ -381,7 +380,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_SENDCAPE, 2, N_SENDTOMBE, 2, N_SENDDANSE, 2, N_SENDAPTITUDE, 2, N_REGENALLIES, 4,
     N_REQABILITY, 2, N_GETABILITY, 4,
     N_ANNOUNCE, 3,
-    N_IDENTIQUEARME, 2,
+    N_CURWEAPON, 2,
     N_BASES, 0, N_BASEINFO, 0, N_BASESCORE, 0, N_CNBASESCORE, 3, N_REPAMMO, 1, N_BASEREGEN, 7,
     -1
 };
@@ -690,10 +689,10 @@ struct gamestate
     {
         switch(rnd(4))
         {
-            case 0: ammo[GUN_CAC349] = 1; gunselect = GUN_CAC349; break;
-            case 1: ammo[GUN_CACMARTEAU] = 1; gunselect = GUN_CACMARTEAU; break;
-            case 2: ammo[GUN_CACMASTER] = 1; gunselect = GUN_CACMASTER; break;
-            case 3: ammo[GUN_CACFLEAU] = 1; gunselect = GUN_CACFLEAU; break;
+            case 0: ammo[GUN_CAC349] = 1; break;
+            case 1: ammo[GUN_CACMARTEAU] = 1; break;
+            case 2: ammo[GUN_CACMASTER] = 1; break;
+            case 3: ammo[GUN_CACFLEAU] = 1; break;
         }
     }
 
@@ -710,7 +709,8 @@ struct gamestate
 
     void spawnstate(int gamemode, int aptitude)
     {
-        if(aptitude!=3) addcacweaps(gamemode, aptitude);
+        bool addsweap = true;
+        if(aptitude!=APT_NINJA) addcacweaps(gamemode, aptitude);
 
         switch(aptitude)
         {
@@ -722,57 +722,48 @@ struct gamestate
             armourtype = A_BLUE;
             armour = aptitude==APT_SOLDAT ? 1000 : 750;
             int randomarme = rnd(17);
-            gunselect = aptitude==6 ? GUN_KAMIKAZE : aptitude==3 ? GUN_CACNINJA : randomarme;
-            ammo[randomarme] = aptitude==2 ? 1.5f*itemstats[randomarme].max : itemstats[randomarme].max;
-            if(aptitude==0) addsweaps();
-            return;
+            gunselect = aptitude==APT_KAMIKAZE ? GUN_KAMIKAZE : aptitude==APT_NINJA ? GUN_CACNINJA : randomarme;
+            baseammo(randomarme);
         }
-        else if (m_fullstuff)
+        else if(m_fullstuff)
         {
             armourtype = A_GREEN;
             armour = aptitude==APT_SOLDAT ? 1750 : 1250;
             int spawngun1 = rnd(17), spawngun2, spawngun3;
             gunselect = spawngun1;
-            baseammo(spawngun1, 4);
+            baseammo(spawngun1, aptitude==APT_AMERICAIN ? 6 : 4);
             do spawngun2 = rnd(17); while(spawngun1==spawngun2);
-            baseammo(spawngun2, 4);
+            baseammo(spawngun2, aptitude==APT_AMERICAIN ? 6 : 4);
             do spawngun3 = rnd(17); while(spawngun1==spawngun3 && spawngun2==spawngun3);
-            baseammo(spawngun3, 4);
-            gunselect = aptitude==6 ? GUN_KAMIKAZE : aptitude==3 ? GUN_CACNINJA : spawngun1;
-            if(aptitude==0) addsweaps();
-            return;
+            baseammo(spawngun3, aptitude==APT_AMERICAIN ? 6 : 4);
+            gunselect = aptitude==APT_KAMIKAZE ? GUN_KAMIKAZE : aptitude==APT_NINJA ? GUN_CACNINJA : spawngun1;
         }
         else if(m_identique)
         {
             loopi(17) baseammo(i);
             armourtype = A_BLUE;
             armour = aptitude==APT_SOLDAT ? 1000 : 750;
-            gunselect = aptitude==6 ? GUN_KAMIKAZE : aptitude==3 ? GUN_CACNINJA : cnidentiquearme;
-            ammo[cnidentiquearme] = aptitude==2 ? 1.5f*itemstats[cnidentiquearme].max : itemstats[cnidentiquearme].max;
-            if(aptitude==0) addsweaps();
-            return;
+            if(aptitude==APT_KAMIKAZE) gunselect = GUN_KAMIKAZE;
+            else if(aptitude==APT_NINJA) gunselect = GUN_CACNINJA;
         }
         else if(m_capture)
         {
             armourtype = A_BLUE;
             armour = m_regencapture ? aptitude==APT_SOLDAT ? 550 : 300 : 750;
-            ammo[GUN_GLOCK] = aptitude==2 ? m_regencapture ? 15 : 45 : m_regencapture ? 10 : 30;
-            ammo[GUN_M32] = aptitude==2 ? 3 : 1;
-            gunselect = aptitude==6 ? GUN_KAMIKAZE : aptitude==3 ? GUN_CACNINJA : GUN_GLOCK;
-            if(aptitude==0) addsweaps();
-            return;
+            ammo[GUN_GLOCK] = aptitude==APT_AMERICAIN ? m_regencapture ? 15 : 45 : m_regencapture ? 10 : 30;
+            ammo[GUN_M32] = aptitude==APT_AMERICAIN ? 3 : 1;
+            gunselect = aptitude==6 ? GUN_KAMIKAZE : aptitude==APT_NINJA ? GUN_CACNINJA : GUN_GLOCK;
         }
-        else if(m_sp || m_tutorial)
+        else if(m_tutorial || m_dmsp)
         {
             armourtype = A_BLUE;
-            armour = 0;
             health = 1000;
             mana = 100;
-
-            if(m_dmsp)
+            if(m_tutorial) addsweap = false;
+            else
             {
                 armour = 750;
-                ammo[GUN_GLOCK] = aptitude==2 ? 100 : 50;
+                ammo[GUN_GLOCK] = aptitude==APT_AMERICAIN ? 75 : 50;
                 gunselect = GUN_GLOCK;
             }
         }
@@ -783,8 +774,9 @@ struct gamestate
             ammo[GUN_GLOCK] = aptitude==2 ? 45 : 30;
             ammo[GUN_M32] = aptitude==2 ? 3 : 1;
             gunselect = aptitude==6 ? GUN_KAMIKAZE : aptitude==3 ? GUN_CACNINJA : GUN_GLOCK;
-            if(aptitude==0) addsweaps();
         }
+
+        if(aptitude==APT_SOLDAT && addsweap) addsweaps();
     }
 
     // just subtract damage here, can set death, etc. later in code calling this
@@ -1023,7 +1015,7 @@ namespace game
     extern void updatespecials(gameent *d);
 
     // game
-    extern int gamemode;
+    extern int gamemode, cncurweapon, nextcnweapon;
 
     struct clientmode
     {

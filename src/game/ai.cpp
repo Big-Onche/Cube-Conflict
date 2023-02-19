@@ -682,7 +682,7 @@ namespace ai
                 case APT_NINJA: d->ai->weappref = GUN_CACNINJA; break;
                 default:
                 {
-                    if(m_identique) d->ai->weappref = cnidentiquearme;
+                    if(m_identique) d->ai->weappref = cncurweapon;
                     else d->ai->weappref = rnd(GUN_GLOCK-GUN_RAIL+1)+GUN_RAIL;
                 }
             }
@@ -1299,14 +1299,14 @@ namespace ai
             {
                 case APT_KAMIKAZE:
                     if(hasrange(d, e, GUN_KAMIKAZE)) gunselect(GUN_KAMIKAZE, d);
-                    else gunselect(cnidentiquearme, d);
+                    else gunselect(cncurweapon, d);
                     break;
                 case APT_NINJA:
                     if(hasrange(d, e, GUN_CACNINJA)) gunselect(GUN_CACNINJA, d);
-                    else gunselect(cnidentiquearme, d);
+                    else gunselect(cncurweapon, d);
                     break;
                 default:
-                    gunselect(cnidentiquearme, d);
+                    gunselect(cncurweapon, d);
             }
             return process(d, b) >= 2;
         }

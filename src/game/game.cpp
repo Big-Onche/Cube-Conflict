@@ -248,12 +248,12 @@ namespace game
         switch(player1->aptitude)
         {
             case APT_KAMIKAZE:
-                if(player1->gunselect!=GUN_KAMIKAZE) gunselect(cnidentiquearme, player1);
+                if(player1->gunselect!=GUN_KAMIKAZE) gunselect(cncurweapon, player1);
                 break;
             case APT_NINJA:
-                if(player1->gunselect!=GUN_CACNINJA) gunselect(cnidentiquearme, player1);
+                if(player1->gunselect!=GUN_CACNINJA) gunselect(cncurweapon, player1);
                 break;
-            default: gunselect(cnidentiquearme, player1);
+            default: gunselect(cncurweapon, player1);
         }
     }
 
