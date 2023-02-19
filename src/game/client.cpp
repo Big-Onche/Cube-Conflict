@@ -63,7 +63,7 @@ void getsteamname()
 ICOMMAND(getsteamname, "", (), {getsteamname();});
 
 bool launch = true;
-VARF(map_atmo, 0, 0, 9, if(!launch && !isconnected()) {execfile("config/default_map_settings.cfg");} else launch = false;);
+VAR(map_atmo, 0, 0, 9);
 
 namespace game
 {
