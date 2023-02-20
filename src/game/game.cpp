@@ -48,6 +48,8 @@ namespace game
 
     int following = -1;
 
+    ICOMMAND(isteamone, "", (), intret(player1->team==1););
+
     VARFP(specmode, 0, 0, 2,
     {
         if(!specmode) stopfollowing();

@@ -232,8 +232,7 @@ namespace game
     {
         int num = isdigit(team[0]) ? parseint(team) : teamnumber(team);
         if(!validteam(num)) return;
-        if(player1->clientnum < 0) player1->team = num;
-        else addmsg(N_SWITCHTEAM, "ri", num);
+        addmsg(N_SWITCHTEAM, "ri", num);
     }
     void printteam()
     {
