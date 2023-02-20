@@ -10,7 +10,7 @@ namespace game
 {
     bool canlaunchability(gameent *d, int ability)
     {
-        if(d->state==CS_DEAD || !isconnected() || gfx::forcecampos>=0 || intermission || premission || (ability<ABILITY_1 && ability>ABILITY_3)) return false;
+        if(d->state!=CS_ALIVE || !isconnected() || gfx::forcecampos>=0 || intermission || premission || (ability<ABILITY_1 && ability>ABILITY_3)) return false;
         else return d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_ESPION || d->aptitude==APT_PRETRE || d->aptitude==APT_SHOSHONE || d->aptitude==APT_KAMIKAZE;
     }
 
@@ -62,7 +62,7 @@ namespace game
     {
         if(!canlaunchability(d, ability)) return; //first check
 
-        if(request) //player is requesting ability
+        if(request) //player is requesting ability (client sided)
         {
             if(!d->abilityready[ability] || d->mana < aptitudes[d->aptitude].abilities[ability].manacost) {if(d==hudplayer())playsound(S_SORTIMPOSSIBLE); return; } //second check (client sided)
             addmsg(N_REQABILITY, "rci", d, ability); //third check (server sided)
@@ -72,15 +72,14 @@ namespace game
         //if all good, we let the ability begin
         d->abilityready[ability] = false;
         d->lastability[ability] = totalmillis;
-        if(d==player1) addstat(1, STAT_ABILITES);
-
         abilityeffect(d, ability);
+        if(d==player1) addstat(1, STAT_ABILITES);
     }
 
     void player1aptitude(int ability) //Player1 abilities commands
     {
-        if(player1->aptitude==APT_KAMIKAZE && ability==ABILITY_1) gunselect(GUN_KAMIKAZE, player1);
-        else aptitude(player1, player1->aptitude==APT_KAMIKAZE ? ABILITY_2 : ability);
+        if(player1->aptitude!=APT_KAMIKAZE) aptitude(player1, ability);
+        else ability==ABILITY_1 ? gunselect(GUN_KAMIKAZE, player1) : aptitude(player1, ability);
     }
     ICOMMAND(aptitude, "i", (int *ability), player1aptitude(*ability));
 
