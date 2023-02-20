@@ -156,6 +156,7 @@ namespace game
 
         void monsteraction(int curtime)           // main AI thinking routine, called every frame for every monster
         {
+            if(player1->state==CS_SPECTATOR || player1->state==CS_EDITING) return;
             if(enemy->state==CS_DEAD) { enemy = player1; anger = 0; }
 
             float dist = enemy->o.dist(o);
