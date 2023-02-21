@@ -19,7 +19,7 @@ namespace game
 {
     VARFP(player1_aptitude, 0, 0, sizeof(aptitudes)/sizeof(aptitudes[0])-1,
     {
-        if(player1->state != CS_DEAD && isconnected()&& !premission && !intermission && !m_tutorial)
+        if(player1->state != CS_DEAD && isconnected() && !premission && !intermission && !m_tutorial)
         {
             conoutf(CON_GAMEINFO, GAME_LANG ? "\fcCannot change class while alive!" : "\fcImpossible de changer d'aptitude en étant vivant !");
             playsound(S_ERROR);
@@ -32,6 +32,7 @@ namespace game
             oldapti = player1->aptitude;
             if(!isconnected())stopsounds();
             playsound(S_APT_SOLDAT+player1_aptitude);
+            if(isconnected() && !premission && !intermission) unlockachievement(ACH_UNDECIDED);
         }
     });
 
@@ -759,6 +760,8 @@ namespace game
                 if(IS_ON_OFFICIAL_SERV) //now let's check for shittons of achievements if playing online
                 {
                     if(distance>=100.f) unlockachievement(ACH_BEAUTIR);
+                    else if(distance<1.f && atk==ATK_MOSSBERG_SHOOT) unlockachievement(ACH_TAKETHAT);
+                    else if(distance>=69.f && distance<70.f ) unlockachievement(ACH_NICE);
                     if(player1->state==CS_DEAD && player1->lastpain > 200) unlockachievement(ACH_TUEURFANTOME);
                     if(player1->health<=10 && player1->state==CS_ALIVE) unlockachievement(ACH_1HPKILL);
 

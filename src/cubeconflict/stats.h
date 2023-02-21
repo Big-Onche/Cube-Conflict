@@ -81,7 +81,7 @@ enum {ACH_TRIPLETTE = 0, ACH_PENTAPLETTE, ACH_DECAPLETTE, ACH_ATOME, ACH_WINNER,
         ACH_CADENCE, ACH_1HPKILL, ACH_MAXSPEED, ACH_INCREVABLE, ACH_CHANCE, ACH_CPASBIEN, ACH_SUICIDEFAIL, ACH_FUCKYEAH, ACH_RICHE,
         ACH_TUEURFANTOME, ACH_EPOFLAG, ACH_M32SUICIDE, ACH_ESPIONDEGUISE, ACH_FUCKYOU, ACH_ABUS, ACH_DESTRUCTEUR, ACH_RAGE,
         ACH_DAVIDGOLIATH, ACH_LANCEEPO, ACH_PASLOGIQUE, ACH_JUSTEPOUR, ACH_BRICOLEUR, ACH_NOSCOPE, ACH_THUGPHYSIQUE, ACH_SPAAACE,
-        ACH_PARKOUR, ACH_EXAM, NUMACHS};
+        ACH_PARKOUR, ACH_EXAM, ACH_UNDECIDED, ACH_WASHAKIE, ACH_NATURO, ACH_TMMONEY, ACH_NICE, ACH_TAKETHAT, ACH_SURVIVOR, ACH_ELIMINATOR, NUMACHS};
 extern bool succes[NUMACHS];
 
 static const struct achinfo { const char *achname, *achnicenameFR, *achnicenameEN; } achievements[NUMACHS] =
@@ -131,6 +131,14 @@ static const struct achinfo { const char *achname, *achnicenameFR, *achnicenameE
     {"ACH_SPAAACE",       "Aller plus haut",             "Spaaaaaace"},
     {"ACH_PARKOUR",       "Le patron du parkour",        "The parkour master"},
     {"ACH_EXAM",          "Examen surprise !",           "Surprise exam!"},
+    {"ACH_UNDECIDED",     "Indécis",                     "Undecided"},
+    {"ACH_WASHAKIE",      "Washakie",                    "Washakie"},
+    {"ACH_NATURO",        "Naturopathe",                 "Naturotherapist"},
+    {"ACH_TMMONEY",       "Dans le train !",             "Take my money!"},
+    {"ACH_NICE",          "Minette",                     "Nice"},
+    {"ACH_TAKETHAT",      "Abattre l'ennemi",            "Take that!"},
+    {"ACH_SURVIVOR",      "Survivant",                   "Survivor"},
+    {"ACH_ELIMINATOR",    "Purificateur",                "Eliminator"}
 };
 
 #endif

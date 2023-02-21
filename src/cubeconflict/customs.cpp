@@ -46,7 +46,7 @@ int hasitem(int itemtype, int itemnum) // Rï¿½cupï¿½re si un objet est possï¿½dï
 }
 ICOMMAND(hasitem, "ii", (int *itemtype, int *itemnum), intret(hasitem(*itemtype, *itemnum)));
 
-void buyitem(int itemtype, int itemnum) //Achï¿½te un objet
+void buyitem(int itemtype, int itemnum) //AchÃ¨te un objet
 {
     switch(itemtype)
     {
@@ -92,5 +92,6 @@ void buyitem(int itemtype, int itemnum) //Achï¿½te un objet
         //       return;
         //    }
     }
+    unlockachievement(ACH_TMMONEY);
 }
 ICOMMAND(buyitem, "ii", (int *itemtype, int *itemnum), buyitem(*itemtype, *itemnum));

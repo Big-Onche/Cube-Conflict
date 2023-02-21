@@ -185,11 +185,16 @@ bool achievementlocked(int achID) {return !succes[achID];} //Succès verrouillé ?
 
 ICOMMAND(unlockach, "i", (int *achID), if(*achID==ACH_PARKOUR || *achID==ACH_EXAM) unlockachievement(*achID));
 
+bool canunlockoffline(int achID)
+{
+    return achID==ACH_PARKOUR || achID==ACH_FUCKYOU || achID==ACH_EXAM || achID==ACH_SURVIVOR || achID==ACH_ELIMINATOR;
+}
+
 string tempachname;
 void unlockachievement(int achID) //Débloque le succès
 {
     bool newach = achievementlocked(achID);
-    if(achID==ACH_PARKOUR || achID==ACH_FUCKYOU || achID==ACH_EXAM || IS_ON_OFFICIAL_SERV) //Ne débloque que si serveur officiel sauf succès en solo
+    if(canunlockoffline(achID) || IS_ON_OFFICIAL_SERV) //Ne débloque que si serveur officiel sauf succès en solo
     {
         #ifdef _WIN32
             if(IS_USING_STEAM)

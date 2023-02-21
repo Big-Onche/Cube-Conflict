@@ -384,6 +384,12 @@ namespace entities
         if(d->ragemillis && (d->ragemillis -= time)<=0) d->ragemillis = 0;
         if(d->vampimillis && (d->vampimillis -= time)<=0) d->vampimillis = 0;
         loopi(NUMABILITIES) { if(d->abilitymillis[i] && (d->abilitymillis[i] -= time)<=0) d->abilitymillis[i] = 0; }
+        if(d==player1 && player1->aptitude==APT_SHOSHONE)
+        {
+            int numabi = 0;
+            loopi(NUMABILITIES) if(d->abilitymillis[i]) numabi++;
+            if(numabi==3) unlockachievement(ACH_WASHAKIE);
+        }
     }
 
     void putitems(packetbuf &p)            // puts items in network stream and also spawns them locally

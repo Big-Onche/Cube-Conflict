@@ -1,5 +1,6 @@
 // pimped old monster.h from sauerbraten: implements AI for single player monsters, currently client only
 #include "gfx.h"
+#include "stats.h"
 
 extern int physsteps;
 int gamesecs;
@@ -522,6 +523,7 @@ namespace game
     {
         numkilled++;
         player1->frags = numkilled;
+        if(player1->frags>=200) unlockachievement(ACH_ELIMINATOR);
         remain = monstertotal-numkilled;
     }
 
@@ -564,7 +566,7 @@ namespace game
                 case 525: loopi(15) spawnmonster(true, 12+rnd(4)); break;
                 case 550: loopi(5)  spawnmonster(true, M_UFO);
                 case 575: loopi(20) spawnmonster(true, 12+rnd(4)); break;
-                case 600: endsp(); break;
+                case 600: endsp(); unlockachievement(ACH_SURVIVOR); break;
                 case 610: trydisconnect(true); break;
                 default:
                     if(gamesecs>450 && (gamesecs%2 == 0)) spawnmonster(true, M_PYRO);
