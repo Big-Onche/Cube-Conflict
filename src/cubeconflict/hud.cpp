@@ -43,7 +43,7 @@ namespace game
         int decal_message = 0;
         bool need_message1 = true, need_message2 = true;
 
-        if(totalmillis - hudmsg[MSG_PREMISSION] <= (m_dmsp ? 5000 : 10000))
+        if(totalmillis - hudmsg[MSG_PREMISSION] <= (m_dmsp ? -10000 : 10000))
         {
             string msg;
             if(m_dmsp)

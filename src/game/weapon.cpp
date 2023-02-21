@@ -6,10 +6,9 @@
 
 int lastshoot;
 
-VARP(temptrisfade, 2500, 15000, 120000);
-
 namespace game
 {
+    VARP(temptrisfade, 2500, 15000, 120000);
     static const int OFFSETMILLIS = 500;
     vec rays[MAXRAYS];
 
@@ -250,8 +249,6 @@ namespace game
         loopi(attacks[atk].rays) offsetray(from, to, attacks[atk].spread, attacks[atk].nozoomspread, attacks[atk].range, rays[i], d);
     }
 
-    enum { BNC_GRENADE, BNC_GIBS, BNC_DEBRIS, BNC_DOUILLES, BNC_BIGDOUILLES, BNC_CARTOUCHES, BNC_DOUILLESUZI, BNC_LIGHT, BNC_ROBOT};
-
     struct bouncer : physent
     {
         int lifetime, bounces;
@@ -461,7 +458,7 @@ namespace game
 
     VARP(blood, 0, 1, 1);
 
-    void spawnbouncer(const vec &p, const vec &vel, gameent *d, int type, int lifetime = rnd(temptrisfade)+rnd(5000))
+    void spawnbouncer(const vec &p, const vec &vel, gameent *d, int type, int lifetime, bool frommonster)
     {
         if(camera1->o.dist(p)>temptrisfade/10 && (type==BNC_DOUILLES || type==BNC_CARTOUCHES || type==BNC_DOUILLESUZI)) return;
 
@@ -470,14 +467,17 @@ namespace game
         switch(type)
         {
             case BNC_GIBS:
+                to.add(vec(rnd(100)-50, rnd(100)-50, rnd(100)-50));
+                break;
             case BNC_ROBOT:
             case BNC_DEBRIS:
-                to.add(vec(rnd(100)-50, rnd(100)-50, rnd(100)-50));
+                to.add(vec(rnd(200)-100, rnd(200)-100, rnd(200)-100));
                 break;
             case BNC_DOUILLESUZI:
                 to.add(vec(0, 0, -1)); break;
             default:
-                to.add(vec(0, 0, 1));
+                if(frommonster && type==BNC_GRENADE) to.add(vec(rnd(80)-40, rnd(80)-40, rnd(80)-40));
+                else to.add(vec(0, 0, 1));
         }
         if(to.iszero()) to.z += 1;
         to.normalize();
@@ -490,7 +490,7 @@ namespace game
         vec p = d->o;
         p.z += 0.6f*(d->eyeheight + d->aboveeye) - d->eyeheight;
 
-        damage = (damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[d->aptitude].apt_resistance); //Dégats de base
+        damage = ((damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[d->aptitude].apt_resistance))/(d->boostmillis[game::B_JOINT] ? (d->aptitude==APT_JUNKIE ? 1.875f : 1.25f) : 1.f); //Dégats de base
         actor->boostmillis[B_ROIDS] ? damage*=actor->aptitude==APT_JUNKIE ? 3 : 2 : 1; //Stéros ou non
         if(d->abilitymillis[ABILITY_3] && d->aptitude==APT_MAGICIEN) damage = damage/5.0f;
         if(d->boostmillis[B_JOINT]) damage = damage/1.25f;
@@ -616,11 +616,21 @@ namespace game
         {
             if(f==player1)
             {
-                damaged(m_dmsp ? damage/4 : damage, f, at, true, atk);
-                if(!m_mp(gamemode)) f->hitpush(damage, vel, at, atk, f);
+                if(player1->boostmillis[B_JOINT]) damage/=(player1->aptitude==APT_JUNKIE ? 1.875f : 1.25f);
+                damage = (damage/aptitudes[player1->aptitude].apt_resistance)*(m_dmsp ? 15.f : 100);
+                damaged(damage, f, at, true, atk);
+                f->hitpush(damage, vel, at, atk, f);
             }
-            else if(at==player1 || m_dmsp) hitmonster(damage, (monster *)f, at, vel, atk);
-
+            else if(at==player1)
+            {
+                if(player1->boostmillis[B_ROIDS]) damage*=(player1->aptitude==APT_JUNKIE ? 3.f : 1.5f);
+                if(player1->aptitude==APT_VAMPIRE)
+                {
+                    player1->health = min(player1->health + damage/2, player1->maxhealth);
+                    player1->vampimillis+=damage*1.5f;
+                }
+                hitmonster((damage*aptitudes[player1->aptitude].apt_degats)/100, (monster *)f, at, vel, atk);
+            }
         }
 
         if(!m_mp(gamemode) || f==at) f->hitpush(damage, vel, at, atk, f);
@@ -1176,7 +1186,7 @@ namespace game
             case ATK_LANCEFLAMMES_SHOOT:
             {
                 if(!local) createrays(gun, from, to, d);
-                if(d->type==ENT_PLAYER) sound = S_FLAMETHROWER;
+                d->type==ENT_AI ? sound = S_PYRO_A : sound = S_FLAMETHROWER;
                 loopi(attacks[atk].rays)
                 {
                     vec origin = d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(gun, d->o, to, d) : d->muzzle;
@@ -1258,7 +1268,7 @@ namespace game
             default:
                 {
                     if(d==hudplayer() && sound!=S_FLAMETHROWER) playsound(attacks[atk].sound, NULL);
-                    else if(sound!=S_FLAMETHROWER) playsound(attacks[atk].sound, &d->o, NULL, 0, 0, atk==ATK_ASSISTXPL_SHOOT || atk==ATK_KAMIKAZE_SHOOT ? 75 : 50, -1, atk==ATK_ASSISTXPL_SHOOT || atk==ATK_KAMIKAZE_SHOOT ? 600 : 400);
+                    else if(sound!=S_FLAMETHROWER) playsound(d->type==ENT_AI && atk==ATK_LANCEFLAMMES_SHOOT ? sound : attacks[atk].sound, &d->o, NULL, 0, 0, atk==ATK_ASSISTXPL_SHOOT || atk==ATK_KAMIKAZE_SHOOT ? 75 : 50, -1, atk==ATK_ASSISTXPL_SHOOT || atk==ATK_KAMIKAZE_SHOOT ? 600 : 400);
                 }
         }
 

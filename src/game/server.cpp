@@ -2039,7 +2039,7 @@ namespace server
             server_entity se = { NOTUSED, 0, false };
             while(sents.length()<=i) sents.add(se);
             sents[i].type = ments[i].type;
-            if(m_mp(gamemode) && delayspawn(sents[i].type)) sents[i].spawntime = spawntime(sents[i].type);
+            if((m_mp(gamemode) || m_dmsp) && delayspawn(sents[i].type)) sents[i].spawntime = spawntime(sents[i].type);
             else sents[i].spawned = true;
         }
         notgotitems = false;
@@ -2320,7 +2320,7 @@ namespace server
         servstate &as = actor->state;
 
         //Calcul des dommages de base
-        damage = ((damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[target->aptitude].apt_resistance))/(ts.boostmillis[game::B_JOINT] ? 1.25f : 1.f);
+        damage = ((damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[target->aptitude].apt_resistance))/(ts.boostmillis[game::B_JOINT] ? (target->aptitude==APT_JUNKIE ? 1.875f : 1.25f) : 1.f);
 
         //Dommages spéciaux d'aptitudes
         switch(actor->aptitude)
@@ -3705,7 +3705,7 @@ namespace server
                     sents[n].type = getint(p);
                     if(canspawnitem(sents[n].type))
                     {
-                        if(m_mp(gamemode) && delayspawn(sents[n].type)) sents[n].spawntime = spawntime(sents[n].type);
+                        if((m_mp(gamemode) || m_dmsp) && delayspawn(sents[n].type)) sents[n].spawntime = spawntime(sents[n].type);
                         else sents[n].spawned = true;
                     }
                 }

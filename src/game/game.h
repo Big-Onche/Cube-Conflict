@@ -310,7 +310,7 @@ enum
     S_SHROOMS_PUPOUT, S_ASSISTALARM,
 
     //npcs
-    S_ALIEN_H, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D,
+    S_ALIEN_H, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D, S_MINION_P, S_MINION_D, S_PYRO_A,
 
     //quotes (fr only)
     S_CGCORTEX, S_CGVALOCHE, S_CGVIEILLE, S_CGHENDEK, S_CGMILITAIREA, S_CGMILITAIREB, S_CGMOUNIR, S_CGDELAVIER, S_CGPRAUD, S_CGRENE, S_CGRAOULT
@@ -689,10 +689,10 @@ struct gamestate
     {
         switch(rnd(4))
         {
-            case 0: ammo[GUN_CAC349] = 1; break;
-            case 1: ammo[GUN_CACMARTEAU] = 1; break;
-            case 2: ammo[GUN_CACMASTER] = 1; break;
-            case 3: ammo[GUN_CACFLEAU] = 1; break;
+            case 0: ammo[GUN_CAC349] = 1; gunselect=GUN_CAC349; break;
+            case 1: ammo[GUN_CACMARTEAU] = 1; gunselect=GUN_CACMARTEAU; break;
+            case 2: ammo[GUN_CACMASTER] = 1; gunselect=GUN_CACMASTER; break;
+            case 3: ammo[GUN_CACFLEAU] = 1; gunselect=GUN_CACFLEAU; break;
         }
     }
 
@@ -760,12 +760,7 @@ struct gamestate
             health = 1000;
             mana = 100;
             if(m_tutorial) addsweap = false;
-            else
-            {
-                armour = 750;
-                ammo[GUN_GLOCK] = aptitude==APT_AMERICAIN ? 75 : 50;
-                gunselect = GUN_GLOCK;
-            }
+            else armour = aptitude==APT_SOLDAT ? 550 : 300;
         }
         else
         {
@@ -807,9 +802,9 @@ struct gamestate
 
     int doregen(int damage)
     {
-        if(health < maxhealth) {
-            health += damage;
-            if(health>maxhealth) health = maxhealth;
+        if(health < maxhealth)
+        {
+            health = min(health + damage, maxhealth);
             return damage;
         }
         else return 0;
@@ -917,7 +912,6 @@ struct gameent : dynent, gamestate
     {
         if(waterchan >= 0) { stopsound(S_UNDERWATER, waterchan, 200); waterchan = -1; }
     }
-
 
     void respawn()
     {
@@ -1147,6 +1141,9 @@ namespace game
     extern float intersectdist;
     extern bool intersect(dynent *d, const vec &from, const vec &to, float margin = 0, float &dist = intersectdist);
     extern dynent *intersectclosest(const vec &from, const vec &to, gameent *at, float margin = 0, float &dist = intersectdist);
+    extern int temptrisfade;
+    enum { BNC_GRENADE, BNC_GIBS, BNC_DEBRIS, BNC_DOUILLES, BNC_BIGDOUILLES, BNC_CARTOUCHES, BNC_DOUILLESUZI, BNC_LIGHT, BNC_ROBOT};
+    extern void spawnbouncer(const vec &p, const vec &vel, gameent *d, int type, int lifetime = rnd(temptrisfade)+rnd(5000), bool frommonster = false);
     extern void clearbouncers();
     extern void updatebouncers(int curtime);
     extern void removebouncers(gameent *owner);

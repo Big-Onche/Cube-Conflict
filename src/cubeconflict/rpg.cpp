@@ -50,7 +50,7 @@ namespace game
                 switch(rnd(6))
                 {
                     case 0: createdrop(o, I_BOUCLIERFER); break;
-                    case 1: loopi(2) createdrop(o, I_RAIL+rnd(17)); break;
+                    case 1: createdrop(o, I_RAIL+rnd(17)); break;
                     case 2: createdrop(o, I_BOOSTPV); break;
                 }
                 break;
@@ -59,7 +59,7 @@ namespace game
                 switch(rnd(6))
                 {
                     case 0: createdrop(o, I_BOUCLIERMAGNETIQUE); break;
-                    case 1: loopi(2) createdrop(o, I_RAIL+rnd(17)); break;
+                    case 1: createdrop(o, I_RAIL+rnd(17)); break;
                     case 2: createdrop(o, I_BOOSTPV); break;
                 }
                 break;
@@ -70,7 +70,7 @@ namespace game
                     case 0: createdrop(o, I_BOUCLIEROR); break;
                     case 1: createdrop(o, I_BOOSTVITESSE); break;
                     case 2: createdrop(o, I_BOOSTPRECISION); break;
-                    case 3: loopi(3) createdrop(o, I_RAIL+rnd(17)); break;
+                    case 3: loopi(2) createdrop(o, I_RAIL+rnd(17)); break;
                 }
                 break;
 
@@ -80,7 +80,7 @@ namespace game
                     case 0: createdrop(o, I_ARMUREASSISTEE); break;
                     case 1: createdrop(o, I_SUPERARME); break;
                     case 2: createdrop(o, I_BOOSTDEGATS); break;
-                    case 3: loopi(4) createdrop(o, I_RAIL+rnd(17)); break;
+                    case 3: loopi(2) createdrop(o, I_RAIL+rnd(17)); break;
                 }
                 break;
         }

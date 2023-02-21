@@ -1,6 +1,8 @@
 #include "engine.h"
 #include "customs.h"
 
+ICOMMAND(updateui, "i", (), execfile("config/ui/main.cfg"));
+
 void notifywelcome()
 {
     UI::hideui("servers");
