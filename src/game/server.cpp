@@ -4092,7 +4092,7 @@ namespace server
 
             case -1: case -2: case -3:
                 generrlog(ci);
-                disconnect_client(sender, msgfilter[type]==-1 ? DISC_MSGERR_SERVMSG : msgfilter[type]==-2 ? DISC_OVERFLOW : DISC_MSGERR_EDIT);
+                disconnect_client(sender, type==-1 ? DISC_MSGERR_SERVMSG : type==-2 ? DISC_OVERFLOW : DISC_MSGERR_EDIT);
                 return;
 
             default: genericmsg:
