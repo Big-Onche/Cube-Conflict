@@ -344,6 +344,7 @@ namespace game
     bool allowedittoggle(bool msg)
     {
         if(editmode) return true;
+        else if(m_dmsp) return false;
         if(isconnected() && multiplayer(false) && !m_edit)
         {
             if(msg) conoutf(CON_ERROR, GAME_LANG ? "Editing in multiplayer requires edit mode" : "Editer la map en multijoueurs requiert le mode édition de map.");

@@ -47,7 +47,7 @@ namespace game
         { GUN_SV98,      5,  600, 2,    30,  1,     1,  200,      1,   10,   85,     60,  2,   false,       -1,          S_ADULT_P,        -1,  S_ADULT_D, "un campeur",      "a camper",         "smileys/bug",       NULL,                  "hats/9",          NULL,               NULL,            NULL},
         { GUN_PULSE,    12, 1200, 1,     0,  0,     1,  500,      5,   10,   80,     60,  1,   false,       -1,          S_ALIEN_P, S_ALIEN_A,  S_ALIEN_D, "un soldat alien", "a alien soldier",  "npcs/alien_king",  "shields/magnet/40",    "hats/0",          NULL,               NULL,            NULL},
         { GUN_SMAW,     12, 4000, 0,     0,  0,     1,  500,      5,   50, 3000,     60,  4,   false,       -1,          S_ALIEN_P, S_ALIEN_A,  S_ALIEN_D, "une soucoupe volante", "an alien ship", "mapmodel/vaisseaux/ufo", NULL,           NULL,              NULL,               NULL,            NULL},
-        { GUN_LANCEFLAMMES, 18, 1000, 0, 0,  0,     1,  300,      1,   10,  100,     60,  2,   false,       -1,          S_ADULT_P, S_ALIEN_A,  S_ADULT_D, "un pyromane",     "an arsonist",      "smileys/sournois", "shields/iron/100",     "hats/8", "boosts/joint",              NULL,            NULL},
+        { GUN_LANCEFLAMMES, 18, 1000, 0, 0,  0,     1,  300,      1,   10,  100,     60,  3,   false,       -1,          S_ADULT_P, S_ALIEN_A,  S_ADULT_D, "un pyromane",     "an arsonist",      "smileys/sournois", "shields/iron/100",     "hats/8", "boosts/joint",              NULL,            NULL},
     };
 
     VAR(skill, 1, 10, 10);
@@ -77,7 +77,7 @@ namespace game
         monster(int _type, int _yaw, int _pitch, int _tag, int _state, int _trigger, int _move) :
             monsterstate(_state), tag(_tag),
             stacked(NULL),
-            stackpos(0, 0, 0)
+            stackpos(0, 10, 0)
         {
             type = ENT_AI;
             respawn();
@@ -550,7 +550,7 @@ namespace game
                 case 150: case 300:
                     spawnmonster(true, M_UFO);
                     loopi(5) spawnmonster(true, gamesecs== 300 ? M_B_ALIENK : M_ALIENS);
-                    if(gamesecs==300) playsound(S_ALIEN_INVASION);
+                    playsound(S_ALIEN_INVASION);
                     break;
 
                 case 210: loopi(3) spawnmonster(true, M_B_GIANT); break;
@@ -564,12 +564,12 @@ namespace game
                 case 400: loopi(10) spawnmonster(true, 12+rnd(4)); break;
                 case 480: loopi(10) spawnmonster(true, 12+rnd(4)); break;
                 case 525: loopi(15) spawnmonster(true, 12+rnd(4)); break;
-                case 550: loopi(5)  spawnmonster(true, M_UFO);
+                case 550: loopi(5)  spawnmonster(true, M_UFO); playsound(S_ALIEN_INVASION);
                 case 575: loopi(20) spawnmonster(true, 12+rnd(4)); break;
                 case 600: endsp(); unlockachievement(ACH_SURVIVOR); break;
                 case 610: trydisconnect(true); break;
                 default:
-                    if(gamesecs>450 && (gamesecs%2 == 0)) spawnmonster(true, M_PYRO);
+                    if(gamesecs>450 && (gamesecs%4 == 0)) spawnmonster(true, M_PYRO);
             }
         }
 
