@@ -3,7 +3,7 @@
 
 #include "engine.h"
 
-VARP(servlang, 0, 0, 1);
+VARP(servlang, 0, 1, 1);
 
 #define LOGSTRLEN 512
 
@@ -306,6 +306,7 @@ const char *disconnectreason(int reason)
         case DISC_TIMEOUT:          return lang ? "connection timed out" : "la connexion a expirée";
         case DISC_OVERFLOW:         return lang ? "connection overflow" : "connexion débordée";
         case DISC_PASSWORD:         return lang ? "invalid password" : "mot de passe invalide";
+        case DISC_SERVERSTOP:       return lang ? "the server will stop" : "le serveur va s'arrêter";
         case DISC_NORMAL:           return lang ? "normal" : "normal";
         default:                    return lang ? "crash?" : "crash ?";
     }
@@ -865,6 +866,7 @@ enum
     MENU_OPENCONSOLE = 0,
     MENU_SHOWCONSOLE,
     MENU_HIDECONSOLE,
+    MENU_KICKCONSOLE,
     MENU_EXIT
 };
 
@@ -894,15 +896,19 @@ static LRESULT CALLBACK handlemessages(HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
             {
                 case MENU_OPENCONSOLE:
                     setupconsole();
-                    if(conwindow) ModifyMenu(appmenu, 0, MF_BYPOSITION|MF_STRING, MENU_HIDECONSOLE, "Hide Console");
+                    if(conwindow) ModifyMenu(appmenu, 0, MF_BYPOSITION|MF_STRING, MENU_HIDECONSOLE, servlang ? "Hide Console" : "Masquer la console");
                     break;
                 case MENU_SHOWCONSOLE:
                     ShowWindow(conwindow, SW_SHOWNORMAL);
-                    ModifyMenu(appmenu, 0, MF_BYPOSITION|MF_STRING, MENU_HIDECONSOLE, "Hide Console");
+                    ModifyMenu(appmenu, 0, MF_BYPOSITION|MF_STRING, MENU_HIDECONSOLE, servlang ? "Hide Console" : "Masquer la console");
                     break;
                 case MENU_HIDECONSOLE:
                     ShowWindow(conwindow, SW_HIDE);
-                    ModifyMenu(appmenu, 0, MF_BYPOSITION|MF_STRING, MENU_SHOWCONSOLE, "Show Console");
+                    ModifyMenu(appmenu, 0, MF_BYPOSITION|MF_STRING, MENU_SHOWCONSOLE, servlang ? "Show Console" : "Afficher la console");
+                    break;
+                case MENU_KICKCONSOLE:
+                    ShowWindow(conwindow, SW_SHOWNORMAL);
+                    loopv(clients) if(clients[i]->type==ST_TCPIP) disconnect_client(i, DISC_SERVERSTOP);
                     break;
                 case MENU_EXIT:
                     PostMessage(hWnd, WM_CLOSE, 0, 0);
@@ -926,9 +932,11 @@ static void setupwindow(const char *title)
 
 	appmenu = CreatePopupMenu();
 	if(!appmenu) fatal("Impossible de lancer le programme (erreur fenêtre)");
-    AppendMenu(appmenu, MF_STRING, MENU_OPENCONSOLE, "Ouvrir la console");
+    AppendMenu(appmenu, MF_STRING, MENU_OPENCONSOLE, servlang ? "Show console" : "Ouvrir la console");
     AppendMenu(appmenu, MF_SEPARATOR, 0, NULL);
-	AppendMenu(appmenu, MF_STRING, MENU_EXIT, "Stopper le serveur");
+	AppendMenu(appmenu, MF_STRING, MENU_KICKCONSOLE, servlang ? "Kick all for restart" : "Déconnecter joueurs pour redémarrer");
+	AppendMenu(appmenu, MF_STRING, MENU_EXIT, servlang ? "Stop server" : "Arrêter le serveur");
+
 	//SetMenuDefaultItem(appmenu, 0, FALSE);
 
 	WNDCLASS wc;
@@ -1059,7 +1067,7 @@ void rundedicatedserver()
 #ifdef WIN32
     SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
     setupconsole();
-    if(conwindow) ModifyMenu(appmenu, 0, MF_BYPOSITION|MF_STRING, MENU_HIDECONSOLE, "Hide Console");
+    if(conwindow) ModifyMenu(appmenu, 0, MF_BYPOSITION|MF_STRING, MENU_HIDECONSOLE, servlang ? "Hide Console" : "Masquer la console");
     for(;;)
     {
         MSG msg;

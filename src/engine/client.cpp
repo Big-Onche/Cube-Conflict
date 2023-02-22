@@ -167,6 +167,7 @@ void disconnect(bool async, bool cleanup, bool volontaire)
         IS_ON_OFFICIAL_SERV = false;
         game::gamedisconnect(cleanup);
         gfx::resetshroomsgfx();
+        clearsleep();
         soundmenu_cleanup();
         mainmenu = 1;
         if(stat[STAT_DAMMAGERECORD] < game::player1->totaldamage/10) addstat(game::player1->totaldamage/10, STAT_DAMMAGERECORD, true);
@@ -281,6 +282,12 @@ void gets2c()           // get updates from the server
                     else conoutf(CON_ERROR, GAME_LANG ? "\f3Server network error, disconnecting." : "\f3Erreur de serveur, déconnexion.");
                 }
                 disconnect();
+            }
+            switch(event.data)
+            {
+                case DISC_OVERFLOW: UI::showui("overflowpopup"); break;
+                case DISC_SERVERSTOP:  UI::showui("servstoppopup"); break;
+                case DISC_MSGERR: case DISC_MSGERR_SERVMSG: case DISC_MSGERR_EDIT: UI::showui("msgerrpopup"); break;
             }
             return;
 
