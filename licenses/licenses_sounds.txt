@@ -85,6 +85,7 @@ Files :	media/sound/mapsound/indoor_1.ogg 			license_certificate_R3FY29ABTJ (ind
 	media/sound/weap_shoot/m32_2.ogg
 	media/sound/weap_shoot/m32_3.ogg
 	media/sound/weap_shoot/flamethrower.ogg			license_certificate_34LXWTZKMH (flamethrower.ogg).txt
+	media/sound/npcs/pyro_attack.ogg
 	media/sound/weap_shoot/mossberg_1.ogg			license_certificate_R5NUYGE39X (mossberg_X.ogg).txt
 	media/sound/weap_shoot/mossberg_2.ogg
 	media/sound/weap_shoot/mossberg_3.ogg
@@ -265,6 +266,9 @@ Files :	media/sound/mapsound/indoor_1.ogg 			license_certificate_R3FY29ABTJ (ind
 	media/sound/notifications/killstreaks/x5_far_3.ogg
 	media/sound/notifications/killstreaks/x7_far_1.ogg
 	media/sound/notifications/killstreaks/x7_far_2.ogg
+	media/sound/npcs/adult_pain_1.ogg
+	media/sound/npcs/adult_pain_2.ogg
+	media/sound/npcs/adult_pain_3.ogg
 	media/sound/quests/notification.ogg			license_certificate_U6KFYCWMXQ (notification.ogg).txt
 	media/sound/notifications/invasion.ogg			license_certificate_C7A2NEKVZH (invasion.ogg).txt
 	media/sound/notification/alien_invasion.ogg		license_certificate_5HPAN6MYVQ (alien_invasion.ogg).txt
@@ -305,14 +309,27 @@ Files :	media/sound/mapsound/indoor_1.ogg 			license_certificate_R3FY29ABTJ (ind
 	media/sound/items_sounds/roids_far_6.ogg
 	media/sound/items_sounds/roids_far_7.ogg
 	media/sound/items_sounds/roids_pupout.ogg
-	media/sound/npcs/alien_hello
-	media/sound/npcs/alien_pain_1				license_certificate_D3L57YMCHF (alien_hello.ogg - alien_pain_X.ogg - alien_angry.ogg - alien_dead.ogg).txt
-	media/sound/npcs/alien_pain_2
-	media/sound/npcs/alien_pain_3
-	media/sound/npcs/alien_angry
-	media/sound/npcs/alien_dead
-
-
+	media/sound/npcs/alien_hello.ogg
+	media/sound/npcs/alien_pain_1.ogg			license_certificate_D3L57YMCHF (alien_hello.ogg - alien_pain_X.ogg - alien_angry.ogg - alien_dead.ogg).txt
+	media/sound/npcs/alien_pain_2.ogg
+	media/sound/npcs/alien_pain_3.ogg
+	media/sound/npcs/alien_angry.ogg
+	media/sound/npcs/alien_dead.ogg
+	media/sound/npcs/minion_pain_1.ogg			license_certificate_GMWBCY5K4U (minion_pain_X.ogg).txt
+	media/sound/npcs/minion_pain_2.ogg
+	media/sound/npcs/minion_pain_3.ogg
+	media/sound/npcs/minion_pain_4.ogg
+	media/sound/npcs/minion_pain_5.ogg
+	media/sound/npcs/minion_dead_1.ogg			license_certificate_KVJ7H2MZG8 (minion_dead_X.ogg).txt
+	media/sound/npcs/minion_dead_2.ogg
+	media/sound/npcs/minion_dead_3.ogg
+	media/sound/npcs/adult_dead_1.ogg			license_certificate_JU52SF93TV (adult_dead_1.ogg).txt
+	media/sound/npcs/adult_dead_2.ogg			license_certificate_G6YXE34NV7 (adult_dead_2.ogg).txt
+	media/sound/npcs/adult_dead_3.ogg
+	media/sound/npcs/giant_pain_1.ogg			license_certificate_2CHVMGNFBP (giant_pain_X.ogg - giant_dead_X.ogg).txt
+	media/sound/npcs/giant_pain_2.ogg
+	media/sound/npcs/giant_dead_1.ogg
+	media/sound/npcs/giant_dead_2.ogg
 -------------------------------------------------------------------------------------------------------
 
 The following files were created expressly for Cube Conflict by its developers. The CC-BY-SA 4.0 license is applied here.
