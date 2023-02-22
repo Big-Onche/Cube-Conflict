@@ -930,6 +930,7 @@ struct gameent : dynent, gamestate
         lastnode = -1;
         loopi(3) abilityready[i] = true;
         gunaccel = 0;
+        killstreak = 0;
         playerexploded = false;
     }
 
