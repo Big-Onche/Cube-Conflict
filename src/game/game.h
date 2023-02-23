@@ -109,7 +109,7 @@ enum { GUN_RAIL = 0, GUN_PULSE, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_M32, GU
        GUN_CAC349, GUN_CACMARTEAU, GUN_CACMASTER, GUN_CACFLEAU,
        GUN_KAMIKAZE, GUN_ASSISTXPL, GUN_CACNINJA,
        NUMGUNS };
-enum { A_BLUE = 0, A_GREEN, A_YELLOW, A_MAGNET, A_ASSIST };
+enum { A_WOOD = 0, A_IRON, A_GOLD, A_MAGNET, A_ASSIST };
 enum { B_ROIDS = 0, B_SHROOMS, B_EPO, B_JOINT, NUMBOOSTS};
 enum { ACT_IDLE = 0, ACT_SHOOT, NUMACTS };
 enum {  ATK_RAIL_SHOOT = 0, ATK_PULSE_SHOOT,
@@ -447,9 +447,9 @@ static struct itemstat { int add, max, sound; const char *name_fr, *name_en; int
     {40000, 120000, S_ITEMCHAMPIS,  "CHAMPIS",             "SHROOMS",        B_SHROOMS},
     {40000,  60000, S_ITEMEPO,      "EPO",                 "EPO",            B_EPO},
     {30000,  90000, S_ITEMJOINT,    "JOINT",               "JOINT",          B_JOINT},
-    {750,      750, S_ITEMBBOIS,    "BOUCLIER EN BOIS",    "WOOD SHIELD",    A_BLUE},
-    {1250,    1250, S_ITEMBFER,     "BOUCLIER DE FER",     "IRON SHIELD",    A_GREEN},
-    {2000,    2000, S_ITEMBOR,      "BOUCLIER D'OR",       "GOLD SHIELD",    A_YELLOW},
+    {750,      750, S_ITEMBBOIS,    "BOUCLIER EN BOIS",    "WOOD SHIELD",    A_WOOD},
+    {1250,    1250, S_ITEMBFER,     "BOUCLIER DE FER",     "IRON SHIELD",    A_IRON},
+    {2000,    2000, S_ITEMBOR,      "BOUCLIER D'OR",       "GOLD SHIELD",    A_GOLD},
     {1500,    1500, S_ITEMBMAGNET,  "BOUCLIER MAGNETIQUE", "MAGNET SHIELD",  A_MAGNET},
     {3000,    3000, S_ITEMARMOUR,   "ARMURE ASSISTEE",     "POWERARMOR",     A_ASSIST},
     {50,       150, S_ITEMMANA,     "MANA",                "MANA",           }
@@ -720,7 +720,7 @@ struct gamestate
         }
         if(m_random)
         {
-            armourtype = A_BLUE;
+            armourtype = A_WOOD;
             armour = aptitude==APT_SOLDAT ? 1000 : 750;
             int randomarme = rnd(17);
             gunselect = aptitude==APT_KAMIKAZE ? GUN_KAMIKAZE : aptitude==APT_NINJA ? GUN_CACNINJA : randomarme;
@@ -728,7 +728,7 @@ struct gamestate
         }
         else if(m_fullstuff)
         {
-            armourtype = A_GREEN;
+            armourtype = A_IRON;
             armour = aptitude==APT_SOLDAT ? 1750 : 1250;
             int spawngun1 = rnd(17), spawngun2, spawngun3;
             gunselect = spawngun1;
@@ -742,14 +742,14 @@ struct gamestate
         else if(m_identique)
         {
             loopi(17) baseammo(i);
-            armourtype = A_BLUE;
+            armourtype = A_WOOD;
             armour = aptitude==APT_SOLDAT ? 1000 : 750;
             if(aptitude==APT_KAMIKAZE) gunselect = GUN_KAMIKAZE;
             else if(aptitude==APT_NINJA) gunselect = GUN_CACNINJA;
         }
         else if(m_capture)
         {
-            armourtype = A_BLUE;
+            armourtype = A_WOOD;
             armour = m_regencapture ? aptitude==APT_SOLDAT ? 550 : 300 : 750;
             ammo[GUN_GLOCK] = aptitude==APT_AMERICAIN ? m_regencapture ? 15 : 45 : m_regencapture ? 10 : 30;
             ammo[GUN_M32] = aptitude==APT_AMERICAIN ? 3 : 1;
@@ -757,7 +757,7 @@ struct gamestate
         }
         else if(m_tutorial || m_dmsp)
         {
-            armourtype = A_BLUE;
+            armourtype = A_WOOD;
             health = 1000;
             mana = 100;
             if(m_tutorial) addsweap = false;
@@ -765,7 +765,7 @@ struct gamestate
         }
         else
         {
-            armourtype = A_BLUE;
+            armourtype = A_WOOD;
             armour = aptitude==APT_SOLDAT ? 1000 : 750;
             ammo[GUN_GLOCK] = aptitude==2 ? 45 : 30;
             ammo[GUN_M32] = aptitude==2 ? 3 : 1;
@@ -781,9 +781,9 @@ struct gamestate
         int absorbfactor = 0;
         switch(armourtype)
         {
-            case A_BLUE: absorbfactor=25; break;
-            case A_GREEN: absorbfactor=50; break;
-            case A_YELLOW: absorbfactor=75; break;
+            case A_WOOD: absorbfactor=25; break;
+            case A_IRON: absorbfactor=50; break;
+            case A_GOLD: absorbfactor=75; break;
             case A_MAGNET: absorbfactor=100; break;
             case A_ASSIST: absorbfactor=85; break;
         }
@@ -793,7 +793,7 @@ struct gamestate
         if(damage>0)
         {
             if(ad>armour) ad = armour;
-            if(aptitude==8 && aptisort>0 && armour>0) armour = min(armour+ad, armourtype==A_BLUE ? 750 : armourtype==A_GREEN ? 1250 : armourtype==A_YELLOW ? 2000 : armourtype==A_MAGNET ? 1500 : 3000);
+            if(aptitude==8 && aptisort>0 && armour>0) armour = min(armour+ad, armourtype==A_WOOD ? 750 : armourtype==A_IRON ? 1250 : armourtype==A_GOLD ? 2000 : armourtype==A_MAGNET ? 1500 : 3000);
             else armour -= ad;
         }
         damage -= ad;

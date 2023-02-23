@@ -304,9 +304,9 @@ namespace game
         {
             switch(d->armourtype)
             {
-                case A_BLUE: settexture("media/interface/hud/bouclier_bois.png"); break;
-                case A_GREEN: settexture("media/interface/hud/bouclier_fer.png"); break;
-                case A_YELLOW: settexture("media/interface/hud/bouclier_or.png"); break;
+                case A_WOOD: settexture("media/interface/hud/bouclier_bois.png"); break;
+                case A_IRON: settexture("media/interface/hud/bouclier_fer.png"); break;
+                case A_GOLD: settexture("media/interface/hud/bouclier_or.png"); break;
                 case A_MAGNET: settexture("media/interface/hud/bouclier_magnetique.png"); break;
                 case A_ASSIST: settexture("media/interface/hud/robot.png"); break;
             }

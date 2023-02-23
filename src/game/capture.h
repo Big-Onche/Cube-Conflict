@@ -865,18 +865,18 @@ ICOMMAND(insidebases, "", (),
 
                 if(ci->state.armour<3000)
                 {
-                    if(!ci->state.armour) ci->state.armourtype = A_BLUE;
+                    if(!ci->state.armour) ci->state.armourtype = A_WOOD;
                     ci->state.armour = min(ci->state.armour + ticks*REGENARMOUR, 3000);
                     notify = true;
                 }
 
                 switch(ci->state.armourtype)
                 {
-                    case A_BLUE: if(ci->state.armour>750) ci->state.armourtype = A_GREEN; break;
+                    case A_WOOD: if(ci->state.armour>750) ci->state.armourtype = A_IRON; break;
 
-                    case A_GREEN: if(ci->state.armour>1250) ci->state.armourtype = A_YELLOW; break;
+                    case A_IRON: if(ci->state.armour>1250) ci->state.armourtype = A_GOLD; break;
 
-                    case A_YELLOW: if(ci->state.armour>2000) {ci->state.armourtype = A_ASSIST; if(!ci->state.ammo[GUN_ASSISTXPL]) ci->state.ammo[GUN_ASSISTXPL] = 1;}
+                    case A_GOLD: if(ci->state.armour>2000) {ci->state.armourtype = A_ASSIST; if(!ci->state.ammo[GUN_ASSISTXPL]) ci->state.ammo[GUN_ASSISTXPL] = 1;}
                 }
 
                 if(b.valid())
@@ -1105,13 +1105,13 @@ case N_BASEREGEN:
         regen->health = health;
         regen->mana = mana;
         if(ammotype>=GUN_RAIL && ammotype<=GUN_GLOCK) regen->ammo[ammotype] = ammo;
-        if(regen->armour==0) {regen->armourtype=A_BLUE; playsound(S_ITEMBBOIS, regen==hudplayer() ? NULL : &regen->o, 0, 0, 0, 150, -1, 300);}
+        if(regen->armour==0) {regen->armourtype=A_WOOD; playsound(S_ITEMBBOIS, regen==hudplayer() ? NULL : &regen->o, 0, 0, 0, 150, -1, 300);}
         regen->armour = armour;
         switch(regen->armourtype)
         {
-            case A_BLUE: if(regen->armour>=750) {regen->armourtype=A_GREEN; playsound(S_ITEMBFER, regen==hudplayer() ? NULL : &regen->o, 0, 0, 0, 150, -1, 300);} break;
-            case A_GREEN: if(regen->armour>=1250) {regen->armourtype=A_YELLOW; playsound(S_ITEMBOR, regen==hudplayer() ? NULL : &regen->o, 0, 0, 0, 150, -1, 300);} break;
-            case A_YELLOW: if(regen->armour>=2000) {regen->armourtype=A_ASSIST; playsound(S_ITEMARMOUR, regen==hudplayer() ? NULL : &regen->o, 0, 0, 0, 150, -1, 300);}
+            case A_WOOD: if(regen->armour>=750) {regen->armourtype=A_IRON; playsound(S_ITEMBFER, regen==hudplayer() ? NULL : &regen->o, 0, 0, 0, 150, -1, 300);} break;
+            case A_IRON: if(regen->armour>=1250) {regen->armourtype=A_GOLD; playsound(S_ITEMBOR, regen==hudplayer() ? NULL : &regen->o, 0, 0, 0, 150, -1, 300);} break;
+            case A_GOLD: if(regen->armour>=2000) {regen->armourtype=A_ASSIST; playsound(S_ITEMARMOUR, regen==hudplayer() ? NULL : &regen->o, 0, 0, 0, 150, -1, 300);}
             case A_ASSIST: regen->ammo[GUN_ASSISTXPL] = 1;
         }
     }

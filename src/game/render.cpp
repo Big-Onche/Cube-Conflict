@@ -356,7 +356,7 @@ namespace game
         }
 
         ////////Boucliers////////
-        if(d->armour && d->state == CS_ALIVE && camera1->o.dist(d->o) && d->armourtype>=A_BLUE && d->armourtype<=A_ASSIST)
+        if(d->armour && d->state == CS_ALIVE && camera1->o.dist(d->o) && d->armourtype>=A_WOOD && d->armourtype<=A_ASSIST)
         {
             a[ai++] = modelattach("tag_shield", gfx::getshielddir(d->armourtype, d->armour), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
@@ -729,7 +729,7 @@ namespace game
         if(d->muzzle.x >= 0) d->muzzle = calcavatarpos(d->muzzle, 12);
         if(d->balles.x >= 0) d->balles = calcavatarpos(d->balles, 12);
 
-        if(!d->armour || d->armourtype<A_BLUE || d->armourtype>A_ASSIST) return;
+        if(!d->armour || d->armourtype<A_WOOD || d->armourtype>A_ASSIST) return;
         else
         {
             vec sway2;
