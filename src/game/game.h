@@ -483,7 +483,7 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, picks
     { GUN_GLOCK,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADSMALL,     S_GLOCK,        S_GLOCK_FAR,        S_FAR_LIGHT, 10,  100,  280,   5, 150, 0, 2000,   7, 8000,  1,    30,   3, 0, 0},
     // Super armes
     { GUN_S_NUKE,       ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADBIG,       S_NUKE,         S_NUKE_FAR,          S_NUKE_FAR,   1, 3000,  3250,  20, 300, 2,  175,  10, 2000,  1,   400, 1500, 6000, 0},
-    { GUN_S_GAU8,       ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADBIG,       S_GAU8,         -1,                           -1, 90,   14,   370, 150, 250, 3, 6000,   5, 8000,  1,    80,   20, 0, 0},
+    { GUN_S_GAU8,       ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADBIG,       S_GAU8,         -1,                           -1, 90,   14,   370, 150, 250, 3, 6000,   4, 8000,  1,    80,   20, 0, 0},
     { GUN_S_ROQUETTES,  ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADBIG,       S_MINIROCKETS,  S_MINIROCKETS_FAR, S_FAR_VERYHEAVY,   14,  170,  2000,  10, 300, 2,  700,   6, 8000,  1,   500,  100, 0, 0},
     { GUN_S_CAMPOUZE,   ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADBIG,       S_CAMPOUZE,     S_CAMPOUZE_FAR,    S_FAR_VERYHEAVY,    8,  500,   500,  50,  50, 5, 5000,   3, 8000, 10,   150,    8, 0, 0},
     // Armes corps à corps
@@ -688,23 +688,18 @@ struct gamestate
 
     void addcacweaps(int gamemode, int aptitude)
     {
-        switch(rnd(4))
-        {
-            case 0: ammo[GUN_CAC349] = 1; gunselect=GUN_CAC349; break;
-            case 1: ammo[GUN_CACMARTEAU] = 1; gunselect=GUN_CACMARTEAU; break;
-            case 2: ammo[GUN_CACMASTER] = 1; gunselect=GUN_CACMASTER; break;
-            case 3: ammo[GUN_CACFLEAU] = 1; gunselect=GUN_CACFLEAU; break;
-        }
+        int cacgun = rnd(4);
+        ammo[cacgun] = 1;
+        gunselect = cacgun;
     }
 
     void addsweaps()
     {
-        switch(rnd(200))
+        int supergun = rnd(4);
+        if(!rnd(50))
         {
-            case 0: ammo[GUN_S_ROQUETTES] = 20; gunselect = GUN_S_ROQUETTES; break;
-            case 1: ammo[GUN_S_GAU8] = 250; gunselect = GUN_S_GAU8; break;
-            case 2: ammo[GUN_S_CAMPOUZE] = 15; gunselect = GUN_S_CAMPOUZE; break;
-            case 3: ammo[GUN_S_NUKE] = 1; gunselect = GUN_S_NUKE; break;
+            ammo[supergun] = 1;
+            gunselect = supergun;
         }
     }
 
@@ -715,8 +710,8 @@ struct gamestate
 
         switch(aptitude)
         {
-            case 3: ammo[GUN_CACNINJA] = 1; break;
-            case 6: ammo[GUN_KAMIKAZE] = 1; break;
+            case APT_NINJA: ammo[GUN_CACNINJA] = 1; break;
+            case APT_KAMIKAZE: ammo[GUN_KAMIKAZE] = 1; break;
         }
         if(m_random)
         {
@@ -730,14 +725,18 @@ struct gamestate
         {
             armourtype = A_IRON;
             armour = aptitude==APT_SOLDAT ? 1750 : 1250;
-            int spawngun1 = rnd(17), spawngun2, spawngun3;
-            gunselect = spawngun1;
-            baseammo(spawngun1, aptitude==APT_AMERICAIN ? 6 : 4);
-            do spawngun2 = rnd(17); while(spawngun1==spawngun2);
-            baseammo(spawngun2, aptitude==APT_AMERICAIN ? 6 : 4);
-            do spawngun3 = rnd(17); while(spawngun1==spawngun3 && spawngun2==spawngun3);
-            baseammo(spawngun3, aptitude==APT_AMERICAIN ? 6 : 4);
-            gunselect = aptitude==APT_KAMIKAZE ? GUN_KAMIKAZE : aptitude==APT_NINJA ? GUN_CACNINJA : spawngun1;
+            int spawnguns[3];
+            loopi(3)
+            {
+                int newgun;
+                bool duplicate;
+                do { newgun = rnd(17); duplicate = false;
+                    loopj(i) if (spawnguns[j] == newgun) {duplicate = true; break; }
+                } while (duplicate);
+                spawnguns[i] = newgun;
+                baseammo(spawnguns[i], aptitude == APT_AMERICAIN ? 6 : 4);
+            }
+            gunselect = aptitude==APT_KAMIKAZE ? GUN_KAMIKAZE : aptitude==APT_NINJA ? GUN_CACNINJA : spawnguns[rnd(3)];
         }
         else if(m_identique)
         {
@@ -753,7 +752,7 @@ struct gamestate
             armour = m_regencapture ? aptitude==APT_SOLDAT ? 550 : 300 : 750;
             ammo[GUN_GLOCK] = aptitude==APT_AMERICAIN ? m_regencapture ? 15 : 45 : m_regencapture ? 10 : 30;
             ammo[GUN_M32] = aptitude==APT_AMERICAIN ? 3 : 1;
-            gunselect = aptitude==6 ? GUN_KAMIKAZE : aptitude==APT_NINJA ? GUN_CACNINJA : GUN_GLOCK;
+            gunselect = aptitude==APT_KAMIKAZE ? GUN_KAMIKAZE : aptitude==APT_NINJA ? GUN_CACNINJA : GUN_GLOCK;
         }
         else if(m_tutorial || m_dmsp)
         {
@@ -767,9 +766,9 @@ struct gamestate
         {
             armourtype = A_WOOD;
             armour = aptitude==APT_SOLDAT ? 1000 : 750;
-            ammo[GUN_GLOCK] = aptitude==2 ? 45 : 30;
-            ammo[GUN_M32] = aptitude==2 ? 3 : 1;
-            gunselect = aptitude==6 ? GUN_KAMIKAZE : aptitude==3 ? GUN_CACNINJA : GUN_GLOCK;
+            ammo[GUN_GLOCK] = aptitude==APT_AMERICAIN ? 45 : 30;
+            ammo[GUN_M32] = aptitude==APT_AMERICAIN ? 3 : 1;
+            gunselect = aptitude==APT_KAMIKAZE ? GUN_KAMIKAZE : aptitude==3 ? GUN_CACNINJA : GUN_GLOCK;
         }
 
         if(aptitude==APT_SOLDAT && addsweap) addsweaps();
