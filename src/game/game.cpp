@@ -568,12 +568,7 @@ namespace game
             {
                 playsound(S_PHY_1, d==h ? NULL : &d->o, 0, 0, 0 , 100, -1, 200);
             }
-            else if(d->armour>0 && actor->gunselect!=GUN_LANCEFLAMMES)
-                playsound(d->armourtype == A_WOOD ? S_IMPACTWOOD :
-                          d->armourtype == A_IRON ? S_IMPACTIRON :
-                          d->armourtype == A_GOLD ? S_IMPACTGOLD :
-                          d->armourtype == A_ASSIST ? S_IMPACTPOWERARMOR : S_IMPACTMAGNET,
-                          d==h ? NULL : &d->o, 0, 0, 0 , 100, -1, 200);
+            else if(d->armour>0 && actor->gunselect!=GUN_LANCEFLAMMES) playsound(S_IMPACTWOOD+d->armourtype, d==h ? NULL : &d->o, 0, 0, 0 , 100, -1, 200);
         }
 
         damageeffect(damage, d, actor, d!=h, atk);
