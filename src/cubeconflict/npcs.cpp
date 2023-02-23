@@ -411,7 +411,7 @@ namespace game
                 state = CS_DEAD;
                 lastpain = lastmillis;
                 playsound(pnjtypes[mtype].diesound, &o, 0, 0, 0, 200, -1, 400);
-                monsterkilled();
+                monsterkilled(d);
                 gibeffect(max(-health, 0), vel, this);
                 monsterlastdeath = totalmillis;
                 defformatstring(id, "monster_dead_%d", tag);
@@ -519,11 +519,14 @@ namespace game
     }
     ICOMMAND(endsp, "", (), endsp());
 
-    void monsterkilled()
+    void monsterkilled(gameent *d)
     {
-        numkilled++;
-        player1->frags = numkilled;
-        if(player1->frags>=200) unlockachievement(ACH_ELIMINATOR);
+        if(d==player1)
+        {
+            numkilled++;
+            player1->frags = numkilled;
+            if(player1->frags>=200) unlockachievement(ACH_ELIMINATOR);
+        }
         remain = monstertotal-numkilled;
     }
 
@@ -727,7 +730,7 @@ namespace game
 
     void suicidemonster(monster *m)
     {
-        m->monsterpain(400, player1, ATK_CAC349_SHOOT);
+        m->monsterpain(400, m, ATK_CAC349_SHOOT);
     }
 
     void hitmonster(int damage, monster *m, gameent *at, const vec &vel, int atk)

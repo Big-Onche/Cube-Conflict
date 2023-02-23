@@ -1128,7 +1128,7 @@ namespace game
     extern void rendermonsters();
     extern void suicidemonster(monster *m);
     extern void hitmonster(int damage, monster *m, gameent *at, const vec &vel, int atk);
-    extern void monsterkilled();
+    extern void monsterkilled(gameent *d);
     extern void endsp();
     extern void spsummary(int accuracy);
 
