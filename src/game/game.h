@@ -479,11 +479,11 @@ static const struct attackinfo { int gun, action, anim, vwepanim, hudanim, picks
     { GUN_ARBALETE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADMID,       S_CROSSBOW,     S_CROSSBOW_FAR,              -1,  5,  900,  850,  10,  90, 0, 2000,   7, 8000,  1,    20,   3, 45000, 0},
     { GUN_AK47,         ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADMID,       S_AK47,         S_AK47_FAR,         S_FAR_LIGHT, 30,   92,  170,  60, 180, 0, 3000,   7, 8000,  1,    50,   5, 0, 0},
     { GUN_GRAP1,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADFUTUR,     S_GRAP1,        S_GRAP1_FAR,                 -1, 12,  200,  250,  30, 300, 3, 1500,  -4, 8000,  1,  -600,  20, 0, 0},
-    { GUN_ARTIFICE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADSMALL,     S_FIREWORKS,    S_FIREWORKS_FAR,             -1,  3, 1100,  800,  35, 200, 0, 1200,  45,  520,  1,   500,  80, 250, 0},
+    { GUN_ARTIFICE,     ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADSMALL,     S_FIREWORKS,    S_FIREWORKS_FAR,             -1,  3, 1100,  900,  35, 200, 2, 1200,  35,  600,  1,   500,  80, 300, 0},
     { GUN_GLOCK,        ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADSMALL,     S_GLOCK,        S_GLOCK_FAR,        S_FAR_LIGHT, 10,  100,  280,   5, 150, 0, 2000,   7, 8000,  1,    30,   3, 0, 0},
     // Super armes
     { GUN_S_NUKE,       ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADBIG,       S_NUKE,         S_NUKE_FAR,          S_NUKE_FAR,   1, 3000,  3250,  20, 300, 2,  175,  10, 2000,  1,   400, 1500, 6000, 0},
-    { GUN_S_GAU8,       ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADBIG,       S_GAU8,         -1,                           -1, 90,   14,   370, 150, 250, 3, 6000,   9, 8000,  1,    80,   20, 0, 0},
+    { GUN_S_GAU8,       ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADBIG,       S_GAU8,         -1,                           -1, 90,   14,   370, 150, 250, 3, 6000,   5, 8000,  1,    80,   20, 0, 0},
     { GUN_S_ROQUETTES,  ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADBIG,       S_MINIROCKETS,  S_MINIROCKETS_FAR, S_FAR_VERYHEAVY,   14,  170,  2000,  10, 300, 2,  700,   6, 8000,  1,   500,  100, 0, 0},
     { GUN_S_CAMPOUZE,   ACT_SHOOT, ANIM_SHOOT, ANIM_VWEP_SHOOT, ANIM_GUN_SHOOT, S_WPLOADBIG,       S_CAMPOUZE,     S_CAMPOUZE_FAR,    S_FAR_VERYHEAVY,    8,  500,   500,  50,  50, 5, 5000,   3, 8000, 10,   150,    8, 0, 0},
     // Armes corps à corps
