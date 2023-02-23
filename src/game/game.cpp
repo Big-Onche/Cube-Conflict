@@ -287,7 +287,7 @@ namespace game
                 if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
                 if(hasboost(d)) entities::checkboosts(curtime, d);
                 if(d->ragemillis || d->vampimillis || hasabilityon(d)) entities::checkaptiskill(curtime, d);
-                if(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION) updatespecials(d);
+                if(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION) updateabilities(d);
             }
 
             if(d->armourtype==A_ASSIST && d->armour<=1000 && d->armour && d->state==CS_ALIVE && isconnected() && !editmode) d->alarmchan = playsound(S_ASSISTALARM, d==hudplayer() ? NULL : &d->o, NULL, 0, -1, 500, d->alarmchan, 250);
@@ -365,7 +365,7 @@ namespace game
 
             if(hasboost(player1)) entities::checkboosts(curtime, player1);
             if(player1->ragemillis || player1->vampimillis || hasabilityon(player1)) entities::checkaptiskill(curtime, player1);
-            if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION) updatespecials(player1);
+            if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION) updateabilities(player1);
         }
         else if (player1->state == CS_DEAD) isalive = 0;
 

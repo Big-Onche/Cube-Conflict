@@ -1008,7 +1008,7 @@ namespace game
     enum abilities {ABILITY_1 = 0, ABILITY_2, ABILITY_3, NUMABILITIES};
     enum boosts {B_ROIDS = 0, B_SHROOMS, B_EPO, B_JOINT, NUMBOOSTS};
     extern void aptitude(gameent *d, int skill, bool request = true);
-    extern void updatespecials(gameent *d);
+    extern void updateabilities(gameent *d);
 
     // game
     extern int gamemode, cncurweapon, nextcnweapon;

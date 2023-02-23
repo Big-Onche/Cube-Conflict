@@ -8,12 +8,6 @@ int getspyability;
 
 namespace game
 {
-    bool canlaunchability(gameent *d, int ability)
-    {
-        if(d->state!=CS_ALIVE || !isconnected() || gfx::forcecampos>=0 || intermission || premission || (ability<ABILITY_1 && ability>ABILITY_3)) return false;
-        else return d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_ESPION || d->aptitude==APT_PRETRE || d->aptitude==APT_SHOSHONE || d->aptitude==APT_KAMIKAZE;
-    }
-
     void abilityeffect(gameent *d, int ability)
     {
         vec sndpos = d->o;
@@ -23,7 +17,7 @@ namespace game
         {
             const int positions[4][2] = { {25, 25}, {-25, -25}, {25, -25}, {-25, 25} };
             sndpos.add(vec(positions[d->aptiseed][0], positions[d->aptiseed][1], 0));
-            nullsndpos = false;
+            nullsndpos = false; //even for player1
         }
 
         playsound(S_SORTLANCE, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
@@ -58,17 +52,21 @@ namespace game
         }
     }
 
+    bool canlaunchability(gameent *d, int ability)
+    {
+        if(d->state!=CS_ALIVE || !isconnected() || gfx::forcecampos>=0 || intermission || premission || (ability<ABILITY_1 && ability>ABILITY_3)) return false;
+        else return d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_ESPION || d->aptitude==APT_PRETRE || d->aptitude==APT_SHOSHONE || d->aptitude==APT_KAMIKAZE;
+    }
+
     void aptitude(gameent *d, int ability, bool request) //abilities commands
     {
-        if(!canlaunchability(d, ability)) return; //first check
-
-        if(request) //player is requesting ability (client sided)
+        if(request) //player is requesting ability
         {
-            if(!d->abilityready[ability] || d->mana < aptitudes[d->aptitude].abilities[ability].manacost) {if(d==hudplayer())playsound(S_SORTIMPOSSIBLE); return; } //second check (client sided)
-            addmsg(N_REQABILITY, "rci", d, ability); //third check (server sided)
+            if(!canlaunchability(d, ability)) return; //check for basic guards
+            if(!d->abilityready[ability] || d->mana < aptitudes[d->aptitude].abilities[ability].manacost) {if(d==hudplayer())playsound(S_SORTIMPOSSIBLE); return; } //check for game vars (client sided)
+            addmsg(N_REQABILITY, "rci", d, ability); //server sided game vars check
             return; //can stop after this, cuz server call this func with !request
         }
-
         //if all good, we let the ability begin
         d->abilityready[ability] = false;
         d->lastability[ability] = totalmillis;
@@ -76,14 +74,14 @@ namespace game
         if(d==player1) addstat(1, STAT_ABILITES);
     }
 
-    void player1aptitude(int ability) //Player1 abilities commands
+    void abilitycmd(int ability) //Player1 abilities commands
     {
         if(player1->aptitude!=APT_KAMIKAZE) aptitude(player1, ability);
         else ability==ABILITY_1 ? gunselect(GUN_KAMIKAZE, player1) : aptitude(player1, ability);
     }
-    ICOMMAND(aptitude, "i", (int *ability), player1aptitude(*ability));
+    ICOMMAND(aptitude, "i", (int *ability), abilitycmd(*ability));
 
-    void updatespecials(gameent *d) //Permet de réarmer les sorts en fonction de la durée de rechargement de ceux-ci
+    void updateabilities(gameent *d) //abilities rearming after cooldown
     {
         loopi(NUMABILITIES)
         {
