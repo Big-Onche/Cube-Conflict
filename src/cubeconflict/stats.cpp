@@ -75,13 +75,16 @@ float kdratio() // kill/death ratio calculation
 //ICOMMAND(gettotalstats, "", (), intret(NUMSTATS)); //gets nb of stats for ui
 
 ICOMMAND(getstatlogo, "i", (int *statID), //gets stat logo for ui
-    if(*statID<0 || *statID>NUMSTATS) result("media/texture/game/notexture.png");
-    defformatstring(logodir, "%s%s", "media/interface/" ,statslist[*statID].statlogo);
-    result(logodir);
+    if(*statID<0 || *statID>=NUMSTATS) result("media/texture/game/notexture.png");
+    else
+    {
+        defformatstring(logodir, "%s%s", "media/interface/" ,statslist[*statID].statlogo);
+        result(logodir);
+    }
 );
 
 ICOMMAND(getstatinfo, "ii", (int *statID, bool *onlyvalue),
-    if(*statID<0 || *statID>NUMSTATS) result(GAME_LANG ? "Invalid ID" : "ID Invalide");
+    if(*statID<0 || *statID>=NUMSTATS) {result(GAME_LANG ? "Invalid ID" : "ID Invalide"); return;}
     string val;
     switch(*statID)
     {
@@ -238,17 +241,20 @@ ICOMMAND(getunlockedach, "", (), //gets nb of unlocked achievements for ui
 );
 
 ICOMMAND(getachievementslogo, "i", (int *achID), //gets achievement logo for ui
-    if(*achID<0 || *achID>NUMACHS) result("media/texture/game/notexture.png");
-    defformatstring(logodir, "media/interface/achievements/%s%s.jpg", achievements[*achID].achname, achievementlocked(*achID) ? "_no" : "_yes");
-    result(logodir);
+    if(*achID<0 || *achID>=NUMACHS) result("media/texture/game/notexture.png");
+    else
+    {
+        defformatstring(logodir, "media/interface/achievements/%s%s.jpg", achievements[*achID].achname, achievementlocked(*achID) ? "_no" : "_yes");
+        result(logodir);
+    }
 );
 
 ICOMMAND(getachievementname, "i", (int *achID), //gets achievement name for ui
-    if(*achID<0 || *achID>NUMACHS) result(GAME_LANG ? "Invalid ID" : "ID Invalide");
-    result(GAME_LANG ? achievements[*achID].achnicenameEN : achievements[*achID].achnicenameFR);
+    if(*achID<0 || *achID>=NUMACHS) result(GAME_LANG ? "Invalid ID" : "ID Invalide");
+    else result(GAME_LANG ? achievements[*achID].achnicenameEN : achievements[*achID].achnicenameFR);
 );
 
 ICOMMAND(getachievementcolor, "i", (int *achID), //gets achievement color status for ui
-    if(*achID<0 || *achID>NUMACHS) intret(0x777777);
-    intret(achievementlocked(*achID) ? 0xFFC6C6 : 0xD0F3D0);
+    if(*achID<0 || *achID>=NUMACHS) intret(0x777777);
+    else intret(achievementlocked(*achID) ? 0xFFC6C6 : 0xD0F3D0);
 );
