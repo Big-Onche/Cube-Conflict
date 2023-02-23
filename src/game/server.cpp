@@ -3283,10 +3283,12 @@ namespace server
                     }
                     else connected(ci);
 
-                    int botamount = servaddbots - numclients(-1, true, false);
-                    if(botamount) {loopi(botamount) aiman::addai(servbotminskill+rnd(servbotmaxskill-servbotminskill), -1);}
-                    while(numclients(-1, true, false) > servaddbots) aiman::deleteai();
-
+                    if(servaddbots)
+                    {
+                        int botamount = servaddbots - numclients(-1, true, false);
+                        if(botamount) {loopi(botamount) aiman::addai(servbotminskill+rnd(servbotmaxskill-servbotminskill), -1);}
+                        while(numclients(-1, true, false) > servaddbots) aiman::deleteai();
+                    }
 
                     if(gamemillis>10000) sendf(-1, 1, "ri2", N_PREMISSION, 0);
                     if(m_identique) sendf(-1, 1, "ri2", N_CURWEAPON, curweapon);
