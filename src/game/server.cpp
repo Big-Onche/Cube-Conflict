@@ -1778,9 +1778,9 @@ namespace server
     {
         if(clients.empty() || (!hasnonlocalclients() && !demorecord)) return false;
         enet_uint32 curtime = enet_time_get()-lastsend;
-        if(curtime<40 && !force) return false;
+        if(curtime<33 && !force) return false;
         bool flush = buildworldstate();
-        lastsend += curtime - (curtime%40);
+        lastsend += curtime - (curtime%33);
         return flush;
     }
 
@@ -2011,7 +2011,7 @@ namespace server
     void sendresume(clientinfo *ci)
     {
         servstate &gs = ci->state;
-        sendf(-1, 1, "ri9i9i4ivi", N_RESUME, ci->clientnum, gs.state,
+        sendf(-1, 1, "ri9i9i5vi", N_RESUME, ci->clientnum, gs.state,
             gs.killstreak, gs.frags, gs.flags, gs.deaths,
             gs.boostmillis[game::B_ROIDS], gs.boostmillis[game::B_EPO], gs.boostmillis[game::B_JOINT], gs.boostmillis[game::B_SHROOMS],
             gs.ragemillis, gs.abilitymillis[game::ABILITY_1], gs.abilitymillis[game::ABILITY_2], gs.abilitymillis[game::ABILITY_3], gs.aptiseed,
@@ -3283,15 +3283,14 @@ namespace server
                     }
                     else connected(ci);
 
-                    if(multiplayer(false))
-                    {
-                        int botamount = servaddbots - numclients(-1, true, false);
-                        if(botamount>0) {loopi(botamount) aiman::addai(servbotminskill+rnd(servbotmaxskill-servbotminskill), -1);}
-                        loopi(numclients(-1, true, false) > servaddbots) aiman::deleteai();
+                    int botamount = servaddbots - numclients(-1, true, false);
+                    if(botamount) {loopi(botamount) aiman::addai(servbotminskill+rnd(servbotmaxskill-servbotminskill), -1);}
+                    while(numclients(-1, true, false) > servaddbots) aiman::deleteai();
 
-                        if(gamemillis>10000) sendf(-1, 1, "ri2", N_PREMISSION, 0);
-                        if(m_identique) sendf(-1, 1, "ri2", N_CURWEAPON, curweapon);
-                    }
+
+                    if(gamemillis>10000) sendf(-1, 1, "ri2", N_PREMISSION, 0);
+                    if(m_identique) sendf(-1, 1, "ri2", N_CURWEAPON, curweapon);
+                    break;
 
                     logoutf("Infos%s: %s (%s %s %d)", servlang ? "" : " ", ci->name, servlang ? aptitudes[cq->aptitude].apt_nomEN : aptitudes[cq->aptitude].apt_nomFR, servlang ? "level" : "niveau", ci->level);
                     break;

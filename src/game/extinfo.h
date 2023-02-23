@@ -4,7 +4,7 @@
 #define EXT_NO_ERROR                    0
 #define EXT_ERROR                       1
 #define EXT_PLAYERSTATS_RESP_IDS        -10
-#define EXT_PLAYERSTATS_RESP_STATS      -12
+#define EXT_PLAYERSTATS_RESP_STATS      -11
 #define EXT_UPTIME                      0
 #define EXT_PLAYERSTATS                 1
 #define EXT_TEAMSCORE                   2
@@ -51,7 +51,7 @@
         putint(q, ci->state.gunselect);
         putint(q, ci->privilege);
         putint(q, ci->state.state);
-        uint ip = getclientip(ci->clientnum);
+        uint ip = extinfoip ? getclientip(ci->clientnum) : 0;
         q.put((uchar*)&ip, 3);
         sendserverinforeply(q);
     }

@@ -122,16 +122,20 @@ namespace entities
 
     // these two functions are called when the server acknowledges that you really
     // picked up the item (in multiplayer someone may grab it before you).
-
+    bool powerarmorpieces(int type, gameent *d)
+    {
+        return (d->armourtype==A_ASSIST && d->armour) && (type==I_BOUCLIERBOIS || type==I_BOUCLIERFER || type == I_BOUCLIERMAGNETIQUE || type==I_BOUCLIEROR);
+    }
 
     void pickupeffects(int n, gameent *d, int rndsweap)
     {
         if(!ents.inrange(n)) return;
-        int type = ents[n]->type;
+        extentity *e = ents[n];
+        int type = e->type;
         if(type<I_RAIL || type>I_MANA) return;
-        ents[n]->clearspawned();
+        e->clearspawned();
+        e->clearnopickup();
         if(!d) return;
-        d->pickupitem(type, d->aptitude, d->abilitymillis[ABILITY_1], d->armourtype==A_ASSIST && d->armour, rndsweap);
 
         if(type>=I_RAIL && type<=I_SUPERARME)
         {
@@ -145,7 +149,9 @@ namespace entities
             playsound(S_PRI_1, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, d==hudplayer() ? 0 : 150, -1, 300);
         }
 
-        playsound((type==I_BOUCLIERBOIS || type==I_BOUCLIERFER || type == I_BOUCLIERMAGNETIQUE || type==I_BOUCLIEROR) && d->armourtype==A_ASSIST ? S_ITEMPIECEROBOTIQUE : itemstats[type-I_RAIL].sound, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, d==hudplayer() ? 0 : 150, -1, 300);
+        playsound(powerarmorpieces(type, d) ? S_ITEMPIECEROBOTIQUE : itemstats[type-I_RAIL].sound, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, d==hudplayer() ? 0 : 150, -1, 300);
+
+		d->pickupitem(type, d->aptitude, d->abilitymillis[ABILITY_1], d->armourtype==A_ASSIST && d->armour, rndsweap);
 
         if(d==player1) switch(type)
         {
@@ -253,7 +259,7 @@ namespace entities
                 if(d->canpickupitem(ents[n]->type, d->aptitude, d->armourtype==A_ASSIST && d->armour))
                 {
                     addmsg(N_ITEMPICKUP, "rci", d, n);
-                    ents[n]->clearspawned(); // even if someone else gets it first
+                    e->setnopickup(); // even if someone else gets it first
 
                     if(d==player1)
                     {
