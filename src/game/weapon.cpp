@@ -1369,8 +1369,6 @@ namespace game
         }
     }
 
-    float kickfactor = 2.5f;
-
     void shoot(gameent *d, const vec &targ)
     {
         int prevaction = d->lastaction, attacktime = lastmillis-prevaction;
@@ -1458,12 +1456,7 @@ namespace game
         float dist = to.dist(from);
         if(!(d->physstate >= PHYS_SLOPE && d->crouching && d->crouched()))
         {
-            switch (d->aptitude)
-            {
-                case 2: kickfactor = 0; break;
-                default: kickfactor = 2.5f;
-            }
-            vec kickback = vec(dir).mul(attacks[atk].kickamount*-kickfactor);
+            vec kickback = (d->aptitude==APT_AMERICAIN ? vec(0, 0, 0) : vec(dir).mul(attacks[atk].kickamount*-2.5f));
             d->vel.add(kickback);
         }
         float shorten = attacks[atk].range && dist > attacks[atk].range ? attacks[atk].range : 0,
