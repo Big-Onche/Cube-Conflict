@@ -798,7 +798,7 @@ ICOMMAND(insidebases, "", (),
 
     void movebases(int team, const vec &oldpos, bool oldclip, const vec &newpos, bool newclip)
     {
-        if(gamemillis>=gamelimit || game::premission || team<1 || team>2) return;
+        if(gamemillis>=gamelimit || team<1 || team>2) return;
         loopv(bases)
         {
             baseinfo &b = bases[i];
@@ -895,8 +895,8 @@ ICOMMAND(insidebases, "", (),
 
     void update()
     {
-        if(gamemillis>=gamelimit || game::premission) return;
         endcheck();
+        if(gamemillis>=gamelimit || game::premission) return;
         int t = gamemillis/1000 - (gamemillis-curtime)/1000;
         if(t<1) return;
         loopv(bases)
@@ -966,7 +966,7 @@ ICOMMAND(insidebases, "", (),
 
     void endcheck()
     {
-        int lastteam = 0;
+        int lastteam = NULL;
 
         loopv(bases)
         {
@@ -977,13 +977,13 @@ ICOMMAND(insidebases, "", (),
                 if(!lastteam) lastteam = b.owner;
                 else if(lastteam!=b.owner)
                 {
-                    lastteam = 0;
+                    lastteam = NULL;
                     break;
                 }
             }
             else
             {
-                lastteam = 0;
+                lastteam = NULL;
                 break;
             }
         }
