@@ -69,7 +69,7 @@ static const struct statsinfo { const char *statname, *statnicenameFR, *statnice
     {"STAT_ATOM",               "Bombes atomiques tirées",          "Amount of atom bomb fired",        "hud/stats.png"},
     {"STAT_MUNSHOOTED",         "Munitions tirées au total",        "Amount of ammo fired",             "hud/stats.png"},
     {"STAT_TOTALDAMAGEDEALT",   "Dommages infligés au total",       "Amount of damage dealt",           "hud/stats.png"},
-    {"STAT_TOTALDAMAGERECIE",   "Dommages reçus au total",          "Amount of damage recieved",        "hud/stats.png"},
+    {"STAT_TOTALDAMAGERECIE",   "Dommages reçus au total",          "Amount of damage recieved",        "hud/stats.png"}
 };
 
 //////////////////////////////////////// Succès | Achievements ////////////////////////////////////////

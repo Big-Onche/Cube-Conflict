@@ -72,54 +72,52 @@ float kdratio() // kill/death ratio calculation
     return (float(stat[STAT_KILLS])/(float(stat[STAT_MORTS]) == 0.f ? 1.f : float(stat[STAT_MORTS])));
 }
 
-string statlogodir;
-const char *getstatlogo(int statID) //Récupère le logo d'une statistique en particulier
-{
-    if(statID>NUMSTATS) return "media/texture/game/notexture.png";
-    formatstring(statlogodir, "%s%s", "media/interface/" ,statslist[statID].statlogo);
-    return statlogodir;
-}
-ICOMMAND(getstatlogo, "i", (int *statID), result(getstatlogo(*statID)));
+//ICOMMAND(gettotalstats, "", (), intret(NUMSTATS)); //gets nb of stats for ui
 
-string tmp;
-const char *getstatinfo(int statID, bool onlyvalue) //Récupère la description d'une statistique
-{
-    if(statID>NUMSTATS) return GAME_LANG ? "Invalid ID" : "ID Invalide";
-    switch(statID)
+ICOMMAND(getstatlogo, "i", (int *statID), //gets stat logo for ui
+    if(*statID<0 || *statID>NUMSTATS) result("media/texture/game/notexture.png");
+    defformatstring(logodir, "%s%s", "media/interface/" ,statslist[*statID].statlogo);
+    result(logodir);
+);
+
+ICOMMAND(getstatinfo, "ii", (int *statID, bool *onlyvalue),
+    if(*statID<0 || *statID>NUMSTATS) result(GAME_LANG ? "Invalid ID" : "ID Invalide");
+    string val;
+    switch(*statID)
     {
         //Based on STAT_KILLS & STAT_MORTS, STAT_KDRATIO not saved.
         case STAT_KDRATIO:
         {
-            formatstring(tmp, "%s%s%.1f", onlyvalue ? "" : GAME_LANG ? statslist[statID].statnicenameEN : statslist[statID].statnicenameFR, onlyvalue ? "" : " : ", kdratio());
+            formatstring(val, "%s%s%.1f", *onlyvalue ? "" : GAME_LANG ? statslist[*statID].statnicenameEN : statslist[*statID].statnicenameFR, *onlyvalue ? "" : " : ", kdratio());
             break;
         }
         //Easy secs to HH:MM:SS converter and displayer
         case STAT_TIMEPLAYED:
         {
-            int tmpsec = stat[STAT_TIMEPLAYED], tmpmin = 0, tmphr = 0;
+            int tmpsec = stat[STAT_TIMEPLAYED]; int tmpmin = 0; int tmphr = 0;
             while(tmpsec > 59) { tmpmin++ ; tmpsec-=60; }
             while(tmpmin > 59) { tmphr++ ; tmpmin-=60; }
 
-            formatstring(tmp, "%s : %d %s%s %d %s%s %d %s%s",  GAME_LANG ? statslist[statID].statnicenameEN : statslist[statID].statnicenameFR,
+            formatstring(val, "%s : %d %s%s %d %s%s %d %s%s",  GAME_LANG ? statslist[*statID].statnicenameEN : statslist[*statID].statnicenameFR,
                         tmphr, GAME_LANG ? "hour" : "heure", tmphr>1 ? "s" : "",
                         tmpmin, "min", tmpmin>1 ? "s" : "",
                         tmpsec, "sec", tmpsec>1 ? "s" : "");
             break;
         }
         //when we need to display the stat after description (rare cases)
+        case STAT_KILLSTREAK:
         case STAT_DAMMAGERECORD:
         case STAT_MAXKILLDIST:
         case STAT_LEVEL:
         case STAT_BASEHACK:
-            formatstring(tmp, "%s%s%d%s", onlyvalue ? "" : GAME_LANG ? statslist[statID].statnicenameEN : statslist[statID].statnicenameFR, onlyvalue ? "" : " : ", stat[statID], statID!=STAT_MAXKILLDIST ? statID==STAT_BASEHACK ? GAME_LANG ? " seconds" : " secondes" : "" : GAME_LANG ? " meters" : " mètres");
+            formatstring(val, "%s%s%d%s", *onlyvalue ? "" : GAME_LANG ? statslist[*statID].statnicenameEN : statslist[*statID].statnicenameFR, *onlyvalue ? "" : " : ", stat[*statID], *statID!=STAT_MAXKILLDIST ? *statID==STAT_BASEHACK ? GAME_LANG ? " seconds" : " secondes" : "" : GAME_LANG ? " meters" : " mètres");
             break;
         //otherwise, we put the stat value before the description by default
-        default: formatstring(tmp, "%d%s%s", stat[statID], onlyvalue ? "" : " ", onlyvalue ? "" : GAME_LANG ? statslist[statID].statnicenameEN : statslist[statID].statnicenameFR);
+        default: formatstring(val, "%d%s%s", stat[*statID], *onlyvalue ? "" : " ", *onlyvalue ? "" : GAME_LANG ? statslist[*statID].statnicenameEN : statslist[*statID].statnicenameFR);
     }
 
-    return tmp;
-}
-ICOMMAND(getstatinfo, "ii", (int *statID, bool *onlyvalue), result(getstatinfo(*statID, *onlyvalue)));
+    result(val);
+);
 
 //////////////////////Gestion des sauvegardes//////////////////////
 #define SUPERCRYPTKEY 10;
@@ -227,41 +225,30 @@ void getsteamachievements() //Récupère les succès enregistrés sur steam
     #endif
 }
 
-string achcount;
-const char *getachievementcount(bool numach = false) //Récupère le nombre de succès déverrouillés
-{
-    int totalachunlocked = 0, achID = 0;
+ICOMMAND(gettotalach, "", (), intret(NUMACHS)); //gets nb of achievements for ui
 
+ICOMMAND(getunlockedach, "", (), //gets nb of unlocked achievements for ui
+    int totalachunlocked = 0; int achID = 0;
     loopi(NUMACHS)
     {
         if(!achievementlocked(achID)) totalachunlocked++;
         achID++;
     }
+    intret(totalachunlocked);
+);
 
-    formatstring(achcount, "%d", numach ? NUMACHS : totalachunlocked);
-    return achcount;
-}
-ICOMMAND(getachievementcount, "i", (bool *numach), result(getachievementcount(*numach)));
+ICOMMAND(getachievementslogo, "i", (int *achID), //gets achievement logo for ui
+    if(*achID<0 || *achID>NUMACHS) result("media/texture/game/notexture.png");
+    defformatstring(logodir, "media/interface/achievements/%s%s.jpg", achievements[*achID].achname, achievementlocked(*achID) ? "_no" : "_yes");
+    result(logodir);
+);
 
-string logodir;
-const char *getachievementslogo(int achID) //Récupère le logo d'un succès en particulier
-{
-    if(achID>NUMACHS || achID<0) return "media/texture/game/notexture.png";
-    formatstring(logodir, "media/interface/achievements/%s%s.jpg", achievements[achID].achname, achievementlocked(achID) ? "_no" : "_yes");
-    return logodir;
-}
-ICOMMAND(getachievementslogo, "i", (int *achID), result(getachievementslogo(*achID)));
+ICOMMAND(getachievementname, "i", (int *achID), //gets achievement name for ui
+    if(*achID<0 || *achID>NUMACHS) result(GAME_LANG ? "Invalid ID" : "ID Invalide");
+    result(GAME_LANG ? achievements[*achID].achnicenameEN : achievements[*achID].achnicenameFR);
+);
 
-const char *getachievementname(int achID) //Récupère le nom d'un succès en particulier
-{
-    if(achID>NUMACHS || achID<0) return GAME_LANG ? "Invalid ID" : "ID Invalide";
-    return GAME_LANG ? achievements[achID].achnicenameEN : achievements[achID].achnicenameFR;
-}
-ICOMMAND(getachievementname, "i", (int *achID), result(getachievementname(*achID)));
-
-const char *getachievementcolor(int achID) //Renvoie une couleur pour savoir si le succes est verrouillé ou non
-{
-    if(achID>NUMACHS || achID<0) return "0x777777";
-    return achievementlocked(achID) ? "0xFFC6C6" : "0xD0F3D0";
-}
-ICOMMAND(getachievementcolor, "i", (int *achID), result(getachievementcolor(*achID)));
+ICOMMAND(getachievementcolor, "i", (int *achID), //gets achievement color status for ui
+    if(*achID<0 || *achID>NUMACHS) intret(0x777777);
+    intret(achievementlocked(*achID) ? 0xFFC6C6 : 0xD0F3D0);
+);
