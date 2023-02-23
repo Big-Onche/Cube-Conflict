@@ -13,8 +13,8 @@ namespace gfx
     int zoomfov = 50;
 
     float champifov = 0;
-    bool champicolor() { return isconnected() && game::hudplayer()->boostmillis[game::B_SHROOMS]; } //checks if player 1 or observed player is on shrooms.
-    bool hasroids(gameent *owner) { return owner->boostmillis[game::B_ROIDS]; }
+    bool champicolor() { return isconnected() && game::hudplayer()->boostmillis[B_SHROOMS]; } //checks if player 1 or observed player is on shrooms.
+    bool hasroids(gameent *owner) { return owner->boostmillis[B_ROIDS]; }
 
     void projgunexplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk) //particles and light effects on impact for slow projectiles
     {

@@ -2013,7 +2013,7 @@ namespace server
         servstate &gs = ci->state;
         sendf(-1, 1, "ri9i9i5vi", N_RESUME, ci->clientnum, gs.state,
             gs.killstreak, gs.frags, gs.flags, gs.deaths,
-            gs.boostmillis[game::B_ROIDS], gs.boostmillis[game::B_EPO], gs.boostmillis[game::B_JOINT], gs.boostmillis[game::B_SHROOMS],
+            gs.boostmillis[B_ROIDS], gs.boostmillis[B_EPO], gs.boostmillis[B_JOINT], gs.boostmillis[B_SHROOMS],
             gs.ragemillis, gs.abilitymillis[game::ABILITY_1], gs.abilitymillis[game::ABILITY_2], gs.abilitymillis[game::ABILITY_3], gs.aptiseed,
             gs.lifesequence,
             gs.health, gs.maxhealth, gs.mana,
@@ -2320,7 +2320,7 @@ namespace server
         servstate &as = actor->state;
 
         //Calcul des dommages de base
-        damage = ((damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[target->aptitude].apt_resistance))/(ts.boostmillis[game::B_JOINT] ? (target->aptitude==APT_JUNKIE ? 1.875f : 1.25f) : 1.f);
+        damage = ((damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[target->aptitude].apt_resistance))/(ts.boostmillis[B_JOINT] ? (target->aptitude==APT_JUNKIE ? 1.875f : 1.25f) : 1.f);
 
         //Dommages spéciaux d'aptitudes
         switch(actor->aptitude)
@@ -2408,7 +2408,7 @@ namespace server
 
         damage = ((damage*100)/aptitudes[target->aptitude].apt_resistance)/2.0f;
         if(target->state.abilitymillis[game::ABILITY_3] && target->aptitude==APT_MAGICIEN) damage /= 5.0f;
-        if(target->state.boostmillis[game::B_JOINT]) damage /= 1.25f;
+        if(target->state.boostmillis[B_JOINT]) damage /= 1.25f;
 
         gamestate &as = actor->state;
         as.doregen(damage);
@@ -2482,7 +2482,7 @@ namespace server
             if(dup) continue;
 
             float damage = attacks[atk].damage*(1-h.dist/EXP_DISTSCALE/attacks[atk].exprad);
-            if(gs.boostmillis[game::B_ROIDS]) damage*= ci->aptitude==13 ? 3 : 2;
+            if(gs.boostmillis[B_ROIDS]) damage*= ci->aptitude==13 ? 3 : 2;
             if(target==ci && atk==ATK_ASSISTXPL_SHOOT) damage = 0;
             if(damage > 0)
             {
@@ -2533,7 +2533,7 @@ namespace server
         float waitfactor = 1;
         if(ci->aptitude==APT_PRETRE && ci->state.abilitymillis[game::ABILITY_3]) waitfactor = 2.5f + ((4000 - ci->state.abilitymillis[game::ABILITY_3])/1000);
 
-        if(gs.boostmillis[game::B_SHROOMS]) waitfactor*=ci->aptitude==APT_JUNKIE ? 2 : 1.5f;
+        if(gs.boostmillis[B_SHROOMS]) waitfactor*=ci->aptitude==APT_JUNKIE ? 2 : 1.5f;
         gs.gunwait = attacks[atk].attackdelay/waitfactor;
 
         sendf(-1, 1, "rii9x", N_SHOTFX, ci->clientnum, atk, id,
@@ -2541,7 +2541,7 @@ namespace server
                 int(to.x*DMF), int(to.y*DMF), int(to.z*DMF),
                 ci->ownernum);
         gs.shotdamage += attacks[atk].damage*attacks[atk].rays;
-        if(gs.boostmillis[game::B_ROIDS]) gs.shotdamage*=ci->aptitude==APT_JUNKIE ? 3 : 2;
+        if(gs.boostmillis[B_ROIDS]) gs.shotdamage*=ci->aptitude==APT_JUNKIE ? 3 : 2;
         if(gs.ragemillis) gs.shotdamage*=1.25f;
 
         switch(atk)
@@ -2579,7 +2579,7 @@ namespace server
                     totalrays += h.rays;
                     if(totalrays>maxrays) continue;
                     int damage = h.rays*attacks[atk].damage;
-                    if(gs.boostmillis[game::B_ROIDS]) damage*=ci->aptitude==APT_JUNKIE ? 3 : 2;
+                    if(gs.boostmillis[B_ROIDS]) damage*=ci->aptitude==APT_JUNKIE ? 3 : 2;
                     if(gs.ragemillis) gs.shotdamage*=1.25f;
                     dodamage(target, ci, damage, atk, h.dir);
                     if(ci->aptitude==APT_VAMPIRE) doregen(target, ci, damage, atk, h.dir);
@@ -2635,7 +2635,7 @@ namespace server
             clientinfo *ci = clients[i];
             if(curtime>0)
             {
-                loopi(game::NUMBOOSTS) if(ci->state.boostmillis[i]) ci->state.boostmillis[i] = max(ci->state.boostmillis[i]-curtime, 0);
+                loopi(NUMBOOSTS) if(ci->state.boostmillis[i]) ci->state.boostmillis[i] = max(ci->state.boostmillis[i]-curtime, 0);
                 if(ci->state.ragemillis) ci->state.ragemillis = max(ci->state.ragemillis-curtime, 0);
                 loopi(3) if(ci->state.abilitymillis[i]) ci->state.abilitymillis[i] = max(ci->state.abilitymillis[i]-curtime, 0);
             }
@@ -3237,7 +3237,7 @@ namespace server
         logoutf("Net : ping %d, overflow %d | %s, %d, %d, %d | rage %d, roids %d, epo %d, joint %d, shrooms %d | health %d, mana %d",
                 ci->ping, ci->overflow,
                 aptitudes[ci->aptitude].apt_nomEN, ci->state.abilitymillis[game::ABILITY_1], ci->state.abilitymillis[game::ABILITY_2], ci->state.abilitymillis[game::ABILITY_3],
-                ci->state.ragemillis, ci->state.boostmillis[game::B_ROIDS], ci->state.boostmillis[game::B_EPO], ci->state.boostmillis[game::B_JOINT], ci->state.boostmillis[game::B_SHROOMS],
+                ci->state.ragemillis, ci->state.boostmillis[B_ROIDS], ci->state.boostmillis[B_EPO], ci->state.boostmillis[B_JOINT], ci->state.boostmillis[B_SHROOMS],
                 ci->state.health, ci->state.mana);
     }
 

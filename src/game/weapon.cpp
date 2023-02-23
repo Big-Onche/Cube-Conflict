@@ -490,7 +490,7 @@ namespace game
         vec p = d->o;
         p.z += 0.6f*(d->eyeheight + d->aboveeye) - d->eyeheight;
 
-        damage = ((damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[d->aptitude].apt_resistance))/(d->boostmillis[game::B_JOINT] ? (d->aptitude==APT_JUNKIE ? 1.875f : 1.25f) : 1.f); //Dégats de base
+        damage = ((damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[d->aptitude].apt_resistance))/(d->boostmillis[B_JOINT] ? (d->aptitude==APT_JUNKIE ? 1.875f : 1.25f) : 1.f); //Dégats de base
         actor->boostmillis[B_ROIDS] ? damage*=actor->aptitude==APT_JUNKIE ? 3 : 2 : 1; //Stéros ou non
         if(d->abilitymillis[ABILITY_3] && d->aptitude==APT_MAGICIEN) damage = damage/5.0f;
         if(d->boostmillis[B_JOINT]) damage = damage/1.25f;

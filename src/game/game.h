@@ -109,7 +109,8 @@ enum { GUN_RAIL = 0, GUN_PULSE, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_M32, GU
        GUN_CAC349, GUN_CACMARTEAU, GUN_CACMASTER, GUN_CACFLEAU,
        GUN_KAMIKAZE, GUN_ASSISTXPL, GUN_CACNINJA,
        NUMGUNS };
-enum { A_BLUE, A_GREEN, A_YELLOW, A_MAGNET, A_ASSIST };
+enum { A_BLUE = 0, A_GREEN, A_YELLOW, A_MAGNET, A_ASSIST };
+enum { B_ROIDS = 0, B_SHROOMS, B_EPO, B_JOINT, NUMBOOSTS};
 enum { ACT_IDLE = 0, ACT_SHOOT, NUMACTS };
 enum {  ATK_RAIL_SHOOT = 0, ATK_PULSE_SHOOT,
         ATK_SMAW_SHOOT, ATK_MINIGUN_SHOOT,
@@ -414,45 +415,44 @@ enum
     HICON_SPACE   = 40
 };
 
-static struct itemstat { int add, max, sound; const char *name_fr, *name_en; int icon, info; } itemstats[] =
+static struct itemstat { int add, max, sound; const char *name_fr, *name_en; int info; } itemstats[] =
 {   // weapons
-    {15,    60,    S_ITEMAMMO,  "FUSIL ELECTRIQUE", "ELECTRIC RIFLE",   HICON_SIZE, GUN_RAIL},
-    {32,   128,    S_ITEMAMMO,  "FUSIL PLASMA",     "PLASMA RIFLE",     HICON_SIZE, GUN_PULSE},
-    {5,     20,    S_ITEMAMMO,  "SMAW",             "SMAW",             HICON_SIZE, GUN_SMAW},
-    {80,   320,    S_ITEMAMMO,  "MINIGUN",          "MINIGUN",          HICON_SIZE, GUN_MINIGUN},
-    {20,    80,    S_ITEMAMMO,  "SPOCKGUN",         "SPOCKGUN",         HICON_SIZE, GUN_SPOCKGUN},
-    {7,     28,    S_ITEMAMMO,  "M32",              "M32",              HICON_SIZE, GUN_M32},
-    {50,   200,    S_ITEMAMMO,  "LANCE-FLAMMES",    "FLAMETHROWER",     HICON_SIZE, GUN_LANCEFLAMMES},
-    {50,   200,    S_ITEMAMMO,  "UZI",              "UZI",              HICON_SIZE, GUN_UZI},
-    {60,   240,    S_ITEMAMMO,  "FAMAS",            "FAMAS",            HICON_SIZE, GUN_FAMAS},
-    {10,    40,    S_ITEMAMMO,  "MOSSBERG 500",     "MOSSBERG 500",     HICON_SIZE, GUN_MOSSBERG},
-    {15,    60,    S_ITEMAMMO,  "HYDRA",            "HYDRA",            HICON_SIZE, GUN_HYDRA},
-    {8,     32,    S_ITEMAMMO,  "SV-98",            "SV-98",            HICON_SIZE, GUN_SV98},
-    {14,    56,    S_ITEMAMMO,  "SKS",              "SKS",              HICON_SIZE, GUN_SKS},
-    {12,    48,    S_ITEMAMMO,  "ARBALETE",         "CROSSBOW",         HICON_SIZE, GUN_ARBALETE},
-    {40,   160,    S_ITEMAMMO,  "AK-47",            "AK-47",            HICON_SIZE, GUN_AK47},
-    {70,   280,    S_ITEMAMMO,  "GAPB-1",           "GAPB-1",           HICON_SIZE, GUN_GRAP1},
-    {10,    40,    S_ITEMAMMO,  "FEU D'ARTIFICE",   "FIREWORKS",        HICON_SIZE, GUN_ARTIFICE},
-    {30,   120,    S_ITEMAMMO,  "GLOCK",            "GLOCK",            HICON_SIZE, GUN_GLOCK},
+    {15,    60,    S_ITEMAMMO,  "FUSIL ELECTRIQUE", "ELECTRIC RIFLE",   GUN_RAIL},
+    {32,   128,    S_ITEMAMMO,  "FUSIL PLASMA",     "PLASMA RIFLE",     GUN_PULSE},
+    {5,     20,    S_ITEMAMMO,  "SMAW",             "SMAW",             GUN_SMAW},
+    {80,   320,    S_ITEMAMMO,  "MINIGUN",          "MINIGUN",          GUN_MINIGUN},
+    {20,    80,    S_ITEMAMMO,  "SPOCKGUN",         "SPOCKGUN",         GUN_SPOCKGUN},
+    {7,     28,    S_ITEMAMMO,  "M32",              "M32",              GUN_M32},
+    {50,   200,    S_ITEMAMMO,  "LANCE-FLAMMES",    "FLAMETHROWER",     GUN_LANCEFLAMMES},
+    {50,   200,    S_ITEMAMMO,  "UZI",              "UZI",              GUN_UZI},
+    {60,   240,    S_ITEMAMMO,  "FAMAS",            "FAMAS",            GUN_FAMAS},
+    {10,    40,    S_ITEMAMMO,  "MOSSBERG 500",     "MOSSBERG 500",     GUN_MOSSBERG},
+    {15,    60,    S_ITEMAMMO,  "HYDRA",            "HYDRA",            GUN_HYDRA},
+    {8,     32,    S_ITEMAMMO,  "SV-98",            "SV-98",            GUN_SV98},
+    {14,    56,    S_ITEMAMMO,  "SKS",              "SKS",              GUN_SKS},
+    {12,    48,    S_ITEMAMMO,  "ARBALETE",         "CROSSBOW",         GUN_ARBALETE},
+    {40,   160,    S_ITEMAMMO,  "AK-47",            "AK-47",            GUN_AK47},
+    {70,   280,    S_ITEMAMMO,  "GAPB-1",           "GAPB-1",           GUN_GRAP1},
+    {10,    40,    S_ITEMAMMO,  "FEU D'ARTIFICE",   "FIREWORKS",        GUN_ARTIFICE},
+    {30,   120,    S_ITEMAMMO,  "GLOCK",            "GLOCK",            GUN_GLOCK},
     // superweapons
-    {  1,    4,    S_ITEMSUPERAMMO, "BOMBE NUCLEAIRE", "NUCLEAR MISSLE",    HICON_SIZE, GUN_S_NUKE},
-    {300, 1200,    S_ITEMSUPERAMMO, "GAU-8",           "GAU-8",             HICON_SIZE, GUN_S_GAU8},
-    { 40,  120,    S_ITEMSUPERAMMO, "MINI-ROQUETTES",  "ROCKETS MINIGUN",   HICON_SIZE, GUN_S_ROQUETTES},
-    { 15,   60,    S_ITEMSUPERAMMO, "CAMPOUZE 2000",   "CAMPER 2000",       HICON_SIZE, GUN_S_CAMPOUZE},
+    {  1,    4,    S_ITEMSUPERAMMO, "BOMBE NUCLEAIRE", "NUCLEAR MISSLE",    GUN_S_NUKE},
+    {300, 1200,    S_ITEMSUPERAMMO, "GAU-8",           "GAU-8",             GUN_S_GAU8},
+    { 40,  120,    S_ITEMSUPERAMMO, "MINI-ROQUETTES",  "ROCKETS MINIGUN",   GUN_S_ROQUETTES},
+    { 15,   60,    S_ITEMSUPERAMMO, "CAMPOUZE 2000",   "CAMPER 2000",       GUN_S_CAMPOUZE},
     // items
-    {250,     1000, S_ITEMHEALTH,   "PANACHAY",            "HEALTH",         HICON_SIZE},
-    {500,     2500, S_COCHON,       "COCHON GRILLAY",      "HEALTH BOOST",   HICON_SIZE},
-    {30000,  45000, S_ITEMSTEROS,   "STEROIDES",           "ROIDS",          HICON_SIZE},
-    {40000, 120000, S_ITEMCHAMPIS,  "CHAMPIS",             "SHROOMS",        HICON_SIZE},
-    {40000,  60000, S_ITEMEPO,      "EPO",                 "EPO",            HICON_SIZE},
-    {30000,  90000, S_ITEMJOINT,    "JOINT",               "JOINT",          HICON_SIZE},
-    {750,      750, S_ITEMBBOIS,    "BOUCLIER EN BOIS",    "WOOD SHIELD",    HICON_SIZE, A_BLUE},
-    {1250,    1250, S_ITEMBFER,     "BOUCLIER DE FER",     "IRON SHIELD",    HICON_SIZE, A_GREEN},
-    {2000,    2000, S_ITEMBOR,      "BOUCLIER D'OR",       "GOLD SHIELD",    HICON_SIZE, A_YELLOW},
-    {1500,    1500, S_ITEMBMAGNET,  "BOUCLIER MAGNETIQUE", "MAGNET SHIELD",  HICON_SIZE, A_MAGNET},
-    {3000,    3000, S_ITEMARMOUR,   "ARMURE ASSISTEE",     "POWERARMOR",     HICON_SIZE, A_ASSIST},
-    {50,       150, S_ITEMMANA,     "MANA",                "MANA",           HICON_SIZE},
-    {50,       150, S_ITEMHEALTH,   "CHAIN",               "CHAIN",          HICON_SIZE}
+    {250,     1000, S_ITEMHEALTH,   "PANACHAY",            "HEALTH",         0},
+    {500,     2500, S_COCHON,       "COCHON GRILLAY",      "HEALTH BOOST",   0},
+    {30000,  45000, S_ITEMSTEROS,   "STEROIDES",           "ROIDS",          B_ROIDS},
+    {40000, 120000, S_ITEMCHAMPIS,  "CHAMPIS",             "SHROOMS",        B_SHROOMS},
+    {40000,  60000, S_ITEMEPO,      "EPO",                 "EPO",            B_EPO},
+    {30000,  90000, S_ITEMJOINT,    "JOINT",               "JOINT",          B_JOINT},
+    {750,      750, S_ITEMBBOIS,    "BOUCLIER EN BOIS",    "WOOD SHIELD",    A_BLUE},
+    {1250,    1250, S_ITEMBFER,     "BOUCLIER DE FER",     "IRON SHIELD",    A_GREEN},
+    {2000,    2000, S_ITEMBOR,      "BOUCLIER D'OR",       "GOLD SHIELD",    A_YELLOW},
+    {1500,    1500, S_ITEMBMAGNET,  "BOUCLIER MAGNETIQUE", "MAGNET SHIELD",  A_MAGNET},
+    {3000,    3000, S_ITEMARMOUR,   "ARMURE ASSISTEE",     "POWERARMOR",     A_ASSIST},
+    {50,       150, S_ITEMMANA,     "MANA",                "MANA",           }
 };
 
 #define MAXRAYS 25
@@ -1004,9 +1004,8 @@ namespace game
     extern void drawrpgminimap(gameent *d, int w, int h);
     extern int getteamfrags(int team);
 
-    // abilities and boosts
+    // abilities
     enum abilities {ABILITY_1 = 0, ABILITY_2, ABILITY_3, NUMABILITIES};
-    enum boosts {B_ROIDS = 0, B_SHROOMS, B_EPO, B_JOINT, NUMBOOSTS};
     extern void aptitude(gameent *d, int skill, bool request = true);
     extern void updateabilities(gameent *d);
 
