@@ -616,6 +616,7 @@ namespace game
         {
             if(f==player1)
             {
+                if(player1->aptitude==APT_VIKING) player1->ragemillis+=damage*5;
                 if(player1->boostmillis[B_JOINT]) damage/=(player1->aptitude==APT_JUNKIE ? 1.875f : 1.25f);
                 damage = (damage/aptitudes[player1->aptitude].apt_resistance)*(m_dmsp ? 15.f : 100);
                 damaged(damage, f, at, true, atk);
@@ -629,6 +630,7 @@ namespace game
                     player1->health = min(player1->health + damage/2, player1->maxhealth);
                     player1->vampimillis+=damage*1.5f;
                 }
+                else if (player1->aptitude==APT_VIKING && player1->ragemillis) damage*=1.25f;
                 hitmonster((damage*aptitudes[player1->aptitude].apt_degats)/100, (monster *)f, at, vel, atk);
             }
         }

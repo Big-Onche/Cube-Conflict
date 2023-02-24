@@ -449,7 +449,11 @@ namespace game
 
     void preloadmonsters()
     {
-        loopi(NUMMONSTERTYPES) preloadmodel(pnjtypes[i].mdlname);
+        loopi(NUMMONSTERTYPES)
+        {
+            preloadmodel(pnjtypes[i].mdlname);
+            preloadmodel(pnjtypes[i].hatname);
+        }
     }
 
     vector<monster *> monsters;

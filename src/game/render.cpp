@@ -838,7 +838,6 @@ namespace game
 
             formatstring(fname, "worldgun/%s", file);
             preloadmodel(fname);
-            if(m_tutorial || m_sp || m_dmsp) preloadmonsters();
         }
     }
 
@@ -850,11 +849,11 @@ namespace game
     void preload()
     {
         if(hudgun) preloadweapons();
+        if(m_tutorial || m_sp || m_dmsp) preloadmonsters();
         preloadbouncers();
         preloadplayermodel();
         preloadsounds();
         entities::preloadentities();
     }
-
 }
 
