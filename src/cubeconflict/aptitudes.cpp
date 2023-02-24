@@ -92,4 +92,23 @@ namespace game
             }
         }
     }
+
+    ICOMMAND(getclasslogo, "ii", (int *cn, int *numapt),
+        if(*numapt==-1 && isconnected()) {gameent *d = getclient(*cn); *numapt = d->aptitude; }
+        else if(*numapt==-2) *numapt = player1->aptitude;
+        defformatstring(logodir, "media/interface/apt_logo/%d.png", *numapt);
+        result(logodir);
+    );
+
+    ICOMMAND(getaptistatval, "ii", (int *apt, int *stat),
+        int val = 0;
+        switch(*stat)
+        {
+            case 0: val = aptitudes[*apt].apt_degats-100; break;
+            case 1: val = aptitudes[*apt].apt_resistance-100; break;
+            case 2: val = aptitudes[*apt].apt_precision-100; break;
+            case 3: val = (aptitudes[*apt].apt_vitesse-1000)*-0.1f;
+        }
+        intret((val/5)+9)
+    );
 }

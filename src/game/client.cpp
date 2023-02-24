@@ -370,29 +370,6 @@ namespace game
     }
     ICOMMAND(getclientname, "i", (int *cn), result(getclientname(*cn)));
 
-    string logodir;
-    const char *getclientaptilogo(int cn, bool force = false, int numapt = 0)   //retrieve the logo for requested classes (scoreboard and menu)
-    {
-        gameent *d = getclient(cn);
-        formatstring(logodir, "media/interface/apt_logo/%s.png", aptitudes[force ? numapt : cn==-1 ? player1->aptitude : d->aptitude].apt_nomEN);
-        return logodir;
-    }
-    ICOMMAND(getclientaptilogo, "iii", (int *cn, bool *force, int *numapt), result(getclientaptilogo(*cn, *force, *numapt)));
-
-    int getaptistatval(int apt, int stat)
-    {
-        int value = 0;
-        switch(stat)
-        {
-            case 0: value = aptitudes[apt].apt_degats-100; break;
-            case 1: value = aptitudes[apt].apt_resistance-100; break;
-            case 2: value = aptitudes[apt].apt_precision-100; break;
-            case 3: value = (aptitudes[apt].apt_vitesse-1000)*-0.1f;
-        }
-        return (value/5)+9;
-    }
-    ICOMMAND(getaptistatval, "ii", (int *apt, int *stat), intret(getaptistatval(*apt, *stat)));
-
     ICOMMAND(getclientcolorname, "i", (int *cn),
     {
         gameent *d = getclient(*cn);
