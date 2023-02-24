@@ -1607,7 +1607,7 @@ namespace server
         switch(msgfilter[type])
         {
             // server-only messages
-            case 1: return ci ? -3 : type;
+            case 1: return ci ? -1 : type;
             // only allowed in coop-edit
             case 2: if(m_edit) break; return -1;
             // only allowed in coop-edit, no overflow check
@@ -1765,7 +1765,6 @@ namespace server
             addmessages(ws, wsbuf, mtu, ci, ci);
             loopvj(ci.bots) addmessages(ws, wsbuf, mtu, *ci.bots[j], ci);
         }
-
         sendmessages(ws, wsbuf);
         reliablemessages = false;
         if(ws.uses) return true;
@@ -4091,9 +4090,9 @@ namespace server
             #include "ctf.h"
             #undef PARSEMESSAGES
 
-            case -1: case -2: case -3:
+            case -1: case -2:
                 generrlog(ci);
-                disconnect_client(sender, type==-1 ? DISC_MSGERR_SERVMSG : type==-2 ? DISC_OVERFLOW : DISC_MSGERR_EDIT);
+                disconnect_client(sender, type==-1 ? DISC_SERVMSGERR : DISC_OVERFLOW);
                 return;
 
             default: genericmsg:

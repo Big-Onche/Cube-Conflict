@@ -287,7 +287,7 @@ void gets2c()           // get updates from the server
             {
                 case DISC_OVERFLOW: UI::showui("overflowpopup"); break;
                 case DISC_SERVERSTOP:  UI::showui("servstoppopup"); break;
-                case DISC_MSGERR: case DISC_MSGERR_SERVMSG: case DISC_MSGERR_EDIT: UI::showui("msgerrpopup"); break;
+                case DISC_MSGERR: case DISC_SERVMSGERR: UI::showui("msgerrpopup"); break;
             }
             return;
 
