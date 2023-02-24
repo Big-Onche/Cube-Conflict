@@ -688,14 +688,14 @@ struct gamestate
 
     void addcacweaps(int gamemode, int aptitude)
     {
-        int cacgun = rnd(4);
+        int cacgun = GUN_CAC349+rnd(4);
         ammo[cacgun] = 1;
         gunselect = cacgun;
     }
 
     void addsweaps()
     {
-        int supergun = rnd(4);
+        int supergun = GUN_S_NUKE+rnd(4);
         if(!rnd(50))
         {
             ammo[supergun] = 1;
