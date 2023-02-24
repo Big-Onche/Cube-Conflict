@@ -306,7 +306,7 @@ const char *disconnectreason(int reason)
         case DISC_TIMEOUT:          return lang ? "connection timed out" : "la connexion a expirée";
         case DISC_OVERFLOW:         return lang ? "connection overflow" : "connexion débordée";
         case DISC_PASSWORD:         return lang ? "invalid password" : "mot de passe invalide";
-        case DISC_SERVERSTOP:       return lang ? "the server will stop" : "le serveur va s'arrêter";
+        case DISC_SERVERSTOP:       return lang ? "the server has been stopped by admin" : "le serveur a été arrêté par un administrateur";
         case DISC_NORMAL:           return lang ? "normal" : "normal";
         default:                    return lang ? "crash?" : "crash ?";
     }
@@ -617,6 +617,9 @@ void updatetime()
     }
 }
 
+bool servshutdown = false;
+int lasttimeupdate = 0, countdown = 6;
+
 void serverslice(bool dedicated, uint timeout)   // main server update, called from main loop in sp, or from below in dedicated server
 {
     if(!serverhost)
@@ -713,6 +716,22 @@ void serverslice(bool dedicated, uint timeout)   // main server update, called f
         }
     }
     if(server::sendpackets()) enet_host_flush(serverhost);
+
+    if(servshutdown)
+    {
+        if(totalmillis >= lasttimeupdate+1000)
+        {
+            if(countdown>5)
+            {
+                loopv(clients) if(clients[i]->type==ST_TCPIP) disconnect_client(i, DISC_SERVERSTOP);
+                if(clients.length()) logoutf(servlang ? "Disconnected %d player%s before shutting down." : "%d joueur%s déconnectés avant arrêt du serveur.", clients.length(), clients.length()>1 ? "s" : "");
+            }
+            lasttimeupdate = totalmillis;
+            countdown--;
+            logoutf(servlang ? "Server shutting down in: %d" : "Arrêt du serveur dans : %d", countdown);
+            if(!countdown) exit(EXIT_SUCCESS);
+        }
+    }
 }
 
 void flushserver(bool force)
@@ -866,7 +885,6 @@ enum
     MENU_OPENCONSOLE = 0,
     MENU_SHOWCONSOLE,
     MENU_HIDECONSOLE,
-    MENU_KICKCONSOLE,
     MENU_EXIT
 };
 
@@ -906,12 +924,8 @@ static LRESULT CALLBACK handlemessages(HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
                     ShowWindow(conwindow, SW_HIDE);
                     ModifyMenu(appmenu, 0, MF_BYPOSITION|MF_STRING, MENU_SHOWCONSOLE, servlang ? "Show Console" : "Afficher la console");
                     break;
-                case MENU_KICKCONSOLE:
-                    ShowWindow(conwindow, SW_SHOWNORMAL);
-                    loopv(clients) if(clients[i]->type==ST_TCPIP) disconnect_client(i, DISC_SERVERSTOP);
-                    break;
                 case MENU_EXIT:
-                    PostMessage(hWnd, WM_CLOSE, 0, 0);
+                    servshutdown = true;
                     break;
             }
             return 0;
@@ -934,7 +948,6 @@ static void setupwindow(const char *title)
 	if(!appmenu) fatal("Impossible de lancer le programme (erreur fenêtre)");
     AppendMenu(appmenu, MF_STRING, MENU_OPENCONSOLE, servlang ? "Show console" : "Ouvrir la console");
     AppendMenu(appmenu, MF_SEPARATOR, 0, NULL);
-	AppendMenu(appmenu, MF_STRING, MENU_KICKCONSOLE, servlang ? "Kick all for restart" : "Déconnecter joueurs pour redémarrer");
 	AppendMenu(appmenu, MF_STRING, MENU_EXIT, servlang ? "Stop server" : "Arrêter le serveur");
 
 	//SetMenuDefaultItem(appmenu, 0, FALSE);
