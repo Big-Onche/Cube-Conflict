@@ -16,6 +16,21 @@ namespace gfx
     bool champicolor() { return isconnected() && game::hudplayer()->boostmillis[B_SHROOMS]; } //checks if player 1 or observed player is on shrooms.
     bool hasroids(gameent *owner) { return owner->boostmillis[B_ROIDS]; }
 
+    void light_trail(const vec &s, const vec &e, int radius, int fade, int peak, const vec &color) //cast lights along a ray
+    {
+        vec v;
+        float d = e.dist(s, v);
+        int trails = (s.dist(e))/30;
+        int steps = clamp(int(d*2), 1, trails);
+        v.div(steps);
+        vec p = s;
+        loopi(steps)
+        {
+            p.add(v);
+            adddynlight(p, radius, color, fade, peak, L_NOSHADOW, 0, color);
+        }
+    }
+
     void projgunexplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk) //particles and light effects on impact for slow projectiles
     {
         vec lightloc = vec(v).sub(vec(vel).mul(10));
@@ -236,6 +251,7 @@ namespace gfx
                 break;
             case ATK_RAIL_SHOOT:
                 loopi(2) particle_flare(muzzlepos, to, 50+rnd(50), PART_LIGHTNING, 0x8888FF, 1.5f+rnd(2), NULL, gfx::champicolor());
+                light_trail(muzzlepos, to, 60, 50+rnd(50), 10, vec(0.2f, 0.6f, 2.f));
                 particle_flare(muzzlepos, muzzlepos, 140, PART_MF_ELEC, d->ragemillis || hasroids(d) ? 0xFF2222 : d->abilitymillis[game::ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0x50CFFF, 4.f/adaptpartsize(d), d, champicolor());
                 adddynlight(muzzlepos, 100, vec(0.25f, 0.75f, 2.0f), 40, 2, lightflags, 0, vec(0.25f, 0.75f, 2.0f), d);
                 break;
@@ -285,9 +301,9 @@ namespace gfx
         fullbrightmodels = 0;
     }
 
-    string shielddir = "";
     char *getshielddir(int armourtype, int armourval, bool hud, bool preload) //récupère l'id d'un bouclier
     {
+        static char dir[64];
         int armourvaldir = 20;
 
         if(!preload)
@@ -300,18 +316,18 @@ namespace gfx
             }
         }
 
-        if(armourtype==A_ASSIST && hud) formatstring(shielddir, "%s%d", "hudshield/power/", preload ? armourval : armourvaldir);
-        else if(armourtype!=A_ASSIST) formatstring(shielddir, "%s%s%d", hud ? "hudshield/" : "shields/", armours[armourtype].armournames, preload ? armourval : armourvaldir);
-        return shielddir;
+        if(armourtype==A_ASSIST && hud) sprintf(dir, "%s%d", "hudshield/power/", preload ? armourval : armourvaldir);
+        else if(armourtype!=A_ASSIST) sprintf(dir, "%s%s%d", hud ? "hudshield/" : "shields/", armours[armourtype].armournames, preload ? armourval : armourvaldir);
+        return dir;
     }
 
-    string mdldir = "";
     char *getdisguisement(int seed)
     {
         defformatstring(alias, "disguise_%d", seed);
+        static char dir[64];
         const char *name = getalias(alias);
         if(seed<0 || seed>3) name = "mapmodel/caisses/caissebois";
-        formatstring(mdldir, "%s", name);
-        return mdldir;
+        formatstring(dir, "%s", name);
+        return dir;
     }
 }
