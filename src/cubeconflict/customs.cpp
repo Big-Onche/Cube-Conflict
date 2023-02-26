@@ -10,11 +10,11 @@ int cust[NUMCUST];
 
 namespace custom
 {
-    string capedir;
     const char *getcapedir(int cape, bool enemy)
     {
-        formatstring(capedir, "capes/%s%s", customscapes[cape].capedir, enemy ? "/enemy" : "");
-        return capedir;
+        static char dir[64];
+        sprintf(dir, "capes/%s%s", customscapes[cape].capedir, enemy ? "/enemy" : "");
+        return dir;
     }
 }
 
