@@ -278,7 +278,7 @@ void show_calclight_progress()
     float bar1 = float(lightprogress) / float(allocnodes);
     defformatstring(text1, "%d%%", int(bar1 * 100));
 
-    renderprogress(bar1, text1);
+    renderprogress(bar1, text1, true, true);
 }
 
 static void calcsurfaces(cube &c, const ivec &co, int size, int usefacemask, int preview = 0)

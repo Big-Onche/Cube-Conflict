@@ -359,8 +359,13 @@ static const struct loadingtextinfo { const char *loadingtext_FR, *loadingtext_E
     {"corruption de votre sauvegarde",                           "deleting your saved game"},
 };
 
-void renderprogressview(int w, int h, float bar, const char *text)   // also used during loading
+int LOADP = 0;
+
+void renderprogressview(int w, int h, float bar, const char *text, bool calc)   // also used during loading
 {
+    if(needlogo) return;
+    if(!calc) bar = LOADP/100.f;
+
     hudmatrix.ortho(0, w, h, 0, -1, 1);
     resethudmatrix();
     resethudshader();
@@ -389,9 +394,9 @@ void renderprogressview(int w, int h, float bar, const char *text)   // also use
     if(bar > 0)
     {
         settexture("media/interface/loading_bar.png", 3);
-        bgquad(bx-50, by*1.04f, sw*2.1f, bh, su1, 0, su2-su1, 1);
-        bgquad(bx+sw-50, by*1.04f, (ex-(bx+sw))*2.1f, bh, su2, 0, eu1-su2, 1);
-        bgquad(ex-50, by*1.04f, ew*2.1f, bh, eu1, 0, eu2-eu1, 1);
+        bgquad(bx-50, by*1.04f, sw*2.14f, bh, su1, 0, su2-su1, 1);
+        bgquad(bx+sw-50, by*1.04f, (ex-(bx+sw))*2.14f, bh, su2, 0, eu1-su2, 1);
+        bgquad(ex-50, by*1.04f, ew*2.14f, bh, eu1, 0, eu2-eu1, 1);
     }
 
     if(text)
@@ -402,16 +407,13 @@ void renderprogressview(int w, int h, float bar, const char *text)   // also use
 
         pushhudtranslate(bx+sw, by + (bh - FONTH*tsz)/2, tsz);
 
-        textetimer += curtime;
-        pointstimer += curtime;
+        textetimer += curtime, pointstimer += curtime;
 
         if(textetimer>3000) {nbtexte = rnd(13); textetimer = 0;}
         if(pointstimer>1000) pointstimer = 0;
 
-        defformatstring(petitpoints, "%s", pointstimer < 250 ? "..." : pointstimer < 500 ? "" : pointstimer < 750 ? "." : "..");
-        defformatstring(text, "%s%s", GAME_LANG ? loadingtext[nbtexte].loadingtext_EN : loadingtext[nbtexte].loadingtext_FR, petitpoints);
-
-        draw_text(text, 0, 0);
+        defformatstring(fancytext, "%d%% - %s%s", LOADP, GAME_LANG ? loadingtext[nbtexte].loadingtext_EN : loadingtext[nbtexte].loadingtext_FR, pointstimer < 250 ? "..." : pointstimer < 500 ? "" : pointstimer < 750 ? "." : "..");
+        draw_text(calc ? text : fancytext, 0, 0);
         pophudmatrix();
     }
 
@@ -420,7 +422,7 @@ void renderprogressview(int w, int h, float bar, const char *text)   // also use
 
 VAR(progressbackground, 0, 0, 1);
 
-void renderprogress(float bar, const char *text, bool background)   // also used during loading
+void renderprogress(float bar, const char *text, bool background, bool calc)   // also used during loading
 {
     if(!inbetweenframes || drawtex) return;
 
@@ -447,7 +449,7 @@ void renderprogress(float bar, const char *text, bool background)   // also used
     bool forcebackground = progressbackground || (mesa_swap_bug && (curvsync || totalmillis==1));
     if(background || forcebackground) restorebackground(w, h, forcebackground);
 
-    renderprogressview(w, h, bar, text);
+    renderprogressview(w, h, bar, text, calc);
     swapbuffers(false);
 }
 

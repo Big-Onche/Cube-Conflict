@@ -620,7 +620,7 @@ extern bool interceptkey(int sym);
 
 extern float loadprogress;
 extern void renderbackground(const char *caption = NULL, Texture *mapshot = NULL, const char *mapname = NULL, const char *mapinfo = NULL, const char *astuce = NULL, bool force = false, bool needsound = false);
-extern void renderprogress(float bar, const char *text = "", bool background = false);
+extern void renderprogress(float bar, const char *text = "", bool background = false, bool calc = false);
 
 extern void getframemillis(float &avg, float &best, float &worst);
 extern void getfps(int &fps, int &bestdiff, int &worstdiff);
@@ -815,7 +815,7 @@ extern bool addpostfx(const char *name, int outputbind, int outputscale, uint in
 extern void clearpostfx();
 extern int fullbrightmodels;
 
-extern int GAME_LANG;
+extern int LOADP, GAME_LANG;
 
 #endif
 

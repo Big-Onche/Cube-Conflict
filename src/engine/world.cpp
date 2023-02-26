@@ -277,7 +277,11 @@ void freeoctaentities(cube &c)
 void entitiesinoctanodes()
 {
     vector<extentity *> &ents = entities::getents();
-    loopv(ents) modifyoctaent(MODOE_ADD, i, *ents[i]);
+    loopv(ents)
+    {
+        LOADP = ((float(i+1)/ents.length())*5)+95;
+        modifyoctaent(MODOE_ADD, i, *ents[i]);
+    }
 }
 
 static inline void findents(octaentities &oe, int low, int high, bool notspawned, const vec &pos, const vec &invradius, vector<int> &found)

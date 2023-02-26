@@ -851,7 +851,7 @@ static void show_genpvs_progress(int unique = pvs.length(), int processed = numv
 
     defformatstring(text1, "%d%% - %d of %d view cells (%d unique)", int(bar1 * 100), processed, totalviewcells, unique);
 
-    renderprogress(bar1, text1);
+    renderprogress(bar1, text1, true, true);
 
     if(interceptkey(SDLK_ESCAPE)) genpvs_canceled = true;
     check_genpvs_progress = false;

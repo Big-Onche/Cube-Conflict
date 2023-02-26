@@ -382,7 +382,7 @@ void flushpreloadedmodels(bool msg)
 {
     loopv(preloadmodels)
     {
-        loadprogress = float(i+1)/preloadmodels.length();
+        LOADP = ((float(i+1)/preloadmodels.length())*25)+60;
         model *m = loadmodel(preloadmodels[i], -1, msg);
         if(!m) { if(msg) conoutf(CON_WARN, "could not load model: %s", preloadmodels[i]); }
         else
@@ -408,7 +408,7 @@ void preloadusedmapmodels(bool msg, bool bih)
     vector<const char *> col;
     loopv(used)
     {
-        loadprogress = float(i+1)/used.length();
+        LOADP = (float(i+1)/used.length())*20;
         int mmindex = used[i];
         if(!mapmodels.inrange(mmindex)) { if(msg) conoutf(CON_WARN, "could not find map model: %d", mmindex); continue; }
         mapmodelinfo &mmi = mapmodels[mmindex];

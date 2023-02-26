@@ -645,6 +645,7 @@ void preloadmapsounds()
     const vector<extentity *> &ents = entities::getents();
     loopv(ents)
     {
+        LOADP = ((float(i+1)/ents.length())*10)+85;
         extentity &e = *ents[i];
         if(e.type==ET_SOUND) mapsounds.preloadsound(e.attr1);
     }
