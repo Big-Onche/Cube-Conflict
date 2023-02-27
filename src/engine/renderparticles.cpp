@@ -932,12 +932,7 @@ void initparticles()
     if(!particlesoftshader) particlesoftshader = lookupshaderbyname("particlesoft");
     if(!particletextshader) particletextshader = lookupshaderbyname("particletext");
     loopi(sizeof(parts)/sizeof(parts[0])) parts[i]->init(parts[i]->type&PT_FEW ? min(fewparticles, maxparticles) : maxparticles);
-    loopi(sizeof(parts)/sizeof(parts[0]))
-    {
-        loadprogress = float(i+1)/(sizeof(parts)/sizeof(parts[0]));
-        parts[i]->preload();
-    }
-    loadprogress = 0;
+    loopi(sizeof(parts)/sizeof(parts[0])) parts[i]->preload();
 }
 
 void clearparticles()

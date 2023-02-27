@@ -3302,12 +3302,7 @@ COMMAND(reloadtex, "s");
 void reloadtextures()
 {
     int reloaded = 0;
-    enumerate(textures, Texture, tex,
-    {
-        loadprogress = float(++reloaded)/textures.numelems;
-        reloadtexture(tex);
-    });
-    loadprogress = 0;
+    enumerate(textures, Texture, tex, {reloadtexture(tex);});
 }
 
 enum

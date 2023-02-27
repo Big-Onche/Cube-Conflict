@@ -279,7 +279,7 @@ void entitiesinoctanodes()
     vector<extentity *> &ents = entities::getents();
     loopv(ents)
     {
-        LOADP = ((float(i+1)/ents.length())*5)+95;
+        loadprogress = ((float(i+1)/ents.length())*3)+94;
         modifyoctaent(MODOE_ADD, i, *ents[i]);
     }
 }

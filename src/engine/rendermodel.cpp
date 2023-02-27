@@ -382,7 +382,7 @@ void flushpreloadedmodels(bool msg)
 {
     loopv(preloadmodels)
     {
-        LOADP = ((float(i+1)/preloadmodels.length())*25)+60;
+        loadprogress = ((float(i+1)/preloadmodels.length())*25)+60;
         model *m = loadmodel(preloadmodels[i], -1, msg);
         if(!m) { if(msg) conoutf(CON_WARN, "could not load model: %s", preloadmodels[i]); }
         else
@@ -392,7 +392,6 @@ void flushpreloadedmodels(bool msg)
         }
     }
     preloadmodels.deletearrays();
-    loadprogress = 0;
 }
 
 void preloadusedmapmodels(bool msg, bool bih)
@@ -408,7 +407,7 @@ void preloadusedmapmodels(bool msg, bool bih)
     vector<const char *> col;
     loopv(used)
     {
-        LOADP = (float(i+1)/used.length())*20;
+        loadprogress = (float(i+1)/used.length())*20;
         int mmindex = used[i];
         if(!mapmodels.inrange(mmindex)) { if(msg) conoutf(CON_WARN, "could not find map model: %d", mmindex); continue; }
         mapmodelinfo &mmi = mapmodels[mmindex];
@@ -427,13 +426,10 @@ void preloadusedmapmodels(bool msg, bool bih)
 
     loopv(col)
     {
-        loadprogress = float(i+1)/col.length();
         model *m = loadmodel(col[i], -1, msg);
         if(!m) { if(msg) conoutf(CON_WARN, "could not load collide model: %s", col[i]); }
         else if(!m->bih) m->setBIH();
     }
-
-    loadprogress = 0;
 }
 
 model *loadmodel(const char *name, int i, bool msg)

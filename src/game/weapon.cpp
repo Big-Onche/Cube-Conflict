@@ -1494,11 +1494,14 @@ namespace game
 
     void adddynlights()
     {
+        int lightradiusvar = 0;
         loopv(projs)
         {
             projectile &p = projs[i];
             vec pos(p.o);
             pos.add(vec(p.offset).mul(p.offsetmillis/float(OFFSETMILLIS)));
+            if(!ispaused()) lightradiusvar = rnd(30);
+
             switch(p.atk)
             {
                 case ATK_PULSE_SHOOT: adddynlight(pos, 30, vec(1.00f, 0.75f, 0.0f)); break;
@@ -1506,7 +1509,7 @@ namespace game
                 case ATK_GRAP1_SHOOT: adddynlight(pos, 50, vec(0.3f, 0.00f, 0.2f)); break;
                 case ATK_ARTIFICE_SHOOT:
                 case ATK_SMAW_SHOOT:
-                case ATK_ROQUETTES_SHOOT: adddynlight(pos, 50, vec(1.2f, 0.75f, 0.0f)); break;
+                case ATK_ROQUETTES_SHOOT: adddynlight(pos, 50+lightradiusvar, vec(1.2f, 0.75f, 0.0f)); break;
                 case ATK_NUKE_SHOOT: adddynlight(pos, 100, vec(1.2f, 0.75f, 0.0f)); break;
             }
         }

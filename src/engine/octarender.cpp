@@ -1575,7 +1575,6 @@ int updateva(cube *c, const ivec &co, int size, int csi)
             int tcount = count + (csi <= MAXMERGELEVEL ? vamerges[csi].length() : 0);
             if(tcount > vafacemax || (tcount >= vafacemin && size >= vacubesize) || size == min(0x1000, worldsize/2))
             {
-                loadprogress = clamp(recalcprogress/float(allocnodes), 0.0f, 1.0f);
                 setva(c[i], o, size, csi);
                 if(c[i].ext && c[i].ext->va)
                 {
@@ -1689,7 +1688,6 @@ void octarender()                               // creates va s for all leaf cub
     recalcprogress = 0;
     varoot.setsize(0);
     updateva(worldroot, ivec(0, 0, 0), worldsize/2, csi-1);
-    loadprogress = 0;
     flushvbo();
 
     explicitsky = 0;
@@ -1723,10 +1721,9 @@ void precachetextures()
     }
     loopv(texs)
     {
-        loadprogress = float(i+1)/texs.length();
+        loadprogress = ((float(i+1)/texs.length())*2)+98;
         lookupvslot(texs[i]);
     }
-    loadprogress = 0;
 }
 
 void allchanged(bool load)

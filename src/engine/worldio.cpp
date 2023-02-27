@@ -698,7 +698,9 @@ void clearmapcrc() { mapcrc = 0; }
 
 bool load_world(const char *mname, const char *cname)        // still supports all map formats that have existed since the earliest cube betas!
 {
-    LOADP = 0;
+    loadprogress = 0;
+    bool hasvsync = false;
+    if(vsync) {vsync = 0; restorevsync(); hasvsync = true; }
     setmapfilenames(mname, cname);
     stream *f = opengzfile(ogzname, "rb");
     if(!f) { conoutf(CON_ERROR, "could not read map %s", ogzname); return false; }
@@ -898,6 +900,7 @@ bool load_world(const char *mname, const char *cname)        // still supports a
 
     startmap(cname ? cname : mname);
     stopmusic();
+    if(hasvsync) {vsync = 1; restorevsync();}
     return true;
 }
 

@@ -359,12 +359,10 @@ static const struct loadingtextinfo { const char *loadingtext_FR, *loadingtext_E
     {"corruption de votre sauvegarde",                           "deleting your saved game"},
 };
 
-int LOADP = 0;
-
 void renderprogressview(int w, int h, float bar, const char *text, bool calc)   // also used during loading
 {
     if(needlogo) return;
-    if(!calc) bar = LOADP/100.f;
+    if(!calc) bar = loadprogress/100.f;
 
     hudmatrix.ortho(0, w, h, 0, -1, 1);
     resethudmatrix();
@@ -407,12 +405,11 @@ void renderprogressview(int w, int h, float bar, const char *text, bool calc)   
 
         pushhudtranslate(bx+sw, by + (bh - FONTH*tsz)/2, tsz);
 
-        textetimer += curtime, pointstimer += curtime;
+        textetimer += curtime;
 
-        if(textetimer>3000) {nbtexte = rnd(13); textetimer = 0;}
-        if(pointstimer>1000) pointstimer = 0;
+        if(textetimer>10000) {nbtexte = rnd(15); textetimer = 0;}
 
-        defformatstring(fancytext, "%d%% - %s%s", LOADP, GAME_LANG ? loadingtext[nbtexte].loadingtext_EN : loadingtext[nbtexte].loadingtext_FR, pointstimer < 250 ? "..." : pointstimer < 500 ? "" : pointstimer < 750 ? "." : "..");
+        defformatstring(fancytext, "%.0f%% - %s...", loadprogress, GAME_LANG ? loadingtext[nbtexte].loadingtext_EN : loadingtext[nbtexte].loadingtext_FR);
         draw_text(calc ? text : fancytext, 0, 0);
         pophudmatrix();
     }

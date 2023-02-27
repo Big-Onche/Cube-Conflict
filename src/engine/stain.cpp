@@ -763,12 +763,7 @@ void initstains()
 {
     if(initing) return;
     loopi(sizeof(stains)/sizeof(stains[0])) stains[i].init(maxstaintris);
-    loopi(sizeof(stains)/sizeof(stains[0]))
-    {
-        loadprogress = float(i+1)/(sizeof(stains)/sizeof(stains[0]));
-        stains[i].preload();
-    }
-    loadprogress = 0;
+    loopi(sizeof(stains)/sizeof(stains[0])) stains[i].preload();
 }
 
 void clearstains()

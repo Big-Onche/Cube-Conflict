@@ -815,7 +815,9 @@ extern bool addpostfx(const char *name, int outputbind, int outputscale, uint in
 extern void clearpostfx();
 extern int fullbrightmodels;
 
-extern int LOADP, GAME_LANG;
+extern int GAME_LANG, vsync;
+
+extern void restorevsync();
 
 #endif
 
