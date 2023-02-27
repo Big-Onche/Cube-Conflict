@@ -1777,15 +1777,16 @@ namespace server
     {
         if(clients.empty() || (!hasnonlocalclients() && !demorecord)) return false;
         enet_uint32 curtime = enet_time_get()-lastsend;
-        if(curtime<33 && !force) return false;
+        if(curtime<40 && !force) return false;
         bool flush = buildworldstate();
-        lastsend += curtime - (curtime%33);
+        lastsend += curtime - (curtime%40);
         return flush;
     }
 
     template<class T>
     void sendstate(servstate &gs, T &p)
     {
+        putint(p, gs.aptiseed);
         putint(p, gs.lifesequence);
         putint(p, gs.health);
         putint(p, gs.maxhealth);
@@ -1800,6 +1801,7 @@ namespace server
     {
         servstate &gs = ci->state;
         gs.spawnstate(gamemode, ci->aptitude);
+        gs.aptiseed = rnd(4);
         gs.lifesequence = (gs.lifesequence + 1)&0x7F;
     }
 
@@ -1807,7 +1809,7 @@ namespace server
     {
         servstate &gs = ci->state;
         spawnstate(ci);
-        sendf(ci->ownernum, 1, "rii8v", N_SPAWNSTATE, ci->clientnum, gs.lifesequence,
+        sendf(ci->ownernum, 1, "rii9v", N_SPAWNSTATE, ci->clientnum, gs.aptiseed, gs.lifesequence,
             gs.health, gs.maxhealth, gs.mana,
             gs.armour, gs.armourtype,
             gs.gunselect, NUMGUNS, gs.ammo);
@@ -1984,7 +1986,6 @@ namespace server
                 loopi(4) putint(p, oi->state.boostmillis[i]);
                 putint(p, oi->state.ragemillis);
                 loopi(3) putint(p, oi->state.abilitymillis[i]);
-                putint(p, oi->state.aptiseed);
                 sendstate(oi->state, p);
             }
             putint(p, -1);
@@ -2013,8 +2014,8 @@ namespace server
         sendf(-1, 1, "ri9i9i5vi", N_RESUME, ci->clientnum, gs.state,
             gs.killstreak, gs.frags, gs.flags, gs.deaths,
             gs.boostmillis[B_ROIDS], gs.boostmillis[B_EPO], gs.boostmillis[B_JOINT], gs.boostmillis[B_SHROOMS],
-            gs.ragemillis, gs.abilitymillis[game::ABILITY_1], gs.abilitymillis[game::ABILITY_2], gs.abilitymillis[game::ABILITY_3], gs.aptiseed,
-            gs.lifesequence,
+            gs.ragemillis, gs.abilitymillis[game::ABILITY_1], gs.abilitymillis[game::ABILITY_2], gs.abilitymillis[game::ABILITY_3],
+            gs.aptiseed, gs.lifesequence,
             gs.health, gs.maxhealth, gs.mana,
             gs.armour, gs.armourtype,
             gs.gunselect, NUMGUNS, gs.ammo, -1);

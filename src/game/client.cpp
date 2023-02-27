@@ -1380,16 +1380,16 @@ namespace game
             d->deaths = getint(p);
             if(d==player1)
             {
-                loopi(9) getint(p);
+                loopi(8) getint(p);
             }
             else
             {
                 loopi(NUMBOOSTS) d->boostmillis[i] = getint(p);
                 d->ragemillis = getint(p);
-                loopi(NUMABILITIES) d->abilitymillis[getint(p)];
-                d->aptiseed = getint(p);
+                loopi(NUMABILITIES) d->abilitymillis[i] = getint(p);
             }
         }
+        d->aptiseed = getint(p);
         d->lifesequence = getint(p);
         d->health = getint(p);
         d->maxhealth = getint(p);
