@@ -15,8 +15,8 @@ struct captureclientmode : clientmode
     static const int CAPTUREHEIGHT = 96;
     static const int OCCUPYBONUS = 1;
     static const int OCCUPYPOINTS = 1;
-    static const int OCCUPYENEMYLIMIT = 15;
-    static const int OCCUPYNEUTRALLIMIT = 10;
+    static const int OCCUPYENEMYLIMIT = 16;
+    static const int OCCUPYNEUTRALLIMIT = 8;
     static const int SCORESECS = 10;
     static const int AMMOSECS = 15;
     static const int REGENSECS = 1;
@@ -39,8 +39,6 @@ struct captureclientmode : clientmode
         int ammogroup, ammotype, tag, ammo, owners, enemies, converted, capturetime, bliptimer;
 
         baseinfo() { reset(); }
-
-        bool valid() const { return ammotype>=0 && ammotype<=I_ARTIFICE-I_RAIL+1; }
 
         void noenemy()
         {
@@ -182,7 +180,7 @@ struct captureclientmode : clientmode
         if(bases.length() >= MAXBASES) return;
         baseinfo &b = bases.add();
         b.ammogroup = min(ammotype, 0);
-        b.ammotype = rnd(I_ARTIFICE-I_RAIL+1);
+        b.ammotype = rnd(17);
 
         b.o = o;
         if(b.ammogroup)
@@ -252,7 +250,7 @@ struct captureclientmode : clientmode
         loopv(bases)
         {
             baseinfo &b = bases[i];
-            if(b.valid() && insidebase(b, player1->feetpos()) && player1->hasmaxammo(b.ammotype-1+I_RAIL)) return;
+            if(insidebase(b, player1->feetpos()) && player1->hasmaxammo(b.ammotype-1+I_RAIL)) return;
         }
         addmsg(N_REPAMMO, "rc", player1);
     }
@@ -271,7 +269,7 @@ struct captureclientmode : clientmode
         loopv(bases)
         {
             baseinfo &b = bases[i];
-            if(b.valid() && insidebase(b, d->feetpos()) && b.owner==d->team && b.o.dist(o) < 12)
+            if(insidebase(b, d->feetpos()) && b.owner==d->team && b.o.dist(o) < 12)
             {
                 if(d->lastrepammo!=i)
                 {
@@ -304,7 +302,7 @@ struct captureclientmode : clientmode
                     insidebasetimer = totalmillis;
                 }
 
-                if(!b.valid() || !insidebase(b, d->feetpos()) || (b.owner!=d->team && b.enemy!=d->team)) continue;
+                if(!insidebase(b, d->feetpos()) || (b.owner!=d->team && b.enemy!=d->team)) continue;
                 if(d->lastbase < 0 && (lookupmaterial(d->feetpos())&MATF_CLIP) == MAT_GAMECLIP) break;
 
                 vec basepos(b.o);
@@ -354,7 +352,6 @@ struct captureclientmode : clientmode
         loopv(bases)
         {
             baseinfo &b = bases[i];
-            if(!b.valid()) continue;
             const char *basename = b.owner ? (b.owner!=hudplayer()->team ? "base/red" : "base/yellow") : "base/neutral";
             rendermodel(basename, ANIM_MAPMODEL|ANIM_LOOP, b.o, 0, 0, 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED);
 
@@ -426,7 +423,6 @@ struct captureclientmode : clientmode
         loopv(bases)
         {
             baseinfo &b = bases[i];
-            if(!b.valid()) continue;
             if(skipenemy && b.enemy) continue;
             switch(type)
             {
@@ -575,8 +571,8 @@ struct captureclientmode : clientmode
         }
         else if(b.owner)
         {
-            if(!b.name[0]) conoutf(CON_GAMEINFO, GAME_LANG ? "%s team lost the \"\fe%d\f7\" terminal." : "L'équipe %s a perdu le terminal \"\fe%d\f7\".", teamcolor(owner), b.tag);
-            else conoutf(CON_GAMEINFO, GAME_LANG ? "%s team lost the \"\fe%s\f7\" terminal." : "L'équipe %s a perdu le terminal \"\fe%s\f7\".", teamcolor(owner), b.name);
+            if(!b.name[0]) conoutf(CON_GAMEINFO, GAME_LANG ? "%s team lost the \"\fe%d\f7\" terminal." : "L'équipe %s a perdu le terminal \"\fe%d\f7\".", teamcolor(b.owner), b.tag);
+            else conoutf(CON_GAMEINFO, GAME_LANG ? "%s team lost the \"\fe%s\f7\" terminal." : "L'équipe %s a perdu le terminal \"\fe%s\f7\".", teamcolor(b.owner), b.name);
             playsound(owner==hudplayer()->team ? S_TERMINAL_LOST : S_TERMINAL_LOST_E, &b.o, NULL, 0, 0, 200, -1, 2500);
         }
         if(b.owner!=owner)  particle_splash(rnd(2) ? PART_ZERO : PART_ONE, 25, 500, b.ammopos, owner ? (owner==hudplayer()->team ? 0xFFFF00 : 0xFF0000) : 0x777777, 1.f, 400, -50);
@@ -634,17 +630,15 @@ struct captureclientmode : clientmode
 		loopvj(bases)
 		{
 			baseinfo &f = bases[j];
-            if(!f.valid()) continue;
 			static vector<int> targets; // build a list of others who are interested in this
 			targets.setsize(0);
 			ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, j, true);
 			gameent *e = NULL;
-			int regen = !m_regencapture || d->health >= 750 || d->armour >= 1000+d->skill*10 ? 0 : 16;
+			int regen = !m_regencapture || d->health >= 750 || d->armour >= 1000+d->skill*10 ? 0 : 1;
 			if(m_regencapture)
 			{
-			    if(d->armour < 1000+d->skill*10) regen = 64;
-				int gun = f.ammotype-1+I_RAIL;
-				if(f.ammo > 0 && !d->hasmaxammo(gun)/1.5f) regen = 32;
+			    if(d->armour < 1000+d->skill*10) regen = 2;
+				if(!d->hasmaxammo(f.ammotype-1+I_RAIL)/2.f) regen = 4;
 			}
 			loopi(numdynents()) if((e = (gameent *)iterdynents(i)) && !e->ai && e->state == CS_ALIVE && isteam(d->team, e->team))
 			{ // try to guess what non ai are doing
@@ -668,7 +662,6 @@ struct captureclientmode : clientmode
 	{
         if(!bases.inrange(b.target)) return false;
         baseinfo &f = bases[b.target];
-        if(!f.valid()) return false;
 		bool regen = !m_regencapture || d->health >= 750 || d->armour >= 1000+d->skill*10 ? false : true;
 		if(!regen && m_regencapture)
 		{
@@ -720,7 +713,7 @@ ICOMMAND(insidebases, "", (),
     if(m_capture && player1->state == CS_ALIVE) loopv(capturemode.bases)
     {
         captureclientmode::baseinfo &b = capturemode.bases[i];
-        if(b.valid() && capturemode.insidebase(b, player1->feetpos()))
+        if(capturemode.insidebase(b, player1->feetpos()))
         {
             if(buf.length()) buf.add(' ');
             defformatstring(basenum, "%d", b.tag);
@@ -786,7 +779,7 @@ ICOMMAND(insidebases, "", (),
         loopv(bases)
         {
             baseinfo &b = bases[i];
-            if(b.valid() && insidebase(b, ci->state.o) && !ci->state.hasmaxammo(b.ammotype-1+I_RAIL) && b.takeammo(ci->team))
+            if(insidebase(b, ci->state.o) && !ci->state.hasmaxammo(b.ammotype-1+I_RAIL) && b.takeammo(ci->team))
             {
                 sendbaseinfo(i);
                 sendf(-1, 1, "riii", N_REPAMMO, ci->clientnum, b.ammotype);
@@ -802,7 +795,6 @@ ICOMMAND(insidebases, "", (),
         loopv(bases)
         {
             baseinfo &b = bases[i];
-            if(!b.valid()) continue;
             bool leave = !oldclip && insidebase(b, oldpos),
                  enter = !newclip && insidebase(b, newpos);
             if(leave && !enter && b.leave(team)) sendbaseinfo(i);
@@ -879,16 +871,13 @@ ICOMMAND(insidebases, "", (),
                     case A_GOLD: if(ci->state.armour>2000) {ci->state.armourtype = A_ASSIST; if(!ci->state.ammo[GUN_ASSISTXPL]) ci->state.ammo[GUN_ASSISTXPL] = 1;}
                 }
 
-                if(b.valid())
+                if(!ci->state.hasmaxammo(b.ammotype))
                 {
-                    int ammotype = b.ammotype-1+I_RAIL;
-                    if(!ci->state.hasmaxammo(ammotype))
-                    {
-                        ci->state.addammo(b.ammotype, ticks*REGENAMMO, 100);
-                        notify = true;
-                    }
+                    ci->state.addammo(b.ammotype, ticks*REGENAMMO, 100);
+                    notify = true;
                 }
-                if(notify) sendf(-1, 1, "ri7", N_BASEREGEN, ci->clientnum, ci->state.health, ci->state.armour, ci->state.mana, b.ammotype, b.valid() ? ci->state.ammo[b.ammotype] : 0);
+
+                if(notify) sendf(-1, 1, "ri7", N_BASEREGEN, ci->clientnum, ci->state.health, ci->state.armour, ci->state.mana, b.ammotype, ci->state.ammo[b.ammotype]);
             }
         }
     }
@@ -902,7 +891,6 @@ ICOMMAND(insidebases, "", (),
         loopv(bases)
         {
             baseinfo &b = bases[i];
-            if(!b.valid()) continue;
             if(b.enemy)
             {
                 if(!b.owners || !b.enemies) b.occupy(b.enemy, OCCUPYBONUS*(b.enemies ? 1 : -1) + OCCUPYPOINTS*(b.enemies ? b.enemies : -(1+b.owners))*t);
@@ -971,7 +959,6 @@ ICOMMAND(insidebases, "", (),
         loopv(bases)
         {
             baseinfo &b = bases[i];
-            if(!b.valid()) continue;
             if(b.owner)
             {
                 if(!lastteam) lastteam = b.owner;
