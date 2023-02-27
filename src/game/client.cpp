@@ -1378,16 +1378,8 @@ namespace game
             d->frags = getint(p);
             d->flags = getint(p);
             d->deaths = getint(p);
-            if(d==player1)
-            {
-                loopi(8) getint(p);
-            }
-            else
-            {
-                loopi(NUMBOOSTS) d->boostmillis[i] = getint(p);
-                d->ragemillis = getint(p);
-                loopi(NUMABILITIES) d->abilitymillis[i] = getint(p);
-            }
+            if(d==player1) loopi(NUMBOOSTS) getint(p);
+            else loopi(NUMBOOSTS) d->boostmillis[i] = getint(p);
         }
         d->aptiseed = getint(p);
         d->lifesequence = getint(p);
@@ -1822,10 +1814,10 @@ namespace game
                 target->health = health;
                 if(target->state == CS_ALIVE && actor != player1) target->lastpain = lastmillis;
                 damaged(damage, target, actor, false, atk);
-                if(player1->aptitude==12 && target==player1 && actor!=player1)
+                if(player1->aptitude==APT_VIKING && target==player1 && actor!=player1 && player1->state==CS_ALIVE)
                 {
-                    player1->ragemillis+=damage*5;
-                    if(player1->ragemillis>8000 && player1->health>0) unlockachievement(ACH_RAGE);
+                    player1->boostmillis[B_RAGE]+=damage*5;
+                    if(player1->boostmillis[B_RAGE]>8000 && player1->health>0) unlockachievement(ACH_RAGE);
                 }
                 break;
             }

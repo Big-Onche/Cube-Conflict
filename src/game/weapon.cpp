@@ -223,7 +223,7 @@ namespace game
             spread/=d->aptitude==APT_CAMPEUR ? 2.5f : 1.333f;
             nozoomspread/=d->aptitude==APT_CAMPEUR ? 2.5f : 1.333f;
         }
-        if(d->boostmillis[B_ROIDS] || d->ragemillis)
+        if(d->boostmillis[B_ROIDS] || d->boostmillis[B_RAGE])
         {
             spread*=1.75f;
             nozoomspread*=1.75f;
@@ -545,7 +545,7 @@ namespace game
                 break;
 
             case APT_VIKING:
-                if(actor->ragemillis)
+                if(actor->boostmillis[B_RAGE])
                 {
                     draweddmg*=1.25f;
                     if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 2500, 0xAA0000, actor==player1 ? 10.0f : 7.0f, -8);
@@ -616,7 +616,7 @@ namespace game
         {
             if(f==player1)
             {
-                if(player1->aptitude==APT_VIKING) player1->ragemillis+=damage*5;
+                if(player1->aptitude==APT_VIKING) player1->boostmillis[B_RAGE]+=damage*5;
                 if(player1->boostmillis[B_JOINT]) damage/=(player1->aptitude==APT_JUNKIE ? 1.875f : 1.25f);
                 damage = (damage/aptitudes[player1->aptitude].apt_resistance)*(m_dmsp ? 15.f : 100);
                 damaged(damage, f, at, true, atk);
@@ -630,7 +630,7 @@ namespace game
                     player1->health = min(player1->health + damage/2, player1->maxhealth);
                     player1->vampimillis+=damage*1.5f;
                 }
-                else if (player1->aptitude==APT_VIKING && player1->ragemillis) damage*=1.25f;
+                else if (player1->aptitude==APT_VIKING && player1->boostmillis[B_RAGE]) damage*=1.25f;
                 hitmonster((damage*aptitudes[player1->aptitude].apt_degats)/100, (monster *)f, at, vel, atk);
             }
         }
@@ -1124,7 +1124,7 @@ namespace game
                     if(!local) createrays(gun, d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? d->o : from, to, d);
                     loopi(atk==ATK_HYDRA_SHOOT ? 3 : 2) spawnbouncer(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(gun, d->o, to, d) : d->balles, vec(0, 0, 0), d, BNC_CARTOUCHES);
                     particle_flare(d->muzzle, d->muzzle, 140, PART_MF_SHOTGUN, d->boostmillis[B_ROIDS] ? 0xFF2222 : d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xCCAAAA, d==hudplayer() ? gfx::zoom ? 1.25f : 3.50f : 4.5f, d, gfx::champicolor());
-                    if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 140, PART_MF_SHOTGUN, 0xFF2222, d==hudplayer() ? gfx::zoom ? 2.00f : 5.5f : 6.5f, d, gfx::champicolor());
+                    if(d->boostmillis[B_RAGE]) particle_flare(d->muzzle, d->muzzle, 140, PART_MF_SHOTGUN, 0xFF2222, d==hudplayer() ? gfx::zoom ? 2.00f : 5.5f : 6.5f, d, gfx::champicolor());
                     particle_splash(PART_SMOKE,  4, 500, d->muzzle, 0x443333, 3.5f, 20, 500, 0, gfx::champicolor());
                     particle_splash(PART_SPARK, d==hudplayer() ? 4 : 7, 40, d->muzzle, 0xFF2200, 0.5f, 300, 500, 0, gfx::champicolor());
                     adddynlight(hudgunorigin(gun, d->o, to, d), 75, vec(1.25f, 0.25f, 0.f), 40, 2, DL_FLASH, 0, vec(1.25f, 0.25f, 0.f), d);
@@ -1151,7 +1151,7 @@ namespace game
                 particle_splash(PART_SPARK, d==hudplayer() ? 4 : 7, 40, d->muzzle, 0xFFFFFF, 0.5f, 300, 500, 0, gfx::champicolor());
                 particle_flare(d->muzzle, d->muzzle, 100, PART_MF_LITTLE, d->boostmillis[B_ROIDS] ? 0xFF2222 : d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFFFFFF, 1.25f, d, gfx::champicolor());
                 particle_flare(d->muzzle, d->muzzle, 100, PART_MF_SNIPER, d->boostmillis[B_ROIDS] ? 0xFF2222 : d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFFFFFF, atk==ATK_CAMPOUZE_SHOOT ? 5.0f : 3.5f, d, gfx::champicolor());
-                if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 75, PART_MF_SNIPER, 0xFF2222, 6.0f, d, gfx::champicolor());
+                if(d->boostmillis[B_RAGE]) particle_flare(d->muzzle, d->muzzle, 75, PART_MF_SNIPER, 0xFF2222, 6.0f, d, gfx::champicolor());
                 adddynlight(hudgunorigin(gun, d->o, to, d), 50, vec(1.25f, 0.75f, 0.3f), 37, 2, DL_FLASH, 0, vec(1.25f, 0.75f, 0.3f), d);
                 if(atk==ATK_CAMPOUZE_SHOOT)
                 {
@@ -1166,7 +1166,7 @@ namespace game
                 break;
             case ATK_ARBALETE_SHOOT:
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
-                if(d->ragemillis) particle_splash(PART_SPARK,  8, 500, d->muzzle, 0xFF2222, 1.0f,  50,   200, 0, gfx::champicolor());
+                if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK,  8, 500, d->muzzle, 0xFF2222, 1.0f,  50,   200, 0, gfx::champicolor());
                 if(d!=hudplayer()) sound_nearmiss(S_FLYBYARROW, from, to);
                 break;
             case ATK_UZI_SHOOT:
@@ -1175,7 +1175,7 @@ namespace game
                 spawnbouncer(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? d->o : d->balles, vec(0, 0, 0), d, atk==ATK_UZI_SHOOT ? BNC_DOUILLESUZI : BNC_DOUILLES);
                 particle_flare(d->muzzle, d->muzzle, 125, PART_MF_LITTLE, d->boostmillis[B_ROIDS] ? 0xFF2222 : d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFFFFFF, d==hudplayer() ? gfx::zoom ? 0.5f : 0.75f : 1.75f, d, gfx::champicolor());
                 particle_flare(d->muzzle, d->muzzle, 75, PART_MF_BIG, d->boostmillis[B_ROIDS] ? 0xFF2222 : d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFFAA55, d==hudplayer() ? gfx::zoom ? 0.75f : 2.f : 3.f, d, gfx::champicolor());
-                if(d->ragemillis) particle_flare(d->muzzle, d->muzzle, 80, PART_MF_BIG, 0xFF2222, d==hudplayer() ? gfx::zoom ? 1.5f : 4.f : 5.f, d, gfx::champicolor());
+                if(d->boostmillis[B_RAGE]) particle_flare(d->muzzle, d->muzzle, 80, PART_MF_BIG, 0xFF2222, d==hudplayer() ? gfx::zoom ? 1.5f : 4.f : 5.f, d, gfx::champicolor());
                 particle_splash(PART_SMOKE, d==hudplayer() ? 3 : 5, d==hudplayer() ? 350 : 500, d->muzzle, 0x444444, d==hudplayer() ? 3.5f : 4.5f, 20, 500, 0, gfx::champicolor());
                 particle_splash(PART_SPARK, d==hudplayer() ? 3 : 5, 35, d->muzzle, 0xFF4400, 0.35f, 300, 500, 0, gfx::champicolor());
                 adddynlight(hudgunorigin(gun, d->o, to, d), 60, vec(1.25f, 0.75f, 0.3f), 30, 2, DL_FLASH, 0, vec(1.25f, 0.75f, 0.3f), d);
@@ -1207,7 +1207,7 @@ namespace game
                             switch(rnd(2)){case 0: if(d!=hudplayer()) sound_nearmiss(S_FLYBYFLAME, from, rays[i]);}
                     }
                 }
-                if(d->ragemillis) particle_splash(PART_SPARK,  3, 500, d->muzzle, 0xFF2222, 1.0f, 50, 200, 0, gfx::champicolor());
+                if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK,  3, 500, d->muzzle, 0xFF2222, 1.0f, 50, 200, 0, gfx::champicolor());
                 particle_flare(d->muzzle, d->muzzle, 150, PART_MF_ROCKET, d->boostmillis[B_ROIDS] ? 0x880000 : d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0x440044 : 0x663311,  d==hudplayer() ? gfx::zoom ? 2.00f : 3.5f : 4.5f, d, gfx::champicolor());
 
                 float dist = from.dist(to);
@@ -1220,7 +1220,7 @@ namespace game
             {
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
                 particle_flare(d->muzzle, d->muzzle, 150, PART_MF_PLASMA, d->boostmillis[B_ROIDS] ? 0xFF4444 : d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF00FF : 0xFF55FF, 1.75f, d, gfx::champicolor());
-                if(d->ragemillis) particle_splash(PART_SPARK,  3, 500, d->muzzle, 0xFF4444, 1.0f, 50, 200, 0, gfx::champicolor());
+                if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK,  3, 500, d->muzzle, 0xFF4444, 1.0f, 50, 200, 0, gfx::champicolor());
                 adddynlight(hudgunorigin(gun, d->o, to, d), 70, vec(1.0f, 0.0f, 1.0f), 80, 100, DL_FLASH, 0, vec(0, 0, 0), d);
                 break;
             }
@@ -1230,7 +1230,7 @@ namespace game
                 vec up = to;
                 up.z += dist/8;
                 particle_splash(PART_SMOKE,  10, 600, d->muzzle, d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0x550044 : 0x444444, 4.0f, 20, 500, 0, gfx::champicolor());
-                if(d->ragemillis) particle_splash(PART_SPARK,  8, 500, d->muzzle, 0xFF4444, 1.0f, 50, 200, 0, gfx::champicolor());
+                if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK,  8, 500, d->muzzle, 0xFF4444, 1.0f, 50, 200, 0, gfx::champicolor());
                 newbouncer(d==player1 && !thirdperson ? d->muzzle : hudgunorigin(gun, d->o, to, d), up, local, id, d, BNC_GRENADE, attacks[atk].ttl, attacks[atk].projspeed);
                 break;
             }
@@ -1252,7 +1252,7 @@ namespace game
             playsound(S_ROIDS_SHOOT, d==hudplayer() ? NULL : &d->o, NULL, 0, 0 , 300, -1, 500);
             if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 400 && d!=player1) playsound(S_ROIDS_SHOOT_FAR, &d->o, NULL, 0, 0 , 600, -1, 800);
         }
-        else if(d->ragemillis && randomevent(attacks[atk].specialsounddelay)) playsound(S_RAGETIR, d==hudplayer() ? NULL : &d->o, NULL, 0, 0 , 300, -1, 500);
+        else if(d->boostmillis[B_RAGE] && randomevent(attacks[atk].specialsounddelay)) playsound(S_RAGETIR, d==hudplayer() ? NULL : &d->o, NULL, 0, 0 , 300, -1, 500);
 
         looped = false;
         if(d->attacksound >= 0 && d->attacksound != sound) d->stopattacksound(d);

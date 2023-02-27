@@ -139,8 +139,7 @@ namespace server
 
         bool waitexpired(int gamemillis)
         {
-            if(armourtype==A_ASSIST && !armour && gunselect==GUN_ASSISTXPL && ammo[GUN_ASSISTXPL]) return true;
-            else return gamemillis - lastshot >= gunwait;
+            return gamemillis - lastshot >= gunwait;
         }
 
         void reset()
@@ -247,7 +246,7 @@ namespace server
 
         void addevent(gameevent *e)
         {
-            if(state.state==CS_SPECTATOR || events.length()>100) delete e;
+            if(state.state==CS_SPECTATOR || events.length()>200) delete e;
             else events.add(e);
         }
 
@@ -1983,9 +1982,7 @@ namespace server
                 putint(p, oi->state.frags);
                 putint(p, oi->state.flags);
                 putint(p, oi->state.deaths);
-                loopi(4) putint(p, oi->state.boostmillis[i]);
-                putint(p, oi->state.ragemillis);
-                loopi(3) putint(p, oi->state.abilitymillis[i]);
+                loopi(NUMBOOSTS) putint(p, oi->state.boostmillis[i]);
                 sendstate(oi->state, p);
             }
             putint(p, -1);
@@ -2011,10 +2008,9 @@ namespace server
     void sendresume(clientinfo *ci)
     {
         servstate &gs = ci->state;
-        sendf(-1, 1, "ri9i9i5vi", N_RESUME, ci->clientnum, gs.state,
+        sendf(-1, 1, "ri9i9i2vi", N_RESUME, ci->clientnum, gs.state,
             gs.killstreak, gs.frags, gs.flags, gs.deaths,
-            gs.boostmillis[B_ROIDS], gs.boostmillis[B_EPO], gs.boostmillis[B_JOINT], gs.boostmillis[B_SHROOMS],
-            gs.ragemillis, gs.abilitymillis[game::ABILITY_1], gs.abilitymillis[game::ABILITY_2], gs.abilitymillis[game::ABILITY_3],
+            gs.boostmillis[B_ROIDS], gs.boostmillis[B_EPO], gs.boostmillis[B_JOINT], gs.boostmillis[B_SHROOMS], gs.boostmillis[B_RAGE],
             gs.aptiseed, gs.lifesequence,
             gs.health, gs.maxhealth, gs.mana,
             gs.armour, gs.armourtype,
@@ -2328,7 +2324,7 @@ namespace server
             case APT_AMERICAIN: {if(atk==ATK_NUKE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_CAMPOUZE_SHOOT) damage *= 1.5f; break;}
             case APT_MAGICIEN: {if(as.abilitymillis[game::ABILITY_2]) damage *= 1.25f; break;}
             case APT_CAMPEUR: damage *= ((as.o.dist(ts.o)/1800.f)+1.f); break;
-            case APT_VIKING: {if(as.ragemillis) damage *=1.25f;} break;
+            case APT_VIKING: {if(as.boostmillis[B_RAGE]) damage *=1.25f;} break;
             case APT_SHOSHONE: {if(as.abilitymillis[game::ABILITY_3]) damage *= 1.3f; break;}
         }
 
@@ -2336,7 +2332,7 @@ namespace server
         switch(target->aptitude)
         {
             case APT_MAGICIEN: {if(ts.abilitymillis[game::ABILITY_3]) damage = damage/5.0f;} break;
-            case APT_VIKING: {if(actor!=target) {ts.ragemillis+=damage*5; sendresume(target);}} break; //Ajoute la rage au Vicking et l'envoie au client
+            case APT_VIKING: {if(actor!=target) {ts.boostmillis[B_RAGE]+=damage*5; sendresume(target);}} break; //Ajoute la rage au Vicking et l'envoie au client
             case APT_PRETRE: { if(ts.abilitymillis[game::ABILITY_2] && ts.mana>0) {ts.mana -= damage/10; damage=0; {if(ts.mana<0)ts.mana=0;}; sendresume(target);} } break;
             case APT_SHOSHONE:
             {
@@ -2542,7 +2538,7 @@ namespace server
                 ci->ownernum);
         gs.shotdamage += attacks[atk].damage*attacks[atk].rays;
         if(gs.boostmillis[B_ROIDS]) gs.shotdamage*=ci->aptitude==APT_JUNKIE ? 3 : 2;
-        if(gs.ragemillis) gs.shotdamage*=1.25f;
+        if(gs.boostmillis[B_RAGE]) gs.shotdamage*=1.25f;
 
         switch(atk)
         {
@@ -2580,7 +2576,7 @@ namespace server
                     if(totalrays>maxrays) continue;
                     int damage = h.rays*attacks[atk].damage;
                     if(gs.boostmillis[B_ROIDS]) damage*=ci->aptitude==APT_JUNKIE ? 3 : 2;
-                    if(gs.ragemillis) gs.shotdamage*=1.25f;
+                    if(gs.boostmillis[B_RAGE]) gs.shotdamage*=1.25f;
                     dodamage(target, ci, damage, atk, h.dir);
                     if(ci->aptitude==APT_VAMPIRE) doregen(target, ci, damage, atk, h.dir);
                 }
@@ -2636,8 +2632,7 @@ namespace server
             if(curtime>0)
             {
                 loopi(NUMBOOSTS) if(ci->state.boostmillis[i]) ci->state.boostmillis[i] = max(ci->state.boostmillis[i]-curtime, 0);
-                if(ci->state.ragemillis) ci->state.ragemillis = max(ci->state.ragemillis-curtime, 0);
-                loopi(3) if(ci->state.abilitymillis[i]) ci->state.abilitymillis[i] = max(ci->state.abilitymillis[i]-curtime, 0);
+                loopi(game::NUMABILITIES) if(ci->state.abilitymillis[i]) ci->state.abilitymillis[i] = max(ci->state.abilitymillis[i]-curtime, 0);
             }
             flushevents(ci, gamemillis);
         }
@@ -3230,15 +3225,6 @@ namespace server
         if(m_demo) setupdemoplayback();
 
         if(servermotd[0]) sendf(ci->clientnum, 1, "ris", N_SERVMSG, servermotd);
-    }
-
-    void generrlog(clientinfo *ci)
-    {
-        logoutf("Net : ping %d, overflow %d | %s, %d, %d, %d | rage %d, roids %d, epo %d, joint %d, shrooms %d | health %d, mana %d",
-                ci->ping, ci->overflow,
-                aptitudes[ci->aptitude].apt_nomEN, ci->state.abilitymillis[game::ABILITY_1], ci->state.abilitymillis[game::ABILITY_2], ci->state.abilitymillis[game::ABILITY_3],
-                ci->state.ragemillis, ci->state.boostmillis[B_ROIDS], ci->state.boostmillis[B_EPO], ci->state.boostmillis[B_JOINT], ci->state.boostmillis[B_SHROOMS],
-                ci->state.health, ci->state.mana);
     }
 
     void parsepacket(int sender, int chan, packetbuf &p)     // has to parse exactly each byte of the packet
@@ -4092,7 +4078,6 @@ namespace server
             #undef PARSEMESSAGES
 
             case -1: case -2:
-                generrlog(ci);
                 disconnect_client(sender, type==-1 ? DISC_SERVMSGERR : DISC_OVERFLOW);
                 return;
 

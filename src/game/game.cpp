@@ -281,12 +281,9 @@ namespace game
             if(d!=player1 && d->state==CS_ALIVE && !intermission && !premission)
             {
                 if(d->armourtype==A_ASSIST && d->ammo[GUN_ASSISTXPL]>0 && d->armour==0 && d->state==CS_ALIVE) {gunselect(GUN_ASSISTXPL, d, true); d->gunwait=0;}
-
-                if(curtime>0 && d->ragemillis) d->ragemillis = max(d->ragemillis-curtime, 0);
-
                 if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
                 if(hasboost(d)) entities::checkboosts(curtime, d);
-                if(d->ragemillis || d->vampimillis || hasabilityon(d)) entities::checkaptiskill(curtime, d);
+                if(d->vampimillis || hasabilityon(d)) entities::checkaptiskill(curtime, d);
                 if(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION) updateabilities(d);
             }
 
@@ -364,7 +361,7 @@ namespace game
             }
 
             if(hasboost(player1)) entities::checkboosts(curtime, player1);
-            if(player1->ragemillis || player1->vampimillis || hasabilityon(player1)) entities::checkaptiskill(curtime, player1);
+            if(player1->vampimillis || hasabilityon(player1)) entities::checkaptiskill(curtime, player1);
             if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION) updateabilities(player1);
         }
         else if (player1->state == CS_DEAD) isalive = 0;

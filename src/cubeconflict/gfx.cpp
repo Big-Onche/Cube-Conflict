@@ -232,7 +232,7 @@ namespace gfx
         }
     }
 
-    float adaptpartsize(gameent *d) { return (d==game::hudplayer() && !thirdperson ? zoom ? 3.f : 1.5f : 1.f)*(d->ragemillis ? 1.33f : 1.f); }
+    float adaptpartsize(gameent *d) { return (d==game::hudplayer() && !thirdperson ? zoom ? 3.f : 1.5f : 1.f)*(d->boostmillis[B_RAGE] ? 1.33f : 1.f); }
 
     void shootgfx(const vec &from, const vec &to, gameent *d, int atk)
     {
@@ -242,17 +242,17 @@ namespace gfx
         switch(atk)
         {
             case ATK_PULSE_SHOOT:
-                particle_flare(muzzlepos, muzzlepos, 100, PART_MF_PLASMA, d->ragemillis || hasroids(d) ? 0xFF4444 : d->abilitymillis[game::ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF44FF : 0xFF7911, 2.f/adaptpartsize(d), d, champicolor());
+                particle_flare(muzzlepos, muzzlepos, 100, PART_MF_PLASMA, d->boostmillis[B_RAGE] || hasroids(d) ? 0xFF4444 : d->abilitymillis[game::ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF44FF : 0xFF7911, 2.f/adaptpartsize(d), d, champicolor());
                 adddynlight(muzzlepos, 100, vec(1.25f, 0.2f, 0.0f), 40, 2, lightflags, 100, vec(1.25f, 0.2f, 0.0f), d);
                 break;
             case ATK_SPOCKGUN_SHOOT:
-                particle_flare(muzzlepos, muzzlepos, 150, PART_MF_PLASMA, d->ragemillis || hasroids(d) ? 0xFF2222 : d->abilitymillis[game::ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0x22FF22, 1.5f/adaptpartsize(d), d, champicolor());
+                particle_flare(muzzlepos, muzzlepos, 150, PART_MF_PLASMA, d->boostmillis[B_RAGE] || hasroids(d) ? 0xFF2222 : d->abilitymillis[game::ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0x22FF22, 1.5f/adaptpartsize(d), d, champicolor());
                 adddynlight(muzzlepos, 75, vec(0.0f, 1.25f, 0.0f), 50, 2, lightflags, 75, vec(0.0f, 1.25f, 0.0f), d);
                 break;
             case ATK_RAIL_SHOOT:
                 loopi(2) particle_flare(muzzlepos, to, 50+rnd(50), PART_LIGHTNING, 0x8888FF, 1.5f+rnd(2), NULL, gfx::champicolor());
                 light_trail(muzzlepos, to, 60, 50+rnd(50), 10, vec(0.2f, 0.6f, 2.f));
-                particle_flare(muzzlepos, muzzlepos, 140, PART_MF_ELEC, d->ragemillis || hasroids(d) ? 0xFF2222 : d->abilitymillis[game::ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0x50CFFF, 4.f/adaptpartsize(d), d, champicolor());
+                particle_flare(muzzlepos, muzzlepos, 140, PART_MF_ELEC, d->boostmillis[B_RAGE] || hasroids(d) ? 0xFF2222 : d->abilitymillis[game::ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0x50CFFF, 4.f/adaptpartsize(d), d, champicolor());
                 adddynlight(muzzlepos, 100, vec(0.25f, 0.75f, 2.0f), 40, 2, lightflags, 0, vec(0.25f, 0.75f, 2.0f), d);
                 break;
             case ATK_SMAW_SHOOT:
@@ -272,7 +272,7 @@ namespace gfx
                 }
                 else
                 {
-                    particle_flare(muzzlepos, muzzlepos, 250, PART_MF_ROCKET, d->ragemillis || hasroids(d) ? 0xFF2222 : d->abilitymillis[game::ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFF7700, 3.5f/adaptpartsize(d), d, champicolor());
+                    particle_flare(muzzlepos, muzzlepos, 250, PART_MF_ROCKET, d->boostmillis[B_RAGE] || hasroids(d) ? 0xFF2222 : d->abilitymillis[game::ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFF7700, 3.5f/adaptpartsize(d), d, champicolor());
                     adddynlight(muzzlepos, 100, vec(1.25f, 0.75f, 0.3f), 75, 2, lightflags, 0, vec(1.25f, 0.75f, 0.3f), d);
                 }
                 break;
@@ -288,7 +288,7 @@ namespace gfx
                     particle_flying_flare(muzzlepos, dest, 100, PART_SPARK, 0xFF7700, rnd(3)/10.f + 0.1f, 100, 0, champicolor());
                     particle_flying_flare(muzzlepos, dest, 300, PART_SMOKE, atk==ATK_GAU8_SHOOT ? 0x282828 : 0x444444, 2.f, 500, 4, champicolor());
                 }
-                particle_flare(muzzlepos, muzzlepos, 100, PART_MF_BIG, d->ragemillis || hasroids(d) ? 0xFF2222 : d->abilitymillis[game::ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xCCAAAA, 3.5f/adaptpartsize(d), d, champicolor());
+                particle_flare(muzzlepos, muzzlepos, 100, PART_MF_BIG, d->boostmillis[B_RAGE] || hasroids(d) ? 0xFF2222 : d->abilitymillis[game::ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xCCAAAA, 3.5f/adaptpartsize(d), d, champicolor());
                 adddynlight(muzzlepos, atk==ATK_GAU8_SHOOT ? 125 : 75, vec(1.25f, 0.75f, 0.3f), 35, 2, lightflags, 0, vec(1.25f, 0.75f, 0.3f), d);
                 break;
         }

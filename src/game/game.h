@@ -110,7 +110,7 @@ enum { GUN_RAIL = 0, GUN_PULSE, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_M32, GU
        GUN_KAMIKAZE, GUN_ASSISTXPL, GUN_CACNINJA,
        NUMGUNS };
 enum { A_WOOD = 0, A_IRON, A_GOLD, A_MAGNET, A_ASSIST };
-enum { B_ROIDS = 0, B_SHROOMS, B_EPO, B_JOINT, NUMBOOSTS};
+enum { B_ROIDS = 0, B_SHROOMS, B_EPO, B_JOINT, B_RAGE, NUMBOOSTS};
 enum { ACT_IDLE = 0, ACT_SHOOT, NUMACTS };
 enum {  ATK_RAIL_SHOOT = 0, ATK_PULSE_SHOOT,
         ATK_SMAW_SHOOT, ATK_MINIGUN_SHOOT,
@@ -566,7 +566,7 @@ struct gamestate
 {
     int health, maxhealth, mana;
     int armour, armourtype;
-    int boostmillis[4], ragemillis, vampimillis;
+    int boostmillis[5], vampimillis;
     int abilitymillis[3], aptiseed;
     int gunselect, gunwait;
     int ammo[NUMGUNS];
@@ -679,8 +679,7 @@ struct gamestate
     {
         health = maxhealth;
         mana = 100;
-        loopi(4) boostmillis[i] = 0;
-        ragemillis = 0;
+        loopi(5) boostmillis[i] = 0;
         vampimillis = 0;
         gunwait = 0;
         loopi(3) abilitymillis[i] = 0;

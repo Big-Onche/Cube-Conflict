@@ -226,8 +226,8 @@ namespace game
                 else {gfx::champifov-=22.f/gfx::nbfps; if(gfx::champifov<-hudplayer()->boostmillis[B_SHROOMS]/1500) enlargefov = true;}
             }
 
-            float alphatex = hudplayer()->boostmillis[B_SHROOMS]>5000 ? 1 : hudplayer()->boostmillis[B_SHROOMS]/5000;
-            gle::colorf(alphatex, alphatex, alphatex, alphatex);
+            float col = hudplayer()->boostmillis[B_SHROOMS]>5000 ? 1 : hudplayer()->boostmillis[B_SHROOMS]/5000.f;
+            gle::colorf(col, col, col, col);
 
             settexture("media/interface/hud/fullscreen/shrooms.png");
             bgquad(0, 0, w, h);
@@ -237,10 +237,10 @@ namespace game
 
         if(ispaused()) return;
 
-        if(player1->ragemillis>0)
+        if(hudplayer()->boostmillis[B_RAGE])
         {
-            if(player1->ragemillis>1000) gle::colorf(1, 1, 1, 1);
-            else gle::colorf(player1->ragemillis/1000.0f, player1->ragemillis/1000.0f, player1->ragemillis/1000.0f, player1->ragemillis/1000.0f);
+            float col = hudplayer()->boostmillis[B_RAGE]>1000 ? 1 :  hudplayer()->boostmillis[B_RAGE]/1000.f;
+            gle::colorf(col, col, col, col);
 
             settexture("media/interface/hud/fullscreen/rage.png");
             bgquad(0, 0, w, h);
@@ -248,10 +248,10 @@ namespace game
             gle::colorf(1, 1, 1, 1);
         }
 
-        if(player1->vampimillis>0)
+        if(hudplayer()->vampimillis)
         {
-            if(player1->vampimillis>1000) gle::colorf(1, 1, 1, 1);
-            else gle::colorf(player1->vampimillis/1000.0f, player1->vampimillis/1000.0f, player1->vampimillis/1000.0f, player1->vampimillis/1000.0f);
+            float col = hudplayer()->vampimillis>1000 ? 1 : hudplayer()->vampimillis/1000.f;
+            gle::colorf(col, col, col, col);
 
             settexture("media/interface/hud/fullscreen/vampire.png");
             bgquad(0, 0, w, h);
@@ -353,11 +353,11 @@ namespace game
             }
         }
 
-        if(player1->ragemillis)                 {settexture("media/interface/hud/rage.png"); bgquad(15, h-260, 115, 115); decal_icon += 130;}
         if(hudplayer()->boostmillis[B_ROIDS])   {settexture("media/interface/hud/steros.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
         if(hudplayer()->boostmillis[B_EPO])     {settexture("media/interface/hud/epo.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
         if(hudplayer()->boostmillis[B_SHROOMS]) {settexture("media/interface/hud/champis.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
         if(hudplayer()->boostmillis[B_JOINT])   {settexture("media/interface/hud/joint.png"); bgquad(15, h-260-decal_icon, 115, 115);}
+        if(hudplayer()->boostmillis[B_RAGE])    {settexture("media/interface/hud/rage.png"); bgquad(15, h-260, 115, 115); decal_icon += 130;}
 
         float lxbarvide = 0.5f*(w - 966), lxbarpleine = 0.5f*(w - 954);
 
@@ -425,7 +425,6 @@ namespace game
            {draw_textf("%d", 135, h-233-decal_number, player1->aptitude==APT_KAMIKAZE ? (player1->abilitymillis[ABILITY_2]-1500)/1000 : player1->mana); decal_number +=130;}
 
         if(player1->crouching && player1->aptitude==APT_CAMPEUR) decal_number +=130;
-        if(player1->ragemillis) {draw_textf("%d", 135, h-233-decal_number, d->ragemillis/1000); decal_number +=130;}
 
         loopi(NUMBOOSTS) { if(hudplayer()->boostmillis[i]) { draw_textf("%d", 135, h-233-decal_number, hudplayer()->boostmillis[i]/1000); decal_number +=130; } }
 

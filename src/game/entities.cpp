@@ -383,11 +383,12 @@ namespace entities
             gfx::resetshroomsgfx();
             if(d==player1) conoutf(CON_GAMEINFO, GAME_LANG ? "\f8The mushrooms have been digested." : "\f8Les champignons sont digérés.");
         }
+
+        if(d->boostmillis[B_RAGE] && (d->boostmillis[B_RAGE] -= time)<=0) d->boostmillis[B_RAGE] = 0;
     }
 
     void checkaptiskill(int time, gameent *d)
     {
-        if(d->ragemillis && (d->ragemillis -= time)<=0) d->ragemillis = 0;
         if(d->vampimillis && (d->vampimillis -= time)<=0) d->vampimillis = 0;
         loopi(NUMABILITIES) { if(d->abilitymillis[i] && (d->abilitymillis[i] -= time)<=0) d->abilitymillis[i] = 0; }
         if(d==player1 && player1->aptitude==APT_SHOSHONE)
