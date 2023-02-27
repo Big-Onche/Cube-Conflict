@@ -554,7 +554,7 @@ namespace game
                 break;
 
             case APT_PRETRE:
-                if(d->abilitymillis[ABILITY_2] && d->aptitude==APT_PRETRE)
+                if(d->abilitymillis[ABILITY_2] && d->aptitude==APT_PRETRE && d->mana)
                 {
                     adddynlight(d->o, 25, vec(1.0f, 0.0f, 1.0f), 300, 50, L_NOSHADOW|L_VOLUMETRIC);
                     playsound(S_PRI_2_2, d!=player1 ? &d->o : NULL, NULL, 0, 0, 0, -1, 150, 300);

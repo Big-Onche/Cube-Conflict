@@ -2331,9 +2331,9 @@ namespace server
         //Absorptions et skills spéciaux d'aptitudes
         switch(target->aptitude)
         {
-            case APT_MAGICIEN: {if(ts.abilitymillis[game::ABILITY_3]) damage = damage/5.0f;} break;
-            case APT_VIKING: {if(actor!=target) {ts.boostmillis[B_RAGE]+=damage*5; sendresume(target);}} break; //Ajoute la rage au Vicking et l'envoie au client
-            case APT_PRETRE: { if(ts.abilitymillis[game::ABILITY_2] && ts.mana>0) {ts.mana -= damage/10; damage=0; {if(ts.mana<0)ts.mana=0;}; sendresume(target);} } break;
+            case APT_MAGICIEN: {if(ts.abilitymillis[game::ABILITY_3]) damage/=5.f; } break;
+            case APT_VIKING: {if(actor!=target) {ts.boostmillis[B_RAGE]+=damage*5; sendf(-1, 1, "ri3", N_VIKING, target->clientnum, ts.boostmillis[B_RAGE]);}} break;
+            case APT_PRETRE: {if(ts.abilitymillis[game::ABILITY_2] && ts.mana) {ts.mana -= damage/10; damage=0; {if(ts.mana<0)ts.mana=0;}; sendf(-1, 1, "ri3", N_PRIEST, target->clientnum, ts.mana);} } break;
             case APT_SHOSHONE:
             {
                 if(as.abilitymillis[game::ABILITY_1]) damage /= 1.3f;
@@ -2346,7 +2346,7 @@ namespace server
         if(target!=actor && !isteam(target->team, actor->team)) as.damage += damage;
 
         sendf(-1, 1, "ri7", N_DAMAGE, target->clientnum, actor->clientnum, damage, ts.armour, ts.health, atk);
-        if(actor->aptitude==APT_VAMPIRE && as.health<as.maxhealth && actor!=target) sendf(-1, 1, "ri5", N_VAMPIRE, actor->clientnum, damage, ts.armour, ts.health);
+        if(actor->aptitude==APT_VAMPIRE && as.health<as.maxhealth && actor!=target) sendf(-1, 1, "ri4", N_VAMPIRE, actor->clientnum, damage, ts.health);
 
         if(target->aptitude!=APT_AMERICAIN)
         {
@@ -2357,13 +2357,12 @@ namespace server
 
         if(ts.health<=0)
         {
-            if(actor->aptitude==APT_FAUCHEUSE && !isteam(target->team, actor->team)) //Augmente la santé maxi de la faucheuse si elle tue un joueur
+            if(actor->aptitude==APT_FAUCHEUSE && !isteam(target->team, actor->team)) // reaper's passive ability
             {
-                if(as.maxhealth >= 1500) as.health = min(as.health+300, as.maxhealth); //Rends juste de la santé si le boost est d�j� appliqu�
-                if(as.maxhealth < 1500) {as.maxhealth += 500; as.health += 500;} //Augmente la santé max à 150 PV si c'est le premier kill
-                sendresume(actor); //Envoie tout �a au client
+                if(as.maxhealth < 1500) {as.maxhealth += 500; as.health += 500;} // add health boost if first kill
+                else as.health = min(as.health+300, as.maxhealth); // otherwise just add health
+                sendf(-1, 1, "ri4", N_REAPER, actor->clientnum, as.health, as.maxhealth);
             }
-            else if (target->aptitude==APT_FAUCHEUSE && ts.maxhealth>=1500) { ts.maxhealth = 1000; sendresume(target); } //Si la faucheuse est tu� alors la sant� redevient normal + envoi au client
 
             target->state.deaths++;
             if(!isteam(target->team, actor->team))actor->state.killstreak++;
@@ -2409,7 +2408,7 @@ namespace server
         gamestate &as = actor->state;
         as.doregen(damage);
 
-        sendf(-1, 1, "ri5", N_VAMPIRE, actor->clientnum, damage, as.armour, as.health);
+        sendf(-1, 1, "ri4", N_VAMPIRE, actor->clientnum, damage, as.health);
     }
 
     void suicide(clientinfo *ci)

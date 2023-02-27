@@ -1826,15 +1826,43 @@ namespace game
             {
                 int acn = getint(p),
                     damage = getint(p),
-                    armour = getint(p),
                     health = getint(p);
                 gameent *actor = getclient(acn);
 
                 if(!actor) break;
-                actor->armour = armour;
                 actor->health = health;
-                if(actor->state == CS_ALIVE && actor != player1) actor->lastpain = lastmillis;
                 actor->vampimillis+=damage*1.5f;
+                break;
+            }
+
+            case N_REAPER:
+            {
+                int acn = getint(p),
+                    health = getint(p),
+                    maxhealth = getint(p);
+                gameent *actor = getclient(acn);
+
+                if(actor) { actor->health = health; actor->maxhealth = maxhealth; }
+                break;
+            }
+
+            case N_VIKING:
+            {
+                int tcn = getint(p),
+                    ragemillis = getint(p);
+                gameent *target = getclient(tcn);
+
+                if(target) target->boostmillis[B_RAGE] = ragemillis;
+                break;
+            }
+
+            case N_PRIEST:
+            {
+                int tcn = getint(p),
+                    mana = getint(p);
+                gameent *target = getclient(tcn);
+
+                if(target) target->mana = mana;
                 break;
             }
 

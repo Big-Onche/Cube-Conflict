@@ -327,7 +327,7 @@ enum
 {
     N_CONNECT = 0, N_SERVINFO, N_WELCOME, N_INITCLIENT, N_POS, N_TEXT, N_SOUND, N_CDIS,
     N_SHOOT, N_EXPLODE, N_SUICIDE,
-    N_DIED, N_DAMAGE, N_VAMPIRE, N_HITPUSH, N_SHOTFX, N_EXPLODEFX,
+    N_DIED, N_DAMAGE, N_VAMPIRE, N_REAPER, N_VIKING, N_PRIEST, N_HITPUSH, N_SHOTFX, N_EXPLODEFX,
     N_TRYSPAWN, N_SPAWNSTATE, N_SPAWN, N_FORCEDEATH,
     N_GUNSELECT, N_TAUNT,
     N_MAPCHANGE, N_MAPVOTE, N_TEAMINFO, N_ITEMSPAWN, N_ITEMPICKUP, N_ITEMACC, N_TELEPORT, N_JUMPPAD,
@@ -360,7 +360,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
 {
     N_CONNECT, 0, N_SERVINFO, 0, N_WELCOME, 1, N_INITCLIENT, 0, N_POS, 0, N_TEXT, 0, N_SOUND, 2, N_CDIS, 2,
     N_SHOOT, 0, N_EXPLODE, 0, N_SUICIDE, 1,
-    N_DIED, 7, N_DAMAGE, 6, N_VAMPIRE, 5, N_HITPUSH, 7, N_SHOTFX, 10, N_EXPLODEFX, 4,
+    N_DIED, 7, N_DAMAGE, 6, N_VAMPIRE, 4, N_REAPER, 4, N_VIKING, 3, N_PRIEST, 3, N_HITPUSH, 7, N_SHOTFX, 10, N_EXPLODEFX, 4,
     N_TRYSPAWN, 1, N_SPAWNSTATE, 0, N_SPAWN, 3, N_FORCEDEATH, 2,
     N_GUNSELECT, 2, N_TAUNT, 1,
     N_MAPCHANGE, 0, N_MAPVOTE, 0, N_TEAMINFO, 0, N_ITEMSPAWN, 2, N_ITEMPICKUP, 2, N_ITEMACC, 4,
@@ -677,7 +677,8 @@ struct gamestate
 
     void respawn()
     {
-        health = maxhealth;
+        health = 1000;
+        maxhealth = 1000;
         mana = 100;
         loopi(5) boostmillis[i] = 0;
         vampimillis = 0;
