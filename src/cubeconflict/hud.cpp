@@ -354,10 +354,10 @@ namespace game
         }
 
         if(hudplayer()->boostmillis[B_ROIDS])   {settexture("media/interface/hud/steros.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
-        if(hudplayer()->boostmillis[B_EPO])     {settexture("media/interface/hud/epo.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
         if(hudplayer()->boostmillis[B_SHROOMS]) {settexture("media/interface/hud/champis.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
-        if(hudplayer()->boostmillis[B_JOINT])   {settexture("media/interface/hud/joint.png"); bgquad(15, h-260-decal_icon, 115, 115);}
-        if(hudplayer()->boostmillis[B_RAGE])    {settexture("media/interface/hud/rage.png"); bgquad(15, h-260, 115, 115); decal_icon += 130;}
+        if(hudplayer()->boostmillis[B_EPO])     {settexture("media/interface/hud/epo.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
+        if(hudplayer()->boostmillis[B_JOINT])   {settexture("media/interface/hud/joint.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
+        if(hudplayer()->boostmillis[B_RAGE])    {settexture("media/interface/hud/rage.png"); bgquad(15, h-260-decal_icon, 115, 115);}
 
         float lxbarvide = 0.5f*(w - 966), lxbarpleine = 0.5f*(w - 954);
 
