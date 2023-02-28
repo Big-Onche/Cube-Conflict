@@ -1009,6 +1009,7 @@ namespace game
     enum abilities {ABILITY_1 = 0, ABILITY_2, ABILITY_3, NUMABILITIES};
     extern void aptitude(gameent *d, int skill, bool request = true);
     extern void updateabilities(gameent *d);
+    extern char *getdisguisement(int seed);
 
     // game
     extern int gamemode, cncurweapon, nextcnweapon;

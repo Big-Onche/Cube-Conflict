@@ -1172,7 +1172,6 @@ VAR(numcpus, 1, 1, 16);
 extern void changerlangue();
 
 VARFP(GAME_LANG, 0, 0, 1,
-    GAME_LANG ? execfile("config/astuces_EN.cfg") : execfile("config/astuces_FR.cfg");
     execfile("config/keymap.cfg");
     execfile("config/default_binds.cfg");
 );
@@ -1364,8 +1363,6 @@ int main(int argc, char **argv)
 
     if(newlang>-1) GAME_LANG = newlang;
     execfile("config/keymap.cfg");
-
-    GAME_LANG ? execfile("config/astuces_EN.cfg") : execfile("config/astuces_FR.cfg");
 
     execfile(game::autoexec(), false);
     execfile("config/ui/main.cfg");

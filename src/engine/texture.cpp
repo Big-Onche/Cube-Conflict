@@ -3301,7 +3301,6 @@ COMMAND(reloadtex, "s");
 
 void reloadtextures()
 {
-    int reloaded = 0;
     enumerate(textures, Texture, tex, {reloadtexture(tex);});
 }
 

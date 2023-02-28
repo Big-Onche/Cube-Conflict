@@ -2333,7 +2333,7 @@ namespace server
         {
             case APT_MAGICIEN: {if(ts.abilitymillis[game::ABILITY_3]) damage/=5.f; } break;
             case APT_VIKING: {if(actor!=target) {ts.boostmillis[B_RAGE]+=damage*5; sendf(-1, 1, "ri3", N_VIKING, target->clientnum, ts.boostmillis[B_RAGE]);}} break;
-            case APT_PRETRE: {if(ts.abilitymillis[game::ABILITY_2] && ts.mana) {ts.mana -= damage/10; damage=0; {if(ts.mana<0)ts.mana=0;}; sendf(-1, 1, "ri3", N_PRIEST, target->clientnum, ts.mana);} } break;
+            case APT_PRETRE: {if(ts.abilitymillis[game::ABILITY_2] && ts.mana) {ts.mana-=damage/10; damage=0; {if(ts.mana<0)ts.mana=0;}; sendf(-1, 1, "ri3", N_PRIEST, target->clientnum, ts.mana);} } break;
             case APT_SHOSHONE:
             {
                 if(as.abilitymillis[game::ABILITY_1]) damage /= 1.3f;
