@@ -391,7 +391,7 @@ void renderprogressview(int w, int h, float bar, const char *text, bool calc)   
         pushhudtranslate(bx+sw, by + (bh - FONTH*tsz)/2, tsz);
 
         texttimer += curtime;
-        if(texttimer>5000) {formatstring(loadingtext, "%s", getfancytext()); texttimer = 0;}
+        if(texttimer>6000) {formatstring(loadingtext, "%s", getfancytext()); texttimer = 0;}
 
         defformatstring(fancytext, "%.0f%% - %s...", loadprogress, loadingtext);
         draw_text(calc ? text : fancytext, 0, 0);

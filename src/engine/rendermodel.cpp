@@ -352,7 +352,7 @@ void mapmodel(char *name)
 
 void mapmodelreset(int *n)
 {
-    if(!(identflags&IDF_OVERRIDDEN) && !game::allowedittoggle(false)) return;
+    if(!(identflags&IDF_OVERRIDDEN) && !game::allowedittoggle()) return;
     mapmodels.shrink(clamp(*n, 0, mapmodels.length()));
 }
 
