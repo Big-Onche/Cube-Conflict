@@ -78,6 +78,11 @@ namespace entities
         }
     }
 
+    bool powerarmorpieces(int type, gameent *d)
+    {
+        return (d->armourtype==A_ASSIST && d->armour) && (type==I_BOUCLIERBOIS || type==I_BOUCLIERFER || type == I_BOUCLIERMAGNETIQUE || type==I_BOUCLIEROR);
+    }
+
     void renderentities()
     {
         loopv(ents)
@@ -94,13 +99,12 @@ namespace entities
                     if(!e.spawned() || e.type < I_RAIL || e.type > I_MANA) continue;
                     break;
             }
-            const char *mdlname = entmodel(e);
-            const char *secmdlname = e.type==I_BOUCLIERBOIS || e.type==I_BOUCLIERFER || e.type==I_BOUCLIEROR || e.type==I_BOUCLIERMAGNETIQUE ? "objets/piecerobotique" : entmodel(e);
+            const char *mdlname = powerarmorpieces(e.type, game::hudplayer()) ? "objets/piecerobotique" : entmodel(e);
             if(mdlname)
             {
                 vec p = e.o;
                 p.z += 1+sinf(lastmillis/100.0+e.o.x+e.o.y)/20;
-                rendermodel(game::player1->armourtype==A_ASSIST && game::player1->armour>0 ? secmdlname : mdlname, ANIM_MAPMODEL|ANIM_LOOP, p, lastmillis/(float)revs, 0, 0, MDL_CULL_VFC | MDL_CULL_EXTDIST | MDL_CULL_OCCLUDED | MDL_FORCESHADOW);
+                rendermodel(mdlname, ANIM_MAPMODEL|ANIM_LOOP, p, lastmillis/(float)revs, 0, 0, MDL_CULL_VFC | MDL_CULL_EXTDIST | MDL_CULL_OCCLUDED);
             }
         }
     }
@@ -122,10 +126,6 @@ namespace entities
 
     // these two functions are called when the server acknowledges that you really
     // picked up the item (in multiplayer someone may grab it before you).
-    bool powerarmorpieces(int type, gameent *d)
-    {
-        return (d->armourtype==A_ASSIST && d->armour) && (type==I_BOUCLIERBOIS || type==I_BOUCLIERFER || type == I_BOUCLIERMAGNETIQUE || type==I_BOUCLIEROR);
-    }
 
     void pickupeffects(int n, gameent *d, int rndsweap)
     {
