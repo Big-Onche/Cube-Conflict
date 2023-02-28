@@ -81,6 +81,16 @@ namespace game
     }
     ICOMMAND(aptitude, "i", (int *ability), abilitycmd(*ability));
 
+    char *getdisguisement(int seed) //spy's ability 2
+    {
+        defformatstring(alias, "disguise_%d", seed);
+        static char dir[64];
+        const char *name = getalias(alias);
+        if(seed<0 || seed>3) name = "mapmodel/caisses/caissebois";
+        formatstring(dir, "%s", name);
+        return dir;
+    }
+
     void updateabilities(gameent *d) //abilities rearming after cooldown
     {
         loopi(NUMABILITIES)
