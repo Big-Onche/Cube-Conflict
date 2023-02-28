@@ -2304,9 +2304,9 @@ namespace server
             {
                 switch(actor->aptitude)
                 {
-                    case APT_MEDECIN: return;
+                    case APT_MEDECIN: damage=0;
                     case APT_JUNKIE: damage/=1.5f;
-                    default: damage/=3;
+                    default: damage/=3.f;
                 }
             }
             else return;
@@ -2369,7 +2369,6 @@ namespace server
             target->state.killstreak = 0;
             int fragvalue = smode ? smode->fragvalue(target, actor, atk) : (target==actor || isteam(target->team, actor->team) ? atk==ATK_KAMIKAZE_SHOOT ? 0 : -1 : 1);
             actor->state.frags += fragvalue;
-            target->state.lastdeath = totalmillis;
 
             if(fragvalue>0)
             {
@@ -2381,7 +2380,6 @@ namespace server
             teaminfo *t = m_teammode && validteam(actor->team) ? &teaminfos[actor->team-1] : NULL;
             if(t) t->frags += fragvalue;
             sendf(-1, 1, "ri7", N_DIED, target->clientnum, actor->clientnum, actor->state.frags, actor->state.killstreak, t ? t->frags : 0, atk);
-
             target->position.setsize(0);
             if(smode) smode->died(target, actor);
             ts.state = CS_DEAD;
@@ -2401,8 +2399,8 @@ namespace server
     {
         if(actor==target || isteam(target->team, actor->team)) return;
 
-        damage = ((damage*100)/aptitudes[target->aptitude].apt_resistance)/2.0f;
-        if(target->state.abilitymillis[game::ABILITY_3] && target->aptitude==APT_MAGICIEN) damage /= 5.0f;
+        damage = ((damage*100)/aptitudes[target->aptitude].apt_resistance)/2.f;
+        if(target->state.abilitymillis[game::ABILITY_3] && target->aptitude==APT_MAGICIEN) damage /= 5.f;
         if(target->state.boostmillis[B_JOINT]) damage /= 1.25f;
 
         gamestate &as = actor->state;
@@ -2418,7 +2416,6 @@ namespace server
         int fragvalue = smode ? smode->fragvalue(ci, ci) : -1;
         ci->state.frags += fragvalue;
         ci->state.killstreak = 0;
-        ci->state.lastdeath = totalmillis;
         ci->state.deaths++;
         teaminfo *t = m_teammode && validteam(ci->team) ? &teaminfos[ci->team-1] : NULL;
         if(t) t->frags += fragvalue;
