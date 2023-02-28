@@ -262,3 +262,4 @@ int ipmask::print(char *buf) const
     if(!bits && range%8) buf += sprintf(buf, "/%d", range);
     return int(buf-start);
 }
+
