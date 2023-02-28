@@ -31,7 +31,7 @@ namespace game
     extern void connectattempt(const char *name, const char *password, const ENetAddress &address);
     extern void connectfail();
     extern void gameconnect(bool _remote);
-    extern bool allowedittoggle(bool msg = true);
+    extern bool allowedittoggle();
     extern void edittoggled(bool on);
     extern void writeclientinfo(stream *f);
     extern void toserver(char *text);

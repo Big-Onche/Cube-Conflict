@@ -1779,7 +1779,7 @@ namespace game
                 if(!s || !validatk(atk)) break;
                 int gun = attacks[atk].gun;
                 s->gunselect = gun;
-                s->ammo[gun] -= attacks[atk].use;
+                if(!m_muninfinie || atk==ATK_GAU8_SHOOT || atk==ATK_NUKE_SHOOT || atk==ATK_CAMPOUZE_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT) s->ammo[gun] -= attacks[atk].use;
                 s->gunwait = attacks[atk].attackdelay;
                 int prevaction = s->lastaction;
                 s->lastaction = lastmillis;

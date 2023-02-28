@@ -1434,25 +1434,7 @@ namespace game
             return;
         }
 
-        switch(atk)
-        {
-            case ATK_GAU8_SHOOT:
-            case ATK_NUKE_SHOOT:
-            case ATK_CAMPOUZE_SHOOT:
-            case ATK_ROQUETTES_SHOOT:
-            case ATK_KAMIKAZE_SHOOT:
-            case ATK_ASSISTXPL_SHOOT:
-                d->ammo[gun]--;
-                break;
-            case ATK_CAC349_SHOOT:
-            case ATK_CACMARTEAU_SHOOT:
-            case ATK_CACMASTER_SHOOT:
-            case ATK_CACFLEAU_SHOOT:
-            case ATK_CACNINJA_SHOOT:
-                break;
-            default:
-                if(!m_muninfinie) d->ammo[gun]--;
-        }
+        if(!m_muninfinie || atk==ATK_GAU8_SHOOT || atk==ATK_NUKE_SHOOT || atk==ATK_CAMPOUZE_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT) d->ammo[gun] -= attacks[atk].use;
 
         vec from = d->o, to = targ, dir = vec(to).sub(from).safenormalize();
         float dist = to.dist(from);
