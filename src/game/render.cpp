@@ -343,7 +343,7 @@ namespace game
             int vanim = ANIM_VWEP_IDLE|ANIM_LOOP, vtime = 0;
             if(lastaction && d->lastattack >= 0 && attacks[d->lastattack].gun==d->gunselect && lastmillis < lastaction+250)
             {
-                vanim = attacks[d->lastattack].vwepanim;
+                vanim = ANIM_VWEP_SHOOT;
                 vtime = lastaction;
             }
             a[ai++] = modelattach("tag_weapon", guns[d->gunselect].vwep , vanim, vtime);
@@ -767,7 +767,7 @@ namespace game
 
         if(d->lastaction && d->lastattack >= 0 && attacks[d->lastattack].gun==d->gunselect && lastmillis-d->lastaction<attacks[d->lastattack].attackdelay)
         {
-            anim = attacks[d->lastattack].hudanim;
+            anim = ANIM_GUN_SHOOT;
             basetime = d->lastaction;
         }
         drawhudmodel(d, anim, basetime);

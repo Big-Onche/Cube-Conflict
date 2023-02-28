@@ -246,7 +246,7 @@ namespace server
 
         void addevent(gameevent *e)
         {
-            if(state.state==CS_SPECTATOR || events.length()>200) delete e;
+            if(state.state==CS_SPECTATOR || events.length()>100) delete e;
             else events.add(e);
         }
 
@@ -920,7 +920,7 @@ namespace server
         int rndsweap = sents[i].type==I_SUPERARME ? rnd(4) : 0;
         if(!ci->local && !ci->state.canpickupitem(sents[i].type+rndsweap, ci->aptitude, ci->state.armourtype==A_ASSIST && ci->state.armour))
         {
-            sendf(ci->ownernum, 1, "ri4", N_ITEMACC, i, -1, rndsweap);
+            sendf(sender, 1, "ri4", N_ITEMACC, i, -1, rndsweap);
             return false;
         }
         sents[i].spawned = false;
@@ -1614,7 +1614,7 @@ namespace server
             // no overflow check
             case 4: return type;
         }
-        if(ci && ++ci->overflow >= 250) return -2;
+        if(ci && ++ci->overflow >= 200) return -2;
         return type;
     }
 
@@ -3482,10 +3482,10 @@ namespace server
             case N_SPAWN:
             {
                 int ls = getint(p), gunselect = getint(p);
-                if(!cq || (cq->state.state!=CS_ALIVE && cq->state.state!=CS_DEAD && cq->state.state!=CS_EDITING) || ls!=cq->state.lifesequence || cq->state.lastspawn<0 || !validgun(gunselect)) break;
+                if(!cq || (cq->state.state!=CS_ALIVE && cq->state.state!=CS_DEAD && cq->state.state!=CS_EDITING) || ls!=cq->state.lifesequence || cq->state.lastspawn<0) break;
                 cq->state.lastspawn = -1;
                 cq->state.state = CS_ALIVE;
-                cq->state.gunselect = gunselect;
+                cq->state.gunselect = validgun(gunselect) ? gunselect : GUN_RAIL;
                 cq->exceeded = 0;
                 if(smode) smode->spawned(cq);
                 QUEUE_AI;

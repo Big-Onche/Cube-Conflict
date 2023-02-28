@@ -705,7 +705,7 @@ namespace game
                     int vanim = ANIM_VWEP_IDLE|ANIM_LOOP, vtime = 0;
                     if(m.lastaction && m.lastattack >= 0 && attacks[m.lastattack].gun==m.gunselect && lastmillis < m.lastaction+250)
                     {
-                        vanim = attacks[m.lastattack].vwepanim;
+                        vanim = ANIM_VWEP_SHOOT;
                         vtime = m.lastaction;
                     }
 

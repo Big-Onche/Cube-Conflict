@@ -1202,7 +1202,7 @@ namespace ai
                 {
                     if((canshoot(d, atk, e) && hastarget(d, atk, b, e, yaw, pitch, dp.squaredist(ep))) || (d->aptitude==APT_PRETRE && d->abilitymillis[ABILITY_3]))
                     {
-                        d->attacking = attacks[atk].action;
+                        d->attacking = ACT_SHOOT;
                         d->ai->lastaction = lastmillis;
                         result = 3;
                     }
