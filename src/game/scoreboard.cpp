@@ -39,7 +39,7 @@ namespace game
             if(a->flags > b->flags) return true;
             if(a->flags < b->flags) return false;
         }
-            if(a->frags > b->frags) return true;
+        if(a->frags > b->frags) return true;
         if(a->frags < b->frags) return false;
         return strcmp(a->name, b->name) < 0;
     }
@@ -202,14 +202,14 @@ namespace game
     ICOMMAND(scoreboardmap, "", (),
     {
         const char *mname = getclientmap();
-        result(mname[0] ? mname : "[Nouvelle map]");
+        result(mname[0] ? mname : GAME_LANG ? "[New map]" : "[Nouvelle map]");
     });
 
     ICOMMAND(scoreboardtime, "", (),
     {
         if(m_timed && getclientmap() && (maplimit >= 0 || intermission))
         {
-            if(intermission) result("Fin de la partie");
+            if(intermission) result(GAME_LANG ? "Game over" : "Fin de la partie");
             else
             {
                 int secs = max(maplimit-lastmillis + 999, 0)/1000;
