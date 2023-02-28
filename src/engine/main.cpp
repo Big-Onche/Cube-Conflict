@@ -167,7 +167,7 @@ void bgquad(float x, float y, float w, float h, float tx, float ty, float tw, fl
 
 int parallaxX, parallaxY;
 string backgroundimg = "media/interface/background.png", backgroundname;
-bool needlogo = true;
+bool islaunching = true;
 
 void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, const char *mapname, const char *mapinfo, const char *astuce, bool force = false)
 {
@@ -196,7 +196,7 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
 
     if(mapshot || mapname)
     {
-        needlogo = false;
+        islaunching = false;
 
         float lh = 0.5f*min(w, h), lw = lh,
               lx = 0.5f*(w - lw), ly = 0.5f*(h - lh);
@@ -241,9 +241,9 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
     }
     else
     {
-        if(force) //CubeConflict
+        if(force)
         {
-            needlogo = false;
+            islaunching = false;
 
             float ilh = 1.1f*min(w, h), ilw = ilh*1.8f,
                   ilx = 0.5f*(w - ilw), ily = 0.5f*(h - ilh);
@@ -255,7 +255,7 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
         }
     }
 
-    if(needlogo)
+    if(islaunching)
     {
         float jlh = 0.5f*min(w, h), jlw = jlh,
               jlx = 0.5f*(w - jlw), jly = 0.5f*(h - jlh);
@@ -266,7 +266,7 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    if(!needlogo) gle::colorf(1, 1, 1, 1);
+    if(!islaunching) gle::colorf(1, 1, 1, 1);
     settexture("media/interface/shadow.png", 3);
     bgquad(0, 0, w, h);
 
@@ -316,16 +316,8 @@ void renderbackground(const char *caption, Texture *mapshot, const char *mapname
     renderedframe = false;
     copystring(backgroundcaption, caption ? caption : "");
     backgroundmapshot = mapshot;
-    if(mapinfo != backgroundmapinfo)
-    {
-        DELETEA(backgroundmapinfo);
-        if(mapinfo) backgroundmapinfo = newstring(mapinfo);
-    }
-    if(astuce != backgroundastuce)
-    {
-        DELETEA(backgroundastuce);
-        if(astuce) backgroundastuce = newstring(astuce);
-    }
+    if(mapinfo != backgroundmapinfo) { DELETEA(backgroundmapinfo); if(mapinfo) backgroundmapinfo = newstring(mapinfo); }
+    if(astuce != backgroundastuce) { DELETEA(backgroundastuce); if(astuce) backgroundastuce = newstring(astuce); }
     setbackgroundinfo(caption, mapshot, mapname, mapinfo);
 }
 
@@ -336,32 +328,25 @@ void restorebackground(int w, int h, bool force)
     renderbackgroundview(w, h, backgroundcaption[0] ? backgroundcaption : NULL, backgroundmapshot, backgroundmapname[0] ? backgroundmapname : NULL, backgroundmapinfo, backgroundastuce);
 }
 
-float loadprogress = 0;
-int nbtexte = rnd(13);
-int textetimer, pointstimer = 0;
+vector<char *> fancytexts_en; vector<char *> fancytexts_fr;
+ICOMMAND(loadingtext, "ss", (char *fancytext_en, char *fancytext_fr), { fancytexts_en.add(newstring(fancytext_en)); fancytexts_fr.add(newstring(fancytext_fr)); });
 
-static const struct loadingtextinfo { const char *loadingtext_FR, *loadingtext_EN; } loadingtext[] =
+const char *getfancytext()
 {
-    {"élaboration de théories complotistes",                     "sharing conspiracy theories"},
-    {"remise des lunettes rondes aux golems",                    "putting five FFP2 masks on soyjak"},
-    {"invocation du Gigachad",                                   "summoning Gigachad"},
-    {"mise en place du crédit social",                           "setting social credit"},
-    {"swatting des streamers",                                   "swatting streamers"},
-    {"minage de bitcoins",                                       "mining some bitcoins"},
-    {"mise en place des bons pixels aux bons endroits",          "putting the right pixels in the right places"},
-    {"chargement des textures (non je déconne il n'y en a pas)", "loading textures (just kidding, there are no textures)"},
-    {"truquage des élections présidentielles",                   "rigging presidential elections"},
-    {"augmentation des dégâts des armes cheatées",               "buffing the most powerful weapons"},
-    {"réduction des dégâts des armes les plus nulles",           "nerfing the most pointless weapons"},
-    {"injection de la 5ème dose de rappel",                      "injection of the fifth booster dose"},
-    {"ERREUR 410 :D",                                            "Connection lost | Please wait - attempting to reestablish"},
-    {"réglage du chauffage à 19° (pas plus)",                    "saving the planet by firing carbon neutral rockets"},
-    {"corruption de votre sauvegarde",                           "deleting your saved game"},
-};
+    static char text[1000];
+    text[0] = '\0';
+    if(!fancytexts_en.empty() && !fancytexts_fr.empty()) strcat(text, GAME_LANG ? fancytexts_en[rnd(fancytexts_en.length())] : fancytexts_fr[rnd(fancytexts_fr.length())] );
+    return text;
+}
+
+float loadprogress = 0;
+bool changedtext = false;
+string loadingtext = "";
+int texttimer;
 
 void renderprogressview(int w, int h, float bar, const char *text, bool calc)   // also used during loading
 {
-    if(needlogo) return;
+    if(islaunching) { formatstring(loadingtext, "%s", getfancytext()); return; }
     if(!calc) bar = loadprogress/100.f;
 
     hudmatrix.ortho(0, w, h, 0, -1, 1);
@@ -405,11 +390,10 @@ void renderprogressview(int w, int h, float bar, const char *text, bool calc)   
 
         pushhudtranslate(bx+sw, by + (bh - FONTH*tsz)/2, tsz);
 
-        textetimer += curtime;
+        texttimer += curtime;
+        if(texttimer>5000) {formatstring(loadingtext, "%s", getfancytext()); texttimer = 0;}
 
-        if(textetimer>10000) {nbtexte = rnd(15); textetimer = 0;}
-
-        defformatstring(fancytext, "%.0f%% - %s...", loadprogress, GAME_LANG ? loadingtext[nbtexte].loadingtext_EN : loadingtext[nbtexte].loadingtext_FR);
+        defformatstring(fancytext, "%.0f%% - %s...", loadprogress, loadingtext);
         draw_text(calc ? text : fancytext, 0, 0);
         pophudmatrix();
     }
@@ -1407,8 +1391,6 @@ int main(int argc, char **argv)
 
     inputgrab(grabinput = true);
     ignoremousemotion();
-
-    nbtexte = rnd(8);
 
     for(;;)
     {

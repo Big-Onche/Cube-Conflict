@@ -692,7 +692,7 @@ bool save_world(const char *mname, bool nolms)
 }
 
 vector<char *> tips_en; vector<char *> tips_fr;
-ICOMMAND(tip, "ss", (char *tip_en, char *tip_fr), { tips_en.add(newstring(tip_en)); tips_fr.add(newstring(tip_fr));});
+ICOMMAND(tip, "ss", (char *tip_en, char *tip_fr), { tips_en.add(newstring(tip_en)); tips_fr.add(newstring(tip_fr)); });
 
 const char *gettip()
 {
