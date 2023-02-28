@@ -572,7 +572,7 @@ struct gamestate
     int ammo[NUMGUNS];
     int aitype, skill;
 
-    gamestate() : maxhealth(1), aitype(AI_NONE), skill(0) {}
+    gamestate() : maxhealth(1000), aitype(AI_NONE), skill(0) {}
 
     void baseammo(int gun, int k = 2)
     {
