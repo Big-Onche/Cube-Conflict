@@ -39,14 +39,12 @@
         putint(q, ci->ping);
         sendstring(ci->name, q);
         sendstring(GAME_LANG ? teamname_EN(m_teammode ? ci->team : 0) : teamname_FR(m_teammode ? ci->team : 0), q);
-        putint(q, ci->state.killstreak);
         putint(q, ci->state.frags);
         putint(q, ci->state.flags);
         putint(q, ci->state.deaths);
         putint(q, ci->state.teamkills);
         putint(q, ci->state.damage*100/max(ci->state.shotdamage,1));
         putint(q, ci->state.health);
-        putint(q, ci->state.mana);
         putint(q, ci->state.armour);
         putint(q, ci->state.gunselect);
         putint(q, ci->privilege);

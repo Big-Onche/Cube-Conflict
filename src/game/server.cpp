@@ -2482,7 +2482,7 @@ namespace server
             if(damage > 0)
             {
                 dodamage(target, ci, max(int(damage), 1), atk, h.dir);
-                if(ci->aptitude==4) doregen(target, ci, damage, atk, h.dir);
+                if(ci->aptitude==APT_VAMPIRE) doregen(target, ci, damage, atk, h.dir);
             }
         }
     }
@@ -2499,7 +2499,6 @@ namespace server
            !validatk(atk))
             return;
         int gun = attacks[atk].gun;
-
         if(gs.ammo[gun]<=0 || (attacks[atk].range && from.dist(to) > attacks[atk].range + 1))
             return;
 

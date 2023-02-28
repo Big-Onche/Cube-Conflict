@@ -232,7 +232,8 @@ namespace game
     {
         int num = isdigit(team[0]) ? parseint(team) : teamnumber(team);
         if(!validteam(num)) return;
-        addmsg(N_SWITCHTEAM, "ri", num);
+        if(player1->clientnum < 0) player1->team = num;
+        else addmsg(N_SWITCHTEAM, "ri", num);
     }
     void printteam()
     {
@@ -373,8 +374,7 @@ namespace game
     ICOMMAND(getclientcolorname, "i", (int *cn),
     {
         gameent *d = getclient(*cn);
-        defformatstring(pseudo_aptitude, "%s", colorname(d));
-        if(d) result(pseudo_aptitude);
+        if(d) result(colorname(d));
     });
 
     int getclientteam(int cn)
@@ -481,7 +481,6 @@ namespace game
     ICOMMAND(isai, "ii", (int *cn, int *type), intret(isai(*cn, *type) ? 1 : 0));
 
     VARP(playersearch, 0, 3, 10);
-
     int parseplayer(const char *arg)
     {
         char *end;
@@ -694,7 +693,6 @@ namespace game
         nextmode = mode;
         intret(1);
     }
-
     ICOMMAND(mode, "i", (int *val), setmode(*val));
     ICOMMAND(getmode, "", (), intret(gamemode));
     ICOMMAND(getnextmode, "", (), intret(m_valid(nextmode) ? nextmode : (remote ? 1 : 0)));
@@ -707,13 +705,6 @@ namespace game
         else intret(val);
     });
     ICOMMAND(intermission, "", (), intret(intermission ? 1 : 0));
-
-    ICOMMANDS("m_ctf", "i", (int *mode), { int gamemode = *mode; intret(m_ctf); });
-    ICOMMANDS("m_teammode", "i", (int *mode), { int gamemode = *mode; intret(m_teammode); });
-    ICOMMANDS("m_demo", "i", (int *mode), { int gamemode = *mode; intret(m_demo); });
-    ICOMMANDS("m_edit", "i", (int *mode), { int gamemode = *mode; intret(m_edit); });
-    ICOMMANDS("m_lobby", "i", (int *mode), { int gamemode = *mode; intret(m_lobby); });
-    ICOMMANDS("m_timed", "i", (int *mode), { int gamemode = *mode; intret(m_timed); });
 
     void changemap(const char *name, int mode) // request map change, server may ignore
     {
