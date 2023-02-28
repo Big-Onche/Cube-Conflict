@@ -568,7 +568,7 @@ namespace game
             else if(d->armour>0 && actor->gunselect!=GUN_LANCEFLAMMES) playsound(S_IMPACTWOOD+d->armourtype, d==h ? NULL : &d->o, 0, 0, 0 , 100, -1, 200);
         }
 
-        damageeffect(damage, d, actor, d!=h, atk);
+        damageeffect(damage, d, actor, atk);
 
         ai::damaged(d, actor);
 

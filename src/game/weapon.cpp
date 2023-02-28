@@ -485,7 +485,7 @@ namespace game
         newbouncer(p, to, true, 0, d, type, lifetime, rnd(100)+20);
     }
 
-    void damageeffect(int damage, gameent *d, gameent *actor, bool thirdperson, int atk)
+    void damageeffect(int damage, gameent *d, gameent *actor, int atk)
     {
         vec p = d->o;
         p.z += 0.6f*(d->eyeheight + d->aboveeye) - d->eyeheight;
@@ -616,9 +616,11 @@ namespace game
         {
             if(f==player1)
             {
-                if(player1->aptitude==APT_VIKING) player1->boostmillis[B_RAGE]+=damage*5;
                 if(player1->boostmillis[B_JOINT]) damage/=(player1->aptitude==APT_JUNKIE ? 1.875f : 1.25f);
+                if(player1->aptitude==APT_VIKING) player1->boostmillis[B_RAGE]+=damage*5;
+                else if(player1->aptitude==APT_PRETRE && player1->abilitymillis[ABILITY_2] && player1->mana) {player1->mana-=damage/10; damage=0; if(player1->mana<0)player1->mana=0;}
                 damage = (damage/aptitudes[player1->aptitude].apt_resistance)*(m_dmsp ? 15.f : 100);
+                damageeffect(damage, f, at, atk);
                 damaged(damage, f, at, true, atk);
                 f->hitpush(damage, vel, at, atk, f);
             }
@@ -648,7 +650,7 @@ namespace game
 
             if(at==player1)
             {
-                damageeffect(damage, f, at, true, atk);
+                damageeffect(damage, f, at, atk);
                 if(f==player1)
                 {
                     damageblend(damage);

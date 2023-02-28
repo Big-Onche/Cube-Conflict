@@ -405,7 +405,7 @@ namespace game
                 monsterhurt = true;
                 monsterhurtpos = o;
             }
-            damageeffect(damage, this, d, false, atk);
+            damageeffect(damage, this, d, atk);
             if((health -= damage)<=0)
             {
                 state = CS_DEAD;
