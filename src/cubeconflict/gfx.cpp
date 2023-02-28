@@ -320,14 +320,4 @@ namespace gfx
         else if(armourtype!=A_ASSIST) sprintf(dir, "%s%s%d", hud ? "hudshield/" : "shields/", armours[armourtype].armournames, preload ? armourval : armourvaldir);
         return dir;
     }
-
-    char *getdisguisement(int seed)
-    {
-        defformatstring(alias, "disguise_%d", seed);
-        static char dir[64];
-        const char *name = getalias(alias);
-        if(seed<0 || seed>3) name = "mapmodel/caisses/caissebois";
-        formatstring(dir, "%s", name);
-        return dir;
-    }
 }

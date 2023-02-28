@@ -234,7 +234,7 @@ namespace game
 
         loopi(13) preloadmodel(customstombes[i].tombedir); //Preloading all graves
 
-        loopi(4) gfx::getdisguisement(i); //Preloading all spy's disguisement
+        loopi(4) getdisguisement(i); //Preloading all spy's disguisement
 
         preloadmodel("smileys/armureassistee"); //Preloading powered armor playermodel
         preloadmodel("smileys/armureassistee/red");
@@ -429,7 +429,7 @@ namespace game
 
         if(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2])
         {
-            rendermodel(gfx::getdisguisement(d->aptiseed), anim, o, yaw, d->pitch>12 ? 12 : d->pitch<-25 ? -25 : pitch, 0, flags, d, NULL, basetime, 0, fade, vec4(vec::hexcolor(color), 1.0f));
+            rendermodel(getdisguisement(d->aptiseed), anim, o, yaw, d->pitch>12 ? 12 : d->pitch<-25 ? -25 : pitch, 0, flags, d, NULL, basetime, 0, fade, vec4(vec::hexcolor(color), 1.0f));
             return;
         }
 
