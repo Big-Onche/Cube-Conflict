@@ -1176,11 +1176,7 @@ namespace game
     extern void removegroupedplayer(gameent *d);
 
     // render
-    struct playermodelinfo
-    {
-        const char *model[1+MAXTEAMS], *hudgun;
-        bool ragdoll;
-    };
+    struct playermodelinfo { const char *model[MAXTEAMS]; };
 
     extern void savetombe(gameent *d);
     extern void clearragdolls();
