@@ -916,8 +916,13 @@ namespace server
     {
         if((m_timed && gamemillis>=gamelimit) || !sents.inrange(i) || !sents[i].spawned) return false;
         clientinfo *ci = getinfo(sender);
+        if(!ci) return false;
         int rndsweap = sents[i].type==I_SUPERARME ? rnd(4) : 0;
-        if(!ci || (!ci->local && !ci->state.canpickupitem(sents[i].type+rndsweap, ci->aptitude, ci->state.armourtype==A_ASSIST && ci->state.armour))) return false;
+        if(!ci->local && !ci->state.canpickupitem(sents[i].type+rndsweap, ci->aptitude, ci->state.armourtype==A_ASSIST && ci->state.armour))
+        {
+            sendf(ci->ownernum, 1, "ri3", N_ITEMACC, i, -1);
+            return false;
+        }
         sents[i].spawned = false;
         sents[i].spawntime = spawntime(sents[i].type);
         sendf(-1, 1, "ri4", N_ITEMACC, i, sender, rndsweap);
@@ -1983,7 +1988,6 @@ namespace server
             putint(p, -1);
             welcomeinitclient(p, ci ? ci->clientnum : -1);
         }
-
         if(smode) smode->initclient(ci, p, true);
         return 1;
     }
@@ -2349,7 +2353,6 @@ namespace server
             sendf(ts.health<=0 ? -1 : target->ownernum, 1, "ri7", N_HITPUSH, target->clientnum, atk, damage, v.x, v.y, v.z);
             target->setpushed();
         }
-
         if(ts.health<=0)
         {
             if(actor->aptitude==APT_FAUCHEUSE && !isteam(target->team, actor->team)) // reaper's passive ability
@@ -2364,7 +2367,6 @@ namespace server
             target->state.killstreak = 0;
             int fragvalue = smode ? smode->fragvalue(target, actor, atk) : (target==actor || isteam(target->team, actor->team) ? atk==ATK_KAMIKAZE_SHOOT ? 0 : -1 : 1);
             actor->state.frags += fragvalue;
-
             if(fragvalue>0)
             {
                 int friends = 0, enemies = 0; // note: friends also includes the fragger
@@ -2414,7 +2416,7 @@ namespace server
         ci->state.deaths++;
         teaminfo *t = m_teammode && validteam(ci->team) ? &teaminfos[ci->team-1] : NULL;
         if(t) t->frags += fragvalue;
-        sendf(-1, 1, "ri7", N_DIED, ci->clientnum, ci->clientnum, gs.frags, gs.killstreak, t ? t->frags : 0, -1);
+        sendf(-1, 1, "ri7", N_DIED, ci->clientnum, ci->clientnum, gs.frags, gs.killstreak, t ? t->frags : 0, 0);
         ci->position.setsize(0);
         if(smode) smode->died(ci, NULL);
         gs.state = CS_DEAD;
@@ -3434,8 +3436,8 @@ namespace server
                 {
                     ci->mapcrc = -1;
                     checkmaps();
-                    //if(ci == cq) { if(ci->state.state != CS_DEAD) break; }
-                    //else if(cq->ownernum != ci->clientnum) { cq = NULL; break; }
+                    if(ci == cq) { if(ci->state.state != CS_DEAD) break; }
+                    else if(cq->ownernum != ci->clientnum) { cq = NULL; break; }
                 }
                 if(cq->state.deadflush)
                 {
@@ -3459,10 +3461,10 @@ namespace server
             case N_SPAWN:
             {
                 int ls = getint(p), gunselect = getint(p);
-                if(!cq || (cq->state.state!=CS_ALIVE && cq->state.state!=CS_DEAD && cq->state.state!=CS_EDITING) || ls!=cq->state.lifesequence || cq->state.lastspawn<0) break;
+                if(!cq || (cq->state.state!=CS_ALIVE && cq->state.state!=CS_DEAD && cq->state.state!=CS_EDITING) || ls!=cq->state.lifesequence || cq->state.lastspawn<0 || !validgun(gunselect)) break;
                 cq->state.lastspawn = -1;
                 cq->state.state = CS_ALIVE;
-                cq->state.gunselect = validgun(gunselect) ? gunselect : GUN_RAIL;
+                cq->state.gunselect = gunselect;
                 cq->exceeded = 0;
                 if(smode) smode->spawned(cq);
                 QUEUE_AI;
@@ -4070,7 +4072,7 @@ namespace server
 
     int laninfoport() { return CC_LANINFO_PORT; }
     int serverport() { return CC_SERVER_PORT; }
-    const char *defaultmaster() { return "master.cubeconflict.com"; }
+    const char *defaultmaster() { return "master.cube-conflict.com"; }
     int masterport() { return CC_MASTER_PORT; }
     int numchannels() { return 3; }
 

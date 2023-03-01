@@ -622,7 +622,7 @@ namespace game
                 damage = (damage/aptitudes[player1->aptitude].apt_resistance)*(m_dmsp ? 15.f : 100);
                 damageeffect(damage, f, at, atk);
                 damaged(damage, f, at, true, atk);
-                f->hitpush(damage, vel, at, atk, f);
+                f->hitphyspush(damage, vel, at, atk, f);
             }
             else if(at==player1)
             {
@@ -637,7 +637,7 @@ namespace game
             }
         }
 
-        if(!m_mp(gamemode) || f==at) f->hitpush(damage, vel, at, atk, f);
+        if(!m_mp(gamemode) || f==at) f->hitphyspush(damage, vel, at, atk, f);
         if(!m_mp(gamemode)) damaged(damage, f, at, false, atk);
         else
         {

@@ -1758,7 +1758,7 @@ namespace game
                 else findplayerspawn(s, -1, m_teammode && !m_capture ? s->team : 0);
                 if(s == player1)
                 {
-                    if(player1->aptitude==APT_SOLDAT && (player1->ammo[GUN_S_NUKE]>0 || player1->ammo[GUN_S_GAU8]>0 || player1->ammo[GUN_S_ROQUETTES]>0 || player1->ammo[GUN_S_CAMPOUZE]>0)) unlockachievement(ACH_CHANCE);
+                    if(player1->aptitude==APT_SOLDAT && (player1->ammo[GUN_S_NUKE] || player1->ammo[GUN_S_GAU8] || player1->ammo[GUN_S_ROQUETTES] || player1->ammo[GUN_S_CAMPOUZE]>0)) unlockachievement(ACH_CHANCE);
                     showscores(false);
                     lasthit = 0;
                 }
@@ -1871,7 +1871,7 @@ namespace game
                 vec dir;
                 loopk(3) dir[k] = getint(p)/DNF;
                 if(!target || !validatk(atk)) break;
-                target->hitpush(damage * (target->health<=0 ? deadpush : 1), dir, NULL, atk, target);
+                target->hitphyspush(damage * (target->health<=0 ? deadpush : 1), dir, NULL, atk, target);
                 break;
             }
 
