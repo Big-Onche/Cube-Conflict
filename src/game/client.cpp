@@ -1628,6 +1628,8 @@ namespace game
                 int player = getint(p);
                 gameent *pl = getclient(player);
                 int ability = getint(p);
+
+                if(!pl) break;
                 pl->abilitymillis[ability] = getint(p);
                 pl->mana-=aptitudes[pl->aptitude].abilities[ability].manacost;
                 aptitude(pl, ability, false);
@@ -1758,7 +1760,7 @@ namespace game
                 else findplayerspawn(s, -1, m_teammode && !m_capture ? s->team : 0);
                 if(s == player1)
                 {
-                    if(player1->aptitude==APT_SOLDAT && (player1->ammo[GUN_S_NUKE] || player1->ammo[GUN_S_GAU8] || player1->ammo[GUN_S_ROQUETTES] || player1->ammo[GUN_S_CAMPOUZE]>0)) unlockachievement(ACH_CHANCE);
+                    if(player1->aptitude==APT_SOLDAT && (player1->ammo[GUN_S_NUKE] || player1->ammo[GUN_S_GAU8] || player1->ammo[GUN_S_ROQUETTES] || player1->ammo[GUN_S_CAMPOUZE])) unlockachievement(ACH_CHANCE);
                     showscores(false);
                     lasthit = 0;
                 }
@@ -1884,7 +1886,7 @@ namespace game
                 actor->frags = frags;
                 actor->killstreak = killstreak;
                 if(m_teammode) setteaminfo(actor->team, tfrags);
-                if(victim) break;
+                if(!victim) break;
                 victim->killstreak = 0;
                 killed(victim, actor, atk);
                 break;

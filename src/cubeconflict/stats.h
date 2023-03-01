@@ -89,7 +89,7 @@ static const struct achinfo { const char *achname, *achnicenameFR, *achnicenameE
     //Steam name          //French name                  //English name
     {"ACH_TRIPLETTE",     "Triple menace",               "Triple threat"},
     {"ACH_PENTAPLETTE",   "Terreur",                     "Terror"},
-    {"ACH_DECAPLETTE",    "Invincible !",                "Invincible !"},
+    {"ACH_DECAPLETTE",    "Invincible !",                "Invincible!"},
     {"ACH_ATOME",         "La puissance de l'atome",     "The power of the atom"},
     {"ACH_WINNER",        "Winner",                      "Winner"},
     {"ACH_ENVOL",         "Envol pour le paradis",       "Fly like an eagle"},
