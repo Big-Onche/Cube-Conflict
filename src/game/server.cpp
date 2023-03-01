@@ -920,7 +920,7 @@ namespace server
         int rndsweap = sents[i].type==I_SUPERARME ? rnd(4) : 0;
         if(!ci->local && !ci->state.canpickupitem(sents[i].type+rndsweap, ci->aptitude, ci->state.armourtype==A_ASSIST && ci->state.armour))
         {
-            sendf(ci->ownernum, 1, "ri3", N_ITEMACC, i, -1);
+            sendf(ci->ownernum, 1, "ri4", N_ITEMACC, i, -1, rndsweap);
             return false;
         }
         sents[i].spawned = false;
@@ -2669,7 +2669,7 @@ namespace server
                             if((giver.state.o.dist(receiver.state.o)/18.f < 7.5f && receiver.state.health < receiver.state.maxhealth+250 && giver.state.state==CS_ALIVE && receiver.state.state==CS_ALIVE) && (m_teammode ? isteam(receiver.team, giver.team) : giver.clientnum==receiver.clientnum))
                             {
                                 receiver.state.health = min(receiver.state.health + 100, receiver.state.maxhealth + 250);
-                                loopv(clients) sendf(clients[i]->clientnum, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, 0, receiver.state.health);
+                                sendf(-1, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, 0, receiver.state.health);
                             }
                         }
                         break;
@@ -2680,12 +2680,12 @@ namespace server
                                 if(receiver.aptitude==APT_VAMPIRE && receiver.state.health < receiver.state.maxhealth+250)
                                 {
                                     receiver.state.health = min(receiver.state.health + 100, receiver.state.maxhealth + 250);
-                                    loopv(clients) sendf(clients[i]->clientnum, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, 0, receiver.state.health); //vampire gets health instead of mana
+                                    sendf(-1, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, 0, receiver.state.health); //vampire gets health instead of mana
                                 }
                                 else if(receiver.aptitude!=APT_VAMPIRE) //other classes needing mana : receive mana
                                 {
                                     receiver.state.mana = min(receiver.state.mana + 10, 150);
-                                    loopv(clients) sendf(clients[i]->clientnum, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum,  1, receiver.state.mana);
+                                    sendf(-1, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum,  1, receiver.state.mana);
                                 }
                             }
                         }
@@ -3636,7 +3636,6 @@ namespace server
             case N_REQABILITY:
             {
                 int ability = getint(p);
-                if(!cq) break;
 
                 if(cq->state.mana < aptitudes[cq->aptitude].abilities[ability].manacost) return;
                 cq->state.mana -= aptitudes[cq->aptitude].abilities[ability].manacost;

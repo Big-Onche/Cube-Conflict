@@ -1185,7 +1185,7 @@ namespace game
             messagereliable = false;
             messagecn = -1;
         }
-        if(totalmillis-lastping>250)
+        if(totalmillis-lastping>500)
         {
             putint(p, N_PING);
             putint(p, totalmillis);
@@ -1883,14 +1883,9 @@ namespace game
                 if(!actor) break;
                 actor->frags = frags;
                 actor->killstreak = killstreak;
-                victim->killstreak = 0;
                 if(m_teammode) setteaminfo(actor->team, tfrags);
-#if 0
-                extern int hidefrags;
-                if(actor!=player1 && (!cmode || !cmode->hidefrags() || !hidefrags))
-                    particle_textcopy(actor->abovehead(), tempformatstring("%d", actor->frags), PART_TEXT, 2000, 0x32FF64, 4.0f, -8);
-#endif
-                if(!victim) break;
+                if(victim) break;
+                victim->killstreak = 0;
                 killed(victim, actor, atk);
                 break;
             }
@@ -1963,6 +1958,7 @@ namespace game
                 if(d) unpackeditinfo(d->edit, q.buf, q.maxlen, unpacklen);
                 break;
             }
+
             case N_UNDO:
             case N_REDO:
             {
