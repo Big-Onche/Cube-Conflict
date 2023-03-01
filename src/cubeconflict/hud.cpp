@@ -55,7 +55,7 @@ namespace game
             {
                 formatstring(msg, GAME_LANG ? "\fcThe game is about to begin" : "\fcLa partie va commencer !");
                 rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/23;
-                formatstring(msg, GAME_LANG ? "\fdThe game mode is: %s" : "\fdLe mode de jeu est : %s", server::modeprettyname(gamemode));
+                formatstring(msg, GAME_LANG ? "\fdThe game mode is: %s" : "\fdLe mode de jeu est : %s", server::modename(gamemode));
                 rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/23;
             }
             else if(premission)

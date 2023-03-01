@@ -666,7 +666,7 @@ namespace game
     {
         if(multiplayer(false) && !m_mp(mode))
         {
-            conoutf(CON_ERROR, "mode %s (%d) not supported in multiplayer", server::modeprettyname(gamemode), gamemode);
+            conoutf(CON_ERROR, "mode %s (%d) not supported in multiplayer", server::modename(gamemode), gamemode);
             loopi(NUMGAMEMODES) if(m_mp(STARTGAMEMODE + i)) { mode = STARTGAMEMODE + i; break; }
         }
 
@@ -686,7 +686,7 @@ namespace game
     {
         if(multiplayer(false) && !m_mp(mode))
         {
-            conoutf(CON_ERROR, "mode %s (%d) not supported in multiplayer",  server::modeprettyname(mode), mode);
+            conoutf(CON_ERROR, "mode %s (%d) not supported in multiplayer",  server::modename(mode), mode);
             intret(0);
             return;
         }
@@ -697,7 +697,6 @@ namespace game
     ICOMMAND(getmode, "", (), intret(gamemode));
     ICOMMAND(getnextmode, "", (), intret(m_valid(nextmode) ? nextmode : (remote ? 1 : 0)));
     ICOMMAND(getmodename, "i", (int *mode), result(server::modename(*mode, "")));
-    ICOMMAND(getmodeprettyname, "i", (int *mode), result(server::modeprettyname(*mode, "")));
     ICOMMAND(timeremaining, "i", (int *formatted),
     {
         int val = max(maplimit - lastmillis + 999, 0)/1000;
@@ -1568,7 +1567,7 @@ namespace game
                 }
                 else                    // new client
                 {
-                     conoutf("\f7%s\f4 vient de rejoindre la partie", colorname(d, text));
+                    conoutf("\f7%s\f4 vient de rejoindre la partie", colorname(d, text));
                     if(needclipboard >= 0) needclipboard++;
                 }
                 copystring(d->name, text, MAXNAMELEN+1);
@@ -1647,6 +1646,8 @@ namespace game
                 int stat = getint(p); //0 = health, 1 = mana
 
                 stat ? r->mana = getint(p) : r->health = getint(p);
+
+                if(!giver || !receiver) break;
 
                 if(!stat && r->clientnum == g->clientnum) regularflame(PART_HEALTH, r->o, 15, 2, 0xFFFFFF, 1, 1.f);
                 else
@@ -1798,6 +1799,7 @@ namespace game
                 explodeeffects(atk, e, false, id);
                 break;
             }
+
             case N_DAMAGE:
             {
                 int tcn = getint(p),

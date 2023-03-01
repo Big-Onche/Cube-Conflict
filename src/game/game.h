@@ -361,7 +361,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_CONNECT, 0, N_SERVINFO, 0, N_WELCOME, 1, N_INITCLIENT, 0, N_POS, 0, N_TEXT, 0, N_SOUND, 2, N_CDIS, 2,
     N_SHOOT, 0, N_EXPLODE, 0, N_SUICIDE, 1,
     N_DIED, 7, N_DAMAGE, 7, N_VAMPIRE, 4, N_REAPER, 4, N_VIKING, 3, N_PRIEST, 3, N_HITPUSH, 7, N_SHOTFX, 10, N_EXPLODEFX, 4,
-    N_TRYSPAWN, 1, N_SPAWNSTATE, 0, N_SPAWN, 3, N_FORCEDEATH, 2,
+    N_TRYSPAWN, 1, N_SPAWNSTATE, 39, N_SPAWN, 3, N_FORCEDEATH, 2,
     N_GUNSELECT, 2, N_TAUNT, 1,
     N_MAPCHANGE, 0, N_MAPVOTE, 0, N_TEAMINFO, 0, N_ITEMSPAWN, 2, N_ITEMPICKUP, 2, N_ITEMACC, 4,
     N_PING, 2, N_PONG, 2, N_CLIENTPING, 2,
@@ -1192,7 +1192,6 @@ namespace game
 namespace server
 {
     extern const char *modename(int n, const char *unknown = "unknown");
-    extern const char *modeprettyname(int n, const char *unknown = "unknown");
     extern const char *mastermodename(int n, const char *unknown = "unknown");
     extern void startintermission();
     extern void stopdemo();

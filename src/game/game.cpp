@@ -958,7 +958,7 @@ namespace game
             cmode->setup();
         }
 
-        conoutf(CON_GAMEINFO, GAME_LANG ? "\f2Gamemode is: %s": "\f2Le mode de jeu est : %s", server::modeprettyname(gamemode));
+        conoutf(CON_GAMEINFO, GAME_LANG ? "\f2Gamemode is: %s": "\f2Le mode de jeu est : %s", server::modename(gamemode));
 
         const char *info = m_valid(gamemode) ? GAME_LANG ? gamemodes[gamemode - STARTGAMEMODE].nameEN : gamemodes[gamemode - STARTGAMEMODE].nameFR : NULL;
         if(showmodeinfo && info) conoutf(CON_GAMEINFO, "\f0%s", info);
@@ -1210,7 +1210,7 @@ namespace game
     ICOMMAND(servinfomodename, "i", (int *i),
         GETSERVINFOATTR(*i, 0, mode,
         {
-            const char *name = server::modeprettyname(mode, NULL);
+            const char *name = server::modename(mode, NULL);
             if(name) result(name);
         }));
     ICOMMAND(servinfomastermode, "i", (int *i), GETSERVINFOATTR(*i, 2, mm, intret(mm)));

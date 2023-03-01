@@ -196,7 +196,7 @@ namespace game
 
     ICOMMAND(scoreboardmode, "", (),
     {
-        result(server::modeprettyname(gamemode));
+        result(server::modename(gamemode));
     });
 
     ICOMMAND(scoreboardmap, "", (),
