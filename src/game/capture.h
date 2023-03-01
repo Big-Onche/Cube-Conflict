@@ -575,7 +575,10 @@ struct captureclientmode : clientmode
             else conoutf(CON_GAMEINFO, GAME_LANG ? "%s team lost the \"\fe%s\f7\" terminal." : "L'équipe %s a perdu le terminal \"\fe%s\f7\".", teamcolor(b.owner), b.name);
             playsound(owner==hudplayer()->team ? S_TERMINAL_LOST : S_TERMINAL_LOST_E, &b.o, NULL, 0, 0, 200, -1, 2500);
         }
-        if(b.owner!=owner)  particle_splash(rnd(2) ? PART_ZERO : PART_ONE, 25, 500, b.ammopos, owner ? (owner==hudplayer()->team ? 0xFFFF00 : 0xFF0000) : 0x777777, 1.f, 400, -50);
+        if(b.owner!=owner)
+        {
+            loopi(2) particle_splash(PART_ZERO+i, 12, 500, b.ammopos, owner ? (owner==hudplayer()->team ? 0xFFFF00 : 0xFF0000) : 0x777777, 1.f, 400, -50);
+        }
 
         b.owner = owner;
         b.enemy = enemy;
