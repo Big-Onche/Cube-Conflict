@@ -196,8 +196,8 @@ namespace game
 
     void setclientmode()
     {
-        if(m_ctf) cmode = &ctfmode;
-        else if(m_capture) cmode = &capturemode;
+        if(m_capture) cmode = &capturemode;
+        else if(m_ctf) cmode = &ctfmode;
         else cmode = NULL;
     }
 

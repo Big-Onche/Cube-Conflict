@@ -232,7 +232,7 @@ struct ctfclientmode : clientmode
 
     bool canspawn(clientinfo *ci, bool connecting)
     {
-        return connecting || !ci->state.lastdeath || gamemillis+curtime-ci->state.lastdeath >= RESPAWNSECS*1000;
+        return connecting || !ci->state.lastdeath || gamemillis+curtime-ci->state.lastdeath >= (RESPAWNSECS*1000)-250;
     }
 
     bool canchangeteam(clientinfo *ci, int oldteam, int newteam)
@@ -691,9 +691,9 @@ struct ctfclientmode : clientmode
        }
     }
 
-    int respawnwait(gameent *d)
+    int respawnwait(gameent *d, int delay = 0)
     {
-        return max(0, RESPAWNSECS-(lastmillis-d->lastpain)/1000);
+        return d->respawnwait(RESPAWNSECS, delay);
     }
 
 	bool aihomerun(gameent *d, ai::aistate &b)

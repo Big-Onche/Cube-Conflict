@@ -458,9 +458,9 @@ struct captureclientmode : clientmode
         if(blips && !basenumbers) gle::end();
     }
 
-    int respawnwait(gameent *d)
+    int respawnwait(gameent *d, int delay = 0)
     {
-        return max(0, RESPAWNSECS-(lastmillis-d->lastpain)/1000);
+        return d->respawnwait(RESPAWNSECS, delay);
     }
 
     int clipconsole(int w, int h)
@@ -1007,7 +1007,7 @@ ICOMMAND(insidebases, "", (),
 
     bool canspawn(clientinfo *ci, bool connecting)
     {
-        return m_regencapture || connecting || !ci->state.lastdeath || gamemillis+curtime-ci->state.lastdeath >= RESPAWNSECS*1000;
+        return connecting || !ci->state.lastdeath || gamemillis+curtime-ci->state.lastdeath >= (RESPAWNSECS*1000)-250;
     }
 
     void moved(clientinfo *ci, const vec &oldpos, bool oldclip, const vec &newpos, bool newclip)

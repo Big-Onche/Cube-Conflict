@@ -916,13 +916,8 @@ namespace server
     {
         if((m_timed && gamemillis>=gamelimit) || !sents.inrange(i) || !sents[i].spawned) return false;
         clientinfo *ci = getinfo(sender);
-        if(!ci) return false;
         int rndsweap = sents[i].type==I_SUPERARME ? rnd(4) : 0;
-        if(!ci->local && !ci->state.canpickupitem(sents[i].type+rndsweap, ci->aptitude, ci->state.armourtype==A_ASSIST && ci->state.armour))
-        {
-            sendf(sender, 1, "ri4", N_ITEMACC, i, -1, rndsweap);
-            return false;
-        }
+        if(!ci || (!ci->local && !ci->state.canpickupitem(sents[i].type+rndsweap, ci->aptitude, ci->state.armourtype==A_ASSIST && ci->state.armour))) return false;
         sents[i].spawned = false;
         sents[i].spawntime = spawntime(sents[i].type);
         sendf(-1, 1, "ri4", N_ITEMACC, i, sender, rndsweap);
@@ -3439,8 +3434,8 @@ namespace server
                 {
                     ci->mapcrc = -1;
                     checkmaps();
-                    if(ci == cq) { if(ci->state.state != CS_DEAD) break; }
-                    else if(cq->ownernum != ci->clientnum) { cq = NULL; break; }
+                    //if(ci == cq) { if(ci->state.state != CS_DEAD) break; }
+                    //else if(cq->ownernum != ci->clientnum) { cq = NULL; break; }
                 }
                 if(cq->state.deadflush)
                 {

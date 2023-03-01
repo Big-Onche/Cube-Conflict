@@ -935,6 +935,11 @@ struct gameent : dynent, gamestate
         playerexploded = false;
     }
 
+    int respawnwait(int secs, int delay = 0)
+    {
+        return max(0, secs - (::lastmillis - lastpain - delay)/1000);
+    }
+
     void startgame()
     {
         killstreak = frags = flags = deaths = 0;
@@ -1025,7 +1030,7 @@ namespace game
         virtual void respawned(gameent *d) {}
         virtual void setup() {}
         virtual void checkitems(gameent *d) {}
-        virtual int respawnwait(gameent *d) { return 0; }
+        virtual int respawnwait(gameent *d, int delay = 0) { return 0; }
         virtual float ratespawn(gameent *d, const extentity &e) { return 1.0f; }
         virtual void pickspawn(gameent *d) { findplayerspawn(d, -1, m_teammode && !m_capture ? d->team : 0); }
         virtual void senditems(packetbuf &p) {}
