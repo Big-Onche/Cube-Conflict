@@ -44,10 +44,10 @@ static const struct statsinfo { const char *statname, *statnicenameFR, *statnice
     {"STAT_BASEHACK",           "Temps passé à hacker",             "Time spent hacking",               "hud/radio_off.jpg"},
     //Classes
     {"STAT_ABILITES",           "Abilitées utilisées",              "Used abilities",                   "hud/stats.png"},
-    {"STAT_HEALTHREGEN",        "Santé redonnée aux alliés",        "Health restored to allies",        "apt_logo/medic.png"},
+    {"STAT_HEALTHREGEN",        "Santé redonnée aux alliés",        "Health restored to allies",        "apt_logo/1.png"},
     {"STAT_HEALTHREGAIN",       "Santé récupérée grâce aux médecins", "Health recovered with medics",   "hud/coeur.png"},
     {"STAT_MANAREGEN",          "Mana redonné aux alliés",          "Mana restored to allies",          "hud/mana.png"},
-    {"STAT_MANAREGAIN",         "Mana récupéré grâce aux junkies",  "Mana recovered with junkies",      "apt_logo/junkie.png"},           //20
+    {"STAT_MANAREGAIN",         "Mana récupéré grâce aux junkies",  "Mana recovered with junkies",      "apt_logo/13.png"},           //20
     //Shields
     {"STAT_BOUCLIERBOIS",       "Boucliers en bois utilisés",       "Wooden shields used",              "hud/bouclier_bois.png"},
     {"STAT_BOUCLIERFER",        "Boucliers en fer utilisés",        "Iron shields used",                "hud/bouclier_fer.png"},
