@@ -227,8 +227,9 @@ struct captureclientmode : clientmode
         return false;
     }
 
-    bool insidebase(const baseinfo &b, const vec &o)
+    bool insidebase(const baseinfo &b, const vec &o, bool isalive)
     {
+        if(!isalive || game::premission || game::intermission) return false;
         float dx = (b.o.x-o.x), dy = (b.o.y-o.y), dz = (b.o.z-o.z);
         return dx*dx + dy*dy <= CAPTURERADIUS*CAPTURERADIUS && fabs(dz) <= CAPTUREHEIGHT;
     }
@@ -250,7 +251,7 @@ struct captureclientmode : clientmode
         loopv(bases)
         {
             baseinfo &b = bases[i];
-            if(insidebase(b, player1->feetpos()) && player1->hasmaxammo(b.ammotype-1+I_RAIL)) return;
+            if(insidebase(b, player1->feetpos(), player1->state==CS_ALIVE) && player1->hasmaxammo(b.ammotype-1+I_RAIL)) return;
         }
         addmsg(N_REPAMMO, "rc", player1);
     }
@@ -269,7 +270,7 @@ struct captureclientmode : clientmode
         loopv(bases)
         {
             baseinfo &b = bases[i];
-            if(insidebase(b, d->feetpos()) && b.owner==d->team && b.o.dist(o) < 12)
+            if(insidebase(b, d->feetpos(), d->state==CS_ALIVE) && b.owner==d->team && b.o.dist(o) < 12)
             {
                 if(d->lastrepammo!=i)
                 {
@@ -295,14 +296,14 @@ struct captureclientmode : clientmode
             {
                 baseinfo &b = bases[i];
 
-                if(insidebase(bases[i], player1->feetpos()) && d==player1 && totalmillis >= insidebasetimer+1000 && (b.converted || !b.owner))
+                if(insidebase(bases[i], player1->feetpos(), player1->state==CS_ALIVE) && d==player1 && totalmillis >= insidebasetimer+1000 && (b.converted || !b.owner))
                 {
                     addxpandcc(1, 1);
                     addstat(1, STAT_BASEHACK);
                     insidebasetimer = totalmillis;
                 }
 
-                if(!insidebase(b, d->feetpos()) || (b.owner!=d->team && b.enemy!=d->team)) continue;
+                if(!insidebase(b, d->feetpos(), d->state==CS_ALIVE) || (b.owner!=d->team && b.enemy!=d->team)) continue;
                 if(d->lastbase < 0 && (lookupmaterial(d->feetpos())&MATF_CLIP) == MAT_GAMECLIP) break;
 
                 vec basepos(b.o);
@@ -716,7 +717,7 @@ ICOMMAND(insidebases, "", (),
     if(m_capture && player1->state == CS_ALIVE) loopv(capturemode.bases)
     {
         captureclientmode::baseinfo &b = capturemode.bases[i];
-        if(capturemode.insidebase(b, player1->feetpos()))
+        if(capturemode.insidebase(b, player1->feetpos(), player1->state==CS_ALIVE))
         {
             if(buf.length()) buf.add(' ');
             defformatstring(basenum, "%d", b.tag);
@@ -770,7 +771,7 @@ ICOMMAND(insidebases, "", (),
         loopv(clients)
         {
             clientinfo *ci = clients[i];
-            if(ci->state.state==CS_ALIVE && ci->team>0 && ci->team<=2 && ci->team==team && insidebase(b, ci->state.o))
+            if(ci->state.state==CS_ALIVE && ci->team>0 && ci->team<=2 && ci->team==team && insidebase(b, ci->state.o, ci->state.state==CS_ALIVE))
                 b.enter(ci->team);
         }
         sendbaseinfo(n);
@@ -782,7 +783,7 @@ ICOMMAND(insidebases, "", (),
         loopv(bases)
         {
             baseinfo &b = bases[i];
-            if(insidebase(b, ci->state.o) && !ci->state.hasmaxammo(b.ammotype-1+I_RAIL) && b.takeammo(ci->team))
+            if(insidebase(b, ci->state.o, ci->state.state==CS_ALIVE) && !ci->state.hasmaxammo(b.ammotype-1+I_RAIL) && b.takeammo(ci->team))
             {
                 sendbaseinfo(i);
                 sendf(-1, 1, "riii", N_REPAMMO, ci->clientnum, b.ammotype);
@@ -792,28 +793,28 @@ ICOMMAND(insidebases, "", (),
         }
     }
 
-    void movebases(int team, const vec &oldpos, bool oldclip, const vec &newpos, bool newclip)
+    void movebases(int team, const vec &oldpos, bool oldclip, const vec &newpos, bool newclip, bool isalive)
     {
         if(gamemillis>=gamelimit || team<1 || team>2) return;
         loopv(bases)
         {
             baseinfo &b = bases[i];
-            bool leave = !oldclip && insidebase(b, oldpos),
-                 enter = !newclip && insidebase(b, newpos);
+            bool leave = !oldclip && insidebase(b, oldpos, isalive),
+                 enter = !newclip && insidebase(b, newpos, isalive);
             if(leave && !enter && b.leave(team)) sendbaseinfo(i);
             else if(enter && !leave && b.enter(team)) sendbaseinfo(i);
             else if(leave && enter && b.steal(team)) stealbase(i, team);
         }
     }
 
-    void leavebases(int team, const vec &o)
+    void leavebases(int team, const vec &o, bool isalive)
     {
-        movebases(team, o, false, vec(-1e10f, -1e10f, -1e10f), true);
+        movebases(team, o, false, vec(-1e10f, -1e10f, -1e10f), true, isalive);
     }
 
-    void enterbases(int team, const vec &o)
+    void enterbases(int team, const vec &o, bool isalive)
     {
-        movebases(team, vec(-1e10f, -1e10f, -1e10f), true, o, false);
+        movebases(team, vec(-1e10f, -1e10f, -1e10f), true, o, false, isalive);
     }
 
     void addscore(int base, int team, int n)
@@ -821,7 +822,7 @@ ICOMMAND(insidebases, "", (),
         if(!n) return;
         score &cs = findscore(team);
         cs.total += n;
-        sendf(-1, 1, "riiii", N_BASESCORE, base, team, cs.total);
+        sendf(-1, 1, "ri4", N_BASESCORE, base, team, cs.total);
     }
 
     void addciscore(baseinfo &b)
@@ -830,7 +831,7 @@ ICOMMAND(insidebases, "", (),
         {
             clientinfo *ci = clients[i];
 
-            if(ci->state.state==CS_ALIVE && ci->team>0 && ci->team<=2 && insidebase(b, ci->state.o))
+            if(ci->state.state==CS_ALIVE && (ci->team==1 || ci->team==2) && insidebase(b, ci->state.o, ci->state.state==CS_ALIVE))
             {
                 b.owner==ci->team ? ci->state.flags++ : ci->state.flags+=2;
                 sendf(-1, 1, "ri3", N_SCOREBASE, ci->clientnum, ci->state.flags);
@@ -843,7 +844,7 @@ ICOMMAND(insidebases, "", (),
         loopv(clients)
         {
             clientinfo *ci = clients[i];
-            if(ci->state.state==CS_ALIVE && b.owner==ci->team && insidebase(b, ci->state.o) && (ci->team==1 || ci->team==2))
+            if(ci->state.state==CS_ALIVE && b.owner==ci->team && insidebase(b, ci->state.o, ci->state.state==CS_ALIVE) && (ci->team==1 || ci->team==2))
             {
                 bool notify = false;
                 if(ci->state.health < ci->state.maxhealth)
@@ -919,7 +920,7 @@ ICOMMAND(insidebases, "", (),
     void sendbaseinfo(int i)
     {
         baseinfo &b = bases[i];
-        sendf(-1, 1, "riiiiii", N_BASEINFO, i, b.owner, b.enemy, b.enemy ? b.converted : 0, b.owner ? b.ammo : 0);
+        sendf(-1, 1, "ri6", N_BASEINFO, i, b.owner, b.enemy, b.enemy ? b.converted : 0, b.owner ? b.ammo : 0);
     }
 
     void sendbases()
@@ -980,32 +981,32 @@ ICOMMAND(insidebases, "", (),
 
         if(!lastteam) return;
         findscore(lastteam).total = 10000;
-        sendf(-1, 1, "riiii", N_BASESCORE, -1, lastteam, 10000);
+        sendf(-1, 1, "ri4", N_BASESCORE, -1, lastteam, 10000);
         startintermission();
     }
 
     void entergame(clientinfo *ci)
     {
         if(notgotbases || ci->state.state!=CS_ALIVE || ci->gameclip) return;
-        enterbases(ci->team, ci->state.o);
+        enterbases(ci->team, ci->state.o, ci->state.state==CS_ALIVE);
     }
 
     void spawned(clientinfo *ci)
     {
         if(notgotbases || ci->gameclip) return;
-        enterbases(ci->team, ci->state.o);
+        enterbases(ci->team, ci->state.o, ci->state.lastspawn>3000);
     }
 
     void leavegame(clientinfo *ci, bool disconnecting = false)
     {
         if(notgotbases || ci->state.state!=CS_ALIVE || ci->gameclip) return;
-        leavebases(ci->team, ci->state.o);
+        leavebases(ci->team, ci->state.o, ci->state.state==CS_ALIVE);
     }
 
     void died(clientinfo *ci, clientinfo *actor)
     {
         if(notgotbases || ci->gameclip) return;
-        leavebases(ci->team, ci->state.o);
+        leavebases(ci->team, ci->state.o, ci->state.state==CS_ALIVE);
     }
 
     bool canspawn(clientinfo *ci, bool connecting)
@@ -1013,17 +1014,17 @@ ICOMMAND(insidebases, "", (),
         return connecting || !ci->state.lastdeath || gamemillis+curtime-ci->state.lastdeath >= RESPAWNSECS*1000;
     }
 
-    void moved(clientinfo *ci, const vec &oldpos, bool oldclip, const vec &newpos, bool newclip)
+    void moved(clientinfo *ci, const vec &oldpos, bool oldclip, const vec &newpos, bool newclip, bool isalive)
     {
         if(notgotbases) return;
-        movebases(ci->team, oldpos, oldclip, newpos, newclip);
+        movebases(ci->team, oldpos, oldclip, newpos, newclip, isalive);
     }
 
     void changeteam(clientinfo *ci, int oldteam, int newteam)
     {
         if(notgotbases || ci->gameclip) return;
-        leavebases(oldteam, ci->state.o);
-        enterbases(newteam, ci->state.o);
+        leavebases(oldteam, ci->state.o, ci->state.state==CS_ALIVE);
+        enterbases(newteam, ci->state.o, ci->state.state==CS_ALIVE);
     }
 
     void parsebases(ucharbuf &p, bool commit)

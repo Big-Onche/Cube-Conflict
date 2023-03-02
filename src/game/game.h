@@ -385,7 +385,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_REQABILITY, 2, N_GETABILITY, 4,
     N_ANNOUNCE, 3,
     N_CURWEAPON, 2,
-    N_BASES, 0, N_BASEINFO, 0, N_BASESCORE, 0, N_SCOREBASE, 3, N_REPAMMO, 1, N_BASEREGEN, 7,
+    N_BASES, 0, N_BASEINFO, 6, N_BASESCORE, 4, N_SCOREBASE, 3, N_REPAMMO, 1, N_BASEREGEN, 7,
     -1
 };
 
