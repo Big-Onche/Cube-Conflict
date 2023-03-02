@@ -1796,6 +1796,7 @@ namespace server
         gs.spawnstate(gamemode, ci->aptitude);
         gs.aptiseed = rnd(4);
         gs.lifesequence = (gs.lifesequence + 1)&0x7F;
+        gs.state = CS_ALIVE;
     }
 
     void sendspawn(clientinfo *ci)
@@ -2643,6 +2644,7 @@ namespace server
     }
 
     int regentimer = 0;
+    enum stat {S_HEALTH = 0, S_MANA};
 
     void regenallies()
     {
@@ -2656,30 +2658,32 @@ namespace server
                 loopv(clients)
                 {
                     clientinfo &giver = *clients[i];        //every body can give
+                    bool bothalive = giver.state.state==CS_ALIVE && receiver.state.state==CS_ALIVE;
+
                     switch(giver.aptitude)
                     {
                         case APT_MEDECIN: //medic regen allie's health (including himself)
                         {
-                            if((giver.state.o.dist(receiver.state.o)/18.f < 7.5f && receiver.state.health < receiver.state.maxhealth+250 && giver.state.state==CS_ALIVE && receiver.state.state==CS_ALIVE) && (m_teammode ? isteam(receiver.team, giver.team) : giver.clientnum==receiver.clientnum))
+                            if((giver.state.o.dist(receiver.state.o)/18.f < 7.5f && receiver.state.health < receiver.state.maxhealth+250 && bothalive) && (m_teammode ? isteam(receiver.team, giver.team) : giver.clientnum==receiver.clientnum))
                             {
                                 receiver.state.health = min(receiver.state.health + 100, receiver.state.maxhealth + 250);
-                                sendf(-1, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, 0, receiver.state.health);
+                                sendf(-1, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, S_HEALTH, receiver.state.health);
                             }
                         }
                         break;
                         case APT_JUNKIE: //junkie regen allie's mana and vampire's health
                         {
-                            if(needmana(receiver.aptitude) && giver.state.o.dist(receiver.state.o)/18.f < 7.5f && receiver.state.mana < 150 && giver.state.state==CS_ALIVE && receiver.state.state==CS_ALIVE)
+                            if(needmana(receiver.aptitude) && giver.state.o.dist(receiver.state.o)/18.f < 7.5f && receiver.state.mana < 150 && bothalive)
                             {
                                 if(receiver.aptitude==APT_VAMPIRE && receiver.state.health < receiver.state.maxhealth+250)
                                 {
                                     receiver.state.health = min(receiver.state.health + 100, receiver.state.maxhealth + 250);
-                                    sendf(-1, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, 0, receiver.state.health); //vampire gets health instead of mana
+                                    sendf(-1, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, S_HEALTH, receiver.state.health); //vampire gets health instead of mana
                                 }
                                 else if(receiver.aptitude!=APT_VAMPIRE) //other classes needing mana : receive mana
                                 {
                                     receiver.state.mana = min(receiver.state.mana + 10, 150);
-                                    sendf(-1, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum,  1, receiver.state.mana);
+                                    sendf(-1, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum,  S_MANA, receiver.state.mana);
                                 }
                             }
                         }
@@ -3425,7 +3429,7 @@ namespace server
                 break;
 
             case N_TRYSPAWN:
-                if(!ci || !cq || cq->state.state!=CS_DEAD || cq->state.lastspawn>=0 || (smode && !smode->canspawn(cq))) break;
+                if(!ci || !cq || cq->state.lastspawn>=0 || (smode && !smode->canspawn(cq))) break;
                 if(!ci->clientmap[0] && !ci->mapcrc)
                 {
                     ci->mapcrc = -1;

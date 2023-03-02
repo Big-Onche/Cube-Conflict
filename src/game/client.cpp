@@ -1698,30 +1698,21 @@ namespace game
             case N_SENDCAPE:
             {
                 int cape = getint(p);
-                if(d)
-                {
-                    d->customcape = cape;
-                }
+                if(d)d->customcape = cape;
                 break;
             }
 
             case N_SENDTOMBE:
             {
-                int ghost = getint(p);
-                if(d)
-                {
-                    d->customtombe = ghost;
-                }
+                int grave = getint(p);
+                if(d) d->customtombe = grave;
                 break;
             }
 
             case N_SENDDANSE:
             {
                 int danse = getint(p);
-                if(d)
-                {
-                    d->customdanse = danse;
-                }
+                if(d) d->customdanse = danse;
                 break;
             }
 

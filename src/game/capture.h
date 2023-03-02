@@ -1010,7 +1010,7 @@ ICOMMAND(insidebases, "", (),
 
     bool canspawn(clientinfo *ci, bool connecting)
     {
-        return connecting || !ci->state.lastdeath || gamemillis+curtime-ci->state.lastdeath >= (RESPAWNSECS*1000)-250;
+        return connecting || !ci->state.lastdeath || gamemillis+curtime-ci->state.lastdeath >= RESPAWNSECS*1000;
     }
 
     void moved(clientinfo *ci, const vec &oldpos, bool oldclip, const vec &newpos, bool newclip)

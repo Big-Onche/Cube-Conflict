@@ -232,7 +232,7 @@ struct ctfclientmode : clientmode
 
     bool canspawn(clientinfo *ci, bool connecting)
     {
-        return connecting || !ci->state.lastdeath || gamemillis+curtime-ci->state.lastdeath >= (RESPAWNSECS*1000)-250;
+        return connecting || !ci->state.lastdeath || gamemillis+curtime-ci->state.lastdeath >= RESPAWNSECS*1000;
     }
 
     bool canchangeteam(clientinfo *ci, int oldteam, int newteam)
