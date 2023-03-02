@@ -420,7 +420,7 @@ namespace entities
             if(m_noitems && ((e->type!=I_SUPERARME) || (e->type>I_BOOSTPV && e->type<I_BOOSTGRAVITE))) return;
             if(e->type>=I_RAIL && e->type<=I_MANA && (!m_noammo || e->type<I_RAIL || e->type>I_GLOCK))
             {
-                e->setspawned(force || m_tutorial || !server::delayspawn(e->type));
+                e->setspawned();
                 e->clearnopickup();
             }
         }
