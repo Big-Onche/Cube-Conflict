@@ -1627,9 +1627,9 @@ namespace game
                 int player = getint(p);
                 gameent *pl = getclient(player);
                 int ability = getint(p);
+                pl->abilitymillis[ability] = getint(p);
 
                 if(!pl) break;
-                pl->abilitymillis[ability] = getint(p);
                 pl->mana-=aptitudes[pl->aptitude].abilities[ability].manacost;
                 aptitude(pl, ability, false);
                 break;
