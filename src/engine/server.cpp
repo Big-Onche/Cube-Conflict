@@ -295,7 +295,7 @@ const char *disconnectreason(int reason)
         case DISC_EOP:              return lang ? "end of packet" : "fin de paquet";
         case DISC_LOCAL:            return lang ? "server in local mode" : "serveur en mode local";
         case DISC_KICK:             return lang ? "kicked or banned" : "kické ou banni";
-        case DISC_MSGERR:           return lang ? "network message error (illegal client message))" : "erreur message (message client illégal)";
+        case DISC_MSGERR:           return lang ? "network message error (illegal client message)" : "erreur message (message client illégal)";
         case DISC_SERVMSGERR:       return lang ? "network message error (illegal server message)" : "erreur message (message serveur illégal)";
         case DISC_DESYNC:           return lang ? "synchronization error" : "erreur de synchronisation";
         case DISC_UNK:              return lang ? "unknown network message" : "message réseau inconnu";
