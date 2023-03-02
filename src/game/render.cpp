@@ -519,17 +519,15 @@ namespace game
             dir.div(dist);
 
             copystring(d->info, colorname(d));
-            if(d->state!=CS_DEAD)
+            if(d->state==CS_ALIVE && player->state==CS_ALIVE)
             {
-                int team = m_teammode && validteam(d->team) ? d->team : 0;
-
                 if(d->health<300 && d->health>0) switch(rnd(d->health+gfx::nbfps*2)) {case 0: gibeffect(300, d->o, d);}
 
                 vec posA = d->abovehead();
                 vec posB = camera1->o;
                 vec posAtofrontofposB = (posA.add((posB.mul(vec(127, 127, 127))))).div(vec(128, 128, 128));
 
-                if(player1->aptitude==APT_MEDECIN && team==1)
+                if(player1->aptitude==APT_MEDECIN && isteam(player1->team, d->team))
                 {
 
                         particle_meter(d->o.dist(camera1->o)<75 ? (d->abovehead().add(camera1->o)).div(vec(2,2,2)) : posAtofrontofposB,
@@ -541,7 +539,7 @@ namespace game
 
                 }
 
-                if((player1->aptitude==APT_JUNKIE && team==1)&&(d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION))
+                if((player1->aptitude==APT_JUNKIE && isteam(player1->team, d->team)) && (d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION))
                     particle_meter(d->o.dist(camera1->o)<75 ? (d->abovehead().add(camera1->o)).div(vec(2,2,2)) : posAtofrontofposB,
                                     d->mana/150.0f, PART_METER,
                                     d->o.dist(camera1->o)<250 ? 1.f : d->o.dist(camera1->o)/250.f, 0.5f,
