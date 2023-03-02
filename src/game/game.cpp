@@ -277,9 +277,8 @@ namespace game
         loopv(players)
         {
             gameent *d = players[i];
-            if(d == player1 || d->ai) continue;
 
-            if(d->state==CS_ALIVE && !intermission && !premission)
+            if(d!=player1 && d->state==CS_ALIVE && !intermission && !premission)
             {
                 if(d->armourtype==A_ASSIST && d->ammo[GUN_ASSISTXPL]>0 && d->armour==0 && d->state==CS_ALIVE) {gunselect(GUN_ASSISTXPL, d, true); d->gunwait=0;}
                 if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
@@ -291,6 +290,7 @@ namespace game
             if(d->armourtype==A_ASSIST && d->armour<=1000 && d->armour && d->state==CS_ALIVE && isconnected() && !editmode) d->alarmchan = playsound(S_ASSISTALARM, d==hudplayer() ? NULL : &d->o, NULL, 0, -1, 500, d->alarmchan, 250);
             else d->stoppowerarmorsound();
 
+            if(d == player1 || d->ai) continue;
             if(d->state==CS_DEAD && d->ragdoll) moveragdoll(d);
 
             const int lagtime = totalmillis-d->lastupdate;
