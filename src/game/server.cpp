@@ -246,7 +246,7 @@ namespace server
 
         void addevent(gameevent *e)
         {
-            if(state.state==CS_SPECTATOR || events.length()>100) delete e;
+            if(state.state==CS_SPECTATOR || events.length()>125) delete e;
             else events.add(e);
         }
 
@@ -1608,7 +1608,7 @@ namespace server
             // no overflow check
             case 4: return type;
         }
-        if(ci && ++ci->overflow >= 200) return -2;
+        if(ci && ++ci->overflow >= 250) return -2;
         return type;
     }
 
