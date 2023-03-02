@@ -827,7 +827,7 @@ namespace server
         virtual void entergame(clientinfo *ci) {}
         virtual void leavegame(clientinfo *ci, bool disconnecting = false) {}
 
-        virtual void moved(clientinfo *ci, const vec &oldpos, bool oldclip, const vec &newpos, bool newclip) {}
+        virtual void moved(clientinfo *ci, const vec &oldpos, bool oldclip, const vec &newpos, bool newclip, bool isalive) {}
         virtual bool canspawn(clientinfo *ci, bool connecting = false) { return true; }
         virtual void spawned(clientinfo *ci) {}
         virtual int fragvalue(clientinfo *victim, clientinfo *actor, int atk = -1)
@@ -1793,10 +1793,10 @@ namespace server
     void spawnstate(clientinfo *ci)
     {
         servstate &gs = ci->state;
-        gs.spawnstate(gamemode, ci->aptitude);
+        gs.state = CS_ALIVE;
         gs.aptiseed = rnd(4);
         gs.lifesequence = (gs.lifesequence + 1)&0x7F;
-        gs.state = CS_ALIVE;
+        gs.spawnstate(gamemode, ci->aptitude);
     }
 
     void sendspawn(clientinfo *ci)
@@ -3333,7 +3333,7 @@ namespace server
                         cp->position.setsize(0);
                         while(curmsg<p.length()) cp->position.add(p.buf[curmsg++]);
                     }
-                    if(smode && cp->state.state==CS_ALIVE) smode->moved(cp, cp->state.o, cp->gameclip, pos, (flags&0x80)!=0);
+                    if(smode && cp->state.state==CS_ALIVE) smode->moved(cp, cp->state.o, cp->gameclip, pos, (flags&0x80)!=0, cp->state.state==CS_ALIVE);
                     cp->state.o = pos;
                     cp->gameclip = (flags&0x80)!=0;
                 }
