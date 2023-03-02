@@ -181,7 +181,7 @@ namespace game
 
     gameent *hudplayer()
     {
-        if(thirdperson || specmode > 1) return player1;
+        if((thirdperson && allowthirdperson()) || specmode > 1) return player1;
         return followingplayer(player1);
     }
 
@@ -277,8 +277,9 @@ namespace game
         loopv(players)
         {
             gameent *d = players[i];
+            if(d == player1 || d->ai) continue;
 
-            if(d!=player1 && d->state==CS_ALIVE && !intermission && !premission)
+            if(d->state==CS_ALIVE && !intermission && !premission)
             {
                 if(d->armourtype==A_ASSIST && d->ammo[GUN_ASSISTXPL]>0 && d->armour==0 && d->state==CS_ALIVE) {gunselect(GUN_ASSISTXPL, d, true); d->gunwait=0;}
                 if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
@@ -290,7 +291,6 @@ namespace game
             if(d->armourtype==A_ASSIST && d->armour<=1000 && d->armour && d->state==CS_ALIVE && isconnected() && !editmode) d->alarmchan = playsound(S_ASSISTALARM, d==hudplayer() ? NULL : &d->o, NULL, 0, -1, 500, d->alarmchan, 250);
             else d->stoppowerarmorsound();
 
-            if(d == player1 || d->ai) continue;
             if(d->state==CS_DEAD && d->ragdoll) moveragdoll(d);
 
             const int lagtime = totalmillis-d->lastupdate;
@@ -503,12 +503,6 @@ namespace game
         return player1->state!=CS_DEAD;
     }
 
-    bool allowmove(physent *d)
-    {
-        return true;
-        //return !((gameent *)d)->lasttaunt || lastmillis-((gameent *)d)->lasttaunt>=5000;
-    }
-
     VARFP(player1_danse, 0, 0, sizeof(customsdance)/sizeof(customsdance[0])-1,
     {
         if(!packtaunt) return;
@@ -598,7 +592,7 @@ namespace game
         {
             if(deathscore) showscores(true);
             disablezoom();
-            game::player1->boostmillis[B_SHROOMS] = 0;
+            d->boostmillis[B_SHROOMS] = 0;
             d->attacking = ACT_IDLE;
             gfx::resetshroomsgfx();
             d->roll = 0;
@@ -901,7 +895,7 @@ namespace game
         gameent *d = clients[cn];
         if(d)
         {
-            if(notify && d->name[0]) conoutf("\f7%s\f4 vient de quitter la partie", colorname(d));
+            if(notify && d->name[0]) conoutf("\f7%s\f4 %s", colorname(d), GAME_LANG ? "left the game" : "a quitté la partie");
             removeweapons(d);
             removetrackedparticles(d);
             removetrackeddynlights(d);
@@ -946,7 +940,6 @@ namespace game
         loopv(players) players[i]->startgame();
 
         setclientmode();
-
         intermission = false;
 
         maptime = maprealtime = 0;
@@ -988,8 +981,7 @@ namespace game
 
     const char *getmapinfo()
     {
-        if(GAME_LANG) return showmodeinfo && m_valid(gamemode) ? gamemodes[gamemode - STARTGAMEMODE].nameEN : NULL;
-        else return showmodeinfo && m_valid(gamemode) ? gamemodes[gamemode - STARTGAMEMODE].nameFR : NULL;
+        return showmodeinfo && m_valid(gamemode) ? (GAME_LANG ? gamemodes[gamemode - STARTGAMEMODE].nameEN : gamemodes[gamemode - STARTGAMEMODE].nameFR): NULL;
     }
 
     const char *getscreenshotinfo()
@@ -1125,7 +1117,7 @@ namespace game
         {
             if(d->state!=CS_ALIVE) return;
             gameent *pl = (gameent *)d;
-            if(!m_mp(gamemode)) killed(pl, pl, -1);
+            if(!m_mp(gamemode)) killed(pl, pl, 0);
             else
             {
                 int seq = (pl->lifesequence<<16)|((lastmillis/1000)&0xFFFF);

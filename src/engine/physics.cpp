@@ -1295,7 +1295,7 @@ bool trystepdown(physent *d, vec &dir, float step, float xy, float z, bool init 
 
 bool trystepdown(physent *d, vec &dir, bool init = false)
 {
-    if((!d->move && !d->strafe) || !game::allowmove(d)) return false;
+    if(!d->move && !d->strafe) return false;
     vec old(d->o);
     d->o.z -= STAIRHEIGHT;
     d->zmargin = -STAIRHEIGHT;
@@ -1706,12 +1706,11 @@ VAR(floatspeed, 1, 400, 10000);
 
 void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curtime, int jointmillis, int aptitude, bool assist, int aptisort)
 {
-    bool allowmove = game::allowmove(pl);
     int maxjumps = jointmillis ? 4 : (assist || aptitude==APT_NINJA || (aptitude==APT_KAMIKAZE && aptisort) ? 2 : 1);
 
     if(floating)
     {
-        if(pl->jumping && allowmove)
+        if(pl->jumping)
         {
             pl->jumping = false;
             pl->vel.z = max(pl->vel.z, JUMPVEL);
@@ -1720,7 +1719,7 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
     else if(((pl->physstate >= PHYS_FALL || lastmillis-pl->lastjump < 280) || water) && pl->jumps<maxjumps)
     {
         if(water && !pl->inwater && aptitude!=APT_NINJA) pl->vel.div(8);
-        if(pl->jumping && allowmove)
+        if(pl->jumping)
         {
             pl->jumping = false;
             if(pl->timeinair && (aptitude==APT_NINJA || assist || jointmillis || (aptitude==APT_KAMIKAZE && aptisort))) pl->falling = vec(0, 0, 0);
@@ -1739,7 +1738,7 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
     if(pl->physstate == PHYS_FALL || pl->physstate == PHYS_FLOAT) pl->timeinair = min(pl->timeinair + curtime, 12000);
 
     vec m(0.0f, 0.0f, 0.0f);
-    if((pl->move || pl->strafe) && allowmove)
+    if(pl->move || pl->strafe)
     {
         vecfromyawpitch(pl->yaw, floating || water || pl->type==ENT_CAMERA ? pl->pitch : 0, pl->move, pl->strafe, m);
 
@@ -1782,7 +1781,7 @@ void modifygravity(physent *pl, bool water, int curtime, int jointmillis, int ap
         g.normalize();
         g.mul(GRAVITY*secs);
     }
-    if(!water || !game::allowmove(pl) || (!pl->move && !pl->strafe)) pl->falling.add(g);
+    if(!water || (!pl->move && !pl->strafe)) pl->falling.add(g);
 
     if(water || pl->physstate >= PHYS_SLOPE)
     {
