@@ -833,7 +833,7 @@ ICOMMAND(insidebases, "", (),
             if(ci->state.state==CS_ALIVE && ci->team>0 && ci->team<=2 && insidebase(b, ci->state.o))
             {
                 b.owner==ci->team ? ci->state.flags++ : ci->state.flags+=2;
-                sendf(-1, 1, "ri3", N_CNBASESCORE, ci->clientnum, ci->state.flags);
+                sendf(-1, 1, "ri3", N_SCOREBASE, ci->clientnum, ci->state.flags);
             }
         }
     }
@@ -1078,7 +1078,7 @@ case N_BASEINFO:
     break;
 }
 
-case N_CNBASESCORE:
+case N_SCOREBASE:
 {
     int ocn = getint(p), score = getint(p);
     gameent *o = ocn==player1->clientnum ? player1 : newclient(ocn);
