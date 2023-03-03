@@ -1204,6 +1204,7 @@ namespace server
     extern int msgsizelookup(int msg);
     extern bool serveroption(const char *arg);
     extern bool delayspawn(int type);
+    extern bool canspawnitem(int type);
     extern bool pickup(int i, int sender);
 }
 

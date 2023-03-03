@@ -869,7 +869,7 @@ namespace server
     {
         if(m_dmsp) return INT_MAX;
         int np = numclients(-1, true, false);
-        np = m_tutorial ? 1 : np<3 ? 4 : (np>4 ? 2 : 3);         // spawn times are dependent on number of players
+        np = m_tutorial ? 1 : np<6 ? 4 : (np>12 ? 2 : 3);         // spawn times are dependent on number of players
         int sec = 0;
         switch(type)
         {
@@ -888,22 +888,7 @@ namespace server
 
     bool delayspawn(int type)
     {
-        switch(type)
-        {
-            case I_BOUCLIERMAGNETIQUE:
-            case I_BOUCLIERFER:
-            case I_BOUCLIEROR:
-            case I_BOOSTDEGATS:
-            case I_BOOSTGRAVITE:
-            case I_BOOSTPRECISION:
-            case I_ARMUREASSISTEE:
-            case I_BOOSTPV:
-            case I_BOOSTVITESSE:
-            case I_SUPERARME:
-                return true;
-            default:
-                return false;
-        }
+        return (type==I_SUPERARME || (type>=I_BOOSTPV && type<=I_BOOSTGRAVITE) || (type>=I_BOUCLIERFER && type<=I_ARMUREASSISTEE));
     }
 
     bool pickup(int i, int sender)         // server side item pickup, acknowledge first client that gets it
@@ -2722,7 +2707,7 @@ namespace server
                             sents[i].spawned = true;
                             sendf(-1, 1, "ri2", N_ITEMSPAWN, i);
                         }
-                        else if(sents[i].spawntime<=10000 && oldtime>10000 && (sents[i].type==I_BOOSTDEGATS || sents[i].type==I_BOOSTGRAVITE || sents[i].type==I_BOOSTPRECISION || sents[i].type==I_BOOSTVITESSE || sents[i].type==I_SUPERARME))
+                        else if(sents[i].spawntime<=10000 && oldtime>10000 && ((sents[i].type>=I_BOOSTDEGATS && sents[i].type<=I_BOOSTGRAVITE) || sents[i].type==I_SUPERARME)
                         {
                             sendf(-1, 1, "ri3", N_ANNOUNCE, sents[i].type, -1);
                         }

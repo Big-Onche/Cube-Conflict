@@ -417,8 +417,7 @@ namespace entities
         loopv(ents)
         {
             extentity *e = ents[i];
-            if(m_noitems && ((e->type!=I_SUPERARME) || (e->type>I_BOOSTPV && e->type<I_BOOSTGRAVITE))) return;
-            if(e->type>=I_RAIL && e->type<=I_MANA && (!m_noammo || e->type<I_RAIL || e->type>I_GLOCK))
+            if(e->type>=I_RAIL && e->type<=I_MANA && server::canspawnitem(e->type))
             {
                 e->setspawned(force || m_tutorial || !server::delayspawn(e->type));
                 e->clearnopickup();
