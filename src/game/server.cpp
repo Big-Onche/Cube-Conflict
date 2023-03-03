@@ -2707,7 +2707,7 @@ namespace server
                             sents[i].spawned = true;
                             sendf(-1, 1, "ri2", N_ITEMSPAWN, i);
                         }
-                        else if(sents[i].spawntime<=10000 && oldtime>10000 && ((sents[i].type>=I_BOOSTDEGATS && sents[i].type<=I_BOOSTGRAVITE) || sents[i].type==I_SUPERARME)
+                        else if(sents[i].spawntime<=10000 && oldtime>10000 && ((sents[i].type>=I_BOOSTDEGATS && sents[i].type<=I_BOOSTGRAVITE) || sents[i].type==I_SUPERARME))
                         {
                             sendf(-1, 1, "ri3", N_ANNOUNCE, sents[i].type, -1);
                         }
