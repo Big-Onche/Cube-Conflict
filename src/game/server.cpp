@@ -3226,7 +3226,7 @@ namespace server
                     }
                     else connected(ci);
 
-                    if(servaddbots)
+                    if(servaddbots && multiplayer(false))
                     {
                         int botamount = servaddbots - numclients(-1, true, false);
                         if(botamount) {loopi(botamount) aiman::addai(servbotminskill+rnd(servbotmaxskill-servbotminskill), -1);}
@@ -3414,7 +3414,7 @@ namespace server
                 break;
 
             case N_TRYSPAWN:
-                if(!ci || !cq || cq->state.lastspawn>=0 || (smode && !smode->canspawn(cq))) break;
+                if(!ci || !cq || (smode && !smode->canspawn(cq))) break;
                 if(!ci->clientmap[0] && !ci->mapcrc)
                 {
                     ci->mapcrc = -1;
