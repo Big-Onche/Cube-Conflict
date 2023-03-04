@@ -1183,6 +1183,7 @@ namespace game
     extern void moveragdolls();
     extern const playermodelinfo &getplayermodelinfo(gameent *d);
     extern int getplayercolor(gameent *d, int team);
+    enum {T_CLASSE = 0, T_PLAYERMODEL, T_CAPE, T_GRAVE, T_TAUNT};
     extern int chooserandomtraits(int seed, int trait);
     extern void syncplayer();
     extern void swayhudgun(int curtime);

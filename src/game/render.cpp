@@ -105,11 +105,11 @@ namespace game
     {
         switch(trait)
         {
-            case 0: return (seed&0xFFFF)%(sizeof(aptitudes)/sizeof(aptitudes[0])); //Classe
-            case 1: return (seed&0xFFFF)%(sizeof(playermodels)/sizeof(playermodels[0])); //Smiley
-            case 2: return (seed&0xFFFF)%(sizeof(customscapes)/sizeof(customscapes[0])); //Cape
-            case 3: return (seed&0xFFFF)%(sizeof(customstombes)/sizeof(customstombes[0])); //Tombe
-            case 4: return (seed&0xFFFF)%(sizeof(customsdance)/sizeof(customsdance[0])); //Voice
+            case T_CLASSE: return (seed&0xFFFF)%(sizeof(aptitudes)/sizeof(aptitudes[0]));
+            case T_PLAYERMODEL: return (seed&0xFFFF)%(sizeof(playermodels)/sizeof(playermodels[0]));
+            case T_CAPE: return (seed&0xFFFF)%(sizeof(customscapes)/sizeof(customscapes[0]));
+            case T_GRAVE: return (seed&0xFFFF)%(sizeof(customstombes)/sizeof(customstombes[0]));
+            case T_TAUNT: return (seed&0xFFFF)%(sizeof(customsdance)/sizeof(customsdance[0]));
             default: return 0;
         }
     }

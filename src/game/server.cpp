@@ -2917,6 +2917,7 @@ namespace server
             clients.removeobj(ci);
             aiman::removeai(ci);
             if(!numclients(-1, false, true)) noclients(); // bans clear when server empties
+            else if(servaddbots && ci->state.aitype!=AI_BOT && numclients(-1, true, false) < servaddbots) aiman::addai(servbotminskill+rnd(servbotmaxskill-servbotminskill), -1);
             if(ci->local) checkpausegame();
         }
         else connects.removeobj(ci);
@@ -3229,13 +3230,15 @@ namespace server
                     if(servaddbots && multiplayer(false))
                     {
                         int botamount = servaddbots - numclients(-1, true, false);
-                        if(botamount) {loopi(botamount) aiman::addai(servbotminskill+rnd(servbotmaxskill-servbotminskill), -1);}
-                        while(numclients(-1, true, false) > servaddbots) aiman::deleteai();
+                        if(botamount)
+                        {
+                            loopi(botamount) aiman::addai(servbotminskill+rnd(servbotmaxskill-servbotminskill), -1);
+                            if(numclients(-1, true, false) > servaddbots+1) aiman::deleteai();
+                        }
                     }
 
-                    if(gamemillis>10000) sendf(-1, 1, "ri2", N_PREMISSION, 0);
+                    sendf(-1, 1, "ri2", N_PREMISSION, gamemillis<10000 ? true : false);
                     if(m_identique) sendf(-1, 1, "ri2", N_CURWEAPON, curweapon);
-                    break;
 
                     logoutf("Infos%s: %s (%s %s %d)", servlang ? "" : " ", ci->name, servlang ? aptitudes[cq->aptitude].apt_nomEN : aptitudes[cq->aptitude].apt_nomFR, servlang ? "level" : "niveau", ci->level);
                     break;

@@ -187,7 +187,7 @@ namespace ai
 
     ICOMMAND(addbot, "s", (char *s), addmsg(N_ADDBOT, "ri", *s ? clamp(parseint(s), 1, 101) : -1));
 
-    void init(gameent *d, int at, int ocn, int apti, int cape, int tombe, int danse, int sk, int bn, int pm, int col, const char *name, int team)
+    void init(gameent *d, int at, int ocn, int classe, int cape, int grave, int taunt, int sk, int bn, int pm, int col, const char *name, int team)
     {
         gameent *o = newclient(ocn);
 
@@ -217,11 +217,11 @@ namespace ai
         d->plag = 0;
         d->skill = d->level = sk;
         d->playercolor = col;
-                d->aptitude = apti;
-        d->playermodel = chooserandomtraits(pm, 1);
-        d->customcape = chooserandomtraits(cape, 2);
-        d->customtombe = chooserandomtraits(tombe, 3);
-        d->customdanse = chooserandomtraits(danse, 4);
+        d->aptitude = chooserandomtraits(classe, T_CLASSE);
+        d->playermodel = chooserandomtraits(pm, T_PLAYERMODEL);
+        d->customcape = chooserandomtraits(cape, T_CAPE);
+        d->customtombe = chooserandomtraits(grave, T_GRAVE);
+        d->customdanse = chooserandomtraits(taunt, T_TAUNT);
 
         if(resetthisguy) removeweapons(d);
         if(d->ownernum >= 0 && player1->clientnum == d->ownernum)
