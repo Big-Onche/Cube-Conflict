@@ -1778,10 +1778,10 @@ namespace server
     void spawnstate(clientinfo *ci)
     {
         servstate &gs = ci->state;
+        gs.spawnstate(gamemode, ci->aptitude);
         gs.state = CS_ALIVE;
         gs.aptiseed = rnd(4);
         gs.lifesequence = (gs.lifesequence + 1)&0x7F;
-        gs.spawnstate(gamemode, ci->aptitude);
     }
 
     void sendspawn(clientinfo *ci)
@@ -3414,7 +3414,7 @@ namespace server
                 break;
 
             case N_TRYSPAWN:
-                if(!ci || !cq || (smode && !smode->canspawn(cq))) break;
+                if(!ci || !cq || cq->state.state!=CS_DEAD || (smode && !smode->canspawn(cq))) break;
                 if(!ci->clientmap[0] && !ci->mapcrc)
                 {
                     ci->mapcrc = -1;
