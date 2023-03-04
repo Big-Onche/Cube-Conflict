@@ -1153,8 +1153,6 @@ int getclockmillis()
 
 VAR(numcpus, 1, 1, 16);
 
-extern void changerlangue();
-
 VARFP(GAME_LANG, 0, 0, 1,
     execfile("config/keymap.cfg");
     execfile("config/default_binds.cfg");
@@ -1324,6 +1322,7 @@ int main(int argc, char **argv)
 
     logoutf("init: cfg");
     initing = INIT_LOAD;
+    execfile("config/wordbank.cfg");
     execfile("config/stdedit.cfg");
     execfile(game::gameconfig());
     execfile("config/sound.cfg");

@@ -194,8 +194,7 @@ namespace ai
         d->aitype = at;
 
         bool resetthisguy = false;
-        int feminin = rnd(2);
-        formatstring(d->name, "%s%s", rndname(true, feminin, GAME_LANG), rndname(false, feminin, GAME_LANG));
+        formatstring(d->name, "%s", rndname());
         if(!d->name[0])
         {
             if(aidebug) conoutf(CON_DEBUG, "%s assigned to %s at skill %d", colorname(d, name), o ? colorname(o) : "?", sk);

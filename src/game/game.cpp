@@ -921,7 +921,6 @@ namespace game
     {
         player1 = spawnstate(new gameent);
         filtertext(player1->name, GAME_LANG ? "BadUsername" : "PseudoPourri", false, false, MAXNAMELEN);
-        genpseudo(3);
         players.add(player1);
         player1->aptitude = player1_aptitude;
     }

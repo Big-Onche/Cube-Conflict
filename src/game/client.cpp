@@ -7,41 +7,29 @@
 
 VARR(mapofficielle, 0, 0, 1);
 
-char namesparts[2][16], trash[16];
-char *rndname(bool firstpart, bool fem, int lang)
+vector<char *> pronouns; vector<char *> adjectives; vector<char *> fpronouns; vector<char *> fadjectives; vector<char *> fpronounsf; vector<char *> fadjectivesf;
+ICOMMAND(pro, "s", (char *s), pronouns.add(newstring(s)); ); ICOMMAND(adj, "s", (char *s), adjectives.add(newstring(s)); );
+ICOMMAND(fpro, "s", (char *s), fpronouns.add(newstring(s)); ); ICOMMAND(fadj, "s", (char *s), fadjectives.add(newstring(s)); );
+ICOMMAND(fprof, "s", (char *s), fpronounsf.add(newstring(s)); ); ICOMMAND(fadjf, "s", (char *s), fadjectivesf.add(newstring(s)); );
+
+char *rndname()
 {
-    char buf[64];
-    int names[3];
-
-    defformatstring(filepath, "config/names/names_part%s_%s.cfg", firstpart ? "1" : "2", GAME_LANG ? "en" : "fr");
-
-    stream *namelist = openfile(filepath, "r");
-
-    while(namelist->getline(buf, sizeof(buf)))
+    static char result[32];
+    if(pronouns.empty() || fpronouns.empty() || fpronounsf.empty() || adjectives.empty() || fadjectives.empty() || fadjectivesf.empty()) formatstring(result, GAME_LANG ? "BadUsername" : "PseudoPourri");
+    else if(GAME_LANG) formatstring(result, "%s%s", adjectives[rnd(adjectives.length())], pronouns[rnd(pronouns.length())]);
+    else
     {
-        if(sscanf(buf, "nbnames = %i", &names[0])==1) names[1] = rnd(names[0]);
-        else
-        {
-            sscanf(buf, "name %i = %s %s", &names[2], namesparts[firstpart], fem && !GAME_LANG ? namesparts[firstpart] : trash);
-            if(names[2] == names[1])
-            {
-                namelist->close();
-                return namesparts[firstpart];
-            }
-        }
+        int genre = rnd(2);
+        formatstring(result, "%s%s", genre ? fpronounsf[rnd(fpronounsf.length())] : fpronouns[rnd(fpronouns.length())], genre ? fadjectivesf[rnd(fadjectivesf.length())] : fadjectives[rnd(fadjectives.length())]);
+
     }
-    namelist->close();
-    copystring(trash, GAME_LANG ? firstpart ? "Bad" : "Username" : firstpart ? "Pseudo" : "Pourri");
-    return trash;
+    return result;
 }
 
-void genpseudo(int forcelang)
-{
-    int feminin = rnd(2);
-    formatstring(game::player1->name, "%s%s", rndname(true, feminin, forcelang<2 ? GAME_LANG : forcelang-2), rndname(false, feminin, forcelang<2 ? GAME_LANG : forcelang-2));
+ICOMMAND(getrandomname, "", (),
+    formatstring(game::player1->name, "%s", rndname());
     game::addmsg(N_SWITCHNAME, "rs", game::player1->name);
-}
-ICOMMAND(genpseudo, "i", (int *forcelang), {genpseudo(*forcelang);});
+);
 
 VARP(usesteamname, 0, 1, 1);
 void getsteamname()
@@ -58,7 +46,7 @@ void getsteamname()
     #endif
 
 }
-ICOMMAND(getsteamname, "", (), {getsteamname();});
+ICOMMAND(getsteamname, "", (), getsteamname());
 
 bool launch = true;
 VAR(map_atmo, 0, 0, 9);
@@ -213,7 +201,7 @@ namespace game
     void switchname(const char *name)
     {
         filtertext(player1->name, name, false, false, MAXNAMELEN);
-        if(!player1->name[0]) genpseudo();
+        if(!player1->name[0]) formatstring(player1->name, GAME_LANG ? "BadUsername" : "PseudoPourri");
         addmsg(N_SWITCHNAME, "rs", player1->name);
     }
     void printname()
@@ -1588,11 +1576,7 @@ namespace game
                 if(d)
                 {
                     filtertext(text, text, false, false, MAXNAMELEN);
-                    if(!text[0])
-                    {
-                        int feminin = rnd(2);
-                        formatstring(text, "%s%s", rndname(true, feminin, GAME_LANG), rndname(false, feminin, GAME_LANG));
-                    }
+                    if(!text[0]) formatstring(text, "%s", rndname());
                     if(strcmp(text, d->name))
                     {
                         if(!isignored(d->clientnum)) conoutf(GAME_LANG ? "%s is now known as %s" : "%s s'appelle maintenant %s", colorname(d), colorname(d, text));

@@ -1209,7 +1209,7 @@ namespace server
     extern bool pickup(int i, int sender);
 }
 
-extern char *rndname(bool firstpart, bool fem, int lang);
+extern char *rndname();
 extern bool randomevent(int probability);
 extern void addsleep(int *msec, char *cmd);
 extern void createdrop(const vec *o, int type);

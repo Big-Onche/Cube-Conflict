@@ -563,7 +563,6 @@ extern bool IS_USING_STEAM, IS_ON_OFFICIAL_SERV, UI_PLAYMUSIC;
 extern int GAME_LANG; // 0 = FR, 1 = EN
 extern int servlang;  // 0 = FR, 1 = EN
 extern void getsteamname();
-extern void genpseudo(int forcelang = 0);
 
 // maps & atmos
 extern int atmos;

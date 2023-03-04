@@ -73,6 +73,7 @@ void menuprocess()
         if(veryfirstlaunch)
         {
             if(IS_USING_STEAM) {getsteamname();}
+            else execute("getrandomname");
             UI::showui("firstlaunch");
             veryfirstlaunch = 0;
         }
