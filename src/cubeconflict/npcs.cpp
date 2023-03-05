@@ -1,6 +1,8 @@
-// pimped old monster.h from sauerbraten: implements AI for single player monsters, currently client only
+// pimped old monster.cpp from sauerbraten: implements AI for single player monsters, currently client only (now with soft coded monsters!)
 #include "gfx.h"
 #include "stats.h"
+
+#define MAXNPCS 128
 
 extern int physsteps;
 int gamesecs;
@@ -14,41 +16,89 @@ namespace game
     static const int TOTMFREQ = 24;
     static const int NUMMONSTERTYPES = 20;
 
-    struct pnjtype      // see docs for how these values modify behaviour
-    {
-        short gun, speed, health, freq, lag, rate, pain, triggerdist, loyalty, bscale, weight, respawntime, dropvalue;
-        bool friendly;
-        short hellosound, painsound, angrysound, diesound;
-        const char *namefr, *nameen, *mdlname, *shieldname, *hatname, *capename, *boost1modelname, *boost2modelname;
-    };
-
     enum { NPC_JO = 0, NPC_BJO, NPC_ALIENK, NPC_SPIKE, NPC_BOING, NPC_HARTM, NPC_SWITCH, NPC_LARRY, NPC_KEVIN, //npcs for rpg
          M_KEVIN, M_DYLAN, M_YALIEN, M_B_ALIENK, M_ARMOR, M_NINJA, M_B_GIANT, M_CAMPER, M_ALIENS, M_UFO, M_PYRO, NUMMONSTERS};  // monsters for dmsp
 
-    static const pnjtype pnjtypes[NUMMONSTERTYPES] =
-    {   //weapon        sp. hea.  freq  lag  rate pain  trigdist. loy. size  weight  res. drop fri.  hellosnd.   painsnd.   angrysnd.      diesnd.        namefr             nameen              mdlldir              shielddir              hatdir             capedir             boost1dir        boost2dir
-        { GUN_S_NUKE,   10, 5000, 0,    30,  5,   100,  100,      5,   12,   85,     1,   0,   true,        -1,         -1,        -1,         -1, "Jean Onche",      "Jean Onche",       "smileys/hap/jo",    "shields/gold/100",    "hats/crown",      "capes/cape_elite", NULL,            NULL},
-        { GUN_CACFLEAU, 15, 2500, 0,    30,  5,    50,  100,      5,   12,   90,     1,   0,   true,        -1,  S_RAGETIR,        -1,         -1, "Bjorn",           "Bjorn",            "npcs/bjorn",        "shields/wood/60",     NULL,              NULL,               NULL,            NULL},
-        { GUN_SPOCKGUN, 10, 2000, 0,     5,  2,   150,  100,      1,   10,   70,     1,   0,   true, S_ALIEN_H,  S_ALIEN_P, S_ALIEN_A,  S_ALIEN_D, "le roi alien",    "the alien king",   "npcs/alien_king",   "shields/magnet/100",  "hats/crown/big",  NULL,               NULL,            NULL},
-        { GUN_ARTIFICE,  5, 1500, 0,    75, 10,    50,  100,      5,   10,   60,     1,   0,   true,        -1,  S_ADULT_P,        -1,         -1, "Spike",           "Spike",            "smileys/content",   NULL,                  NULL,              NULL,               "boosts/steros", "boosts/epo"},
-        { GUN_ARBALETE, 20, 2000, 0,     5,  2,    25,  100,      5,    8,   70,     1,   0,   true,        -1,  S_ADULT_P,        -1,         -1, "Boing",           "Boing",            "smileys/fou/b",     NULL,                  "hats/3",          NULL,               NULL,            NULL},
-        { GUN_MOSSBERG,  8, 2000, 0,     5,  2,    25,  100,      5,   12,   80,     1,   0,   true,        -1,  S_ADULT_P,        -1,         -1, "Sergent Fartman", "Sergeant Fartman", "smileys/colere/sh", NULL,                  "hats/green",      NULL,               NULL,            NULL},
-        { GUN_RAIL,     10, 1500, 0,    15,  2,    50,  100,      5,   10,   80,     1,   0,   true,        -1,  S_ADULT_P,        -1,         -1, "Switch",          "Switch",           "smileys/sournois",  "shields/iron/100",    "hats/5",          NULL,               NULL,            NULL},
-        { GUN_SMAW,      8, 1250, 0,    15,  2,    50,  100,      5,   10,   80,     1,   0,   true,        -1,  S_ADULT_P,        -1,         -1, "Larry",           "Larry",            "smileys/cool",      NULL,                  "hats/0",          NULL,               NULL,            NULL},
-        { GUN_CAC349,    5,  500, 0,     5,  2,   150,  125,      1,    6,   40,     60,  0,   false,       -1, S_MINION_P,        -1, S_MINION_D, "un Kévin",        "a Moron",          "npcs/kevin",        "shields/bois/20",     NULL,              NULL,               NULL,            NULL},
-        // DMSP
-        { GUN_CAC349,   10,  350, 9,    10,  5,     1,  300,      1,    6,   40,     60,  0,   false,       -1,         S_MINION_P,        -1, S_MINION_D, "un Kévin",        "a moron",          "npcs/kevin",        "shields/bois/20",     NULL,              NULL,               NULL,            NULL},
-        { GUN_GLOCK,     8,  350, 9,    10,  5,     1,  300,      1,    6,   40,     60,  0,   false,       -1,         S_MINION_P,        -1, S_MINION_D, "un Dylan",        "a fool",           "npcs/dylan",        "shields/bois/20",     NULL,              NULL,               NULL,            NULL},
-        { GUN_SPOCKGUN, 15,  550, 4,     5,  5,     1,  500,      5,    6,   40,     60,  1,   false,       -1,          S_ALIEN_P, S_ALIEN_A,  S_ALIEN_D, "un jeune alien",  "a young alien",    "npcs/alien_king/y", NULL,                  NULL,              NULL,               NULL,            NULL},
-        { GUN_GRAP1,    20, 3000, 0,     0,  0,     1,  150,      5,   10,   70,     90,  4,   false,       -1,          S_ALIEN_P, S_ALIEN_A,  S_ALIEN_D, "le roi alien",    "the alien king",   "npcs/alien_king",   "shields/magnet/100",  "hats/crown/big",  NULL,               NULL,            NULL},
-        { GUN_MOSSBERG, 15, 1500, 0,     0,  0,     1,  150,      5,   10,  150,     90,  3,   false,       -1, S_IMPACTPOWERARMOR,     -1, S_EXPL_PARMOR, "une armure hantée", "a haunted armor", "smileys/armureassistee/red", NULL,        "hats/7",          NULL,               NULL,            NULL},
-        { GUN_CACNINJA, 35, 1000, 0,     5,  2,     1,  150,      5,    8,   70,     90,  2,   false,       -1,          S_ADULT_P,        -1,  S_ADULT_D, "un Ninja",        "a Ninja",          "smileys/fou/b",     NULL,                  "hats/3",          NULL,       "boosts/epo",            NULL},
-        { GUN_S_ROQUETTES, 10, 5000, 0, 50, 50,     1,  300,     10,   20,  750,     60,  4,   false,       -1,          S_GIANT_P,        -1,  S_GIANT_D, "un Géant",        "a Giant",          "smileys/content/g", "shields/gold/100",    "hats/2",          NULL,               NULL,            NULL},
-        { GUN_SV98,      5,  600, 2,    30,  1,     1,  200,      1,   10,   85,     60,  2,   false,       -1,          S_ADULT_P,        -1,  S_ADULT_D, "un campeur",      "a camper",         "smileys/bug",       NULL,                  "hats/9",          NULL,               NULL,            NULL},
-        { GUN_PULSE,    12, 1200, 1,     0,  0,     1,  500,      5,   10,   80,     60,  1,   false,       -1,          S_ALIEN_P, S_ALIEN_A,  S_ALIEN_D, "un soldat alien", "a alien soldier",  "npcs/alien_king",  "shields/magnet/40",    "hats/0",          NULL,               NULL,            NULL},
-        { GUN_SMAW,     12, 4000, 0,     0,  0,     1,  500,      5,   50, 3000,     60,  4,   false,       -1,          S_ALIEN_P, S_ALIEN_A,  S_ALIEN_D, "une soucoupe volante", "an alien ship", "mapmodel/vaisseaux/ufo", NULL,           NULL,              NULL,               NULL,            NULL},
-        { GUN_LANCEFLAMMES, 18, 1000, 0, 0,  0,     1,  300,      1,   10,  100,     60,  3,   false,       -1,          S_ADULT_P, S_ALIEN_A,  S_ADULT_D, "un pyromane",     "an arsonist",      "smileys/sournois", "shields/iron/100",     "hats/8", "boosts/joint",              NULL,            NULL},
+    class npc
+    {
+    private:
+        string nameen, namefr, mdlname, shieldname, hatname, capename, boost1mdlname, boost2mdlname;
+        bool friendly;
+        int gun, speed, health, weight, bscale, pain, trigdist, loyalty, respawn, dropval, freq;
+        int hellosnd, painsnd, angrysnd, diesnd;
+
+    public:
+        void setnpcbase(char *ne, char *nf, int fr, int t, int r, int d, int f) { //npc base information
+            formatstring(nameen, "%s", ne);
+            formatstring(namefr, "%s", nf);
+            friendly = fr; trigdist = t; respawn = r; dropval = d; freq = f;
+        }
+
+        const char* npcnameen() const { return nameen; }
+        const char* npcnamefr() const { return namefr; }
+        bool isfriendly() const { return friendly; }
+        int npctrigdist() const { return trigdist; }
+        int npcrespawn() const { return respawn; }
+        int npcdropval() const { return dropval; }
+        int npcfreq() const { return freq; }
+
+        void setnpcstats(int g, int s, int h, int w, int b, int p, int lo) { //npc stats (mainly for combat)
+             gun = g; speed = s; health = h; weight = w; bscale = b; pain = p; loyalty = lo;
+        }
+
+        int npcgun() const { return gun; }
+        int npcspeed() const { return speed; }
+        int npchealth() const { return health; }
+        int npcweight() const { return weight; }
+        int npcbscale() const { return bscale; }
+        int npcpain() const { return pain; }
+        int npcloyalty() const { return loyalty; }
+
+        void setnpcsounds(int hs, int ps, int as, int ds) { //npc sounds
+            hellosnd = hs; painsnd = ps; angrysnd = as; diesnd = ds;
+        }
+
+        int npchsnd() const { return hellosnd; }
+        int npcpsnd() const { return painsnd; }
+        int npcasnd() const { return angrysnd; }
+        int npcdsnd() const { return diesnd; }
+
+        void setnpcmodels(char *mn, char *sn, char *hn, char *cn, char *b1n, char *b2n) {  //npc 3d models
+            formatstring(mdlname, "%s", mn);
+            formatstring(shieldname, "%s", sn);
+            formatstring(hatname, "%s", hn);
+            formatstring(capename, "%s", cn);
+            formatstring(boost1mdlname, "%s", b1n);
+            formatstring(boost2mdlname, "%s", b2n);
+        }
+
+        const char* npcmdl() const { return mdlname; }
+        const char* npcshield() const { return shieldname; }
+        const char* npchat() const { return hatname; }
+        const char* npccape() const { return capename; }
+        const char* npcboost1() const { return boost1mdlname; }
+        const char* npcboost2() const { return boost2mdlname; }
     };
+
+    npc npcs[MAXNPCS];
+
+    ICOMMAND(npcbase, "issiiiii", (int *id, char *ne, char *nf, int *fr, int *t, int *r, int *d, int *f),
+        npcs[*id].setnpcbase(ne, nf, *fr, *t, *r, *d, *f);
+    );
+
+    ICOMMAND(npcstats, "iiiiiiii", (int *id, int *g, int *s, int *h, int *w, int *b, int *p, int *lo),
+        npcs[*id].setnpcstats(*g, *s, *h, *w, *b, *p, *lo);
+    );
+
+    ICOMMAND(npcsounds, "iiiii", (int *id, int *hs, int *ps, int *as, int *ds),
+        npcs[*id].setnpcsounds(*hs, *ps, *as, *ds);
+    );
+
+    ICOMMAND(npcmodels, "issssss", (int *id, char *mn, char *sn, char *hn, char *cn, char *b1n, char *b2n),
+        npcs[*id].setnpcmodels(mn, sn, hn, cn, b1n, b2n);
+    );
+
+    ICOMMAND(updatenpcs, "", (), execfile("config/npcs.cfg"); );
 
     VAR(skill, 1, 10, 10);
     VAR(killsendsp, 0, 1, 1);
@@ -87,32 +137,32 @@ namespace game
                 _type = 0;
             }
             mtype = _type;
-            const pnjtype &t = pnjtypes[mtype];
+            const npc &t = npcs[mtype];
             eyeheight = 8.0f;
             aboveeye = 7.0f;
-            radius *= t.bscale/10.0f;
+            radius *= t.npcbscale()/10.0f;
             xradius = yradius = radius;
-            eyeheight *= t.bscale/10.0f;
-            aboveeye *= t.bscale/10.0f;
-            weight = t.weight;
+            eyeheight *= t.npcbscale()/10.0f;
+            aboveeye *= t.npcbscale()/10.0f;
+            weight = t.npcweight();
             if(_state!=M_SLEEP) spawnplayer(this);
             trigger = lastmillis+_trigger;
             targetyaw = spawnyaw = yaw = (float)_yaw;
             targetpitch = pitch = (float)_pitch;
             move = _move;
             enemy = player1;
-            gunselect = t.gun;
-            maxspeed = (float)t.speed*4;
-            health = t.health;
+            gunselect = t.npcgun();
+            maxspeed = (float)t.npcspeed()*4;
+            health = t.npchealth();
             armour = 0;
             loopi(NUMGUNS) ammo[i] = 10000;
             pitch = 0;
             roll = 0;
             state = CS_ALIVE;
             anger = 0;
-            friendly = t.friendly;
+            friendly = t.isfriendly();
             monsterlastdeath = 0;
-            copystring(name, GAME_LANG ? t.nameen : t.namefr);
+            copystring(name, GAME_LANG ? t.npcnameen() : t.npcnamefr());
         }
 
         void normalize_yaw(float angle)
@@ -156,6 +206,8 @@ namespace game
             }
         }
 
+        const int positions[4][2] = { {25, 25}, {-25, -25}, {25, -25}, {-25, 25} };
+
         void monsteraction(int curtime)           // main AI thinking routine, called every frame for every monster
         {
             if(player1->state==CS_SPECTATOR || player1->state==CS_EDITING) return;
@@ -175,7 +227,7 @@ namespace game
                 if(targetyaw>yaw) yaw = targetyaw;
             }
 
-            if(dist < pnjtypes[mtype].triggerdist*(friendly ? 4 : 2))
+            if(dist < npcs[mtype].npctrigdist()*(friendly ? 4 : 2))
             {
                 targetpitch < -45 ? targetpitch = -45 : targetpitch > 45 ? targetpitch = 45 : targetpitch;
                 normalize_pitch(targetpitch);
@@ -196,7 +248,7 @@ namespace game
                 case M_SLEEP: targetpitch = 0; break;
                 default:
                     int trigdist = dist*(player1->crouched() ? 2 : 1);
-                    if(trigdist < pnjtypes[mtype].triggerdist) targetpitch = asin((enemy->o.z - o.z) / dist) / RAD;            // if player1 is close to pnj, pnj look at the player
+                    if(trigdist < npcs[mtype].npctrigdist()) targetpitch = asin((enemy->o.z - o.z) / dist) / RAD;            // if player1 is close to pnj, pnj look at the player
                     else targetpitch = 0;
             }
 
@@ -205,7 +257,7 @@ namespace game
             if(blocked)                                                            // special case: if we run into scenery
             {
                 blocked = false;
-                if(!rnd(2500/pnjtypes[mtype].speed)) jumping = true;               // try to jump over obstackle (rare)
+                if(!rnd(2500/npcs[mtype].npcspeed())) jumping = true;               // try to jump over obstackle (rare)
                 else if(trigger<lastmillis && (((monsterstate!=M_AGGRO) && (monsterstate!=M_RETREAT)) || !rnd(5)))    // search for a way around (common)
                 {
                     targetyaw += 90+rnd(180);                                      // patented "random walk" AI pathfinding (tm) ;)
@@ -227,12 +279,12 @@ namespace game
                 case M_NEUTRAL: if(trigger+10000<lastmillis) transition(M_FRIENDLY, 1, 100, 200);
 
                 case M_FRIENDLY:
-                    if(dist < pnjtypes[mtype].triggerdist)
+                    if(dist < npcs[mtype].npctrigdist())
                     {
                         targetyaw = enemyyaw;
                         if(pissoffnpc)
                         {
-                            transition(M_ANGRY, 1, pnjtypes[mtype].lag, 10);
+                            transition(M_ANGRY, 1, rnd(250), 10);
                             pissoffnpc = 0;
                         }
                     }
@@ -242,6 +294,7 @@ namespace game
                 case M_PAIN:
                 case M_ATTACKING:
                 case M_SEARCH:
+                    if(player1->aptitude==APT_ESPION && player1->abilitymillis[ABILITY_2]) break;
                     if(trigger<lastmillis) transition(M_AGGRO, 1, 100, 200);
                     break;
 
@@ -252,20 +305,17 @@ namespace game
                     normalize_yaw(enemyyaw);
                     float angle = (float)fabs(enemyyaw-yaw);
                     int trigdist = dist*(player1->crouched() ? 2 : 1);                           // if player1 is crouched, minimal trigger distance is reduced by 2
-                    if(trigdist < pnjtypes[mtype].triggerdist/(friendly ? 2 : 4)                   // the better the angle to the player, the further the monster can see/hear
-                    ||(trigdist < pnjtypes[mtype].triggerdist/(friendly ? 1.5f : 3) && angle<135)
-                    ||(trigdist < pnjtypes[mtype].triggerdist/(friendly ? 1 : 2) && angle<90)
-                    ||(trigdist < pnjtypes[mtype].triggerdist && angle<45)
-                    ||(monsterhurt && o.dist(player1->o) < pnjtypes[mtype].triggerdist*(friendly ? 4 : 2)))
+                    if(trigdist < npcs[mtype].npctrigdist()/(friendly ? 2 : 4)                   // the better the angle to the player, the further the monster can see/hear
+                    ||(trigdist < npcs[mtype].npctrigdist()/(friendly ? 1.5f : 3) && angle<135)
+                    ||(trigdist < npcs[mtype].npctrigdist()/(friendly ? 1 : 2) && angle<90)
+                    ||(trigdist < npcs[mtype].npctrigdist() && angle<45)
+                    ||(monsterhurt && o.dist(player1->o) < npcs[mtype].npctrigdist()*(friendly ? 4 : 2)))
                     {
                         vec target;
                         if(raycubelos(o, enemy->o, target))
                         {
                             transition(friendly ? M_FRIENDLY : M_SEARCH, 1, 500, 200);
-                            playsound(pnjtypes[mtype].hellosound, &o);
-                            //transition(monsterhurt ? M_NEUTRAL : friendly ? M_FRIENDLY : M_SEARCH, 1, 500, 200);
-                            //if(monsterhurt) break;
-                            //if(this->state==M_FRIENDLY) playsound(pnjtypes[mtype].hellosound, &o, 0, 0, 0, 250, -1, 500);
+                            playsound(npcs[mtype].npchsnd(), &o);
                         }
                     }
                     break;
@@ -286,7 +336,7 @@ namespace game
                     if(trigger<lastmillis)
                     {
                         targetyaw = -atan2(spawnpos.x - o.x, spawnpos.y - o.y)/RAD;
-                        transition(M_RETREAT, 1, pnjtypes[mtype].rate, 0);
+                        transition(M_RETREAT, 1, 0, 0);
                         if(o.dist(spawnpos)<10) {targetyaw = spawnyaw; transition(M_SLEEP, 0, 600, 0);}
                     }
                     break;
@@ -294,10 +344,13 @@ namespace game
                 case M_AGGRO:                        // monster has visual contact, heads straight for player and may want to shoot at any time
                     targetyaw = enemyyaw;
 
-                    if(dist > pnjtypes[mtype].triggerdist*2 && !m_dmsp) {transition(friendly ? M_NEUTRAL : M_RETREAT, 0, 600, 0); break;}
+                    if(dist > npcs[mtype].npctrigdist()*2 && !m_dmsp) {transition(friendly ? M_NEUTRAL : M_RETREAT, 0, 600, 0); break;}
+                    else if(player1->aptitude==APT_ESPION && player1->abilitymillis[ABILITY_2]) {transition(M_SEARCH, 0, 600, 0); break;}
+
                     if(trigger<lastmillis)
                     {
                         vec target;
+
                         if(!raycubelos(o, enemy->o, target))    // no visual contact anymore, let monster get as close as possible then search for player
                         {
                             transition(M_AGGRO, 1, 800, 500);
@@ -305,7 +358,7 @@ namespace game
                         else
                         {
                             bool melee = false, longrange = false;
-                            switch(pnjtypes[mtype].gun)
+                            switch(npcs[mtype].npcgun())
                             {
                                 case GUN_CAC349: case GUN_CACFLEAU: case GUN_CACMARTEAU: case GUN_CACMASTER: case GUN_CACNINJA: melee = true; break;
                                 case GUN_SV98: case GUN_SKS: case GUN_ARBALETE: case GUN_S_CAMPOUZE: longrange = true; break;
@@ -314,11 +367,12 @@ namespace game
                             if((!melee || dist<50) && !rnd(longrange ? (int)dist/12+1 : min((int)dist/12+1,6)) && enemy->state==CS_ALIVE)      // get ready to fire
                             {
                                 attacktarget = target;
+                                if(player1->aptitude==APT_ESPION && player1->abilitymillis[ABILITY_1]) attacktarget.add(vec(positions[player1->aptiseed][0], positions[player1->aptiseed][1], 0));
                                 transition(M_AIMING, friendly ? 0 : 1, 1, 10);
                             }
                             else                                                        // track player some more
                             {
-                                transition(M_AGGRO, 1, pnjtypes[mtype].rate, 0);
+                                transition(M_AGGRO, 1, 0, 0);
                             }
                         }
                     }
@@ -344,7 +398,7 @@ namespace game
 
         void checkmonsterstriggers()
         {
-            if(pnjtypes[mtype].friendly && player1->o.dist(this->o) < 40 && (this->monsterstate==M_FRIENDLY || this->monsterstate==M_NEUTRAL) && gfx::forcecampos==-1)
+            if(npcs[mtype].isfriendly() && player1->o.dist(this->o) < 40 && (this->monsterstate==M_FRIENDLY || this->monsterstate==M_NEUTRAL) && gfx::forcecampos==-1)
             {
                 defformatstring(id, "npc_dial_%d", tag);
                 if(identexists(id)) execute(id);
@@ -360,19 +414,19 @@ namespace game
 
         void checkmonstersrespawns()
         {
-            if(totalmillis - monsterlastdeath > pnjtypes[mtype].respawntime*1000)
+            if(totalmillis - monsterlastdeath > npcs[mtype].npcrespawn()*1000)
             {
                 targetyaw = spawnyaw;
                 o = spawnpos;
                 o.addz(4);
                 state = CS_ALIVE;
-                health = pnjtypes[mtype].health;
+                health = npcs[mtype].npchealth();
             }
         }
 
         void monsterpain(int damage, gameent *d, int atk)
         {
-            playsound(pnjtypes[mtype].painsound, &o, 0, 0, 0, 250, -1, 500);
+            playsound(npcs[mtype].npcpsnd(), &o, 0, 0, 0, 250, -1, 500);
 
             if(d->type==ENT_AI && !friendly)     // a monster hit us
             {
@@ -380,9 +434,9 @@ namespace game
                 {
                     anger++;     // don't attack straight away, first get angry
                     int _anger = d->type==ENT_AI && mtype==((monster *)d)->mtype ? anger/2 : anger;
-                    if(_anger >= pnjtypes[mtype].loyalty)
+                    if(_anger >= npcs[mtype].npcloyalty())
                     {
-                        transition(M_AGGRO, 1, pnjtypes[mtype].rate, 200);
+                        transition(M_AGGRO, 1, 0, 200);
                         enemy = d;     // monster infight if very angry
                     }
                 }
@@ -391,11 +445,11 @@ namespace game
             {
                 if(friendly)
                 {
-                    if(this->monsterstate==M_FRIENDLY) transition(M_NEUTRAL, 1, pnjtypes[mtype].rate, 200);      //if you mess with a friendly pnj, he gets neutral for a moment
+                    if(this->monsterstate==M_FRIENDLY) transition(M_NEUTRAL, 1, 0, 200);      //if you mess with a friendly pnj, he gets neutral for a moment
                     else if(this->monsterstate==M_NEUTRAL)
                     {
-                        transition(M_ANGRY, 1, pnjtypes[mtype].lag, 10);    //if you mess with a neutral pnj, he gets aggressive
-                        playsound(pnjtypes[mtype].angrysound, &o, 0, 0, 0, 200, -1, 400);
+                        transition(M_ANGRY, 1, rnd(250), 10);    //if you mess with a neutral pnj, he gets aggressive
+                        playsound(npcs[mtype].npcasnd(), &o, 0, 0, 0, 200, -1, 400);
                     }
                     return;
                 }
@@ -410,13 +464,13 @@ namespace game
             {
                 state = CS_DEAD;
                 lastpain = lastmillis;
-                playsound(pnjtypes[mtype].diesound, &o, 0, 0, 0, 200, -1, 400);
+                playsound(npcs[mtype].npcdsnd(), &o, 0, 0, 0, 200, -1, 400);
                 monsterkilled(d);
                 gibeffect(max(-health, 0), vel, this);
                 monsterlastdeath = totalmillis;
                 defformatstring(id, "monster_dead_%d", tag);
                 if(identexists(id)) execute(id);
-                if(m_dmsp && gamesecs<599) npcdrop(&monsterhurtpos, pnjtypes[mtype].dropvalue);
+                if(m_dmsp && gamesecs<599) npcdrop(&monsterhurtpos, npcs[mtype].npcdropval());
                 if(player1->aptitude==APT_FAUCHEUSE && player1->health<1500) player1->health = min(player1->health+50, 1500);
                 switch(mtype)
                 {
@@ -427,8 +481,8 @@ namespace game
             }
             else
             {
-                transition(M_PAIN, 0, pnjtypes[mtype].pain, 200);      // in this state monster won't attack
-                playsound(pnjtypes[mtype].painsound, &o, 0, 0, 0, 200, -1, 400);
+                transition(M_PAIN, 0, npcs[mtype].npcpain(), 200);      // in this state monster won't attack
+                playsound(npcs[mtype].npcpsnd(), &o, 0, 0, 0, 200, -1, 400);
             }
         }
     };
@@ -451,8 +505,8 @@ namespace game
     {
         loopi(NUMMONSTERTYPES)
         {
-            preloadmodel(pnjtypes[i].mdlname);
-            preloadmodel(pnjtypes[i].hatname);
+            preloadmodel(npcs[i].npcmdl());
+            preloadmodel(npcs[i].npcmdl());
         }
     }
 
@@ -466,7 +520,7 @@ namespace game
         else
         {
             int n = rnd(TOTMFREQ), type;
-            for(int i = 0; ; i++) if((n -= pnjtypes[i].freq)<0) { type = i; break; }
+            for(int i = 0; ; i++) if((n -= npcs[i].npcfreq())<0) { type = i; break; }
             monsters.add(new monster(type, rnd(360), 0, 0, M_SEARCH, 1000, 1));
         }
     }
@@ -611,7 +665,7 @@ namespace game
         {
             monster *o = monsters[i];
 
-            if(m_dmsp ? o->state==CS_ALIVE : pnjtypes[o->mtype].friendly)
+            if(m_dmsp ? o->state==CS_ALIVE : npcs[o->mtype].isfriendly())
             {
                 setbliptex(m_dmsp ? 2 : 1, "");
                 gle::defvertex(2);
@@ -681,7 +735,7 @@ namespace game
                 else
                 {
                     //////////////////////////////////// Npc's anims ////////////////////////////////////////////////////////////////////////
-                    if(!pnjtypes[m.mtype].friendly)
+                    if(!npcs[m.mtype].isfriendly())
                     {
                         if(m.inwater && m.physstate<=PHYS_FALL)
                         {
@@ -719,14 +773,14 @@ namespace game
                     }
 
                     //////////////////////////////////// Other mdls rendering ////////////////////////////////////////////////////////////////////////
-                    if(pnjtypes[m.mtype].shieldname) a[ai++] = modelattach("tag_shield", pnjtypes[m.mtype].shieldname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-                    if(pnjtypes[m.mtype].hatname) a[ai++] = modelattach("tag_hat", pnjtypes[m.mtype].hatname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-                    if(pnjtypes[m.mtype].capename) a[ai++] = modelattach("tag_cape", pnjtypes[m.mtype].capename, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-                    if(pnjtypes[m.mtype].boost1modelname) a[ai++] = modelattach("tag_boost1", pnjtypes[m.mtype].boost1modelname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-                    if(pnjtypes[m.mtype].boost2modelname) a[ai++] = modelattach("tag_boost2", pnjtypes[m.mtype].boost2modelname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+                    if(npcs[m.mtype].npcshield()) a[ai++] = modelattach("tag_shield", npcs[m.mtype].npcshield(), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+                    if(npcs[m.mtype].npchat()) a[ai++] = modelattach("tag_hat", npcs[m.mtype].npchat(), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+                    if(npcs[m.mtype].npccape()) a[ai++] = modelattach("tag_cape", npcs[m.mtype].npccape(), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+                    if(npcs[m.mtype].npcboost1()) a[ai++] = modelattach("tag_boost1", npcs[m.mtype].npcboost1(), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+                    if(npcs[m.mtype].npcboost2()) a[ai++] = modelattach("tag_boost2", npcs[m.mtype].npcboost2(), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
                 }
 
-                rendermodel(pnjtypes[m.mtype].mdlname, anim, o, yaw, pitch, 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY, &m, a[0].tag ? a : NULL, basetime, 0, fade);
+                rendermodel(npcs[m.mtype].npcmdl(), anim, o, yaw, pitch, 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY, &m, a[0].tag ? a : NULL, basetime, 0, fade);
                 if(dbgpnj) debugpnj(&m);
             }
         }
