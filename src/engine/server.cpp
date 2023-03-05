@@ -1041,40 +1041,32 @@ static bool dedicatedserver = false;
 
 bool isdedicatedserver() { return dedicatedserver; }
 
-string CCversion = "Fichier de version indisponible";
-
-void getCCversion()
+char *gameversion()
 {
-    stream *versionfile = openfile("config/gameversion.cfg", "r");
-    if(!versionfile) return;
-
+    static char s[32] = {0};
     char buf[32], verpt1[16], verpt2[16];
 
-    while(versionfile->getline(buf, sizeof(buf)))
+    stream *versionfile = openfile("config/gameversion.cfg", "r");
+    if(!versionfile || !versionfile->getline(buf, sizeof(buf))) formatstring(s, "Undefined");
+    else
     {
-        int i;
-
-        for(i = 0; (i < 500 && buf[i] != '\0'); i++)
-            buf[i] = buf[i];
-
-        sscanf(buf, "%s %s", verpt1, verpt2);
+        sscanf(buf, "%15s %15s", verpt1, verpt2);
+        formatstring(s, "%s %s", verpt1, verpt2);
     }
-    formatstring(CCversion, "%s %s", verpt1, verpt2);
-
-    versionfile->close();
+    if(versionfile) versionfile->close();
+    return s;
 }
 
 void rundedicatedserver()
 {
     dedicatedserver = true;
-    getCCversion();
     string servtime;
     time_t t = time(NULL);
     size_t len = strftime(servtime, sizeof(servtime), "%d-%m-%Y %Hh %Mmin %Ssec", localtime(&t));
     servtime[min(len, sizeof(servtime)-1)] = '\0';
     logoutf("%s | %s", servlang ? "Server started" : "Serveur en ligne", servtime);
     logoutf("IP%s: %s | Port: %d", servlang ? "" : " ", !strcmp(serverip, "") ? "LAN" : serverip, serverport);
-    logoutf("Version%s: %s", servlang ? "" : " ", CCversion);
+    logoutf("Version%s: %s", servlang ? "" : " ", gameversion());
     logoutf("--------------------------------------------------------------");
 #ifdef WIN32
     SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
