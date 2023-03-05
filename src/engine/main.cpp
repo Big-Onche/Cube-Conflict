@@ -1323,10 +1323,10 @@ int main(int argc, char **argv)
     logoutf("init: cfg");
     initing = INIT_LOAD;
     execfile("config/wordbank.cfg");
-    execfile("config/npcs.cfg");
     execfile("config/stdedit.cfg");
     execfile(game::gameconfig());
     execfile("config/sound.cfg");
+    execfile("config/npcs.cfg");
     execfile("config/heightmap.cfg");
     execfile("config/blendbrush.cfg");
     if(game::savedservers()) execfile(game::savedservers(), false);
