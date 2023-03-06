@@ -22,13 +22,12 @@ namespace game
         int npcclass, gun, speed, health, weight, bscale, painlag, trigdist, loyalty, respawn, dropval, spawnfreq;
         int hellosnd, painsnd, angrysnd, diesnd;
         // can be useful in the future to select difficulty and manipulate those vars
-        int npctrigdist() const { return trigdist; }
+        int npctrigdist() const { return trigdist/(player1->crouched() ? 2 : 1); }
         int npcrespawn() const { return respawn; }
         int npcspeed() const { return speed; }
         int npchealth() const { return health; }
         int npcpain() const { return painlag; }
     };
-
     npc npcs[MAXNPCS];
     //basic informations about npcs
     ICOMMAND(npcbase, "issiiiiii", (int *id, char *ne, char *nf, int *f, int *c, int *t, int *r, int *d, int *s),
@@ -216,7 +215,7 @@ namespace game
                 case M_SLEEP: targetpitch = 0; break;
                 default:
                     int trigdist = dist*(player1->crouched() ? 2 : 1);
-                    if(trigdist < npcs[mtype].npctrigdist()) targetpitch = asin((enemy->o.z - o.z) / dist) / RAD;            // if player1 is close to pnj, pnj look at the player
+                    if(trigdist < npcs[mtype].npctrigdist()) targetpitch = asin((enemy->o.z - o.z) / dist) / RAD; // if player1 is close to npc, npc look at the player
                     else targetpitch = 0;
             }
 
@@ -272,11 +271,10 @@ namespace game
 
                     normalize_yaw(enemyyaw);
                     float angle = (float)fabs(enemyyaw-yaw);
-                    int trigdist = dist*(player1->crouched() ? 2 : 1);                           // if player1 is crouched, minimal trigger distance is reduced by 2
-                    if(trigdist < npcs[mtype].npctrigdist()/(friendly ? 2 : 4)                   // the better the angle to the player, the further the monster can see/hear
-                    ||(trigdist < npcs[mtype].npctrigdist()/(friendly ? 1.5f : 3) && angle<135)
-                    ||(trigdist < npcs[mtype].npctrigdist()/(friendly ? 1 : 2) && angle<90)
-                    ||(trigdist < npcs[mtype].npctrigdist() && angle<45)
+                    if(dist < npcs[mtype].npctrigdist()/(friendly ? 2 : 4)                   // the better the angle to the player, the further the monster can see/hear
+                    ||(dist < npcs[mtype].npctrigdist()/(friendly ? 1.5f : 3) && angle<135)
+                    ||(dist < npcs[mtype].npctrigdist()/(friendly ? 1 : 2) && angle<90)
+                    ||(dist < npcs[mtype].npctrigdist() && angle<45)
                     ||(monsterhurt && o.dist(player1->o) < npcs[mtype].npctrigdist()*(friendly ? 4 : 2)))
                     {
                         vec target;
@@ -312,7 +310,7 @@ namespace game
                 case M_AGGRO:                        // monster has visual contact, heads straight for player and may want to shoot at any time
                     targetyaw = enemyyaw;
 
-                    if(dist > npcs[mtype].npctrigdist()*2 && !m_dmsp) {transition(friendly ? M_NEUTRAL : M_RETREAT, 0, 600, 0); break;}
+                    if(dist > npcs[mtype].npctrigdist()*(friendly ? 15 : 2) && !m_dmsp) {transition(friendly ? M_NEUTRAL : M_RETREAT, 0, 600, 0); break;}
                     else if(player1->aptitude==APT_ESPION && player1->abilitymillis[ABILITY_2]) {transition(M_SEARCH, 0, 600, 0); break;}
 
                     if(trigger<lastmillis)
@@ -473,7 +471,6 @@ namespace game
     {
         loopi(MAXNPCS)
         {
-            conoutf("%d", npcs[i].spawnfreq);
             preloadmodel(npcs[i].mdlname);
             preloadmodel(npcs[i].hatname);
         }
@@ -496,7 +493,6 @@ namespace game
         else
         {
             int n = rnd(totmfreq()), type;
-            conoutf("%d", totmfreq());
             for(int i = 0; ; i++) if((n -= npcs[i].spawnfreq)<0) { type = i; break; }
             monsters.add(new monster(type, rnd(360), 0, 0, M_SEARCH, 1000, 1));
         }
