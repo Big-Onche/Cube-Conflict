@@ -85,11 +85,11 @@ namespace game
             string msg;
             switch(killstreak)
             {
-                case 3: formatstring(msg, "%s \fc(x%d)", GAME_LANG ? "You are hot !" : "Triplette !", killstreak); break;
-                case 5: formatstring(msg, "%s \fc(x%d)", GAME_LANG ? "You are on fire !" : "Pentaplette !", killstreak); break;
-                case 10: formatstring(msg, "%s \fc(x%d)", GAME_LANG ? "You are unstoppable !" : "Décaplette !", killstreak); break;
-                case 20: formatstring(msg, "%s \fc(x%d)", GAME_LANG ? "You are a god !" : "Eicoplette !", killstreak); break;
-                case 30: formatstring(msg, "%s \fc(x%d)", GAME_LANG ? "Are you cheating ?" : "Triaconplette !", killstreak); break;
+                case 3: formatstring(msg, "%s \fc(x%d)", GAME_LANG ? "Good job!" : "Triplette !", killstreak); break;
+                case 5: formatstring(msg, "%s \fc(x%d)", GAME_LANG ? "You're killing it!" : "Pentaplette !", killstreak); break;
+                case 10: formatstring(msg, "%s \fc(x%d)", GAME_LANG ? "Unstoppable!" : "Décaplette !", killstreak); break;
+                case 20: formatstring(msg, "%s \fc(x%d)", GAME_LANG ? "You're a god!" : "Eicoplette !", killstreak); break;
+                case 30: formatstring(msg, "%s \fc(x%d)", GAME_LANG ? "Are you cheating?" : "Triaconplette !", killstreak); break;
                 default : need_message1 = false;
             }
 
