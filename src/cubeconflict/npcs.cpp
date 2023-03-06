@@ -2,7 +2,7 @@
 #include "gfx.h"
 #include "stats.h"
 
-#define MAXNPCS 128
+#define MAXNPCS 64 //max amount of different NPCs & monsters for one map/game mode, I think it will be enough
 
 extern int physsteps;
 int gamesecs;
@@ -13,29 +13,24 @@ namespace game
 {
     static vector<int> teleports;
 
-    static const int NUMMONSTERTYPES = 20;
-
-    enum { NPC_JO = 0, NPC_BJO, NPC_ALIENK, NPC_SPIKE, NPC_BOING, NPC_HARTM, NPC_SWITCH, NPC_LARRY, NPC_KEVIN, //npcs for rpg
-         M_KEVIN, M_DYLAN, M_YALIEN, M_B_ALIENK, M_ARMOR, M_NINJA, M_B_GIANT, M_CAMPER, M_ALIENS, M_UFO, M_PYRO, NUMMONSTERS};  // monsters for dmsp
+    enum {M_KEVIN, M_DYLAN, M_YALIEN, M_B_ALIENK, M_ARMOR, M_NINJA, M_B_GIANT, M_CAMPER, M_ALIENS, M_UFO, M_PYRO, NUMMONSTERS};  // monsters for dmsp
 
     struct npc
-    {
+    {   //all needed infos for npcs/monsters
         string nameen, namefr, mdlname, shieldname, hatname, capename, boost1name, boost2name;
         bool friendly;
         int npcclass, gun, speed, health, weight, bscale, painlag, trigdist, loyalty, respawn, dropval, spawnfreq;
         int hellosnd, painsnd, angrysnd, diesnd;
-
+        // can be useful in the future to select difficulty and manipulate those vars
         int npctrigdist() const { return trigdist; }
         int npcrespawn() const { return respawn; }
-        int npcdropval() const { return dropval; }
-
         int npcspeed() const { return speed; }
         int npchealth() const { return health; }
         int npcpain() const { return painlag; }
     };
 
     npc npcs[MAXNPCS];
-
+    //basic informations about npcs
     ICOMMAND(npcbase, "issiiiiii", (int *id, char *ne, char *nf, int *f, int *c, int *t, int *r, int *d, int *s),
         formatstring(npcs[*id].nameen, "%s", ne);
         formatstring(npcs[*id].namefr, "%s", nf);
@@ -46,24 +41,24 @@ namespace game
         npcs[*id].dropval = *d;
         npcs[*id].spawnfreq = *s;
     );
-
+    //main stats for npcs
     ICOMMAND(npcstats, "iiiiiiii", (int *id, int *g, int *s, int *h, int *w, int *b, int *p, int *l),
         npcs[*id].gun = *g;
-        npcs[*id].speed = *s;
+        npcs[*id].speed = *s<=0 ? 1 : *s; //speed 0 causes crash
         npcs[*id].health = *h;
         npcs[*id].weight = *w;
         npcs[*id].bscale = *b;
         npcs[*id].painlag = *p;
         npcs[*id].loyalty = *l;
     );
-
+    //sounds for npcs
     ICOMMAND(npcsounds, "iiiii", (int *id, int *h, int *p, int *a, int *d),
         npcs[*id].hellosnd = *h;
         npcs[*id].painsnd = *p;
         npcs[*id].angrysnd = *a;
         npcs[*id].diesnd = *d;
     );
-
+    //models for npcs
     ICOMMAND(npcmodels, "issssss", (int *id, char *mn, char *sn, char *hn, char *cn, char *b1n, char *b2n),
         formatstring(npcs[*id].mdlname, "%s", mn);
         formatstring(npcs[*id].shieldname, "%s", sn);
@@ -72,8 +67,6 @@ namespace game
         formatstring(npcs[*id].boost1name, "%s", b1n);
         formatstring(npcs[*id].boost2name, "%s", b2n);
     );
-
-    ICOMMAND(updatenpcs, "", (), execfile("config/npcs.cfg"); );
 
     VAR(skill, 1, 10, 10);
     VAR(killsendsp, 0, 1, 1);
@@ -106,7 +99,7 @@ namespace game
         {
             type = ENT_AI;
             respawn();
-            if(_type>=NUMMONSTERTYPES || _type < 0)
+            if(_type>=MAXNPCS || _type < 0)
             {
                 conoutf(CON_WARN, "warning: unknown monster in spawn: %d", _type);
                 _type = 0;
@@ -445,7 +438,7 @@ namespace game
                 monsterlastdeath = totalmillis;
                 defformatstring(id, "monster_dead_%d", tag);
                 if(identexists(id)) execute(id);
-                if(m_dmsp && gamesecs<599) npcdrop(&monsterhurtpos, npcs[mtype].npcdropval());
+                if(m_dmsp && gamesecs<599) npcdrop(&monsterhurtpos, npcs[mtype].dropval);
                 if(player1->aptitude==APT_FAUCHEUSE && player1->health<1500) player1->health = min(player1->health+50, 1500);
                 switch(mtype)
                 {
@@ -478,8 +471,9 @@ namespace game
 
     void preloadmonsters()
     {
-        loopi(NUMMONSTERTYPES)
+        loopi(MAXNPCS)
         {
+            conoutf("%d", npcs[i].spawnfreq);
             preloadmodel(npcs[i].mdlname);
             preloadmodel(npcs[i].hatname);
         }
@@ -491,9 +485,9 @@ namespace game
 
     int totmfreq()
     {
-        int n;
-        loopi(npcs[i].spawnfreq) n += npcs[i].spawnfreq;
-        return n == 0 ? 1 : n;
+        int n = 0;
+        loopi(MAXNPCS) {n += npcs[i].spawnfreq;}
+        return n;
     }
 
     void spawnmonster(bool boss = false, int type = 0)     // spawn a random monster according to freq distribution in DMSP
@@ -502,6 +496,7 @@ namespace game
         else
         {
             int n = rnd(totmfreq()), type;
+            conoutf("%d", totmfreq());
             for(int i = 0; ; i++) if((n -= npcs[i].spawnfreq)<0) { type = i; break; }
             monsters.add(new monster(type, rnd(360), 0, 0, M_SEARCH, 1000, 1));
         }

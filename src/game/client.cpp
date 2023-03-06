@@ -661,6 +661,7 @@ namespace game
         gamemode = mode;
         nextmode = mode;
         if(editmode) toggleedit();
+        if(m_dmsp) execfile("config/dmsp.cfg");
         if(m_demo) { entities::resetspawns(); return; }
         if((m_edit && !name[0]) || !load_world(name))
         {

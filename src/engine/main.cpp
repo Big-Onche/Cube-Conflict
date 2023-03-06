@@ -1326,7 +1326,6 @@ int main(int argc, char **argv)
     execfile("config/stdedit.cfg");
     execfile(game::gameconfig());
     execfile("config/sound.cfg");
-    execfile("config/npcs.cfg");
     execfile("config/heightmap.cfg");
     execfile("config/blendbrush.cfg");
     if(game::savedservers()) execfile(game::savedservers(), false);
