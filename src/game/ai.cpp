@@ -1288,7 +1288,7 @@ namespace ai
     bool request(gameent *d, aistate &b)
     {
         gameent *e = getclient(d->ai->enemy);
-        if(d->armourtype==A_ASSIST && d->armour==0 && d->hasammo(GUN_ASSISTXPL)){gunselect(GUN_ASSISTXPL, d, true); return process(d, b) >= 2;}
+        if(d->armourtype==A_ASSIST && !d->armour && d->ammo[GUN_ASSISTXPL]){gunselect(GUN_ASSISTXPL, d, true); return process(d, b) >= 2;}
         else if (d->aptitude==APT_KAMIKAZE && hasrange(d, e, GUN_KAMIKAZE)) {gunselect(GUN_KAMIKAZE, d); return process(d, b) >= 2;}
         else {loopi(4) if(d->hasammo(GUN_S_NUKE+i)){gunselect(GUN_S_NUKE+i, d); return process(d, b) >= 2;} }
 

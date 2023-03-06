@@ -19,12 +19,6 @@ namespace game
     };
     vector<hitmsg> hits;
 
-#if 0
-    #define MINDEBRIS 3
-    VARP(maxdebris, MINDEBRIS, 10, 100);
-    VARP(maxgibs, 0, 4, 100);
-#endif
-
     ICOMMAND(getweapon, "", (), intret(player1->gunselect));
 
     void gunselect(int gun, gameent *d, bool force)
@@ -152,39 +146,16 @@ namespace game
 
     void weaponswitch(gameent *d)
     {
-        if(d->state!=CS_ALIVE) return;
-        int s = d->gunselect;
-        if(s!=GUN_PULSE             && d->ammo[GUN_PULSE])          s = GUN_PULSE;
-        else if(s!=GUN_RAIL         && d->ammo[GUN_RAIL])           s = GUN_RAIL;
-        else if(s!=GUN_SMAW         && d->ammo[GUN_SMAW])           s = GUN_SMAW;
-        else if(s!=GUN_MINIGUN      && d->ammo[GUN_MINIGUN])        s = GUN_MINIGUN;
-        else if(s!=GUN_SPOCKGUN     && d->ammo[GUN_SPOCKGUN])       s = GUN_SPOCKGUN;
-        else if(s!=GUN_LANCEFLAMMES && d->ammo[GUN_LANCEFLAMMES])   s = GUN_LANCEFLAMMES;
-        else if(s!=GUN_UZI          && d->ammo[GUN_UZI])            s = GUN_UZI;
-        else if(s!=GUN_FAMAS        && d->ammo[GUN_FAMAS])          s = GUN_FAMAS;
-        else if(s!=GUN_MOSSBERG     && d->ammo[GUN_MOSSBERG])       s = GUN_MOSSBERG;
-        else if(s!=GUN_HYDRA        && d->ammo[GUN_HYDRA])          s = GUN_HYDRA;
-        else if(s!=GUN_SV98         && d->ammo[GUN_SV98])           s = GUN_SV98;
-        else if(s!=GUN_SKS          && d->ammo[GUN_SKS])            s = GUN_SKS;
-        else if(s!=GUN_ARBALETE     && d->ammo[GUN_ARBALETE])       s = GUN_ARBALETE;
-        else if(s!=GUN_AK47         && d->ammo[GUN_AK47])           s = GUN_AK47;
-        else if(s!=GUN_GRAP1        && d->ammo[GUN_GRAP1])          s = GUN_GRAP1;
-        else if(s!=GUN_ARTIFICE     && d->ammo[GUN_ARTIFICE])       s = GUN_ARTIFICE;
-        else if(s!=GUN_GLOCK        && d->ammo[GUN_GLOCK])          s = GUN_GLOCK;
+        if(d->state != CS_ALIVE) return;
 
-        else if(s!=GUN_S_NUKE       && d->ammo[GUN_S_NUKE])         s = GUN_S_NUKE;
-        else if(s!=GUN_S_GAU8       && d->ammo[GUN_S_GAU8])         s = GUN_S_GAU8;
-        else if(s!=GUN_S_ROQUETTES  && d->ammo[GUN_S_ROQUETTES])    s = GUN_S_ROQUETTES;
-        else if(s!=GUN_S_CAMPOUZE   && d->ammo[GUN_S_CAMPOUZE])     s = GUN_S_CAMPOUZE;
-
-        else if(s!=GUN_CAC349       && d->ammo[GUN_CAC349])         s = GUN_CAC349;
-        else if(s!=GUN_CACMASTER    && d->ammo[GUN_CACMASTER])      s = GUN_CACMASTER;
-        else if(s!=GUN_CACMARTEAU   && d->ammo[GUN_CACMARTEAU])     s = GUN_CACMARTEAU;
-        else if(s!=GUN_CACFLEAU     && d->ammo[GUN_CACFLEAU])       s = GUN_CACFLEAU;
-
-        else if(s!=GUN_KAMIKAZE     && d->ammo[GUN_KAMIKAZE])       s = GUN_KAMIKAZE;
-        else if(s!=GUN_CACNINJA     && d->ammo[GUN_CACNINJA])       s = GUN_CACNINJA;
-        gunselect(s, d);
+        loopi(NUMGUNS)
+        {
+            if(d->ammo[i] && d->gunselect!=i && i!=GUN_ASSISTXPL)
+            {
+                gunselect(i, d);
+                break;
+            }
+        }
     }
 
     ICOMMAND(weapon, "V", (tagval *args, int numargs),
@@ -1472,7 +1443,7 @@ namespace game
         //if(d->ai) d->gunwait += int(d->gunwait*(((101-d->skill)+rnd(111-d->skill))/100.f));
         d->boostmillis[B_ROIDS] ? d->totalshots += (attacks[atk].damage*attacks[atk].rays)*2: d->totalshots += attacks[atk].damage*attacks[atk].rays;
 
-        if(d->playerexploded){d->attacking = ACT_IDLE; d->playerexploded = false; weaponswitch(d);}
+        if(d->playerexploded){d->attacking = ACT_IDLE; d->playerexploded = false; gunselect(d->lastweap, d);}
         if(atk==ATK_GLOCK_SHOOT || atk==ATK_SPOCKGUN_SHOOT || atk==ATK_HYDRA_SHOOT || d->gunselect==GUN_SKS || d->gunselect==GUN_S_CAMPOUZE) d->attacking = ACT_IDLE;
     }
 
