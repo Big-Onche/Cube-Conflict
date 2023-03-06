@@ -360,7 +360,6 @@ namespace game
             if(player1->vampimillis || hasabilityon(player1)) entities::checkaptiskill(curtime, player1);
             if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION) updateabilities(player1);
         }
-        else if (player1->state == CS_DEAD)
 
         if(lookupmaterial(camera1->o)==MAT_WATER)  hudplayer()->waterchan = playsound(S_UNDERWATER, NULL, NULL, 0, -1, 100, hudplayer()->waterchan);
         else hudplayer()->stopunderwatersound();

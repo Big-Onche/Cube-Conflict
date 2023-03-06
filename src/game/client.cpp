@@ -1683,7 +1683,7 @@ namespace game
             case N_SENDCAPE:
             {
                 int cape = getint(p);
-                if(d)d->customcape = cape;
+                if(d) d->customcape = cape;
                 break;
             }
 
@@ -1808,7 +1808,7 @@ namespace game
 
                 if(!actor) break;
                 actor->health = health;
-                actor->vampimillis+=damage*1.5f;
+                actor->vampimillis+=damage*2.f;
                 break;
             }
 
