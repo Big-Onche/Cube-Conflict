@@ -385,7 +385,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_REQABILITY, 2, N_GETABILITY, 4,
     N_ANNOUNCE, 3,
     N_CURWEAPON, 2,
-    N_BASES, 0, N_BASEINFO, 6, N_BASESCORE, 4, N_SCOREBASE, 3, N_REPAMMO, 1, N_BASEREGEN, 7,
+    N_BASES, 0, N_BASEINFO, 0, N_BASESCORE, 0, N_SCOREBASE, 3, N_REPAMMO, 1, N_BASEREGEN, 7,
     -1
 };
 
@@ -841,7 +841,7 @@ struct gameent : dynent, gamestate
     int attacking, gunaccel;
     int lastfootstep, attacksound, attackchan, dansesound, dansechan, alarmchan, waterchan;
     int lasttaunt;
-    int lastpickup, lastpickupmillis, flagpickup, lastbase, lastrepammo;
+    int lastpickup, lastpickupmillis, flagpickup, lastbase, lastrepammo, lastweap;
     int killstreak, frags, flags, deaths, totaldamage, totalshots;
     editinfo *edit;
     float deltayaw, deltapitch, deltaroll, newyaw, newpitch, newroll;

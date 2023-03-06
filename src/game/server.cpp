@@ -2325,7 +2325,6 @@ namespace server
         if(target!=actor && !isteam(target->team, actor->team)) as.damage += damage;
 
         sendf(-1, 1, "ri7", N_DAMAGE, target->clientnum, actor->clientnum, damage, ts.armour, ts.health, atk);
-        if(actor->aptitude==APT_VAMPIRE && as.health<as.maxhealth && actor!=target) sendf(-1, 1, "ri4", N_VAMPIRE, actor->clientnum, damage, ts.health);
 
         if(target->aptitude!=APT_AMERICAIN)
         {
@@ -2396,7 +2395,7 @@ namespace server
         ci->state.deaths++;
         teaminfo *t = m_teammode && validteam(ci->team) ? &teaminfos[ci->team-1] : NULL;
         if(t) t->frags += fragvalue;
-        sendf(-1, 1, "ri7", N_DIED, ci->clientnum, ci->clientnum, gs.frags, gs.killstreak, t ? t->frags : 0, 0);
+        sendf(-1, 1, "ri7", N_DIED, ci->clientnum, ci->clientnum, gs.frags, 0, t ? t->frags : 0, 0);
         ci->position.setsize(0);
         if(smode) smode->died(ci, NULL);
         gs.state = CS_DEAD;
@@ -2451,7 +2450,7 @@ namespace server
             if(dup) continue;
 
             float damage = attacks[atk].damage*(1-h.dist/EXP_DISTSCALE/attacks[atk].exprad);
-            if(gs.boostmillis[B_ROIDS]) damage*= ci->aptitude==13 ? 3 : 2;
+            if(gs.boostmillis[B_ROIDS]) damage*= ci->aptitude==APT_JUNKIE ? 3 : 2;
             if(target==ci && atk==ATK_ASSISTXPL_SHOOT) damage = 0;
             if(damage > 0)
             {
@@ -2466,7 +2465,7 @@ namespace server
         servstate &gs = ci->state;
         int wait = millis - gs.lastshot;
 
-        if(ci->state.armourtype==A_ASSIST && ci->state.armour==0 && ci->state.ammo[GUN_ASSISTXPL] && ci->state.gunselect==GUN_ASSISTXPL) gs.gunwait=0;
+        if(ci->state.armourtype==A_ASSIST && !ci->state.armour && ci->state.ammo[GUN_ASSISTXPL] && ci->state.gunselect==GUN_ASSISTXPL) gs.gunwait=0;
 
         if(!gs.isalive(gamemillis) ||
            wait<gs.gunwait ||
@@ -2695,7 +2694,7 @@ namespace server
                 processevents();
                 if(curtime)
                 {
-                    if(!game::premission)regenallies();
+                    if(!game::premission || !game::intermission) regenallies();
 
                     loopv(sents) if(sents[i].spawntime) // spawn entities when timer reached
                     {
@@ -3321,7 +3320,7 @@ namespace server
                         cp->position.setsize(0);
                         while(curmsg<p.length()) cp->position.add(p.buf[curmsg++]);
                     }
-                    if(smode && cp->state.state==CS_ALIVE) smode->moved(cp, cp->state.o, cp->gameclip, pos, (flags&0x80)!=0, cp->state.state==CS_ALIVE);
+                    if(smode && cp->state.state==CS_ALIVE) smode->moved(cp, cp->state.o, cp->gameclip, pos, (flags&0x80)!=0, true);
                     cp->state.o = pos;
                     cp->gameclip = (flags&0x80)!=0;
                 }
