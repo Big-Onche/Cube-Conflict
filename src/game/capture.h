@@ -1096,8 +1096,9 @@ case N_BASEREGEN:
         regen->health = health;
         regen->mana = mana;
         if(ammotype>=GUN_RAIL && ammotype<=GUN_GLOCK) regen->ammo[ammotype] = ammo;
-        if(regen->armour==10) {regen->armourtype=A_WOOD; playsound(S_ITEMBBOIS, regen==hudplayer() ? NULL : &regen->o, 0, 0, 0, 150, -1, 300);}
+        if(!regen->armour) regen->armourtype=A_WOOD;
         regen->armour = armour;
+        if(regen->armour==10) playsound(S_ITEMBBOIS, regen==hudplayer() ? NULL : &regen->o, 0, 0, 0, 150, -1, 300);
         switch(regen->armourtype)
         {
             case A_WOOD: if(regen->armour>=750) {regen->armourtype=A_IRON; playsound(S_ITEMBFER, regen==hudplayer() ? NULL : &regen->o, 0, 0, 0, 150, -1, 300);} break;
