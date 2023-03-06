@@ -13,89 +13,64 @@ namespace game
 {
     static vector<int> teleports;
 
-    static const int TOTMFREQ = 24;
     static const int NUMMONSTERTYPES = 20;
 
     enum { NPC_JO = 0, NPC_BJO, NPC_ALIENK, NPC_SPIKE, NPC_BOING, NPC_HARTM, NPC_SWITCH, NPC_LARRY, NPC_KEVIN, //npcs for rpg
          M_KEVIN, M_DYLAN, M_YALIEN, M_B_ALIENK, M_ARMOR, M_NINJA, M_B_GIANT, M_CAMPER, M_ALIENS, M_UFO, M_PYRO, NUMMONSTERS};  // monsters for dmsp
 
-    class npc
+    struct npc
     {
-    private:
-        string nameen, namefr, mdlname, shieldname, hatname, capename, boost1mdlname, boost2mdlname;
+        string nameen, namefr, mdlname, shieldname, hatname, capename, boost1name, boost2name;
         bool friendly;
-        int gun, speed, health, weight, bscale, pain, trigdist, loyalty, respawn, dropval, freq;
+        int npcclass, gun, speed, health, weight, bscale, painlag, trigdist, loyalty, respawn, dropval, spawnfreq;
         int hellosnd, painsnd, angrysnd, diesnd;
 
-    public:
-        void setnpcbase(char *ne, char *nf, int fr, int t, int r, int d, int f) { //npc base information
-            formatstring(nameen, "%s", ne);
-            formatstring(namefr, "%s", nf);
-            friendly = fr; trigdist = t; respawn = r; dropval = d; freq = f;
-        }
-
-        const char* npcnameen() const { return nameen; }
-        const char* npcnamefr() const { return namefr; }
-        bool isfriendly() const { return friendly; }
         int npctrigdist() const { return trigdist; }
         int npcrespawn() const { return respawn; }
         int npcdropval() const { return dropval; }
-        int npcfreq() const { return freq; }
 
-        void setnpcstats(int g, int s, int h, int w, int b, int p, int lo) { //npc stats (mainly for combat)
-             gun = g; speed = s; health = h; weight = w; bscale = b; pain = p; loyalty = lo;
-        }
-
-        int npcgun() const { return gun; }
         int npcspeed() const { return speed; }
         int npchealth() const { return health; }
-        int npcweight() const { return weight; }
-        int npcbscale() const { return bscale; }
-        int npcpain() const { return pain; }
-        int npcloyalty() const { return loyalty; }
-
-        void setnpcsounds(int hs, int ps, int as, int ds) { //npc sounds
-            hellosnd = hs; painsnd = ps; angrysnd = as; diesnd = ds;
-        }
-
-        int npchsnd() const { return hellosnd; }
-        int npcpsnd() const { return painsnd; }
-        int npcasnd() const { return angrysnd; }
-        int npcdsnd() const { return diesnd; }
-
-        void setnpcmodels(char *mn, char *sn, char *hn, char *cn, char *b1n, char *b2n) {  //npc 3d models
-            formatstring(mdlname, "%s", mn);
-            formatstring(shieldname, "%s", sn);
-            formatstring(hatname, "%s", hn);
-            formatstring(capename, "%s", cn);
-            formatstring(boost1mdlname, "%s", b1n);
-            formatstring(boost2mdlname, "%s", b2n);
-        }
-
-        const char* npcmdl() const { return mdlname; }
-        const char* npcshield() const { return shieldname; }
-        const char* npchat() const { return hatname; }
-        const char* npccape() const { return capename; }
-        const char* npcboost1() const { return boost1mdlname; }
-        const char* npcboost2() const { return boost2mdlname; }
+        int npcpain() const { return painlag; }
     };
 
     npc npcs[MAXNPCS];
 
-    ICOMMAND(npcbase, "issiiiii", (int *id, char *ne, char *nf, int *fr, int *t, int *r, int *d, int *f),
-        npcs[*id].setnpcbase(ne, nf, *fr, *t, *r, *d, *f);
+    ICOMMAND(npcbase, "issiiiiii", (int *id, char *ne, char *nf, int *f, int *c, int *t, int *r, int *d, int *s),
+        formatstring(npcs[*id].nameen, "%s", ne);
+        formatstring(npcs[*id].namefr, "%s", nf);
+        npcs[*id].friendly = *f;
+        npcs[*id].npcclass = *c;
+        npcs[*id].trigdist = *t;
+        npcs[*id].respawn = *r;
+        npcs[*id].dropval = *d;
+        npcs[*id].spawnfreq = *s;
     );
 
-    ICOMMAND(npcstats, "iiiiiiii", (int *id, int *g, int *s, int *h, int *w, int *b, int *p, int *lo),
-        npcs[*id].setnpcstats(*g, *s, *h, *w, *b, *p, *lo);
+    ICOMMAND(npcstats, "iiiiiiii", (int *id, int *g, int *s, int *h, int *w, int *b, int *p, int *l),
+        npcs[*id].gun = *g;
+        npcs[*id].speed = *s;
+        npcs[*id].health = *h;
+        npcs[*id].weight = *w;
+        npcs[*id].bscale = *b;
+        npcs[*id].painlag = *p;
+        npcs[*id].loyalty = *l;
     );
 
-    ICOMMAND(npcsounds, "iiiii", (int *id, int *hs, int *ps, int *as, int *ds),
-        npcs[*id].setnpcsounds(*hs, *ps, *as, *ds);
+    ICOMMAND(npcsounds, "iiiii", (int *id, int *h, int *p, int *a, int *d),
+        npcs[*id].hellosnd = *h;
+        npcs[*id].painsnd = *p;
+        npcs[*id].angrysnd = *a;
+        npcs[*id].diesnd = *d;
     );
 
     ICOMMAND(npcmodels, "issssss", (int *id, char *mn, char *sn, char *hn, char *cn, char *b1n, char *b2n),
-        npcs[*id].setnpcmodels(mn, sn, hn, cn, b1n, b2n);
+        formatstring(npcs[*id].mdlname, "%s", mn);
+        formatstring(npcs[*id].shieldname, "%s", sn);
+        formatstring(npcs[*id].hatname, "%s", hn);
+        formatstring(npcs[*id].capename, "%s", cn);
+        formatstring(npcs[*id].boost1name, "%s", b1n);
+        formatstring(npcs[*id].boost2name, "%s", b2n);
     );
 
     ICOMMAND(updatenpcs, "", (), execfile("config/npcs.cfg"); );
@@ -140,18 +115,18 @@ namespace game
             const npc &t = npcs[mtype];
             eyeheight = 8.0f;
             aboveeye = 7.0f;
-            radius *= t.npcbscale()/10.0f;
+            radius *= t.bscale/10.0f;
             xradius = yradius = radius;
-            eyeheight *= t.npcbscale()/10.0f;
-            aboveeye *= t.npcbscale()/10.0f;
-            weight = t.npcweight();
+            eyeheight *= t.bscale/10.0f;
+            aboveeye *= t.bscale/10.0f;
+            weight = t.weight;
             if(_state!=M_SLEEP) spawnplayer(this);
             trigger = lastmillis+_trigger;
             targetyaw = spawnyaw = yaw = (float)_yaw;
             targetpitch = pitch = (float)_pitch;
             move = _move;
             enemy = player1;
-            gunselect = t.npcgun();
+            gunselect = t.gun;
             maxspeed = (float)t.npcspeed()*4;
             health = t.npchealth();
             armour = 0;
@@ -160,9 +135,9 @@ namespace game
             roll = 0;
             state = CS_ALIVE;
             anger = 0;
-            friendly = t.isfriendly();
+            friendly = t.friendly;
             monsterlastdeath = 0;
-            copystring(name, GAME_LANG ? t.npcnameen() : t.npcnamefr());
+            copystring(name, GAME_LANG ? t.nameen : t.namefr);
         }
 
         void normalize_yaw(float angle)
@@ -315,7 +290,7 @@ namespace game
                         if(raycubelos(o, enemy->o, target))
                         {
                             transition(friendly ? M_FRIENDLY : M_SEARCH, 1, 500, 200);
-                            playsound(npcs[mtype].npchsnd(), &o);
+                            playsound(npcs[mtype].hellosnd, &o);
                         }
                     }
                     break;
@@ -358,7 +333,7 @@ namespace game
                         else
                         {
                             bool melee = false, longrange = false;
-                            switch(npcs[mtype].npcgun())
+                            switch(npcs[mtype].gun)
                             {
                                 case GUN_CAC349: case GUN_CACFLEAU: case GUN_CACMARTEAU: case GUN_CACMASTER: case GUN_CACNINJA: melee = true; break;
                                 case GUN_SV98: case GUN_SKS: case GUN_ARBALETE: case GUN_S_CAMPOUZE: longrange = true; break;
@@ -398,7 +373,7 @@ namespace game
 
         void checkmonsterstriggers()
         {
-            if(npcs[mtype].isfriendly() && player1->o.dist(this->o) < 40 && (this->monsterstate==M_FRIENDLY || this->monsterstate==M_NEUTRAL) && gfx::forcecampos==-1)
+            if(npcs[mtype].friendly && player1->o.dist(this->o) < 40 && (this->monsterstate==M_FRIENDLY || this->monsterstate==M_NEUTRAL) && gfx::forcecampos==-1)
             {
                 defformatstring(id, "npc_dial_%d", tag);
                 if(identexists(id)) execute(id);
@@ -426,7 +401,7 @@ namespace game
 
         void monsterpain(int damage, gameent *d, int atk)
         {
-            playsound(npcs[mtype].npcpsnd(), &o, 0, 0, 0, 250, -1, 500);
+            playsound(npcs[mtype].painsnd, &o, 0, 0, 0, 250, -1, 500);
 
             if(d->type==ENT_AI && !friendly)     // a monster hit us
             {
@@ -434,7 +409,7 @@ namespace game
                 {
                     anger++;     // don't attack straight away, first get angry
                     int _anger = d->type==ENT_AI && mtype==((monster *)d)->mtype ? anger/2 : anger;
-                    if(_anger >= npcs[mtype].npcloyalty())
+                    if(_anger >= npcs[mtype].loyalty)
                     {
                         transition(M_AGGRO, 1, 0, 200);
                         enemy = d;     // monster infight if very angry
@@ -449,7 +424,7 @@ namespace game
                     else if(this->monsterstate==M_NEUTRAL)
                     {
                         transition(M_ANGRY, 1, rnd(250), 10);    //if you mess with a neutral pnj, he gets aggressive
-                        playsound(npcs[mtype].npcasnd(), &o, 0, 0, 0, 200, -1, 400);
+                        playsound(npcs[mtype].angrysnd, &o, 0, 0, 0, 200, -1, 400);
                     }
                     return;
                 }
@@ -464,7 +439,7 @@ namespace game
             {
                 state = CS_DEAD;
                 lastpain = lastmillis;
-                playsound(npcs[mtype].npcdsnd(), &o, 0, 0, 0, 200, -1, 400);
+                playsound(npcs[mtype].diesnd, &o, 0, 0, 0, 200, -1, 400);
                 monsterkilled(d);
                 gibeffect(max(-health, 0), vel, this);
                 monsterlastdeath = totalmillis;
@@ -481,8 +456,8 @@ namespace game
             }
             else
             {
-                transition(M_PAIN, 0, npcs[mtype].npcpain(), 200);      // in this state monster won't attack
-                playsound(npcs[mtype].npcpsnd(), &o, 0, 0, 0, 200, -1, 400);
+                transition(M_PAIN, 0, npcs[mtype].painlag, 200);      // in this state monster won't attack
+                playsound(npcs[mtype].painsnd, &o, 0, 0, 0, 200, -1, 400);
             }
         }
     };
@@ -505,8 +480,8 @@ namespace game
     {
         loopi(NUMMONSTERTYPES)
         {
-            preloadmodel(npcs[i].npcmdl());
-            preloadmodel(npcs[i].npcmdl());
+            preloadmodel(npcs[i].mdlname);
+            preloadmodel(npcs[i].hatname);
         }
     }
 
@@ -514,13 +489,20 @@ namespace game
 
     int nextmonster, spawnremain, numkilled, monstertotal, mtimestart, remain;
 
+    int totmfreq()
+    {
+        int n;
+        loopi(npcs[i].spawnfreq) n += npcs[i].spawnfreq;
+        return n == 0 ? 1 : n;
+    }
+
     void spawnmonster(bool boss = false, int type = 0)     // spawn a random monster according to freq distribution in DMSP
     {
         if(boss) monsters.add(new monster(type, rnd(360), 0, 0, M_SEARCH, 1000, 1));
         else
         {
-            int n = rnd(TOTMFREQ), type;
-            for(int i = 0; ; i++) if((n -= npcs[i].npcfreq())<0) { type = i; break; }
+            int n = rnd(totmfreq()), type;
+            for(int i = 0; ; i++) if((n -= npcs[i].spawnfreq)<0) { type = i; break; }
             monsters.add(new monster(type, rnd(360), 0, 0, M_SEARCH, 1000, 1));
         }
     }
@@ -665,7 +647,7 @@ namespace game
         {
             monster *o = monsters[i];
 
-            if(m_dmsp ? o->state==CS_ALIVE : npcs[o->mtype].isfriendly())
+            if(m_dmsp ? o->state==CS_ALIVE : npcs[o->mtype].friendly)
             {
                 setbliptex(m_dmsp ? 2 : 1, "");
                 gle::defvertex(2);
@@ -735,7 +717,7 @@ namespace game
                 else
                 {
                     //////////////////////////////////// Npc's anims ////////////////////////////////////////////////////////////////////////
-                    if(!npcs[m.mtype].isfriendly())
+                    if(!npcs[m.mtype].friendly)
                     {
                         if(m.inwater && m.physstate<=PHYS_FALL)
                         {
@@ -773,14 +755,14 @@ namespace game
                     }
 
                     //////////////////////////////////// Other mdls rendering ////////////////////////////////////////////////////////////////////////
-                    if(npcs[m.mtype].npcshield()) a[ai++] = modelattach("tag_shield", npcs[m.mtype].npcshield(), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-                    if(npcs[m.mtype].npchat()) a[ai++] = modelattach("tag_hat", npcs[m.mtype].npchat(), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-                    if(npcs[m.mtype].npccape()) a[ai++] = modelattach("tag_cape", npcs[m.mtype].npccape(), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-                    if(npcs[m.mtype].npcboost1()) a[ai++] = modelattach("tag_boost1", npcs[m.mtype].npcboost1(), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-                    if(npcs[m.mtype].npcboost2()) a[ai++] = modelattach("tag_boost2", npcs[m.mtype].npcboost2(), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+                    if(npcs[m.mtype].shieldname) a[ai++] = modelattach("tag_shield", npcs[m.mtype].shieldname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+                    if(npcs[m.mtype].hatname) a[ai++] = modelattach("tag_hat", npcs[m.mtype].hatname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+                    if(npcs[m.mtype].capename) a[ai++] = modelattach("tag_cape", npcs[m.mtype].capename, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+                    if(npcs[m.mtype].boost1name) a[ai++] = modelattach("tag_boost1", npcs[m.mtype].boost1name, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+                    if(npcs[m.mtype].boost2name) a[ai++] = modelattach("tag_boost2", npcs[m.mtype].boost2name, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
                 }
 
-                rendermodel(npcs[m.mtype].npcmdl(), anim, o, yaw, pitch, 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY, &m, a[0].tag ? a : NULL, basetime, 0, fade);
+                rendermodel(npcs[m.mtype].mdlname, anim, o, yaw, pitch, 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY, &m, a[0].tag ? a : NULL, basetime, 0, fade);
                 if(dbgpnj) debugpnj(&m);
             }
         }
