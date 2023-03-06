@@ -356,7 +356,7 @@ namespace game
                 }
 
                 if(physsteps > 0) stacked = NULL;
-                moveplayer(this, m_dmsp ? 1 : 10, true, curtime, 0, mtype==M_UFO ? 999999 : 0, mtype==M_UFO ? APT_PHYSICIEN : 0, 999999, false);        // use physics to move monster
+                moveplayer(this, 10, true, curtime, 0, mtype==M_UFO ? 999999 : 0, mtype==M_UFO ? APT_PHYSICIEN : 0, 999999, false);        // use physics to move monster
             }
         }
 
@@ -383,8 +383,6 @@ namespace game
             if(totalmillis - monsterlastdeath > npcs[mtype].npcrespawn()*1000)
             {
                 targetyaw = spawnyaw;
-                o = spawnpos;
-                o.addz(4);
                 state = CS_ALIVE;
                 health = npcs[mtype].npchealth();
             }
