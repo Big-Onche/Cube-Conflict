@@ -3237,7 +3237,7 @@ namespace server
                         }
                     }
 
-                    sendf(-1, 1, "ri2", N_PREMISSION, gamemillis<10000 ? true : false);
+                    sendf(-1, 1, "ri2", N_PREMISSION, gamemillis<10000 && !m_tutorial && !m_dmsp ? true : false);
                     if(m_identique) sendf(-1, 1, "ri2", N_CURWEAPON, curweapon);
 
                     logoutf("Infos%s: %s (%s %s %d)", servlang ? "" : " ", ci->name, servlang ? aptitudes[cq->aptitude].apt_nomEN : aptitudes[cq->aptitude].apt_nomFR, servlang ? "level" : "niveau", ci->level);
