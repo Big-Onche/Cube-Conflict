@@ -592,7 +592,7 @@ namespace game
             gfx::resetshroomsgfx();
             d->roll = 0;
             playsound(S_DIE_P1);
-            execute("reset_needed_triggers");
+            if(m_tutorial) execute("reset_needed_triggers");
         }
         else
         {
