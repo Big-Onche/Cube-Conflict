@@ -382,6 +382,7 @@ namespace game
         {
             if(totalmillis - monsterlastdeath > npcs[mtype].npcrespawn()*1000)
             {
+                o = spawnpos;
                 targetyaw = spawnyaw;
                 state = CS_ALIVE;
                 health = npcs[mtype].npchealth();
