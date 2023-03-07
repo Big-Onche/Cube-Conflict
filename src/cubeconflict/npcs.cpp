@@ -220,7 +220,7 @@ namespace game
                     else targetpitch = 0;
             }
 
-            if(mtype==M_UFO) if(timeinair<2000 && rnd(2)) jumping = true;
+            if(mtype==M_UFO && m_dmsp) if(timeinair<2000 && rnd(2)) jumping = true;
 
             if(blocked)                                                            // special case: if we run into scenery
             {
@@ -357,7 +357,7 @@ namespace game
                 }
 
                 if(physsteps > 0) stacked = NULL;
-                moveplayer(this, 10, true, curtime, 0, mtype==M_UFO ? 999999 : 0, mtype==M_UFO ? APT_PHYSICIEN : 0, 999999, false);        // use physics to move monster
+                moveplayer(this, 10, true, curtime, 0, mtype==M_UFO ? 999999 : 0, mtype==M_UFO && m_dmsp ? APT_PHYSICIEN : 0, 999999, false);        // use physics to move monster
             }
         }
 
