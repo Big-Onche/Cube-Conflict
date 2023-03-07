@@ -23,11 +23,12 @@ namespace game
 
     void gunselect(int gun, gameent *d, bool force)
     {
-        if(gun==GUN_ASSISTXPL && !force) return;
+        if(gun==GUN_ASSISTXPL && !force && !validgun(gun)) return;
         if(gun!=d->gunselect)
         {
             addmsg(N_GUNSELECT, "rci", d, gun);
-            playsound(attacks[gun-GUN_RAIL].picksound, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 50, -1, 150);
+
+            playsound(attacks[gun-GUN_RAIL].picksound, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 50, -1, 150); //gun-GUN_RAIL<0 || gun-GUN_RAIL>NUMGUNS ? 0 :
         }
         d->gunselect = gun;
     }
@@ -1377,6 +1378,7 @@ namespace game
 
         if(d->armourtype==A_ASSIST && !d->armour && !d->playerexploded && d->ammo[GUN_ASSISTXPL])
         {
+            if(d==player1) player1->lastweap = player1->gunselect;
             gunselect(GUN_ASSISTXPL, d, true);
             d->attacking = ACT_SHOOT;
             d->lastattack = -1;
@@ -1443,7 +1445,7 @@ namespace game
         //if(d->ai) d->gunwait += int(d->gunwait*(((101-d->skill)+rnd(111-d->skill))/100.f));
         d->boostmillis[B_ROIDS] ? d->totalshots += (attacks[atk].damage*attacks[atk].rays)*2: d->totalshots += attacks[atk].damage*attacks[atk].rays;
 
-        if(d->playerexploded){d->attacking = ACT_IDLE; d->playerexploded = false; gunselect(d->lastweap, d);}
+        if(d->playerexploded){d->attacking = ACT_IDLE; d->playerexploded = false;}
         if(atk==ATK_GLOCK_SHOOT || atk==ATK_SPOCKGUN_SHOOT || atk==ATK_HYDRA_SHOOT || d->gunselect==GUN_SKS || d->gunselect==GUN_S_CAMPOUZE) d->attacking = ACT_IDLE;
     }
 
