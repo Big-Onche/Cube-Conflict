@@ -83,12 +83,21 @@ namespace entities
         return (d->armourtype==A_ASSIST && d->armour) && (type==I_BOUCLIERBOIS || type==I_BOUCLIERFER || type == I_BOUCLIERMAGNETIQUE || type==I_BOUCLIEROR);
     }
 
+    bool canspawnitem(int type)
+    {
+        if(type<I_RAIL && type>I_MANA) return false; //just to be sure
+        else if(m_noitems) return (type==I_SUPERARME || (type>=I_BOOSTPV && type<=I_BOOSTGRAVITE)); // no shields, mana, health and ammo (just boosts and superweapon)
+        else if(m_noammo) return (type>=I_SUPERARME && type<=I_MANA); //everything except regular ammo
+        else return (type>=I_RAIL && type<=I_MANA); //everything
+    }
+
     void renderentities()
     {
         loopv(ents)
         {
             extentity &e = *ents[i];
             int revs = hudplayer()->boostmillis[B_SHROOMS] ? 2 : 10;
+
             switch(e.type)
             {
                 case TELEPORT:
@@ -102,7 +111,7 @@ namespace entities
             const char *mdlname = powerarmorpieces(e.type, game::hudplayer()) ? "objets/piecerobotique" : entmodel(e);
             if(mdlname)
             {
-                vec p = e.o;
+                   vec p = e.o;
                 p.z += 1+sinf(lastmillis/100.0+e.o.x+e.o.y)/20;
                 rendermodel(mdlname, ANIM_MAPMODEL|ANIM_LOOP, p, lastmillis/(float)revs, 0, 0, MDL_CULL_VFC | MDL_CULL_EXTDIST | MDL_CULL_OCCLUDED);
             }
@@ -402,7 +411,7 @@ namespace entities
     void putitems(packetbuf &p)            // puts items in network stream and also spawns them locally
     {
         putint(p, N_ITEMLIST);
-        loopv(ents) if(ents[i]->type>=I_RAIL && ents[i]->type<=I_MANA && (!m_noammo || ents[i]->type<I_RAIL || ents[i]->type>I_GLOCK))
+        loopv(ents) if(canspawnitem(ents[i]->type))
         {
             putint(p, i);
             putint(p, ents[i]->type);
@@ -417,7 +426,7 @@ namespace entities
         loopv(ents)
         {
             extentity *e = ents[i];
-            if(e->type>=I_RAIL && e->type<=I_MANA && server::canspawnitem(e->type))
+            if(canspawnitem(e->type))
             {
                 e->setspawned(force || m_tutorial || !server::delayspawn(e->type));
                 e->clearnopickup();

@@ -185,7 +185,6 @@ namespace server
 
         void save(servstate &gs)
         {
-            killstreak = gs.killstreak;
             frags = gs.frags;
             flags = gs.flags;
             deaths = gs.deaths;
@@ -198,7 +197,6 @@ namespace server
 
         void restore(servstate &gs)
         {
-            gs.killstreak = killstreak;
             gs.frags = frags;
             gs.flags = flags;
             gs.deaths = deaths;
@@ -246,7 +244,7 @@ namespace server
 
         void addevent(gameevent *e)
         {
-            if(state.state==CS_SPECTATOR || events.length()>125) delete e;
+            if(state.state==CS_SPECTATOR || events.length()>100) delete e;
             else events.add(e);
         }
 
@@ -860,7 +858,7 @@ namespace server
 
     bool canspawnitem(int type)
     {
-        if(m_noitems) return type==I_SUPERARME || (type>=I_BOOSTPV && type<=I_BOOSTGRAVITE);
+        if(m_noitems) return (type==I_SUPERARME || (type>=I_BOOSTPV && type<=I_BOOSTGRAVITE));
         else if(m_noammo) return (type>=I_SUPERARME && type<=I_MANA);
         else return (type>=I_RAIL && type<=I_MANA);
     }
@@ -2095,7 +2093,7 @@ namespace server
 
         if(!maprotations.inrange(curmaprotation))
         {
-            changemap("", 0);
+            changemap("", 1);
             return;
         }
         if(next)

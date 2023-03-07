@@ -720,7 +720,7 @@ namespace game
 
     void forceedit(const char *name)
     {
-        changemap(name, 0);
+        changemap(name, 1);
     }
 
     void newmap(int size)
@@ -1160,7 +1160,7 @@ namespace game
         }
         if(senditemstoserver)
         {
-            p.reliable();
+            if(cmode!=NULL) p.reliable();
             entities::putitems(p);
             if(cmode) cmode->senditems(p);
             senditemstoserver = false;
@@ -1506,7 +1506,6 @@ namespace game
                 gfx::resetshroomsgfx();
                 break;
             }
-
             case N_FORCEDEATH:
             {
                 int cn = getint(p);
