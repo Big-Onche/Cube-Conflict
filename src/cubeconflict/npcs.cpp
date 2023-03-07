@@ -126,6 +126,7 @@ namespace game
             pitch = 0;
             roll = 0;
             state = CS_ALIVE;
+            aptitude = t.npcclass;
             anger = 0;
             friendly = t.friendly;
             monsterlastdeath = 0;
