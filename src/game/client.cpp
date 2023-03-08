@@ -1739,7 +1739,7 @@ namespace game
                     if(player1->aptitude==APT_SOLDAT && (player1->ammo[GUN_S_NUKE] || player1->ammo[GUN_S_GAU8] || player1->ammo[GUN_S_ROQUETTES] || player1->ammo[GUN_S_CAMPOUZE])) unlockachievement(ACH_CHANCE);
                     showscores(false);
                     lasthit = 0;
-                    player1->lastweap = 0;
+                    player1->lastweap = player1->gunselect;
                 }
                 if(cmode) cmode->respawned(s);
                 ai::spawned(s);
