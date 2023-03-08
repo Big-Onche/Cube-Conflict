@@ -158,7 +158,7 @@ void loadsave() //we read the poorly encrypted value for all stat
 {
     givestarterkit(); //-> on donne toujours le kit de départ
     stream *savefile = openfile("config/stats.cfg", "r");
-    if(!savefile) return;
+    if(!savefile) {genlvl(); return;}
 
     char buf[50];
     int saveID = 0;
