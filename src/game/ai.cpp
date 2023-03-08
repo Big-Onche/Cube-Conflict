@@ -1289,7 +1289,7 @@ namespace ai
     {
         gameent *e = getclient(d->ai->enemy);
         if(d->armourtype==A_ASSIST && !d->armour && d->ammo[GUN_ASSISTXPL]){gunselect(GUN_ASSISTXPL, d, true); return process(d, b) >= 2;}
-        else if (d->aptitude==APT_KAMIKAZE && hasrange(d, e, GUN_KAMIKAZE)) {gunselect(GUN_KAMIKAZE, d); return process(d, b) >= 2;}
+        else if (d->aptitude==APT_KAMIKAZE && hasrange(d, e, GUN_KAMIKAZE) && d->ammo[GUN_KAMIKAZE]) {gunselect(GUN_KAMIKAZE, d); return process(d, b) >= 2;}
         else {loopi(4) if(d->hasammo(GUN_S_NUKE+i)){gunselect(GUN_S_NUKE+i, d); return process(d, b) >= 2;} }
 
         if(m_identique)
@@ -1297,7 +1297,7 @@ namespace ai
             switch(d->aptitude)
             {
                 case APT_KAMIKAZE:
-                    if(hasrange(d, e, GUN_KAMIKAZE)) gunselect(GUN_KAMIKAZE, d);
+                    if(hasrange(d, e, GUN_KAMIKAZE) && d->ammo[GUN_KAMIKAZE]) gunselect(GUN_KAMIKAZE, d);
                     else gunselect(cncurweapon, d);
                     break;
                 case APT_NINJA:
