@@ -21,50 +21,44 @@ namespace game
 
     ICOMMAND(getweapon, "", (), intret(player1->gunselect));
 
-    void gunselect(int gun, gameent *d, bool force)
+    void gunselect(int gun, gameent *d, bool force, bool shortcut)
     {
-        if(gun==GUN_ASSISTXPL && !force && !validgun(gun)) return;
+        if((gun==GUN_ASSISTXPL && !force) || !validgun(gun)) return;
         if(gun!=d->gunselect)
         {
+            if(d==player1 && gun!=GUN_ASSISTXPL && !shortcut) player1->lastweap = gun;
             addmsg(N_GUNSELECT, "rci", d, gun);
-
-            playsound(attacks[gun-GUN_RAIL].picksound, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 50, -1, 150); //gun-GUN_RAIL<0 || gun-GUN_RAIL>NUMGUNS ? 0 :
+            playsound(attacks[gun-GUN_RAIL].picksound, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 50, -1, 150);
         }
         d->gunselect = gun;
     }
 
-    int oldweap = 0;
-
-    ICOMMAND(getgrenade, "", (),
+    ICOMMAND(launchgrenade, "", (), // shortcut for grenade attack, then select old gun
     {
-         if(m_identique && !isconnected()) return;
-         oldweap = player1->gunselect;
-         if(player1->ammo[GUN_M32]>0) gunselect(GUN_M32, player1);
+        if(!isconnected() || m_identique) return;
+        if(!player1->ammo[GUN_M32]) playsound(S_NOAMMO, NULL);
+        else
+        {
+            gunselect(GUN_M32, player1, false, true);
+            doaction(ACT_SHOOT);
+            execute("sleep 500 [shoot ; getoldweap]");
+        }
     });
 
-    void getcac()
-    {
-         if(m_identique && player1->aptitude!=APT_NINJA) return;
-         oldweap = player1->gunselect;
-         int gun = 0;
-         loopi(4) if(player1->ammo[GUN_CAC349+i]>0) gun = GUN_CAC349+i;
-         gunselect(gun, player1);
-    }
-    ICOMMAND(getcac, "", (), if(isconnected()) getcac(););
+    ICOMMAND(meleeattack, "", (), // shortcut for melee attack, then select old gun
+        if(!isconnected() || m_identique) return;
+        if(player1->aptitude==APT_NINJA) gunselect(GUN_CACNINJA, player1, false, true);
+        else loopi(4) { if(player1->ammo[GUN_CAC349+i]) { gunselect(GUN_CAC349+i, player1, false, true); break; } }
+        doaction(ACT_SHOOT);
+        execute("sleep 500 [shoot ; getoldweap]");
+    );
 
-    ICOMMAND(getoldweap, "", (),
-    {
-        if(!isconnected()) return;
-        if(player1->aptitude != APT_NINJA && m_identique) return;
-        gunselect(oldweap, player1);
-    });
+    ICOMMAND(getoldweap, "", (), { if(isconnected() || !m_identique) gunselect(player1->lastweap, player1); });
 
-    void getsweap()
+    void getsuperweap() // used to select superweapon with identical weapons mutator
     {
-         if(!m_identique) return;
-         int gun = cncurweapon;
-         loopi(4) if(player1->ammo[GUN_S_CAMPOUZE-i]>0) gun = GUN_S_CAMPOUZE-i;
-         gunselect(gun, player1);
+         loopi(4) { if(player1->ammo[GUN_S_NUKE+i]) { gunselect(GUN_S_NUKE+i, player1); return; } }
+         gunselect(cncurweapon, player1);
     }
 
     void nextweapon(int dir, bool force = false)
@@ -75,15 +69,15 @@ namespace game
             switch(player1->aptitude)
             {
                 case APT_KAMIKAZE:
-                    if(player1->gunselect==cncurweapon) {dir-1 ? gunselect(GUN_KAMIKAZE, player1) : getsweap();}
+                    if(player1->gunselect==cncurweapon) {dir-1 ? gunselect(GUN_KAMIKAZE, player1) : getsuperweap();}
                     else gunselect(cncurweapon, player1);
                     return;
                 case APT_NINJA:
-                    if(player1->gunselect==cncurweapon){dir-1 ? gunselect(GUN_CACNINJA, player1) : getsweap();}
+                    if(player1->gunselect==cncurweapon){dir-1 ? gunselect(GUN_CACNINJA, player1) : getsuperweap();}
                     else gunselect(cncurweapon, player1);
                     return;
                 default:
-                    if(player1->gunselect==cncurweapon) getsweap();
+                    if(player1->gunselect==cncurweapon) getsuperweap();
                     else gunselect(cncurweapon, player1);
                     return;
             }
@@ -1378,7 +1372,6 @@ namespace game
 
         if(d->armourtype==A_ASSIST && !d->armour && !d->playerexploded && d->ammo[GUN_ASSISTXPL])
         {
-            if(d==player1) player1->lastweap = player1->gunselect;
             gunselect(GUN_ASSISTXPL, d, true);
             d->attacking = ACT_SHOOT;
             d->lastattack = -1;
@@ -1445,7 +1438,7 @@ namespace game
         //if(d->ai) d->gunwait += int(d->gunwait*(((101-d->skill)+rnd(111-d->skill))/100.f));
         d->boostmillis[B_ROIDS] ? d->totalshots += (attacks[atk].damage*attacks[atk].rays)*2: d->totalshots += attacks[atk].damage*attacks[atk].rays;
 
-        if(d->playerexploded){d->attacking = ACT_IDLE; d->playerexploded = false;}
+        if(d->playerexploded){d->attacking = ACT_IDLE; d->playerexploded = false; execute("getoldweap"); }
         if(atk==ATK_GLOCK_SHOOT || atk==ATK_SPOCKGUN_SHOOT || atk==ATK_HYDRA_SHOOT || d->gunselect==GUN_SKS || d->gunselect==GUN_S_CAMPOUZE) d->attacking = ACT_IDLE;
     }
 

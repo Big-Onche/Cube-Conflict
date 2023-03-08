@@ -334,7 +334,7 @@ namespace game
 
         if(player1->state==CS_ALIVE && !intermission && !premission)   // checking player1's shits
         {
-            if(player1->armourtype==A_ASSIST && player1->ammo[GUN_ASSISTXPL] && !player1->armour) {player1->lastweap=player1->gunselect; gunselect(GUN_ASSISTXPL, player1, true); player1->gunwait=0;}
+            if(player1->armourtype==A_ASSIST && player1->ammo[GUN_ASSISTXPL] && !player1->armour) {gunselect(GUN_ASSISTXPL, player1, true); player1->gunwait=0;}
             else if(m_identique)
             {
                 switch(player1->gunselect)

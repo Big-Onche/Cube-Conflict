@@ -1141,6 +1141,7 @@ namespace game
     // weapon
     extern int getweapon(const char *name);
     extern void shoot(gameent *d, const vec &targ);
+    extern void doaction(int act);
     extern void shoteffects(int atk, const vec &from, const vec &to, gameent *d, bool local, int id, int prevaction);
     extern void explode(bool local, gameent *owner, const vec &v, const vec &vel, dynent *safe, int dam, int atk);
     extern void explodeeffects(int atk, gameent *d, bool local, int id = 0);
@@ -1163,7 +1164,7 @@ namespace game
     extern void preloadbouncers();
     extern void removeweapons(gameent *owner);
     extern void updateweapons(int curtime);
-    extern void gunselect(int gun, gameent *d, bool force = false);
+    extern void gunselect(int gun, gameent *d, bool force = false, bool shortcut = false);
     extern void weaponswitch(gameent *d);
     extern void avoidweapons(ai::avoidset &obstacles, float radius);
 
