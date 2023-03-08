@@ -1404,11 +1404,11 @@ namespace game
 
         vec from = d->o, to = targ, dir = vec(to).sub(from).safenormalize();
         float dist = to.dist(from);
-        if(!(d->physstate >= PHYS_SLOPE && d->crouching && d->crouched()))
-        {
-            vec kickback = (d->aptitude==APT_AMERICAIN ? vec(0, 0, 0) : vec(dir).mul(attacks[atk].kickamount*-2.5f));
-            d->vel.add(kickback);
-        }
+
+        int kickfactor = (m_tutorial && !canmove) || d->aptitude==APT_AMERICAIN ? 0 : (d->crouched() ? -1.25f : -2.5f);
+        vec kickback = (d->aptitude==APT_AMERICAIN ? vec(0, 0, 0) : vec(dir).mul(attacks[atk].kickamount*kickfactor));
+        d->vel.add(kickback);
+
         float shorten = attacks[atk].range && dist > attacks[atk].range ? attacks[atk].range : 0,
               barrier = raycube(d->o, dir, dist, RAY_CLIPMAT|RAY_ALPHAPOLY);
         if(barrier > 0 && barrier < dist && (!shorten || barrier < shorten))

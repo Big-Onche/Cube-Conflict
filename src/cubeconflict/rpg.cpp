@@ -18,6 +18,16 @@ namespace game
         if(m_tutorial) cust[TOM_BASIQUE1] = cust[CAPE_PAINT1] = cust[SMI_NOEL] = rnd(99)+1;
     );
 
+    ICOMMAND(giveammo, "ii", (int *gun, int *amount), //giving ammunitions
+        if(!m_tutorial) return;
+        player1->ammo[*gun] = *amount;
+        gunselect(*gun, player1, false, true);
+    );
+
+    ICOMMAND(checkammo, "i", (int *gun), //checking if p1 has ammo for gun
+        intret(player1->ammo[*gun]);
+    );
+
     //////////////////////////////////// Drops ////////////////////////////////////////////////////////////////////////
     void utilitydrop(const vec *o, bool hightier = false) //always roll'd
     {

@@ -310,6 +310,8 @@ namespace game
         }
     }
 
+    VAR(canmove, 0, 1, 1);
+
     void updateworld()        // main game update loop
     {
         loopi(gfx::nbfps > 250 ? 1 : 250/gfx::nbfps)
@@ -385,8 +387,11 @@ namespace game
             {
                 if(player1->ragdoll) cleanragdoll(player1);
                 crouchplayer(player1, 10, true);
-                moveplayer(player1, 10, true, player1->boostmillis[B_EPO], player1->boostmillis[B_JOINT], player1->aptitude, player1->aptitude==APT_MAGICIEN ? player1->abilitymillis[ABILITY_1] : player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || player1->aptitude==APT_KAMIKAZE ? player1->abilitymillis[ABILITY_2] : player1->abilitymillis[ABILITY_3], player1->armourtype==A_ASSIST && player1->armour>0 ? true : false);
-                swayhudgun(curtime);
+                if(canmove || !m_tutorial)
+                {
+                    moveplayer(player1, 10, true, player1->boostmillis[B_EPO], player1->boostmillis[B_JOINT], player1->aptitude, player1->aptitude==APT_MAGICIEN ? player1->abilitymillis[ABILITY_1] : player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || player1->aptitude==APT_KAMIKAZE ? player1->abilitymillis[ABILITY_2] : player1->abilitymillis[ABILITY_3], player1->armourtype==A_ASSIST && player1->armour>0 ? true : false);
+                    swayhudgun(curtime);
+                }
                 entities::checkitems(player1);
                 if(m_sp || m_classicsp || m_tutorial) entities::checktriggers();
                 else if(cmode) cmode->checkitems(player1);
