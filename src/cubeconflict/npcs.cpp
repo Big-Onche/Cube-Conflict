@@ -43,7 +43,7 @@ namespace game
     //main stats for npcs
     ICOMMAND(npcstats, "iiiiiiii", (int *id, int *g, int *s, int *h, int *w, int *b, int *p, int *l),
         npcs[*id].gun = *g;
-        npcs[*id].speed = *s<=0 ? 1 : *s; //speed 0 causes crash
+        npcs[*id].speed = *s;
         npcs[*id].health = *h;
         npcs[*id].weight = *w;
         npcs[*id].bscale = *b;
@@ -357,7 +357,7 @@ namespace game
                 }
 
                 if(physsteps > 0) stacked = NULL;
-                moveplayer(this, 10, true, curtime, 0, mtype==M_UFO ? 999999 : 0, mtype==M_UFO && m_dmsp ? APT_PHYSICIEN : 0, 999999, false);        // use physics to move monster
+                if(npcs[mtype].speed) moveplayer(this, 10, true, curtime, 0, mtype==M_UFO ? 999999 : 0, mtype==M_UFO && m_dmsp ? APT_PHYSICIEN : 0, 999999, false);        // use physics to move monster
             }
         }
 
@@ -621,7 +621,7 @@ namespace game
                 if(lastmillis-monsters[i]->lastpain<2000)
                 {
                     monsters[i]->move = monsters[i]->strafe = 0;
-                    moveplayer(monsters[i], 5, true, curtime, 0, 0, 0 , 0, false);
+                    if(npcs[monsters[i]->mtype].speed) moveplayer(monsters[i], 5, true, curtime, 0, 0, 0 , 0, false);
                 }
                 if(!m_dmsp) monsters[i]->checkmonstersrespawns();
             }
