@@ -91,6 +91,7 @@ namespace game
     extern int maxsoundradius(int n);
     extern bool needminimap();
     extern void dotime();
+    extern int dmgsecs[2], avgdmg[4];
 }
 
 namespace server

@@ -65,16 +65,23 @@ namespace game
         return fallback;
     }
 
-    int lasttimeupdate = 0;
+    int lasttimeupdate = 0, dmg = 0, dmgsecs[2];
 
     void dotime()
     {
+        dmg = 0;
+        loopi(4) dmg+=avgdmg[i];
         if(totalmillis >= lasttimeupdate+1000) //1 second interval
         {
             addstat(1, STAT_TIMEPLAYED);
             lasttimeupdate = totalmillis;
+            dmgsecs[0]==3 ? dmgsecs[0]=0 : dmgsecs[0]++;
+            dmgsecs[1]==5 ? dmgsecs[1]=2 : dmgsecs[1]++;
+            avgdmg[dmgsecs[1]-2] = 0;
         }
     }
+
+    ICOMMAND(getdps, "", (), intret(dmg/4.f));
 
     ICOMMAND(getfollow, "", (),
     {
