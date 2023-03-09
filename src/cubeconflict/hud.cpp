@@ -10,11 +10,11 @@ string str_pseudovictime, str_pseudotueur, str_armetueur, str_pseudoacteur;
 namespace game
 {
     string custommsg, helpmsg;
-    ICOMMAND(popupmsg, "ssi", (char *msg_fr, char *msg_en, int *duration),
+    ICOMMAND(popupmsg, "ssii", (char *msg_fr, char *msg_en, int *duration, int *sound),
     {
         formatstring(custommsg, "%s", GAME_LANG ? msg_en : msg_fr);
         hudmsg[MSG_CUSTOM] = totalmillis + *duration;
-        playsound(S_NOTIFICATION);
+        if(sound>=0) playsound(*sound);
     });
 
     ICOMMAND(helpmsg, "s", (char *msg),
