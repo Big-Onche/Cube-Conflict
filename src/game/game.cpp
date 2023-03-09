@@ -1183,8 +1183,6 @@ namespace game
             }
         }
 
-        if(d->gunwait) col.mul(0.5f);
-
         return crosshair;
     }
 
