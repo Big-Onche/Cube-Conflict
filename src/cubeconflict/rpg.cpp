@@ -4,8 +4,38 @@
 
 namespace game
 {
+    const int MAXQUESTS = 256;
+
+    struct quest
+    {   //all needed infos for quests
+        string nameen, namefr, descen, descfr;
+        int steps, type, difficulty, reward;
+    };
+    quest quests[MAXQUESTS];
+
+    ICOMMAND(quest, "issssiiii", (int *id, char *ne, char *nf, char *de, char *df, int *s, int *t, int *d, int *r),
+        formatstring(quests[*id].nameen, "%s", ne); // Quest name
+        formatstring(quests[*id].namefr, "%s", nf);
+        formatstring(quests[*id].nameen, "%s", de); // Quest short description
+        formatstring(quests[*id].namefr, "%s", df);
+        quests[*id].steps = *s;                     // Amount of steps before completion
+        quests[*id].type = *t;                      // Type (main or side quest)
+        quests[*id].difficulty = *d;                // Difficulty
+        quests[*id].reward = *r;                    // XP reward
+    );
+
+    ICOMMAND(isfinished, "ii", (int *id, int *s),
+        intret(*s >= quests[*id].steps ? true : false);
+    );
+
     //////////////////////////////////// Basic functions ////////////////////////////////////////////////////////////////////////
-    ICOMMAND(isdead, "", (), intret(player1->state==CS_DEAD););
+    ICOMMAND(isdead, "", (), intret(player1->state==CS_DEAD));
+
+    ICOMMAND(giveammo, "ii", (int *gun, int *amount), //giving ammunitions
+        if(!m_tutorial) return;
+        player1->ammo[*gun] = *amount;
+        gunselect(*gun, player1, false, true);
+    );
 
     //////////////////////////////////// Tutorial ////////////////////////////////////////////////////////////////////////
     VAR(examresult, 0, 0, 4); //calc exam result from tutorial's map
@@ -16,12 +46,6 @@ namespace game
 
     ICOMMAND(getfreecust, "", (), //free customs from treasure
         if(m_tutorial) cust[TOM_BASIQUE1] = cust[CAPE_PAINT1] = cust[SMI_NOEL] = rnd(99)+1;
-    );
-
-    ICOMMAND(giveammo, "ii", (int *gun, int *amount), //giving ammunitions
-        if(!m_tutorial) return;
-        player1->ammo[*gun] = *amount;
-        gunselect(*gun, player1, false, true);
     );
 
     ICOMMAND(checkammo, "i", (int *gun), //checking if p1 has ammo for gun
