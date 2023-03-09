@@ -564,6 +564,8 @@ namespace game
         loopi(damage/300) spawnbouncer(d->o, vec(0,0,0), d, BNC_GIBS);
     }
 
+    int avgdmg[4];
+
     void hit(int damage, dynent *d, gameent *at, const vec &vel, int atk, float info1, int info2 = 1)
     {
         if(at==player1 && d!=at)
@@ -583,8 +585,12 @@ namespace game
             if(f==player1)
             {
                 if(player1->boostmillis[B_JOINT]) damage/=(player1->aptitude==APT_JUNKIE ? 1.875f : 1.25f);
-                if(player1->aptitude==APT_VIKING) player1->boostmillis[B_RAGE]+=damage*5;
-                else if(player1->aptitude==APT_PRETRE && player1->abilitymillis[ABILITY_2] && player1->mana) {player1->mana-=damage/10; damage=0; if(player1->mana<0)player1->mana=0;}
+                switch(player1->aptitude)
+                {
+                    case APT_VIKING: player1->boostmillis[B_RAGE]+=damage*5; break;
+                    case APT_PRETRE: if(player1->abilitymillis[ABILITY_2] && player1->mana) {player1->mana-=damage/10; damage=0; if(player1->mana<0)player1->mana=0;} break;
+                    case APT_SHOSHONE: if(player1->abilitymillis[ABILITY_1]) damage/=1.3f;
+                }
                 damage = (damage/aptitudes[player1->aptitude].apt_resistance)*(m_dmsp ? 15.f : 100);
                 damageeffect(damage, f, at, atk);
                 damaged(damage, f, at, true, atk);
@@ -593,13 +599,16 @@ namespace game
             else if(at==player1)
             {
                 if(player1->boostmillis[B_ROIDS]) damage*=(player1->aptitude==APT_JUNKIE ? 3.f : 1.5f);
-                if(player1->aptitude==APT_VAMPIRE)
+                switch(player1->aptitude)
                 {
-                    player1->health = min(player1->health + damage/2, player1->maxhealth);
-                    player1->vampimillis+=damage*1.5f;
+                    case APT_VIKING: if(player1->boostmillis[B_RAGE]) damage*=1.25f; break;
+                    case APT_MAGICIEN: {if(player1->abilitymillis[game::ABILITY_2]) damage *= 1.25f; break;}
+                    case APT_CAMPEUR: damage *= ((player1->o.dist(f->o)/1800.f)+1.f); break;
+                    case APT_VAMPIRE: {player1->health = min(player1->health + damage/2, player1->maxhealth); player1->vampimillis+=damage*1.5f;} break;
+                    case APT_SHOSHONE: if(player1->abilitymillis[ABILITY_1]) damage*=1.3f;
                 }
-                else if (player1->aptitude==APT_VIKING && player1->boostmillis[B_RAGE]) damage*=1.25f;
                 hitmonster((damage*aptitudes[player1->aptitude].apt_degats)/100, (monster *)f, at, vel, atk);
+                avgdmg[dmgsecs[0]] += damage/10;
             }
         }
 
