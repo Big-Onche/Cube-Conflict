@@ -108,7 +108,7 @@ enum { GUN_RAIL = 0, GUN_PULSE, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_M32, GU
        GUN_S_NUKE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_S_CAMPOUZE,
        GUN_CAC349, GUN_CACMARTEAU, GUN_CACMASTER, GUN_CACFLEAU,
        GUN_KAMIKAZE, GUN_ASSISTXPL, GUN_CACNINJA,
-       NUMGUNS };
+       GUN_NONE, NUMGUNS };
 enum { A_WOOD = 0, A_IRON, A_GOLD, A_MAGNET, A_ASSIST };
 enum { B_ROIDS = 0, B_SHROOMS, B_EPO, B_JOINT, B_RAGE, NUMBOOSTS};
 enum { ACT_IDLE = 0, ACT_SHOOT, NUMACTS };
@@ -129,7 +129,7 @@ enum {  ATK_RAIL_SHOOT = 0, ATK_PULSE_SHOOT,
         ATK_CACMASTER_SHOOT, ATK_CACFLEAU_SHOOT,
         //Spéciales aptitudes/objets (3 armes)
         ATK_KAMIKAZE_SHOOT, ATK_ASSISTXPL_SHOOT, ATK_CACNINJA_SHOOT,
-        NUMATKS
+        ATK_NONE, NUMATKS
 };
 enum { M_NONE = 0, M_SEARCH, M_AGGRO, M_RETREAT, M_ATTACKING, M_PAIN, M_SLEEP, M_AIMING, M_FRIENDLY, M_NEUTRAL, M_ANGRY, M_MAX};  // monster states
 
@@ -496,7 +496,9 @@ static const struct attackinfo { int gun, action, picksound, sound, middistsnd, 
     // Armes spéciales
     { GUN_KAMIKAZE,     ACT_SHOOT, S_WPLOADFASTWOOSH, S_EXPL_KAMIKAZE, S_EXPL_FAR, S_EXPL_FAR,   1, 1000, 4000, 1, 1,  0, 1,  10, 120,  1, 250, 500, 5, 1},
     { GUN_ASSISTXPL,    ACT_SHOOT, -1,                S_EXPL_PARMOR,   S_EXPL_FAR, S_EXPL_FAR,   1,  220, 1500, 1, 1,  0, 1,  10,  50,  1, 100, 350, 5, 1},
-    { GUN_CACNINJA,     ACT_SHOOT, S_WPLOADSWORD,     S_NINJASABER,            -1,         -1,   8,  400,  900, 1, 1, 30, 0, -10,  36,  1,  25,   0, 0, 0}
+    { GUN_CACNINJA,     ACT_SHOOT, S_WPLOADSWORD,     S_NINJASABER,            -1,         -1,   8,  400,  900, 1, 1, 30, 0, -10,  36,  1,  25,   0, 0, 0},
+    // no weap for monsters
+    { GUN_NONE,         ACT_SHOOT, -1, -1, -1, -1, 0, 10000, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0}
 };
 
 static const struct guninfo { const char *name, *file, *vwep, *armedescFR, *armedescEN; int maxweapposside, maxweapposup, maxzoomfov, hudrange, attacks[NUMACTS]; } guns[NUMGUNS] =
@@ -533,7 +535,9 @@ static const struct guninfo { const char *name, *file, *vwep, *armedescFR, *arme
     // Armes spéciales aptitudes
     { "kamikaze",   "kamikaze",         "worldgun/kamikaze",        "une ceinture d'explosifs !",   "an explosives ISIS's made belt!",           4, 3, 95, 0,  { -1, ATK_KAMIKAZE_SHOOT }, },
     { "assistxpl",  "assistxpl",        "worldgun/assistxpl",       "une armure assistée !",        "powered combat armor!",                     4, 3, 95, 0,  { -1, ATK_ASSISTXPL_SHOOT }, },
-    { "sabre",      "armes_cac/sabre",  "worldgun/armes_cac/sabre", "un sabre de ninja !",          "a ninja saber!",                            4, 3, 95, 120,  { -1, ATK_CACNINJA_SHOOT }, }
+    { "sabre",      "armes_cac/sabre",  "worldgun/armes_cac/sabre", "un sabre de ninja !",          "a ninja saber!",                            4, 3, 95, 120,  { -1, ATK_CACNINJA_SHOOT }, },
+    // no weap for monsters
+    { "epee349", "armes_cac/epee349",  "worldgun/armes_cac/epee349", "none?", "none?", 0, 0, 0, 0,  { -1, ATK_NONE }, }
 };
 
 //Définition des aptitudes
