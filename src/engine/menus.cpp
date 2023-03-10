@@ -79,6 +79,7 @@ void menuprocess()
         }
         else UI::showui("main");
     }
+    else if (isconnected() && !game::ispaused() && !UI::uivisible("hud")) UI::showui("hud");
 }
 
 VAR(mainmenu, 1, 1, 0);

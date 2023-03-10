@@ -680,7 +680,7 @@ namespace game
         }
 
         //////////////////////////////GRAPHISMES//////////////////////////////
-        if(actor->aptitude==7) //Eclair aptitude faucheuse
+        if(actor->aptitude==APT_FAUCHEUSE) //Eclair aptitude faucheuse
         {
             if(camera1->o.dist(d->o) >= 250) playsound(S_ECLAIRLOIN, &d->o, NULL, 0, 0, 100, -1, 1000);
             else playsound(S_ECLAIRPROCHE, &d->o, NULL, 0, 0, 100, -1, 300);
@@ -688,7 +688,7 @@ namespace game
             vec pos(d->o.x, d->o.y, d->o.z-50);
             particle_flare(vec(0, rnd(15000)+rnd(-30000), 20000+rnd(20000)), pos, 175, PART_LIGHTNING, 0xFFFFFF, 40.0f);
             particle_splash(PART_SMOKE,  15, 2000, d->o, 0x333333, 40.0f,  150,   500);
-            if(actor==player1) {playsound(S_FAUCHEUSE);}
+            if(actor==player1) {playsound(S_FAUCHEUSE); player1->vampimillis=1500;}
         }
 
         //////////////////////////////MESSAGES//////////////////////////////

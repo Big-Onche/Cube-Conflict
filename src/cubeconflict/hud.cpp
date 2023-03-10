@@ -9,6 +9,31 @@ string str_pseudovictime, str_pseudotueur, str_armetueur, str_pseudoacteur;
 
 namespace game
 {
+    // all we need to communicate with soft-coded hud
+    ICOMMAND(huddead, "", (), intret(hudplayer()->state==CS_DEAD));
+    ICOMMAND(hudhealth, "", (), intret(hudplayer()->health/10));
+    ICOMMAND(hudarmour, "", (), intret(hudplayer()->armour/10));
+    ICOMMAND(hudarmourtype, "", (), intret(hudplayer()->armourtype));
+    ICOMMAND(hudinfammo, "", (), intret(m_identique || m_random));
+    ICOMMAND(hudammo, "", (), intret(hudplayer()->ammo[hudplayer()->gunselect]));
+    ICOMMAND(hudmelee, "", (), intret((player1->gunselect>=GUN_CAC349 && player1->gunselect<=GUN_CACFLEAU) || player1->gunselect==GUN_CACNINJA));
+    ICOMMAND(hudboost, "i", (int *id), if(*id>=0 && *id<=3) intret(hudplayer()->boostmillis[*id]/1000););
+    ICOMMAND(hudclass, "", (), intret(hudplayer()->aptitude));
+    ICOMMAND(hudability, "", (),
+        switch(hudplayer()->aptitude)
+        {
+            case APT_MAGICIEN: case APT_PHYSICIEN: case APT_PRETRE: case APT_SHOSHONE: case APT_ESPION:
+                intret(hudplayer()->mana);
+                break;
+            case APT_KAMIKAZE:
+                intret((hudplayer()->abilitymillis[ABILITY_2]-1500)/1000);
+                break;
+            case APT_VIKING:
+                intret(hudplayer()->boostmillis[B_RAGE]/1000);
+                break;
+        }
+    );
+
     string custommsg, helpmsg;
     ICOMMAND(popupmsg, "ssii", (char *msg_fr, char *msg_en, int *duration, int *sound),
     {
@@ -63,7 +88,6 @@ namespace game
                 formatstring(msg, GAME_LANG ? "\fd%.1f" : "\fd%.1f", (10000 - (totalmillis - hudmsg[MSG_PREMISSION]))/1000.f);
                 rendermessage(msg, 60, 8.8f, decal_message); decal_message -= screenh/23;
             }
-
         }
 
         if(totalmillis - hudmsg[MSG_LEVELUP] <=2500) //////////////////////////////////////////////////////////////// LVL UP MESSAGE
@@ -208,6 +232,8 @@ namespace game
 
         gfx::zoomfov = (guns[player1->gunselect].maxzoomfov);
 
+        if(ispaused()) {gfx::zoom = 0; return;}
+
         if((player1->gunselect==GUN_SKS || player1->gunselect==GUN_SV98 || player1->gunselect==GUN_ARBALETE || player1->gunselect==GUN_S_CAMPOUZE || player1->gunselect==GUN_S_ROQUETTES) && gfx::zoom)
         {
             if(player1->gunselect==GUN_S_ROQUETTES) settexture("media/interface/hud/fullscreen/scope_1.png");
@@ -220,11 +246,8 @@ namespace game
 
         if(hudplayer()->boostmillis[B_SHROOMS])
         {
-            if(!ispaused())
-            {
-                if(enlargefov) {gfx::champifov+=22.f/gfx::nbfps; if(gfx::champifov>hudplayer()->boostmillis[B_SHROOMS]/1500) enlargefov = false;}
-                else {gfx::champifov-=22.f/gfx::nbfps; if(gfx::champifov<-hudplayer()->boostmillis[B_SHROOMS]/1500) enlargefov = true;}
-            }
+            if(enlargefov) {gfx::champifov+=22.f/gfx::nbfps; if(gfx::champifov>hudplayer()->boostmillis[B_SHROOMS]/1500) enlargefov = false;}
+            else {gfx::champifov-=22.f/gfx::nbfps; if(gfx::champifov<-hudplayer()->boostmillis[B_SHROOMS]/1500) enlargefov = true;}
 
             float col = hudplayer()->boostmillis[B_SHROOMS]>5000 ? 1 : hudplayer()->boostmillis[B_SHROOMS]/5000.f;
             gle::colorf(col, col, col, col);
@@ -234,8 +257,6 @@ namespace game
 
             gle::colorf(1, 1, 1, 1);
         }
-
-        if(ispaused()) return;
 
         if(hudplayer()->boostmillis[B_RAGE])
         {
@@ -282,61 +303,8 @@ namespace game
 
         //////////////////////////////////////////////////////////////// RENDU DES IMAGES ////////////////////////////////////////////////////////////////
 
-        if(d->state==CS_DEAD || player1->state==CS_SPECTATOR)
-        {
-            if(d->state==CS_DEAD)
-            {
-                settexture("media/interface/hud/mort.png");
-                bgquad(15, h-130, 115, 115);
-            }
-            pophudmatrix();
-            return;
-        }
-
-        if((player1->gunselect>=GUN_CAC349 && player1->gunselect<=GUN_CACFLEAU) || player1->gunselect==GUN_CACNINJA) settexture("media/interface/hud/epee.png");
-        else settexture("media/interface/hud/balle.png");
-        bgquad(w-130, h-130, 115, 115);
-
-        settexture("media/interface/hud/coeur.png");
-        bgquad(15, h-130, 115, 115);
-
-        if(d->armour)
-        {
-            switch(d->armourtype)
-            {
-                case A_WOOD: settexture("media/interface/hud/bouclier_bois.png"); break;
-                case A_IRON: settexture("media/interface/hud/bouclier_fer.png"); break;
-                case A_GOLD: settexture("media/interface/hud/bouclier_or.png"); break;
-                case A_MAGNET: settexture("media/interface/hud/bouclier_magnetique.png"); break;
-                case A_ASSIST: settexture("media/interface/hud/robot.png"); break;
-            }
-            bgquad(250, h-130, 115, 115);
-        }
-
-        int decal_icon = 0;
-
-        if(player1->crouching && player1->aptitude==APT_CAMPEUR)
-        {
-            settexture("media/interface/hud/campeur.png");
-            bgquad(15, h-260, 115, 115);
-            decal_icon += 130;
-        }
-
         if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || player1->aptitude==APT_KAMIKAZE)
         {
-            if(player1->abilitymillis[ABILITY_2] && player1->aptitude==APT_KAMIKAZE && player1->ammo[GUN_KAMIKAZE]>0)
-            {
-                settexture("media/interface/hud/chrono.png");
-                bgquad(15, h-260, 115, 115);
-                decal_icon += 130;
-            }
-            else if(player1->aptitude!=APT_KAMIKAZE)
-            {
-                settexture("media/interface/hud/mana.png");
-                bgquad(15, h-260, 115, 115);
-                decal_icon += 130;
-            }
-
             float abbilityiconpos = (0.5f*(w-270));
 
             loopi(NUMABILITIES)
@@ -352,12 +320,6 @@ namespace game
                 abbilityiconpos+=85;
             }
         }
-
-        if(hudplayer()->boostmillis[B_ROIDS])   {settexture("media/interface/hud/steros.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
-        if(hudplayer()->boostmillis[B_SHROOMS]) {settexture("media/interface/hud/champis.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
-        if(hudplayer()->boostmillis[B_EPO])     {settexture("media/interface/hud/epo.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
-        if(hudplayer()->boostmillis[B_JOINT])   {settexture("media/interface/hud/joint.png"); bgquad(15, h-260-decal_icon, 115, 115); decal_icon += 130;}
-        if(hudplayer()->boostmillis[B_RAGE])    {settexture("media/interface/hud/rage.png"); bgquad(15, h-260-decal_icon, 115, 115);}
 
         float lxbarvide = 0.5f*(w - 966), lxbarpleine = 0.5f*(w - 954);
 
@@ -401,33 +363,6 @@ namespace game
         }
 
         //////////////////////////////////////////////////////////////// RENDU DES NOMBRES ////////////////////////////////////////////////////////////////
-
-        int decal_number = 0;
-
-        switch(player1->gunselect)
-        {
-            case GUN_S_CAMPOUZE: case GUN_S_GAU8: case GUN_S_NUKE: case GUN_S_ROQUETTES: draw_textf("%d", (d->ammo[d->gunselect] > 99 ? w-227 : d->ammo[d->gunselect] > 9 ? w-196 : w-166), h-103, d->ammo[d->gunselect]); break;
-            default:
-            {
-                if(m_muninfinie)
-                {
-                    settexture("media/interface/hud/inf.png"); bgquad(w-227, h-130, 115, 115);
-                }
-                else draw_textf("%d", (d->ammo[d->gunselect] > 99 ? w-227 : d->ammo[d->gunselect] > 9 ? w-196 : w-166), h-103, d->ammo[d->gunselect]);
-            }
-        }
-
-        draw_textf("%d", 135, h-103, d->health < 9 ? 1 : d->health/10);
-        if(d->armour > 0) draw_textf("%d", 370, h-103, d->armour < 9 ? 1 : d->armour/10);
-
-
-        if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || (player1->aptitude==APT_KAMIKAZE && player1->abilitymillis[ABILITY_2] && player1->ammo[GUN_KAMIKAZE]>0))
-           {draw_textf("%d", 135, h-233-decal_number, player1->aptitude==APT_KAMIKAZE ? (player1->abilitymillis[ABILITY_2]-1500)/1000 : player1->mana); decal_number +=130;}
-
-        if(player1->crouching && player1->aptitude==APT_CAMPEUR) decal_number +=130;
-
-        loopi(NUMBOOSTS) { if(hudplayer()->boostmillis[i]) { draw_textf("%d", 135, h-233-decal_number, hudplayer()->boostmillis[i]/1000); decal_number +=130; } }
-
         defformatstring(infobarrexp, "%d/%d XP - LVL %d", totalneededxp - (xpneededfornextlvl - stat[STAT_XP]), totalneededxp, stat[STAT_LEVEL]);
         int tw = text_width(infobarrexp);
         float tsz = 0.4f,
