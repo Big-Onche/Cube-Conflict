@@ -19,6 +19,7 @@ namespace game
     ICOMMAND(hudmelee, "", (), intret((player1->gunselect>=GUN_CAC349 && player1->gunselect<=GUN_CACFLEAU) || player1->gunselect==GUN_CACNINJA));
     ICOMMAND(hudboost, "i", (int *id), if(*id>=0 && *id<=3) intret(hudplayer()->boostmillis[*id]/1000););
     ICOMMAND(hudclass, "", (), intret(hudplayer()->aptitude));
+
     ICOMMAND(hudability, "", (),
         switch(hudplayer()->aptitude)
         {
@@ -26,11 +27,37 @@ namespace game
                 intret(hudplayer()->mana);
                 break;
             case APT_KAMIKAZE:
-                intret((hudplayer()->abilitymillis[ABILITY_2]-1500)/1000);
+                if(hudplayer()->abilitymillis[ABILITY_2]) intret((hudplayer()->abilitymillis[ABILITY_2]-1500)/1000);
                 break;
             case APT_VIKING:
                 intret(hudplayer()->boostmillis[B_RAGE]/1000);
                 break;
+            default:
+                intret(false);
+        }
+    );
+
+    ICOMMAND(hudabilitylogo, "i", (int *id),
+        defformatstring(logodir, "media/interface/hud/abilities/%d_%d.png", hudplayer()->aptitude, *id);
+        result(logodir);
+    );
+
+    ICOMMAND(hudabilitystatus, "i", (int *id),
+        if(*id>=0 && *id<=2)
+        {
+            string logodir;
+            if(hudplayer()->abilitymillis[*id]) formatstring(logodir, "media/interface/hud/checkbox_on.jpg");
+            else if(!hudplayer()->abilityready[*id] || hudplayer()->mana < aptitudes[hudplayer()->aptitude].abilities[*id].manacost) formatstring(logodir, "media/interface/hud/checkbox_off.jpg");
+            else formatstring(logodir, "media/interface/hud/abilities/%d_%d.png", hudplayer()->aptitude, *id);
+            result(logodir);
+        }
+    );
+
+    ICOMMAND(hudshowabilities, "", (),
+        switch(hudplayer()->aptitude)
+        {
+           case APT_MAGICIEN: case APT_PHYSICIEN: case APT_PRETRE: case APT_SHOSHONE: case APT_ESPION: case APT_KAMIKAZE: intret(true); break;
+           default: intret(false);
         }
     );
 
@@ -302,25 +329,6 @@ namespace game
         pushhudmatrix();
 
         //////////////////////////////////////////////////////////////// RENDU DES IMAGES ////////////////////////////////////////////////////////////////
-
-        if(player1->aptitude==APT_MAGICIEN || player1->aptitude==APT_PHYSICIEN || player1->aptitude==APT_PRETRE || player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || player1->aptitude==APT_KAMIKAZE)
-        {
-            float abbilityiconpos = (0.5f*(w-270));
-
-            loopi(NUMABILITIES)
-            {
-                defformatstring(logodir, "media/interface/hud/abilities/%d_%d.png", hudplayer()->aptitude, i);
-                if(hudplayer()->aptitude==APT_KAMIKAZE && i!=1) continue;
-                if(d->abilitymillis[i]) gle::colorf(2, 2, 2, 1);
-                else if(d->mana<aptitudes[d->aptitude].abilities[i].manacost || !d->abilityready[i]) gle::colorf(0.2, 0.2, 0.2, 1);
-                else gle::colorf(1, 1, 1, 1);
-                settexture(logodir, 3);
-                bgquad(abbilityiconpos, h-114, 100, 100);
-                gle::colorf(1, 1, 1, 1);
-                abbilityiconpos+=85;
-            }
-        }
-
         float lxbarvide = 0.5f*(w - 966), lxbarpleine = 0.5f*(w - 954);
 
         settexture("media/interface/hud/fondbarrexp.png", 3);
