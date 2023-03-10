@@ -527,7 +527,7 @@ namespace game
                 vec posB = camera1->o;
                 vec posAtofrontofposB = (posA.add((posB.mul(vec(127, 127, 127))))).div(vec(128, 128, 128));
 
-                if(player1->aptitude==APT_MEDECIN && isteam(player1->team, d->team))
+                if(player1->aptitude==APT_MEDECIN && isteam(player1->team, d->team) && d!=player1)
                 {
 
                         particle_meter(d->o.dist(camera1->o)<75 ? (d->abovehead().add(camera1->o)).div(vec(2,2,2)) : posAtofrontofposB,
