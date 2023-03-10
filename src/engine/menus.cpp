@@ -78,6 +78,7 @@ void menuprocess()
             veryfirstlaunch = 0;
         }
         else UI::showui("main");
+        if(UI::uivisible("hud")) UI::hideui("hud");
     }
     else if (isconnected() && !game::ispaused() && !UI::uivisible("hud")) UI::showui("hud");
 }
