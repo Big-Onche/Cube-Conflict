@@ -42,6 +42,8 @@ void genlvl() //Calcule le niveau du joueur
     stat[STAT_LEVEL] = cclvl;
 }
 
+ICOMMAND(hudlevelprogress, "", (), floatret(fabs(pourcents)));
+
 //////////////////////Gestion des statistiques//////////////////////
 int stat[NUMSTATS];
 bool updatewinstat = true;

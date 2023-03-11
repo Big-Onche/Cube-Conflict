@@ -2,7 +2,6 @@
 #define __STATS_H__
 
 extern int xpneededfornextlvl, totalneededxp;
-extern float pourcents;
 
 extern bool updatewinstat;
 

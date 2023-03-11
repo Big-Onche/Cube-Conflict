@@ -371,11 +371,6 @@ struct ctfclientmode : clientmode
 
     void drawhud(gameent *d, int w, int h)
     {
-        loopv(flags)
-        {
-            if(flags[i].owner == player1) {settexture("media/interface/hud/drapeau_ennemi.png"); bgquad(w-130, h-260, 115, 115);}
-        }
-
         pushhudscale(h/1800.0f);
         pushhudscale(2);
         pophudmatrix();
@@ -898,9 +893,20 @@ struct ctfclientmode : clientmode
         }
         return false;
     }
+
+    bool isholdingflag()
+    {
+        loopv(flags) if(flags[i].owner == hudplayer()) return true;
+        return false;
+    }
+
 };
 extern ctfclientmode ctfmode;
 ICOMMAND(dropflag, "", (), { ctfmode.trydropflag(); });
+
+ICOMMAND(hudflag, "", (),
+    intret(ctfmode.isholdingflag());
+);
 
 #endif
 

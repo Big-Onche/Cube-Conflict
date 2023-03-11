@@ -15,6 +15,7 @@ namespace game
     ICOMMAND(hudarmour, "", (), intret(hudplayer()->armour/10));
     ICOMMAND(hudarmourtype, "", (), intret(hudplayer()->armourtype));
     ICOMMAND(hudinfammo, "", (), intret(m_identique || m_random));
+    ICOMMAND(hudctf, "", (), intret(m_ctf));
     ICOMMAND(hudammo, "", (), intret(hudplayer()->ammo[hudplayer()->gunselect]));
     ICOMMAND(hudmelee, "", (), intret((player1->gunselect>=GUN_CAC349 && player1->gunselect<=GUN_CACFLEAU) || player1->gunselect==GUN_CACNINJA));
     ICOMMAND(hudboost, "i", (int *id), if(*id>=0 && *id<=3) intret(hudplayer()->boostmillis[*id]/1000););
@@ -61,9 +62,35 @@ namespace game
         }
     );
 
-    ICOMMAND(hudlevelprogress, "", (), floatret(fabs(pourcents)) );
     ICOMMAND(hudxpcount, "", (),
         defformatstring(s, "%d / %d XP (%s %d)", totalneededxp - (xpneededfornextlvl - stat[STAT_XP]), totalneededxp, GAME_LANG ? "Lvl" : "Niv", stat[STAT_LEVEL]);
+        result(s);
+    );
+
+    ICOMMAND(hudscores, "i", (int *uicoltxt),
+        string s;
+        if(!m_teammode) formatstring(s, "%s%d %sfrag%s", *uicoltxt ? "" : "\fd", hudplayer()->frags, *uicoltxt ? "" : "\f7", hudplayer()->frags>1 ? "s" : ""); // solo dm
+        else if(m_ctf || m_capture) formatstring(s, "%s%d %s- %s%d", *uicoltxt ? "" : "\fd", cmode->getteamscore(hudplayer()->team), *uicoltxt ? "" : "\f7", *uicoltxt ? "" : "\fc", cmode->getteamscore(hudplayer()->team == 1 ? 2 : 1)); // ctf, domination mode
+        else formatstring(s, "%s%d %s- %s%d", *uicoltxt ? "" : "\fd", getteamfrags(hudplayer()->team), *uicoltxt ? "" : "\f7", *uicoltxt ? "" : "\fc", getteamfrags(hudplayer()->team == 1 ? 2 : 1)); //  team dm
+        result(s);
+    );
+
+    int colortimer;
+    ICOMMAND(hudtimer, "", (),
+        string s = " ";
+        if(((m_timed && getclientmap()) && (maplimit >= 0 || intermission)) || m_dmsp)
+        {
+            int secs = m_dmsp ? gamesecs : max(maplimit-lastmillis + 999, 0)/1000;
+            defformatstring(col, "\f7");
+            if(secs/60<1 && secs%60<30 && !m_dmsp)
+            {
+                colortimer += curtime;
+                if(colortimer>1000) colortimer = 0;
+                if(colortimer > 500) formatstring(col, "\fc");
+            }
+            if(intermission) formatstring(s, GAME_LANG ? "\fcEND" : "\fcFINI");
+            else formatstring(s, "%s%d:%02d", col, secs/60, secs%60);
+        }
         result(s);
     );
 
@@ -249,7 +276,6 @@ namespace game
         }
     }
 
-    int colortimer = 0;
     bool enlargefov = true;
 
     void gameplayhud(int w, int h)
@@ -353,62 +379,6 @@ namespace game
             bgquad(lxhbarpleine, h-screenh/1.57f, pourcents3*477.0f, 19);
             settexture("media/interface/hud/barrestatsvide.png", 3);
             bgquad(lxhbarvide, h-screenh/1.57f-10, 483, 40);
-        }
-
-        float hudscores = 0.5f*(w - 320);
-        settexture("media/interface/hud/scores.png", 3);
-        bgquad(hudscores, h-screenh, 320, 100);
-
-        if(m_ctf)
-        {
-            settexture("media/interface/hud/scores_ctf.png", 3);
-            bgquad(hudscores, h-screenh, 320, 100);
-        }
-
-        //////////////////////////////////////////////////////////////// RENDU DES NOMBRES ////////////////////////////////////////////////////////////////
-        string infoscores;
-        if(m_ctf || m_capture) {formatstring(infoscores, "\fd%d \f7- \fc%d", cmode->getteamscore(hudplayer()->team), cmode->getteamscore(hudplayer()->team == 1 ? 2 : 1));}
-        else if (!m_teammode) {formatstring(infoscores, GAME_LANG ? "\fd%d \f7frags" : "\fd%d \f7éliminations", hudplayer()->frags);}
-        else {formatstring(infoscores, "\fd%d \f7- \fc%d", getteamfrags(hudplayer()->team), getteamfrags(hudplayer()->team == 1 ? 2 : 1));}
-
-        int tw2 = text_width(infoscores);
-        float tsz2 = 0.6f,
-              tx2 = 0.5f*(w - tw2*tsz2);
-        pushhudmatrix();
-        hudmatrix.translate(tx2, 0, 0);
-        hudmatrix.scale(tsz2, tsz2, 1);
-        flushhudmatrix();
-        draw_text(infoscores, 0, +30);
-        pophudmatrix();
-
-        if(((m_timed && getclientmap()) && (maplimit >= 0 || intermission)) || m_dmsp)
-        {
-            string infotimer, color;
-            if(intermission) formatstring(infotimer, GAME_LANG ? "\fcEND" : "\fcFINI");
-            else
-            {
-                int secs = m_dmsp ? gamesecs : max(maplimit-lastmillis + 999, 0)/1000;
-
-                if(secs/60<1 && secs%60<30 && !m_dmsp)
-                {
-                    colortimer += curtime;
-                    if(colortimer>1000) colortimer = 0;
-                    formatstring(color, colortimer > 500 ? "\fc" : "\f7");
-                }
-                else formatstring(color, "\f7");
-                formatstring(infotimer, "%s%d:%02d", color, secs/60, secs%60);
-            }
-
-            int tw3 = text_width(infotimer);
-            float tsz3 = 0.4f,
-                  tx3 = 0.5f*(w - tw3*tsz3);
-            pushhudmatrix();
-            hudmatrix.translate(tx3, 0, 0);
-            hudmatrix.scale(tsz3, tsz3, 1);
-            flushhudmatrix();
-            draw_text(infotimer, 0, +164);
-
-            pophudmatrix();
         }
     }
 }
