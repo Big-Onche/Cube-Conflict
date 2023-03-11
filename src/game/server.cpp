@@ -2665,7 +2665,7 @@ namespace server
                                 else if(receiver.aptitude!=APT_VAMPIRE) //other classes needing mana : receive mana
                                 {
                                     receiver.state.mana = min(receiver.state.mana + 10, 150);
-                                    sendf(-1, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum,  S_MANA, receiver.state.mana);
+                                    sendf(-1, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, S_MANA, receiver.state.mana);
                                 }
                             }
                         }
@@ -2692,7 +2692,7 @@ namespace server
                 processevents();
                 if(curtime)
                 {
-                    if(!game::premission || !game::intermission) regenallies();
+                    if(!game::premission && !game::intermission) regenallies();
 
                     loopv(sents) if(sents[i].spawntime) // spawn entities when timer reached
                     {

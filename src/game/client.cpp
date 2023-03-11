@@ -1631,8 +1631,6 @@ namespace game
 
                 stat ? r->mana = getint(p) : r->health = getint(p);
 
-                if(!giver || !receiver) break;
-
                 if(!stat && r->clientnum == g->clientnum) regularflame(PART_HEALTH, r->o, 15, 2, 0xFFFFFF, 1, 1.f);
                 else
                 {
