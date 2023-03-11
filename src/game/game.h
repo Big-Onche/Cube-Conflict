@@ -554,7 +554,7 @@ static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precisio
     { 100,   85,   90,  1000, "Magicien",   "Wizard",    { {30,  250, 2000, S_WIZ_1}, {40,  4000, 5000, S_WIZ_2}, {60, 3000,  6000, S_WIZ_3} } },  // 5 APT_MAGICIEN
     { 100,  100,   70,   850, "Kamikaze",   "Kamikaze",  { {0,     0,    0,      -1}, {100, 5000, 5000, S_TIMER}, {0,     0,     0,      -1} } },  // 6 APT_KAMIKAZE
     { 120,   85,   90,  1050, "Faucheuse",  "Reaper",    { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 7 APT_FAUCHEUSE
-    {  90,   85,   85,  1050, "Physicien",  "Physicist", { {45, 4000, 3000, S_PHY_1}, {50,  5000, 7000, S_PHY_2}, {65, 6000,  9000, S_PHY_3} } },  // 8 APT_PHYSICIEN
+    {  90,   85,   85,  1050, "Physicien",  "Physicist", { {40, 4000, 3000, S_PHY_1}, {50,  5000, 7000, S_PHY_2}, {65, 6000,  9000, S_PHY_3} } },  // 8 APT_PHYSICIEN
     { 100,   60,  135,  1250, "Campeur",    "Camper",    { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 9 APT_CAMPEUR
     {  90,   85,  120,  1100, "Espion",     "Spy",       { {40, 4000, 7000, S_SPY_1}, {50,  7000, 7000, S_SPY_2}, {60, 5000, 10000, S_SPY_3} } },  // 10 APT_ESPION
     {  85,  105,   85,   950, "Prêtre",     "Priest",    { {30, 4000, 8000, S_PRI_1}, {10,  8000, 8000, S_PRI_2}, {80, 4000, 10000, S_PRI_3} } },  // 11 APT_PRETRE

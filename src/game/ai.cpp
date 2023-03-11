@@ -1473,7 +1473,7 @@ namespace ai
                     case APT_PHYSICIEN:
                         if(randomevent(70) && d->mana>70) aptitude(d, ABILITY_3);
                         if(d->health<400+d->skill && d->mana>=50) aptitude(d, ABILITY_2);
-                        if(d->health<700 && d->armour<50 && d->mana>=25) aptitude(d, ABILITY_1);
+                        if(d->armour<200 && d->mana>=40) aptitude(d, ABILITY_1);
                         break;
                     case APT_ESPION:
                         if(d->mana>100) aptitude(d, ABILITY_3);

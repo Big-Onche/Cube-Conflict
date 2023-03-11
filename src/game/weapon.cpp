@@ -631,8 +631,8 @@ namespace game
                     damageblend(damage);
                     damagecompass(damage, at ? at->o : f->o);
 
-                    if(player1->aptitude==APT_PHYSICIEN && player1->abilitymillis[ABILITY_1] && player1->armour>0) {playsound(S_PHY_1); playsound(S_IMPACTWOOD+f->armourtype+70);}
-                    else if(player1->armour>0 && atk!=ATK_LANCEFLAMMES_SHOOT && randomevent(2)) playsound(S_IMPACTWOOD+f->armourtype);
+                    if(player1->aptitude==APT_PHYSICIEN && player1->abilitymillis[ABILITY_1] && player1->armour) {playsound(S_PHY_1); playsound(S_PHY_1_WOOD+f->armourtype);}
+                    else if(player1->armour && atk!=ATK_LANCEFLAMMES_SHOOT && randomevent(2)) playsound(S_IMPACTWOOD+f->armourtype);
                     else playsound(S_IMPACTBODY);
                 }
             }
@@ -640,8 +640,8 @@ namespace game
             {
                 if(randomevent(2))
                 {
-                    if(f->aptitude==APT_PHYSICIEN && f->abilitymillis[ABILITY_1] && f->armour>0) playsound(S_PHY_1, &f->o, 0, 0, 0 , 100, -1, 200);
-                    else if(f->armour>0 && atk!=ATK_LANCEFLAMMES_SHOOT) playsound(S_IMPACTWOOD+f->armourtype, &f->o, 0, 0, 0 , 100, -1, 200);
+                    if(f->aptitude==APT_PHYSICIEN && f->abilitymillis[ABILITY_1] && f->armour) {playsound(S_PHY_1, &f->o, 0, 0, 0 , 100, -1, 200); playsound(S_PHY_1_WOOD+f->armourtype, &f->o, 0, 0, 0 , 100, -1, 200);}
+                    else if(f->armour && atk!=ATK_LANCEFLAMMES_SHOOT) playsound(S_IMPACTWOOD+f->armourtype, &f->o, 0, 0, 0 , 100, -1, 200);
                 }
             }
         }
