@@ -1807,20 +1807,22 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
     bool floating = (pl->type==ENT_PLAYER && (pl->state==CS_EDITING || pl->state==CS_SPECTATOR)) || (aptisort>0 && aptitude==APT_PHYSICIEN);
 
     // Application de la vitesse des aptitudes
-    float classespeed = 1000.f;
+    float speed = 1000.f;
 
     switch(aptitude)
     {
-        case APT_MAGICIEN: if(aptisort) classespeed = 150.f;  break;
-        case APT_SHOSHONE: if(aptisort) classespeed = 700.f;  break;
-        case APT_ESPION:   if(aptisort) classespeed = 4000.f; break;
-        case APT_KAMIKAZE: if(aptisort) classespeed = 425.f;  break;
-        default : classespeed = aptitudes[aptitude].apt_vitesse;
+        case APT_MAGICIEN: if(aptisort) speed = 150.f;  break;
+        case APT_SHOSHONE: if(aptisort) speed = 700.f;  break;
+        case APT_ESPION:   if(aptisort) speed = 4000.f; break;
+        case APT_KAMIKAZE: if(aptisort) speed = 425.f;  break;
+        default : speed = aptitudes[aptitude].apt_vitesse;
     }
 
-    if(epomillis) classespeed/=((epomillis + (aptitude==APT_JUNKIE ? 20000.f : 30000.f))/(aptitude==APT_JUNKIE ? 20000.f : 30000.f));
+    if(pl->crouched() && aptitude!=APT_NINJA && pl->physstate!=PHYS_FALL) speed*=2.f;
 
-    float secs = curtime/classespeed;
+    if(epomillis) speed/=((epomillis + (aptitude==APT_JUNKIE ? 20000.f : 30000.f))/(aptitude==APT_JUNKIE ? 20000.f : 30000.f));
+
+    float secs = curtime/speed;
 
     // apply gravity
     if(!floating) modifygravity(pl, water, curtime, jointmillis, aptitude, assist);
