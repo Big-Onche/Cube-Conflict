@@ -61,6 +61,12 @@ namespace game
         }
     );
 
+    ICOMMAND(hudlevelprogress, "", (), floatret(fabs(pourcents)) );
+    ICOMMAND(hudxpcount, "", (),
+        defformatstring(s, "%d / %d XP (%s %d)", totalneededxp - (xpneededfornextlvl - stat[STAT_XP]), totalneededxp, GAME_LANG ? "Lvl" : "Niv", stat[STAT_LEVEL]);
+        result(s);
+    );
+
     string custommsg, helpmsg;
     ICOMMAND(popupmsg, "ssii", (char *msg_fr, char *msg_en, int *duration, int *sound),
     {
@@ -329,17 +335,6 @@ namespace game
         pushhudmatrix();
 
         //////////////////////////////////////////////////////////////// RENDU DES IMAGES ////////////////////////////////////////////////////////////////
-        float lxbarvide = 0.5f*(w - 966), lxbarpleine = 0.5f*(w - 954);
-
-        settexture("media/interface/hud/fondbarrexp.png", 3);
-        bgquad(lxbarpleine, h-19, 954, 19);
-
-        settexture("media/interface/hud/barrexppleine.png", 3);
-        bgquad(lxbarpleine, h-19, (pourcents + 1)*954.0f, 19);
-
-        settexture("media/interface/hud/barrexpvide.png", 3);
-        bgquad(lxbarvide, h-29, 966, 40);
-
         dynent *o = intersectclosest(d->o, worldpos, d, gfx::zoom ? 40 : 25);
         if(o && o->type==ENT_PLAYER && !isteam(player1->team, ((gameent *)o)->team) && totalmillis-lastshoot<=1000 && player1->o.dist(o->o)<guns[d->gunselect].hudrange)
         {
@@ -371,17 +366,6 @@ namespace game
         }
 
         //////////////////////////////////////////////////////////////// RENDU DES NOMBRES ////////////////////////////////////////////////////////////////
-        defformatstring(infobarrexp, "%d/%d XP - LVL %d", totalneededxp - (xpneededfornextlvl - stat[STAT_XP]), totalneededxp, stat[STAT_LEVEL]);
-        int tw = text_width(infobarrexp);
-        float tsz = 0.4f,
-              tx = 0.5f*(w - tw*tsz), ty = h - 22;
-        pushhudmatrix();
-        hudmatrix.translate(tx, ty, 0);
-        hudmatrix.scale(tsz, tsz, 1);
-        flushhudmatrix();
-        draw_text(infobarrexp, 0, 0);
-        pophudmatrix();
-
         string infoscores;
         if(m_ctf || m_capture) {formatstring(infoscores, "\fd%d \f7- \fc%d", cmode->getteamscore(hudplayer()->team), cmode->getteamscore(hudplayer()->team == 1 ? 2 : 1));}
         else if (!m_teammode) {formatstring(infoscores, GAME_LANG ? "\fd%d \f7frags" : "\fd%d \f7éliminations", hudplayer()->frags);}
