@@ -14,7 +14,12 @@ namespace game
     ICOMMAND(hudhealth, "", (), intret(hudplayer()->health/10));
     ICOMMAND(hudarmour, "", (), intret(hudplayer()->armour/10));
     ICOMMAND(hudarmourtype, "", (), intret(hudplayer()->armourtype));
-    ICOMMAND(hudinfammo, "", (), intret(m_identique || m_random));
+    ICOMMAND(hudinfammo, "", (),
+        bool b = false;
+        if((m_identique || m_random) && hudplayer()->gunselect<GUN_S_NUKE) b = true;
+        if((hudplayer()->gunselect>=GUN_CAC349 && hudplayer()->gunselect<=GUN_CACFLEAU) || hudplayer()->gunselect==GUN_CACNINJA) b = true;
+        intret(b);
+    );
     ICOMMAND(hudctf, "", (), intret(m_ctf));
     ICOMMAND(hudammo, "", (), intret(hudplayer()->ammo[hudplayer()->gunselect]));
     ICOMMAND(hudmelee, "", (), intret((player1->gunselect>=GUN_CAC349 && player1->gunselect<=GUN_CACFLEAU) || player1->gunselect==GUN_CACNINJA));
