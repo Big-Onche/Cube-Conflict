@@ -270,11 +270,10 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
     settexture("media/interface/shadow.png", 3);
     bgquad(0, 0, w, h);
 
-
-
     glDisable(GL_BLEND);
 }
 
+VARFP(hudscale, 0, 20, 100, if(!islaunching) execute("calcratio"));
 VAR(menumute, 0, 0, 1);
 
 void setbackgroundinfo(const char *caption = NULL, Texture *mapshot = NULL, const char *mapname = NULL, const char *mapinfo = NULL)
@@ -619,6 +618,9 @@ VARFP(vsync, 0, 0, 1, restorevsync());
 VARFP(vsynctear, 0, 0, 1, { if(vsync) restorevsync(); });
 
 VAR(dbgmodes, 0, 0, 1);
+
+ICOMMAND(getdesktopw, "", (), intret(desktopw));
+ICOMMAND(getdesktoph, "", (), intret(desktoph));
 
 void setupscreen()
 {
