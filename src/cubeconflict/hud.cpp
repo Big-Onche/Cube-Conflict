@@ -99,6 +99,20 @@ namespace game
         result(s);
     );
 
+    ICOMMAND(hudspecname, "", (),
+        if(player1->state==CS_SPECTATOR)
+        {
+            string s;
+            if(!followingplayer()) formatstring(s, "%s", GAME_LANG ? "Free camera" : "Caméra libre");
+            else
+            {
+                gameent *f = followingplayer();
+                formatstring(s, "%s", f->name);
+            }
+            result(s);
+        }
+    );
+
     string custommsg, helpmsg;
     ICOMMAND(popupmsg, "ssii", (char *msg_fr, char *msg_en, int *duration, int *sound),
     {
@@ -254,30 +268,6 @@ namespace game
             else formatstring(waitmsg, GAME_LANG ? "Press any key to respawn !" : "Appuie n'importe où pour revivre !");
             rendermessage(waitmsg, 95, 1.5f, -screenh/1.862f);
             return;
-        }
-
-        if(player1->state==CS_SPECTATOR) //////////////////////////////////////////////////////////////// SPECTATOR SCREEN TEXT
-        {
-            string spectatormsg, color;
-
-            gameent *f = followingplayer();
-
-            if(f)
-            {
-                f->state!=CS_DEAD ? formatstring(color, "\f7") : formatstring(color, "\fg") ;
-
-                if(f->privilege)
-                {
-                    f->privilege>=PRIV_ADMIN ? formatstring(color, "\fc") : formatstring(color, "\f7");
-                    if(f->state==CS_DEAD) formatstring(color, "\fg") ;
-                }
-                formatstring(spectatormsg, GAME_LANG ? "Spectator : %s%s (%s)" : "Spectateur : %s%s (%s)", color, colorname(f), GAME_LANG ? aptitudes[f->aptitude].apt_nomEN : aptitudes[f->aptitude].apt_nomFR);
-            }
-            else
-            {
-                formatstring(spectatormsg, GAME_LANG ? "Spectator: Free Camera" : "Spectateur : Caméra libre");
-            }
-            rendermessage(spectatormsg, 75, 1.0f);
         }
     }
 
