@@ -2780,8 +2780,6 @@ void gl_drawhud()
             getfps(nextfps[0], nextfps[1], nextfps[2]);
             loopi(3) if(prevfps[i]==curfps[i]) curfps[i] = nextfps[i];
             gfx::nbfps = curfps[0];
-            if(multiplayer(false) && showmyping) draw_textf("%s%sPING : %d", conw-(showfps ? 10 : 5)*FONTH, conh-FONTH*3/3.2f, "", game::player1->ping>100 ? "\f3" : game::player1->ping>75 ? "\f9" : game::player1->ping>40 ? "\f0" : "\f8", game::player1->ping);
-            draw_textf("%s%sFPS : %d", conw-5*FONTH, conh-FONTH*3/3.2f, showfps ? "" : "            ", curfps[0]<29 ? "\f3" : curfps[0]<38 ? "\f9" :  curfps[0]<59 ? "\f0" : "\f8", curfps[0]);
             roffset += FONTH;
 
             printtimers(conw, conh);
@@ -2828,6 +2826,17 @@ void gl_drawhud()
         framemillis = getclockmillis() - totalmillis;
     }
 }
+
+ICOMMAND(getcurfps, "", (),
+    defformatstring(s, "%sFPS %d", gfx::nbfps<25 ? "\f3" : gfx::nbfps<40 ? "\f9" : gfx::nbfps<59 ? "\f0" : "\f8", gfx::nbfps);
+    result(s);
+);
+
+ICOMMAND(getcurping, "", (),
+    string s = "";
+    if(multiplayer(false) && showmyping) formatstring(s, "%sPING %d", game::player1->ping>100 ? "\f3" : game::player1->ping>75 ? "\f9" : game::player1->ping>40 ? "\f0" : "\f8", game::player1->ping);
+    result(s);
+);
 
 int renderw = 0, renderh = 0, hudw = 0, hudh = 0;
 
