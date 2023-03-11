@@ -1137,18 +1137,6 @@ namespace game
 
     bool needminimap() { return m_ctf || m_capture || m_tutorial || m_dmsp; }
 
-    float abovegameplayhud(int w, int h)
-    {
-        switch(hudplayer()->state)
-        {
-            case CS_EDITING:
-            case CS_SPECTATOR:
-                return 1;
-            default:
-                return 1650.0f/1800.0f;
-        }
-    }
-
     float clipconsole(float w, float h)
     {
         if(cmode) return cmode->clipconsole(w, h);

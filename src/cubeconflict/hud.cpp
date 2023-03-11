@@ -276,13 +276,7 @@ namespace game
     void gameplayhud(int w, int h)
     {
         gameent *d = hudplayer();
-        if(d->state==CS_EDITING || d->state==CS_SPECTATOR) return;
-        else if(cmode)
-        {
-            cmode->drawhud(d, w, h);
-            pophudmatrix();
-        }
-        else if(m_tutorial || m_dmsp) drawrpgminimap(d, w, h);
+        if(d->state==CS_EDITING || d->state==CS_SPECTATOR || d->state==CS_DEAD) return;
 
         gfx::zoomfov = (guns[player1->gunselect].maxzoomfov);
 
@@ -293,7 +287,7 @@ namespace game
             if(player1->gunselect==GUN_S_ROQUETTES) settexture("media/interface/hud/fullscreen/scope_1.png");
             if(player1->gunselect==GUN_SKS) settexture("media/interface/hud/fullscreen/scope_3.png");
             else settexture("media/interface/hud/fullscreen/scope_2.png");
-            bgquad(0, 0, w, h);
+            hudquad(0, 0, w, h);
 
             gle::colorf(1, 1, 1, 1);
         }
@@ -307,7 +301,7 @@ namespace game
             gle::colorf(col, col, col, col);
 
             settexture("media/interface/hud/fullscreen/shrooms.png");
-            bgquad(0, 0, w, h);
+            hudquad(0, 0, w, h);
 
             gle::colorf(1, 1, 1, 1);
         }
@@ -318,7 +312,7 @@ namespace game
             gle::colorf(col, col, col, col);
 
             settexture("media/interface/hud/fullscreen/rage.png");
-            bgquad(0, 0, w, h);
+            hudquad(0, 0, w, h);
 
             gle::colorf(1, 1, 1, 1);
         }
@@ -329,7 +323,7 @@ namespace game
             gle::colorf(col, col, col, col);
 
             settexture("media/interface/hud/fullscreen/vampire.png");
-            bgquad(0, 0, w, h);
+            hudquad(0, 0, w, h);
 
             gle::colorf(1, 1, 1, 1);
         }
@@ -339,7 +333,7 @@ namespace game
             d->aptitude==APT_MAGICIEN ? gle::colorf(1, 1, 1, 0.7f) : gle::colorf(0.3, 0.6, 1, 0.7f);
 
             settexture("media/interface/hud/fullscreen/ability.png");
-            bgquad(0, 0, w, h);
+            hudquad(0, 0, w, h);
 
             gle::colorf(1, 1, 1, 1);
         }
@@ -348,32 +342,38 @@ namespace game
         {
             gle::colorf((-(player1->health)+700)/1000.0f, (-(player1->health)+700)/1000.0f, (-(player1->health)+700)/1000.0f, (-(player1->health)+700)/1000.0f);
             settexture("media/interface/hud/fullscreen/damage.png");
-            bgquad(0, 0, w, h);
+            hudquad(0, 0, w, h);
 
             gle::colorf(1, 1, 1, 1);
         }
 
-        pushhudmatrix();
-
-        //////////////////////////////////////////////////////////////// RENDU DES IMAGES ////////////////////////////////////////////////////////////////
         dynent *o = intersectclosest(d->o, worldpos, d, gfx::zoom ? 40 : 25);
         if(o && o->type==ENT_PLAYER && !isteam(player1->team, ((gameent *)o)->team) && totalmillis-lastshoot<=1000 && player1->o.dist(o->o)<guns[d->gunselect].hudrange)
         {
-            float pour1 = ((gameent *)o)->health, pour2 = ((gameent *)o)->health > ((gameent *)o)->maxhealth ? ((gameent *)o)->health : ((gameent *)o)->maxhealth;
-            float pourcents2 = (pour1/pour2);
-            float pour3 = ((gameent *)o)->armour, pour4 = ((gfx::armours[((gameent *)o)->armourtype].armoursteps)*5.f) + (((gameent *)o)->aptitude==APT_SOLDAT ? (((gameent *)o)->armourtype+1)*250.f : 0);
-            float pourcents3 = (pour3/pour4);
+            float health = ((gameent *)o)->health > ((gameent *)o)->maxhealth ? ((gameent *)o)->health : ((gameent *)o)->maxhealth;
+            float healthbar = (((gameent *)o)->health / health);
+            float armour = ((gfx::armours[((gameent *)o)->armourtype].armoursteps)*5.f) + (((gameent *)o)->aptitude==APT_SOLDAT ? (((gameent *)o)->armourtype+1)*250.f : 0);
+            float armourbar = (((gameent *)o)->armour / armour);
 
             float lxhbarvide = 0.5f*(w - 483), lxhbarpleine = 0.5f*(w - 477);
 
             settexture("media/interface/hud/fondbarrestats.png", 3);
-            bgquad(lxhbarpleine, h-screenh/1.57f, 477, 19);
+            hudquad(lxhbarpleine, h-screenh/1.57f, 477, 19);
             settexture("media/interface/hud/barresantepleine.png", 3);
-            bgquad(lxhbarpleine, h-screenh/1.57f, pourcents2*477.0f, 19);
+            hudquad(lxhbarpleine, h-screenh/1.57f, healthbar*477.f, 19);
             settexture("media/interface/hud/barrebouclierpleine.png", 3);
-            bgquad(lxhbarpleine, h-screenh/1.57f, pourcents3*477.0f, 19);
+            hudquad(lxhbarpleine, h-screenh/1.57f, armourbar*477.f, 19);
             settexture("media/interface/hud/barrestatsvide.png", 3);
-            bgquad(lxhbarvide, h-screenh/1.57f-10, 483, 40);
+            hudquad(lxhbarvide, h-screenh/1.57f-10, 483, 40);
         }
+
+        if(cmode)
+        {
+            cmode->drawhud(d, w, h);
+            pophudmatrix();
+        }
+        else if(m_tutorial || m_dmsp) drawrpgminimap(d, w, h);
+
+        pushhudmatrix();
     }
 }

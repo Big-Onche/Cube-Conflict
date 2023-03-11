@@ -65,7 +65,6 @@ namespace game
     extern void newmap(int size);
     extern void startmap(const char *name);
     extern void preload();
-    extern float abovegameplayhud(int w, int h);
     extern void gameplayhud(int w, int h);
     extern bool canjump();
     extern bool cancrouch();

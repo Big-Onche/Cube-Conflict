@@ -2762,12 +2762,6 @@ void gl_drawhud()
 
     debugparticles();
 
-    if(!mainmenu)
-    {
-        drawdamagescreen(w, h);
-        drawdamagecompass(w, h);
-    }
-
     float conw = w/conscale, conh = h/conscale, abovehud = conh - FONTH;
     if(!hidehud && !mainmenu)
     {
@@ -2810,18 +2804,8 @@ void gl_drawhud()
                     roffset += FONTH;
                 }
             }
-
             pophudmatrix();
         }
-
-        if(!editmode)
-        {
-            resethudshader();
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            game::gameplayhud(w, h);
-            abovehud = min(abovehud, conh*game::abovegameplayhud(w, h));
-        }
-
         rendertexturepanel(w, h);
     }
 
@@ -2869,6 +2853,22 @@ void gl_drawframe()
     viewh = hudh;
     if(mainmenu) gl_drawmainmenu();
     else gl_drawview();
+    if(!mainmenu && !editmode)
+    {
+        glEnable(GL_BLEND);
+
+        drawdamagescreen(hudw, hudh);
+        drawdamagecompass(hudw, hudh);
+        pophudmatrix();
+        resethudshader();
+
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        game::gameplayhud(hudw, hudh);
+        pophudmatrix();
+        resethudshader();
+
+        glDisable(GL_BLEND);
+    }
     UI::render();
     gl_drawhud();
 }
