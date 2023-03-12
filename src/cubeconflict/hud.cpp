@@ -20,6 +20,7 @@ namespace game
         if((hudplayer()->gunselect>=GUN_CAC349 && hudplayer()->gunselect<=GUN_CACFLEAU) || hudplayer()->gunselect==GUN_CACNINJA) b = true;
         intret(b);
     );
+    ICOMMAND(hudcapture, "", (), intret(m_capture));
     ICOMMAND(hudctf, "", (), intret(m_ctf));
     ICOMMAND(hudammo, "", (), intret(hudplayer()->ammo[hudplayer()->gunselect]));
     ICOMMAND(hudmelee, "", (), intret((player1->gunselect>=GUN_CAC349 && player1->gunselect<=GUN_CACFLEAU) || player1->gunselect==GUN_CACNINJA));

@@ -728,6 +728,25 @@ ICOMMAND(insidebases, "", (),
     result(buf.getbuf());
 });
 
+
+ICOMMAND(hudbasesstats, "i", (int *team),
+    if(m_capture)
+    {
+        int totalbases = 0;
+        int baseteam[3];
+        loopi(3) baseteam[i] = 0; //cannot initialize baseteam[] with "{0, 0, 0}" in ICOMMAND macro
+        loopv(capturemode.bases)
+        {
+            captureclientmode::baseinfo &b = capturemode.bases[i];
+            totalbases++;
+            b.owner ? (b.owner!=hudplayer()->team ? baseteam[2]++ : baseteam[1]++) : baseteam[0]++;
+        }
+        float pcts[3];
+        loopi(3) pcts[i] = ((float)baseteam[i] / totalbases) * 100;
+        floatret(pcts[*team]);
+    }
+);
+
 #else
     bool notgotbases;
 
