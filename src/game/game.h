@@ -47,7 +47,8 @@ enum
     CON_GAMEINFO   = 1<<10,
     CON_FRAG_SELF  = 1<<11,
     CON_FRAG_OTHER = 1<<12,
-    CON_TEAMKILL   = 1<<13
+    CON_TEAMKILL   = 1<<13,
+    CON_HUDCONSOLE = 1<<14,
 };
 
 // network quantization scale
@@ -1010,7 +1011,6 @@ namespace entities
 namespace game
 {
     //hud
-    extern void drawmessages(int killstreak, string str_pseudovictime, int n_aptitudevictime, string str_pseudoacteur, int n_killstreakacteur, float killdistance);
     extern void drawrpgminimap(gameent *d, int w, int h);
     extern int getteamfrags(int team);
 
@@ -1021,7 +1021,7 @@ namespace game
     extern char *getdisguisement(int seed);
 
     // game
-    extern int gamemode, cncurweapon, nextcnweapon, canmove;
+    extern int gamemode, cncurweapon, canmove;
 
     struct clientmode
     {

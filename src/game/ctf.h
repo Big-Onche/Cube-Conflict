@@ -576,7 +576,8 @@ struct ctfclientmode : clientmode
         f.interptime = 0;
         returnflag(i);
         conoutf(CON_GAMEINFO, GAME_LANG ? "%s\f7 %srecovered the %s's flag." : "%s\f7 %s récupéré le drapeau %s", teamcolorname(d), GAME_LANG ? "" : d==player1 ? "as" : "a", teamcolorflag(f));
-        d->team==player1->team ? hudmsg[MSG_CTF_TEAMFLAGRECO]=totalmillis : hudmsg[MSG_CTF_ENNEMYFLAGRECO]=totalmillis;
+        if(d->team==player1->team) conoutf(CON_HUDCONSOLE, GAME_LANG ? "\f9We recovered our flag!" : "\f9Notre équipe a récupéré son drapeau !");
+        else conoutf(CON_HUDCONSOLE, GAME_LANG ? "\f3The enemy team has recovered their flag" : "\f3L'équipe ennemie a récupéré son drapeau.");
         if(d==player1) {addstat(1, STAT_DRAPEAUXALYREC); addxpandcc(10, 3);}
         playsound(S_DRAPEAURESET);
     }
@@ -614,12 +615,14 @@ struct ctfclientmode : clientmode
         if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%d", score), PART_TEXT, 2000, 0x32FF64, 4.0f, -8);
         d->flags = dflags;
         conoutf(CON_GAMEINFO, "%s\f7 %s marqué un point pour l'équipe %s !", teamcolorname(d), d==player1 ? "as" : "a", teamcolor(team));
-        team==player1->team ? hudmsg[MSG_CTF_TEAMPOINT]=totalmillis : hudmsg[MSG_CTF_ENNEMYPOINT]=totalmillis;
+        conoutf(CON_HUDCONSOLE, team==player1->team ? (GAME_LANG ? "\f9We scored a point!" : "\f9Notre équipe a marqué un point !") :
+                                                      (GAME_LANG ? "\f3The enemy team has scored a point." : "\f3L'équipe ennemie a marqué un point."));
+
         if(d==player1) {addstat(1, STAT_DRAPEAUXENRAP); addxpandcc(20, 10); if(player1->boostmillis[B_EPO]) unlockachievement(ACH_EPOFLAG);}
 
         playsound(team==player1->team ? S_DRAPEAUSCORE : S_DRAPEAUTOMBE);
 
-        if(score >= FLAGLIMIT) conoutf(CON_GAMEINFO, "%s\f7 a gagné la partie !", teamcolor(team));
+        if(score >= FLAGLIMIT) conoutf(CON_GAMEINFO, GAME_LANG ? "%s\f7 won the game!" : "%s\f7 a gagné la partie !", teamcolor(team));
     }
 
     void takeflag(gameent *d, int i, int version)
@@ -630,7 +633,9 @@ struct ctfclientmode : clientmode
         f.interploc = interpflagpos(f, f.interpangle);
         f.interptime = lastmillis;
         conoutf(CON_GAMEINFO, GAME_LANG ? "%s\f7 %sstole the %s's flag!" : "%s\f7 %s volé le drapeau %s !", teamcolorname(d), GAME_LANG ? "" : d==player1 ? "as" : "a", teamcolorflag(f));
-        d->team==player1->team ? hudmsg[MSG_CTF_TEAMSTOLE]=totalmillis : hudmsg[MSG_CTF_ENNEMYSTOLE]=totalmillis;
+        conoutf(CON_HUDCONSOLE, f.team!=player1->team ? (GAME_LANG ? "\f9We stole the enemy flag !" : "\f9Notre équipe a volé le drapeau ennemi !") :
+                                                      (GAME_LANG ? "\f3The enemy team stole our flag." : "\f3L'équipe ennemie a volé notre drapeau !"));
+
         if(d==player1) {addstat(1, STAT_DRAPEAUXENVOL); addxpandcc(5, 2);}
         ownflag(i, d, lastmillis);
         playsound(S_DRAPEAUPRIS);

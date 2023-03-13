@@ -568,14 +568,4 @@ extern void getsteamname();
 extern int atmos;
 extern float wateramplitude;
 
-// hud and menus
-extern string str_pseudovictime, str_pseudotueur, str_armetueur, str_pseudoacteur, tempachname;
-extern int n_aptitudetueur, n_aptitudevictime, n_killstreakacteur;
-extern bool hassuicided;
-
-enum {MSG_OWNKILLSTREAK = 0, MSG_YOUKILLED, MSG_OTHERKILLSTREAK, MSG_CTF_TEAMPOINT, MSG_CTF_ENNEMYPOINT,
-      MSG_CTF_TEAMFLAGRECO, MSG_CTF_ENNEMYFLAGRECO, MSG_CTF_TEAMSTOLE, MSG_CTF_ENNEMYSTOLE, MSG_LEVELUP,
-      MSG_ACHUNLOCKED, MSG_IDENTICAL, MSG_CUSTOM, MSG_HELP, MSG_PREMISSION, NUMMSGS};
-extern int hudmsg[NUMMSGS];
-
 extern int gamesecs;

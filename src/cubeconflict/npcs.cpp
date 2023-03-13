@@ -567,7 +567,7 @@ namespace game
         if(!isconnected()) return;
         if(m_dmsp && spawnremain && lastmillis>nextmonster && player1->state==CS_ALIVE)
         {
-            if(spawnremain--==monstertotal) { hudmsg[MSG_PREMISSION]=lastmillis; playsound(S_INVASION); musicmanager(2+map_sel); execute("playmapsong"); }
+            if(spawnremain--==monstertotal) { playsound(S_INVASION); musicmanager(2+map_sel); execute("playmapsong"); }
             nextmonster = lastmillis+1000;
             gamesecs++;
             if(spawn && !intermission)

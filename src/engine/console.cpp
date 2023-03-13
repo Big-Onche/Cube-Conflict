@@ -76,9 +76,11 @@ float rendercommand(float x, float y, float w)
 
 VARP(consize, 0, 5, 100);
 VARP(miniconsize, 0, 5, 100);
+VARP(hudconsize, 0, 5, 100);
 VARP(miniconwidth, 0, 40, 100);
 VARP(confade, 0, 30, 60);
 VARP(miniconfade, 0, 30, 60);
+VARP(hudconfade, 0, 3, 10);
 VARP(fullconsize, 0, 75, 100);
 HVARP(confilter, 0, 0xFFFFFF, 0xFFFFFF);
 HVARP(fullconfilter, 0, 0xFFFFFF, 0xFFFFFF);
@@ -108,7 +110,7 @@ ICOMMAND(miniconskip, "i", (int *n), setconskip(miniconskip, miniconfilter, *n))
 
 ICOMMAND(clearconsole, "", (), { while(conlines.length()) delete[] conlines.pop().line; });
 
-float drawconlines(int conskip, int confade, float conwidth, float conheight, float conoff, int filter, float y = 0, int dir = 1)
+float drawconlines(int conskip, int confade, float conwidth, float conheight, float conoff, int filter, float y = 0, int dir = 1, bool hudconsole = false)
 {
     filter &= CON_FLAGS;
     int numl = conlines.length(), offset = min(conskip, numl);
@@ -139,12 +141,14 @@ float drawconlines(int conskip, int confade, float conwidth, float conheight, fl
     loopi(numl)
     {
         int idx = offset + (dir > 0 ? numl-i-1 : i);
+
         if(!(conlines[idx].type&filter)) continue;
         char *line = conlines[idx].line;
         float width, height;
         text_boundsf(line, width, height, conwidth);
         if(dir <= 0) y -= height;
-        draw_text(line, conoff, y, 0xFF, 0xFF, 0xFF, 0xFF, -1, conwidth);
+        if(hudconsole) game::rendermessages(line, y, 8.8f, 0);
+        else draw_text(line, conoff, y, 0xFF, 0xFF, 0xFF, 0xFF, -1, conwidth);
         if(dir > 0) y += height;
     }
     return y+conoff;
@@ -165,6 +169,7 @@ float renderconsole(float w, float h, float abovehud)
           conheight = min(float(FONTH*consize), h - 2*conpad),
           conwidth = w - 2*conpad - game::clipconsole(w, h);
     float y = drawconlines(conskip, confade, conwidth, conheight, conpad, confilter);
+    drawconlines(conskip, hudconfade, conwidth, min(float(FONTH*hudconsize), h - 2*conpad), conpad, 0x4000, 0, 1, true); // hud centered console
     if(miniconsize && miniconwidth)
         drawconlines(miniconskip, miniconfade, (miniconwidth*(w - 2*conpad))/100, min(float(FONTH*miniconsize), abovehud - y), conpad, miniconfilter, abovehud, -1);
     return y;

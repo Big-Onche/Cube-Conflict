@@ -23,7 +23,7 @@ void genlvl() //Calcule le niveau du joueur
         if(isconnected())
         {
             playsound(S_LEVELUP);
-            hudmsg[MSG_LEVELUP]=totalmillis;
+            conoutf(CON_HUDCONSOLE, GAME_LANG ? "\f1LEVEL UP! \fi(Lvl %d)" : "\f1NIVEAU SUPÉRIEUR ! \fi(Niveau %d)", stat[STAT_LEVEL]);
         }
     }
 
@@ -193,7 +193,6 @@ bool canunlockoffline(int achID)
     return achID==ACH_PARKOUR || achID==ACH_FUCKYOU || achID==ACH_EXAM || achID==ACH_TMMONEY || achID==ACH_SURVIVOR || achID==ACH_ELIMINATOR;
 }
 
-string tempachname;
 void unlockachievement(int achID) //Débloque le succès
 {
     bool newach = achievementlocked(achID);
@@ -212,8 +211,7 @@ void unlockachievement(int achID) //Débloque le succès
             succes[achID] = true; //Met le succès à jour côté client
             addxpandcc(25, 25);
             playsound(S_ACHIEVEMENTUNLOCKED);
-            formatstring(tempachname, "%s", GAME_LANG ? achievements[achID].achnicenameEN : achievements[achID].achnicenameFR);
-            hudmsg[MSG_ACHUNLOCKED] = totalmillis;
+            conoutf(CON_HUDCONSOLE, GAME_LANG ? "\f1ACHIEVEMENT UNLOCKED! \fi(%s)" : "\f1SUCCES DÉBLOQUÉ ! \fi(%s)", GAME_LANG ? achievements[achID].achnicenameEN : achievements[achID].achnicenameFR);
         }
     }
 }

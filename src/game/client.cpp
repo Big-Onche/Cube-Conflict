@@ -53,7 +53,7 @@ VAR(map_atmo, 0, 0, 9);
 
 namespace game
 {
-    int cncurweapon, nextcnweapon = 0;
+    int cncurweapon;
 
     VARP(minradarscale, 0, 384, 10000);
     VARP(maxradarscale, 1, 1024, 10000);
@@ -2080,7 +2080,7 @@ namespace game
 
             case N_PREMISSION:
                 premission = getint(p);
-                if(premission) {execute("premission"); hudmsg[MSG_PREMISSION] = totalmillis; musicmanager(2);}
+                if(premission) {execute("premission"); musicmanager(2);}
                 break;
 
             case N_SERVMSG:
@@ -2224,7 +2224,7 @@ namespace game
                                               t==I_SUPERARME ? "\faLA SUPER-ARME EST BIENTÔT PRÊTE À ANNIHILER" :
                                               t==50 ? "\faCHANGEMENT D'ARME DANS 5 SECONDES !" : "" );
                 }
-                if(t==50) {hudmsg[MSG_IDENTICAL] = totalmillis; nextcnweapon = weap;}
+                if(t==50) conoutf(CON_HUDCONSOLE, GAME_LANG ? "\fdNext weapon: \fc%s" : "\fdArme suivante : \fc%s", GAME_LANG ? itemstats[weap].name_en : itemstats[weap].name_fr);
                 conoutf(CON_GAMEINFO, announcemsg);
                 break;
             }

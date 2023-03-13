@@ -3,9 +3,9 @@
 #include "gfx.h"
 #include "stats.h"
 
-int hudmsg[NUMMSGS];
-int n_aptitudetueur, n_aptitudevictime, n_killstreakacteur;
-string str_pseudovictime, str_pseudotueur, str_armetueur, str_pseudoacteur;
+ICOMMAND(testmsg, "", (),
+    conoutf(CON_HUDCONSOLE, "test");
+);
 
 namespace game
 {
@@ -117,159 +117,26 @@ namespace game
     string custommsg, helpmsg;
     ICOMMAND(popupmsg, "ssii", (char *msg_fr, char *msg_en, int *duration, int *sound),
     {
-        formatstring(custommsg, "%s", GAME_LANG ? msg_en : msg_fr);
-        hudmsg[MSG_CUSTOM] = totalmillis + *duration;
+        conoutf(CON_HUDCONSOLE, "%s", GAME_LANG ? msg_en : msg_fr);
         if(sound>=0) playsound(*sound);
     });
 
     ICOMMAND(helpmsg, "s", (char *msg),
     {
-        formatstring(helpmsg, "%s", msg);
-        hudmsg[MSG_HELP]=totalmillis;
+        conoutf(CON_HUDCONSOLE, "%s", msg);
     });
 
-    void rendermessage(string message, int textsize = 100, float pos = 8.8f, int decal = 0)
+    void rendermessages(string message, int textsize, float pos, int decal)
     {
-        int tw = text_width(message);
-        float tsz = 0.04f*min(screenw, screenh)/textsize,
-              tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*pos*min(screenw, screenh+decal) - textsize*tsz;
-        pushhudmatrix();
-        hudmatrix.translate(tx, ty, 0);
+        float tsz = 0.35f + hudscale/300.f,
+              tx = 0.5f*(screenw - text_width(message)*tsz);
+
+        pushhudscale(3);
+        hudmatrix.translate(tx, screenh/4.f, 0);
         hudmatrix.scale(tsz, tsz, 1);
         flushhudmatrix();
-        draw_text(message, 0, 0);
+        draw_text(message, 0, textsize);
         pophudmatrix();
-    }
-
-    void drawmessages(int killstreak, string str_pseudovictime, int n_aptitudevictime, string str_pseudoacteur, int n_killstreakacteur, float killdistance)
-    {
-        if(ispaused()) return;
-
-        int decal_message = 0;
-        bool need_message1 = true, need_message2 = true;
-
-        if(totalmillis - hudmsg[MSG_PREMISSION] <= (m_dmsp ? -10000 : 10000))
-        {
-            string msg;
-            if(m_dmsp)
-            {
-                formatstring(msg, GAME_LANG ? "\fcThe invasion has begun!" : "\fcL'invasion commence !");
-                rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/23;
-            }
-            else if(totalmillis - hudmsg[MSG_PREMISSION] <= 6900 && premission)
-            {
-                formatstring(msg, GAME_LANG ? "\fcThe game is about to begin" : "\fcLa partie va commencer !");
-                rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/23;
-                formatstring(msg, GAME_LANG ? "\fdThe game mode is: %s" : "\fdLe mode de jeu est : %s", server::modename(gamemode));
-                rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/23;
-            }
-            else if(premission)
-            {
-                formatstring(msg, GAME_LANG ? "\fd%.1f" : "\fd%.1f", (10000 - (totalmillis - hudmsg[MSG_PREMISSION]))/1000.f);
-                rendermessage(msg, 60, 8.8f, decal_message); decal_message -= screenh/23;
-            }
-        }
-
-        if(totalmillis - hudmsg[MSG_LEVELUP] <=2500) //////////////////////////////////////////////////////////////// LVL UP MESSAGE
-        {
-            string msg;
-            formatstring(msg, GAME_LANG ? "\f1LEVEL UP! \fi(Lvl %d)" : "\f1NIVEAU SUPÉRIEUR ! \fi(Niveau %d)", stat[STAT_LEVEL]);
-            rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/24;
-        }
-
-        if(totalmillis - hudmsg[MSG_ACHUNLOCKED] <=3000)//////////////////////////////////////////////////////////////// ACHIEVEMENT UNLOCKED MESSAGE
-        {
-            string msg;
-            formatstring(msg, GAME_LANG ? "\f1ACHIEVEMENT UNLOCKED! \fi(%s)" : "\f1SUCCES DÉBLOQUÉ ! \fi(%s)", tempachname);
-            rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/24;
-        }
-
-        if(totalmillis - hudmsg[MSG_OWNKILLSTREAK] <=2500) //////////////////////////////////////////////////////////////// PLAYER1 KILLSTREAK MESSAGE
-        {
-            string msg;
-            switch(killstreak)
-            {
-                case 3: formatstring(msg, "%s \fc(x%d)", GAME_LANG ? "Good job!" : "Triplette !", killstreak); break;
-                case 5: formatstring(msg, "%s \fc(x%d)", GAME_LANG ? "You're killing it!" : "Pentaplette !", killstreak); break;
-                case 10: formatstring(msg, "%s \fc(x%d)", GAME_LANG ? "Unstoppable!" : "Décaplette !", killstreak); break;
-                case 20: formatstring(msg, "%s \fc(x%d)", GAME_LANG ? "You're a god!" : "Eicoplette !", killstreak); break;
-                case 30: formatstring(msg, "%s \fc(x%d)", GAME_LANG ? "Are you cheating?" : "Triaconplette !", killstreak); break;
-                default : need_message1 = false;
-            }
-
-            if(need_message1) {rendermessage(msg, 85, 8.8f, decal_message); decal_message -= screenh/24;}
-        }
-
-        if(totalmillis < hudmsg[MSG_CUSTOM]) //////////////////////////////////////////////////////////////// CUSTOM MSG
-        {
-            string msg;
-            formatstring(msg, custommsg);
-            rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/24;
-        }
-
-        if(totalmillis - hudmsg[MSG_HELP] <= 1) //////////////////////////////////////////////////////////////// CUSTOM MSG
-        {
-            string msg;
-            formatstring(msg, helpmsg);
-            rendermessage(msg, 80, 2.75f, 0);
-        }
-
-        if(totalmillis - hudmsg[MSG_YOUKILLED] <=2500)//////////////////////////////////////////////////////////////// PLAYER 1 KILL MESSAGE
-        {
-            string msg;
-            formatstring(msg, "%s \fc%s \f7! (%s à %.1fm)", GAME_LANG ? "You killed" : "Tu as tué", str_pseudovictime, GAME_LANG ? aptitudes[n_aptitudevictime].apt_nomEN : aptitudes[n_aptitudevictime].apt_nomFR, killdistance);
-            rendermessage(msg, 100, 8.8f, decal_message);
-            decal_message -= screenh/27;
-        }
-
-        if(totalmillis - hudmsg[MSG_OTHERKILLSTREAK] <=2500) //////////////////////////////////////////////////////////////// OTHER PLAYER KILLSTREAK MESSAGE
-        {
-            string msg;
-            switch(n_killstreakacteur)
-            {
-                case 3: formatstring(msg, "\fc%s\f7 %s %s", str_pseudoacteur, GAME_LANG ? "is hot !" : "est chaud !", GAME_LANG ? "(Triple kill)" : "(Triplette)"); break;
-                case 5: formatstring(msg, "\fc%s\f7 %s %s", str_pseudoacteur, GAME_LANG ? "dominate !" : "est chaud !", GAME_LANG ? "(Pentakill)" : "(Pentaplette)"); break;
-                case 10: formatstring(msg, "\fc%s\f7 %s %s", str_pseudoacteur, GAME_LANG ? "is instoppable !" : "est chaud !", GAME_LANG ? "(x7 !)" : "(Heptaplette)"); break;
-                case 20: formatstring(msg, "\fc%s\f7 %s %s", str_pseudoacteur, GAME_LANG ? "is invincible !" : "est chaud !", GAME_LANG ? "(x10 !)" : "(Décaplette)"); break;
-                case 30: formatstring(msg, "\fc%s\f7 %s %s", str_pseudoacteur, GAME_LANG ? "is as god !" : "est chaud !", GAME_LANG ? "(x15 !)" : "(Pentakaidecaplette)"); break;
-                default: need_message2 = false;
-            }
-            if(need_message2) {rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-        }
-
-        if(m_identique) ////////////////////////////////////////////////////////////////////////////////////////////////// IDENTICAL WEAPON MESSAGE
-        {
-            string msg;
-            if(totalmillis - hudmsg[MSG_IDENTICAL] <= 3000) {formatstring(msg, GAME_LANG ? "\fdNext weapon: \fc%s" : "\fdArme suivante : \fc%s", GAME_LANG ? itemstats[nextcnweapon].name_en : itemstats[nextcnweapon].name_fr); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-        }
-
-        if(m_ctf) ////////////////////////////////////////////////////////////////////////////////////////////////// CAPTURE THE FLAG MESSAGES
-        {
-            string msg;
-            if(totalmillis - hudmsg[MSG_CTF_TEAMPOINT]      <=3000) {formatstring(msg, GAME_LANG ? "\f9We scored a point!" : "\f9Notre équipe a marqué un point !"); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-            if(totalmillis - hudmsg[MSG_CTF_ENNEMYPOINT]    <=3000) {formatstring(msg, GAME_LANG ? "\f3The enemy team has scored a point." : "\f3L'équipe ennemie a marqué un point."); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-            if(totalmillis - hudmsg[MSG_CTF_TEAMFLAGRECO]   <=3000) {formatstring(msg, GAME_LANG ? "\f9We recovered our flag!" : "\f9Notre équipe a récupéré son drapeau !"); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-            if(totalmillis - hudmsg[MSG_CTF_ENNEMYFLAGRECO] <=3000) {formatstring(msg, GAME_LANG ? "\f3The enemy team has recovered their flag" : "\f3L'équipe ennemie a récupéré son drapeau."); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-            if(totalmillis - hudmsg[MSG_CTF_TEAMSTOLE]      <=3000) {formatstring(msg, GAME_LANG ? "\f9We stole the enemy flag !" : "\f9Notre équipe a volé le drapeau ennemi !"); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-            if(totalmillis - hudmsg[MSG_CTF_ENNEMYSTOLE]    <=3000) {formatstring(msg, GAME_LANG ? "\f3The enemy team stole our flag." : "\f3L'équipe ennemie a volé notre drapeau !"); rendermessage(msg, 100, 8.8f, decal_message); decal_message -= screenh/27;}
-        }
-
-        if(player1->state==CS_DEAD)///////////////////////////////////////////////////////////////////////////////// DEATH SCREEN TEXT
-        {
-            string killedbymsg, withmsg, waitmsg;
-            if(hassuicided) formatstring(killedbymsg, GAME_LANG ? "You committed suicide !" : "Tu t'es suicidé !");
-            else formatstring(killedbymsg, "%s %s (%s)", GAME_LANG ? "Killed by" : "Tué par", str_pseudotueur, GAME_LANG ? aptitudes[n_aptitudetueur].apt_nomEN : aptitudes[n_aptitudetueur].apt_nomFR);
-
-            rendermessage(killedbymsg, 65, 1.5f, 0);
-            formatstring(withmsg, "%s %s", GAME_LANG ? "With" : "Avec", str_armetueur);
-            rendermessage(withmsg, 95, 1.5f, -screenh/3);
-
-            int wait = cmode ? cmode->respawnwait(player1) : (lastmillis < player1->lastpain + 1000) ? 1 : 0 ;
-            if(wait>0) formatstring(waitmsg, "%s %d second%s%s", GAME_LANG ? "Respawn available in" : "Respawn possible dans", wait, GAME_LANG ? "" : "e", wait<=1?"":"s");
-            else formatstring(waitmsg, GAME_LANG ? "Press any key to respawn !" : "Appuie n'importe où pour revivre !");
-            rendermessage(waitmsg, 95, 1.5f, -screenh/1.862f);
-            return;
-        }
     }
 
     bool enlargefov = true;

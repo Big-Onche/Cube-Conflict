@@ -2,10 +2,6 @@
 #include "customs.h"
 #include "stats.h"
 
-float killdistance = 0;
-int oldapti;
-bool hassuicided;
-
 bool randomevent(int probability)
 {
     if(game::ispaused()) return false;
@@ -17,6 +13,7 @@ VARP(packtaunt, 0, 0, 1);
 
 namespace game
 {
+    int oldapti = player1->aptitude;
     VARFP(player1_aptitude, 0, 0, sizeof(aptitudes)/sizeof(aptitudes[0])-1,
     {
         if(player1->state != CS_DEAD && isconnected() && !premission && !intermission && !m_tutorial)
@@ -712,8 +709,6 @@ namespace game
             conoutf(contype, "%s%s %s%s%s", d==player1 ? "\fd" : "", dname, GAME_LANG ? "" : d==player1 ? "t'es " : "s'est ", GAME_LANG ? partmessageEN[rnd(2)].partsuicide : partmessageFR[rnd(5)].partsuicide, d==player1 ? " !" : ".");
             if(d==player1)
             {
-                copystring(str_armetueur, GAME_LANG ? partmessageEN[rnd(5)].parttroll : partmessageFR[rnd(9)].parttroll);
-                hassuicided = true;
                 addstat(1, STAT_MORTS); addstat(1, STAT_SUICIDES);
                 if(atk==ATK_M32_SHOOT)unlockachievement(ACH_M32SUICIDE);
             }
@@ -723,10 +718,7 @@ namespace game
             contype |= CON_TEAMKILL;
             if(d==player1) //TU as été tué par un allié
             {
-                copystring(str_pseudotueur, aname); n_aptitudetueur = actor->aptitude;
-                copystring(str_armetueur, GAME_LANG ? guns[atk].armedescEN : guns[atk].armedescFR);
                 conoutf(contype, "\f6%s %s (%s\f6)", dname, GAME_LANG ? "got fragged by a teammate" : "as été tué par un allié", aname);
-                hassuicided = false;
                 addstat(1, STAT_MORTS);
             }
             else
@@ -737,7 +729,7 @@ namespace game
         }
         else // Kill ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
-            float distance = actor->o.dist(d->o)/18.f;
+            float killdistance = actor->o.dist(d->o)/18.f;
             if(actor==player1) ////////////////////TU as tué quelqu'un////////////////////
             {
                 conoutf(contype, "\fd%s \f7%s%s \fc%s \f7%s %s (%.1fm)",
@@ -747,15 +739,15 @@ namespace game
                     dname,
                     GAME_LANG ? "with" : "avec",
                     GAME_LANG ? guns[atk].armedescEN : guns[atk].armedescFR,
-                    distance);
+                    killdistance);
                 playsound(S_KILL);
-                hudmsg[MSG_YOUKILLED] = totalmillis; hudmsg[MSG_OWNKILLSTREAK] = totalmillis; copystring(str_pseudovictime, dname); n_aptitudevictime = d->aptitude; killdistance = distance;
+                conoutf(CON_HUDCONSOLE, "%s \fc%s \f7! (%s à %.1fm)", GAME_LANG ? "You killed" : "Tu as tué", dname, GAME_LANG ? aptitudes[d->aptitude].apt_nomEN : aptitudes[d->aptitude].apt_nomFR, killdistance);
 
                 if(IS_ON_OFFICIAL_SERV) //now let's check for shittons of achievements if playing online
                 {
-                    if(distance>=100.f) unlockachievement(ACH_BEAUTIR);
-                    else if(distance<1.f && atk==ATK_MOSSBERG_SHOOT) unlockachievement(ACH_TAKETHAT);
-                    else if(distance>=69.f && distance<70.f ) unlockachievement(ACH_NICE);
+                    if(killdistance>=100.f) unlockachievement(ACH_BEAUTIR);
+                    else if(killdistance<1.f && atk==ATK_MOSSBERG_SHOOT) unlockachievement(ACH_TAKETHAT);
+                    else if(killdistance>=69.f && killdistance<70.f ) unlockachievement(ACH_NICE);
                     if(player1->state==CS_DEAD && player1->lastpain > 200) unlockachievement(ACH_TUEURFANTOME);
                     if(player1->health<=10 && player1->state==CS_ALIVE) unlockachievement(ACH_1HPKILL);
 
@@ -781,7 +773,7 @@ namespace game
                     addstat(1, STAT_KILLS);
                     addxpandcc(7+player1->killstreak-1, 3+player1->killstreak-1);
                     if(player1->killstreak > stat[STAT_KILLSTREAK]) addstat(player1->killstreak, STAT_KILLSTREAK, true);
-                    if(stat[STAT_MAXKILLDIST]<distance) addstat(distance, STAT_MAXKILLDIST, true);
+                    if(stat[STAT_MAXKILLDIST]<killdistance) addstat(killdistance, STAT_MAXKILLDIST, true);
                 }
             }
             else if(d==player1) ////////////////////TU as été tué////////////////////
@@ -794,10 +786,7 @@ namespace game
                     aname,
                     GAME_LANG ? "with" : "avec",
                     GAME_LANG ? guns[atk].armedescEN : guns[atk].armedescFR,
-                    distance);
-                copystring(str_pseudotueur, aname); n_aptitudetueur = actor->aptitude;
-                copystring(str_armetueur, GAME_LANG ? guns[atk].armedescEN : guns[atk].armedescFR);
-                hassuicided = false;
+                    killdistance);
                 addstat(1, STAT_MORTS);
             }
             else ////////////////////Quelqu'un a tué quelqu'un////////////////////
@@ -808,17 +797,20 @@ namespace game
                     GAME_LANG ? partmessageEN[rnd(7)].partverb : partmessageFR[rnd(15)].partverb,
                     dname,
                     GAME_LANG ? "with" : "avec",
-                    GAME_LANG ? guns[atk].armedescEN : guns[atk].armedescFR, distance);
+                    GAME_LANG ? guns[atk].armedescEN : guns[atk].armedescFR, killdistance);
             }
 
-            if(actor!=player1) ////////////////////Informe que quelqu'un est chaud////////////////////
+            ////////////////////Informe que quelqu'un est chaud////////////////////
+            defformatstring(verb, "%s", GAME_LANG ? (actor==player1 ? "are" : "is") : (actor==player1 ? "es" : "est"));
+            defformatstring(name, "%s", actor==player1 ? "Tu" : aname);
+
+            switch(actor->killstreak)
             {
-                if(actor->killstreak==3 || actor->killstreak==5 || actor->killstreak==10)
-                {
-                    copystring(str_pseudoacteur, aname);
-                    n_killstreakacteur = actor->killstreak;
-                    hudmsg[MSG_OTHERKILLSTREAK] = totalmillis;
-                }
+                case 3: conoutf(CON_HUDCONSOLE, "%s\f7 %s %s", name, verb, GAME_LANG ? "hot! (Triple kill)" : "chaud ! (Triplette)"); break;
+                case 5: conoutf(CON_HUDCONSOLE, "%s\f7 %s %s", name, verb, GAME_LANG ? "killing it! (Pentakill)" : "domine ! (Pentaplette)"); break;
+                case 7: conoutf(CON_HUDCONSOLE, "%s\f7 %s %s", name, verb, GAME_LANG ? "instoppable! (Heptakill!)" : "inarrêtable ! (Heptaplette)"); break;
+                case 10: conoutf(CON_HUDCONSOLE, "%s\f7 %s %s", name, verb, GAME_LANG ? "invincible! (Decakill!)" : "invincible ! (Décaplette)"); break;
+                case 15: conoutf(CON_HUDCONSOLE, "%s\f7 %s %s", name, verb, GAME_LANG ? "as god! (Pentakaidecakill!)" : "un dieu ! (Pentakaidecaplette)"); break;
             }
         }
         deathstate(d);
@@ -958,7 +950,8 @@ namespace game
             cmode->setup();
         }
 
-        conoutf(CON_GAMEINFO, GAME_LANG ? "\f2Gamemode is: %s": "\f2Le mode de jeu est : %s", server::modename(gamemode));
+        if(premission) conoutf(CON_HUDCONSOLE, GAME_LANG ? "\fcThe game is about to begin" : "\fcLa partie va commencer !");
+        conoutf(CON_HUDCONSOLE, GAME_LANG ? "\f2Gamemode is: %s": "\f2Le mode de jeu est : %s", server::modename(gamemode));
 
         const char *info = m_valid(gamemode) ? GAME_LANG ? gamemodes[gamemode - STARTGAMEMODE].nameEN : gamemodes[gamemode - STARTGAMEMODE].nameFR : NULL;
         if(showmodeinfo && info) conoutf(CON_GAMEINFO, "\f0%s", info);
@@ -1159,8 +1152,6 @@ namespace game
     int selectcrosshair(vec &col)
     {
         gameent *d = hudplayer();
-
-        drawmessages(player1->killstreak, str_pseudovictime, n_aptitudevictime, str_pseudoacteur, n_killstreakacteur, killdistance);
 
         if(d->state==CS_SPECTATOR || d->state==CS_DEAD || UI::uivisible("scoreboard")) return -1;
 
