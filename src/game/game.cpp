@@ -13,7 +13,7 @@ VARP(packtaunt, 0, 0, 1);
 
 namespace game
 {
-    int oldapti = player1->aptitude;
+    int oldapti;
     VARFP(player1_aptitude, 0, 0, sizeof(aptitudes)/sizeof(aptitudes[0])-1,
     {
         if(player1->state != CS_DEAD && isconnected() && !premission && !intermission && !m_tutorial)

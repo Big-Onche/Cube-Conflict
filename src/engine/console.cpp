@@ -147,7 +147,7 @@ float drawconlines(int conskip, int confade, float conwidth, float conheight, fl
         float width, height;
         text_boundsf(line, width, height, conwidth);
         if(dir <= 0) y -= height;
-        if(hudconsole) game::rendermessages(line, y, 8.8f, 0);
+        if(hudconsole) game::rendermessages(line, y);
         else draw_text(line, conoff, y, 0xFF, 0xFF, 0xFF, 0xFF, -1, conwidth);
         if(dir > 0) y += height;
     }
@@ -172,6 +172,7 @@ float renderconsole(float w, float h, float abovehud)
     drawconlines(conskip, hudconfade, conwidth, min(float(FONTH*hudconsize), h - 2*conpad), conpad, 0x4000, 0, 1, true); // hud centered console
     if(miniconsize && miniconwidth)
         drawconlines(miniconskip, miniconfade, (miniconwidth*(w - 2*conpad))/100, min(float(FONTH*miniconsize), abovehud - y), conpad, miniconfilter, abovehud, -1);
+    game::rendersoftmessages(y);
     return y;
 }
 

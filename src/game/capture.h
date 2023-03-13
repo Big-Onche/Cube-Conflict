@@ -565,15 +565,31 @@ struct captureclientmode : clientmode
         {
             if(b.owner!=owner)
             {
-                if(!b.name[0]) conoutf(CON_GAMEINFO, GAME_LANG ? "%s team hacked \"\fe%d\f7\" terminal." : "L'équipe %s a hacké le terminal \"\fe%d\f7\".", teamcolor(owner), b.tag);
-                else conoutf(CON_GAMEINFO, GAME_LANG ? "%s team hacked \"\fe%s\f7\" terminal." : "L'équipe %s a hacké le terminal \"\fe%s\f7\".", teamcolor(owner), b.name);
+                if(!b.name[0])
+                {
+                    conoutf(CON_GAMEINFO, GAME_LANG ? "%s team hacked \"\fe%d\f7\" terminal." : "L'équipe %s a hacké le terminal \"\fe%d\f7\".", teamcolor(owner), b.tag);
+                    if(owner==hudplayer()->team) conoutf(CON_HUDCONSOLE, (GAME_LANG ? "\f9We hacked the \"\fe%d\f9\" terminal. " : "\f9Nous avons hacké le terminal \"\fe%d\f9\"."), b.tag);
+                }
+                else
+                {
+                    conoutf(CON_GAMEINFO, GAME_LANG ? "%s team hacked \"\fe%s\f7\" terminal." : "L'équipe %s a hacké le terminal \"\fe%s\f7\".", teamcolor(owner), b.name);
+                    if(owner==hudplayer()->team) conoutf(CON_HUDCONSOLE, (GAME_LANG ? "\f9We hacked the \"\fe%s\f9\" terminal. " : "\f9Nous avons hacké le terminal \"\fe%s\f9\"."), b.name);
+                }
                 playsound(owner==hudplayer()->team ? S_TERMINAL_HACKED : S_TERMINAL_HACKED_E, &b.o, NULL, 0, 0, 200, -1, 2500);
             }
         }
         else if(b.owner)
         {
-            if(!b.name[0]) conoutf(CON_GAMEINFO, GAME_LANG ? "%s team lost the \"\fe%d\f7\" terminal." : "L'équipe %s a perdu le terminal \"\fe%d\f7\".", teamcolor(b.owner), b.tag);
-            else conoutf(CON_GAMEINFO, GAME_LANG ? "%s team lost the \"\fe%s\f7\" terminal." : "L'équipe %s a perdu le terminal \"\fe%s\f7\".", teamcolor(b.owner), b.name);
+            if(!b.name[0])
+            {
+                conoutf(CON_GAMEINFO, GAME_LANG ? "%s team lost the \"\fe%d\f7\" terminal." : "L'équipe %s a perdu le terminal \"\fe%d\f7\".", teamcolor(b.owner), b.tag);
+                if(b.owner==hudplayer()->team) conoutf(CON_HUDCONSOLE, (GAME_LANG ? "\f3We lost the \"\fe%d\f3\" terminal. " : "\f3Nous avons perdu le terminal \"\fe%d\f7\"."), b.tag);
+            }
+            else
+            {
+                conoutf(CON_GAMEINFO, GAME_LANG ? "%s team lost the \"\fe%s\f7\" terminal." : "L'équipe %s a perdu le terminal \"\fe%s\f7\".", teamcolor(b.owner), b.name);
+                if(b.owner==hudplayer()->team) conoutf(CON_HUDCONSOLE, (GAME_LANG ? "\f3We lost the \"\fe%s\f3\" terminal. " : "\f3Nous avons perdu le terminal \"\fe%s\f3\"."), b.name);
+            }
             playsound(owner==hudplayer()->team ? S_TERMINAL_LOST : S_TERMINAL_LOST_E, &b.o, NULL, 0, 0, 200, -1, 2500);
         }
         if(b.owner!=owner)

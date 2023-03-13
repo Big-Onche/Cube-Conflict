@@ -3,10 +3,6 @@
 #include "gfx.h"
 #include "stats.h"
 
-ICOMMAND(testmsg, "", (),
-    conoutf(CON_HUDCONSOLE, "test");
-);
-
 namespace game
 {
     // all we need to communicate with soft-coded hud
@@ -114,28 +110,66 @@ namespace game
         }
     );
 
-    string custommsg, helpmsg;
+    int msgmillis[2]; enum {MSG_INTERRACT, MSG_CUSTOM};
+
+    string custommsg;
     ICOMMAND(popupmsg, "ssii", (char *msg_fr, char *msg_en, int *duration, int *sound),
     {
-        conoutf(CON_HUDCONSOLE, "%s", GAME_LANG ? msg_en : msg_fr);
+        msgmillis[MSG_CUSTOM] = totalmillis + *duration;
+        formatstring(custommsg, "%s", GAME_LANG ? msg_en : msg_fr);
         if(sound>=0) playsound(*sound);
     });
 
+    string interractmsg;
     ICOMMAND(helpmsg, "s", (char *msg),
     {
-        conoutf(CON_HUDCONSOLE, "%s", msg);
+        msgmillis[MSG_INTERRACT] = totalmillis;
+        formatstring(interractmsg, "%s", msg);
     });
 
-    void rendermessages(string message, int textsize, float pos, int decal)
+    void rendersoftmessages(int y)
+    {
+        if(totalmillis - msgmillis[MSG_INTERRACT] <= 1)
+        {
+            defformatstring(s, "%s", interractmsg);
+
+            float tsz = 0.35f + hudscale/300.f,
+                  tx = 0.5f*(screenw - text_width(s)*tsz);
+
+            pushhudscale(3);
+            hudmatrix.translate(tx, screenh/1.5f, 0);
+            hudmatrix.scale(tsz, tsz, 1);
+            flushhudmatrix();
+            draw_text(s, 0, 0);
+            pophudmatrix();
+        }
+
+        if(totalmillis < msgmillis[MSG_CUSTOM])
+        {
+            defformatstring(s, "%s", custommsg);
+
+            float tsz = 0.35f + hudscale/300.f,
+                  tx = 0.5f*(screenw - text_width(s)*tsz);
+
+            pushhudscale(3);
+            hudmatrix.translate(tx, screenh/4.f, 0);
+            hudmatrix.scale(tsz, tsz, 1);
+            flushhudmatrix();
+            draw_text(s, 0, 0);
+            pophudmatrix();
+        }
+    }
+
+    void rendermessages(char *line, int y)
     {
         float tsz = 0.35f + hudscale/300.f,
-              tx = 0.5f*(screenw - text_width(message)*tsz);
+              tx = 0.5f*(screenw - text_width(line)*tsz);
 
         pushhudscale(3);
         hudmatrix.translate(tx, screenh/4.f, 0);
         hudmatrix.scale(tsz, tsz, 1);
         flushhudmatrix();
-        draw_text(message, 0, textsize);
+        draw_text(line, 0, y);
         pophudmatrix();
     }
 
