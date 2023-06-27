@@ -1113,7 +1113,7 @@ namespace game
 
     void suicide(physent *d)
     {
-        if(d==player1 || (d->type==ENT_PLAYER && ((gameent *)d)->ai))
+        if(d==player1 || (d->type==ENT_PLAYER && ((gameent *)d)->ai) && !premission)
         {
             if(d->state!=CS_ALIVE) return;
             gameent *pl = (gameent *)d;
