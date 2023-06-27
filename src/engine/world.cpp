@@ -640,7 +640,7 @@ void renderentring(const vec &o, float radius, int axis)
     loopi(16)
     {
         vec p(o);
-        const vec2 &sc = sincos360[i*(360/16)];
+        const vec2 &sc = sincos360[(i*360+8)/16];
         p[axis>=2 ? 1 : 0] += radius*sc.x;
         p[axis>=1 ? 2 : 1] += radius*sc.y;
         gle::attrib(p);

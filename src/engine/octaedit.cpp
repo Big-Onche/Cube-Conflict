@@ -234,6 +234,13 @@ ICOMMAND(selsave, "", (), { if(noedit(true)) return; savedsel = sel; });
 ICOMMAND(selrestore, "", (), { if(noedit(true)) return; sel = savedsel; });
 ICOMMAND(selswap, "", (), { if(noedit(true)) return; swap(sel, savedsel); });
 
+ICOMMAND(getselpos, "", (),
+{
+    if(noedit(true)) return;
+    defformatstring(pos, "%d %d %d", sel.o.x, sel.o.y, sel.o.z);
+    result(pos);
+});
+
 ///////// selection support /////////////
 
 cube &blockcube(int x, int y, int z, const block3 &b, int rgrid) // looks up a world cube, based on coordinates mapped by the block
