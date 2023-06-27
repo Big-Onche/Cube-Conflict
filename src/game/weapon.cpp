@@ -458,8 +458,8 @@ namespace game
 
         damage = ((damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[d->aptitude].apt_resistance))/(d->boostmillis[B_JOINT] ? (d->aptitude==APT_JUNKIE ? 1.875f : 1.25f) : 1.f); //Dégats de base
         actor->boostmillis[B_ROIDS] ? damage*=actor->aptitude==APT_JUNKIE ? 3 : 2 : 1; //Stéros ou non
-        if(d->abilitymillis[ABILITY_3] && d->aptitude==APT_MAGICIEN) damage = damage/5.0f;
-        if(d->boostmillis[B_JOINT]) damage = damage/1.25f;
+        if(d->abilitymillis[ABILITY_3] && d->aptitude==APT_MAGICIEN) damage/=damage/5.0f;
+        if(d->aptitude==APT_SHOSHONE && d->abilitymillis[ABILITY_1]) damage/=1.3f;
         damage = damage/10.f;
 
         if(d->armourtype!=A_MAGNET)
@@ -472,7 +472,7 @@ namespace game
         {
             if(actor->aptitude==APT_MEDECIN) return;
             damage/=(actor->aptitude==APT_JUNKIE ? 1.5f : 3.f); //Divisé si allié sauf sois-même
-            particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.0f), PART_TEXT, actor->boostmillis[B_ROIDS] ? 2500 : 1500, 0x666666, actor==player1 ? 5.0f : 2.2f, -8);
+            particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.0f), PART_TEXT, 1500, 0x666666, actor==player1 ? 5.0f : 2.2f, -8);
             return;
         }
 
@@ -482,39 +482,38 @@ namespace game
         switch(actor->aptitude)
         {
             case APT_AMERICAIN:
-                if(atk==ATK_NUKE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_CAMPOUZE_SHOOT)
+                if(atk>=ATK_NUKE_SHOOT && atk<=ATK_CAMPOUZE_SHOOT)
                 {
                     draweddmg*=1.5f;
-                    if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 2500, 0xFF5500, actor==player1 ? 5.5f : 4.0f, -8);
+                    if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 1500, 0xFF0000, actor==player1 ? 5.5f : 4.0f, -8);
                     normaldamage = false;
                 }
                 break;
 
             case APT_NINJA:
-                if(atk==ATK_CACNINJA_SHOOT && d!=player1){particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 2500, 0xFF0000, actor==player1 ? 7.0f : 5.0f, -8); normaldamage = false; }
+                if(atk==ATK_CACNINJA_SHOOT && d!=player1){particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 1500, 0xFF0000, actor==player1 ? 7.0f : 5.0f, -8); normaldamage = false; }
                 break;
 
             case APT_MAGICIEN:
                 if(actor->abilitymillis[ABILITY_2])
                 {
                     draweddmg*=1.25f;
-                    if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 2500, 0xFF00FF, actor==player1 ? 5.5f : 4.0f, -8);
+                    if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 1500, 0xFF00FF, actor==player1 ? 5.5f : 4.0f, -8);
                     normaldamage = false;
                 }
                 break;
 
             case APT_CAMPEUR:
-                {
-                    draweddmg *= ((actor->o.dist(d->o)/1800.f)+1.f);
-                    if(d!=player1) {particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, actor->boostmillis[B_ROIDS] ? 2500 : 1500, draweddmg<0 ? 0x22FF22 : actor->boostmillis[B_ROIDS] ? 0xFF0000: 0xFF4B19, actor==player1 ? 7.0f : 3.0f, -8);  normaldamage = false;}
-                }
+                draweddmg *= ((actor->o.dist(d->o)/1800.f)+1.f);
+                if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 1500, actor->boostmillis[B_ROIDS] ? 0xFF0000: 0xFF4B19, actor==player1 ? 7.0f : 3.0f, -8);
+                normaldamage = false;
                 break;
 
             case APT_VIKING:
                 if(actor->boostmillis[B_RAGE])
                 {
                     draweddmg*=1.25f;
-                    if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 2500, 0xAA0000, actor==player1 ? 10.0f : 7.0f, -8);
+                    if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 1500, 0xFF5500, actor==player1 ? 10.0f : 7.0f, -8);
                     normaldamage = false;
                 }
                 break;
@@ -530,29 +529,24 @@ namespace game
                 break;
 
             case APT_VAMPIRE:
-                if(d!=player1) particle_textcopy(actor->abovehead(), tempformatstring("%.1f", draweddmg*0.5f), PART_TEXT, actor->boostmillis[B_ROIDS] ? 2500 : 1500, 0xBBDDBB, 3.5f, -8);
+                if(d!=player1) particle_textcopy(actor->abovehead(), tempformatstring("%.1f", draweddmg*0.5f), PART_TEXT, 1500, 0xBBDDBB, 3.5f, -8);
                 break;
 
             case APT_SHOSHONE:
-                if(d->abilitymillis[ABILITY_1])
-                {
-                    draweddmg/=1.3f;
-                    if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 2500, 0xAAAA00, actor==player1 ? 10.0f : 7.0f, -8);
-                    normaldamage = false;
-                }
                 if(actor->abilitymillis[ABILITY_3])
                 {
                     draweddmg*=1.3f;
-                    if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 2500, 0xFF3333, actor==player1 ? 10.0f : 7.0f, -8);
+                    if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 1500, 0xFF3333, actor==player1 ? 10.0f : 7.0f, -8);
                     normaldamage = false;
                 }
+                if(d->aptitude==APT_AMERICAIN) draweddmg/=1.3f;
                 break;
 
             case APT_PHYSICIEN:
-                if(d==player1 && actor==player1 && player1->armour > 0 && player1->abilitymillis[ABILITY_1]) unlockachievement(ACH_BRICOLEUR);
+                if(d==player1 && actor==player1 && player1->armour && player1->abilitymillis[ABILITY_1]) unlockachievement(ACH_BRICOLEUR);
                 break;
         }
-        if(normaldamage && d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, actor->boostmillis[B_ROIDS] > 0 ? 2500 : 1500, actor->boostmillis[B_ROIDS] > 0 ? 0xFF0000 : 0xFF4400, actor==player1 ? 7.0f : 3.0f, -8);
+        if(normaldamage && d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 1500, actor->boostmillis[B_ROIDS] ? 0xFF0000 : 0xFF4400, actor==player1 ? 7.0f : 3.0f, -8);
 
         if(actor==player1) addstat(draweddmg, STAT_TOTALDAMAGEDEALT);
         else if(d==player1) addstat(draweddmg, STAT_TOTALDAMAGERECIE);
