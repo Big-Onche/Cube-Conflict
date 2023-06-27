@@ -63,7 +63,7 @@ namespace game
         if(request) //player is requesting ability
         {
             if(!canlaunchability(d, ability)) return; //check for basic guards
-            if(!d->abilityready[ability] || d->mana < aptitudes[d->aptitude].abilities[ability].manacost) {if(d==hudplayer())playsound(S_SORTIMPOSSIBLE); return; } //check for game vars (client sided)
+            if(!d->abilityready[ability] || d->mana < aptitudes[d->aptitude].abilities[ability].manacost) { if(d==player1) playsound(S_SORTIMPOSSIBLE); return; } //check for game vars (client sided)
             addmsg(N_REQABILITY, "rci", d, ability); //server sided game vars check
             return; //can stop after this, cuz server call this func with !request
         }
