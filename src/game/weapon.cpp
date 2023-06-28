@@ -917,7 +917,7 @@ namespace game
                 {
                     vec pos = vec(p.offset).mul(p.offsetmillis/float(OFFSETMILLIS)).add(v);
 
-                    float len = min(20.0f, vec(p.offset).add(p.from).dist(pos));
+                    float len = min(100.f, vec(p.offset).add(p.from).dist(pos));
                         vec dir = vec(dv).normalize(),
                         tail = vec(dir).mul(-len).add(pos),
                         head = vec(dir).mul(2.4f).add(pos);
@@ -957,7 +957,7 @@ namespace game
                         case ATK_CAMPOUZE_SHOOT:
                         case ATK_GAU8_SHOOT:
                             if(lookupmaterial(pos)==MAT_WATER) particle_splash(PART_BUBBLE, 1, 150, v, 0x18181A, 2.0f+rnd(2), 20, -30);
-                            particle_flare(tail, head, 1, PART_F_BULLET, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFFBB88, ATK_GAU8_SHOOT==1 ? 0.8f : 0.65f, p.owner, gfx::champicolor());
+                            particle_flare(tail, head, 1, PART_F_BULLET, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFFBB88, ATK_GAU8_SHOOT==1 ? 0.75f : 0.65f, p.owner, gfx::champicolor());
                             particle_splash(PART_PLASMA_FRONT, 1, 1, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFFBB88,  p.owner==player1 ? 0.65f : ATK_GAU8_SHOOT==1 ? 0.45f : 0.3f, 150, 20, 0, gfx::champicolor());
                             break;
                         case ATK_MINIGUN_SHOOT:
@@ -973,7 +973,7 @@ namespace game
                             if(!p.exploded)
                             {
                                 if(lookupmaterial(pos)==MAT_WATER) particle_splash(PART_BUBBLE, 1, 150, v, 0x888888, 1.0f+rnd(2), 20, -30);
-                                particle_splash(PART_SMOKE, 2, 100, pos, 0xAAAAAA, 0.8f, 25, 250, 0, gfx::champicolor());
+                                particle_splash(PART_SMOKE, 3, 250, pos, 0xBBBBBB, 1.f, 25, 250, 0, gfx::champicolor());
                                 if(p.owner->boostmillis[B_ROIDS])
                                 {
                                     particle_flare(tail, head, 1, PART_F_BULLET, 0xFF4444, 0.30f, p.owner, gfx::champicolor());

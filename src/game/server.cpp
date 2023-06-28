@@ -2450,7 +2450,14 @@ namespace server
 
             float damage = attacks[atk].damage*(1-h.dist/EXP_DISTSCALE/attacks[atk].exprad);
             if(gs.boostmillis[B_ROIDS]) damage*= ci->aptitude==APT_JUNKIE ? 3 : 2;
-            if(target==ci && atk==ATK_ASSISTXPL_SHOOT) damage = 0;
+            if(target==ci)
+            {
+                switch(atk)
+                {
+                    case ATK_ASSISTXPL_SHOOT: damage = 0; break;
+                    case ATK_KAMIKAZE_SHOOT: damage*=1.33f;
+                }
+            }
             if(damage > 0)
             {
                 dodamage(target, ci, max(int(damage), 1), atk, h.dir);
