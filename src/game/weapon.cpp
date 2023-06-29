@@ -959,6 +959,7 @@ namespace game
                             if(lookupmaterial(pos)==MAT_WATER) particle_splash(PART_BUBBLE, 1, 150, v, 0x18181A, 2.0f+rnd(2), 20, -30);
                             particle_flare(tail, head, 1, PART_F_BULLET, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFFBB88, ATK_GAU8_SHOOT==1 ? 0.75f : 0.65f, p.owner, gfx::champicolor());
                             particle_splash(PART_PLASMA_FRONT, 1, 1, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFFBB88,  p.owner==player1 ? 0.65f : ATK_GAU8_SHOOT==1 ? 0.45f : 0.3f, 150, 20, 0, gfx::champicolor());
+                            particle_flare(tail, head, ATK_SV98_SHOOT==1 || ATK_CAMPOUZE_SHOOT==1 ? 1750 : 750, PART_F_SMOKE, 0x333333, ATK_SV98_SHOOT==1 || ATK_CAMPOUZE_SHOOT==1 ? 1.4f : 1.f, p.owner, gfx::champicolor());
                             break;
                         case ATK_MINIGUN_SHOOT:
                         case ATK_AK47_SHOOT:
@@ -968,12 +969,14 @@ namespace game
                             if(lookupmaterial(pos)==MAT_WATER) particle_splash(PART_BUBBLE, 1, 150, v, 0x18181A, 1.0f+rnd(2), 20, -30);
                             particle_flare(tail, head, 1, PART_F_BULLET, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFFBB88, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.55f : 0.45f, p.owner, gfx::champicolor());
                             particle_splash(PART_PLASMA_FRONT, 1, 1, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFFBB88, p.owner==player1 ? 0.4f : ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.3f : 0.24f, 150, 20, 0, gfx::champicolor());
+                            particle_flare(tail, head, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 1250 : 750, PART_F_SMOKE, 0x252525, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 1.f : 0.75f, p.owner, gfx::champicolor());
                             break;
                         case ATK_ARBALETE_SHOOT:
                             if(!p.exploded)
                             {
                                 if(lookupmaterial(pos)==MAT_WATER) particle_splash(PART_BUBBLE, 1, 150, v, 0x888888, 1.0f+rnd(2), 20, -30);
-                                particle_splash(PART_SMOKE, 3, 250, pos, 0xBBBBBB, 1.f, 25, 250, 0, gfx::champicolor());
+                                particle_flare(tail, head, 250, PART_F_SMOKE, 0x444444, 0.60f, p.owner, gfx::champicolor());
+
                                 if(p.owner->boostmillis[B_ROIDS])
                                 {
                                     particle_flare(tail, head, 1, PART_F_BULLET, 0xFF4444, 0.30f, p.owner, gfx::champicolor());
