@@ -1372,6 +1372,10 @@ int main(int argc, char **argv)
     identflags |= IDF_PERSIST;
 
     addpostfx("sobel", 1, 1, 1, 1, vec4(1, 1, 1, 1));
+    addpostfx("mainfilter", 1, 1, 1, 1, vec4(1, 1, 1, 1));
+    addpostfx("protanopia", 1, 1, 1, 1, vec4(1, 1, 1, 1));
+    addpostfx("deuteranopia", 1, 1, 1, 1, vec4(1, 1, 1, 1));
+    addpostfx("tritanopia", 1, 1, 1, 1, vec4(1, 1, 1, 1));
     clearpostfx();
 
     logoutf("init: mainloop");

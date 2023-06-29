@@ -912,6 +912,13 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     startmap(cname ? cname : mname);
     stopmusic();
     if(hasvsync) {vsync = 1; restorevsync();}
+    addpostfx("mainfilter", 1, 1, 1, 1, vec4(1, 1, 1, 1));
+    switch(cbcompensation)
+    {
+        case 1: addpostfx("protanopia", 1, 1, 1, 1, vec4(1, 1, 1, 1)); break;
+        case 2: addpostfx("deuteranopia", 1, 1, 1, 1, vec4(1, 1, 1, 1)); break;
+        case 3: addpostfx("tritanopia", 1, 1, 1, 1, vec4(1, 1, 1, 1));
+    }
     return true;
 }
 

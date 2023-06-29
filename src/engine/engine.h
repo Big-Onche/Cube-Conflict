@@ -812,14 +812,14 @@ extern void bgquad(float x, float y, float w, float h, float tx = 0, float ty = 
 
 extern int map_atmo, map_sel, packtaunt;  //Config partie Cube Conflict
 
-//Used for shrooms gfx
+// main graphical effects
 extern bool addpostfx(const char *name, int outputbind, int outputscale, uint inputs, uint freeinputs, const vec4 &params);
 extern void clearpostfx();
 extern int fullbrightmodels;
-
-extern int GAME_LANG, vsync;
-
+extern int GAME_LANG, vsync, cbcompensation;
 extern void restorevsync();
+
+extern bool islaunching;
 
 #endif
 

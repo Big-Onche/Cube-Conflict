@@ -879,6 +879,7 @@ static partrenderer *parts[] =
     new taperenderer("media/particles/trails/bullet_side.png", PT_TAPE|PT_FEW|PT_BRIGHT),                                    // PART_F_BULLET
     new taperenderer("media/particles/trails/shotgun_side.png", PT_TAPE|PT_BRIGHT),                                          // PART_F_SHOTGUN
     new taperenderer("media/particles/trails/plasma_side.png", PT_TAPE|PT_FEW|PT_BRIGHT),                                    // PART_F_PLASMA
+    new taperenderer("media/particles/trails/smoke_side.png", PT_TAPE|PT_FLIP|PT_FEW),                                       // PART_F_SMOKE
     new quadrenderer("media/particles/trails/spock_front.png", PT_PART|PT_FEW|PT_HFLIP|PT_BRIGHT),                           // PART_SPOCK_FRONT
     new quadrenderer("media/particles/trails/plasma_front.png", PT_PART|PT_FLIP|PT_FEW|PT_BRIGHT),                           // PART_PLASMA_FRONT
     // flames and smokes

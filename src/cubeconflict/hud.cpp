@@ -110,6 +110,15 @@ namespace game
         }
     );
 
+    int respawnwait(gameent *d, int delay = 0)
+    {
+        return d->respawnwait(3, delay);
+    }
+
+    ICOMMAND(hudrespawnwait, "", (),
+        intret(cmode ? cmode->respawnwait(hudplayer()) : respawnwait(hudplayer()));
+    );
+
     int msgmillis[2]; enum {MSG_INTERRACT, MSG_CUSTOM};
 
     string custommsg;
@@ -274,7 +283,7 @@ namespace game
             cmode->drawhud(d, w, h);
             pophudmatrix();
         }
-        else if(m_tutorial || m_dmsp) drawrpgminimap(d, w, h);
+        //else if(m_tutorial || m_dmsp) drawrpgminimap(d, w, h);
 
         pushhudmatrix();
     }

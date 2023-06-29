@@ -4,6 +4,21 @@
 
 VARP(epilepsyfriendly, 0, 0, 1);
 
+void setcbfilter(int i)
+{
+    clearpostfx();
+    addpostfx("mainfilter", 1, 1, 1, 1, vec4(1, 1, 1, 1));
+
+    switch(i)
+    {
+        case 1: addpostfx("protanopia", 1, 1, 1, 1, vec4(1, 1, 1, 1)); break;
+        case 2: addpostfx("deuteranopia", 1, 1, 1, 1, vec4(1, 1, 1, 1)); break;
+        case 3: addpostfx("tritanopia", 1, 1, 1, 1, vec4(1, 1, 1, 1));
+    }
+}
+
+VARFP(cbcompensation, 0, 0, 3, if(!islaunching) setcbfilter(cbcompensation));
+
 namespace gfx
 {
     VAR(forcecampos, -1, -1, 1000);
@@ -297,6 +312,13 @@ namespace gfx
     void resetshroomsgfx()
     {
         clearpostfx();
+        addpostfx("mainfilter", 1, 1, 1, 1, vec4(1, 1, 1, 1));
+        switch(cbcompensation)
+        {
+            case 1: addpostfx("protanopia", 1, 1, 1, 1, vec4(1, 1, 1, 1)); break;
+            case 2: addpostfx("deuteranopia", 1, 1, 1, 1, vec4(1, 1, 1, 1)); break;
+            case 3: addpostfx("tritanopia", 1, 1, 1, 1, vec4(1, 1, 1, 1));
+        }
         champifov = 0;
         fullbrightmodels = 0;
     }

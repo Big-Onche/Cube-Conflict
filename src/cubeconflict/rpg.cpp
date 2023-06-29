@@ -124,7 +124,7 @@ namespace game
     void drawrpgminimap(gameent *d, int w, int h)
     {
         pushhudscale(h/1800.0f);
-        pushhudscale(2);
+        pushhudscale(3);
         pophudmatrix();
         resethudshader();
 
