@@ -175,6 +175,7 @@ namespace game
             lasthit = 0;
             if(cmode) cmode->respawned(player1);
         }
+        gfx::resetshroomsgfx();
     }
 
     gameent *pointatplayer()
@@ -460,7 +461,7 @@ namespace game
         checkfollow();
     }
 
-    VARP(spawnwait, 2000, 2000, 10000);
+    VARP(spawnwait, 3000, 3000, 10000);
 
     void respawn()
     {
@@ -596,9 +597,11 @@ namespace game
         {
             if(deathscore) showscores(true);
             disablezoom();
+            cleardamagescreen();
             d->boostmillis[B_SHROOMS] = 0;
             d->attacking = ACT_IDLE;
             gfx::resetshroomsgfx();
+            if(!cbcompensation) addpostfx("deathscreen", 1, 1, 1, 1, vec4(1, 1, 1, 1));
             d->roll = 0;
             playsound(S_DIE_P1);
             if(m_tutorial) execute("reset_needed_triggers");
@@ -643,6 +646,10 @@ namespace game
         {"destroyed"},
         {"annihilated"},
     };
+
+    string killername, weapdesc;
+    ICOMMAND(getkillername, "", (), result(killername); );
+    ICOMMAND(getweapondesc, "", (), result(weapdesc); );
 
     void killed(gameent *d, gameent *actor, int atk)
     {
@@ -713,35 +720,14 @@ namespace game
                 if(atk==ATK_M32_SHOOT)unlockachievement(ACH_M32SUICIDE);
             }
         }
-        else if(isteam(d->team, actor->team)) // Tir allié /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        {
-            contype |= CON_TEAMKILL;
-            if(d==player1) //TU as été tué par un allié
-            {
-                conoutf(contype, "\f6%s %s (%s\f6)", dname, GAME_LANG ? "got fragged by a teammate" : "as été tué par un allié", aname);
-                addstat(1, STAT_MORTS);
-            }
-            else
-            {
-                conoutf(contype, "\f2%s \f6%s%s (%s\f6)", aname, GAME_LANG ? "" : actor==player1 ? "as " : "a ", GAME_LANG ? "fragged a teammate" : "tué un allié" , dname); //Quelqu'un a ou TU as tué un de ses alliés
-                if(actor==player1) {addstat(1, STAT_ALLIESTUES); unlockachievement(ACH_CPASBIEN);}
-            }
-        }
         else // Kill ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
             float killdistance = actor->o.dist(d->o)/18.f;
             if(actor==player1) ////////////////////TU as tué quelqu'un////////////////////
             {
-                conoutf(contype, "\fd%s \f7%s%s \fc%s \f7%s %s (%.1fm)",
-                    aname,
-                    GAME_LANG ? "" : "as ",
-                    GAME_LANG ? partmessageEN[rnd(7)].partverb : partmessageFR[rnd(15)].partverb,
-                    dname,
-                    GAME_LANG ? "with" : "avec",
-                    GAME_LANG ? guns[atk].armedescEN : guns[atk].armedescFR,
-                    killdistance);
                 playsound(S_KILL);
-                conoutf(CON_HUDCONSOLE, "%s \fc%s \f7! (%s à %.1fm)", GAME_LANG ? "You killed" : "Tu as tué", dname, GAME_LANG ? aptitudes[d->aptitude].apt_nomEN : aptitudes[d->aptitude].apt_nomFR, killdistance);
+                conoutf(CON_HUDCONSOLE, "%s \fc%s \f7! \f4(%.1fm)", GAME_LANG ? "You killed" : "Tu as tué", dname, killdistance);
+                conoutf(contype, "\fd%s\f7 > \f4%s\f7 > %s \f4(%.1fm)", player1->name, GAME_LANG ? guns[atk].nameEN : guns[atk].nameFR, dname, killdistance);
 
                 if(IS_ON_OFFICIAL_SERV) //now let's check for shittons of achievements if playing online
                 {
@@ -750,6 +736,7 @@ namespace game
                     else if(killdistance>=69.f && killdistance<70.f ) unlockachievement(ACH_NICE);
                     if(player1->state==CS_DEAD && player1->lastpain > 200) unlockachievement(ACH_TUEURFANTOME);
                     if(player1->health<=10 && player1->state==CS_ALIVE) unlockachievement(ACH_1HPKILL);
+                    if(isteam(d->team, player1->team)) {addstat(1, STAT_ALLIESTUES); unlockachievement(ACH_CPASBIEN);}
 
                     switch(atk)
                     {
@@ -778,26 +765,14 @@ namespace game
             }
             else if(d==player1) ////////////////////TU as été tué////////////////////
             {
-                conoutf(contype, "\fd%s \f7%s %s %s \fc%s \f7%s %s (%.1fm)",
-                    dname,
-                    GAME_LANG ? "got" : "as été",
-                    GAME_LANG ? partmessageEN[rnd(7)].partverb : partmessageFR[rnd(15)].partverb,
-                    GAME_LANG ? "by" : "par",
-                    aname,
-                    GAME_LANG ? "with" : "avec",
-                    GAME_LANG ? guns[atk].armedescEN : guns[atk].armedescFR,
-                    killdistance);
+                conoutf(contype, "%s\f7 > \f4%s\f7 > \fd%s \f4(%.1fm)", aname, GAME_LANG ? guns[atk].nameEN : guns[atk].nameFR, player1->name, killdistance);
                 addstat(1, STAT_MORTS);
+                formatstring(killername, "%s", aname);
+                formatstring(weapdesc, "%s", GAME_LANG ? guns[atk].armedescEN : guns[atk].armedescFR);
             }
             else ////////////////////Quelqu'un a tué quelqu'un////////////////////
             {
-                conoutf(contype, "%s \f7%s%s %s \f7%s %s (%.1fm)",
-                    aname,
-                    GAME_LANG ? "" : "a ",
-                    GAME_LANG ? partmessageEN[rnd(7)].partverb : partmessageFR[rnd(15)].partverb,
-                    dname,
-                    GAME_LANG ? "with" : "avec",
-                    GAME_LANG ? guns[atk].armedescEN : guns[atk].armedescFR, killdistance);
+                conoutf(contype, "%s\f7 > \f4%s\f7 > %s \f4(%.1fm)", aname, GAME_LANG ? guns[atk].nameEN : guns[atk].nameFR, dname, killdistance);
             }
 
             ////////////////////Informe que quelqu'un est chaud////////////////////
@@ -1113,7 +1088,7 @@ namespace game
 
     void suicide(physent *d)
     {
-        if(d==player1 || (d->type==ENT_PLAYER && ((gameent *)d)->ai) && !premission)
+        if((d==player1 || (d->type==ENT_PLAYER && ((gameent *)d)->ai)) && !premission)
         {
             if(d->state!=CS_ALIVE) return;
             gameent *pl = (gameent *)d;
