@@ -93,7 +93,7 @@ ICOMMAND(getstatinfo, "ii", (int *statID, bool *onlyvalue),
         //Based on STAT_KILLS & STAT_MORTS, STAT_KDRATIO not saved.
         case STAT_KDRATIO:
         {
-            formatstring(val, "%s%s%.1f", *onlyvalue ? "" : GAME_LANG ? statslist[*statID].statnicenameEN : statslist[*statID].statnicenameFR, *onlyvalue ? "" : " : ", kdratio());
+            formatstring(val, "%s%s%.1f", *onlyvalue ? "" : GAME_LANG ? statslist[*statID].statnicenameEN : statslist[*statID].statnicenameFR, *onlyvalue ? "" : GAME_LANG ? ": " : " : ", kdratio());
             break;
         }
         //Easy secs to HH:MM:SS converter and displayer
@@ -115,7 +115,7 @@ ICOMMAND(getstatinfo, "ii", (int *statID, bool *onlyvalue),
         case STAT_MAXKILLDIST:
         case STAT_LEVEL:
         case STAT_BASEHACK:
-            formatstring(val, "%s%s%d%s", *onlyvalue ? "" : GAME_LANG ? statslist[*statID].statnicenameEN : statslist[*statID].statnicenameFR, *onlyvalue ? "" : " : ", stat[*statID], *statID!=STAT_MAXKILLDIST ? *statID==STAT_BASEHACK ? GAME_LANG ? " seconds" : " secondes" : "" : GAME_LANG ? " meters" : " mètres");
+            formatstring(val, "%s%s%d%s", *onlyvalue ? "" : GAME_LANG ? statslist[*statID].statnicenameEN : statslist[*statID].statnicenameFR, *onlyvalue ? "" : GAME_LANG ? ": " : " : ", stat[*statID], *statID!=STAT_MAXKILLDIST ? *statID==STAT_BASEHACK ? GAME_LANG ? " seconds" : " secondes" : "" : GAME_LANG ? " meters" : " mètres");
             break;
         //otherwise, we put the stat value before the description by default
         default: formatstring(val, "%d%s%s", stat[*statID], *onlyvalue ? "" : " ", *onlyvalue ? "" : GAME_LANG ? statslist[*statID].statnicenameEN : statslist[*statID].statnicenameFR);
