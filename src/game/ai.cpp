@@ -469,12 +469,11 @@ namespace ai
     }
 
     int isgoodammo(int gun) { return gun >= GUN_RAIL && gun <= GUN_S_CAMPOUZE; }
-    static const int goodguns[] = { GUN_S_CAMPOUZE, GUN_S_NUKE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_PULSE, GUN_RAIL, GUN_FAMAS, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_AK47, GUN_SV98, GUN_SKS, GUN_ARTIFICE, GUN_ARBALETE, GUN_LANCEFLAMMES, GUN_M32};
 
     bool hasgoodammo(gameent *d)
     {
         if(m_identique || m_random || d->ammo[GUN_M32] > 5) return true;
-        loopi(sizeof(goodguns)/sizeof(goodguns[0])) if(d->hasammo(goodguns[0])) return true;
+        loopi(NUMGUNS) if(d->hasammo(i)) return true;
         return false;
     }
 
@@ -1455,7 +1454,7 @@ namespace ai
                 c.override = false;
                 cleannext = false;
             }
-            if(d->state == CS_DEAD && (!cmode || cmode->respawnwait(d, 100+rnd(400)) <= 0) && lastmillis - d->lastpain >= 500)
+            if(d->state == CS_DEAD && (!cmode || cmode->respawnwait(d, 100+rnd(400)) <= 0) && lastmillis - d->lastpain >= 3000)
             {
                 addmsg(N_TRYSPAWN, "rc", d);
                 d->respawned = d->lifesequence;
@@ -1595,7 +1594,7 @@ namespace ai
                 {
                     if(d->ai->weappref >= 0 && d->ai->weappref < NUMGUNS)
                     {
-                        particle_textcopy(pos, guns[d->ai->weappref].name, PART_TEXT, 1);
+                        particle_textcopy(pos, GAME_LANG ? guns[d->ai->weappref].nameEN : guns[d->ai->weappref].nameFR, PART_TEXT, 1);
                         pos.z += 2;
                     }
                     gameent *e = getclient(d->ai->enemy);
