@@ -876,12 +876,12 @@ static partrenderer *parts[] =
     new quadrenderer("media/particles/flashes/shotgun.png", PT_PART|PT_FEW|PT_BRIGHT|PT_TRACK),                              // PART_MF_SHOTGUN
     new quadrenderer("media/particles/flashes/sniper.png", PT_PART|PT_FEW|PT_BRIGHT|PT_TRACK),                               // PART_MF_SNIPER
     // bullets flares
-    new taperenderer("media/particles/trails/bullet_side.png", PT_TAPE|PT_FEW|PT_BRIGHT),                                    // PART_F_BULLET
-    new taperenderer("media/particles/trails/shotgun_side.png", PT_TAPE|PT_BRIGHT),                                          // PART_F_SHOTGUN
-    new taperenderer("media/particles/trails/plasma_side.png", PT_TAPE|PT_FEW|PT_BRIGHT),                                    // PART_F_PLASMA
+    new taperenderer("media/particles/trails/bullet_side.png", PT_TAPE|PT_FEW|PT_OVERBRIGHT),                                // PART_F_BULLET
+    new taperenderer("media/particles/trails/shotgun_side.png", PT_TAPE|PT_OVERBRIGHT),                                      // PART_F_SHOTGUN
+    new taperenderer("media/particles/trails/plasma_side.png", PT_TAPE|PT_FEW|PT_OVERBRIGHT),                                // PART_F_PLASMA
     new taperenderer("media/particles/trails/smoke_side.png", PT_TAPE|PT_FLIP|PT_FEW),                                       // PART_F_SMOKE
     new quadrenderer("media/particles/trails/spock_front.png", PT_PART|PT_FEW|PT_HFLIP|PT_BRIGHT),                           // PART_SPOCK_FRONT
-    new quadrenderer("media/particles/trails/plasma_front.png", PT_PART|PT_FLIP|PT_FEW|PT_BRIGHT),                           // PART_PLASMA_FRONT
+    new quadrenderer("media/particles/trails/plasma_front.png", PT_PART|PT_FLIP|PT_FEW|PT_OVERBRIGHT),                       // PART_PLASMA_FRONT
     // flames and smokes
     new quadrenderer("media/particles/fire/smoke.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_LERP|PT_RND4),                           // PART_SMOKE
     new quadrenderer("media/particles/fire/flames.png", PT_PART|PT_HFLIP|PT_RND4|PT_OVERBRIGHT),                             // PART_FLAME
@@ -1160,10 +1160,10 @@ void particle_meter(const vec &s, float val, int type, float relativesize, int f
     p->progress = clamp(int(val*100), 0, 100);
 }
 
-void particle_flare(const vec &p, const vec &dest, int fade, int type, int color, float size, physent *owner, bool randomcolor)
+void particle_flare(const vec &p, const vec &dest, int fade, int type, int color, float size, physent *owner, bool randomcolor, int sizemod)
 {
     if(!canaddparticles()) return;
-    newparticle(p, dest, fade, type, randomcolor ? gfx::rndcolor[rnd(6)].color : color, size)->owner = owner;
+    newparticle(p, dest, fade, type, randomcolor ? gfx::rndcolor[rnd(6)].color : color, size, 0, sizemod)->owner = owner;
 }
 
 void particle_fireball(const vec &dest, float maxsize, int type, int fade, int color, float size, bool randomcolor)
