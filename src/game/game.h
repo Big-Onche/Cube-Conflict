@@ -502,43 +502,43 @@ static const struct attackinfo { int gun, action, picksound, sound, middistsnd, 
     { GUN_NONE,         ACT_SHOOT, -1, -1, -1, -1, 0, 10000, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0}
 };
 
-static const struct guninfo { const char *name, *file, *vwep, *armedescFR, *armedescEN; int maxweapposside, maxweapposup, maxzoomfov, hudrange, attacks[NUMACTS]; } guns[NUMGUNS] =
+static const struct guninfo { const char *nameFR, *nameEN, *file, *vwep, *armedescFR, *armedescEN; int maxweapposside, maxweapposup, maxzoomfov, hudrange, attacks[NUMACTS]; } guns[NUMGUNS] =
 {
     //Armes "normales"
-    { "fusilelectrique", "fusilelectrique", "worldgun/fusilelectrique", "un fusil électrique !", "an electric rifle.",                   65,  26, 60, 1000,  { -1, ATK_RAIL_SHOOT }, },
-    { "fusilplasma", "fusilplasma", "worldgun/fusilplasma",             "un fusil du turfu !", "a futuristic rifle.",                    28,  10, 60,  750,  { -1, ATK_PULSE_SHOOT }, },
-    { "smaw", "smaw", "worldgun/smaw",                                  "un lance-roquettes de noob.", "a noob rocket launcher.",         8,   8, 85,  500,  { -1, ATK_SMAW_SHOOT }, },
-    { "minigun", "minigun", "worldgun/minigun",                         "un minigun cheaté.", "a cheated minigun.",                      36,  11, 80,  750,  { -1, ATK_MINIGUN_SHOOT }, },
-    { "spockgun", "spockgun", "worldgun/spockgun",                      "un pistolet alien", "an alien gun.",                            52,  20, 70,  500,  { -1, ATK_SPOCKGUN_SHOOT }, },
-    { "m32", "m32", "worldgun/m32",                                     "une grenade imprévisible.", "an unpredictable grenade",         65,  21, 85,  600,  { -1, ATK_M32_SHOOT }, },
-    { "lanceflammes", "lanceflammes", "worldgun/lanceflammes",          "un lance-flammes !", "a flame thrower!",                        40,  15, 95,  280,  { -1, ATK_LANCEFLAMMES_SHOOT }, },
-    { "uzi", "uzi", "worldgun/uzi",                                     "une mitraillette de gangster.", "a gangster's weapon.",         23,  21, 80,  500,  { -1, ATK_UZI_SHOOT }, },
-    { "famas", "famas", "worldgun/famas",                               "une arme made in France", "a weapon made in France.",           54,  14, 70,  750,  { -1, ATK_FAMAS_SHOOT }, },
-    { "mossberg500", "mossberg500", "worldgun/mossberg500",             "un fusil à pompe de vieux con.", "an old man's shotgun.",       38,  18, 95,  300,  { -1, ATK_MOSSBERG_SHOOT }, },
-    { "hydra", "hydra", "worldgun/hydra",                               "un fusil venant d'un autre jeu !", "a gun from another game!",  44,  20, 95,  300,  { -1, ATK_HYDRA_SHOOT }, },
-    { "sv98", "sv98", "worldgun/sv98",                                  "un sniper de campeur.", "a camper rifle.",                       1,   3, 30, 2000,  { -1, ATK_SV98_SHOOT }, },
-    { "sks", "sks", "worldgun/sks",                                     "une carabine russe !", "a russian rifle!",                       1,   3, 50, 1500,  { -1, ATK_SKS_SHOOT }, },
-    { "arbalete", "arbalete", "worldgun/arbalete",                      "une flèche de merde !", "a rotten arrow.",                       1,   3, 45, 1000,  { -1, ATK_ARBALETE_SHOOT }, },
-    { "ak47", "ak47", "worldgun/ak47",                                  "l'arme à Vladimir Poutine !", "Putin's weapon!",                46,  25, 70,  750,  { -1, ATK_AK47_SHOOT }, },
-    { "gapb1", "gapb1", "worldgun/gapb1",                               "un projectile rose de tapette !", "a gay ass pink projectile.", 43,  17, 85,  500,  { -1, ATK_GRAP1_SHOOT }, },
-    { "feuartifice", "feuartifice", "worldgun/feuartifice",             "une arme de Gilet jaune.", "a yellow vests weapon",             70,  30, 85,  500,  { -1, ATK_ARTIFICE_SHOOT }, },
-    { "glock", "glock", "worldgun/glock",                               "un pistolet vraiment pourri.", "a very bad gun",                55,  20, 85,  300,  { -1, ATK_GLOCK_SHOOT }, },
+    { "Fusil électrique", "Electric rifle", "fusilelectrique", "worldgun/fusilelectrique",  "un fusil électrique !", "an electric rifle.",                   65,  26, 60, 1000,  { -1, ATK_RAIL_SHOOT }, },
+    { "Fusil plasma", "Plasma rifle", "fusilplasma", "worldgun/fusilplasma",                "un fusil du turfu !", "a futuristic rifle.",                    28,  10, 60,  750,  { -1, ATK_PULSE_SHOOT }, },
+    { "SMAW", "SMAW", "smaw", "worldgun/smaw",                                              "un lance-roquettes de noob.", "a noob rocket launcher.",         8,   8, 85,  500,  { -1, ATK_SMAW_SHOOT }, },
+    { "Minigun", "Minigun", "minigun", "worldgun/minigun",                                  "un minigun cheaté.", "a cheated minigun.",                      36,  11, 80,  750,  { -1, ATK_MINIGUN_SHOOT }, },
+    { "Spockgun", "Pistolet spock","spockgun", "worldgun/spockgun",                         "un pistolet alien", "an alien gun.",                            52,  20, 70,  500,  { -1, ATK_SPOCKGUN_SHOOT }, },
+    { "M32", "M32", "m32", "worldgun/m32",                                                  "une grenade imprévisible.", "an unpredictable grenade",         65,  21, 85,  600,  { -1, ATK_M32_SHOOT }, },
+    { "Lance-flammes", "Flamethrower", "lanceflammes", "worldgun/lanceflammes",             "un lance-flammes !", "a flame thrower!",                        40,  15, 95,  280,  { -1, ATK_LANCEFLAMMES_SHOOT }, },
+    { "UZI", "UZI", "uzi", "worldgun/uzi",                                                  "une mitraillette de gangster.", "a gangster's weapon.",         23,  21, 80,  500,  { -1, ATK_UZI_SHOOT }, },
+    { "FAMAS", "FAMAS", "famas", "worldgun/famas",                                          "une arme made in France", "a weapon made in France.",           54,  14, 70,  750,  { -1, ATK_FAMAS_SHOOT }, },
+    { "Mossberg 500", "Mossberg 500", "mossberg500", "worldgun/mossberg500",                "un fusil à pompe de vieux con.", "an old man's shotgun.",       38,  18, 95,  300,  { -1, ATK_MOSSBERG_SHOOT }, },
+    { "Hydra", "Hydra", "hydra", "worldgun/hydra",                                         "un fusil venant d'un autre jeu !", "a gun from another game!",  44,  20, 95,  300,  { -1, ATK_HYDRA_SHOOT }, },
+    { "SV-98", "SV-98", "sv98", "worldgun/sv98",                                            "un sniper de campeur.", "a camper rifle.",                       1,   3, 30, 2000,  { -1, ATK_SV98_SHOOT }, },
+    { "SKS", "SKS", "sks",  "worldgun/sks",                                                 "une carabine russe !", "a russian rifle!",                       1,   3, 50, 1500,  { -1, ATK_SKS_SHOOT }, },
+    { "Arbalète", "Crossbow", "arbalete", "worldgun/arbalete",                              "une flèche de merde !", "a rotten arrow.",                       1,   3, 45, 1000,  { -1, ATK_ARBALETE_SHOOT }, },
+    { "AK-47", "AK-47", "ak47", "worldgun/ak47",                                            "l'arme à Vladimir Poutine !", "Putin's weapon!",                46,  25, 70,  750,  { -1, ATK_AK47_SHOOT }, },
+    { "GAPB-1", "GAPB-1", "gapb1", "worldgun/gapb1",                                        "un projectile rose de tapette !", "a gay ass pink projectile.", 43,  17, 85,  500,  { -1, ATK_GRAP1_SHOOT }, },
+    { "Feux d'artifice", "Fireworks", "feuartifice","worldgun/feuartifice",                 "une arme de Gilet jaune.", "a yellow vests weapon",             70,  30, 85,  500,  { -1, ATK_ARTIFICE_SHOOT }, },
+    { "Glock", "Glock", "glock", "worldgun/glock",                                          "un pistolet vraiment pourri.", "a very bad gun",                55,  20, 85,  300,  { -1, ATK_GLOCK_SHOOT }, },
     //Super armes
-    { "missilenorko", "missilenorko", "worldgun/missilenorko",          "une putain de bombe nucléaire !", "a fucking nuclear missile!",    8,   3, 85, 2000,  { -1, ATK_NUKE_SHOOT }, },
-    { "gau8", "gau8", "worldgun/gau8",                                  "un GAU-8 portable !", "a portable GAU-8!",                        57,  10, 85, 2000,  { -1, ATK_GAU8_SHOOT }, },
-    { "miniroquettes", "miniroquettes", "worldgun/miniroquettes",       "un minigun à roquettes !", "a missiles minigun",                  10,  10, 70, 1000,  { -1, ATK_ROQUETTES_SHOOT }, },
-    { "campouze2000", "campouze2000", "worldgun/campouze2000",          "el famoso Campouze 2000 !", "the famous Camp-2000!",              10,  10, 60, 3000,  { -1, ATK_CAMPOUZE_SHOOT }, },
+    { "Bombe atomique", "Atomic bomb", "missilenorko","worldgun/missilenorko",     "une putain de bombe nucléaire !", "a fucking nuclear missile!",    8,   3, 85, 2000,  { -1, ATK_NUKE_SHOOT }, },
+    { "GAU-8", "GAU-8", "gau8", "worldgun/gau8",                                   "un GAU-8 portable !", "a portable GAU-8!",                        57,  10, 85, 2000,  { -1, ATK_GAU8_SHOOT }, },
+    { "Miniroquettes", "Minirockets", "miniroquettes", "worldgun/miniroquettes",   "un minigun à roquettes !", "a missiles minigun",                  10,  10, 70, 1000,  { -1, ATK_ROQUETTES_SHOOT }, },
+    { "Campouze 2000", "Camper 2000", "campouze2000", "worldgun/campouze2000",     "el famoso Campouze 2000 !", "the famous Camper-2000!",              10,  10, 60, 3000,  { -1, ATK_CAMPOUZE_SHOOT }, },
     //Corps à corps
-    { "epee349", "armes_cac/epee349", "worldgun/armes_cac/epee349",             "l'épée collector à 349 euros.", "a 386$ collector sword.",      4, 3, 95, 120,  { -1, ATK_CAC349_SHOOT }, },
-    { "marteauban", "armes_cac/marteauban", "worldgun/armes_cac/marteauban",    "un marteau de bannissement !", "the Ban Hammer.",               4, 3, 95, 120,  { -1, ATK_CACMARTEAU_SHOOT }, },
-    { "mastersword", "armes_cac/mastersword", "worldgun/armes_cac/mastersword", "une épée légendaire !", "a legendary sword!",                   4, 3, 95, 120,  { -1, ATK_CACMASTER_SHOOT }, },
-    { "fleau", "armes_cac/fleau", "worldgun/armes_cac/fleau",                   "une boule piquante !", "a spiky ball.",                         4, 3, 95, 120,  { -1, ATK_CACFLEAU_SHOOT }, },
+    { "Epée à 349€", "Buster Sword", "armes_cac/epee349", "worldgun/armes_cac/epee349",                 "l'épée collector à 349 euros.", "a 386$ Buster Sword.",      4, 3, 95, 120,  { -1, ATK_CAC349_SHOOT }, },
+    { "Marteau de bannissement", "Ban hammer", "armes_cac/marteauban", "worldgun/armes_cac/marteauban", "un marteau de bannissement !", "the Ban Hammer.",               4, 3, 95, 120,  { -1, ATK_CACMARTEAU_SHOOT }, },
+    { "Épée de Légende", "Master Sword", "armes_cac/mastersword", "worldgun/armes_cac/mastersword",     "une épée légendaire !", "a legendary sword!",                   4, 3, 95, 120,  { -1, ATK_CACMASTER_SHOOT }, },
+    { "Fléau", "Flail", "armes_cac/fleau", "worldgun/armes_cac/fleau",                                  "une boule piquante !", "a spiky ball.",                         4, 3, 95, 120,  { -1, ATK_CACFLEAU_SHOOT }, },
     // Armes spéciales aptitudes
-    { "kamikaze",   "kamikaze",         "worldgun/kamikaze",        "une ceinture d'explosifs !",   "an explosives ISIS's made belt!",           4, 3, 95, 0,  { -1, ATK_KAMIKAZE_SHOOT }, },
-    { "assistxpl",  "assistxpl",        "worldgun/assistxpl",       "une armure assistée !",        "powered combat armor!",                     4, 3, 95, 0,  { -1, ATK_ASSISTXPL_SHOOT }, },
-    { "sabre",      "armes_cac/sabre",  "worldgun/armes_cac/sabre", "un sabre de ninja !",          "a ninja saber!",                            4, 3, 95, 120,  { -1, ATK_CACNINJA_SHOOT }, },
+    { "Explosifs", "Explosives", "kamikaze", "worldgun/kamikaze",           "une ceinture d'explosifs !",   "an explosives ISIS's made belt!",           4, 3, 95, 0,  { -1, ATK_KAMIKAZE_SHOOT }, },
+    { "Armure assistée", "Power armor", "assistxpl", "worldgun/assistxpl",  "une armure assistée !",        "powered combat armor!",                     4, 3, 95, 0,  { -1, ATK_ASSISTXPL_SHOOT }, },
+    { "Sabre", "Saber", "armes_cac/sabre", "worldgun/armes_cac/sabre",      "un sabre de ninja !",          "a ninja saber!",                            4, 3, 95, 120,  { -1, ATK_CACNINJA_SHOOT }, },
     // no weap for monsters
-    { "epee349", "armes_cac/epee349",  "worldgun/armes_cac/epee349", "none?", "none?", 0, 0, 0, 0,  { -1, ATK_NONE }, }
+    { "none?", "none?", "armes_cac/epee349",  "worldgun/armes_cac/epee349", "none?", "none?", 0, 0, 0, 0,  { -1, ATK_NONE }, }
 };
 
 //Définition des aptitudes
