@@ -917,7 +917,8 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     {
         case 1: addpostfx("protanopia", 1, 1, 1, 1, vec4(1, 1, 1, 1)); break;
         case 2: addpostfx("deuteranopia", 1, 1, 1, 1, vec4(1, 1, 1, 1)); break;
-        case 3: addpostfx("tritanopia", 1, 1, 1, 1, vec4(1, 1, 1, 1));
+        case 3: addpostfx("tritanopia", 1, 1, 1, 1, vec4(1, 1, 1, 1)); break;
+        case 4: addpostfx("achromatopsia", 1, 1, 1, 1, vec4(1, 1, 1, 1));
     }
     return true;
 }

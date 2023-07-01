@@ -86,16 +86,16 @@ namespace game
 
     static const playermodelinfo playermodels[10] =
     {
-        { { "smileys/hap/red", "smileys/hap" } },
-        { { "smileys/noel/red", "smileys/noel" } },
-        { { "smileys/malade/red", "smileys/malade" } },
-        { { "smileys/content/red", "smileys/content" } },
-        { { "smileys/colere/red", "smileys/colere" } },
-        { { "smileys/sournois/red", "smileys/sournois" } },
-        { { "smileys/fou/red", "smileys/fou" } },
-        { { "smileys/clindoeil/red", "smileys/clindoeil" } },
-        { { "smileys/cool/red", "smileys/cool" } },
-        { { "smileys/bug/red", "smileys/bug" } }
+        { { "smileys/hap/red", "smileys/hap" }, "smileys/hap/cb" },
+        { { "smileys/noel/red", "smileys/noel" }, "smileys/noel/cb" },
+        { { "smileys/malade/red", "smileys/malade" }, "smileys/malade/cb" },
+        { { "smileys/content/red", "smileys/content" }, "smileys/content/cb" },
+        { { "smileys/colere/red", "smileys/colere" }, "smileys/colere/cb" },
+        { { "smileys/sournois/red", "smileys/sournois" }, "smileys/sournois/cb" },
+        { { "smileys/fou/red", "smileys/fou" }, "smileys/fou/cb"  },
+        { { "smileys/clindoeil/red", "smileys/clindoeil" }, "smileys/clindoeil/cb" },
+        { { "smileys/cool/red", "smileys/cool" }, "smileys/cool/cb" },
+        { { "smileys/bug/red", "smileys/bug" }, "smileys/bug/cb" }
     };
 
     extern void changedplayermodel();
@@ -312,7 +312,7 @@ namespace game
         else
         {
             if(haspowerarmor(d)) mdlname = d->team==player1->team && validteam(team) ? "smileys/armureassistee" : "smileys/armureassistee/red";
-            else mdlname =  d->abilitymillis[ABILITY_2] && d->aptitude==APT_PHYSICIEN ? "smileys/phy_2" : mdl.model[validteam(team) && d->team==player1->team ? 1 : 0];
+            else mdlname =  d->abilitymillis[ABILITY_2] && d->aptitude==APT_PHYSICIEN ? "smileys/phy_2" : cbcompensation && d->team==player1->team ? mdl.cbmodel : mdl.model[validteam(team) && d->team==player1->team ? 1 : 0];
         }
 
         if(intermission && updatewinstat && (validteam(team) ? bestteams.htfind(player1->team)>=0 : bestplayers.find(player1)>=0))

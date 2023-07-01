@@ -1377,6 +1377,7 @@ int main(int argc, char **argv)
     addpostfx("protanopia", 1, 1, 1, 1, vec4(1, 1, 1, 1));
     addpostfx("deuteranopia", 1, 1, 1, 1, vec4(1, 1, 1, 1));
     addpostfx("tritanopia", 1, 1, 1, 1, vec4(1, 1, 1, 1));
+    addpostfx("achromatopsia", 1, 1, 1, 1, vec4(1, 1, 1, 1));
     clearpostfx();
 
     logoutf("init: mainloop");
