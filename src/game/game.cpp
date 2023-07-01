@@ -651,6 +651,15 @@ namespace game
     ICOMMAND(getkillername, "", (), result(killername); );
     ICOMMAND(getweapondesc, "", (), result(weapdesc); );
 
+    int killerclass;
+    ICOMMAND(getkillerclass, "", (), intret(killerclass); );
+
+    float killerdistance;
+    ICOMMAND(getkilldistance, "", (), floatret(roundf(killerdistance * 10) / 10); );
+
+    bool hassuicided = true;
+    ICOMMAND(hassuicided, "", (), intret(hassuicided); );
+
     void killed(gameent *d, gameent *actor, int atk)
     {
         d->killstreak = 0;
@@ -716,6 +725,7 @@ namespace game
             conoutf(contype, "%s%s %s%s%s", d==player1 ? "\fd" : "", dname, GAME_LANG ? "" : d==player1 ? "t'es " : "s'est ", GAME_LANG ? partmessageEN[rnd(2)].partsuicide : partmessageFR[rnd(5)].partsuicide, d==player1 ? " !" : ".");
             if(d==player1)
             {
+                hassuicided = true;
                 addstat(1, STAT_MORTS); addstat(1, STAT_SUICIDES);
                 if(atk==ATK_M32_SHOOT)unlockachievement(ACH_M32SUICIDE);
             }
@@ -769,6 +779,9 @@ namespace game
                 addstat(1, STAT_MORTS);
                 formatstring(killername, "%s", aname);
                 formatstring(weapdesc, "%s", GAME_LANG ? guns[atk].armedescEN : guns[atk].armedescFR);
+                killerclass = actor->aptitude;
+                killerdistance = killdistance;
+                hassuicided = false;
             }
             else ////////////////////Quelqu'un a tué quelqu'un////////////////////
             {
