@@ -483,7 +483,7 @@ namespace game
     int totmfreq()
     {
         int n = 0;
-        loopi(MAXNPCS) {n += npcs[i].spawnfreq;}
+        loopi(11) {n += npcs[i].spawnfreq;}
         return n;
     }
 

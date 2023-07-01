@@ -581,7 +581,7 @@ namespace game
                 if(player1->boostmillis[B_JOINT]) damage/=(player1->aptitude==APT_JUNKIE ? 1.875f : 1.25f);
                 switch(player1->aptitude)
                 {
-                    case APT_VIKING: player1->boostmillis[B_RAGE]+=damage*5; break;
+                    case APT_VIKING: player1->boostmillis[B_RAGE]+=(damage/15.f)*5; break;
                     case APT_PRETRE: if(player1->abilitymillis[ABILITY_2] && player1->mana) {player1->mana-=damage/10; damage=0; if(player1->mana<0)player1->mana=0;} break;
                     case APT_SHOSHONE: if(player1->abilitymillis[ABILITY_1]) damage/=1.3f;
                 }
