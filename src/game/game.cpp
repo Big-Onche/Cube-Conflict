@@ -651,8 +651,9 @@ namespace game
     ICOMMAND(getkillername, "", (), result(killername); );
     ICOMMAND(getweapondesc, "", (), result(weapdesc); );
 
-    int killerclass;
+    int killerclass, killerlevel;
     ICOMMAND(getkillerclass, "", (), intret(killerclass); );
+    ICOMMAND(getkillerlevel, "", (), intret(killerlevel); );
 
     float killerdistance;
     ICOMMAND(getkilldistance, "", (), floatret(roundf(killerdistance * 10) / 10); );
@@ -780,6 +781,7 @@ namespace game
                 formatstring(killername, "%s", aname);
                 formatstring(weapdesc, "%s", GAME_LANG ? guns[atk].armedescEN : guns[atk].armedescFR);
                 killerclass = actor->aptitude;
+                killerlevel = actor->level;
                 killerdistance = killdistance;
                 hassuicided = false;
             }
