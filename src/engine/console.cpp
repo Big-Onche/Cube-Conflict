@@ -78,11 +78,11 @@ VARP(consize, 0, 5, 100);
 VARP(miniconsize, 0, 5, 100);
 VARP(hudconsize, 0, 5, 100);
 VARP(miniconwidth, 0, 40, 100);
-VARP(confade, 0, 30, 60);
-VARP(miniconfade, 0, 30, 60);
+VARP(confade, 0, 15, 60);
+VARP(miniconfade, 0, 20, 60);
 VARP(hudconfade, 0, 3, 10);
 VARP(fullconsize, 0, 75, 100);
-HVARP(confilter, 0, 0xFFFFFF, 0xFFFFFF);
+HVARP(confilter, 0, 0x1F00, 0xFFFFFF);
 HVARP(fullconfilter, 0, 0xFFFFFF, 0xFFFFFF);
 HVARP(miniconfilter, 0, 0, 0xFFFFFF);
 

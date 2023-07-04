@@ -738,7 +738,7 @@ namespace game
             {
                 playsound(S_KILL);
                 conoutf(CON_HUDCONSOLE, "%s \fc%s \f7! \f4(%.1fm)", GAME_LANG ? "You killed" : "Tu as tué", dname, killdistance);
-                conoutf(contype, "\fd%s\f7 > \f4%s\f7 > %s \f4(%.1fm)", player1->name, GAME_LANG ? guns[atk].nameEN : guns[atk].nameFR, dname, killdistance);
+                conoutf(contype, "\fd%s\f7 > \fl%s\f7 > %s \fl(%.1fm)", player1->name, GAME_LANG ? guns[atk].nameEN : guns[atk].nameFR, dname, killdistance);
 
                 if(IS_ON_OFFICIAL_SERV) //now let's check for shittons of achievements if playing online
                 {
@@ -776,7 +776,7 @@ namespace game
             }
             else if(d==player1) ////////////////////TU as été tué////////////////////
             {
-                conoutf(contype, "%s\f7 > \f4%s\f7 > \fd%s \f4(%.1fm)", aname, GAME_LANG ? guns[atk].nameEN : guns[atk].nameFR, player1->name, killdistance);
+                conoutf(contype, "%s\f7 > \fl%s\f7 > \fd%s \fl(%.1fm)", aname, GAME_LANG ? guns[atk].nameEN : guns[atk].nameFR, player1->name, killdistance);
                 addstat(1, STAT_MORTS);
                 formatstring(killername, "%s", aname);
                 formatstring(weapdesc, "%s", GAME_LANG ? guns[atk].armedescEN : guns[atk].armedescFR);
@@ -787,7 +787,7 @@ namespace game
             }
             else ////////////////////Quelqu'un a tué quelqu'un////////////////////
             {
-                conoutf(contype, "%s\f7 > \f4%s\f7 > %s \f4(%.1fm)", aname, GAME_LANG ? guns[atk].nameEN : guns[atk].nameFR, dname, killdistance);
+                conoutf(contype, "%s\f7 > \fl%s\f7 > %s \fl(%.1fm)", aname, GAME_LANG ? guns[atk].nameEN : guns[atk].nameFR, dname, killdistance);
             }
 
             ////////////////////Informe que quelqu'un est chaud////////////////////
@@ -797,7 +797,7 @@ namespace game
             switch(actor->killstreak)
             {
                 case 3: conoutf(CON_HUDCONSOLE, "%s\f7 %s %s", name, verb, GAME_LANG ? "hot! (Triple kill)" : "chaud ! (Triplette)"); break;
-                case 5: conoutf(CON_HUDCONSOLE, "%s\f7 %s %s", name, verb, GAME_LANG ? "killing it! (Pentakill)" : "domine ! (Pentaplette)"); break;
+                case 5: conoutf(CON_HUDCONSOLE, "%s\f7 %s %s", name, verb, GAME_LANG ? "killing it! (Pentakill)" : "dominant ! (Pentaplette)"); break;
                 case 7: conoutf(CON_HUDCONSOLE, "%s\f7 %s %s", name, verb, GAME_LANG ? "instoppable! (Heptakill!)" : "inarrêtable ! (Heptaplette)"); break;
                 case 10: conoutf(CON_HUDCONSOLE, "%s\f7 %s %s", name, verb, GAME_LANG ? "invincible! (Decakill!)" : "invincible ! (Décaplette)"); break;
                 case 15: conoutf(CON_HUDCONSOLE, "%s\f7 %s %s", name, verb, GAME_LANG ? "as god! (Pentakaidecakill!)" : "un dieu ! (Pentakaidecaplette)"); break;
