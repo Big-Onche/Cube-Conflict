@@ -567,7 +567,13 @@ namespace game
         if(!isconnected()) return;
         if(m_dmsp && spawnremain && lastmillis>nextmonster && player1->state==CS_ALIVE)
         {
-            if(spawnremain--==monstertotal) { playsound(S_INVASION); musicmanager(2+map_sel); execute("playmapsong"); }
+            if(spawnremain--==monstertotal)
+            {
+                playsound(S_INVASION);
+                musicmanager(2+map_sel);
+                execute("playmapsong");
+                conoutf(CON_HUDCONSOLE, GAME_LANG ? "\f3The invasion has begun!" : "\f3L'invasion vient de commencer !");
+            }
             nextmonster = lastmillis+1000;
             gamesecs++;
             if(spawn && !intermission)
