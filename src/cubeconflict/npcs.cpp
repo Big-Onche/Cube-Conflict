@@ -483,7 +483,7 @@ namespace game
     int totmfreq()
     {
         int n = 0;
-        loopi(11) {n += npcs[i].spawnfreq;}
+        loopi(NUMMONSTERS) {n += npcs[i].spawnfreq;}
         return n;
     }
 
@@ -601,11 +601,9 @@ namespace game
                     playsound(S_ALIEN_INVASION);
                     break;
                 case 360: loopi(10) spawnmonster(true, M_CAMPER); break;
-                case 400: loopi(10) spawnmonster(true, 12+rnd(4)); break;
-                case 480: loopi(10) spawnmonster(true, 12+rnd(4)); break;
-                case 525: loopi(15) spawnmonster(true, 12+rnd(4)); break;
+                case 480: loopi(3) spawnmonster(true, M_B_GIANT); break;
                 case 550: loopi(5)  spawnmonster(true, M_UFO); playsound(S_ALIEN_INVASION);
-                case 575: loopi(20) spawnmonster(true, 12+rnd(4)); break;
+                case 575: loopi(5) spawnmonster(true, M_B_GIANT); break;
                 case 600: endsp(); unlockachievement(ACH_SURVIVOR); break;
                 case 610: trydisconnect(true); break;
                 default:
