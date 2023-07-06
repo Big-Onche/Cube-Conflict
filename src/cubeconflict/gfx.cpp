@@ -310,7 +310,7 @@ namespace gfx
         }
     }
 
-    void resetshroomsgfx()
+    void resetpostfx()
     {
         clearpostfx();
         addpostfx("mainfilter", 1, 1, 1, 1, vec4(1, 1, 1, 1));

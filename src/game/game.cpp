@@ -175,7 +175,7 @@ namespace game
             lasthit = 0;
             if(cmode) cmode->respawned(player1);
         }
-        gfx::resetshroomsgfx();
+        gfx::resetpostfx();
     }
 
     gameent *pointatplayer()
@@ -600,7 +600,7 @@ namespace game
             cleardamagescreen();
             d->boostmillis[B_SHROOMS] = 0;
             d->attacking = ACT_IDLE;
-            gfx::resetshroomsgfx();
+            gfx::resetpostfx();
             if(!cbcompensation) addpostfx("deathscreen", 1, 1, 1, 1, vec4(1, 1, 1, 1));
             d->roll = 0;
             playsound(S_DIE_P1);

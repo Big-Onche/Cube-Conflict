@@ -168,7 +168,7 @@ void disconnect(bool async, bool cleanup, bool volontaire)
         conoutf(GAME_LANG ? "Disconnected" : "Déconnecté");
         IS_ON_OFFICIAL_SERV = false;
         game::gamedisconnect(cleanup);
-        gfx::resetshroomsgfx();
+        gfx::resetpostfx();
         clearsleep();
         soundmenu_cleanup();
         mainmenu = 1;

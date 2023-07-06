@@ -642,6 +642,7 @@ namespace game
     {
         int i = who[0] ? parseplayer(who) : player1->clientnum;
         if(i>=0) addmsg(N_SPECTATOR, "rii", i, val);
+        gfx::resetpostfx();
     }
     ICOMMAND(spectator, "is", (int *val, char *who), togglespectator(*val, who));
 
@@ -714,7 +715,7 @@ namespace game
     void changemap(const char *name)
     {
         changemap(name, m_valid(nextmode) ? nextmode : (remote ? 1 : 0));
-        gfx::resetshroomsgfx();
+        gfx::resetpostfx();
     }
     ICOMMAND(map, "s", (char *name), changemap(name));
 
@@ -1503,7 +1504,7 @@ namespace game
                 else senditemstoserver = false;
                 ai::loadwaypoints();
                 updatewinstat = true;
-                gfx::resetshroomsgfx();
+                gfx::resetpostfx();
                 break;
             }
             case N_FORCEDEATH:

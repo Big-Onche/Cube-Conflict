@@ -389,7 +389,7 @@ namespace entities
         if(d->boostmillis[B_SHROOMS] && (d->boostmillis[B_SHROOMS] -= time)<=0)
         {
             d->boostmillis[B_SHROOMS] = 0;
-            gfx::resetshroomsgfx();
+            gfx::resetpostfx();
             if(d==player1) conoutf(CON_GAMEINFO, GAME_LANG ? "\f8The mushrooms have been digested." : "\f8Les champignons sont digérés.");
         }
 
