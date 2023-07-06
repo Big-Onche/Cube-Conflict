@@ -6,34 +6,34 @@
 namespace game
 {
     // all we need to communicate with soft-coded hud
-    ICOMMAND(huddead, "", (), intret(hudplayer()->state==CS_DEAD));
-    ICOMMAND(hudhealth, "", (), intret(hudplayer()->health/10));
-    ICOMMAND(hudarmour, "", (), intret(hudplayer()->armour/10));
-    ICOMMAND(hudarmourtype, "", (), intret(hudplayer()->armourtype));
+    ICOMMAND(huddead, "", (), intret(followingplayer(player1)->state==CS_DEAD));
+    ICOMMAND(hudhealth, "", (), intret(followingplayer(player1)->health/10));
+    ICOMMAND(hudarmour, "", (), intret(followingplayer(player1)->armour/10));
+    ICOMMAND(hudarmourtype, "", (), intret(followingplayer(player1)->armourtype));
     ICOMMAND(hudinfammo, "", (),
         bool b = false;
-        if((m_identique || m_random) && hudplayer()->gunselect<GUN_S_NUKE) b = true;
-        if((hudplayer()->gunselect>=GUN_CAC349 && hudplayer()->gunselect<=GUN_CACFLEAU) || hudplayer()->gunselect==GUN_CACNINJA) b = true;
+        if((m_identique || m_random) && followingplayer(player1)->gunselect<GUN_S_NUKE) b = true;
+        if((followingplayer(player1)->gunselect>=GUN_CAC349 && followingplayer(player1)->gunselect<=GUN_CACFLEAU) || followingplayer(player1)->gunselect==GUN_CACNINJA) b = true;
         intret(b);
     );
     ICOMMAND(hudcapture, "", (), intret(m_capture));
     ICOMMAND(hudctf, "", (), intret(m_ctf));
-    ICOMMAND(hudammo, "", (), intret(hudplayer()->ammo[hudplayer()->gunselect]));
+    ICOMMAND(hudammo, "", (), intret(followingplayer(player1)->ammo[followingplayer(player1)->gunselect]));
     ICOMMAND(hudmelee, "", (), intret((player1->gunselect>=GUN_CAC349 && player1->gunselect<=GUN_CACFLEAU) || player1->gunselect==GUN_CACNINJA));
-    ICOMMAND(hudboost, "i", (int *id), if(*id>=0 && *id<=3) intret(hudplayer()->boostmillis[*id]/1000););
-    ICOMMAND(hudclass, "", (), intret(hudplayer()->aptitude));
+    ICOMMAND(hudboost, "i", (int *id), if(*id>=0 && *id<=3) intret(followingplayer(player1)->boostmillis[*id]/1000););
+    ICOMMAND(hudclass, "", (), intret(followingplayer(player1)->aptitude));
 
     ICOMMAND(hudability, "", (),
-        switch(hudplayer()->aptitude)
+        switch(followingplayer(player1)->aptitude)
         {
             case APT_MAGICIEN: case APT_PHYSICIEN: case APT_PRETRE: case APT_SHOSHONE: case APT_ESPION:
-                intret(hudplayer()->mana);
+                intret(followingplayer(player1)->mana);
                 break;
             case APT_KAMIKAZE:
-                if(hudplayer()->abilitymillis[ABILITY_2]) intret((hudplayer()->abilitymillis[ABILITY_2]-1500)/1000);
+                if(followingplayer(player1)->abilitymillis[ABILITY_2]) intret((followingplayer(player1)->abilitymillis[ABILITY_2]-1500)/1000);
                 break;
             case APT_VIKING:
-                intret(hudplayer()->boostmillis[B_RAGE]/1000);
+                intret(followingplayer(player1)->boostmillis[B_RAGE]/1000);
                 break;
             default:
                 intret(false);
@@ -41,7 +41,7 @@ namespace game
     );
 
     ICOMMAND(hudabilitylogo, "i", (int *id),
-        defformatstring(logodir, "media/interface/hud/abilities/%d_%d.png", hudplayer()->aptitude, *id);
+        defformatstring(logodir, "media/interface/hud/abilities/%d_%d.png", followingplayer(player1)->aptitude, *id);
         result(logodir);
     );
 
@@ -49,15 +49,15 @@ namespace game
         if(*id>=0 && *id<=2)
         {
             string logodir;
-            if(hudplayer()->abilitymillis[*id]) formatstring(logodir, "media/interface/hud/checkbox_on.jpg");
-            else if(!hudplayer()->abilityready[*id] || hudplayer()->mana < aptitudes[hudplayer()->aptitude].abilities[*id].manacost) formatstring(logodir, "media/interface/hud/checkbox_off.jpg");
-            else formatstring(logodir, "media/interface/hud/abilities/%d_%d.png", hudplayer()->aptitude, *id);
+            if(followingplayer(player1)->abilitymillis[*id]) formatstring(logodir, "media/interface/hud/checkbox_on.jpg");
+            else if(!followingplayer(player1)->abilityready[*id] || followingplayer(player1)->mana < aptitudes[followingplayer(player1)->aptitude].abilities[*id].manacost) formatstring(logodir, "media/interface/hud/checkbox_off.jpg");
+            else formatstring(logodir, "media/interface/hud/abilities/%d_%d.png", followingplayer(player1)->aptitude, *id);
             result(logodir);
         }
     );
 
     ICOMMAND(hudshowabilities, "", (),
-        switch(hudplayer()->aptitude)
+        switch(followingplayer(player1)->aptitude)
         {
            case APT_MAGICIEN: case APT_PHYSICIEN: case APT_PRETRE: case APT_SHOSHONE: case APT_ESPION: case APT_KAMIKAZE: intret(true); break;
            default: intret(false);
@@ -71,9 +71,9 @@ namespace game
 
     ICOMMAND(hudscores, "i", (int *uicoltxt),
         string s;
-        if(!m_teammode) formatstring(s, "%s%d %sfrag%s", *uicoltxt ? "" : "\fd", hudplayer()->frags, *uicoltxt ? "" : "\f7", hudplayer()->frags>1 ? "s" : ""); // solo dm
-        else if(m_ctf || m_capture) formatstring(s, "%s%d %s- %s%d", *uicoltxt ? "" : "\fd", cmode->getteamscore(hudplayer()->team), *uicoltxt ? "" : "\f7", *uicoltxt ? "" : "\fc", cmode->getteamscore(hudplayer()->team == 1 ? 2 : 1)); // ctf, domination mode
-        else formatstring(s, "%s%d %s- %s%d", *uicoltxt ? "" : "\fd", getteamfrags(hudplayer()->team), *uicoltxt ? "" : "\f7", *uicoltxt ? "" : "\fc", getteamfrags(hudplayer()->team == 1 ? 2 : 1)); //  team dm
+        if(!m_teammode) formatstring(s, "%s%d %sfrag%s", *uicoltxt ? "" : "\fd", followingplayer(player1)->frags, *uicoltxt ? "" : "\f7", followingplayer(player1)->frags>1 ? "s" : ""); // solo dm
+        else if(m_ctf || m_capture) formatstring(s, "%s%d %s- %s%d", *uicoltxt ? "" : "\fd", cmode->getteamscore(followingplayer(player1)->team), *uicoltxt ? "" : "\f7", *uicoltxt ? "" : "\fc", cmode->getteamscore(followingplayer(player1)->team == 1 ? 2 : 1)); // ctf, domination mode
+        else formatstring(s, "%s%d %s- %s%d", *uicoltxt ? "" : "\fd", getteamfrags(followingplayer(player1)->team), *uicoltxt ? "" : "\f7", *uicoltxt ? "" : "\fc", getteamfrags(followingplayer(player1)->team == 1 ? 2 : 1)); //  team dm
         result(s);
     );
 
@@ -103,12 +103,13 @@ namespace game
             if(!followingplayer()) formatstring(s, "%s", GAME_LANG ? "Free camera" : "Caméra libre");
             else
             {
-                gameent *f = followingplayer();
-                formatstring(s, "%s", f->name);
+                formatstring(s, "%s", followingplayer(player1)->name);
             }
             result(s);
         }
     );
+
+    ICOMMAND(hudfreecamera, "", (), intret(!followingplayer() && player1->state==CS_SPECTATOR); );
 
     int respawnwait(gameent *d, int delay = 0)
     {
@@ -116,7 +117,7 @@ namespace game
     }
 
     ICOMMAND(hudrespawnwait, "", (),
-        intret(cmode ? cmode->respawnwait(hudplayer()) : respawnwait(hudplayer()));
+        intret(cmode ? cmode->respawnwait(followingplayer(player1)) : respawnwait(followingplayer(player1)));
     );
 
     int msgmillis[2]; enum {MSG_INTERRACT, MSG_CUSTOM};
