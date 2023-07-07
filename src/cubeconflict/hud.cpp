@@ -284,7 +284,7 @@ namespace game
             cmode->drawhud(d, w, h);
             pophudmatrix();
         }
-        //else if(m_tutorial || m_dmsp) drawrpgminimap(d, w, h);
+        else if(m_tutorial || m_dmsp) drawrpgminimap(d, w, h);
 
         pushhudmatrix();
     }
