@@ -1615,9 +1615,18 @@ void updateparticles()
 
         if(sunflare) //map sunflare
         {
-            vec flarepos = camera1->o; //the sun is closer than you think ;)
-            flarepos.add(vec(sunflarex, sunflarey, sunflarez)); //flare is near the camera but always aligned with sun
-            flares.addflare(flarepos, (sunflarecolour >> 16) & 0xFF, (sunflarecolour >> 8) & 0xFF, sunflarecolour & 0xFF, 125, 1250, true, true);
+            float flaredist = 1000; // distance from the camera to the flare
+
+            vec flaredir(
+                flaredist * cos(sunlightpitch * M_PI / 180.0f) * cos(fmod(sunlightyaw + 90.0f, 360.0f) * M_PI / 180.0f),
+                flaredist * cos(sunlightpitch * M_PI / 180.0f) * sin(fmod(sunlightyaw + 90.0f, 360.0f) * M_PI / 180.0f),
+                flaredist * sin(sunlightpitch * M_PI / 180.0f)
+            );
+
+            vec flarepos = camera1->o;
+            flarepos.add(flaredir);
+
+            flares.addflare(flarepos, (sunflarecolour >> 16) & 0xFF, (sunflarecolour >> 8) & 0xFF, sunflarecolour & 0xFF, 125, 3000, true, true);
         }
 
         if(dbgpcull && (canemit || replayed) && addedparticles) conoutf(CON_DEBUG, "%d emitters, %d particles", emitted, addedparticles);
