@@ -346,6 +346,9 @@ namespace fogdome
     }
 }
 
+CVARR(fogdomerayleighcolour, 0);
+CVARR(fogdomediffusecolour, 0);
+
 static void drawfogdome()
 {
     SETVARIANT(skyfog, fogdomesquare ? 0 : -1, 0);
@@ -358,6 +361,10 @@ static void drawfogdome()
     skymatrix.scale(farplane/2, farplane/2, farplane*(0.5f - fogdomeheight*0.5f));
     skyprojmatrix.mul(projmatrix, skymatrix);
     LOCALPARAM(skymatrix, skyprojmatrix);
+    LOCALPARAM(sundir, sunlightdir);
+    LOCALPARAM(rayleighcolor, !fogdomerayleighcolour.iszero() ? fogdomerayleighcolour.tocolor() : fogcolour.tocolor());
+    LOCALPARAM(diffusecolor, !fogdomediffusecolour.iszero() ? fogdomediffusecolour.tocolor() : fogcolour.tocolor());
+    LOCALPARAM(camerapos, camera1->o);
 
     fogdome::draw();
 
@@ -379,10 +386,12 @@ CVAR1R(atmosundisk, 0);
 FVARR(atmosundisksize, 0, 12, 90);
 FVARR(atmosundiskcorona, 0, 0.4f, 1);
 FVARR(atmosundiskbright, 0, 1, 16);
-FVARR(atmohaze, 0, 0.1f, 16);
-FVARR(atmodensity, 0, 1, 16);
+FVARR(atmohaze, 0, 0, 16);
+FVARR(atmodensity, 0, 0.4f, 16);
 FVARR(atmoozone, 0, 1, 16);
 FVARR(atmoalpha, 0, 1, 1);
+CVARR(atmorayleighcolour, 0xFF9933);
+CVARR(atmodiffusecolour, 0x050514);
 
 static void drawatmosphere()
 {
@@ -414,6 +423,8 @@ static void drawatmosphere()
     LOCALPARAM(betarayleigh, betar);
     LOCALPARAM(betamie, betam);
     LOCALPARAM(betaozone, betao);
+    LOCALPARAM(rayleighcolor, atmorayleighcolour.tocolor());
+    LOCALPARAM(diffusecolor, atmodiffusecolour.tocolor());
 
     // extinction in direction of sun
     float sunoffset = sunlightdir.z*planetradius;
