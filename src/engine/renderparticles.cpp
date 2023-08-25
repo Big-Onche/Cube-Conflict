@@ -1546,8 +1546,7 @@ void seedparticles()
 VARR(sunflarex, -1000, -400, 1000);
 VARR(sunflarey, -1000, 360, 1000);
 VARR(sunflarez, -1000, 135, 1000);
-VARR(sunflarecolour, 0x000000, 0x888888, 0xFFFFFF);
-VARR(sunflare, 0, 0, 1);
+CVARR(sunflarecolour, 0x000000);
 
 static const char * const enthudnames[] =
 {
@@ -1613,9 +1612,9 @@ void updateparticles()
             pe.lastemit = lastmillis;
         }
 
-        if(sunflare) //map sunflare
+        if(sunflarecolour != bvec(0, 0, 0)) //sunflare
         {
-            float flaredist = 1000; // distance from the camera to the flare
+            float flaredist = 1250; // distance from the camera to the flare
 
             vec flaredir(
                 flaredist * cos(sunlightpitch * M_PI / 180.0f) * cos(fmod(sunlightyaw + 90.0f, 360.0f) * M_PI / 180.0f),
@@ -1626,7 +1625,7 @@ void updateparticles()
             vec flarepos = camera1->o;
             flarepos.add(flaredir);
 
-            flares.addflare(flarepos, (sunflarecolour >> 16) & 0xFF, (sunflarecolour >> 8) & 0xFF, sunflarecolour & 0xFF, 125, 3000, true, true);
+            flares.addflare(flarepos, sunflarecolour.r, sunflarecolour.g, sunflarecolour.b, 125, 4000, true, true);
         }
 
         if(dbgpcull && (canemit || replayed) && addedparticles) conoutf(CON_DEBUG, "%d emitters, %d particles", emitted, addedparticles);
