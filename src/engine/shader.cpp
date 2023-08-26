@@ -86,7 +86,7 @@ static void showglslinfo(GLenum type, GLuint obj, const char *name, const char *
             GLchar *log = new GLchar[length];
             if(type) glGetShaderInfoLog_(obj, length, &length, log);
             else glGetProgramInfoLog_(obj, length, &length, log);
-            fprintf(l, "%s\n", log);
+            conoutf(CON_INFO, "%s\n", log);
             bool partlines = log[0] != '0';
             int line = 0;
             loopi(numparts)

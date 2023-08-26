@@ -381,11 +381,11 @@ FVARR(atmoplanetsize, 1e-3f, 1, 1e3f);
 FVARR(atmoheight, 1e-3f, 1, 1e3f);
 FVARR(atmobright, 0, 1, 16);
 CVAR1R(atmosunlight, 0);
-FVARR(atmosunlightscale, 0, 1, 16);
+FVARR(atmosunlightscale, 0, 1.25f, 16);
 CVAR1R(atmosundisk, 0);
-FVARR(atmosundisksize, 0, 12, 90);
-FVARR(atmosundiskcorona, 0, 0.4f, 1);
-FVARR(atmosundiskbright, 0, 1, 16);
+FVARR(atmosundisksize, 0, 7, 90);
+FVARR(atmosundiskcorona, 0, 0.2f, 1);
+FVARR(atmosundiskbright, 0, 8, 16);
 FVARR(atmohaze, 0, 0, 16);
 FVARR(atmodensity, 0, 0.4f, 16);
 FVARR(atmoozone, 0, 1, 16);
@@ -431,7 +431,7 @@ static void drawatmosphere()
     vec sundepth = vec(atmoshells).add(sunoffset*sunoffset).sqrt().sub(sunoffset);
     vec sunweight = vec(betar).mul(sundepth.x).madd(betam, sundepth.y).madd(betao, sundepth.z - sundepth.x);
     vec sunextinction = vec(sunweight).neg().exp2();
-    vec suncolor = !atmosunlight.iszero() ? atmosunlight.tocolor().mul(atmosunlightscale) : sunlight.tocolor().mul(sunlightscale);
+    vec suncolor = (!atmosunlight.iszero() ? atmosunlight.tocolor().mul(atmosunlightscale) : sunlight.tocolor().mul(sunlightscale * 3));
     // assume sunlight color is gamma encoded, so decode to linear light, then apply extinction
     extern float hdrgamma;
     vec sunscale = vec(suncolor).mul(ldrscale).pow(hdrgamma).mul(atmobright * 16).mul(sunextinction);
@@ -446,7 +446,7 @@ static void drawatmosphere()
     vec zenithdepth = vec(atmoshells).add(planetradius*planetradius).sqrt().sub(planetradius);
     vec zenithweight = vec(betar).mul(zenithdepth.x).madd(betam, zenithdepth.y).madd(betao, zenithdepth.z - zenithdepth.x);
     vec zenithextinction = vec(zenithweight).sub(sunweight).exp2();
-    vec diskcolor = (!atmosundisk.iszero() ? atmosundisk.tocolor() : suncolor).mul(ldrscale).pow(hdrgamma).mul(zenithextinction).mul(atmosundiskbright * 4);
+    vec diskcolor = (!atmosundisk.iszero() ? atmosundisk.tocolor() : suncolor).mul(ldrscale).pow(hdrgamma*2).mul(zenithextinction).mul(atmosundiskbright * 4);
     LOCALPARAM(sundiskcolor, diskcolor);
 
     // convert from view cosine into mu^2 for limb darkening, where mu = sqrt(1 - sin^2) and sin^2 = 1 - cos^2, thus mu^2 = 1 - (1 - cos^2*scale)
