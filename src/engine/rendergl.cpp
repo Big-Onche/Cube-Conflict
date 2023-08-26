@@ -1346,7 +1346,7 @@ VARP(zoomoutvel, 0, 50, 500);
 VARP(fov, 10, 100, 150);
 int avatarzoomfov = 40;
 VAR(avatarfov, 10, 40, 100);
-FVAR(avatardepth, 0, 0.7f, 1);
+FVAR(avatardepth, 0, 0.2f, 1);
 FVARNP(aspect, forceaspect, 0, 0, 1e3f);
 
 static float zoomprogress = 0;
@@ -1548,21 +1548,27 @@ extern const matrix4 viewmatrix(vec(-1, 0, 0), vec(0, 0, 1), vec(0, -1, 0));
 extern const matrix4 invviewmatrix(vec(-1, 0, 0), vec(0, 0, -1), vec(0, 1, 0));
 matrix4 cammatrix, projmatrix, camprojmatrix, invcammatrix, invcamprojmatrix, invprojmatrix;
 
-FVAR(nearplane, 0.01f, 0.54f, 2.0f);
+//FVARR(nearplane, 0.01f, 4.0f, 8.0f);
+
+float nearplane()
+{
+    return clamp(1.1533f * worldscale - 13.3f, 0.54, 4.0);
+}
 
 vec calcavatarpos(const vec &pos, float dist)
 {
     vec eyepos;
     cammatrix.transform(pos, eyepos);
-    GLdouble ydist = nearplane * tan(curavatarfov/2*RAD), xdist = ydist * aspect;
+    GLdouble ydist = nearplane() * tan(curavatarfov/2*RAD), xdist = ydist * aspect;
     vec4 scrpos;
-    scrpos.x = eyepos.x*nearplane/xdist;
-    scrpos.y = eyepos.y*nearplane/ydist;
-    scrpos.z = (eyepos.z*(farplane + nearplane) - 2*nearplane*farplane) / (farplane - nearplane);
+    scrpos.x = eyepos.x*nearplane()/xdist;
+    scrpos.y = eyepos.y*nearplane()/ydist;
+    scrpos.z = (eyepos.z*(farplane + nearplane()) - 2*nearplane()*farplane) / (farplane - nearplane());
     scrpos.w = -eyepos.z;
 
     vec worldpos = invcamprojmatrix.perspectivetransform(scrpos);
     vec dir = vec(worldpos).sub(camera1->o).rescale(dist);
+
     return dir.add(camera1->o);
 }
 
@@ -1571,13 +1577,19 @@ void renderavatar()
     if(isthirdperson()) return;
 
     matrix4 oldprojmatrix = nojittermatrix;
-    projmatrix.perspective(curavatarfov, aspect, nearplane, farplane);
+    projmatrix.perspective(curavatarfov, aspect, nearplane(), farplane);
     projmatrix.scalez(avatardepth);
     setcamprojmatrix(false);
+
+    glPushAttrib(GL_DEPTH_BUFFER_BIT);
+
+    glDepthRange(0.0, 0.1); // restricted depth range for the avatar's gun and shield
 
     enableavatarmask();
     game::renderavatar();
     disableavatarmask();
+
+    glPopAttrib();
 
     projmatrix = oldprojmatrix;
     setcamprojmatrix(false);
@@ -1664,7 +1676,7 @@ bool calcspherescissor(const vec &center, float size, float &sx1, float &sy1, fl
         CHECKPLANE(y, -, focaldist, sy1, sy2);
         CHECKPLANE(y, +, focaldist, sy1, sy2);
     }
-    float z1 = min(e.z + size, -1e-3f - nearplane), z2 = min(e.z - size, -1e-3f - nearplane);
+    float z1 = min(e.z + size, -1e-3f - nearplane()), z2 = min(e.z - size, -1e-3f - nearplane());
     sz1 = (z1*projmatrix.c.z + projmatrix.d.z) / (z1*projmatrix.c.w + projmatrix.d.w);
     sz2 = (z2*projmatrix.c.z + projmatrix.d.z) / (z2*projmatrix.c.w + projmatrix.d.w);
     return sx1 < sx2 && sy1 < sy2 && sz1 < sz2;
@@ -1947,10 +1959,16 @@ static void blendfog(int fogmat, float below, float blend, float logblend, float
 }
 
 vec curfogcolor(0, 0, 0);
+CVARR(fograyleighcolor, 0xFF0000);
+CVARR(fogdiffusecolor, 0x0000FF);
 
 void setfogcolor(const vec &v)
 {
     GLOBALPARAM(fogcolor, v);
+    LOCALPARAM(sundir, sunlightdir);
+    LOCALPARAM(rayleighColor, fograyleighcolor.tocolor());
+    LOCALPARAM(diffuseColor, fogdiffusecolor.tocolor());
+    LOCALPARAM(camerapos, camera1->o);
 }
 
 void zerofogcolor()
@@ -1983,6 +2001,14 @@ static void setfog(int fogmat, float below = 0, float blend = 1, int abovemat = 
     float logscale = 256, logblend = log(1 + (logscale - 1)*blend) / log(logscale);
 
     curfogcolor = vec(0, 0, 0);
+
+    vec camForward = camdir.normalize();
+    float alignment = camForward.dot(sunlightdir);
+    float t = 1.0 - (alignment * 0.5 + 0.5);
+
+    vec rayleigh = vec(fogdomerayleighcolour.r/850.f, fogdomerayleighcolour.g/850.f, fogdomerayleighcolour.b/850.f);
+    curfogcolor.lerp(rayleigh, curfogcolor, t);
+
     blendfog(fogmat, below, blend, logblend, start, end, curfogcolor);
     if(blend < 1) blendfog(abovemat, 0, 1-blend, 1-logblend, start, end, curfogcolor);
     curfogcolor.mul(ldrscale);
@@ -2025,6 +2051,8 @@ static void blendfogoverlay(int fogmat, float below, float blend, vec &overlay)
 void drawfogoverlay(int fogmat, float fogbelow, float fogblend, int abovemat)
 {
     SETSHADER(fogoverlay);
+    LOCALPARAM(sundir, sunlightdir);
+    LOCALPARAM(camerapos, camera1->o);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_ZERO, GL_SRC_COLOR);
@@ -2216,7 +2244,7 @@ void drawcubemap(int size, const vec &o, float yaw, float pitch, const cubemapsi
     camera1 = &cmcamera;
     setviewcell(camera1->o);
 
-    float fogmargin = 1 + wateramplitude + nearplane;
+    float fogmargin = 1 + wateramplitude + nearplane();
     int fogmat = lookupmaterial(vec(camera1->o.x, camera1->o.y, camera1->o.z - fogmargin))&(MATF_VOLUME|MATF_INDEX), abovemat = MAT_AIR;
     float fogbelow = 0;
     if(isliquid(fogmat&MATF_VOLUME))
@@ -2237,7 +2265,7 @@ void drawcubemap(int size, const vec &o, float yaw, float pitch, const cubemapsi
     aspect = 1;
     farplane = worldsize*2;
     vieww = viewh = size;
-    projmatrix.perspective(fovy, aspect, nearplane, farplane);
+    projmatrix.perspective(fovy, aspect, nearplane(), farplane);
     setcamprojmatrix();
 
     glEnable(GL_CULL_FACE);
@@ -2361,7 +2389,7 @@ namespace modelpreview
         ldrscale = 1;
         ldrscaleb = ldrscale/255;
 
-        projmatrix.perspective(fovy, aspect, nearplane, farplane);
+        projmatrix.perspective(fovy, aspect, nearplane(), farplane);
         setcamprojmatrix();
 
         glEnable(GL_CULL_FACE);
@@ -2413,7 +2441,7 @@ void gl_drawview()
     GLuint scalefbo = shouldscale();
     if(scalefbo) { vieww = gw; viewh = gh; }
 
-    float fogmargin = 1 + wateramplitude + nearplane;
+    float fogmargin = 1 + wateramplitude + nearplane();
     int fogmat = lookupmaterial(vec(camera1->o.x, camera1->o.y, camera1->o.z - fogmargin))&(MATF_VOLUME|MATF_INDEX), abovemat = MAT_AIR;
     float fogbelow = 0;
     if(isliquid(fogmat&MATF_VOLUME))
@@ -2431,7 +2459,7 @@ void gl_drawview()
 
     farplane = worldsize*2;
 
-    projmatrix.perspective(fovy, aspect, nearplane, farplane);
+    projmatrix.perspective(fovy, aspect, nearplane(), farplane);
     setcamprojmatrix();
 
     glEnable(GL_CULL_FACE);
