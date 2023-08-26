@@ -952,7 +952,7 @@ VAR(hdraccummillis, 1, 30, 1000);
 VAR(hdrreduce, 0, 2, 2);
 VARFP(hdrprec, 0, 2, 3, cleanupgbuffer());
 FVARFP(hdrgamma, 1e-3f, 4, 1e3f, initwarning("HDR setup", INIT_LOAD, CHANGE_SHADERS));
-VARR(hdrbright, 1, 2, 1e4f);
+FVARR(hdrbright, 1, 2, 1e4f);
 FVAR(hdrsaturate, 1e-3f, 1.f, 1e3f);
 FVAR(hdrminexposure, 0, 0.03f, 1);
 FVAR(hdrmaxexposure, 0, 0.3f, 1);
