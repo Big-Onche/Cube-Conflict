@@ -1817,7 +1817,9 @@ void setupshadowatlas()
     if(!shadowatlastex) glGenTextures(1, &shadowatlastex);
 
     shadowatlastarget = usegatherforsm() ? GL_TEXTURE_2D : GL_TEXTURE_RECTANGLE;
-    createtexture(shadowatlastex, shadowatlaspacker.w, shadowatlaspacker.h, NULL, 3, 1, smdepthprec > 1 ? GL_DEPTH_COMPONENT32 : (smdepthprec ? GL_DEPTH_COMPONENT24 : GL_DEPTH_COMPONENT16), shadowatlastarget);
+    GLenum depthcomp = smdepthprec > 1 ? GL_DEPTH_COMPONENT32 : (smdepthprec ? GL_DEPTH_COMPONENT24 : GL_DEPTH_COMPONENT16);
+
+    createtexture(shadowatlastex, shadowatlaspacker.w, shadowatlaspacker.h, NULL, 3, 1, depthcomp, shadowatlastarget);
     glTexParameteri(shadowatlastarget, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
     glTexParameteri(shadowatlastarget, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 
@@ -1856,7 +1858,7 @@ void setupshadowatlas()
     if(shadowcolortex) glFramebufferTexture2D_(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, shadowatlastarget, shadowcolortex, 0);
     glFramebufferTexture2D_(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadowatlastarget, shadowatlastex, 0);
 
-    if(!shadowcolortex) glDrawBuffer(GL_NONE);
+    if(!shadowcolortex && !hasES2) glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
 
     if(glCheckFramebufferStatus_(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -2076,11 +2078,13 @@ struct cascadedshadowmap
         vec center, bounds;  // max extents of shadowmap in sunlight model space
         plane cull[4];       // world space culling planes of the split's projected sides
     };
+    ivec bbmin, bbmax;              // shadowed bounding box
     matrix4 model;                // model view is shared by all splits
     splitinfo splits[CSM_MAXSPLITS]; // per-split parameters
     vec lightview;                  // view vector for light
     int rendered;
     void setup();                   // insert shadowmaps for each split frustum if there is sunlight
+    void calcbb();                  // compute shadowed bounding box
     void updatesplitdist();         // compute split frustum distances
     void getmodelmatrix();          // compute the shared model matrix
     void getprojmatrix();           // compute each cropped projection matrix
@@ -2090,6 +2094,8 @@ struct cascadedshadowmap
 
 void cascadedshadowmap::setup()
 {
+    calcbb();
+
     int size = ((csmmaxsize * shadowatlaspacker.w) / SHADOWATLAS_SIZE + smalign)&~smalign;
     loopi(csmsplits)
     {
@@ -2115,6 +2121,12 @@ FVAR(csmpolyfactor2, -1e3f, 3, 1e3f);
 FVAR(csmpolyoffset2, -1e4f, 0, 1e4f);
 FVAR(csmbias2, -1e16f, 2e-4f, 1e6f);
 VAR(csmcull, 0, 1, 1);
+
+void cascadedshadowmap::calcbb()
+{
+    bbmin = worldmin;
+    bbmax = worldmax;
+}
 
 void cascadedshadowmap::updatesplitdist()
 {
@@ -2144,7 +2156,7 @@ void cascadedshadowmap::getprojmatrix()
     updatesplitdist();
 
     // find z extent
-    float minz = lightview.project_bb(worldmin, worldmax), maxz = lightview.project_bb(worldmax, worldmin),
+    float minz = lightview.project_bb(bbmin, bbmax), maxz = lightview.project_bb(bbmax, bbmin),
           zmargin = max((maxz - minz)*csmdepthmargin, 0.5f*(csmdepthrange - (maxz - minz)));
     minz -= zmargin;
     maxz += zmargin;
@@ -3103,7 +3115,7 @@ static void renderlightsnobatch(Shader *s, int stencilref, bool transparent, flo
 
             if(hasDBT && depthtestlights > 1) glDepthBounds_(l.sz1*0.5f + 0.5f, min(l.sz2*0.5f + 0.5f, depthtestlightsclamp));
 
-            if(camera1->o.dist(l.o) <= l.radius*lightradiustweak + nearplane + 1 && depthfaillights)
+            if(camera1->o.dist(l.o) <= l.radius*lightradiustweak + nearplane() + 1 && depthfaillights)
             {
                 if(outside)
                 {
@@ -3433,7 +3445,7 @@ void rendervolumetric()
             tx2 = int(ceil((l.sx2*0.5f+0.5f)*volw)), ty2 = int(ceil((l.sy2*0.5f+0.5f)*volh));
         glScissor(tx1, ty1, tx2-tx1, ty2-ty1);
 
-        if(camera1->o.dist(l.o) <= l.radius*lightradiustweak + nearplane + 1 && depthfaillights)
+        if(camera1->o.dist(l.o) <= l.radius*lightradiustweak + nearplane() + 1 && depthfaillights)
         {
             if(outside)
             {
@@ -4429,8 +4441,8 @@ void rendercsmshadowmaps()
     shadowmapping = SM_CASCADE;
     shadoworigin = vec(0, 0, 0);
     shadowdir = csm.lightview;
-    shadowbias = csm.lightview.project_bb(worldmin, worldmax);
-    shadowradius = fabs(csm.lightview.project_bb(worldmax, worldmin));
+    shadowbias = csm.lightview.project_bb(csm.bbmin, csm.bbmax);
+    shadowradius = fabs(csm.lightview.project_bb(csm.bbmax, csm.bbmin));
 
     float polyfactor = csmpolyfactor, polyoffset = csmpolyoffset;
     if(smfilter > 2) { polyfactor = csmpolyfactor2; polyoffset = csmpolyoffset2; }
@@ -4809,6 +4821,7 @@ void rendershadowatlas()
 
     if(debugshadowatlas)
     {
+        // clean up the atlas to make it more readable in debug view
         glClearDepth(0);
         if(shadowcolortex)
         {
