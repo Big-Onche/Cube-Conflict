@@ -319,19 +319,12 @@ namespace game
 
     void updateworld()        // main game update loop
     {
-        loopi(gfx::nbfps > 250 ? 1 : 250/gfx::nbfps)
-        {
-            if(gfx::zoom)
-            {
-                gfx::weapposside = min(gfx::weapposside + 2, guns[player1->gunselect].maxweapposside);
-                if(gfx::weapposup>1) gfx::weapposup -= 1;
-            }
-            else
-            {
-                gfx::weapposup = min(gfx::weapposup + 1, guns[player1->gunselect].maxweapposup);
-                if(gfx::weapposside>1) gfx::weapposside -= 2;
-            }
-        }
+        int delta = 250 / max(gfx::nbfps, 1);
+        int horizontaltrans = gfx::zoom ? 2 : -2;
+        int verticaltrans = gfx::zoom ? -1 : 1;
+
+        gfx::weapposside = clamp(gfx::weapposside + horizontaltrans * delta, 1, guns[player1->gunselect].maxweapposside);
+        gfx::weapposup = clamp(gfx::weapposup + verticaltrans * delta, 1, guns[player1->gunselect].maxweapposup);
 
         if(!maptime) { maptime = lastmillis; maprealtime = totalmillis; return; }
         if(!curtime) { gets2c(); if(player1->clientnum>=0) c2sinfo(); return; }

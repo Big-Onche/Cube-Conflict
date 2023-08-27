@@ -674,12 +674,8 @@ namespace game
         sway.mul((swayside)*cosf(steps));
         vec weapzoom;
 
-        if(gfx::zoom==1) sway.z = -gfx::weapposup-2; //CubeConflict, permet de faire bouger l'arme en fonction du zoom ou non
-        else
-        {
-            sway.z = -gfx::weapposup;
-            vecfromyawpitch(d->yaw, 0, -10, gfx::weapposside, weapzoom);
-        }
+        sway.z = -gfx::weapposup - (gfx::zoom ? 2 : 0);
+        if(!gfx::zoom) vecfromyawpitch(d->yaw, 0, -10, gfx::weapposside, weapzoom);
 
         sway.z += swayup*(fabs(sinf(steps)) - 1);
         sway.add(swaydir).add(d->o);
@@ -731,9 +727,9 @@ namespace game
         {
             vec sway2;
             vecfromyawpitch(d->yaw, 0, 0, 1, sway2);
-            float floatdivfactor = d->armourtype==A_ASSIST ? 6.f : 3.f;
-            sway2.mul((swayside/floatdivfactor)*cosf(steps));
-            sway2.z += (swayup/floatdivfactor)*(fabs(sinf(steps)) - 1);
+            float swaydiv = d->armourtype==A_ASSIST ? 6.f : 3.f;
+            sway2.mul((swayside/swaydiv)*cosf(steps));
+            sway2.z += (swayup/swaydiv)*(fabs(sinf(steps)) - 1);
             if(d->armourtype==A_ASSIST || !gfx::zoom) sway2.add(swaydir).add(d->o);
 
             rendermodel(gfx::getshielddir(d->armourtype, d->armour, true), anim, sway2, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
