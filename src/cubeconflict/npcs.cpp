@@ -29,43 +29,57 @@ namespace game
         int npcpain() const { return painlag; }
     };
     npc npcs[MAXNPCS];
-    //basic informations about npcs
-    ICOMMAND(npcbase, "issiiiiii", (int *id, char *ne, char *nf, int *f, int *c, int *t, int *r, int *d, int *s),
-        formatstring(npcs[*id].nameen, "%s", ne);
-        formatstring(npcs[*id].namefr, "%s", nf);
-        npcs[*id].friendly = *f;
-        npcs[*id].npcclass = *c;
-        npcs[*id].trigdist = *t;
-        npcs[*id].respawn = *r;
-        npcs[*id].dropval = *d;
-        npcs[*id].spawnfreq = *s;
+
+    int id = 0;
+
+    ICOMMAND(setNpcId, "i", (int *i),
+        if (*i < 0) { conoutf(CON_ERROR, "min value for npc id is 0"); return; }
+        else if (*i > MAXNPCS) { conoutf(CON_ERROR, "max value for npc id is %d", MAXNPCS); return; }
+        else id = *i;
     );
-    //main stats for npcs
-    ICOMMAND(npcstats, "iiiiiiii", (int *id, int *g, int *s, int *h, int *w, int *b, int *p, int *l),
-        npcs[*id].gun = *g;
-        npcs[*id].speed = *s;
-        npcs[*id].health = *h;
-        npcs[*id].weight = *w;
-        npcs[*id].bscale = *b;
-        npcs[*id].painlag = *p;
-        npcs[*id].loyalty = *l;
+
+    ICOMMAND(npcName, "ss", (char *en, char *fr),
+        formatstring(npcs[id].nameen, "%s", en);
+        formatstring(npcs[id].namefr, "%s", fr);
     );
-    //sounds for npcs
-    ICOMMAND(npcsounds, "iiiii", (int *id, int *h, int *p, int *a, int *d),
-        npcs[*id].hellosnd = *h;
-        npcs[*id].painsnd = *p;
-        npcs[*id].angrysnd = *a;
-        npcs[*id].diesnd = *d;
+
+    ICOMMAND(npcModel, "s", (char *s), formatstring(npcs[id].mdlname, "%s", s); );
+    ICOMMAND(npcShield, "s", (char *s), formatstring(npcs[id].shieldname, "%s", s); );
+    ICOMMAND(npcHat, "s", (char *s), formatstring(npcs[id].hatname, "%s", s); );
+    ICOMMAND(npcCape, "s", (char *s), formatstring(npcs[id].capename, "%s", s); );
+    ICOMMAND(npcFriendly, "i", (int *i), npcs[id].friendly = min(max(*i, 0), 1) );
+
+    ICOMMAND(npcClass, "i", (int *i),
+        if (*i < 0) { conoutf(CON_ERROR, "min value for npc class is 0"); return; }
+        else if (*i > NUMAPTS-1) { conoutf(CON_ERROR, "max value for npc id class %d", NUMAPTS-1); return; }
+        else npcs[id].npcclass = *i;
     );
-    //models for npcs
-    ICOMMAND(npcmodels, "issssss", (int *id, char *mn, char *sn, char *hn, char *cn, char *b1n, char *b2n),
-        formatstring(npcs[*id].mdlname, "%s", mn);
-        formatstring(npcs[*id].shieldname, "%s", sn);
-        formatstring(npcs[*id].hatname, "%s", hn);
-        formatstring(npcs[*id].capename, "%s", cn);
-        formatstring(npcs[*id].boost1name, "%s", b1n);
-        formatstring(npcs[*id].boost2name, "%s", b2n);
+
+    ICOMMAND(npcWeapon, "i", (int *i),
+        if (*i < 0) { conoutf(CON_ERROR, "min value for npc weapon is 0"); return; }
+        else if (*i > NUMGUNS-1) { conoutf(CON_ERROR, "max value for npc drop class %d", NUMGUNS-1); return; }
+        else npcs[id].gun = *i;
     );
+
+    ICOMMAND(npcDropValue, "i", (int *i),
+        if (*i < 0) { conoutf(CON_ERROR, "min value for npc drop is 0"); return; }
+        else if (*i > NUMDROPS-1) { conoutf(CON_ERROR, "max value for npc drop class %d", NUMDROPS-1); return; }
+        else npcs[id].dropval = *i;
+    );
+
+    ICOMMAND(npcSpeed, "i", (int *i), npcs[id].speed = max(*i, 1); );
+    ICOMMAND(npcHealth, "i", (int *i), npcs[id].health = max(*i*10, 10); );
+    ICOMMAND(npcWeight, "i", (int *i), npcs[id].weight = max(*i, 1); );
+    ICOMMAND(npcPainFreeze, "i", (int *i), npcs[id].painlag = max(*i, 1); );
+    ICOMMAND(npcHitboxSize, "i", (int *i), npcs[id].bscale = max(*i, 1); );
+    ICOMMAND(npcTriggerDist, "i", (int *i), npcs[id].trigdist = max(*i, 1); );
+    ICOMMAND(npcRespawnDelay, "i", (int *i), npcs[id].respawn = max(*i, 1); );
+    ICOMMAND(npcSpawnProp, "i", (int *i), npcs[id].spawnfreq = max(*i, 0); );
+    ICOMMAND(npcLoyalty, "i", (int *i), npcs[id].loyalty = max(*i, 0); );
+    ICOMMAND(npcHelloSound, "i", (int *i), npcs[id].hellosnd = (*i >= -1) ? *i : -1; );
+    ICOMMAND(npcAngrySound, "i", (int *i), npcs[id].angrysnd = (*i >= -1) ? *i : -1; );
+    ICOMMAND(npcPainSound, "i", (int *i), npcs[id].painsnd = (*i >= -1) ? *i : -1; );
+    ICOMMAND(npcDieSound, "i", (int *i), npcs[id].diesnd = (*i >= -1) ? *i : -1; );
 
     VAR(skill, 1, 10, 10);
     VAR(killsendsp, 0, 1, 1);
