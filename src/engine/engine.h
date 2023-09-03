@@ -129,7 +129,7 @@ enum { DRAWTEX_NONE = 0, DRAWTEX_ENVMAP, DRAWTEX_MINIMAP, DRAWTEX_MODELPREVIEW }
 extern int vieww, viewh;
 extern int fov;
 extern float curfov, fovy, aspect, forceaspect;
-extern float nearplane;
+extern float nearplane();
 extern int farplane;
 extern bool hdrfloat;
 extern float ldrscale, ldrscaleb;
@@ -820,6 +820,8 @@ extern int GAME_LANG, vsync, cbcompensation;
 extern void restorevsync();
 
 extern bool islaunching;
+
+extern bvec fogdomerayleighcolour;
 
 #endif
 

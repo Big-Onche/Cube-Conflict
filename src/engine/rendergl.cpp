@@ -1581,15 +1581,13 @@ void renderavatar()
     projmatrix.scalez(avatardepth);
     setcamprojmatrix(false);
 
-    glPushAttrib(GL_DEPTH_BUFFER_BIT);
-
-    glDepthRange(0.0, 0.1); // restricted depth range for the avatar's gun and shield
+    glDepthRange(0.0, 0.05); // restricted depth range for the avatar's gun and shield
 
     enableavatarmask();
     game::renderavatar();
     disableavatarmask();
 
-    glPopAttrib();
+    glDepthRange(0.0, 1.0);
 
     projmatrix = oldprojmatrix;
     setcamprojmatrix(false);
@@ -1959,15 +1957,12 @@ static void blendfog(int fogmat, float below, float blend, float logblend, float
 }
 
 vec curfogcolor(0, 0, 0);
-CVARR(fograyleighcolor, 0xFF0000);
-CVARR(fogdiffusecolor, 0x0000FF);
+CVARR(fograyleighcolour, 0xFF0000);
 
 void setfogcolor(const vec &v)
 {
     GLOBALPARAM(fogcolor, v);
     LOCALPARAM(sundir, sunlightdir);
-    LOCALPARAM(rayleighColor, fograyleighcolor.tocolor());
-    LOCALPARAM(diffuseColor, fogdiffusecolor.tocolor());
     LOCALPARAM(camerapos, camera1->o);
 }
 
@@ -2006,8 +2001,12 @@ static void setfog(int fogmat, float below = 0, float blend = 1, int abovemat = 
     float alignment = camForward.dot(sunlightdir);
     float t = 1.0 - (alignment * 0.5 + 0.5);
 
-    vec rayleigh = vec(fogdomerayleighcolour.r/850.f, fogdomerayleighcolour.g/850.f, fogdomerayleighcolour.b/850.f);
-    curfogcolor.lerp(rayleigh, curfogcolor, t);
+    if(fogdomerayleighcolour.r || fogdomerayleighcolour.g || fogdomerayleighcolour.b)
+    {
+        vec rayleigh = vec(fogdomerayleighcolour.r/850.f, fogdomerayleighcolour.g/850.f, fogdomerayleighcolour.b/850.f);
+        curfogcolor.lerp(rayleigh, curfogcolor, t);
+    }
+
 
     blendfog(fogmat, below, blend, logblend, start, end, curfogcolor);
     if(blend < 1) blendfog(abovemat, 0, 1-blend, 1-logblend, start, end, curfogcolor);
