@@ -1099,10 +1099,10 @@ void regular_particle_splash(int type, int num, int fade, const vec &p, int colo
     regularsplash(type, color, radius, num, fade, p, size, gravity, delay);
 }
 
-void particle_splash(int type, int num, int fade, const vec &p, int color, float size, int radius, int gravity, int sizemod, bool randomcolor, float relativesize)
+void particle_splash(int type, int num, int fade, const vec &p, int color, float size, int radius, int gravity, int sizemod, bool randomcolor)
 {
     if(!canaddparticles()) return;
-    splash(type, randomcolor ? gfx::rndcolor[rnd(6)].color : color, radius, num, fade, p, size*relativesize, gravity, sizemod);
+    splash(type, randomcolor ? gfx::rndcolor[rnd(6)].color : color, radius, num, fade, p, size, gravity, sizemod);
 }
 
 VARP(maxtrail, 1, 500, 10000);
@@ -1134,11 +1134,11 @@ void particle_text(const vec &s, const char *t, int type, int fade, int color, f
     p->text = t;
 }
 
-void particle_textcopy(const vec &s, const char *t, int type, int fade, int color, float size, int gravity, float relativesize)
+void particle_textcopy(const vec &s, const char *t, int type, int fade, int color, float size, int gravity)
 {
     if(!canaddparticles()) return;
     if(!particletext || camera1->o.dist(s) > maxparticletextdistance) return;
-    particle *p = newparticle(s, vec(0, 0, 1), fade, type, color, size*relativesize, gravity);
+    particle *p = newparticle(s, vec(0, 0, 1), fade, type, color, size, gravity);
     p->text = newstring(t);
     p->flags = 1;
 }
@@ -1150,10 +1150,27 @@ void particle_icon(const vec &s, int ix, int iy, int type, int fade, int color, 
     p->flags |= ix | (iy<<2);
 }
 
-void particle_meter(const vec &s, float val, int type, float relativesize, int fade, int color, int color2, float size)
+vec computepartpos(const vec &s)
+{
+    vec pdir = s;
+    vec cpos = camera1->o;
+    pdir.sub(cpos);
+    pdir.normalize();
+    pdir.mul(2);
+    return cpos.add(pdir);
+}
+
+void particle_ui(int type, const vec &pos, int color, float size)
 {
     if(!canaddparticles()) return;
-    particle *p = newparticle(s, vec(0, 0, 1), fade, type, color, size*relativesize);
+    newparticle(computepartpos(pos), vec(0, 0, 1), 1, type, color, size, 0);
+}
+
+void particle_meter(const vec &s, float val, int type, int fade, int color, int color2, float size, bool ui)
+{
+    if(!canaddparticles()) return;
+
+    particle *p = newparticle(ui ? computepartpos(s) : s, vec(0, 0, 1), fade, type, color, size);
     p->color2[0] = color2>>16;
     p->color2[1] = (color2>>8)&0xFF;
     p->color2[2] = color2&0xFF;

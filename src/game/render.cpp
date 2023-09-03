@@ -523,48 +523,29 @@ namespace game
             {
                 if(d->health<300 && d->health>0) switch(rnd(d->health+gfx::nbfps*2)) {case 0: gibeffect(300, d->o, d);}
 
-                vec posA = d->abovehead();
-                vec posB = camera1->o;
-                vec posAtofrontofposB = (posA.add((posB.mul(vec(127, 127, 127))))).div(vec(128, 128, 128));
 
-                if(player1->aptitude==APT_MEDECIN && isteam(player1->team, d->team) && d!=hudplayer())
+                if(d->o.dist(camera1->o)< 250)
                 {
+                    float metersize = 0.04f / (d->o.dist(camera1->o)/125.f);
 
-                        particle_meter(d->o.dist(camera1->o)<75 ? (d->abovehead().add(camera1->o)).div(vec(2,2,2)) : posAtofrontofposB,
-                                       d->health/1000.0f, PART_METER,
-                                       d->o.dist(camera1->o)<250 ? 1.f : d->o.dist(camera1->o)/250.f, 0.5f,
-                                       genrygbcolorgradient(d->health/10),
-                                       0x000000,
-                                       d->o.dist(camera1->o)<75 ? 1.35f : 0.02f);
+                    if(player1->aptitude==APT_MEDECIN && isteam(player1->team, d->team) && d!=hudplayer() && d->o.dist(camera1->o)< 250)
+                        particle_meter(d->abovehead(), d->health/1000.0f, PART_METER, 1, genrygbcolorgradient(d->health/10), 0x000000, metersize, true);
 
+                    if((player1->aptitude==APT_JUNKIE && isteam(player1->team, d->team)) && (d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION))
+                        particle_meter(d->abovehead(), d->health/1000.0f, PART_METER, 1, 0xFF00FF, 0x000000, metersize, true);
                 }
 
-                if((player1->aptitude==APT_JUNKIE && isteam(player1->team, d->team)) && (d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION))
-                    particle_meter(d->o.dist(camera1->o)<75 ? (d->abovehead().add(camera1->o)).div(vec(2,2,2)) : posAtofrontofposB,
-                                    d->mana/150.0f, PART_METER,
-                                    d->o.dist(camera1->o)<250 ? 1.f : d->o.dist(camera1->o)/250.f, 0.5f,
-                                    0xFF00FF, 0x000000,
-                                    d->o.dist(camera1->o)<75 ? 1.35f : 0.02f);
+                vec centerplayerpos = d->o;
+                centerplayerpos.sub(vec(0, 0, 8));
 
-                if(d->abilitymillis[ABILITY_2] && d->aptitude==APT_ESPION);
-                else if(((player1->aptitude==APT_ESPION && player1->abilitymillis[ABILITY_3] && d!=player1) || (totalmillis-getspyability<2000)) && (!isteam(player1->team, d->team)) && d->o.dist(camera1->o) > 32)
-                {
-                    vec posA = d->o;
-                    vec posB = camera1->o;
-                    vec posC = posA.subz(8);
-                    vec posAtofrontofposB = (posA.add((posB.mul(vec(127, 127, 127))))).div(vec(128, 128, 128));
-                    int nearsize = 1.f;
-                    if(d->o.dist(camera1->o) < 132) nearsize = (d->o.dist(camera1->o)-32)/100.f;
-                    particle_splash(PART_VISEUR, 1, 1, d->o.dist(camera1->o)<75 ? (posC.add(camera1->o)).div(vec(2,2,2)) : posAtofrontofposB, 0xAAAAAA, d->o.dist(camera1->o)<75 ? 2.f*(gfx::zoom ? (guns[player1->gunselect].maxzoomfov)/100.f*nearsize : nearsize) : 0.038f*(gfx::zoom ? (guns[player1->gunselect].maxzoomfov)/100.f*nearsize : nearsize), 1, 1, 0, false, d->o.dist(camera1->o)<150 ? 1.f : d->o.dist(camera1->o)/150.f);
-                }
-
-                vec pos = d->abovehead().add(vec(0, 0,-12));
+                if(((player1->aptitude==APT_ESPION && player1->abilitymillis[ABILITY_3] && d!=player1) || totalmillis-getspyability<2000) && !isteam(player1->team, d->team))
+                    particle_ui(PART_VISEUR, centerplayerpos, 0xBBBBBB);
 
                 switch(d->aptitude)
                 {
                     case APT_MAGICIEN:
                         if(d->abilitymillis[ABILITY_1]) particle_splash(PART_SMOKE, 2, 120, d->o, 0xFF33FF, 10+rnd(5), 400,400);
-                        if(d->abilitymillis[ABILITY_3]  && (d!=hudplayer() || thirdperson)) particle_fireball(pos, 15.2f, PART_EXPLOSION, 5,  0x880088, 13.0f);
+                        if(d->abilitymillis[ABILITY_3]  && (d!=hudplayer() || thirdperson)) particle_fireball(centerplayerpos, 15.2f, PART_EXPLOSION, 5,  0x880088, 13.0f);
                         break;
                     case APT_PHYSICIEN:
                         if(d->abilitymillis[ABILITY_2] && randomevent(0.05f*gfx::nbfps)) particle_splash(PART_SMOKE, 1, 300, d->o, 0x7777FF, 10+rnd(5), 400, 400);
@@ -575,7 +556,7 @@ namespace game
                         }
                         break;
                     case APT_PRETRE:
-                        if(d->abilitymillis[ABILITY_2]) particle_fireball(pos , 16.0f, PART_SHOCKWAVE, 5, 0xFFFF00, 16.0f);
+                        if(d->abilitymillis[ABILITY_2]) particle_fireball(centerplayerpos , 16.0f, PART_SHOCKWAVE, 5, 0xFFFF00, 16.0f);
                         break;
                     case APT_VIKING:
                         if(d->boostmillis[B_RAGE] && randomevent(0.03f*gfx::nbfps) && (d!=hudplayer() || thirdperson)) particle_splash(PART_SMOKE, 2, 150, d->o, 0xFF3300, 12+rnd(5), 400, 200);
