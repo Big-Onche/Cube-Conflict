@@ -523,23 +523,53 @@ namespace game
             {
                 if(d->health<300 && d->health>0) switch(rnd(d->health+gfx::nbfps*2)) {case 0: gibeffect(300, d->o, d);}
 
-
-                if(d->o.dist(camera1->o)< 250)
-                {
-                    float metersize = 0.04f / (d->o.dist(camera1->o)/125.f);
-
-                    if(player1->aptitude==APT_MEDECIN && isteam(player1->team, d->team) && d!=hudplayer() && d->o.dist(camera1->o)< 250)
-                        particle_meter(d->abovehead(), d->health/1000.0f, PART_METER, 1, genrygbcolorgradient(d->health/10), 0x000000, metersize, true);
-
-                    if((player1->aptitude==APT_JUNKIE && isteam(player1->team, d->team)) && (d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION))
-                        particle_meter(d->abovehead(), d->health/1000.0f, PART_METER, 1, 0xFF00FF, 0x000000, metersize, true);
-                }
-
                 vec centerplayerpos = d->o;
                 centerplayerpos.sub(vec(0, 0, 8));
 
+                if(isteam(player1->team, d->team) && d!=hudplayer())
+                {
+                    float distance = d->o.dist(camera1->o);
+                    float metersize = 0.04f / (distance/125);
+
+                    if(player1->aptitude==APT_MEDECIN)
+                    {
+                        if(distance <= 250) particle_meter(d->abovehead(), d->health/1000.0f, PART_METER, 1, genrygbcolorgradient(d->health/10), 0x000000, metersize, true);
+                        if(d->health < 750)
+                        {
+                            int blinkSpeed = 1001 - (750 - d->health)/2;
+                            particle_hud(PART_HEALTH, centerplayerpos, (totalmillis % blinkSpeed < blinkSpeed / 2) ? 0x111111 : 0xFFFFFF, 0.04f);
+                        }
+                    }
+                    else if(player1->aptitude==APT_JUNKIE)
+                    {
+                        bool showmana = false;
+
+                        switch(d->aptitude)
+                        {
+                            case APT_MAGICIEN:
+                            case APT_PHYSICIEN:
+                            case APT_PRETRE:
+                            case APT_SHOSHONE:
+                            case APT_ESPION:
+                                showmana = true;
+                                break;
+                        }
+
+                        if(showmana)
+                        {
+                            if(distance <= 250)  particle_meter(d->abovehead(), d->mana/100.0f, PART_METER, 1, 0xFF00FF, 0x000000, metersize, true);
+                            if(d->mana < 75)
+                            {
+                                int blinkSpeed = 1001 - (750 - d->mana*10)/2;
+                                particle_hud(PART_MANA, centerplayerpos, (totalmillis % blinkSpeed < blinkSpeed / 2) ? 0xFF00FF : 0xFFFFFF, 0.04f);
+                            }
+                        }
+                    }
+                }
+
                 if(((player1->aptitude==APT_ESPION && player1->abilitymillis[ABILITY_3] && d!=player1) || totalmillis-getspyability<2000) && !isteam(player1->team, d->team))
-                    particle_ui(PART_VISEUR, centerplayerpos, 0xBBBBBB);
+                    particle_hud(PART_VISEUR, centerplayerpos, 0xBBBBBB);
+
 
                 switch(d->aptitude)
                 {

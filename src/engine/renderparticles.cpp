@@ -1160,7 +1160,7 @@ vec computepartpos(const vec &s)
     return cpos.add(pdir);
 }
 
-void particle_ui(int type, const vec &pos, int color, float size)
+void particle_hud(int type, const vec &pos, int color, float size)
 {
     if(!canaddparticles()) return;
     newparticle(computepartpos(pos), vec(0, 0, 1), 1, type, color, size, 0);

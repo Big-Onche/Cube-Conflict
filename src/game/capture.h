@@ -36,7 +36,7 @@ struct captureclientmode : clientmode
         vec ammopos;
         string name, info;
 #endif
-        int ammogroup, ammotype, tag, ammo, owners, enemies, converted, capturetime, bliptimer;
+        int ammogroup, ammotype, tag, ammo, owners, enemies, converted, capturetime;
 
         baseinfo() { reset(); }
 
@@ -337,8 +337,6 @@ struct captureclientmode : clientmode
         loopi(3) preloadmodel(basemodels[i]);
     }
 
-    int bliptimer = 0;
-
     void rendergame()
     {
         if(capturetether && canaddparticles())
@@ -367,6 +365,7 @@ struct captureclientmode : clientmode
             }
 
             int tcolor = 0x888888, mtype = -1, mcolor = 0xFFFFFF, mcolor2 = 0;
+
             if(b.owner)
             {
                 defformatstring(baseteam, "%s", b.converted ? (GAME_LANG ? "Disputed!" : "Contesté !") : (b.owner==hudplayer()->team ? (GAME_LANG ? "Allied" : "Allié") : (GAME_LANG ? "Enemy" : "Ennemi")));
@@ -377,22 +376,11 @@ struct captureclientmode : clientmode
                 else formatstring(b.info, "%s - %s", b.name, baseteam);
                 tcolor = isowner ? 0xFFFF00 : 0xFF0000;
 
-                if(b.owner==hudplayer()->team && b.o.dist(camera1->o) > 128)
+                if(b.owner==hudplayer()->team && hudplayer()->state==CS_ALIVE)
                 {
-                    if(b.converted)
-                    {
-                        b.bliptimer += curtime;
-                        if(b.bliptimer>1000) b.bliptimer = 0;
-                    }
-                    else b.bliptimer = 0;
-
-                    vec posA = b.o;
-                    posA.add(vec(0, 0, 7));
-                    vec posB = camera1->o;
-                    vec posAtofrontofposB = (posA.add((posB.mul(vec(127, 127, 127))))).div(vec(128, 128, 128));
-                    particle_splash(PART_BLIP, 1, 1, posAtofrontofposB, b.bliptimer < 500 ? 0xFFFF00 : 0xFF0000, 0.03f*(gfx::zoom ? (guns[player1->gunselect].maxzoomfov)/100.f : b.o.dist(camera1->o) > 228 ? 1.f : (b.o.dist(camera1->o)-128)/100.f), 1, 1, 0, false, b.o.dist(camera1->o)/170.f);
+                    vec bpos = b.o;
+                    particle_hud(PART_BLIP, bpos.add(vec(0, 0, 10)), (totalmillis % 1001 < 500) && b.converted ? 0xFF0000 : 0xFFFF00);
                 }
-
             }
             else if(b.enemy)
             {
@@ -412,7 +400,7 @@ struct captureclientmode : clientmode
             if(mtype>=0)
             {
                 above.z += 3.5f;
-                particle_meter(above, b.converted/float((b.owner ? int(OCCUPYENEMYLIMIT) : int(OCCUPYNEUTRALLIMIT))), mtype, 1, 1, mcolor, mcolor2, 3.0f);
+                particle_meter(above, b.converted/float((b.owner ? int(OCCUPYENEMYLIMIT) : int(OCCUPYNEUTRALLIMIT))), mtype, 1, mcolor, mcolor2, 3.0f);
             }
         }
     }
