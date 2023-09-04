@@ -451,16 +451,13 @@ namespace game
         newbouncer(p, to, true, 0, d, type, lifetime, rnd(100)+20);
     }
 
+    int dmgcolor = 0xFFAA00;
+    float dmgsize = 0.12f;
+
     void damageeffect(int damage, gameent *d, gameent *actor, int atk)
     {
         vec p = d->o;
         p.z += 0.6f*(d->eyeheight + d->aboveeye) - d->eyeheight;
-
-        damage = ((damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[d->aptitude].apt_resistance))/(d->boostmillis[B_JOINT] ? (d->aptitude==APT_JUNKIE ? 1.875f : 1.25f) : 1.f); //Dégats de base
-        actor->boostmillis[B_ROIDS] ? damage*=actor->aptitude==APT_JUNKIE ? 3 : 2 : 1; //Stéros ou non
-        if(d->abilitymillis[ABILITY_3] && d->aptitude==APT_MAGICIEN) damage/=damage/5.0f;
-        if(d->aptitude==APT_SHOSHONE && d->abilitymillis[ABILITY_1]) damage/=1.3f;
-        damage = damage/10.f;
 
         if(d->armourtype!=A_MAGNET)
         {
@@ -468,88 +465,114 @@ namespace game
             gibeffect(!isteam(d->team, actor->team) ? damage : actor->aptitude==APT_MEDECIN ? 0 : actor->aptitude==APT_JUNKIE ? damage/=1.5f : damage/=3.f, vec(0,0,0), d);
         }
 
-        if(isteam(d->team, actor->team) && actor!=d)
+        bool teamdmg = false;
+        if(actor==hudplayer())
         {
-            if(actor->aptitude==APT_MEDECIN) return;
-            damage/=(actor->aptitude==APT_JUNKIE ? 1.5f : 3.f); //Divisé si allié sauf sois-même
-            particle_textcopy(d->abovehead(), tempformatstring("%.1f", damage*1.0f), PART_TEXT, 1500, 0x666666, actor==player1 ? 5.0f : 2.2f, -8);
-            return;
+            dmgcolor = 0xFFAA00;
+            dmgsize = 0.11f;
         }
 
-        float draweddmg = damage;
-        bool normaldamage = true;
+        if(atk==GUN_S_CAMPOUZE && actor==hudplayer()) damage = 50; // specific fix for that gun (true damage = only one ray)
+        damage = ((damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[d->aptitude].apt_resistance)); // calc damage based on the class's stats
 
-        switch(actor->aptitude)
+        if(actor->boostmillis[B_ROIDS]) // recalc damage if actor has roids
+        {
+            damage *= actor->aptitude==APT_JUNKIE ? 3 : 2;
+            if(actor==hudplayer()) {dmgsize = 0.12f; dmgcolor = 0xFF0000; }
+        }
+        if(d->boostmillis[B_JOINT]) // recalc victim if actor has joint
+        {
+            damage /= d->aptitude==APT_JUNKIE ? 1.875f : 1.25f;
+            if(actor==hudplayer()) {dmgsize = 0.105f; dmgcolor = 0xAAAA55; }
+        }
+
+        switch(actor->aptitude) // recalc damage based on the actor's passive/active skills
         {
             case APT_AMERICAIN:
                 if(atk>=ATK_NUKE_SHOOT && atk<=ATK_CAMPOUZE_SHOOT)
                 {
-                    draweddmg*=1.5f;
-                    if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 1500, 0xFF0000, actor==player1 ? 5.5f : 4.0f, -8);
-                    normaldamage = false;
+                    damage *= 1.5f;
+                    if(actor==hudplayer()) {dmgsize = 0.115f; dmgcolor = 0xFF0000; }
                 }
                 break;
 
             case APT_NINJA:
-                if(atk==ATK_CACNINJA_SHOOT && d!=player1){particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 1500, 0xFF0000, actor==player1 ? 7.0f : 5.0f, -8); normaldamage = false; }
+                if(atk==ATK_CACNINJA_SHOOT && actor==hudplayer()) {dmgsize = 0.115f; dmgcolor = 0xFF0000; }
                 break;
 
             case APT_MAGICIEN:
                 if(actor->abilitymillis[ABILITY_2])
                 {
-                    draweddmg*=1.25f;
-                    if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 1500, 0xFF00FF, actor==player1 ? 5.5f : 4.0f, -8);
-                    normaldamage = false;
+                    damage *= 1.25f;
+                    if(actor==hudplayer()) dmgcolor = 0xFF00FF;
                 }
                 break;
 
             case APT_CAMPEUR:
-                draweddmg *= ((actor->o.dist(d->o)/1800.f)+1.f);
-                if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 1500, actor->boostmillis[B_ROIDS] ? 0xFF0000: 0xFF4B19, actor==player1 ? 7.0f : 3.0f, -8);
-                normaldamage = false;
+                damage *= ((actor->o.dist(d->o)/1800.f)+1.f);
                 break;
 
             case APT_VIKING:
                 if(actor->boostmillis[B_RAGE])
                 {
-                    draweddmg*=1.25f;
-                    if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 1500, 0xFF5500, actor==player1 ? 10.0f : 7.0f, -8);
-                    normaldamage = false;
+                    damage *= 1.25f;
+                    if(actor==hudplayer()) {dmgsize = 0.115f; dmgcolor = 0xFF7700; }
                 }
-                break;
-
-            case APT_PRETRE:
-                if(d->abilitymillis[ABILITY_2] && d->aptitude==APT_PRETRE && d->mana)
-                {
-                    adddynlight(d->o, 25, vec(1.0f, 0.0f, 1.0f), 300, 50, L_NOSHADOW|L_VOLUMETRIC);
-                    playsound(S_PRI_2_2, d!=player1 ? &d->o : NULL, NULL, 0, 0, 0, -1, 150, 300);
-                    if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 1500, 0xAA00AA, actor==player1 ? 7.0f : 3.0f, -8);
-                    normaldamage = false;
-                }
-                break;
-
-            case APT_VAMPIRE:
-                if(d!=player1) particle_textcopy(actor->abovehead(), tempformatstring("%.1f", draweddmg*0.5f), PART_TEXT, 1500, 0xBBDDBB, 3.5f, -8);
                 break;
 
             case APT_SHOSHONE:
                 if(actor->abilitymillis[ABILITY_3])
                 {
-                    draweddmg*=1.3f;
-                    if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 1500, 0xFF3333, actor==player1 ? 10.0f : 7.0f, -8);
-                    normaldamage = false;
+                    damage *= 1.3f;
+                    if(actor==hudplayer()) {dmgsize = 0.115f; dmgcolor = 0xFF7700; }
                 }
-                if(d->aptitude==APT_AMERICAIN) draweddmg/=1.3f;
+                if(d->aptitude==APT_AMERICAIN)
+                {
+                    damage /= 1.25f;
+                    if(actor==hudplayer()) {dmgsize = 0.105f; dmgcolor = 0xFFFF00; }
+                }
                 break;
 
             case APT_PHYSICIEN:
                 if(d==player1 && actor==player1 && player1->armour && player1->abilitymillis[ABILITY_1]) unlockachievement(ACH_BRICOLEUR);
-                break;
         }
-        if(normaldamage && d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%.1f", draweddmg), PART_TEXT, 1500, actor->boostmillis[B_ROIDS] ? 0xFF0000 : 0xFF4400, actor==player1 ? 7.0f : 3.0f, -8);
 
-        if(actor==player1) addstat(draweddmg, STAT_TOTALDAMAGEDEALT);
-        else if(d==player1) addstat(draweddmg, STAT_TOTALDAMAGERECIE);
+        switch(d->aptitude) // recalc damage based on the victim's passive/active
+        {
+            case APT_MAGICIEN:
+                if(d->abilitymillis[ABILITY_3]) damage /= 5.0f;
+                break;
+
+            case APT_PRETRE:
+                if(actor==hudplayer() && d->abilitymillis[ABILITY_2] && d->aptitude==APT_PRETRE && d->mana) {dmgsize = 0.105f; dmgcolor = 0xAA00AA; }
+                break;
+
+            case APT_SHOSHONE:
+                if(d->abilitymillis[ABILITY_1]) damage /= 1.3f;
+                if(actor->aptitude==APT_AMERICAIN)
+                {
+                    damage *= 1.25f;
+                    if(actor==hudplayer()) {dmgsize = 0.115f; dmgcolor = 0xFF7700; }
+                }
+        }
+
+        if(isteam(d->team, actor->team) && actor!=d && actor==hudplayer()) // recalc if ally or not
+        {
+            if(actor->aptitude==APT_MEDECIN) return;
+            damage /= (actor->aptitude==APT_JUNKIE ? 1.5f : 3.f);
+            if(actor==hudplayer()) dmgcolor = 0x888888;
+            teamdmg = true;
+        }
+
+        damage = damage/10.f; // rescale damage value
+
+        if(actor==hudplayer())
+        {
+            d->curdamage += damage;
+            d->lastcurdamage = totalmillis;
+            if(!teamdmg && actor==player1) addstat(damage, STAT_TOTALDAMAGEDEALT);
+        }
+        else if(d==player1) addstat(damage, STAT_TOTALDAMAGERECIE);
     }
 
     void gibeffect(int damage, const vec &vel, gameent *d)
@@ -1371,7 +1394,6 @@ namespace game
             {
                 gunselect(GUN_KAMIKAZE, d);
                 d->attacking = ACT_SHOOT;
-                d->lastattack = -1;
                 d->playerexploded = true;
             }
         }
@@ -1380,7 +1402,6 @@ namespace game
         {
             gunselect(GUN_ASSISTXPL, d, true);
             d->attacking = ACT_SHOOT;
-            d->lastattack = -1;
             d->playerexploded = true;
         }
 
@@ -1397,7 +1418,7 @@ namespace game
             if(atk==ATK_SMAW_SHOOT || atk==ATK_NUKE_SHOOT || atk==ATK_CACMARTEAU_SHOOT || atk == ATK_MOSSBERG_SHOOT || atk == ATK_SV98_SHOOT) lastshoot+=750;
         }
 
-        if (!d->ammo[gun])
+        if(!d->ammo[gun])
         {
             if(d==player1) msgsound(S_NOAMMO, d);
             d->gunwait = 600;

@@ -519,6 +519,16 @@ namespace game
             dir.div(dist);
 
             copystring(d->info, colorname(d));
+
+            if(d->curdamage) // damage dealt displayed on hud
+            {
+                vec pos = d->abovehead();
+                float up = ((totalmillis - d->lastcurdamage) / 80.f) / (d->o.dist(camera1->o) <= 160 ? 160.f - d->o.dist(camera1->o) : 1); // particle going up effect
+                float t = clamp(d->o.dist(camera1->o), 0.f, 160.f) / 160.f;
+                pos.add(vec(0, 0, 5 + up - (15 * (1 - t))));
+                particle_textcopy(pos, tempformatstring("%d", d->curdamage), PART_TEXT, 1, dmgcolor, gfx::zoom ? dmgsize*(guns[player1->gunselect].maxzoomfov)/100.f : dmgsize, 0, true);
+            }
+
             if(d->state==CS_ALIVE && player->state==CS_ALIVE)
             {
                 if(d->health<300 && d->health>0) switch(rnd(d->health+gfx::nbfps*2)) {case 0: gibeffect(300, d->o, d);}
@@ -569,7 +579,6 @@ namespace game
 
                 if(((player1->aptitude==APT_ESPION && player1->abilitymillis[ABILITY_3] && d!=player1) || totalmillis-getspyability<2000) && !isteam(player1->team, d->team))
                     particle_hud(PART_VISEUR, centerplayerpos, 0xBBBBBB);
-
 
                 switch(d->aptitude)
                 {

@@ -843,6 +843,7 @@ struct gameent : dynent, gamestate
     int respawned, suicided;
     int lastpain;
     int lastaction, lastattack;
+    int curdamage, lastcurdamage;
     int attacking, gunaccel;
     int lastfootstep, attacksound, attackchan, dansesound, dansechan, alarmchan, waterchan;
     int lasttaunt;
@@ -927,6 +928,8 @@ struct gameent : dynent, gamestate
         respawned = suicided = -1;
         lastaction = 0;
         lastattack = -1;
+        curdamage = 0;
+        lastcurdamage = 0;
         attacking = ACT_IDLE;
         lasttaunt = 0;
         lastpickup = -1;
@@ -1013,6 +1016,8 @@ namespace game
     //hud
     extern void drawrpgminimap(gameent *d, int w, int h);
     extern int getteamfrags(int team);
+    extern int dmgcolor;
+    extern float dmgsize;
 
     // abilities
     enum abilities {ABILITY_1 = 0, ABILITY_2, ABILITY_3, NUMABILITIES};

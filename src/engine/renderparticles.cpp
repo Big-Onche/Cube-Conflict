@@ -134,6 +134,7 @@ struct particle
 {
     vec o, d;
     int gravity, fade, millis, sizemod;
+    bool hud;
     bvec color;
     uchar flags;
     float size;
@@ -184,7 +185,7 @@ struct partrenderer
     virtual void init(int n) { }
     virtual void reset() = 0;
     virtual void resettracked(physent *owner) { }
-    virtual particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity = 0, int sizemod = 0) = 0;
+    virtual particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity = 0, int sizemod = 0, bool hud = false) = 0;
     virtual void update() { }
     virtual void render() = 0;
     virtual bool haswork() = 0;
@@ -340,7 +341,7 @@ struct listrenderer : partrenderer
         }
     }
 
-    particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity, int sizemod)
+    particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity, int sizemod, bool hud)
     {
         if(!parempty)
         {
@@ -362,6 +363,8 @@ struct listrenderer : partrenderer
         p->size = size;
         p->owner = NULL;
         p->flags = 0;
+        p->sizemod = sizemod;
+        p->hud = hud;
         return p;
     }
 
@@ -697,7 +700,7 @@ struct varenderer : partrenderer
         return (numparts > 0);
     }
 
-    particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity, int sizemod)
+    particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity, int sizemod, bool hud)
     {
         particle *p = parts + (numparts < maxparts ? numparts++ : rnd(maxparts)); //next free slot, or kill a random kitten
         p->o = o;
@@ -710,6 +713,7 @@ struct varenderer : partrenderer
         p->owner = NULL;
         p->flags = 0x80 | (rndmask ? rnd(0x80) & rndmask : 0);
         p->sizemod = sizemod;
+        p->hud = hud;
         lastupdate = -1;
         return p;
     }
@@ -1040,7 +1044,7 @@ void renderparticles(int layer)
 
 static int addedparticles = 0;
 
-static inline particle *newparticle(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity = 0, int sizemod = 0)
+static inline particle *newparticle(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity = 0, int sizemod = 0, bool hud = false)
 {
     static particle dummy;
     if(seedemitter)
@@ -1050,7 +1054,7 @@ static inline particle *newparticle(const vec &o, const vec &d, int fade, int ty
     }
     if(fade + emitoffset < 0) return &dummy;
     addedparticles++;
-    return parts[type]->addpart(o, d, fade, color, size, gravity, sizemod);
+    return parts[type]->addpart(o, d, fade, color, size, gravity, sizemod, hud);
 }
 
 VARP(maxparticledistance, 256, 1024, 4092);
@@ -1123,8 +1127,18 @@ void particle_trail(int type, int fade, const vec &s, const vec &e, int color, f
     }
 }
 
+vec computepartpos(const vec &s)
+{
+    vec pdir = s;
+    vec cpos = camera1->o;
+    pdir.sub(cpos);
+    pdir.normalize();
+    pdir.mul(2);
+    return cpos.add(pdir);
+}
+
 VARP(particletext, 0, 1, 1);
-VARP(maxparticletextdistance, 0, 128, 10000);
+VARP(maxparticletextdistance, 0, 4096, 10000);
 
 void particle_text(const vec &s, const char *t, int type, int fade, int color, float size, int gravity)
 {
@@ -1134,11 +1148,10 @@ void particle_text(const vec &s, const char *t, int type, int fade, int color, f
     p->text = t;
 }
 
-void particle_textcopy(const vec &s, const char *t, int type, int fade, int color, float size, int gravity)
+void particle_textcopy(const vec &s, const char *t, int type, int fade, int color, float size, int gravity, bool hud)
 {
-    if(!canaddparticles()) return;
-    if(!particletext || camera1->o.dist(s) > maxparticletextdistance) return;
-    particle *p = newparticle(s, vec(0, 0, 1), fade, type, color, size, gravity);
+    if(((!particletext || camera1->o.dist(s) > maxparticletextdistance) || !canaddparticles()) && !hud) return;
+    particle *p = newparticle(hud ? computepartpos(s) : s, vec(0, 0, 1), fade, type, color, size, gravity, hud);
     p->text = newstring(t);
     p->flags = 1;
 }
@@ -1148,16 +1161,6 @@ void particle_icon(const vec &s, int ix, int iy, int type, int fade, int color, 
     if(!canaddparticles()) return;
     particle *p = newparticle(s, vec(0, 0, 1), fade, type, color, size, gravity);
     p->flags |= ix | (iy<<2);
-}
-
-vec computepartpos(const vec &s)
-{
-    vec pdir = s;
-    vec cpos = camera1->o;
-    pdir.sub(cpos);
-    pdir.normalize();
-    pdir.mul(2);
-    return cpos.add(pdir);
 }
 
 void particle_hud(int type, const vec &pos, int color, float size)
