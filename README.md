@@ -1,43 +1,48 @@
-# Cube Conflict
+![Logo of Cube Conflict](https://www.cube-conflict.com/images/logo.png) 
+# Cube Conflict 
 
-Cube Conflict is a fork of Tesseract (http://tesseract.gg) which is a fork of the Cube 2: Sauerbraten (http://sauerbraten.org).
+Join the battle in **Cube Conflict**, an FPS game where dumb smileys are locked in a never-ending war! Forked from [Tesseract](http://tesseract.gg).
+🎮 [Play on Steam](https://store.steampowered.com/app/1454700/Cube_Conflict/)
 
-The goal is to make a free, open-source, fun, and complete game able to run smoothly even on low-end computers.
-Available here and on Steam https://store.steampowered.com/app/1454700/Cube_Conflict/
+## 🎯 Goal
+The mission is to deliver a free, open-source, and exhilarating gaming experience while being able to run smoothly on low-end computers.
 
-# Current Content
+## 🕹 Current Content
 - More than 20 weapons, from the most rotten to the most buffed!
-- 15 classes with passive and active abilities.
-- More than 10 items to use ingame (different shields, boosts, super-weapons, etc.)
+- 15 character classes each with unique abilities.
+- 10+ in-game items including shields, boosts, and super-weapons.
 - 5 themed maps, from the moon with reduced gravity to the volcano and its molten lava.
-- 8 different atmospheres (night, heat wave, rain, sunset, etc.) for outdoor maps.
-- 3 multiplayer game modes (deathmatch, capture the flag, and domination) with lots of mutators.
+- 8 atmospheric settings for a dynamic outdoor experience.
+- 3 game modes: deathmatch, capture the flag, and domination, enhanced with mutators.
 - Survival solo game mode: surviving waves of dumb monsters.
-- 2 official servers, running 24h/24.
-- Achievements and player stats tracking when playing online. Saved locally and/or on Steam.
-- Lot of skins to customize your character (capes, graves, smileys).
+- 2 dedicated servers for uninterrupted gameplay.
+- Track your progress with achievements and player stats, saved locally and on Steam.
+- Loads of skins for character customization.
 
-# Roadmap for the first release:
-- GUI for creating new maps and managing saved customs maps and easier map editing.
-- More maps!
-- Finished tutorial map.
-- Stats and achievement fully stored on Steam account.
+## 🚧 Roadmap for the First Release
+- [####------] More maps!
+- [####------] Simplified map editing with a dedicated GUI.
+- [########--] Completion of the tutorial map.
+- [######----] Seamless integration of stats and achievements with Steam.
+- [----------] Support for multiple language translations.
 
-# Planned content in the future:
-- Advanced tools for e-sports such as better server management, and better spectator experience.
-- Single-player campaign with a quest system in a semi-opened world.
+## 📅 Upcoming Features
+- Advanced tools enhancing e-sports with a seamless server management system.
+- Battle-royale game mode.
+- Single-player campaign mode with a quest system in a semi-open world.
+- Dynamic weather and day-night cycles.
+- Steam Workshop support.
 
-# Platforms
-Available on Windows and Linux.
+## 🖥 Platforms
+Cube Conflict is available on:
+- Windows
+- Linux *(Please note: Linux updates will only occur at major releases. To access the latest version, it's recommended to build the binary manually with the command: `make -C src install`)*
 
-Note that Linux's executables will be updated only at major releases. If you want to try the
-very last version of the game, it is preferable to build the binary by yourself
-("make -C src install" in the main folder)
+## 🤝 Contribute
+We welcome all contributions!
+- Submit a patch or feature via a [GitHub Pull Request](https://github.com/CubeConflict/Cube-Conflict/pulls).
+- Report bugs or suggest features on the [GitHub Issue Tracker](https://github.com/CubeConflict/Cube-Conflict/issues).
+- Create innovative maps or propose gameplay enhancements.
 
-# Contribute
-Opened to any contriutions: Submitting a patch to GitHub, post suggestions/bugs on the [GitHub tracker](https://github.com/CubeConflict/Cube-Conflict/issues), 
-[Fork the project](https://github.com/CubeConflict/Cube-Conflict/fork) and [push your changes](https://github.com/CubeConflict/Cube-Conflict/pulls),
-create some cool maps and ask for bigger guns!
-
-# License
-- "/licenses" folder for more information.
+## 📜 License
+[Refer to the licensing information.](https://github.com/Big-Onche/Cube-Conflict/tree/master/licenses)
