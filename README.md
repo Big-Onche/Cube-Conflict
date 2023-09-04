@@ -19,12 +19,11 @@ Available here and on Steam https://store.steampowered.com/app/1454700/Cube_Conf
 
 # Roadmap for the first release:
 - GUI for creating new maps and managing saved customs maps and easier map editing.
-- Responsive HUD.
+- More maps!
 - Finished tutorial map.
 - Stats and achievement fully stored on Steam account.
 
 # Planned content in the future:
-- More maps!
 - Advanced tools for e-sports such as better server management, and better spectator experience.
 - Single-player campaign with a quest system in a semi-opened world.
 
