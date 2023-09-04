@@ -2302,7 +2302,11 @@ namespace server
             case APT_MAGICIEN: {if(as.abilitymillis[game::ABILITY_2]) damage *= 1.25f; break;}
             case APT_CAMPEUR: damage *= ((as.o.dist(ts.o)/1800.f)+1.f); break;
             case APT_VIKING: {if(as.boostmillis[B_RAGE]) damage *=1.25f;} break;
-            case APT_SHOSHONE: {if(as.abilitymillis[game::ABILITY_3]) damage *= 1.3f; break;}
+            case APT_SHOSHONE:
+            {
+                if(as.abilitymillis[game::ABILITY_3]) damage *= 1.3f;
+                if(target->aptitude==APT_AMERICAIN) damage /= 1.25f;
+            }
         }
 
         //Absorptions et skills spéciaux d'aptitudes
