@@ -20,11 +20,11 @@ The mission is to deliver a free, open-source, and exhilarating gaming experienc
 - Loads of skins for character customization.
 
 ## 🚧 Roadmap for the First Release
-- [####------] More maps!
-- [####------] Simplified map editing with a dedicated GUI.
-- [########--] Completion of the tutorial map.
-- [######----] Seamless integration of stats and achievements with Steam.
-- [----------] Support for multiple language translations.
+- [🟩🟩⬛⬛⬛] More maps!
+- [🟩🟩⬛⬛⬛] Simplified map editing with a dedicated GUI.
+- [🟩🟩🟩🟩⬛] Completion of the tutorial map.
+- [🟩🟩🟩⬛⬛] Seamless integration of stats and achievements with Steam.
+- [🟩⬛⬛⬛⬛] Support for multiple language translations.
 
 ## 📅 Upcoming Features
 - Advanced tools enhancing e-sports with a seamless server management system.
