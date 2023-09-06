@@ -1254,12 +1254,6 @@ namespace game
 
         looped = false;
         if(d->attacksound >= 0 && d->attacksound != sound) d->stopattacksound(d);
-        if(atk==ATK_AK47_SHOOT)
-        {
-            playSound(SND_AK47, d==hudplayer() ? NULL : &d->o, 400, 50);
-            if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 300) playSound(SND_AK47_FAR, &d->o, 700, 300);
-            if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 600) playSound(SND_FAR_SHOOT, &d->o, 1000, 600);
-        }
 
         switch(sound)
         {
@@ -1269,16 +1263,17 @@ namespace game
                 if(d->attacksound >= 0) looped = true;
                 d->attacksound = sound;
                 d->attackchan = playsound(sound, d==hudplayer() ? NULL : &d->o, NULL, 0, -1, atk==ATK_GAU8_SHOOT ? 75 : 50, d->attackchan, atk==ATK_GAU8_SHOOT ? 600 : 350);
-                if(sound==S_GAU8) return;
+                return;
             default:
-                {
-                    if(d==hudplayer() && sound!=S_FLAMETHROWER) playsound(attacks[atk].sound, NULL);
-                    else if(sound!=S_FLAMETHROWER) playsound(d->type==ENT_AI && atk==ATK_LANCEFLAMMES_SHOOT ? sound : attacks[atk].sound, &d->o, NULL, 0, 0, atk==ATK_ASSISTXPL_SHOOT || atk==ATK_KAMIKAZE_SHOOT ? 75 : 50, -1, atk==ATK_ASSISTXPL_SHOOT || atk==ATK_KAMIKAZE_SHOOT ? 600 : 400);
-                }
+                bool incraseDist = atk==ATK_ASSISTXPL_SHOOT || atk==ATK_KAMIKAZE_SHOOT;
+                playSound(attacks[atk].sound, d==hudplayer() ? NULL : &d->muzzle, incraseDist ? 600 : 400, incraseDist ? 200 : 150);
         }
 
-        if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 300) playsound(attacks[atk].middistsnd, &d->muzzle, NULL, 0, 0 , 300, -1, 550);
-        if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 500) playsound(attacks[atk].fardistsnd, &d->muzzle, NULL, 0, 0 , 500, -1, 800);
+        if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 300)
+        {
+            playSound(attacks[atk].middistsnd, &d->muzzle, NULL, 700, 300);
+            if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 600) playSound(attacks[atk].fardistsnd, &d->muzzle, NULL, 1000, 600);
+        }
     }
 
     void particletrack(physent *owner, vec &o, vec &d)

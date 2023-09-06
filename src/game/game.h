@@ -2,6 +2,7 @@
 #define __GAME_H__
 
 #include "cube.h"
+#include "sound.h"
 #include "engine.h"
 
 extern int lastshoot, getspyability;
@@ -243,20 +244,7 @@ static const char * const mastermodeicons[] =  { "server", "server", "serverlock
 // hardcoded sounds, defined in sounds.cfg
 enum
 {
-    // close weapon shoot sounds
-    S_ELECRIFLE, S_PLASMARIFLE, S_PLASMARIFLE_SFX,                                              // 13-15
-    S_SMAW, S_MINIGUN, S_SPOCKGUN, S_M32, S_FLAMETHROWER,                                       // 16-20
-    S_UZI, S_FAMAS, S_MOSSBERG, S_HYDRA, S_SV98,                                                // 21-25
-    S_SKS, S_CROSSBOW, S_AK47, S_GRAP1, S_FIREWORKS,                                            // 26-30
-    S_GLOCK, S_NUKE, S_GAU8, S_MINIROCKETS, S_CAMPOUZE,                                         // 31-35
-    S_SWORD349, S_BANHAMMER, S_MASTERSWORD, S_FLAIL, S_NINJASABER,                              // 36-40
 
-    // far weapon shoot sounds
-    S_ELECRIFLE_FAR, S_PLASMARIFLE_FAR, S_SMAW_FAR, S_MINIGUN_FAR, S_SPOCKGUN_FAR,              // 41-45
-    S_M32_FAR, S_FLAMETHROWER_FAR, S_UZI_FAR, S_FAMAS_FAR, S_MOSSBERG_FAR,                      // 46-50
-    S_HYDRA_FAR, S_SV98_FAR, S_SKS_FAR, S_CROSSBOW_FAR, S_AK47_FAR,                             // 51-55
-    S_GRAP1_FAR, S_FIREWORKS_FAR, S_GLOCK_FAR, S_NUKE_FAR, S_GAU8_FAR,                          // 56-60
-    S_MINIROCKETS_FAR, S_CAMPOUZE_FAR, S_FAR_LIGHT, S_FAR_HEAVY, S_FAR_VERYHEAVY,               // 61-65
 
     // explosions
     S_EXPL_MISSILE, S_EXPL_GRENADE, S_EXPL_FIREWORKS, S_EXPL_NUKE, S_EXPL_KAMIKAZE,             // 66-70
