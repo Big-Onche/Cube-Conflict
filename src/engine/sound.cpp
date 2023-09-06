@@ -1,9 +1,337 @@
 // sound.cpp: basic positional sound using sdl_mixer
 
 #include "engine.h"
+#include "sound.h"
 #include "SDL_mixer.h"
+#include <sndfile.h>
+#include <AL/efx.h>
 
-bool nosound = true;
+bool foundDevice = false;
+bool noSound = false;
+bool noEfx = false;
+
+VAR(debugsounds, 0, 1, 1);
+
+Sound sounds[NUMSNDS];
+
+ALuint sources[MAX_SOURCES];
+bool sourceActive[MAX_SOURCES] = {false};
+
+LPALGENAUXILIARYEFFECTSLOTS    alGenAuxiliaryEffectSlots    = NULL;
+LPALDELETEAUXILIARYEFFECTSLOTS alDeleteAuxiliaryEffectSlots = NULL;
+LPALAUXILIARYEFFECTSLOTI       alAuxiliaryEffectSloti       = NULL;
+LPALGENEFFECTS                 alGenEffects                 = NULL;
+LPALDELETEEFFECTS              alDeleteEffects              = NULL;
+LPALISEFFECT                   alIsEffect                   = NULL;
+LPALEFFECTI                    alEffecti                    = NULL;
+LPALEFFECTF                    alEffectf                    = NULL;
+LPALEFFECTFV                   alEffectfv                   = NULL;
+LPALGENFILTERS                 alGenFilters                 = NULL;
+LPALDELETEFILTERS              alDeleteFilters              = NULL;
+LPALISFILTER                   alIsFilter                   = NULL;
+LPALFILTERI                    alFilteri                    = NULL;
+LPALFILTERF                    alFilterf                    = NULL;
+
+static void getEfxFuncs()
+{
+    if(noEfx) return;
+
+    alGenAuxiliaryEffectSlots    = (LPALGENAUXILIARYEFFECTSLOTS)   alGetProcAddress("alGenAuxiliaryEffectSlots");
+    alDeleteAuxiliaryEffectSlots = (LPALDELETEAUXILIARYEFFECTSLOTS)alGetProcAddress("alDeleteAuxiliaryEffectSlots");
+    alAuxiliaryEffectSloti       = (LPALAUXILIARYEFFECTSLOTI)      alGetProcAddress("alAuxiliaryEffectSloti");
+    alGenEffects                 = (LPALGENEFFECTS)                alGetProcAddress("alGenEffects");
+    alDeleteEffects              = (LPALDELETEEFFECTS)             alGetProcAddress("alDeleteEffects");
+    alIsEffect                   = (LPALISEFFECT)                  alGetProcAddress("alIsEffect");
+    alEffecti                    = (LPALEFFECTI)                   alGetProcAddress("alEffecti");
+    alEffectf                    = (LPALEFFECTF)                   alGetProcAddress("alEffectf");
+    alEffectfv                   = (LPALEFFECTFV)                  alGetProcAddress("alEffectfv");
+    alGenFilters                 = (LPALGENFILTERS)                alGetProcAddress("alGenFilters");
+    alDeleteFilters              = (LPALDELETEFILTERS)             alGetProcAddress("alDeleteFilters");
+    alIsFilter                   = (LPALISFILTER)                  alGetProcAddress("alIsFilter");
+    alFilteri                    = (LPALFILTERI)                   alGetProcAddress("alFilteri");
+    alFilterf                    = (LPALFILTERF)                   alGetProcAddress("alFilterf");
+}
+
+void initSources()
+{
+    alGenSources(MAX_SOURCES, sources);
+    for(int i = 0; i < MAX_SOURCES; i++) sourceActive[i] = false;
+}
+
+ALuint reverbEffect;
+ALuint auxEffectReverb;
+
+ALuint lowPassFilter;
+
+void setReverbEffect()
+{
+    alGenAuxiliaryEffectSlots(1, &auxEffectReverb);
+
+    alGenEffects(1, &reverbEffect);
+    alEffecti(reverbEffect, AL_EFFECT_TYPE, AL_EFFECT_REVERB);
+    alEffectf(reverbEffect, AL_REVERB_DENSITY, 1.0f);
+    alEffectf(reverbEffect, AL_REVERB_DIFFUSION, 1.0f);
+    alEffectf(reverbEffect, AL_REVERB_GAIN, 0.5f);
+    alEffectf(reverbEffect, AL_REVERB_GAINHF, 0.9f);
+    alEffectf(reverbEffect, AL_REVERB_DECAY_TIME, 1.5f);
+    alEffectf(reverbEffect, AL_REVERB_DECAY_HFRATIO, 0.5f);
+    alEffectf(reverbEffect, AL_REVERB_REFLECTIONS_GAIN, 0.5f);
+    alEffectf(reverbEffect, AL_REVERB_LATE_REVERB_GAIN, 1.0f);
+    alEffectf(reverbEffect, AL_REVERB_LATE_REVERB_DELAY, 0.15f);
+    alEffectf(reverbEffect, AL_REVERB_AIR_ABSORPTION_GAINHF, 1.0f);
+    alEffectf(reverbEffect, AL_REVERB_ROOM_ROLLOFF_FACTOR, 0.0f);
+    alEffecti(reverbEffect, AL_REVERB_DECAY_HFLIMIT, AL_TRUE);
+
+    alAuxiliaryEffectSloti(auxEffectReverb, AL_EFFECTSLOT_EFFECT, reverbEffect);
+}
+
+void reportSoundError(const char* func, const char* filepath, int buffer)
+{
+    if(!debugsounds) return;
+    ALenum error = alGetError();
+    if(error != AL_NO_ERROR) conoutf(CON_ERROR, "OpenAL Error after %s for %s: %d (Buffer ID: %d)", func, filepath, error, buffer);
+}
+
+void setOcclusionEffect()
+{
+    alGenFilters(1, &lowPassFilter);
+    reportSoundError("alGenFilters-lowPassFilter", "N/A", -1);
+
+    alFilteri(lowPassFilter, AL_FILTER_TYPE, AL_FILTER_LOWPASS);
+    reportSoundError("alFilteri-lowPassFilter", "N/A", -1);
+
+    alFilterf(lowPassFilter, AL_LOWPASS_GAIN, 0.6f);  // Value between 0.0 to 1.0. Adjust to your liking.
+    alFilterf(lowPassFilter, AL_LOWPASS_GAINHF, 0.08f);
+}
+
+void alInit()
+{
+    logoutf("init: openal");
+
+    ALCdevice* device = alcOpenDevice(NULL); // open default device
+    if(!device) { conoutf("Unable to initialize OpenAL (no audio device detected)"); noSound = true; return; }
+
+    ALCint attributes[] = {
+        ALC_FREQUENCY, 44100,
+        0
+    };
+
+    ALCcontext* context = alcCreateContext(device, attributes);
+    if(!context) { conoutf("Unable to initialize OpenAL (!context)"); noSound = true; return; }
+    alcMakeContextCurrent(context);
+
+    if(!alcIsExtensionPresent(device, "ALC_EXT_EFX")) // check for EFX extension support
+    {
+        conoutf(CON_WARN, "EFX extension not available.");
+        noEfx = true;
+    }
+    else
+    {
+        getEfxFuncs();
+        setReverbEffect();
+        setOcclusionEffect();
+    }
+
+    alDistanceModel(AL_LINEAR_DISTANCE);
+    initSources();
+}
+
+void alCleanUp()
+{
+    alDeleteSources(MAX_SOURCES, sources);
+    alDeleteEffects(1, &reverbEffect);
+    alDeleteAuxiliaryEffectSlots(1, &auxEffectReverb);
+    ALCcontext* context = alcGetCurrentContext();
+    ALCdevice* device = alcGetContextsDevice(context);
+    alcMakeContextCurrent(NULL);
+    alcDestroyContext(context);
+    alcCloseDevice(device);
+}
+
+ICOMMAND(gamesound, "isii", (int *id, char *path, int *alts, int *vol),
+    formatstring(sounds[*id].soundPath, "%s", path);
+    sounds[*id].numAlts = *alts;
+    sounds[*id].soundVol = *vol;
+    loadSound(sounds[*id]);
+);
+
+void loadSoundFile(const string& filepath, ALuint buffer) // load a sound using libsndfile
+{
+    SNDFILE* file;
+    SF_INFO sfinfo;
+    short* membuf;
+    sf_count_t num_frames;
+    ALsizei num_bytes;
+
+    file = sf_open(tempformatstring("%s", filepath), SFM_READ, &sfinfo); // open the audio file and check if valid
+    if(!file) { conoutf(CON_WARN, "Could not open audio in %s: %s", filepath, sf_strerror(file)); return; }
+
+    num_frames = sfinfo.frames; // get the number of frames in the sound file
+    membuf = new short[num_frames * sfinfo.channels];
+    if(membuf == nullptr)
+    {
+        conoutf(CON_ERROR, "Could not allocate memory for the sound data.");
+        sf_close(file);
+        return;
+    }
+
+    // read the sound data into the memory buffer
+    num_frames = sf_readf_short(file, membuf, num_frames);
+    num_bytes = num_frames * sizeof(short) * sfinfo.channels;
+
+    ALenum format;
+    switch(sfinfo.channels) // determine the OpenAL format from the number of channels
+    {
+        case 1: format = AL_FORMAT_MONO16; break;
+        case 2: format = AL_FORMAT_STEREO16; break;
+        default:
+            conoutf(CON_ERROR, "Unsupported channel count in %s (%d instead of 1 or 2)", filepath, sfinfo.channels);
+            delete[] membuf;
+            sf_close(file);
+            return;
+    }
+
+    alBufferData(buffer, format, membuf, num_bytes, sfinfo.samplerate); // upload the sound data to the OpenAL buffer
+    reportSoundError("alBufferData", filepath, buffer);
+
+    delete[] membuf; // clean up and free resources
+    sf_close(file);
+}
+
+bool loadSound(Sound& s) // load a sound including his alts
+{
+    loopi(s.numAlts ? s.numAlts+1 : 1)
+    {
+        if(s.bufferId[i]) alDeleteBuffers(1, &s.bufferId[i]); // delete the buffer if it already exists.
+
+        defformatstring(fullPath, s.numAlts ? "media/sounds/%s_%d.wav" : "media/sounds/%s.wav", s.soundPath, i + 1);
+        alGenBuffers(1, &s.bufferId[i]);
+        reportSoundError("alGenBuffers", s.soundPath, s.bufferId[i]);
+        loadSoundFile(fullPath, s.bufferId[i]);
+    }
+    return true;
+}
+
+bool preloadAllSounds()
+{
+    loopi(NUMSNDS) { if (!loadSound(sounds[i])) return false; }
+    return true;
+}
+
+int findInactiveSource()
+{
+    loopi(MAX_SOURCES) { if(!sourceActive[i]) return i; }
+    return -1;
+}
+
+bool checkSoundOcclusion(const vec *soundPos)
+{
+    if(!soundPos) return false;  // HUD sounds are never occluded
+
+    vec dir = vec(camera1->o).sub(*soundPos);
+    float dist = dir.magnitude();
+    dir.mul(1/dist);
+
+    return raycube(*soundPos, dir, camera1->o.dist(*soundPos), RAY_CLIPMAT|RAY_POLY) < dist;
+}
+
+void manageSources()
+{
+    ALint state;
+    loopi(MAX_SOURCES)
+    {
+        if(sourceActive[i])
+        {
+            alGetSourcei(sources[i], AL_SOURCE_STATE, &state);
+            reportSoundError("alGetSourcei", "N/A", -1);
+            if(state == AL_STOPPED) sourceActive[i] = false;
+        }
+    }
+}
+
+int countActiveSources()
+{
+    int count = 0;
+    loopi(MAX_SOURCES) { if (sourceActive[i]) count++; }
+    return count;
+}
+
+void updateListenerPos()
+{
+    ALfloat listenerPos[] = {camera1->o.x, camera1->o.z, camera1->o.y}; // Updating listener position
+    alListenerfv(AL_POSITION, listenerPos);
+
+    camdir.normalize(); // Normalize the forward vector
+
+    vec up = vec(0, 0, 1); // no roll ATM (z-axis is up in cube engine)
+
+    ALfloat orientation[] = {               // Combine the forward and up vectors for orientation
+        camdir.x, camdir.z, camdir.y,    // Forward vector (inverted for some obscure reason)
+        up.x, up.z, up.y                    // Up vector
+    };
+
+    alListenerfv(AL_ORIENTATION, orientation); // Set the listener's orientation
+}
+
+void playSound(int soundIndex, const vec *soundPos, float maxRadius, float maxVolRadius, int flags)
+{
+    if(soundIndex < 0 || soundIndex > NUMSNDS || noSound) return; // Invalid index or openal not initialized
+
+    if(soundPos && !(flags & SOUND_NOCULL) && camera1->o.dist(*soundPos) > maxRadius + 50) return; // do not play sound to far from camera, except if flag SOUND_NOCULL
+
+    int sourceIndex = findInactiveSource();
+    if((flags & SOUND_LOWPRIORITY) && (countActiveSources() >= 0.85f * MAX_SOURCES)) return; // skip low priority sounds (distant shoots etc.) when we are close (85%) to max capacity
+    else if(sourceIndex == -1)
+    {
+        conoutf(CON_WARN, "Max sounds at once capacity reached (%d)", MAX_SOURCES); // all sources are active, skip the sound
+        return;
+    }
+
+    Sound& s = sounds[soundIndex];
+    ALuint source = sources[sourceIndex];
+
+    int altIndex = (s.numAlts > 0) ? rnd(s.numAlts+1) : 0;
+    ALuint buffer = s.bufferId[altIndex];
+
+    alSourcei(source, AL_BUFFER, buffer); // managing sounds alternatives
+    alSourcef(source, AL_GAIN, s.soundVol / 100.0f); // managing sound volume
+    float randomPitch = 0.85f + 0.3f * ((float)rand() / (float)RAND_MAX); // managing variations of pitches
+    if(!(flags & SOUND_FIXEDPITCH)) alSourcef(source, AL_PITCH, randomPitch);
+
+    if(!soundPos)
+    {
+        ALfloat sourcePos[] = {0.f, 0.f, 0.f};
+        alSourcefv(source, AL_POSITION, sourcePos);
+        alSourcei(source, AL_SOURCE_RELATIVE, AL_TRUE); // hud sound, make the source relative to the listener
+    }
+    else
+    {
+        ALfloat sourcePos[] = {soundPos->x, soundPos->z, soundPos->y};
+        alSourcefv(source, AL_POSITION, sourcePos);
+        alSourcei(source, AL_SOURCE_RELATIVE, AL_FALSE);
+
+        alSourcef(source, AL_MAX_DISTANCE, maxRadius);
+        alSourcef(source, AL_REFERENCE_DISTANCE, maxVolRadius); // Start decreasing volume immediately
+        alSourcef(source, AL_ROLLOFF_FACTOR, 1.0f); // For linear decrease over the distance
+    }
+
+    if(!noEfx) // apply efx if available
+    {
+        alSource3i(source, AL_AUXILIARY_SEND_FILTER, auxEffectReverb, 0, checkSoundOcclusion(soundPos) ? lowPassFilter : AL_FILTER_NULL);
+        reportSoundError("alSource3i-auxEffectReverb+lowPassFilter", s.soundPath, s.bufferId[altIndex]);
+
+        alSourcei(source, AL_DIRECT_FILTER, checkSoundOcclusion(soundPos) ? lowPassFilter : AL_FILTER_NULL);
+        reportSoundError("alSourcei-lowPassFilter", s.soundPath, s.bufferId[altIndex]);
+    }
+
+    alSourcePlay(source);
+    reportSoundError("alSourcePlay", s.soundPath, s.bufferId[altIndex]);
+
+    sourceActive[sourceIndex] = true;
+}
+
+
+
 
 struct soundsample
 {
@@ -135,13 +463,13 @@ stream *musicstream = NULL;
 
 void setmusicvol(int musicvol)
 {
-    if(nosound) return;
+    if(noSound) return;
     if(music) Mix_VolumeMusic((musicvol*MIX_MAX_VOLUME)/255);
 }
 
 void stopmusic()
 {
-    if(nosound) return;
+    if(noSound) return;
     DELETEA(musicfile);
     DELETEA(musicdonecmd);
     if(music)
@@ -208,11 +536,12 @@ bool initaudio()
 
 void initsound()
 {
+    return;
     SDL_version version;
     SDL_GetVersion(&version);
     if(version.major == 2 && version.minor == 0 && version.patch == 6)
     {
-        nosound = true;
+        noSound = true;
         if(sound) conoutf(CON_ERROR, "audio is broken in SDL 2.0.6");
         return;
     }
@@ -223,20 +552,20 @@ void initsound()
         if(SDL_WasInit(SDL_INIT_AUDIO)) SDL_QuitSubSystem(SDL_INIT_AUDIO);
         if(!sound || !initaudio())
         {
-            nosound = true;
+            noSound = true;
             return;
         }
     }
 
     if(Mix_OpenAudio(soundfreq, MIX_DEFAULT_FORMAT, 2, soundbufferlen)<0)
     {
-        nosound = true;
+        noSound = true;
         conoutf(CON_ERROR, "sound init failed (SDL_mixer): %s", Mix_GetError());
         return;
     }
     Mix_AllocateChannels(soundchans);
     maxchannels = soundchans;
-    nosound = false;
+    noSound = false;
 }
 
 void musicdone()
@@ -272,7 +601,7 @@ Mix_Music *loadmusic(const char *name)
 
 void startmusic(char *name, int loops = 0)
 {
-    if(nosound) return;
+    if(noSound) return;
     stopmusic();
     if(soundvol && musicvol && *name)
     {
@@ -447,7 +776,7 @@ static struct soundtype
 
     void preloadsound(int n)
     {
-        if(nosound || !configs.inrange(n)) return;
+        if(noSound || !configs.inrange(n)) return;
         soundconfig &config = configs[n];
         loopk(config.numslots) slots[config.slots+k].sample->load(dir, true);
     }
@@ -494,7 +823,7 @@ void resetchannels()
 void clear_sound()
 {
     closemumble();
-    if(nosound) return;
+    if(noSound) return;
     stopmusic();
 
     gamesounds.cleanup();
@@ -610,7 +939,7 @@ void updatesounds()
 {
     updatemumble();
 
-    if(nosound) return;
+    if(noSound) return;
     if((minimized && !minimizedsounds) || game::ispaused()) stopsounds();
     else
     {
@@ -653,7 +982,7 @@ void preloadmapsounds()
 
 int playsound(int n, const vec *loc, extentity *ent, int flags, int loops, int fade, int chanid, int radius, int expire)
 {
-    if(nosound || !soundvol || (minimized && !minimizedsounds) || n==-1) return -1;
+    if(noSound || !soundvol || (minimized && !minimizedsounds) || n==-1) return -1;
 
     soundtype &sounds = ent || flags&SND_MAP ? mapsounds : gamesounds;
     if(!sounds.configs.inrange(n)) { conoutf(CON_WARN, "unregistered sound: %d", n); return -1; }
@@ -761,7 +1090,7 @@ ICOMMAND(playsnd, "s", (const char *s), playsoundname(s));
 void resetsound()
 {
     clearchanges(CHANGE_SOUND);
-    if(!nosound)
+    if(!noSound)
     {
         gamesounds.cleanupsamples();
         mapsounds.cleanupsamples();
@@ -775,7 +1104,7 @@ void resetsound()
     }
     initsound();
     resetchannels();
-    if(nosound)
+    if(noSound)
     {
         DELETEA(musicfile);
         DELETEA(musicdonecmd);

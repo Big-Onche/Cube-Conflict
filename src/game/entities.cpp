@@ -1,5 +1,6 @@
 #include "gfx.h"
 #include "stats.h"
+#include "sound.h"
 #include "engine.h"
 
 namespace entities
@@ -191,7 +192,7 @@ namespace entities
         if(ents.inrange(tp) && ents[tp]->type == TELEPORT)
         {
             extentity &e = *ents[tp];
-            if(e.attr4 >= 0) playsound(S_TELEPORT, d==hudplayer() ? NULL : &e.o, 0, 0, 0 , 100, -1, 350);
+            if(e.attr4 >= 0) playSound(S_TELEPORT, d==hudplayer() ? NULL : &e.o, 300, 50);
 
             if(d==hudplayer()) { defformatstring(cmd, "%s %d", "screenshake", 2); int sleep = 0; loopi(16){addsleep(&sleep, cmd); sleep +=25;} }
         }
@@ -213,7 +214,7 @@ namespace entities
         if(ents.inrange(jp) && ents[jp]->type == JUMPPAD)
         {
             extentity &e = *ents[jp];
-            playsound(S_JUMPPAD, d==hudplayer() ? NULL : &e.o, 0, 0, 0 , 100, -1, 350);
+            playSound(S_JUMPPAD, d==hudplayer() ? NULL : &e.o, 150, 25);
         }
         if(local && d->clientnum >= 0)
         {

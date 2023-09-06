@@ -1,6 +1,7 @@
 #include "gfx.h"
 #include "customs.h"
 #include "stats.h"
+#include "sound.h"
 
 bool randomevent(int probability)
 {
@@ -598,7 +599,7 @@ namespace game
             gfx::resetpostfx();
             if(!cbcompensation) addpostfx("deathscreen", 1, 1, 1, 1, vec4(1, 1, 1, 1));
             d->roll = 0;
-            playsound(S_DIE_P1);
+            playSound(S_DIE_P1, NULL, 0, 0, SOUND_FIXEDPITCH);
             if(m_tutorial) execute("reset_needed_triggers");
         }
         else
@@ -606,7 +607,7 @@ namespace game
             d->move = d->strafe = 0;
             d->resetinterp();
             d->smoothmillis = 0;
-            playsound(S_DIE, &d->o, 0, 0, 0 , 100, -1, 300);
+            playSound(S_DIE, &d->o, 300, 50);
         }
     }
 
@@ -982,7 +983,7 @@ namespace game
         {
             if(material&MAT_WATER)
             {
-                playsound(S_WATER, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 350);
+                playSound(S_WATER, d==hudplayer() ? NULL : &d->o, 200, 30);
                 particle_splash(PART_WATER, 30, 120, o, 0x18181A, 10.0f+rnd(9), 500, -20);
             }
         }
@@ -990,12 +991,12 @@ namespace game
         {
             if(material&MAT_WATER)
             {
-                playsound(S_SPLASH, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 350);
+                playSound(S_SPLASH, d==hudplayer() ? NULL : &d->o, 300, 50);
                 particle_splash(PART_WATER, 40, 150, o, 0x18181A, 10.0f+rnd(12), 600, 30);
             }
             else if(material&MAT_LAVA)
             {
-                playsound(S_SPLASH_LAVA, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 350);
+                playSound(S_SPLASH, d==hudplayer() ? NULL : &d->o, 300, 50);
                 particle_splash(PART_SMOKE, 25, 100, o, 0x222222, 10.0f+rnd(5), 400, 20);
                 particle_splash(PART_FIRE_BALL, 7, 120, o, 0xCC7744, 10.00f+rnd(5), 400, 300);
                 loopi(5)regularsplash(PART_FIRESPARK, 0xFFBB55, 500, 10, 500+(rnd(500)), d->o, 1.5f+(rnd(18)/5.f), -10, true);
@@ -1004,12 +1005,12 @@ namespace game
         if (floorlevel>0)
         {
             particle_splash(map_atmo==4 && atmos ? PART_WATER : PART_SMOKE, pl->armourtype==A_ASSIST ? 12 : 10, 100, d->feetpos(), map_atmo==4 && atmos ? 0x111111 : map_atmo==9 ? 0xFFFFFF : 0x666666, 7.0f+rnd(pl->armourtype==A_ASSIST ? 10 : 5), 400, 20);
-            if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_ASSIST && pl->armour>0 ? S_JUMP_ASSIST : pl->aptitude==APT_NINJA || (pl->aptitude==APT_KAMIKAZE && pl->abilitymillis[ABILITY_2]) ? S_JUMP_NINJA : S_JUMP_BASIC, d);
+            if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_ASSIST && pl->armour ? S_JUMP_ASSIST : pl->aptitude==APT_NINJA || (pl->aptitude==APT_KAMIKAZE && pl->abilitymillis[ABILITY_2]) ? S_JUMP_NINJA : S_JUMP_BASIC, d);
         }
         else if(floorlevel<0)
         {
             particle_splash(map_atmo==4 && atmos ? PART_WATER : PART_SMOKE, pl->armourtype==A_ASSIST ? 20 : 15, 120, d->feetpos(), map_atmo==4 && atmos ? 0x131313 : map_atmo==9 ? 0xFFFFFF : 0x442211, 7.0f+rnd(pl->armourtype==A_ASSIST ? 10 : 5), 400, 20);
-            if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_ASSIST && pl->armour>0 ? S_LAND_ASSIST : S_LAND_BASIC, d);
+            if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_ASSIST && pl->armour ? S_LAND_ASSIST : S_LAND_BASIC, d);
         }
     }
 
@@ -1023,7 +1024,11 @@ namespace game
             int snd = pl->armourtype==A_ASSIST && pl->armour> 0 ? S_FOOTSTEP_ASSIST : S_FOOTSTEP;
             if(lookupmaterial(d->feetpos())==MAT_WATER) snd = S_SWIM;
             if(lastmillis-pl->lastfootstep < (d->vel.magnitude()*(aptitudes[pl->aptitude].apt_vitesse*0.35f)*(pl->crouched() || (pl->abilitymillis[ABILITY_2] && pl->aptitude==APT_ESPION) ? 2 : 1)*(d->inwater ? 2 : 1)*(pl->armourtype==A_ASSIST && pl->armour> 0 ? 2.f : 1)/d->vel.magnitude())) return;
-            else {playsound(snd, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , pl->armourtype==A_ASSIST ? 300 : 150, -1, pl->armourtype==A_ASSIST ? 600 : 300); if(pl->boostmillis[B_EPO]) if(randomevent(4)) playsound(S_EPO_RUN, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 500, -1, 1000);}
+            else
+            {
+                playSound(snd, d==hudplayer() ? NULL : &d->o, pl->armourtype==A_ASSIST ? 300 : 150, 20);
+                if(pl->boostmillis[B_EPO]) if(randomevent(4)) playsound(S_EPO_RUN, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 500, -1, 1000);
+            }
         }
         pl->lastfootstep = lastmillis;
     }
@@ -1042,13 +1047,12 @@ namespace game
         if(!d || d==player1)
         {
             addmsg(N_SOUND, "ci", d, n);
-            playsound(n);
+            playSound(n);
         }
         else
         {
-            if(d->type==ENT_PLAYER && ((gameent *)d)->ai)
-                addmsg(N_SOUND, "ci", d, n);
-            playsound(n, &d->o, 0, 0, 0 , 100, -1, 350);
+            if(d->type==ENT_PLAYER && ((gameent *)d)->ai) addmsg(N_SOUND, "ci", d, n);
+            playSound(n, &d->o, 150, 20);
         }
     }
 

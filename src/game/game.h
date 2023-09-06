@@ -243,11 +243,6 @@ static const char * const mastermodeicons[] =  { "server", "server", "serverlock
 // hardcoded sounds, defined in sounds.cfg
 enum
 {
-    // player movements sounds
-    S_JUMP_BASIC = 0, S_JUMP_NINJA, S_JUMP_ASSIST, S_LAND_BASIC, S_LAND_ASSIST, S_FOOTSTEP,     // 0-5
-    S_FOOTSTEP_ASSIST, S_SWIM, S_SPLASH, S_WATER, S_UNDERWATER, S_JUMPPAD,                      // 6-10
-    S_TELEPORT, S_SPLASH_LAVA, S_DIE_P1, S_DIE,                                                 // 11-12
-
     // close weapon shoot sounds
     S_ELECRIFLE, S_PLASMARIFLE, S_PLASMARIFLE_SFX,                                              // 13-15
     S_SMAW, S_MINIGUN, S_SPOCKGUN, S_M32, S_FLAMETHROWER,                                       // 16-20
@@ -724,9 +719,11 @@ struct gamestate
         {
             armourtype = A_WOOD;
             armour = aptitude==APT_SOLDAT ? 1000 : 750;
-            int randomarme = rnd(17);
-            gunselect = aptitude==APT_KAMIKAZE ? GUN_KAMIKAZE : aptitude==APT_NINJA ? GUN_CACNINJA : randomarme;
-            baseammo(randomarme);
+            gunselect = GUN_AK47;
+            ammo[GUN_AK47] = 500;
+            //int randomarme = rnd(17);
+            //gunselect = aptitude==APT_KAMIKAZE ? GUN_KAMIKAZE : aptitude==APT_NINJA ? GUN_CACNINJA : randomarme;
+            //baseammo(randomarme);
         }
         else if(m_fullstuff)
         {
@@ -918,7 +915,7 @@ struct gameent : dynent, gamestate
 
     void stopunderwatersound()
     {
-        if(waterchan >= 0) { stopsound(S_UNDERWATER, waterchan, 200); waterchan = -1; }
+        //if(waterchan >= 0) { stopsound(S_UNDERWATER, waterchan, 200); waterchan = -1; }
     }
 
     void respawn()

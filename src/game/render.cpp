@@ -855,11 +855,7 @@ namespace game
 
     void preloadsounds()
     {
-        for(int i = S_JUMP_BASIC; i <= S_ALIEN_D; i++)
-        {
-            loadprogress = ((float(i+1)/NUMSOUNDS)*40)+20;
-            preloadsound(i);
-        }
+
     }
 
     void preload()

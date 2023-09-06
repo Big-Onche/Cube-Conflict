@@ -3,6 +3,7 @@
 #include "engine.h"
 #include "gfx.h"
 #include "stats.h"
+#include "sound.h"
 
 int lastshoot;
 
@@ -1253,6 +1254,13 @@ namespace game
 
         looped = false;
         if(d->attacksound >= 0 && d->attacksound != sound) d->stopattacksound(d);
+        if(atk==ATK_AK47_SHOOT)
+        {
+            playSound(SND_AK47, d==hudplayer() ? NULL : &d->o, 400, 50);
+            if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 300) playSound(SND_AK47_FAR, &d->o, 700, 300);
+            if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 600) playSound(SND_FAR_SHOOT, &d->o, 1000, 600);
+        }
+
         switch(sound)
         {
             case S_FLAMETHROWER:
