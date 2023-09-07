@@ -246,9 +246,7 @@ enum
 {
 
 
-    // explosions
-    S_EXPL_MISSILE, S_EXPL_GRENADE, S_EXPL_FIREWORKS, S_EXPL_NUKE, S_EXPL_KAMIKAZE,             // 66-70
-    S_EXPL_PARMOR, S_EXPL_INWATER, S_EXPL_FAR,S_BIGEXPL_FAR, S_FIREWORKSEXPL_FAR,               // 71-75
+
 
     // bullets & projectiles
     S_IMPACTBODY, S_IMPACTWOOD, S_IMPACTIRON, S_IMPACTGOLD, S_IMPACTMAGNET,                     // 76-80
