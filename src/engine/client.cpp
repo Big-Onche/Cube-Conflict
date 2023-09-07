@@ -184,7 +184,7 @@ void disconnect(bool async, bool cleanup, bool volontaire)
 
 void trydisconnect(bool local)
 {
-    //clearAllSounds();
+    clearAllSounds();
     if(connpeer)
     {
         conoutf(GAME_LANG ? "Aborting connection attempt" : "Annulation de la connexion");

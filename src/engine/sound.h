@@ -60,11 +60,13 @@ struct Sound
 extern void alInit();
 extern void alCleanUp();
 
+extern void updateSounds();
 extern void clearMapSounds();
 extern void clearAllSounds();
 
 extern bool loadSound(Sound& s);
 extern void manageSources();
 extern void updateListenerPos();
+extern const char *getmapsoundname(int n);
 
 #endif

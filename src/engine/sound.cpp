@@ -1,7 +1,7 @@
 // sound.cpp: basic positional sound using sdl_mixer
 
 #include "engine.h"
-#include "sound.h"
+#include "game.h"
 #include <sndfile.h>
 #include <AL/efx.h>
 
@@ -23,7 +23,18 @@ Sound mapSounds[NUMMAPSNDS];
 
 ALuint sources[MAX_SOURCES];
 bool sourceActive[MAX_SOURCES] = {false};
-extentity* sourceOwners[MAX_SOURCES] = {NULL};
+
+struct EntityUnion                  // join both gameent and extentity
+{
+    enum EntityType { GAME_ENT, EXT_ENTITY } type;
+    union
+    {
+        gameent* gameEnt;
+        extentity* extEntity;
+    } data;
+};
+
+EntityUnion sourceOwners[MAX_SOURCES];
 
 LPALGENAUXILIARYEFFECTSLOTS    alGenAuxiliaryEffectSlots    = NULL;
 LPALDELETEAUXILIARYEFFECTSLOTS alDeleteAuxiliaryEffectSlots = NULL;
@@ -292,16 +303,22 @@ void manageSources()
             if(state == AL_STOPPED)
             {
                 sourceActive[i] = false;
-                sourceOwners[i] = NULL;
+                sourceOwners[i].type = EntityUnion::EntityType::GAME_ENT; // defaulting to GAME_ENT; can be either since we're just resetting
+                sourceOwners[i].data.gameEnt = nullptr;
             }
             else
             {
-                if(sourceOwners[i]) // if the source is active and the owner entity exists, update the source position
+                if(sourceOwners[i].type == EntityUnion::GAME_ENT && sourceOwners[i].data.gameEnt)
                 {
-                    vec o = sourceOwners[i]->o;
+                    vec o = sourceOwners[i].data.gameEnt->o;
                     alSource3f(sources[i], AL_POSITION, o.x, o.z, o.y);
-                    reportSoundError("alSource3f-manageSources", "N/A", -1);
                 }
+                else if(sourceOwners[i].type == EntityUnion::EXT_ENTITY && sourceOwners[i].data.extEntity)
+                {
+                    vec o = sourceOwners[i].data.extEntity->o;
+                    alSource3f(sources[i], AL_POSITION, o.x, o.z, o.y);
+                }
+                reportSoundError("alSource3f-manageSources", "N/A", -1);
             }
         }
     }
@@ -335,7 +352,7 @@ void stopMapSound(extentity *e)
 {
     loopi(MAX_SOURCES)
     {
-        if(sourceActive[i] && sourceOwners[i] == e)
+        if(sourceActive[i] && sourceOwners[i].type == EntityUnion::EXT_ENTITY && sourceOwners[i].data.extEntity == e)
         {
             ALint state;
             alGetSourcei(sources[i], AL_SOURCE_STATE, &state);
@@ -344,7 +361,10 @@ void stopMapSound(extentity *e)
             reportSoundError("alSourceStop-stopMapSound", "N/A", -1);
 
             sourceActive[i] = false;
-            sourceOwners[i] = NULL;
+
+            sourceOwners[i].type = EntityUnion::EXT_ENTITY;  // Setting to EXT_ENTITY type, you can change based on your logic
+            sourceOwners[i].data.extEntity = NULL;
+
             e->flags &= ~EF_SOUND; // clear the sound flag for the entity
 
             alGetSourcei(sources[i], AL_SOURCE_STATE, &state);
@@ -357,29 +377,12 @@ void stopMapSound(extentity *e)
 void clearMapSounds()
 {
     loopi(MAX_SOURCES)
-    {
-        if(sourceActive[i])
-        {
-            ALint state;
-            alGetSourcei(sources[i], AL_SOURCE_STATE, &state);
-
-            alSourceStop(sources[i]);
-            reportSoundError("alSourceStop-stopAllMapSounds", "N/A", -1);
-
-            if(sourceOwners[i]) // If this source has an owner, clear the EF_SOUND flag for the entity
-            {
-                sourceOwners[i]->flags &= ~EF_SOUND;
-                sourceOwners[i] = NULL;
-            }
-
-            sourceActive[i] = false;
-
-            alGetSourcei(sources[i], AL_SOURCE_STATE, &state);
-        }
+    { // checking if it is active, extentity and non-null
+        if(sourceActive[i] && sourceOwners[i].type == EntityUnion::EXT_ENTITY && sourceOwners[i].data.extEntity) stopMapSound(sourceOwners[i].data.extEntity);
     }
 }
 
-void playSound(int soundIndex, const vec *soundPos, float maxRadius, float maxVolRadius, int flags, extentity* owner)
+void playSound(int soundIndex, const vec *soundPos, float maxRadius, float maxVolRadius, int flags, gameent* owner, extentity* entity)
 {
     if(soundIndex < 0 || soundIndex > NUMSNDS || noSound) return; // Invalid index or openal not initialized
 
@@ -392,10 +395,16 @@ void playSound(int soundIndex, const vec *soundPos, float maxRadius, float maxVo
         conoutf(CON_WARN, "Max sounds at once capacity reached (%d)", MAX_SOURCES); // all sources are active, skip the sound
         return;
     }
-    else
+
+    sourceActive[sourceIndex] = true;   // now the source is set to active
+
+    if(owner || entity) //link the sound to an extentity or a gameent
     {
-        sourceActive[sourceIndex] = true;
-        sourceOwners[sourceIndex] = owner;
+        EntityUnion sourceEntity;
+        sourceEntity.type = owner ? EntityUnion::GAME_ENT : EntityUnion::EXT_ENTITY;
+        sourceEntity.data.gameEnt = owner ? owner : NULL;
+        sourceEntity.data.extEntity = entity ? entity : NULL;
+        sourceOwners[sourceIndex] = sourceEntity;
     }
 
     Sound& s = (flags & SND_MAPSOUND) ? mapSounds[soundIndex] : gameSounds[soundIndex];
@@ -446,8 +455,6 @@ void playSound(int soundIndex, const vec *soundPos, float maxRadius, float maxVo
 
     alSourcePlay(source);
     reportSoundError("alSourcePlay", s.soundPath, s.bufferId[altIndex]);
-
-    sourceActive[sourceIndex] = true;
 }
 
 void checkMapSounds()
@@ -463,7 +470,7 @@ void checkMapSounds()
         {
             if(!(e.flags & EF_SOUND))
             {
-                playSound(e.attr1, &e.o, e.attr2, e.attr3, SND_LOOPED|SND_NOOCCLUSION|SND_MAPSOUND|SND_FIXEDPITCH, &e);
+                playSound(e.attr1, &e.o, e.attr2, e.attr3, SND_LOOPED|SND_NOOCCLUSION|SND_MAPSOUND|SND_FIXEDPITCH, NULL, &e);
                 e.flags |= EF_SOUND;  // set the flag to indicate that the sound is currently playing
             }
         }

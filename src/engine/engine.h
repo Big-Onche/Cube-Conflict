@@ -754,16 +754,6 @@ extern void clearchanges(int type);
 extern void menuprocess();
 extern void clearmainmenu();
 
-// sound
-extern void updateSounds();
-extern void preloadmapsounds();
-
-extern void initmumble();
-extern void closemumble();
-extern void updatemumble();
-
-extern void musicmanager(int track);
-extern void stopmusic();
 // grass
 extern void loadgrassshaders();
 extern void generategrass();
