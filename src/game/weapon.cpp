@@ -36,7 +36,7 @@ namespace game
     ICOMMAND(launchgrenade, "", (), // shortcut for grenade attack, then select old gun
     {
         if(!isconnected() || m_identique) return;
-        if(!player1->ammo[GUN_M32]) playsound(S_NOAMMO, NULL);
+        if(!player1->ammo[GUN_M32])   ; //playsound(S_NOAMMO, NULL);
         else
         {
             gunselect(GUN_M32, player1, false, true);
@@ -91,7 +91,7 @@ namespace game
             if(force || player1->ammo[gun]) break;
         }
         if(gun != player1->gunselect) {gunselect(gun, player1); gfx::weapposup=40; }
-        else playsound(S_NOAMMO);
+        //else //playsound(S_NOAMMO);
     }
     ICOMMAND(nextweapon, "ii", (int *dir, int *force), nextweapon(*dir, *force!=0));
 
@@ -111,7 +111,7 @@ namespace game
         int gun = getweapon(name);
         if(player1->state!=CS_ALIVE || !validgun(gun) || gun==GUN_ASSISTXPL) return;
         if(force || player1->ammo[gun]) gunselect(gun, player1);
-        else playsound(S_NOAMMO);
+        //else //playsound(S_NOAMMO);
     }
     ICOMMAND(setweapon, "si", (char *name, int *force), setweapon(name, *force!=0));
 
@@ -129,7 +129,7 @@ namespace game
                 return;
             }
         }
-        playsound(S_NOAMMO);
+        //playsound(S_NOAMMO);
     }
     ICOMMAND(cycleweapon, "V", (tagval *args, int numargs),
     {
@@ -165,7 +165,7 @@ namespace game
                 if(validgun(gun) && gun != player1->gunselect && player1->ammo[gun] && gun!=GUN_ASSISTXPL) { gunselect(gun, player1); return; }
             } else { weaponswitch(player1); return; }
         }
-        playsound(S_NOAMMO);
+        //playsound(S_NOAMMO);
     });
 
     void offsetray(const vec &from, const vec &to, int spread, int nozoomspread, float range, vec &dest, gameent *d)
@@ -285,10 +285,10 @@ namespace game
         {
             switch(b->bouncetype)
             {
-                case BNC_DOUILLES: case BNC_DOUILLESUZI: playsound(S_DOUILLE, &b->o, 0, 0, 0 , 50, -1, 150); break;
-                case BNC_BIGDOUILLES: playsound(S_BIGDOUILLE, &b->o, 0, 0, 0 , 50, -1, 150); break;
-                case BNC_CARTOUCHES: playsound(S_CARTOUCHE, &b->o, 0, 0, 0 , 50, -1, 150); break;
-                case BNC_GRENADE: playsound(S_RGRENADE, &b->o, 0, 0, 0 , 100, -1, 350); break;
+                case BNC_DOUILLES: case BNC_DOUILLESUZI: //playsound(S_DOUILLE, &b->o, 0, 0, 0 , 50, -1, 150); break;
+                case BNC_BIGDOUILLES: //playsound(S_BIGDOUILLE, &b->o, 0, 0, 0 , 50, -1, 150); break;
+                case BNC_CARTOUCHES: //playsound(S_CARTOUCHE, &b->o, 0, 0, 0 , 50, -1, 150); break;
+                case BNC_GRENADE: //playsound(S_RGRENADE, &b->o, 0, 0, 0 , 100, -1, 350); break;
                 case BNC_LIGHT: b->lifetime=0;
             }
         }
@@ -588,7 +588,7 @@ namespace game
         if(at==player1 && d!=at)
         {
             extern int hitsound;
-            if(hitsound && lasthit != lastmillis) playsound(S_HIT);
+            //if(hitsound && lasthit != lastmillis) //playsound(S_HIT);
             lasthit = lastmillis;
         }
 
@@ -648,17 +648,17 @@ namespace game
                     damageblend(damage);
                     damagecompass(damage, at ? at->o : f->o);
 
-                    if(player1->aptitude==APT_PHYSICIEN && player1->abilitymillis[ABILITY_1] && player1->armour) {playsound(S_PHY_1); playsound(S_PHY_1_WOOD+f->armourtype);}
-                    else if(player1->armour && atk!=ATK_LANCEFLAMMES_SHOOT && randomevent(2)) playsound(S_IMPACTWOOD+f->armourtype);
-                    else playsound(S_IMPACTBODY);
+                    if(player1->aptitude==APT_PHYSICIEN && player1->abilitymillis[ABILITY_1] && player1->armour); //{//playsound(S_PHY_1); //playsound(S_PHY_1_WOOD+f->armourtype);}
+                    else if(player1->armour && atk!=ATK_LANCEFLAMMES_SHOOT && randomevent(2)) playSound(S_IMPACTWOOD+f->armourtype, NULL, 250, 50, SND_LOWPRIORITY);
+                    else playSound(S_IMPACTBODY);
                 }
             }
             else
             {
                 if(randomevent(2))
                 {
-                    if(f->aptitude==APT_PHYSICIEN && f->abilitymillis[ABILITY_1] && f->armour) {playsound(S_PHY_1, &f->o, 0, 0, 0 , 100, -1, 200); playsound(S_PHY_1_WOOD+f->armourtype, &f->o, 0, 0, 0 , 100, -1, 200);}
-                    else if(f->armour && atk!=ATK_LANCEFLAMMES_SHOOT) playsound(S_IMPACTWOOD+f->armourtype, &f->o, 0, 0, 0 , 100, -1, 200);
+                    if(f->aptitude==APT_PHYSICIEN && f->abilitymillis[ABILITY_1] && f->armour); //{//playsound(S_PHY_1, &f->o, 0, 0, 0 , 100, -1, 200); //playsound(S_PHY_1_WOOD+f->armourtype, &f->o, 0, 0, 0 , 100, -1, 200);}
+                    else if(f->armour && atk!=ATK_LANCEFLAMMES_SHOOT) playSound(S_IMPACTWOOD+f->armourtype, &f->o, 250, 50, SND_LOWPRIORITY);
                 }
             }
         }
@@ -707,22 +707,22 @@ namespace game
     {
         vec debrisvel = owner->o==v ? vec(0, 0, 0) : vec(owner->o).sub(v).normalize(), debrisorigin(v);
         debrisorigin = vec(v).sub(vec(vel).mul(10)).add(vec(5-rnd(10), 5-rnd(10), 5-rnd(10)));
-        vec soundloc = vec(v).sub(vec(vel).mul(20));
+        //vec soundloc = vec(v).sub(vec(vel).mul(20));
 
         switch(atk)
         {
             case ATK_PULSE_SHOOT:
             case ATK_GRAP1_SHOOT:
             case ATK_SPOCKGUN_SHOOT:
-                playsound(atk==ATK_GRAP1_SHOOT ? S_IMPACTGRAP1 : atk==ATK_PULSE_SHOOT ? S_IMPACTPLASMA : S_IMPACTSPOCK, &v, 0, 0, 0 , 75, -1, 225);
+                playSound(atk==ATK_GRAP1_SHOOT ? S_IMPACTGRAP1 : atk==ATK_PULSE_SHOOT ? S_IMPACTPLASMA : S_IMPACTSPOCK, &v, 250, 50, SND_LOWPRIORITY);
                 gfx::projgunexplosion(owner, v, vel, safe, atk);
                 break;
 
             case ATK_SMAW_SHOOT:
             case ATK_ROQUETTES_SHOOT:
-                playSound(S_EXPL_MISSILE, &soundloc, 400, 150);
-                if(lookupmaterial(v)==MAT_WATER) playSound(S_EXPL_INWATER, &soundloc, 300, 100);
-                if(camera1->o.dist(v) >= 300) playSound(S_EXPL_FAR, &soundloc, 1500, 400, SND_LOWPRIORITY);
+                playSound(S_EXPL_MISSILE, &v, 400, 150);
+                if(lookupmaterial(v)==MAT_WATER) playSound(S_EXPL_INWATER, &v, 300, 100);
+                if(camera1->o.dist(v) >= 300) playSound(S_EXPL_FAR, &v, 1500, 400, SND_LOWPRIORITY);
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
                 gfx::projexplosion(owner, v, vel, safe, atk);
                 startshake(v, 150, atk);
@@ -730,8 +730,8 @@ namespace game
 
             case ATK_KAMIKAZE_SHOOT:
             case ATK_ASSISTXPL_SHOOT:
-                if(camera1->o.dist(v) >= 300) playSound(S_BIGEXPL_FAR, &soundloc, 2000, 400);
-                if((lookupmaterial(v)==MAT_WATER)) playSound(S_EXPL_INWATER, &soundloc, 300, 100);
+                if(camera1->o.dist(v) >= 300) playSound(S_BIGEXPL_FAR, &v, 2000, 400);
+                if((lookupmaterial(v)==MAT_WATER)) playSound(S_EXPL_INWATER, &v, 300, 100);
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
                 if(atk==ATK_ASSISTXPL_SHOOT) loopi(10+rnd(5)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_ROBOT);
                 gfx::projexplosion(owner, v, vel, safe, atk);
@@ -745,9 +745,9 @@ namespace game
                 break;
 
             case ATK_ARTIFICE_SHOOT:
-                playSound(S_EXPL_FIREWORKS, &soundloc, 300, 100);
-                if(lookupmaterial(v)==MAT_WATER) playSound(S_EXPL_INWATER, &soundloc, 300, 100);
-                if(camera1->o.dist(v) >= 300) playSound(S_FIREWORKSEXPL_FAR, &soundloc, 2000, 400);
+                playSound(S_EXPL_FIREWORKS, &v, 300, 100);
+                if(lookupmaterial(v)==MAT_WATER) playSound(S_EXPL_INWATER, &v, 300, 100);
+                if(camera1->o.dist(v) >= 300) playSound(S_FIREWORKSEXPL_FAR, &v, 2000, 400);
                 gfx::projexplosion(owner, v, vel, safe, atk);
                 startshake(v, 100, atk);
                 break;
@@ -767,7 +767,7 @@ namespace game
             case ATK_FAMAS_SHOOT:
             case ATK_GLOCK_SHOOT:
             case ATK_ARBALETE_SHOOT:
-                if(!(lookupmaterial(v)==MAT_WATER)) playsound(atk==ATK_ARBALETE_SHOOT ? S_IMPACTARROW : S_LITTLERICOCHET, &v, 0, 0, 0 , 100, -1, 250);
+                if(!(lookupmaterial(v)==MAT_WATER)) playSound(atk==ATK_ARBALETE_SHOOT ? S_IMPACTARROW : S_LITTLERICOCHET, &v, 250, 50, SND_LOWPRIORITY);
                 gfx::projgunhit(owner, v, vel, safe, atk);
                 break;
 
@@ -778,8 +778,8 @@ namespace game
             {
                 if(!(lookupmaterial(v)==MAT_WATER))
                 {
-                    playsound(S_IMPACTLOURDLOIN, &v, 0, 0, 0 , 500, -1, 1000);
-                    playsound(S_BIGRICOCHET, &v, 0, 0, 0 , 100, -1, 300);
+                    playSound(S_IMPACTLOURDLOIN, &v, 1000, 500, SND_LOWPRIORITY);
+                    playSound(S_BIGRICOCHET, &v, 350, 50, SND_LOWPRIORITY);
                 }
                 gfx::projgunhit(owner, v, vel, safe, atk);
             }
@@ -951,7 +951,7 @@ namespace game
                     {
                         p.inwater = true;
                         particle_splash(PART_WATER, 15, 100, v, 0x28282A, 0.75f, 50, -300, 1, gfx::champicolor());
-                        playsound(S_IMPACTWATER, &v, NULL, 0, 0 , 150, -1, 250);
+                        playSound(S_IMPACTWATER, &v, 250, 50, SND_LOWPRIORITY);
                     }
 
                     switch(p.atk)
@@ -1025,7 +1025,7 @@ namespace game
                             canplaysound = true;
                             break;
                     }
-                    if(canplaysound) p.projchan = playsound(p.projsound, &pos, NULL, 0, -1, 128, p.projchan, p.atk==ATK_NUKE_SHOOT || p.atk==ATK_ROQUETTES_SHOOT || p.atk==ATK_ARTIFICE_SHOOT ? 500 : 375);
+                    if(canplaysound)    ;//p.projchan = //playsound(p.projsound, &pos, NULL, 0, -1, 128, p.projchan, p.atk==ATK_NUKE_SHOOT || p.atk==ATK_ROQUETTES_SHOOT || p.atk==ATK_ARTIFICE_SHOOT ? 500 : 375);
                 }
             }
             if(exploded)
@@ -1040,25 +1040,6 @@ namespace game
         }
     }
 
-    void sound_nearmiss(int sound, const vec &s, const vec &e)
-    {
-        vec v;
-        float d = e.dist(s, v);
-        int steps = clamp(int(d*2), 1, 2048);
-        v.div(steps);
-        vec p = s;
-        bool soundused = false;
-        loopi(steps)
-        {
-            p.add(v);
-            if(camera1->o.dist(p) <= 32 && !soundused)
-            {
-                playsound(sound, &p, 0, 0, 0 , 100, -1, 250);
-                soundused = true;
-            }
-        }
-    }
-
     bool looped;
 
     void shoteffects(int atk, const vec &from, const vec &to, gameent *d, bool local, int id, int prevaction)     // create visual effect from a shot
@@ -1068,7 +1049,7 @@ namespace game
         int gun = attacks[atk].gun;
         int sound = attacks[atk].sound;
         //int soundwater = attacks[atk]].soundwater;
-        if(player1->abilitymillis[ABILITY_2] && d==player1 && player1->aptitude==APT_MAGICIEN) playsound(S_WIZ_2);
+        if(player1->abilitymillis[ABILITY_2] && d==player1 && player1->aptitude==APT_MAGICIEN)    ;//playsound(S_WIZ_2);
         if(d->abilitymillis[ABILITY_3] && d->aptitude==APT_PRETRE)adddynlight(d->muzzle, 6, vec(1.5f, 1.5f, 0.0f), 80, 40, L_NOSHADOW|L_VOLUMETRIC|DL_FLASH);
 
         int movefactor = game::player1->aptitude==APT_SOLDAT ? 2 : 1;
@@ -1083,8 +1064,8 @@ namespace game
                 break;
 
             case ATK_RAIL_SHOOT:
-                playsound(S_IMPACTELEC, &to, 0, 0, 0 , 100, -1, 250);
-                if(d!=hudplayer()) sound_nearmiss(S_FLYBYELEC, from, to);
+                playSound(S_IMPACTELEC, &to, 250, 50, SND_LOWPRIORITY);
+                if(d!=hudplayer()) soundNearmiss(S_FLYBYELEC, from, to);
                 gfx::shootgfx(from, to, d, atk);
                 gfx::instantrayhit(from, to, d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle, atk);
                 break;
@@ -1113,7 +1094,7 @@ namespace game
                 spawnbouncer(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? d->o : d->balles, vec(0, 0, 0), d, atk==ATK_GAU8_SHOOT ? BNC_BIGDOUILLES : BNC_DOUILLES);
                 gfx::shootgfx(from, to, d, atk);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
-                if(d!=hudplayer()) sound_nearmiss(atk==ATK_GAU8_SHOOT ? S_BIGBULLETFLYBY : S_BULLETFLYBY, from, to);
+                if(d!=hudplayer()) soundNearmiss(atk==ATK_GAU8_SHOOT ? S_BIGBULLETFLYBY : S_BULLETFLYBY, from, to);
                 if(d==player1) mousemove(atk==ATK_MINIGUN_SHOOT ? (-7+rnd(15))/movefactor : (-3+rnd(7))/movefactor, atk==ATK_MINIGUN_SHOOT ? (-7+rnd(15))/movefactor : (-3+rnd(7))/movefactor, player1->abilitymillis[ABILITY_2] && player1->aptitude==APT_MAGICIEN ? true : false);
                 break;
             case ATK_MOSSBERG_SHOOT:
@@ -1128,7 +1109,7 @@ namespace game
                     adddynlight(hudgunorigin(gun, d->o, to, d), 75, vec(1.25f, 0.25f, 0.f), 40, 2, DL_FLASH, 0, vec(1.25f, 0.25f, 0.f), d);
                     loopi(attacks[atk].rays)
                     {
-                        if(!(lookupmaterial(rays[i])==MAT_WATER)) playsound(S_LITTLERICOCHET, &rays[i], 0, 0, 0 , 100, -1, 250);
+                        //if(!(lookupmaterial(rays[i])==MAT_WATER)) //playsound(S_LITTLERICOCHET, &rays[i], 0, 0, 0 , 100, -1, 250);
                         particle_splash(PART_SPARK, 9, 60, rays[i], d->boostmillis[B_ROIDS] ? 0xFF2222 : 0xAA1100, 0.4, 150, 100, 0, gfx::champicolor());
                         particle_splash(PART_SMOKE, 3, 500+rnd(300), rays[i], 0x797979, 0.2f, 35, 300, 2, gfx::champicolor());
                         particle_splash(PART_SMOKE, 3, 275+rnd(275), rays[i], 0x553915, 0.15f, 35, 300, 2, gfx::champicolor());
@@ -1136,7 +1117,7 @@ namespace game
                         origin.add(vec(0.2f-(rnd(5)/10.f), 0.2f-(rnd(5)/10.f), 0.2f-(rnd(5)/10.f)));
                         particle_flare(origin, rays[i], 30, PART_F_SHOTGUN, d->boostmillis[B_ROIDS] ? 0xFF2222 : atk==ATK_HYDRA_SHOOT ? 0xFF8800 : 0xFFFF22, atk==ATK_HYDRA_SHOOT ? 0.15f : 0.2f, d, gfx::champicolor());
                         gfx::instantrayhit(from, rays[i], d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle, atk);
-                        if(d!=hudplayer()) sound_nearmiss(S_BULLETFLYBY, from, rays[i]);
+                        if(d!=hudplayer()) soundNearmiss(S_BULLETFLYBY, from, rays[i], 512);
                     }
                 }
                 break;
@@ -1156,16 +1137,16 @@ namespace game
                     loopi(attacks[atk].rays)
                     {
                         newprojectile(from, rays[i], attacks[atk].projspeed, local, id, d, atk);
-                        if(d!=hudplayer()) sound_nearmiss(S_BULLETFLYBY, from, rays[i]);
+                        if(d!=hudplayer()) soundNearmiss(S_BULLETFLYBY, from, rays[i], 512);
                     }
                 }
                 else newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
-                if(d!=hudplayer()) sound_nearmiss(S_BIGBULLETFLYBY, from, to);
+                if(d!=hudplayer()) soundNearmiss(S_BIGBULLETFLYBY, from, to);
                 break;
             case ATK_ARBALETE_SHOOT:
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
                 if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK,  8, 500, d->muzzle, 0xFF2222, 1.0f,  50,   200, 0, gfx::champicolor());
-                if(d!=hudplayer()) sound_nearmiss(S_FLYBYARROW, from, to);
+                if(d!=hudplayer()) soundNearmiss(S_FLYBYARROW, from, to);
                 break;
             case ATK_UZI_SHOOT:
             case ATK_FAMAS_SHOOT:
@@ -1178,7 +1159,7 @@ namespace game
                 particle_splash(PART_SPARK, d==hudplayer() ? 3 : 5, 35, d->muzzle, 0xFF4400, 0.35f, 300, 500, 0, gfx::champicolor());
                 adddynlight(hudgunorigin(gun, d->o, to, d), 60, vec(1.25f, 0.75f, 0.3f), 30, 2, DL_FLASH, 0, vec(1.25f, 0.75f, 0.3f), d);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
-                if(d!=hudplayer()) sound_nearmiss(S_BULLETFLYBY, from, to);
+                if(d!=hudplayer()) soundNearmiss(S_BULLETFLYBY, from, to);
                 if(d==player1) {if(atk!=ATK_GLOCK_SHOOT) mousemove((-3+rnd(7))/movefactor, (-3+rnd(7))/movefactor, player1->abilitymillis[ABILITY_2] && player1->aptitude==APT_MAGICIEN ? true : false);}
                 break;
             case ATK_LANCEFLAMMES_SHOOT:
@@ -1202,7 +1183,7 @@ namespace game
                             particle_flying_flare(origin, iflames, 1100, PART_SMOKE, 0x111111, (15.f+rnd(18))/3.f, -20, 15+rnd(10), gfx::champicolor());
                             adddynlight(hudgunorigin(gun, d->o, iflames, d), 50, vec(0.40f, 0.2f, 0.1f), 100, 100, L_NODYNSHADOW, 10, vec(0.50f, 0, 0), d);
                             gfx::instantrayhit(from, rays[i], d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle, atk);
-                            switch(rnd(2)){case 0: if(d!=hudplayer()) sound_nearmiss(S_FLYBYFLAME, from, rays[i]);}
+                            switch(rnd(2)){case 0: if(d!=hudplayer()) soundNearmiss(S_FLYBYFLAME, from, rays[i]);}
                     }
                 }
                 if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK,  3, 500, d->muzzle, 0xFF2222, 1.0f, 50, 200, 0, gfx::champicolor());
@@ -1247,10 +1228,10 @@ namespace game
 
         if(d->boostmillis[B_ROIDS] && randomevent(attacks[atk].specialsounddelay))
         {
-            playsound(S_ROIDS_SHOOT, d==hudplayer() ? NULL : &d->o, NULL, 0, 0 , 300, -1, 500);
-            if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 400 && d!=player1) playsound(S_ROIDS_SHOOT_FAR, &d->o, NULL, 0, 0 , 600, -1, 800);
+            //playsound(S_ROIDS_SHOOT, d==hudplayer() ? NULL : &d->o, NULL, 0, 0 , 300, -1, 500);
+            //if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 400 && d!=player1) //playsound(S_ROIDS_SHOOT_FAR, &d->o, NULL, 0, 0 , 600, -1, 800);
         }
-        else if(d->boostmillis[B_RAGE] && randomevent(attacks[atk].specialsounddelay)) playsound(S_RAGETIR, d==hudplayer() ? NULL : &d->o, NULL, 0, 0 , 300, -1, 500);
+        else if(d->boostmillis[B_RAGE] && randomevent(attacks[atk].specialsounddelay))    ; //playsound(S_RAGETIR, d==hudplayer() ? NULL : &d->o, NULL, 0, 0 , 300, -1, 500);
 
         looped = false;
         if(d->attacksound >= 0 && d->attacksound != sound) d->stopattacksound(d);
@@ -1262,7 +1243,7 @@ namespace game
             case S_PLASMARIFLE_SFX:
                 if(d->attacksound >= 0) looped = true;
                 d->attacksound = sound;
-                d->attackchan = playsound(sound, d==hudplayer() ? NULL : &d->o, NULL, 0, -1, atk==ATK_GAU8_SHOOT ? 75 : 50, d->attackchan, atk==ATK_GAU8_SHOOT ? 600 : 350);
+                //d->attackchan = //playsound(sound, d==hudplayer() ? NULL : &d->o, NULL, 0, -1, atk==ATK_GAU8_SHOOT ? 75 : 50, d->attackchan, atk==ATK_GAU8_SHOOT ? 600 : 350);
                 return;
             default:
                 bool incraseDist = atk==ATK_ASSISTXPL_SHOOT || atk==ATK_KAMIKAZE_SHOOT;
@@ -1636,6 +1617,7 @@ namespace game
 
     void checkdansesound(gameent *d, bool local)
     {
+        /*
         if(!packtaunt) return;
         if(d->clientnum >= 0 && d->state == CS_ALIVE && lastmillis - d->lasttaunt < 5000)
         {
@@ -1643,15 +1625,18 @@ namespace game
             if(d->dansechan < 0) d->dansesound = -1;
         }
         else d->stopdansesound(d);
+        */
     }
 
     void checkabiounds(gameent *d, bool local)
     {
+        /*
         if(d->clientnum >= 0 && d->state == CS_ALIVE)
         {
             loopi(3) if(d->abisnd[i] >= 0) {d->abichan[i] = playsound(d->abisnd[i], local ? NULL : &d->o, NULL, 0, -1, -1, d->abichan[i], 300); if(d->abichan[i] < 0) d->abisnd[i] = -1;}
         }
         else d->stopabisound(d);
+        */
     }
 
     void removeweapons(gameent *d)

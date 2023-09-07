@@ -4,6 +4,8 @@
 #include "game.h"
 #include <sndfile.h>
 #include <AL/efx.h>
+#include <AL/alext.h>
+#include <AL/efx-presets.h>
 
 bool foundDevice = false;
 bool noSound = false;
@@ -81,28 +83,38 @@ void reportSoundError(const char* func, const char* filepath, int buffer)
 ALuint reverbEffect;
 ALuint auxEffectReverb;
 
-void setReverbEffect()
+void applyReverbPreset(ALuint auxEffectSlot, const EFXEAXREVERBPROPERTIES& preset)
 {
     alGenAuxiliaryEffectSlots(1, &auxEffectReverb);
-    reportSoundError("alGenAuxiliaryEffectSlots-auxEffectReverb", "N/A", -1);
-
     alGenEffects(1, &reverbEffect);
+
     alEffecti(reverbEffect, AL_EFFECT_TYPE, AL_EFFECT_REVERB);
-    alEffectf(reverbEffect, AL_REVERB_DENSITY, 1.0f);
-    alEffectf(reverbEffect, AL_REVERB_DIFFUSION, 1.0f);
-    alEffectf(reverbEffect, AL_REVERB_GAIN, 0.5f);
-    alEffectf(reverbEffect, AL_REVERB_GAINHF, 0.9f);
-    alEffectf(reverbEffect, AL_REVERB_DECAY_TIME, 1.5f);
-    alEffectf(reverbEffect, AL_REVERB_DECAY_HFRATIO, 0.5f);
-    alEffectf(reverbEffect, AL_REVERB_REFLECTIONS_GAIN, 0.5f);
-    alEffectf(reverbEffect, AL_REVERB_LATE_REVERB_GAIN, 1.0f);
-    alEffectf(reverbEffect, AL_REVERB_LATE_REVERB_DELAY, 0.15f);
-    alEffectf(reverbEffect, AL_REVERB_AIR_ABSORPTION_GAINHF, 1.0f);
-    alEffectf(reverbEffect, AL_REVERB_ROOM_ROLLOFF_FACTOR, 0.0f);
+
+    alEffectf(reverbEffect, AL_REVERB_DENSITY, preset.flDensity);
+    alEffectf(reverbEffect, AL_REVERB_DIFFUSION, preset.flDiffusion); conoutf("%f, %f, %f", preset.flDensity, preset.flDiffusion, preset.flDecayTime);
+    alEffectf(reverbEffect, AL_REVERB_GAIN, preset.flGain);
+    alEffectf(reverbEffect, AL_REVERB_GAINHF, preset.flGainHF);
+    alEffectf(reverbEffect, AL_REVERB_DECAY_TIME, preset.flDecayTime);
+    alEffectf(reverbEffect, AL_REVERB_DECAY_HFRATIO, preset.flDecayHFRatio);
+    alEffectf(reverbEffect, AL_REVERB_REFLECTIONS_GAIN, preset.flReflectionsGain);
+    alEffectf(reverbEffect, AL_REVERB_LATE_REVERB_GAIN, preset.flLateReverbGain);
+    alEffectf(reverbEffect, AL_REVERB_LATE_REVERB_DELAY, preset.flLateReverbDelay);
+    alEffectf(reverbEffect, AL_REVERB_AIR_ABSORPTION_GAINHF, preset.flAirAbsorptionGainHF);
+    alEffectf(reverbEffect, AL_REVERB_ROOM_ROLLOFF_FACTOR, preset.flRoomRolloffFactor);
     alEffecti(reverbEffect, AL_REVERB_DECAY_HFLIMIT, AL_TRUE);
 
     alAuxiliaryEffectSloti(auxEffectReverb, AL_EFFECTSLOT_EFFECT, reverbEffect);
-    reportSoundError("alAuxiliaryEffectSloti-reverbEffect", "N/A", -1);
+    reportSoundError("applyReverbPreset", "N/A", -1);
+}
+
+void setReverbEffect()
+{
+    applyReverbPreset(auxEffectReverb, EFX_REVERB_PRESET_FACTORY_MEDIUMROOM);
+
+    //EFX_REVERB_PRESET_FACTORY_MEDIUMROOM
+    //EFX_REVERB_PRESET_MOUNTAINS //EFX_REVERB_PRESET_VALLEY
+    //EFX_REVERB_PRESET_CAVE
+    //EFX_REVERB_PRESET_SPACE
 }
 
 ALuint occlusionFilter;
@@ -132,6 +144,7 @@ void alInit()
 
     ALCint attributes[] = {
         ALC_FREQUENCY, 44100,
+        ALC_HRTF_SOFT, ALC_FALSE,
         0
     };
 
@@ -191,7 +204,7 @@ void loadSoundFile(const string& filepath, ALuint buffer) // load a sound using 
     ALsizei num_bytes;
 
     file = sf_open(tempformatstring("%s", filepath), SFM_READ, &sfinfo); // open the audio file and check if valid
-    if(!file) { conoutf(CON_WARN, "Could not open audio in %s: %s", filepath, sf_strerror(file)); return; }
+    if(!file) { conoutf(CON_WARN, "Could not load audio file: %s", filepath); return; }
 
     num_frames = sfinfo.frames; // get the number of frames in the sound file
     membuf = new short[num_frames * sfinfo.channels];
@@ -382,6 +395,26 @@ void clearMapSounds()
     }
 }
 
+void soundNearmiss(int sound, const vec &from, const vec &to, int precision)
+{
+    vec v;
+    float d = to.dist(from, v);
+    int steps = clamp(int(d*2), 1, 2048);
+    v.div(steps);
+    vec p = from;
+    bool soundPlayed = false;
+    loopi(steps)
+    {
+        p.add(v);
+        if(camera1->o.dist(p) <= 64 && !soundPlayed)
+        {
+            playSound(sound, &from, 300, 50, SND_LOWPRIORITY);
+            soundPlayed = true;
+            break;
+        }
+    }
+}
+
 void playSound(int soundIndex, const vec *soundPos, float maxRadius, float maxVolRadius, int flags, gameent* owner, extentity* entity)
 {
     if(soundIndex < 0 || soundIndex > NUMSNDS || noSound) return; // Invalid index or openal not initialized
@@ -390,7 +423,7 @@ void playSound(int soundIndex, const vec *soundPos, float maxRadius, float maxVo
 
     int sourceIndex = findInactiveSource();
     if((flags & SND_LOWPRIORITY) && (countActiveSources() >= 0.80f * MAX_SOURCES)) return; // skip low priority sounds (distant shoots etc.) when we are close (85%) to max capacity
-    else if(sourceIndex == -1)
+    if(sourceIndex == -1)
     {
         conoutf(CON_WARN, "Max sounds at once capacity reached (%d)", MAX_SOURCES); // all sources are active, skip the sound
         return;
