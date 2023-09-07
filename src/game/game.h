@@ -852,10 +852,10 @@ struct gameent : dynent, gamestate
         freeeditinfo(edit);
         freeeditinfo(edit);
 
-        if(attackchan >= 0) stopsound(attacksound, attackchan);
-        if(dansesound >= 0) stopsound(dansesound, dansechan);
-        loopi(3) if(abisnd[i] >= 0) stopsound(abisnd[i], abisnd[i]);
-        if(alarmchan >= 0) stopsound(S_ASSISTALARM, alarmchan);
+        //if(attackchan >= 0) stopsound(attacksound, attackchan);
+       // if(dansesound >= 0) stopsound(dansesound, dansechan);
+        //loopi(3) if(abisnd[i] >= 0) stopsound(abisnd[i], abisnd[i]);
+        //if(alarmchan >= 0) stopsound(S_ASSISTALARM, alarmchan);
         if(ai) delete ai;
     }
 
@@ -869,22 +869,22 @@ struct gameent : dynent, gamestate
 
     void stopattacksound(gameent *d)
     {
-        if(attackchan >= 0) { stopsound(attacksound, attackchan, d->gunselect==GUN_S_GAU8 ? 150 : 250); attacksound = attackchan = -1; }
+        //if(attackchan >= 0) { stopsound(attacksound, attackchan, d->gunselect==GUN_S_GAU8 ? 150 : 250); attacksound = attackchan = -1; }
     }
 
     void stopdansesound(gameent *d)
     {
-        if(dansechan >= 0) { stopsound(S_CGCORTEX+(d->customdanse), dansechan, 50); dansesound = dansechan = -1; }
+        //if(dansechan >= 0) { stopsound(S_CGCORTEX+(d->customdanse), dansechan, 50); dansesound = dansechan = -1; }
     }
 
     void stopabisound(gameent *d)
     {
-        loopi(3) if(abichan[i] >= 0) { stopsound(abisnd[i], abichan[i], 50); abisnd[i] = abichan[i] = -1; }
+        //loopi(3) if(abichan[i] >= 0) { stopsound(abisnd[i], abichan[i], 50); abisnd[i] = abichan[i] = -1; }
     }
 
     void stoppowerarmorsound()
     {
-        if(alarmchan >= 0) { stopsound(S_ASSISTALARM, alarmchan, 100); alarmchan = -1; }
+        //if(alarmchan >= 0) { stopsound(S_ASSISTALARM, alarmchan, 100); alarmchan = -1; }
     }
 
     void stopunderwatersound()

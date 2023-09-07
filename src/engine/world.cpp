@@ -1444,7 +1444,6 @@ void splitocta(cube *c, int size)
 void resetmap()
 {
     clearoverrides();
-    clearmapsounds();
     resetblendmap();
     clearlights();
     clearpvs();

@@ -584,7 +584,7 @@ namespace game
             if(spawnremain--==monstertotal)
             {
                 playsound(S_INVASION);
-                musicmanager(2+map_sel);
+                //musicmanager(2+map_sel);
                 execute("playmapsong");
                 conoutf(CON_HUDCONSOLE, GAME_LANG ? "\f3The invasion has begun!" : "\f3L'invasion vient de commencer !");
             }

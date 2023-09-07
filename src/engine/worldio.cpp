@@ -903,14 +903,12 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     game::preload();
     flushpreloadedmodels();
 
-    preloadmapsounds();
-
     entitiesinoctanodes();
     attachentities();
     allchanged(true);
 
     startmap(cname ? cname : mname);
-    stopmusic();
+    //stopmusic();
     if(hasvsync) {vsync = 1; restorevsync();}
     addpostfx("mainfilter", 1, 1, 1, 1, vec4(1, 1, 1, 1));
     switch(cbcompensation)

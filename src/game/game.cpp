@@ -27,7 +27,7 @@ namespace game
             addmsg(N_SENDAPTITUDE, "ri", player1_aptitude);
             player1->aptitude = player1_aptitude;
             oldapti = player1->aptitude;
-            if(!isconnected())stopsounds();
+            //if(!isconnected()) stopsounds();
             playsound(S_APT_SOLDAT+player1_aptitude);
             if(isconnected() && !premission && !intermission) unlockachievement(ACH_UNDECIDED);
         }
@@ -508,7 +508,7 @@ namespace game
         if(!packtaunt) return;
         if(cust[VOI_CORTEX+player1_danse]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette voix !"); playsound(S_ERROR); player1_danse=0; return;}
         addmsg(N_SENDDANSE, "ri", player1_danse);
-        stopsounds();
+        //stopsounds();
         player1->customdanse = player1_danse;
         playsound(S_CGCORTEX+(player1_danse));
     });

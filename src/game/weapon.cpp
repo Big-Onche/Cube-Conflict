@@ -382,7 +382,7 @@ namespace game
         }
         ~projectile()
         {
-            if(projchan>=0) stopsound(projsound, projchan);
+            //if(projchan>=0) stopsound(projsound, projchan);
 
         }
     };

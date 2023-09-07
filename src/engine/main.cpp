@@ -16,7 +16,6 @@ extern void cleargamma();
 
 void cleanup()
 {
-    recorder::stop();
     cleanupserver();
     SDL_ShowCursor(SDL_TRUE);
     SDL_SetRelativeMouseMode(SDL_FALSE);
@@ -27,7 +26,7 @@ void cleanup()
     extern void clear_command(); clear_command();
     extern void clear_console(); clear_console();
     extern void clear_models();  clear_models();
-    extern void clear_sound();   clear_sound();
+    alCleanUp();
     closelogfile();
     #ifdef __APPLE__
         if(screen) SDL_SetWindowFullscreen(screen, 0);
@@ -127,13 +126,10 @@ void writeinitcfg()
     f->printf("fullscreen %d\n", fullscreen);
     f->printf("screenw %d\n", scr_w);
     f->printf("screenh %d\n", scr_h);
-    extern int sound, soundchans, soundfreq, soundbufferlen;
-    extern char *audiodriver;
-    f->printf("sound %d\n", sound);
-    f->printf("soundchans %d\n", soundchans);
+    extern int soundfreq;
+    //extern char *audiodriver;
     f->printf("soundfreq %d\n", soundfreq);
-    f->printf("soundbufferlen %d\n", soundbufferlen);
-    if(audiodriver[0]) f->printf("audiodriver %s\n", escapestring(audiodriver));
+    //if(audiodriver[0]) f->printf("audiodriver %s\n", escapestring(audiodriver));
     delete f;
 }
 
@@ -293,7 +289,7 @@ void renderbackground(const char *caption, Texture *mapshot, const char *mapname
 {
     if(!inbetweenframes && !force) return;
 
-    if(menumute || !needsound) stopsounds(); // stop sounds while loading
+    //if(menumute || !needsound) stopsounds(); // stop sounds while loading
 
     int w = hudw, h = hudh;
     if(forceaspect) w = int(ceil(h*forceaspect));
@@ -699,7 +695,6 @@ void resetgl()
 
     renderbackground("resetting OpenGL");
 
-    recorder::cleanup();
     cleanupva();
     cleanupparticles();
     cleanupstains();
@@ -978,7 +973,6 @@ void checkinput()
 
 void swapbuffers(bool overlay)
 {
-    recorder::capture(overlay);
     gle::disable();
     SDL_GL_SwapWindow(screen);
 }
@@ -1172,8 +1166,9 @@ bool initsteam()
         else
         {
             logoutf("init: steam api");
-            SteamAPI_ManualDispatch_Init();
-            SteamUserStats()->RequestCurrentStats();
+            g_SteamStats = new CSteamStats(g_Stats, 6);
+            //SteamAPI_ManualDispatch_Init();
+            //SteamUserStats()->RequestCurrentStats();
             getsteamachievements();
             return true;
         }
@@ -1327,15 +1322,15 @@ int main(int argc, char **argv)
     execfile("config/wordbank.cfg");
     execfile("config/stdedit.cfg");
     execfile(game::gameconfig());
-    execfile("config/sound.cfg");
     execfile("config/heightmap.cfg");
     execfile("config/blendbrush.cfg");
     if(game::savedservers()) execfile(game::savedservers(), false);
     loadsave();
 
     logoutf("init: sound");
-    initsound();
-    if(UI_PLAYMUSIC) { musicmanager(0); UI_PLAYMUSIC = false; }
+    alInit();
+    execfile("config/sound.cfg");
+    //if(UI_PLAYMUSIC) { musicmanager(0); UI_PLAYMUSIC = false; }
 
     game::player1->playermodel = 0;
 
@@ -1393,7 +1388,6 @@ int main(int argc, char **argv)
 
     if(initscript) execute(initscript);
 
-    initmumble();
     resetfpshistory();
 
     inputgrab(grabinput = true);
@@ -1433,7 +1427,7 @@ int main(int argc, char **argv)
         // miscellaneous general game effects
         recomputecamera(gfx::forcecampos);
         updateparticles();
-        updatesounds();
+        updateSounds();
 
         if(minimized) continue;
 
@@ -1443,6 +1437,9 @@ int main(int argc, char **argv)
         gl_drawframe();
         swapbuffers();
         renderedframe = inbetweenframes = true;
+
+        //steam api
+        if(IS_USING_STEAM) SteamAPI_RunCallbacks();
     }
 
     ASSERT(0);

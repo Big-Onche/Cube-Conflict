@@ -67,7 +67,7 @@ void menuprocess()
         lastmainmenu = mainmenu;
         execident("mainmenutoggled");
     }
-    if(UI_PLAYMUSIC) {musicmanager(0); UI_PLAYMUSIC = false;}
+    //if(UI_PLAYMUSIC) {musicmanager(0); UI_PLAYMUSIC = false;}
     if(mainmenu && !isconnected(true) && !UI::hascursor())
     {
         if(veryfirstlaunch)

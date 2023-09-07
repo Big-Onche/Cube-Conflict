@@ -1437,7 +1437,7 @@ namespace game
                 }
                 if(a) conoutf(GAME_LANG ? "Game is paused by administrator." : "La partie a été mise en pause par un administrateur.");
                 else conoutf(GAME_LANG ? "Game is paused." : "La partie est en pause.");
-                val ? musicmanager(1) : stopmusic();
+                //val ? musicmanager(1) : stopmusic();
                 break;
             }
 
@@ -2082,7 +2082,7 @@ namespace game
 
             case N_PREMISSION:
                 premission = getint(p);
-                if(premission) {execute("premission"); musicmanager(2);}
+                //if(premission) {execute("premission"); musicmanager(2);}
                 break;
 
             case N_SERVMSG:
