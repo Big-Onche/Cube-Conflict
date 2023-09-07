@@ -1883,7 +1883,7 @@ namespace game
                 int gun = getint(p);
                 if(!validgun(gun)) return;
                 d->gunselect = gun;
-                playsound(attacks[gun-GUN_RAIL].picksound, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 50, -1, 150);
+                playSound(attacks[gun-GUN_RAIL].picksound, d==hudplayer() ? NULL : &d->o, 200, 50);
                 break;
             }
 
@@ -1913,7 +1913,8 @@ namespace game
                 if(!entities::ents.inrange(i)) break;
                 entities::setspawn(i, true);
                 ai::itemspawned(i);
-                playsound(entities::ents[i]->type==I_SUPERARME ? S_ALARME : S_ITEMSPAWN, &entities::ents[i]->o, NULL, 0, 0, 0, -1, entities::ents[i]->type==I_SUPERARME ? 4000 : 300);
+                bool superweap = entities::ents[i]->type==I_SUPERARME;
+                playSound(superweap ? S_ALARME : S_ITEMSPAWN, &entities::ents[i]->o, superweap ? 2000 : 250, 50, superweap ? SND_FIXEDPITCH : NULL);
                 break;
             }
 

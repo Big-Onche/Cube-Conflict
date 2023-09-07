@@ -158,29 +158,20 @@ namespace entities
             playsound(S_PRI_1, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, d==hudplayer() ? 0 : 150, -1, 300);
         }
 
-        playsound(powerarmorpieces(type, d) ? S_ITEMPIECEROBOTIQUE : itemstats[type-I_RAIL].sound, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, d==hudplayer() ? 0 : 150, -1, 300);
+        playSound(powerarmorpieces(type, d) ? S_ITEMPIECEROBOTIQUE : itemstats[type-I_RAIL].sound, d==hudplayer() ? NULL : &d->o, 300, 50);
 
 		d->pickupitem(type, d->aptitude, d->abilitymillis[ABILITY_1], d->armourtype==A_ASSIST && d->armour, rndsweap);
 
         if(d==player1) switch(type)
         {
-            case I_BOOSTPV:
-                playsound(S_COCHON, NULL, NULL, 0, 0, 0, -1, 0, 0);
-                break;
-            case I_BOOSTDEGATS:
-                playsound(S_ITEMSTEROS, NULL, NULL, 0, 0, 0, -1, 0);
-                break;
+            case I_BOOSTPV: playSound(S_COCHON); break;
+            case I_BOOSTDEGATS: playSound(S_ITEMSTEROS); break;
+            case I_BOOSTVITESSE: playSound(S_ITEMEPO); break;
+            case I_BOOSTGRAVITE:  playSound(S_ITEMJOINT); break;
             case I_BOOSTPRECISION:
                 addpostfx("sobel", 1, 1, 1, 1, vec4(1, 1, 1, 1));
                 fullbrightmodels = 200;
-                playsound(S_ITEMCHAMPIS, NULL, NULL, 0, 0, 0, -1, 0);
-                break;
-            case I_BOOSTVITESSE:
-                playsound(S_ITEMEPO, NULL, NULL, 0, 0, 0, -1, 0);
-                break;
-            case I_BOOSTGRAVITE:
-                playsound(S_ITEMJOINT, NULL, NULL, 0, 0, 0, -1, 0);
-                break;
+                playSound(S_ITEMCHAMPIS);
         }
     }
 

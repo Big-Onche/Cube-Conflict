@@ -588,7 +588,7 @@ struct captureclientmode : clientmode
         b.owner = owner;
         b.enemy = enemy;
         b.converted = converted;
-        if(ammo>b.ammo) playsound(S_ITEMSPAWN, &b.o);
+        if(ammo>b.ammo) playSound(S_ITEMSPAWN, &b.o, 250, 50);
         b.ammo = ammo;
     }
 

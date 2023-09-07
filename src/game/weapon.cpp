@@ -28,7 +28,7 @@ namespace game
         {
             if(d==player1 && gun!=GUN_ASSISTXPL && !shortcut) player1->lastweap = gun;
             addmsg(N_GUNSELECT, "rci", d, gun);
-            playsound(attacks[gun-GUN_RAIL].picksound, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 50, -1, 150);
+            playSound(attacks[gun-GUN_RAIL].picksound, d==hudplayer() ? NULL : &d->o, 200, 50);
         }
         d->gunselect = gun;
     }

@@ -244,7 +244,10 @@ bool checkSoundOcclusion(const vec *soundPos)
     float dist = dir.magnitude();
     dir.mul(1/dist);
 
-    return raycube(*soundPos, dir, camera1->o.dist(*soundPos), RAY_CLIPMAT|RAY_POLY) < dist;
+    float rayDist = raycube(*soundPos, dir, camera1->o.dist(*soundPos), RAY_CLIPMAT|RAY_POLY);
+
+    float tolerance = 5.0f;
+    return rayDist < dist - tolerance;
 }
 
 void manageSources()
@@ -341,7 +344,7 @@ void playSound(int soundIndex, const vec *soundPos, float maxRadius, float maxVo
 {
     if(soundIndex < 0 || soundIndex > NUMSNDS || noSound) return; // Invalid index or openal not initialized
 
-    if(soundPos && !(flags & SND_NOCULL) && camera1->o.dist(*soundPos) > maxRadius + 50) return; // do not play sound to far from camera, except if flag SND_NOCULL
+    if(soundPos && !(flags & SND_NOCULL) && camera1->o.dist(*soundPos) > maxRadius + 50) return; // do not play sound too far from camera, except if flag SND_NOCULL
 
     int sourceIndex = findInactiveSource();
     if((flags & SND_LOWPRIORITY) && (countActiveSources() >= 0.80f * MAX_SOURCES)) return; // skip low priority sounds (distant shoots etc.) when we are close (85%) to max capacity
