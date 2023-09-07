@@ -60,6 +60,9 @@ struct Sound
 extern void alInit();
 extern void alCleanUp();
 
+extern void clearMapSounds();
+extern void clearAllSounds();
+
 extern bool loadSound(Sound& s);
 extern void manageSources();
 extern void updateListenerPos();

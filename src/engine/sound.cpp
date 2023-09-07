@@ -288,10 +288,20 @@ void manageSources()
             alGetSourcei(sources[i], AL_SOURCE_STATE, &state);
             alGetSourcei(sources[i], AL_LOOPING, &looping);
             reportSoundError("alGetSourcei-manageSources", "N/A", -1);
+
             if(state == AL_STOPPED)
             {
                 sourceActive[i] = false;
                 sourceOwners[i] = NULL;
+            }
+            else
+            {
+                if(sourceOwners[i]) // if the source is active and the owner entity exists, update the source position
+                {
+                    vec o = sourceOwners[i]->o;
+                    alSource3f(sources[i], AL_POSITION, o.x, o.z, o.y);
+                    reportSoundError("alSource3f-manageSources", "N/A", -1);
+                }
             }
         }
     }
@@ -327,44 +337,45 @@ void stopMapSound(extentity *e)
     {
         if(sourceActive[i] && sourceOwners[i] == e)
         {
+            ALint state;
+            alGetSourcei(sources[i], AL_SOURCE_STATE, &state);
+
             alSourceStop(sources[i]);
+            reportSoundError("alSourceStop-stopMapSound", "N/A", -1);
+
             sourceActive[i] = false;
-            sourceOwners[i] = nullptr;
-            e->flags &= ~EF_SOUND; // Clear the sound flag for the entity
+            sourceOwners[i] = NULL;
+            e->flags &= ~EF_SOUND; // clear the sound flag for the entity
+
+            alGetSourcei(sources[i], AL_SOURCE_STATE, &state);
+
+            break;  // no need to check for other sources after that
         }
     }
 }
 
-void checkMapSounds()
+void clearMapSounds()
 {
-    if(mainmenu) return;
-    const vector<extentity *> &ents = entities::getents();
-
-    loopv(ents)
+    loopi(MAX_SOURCES)
     {
-        extentity &e = *ents[i];
-        if(e.type!=ET_SOUND) continue;
-        if(camera1->o.dist(e.o) < e.attr2)
+        if(sourceActive[i])
         {
-            if(!(e.flags & EF_SOUND))
-            {
-                playSound(e.attr1, &e.o, e.attr2, e.attr3, SND_LOOPED|SND_NOOCCLUSION|SND_MAPSOUND|SND_FIXEDPITCH, &e);
-                e.flags |= EF_SOUND;  // set the flag to indicate that the sound is currently playing
-            }
-        }
-        else if(e.flags & EF_SOUND) stopMapSound(&e);
-    }
-}
+            ALint state;
+            alGetSourcei(sources[i], AL_SOURCE_STATE, &state);
 
-void updateSounds()
-{
-    if(noSound) return;
-    if((minimized && !minimizedsounds) || game::ispaused()); //stopsounds();
-    else
-    {
-        manageSources();
-        updateListenerPos();
-        checkMapSounds();
+            alSourceStop(sources[i]);
+            reportSoundError("alSourceStop-stopAllMapSounds", "N/A", -1);
+
+            if(sourceOwners[i]) // If this source has an owner, clear the EF_SOUND flag for the entity
+            {
+                sourceOwners[i]->flags &= ~EF_SOUND;
+                sourceOwners[i] = NULL;
+            }
+
+            sourceActive[i] = false;
+
+            alGetSourcei(sources[i], AL_SOURCE_STATE, &state);
+        }
     }
 }
 
@@ -380,6 +391,11 @@ void playSound(int soundIndex, const vec *soundPos, float maxRadius, float maxVo
     {
         conoutf(CON_WARN, "Max sounds at once capacity reached (%d)", MAX_SOURCES); // all sources are active, skip the sound
         return;
+    }
+    else
+    {
+        sourceActive[sourceIndex] = true;
+        sourceOwners[sourceIndex] = owner;
     }
 
     Sound& s = (flags & SND_MAPSOUND) ? mapSounds[soundIndex] : gameSounds[soundIndex];
@@ -432,6 +448,47 @@ void playSound(int soundIndex, const vec *soundPos, float maxRadius, float maxVo
     reportSoundError("alSourcePlay", s.soundPath, s.bufferId[altIndex]);
 
     sourceActive[sourceIndex] = true;
+}
+
+void checkMapSounds()
+{
+    if(mainmenu) return;
+    const vector<extentity *> &ents = entities::getents();
+
+    loopv(ents)
+    {
+        extentity &e = *ents[i];
+        if(e.type!=ET_SOUND) continue;
+        if(camera1->o.dist(e.o) < e.attr2 + 50) // check for distance + add a slight tolerance for efx sound effects
+        {
+            if(!(e.flags & EF_SOUND))
+            {
+                playSound(e.attr1, &e.o, e.attr2, e.attr3, SND_LOOPED|SND_NOOCCLUSION|SND_MAPSOUND|SND_FIXEDPITCH, &e);
+                e.flags |= EF_SOUND;  // set the flag to indicate that the sound is currently playing
+            }
+        }
+        else if(e.flags & EF_SOUND) stopMapSound(&e);
+    }
+}
+
+void updateSounds()
+{
+    if(noSound) return;
+    if((minimized && !minimizedsounds) || game::ispaused()); //stopsounds();
+    else
+    {
+        manageSources();
+        updateListenerPos();
+        checkMapSounds();
+    }
+}
+
+void clearAllSounds()
+{
+    clearMapSounds();
+    //stopmusic();
+    //stopsounds();
+    //UI_PLAYMUSIC = true;
 }
 
 /*
@@ -559,12 +616,7 @@ ICOMMAND(playsound, "i", (int *n), playsound(*n));
 ICOMMAND(playsnd, "s", (const char *s), playsoundname(s));
 
 
-void soundmenu_cleanup()
-{
-    stopmusic();
-    stopsounds();
-    UI_PLAYMUSIC = true;
-}
+
 */
 
 const char *getmapsoundname(int n)

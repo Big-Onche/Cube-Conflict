@@ -755,8 +755,6 @@ extern void menuprocess();
 extern void clearmainmenu();
 
 // sound
-extern void clearmapsounds();
-extern void checkmapsounds();
 extern void updateSounds();
 extern void preloadmapsounds();
 

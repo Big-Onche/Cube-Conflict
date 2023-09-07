@@ -170,7 +170,7 @@ void disconnect(bool async, bool cleanup, bool volontaire)
         game::gamedisconnect(cleanup);
         gfx::resetpostfx();
         clearsleep();
-        //soundmenu_cleanup();
+        clearAllSounds();
         mainmenu = 1;
         if(stat[STAT_DAMMAGERECORD] < game::player1->totaldamage/10) addstat(game::player1->totaldamage/10, STAT_DAMMAGERECORD, true);
         if(game::player1->totaldamage/10 > 10000) unlockachievement(ACH_DESTRUCTEUR);
@@ -184,8 +184,7 @@ void disconnect(bool async, bool cleanup, bool volontaire)
 
 void trydisconnect(bool local)
 {
-    //soundmenu_cleanup();
-
+    //clearAllSounds();
     if(connpeer)
     {
         conoutf(GAME_LANG ? "Aborting connection attempt" : "Annulation de la connexion");

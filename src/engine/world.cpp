@@ -1,6 +1,7 @@
 // world.cpp: core map management stuff
 
 #include "engine.h"
+#include "sound.h"
 
 VARR(mapversion, 1, MAPVERSION, 0);
 VARNR(mapscale, worldscale, 1, 0, 0);
@@ -1444,6 +1445,7 @@ void splitocta(cube *c, int size)
 void resetmap()
 {
     clearoverrides();
+    clearMapSounds();
     resetblendmap();
     clearlights();
     clearpvs();
