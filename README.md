@@ -2,7 +2,8 @@
 # Cube Conflict 
 
 Join the battle in **Cube Conflict**, an FPS game where dumb smileys are locked in a never-ending war! Forked from [Tesseract](http://tesseract.gg).
-🎮 [Play on Steam](https://store.steampowered.com/app/1454700/Cube_Conflict/)
+
+🎮 **[Play on Steam now!](https://store.steampowered.com/app/1454700/Cube_Conflict/)**
 
 ## 🎯 Goal
 The mission is to deliver a free, open-source, and exhilarating gaming experience while being able to run smoothly on low-end computers.
@@ -20,11 +21,12 @@ The mission is to deliver a free, open-source, and exhilarating gaming experienc
 - Loads of skins for character customization.
 
 ## 🚧 Roadmap for the First Release
-- [🟩🟩⬛⬛⬛] More maps!
-- [🟩🟩⬛⬛⬛] Simplified map editing with a dedicated GUI.
-- [🟩🟩🟩🟩⬛] Completion of the tutorial map.
-- [🟩🟩🟩⬛⬛] Seamless integration of stats and achievements with Steam.
-- [🟩⬛⬛⬛⬛] Support for multiple language translations.
+- 🟩🟩🟩⬛⬛ Moving to OpenAL soft instead of SDL Mixer
+- 🟩🟩⬛⬛⬛ More maps!
+- 🟩🟩⬛⬛⬛ Simplified map editing with a dedicated GUI.
+- 🟩🟩🟩🟩⬛ Completion of the tutorial map.
+- 🟩🟩🟩⬛⬛ Seamless integration of stats and achievements with Steam.
+- 🟩⬛⬛⬛⬛ Support for multiple language translations.
 
 ## 📅 Upcoming Features
 - Advanced tools enhancing e-sports with a seamless server management system.
