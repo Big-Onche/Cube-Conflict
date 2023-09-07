@@ -35,18 +35,20 @@ enum SoundNames
 
 enum SoundFlags
 {
-    SOUND_NOCULL        = 1 << 0,   // sound will be played even if camera1 is beyond radius
-    SOUND_NOOCCLUSION   = 1 << 1,   // no filter if occlusion
-    SOUND_LOWPRIORITY   = 1 << 2,   // sound will not play if source limit is reached
-    SOUND_FIXEDPITCH    = 1 << 3    // no random variation in pitch
+    SND_NOCULL        = 1 << 0,     // sound will be played even if camera1 is beyond radius
+    SND_NOOCCLUSION   = 1 << 1,     // no filter if occlusion
+    SND_LOWPRIORITY   = 1 << 2,     // sound will not play if source limit is almost reached
+    SND_FIXEDPITCH    = 1 << 3,     // no random variation in pitch
+    SND_LOOPED        = 1 << 4,     // sound is a loop
+    SND_MAPSOUND      = 1 << 5,     // sound used in a map
 };
 
 struct Sound
 {
-    string soundPath;                   // relative path of the sound
-    int numAlts;                        // number of alternatives for the same sound id
-    int soundVol;                       // volume of the sound
-    ALuint bufferId[MAX_ALTS];          // OpenAL buffer ID
+    string soundPath;               // relative path of the sound
+    int numAlts;                    // number of alternatives for the same sound id
+    int soundVol;                   // volume of the sound
+    ALuint bufferId[MAX_ALTS];      // OpenAL buffer ID
 };
 
 extern void alInit();

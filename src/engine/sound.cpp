@@ -11,11 +11,15 @@ bool noSound = false;
 bool noEfx = false;
 
 VAR(debugsounds, 0, 1, 1);
+VARP(minimizedsounds, 0, 0, 1);
 
-Sound sounds[NUMSNDS];
+#define NUMMAPSNDS 32
+Sound gameSounds[NUMSNDS];
+Sound mapSounds[NUMMAPSNDS];
 
 ALuint sources[MAX_SOURCES];
 bool sourceActive[MAX_SOURCES] = {false};
+extentity* sourceOwners[MAX_SOURCES] = {NULL};
 
 LPALGENAUXILIARYEFFECTSLOTS    alGenAuxiliaryEffectSlots    = NULL;
 LPALDELETEAUXILIARYEFFECTSLOTS alDeleteAuxiliaryEffectSlots = NULL;
@@ -55,7 +59,7 @@ static void getEfxFuncs()
 void initSources()
 {
     alGenSources(MAX_SOURCES, sources);
-    for(int i = 0; i < MAX_SOURCES; i++) sourceActive[i] = false;
+    loopi(MAX_SOURCES) sourceActive[i] = false;
 }
 
 ALuint reverbEffect;
@@ -100,8 +104,8 @@ void setOcclusionEffect()
     alFilteri(lowPassFilter, AL_FILTER_TYPE, AL_FILTER_LOWPASS);
     reportSoundError("alFilteri-lowPassFilter", "N/A", -1);
 
-    alFilterf(lowPassFilter, AL_LOWPASS_GAIN, 0.6f);  // Value between 0.0 to 1.0. Adjust to your liking.
-    alFilterf(lowPassFilter, AL_LOWPASS_GAINHF, 0.08f);
+    alFilterf(lowPassFilter, AL_LOWPASS_GAIN, 0.5f);  // Value between 0.0 to 1.0. Adjust to your liking.
+    alFilterf(lowPassFilter, AL_LOWPASS_GAINHF, 0.1f);
 }
 
 void alInit()
@@ -149,10 +153,17 @@ void alCleanUp()
 }
 
 ICOMMAND(gamesound, "isii", (int *id, char *path, int *alts, int *vol),
-    formatstring(sounds[*id].soundPath, "%s", path);
-    sounds[*id].numAlts = *alts;
-    sounds[*id].soundVol = *vol;
-    loadSound(sounds[*id]);
+    formatstring(gameSounds[*id].soundPath, "%s", path);
+    gameSounds[*id].numAlts = *alts;
+    gameSounds[*id].soundVol = *vol;
+    loadSound(gameSounds[*id]);
+);
+
+ICOMMAND(mapsound, "isii", (int *id, char *path, int *alts, int *vol),
+    formatstring(mapSounds[*id].soundPath, "%s", path);
+    mapSounds[*id].numAlts = *alts;
+    mapSounds[*id].soundVol = *vol;
+    loadSound(mapSounds[*id]);
 );
 
 void loadSoundFile(const string& filepath, ALuint buffer) // load a sound using libsndfile
@@ -214,7 +225,8 @@ bool loadSound(Sound& s) // load a sound including his alts
 
 bool preloadAllSounds()
 {
-    loopi(NUMSNDS) { if (!loadSound(sounds[i])) return false; }
+    loopi(NUMSNDS) { if (!loadSound(gameSounds[i])) return false; }
+    loopi(NUMMAPSNDS)  { if (!loadSound(mapSounds[i])) return false; }
     return true;
 }
 
@@ -237,14 +249,19 @@ bool checkSoundOcclusion(const vec *soundPos)
 
 void manageSources()
 {
-    ALint state;
+    ALint state, looping;
     loopi(MAX_SOURCES)
     {
         if(sourceActive[i])
         {
             alGetSourcei(sources[i], AL_SOURCE_STATE, &state);
-            reportSoundError("alGetSourcei", "N/A", -1);
-            if(state == AL_STOPPED) sourceActive[i] = false;
+            alGetSourcei(sources[i], AL_LOOPING, &looping);
+            reportSoundError("alGetSourcei-manageSources", "N/A", -1);
+            if(state == AL_STOPPED)
+            {
+                sourceActive[i] = false;
+                sourceOwners[i] = NULL;
+            }
         }
     }
 }
@@ -273,30 +290,84 @@ void updateListenerPos()
     alListenerfv(AL_ORIENTATION, orientation); // Set the listener's orientation
 }
 
-void playSound(int soundIndex, const vec *soundPos, float maxRadius, float maxVolRadius, int flags)
+void stopMapSound(extentity *e)
+{
+    loopi(MAX_SOURCES)
+    {
+        if(sourceActive[i] && sourceOwners[i] == e)
+        {
+            alSourceStop(sources[i]);
+            sourceActive[i] = false;
+            sourceOwners[i] = nullptr;
+            e->flags &= ~EF_SOUND; // Clear the sound flag for the entity
+        }
+    }
+}
+
+void checkMapSounds()
+{
+    if(mainmenu) return;
+    const vector<extentity *> &ents = entities::getents();
+
+    loopv(ents)
+    {
+        extentity &e = *ents[i];
+        if(e.type!=ET_SOUND) continue;
+        if(camera1->o.dist(e.o) < e.attr2)
+        {
+            if(!(e.flags & EF_SOUND))
+            {
+                playSound(e.attr1, &e.o, e.attr2, e.attr3, SND_LOOPED|SND_NOOCCLUSION|SND_MAPSOUND|SND_FIXEDPITCH, &e);
+                e.flags |= EF_SOUND;  // set the flag to indicate that the sound is currently playing
+            }
+        }
+        else if(e.flags & EF_SOUND) stopMapSound(&e);
+    }
+}
+
+void updateSounds()
+{
+    if(noSound) return;
+    if((minimized && !minimizedsounds) || game::ispaused()) stopsounds();
+    else
+    {
+        manageSources();
+        updateListenerPos();
+        checkMapSounds();
+    }
+}
+
+void playSound(int soundIndex, const vec *soundPos, float maxRadius, float maxVolRadius, int flags, extentity* owner)
 {
     if(soundIndex < 0 || soundIndex > NUMSNDS || noSound) return; // Invalid index or openal not initialized
 
-    if(soundPos && !(flags & SOUND_NOCULL) && camera1->o.dist(*soundPos) > maxRadius + 50) return; // do not play sound to far from camera, except if flag SOUND_NOCULL
+    if(soundPos && !(flags & SND_NOCULL) && camera1->o.dist(*soundPos) > maxRadius + 50) return; // do not play sound to far from camera, except if flag SND_NOCULL
 
     int sourceIndex = findInactiveSource();
-    if((flags & SOUND_LOWPRIORITY) && (countActiveSources() >= 0.85f * MAX_SOURCES)) return; // skip low priority sounds (distant shoots etc.) when we are close (85%) to max capacity
+    if((flags & SND_LOWPRIORITY) && (countActiveSources() >= 0.80f * MAX_SOURCES)) return; // skip low priority sounds (distant shoots etc.) when we are close (85%) to max capacity
     else if(sourceIndex == -1)
     {
         conoutf(CON_WARN, "Max sounds at once capacity reached (%d)", MAX_SOURCES); // all sources are active, skip the sound
         return;
     }
 
-    Sound& s = sounds[soundIndex];
+    Sound& s = (flags & SND_MAPSOUND) ? mapSounds[soundIndex] : gameSounds[soundIndex];
     ALuint source = sources[sourceIndex];
 
     int altIndex = (s.numAlts > 0) ? rnd(s.numAlts+1) : 0;
     ALuint buffer = s.bufferId[altIndex];
 
     alSourcei(source, AL_BUFFER, buffer); // managing sounds alternatives
-    alSourcef(source, AL_GAIN, s.soundVol / 100.0f); // managing sound volume
-    float randomPitch = 0.85f + 0.3f * ((float)rand() / (float)RAND_MAX); // managing variations of pitches
-    if(!(flags & SOUND_FIXEDPITCH)) alSourcef(source, AL_PITCH, randomPitch);
+    alSourcef(source, AL_GAIN, s.soundVol / 100.f); // managing sound volume
+    if(!(flags & SND_FIXEDPITCH)) // managing variations of pitches
+    {
+        float randomPitch = 0.9f + 0.2f * ((float)rand() / (float)RAND_MAX);
+        alSourcef(source, AL_PITCH, randomPitch);
+    }
+    else alSourcef(source, AL_PITCH, 1.f);
+
+    if(flags & SND_LOOPED) alSourcei(source, AL_LOOPING, AL_TRUE); // Loop the sound
+    else alSourcei(source, AL_LOOPING, AL_FALSE); // Don't loop the sound
 
     if(!soundPos)
     {
@@ -317,10 +388,12 @@ void playSound(int soundIndex, const vec *soundPos, float maxRadius, float maxVo
 
     if(!noEfx) // apply efx if available
     {
-        alSource3i(source, AL_AUXILIARY_SEND_FILTER, auxEffectReverb, 0, checkSoundOcclusion(soundPos) ? lowPassFilter : AL_FILTER_NULL);
+        bool occluded = checkSoundOcclusion(soundPos) && !(flags & SND_NOOCCLUSION);
+
+        alSource3i(source, AL_AUXILIARY_SEND_FILTER, auxEffectReverb, 0, occluded ? lowPassFilter : AL_FILTER_NULL);
         reportSoundError("alSource3i-auxEffectReverb+lowPassFilter", s.soundPath, s.bufferId[altIndex]);
 
-        alSourcei(source, AL_DIRECT_FILTER, checkSoundOcclusion(soundPos) ? lowPassFilter : AL_FILTER_NULL);
+        alSourcei(source, AL_DIRECT_FILTER, occluded ? lowPassFilter : AL_FILTER_NULL);
         reportSoundError("alSourcei-lowPassFilter", s.soundPath, s.bufferId[altIndex]);
     }
 
@@ -847,35 +920,6 @@ void clearmapsounds()
     mapsounds.clear();
 }
 
-void stopmapsound(extentity *e)
-{
-    loopv(channels)
-    {
-        soundchannel &chan = channels[i];
-        if(chan.inuse && chan.ent == e)
-        {
-            Mix_HaltChannel(i);
-            freechannel(i);
-        }
-    }
-}
-
-void checkmapsounds()
-{
-    if(mainmenu) return;
-    const vector<extentity *> &ents = entities::getents();
-    loopv(ents)
-    {
-        extentity &e = *ents[i];
-        if(e.type!=ET_SOUND) continue;
-        if(camera1->o.dist(e.o) < e.attr2)
-        {
-            if(!(e.flags&EF_SOUND)) playsound(e.attr1, NULL, &e, SND_MAP, -1);
-        }
-        else if(e.flags&EF_SOUND) stopmapsound(&e);
-    }
-}
-
 VAR(stereo, 0, 1, 1);
 
 int maxsoundradius = 340;
@@ -933,27 +977,7 @@ void syncchannels()
     }
 }
 
-VARP(minimizedsounds, 0, 0, 1);
 
-void updatesounds()
-{
-    updatemumble();
-
-    if(noSound) return;
-    if((minimized && !minimizedsounds) || game::ispaused()) stopsounds();
-    else
-    {
-        reclaimchannels();
-        if(mainmenu) stopmapsounds();
-        else checkmapsounds();
-        syncchannels();
-    }
-    if(music)
-    {
-        if(!Mix_PlayingMusic()) musicdone();
-        else if(Mix_PausedMusic()) Mix_ResumeMusic();
-    }
-}
 
 VARP(maxsoundsatonce, 0, 256, 512);
 

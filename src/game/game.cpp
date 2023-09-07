@@ -1,7 +1,6 @@
 #include "gfx.h"
 #include "customs.h"
 #include "stats.h"
-#include "sound.h"
 
 bool randomevent(int probability)
 {
@@ -599,7 +598,7 @@ namespace game
             gfx::resetpostfx();
             if(!cbcompensation) addpostfx("deathscreen", 1, 1, 1, 1, vec4(1, 1, 1, 1));
             d->roll = 0;
-            playSound(S_DIE_P1, NULL, 0, 0, SOUND_FIXEDPITCH);
+            playSound(S_DIE_P1, NULL, 0, 0, SND_FIXEDPITCH);
             if(m_tutorial) execute("reset_needed_triggers");
         }
         else

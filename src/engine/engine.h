@@ -757,7 +757,7 @@ extern void clearmainmenu();
 // sound
 extern void clearmapsounds();
 extern void checkmapsounds();
-extern void updatesounds();
+extern void updateSounds();
 extern void preloadmapsounds();
 
 extern void initmumble();
