@@ -241,13 +241,36 @@ bool checkSoundOcclusion(const vec *soundPos)
     if(!soundPos) return false;  // HUD sounds are never occluded
 
     vec dir = vec(camera1->o).sub(*soundPos);
-    float dist = dir.magnitude();
+    const float dist = dir.magnitude();
     dir.mul(1/dist);
 
-    float rayDist = raycube(*soundPos, dir, camera1->o.dist(*soundPos), RAY_CLIPMAT|RAY_POLY);
+    const float toleranceRadius = 27.f;
 
-    float tolerance = 5.0f;
-    return rayDist < dist - tolerance;
+    const int sectors = 4;
+    const int stacks = 4;
+    const float sectorAngle = 2 * M_PI / sectors;
+    const float stackAngle = M_PI / stacks;
+
+    const vec camPos = camera1->o;
+
+    loopi(sectors)
+    {
+        loopj(stacks)
+        {
+            float theta = i * sectorAngle;
+            float phi = j * stackAngle;
+
+            vec samplePoint = *soundPos;
+            samplePoint.x += toleranceRadius * sin(phi) * cos(theta);
+            samplePoint.y += toleranceRadius * sin(phi) * sin(theta);
+            samplePoint.z += toleranceRadius * cos(phi);
+
+            const float rayDist = raycube(samplePoint, dir, camPos.dist(samplePoint), RAY_CLIPMAT|RAY_POLY);
+
+            if(rayDist >= dist) return false;
+        }
+    }
+    return true;
 }
 
 void manageSources()
