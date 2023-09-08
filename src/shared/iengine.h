@@ -452,7 +452,6 @@ extern void flushpreloadedmodels(bool msg = true);
 extern bool matchanim(const char *name, const char *pattern);
 
 // UI
-
 namespace UI
 {
     bool showui(const char *name);

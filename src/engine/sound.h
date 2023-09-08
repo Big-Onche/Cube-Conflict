@@ -41,6 +41,12 @@ enum SoundNames
     S_ALARME, S_WPLOADSMALL, S_WPLOADMID, S_WPLOADBIG, S_WPLOADFUTUR,
     S_WPLOADALIEN, S_WPLOADSWORD, S_WPLOADCHAINS, S_WPLOADFASTWOOSH, S_WPLOADSLOWWOOSH,
     S_NOAMMO,
+    // powerups & item sounds
+    S_ROIDS_SHOOT, S_ROIDS_SHOOT_FAR, S_ROIDS_PUPOUT, S_EPO_RUN, S_EPO_PUPOUT,
+    S_SHROOMS_PUPOUT, S_ASSISTALARM,
+    // physics
+    S_DOUILLE, S_BIGDOUILLE, S_CARTOUCHE, S_RGRENADE, S_ECLAIRPROCHE,
+    S_ECLAIRLOIN, S_LAVASPLASH,
 
     NUMSNDS
 };
@@ -63,16 +69,16 @@ struct Sound
     ALuint bufferId[MAX_ALTS];      // OpenAL buffer ID
 };
 
-extern void alInit();
-extern void alCleanUp();
+extern void initSounds();
+extern void cleanUpSounds();
 
+extern void updateSoundPosition(int projchan, const vec* soundPos);
 extern void updateSounds();
-extern void clearMapSounds();
-extern void clearAllSounds();
+extern void stopAllMapSounds();
+extern void stopAllSounds();
 
 extern bool loadSound(Sound& s);
 extern void manageSources();
-extern void updateListenerPos();
 extern const char *getmapsoundname(int n);
 
 extern void soundNearmiss(int sound, const vec &from, const vec &to, int precision = 2048);

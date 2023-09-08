@@ -27,12 +27,24 @@ enum
     EF_NOPICKUP   = 1<<9
 };
 
+struct GlobalIdGenerator // id given to players, projectiles, or other ents used for sound position update, each one has their own id
+{
+    static size_t currentId; // current ID counter
+    static size_t getNewId() {return currentId++;} // get a new unique ID
+    static void reset() { currentId = 0; } // reset the ID counter to 0 just in case if we shoot 1000000 rounds per secs
+};
+
 struct extentity : entity                       // part of the entity that doesn't get saved to disk
 {
+    size_t entityId;
     int flags;
     extentity *attached;
 
-    extentity() : flags(0), attached(NULL) {}
+    extentity()
+        : entityId(GlobalIdGenerator::getNewId()), // initialize the new entityId field here
+          flags(0),
+          attached(NULL)
+    {}
 
     bool spawned() const { return (flags&EF_SPAWNED) != 0; }
     void setspawned(bool val) { if(val) flags |= EF_SPAWNED; else flags &= ~EF_SPAWNED; }

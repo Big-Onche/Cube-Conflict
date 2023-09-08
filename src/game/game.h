@@ -244,17 +244,6 @@ static const char * const mastermodeicons[] =  { "server", "server", "serverlock
 // hardcoded sounds, defined in sounds.cfg
 enum
 {
-    // bullets & projectiles
-    S_IMPACTBODY, S_IMPACTWOOD, S_IMPACTIRON, S_IMPACTGOLD, S_IMPACTMAGNET,                     // 76-80
-    S_IMPACTPOWERARMOR, S_IMPACTWATER, S_LITTLERICOCHET, S_BIGRICOCHET, S_IMPACTARROW,          // 81-85
-    S_BULLETFLYBY, S_BIGBULLETFLYBY, S_ROCKET, S_MINIROCKET, S_MISSILENUKE,                     // 86-90
-    S_FLYBYFIREWORKS, S_FLYBYSPOCK, S_FLYBYFLAME, S_FLYBYARROW, S_FLYBYGRAP1, S_FLYBYPLASMA,
-    S_FLYBYELEC, S_IMPACTELEC, S_IMPACTPLASMA, S_IMPACTSPOCK, S_IMPACTGRAP1, S_IMPACTLOURDLOIN,
-
-    // physics
-    S_DOUILLE, S_BIGDOUILLE, S_CARTOUCHE, S_RGRENADE, S_ECLAIRPROCHE,
-    S_ECLAIRLOIN, S_LAVASPLASH,
-
     // classes & spells
     S_SORTLANCE, S_SORTIMPOSSIBLE, S_SORTPRET, S_TIMER, S_FAUCHEUSE,
     S_RAGETIR, S_REGENMEDIGUN, S_REGENJUNKIE, S_WIZ_1, S_WIZ_2,
@@ -275,10 +264,6 @@ enum
     S_APT_SOLDAT, S_APT_MEDECIN, S_APT_AMERICAIN, S_APT_NINJA, S_APT_VAMPIRE,
     S_APT_MAGICIEN, S_APT_KAMIKAZE, S_APT_FAUCHEUSE, S_APT_PHYSICIEN, S_APT_CAMPEUR,
     S_APT_ESPION, S_APT_PRETRE, S_APT_VIKING, S_APT_JUNKIE, S_APT_SHOSHONE,
-
-    // powerups & item sounds
-    S_ROIDS_SHOOT, S_ROIDS_SHOOT_FAR, S_ROIDS_PUPOUT, S_EPO_RUN, S_EPO_PUPOUT,
-    S_SHROOMS_PUPOUT, S_ASSISTALARM,
 
     //npcs
     S_ALIEN_H, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D, S_MINION_P, S_MINION_D,
@@ -954,6 +939,8 @@ struct teaminfo
 
     void reset() { frags = 0; }
 };
+
+extern void playSound(int soundIndex, const vec *soundPos = NULL, float maxRadius = 300.f, float maxVolRadius = 10.f, int flags = NULL, size_t entityId = SIZE_MAX);
 
 namespace entities
 {

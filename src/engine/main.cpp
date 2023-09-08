@@ -26,7 +26,7 @@ void cleanup()
     extern void clear_command(); clear_command();
     extern void clear_console(); clear_console();
     extern void clear_models();  clear_models();
-    alCleanUp();
+    cleanUpSounds();
     closelogfile();
     #ifdef __APPLE__
         if(screen) SDL_SetWindowFullscreen(screen, 0);
@@ -1328,7 +1328,7 @@ int main(int argc, char **argv)
     loadsave();
 
     logoutf("init: sound");
-    alInit();
+    initSounds();
     execfile("config/sound.cfg");
     //if(UI_PLAYMUSIC) { musicmanager(0); UI_PLAYMUSIC = false; }
 
