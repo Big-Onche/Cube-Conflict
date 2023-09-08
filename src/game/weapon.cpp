@@ -285,10 +285,10 @@ namespace game
         {
             switch(b->bouncetype)
             {
-                case BNC_DOUILLES: case BNC_DOUILLESUZI: //playsound(S_DOUILLE, &b->o, 0, 0, 0 , 50, -1, 150); break;
-                case BNC_BIGDOUILLES: //playsound(S_BIGDOUILLE, &b->o, 0, 0, 0 , 50, -1, 150); break;
-                case BNC_CARTOUCHES: //playsound(S_CARTOUCHE, &b->o, 0, 0, 0 , 50, -1, 150); break;
-                case BNC_GRENADE: //playsound(S_RGRENADE, &b->o, 0, 0, 0 , 100, -1, 350); break;
+                case BNC_DOUILLES: case BNC_DOUILLESUZI: playSound(S_DOUILLE, &b->o, 150, 50, SND_LOWPRIORITY|SND_FIXEDPITCH); break;
+                case BNC_BIGDOUILLES: playSound(S_BIGDOUILLE, &b->o, 150, 50, SND_LOWPRIORITY|SND_FIXEDPITCH); break;
+                case BNC_CARTOUCHES: playSound(S_CARTOUCHE, &b->o, 150, 50, SND_LOWPRIORITY); break;
+                case BNC_GRENADE: playSound(S_RGRENADE, &b->o, 350, 100); break;
                 case BNC_LIGHT: b->lifetime=0;
             }
         }
@@ -365,6 +365,7 @@ namespace game
 
     struct projectile
     {
+        size_t entityId;
         vec dir, o, from, to, offset;
         float speed;
         gameent *owner;
@@ -374,21 +375,25 @@ namespace game
         int id;
         int lifetime;
         bool exploded;
-        int projchan, projsound;
         bool inwater;
+        int projsound;
+        bool soundplaying;
 
-        projectile() : projchan(-1), projsound(-1)
-        {
-        }
-        ~projectile()
-        {
-            //if(projchan>=0) stopsound(projsound, projchan);
-
-        }
+        projectile()
+            : entityId(GlobalIdGenerator::getNewId()) // initialize the new entityId field here
+        {}
     };
     vector<projectile> projs;
 
-    void clearprojectiles() { projs.shrink(0); }
+    void clearprojectiles()
+    {
+        loopv(projs)
+        {
+            projectile &p = projs[i];
+            stopLinkedSound(p.entityId);
+        }
+        projs.shrink(0);
+    }
 
     void newprojectile(const vec &from, const vec &to, float speed, bool local, int id, gameent *owner, int atk)
     {
@@ -413,6 +418,20 @@ namespace game
         p.offsetmillis = OFFSETMILLIS;
         p.id = local ? lastmillis : id;
         p.inwater = owner->inwater ? true : false;
+
+        switch (p.atk)
+        {
+            case ATK_PULSE_SHOOT: p.projsound = S_FLYBYPLASMA; break;
+            case ATK_GRAP1_SHOOT: p.projsound = S_FLYBYGRAP1; break;
+            case ATK_SPOCKGUN_SHOOT: p.projsound = S_FLYBYSPOCK; break;
+            case ATK_SMAW_SHOOT: p.projsound = S_ROCKET; break;
+            case ATK_ROQUETTES_SHOOT: p.projsound = S_MINIROCKET; break;
+            case ATK_NUKE_SHOOT: p.projsound = S_MISSILENUKE; break;
+            case ATK_ARTIFICE_SHOOT: p.projsound = S_FLYBYFIREWORKS;
+            default: p.projsound = 0;
+        }
+
+        p.soundplaying = false;
     }
 
     void removeprojectiles(gameent *owner)
@@ -946,7 +965,6 @@ namespace game
                         tail = vec(dir).mul(-len).add(pos),
                         head = vec(dir).mul(2.4f).add(pos);
 
-                    bool canplaysound = false;
                     if(!p.inwater && lookupmaterial(pos)==MAT_WATER)
                     {
                         p.inwater = true;
@@ -960,22 +978,17 @@ namespace game
                             particle_splash(PART_PLASMA_FRONT, 1, 1, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFF6600, 2.4f, 150, 20, 0, gfx::champicolor());
                             particle_flare(tail, head, 1, PART_F_PLASMA, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFF6600, 2.0f, p.owner, gfx::champicolor());
                             if(lookupmaterial(pos)==MAT_WATER) particle_splash(PART_BUBBLE, 1, 150, v, 0x18181A, 2.0f+rnd(2), 20, -30);
-                            p.projsound = S_FLYBYPLASMA;
-                            canplaysound = true;
                             break;
                         case ATK_GRAP1_SHOOT:
                             particle_splash(PART_PLASMA_FRONT, 1, 1, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFF33BB, 3.0f, 150, 20, 0, gfx::champicolor());
                             particle_flare(tail, head, 1, PART_F_PLASMA, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xEE22AA, 3.0f, p.owner, gfx::champicolor());
                             particle_splash(lookupmaterial(pos)==MAT_WATER ? PART_BUBBLE : PART_SMOKE, 1, lookupmaterial(pos)==MAT_WATER ? 150 : 300, pos, lookupmaterial(pos)&MAT_WATER ? 0x18181A : 0xAAAAAA, 4.0f, 25, 250, 0, gfx::champicolor());
-                            p.projsound = S_FLYBYGRAP1;
-                            canplaysound = true;
                             break;
                         case ATK_SPOCKGUN_SHOOT:
                             particle_splash(PART_SPOCK_FRONT, 1, 1, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0x00FF00, 4.f, 150, 20, 0, gfx::champicolor());
                             particle_flare(tail, head, 1, PART_F_PLASMA, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0x22FF22, 2.5f, p.owner, gfx::champicolor());
-                            p.projsound = S_FLYBYSPOCK;
-                            canplaysound = true;
                             break;
+
                         case ATK_SV98_SHOOT:
                         case ATK_SKS_SHOOT:
                         case ATK_CAMPOUZE_SHOOT:
@@ -985,6 +998,7 @@ namespace game
                             particle_splash(PART_PLASMA_FRONT, 1, 1, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFFBB88,  p.owner==player1 ? 0.65f : ATK_GAU8_SHOOT==1 ? 0.45f : 0.3f, 150, 20, 0, gfx::champicolor());
                             particle_flare(tail, head, ATK_SV98_SHOOT==1 || ATK_CAMPOUZE_SHOOT==1 ? 3000 : 2000, PART_F_SMOKE, 0x333333, ATK_SV98_SHOOT==1 || ATK_CAMPOUZE_SHOOT==1 ? 1.4f : 1.f, p.owner, gfx::champicolor(), 3);
                             break;
+
                         case ATK_MINIGUN_SHOOT:
                         case ATK_AK47_SHOOT:
                         case ATK_UZI_SHOOT:
@@ -995,6 +1009,7 @@ namespace game
                             particle_splash(PART_PLASMA_FRONT, 1, 1, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFFBB88, p.owner==player1 ? 0.4f : ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.3f : 0.24f, 150, 20, 0, gfx::champicolor());
                             particle_flare(tail, head, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 2000 : 1250, PART_F_SMOKE, 0x252525, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 1.f : 0.75f, p.owner, gfx::champicolor(), 3);
                             break;
+
                         case ATK_ARBALETE_SHOOT:
                             if(!p.exploded)
                             {
@@ -1007,31 +1022,29 @@ namespace game
                                     particle_splash(PART_PLASMA_FRONT, 1, 1, pos, 0xFF4444, p.owner==player1 ? 0.5f : 0.25f, 150, 20, 0, gfx::champicolor());
                                 }
                             }
-                            break;
-                        case ATK_SMAW_SHOOT:
-                            p.projsound = S_ROCKET;
-                            canplaysound = true;
-                            break;
-                        case ATK_ROQUETTES_SHOOT:
-                            p.projsound = S_MINIROCKET;
-                            canplaysound = true;
-                            break;
-                        case ATK_NUKE_SHOOT:
-                            p.projsound = S_MISSILENUKE;
-                            canplaysound = true;
-                            break;
-                        case ATK_ARTIFICE_SHOOT:
-                            p.projsound = S_FLYBYFIREWORKS;
-                            canplaysound = true;
-                            break;
                     }
-                    if(canplaysound)    ;//p.projchan = //playsound(p.projsound, &pos, NULL, 0, -1, 128, p.projchan, p.atk==ATK_NUKE_SHOOT || p.atk==ATK_ROQUETTES_SHOOT || p.atk==ATK_ARTIFICE_SHOOT ? 500 : 375);
+                }
+
+                bool bigradius = p.atk==ATK_NUKE_SHOOT || p.atk==ATK_ROQUETTES_SHOOT || p.atk==ATK_ARTIFICE_SHOOT;
+
+                if(camera1->o.dist(p.o) < (bigradius ? 800 : 400) && p.projsound) // play and update the sound only if the projectile is passing by
+                {
+                    vec velocity = dv.div(float(time));
+                    if(!p.soundplaying) playSound(p.projsound, &p.o, bigradius ? 800 : 400, 1, SND_LOOPED, p.entityId);
+                    p.soundplaying = true;
+                    if(p.entityId) updateSoundPosition(p.entityId, p.o, velocity.mul(vec(70, 70, 70)));
+                }
+                else
+                {
+                    p.soundplaying = false;
+                    stopLinkedSound(p.entityId);
                 }
             }
             if(exploded)
             {
                 if(p.local && !p.exploded) addmsg(N_EXPLODE, "rci3iv", p.owner, lastmillis-maptime, p.atk, p.id-maptime, hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
                 p.exploded = true;
+                if(p.soundplaying) stopLinkedSound(p.entityId);
 
                 if((p.lifetime -= time)<0 || removearrow) projs.remove(i--);
                 else if(p.atk!=ATK_ARBALETE_SHOOT) projs.remove(i--);
@@ -1228,8 +1241,8 @@ namespace game
 
         if(d->boostmillis[B_ROIDS] && randomevent(attacks[atk].specialsounddelay))
         {
-            //playsound(S_ROIDS_SHOOT, d==hudplayer() ? NULL : &d->o, NULL, 0, 0 , 300, -1, 500);
-            //if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 400 && d!=player1) //playsound(S_ROIDS_SHOOT_FAR, &d->o, NULL, 0, 0 , 600, -1, 800);
+            playSound(S_ROIDS_SHOOT, d==hudplayer() ? NULL : &d->o, 500, 100);
+            if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 400 && d!=player1) playSound(S_ROIDS_SHOOT_FAR, &d->o, 800, 450);
         }
         else if(d->boostmillis[B_RAGE] && randomevent(attacks[atk].specialsounddelay))    ; //playsound(S_RAGETIR, d==hudplayer() ? NULL : &d->o, NULL, 0, 0 , 300, -1, 500);
 

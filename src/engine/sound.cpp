@@ -8,7 +8,7 @@
 #include <AL/efx-presets.h>
 
 bool foundDevice = false;
-bool noSound = false;
+bool noSound = true;
 bool noEfx = false;
 
 VAR(debugsounds, 0, 1, 1);
@@ -86,8 +86,9 @@ void loadSoundFile(const string& filepath, ALuint buffer) // load a sound using 
     sf_close(file);
 }
 
-bool loadSound(Sound& s) // load a sound including his alts
+void loadSound(Sound& s) // load a sound including his alts
 {
+    if(noSound) return;
     loopi(s.numAlts ? s.numAlts+1 : 1)
     {
         if(s.bufferId[i]) alDeleteBuffers(1, &s.bufferId[i]); // delete the buffer if it already exists.
@@ -97,7 +98,6 @@ bool loadSound(Sound& s) // load a sound including his alts
         reportSoundError("alGenBuffers", s.soundPath, s.bufferId[i]);
         loadSoundFile(fullPath, s.bufferId[i]);
     }
-    return true;
 }
 
 LPALGENAUXILIARYEFFECTSLOTS    alGenAuxiliaryEffectSlots    = NULL;
@@ -166,6 +166,8 @@ ALuint occlusionFilter;
 
 void setOcclusionEffect()
 {
+    if(noEfx) return;
+
     alGenFilters(1, &occlusionFilter);
     reportSoundError("alGenFilters-occlusionFilter", "N/A", -1);
 
@@ -207,14 +209,13 @@ int countActiveSources()
 {
     int count = 0;
     loopi(MAX_SOURCES) { if (sources[i].isActive) count++; }
-    if(debugsounds) conoutf(CON_INFO, "Currently playing %d sounds", count);
     return count;
 }
 
 void initSounds()
 {
     ALCdevice* device = alcOpenDevice(NULL); // open default device
-    if(!device) { conoutf("Unable to initialize OpenAL (no audio device detected)"); noSound = true; return; }
+    if(!device) { conoutf("Unable to initialize OpenAL (no audio device detected)"); return; }
 
     ALCint attributes[] = {
         ALC_FREQUENCY, 44100,
@@ -223,8 +224,10 @@ void initSounds()
     };
 
     ALCcontext* context = alcCreateContext(device, attributes);
-    if(!context) { conoutf("Unable to initialize OpenAL (!context)"); noSound = true; return; }
+    if(!context) { conoutf("Unable to initialize OpenAL (!context)"); return; }
     alcMakeContextCurrent(context);
+
+    noSound = false;
 
     if(!alcIsExtensionPresent(device, "ALC_EXT_EFX")) // check for EFX extension support
     {
@@ -239,12 +242,14 @@ void initSounds()
     }
 
     alDistanceModel(AL_LINEAR_DISTANCE);
+    alDopplerFactor(1.0f);
+    alSpeedOfSound(343.3f);
     initSoundSources();
 }
 
 bool checkSoundOcclusion(const vec *soundPos)
 {
-    if(!soundPos) return false;  // HUD sounds are never occluded
+    if(!soundPos || noSound || noEfx) return false;  // HUD sounds are never occluded
 
     vec dir = vec(camera1->o).sub(*soundPos);
     const float dist = dir.magnitude();
@@ -286,7 +291,7 @@ void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRa
     if(soundPos && !(flags & SND_NOCULL) && camera1->o.dist(*soundPos) > maxRadius + 50) return; // do not play sound too far from camera, except if flag SND_NOCULL
 
     size_t sourceIndex = findInactiveSource();
-    if((flags & SND_LOWPRIORITY) && (countActiveSources() >= 0.80f * MAX_SOURCES)) return; // skip low priority sounds (distant shoots etc.) when we are close (85%) to max capacity
+    if((flags & SND_LOWPRIORITY) && (countActiveSources() >= 0.6f * MAX_SOURCES)) return; // skip low-priority sounds (distant shoots etc.) when we are getting at 60% of max capacity
 
     if(sourceIndex == SIZE_MAX) { conoutf(CON_WARN, "Max sounds at once capacity reached (%d)", MAX_SOURCES); return; } // skip sound if max capacity
 
@@ -303,7 +308,7 @@ void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRa
     alSourcef(source, AL_GAIN, s.soundVol / 100.f); // managing sound volume
     if(!(flags & SND_FIXEDPITCH)) // managing variations of pitches
     {
-        float randomPitch = 0.9f + 0.2f * ((float)rand() / (float)RAND_MAX);
+        float randomPitch = 0.92f + 0.16f * ((float)rand() / (float)RAND_MAX);
         alSourcef(source, AL_PITCH, randomPitch);
     }
     else alSourcef(source, AL_PITCH, 1.f);
@@ -374,14 +379,16 @@ void updateListenerPos()
     };
 
     alListenerfv(AL_ORIENTATION, orientation); // set the listener's orientation
+    alListener3f(AL_VELOCITY, camera1->vel.x/100, camera1->vel.z/100, camera1->vel.y/100); // set the listener's velocity
 }
 
-void updateSoundPosition(size_t entityId, const vec &newPosition)
+void updateSoundPosition(size_t entityId, const vec &newPosition, const vec &velocity)
 {
     loopi(MAX_SOURCES) // loop through all the SoundSources and find the one with the matching entityId
     {
         if(sources[i].entityId == entityId) // found the correct sound source, now update its position
         {
+            alSource3f(sources[i].source, AL_VELOCITY, velocity.x, velocity.z, velocity.y);
             alSource3f(sources[i].source, AL_POSITION, newPosition.x, newPosition.z, newPosition.y);
             break;
         }
@@ -390,6 +397,7 @@ void updateSoundPosition(size_t entityId, const vec &newPosition)
 
 void soundNearmiss(int sound, const vec &from, const vec &to, int precision)
 {
+    if(noSound) return;
     vec v;
     float d = to.dist(from, v);
     int steps = clamp(int(d*2), 1, 2048);
@@ -443,7 +451,7 @@ void stopAllMapSounds()
 
 void checkMapSounds()
 {
-    if(mainmenu) return;
+    if(mainmenu || noSound) return;
     const vector<extentity *> &ents = entities::getents();
 
     loopv(ents)
@@ -462,6 +470,20 @@ void checkMapSounds()
             }
         }
         else if(e.flags & EF_SOUND) stopMapSound(&e);
+    }
+}
+
+void stopLinkedSound(size_t entityId)
+{
+    SoundSource* soundSource = NULL;
+    loopi(MAX_SOURCES) if(sources[i].entityId == entityId) { soundSource = &sources[i]; break; }
+
+    if(soundSource)
+    {
+        alSourceStop(soundSource->source);
+        reportSoundError("alSourceStop-stopMapSound", "N/A", soundSource->source);
+        alSource3f(soundSource->source, AL_VELOCITY, 0.f, 0.f, 0.f);
+        soundSource->isActive = false;
     }
 }
 

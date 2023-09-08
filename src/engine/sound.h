@@ -72,12 +72,13 @@ struct Sound
 extern void initSounds();
 extern void cleanUpSounds();
 
-extern void updateSoundPosition(int projchan, const vec* soundPos);
+extern void updateSoundPosition(size_t entityId, const vec &newPosition, const vec &velocity = vec(0,0,0));
+extern void stopLinkedSound(size_t entityId);
 extern void updateSounds();
 extern void stopAllMapSounds();
 extern void stopAllSounds();
 
-extern bool loadSound(Sound& s);
+extern void loadSound(Sound& s);
 extern void manageSources();
 extern const char *getmapsoundname(int n);
 

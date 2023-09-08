@@ -4080,7 +4080,7 @@ namespace server
         }
 
         putint(p, PROTOCOL_VERSION);
-        putint(p, numclients(-1, true, true)<servaddbots ? servaddbots : numclients(-1, false, true));
+        putint(p, numclients(-1, true, true) < servaddbots ? servaddbots : numclients(-1, false, true));
         putint(p, maxclients);
         putint(p, gamepaused || gamespeed != 100 ? 5 : 3); // number of attrs following
         putint(p, gamemode);
