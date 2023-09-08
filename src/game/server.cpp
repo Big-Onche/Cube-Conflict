@@ -2477,13 +2477,10 @@ namespace server
 
         if(ci->state.armourtype==A_ASSIST && !ci->state.armour && ci->state.ammo[GUN_ASSISTXPL] && ci->state.gunselect==GUN_ASSISTXPL) gs.gunwait=0;
 
-        if(!gs.isalive(gamemillis) ||
-           wait<gs.gunwait ||
-           !validatk(atk))
-            return;
+        if(!gs.isalive(gamemillis) || wait<gs.gunwait || !validatk(atk)) return;
+
         int gun = attacks[atk].gun;
-        if(gs.ammo[gun]<=0 || (attacks[atk].range && from.dist(to) > attacks[atk].range + 1))
-            return;
+        if(gs.ammo[gun]<=0 || (attacks[atk].range && from.dist(to) > attacks[atk].range + 1)) return;
 
         if(!m_muninfinie || atk==ATK_GAU8_SHOOT || atk==ATK_NUKE_SHOOT || atk==ATK_CAMPOUZE_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT) gs.ammo[gun] -= attacks[atk].use;
 
@@ -2644,49 +2641,45 @@ namespace server
     {
         regentimer += curtime;
 
-        if(regentimer > 1000)   //ticked regeneration to spare bandwidth
-        {
-            loopv(clients)
-            {
-                clientinfo &receiver = *clients[i];     //every body can receive
-                loopv(clients)
-                {
-                    clientinfo &giver = *clients[i];        //every body can give
-                    bool bothalive = giver.state.state==CS_ALIVE && receiver.state.state==CS_ALIVE;
+        if(regentimer <= 1000) return;
 
-                    switch(giver.aptitude)
+        loopv(clients)
+        {
+            clientinfo &receiver = *clients[i];     //every body can receive
+            loopvj(clients)
+            {
+                clientinfo &giver = *clients[j];        //every body can give
+
+                if(!(giver.state.state==CS_ALIVE && receiver.state.state==CS_ALIVE)) continue;
+                float distance = giver.state.o.dist(receiver.state.o)/18.f;
+
+                if(giver.aptitude==APT_MEDECIN)
+                {
+                    if((distance < 7.5f && receiver.state.health < receiver.state.maxhealth+250) && (m_teammode ? isteam(receiver.team, giver.team) : giver.clientnum==receiver.clientnum))
                     {
-                        case APT_MEDECIN: //medic regen allie's health (including himself)
+                        receiver.state.health = min(receiver.state.health + 100, receiver.state.maxhealth + 250);
+                        sendf(-1, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, S_HEALTH, receiver.state.health);
+                    }
+                }
+                else if( giver.aptitude==APT_JUNKIE)
+                {
+                    if(needmana(receiver.aptitude) && distance < 7.5f && receiver.state.mana < 150)
+                    {
+                        if(receiver.aptitude==APT_VAMPIRE && receiver.state.health < receiver.state.maxhealth+250)
                         {
-                            if((giver.state.o.dist(receiver.state.o)/18.f < 7.5f && receiver.state.health < receiver.state.maxhealth+250 && bothalive) && (m_teammode ? isteam(receiver.team, giver.team) : giver.clientnum==receiver.clientnum))
-                            {
-                                receiver.state.health = min(receiver.state.health + 100, receiver.state.maxhealth + 250);
-                                sendf(-1, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, S_HEALTH, receiver.state.health);
-                            }
+                            receiver.state.health = min(receiver.state.health + 100, receiver.state.maxhealth + 250);
+                            sendf(-1, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, S_HEALTH, receiver.state.health); //vampire gets health instead of mana
                         }
-                        break;
-                        case APT_JUNKIE: //junkie regen allie's mana and vampire's health
+                        else if(receiver.aptitude!=APT_VAMPIRE) //other classes needing mana : receive mana
                         {
-                            if(needmana(receiver.aptitude) && giver.state.o.dist(receiver.state.o)/18.f < 7.5f && receiver.state.mana < 150 && bothalive)
-                            {
-                                if(receiver.aptitude==APT_VAMPIRE && receiver.state.health < receiver.state.maxhealth+250)
-                                {
-                                    receiver.state.health = min(receiver.state.health + 100, receiver.state.maxhealth + 250);
-                                    sendf(-1, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, S_HEALTH, receiver.state.health); //vampire gets health instead of mana
-                                }
-                                else if(receiver.aptitude!=APT_VAMPIRE) //other classes needing mana : receive mana
-                                {
-                                    receiver.state.mana = min(receiver.state.mana + 10, 150);
-                                    sendf(-1, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, S_MANA, receiver.state.mana);
-                                }
-                            }
+                            receiver.state.mana = min(receiver.state.mana + 10, 150);
+                            sendf(-1, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, S_MANA, receiver.state.mana);
                         }
-                        break;
                     }
                 }
             }
-            regentimer = 0;
         }
+        regentimer = 0;
     }
 
     int identiquetimer, nextweapon, curweapon;
