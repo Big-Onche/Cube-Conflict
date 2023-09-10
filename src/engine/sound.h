@@ -5,7 +5,7 @@
 #include <AL/alc.h>
 
 #define MAX_ALTS 16
-#define MAX_SOURCES 256
+#define MAX_SOURCES 64
 
 enum SoundNames
 {   // players sounds
@@ -66,7 +66,15 @@ struct Sound
     string soundPath;               // relative path of the sound
     int numAlts;                    // number of alternatives for the same sound id
     int soundVol;                   // volume of the sound
+    bool loaded = false;
     ALuint bufferId[MAX_ALTS];      // OpenAL buffer ID
+};
+
+struct SoundSource
+{
+    ALuint source;
+    size_t entityId;
+    bool isActive;
 };
 
 extern void initSounds();
@@ -78,8 +86,10 @@ extern void updateSounds();
 extern void stopAllMapSounds();
 extern void stopAllSounds();
 
-extern void loadSound(Sound& s);
+extern bool loadSound(Sound& s);
 extern void manageSources();
+
+extern void setShroomsEfx(bool enable);
 extern const char *getmapsoundname(int n);
 
 extern void soundNearmiss(int sound, const vec &from, const vec &to, int precision = 2048);
