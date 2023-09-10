@@ -285,16 +285,16 @@ namespace game
         {
             switch(b->bouncetype)
             {
-                case BNC_DOUILLES: case BNC_DOUILLESUZI: playSound(S_DOUILLE, &b->o, 150, 50, SND_LOWPRIORITY|SND_FIXEDPITCH); break;
-                case BNC_BIGDOUILLES: playSound(S_BIGDOUILLE, &b->o, 150, 50, SND_LOWPRIORITY|SND_FIXEDPITCH); break;
-                case BNC_CARTOUCHES: playSound(S_CARTOUCHE, &b->o, 150, 50, SND_LOWPRIORITY); break;
-                case BNC_GRENADE: playSound(S_RGRENADE, &b->o, 350, 100); break;
+                case BNC_DOUILLES: case BNC_DOUILLESUZI: playSound(S_DOUILLE, &b->o, 125, 75, SND_LOWPRIORITY|SND_FIXEDPITCH); break;
+                case BNC_BIGDOUILLES: playSound(S_BIGDOUILLE, &b->o, 125, 75, SND_LOWPRIORITY|SND_FIXEDPITCH); break;
+                case BNC_CARTOUCHES: playSound(S_CARTOUCHE, &b->o, 125, 75, SND_LOWPRIORITY); break;
+                case BNC_GRENADE: playSound(S_RGRENADE, &b->o, 300, 50); break;
                 case BNC_LIGHT: b->lifetime=0;
             }
         }
 
         b->bounces++;
-        if(b->bouncetype == BNC_GIBS && b->bounces < 2 && randomevent(0.05*gfx::nbfps)) addstain(STAIN_BLOOD, vec(b->o).sub(vec(surface).mul(b->radius)), surface, 2.96f/b->bounces, bvec(0x60, 0xFF, 0xFF), rnd(4));
+        if(b->bouncetype == BNC_GIBS && b->bounces < 2 && randomevent(0.05f*gfx::nbfps)) addstain(STAIN_BLOOD, vec(b->o).sub(vec(surface).mul(b->radius)), surface, 2.96f/b->bounces, bvec(0x60, 0xFF, 0xFF), rnd(4));
         if(b->bouncetype == BNC_GRENADE) addstain(STAIN_PLASMA_GLOW, vec(b->o).sub(vec(surface).mul(b->radius)), surface, 4.f, 0x0000FF);
     }
 
@@ -445,7 +445,7 @@ namespace game
 
     void spawnbouncer(const vec &p, const vec &vel, gameent *d, int type, int lifetime, bool frommonster)
     {
-        if(camera1->o.dist(p)>temptrisfade/10 && (type==BNC_DOUILLES || type==BNC_CARTOUCHES || type==BNC_DOUILLESUZI)) return;
+        if(camera1->o.dist(p) > (type==BNC_DEBRIS ? 750 : 500) && (type==BNC_DOUILLES || type==BNC_BIGDOUILLES || type==BNC_CARTOUCHES || type==BNC_DOUILLESUZI)) return;
 
         vec to(0, 0, 0);
 
@@ -786,7 +786,7 @@ namespace game
             case ATK_FAMAS_SHOOT:
             case ATK_GLOCK_SHOOT:
             case ATK_ARBALETE_SHOOT:
-                if(!(lookupmaterial(v)==MAT_WATER)) playSound(atk==ATK_ARBALETE_SHOOT ? S_IMPACTARROW : S_LITTLERICOCHET, &v, 250, 50, SND_LOWPRIORITY);
+                if(!(lookupmaterial(v)==MAT_WATER)) playSound(atk==ATK_ARBALETE_SHOOT ? S_IMPACTARROW : S_LITTLERICOCHET, &v, 175, 75, SND_LOWPRIORITY);
                 gfx::projgunhit(owner, v, vel, safe, atk);
                 break;
 
@@ -797,8 +797,8 @@ namespace game
             {
                 if(!(lookupmaterial(v)==MAT_WATER))
                 {
-                    playSound(S_IMPACTLOURDLOIN, &v, 1000, 500, SND_LOWPRIORITY);
-                    playSound(S_BIGRICOCHET, &v, 350, 50, SND_LOWPRIORITY);
+                    playSound(S_IMPACTLOURDLOIN, &v, 750, 400, SND_LOWPRIORITY);
+                    playSound(S_BIGRICOCHET, &v, 250, 75, SND_LOWPRIORITY);
                 }
                 gfx::projgunhit(owner, v, vel, safe, atk);
             }
@@ -1061,7 +1061,6 @@ namespace game
 
         int gun = attacks[atk].gun;
         int sound = attacks[atk].sound;
-        //int soundwater = attacks[atk]].soundwater;
         if(player1->abilitymillis[ABILITY_2] && d==player1 && player1->aptitude==APT_MAGICIEN)    ;//playsound(S_WIZ_2);
         if(d->abilitymillis[ABILITY_3] && d->aptitude==APT_PRETRE)adddynlight(d->muzzle, 6, vec(1.5f, 1.5f, 0.0f), 80, 40, L_NOSHADOW|L_VOLUMETRIC|DL_FLASH);
 
@@ -1239,33 +1238,40 @@ namespace game
                 break;
         }
 
-        if(d->boostmillis[B_ROIDS] && randomevent(attacks[atk].specialsounddelay))
+        if(randomevent(attacks[atk].specialsounddelay))
         {
-            playSound(S_ROIDS_SHOOT, d==hudplayer() ? NULL : &d->o, 500, 100);
-            if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 400 && d!=player1) playSound(S_ROIDS_SHOOT_FAR, &d->o, 800, 450);
+            if(d->boostmillis[B_ROIDS])
+            {
+                playSound(S_ROIDS_SHOOT, d==hudplayer() ? NULL : &d->o, 500, 100);
+                if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 400 && d!=player1) playSound(S_ROIDS_SHOOT_FAR, &d->o, 800, 450);
+            }
+            else if(d->boostmillis[B_RAGE])    ; //playsound(S_RAGETIR, d==hudplayer() ? NULL : &d->o, NULL, 0, 0 , 300, -1, 500);
         }
-        else if(d->boostmillis[B_RAGE] && randomevent(attacks[atk].specialsounddelay))    ; //playsound(S_RAGETIR, d==hudplayer() ? NULL : &d->o, NULL, 0, 0 , 300, -1, 500);
 
-        looped = false;
-        if(d->attacksound >= 0 && d->attacksound != sound) d->stopattacksound(d);
+        bool incraseDist = atk==ATK_ASSISTXPL_SHOOT || atk==ATK_KAMIKAZE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_NUKE_SHOOT;
 
         switch(sound)
         {
             case S_FLAMETHROWER:
             case S_GAU8:
-            case S_PLASMARIFLE_SFX:
-                if(d->attacksound >= 0) looped = true;
-                d->attacksound = sound;
-                //d->attackchan = //playsound(sound, d==hudplayer() ? NULL : &d->o, NULL, 0, -1, atk==ATK_GAU8_SHOOT ? 75 : 50, d->attackchan, atk==ATK_GAU8_SHOOT ? 600 : 350);
+                if(!d->attacksound)
+                {
+                    playSound(sound, d==hudplayer() ? NULL : &d->muzzle, incraseDist ? 800 : 400, incraseDist ? 250 : 150, SND_LOOPED|SND_FIXEDPITCH|SND_NOCULL, d->entityId);
+                    d->attacksound = true;
+                }
                 return;
             default:
-                bool incraseDist = atk==ATK_ASSISTXPL_SHOOT || atk==ATK_KAMIKAZE_SHOOT;
+                if(!d->attacksound && sound==S_PLASMARIFLE_SFX)
+                {
+                    playSound(sound, d==hudplayer() ? NULL : &d->muzzle, 400, 150, SND_LOOPED|SND_FIXEDPITCH|SND_NOCULL, d->entityId);
+                    d->attacksound = true;
+                }
                 playSound(attacks[atk].sound, d==hudplayer() ? NULL : &d->muzzle, incraseDist ? 600 : 400, incraseDist ? 200 : 150);
         }
 
         if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 300)
         {
-            playSound(attacks[atk].middistsnd, &d->muzzle, 700, 300);
+            playSound(attacks[atk].middistsnd, &d->muzzle, 700, 300, SND_LOWPRIORITY);
             if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 600) playSound(attacks[atk].fardistsnd, &d->muzzle, 1000, 600, SND_LOWPRIORITY);
         }
     }
@@ -1598,60 +1604,6 @@ namespace game
         }
     }
 
-    void checkattacksound(gameent *d, bool local)
-    {
-        //updateLoopedSoundPosition(S_JUMP_BASIC, newPlayerPosition);
-        //int atk = -1;
-        /*
-        switch(d->attacksound)
-        {
-            case S_FLAMETHROWER:
-                atk = ATK_LANCEFLAMMES_SHOOT;
-                break;
-            case S_GAU8:
-                atk = ATK_GAU8_SHOOT;
-                break;
-            case S_PLASMARIFLE_SFX:
-                atk = ATK_PULSE_SHOOT;
-                break;
-            default:
-                return;
-        }
-        if(atk >= 0 && atk < NUMATKS &&
-           d->clientnum >= 0 && d->state == CS_ALIVE &&
-           d->lastattack == atk && lastmillis - d->lastaction < attacks[atk].attackdelay + 50)
-        {
-            d->attackchan = playsound(d->attacksound, local ? NULL : &d->o, NULL, 0, -1, -1, d->attackchan, 300);
-            if(d->attackchan < 0) d->attacksound = -1;
-        }
-        else d->stopattacksound(d);
-        */
-    }
-
-    void checkdansesound(gameent *d, bool local)
-    {
-        /*
-        if(!packtaunt) return;
-        if(d->clientnum >= 0 && d->state == CS_ALIVE && lastmillis - d->lasttaunt < 5000)
-        {
-            d->dansechan = playsound(S_CGCORTEX+(d->customdanse), local ? NULL : &d->o, NULL, 0, -1, -1, d->dansechan, 400);
-            if(d->dansechan < 0) d->dansesound = -1;
-        }
-        else d->stopdansesound(d);
-        */
-    }
-
-    void checkabiounds(gameent *d, bool local)
-    {
-        /*
-        if(d->clientnum >= 0 && d->state == CS_ALIVE)
-        {
-            loopi(3) if(d->abisnd[i] >= 0) {d->abichan[i] = playsound(d->abisnd[i], local ? NULL : &d->o, NULL, 0, -1, -1, d->abichan[i], 300); if(d->abichan[i] < 0) d->abisnd[i] = -1;}
-        }
-        else d->stopabisound(d);
-        */
-    }
-
     void removeweapons(gameent *d)
     {
         removebouncers(d);
@@ -1665,13 +1617,6 @@ namespace game
         updatebouncers(curtime); // need to do this after the player shoots so bouncers don't end up inside player's BB next frame
         gameent *following = followingplayer();
         if(!following) following = player1;
-        loopv(players)
-        {
-            gameent *d = players[i];
-            checkattacksound(d, d==following);
-            checkdansesound(d, d==following);
-            checkabiounds(d, d==following);
-        }
     }
 
     void avoidweapons(ai::avoidset &obstacles, float radius)
