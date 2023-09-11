@@ -2,6 +2,8 @@
 #include "stats.h"
 #include "engine.h"
 
+size_t GlobalIdGenerator::currentId = 0;
+
 namespace entities
 {
     using namespace game;
@@ -135,16 +137,19 @@ namespace entities
 
     // these two functions are called when the server acknowledges that you really
     // picked up the item (in multiplayer someone may grab it before you).
+    bool validitem(int etype) { return etype >= I_RAIL && etype <= I_MANA; }
 
     void pickupeffects(int n, gameent *d, int rndsweap)
     {
         if(!ents.inrange(n)) return;
-        extentity *e = ents[n];
-        int type = e->type;
-        if(type<I_RAIL || type>I_MANA) return;
-        e->clearspawned();
-        e->clearnopickup();
+        int type = ents[n]->type;
+        if(!validitem(ents[n]->type)) return;
+        ents[n]->clearspawned();
         if(!d) return;
+
+        d->pickupitem(type, d->aptitude, d->abilitymillis[ABILITY_1], d->armourtype==A_ASSIST && d->armour, rndsweap);
+
+        playSound(powerarmorpieces(type, d) ? S_ITEMPIECEROBOTIQUE : itemstats[type-I_RAIL].sound, d==hudplayer() ? NULL : &d->o, 300, 50);
 
         if(type>=I_RAIL && type<=I_SUPERARME)
         {
@@ -155,23 +160,14 @@ namespace entities
         if(d->abilitymillis[ABILITY_1] && d->aptitude==APT_PRETRE)
         {
             adddynlight(d->o, 20, vec(1.5f, 1.5f, 0.0f), 300, 50, L_NOSHADOW|L_VOLUMETRIC);
-            playsound(S_PRI_1, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, d==hudplayer() ? 0 : 150, -1, 300);
+            //playsound(S_PRI_1, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, d==hudplayer() ? 0 : 150, -1, 300);
         }
 
-        playSound(powerarmorpieces(type, d) ? S_ITEMPIECEROBOTIQUE : itemstats[type-I_RAIL].sound, d==hudplayer() ? NULL : &d->o, 300, 50);
-
-		d->pickupitem(type, d->aptitude, d->abilitymillis[ABILITY_1], d->armourtype==A_ASSIST && d->armour, rndsweap);
-
-        if(d==player1) switch(type)
+        if(d==player1 && type==I_BOOSTPRECISION)
         {
-            case I_BOOSTPV: playSound(S_COCHON); break;
-            case I_BOOSTDEGATS: playSound(S_ITEMSTEROS); break;
-            case I_BOOSTVITESSE: playSound(S_ITEMEPO); break;
-            case I_BOOSTGRAVITE:  playSound(S_ITEMJOINT); break;
-            case I_BOOSTPRECISION:
-                addpostfx("sobel", 1, 1, 1, 1, vec4(1, 1, 1, 1));
-                fullbrightmodels = 200;
-                playSound(S_ITEMCHAMPIS);
+            addpostfx("sobel", 1, 1, 1, 1, vec4(1, 1, 1, 1));
+            fullbrightmodels = 200;
+            setShroomsEfx(true);
         }
     }
 
@@ -256,10 +252,10 @@ namespace entities
         switch(e->type)
         {
             default:
-                if(d->canpickupitem(ents[n]->type, d->aptitude, d->armourtype==A_ASSIST && d->armour))
+                if(d->canpickupitem(e->type, d->aptitude, d->armourtype==A_ASSIST && d->armour))
                 {
                     addmsg(N_ITEMPICKUP, "rci", d, n);
-                    e->setnopickup(); // even if someone else gets it first
+                    ents[n]->clearspawned(); // even if someone else gets it first
 
                     if(d==player1)
                     {
@@ -295,9 +291,9 @@ namespace entities
             {
                 if(d->lastpickup==e->type && lastmillis-d->lastpickupmillis<500) break;
                 if(!teleteam && m_teammode) break;
-                if(e->attr3 > 0)
+                if(e->type > 0)
                 {
-                    defformatstring(hookname, "can_teleport_%d", e->attr3);
+                    defformatstring(hookname, "can_teleport_%d", e->type);
                     if(!execidentbool(hookname, true)) break;
                 }
                 d->lastpickup = e->type;
@@ -340,7 +336,7 @@ namespace entities
         {
             extentity &e = *ents[i];
             if(e.type==NOTUSED) continue;
-            if((!e.spawned() || e.nopickup()) && e.type!=TELEPORT && e.type!=JUMPPAD && e.type!=RESPAWNPOINT) continue;
+            if(!e.spawned() && e.type!=TELEPORT && e.type!=JUMPPAD && e.type!=RESPAWNPOINT) continue;
             float dist = e.o.dist(o);
             if(dist<(e.type==TELEPORT || e.type==I_SUPERARME ? 20 : 16)) trypickup(i, d);
         }
@@ -353,14 +349,14 @@ namespace entities
         if(d->boostmillis[B_ROIDS] && (d->boostmillis[B_ROIDS] -= time)<=0)
         {
             d->boostmillis[B_ROIDS] = 0;
-            playsound(S_ROIDS_PUPOUT, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
+            playSound(S_ROIDS_PUPOUT, d==hudplayer() ? NULL : &d->o, 300, 50);
             if(d==player1) conoutf(CON_GAMEINFO, GAME_LANG ? "\f8The steroid cycle is over." : "\f8La cure de stéros est terminée.");
         }
 
         if(d->boostmillis[B_EPO] && (d->boostmillis[B_EPO] -= time)<=0)
         {
             d->boostmillis[B_EPO] = 0;
-            playsound(S_EPO_PUPOUT, d==player1 ? NULL : &d->o, 0, 0, 0 , 100, -1, 300);
+            playSound(S_EPO_PUPOUT, d==player1 ? NULL : &d->o, 300, 50);
             if(d==player1) conoutf(CON_GAMEINFO, GAME_LANG ? "\f8EPO no longer works..." : "\f8L'EPO ne fait plus effet.");
         }
 
@@ -373,7 +369,7 @@ namespace entities
         if(d==hudplayer() && d->boostmillis[B_SHROOMS] > 4000) playendshrooms = false;
         else if(!playendshrooms && d==hudplayer() && d->boostmillis[B_SHROOMS] && d->boostmillis[B_SHROOMS] < 4000)
         {
-            playsound(S_SHROOMS_PUPOUT, NULL);
+            playSound(S_SHROOMS_PUPOUT);
             playendshrooms = true;
         }
 
@@ -387,18 +383,6 @@ namespace entities
         if(d->boostmillis[B_RAGE] && (d->boostmillis[B_RAGE] -= time)<=0) d->boostmillis[B_RAGE] = 0;
     }
 
-    void checkaptiskill(int time, gameent *d)
-    {
-        if(d->vampimillis && (d->vampimillis -= time)<=0) d->vampimillis = 0;
-        loopi(NUMABILITIES) { if(d->abilitymillis[i] && (d->abilitymillis[i] -= time)<=0) d->abilitymillis[i] = 0; }
-        if(d==player1 && player1->aptitude==APT_SHOSHONE)
-        {
-            int numabi = 0;
-            loopi(NUMABILITIES) if(d->abilitymillis[i]) numabi++;
-            if(numabi==3) unlockachievement(ACH_WASHAKIE);
-        }
-    }
-
     void putitems(packetbuf &p)            // puts items in network stream and also spawns them locally
     {
         putint(p, N_ITEMLIST);
@@ -410,22 +394,17 @@ namespace entities
         putint(p, -1);
     }
 
-    void resetspawns() { loopv(ents) { extentity *e = ents[i]; e->clearspawned(); e->clearnopickup(); } }
+    void resetspawns() { loopv(ents) ents[i]->clearspawned(); }
 
     void spawnitems(bool force)
     {
-        loopv(ents)
+        loopv(ents) if(validitem(ents[i]->type))
         {
-            extentity *e = ents[i];
-            if(canspawnitem(e->type))
-            {
-                e->setspawned(force || m_tutorial || !server::delayspawn(e->type));
-                e->clearnopickup();
-            }
+            ents[i]->setspawned(force || !server::delayspawn(ents[i]->type));
         }
     }
 
-    void setspawn(int i, bool on) { if(ents.inrange(i)) { extentity *e = ents[i]; e->setspawned(on); e->clearnopickup(); } }
+    void setspawn(int i, bool on) { if(ents.inrange(i)) ents[i]->setspawned(on); }
 
     extentity *newentity() { return new gameentity(); }
     void deleteentity(extentity *e) { delete (gameentity *)e; }
