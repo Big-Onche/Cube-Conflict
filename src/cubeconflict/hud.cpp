@@ -127,7 +127,7 @@ namespace game
     {
         msgmillis[MSG_CUSTOM] = totalmillis + *duration;
         formatstring(custommsg, "%s", GAME_LANG ? msg_en : msg_fr);
-        if(sound>=0) playsound(*sound);
+        if(sound>=0) playSound(*sound);
     });
 
     string interractmsg;
@@ -258,7 +258,7 @@ namespace game
 
             gle::colorf(1, 1, 1, 1);
         }
-
+        /*
         dynent *o = intersectclosest(d->o, worldpos, d, gfx::zoom ? 40 : 25);
         if(o && o->type==ENT_PLAYER && !isteam(player1->team, ((gameent *)o)->team) && totalmillis-lastshoot<=1000 && player1->o.dist(o->o)<guns[d->gunselect].hudrange)
         {
@@ -278,7 +278,7 @@ namespace game
             settexture("media/interface/hud/barrestatsvide.png", 3);
             hudquad(lxhbarvide, h-screenh/1.57f-10, 483, 40);
         }
-
+        */
         if(cmode)
         {
             cmode->drawhud(d, w, h);
