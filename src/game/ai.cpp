@@ -11,20 +11,9 @@ namespace ai
     vec aitarget(0, 0, 0);
     VAR(aidebug, 0, 0, 6);
     VAR(aiforcegun, -1, -1, NUMGUNS-1);
-    VARP(IA_number, 0, 5, 49);
-
-    int IA_rndlvl;
-    VARFP(IA_lvl, 0, 2, 4,
-        switch(IA_lvl)
-        {
-            case 0: IA_rndlvl = 39; return;
-            case 1: IA_rndlvl = 51; return;
-            case 2: IA_rndlvl = 63; return;
-            case 3: IA_rndlvl = 75; return;
-            case 4: IA_rndlvl = 88; return;
-        }
-    );
-    ICOMMAND(addbots, "s", (char *s), loopi(IA_number){addmsg(N_ADDBOT, "ri", IA_rndlvl+rnd(7));} );
+    VARP(numbots, 0, 5, 49);
+    VARP(botlevel, 0, 2, 4);
+    ICOMMAND(addbots, "ii", (int *num, int *classe), loopi(*num) addmsg(N_ADDBOT, "rii", (33 + botlevel * 15) + rnd(7), *classe); );
     ICOMMAND(delbot, "", (), addmsg(N_DELBOT, "r"));
     ICOMMAND(botlimit, "i", (int *n), addmsg(N_BOTLIMIT, "ri", *n));
     ICOMMAND(botbalance, "i", (int *n), addmsg(N_BOTBALANCE, "ri", *n));
@@ -35,7 +24,7 @@ namespace ai
         if(d->state!=CS_ALIVE || d->physstate<PHYS_SLOPE) return;
         if(lastmillis-d->lasttaunt<7500) return;
         d->lasttaunt = lastmillis;
-        d->dansechan = playsound(S_CGCORTEX+(d->customdanse), d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 150, d->dansechan, 400);
+        //d->dansechan = playsound(S_CGCORTEX+(d->customdanse), d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 150, d->dansechan, 400);
         addmsg(N_TAUNT, "rc", d);
     }
 
@@ -73,11 +62,6 @@ namespace ai
     {
         float mindist = attackmindist(atk), maxdist = attackmaxdist(atk);
         return dist >= mindist*mindist && dist <= maxdist*maxdist;
-    }
-
-    bool validitem(int etype)
-    {
-        return etype >= I_RAIL && etype <= I_MANA;
     }
 
     bool targetable(gameent *d, gameent *e)
@@ -184,8 +168,6 @@ namespace ai
     {
         if(d->ai) DELETEP(d->ai);
     }
-
-    ICOMMAND(addbot, "s", (char *s), addmsg(N_ADDBOT, "ri", *s ? clamp(parseint(s), 1, 101) : -1));
 
     void init(gameent *d, int at, int ocn, int classe, int cape, int grave, int taunt, int sk, int bn, int pm, int col, const char *name, int team)
     {
@@ -507,7 +489,7 @@ namespace ai
                 break;
             case I_SANTE:
                 if(d->health<800){score = m_ctf || d->health > 400 ? 1e2f : 1e5f; }
-                if(d->mana>40 && d->aptitude==APT_PRETRE && d->health<=300) aptitude(d, ABILITY_1);
+                if(d->mana>40 && d->aptitude==APT_PRETRE && d->health<=300) launchAbility(d, ABILITY_1);
                 break;
             case I_MANA:
                 if(d->mana < 100 && d->aptitude!=APT_VAMPIRE) score = m_ctf ? 1e2f : 1e5f;
@@ -549,7 +531,7 @@ namespace ai
         loopv(entities::ents)
         {
             extentity &e = *(extentity *)entities::ents[i];
-            if(!e.spawned() || e.nopickup() || !d->canpickupitem(e.type, d->aptitude, d->armourtype==A_ASSIST && d->armour)) continue;
+            if(!e.spawned() || !d->canpickupitem(e.type, d->aptitude, d->armourtype==A_ASSIST && d->armour)) continue;
             tryitem(d, e, i, b, interests, force);
         }
     }
@@ -703,7 +685,7 @@ namespace ai
     {
         if(!entities::ents.inrange(ent)) return;
         extentity &e = *entities::ents[ent];
-        if(validitem(e.type))
+        if(entities::validitem(e.type))
         {
             loopv(players) if(players[i] && players[i]->ai && players[i]->aitype == AI_BOT && players[i]->canpickupitem(e.type, players[i]->aptitude, players[i]->armourtype==A_ASSIST && players[i]->armour))
             {
@@ -809,7 +791,7 @@ namespace ai
                 if(entities::ents.inrange(b.target))
                 {
                     extentity &e = *(extentity *)entities::ents[b.target];
-                    if(!e.spawned() || e.nopickup() || !validitem(e.type) || d->hasmaxammo(e.type)) return 0;
+                    if(!e.spawned() || !entities::validitem(e.type) || d->hasmaxammo(e.type)) return 0;
 
                     return makeroute(d, b, e.o) ? 1 : 0;
                 }
@@ -847,12 +829,12 @@ namespace ai
                         switch(d->aptitude)
                         {
                             case APT_MAGICIEN:
-                                if(d->mana>60 && d->o.dist(e->o)<500) aptitude(d, ABILITY_1);
-                                else if (d->mana>=100 && d->o.dist(e->o)>500) aptitude(d, ABILITY_2);
+                                if(d->mana>60 && d->o.dist(e->o)<500) launchAbility(d, ABILITY_1);
+                                else if (d->mana>=100 && d->o.dist(e->o)>500) launchAbility(d, ABILITY_2);
                                 break;
                             case APT_ESPION:
-                                if(randomevent(2) && d->mana>=40 && d->o.dist(e->o)<700 && !d->abilitymillis[ABILITY_2]) aptitude(d, ABILITY_1);
-                                else if(d->mana>=50 && d->o.dist(e->o)<700 && !d->abilitymillis[ABILITY_1]) aptitude(d, ABILITY_2);
+                                if(randomevent(2) && d->mana>=40 && d->o.dist(e->o)<700 && !d->abilitymillis[ABILITY_2]) launchAbility(d, ABILITY_1);
+                                else if(d->mana>=50 && d->o.dist(e->o)<700 && !d->abilitymillis[ABILITY_1]) launchAbility(d, ABILITY_2);
                         }
 
                         int atk = guns[d->gunselect].attacks[ACT_SHOOT];
@@ -1159,13 +1141,13 @@ namespace ai
                     if(!enemyok) violence(d, b, f, needpursue(d));
                     switch(d->aptitude)
                     {
-                        case APT_PRETRE: case APT_SHOSHONE: if(d->mana>70 && d->o.dist(f->o)<750) aptitude(d, ABILITY_3); break;
+                        case APT_PRETRE: case APT_SHOSHONE: if(d->mana>70 && d->o.dist(f->o)<750) launchAbility(d, ABILITY_3); break;
                         case APT_KAMIKAZE:
-                            if(d->o.dist(f->o)<500) aptitude(d, ABILITY_2);
+                            if(d->o.dist(f->o)<500) launchAbility(d, ABILITY_2);
                             break;
                         case APT_ESPION:
-                            if(randomevent(2) && d->mana>=40 && d->o.dist(f->o)<700 && !d->abilitymillis[ABILITY_2]) aptitude(d, ABILITY_1);
-                            else if(d->mana>=50 && d->o.dist(f->o)<700 && !d->abilitymillis[ABILITY_1]) aptitude(d, ABILITY_2);
+                            if(randomevent(2) && d->mana>=40 && d->o.dist(f->o)<700 && !d->abilitymillis[ABILITY_2]) launchAbility(d, ABILITY_1);
+                            else if(d->mana>=50 && d->o.dist(f->o)<700 && !d->abilitymillis[ABILITY_1]) launchAbility(d, ABILITY_2);
                     }
                     enemyok = true;
                     e = f;
@@ -1466,16 +1448,16 @@ namespace ai
 
                 switch(d->aptitude)
                 {
-                    case APT_MAGICIEN: if(d->health<250+d->skill*2 && d->mana>=60) aptitude(d, ABILITY_3); break;
-                    case APT_PRETRE: if(d->mana>30 && d->health<(d->skill/3)) aptitude(d, ABILITY_2); break;
-                    case APT_SHOSHONE: if(d->mana>=100) aptitude(d, ABILITY_2); break;
+                    case APT_MAGICIEN: if(d->health<250+d->skill*2 && d->mana>=60) launchAbility(d, ABILITY_3); break;
+                    case APT_PRETRE: if(d->mana>30 && d->health<(d->skill/3)) launchAbility(d, ABILITY_2); break;
+                    case APT_SHOSHONE: if(d->mana>=100) launchAbility(d, ABILITY_2); break;
                     case APT_PHYSICIEN:
-                        if(randomevent(70) && d->mana>70) aptitude(d, ABILITY_3);
-                        if(d->health<400+d->skill && d->mana>=50) aptitude(d, ABILITY_2);
-                        if(d->armour<200 && d->mana>=40) aptitude(d, ABILITY_1);
+                        if(randomevent(70) && d->mana>70) launchAbility(d, ABILITY_3);
+                        if(d->health<400+d->skill && d->mana>=50) launchAbility(d, ABILITY_2);
+                        if(d->armour<200 && d->mana>=40) launchAbility(d, ABILITY_1);
                         break;
                     case APT_ESPION:
-                        if(d->mana>100) aptitude(d, ABILITY_3);
+                        if(d->mana>100) launchAbility(d, ABILITY_3);
                 }
                 if(randomevent(2.5f*gfx::nbfps) && packtaunt) bottaunt(d);
 
