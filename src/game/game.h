@@ -323,7 +323,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_CLIENT, 0,
     N_AUTHTRY, 0, N_AUTHKICK, 0, N_AUTHCHAL, 0, N_AUTHANS, 0, N_REQAUTH, 0,
     N_PAUSEGAME, 0, N_GAMESPEED, 0,
-    N_ADDBOT, 2, N_DELBOT, 1, N_INITAI, 0, N_FROMAI, 2, N_BOTLIMIT, 2, N_BOTBALANCE, 2,
+    N_ADDBOT, 3, N_DELBOT, 1, N_INITAI, 0, N_FROMAI, 2, N_BOTLIMIT, 2, N_BOTBALANCE, 2,
     N_MAPCRC, 0, N_CHECKMAPS, 1,
     N_SWITCHNAME, 0, N_SWITCHMODEL, 2, N_SWITCHCOLOR, 2, N_SWITCHTEAM, 2,
     N_SERVCMD, 0,
@@ -902,7 +902,7 @@ struct teaminfo
     void reset() { frags = 0; }
 };
 
-extern void playSound(int soundIndex, const vec *soundPos = NULL, float maxRadius = 300.f, float maxVolRadius = 10.f, int flags = NULL, size_t entityId = SIZE_MAX);
+extern void playSound(int soundIndex, const vec *soundPos = NULL, float maxRadius = 300.f, float maxVolRadius = 10.f, int flags = NULL, size_t entityId = SIZE_MAX, int soundType = 0);
 
 namespace entities
 {
@@ -915,9 +915,7 @@ namespace entities
     extern void resettriggers();
     extern void checktriggers();
     extern void checkitems(gameent *d);
-
     extern void checkboosts(int time, gameent *d);
-    extern void checkaptiskill(int time, gameent *d);
 
     extern void resetspawns();
     extern void spawnitems(bool force = false);
@@ -942,8 +940,9 @@ namespace game
 
     // abilities
     enum abilities {ABILITY_1 = 0, ABILITY_2, ABILITY_3, NUMABILITIES};
-    extern void aptitude(gameent *d, int skill, bool request = true);
-    extern void updateabilities(gameent *d);
+    extern void launchAbility(gameent *d, int skill, bool request = true);
+    extern void updateAbilitiesSkills(int curtime, gameent *d);
+    extern bool hasAbilityEnabled(gameent *d, int numAbility);
     extern char *getdisguisement(int seed);
 
     // game
@@ -1045,6 +1044,16 @@ namespace game
     struct monster;
     extern vector<monster *> monsters;
     extern void npcdrop(const vec *o, int type);
+    extern void clearmonsters();
+    extern void preloadmonsters();
+    extern void stackmonster(monster *d, physent *o);
+    extern void updatemonsters(int curtime);
+    extern void rendermonsters();
+    extern void suicidemonster(monster *m);
+    extern void hitmonster(int damage, monster *m, gameent *at, const vec &vel, int atk);
+    extern void monsterkilled(gameent *d);
+    extern void endsp();
+    extern void spsummary(int accuracy);
 
     // minimap
     extern float minimapalpha;
@@ -1056,17 +1065,6 @@ namespace game
     extern void drawnpcs(gameent *d, float x, float y, float s);
     extern void setbliptex(int team, const char *type = "");
     extern void drawteammate(gameent *d, float x, float y, float s, gameent *o, float scale, float blipsize = 1);
-
-    extern void clearmonsters();
-    extern void preloadmonsters();
-    extern void stackmonster(monster *d, physent *o);
-    extern void updatemonsters(int curtime);
-    extern void rendermonsters();
-    extern void suicidemonster(monster *m);
-    extern void hitmonster(int damage, monster *m, gameent *at, const vec &vel, int atk);
-    extern void monsterkilled(gameent *d);
-    extern void endsp();
-    extern void spsummary(int accuracy);
 
     // weapon
     extern int getweapon(const char *name);
@@ -1109,7 +1107,6 @@ namespace game
 
     // render
     struct playermodelinfo { const char *model[MAXTEAMS], *cbmodel; };
-
     extern void savetombe(gameent *d);
     extern void clearragdolls();
     extern void moveragdolls();

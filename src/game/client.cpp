@@ -1186,7 +1186,7 @@ namespace game
     void c2sinfo(bool force) // send update to the server
     {
         static int lastupdate = -1000;
-        if(totalmillis - lastupdate < 40 && !force) return; // don't update faster than 30fps
+        if(totalmillis - lastupdate < 40 && !force) return; // don't update faster than 25fps
         lastupdate = totalmillis;
         sendpositions();
         sendmessages();
@@ -1615,8 +1615,8 @@ namespace game
                 pl->abilitymillis[ability] = getint(p);
 
                 if(!pl) break;
-                pl->mana-=aptitudes[pl->aptitude].abilities[ability].manacost;
-                aptitude(pl, ability, false);
+                pl->mana -= aptitudes[pl->aptitude].abilities[ability].manacost;
+                launchAbility(pl, ability, false);
                 break;
             }
 
@@ -1649,7 +1649,7 @@ namespace game
 
                 else if(r==player1) stat ? addstat(10, STAT_MANAREGAIN) : addstat(5, STAT_HEALTHREGAIN);
 
-                playsound(stat ? S_REGENJUNKIE : S_REGENMEDIGUN, r==hudplayer() ? NULL : &r->o, 0, 0, 0 , 50, -1, 125);
+                //playsound(stat ? S_REGENJUNKIE : S_REGENMEDIGUN, r==hudplayer() ? NULL : &r->o, 0, 0, 0 , 50, -1, 125);
                 break;
             }
 
@@ -1891,7 +1891,7 @@ namespace game
             {
                 if(GAME_LANG || !d) return;
                 d->lasttaunt = lastmillis;
-                d->dansechan = playsound(S_CGCORTEX+(d->customdanse), d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 150, d->dansechan, 400);
+                //d->dansechan = //playsound(S_CGCORTEX+(d->customdanse), d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 150, d->dansechan, 400);
                 break;
             }
 
@@ -1926,7 +1926,11 @@ namespace game
                     gameent *d = getclient(cn);
                     entities::pickupeffects(i, d, rndsweap);
                 }
-                else entities::setspawn(i, true);
+                else if(entities::ents.inrange(i))
+                {
+                    entities::setspawn(i, true);
+                    ai::itemspawned(i);
+                }
                 break;
             }
 

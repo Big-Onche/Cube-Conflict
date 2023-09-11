@@ -1256,14 +1256,14 @@ namespace game
             case S_GAU8:
                 if(!d->attacksound)
                 {
-                    playSound(sound, d==hudplayer() ? NULL : &d->muzzle, incraseDist ? 800 : 400, incraseDist ? 250 : 150, SND_LOOPED|SND_FIXEDPITCH|SND_NOCULL, d->entityId);
+                    playSound(sound, d==hudplayer() ? NULL : &d->muzzle, incraseDist ? 800 : 400, incraseDist ? 250 : 150, SND_LOOPED|SND_FIXEDPITCH|SND_NOCULL, d->entityId, PL_ATTACK_SND);
                     d->attacksound = true;
                 }
                 return;
             default:
                 if(!d->attacksound && sound==S_PLASMARIFLE_SFX)
                 {
-                    playSound(sound, d==hudplayer() ? NULL : &d->muzzle, 400, 150, SND_LOOPED|SND_FIXEDPITCH|SND_NOCULL, d->entityId);
+                    playSound(sound, d==hudplayer() ? NULL : &d->muzzle, 400, 150, SND_LOOPED|SND_FIXEDPITCH|SND_NOCULL, d->entityId, PL_ATTACK_SND);
                     d->attacksound = true;
                 }
                 playSound(attacks[atk].sound, d==hudplayer() ? NULL : &d->muzzle, incraseDist ? 600 : 400, incraseDist ? 200 : 150);

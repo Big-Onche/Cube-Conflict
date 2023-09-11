@@ -68,6 +68,8 @@ enum SoundFlags
     SND_MAPSOUND      = 1 << 5,     // sound used in a map
 };
 
+enum PlayerLinkedSounds { PL_NONE = 0, PL_ATTACK_SND, PL_ABI_SND_1, PL_ABI_SND_2, PL_ABI_SND_3, PL_POWERARMOR_SND, PL_UNDERWATER_SND, PL_TAUNT_SND }; // types of sounds that can be linked to a bot/player
+
 struct Sound
 {
     string soundPath;               // relative path of the sound
@@ -80,15 +82,16 @@ struct Sound
 struct SoundSource
 {
     ALuint source;
-    size_t entityId;
     bool isActive;
+    size_t entityId;
+    int soundType;
 };
 
 extern void initSounds();
 extern void cleanUpSounds();
 
-extern void updateSoundPosition(size_t entityId, const vec &newPosition, const vec &velocity = vec(0,0,0));
-extern void stopLinkedSound(size_t entityId);
+extern void updateSoundPosition(size_t entityId, const vec &newPosition, const vec &velocity = vec(0,0,0), int soundType = 0);
+extern void stopLinkedSound(size_t entityId, int soundType = 0);
 extern void updateSounds();
 extern void stopAllMapSounds();
 extern void stopAllSounds();

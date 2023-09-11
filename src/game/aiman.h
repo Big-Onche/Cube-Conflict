@@ -79,7 +79,7 @@ namespace aiman
         return least;
     }
 
-    bool addai(int skill, int limit)
+    bool addai(int skill, int limit, int classe)
     {
         int numai = 0, cn = -1, maxai = limit >= 0 ? min(limit, MAXBOTS) : MAXBOTS;
         loopv(bots)
@@ -119,7 +119,7 @@ namespace aiman
         ci->team = team;
         ci->playercolor = rnd(0x8000);
         ci->level = skill;
-        ci->aptitude = rnd(NUMAPTS);
+        ci->aptitude = classe>=0 && classe<NUMAPTS ? classe : rnd(NUMAPTS);
         ci->playermodel = rnd(128);
         ci->customcape = rnd(128);
         ci->customtombe = rnd(128);
@@ -230,10 +230,10 @@ namespace aiman
         else clearai();
     }
 
-    void reqadd(clientinfo *ci, int skill)
+    void reqadd(clientinfo *ci, int skill, int classe)
     {
         if(!ci->local && !ci->privilege) return;
-        if(!addai(skill, !ci->local && ci->privilege < PRIV_ADMIN ? botlimit : -1)) sendf(ci->clientnum, 1, "ris", N_SERVMSG, "Impossible d'ajouter une IA supplémentaire !");
+        if(!addai(skill, !ci->local && ci->privilege < PRIV_ADMIN ? botlimit : -1, classe)) sendf(ci->clientnum, 1, "ris", N_SERVMSG, "Impossible d'ajouter une IA supplémentaire !");
     }
 
     void reqdel(clientinfo *ci)

@@ -378,9 +378,9 @@ namespace server
         extern void removeai(clientinfo *ci);
         extern void clearai();
         extern void checkai();
-        extern bool addai(int skill, int limit);
+        extern bool addai(int skill, int limit, int classe = -1);
         extern bool deleteai();
-        extern void reqadd(clientinfo *ci, int skill);
+        extern void reqadd(clientinfo *ci, int skill, int classe);
         extern void reqdel(clientinfo *ci);
         extern void setbotlimit(clientinfo *ci, int limit);
         extern void setbotbalance(clientinfo *ci, bool balance);
@@ -1591,7 +1591,7 @@ namespace server
             // no overflow check
             case 4: return type;
         }
-        if(ci && ++ci->overflow >= 250) return -2;
+        if(ci && ++ci->overflow >= 300) return -2;
         return type;
     }
 
@@ -2414,14 +2414,33 @@ namespace server
     void explodeevent::process(clientinfo *ci)
     {
         servstate &gs = ci->state;
-
-        if(attacks[atk].exprad)
+        switch(atk)
         {
-            if(atk==ATK_M32_SHOOT) { if(!gs.grenades.remove(id)); return; }
-            if(!gs.projs.remove(id)) return;
+            case ATK_PULSE_SHOOT:
+            case ATK_SMAW_SHOOT:
+            case ATK_MINIGUN_SHOOT:
+            case ATK_SPOCKGUN_SHOOT:
+            case ATK_UZI_SHOOT:
+            case ATK_FAMAS_SHOOT:
+            case ATK_SV98_SHOOT:
+            case ATK_SKS_SHOOT:
+            case ATK_ARBALETE_SHOOT:
+            case ATK_AK47_SHOOT:
+            case ATK_ARTIFICE_SHOOT:
+            case ATK_GLOCK_SHOOT:
+            case ATK_NUKE_SHOOT:
+            case ATK_GAU8_SHOOT:
+            case ATK_ROQUETTES_SHOOT:
+            case ATK_CAMPOUZE_SHOOT:
+            case ATK_GRAP1_SHOOT:
+            case ATK_ASSISTXPL_SHOOT:
+            case ATK_KAMIKAZE_SHOOT:
+                if(!gs.projs.remove(id)) return;
+                break;
+            case ATK_M32_SHOOT: if(!gs.grenades.remove(id)) return; break;
+            default:
+                return;
         }
-        else return;
-
         sendf(-1, 1, "ri4x", N_EXPLODEFX, ci->clientnum, atk, id, ci->ownernum);
         loopv(hits)
         {
@@ -2481,27 +2500,47 @@ namespace server
         if(gs.boostmillis[B_ROIDS]) gs.shotdamage*=ci->aptitude==APT_JUNKIE ? 3 : 2;
         if(gs.boostmillis[B_RAGE]) gs.shotdamage*=1.25f;
 
-        if(attacks[atk].projspeed && atk!=ATK_LANCEFLAMMES_SHOOT)
+        switch(atk)
         {
-            loopi(attacks[atk].rays) gs.projs.add(id);
-        }
-        else if(atk==ATK_M32_SHOOT) gs.grenades.add(id);
-        else
-        {
-            int totalrays = 0, maxrays = attacks[atk].rays;
-            loopv(hits)
+            case ATK_PULSE_SHOOT:
+            case ATK_SMAW_SHOOT:
+            case ATK_MINIGUN_SHOOT:
+            case ATK_SPOCKGUN_SHOOT:
+            case ATK_UZI_SHOOT:
+            case ATK_FAMAS_SHOOT:
+            case ATK_SV98_SHOOT:
+            case ATK_SKS_SHOOT:
+            case ATK_ARBALETE_SHOOT:
+            case ATK_AK47_SHOOT:
+            case ATK_ARTIFICE_SHOOT:
+            case ATK_GLOCK_SHOOT:
+            case ATK_NUKE_SHOOT:
+            case ATK_GAU8_SHOOT:
+            case ATK_ROQUETTES_SHOOT:
+            case ATK_CAMPOUZE_SHOOT:
+            case ATK_GRAP1_SHOOT:
+            case ATK_ASSISTXPL_SHOOT:
+            case ATK_KAMIKAZE_SHOOT:
+                loopi(attacks[atk].rays) {gs.projs.add(id);} break;
+            case ATK_M32_SHOOT: gs.grenades.add(id); break;
+            default:
             {
-                hitinfo &h = hits[i];
-                clientinfo *target = getinfo(h.target);
-                if(!target || target->state.state!=CS_ALIVE || h.lifesequence!=target->state.lifesequence || h.rays<1 || h.dist > attacks[atk].range + 1) continue;
+                int totalrays = 0, maxrays = attacks[atk].rays;
+                loopv(hits)
+                {
+                    hitinfo &h = hits[i];
+                    clientinfo *target = getinfo(h.target);
+                    if(!target || target->state.state!=CS_ALIVE || h.lifesequence!=target->state.lifesequence || h.rays<1 || h.dist > attacks[atk].range + 1) continue;
 
-                totalrays += h.rays;
-                if(totalrays>maxrays) continue;
-                int damage = h.rays*attacks[atk].damage;
-                if(gs.boostmillis[B_ROIDS]) damage*=ci->aptitude==APT_JUNKIE ? 3 : 2;
-                if(gs.boostmillis[B_RAGE]) gs.shotdamage*=1.25f;
-                dodamage(target, ci, damage, atk, h.dir);
-                if(ci->aptitude==APT_VAMPIRE) doregen(target, ci, damage, atk, h.dir);
+                    totalrays += h.rays;
+                    if(totalrays>maxrays) continue;
+                    int damage = h.rays*attacks[atk].damage;
+                    if(gs.boostmillis[B_ROIDS]) damage*=ci->aptitude==APT_JUNKIE ? 3 : 2;
+                    if(gs.boostmillis[B_RAGE]) gs.shotdamage*=1.25f;
+                    dodamage(target, ci, damage, atk, h.dir);
+                    if(ci->aptitude==APT_VAMPIRE) doregen(target, ci, damage, atk, h.dir);
+                }
+                break;
             }
         }
     }
@@ -3838,7 +3877,8 @@ namespace server
 
             case N_ADDBOT:
             {
-                aiman::reqadd(ci, getint(p));
+                int level = getint(p), classe = getint(p);
+                aiman::reqadd(ci, level, classe);
                 break;
             }
 

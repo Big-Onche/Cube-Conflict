@@ -190,8 +190,9 @@ void initSoundSources()
         alGenSources(1, &sources[i].source);
         reportSoundError("initSoundSources", "N/A", -1);
 
-        sources[i].entityId = SIZE_MAX;  // set to SIZE_MAX initially to represent "no entity"
         sources[i].isActive = false;
+        sources[i].entityId = SIZE_MAX;  // set to SIZE_MAX initially to represent "no entity"
+        sources[i].soundType = 0;
     }
 }
 
@@ -271,7 +272,7 @@ bool checkSoundOcclusion(const vec *soundPos)
     return true;
 }
 
-void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRadius, int flags, size_t entityId)
+void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRadius, int flags, size_t entityId, int soundType)
 {
     if(soundId < 0 || soundId > NUMSNDS || noSound) return; // invalid index or openal not initialized
 
@@ -295,6 +296,7 @@ void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRa
 
     sources[sourceIndex].isActive = true;       // now the source is set to active
     sources[sourceIndex].entityId = entityId;
+    sources[sourceIndex].soundType = soundType;
 
     Sound& s = (flags & SND_MAPSOUND) ? mapSounds[soundId] : gameSounds[soundId];
     ALuint source = sources[sourceIndex].source;
@@ -403,13 +405,13 @@ void fadeFilter(ALuint source, ALuint filter, float targetGain)
 }
 */
 
-void updateSoundPosition(size_t entityId, const vec &newPosition, const vec &velocity)
+void updateSoundPosition(size_t entityId, const vec &newPosition, const vec &velocity, int soundType)
 {
     if(noSound) return;
 
     loopi(MAX_SOURCES) // loop through all the SoundSources and find the one with the matching entityId
     {
-        if(sources[i].entityId == entityId) // found the correct sound source, now update its position
+        if(sources[i].entityId == entityId && sources[i].soundType == soundType) // found the correct sound source, now update its position
         {
             //fadeFilter(sources[i].source, occlusionFilter, checkSoundOcclusion(&newPosition) ? 0.5f : 0);
             alSourcei(sources[i].source, AL_DIRECT_FILTER, checkSoundOcclusion(&newPosition) ? occlusionFilter : AL_FILTER_NULL);
@@ -496,10 +498,10 @@ void checkMapSounds()
     }
 }
 
-void stopLinkedSound(size_t entityId)
+void stopLinkedSound(size_t entityId, int soundType)
 {
     SoundSource* soundSource = NULL;
-    loopi(MAX_SOURCES) if(sources[i].entityId == entityId) { soundSource = &sources[i]; break; }
+    loopi(MAX_SOURCES) if(sources[i].entityId == entityId && sources[i].soundType == soundType) { soundSource = &sources[i]; break; }
 
     if(soundSource)
     {
@@ -512,8 +514,6 @@ void stopLinkedSound(size_t entityId)
 
 void stopAllSounds()
 {
-    stopAllMapSounds();
-
     loopi(MAX_SOURCES)
     {
         if(sources[i].isActive)
