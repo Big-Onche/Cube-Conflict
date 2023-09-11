@@ -323,6 +323,7 @@ namespace gfx
         }
         champifov = 0;
         fullbrightmodels = 0;
+        setShroomsEfx(false);
     }
 
     char *getshielddir(int armourtype, int armourval, bool hud, bool preload) //récupère l'id d'un bouclier

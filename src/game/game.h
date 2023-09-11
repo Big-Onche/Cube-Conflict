@@ -244,14 +244,6 @@ static const char * const mastermodeicons[] =  { "server", "server", "serverlock
 // hardcoded sounds, defined in sounds.cfg
 enum
 {
-    // classes & spells
-    S_SORTLANCE, S_SORTIMPOSSIBLE, S_SORTPRET, S_TIMER, S_FAUCHEUSE,
-    S_RAGETIR, S_REGENMEDIGUN, S_REGENJUNKIE, S_WIZ_1, S_WIZ_2,
-    S_WIZ_3, S_PHY_1, S_PHY_1_WOOD, S_PHY_1_IRON,  S_PHY_1_GOLD,
-    S_PHY_1_MAGNET, S_PHY_1_POWERARMOR, S_PHY_2, S_PHY_3, S_SPY_1,
-    S_SPY_2, S_SPY_3, S_PRI_1, S_PRI_2, S_PRI_2_2,
-    S_PRI_3, S_SHO_1, S_SHO_2, S_SHO_3,
-
     // notifications
     S_KILL, S_HIT, S_ACHIEVEMENTUNLOCKED, S_LEVELUP, S_DRAPEAUPRIS,
     S_DRAPEAUTOMBE, S_DRAPEAUSCORE, S_DRAPEAURESET, S_TERMINAL_HACKED, S_TERMINAL_LOST,
@@ -347,7 +339,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
 #define CC_SERVER_PORT 43000
 #define CC_LANINFO_PORT 42998
 #define CC_MASTER_PORT 42999
-#define PROTOCOL_VERSION 94          // bump when protocol changes
+#define PROTOCOL_VERSION 95          // bump when protocol changes
 #define DEMO_VERSION 1               // bump when demo format changes
 #define DEMO_MAGIC "CC_DEMO\0\0"
 
@@ -678,8 +670,8 @@ struct gamestate
         {
             armourtype = A_WOOD;
             armour = aptitude==APT_SOLDAT ? 1000 : 750;
-            gunselect = GUN_AK47;
-            ammo[GUN_AK47] = 500;
+            gunselect = GUN_PULSE;
+            ammo[GUN_PULSE] = 500;
             //int randomarme = rnd(17);
             //gunselect = aptitude==APT_KAMIKAZE ? GUN_KAMIKAZE : aptitude==APT_NINJA ? GUN_CACNINJA : randomarme;
             //baseammo(randomarme);
@@ -793,6 +785,7 @@ static inline int teamnumber(const char *name) { loopi(MAXTEAMS) if(!strcmp(GAME
 
 struct gameent : dynent, gamestate
 {
+    size_t entityId;
     int weight;                         // affects the effectiveness of hitpush
     int clientnum, privilege, lastupdate, plag, ping;
     int lifesequence;                   // sequence id for each respawn, used in damage test
@@ -801,7 +794,7 @@ struct gameent : dynent, gamestate
     int lastaction, lastattack;
     int curdamage, lastcurdamage;
     int attacking, gunaccel;
-    int lastfootstep, attacksound, attackchan, dansesound, dansechan, alarmchan, waterchan;
+    int lastfootstep;
     int lasttaunt;
     int lastpickup, lastpickupmillis, flagpickup, lastbase, lastrepammo, lastweap;
     int killstreak, frags, flags, deaths, totaldamage, totalshots;
@@ -809,9 +802,8 @@ struct gameent : dynent, gamestate
     float deltayaw, deltapitch, deltaroll, newyaw, newpitch, newroll;
     int smoothmillis;
 
-    int abisnd[3], abichan[3];
     int lastability[3];
-    bool abilityready[3], playerexploded;
+    bool abilityready[3], playerexploded, attacksound;
 
     string name, info;
     int team, playermodel, playercolor, customcape, customtombe, customdanse, aptitude, level;
@@ -821,14 +813,12 @@ struct gameent : dynent, gamestate
 
     vec muzzle, weed, balles, assist;
 
-    gameent() : weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0), lifesequence(0), respawned(-1), suicided(-1), lastpain(0), lastfootstep(0), attacksound(-1), attackchan(-1), dansesound(-1), dansechan(-1), killstreak(0), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0), customcape(0), customtombe(0), customdanse(0), aptitude(0), level(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
+    gameent() : entityId(GlobalIdGenerator::getNewId()), weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0),
+                lifesequence(0), respawned(-1), suicided(-1), lastpain(0), lastfootstep(0), killstreak(0), frags(0), flags(0), deaths(0),
+                totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0),
+                customcape(0), customtombe(0), customdanse(0), aptitude(0), level(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
     {
-        loopi(3)
-        {
-            abisnd[i] = -1;
-            abichan[i] = -1;
-            lastability[i] = -1;
-        }
+        loopi(3) lastability[i] = -1;
         name[0] = info[0] = 0;
         respawn();
     }
@@ -837,10 +827,6 @@ struct gameent : dynent, gamestate
         freeeditinfo(edit);
         freeeditinfo(edit);
 
-        //if(attackchan >= 0) stopsound(attacksound, attackchan);
-       // if(dansesound >= 0) stopsound(dansesound, dansechan);
-        //loopi(3) if(abisnd[i] >= 0) stopsound(abisnd[i], abisnd[i]);
-        //if(alarmchan >= 0) stopsound(S_ASSISTALARM, alarmchan);
         if(ai) delete ai;
     }
 
@@ -850,31 +836,6 @@ struct gameent : dynent, gamestate
         vec push(dir);
         push.mul((actor==this && attacks[atk].exprad ? EXP_SELFPUSH : 1.0f)*attacks[atk].hitpush*(damage/10)/weight);
         vel.add(push);
-    }
-
-    void stopattacksound(gameent *d)
-    {
-        //if(attackchan >= 0) { stopsound(attacksound, attackchan, d->gunselect==GUN_S_GAU8 ? 150 : 250); attacksound = attackchan = -1; }
-    }
-
-    void stopdansesound(gameent *d)
-    {
-        //if(dansechan >= 0) { stopsound(S_CGCORTEX+(d->customdanse), dansechan, 50); dansesound = dansechan = -1; }
-    }
-
-    void stopabisound(gameent *d)
-    {
-        //loopi(3) if(abichan[i] >= 0) { stopsound(abisnd[i], abichan[i], 50); abisnd[i] = abichan[i] = -1; }
-    }
-
-    void stoppowerarmorsound()
-    {
-        //if(alarmchan >= 0) { stopsound(S_ASSISTALARM, alarmchan, 100); alarmchan = -1; }
-    }
-
-    void stopunderwatersound()
-    {
-        //if(waterchan >= 0) { stopsound(S_UNDERWATER, waterchan, 200); waterchan = -1; }
     }
 
     void respawn()
@@ -897,6 +858,7 @@ struct gameent : dynent, gamestate
         gunaccel = 0;
         killstreak = 0;
         playerexploded = false;
+        attacksound = false;
     }
 
     int respawnwait(int secs, int delay = 0)
@@ -967,6 +929,7 @@ namespace entities
     extern void jumppadeffects(gameent *d, int jp, bool local = true);
 
     extern void repammo(gameent *d, int type, bool local = true);
+    extern bool validitem(int type);
 }
 
 namespace game
@@ -1134,6 +1097,7 @@ namespace game
     extern void gunselect(int gun, gameent *d, bool force = false, bool shortcut = false);
     extern void weaponswitch(gameent *d);
     extern void avoidweapons(ai::avoidset &obstacles, float radius);
+    extern bool isattacking(gameent *d);
 
     // scoreboard
     extern void showscores(bool on);

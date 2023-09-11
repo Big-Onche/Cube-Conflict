@@ -20,9 +20,8 @@ namespace game
             nullsndpos = false; //even for player1
         }
 
-        playsound(S_SORTLANCE, d==hudplayer() ? NULL : &d->o, 0, 0, 0 , 100, -1, 250);
-        d->abichan[ability] = playsound(aptitudes[d->aptitude].abilities[ability].snd, nullsndpos ? NULL : &sndpos, NULL, 0, 0, 100, d->abichan[ability], 225);
-        d->abisnd[ability] = aptitudes[d->aptitude].abilities[ability].snd;
+        if(d==hudplayer()) playSound(S_SORTLANCE);
+        playSound(aptitudes[d->aptitude].abilities[ability].snd, nullsndpos ? NULL : &sndpos, 250, 100, SND_NOCULL);
 
         switch(ability) //here we play some one shot gfx effects
         {
@@ -45,7 +44,7 @@ namespace game
                     if(isteam(hudplayer()->team, d->team))
                     {
                         getspyability = totalmillis;
-                        playsound(S_SPY_3, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 0, -1, 4000);
+                        playSound(S_SPY_3, d==hudplayer() ? NULL : &d->o, 3000, 50);
                     }
                 }
             }
@@ -63,7 +62,7 @@ namespace game
         if(request) //player is requesting ability
         {
             if(!canlaunchability(d, ability)) return; //check for basic guards
-            if(!d->abilityready[ability] || d->mana < aptitudes[d->aptitude].abilities[ability].manacost) { if(d==player1) playsound(S_SORTIMPOSSIBLE); return; } //check for game vars (client sided)
+            if(!d->abilityready[ability] || d->mana < aptitudes[d->aptitude].abilities[ability].manacost) { if(d==player1) playSound(S_SORTIMPOSSIBLE); return; } //check for game vars (client sided)
             addmsg(N_REQABILITY, "rci", d, ability); //server sided game vars check
             return; //can stop after this, cuz server call this func with !request
         }
@@ -97,7 +96,7 @@ namespace game
         {
             if(totalmillis-d->lastability[i] >= aptitudes[d->aptitude].abilities[i].cooldown && !d->abilityready[i])
             {
-                if(d==hudplayer()) playsound(S_SORTPRET);
+                if(d==hudplayer()) playSound(S_SORTPRET);
                 d->abilityready[i] = true;
             }
         }
