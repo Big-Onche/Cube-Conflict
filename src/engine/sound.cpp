@@ -406,6 +406,7 @@ void fadeFilter(ALuint source, ALuint filter, float targetGain)
 void updateSoundPosition(size_t entityId, const vec &newPosition, const vec &velocity)
 {
     if(noSound) return;
+
     loopi(MAX_SOURCES) // loop through all the SoundSources and find the one with the matching entityId
     {
         if(sources[i].entityId == entityId) // found the correct sound source, now update its position
@@ -482,7 +483,7 @@ void checkMapSounds()
 
         if(e.type!=ET_SOUND) continue;
 
-        if(e.entityId != SIZE_MAX) updateSoundPosition(e.entityId, e.o);
+        if(e.entityId != SIZE_MAX && editmode) updateSoundPosition(e.entityId, e.o);
         if(camera1->o.dist(e.o) < e.attr2 + 50) // check for distance + add a slight tolerance for efx sound effects
         {
             if(!(e.flags & EF_SOUND))
