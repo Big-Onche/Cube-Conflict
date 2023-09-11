@@ -91,7 +91,7 @@ void connectserv(const char *servername, int serverport, const char *serverpassw
     ENetAddress address;
     address.port = serverport;
 
-    const char* domains[] = {"serveur1.cube-conflict.com", "serveur2.cube-conflict.com", "s1.cube-conflict.com", "s2.cube-conflict.com"};
+    const char* domains[] = {"s1.cube-conflict.com", "s2.cube-conflict.com"};
 
     if(servername)
     {
@@ -99,7 +99,7 @@ void connectserv(const char *servername, int serverport, const char *serverpassw
         if(serverport != connectport) setvar("connectport", serverport);
         addserver(servername, serverport, serverpassword && serverpassword[0] ? serverpassword : NULL);
         conoutf("%s %s:%d", GAME_LANG ? "Attempting to connect to" : "Connexion en cours à", servername, serverport);
-        loopi(4) {if(!strcasecmp(servername, domains[i])) IS_ON_OFFICIAL_SERV = true; }
+        loopi(sizeof(domains)/sizeof(domains[0])) {if(!strcasecmp(servername, domains[i])) IS_ON_OFFICIAL_SERV = true; }
         if(IS_ON_OFFICIAL_SERV) conoutf(GAME_LANG ? "Official server: Stats and achievements are saved." : "Serveur officiel : Les statistiques et succès sont enregistrés.");
 
         if(!resolverwait(servername, &address))
