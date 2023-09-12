@@ -73,6 +73,8 @@ enum SoundNames
     NUMSNDS
 };
 
+enum SongNames { S_MAINMENU = 0, S_PREMISSION, S_PAUSE, S_TUTORIAL, NUMSONGS };
+
 enum SoundFlags
 {
     SND_NOCULL        = 1 << 0,     // sound will be played even if camera1 is beyond radius
@@ -81,7 +83,8 @@ enum SoundFlags
     SND_LOWPRIORITY   = 1 << 3,     // sound will not play if source limit is almost reached
     SND_FIXEDPITCH    = 1 << 4,     // no random variation in pitch
     SND_LOOPED        = 1 << 5,     // sound is a loop
-    SND_MAPSOUND      = 1 << 6      // sound used in a map
+    SND_MAPSOUND      = 1 << 6,     // sound used in a map
+    SND_MUSIC         = 1 << 7      // music
 };
 
 enum PlayerLinkedSounds { PL_NONE = 0, PL_ATTACK_SND, PL_ABI_SND_1, PL_ABI_SND_2, PL_ABI_SND_3, PL_POWERARMOR_SND, PL_UNDERWATER_SND, PL_TAUNT_SND }; // types of sounds that can be linked to a bot/player
@@ -111,26 +114,27 @@ struct SoundSource
 {
     ALuint source;
     bool isActive;
-    size_t entityId;
+    size_t entityId;                // id of the sound linked to an entity
     int soundType;
     bool noGeomOcclusion;
+    int soundId;                    // register the sound id to stop sound if needed
+    int soundFlags;
 };
 
 extern void initSounds();
-extern void cleanUpSounds();
-
+extern void playMusic(int musicId);
 extern void updateSoundPosition(size_t entityId, const vec &newPosition, const vec &velocity = vec(0,0,0), int soundType = 0);
-extern void stopLinkedSound(size_t entityId, int soundType = 0);
+extern void soundNearmiss(int sound, const vec &from, const vec &to, int precision = 2048);
 extern void updateSounds();
+extern void stopSound(int soundId, int flags);
+extern void stopMusic(int soundId);
+extern void stopLinkedSound(size_t entityId, int soundType = 0);
 extern void stopAllMapSounds();
 extern void stopAllSounds();
-
-extern bool loadSound(Sound& s);
+extern bool loadSound(Sound& s, bool music = false);
 extern void manageSources();
-
+extern void cleanUpSounds();
 extern void setShroomsEfx(bool enable);
 extern const char *getmapsoundname(int n);
-
-extern void soundNearmiss(int sound, const vec &from, const vec &to, int precision = 2048);
 
 #endif

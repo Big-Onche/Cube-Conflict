@@ -1,5 +1,6 @@
 #include "engine.h"
 #include "customs.h"
+#include "sound.h"
 
 ICOMMAND(updateui, "i", (), execfile("config/ui/main.cfg"));
 
@@ -67,7 +68,7 @@ void menuprocess()
         lastmainmenu = mainmenu;
         execident("mainmenutoggled");
     }
-    //if(UI_PLAYMUSIC) {musicmanager(0); UI_PLAYMUSIC = false;}
+    if(UI_PLAYMUSIC) { playMusic(S_MAINMENU); UI_PLAYMUSIC = false; }
     if(mainmenu && !isconnected(true) && !UI::hascursor())
     {
         if(veryfirstlaunch)

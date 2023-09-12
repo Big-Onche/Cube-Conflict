@@ -1,5 +1,6 @@
 #include "gfx.h"
 #include "stats.h"
+#include "sound.h"
 
 #ifdef _WIN32
     #include "steam_api.h"
@@ -1435,9 +1436,19 @@ namespace game
                     gamepaused = val;
                     player1->attacking = ACT_IDLE;
                 }
-                if(a) conoutf(GAME_LANG ? "Game is paused by administrator." : "La partie a été mise en pause par un administrateur.");
-                else conoutf(GAME_LANG ? "Game is paused." : "La partie est en pause.");
-                //val ? musicmanager(1) : stopmusic();
+                if(val)
+                {
+                    if(a) conoutf(GAME_LANG ? "Game is paused by administrator." : "La partie a été mise en pause par un administrateur.");
+                    else conoutf(GAME_LANG ? "Game is paused." : "La partie est en pause.");
+                    loopi(NUMSONGS) stopMusic(i);
+                    playMusic(S_PAUSE);
+                }
+                else
+                {
+                    if(a) conoutf(GAME_LANG ? "The game has been resumed by the administrator." : "L'administrateur a mis fin à la pause.");
+                    else conoutf(GAME_LANG ? "The game has resumed!" : "La partie a repris !");
+                    stopMusic(S_PAUSE);
+                }
                 break;
             }
 
@@ -2086,7 +2097,7 @@ namespace game
 
             case N_PREMISSION:
                 premission = getint(p);
-                //if(premission) {execute("premission"); musicmanager(2);}
+                if(premission) { execute("premission"); playMusic(S_PREMISSION); }
                 break;
 
             case N_SERVMSG:
