@@ -26,7 +26,7 @@ namespace game
             addmsg(N_SENDAPTITUDE, "ri", player1_aptitude);
             player1->aptitude = player1_aptitude;
             oldapti = player1->aptitude;
-            if(!islaunching) playSound(S_APT_SOLDAT+player1_aptitude);
+            if(!islaunching) playSound(S_APT_SOLDAT+player1_aptitude, NULL, 0, 0, SND_FIXEDPITCH);
             if(isconnected() && !premission && !intermission) unlockachievement(ACH_UNDECIDED);
         }
     });
@@ -740,7 +740,7 @@ namespace game
             float killdistance = actor->o.dist(d->o)/18.f;
             if(actor==player1) ////////////////////TU as tué quelqu'un////////////////////
             {
-                playSound(S_KILL);
+                playSound(S_KILL, NULL, 0, 0, SND_FIXEDPITCH);
                 conoutf(CON_HUDCONSOLE, "%s \fc%s \f7! \f4(%.1fm)", GAME_LANG ? "You killed" : "Tu as tué", dname, killdistance);
                 conoutf(contype, "\fd%s\f7 > \fl%s\f7 > %s \fl(%.1fm)", player1->name, GAME_LANG ? guns[atk].nameEN : guns[atk].nameFR, dname, killdistance);
 

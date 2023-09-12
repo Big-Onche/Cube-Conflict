@@ -315,7 +315,7 @@ struct captureclientmode : clientmode
 
                 if(oldbase < 0)
                 {
-                    if(b.owner!=d->team && b.owner) playSound(S_TERMINAL_ALARM, &b.o, 300, 50);
+                    if(b.owner!=d->team && b.owner) playSound(S_TERMINAL_ALARM, &b.o, 300, 50, SND_FIXEDPITCH);
                     playSound(S_TERMINAL_ENTER, d==hudplayer() ? 0 : &pos, 150, 50);
                     particle_splash(PART_ZERO, 12, 250, pos, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.8f, 200, 50);
                     particle_splash(PART_ONE, 12, 250, pos, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.8f, 200, 50);
@@ -563,7 +563,7 @@ struct captureclientmode : clientmode
                     conoutf(CON_GAMEINFO, GAME_LANG ? "%s team hacked \"\fe%s\f7\" terminal." : "L'équipe %s a hacké le terminal \"\fe%s\f7\".", teamcolor(owner), b.name);
                     if(owner==hudplayer()->team) conoutf(CON_HUDCONSOLE, (GAME_LANG ? "\f9We hacked the \"\fe%s\f9\" terminal. " : "\f9Nous avons hacké le terminal \"\fe%s\f9\"."), b.name);
                 }
-                playSound(owner==hudplayer()->team ? S_TERMINAL_HACKED : S_TERMINAL_HACKED_E, &b.o, 2500, 200);
+                playSound(owner==hudplayer()->team ? S_TERMINAL_HACKED : S_TERMINAL_HACKED_E, &b.o, 2500, 200, SND_FIXEDPITCH);
             }
         }
         else if(b.owner)
@@ -578,7 +578,7 @@ struct captureclientmode : clientmode
                 conoutf(CON_GAMEINFO, GAME_LANG ? "%s team lost the \"\fe%s\f7\" terminal." : "L'équipe %s a perdu le terminal \"\fe%s\f7\".", teamcolor(b.owner), b.name);
                 if(b.owner==hudplayer()->team) conoutf(CON_HUDCONSOLE, (GAME_LANG ? "\f3We lost the \"\fe%s\f3\" terminal. " : "\f3Nous avons perdu le terminal \"\fe%s\f3\"."), b.name);
             }
-            playSound(owner==hudplayer()->team ? S_TERMINAL_LOST : S_TERMINAL_LOST_E, &b.o, 2500, 200);
+            playSound(owner==hudplayer()->team ? S_TERMINAL_LOST : S_TERMINAL_LOST_E, &b.o, 2500, 200, SND_FIXEDPITCH);
         }
         if(b.owner!=owner)
         {

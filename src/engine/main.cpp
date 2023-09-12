@@ -1166,9 +1166,6 @@ bool initsteam()
         else
         {
             logoutf("init: steam api");
-            g_SteamStats = new CSteamStats(g_Stats, 6);
-            //SteamAPI_ManualDispatch_Init();
-            //SteamUserStats()->RequestCurrentStats();
             getsteamachievements();
             return true;
         }
