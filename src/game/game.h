@@ -644,11 +644,9 @@ struct gamestate
         {
             armourtype = A_WOOD;
             armour = aptitude==APT_SOLDAT ? 1000 : 750;
-            gunselect = GUN_PULSE;
-            ammo[GUN_PULSE] = 500;
-            //int randomarme = rnd(17);
-            //gunselect = aptitude==APT_KAMIKAZE ? GUN_KAMIKAZE : aptitude==APT_NINJA ? GUN_CACNINJA : randomarme;
-            //baseammo(randomarme);
+            int randomarme = rnd(17);
+            gunselect = aptitude==APT_KAMIKAZE ? GUN_KAMIKAZE : aptitude==APT_NINJA ? GUN_CACNINJA : randomarme;
+            baseammo(randomarme);
         }
         else if(m_fullstuff)
         {
