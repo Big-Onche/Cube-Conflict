@@ -3,6 +3,7 @@
 
 #include <AL/al.h>
 #include <AL/alc.h>
+#include <AL/efx-presets.h>
 
 #define MAX_ALTS 16
 #define MAX_SOURCES 128
@@ -85,12 +86,24 @@ enum SoundFlags
 
 enum PlayerLinkedSounds { PL_NONE = 0, PL_ATTACK_SND, PL_ABI_SND_1, PL_ABI_SND_2, PL_ABI_SND_3, PL_POWERARMOR_SND, PL_UNDERWATER_SND, PL_TAUNT_SND }; // types of sounds that can be linked to a bot/player
 
+const EFXEAXREVERBPROPERTIES presets[] = // declaration of efx reverb presets
+{
+    EFX_REVERB_PRESET_OUTDOORS_ROLLINGPLAINS,
+    EFX_REVERB_PRESET_FACTORY_MEDIUMROOM,
+    EFX_REVERB_PRESET_SPACE,
+    EFX_REVERB_PRESET_MOUNTAINS,
+    EFX_REVERB_PRESET_CAVE
+};
+
+const int numPresets = sizeof(presets) / sizeof(presets[0]);
+
 struct Sound
 {
     string soundPath;               // relative path of the sound
     int numAlts;                    // number of alternatives for the same sound id
     int soundVol;                   // volume of the sound
-    bool loaded = false;
+    bool loaded;
+    bool noGeomOcclusion;           // never occluded except from liquids
     ALuint bufferId[MAX_ALTS];      // OpenAL buffer ID
 };
 
@@ -100,6 +113,7 @@ struct SoundSource
     bool isActive;
     size_t entityId;
     int soundType;
+    bool noGeomOcclusion;
 };
 
 extern void initSounds();

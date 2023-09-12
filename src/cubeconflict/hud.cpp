@@ -127,7 +127,7 @@ namespace game
     {
         msgmillis[MSG_CUSTOM] = totalmillis + *duration;
         formatstring(custommsg, "%s", GAME_LANG ? msg_en : msg_fr);
-        if(sound>=0) playSound(*sound);
+        if(*sound >= 0 && *sound<=NUMSNDS) playSound(*sound, NULL, 0, 0, SND_FIXEDPITCH|SND_NOTIFICATION);
     });
 
     string interractmsg;
