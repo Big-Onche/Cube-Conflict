@@ -167,7 +167,6 @@ VARF(maxclients, 0, DEFAULTCLIENTS, MAXCLIENTS, { if(!maxclients) maxclients = D
 VARF(maxdupclients, 0, 0, MAXCLIENTS, { if(serverhost) serverhost->duplicatePeers = maxdupclients ? maxdupclients : MAXCLIENTS; });
 
 void process(ENetPacket *packet, int sender, int chan);
-//void disconnect_client(int n, int reason);
 
 int getservermtu() { return serverhost ? serverhost->mtu : -1; }
 void *getclientinfo(int i) { return !clients.inrange(i) || clients[i]->type==ST_EMPTY ? NULL : clients[i]->info; }

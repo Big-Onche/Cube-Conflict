@@ -296,7 +296,7 @@ namespace game
                         if(raycubelos(o, enemy->o, target))
                         {
                             transition(friendly ? M_FRIENDLY : M_SEARCH, 1, 500, 200);
-                            playsound(npcs[mtype].hellosnd, &o);
+                            playSound(npcs[mtype].hellosnd, &o, 200, 50);
                         }
                     }
                     break;
@@ -406,7 +406,7 @@ namespace game
 
         void monsterpain(int damage, gameent *d, int atk)
         {
-            playsound(npcs[mtype].painsnd, &o, 0, 0, 0, 250, -1, 500);
+            playSound(npcs[mtype].painsnd, &o, 300, 50);
 
             if(d->type==ENT_AI && !friendly)     // a monster hit us
             {
@@ -429,7 +429,7 @@ namespace game
                     else if(this->monsterstate==M_NEUTRAL)
                     {
                         transition(M_ANGRY, 1, rnd(250), 10);    //if you mess with a neutral pnj, he gets aggressive
-                        playsound(npcs[mtype].angrysnd, &o, 0, 0, 0, 200, -1, 400);
+                        playSound(npcs[mtype].angrysnd, &o, 300, 50);
                     }
                     return;
                 }
@@ -444,7 +444,7 @@ namespace game
             {
                 state = CS_DEAD;
                 lastpain = lastmillis;
-                playsound(npcs[mtype].diesnd, &o, 0, 0, 0, 200, -1, 400);
+                playSound(npcs[mtype].diesnd, &o, 300, 50);
                 monsterkilled(d);
                 gibeffect(max(-health, 0), vel, this);
                 monsterlastdeath = totalmillis;
@@ -462,7 +462,7 @@ namespace game
             else
             {
                 transition(M_PAIN, 0, npcs[mtype].painlag, 200);      // in this state monster won't attack
-                playsound(npcs[mtype].painsnd, &o, 0, 0, 0, 200, -1, 400);
+                playSound(npcs[mtype].painsnd, &o, 300, 50);
             }
         }
     };
@@ -583,7 +583,7 @@ namespace game
         {
             if(spawnremain--==monstertotal)
             {
-                playsound(S_INVASION);
+                playSound(S_INVASION);
                 //musicmanager(2+map_sel);
                 execute("playmapsong");
                 conoutf(CON_HUDCONSOLE, GAME_LANG ? "\f3The invasion has begun!" : "\f3L'invasion vient de commencer !");
@@ -604,7 +604,7 @@ namespace game
                 case 150: case 300:
                     spawnmonster(true, M_UFO);
                     loopi(5) spawnmonster(true, gamesecs== 300 ? M_B_ALIENK : M_ALIENS);
-                    playsound(S_ALIEN_INVASION);
+                    playSound(S_ALIEN_INVASION);
                     break;
 
                 case 210: loopi(3) spawnmonster(true, M_B_GIANT); break;
@@ -612,11 +612,11 @@ namespace game
                 case 270: case 330:
                     loopi(3) spawnmonster(true, M_UFO);
                     loopi(15) spawnmonster(true, gamesecs==330 ? M_ALIENS : M_YALIEN);
-                    playsound(S_ALIEN_INVASION);
+                    playSound(S_ALIEN_INVASION);
                     break;
                 case 360: loopi(10) spawnmonster(true, M_CAMPER); break;
                 case 480: loopi(3) spawnmonster(true, M_B_GIANT); break;
-                case 550: loopi(5)  spawnmonster(true, M_UFO); playsound(S_ALIEN_INVASION);
+                case 550: loopi(5)  spawnmonster(true, M_UFO); playSound(S_ALIEN_INVASION);
                 case 575: loopi(5) spawnmonster(true, M_B_GIANT); break;
                 case 600: endsp(); unlockachievement(ACH_SURVIVOR); break;
                 case 610: trydisconnect(true); break;

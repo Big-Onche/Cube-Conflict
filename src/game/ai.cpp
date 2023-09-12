@@ -20,12 +20,10 @@ namespace ai
 
     void bottaunt(gameent *d)
     {
-        if(!packtaunt) return;
-        if(d->state!=CS_ALIVE || d->physstate<PHYS_SLOPE) return;
-        if(lastmillis-d->lasttaunt<7500) return;
-        d->lasttaunt = lastmillis;
-        //d->dansechan = playsound(S_CGCORTEX+(d->customdanse), d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 150, d->dansechan, 400);
-        addmsg(N_TAUNT, "rc", d);
+        //if(d->state!=CS_ALIVE || d->physstate<PHYS_SLOPE) return;
+        //if(lastmillis-d->lasttaunt<7500) return;
+        //d->lasttaunt = lastmillis;
+        //addmsg(N_TAUNT, "rc", d);
     }
 
     float viewdist(int x)
@@ -1459,7 +1457,7 @@ namespace ai
                     case APT_ESPION:
                         if(d->mana>100) launchAbility(d, ABILITY_3);
                 }
-                if(randomevent(2.5f*gfx::nbfps) && packtaunt) bottaunt(d);
+                //if(randomevent(2.5f*gfx::nbfps) && packtaunt) bottaunt(d);
 
                 switch(c.type)
                 {

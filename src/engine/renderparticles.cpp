@@ -446,9 +446,9 @@ struct meterrenderer : listrenderer
         {
             gle::colorf(0, 0.8f, 0);
             gle::begin(GL_TRIANGLE_STRIP);
-            loopk(10)
+            loopk(4)
             {
-                const vec2 &sc = sincos360[k*(180/(10-1))];
+                const vec2 &sc = sincos360[k*(180/(4-1))];
                 float c = (0.5f + 0.1f)*sc.y, s = 0.5f - (0.5f + 0.1f)*sc.x;
                 gle::attrib(m.transform(vec2(-c, s)));
                 gle::attrib(m.transform(vec2(right + c, s)));
@@ -459,9 +459,9 @@ struct meterrenderer : listrenderer
         if(basetype==PT_METERVS) gle::colorub(p->color2[0], p->color2[1], p->color2[2]);
         else gle::colorf(0, 0, 0);
         gle::begin(GL_TRIANGLE_STRIP);
-        loopk(10)
+        loopk(4)
         {
-            const vec2 &sc = sincos360[k*(180/(10-1))];
+            const vec2 &sc = sincos360[k*(180/(4-1))];
             float c = 0.5f*sc.y, s = 0.5f - 0.5f*sc.x;
             gle::attrib(m.transform(vec2(left + c, s)));
             gle::attrib(m.transform(vec2(right + c, s)));
@@ -472,9 +472,9 @@ struct meterrenderer : listrenderer
         {
             gle::colorf(0, 0.8f, 0);
             gle::begin(GL_TRIANGLE_FAN);
-            loopk(10)
+            loopk(4)
             {
-                const vec2 &sc = sincos360[k*(180/(10-1))];
+                const vec2 &sc = sincos360[k*(180/(4-1))];
                 float c = (0.5f + 0.1f)*sc.y, s = 0.5f - (0.5f + 0.1f)*sc.x;
                 gle::attrib(m.transform(vec2(left + c, s)));
             }
@@ -483,9 +483,10 @@ struct meterrenderer : listrenderer
 
         gle::color(p->color);
         gle::begin(GL_TRIANGLE_STRIP);
-        loopk(10)
+        loopk(4)
         {
-            const vec2 &sc = sincos360[k*(180/(10-1))];
+            const vec2 &sc = sincos360[k*(180/(4-1))];
+
             float c = 0.5f*sc.y, s = 0.5f - 0.5f*sc.x;
             gle::attrib(m.transform(vec2(-c, s)));
             gle::attrib(m.transform(vec2(left + c, s)));
@@ -1442,7 +1443,7 @@ static void makeparticles(entity &e)
                 {
                     vec pos = e.o;
                     pos.add(vec(-30+rnd(30), -30+rnd(30), -5));
-                    playsound(S_LAVASPLASH, &e.o, 0, 0, 0 , 30, -1, 200);
+                    playSound(S_LAVASPLASH, &e.o, 300, 100);
                     loopi(6)regularsplash(PART_FIRESPARK, 0xFFBB55, 800+rnd(600), 10, 300+(rnd(500)), pos, 3.f+(rnd(30)/6.f), 200, 0, -3.f, true);
                     loopi(4)regularsplash(PART_SMOKE, 0x333333, 400, 3, 1000+(rnd(1000)), pos, 8.f+(rnd(8)), -20, 0, 18.f, true);
                     loopi(2)particle_fireball(pos, 20, PART_EXPLOSION, 500, 0xFF9900, 2.5f, false);
@@ -1461,13 +1462,13 @@ static void makeparticles(entity &e)
                     posground.add(vec(posx, posy, -50));
                     loopi(2)particle_flare(possky, posground, 750, PART_LIGHTNING, 0x8888FF, 15.f+rnd(10), NULL, gfx::champicolor());
 
-                    playsound(S_ECLAIRPROCHE, &posground, 0, 0, 0 , 50, -1, 500);
+                    playSound(S_ECLAIRPROCHE, &posground, 400, 100);
 
                     vec posA = possky;
                     vec posB = camera1->o;
                     vec flashloc = (posA.add((posB.mul(vec(3, 3, 3))))).div(vec(4, 4, 4));
 
-                    if(camera1->o.dist(posground) >= 250) playsound(S_ECLAIRLOIN, &flashloc, 0, 0, 0 , 500, -1, 1500);
+                    if(camera1->o.dist(posground) >= 250) playSound(S_ECLAIRPROCHE, &flashloc, 1500, 300);
                     adddynlight(flashloc, 4000, vec(1.5f, 1.5f, 2.0f), 200, 40, L_NOSHADOW, 2000, vec(0.5f, 0.5f, 1.0f));
                 }
             }
@@ -1492,13 +1493,13 @@ static void makeparticles(entity &e)
                     possky.add(vec(posx+(-200+(rnd(400))), posy+(-200+(rnd(400))), 800));
                     posground.add(vec(posx, posy, -50));
                     particle_flare(possky, posground, 1000, PART_LIGHTNING, 0xFF6622, 15.f+rnd(10), NULL, gfx::champicolor());
-                    playsound(S_ECLAIRPROCHE, &posground, 0, 0, 0 , 50, -1, 500);
+                    playSound(S_ECLAIRPROCHE, &posground, 500, 50);
 
                     vec posA = possky;
                     vec posB = camera1->o;
                     vec flashloc = (posA.add((posB.mul(vec(3, 3, 3))))).div(vec(4, 4, 4));
 
-                    if(camera1->o.dist(posground) >= 250) playsound(S_ECLAIRLOIN, &flashloc, 0, 0, 0 , 500, -1, 1500);
+                    if(camera1->o.dist(posground) >= 250) playSound(S_ECLAIRLOIN, &flashloc, 1000, 250);
                     if(camera1->o.dist(posground) < 1500) adddynlight(flashloc, 4000, vec(1.5f, 0.5f, 0.0f), 200, 40, L_NOSHADOW, 1000, vec(0.5f, 1.0f, 0.5f));
                 }
             }

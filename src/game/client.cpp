@@ -1649,7 +1649,7 @@ namespace game
 
                 else if(r==player1) stat ? addstat(10, STAT_MANAREGAIN) : addstat(5, STAT_HEALTHREGAIN);
 
-                //playsound(stat ? S_REGENJUNKIE : S_REGENMEDIGUN, r==hudplayer() ? NULL : &r->o, 0, 0, 0 , 50, -1, 125);
+                playSound(stat ? S_REGENJUNKIE : S_REGENMEDIGUN, r==hudplayer() ? NULL : &r->o, 125, 50);
                 break;
             }
 

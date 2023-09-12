@@ -51,33 +51,33 @@ void buyitem(int itemtype, int itemnum) //Achète un objet
     switch(itemtype)
     {
         case CUST_SMILEY:
-            if(customsmileys[itemnum].smileyprice > stat[STAT_CC]) {conoutf(CON_GAMEINFO, GAME_LANG ? "\f3This smiley is too expensive for you!" : "\f3Ce smiley est trop cher pour toi !"); playsound(S_ERROR); return;}
-            else if(cust[SMI_HAP+itemnum]) {conoutf(CON_GAMEINFO, GAME_LANG ? "\f3You already own this smiley!" : "\f3Vous poss�dez déjà ce smiley !"); playsound(S_ERROR); return;}
+            if(customsmileys[itemnum].smileyprice > stat[STAT_CC]) {conoutf(CON_GAMEINFO, GAME_LANG ? "\f3This smiley is too expensive for you!" : "\f3Ce smiley est trop cher pour toi !"); playSound(S_ERROR); return; }
+            else if(cust[SMI_HAP+itemnum]) {conoutf(CON_GAMEINFO, GAME_LANG ? "\f3You already own this smiley!" : "\f3Vous poss�dez déjà ce smiley !");  playSound(S_ERROR); return; }
             else
             {
                 stat[STAT_CC] -= customsmileys[itemnum].smileyprice;
                 cust[SMI_HAP+itemnum] = rnd(99)+1;
-                playsound(S_CAISSEENREGISTREUSE);
+                playSound(S_CAISSEENREGISTREUSE);
             }
             break;
         case CUST_CAPE:
-            if(customscapes[itemnum].capeprice > stat[STAT_CC]) {conoutf(CON_GAMEINFO, GAME_LANG ? "\f3This cape is too expensive for you!" : "\f3Cette cape est trop chère pour toi !"); playsound(S_ERROR); return;}
-            else if(cust[CAPE_CUBE+itemnum]) {conoutf(CON_GAMEINFO, GAME_LANG ? "\f3You already own this cape!" : "\f3Vous poss�dez déjà cette cape !"); playsound(S_ERROR); return;}
+            if(customscapes[itemnum].capeprice > stat[STAT_CC]) {conoutf(CON_GAMEINFO, GAME_LANG ? "\f3This cape is too expensive for you!" : "\f3Cette cape est trop chère pour toi !"); playSound(S_ERROR); return; }
+            else if(cust[CAPE_CUBE+itemnum]) {conoutf(CON_GAMEINFO, GAME_LANG ? "\f3You already own this cape!" : "\f3Vous poss�dez déjà cette cape !"); playSound(S_ERROR); return; }
             else
             {
                 stat[STAT_CC] -= customscapes[itemnum].capeprice;
                 cust[CAPE_CUBE+itemnum] = rnd(99)+1;
-                playsound(S_CAISSEENREGISTREUSE);
+                playSound(S_CAISSEENREGISTREUSE);
             }
             break;
         case CUST_GRAVE:
-            if(customstombes[itemnum].tombeprice > stat[STAT_CC]) {conoutf(CON_GAMEINFO, GAME_LANG ? "\f3This grave is too expensive for you!" : "\f3Cette tombe est trop ch�chère pour toi !"); playsound(S_ERROR); return;}
-            else if(cust[TOM_MERDE+itemnum]) {conoutf(CON_GAMEINFO, GAME_LANG ? "\f3You already own this grave!" : "\f3Vous poss�dez déjà cette tombe !"); playsound(S_ERROR); return;}
+            if(customstombes[itemnum].tombeprice > stat[STAT_CC]) {conoutf(CON_GAMEINFO, GAME_LANG ? "\f3This grave is too expensive for you!" : "\f3Cette tombe est trop chère pour toi !"); playSound(S_ERROR); return; }
+            else if(cust[TOM_MERDE+itemnum]) {conoutf(CON_GAMEINFO, GAME_LANG ? "\f3You already own this grave!" : "\f3Vous poss�dez déjà cette tombe !"); playSound(S_ERROR); return; }
             else
             {
                 stat[STAT_CC] -= customstombes[itemnum].tombeprice;
                 cust[TOM_MERDE+itemnum] = rnd(99)+1;
-                playsound(S_CAISSEENREGISTREUSE);
+                playSound(S_CAISSEENREGISTREUSE);
             }
             break;
         //case 3:

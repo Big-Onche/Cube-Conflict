@@ -160,7 +160,7 @@ namespace entities
         if(d->abilitymillis[ABILITY_1] && d->aptitude==APT_PRETRE)
         {
             adddynlight(d->o, 20, vec(1.5f, 1.5f, 0.0f), 300, 50, L_NOSHADOW|L_VOLUMETRIC);
-            //playsound(S_PRI_1, d==hudplayer() ? NULL : &d->o, NULL, 0, 0, d==hudplayer() ? 0 : 150, -1, 300);
+            playSound(S_PRI_1, d==hudplayer() ? NULL : &d->o, 300, 150);
         }
 
         if(d==player1 && type==I_BOOSTPRECISION)

@@ -41,3 +41,32 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+src/launcher/Launcher.depend
+src/launcher/Launcher.layout
+src/launcher/obj/Release/updater.obj
+src/launcher/obj/Release/resource.res
+src/launcher/obj/Release/main.obj
+src/launcher/obj/Release/launcher.obj
+src/launcher/obj/Release/config.obj
+*.o
+*.gch
+src/project/obj32/project/mingw.res
+src/project/obj64/project/mingw.res
+src/project/Cube Conflict.layout
+src/project/Cube Conflict.depend
+src/project/Cube Conflict.depend
+.txt
+src/project/Cube Conflict.depend
+Nouveau document texte.txt
+src/project/Cube Conflict.depend
+media/model/objets/panachay/capsule.jpg
+media/model/objets/panachay/bouteille.jpg
+media/model/objets/panachay/capsule.jpg
+media/model/objets/panachay/bouteille.jpg
+Changelog.txt
+src/project/Cube Conflict.cbp
+src/project/Cube Conflict.depend
+BLOC.txt
+src/project/Cube Conflict.cscope_file_list
+src/project/Cube Conflict.depend
+todo.txt

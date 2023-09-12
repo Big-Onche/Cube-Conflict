@@ -241,32 +241,6 @@ static const char * const mastermodenames[] =  { "Auth",   "Public",   "Veto",  
 static const char * const mastermodecolors[] = { "",       "\f0",    "\f2",        "\f2",        "\f3",        "\f3" };
 static const char * const mastermodeicons[] =  { "server", "server", "serverlock", "serverlock", "serverpriv", "serverpriv" };
 
-// hardcoded sounds, defined in sounds.cfg
-enum
-{
-    // notifications
-    S_KILL, S_HIT, S_ACHIEVEMENTUNLOCKED, S_LEVELUP, S_DRAPEAUPRIS,
-    S_DRAPEAUTOMBE, S_DRAPEAUSCORE, S_DRAPEAURESET, S_TERMINAL_HACKED, S_TERMINAL_LOST,
-    S_TERMINAL_HACKED_E, S_TERMINAL_LOST_E, S_TERMINAL_ALARM, S_TERMINAL_ENTER,
-    S_KS_X3, S_KS_X5, S_KS_X7, S_KS_X3_FAR, S_KS_X5_FAR,
-    S_KS_X7_FAR, S_NOTIFICATION, S_INVASION, S_ALIEN_INVASION,
-
-    // ui
-    S_CLICK, S_SCROLLUP, S_SCROLLDOWN, S_CAISSEENREGISTREUSE, S_ERROR,
-    S_APT_SOLDAT, S_APT_MEDECIN, S_APT_AMERICAIN, S_APT_NINJA, S_APT_VAMPIRE,
-    S_APT_MAGICIEN, S_APT_KAMIKAZE, S_APT_FAUCHEUSE, S_APT_PHYSICIEN, S_APT_CAMPEUR,
-    S_APT_ESPION, S_APT_PRETRE, S_APT_VIKING, S_APT_JUNKIE, S_APT_SHOSHONE,
-
-    //npcs
-    S_ALIEN_H, S_ALIEN_P, S_ALIEN_A, S_ALIEN_D, S_MINION_P, S_MINION_D,
-    S_ADULT_P, S_ADULT_D, S_GIANT_P, S_GIANT_D, S_PYRO_A,
-
-    //quotes (fr only)
-    S_CGCORTEX, S_CGVALOCHE, S_CGVIEILLE, S_CGHENDEK, S_CGMILITAIREA, S_CGMILITAIREB, S_CGMOUNIR, S_CGDELAVIER, S_CGPRAUD, S_CGRENE, S_CGRAOULT,
-
-    NUMSOUNDS
-};
-
 // network messages codes, c2s, c2c, s2c
 enum { PRIV_NONE = 0, PRIV_MASTER, PRIV_AUTH, PRIV_ADMIN };
 

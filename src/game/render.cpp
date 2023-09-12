@@ -25,8 +25,6 @@ namespace game
         r->lastupdate = ragdollfade && lastmillis > d->lastpain + max(ragdollmillis - ragdollfade, 0) ? lastmillis - max(ragdollmillis - ragdollfade, 0) : d->lastpain;
         r->edit = NULL;
         r->ai = NULL;
-        r->attackchan = r->dansechan = -1;
-        loopi(3) r->abichan[i] = -1;
         ragdolls.add(r);
         d->ragdoll = NULL;
     }
@@ -154,7 +152,7 @@ namespace game
 
     void changedplayermodel()
     {
-        if(cust[SMI_HAP+playermodel]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas ce smiley !"); playsound(S_ERROR); playermodel = 0; return;}
+        if(cust[SMI_HAP+playermodel]<= 0) { conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas ce smiley !"); playSound(S_ERROR); playermodel = 0; return; }
         if(player1->clientnum < 0) player1->playermodel = playermodel;
         if(player1->ragdoll) cleanragdoll(player1);
         loopv(ragdolls)
@@ -269,14 +267,14 @@ namespace game
 
     VARFP(player1_cape, 0, 0, sizeof(customscapes)/sizeof(customscapes[0])-1,
     {
-        if(cust[CAPE_CUBE+player1_cape]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette cape !"); playsound(S_ERROR); player1_cape=0; return;}
+        if(cust[CAPE_CUBE+player1_cape]<= 0) { conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette cape !"); playSound(S_ERROR); player1_cape=0; return; }
         addmsg(N_SENDCAPE, "ri", player1_cape);
         player1->customcape = player1_cape;
     });
 
     VARFP(player1_tombe, 0, 0, sizeof(customstombes)/sizeof(customstombes[0])-1,
     {
-        if(cust[TOM_MERDE+player1_tombe]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette tombe !"); playsound(S_ERROR); player1_tombe=0; return;}
+        if(cust[TOM_MERDE+player1_tombe]<= 0) { conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette tombe !"); playSound(S_ERROR); player1_tombe=0; return; }
         addmsg(N_SENDTOMBE, "ri", player1_tombe);
         player1->customtombe = player1_tombe;
         if(player1->customtombe==10) unlockachievement(ACH_FUCKYOU);
@@ -341,7 +339,7 @@ namespace game
         if(d->gunselect>=GUN_RAIL && d->gunselect<=GUN_CACNINJA)
         {
             int vanim = ANIM_VWEP_IDLE|ANIM_LOOP, vtime = 0;
-            if(lastaction && d->lastattack >= 0 && attacks[d->lastattack].gun==d->gunselect && lastmillis < lastaction+250)
+            if(isattacking(d))
             {
                 vanim = ANIM_VWEP_SHOOT;
                 vtime = lastaction;
@@ -384,11 +382,11 @@ namespace game
             anim = ANIM_LOSE|ANIM_LOOP;
             if(validteam(team) ? bestteams.htfind(team)>=0 : bestplayers.find(d)>=0) anim = ANIM_WIN|ANIM_LOOP;
         }
-        else if(packtaunt && d->lasttaunt && lastmillis-d->lasttaunt<1000)
-        {
-            lastaction = d->lasttaunt;
-            anim = ANIM_TAUNT|ANIM_LOOP;
-        }
+        //else if(packtaunt && d->lasttaunt && lastmillis-d->lasttaunt<1000)
+        //{
+        //    lastaction = d->lasttaunt;
+        //    anim = ANIM_TAUNT|ANIM_LOOP;
+        //}
         else if(!intermission && gfx::forcecampos<0)
         {
             if(d->inwater && d->physstate<=PHYS_FALL)
@@ -523,9 +521,9 @@ namespace game
             if(d->curdamage) // damage dealt displayed on hud
             {
                 vec pos = d->abovehead();
-                float up = ((totalmillis - d->lastcurdamage) / 80.f) / (d->o.dist(camera1->o) <= 160 ? 160.f - d->o.dist(camera1->o) : 1); // particle going up effect
+                float up = 5 + d->o.dist(camera1->o)/40.f + (((totalmillis - d->lastcurdamage) / 50.f) / (d->o.dist(camera1->o) <= 160 ? 160.f - d->o.dist(camera1->o) : 1)); // particle going up effect
                 float t = clamp(d->o.dist(camera1->o), 0.f, 160.f) / 160.f;
-                pos.add(vec(0, 0, 5 + up - (15 * (1 - t))));
+                pos.add(vec(0, 0, up - (15 * (1 - t))));
                 particle_textcopy(pos, tempformatstring("%d", d->curdamage), PART_TEXT, 1, dmgcolor, gfx::zoom ? dmgsize*(guns[player1->gunselect].maxzoomfov)/100.f : dmgsize, 0, true);
             }
 
@@ -778,11 +776,7 @@ namespace game
 
         int anim = ANIM_GUN_IDLE|ANIM_LOOP, basetime = 0;
 
-        if(d->lastaction && d->lastattack >= 0 && attacks[d->lastattack].gun==d->gunselect && lastmillis-d->lastaction<attacks[d->lastattack].attackdelay)
-        {
-            anim = ANIM_GUN_SHOOT;
-            basetime = d->lastaction;
-        }
+        if(isattacking(d)) { anim = ANIM_GUN_SHOOT; basetime = d->lastaction; }
         drawhudmodel(d, anim, basetime);
     }
 
@@ -853,18 +847,12 @@ namespace game
         }
     }
 
-    void preloadsounds()
-    {
-
-    }
-
     void preload()
     {
         if(hudgun) preloadweapons();
         if(m_tutorial || m_sp || m_dmsp) preloadmonsters();
         preloadbouncers();
         preloadplayermodel();
-        preloadsounds();
         entities::preloadentities();
     }
 }

@@ -542,7 +542,7 @@ struct ctfclientmode : clientmode
             f.interptime = 0;
         }
         conoutf(CON_GAMEINFO, GAME_LANG ? "%s\f7 %sdropped %s's flag." : "%s\f7 %s perdu le drapeau %s", teamcolorname(d), GAME_LANG ? "" : d==player1 ? "as" : "a", teamcolorflag(f));
-        playsound(S_DRAPEAUTOMBE);
+        playSound(S_DRAPEAUTOMBE);
     }
 
     void flagexplosion(int i, int team, const vec &loc)
@@ -579,7 +579,7 @@ struct ctfclientmode : clientmode
         if(d->team==player1->team) conoutf(CON_HUDCONSOLE, GAME_LANG ? "\f9We recovered our flag!" : "\f9Notre équipe a récupéré son drapeau !");
         else conoutf(CON_HUDCONSOLE, GAME_LANG ? "\f3The enemy team has recovered their flag" : "\f3L'équipe ennemie a récupéré son drapeau.");
         if(d==player1) {addstat(1, STAT_DRAPEAUXALYREC); addxpandcc(10, 3);}
-        playsound(S_DRAPEAURESET);
+        playSound(S_DRAPEAURESET);
     }
 
     void resetflag(int i, int version)
@@ -591,7 +591,7 @@ struct ctfclientmode : clientmode
         f.interptime = 0;
         returnflag(i);
         conoutf(CON_GAMEINFO, GAME_LANG ? "The %s's flag has been reset." : "Le drapeau %s\f7 a été replacé.", teamcolorflag(f));
-        playsound(S_DRAPEAURESET);
+        playSound(S_DRAPEAURESET);
     }
 
     void scoreflag(gameent *d, int relay, int relayversion, int goal, int goalversion, int team, int score, int dflags)
@@ -620,7 +620,7 @@ struct ctfclientmode : clientmode
 
         if(d==player1) {addstat(1, STAT_DRAPEAUXENRAP); addxpandcc(20, 10); if(player1->boostmillis[B_EPO]) unlockachievement(ACH_EPOFLAG);}
 
-        playsound(team==player1->team ? S_DRAPEAUSCORE : S_DRAPEAUTOMBE);
+        playSound(team==player1->team ? S_DRAPEAUSCORE : S_DRAPEAUTOMBE);
 
         if(score >= FLAGLIMIT) conoutf(CON_GAMEINFO, GAME_LANG ? "%s\f7 won the game!" : "%s\f7 a gagné la partie !", teamcolor(team));
     }
@@ -638,7 +638,7 @@ struct ctfclientmode : clientmode
 
         if(d==player1) {addstat(1, STAT_DRAPEAUXENVOL); addxpandcc(5, 2);}
         ownflag(i, d, lastmillis);
-        playsound(S_DRAPEAUPRIS);
+        playSound(S_DRAPEAUPRIS);
     }
 
     void checkitems(gameent *d)

@@ -9,7 +9,6 @@ bool randomevent(int probability)
 }
 
 VARP(map_sel, 0, 1, 99);
-VARP(packtaunt, 0, 0, 1);
 
 namespace game
 {
@@ -19,7 +18,7 @@ namespace game
         if(player1->state != CS_DEAD && isconnected() && !premission && !intermission && !m_tutorial)
         {
             conoutf(CON_GAMEINFO, GAME_LANG ? "\fcCannot change class while alive!" : "\fcImpossible de changer d'aptitude en étant vivant !");
-            //playsound(S_ERROR);
+            playSound(S_ERROR);
             player1_aptitude = oldapti;
         }
         else
@@ -27,8 +26,7 @@ namespace game
             addmsg(N_SENDAPTITUDE, "ri", player1_aptitude);
             player1->aptitude = player1_aptitude;
             oldapti = player1->aptitude;
-            //if(!isconnected()) stopsounds();
-            //playsound(S_APT_SOLDAT+player1_aptitude);
+            if(!islaunching) playSound(S_APT_SOLDAT+player1_aptitude);
             if(isconnected() && !premission && !intermission) unlockachievement(ACH_UNDECIDED);
         }
     });
@@ -512,24 +510,24 @@ namespace game
         return player1->state!=CS_DEAD;
     }
 
-    VARFP(player1_danse, 0, 0, sizeof(customsdance)/sizeof(customsdance[0])-1,
+    VARFP(player1_taunt, 0, 0, sizeof(customsdance)/sizeof(customsdance[0])-1,
     {
-        if(!packtaunt) return;
+        //if(!packtaunt) return;
         //if(cust[VOI_CORTEX+player1_danse]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette voix !"); //playsound(S_ERROR); player1_danse=0; return;}
-        addmsg(N_SENDDANSE, "ri", player1_danse);
+        //addmsg(N_SENDDANSE, "ri", player1_danse);
         //stopsounds();
-        player1->customdanse = player1_danse;
+        //player1->customdanse = player1_danse;
         //playsound(S_CGCORTEX+(player1_danse));
     });
 
     void taunt()
     {
-        if(!packtaunt) return;
-        if(player1->state!=CS_ALIVE) return;
-        if(lastmillis-player1->lasttaunt<2000){conoutf(CON_GAMEINFO, "\faOn abuse pas des bonnes choses !"); return;}
-        player1->lasttaunt = lastmillis;
+        //if(!packtaunt) return;
+        //if(player1->state!=CS_ALIVE) return;
+        //if(lastmillis-player1->lasttaunt<2000){conoutf(CON_GAMEINFO, "\faOn abuse pas des bonnes choses !"); return;}
+        //player1->lasttaunt = lastmillis;
         //playsound(S_CGCORTEX+(player1->customdanse), gfx::forcecampos>=0 ? &player1->o : NULL, NULL, 0, -1, -1, -1, 400);
-        addmsg(N_TAUNT, "rc", player1);
+        //addmsg(N_TAUNT, "rc", player1);
     }
     COMMAND(taunt, "");
 
@@ -552,7 +550,7 @@ namespace game
         gameent *h = hudplayer();
         if(h!=player1 && actor==h && d!=actor)
         {
-            if(hitsound && lasthit != lastmillis)    ;//playsound(S_HIT);
+            if(hitsound && lasthit != lastmillis) playSound(S_HIT);
             lasthit = lastmillis;
         }
 
@@ -564,10 +562,7 @@ namespace game
 
         if(randomevent(2))
         {
-            if(d->aptitude==APT_PHYSICIEN && d->abilitymillis[ABILITY_1] && d->armour>0)
-            {
-                //playsound(S_PHY_1, d==h ? NULL : &d->o, 0, 0, 0 , 100, -1, 200);
-            }
+            if(d->aptitude==APT_PHYSICIEN && d->abilitymillis[ABILITY_1] && d->armour>0) playSound(S_PHY_1, d==h ? NULL : &d->o, 200, 100, SND_LOWPRIORITY);
             else if(d->armour>0 && actor->gunselect!=GUN_LANCEFLAMMES) playSound(S_IMPACTWOOD+d->armourtype, d==h ? NULL : &d->o, 250, 50, SND_LOWPRIORITY);
         }
 
@@ -687,31 +682,31 @@ namespace game
         switch(actor->killstreak) //Sons Killstreak
         {
             case 3:
-                //playsound(S_KS_X3, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300);
-                //if(camera1->o.dist(actor->o) >= 250) //playsound(S_KS_X3_FAR, &actor->o, NULL, 0, 0 , 200, -1, 2000);
+                playSound(S_KS_X3, actor==player1 ? NULL : &actor->o, 300, 100);
+                if(camera1->o.dist(actor->o) >= 250) playSound(S_KS_X3_FAR, &actor->o, 1500, 200);
                 break;
             case 5:
-                //playsound(S_KS_X5, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300);
-                //if(camera1->o.dist(actor->o) >= 250) //playsound(S_KS_X5_FAR, &actor->o, NULL, 0, 0 , 200, -1, 750);
+                playSound(S_KS_X5, actor==player1 ? NULL : &actor->o, 300, 100);
+                if(camera1->o.dist(actor->o) >= 250) playSound(S_KS_X5_FAR, &actor->o, 1500, 200);
                 break;
             case 7:
             case 10:
             case 15:
-                //playsound(S_KS_X7, actor==player1 ? NULL : &actor->o, 0, 0, 0 , 100, -1, 300);
-                //if(camera1->o.dist(actor->o) >= 250) //playsound(S_KS_X7_FAR, &actor->o, NULL, 0, 0 , 200, -1, 1500);
+                playSound(S_KS_X7, actor==player1 ? NULL : &actor->o, 300, 100);
+                if(camera1->o.dist(actor->o) >= 250) playSound(S_KS_X7_FAR, &actor->o, 1500, 200);
                 break;
         }
 
         //////////////////////////////GRAPHISMES//////////////////////////////
         if(actor->aptitude==APT_FAUCHEUSE) //Eclair aptitude faucheuse
         {
-            if(camera1->o.dist(d->o) >= 250)   ; //playsound(S_ECLAIRLOIN, &d->o, NULL, 0, 0, 100, -1, 1000);
-            //else //playsound(S_ECLAIRPROCHE, &d->o, NULL, 0, 0, 100, -1, 300);
+            if(camera1->o.dist(d->o) >= 250) playSound(S_ECLAIRLOIN, &d->o, 1000, 100);
+            else playSound(S_ECLAIRPROCHE, &d->o, 300, 100);
             adddynlight(d->o.add(vec(0, 0, 20)), 5000, vec(1.5f, 1.5f, 1.5f), 80, 40);
             vec pos(d->o.x, d->o.y, d->o.z-50);
             particle_flare(vec(0, rnd(15000)+rnd(-30000), 20000+rnd(20000)), pos, 175, PART_LIGHTNING, 0xFFFFFF, 40.0f);
             particle_splash(PART_SMOKE,  15, 2000, d->o, 0x333333, 40.0f,  150,   500);
-            if(actor==player1)  ; //{playsound(S_FAUCHEUSE); player1->vampimillis=1500;}
+            if(actor==player1) { playSound(S_FAUCHEUSE); player1->vampimillis=1500; }
         }
 
         //////////////////////////////MESSAGES//////////////////////////////
@@ -745,7 +740,7 @@ namespace game
             float killdistance = actor->o.dist(d->o)/18.f;
             if(actor==player1) ////////////////////TU as tué quelqu'un////////////////////
             {
-                //playsound(S_KILL);
+                playSound(S_KILL);
                 conoutf(CON_HUDCONSOLE, "%s \fc%s \f7! \f4(%.1fm)", GAME_LANG ? "You killed" : "Tu as tué", dname, killdistance);
                 conoutf(contype, "\fd%s\f7 > \fl%s\f7 > %s \fl(%.1fm)", player1->name, GAME_LANG ? guns[atk].nameEN : guns[atk].nameFR, dname, killdistance);
 
