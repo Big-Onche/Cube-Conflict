@@ -18,7 +18,7 @@ void genlvl() //Calcule le niveau du joueur
         totalneededxp += cclvl*2;
         if(isconnected())
         {
-            playSound(S_LEVELUP, NULL, 0, 0, SND_FIXEDPITCH);
+            playSound(S_LEVELUP, NULL, 0, 0, SND_FIXEDPITCH|SND_NOTIFICATION);
             conoutf(CON_HUDCONSOLE, GAME_LANG ? "\f1LEVEL UP! \fi(Lvl %d)" : "\f1NIVEAU SUPÉRIEUR ! \fi(Niveau %d)", stat[STAT_LEVEL]);
         }
     }
@@ -206,7 +206,7 @@ void unlockachievement(int achID) //Débloque le succès
         {
             succes[achID] = true; //Met le succès à jour côté client
             addxpandcc(25, 25);
-            playSound(S_ACHIEVEMENTUNLOCKED, NULL, 0, 0, SND_FIXEDPITCH);
+            playSound(S_ACHIEVEMENTUNLOCKED, NULL, 0, 0, SND_FIXEDPITCH|SND_NOTIFICATION);
             conoutf(CON_HUDCONSOLE, GAME_LANG ? "\f1ACHIEVEMENT UNLOCKED! \fi(%s)" : "\f1SUCCES DÉBLOQUÉ ! \fi(%s)", GAME_LANG ? achievements[achID].achnicenameEN : achievements[achID].achnicenameFR);
         }
     }
