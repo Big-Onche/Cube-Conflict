@@ -26,7 +26,7 @@ namespace game
             addmsg(N_SENDAPTITUDE, "ri", player1_aptitude);
             player1->aptitude = player1_aptitude;
             oldapti = player1->aptitude;
-            if(!islaunching) playSound(S_APT_SOLDAT+player1_aptitude, NULL, 0, 0, SND_FIXEDPITCH);
+            if(!islaunching) playSound(S_APT_SOLDAT+player1_aptitude, NULL, 0, 0, SND_FIXEDPITCH|SND_NOTIFICATION);
             if(isconnected() && !premission && !intermission) unlockachievement(ACH_UNDECIDED);
         }
     });
@@ -326,6 +326,7 @@ namespace game
     }
 
     VAR(canmove, 0, 1, 1);
+    bool uwSoundPlaying = false;
 
     void updateworld()        // main game update loop
     {
@@ -370,8 +371,12 @@ namespace game
             updateAbilitiesSkills(curtime, player1);
         }
 
-        if(lookupmaterial(camera1->o)==MAT_WATER)    ;// hudplayer()->waterchan = //playsound(S_UNDERWATER, NULL, NULL, 0, -1, 100, hudplayer()->waterchan);
-        //else hudplayer()->stopunderwatersound(); //linkedsound
+        if(lookupmaterial(camera1->o)==MAT_WATER && !uwSoundPlaying)
+        {
+            playSound(S_UNDERWATER, NULL, 0, 0, SND_FIXEDPITCH|SND_LOOPED, hudplayer()->entityId, PL_UNDERWATER_SND);
+            uwSoundPlaying = true;
+        }
+        if(lookupmaterial(camera1->o)!=MAT_WATER) { stopLinkedSound(hudplayer()->entityId, PL_UNDERWATER_SND); uwSoundPlaying = false; }
 
         updateweapons(curtime);
         otherplayers(curtime);
@@ -550,7 +555,7 @@ namespace game
         gameent *h = hudplayer();
         if(h!=player1 && actor==h && d!=actor)
         {
-            if(hitsound && lasthit != lastmillis) playSound(S_HIT);
+            if(hitsound && lasthit != lastmillis) playSound(S_HIT, NULL, 0, 0, SND_NOTIFICATION);
             lasthit = lastmillis;
         }
 
@@ -740,7 +745,7 @@ namespace game
             float killdistance = actor->o.dist(d->o)/18.f;
             if(actor==player1) ////////////////////TU as tué quelqu'un////////////////////
             {
-                playSound(S_KILL, NULL, 0, 0, SND_FIXEDPITCH);
+                playSound(S_KILL, NULL, 0, 0, SND_FIXEDPITCH|SND_NOTIFICATION);
                 conoutf(CON_HUDCONSOLE, "%s \fc%s \f7! \f4(%.1fm)", GAME_LANG ? "You killed" : "Tu as tué", dname, killdistance);
                 conoutf(contype, "\fd%s\f7 > \fl%s\f7 > %s \fl(%.1fm)", player1->name, GAME_LANG ? guns[atk].nameEN : guns[atk].nameFR, dname, killdistance);
 

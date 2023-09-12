@@ -141,6 +141,7 @@ static void getEfxFuncs()
 }
 
 ALuint reverbEffect, auxEffectReverb;
+float currentReverbGain = 0.f;
 
 void applyReverbPreset(ALuint auxEffectSlot, const EFXEAXREVERBPROPERTIES& preset)
 {
@@ -163,6 +164,29 @@ void applyReverbPreset(ALuint auxEffectSlot, const EFXEAXREVERBPROPERTIES& prese
 
     alAuxiliaryEffectSloti(auxEffectReverb, AL_EFFECTSLOT_EFFECT, reverbEffect);
     reportSoundError("applyReverbPreset", "N/A", -1);
+
+    currentReverbGain = preset.flGainHF;
+}
+
+void stopReverb()
+{
+    alAuxiliaryEffectSloti(auxEffectReverb, AL_EFFECTSLOT_EFFECT, AL_EFFECT_NULL);
+    alDeleteEffects(1, &reverbEffect);
+    reportSoundError("stopReverb", "N/A", -1);
+}
+
+void muteReverb()
+{
+    alEffectf(reverbEffect, AL_REVERB_GAIN, 0.0f);
+    alAuxiliaryEffectSloti(auxEffectReverb, AL_EFFECTSLOT_EFFECT, reverbEffect);
+    reportSoundError("muteReverb", "N/A", -1);
+}
+
+void resumeReverb()
+{
+    alEffectf(reverbEffect, AL_REVERB_GAIN, currentReverbGain);
+    alAuxiliaryEffectSloti(auxEffectReverb, AL_EFFECTSLOT_EFFECT, reverbEffect);
+    reportSoundError("resumeReverb", "N/A", -1);
 }
 
 ALuint occlusionFilter;
@@ -272,6 +296,17 @@ bool checkSoundOcclusion(const vec *soundPos)
     return true;
 }
 
+bool applyUnderwaterFilter(int flags)
+{
+    if(lookupmaterial(camera1->o)==MAT_WATER || lookupmaterial(camera1->o)==MAT_LAVA)
+    {
+        muteReverb();
+        return !(flags & SND_NOTIFICATION);
+    }
+    else resumeReverb();
+    return false;
+}
+
 void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRadius, int flags, size_t entityId, int soundType)
 {
     if(soundId < 0 || soundId > NUMSNDS || noSound) return; // invalid index or openal not initialized
@@ -328,7 +363,7 @@ void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRa
 
     if(!noEfx) // apply efx if available
     {
-        bool occluded = !(flags & SND_NOOCCLUSION) && checkSoundOcclusion(soundPos);
+        bool occluded = applyUnderwaterFilter(flags) ? true : (!(flags & SND_NOOCCLUSION) && checkSoundOcclusion(soundPos));
 
         alSource3i(source, AL_AUXILIARY_SEND_FILTER, auxEffectReverb, 0, occluded ? occlusionFilter : AL_FILTER_NULL);
         reportSoundError("alSource3i-auxEffectReverb+occlusionFilter", s.soundPath, s.bufferId[altIndex]);
@@ -414,7 +449,7 @@ void updateSoundPosition(size_t entityId, const vec &newPosition, const vec &vel
         if(sources[i].entityId == entityId && sources[i].soundType == soundType) // found the correct sound source, now update its position
         {
             //fadeFilter(sources[i].source, occlusionFilter, checkSoundOcclusion(&newPosition) ? 0.5f : 0);
-            alSourcei(sources[i].source, AL_DIRECT_FILTER, checkSoundOcclusion(&newPosition) ? occlusionFilter : AL_FILTER_NULL);
+            alSourcei(sources[i].source, AL_DIRECT_FILTER, checkSoundOcclusion(&newPosition) || applyUnderwaterFilter(NULL) ? occlusionFilter : AL_FILTER_NULL);
             alSource3f(sources[i].source, AL_VELOCITY, velocity.x, velocity.z, velocity.y);
             alSource3f(sources[i].source, AL_POSITION, newPosition.x, newPosition.z, newPosition.y);
             break;
@@ -485,7 +520,7 @@ void checkMapSounds()
 
         if(e.type!=ET_SOUND) continue;
 
-        if(e.entityId != SIZE_MAX && editmode) updateSoundPosition(e.entityId, e.o);
+        if(e.entityId != SIZE_MAX) updateSoundPosition(e.entityId, e.o);
         if(camera1->o.dist(e.o) < e.attr2 + 50) // check for distance + add a slight tolerance for efx sound effects
         {
             if(!(e.flags & EF_SOUND))

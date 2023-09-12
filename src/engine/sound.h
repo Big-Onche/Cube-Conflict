@@ -5,7 +5,7 @@
 #include <AL/alc.h>
 
 #define MAX_ALTS 16
-#define MAX_SOURCES 64
+#define MAX_SOURCES 128
 
 // hardcoded sounds, defined in sounds.cfg
 enum SoundNames
@@ -76,10 +76,11 @@ enum SoundFlags
 {
     SND_NOCULL        = 1 << 0,     // sound will be played even if camera1 is beyond radius
     SND_NOOCCLUSION   = 1 << 1,     // no filter if occlusion
-    SND_LOWPRIORITY   = 1 << 2,     // sound will not play if source limit is almost reached
-    SND_FIXEDPITCH    = 1 << 3,     // no random variation in pitch
-    SND_LOOPED        = 1 << 4,     // sound is a loop
-    SND_MAPSOUND      = 1 << 5,     // sound used in a map
+    SND_NOTIFICATION  = 1 << 2,     // notifications sounds such as kills, achievements, etc.
+    SND_LOWPRIORITY   = 1 << 3,     // sound will not play if source limit is almost reached
+    SND_FIXEDPITCH    = 1 << 4,     // no random variation in pitch
+    SND_LOOPED        = 1 << 5,     // sound is a loop
+    SND_MAPSOUND      = 1 << 6      // sound used in a map
 };
 
 enum PlayerLinkedSounds { PL_NONE = 0, PL_ATTACK_SND, PL_ABI_SND_1, PL_ABI_SND_2, PL_ABI_SND_3, PL_POWERARMOR_SND, PL_UNDERWATER_SND, PL_TAUNT_SND }; // types of sounds that can be linked to a bot/player
