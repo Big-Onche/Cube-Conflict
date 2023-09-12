@@ -21,7 +21,7 @@ The mission is to deliver a free, open-source, and exhilarating gaming experienc
 - Loads of skins for character customization.
 
 ## 🚧 Roadmap for the First Release
-- 🟩🟩🟩⬛⬛ Moving to OpenAL soft instead of SDL Mixer
+- 🟩🟩🟩🟩⬛ Moving to OpenAL soft instead of SDL Mixer
 - 🟩🟩⬛⬛⬛ More maps!
 - 🟩🟩⬛⬛⬛ Simplified map editing with a dedicated GUI.
 - 🟩🟩🟩🟩⬛ Completion of the tutorial map.
