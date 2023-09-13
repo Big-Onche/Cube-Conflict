@@ -82,13 +82,13 @@ namespace entities
 
     bool powerarmorpieces(int type, gameent *d)
     {
-        return (d->armourtype==A_ASSIST && d->armour) && (type==I_BOUCLIERBOIS || type==I_BOUCLIERFER || type == I_BOUCLIERMAGNETIQUE || type==I_BOUCLIEROR);
+        return (d->armourtype==A_ASSIST && d->armour) && (type==I_WOODSHIELD || type==I_IRONSHIELD || type == I_MAGNETSHIELD || type==I_GOLDSHIELD);
     }
 
     bool canspawnitem(int type)
     {
         if(type<I_RAIL && type>I_MANA) return false; //just to be sure
-        else if(m_noitems) return (type==I_SUPERARME || (type>=I_BOOSTPV && type<=I_BOOSTGRAVITE)); // no shields, mana, health and ammo (just boosts and superweapon)
+        else if(m_noitems) return (type==I_SUPERARME || (type>=I_BOOSTPV && type<=I_JOINT)); // no shields, mana, health and ammo (just boosts and superweapon)
         else if(m_noammo) return (type>=I_SUPERARME && type<=I_MANA); //everything except regular ammo
         else return (type>=I_RAIL && type<=I_MANA); //everything
     }
@@ -132,7 +132,7 @@ namespace entities
 
     void repammo(gameent *d, int type, bool local)
     {
-        addammo(type, d->ammo[type-I_RAIL+GUN_RAIL], local);
+        addammo(type, d->ammo[type-I_RAIL+GUN_ELEC], local);
     }
 
     // these two functions are called when the server acknowledges that you really
@@ -163,7 +163,7 @@ namespace entities
             playSound(S_PRI_1, d==hudplayer() ? NULL : &d->o, 300, 150);
         }
 
-        if(d==player1 && type==I_BOOSTPRECISION)
+        if(d==player1 && type==I_SHROOMS)
         {
             addpostfx("sobel", 1, 1, 1, 1, vec4(1, 1, 1, 1));
             fullbrightmodels = 200;
@@ -263,23 +263,23 @@ namespace entities
                         {
                             case I_SANTE: addstat(1, STAT_PANACHAY); addxpandcc(1); break;
                             case I_MANA:  addstat(1, STAT_MANA); addxpandcc(1); break;
-                            case I_BOUCLIERBOIS:
-                            case I_BOUCLIERFER:
-                            case I_BOUCLIEROR:
-                            case I_BOUCLIERMAGNETIQUE:
+                            case I_WOODSHIELD:
+                            case I_IRONSHIELD:
+                            case I_GOLDSHIELD:
+                            case I_MAGNETSHIELD:
                                 if(player1->armourtype==A_ASSIST) addstat(1, STAT_REPASSIST);
                                 else
                                 {
-                                    addstat(1, e->type==I_BOUCLIERBOIS ? STAT_BOUCLIERBOIS : e->type==I_BOUCLIERFER ? STAT_BOUCLIERFER : e->type==I_BOUCLIERMAGNETIQUE ? STAT_BOUCLIERMAGNETIQUE : STAT_BOUCLIEROR);
-                                    addxpandcc(e->type==I_BOUCLIERBOIS ? 2 : e->type==I_BOUCLIERFER ? 3 : 4);
+                                    addstat(1, e->type==I_WOODSHIELD ? STAT_BOUCLIERBOIS : e->type==I_IRONSHIELD ? STAT_BOUCLIERFER : e->type==I_MAGNETSHIELD ? STAT_BOUCLIERMAGNETIQUE : STAT_BOUCLIEROR);
+                                    addxpandcc(e->type==I_WOODSHIELD ? 2 : e->type==I_IRONSHIELD ? 3 : 4);
                                 }
                                 break;
-                            case I_ARMUREASSISTEE:  addstat(1, STAT_ARMUREASSIST); addxpandcc(5); break;
+                            case I_POWERARMOR:  addstat(1, STAT_ARMUREASSIST); addxpandcc(5); break;
                             case I_BOOSTPV:         addstat(1, STAT_COCHON); addxpandcc(5); break;
-                            case I_BOOSTDEGATS:     addstat(1, STAT_STEROS); addxpandcc(5); break;
-                            case I_BOOSTVITESSE:    addstat(1, STAT_EPO); addxpandcc(5); break;
-                            case I_BOOSTGRAVITE:    addstat(1, STAT_JOINT); addxpandcc(5); break;
-                            case I_BOOSTPRECISION:  addstat(1, STAT_CHAMPIS); addxpandcc(5); break;
+                            case I_ROIDS:     addstat(1, STAT_STEROS); addxpandcc(5); break;
+                            case I_EPO:    addstat(1, STAT_EPO); addxpandcc(5); break;
+                            case I_JOINT:    addstat(1, STAT_JOINT); addxpandcc(5); break;
+                            case I_SHROOMS:  addstat(1, STAT_CHAMPIS); addxpandcc(5); break;
                             case I_SUPERARME:       addstat(1, STAT_SUPERARMES); addxpandcc(7); break;
                             default: if(e->type>=I_RAIL && e->type<=I_GLOCK) {addstat(1, STAT_ARMES); addxpandcc(1);}
                         }

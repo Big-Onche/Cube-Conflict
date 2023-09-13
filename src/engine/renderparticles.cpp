@@ -1718,8 +1718,8 @@ void updateparticles()
                     string gameenttype = "";
                     if(e.type >= I_RAIL && e.type <= I_SUPERARME) formatstring(gameenttype, "%s", GAME_LANG ? "Weapon" : "Arme");
                     else if(e.type==I_SANTE || e.type==I_MANA) formatstring(gameenttype, "%s", GAME_LANG ? "Item" : "Objet");
-                    else if(e.type >= I_BOUCLIERBOIS && e.type <= I_ARMUREASSISTEE) formatstring(gameenttype, "%s", GAME_LANG ? "Shield" : "Bouclier");
-                    else if(e.type >= I_BOOSTPV && e.type <= I_BOOSTGRAVITE) formatstring(gameenttype, "%s", GAME_LANG ? "Boost" : "Boost");
+                    else if(e.type >= I_WOODSHIELD && e.type <= I_POWERARMOR) formatstring(gameenttype, "%s", GAME_LANG ? "Shield" : "Bouclier");
+                    else if(e.type >= I_BOOSTPV && e.type <= I_JOINT) formatstring(gameenttype, "%s", GAME_LANG ? "Boost" : "Boost");
                     defformatstring(txt, "%s%s%s%s", gameenttype, strcmp(gameenttype, "") ? " (\ff" : "", enthudnames[(e.type*2)+GAME_LANG], strcmp(gameenttype, "") ? "\f7)" : "");
                     particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);
                     if(strcmp(gameenttype, "")) partcol = 0x0000FF;

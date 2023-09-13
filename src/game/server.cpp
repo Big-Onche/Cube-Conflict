@@ -858,7 +858,7 @@ namespace server
 
     bool canspawnitem(int type)
     {
-        if(m_noitems) return (type==I_SUPERARME || (type>=I_BOOSTPV && type<=I_BOOSTGRAVITE));
+        if(m_noitems) return (type==I_SUPERARME || (type>=I_BOOSTPV && type<=I_JOINT));
         else if(m_noammo) return (type>=I_SUPERARME && type<=I_MANA);
         else return (type>=I_RAIL && type<=I_MANA);
     }
@@ -872,21 +872,21 @@ namespace server
         switch(type)
         {
             case I_GLOCK: case I_SANTE: case I_MANA: sec = np*3; break;
-            case I_UZI: case I_LANCEFLAMMES: case I_ARBALETE: case I_HYDRA: case I_BOUCLIERBOIS: sec = np*4; break;
+            case I_UZI: case I_LANCEFLAMMES: case I_ARBALETE: case I_HYDRA: case I_WOODSHIELD: sec = np*4; break;
             case I_MOSSBERG: case I_SMAW: case I_ARTIFICE: case I_SV98: case I_M32: case I_FAMAS: case I_PULSE: case I_AK47: case I_GRAP1: sec = np*5; break;
-            case I_MINIGUN: case I_RAIL: case I_SPOCKGUN: case I_BOUCLIERFER: sec = np*6;
-            case I_BOUCLIERMAGNETIQUE: sec = np*7; break;
-            case I_BOUCLIEROR: sec = np*8; break;
+            case I_MINIGUN: case I_RAIL: case I_SPOCKGUN: case I_IRONSHIELD: sec = np*6;
+            case I_MAGNETSHIELD: sec = np*7; break;
+            case I_GOLDSHIELD: sec = np*8; break;
             case I_SUPERARME: sec = 45+rnd(31); break;
-            case I_BOOSTPV: case I_BOOSTGRAVITE: sec = 30+rnd(21); break;
-            case I_BOOSTPRECISION: case I_BOOSTVITESSE: case I_BOOSTDEGATS: case I_ARMUREASSISTEE: sec = 40+rnd(21); break;
+            case I_BOOSTPV: case I_JOINT: sec = 30+rnd(21); break;
+            case I_SHROOMS: case I_EPO: case I_ROIDS: case I_POWERARMOR: sec = 40+rnd(21); break;
         }
         return sec*1000;
     }
 
     bool delayspawn(int type)
     {
-        return (type==I_SUPERARME || (type>=I_BOOSTPV && type<=I_BOOSTGRAVITE) || (type>=I_BOUCLIERFER && type<=I_ARMUREASSISTEE));
+        return (type==I_SUPERARME || (type>=I_BOOSTPV && type<=I_JOINT) || (type>=I_IRONSHIELD && type<=I_POWERARMOR));
     }
 
     bool pickup(int i, int sender)         // server side item pickup, acknowledge first client that gets it
@@ -2709,7 +2709,7 @@ namespace server
                             sents[i].spawned = true;
                             sendf(-1, 1, "ri2", N_ITEMSPAWN, i);
                         }
-                        else if(sents[i].spawntime<=10000 && oldtime>10000 && ((sents[i].type>=I_BOOSTDEGATS && sents[i].type<=I_BOOSTGRAVITE) || sents[i].type==I_SUPERARME))
+                        else if(sents[i].spawntime<=10000 && oldtime>10000 && ((sents[i].type>=I_ROIDS && sents[i].type<=I_JOINT) || sents[i].type==I_SUPERARME))
                         {
                             sendf(-1, 1, "ri3", N_ANNOUNCE, sents[i].type, -1);
                         }

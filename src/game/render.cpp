@@ -336,7 +336,7 @@ namespace game
         //////////////////////////////////////////////////////////////////MODELES//////////////////////////////////////////////////////////////////
         modelattach a[10];
         int ai = 0;
-        if(d->gunselect>=GUN_RAIL && d->gunselect<=GUN_CACNINJA)
+        if(d->gunselect>=GUN_ELEC && d->gunselect<=GUN_CACNINJA)
         {
             int vanim = ANIM_VWEP_IDLE|ANIM_LOOP, vtime = 0;
             if(isattacking(d))
@@ -349,8 +349,8 @@ namespace game
         if(mainpass && !(flags&MDL_ONLYSHADOW))
         {
             d->muzzle = d->balles = vec(-1, -1, -1);
-            if(d->gunselect>=GUN_RAIL && d->gunselect<=GUN_CACNINJA) a[ai++] = modelattach("tag_muzzle", &d->muzzle);
-            if(d->gunselect>=GUN_RAIL && d->gunselect<=GUN_CACNINJA) a[ai++] = modelattach("tag_balles", &d->balles);
+            if(d->gunselect>=GUN_ELEC && d->gunselect<=GUN_CACNINJA) a[ai++] = modelattach("tag_muzzle", &d->muzzle);
+            if(d->gunselect>=GUN_ELEC && d->gunselect<=GUN_CACNINJA) a[ai++] = modelattach("tag_balles", &d->balles);
         }
 
         ////////Boucliers////////
@@ -709,7 +709,7 @@ namespace game
         d->muzzle = d->balles = vec(-1, -1, -1);
         a[ai++] = modelattach("tag_muzzle", &d->muzzle);
         a[ai++] = modelattach("tag_balles", &d->balles);
-        if((d->gunselect==GUN_MINIGUN || d->gunselect==GUN_LANCEFLAMMES || d->gunselect==GUN_PULSE || d->gunselect==GUN_UZI || d->gunselect==GUN_S_GAU8) && anim!=ANIM_GUN_MELEE)
+        if((d->gunselect==GUN_MINIGUN || d->gunselect==GUN_LANCEFLAMMES || d->gunselect==GUN_PLASMA || d->gunselect==GUN_UZI || d->gunselect==GUN_S_GAU8) && anim!=ANIM_GUN_MELEE)
         {
             anim |= ANIM_LOOP;
             basetime = 0;
@@ -797,7 +797,7 @@ namespace game
               zrad = height/1.6f;
         vec2 xyrad = vec2(previewent->xradius, previewent->yradius).max(height/3);
         previewent->o = calcmodelpreviewpos(vec(xyrad, zrad), previewent->yaw).addz(previewent->eyeheight - zrad);
-        previewent->gunselect = validgun(weap) ? weap : GUN_RAIL;
+        previewent->gunselect = validgun(weap) ? weap : GUN_ELEC;
         const playermodelinfo *mdlinfo = getplayermodelinfo(model);
         if(!mdlinfo) return;
         renderplayerui(previewent, *mdlinfo, cape, getplayercolor(team, color), team);

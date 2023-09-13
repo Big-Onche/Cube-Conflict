@@ -72,8 +72,8 @@ enum                            // static entity types
     I_RAIL, I_PULSE, I_SMAW, I_MINIGUN, I_SPOCKGUN, I_M32, I_LANCEFLAMMES, I_UZI, I_FAMAS, I_MOSSBERG, I_HYDRA, I_SV98, I_SKS, I_ARBALETE, I_AK47, I_GRAP1, I_ARTIFICE, I_GLOCK,
     I_SUPERARME, I_NULL1, I_NULL2, I_NULL3,
     // items
-    I_SANTE, I_BOOSTPV, I_BOOSTDEGATS, I_BOOSTPRECISION, I_BOOSTVITESSE, I_BOOSTGRAVITE,
-    I_BOUCLIERBOIS, I_BOUCLIERFER, I_BOUCLIEROR, I_BOUCLIERMAGNETIQUE, I_ARMUREASSISTEE,
+    I_SANTE, I_BOOSTPV, I_ROIDS, I_SHROOMS, I_EPO, I_JOINT,
+    I_WOODSHIELD, I_IRONSHIELD, I_GOLDSHIELD, I_MAGNETSHIELD, I_POWERARMOR,
     I_MANA,
     // other
     TELEPORT,                   // attr1 = idx, attr2 = model, attr3 = tag
@@ -106,7 +106,7 @@ struct gameentity : extentity
     gameentity() : triggerstate(TRIGGER_RESET), lasttrigger(0) {}
 };
 
-enum { GUN_RAIL = 0, GUN_PULSE, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_M32, GUN_LANCEFLAMMES, GUN_UZI, GUN_FAMAS, GUN_MOSSBERG, GUN_HYDRA, GUN_SV98, GUN_SKS, GUN_ARBALETE, GUN_AK47, GUN_GRAP1, GUN_ARTIFICE, GUN_GLOCK,
+enum { GUN_ELEC = 0, GUN_PLASMA, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_M32, GUN_LANCEFLAMMES, GUN_UZI, GUN_FAMAS, GUN_MOSSBERG, GUN_HYDRA, GUN_SV98, GUN_SKS, GUN_ARBALETE, GUN_AK47, GUN_GRAP1, GUN_ARTIFICE, GUN_GLOCK,
        GUN_S_NUKE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_S_CAMPOUZE,
        GUN_CAC349, GUN_CACMARTEAU, GUN_CACMASTER, GUN_CACFLEAU,
        GUN_KAMIKAZE, GUN_ASSISTXPL, GUN_CACNINJA,
@@ -340,8 +340,8 @@ enum
 
 static struct itemstat { int add, max, sound; const char *name_fr, *name_en; int info; } itemstats[] =
 {   // weapons
-    {15,    60,    S_ITEMAMMO,  "FUSIL ELECTRIQUE", "ELECTRIC RIFLE",   GUN_RAIL},
-    {32,   128,    S_ITEMAMMO,  "FUSIL PLASMA",     "PLASMA RIFLE",     GUN_PULSE},
+    {15,    60,    S_ITEMAMMO,  "FUSIL ELECTRIQUE", "ELECTRIC RIFLE",   GUN_ELEC},
+    {32,   128,    S_ITEMAMMO,  "FUSIL PLASMA",     "PLASMA RIFLE",     GUN_PLASMA},
     {5,     20,    S_ITEMAMMO,  "SMAW",             "SMAW",             GUN_SMAW},
     {80,   320,    S_ITEMAMMO,  "MINIGUN",          "MINIGUN",          GUN_MINIGUN},
     {20,    80,    S_ITEMAMMO,  "SPOCKGUN",         "SPOCKGUN",         GUN_SPOCKGUN},
@@ -386,8 +386,8 @@ static struct itemstat { int add, max, sound; const char *name_fr, *name_en; int
 static const struct attackinfo { int gun, action, picksound, sound, middistsnd, fardistsnd, specialsounddelay, attackdelay, damage, spread, nozoomspread, margin, projspeed, kickamount, range, rays, hitpush, exprad, ttl, use; } attacks[NUMATKS] =
 {
     //Armes "normales"
-    { GUN_RAIL,         ACT_SHOOT, S_WPLOADFUTUR,     S_ELECRIFLE,    S_ELECRIFLE_FAR,    S_FAR_LIGHT, 10,  350,  325,  35, 105, 0,    0,  10, 8000,  1,    30,   0, 0, 1},
-    { GUN_PULSE,        ACT_SHOOT, S_WPLOADFUTUR,     S_PLASMARIFLE,  S_PLASMARIFLE_FAR,  S_FAR_LIGHT, 25,   90,  180,  45, 135, 0, 2000,   5, 8000,  1,    50,  25, 0, 1},
+    { GUN_ELEC,         ACT_SHOOT, S_WPLOADFUTUR,     S_ELECRIFLE,    S_ELECRIFLE_FAR,    S_FAR_LIGHT, 10,  350,  325,  35, 105, 0,    0,  10, 8000,  1,    30,   0, 0, 1},
+    { GUN_PLASMA,        ACT_SHOOT, S_WPLOADFUTUR,     S_PLASMARIFLE,  S_PLASMARIFLE_FAR,  S_FAR_LIGHT, 25,   90,  180,  45, 135, 0, 2000,   5, 8000,  1,    50,  25, 0, 1},
     { GUN_SMAW,         ACT_SHOOT, S_WPLOADBIG,       S_SMAW,         S_SMAW_FAR,                  -1,  3, 1250,  850,  20,  60, 2,  700,  15, 8000,  1,   750, 125, 0, 1},
     { GUN_MINIGUN,      ACT_SHOOT, S_WPLOADMID,       S_MINIGUN,      S_MINIGUN_FAR,      S_FAR_LIGHT, 35,   60,  180,  60, 180, 0, 4250,   5, 8000,  1,    15 ,  7, 0, 1},
     { GUN_SPOCKGUN,     ACT_SHOOT, S_WPLOADALIEN,     S_SPOCKGUN,     S_SPOCKGUN_FAR,     S_FAR_LIGHT, 15,  175,  250,  15, 150, 3, 2250,   5, 8000,  1,    30,  15, 0, 1},
@@ -501,19 +501,19 @@ struct gamestate
 
     void baseammo(int gun, int k = 2)
     {
-        ammo[gun] = (itemstats[gun-GUN_RAIL].add*k);
+        ammo[gun] = (itemstats[gun-GUN_ELEC].add*k);
     }
 
     void addammo(int gun, int k = 1, int scale = 1)
     {
-        itemstat &is = itemstats[gun-GUN_RAIL];
+        itemstat &is = itemstats[gun-GUN_ELEC];
         ammo[gun] = min(ammo[gun] + (is.add*k)/scale, is.max);
     }
 
     bool hasmaxammo(int type)
     {
        const itemstat &is = itemstats[type-I_RAIL];
-       return ammo[type-I_RAIL+GUN_RAIL]>=is.max;
+       return ammo[type-I_RAIL+GUN_ELEC]>=is.max;
     }
 
     bool canpickupitem(int type, int aptitude, bool haspowerarmor)
@@ -531,18 +531,18 @@ struct gamestate
                 if(aptitude==APT_VAMPIRE) return health<maxhealth;
                 else return (aptitude==APT_MAGICIEN || aptitude==APT_PHYSICIEN || aptitude==APT_PRETRE || aptitude==APT_ESPION || aptitude==APT_SHOSHONE) && mana<is.max;
 
-            case I_BOOSTDEGATS: case I_BOOSTVITESSE: case I_BOOSTGRAVITE: case I_BOOSTPRECISION:
-                return boostmillis[type-I_BOOSTDEGATS]<is.max;
+            case I_ROIDS: case I_EPO: case I_JOINT: case I_SHROOMS:
+                return boostmillis[type-I_ROIDS]<is.max;
 
-            case I_BOUCLIERBOIS: return haspowerarmor ? armour<3000 : armour < (aptitude==APT_SOLDAT ? 1000 : is.max);
+            case I_WOODSHIELD: return haspowerarmor ? armour<3000 : armour < (aptitude==APT_SOLDAT ? 1000 : is.max);
 
-            case I_BOUCLIERFER: return haspowerarmor ? armour<3000 : armour < (aptitude==APT_SOLDAT ? 1750 : is.max);
+            case I_IRONSHIELD: return haspowerarmor ? armour<3000 : armour < (aptitude==APT_SOLDAT ? 1750 : is.max);
 
-            case I_BOUCLIERMAGNETIQUE: return haspowerarmor ? armour<3000 : armour < (aptitude==APT_SOLDAT ? 2500 : is.max);
+            case I_MAGNETSHIELD: return haspowerarmor ? armour<3000 : armour < (aptitude==APT_SOLDAT ? 2500 : is.max);
 
-            case I_BOUCLIEROR: return haspowerarmor ? armour<3000 : armour < (aptitude==APT_SOLDAT ? 2750 : is.max);
+            case I_GOLDSHIELD: return haspowerarmor ? armour<3000 : armour < (aptitude==APT_SOLDAT ? 2750 : is.max);
 
-            case I_ARMUREASSISTEE: return !haspowerarmor;
+            case I_POWERARMOR: return !haspowerarmor;
 
             default: return ammo[is.info]<is.max*(aptitude==APT_AMERICAIN ? 1.5f : 1);
         }
@@ -570,8 +570,8 @@ struct gamestate
                 else health = min(health+250, maxhealth);
                 return;
 
-            case I_BOUCLIERBOIS: case I_BOUCLIERFER: case I_BOUCLIEROR: case I_BOUCLIERMAGNETIQUE: case I_ARMUREASSISTEE:
-                if(type==I_ARMUREASSISTEE)
+            case I_WOODSHIELD: case I_IRONSHIELD: case I_GOLDSHIELD: case I_MAGNETSHIELD: case I_POWERARMOR:
+                if(type==I_POWERARMOR)
                 {
                     armourtype = A_ASSIST;
                     armour = min(armour+is.add, is.max);
@@ -587,10 +587,10 @@ struct gamestate
                     return;
                 }
 
-            case I_BOOSTDEGATS: case I_BOOSTVITESSE: case I_BOOSTGRAVITE: case I_BOOSTPRECISION:
+            case I_ROIDS: case I_EPO: case I_JOINT: case I_SHROOMS:
                 {
                     int boostboost = aptitude==APT_JUNKIE ? 1.5f : itemboost; //cannot find a better var name :)
-                    boostmillis[type-I_BOOSTDEGATS] = min(boostmillis[type-I_BOOSTDEGATS]+is.add*boostboost, is.max*boostboost);
+                    boostmillis[type-I_ROIDS] = min(boostmillis[type-I_ROIDS]+is.add*boostboost, is.max*boostboost);
                     return;
                 }
 

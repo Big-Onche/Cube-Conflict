@@ -97,7 +97,7 @@ namespace ai
             switch(d->gunselect)
             {
                 case GUN_MINIGUN:
-                case GUN_PULSE:
+                case GUN_PLASMA:
                 case GUN_S_ROQUETTES:
                 case GUN_GLOCK:
                 case GUN_SPOCKGUN:
@@ -448,7 +448,7 @@ namespace ai
         return false;
     }
 
-    int isgoodammo(int gun) { return gun >= GUN_RAIL && gun <= GUN_S_CAMPOUZE; }
+    int isgoodammo(int gun) { return gun >= GUN_ELEC && gun <= GUN_S_CAMPOUZE; }
 
     bool hasgoodammo(gameent *d)
     {
@@ -482,7 +482,7 @@ namespace ai
             case I_SUPERARME:
                 score = m_ctf ? 1e3f : 1e9f;
                 break;
-            case I_BOOSTDEGATS: case I_BOOSTGRAVITE: case I_BOOSTPRECISION: case I_BOOSTPV: case I_BOOSTVITESSE:
+            case I_ROIDS: case I_JOINT: case I_SHROOMS: case I_BOOSTPV: case I_EPO:
                 d->aptitude==APT_JUNKIE ? score = 1e9f : score = m_ctf ? 1e2f : 1e7f;
                 break;
             case I_SANTE:
@@ -493,21 +493,21 @@ namespace ai
                 if(d->mana < 100 && d->aptitude!=APT_VAMPIRE) score = m_ctf ? 1e2f : 1e5f;
                 else if (d->aptitude==APT_VAMPIRE) score = d->health < 600 ? 1e4f : 1e3f;
                 break;
-            case I_BOUCLIERBOIS: case I_BOUCLIERFER:
+            case I_WOODSHIELD: case I_IRONSHIELD:
                 if(d->armourtype==A_ASSIST && d->armour<1500) score = m_ctf ? 1e2f : 1e4f;
                 else if(d->armour<600) score = m_ctf ? 1e3f : 1e5f;
                 break;
-            case I_BOUCLIEROR: case I_BOUCLIERMAGNETIQUE:
+            case I_GOLDSHIELD: case I_MAGNETSHIELD:
                 if(d->armourtype==A_ASSIST && d->armour<1500) score = m_ctf ? 1e2f : 1e4f;
                 if(d->armour <= 1250) score =  m_ctf ? 1e3f : 1e6f;
-            case I_ARMUREASSISTEE:
+            case I_POWERARMOR:
                 if(d->armourtype!=A_ASSIST) score =  m_ctf ? 1e3f : 1e9f;
                 break;
             default:
             {
                 if(e.type >= I_RAIL && e.type <= I_GLOCK && !d->hasmaxammo(e.type)/2 && !m_noammo)
                 {
-                    int gun = e.type - I_RAIL + GUN_RAIL;
+                    int gun = e.type - I_RAIL + GUN_ELEC;
                     if(isgoodammo(gun)) score = hasgoodammo(d) ? m_ctf ? 1e1f : 1e2f : m_ctf ? 1e2f : 1e4f;
                 }
                 break;
@@ -661,7 +661,7 @@ namespace ai
                 default:
                 {
                     if(m_identique) d->ai->weappref = cncurweapon;
-                    else d->ai->weappref = rnd(GUN_GLOCK-GUN_RAIL+1)+GUN_RAIL;
+                    else d->ai->weappref = rnd(GUN_GLOCK-GUN_ELEC+1)+GUN_ELEC;
                 }
             }
         }
@@ -695,14 +695,14 @@ namespace ai
                     case I_MANA:
                         d->aptitude==APT_VAMPIRE ? wantsitem = badhealth(d) : wantsitem = needmana(d);
                         break;
-                    case I_BOUCLIEROR:
-                    case I_BOUCLIERMAGNETIQUE:
-                    case I_BOUCLIERFER:
-                    case I_BOUCLIERBOIS:
-                    case I_ARMUREASSISTEE:
-                        wantsitem = needshield(d, e.type==I_ARMUREASSISTEE ? true : false);
+                    case I_GOLDSHIELD:
+                    case I_MAGNETSHIELD:
+                    case I_IRONSHIELD:
+                    case I_WOODSHIELD:
+                    case I_POWERARMOR:
+                        wantsitem = needshield(d, e.type==I_POWERARMOR ? true : false);
                         break;
-                    case I_SUPERARME: case I_BOOSTDEGATS: case I_BOOSTGRAVITE: case I_BOOSTPRECISION: case I_BOOSTVITESSE:
+                    case I_SUPERARME: case I_ROIDS: case I_JOINT: case I_SHROOMS: case I_EPO:
                         wantsitem = true;
                 }
                 if(wantsitem)
@@ -1176,7 +1176,7 @@ namespace ai
                     d->ai->becareful = false;
                 }
                 scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, sskew);
-                if(insight || quick || (hasseen && (d->gunselect==GUN_PULSE || d->gunselect==GUN_MINIGUN || d->gunselect==GUN_S_ROQUETTES)))
+                if(insight || quick || (hasseen && (d->gunselect==GUN_PLASMA || d->gunselect==GUN_MINIGUN || d->gunselect==GUN_S_ROQUETTES)))
                 {
                     if((canshoot(d, atk, e) && hastarget(d, atk, b, e, yaw, pitch, dp.squaredist(ep))) || (d->aptitude==APT_PRETRE && d->abilitymillis[ABILITY_3]))
                     {
@@ -1262,7 +1262,7 @@ namespace ai
         return false;
     }
 
-    static const int gunprefs[] = {GUN_S_NUKE, GUN_S_CAMPOUZE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_KAMIKAZE, GUN_CACNINJA, GUN_CACFLEAU, GUN_CACMARTEAU, GUN_CACMASTER, GUN_CAC349, GUN_MINIGUN, GUN_PULSE, GUN_RAIL, GUN_LANCEFLAMMES, GUN_HYDRA, GUN_SV98, GUN_SMAW, GUN_ARBALETE, GUN_ARTIFICE, GUN_MOSSBERG, GUN_FAMAS, GUN_AK47, GUN_M32, GUN_SKS, GUN_SPOCKGUN, GUN_UZI };
+    static const int gunprefs[] = {GUN_S_NUKE, GUN_S_CAMPOUZE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_KAMIKAZE, GUN_CACNINJA, GUN_CACFLEAU, GUN_CACMARTEAU, GUN_CACMASTER, GUN_CAC349, GUN_MINIGUN, GUN_PLASMA, GUN_ELEC, GUN_LANCEFLAMMES, GUN_HYDRA, GUN_SV98, GUN_SMAW, GUN_ARBALETE, GUN_ARTIFICE, GUN_MOSSBERG, GUN_FAMAS, GUN_AK47, GUN_M32, GUN_SKS, GUN_SPOCKGUN, GUN_UZI };
 
     bool request(gameent *d, aistate &b)
     {

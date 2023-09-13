@@ -61,7 +61,7 @@ namespace game
             {
                 case 0: createdrop(o, hightier ? I_BOOSTPV : I_SANTE); break;
                 case 1: createdrop(o, I_MANA); break;
-                case 2: createdrop(o, hightier ? I_BOUCLIERFER : I_BOUCLIERBOIS);
+                case 2: createdrop(o, hightier ? I_IRONSHIELD : I_WOODSHIELD);
             }
         }
     }
@@ -83,7 +83,7 @@ namespace game
             case D_UNCOMMON:
                 switch(rnd(6))
                 {
-                    case 0: createdrop(o, I_BOUCLIERFER); break;
+                    case 0: createdrop(o, I_IRONSHIELD); break;
                     case 1: createdrop(o, I_RAIL+rnd(17)); break;
                     case 2: createdrop(o, I_BOOSTPV); break;
                 }
@@ -92,7 +92,7 @@ namespace game
             case D_RARE:
                 switch(rnd(6))
                 {
-                    case 0: createdrop(o, I_BOUCLIERMAGNETIQUE); break;
+                    case 0: createdrop(o, I_MAGNETSHIELD); break;
                     case 1: createdrop(o, I_RAIL+rnd(17)); break;
                     case 2: createdrop(o, I_BOOSTPV); break;
                 }
@@ -101,9 +101,9 @@ namespace game
             case D_LEGENDARY:
                 switch(rnd(6))
                 {
-                    case 0: createdrop(o, I_BOUCLIEROR); break;
-                    case 1: createdrop(o, I_BOOSTVITESSE); break;
-                    case 2: createdrop(o, I_BOOSTPRECISION); break;
+                    case 0: createdrop(o, I_GOLDSHIELD); break;
+                    case 1: createdrop(o, I_EPO); break;
+                    case 2: createdrop(o, I_SHROOMS); break;
                     case 3: loopi(2) createdrop(o, I_RAIL+rnd(17)); break;
                 }
                 break;
@@ -111,9 +111,9 @@ namespace game
             case D_GODLY:
                 switch(rnd(6))
                 {
-                    case 0: createdrop(o, I_ARMUREASSISTEE); break;
+                    case 0: createdrop(o, I_POWERARMOR); break;
                     case 1: createdrop(o, I_SUPERARME); break;
-                    case 2: createdrop(o, I_BOOSTDEGATS); break;
+                    case 2: createdrop(o, I_ROIDS); break;
                     case 3: loopi(2) createdrop(o, I_RAIL+rnd(17)); break;
                 }
                 break;

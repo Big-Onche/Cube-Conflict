@@ -634,7 +634,7 @@ struct ctfclientmode : clientmode
         f.interptime = lastmillis;
         conoutf(CON_GAMEINFO, GAME_LANG ? "%s\f7 %sstole the %s's flag!" : "%s\f7 %s volé le drapeau %s !", teamcolorname(d), GAME_LANG ? "" : d==player1 ? "as" : "a", teamcolorflag(f));
         conoutf(CON_HUDCONSOLE, f.team!=player1->team ? (GAME_LANG ? "\f9We stole the enemy flag !" : "\f9Notre équipe a volé le drapeau ennemi !") :
-                                                      (GAME_LANG ? "\f3The enemy team stole our flag." : "\f3L'équipe ennemie a volé notre drapeau !"));
+                                                        (GAME_LANG ? "\f3The enemy team stole our flag." : "\f3L'équipe ennemie a volé notre drapeau !"));
 
         if(d==player1) {addstat(1, STAT_DRAPEAUXENVOL); addxpandcc(5, 2);}
         ownflag(i, d, lastmillis);

@@ -28,7 +28,7 @@ namespace game
         {
             if(d==player1 && gun!=GUN_ASSISTXPL && !shortcut) player1->lastweap = gun;
             addmsg(N_GUNSELECT, "rci", d, gun);
-            playSound(attacks[gun-GUN_RAIL].picksound, d==hudplayer() ? NULL : &d->o, 200, 50);
+            playSound(attacks[gun-GUN_ELEC].picksound, d==hudplayer() ? NULL : &d->o, 200, 50);
         }
         d->gunselect = gun;
     }
@@ -1381,14 +1381,14 @@ namespace game
         switch(d->gunselect)
         {
             case GUN_MINIGUN:
-            case GUN_PULSE:
+            case GUN_PLASMA:
             case GUN_S_ROQUETTES:
-                if(!d->attacking) d->gunselect==GUN_PULSE ? d->gunaccel=4 : d->gunselect==GUN_S_ROQUETTES ? d->gunaccel=3 : d->gunaccel=12;
+                if(!d->attacking) d->gunselect==GUN_PLASMA ? d->gunaccel=4 : d->gunselect==GUN_S_ROQUETTES ? d->gunaccel=3 : d->gunaccel=12;
                 break;
             default: d->gunaccel=0;
         }
 
-        if(attacktime < d->gunwait + d->gunaccel*(d->gunselect==GUN_PULSE ? 50 : d->gunselect==GUN_S_ROQUETTES ? 150 : 8) + (d==player1 || (d->aptitude==APT_PRETRE && d->abilitymillis[ABILITY_3]) ? 0 : attacks[d->gunselect].attackdelay)) return;
+        if(attacktime < d->gunwait + d->gunaccel*(d->gunselect==GUN_PLASMA ? 50 : d->gunselect==GUN_S_ROQUETTES ? 150 : 8) + (d==player1 || (d->aptitude==APT_PRETRE && d->abilitymillis[ABILITY_3]) ? 0 : attacks[d->gunselect].attackdelay)) return;
         d->gunwait = 0;
 
         if(d->aptitude==APT_KAMIKAZE)

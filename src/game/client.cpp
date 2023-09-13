@@ -1895,7 +1895,7 @@ namespace game
                 int gun = getint(p);
                 if(!validgun(gun)) return;
                 d->gunselect = gun;
-                playSound(attacks[gun-GUN_RAIL].picksound, d==hudplayer() ? NULL : &d->o, 200, 50);
+                playSound(attacks[gun-GUN_ELEC].picksound, d==hudplayer() ? NULL : &d->o, 200, 50);
                 break;
             }
 
@@ -2226,19 +2226,19 @@ namespace game
                 string announcemsg;
                 if(GAME_LANG)
                 {
-                    formatstring(announcemsg, t==I_BOOSTDEGATS ? "\faROIDS ARE COMING SOON!" :
-                                              t==I_BOOSTPRECISION ? "\faTHE MUSHROOMS ARE GROWING!" :
-                                              t==I_BOOSTVITESSE ? "\faEPO IS COMING FOR CYCLISTS!" :
-                                              t==I_BOOSTGRAVITE ? "\faSOMEONE IS ROLLING A BIG JOINT!" :
+                    formatstring(announcemsg, t==I_ROIDS ? "\faROIDS ARE COMING SOON!" :
+                                              t==I_SHROOMS ? "\faTHE MUSHROOMS ARE GROWING!" :
+                                              t==I_EPO ? "\faEPO IS COMING FOR CYCLISTS!" :
+                                              t==I_JOINT ? "\faSOMEONE IS ROLLING A BIG JOINT!" :
                                               t==I_SUPERARME ? "\faTHE SUPER-WEAPON IS BEING DEPLOYED" :
                                               t==50 ? "\faWEAPON CHANGE IN 5 SECONDS!" : "" );
                 }
                 else
                 {
-                    formatstring(announcemsg, t==I_BOOSTDEGATS ? "\faLES STÉROS SONT BIENTÔT PRÊTS !" :
-                                              t==I_BOOSTPRECISION ? "\faLES CHAMPIGNONS REPOUSSENT !" :
-                                              t==I_BOOSTVITESSE ? "\faL'EPO ARRIVE POUR LES CYCLISTES !" :
-                                              t==I_BOOSTGRAVITE ? "\faQUELQU'UN ROULE UN GROS JOINT !" :
+                    formatstring(announcemsg, t==I_ROIDS ? "\faLES STÉROS SONT BIENTÔT PRÊTS !" :
+                                              t==I_SHROOMS ? "\faLES CHAMPIGNONS REPOUSSENT !" :
+                                              t==I_EPO ? "\faL'EPO ARRIVE POUR LES CYCLISTES !" :
+                                              t==I_JOINT ? "\faQUELQU'UN ROULE UN GROS JOINT !" :
                                               t==I_SUPERARME ? "\faLA SUPER-ARME EST BIENTÔT PRÊTE À ANNIHILER" :
                                               t==50 ? "\faCHANGEMENT D'ARME DANS 5 SECONDES !" : "" );
                 }
