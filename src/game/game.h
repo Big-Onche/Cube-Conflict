@@ -775,7 +775,7 @@ struct gameent : dynent, gamestate
     int smoothmillis;
 
     int lastability[3];
-    bool abilityready[3], playerexploded, attacksound;
+    bool abilityready[3], playerexploded, attacksound, powerarmoursound;
 
     string name, info;
     int team, playermodel, playercolor, customcape, customtombe, customdanse, aptitude, level;
@@ -831,6 +831,7 @@ struct gameent : dynent, gamestate
         killstreak = 0;
         playerexploded = false;
         attacksound = false;
+        powerarmoursound = false;
     }
 
     int respawnwait(int secs, int delay = 0)
