@@ -492,7 +492,7 @@ void soundNearmiss(int sound, const vec &from, const vec &to, int precision)
         p.add(v);
         if(camera1->o.dist(p) <= 64)
         {
-            playSound(sound, &from, 300, 50, SND_LOWPRIORITY);
+            playSound(sound, &p, 300, 50, SND_LOWPRIORITY);
             return;
         }
     }
