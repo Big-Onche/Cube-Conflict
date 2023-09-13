@@ -45,19 +45,19 @@ override WINDRES+= -F pe-i386
 endif
 CLIENT_INCLUDES= $(INCLUDES) -Iinclude
 STD_LIBS= -static-libgcc -static-libstdc++
-CLIENT_LIBS= -mwindows $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lSDL2 -lSDL2_image -lSDL2_mixer -lzlib1 -lopengl32 -lenet -lws2_32 -lwinmm
+CLIENT_LIBS= -mwindows $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lSDL2 -lSDL2_image -lOpenAL32 -lzlib1 -lopengl32 -lenet -lws2_32 -lwinmm
 else    
 ifneq (,$(findstring DARWIN,$(PLATFORM)))
 OSXMIN= 10.9
 override CC+= -arch x86_64 -mmacosx-version-min=$(OSXMIN)
 override CXX+= -arch x86_64 -mmacosx-version-min=$(OSXMIN)
 CLIENT_INCLUDES= $(INCLUDES) -Iinclude
-CLIENT_LIBS= -F../sauerbraten.app/Contents/Frameworks/ -framework SDL2 -framework SDL2_image
-CLIENT_LIBS+= -framework SDL2_mixer -framework CoreAudio -framework AudioToolbox
+CLIENT_LIBS= -F../cubeconflict.app/Contents/Frameworks/ -framework SDL2 -framework SDL2_image
+CLIENT_LIBS+= -framework OpenAL32 -framework CoreAudio -framework AudioToolbox
 CLIENT_LIBS+= -framework AudioUnit -framework OpenGL -framework Cocoa -lz -Lenet -lenet
 else
 CLIENT_INCLUDES= $(INCLUDES) -I/usr/X11R6/include `sdl2-config --cflags`
-CLIENT_LIBS= -Lenet -lenet -L/usr/X11R6/lib -lX11 `sdl2-config --libs` -lSDL2_image -lSDL2_mixer -lz -lGL
+CLIENT_LIBS= -Lenet -lenet -L/usr/X11R6/lib -lX11 `sdl2-config --libs` -lSDL2_image -lOpenAL32 -lz -lGL
 endif
 endif
 ifeq ($(PLATFORM),LINUX)
@@ -87,7 +87,6 @@ CLIENT_OBJS= \
         engine/main.o \
         engine/material.o \
         engine/menus.o \
-        engine/movie.o \
         engine/normal.o \
         engine/octa.o \
         engine/octaedit.o \
@@ -111,13 +110,13 @@ CLIENT_OBJS= \
         engine/water.o \
         engine/world.o \
         engine/worldio.o \
-	cubeconflict/gfx.o \
-	cubeconflict/customs.o \
-	cubeconflict/aptitudes.o \
-	cubeconflict/hud.o \
-	cubeconflict/stats.o \
-	cubeconflict/npcs.o \
-	cubeconflict/rpg.o \
+		cubeconflict/gfx.o \
+		cubeconflict/customs.o \
+		cubeconflict/aptitudes.o \
+		cubeconflict/hud.o \
+		cubeconflict/stats.o \
+		cubeconflict/npcs.o \
+		cubeconflict/rpg.o \
         game/ai.o \
         game/client.o \
         game/entities.o \
@@ -172,7 +171,7 @@ tessfont: shared/tessfont.o
 
 ifneq (,$(findstring DARWIN,$(PLATFORM)))
 install: client
-	cp sauer_client ../sauerbraten.app/Contents/MacOS/sauerbraten_universal
+	cp cc_client ../cubeconflict.app/Contents/MacOS/cubeconflict_universal
 else
 install: all
 	cp -f cc_client       ../bin_unix/$(PLATFORM_PREFIX)_client
