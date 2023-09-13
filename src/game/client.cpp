@@ -1440,7 +1440,7 @@ namespace game
                 {
                     if(a) conoutf(GAME_LANG ? "Game is paused by administrator." : "La partie a été mise en pause par un administrateur.");
                     else conoutf(GAME_LANG ? "Game is paused." : "La partie est en pause.");
-                    loopi(NUMSONGS) stopMusic(i);
+                    stopAllSounds(true);
                     playMusic(S_PAUSE);
                 }
                 else
@@ -1448,6 +1448,7 @@ namespace game
                     if(a) conoutf(GAME_LANG ? "The game has been resumed by the administrator." : "L'administrateur a mis fin à la pause.");
                     else conoutf(GAME_LANG ? "The game has resumed!" : "La partie a repris !");
                     stopMusic(S_PAUSE);
+                    resumeAllSounds();
                 }
                 break;
             }

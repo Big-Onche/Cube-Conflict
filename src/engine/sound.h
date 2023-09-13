@@ -121,6 +121,8 @@ struct SoundSource
     int soundFlags;
 };
 
+extern int minimizedmute;
+
 extern void initSounds();
 extern void playMusic(int musicId);
 extern void updateSoundPosition(size_t entityId, const vec &newPosition, const vec &velocity = vec(0,0,0), int soundType = 0);
@@ -130,7 +132,8 @@ extern void stopSound(int soundId, int flags);
 extern void stopMusic(int soundId);
 extern void stopLinkedSound(size_t entityId, int soundType = 0);
 extern void stopAllMapSounds();
-extern void stopAllSounds();
+extern void stopAllSounds(bool pause = false);
+extern void resumeAllSounds();
 extern bool loadSound(Sound& s, bool music = false);
 extern void manageSources();
 extern void cleanUpSounds();

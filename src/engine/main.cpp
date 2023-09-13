@@ -887,6 +887,8 @@ void checkinput()
 
                     case SDL_WINDOWEVENT_FOCUS_GAINED:
                         shouldgrab = true;
+                        if(minimizedmute) resumeAllSounds();
+
                         break;
                     case SDL_WINDOWEVENT_ENTER:
                         shouldgrab = false;
@@ -896,6 +898,7 @@ void checkinput()
                     case SDL_WINDOWEVENT_LEAVE:
                     case SDL_WINDOWEVENT_FOCUS_LOST:
                         shouldgrab = false;
+                        if(minimizedmute) stopAllSounds(true);
                         focused = -1;
                         break;
 
