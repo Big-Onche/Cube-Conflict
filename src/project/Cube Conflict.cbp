@@ -12,7 +12,7 @@
 				<Option object_output="obj64" />
 				<Option type="0" />
 				<Option compiler="gcc" />
-				<Option parameters="-w1280 -h720 -glog.txt" />
+				<Option parameters='-w1280 -h720 -f0 -u&quot;Devel config&quot; -glog.txt' />
 				<Option projectCompilerOptionsRelation="1" />
 				<Compiler>
 					<Add option="-fomit-frame-pointer" />
@@ -36,17 +36,19 @@
 					<Add directory="../project" />
 				</ResourceCompiler>
 				<Linker>
+					<Add option="-s" />
 					<Add option="-m64" />
 					<Add option="-mwindows" />
 					<Add library="SDL2" />
 					<Add library="SDL2_image" />
-					<Add library="SDL2_mixer" />
 					<Add library="zlib1" />
 					<Add library="opengl32" />
 					<Add library="enet" />
 					<Add library="ws2_32" />
 					<Add library="winmm" />
 					<Add library="steam_api64" />
+					<Add library="OpenAL32" />
+					<Add library="sndfile" />
 					<Add directory="../../bin64" />
 					<Add directory="../lib64" />
 				</Linker>
@@ -60,7 +62,7 @@
 				<Option object_output="obj32" />
 				<Option type="0" />
 				<Option compiler="gcc" />
-				<Option parameters="w1280 -h720 -glog.txt" />
+				<Option parameters='-w1280 -h720 -f0 -u&quot;Devel config&quot; -glog.txt' />
 				<Option projectCompilerOptionsRelation="1" />
 				<Compiler>
 					<Add option="-fomit-frame-pointer" />
@@ -84,17 +86,19 @@
 					<Add directory="../project" />
 				</ResourceCompiler>
 				<Linker>
+					<Add option="-s" />
 					<Add option="-m32" />
 					<Add option="-mwindows" />
 					<Add library="SDL2" />
 					<Add library="SDL2_image" />
-					<Add library="SDL2_mixer" />
 					<Add library="zlib1" />
 					<Add library="opengl32" />
 					<Add library="enet" />
 					<Add library="ws2_32" />
 					<Add library="winmm" />
 					<Add library="steam_api" />
+					<Add library="OpenAL32" />
+					<Add library="sndfile" />
 					<Add directory="../../bin" />
 					<Add directory="../lib" />
 				</Linker>
@@ -153,7 +157,6 @@
 		<Unit filename="../engine/md5.h" />
 		<Unit filename="../engine/menus.cpp" />
 		<Unit filename="../engine/model.h" />
-		<Unit filename="../engine/movie.cpp" />
 		<Unit filename="../engine/mpr.h" />
 		<Unit filename="../engine/normal.cpp" />
 		<Unit filename="../engine/obj.h" />
@@ -177,6 +180,7 @@
 		<Unit filename="../engine/skelmodel.h" />
 		<Unit filename="../engine/smd.h" />
 		<Unit filename="../engine/sound.cpp" />
+		<Unit filename="../engine/sound.h" />
 		<Unit filename="../engine/stain.cpp" />
 		<Unit filename="../engine/textedit.h" />
 		<Unit filename="../engine/texture.cpp" />
@@ -190,7 +194,6 @@
 		<Unit filename="../game/ai.cpp" />
 		<Unit filename="../game/ai.h" />
 		<Unit filename="../game/aiman.h" />
-		<Unit filename="../game/camera.cpp" />
 		<Unit filename="../game/capture.h" />
 		<Unit filename="../game/client.cpp" />
 		<Unit filename="../game/ctf.h" />
