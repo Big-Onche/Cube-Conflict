@@ -2249,14 +2249,12 @@ namespace server
     {
         if(gamemillis<=10000 && !startpremission)
         {
-            game::premission = true;
             sendf(-1, 1, "ri2", N_PREMISSION, 1);
             startpremission = true;
             stoppremission = false;
         }
         else if(gamemillis>10000 && !stoppremission)
         {
-            game::premission = false;
             sendf(-1, 1, "ri2", N_PREMISSION, 0);
             stoppremission = true;
             startpremission = false;
