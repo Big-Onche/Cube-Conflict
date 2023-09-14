@@ -728,7 +728,7 @@ namespace game
     {
         vec debrisvel = owner->o==v ? vec(0, 0, 0) : vec(owner->o).sub(v).normalize(), debrisorigin(v);
         debrisorigin = vec(v).sub(vec(vel).mul(10)).add(vec(5-rnd(10), 5-rnd(10), 5-rnd(10)));
-        //vec soundloc = vec(v).sub(vec(vel).mul(20));
+        vec soundloc = vec(v).sub(vec(vel).mul(atk==ATK_SMAW_SHOOT || atk==ATK_ARTIFICE_SHOOT || atk==ATK_ROQUETTES_SHOOT ? 20 : 10)); // avoid false positive for occlusion effect
 
         switch(atk)
         {
@@ -741,9 +741,9 @@ namespace game
 
             case ATK_SMAW_SHOOT:
             case ATK_ROQUETTES_SHOOT:
-                playSound(S_EXPL_MISSILE, &v, 400, 150);
+                playSound(S_EXPL_MISSILE, &soundloc, 400, 150);
                 if(lookupmaterial(v)==MAT_WATER) playSound(S_EXPL_INWATER, &v, 300, 100);
-                if(camera1->o.dist(v) >= 300) playSound(S_EXPL_FAR, &v, 1500, 400, SND_LOWPRIORITY);
+                if(camera1->o.dist(v) >= 300) playSound(S_EXPL_FAR, &soundloc, 1500, 400, SND_LOWPRIORITY);
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
                 gfx::projexplosion(owner, v, vel, safe, atk);
                 startshake(v, 150, atk);
@@ -751,7 +751,7 @@ namespace game
 
             case ATK_KAMIKAZE_SHOOT:
             case ATK_ASSISTXPL_SHOOT:
-                if(camera1->o.dist(v) >= 300) playSound(S_BIGEXPL_FAR, &v, 2000, 400);
+                if(camera1->o.dist(v) >= 300) playSound(S_BIGEXPL_FAR, &soundloc, 2000, 400);
                 if((lookupmaterial(v)==MAT_WATER)) playSound(S_EXPL_INWATER, &v, 300, 100);
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
                 if(atk==ATK_ASSISTXPL_SHOOT) loopi(10+rnd(5)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_ROBOT);
@@ -766,9 +766,9 @@ namespace game
                 break;
 
             case ATK_ARTIFICE_SHOOT:
-                playSound(S_EXPL_FIREWORKS, &v, 300, 100);
+                playSound(S_EXPL_FIREWORKS, &soundloc, 300, 100);
                 if(lookupmaterial(v)==MAT_WATER) playSound(S_EXPL_INWATER, &v, 300, 100);
-                if(camera1->o.dist(v) >= 300) playSound(S_FIREWORKSEXPL_FAR, &v, 2000, 400);
+                if(camera1->o.dist(v) >= 300) playSound(S_FIREWORKSEXPL_FAR, &soundloc, 2000, 400);
                 gfx::projexplosion(owner, v, vel, safe, atk);
                 startshake(v, 100, atk);
                 break;
@@ -776,7 +776,7 @@ namespace game
             case ATK_M32_SHOOT:
                 playSound(S_EXPL_GRENADE, &v, 400, 150);
                 if(lookupmaterial(v)==MAT_WATER) playSound(S_EXPL_INWATER, &v, 300, 100);
-                if(camera1->o.dist(v) >= 300) playSound(S_EXPL_FAR, &v, 2000, 400, SND_LOWPRIORITY);
+                if(camera1->o.dist(v) >= 300) playSound(S_EXPL_FAR, &soundloc, 2000, 400, SND_LOWPRIORITY);
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
                 gfx::projexplosion(owner, v, vel, safe, atk);
                 startshake(v, 150, atk);
@@ -788,7 +788,7 @@ namespace game
             case ATK_FAMAS_SHOOT:
             case ATK_GLOCK_SHOOT:
             case ATK_ARBALETE_SHOOT:
-                if(!(lookupmaterial(v)==MAT_WATER)) playSound(atk==ATK_ARBALETE_SHOOT ? S_IMPACTARROW : S_LITTLERICOCHET, &v, 175, 75, SND_LOWPRIORITY);
+                if(!(lookupmaterial(v)==MAT_WATER)) playSound(atk==ATK_ARBALETE_SHOOT ? S_IMPACTARROW : S_LITTLERICOCHET, &soundloc, 175, 75, SND_LOWPRIORITY);
                 gfx::projgunhit(owner, v, vel, safe, atk);
                 break;
 
@@ -799,8 +799,8 @@ namespace game
             {
                 if(!(lookupmaterial(v)==MAT_WATER))
                 {
-                    playSound(S_IMPACTLOURDLOIN, &v, 750, 400, SND_LOWPRIORITY);
-                    playSound(S_BIGRICOCHET, &v, 250, 75, SND_LOWPRIORITY);
+                    playSound(S_IMPACTLOURDLOIN, &soundloc, 750, 400, SND_LOWPRIORITY);
+                    playSound(S_BIGRICOCHET, &soundloc, 250, 75, SND_LOWPRIORITY);
                 }
                 gfx::projgunhit(owner, v, vel, safe, atk);
             }
