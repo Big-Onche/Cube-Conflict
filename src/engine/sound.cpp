@@ -484,7 +484,7 @@ void soundNearmiss(int sound, const vec &from, const vec &to, int precision)
     if(noSound) return;
     vec v;
     float d = to.dist(from, v);
-    int steps = clamp(int(d*2), 1, 2048);
+    int steps = clamp(int(d*2), 1, 1024);
     v.div(steps);
     vec p = from;
     loopi(steps)
