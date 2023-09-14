@@ -175,13 +175,24 @@ namespace gfx
                 loopi(50)
                 {
                     vec pos = v;
-                    int o = (i % 2 == 0) ? -1 : 1;
-                    pos.add(vec(rnd(5*i+1)*o, rnd(5*i+1)*o, rnd(5*i+1)*o));
-                    particle_splash(PART_SMOKE, 1, 2000,  pos, 0x212121, 150.0f, 700,   70, 1, champicolor());
-                    particle_splash(PART_SMOKE, 1, 15000, pos, 0x222222, 200.0f,  35,  300, 1, champicolor());
+
+                    float radius = 6.f * i;
+                    float theta = static_cast<float>(rnd(1000)) / 1000.0f * M_PI;
+                    float phi = static_cast<float>(rnd(1000)) / 1000.0f * 2.0f * M_PI;
+                    float r = static_cast<float>(rnd(1000)) / 1000.0f * radius;
+
+                    if(i<30) theta = theta / 3.0f;
+                    else theta = M_PI / 2 + theta / 3.0f;
+
+                    pos.x += r * sin(theta) * cos(phi);
+                    pos.y += r * sin(theta) * sin(phi);
+                    pos.z += r * cos(theta);
+
+                    particle_splash(PART_SMOKE, 1, 2000,  pos, 0x212121, 150.0f,  700,  70, 1, champicolor());
+                    particle_splash(PART_SMOKE, 1, 15000, pos, 0x222222, 200.0f,  150, 300, 1, champicolor());
                     particle_splash(PART_SMOKE, 2, 5000,  pos, 0x333333, 250.0f, 1000, 500, 1, champicolor());
-                    particle_splash(PART_FIRE_BALL, 4, 750+(i*10), pos, hasroids(owner) ? 0xFF0000 : i<16 ? 0xFFFF00 : i<32 ? 0x224400 : 0xFFAA22, 25+rnd(20), 350, 150, 2.5f, champicolor());
-                    if(i>40) particle_fireball(pos, 150, PART_EXPLOSION, 500, hasroids(owner) ? 0xFF0000 : i<37 ? 0xFFFF00 : i<43 ? 0x224400 : 0xFFAA22, 10+rnd(15), champicolor());
+                    particle_splash(PART_FIRE_BALL, 4, 750+(i*30), pos, hasroids(owner) ? 0xFF0000 : i<16 ? 0xFFFF00 : i<32 ? 0x224400 : 0xFFAA22, 30+rnd(30), 400, 200, 2.5f, champicolor());
+                    if(i>25) particle_fireball(pos, 150, PART_EXPLOSION, 1500, hasroids(owner) ? 0xFF0000 : i<37 ? 0xFFFF00 : i<43 ? 0x224400 : 0xFFAA22, 10+rnd(15), champicolor());
                 }
 
                 if(!epilepsyfriendly)
