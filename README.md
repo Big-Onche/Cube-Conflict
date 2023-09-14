@@ -13,7 +13,7 @@ The mission is to deliver a free, open-source, and exhilarating gaming experienc
 - 15 character classes each with unique abilities.
 - 10+ in-game items including shields, boosts, and super-weapons.
 - 5 themed maps, from the moon with reduced gravity to the volcano and its molten lava.
-- 8 atmospheric settings for a dynamic outdoor experience.
+- 9 atmospheric settings for a dynamic outdoor experience.
 - 3 game modes: deathmatch, capture the flag, and domination, enhanced with mutators.
 - Survival solo game mode: surviving waves of dumb monsters.
 - 2 dedicated servers for uninterrupted gameplay.
@@ -21,7 +21,7 @@ The mission is to deliver a free, open-source, and exhilarating gaming experienc
 - Loads of skins for character customization.
 
 ## 🚧 Roadmap for the First Release
-- 🟩🟩🟩🟩⬛ Moving to OpenAL soft instead of SDL Mixer
+- 🟩🟩🟩🟩🟩 (Done!) Moving to OpenAL soft instead of SDL Mixer
 - 🟩🟩⬛⬛⬛ More maps!
 - 🟩🟩⬛⬛⬛ Simplified map editing with a dedicated GUI.
 - 🟩🟩🟩🟩⬛ Completion of the tutorial map.
