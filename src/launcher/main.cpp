@@ -153,6 +153,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
     case WM_DESTROY:
         ChangedLang = 0;
         WriteConfigFile();
+        CleanUpImages();
         PostQuitMessage(0);
         break;
     default:
@@ -237,11 +238,48 @@ void AddControls(HWND hWnd)
     SendMessage (hWnd, WM_SETFONT, WPARAM (hFont), TRUE);
 }
 
+#include <gdiplus.h>
+using namespace Gdiplus;
+
+#pragma comment (lib,"Gdiplus.lib")
+
+ULONG_PTR           gdiplusToken;
+
 void LoadImages()
 {
-    hBackgroundImg = (HBITMAP)LoadImageW(NULL, L"config/launcher/background.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    hFrFlag = (HBITMAP)LoadImageW(NULL, L"config/launcher/flag_fr.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    hEnFlag = (HBITMAP)LoadImageW(NULL, L"config/launcher/flag_en.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    hSpeakerON = (HBITMAP)LoadImageW(NULL, L"config/launcher/speakerON.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    hSpeakerOFF = (HBITMAP)LoadImageW(NULL, L"config/launcher/speakerOFF.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    GdiplusStartupInput gdiplusStartupInput;
+    GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+
+    Bitmap* backgroundImg = new Bitmap(L"media/interface/launcher.png");
+    Bitmap* frFlag = new Bitmap(L"media/interface/hud/flag_fr.png");
+    Bitmap* enFlag = new Bitmap(L"media/interface/hud/flag_en.png");
+    Bitmap* speakerON = new Bitmap(L"media/interface/hud/speaker_ON.png");
+    Bitmap* speakerOFF = new Bitmap(L"media/interface/hud/speaker_OFF.png");
+
+    // Convert Gdiplus::Bitmap to HBITMAP
+    Color colorBackground;
+    backgroundImg->GetHBITMAP(colorBackground, &hBackgroundImg);
+    frFlag->GetHBITMAP(colorBackground, &hFrFlag);
+    enFlag->GetHBITMAP(colorBackground, &hEnFlag);
+    speakerON->GetHBITMAP(colorBackground, &hSpeakerON);
+    speakerOFF->GetHBITMAP(colorBackground, &hSpeakerOFF);
+
+    // Cleanup Gdiplus::Bitmap objects
+    delete backgroundImg;
+    delete frFlag;
+    delete enFlag;
+    delete speakerON;
+    delete speakerOFF;
+}
+
+void CleanUpImages()
+{
+    // Cleanup HBITMAP objects
+    DeleteObject(hBackgroundImg);
+    DeleteObject(hFrFlag);
+    DeleteObject(hEnFlag);
+    DeleteObject(hSpeakerON);
+    DeleteObject(hSpeakerOFF);
+
+    GdiplusShutdown(gdiplusToken);
 }

@@ -41,6 +41,7 @@ extern void LaunchGame(HWND hWnd, int ForceBits = 0);
 extern void AddMenus(HWND);
 extern void AddControls(HWND);
 extern void LoadImages();
+extern void CleanUpImages();
 
 //updater
 extern std::string InstalledCCversion, AvailableCCversion;
