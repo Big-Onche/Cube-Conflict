@@ -623,6 +623,7 @@ namespace game
                 if(player1->boostmillis[B_JOINT]) damage/=(player1->aptitude==APT_JUNKIE ? 1.875f : 1.25f);
                 switch(player1->aptitude)
                 {
+                    case APT_MAGICIEN: {if(player1->abilitymillis[game::ABILITY_3]) damage/=5.f; } break;
                     case APT_VIKING: player1->boostmillis[B_RAGE]+=damage; break;
                     case APT_PRETRE: if(player1->abilitymillis[ABILITY_2] && player1->mana) {player1->mana-=damage/10; damage=0; if(player1->mana<0)player1->mana=0;} break;
                     case APT_SHOSHONE: if(player1->abilitymillis[ABILITY_1]) damage/=1.3f;
@@ -637,6 +638,7 @@ namespace game
                 if(player1->boostmillis[B_ROIDS]) damage*=(player1->aptitude==APT_JUNKIE ? 3.f : 1.5f);
                 switch(player1->aptitude)
                 {
+                    case APT_AMERICAIN: {if(atk==ATK_NUKE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_CAMPOUZE_SHOOT) damage *= 1.5f; break;}
                     case APT_VIKING: if(player1->boostmillis[B_RAGE]) damage*=1.25f; break;
                     case APT_MAGICIEN: {if(player1->abilitymillis[game::ABILITY_2]) damage *= 1.25f; break;}
                     case APT_CAMPEUR: damage *= ((player1->o.dist(f->o)/1800.f)+1.f); break;
