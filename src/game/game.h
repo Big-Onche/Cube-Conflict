@@ -387,7 +387,7 @@ static const struct attackinfo { int gun, action, picksound, sound, middistsnd, 
 {
     //Armes "normales"
     { GUN_ELEC,         ACT_SHOOT, S_WPLOADFUTUR,     S_ELECRIFLE,    S_ELECRIFLE_FAR,    S_FAR_LIGHT, 10,  350,  325,  35, 105, 0,    0,  10, 8000,  1,    30,   0, 0, 1},
-    { GUN_PLASMA,        ACT_SHOOT, S_WPLOADFUTUR,     S_PLASMARIFLE,  S_PLASMARIFLE_FAR,  S_FAR_LIGHT, 25,   90,  180,  45, 135, 0, 2000,   5, 8000,  1,    50,  25, 0, 1},
+    { GUN_PLASMA,       ACT_SHOOT, S_WPLOADFUTUR,     S_PLASMARIFLE,  S_PLASMARIFLE_FAR,  S_FAR_LIGHT, 25,   90,  180,  45, 135, 0, 2000,   5, 8000,  1,    50,  25, 0, 1},
     { GUN_SMAW,         ACT_SHOOT, S_WPLOADBIG,       S_SMAW,         S_SMAW_FAR,                  -1,  3, 1250,  850,  20,  60, 2,  700,  15, 8000,  1,   750, 125, 0, 1},
     { GUN_MINIGUN,      ACT_SHOOT, S_WPLOADMID,       S_MINIGUN,      S_MINIGUN_FAR,      S_FAR_LIGHT, 35,   60,  180,  60, 180, 0, 4250,   5, 8000,  1,    15 ,  7, 0, 1},
     { GUN_SPOCKGUN,     ACT_SHOOT, S_WPLOADALIEN,     S_SPOCKGUN,     S_SPOCKGUN_FAR,     S_FAR_LIGHT, 15,  175,  250,  15, 150, 3, 2250,   5, 8000,  1,    30,  15, 0, 1},

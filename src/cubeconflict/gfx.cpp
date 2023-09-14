@@ -197,7 +197,7 @@ namespace gfx
 
                 if(!epilepsyfriendly)
                 {
-                    loopi(3) particle_fireball(v, 350, PART_SHOCKWAVE, 300, 0xFFCCAA, 800.0f, champicolor());
+                    loopi(3) particle_fireball(v, 350, PART_SHOCKWAVE, 600, 0xFFCCAA, 800.0f, champicolor());
                     adddynlight(safe ? v : lightloc, 9*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 300, 40, L_NOSHADOW, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
                     adddynlight(safe ? v : lightloc, 6*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 300, 40, L_NOSHADOW|L_VOLUMETRIC, attacks[atk].exprad/2, vec(0.0f, 0.0f, 1.5f));
                 }

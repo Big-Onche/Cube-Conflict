@@ -217,6 +217,7 @@ namespace game
 
     struct bouncer : physent
     {
+        size_t entityId;
         int lifetime, bounces;
         float lastyaw, lastpitch, roll;
         bool local;
@@ -226,7 +227,7 @@ namespace game
         int offsetmillis;
         int id;
 
-        bouncer() : bounces(0), roll(0), variant(0)
+        bouncer() : entityId(GlobalIdGenerator::getNewId()), bounces(0), roll(0), variant(0)
         {
             type = ENT_BOUNCE;
         }
@@ -267,6 +268,7 @@ namespace game
         {
             bnc.offset = hudgunorigin(GUN_M32, from, to, owner);
             if(owner==hudplayer() && !isthirdperson()) bnc.offset.sub(owner->o).rescale(16).add(owner->o);
+            playSound(S_GRENADE, &bnc.o, 300, 100, SND_FIXEDPITCH, bnc.entityId);
         }
 
         bnc.offset = from;
@@ -305,7 +307,7 @@ namespace game
             bouncer &bnc = *bouncers[i];
             vec old(bnc.o);
 
-            if(bnc.vel.magnitude() > 25.0f && bnc.bounces<=5)
+            if((bnc.vel.magnitude() > 25.0f && bnc.bounces<=5) || bnc.bouncetype==BNC_GRENADE)
             {
                 vec pos(bnc.o);
                 pos.add(vec(bnc.offset).mul(bnc.offsetmillis/float(OFFSETMILLIS)));
@@ -313,8 +315,15 @@ namespace game
                 switch(bnc.bouncetype)
                 {
                     case BNC_DOUILLES: case BNC_DOUILLESUZI: case BNC_BIGDOUILLES: case BNC_CARTOUCHES: regular_particle_splash(PART_SMOKE, bnc.bouncetype==BNC_DOUILLESUZI ? randomevent(2) : 1, 150, pos, bnc.bouncetype==BNC_CARTOUCHES ? 0x252525 : 0x404040, bnc.bouncetype==BNC_DOUILLES ? 1.0f : bnc.bouncetype==BNC_DOUILLESUZI ? 0.5f : 1.75f, 50, -20); break;
-                    case BNC_GRENADE: regular_particle_splash(PART_SMOKE, 1, 150, pos, 0x404040, 2.5f, 50, -20); break;
-                    case BNC_DEBRIS:
+                    case BNC_DEBRIS: regular_particle_splash(PART_SMOKE, 1, 150, pos, 0x404040, 2.5f, 50, -20); break;
+                    case BNC_GRENADE:
+                    {
+                        float growth = (1000 - (bnc.lifetime - time))/150.f;
+                        particle_fireball(pos, growth, PART_EXPLOSION, 20, gfx::hasroids(bnc.owner) ? 0xFF0000 : 0x0055FF, growth, gfx::champicolor());
+                        regular_particle_splash(PART_SMOKE, 1, 150, pos, 0x404088, 2.5f, 50, -20);
+                        updateSoundPosition(bnc.entityId, pos);
+                        break;
+                    }
                     case BNC_ROBOT:
                         regular_particle_splash(lookupmaterial(pos)==MAT_WATER ? PART_BUBBLE : PART_SMOKE, lookupmaterial(pos)==MAT_WATER ? 1 : 3, 250, pos, 0x222222, 2.5f, 50, -50);
                         regular_particle_splash(PART_FIRE_BALL, 2, 75, pos, 0x994400, 0.7f, 30, -30);
@@ -342,6 +351,7 @@ namespace game
                 {
                     hits.setsize(0);
                     explode(bnc.local, bnc.owner, bnc.o, bnc.o, NULL, 1, ATK_M32_SHOOT);
+                    stopLinkedSound(bnc.entityId);
                     if(bnc.local)
                         addmsg(N_EXPLODE, "rci3iv", bnc.owner, lastmillis-maptime, ATK_M32_SHOOT, bnc.id-maptime,
                                 hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
