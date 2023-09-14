@@ -289,8 +289,6 @@ void renderbackground(const char *caption, Texture *mapshot, const char *mapname
 {
     if(!inbetweenframes && !force) return;
 
-    //if(menumute || !needsound) stopsounds(); // stop sounds while loading
-
     int w = hudw, h = hudh;
     if(forceaspect) w = int(ceil(h*forceaspect));
     getbackgroundres(w, h);
