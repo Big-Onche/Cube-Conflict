@@ -5,12 +5,12 @@ Les fichiers suivants sont protégés par licence Envato Elements vous ne POUVEZ
 
 See "licenses_certificates" folder for every licences / Voir dossier "licenses_certificates" pour chaque licences.
 Files :	media/songs/launcher.mp3 	license_certificate_7XNJRLTEZ8 (launcher.mp3).txt
-	media/songs/menu.ogg 		license_certificate_D4LANQ5B3V (menu.ogg).txt
-	media/songs/premission.ogg 	license_certificate_LRNY9GTZ4K (premission.ogg).txt
-	media/songs/pause.ogg 		license_certificate_BJ9VEKD8ZW (pause.ogg).txt
-	media/songs/tutorial.ogg 	license_certificate_ZKMUR95SEL (tutorial.ogg).txt
-	media/songs/village.ogg 	license_certificate_6349XQ8FBL (village.ogg).txt
-	media/songs/factory.ogg		license_certificate_NJQE2MPDLF (factory.ogg).txt
-	media/songs/moon.ogg		license_certificate_W4EJKVSR2A (moon.ogg).txt
-	media/songs/castle.ogg		license_certificate_W4EJKVSR2A (moon.ogg).txt
-	media/songs/volcano.ogg		license_certificate_UXJSGYRMNC (volcano.ogg).txt
+	media/songs/menu.flac 			license_certificate_D4LANQ5B3V (menu.flac).txt
+	media/songs/premission.flac 	license_certificate_LRNY9GTZ4K (premission.flac).txt
+	media/songs/pause.flac 			license_certificate_BJ9VEKD8ZW (pause.flac).txt
+	media/songs/tutorial.flac 		license_certificate_ZKMUR95SEL (tutorial.flac).txt
+	media/songs/village.flac 		license_certificate_6349XQ8FBL (village.flac).txt
+	media/songs/factory.flac		license_certificate_NJQE2MPDLF (factory.flac).txt
+	media/songs/moon.flac			license_certificate_W4EJKVSR2A (moon.flac).txt
+	media/songs/castle.flac			license_certificate_W4EJKVSR2A (moon.flac).txt
+	media/songs/volcano.flac		license_certificate_UXJSGYRMNC (volcano.flac).txt

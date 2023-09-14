@@ -1,335 +1,335 @@
-List of licenses applied to sound effects and songs | Liste des licences appliquées aux effets sonores et musiques
+List of licenses applied to sounds effects and songs | Liste des licences appliquées aux effets sonores et musiques
 
-The following files are protected by Envato Elements license, you CANNOT use them for your personal projects unless you buy the sounds.
+The following files are protected by Envato Elements license, you CANNOT use them for your personal projects unless you buy the soundss.
 Les fichiers suivants sont protégés par licence Envato Elements vous ne POUVEZ PAS les utiliser pour vos projets personnels à moins d'acheter les sons.
 
 See "licenses_certificates" folder for every licences / Voir dossier "licenses_certificates" pour chaque licences.
-Files :	media/sound/mapsound/indoor_1.ogg 			license_certificate_R3FY29ABTJ (indoor1.ogg).txt
-	media/sound/mapsound/indoor_2.ogg 			license_certificate_M6YEV3H785 (indoor2.ogg).txt
-	media/sound/mapsound/reactor.ogg 			license_certificate_9Q6WDAHN2Y (reactor.ogg).txt
-	media/sound/mapsound/buzz.ogg 				license_certificate_9WUQDBHCL5 (buzz.ogg).txt
-	media/sound/mapsound/birds.ogg 				license_certificate_XTMR3LZ4JN (birds.ogg).txt
-	media/sound/mapsound/rain.ogg 				license_certificate_BY38M9AHN4 (rain.ogg).txt
-	media/sound/mapsound/coldwind.ogg 			license_certificate_QDH4WYEPNU (coldwind.ogg).txt
-	media/sound/mapsound/lightwind.ogg 			license_certificate_FSKE6LAH9D (lightwind.ogg).txt
-	media/sound/mapsound/apocalypse.ogg 			license_certificate_S8WK43UC6A (apocalypse.ogg).txt	
-	media/sound/mapsound/heatwave.ogg 			license_certificate_HLSCJ8YT95 (heatwave.ogg).txt
-	media/sound/mapsound/crickets.ogg 			license_certificate_C8BV2TWUKS (crickets.ogg).txt
-	media/sound/mapsound/calm.ogg				license_certificate_A257RKVWJS (calm.ogg).txt
-	media/sound/mapsound/bigfire.ogg 			license_certificate_F6Y4TAGBPJ (bigfire.ogg).txt
-	media/sound/mapsound/steam.ogg 				license_certificate_4BZU5KSJCY (steam.ogg).txt
-	media/sound/mapsound/bigfan.ogg 			license_certificate_9GVP3Y5TRM (bigfan.ogg).txt
-	media/sound/mapsound/alarm.ogg 				license_certificate_BWEQ6GRKA8 (alarm.ogg).txt
-	media/sound/mapsound/computer.ogg 			license_certificate_KMQRB8LGF3 (computer.ogg).txt
-	media/sound/mapsound/moon.ogg 				license_certificate_HA5YG7B29X (moon.ogg).txt
-	media/sound/mapsound/spaceships.ogg 			license_certificate_CWXMT9U7PQ (spaceships).txt
-	media/sound/mapsound/lava.ogg 				license_certificate_GJF3C9D4YR (lava.ogg).txt
-	media/sound/mapsound/littlefire.ogg 			license_certificate_KJ8FGTW3P5 (littlefire.ogg).txt
-	media/sound/mapsound/ufo.ogg 				license_certificate_2UYCTV5PRW (ufo.ogg).txt
-	media/sound/mapsound/seagulls.ogg 			license_certificate_E4U3BSCKXH (seagulls.ogg).txt
-	media/sound/mapsound/waterwaves.ogg 			license_certificate_GNEYCPD97J (waterwaves.ogg).txt
-	media/sound/ent_player/jump_basic_1.ogg			license_certificates (jump_basic_X).txt
-	media/sound/ent_player/jump_basic_2.ogg
-	media/sound/ent_player/jump_basic_3.ogg
-	media/sound/ent_player/jump_basic_4.ogg
-	media/sound/ent_player/jump_basic_5.ogg
-	media/sound/ent_player/jump_ninja_1.ogg			license_certificates (jump_ninja_X).txt
-	media/sound/ent_player/jump_ninja_2.ogg
-	media/sound/ent_player/jump_ninja_3.ogg
-	media/sound/ent_player/jump_parmour_1.ogg		license_certificates (jump_parmour_X).txt
-	media/sound/ent_player/jump_parmour_2.ogg
-	media/sound/ent_player/jump_parmour_3.ogg
-	media/sound/ent_player/land_basic_1.ogg			license_certificates (land_basic_X).txt
-	media/sound/ent_player/land_basic_2.ogg
-	media/sound/ent_player/land_basic_3.ogg
-	media/sound/ent_player/land_parmour_1.ogg		license_certificates (land_parmour_X).txt
-	media/sound/ent_player/land_parmour_2.ogg
-	media/sound/ent_player/land_parmour_3.ogg
-	media/sound/ent_player/move_1.ogg			license_certificate_8TWUD9CBAR (move_X).txt
-	media/sound/ent_player/move_2.ogg
-	media/sound/ent_player/move_3.ogg
-	media/sound/ent_player/move_4.ogg
-	media/sound/ent_player/move_5.ogg
-	media/sound/ent_player/move_parmour_1.ogg		license_certificates (move_parmour_X).txt
-	media/sound/ent_player/move_parmour_2.ogg
-	media/sound/ent_player/move_parmour_3.ogg
-	media/sound/ent_player/swim_1.ogg			license_certificate_XPW6FS9DZA (swim_X).txt
-	media/sound/ent_player/swim_2.ogg
-	media/sound/ent_player/swim_3.ogg
-	media/sound/ent_player/swim_4.ogg
-	media/sound/ent_player/swim_5.ogg
-	media/sound/ent_player/splash_1.ogg			license_certificates (splash_X).txt
-	media/sound/ent_player/splash_2.ogg
-	media/sound/ent_player/splash_3.ogg
-	media/sound/ent_player/water_1.ogg			license_certificates (water_X).txt
-	media/sound/ent_player/water_2.ogg
-	media/sound/ent_player/water_3.ogg
-	media/sound/ent_player/underwater.ogg 			license_certificate_5D8YBU6VJP (underwater.ogg).txt
-	media/sound/ent_player/jumppad_1.ogg			license_certificate_SYF6G82QEM (jumppad_X).txt
-	media/sound/ent_player/jumppad_2.ogg
-	media/sound/ent_player/jumppad_3.ogg
-	media/sound/ent_player/teleport_1.ogg			license_certificates (teleport_X).txt
-	media/sound/ent_player/teleport_2.ogg
-	media/sound/ent_player/splash_lava_1.ogg		license_certificate_EHS6CTBZY2 (splash_lava_X).txt
-	media/sound/ent_player/splash_lava_2.ogg
-	media/sound/ent_player/splash_lava_3.ogg
-	media/sound/ent_player/die_p1.ogg 			license_certificate_4B5ACNP78M (die_p1.ogg).txt
-	media/sound/ent_player/die_1.ogg			license_certificate_TX3ZEW784D (die_1.ogg).txt
-	media/sound/ent_player/die_2.ogg			license_certificate_LUX4WVGB6J (die_2.ogg).txt
-	note: licenses are identical for media/sound/weap_shoot/mid_dist* too
-	media/sound/weap_shoot/plasma_rifle_sfx.ogg		license_certificate_XXXXXXXX (plasma_rifle_sfx).txt
-	media/sound/weap_shoot/spockgun_1.ogg			license_certificate_XXXXXXXX (spockgun_X).txt
-	media/sound/weap_shoot/spockgun_2.ogg
-	media/sound/weap_shoot/spockgun_3.ogg
-	media/sound/weap_shoot/m32_1.ogg			license_certificate_XXXXXXXX (m32_X).txt
-	media/sound/weap_shoot/m32_2.ogg
-	media/sound/weap_shoot/m32_3.ogg
-	media/sound/weap_shoot/flamethrower.ogg			license_certificate_34LXWTZKMH (flamethrower.ogg).txt
-	media/sound/npcs/pyro_attack.ogg
-	media/sound/weap_shoot/mossberg_1.ogg			license_certificate_R5NUYGE39X (mossberg_X.ogg).txt
-	media/sound/weap_shoot/mossberg_2.ogg
-	media/sound/weap_shoot/mossberg_3.ogg
-	media/sound/weap_shoot/hydra_1.ogg			license_certificate_RS6MJUL27Z (hydra_X.ogg).txt
-	media/sound/weap_shoot/hydra_2.ogg
-	media/sound/weap_shoot/hydra_3.ogg
-	media/sound/weap_shoot/sv98_1.ogg			license_certificate_6GRVES9MBF (sv98_X.ogg).txt		license_certificate_73PBJWM9FA (sv98_X.ogg).txt
-	media/sound/weap_shoot/sv98_2.ogg
-	media/sound/weap_shoot/sv98_3.ogg
-	media/sound/weap_shoot/crossbow_1.ogg			license_certificate_LUDF2Y94MP (crossbow_X.ogg).txt
-	media/sound/weap_shoot/crossbow_2.ogg
-	media/sound/weap_shoot/crossbow_3.ogg
-	media/sound/weap_shoot/grap1_1.ogg			license_certificate_3HZ27XQG4D (grap1_X.ogg).txt
-	media/sound/weap_shoot/grap1_2.ogg
-	media/sound/weap_shoot/grap1_3.ogg
-	media/sound/weap_shoot/fireworks_1.ogg			license_certificate_7HKFRUX9Z8 (fireworks_X.ogg).txt	license_certificate_YR56VAHWJL (fireworks_X.ogg).txt
-	media/sound/weap_shoot/fireworks_2.ogg
-	media/sound/weap_shoot/fireworks_3.ogg
-	media/sound/weap_shoot/nuke.ogg				license_certificate_2968HCARTU (nuke.ogg).txt
-	media/sound/weap_shoot/sword_1.ogg			license_certificate_8JTVGMWZKA (sword_x.ogg).txt
-	media/sound/weap_shoot/sword_2.ogg
-	media/sound/weap_shoot/sword_3.ogg
-	media/sound/weap_shoot/banhammer_1.ogg			license_certificate_K45JP8SADM (banhammer_x.ogg).txt	license_certificate_3ZRSL6W9FN (banhammer_x.ogg).txt
-	media/sound/weap_shoot/banhammer_2.ogg
-	media/sound/weap_shoot/banhammer_3.ogg
-	media/sound/weap_shoot/mastersword_1.ogg		license_certificate_ZTC23VUL5F (mastersword_x.ogg).txt	license_certificate_BVM4N63X9Y (mastersword_x.ogg).txt
-	media/sound/weap_shoot/mastersword_2.ogg
-	media/sound/weap_shoot/mastersword_3.ogg
-	media/sound/weap_shoot/flail_1.ogg			license_certificate_FBLHYNE6XJ (flail_x.ogg).txt	license_certificate_NH4ABGPE2D (chains.ogg - flail_X.ogg).txt
-	media/sound/weap_shoot/flail_2.ogg
-	media/sound/weap_shoot/flail_3.ogg
-	media/sound/weap_shoot/saber_1.ogg			license_certificate_4A63FU2JQX (saber_x.ogg).txt
-	media/sound/weap_shoot/saber_2.ogg
-	media/sound/weap_shoot/saber_3.ogg
+Files :	media/sounds/mapsounds/indoor_1.wav 				license_certificate_R3FY29ABTJ (indoor1.wav).txt
+	media/sounds/mapsounds/indoor_2.wav 				license_certificate_M6YEV3H785 (indoor2.wav).txt
+	media/sounds/mapsounds/reactor.wav 				license_certificate_9Q6WDAHN2Y (reactor.wav).txt
+	media/sounds/mapsounds/buzz.wav 				license_certificate_9WUQDBHCL5 (buzz.wav).txt
+	media/sounds/mapsounds/birds.wav 				license_certificate_XTMR3LZ4JN (birds.wav).txt
+	media/sounds/mapsounds/rain.wav 				license_certificate_BY38M9AHN4 (rain.wav).txt
+	media/sounds/mapsounds/coldwind.wav 				license_certificate_QDH4WYEPNU (coldwind.wav).txt
+	media/sounds/mapsounds/lightwind.wav 				license_certificate_FSKE6LAH9D (lightwind.wav).txt
+	media/sounds/mapsounds/apocalypse.wav 				license_certificate_S8WK43UC6A (apocalypse.wav).txt	
+	media/sounds/mapsounds/heatwave.wav 				license_certificate_HLSCJ8YT95 (heatwave.wav).txt
+	media/sounds/mapsounds/crickets.wav 				license_certificate_C8BV2TWUKS (crickets.wav).txt
+	media/sounds/mapsounds/calm.wav					license_certificate_A257RKVWJS (calm.wav).txt
+	media/sounds/mapsounds/bigfire.wav 				license_certificate_F6Y4TAGBPJ (bigfire.wav).txt
+	media/sounds/mapsounds/steam.wav 				license_certificate_4BZU5KSJCY (steam.wav).txt
+	media/sounds/mapsounds/bigfan.wav 				license_certificate_9GVP3Y5TRM (bigfan.wav).txt
+	media/sounds/mapsounds/alarm.wav 				license_certificate_BWEQ6GRKA8 (alarm.wav).txt
+	media/sounds/mapsounds/computer.wav 				license_certificate_KMQRB8LGF3 (computer.wav).txt
+	media/sounds/mapsounds/moon.wav 				license_certificate_HA5YG7B29X (moon.wav).txt
+	media/sounds/mapsounds/spaceships.wav 				license_certificate_CWXMT9U7PQ (spaceships).txt
+	media/sounds/mapsounds/lava.wav 				license_certificate_GJF3C9D4YR (lava.wav).txt
+	media/sounds/mapsounds/littlefire.wav 				license_certificate_KJ8FGTW3P5 (littlefire.wav).txt
+	media/sounds/mapsounds/ufo.wav 					license_certificate_2UYCTV5PRW (ufo.wav).txt
+	media/sounds/mapsounds/seagulls.wav 				license_certificate_E4U3BSCKXH (seagulls.wav).txt
+	media/sounds/mapsounds/waterwaves.wav 				license_certificate_GNEYCPD97J (waterwaves.wav).txt
+	media/sounds/ent_player/jump_basic_1.wav			license_certificates (jump_basic_X).txt
+	media/sounds/ent_player/jump_basic_2.wav
+	media/sounds/ent_player/jump_basic_3.wav
+	media/sounds/ent_player/jump_basic_4.wav
+	media/sounds/ent_player/jump_basic_5.wav
+	media/sounds/ent_player/jump_ninja_1.wav			license_certificates (jump_ninja_X).txt
+	media/sounds/ent_player/jump_ninja_2.wav
+	media/sounds/ent_player/jump_ninja_3.wav
+	media/sounds/ent_player/jump_parmour_1.wav			license_certificates (jump_parmour_X).txt
+	media/sounds/ent_player/jump_parmour_2.wav
+	media/sounds/ent_player/jump_parmour_3.wav
+	media/sounds/ent_player/land_basic_1.wav			license_certificates (land_basic_X).txt
+	media/sounds/ent_player/land_basic_2.wav
+	media/sounds/ent_player/land_basic_3.wav
+	media/sounds/ent_player/land_parmour_1.wav			license_certificates (land_parmour_X).txt
+	media/sounds/ent_player/land_parmour_2.wav
+	media/sounds/ent_player/land_parmour_3.wav
+	media/sounds/ent_player/move_1.wav				license_certificate_8TWUD9CBAR (move_X).txt
+	media/sounds/ent_player/move_2.wav
+	media/sounds/ent_player/move_3.wav
+	media/sounds/ent_player/move_4.wav
+	media/sounds/ent_player/move_5.wav
+	media/sounds/ent_player/move_parmour_1.wav			license_certificates (move_parmour_X).txt
+	media/sounds/ent_player/move_parmour_2.wav
+	media/sounds/ent_player/move_parmour_3.wav
+	media/sounds/ent_player/swim_1.wav				license_certificate_XPW6FS9DZA (swim_X).txt
+	media/sounds/ent_player/swim_2.wav
+	media/sounds/ent_player/swim_3.wav
+	media/sounds/ent_player/swim_4.wav
+	media/sounds/ent_player/swim_5.wav
+	media/sounds/ent_player/splash_1.wav				license_certificates (splash_X).txt
+	media/sounds/ent_player/splash_2.wav
+	media/sounds/ent_player/splash_3.wav
+	media/sounds/ent_player/water_1.wav				license_certificates (water_X).txt
+	media/sounds/ent_player/water_2.wav
+	media/sounds/ent_player/water_3.wav
+	media/sounds/ent_player/underwater.wav 				license_certificate_5D8YBU6VJP (underwater.wav).txt
+	media/sounds/ent_player/jumppad_1.wav				license_certificate_SYF6G82QEM (jumppad_X).txt
+	media/sounds/ent_player/jumppad_2.wav
+	media/sounds/ent_player/jumppad_3.wav
+	media/sounds/ent_player/teleport_1.wav				license_certificates (teleport_X).txt
+	media/sounds/ent_player/teleport_2.wav
+	media/sounds/ent_player/splash_lava_1.wav			license_certificate_EHS6CTBZY2 (splash_lava_X).txt
+	media/sounds/ent_player/splash_lava_2.wav
+	media/sounds/ent_player/splash_lava_3.wav
+	media/sounds/ent_player/die_p1.wav 				license_certificate_4B5ACNP78M (die_p1.wav).txt
+	media/sounds/ent_player/die_1.wav				license_certificate_TX3ZEW784D (die_1.wav).txt
+	media/sounds/ent_player/die_2.wav				license_certificate_LUX4WVGB6J (die_2.wav).txt
+	note: licenses are identical for media/sounds/weap_shoot/mid_dist* too
+	media/sounds/weap_shoot/plasma_rifle_sfx.wav			license_certificate_XXXXXXXX (plasma_rifle_sfx).txt
+	media/sounds/weap_shoot/spockgun_1.wav				license_certificate_XXXXXXXX (spockgun_X).txt
+	media/sounds/weap_shoot/spockgun_2.wav
+	media/sounds/weap_shoot/spockgun_3.wav
+	media/sounds/weap_shoot/m32_1.wav				license_certificate_XXXXXXXX (m32_X).txt
+	media/sounds/weap_shoot/m32_2.wav
+	media/sounds/weap_shoot/m32_3.wav
+	media/sounds/weap_shoot/flamethrower.wav			license_certificate_34LXWTZKMH (flamethrower.wav).txt
+	media/sounds/npcs/pyro_attack.wav
+	media/sounds/weap_shoot/mossberg_1.wav				license_certificate_R5NUYGE39X (mossberg_X.wav).txt
+	media/sounds/weap_shoot/mossberg_2.wav
+	media/sounds/weap_shoot/mossberg_3.wav
+	media/sounds/weap_shoot/hydra_1.wav				license_certificate_RS6MJUL27Z (hydra_X.wav).txt
+	media/sounds/weap_shoot/hydra_2.wav
+	media/sounds/weap_shoot/hydra_3.wav
+	media/sounds/weap_shoot/sv98_1.wav				license_certificate_6GRVES9MBF (sv98_X.wav).txt		license_certificate_73PBJWM9FA (sv98_X.wav).txt
+	media/sounds/weap_shoot/sv98_2.wav
+	media/sounds/weap_shoot/sv98_3.wav
+	media/sounds/weap_shoot/crossbow_1.wav				license_certificate_LUDF2Y94MP (crossbow_X.wav).txt
+	media/sounds/weap_shoot/crossbow_2.wav
+	media/sounds/weap_shoot/crossbow_3.wav
+	media/sounds/weap_shoot/grap1_1.wav				license_certificate_3HZ27XQG4D (grap1_X.wav).txt
+	media/sounds/weap_shoot/grap1_2.wav
+	media/sounds/weap_shoot/grap1_3.wav
+	media/sounds/weap_shoot/fireworks_1.wav				license_certificate_7HKFRUX9Z8 (fireworks_X.wav).txt	license_certificate_YR56VAHWJL (fireworks_X.wav).txt
+	media/sounds/weap_shoot/fireworks_2.wav
+	media/sounds/weap_shoot/fireworks_3.wav
+	media/sounds/weap_shoot/nuke.wav				license_certificate_2968HCARTU (nuke.wav).txt
+	media/sounds/weap_shoot/sword_1.wav				license_certificate_8JTVGMWZKA (sword_x.wav).txt
+	media/sounds/weap_shoot/sword_2.wav
+	media/sounds/weap_shoot/sword_3.wav
+	media/sounds/weap_shoot/banhammer_1.wav				license_certificate_K45JP8SADM (banhammer_x.wav).txt	license_certificate_3ZRSL6W9FN (banhammer_x.wav).txt
+	media/sounds/weap_shoot/banhammer_2.wav
+	media/sounds/weap_shoot/banhammer_3.wav
+	media/sounds/weap_shoot/mastersword_1.wav			license_certificate_ZTC23VUL5F (mastersword_x.wav).txt	license_certificate_BVM4N63X9Y (mastersword_x.wav).txt
+	media/sounds/weap_shoot/mastersword_2.wav
+	media/sounds/weap_shoot/mastersword_3.wav
+	media/sounds/weap_shoot/flail_1.wav				license_certificate_FBLHYNE6XJ (flail_x.wav).txt	license_certificate_NH4ABGPE2D (chains.wav - flail_X.wav).txt
+	media/sounds/weap_shoot/flail_2.wav
+	media/sounds/weap_shoot/flail_3.wav
+	media/sounds/weap_shoot/saber_1.wav				license_certificate_4A63FU2JQX (saber_x.wav).txt
+	media/sounds/weap_shoot/saber_2.wav
+	media/sounds/weap_shoot/saber_3.wav
 	//end of the note
-	media/sound/bullets/impactbody_1.ogg			license_certificate_V3B84XDQGL (impactbody_X.ogg).txt
-	media/sound/bullets/impactbody_2.ogg
-	media/sound/bullets/impactbody_3.ogg
-	media/sound/bullets/shields/impactwood_1.ogg		license_certificate_XN3SUH86JY (impactwood_X.ogg).txt
-	media/sound/bullets/shields/impactwood_2.ogg
-	media/sound/bullets/shields/impactwood_3.ogg
-	media/sound/bullets/shields/impactiron_1.ogg		license_certificate_NX28HEGMQL (impactiron_X.ogg).txt
-	media/sound/bullets/shields/impactiron_2.ogg
-	media/sound/bullets/shields/impactiron_3.ogg
-	media/sound/bullets/shields/impactiron_4.ogg
-	media/sound/bullets/shields/impactiron_5.ogg
-	media/sound/bullets/shields/impactgold_1.ogg		license_certificate_NTKZYACR3L (impactgold_X).txt
-	media/sound/bullets/shields/impactgold_2.ogg
-	media/sound/bullets/shields/impactgold_3.ogg
-	media/sound/bullets/shields/impactmagnet_1.ogg		license_certificate_8WCUZMJRYG (impactmagnet_X.ogg).txt
-	media/sound/bullets/shields/impactmagnet_2.ogg
-	media/sound/bullets/shields/impactmagnet_3.ogg
-	media/sound/bullets/shields/impactpowerarmor_1.ogg	license_certificate_PH3CJVEDYS (impactpowerarmor_X.ogg).txt
-	media/sound/bullets/shields/impactpowerarmor_2.ogg
-	media/sound/bullets/shields/impactpowerarmor_3.ogg
-	media/sound/bullets/littlericochet_1.ogg		license_certificate_LE94ASW5MN (littlericohet_X.ogg).txt
-	media/sound/bullets/littlericochet_2.ogg
-	media/sound/bullets/littlericochet_3.ogg
-	media/sound/bullets/littlericochet_4.ogg
-	media/sound/bullets/littlericochet_5.ogg
-	media/sound/bullets/bigricochet_1.ogg			license_certificate_2YTRKMX75H (bigricochet_X.ogg).txt
-	media/sound/bullets/bigricochet_2.ogg
-	media/sound/bullets/bigricochet_3.ogg
-	media/sound/bullets/impactarrow_1.ogg			license_certificate_LD3BQWEF8K (impactarrow_X.ogg).txt
-	media/sound/bullets/impactarrow_2.ogg
-	media/sound/bullets/impactarrow_3.ogg
-	media/sound/bullets/impactwater_1.ogg			license_certificate_EJ8V3UGN45 (impactwater_X.ogg).txt		license_certificate_SNGUP35LE4 (impactwater_X.ogg).txt
-	media/sound/bullets/impactwater_2.ogg
-	media/sound/bullets/impactwater_3.ogg
-	media/sound/bullets/impactwater_4.ogg
-	media/sound/bullets/impactwater_5.ogg
-	media/sound/bullets/bulletflyby_1.ogg			license_certificate_GVBDHU5E9Q (bulletflyby_X.ogg).txt
-	media/sound/bullets/bulletflyby_2.ogg
-	media/sound/bullets/bulletflyby_3.ogg
-	media/sound/bullets/bulletflyby_4.ogg
-	media/sound/bullets/bulletflyby_5.ogg								
-	media/sound/bullets/projectiles/rocket_1.ogg		license_certificate_P2JKHM9A6G (rocket_1.ogg).txt
-	media/sound/bullets/projectiles/rocket_2.ogg		license_certificate_U346AHRTBQ (rocket_2.ogg).txt
-	media/sound/bullets/projectiles/rocket_3.ogg		license_certificate_EXZDGR9HU5 (rocket_3.ogg).txt
-	media/sound/bullets/projectiles/minirocket.ogg		license_certificate_FJH54SBL7W (minirocket.ogg).txt
-	media/sound/bullets/projectiles/fireworks.ogg		license_certificate_5LWT2A96BN (fireworks.ogg).txt
-	media/sound/bullets/projectiles/flames_1.ogg		license_certificate_QNGJMUBD5R (flames_X.ogg).txt
-	media/sound/bullets/projectiles/flames_2.ogg
-	media/sound/bullets/projectiles/flames_3.ogg
-	media/sound/bullets/projectiles/arrow_1.ogg		license_certificate_RU264Q8NSA (arrow_X.ogg).txt
-	media/sound/bullets/projectiles/arrow_2.ogg
-	media/sound/bullets/projectiles/arrow_3.ogg
-	media/sound/bullets/projectiles/grap1_1.ogg		license_certificate_3HZ27XQG4D (grap1_X.ogg).txt
-	media/sound/bullets/projectiles/grap1_2.ogg
-	media/sound/bullets/projectiles/grap1_3.ogg
-	media/sound/bullets/projectiles/plasma_1.ogg		license_certificate_PDEB5K7V2U (plasma_X.ogg).txt
-	media/sound/bullets/projectiles/plasma_2.ogg
-	media/sound/bullets/projectiles/plasma_3.ogg
-	media/sound/bullets/impactelectric_1.ogg		license_certificate_AKSDT82L3W (impactelectric_X.ogg).txt
-	media/sound/bullets/impactelectric_2.ogg
-	media/sound/bullets/impactelectric_3.ogg
-	media/sound/bullets/impactplasma_1.ogg			license_certificate_DEL9H423VG (impactplasma_X.ogg).txt
-	media/sound/bullets/impactplasma_2.ogg
-	media/sound/bullets/impactplasma_3.ogg
-	media/sound/items/health_1.ogg				license_certificate_7X3HQE4VJB (health_X.ogg).txt	license_certificate_H8KDA2F5LC (health_X.ogg).txt	license_certificate_U4GF7YPWE6 (health_X.ogg).txt
-	media/sound/items/health_2.ogg
-	media/sound/items/health_3.ogg
-	media/sound/items/mana_1.ogg				license_certificate_W2D56JCRMY (mana_X.ogg).txt
-	media/sound/items/mana_2.ogg
-	media/sound/items/mana_3.ogg
-	media/sound/items/weapons/pickup.ogg			license_certificate_Q8GBJLPA57 (pickup.ogg).txt
-	media/sound/items/roids.ogg 				license_certificate_NGCHKBR5DE (roids.ogg).txt
-	media/sound/items/joint.ogg 				license_certificate_WGEKTRYLPD  (joint.ogg).txt		license_certificate_2BAGHCS79U (joint.ogg).txt
-	media/sound/items/spawn_1.ogg 				license_certificate_XQ2SNTA8M6 (spawn_x.ogg).txt
-	media/sound/items/spawn_2.ogg 
-	media/sound/items/spawn_3.ogg 
-	media/sound/items/weapons/small.ogg 			license_certificate_PL5UX738YF (small.ogg).txt
-	media/sound/items/weapons/medium.ogg 			license_certificate_JK3UGY8Z2Q (medium.ogg).txt
-	media/sound/items/weapons/big.ogg 			license_certificate_X7M5SZGAUE (big.ogg).txt
-	media/sound/items/weapons/futuristic.ogg 		license_certificate_FMN6HKJYXP (futuristic.ogg).txt
-	media/sound/items/weapons/alien.ogg 			license_certificate_9MSAXDY76R (alien.ogg).txt
-	media/sound/items/weapons/sword.ogg 			license_certificate_7RC3H9UT8J (sword.ogg).txt
-	media/sound/items/weapons/chains.ogg 			license_certificate_NH4ABGPE2D (chains.ogg - flail_X.ogg).txt
-	media/sound/items/weapons/fastwoosh.ogg 		license_certificate_GVJ72HFN85 (fastwoosh.ogg - slowwoosh.ogg).txt
-	media/sound/items/weapons/slowwoosh.ogg 		license_certificate_GVJ72HFN85 (fastwoosh.ogg - slowwoosh.ogg).txt
-	media/sound/items/weapons/noammo.ogg			license_certificate_5B8UPMRDLY (noammo.ogg).txt
-	media/sound/classes/spell.ogg				license_certificate_4BDV7WXLKP (spell.ogg).txt
-	media/sound/classes/spell_impossible.ogg		license_certificate_UE9JT63SM8 (spell_impossible.ogg).txt
-	media/sound/classes/spell_ready.ogg			license_certificate_SJWH495N7U (spell_ready.ogg).txt
-	media/sound/classes/reaper.ogg				license_certificate_Q9JNV8YL5G (reaper.ogg).txt
-	media/sound/classes/wizard_1.ogg			license_certificate_GZXPC3S5W9 (wizard_1.ogg).txt
-	media/sound/classes/wizard_2_1.ogg			license_certificate_MVA9W7TFX5 (wizard_2_X.ogg).txt
-	media/sound/classes/wizard_2_2.ogg
-	media/sound/classes/wizard_2_3.ogg
-	media/sound/classes/wizard_2_4.ogg
-	media/sound/classes/wizard_2_5.ogg
-	media/sound/classes/wizard_3.ogg			license_certificate_KZ4BC8TSXV (wizard_3.ogg).txt
-	media/sound/classes/kamikaze_1.ogg			license_certificate_MGEVH439ZJ (kamikaze_X.ogg).txt	license_certificate_PNBF46YD8R (kamikaze_X.ogg).txt	license_certificate_5ZSWRDAPJY (kamikaze_X.ogg).txt
-	media/sound/classes/kamikaze_2.ogg
-	media/sound/classes/kamikaze_3.ogg
-	media/sound/classes/phy_1_1.ogg				license_certificate_H5TNVKQMER (phy_1_X.ogg).txt
-	media/sound/classes/phy_1_2.ogg
-	media/sound/classes/phy_1_3.ogg
-	media/sound/classes/phy_2_1.ogg				license_certificate_2K6LN34AGC (phy_2_1.ogg).txt	license_certificate_MVPY8WENB9 (phy_2_X.ogg).txt
-	media/sound/classes/phy_2_2.ogg				license_certificate_5CGFLS9Y3T (pri_2.ogg).txt		license_certificate_869SKZPUTQ (phy_2_2.ogg).txt
-	media/sound/classes/phy_2_3.ogg				license_certificate_S3NZAVUMWE (phy_2_3.ogg).txt	license_certificate_MVPY8WENB9 (phy_2_X.ogg).txt
-	media/sound/classes/phy_3.ogg				license_certificate_FHM2ADCYXU (phy_3.ogg).txt
-	media/sound/classes/spy_1_1.ogg				license_certificate_F52A98HDJV (spy_1_1.ogg).txt	license_certificate_9Q4XCRETMS (spy_1_X.ogg).txt
-	media/sound/classes/spy_1_2.ogg				license_certificate_G5TLJRN7FM (spy_1_2.ogg).txt
-	media/sound/classes/spy_1_3.ogg				license_certificate_ZSUJVPTR4H (spy_1_3.ogg).txt
-	media/sound/classes/spy_2.ogg				license_certificate_3B97UCQJ45 (spy_2.ogg).txt
-	media/sound/classes/spy_3.ogg				license_certificate_NXGZHMYCEL (spy_3.ogg).txt
-	media/sound/classes/pri_1.ogg				license_certificate_7DNWPTKZM4 (pri_1.ogg).txt
-	media/sound/classes/pri_2.ogg				license_certificate_5CGFLS9Y3T (pri_2.ogg).txt
-	media/sound/classes/pri_2_2.ogg				license_certificate_M8EKSHYGBV (pri_2_2.ogg).txt
-	media/sound/classes/pri_3.ogg				license_certificate_Z3W72REAKC (pri_3.ogg).txt
-	media/sound/classes/sho_1.ogg				license_certificate_QTD7LJFYGW (sho_1.ogg).txt
-	media/sound/classes/sho_2.ogg				license_certificate_QP3D9G64ZM (sho_2.ogg).txt
-	media/sound/classes/sho_3.ogg				license_certificate_MNZPR2G76C (sho_3.ogg).txt
-	media/sound/notifications/terminal_hacked.ogg		license_certificate_BCNHRTWDX6 (terminal_hacked.ogg - terminal_lost.ogg).txt
-	media/sound/notifications/terminal_lost.ogg
-	media/sound/notifications/enemy_terminal_hacked.ogg
-	media/sound/notifications/enemy_terminal_lost.ogg
-	media/sound/notifications/terminal_alarm.ogg		license_certificate_N7A4CMR3QY (terminal_alarm.ogg).txt
-	media/sound/notifications/terminal_enter_1.ogg		license_certificate_R2MKYUJAZP (terminal_enter_1.ogg).txt
-	media/sound/notifications/terminal_enter_2.ogg		license_certificate_JRTZL5PAQU (terminal_enter_3.ogg - terminal_enter_2.ogg).txt
-	media/sound/notifications/terminal_enter_3.ogg
-	media/sound/notifications/killstreaks.ogg		license_certificate_NAZYU8Q2P6 (levelup.ogg).txt	license_certificate_L36YTMBPWH (levelup.ogg)
-	media/sound/notifications/killstreaks/x3_1.ogg		license_certificates (killstreaks).txt
-	media/sound/notifications/killstreaks/x3_2.ogg
-	media/sound/notifications/killstreaks/x3_3.ogg
-	media/sound/notifications/killstreaks/x5_1.ogg
-	media/sound/notifications/killstreaks/x5_2.ogg
-	media/sound/notifications/killstreaks/x5_3.ogg
-	media/sound/notifications/killstreaks/x7_1.ogg
-	media/sound/notifications/killstreaks/x7_2.ogg
-	media/sound/notifications/killstreaks/x7_3.ogg
-	media/sound/notifications/killstreaks/x3_far_1.ogg
-	media/sound/notifications/killstreaks/x3_far_2.ogg
-	media/sound/notifications/killstreaks/x3_far_3.ogg
-	media/sound/notifications/killstreaks/x5_far_1.ogg
-	media/sound/notifications/killstreaks/x5_far_2.ogg
-	media/sound/notifications/killstreaks/x5_far_3.ogg
-	media/sound/notifications/killstreaks/x7_far_1.ogg
-	media/sound/notifications/killstreaks/x7_far_2.ogg
-	media/sound/npcs/adult_pain_1.ogg
-	media/sound/npcs/adult_pain_2.ogg
-	media/sound/npcs/adult_pain_3.ogg
-	media/sound/quests/notification.ogg			license_certificate_U6KFYCWMXQ (notification.ogg).txt
-	media/sound/notifications/invasion.ogg			license_certificate_C7A2NEKVZH (invasion.ogg).txt
-	media/sound/notification/alien_invasion.ogg		license_certificate_5HPAN6MYVQ (alien_invasion.ogg).txt
-	media/sound/ui/click_1.ogg				license_certificate_T7V86YNQZ2 (click_X.ogg).txt
-	media/sound/ui/click_2.ogg
-	media/sound/ui/click_3.ogg
-	media/sound/ui/scroll_up.ogg				license_certificate_JVF3TH7CL2 (scroll_up.ogg - scroll_down.ogg).txt
-	media/sound/ui/scroll_down.ogg				license_certificate_JVF3TH7CL2 (scroll_up.ogg - scroll_down.ogg).txt
-	media/sound/ui/cashregister.ogg				license_certificate_KLWBHPY438 (cashregister.ogg).txt
-	media/sound/ui/error.ogg				license_certificate_FC4ANJMZSY (error.ogg).txt
-	media/sound/ui/soldier.ogg				license_certificate_LBF2UD8TJ4 (soldier.ogg).txt
-	media/sound/ui/medic.ogg				license_certificate_FADJWG9Y7K (medic.ogg).txt
-	media/sound/ui/american.ogg				license_certificate_FADJWG9Y7K (american.ogg).txt
-	media/sound/ui/ninja.ogg				license_certificate_8TWUD9CBAR (ninja.ogg).txt
-	media/sound/ui/vampire.ogg				license_certificate_CSJLUAPHXW (vampire.ogg).txt
-	media/sound/ui/wizard.ogg				license_certificate_SF96J3YDLA (wizard.ogg).txt
-	media/sound/ui/kamikaze.ogg				license_certificate_4N6PCLD3XQ (kamikaze.ogg).txt
-	media/sound/ui/reaper.ogg				license_certificate_FVYASHCZPU (reaper.ogg).txt
-	media/sound/ui/physicist.ogg				license_certificate_6HA5EBNU4Q (physicist.ogg).txt
-	media/sound/ui/camper.ogg				license_certificate_N4D9YAVB2U (camper.ogg).txt
-	media/sound/ui/spy.ogg					license_certificate_BSZ9HC6Y3Q (spy.ogg).txt
-	media/sound/ui/priest.ogg				license_certificate_RT456HS8C2 (priest.ogg).txt
-	media/sound/ui/viking.ogg				license_certificate_2FDS7XT6CW (viking.ogg - roids_X.ogg - roids_pupout.ogg).txt
-	media/sound/ui/junkie.ogg				license_certificate_5JT983UKL2 (junkie.ogg).txt
-	media/sound/ui/shoshone.ogg				license_certificate_AHRM9Z2N7V (shoshone.ogg).txt
-	media/sound/items_sounds/roids_1.ogg			license_certificate_2FDS7XT6CW (viking.ogg - roids_X.ogg - roids_pupout.ogg).txt
-	media/sound/items_sounds/roids_2.ogg
-	media/sound/items_sounds/roids_3.ogg
-	media/sound/items_sounds/roids_4.ogg
-	media/sound/items_sounds/roids_5.ogg
-	media/sound/items_sounds/roids_6.ogg
-	media/sound/items_sounds/roids_7.ogg
-	media/sound/items_sounds/roids_far_1.ogg
-	media/sound/items_sounds/roids_far_2.ogg
-	media/sound/items_sounds/roids_far_3.ogg
-	media/sound/items_sounds/roids_far_4.ogg
-	media/sound/items_sounds/roids_far_5.ogg
-	media/sound/items_sounds/roids_far_6.ogg
-	media/sound/items_sounds/roids_far_7.ogg
-	media/sound/items_sounds/roids_pupout.ogg
-	media/sound/npcs/alien_hello.ogg
-	media/sound/npcs/alien_pain_1.ogg			license_certificate_D3L57YMCHF (alien_hello.ogg - alien_pain_X.ogg - alien_angry.ogg - alien_dead.ogg).txt
-	media/sound/npcs/alien_pain_2.ogg
-	media/sound/npcs/alien_pain_3.ogg
-	media/sound/npcs/alien_angry.ogg
-	media/sound/npcs/alien_dead.ogg
-	media/sound/npcs/minion_pain_1.ogg			license_certificate_GMWBCY5K4U (minion_pain_X.ogg).txt
-	media/sound/npcs/minion_pain_2.ogg
-	media/sound/npcs/minion_pain_3.ogg
-	media/sound/npcs/minion_pain_4.ogg
-	media/sound/npcs/minion_pain_5.ogg
-	media/sound/npcs/minion_dead_1.ogg			license_certificate_KVJ7H2MZG8 (minion_dead_X.ogg).txt
-	media/sound/npcs/minion_dead_2.ogg
-	media/sound/npcs/minion_dead_3.ogg
-	media/sound/npcs/adult_dead_1.ogg			license_certificate_JU52SF93TV (adult_dead_1.ogg).txt
-	media/sound/npcs/adult_dead_2.ogg			license_certificate_G6YXE34NV7 (adult_dead_2.ogg).txt
-	media/sound/npcs/adult_dead_3.ogg
-	media/sound/npcs/giant_pain_1.ogg			license_certificate_2CHVMGNFBP (giant_pain_X.ogg - giant_dead_X.ogg).txt
-	media/sound/npcs/giant_pain_2.ogg
-	media/sound/npcs/giant_dead_1.ogg
-	media/sound/npcs/giant_dead_2.ogg
+	media/sounds/bullets/impactbody_1.wav				license_certificate_V3B84XDQGL (impactbody_X.wav).txt
+	media/sounds/bullets/impactbody_2.wav
+	media/sounds/bullets/impactbody_3.wav
+	media/sounds/bullets/shields/impactwood_1.wav			license_certificate_XN3SUH86JY (impactwood_X.wav).txt
+	media/sounds/bullets/shields/impactwood_2.wav
+	media/sounds/bullets/shields/impactwood_3.wav
+	media/sounds/bullets/shields/impactiron_1.wav			license_certificate_NX28HEGMQL (impactiron_X.wav).txt
+	media/sounds/bullets/shields/impactiron_2.wav
+	media/sounds/bullets/shields/impactiron_3.wav
+	media/sounds/bullets/shields/impactiron_4.wav
+	media/sounds/bullets/shields/impactiron_5.wav
+	media/sounds/bullets/shields/impactgold_1.wav			license_certificate_NTKZYACR3L (impactgold_X).txt
+	media/sounds/bullets/shields/impactgold_2.wav
+	media/sounds/bullets/shields/impactgold_3.wav
+	media/sounds/bullets/shields/impactmagnet_1.wav			license_certificate_8WCUZMJRYG (impactmagnet_X.wav).txt
+	media/sounds/bullets/shields/impactmagnet_2.wav
+	media/sounds/bullets/shields/impactmagnet_3.wav
+	media/sounds/bullets/shields/impactpowerarmor_1.wav		license_certificate_PH3CJVEDYS (impactpowerarmor_X.wav).txt
+	media/sounds/bullets/shields/impactpowerarmor_2.wav
+	media/sounds/bullets/shields/impactpowerarmor_3.wav
+	media/sounds/bullets/littlericochet_1.wav			license_certificate_LE94ASW5MN (littlericohet_X.wav).txt
+	media/sounds/bullets/littlericochet_2.wav
+	media/sounds/bullets/littlericochet_3.wav
+	media/sounds/bullets/littlericochet_4.wav
+	media/sounds/bullets/littlericochet_5.wav
+	media/sounds/bullets/bigricochet_1.wav				license_certificate_2YTRKMX75H (bigricochet_X.wav).txt
+	media/sounds/bullets/bigricochet_2.wav
+	media/sounds/bullets/bigricochet_3.wav
+	media/sounds/bullets/impactarrow_1.wav				license_certificate_LD3BQWEF8K (impactarrow_X.wav).txt
+	media/sounds/bullets/impactarrow_2.wav
+	media/sounds/bullets/impactarrow_3.wav
+	media/sounds/bullets/impactwater_1.wav				license_certificate_EJ8V3UGN45 (impactwater_X.wav).txt		license_certificate_SNGUP35LE4 (impactwater_X.wav).txt
+	media/sounds/bullets/impactwater_2.wav
+	media/sounds/bullets/impactwater_3.wav
+	media/sounds/bullets/impactwater_4.wav
+	media/sounds/bullets/impactwater_5.wav
+	media/sounds/bullets/bulletflyby_1.wav				license_certificate_GVBDHU5E9Q (bulletflyby_X.wav).txt
+	media/sounds/bullets/bulletflyby_2.wav
+	media/sounds/bullets/bulletflyby_3.wav
+	media/sounds/bullets/bulletflyby_4.wav
+	media/sounds/bullets/bulletflyby_5.wav								
+	media/sounds/bullets/projectiles/rocket_1.wav			license_certificate_P2JKHM9A6G (rocket_1.wav).txt
+	media/sounds/bullets/projectiles/rocket_2.wav			license_certificate_U346AHRTBQ (rocket_2.wav).txt
+	media/sounds/bullets/projectiles/rocket_3.wav			license_certificate_EXZDGR9HU5 (rocket_3.wav).txt
+	media/sounds/bullets/projectiles/minirocket.wav			license_certificate_FJH54SBL7W (minirocket.wav).txt
+	media/sounds/bullets/projectiles/fireworks.wav			license_certificate_5LWT2A96BN (fireworks.wav).txt
+	media/sounds/bullets/projectiles/flames_1.wav			license_certificate_QNGJMUBD5R (flames_X.wav).txt
+	media/sounds/bullets/projectiles/flames_2.wav
+	media/sounds/bullets/projectiles/flames_3.wav
+	media/sounds/bullets/projectiles/arrow_1.wav			license_certificate_RU264Q8NSA (arrow_X.wav).txt
+	media/sounds/bullets/projectiles/arrow_2.wav
+	media/sounds/bullets/projectiles/arrow_3.wav
+	media/sounds/bullets/projectiles/grap1_1.wav			license_certificate_3HZ27XQG4D (grap1_X.wav).txt
+	media/sounds/bullets/projectiles/grap1_2.wav
+	media/sounds/bullets/projectiles/grap1_3.wav
+	media/sounds/bullets/projectiles/plasma_1.wav			license_certificate_PDEB5K7V2U (plasma_X.wav).txt
+	media/sounds/bullets/projectiles/plasma_2.wav
+	media/sounds/bullets/projectiles/plasma_3.wav
+	media/sounds/bullets/impactelectric_1.wav			license_certificate_AKSDT82L3W (impactelectric_X.wav).txt
+	media/sounds/bullets/impactelectric_2.wav
+	media/sounds/bullets/impactelectric_3.wav
+	media/sounds/bullets/impactplasma_1.wav				license_certificate_DEL9H423VG (impactplasma_X.wav).txt
+	media/sounds/bullets/impactplasma_2.wav
+	media/sounds/bullets/impactplasma_3.wav
+	media/sounds/items/health_1.wav					license_certificate_7X3HQE4VJB (health_X.wav).txt	license_certificate_H8KDA2F5LC (health_X.wav).txt	license_certificate_U4GF7YPWE6 (health_X.wav).txt
+	media/sounds/items/health_2.wav
+	media/sounds/items/health_3.wav
+	media/sounds/items/mana_1.wav					license_certificate_W2D56JCRMY (mana_X.wav).txt
+	media/sounds/items/mana_2.wav
+	media/sounds/items/mana_3.wav
+	media/sounds/items/weapons/pickup.wav				license_certificate_Q8GBJLPA57 (pickup.wav).txt
+	media/sounds/items/roids.wav 					license_certificate_NGCHKBR5DE (roids.wav).txt
+	media/sounds/items/joint.wav 					license_certificate_WGEKTRYLPD  (joint.wav).txt		license_certificate_2BAGHCS79U (joint.wav).txt
+	media/sounds/items/spawn_1.wav 					license_certificate_XQ2SNTA8M6 (spawn_x.wav).txt
+	media/sounds/items/spawn_2.wav 
+	media/sounds/items/spawn_3.wav 
+	media/sounds/items/weapons/small.wav 				license_certificate_PL5UX738YF (small.wav).txt
+	media/sounds/items/weapons/medium.wav 				license_certificate_JK3UGY8Z2Q (medium.wav).txt
+	media/sounds/items/weapons/big.wav 				license_certificate_X7M5SZGAUE (big.wav).txt
+	media/sounds/items/weapons/futuristic.wav 			license_certificate_FMN6HKJYXP (futuristic.wav).txt
+	media/sounds/items/weapons/alien.wav 				license_certificate_9MSAXDY76R (alien.wav).txt
+	media/sounds/items/weapons/sword.wav 				license_certificate_7RC3H9UT8J (sword.wav).txt
+	media/sounds/items/weapons/chains.wav 				license_certificate_NH4ABGPE2D (chains.wav - flail_X.wav).txt
+	media/sounds/items/weapons/fastwoosh.wav 			license_certificate_GVJ72HFN85 (fastwoosh.wav - slowwoosh.wav).txt
+	media/sounds/items/weapons/slowwoosh.wav 			license_certificate_GVJ72HFN85 (fastwoosh.wav - slowwoosh.wav).txt
+	media/sounds/items/weapons/noammo.wav				license_certificate_5B8UPMRDLY (noammo.wav).txt
+	media/sounds/classes/spell.wav					license_certificate_4BDV7WXLKP (spell.wav).txt
+	media/sounds/classes/spell_impossible.wav			license_certificate_UE9JT63SM8 (spell_impossible.wav).txt
+	media/sounds/classes/spell_ready.wav				license_certificate_SJWH495N7U (spell_ready.wav).txt
+	media/sounds/classes/reaper.wav					license_certificate_Q9JNV8YL5G (reaper.wav).txt
+	media/sounds/classes/wizard_1.wav				license_certificate_GZXPC3S5W9 (wizard_1.wav).txt
+	media/sounds/classes/wizard_2_1.wav				license_certificate_MVA9W7TFX5 (wizard_2_X.wav).txt
+	media/sounds/classes/wizard_2_2.wav
+	media/sounds/classes/wizard_2_3.wav
+	media/sounds/classes/wizard_2_4.wav
+	media/sounds/classes/wizard_2_5.wav
+	media/sounds/classes/wizard_3.wav				license_certificate_KZ4BC8TSXV (wizard_3.wav).txt
+	media/sounds/classes/kamikaze_1.wav				license_certificate_MGEVH439ZJ (kamikaze_X.wav).txt	license_certificate_PNBF46YD8R (kamikaze_X.wav).txt	license_certificate_5ZSWRDAPJY (kamikaze_X.wav).txt
+	media/sounds/classes/kamikaze_2.wav
+	media/sounds/classes/kamikaze_3.wav
+	media/sounds/classes/phy_1_1.wav				license_certificate_H5TNVKQMER (phy_1_X.wav).txt
+	media/sounds/classes/phy_1_2.wav
+	media/sounds/classes/phy_1_3.wav
+	media/sounds/classes/phy_2_1.wav				license_certificate_2K6LN34AGC (phy_2_1.wav).txt	license_certificate_MVPY8WENB9 (phy_2_X.wav).txt
+	media/sounds/classes/phy_2_2.wav				license_certificate_5CGFLS9Y3T (pri_2.wav).txt		license_certificate_869SKZPUTQ (phy_2_2.wav).txt
+	media/sounds/classes/phy_2_3.wav				license_certificate_S3NZAVUMWE (phy_2_3.wav).txt	license_certificate_MVPY8WENB9 (phy_2_X.wav).txt
+	media/sounds/classes/phy_3.wav					license_certificate_FHM2ADCYXU (phy_3.wav).txt
+	media/sounds/classes/spy_1_1.wav				license_certificate_F52A98HDJV (spy_1_1.wav).txt	license_certificate_9Q4XCRETMS (spy_1_X.wav).txt
+	media/sounds/classes/spy_1_2.wav				license_certificate_G5TLJRN7FM (spy_1_2.wav).txt
+	media/sounds/classes/spy_1_3.wav				license_certificate_ZSUJVPTR4H (spy_1_3.wav).txt
+	media/sounds/classes/spy_2.wav					license_certificate_3B97UCQJ45 (spy_2.wav).txt
+	media/sounds/classes/spy_3.wav					license_certificate_NXGZHMYCEL (spy_3.wav).txt
+	media/sounds/classes/pri_1.wav					license_certificate_7DNWPTKZM4 (pri_1.wav).txt
+	media/sounds/classes/pri_2.wav					license_certificate_5CGFLS9Y3T (pri_2.wav).txt
+	media/sounds/classes/pri_2_2.wav				license_certificate_M8EKSHYGBV (pri_2_2.wav).txt
+	media/sounds/classes/pri_3.wav					license_certificate_Z3W72REAKC (pri_3.wav).txt
+	media/sounds/classes/sho_1.wav					license_certificate_QTD7LJFYGW (sho_1.wav).txt
+	media/sounds/classes/sho_2.wav					license_certificate_QP3D9G64ZM (sho_2.wav).txt
+	media/sounds/classes/sho_3.wav					license_certificate_MNZPR2G76C (sho_3.wav).txt
+	media/sounds/notifications/terminal_hacked.wav			license_certificate_BCNHRTWDX6 (terminal_hacked.wav - terminal_lost.wav).txt
+	media/sounds/notifications/terminal_lost.wav
+	media/sounds/notifications/enemy_terminal_hacked.wav
+	media/sounds/notifications/enemy_terminal_lost.wav
+	media/sounds/notifications/terminal_alarm.wav			license_certificate_N7A4CMR3QY (terminal_alarm.wav).txt
+	media/sounds/notifications/terminal_enter_1.wav			license_certificate_R2MKYUJAZP (terminal_enter_1.wav).txt
+	media/sounds/notifications/terminal_enter_2.wav			license_certificate_JRTZL5PAQU (terminal_enter_3.wav - terminal_enter_2.wav).txt
+	media/sounds/notifications/terminal_enter_3.wav
+	media/sounds/notifications/killstreaks.wav			license_certificate_NAZYU8Q2P6 (levelup.wav).txt	license_certificate_L36YTMBPWH (levelup.wav)
+	media/sounds/notifications/killstreaks/x3_1.wav			license_certificates (killstreaks).txt
+	media/sounds/notifications/killstreaks/x3_2.wav
+	media/sounds/notifications/killstreaks/x3_3.wav
+	media/sounds/notifications/killstreaks/x5_1.wav
+	media/sounds/notifications/killstreaks/x5_2.wav
+	media/sounds/notifications/killstreaks/x5_3.wav
+	media/sounds/notifications/killstreaks/x7_1.wav
+	media/sounds/notifications/killstreaks/x7_2.wav
+	media/sounds/notifications/killstreaks/x7_3.wav
+	media/sounds/notifications/killstreaks/x3_far_1.wav
+	media/sounds/notifications/killstreaks/x3_far_2.wav
+	media/sounds/notifications/killstreaks/x3_far_3.wav
+	media/sounds/notifications/killstreaks/x5_far_1.wav
+	media/sounds/notifications/killstreaks/x5_far_2.wav
+	media/sounds/notifications/killstreaks/x5_far_3.wav
+	media/sounds/notifications/killstreaks/x7_far_1.wav
+	media/sounds/notifications/killstreaks/x7_far_2.wav
+	media/sounds/npcs/adult_pain_1.wav
+	media/sounds/npcs/adult_pain_2.wav
+	media/sounds/npcs/adult_pain_3.wav
+	media/sounds/quests/notification.wav				license_certificate_U6KFYCWMXQ (notification.wav).txt
+	media/sounds/notifications/invasion.wav				license_certificate_C7A2NEKVZH (invasion.wav).txt
+	media/sounds/notification/alien_invasion.wav			license_certificate_5HPAN6MYVQ (alien_invasion.wav).txt
+	media/sounds/ui/click_1.wav					license_certificate_T7V86YNQZ2 (click_X.wav).txt
+	media/sounds/ui/click_2.wav
+	media/sounds/ui/click_3.wav
+	media/sounds/ui/scroll_up.wav					license_certificate_JVF3TH7CL2 (scroll_up.wav - scroll_down.wav).txt
+	media/sounds/ui/scroll_down.wav					license_certificate_JVF3TH7CL2 (scroll_up.wav - scroll_down.wav).txt
+	media/sounds/ui/cashregister.wav				license_certificate_KLWBHPY438 (cashregister.wav).txt
+	media/sounds/ui/error.wav					license_certificate_FC4ANJMZSY (error.wav).txt
+	media/sounds/ui/soldier.wav					license_certificate_LBF2UD8TJ4 (soldier.wav).txt
+	media/sounds/ui/medic.wav					license_certificate_FADJWG9Y7K (medic.wav).txt
+	media/sounds/ui/american.wav					license_certificate_FADJWG9Y7K (american.wav).txt
+	media/sounds/ui/ninja.wav					license_certificate_8TWUD9CBAR (ninja.wav).txt
+	media/sounds/ui/vampire.wav					license_certificate_CSJLUAPHXW (vampire.wav).txt
+	media/sounds/ui/wizard.wav					license_certificate_SF96J3YDLA (wizard.wav).txt
+	media/sounds/ui/kamikaze.wav					license_certificate_4N6PCLD3XQ (kamikaze.wav).txt
+	media/sounds/ui/reaper.wav					license_certificate_FVYASHCZPU (reaper.wav).txt
+	media/sounds/ui/physicist.wav					license_certificate_6HA5EBNU4Q (physicist.wav).txt
+	media/sounds/ui/camper.wav					license_certificate_N4D9YAVB2U (camper.wav).txt
+	media/sounds/ui/spy.wav						license_certificate_BSZ9HC6Y3Q (spy.wav).txt
+	media/sounds/ui/priest.wav					license_certificate_RT456HS8C2 (priest.wav).txt
+	media/sounds/ui/viking.wav					license_certificate_2FDS7XT6CW (viking.wav - roids_X.wav - roids_pupout.wav).txt
+	media/sounds/ui/junkie.wav					license_certificate_5JT983UKL2 (junkie.wav).txt
+	media/sounds/ui/shoshone.wav					license_certificate_AHRM9Z2N7V (shoshone.wav).txt
+	media/sounds/items_soundss/roids_1.wav				license_certificate_2FDS7XT6CW (viking.wav - roids_X.wav - roids_pupout.wav).txt
+	media/sounds/items_soundss/roids_2.wav
+	media/sounds/items_soundss/roids_3.wav
+	media/sounds/items_soundss/roids_4.wav
+	media/sounds/items_soundss/roids_5.wav
+	media/sounds/items_soundss/roids_6.wav
+	media/sounds/items_soundss/roids_7.wav
+	media/sounds/items_soundss/roids_far_1.wav
+	media/sounds/items_soundss/roids_far_2.wav
+	media/sounds/items_soundss/roids_far_3.wav
+	media/sounds/items_soundss/roids_far_4.wav
+	media/sounds/items_soundss/roids_far_5.wav
+	media/sounds/items_soundss/roids_far_6.wav
+	media/sounds/items_soundss/roids_far_7.wav
+	media/sounds/items_soundss/roids_pupout.wav
+	media/sounds/npcs/alien_hello.wav
+	media/sounds/npcs/alien_pain_1.wav				license_certificate_D3L57YMCHF (alien_hello.wav - alien_pain_X.wav - alien_angry.wav - alien_dead.wav).txt
+	media/sounds/npcs/alien_pain_2.wav
+	media/sounds/npcs/alien_pain_3.wav
+	media/sounds/npcs/alien_angry.wav
+	media/sounds/npcs/alien_dead.wav
+	media/sounds/npcs/minion_pain_1.wav				license_certificate_GMWBCY5K4U (minion_pain_X.wav).txt
+	media/sounds/npcs/minion_pain_2.wav
+	media/sounds/npcs/minion_pain_3.wav
+	media/sounds/npcs/minion_pain_4.wav
+	media/sounds/npcs/minion_pain_5.wav
+	media/sounds/npcs/minion_dead_1.wav				license_certificate_KVJ7H2MZG8 (minion_dead_X.wav).txt
+	media/sounds/npcs/minion_dead_2.wav
+	media/sounds/npcs/minion_dead_3.wav
+	media/sounds/npcs/adult_dead_1.wav				license_certificate_JU52SF93TV (adult_dead_1.wav).txt
+	media/sounds/npcs/adult_dead_2.wav				license_certificate_G6YXE34NV7 (adult_dead_2.wav).txt
+	media/sounds/npcs/adult_dead_3.wav
+	media/sounds/npcs/giant_pain_1.wav				license_certificate_2CHVMGNFBP (giant_pain_X.wav - giant_dead_X.wav).txt
+	media/sounds/npcs/giant_pain_2.wav
+	media/sounds/npcs/giant_dead_1.wav
+	media/sounds/npcs/giant_dead_2.wav
 -------------------------------------------------------------------------------------------------------
 
 The following files were created expressly for Cube Conflict by its developers. The CC-BY-SA 4.0 license is applied here.
@@ -338,53 +338,53 @@ Les fichiers suivants ont été crées expressément pour Cube Conflict par ses 
 See / Voir licenses_certificates/cc-by-sa.txt
 
 Created by "Jean Onche" for Cube Conflict | Réalisé par "Jean Onche" pour Cube Conflict
-Files :	note: licenses are identical for media/sound/weap_shoot/mid_dist* too
-	media/sound/game/weap_shoot/electricrifle_1.ogg
-	media/sound/game/weap_shoot/electricrifle_2.ogg
-	media/sound/game/weap_shoot/electricrifle_3.ogg
-	media/sound/game/weap_shoot/plasmarifle_1.ogg
-	media/sound/game/weap_shoot/plasmarifle_2.ogg
-	media/sound/game/weap_shoot/plasmarifle_3.ogg
-	media/sound/game/weap_shoot/smaw_1.ogg
-	media/sound/game/weap_shoot/smaw_2.ogg
-	media/sound/game/weap_shoot/smaw_3.ogg
-	media/sound/game/weap_shoot/minigun_1.ogg
-	media/sound/game/weap_shoot/minigun_2.ogg
-	media/sound/game/weap_shoot/minigun_3.ogg
-	media/sound/game/weap_shoot/uzi_1.ogg
-	media/sound/game/weap_shoot/uzi_2.ogg
-	media/sound/game/weap_shoot/uzi_3.ogg
-	media/sound/game/weap_shoot/famas_1.ogg
-	media/sound/game/weap_shoot/famas_2.ogg
-	media/sound/game/weap_shoot/famas_3.ogg
-	media/sound/game/weap_shoot/sks_1.ogg
-	media/sound/game/weap_shoot/sks_2.ogg
-	media/sound/game/weap_shoot/sks_3.ogg
-	media/sound/game/weap_shoot/ak47_1.ogg
-	media/sound/game/weap_shoot/ak47_2.ogg
-	media/sound/game/weap_shoot/ak47_3.ogg
-	media/sound/game/weap_shoot/glock_1.ogg
-	media/sound/game/weap_shoot/glock_2.ogg
-	media/sound/game/weap_shoot/glock_3.ogg
-	media/sound/game/weap_shoot/gau8.ogg
-	media/sound/game/weap_shoot/minirockets_1.ogg
-	media/sound/game/weap_shoot/minirockets_2.ogg
-	media/sound/game/weap_shoot/minirockets_3.ogg
-	media/sound/game/weap_shoot/campouze2000_1.ogg
-	media/sound/game/weap_shoot/campouze2000_2.ogg
-	media/sound/game/weap_shoot/campouze2000_3.ogg
-	media/sound/weap_shoot/far_dist/lightshoot_1.ogg
-	media/sound/weap_shoot/far_dist/lightshoot_2.ogg
-	media/sound/weap_shoot/far_dist/lightshoot_3.ogg
-	media/sound/weap_shoot/far_dist/heavyshoot_1.ogg
-	media/sound/weap_shoot/far_dist/heavyshoot_2.ogg
-	media/sound/weap_shoot/far_dist/heavyshoot_3.ogg
-	media/sound/weap_shoot/far_dist/veryheavyshoot_1.ogg
-	media/sound/weap_shoot/far_dist/veryheavyshoot_2.ogg
-	media/sound/weap_shoot/far_dist/veryheavyshoot_3.ogg
+Files :	note: licenses are identical for media/sounds/weap_shoot/mid_dist* too
+	media/sounds/weap_shoot/electricrifle_1.wav
+	media/sounds/weap_shoot/electricrifle_2.wav
+	media/sounds/weap_shoot/electricrifle_3.wav
+	media/sounds/weap_shoot/plasmarifle_1.wav
+	media/sounds/weap_shoot/plasmarifle_2.wav
+	media/sounds/weap_shoot/plasmarifle_3.wav
+	media/sounds/weap_shoot/smaw_1.wav
+	media/sounds/weap_shoot/smaw_2.wav
+	media/sounds/weap_shoot/smaw_3.wav
+	media/sounds/weap_shoot/minigun_1.wav
+	media/sounds/weap_shoot/minigun_2.wav
+	media/sounds/weap_shoot/minigun_3.wav
+	media/sounds/weap_shoot/uzi_1.wav
+	media/sounds/weap_shoot/uzi_2.wav
+	media/sounds/weap_shoot/uzi_3.wav
+	media/sounds/weap_shoot/famas_1.wav
+	media/sounds/weap_shoot/famas_2.wav
+	media/sounds/weap_shoot/famas_3.wav
+	media/sounds/weap_shoot/sks_1.wav
+	media/sounds/weap_shoot/sks_2.wav
+	media/sounds/weap_shoot/sks_3.wav
+	media/sounds/weap_shoot/ak47_1.wav
+	media/sounds/weap_shoot/ak47_2.wav
+	media/sounds/weap_shoot/ak47_3.wav
+	media/sounds/weap_shoot/glock_1.wav
+	media/sounds/weap_shoot/glock_2.wav
+	media/sounds/weap_shoot/glock_3.wav
+	media/sounds/weap_shoot/gau8.wav
+	media/sounds/weap_shoot/minirockets_1.wav
+	media/sounds/weap_shoot/minirockets_2.wav
+	media/sounds/weap_shoot/minirockets_3.wav
+	media/sounds/weap_shoot/campouze2000_1.wav
+	media/sounds/weap_shoot/campouze2000_2.wav
+	media/sounds/weap_shoot/campouze2000_3.wav
+	media/sounds/weap_shoot/far_dist/lightshoot_1.wav
+	media/sounds/weap_shoot/far_dist/lightshoot_2.wav
+	media/sounds/weap_shoot/far_dist/lightshoot_3.wav
+	media/sounds/weap_shoot/far_dist/heavyshoot_1.wav
+	media/sounds/weap_shoot/far_dist/heavyshoot_2.wav
+	media/sounds/weap_shoot/far_dist/heavyshoot_3.wav
+	media/sounds/weap_shoot/far_dist/veryheavyshoot_1.wav
+	media/sounds/weap_shoot/far_dist/veryheavyshoot_2.wav
+	media/sounds/weap_shoot/far_dist/veryheavyshoot_3.wav
 	//end of the note
-	media/sound/items/epo.ogg
-	media/sound/items_sounds/epo_1.ogg
-	media/sound/items_sounds/epo_2.ogg
-	media/sound/items_sounds/epo_pupout.ogg
-	media/sound/notifications/kill.ogg
+	media/sounds/items/epo.wav
+	media/sounds/items_soundss/epo_1.wav
+	media/sounds/items_soundss/epo_2.wav
+	media/sounds/items_soundss/epo_pupout.wav
+	media/sounds/notifications/kill.wav
