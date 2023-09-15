@@ -408,7 +408,7 @@ static const struct attackinfo { int gun, action, picksound, sound, middistsnd, 
     { GUN_S_NUKE,       ACT_SHOOT, S_WPLOADBIG,       S_NUKE,         S_NUKE_FAR,             S_NUKE_FAR,    1, 3000,  3250,  20, 300, 2,  200,  10, 2000,  1,   400, 1500, 6000, 1},
     { GUN_S_GAU8,       ACT_SHOOT, S_WPLOADBIG,       S_GAU8,         -1,                             -1,   90,   14,   370, 150, 250, 3, 7500,   4, 8000,  1,    80,   20, 0, 1},
     { GUN_S_ROQUETTES,  ACT_SHOOT, S_WPLOADBIG,       S_MINIROCKETS,  S_MINIROCKETS_FAR, S_FAR_VERYHEAVY,   14,  170,  2000,  10, 300, 2,  850,   6, 8000,  1,   500,  100, 0, 1},
-    { GUN_S_CAMPOUZE,   ACT_SHOOT, S_WPLOADBIG,       S_CAMPOUZE,     S_CAMPOUZE_FAR,    S_FAR_VERYHEAVY,    8,  500,   500,  50,  50, 5, 7500,   3, 8000, 10,   150,    8, 0, 1},
+    { GUN_S_CAMPOUZE,   ACT_SHOOT, S_WPLOADBIG,       S_CAMPOUZE,     S_CAMPOUZE_FAR,    S_FAR_VERYHEAVY,    8,  500,    75,  10,  50, 5,    0,   3, 4000, 10,   150,    8, 0, 1},
     // Armes corps à corps
     { GUN_CAC349,       ACT_SHOOT, S_WPLOADSWORD,     S_SWORD349,     -1, -1,   4, 1000,  600, 1, 1, 20, 0, -10,  28,  1,  50,  0, 0, 0},
     { GUN_CACMARTEAU,   ACT_SHOOT, S_WPLOADSLOWWOOSH, S_BANHAMMER,    -1, -1,   3, 1500, 1000, 1, 1, 15, 0,  -5,  30,  1,  10,  0, 0, 0},
@@ -1109,6 +1109,7 @@ namespace server
     extern bool delayspawn(int type);
     extern bool canspawnitem(int type);
     extern bool pickup(int i, int sender);
+    extern bool noInfiniteAmmo(int atk);
 }
 
 extern char *rndname();

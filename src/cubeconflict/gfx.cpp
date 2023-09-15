@@ -223,7 +223,6 @@ namespace gfx
             case ATK_SV98_SHOOT:
             case ATK_SKS_SHOOT:
             case ATK_GAU8_SHOOT:
-            case ATK_CAMPOUZE_SHOOT:
                 particle_splash(PART_SPARK, 12, 80, v, hasroids(owner) ? 0xFF0000 : 0xFF5533, 0.6f,  400, 250, 0, champicolor());
                 particle_splash(PART_SMOKE,  4, 800+rnd(300), v, 0x414141, 0.4f, 25, 300, 2, champicolor());
                 particle_splash(PART_SMOKE,  4, 500+rnd(300), v, 0x442200, 0.4f, 15, 300, 2, champicolor());

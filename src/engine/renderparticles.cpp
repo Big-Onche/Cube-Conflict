@@ -1110,7 +1110,7 @@ void particle_splash(int type, int num, int fade, const vec &p, int color, float
     splash(type, randomcolor ? gfx::rndcolor[rnd(6)].color : color, radius, num, fade, p, size, gravity, sizemod);
 }
 
-VARP(maxtrail, 1, 500, 10000);
+VARP(maxtrail, 1, 2000, 10000);
 
 void particle_trail(int type, int fade, const vec &s, const vec &e, int color, float size, int gravity)
 {

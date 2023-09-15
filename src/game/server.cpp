@@ -2201,6 +2201,7 @@ namespace server
     }
 
     VAR(overtime, 0, 0, 1);
+    VARP(gameintro, 0, 1, 1);
 
     bool checkovertime()
     {
@@ -2247,18 +2248,23 @@ namespace server
 
     void checkintermission(bool force = false)
     {
-        if(gamemillis<=10000 && !startpremission)
+        if(!isdedicatedserver() && !gameintro) { startpremission = false; stoppremission = true; }
+        else
         {
-            sendf(-1, 1, "ri2", N_PREMISSION, 1);
-            startpremission = true;
-            stoppremission = false;
+            if(gamemillis<=10000 && !startpremission)
+            {
+                sendf(-1, 1, "ri2", N_PREMISSION, 1);
+                startpremission = true;
+                stoppremission = false;
+            }
+            else if(gamemillis>10000 && !stoppremission)
+            {
+                sendf(-1, 1, "ri2", N_PREMISSION, 0);
+                stoppremission = true;
+                startpremission = false;
+            }
         }
-        else if(gamemillis>10000 && !stoppremission)
-        {
-            sendf(-1, 1, "ri2", N_PREMISSION, 0);
-            stoppremission = true;
-            startpremission = false;
-        }
+
 
         if(gamemillis >= gamelimit && !interm && (force || !checkovertime()))
         {
@@ -2429,7 +2435,6 @@ namespace server
             case ATK_NUKE_SHOOT:
             case ATK_GAU8_SHOOT:
             case ATK_ROQUETTES_SHOOT:
-            case ATK_CAMPOUZE_SHOOT:
             case ATK_GRAP1_SHOOT:
             case ATK_ASSISTXPL_SHOOT:
             case ATK_KAMIKAZE_SHOOT:
@@ -2468,6 +2473,11 @@ namespace server
         }
     }
 
+    bool noInfiniteAmmo(int atk)
+    {
+        return atk==ATK_GAU8_SHOOT || atk==ATK_NUKE_SHOOT || atk==ATK_CAMPOUZE_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT;
+    }
+
     void shotevent::process(clientinfo *ci)
     {
         servstate &gs = ci->state;
@@ -2480,7 +2490,7 @@ namespace server
         int gun = attacks[atk].gun;
         if(gs.ammo[gun]<=0 || (attacks[atk].range && from.dist(to) > attacks[atk].range + 1)) return;
 
-        if(!m_muninfinie || atk==ATK_GAU8_SHOOT || atk==ATK_NUKE_SHOOT || atk==ATK_CAMPOUZE_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT) gs.ammo[gun] -= attacks[atk].use;
+        if(!m_muninfinie || noInfiniteAmmo(atk)) gs.ammo[gun] -= attacks[atk].use;
 
         gs.lastshot = millis;
 
@@ -2515,7 +2525,6 @@ namespace server
             case ATK_NUKE_SHOOT:
             case ATK_GAU8_SHOOT:
             case ATK_ROQUETTES_SHOOT:
-            case ATK_CAMPOUZE_SHOOT:
             case ATK_GRAP1_SHOOT:
             case ATK_ASSISTXPL_SHOOT:
             case ATK_KAMIKAZE_SHOOT:
