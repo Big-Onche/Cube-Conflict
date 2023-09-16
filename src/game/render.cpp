@@ -492,6 +492,8 @@ namespace game
         return (r << 16) | (g << 8) | b;
     }
 
+    FVARP(huddamagesize, 0.01f, 0.11f, 1.f);
+
     void rendergame()
     {
         ai::render();
@@ -524,7 +526,7 @@ namespace game
                 float up = 5 + d->o.dist(camera1->o)/40.f + (((totalmillis - d->lastcurdamage) / 50.f) / (d->o.dist(camera1->o) <= 160 ? 160.f - d->o.dist(camera1->o) : 1)); // particle going up effect
                 float t = clamp(d->o.dist(camera1->o), 0.f, 160.f) / 160.f;
                 pos.add(vec(0, 0, up - (15 * (1 - t))));
-                particle_textcopy(pos, tempformatstring("%d", d->curdamage), PART_TEXT, 1, dmgcolor, gfx::zoom ? dmgsize*(guns[player1->gunselect].maxzoomfov)/100.f : dmgsize, 0, true);
+                particle_textcopy(pos, tempformatstring("%d", d->curdamage), PART_TEXT, 1, d->curdamagecolor, gfx::zoom ? huddamagesize*(guns[player1->gunselect].maxzoomfov)/100.f : huddamagesize, 0, true);
             }
 
             if(d->state==CS_ALIVE && player->state==CS_ALIVE)

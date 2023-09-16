@@ -480,9 +480,6 @@ namespace game
         newbouncer(p, to, true, 0, d, type, lifetime, rnd(100)+20);
     }
 
-    int dmgcolor = 0xFFAA00;
-    float dmgsize = 0.12f;
-
     void damageeffect(int damage, gameent *d, gameent *actor, int atk)
     {
         vec p = d->o;
@@ -495,11 +492,7 @@ namespace game
         }
 
         bool teamdmg = false;
-        if(actor==hudplayer())
-        {
-            dmgcolor = 0xFFAA00;
-            dmgsize = 0.11f;
-        }
+        if(actor==hudplayer()) d->curdamagecolor = 0xFFAA00;
 
         damage = ((damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[d->aptitude].apt_resistance)); // calc damage based on the class's stats
 
@@ -509,19 +502,19 @@ namespace game
                 if(atk>=ATK_NUKE_SHOOT && atk<=ATK_CAMPOUZE_SHOOT)
                 {
                     damage *= 1.5f;
-                    if(actor==hudplayer()) {dmgsize = 0.115f; dmgcolor = 0xFF0000; }
+                    if(actor==hudplayer()) d->curdamagecolor = 0xFF0000;
                 }
                 break;
 
             case APT_NINJA:
-                if(atk==ATK_CACNINJA_SHOOT && actor==hudplayer()) {dmgsize = 0.115f; dmgcolor = 0xFF0000; }
+                if(atk==ATK_CACNINJA_SHOOT && actor==hudplayer()) d->curdamagecolor = 0xFF0000;
                 break;
 
             case APT_MAGICIEN:
                 if(actor->abilitymillis[ABILITY_2])
                 {
                     damage *= 1.25f;
-                    if(actor==hudplayer()) dmgcolor = 0xFF00FF;
+                    if(actor==hudplayer()) d->curdamagecolor = 0xFF00FF;
                 }
                 break;
 
@@ -533,7 +526,7 @@ namespace game
                 if(actor->boostmillis[B_RAGE])
                 {
                     damage *= 1.25f;
-                    if(actor==hudplayer()) {dmgsize = 0.115f; dmgcolor = 0xFF7700; }
+                    if(actor==hudplayer()) d->curdamagecolor = 0xFF7700;
                 }
                 break;
 
@@ -541,12 +534,12 @@ namespace game
                 if(actor->abilitymillis[ABILITY_3])
                 {
                     damage *= 1.3f;
-                    if(actor==hudplayer()) {dmgsize = 0.115f; dmgcolor = 0xFF7700; }
+                    if(actor==hudplayer()) d->curdamagecolor = 0xFF7700;
                 }
                 if(d->aptitude==APT_AMERICAIN)
                 {
                     damage /= 1.25f;
-                    if(actor==hudplayer()) {dmgsize = 0.105f; dmgcolor = 0xFFFF00; }
+                    if(actor==hudplayer()) d->curdamagecolor = 0xFFFF00;
                 }
                 break;
 
@@ -561,7 +554,7 @@ namespace game
                 break;
 
             case APT_PRETRE:
-                if(actor==hudplayer() && d->abilitymillis[ABILITY_2] && d->aptitude==APT_PRETRE && d->mana) {dmgsize = 0.105f; dmgcolor = 0xAA00AA; }
+                if(actor==hudplayer() && d->abilitymillis[ABILITY_2] && d->aptitude==APT_PRETRE && d->mana) d->curdamagecolor = 0xAA00AA;
                 break;
 
             case APT_SHOSHONE:
@@ -569,26 +562,26 @@ namespace game
                 if(actor->aptitude==APT_AMERICAIN)
                 {
                     damage *= 1.25f;
-                    if(actor==hudplayer()) {dmgsize = 0.115f; dmgcolor = 0xFF7700; }
+                    if(actor==hudplayer()) d->curdamagecolor = 0xFF7700;
                 }
         }
 
         if(actor->boostmillis[B_ROIDS]) // recalc damage if actor has roids
         {
             damage *= actor->aptitude==APT_JUNKIE ? 3 : 2;
-            if(actor==hudplayer()) {dmgsize = 0.12f; dmgcolor = 0xFF0000; }
+            if(actor==hudplayer()) d->curdamagecolor = 0xFF0000;
         }
         if(d->boostmillis[B_JOINT]) // recalc victim if actor has joint
         {
             damage /= d->aptitude==APT_JUNKIE ? 1.875f : 1.25f;
-            if(actor==hudplayer()) {dmgsize = 0.105f; dmgcolor = 0xAAAA55; }
+            if(actor==hudplayer()) d->curdamagecolor = 0xAAAA55;
         }
 
         if(isteam(d->team, actor->team) && actor!=d && actor==hudplayer()) // recalc if ally or not
         {
             if(actor->aptitude==APT_MEDECIN) return;
             damage /= (actor->aptitude==APT_JUNKIE ? 1.5f : 3.f);
-            if(actor==hudplayer()) dmgcolor = 0x888888;
+            if(actor==hudplayer()) d->curdamagecolor = 0x888888;
             teamdmg = true;
         }
 
