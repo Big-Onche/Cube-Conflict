@@ -629,7 +629,7 @@ void setShroomsEfx(bool enable)
     else applyReverbPreset(auxEffectReverb, EFX_REVERB_PRESET_GENERIC);
 }
 
-ICOMMAND(playsound, "i", (int *sound), if(*sound >= 0 && *sound<=NUMSNDS) playSound(*sound, NULL, 0, 0, SND_FIXEDPITCH|SND_NOTIFICATION); );
+ICOMMAND(playsound, "ii", (int *sound, bool fixedPitch), if(*sound >= 0 && *sound<=NUMSNDS) playSound(*sound, NULL, 0, 0, fixedPitch ? SND_FIXEDPITCH : NULL); );
 
 void playMusic(int musicId)
 {
