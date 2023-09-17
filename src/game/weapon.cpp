@@ -268,7 +268,7 @@ namespace game
         {
             bnc.offset = hudgunorigin(GUN_M32, from, to, owner);
             if(owner==hudplayer() && !isthirdperson()) bnc.offset.sub(owner->o).rescale(16).add(owner->o);
-            playSound(S_GRENADE, &bnc.o, 300, 100, SND_FIXEDPITCH, bnc.entityId);
+            playSound(S_GRENADE, &bnc.o, 300, 100, SND_FIXEDPITCH|SND_NOCULL, bnc.entityId);
         }
 
         bnc.offset = from;
