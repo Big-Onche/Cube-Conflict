@@ -92,6 +92,6 @@ void buyitem(int itemtype, int itemnum) //Achète un objet
         //       return;
         //    }
     }
-    unlockachievement(ACH_TMMONEY);
+    unlockAchievement(ACH_TMMONEY);
 }
 ICOMMAND(buyitem, "ii", (int *itemtype, int *itemnum), buyitem(*itemtype, *itemnum));

@@ -6,14 +6,13 @@
     #include "isteamuserstats.h"
 #endif
 
-extern int xpneededfornextlvl, totalneededxp;
+extern int xpForNextLevel, totalXpNeeded;
+extern bool incrementWinsStat;
 
-extern bool updatewinstat;
-
-extern void loadsave();
-extern void writesave();
-extern void addstat(int valeur, int stat, bool rewrite = false);
-extern void addxpandcc(int nbxp, int nbcc = 0);
+extern void loadSave();
+extern void writeSave();
+extern void updateStat(int value, int statId, bool rewrite = false);
+extern void addReward(int xp, int cc = 0);
 
 //////////////////////////////////////// Statistiques | Player stats ////////////////////////////////////////
 enum {STAT_CC, STAT_XP, STAT_LEVEL, STAT_KILLS, STAT_MORTS, STAT_KDRATIO, STAT_DAMMAGERECORD, STAT_KILLSTREAK, STAT_MAXKILLDIST, STAT_WINS, STAT_SUICIDES, STAT_ALLIESTUES, STAT_TIMEPLAYED, STAT_DRAPEAUXENVOL, STAT_DRAPEAUXENRAP, STAT_DRAPEAUXALYREC, STAT_BASEHACK, //Main game stats
@@ -78,7 +77,7 @@ static const struct statsinfo { const char *statname, *statnicenameFR, *statnice
 
 //////////////////////////////////////// Succès | Achievements ////////////////////////////////////////
 extern void getsteamachievements();
-extern void unlockachievement(int achID);
+extern void unlockAchievement(int achID);
 
 enum {ACH_TRIPLETTE = 0, ACH_PENTAPLETTE, ACH_DECAPLETTE, ACH_ATOME, ACH_WINNER, ACH_ENVOL, ACH_POSTULANT, ACH_STAGIAIRE,
         ACH_SOLDAT, ACH_LIEUTENANT, ACH_MAJOR, ACH_BEAUTIR, ACH_DEFONCE, ACH_PRECIS, ACH_KILLASSIST, ACH_KILLER, ACH_SACAPV,
@@ -86,7 +85,7 @@ enum {ACH_TRIPLETTE = 0, ACH_PENTAPLETTE, ACH_DECAPLETTE, ACH_ATOME, ACH_WINNER,
         ACH_TUEURFANTOME, ACH_EPOFLAG, ACH_M32SUICIDE, ACH_ESPIONDEGUISE, ACH_FUCKYOU, ACH_ABUS, ACH_DESTRUCTEUR, ACH_RAGE,
         ACH_DAVIDGOLIATH, ACH_LANCEEPO, ACH_PASLOGIQUE, ACH_JUSTEPOUR, ACH_BRICOLEUR, ACH_NOSCOPE, ACH_THUGPHYSIQUE, ACH_SPAAACE,
         ACH_PARKOUR, ACH_EXAM, ACH_UNDECIDED, ACH_WASHAKIE, ACH_NATURO, ACH_TMMONEY, ACH_NICE, ACH_TAKETHAT, ACH_SURVIVOR, ACH_ELIMINATOR, NUMACHS};
-extern bool succes[NUMACHS];
+extern bool achievement[NUMACHS];
 
 static const struct achinfo { const char *achname, *achnicenameFR, *achnicenameEN; } achievements[NUMACHS] =
 {

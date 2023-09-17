@@ -1831,7 +1831,7 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
     modifyvelocity(pl, local, water, floating, curtime, jointmillis, aptitude, assist, aptisort);
 
     vec d(pl->vel);
-    if(pl==game::player1 && game::player1->aptitude==APT_MAGICIEN && game::player1->boostmillis[B_EPO]>30000 && aptisort) unlockachievement(ACH_MAXSPEED);
+    if(pl==game::player1 && game::player1->aptitude==APT_MAGICIEN && game::player1->boostmillis[B_EPO]>30000 && aptisort) unlockAchievement(ACH_MAXSPEED);
     if(!floating && water) d.mul(0.5f);
     d.add(pl->falling);
     d.mul(secs);
@@ -1869,7 +1869,7 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
         game::footsteps(pl);
     }
 
-    if(game::player1->timeinair > 10000 && !game::premission && game::player1->state==CS_ALIVE && lookupmaterial(game::player1->feetpos())==MAT_AIR) {unlockachievement(ACH_ENVOL);}
+    if(game::player1->timeinair > 10000 && !game::premission && game::player1->state==CS_ALIVE && lookupmaterial(game::player1->feetpos())==MAT_AIR) {unlockAchievement(ACH_ENVOL);}
 
     if(pl->state==CS_ALIVE) updatedynentcache(pl);
 

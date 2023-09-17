@@ -176,8 +176,8 @@ void disconnect(bool async, bool cleanup, bool volontaire)
         loopi(NUMSONGS) stopMusic(i);
         playMusic(S_MAINMENU);
         mainmenu = 1;
-        if(stat[STAT_DAMMAGERECORD] < game::player1->totaldamage/10) addstat(game::player1->totaldamage/10, STAT_DAMMAGERECORD, true);
-        if(game::player1->totaldamage/10 > 10000) unlockachievement(ACH_DESTRUCTEUR);
+        if(stat[STAT_DAMMAGERECORD] < game::player1->totaldamage/10) updateStat(game::player1->totaldamage/10, STAT_DAMMAGERECORD, true);
+        if(game::player1->totaldamage/10 > 10000) unlockAchievement(ACH_DESTRUCTEUR);
     }
     if(!connpeer && clienthost)
     {

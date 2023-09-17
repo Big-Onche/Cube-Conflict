@@ -298,8 +298,8 @@ struct captureclientmode : clientmode
 
                 if(insidebase(bases[i], player1->feetpos(), player1->state==CS_ALIVE) && d==player1 && totalmillis >= insidebasetimer+1000 && (b.converted || !b.owner))
                 {
-                    addxpandcc(1, 1);
-                    addstat(1, STAT_BASEHACK);
+                    addReward(1, 1);
+                    updateStat(1, STAT_BASEHACK);
                     insidebasetimer = totalmillis;
                 }
 

@@ -40,7 +40,7 @@ void quit(bool savecfgs = true)                      // normal exit
 {
     if(savecfgs)
     {
-        writesave();
+        writeSave();
         writeinitcfg();
         writeservercfg();
         writecfg();
@@ -1323,7 +1323,7 @@ int main(int argc, char **argv)
     execfile("config/heightmap.cfg");
     execfile("config/blendbrush.cfg");
     if(game::savedservers()) execfile(game::savedservers(), false);
-    loadsave();
+    loadSave();
 
     logoutf("init: sound");
     initSounds();

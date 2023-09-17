@@ -69,7 +69,7 @@ namespace game
         //if all good, we let the ability begin
         d->lastability[ability] = totalmillis;
         abilityeffect(d, ability);
-        if(d==player1) addstat(1, STAT_ABILITES);
+        if(d==player1) updateStat(1, STAT_ABILITES);
     }
 
     ICOMMAND(aptitude, "i", (int *ability),  // player1 abilities commands
@@ -111,7 +111,7 @@ namespace game
             if(d->abilitymillis[i]) numEnabled++; // abilities used at the same time (only for achievement below)
         }
 
-        if(d==player1 && player1->aptitude==APT_SHOSHONE && numEnabled==3) unlockachievement(ACH_WASHAKIE);
+        if(d==player1 && player1->aptitude==APT_SHOSHONE && numEnabled==3) unlockAchievement(ACH_WASHAKIE);
     }
 
     ICOMMAND(getclasslogo, "ii", (int *cn, int *numapt),

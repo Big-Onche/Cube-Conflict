@@ -277,7 +277,7 @@ namespace game
         if(cust[TOM_MERDE+player1_tombe]<= 0) { conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette tombe !"); playSound(S_ERROR); player1_tombe=0; return; }
         addmsg(N_SENDTOMBE, "ri", player1_tombe);
         player1->customtombe = player1_tombe;
-        if(player1->customtombe==10) unlockachievement(ACH_FUCKYOU);
+        if(player1->customtombe==10) unlockAchievement(ACH_FUCKYOU);
     });
 
     void rendertombeplayer(gameent *d, float fade)
@@ -313,11 +313,11 @@ namespace game
             else mdlname =  d->abilitymillis[ABILITY_2] && d->aptitude==APT_PHYSICIEN ? "smileys/phy_2" : cbcompensation && d->team==player1->team ? mdl.cbmodel : mdl.model[validteam(team) && d->team==player1->team ? 1 : 0];
         }
 
-        if(intermission && updatewinstat && (validteam(team) ? bestteams.htfind(player1->team)>=0 : bestplayers.find(player1)>=0))
+        if(intermission && incrementWinsStat && (validteam(team) ? bestteams.htfind(player1->team)>=0 : bestplayers.find(player1)>=0))
         {
-            unlockachievement(ACH_WINNER);
-            addstat(1, STAT_WINS);
-            updatewinstat = false;
+            unlockAchievement(ACH_WINNER);
+            updateStat(1, STAT_WINS);
+            incrementWinsStat = false;
         }
 
         if(d->state==CS_DEAD && d->lastpain)

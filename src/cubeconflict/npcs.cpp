@@ -570,7 +570,7 @@ namespace game
         {
             numkilled++;
             player1->frags = numkilled;
-            if(player1->frags>=200) unlockachievement(ACH_ELIMINATOR);
+            if(player1->frags>=200) unlockAchievement(ACH_ELIMINATOR);
         }
         remain = monstertotal-numkilled;
     }
@@ -618,7 +618,7 @@ namespace game
                 case 480: loopi(3) spawnmonster(true, M_B_GIANT); break;
                 case 550: loopi(5)  spawnmonster(true, M_UFO); playSound(S_ALIEN_INVASION);
                 case 575: loopi(5) spawnmonster(true, M_B_GIANT); break;
-                case 600: endsp(); unlockachievement(ACH_SURVIVOR); break;
+                case 600: endsp(); unlockAchievement(ACH_SURVIVOR); break;
                 case 610: trydisconnect(true); break;
                 default:
                     if(gamesecs>450 && (gamesecs%4 == 0)) spawnmonster(true, M_PYRO);

@@ -1424,7 +1424,7 @@ namespace ai
         // others spawn new commands to the stack the ai reads the top command from the stack and executes
         // it or pops the stack and goes back along the history until it finds a suitable command to execute
         bool cleannext = false;
-        if(d->ai->state.empty()) d->ai->addstate(AI_S_WAIT);
+        if(d->ai->state.empty()) d->ai->updateState(AI_S_WAIT);
         loopvrev(d->ai->state)
         {
             aistate &c = d->ai->state[i];

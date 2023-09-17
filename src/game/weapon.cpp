@@ -544,7 +544,7 @@ namespace game
                 break;
 
             case APT_PHYSICIEN:
-                if(d==player1 && actor==player1 && player1->armour && player1->abilitymillis[ABILITY_1]) unlockachievement(ACH_BRICOLEUR);
+                if(d==player1 && actor==player1 && player1->armour && player1->abilitymillis[ABILITY_1]) unlockAchievement(ACH_BRICOLEUR);
         }
 
         switch(d->aptitude) // recalc damage based on the victim's passive/active
@@ -591,9 +591,9 @@ namespace game
         {
             d->curdamage += damage;
             d->lastcurdamage = totalmillis;
-            if(!teamdmg && actor==player1) addstat(damage, STAT_TOTALDAMAGEDEALT);
+            if(!teamdmg && actor==player1) updateStat(damage, STAT_TOTALDAMAGEDEALT);
         }
-        else if(d==player1) addstat(damage, STAT_TOTALDAMAGERECIE);
+        else if(d==player1) updateStat(damage, STAT_TOTALDAMAGERECIE);
     }
 
     void gibeffect(int damage, const vec &vel, gameent *d)
@@ -1059,7 +1059,7 @@ namespace game
 
     void shoteffects(int atk, const vec &from, const vec &to, gameent *d, bool local, int id, int prevaction)     // create visual effect from a shot
     {
-        if(d==player1) addstat(1, STAT_MUNSHOOTED);
+        if(d==player1) updateStat(1, STAT_MUNSHOOTED);
 
         int gun = attacks[atk].gun;
         int sound = attacks[atk].sound;
@@ -1090,8 +1090,8 @@ namespace game
             case ATK_ARTIFICE_SHOOT:
                 if(d==player1 && atk==ATK_NUKE_SHOOT)
                 {
-                    unlockachievement(ACH_ATOME);
-                    addstat(1, STAT_ATOM);
+                    unlockAchievement(ACH_ATOME);
+                    updateStat(1, STAT_ATOM);
                 }
                 gfx::shootgfx(from, to, d, atk);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
@@ -1103,7 +1103,7 @@ namespace game
                 if(atk==ATK_GAU8_SHOOT)
                 {
                     if(d->type==ENT_PLAYER) sound = S_GAU8;
-                     if(d==player1 && player1->aptitude==APT_PRETRE && player1->boostmillis[B_SHROOMS] && player1->abilitymillis[ABILITY_3]) unlockachievement(ACH_CADENCE);
+                     if(d==player1 && player1->aptitude==APT_PRETRE && player1->boostmillis[B_SHROOMS] && player1->abilitymillis[ABILITY_3]) unlockAchievement(ACH_CADENCE);
                 }
                 spawnbouncer(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? d->o : d->balles, vec(0, 0, 0), d, atk==ATK_GAU8_SHOOT ? BNC_BIGDOUILLES : BNC_DOUILLES);
                 gfx::shootgfx(from, to, d, atk);

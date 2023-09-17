@@ -261,27 +261,27 @@ namespace entities
                     {
                         switch(e->type)
                         {
-                            case I_SANTE: addstat(1, STAT_PANACHAY); addxpandcc(1); break;
-                            case I_MANA:  addstat(1, STAT_MANA); addxpandcc(1); break;
+                            case I_SANTE: updateStat(1, STAT_PANACHAY); addReward(1); break;
+                            case I_MANA:  updateStat(1, STAT_MANA); addReward(1); break;
                             case I_WOODSHIELD:
                             case I_IRONSHIELD:
                             case I_GOLDSHIELD:
                             case I_MAGNETSHIELD:
-                                if(player1->armourtype==A_ASSIST) addstat(1, STAT_REPASSIST);
+                                if(player1->armourtype==A_ASSIST) updateStat(1, STAT_REPASSIST);
                                 else
                                 {
-                                    addstat(1, e->type==I_WOODSHIELD ? STAT_BOUCLIERBOIS : e->type==I_IRONSHIELD ? STAT_BOUCLIERFER : e->type==I_MAGNETSHIELD ? STAT_BOUCLIERMAGNETIQUE : STAT_BOUCLIEROR);
-                                    addxpandcc(e->type==I_WOODSHIELD ? 2 : e->type==I_IRONSHIELD ? 3 : 4);
+                                    updateStat(1, e->type==I_WOODSHIELD ? STAT_BOUCLIERBOIS : e->type==I_IRONSHIELD ? STAT_BOUCLIERFER : e->type==I_MAGNETSHIELD ? STAT_BOUCLIERMAGNETIQUE : STAT_BOUCLIEROR);
+                                    addReward(e->type==I_WOODSHIELD ? 2 : e->type==I_IRONSHIELD ? 3 : 4);
                                 }
                                 break;
-                            case I_POWERARMOR:  addstat(1, STAT_ARMUREASSIST); addxpandcc(5); break;
-                            case I_BOOSTPV:         addstat(1, STAT_COCHON); addxpandcc(5); break;
-                            case I_ROIDS:     addstat(1, STAT_STEROS); addxpandcc(5); break;
-                            case I_EPO:    addstat(1, STAT_EPO); addxpandcc(5); break;
-                            case I_JOINT:    addstat(1, STAT_JOINT); addxpandcc(5); break;
-                            case I_SHROOMS:  addstat(1, STAT_CHAMPIS); addxpandcc(5); break;
-                            case I_SUPERARME:       addstat(1, STAT_SUPERARMES); addxpandcc(7); break;
-                            default: if(e->type>=I_RAIL && e->type<=I_GLOCK) {addstat(1, STAT_ARMES); addxpandcc(1);}
+                            case I_POWERARMOR:  updateStat(1, STAT_ARMUREASSIST); addReward(5); break;
+                            case I_BOOSTPV:         updateStat(1, STAT_COCHON); addReward(5); break;
+                            case I_ROIDS:     updateStat(1, STAT_STEROS); addReward(5); break;
+                            case I_EPO:    updateStat(1, STAT_EPO); addReward(5); break;
+                            case I_JOINT:    updateStat(1, STAT_JOINT); addReward(5); break;
+                            case I_SHROOMS:  updateStat(1, STAT_CHAMPIS); addReward(5); break;
+                            case I_SUPERARME:       updateStat(1, STAT_SUPERARMES); addReward(7); break;
+                            default: if(e->type>=I_RAIL && e->type<=I_GLOCK) {updateStat(1, STAT_ARMES); addReward(1);}
                         }
                     }
                 }

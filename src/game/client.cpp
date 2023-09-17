@@ -1515,7 +1515,7 @@ namespace game
                 if(getint(p)) entities::spawnitems();
                 else senditemstoserver = false;
                 ai::loadwaypoints();
-                updatewinstat = true;
+                incrementWinsStat = true;
                 gfx::resetpostfx();
                 break;
             }
@@ -1655,11 +1655,11 @@ namespace game
 
                 if(g==player1)
                 {
-                    if(player1->aptitude==APT_JUNKIE && isteam(g->team, r->team) && r->aptitude==APT_VAMPIRE) unlockachievement(ACH_NATURO);
-                    stat ? addstat(10, STAT_MANAREGEN) : addstat(5, STAT_HEALTHREGEN);
+                    if(player1->aptitude==APT_JUNKIE && isteam(g->team, r->team) && r->aptitude==APT_VAMPIRE) unlockAchievement(ACH_NATURO);
+                    stat ? updateStat(10, STAT_MANAREGEN) : updateStat(5, STAT_HEALTHREGEN);
                 }
 
-                else if(r==player1) stat ? addstat(10, STAT_MANAREGAIN) : addstat(5, STAT_HEALTHREGAIN);
+                else if(r==player1) stat ? updateStat(10, STAT_MANAREGAIN) : updateStat(5, STAT_HEALTHREGAIN);
 
                 playSound(stat ? S_REGENJUNKIE : S_REGENMEDIGUN, r==hudplayer() ? NULL : &r->o, 125, 50);
                 break;
@@ -1747,7 +1747,7 @@ namespace game
                 else findplayerspawn(s, -1, m_teammode && !m_capture ? s->team : 0);
                 if(s == player1)
                 {
-                    if(player1->aptitude==APT_SOLDAT && (player1->ammo[GUN_S_NUKE] || player1->ammo[GUN_S_GAU8] || player1->ammo[GUN_S_ROQUETTES] || player1->ammo[GUN_S_CAMPOUZE])) unlockachievement(ACH_CHANCE);
+                    if(player1->aptitude==APT_SOLDAT && (player1->ammo[GUN_S_NUKE] || player1->ammo[GUN_S_GAU8] || player1->ammo[GUN_S_ROQUETTES] || player1->ammo[GUN_S_CAMPOUZE])) unlockAchievement(ACH_CHANCE);
                     showscores(false);
                     lasthit = 0;
                     player1->lastweap = player1->gunselect;
@@ -1805,7 +1805,7 @@ namespace game
                 if(player1->aptitude==APT_VIKING && target==player1 && actor!=player1 && player1->state==CS_ALIVE)
                 {
                     player1->boostmillis[B_RAGE]+=damage*5;
-                    if(player1->boostmillis[B_RAGE]>8000 && player1->health>0) unlockachievement(ACH_RAGE);
+                    if(player1->boostmillis[B_RAGE]>8000 && player1->health>0) unlockAchievement(ACH_RAGE);
                 }
                 break;
             }

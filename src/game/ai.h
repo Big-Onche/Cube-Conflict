@@ -220,7 +220,7 @@ namespace ai
         {
             clear(prev);
             state.setsize(0);
-            addstate(AI_S_WAIT);
+            updateState(AI_S_WAIT);
             trywipe = false;
         }
 
@@ -249,7 +249,7 @@ namespace ai
             }
         }
 
-        aistate &addstate(int t, int r = -1, int v = -1)
+        aistate &updateState(int t, int r = -1, int v = -1)
         {
             return state.add(aistate(lastmillis, t, r, v));
         }
@@ -258,7 +258,7 @@ namespace ai
         {
             if(index < 0) state.pop();
             else if(state.inrange(index)) state.remove(index);
-            if(!state.length()) addstate(AI_S_WAIT);
+            if(!state.length()) updateState(AI_S_WAIT);
         }
 
         aistate &getstate(int idx = -1)
@@ -276,7 +276,7 @@ namespace ai
                 b.reset();
                 return b;
             }
-            return addstate(t, r, v);
+            return updateState(t, r, v);
         }
     };
 

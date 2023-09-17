@@ -578,7 +578,7 @@ struct ctfclientmode : clientmode
         conoutf(CON_GAMEINFO, GAME_LANG ? "%s\f7 %srecovered the %s's flag." : "%s\f7 %s récupéré le drapeau %s", teamcolorname(d), GAME_LANG ? "" : d==player1 ? "as" : "a", teamcolorflag(f));
         if(d->team==player1->team) conoutf(CON_HUDCONSOLE, GAME_LANG ? "\f9We recovered our flag!" : "\f9Notre équipe a récupéré son drapeau !");
         else conoutf(CON_HUDCONSOLE, GAME_LANG ? "\f3The enemy team has recovered their flag" : "\f3L'équipe ennemie a récupéré son drapeau.");
-        if(d==player1) {addstat(1, STAT_DRAPEAUXALYREC); addxpandcc(10, 3);}
+        if(d==player1) {updateStat(1, STAT_DRAPEAUXALYREC); addReward(10, 3);}
         playSound(S_DRAPEAURESET);
     }
 
@@ -618,7 +618,7 @@ struct ctfclientmode : clientmode
         conoutf(CON_HUDCONSOLE, team==player1->team ? (GAME_LANG ? "\f9We scored a point!" : "\f9Notre équipe a marqué un point !") :
                                                       (GAME_LANG ? "\f3The enemy team has scored a point." : "\f3L'équipe ennemie a marqué un point."));
 
-        if(d==player1) {addstat(1, STAT_DRAPEAUXENRAP); addxpandcc(20, 10); if(player1->boostmillis[B_EPO]) unlockachievement(ACH_EPOFLAG);}
+        if(d==player1) {updateStat(1, STAT_DRAPEAUXENRAP); addReward(20, 10); if(player1->boostmillis[B_EPO]) unlockAchievement(ACH_EPOFLAG);}
 
         playSound(team==player1->team ? S_DRAPEAUSCORE : S_DRAPEAUTOMBE);
 
@@ -636,7 +636,7 @@ struct ctfclientmode : clientmode
         conoutf(CON_HUDCONSOLE, f.team!=player1->team ? (GAME_LANG ? "\f9We stole the enemy flag !" : "\f9Notre équipe a volé le drapeau ennemi !") :
                                                         (GAME_LANG ? "\f3The enemy team stole our flag." : "\f3L'équipe ennemie a volé notre drapeau !"));
 
-        if(d==player1) {addstat(1, STAT_DRAPEAUXENVOL); addxpandcc(5, 2);}
+        if(d==player1) {updateStat(1, STAT_DRAPEAUXENVOL); addReward(5, 2);}
         ownflag(i, d, lastmillis);
         playSound(S_DRAPEAUPRIS);
     }

@@ -27,7 +27,7 @@ namespace game
             player1->aptitude = player1_aptitude;
             oldapti = player1->aptitude;
             if(!islaunching) playSound(S_APT_SOLDAT+player1_aptitude, NULL, 0, 0, SND_FIXEDPITCH|SND_NOTIFICATION);
-            if(isconnected() && !premission && !intermission) unlockachievement(ACH_UNDECIDED);
+            if(isconnected() && !premission && !intermission) unlockAchievement(ACH_UNDECIDED);
         }
     });
 
@@ -68,7 +68,7 @@ namespace game
         loopi(4) dmg+=avgdmg[i];
         if(totalmillis >= lasttimeupdate+1000) //1 second interval
         {
-            addstat(1, STAT_TIMEPLAYED);
+            updateStat(1, STAT_TIMEPLAYED);
             lasttimeupdate = totalmillis;
             dmgsecs[0]==3 ? dmgsecs[0]=0 : dmgsecs[0]++;
             dmgsecs[1]==5 ? dmgsecs[1]=2 : dmgsecs[1]++;
@@ -380,12 +380,12 @@ namespace game
             {
                 bool p1hassuperweapon = false;
                 loopi(4) if(player1->ammo[GUN_S_NUKE+i]>0) p1hassuperweapon = true;
-                if(player1->health>=2000) unlockachievement(ACH_SACAPV);
-                if(player1->boostmillis[B_ROIDS] && player1->boostmillis[B_EPO] && player1->boostmillis[B_JOINT] && player1->boostmillis[B_SHROOMS]) unlockachievement(ACH_DEFONCE);
-                if(lookupmaterial(player1->o)==MAT_NOCLIP && map_sel==3) unlockachievement(ACH_SPAAACE);
-                if(p1hassuperweapon && player1->boostmillis[B_ROIDS] && player1->armour>0 && player1->armourtype==A_ASSIST) unlockachievement(ACH_ABUS);
-                if(player1->aptitude==APT_KAMIKAZE && player1->ammo[GUN_KAMIKAZE]<=0 && totalmillis-lastshoot>=500 && totalmillis-lastshoot<=750 && isconnected()) unlockachievement(ACH_SUICIDEFAIL);
-                if(player1->boostmillis[B_EPO] && player1->aptitude==APT_JUNKIE) unlockachievement(ACH_LANCEEPO);
+                if(player1->health>=2000) unlockAchievement(ACH_SACAPV);
+                if(player1->boostmillis[B_ROIDS] && player1->boostmillis[B_EPO] && player1->boostmillis[B_JOINT] && player1->boostmillis[B_SHROOMS]) unlockAchievement(ACH_DEFONCE);
+                if(lookupmaterial(player1->o)==MAT_NOCLIP && map_sel==3) unlockAchievement(ACH_SPAAACE);
+                if(p1hassuperweapon && player1->boostmillis[B_ROIDS] && player1->armour>0 && player1->armourtype==A_ASSIST) unlockAchievement(ACH_ABUS);
+                if(player1->aptitude==APT_KAMIKAZE && player1->ammo[GUN_KAMIKAZE]<=0 && totalmillis-lastshoot>=500 && totalmillis-lastshoot<=750 && isconnected()) unlockAchievement(ACH_SUICIDEFAIL);
+                if(player1->boostmillis[B_EPO] && player1->aptitude==APT_JUNKIE) unlockAchievement(ACH_LANCEEPO);
             }
 
             if(hasboost(player1)) entities::checkboosts(curtime, player1);
@@ -750,8 +750,8 @@ namespace game
             if(d==player1)
             {
                 hassuicided = true;
-                addstat(1, STAT_MORTS); addstat(1, STAT_SUICIDES);
-                if(atk==ATK_M32_SHOOT)unlockachievement(ACH_M32SUICIDE);
+                updateStat(1, STAT_MORTS); updateStat(1, STAT_SUICIDES);
+                if(atk==ATK_M32_SHOOT)unlockAchievement(ACH_M32SUICIDE);
             }
         }
         else // Kill ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -765,42 +765,42 @@ namespace game
 
                 if(IS_ON_OFFICIAL_SERV) //now let's check for shittons of achievements if playing online
                 {
-                    if(killdistance>=100.f) unlockachievement(ACH_BEAUTIR);
-                    else if(killdistance<1.f && atk==ATK_MOSSBERG_SHOOT) unlockachievement(ACH_TAKETHAT);
-                    else if(killdistance>=69.f && killdistance<70.f ) unlockachievement(ACH_NICE);
-                    if(player1->state==CS_DEAD && player1->lastpain > 200) unlockachievement(ACH_TUEURFANTOME);
-                    if(player1->health<=10 && player1->state==CS_ALIVE) unlockachievement(ACH_1HPKILL);
-                    if(isteam(d->team, player1->team)) {addstat(1, STAT_ALLIESTUES); unlockachievement(ACH_CPASBIEN);}
+                    if(killdistance>=100.f) unlockAchievement(ACH_BEAUTIR);
+                    else if(killdistance<1.f && atk==ATK_MOSSBERG_SHOOT) unlockAchievement(ACH_TAKETHAT);
+                    else if(killdistance>=69.f && killdistance<70.f ) unlockAchievement(ACH_NICE);
+                    if(player1->state==CS_DEAD && player1->lastpain > 200) unlockAchievement(ACH_TUEURFANTOME);
+                    if(player1->health<=10 && player1->state==CS_ALIVE) unlockAchievement(ACH_1HPKILL);
+                    if(isteam(d->team, player1->team)) {updateStat(1, STAT_ALLIESTUES); unlockAchievement(ACH_CPASBIEN);}
 
                     switch(atk)
                     {
-                        case ATK_ASSISTXPL_SHOOT: if(player1->armourtype==A_ASSIST) unlockachievement(ACH_KILLASSIST); break;
-                        case ATK_LANCEFLAMMES_SHOOT: if(lookupmaterial(d->feetpos())==MAT_WATER) unlockachievement(ACH_THUGPHYSIQUE); break;
-                        case ATK_SV98_SHOOT: if(gfx::zoom==0) unlockachievement(ACH_NOSCOPE); break;
-                        case ATK_GLOCK_SHOOT: if(d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_CAMPOUZE || d->gunselect==GUN_S_GAU8 || d->gunselect==GUN_S_ROQUETTES) unlockachievement(ACH_DAVIDGOLIATH); break;
-                        case ATK_CAC349_SHOOT: case ATK_CACFLEAU_SHOOT: case ATK_CACMARTEAU_SHOOT: case ATK_CACMASTER_SHOOT: if(d->aptitude==APT_NINJA) unlockachievement(ACH_PASLOGIQUE); break;
-                        case ATK_NUKE_SHOOT: case ATK_CAMPOUZE_SHOOT: case ATK_GAU8_SHOOT: case ATK_ROQUETTES_SHOOT: if(player1->aptitude==APT_AMERICAIN && player1->boostmillis[B_ROIDS]) unlockachievement(ACH_JUSTEPOUR);
+                        case ATK_ASSISTXPL_SHOOT: if(player1->armourtype==A_ASSIST) unlockAchievement(ACH_KILLASSIST); break;
+                        case ATK_LANCEFLAMMES_SHOOT: if(lookupmaterial(d->feetpos())==MAT_WATER) unlockAchievement(ACH_THUGPHYSIQUE); break;
+                        case ATK_SV98_SHOOT: if(gfx::zoom==0) unlockAchievement(ACH_NOSCOPE); break;
+                        case ATK_GLOCK_SHOOT: if(d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_CAMPOUZE || d->gunselect==GUN_S_GAU8 || d->gunselect==GUN_S_ROQUETTES) unlockAchievement(ACH_DAVIDGOLIATH); break;
+                        case ATK_CAC349_SHOOT: case ATK_CACFLEAU_SHOOT: case ATK_CACMARTEAU_SHOOT: case ATK_CACMASTER_SHOOT: if(d->aptitude==APT_NINJA) unlockAchievement(ACH_PASLOGIQUE); break;
+                        case ATK_NUKE_SHOOT: case ATK_CAMPOUZE_SHOOT: case ATK_GAU8_SHOOT: case ATK_ROQUETTES_SHOOT: if(player1->aptitude==APT_AMERICAIN && player1->boostmillis[B_ROIDS]) unlockAchievement(ACH_JUSTEPOUR);
                     }
 
                     switch(player1->aptitude)
                     {
-                        case APT_AMERICAIN: if(d->aptitude==APT_SHOSHONE) unlockachievement(ACH_FUCKYEAH); break;
-                        case APT_ESPION: if(player1->abilitymillis[ABILITY_2]) unlockachievement(ACH_ESPIONDEGUISE);
+                        case APT_AMERICAIN: if(d->aptitude==APT_SHOSHONE) unlockAchievement(ACH_FUCKYEAH); break;
+                        case APT_ESPION: if(player1->abilitymillis[ABILITY_2]) unlockAchievement(ACH_ESPIONDEGUISE);
                     }
 
-                    switch(player1->killstreak) {case 3: unlockachievement(ACH_TRIPLETTE); break; case 5: unlockachievement(ACH_PENTAPLETTE); break; case 10: unlockachievement(ACH_DECAPLETTE);}
+                    switch(player1->killstreak) {case 3: unlockAchievement(ACH_TRIPLETTE); break; case 5: unlockAchievement(ACH_PENTAPLETTE); break; case 10: unlockAchievement(ACH_DECAPLETTE);}
 
                     //now let's add player stats
-                    addstat(1, STAT_KILLS);
-                    addxpandcc(7+player1->killstreak-1, 3+player1->killstreak-1);
-                    if(player1->killstreak > stat[STAT_KILLSTREAK]) addstat(player1->killstreak, STAT_KILLSTREAK, true);
-                    if(stat[STAT_MAXKILLDIST]<killdistance) addstat(killdistance, STAT_MAXKILLDIST, true);
+                    updateStat(1, STAT_KILLS);
+                    addReward(7+player1->killstreak-1, 3+player1->killstreak-1);
+                    if(player1->killstreak > stat[STAT_KILLSTREAK]) updateStat(player1->killstreak, STAT_KILLSTREAK, true);
+                    if(stat[STAT_MAXKILLDIST]<killdistance) updateStat(killdistance, STAT_MAXKILLDIST, true);
                 }
             }
             else if(d==player1) ////////////////////TU as été tué////////////////////
             {
                 conoutf(contype, "%s\f7 > \fl%s\f7 > \fd%s \fl(%.1fm)", aname, GAME_LANG ? guns[atk].nameEN : guns[atk].nameFR, player1->name, killdistance);
-                addstat(1, STAT_MORTS);
+                updateStat(1, STAT_MORTS);
                 formatstring(killername, "%s", aname);
                 formatstring(weapdesc, "%s", GAME_LANG ? guns[atk].armedescEN : guns[atk].armedescFR);
                 killerclass = actor->aptitude;
@@ -847,17 +847,17 @@ namespace game
 
             if(player1->frags>=10)
             {
-                if(accuracy>=50) unlockachievement(ACH_PRECIS);
-                if(player1->deaths<=5) unlockachievement(ACH_INCREVABLE);
-                if(player1->frags>=30) unlockachievement(ACH_KILLER);
+                if(accuracy>=50) unlockAchievement(ACH_PRECIS);
+                if(player1->deaths<=5) unlockAchievement(ACH_INCREVABLE);
+                if(player1->frags>=30) unlockAchievement(ACH_KILLER);
             }
-            if(player1->totaldamage/10 > 10000) unlockachievement(ACH_DESTRUCTEUR);
+            if(player1->totaldamage/10 > 10000) unlockAchievement(ACH_DESTRUCTEUR);
 
             defformatstring(flags, "%d", player1->flags);
             conoutf(CON_GAMEINFO, GAME_LANG ? "\faGAME OVER!" : "\faFIN DE LA PARTIE !");
             if(GAME_LANG) conoutf(CON_GAMEINFO, "\f2Kills : %d | Deaths : %d | Total damage : %d | Accuracy : %d%% %s %s", player1->frags, player1->deaths, player1->totaldamage/10, accuracy, m_ctf ? "| Flags :" : "", m_ctf ? flags : "");
             else conoutf(CON_GAMEINFO, "\f2Éliminations : %d | Morts : %d | Dégats infligés : %d | Précision : %d%% %s %s", player1->frags, player1->deaths, player1->totaldamage/10, accuracy, m_ctf ? "| Drapeaux :" : "", m_ctf ? flags : "");
-            if(stat[STAT_DAMMAGERECORD] < player1->totaldamage/10) addstat(player1->totaldamage/10, STAT_DAMMAGERECORD, true);
+            if(stat[STAT_DAMMAGERECORD] < player1->totaldamage/10) updateStat(player1->totaldamage/10, STAT_DAMMAGERECORD, true);
             showscores(true);
             disablezoom();
 
