@@ -65,7 +65,7 @@ namespace game
     );
 
     ICOMMAND(hudxpcount, "", (),
-        defformatstring(s, "%d / %d XP (%s %d)", totalneededxp - (xpneededfornextlvl - stat[STAT_XP]), totalneededxp, GAME_LANG ? "Lvl" : "Niv", stat[STAT_LEVEL]);
+        defformatstring(s, "%d / %d XP (%s %d)", totalXpNeeded - (xpForNextLevel - stat[STAT_XP]), totalXpNeeded, GAME_LANG ? "Lvl" : "Niv", stat[STAT_LEVEL]);
         result(s);
     );
 
@@ -120,7 +120,7 @@ namespace game
         intret(cmode ? cmode->respawnwait(followingplayer(player1)) : respawnwait(followingplayer(player1)));
     );
 
-    int msgmillis[2]; enum {MSG_INTERRACT, MSG_CUSTOM};
+    enum {MSG_INTERRACT = 0, MSG_CUSTOM, NUMMSGS}; int msgmillis[NUMMSGS];
 
     string custommsg;
     ICOMMAND(popupmsg, "ssii", (char *msg_fr, char *msg_en, int *duration, int *sound),
@@ -139,6 +139,12 @@ namespace game
 
     void rendersoftmessages(int y)
     {
+        if(!isconnected())
+        {
+            loopi(NUMMSGS) msgmillis[i] = 0;
+            return;
+        }
+
         if(totalmillis - msgmillis[MSG_INTERRACT] <= 1)
         {
             defformatstring(s, "%s", interractmsg);

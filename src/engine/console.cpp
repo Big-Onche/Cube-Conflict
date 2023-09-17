@@ -169,7 +169,7 @@ float renderconsole(float w, float h, float abovehud)
           conheight = min(float(FONTH*consize), h - 2*conpad),
           conwidth = w - 2*conpad - game::clipconsole(w, h);
     float y = drawconlines(conskip, confade, conwidth, conheight, conpad, confilter);
-    drawconlines(conskip, hudconfade, conwidth, min(float(FONTH*hudconsize), h - 2*conpad), conpad, 0x4000, 0, 1, true); // hud centered console
+    if(isconnected()) drawconlines(conskip, hudconfade, conwidth, min(float(FONTH*hudconsize), h - 2*conpad), conpad, 0x4000, 0, 1, true); // hud centered console
     if(miniconsize && miniconwidth)
         drawconlines(miniconskip, miniconfade, (miniconwidth*(w - 2*conpad))/100, min(float(FONTH*miniconsize), abovehud - y), conpad, miniconfilter, abovehud, -1);
     game::rendersoftmessages(y);
