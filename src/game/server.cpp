@@ -623,7 +623,8 @@ namespace server
     VAR(restrictpausegame, 0, 1, 1);
     VAR(restrictgamespeed, 0, 1, 1);
 
-    SVAR(serverdesc, "");
+    SVAR(serverdescen, "");
+    SVAR(serverdescfr, "");
     SVAR(serverpass, "");
     SVAR(adminpass, "");
     VARF(publicserver, 0, 0, 2, {
@@ -2872,7 +2873,7 @@ namespace server
 
     void sendservinfo(clientinfo *ci)
     {
-        sendf(ci->clientnum, 1, "ri6ss", N_SERVINFO, ci->clientnum, PROTOCOL_VERSION, ci->sessionid, atoi(smapname), serverpass[0] ? 1 : 0, serverdesc, serverauth);
+        sendf(ci->clientnum, 1, "ri6ss", N_SERVINFO, ci->clientnum, PROTOCOL_VERSION, ci->sessionid, atoi(smapname), serverpass[0] ? 1 : 0, serverdescen, serverdescfr, serverauth);
     }
 
     void noclients()
@@ -4093,7 +4094,8 @@ namespace server
             putint(p, gamespeed);
         }
         sendstring(smapname, p);
-        sendstring(serverdesc, p);
+        sendstring(serverdescen, p);
+        sendstring(serverdescfr, p);
         sendserverinforeply(p);
     }
 

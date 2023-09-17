@@ -498,13 +498,13 @@ extern bool isdedicatedserver();
 
 struct servinfo
 {
-    string name, map, desc;
+    string name, map, descen, descfr;
     int protocol, numplayers, maxplayers, ping;
     vector<int> attr;
 
     servinfo() : protocol(INT_MIN), numplayers(0), maxplayers(0)
     {
-        name[0] = map[0] = desc[0] = '\0';
+        name[0] = map[0] = descen[0] = '\0'; descfr[0] = '\0';
     }
 };
 

@@ -540,7 +540,9 @@ void checkpings()
         getstring(text, p);
         filtertext(si->map, text, false);
         getstring(text, p);
-        filtertext(si->desc, text, true, true);
+        filtertext(si->descen, text, true, true);
+        getstring(text, p);
+        filtertext(si->descfr, text, true, true);
     }
 }
 
@@ -585,7 +587,7 @@ ICOMMAND(servinfodesc, "i", (int *i),
     GETSERVERINFO_(*i, si,
     {
         const char *status = si.status();
-        result(status ? status : si.desc);
+        result(status ? status : GAME_LANG ? si.descen : si.descfr);
     }));
 ICOMMAND(servinfoname, "i", (int *i), GETSERVERINFO_(*i, si, result(si.name)));
 ICOMMAND(servinfoport, "i", (int *i), GETSERVERINFO_(*i, si, intret(si.address.port)));
