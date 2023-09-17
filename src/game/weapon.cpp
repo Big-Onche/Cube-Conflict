@@ -647,7 +647,8 @@ namespace game
                     case APT_VAMPIRE: {player1->health = min(player1->health + damage/2, player1->maxhealth); player1->vampimillis+=damage*1.5f;} break;
                     case APT_SHOSHONE: if(player1->abilitymillis[ABILITY_1]) damage*=1.3f;
                 }
-                hitmonster((damage*aptitudes[player1->aptitude].apt_degats)/100, (monster *)f, at, vel, atk);
+                damage = (damage*aptitudes[player1->aptitude].apt_degats)/100;
+                hitmonster(damage, (monster *)f, at, vel, atk);
                 avgdmg[dmgsecs[0]] += damage/10;
             }
         }
