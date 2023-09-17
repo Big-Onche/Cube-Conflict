@@ -56,7 +56,6 @@ void applychanges()
 COMMAND(applychanges, "");
 ICOMMAND(pendingchanges, "b", (int *idx), { if(needsapply.inrange(*idx)) result(needsapply[*idx].desc); else if(*idx < 0) intret(needsapply.length()); });
 
-bool UI_PLAYMUSIC = true;
 VARP(veryfirstlaunch, 0, 1, 1);
 static int lastmainmenu = -1;
 ICOMMAND(usingsteam, "", (), intret(IS_USING_STEAM));
@@ -68,7 +67,7 @@ void menuprocess()
         lastmainmenu = mainmenu;
         execident("mainmenutoggled");
     }
-    if(UI_PLAYMUSIC) { playMusic(S_MAINMENU); UI_PLAYMUSIC = false; }
+    if(islaunching) playMusic(S_MAINMENU);
     if(mainmenu && !isconnected(true) && !UI::hascursor())
     {
         if(veryfirstlaunch)

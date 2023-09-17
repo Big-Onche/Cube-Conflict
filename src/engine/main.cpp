@@ -1328,7 +1328,6 @@ int main(int argc, char **argv)
     logoutf("init: sound");
     initSounds();
     execfile("config/sound.cfg");
-    if(UI_PLAYMUSIC) { playMusic(S_MAINMENU); UI_PLAYMUSIC = false; }
 
     game::player1->playermodel = 0;
 

@@ -635,6 +635,7 @@ void playMusic(int musicId)
 {
     if(musicId>=0 && musicId<=NUMSONGS) playSound(musicId, NULL, 0, 0, SND_MUSIC);
     else conoutf("Invalide music ID (must be 0 to %d)", NUMSONGS);
+    updateMusicVol();
 }
 ICOMMAND(playmusic, "i", (int *i), playMusic(*i));
 
