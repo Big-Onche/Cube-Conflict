@@ -1468,7 +1468,7 @@ static void makeparticles(entity &e)
                     vec posB = camera1->o;
                     vec flashloc = (posA.add((posB.mul(vec(3, 3, 3))))).div(vec(4, 4, 4));
 
-                    if(camera1->o.dist(posground) >= 250) playSound(S_ECLAIRPROCHE, &flashloc, 1500, 300);
+                    if(camera1->o.dist(posground) >= 250) playSound(S_ECLAIRLOIN, &flashloc, 1500, 300);
                     adddynlight(flashloc, 4000, vec(1.5f, 1.5f, 2.0f), 200, 40, L_NOSHADOW, 2000, vec(0.5f, 0.5f, 1.0f));
                 }
             }
