@@ -300,7 +300,7 @@ namespace game
 
         if(d->armourtype==A_ASSIST && d->armour>0 && d->armour<1000 && d->state==CS_ALIVE) // power armor alarm sound
         {
-            if(d->armour && !d->powerarmoursound)
+            if(!d->powerarmoursound && d->armour && isconnected())
             {
                 playSound(S_ASSISTALARM, d==hudplayer() ? NULL : &d->o, 250, 100, SND_FIXEDPITCH|SND_LOOPED, d->entityId, PL_POWERARMOR_SND);
                 d->powerarmoursound = true;
