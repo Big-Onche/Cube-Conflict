@@ -541,14 +541,14 @@ namespace game
                 if(d->state==CS_ALIVE) particle_meter(d->abovehead(), d->health/1000.0f, PART_METER, 1, genrygbcolorgradient(d->health/10), 0x000000, 0.05f, true);
             }
 
-            if(d->state==CS_ALIVE && player->state==CS_ALIVE)
+            if(d->state==CS_ALIVE)
             {
                 vec centerplayerpos = d->o;
                 centerplayerpos.sub(vec(0, 0, 8));
 
                 if(d->health<300 && d->health>0) switch(rnd(d->health+gfx::nbfps*2)) {case 0: gibeffect(300, d->o, d);}
 
-                if(d!=hudplayer())
+                if(d!=hudplayer() && player1->state==CS_ALIVE)
                 {
                     if(isteam(player1->team, d->team))
                     {
