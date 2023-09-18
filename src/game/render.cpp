@@ -548,7 +548,7 @@ namespace game
 
                 if(d->health<300 && d->health>0) switch(rnd(d->health+gfx::nbfps*2)) {case 0: gibeffect(300, d->o, d);}
 
-                if(d!=hudplayer() && player1->state==CS_ALIVE)
+                if(d!=hudplayer() && hudplayer()->state==CS_ALIVE)
                 {
                     if(isteam(player1->team, d->team))
                     {

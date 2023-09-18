@@ -2025,6 +2025,7 @@ namespace server
     VARP(servrandommode, 0, 0, 1);
     VARP(servforcemode, -1, 0, 18);
 
+    VARP(gameintro, 0, 1, 1);
     bool startpremission = false, stoppremission = false;
 
     void changemap(const char *s, int mode)
@@ -2034,10 +2035,10 @@ namespace server
         changegamespeed(100);
         if(smode) smode->cleanup();
 
-        game::premission = true;
+        if(gameintro) game::premission = true;
         gamemode = mode;
         gamemillis = 0;
-        gamelimit = gamelength*60000+10000;
+        gamelimit = gamelength*60000+(gameintro ? 10000 : 0);
         startpremission = false;
         interm = 0;
         nextexceeded = 0;
@@ -2202,7 +2203,6 @@ namespace server
     }
 
     VAR(overtime, 0, 0, 1);
-    VARP(gameintro, 0, 1, 1);
 
     bool checkovertime()
     {
@@ -2252,7 +2252,7 @@ namespace server
         if(!isdedicatedserver() && !gameintro) { startpremission = false; stoppremission = true; }
         else
         {
-            if(gamemillis<=10000 && !startpremission)
+            if(gamemillis<=10000 && !startpremission && gameintro)
             {
                 sendf(-1, 1, "ri2", N_PREMISSION, 1);
                 startpremission = true;
