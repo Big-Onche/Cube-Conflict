@@ -643,7 +643,6 @@ namespace game
     {
         int i = who[0] ? parseplayer(who) : player1->clientnum;
         if(i>=0) addmsg(N_SPECTATOR, "rii", i, val);
-        gfx::resetpostfx();
     }
     ICOMMAND(spectator, "is", (int *val, char *who), togglespectator(*val, who));
 
@@ -2193,6 +2192,7 @@ namespace game
                         if(editmode) toggleedit();
                         if(s->state==CS_DEAD) showscores(false);
                         disablezoom();
+                        gfx::resetpostfx();
                     }
                     s->state = CS_SPECTATOR;
                 }

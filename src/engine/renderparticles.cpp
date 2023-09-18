@@ -907,6 +907,7 @@ static partrenderer *parts[] =
     &lightnings,                                                                                                             // PART_LIGHTNING
     // game specific
     new quadrenderer("media/particles/game/target.png", PT_PART|PT_LERP|PT_BRIGHT),                                          // PART_TARGET
+    new quadrenderer("media/particles/game/dead.png", PT_PART|PT_LERP|PT_BRIGHT),                                            // PART_DEAD
     new quadrenderer("media/particles/game/zero.png", PT_PART|PT_BRIGHT),                                                    // PART_ZERO
     new quadrenderer("media/particles/game/one.png", PT_PART|PT_BRIGHT),                                                     // PART_ONE
     new quadrenderer("media/particles/game/blip.png", PT_PART|PT_LERP),                                                      // PART_BLIP
@@ -1167,6 +1168,7 @@ void particle_icon(const vec &s, int ix, int iy, int type, int fade, int color, 
 void particle_hud(int type, const vec &pos, int color, float size)
 {
     if(!canaddparticles()) return;
+    size = gfx::zoom ? size*(guns[game::hudplayer()->gunselect].maxzoomfov)/100.f : size;
     newparticle(computepartpos(pos), vec(0, 0, 1), 1, type, color, size, 0);
 }
 
