@@ -361,7 +361,8 @@ void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRa
 
     alSourcei(source, AL_BUFFER, buffer); // managing sounds alternatives
     alSourcef(source, AL_GAIN, s.soundVol / 100.f); // managing sound volume
-    alSourcef(source, AL_PITCH, !(flags & SND_FIXEDPITCH) && !(flags & SND_MUSIC) ? (0.92f + 0.16f * static_cast<float>(rand()) / RAND_MAX) : 1.f); // managing variations of pitches
+    float basePitch = (flags & SND_FIXEDPITCH) ? 1.f : (0.92f + 0.16f * static_cast<float>(rand()) / RAND_MAX);
+    alSourcef(source, AL_PITCH, !(flags & SND_MUSIC) ? (basePitch/100.f)*game::gamespeed : 1.f); // managing variations of pitches
     alSourcei(source, AL_LOOPING, (flags & SND_LOOPED) ? AL_TRUE : AL_FALSE); // loop the sound or not
 
     if(!soundPos)

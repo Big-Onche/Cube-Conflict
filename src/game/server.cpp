@@ -2266,7 +2266,6 @@ namespace server
             }
         }
 
-
         if(gamemillis >= gamelimit && !interm && (force || !checkovertime()))
         {
             sendf(-1, 1, "ri2", N_TIMEUP, 0);

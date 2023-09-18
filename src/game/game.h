@@ -917,7 +917,7 @@ namespace game
     extern char *getdisguisement(int seed);
 
     // game
-    extern int gamemode, cncurweapon, canmove;
+    extern int gamemode, cncurweapon, canmove, gamespeed;
 
     struct clientmode
     {
