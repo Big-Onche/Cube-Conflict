@@ -1716,7 +1716,7 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
             pl->vel.z = max(pl->vel.z, JUMPVEL);
         }
     }
-    else if(((pl->physstate >= PHYS_FALL || lastmillis-pl->lastjump < 280) || water) && pl->jumps<maxjumps)
+    else if(((pl->physstate >= PHYS_FALL || lastmillis-pl->lastjump < 280) || water) && pl->jumps < (pl->inwater ? INT_MAX : maxjumps))
     {
         if(water && !pl->inwater && aptitude!=APT_NINJA) pl->vel.div(8);
         if(pl->jumping)
