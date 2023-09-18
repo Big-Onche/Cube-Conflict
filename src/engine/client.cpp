@@ -91,7 +91,7 @@ void connectserv(const char *servername, int serverport, const char *serverpassw
     ENetAddress address;
     address.port = serverport;
 
-    const char* domains[] = {"s1.cube-conflict.com", "s2.cube-conflict.com"};
+    const char* domains[] = {"s1.cube-conflict.com", "s2.cube-conflict.com", "s3.cube-conflict.com"};
 
     if(servername)
     {
