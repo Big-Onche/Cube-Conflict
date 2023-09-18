@@ -1495,7 +1495,7 @@ static void makeparticles(entity &e)
                     possky.add(vec(posx+(-200+(rnd(400))), posy+(-200+(rnd(400))), 800));
                     posground.add(vec(posx, posy, -50));
                     particle_flare(possky, posground, 1000, PART_LIGHTNING, 0xFF6622, 15.f+rnd(10), NULL, gfx::champicolor());
-                    playSound(S_ECLAIRPROCHE, &posground, 500, 50);
+                    playSound(S_ECLAIRPROCHE, &posground, 500, 50, SND_NOOCCLUSION);
 
                     vec posA = possky;
                     vec posB = camera1->o;

@@ -382,7 +382,9 @@ void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRa
         alSourcef(source, AL_ROLLOFF_FACTOR, 1.0f); // For linear decrease over the distance
     }
 
-    if(!noEfx && !(flags & SND_MUSIC) && !(flags & SND_NOTIFICATION)) // apply efx if available
+    bool noSoundFx = (flags & SND_MUSIC) || (flags & SND_NOTIFICATION);
+
+    if(!noEfx && !noSoundFx) // apply efx if available
     {
         bool occluded = applyUnderwaterFilter(flags) ? true : (!(flags & SND_NOOCCLUSION) && checkSoundOcclusion(soundPos));
 
