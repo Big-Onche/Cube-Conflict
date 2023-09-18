@@ -172,11 +172,11 @@ namespace gfx
                 return;
 
             case ATK_NUKE_SHOOT:
-                loopi(50)
+                loopi(60)
                 {
                     vec pos = v;
 
-                    float radius = 6.f * i;
+                    float radius = 7.f * i;
                     float theta = static_cast<float>(rnd(1000)) / 1000.0f * M_PI;
                     float phi = static_cast<float>(rnd(1000)) / 1000.0f * 2.0f * M_PI;
                     float r = static_cast<float>(rnd(1000)) / 1000.0f * radius;
@@ -191,8 +191,8 @@ namespace gfx
                     particle_splash(PART_SMOKE, 1, 2000,  pos, 0x212121, 150.0f,  700,  70, 1, champicolor());
                     particle_splash(PART_SMOKE, 1, 15000, pos, 0x222222, 200.0f,  150, 300, 1, champicolor());
                     particle_splash(PART_SMOKE, 2, 5000,  pos, 0x333333, 250.0f, 1000, 500, 1, champicolor());
-                    particle_splash(PART_FIRE_BALL, 4, 750+(i*30), pos, hasroids(owner) ? 0xFF0000 : i<16 ? 0xFFFF00 : i<32 ? 0x224400 : 0xFFAA22, 30+rnd(30), 400, 200, 2.5f, champicolor());
-                    if(i>25) particle_fireball(pos, 150, PART_EXPLOSION, 1500, hasroids(owner) ? 0xFF0000 : i<37 ? 0xFFFF00 : i<43 ? 0x224400 : 0xFFAA22, 10+rnd(15), champicolor());
+                    particle_splash(PART_FIRE_BALL, 7, 1000+rnd(300), pos, hasroids(owner) ? 0xFF0000 : i<16 ? 0xFFFF00 : i<32 ? 0x224400 : 0xFFAA22, 20+rnd(15), 400, 200, 3.f, champicolor());
+                    if(i>30) particle_fireball(pos, 50+rnd(150), PART_EXPLOSION, 750, hasroids(owner) ? 0xFF0000 : i<37 ? 0xFFFF00 : i<43 ? 0x224400 : 0xFFAA22, 10+rnd(15), champicolor());
                 }
 
                 if(!epilepsyfriendly)
