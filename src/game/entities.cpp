@@ -398,7 +398,7 @@ namespace entities
 
     void spawnitems(bool force)
     {
-        loopv(ents) if(validitem(ents[i]->type))
+        loopv(ents) if(canspawnitem(ents[i]->type))
         {
             ents[i]->setspawned(force || !server::delayspawn(ents[i]->type));
         }

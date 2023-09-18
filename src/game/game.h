@@ -1108,6 +1108,7 @@ namespace server
     extern bool canspawnitem(int type);
     extern bool pickup(int i, int sender);
     extern bool noInfiniteAmmo(int atk);
+    extern int gamemillis;
 }
 
 extern char *rndname();
