@@ -2393,7 +2393,6 @@ namespace server
 
     void suicide(clientinfo *ci)
     {
-        if(game::premission) return;
         servstate &gs = ci->state;
         if(gs.state!=CS_ALIVE) return;
         int fragvalue = smode ? smode->fragvalue(ci, ci) : -1;
