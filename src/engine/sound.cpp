@@ -382,17 +382,17 @@ void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRa
         alSourcef(source, AL_ROLLOFF_FACTOR, 1.0f); // For linear decrease over the distance
     }
 
-    bool noSoundFx = (flags & SND_MUSIC) || (flags & SND_NOTIFICATION);
-
-    if(!noEfx && !noSoundFx) // apply efx if available
+    if((flags & SND_MUSIC) || (flags & SND_NOTIFICATION))
+    {
+        alSource3i(source, AL_AUXILIARY_SEND_FILTER, auxEffectReverb, 0, AL_FILTER_NULL);
+        alSourcei(source, AL_DIRECT_FILTER, AL_FILTER_NULL);
+    }
+    else if(!noEfx) // apply efx if available
     {
         bool occluded = applyUnderwaterFilter(flags) ? true : (!(flags & SND_NOOCCLUSION) && checkSoundOcclusion(soundPos));
 
         alSource3i(source, AL_AUXILIARY_SEND_FILTER, auxEffectReverb, 0, occluded ? occlusionFilter : AL_FILTER_NULL);
-        reportSoundError("alSource3i-auxEffectReverb+occlusionFilter", s.soundPath, s.bufferId[altIndex]);
-
         alSourcei(source, AL_DIRECT_FILTER, occluded ? occlusionFilter : AL_FILTER_NULL);
-        reportSoundError("alSourcei-occlusionFilter", s.soundPath, s.bufferId[altIndex]);
     }
 
     alSourcePlay(source);
