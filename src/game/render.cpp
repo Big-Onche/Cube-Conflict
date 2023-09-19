@@ -236,6 +236,7 @@ namespace game
 
         preloadmodel("smileys/armureassistee"); //Preloading powered armor playermodel
         preloadmodel("smileys/armureassistee/red");
+        preloadmodel("objets/piecerobotique");
         preloadmodel("boosts/epo"); //Preloading boosts models
         preloadmodel("boosts/joint");
         preloadmodel("boosts/steros");
