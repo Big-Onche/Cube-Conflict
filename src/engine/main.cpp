@@ -1342,7 +1342,7 @@ int main(int argc, char **argv)
     execfile("config/keymap.cfg");
 
     execfile(game::autoexec(), false);
-    execfile("config/ui/main.cfg");
+    execfile("config/ui/ui.cfg");
 
     renderbackground(GAME_LANG ? "Loading..." : "Chargement...");
 
