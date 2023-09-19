@@ -1057,6 +1057,11 @@ namespace game
 
     bool looped;
 
+    bool noMuzzle(int atk)
+    {
+        return atk==ATK_CAC349_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACMARTEAU_SHOOT || atk==ATK_CACMASTER_SHOOT || atk==ATK_CACNINJA_SHOOT;
+    }
+
     void shoteffects(int atk, const vec &from, const vec &to, gameent *d, bool local, int id, int prevaction)     // create visual effect from a shot
     {
         if(d==player1) updateStat(1, STAT_MUNSHOOTED);
@@ -1275,7 +1280,8 @@ namespace game
                     playSound(sound, d==hudplayer() ? NULL : &d->muzzle, 400, 150, SND_LOOPED|SND_FIXEDPITCH|SND_NOCULL, d->entityId, PL_ATTACK_SND);
                     d->attacksound = true;
                 }
-                playSound(attacks[atk].sound, d==hudplayer() ? NULL : &d->muzzle, incraseDist ? 600 : 400, incraseDist ? 200 : 150);
+                vec soundOrigin = noMuzzle(atk) ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle;
+                playSound(attacks[atk].sound, d==hudplayer() ? NULL : &soundOrigin, incraseDist ? 600 : 400, incraseDist ? 200 : 150);
         }
 
         if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 300)
