@@ -705,8 +705,8 @@ namespace entities
 
             "electricrifle", "plasmarifle", "smaw", "minigun", "spockgun", "m32",
             "flamethrower", "uzi", "famas", "mossberg500", "hydra", "sv98",
-            "sks", "crossbow", "ak47", "grap1", "fireworks", "glock",
-            "Superweapon", "none?", "none?", "none?",
+            "sks", "crossbow", "ak47", "gapb1", "fireworks", "glock",
+            "superweapon", "none?", "none?", "none?",
 
             "health", "healthboost", "roids", "shrooms", "epo", "joint",
             "woodshield", "ironshield", "goldshield", "magnetshield", "powerarmor",
