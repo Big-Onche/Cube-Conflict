@@ -933,7 +933,7 @@ ICOMMAND(entadd, "", (),
 
 ICOMMAND(enttoggle, "", (),
 {
-    if(enthover < 0 || noentedit() || !enttoggle(enthover)) { entmoving = 0; intret(0); }
+    if(enthover < 0 || noentedit() || !enttoggle(enthover)) { entmoving = 0; intret(0);}
     else { if(entmoving > 1) entmoving = 1; intret(1); }
 });
 
@@ -1073,7 +1073,7 @@ VARP(entcamdir, 0, 1, 1);
 
 static int keepents = 0;
 
-extentity *newentity(bool local, const vec &o, int type, int v1, int v2, int v3, int v4, int v5, int &idx, bool fix = true)
+extentity *newentity(bool local, const vec &o, int type, int v1, int v2, int v3, int v4, int v5, int v6, int v7, int v8, int v9, int &idx, bool fix = true)
 {
     vector<extentity *> &ents = entities::getents();
     if(local)
@@ -1090,6 +1090,10 @@ extentity *newentity(bool local, const vec &o, int type, int v1, int v2, int v3,
     e.attr3 = v3;
     e.attr4 = v4;
     e.attr5 = v5;
+    e.attr6 = v6;
+    e.attr7 = v7;
+    e.attr8 = v8;
+    e.attr9 = v9;
     e.type = type;
     e.reserved = 0;
     if(local && fix)
@@ -1122,10 +1126,10 @@ extentity *newentity(bool local, const vec &o, int type, int v1, int v2, int v3,
     return &e;
 }
 
-void newentity(int type, int a1, int a2, int a3, int a4, int a5, bool fix = true)
+void newentity(int type, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, bool fix = true)
 {
     int idx;
-    extentity *t = newentity(true, player->o, type, a1, a2, a3, a4, a5, idx, fix);
+    extentity *t = newentity(true, player->o, type, a1, a2, a3, a4, a5, a6, a7, a8, a9, idx, fix);
     if(!t) return;
     dropentity(*t);
     t->type = ET_EMPTY;
@@ -1140,7 +1144,7 @@ void createdrop(const vec *o, int type)
     int idx;
     vec droppos = *o;
     droppos.add(vec(-18+rnd(36), 0, 0));
-    extentity *t = newentity(true, droppos, type, 0, 0, 0, 0, 0, idx);
+    extentity *t = newentity(true, droppos, type, 0, 0, 0, 0, 0, 0, 0, 0, 0, idx);
     if(!t) return;
     dropentity(*t, 1);
     t->type = ET_EMPTY;
@@ -1149,12 +1153,12 @@ void createdrop(const vec *o, int type)
     commitchanges();
 }
 
-void newent(char *what, int *a1, int *a2, int *a3, int *a4, int *a5)
+void newent(char *what, int *a1, int *a2, int *a3, int *a4, int *a5, int *a6, int *a7, int *a8, int *a9)
 {
     if(noentedit()) return;
     int type = findtype(what);
     if(type != ET_EMPTY)
-        newentity(type, *a1, *a2, *a3, *a4, *a5);
+        newentity(type, *a1, *a2, *a3, *a4, *a5, *a6, *a7, *a8, *a9);
 }
 
 int entcopygrid;
@@ -1180,7 +1184,7 @@ void entpaste()
         const entity &c = entcopybuf[i];
         vec o = vec(c.o).mul(m).add(vec(sel.o));
         int idx;
-        extentity *e = newentity(true, o, ET_EMPTY, c.attr1, c.attr2, c.attr3, c.attr4, c.attr5, idx);
+        extentity *e = newentity(true, o, ET_EMPTY, c.attr1, c.attr2, c.attr3, c.attr4, c.attr5, c.attr6, c.attr7, c.attr8, c.attr9, idx);
         if(!e) continue;
         entadd(idx);
         keepents = max(keepents, idx+1);
@@ -1203,22 +1207,26 @@ void entreplace()
             e.attr3 = c.attr3;
             e.attr4 = c.attr4;
             e.attr5 = c.attr5;
+            e.attr6 = c.attr6;
+            e.attr7 = c.attr7;
+            e.attr8 = c.attr8;
+            e.attr9 = c.attr9;
         });
     }
     else
     {
-        newentity(c.type, c.attr1, c.attr2, c.attr3, c.attr4, c.attr5, false);
+        newentity(c.type, c.attr1, c.attr2, c.attr3, c.attr4, c.attr5, c.attr6, c.attr7, c.attr8, c.attr9, false);
     }
 }
 
-COMMAND(newent, "siiiii");
+COMMAND(newent, "siiiiiiiii");
 COMMAND(delent, "");
 COMMAND(dropent, "");
 COMMAND(entcopy, "");
 COMMAND(entpaste, "");
 COMMAND(entreplace, "");
 
-void entset(char *what, int *a1, int *a2, int *a3, int *a4, int *a5)
+void entset(char *what, int *a1, int *a2, int *a3, int *a4, int *a5, int *a6, int *a7, int *a8, int *a9)
 {
     if(noentedit()) return;
     int type = findtype(what);
@@ -1228,7 +1236,11 @@ void entset(char *what, int *a1, int *a2, int *a3, int *a4, int *a5)
                   e.attr2=*a2;
                   e.attr3=*a3;
                   e.attr4=*a4;
-                  e.attr5=*a5);
+                  e.attr5=*a5;
+                  e.attr6=*a6;
+                  e.attr7=*a7;
+                  e.attr8=*a8;
+                  e.attr9=*a9);
 }
 
 
@@ -1241,7 +1253,7 @@ void mmswap(int m1, int m2) // mapmodels swapping
         const extentity &e = *ents[i];
         if(e.type==ET_MAPMODEL)
         {
-            if(e.attr1==m1) { mpeditent(i, e.o, ET_MAPMODEL, m2, e.attr2, e.attr3, e.attr4, e.attr5, true); numswaps++; }
+            if(e.attr1==m1) { mpeditent(i, e.o, ET_MAPMODEL, m2, e.attr2, e.attr3, e.attr4, e.attr5, e.attr6, e.attr7, e.attr8, e.attr9, true); numswaps++; }
         }
     }
     conoutf("swapped %d models (%d - %d)", numswaps, m1, m2);
@@ -1257,13 +1269,12 @@ void mmpush(int from, int to) // mapmodels ID pushing
         const extentity &e = *ents[i];
         if(e.type==ET_MAPMODEL)
         {
-            if(e.attr1>=from) { mpeditent(i, e.o, ET_MAPMODEL, e.attr1+to, e.attr2, e.attr3, e.attr4, e.attr5, true); numpush++; }
+            if(e.attr1>=from) { mpeditent(i, e.o, ET_MAPMODEL, e.attr1+to, e.attr2, e.attr3, e.attr4, e.attr5, e.attr6, e.attr7, e.attr8, e.attr9, true); numpush++; }
         }
     }
     conoutf("pushed %d models (from %d to %d)", numpush, from, to);
 }
 ICOMMAND(mmpush, "ii", (int *from, int *to), mmpush(*from, *to));
-
 
 void printent(extentity &e, char *buf, int len)
 {
@@ -1277,7 +1288,7 @@ void printent(extentity &e, char *buf, int len)
             if(e.type >= ET_GAMESPECIFIC && entities::printent(e, buf, len)) return;
             break;
     }
-    nformatstring(buf, len, "%s %d %d %d %d %d", entities::entname(e.type), e.attr1, e.attr2, e.attr3, e.attr4, e.attr5);
+    nformatstring(buf, len, "%s %d %d %d %d %d %d %d %d %d", entities::entname(e.type), e.attr1, e.attr2, e.attr3, e.attr4, e.attr5, e.attr6, e.attr7, e.attr8, e.attr9);
 }
 
 void nearestent()
@@ -1326,7 +1337,7 @@ void entattr(int *attr, int *val, int *numargs)
 {
     if(*numargs >= 2)
     {
-        if(*attr >= 0 && *attr <= 4)
+        if(*attr >= 0 && *attr <= 6)
             groupedit(
                 switch(*attr)
                 {
@@ -1335,6 +1346,10 @@ void entattr(int *attr, int *val, int *numargs)
                     case 2: e.attr3 = *val; break;
                     case 3: e.attr4 = *val; break;
                     case 4: e.attr5 = *val; break;
+                    case 5: e.attr6 = *val; break;
+                    case 6: e.attr7 = *val; break;
+                    case 7: e.attr8 = *val; break;
+                    case 8: e.attr9 = *val; break;
                 }
             );
     }
@@ -1347,6 +1362,10 @@ void entattr(int *attr, int *val, int *numargs)
             case 2: intret(e.attr3); break;
             case 3: intret(e.attr4); break;
             case 4: intret(e.attr5); break;
+            case 5: intret(e.attr6); break;
+            case 6: intret(e.attr7); break;
+            case 7: intret(e.attr8); break;
+            case 8: intret(e.attr9); break;
         }
     });
 }
@@ -1592,13 +1611,13 @@ void mapname()
 
 COMMAND(mapname, "");
 
-void mpeditent(int i, const vec &o, int type, int attr1, int attr2, int attr3, int attr4, int attr5, bool local)
+void mpeditent(int i, const vec &o, int type, int attr1, int attr2, int attr3, int attr4, int attr5, int attr6, int attr7, int attr8, int attr9, bool local)
 {
     if(i < 0 || i >= MAXENTS) return;
     vector<extentity *> &ents = entities::getents();
     if(ents.length()<=i)
     {
-        extentity *e = newentity(local, o, type, attr1, attr2, attr3, attr4, attr5, i);
+        extentity *e = newentity(local, o, type, attr1, attr2, attr3, attr4, attr5, attr6, attr7, attr8, attr9, i);
         if(!e) return;
         addentityedit(i);
         attachentity(*e);
@@ -1611,7 +1630,7 @@ void mpeditent(int i, const vec &o, int type, int attr1, int attr2, int attr3, i
         if(oldtype!=type) detachentity(e);
         e.type = type;
         e.o = o;
-        e.attr1 = attr1; e.attr2 = attr2; e.attr3 = attr3; e.attr4 = attr4; e.attr5 = attr5;
+        e.attr1 = attr1; e.attr2 = attr2; e.attr3 = attr3; e.attr4 = attr4; e.attr5 = attr5; e.attr6 = attr6; e.attr7 = attr7; e.attr8 = attr8; e.attr9 = attr9;
         addentityedit(i);
         if(oldtype!=type) attachentity(e);
     }

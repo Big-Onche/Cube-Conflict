@@ -2044,9 +2044,9 @@ namespace game
                 int i = getint(p);
                 float x = getint(p)/DMF, y = getint(p)/DMF, z = getint(p)/DMF;
                 int type = getint(p);
-                int attr1 = getint(p), attr2 = getint(p), attr3 = getint(p), attr4 = getint(p), attr5 = getint(p);
+                int attr1 = getint(p), attr2 = getint(p), attr3 = getint(p), attr4 = getint(p), attr5 = getint(p), attr6 = getint(p), attr7 = getint(p), attr8 = getint(p), attr9 = getint(p);
 
-                mpeditent(i, vec(x, y, z), type, attr1, attr2, attr3, attr4, attr5, false);
+                mpeditent(i, vec(x, y, z), type, attr1, attr2, attr3, attr4, attr5, attr6, attr7, attr8, attr9, false);
                 break;
             }
             case N_EDITVAR:
