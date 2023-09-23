@@ -589,6 +589,13 @@ void loadvslots(stream *f, int numvslots)
 bool save_world(const char *mname, bool nolms)
 {
     if(!*mname) mname = game::getclientmap();
+
+    if(!strcasecmp(mname, "base"))
+    {
+        conoutf(CON_WARN, "could not save map as %s", mname);
+        return false;
+    }
+
     setmapfilenames(*mname ? mname : "untitled");
     if(savebak) backup(ogzname, bakname);
     stream *f = opengzfile(ogzname, "wb");
