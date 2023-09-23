@@ -779,7 +779,7 @@ namespace game
             case ATK_M32_SHOOT:
                 playSound(S_EXPL_GRENADE, &v, 400, 150);
                 if(lookupmaterial(v)==MAT_WATER) playSound(S_EXPL_INWATER, &v, 300, 100);
-                if(camera1->o.dist(v) >= 300) playSound(S_EXPL_FAR, &soundloc, 2000, 400, SND_LOWPRIORITY);
+                if(camera1->o.dist(v) >= 300) playSound(S_EXPL_FAR, &v, 2000, 400, SND_LOWPRIORITY);
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
                 gfx::projexplosion(owner, v, vel, safe, atk);
                 startshake(v, 150, atk);
