@@ -18,6 +18,8 @@ enum
 
 VARN(numargs, _numargs, MAXARGS, 0, 0);
 
+ICOMMAND(rand, "i", (int *i), intret(rnd(clamp(*i, 1, INT_MAX))));
+
 static inline void freearg(tagval &v)
 {
     switch(v.type)
