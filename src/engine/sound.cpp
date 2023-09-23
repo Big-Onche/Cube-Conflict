@@ -533,6 +533,7 @@ void stopAllMapSounds()
         stopMapSound(&e);
     }
 }
+ICOMMAND(stopmapsounds, "", (), stopAllMapSounds());
 
 void checkMapSounds()
 {
