@@ -1452,4 +1452,7 @@ struct ipmask
     bool check(enet_uint32 host) const { return (host & mask) == ip; }
 };
 
+extern int rygbGradient(int val);
+extern int rgbToHex(int r, int g, int b);
+
 #endif

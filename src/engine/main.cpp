@@ -165,6 +165,11 @@ int parallaxX, parallaxY;
 string backgroundimg = "media/interface/background.png", backgroundname;
 bool islaunching = true;
 
+string mapselimg = "village";
+ICOMMAND(getcurmapsel, "s", (char *s),
+    formatstring(mapselimg, "%s", s);
+);
+
 void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, const char *mapname, const char *mapinfo, const char *astuce, bool force = false)
 {
     static int lastupdate = -1, lastw = -1, lasth = -1;
@@ -244,9 +249,7 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
             float ilh = 1.1f*min(w, h), ilw = ilh*1.8f,
                   ilx = 0.5f*(w - ilw), ily = 0.5f*(h - ilh);
 
-            formatstring(backgroundimg, "media/map/%s.png", mapname);
-
-            settexture(backgroundimg);
+            settexture(tempformatstring("media/map/%s.png", mapselimg));
             bgquad(ilx-parallaxX/-40, ily-parallaxY/-40, ilw, ilh);
         }
     }
@@ -1294,12 +1297,6 @@ int main(int argc, char **argv)
     textureload("media/interface/hud/fullscreen/vampire.png");
     textureload("media/interface/hud/fullscreen/rage.png");
     textureload("media/interface/hud/fullscreen/shrooms.png");
-    textureload("media/map/0.png");
-    textureload("media/map/1.png");
-    textureload("media/map/2.png");
-    textureload("media/map/3.png");
-    textureload("media/map/4.png");
-    textureload("media/map/5.png");
 
     logoutf("init: console");
     if(!execfile("config/stdlib.cfg", false)) fatal("cannot find data files (you are running from the wrong folder, try .bat file in the main folder)");   // this is the first file we load.
@@ -1343,8 +1340,6 @@ int main(int argc, char **argv)
 
     execfile(game::autoexec(), false);
     execfile("config/ui/ui.cfg");
-
-    renderbackground(GAME_LANG ? "Loading..." : "Chargement...");
 
     identflags &= ~IDF_PERSIST;
 
@@ -1446,3 +1441,7 @@ int main(int argc, char **argv)
     } __except(stackdumper(0, GetExceptionInformation()), EXCEPTION_CONTINUE_SEARCH) { return 0; }
     #endif
 }
+
+ICOMMAND(loadbackgroundmaptex, "s", (char *s),
+    textureload(tempformatstring("media/map/%s.png", s));
+);

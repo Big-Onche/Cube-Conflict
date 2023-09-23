@@ -263,3 +263,21 @@ int ipmask::print(char *buf) const
     return int(buf-start);
 }
 
+int rygbGradient(int val)
+{
+    double t = min(1.0f, max(0.0f, val / 150.0f));
+    int r = (int)round(255 * (1 - t));
+    int g = (int)round(255 * t);
+    int b = 0;
+    if (t > 0.5f)
+    {
+        r = 0;
+        g = (int)round(255 * (1 - (t - 0.5f) / 0.5f));
+        b = (int)round(255 * (t - 0.5f) / 0.5f);
+    }
+    else g *= 1.5f;
+
+    return (r << 16) | (g << 8) | b;
+}
+
+int rgbToHex(int r, int g, int b) { return (r << 16) | (g << 8) | b; }

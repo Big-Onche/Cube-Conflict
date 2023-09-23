@@ -474,24 +474,6 @@ namespace game
         renderplayer(d, getplayermodelinfo(d), getplayercolor(d, team), team, fade, flags);
     }
 
-    int genrygbcolorgradient(int val)
-    {
-        double t = min(1.0f, max(0.0f, val / 150.0f));
-        int r = (int)round(255 * (1 - t));
-        int g = (int)round(255 * t);
-        int b = 0;
-        if (t > 0.5f)
-        {
-            r = 0;
-            g = (int)round(255 * (1 - (t - 0.5f) / 0.5f));
-            b = (int)round(255 * (t - 0.5f) / 0.5f);
-        }
-        else {
-            g *= 1.5f;
-        }
-        return (r << 16) | (g << 8) | b;
-    }
-
     bool drawManaStat(gameent *d)
     {
         return d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_PRETRE || d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION;
@@ -538,7 +520,7 @@ namespace game
             if(player1->state==CS_SPECTATOR && showspecplayerinfo)
             {
                 particle_textcopy(d->abovehead(), tempformatstring("%s", d->name), PART_TEXT, 1, d->state==CS_ALIVE ? (d->team==1 ? 0xFFFF00 : 0xFF0000) : 0x595959, gfx::zoom ? 0.045f*(guns[player1->gunselect].maxzoomfov)/100.f : 0.045f, 0, true);
-                if(d->state==CS_ALIVE) particle_meter(d->abovehead(), d->health/1000.0f, PART_METER, 1, genrygbcolorgradient(d->health/10), 0x000000, 0.05f, true);
+                if(d->state==CS_ALIVE) particle_meter(d->abovehead(), d->health/1000.0f, PART_METER, 1, rygbGradient(d->health/10), 0x000000, 0.05f, true);
             }
 
             if(d->state==CS_ALIVE)
@@ -557,7 +539,7 @@ namespace game
 
                         if(hudplayer()->aptitude==APT_MEDECIN)
                         {
-                            if(distance <= 250) particle_meter(d->abovehead(), d->health/1000.0f, PART_METER, 1, genrygbcolorgradient(d->health/10), 0x000000, metersize, true);
+                            if(distance <= 250) particle_meter(d->abovehead(), d->health/1000.0f, PART_METER, 1, rygbGradient(d->health/10), 0x000000, metersize, true);
                             if(d->health < 750)
                             {
                                 int blinkSpeed = 1001 - (750 - d->health)/2;
