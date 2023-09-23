@@ -28,7 +28,6 @@ namespace gfx
     int weapposside, weapposup, nbfps = 60;
     int zoomfov = 50;
 
-    float champifov = 0;
     bool champicolor() { return isconnected() && game::hudplayer()->boostmillis[B_SHROOMS]; } //checks if player 1 or observed player is on shrooms.
     bool hasroids(gameent *owner) { return owner->boostmillis[B_ROIDS]; }
 
@@ -331,7 +330,6 @@ namespace gfx
             case 3: addpostfx("tritanopia", 1, 1, 1, 1, vec4(1, 1, 1, 1)); break;
             case 4: addpostfx("achromatopsia", 1, 1, 1, 1, vec4(1, 1, 1, 1));
         }
-        champifov = 0;
         fullbrightmodels = 0;
         setShroomsEfx(false);
     }

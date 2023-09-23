@@ -28,7 +28,6 @@ namespace gfx
     extern char *getshielddir(int armourtype, int armourval, bool hud = false, bool preload = false);
 
     extern int zoomfov, zoom, crosshairsize, weapposside, weapposup, forcecampos;
-    extern float champifov;
 
     extern int nbfps;
 }
