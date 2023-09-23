@@ -207,7 +207,9 @@ struct partrenderer
         o = p->o;
         d = p->d;
         if(type&PT_TRACK && p->owner) game::particletrack(p->owner, o, d);
-        if(p->fade <= 5)
+        if(p->size<=0) blend = 0;
+
+        else if(p->fade <= 5)
         {
             ts = 1;
             blend = 255;
@@ -216,8 +218,7 @@ struct partrenderer
         {
             if(p->sizemod && !game::ispaused() && p->sizemod > -25 && p->sizemod < 25)
             {
-                float mod = p->sizemod;
-                p->size += mod/gfx::nbfps;
+                p->size += (((float)p->sizemod/gfx::nbfps)/100.f)*game::gamespeed;
             }
 
             ts = lastmillis-p->millis;
@@ -899,10 +900,10 @@ static partrenderer *parts[] =
     // weather
     new quadrenderer("media/particles/weather/snow.png", PT_PART|PT_FLIP|PT_RND4|PT_COLLIDE, STAIN_SNOW),                    // PART_SNOW
     new trailrenderer("media/particles/weather/rain.png", PT_PART|PT_COLLIDE, STAIN_RAIN),                                   // PART_RAIN
-    new trailrenderer("media/particles/weather/cloud_1.png", PT_TRAIL|PT_NOMAXDIST),                                         // PART_CLOUD1
-    new trailrenderer("media/particles/weather/cloud_2.png", PT_TRAIL|PT_NOMAXDIST),                                         // PART_CLOUD2
-    new trailrenderer("media/particles/weather/cloud_3.png", PT_TRAIL|PT_NOMAXDIST),                                         // PART_CLOUD3
-    new trailrenderer("media/particles/weather/cloud_4.png", PT_TRAIL|PT_NOMAXDIST),                                         // PART_CLOUD4
+    new quadrenderer("media/particles/weather/cloud_1.png", PT_PART|PT_NOMAXDIST),                                           // PART_CLOUD1
+    new quadrenderer("media/particles/weather/cloud_2.png", PT_PART|PT_NOMAXDIST),                                           // PART_CLOUD2
+    new quadrenderer("media/particles/weather/cloud_3.png", PT_PART|PT_NOMAXDIST),                                           // PART_CLOUD3
+    new quadrenderer("media/particles/weather/cloud_4.png", PT_PART|PT_NOMAXDIST),                                           // PART_CLOUD4
     new trailrenderer("media/particles/weather/rainbow.png", PT_TRAIL),                                                      // PART_RAINBOW
     &lightnings,                                                                                                             // PART_LIGHTNING
     // game specific
@@ -1349,7 +1350,7 @@ void regular_particle_flame(int type, const vec &p, float radius, float height, 
     regularflame(type, p, radius, height, color, density, scale, speed, fade, gravity);
 }
 
-void regularflame(int type, const vec &p, float radius, float height, int color, int density, float scale, float speed, float fade, int gravity)
+void regularflame(int type, const vec &p, float radius, float height, int color, int density, float scale, float speed, float fade, int gravity, int sizemod)
 {
     if(!canemitparticles()) return;
 
@@ -1360,7 +1361,7 @@ void regularflame(int type, const vec &p, float radius, float height, int color,
         vec s = p;
         s.x += rndscale(radius*2.0f)-radius;
         s.y += rndscale(radius*2.0f)-radius;
-        newparticle(s, v, rnd(max(int(fade*height), 1))+1, type, color, size, gravity, -3.f);
+        newparticle(s, v, rnd(max(int(fade*height), 1))+1, type, color, size, gravity, sizemod);
     }
 }
 
@@ -1370,27 +1371,133 @@ void regularflare(const vec &p, int color, int flaresize, int viewdist)
     flares.addflare(pos, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, flaresize, viewdist, false, true);
 }
 
+int applyRandomOffset(int base, int offset)
+{
+    return clamp(base + rnd(2 * offset + 1) - offset, 0, 255);
+}
+
+bool defaultColors(int r, int g, int b)
+{
+    return !r && !g && !b;
+}
+
+int smokeGs() {return 17 + rnd(37);} // setting random smoke grayscale
+
+void popLightning(vec pos, vec flashColor, int lightColor)
+{
+        vec possky = pos, posground = pos;
+        int posx = -1250+rnd(2500), posy = -1250+rnd(2500);
+        possky.add(vec(posx+(-200+(rnd(400))), posy+(-200+(rnd(400))), 800));
+        posground.add(vec(posx, posy, -50));
+        loopi(2)particle_flare(possky, posground, 750, PART_LIGHTNING, lightColor, 15.f+rnd(10), NULL, gfx::champicolor());
+
+        playSound(S_ECLAIRPROCHE, &posground, 400, 100);
+
+        vec posA = possky;
+        vec posB = camera1->o;
+        vec flashloc = (posA.add((posB.mul(vec(3, 3, 3))))).div(vec(4, 4, 4));
+
+        if(camera1->o.dist(posground) >= 250) playSound(S_ECLAIRLOIN, &flashloc, 1500, 300);
+        adddynlight(flashloc, 4000, flashColor, 200, 40, L_NOSHADOW, 2000, flashColor);
+}
+
+enum {RAIN_LIGHT = 1, RAIN_MODERATE, RAIN_STORM, NUMRAINS};
+void spawnRain(vec pos, int rainType, int intensity, int r, int g, int b, int wind, bool force)
+{
+    if(!force) // default map atmospheres
+    {
+        if(map_atmo==8) rainType = RAIN_LIGHT;
+        else if(map_atmo==4) rainType = RAIN_MODERATE;
+    }
+    else if (rainType > NUMRAINS) return; // if force rain, don't go after max rains
+
+    if(defaultColors(r, g, b)) { r = 85; g = 85;  b = 102; } // setting default colors for generic rain
+    if(!intensity) intensity = 600*(rainType*2);
+    if(!wind) wind = 400*(rainType);
+    int vel = - 900 - (500 * rainType);
+
+    regularshape(PART_RAIN, 4000, rgbToHex(r, g, b), 44, intensity, 10000, pos, 5+(rnd(3)), 200, vel, wind, true, 200);
+
+    bool canPopLightning = rainType > RAIN_LIGHT && (map_atmo == 4 || force) && randomevent((50/rainType)*gfx::nbfps);
+    if(canPopLightning) popLightning(pos, vec(1.5f, 1.5f, 2.0f), 0x8888FF);
+}
+
+void spawnSnow(vec pos, int intensity, int r, int g, int b, int wind, bool force)
+{
+    if(defaultColors(r, g, b)) { r = 255; g = 255;  b = 255; } // setting default colors for generic snow
+    if(!intensity) intensity = (map_atmo==8 && !force ? 300 : 600);
+    if(!wind) wind = 1200;
+
+    regularshape(PART_SNOW, 4000, rgbToHex(r, g, b), 44, intensity, 10000, pos, 2+(rnd(3)), 200, -400, wind, true, 200);
+}
+
+void spawnApocalypse(vec pos, int intensity, int r, int g, int b, int wind)
+{
+    bool volcano = !strcasecmp(maptitle_en, "Volcano");
+
+    if(defaultColors(r, g, b)) { r = 255; g = 150;  b = 0; } // setting default colors for "generic" apocalypse
+    if(!intensity) intensity = 300;
+
+    if(!wind) wind = 2000;
+    regularshape(PART_FIRESPARK, 4000, rgbToHex(r, g, b), 44, intensity, 10000, pos, 2+(rnd(3)), 200, -400, wind, true, 300);
+
+    if(randomevent(6*gfx::nbfps) && !volcano) popLightning(pos, vec(1.5f, 0.5f, 0.0f), 0xFF6622);
+}
+
 static void makeparticles(entity &e)
 {
     if(!isconnected()) return;
     switch(e.attr1)
     {
-        case 0: //fire and smoke -  <radius> <height> <rgb> - 0 values default to compat for old maps
+        case 0: // weather effect: attr 2:<weather type (0 = default else = force weather)> 3:<intensity> 4:<r> 5:<g> 6:<b> 7:<wind>
+            if((map_atmo==4 || map_atmo==8) || (e.attr2 >=1 && e.attr2 <=3)) spawnRain(e.o, e.attr2, e.attr3, e.attr4, e.attr5, e.attr6, e.attr7, e.attr2!=0); // light rain, moderate rain, storm
+            if(map_atmo==8 || map_atmo==9 || e.attr2==4) spawnSnow(e.o, e.attr3, e.attr4, e.attr5, e.attr6, e.attr7, e.attr2!=0); // snow
+            if(map_atmo==5 || e.attr2==5) spawnApocalypse(e.o, e.attr3, e.attr4, e.attr5, e.attr6, e.attr7); // apocalypse
+            if(editmode) particle_textcopy(e.o, GAME_LANG ? "\feWeather" : "feMétéo", PART_TEXT, 1, 0xFFFFFF, 3.0f);
+            break;
+
+        case 1: // fire and smoke: attr 2:<radius> 3:<height> 4:<r> 5:<g> 6:<b> 7:<color offset> 8:<grow(+)/shrink(-)> 9:<sparks(amount)>
+        case 2: // flames only: same attrs as fire and smoke
         {
             float radius = e.attr2 ? float(e.attr2)/100.0f : 1.5f,
                   height = e.attr3 ? float(e.attr3)/100.0f : radius/3;
-            int rndflamecolor, rndsmokecolor;
-            switch(rnd(3))
-            {
-                case 1: rndflamecolor = 0x444422; rndsmokecolor = 0x222222; break;
-                case 2: rndflamecolor = 0x363636; rndsmokecolor = 0x111111; break;
-                default: rndflamecolor = 0x663515; rndsmokecolor = 0x303020; break;
-            }
-            regularflame(PART_FLAME, e.o, radius, height, e.attr4 ? colorfromattr(e.attr4) : rndflamecolor, 2, 2.0f+(rnd(2)));
-            regularflame(PART_SMOKE, vec(e.o.x, e.o.y, e.o.z + 4.0f*min(radius, height)), radius, height, rndsmokecolor, 1, 4.0f+(rnd(6)), 100.0f, 2750.0f, -15);
-            if(e.attr5==0 && randomevent(0.16f*gfx::nbfps)) regularsplash(PART_FIRESPARK, 0xFFFF55, 125, rnd(3)+1, 750+(rnd(750)), offsetvec(e.o, rnd(12)-rnd(24), rnd(12)-rnd(10)), 0.5f+(rnd(18)/12.f), -10);
+
+            int r, g, b;
+
+            if(defaultColors(e.attr4, e.attr5, e.attr6)) { r = 162; g = 90;  b = 0; } // setting default colors for generic flames
+            else { r = e.attr4; g = e.attr5; b = e.attr6; } // setting custom colors from r g b attrs
+
+            // apply color offset
+            if(r) r = applyRandomOffset(r, e.attr7);
+            if(g) g = applyRandomOffset(g, e.attr7);
+            if(b) b = applyRandomOffset(b, e.attr7);
+
+            regularflame(PART_FLAME, e.o, radius, height, rgbToHex(r, g, b), 2, 2.0f+(rnd(2)), 200.f, 600.f, -15, e.attr8);
+            if(e.attr1==0) regularflame(PART_SMOKE, vec(e.o.x, e.o.y, e.o.z + 4.0f*min(radius, height)), radius, height, rgbToHex(smokeGs(), smokeGs(), smokeGs()), 1, 4.0f+(rnd(6)), 100.0f, 2750.0f, -15, e.attr8);
+
+            bool popSpark = e.attr9 && randomevent(( 1.0f - (e.attr9 / 100.f)) * gfx::nbfps);
+            if(popSpark) regularsplash(PART_FIRESPARK, 0xFFFF55, 125, rnd(3)+1, 750+(rnd(750)), offsetvec(e.o, rnd(15)-rnd(31), rnd(15)-rnd(31)), 0.5f + (rnd(18)/12.f), -10, 0);
             break;
         }
+        case 3: // smoke only : attr 2:<radius> 3:<height> 4:<r> 5:<g> 6:<b> 7:<color offset> 8:<grow(+)/shrink(-)>
+        {
+            float radius = e.attr2 ? float(e.attr2)/100.0f : 1.5f,
+                  height = e.attr3 ? float(e.attr3)/100.0f : radius/3;
+
+            int r, g, b;
+
+            if(defaultColors(e.attr4, e.attr5, e.attr6)) { r = smokeGs(); g = smokeGs();  b = smokeGs(); }// setting default colors for generic smoke
+            else { r = e.attr4; g = e.attr5; b = e.attr6; } // setting random colors for custom r g b attrs
+
+            // apply color offset
+            if(r) r = applyRandomOffset(r, e.attr7);
+            if(g) g = applyRandomOffset(g, e.attr7);
+            if(b) b = applyRandomOffset(b, e.attr7);
+
+            regularflame(PART_SMOKE, vec(e.o.x, e.o.y, e.o.z + 4.0f*min(radius, height)), radius, height, rgbToHex(r, g, b), 1, 4.0f+(rnd(6)), 100.0f, 2750.0f, -15, e.attr8);
+            break;
+        }
+        /*
         case 1: //steam vent - <dir>
             regularsplash(PART_STEAM, colorfromattr(e.attr3), 50, 1, 200, offsetvec(e.o, e.attr2, rnd(10)), 2.4f, -20);
             break;
@@ -1427,14 +1534,11 @@ static void makeparticles(entity &e)
             p->progress = clamp(int(e.attr2), 0, 100);
             break;
         }
-        case 11: // flame <radius> <height> <rgb> - radius=100, height=100 is the classic size
-            regularflame(PART_FLAME, e.o, float(e.attr2)/100.0f, float(e.attr3)/100.0f, colorfromattr(e.attr4), 3, 2.0f);
-            break;
-        case 12: // smoke plume <radius> <height> <rgb>
-            regularflame(PART_SMOKE, e.o, float(e.attr2)/100.0f, float(e.attr3)/100.0f, colorfromattr(e.attr4), 1, 4.0f, 100.0f, 2000.0f, -20);
-            break;
+
+
+
         case 14: //Clouds/Nuages
-            newparticle(e.o, offsetvec(e.o, e.attr4, 1000*3+(e.attr5*300)), 1, PART_CLOUD1+e.attr2, partcloudcolour, 100+(e.attr3*10));
+            newparticle(e.o, e.o, 1, PART_CLOUD1 + clamp((int)e.attr2, 0, 3), partcloudcolour, (e.attr3*5));
             break;
         case 15: //Rainbow/Arc-en-ciel
             if(map_atmo==8) newparticle(e.o, offsetvec(e.o, e.attr4, 1000*3+(e.attr5*300)), 1, PART_RAINBOW, 0xAAAAAA, 100+(e.attr3*10));
@@ -1453,59 +1557,7 @@ static void makeparticles(entity &e)
             }
             break;
 
-        case 17: //rain
-            {
-                if(map_atmo==4 || map_atmo==8) regularshape(PART_RAIN, max(1+e.attr2, 1), 0x555566, 44, map_atmo==8 ? e.attr3/2 : e.attr3, 10000, e.o, 5+(rnd(3)), 200, -900, e.attr5, true, 200);
-                if(randomevent(25*gfx::nbfps) && map_atmo == 4 && isconnected())
-                {
-                    vec possky = e.o; vec posground = e.o;
-                    int posx = -1250+rnd(2500), posy = -1250+rnd(2500);
-                    possky.add(vec(posx+(-200+(rnd(400))), posy+(-200+(rnd(400))), 800));
-                    posground.add(vec(posx, posy, -50));
-                    loopi(2)particle_flare(possky, posground, 750, PART_LIGHTNING, 0x8888FF, 15.f+rnd(10), NULL, gfx::champicolor());
 
-                    playSound(S_ECLAIRPROCHE, &posground, 400, 100);
-
-                    vec posA = possky;
-                    vec posB = camera1->o;
-                    vec flashloc = (posA.add((posB.mul(vec(3, 3, 3))))).div(vec(4, 4, 4));
-
-                    if(camera1->o.dist(posground) >= 250) playSound(S_ECLAIRLOIN, &flashloc, 1500, 300);
-                    adddynlight(flashloc, 4000, vec(1.5f, 1.5f, 2.0f), 200, 40, L_NOSHADOW, 2000, vec(0.5f, 0.5f, 1.0f));
-                }
-            }
-            break;
-
-        case 18: //snow
-            if(map_atmo==8 || map_atmo==9) regularshape(PART_SNOW, max(1+e.attr2, 1), colorfromattr(e.attr4), 44, map_atmo==9 ? e.attr3 : e.attr3/1.75f, 10000, e.o, 2+(rnd(3)), 200, -400, e.attr5, true, 200);
-            break;
-
-        case 19: //apocalypse
-            {
-                if(map_sel==5);
-                else if(map_atmo!=5) return;
-
-                regularshape(PART_SMOKE, max(1+e.attr2, 1), map_sel==5 ? 0x352412 : 0x184418, 44, 3, 10000, e.o, 0.5f, 200, -200, -2500, true, 500, 22.f);
-                regularshape(PART_FIRESPARK, max(1+e.attr2, 1), colorfromattr(e.attr4), 44, e.attr3, 10000, e.o, 2+(rnd(3)), 200, -400, e.attr5, true, 300);
-
-                if(randomevent(6*gfx::nbfps) && map_sel!=5 && isconnected())
-                {
-                    vec possky = e.o; vec posground = e.o;
-                    int posx = -1250+rnd(2500), posy = -1250+rnd(2500);
-                    possky.add(vec(posx+(-200+(rnd(400))), posy+(-200+(rnd(400))), 800));
-                    posground.add(vec(posx, posy, -50));
-                    particle_flare(possky, posground, 1000, PART_LIGHTNING, 0xFF6622, 15.f+rnd(10), NULL, gfx::champicolor());
-                    playSound(S_ECLAIRPROCHE, &posground, 500, 50, SND_NOOCCLUSION);
-
-                    vec posA = possky;
-                    vec posB = camera1->o;
-                    vec flashloc = (posA.add((posB.mul(vec(3, 3, 3))))).div(vec(4, 4, 4));
-
-                    if(camera1->o.dist(posground) >= 250) playSound(S_ECLAIRLOIN, &flashloc, 1000, 250);
-                    if(camera1->o.dist(posground) < 1500) adddynlight(flashloc, 4000, vec(1.5f, 0.5f, 0.0f), 200, 40, L_NOSHADOW, 1000, vec(0.5f, 1.0f, 0.5f));
-                }
-            }
-            break;
 
         case 32: //lens flares - plain/sparkle/sun/sparklesun <red> <green> <blue> <size>
         case 33:
@@ -1520,32 +1572,15 @@ static void makeparticles(entity &e)
         case 52:    //volcano smoke
             loopi((particleslod*13)+3) regularshape(PART_SMOKE, max(1+e.attr2, 1), 0x181818, 44, 6, 4000, e.o, 0.5f, -50, 30, 500, true, -30, 18.f);
             break;
-
-        default:
-            if(!editmode)
-            {
-                defformatstring(ds, "particles %d?", e.attr1);
-                particle_textcopy(e.o, ds, PART_TEXT, 1, 0x6496FF, 2.0f);
-            }
-            break;
+        */
+        default: particle_textcopy(e.o, tempformatstring("\fcInvalid particle ID: %d", e.attr1), PART_TEXT, 1, 0xFFFFFF, 3.0f);
     }
 }
 
 bool printparticles(extentity &e, char *buf, int len)
 {
-    switch(e.attr1)
-    {
-        case 0: case 4: case 7: case 8: case 9: case 10: case 11: case 12: case 13:
-            nformatstring(buf, len, "%s %d %d %d 0x%.3hX %d", entities::entname(e.type), e.attr1, e.attr2, e.attr3, e.attr4, e.attr5);
-            return true;
-        case 3:
-            nformatstring(buf, len, "%s %d %d 0x%.3hX %d %d", entities::entname(e.type), e.attr1, e.attr2, e.attr3, e.attr4, e.attr5);
-            return true;
-        case 5: case 6:
-            nformatstring(buf, len, "%s %d %d 0x%.3hX 0x%.3hX %d", entities::entname(e.type), e.attr1, e.attr2, e.attr3, e.attr4, e.attr5);
-            return true;
-    }
-    return false;
+    nformatstring(buf, len, "%s %d %d %d \fc%d \fe%d \ff%d \f7%d %d %d", entities::entname(e.type), e.attr1, e.attr2, e.attr3, e.attr4, e.attr5, e.attr6, e.attr7, e.attr8, e.attr9);
+    return true;
 }
 
 void seedparticles()
