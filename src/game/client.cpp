@@ -1409,7 +1409,6 @@ namespace game
                     return;
                 }
                 sessionid = getint(p);
-                map_sel = getint(p);
                 player1->clientnum = mycn;      // we are now connected
                 if(getint(p) > 0) conoutf("this server is password protected");
                 getstring(servdesc, p, sizeof(servdesc));
@@ -1509,7 +1508,6 @@ namespace game
                 filtertext(text, text, false);
                 fixmapname(text);
                 changemapserv(text, getint(p));
-                map_sel = atoi(text);
                 mapchanged = true;
                 if(getint(p)) entities::spawnitems();
                 else senditemstoserver = false;

@@ -798,7 +798,7 @@ namespace recorder
 
 extern void bgquad(float x, float y, float w, float h, float tx = 0, float ty = 0, float tw = 1, float th = 1);
 
-extern int map_atmo, map_sel;  //Config partie Cube Conflict
+extern int map_atmo;  //Config partie Cube Conflict
 
 // main graphical effects
 extern bool addpostfx(const char *name, int outputbind, int outputscale, uint inputs, uint freeinputs, const vec4 &params);

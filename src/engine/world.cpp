@@ -6,8 +6,8 @@
 VARR(mapversion, 1, MAPVERSION, 0);
 VARNR(mapscale, worldscale, 1, 0, 0);
 VARNR(mapsize, worldsize, 1, 0, 0);
-SVARR(maptitle_fr, "Map");
-SVARR(maptitle_en, "Map");
+SVARR(maptitle_fr, "Nouvelle map");
+SVARR(maptitle_en, "New map");
 VARNR(emptymap, _emptymap, 1, 0, 0);
 
 VAR(octaentsize, 0, 64, 1024);

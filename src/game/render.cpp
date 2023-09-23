@@ -286,7 +286,6 @@ namespace game
          rendermodel(customstombes[d->customtombe].tombedir, ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED, d, NULL, 0, 0, fade); //DEBUG
     }
 
-    string costumemdlname, curmapname;
     static const int dirs[9] =
     {
         ANIM_LEFT,  ANIM_FORWARD,   ANIM_RIGHT,

@@ -8,8 +8,6 @@ bool randomevent(int probability)
     return probability <= 1 ? true : rnd(probability)==0;
 }
 
-VARP(map_sel, 0, 1, 99);
-
 namespace game
 {
     int oldapti;
@@ -382,7 +380,7 @@ namespace game
                 loopi(4) if(player1->ammo[GUN_S_NUKE+i]>0) p1hassuperweapon = true;
                 if(player1->health>=2000) unlockAchievement(ACH_SACAPV);
                 if(player1->boostmillis[B_ROIDS] && player1->boostmillis[B_EPO] && player1->boostmillis[B_JOINT] && player1->boostmillis[B_SHROOMS]) unlockAchievement(ACH_DEFONCE);
-                if(lookupmaterial(player1->o)==MAT_NOCLIP && map_sel==3) unlockAchievement(ACH_SPAAACE);
+                if(lookupmaterial(player1->o)==MAT_NOCLIP && !strcasecmp(maptitle_en, "Moon")) unlockAchievement(ACH_SPAAACE);
                 if(p1hassuperweapon && player1->boostmillis[B_ROIDS] && player1->armour>0 && player1->armourtype==A_ASSIST) unlockAchievement(ACH_ABUS);
                 if(player1->aptitude==APT_KAMIKAZE && player1->ammo[GUN_KAMIKAZE]<=0 && totalmillis-lastshoot>=500 && totalmillis-lastshoot<=750 && isconnected()) unlockAchievement(ACH_SUICIDEFAIL);
                 if(player1->boostmillis[B_EPO] && player1->aptitude==APT_JUNKIE) unlockAchievement(ACH_LANCEEPO);
