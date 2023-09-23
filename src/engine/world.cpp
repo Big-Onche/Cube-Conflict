@@ -1337,7 +1337,7 @@ void entattr(int *attr, int *val, int *numargs)
 {
     if(*numargs >= 2)
     {
-        if(*attr >= 0 && *attr <= 6)
+        if(*attr >= 0 && *attr <= 8)
             groupedit(
                 switch(*attr)
                 {
