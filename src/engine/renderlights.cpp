@@ -3593,15 +3593,27 @@ void viewlightscissor()
     }
 }
 
+bool blinkLight(int blinkSpeed)
+{
+    return (blinkSpeed > 0 && (totalmillis % blinkSpeed+1 < blinkSpeed/2)) && !game::ispaused();
+}
+
+bool hideLight(bool var)
+{
+    return var && (map_atmo==3 || map_atmo==6 || map_atmo==9);
+}
+
 void collectlights()
 {
     if(lights.length()) return;
 
     // point lights processed here
     const vector<extentity *> &ents = entities::getents();
+
     if(!editmode || !fullbright) loopv(ents)
     {
         const extentity *e = ents[i];
+
         if(e->type != ET_LIGHT || e->attr1 <= 0) continue;
 
         if(smviscull)
@@ -3610,7 +3622,7 @@ void collectlights()
             if(pvsoccludedsphere(e->o, e->attr1)) continue;
         }
 
-        if((map_atmo==3 || map_atmo==6 || map_atmo==9) && e->attr5 < 0) continue;
+        if(hideLight(e->attr6) || blinkLight(e->attr7)) continue;
         else
         {
             lightinfo &l = lights.add(lightinfo(i, *e));
