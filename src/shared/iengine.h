@@ -335,7 +335,7 @@ enum
     // water
     PART_WATER, PART_BUBBLE, PART_STEAM,
     // weather
-    PART_SNOW, PART_RAIN, PART_CLOUD1, PART_CLOUD2, PART_CLOUD3, PART_CLOUD4, PART_RAINBOW, PART_LIGHTNING,
+    PART_SNOW, PART_RAIN, PART_CLOUD1, PART_CLOUD2, PART_CLOUD3, PART_CLOUD4, PART_CLOUD5, PART_CLOUD6, PART_RAINBOW, PART_LIGHTNING,
     // game specific
     PART_VISEUR, PART_DEAD, PART_ZERO, PART_ONE, PART_BLIP, PART_HEALTH, PART_MANA, PART_RADAR, PART_METER, PART_METER_VS,
     // explosions
@@ -359,7 +359,7 @@ extern void particle_meter(const vec &s, float val, int type, int fade = 1, int 
 extern void particle_flare(const vec &p, const vec &dest, int fade, int type, int color = 0xFFFFFF, float size = 0.28f, physent *owner = NULL, bool randomcolor = false, int sizemod = 0);
 extern void particle_fireball(const vec &dest, float max, int type, int fade = -1, int color = 0xFFFFFF, float size = 4.0f, bool randomcolor = false);
 extern void regularflare(const vec &p, int color, int flaresize, int viewdist);
-extern void regularflame(int type, const vec &p, float radius, float height, int color, int density = 3, float scale = 2.0f, float speed = 200.0f, float fade = 600.0f, int gravity = -15);
+extern void regularflame(int type, const vec &p, float radius, float height, int color, int density = 3, float scale = 2.0f, float speed = 200.0f, float fade = 600.0f, int gravity = -15, int sizemod = -3);
 extern void regularshape(int type, int radius, int color, int dir, int num, int fade, const vec &p, float size, int gravity, float vel = 0, int windoffset = 0, bool weather = false, int height = 0, int sizemod = 0);
 extern void regularsplash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int delay = 0, int sizemod = 0, bool upsplash = false);
 extern void removetrackedparticles(physent *owner = NULL);

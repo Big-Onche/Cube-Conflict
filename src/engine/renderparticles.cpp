@@ -904,7 +904,9 @@ static partrenderer *parts[] =
     new quadrenderer("media/particles/weather/cloud_2.png", PT_PART|PT_NOMAXDIST),                                           // PART_CLOUD2
     new quadrenderer("media/particles/weather/cloud_3.png", PT_PART|PT_NOMAXDIST),                                           // PART_CLOUD3
     new quadrenderer("media/particles/weather/cloud_4.png", PT_PART|PT_NOMAXDIST),                                           // PART_CLOUD4
-    new trailrenderer("media/particles/weather/rainbow.png", PT_TRAIL),                                                      // PART_RAINBOW
+    new quadrenderer("media/particles/weather/cloud_5.png", PT_PART|PT_NOMAXDIST),                                           // PART_CLOUD5
+    new quadrenderer("media/particles/weather/cloud_6.png", PT_PART|PT_NOMAXDIST),                                           // PART_CLOUD6
+    new quadrenderer("media/particles/weather/rainbow.png", PT_PART|PT_NOMAXDIST),                                           // PART_RAINBOW
     &lightnings,                                                                                                             // PART_LIGHTNING
     // game specific
     new quadrenderer("media/particles/game/target.png", PT_PART|PT_LERP|PT_BRIGHT),                                          // PART_TARGET
@@ -1060,11 +1062,11 @@ static inline particle *newparticle(const vec &o, const vec &d, int fade, int ty
     return parts[type]->addpart(o, d, fade, color, size, gravity, sizemod, hud);
 }
 
-VARP(maxparticledistance, 256, 1024, 4092);
+VARP(maxparticledistance, 256, 1024, 8192);
 
 static void splash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int sizemod, bool upsplash = false)
 {
-    if(camera1->o.dist(p) > (parts[type]->type&PT_NOMAXDIST ? 9999 : maxparticledistance) && !seedemitter) return;
+    if(camera1->o.dist(p) > maxparticledistance && !seedemitter) return;
     float collidez = parts[type]->type&PT_COLLIDE ? p.z - raycube(p, vec(0, 0, -1), COLLIDERADIUS, RAY_CLIPMAT|RAY_POLY) + (parts[type]->stain >= 0 ? COLLIDEERROR : 0) : -1;
     int fmin = 1;
     int fmax = fade*3;
@@ -1318,7 +1320,7 @@ void regularshape(int type, int radius, int color, int dir, int num, int fade, c
         {
 			if(taper)
 			{
-				float dist = clamp(from.dist2(camera1->o)/(parts[type]->type&PT_NOMAXDIST ? 9999 : maxparticledistance), 0.0f, 1.0f);
+				float dist = clamp(from.dist2(camera1->o)/maxparticledistance, 0.0f, 1.0f);
 				if(dist > 0.2f)
 				{
 					dist = 1 - (dist - 0.2f)/0.8f;
@@ -1436,10 +1438,10 @@ void spawnApocalypse(vec pos, int intensity, int r, int g, int b, int wind)
     bool volcano = !strcasecmp(maptitle_en, "Volcano");
 
     if(defaultColors(r, g, b)) { r = 255; g = 150;  b = 0; } // setting default colors for "generic" apocalypse
-    if(!intensity) intensity = 300;
+    if(!intensity) intensity = 125;
 
-    if(!wind) wind = 2000;
-    regularshape(PART_FIRESPARK, 4000, rgbToHex(r, g, b), 44, intensity, 10000, pos, 2+(rnd(3)), 200, -400, wind, true, 300);
+    if(!wind) wind = 2500;
+    regularshape(PART_FIRESPARK, 4000, rgbToHex(r, g, b), 44, intensity, 10000, pos, 1+(rnd(5)), 200, -500, wind, true, 300);
 
     if(randomevent(6*gfx::nbfps) && !volcano) popLightning(pos, vec(1.5f, 0.5f, 0.0f), 0xFF6622);
 }
@@ -1453,7 +1455,8 @@ static void makeparticles(entity &e)
             if((map_atmo==4 || map_atmo==8) || (e.attr2 >=1 && e.attr2 <=3)) spawnRain(e.o, e.attr2, e.attr3, e.attr4, e.attr5, e.attr6, e.attr7, e.attr2!=0); // light rain, moderate rain, storm
             if(map_atmo==8 || map_atmo==9 || e.attr2==4) spawnSnow(e.o, e.attr3, e.attr4, e.attr5, e.attr6, e.attr7, e.attr2!=0); // snow
             if(map_atmo==5 || e.attr2==5) spawnApocalypse(e.o, e.attr3, e.attr4, e.attr5, e.attr6, e.attr7); // apocalypse
-            if(editmode) particle_textcopy(e.o, GAME_LANG ? "\feWeather" : "feMétéo", PART_TEXT, 1, 0xFFFFFF, 3.0f);
+            if(editmode) particle_textcopy(e.o, tempformatstring(GAME_LANG ? "\feWeather (%s)" : "\feMétéo (%s)", e.attr2 ? GAME_LANG ? "Forced" : "Forcée" : GAME_LANG ? "Cur. atmo" : "Atmo. actuelle"), PART_TEXT, 1, 0xFFFFFF, 3.0f);
+            particle_hud(PART_VISEUR, e.o, 0xBBBBBB);
             break;
 
         case 1: // fire and smoke: attr 2:<radius> 3:<height> 4:<r> 5:<g> 6:<b> 7:<color offset> 8:<grow(+)/shrink(-)> 9:<sparks(amount)>
@@ -1473,21 +1476,22 @@ static void makeparticles(entity &e)
             if(b) b = applyRandomOffset(b, e.attr7);
 
             regularflame(PART_FLAME, e.o, radius, height, rgbToHex(r, g, b), 2, 2.0f+(rnd(2)), 200.f, 600.f, -15, e.attr8);
-            if(e.attr1==0) regularflame(PART_SMOKE, vec(e.o.x, e.o.y, e.o.z + 4.0f*min(radius, height)), radius, height, rgbToHex(smokeGs(), smokeGs(), smokeGs()), 1, 4.0f+(rnd(6)), 100.0f, 2750.0f, -15, e.attr8);
+            if(e.attr1==1) regularflame(PART_SMOKE, vec(e.o.x, e.o.y, e.o.z + 4.0f*min(radius, height)), radius, height, rgbToHex(smokeGs(), smokeGs(), smokeGs()), 1, 4.0f+(rnd(6)), 100.0f, 2750.0f, -15, e.attr8);
 
             bool popSpark = e.attr9 && randomevent(( 1.0f - (e.attr9 / 100.f)) * gfx::nbfps);
             if(popSpark) regularsplash(PART_FIRESPARK, 0xFFFF55, 125, rnd(3)+1, 750+(rnd(750)), offsetvec(e.o, rnd(15)-rnd(31), rnd(15)-rnd(31)), 0.5f + (rnd(18)/12.f), -10, 0);
+            if(editmode) particle_textcopy(e.o, e.attr1==1 ? (GAME_LANG ? "\feFire and smoke" : "\feFeu et fumée") : (GAME_LANG ? "\feFire" : "\feFeu"), PART_TEXT, 1, 0xFFFFFF, 3.0f);
             break;
         }
-        case 3: // smoke only : attr 2:<radius> 3:<height> 4:<r> 5:<g> 6:<b> 7:<color offset> 8:<grow(+)/shrink(-)>
+        case 3: // smoke only: attr 2:<radius> 3:<height> 4:<r> 5:<g> 6:<b> 7:<color offset> 8:<grow(+)/shrink(-)>
         {
             float radius = e.attr2 ? float(e.attr2)/100.0f : 1.5f,
                   height = e.attr3 ? float(e.attr3)/100.0f : radius/3;
 
             int r, g, b;
 
-            if(defaultColors(e.attr4, e.attr5, e.attr6)) { r = smokeGs(); g = smokeGs();  b = smokeGs(); }// setting default colors for generic smoke
-            else { r = e.attr4; g = e.attr5; b = e.attr6; } // setting random colors for custom r g b attrs
+            if(defaultColors(e.attr4, e.attr5, e.attr6)) { r = smokeGs(); g = smokeGs();  b = smokeGs(); } // setting default colors for generic smoke
+            else { r = e.attr4; g = e.attr5; b = e.attr6; } // setting custom colors from r g b attrs
 
             // apply color offset
             if(r) r = applyRandomOffset(r, e.attr7);
@@ -1495,12 +1499,51 @@ static void makeparticles(entity &e)
             if(b) b = applyRandomOffset(b, e.attr7);
 
             regularflame(PART_SMOKE, vec(e.o.x, e.o.y, e.o.z + 4.0f*min(radius, height)), radius, height, rgbToHex(r, g, b), 1, 4.0f+(rnd(6)), 100.0f, 2750.0f, -15, e.attr8);
+            if(editmode) particle_textcopy(e.o, GAME_LANG ? "\feSmoke" : "\feFumée", PART_TEXT, 1, 0xFFFFFF, 3.0f);
             break;
         }
-        /*
-        case 1: //steam vent - <dir>
-            regularsplash(PART_STEAM, colorfromattr(e.attr3), 50, 1, 200, offsetvec(e.o, e.attr2, rnd(10)), 2.4f, -20);
+        case 4: // steam vent: attr2: <dir> 3:<size> 4:<r> 5:<g> 6:<b> 7:<radius> 8:<fade>
+        {
+            int radius = e.attr7, fade = e.attr8, size = e.attr3;
+            if(!radius) radius = 50;
+            if(!size) size = 2.5f;
+            if(!fade) fade = 200;
+
+            int r, g, b;
+            if(defaultColors(e.attr4, e.attr5, e.attr6)) { r = 200; g = 200;  b = 200; } // setting default colors for generic steam
+            else { r = e.attr4; g = e.attr5; b = e.attr6; } // setting custom colors from r g b attrs
+
+            regularsplash(PART_STEAM, rgbToHex(r, g, b), radius, 1, fade, offsetvec(e.o, e.attr2, rnd(10)), size, -20);
+            if(editmode) particle_textcopy(e.o, GAME_LANG ? "\feSteam" : "\feVapeur", PART_TEXT, 1, 0xFFFFFF, 3.0f);
             break;
+        }
+        case 5: // energy ball: 2:<type (shockwave, plasma, grenade, explosion)> attr 3:<radius> 4:<r> 5:<g> 6:<b>
+        {
+            int r, g, b;
+            if(defaultColors(e.attr4, e.attr5, e.attr6)) { r = 128; g = 128;  b = 128; } // setting default colors for generic energy ball
+            else { r = e.attr4; g = e.attr5; b = e.attr6; } // setting custom colors from r g b attrs
+
+            newparticle(e.o, vec(0, 0, 1), 1, PART_SHOCKWAVE + clamp((int)e.attr2, 0, 3), rgbToHex(r, g, b), 4.0f)->val = 1+e.attr3;
+            if(editmode) particle_textcopy(e.o, GAME_LANG ? "\feEnergy ball" : "\feBoule d'énergie", PART_TEXT, 1, 0xFFFFFF, 3.0f);
+            break;
+        }
+        case 6: // clouds: attr 2:<size> 3:<type(0-5)> 4:<r> 5:<g> 6:<b>
+            newparticle(e.o, e.o, 1, PART_CLOUD1 + clamp((int)e.attr3, 0, 5), defaultColors(e.attr4, e.attr5, e.attr6) ? partcloudcolour : rgbToHex(e.attr4, e.attr5, e.attr6), e.attr2);
+            if(editmode) particle_textcopy(e.o, GAME_LANG ? "\feCloud" : "\feNuage", PART_TEXT, 1, 0xFFFFFF, 3.0f);
+            particle_hud(PART_VISEUR, e.o, 0xBBBBBB);
+            break;
+
+        case 7: // rainbow: attr 2:<size> 3:<force>
+            if(map_atmo==8 || e.attr3)
+            {
+                int size = e.attr2;
+                newparticle(e.o, e.o, 1, PART_RAINBOW, 0xAAAAAA, size*3);
+            }
+            if(editmode) particle_textcopy(e.o, GAME_LANG ? "\feRainbow" : "\feArc-en-ciel", PART_TEXT, 1, 0xFFFFFF, 3.0f);
+            particle_hud(PART_VISEUR, e.o, 0xBBBBBB);
+            break;
+
+        /*
         case 2: //water fountain - <dir>
         {
             int color;
@@ -1514,9 +1557,6 @@ static void makeparticles(entity &e)
             regularsplash(PART_WATER, color, 150, 4, 200, offsetvec(e.o, e.attr2, rnd(10)), 0.6f, 2);
             break;
         }
-        case 3: //fire ball - <size> <rgb>
-            newparticle(e.o, vec(0, 0, 1), 1, PART_EXPLOSION, colorfromattr(e.attr3), 4.0f)->val = 1+e.attr2;
-            break;
         case 4:  //tape - <dir> <length> <rgb>
         case 7:  //lightning
         case 9:  //steam
@@ -1534,15 +1574,6 @@ static void makeparticles(entity &e)
             p->progress = clamp(int(e.attr2), 0, 100);
             break;
         }
-
-
-
-        case 14: //Clouds/Nuages
-            newparticle(e.o, e.o, 1, PART_CLOUD1 + clamp((int)e.attr2, 0, 3), partcloudcolour, (e.attr3*5));
-            break;
-        case 15: //Rainbow/Arc-en-ciel
-            if(map_atmo==8) newparticle(e.o, offsetvec(e.o, e.attr4, 1000*3+(e.attr5*300)), 1, PART_RAINBOW, 0xAAAAAA, 100+(e.attr3*10));
-            break;
         case 16:
             {
                 if(randomevent(5*gfx::nbfps))
@@ -1573,7 +1604,9 @@ static void makeparticles(entity &e)
             loopi((particleslod*13)+3) regularshape(PART_SMOKE, max(1+e.attr2, 1), 0x181818, 44, 6, 4000, e.o, 0.5f, -50, 30, 500, true, -30, 18.f);
             break;
         */
-        default: particle_textcopy(e.o, tempformatstring("\fcInvalid particle ID: %d", e.attr1), PART_TEXT, 1, 0xFFFFFF, 3.0f);
+        default:
+            particle_textcopy(e.o, tempformatstring("\fcInvalid particle ID: %d", e.attr1), PART_TEXT, 1, 0xFFFFFF, 3.0f);
+            particle_hud(PART_VISEUR, e.o, 0xBBBBBB);
     }
 }
 
@@ -1650,7 +1683,7 @@ void updateparticles()
         {
             particleemitter &pe = emitters[i];
             extentity &e = *pe.ent;
-            if(e.o.dist(camera1->o) > (e.attr1==14 || e.attr1==15 ? 9999 : maxparticledistance)) { pe.lastemit = lastmillis; continue; }
+            if(e.o.dist(camera1->o) > maxparticledistance) { pe.lastemit = lastmillis; continue; }
             if(cullparticles && pe.maxfade >= 0)
             {
                 if(isfoggedsphere(pe.radius, pe.center)) { pe.lastcull = lastmillis; continue; }
