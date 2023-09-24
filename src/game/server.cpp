@@ -3671,7 +3671,7 @@ namespace server
                 int i = getint(p);
                 loopk(3) getint(p);
                 int type = getint(p);
-                loopk(5) getint(p);
+                loopk(9) getint(p);
                 if(!ci || ci->state.state==CS_SPECTATOR) break;
                 QUEUE_MSG;
                 bool canspawn = canspawnitem(type);
