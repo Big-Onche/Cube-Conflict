@@ -448,7 +448,7 @@ namespace game
     {
         // can't use loopv here due to strange GCC optimizer bug
         int len = projs.length();
-        loopi(len) if(projs[i].owner==owner) { projs.remove(i--); len--; }
+        loopi(len) if(projs[i].owner==owner) { stopLinkedSound(projs[i].entityId); projs.remove(i--); len--; }
     }
 
     VARP(blood, 0, 1, 1);
@@ -881,6 +881,7 @@ namespace game
                 vec pos = vec(p.offset).mul(p.offsetmillis/float(OFFSETMILLIS)).add(p.o);
                 explode(p.local, p.owner, pos, p.dir, NULL, 0, atk);
                 projstain(p, pos, atk);
+                stopLinkedSound(p.entityId);
                 projs.remove(i);
                 break;
             }
