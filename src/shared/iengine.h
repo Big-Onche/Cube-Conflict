@@ -294,6 +294,7 @@ enum
 
 extern void adddynlight(const vec &o, float radius, const vec &color, int fade = 0, int peak = 0, int flags = 0, float initradius = 0, const vec &initcolor = vec(0, 0, 0), physent *owner = NULL, const vec &dir = vec(0, 0, 0), int spot = 0);
 extern void removetrackeddynlights(physent *owner = NULL);
+extern int dynlightdist;
 
 // rendergl
 extern physent *camera1;
@@ -341,7 +342,7 @@ enum
     // explosions
     PART_SHOCKWAVE, PART_PLASMABURST, PART_PLASMAGRENADE, PART_EXPLOSION,
     // misc
-    PART_BLOOD, PART_SPARK, PART_TEXT, PART_LENS_FLARE
+    PART_BLOOD, PART_SPARK, PART_SPARK_L, PART_TEXT, PART_LENS_FLARE
 };
 
 extern bool canaddparticles();

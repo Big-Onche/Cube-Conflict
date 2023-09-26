@@ -240,6 +240,8 @@ Files :	media/sounds/mapsounds/indoor_1.wav 				license_certificate_R3FY29ABTJ (
 	media/sounds/classes/sho_1.wav					license_certificate_QTD7LJFYGW (sho_1.wav).txt
 	media/sounds/classes/sho_2.wav					license_certificate_QP3D9G64ZM (sho_2.wav).txt
 	media/sounds/classes/sho_3.wav					license_certificate_MNZPR2G76C (sho_3.wav).txt
+	media/sounds/classes/sparks_1.wav				license_certificate_4N5PKQZ2EY (sparks_1.wav).txt
+	media/sounds/classes/sparks_2.wav				license_certificate_6VNB4T5SXM (sparks_2.wav).txt
 	media/sounds/notifications/terminal_hacked.wav			license_certificate_BCNHRTWDX6 (terminal_hacked.wav - terminal_lost.wav).txt
 	media/sounds/notifications/terminal_lost.wav
 	media/sounds/notifications/enemy_terminal_hacked.wav
