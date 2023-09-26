@@ -410,6 +410,12 @@ struct vacollect : verthash
         }
     }
 
+    bool canShowDecal(extentity *e)
+    {
+        if(e->attr6) return map_atmo==4 || map_atmo==8 || map_atmo==9;
+        else return true;
+    }
+
     void gendecals()
     {
         if(decals.length()) extdecals.put(decals.getbuf(), decals.length());
@@ -421,7 +427,7 @@ struct vacollect : verthash
             loopvj(oe->decals)
             {
                 extentity &e = *ents[oe->decals[j]];
-                if(e.flags&EF_RENDER) continue;
+                if(e.flags&EF_RENDER || !canShowDecal(&e)) continue;
                 e.flags |= EF_RENDER;
                 DecalSlot &s = lookupdecalslot(e.attr1, true);
                 if(!s.shader) continue;
