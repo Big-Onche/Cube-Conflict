@@ -125,6 +125,7 @@ enum
     PT_COLLIDE      = 1<<23,
     PT_OVERBRIGHT   = 1<<24,
     PT_NOMAXDIST    = 1<<25,
+    PT_EMITLIGHT    = 1<<26,
     PT_FLIP         = PT_HFLIP | PT_VFLIP | PT_ROT
 };
 
@@ -207,8 +208,8 @@ struct partrenderer
         o = p->o;
         d = p->d;
         if(type&PT_TRACK && p->owner) game::particletrack(p->owner, o, d);
-        if(p->size<=0) blend = 0;
 
+        if(p->size<=0) blend = 0;
         else if(p->fade <= 5)
         {
             ts = 1;
@@ -255,11 +256,19 @@ struct partrenderer
                                 addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size*1.5f, 0x222222, type&PT_RND4 ? (p->flags>>5)&3 : 0);
                                 addstain(STAIN_BULLET_GLOW, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size, 0xFF6622, type&PT_RND4 ? (p->flags>>5)&3 : 0);
                                 break;
+                            case STAIN_BULLET_GLOW:
+                                addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size*2.5f, 0xFF6622);
+                                break;
                         }
                         blend = 0;
                     }
                 }
                 else blend = 0;
+            }
+            if(type&PT_EMITLIGHT && camera1->o.dist(o) < dynlightdist/2)
+            {
+                vec lightcolor = vec(p->color.r/1400.f, p->color.g/1400.f, p->color.b/1400.f);
+                adddynlight(o, p->size*40, lightcolor, 25, 1, L_NOSHADOW|L_VOLUMETRIC|DL_EXPAND, p->size*40);
             }
         }
     }
@@ -891,7 +900,7 @@ static partrenderer *parts[] =
     // flames and smokes
     new quadrenderer("media/particles/fire/smoke.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_LERP|PT_RND4),                           // PART_SMOKE
     new quadrenderer("media/particles/fire/flames.png", PT_PART|PT_HFLIP|PT_RND4|PT_OVERBRIGHT),                             // PART_FLAME
-    new quadrenderer("media/particles/fire/fire_ball.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_RND4),                               // PART_FIRE_BALL
+    new quadrenderer("media/particles/fire/fire_ball.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_RND4|PT_EMITLIGHT),                  // PART_FIRE_BALL
     new quadrenderer("media/particles/fire/firespark.png", PT_PART|PT_FLIP|PT_RND4|PT_OVERBRIGHT|PT_COLLIDE, STAIN_BURN),    // PART_FIRESPARK
     // water
     new quadrenderer("media/particles/water/water.png", PT_PART|PT_FLIP|PT_RND4|PT_BRIGHT),                                  // PART_WATER
@@ -926,7 +935,8 @@ static partrenderer *parts[] =
     &fireballs,                                                                                                              // PART_EXPLOSION
     // misc
     new quadrenderer("<grey>media/particles/misc/blood.png", PT_PART|PT_FLIP|PT_MOD|PT_RND4|PT_COLLIDE, STAIN_BLOOD),        // PART_BLOOD (note: rgb is inverted)
-    new quadrenderer("media/particles/misc/spark.png", PT_PART|PT_FLIP|PT_BRIGHT),                                           // PART_SPARK
+    new quadrenderer("media/particles/misc/spark.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_COLLIDE, STAIN_BULLET_GLOW),             // PART_SPARK
+    new quadrenderer("media/particles/misc/spark.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_EMITLIGHT|PT_COLLIDE, STAIN_BULLET_GLOW),// PART_SPARK_L
     &texts,                                                                                                                  // PART_TEXT
     &flares                                                                                                                  // PART_LENS_FLARE - must be done last
 };
@@ -1446,6 +1456,7 @@ void spawnApocalypse(vec pos, int intensity, int r, int g, int b, int wind)
     if(randomevent(6*gfx::nbfps) && !volcano) popLightning(pos, vec(1.5f, 0.5f, 0.0f), 0xFF6622);
 }
 
+
 static void makeparticles(entity &e)
 {
     if(!isconnected()) return;
@@ -1542,6 +1553,27 @@ static void makeparticles(entity &e)
             if(editmode) particle_textcopy(e.o, GAME_LANG ? "\feRainbow" : "\feArc-en-ciel", PART_TEXT, 1, 0xFFFFFF, 3.0f);
             particle_hud(PART_VISEUR, e.o, 0xBBBBBB);
             break;
+        case 8: // sparks: attr 2:<quantity> attr 3:<size> 4:<r> 5:<g> 6:<b> 7:<radius> 8:<fade> 9:<probability>
+        {
+            bool popSpark = e.attr9 && randomevent(( 1.0f - (e.attr9 / 100.f)) * gfx::nbfps);
+
+            if(popSpark)
+            {
+                int radius = e.attr7, num = e.attr2, fade = e.attr8, size = e.attr3;
+                if(!radius) radius = 50;
+                if(!num) num = 5;
+                if(!size) size = 0.2f;
+                if(!fade) fade = 200;
+
+                int r, g, b;
+                if(defaultColors(e.attr4, e.attr5, e.attr6)) { r = 150; g = 40;  b = 0; } // setting default colors for generic sparks
+                else { r = e.attr4; g = e.attr5; b = e.attr6; } // setting custom colors from r g b attrs
+                regularsplash(PART_SPARK_L, rgbToHex(r, g, b), radius, num, fade, e.o, size/100.f, 2);
+                particle_splash(PART_SMOKE, 4, 600+rnd(300), e.o, 0x454545, 0.4f, 25, 300, 3);
+                playSound(S_SPARKS, &e.o, 200, 50);
+            }
+            break;
+        }
 
         /*
         case 2: //water fountain - <dir>
