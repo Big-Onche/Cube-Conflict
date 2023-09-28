@@ -247,7 +247,7 @@ struct partrenderer
                         {
                             case STAIN_RAIN:
                                 addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size/7.5f, 0xFFFFFF, type&PT_RND4 ? (p->flags>>5)&3 : 0);
-                                regularsplash(PART_WATER, 0x18181A, 50, 3, 120, vec(o.x, o.y, collidez), 0.08f, 500, 0, 3, true);
+                                regularsplash(PART_WATER, 0x303048, 50, 3, 120, vec(o.x, o.y, collidez), 0.08f, 500, 0, 3, true);
                                 break;
                             case STAIN_SNOW:
                                 addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size, p->color, type&PT_RND4 ? (p->flags>>5)&3 : 0);
@@ -904,7 +904,8 @@ static partrenderer *parts[] =
     new quadrenderer("media/particles/fire/firespark.png", PT_PART|PT_FLIP|PT_RND4|PT_OVERBRIGHT|PT_COLLIDE, STAIN_BURN),    // PART_FIRESPARK
     // water
     new quadrenderer("media/particles/water/water.png", PT_PART|PT_FLIP|PT_RND4|PT_BRIGHT),                                  // PART_WATER
-    new quadrenderer("media/particles/water/bubbles.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_RND4|PT_COLLIDE),                     // PART_BUBBLE
+    new quadrenderer("media/particles/water/waterdrops.png", PT_PART|PT_FLIP|PT_RND4|PT_COLLIDE, STAIN_RAIN),                // PART_DROP
+    new quadrenderer("media/particles/water/bubbles.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_RND4),                                // PART_BUBBLE
     new quadrenderer("<grey>media/particles/water/steam.png", PT_PART|PT_FLIP|PT_RND4),                                      // PART_STEAM
     // weather
     new quadrenderer("media/particles/weather/snow.png", PT_PART|PT_FLIP|PT_RND4|PT_COLLIDE, STAIN_SNOW),                    // PART_SNOW
@@ -1459,7 +1460,7 @@ void spawnApocalypse(vec pos, int intensity, int r, int g, int b, int wind)
 
 static void makeparticles(entity &e)
 {
-    if(!isconnected()) return;
+    if(!isconnected() || game::ispaused()) return;
     switch(e.attr1)
     {
         case 0: // weather effect: attr 2:<weather type (0 = default else = force weather)> 3:<intensity> 4:<r> 5:<g> 6:<b> 7:<wind>
@@ -1553,6 +1554,7 @@ static void makeparticles(entity &e)
             if(editmode) particle_textcopy(e.o, GAME_LANG ? "\feRainbow" : "\feArc-en-ciel", PART_TEXT, 1, 0xFFFFFF, 3.0f);
             particle_hud(PART_VISEUR, e.o, 0xBBBBBB);
             break;
+
         case 8: // sparks: attr 2:<quantity> attr 3:<size> 4:<r> 5:<g> 6:<b> 7:<radius> 8:<fade> 9:<probability>
         {
             bool popSpark = e.attr9 && randomevent(( 1.0f - (e.attr9 / 100.f)) * gfx::nbfps);
@@ -1575,6 +1577,37 @@ static void makeparticles(entity &e)
             break;
         }
 
+        case 9: // water: attr 2:<quantity> attr 3:<size> 4:<r> 5:<g> 6:<b> 7:<radius> 8:<fade>
+        {
+            int radius = e.attr7, num = e.attr2, fade = e.attr8, size = e.attr3;
+            if(!radius) radius = 50;
+            if(!num) num = 5;
+            if(!size) size = 0.2f;
+            if(!fade) fade = 200; // 0x18181A
+
+            int r, g, b;
+            if(defaultColors(e.attr4, e.attr5, e.attr6)) { r = 170; g = 170;  b = 200; } // setting default colors for generic sparks
+            else { r = e.attr4; g = e.attr5; b = e.attr6; } // setting custom colors from r g b attrs
+            regularsplash(PART_DROP, rgbToHex(r, g, b), radius, num, fade, e.o, size/100.f, 2);
+            break;
+        }
+
+        case 10: // lava bubble: attr 2:<probability>
+        {
+            int probability = e.attr2 ? e.attr2 : 7;
+            if(randomevent(probability*gfx::nbfps))
+            {
+                vec pos = e.o;
+                pos.add(vec(-30+rnd(30), -30+rnd(30), -5));
+                playSound(S_LAVASPLASH, &e.o, 300, 100);
+                loopi(6)regularsplash(PART_FIRESPARK, 0xFFBB55, 800+rnd(600), 10, 300+(rnd(500)), pos, 3.f+(rnd(30)/6.f), 200, 0, -3.f, true);
+                loopi(4)regularsplash(PART_SMOKE, 0x333333, 400, 3, 1000+(rnd(1000)), pos, 8.f+(rnd(8)), -20, 0, 18.f, true);
+                loopi(2)particle_fireball(pos, 20, PART_EXPLOSION, 500, 0xFF9900, 2.5f, false);
+                adddynlight(e.o, 200, vec(0.3f, 0.15f, 0), 250, 150, DL_EXPAND|L_NOSHADOW|L_VOLUMETRIC, 50);
+            }
+            break;
+        }
+
         /*
         case 2: //water fountain - <dir>
         {
@@ -1591,9 +1624,6 @@ static void makeparticles(entity &e)
         }
         case 4:  //tape - <dir> <length> <rgb>
         case 7:  //lightning
-        case 9:  //steam
-        case 10: //water
-            break;
 
         case 5: //meter, metervs - <percent> <rgb> <rgb2>
         case 6:
@@ -1607,21 +1637,6 @@ static void makeparticles(entity &e)
             break;
         }
         case 16:
-            {
-                if(randomevent(5*gfx::nbfps))
-                {
-                    vec pos = e.o;
-                    pos.add(vec(-30+rnd(30), -30+rnd(30), -5));
-                    playSound(S_LAVASPLASH, &e.o, 300, 100);
-                    loopi(6)regularsplash(PART_FIRESPARK, 0xFFBB55, 800+rnd(600), 10, 300+(rnd(500)), pos, 3.f+(rnd(30)/6.f), 200, 0, -3.f, true);
-                    loopi(4)regularsplash(PART_SMOKE, 0x333333, 400, 3, 1000+(rnd(1000)), pos, 8.f+(rnd(8)), -20, 0, 18.f, true);
-                    loopi(2)particle_fireball(pos, 20, PART_EXPLOSION, 500, 0xFF9900, 2.5f, false);
-                }
-            }
-            break;
-
-
-
         case 32: //lens flares - plain/sparkle/sun/sparklesun <red> <green> <blue> <size>
         case 33:
         case 34:
