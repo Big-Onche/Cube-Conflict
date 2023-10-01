@@ -1468,7 +1468,6 @@ static void makeparticles(entity &e)
             if(map_atmo==8 || map_atmo==9 || e.attr2==4) spawnSnow(e.o, e.attr3, e.attr4, e.attr5, e.attr6, e.attr7, e.attr2!=0); // snow
             if(map_atmo==5 || e.attr2==5) spawnApocalypse(e.o, e.attr3, e.attr4, e.attr5, e.attr6, e.attr7); // apocalypse
             if(editmode) particle_textcopy(e.o, tempformatstring(GAME_LANG ? "\feWeather (%s)" : "\feMétéo (%s)", e.attr2 ? GAME_LANG ? "Forced" : "Forcée" : GAME_LANG ? "Cur. atmo" : "Atmo. actuelle"), PART_TEXT, 1, 0xFFFFFF, 3.0f);
-            particle_hud(PART_VISEUR, e.o, 0xBBBBBB);
             break;
 
         case 1: // fire and smoke: attr 2:<radius> 3:<height> 4:<r> 5:<g> 6:<b> 7:<color offset> 8:<grow(+)/shrink(-)> 9:<sparks(amount)>
@@ -1542,7 +1541,6 @@ static void makeparticles(entity &e)
         case 6: // clouds: attr 2:<size> 3:<type(0-5)> 4:<r> 5:<g> 6:<b>
             newparticle(e.o, e.o, 1, PART_CLOUD1 + clamp((int)e.attr3, 0, 5), defaultColors(e.attr4, e.attr5, e.attr6) ? partcloudcolour : rgbToHex(e.attr4, e.attr5, e.attr6), e.attr2);
             if(editmode) particle_textcopy(e.o, GAME_LANG ? "\feCloud" : "\feNuage", PART_TEXT, 1, 0xFFFFFF, 3.0f);
-            particle_hud(PART_VISEUR, e.o, 0xBBBBBB);
             break;
 
         case 7: // rainbow: attr 2:<size> 3:<force>
