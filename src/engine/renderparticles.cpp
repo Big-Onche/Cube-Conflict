@@ -900,7 +900,7 @@ static partrenderer *parts[] =
     // flames and smokes
     new quadrenderer("media/particles/fire/smoke.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_LERP|PT_RND4),                           // PART_SMOKE
     new quadrenderer("media/particles/fire/flames.png", PT_PART|PT_HFLIP|PT_RND4|PT_OVERBRIGHT),                             // PART_FLAME
-    new quadrenderer("media/particles/fire/fire_ball.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_RND4|PT_EMITLIGHT),                  // PART_FIRE_BALL
+    new quadrenderer("media/particles/fire/fire_ball.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_RND4),                               // PART_FIRE_BALL
     new quadrenderer("media/particles/fire/firespark.png", PT_PART|PT_FLIP|PT_RND4|PT_OVERBRIGHT|PT_COLLIDE, STAIN_BURN),    // PART_FIRESPARK
     // water
     new quadrenderer("media/particles/water/water.png", PT_PART|PT_FLIP|PT_RND4|PT_BRIGHT),                                  // PART_WATER
@@ -1814,8 +1814,7 @@ void updateparticles()
                 }
                 case BASE:
                 {
-                    defformatstring(alias, GAME_LANG ? "base_en_%d" : "base_fr_%d", e.attr2);
-                    const char *name = getalias(alias);
+                    const char *name = getalias(tempformatstring("disguise_%s_%d", GAME_LANG ? "en" : "fr", e.attr2));
                     defformatstring(basename, name);
                     defformatstring(txt, "%s - %s", enthudnames[(e.type*2)+GAME_LANG], basename);
                     particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);
