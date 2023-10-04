@@ -667,11 +667,11 @@ namespace game
         {"annihilated"},
     };
 
-    string killername, weapdesc;
+    string killername;
     ICOMMAND(getkillername, "", (), result(killername); );
-    ICOMMAND(getweapondesc, "", (), result(weapdesc); );
 
-    int killerclass, killerlevel;
+    int killerclass, killerlevel, killerweapon;
+    ICOMMAND(getkillerweapon, "", (), intret(killerweapon); );
     ICOMMAND(getkillerclass, "", (), intret(killerclass); );
     ICOMMAND(getkillerlevel, "", (), intret(killerlevel); );
 
@@ -758,7 +758,7 @@ namespace game
             {
                 playSound(S_KILL, NULL, 0, 0, SND_FIXEDPITCH|SND_NOTIFICATION);
                 conoutf(CON_HUDCONSOLE, "%s \fc%s \f7! \f4(%.1fm)", GAME_LANG ? "You killed" : "Tu as tué", dname, killdistance);
-                conoutf(contype, "\fd%s\f7 > \fl%s\f7 > %s \fl(%.1fm)", player1->name, GAME_LANG ? guns[atk].nameEN : guns[atk].nameFR, dname, killdistance);
+                conoutf(contype, "\fd%s\f7 > \fl%s\f7 > %s \fl(%.1fm)", player1->name, readstr(itemstats[atk].ident), dname, killdistance);
 
                 if(IS_ON_OFFICIAL_SERV) //now let's check for shittons of achievements if playing online
                 {
@@ -796,10 +796,10 @@ namespace game
             }
             else if(d==player1) ////////////////////TU as été tué////////////////////
             {
-                conoutf(contype, "%s\f7 > \fl%s\f7 > \fd%s \fl(%.1fm)", aname, GAME_LANG ? guns[atk].nameEN : guns[atk].nameFR, player1->name, killdistance);
+                conoutf(contype, "%s\f7 > \fl%s\f7 > \fd%s \fl(%.1fm)", aname, readstr(itemstats[atk].ident), player1->name, killdistance);
                 updateStat(1, STAT_MORTS);
                 formatstring(killername, "%s", aname);
-                formatstring(weapdesc, "%s", GAME_LANG ? guns[atk].armedescEN : guns[atk].armedescFR);
+                killerweapon = atk;
                 killerclass = actor->aptitude;
                 killerlevel = actor->level;
                 killerdistance = killdistance;
@@ -807,7 +807,7 @@ namespace game
             }
             else ////////////////////Quelqu'un a tué quelqu'un////////////////////
             {
-                conoutf(contype, "%s\f7 > \fl%s\f7 > %s \fl(%.1fm)", aname, GAME_LANG ? guns[atk].nameEN : guns[atk].nameFR, dname, killdistance);
+                conoutf(contype, "%s\f7 > \fl%s\f7 > %s \fl(%.1fm)", aname, readstr(itemstats[atk].ident), dname, killdistance);
             }
 
             ////////////////////Informe que quelqu'un est chaud////////////////////

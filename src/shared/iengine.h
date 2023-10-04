@@ -142,6 +142,7 @@ extern char *executestr(const uint *code);
 extern char *executestr(const char *p);
 extern char *executestr(ident *id, tagval *args, int numargs, bool lookup = false);
 extern char *execidentstr(const char *name, bool lookup = false);
+extern const char *readstr(const char *ident);
 extern int execute(const uint *code);
 extern int execute(const char *p);
 extern int execute(ident *id, tagval *args, int numargs, bool lookup = false);

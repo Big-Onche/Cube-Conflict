@@ -77,7 +77,7 @@ enum                            // static entity types
     I_MANA,
     // other
     TELEPORT,                   // attr1 = idx, attr2 = model, attr3 = tag
-    TELEDEST,                   // attr1 = angle, attr2 = idx
+    TELEDEST,                   // attr1 = idx, attr2 = angle
     JUMPPAD,                    // attr1 = zpush, attr2 = ypush, attr3 = xpush
     FLAG,                       // attr1 = angle, attr2 = team
     BASE,                       // attr2 = name alias
@@ -109,8 +109,7 @@ struct gameentity : extentity
 enum { GUN_ELEC = 0, GUN_PLASMA, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_M32, GUN_LANCEFLAMMES, GUN_UZI, GUN_FAMAS, GUN_MOSSBERG, GUN_HYDRA, GUN_SV98, GUN_SKS, GUN_ARBALETE, GUN_AK47, GUN_GRAP1, GUN_ARTIFICE, GUN_GLOCK,
        GUN_S_NUKE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_S_CAMPOUZE,
        GUN_CAC349, GUN_CACMARTEAU, GUN_CACMASTER, GUN_CACFLEAU,
-       GUN_KAMIKAZE, GUN_ASSISTXPL, GUN_CACNINJA,
-       GUN_NONE, NUMGUNS };
+       GUN_KAMIKAZE, GUN_ASSISTXPL, GUN_CACNINJA, NUMGUNS };
 enum { A_WOOD = 0, A_IRON, A_GOLD, A_MAGNET, A_ASSIST };
 enum { B_ROIDS = 0, B_SHROOMS, B_EPO, B_JOINT, B_RAGE, NUMBOOSTS};
 enum { ACT_IDLE = 0, ACT_SHOOT, NUMACTS };
@@ -338,44 +337,44 @@ enum
     HICON_SPACE   = 40
 };
 
-static struct itemstat { int add, max, sound; const char *name_fr, *name_en; int info; } itemstats[] =
+static struct itemstat { int add, max, sound; const char *ident; int info; } itemstats[] =
 {   // weapons
-    {15,    60,    S_ITEMAMMO,  "FUSIL ELECTRIQUE", "ELECTRIC RIFLE",   GUN_ELEC},
-    {32,   128,    S_ITEMAMMO,  "FUSIL PLASMA",     "PLASMA RIFLE",     GUN_PLASMA},
-    {5,     20,    S_ITEMAMMO,  "SMAW",             "SMAW",             GUN_SMAW},
-    {80,   320,    S_ITEMAMMO,  "MINIGUN",          "MINIGUN",          GUN_MINIGUN},
-    {20,    80,    S_ITEMAMMO,  "SPOCKGUN",         "SPOCKGUN",         GUN_SPOCKGUN},
-    {7,     28,    S_ITEMAMMO,  "M32",              "M32",              GUN_M32},
-    {50,   200,    S_ITEMAMMO,  "LANCE-FLAMMES",    "FLAMETHROWER",     GUN_LANCEFLAMMES},
-    {50,   200,    S_ITEMAMMO,  "UZI",              "UZI",              GUN_UZI},
-    {60,   240,    S_ITEMAMMO,  "FAMAS",            "FAMAS",            GUN_FAMAS},
-    {10,    40,    S_ITEMAMMO,  "MOSSBERG 500",     "MOSSBERG 500",     GUN_MOSSBERG},
-    {15,    60,    S_ITEMAMMO,  "HYDRA",            "HYDRA",            GUN_HYDRA},
-    {8,     32,    S_ITEMAMMO,  "SV-98",            "SV-98",            GUN_SV98},
-    {14,    56,    S_ITEMAMMO,  "SKS",              "SKS",              GUN_SKS},
-    {12,    48,    S_ITEMAMMO,  "ARBALETE",         "CROSSBOW",         GUN_ARBALETE},
-    {40,   160,    S_ITEMAMMO,  "AK-47",            "AK-47",            GUN_AK47},
-    {70,   280,    S_ITEMAMMO,  "GAPB-1",           "GAPB-1",           GUN_GRAP1},
-    {10,    40,    S_ITEMAMMO,  "FEU D'ARTIFICE",   "FIREWORKS",        GUN_ARTIFICE},
-    {30,   120,    S_ITEMAMMO,  "GLOCK",            "GLOCK",            GUN_GLOCK},
+    {15,    60,    S_ITEMAMMO,  "Weapon_ElectricRifle", GUN_ELEC},
+    {32,   128,    S_ITEMAMMO,  "Weapon_PlasmaRifle",   GUN_PLASMA},
+    {5,     20,    S_ITEMAMMO,  "Weapon_Smaw",          GUN_SMAW},
+    {80,   320,    S_ITEMAMMO,  "Weapon_Minigun",       GUN_MINIGUN},
+    {20,    80,    S_ITEMAMMO,  "Weapon_Spockgun",      GUN_SPOCKGUN},
+    {7,     28,    S_ITEMAMMO,  "Weapon_M32",           GUN_M32},
+    {50,   200,    S_ITEMAMMO,  "Weapon_Flamethrower",  GUN_LANCEFLAMMES},
+    {50,   200,    S_ITEMAMMO,  "Weapon_Uzi",           GUN_UZI},
+    {60,   240,    S_ITEMAMMO,  "Weapon_Famas",         GUN_FAMAS},
+    {10,    40,    S_ITEMAMMO,  "Weapon_Mossberg500",   GUN_MOSSBERG},
+    {15,    60,    S_ITEMAMMO,  "Weapon_Hydra",         GUN_HYDRA},
+    {8,     32,    S_ITEMAMMO,  "Weapon_Sv98",          GUN_SV98},
+    {14,    56,    S_ITEMAMMO,  "Weapon_Sks",           GUN_SKS},
+    {12,    48,    S_ITEMAMMO,  "Weapon_Crossbow",      GUN_ARBALETE},
+    {40,   160,    S_ITEMAMMO,  "Weapon_Ak47",          GUN_AK47},
+    {70,   280,    S_ITEMAMMO,  "Weapon_Gapb1",         GUN_GRAP1},
+    {10,    40,    S_ITEMAMMO,  "Weapon_Fireworks",     GUN_ARTIFICE},
+    {30,   120,    S_ITEMAMMO,  "Weapon_Glock",         GUN_GLOCK},
     // superweapons
-    {  1,    4,    S_ITEMSUPERAMMO, "BOMBE NUCLEAIRE", "NUCLEAR MISSLE",    GUN_S_NUKE},
-    {300, 1200,    S_ITEMSUPERAMMO, "GAU-8",           "GAU-8",             GUN_S_GAU8},
-    { 40,  120,    S_ITEMSUPERAMMO, "MINI-ROQUETTES",  "ROCKETS MINIGUN",   GUN_S_ROQUETTES},
-    { 15,   60,    S_ITEMSUPERAMMO, "CAMPOUZE 2000",   "CAMPER 2000",       GUN_S_CAMPOUZE},
+    {  1,    4,    S_ITEMSUPERAMMO, "BOMBE NUCLEAIRE",  GUN_S_NUKE},
+    {300, 1200,    S_ITEMSUPERAMMO, "GAU-8",            GUN_S_GAU8},
+    { 40,  120,    S_ITEMSUPERAMMO, "MINI-ROQUETTES",   GUN_S_ROQUETTES},
+    { 15,   60,    S_ITEMSUPERAMMO, "CAMPOUZE 2000",    GUN_S_CAMPOUZE},
     // items
-    {250,     1000, S_ITEMHEALTH,   "PANACHAY",            "HEALTH",         0},
-    {500,     2500, S_COCHON,       "COCHON GRILLAY",      "HEALTH BOOST",   0},
-    {30000,  45000, S_ITEMSTEROS,   "STEROIDES",           "ROIDS",          B_ROIDS},
-    {40000, 120000, S_ITEMCHAMPIS,  "CHAMPIS",             "SHROOMS",        B_SHROOMS},
-    {40000,  60000, S_ITEMEPO,      "EPO",                 "EPO",            B_EPO},
-    {30000,  90000, S_ITEMJOINT,    "JOINT",               "JOINT",          B_JOINT},
-    {750,      750, S_ITEMBBOIS,    "BOUCLIER EN BOIS",    "WOOD SHIELD",    A_WOOD},
-    {1250,    1250, S_ITEMBFER,     "BOUCLIER DE FER",     "IRON SHIELD",    A_IRON},
-    {2000,    2000, S_ITEMBOR,      "BOUCLIER D'OR",       "GOLD SHIELD",    A_GOLD},
-    {1500,    1500, S_ITEMBMAGNET,  "BOUCLIER MAGNETIQUE", "MAGNET SHIELD",  A_MAGNET},
-    {3000,    3000, S_ITEMARMOUR,   "ARMURE ASSISTEE",     "POWERARMOR",     A_ASSIST},
-    {50,       150, S_ITEMMANA,     "MANA",                "MANA",           }
+    {250,     1000, S_ITEMHEALTH,   "Item_Health",      0},
+    {500,     2500, S_COCHON,       "Item_GrilledPig",  0},
+    {30000,  45000, S_ITEMSTEROS,   "STEROIDES",      B_ROIDS},
+    {40000, 120000, S_ITEMCHAMPIS,  "CHAMPIS",        B_SHROOMS},
+    {40000,  60000, S_ITEMEPO,      "EPO",            B_EPO},
+    {30000,  90000, S_ITEMJOINT,    "JOINT",          B_JOINT},
+    {750,      750, S_ITEMBBOIS,    "BOUCLIER EN BOIS",    A_WOOD},
+    {1250,    1250, S_ITEMBFER,     "BOUCLIER DE FER",    A_IRON},
+    {2000,    2000, S_ITEMBOR,      "BOUCLIER D'OR",    A_GOLD},
+    {1500,    1500, S_ITEMBMAGNET,  "BOUCLIER MAGNETIQUE",  A_MAGNET},
+    {3000,    3000, S_ITEMARMOUR,   "ARMURE ASSISTEE",    A_ASSIST},
+    {50,       150, S_ITEMMANA,     "Item_Mana", 0           }
 };
 
 #define MAXRAYS 25
@@ -418,47 +417,43 @@ static const struct attackinfo { int gun, action, picksound, sound, middistsnd, 
     { GUN_KAMIKAZE,     ACT_SHOOT, S_WPLOADFASTWOOSH, S_EXPL_KAMIKAZE, S_EXPL_FAR, S_EXPL_FAR,   1, 1000, 3000, 1, 1,  0, 1,  10, 120,  1, 250, 500, 5, 1},
     { GUN_ASSISTXPL,    ACT_SHOOT, -1,                S_EXPL_PARMOR,   S_EXPL_FAR, S_EXPL_FAR,   1,  220, 2000, 1, 1,  0, 1,  10,  50,  1, 100, 350, 5, 1},
     { GUN_CACNINJA,     ACT_SHOOT, S_WPLOADSWORD,     S_NINJASABER,            -1,         -1,   8,  400,  800, 1, 1, 30, 0, -10,  36,  1,  25,   0, 0, 0},
-    // no weap for monsters
-    { GUN_NONE,         ACT_SHOOT, -1, -1, -1, -1, 0, 10000, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0}
 };
 
-static const struct guninfo { const char *nameFR, *nameEN, *file, *vwep, *armedescFR, *armedescEN; int maxweapposside, maxweapposup, maxzoomfov, hudrange, attacks[NUMACTS]; } guns[NUMGUNS] =
+static const struct guninfo { const char *ident, *file, *vwep; int maxweapposside, maxweapposup, maxzoomfov, hudrange, attacks[NUMACTS]; } guns[NUMGUNS] =
 {
     //Armes "normales"
-    { "Fusil électrique", "Electric rifle", "fusilelectrique", "worldgun/fusilelectrique",  "un fusil électrique !", "an electric rifle.",                   65,  26, 60, 1000,  { -1, ATK_RAIL_SHOOT }, },
-    { "Fusil plasma", "Plasma rifle", "fusilplasma", "worldgun/fusilplasma",                "un fusil du turfu !", "a futuristic rifle.",                    28,  10, 60,  750,  { -1, ATK_PULSE_SHOOT }, },
-    { "SMAW", "SMAW", "smaw", "worldgun/smaw",                                              "un lance-roquettes de noob.", "a noob rocket launcher.",         8,   8, 85,  500,  { -1, ATK_SMAW_SHOOT }, },
-    { "Minigun", "Minigun", "minigun", "worldgun/minigun",                                  "un minigun cheaté.", "a cheated minigun.",                      36,  11, 80,  750,  { -1, ATK_MINIGUN_SHOOT }, },
-    { "Spockgun", "Pistolet spock","spockgun", "worldgun/spockgun",                         "un pistolet alien", "an alien gun.",                            52,  20, 70,  500,  { -1, ATK_SPOCKGUN_SHOOT }, },
-    { "M32", "M32", "m32", "worldgun/m32",                                                  "une grenade imprévisible.", "an unpredictable grenade",         65,  21, 85,  600,  { -1, ATK_M32_SHOOT }, },
-    { "Lance-flammes", "Flamethrower", "lanceflammes", "worldgun/lanceflammes",             "un lance-flammes !", "a flame thrower!",                        40,  15, 95,  280,  { -1, ATK_LANCEFLAMMES_SHOOT }, },
-    { "UZI", "UZI", "uzi", "worldgun/uzi",                                                  "une mitraillette de gangster.", "a gangster's weapon.",         23,  21, 80,  500,  { -1, ATK_UZI_SHOOT }, },
-    { "FAMAS", "FAMAS", "famas", "worldgun/famas",                                          "une arme made in France", "a weapon made in France.",           54,  14, 70,  750,  { -1, ATK_FAMAS_SHOOT }, },
-    { "Mossberg 500", "Mossberg 500", "mossberg500", "worldgun/mossberg500",                "un fusil à pompe de vieux con.", "an old man's shotgun.",       38,  18, 95,  300,  { -1, ATK_MOSSBERG_SHOOT }, },
-    { "Hydra", "Hydra", "hydra", "worldgun/hydra",                                         "un fusil venant d'un autre jeu !", "a gun from another game!",  44,  20, 95,  300,  { -1, ATK_HYDRA_SHOOT }, },
-    { "SV-98", "SV-98", "sv98", "worldgun/sv98",                                            "un sniper de campeur.", "a camper rifle.",                       1,   3, 30, 2000,  { -1, ATK_SV98_SHOOT }, },
-    { "SKS", "SKS", "sks",  "worldgun/sks",                                                 "une carabine russe !", "a russian rifle!",                       1,   3, 50, 1500,  { -1, ATK_SKS_SHOOT }, },
-    { "Arbalète", "Crossbow", "arbalete", "worldgun/arbalete",                              "une flèche de merde !", "a rotten arrow.",                       1,   3, 45, 1000,  { -1, ATK_ARBALETE_SHOOT }, },
-    { "AK-47", "AK-47", "ak47", "worldgun/ak47",                                            "l'arme à Vladimir Poutine !", "Putin's weapon!",                46,  25, 70,  750,  { -1, ATK_AK47_SHOOT }, },
-    { "GAPB-1", "GAPB-1", "gapb1", "worldgun/gapb1",                                        "un projectile rose de tapette !", "a gay ass pink projectile.", 43,  17, 85,  500,  { -1, ATK_GRAP1_SHOOT }, },
-    { "Feux d'artifice", "Fireworks", "feuartifice","worldgun/feuartifice",                 "une arme de Gilet jaune.", "a yellow vests weapon",             70,  30, 85,  500,  { -1, ATK_ARTIFICE_SHOOT }, },
-    { "Glock", "Glock", "glock", "worldgun/glock",                                          "un pistolet vraiment pourri.", "a very bad gun",                55,  20, 85,  300,  { -1, ATK_GLOCK_SHOOT }, },
+    { "Weapon_ElectricRifle",   "fusilelectrique", "worldgun/fusilelectrique",  65,  26, 60, 1000,  { -1, ATK_RAIL_SHOOT }, },
+    { "Weapon_PlasmaRifle",     "fusilplasma", "worldgun/fusilplasma",          28,  10, 60,  750,  { -1, ATK_PULSE_SHOOT }, },
+    { "Weapon_Smaw",            "smaw", "worldgun/smaw",                         8,   8, 85,  500,  { -1, ATK_SMAW_SHOOT }, },
+    { "Weapon_Minigun",         "minigun", "worldgun/minigun",                  36,  11, 80,  750,  { -1, ATK_MINIGUN_SHOOT }, },
+    { "Weapon_Spockgun",        "spockgun", "worldgun/spockgun",                52,  20, 70,  500,  { -1, ATK_SPOCKGUN_SHOOT }, },
+    { "Weapon_M32",             "m32", "worldgun/m32",                          65,  21, 85,  600,  { -1, ATK_M32_SHOOT }, },
+    { "Weapon_Flamethrower",    "lanceflammes", "worldgun/lanceflammes",        40,  15, 95,  280,  { -1, ATK_LANCEFLAMMES_SHOOT }, },
+    { "Weapon_Uzi",             "uzi", "worldgun/uzi",                          23,  21, 80,  500,  { -1, ATK_UZI_SHOOT }, },
+    { "Weapon_Famas",           "famas", "worldgun/famas",                      54,  14, 70,  750,  { -1, ATK_FAMAS_SHOOT }, },
+    { "Weapon_Mossberg500",     "mossberg500", "worldgun/mossberg500",          38,  18, 95,  300,  { -1, ATK_MOSSBERG_SHOOT }, },
+    { "Weapon_Hydra",           "hydra", "worldgun/hydra",                      44,  20, 95,  300,  { -1, ATK_HYDRA_SHOOT }, },
+    { "Weapon_Sv98",            "sv98", "worldgun/sv98",                         1,   3, 30, 2000,  { -1, ATK_SV98_SHOOT }, },
+    { "Weapon_Sks",             "sks",  "worldgun/sks",                          1,   3, 50, 1500,  { -1, ATK_SKS_SHOOT }, },
+    { "Weapon_Crossbow",        "arbalete", "worldgun/arbalete",                 1,   3, 45, 1000,  { -1, ATK_ARBALETE_SHOOT }, },
+    { "Weapon_Ak47",            "ak47", "worldgun/ak47",                        46,  25, 70,  750,  { -1, ATK_AK47_SHOOT }, },
+    { "Weapon_Gapb1",           "gapb1", "worldgun/gapb1",                      43,  17, 85,  500,  { -1, ATK_GRAP1_SHOOT }, },
+    { "Weapon_Fireworks",       "feuartifice","worldgun/feuartifice",           70,  30, 85,  500,  { -1, ATK_ARTIFICE_SHOOT }, },
+    { "Weapon_Glock",           "glock", "worldgun/glock",                      55,  20, 85,  300,  { -1, ATK_GLOCK_SHOOT }, },
     //Super armes
-    { "Bombe atomique", "Atomic bomb", "missilenorko","worldgun/missilenorko",     "une putain de bombe nucléaire !", "a fucking nuclear missile!",    8,   3, 85, 2000,  { -1, ATK_NUKE_SHOOT }, },
-    { "GAU-8", "GAU-8", "gau8", "worldgun/gau8",                                   "un GAU-8 portable !", "a portable GAU-8!",                        57,  10, 85, 2000,  { -1, ATK_GAU8_SHOOT }, },
-    { "Miniroquettes", "Minirockets", "miniroquettes", "worldgun/miniroquettes",   "un minigun à roquettes !", "a missiles minigun",                  10,  10, 70, 1000,  { -1, ATK_ROQUETTES_SHOOT }, },
-    { "Campouze 2000", "Camper 2000", "campouze2000", "worldgun/campouze2000",     "el famoso Campouze 2000 !", "the famous Camper-2000!",              10,  10, 60, 3000,  { -1, ATK_CAMPOUZE_SHOOT }, },
+    { "Weapon_Nuke",            "missilenorko","worldgun/missilenorko",          8,   3, 85, 2000,  { -1, ATK_NUKE_SHOOT }, },
+    { "Weapon_Gau8",            "gau8", "worldgun/gau8",                        57,  10, 85, 2000,  { -1, ATK_GAU8_SHOOT }, },
+    { "Weapon_Minirockets",     "miniroquettes", "worldgun/miniroquettes",      10,  10, 70, 1000,  { -1, ATK_ROQUETTES_SHOOT }, },
+    { "Weapon_Camper2000",      "campouze2000", "worldgun/campouze2000",        10,  10, 60, 3000,  { -1, ATK_CAMPOUZE_SHOOT }, },
     //Corps à corps
-    { "Epée à 349€", "Buster Sword", "armes_cac/epee349", "worldgun/armes_cac/epee349",                 "l'épée collector à 349 euros.", "a 386$ Buster Sword.",      4, 3, 95, 120,  { -1, ATK_CAC349_SHOOT }, },
-    { "Marteau de bannissement", "Ban hammer", "armes_cac/marteauban", "worldgun/armes_cac/marteauban", "un marteau de bannissement !", "the Ban Hammer.",               4, 3, 95, 120,  { -1, ATK_CACMARTEAU_SHOOT }, },
-    { "Épée de Légende", "Master Sword", "armes_cac/mastersword", "worldgun/armes_cac/mastersword",     "une épée légendaire !", "a legendary sword!",                   4, 3, 95, 120,  { -1, ATK_CACMASTER_SHOOT }, },
-    { "Fléau", "Flail", "armes_cac/fleau", "worldgun/armes_cac/fleau",                                  "une boule piquante !", "a spiky ball.",                         4, 3, 95, 120,  { -1, ATK_CACFLEAU_SHOOT }, },
+    { "Weapon_BusterSword",     "epee349", "worldgun/epee349",                   4,   3, 95,  120,  { -1, ATK_CAC349_SHOOT }, },
+    { "Weapon_BanHammer",       "marteauban", "worldgun/marteauban",             4,   3, 95,  120,  { -1, ATK_CACMARTEAU_SHOOT }, },
+    { "Weapon_MasterSword",     "mastersword", "worldgun/mastersword",           4,   3, 95,  120,  { -1, ATK_CACMASTER_SHOOT }, },
+    { "Weapon_Flail",           "fleau", "worldgun/fleau",                       4,   3, 95,  120,  { -1, ATK_CACFLEAU_SHOOT }, },
     // Armes spéciales aptitudes
-    { "Explosifs", "Explosives", "kamikaze", "worldgun/kamikaze",           "une ceinture d'explosifs !",   "an explosives ISIS's made belt!",           4, 3, 95, 0,  { -1, ATK_KAMIKAZE_SHOOT }, },
-    { "Armure assistée", "Power armor", "assistxpl", "worldgun/assistxpl",  "une armure assistée !",        "powered combat armor!",                     4, 3, 95, 0,  { -1, ATK_ASSISTXPL_SHOOT }, },
-    { "Sabre", "Saber", "armes_cac/sabre", "worldgun/armes_cac/sabre",      "un sabre de ninja !",          "a ninja saber!",                            4, 3, 95, 120,  { -1, ATK_CACNINJA_SHOOT }, },
-    // no weap for monsters
-    { "none?", "none?", "armes_cac/epee349",  "worldgun/armes_cac/epee349", "none?", "none?", 0, 0, 0, 0,  { -1, ATK_NONE }, }
+    { "Weapon_Explosives",      "kamikaze", "worldgun/kamikaze",                 4,   3, 95,    0,  { -1, ATK_KAMIKAZE_SHOOT }, },
+    { "Weapon_PowerArmor",      "assistxpl", "worldgun/assistxpl",               4,   3, 95,    0,  { -1, ATK_ASSISTXPL_SHOOT }, },
+    { "Weapon_Sabre",           "sabre", "worldgun/sabre",                       4,   3, 95,  120,  { -1, ATK_CACNINJA_SHOOT }, },
 };
 
 //Définition des aptitudes

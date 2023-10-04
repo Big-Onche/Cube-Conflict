@@ -3033,6 +3033,12 @@ char *execidentstr(const char *name, bool lookup)
     return id ? executestr(id, NULL, 0, lookup) : NULL;
 }
 
+const char *readstr(const char *ident)
+{
+    executestr(tempformatstring("getsoftstr $%s %d", ident, GAME_LANG));
+    return getalias("strresult");
+}
+
 int execute(const uint *code)
 {
     tagval result;

@@ -2240,7 +2240,7 @@ namespace game
                                               t==I_SUPERARME ? "\faLA SUPER-ARME EST BIENTÔT PRÊTE À ANNIHILER" :
                                               t==50 ? "\faCHANGEMENT D'ARME DANS 5 SECONDES !" : "" );
                 }
-                if(t==50) conoutf(CON_HUDCONSOLE, GAME_LANG ? "\fdNext weapon: \fc%s" : "\fdArme suivante : \fc%s", GAME_LANG ? itemstats[weap].name_en : itemstats[weap].name_fr);
+                if(t==50) conoutf(CON_HUDCONSOLE, GAME_LANG ? "\fdNext weapon: \fc%s" : "\fdArme suivante : \fc%s", readstr(itemstats[weap].ident));
                 conoutf(CON_GAMEINFO, announcemsg);
                 break;
             }
