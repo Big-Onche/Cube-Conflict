@@ -63,25 +63,24 @@ namespace game
             if(!canlaunchability(d, ability)) return; //check for basic guards
             if(!d->abilityready[ability] || d->mana < aptitudes[d->aptitude].abilities[ability].manacost) { if(d==player1) playSound(S_SORTIMPOSSIBLE); return; } //check for game vars (client sided)
             addmsg(N_REQABILITY, "rci", d, ability); //server sided game vars check
-            d->abilityready[ability] = false;
             return; //can stop after this, cuz server call this func with !request
         }
         //if all good, we let the ability begin
+        d->abilityready[ability] = false;
         d->lastability[ability] = totalmillis;
         abilityeffect(d, ability);
         if(d==player1) updateStat(1, STAT_ABILITES);
     }
 
     ICOMMAND(aptitude, "i", (int *ability),  // player1 abilities commands
-        if(player1->aptitude != APT_KAMIKAZE) launchAbility(player1, *ability, true);
-        else *ability == ABILITY_1 ? gunselect(GUN_KAMIKAZE, player1) : launchAbility(player1, *ability, true);
+        if(player1->aptitude != APT_KAMIKAZE) launchAbility(player1, *ability);
+        else *ability == ABILITY_1 ? gunselect(GUN_KAMIKAZE, player1) : launchAbility(player1, *ability);
     );
 
     char *getdisguisement(int seed) //spy's ability 2
     {
-        defformatstring(alias, "disguise_%d", seed);
         static char dir[64];
-        const char *name = getalias(alias);
+        const char *name = getalias(tempformatstring("disguise_%d", seed));
         if(seed<0 || seed>3) name = "mapmodel/caisses/caissebois";
         formatstring(dir, "%s", name);
         return dir;
@@ -103,7 +102,7 @@ namespace game
             if(hasAbilityEnabled(d, i))
             {
                 vec playerVel = d->vel;
-                if(d!=hudplayer() && !thirdperson) updateSoundPosition(d->entityId, d->o, playerVel.div(vec(75, 75, 75)), PL_ABI_SND_1+i);
+                if(d!=hudplayer()) updateSoundPosition(d->entityId, d->o, playerVel.div(vec(75, 75, 75)), PL_ABI_SND_1+i);
             }
             else continue; // no need to go further in the loop if ability no enabled
 
