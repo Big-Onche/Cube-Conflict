@@ -1153,7 +1153,7 @@ int getclockmillis()
 
 VAR(numcpus, 1, 1, 16);
 
-VARFP(GAME_LANG, 0, 0, 1,
+VARFP(GAME_LANG, 0, 0, 2,
     execfile("config/keymap.cfg");
     execfile("config/default_binds.cfg");
 );

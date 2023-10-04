@@ -1574,7 +1574,7 @@ namespace ai
                 {
                     if(d->ai->weappref >= 0 && d->ai->weappref < NUMGUNS)
                     {
-                        particle_textcopy(pos, readstr(itemstats[d->ai->weappref].ident), PART_TEXT, 1);
+                        particle_textcopy(pos, readstr(guns[d->ai->weappref].ident), PART_TEXT, 1);
                         pos.z += 2;
                     }
                     gameent *e = getclient(d->ai->enemy);

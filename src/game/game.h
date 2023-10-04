@@ -453,7 +453,7 @@ static const struct guninfo { const char *ident, *file, *vwep; int maxweappossid
     // Armes spéciales aptitudes
     { "Weapon_Explosives",      "kamikaze", "worldgun/kamikaze",                 4,   3, 95,    0,  { -1, ATK_KAMIKAZE_SHOOT }, },
     { "Weapon_PowerArmor",      "assistxpl", "worldgun/assistxpl",               4,   3, 95,    0,  { -1, ATK_ASSISTXPL_SHOOT }, },
-    { "Weapon_Sabre",           "sabre", "worldgun/sabre",                       4,   3, 95,  120,  { -1, ATK_CACNINJA_SHOOT }, },
+    { "Weapon_Saber",           "sabre", "worldgun/sabre",                       4,   3, 95,  120,  { -1, ATK_CACNINJA_SHOOT }, },
 };
 
 //Définition des aptitudes
