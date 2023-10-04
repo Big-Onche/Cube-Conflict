@@ -222,11 +222,11 @@ namespace entities
             e = findentity(TELEDEST, e+1);
             if(e==beenhere || e<0) { conoutf(CON_WARN, "no teleport destination for tag %d", tag); return; }
             if(beenhere<0) beenhere = e;
-            if(ents[e]->attr2==tag)
+            if(ents[e]->attr1==tag)
             {
                 teleporteffects(d, n, e, true);
                 d->o = ents[e]->o;
-                d->yaw = ents[e]->attr1;
+                d->yaw = ents[e]->attr2;
                 if(ents[e]->attr3 > 0)
                 {
                     vec dir;
@@ -643,11 +643,6 @@ namespace entities
             case FLAG:
                 e.attr5 = e.attr4;
                 e.attr4 = e.attr3;
-            case TELEDEST:
-                e.attr3 = e.attr2;
-                e.attr2 = e.attr1;
-                e.attr1 = (int)player1->yaw;
-                break;
             case RESPAWNPOINT:
                 e.attr1 = (int)player1->yaw;
         }
@@ -658,7 +653,7 @@ namespace entities
         switch(e.type)
         {
             case TELEPORT:
-                loopv(ents) if(ents[i]->type == TELEDEST && e.attr1==ents[i]->attr2)
+                loopv(ents) if(ents[i]->type == TELEDEST && e.attr1==ents[i]->attr1)
                 {
                     renderentarrow(e, vec(ents[i]->o).sub(e.o).normalize(), e.o.dist(ents[i]->o));
                     break;
