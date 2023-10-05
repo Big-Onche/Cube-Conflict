@@ -757,7 +757,7 @@ namespace game
             if(actor==player1) ////////////////////TU as tué quelqu'un////////////////////
             {
                 playSound(S_KILL, NULL, 0, 0, SND_FIXEDPITCH|SND_NOTIFICATION);
-                conoutf(CON_HUDCONSOLE, "%s \fc%s \f7! \f4(%.1fm)", GAME_LANG ? "You killed" : "Tu as tué", dname, killdistance);
+                conoutf(CON_HUDCONSOLE, "%s \fc%s \f7! \f4(%.1fm)", readstr("GameMessage_YouKilled"), dname, killdistance);
                 conoutf(contype, "\fd%s\f7 > \fl%s\f7 > %s \fl(%.1fm)", player1->name, readstr(guns[atk].ident), dname, killdistance);
 
                 if(IS_ON_OFFICIAL_SERV) //now let's check for shittons of achievements if playing online
@@ -811,16 +811,17 @@ namespace game
             }
 
             ////////////////////Informe que quelqu'un est chaud////////////////////
-            defformatstring(verb, "%s", GAME_LANG ? (actor==player1 ? "are" : "is") : (actor==player1 ? "es" : "est"));
-            defformatstring(name, "%s", actor==player1 ? "Tu" : aname);
+            defformatstring(verb, "%s", (actor==player1 ? readstr("GameMessage_Are") : readstr("GameMessage_Is") ));
+            defformatstring(name, "%s", actor==player1 ? readstr("GameMessage_You")  : aname);
 
-            switch(actor->killstreak)
+            if(actor->killstreak == 3 || actor->killstreak == 5 || actor->killstreak == 7 || actor->killstreak == 10 || actor->killstreak == 15)
             {
-                case 3: conoutf(CON_HUDCONSOLE, "%s\f7 %s %s", name, verb, GAME_LANG ? "hot! (Triple kill)" : "chaud ! (Triplette)"); break;
-                case 5: conoutf(CON_HUDCONSOLE, "%s\f7 %s %s", name, verb, GAME_LANG ? "killing it! (Pentakill)" : "dominant ! (Pentaplette)"); break;
-                case 7: conoutf(CON_HUDCONSOLE, "%s\f7 %s %s", name, verb, GAME_LANG ? "instoppable! (Heptakill!)" : "inarrêtable ! (Heptaplette)"); break;
-                case 10: conoutf(CON_HUDCONSOLE, "%s\f7 %s %s", name, verb, GAME_LANG ? "invincible! (Decakill!)" : "invincible ! (Décaplette)"); break;
-                case 15: conoutf(CON_HUDCONSOLE, "%s\f7 %s %s", name, verb, GAME_LANG ? "as god! (Pentakaidecakill!)" : "un dieu ! (Pentakaidecaplette)"); break;
+                defformatstring(KillStreakIdent, "GameMessage_Kill%s", actor->killstreak == 3 ? "X3" :
+                                                                       actor->killstreak == 5 ? "X5" :
+                                                                       actor->killstreak == 7 ? "X7" :
+                                                                       actor->killstreak == 10 ? "X10" : "X15");
+
+                conoutf(CON_HUDCONSOLE, "%s\f7 %s %s", name, verb, readstr(KillStreakIdent));
             }
         }
         deathstate(d);
@@ -851,9 +852,11 @@ namespace game
             if(player1->totaldamage/10 > 10000) unlockAchievement(ACH_DESTRUCTEUR);
 
             defformatstring(flags, "%d", player1->flags);
+            /*
             conoutf(CON_GAMEINFO, GAME_LANG ? "\faGAME OVER!" : "\faFIN DE LA PARTIE !");
             if(GAME_LANG) conoutf(CON_GAMEINFO, "\f2Kills : %d | Deaths : %d | Total damage : %d | Accuracy : %d%% %s %s", player1->frags, player1->deaths, player1->totaldamage/10, accuracy, m_ctf ? "| Flags :" : "", m_ctf ? flags : "");
             else conoutf(CON_GAMEINFO, "\f2Éliminations : %d | Morts : %d | Dégats infligés : %d | Précision : %d%% %s %s", player1->frags, player1->deaths, player1->totaldamage/10, accuracy, m_ctf ? "| Drapeaux :" : "", m_ctf ? flags : "");
+            */
             if(stat[STAT_DAMMAGERECORD] < player1->totaldamage/10) updateStat(player1->totaldamage/10, STAT_DAMMAGERECORD, true);
             showscores(true);
             disablezoom();

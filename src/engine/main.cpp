@@ -149,7 +149,7 @@ string backgroundmapname = "";
 string backgroundcaption = "";
 Texture *backgroundmapshot = NULL;
 char *backgroundmapinfo = NULL;
-char *backgroundastuce = NULL;
+char *backgroundtip = NULL;
 
 void bgquad(float x, float y, float w, float h, float tx, float ty, float tw, float th)
 {
@@ -170,7 +170,7 @@ ICOMMAND(getcurmapsel, "s", (char *s),
     formatstring(mapselimg, "%s", s);
 );
 
-void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, const char *mapname, const char *mapinfo, const char *astuce, bool force = false)
+void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, const char *mapname, const char *mapinfo, const char *tip, bool force = false)
 {
     static int lastupdate = -1, lastw = -1, lasth = -1;
 
@@ -227,7 +227,7 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
             pophudmatrix();
         }
 
-        if(astuce)
+        if(tip)
         {
             int tw = infowidth+2;
             float tsz = 0.04f*min(screenw, screenh)/100,
@@ -236,7 +236,7 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
             hudmatrix.translate(tx, ty, 0);
             hudmatrix.scale(tsz, tsz, 1);
             flushhudmatrix();
-            draw_text(astuce, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, -1, infowidth+2);
+            draw_text(tip, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, -1, infowidth+2);
             pophudmatrix();
         }
     }
@@ -288,7 +288,7 @@ void setbackgroundinfo(const char *caption = NULL, Texture *mapshot = NULL, cons
     }
 }
 
-void renderbackground(const char *caption, Texture *mapshot, const char *mapname, const char *mapinfo, const char *astuce, bool force, bool needsound)
+void renderbackground(const char *caption, Texture *mapshot, const char *mapname, const char *mapinfo, const char *tip, bool force, bool needsound)
 {
     if(!inbetweenframes && !force) return;
 
@@ -299,13 +299,13 @@ void renderbackground(const char *caption, Texture *mapshot, const char *mapname
 
     if(force)
     {
-        renderbackgroundview(w, h, caption, mapshot, mapname, mapinfo, astuce, true);
+        renderbackgroundview(w, h, caption, mapshot, mapname, mapinfo, tip, true);
         return;
     }
 
     loopi(3)
     {
-        renderbackgroundview(w, h, caption, mapshot, mapname, mapinfo, astuce);
+        renderbackgroundview(w, h, caption, mapshot, mapname, mapinfo, tip);
         swapbuffers(false);
     }
 
@@ -313,7 +313,7 @@ void renderbackground(const char *caption, Texture *mapshot, const char *mapname
     copystring(backgroundcaption, caption ? caption : "");
     backgroundmapshot = mapshot;
     if(mapinfo != backgroundmapinfo) { DELETEA(backgroundmapinfo); if(mapinfo) backgroundmapinfo = newstring(mapinfo); }
-    if(astuce != backgroundastuce) { DELETEA(backgroundastuce); if(astuce) backgroundastuce = newstring(astuce); }
+    if(tip != backgroundtip) { DELETEA(backgroundtip); if(tip) backgroundtip = newstring(tip); }
     setbackgroundinfo(caption, mapshot, mapname, mapinfo);
 }
 
@@ -321,18 +321,7 @@ void restorebackground(int w, int h, bool force)
 {
     if(renderedframe && !force) return;
     setbackgroundinfo();
-    renderbackgroundview(w, h, backgroundcaption[0] ? backgroundcaption : NULL, backgroundmapshot, backgroundmapname[0] ? backgroundmapname : NULL, backgroundmapinfo, backgroundastuce);
-}
-
-vector<char *> fancytexts_en; vector<char *> fancytexts_fr;
-ICOMMAND(loadingtext, "ss", (char *fancytext_en, char *fancytext_fr), { fancytexts_en.add(newstring(fancytext_en)); fancytexts_fr.add(newstring(fancytext_fr)); });
-
-const char *getfancytext()
-{
-    static char text[1000];
-    text[0] = '\0';
-    if(!fancytexts_en.empty() && !fancytexts_fr.empty()) strcat(text, GAME_LANG ? fancytexts_en[rnd(fancytexts_en.length())] : fancytexts_fr[rnd(fancytexts_fr.length())] );
-    return text;
+    renderbackgroundview(w, h, backgroundcaption[0] ? backgroundcaption : NULL, backgroundmapshot, backgroundmapname[0] ? backgroundmapname : NULL, backgroundmapinfo, backgroundtip);
 }
 
 float loadprogress = 0;
@@ -342,7 +331,7 @@ int texttimer;
 
 void renderprogressview(int w, int h, float bar, const char *text, bool calc)   // also used during loading
 {
-    if(islaunching) { formatstring(loadingtext, "%s", getfancytext()); return; }
+    if(islaunching) { formatstring(loadingtext, "%s", readstr("Loading_Bar_Quotes", rnd(14), true)); return; }
     if(!calc) bar = loadprogress/100.f;
 
     hudmatrix.ortho(0, w, h, 0, -1, 1);
@@ -387,7 +376,7 @@ void renderprogressview(int w, int h, float bar, const char *text, bool calc)   
         pushhudtranslate(bx+sw, by + (bh - FONTH*tsz)/2, tsz);
 
         texttimer += curtime;
-        if(texttimer>6000) {formatstring(loadingtext, "%s", getfancytext()); texttimer = 0;}
+        if(texttimer > 4000) {formatstring(loadingtext, "%s", readstr("Loading_Bar_Quotes", rnd(14), true)); texttimer = 0;}
 
         defformatstring(fancytext, "%.0f%% - %s...", loadprogress, loadingtext);
         draw_text(calc ? text : fancytext, 0, 0);

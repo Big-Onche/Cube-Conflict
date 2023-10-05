@@ -621,7 +621,7 @@ extern bool grabinput, minimized;
 extern bool interceptkey(int sym);
 
 extern float loadprogress;
-extern void renderbackground(const char *caption = NULL, Texture *mapshot = NULL, const char *mapname = NULL, const char *mapinfo = NULL, const char *astuce = NULL, bool force = false, bool needsound = false);
+extern void renderbackground(const char *caption = NULL, Texture *mapshot = NULL, const char *mapname = NULL, const char *mapinfo = NULL, const char *tip = NULL, bool force = false, bool needsound = false);
 extern void renderprogress(float bar, const char *text = "", bool background = false, bool calc = false);
 
 extern void getframemillis(float &avg, float &best, float &worst);

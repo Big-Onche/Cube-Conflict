@@ -699,17 +699,6 @@ bool save_world(const char *mname, bool nolms)
     return true;
 }
 
-vector<char *> tips_en; vector<char *> tips_fr;
-ICOMMAND(tip, "ss", (char *tip_en, char *tip_fr), { tips_en.add(newstring(tip_en)); tips_fr.add(newstring(tip_fr)); });
-
-const char *gettip()
-{
-    static char tip[1000];
-    tip[0] = '\0';
-    if(!tips_en.empty() && !tips_fr.empty()) strcat(tip, GAME_LANG ? tips_en[rnd(tips_en.length())] : tips_fr[rnd(tips_fr.length())] );
-    return tip;
-}
-
 static uint mapcrc = 0;
 
 uint getmapcrc() { return mapcrc; }
@@ -790,7 +779,7 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     }
     if(dbgvars) conoutf(CON_DEBUG, "read %d vars", hdr.numvars);
 
-    renderbackground(GAME_LANG ? "Loading..." : "Chargement...", mapshot, mname, game::getmapinfo(), gettip());
+    renderbackground(GAME_LANG ? "Loading..." : "Chargement...", mapshot, mname, game::getmapinfo(), readstr("Loading_Screen_Tips", rnd(17), true));
 
     setvar("mapversion", hdr.version, true, false);
 
