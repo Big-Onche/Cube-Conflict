@@ -23,10 +23,10 @@ The mission is to deliver a free, open-source, and exhilarating gaming experienc
 ## 🚧 Roadmap for the First Release
 - 🟩🟩🟩🟩🟩 (Done!) Moving to OpenAL soft instead of SDL Mixer
 - 🟩🟩⬛⬛⬛ More maps!
-- 🟩🟩⬛⬛⬛ Simplified map editing with a dedicated GUI.
+- 🟩🟩🟩⬛⬛ Simplified map editing with a dedicated GUI.
 - 🟩🟩🟩🟩⬛ Completion of the tutorial map.
 - 🟩🟩🟩⬛⬛ Seamless integration of stats and achievements with Steam.
-- 🟩⬛⬛⬛⬛ Support for multiple language translations.
+- 🟩🟩🟩⬛⬛ Support for multiple language translations.
 
 ## 📅 Upcoming Features
 - Advanced tools enhancing e-sports with a seamless server management system.
