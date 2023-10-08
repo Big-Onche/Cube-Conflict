@@ -114,14 +114,14 @@ bool initwarning(const char *desc, int level, int type)
 #define SCR_MAXH 10000
 #define SCR_DEFAULTW 1280
 #define SCR_DEFAULTH 720
-VARFN(screenw, scr_w, SCR_MINW, -1, SCR_MAXW, initwarning(GAME_LANG ? "Screen resolution" : "Résolution d'écran"));
-VARFN(screenh, scr_h, SCR_MINH, -1, SCR_MAXH, initwarning(GAME_LANG ? "Screen resolution" : "Résolution d'écran"));
+VARFN(screenw, scr_w, SCR_MINW, -1, SCR_MAXW, initwarning(readstr("Setting_ScreenResolution")));
+VARFN(screenh, scr_h, SCR_MINH, -1, SCR_MAXH, initwarning(readstr("Setting_ScreenResolution")));
 
 void writeinitcfg()
 {
     stream *f = openutf8file("config/init.cfg", "w");
     if(!f) return;
-    f->printf("// automatically written on exit, DO NOT MODIFY\n// modify settings in game\n");
+    f->printf("// init config file\n");
     extern int fullscreen;
     f->printf("fullscreen %d\n", fullscreen);
     f->printf("screenw %d\n", scr_w);
@@ -560,7 +560,7 @@ void screenres(int w, int h)
     }
     else
     {
-        initwarning(GAME_LANG ? "Screen resolution" : "Résolution d'écran");
+        initwarning(readstr("Setting_ScreenResolution"));
     }
 }
 

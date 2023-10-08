@@ -645,6 +645,6 @@ ICOMMAND(playmusic, "i", (int *i), playMusic(*i));
 
 const char *getmapsoundname(int n)
 {
-    if(n < 0 || !mapSounds[n].loaded) return GAME_LANG ? "\fcInvalid ID" : "\fcID Invalide";
+    if(n < 0 || !mapSounds[n].loaded) return readstr("Misc_InvalidId");
     else return mapSounds[n].soundPath;
 }

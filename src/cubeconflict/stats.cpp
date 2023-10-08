@@ -19,7 +19,7 @@ void calcPlayerLevel()
         if(isconnected())
         {
             playSound(S_LEVELUP, NULL, 0, 0, SND_FIXEDPITCH|SND_NOTIFICATION);
-            conoutf(CON_HUDCONSOLE, GAME_LANG ? "\f1LEVEL UP! \fi(Lvl %d)" : "\f1NIVEAU SUPÉRIEUR ! \fi(Niveau %d)", currentLevel);
+            conoutf(CON_HUDCONSOLE, "\f1%s \fi(%s %d)", readstr("GameMessage_LevelUp"), readstr("Stat_Level"), currentLevel);
         }
     }
 
@@ -85,7 +85,7 @@ ICOMMAND(getstatlogo, "i", (int *statID), //gets stat logo for ui
 );
 
 ICOMMAND(getstatinfo, "ii", (int *statID, bool *onlyvalue),
-    if(*statID<0 || *statID>=NUMSTATS) { result(GAME_LANG ? "Invalid ID" : "ID Invalide"); return; }
+    if(*statID<0 || *statID>=NUMSTATS) { result(readstr("Misc_InvalidId")); return; }
     string val;
     switch(*statID)
     {
@@ -195,7 +195,7 @@ void unlockAchievement(int achID)
         #ifdef _WIN32
             if(IS_USING_STEAM)
             {
-                SteamUserStats()->SetAchievement(achievements[achID].achname); //Met le succès à jour côté steam
+                SteamUserStats()->SetAchievement(achievementNames[achID]); //Met le succès à jour côté steam
                 SteamUserStats()->StoreStats();
             }
         #endif
@@ -205,7 +205,7 @@ void unlockAchievement(int achID)
             achievement[achID] = true;
             addReward(25, 25);
             playSound(S_ACHIEVEMENTUNLOCKED, NULL, 0, 0, SND_FIXEDPITCH|SND_NOTIFICATION);
-            conoutf(CON_HUDCONSOLE, GAME_LANG ? "\f1ACHIEVEMENT UNLOCKED! \fi(%s)" : "\f1SUCCES DÉBLOQUÉ ! \fi(%s)", GAME_LANG ? achievements[achID].achnicenameEN : achievements[achID].achnicenameFR);
+            conoutf(CON_HUDCONSOLE, "\f1%s\fi (%s)", readstr("GameMessage_AchievementUnlocked"), readstr("Stat_Achievements", achID, true));
         }
     }
 }
@@ -216,7 +216,7 @@ void getsteamachievements() //Récupère les succès enregistrés sur steam
         int achID = 0;
         loopi(NUMACHS)
         {
-            SteamUserStats()->GetAchievement(achievements[achID].achname, &achievement[achID]);
+            SteamUserStats()->GetAchievement(achievementNames[achID], &achievement[achID]);
             achID++;
         }
     #endif
@@ -238,17 +238,18 @@ ICOMMAND(getachievementslogo, "i", (int *achID), //gets achievement logo for ui
     if(*achID<0 || *achID>=NUMACHS) result("media/texture/game/notexture.png");
     else
     {
-        defformatstring(logodir, "media/interface/achievements/%s%s.jpg", achievements[*achID].achname, isLocked(*achID) ? "_no" : "_yes");
+        defformatstring(logodir, "media/interface/achievements/%s%s.jpg", achievementNames[*achID], isLocked(*achID) ? "_no" : "_yes");
         result(logodir);
     }
 );
 
-ICOMMAND(getachievementname, "i", (int *achID), //gets achievement name for ui
-    if(*achID<0 || *achID>=NUMACHS) result(GAME_LANG ? "Invalid ID" : "ID Invalide");
-    else result(GAME_LANG ? achievements[*achID].achnicenameEN : achievements[*achID].achnicenameFR);
-);
+ICOMMAND(getachievementstate, "i", (int *achID), intret(!isLocked(*achID)); );
 
-ICOMMAND(getachievementcolor, "i", (int *achID), //gets achievement color status for ui
-    if(*achID<0 || *achID>=NUMACHS) intret(0x777777);
-    else intret(isLocked(*achID) ? 0xFFC6C6 : 0xD0F3D0);
-);
+const char *achievementNames[NUMACHS] = {
+    "ACH_TRIPLETTE", "ACH_PENTAPLETTE", "ACH_DECAPLETTE", "ACH_ATOME", "ACH_WINNER", "ACH_ENVOL", "ACH_POSTULANT", "ACH_STAGIAIRE",
+    "ACH_SOLDAT", "ACH_LIEUTENANT", "ACH_MAJOR", "ACH_BEAUTIR", "ACH_DEFONCE", "ACH_PRECIS", "ACH_KILLASSIST", "ACH_KILLER", "ACH_SACAPV",
+    "ACH_CADENCE", "ACH_1HPKILL", "ACH_MAXSPEED", "ACH_INCREVABLE", "ACH_CHANCE", "ACH_CPASBIEN", "ACH_SUICIDEFAIL", "ACH_FKYEAH", "ACH_RICHE",
+    "ACH_TUEURFANTOME", "ACH_EPOFLAG", "ACH_M32SUICIDE", "ACH_ESPIONDEGUISE", "ACH_FKYOU", "ACH_ABUS", "ACH_DESTRUCTEUR", "ACH_RAGE",
+    "ACH_DAVIDGOLIATH", "ACH_LANCEEPO", "ACH_PASLOGIQUE", "ACH_JUSTEPOUR", "ACH_BRICOLEUR", "ACH_NOSCOPE", "ACH_THUGPHYSIQUE", "ACH_SPAAACE",
+    "ACH_PARKOUR", "ACH_EXAM", "ACH_UNDECIDED", "ACH_WASHAKIE", "ACH_NATURO", "ACH_TMMONEY", "ACH_NICE", "ACH_TAKETHAT", "ACH_SURVIVOR", "ACH_ELIMINATOR"
+};

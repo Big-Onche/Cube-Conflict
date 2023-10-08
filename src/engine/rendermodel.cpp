@@ -356,7 +356,7 @@ void mapmodelreset(int *n)
     mapmodels.shrink(clamp(*n, 0, mapmodels.length()));
 }
 
-const char *mapmodelname(int i) { return mapmodels.inrange(i) ? mapmodels[i].name : GAME_LANG ? "\fcInvalid ID" : "\fcID Invalide"; }
+const char *mapmodelname(int i) { return mapmodels.inrange(i) ? mapmodels[i].name : readstr("Misc_InvalidId"); }
 
 ICOMMAND(mmodel, "s", (char *name), mapmodel(name));
 COMMAND(mapmodel, "s");
