@@ -732,13 +732,13 @@ namespace game
 
         if(m_teammode && teamcolorfrags)
         {
-            dname = teamcolorname(d, GAME_LANG ? "You" : "Tu");
-            aname = teamcolorname(actor, GAME_LANG ? "You" : "Tu");
+            dname = teamcolorname(d, readstr("GameMessage_You"));
+            aname = teamcolorname(actor, readstr("GameMessage_You"));
         }
         else
         {
-            dname = colorname(d, NULL, GAME_LANG ? "\fdYou" : "\fdTu", "\fc");
-            aname = colorname(actor, NULL, GAME_LANG ? "\fdYou" : "\fdTu", "\fc");
+            dname = colorname(d, NULL, "\fd%s\fc", readstr("GameMessage_You"));
+            aname = colorname(actor, NULL, readstr("GameMessage_You"));
         }
 
         if(d==actor) // Suicide ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -821,7 +821,7 @@ namespace game
                                                                        actor->killstreak == 7 ? "X7" :
                                                                        actor->killstreak == 10 ? "X10" : "X15");
 
-                conoutf(CON_HUDCONSOLE, "%s\f7 %s %s", name, verb, readstr(KillStreakIdent));
+                conoutf(CON_HUDCONSOLE, "%s\f7%s %s", name, verb, readstr(KillStreakIdent));
             }
         }
         deathstate(d);
@@ -908,7 +908,7 @@ namespace game
         gameent *d = clients[cn];
         if(d)
         {
-            if(notify && d->name[0]) conoutf("\f7%s\f4 %s", colorname(d), GAME_LANG ? "left the game" : "a quitté la partie");
+            if(notify && d->name[0]) conoutf("\f7%s\f4 %s", colorname(d), readstr("GameMessage_Left"));
             removeweapons(d);
             removetrackedparticles(d);
             removetrackeddynlights(d);
@@ -933,7 +933,7 @@ namespace game
     void initclient()
     {
         player1 = spawnstate(new gameent);
-        filtertext(player1->name, GAME_LANG ? "BadUsername" : "PseudoPourri", false, false, MAXNAMELEN);
+        filtertext(player1->name, readstr("Misc_BadUsername"), false, false, MAXNAMELEN);
         players.add(player1);
         player1->aptitude = player1_aptitude;
     }
@@ -962,12 +962,6 @@ namespace game
             cmode->preload();
             cmode->setup();
         }
-
-        if(premission) conoutf(CON_HUDCONSOLE, GAME_LANG ? "\fcThe game is about to begin" : "\fcLa partie va commencer !");
-        conoutf(CON_HUDCONSOLE, GAME_LANG ? "\f2Gamemode is: %s": "\f2Le mode de jeu est : %s", server::modename(gamemode));
-
-        const char *info = m_valid(gamemode) ? GAME_LANG ? gamemodes[gamemode - STARTGAMEMODE].nameEN : gamemodes[gamemode - STARTGAMEMODE].nameFR : NULL;
-        if(showmodeinfo && info) conoutf(CON_GAMEINFO, "\f0%s", info);
 
         syncplayer();
 

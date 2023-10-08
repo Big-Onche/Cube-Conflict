@@ -65,7 +65,7 @@ namespace game
     );
 
     ICOMMAND(hudxpcount, "", (),
-        defformatstring(s, "%d / %d XP (%s %d)", totalXpNeeded - (xpForNextLevel - stat[STAT_XP]), totalXpNeeded, GAME_LANG ? "Lvl" : "Niv", stat[STAT_LEVEL]);
+        defformatstring(s, "%d / %d XP (%s %d)", totalXpNeeded - (xpForNextLevel - stat[STAT_XP]), totalXpNeeded, readstr("Stat_Level"), stat[STAT_LEVEL]);
         result(s);
     );
 
@@ -90,7 +90,7 @@ namespace game
                 if(colortimer>1000) colortimer = 0;
                 if(colortimer > 500) formatstring(col, "\fc");
             }
-            if(intermission) formatstring(s, GAME_LANG ? "\fcEND" : "\fcFINI");
+            if(intermission) formatstring(s, readstr("Hud_End"));
             else formatstring(s, "%s%d:%02d", col, secs/60, secs%60);
         }
         result(s);
@@ -100,7 +100,7 @@ namespace game
         if(player1->state==CS_SPECTATOR)
         {
             string s;
-            if(!followingplayer()) formatstring(s, "%s", GAME_LANG ? "Free camera" : "Caméra libre");
+            if(!followingplayer()) formatstring(s, "%s", readstr("Hud_FreeCamera"));
             else
             {
                 formatstring(s, "%s", followingplayer(player1)->name);

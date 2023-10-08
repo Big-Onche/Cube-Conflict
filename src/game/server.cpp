@@ -3209,7 +3209,7 @@ namespace server
                 {
                     getstring(text, p);
                     filtertext(text, text, false, false, MAXNAMELEN);
-                    if(!text[0]) copystring(text, GAME_LANG ? "BadUsername" : "PseudoPourri");
+                    if(!text[0]) copystring(text, readstr("Misc_BadUsername"));
                     copystring(ci->name, text, MAXNAMELEN+1);
                     ci->playermodel = getint(p);
                     ci->playercolor = getint(p);
@@ -3567,7 +3567,7 @@ namespace server
                 QUEUE_MSG;
                 getstring(text, p);
                 filtertext(ci->name, text, false, false, MAXNAMELEN);
-                if(!ci->name[0]) copystring(ci->name, GAME_LANG ? "BadUsername" : "PseudoPourri");
+                if(!ci->name[0]) copystring(ci->name, readstr("Misc_BadUsername"));
                 QUEUE_STR(ci->name);
                 break;
             }

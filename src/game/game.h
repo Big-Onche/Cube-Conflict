@@ -160,22 +160,16 @@ enum
     M_TUTORIAL   = 1<<17,
 };
 
-static struct gamemodeinfo
+static struct gamemodeinfo { const char *nameFR; const char *nameEN; int flags; } gamemodes[] =
 {
-    const char *nameFR;
-    const char *nameEN;
-    int flags;
-} gamemodes[] =
-{
-    { "Invasion", "Invasion", M_DMSP | M_LOCAL },               // -3
+    { "Invasion", "Invasion", M_DMSP | M_LOCAL },       // -3
     { "Tutoriel", "Tutorial", M_TUTORIAL | M_LOCAL },   // -2
     { "SP", "SP", M_CLASSICSP | M_LOCAL },              // -1
     { "demo", "demo", M_DEMO | M_LOCAL },               // 0
     { "Editeur de maps", "Map editor", M_EDIT },        // 1
-
     //MODE 1, 2, 3, 4
     { "Tue Les Tous (Collecte d'armes)",   "Deathmatch (Weapon pickup)",        M_LOBBY },
-    { "Tue Les Tous (Armes aléatoire)",   "Deathmatch (Random weapons)",        M_RANDOM | M_NOAMMO | M_MUNINFINIE},
+    { "Tue Les Tous (Armes aléatoire)",    "Deathmatch (Random weapons)",       M_RANDOM | M_NOAMMO | M_MUNINFINIE},
     { "Tue Les Tous (Armes multiples)",    "Deathmatch (Multiple weapons)",     M_FULLSTUFF},
     { "Tue Les Tous (Armes identiques)",   "Deathmatch (Identical weapons)",    M_IDENTIQUE | M_NOAMMO | M_MUNINFINIE},
     //MODE 5, 6, 7, 8

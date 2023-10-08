@@ -202,7 +202,7 @@ namespace game
     void switchname(const char *name)
     {
         filtertext(player1->name, name, false, false, MAXNAMELEN);
-        if(!player1->name[0]) formatstring(player1->name, GAME_LANG ? "BadUsername" : "PseudoPourri");
+        if(!player1->name[0]) formatstring(player1->name, readstr("Misc_BadUsername"));
         addmsg(N_SWITCHNAME, "rs", player1->name);
     }
     void printname()
@@ -1557,7 +1557,7 @@ namespace game
                 }
                 getstring(text, p);
                 filtertext(text, text, false, false, MAXNAMELEN);
-                if(!text[0]) copystring(text, GAME_LANG ? "BadUsername" : "PseudoPourri");
+                if(!text[0]) copystring(text, readstr("Misc_BadUsername"));
                 if(d->name[0])          // already connected
                 {
                     if(strcmp(d->name, text) && !isignored(d->clientnum))
@@ -2220,28 +2220,15 @@ namespace game
             {
                 int t = getint(p);
                 int weap = getint(p);
-
-                string announcemsg;
-                if(GAME_LANG)
+                switch(t)
                 {
-                    formatstring(announcemsg, t==I_ROIDS ? "\faROIDS ARE COMING SOON!" :
-                                              t==I_SHROOMS ? "\faTHE MUSHROOMS ARE GROWING!" :
-                                              t==I_EPO ? "\faEPO IS COMING FOR CYCLISTS!" :
-                                              t==I_JOINT ? "\faSOMEONE IS ROLLING A BIG JOINT!" :
-                                              t==I_SUPERARME ? "\faTHE SUPER-WEAPON IS BEING DEPLOYED" :
-                                              t==50 ? "\faWEAPON CHANGE IN 5 SECONDS!" : "" );
+                    case I_ROIDS: conoutf(CON_HUDCONSOLE, "\fd%s", readstr("Announcement_Roids")); break;
+                    case I_SHROOMS: conoutf(CON_HUDCONSOLE, "\fd%s", readstr("Announcement_Shrooms")); break;
+                    case I_EPO: conoutf(CON_HUDCONSOLE, "\fd%s", readstr("Announcement_Epo")); break;
+                    case I_JOINT: conoutf(CON_HUDCONSOLE, "\fd%s", readstr("Announcement_Joint")); break;
+                    case I_SUPERARME: conoutf(CON_HUDCONSOLE, "\fd%s", readstr("Announcement_SuperWeapon")); break;
+                    default: conoutf(CON_HUDCONSOLE, "\fd%s \fc%s", readstr("Announcement_WeaponChange"), readstr(guns[weap].ident));
                 }
-                else
-                {
-                    formatstring(announcemsg, t==I_ROIDS ? "\faLES STÉROS SONT BIENTÔT PRÊTS !" :
-                                              t==I_SHROOMS ? "\faLES CHAMPIGNONS REPOUSSENT !" :
-                                              t==I_EPO ? "\faL'EPO ARRIVE POUR LES CYCLISTES !" :
-                                              t==I_JOINT ? "\faQUELQU'UN ROULE UN GROS JOINT !" :
-                                              t==I_SUPERARME ? "\faLA SUPER-ARME EST BIENTÔT PRÊTE À ANNIHILER" :
-                                              t==50 ? "\faCHANGEMENT D'ARME DANS 5 SECONDES !" : "" );
-                }
-                if(t==50) conoutf(CON_HUDCONSOLE, GAME_LANG ? "\fdNext weapon: \fc%s" : "\fdArme suivante : \fc%s", readstr(guns[weap].ident));
-                conoutf(CON_GAMEINFO, announcemsg);
                 break;
             }
 
