@@ -1420,7 +1420,9 @@ int main(int argc, char **argv)
         renderedframe = inbetweenframes = true;
 
         //steam api
-        if(IS_USING_STEAM) SteamAPI_RunCallbacks();
+        #ifdef _WIN32
+            if(IS_USING_STEAM) SteamAPI_RunCallbacks();
+        #endif
     }
 
     ASSERT(0);
