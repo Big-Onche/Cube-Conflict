@@ -1,4 +1,4 @@
-![Logo of Cube Conflict](https://www.cube-conflict.com/images/logo.png) 
+![Logo of Cube Conflict](https://static.manakeep.com/photos/2023/11/17/59462wwjix_logo.png) 
 # Cube Conflict 
 
 Join the battle in **Cube Conflict**, an FPS game where dumb smileys are locked in a never-ending war! Forked from [Tesseract](http://tesseract.gg).
