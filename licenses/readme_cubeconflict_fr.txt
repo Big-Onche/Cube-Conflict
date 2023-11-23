@@ -26,7 +26,7 @@ ce logiciel sous réserve des restrictions suivantes :
 4. La distribution à des fins lucratives de Cube Conflict n'est pas autorisée.
    Cela signifie que la vente, la redistribution via des liens contenant des
    publicités forcées, la distribution d'un installateur pour ce jeu contenant
-   des publicitiés ou logiciels tiers est strictement interdite.
+   des publicités ou logiciels tiers est strictement interdite.
 
 5. Cette note ne peut être supprimée ou modifiée sur aucune distribution du logiciel
    et ce même avec de lourdes modifications.
