@@ -12,7 +12,7 @@ int connmillis = 0, connattempts = 0, discmillis = 0;
 bool multiplayer(bool msg)
 {
     bool val = curpeer || hasnonlocalclients();
-    if(val && msg) conoutf(CON_ERROR, GAME_LANG ? "Operation not available in multiplayer." : "Opération non disponible en multijoueur.");
+    if(val && msg) conoutf(CON_ERROR, "\f3%s", readstr("Console_NotAvailableInMultiplayer"));
     return val;
 }
 
@@ -81,7 +81,7 @@ void connectserv(const char *servername, int serverport, const char *serverpassw
 {
     if(connpeer)
     {
-        conoutf(GAME_LANG ? "Aborting connection attempt." : "Abandon de la tentative de connexion.");
+        conoutf(CON_INFO, readstr("Console_Connection_Abort"));
         IS_ON_OFFICIAL_SERV = false;
         abortconnect();
     }
@@ -98,13 +98,13 @@ void connectserv(const char *servername, int serverport, const char *serverpassw
         if(strcmp(servername, connectname)) setsvar("connectname", servername);
         if(serverport != connectport) setvar("connectport", serverport);
         addserver(servername, serverport, serverpassword && serverpassword[0] ? serverpassword : NULL);
-        conoutf("%s %s:%d", GAME_LANG ? "Attempting to connect to" : "Connexion en cours à", servername, serverport);
+        conoutf(CON_INFO, "%s %s:%d", readstr("Console_Connection_Attempt"), servername, serverport);
         loopi(sizeof(domains)/sizeof(domains[0])) {if(!strcasecmp(servername, domains[i])) IS_ON_OFFICIAL_SERV = true; }
-        if(IS_ON_OFFICIAL_SERV) conoutf(GAME_LANG ? "Official server: Stats and achievements are saved." : "Serveur officiel : Les statistiques et succès sont enregistrés.");
+        if(IS_ON_OFFICIAL_SERV) conoutf(CON_INFO, "\fe%s", readstr("Console_Connection_OfficialServ"));
 
         if(!resolverwait(servername, &address))
         {
-            conoutf(CON_ERROR, "\f3%s %s", GAME_LANG ? "Could not resolve server": "Impossible de trouver le serveur", servername);
+            conoutf(CON_ERROR, "\f3%s %s", readstr("Console_Connection_ServNotFound"), servername);
             IS_ON_OFFICIAL_SERV = false;
             return;
         }
@@ -113,7 +113,7 @@ void connectserv(const char *servername, int serverport, const char *serverpassw
     {
         setsvar("connectname", "");
         setvar("connectport", 0);
-        conoutf(GAME_LANG ? "Attempting to connect over LAN" : "Connexion en cours au réseau LAN");
+        conoutf(CON_INFO, readstr("Console_Connection_AttemptLan"));
         address.host = ENET_HOST_BROADCAST;
     }
 
@@ -122,7 +122,7 @@ void connectserv(const char *servername, int serverport, const char *serverpassw
         clienthost = enet_host_create(NULL, 2, server::numchannels(), rate*1024, rate*1024);
         if(!clienthost)
         {
-            conoutf(CON_ERROR, GAME_LANG ? "\f3Could not connect to server." : "\f3La connexion au serveur a échoué.");
+            conoutf(CON_ERROR, "\f3%s", readstr("Console_Connection_Impossible"));
             IS_ON_OFFICIAL_SERV = false;
             return;
         }
@@ -141,7 +141,7 @@ void reconnect(const char *serverpassword)
 {
     if(!connectname[0] || connectport <= 0)
     {
-        conoutf(CON_ERROR, GAME_LANG ? "No previous connection." : "Aucune connexion précédente.");
+        conoutf(CON_ERROR, "\f3%s", readstr("Console_Connection_NoPrevious"));
         return;
     }
 
@@ -165,7 +165,7 @@ void disconnect(bool async, bool cleanup, bool volontaire)
         }
         curpeer = NULL;
         discmillis = 0;
-        conoutf(GAME_LANG ? "Disconnected" : "Déconnecté");
+        conoutf(CON_INFO, readstr("Console_Connection_Disconnected"));
         IS_ON_OFFICIAL_SERV = false;
         game::gamedisconnect(cleanup);
         gfx::resetpostfx();
@@ -174,7 +174,7 @@ void disconnect(bool async, bool cleanup, bool volontaire)
         game::clearbouncers();
         game::clearprojectiles(); // clean up before showing menu
         loopi(NUMSONGS) stopMusic(i);
-        playMusic(S_MAINMENU);
+        playMusic(GAME_LANG == 2 ? S_MAINMENURU : S_MAINMENU);
         mainmenu = 1;
         if(stat[STAT_DAMMAGERECORD] < game::player1->totaldamage/10) updateStat(game::player1->totaldamage/10, STAT_DAMMAGERECORD, true);
         if(game::player1->totaldamage/10 > 10000) unlockAchievement(ACH_DESTRUCTEUR);
@@ -192,19 +192,19 @@ void trydisconnect(bool local)
     game::clearbouncers();
     game::clearprojectiles();
     loopi(NUMSONGS) stopMusic(i);
-    playMusic(S_MAINMENU);
+    playMusic(GAME_LANG == 2 ? S_MAINMENURU : S_MAINMENU);
     if(connpeer)
     {
-        conoutf(GAME_LANG ? "Aborting connection attempt" : "Annulation de la connexion");
+        conoutf(CON_INFO, readstr("Console_Connection_Abort"));
         abortconnect();
     }
     else if(curpeer)
     {
-        conoutf(GAME_LANG ? "Attempting to disconnect..." : "Déconnexion en cours...");
+        conoutf(CON_INFO, readstr("Console_Connection_DiscAttempt"));
         disconnect(!discmillis, true, true);
     }
     else if(local && haslocalclients()) localdisconnect();
-    else conoutf(CON_WARN, GAME_LANG ? "Not connected" : "Non connecté");
+    else conoutf(CON_WARN, readstr("Console_Connection_NotConnected"));
 }
 
 ICOMMAND(connect, "sis", (char *name, int *port, char *pw), connectserv(name, *port, pw));
@@ -227,7 +227,7 @@ void flushclient()
 
 void neterr(const char *s, bool disc)
 {
-    conoutf(CON_ERROR, "\f3%s (%s)", GAME_LANG ? "Illegal network message" : "Message réseau erroné", s);
+    conoutf(CON_ERROR, "\f3%s (%s).", readstr("Console_Connection_IllegalMsg"), s);
     if(disc) disconnect();
 }
 
@@ -245,12 +245,12 @@ void gets2c()           // get updates from the server
     if(!clienthost) return;
     if(connpeer && totalmillis/3000 > connmillis/3000)
     {
-        conoutf(GAME_LANG ? "Attempting to connect..." : "Connexion au serveur...");
+        conoutf(CON_INFO, readstr("Console_Connection_AttemptWait"));
         connmillis = totalmillis;
         ++connattempts;
         if(connattempts > 3)
         {
-            conoutf(CON_ERROR, GAME_LANG ? "\f3Could not connect to server" : "\f3Connexion au serveur impossible");
+            conoutf(CON_ERROR, "\f3%s", readstr("Console_Connection_Impossible"));
             abortconnect();
             return;
         }
@@ -263,14 +263,14 @@ void gets2c()           // get updates from the server
             localdisconnect(false);
             curpeer = connpeer;
             connpeer = NULL;
-            conoutf(GAME_LANG ? "Connexion successful." : "Connecté au serveur.");
+            conoutf(CON_INFO, readstr("Console_Connection_Success"));
             throttle();
             if(rate) setrate(rate);
             game::gameconnect(true);
             break;
 
         case ENET_EVENT_TYPE_RECEIVE:
-            if(discmillis) conoutf(GAME_LANG ? "Disconnecting..." : "Déconnexion...");
+            if(discmillis) conoutf(CON_INFO, readstr("Console_Connection_Disconnecting"));
             else localservertoclient(event.channelID, event.packet);
             enet_packet_destroy(event.packet);
             break;
@@ -279,7 +279,7 @@ void gets2c()           // get updates from the server
             if(event.data>=DISC_NUM) event.data = DISC_NONE;
             if(event.peer==connpeer)
             {
-                conoutf(CON_ERROR, GAME_LANG ? "\f3Could not connect to server." : "\f3Impossible de se connecter au serveur.");
+                conoutf(CON_ERROR, "\f3%s", readstr("Console_Connection_Impossible"));
                 abortconnect();
             }
             else
@@ -287,8 +287,8 @@ void gets2c()           // get updates from the server
                 if(!discmillis || event.data)
                 {
                     const char *msg = disconnectreason(event.data);
-                    if(msg) conoutf(CON_ERROR, GAME_LANG ? "\f3Server network error, disconnecting (%s) ..." : "\f3Erreur de serveur, déconnexion (%s)", msg);
-                    else conoutf(CON_ERROR, GAME_LANG ? "\f3Server network error, disconnecting." : "\f3Erreur de serveur, déconnexion.");
+                    if(msg) conoutf(CON_ERROR, "\f3%s (%s).", readstr("Console_Connection_NetError"), msg);
+                    else conoutf(CON_ERROR, "\f3%s.", readstr("Console_Connection_NetError"));
                 }
                 disconnect();
             }

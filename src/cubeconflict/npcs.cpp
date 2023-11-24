@@ -560,7 +560,7 @@ namespace game
             monsters[i]->lastpain = lastmillis;
             monsters[i]->state = CS_DEAD;
         }
-        conoutf(CON_GAMEINFO, GAME_LANG ? "\f2You survived, well done!" : "\f2Tu as survécu, bravo !");
+        conoutf(CON_HUDCONSOLE, "\f2%s", readstr("GameMessage_InvasionEnded"));
     }
     ICOMMAND(endsp, "", (), endsp());
 
@@ -584,9 +584,7 @@ namespace game
             if(spawnremain--==monstertotal)
             {
                 playSound(S_INVASION, NULL, 0, 0, SND_FIXEDPITCH);
-                //musicmanager(2+map_sel);
-                execute("playmapsong");
-                conoutf(CON_HUDCONSOLE, GAME_LANG ? "\f3The invasion has begun!" : "\f3L'invasion vient de commencer !");
+                conoutf(CON_HUDCONSOLE, "\f3%s", readstr("GameMessage_InvasionBegun"));
             }
             nextmonster = lastmillis+1000;
             gamesecs++;

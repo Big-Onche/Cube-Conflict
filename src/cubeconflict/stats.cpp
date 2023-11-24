@@ -133,7 +133,7 @@ char *encryptSave(char savepart[20]) // simple and easily crackable encryption
 void writeSave() // we write the poorly encrypted value for all stat
 {
     stream *savefile = openutf8file("config/stats.cfg", "w");
-    if(!savefile) { conoutf(GAME_LANG ? "\fcUnable to write your save file !" : "\fcUnable d'écrite votre fichier de sauvegarde !"); return; }
+    if(!savefile) { conoutf(CON_ERROR, readstr("Console_SaveError")); return; }
 
     int saveID = 0;
     loopi(NUMSTATS + NUMCUST + NUMACHS)
@@ -205,7 +205,7 @@ void unlockAchievement(int achID)
             achievement[achID] = true;
             addReward(25, 25);
             playSound(S_ACHIEVEMENTUNLOCKED, NULL, 0, 0, SND_FIXEDPITCH|SND_NOTIFICATION);
-            conoutf(CON_HUDCONSOLE, "\f1%s\fi (%s)", readstr("GameMessage_AchievementUnlocked"), readstr("Stat_Achievements", achID, true));
+            conoutf(CON_HUDCONSOLE, "\f1%s\fi (%s)", readstr("GameMessage_AchievementUnlocked"), readstr("Stat_Achievements", achID));
         }
     }
 }

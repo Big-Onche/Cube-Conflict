@@ -3033,9 +3033,9 @@ char *execidentstr(const char *name, bool lookup)
     return id ? executestr(id, NULL, 0, lookup) : NULL;
 }
 
-const char *readstr(const char *ident, int at, bool array)
+const char *readstr(const char *ident, int at)
 {
-    return executestr(tempformatstring("%s $%s %d", array ? "getArrayText" : "getText", ident, at));
+    return executestr(tempformatstring("getText $%s %d", ident, at));
 }
 
 int execute(const uint *code)

@@ -127,9 +127,8 @@ void writeinitcfg()
     f->printf("screenw %d\n", scr_w);
     f->printf("screenh %d\n", scr_h);
     extern int soundfreq;
-    //extern char *audiodriver;
     f->printf("soundfreq %d\n", soundfreq);
-    //if(audiodriver[0]) f->printf("audiodriver %s\n", escapestring(audiodriver));
+    f->printf("GAME_LANG %d\n", GAME_LANG);
     delete f;
 }
 
@@ -331,7 +330,7 @@ int texttimer;
 
 void renderprogressview(int w, int h, float bar, const char *text, bool calc)   // also used during loading
 {
-    if(islaunching) { formatstring(loadingtext, "%s", readstr("Loading_Bar_Quotes", rnd(14), true)); return; }
+    if(islaunching) { formatstring(loadingtext, "%s", readstr("Loading_Bar_Quotes", rnd(14))); return; }
     if(!calc) bar = loadprogress/100.f;
 
     hudmatrix.ortho(0, w, h, 0, -1, 1);
@@ -376,7 +375,7 @@ void renderprogressview(int w, int h, float bar, const char *text, bool calc)   
         pushhudtranslate(bx+sw, by + (bh - FONTH*tsz)/2, tsz);
 
         texttimer += curtime;
-        if(texttimer > 4000) {formatstring(loadingtext, "%s", readstr("Loading_Bar_Quotes", rnd(14), true)); texttimer = 0;}
+        if(texttimer > 4000) {formatstring(loadingtext, "%s", readstr("Loading_Bar_Quotes", rnd(14))); texttimer = 0;}
 
         defformatstring(fancytext, "%.0f%% - %s...", loadprogress, loadingtext);
         draw_text(calc ? text : fancytext, 0, 0);
@@ -1198,7 +1197,12 @@ int main(int argc, char **argv)
         logoutf("Setting log file: %s", file);
         break;
     }
+
+    if(!execfile("config/languages/lib.cfg", false)) fatal("cannot find languages data files (config/languages/lib.cfg)");
+    execute("selectlanguage");
+
     execfile("config/init.cfg", false);
+
     for(int i = 1; i<argc; i++)
     {
         if(argv[i][0]=='-') switch(argv[i][1])
@@ -1257,13 +1261,12 @@ int main(int argc, char **argv)
     atexit(enet_deinitialize);
     enet_time_set(0);
 
-    if(IS_USING_STEAM) initsteam();
-
     logoutf("init: game");
     game::parseoptions(gameargs);
     initserver(dedicated>0, dedicated>1);  // never returns if dedicated
     ASSERT(dedicated <= 1);
     game::initclient();
+    if(IS_USING_STEAM) initsteam();
 
     logoutf("init: video");
     SDL_SetHint(SDL_HINT_GRAB_KEYBOARD, "0");
@@ -1288,10 +1291,9 @@ int main(int argc, char **argv)
     textureload("media/interface/hud/fullscreen/shrooms.png");
 
     logoutf("init: console");
-    if(!execfile("config/stdlib.cfg", false)) fatal("cannot find data files (you are running from the wrong folder, try .bat file in the main folder)");   // this is the first file we load.
+    if(!execfile("config/stdlib.cfg", false)) fatal("cannot find data files (you are running from the wrong folder, try .bat file in the main folder)");
     if(!execfile("config/font.cfg", false)) fatal("cannot find font definitions");
     if(!setfont("default")) fatal("no default font specified");
-
     UI::setup();
 
     inbetweenframes = true;
