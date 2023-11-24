@@ -1467,7 +1467,7 @@ static void makeparticles(entity &e)
             if((map_atmo==4 || map_atmo==8) || (e.attr2 >=1 && e.attr2 <=3)) spawnRain(e.o, e.attr2, e.attr3, e.attr4, e.attr5, e.attr6, e.attr7, e.attr2!=0); // light rain, moderate rain, storm
             if(map_atmo==8 || map_atmo==9 || e.attr2==4) spawnSnow(e.o, e.attr3, e.attr4, e.attr5, e.attr6, e.attr7, e.attr2!=0); // snow
             if(map_atmo==5 || e.attr2==5) spawnApocalypse(e.o, e.attr3, e.attr4, e.attr5, e.attr6, e.attr7); // apocalypse
-            if(editmode) particle_textcopy(e.o, tempformatstring(GAME_LANG ? "\feWeather (%s)" : "\feMétéo (%s)", e.attr2 ? GAME_LANG ? "Forced" : "Forcée" : GAME_LANG ? "Cur. atmo" : "Atmo. actuelle"), PART_TEXT, 1, 0xFFFFFF, 3.0f);
+            //if(editmode) particle_textcopy(e.o, tempformatstring(GAME_LANG ? "\feWeather (%s)" : "\feMétéo (%s)", e.attr2 ? GAME_LANG ? "Forced" : "Forcée" : GAME_LANG ? "Cur. atmo" : "Atmo. actuelle"), PART_TEXT, 1, 0xFFFFFF, 3.0f);
             break;
 
         case 1: // fire and smoke: attr 2:<radius> 3:<height> 4:<r> 5:<g> 6:<b> 7:<color offset> 8:<grow(+)/shrink(-)> 9:<sparks(amount)>
@@ -1491,7 +1491,6 @@ static void makeparticles(entity &e)
 
             bool popSpark = e.attr9 && randomevent(( 1.0f - (e.attr9 / 100.f)) * gfx::nbfps);
             if(popSpark) regularsplash(PART_FIRESPARK, 0xFFFF55, 125, rnd(3)+1, 750+(rnd(750)), offsetvec(e.o, rnd(15)-rnd(31), rnd(15)-rnd(31)), 0.5f + (rnd(18)/12.f), -10, 0);
-            if(editmode) particle_textcopy(e.o, e.attr1==1 ? (GAME_LANG ? "\feFire and smoke" : "\feFeu et fumée") : (GAME_LANG ? "\feFire" : "\feFeu"), PART_TEXT, 1, 0xFFFFFF, 3.0f);
             break;
         }
         case 3: // smoke only: attr 2:<radius> 3:<height> 4:<r> 5:<g> 6:<b> 7:<color offset> 8:<grow(+)/shrink(-)>
@@ -1510,7 +1509,6 @@ static void makeparticles(entity &e)
             if(b) b = applyRandomOffset(b, e.attr7);
 
             regularflame(PART_SMOKE, vec(e.o.x, e.o.y, e.o.z + 4.0f*min(radius, height)), radius, height, rgbToHex(r, g, b), 1, 4.0f+(rnd(6)), 100.0f, 2750.0f, -15, e.attr8);
-            if(editmode) particle_textcopy(e.o, GAME_LANG ? "\feSmoke" : "\feFumée", PART_TEXT, 1, 0xFFFFFF, 3.0f);
             break;
         }
         case 4: // steam vent: attr2: <dir> 3:<size> 4:<r> 5:<g> 6:<b> 7:<radius> 8:<fade>
@@ -1525,7 +1523,6 @@ static void makeparticles(entity &e)
             else { r = e.attr4; g = e.attr5; b = e.attr6; } // setting custom colors from r g b attrs
 
             regularsplash(PART_STEAM, rgbToHex(r, g, b), radius, 1, fade, offsetvec(e.o, e.attr2, rnd(10)), size, -20);
-            if(editmode) particle_textcopy(e.o, GAME_LANG ? "\feSteam" : "\feVapeur", PART_TEXT, 1, 0xFFFFFF, 3.0f);
             break;
         }
         case 5: // energy ball: 2:<type (shockwave, plasma, grenade, explosion)> attr 3:<radius> 4:<r> 5:<g> 6:<b>
@@ -1535,12 +1532,10 @@ static void makeparticles(entity &e)
             else { r = e.attr4; g = e.attr5; b = e.attr6; } // setting custom colors from r g b attrs
 
             newparticle(e.o, vec(0, 0, 1), 1, PART_SHOCKWAVE + clamp((int)e.attr2, 0, 3), rgbToHex(r, g, b), 4.0f)->val = 1+e.attr3;
-            if(editmode) particle_textcopy(e.o, GAME_LANG ? "\feEnergy ball" : "\feBoule d'énergie", PART_TEXT, 1, 0xFFFFFF, 3.0f);
             break;
         }
         case 6: // clouds: attr 2:<size> 3:<type(0-5)> 4:<r> 5:<g> 6:<b>
             newparticle(e.o, e.o, 1, PART_CLOUD1 + clamp((int)e.attr3, 0, 5), defaultColors(e.attr4, e.attr5, e.attr6) ? partcloudcolour : rgbToHex(e.attr4, e.attr5, e.attr6), e.attr2);
-            if(editmode) particle_textcopy(e.o, GAME_LANG ? "\feCloud" : "\feNuage", PART_TEXT, 1, 0xFFFFFF, 3.0f);
             break;
 
         case 7: // rainbow: attr 2:<size> 3:<force>
@@ -1549,7 +1544,6 @@ static void makeparticles(entity &e)
                 int size = e.attr2;
                 newparticle(e.o, e.o, 1, PART_RAINBOW, 0xAAAAAA, size*3);
             }
-            if(editmode) particle_textcopy(e.o, GAME_LANG ? "\feRainbow" : "\feArc-en-ciel", PART_TEXT, 1, 0xFFFFFF, 3.0f);
             particle_hud(PART_VISEUR, e.o, 0xBBBBBB);
             break;
 
@@ -1653,6 +1647,8 @@ static void makeparticles(entity &e)
             particle_textcopy(e.o, tempformatstring("\fcInvalid particle ID: %d", e.attr1), PART_TEXT, 1, 0xFFFFFF, 3.0f);
             particle_hud(PART_VISEUR, e.o, 0xBBBBBB);
     }
+
+    if(editmode) particle_textcopy(e.o, tempformatstring("\fe%s", readstr("Map_Editor_PartsTypesList", e.attr1)), PART_TEXT, 1, 0xFFFFFF, 3.0f);
 }
 
 bool printparticles(extentity &e, char *buf, int len)
@@ -1684,22 +1680,22 @@ VARR(sunflarey, -1000, 360, 1000);
 VARR(sunflarez, -1000, 135, 1000);
 CVARR(sunflarecolour, 0x000000);
 
-static const char * const enthudnames[] =
+static const char * const entreferences[] =
 {
-    "invalide?", "none?", "Lumière", "Light", "Modèle 3D", "3D model", "Point de réapparition","Respawn point",
-    "Placage d'environnement", "Environment map", "Effet de particules", "Particles effect", "Son", "Sound", "Spot de lumière", "Spotlight", "Projection", "Decal",
+    "Ent_Invalid", "Ent_Light", "Ent_Mapmodel", "Ent_Respawn",
+    "Ent_Reflections", "Ent_Particles", "Ent_Sound", "Ent_Spotlight", "Ent_Decal",
 
-    "Fusil électrique", "Electric Rifle", "Fusil plasma", "Plasma rifle", "SMAW", "SMAW", "Minigun", "Minigun", "Pistolet spock", "Spockgun",
-    "M32", "M32", "Lance-flammes", "Flamethrower", "UZI", "UZI", "FAMAS", "FAMAS", "Mossberg 500", "Mossberg 500", "Hydra", "Hydra",
-    "SV-98", "SV-98", "SKS", "SKS", "Arbalète", "Crossbow", "AK-47", "AK-47", "GAPB-1", "GAPB-1", "Feux d'artifice", "Fireworks", "Glock 45", "Glock 45",
-    "Super-arme", "Superweapon", "invalide?", "none?", "invalide?", "none?", "invalide?", "none?",
+    "Weapon_ElectricRifle", "Weapon_PlasmaRifle", "Weapon_Smaw", "Weapon_Minigun", "Weapon_Spockgun",
+    "Weapon_M32", "Weapon_Flamethrower", "Weapon_Uzi", "Weapon_Famas", "Weapon_Mossberg500", "Weapon_Hydra",
+    "Weapon_Sv98", "Weapon_Sks", "Weapon_Crossbow", "Weapon_Ak47", "Weapon_Gapb1", "Weapon_Fireworks", "Weapon_Glock",
+    "Weapon_Superweapon", "Ent_Invalid", "Ent_Invalid", "Ent_Invalid",
 
-    "Santé [25]", "Health [25]", "Boost de santé [50]", "Health boost [50]", "Stéroïdes [Dégâts]", "Steroïds [Damages]", "Champis [Cadence]", "Shrooms [Cadency]",
-    "EPO [Vitesse]", "EPO [Speed]", "Joint [Résistance]", "Joint [Resistance]", "Bois [75]", "Wood [75]", "Fer [125]", "Iron [125]", "Or [200]", "Gold [200]",
-    "Magnétique [150]", "Magnetic [150]", "Armure assistée [300]", "Power armor [300]", "Mana [25]", "Mana [25]",
+    "Item_Health", "Item_GrilledPig", "Item_Roids", "Item_Shrooms",
+    "Item_Epo", "Item_Joint", "Item_WoodShield", "Item_IronShield", "Item_GoldShield",
+    "Item_MagnetShield", "Item_PowerArmor", "Item_Mana",
 
-    "Téléporation [Entrée]", "Teleport [In]", "Téléportation [Destination]", "Téléportation [Destination]", "Trampoline", "Jump pad", "Drapeau", "Flag",
-    "Base", "Base", "PNJ [Solo]", "NPC [SP]", "Point de réapparition [Solo]", "Respawn point [SP]", "Zone de déclencheur [Solo]", "Trigger zone [SP]", "Caméra", "Camera",
+    "Ent_Teleport", "Ent_Teledest", "Ent_JumpPad", "Ent_Flag",
+    "Ent_Base", "Ent_Npc", "Ent_SpRespawnPoint", "Ent_TriggerZone", "Ent_Camera",
 };
 
 void updateparticles()
@@ -1795,19 +1791,19 @@ void updateparticles()
             {
                 case MAPMODEL:
                 {
-                    defformatstring(txt, "%s (\fg%s\f7)", enthudnames[(e.type*2)+GAME_LANG], mapmodelname(e.attr1));
+                    defformatstring(txt, "%s (\fg%s\f7)", readstr(entreferences[e.type]), mapmodelname(e.attr1));
                     particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);
                     break;
                 }
                 case ET_LIGHT:
                 {
                     unsigned int color = ((e.attr2 & 0xff) << 16) + ((e.attr3 & 0xff) << 8) + (e.attr4 & 0xff);
-                    particle_textcopy(partpos.addz(1), enthudnames[(e.type*2)+GAME_LANG], PART_TEXT, 1, color, 1.25f);
+                    particle_textcopy(partpos.addz(1), readstr(entreferences[e.type]), PART_TEXT, 1, color, 1.25f);
                     break;
                 }
                 case ET_PLAYERSTART: case FLAG:
                 {
-                    defformatstring(txt, "%s%s", e.attr2==0 ? "\fe" : e.attr2==1? "\fd" : "\fc", enthudnames[(e.type*2)+GAME_LANG]);
+                    defformatstring(txt, "%s%s", e.attr2==0 ? "\fe" : e.attr2==1? "\fd" : "\fc", readstr(entreferences[e.type]));
                     particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);
                     partcol = e.attr2==0 ? 0x00FF00 : e.attr2==1? 0xFFFF00 : 0xFF0000;
                     break;
@@ -1816,14 +1812,14 @@ void updateparticles()
                 {
                     const char *name = getalias(tempformatstring("disguise_%s_%d", GAME_LANG ? "en" : "fr", e.attr2));
                     defformatstring(basename, name);
-                    defformatstring(txt, "%s - %s", enthudnames[(e.type*2)+GAME_LANG], basename);
+                    defformatstring(txt, "%s - %s", readstr(entreferences[e.type]), basename);
                     particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);
                     partcol = 0x00FF00;
                     break;
                 }
                 case MAPSOUND:
                 {
-                    defformatstring(txt, "%s (\fg%s\f7)", enthudnames[(e.type*2)+GAME_LANG], getmapsoundname(e.attr1));
+                    defformatstring(txt, "%s (\fg%s\f7)", readstr(entreferences[e.type]), getmapsoundname(e.attr1));
                     particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);
                     break;
                 }
@@ -1834,7 +1830,7 @@ void updateparticles()
                     else if(e.type==I_SANTE || e.type==I_MANA) formatstring(gameenttype, "%s", GAME_LANG ? "Item" : "Objet");
                     else if(e.type >= I_WOODSHIELD && e.type <= I_POWERARMOR) formatstring(gameenttype, "%s", GAME_LANG ? "Shield" : "Bouclier");
                     else if(e.type >= I_BOOSTPV && e.type <= I_JOINT) formatstring(gameenttype, "%s", GAME_LANG ? "Boost" : "Boost");
-                    defformatstring(txt, "%s%s%s%s", gameenttype, strcmp(gameenttype, "") ? " (\ff" : "", enthudnames[(e.type*2)+GAME_LANG], strcmp(gameenttype, "") ? "\f7)" : "");
+                    defformatstring(txt, "%s%s%s%s", gameenttype, strcmp(gameenttype, "") ? " (\ff" : "", readstr(entreferences[e.type]), strcmp(gameenttype, "") ? "\f7)" : "");
                     particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);
                     if(strcmp(gameenttype, "")) partcol = 0x0000FF;
                 }
