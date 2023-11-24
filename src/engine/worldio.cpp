@@ -779,7 +779,7 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     }
     if(dbgvars) conoutf(CON_DEBUG, "read %d vars", hdr.numvars);
 
-    renderbackground(GAME_LANG ? "Loading..." : "Chargement...", mapshot, mname, game::getmapinfo(), readstr("Loading_Screen_Tips", rnd(17), true));
+    renderbackground(GAME_LANG ? "Loading..." : "Chargement...", mapshot, mname, game::getmapinfo(), readstr("Loading_Screen_Tips", rnd(17)));
 
     setvar("mapversion", hdr.version, true, false);
 
@@ -905,7 +905,7 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     allchanged(true);
 
     startmap(cname ? cname : mname);
-    stopMusic(S_MAINMENU);
+    stopMusic(GAME_LANG == 2 ? S_MAINMENURU : S_MAINMENU);
     if(hasvsync) {vsync = 1; restorevsync();}
     addpostfx("mainfilter", 1, 1, 1, 1, vec4(1, 1, 1, 1));
     switch(cbcompensation)

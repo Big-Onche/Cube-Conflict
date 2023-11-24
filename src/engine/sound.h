@@ -75,7 +75,7 @@ enum SoundNames
     NUMSNDS
 };
 
-enum SongNames { S_MAINMENU = 0, S_PREMISSION, S_PAUSE, S_TUTORIAL, NUMSONGS };
+enum SongNames { S_MAINMENU = 0, S_MAINMENURU, S_PREMISSION, S_PAUSE, S_TUTORIAL, NUMSONGS };
 
 enum SoundFlags
 {
