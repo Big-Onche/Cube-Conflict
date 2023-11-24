@@ -74,7 +74,7 @@ namespace sphere
 
     void enable()
     {
-        if(!vbuf) init(12, 6);
+        if(!vbuf) init(24, 12);
 
         gle::bindvbo(vbuf);
         gle::bindebo(ebuf);
@@ -102,7 +102,7 @@ namespace sphere
     }
 }
 
-static const float WOBBLE = 1.25f;
+static const float WOBBLE = 1.4f;
 
 struct fireballrenderer : listrenderer
 {
