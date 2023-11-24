@@ -469,10 +469,10 @@ namespace game
                 to.add(vec(rnd(200)-100, rnd(200)-100, rnd(200)-100));
                 break;
             case BNC_DOUILLESUZI:
-                to.add(vec(0, 0, -1)); break;
+                to.add(vec((rnd(80)-40)/300.f, (rnd(80)-40)/300.f, -1)); break;
             default:
                 if(frommonster && type==BNC_GRENADE) to.add(vec(rnd(80)-40, rnd(80)-40, rnd(80)-40));
-                else to.add(vec(0, 0, 1));
+                else to.add(vec((rnd(80)-40)/300.f, (rnd(80)-40)/300.f, 1));
         }
         if(to.iszero()) to.z += 1;
         to.normalize();
@@ -1549,7 +1549,7 @@ namespace game
             pos.add(vec(bnc.offset).mul(bnc.offsetmillis/float(OFFSETMILLIS)));
             vec vel(bnc.vel);
             pitch = -bnc.roll;
-            if(vel.magnitude() <= 10.0f) {yaw = bnc.lastyaw; pitch = bnc.lastpitch;}
+            if(vel.magnitude() <= 3.0f) {yaw = bnc.lastyaw; pitch = bnc.lastpitch;}
             else
             {
                 vectoyawpitch(vel, yaw, pitch);
@@ -1559,7 +1559,7 @@ namespace game
             }
 			int cull = MDL_CULL_VFC|MDL_CULL_EXTDIST|MDL_CULL_OCCLUDED;
 
-            if(bnc.bouncetype==BNC_GRENADE) rendermodel("projectiles/grenade", ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, cull);
+            if(bnc.bouncetype==BNC_GRENADE) rendermodel("projectiles/grenade", ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, 0, cull);
             else
             {
                 const char *mdl = NULL;
