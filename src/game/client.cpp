@@ -227,16 +227,16 @@ namespace game
     void printteam()
     {
         if((player1->clientnum >= 0 && !m_teammode) || !validteam(player1->team)) conoutf(GAME_LANG ? "You are not in a team." : "Tu n'est pas dans une équipe.");
-        else conoutf(GAME_LANG ? "Your team is: \fs%s%s\fr" : "Tu es désormais dans l'équipe \fs%s%s\fr", teamtextcode[player1->team], GAME_LANG ? teamnames_EN[player1->team] : teamnames_FR[player1->team]);
+        else conoutf(GAME_LANG ? "Your team is: \fs%s%s\fr" : "Tu es désormais dans l'équipe \fs%s%s\fr", teamtextcode[player1->team], readstr("Team_Names", player1->team));
     }
     ICOMMAND(team, "sN", (char *s, int *numargs),
     {
         if(*numargs > 0) switchteam(s);
         else if(!*numargs) printteam();
-        else if((player1->clientnum < 0 || m_teammode) && validteam(player1->team)) result(tempformatstring("\fs%s%s\fr", teamtextcode[player1->team], GAME_LANG ? teamnames_EN[player1->team] : teamnames_FR[player1->team]));
+        else if((player1->clientnum < 0 || m_teammode) && validteam(player1->team)) result(tempformatstring("\fs%s%s\fr", teamtextcode[player1->team], readstr("Team_Names", player1->team)));
     });
     ICOMMAND(getteam, "", (), intret((player1->clientnum < 0 || m_teammode) && validteam(player1->team) ? player1->team : 0));
-    ICOMMAND(getteamname, "i", (int *num), result(GAME_LANG ?  teamname_EN(*num) : teamname_FR(*num)));
+    ICOMMAND(getteamname, "i", (int *num), result(teamname(*num)));
 
     struct authkey
     {
@@ -2207,7 +2207,7 @@ namespace game
                 w->team = validteam(team) ? team : 0;
                 static const char * const fmt[2] = { GAME_LANG ? "%s switched to team %s" : "%s a retourné sa veste pour l'équipe %s", GAME_LANG ? "%s forced to team %s" : "%s a été forcé de rejoindre l'équipe %s"};
                 if(reason >= 0 && size_t(reason) < sizeof(fmt)/sizeof(fmt[0]))
-                    conoutf(fmt[reason], colorname(w), GAME_LANG ? teamnames_EN[w->team] : teamnames_FR[w->team]);
+                    conoutf(fmt[reason], colorname(w), readstr("Team_Names", w->team));
                 break;
             }
 

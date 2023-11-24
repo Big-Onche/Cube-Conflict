@@ -3558,7 +3558,7 @@ namespace server
                     if(t==cq || t->state.state==CS_SPECTATOR || t->state.aitype != AI_NONE || cq->team != t->team) continue;
                     sendf(t->clientnum, 1, "riis", N_SAYTEAM, cq->clientnum, text);
                 }
-                if(isdedicatedserver() && cq) logoutf("%s <%s>: %s", colorname(cq), GAME_LANG ? teamnames_EN[cq->team] : teamnames_FR[cq->team], text);
+                if(isdedicatedserver() && cq) logoutf("%s <%s>: %s", colorname(cq), readstr("Team_Names", cq->team), text);
                 break;
             }
 

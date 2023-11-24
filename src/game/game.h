@@ -733,16 +733,13 @@ struct gamestate
 };
 
 #define MAXTEAMS 2
-
-static const char * const teamnames_FR[1+MAXTEAMS] = { "", "Yorarien", "Yakekchose" };
-static const char * const teamnames_EN[1+MAXTEAMS] = { "", "Democrats", "Republicans" };
+static const char * const teamnames[1+MAXTEAMS] = { "", "1", "2" };
 static const char * const teamtextcode[1+MAXTEAMS] = { "\fc", "\fd", "\fc" };
 static const int teamtextcolor[1+MAXTEAMS] = { 0xFF2222, 0xFFFF22, 0xFF2222 };
 static const char * const teamblipcolor[1+MAXTEAMS] = { "_neutral", "_blue", "_red" };
-static inline int teamnumber(const char *name) { loopi(MAXTEAMS) if(!strcmp(GAME_LANG ? teamnames_EN[1+i] : teamnames_FR[1+i], name)) return 1+i; return 0; }
+static inline int teamnumber(const char *name) { loopi(MAXTEAMS) if(!strcmp(teamnames[1+i], name)) return 1+i; return 0; }
 #define validteam(n) ((n) >= 1 && (n) <= MAXTEAMS)
-#define teamname_FR(n) (teamnames_FR[validteam(n) ? (n) : 0])
-#define teamname_EN(n) (teamnames_EN[validteam(n) ? (n) : 0])
+#define teamname(n) (teamnames[validteam(n) ? (n) : 0])
 
 struct gameent : dynent, gamestate
 {

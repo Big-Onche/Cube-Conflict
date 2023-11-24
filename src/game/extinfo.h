@@ -38,7 +38,7 @@
         putint(q, ci->clientnum); //add player id
         putint(q, ci->ping);
         sendstring(ci->name, q);
-        sendstring(GAME_LANG ? teamname_EN(m_teammode ? ci->team : 0) : teamname_FR(m_teammode ? ci->team : 0), q);
+        sendstring(teamname(m_teammode ? ci->team : 0), q);
         putint(q, ci->state.frags);
         putint(q, ci->state.flags);
         putint(q, ci->state.deaths);
@@ -56,7 +56,7 @@
 
     static inline void extinfoteamscore(ucharbuf &p, int team, int score)
     {
-        sendstring(GAME_LANG ? teamname_EN(team) : teamname_FR(team), p);
+        sendstring(teamname(team), p);
         putint(p, score);
         if(!smode || !smode->extinfoteam(team, p))
             putint(p,-1); //no bases follow
