@@ -36,13 +36,13 @@ void *operator new[](size_t size, bool err)
 
 ////////////////////////// strings ////////////////////////////////////////
 
-static string tmpstr[4];
+static string tmpstr[8];
 static int tmpidx = 0;
 
 char *tempformatstring(const char *fmt, ...)
 {
-    tmpidx = (tmpidx+1)%4;
-
+    tmpidx = (tmpidx+1)%8;
+    conoutf("tempformatstring called. Using buffer index: %d", tmpidx);
     va_list v;
     va_start(v, fmt);
     vformatstring(tmpstr[tmpidx], fmt, v);

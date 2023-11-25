@@ -3035,7 +3035,8 @@ char *execidentstr(const char *name, bool lookup)
 
 const char *readstr(const char *ident, int at)
 {
-    return executestr(tempformatstring("getText $%s %d", ident, at));
+    defformatstring(cmd, "getText $%s %d", ident, at);
+    return executestr(cmd);
 }
 
 int execute(const uint *code)
