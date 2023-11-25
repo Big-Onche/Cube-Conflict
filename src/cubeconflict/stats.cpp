@@ -84,35 +84,27 @@ ICOMMAND(getstatlogo, "i", (int *statID), //gets stat logo for ui
     }
 );
 
-ICOMMAND(getstatinfo, "ii", (int *statID, bool *onlyvalue),
+ICOMMAND(getstatinfo, "i", (int *statID),
     if(*statID<0 || *statID>=NUMSTATS) { result(readstr("Misc_InvalidId")); return; }
     string val;
     switch(*statID)
     {
-        //Based on STAT_KILLS & STAT_MORTS, STAT_KDRATIO not saved.
-        case STAT_KDRATIO:
+        case STAT_KDRATIO: // based on STAT_KILLS & STAT_MORTS, STAT_KDRATIO not saved.
         {
-            formatstring(val, "%s%s%.1f", *onlyvalue ? "" : GAME_LANG ? statslist[*statID].statnicenameEN : statslist[*statID].statnicenameFR, *onlyvalue ? "" : GAME_LANG ? ": " : " : ", killDeathRatio());
+            formatstring(val, "%.1f", killDeathRatio());
             break;
         }
-        //Easy secs to HH:MM:SS converter and displayer
-        case STAT_TIMEPLAYED:
-        {
-            int hours = stat[STAT_TIMEPLAYED] / 3600; int mins = (stat[STAT_TIMEPLAYED] % 3600) / 60; int secs = stat[STAT_TIMEPLAYED] % 60;
-            formatstring(val, "%s : %d %s%s %d %s%s %d %s%s",  GAME_LANG ? statslist[*statID].statnicenameEN : statslist[*statID].statnicenameFR,
-                        hours, GAME_LANG ? "hour" : "heure", hours>1 ? "s" : "", mins, "min", mins>1 ? "s" : "", secs, "sec", secs>1 ? "s" : "");
-            break;
-        }
-        //when we need to display the stat after description (rare cases)
-        case STAT_KILLSTREAK:
-        case STAT_DAMMAGERECORD:
-        case STAT_MAXKILLDIST:
-        case STAT_LEVEL:
+        case STAT_TIMEPLAYED: // easy secs to HH:MM:SS converter and displayer
         case STAT_BASEHACK:
-            formatstring(val, "%s%s%d%s", *onlyvalue ? "" : GAME_LANG ? statslist[*statID].statnicenameEN : statslist[*statID].statnicenameFR, *onlyvalue ? "" : GAME_LANG ? ": " : " : ", stat[*statID], *statID!=STAT_MAXKILLDIST ? *statID==STAT_BASEHACK ? GAME_LANG ? " seconds" : " secondes" : "" : GAME_LANG ? " meters" : " mètres");
+        {
+            int secs = *statID == STAT_TIMEPLAYED ? stat[STAT_TIMEPLAYED] : stat[STAT_BASEHACK];
+            int h = secs / 3600;
+            int m = (secs % 3600) / 60;
+            int s = secs % 60;
+            formatstring(val, "%02d:%02d:%02d", h, m, s);
             break;
-        //otherwise, we put the stat value before the description by default
-        default: formatstring(val, "%d%s%s", stat[*statID], *onlyvalue ? "" : " ", *onlyvalue ? "" : GAME_LANG ? statslist[*statID].statnicenameEN : statslist[*statID].statnicenameFR);
+        }
+        default: formatstring(val, "%d%s", stat[*statID], *statID==STAT_MAXKILLDIST ? " m" : "");
     }
 
     result(val);

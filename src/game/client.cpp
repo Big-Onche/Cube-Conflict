@@ -337,7 +337,7 @@ namespace game
         else if(m_dmsp) return false;
         if(isconnected() && multiplayer(false) && !m_edit)
         {
-            conoutf(CON_ERROR, GAME_LANG ? "Editing in multiplayer requires edit mode" : "Editer la map en multijoueurs requiert le mode édition de map.");
+            conoutf(CON_ERROR, readstr("Console_Server_EditModeRequired"));
             return false;
         }
         return execidentbool("allowedittoggle", true);
@@ -1436,15 +1436,13 @@ namespace game
                 }
                 if(val)
                 {
-                    if(a) conoutf(GAME_LANG ? "Game is paused by administrator." : "La partie a été mise en pause par un administrateur.");
-                    else conoutf(GAME_LANG ? "Game is paused." : "La partie est en pause.");
+                    conoutf(a ? readstr("Console_Game_PausedByAdmin") : readstr("Console_Game_Paused"));
                     stopAllSounds(true);
                     playMusic(S_PAUSE);
                 }
                 else
                 {
-                    if(a) conoutf(GAME_LANG ? "The game has been resumed by the administrator." : "L'administrateur a mis fin à la pause.");
-                    else conoutf(GAME_LANG ? "The game has resumed!" : "La partie a repris !");
+                    conoutf(a ? readstr("Console_Game_ResumedByAdmin") : readstr("Console_Game_Resumed"));
                     stopMusic(S_PAUSE);
                     resumeAllSounds();
                 }

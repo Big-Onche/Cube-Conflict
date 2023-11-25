@@ -728,18 +728,9 @@ namespace game
         //////////////////////////////MESSAGES//////////////////////////////
         gameent *h = followingplayer(player1);
         int contype = d==h || actor==h ? CON_FRAG_SELF : CON_FRAG_OTHER;
-        const char *dname = "", *aname = "";
 
-        if(m_teammode && teamcolorfrags)
-        {
-            dname = teamcolorname(d, readstr("GameMessage_You"));
-            aname = teamcolorname(actor, readstr("GameMessage_You"));
-        }
-        else
-        {
-            dname = colorname(d, NULL, "\fd%s\fc", readstr("GameMessage_You"));
-            aname = colorname(actor, NULL, readstr("GameMessage_You"));
-        }
+        defformatstring(dname, "%s", m_teammode && teamcolorfrags ? teamcolorname(d, readstr("GameMessage_You")) : colorname(d, NULL, readstr("GameMessage_You"), "\fc"));
+        defformatstring(aname, "%s", m_teammode && teamcolorfrags ? teamcolorname(actor, readstr("GameMessage_You")) : colorname(actor, NULL, readstr("GameMessage_You"), "\fc"));
 
         if(d==actor) // Suicide ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
@@ -757,8 +748,9 @@ namespace game
             if(actor==player1) ////////////////////TU as tué quelqu'un////////////////////
             {
                 playSound(S_KILL, NULL, 0, 0, SND_FIXEDPITCH|SND_NOTIFICATION);
-                conoutf(CON_HUDCONSOLE, "%s \fc%s \f7! \f4(%.1fm)", readstr("GameMessage_YouKilled"), dname, killdistance);
-                conoutf(contype, "\fd%s\f7 > \fl%s\f7 > %s \fl(%.1fm)", player1->name, readstr("guns[atk].ident"), dname, killdistance);
+                defformatstring(victimname, "%s", dname);
+                conoutf(CON_HUDCONSOLE, "%s \fc%s \f7! \f4(%.1fm)", readstr("GameMessage_YouKilled"), victimname, killdistance);
+                conoutf(contype, "\fd%s\f7 > \fl%s\f7 > %s \fl(%.1fm)", player1->name, readstr(guns[atk].ident), victimname, killdistance);
 
                 if(IS_ON_OFFICIAL_SERV) //now let's check for shittons of achievements if playing online
                 {
@@ -852,8 +844,10 @@ namespace game
             if(player1->totaldamage/10 > 10000) unlockAchievement(ACH_DESTRUCTEUR);
 
             defformatstring(flags, "%d", player1->flags);
+
+            conoutf(CON_HUDCONSOLE, "\fa%s", readstr("Announcement_GameOver"));
             /*
-            conoutf(CON_GAMEINFO, GAME_LANG ? "\faGAME OVER!" : "\faFIN DE LA PARTIE !");
+
             if(GAME_LANG) conoutf(CON_GAMEINFO, "\f2Kills : %d | Deaths : %d | Total damage : %d | Accuracy : %d%% %s %s", player1->frags, player1->deaths, player1->totaldamage/10, accuracy, m_ctf ? "| Flags :" : "", m_ctf ? flags : "");
             else conoutf(CON_GAMEINFO, "\f2Éliminations : %d | Morts : %d | Dégats infligés : %d | Précision : %d%% %s %s", player1->frags, player1->deaths, player1->totaldamage/10, accuracy, m_ctf ? "| Drapeaux :" : "", m_ctf ? flags : "");
             */
@@ -1102,7 +1096,11 @@ namespace game
         bool dup = !name[0] || duplicatename(d, name, alt) || d->aitype != AI_NONE;
         if(dup || color[0])
         {
-            if(dup) return tempformatstring(d->aitype == AI_NONE ? "\fs%s%s \f5(%d)\fr" : GAME_LANG ? "\fs%s[AI]%s" : "\fs%s[IA]%s", color, name, d->clientnum);
+            if(dup)
+            {
+                if(d->aitype == AI_NONE) return tempformatstring("\fs%s%s \f5(%d)\fr", color, name, d->clientnum);
+                else return tempformatstring("\fs%s[%s]%s\fr", color, readstr("Misc_Bot"), name);
+            }
             return tempformatstring("\fs%s%s\fr", color, name);
         }
         return name;
