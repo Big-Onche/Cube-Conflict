@@ -547,7 +547,7 @@ namespace server
                     if(mode[0] != '?') break;
                 case '?':
                     mode++;
-                    loopk(NUMGAMEMODES) if(searchmodename(GAME_LANG ? gamemodes[k].nameEN : gamemodes[k].nameFR, mode))
+                    loopk(NUMGAMEMODES) if(searchmodename(readstr(gamemodes[gamemode - STARTGAMEMODE].modeId), mode))
                     {
                         if(op == '!') modemask &= ~(1<<k);
                         else modemask |= 1<<k;
@@ -556,7 +556,7 @@ namespace server
             }
             int modenum = INT_MAX;
             if(isdigit(mode[0])) modenum = atoi(mode);
-            else loopk(NUMGAMEMODES) if(searchmodename(GAME_LANG ? gamemodes[k].nameEN : gamemodes[k].nameFR, mode)) { modenum = k+STARTGAMEMODE; break; }
+            else loopk(NUMGAMEMODES) if(searchmodename(readstr(gamemodes[gamemode - STARTGAMEMODE].modeId), mode)) { modenum = k+STARTGAMEMODE; break; }
             if(!m_valid(modenum)) continue;
             switch(op)
             {
@@ -742,7 +742,7 @@ namespace server
 
     const char *modename(int n, const char *unknown)
     {
-        if(m_valid(n)) return GAME_LANG ? gamemodes[n - STARTGAMEMODE].nameEN : gamemodes[n - STARTGAMEMODE].nameFR;
+        if(m_valid(n)) return tempformatstring("%s (%s)", readstr(gamemodes[gamemode - STARTGAMEMODE].modeId), readstr(gamemodes[gamemode - STARTGAMEMODE].mutatorId));
         return unknown;
     }
 
@@ -2105,7 +2105,7 @@ namespace server
             else curmaprotation = smapname[0] ? max(findmaprotation(gamemode, ""), 0) : 0;
         }
 
-        logoutf("%s %s", servlang ? "Gamemode:" : "Mode de jeu :", m_valid(gamemode) ? servlang ? gamemodes[gamemode - STARTGAMEMODE].nameEN : gamemodes[gamemode - STARTGAMEMODE].nameFR : "Unknown");
+        logoutf("%s %s (%s)", servlang ? "Gamemode:" : "Mode de jeu :", m_valid(gamemode) ? readstr(gamemodes[gamemode - STARTGAMEMODE].modeId) : "Unknown", readstr(gamemodes[gamemode - STARTGAMEMODE].mutatorId));
 
         maprotation &rot = maprotations[curmaprotation];
         changemap(rot.map, rot.findmode(gamemode));

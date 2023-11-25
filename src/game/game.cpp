@@ -982,7 +982,7 @@ namespace game
 
     const char *getmapinfo()
     {
-        return showmodeinfo && m_valid(gamemode) ? (GAME_LANG ? gamemodes[gamemode - STARTGAMEMODE].nameEN : gamemodes[gamemode - STARTGAMEMODE].nameFR): NULL;
+        return showmodeinfo && m_valid(gamemode) ? readstr(gamemodes[gamemode - STARTGAMEMODE].modeId) : NULL;
     }
 
     const char *getscreenshotinfo()

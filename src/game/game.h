@@ -160,34 +160,34 @@ enum
     M_TUTORIAL   = 1<<17,
 };
 
-static struct gamemodeinfo { const char *nameFR; const char *nameEN; int flags; } gamemodes[] =
-{
-    { "Invasion", "Invasion", M_DMSP | M_LOCAL },       // -3
-    { "Tutoriel", "Tutorial", M_TUTORIAL | M_LOCAL },   // -2
-    { "SP", "SP", M_CLASSICSP | M_LOCAL },              // -1
-    { "demo", "demo", M_DEMO | M_LOCAL },               // 0
-    { "Editeur de maps", "Map editor", M_EDIT },        // 1
-    //MODE 1, 2, 3, 4
-    { "Tue Les Tous (Collecte d'armes)",   "Deathmatch (Weapon pickup)",        M_LOBBY },
-    { "Tue Les Tous (Armes aléatoire)",    "Deathmatch (Random weapons)",       M_RANDOM | M_NOAMMO | M_MUNINFINIE},
-    { "Tue Les Tous (Armes multiples)",    "Deathmatch (Multiple weapons)",     M_FULLSTUFF},
-    { "Tue Les Tous (Armes identiques)",   "Deathmatch (Identical weapons)",    M_IDENTIQUE | M_NOAMMO | M_MUNINFINIE},
-    //MODE 5, 6, 7, 8
-    { "Tue Les Tous (Collecte d'armes)",   "Team Deathmatch (Weapon pickup)",          M_TEAM },
-    { "Tue Les Tous (Arme aléatoire)",     "Team Deathmatch (Random weapon)",          M_RANDOM | M_TEAM | M_NOAMMO | M_MUNINFINIE},
-    { "Tue Les Tous (Armes multiples)",    "Team Deathmatch (Multiple weapons)",       M_FULLSTUFF | M_TEAM},
-    { "Tue Les Tous (Armes identiques)",   "Team Deathmatch (Identical weapons)",      M_IDENTIQUE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
-    //MODE 9, 10, 11, 12
-    { "Capture de drapeau (Collecte d'armes)",  "Capture the flag (Weapon pickup)",       M_CTF | M_TEAM },
-    { "Capture de drapeau (Arme aléatoire)",    "Capture the flag (Random weapon)",       M_RANDOM | M_CTF | M_TEAM | M_NOAMMO | M_MUNINFINIE},
-    { "Capture de drapeau (Full stuff)",        "Capture the flag (Multiple weapons)",    M_FULLSTUFF | M_CTF | M_TEAM},
-    { "Capture de drapeau (Identique)",         "Capture the flag (Identical)",           M_IDENTIQUE | M_CTF | M_TEAM | M_NOAMMO | M_MUNINFINIE},
-    //MODE 13, 14, 15, 16, 17
-    { "Conquête (Collecte d'armes)",        "Domination (Weapon pickup)",       M_CAPTURE | M_TEAM},
-    { "Conquête (Arme aléatoire)",          "Domination (Random weapon)",       M_RANDOM | M_CAPTURE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
-    { "Conquête (Armes multiples)",         "Domination (Multiple weapons)",    M_FULLSTUFF | M_CAPTURE | M_TEAM},
-    { "Conquête (Armes identiques)",        "Domination (Identical weapons)",   M_IDENTIQUE | M_CAPTURE | M_TEAM | M_NOAMMO | M_MUNINFINIE},
-    { "Conquête (Régénération)",            "Domination (Regeneration)",        M_NOITEMS | M_CAPTURE | M_TEAM | M_REGEN},
+static struct gamemodeinfo { const char *modeId, *mutatorId; int flags; } gamemodes[] =
+{   // mode -3, -2, -1, 0, 1
+    { "Mode_Invasion",          "",                 M_DMSP | M_LOCAL },
+    { "Mode_Tutorial",          "",                 M_TUTORIAL | M_LOCAL },
+    { "Mode_Campaign",          "",                 M_CLASSICSP | M_LOCAL },
+    { "Mode_Replay",            "",                 M_DEMO | M_LOCAL },
+    { "Mode_MapEditor",         "",                 M_EDIT },
+    // mode 2, 3, 4, 5
+    { "Mode_Deathmatch",        "Mut_Pickup",       M_LOBBY },
+    { "Mode_Deathmatch",        "Mut_Random",       M_RANDOM | M_NOAMMO | M_MUNINFINIE },
+    { "Mode_Deathmatch",        "Mut_FullStuff",    M_FULLSTUFF },
+    { "Mode_Deathmatch",        "Mut_Identical",    M_IDENTIQUE | M_NOAMMO | M_MUNINFINIE },
+    // mode 6, 7, 8, 9
+    { "Mode_TeamDeathmatch",    "Mut_Pickup",       M_TEAM },
+    { "Mode_TeamDeathmatch",    "Mut_Random",       M_RANDOM | M_TEAM | M_NOAMMO | M_MUNINFINIE },
+    { "Mode_TeamDeathmatch",    "Mut_FullStuff",    M_FULLSTUFF | M_TEAM },
+    { "Mode_TeamDeathmatch",    "Mut_Identical",    M_IDENTIQUE | M_TEAM | M_NOAMMO | M_MUNINFINIE },
+    // mode 10, 11, 12, 13
+    { "Mode_CaptureTheFlag",    "Mut_Pickup",       M_CTF | M_TEAM },
+    { "Mode_CaptureTheFlag",    "Mut_Random",       M_RANDOM | M_CTF | M_TEAM | M_NOAMMO | M_MUNINFINIE },
+    { "Mode_CaptureTheFlag",    "Mut_FullStuff",    M_FULLSTUFF | M_CTF | M_TEAM },
+    { "Mode_CaptureTheFlag",    "Mut_Identical",    M_IDENTIQUE | M_CTF | M_TEAM | M_NOAMMO | M_MUNINFINIE },
+    // mode 14, 15, 16, 17, 18
+    { "Mode_Domination",        "Mut_Pickup",       M_CAPTURE | M_TEAM },
+    { "Mode_Domination",        "Mut_Random",       M_RANDOM | M_CAPTURE | M_TEAM | M_NOAMMO | M_MUNINFINIE },
+    { "Mode_Domination",        "Mut_FullStuff",    M_FULLSTUFF | M_CAPTURE | M_TEAM },
+    { "Mode_Domination",        "Mut_Identical",    M_IDENTIQUE | M_CAPTURE | M_TEAM | M_NOAMMO | M_MUNINFINIE },
+    { "Mode_Domination",        "Mut_Regen",        M_NOITEMS | M_CAPTURE | M_TEAM | M_REGEN },
 };
 
 #define STARTGAMEMODE (-3)
