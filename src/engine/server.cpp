@@ -288,25 +288,24 @@ ENetPacket *sendfile(int cn, int chan, stream *file, const char *format, ...)
 
 const char *disconnectreason(int reason)
 {
-    bool lang = GAME_LANG || servlang;
     switch(reason)
     {
-        case DISC_EOP:              return lang ? "end of packet" : "fin de paquet";
-        case DISC_LOCAL:            return lang ? "server in local mode" : "serveur en mode local";
-        case DISC_KICK:             return lang ? "kicked or banned" : "kické ou banni";
-        case DISC_MSGERR:           return lang ? "network message error (illegal client message)" : "erreur message (message client illégal)";
-        case DISC_SERVMSGERR:       return lang ? "network message error (illegal server message)" : "erreur message (message serveur illégal)";
-        case DISC_DESYNC:           return lang ? "synchronization error" : "erreur de synchronisation";
-        case DISC_UNK:              return lang ? "unknown network message" : "message réseau inconnu";
-        case DISC_IPBAN:            return lang ? "ip banned" : "ip bannie";
-        case DISC_PRIVATE:          return lang ? "server in private mode" : "serveur en mode privé";
-        case DISC_MAXCLIENTS:       return lang ? "server full" : "serveur plein";
-        case DISC_TIMEOUT:          return lang ? "connection timed out" : "la connexion a expirée";
-        case DISC_OVERFLOW:         return lang ? "connection overflow" : "connexion débordée";
-        case DISC_PASSWORD:         return lang ? "invalid password" : "mot de passe invalide";
-        case DISC_SERVERSTOP:       return lang ? "the server has been stopped by admin" : "le serveur a été arrêté par un administrateur";
-        case DISC_NORMAL:           return lang ? "normal" : "normal";
-        default:                    return lang ? "crash?" : "crash ?";
+        case DISC_EOP:              return "Console_Error_DiscEop";
+        case DISC_LOCAL:            return "Console_Error_DiscLocal";
+        case DISC_KICK:             return "Console_Error_DiscKick";
+        case DISC_MSGERR:           return "Console_Error_DiscMsgErr";
+        case DISC_SERVMSGERR:       return "Console_Error_DiscServMsgErr";
+        case DISC_DESYNC:           return "Console_Error_DiscDesync";
+        case DISC_UNK:              return "Console_Error_DiscUnk";
+        case DISC_IPBAN:            return "Console_Error_DiscIpBan";
+        case DISC_PRIVATE:          return "Console_Error_DiscPrivate";
+        case DISC_MAXCLIENTS:       return "Console_Error_DiscMaxClients";
+        case DISC_TIMEOUT:          return "Console_Error_DiscTimeOut";
+        case DISC_OVERFLOW:         return "Console_Error_DiscOverflow";
+        case DISC_PASSWORD:         return "Console_Error_DiscPassword";
+        case DISC_SERVERSTOP:       return "Console_Error_DiscServerStop";
+        case DISC_NORMAL:           return "Console_Error_DiscNormal";
+        default:                    return "Console_Error_DiscCrash";
     }
 }
 
@@ -316,7 +315,7 @@ void disconnect_client(int n, int reason)
     enet_peer_disconnect(clients[n]->peer, reason);
     server::clientdisconnect(n);
     delclient(clients[n]);
-    const char *msg = disconnectreason(reason);
+    const char *msg = readstr(disconnectreason(reason));
     string s;
     if(msg) formatstring(s, "%s %s (%s)", servlang ? "Disconnected:" : "Hors-ligne :", clients[n]->hostname, msg);
     else formatstring(s, "%s %s", servlang ? "Disconnected:" : "Hors-ligne :", clients[n]->hostname);
@@ -703,7 +702,7 @@ void serverslice(bool dedicated, uint timeout)   // main server update, called f
                 time_t t = time(NULL);
                 size_t len = strftime(contime, sizeof(contime), "%d-%m-%Y %Hh %Mmin %Ssec", localtime(&t));
                 contime[min(len, sizeof(contime)-1)] = '\0';
-                const char *msg = disconnectreason(event.data);
+                const char *msg = readstr(disconnectreason(event.data));
                 logoutf("%s %s | %s | %s", servlang ? "Disconnected:" : "Hors-ligne :", c->hostname, contime, msg);
                 server::clientdisconnect(c->num);
                 delclient(c);

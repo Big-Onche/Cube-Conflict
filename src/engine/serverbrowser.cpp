@@ -330,12 +330,14 @@ struct serverinfo : servinfo, pingattempts
         calcping();
     }
 
+    enum status {STATUS_UNK = 0, STATUS_WAITING, STATUS_OLDERSERVER, STATUS_NEWERSERVER};
+
     const char *status() const
     {
-        if(address.host == ENET_HOST_ANY) return GAME_LANG ? "Unknown host" : "IP Invalide";
-        if(ping == WAITING) return GAME_LANG ? "Waiting for response..." : "Connexion en cours...";
-        if(protocol < currentprotocol) return GAME_LANG ? "The server needs to be updated" : "Le serveur n'est pas à jour";
-        if(protocol > currentprotocol) return GAME_LANG ? "Your game needs to be updated" : "Votre jeu n'est pas à jour";
+        if(address.host == ENET_HOST_ANY) return readstr("ServerStatus", STATUS_UNK);
+        if(ping == WAITING) return readstr("ServerStatus", STATUS_WAITING);
+        if(protocol < currentprotocol) return readstr("ServerStatus", STATUS_OLDERSERVER);
+        if(protocol > currentprotocol) return readstr("ServerStatus", STATUS_NEWERSERVER);
         return NULL;
     }
 

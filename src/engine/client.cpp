@@ -286,7 +286,7 @@ void gets2c()           // get updates from the server
             {
                 if(!discmillis || event.data)
                 {
-                    const char *msg = disconnectreason(event.data);
+                    const char *msg = readstr(disconnectreason(event.data));
                     if(msg) conoutf(CON_ERROR, "\f3%s (%s).", readstr("Console_Connection_NetError"), msg);
                     else conoutf(CON_ERROR, "\f3%s.", readstr("Console_Connection_NetError"));
                 }

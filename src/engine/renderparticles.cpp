@@ -1446,7 +1446,7 @@ void spawnSnow(vec pos, int intensity, int r, int g, int b, int wind, bool force
 
 void spawnApocalypse(vec pos, int intensity, int r, int g, int b, int wind)
 {
-    bool volcano = !strcasecmp(maptitle_en, "Volcano");
+    bool volcano = !strcasecmp(mapref, "volcano");
 
     if(defaultColors(r, g, b)) { r = 255; g = 150;  b = 0; } // setting default colors for "generic" apocalypse
     if(!intensity) intensity = 125;
@@ -1467,7 +1467,6 @@ static void makeparticles(entity &e)
             if((map_atmo==4 || map_atmo==8) || (e.attr2 >=1 && e.attr2 <=3)) spawnRain(e.o, e.attr2, e.attr3, e.attr4, e.attr5, e.attr6, e.attr7, e.attr2!=0); // light rain, moderate rain, storm
             if(map_atmo==8 || map_atmo==9 || e.attr2==4) spawnSnow(e.o, e.attr3, e.attr4, e.attr5, e.attr6, e.attr7, e.attr2!=0); // snow
             if(map_atmo==5 || e.attr2==5) spawnApocalypse(e.o, e.attr3, e.attr4, e.attr5, e.attr6, e.attr7); // apocalypse
-            //if(editmode) particle_textcopy(e.o, tempformatstring(GAME_LANG ? "\feWeather (%s)" : "\feMétéo (%s)", e.attr2 ? GAME_LANG ? "Forced" : "Forcée" : GAME_LANG ? "Cur. atmo" : "Atmo. actuelle"), PART_TEXT, 1, 0xFFFFFF, 3.0f);
             break;
 
         case 1: // fire and smoke: attr 2:<radius> 3:<height> 4:<r> 5:<g> 6:<b> 7:<color offset> 8:<grow(+)/shrink(-)> 9:<sparks(amount)>
@@ -1810,9 +1809,9 @@ void updateparticles()
                 }
                 case BASE:
                 {
-                    const char *name = getalias(tempformatstring("disguise_%s_%d", GAME_LANG ? "en" : "fr", e.attr2));
-                    defformatstring(basename, name);
-                    defformatstring(txt, "%s - %s", readstr(entreferences[e.type]), basename);
+                    defformatstring(alias, "base_%s_%d", readstr("languages", GAME_LANG), e.attr2);
+                    const char *name = getalias(alias);
+                    defformatstring(txt, "%s - %s", readstr(entreferences[e.type]), name);
                     particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);
                     partcol = 0x00FF00;
                     break;
@@ -1826,10 +1825,10 @@ void updateparticles()
                 default:
                 {
                     string gameenttype = "";
-                    if(e.type >= I_RAIL && e.type <= I_SUPERARME) formatstring(gameenttype, "%s", GAME_LANG ? "Weapon" : "Arme");
-                    else if(e.type==I_SANTE || e.type==I_MANA) formatstring(gameenttype, "%s", GAME_LANG ? "Item" : "Objet");
-                    else if(e.type >= I_WOODSHIELD && e.type <= I_POWERARMOR) formatstring(gameenttype, "%s", GAME_LANG ? "Shield" : "Bouclier");
-                    else if(e.type >= I_BOOSTPV && e.type <= I_JOINT) formatstring(gameenttype, "%s", GAME_LANG ? "Boost" : "Boost");
+                    if(e.type >= I_RAIL && e.type <= I_SUPERARME) formatstring(gameenttype, "%s", readstr("Ent_Weapon"));
+                    else if(e.type==I_SANTE || e.type==I_MANA) formatstring(gameenttype, "%s", readstr("Ent_Item"));
+                    else if(e.type >= I_WOODSHIELD && e.type <= I_POWERARMOR) formatstring(gameenttype, "%s", readstr("Ent_Shield"));
+                    else if(e.type >= I_BOOSTPV && e.type <= I_JOINT) formatstring(gameenttype, "%s", readstr("Ent_Boost"));
                     defformatstring(txt, "%s%s%s%s", gameenttype, strcmp(gameenttype, "") ? " (\ff" : "", readstr(entreferences[e.type]), strcmp(gameenttype, "") ? "\f7)" : "");
                     particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);
                     if(strcmp(gameenttype, "")) partcol = 0x0000FF;

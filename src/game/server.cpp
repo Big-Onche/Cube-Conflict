@@ -742,13 +742,14 @@ namespace server
 
     const char *modename(int n, const char *unknown)
     {
-        if(m_valid(n)) return tempformatstring("%s (%s)", readstr(gamemodes[gamemode - STARTGAMEMODE].modeId), readstr(gamemodes[gamemode - STARTGAMEMODE].mutatorId));
+        defformatstring(mutator, gamemode - STARTGAMEMODE > 2 ? " (%s)" : "", readstr(gamemodes[gamemode - STARTGAMEMODE].mutatorId));
+        return tempformatstring("%s%s", readstr(gamemodes[gamemode - STARTGAMEMODE].modeId), mutator);
         return unknown;
     }
 
     const char *mastermodename(int n, const char *unknown)
     {
-        return (n>=MM_START && size_t(n-MM_START)<sizeof(mastermodenames)/sizeof(mastermodenames[0])) ? GAME_LANG ? mastermodenames[n-MM_START] : mastermodenames_fr[n-MM_START] : unknown;
+        return (n>=MM_START && size_t(n-MM_START)<NUMMMNAMES) ? readstr("MasterModeNames", n-MM_START) : unknown;
     }
 
     const char *privname(int type)

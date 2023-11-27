@@ -51,19 +51,19 @@ namespace game
 
     ICOMMAND(npcClass, "i", (int *i),
         if (*i < 0) { conoutf(CON_ERROR, "min value for npc class is 0"); return; }
-        else if (*i > NUMAPTS-1) { conoutf(CON_ERROR, "max value for npc id class %d", NUMAPTS-1); return; }
+        else if (*i > NUMAPTS-1) { conoutf(CON_ERROR, "max value for npc class is %d", NUMAPTS-1); return; }
         else npcs[id].npcclass = *i;
     );
 
     ICOMMAND(npcWeapon, "i", (int *i),
         if (*i < 0) { conoutf(CON_ERROR, "min value for npc weapon is 0"); return; }
-        else if (*i > NUMGUNS-1) { conoutf(CON_ERROR, "max value for npc drop class %d", NUMGUNS-1); return; }
+        else if (*i > NUMGUNS-1) { conoutf(CON_ERROR, "max value for npc weapon is %d", NUMGUNS-1); return; }
         else npcs[id].gun = *i;
     );
 
     ICOMMAND(npcDropValue, "i", (int *i),
         if (*i < 0) { conoutf(CON_ERROR, "min value for npc drop is 0"); return; }
-        else if (*i > NUMDROPS-1) { conoutf(CON_ERROR, "max value for npc drop class %d", NUMDROPS-1); return; }
+        else if (*i > NUMDROPS-1) { conoutf(CON_ERROR, "max value for npc drop is %d", NUMDROPS-1); return; }
         else npcs[id].dropval = *i;
     );
 

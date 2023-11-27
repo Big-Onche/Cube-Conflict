@@ -307,7 +307,7 @@ namespace entities
                 if(m_classicsp || m_tutorial)
                 {
                     respawnent = n;
-                    conoutf(CON_GAMEINFO, GAME_LANG ? "\f2Respawn point set!" : "\f2Point de réapparition mis à jour !");
+                    conoutf(CON_GAMEINFO, "\f2%s", readstr("Console_Game_RespawnPointSet"));
                     //playsound(-1);
                 }
                 break;
@@ -350,20 +350,20 @@ namespace entities
         {
             d->boostmillis[B_ROIDS] = 0;
             playSound(S_ROIDS_PUPOUT, d==hudplayer() ? NULL : &d->o, 300, 50);
-            if(d==player1) conoutf(CON_GAMEINFO, GAME_LANG ? "\f8The steroid cycle is over." : "\f8La cure de stéros est terminée.");
+            if(d==player1) conoutf(CON_HUDCONSOLE, "\f8%s", readstr("GameMessage_RoidsEnded"));
         }
 
         if(d->boostmillis[B_EPO] && (d->boostmillis[B_EPO] -= time)<=0)
         {
             d->boostmillis[B_EPO] = 0;
             playSound(S_EPO_PUPOUT, d==player1 ? NULL : &d->o, 300, 50);
-            if(d==player1) conoutf(CON_GAMEINFO, GAME_LANG ? "\f8EPO no longer works..." : "\f8L'EPO ne fait plus effet.");
+            if(d==player1) conoutf(CON_HUDCONSOLE, "\f8%s", readstr("GameMessage_EpoEnded"));
         }
 
         if(d->boostmillis[B_JOINT] && (d->boostmillis[B_JOINT] -= time)<=0)
         {
             d->boostmillis[B_JOINT] = 0;
-            if(d==player1) conoutf(CON_GAMEINFO, GAME_LANG ? "\f8You smoked the joint to the filter!" : "\f8Tu as fumé le joint jusqu'au carton !");
+            if(d==player1) conoutf(CON_HUDCONSOLE, "\f8%s", readstr("GameMessage_JointEnded"));
         }
 
         if(d==hudplayer() && d->boostmillis[B_SHROOMS] > 4000) playendshrooms = false;
@@ -377,7 +377,7 @@ namespace entities
         {
             d->boostmillis[B_SHROOMS] = 0;
             gfx::resetpostfx();
-            if(d==player1) conoutf(CON_GAMEINFO, GAME_LANG ? "\f8The mushrooms have been digested." : "\f8Les champignons sont digérés.");
+            if(d==player1) conoutf(CON_HUDCONSOLE, "\f8%s", readstr("GameMessage_ShroomsEnded"));
         }
 
         if(d->boostmillis[B_RAGE] && (d->boostmillis[B_RAGE] -= time)<=0) d->boostmillis[B_RAGE] = 0;

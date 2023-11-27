@@ -15,7 +15,7 @@ namespace game
     {
         if(player1->state != CS_DEAD && isconnected() && !premission && !intermission && !m_tutorial)
         {
-            conoutf(CON_GAMEINFO, GAME_LANG ? "\fcCannot change class while alive!" : "\fcImpossible de changer d'aptitude en étant vivant !");
+            conoutf(CON_GAMEINFO, "\fc%s", readstr("Console_Game_UnableToChangeClass"));
             playSound(S_ERROR);
             player1_aptitude = oldapti;
         }
@@ -379,7 +379,7 @@ namespace game
                 loopi(4) if(player1->ammo[GUN_S_NUKE+i]>0) p1hassuperweapon = true;
                 if(player1->health>=2000) unlockAchievement(ACH_SACAPV);
                 if(player1->boostmillis[B_ROIDS] && player1->boostmillis[B_EPO] && player1->boostmillis[B_JOINT] && player1->boostmillis[B_SHROOMS]) unlockAchievement(ACH_DEFONCE);
-                if(lookupmaterial(player1->o)==MAT_NOCLIP && !strcasecmp(maptitle_en, "Moon")) unlockAchievement(ACH_SPAAACE);
+                if(lookupmaterial(player1->o)==MAT_NOCLIP && !strcasecmp(mapref, "moon")) unlockAchievement(ACH_SPAAACE);
                 if(p1hassuperweapon && player1->boostmillis[B_ROIDS] && player1->armour>0 && player1->armourtype==A_ASSIST) unlockAchievement(ACH_ABUS);
                 if(player1->aptitude==APT_KAMIKAZE && player1->ammo[GUN_KAMIKAZE]<=0 && totalmillis-lastshoot>=500 && totalmillis-lastshoot<=750 && isconnected()) unlockAchievement(ACH_SUICIDEFAIL);
                 if(player1->boostmillis[B_EPO] && player1->aptitude==APT_JUNKIE) unlockAchievement(ACH_LANCEEPO);
@@ -547,13 +547,6 @@ namespace game
     }
     COMMAND(taunt, "");
 
-    //void showvoice()
-    //{
-    //    if(GAME_LANG) return;
-    //    playsound(S_CGCORTEX+UI_voix);
-    //}
-    //COMMAND(showvoice, "");
-
     VARP(hitsound, 0, 0, 1);
 
     void damaged(int damage, gameent *d, gameent *actor, bool local, int atk)
@@ -637,36 +630,6 @@ namespace game
 
     VARP(teamcolorfrags, 0, 1, 1);
 
-    static const struct partFR { const char *partverb, *parttroll, *partsuicide; } partmessageFR[] =
-    {
-        {"explosé", "ta bêtise.", "suicidé : Darwin Award"},
-        {"owned", "ton incompétence.", "tué tout seul"},
-        {"niqué", "ta débilité !", "niqué comme un con"},
-        {"tué", "ton manque de chance.", "annihilé bêtement"},
-        {"butté", "la meilleure volonté du monde.", "exterminé sans ennemis"},
-        {"troué", "succès."},
-        {"dézingué", "détermination."},
-        {"annihilé", "une précision sans précédent."},
-        {"brisé", "d'atroces souffrances."},
-        {"neutralisé"},
-        {"pulverisé"},
-        {"exterminé"},
-        {"achevé"},
-        {"détruit"},
-        {"vaporisé"},
-    };
-
-    static const struct partEN { const char *partverb, *parttroll, *partsuicide; } partmessageEN[] =
-    {
-        {"killed", "stupidity.", "suicided: Darwin Award"},
-        {"slayed", "determination.", "committed suicide"},
-        {"finished", "success!"},
-        {"deleted", "excruciating pain."},
-        {"murdered", "regrets."},
-        {"destroyed"},
-        {"annihilated"},
-    };
-
     string killername;
     ICOMMAND(getkillername, "", (), result(killername); );
 
@@ -678,7 +641,7 @@ namespace game
     float killerdistance;
     ICOMMAND(getkilldistance, "", (), floatret(roundf(killerdistance * 10) / 10); );
 
-    bool hassuicided = true;
+    bool hassuicided = false;
     ICOMMAND(hassuicided, "", (), intret(hassuicided); );
 
     void killed(gameent *d, gameent *actor, int atk)
@@ -694,8 +657,8 @@ namespace game
         }
         else if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission || premission) return;
 
-        //////////////////////////////SONS//////////////////////////////
-        switch(actor->killstreak) //Sons Killstreak
+        ////////////////////////////// sounds //////////////////////////////
+        switch(actor->killstreak) // killstreak
         {
             case 3:
                 playSound(S_KS_X3, actor==player1 ? NULL : &actor->o, 300, 100);
@@ -713,8 +676,8 @@ namespace game
                 break;
         }
 
-        //////////////////////////////GRAPHISMES//////////////////////////////
-        if(actor->aptitude==APT_FAUCHEUSE) //Eclair aptitude faucheuse
+        ////////////////////////////// gfx //////////////////////////////
+        if(actor->aptitude==APT_FAUCHEUSE)
         {
             if(camera1->o.dist(d->o) >= 250) playSound(S_ECLAIRLOIN, &d->o, 1000, 100);
             else playSound(S_ECLAIRPROCHE, &d->o, 300, 100);
@@ -725,34 +688,35 @@ namespace game
             if(actor==player1) { playSound(S_FAUCHEUSE); player1->vampimillis=1500; }
         }
 
-        //////////////////////////////MESSAGES//////////////////////////////
+        ////////////////////////////// game messages //////////////////////////////
         gameent *h = followingplayer(player1);
         int contype = d==h || actor==h ? CON_FRAG_SELF : CON_FRAG_OTHER;
 
         defformatstring(dname, "%s", m_teammode && teamcolorfrags ? teamcolorname(d, readstr("GameMessage_You")) : colorname(d, NULL, readstr("GameMessage_You"), "\fc"));
         defformatstring(aname, "%s", m_teammode && teamcolorfrags ? teamcolorname(actor, readstr("GameMessage_You")) : colorname(actor, NULL, readstr("GameMessage_You"), "\fc"));
 
-        if(d==actor) // Suicide ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        if(d==actor) // suicide ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
-            conoutf(contype, "%s%s %s%s%s", d==player1 ? "\fd" : "", dname, GAME_LANG ? "" : d==player1 ? "t'es " : "s'est ", GAME_LANG ? partmessageEN[rnd(2)].partsuicide : partmessageFR[rnd(5)].partsuicide, d==player1 ? " !" : ".");
             if(d==player1)
             {
                 hassuicided = true;
                 updateStat(1, STAT_MORTS); updateStat(1, STAT_SUICIDES);
-                if(atk==ATK_M32_SHOOT)unlockAchievement(ACH_M32SUICIDE);
+                if(atk==ATK_M32_SHOOT) unlockAchievement(ACH_M32SUICIDE);
+                conoutf(contype, "\fd%s %s", readstr("GameMessage_You"), readstr("Console_Game_Suicided"));
             }
+            else conoutf(contype, "%s%s > %s", d==player1 ? "\fd" : "", dname, readstr("GameMessage_Suicide"));
         }
         else // Kill ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
             float killdistance = actor->o.dist(d->o)/18.f;
-            if(actor==player1) ////////////////////TU as tué quelqu'un////////////////////
+            if(actor==player1) //////////////////// you killed someone ////////////////////
             {
                 playSound(S_KILL, NULL, 0, 0, SND_FIXEDPITCH|SND_NOTIFICATION);
                 defformatstring(victimname, "%s", dname);
                 conoutf(CON_HUDCONSOLE, "%s \fc%s \f7! \f4(%.1fm)", readstr("GameMessage_YouKilled"), victimname, killdistance);
                 conoutf(contype, "\fd%s\f7 > \fl%s\f7 > %s \fl(%.1fm)", player1->name, readstr(guns[atk].ident), victimname, killdistance);
 
-                if(IS_ON_OFFICIAL_SERV) //now let's check for shittons of achievements if playing online
+                if(IS_ON_OFFICIAL_SERV) // now let's check for shittons of achievements if playing online
                 {
                     if(killdistance>=100.f) unlockAchievement(ACH_BEAUTIR);
                     else if(killdistance<1.f && atk==ATK_MOSSBERG_SHOOT) unlockAchievement(ACH_TAKETHAT);
@@ -786,7 +750,7 @@ namespace game
                     if(stat[STAT_MAXKILLDIST]<killdistance) updateStat(killdistance, STAT_MAXKILLDIST, true);
                 }
             }
-            else if(d==player1) ////////////////////TU as été tué////////////////////
+            else if(d==player1) //////////////////// you were killed ////////////////////
             {
                 conoutf(contype, "%s\f7 > \fl%s\f7 > \fd%s \fl(%.1fm)", aname, readstr(guns[atk].ident), player1->name, killdistance);
                 updateStat(1, STAT_MORTS);
@@ -795,14 +759,13 @@ namespace game
                 killerclass = actor->aptitude;
                 killerlevel = actor->level;
                 killerdistance = killdistance;
-                hassuicided = false;
             }
-            else ////////////////////Quelqu'un a tué quelqu'un////////////////////
+            else //////////////////// someone killed someone ////////////////////
             {
                 conoutf(contype, "%s\f7 > \fl%s\f7 > %s \fl(%.1fm)", aname, readstr(guns[atk].ident), dname, killdistance);
             }
 
-            ////////////////////Informe que quelqu'un est chaud////////////////////
+            //////////////////// someone is killin' it ////////////////////
             defformatstring(verb, "%s", (actor==player1 ? readstr("GameMessage_Are") : readstr("GameMessage_Is") ));
             defformatstring(name, "%s", actor==player1 ? readstr("GameMessage_You")  : aname);
 
@@ -847,7 +810,6 @@ namespace game
 
             conoutf(CON_HUDCONSOLE, "\fa%s", readstr("Announcement_GameOver"));
             /*
-
             if(GAME_LANG) conoutf(CON_GAMEINFO, "\f2Kills : %d | Deaths : %d | Total damage : %d | Accuracy : %d%% %s %s", player1->frags, player1->deaths, player1->totaldamage/10, accuracy, m_ctf ? "| Flags :" : "", m_ctf ? flags : "");
             else conoutf(CON_GAMEINFO, "\f2Éliminations : %d | Morts : %d | Dégats infligés : %d | Précision : %d%% %s %s", player1->frags, player1->deaths, player1->totaldamage/10, accuracy, m_ctf ? "| Drapeaux :" : "", m_ctf ? flags : "");
             */

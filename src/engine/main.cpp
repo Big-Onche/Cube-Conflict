@@ -214,7 +214,9 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
 
         if(mapname)
         {
-            defformatstring(mapprettyname, "%s", GAME_LANG ? maptitle_en : maptitle_fr);
+            execfile(tempformatstring("media/map/%s.cfg", mapname));
+            const char *name = getalias(tempformatstring("maptitle_%s", readstr("languages", GAME_LANG)));
+            defformatstring(mapprettyname, name);
             int tw = text_width(mapprettyname);
             float tsz = 0.04f*min(screenw, screenh)/70,
                   tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*8.0f*min(screenw, screenh) - 70*tsz;
@@ -712,7 +714,6 @@ void resetgl()
         fatal("failed to reload core texture");
     reloadfonts();
     inbetweenframes = true;
-    renderbackground(GAME_LANG ? "Loading..." : "Chargement...");
     restoregamma();
     restorevsync();
     initgbuffer();
@@ -1151,7 +1152,7 @@ bool initsteam()
     #ifdef _WIN32
         if(!SteamAPI_Init())
         {
-            conoutf(CON_WARN, GAME_LANG ? "Steam API failed to start." : "API Steam non démarrée.");
+            conoutf(CON_ERROR, "\fc%s", readstr("Console_Error_InitSteamAPI"));
             IS_USING_STEAM = false;
             return false;
         }

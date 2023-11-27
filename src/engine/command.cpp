@@ -3219,7 +3219,7 @@ void writecfg(const char *name)
 {
     stream *f = openutf8file(path(name && name[0] ? name : game::savedconfig(), true), "w");
     if(!f) return;
-    f->printf(GAME_LANG ? "// Saved game settings.\n\n" : "// Sauvegarde de la configuration du jeu.\n\n");
+    f->printf("// Saved game settings.\n\n");
     game::writeclientinfo(f);
     vector<ident *> ids;
     enumerate(idents, ident, id, ids.add(&id));

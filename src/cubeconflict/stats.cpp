@@ -125,7 +125,7 @@ char *encryptSave(char savepart[20]) // simple and easily crackable encryption
 void writeSave() // we write the poorly encrypted value for all stat
 {
     stream *savefile = openutf8file("config/stats.cfg", "w");
-    if(!savefile) { conoutf(CON_ERROR, readstr("Console_SaveError")); return; }
+    if(!savefile) { conoutf(CON_ERROR, "\fc%s", readstr("Console_Error_WriteSave")); return; }
 
     int saveID = 0;
     loopi(NUMSTATS + NUMCUST + NUMACHS)

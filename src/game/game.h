@@ -229,8 +229,7 @@ static struct gamemodeinfo { const char *modeId, *mutatorId; int flags; } gamemo
 
 enum { MM_AUTH = -1, MM_OPEN = 0, MM_VETO, MM_LOCKED, MM_PRIVATE, MM_PASSWORD, MM_START = MM_AUTH, MM_INVALID = MM_START - 1 };
 
-static const char * const mastermodenames_fr[] = { "Auth", "Publique", "Veto",     "Verrouillé", "Privé",      "Mot de passe" };
-static const char * const mastermodenames[] =  { "Auth",   "Public",   "Veto",     "Locked",     "Private",    "Password" };
+#define NUMMMNAMES 6
 static const char * const mastermodecolors[] = { "",       "\f0",    "\f2",        "\f2",        "\f3",        "\f3" };
 static const char * const mastermodeicons[] =  { "server", "server", "serverlock", "serverlock", "serverpriv", "serverpriv" };
 
@@ -950,7 +949,7 @@ namespace game
     extern gameent *getclient(int cn);
     extern gameent *newclient(int cn);
     extern const char *colorname(gameent *d, const char *name = NULL, const char *alt = NULL, const char *color = "");
-    extern const char *teamcolorname(gameent *d, const char *alt = GAME_LANG ? "You" : "Tu");
+    extern const char *teamcolorname(gameent *d, const char *alt);
     extern const char *teamcolor(int team);
     extern gameent *pointatplayer();
     extern gameent *hudplayer();

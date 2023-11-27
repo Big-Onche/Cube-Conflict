@@ -17,7 +17,7 @@ extern physent *camera1;                // special ent that acts as camera, same
 
 extern int worldscale, worldsize;
 extern int mapversion;
-extern char *maptitle_fr, *maptitle_en;
+extern char *mapref;
 extern vector<ushort> texmru;
 extern int xtraverts, xtravertsva;
 extern const ivec cubecoords[8];

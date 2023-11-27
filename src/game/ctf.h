@@ -541,7 +541,7 @@ struct ctfclientmode : clientmode
             f.droploc = vec(-1, -1, -1);
             f.interptime = 0;
         }
-        conoutf(CON_GAMEINFO, GAME_LANG ? "%s\f7 %sdropped %s's flag." : "%s\f7 %s perdu le drapeau %s", teamcolorname(d), GAME_LANG ? "" : d==player1 ? "as" : "a", teamcolorflag(f));
+        conoutf(CON_GAMEINFO, GAME_LANG ? "%s\f7 %sdropped %s's flag." : "%s\f7 %s perdu le drapeau %s", teamcolorname(d, readstr("GameMessage_You")), GAME_LANG ? "" : d==player1 ? "as" : "a", teamcolorflag(f));
         playSound(S_DRAPEAUTOMBE);
     }
 
@@ -575,7 +575,7 @@ struct ctfclientmode : clientmode
         flageffect(i, f.team, interpflagpos(f), vec(f.spawnloc).addz(FLAGFLOAT+FLAGCENTER));
         f.interptime = 0;
         returnflag(i);
-        conoutf(CON_GAMEINFO, GAME_LANG ? "%s\f7 %srecovered the %s's flag." : "%s\f7 %s récupéré le drapeau %s", teamcolorname(d), GAME_LANG ? "" : d==player1 ? "as" : "a", teamcolorflag(f));
+        conoutf(CON_GAMEINFO, GAME_LANG ? "%s\f7 %srecovered the %s's flag." : "%s\f7 %s récupéré le drapeau %s", teamcolorname(d, readstr("GameMessage_You")), GAME_LANG ? "" : d==player1 ? "as" : "a", teamcolorflag(f));
         if(d->team==player1->team) conoutf(CON_HUDCONSOLE, GAME_LANG ? "\f9We recovered our flag!" : "\f9Notre équipe a récupéré son drapeau !");
         else conoutf(CON_HUDCONSOLE, GAME_LANG ? "\f3The enemy team has recovered their flag" : "\f3L'équipe ennemie a récupéré son drapeau.");
         if(d==player1) {updateStat(1, STAT_DRAPEAUXALYREC); addReward(10, 3);}
@@ -614,7 +614,7 @@ struct ctfclientmode : clientmode
         }
         if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%d", score), PART_TEXT, 2000, 0x32FF64, 4.0f, -8);
         d->flags = dflags;
-        conoutf(CON_GAMEINFO, "%s\f7 %s marqué un point pour l'équipe %s !", teamcolorname(d), d==player1 ? "as" : "a", teamcolor(team));
+        conoutf(CON_GAMEINFO, "%s\f7 %s marqué un point pour l'équipe %s !", teamcolorname(d, readstr("GameMessage_You")), d==player1 ? "as" : "a", teamcolor(team));
         conoutf(CON_HUDCONSOLE, team==player1->team ? (GAME_LANG ? "\f9We scored a point!" : "\f9Notre équipe a marqué un point !") :
                                                       (GAME_LANG ? "\f3The enemy team has scored a point." : "\f3L'équipe ennemie a marqué un point."));
 
@@ -632,7 +632,7 @@ struct ctfclientmode : clientmode
         f.version = version;
         f.interploc = interpflagpos(f, f.interpangle);
         f.interptime = lastmillis;
-        conoutf(CON_GAMEINFO, GAME_LANG ? "%s\f7 %sstole the %s's flag!" : "%s\f7 %s volé le drapeau %s !", teamcolorname(d), GAME_LANG ? "" : d==player1 ? "as" : "a", teamcolorflag(f));
+        conoutf(CON_GAMEINFO, GAME_LANG ? "%s\f7 %sstole the %s's flag!" : "%s\f7 %s volé le drapeau %s !", teamcolorname(d, readstr("GameMessage_You")), GAME_LANG ? "" : d==player1 ? "as" : "a", teamcolorflag(f));
         conoutf(CON_HUDCONSOLE, f.team!=player1->team ? (GAME_LANG ? "\f9We stole the enemy flag !" : "\f9Notre équipe a volé le drapeau ennemi !") :
                                                         (GAME_LANG ? "\f3The enemy team stole our flag." : "\f3L'équipe ennemie a volé notre drapeau !"));
 

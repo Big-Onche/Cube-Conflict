@@ -16,7 +16,7 @@ ICOMMAND(fprof, "s", (char *s), fpronounsf.add(newstring(s)); ); ICOMMAND(fadjf,
 char *rndname()
 {
     static char result[32];
-    if(pronouns.empty() || fpronouns.empty() || fpronounsf.empty() || adjectives.empty() || fadjectives.empty() || fadjectivesf.empty()) formatstring(result, GAME_LANG ? "BadUsername" : "PseudoPourri");
+    if(pronouns.empty() || fpronouns.empty() || fpronounsf.empty() || adjectives.empty() || fadjectives.empty() || fadjectivesf.empty()) formatstring(result, readstr("Misc_BadUsername"));
     else if(GAME_LANG) formatstring(result, "%s%s", adjectives[rnd(adjectives.length())], pronouns[rnd(pronouns.length())]);
     else
     {
@@ -36,14 +36,14 @@ VARP(usesteamname, 0, 1, 1);
 void getsteamname()
 {
     #ifdef _WIN32
-        if(!IS_USING_STEAM) {conoutf(CON_ERROR, GAME_LANG ? "Steam API not initialized" : "API Steam non initialisée"); return;}
+        if(!IS_USING_STEAM) {conoutf(CON_ERROR, "\fc%s", readstr("Console_Error_SteamAPINotInit")); return;}
         else if(usesteamname)
         {
             copystring(game::player1->name, SteamFriends()->GetPersonaName());
             game::addmsg(N_SWITCHNAME, "rs", game::player1->name);
         }
     #elif __linux__
-        conoutf(CON_ERROR, GAME_LANG ? "Steam API currently not supported." : "API Steam non supportée pour l'instant");
+        //conoutf(CON_ERROR, GAME_LANG ? "Steam API currently not supported." : "API Steam non supportée pour l'instant");
     #endif
 
 }
@@ -207,7 +207,7 @@ namespace game
     }
     void printname()
     {
-        conoutf(GAME_LANG ? "Your name is: %s" : "Ton pseudo est : %s", colorname(player1));
+        conoutf("%s \fd%s\fr.", readstr("Console_Game_YourNameIs"), colorname(player1));
     }
     ICOMMAND(name, "sN", (char *s, int *numargs),
     {
@@ -226,8 +226,8 @@ namespace game
     }
     void printteam()
     {
-        if((player1->clientnum >= 0 && !m_teammode) || !validteam(player1->team)) conoutf(GAME_LANG ? "You are not in a team." : "Tu n'est pas dans une équipe.");
-        else conoutf(GAME_LANG ? "Your team is: \fs%s%s\fr" : "Tu es désormais dans l'équipe \fs%s%s\fr", teamtextcode[player1->team], readstr("Team_Names", player1->team));
+        if((player1->clientnum >= 0 && !m_teammode) || !validteam(player1->team)) conoutf(readstr("Console_User_NoTeam"));
+        else conoutf("%s \fs%s%s\fr", readstr("Console_Game_YourTeamIs"), teamtextcode[player1->team], readstr("Team_Names", player1->team));
     }
     ICOMMAND(team, "sN", (char *s, int *numargs),
     {
@@ -1559,11 +1559,11 @@ namespace game
                 if(d->name[0])          // already connected
                 {
                     if(strcmp(d->name, text) && !isignored(d->clientnum))
-                        conoutf(GAME_LANG ? "%s is now known as %s" : "%s s'appelle maintenant %s", colorname(d), colorname(d, text));
+                        conoutf("%s %s %s", colorname(d), readstr("Console_User_ChangedName"), colorname(d, text));
                 }
                 else                    // new client
                 {
-                    conoutf("\f7%s\f4 vient de rejoindre la partie", colorname(d, text));
+                    conoutf("\f7%s\f4 %s", colorname(d, text), readstr("Console_Game_Joined"));
                     if(needclipboard >= 0) needclipboard++;
                 }
                 copystring(d->name, text, MAXNAMELEN+1);
@@ -1587,7 +1587,7 @@ namespace game
                     if(!text[0]) formatstring(text, "%s", rndname());
                     if(strcmp(text, d->name))
                     {
-                        if(!isignored(d->clientnum)) conoutf(GAME_LANG ? "%s is now known as %s" : "%s s'appelle maintenant %s", colorname(d), colorname(d, text));
+                        if(!isignored(d->clientnum)) conoutf("%s %s %s", colorname(d), readstr("Console_User_ChangedName"), colorname(d, text));
                         copystring(d->name, text, MAXNAMELEN+1);
                     }
                 }
@@ -1896,7 +1896,7 @@ namespace game
 
             case N_TAUNT:
             {
-                if(GAME_LANG || !d) return;
+                if(!d) return;
                 d->lasttaunt = lastmillis;
                 //d->dansechan = //playsound(S_CGCORTEX+(d->customdanse), d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 150, d->dansechan, 400);
                 break;
@@ -2203,9 +2203,7 @@ namespace game
                 gameent *w = getclient(wn);
                 if(!w) return;
                 w->team = validteam(team) ? team : 0;
-                static const char * const fmt[2] = { GAME_LANG ? "%s switched to team %s" : "%s a retourné sa veste pour l'équipe %s", GAME_LANG ? "%s forced to team %s" : "%s a été forcé de rejoindre l'équipe %s"};
-                if(reason >= 0 && size_t(reason) < sizeof(fmt)/sizeof(fmt[0]))
-                    conoutf(fmt[reason], colorname(w), readstr("Team_Names", w->team));
+                if(reason>=0) conoutf(CON_GAMEINFO, "%s %s %s", colorname(w), reason ? readstr("Console_User_TeamSwitch") : readstr("Console_User_ForcedTeamSwitch"), readstr("Team_Names", w->team));
                 break;
             }
 
