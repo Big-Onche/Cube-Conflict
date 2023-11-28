@@ -779,7 +779,7 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     }
     if(dbgvars) conoutf(CON_DEBUG, "read %d vars", hdr.numvars);
 
-    renderbackground(GAME_LANG ? "Loading..." : "Chargement...", mapshot, mname, game::getmapinfo(), readstr("Loading_Screen_Tips", rnd(17)));
+    renderbackground("...", mapshot, mname, game::getmapinfo(), readstr("Loading_Screen_Tips", rnd(17)));
 
     setvar("mapversion", hdr.version, true, false);
 

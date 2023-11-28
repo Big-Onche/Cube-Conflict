@@ -1078,7 +1078,7 @@ namespace game
 
     const char *teamcolor(int team)
     {
-        return tempformatstring("\fs%s%s\fr", team!=player1->team ? teamtextcode[2] : teamtextcode[1], teamnames[team]);
+        return tempformatstring("\fs%s%s\fr", team!=player1->team ? teamtextcode[2] : teamtextcode[1], readstr("Team_Names", team));
     }
 
     void suicide(physent *d)

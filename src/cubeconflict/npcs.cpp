@@ -17,7 +17,7 @@ namespace game
 
     struct npc
     {   //all needed infos for npcs/monsters
-        string nameen, namefr, mdlname, shieldname, hatname, capename, boost1name, boost2name;
+        string name, mdlname, shieldname, hatname, capename, boost1name, boost2name;
         bool friendly;
         int npcclass, gun, speed, health, weight, bscale, painlag, trigdist, loyalty, respawn, dropval, spawnfreq;
         int hellosnd, painsnd, angrysnd, diesnd;
@@ -38,11 +38,7 @@ namespace game
         else id = *i;
     );
 
-    ICOMMAND(npcName, "ss", (char *en, char *fr),
-        formatstring(npcs[id].nameen, "%s", en);
-        formatstring(npcs[id].namefr, "%s", fr);
-    );
-
+    ICOMMAND(npcName, "s", (char *s), formatstring(npcs[id].name, "%s", s); );
     ICOMMAND(npcModel, "s", (char *s), formatstring(npcs[id].mdlname, "%s", s); );
     ICOMMAND(npcShield, "s", (char *s), formatstring(npcs[id].shieldname, "%s", s); );
     ICOMMAND(npcHat, "s", (char *s), formatstring(npcs[id].hatname, "%s", s); );
@@ -144,7 +140,7 @@ namespace game
             anger = 0;
             friendly = t.friendly;
             monsterlastdeath = 0;
-            copystring(name, GAME_LANG ? t.nameen : t.namefr);
+            copystring(name, t.name);
         }
 
         void normalize_yaw(float angle)

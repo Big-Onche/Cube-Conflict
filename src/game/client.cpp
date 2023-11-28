@@ -227,7 +227,7 @@ namespace game
     void printteam()
     {
         if((player1->clientnum >= 0 && !m_teammode) || !validteam(player1->team)) conoutf(readstr("Console_User_NoTeam"));
-        else conoutf("%s \fs%s%s\fr", readstr("Console_Game_YourTeamIs"), teamtextcode[player1->team], readstr("Team_Names", player1->team));
+        else conoutf("%s \fs%s%s\fr", readstr("Console_User_YourTeamIs"), teamtextcode[player1->team], readstr("Team_Names", player1->team));
     }
     ICOMMAND(team, "sN", (char *s, int *numargs),
     {

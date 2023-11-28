@@ -178,7 +178,7 @@ namespace ai
         if(!d->name[0])
         {
             if(aidebug) conoutf(CON_DEBUG, "%s assigned to %s at skill %d", colorname(d, name), o ? colorname(o) : "?", sk);
-            else conoutf(GAME_LANG ? "\f7%s\f4 has joined the game." : "\f7%s\f4 vient de rejoindre la partie.", colorname(d, name));
+            else conoutf("\f7%s\fr %s", colorname(d, name), readstr("Console_Game_Joined"));
             resetthisguy = true;
         }
         else

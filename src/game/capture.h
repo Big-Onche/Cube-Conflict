@@ -368,10 +368,10 @@ struct captureclientmode : clientmode
 
             if(b.owner)
             {
-                defformatstring(baseteam, "%s", b.converted ? (GAME_LANG ? "Disputed!" : "Contesté !") : (b.owner==hudplayer()->team ? (GAME_LANG ? "Allied" : "Allié") : (GAME_LANG ? "Enemy" : "Ennemi")));
+                defformatstring(baseteam, "%s", b.converted ? readstr("Capture_Contested") : (b.owner==hudplayer()->team ? readstr("Capture_Allied") : readstr("Capture_Enemy")));
                 bool isowner = b.owner==hudplayer()->team;
                 if(b.enemy) { mtype = PART_METER_VS; mcolor = 0xFF0000; mcolor2 = 0xFFFF00; if(!isowner) swap(mcolor, mcolor2); }
-                if(!b.name[0]) formatstring(b.info, "Terminal %d - %s", b.tag, baseteam);
+                if(!b.name[0]) formatstring(b.info, "%s %d - %s", readstr("Capture_Terminal"), b.tag, baseteam);
                 else if(basenumbers) formatstring(b.info, "%s (%d) - %s", b.name, b.tag, baseteam);
                 else formatstring(b.info, "%s - %s", b.name, baseteam);
                 tcolor = isowner ? 0xFFFF00 : 0xFF0000;
@@ -384,13 +384,13 @@ struct captureclientmode : clientmode
             }
             else if(b.enemy)
             {
-                if(!b.name[0]) formatstring(b.info, "Terminal %d - %s", b.tag, GAME_LANG ? "Hack in progress..." : "Hack en cours... ");
-                else if(basenumbers) formatstring(b.info, "%s (%d) - %s", b.name, b.tag,  GAME_LANG ? "Hack in progress..." : "Hack en cours... ");
-                else formatstring(b.info, "%s - %s", b.name,  GAME_LANG ? "Hack in progress..." : "Hack en cours... ");
+                if(!b.name[0]) formatstring(b.info, "%s %d - %s", readstr("Capture_Terminal"), b.tag, readstr("Capture_Hacking"));
+                else if(basenumbers) formatstring(b.info, "%s (%d) - %s", b.name, b.tag, readstr("Capture_Hacking"));
+                else formatstring(b.info, "%s - %s", b.name, readstr("Capture_Hacking"));
                 if(b.enemy!=hudplayer()->team) { tcolor = 0xFF0000; mtype = PART_METER; mcolor = 0xFF0000; }
                 else { tcolor = 0xFFFF00; mtype = PART_METER; mcolor = 0xFFFF00; }
             }
-            else if(!b.name[0]) formatstring(b.info, "Terminal %d", b.tag);
+            else if(!b.name[0]) formatstring(b.info, "%s %d", readstr("Capture_Terminal"), b.tag);
             else if(basenumbers) formatstring(b.info, "%s (%d)", b.name, b.tag);
             else copystring(b.info, b.name);
 
@@ -555,13 +555,13 @@ struct captureclientmode : clientmode
             {
                 if(!b.name[0])
                 {
-                    conoutf(CON_GAMEINFO, GAME_LANG ? "%s team hacked \"\fe%d\f7\" terminal." : "L'équipe %s a hacké le terminal \"\fe%d\f7\".", teamcolor(owner), b.tag);
-                    if(owner==hudplayer()->team) conoutf(CON_HUDCONSOLE, (GAME_LANG ? "\f9We hacked the \"\fe%d\f9\" terminal. " : "\f9Nous avons hacké le terminal \"\fe%d\f9\"."), b.tag);
+                    conoutf(CON_GAMEINFO, "%s %s %s \"\fe%d\f7\".", readstr("Misc_Team"), teamcolor(owner), readstr("Console_Game_Capture_Hack"), b.tag);
+                    if(owner==hudplayer()->team) conoutf(CON_HUDCONSOLE, "\f9%s \"\fe%d\f9\".", readstr("Console_Game_Capture_WeHacked"), b.tag);
                 }
                 else
                 {
-                    conoutf(CON_GAMEINFO, GAME_LANG ? "%s team hacked \"\fe%s\f7\" terminal." : "L'équipe %s a hacké le terminal \"\fe%s\f7\".", teamcolor(owner), b.name);
-                    if(owner==hudplayer()->team) conoutf(CON_HUDCONSOLE, (GAME_LANG ? "\f9We hacked the \"\fe%s\f9\" terminal. " : "\f9Nous avons hacké le terminal \"\fe%s\f9\"."), b.name);
+                    conoutf(CON_GAMEINFO, "%s %s %s \"\fe%s\f7\".", readstr("Misc_Team"), teamcolor(owner), readstr("Console_Game_Capture_Hack"), b.name);
+                    if(owner==hudplayer()->team) conoutf(CON_HUDCONSOLE, "\f9%s \"\fe%s\f9\".", readstr("Console_Game_Capture_WeHacked"), b.name);
                 }
                 playSound(owner==hudplayer()->team ? S_TERMINAL_HACKED : S_TERMINAL_HACKED_E, &b.o, 2500, 200, SND_FIXEDPITCH);
             }
@@ -570,13 +570,13 @@ struct captureclientmode : clientmode
         {
             if(!b.name[0])
             {
-                conoutf(CON_GAMEINFO, GAME_LANG ? "%s team lost the \"\fe%d\f7\" terminal." : "L'équipe %s a perdu le terminal \"\fe%d\f7\".", teamcolor(b.owner), b.tag);
-                if(b.owner==hudplayer()->team) conoutf(CON_HUDCONSOLE, (GAME_LANG ? "\f3We lost the \"\fe%d\f3\" terminal. " : "\f3Nous avons perdu le terminal \"\fe%d\f7\"."), b.tag);
+                conoutf(CON_GAMEINFO, "%s %s %s \"\fe%d\f7\".", readstr("Misc_Team"), teamcolor(b.owner), readstr("Console_Game_Capture_Lost"), b.tag);
+                if(b.owner==hudplayer()->team) conoutf(CON_HUDCONSOLE, "\f3%s \"\fe%d\f3\".", readstr("Console_Game_Capture_WeLost"), b.tag);
             }
             else
             {
-                conoutf(CON_GAMEINFO, GAME_LANG ? "%s team lost the \"\fe%s\f7\" terminal." : "L'équipe %s a perdu le terminal \"\fe%s\f7\".", teamcolor(b.owner), b.name);
-                if(b.owner==hudplayer()->team) conoutf(CON_HUDCONSOLE, (GAME_LANG ? "\f3We lost the \"\fe%s\f3\" terminal. " : "\f3Nous avons perdu le terminal \"\fe%s\f3\"."), b.name);
+                conoutf(CON_GAMEINFO, "%s %s %s \"\fe%s\f7\".", readstr("Misc_Team"), teamcolor(b.owner), readstr("Console_Game_Capture_Lost"), b.name);
+                if(b.owner==hudplayer()->team) conoutf(CON_HUDCONSOLE, "\f3%s \"\fe%s\f3\".", readstr("Console_Game_Capture_WeLost"), b.name);
             }
             playSound(owner==hudplayer()->team ? S_TERMINAL_LOST : S_TERMINAL_LOST_E, &b.o, 2500, 200, SND_FIXEDPITCH);
         }
@@ -595,7 +595,7 @@ struct captureclientmode : clientmode
     void setscore(int base, int team, int total)
     {
         findscore(team).total = total;
-        if(total>=10000) conoutf(CON_GAMEINFO, GAME_LANG ? "%s team hacked all terminals!" : "L'équipe %s a hacké tous les terminaux !", teamcolor(team));
+        if(total>=10000) conoutf(CON_GAMEINFO, "%s %s %s", readstr("Misc_Team"), teamcolor(team), readstr("Console_Game_Capture_Won"));
         else if(bases.inrange(base))
         {
             baseinfo &b = bases[base];

@@ -123,10 +123,10 @@ namespace game
     enum {MSG_INTERRACT = 0, MSG_CUSTOM, NUMMSGS}; int msgmillis[NUMMSGS];
 
     string custommsg;
-    ICOMMAND(popupmsg, "ssii", (char *msg_fr, char *msg_en, int *duration, int *sound),
+    ICOMMAND(popupmsg, "sii", (char *s, int *duration, int *sound),
     {
         msgmillis[MSG_CUSTOM] = totalmillis + *duration;
-        formatstring(custommsg, "%s", GAME_LANG ? msg_en : msg_fr);
+        formatstring(custommsg, "%s", s);
         if(*sound >= 0 && *sound<=NUMSNDS) playSound(*sound, NULL, 0, 0, SND_FIXEDPITCH|SND_NOTIFICATION);
     });
 
