@@ -868,17 +868,22 @@ namespace server
     int spawntime(int type)
     {
         if(m_dmsp) return INT_MAX;
-        int np = numclients(-1, true, false);
-        np = m_tutorial ? 1 : np<6 ? 4 : (np>12 ? 2 : 3);         // spawn times are dependent on number of players
-        int sec = 0;
+        int clients = numclients(-1, true, false);
+
+        float mp; // spawn times are dependent on number of players
+        if (clients < 6) mp = 4;
+        else if (clients > 24) mp = 2;
+        else mp = 4 + (-2 / 18.0) * (clients - 6); // simplified linear interpolation between 6 and 24 clients
+
+        float sec = 0;
         switch(type)
         {
-            case I_GLOCK: case I_SANTE: case I_MANA: sec = np*3; break;
-            case I_UZI: case I_LANCEFLAMMES: case I_ARBALETE: case I_HYDRA: case I_WOODSHIELD: sec = np*4; break;
-            case I_MOSSBERG: case I_SMAW: case I_ARTIFICE: case I_SV98: case I_M32: case I_FAMAS: case I_PULSE: case I_AK47: case I_GRAP1: sec = np*5; break;
-            case I_MINIGUN: case I_RAIL: case I_SPOCKGUN: case I_IRONSHIELD: sec = np*6;
-            case I_MAGNETSHIELD: sec = np*7; break;
-            case I_GOLDSHIELD: sec = np*8; break;
+            case I_GLOCK: case I_SANTE: case I_MANA: sec = mp*3; break;
+            case I_UZI: case I_LANCEFLAMMES: case I_ARBALETE: case I_HYDRA: case I_WOODSHIELD: sec = mp*4; break;
+            case I_MOSSBERG: case I_SMAW: case I_ARTIFICE: case I_SV98: case I_M32: case I_FAMAS: case I_PULSE: case I_AK47: case I_GRAP1: sec = mp*5; break;
+            case I_MINIGUN: case I_RAIL: case I_SPOCKGUN: case I_IRONSHIELD: sec = mp*6;
+            case I_MAGNETSHIELD: sec = mp*7; break;
+            case I_GOLDSHIELD: sec = mp*8; break;
             case I_SUPERARME: sec = 45+rnd(31); break;
             case I_BOOSTPV: case I_JOINT: sec = 30+rnd(21); break;
             case I_SHROOMS: case I_EPO: case I_ROIDS: case I_POWERARMOR: sec = 40+rnd(21); break;
