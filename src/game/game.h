@@ -613,7 +613,7 @@ struct gamestate
         int supergun = GUN_S_NUKE+rnd(4);
         if(!rnd(50))
         {
-            ammo[supergun] = 1;
+            baseammo(supergun, 1);
             gunselect = supergun;
         }
     }
