@@ -5,7 +5,7 @@ PLATFORM= $(shell uname -s | tr '[:lower:]' '[:upper:]')
 PLATFORM_ARCH= $(shell uname -m)
 PLATFORM_PREFIX= native
 
-INCLUDES= -Ishared -Icubeconflict -Iengine -Igame -Ienet/include
+INCLUDES= -Ishared -Isteam -Icubeconflict -Iengine -Igame -Ienet/include -Iinclude
 
 STRIP=
 ifeq (,$(findstring -g,$(CXXFLAGS)))
@@ -45,7 +45,7 @@ override WINDRES+= -F pe-i386
 endif
 CLIENT_INCLUDES= $(INCLUDES) -Iinclude
 STD_LIBS= -static-libgcc -static-libstdc++
-CLIENT_LIBS= -mwindows $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lSDL2 -lSDL2_image -lOpenAL32 -lzlib1 -lopengl32 -lenet -lws2_32 -lwinmm
+CLIENT_LIBS= -mwindows $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lSDL2 -lSDL2_image -lopenal -lzlib1 -lopengl32 -lsndfile -lsteam_api -lenet -lws2_32 -lwinmm
 else    
 ifneq (,$(findstring DARWIN,$(PLATFORM)))
 OSXMIN= 10.9
@@ -57,14 +57,14 @@ CLIENT_LIBS+= -framework OpenAL32 -framework CoreAudio -framework AudioToolbox
 CLIENT_LIBS+= -framework AudioUnit -framework OpenGL -framework Cocoa -lz -Lenet -lenet
 else
 CLIENT_INCLUDES= $(INCLUDES) -I/usr/X11R6/include `sdl2-config --cflags`
-CLIENT_LIBS= -Lenet -lenet -L/usr/X11R6/lib -lX11 `sdl2-config --libs` -lSDL2_image -lOpenAL32 -lz -lGL
+CLIENT_LIBS= -Lenet -lenet -L/usr/X11R6/lib -lX11 `sdl2-config --libs` -lSDL2_image -lopenal -lsndfile -lz -lGL -L./lib64 -lsteam_api
 endif
 endif
 ifeq ($(PLATFORM),LINUX)
 CLIENT_LIBS+= -lrt
 else
 ifneq (,$(findstring GNU,$(PLATFORM))) 
-CLIENT_LIBS+= -lrt 
+CLIENT_LIBS+= -lrt
 endif 
 endif
 
@@ -110,13 +110,13 @@ CLIENT_OBJS= \
         engine/water.o \
         engine/world.o \
         engine/worldio.o \
-		cubeconflict/gfx.o \
-		cubeconflict/customs.o \
-		cubeconflict/aptitudes.o \
-		cubeconflict/hud.o \
-		cubeconflict/stats.o \
-		cubeconflict/npcs.o \
-		cubeconflict/rpg.o \
+        cubeconflict/gfx.o \
+        cubeconflict/customs.o \
+        cubeconflict/aptitudes.o \
+        cubeconflict/hud.o \
+        cubeconflict/stats.o \
+        cubeconflict/npcs.o \
+        cubeconflict/rpg.o \
         game/ai.o \
         game/client.o \
         game/entities.o \
