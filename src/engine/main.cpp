@@ -4,9 +4,7 @@
 #include "gfx.h"
 #include "stats.h"
 
-#ifdef _WIN32
-    #include "steam_api.h"
-#endif
+#include "steam_api.h"
 
 #ifdef SDL_VIDEO_DRIVER_X11
 #include "SDL_syswm.h"
@@ -50,9 +48,7 @@ void quit(bool savecfgs = true)                      // normal exit
     disconnect(false, true, true);
     localdisconnect();
     cleanup();
-    #ifdef _WIN32
-        if(IS_USING_STEAM) SteamAPI_Shutdown();
-    #endif
+    if(IS_USING_STEAM) SteamAPI_Shutdown();
     exit(EXIT_SUCCESS);
 }
 
@@ -1149,22 +1145,18 @@ VARFP(language, 0, 0, 2,
 
 bool initsteam()
 {
-    #ifdef _WIN32
-        if(!SteamAPI_Init())
-        {
-            conoutf(CON_ERROR, "\fc%s", readstr("Console_Error_InitSteamAPI"));
-            IS_USING_STEAM = false;
-            return false;
-        }
-        else
-        {
-            logoutf("init: steam api");
-            getsteamachievements();
-            return true;
-        }
-    #elif __linux__
+    if(!SteamAPI_Init())
+    {
+        conoutf(CON_ERROR, "\fc%s", readstr("Console_Error_InitSteamAPI"));
+        IS_USING_STEAM = false;
         return false;
-    #endif
+    }
+    else
+    {
+        logoutf("init: steam api");
+        getsteamachievements();
+        return true;
+    }
 }
 
 int newlang = -1;
@@ -1241,9 +1233,7 @@ int main(int argc, char **argv)
 
     if(dedicated <= 1)
     {
-        #ifdef _WIN32
-            if(IS_USING_STEAM && SteamAPI_RestartAppIfNecessary(1454700)) quit(false);
-        #endif
+        if(IS_USING_STEAM && SteamAPI_RestartAppIfNecessary(1454700)) quit(false);
 
         logoutf("init: sdl");
 
@@ -1422,10 +1412,7 @@ int main(int argc, char **argv)
         swapbuffers();
         renderedframe = inbetweenframes = true;
 
-        //steam api
-        #ifdef _WIN32
-            if(IS_USING_STEAM) SteamAPI_RunCallbacks();
-        #endif
+        if(IS_USING_STEAM) SteamAPI_RunCallbacks();
     }
 
     ASSERT(0);

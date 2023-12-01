@@ -1,10 +1,8 @@
 #ifndef __STATS_H__
 #define __STATS_H__
 
-#ifdef _WIN32
-    #include "steam_api.h"
-    #include "isteamuserstats.h"
-#endif
+#include "steam_api.h"
+#include "isteamuserstats.h"
 
 extern int xpForNextLevel, totalXpNeeded;
 extern bool incrementWinsStat;

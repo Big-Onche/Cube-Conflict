@@ -184,13 +184,11 @@ void unlockAchievement(int achID)
     bool newAchievement = isLocked(achID);
     if(canUnlockOffline(achID) || IS_ON_OFFICIAL_SERV) //Ne débloque que si serveur officiel sauf succès en solo
     {
-        #ifdef _WIN32
-            if(IS_USING_STEAM)
-            {
-                SteamUserStats()->SetAchievement(achievementNames[achID]); //Met le succès à jour côté steam
-                SteamUserStats()->StoreStats();
-            }
-        #endif
+        if(IS_USING_STEAM)
+        {
+            SteamUserStats()->SetAchievement(achievementNames[achID]); //Met le succès à jour côté steam
+            SteamUserStats()->StoreStats();
+        }
 
         if(newAchievement) // update achievement status and give reward if new achievement
         {
@@ -204,14 +202,12 @@ void unlockAchievement(int achID)
 
 void getsteamachievements() //Récupère les succès enregistrés sur steam
 {
-    #ifdef _WIN32
-        int achID = 0;
-        loopi(NUMACHS)
-        {
-            SteamUserStats()->GetAchievement(achievementNames[achID], &achievement[achID]);
-            achID++;
-        }
-    #endif
+    int achID = 0;
+    loopi(NUMACHS)
+    {
+        SteamUserStats()->GetAchievement(achievementNames[achID], &achievement[achID]);
+        achID++;
+    }
 }
 
 ICOMMAND(gettotalach, "", (), intret(NUMACHS)); //gets nb of achievements for ui

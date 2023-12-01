@@ -35,17 +35,12 @@ ICOMMAND(getrandomname, "", (),
 VARP(usesteamname, 0, 1, 1);
 void getsteamname()
 {
-    #ifdef _WIN32
-        if(!IS_USING_STEAM) {conoutf(CON_ERROR, "\fc%s", readstr("Console_Error_SteamAPINotInit")); return;}
-        else if(usesteamname)
-        {
-            copystring(game::player1->name, SteamFriends()->GetPersonaName());
-            game::addmsg(N_SWITCHNAME, "rs", game::player1->name);
-        }
-    #elif __linux__
-        //conoutf(CON_ERROR, GAME_LANG ? "Steam API currently not supported." : "API Steam non supportée pour l'instant");
-    #endif
-
+    if(!IS_USING_STEAM) {conoutf(CON_ERROR, "\fc%s", readstr("Console_Error_SteamAPINotInit")); return;}
+    else if(usesteamname)
+    {
+        copystring(game::player1->name, SteamFriends()->GetPersonaName());
+        game::addmsg(N_SWITCHNAME, "rs", game::player1->name);
+    }
 }
 ICOMMAND(getsteamname, "", (), getsteamname());
 
