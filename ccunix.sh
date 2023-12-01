@@ -11,6 +11,10 @@ CC_BIN=${CC_DATA}/bin_unix
 #CC_OPTIONS=""
 CC_OPTIONS="-u${HOME}/.cubeconflict"
 
+for arg in "$@"; do
+    CC_OPTIONS="${CC_OPTIONS} ${arg}"
+done
+
 # SYSTEM_NAME should be set to the name of your operating system.
 #SYSTEM_NAME=Linux
 SYSTEM_NAME=`uname -s`
@@ -50,6 +54,8 @@ then
   MACHINE_NAME=
 fi
 
+export LD_LIBRARY_PATH="${CC_BIN}:$LD_LIBRARY_PATH"
+
 if [ -x ${CC_BIN}/${SYSTEM_NAME}${MACHINE_NAME}client ]
 then
   cd ${CC_DATA}
@@ -57,7 +63,7 @@ then
 else
   echo "Your platform does not have a pre-compiled Cube Conflict client."
   echo "Please follow the following steps to build a native client:"
-  echo "1) Ensure you have the SDL2, SDL2-image, SDL2-mixer, and OpenGL libraries installed."
+  echo "1) Ensure you have the SDL2, SDL2-image, OpenAL, Libsndfile and OpenGL libraries installed."
   echo "2) Type \"make -C src install\"."
   echo "3) If the build succeeds, run this script again."
   exit 1
