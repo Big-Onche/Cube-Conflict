@@ -208,7 +208,7 @@ void keymap(int *code, char *keyen, char *keyfr, char *keyru)
     keym &km = keyms[*code];
     km.code = *code;
     DELETEA(km.name);
-    km.name = newstring(GAME_LANG==0 ? keyfr : GAME_LANG==1 ? keyen : keyru);
+    km.name = newstring(language==0 ? keyfr : language==1 ? keyen : keyru);
 }
 
 COMMAND(keymap, "isss");

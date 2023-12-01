@@ -17,7 +17,7 @@ char *rndname()
 {
     static char result[32];
     if(pronouns.empty() || fpronouns.empty() || fpronounsf.empty() || adjectives.empty() || fadjectives.empty() || fadjectivesf.empty()) formatstring(result, readstr("Misc_BadUsername"));
-    else if(GAME_LANG) formatstring(result, "%s%s", adjectives[rnd(adjectives.length())], pronouns[rnd(pronouns.length())]);
+    else if(language) formatstring(result, "%s%s", adjectives[rnd(adjectives.length())], pronouns[rnd(pronouns.length())]);
     else
     {
         int genre = rnd(2);

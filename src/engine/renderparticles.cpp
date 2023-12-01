@@ -1809,7 +1809,7 @@ void updateparticles()
                 }
                 case BASE:
                 {
-                    defformatstring(alias, "base_%s_%d", readstr("languages", GAME_LANG), e.attr2);
+                    defformatstring(alias, "base_%s_%d", readstr("languages", language), e.attr2);
                     const char *name = getalias(alias);
                     defformatstring(txt, "%s - %s", readstr(entreferences[e.type]), name);
                     particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);

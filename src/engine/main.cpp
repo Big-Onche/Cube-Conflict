@@ -128,7 +128,7 @@ void writeinitcfg()
     f->printf("screenh %d\n", scr_h);
     extern int soundfreq;
     f->printf("soundfreq %d\n", soundfreq);
-    f->printf("GAME_LANG %d\n", GAME_LANG);
+    f->printf("language %d\n", language);
     delete f;
 }
 
@@ -215,7 +215,7 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
         if(mapname)
         {
             execfile(tempformatstring("media/map/%s.cfg", mapname));
-            const char *name = getalias(tempformatstring("maptitle_%s", readstr("languages", GAME_LANG)));
+            const char *name = getalias(tempformatstring("maptitle_%s", readstr("languages", language)));
             defformatstring(mapprettyname, name);
             int tw = text_width(mapprettyname);
             float tsz = 0.04f*min(screenw, screenh)/70,
@@ -1142,7 +1142,7 @@ int getclockmillis()
 
 VAR(numcpus, 1, 1, 16);
 
-VARFP(GAME_LANG, 0, 0, 2,
+VARFP(language, 0, 0, 2,
     execfile("config/keymap.cfg");
     execfile("config/default_binds.cfg");
 );
@@ -1327,7 +1327,7 @@ int main(int argc, char **argv)
         execfile("config/default_binds.cfg");
     }
 
-    if(newlang>-1) GAME_LANG = newlang;
+    if(newlang>-1) language = newlang;
     execfile("config/keymap.cfg");
 
     execfile(game::autoexec(), false);

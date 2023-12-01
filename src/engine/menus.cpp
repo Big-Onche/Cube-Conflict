@@ -67,7 +67,7 @@ void menuprocess()
         lastmainmenu = mainmenu;
         execident("mainmenutoggled");
     }
-    if(islaunching) playMusic(GAME_LANG == 2 ? S_MAINMENURU : S_MAINMENU);
+    if(islaunching) playMusic(language == 2 ? S_MAINMENURU : S_MAINMENU);
     if(mainmenu && !isconnected(true) && !UI::hascursor())
     {
         if(veryfirstlaunch)

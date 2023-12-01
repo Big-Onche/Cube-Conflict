@@ -804,7 +804,7 @@ extern int map_atmo;  //Config partie Cube Conflict
 extern bool addpostfx(const char *name, int outputbind, int outputscale, uint inputs, uint freeinputs, const vec4 &params);
 extern void clearpostfx();
 extern int fullbrightmodels;
-extern int GAME_LANG, vsync, cbcompensation;
+extern int vsync, cbcompensation;
 extern void restorevsync();
 
 extern bool islaunching;

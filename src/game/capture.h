@@ -524,7 +524,7 @@ struct captureclientmode : clientmode
             abovemodel(b.ammopos, "base/neutral");
             b.ammopos.z += AMMOHEIGHT-2;
             b.ammotype = e->attr1;
-            defformatstring(alias, "base_%s_%d", readstr("languages", GAME_LANG), e->attr2);
+            defformatstring(alias, "base_%s_%d", readstr("languages", language), e->attr2);
             const char *name = getalias(alias);
             copystring(b.name, name);
             b.tag = e->attr2>0 ? e->attr2 : bases.length();

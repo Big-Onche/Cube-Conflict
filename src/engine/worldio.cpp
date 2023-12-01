@@ -905,7 +905,7 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     allchanged(true);
 
     startmap(cname ? cname : mname);
-    stopMusic(GAME_LANG == 2 ? S_MAINMENURU : S_MAINMENU);
+    stopMusic(language == 2 ? S_MAINMENURU : S_MAINMENU);
     if(hasvsync) {vsync = 1; restorevsync();}
     addpostfx("mainfilter", 1, 1, 1, 1, vec4(1, 1, 1, 1));
     switch(cbcompensation)

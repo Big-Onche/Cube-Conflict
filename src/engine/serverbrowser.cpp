@@ -589,7 +589,7 @@ ICOMMAND(servinfodesc, "i", (int *i),
     GETSERVERINFO_(*i, si,
     {
         const char *status = si.status();
-        result(status ? status : GAME_LANG ? si.descen : si.descfr);
+        result(status ? status : language ? si.descen : si.descfr);
     }));
 ICOMMAND(servinfoname, "i", (int *i), GETSERVERINFO_(*i, si, result(si.name)));
 ICOMMAND(servinfoport, "i", (int *i), GETSERVERINFO_(*i, si, intret(si.address.port)));
