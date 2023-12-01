@@ -166,6 +166,7 @@ void loadSave() // we read the poorly encrypted value for all stat
     }
     savefile->close();
     calcPlayerLevel();
+    if(IS_USING_STEAM) getsteamachievements();
 }
 
 //////////////////////Achievements//////////////////////

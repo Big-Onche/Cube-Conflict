@@ -1154,7 +1154,6 @@ bool initsteam()
     else
     {
         logoutf("init: steam api");
-        getsteamachievements();
         return true;
     }
 }
