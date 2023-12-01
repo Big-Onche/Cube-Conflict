@@ -1,11 +1,11 @@
-CXXFLAGS= -O3 -fomit-frame-pointer -ffast-math
-override CXXFLAGS+= -Wall -fsigned-char -fno-exceptions -fno-rtti
+CXXFLAGS = -O3 -fomit-frame-pointer -ffast-math
+override CXXFLAGS += -Wall -fsigned-char -fno-exceptions -fno-rtti
 
 PLATFORM= $(shell uname -s | tr '[:lower:]' '[:upper:]')
 PLATFORM_ARCH= $(shell uname -m)
 PLATFORM_PREFIX= native
 
-INCLUDES= -Ishared -Isteam -Icubeconflict -Iengine -Igame -Ienet/include -Iinclude
+INCLUDES= -Ishared -Icubeconflict -Iengine -Igame -Ienet/include -Isteam -Iinclude
 
 STRIP=
 ifeq (,$(findstring -g,$(CXXFLAGS)))
@@ -57,7 +57,7 @@ CLIENT_LIBS+= -framework OpenAL32 -framework CoreAudio -framework AudioToolbox
 CLIENT_LIBS+= -framework AudioUnit -framework OpenGL -framework Cocoa -lz -Lenet -lenet
 else
 CLIENT_INCLUDES= $(INCLUDES) -I/usr/X11R6/include `sdl2-config --cflags`
-CLIENT_LIBS= -Lenet -lenet -L/usr/X11R6/lib -lX11 `sdl2-config --libs` -lSDL2_image -lopenal -lsndfile -lz -lGL -L./lib64 -lsteam_api
+CLIENT_LIBS= -Lenet -lenet -L/usr/X11R6/lib -lX11 `sdl2-config --libs` -lSDL2_image -lopenal -lsndfile -lz -lGL -L../bin_unix -lsteam_api
 endif
 endif
 ifeq ($(PLATFORM),LINUX)
@@ -153,7 +153,7 @@ $(filter game/%,$(CLIENT_OBJS)): $(filter game/%,$(CLIENT_PCH))
 ifneq (,$(findstring MINGW,$(PLATFORM)))
 client: $(CLIENT_OBJS)
 	$(WINDRES) -I vcpp -i vcpp/mingw.rc -J rc -o vcpp/mingw.res -O coff 
-	$(CXX) $(CXXFLAGS) -o $(WINBIN)/cc_client.exe vcpp/mingw.res $(CLIENT_OBJS) $(CLIENT_LIBS)
+	$(CXX) $(CXXFLAGS) -o $(WINBIN)/cubeconflict.exe vcpp/mingw.res $(CLIENT_OBJS) $(CLIENT_LIBS)
 
 install: all
 else
