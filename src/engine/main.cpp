@@ -165,6 +165,10 @@ ICOMMAND(getcurmapsel, "s", (char *s),
     formatstring(mapselimg, "%s", s);
 );
 
+ICOMMAND(getmaptitle, "", (),
+    result(getalias(tempformatstring("maptitle_%s", readstr("languages", language))));
+)
+
 void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, const char *mapname, const char *mapinfo, const char *tip, bool force = false)
 {
     static int lastupdate = -1, lastw = -1, lasth = -1;
