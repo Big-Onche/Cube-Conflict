@@ -10,6 +10,7 @@ Clients will need the following dynamic link libraries present:
 * SDL2 (>= 2.0.0)
 * SDL2_image
 * libopenal
+* libsndfile
 * libpng
 * libjpeg
 * zlib
@@ -41,6 +42,7 @@ Le jeu aura besoin des bibliothèques suivantes :
 * SDL2 (>= 2.0.0)
 * SDL2_image
 * libopenal
+* libsndfile
 * libpng
 * libjpeg
 * zlib
