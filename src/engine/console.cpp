@@ -202,13 +202,13 @@ struct keym
 
 hashtable<int, keym> keyms(128);
 
-void keymap(int *code, char *keyen, char *keyfr, char *keyru)
+void keymap(int *code, char *key)
 {
     if(identflags&IDF_OVERRIDDEN) { conoutf(CON_ERROR, "cannot override keymap %d", *code); return; }
     keym &km = keyms[*code];
     km.code = *code;
     DELETEA(km.name);
-    km.name = newstring(language==0 ? keyfr : language==1 ? keyen : keyru);
+    km.name = newstring(key);
 }
 
 COMMAND(keymap, "isss");
