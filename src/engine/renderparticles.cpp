@@ -936,7 +936,7 @@ static partrenderer *parts[] =
     &fireballs,                                                                                                              // PART_EXPLOSION
     // misc
     new quadrenderer("<grey>media/particles/misc/blood.png", PT_PART|PT_FLIP|PT_MOD|PT_RND4|PT_COLLIDE, STAIN_BLOOD),        // PART_BLOOD (note: rgb is inverted)
-    new quadrenderer("media/particles/misc/spark.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_COLLIDE, STAIN_BULLET_GLOW),             // PART_SPARK
+    new quadrenderer("media/particles/misc/spark.png", PT_PART|PT_FLIP|PT_BRIGHT),                                           // PART_SPARK
     new quadrenderer("media/particles/misc/spark.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_EMITLIGHT|PT_COLLIDE, STAIN_BULLET_GLOW),// PART_SPARK_L
     &texts,                                                                                                                  // PART_TEXT
     &flares                                                                                                                  // PART_LENS_FLARE - must be done last
@@ -1446,7 +1446,7 @@ void spawnSnow(vec pos, int intensity, int r, int g, int b, int wind, bool force
 
 void spawnApocalypse(vec pos, int intensity, int r, int g, int b, int wind)
 {
-    bool volcano = !strcasecmp(mapref, "volcano");
+    bool volcano = !strcasecmp(game::getclientmap(), "volcano");
 
     if(defaultColors(r, g, b)) { r = 255; g = 150;  b = 0; } // setting default colors for "generic" apocalypse
     if(!intensity) intensity = 125;
