@@ -1141,11 +1141,7 @@ int getclockmillis()
 }
 
 VAR(numcpus, 1, 1, 16);
-
-VARFP(language, 0, 0, 2,
-    execfile("config/keymap.cfg");
-    execfile("config/default_binds.cfg");
-);
+VAR(language, 0, 1, 2);
 
 bool initsteam()
 {
@@ -1194,9 +1190,9 @@ int main(int argc, char **argv)
         break;
     }
 
-    if(!execfile("config/languages/lib.cfg", false)) fatal("cannot find languages data files (config/languages/lib.cfg)");
-    execute("selectlanguage");
 
+    execfile("config/vars.cfg", false);
+    if(!execfile("config/languages/lib.cfg", false) || !execfile("config/languages/english.cfg", false)) fatal("cannot find languages data files");
     execfile("config/init.cfg", false);
 
     for(int i = 1; i<argc; i++)
@@ -1314,17 +1310,26 @@ int main(int argc, char **argv)
     game::player1->playermodel = 0;
 
     identflags |= IDF_PERSIST;
+
+    execfile(game::autoexec(), false);
+    execfile("config/ui/ui.cfg");
+
+    if(newlang > -1)
+    {
+        language = newlang;
+        execfile("config/keymap.cfg");
+        execfile("config/default_binds.cfg");
+    }
+
+    execute("selectlanguage");
+
     if(!execfile(game::savedconfig(), false))
     {
         execfile("config/keymap.cfg");
         execfile("config/default_binds.cfg");
     }
 
-    if(newlang>-1) language = newlang;
-    execfile("config/keymap.cfg");
 
-    execfile(game::autoexec(), false);
-    execfile("config/ui/ui.cfg");
 
     identflags &= ~IDF_PERSIST;
 
