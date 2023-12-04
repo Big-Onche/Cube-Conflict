@@ -377,14 +377,14 @@ namespace game
         {
             if(npcs[mtype].friendly && player1->o.dist(this->o) < 40 && (this->monsterstate==M_FRIENDLY || this->monsterstate==M_NEUTRAL) && gfx::forcecampos==-1)
             {
-                defformatstring(id, "npc_dial_%d", tag);
-                if(identexists(id)) execute(id);
+                defformatstring(id, "npc_interaction_%d %d", tag, true);
+                execute(id);
                 activetrigger = true;
             }
             else if(activetrigger)
             {
-                defformatstring(id, "npc_leave_%d", tag);
-                if(identexists(id)) execute(id);
+                defformatstring(id, "npc_interaction_%d %d", tag, false);
+                execute(id);
                 activetrigger = false;
             }
         }

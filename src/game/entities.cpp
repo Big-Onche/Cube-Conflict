@@ -532,7 +532,7 @@ namespace entities
 
     void doleveltrigger(int trigger, int state)
     {
-        defformatstring(aliasname, "level_trigger_%d", trigger);
+        defformatstring(aliasname, "trigger_enter_%d", trigger);
         if(identexists(aliasname))
         {
             triggerstate = state;
