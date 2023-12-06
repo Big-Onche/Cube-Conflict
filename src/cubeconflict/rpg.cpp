@@ -6,22 +6,32 @@ namespace game
 {
     const int MAXQUESTS = 256;
 
-    struct quest
-    {   //all needed infos for quests
-        string nameen, namefr, descen, descfr;
+    struct quest //all needed infos for quests
+    {
+        string name, desc;
         int steps, type, difficulty, reward;
     };
+
     quest quests[MAXQUESTS];
 
-    ICOMMAND(quest, "issssiiii", (int *id, char *ne, char *nf, char *de, char *df, int *s, int *t, int *d, int *r),
-        formatstring(quests[*id].nameen, "%s", ne); // Quest name
-        formatstring(quests[*id].namefr, "%s", nf);
-        formatstring(quests[*id].nameen, "%s", de); // Quest short description
-        formatstring(quests[*id].namefr, "%s", df);
-        quests[*id].steps = *s;                     // Amount of steps before completion
-        quests[*id].type = *t;                      // Type (main or side quest)
-        quests[*id].difficulty = *d;                // Difficulty
-        quests[*id].reward = *r;                    // XP reward
+    ICOMMAND(quest, "issiiii", (int *id, char *name, char *desc, int *steps, int *type, int *dif, int *reward),
+        formatstring(quests[*id].name, "%s", name); // Quest name
+        formatstring(quests[*id].desc, "%s", desc); // Quest short description
+        quests[*id].steps = *steps;                 // Amount of steps before completion
+        quests[*id].type = *type;                   // Type (main or side quest)
+        quests[*id].difficulty = *dif;              // Difficulty
+        quests[*id].reward = *reward;               // XP reward
+    );
+
+    enum questsRewards {R_TREASURE = 0};
+
+    ICOMMAND(getQuestReward, "i", (int *i),
+        switch(*i)
+        {
+            case R_TREASURE:
+               if(m_tutorial) cust[TOM_BASIQUE1] = cust[CAPE_PAINT1] = cust[SMI_NOEL] = rnd(99)+1;
+               break;
+        }
     );
 
     ICOMMAND(isfinished, "ii", (int *id, int *s),
@@ -31,22 +41,14 @@ namespace game
     //////////////////////////////////// Basic functions ////////////////////////////////////////////////////////////////////////
     ICOMMAND(isdead, "", (), intret(player1->state==CS_DEAD));
 
-    ICOMMAND(giveammo, "ii", (int *gun, int *amount), //giving ammunitions
-        if(!m_tutorial) return;
-        player1->ammo[*gun] = *amount;
+    ICOMMAND(giveAmmo, "ii", (int *amount, int *gun), // giving ammunitions
+        if(!m_tutorial || !validgun(*gun)) return;
+        player1->ammo[*gun] += *amount;
         gunselect(*gun, player1, false, true);
     );
 
     //////////////////////////////////// Tutorial ////////////////////////////////////////////////////////////////////////
-    VAR(examresult, 0, 0, 4); //calc exam result from tutorial's map
-    ICOMMAND(calcexamresult, "iiii", (int *a, int *b, int *c, int *d),
-        int max_value = max(max(*a, *b), max(*c, *d));
-        max_value == *b ? examresult = 2 : max_value == *d ? examresult = 4 : max_value == *a ? examresult = 1 : examresult = 3;
-    );
 
-    ICOMMAND(getfreecust, "", (), //free customs from treasure
-        if(m_tutorial) cust[TOM_BASIQUE1] = cust[CAPE_PAINT1] = cust[SMI_NOEL] = rnd(99)+1;
-    );
 
     ICOMMAND(checkammo, "i", (int *gun), //checking if p1 has ammo for gun
         intret(player1->ammo[*gun]);

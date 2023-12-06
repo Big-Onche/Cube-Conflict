@@ -649,7 +649,7 @@ namespace game
                 }
                 damage = (damage*aptitudes[player1->aptitude].apt_degats)/100;
                 hitmonster(damage, (monster *)f, at, vel, atk);
-                avgdmg[dmgsecs[0]] += damage/10;
+                avgdmg[dmgsecs[0]] += damage/10.f;
             }
         }
 
@@ -1451,7 +1451,7 @@ namespace game
         vec from = d->o, to = targ, dir = vec(to).sub(from).safenormalize();
         float dist = to.dist(from);
 
-        int kickfactor = (m_tutorial && !canmove) || d->aptitude==APT_AMERICAIN ? 0 : (d->crouched() ? -1.25f : -2.5f);
+        int kickfactor = (m_tutorial && !canMove) || d->aptitude==APT_AMERICAIN ? 0 : (d->crouched() ? -1.25f : -2.5f);
         vec kickback = (d->aptitude==APT_AMERICAIN ? vec(0, 0, 0) : vec(dir).mul(attacks[atk].kickamount*kickfactor));
         d->vel.add(kickback);
 

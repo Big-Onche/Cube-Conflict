@@ -474,6 +474,8 @@ static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precisio
 
 #include "ai.h"
 
+extern int cncurweapon;
+
 // inherited by gameent and server clients
 struct gamestate
 {
@@ -658,6 +660,7 @@ struct gamestate
             loopi(17) baseammo(i);
             armourtype = A_WOOD;
             armour = aptitude==APT_SOLDAT ? 1000 : 750;
+            gunselect = cncurweapon;
             if(aptitude==APT_KAMIKAZE) gunselect = GUN_KAMIKAZE;
             else if(aptitude==APT_NINJA) gunselect = GUN_CACNINJA;
         }
@@ -902,7 +905,7 @@ namespace game
     extern char *getdisguisement(int seed);
 
     // game
-    extern int gamemode, cncurweapon, canmove, gamespeed;
+    extern int gamemode, canMove, gamespeed;
 
     struct clientmode
     {

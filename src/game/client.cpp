@@ -46,11 +46,10 @@ ICOMMAND(getsteamname, "", (), getsteamname());
 
 bool launch = true;
 VAR(map_atmo, 0, 0, 9);
+int cncurweapon;
 
 namespace game
 {
-    int cncurweapon;
-
     VARP(minradarscale, 0, 384, 10000);
     VARP(maxradarscale, 1, 1024, 10000);
     VARP(radarteammates, 0, 1, 1);

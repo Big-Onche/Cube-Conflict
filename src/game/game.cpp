@@ -63,8 +63,8 @@ namespace game
     void dotime()
     {
         dmg = 0;
-        loopi(4) dmg+=avgdmg[i];
-        if(totalmillis >= lasttimeupdate+1000) //1 second interval
+        loopi(4) dmg += avgdmg[i];
+        if(totalmillis >= lasttimeupdate+1000) // 1 second interval
         {
             updateStat(1, STAT_TIMEPLAYED);
             lasttimeupdate = totalmillis;
@@ -74,7 +74,7 @@ namespace game
         }
     }
 
-    ICOMMAND(getdps, "", (), intret(dmg/4.f));
+    ICOMMAND(getCurrentDps, "", (), intret(dmg/4.f));
 
     ICOMMAND(getfollow, "", (),
     {
@@ -344,7 +344,7 @@ namespace game
         }
     }
 
-    VAR(canmove, 0, 1, 1);
+    VAR(canMove, 0, 1, 1);
 
     void updateworld()        // main game update loop
     {
@@ -410,7 +410,7 @@ namespace game
             {
                 if(player1->ragdoll) cleanragdoll(player1);
                 crouchplayer(player1, 10, true);
-                if(canmove || !m_tutorial)
+                if(canMove || !m_tutorial)
                 {
                     moveplayer(player1, 10, true, player1->boostmillis[B_EPO], player1->boostmillis[B_JOINT], player1->aptitude, player1->aptitude==APT_MAGICIEN ? player1->abilitymillis[ABILITY_1] : player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || player1->aptitude==APT_KAMIKAZE ? player1->abilitymillis[ABILITY_2] : player1->abilitymillis[ABILITY_3], player1->armourtype==A_ASSIST && player1->armour>0 ? true : false);
                     swayhudgun(curtime);
@@ -617,7 +617,7 @@ namespace game
             if(!cbcompensation) addpostfx("deathscreen", 1, 1, 1, 1, vec4(1, 1, 1, 1));
             d->roll = 0;
             playSound(S_DIE_P1, NULL, 0, 0, SND_FIXEDPITCH);
-            if(m_tutorial) execute("reset_needed_triggers");
+            if(m_tutorial) execute("deathReset");
         }
         else
         {

@@ -578,7 +578,7 @@ namespace entities
                         if(e.o.dist(o)-player1->radius>=(checktriggertype(e.attr2, TRIG_COLLIDE) ? 20 : e.attr3))
                         {
                             defformatstring(s, "trigger_leave_%d", e.attr1);
-                            execute(s);
+                            if(identexists(s)) execute(s);
                         }
                         break;
                     }

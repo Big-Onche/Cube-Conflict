@@ -123,7 +123,7 @@ namespace game
     enum {MSG_INTERRACT = 0, MSG_CUSTOM, NUMMSGS}; int msgmillis[NUMMSGS];
 
     string custommsg;
-    ICOMMAND(popupmsg, "sii", (char *s, int *duration, int *sound),
+    ICOMMAND(popNotification, "sii", (char *s, int *duration, int *sound),
     {
         msgmillis[MSG_CUSTOM] = totalmillis + *duration;
         formatstring(custommsg, "%s", s);
