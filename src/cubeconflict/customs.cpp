@@ -69,8 +69,8 @@ void buyitem(int itemtype, int itemnum)
             }
             break;
         case CUST_GRAVE:
-            if(customstombes[itemnum].tombeprice > stat[STAT_CC]) {conoutf(CON_GAMEINFO, "\f3%s", readstr("Console_Shop_GraveOwned")); playSound(S_ERROR); return; }
-            else if(cust[TOM_MERDE+itemnum]) {conoutf(CON_GAMEINFO, "\f3%s", readstr("Console_Shop_GraveBuyed")); playSound(S_ERROR); return; }
+            if(customstombes[itemnum].tombeprice > stat[STAT_CC]) {conoutf(CON_GAMEINFO, "\f3%s", readstr("Console_Shop_GraveTooExpensive")); playSound(S_ERROR); return; }
+            else if(cust[TOM_MERDE+itemnum]) {conoutf(CON_GAMEINFO, "\f3%s", readstr("Console_Shop_GraveOwned")); playSound(S_ERROR); return; }
             else
             {
                 stat[STAT_CC] -= customstombes[itemnum].tombeprice;
