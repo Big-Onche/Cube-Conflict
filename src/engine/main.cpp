@@ -1158,7 +1158,7 @@ bool initsteam()
     }
 }
 
-int newlang = -1;
+//int newlang = -1;
 bool IS_USING_STEAM = false;
 bool IS_ON_OFFICIAL_SERV = false;
 
@@ -1211,8 +1211,8 @@ int main(int argc, char **argv)
             case 'w': scr_w = clamp(atoi(&argv[i][2]), SCR_MINW, SCR_MAXW); if(!findarg(argc, argv, "-h")) scr_h = -1; break;
             case 'h': scr_h = clamp(atoi(&argv[i][2]), SCR_MINH, SCR_MAXH); if(!findarg(argc, argv, "-w")) scr_w = -1; break;
             case 'f': fullscreen = atoi(&argv[i][2]); break;
-            case 'a': newlang = 0; break;
-            case 'b': newlang = 1; break;
+            //case 'a': newlang = 0; break;
+            //case 'b': newlang = 1; break;
             case 'l':
             {
                 char pkgdir[] = "media/";
@@ -1312,24 +1312,11 @@ int main(int argc, char **argv)
     identflags |= IDF_PERSIST;
 
     execfile(game::autoexec(), false);
-    execfile("config/ui/ui.cfg");
-
-    if(newlang > -1)
-    {
-        language = newlang;
-        execfile("config/keymap.cfg");
-        execfile("config/default_binds.cfg");
-    }
 
     execute("selectlanguage");
+    if(!execfile(game::savedconfig(), false)) execfile("config/default_binds.cfg");
 
-    if(!execfile(game::savedconfig(), false))
-    {
-        execfile("config/keymap.cfg");
-        execfile("config/default_binds.cfg");
-    }
-
-
+    execfile("config/ui/ui.cfg");
 
     identflags &= ~IDF_PERSIST;
 
