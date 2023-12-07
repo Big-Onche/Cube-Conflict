@@ -2182,12 +2182,12 @@ namespace game
                 int weap = getint(p);
                 switch(t)
                 {
-                    case I_ROIDS: conoutf(CON_HUDCONSOLE, "\fd%s", readstr("Announcement_Roids")); break;
-                    case I_SHROOMS: conoutf(CON_HUDCONSOLE, "\fd%s", readstr("Announcement_Shrooms")); break;
-                    case I_EPO: conoutf(CON_HUDCONSOLE, "\fd%s", readstr("Announcement_Epo")); break;
-                    case I_JOINT: conoutf(CON_HUDCONSOLE, "\fd%s", readstr("Announcement_Joint")); break;
-                    case I_SUPERARME: conoutf(CON_HUDCONSOLE, "\fd%s", readstr("Announcement_SuperWeapon")); break;
-                    default: conoutf(CON_HUDCONSOLE, "\fd%s \fc%s", readstr("Announcement_WeaponChange"), readstr(guns[weap].ident));
+                    case I_ROIDS: conoutf(CON_HUDCONSOLE, "\f8%s", readstr("Announcement_Roids")); break;
+                    case I_SHROOMS: conoutf(CON_HUDCONSOLE, "\f8%s", readstr("Announcement_Shrooms")); break;
+                    case I_EPO: conoutf(CON_HUDCONSOLE, "\f8%s", readstr("Announcement_Epo")); break;
+                    case I_JOINT: conoutf(CON_HUDCONSOLE, "\f8%s", readstr("Announcement_Joint")); break;
+                    case I_SUPERARME: conoutf(CON_HUDCONSOLE, "\f8%s", readstr("Announcement_SuperWeapon")); break;
+                    default: conoutf(CON_HUDCONSOLE, "\f8%s \fc%s", readstr("Announcement_WeaponChange"), readstr(guns[weap].ident));
                 }
                 break;
             }
