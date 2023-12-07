@@ -2,7 +2,7 @@
 #include "customs.h"
 #include "sound.h"
 
-ICOMMAND(updateui, "i", (), execfile("config/ui/ui.cfg"));
+ICOMMAND(updateui, "", (), execfile("config/ui/ui.cfg"));
 
 void notifywelcome()
 {

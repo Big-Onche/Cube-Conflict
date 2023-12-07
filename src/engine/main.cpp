@@ -1313,7 +1313,7 @@ int main(int argc, char **argv)
 
     execfile(game::autoexec(), false);
 
-    execute("selectlanguage");
+    execute(tempformatstring("selectLanguage %d %d", language, false));
     if(!execfile(game::savedconfig(), false)) execfile("config/default_binds.cfg");
 
     execfile("config/ui/ui.cfg");
