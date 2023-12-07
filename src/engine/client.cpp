@@ -239,7 +239,7 @@ void localservertoclient(int chan, ENetPacket *packet)   // processes any update
 
 void clientkeepalive() { if(clienthost) enet_host_service(clienthost, NULL, 0); }
 
-VAR(discReason, 0, 0 , 2);
+VAR(discReason, 0, 0, 3);
 
 void gets2c()           // get updates from the server
 {
@@ -306,8 +306,9 @@ void gets2c()           // get updates from the server
                 case DISC_SERVMSGERR:
                     discReason = 2;
                     break;
+                default:
+                    discReason = 3;
             }
-            UI::hideui("main");
             UI::showui("disconnected");
             return;
 
