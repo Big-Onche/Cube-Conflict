@@ -174,7 +174,7 @@ namespace ai
         d->aitype = at;
 
         bool resetthisguy = false;
-        formatstring(d->name, "%s", rndname());
+        formatstring(d->name, "%s", executestr("createNickname $FALSE"));
         if(!d->name[0])
         {
             if(aidebug) conoutf(CON_DEBUG, "%s assigned to %s at skill %d", colorname(d, name), o ? colorname(o) : "?", sk);

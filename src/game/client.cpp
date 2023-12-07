@@ -2,36 +2,6 @@
 #include "stats.h"
 #include "sound.h"
 
-#ifdef _WIN32
-    #include "steam_api.h"
-#endif
-
-VARR(mapofficielle, 0, 0, 1);
-
-vector<char *> pronouns; vector<char *> adjectives; vector<char *> fpronouns; vector<char *> fadjectives; vector<char *> fpronounsf; vector<char *> fadjectivesf;
-ICOMMAND(pro, "s", (char *s), pronouns.add(newstring(s)); ); ICOMMAND(adj, "s", (char *s), adjectives.add(newstring(s)); );
-ICOMMAND(fpro, "s", (char *s), fpronouns.add(newstring(s)); ); ICOMMAND(fadj, "s", (char *s), fadjectives.add(newstring(s)); );
-ICOMMAND(fprof, "s", (char *s), fpronounsf.add(newstring(s)); ); ICOMMAND(fadjf, "s", (char *s), fadjectivesf.add(newstring(s)); );
-
-char *rndname()
-{
-    static char result[32];
-    if(pronouns.empty() || fpronouns.empty() || fpronounsf.empty() || adjectives.empty() || fadjectives.empty() || fadjectivesf.empty()) formatstring(result, readstr("Misc_BadUsername"));
-    else if(language) formatstring(result, "%s%s", adjectives[rnd(adjectives.length())], pronouns[rnd(pronouns.length())]);
-    else
-    {
-        int genre = rnd(2);
-        formatstring(result, "%s%s", genre ? fpronounsf[rnd(fpronounsf.length())] : fpronouns[rnd(fpronouns.length())], genre ? fadjectivesf[rnd(fadjectivesf.length())] : fadjectives[rnd(fadjectives.length())]);
-
-    }
-    return result;
-}
-
-ICOMMAND(getrandomname, "", (),
-    formatstring(game::player1->name, "%s", rndname());
-    game::addmsg(N_SWITCHNAME, "rs", game::player1->name);
-);
-
 VARP(usesteamname, 0, 1, 1);
 void getsteamname()
 {
@@ -1578,7 +1548,7 @@ namespace game
                 if(d)
                 {
                     filtertext(text, text, false, false, MAXNAMELEN);
-                    if(!text[0]) formatstring(text, "%s", rndname());
+                    if(!text[0]) formatstring(text, "%s", executestr("createNickname $FALSE"));
                     if(strcmp(text, d->name))
                     {
                         if(!isignored(d->clientnum)) conoutf("%s %s %s", colorname(d), readstr("Console_User_ChangedName"), colorname(d, text));
