@@ -532,7 +532,7 @@ namespace game
 
                 if(d!=hudplayer() && hudplayer()->state==CS_ALIVE)
                 {
-                    if(isteam(player1->team, d->team))
+                    if(isteam(hudplayer()->team, d->team))
                     {
                         float distance = d->o.dist(camera1->o);
                         float metersize = 0.04f / (distance/125);
