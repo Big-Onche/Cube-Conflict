@@ -752,6 +752,7 @@ namespace game
             }
             else if(d==player1) //////////////////// you were killed ////////////////////
             {
+                hassuicided = false;
                 conoutf(contype, "%s\f7 > \fl%s\f7 > \fd%s \fl(%.1fm)", aname, readstr(guns[atk].ident), player1->name, killdistance);
                 updateStat(1, STAT_MORTS);
                 formatstring(killername, "%s", aname);
