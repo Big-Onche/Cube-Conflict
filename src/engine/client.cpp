@@ -239,6 +239,8 @@ void localservertoclient(int chan, ENetPacket *packet)   // processes any update
 
 void clientkeepalive() { if(clienthost) enet_host_service(clienthost, NULL, 0); }
 
+VAR(discReason, 0, 0 , 2);
+
 void gets2c()           // get updates from the server
 {
     ENetEvent event;
@@ -294,10 +296,19 @@ void gets2c()           // get updates from the server
             }
             switch(event.data)
             {
-                case DISC_OVERFLOW: UI::showui("overflowpopup"); break;
-                case DISC_SERVERSTOP:  UI::showui("servstoppopup"); break;
-                case DISC_MSGERR: case DISC_SERVMSGERR: UI::showui("msgerrpopup"); break;
+                case DISC_OVERFLOW:
+                    discReason = 0;
+                    break;
+                case DISC_SERVERSTOP:
+                    discReason = 1;
+                    break;
+                case DISC_MSGERR:
+                case DISC_SERVMSGERR:
+                    discReason = 2;
+                    break;
             }
+            UI::hideui("main");
+            UI::showui("disconnected");
             return;
 
         default:
