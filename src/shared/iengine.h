@@ -546,7 +546,6 @@ extern bool checkchallenge(const char *answerstr, void *correct);
 // elementary configuration
 extern bool IS_USING_STEAM, IS_ON_OFFICIAL_SERV;
 extern int language;
-extern int servlang;  // 0 = FR, 1 = EN
 extern void getsteamname();
 
 // maps & atmos
