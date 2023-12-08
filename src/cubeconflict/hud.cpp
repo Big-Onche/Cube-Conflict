@@ -123,11 +123,11 @@ namespace game
     enum {MSG_INTERRACT = 0, MSG_CUSTOM, NUMMSGS}; int msgmillis[NUMMSGS];
 
     string custommsg;
-    ICOMMAND(popNotification, "sii", (char *s, int *duration, int *sound),
+    ICOMMAND(popNotification, "siii", (char *s, int *duration, int *sound),
     {
         msgmillis[MSG_CUSTOM] = totalmillis + *duration;
         formatstring(custommsg, "%s", s);
-        if(*sound >= 0 && *sound<=NUMSNDS) playSound(*sound, NULL, 0, 0, SND_FIXEDPITCH|SND_NOTIFICATION);
+        if(*sound >= 0) playSound(*sound == 0 ? S_NOTIFICATION : *sound == 1 ? S_Q_FAIL : S_ACHIEVEMENTUNLOCKED, NULL, 0, 0, SND_FIXEDPITCH|SND_NOTIFICATION);
     });
 
     string interractmsg;

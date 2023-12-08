@@ -633,7 +633,17 @@ void setShroomsEfx(bool enable)
     else applyReverbPreset(auxEffectReverb, EFX_REVERB_PRESET_GENERIC);
 }
 
-ICOMMAND(playsound, "ii", (int *sound, bool fixedPitch), if(*sound >= 0 && *sound<=NUMSNDS) playSound(*sound, NULL, 0, 0, fixedPitch ? SND_FIXEDPITCH : NULL); );
+ICOMMAND(playSound, "si", (char *soundName, bool fixedPitch),
+    loopi(NUMSNDS)
+    {
+        if(!strcasecmp(soundName, gameSounds[i].soundPath))
+        {
+            playSound(i, NULL, 0, 0, fixedPitch ? SND_FIXEDPITCH : NULL);
+            return;
+        }
+    }
+    conoutf(CON_ERROR, "sound not found or not loaded: %s", soundName);
+);
 
 void playMusic(int musicId)
 {
