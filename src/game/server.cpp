@@ -2111,7 +2111,7 @@ namespace server
             else curmaprotation = smapname[0] ? max(findmaprotation(gamemode, ""), 0) : 0;
         }
 
-        logoutf("%s %s (%s)", servlang ? "Gamemode:" : "Mode de jeu :", m_valid(gamemode) ? readstr(gamemodes[gamemode - STARTGAMEMODE].modeId) : "Unknown", readstr(gamemodes[gamemode - STARTGAMEMODE].mutatorId));
+        logoutf("Gamemode: %s (%s)", m_valid(gamemode) ? readstr(gamemodes[gamemode - STARTGAMEMODE].modeId) : "Unknown", readstr(gamemodes[gamemode - STARTGAMEMODE].mutatorId));
 
         maprotation &rot = maprotations[curmaprotation];
         changemap(rot.map, rot.findmode(gamemode));
@@ -3254,7 +3254,7 @@ namespace server
                     sendf(-1, 1, "ri2", N_PREMISSION, gamemillis<10000 && !m_tutorial && !m_dmsp && isdedicatedserver() ? 1 : 0);
                     if(m_identique) sendf(-1, 1, "ri2", N_CURWEAPON, curweapon);
 
-                    logoutf("Infos%s: %s (%s %s %d)", servlang ? "" : " ", ci->name, readstr("Classes_Names", ci->aptitude), servlang ? "level" : "niveau", ci->level);
+                    logoutf("Infos: %s (%s level %d)", ci->name, readstr("Classes_Names", ci->aptitude), ci->level);
                     break;
                 }
 

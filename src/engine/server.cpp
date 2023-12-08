@@ -3,8 +3,6 @@
 
 #include "engine.h"
 
-VARP(servlang, 0, 1, 1);
-
 #define LOGSTRLEN 512
 
 static FILE *logfile = NULL;
@@ -317,8 +315,8 @@ void disconnect_client(int n, int reason)
     delclient(clients[n]);
     const char *msg = readstr(disconnectreason(reason));
     string s;
-    if(msg) formatstring(s, "%s %s (%s)", servlang ? "Disconnected:" : "Hors-ligne :", clients[n]->hostname, msg);
-    else formatstring(s, "%s %s", servlang ? "Disconnected:" : "Hors-ligne :", clients[n]->hostname);
+    if(msg) formatstring(s, "Disconnected: %s (%s)", clients[n]->hostname, msg);
+    else formatstring(s, "Disconnected: %s", clients[n]->hostname);
     logoutf("%s", s);
     server::sendservmsg(s);
 }
@@ -656,7 +654,7 @@ void serverslice(bool dedicated, uint timeout)   // main server update, called f
         time_t t = time(NULL);
         size_t len = strftime(servtime, sizeof(servtime), "%d-%m-%Y %Hh %Mmin %Ssec", localtime(&t));
         servtime[min(len, sizeof(servtime)-1)] = '\0';
-        if(nonlocalclients || serverhost->totalSentData || serverhost->totalReceivedData) logoutf("Status%s: %d/%d clients | <<<%.1f K/sec UP>>> | >>>%.1f K/sec DOWN<<< | %s", servlang ? "" : " ", nonlocalclients, maxclients, serverhost->totalSentData/60.0f/1024, serverhost->totalReceivedData/60.0f/1024, servtime);
+        if(nonlocalclients || serverhost->totalSentData || serverhost->totalReceivedData) logoutf("Status: %d/%d clients | <<<%.1f K/sec UP>>> | >>>%.1f K/sec DOWN<<< | %s", nonlocalclients, maxclients, serverhost->totalSentData/60.0f/1024, serverhost->totalReceivedData/60.0f/1024, servtime);
         serverhost->totalSentData = serverhost->totalReceivedData = 0;
     }
 
@@ -677,12 +675,12 @@ void serverslice(bool dedicated, uint timeout)   // main server update, called f
                 c.peer = event.peer;
                 c.peer->data = &c;
                 string hn;
-                copystring(c.hostname, (enet_address_get_host_ip(&c.peer->address, hn, sizeof(hn))==0) ? hn : servlang ? "unknown" : "inconnue");
+                copystring(c.hostname, (enet_address_get_host_ip(&c.peer->address, hn, sizeof(hn))==0) ? hn : "unknown");
                 string contime;
                 time_t t = time(NULL);
                 size_t len = strftime(contime, sizeof(contime), "%d-%m-%Y %Hh %Mmin %Ssec", localtime(&t));
                 contime[min(len, sizeof(contime)-1)] = '\0';
-                logoutf("%s %s | %s", servlang ? "Connected:" : "En ligne :", c.hostname, contime);
+                logoutf("Connected: %s | %s", c.hostname, contime);
                 int reason = server::clientconnect(c.num, c.peer->address.host);
                 if(reason) disconnect_client(c.num, reason);
                 break;
@@ -703,7 +701,7 @@ void serverslice(bool dedicated, uint timeout)   // main server update, called f
                 size_t len = strftime(contime, sizeof(contime), "%d-%m-%Y %Hh %Mmin %Ssec", localtime(&t));
                 contime[min(len, sizeof(contime)-1)] = '\0';
                 const char *msg = readstr(disconnectreason(event.data));
-                logoutf("%s %s | %s | %s", servlang ? "Disconnected:" : "Hors-ligne :", c->hostname, contime, msg);
+                logoutf("Disconnected: %s | %s | %s", c->hostname, contime, msg);
                 server::clientdisconnect(c->num);
                 delclient(c);
                 break;
@@ -721,11 +719,11 @@ void serverslice(bool dedicated, uint timeout)   // main server update, called f
             if(countdown>5)
             {
                 loopv(clients) if(clients[i]->type==ST_TCPIP) disconnect_client(i, DISC_SERVERSTOP);
-                if(clients.length()) logoutf(servlang ? "Disconnected %d player%s before shutting down." : "%d joueur%s déconnectés avant arrêt du serveur.", clients.length(), clients.length()>1 ? "s" : "");
+                if(clients.length()) logoutf("Disconnected %d player%s before shutting down.", clients.length(), clients.length()>1 ? "s" : "");
             }
             lasttimeupdate = totalmillis;
             countdown--;
-            logoutf(servlang ? "Server shutting down in: %d" : "Arrêt du serveur dans : %d", countdown);
+            logoutf("Server shutting down in: %d", countdown);
             if(!countdown) exit(EXIT_SUCCESS);
         }
     }
@@ -911,15 +909,15 @@ static LRESULT CALLBACK handlemessages(HWND hWnd, UINT uMsg, WPARAM wParam, LPAR
             {
                 case MENU_OPENCONSOLE:
                     setupconsole();
-                    if(conwindow) ModifyMenu(appmenu, 0, MF_BYPOSITION|MF_STRING, MENU_HIDECONSOLE, servlang ? "Hide Console" : "Masquer la console");
+                    if(conwindow) ModifyMenu(appmenu, 0, MF_BYPOSITION|MF_STRING, MENU_HIDECONSOLE, "Hide Console");
                     break;
                 case MENU_SHOWCONSOLE:
                     ShowWindow(conwindow, SW_SHOWNORMAL);
-                    ModifyMenu(appmenu, 0, MF_BYPOSITION|MF_STRING, MENU_HIDECONSOLE, servlang ? "Hide Console" : "Masquer la console");
+                    ModifyMenu(appmenu, 0, MF_BYPOSITION|MF_STRING, MENU_HIDECONSOLE, "Hide Console");
                     break;
                 case MENU_HIDECONSOLE:
                     ShowWindow(conwindow, SW_HIDE);
-                    ModifyMenu(appmenu, 0, MF_BYPOSITION|MF_STRING, MENU_SHOWCONSOLE, servlang ? "Show Console" : "Afficher la console");
+                    ModifyMenu(appmenu, 0, MF_BYPOSITION|MF_STRING, MENU_SHOWCONSOLE, "Open console");
                     break;
                 case MENU_EXIT:
                     servshutdown = true;
@@ -937,15 +935,15 @@ static void setupwindow(const char *title)
 {
 	copystring(apptip, title);
 	//appinstance = GetModuleHandle(NULL);
-	if(!appinstance) fatal("Impossible de lancer le programme.");
+	if(!appinstance) fatal("failed getting application instance");
 	appicon = LoadIcon(appinstance, MAKEINTRESOURCE(IDI_ICON1));//(HICON)LoadImage(appinstance, MAKEINTRESOURCE(IDI_ICON1), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE);
 	if(!appicon) fatal("Impossible de charger l'icône");
 
 	appmenu = CreatePopupMenu();
-	if(!appmenu) fatal("Impossible de lancer le programme (erreur fenêtre)");
-    AppendMenu(appmenu, MF_STRING, MENU_OPENCONSOLE, servlang ? "Show console" : "Ouvrir la console");
+	if(!appmenu) fatal("failed creating popup menu");
+    AppendMenu(appmenu, MF_STRING, MENU_OPENCONSOLE, "Open console");
     AppendMenu(appmenu, MF_SEPARATOR, 0, NULL);
-	AppendMenu(appmenu, MF_STRING, MENU_EXIT, servlang ? "Stop server" : "Arrêter le serveur");
+	AppendMenu(appmenu, MF_STRING, MENU_EXIT, "Stop server");
 
 	//SetMenuDefaultItem(appmenu, 0, FALSE);
 
@@ -1057,19 +1055,20 @@ char *gameversion()
 
 void rundedicatedserver()
 {
+    execfile("config/languages/english.cfg");
     dedicatedserver = true;
     string servtime;
     time_t t = time(NULL);
     size_t len = strftime(servtime, sizeof(servtime), "%d-%m-%Y %Hh %Mmin %Ssec", localtime(&t));
     servtime[min(len, sizeof(servtime)-1)] = '\0';
-    logoutf("%s | %s", servlang ? "Server started" : "Serveur en ligne", servtime);
-    logoutf("IP%s: %s | Port: %d", servlang ? "" : " ", !strcmp(serverip, "") ? "LAN" : serverip, serverport);
-    logoutf("Version%s: %s", servlang ? "" : " ", gameversion());
+    logoutf("Server started | %s", servtime);
+    logoutf("IP: %s | Port: %d", !strcmp(serverip, "") ? "LAN" : serverip, serverport);
+    logoutf("Version: %s", gameversion());
     logoutf("--------------------------------------------------------------");
 #ifdef WIN32
     SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
     setupconsole();
-    if(conwindow) ModifyMenu(appmenu, 0, MF_BYPOSITION|MF_STRING, MENU_HIDECONSOLE, servlang ? "Hide Console" : "Masquer la console");
+    if(conwindow) ModifyMenu(appmenu, 0, MF_BYPOSITION|MF_STRING, MENU_HIDECONSOLE, "Hide console");
     for(;;)
     {
         MSG msg;
