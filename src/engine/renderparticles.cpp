@@ -1060,9 +1060,17 @@ void renderparticles(int layer)
 
 static int addedparticles = 0;
 
+VARP(maxparticledistance, 128, 1024, 4096);
+static inline bool isInRange(vec o, int flags)
+{
+    return flags&PT_NOMAXDIST || camera1->o.dist(o) < maxparticledistance;
+}
+
 static inline particle *newparticle(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity = 0, int sizemod = 0, bool hud = false)
 {
     static particle dummy;
+
+    if(!isInRange(o, parts[type]->type)) return &dummy;
     if(seedemitter)
     {
         parts[type]->seedemitter(*seedemitter, o, d, fade, size, gravity);
@@ -1073,11 +1081,8 @@ static inline particle *newparticle(const vec &o, const vec &d, int fade, int ty
     return parts[type]->addpart(o, d, fade, color, size, gravity, sizemod, hud);
 }
 
-VARP(maxparticledistance, 256, 1024, 8192);
-
 static void splash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int sizemod, bool upsplash = false)
 {
-    if(camera1->o.dist(p) > maxparticledistance && !seedemitter) return;
     float collidez = parts[type]->type&PT_COLLIDE ? p.z - raycube(p, vec(0, 0, -1), COLLIDERADIUS, RAY_CLIPMAT|RAY_POLY) + (parts[type]->stain >= 0 ? COLLIDEERROR : 0) : -1;
     int fmin = 1;
     int fmax = fade*3;
@@ -1544,7 +1549,6 @@ static void makeparticles(entity &e)
                 vec origin = e.o;
                 newparticle(origin.add(vec(0, 0, size*1.5)), offsetvec(e.o, 0, size*300), 1, PART_RAINBOW, 0xAAAAAA, size*3);
             }
-            particle_hud(PART_VISEUR, e.o, 0xBBBBBB);
             break;
 
         case 8: // sparks: attr 2:<quantity> attr 3:<size> 4:<r> 5:<g> 6:<b> 7:<radius> 8:<fade> 9:<probability>
@@ -1724,7 +1728,6 @@ void updateparticles()
         {
             particleemitter &pe = emitters[i];
             extentity &e = *pe.ent;
-            if(e.o.dist(camera1->o) > maxparticledistance) { pe.lastemit = lastmillis; continue; }
             if(cullparticles && pe.maxfade >= 0)
             {
                 if(isfoggedsphere(pe.radius, pe.center)) { pe.lastcull = lastmillis; continue; }
