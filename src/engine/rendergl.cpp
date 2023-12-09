@@ -1957,7 +1957,6 @@ static void blendfog(int fogmat, float below, float blend, float logblend, float
 }
 
 vec curfogcolor(0, 0, 0);
-CVARR(fograyleighcolour, 0xFF0000);
 
 void setfogcolor(const vec &v)
 {
@@ -2006,7 +2005,6 @@ static void setfog(int fogmat, float below = 0, float blend = 1, int abovemat = 
         vec rayleigh = vec(fogdomerayleighcolour.r/850.f, fogdomerayleighcolour.g/850.f, fogdomerayleighcolour.b/850.f);
         curfogcolor.lerp(rayleigh, curfogcolor, t);
     }
-
 
     blendfog(fogmat, below, blend, logblend, start, end, curfogcolor);
     if(blend < 1) blendfog(abovemat, 0, 1-blend, 1-logblend, start, end, curfogcolor);
