@@ -590,7 +590,7 @@ bool save_world(const char *mname, bool nolms)
 {
     if(!*mname) mname = game::getclientmap();
 
-    if(!strcasecmp(mname, "base"))
+    if(!strcmp(mname, "base") || !strcmp(mname, "base.ogz"))
     {
         conoutf(CON_WARN, "could not save map as %s", mname);
         return false;
