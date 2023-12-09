@@ -251,8 +251,8 @@ void LoadImages()
     GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
     Bitmap* backgroundImg = new Bitmap(L"media/interface/launcher.png");
-    Bitmap* frFlag = new Bitmap(L"media/interface/hud/flag_fr.png");
-    Bitmap* enFlag = new Bitmap(L"media/interface/hud/flag_en.png");
+    Bitmap* frFlag = new Bitmap(L"media/interface/flags/french.png");
+    Bitmap* enFlag = new Bitmap(L"media/interface/flags/english.png");
     Bitmap* speakerON = new Bitmap(L"media/interface/hud/speaker_ON.png");
     Bitmap* speakerOFF = new Bitmap(L"media/interface/hud/speaker_OFF.png");
 

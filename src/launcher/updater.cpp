@@ -2,7 +2,7 @@
 
 using namespace std;
 
-string LAUNCHER_VERSION = "0.9.4";
+string LAUNCHER_VERSION = "0.9.5";
 
 string InstalledCCversion, AvailableCCversion;
 bool UnableToCheckForUpdate, UpdateAvailable;
