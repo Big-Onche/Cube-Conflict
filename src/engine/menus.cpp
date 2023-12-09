@@ -82,7 +82,7 @@ void menuprocess()
             UI::hideui("hud");
         }
     }
-    else if (isconnected() && !UI::uivisible("main") && !UI::uivisible("settings") && !UI::uivisible("classes") && !UI::uivisible("hud")) UI::showui("hud");
+    else if (isconnected() && !UI::uivisible("main") && !UI::uivisible("settings") && !UI::uivisible("classes") && !UI::uivisible("quit")) UI::showui("hud");
 }
 
 VAR(mainmenu, 1, 1, 0);
