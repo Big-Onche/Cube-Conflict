@@ -63,7 +63,7 @@ static const struct statsinfo { const char *statname, *statlogo; } statslist[] =
     {"STAT_JOINT",              "hud/b_joint.png"},
     {"STAT_CHAMPIS",            "hud/b_shrooms.png"},
     {"STAT_ARMES",              "hud/loader.png"},
-    {"STAT_SUPERARMES"          "hud/stats.png"},
+    {"STAT_SUPERARMES",         "hud/flingue.jpg"},
     // stupid stats
     {"STAT_ATOM",               "hud/stats.png"},
     {"STAT_MUNSHOOTED",         "hud/stats.png"},

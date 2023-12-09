@@ -79,7 +79,7 @@ ICOMMAND(getstatlogo, "i", (int *statID), //gets stat logo for ui
     if(*statID<0 || *statID>=NUMSTATS) result("media/texture/game/notexture.png");
     else
     {
-        defformatstring(logodir, "%s%s", "media/interface/" ,statslist[*statID].statlogo);
+        defformatstring(logodir, "%s%s", "media/interface/", statslist[*statID].statlogo);
         result(logodir);
     }
 );
