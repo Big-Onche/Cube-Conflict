@@ -201,25 +201,16 @@ void unlockAchievement(int achID)
     }
 }
 
-void getsteamachievements() //Récupère les succès enregistrés sur steam
+void getsteamachievements() // retrieves achievements from steam
 {
-    int achID = 0;
-    loopi(NUMACHS)
-    {
-        SteamUserStats()->GetAchievement(achievementNames[achID], &achievement[achID]);
-        achID++;
-    }
+    loopi(NUMACHS) { SteamUserStats()->GetAchievement(achievementNames[i], &achievement[i]); }
 }
 
 ICOMMAND(gettotalach, "", (), intret(NUMACHS)); //gets nb of achievements for ui
 
 ICOMMAND(getunlockedach, "", (), //gets nb of unlocked achievements for ui
-    int totalachunlocked = 0; int achID = 0;
-    loopi(NUMACHS)
-    {
-        if(!isLocked(achID)) totalachunlocked++;
-        achID++;
-    }
+    int totalachunlocked = 0;
+    loopi(NUMACHS) { if(!isLocked(i)) totalachunlocked++; }
     intret(totalachunlocked);
 );
 
@@ -227,7 +218,7 @@ ICOMMAND(getachievementslogo, "i", (int *achID), //gets achievement logo for ui
     if(*achID<0 || *achID>=NUMACHS) result("media/texture/game/notexture.png");
     else
     {
-        defformatstring(logodir, "media/interface/achievements/%s%s.jpg", achievementNames[*achID], isLocked(*achID) ? "_no" : "_yes");
+        defformatstring(logodir, "media/interface/achievements/%s%s.jpg", achievementNames[*achID], isLocked(*achID) ? "_n" : "_y");
         result(logodir);
     }
 );
@@ -235,10 +226,10 @@ ICOMMAND(getachievementslogo, "i", (int *achID), //gets achievement logo for ui
 ICOMMAND(getachievementstate, "i", (int *achID), intret(!isLocked(*achID)); );
 
 const char *achievementNames[NUMACHS] = {
-    "ACH_TRIPLETTE", "ACH_PENTAPLETTE", "ACH_DECAPLETTE", "ACH_ATOME", "ACH_WINNER", "ACH_ENVOL", "ACH_POSTULANT", "ACH_STAGIAIRE",
-    "ACH_SOLDAT", "ACH_LIEUTENANT", "ACH_MAJOR", "ACH_BEAUTIR", "ACH_DEFONCE", "ACH_PRECIS", "ACH_KILLASSIST", "ACH_KILLER", "ACH_SACAPV",
-    "ACH_CADENCE", "ACH_1HPKILL", "ACH_MAXSPEED", "ACH_INCREVABLE", "ACH_CHANCE", "ACH_CPASBIEN", "ACH_SUICIDEFAIL", "ACH_FKYEAH", "ACH_RICHE",
-    "ACH_TUEURFANTOME", "ACH_EPOFLAG", "ACH_M32SUICIDE", "ACH_ESPIONDEGUISE", "ACH_FKYOU", "ACH_ABUS", "ACH_DESTRUCTEUR", "ACH_RAGE",
-    "ACH_DAVIDGOLIATH", "ACH_LANCEEPO", "ACH_PASLOGIQUE", "ACH_JUSTEPOUR", "ACH_BRICOLEUR", "ACH_NOSCOPE", "ACH_THUGPHYSIQUE", "ACH_SPAAACE",
-    "ACH_PARKOUR", "ACH_EXAM", "ACH_UNDECIDED", "ACH_WASHAKIE", "ACH_NATURO", "ACH_TMMONEY", "ACH_NICE", "ACH_TAKETHAT", "ACH_SURVIVOR", "ACH_ELIMINATOR"
+    "ach_triple", "ach_penta", "ach_deca", "ach_atom", "ach_winner", "ach_fly", "ach_applicant", "ach_trainee",
+    "ach_soldier", "ach_lieutenant", "ach_major", "ach_niceshot", "ach_stoned", "ach_accurate", "ach_armorkill", "ach_killer", "ach_hpbag",
+    "ach_firerate", "ach_onehpkill", "ach_maxspeed", "ach_indestructible", "ach_luck", "ach_notgood", "ach_suicidefail", "ach_fkyeah", "ach_rich",
+    "ach_ghost", "ach_epoflag", "ach_grenadefail", "ach_spy", "ach_fkyou", "ach_enough", "ach_destructor", "ach_rage",
+    "ach_davidgoliath", "ach_lanceepo", "ach_illogical", "ach_sure", "ach_handyman", "ach_noscope", "ach_thug", "ach_spaaace",
+    "ach_parkour", "ach_exam", "ach_undecided", "ach_washakie", "ach_naturo", "ach_tmmoney", "ach_nice", "ach_takethat", "ach_survivor", "ach_eliminator"
 };
