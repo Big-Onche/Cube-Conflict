@@ -2349,7 +2349,7 @@ namespace server
             if(actor->aptitude==APT_FAUCHEUSE && !isteam(target->team, actor->team)) // reaper's passive ability
             {
                 if(as.maxhealth < 1500) {as.maxhealth += 500; as.health += 500;} // add health boost if first kill
-                else as.health = min(as.health+300, as.maxhealth); // otherwise just add health
+                else as.health = min(as.health+500, as.maxhealth); // otherwise just add health
                 sendf(-1, 1, "ri4", N_REAPER, actor->clientnum, as.health, as.maxhealth);
             }
 
