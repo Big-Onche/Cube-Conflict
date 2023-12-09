@@ -916,7 +916,7 @@ static partrenderer *parts[] =
     new quadrenderer("media/particles/weather/cloud_4.png", PT_PART|PT_NOMAXDIST),                                           // PART_CLOUD4
     new quadrenderer("media/particles/weather/cloud_5.png", PT_PART|PT_NOMAXDIST),                                           // PART_CLOUD5
     new quadrenderer("media/particles/weather/cloud_6.png", PT_PART|PT_NOMAXDIST),                                           // PART_CLOUD6
-    new quadrenderer("media/particles/weather/rainbow.png", PT_PART|PT_NOMAXDIST),                                           // PART_RAINBOW
+    new trailrenderer("media/particles/weather/rainbow.png", PT_TRAIL|PT_NOMAXDIST),                                         // PART_RAINBOW
     &lightnings,                                                                                                             // PART_LIGHTNING
     // game specific
     new quadrenderer("media/particles/game/target.png", PT_PART|PT_LERP|PT_BRIGHT),                                          // PART_TARGET
@@ -1541,7 +1541,8 @@ static void makeparticles(entity &e)
             if(map_atmo==8 || e.attr3)
             {
                 int size = e.attr2;
-                newparticle(e.o, e.o, 1, PART_RAINBOW, 0xAAAAAA, size*3);
+                vec origin = e.o;
+                newparticle(origin.add(vec(0, 0, size*1.5)), offsetvec(e.o, 0, size*300), 1, PART_RAINBOW, 0xAAAAAA, size*3);
             }
             particle_hud(PART_VISEUR, e.o, 0xBBBBBB);
             break;
