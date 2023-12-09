@@ -609,7 +609,7 @@ namespace game
         if(at==player1 && d!=at)
         {
             extern int hitsound;
-            if(hitsound && lasthit != lastmillis) playSound(S_HIT, NULL, 0, 0, SND_NOTIFICATION);
+            if(hitsound && lasthit != lastmillis) playSound(S_HIT, NULL, 0, 0, SND_UI);
             lasthit = lastmillis;
         }
 

@@ -186,13 +186,17 @@ void stopReverb()
     reportSoundError("stopReverb", "N/A", -1);
 }
 
-void manageReverb(bool mute)
+void muteReverb(bool mute = true)
 {
-    if(mute) alEffectf(reverbEffect, AL_EAXREVERB_GAIN, 0.0);
-    else alEffectf(reverbEffect, AL_EAXREVERB_GAIN, 0.35);
+    alEffectf(reverbEffect, AL_EAXREVERB_GAIN, mute ? 0.0 : 0.35);
     alAuxiliaryEffectSloti(auxEffectReverb, AL_EFFECTSLOT_EFFECT, reverbEffect);
-    reportSoundError("manageReverb", "N/A", -1);
+    reportSoundError("muteReverb", "N/A", -1);
 }
+
+ICOMMAND(testmute, "i", (int *i),
+{
+    muteReverb(*i);
+});
 
 int mapReverb = 0;
 ICOMMAND(mainmapreverb, "i", (int *i),
@@ -265,8 +269,8 @@ void initSounds()
     {
         getEfxFuncs();
         alGenAuxiliaryEffectSlots(1, &auxEffectReverb);
-        alEffectf(reverbEffect, AL_EAXREVERB_GAIN, 0.35);
-        applyReverbPreset(auxEffectReverb, EFX_REVERB_PRESET_GENERIC);
+        //alEffectf(reverbEffect, AL_EAXREVERB_GAIN, 0);
+        //applyReverbPreset(auxEffectReverb, EFX_REVERB_PRESET_GENERIC);
         setOcclusionEffect();
     }
 
@@ -317,10 +321,10 @@ bool applyUnderwaterFilter(int flags)
 {
     if(lookupmaterial(camera1->o)==MAT_WATER || lookupmaterial(camera1->o)==MAT_LAVA)
     {
-        manageReverb(true);
-        return !(flags & SND_NOTIFICATION);
+        muteReverb();
+        return !(flags & SND_UI);
     }
-    else manageReverb(false);
+    else muteReverb(false);
     return false;
 }
 
@@ -382,9 +386,9 @@ void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRa
         alSourcef(source, AL_ROLLOFF_FACTOR, 1.0f); // For linear decrease over the distance
     }
 
-    if((flags & SND_MUSIC) || (flags & SND_NOTIFICATION))
+    if((flags & SND_MUSIC) || (flags & SND_UI))
     {
-        alSource3i(source, AL_AUXILIARY_SEND_FILTER, auxEffectReverb, 0, AL_FILTER_NULL);
+        alSource3i(source, AL_AUXILIARY_SEND_FILTER, AL_FILTER_NULL, 0, AL_FILTER_NULL);
         alSourcei(source, AL_DIRECT_FILTER, AL_FILTER_NULL);
     }
     else if(!noEfx) // apply efx if available

@@ -24,7 +24,7 @@ namespace game
             addmsg(N_SENDAPTITUDE, "ri", player1_aptitude);
             player1->aptitude = player1_aptitude;
             oldapti = player1->aptitude;
-            if(!islaunching) playSound(S_APT_SOLDAT+player1_aptitude, NULL, 0, 0, SND_FIXEDPITCH|SND_NOTIFICATION);
+            if(!islaunching) playSound(S_APT_SOLDAT+player1_aptitude, NULL, 0, 0, SND_FIXEDPITCH|SND_UI);
             if(isconnected() && !premission && !intermission) unlockAchievement(ACH_UNDECIDED);
         }
     });
@@ -559,7 +559,7 @@ namespace game
         gameent *h = hudplayer();
         if(h!=player1 && actor==h && d!=actor)
         {
-            if(hitsound && lasthit != lastmillis) playSound(S_HIT, NULL, 0, 0, SND_NOTIFICATION);
+            if(hitsound && lasthit != lastmillis) playSound(S_HIT, NULL, 0, 0, SND_UI);
             lasthit = lastmillis;
         }
 
@@ -704,14 +704,14 @@ namespace game
                 if(atk==ATK_M32_SHOOT) unlockAchievement(ACH_M32SUICIDE);
                 conoutf(contype, "\fd%s %s", readstr("GameMessage_You"), readstr("Console_Game_Suicided"));
             }
-            else conoutf(contype, "%s%s > %s", d==player1 ? "\fd" : "", dname, readstr("GameMessage_Suicide"));
+            else conoutf(contype, "%s > \fl%s", dname, readstr("GameMessage_Suicide"));
         }
         else // Kill ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
             float killdistance = actor->o.dist(d->o)/18.f;
             if(actor==player1) //////////////////// you killed someone ////////////////////
             {
-                playSound(S_KILL, NULL, 0, 0, SND_FIXEDPITCH|SND_NOTIFICATION);
+                playSound(S_KILL, NULL, 0, 0, SND_FIXEDPITCH|SND_UI);
                 defformatstring(victimname, "%s", dname);
                 conoutf(CON_HUDCONSOLE, "%s \fc%s \f7! \f4(%.1fm)", readstr("GameMessage_YouKilled"), victimname, killdistance);
                 conoutf(contype, "\fd%s\f7 > \fl%s\f7 > %s \fl(%.1fm)", player1->name, readstr(guns[atk].ident), victimname, killdistance);

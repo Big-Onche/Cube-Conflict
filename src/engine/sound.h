@@ -81,7 +81,7 @@ enum SoundFlags
 {
     SND_NOCULL        = 1 << 0,     // sound will be played even if camera1 is beyond radius
     SND_NOOCCLUSION   = 1 << 1,     // no filter if occlusion
-    SND_NOTIFICATION  = 1 << 2,     // notifications sounds such as kills, achievements, etc.
+    SND_UI            = 1 << 2,     // ui/notification sounds such as kills, achievements, etc.
     SND_LOWPRIORITY   = 1 << 3,     // sound will not play if source limit is almost reached
     SND_FIXEDPITCH    = 1 << 4,     // no random variation in pitch
     SND_LOOPED        = 1 << 5,     // sound is a loop
