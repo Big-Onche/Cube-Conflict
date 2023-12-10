@@ -1567,7 +1567,7 @@ namespace server
         }
 
         uchar operator[](int msg) const { return msg >= 0 && msg < NUMMSG ? msgmask[msg] : 0; }
-    } msgfilter(-1, N_CONNECT, N_SERVINFO, N_INITCLIENT, N_WELCOME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_HITPUSH, N_SHOTFX, N_EXPLODEFX, N_DIED, N_SPAWNSTATE, N_FORCEDEATH, N_TEAMINFO, N_ITEMACC, N_ITEMSPAWN, N_TIMEUP, N_PREMISSION, N_CDIS, N_CURRENTMASTER, N_PONG, N_RESUME, N_BASESCORE, N_BASEINFO, N_BASEREGEN, N_SCOREBASE, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_SENDMAP, N_DROPFLAG, N_SCOREFLAG, N_RETURNFLAG, N_RESETFLAG, N_CLIENT, N_AUTHCHAL, N_INITAI, N_DEMOPACKET, N_CURWEAPON, -2, N_CALCLIGHT, N_REMIP, N_NEWMAP, N_GETMAP, N_SENDMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, N_EDITVAR, N_EDITVSLOT, N_UNDO, N_REDO, -4, N_POS, NUMMSG),
+    } msgfilter(-1, N_CONNECT, N_SERVINFO, N_INITCLIENT, N_WELCOME, N_MAPCHANGE, N_SERVMSG, N_DAMAGE, N_HITPUSH, N_SHOTFX, N_EXPLODEFX, N_DIED, N_SPAWNSTATE, N_FORCEDEATH, N_TEAMINFO, N_ITEMACC, N_ITEMSPAWN, N_TIMEUP, N_CDIS, N_CURRENTMASTER, N_PONG, N_RESUME, N_BASESCORE, N_BASEINFO, N_BASEREGEN, N_SCOREBASE, N_ANNOUNCE, N_SENDDEMOLIST, N_SENDDEMO, N_DEMOPLAYBACK, N_SENDMAP, N_DROPFLAG, N_SCOREFLAG, N_RETURNFLAG, N_RESETFLAG, N_CLIENT, N_AUTHCHAL, N_INITAI, N_DEMOPACKET, N_CURWEAPON, -2, N_CALCLIGHT, N_REMIP, N_NEWMAP, N_GETMAP, N_SENDMAP, N_CLIPBOARD, -3, N_EDITENT, N_EDITF, N_EDITT, N_EDITM, N_FLIP, N_COPY, N_PASTE, N_ROTATE, N_REPLACE, N_DELCUBE, N_EDITVAR, N_EDITVSLOT, N_UNDO, N_REDO, -4, N_POS, NUMMSG),
       connectfilter(-1, N_CONNECT, -2, N_AUTHANS, -3, N_PING, NUMMSG);
 
     int checktype(int type, clientinfo *ci)
@@ -2032,7 +2032,6 @@ namespace server
     VARP(servforcemode, -1, 0, 18);
 
     VARP(gameintro, 0, 1, 1);
-    bool startpremission = false, stoppremission = false;
 
     void changemap(const char *s, int mode)
     {
@@ -2040,12 +2039,9 @@ namespace server
         pausegame(false);
         changegamespeed(100);
         if(smode) smode->cleanup();
-
-        if(gameintro) game::premission = true;
         gamemode = mode;
         gamemillis = 0;
         gamelimit = gamelength*60000+(gameintro ? 10000 : 0);
-        startpremission = false;
         interm = 0;
         nextexceeded = 0;
         copystring(smapname, s);
@@ -2255,23 +2251,6 @@ namespace server
 
     void checkintermission(bool force = false)
     {
-        if(!isdedicatedserver() && !gameintro) { startpremission = false; stoppremission = true; }
-        else
-        {
-            if(gamemillis<=10000 && !startpremission && gameintro)
-            {
-                sendf(-1, 1, "ri2", N_PREMISSION, 1);
-                startpremission = true;
-                stoppremission = false;
-            }
-            else if(gamemillis>10000 && !stoppremission)
-            {
-                sendf(-1, 1, "ri2", N_PREMISSION, 0);
-                stoppremission = true;
-                startpremission = false;
-            }
-        }
-
         if(gamemillis >= gamelimit && !interm && (force || !checkovertime()))
         {
             sendf(-1, 1, "ri2", N_TIMEUP, 0);
@@ -2709,7 +2688,7 @@ namespace server
                 processevents();
                 if(curtime)
                 {
-                    if(!game::premission && !game::intermission) regenallies();
+                    regenallies();
 
                     loopv(sents) if(sents[i].spawntime) // spawn entities when timer reached
                     {
@@ -3251,7 +3230,6 @@ namespace server
                         }
                     }
 
-                    sendf(-1, 1, "ri2", N_PREMISSION, gamemillis<10000 && !m_tutorial && !m_dmsp && isdedicatedserver() ? 1 : 0);
                     if(m_identique) sendf(-1, 1, "ri2", N_CURWEAPON, curweapon);
 
                     logoutf("Infos: %s (%s level %d)", ci->name, readstr("Classes_Names", ci->aptitude), ci->level);

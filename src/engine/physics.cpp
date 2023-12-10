@@ -1869,7 +1869,7 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
         game::footsteps(pl);
     }
 
-    if(game::player1->timeinair > 10000 && !game::premission && game::player1->state==CS_ALIVE && lookupmaterial(game::player1->feetpos())==MAT_AIR) {unlockAchievement(ACH_ENVOL);}
+    if(game::player1->timeinair > 10000 && game::player1->state==CS_ALIVE && lookupmaterial(game::player1->feetpos())==MAT_AIR) {unlockAchievement(ACH_ENVOL);}
 
     if(pl->state==CS_ALIVE) updatedynentcache(pl);
 

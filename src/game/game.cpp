@@ -13,7 +13,7 @@ namespace game
     int oldapti;
     VARFP(player1_aptitude, 0, 0, NUMAPTS-1,
     {
-        if(player1->state != CS_DEAD && isconnected() && !premission && !intermission && !m_tutorial)
+        if(player1->state != CS_DEAD && isconnected() && !intermission && !m_tutorial)
         {
             conoutf(CON_GAMEINFO, "\fc%s", readstr("Console_Game_UnableToChangeClass"));
             playSound(S_ERROR);
@@ -25,11 +25,11 @@ namespace game
             player1->aptitude = player1_aptitude;
             oldapti = player1->aptitude;
             if(!islaunching) playSound(S_APT_SOLDAT+player1_aptitude, NULL, 0, 0, SND_FIXEDPITCH|SND_UI);
-            if(isconnected() && !premission && !intermission) unlockAchievement(ACH_UNDECIDED);
+            if(isconnected() && !intermission) unlockAchievement(ACH_UNDECIDED);
         }
     });
 
-    bool intermission = false, premission = false;
+    bool intermission = false;
     int maptime = 0, maprealtime = 0, maplimit = -1;
     int lasthit = 0, lastspawnattempt = 0;
     int respawnent = -1;
@@ -314,7 +314,7 @@ namespace game
 
             if(isconnected()) updatePlayersSounds(d);
 
-            if(d!=player1 && d->state==CS_ALIVE && !intermission && !premission)
+            if(d!=player1 && d->state==CS_ALIVE && !intermission)
             {
                 if(d->armourtype==A_ASSIST && d->ammo[GUN_ASSISTXPL] && !d->armour) {gunselect(GUN_ASSISTXPL, d, true); d->gunwait=0;}
                 if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
@@ -328,7 +328,7 @@ namespace game
             if(d->state==CS_DEAD && d->ragdoll) moveragdoll(d);
 
             const int lagtime = totalmillis-d->lastupdate;
-            if(!lagtime || intermission || premission) continue;
+            if(!lagtime || intermission) continue;
             else if(lagtime>1000 && d->state==CS_ALIVE)
             {
                 d->state = CS_LAGGED;
@@ -346,6 +346,11 @@ namespace game
 
     VAR(canMove, 0, 1, 1);
 
+    bool onFixedCamera(gameent *d)
+    {
+        return gfx::forcecampos >= 0 && d->state!=CS_SPECTATOR;
+    }
+
     void updateworld()        // main game update loop
     {
         int delta = 250 / max(gfx::nbfps, 1);
@@ -361,7 +366,7 @@ namespace game
         physicsframe();
         ai::navigate();
 
-        if(player1->state==CS_ALIVE && !intermission && !premission)   // checking player1's shits
+        if(player1->state==CS_ALIVE && !intermission)   // checking player1's shits
         {
             if(player1->armourtype==A_ASSIST && player1->ammo[GUN_ASSISTXPL] && !player1->armour) {gunselect(GUN_ASSISTXPL, player1, true); player1->gunwait=0;}
             else if(m_identique)
@@ -406,7 +411,7 @@ namespace game
                     moveplayer(player1, 10, true, 0, 0, player1->aptitude, 0, false);
                 }
             }
-            else if(!intermission && !premission && gfx::forcecampos<0)
+            else if(!intermission && !onFixedCamera(player1))
             {
                 if(player1->ragdoll) cleanragdoll(player1);
                 crouchplayer(player1, 10, true);
@@ -505,7 +510,7 @@ namespace game
 
     void doaction(int act)
     {
-        if(!connected || intermission || premission || gfx::forcecampos>=0) return;
+        if(!connected || intermission || onFixedCamera(player1)) return;
         if((player1->attacking = act) && attackspawn) respawn();
     }
 
@@ -515,14 +520,14 @@ namespace game
 
     bool canjump()
     {
-        if(!connected || intermission || premission || gfx::forcecampos>=0) return false;
+        if(!connected || intermission || onFixedCamera(player1)) return false;
         if(jumpspawn) respawn();
         return player1->state!=CS_DEAD;
     }
 
     bool cancrouch()
     {
-        if(!connected || intermission || premission || gfx::forcecampos>=0) return false;
+        if(!connected || intermission || onFixedCamera(player1)) return false;
         return player1->state!=CS_DEAD;
     }
 
@@ -551,7 +556,7 @@ namespace game
 
     void damaged(int damage, gameent *d, gameent *actor, bool local, int atk)
     {
-        if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission || premission) return;
+        if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission) return;
 
         if(local) damage = d->dodamage(damage, d->aptitude, d->abilitymillis[ABILITY_1]);
         else if(actor==player1) return;
@@ -655,7 +660,7 @@ namespace game
             if(d!=player1) d->resetinterp();
             return;
         }
-        else if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission || premission) return;
+        else if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission) return;
 
         ////////////////////////////// sounds //////////////////////////////
         switch(actor->killstreak) // killstreak

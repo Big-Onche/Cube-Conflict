@@ -673,7 +673,6 @@ namespace game
             if(!isconnected()) localconnect();
         }
         else if(player1->state!=CS_SPECTATOR || player1->privilege) addmsg(N_MAPVOTE, "rsi", name, mode);
-        if(m_dmsp || m_tutorial || m_edit) {premission = false; gfx::forcecampos = -1;}
     }
 
     void changemap(const char *name)
@@ -1475,6 +1474,8 @@ namespace game
                 else senditemstoserver = false;
                 ai::loadwaypoints();
                 incrementWinsStat = true;
+                //execute("premission");
+                //playMusic(S_PREMISSION);
                 gfx::resetpostfx();
                 break;
             }
@@ -2054,11 +2055,6 @@ namespace game
 
             case N_TIMEUP:
                 timeupdate(getint(p));
-                break;
-
-            case N_PREMISSION:
-                premission = getint(p);
-                if(premission) { execute("premission"); playMusic(S_PREMISSION); }
                 break;
 
             case N_SERVMSG:

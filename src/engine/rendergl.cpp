@@ -1359,7 +1359,7 @@ void disablezoom()
 
 void computezoom()
 {
-    if(game::player1->state==CS_DEAD || game::premission || game::intermission) gfx::zoom = 0;
+    if(game::player1->state==CS_DEAD || game::intermission) gfx::zoom = 0;
     if(!gfx::zoom) { zoomprogress = 0; curfov = fov; curavatarfov = avatarfov; return; }
     if(gfx::zoom > 0) zoomprogress = zoominvel ? min(zoomprogress + float(elapsedtime) / zoominvel, 1.0f) : 1;
     else

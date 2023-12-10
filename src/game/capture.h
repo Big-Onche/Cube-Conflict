@@ -229,7 +229,7 @@ struct captureclientmode : clientmode
 
     bool insidebase(const baseinfo &b, const vec &o, bool isalive)
     {
-        if(!isalive || (server::gamemillis<10000 && game::premission) || game::intermission) return false;
+        if(!isalive || game::intermission) return false;
         float dx = (b.o.x-o.x), dy = (b.o.y-o.y), dz = (b.o.z-o.z);
         return dx*dx + dy*dy <= CAPTURERADIUS*CAPTURERADIUS && fabs(dz) <= CAPTUREHEIGHT;
     }
@@ -912,7 +912,7 @@ ICOMMAND(hudbasesstats, "i", (int *team),
     void update()
     {
         endcheck();
-        if(gamemillis>=gamelimit || (gamemillis<10000 && game::premission)) return;
+        if(gamemillis>=gamelimit) return;
         int t = gamemillis/1000 - (gamemillis-curtime)/1000;
         if(t<1) return;
         loopv(bases)
