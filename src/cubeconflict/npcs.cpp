@@ -378,13 +378,13 @@ namespace game
             if(npcs[mtype].friendly && player1->o.dist(this->o) < 40 && (this->monsterstate==M_FRIENDLY || this->monsterstate==M_NEUTRAL) && gfx::forcecampos==-1)
             {
                 defformatstring(id, "npc_interaction_%d %d", tag, true);
-                execute(id);
+                if(identexists(id)) execute(id);
                 activetrigger = true;
             }
             else if(activetrigger)
             {
                 defformatstring(id, "npc_interaction_%d %d", tag, false);
-                execute(id);
+                if(identexists(id)) execute(id);
                 activetrigger = false;
             }
         }
@@ -739,6 +739,11 @@ namespace game
 
                     if((anim&ANIM_INDEX)==ANIM_IDLE && (anim>>ANIM_SECONDARY)&ANIM_INDEX) anim >>= ANIM_SECONDARY;
                     if(!((anim>>ANIM_SECONDARY)&ANIM_INDEX)) anim |= (ANIM_IDLE|ANIM_LOOP)<<ANIM_SECONDARY;
+                    if(m.lastaction && m.lastattack >= 0 && lastmillis < m.lastaction+250)
+                    {
+                        basetime = m.lastaction;
+                        anim = ANIM_MELEE;
+                    }
 
                     //////////////////////////////////// Weapon rendering ////////////////////////////////////////////////////////////////////////
                     int vanim = ANIM_VWEP_IDLE|ANIM_LOOP, vtime = 0;
