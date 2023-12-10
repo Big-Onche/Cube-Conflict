@@ -1854,6 +1854,7 @@ namespace game
                 int gun = getint(p);
                 if(!validgun(gun)) return;
                 d->gunselect = gun;
+                d->attacksound = false;
                 playSound(attacks[gun-GUN_ELEC].picksound, d==hudplayer() ? NULL : &d->o, 200, 50);
                 break;
             }
