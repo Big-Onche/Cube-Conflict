@@ -367,7 +367,8 @@ namespace game
                 }
 
                 if(physsteps > 0) stacked = NULL;
-                if(npcs[mtype].speed) moveplayer(this, 10, true, curtime, 0, mtype==M_UFO ? 999999 : 0, mtype==M_UFO && m_dmsp ? APT_PHYSICIEN : 0, 999999, false);        // use physics to move monster
+                bool ufoMonster = mtype==M_UFO && m_dmsp;
+                if(npcs[mtype].speed) moveplayer(this, 10, true, curtime, 0, ufoMonster ? 999999 : 0, ufoMonster ? APT_PHYSICIEN : 0, 999999, false);        // use physics to move monster
             }
         }
 
@@ -378,13 +379,13 @@ namespace game
             if(npcs[mtype].friendly && player1->o.dist(this->o) < 40 && (this->monsterstate==M_FRIENDLY || this->monsterstate==M_NEUTRAL) && gfx::forcecampos==-1)
             {
                 defformatstring(id, "npc_interaction_%d %d", tag, true);
-                if(identexists(id)) execute(id);
+                execute(id);
                 activetrigger = true;
             }
             else if(activetrigger)
             {
                 defformatstring(id, "npc_interaction_%d %d", tag, false);
-                if(identexists(id)) execute(id);
+                execute(id);
                 activetrigger = false;
             }
         }
@@ -429,7 +430,6 @@ namespace game
                     }
                     return;
                 }
-
                 anger = 0;
                 enemy = d;
                 monsterhurt = true;
@@ -448,11 +448,14 @@ namespace game
                 if(identexists(id)) execute(id);
                 if(m_dmsp && gamesecs<599) npcdrop(&monsterhurtpos, npcs[mtype].dropval);
                 if(player1->aptitude==APT_FAUCHEUSE && player1->health<1500) player1->health = min(player1->health+50, 1500);
-                switch(mtype)
+                if(m_dmsp)
                 {
-                    case M_KEVIN: case M_DYLAN: loopi(2+rnd(3)) spawnbouncer(o, vec(0, 0, 0), this, BNC_GIBS); break;
-                    case M_UFO: loopi(25) spawnbouncer(o, vec(0, 0, 0), this, BNC_GRENADE, 5000+rnd(2000), true); break;
-                    case M_ARMOR: loopi(10+rnd(5)) spawnbouncer(o, vec(0, 0, 0), this, BNC_ROBOT); break;
+                    switch(mtype)
+                    {
+                        case M_KEVIN: case M_DYLAN: loopi(2+rnd(3)) spawnbouncer(o, vec(0, 0, 0), this, BNC_GIBS); break;
+                        case M_UFO: loopi(25) spawnbouncer(o, vec(0, 0, 0), this, BNC_GRENADE, 5000+rnd(2000), true); break;
+                        case M_ARMOR: loopi(10+rnd(5)) spawnbouncer(o, vec(0, 0, 0), this, BNC_ROBOT); break;
+                    }
                 }
             }
             else
