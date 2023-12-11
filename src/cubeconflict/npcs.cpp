@@ -587,7 +587,7 @@ namespace game
             }
             nextmonster = lastmillis+1000;
             gamesecs++;
-            if(spawn && !intermission)
+            if(spawn && gamesecs < 599)
             {
                 gamesecs > 270 && gamesecs < 330 ? spawnmonster(true, M_YALIEN) : spawnmonster();
                 spawn = gamesecs > 450 ? true : false;
@@ -612,11 +612,11 @@ namespace game
                     playSound(S_ALIEN_INVASION);
                     break;
                 case 360: loopi(10) spawnmonster(true, M_CAMPER); break;
-                case 480: loopi(3) spawnmonster(true, M_B_GIANT); break;
-                case 550: loopi(5)  spawnmonster(true, M_UFO); playSound(S_ALIEN_INVASION);
+                case 480: loopi(5) spawnmonster(true, M_B_GIANT); break;
+                case 550: loopi(5) spawnmonster(true, M_UFO); playSound(S_ALIEN_INVASION);
                 case 575: loopi(5) spawnmonster(true, M_B_GIANT); break;
                 case 600: endsp(); unlockAchievement(ACH_SURVIVOR); break;
-                case 610: trydisconnect(true); break;
+                case 615: trydisconnect(true); break;
                 default:
                     if(gamesecs>450 && (gamesecs%4 == 0)) spawnmonster(true, M_PYRO);
             }
