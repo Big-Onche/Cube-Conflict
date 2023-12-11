@@ -186,17 +186,12 @@ void stopReverb()
     reportSoundError("stopReverb", "N/A", -1);
 }
 
-void muteReverb(bool mute = true)
+void muteReverb(bool mute)
 {
     alEffectf(reverbEffect, AL_EAXREVERB_GAIN, mute ? 0.0 : 0.35);
     alAuxiliaryEffectSloti(auxEffectReverb, AL_EFFECTSLOT_EFFECT, reverbEffect);
     reportSoundError("muteReverb", "N/A", -1);
 }
-
-ICOMMAND(testmute, "i", (int *i),
-{
-    muteReverb(*i);
-});
 
 int mapReverb = 0;
 ICOMMAND(mainmapreverb, "i", (int *i),

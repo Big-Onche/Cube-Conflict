@@ -139,6 +139,7 @@ extern void resumeAllSounds();
 extern bool loadSound(Sound& s, bool music = false);
 extern void manageSources();
 extern void cleanUpSounds();
+extern void muteReverb(bool mute = true);
 extern void setShroomsEfx(bool enable);
 extern const char *getmapsoundname(int n);
 
