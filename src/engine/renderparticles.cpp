@@ -1462,6 +1462,10 @@ void spawnApocalypse(vec pos, int intensity, int r, int g, int b, int wind)
     if(randomevent(6*gfx::nbfps) && !volcano) popLightning(pos, vec(1.5f, 0.5f, 0.0f), 0xFF6622);
 }
 
+bool canPopParticle(int probability)
+{
+    return probability && randomevent(( 1.0f - (probability / 100.f)) * gfx::nbfps);
+}
 
 static void makeparticles(entity &e)
 {
@@ -1553,12 +1557,9 @@ static void makeparticles(entity &e)
 
         case 8: // sparks: attr 2:<quantity> attr 3:<size> 4:<r> 5:<g> 6:<b> 7:<radius> 8:<fade> 9:<probability>
         {
-            bool popSpark = e.attr9 && randomevent(( 1.0f - (e.attr9 / 100.f)) * gfx::nbfps);
-
-            if(popSpark)
+            if(canPopParticle(e.attr9))
             {
-                int radius = e.attr7, num = e.attr2, fade = e.attr8, size = e.attr3;
-                if(!radius) radius = 50;
+                int num = e.attr2, fade = e.attr8, size = e.attr3;
                 if(!num) num = 5;
                 if(!size) size = 0.2f;
                 if(!fade) fade = 200;
@@ -1566,25 +1567,28 @@ static void makeparticles(entity &e)
                 int r, g, b;
                 if(defaultColors(e.attr4, e.attr5, e.attr6)) { r = 150; g = 40;  b = 0; } // setting default colors for generic sparks
                 else { r = e.attr4; g = e.attr5; b = e.attr6; } // setting custom colors from r g b attrs
-                regularsplash(PART_SPARK_L, rgbToHex(r, g, b), radius, num, fade, e.o, size/100.f, 2);
+                regularsplash(PART_SPARK_L, rgbToHex(r, g, b), e.attr7, num, fade, e.o, size/100.f, 0);
                 particle_splash(PART_SMOKE, 4, 600+rnd(300), e.o, 0x454545, 0.4f, 25, 300, 3);
                 playSound(S_SPARKS, &e.o, 200, 50);
             }
             break;
         }
 
-        case 9: // water: attr 2:<quantity> attr 3:<size> 4:<r> 5:<g> 6:<b> 7:<radius> 8:<fade>
+        case 9: // water: attr 2:<quantity> attr 3:<size> 4:<r> 5:<g> 6:<b> 7:<radius> 8:<fade> 9:<probability>
         {
-            int radius = e.attr7, num = e.attr2, fade = e.attr8, size = e.attr3;
-            if(!radius) radius = 50;
-            if(!num) num = 5;
-            if(!size) size = 0.2f;
-            if(!fade) fade = 200; // 0x18181A
+            if(canPopParticle(e.attr9))
+            {
+                int radius = e.attr7, num = e.attr2, fade = e.attr8, size = e.attr3;
+                if(!radius) radius = 50;
+                if(!num) num = 5;
+                if(!size) size = 0.2f;
+                if(!fade) fade = 200; // 0x18181A
 
-            int r, g, b;
-            if(defaultColors(e.attr4, e.attr5, e.attr6)) { r = 170; g = 170;  b = 200; } // setting default colors for generic sparks
-            else { r = e.attr4; g = e.attr5; b = e.attr6; } // setting custom colors from r g b attrs
-            regularsplash(PART_DROP, rgbToHex(r, g, b), radius, num, fade, e.o, size/100.f, 2);
+                int r, g, b;
+                if(defaultColors(e.attr4, e.attr5, e.attr6)) { r = 170; g = 170;  b = 200; } // setting default colors for generic sparks
+                else { r = e.attr4; g = e.attr5; b = e.attr6; } // setting custom colors from r g b attrs
+                regularsplash(PART_DROP, rgbToHex(r, g, b), radius, num, fade, e.o, size/100.f, 2);
+            }
             break;
         }
 
