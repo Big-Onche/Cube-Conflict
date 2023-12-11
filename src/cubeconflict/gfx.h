@@ -26,10 +26,9 @@ namespace gfx
     extern void instantrayhit(const vec &from, const vec &to, const vec &muzzle, int atk);
     extern void shootgfx(const vec &from, const vec &to, gameent *d, int atk);
     extern char *getshielddir(int armourtype, int armourval, bool hud = false, bool preload = false);
+    extern void addColorBlindnessFilter();
 
-    extern int zoomfov, zoom, crosshairsize, weapposside, weapposup, forcecampos;
-
-    extern int nbfps;
+    extern int zoomfov, zoom, crosshairsize, weapposside, weapposup, forcecampos, cbfilter, nbfps;
 }
 
 #endif

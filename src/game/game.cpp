@@ -619,7 +619,7 @@ namespace game
             d->boostmillis[B_SHROOMS] = 0;
             d->attacking = ACT_IDLE;
             gfx::resetpostfx();
-            if(!cbcompensation) addpostfx("deathscreen", 1, 1, 1, 1, vec4(1, 1, 1, 1));
+            if(!gfx::cbfilter) addpostfx("deathscreen", 1, 1, 1, 1, vec4(1, 1, 1, 1));
             d->roll = 0;
             playSound(S_DIE_P1, NULL, 0, 0, SND_FIXEDPITCH);
             if(m_tutorial) execute("deathReset");

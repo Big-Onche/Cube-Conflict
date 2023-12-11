@@ -310,7 +310,7 @@ namespace game
         else
         {
             if(haspowerarmor(d)) mdlname = d->team==player1->team && validteam(team) ? "smileys/armureassistee" : "smileys/armureassistee/red";
-            else mdlname =  d->abilitymillis[ABILITY_2] && d->aptitude==APT_PHYSICIEN ? "smileys/phy_2" : cbcompensation && d->team==player1->team ? mdl.cbmodel : mdl.model[validteam(team) && d->team==player1->team ? 1 : 0];
+            else mdlname =  d->abilitymillis[ABILITY_2] && d->aptitude==APT_PHYSICIEN ? "smileys/phy_2" : gfx::cbfilter && d->team==player1->team ? mdl.cbmodel : mdl.model[validteam(team) && d->team==player1->team ? 1 : 0];
         }
 
         if(intermission && incrementWinsStat && (validteam(team) ? bestteams.htfind(player1->team)>=0 : bestplayers.find(player1)>=0))

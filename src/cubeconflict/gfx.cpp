@@ -18,12 +18,11 @@ void setcbfilter(int i)
     }
 }
 
-VARFP(cbcompensation, 0, 0, 4, if(!islaunching) setcbfilter(cbcompensation));
-
 namespace gfx
 {
     VAR(forcecampos, -1, -1, 1000);
     VAR(zoom, -1, 0, 1);
+    VARFP(cbfilter, 0, 0, 4, if(!islaunching) setcbfilter(cbfilter));
 
     int weapposside, weapposup, nbfps = 60;
     int zoomfov = 50;
@@ -319,17 +318,17 @@ namespace gfx
         }
     }
 
+    void addColorBlindnessFilter()
+    {
+        defformatstring(s, "%s", cbfilter==1 ? "protanopia" : cbfilter==2 ? "deuteranopia" : cbfilter==3 ? "tritanopia" : "achromatopsia");
+        addpostfx(s, 1, 1, 1, 1, vec4(1, 1, 1, 1));
+    }
+
     void resetpostfx()
     {
         clearpostfx();
         addpostfx("mainfilter", 1, 1, 1, 1, vec4(1, 1, 1, 1));
-        switch(cbcompensation)
-        {
-            case 1: addpostfx("protanopia", 1, 1, 1, 1, vec4(1, 1, 1, 1)); break;
-            case 2: addpostfx("deuteranopia", 1, 1, 1, 1, vec4(1, 1, 1, 1)); break;
-            case 3: addpostfx("tritanopia", 1, 1, 1, 1, vec4(1, 1, 1, 1)); break;
-            case 4: addpostfx("achromatopsia", 1, 1, 1, 1, vec4(1, 1, 1, 1));
-        }
+        if(cbfilter) addColorBlindnessFilter();
         fullbrightmodels = 0;
         setShroomsEfx(false);
     }
