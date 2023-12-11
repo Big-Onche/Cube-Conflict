@@ -1889,7 +1889,7 @@ namespace game
                 entities::setspawn(i, true);
                 ai::itemspawned(i);
                 bool superweap = entities::ents[i]->type==I_SUPERARME;
-                playSound(superweap ? S_ALARME : S_ITEMSPAWN, &entities::ents[i]->o, superweap ? 2000 : 250, 50, superweap ? SND_FIXEDPITCH : NULL);
+                playSound(superweap ? S_ALARME : S_ITEMSPAWN, &entities::ents[i]->o, superweap ? 2000 : 250, 50, superweap ? SND_FIXEDPITCH|SND_NOOCCLUSION : NULL);
                 break;
             }
 
