@@ -317,7 +317,7 @@ bool applyUnderwaterFilter(int flags)
     if(lookupmaterial(camera1->o)==MAT_WATER || lookupmaterial(camera1->o)==MAT_LAVA)
     {
         muteReverb();
-        return !(flags & SND_UI);
+        return true;
     }
     else muteReverb(false);
     return false;
@@ -632,12 +632,15 @@ void setShroomsEfx(bool enable)
     else applyReverbPreset(auxEffectReverb, EFX_REVERB_PRESET_GENERIC);
 }
 
-ICOMMAND(playSound, "si", (char *soundName, bool fixedPitch),
+ICOMMAND(playSound, "sii", (char *soundName, bool fixedPitch, bool uiSound),
     loopi(NUMSNDS)
     {
         if(!strcasecmp(soundName, gameSounds[i].soundPath))
         {
-            playSound(i, NULL, 0, 0, fixedPitch ? SND_FIXEDPITCH : NULL);
+            int flags = 0;
+            if(fixedPitch) flags |= SND_FIXEDPITCH;
+            if(uiSound) flags |= SND_UI;
+            playSound(i, NULL, 0, 0, flags);
             return;
         }
     }

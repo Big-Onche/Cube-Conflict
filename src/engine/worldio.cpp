@@ -907,7 +907,6 @@ bool load_world(const char *mname, const char *cname)        // still supports a
 
     startmap(cname ? cname : mname);
     stopMusic(language == 2 ? S_MAINMENURU : S_MAINMENU);
-    muteReverb(false);
     if(hasvsync) {vsync = 1; restorevsync();}
     addpostfx("mainfilter", 1, 1, 1, 1, vec4(1, 1, 1, 1));
     if(gfx::cbfilter) gfx::addColorBlindnessFilter();

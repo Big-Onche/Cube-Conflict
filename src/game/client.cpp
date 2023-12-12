@@ -1401,14 +1401,12 @@ namespace game
                 {
                     conoutf(a ? readstr("Console_Game_PausedByAdmin") : readstr("Console_Game_Paused"));
                     stopAllSounds(true);
-                    muteReverb();
                     playMusic(S_PAUSE);
                 }
                 else
                 {
                     conoutf(a ? readstr("Console_Game_ResumedByAdmin") : readstr("Console_Game_Resumed"));
                     stopMusic(S_PAUSE);
-                    muteReverb(false);
                     resumeAllSounds();
                 }
                 break;
