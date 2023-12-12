@@ -742,8 +742,8 @@ namespace server
 
     const char *modename(int n, const char *unknown)
     {
-        defformatstring(mutator, gamemode - STARTGAMEMODE > 2 ? " (%s)" : "", readstr(gamemodes[gamemode - STARTGAMEMODE].mutatorId));
-        return tempformatstring("%s%s", readstr(gamemodes[gamemode - STARTGAMEMODE].modeId), mutator);
+        defformatstring(mutator, n - STARTGAMEMODE > 2 ? " (%s)" : "", readstr(gamemodes[n - STARTGAMEMODE].mutatorId));
+        return tempformatstring("%s%s", readstr(gamemodes[n - STARTGAMEMODE].modeId), mutator);
         return unknown;
     }
 
