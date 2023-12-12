@@ -1598,7 +1598,7 @@ namespace server
             // no overflow check
             case 4: return type;
         }
-        if(ci && ++ci->overflow >= 300) return -2;
+        if(ci && ++ci->overflow >= 200) return -2;
         return type;
     }
 
@@ -1760,9 +1760,9 @@ namespace server
     {
         if(clients.empty() || (!hasnonlocalclients() && !demorecord)) return false;
         enet_uint32 curtime = enet_time_get()-lastsend;
-        if(curtime<40 && !force) return false;
+        if(curtime<33 && !force) return false;
         bool flush = buildworldstate();
-        lastsend += curtime - (curtime%40);
+        lastsend += curtime - (curtime%33);
         return flush;
     }
 

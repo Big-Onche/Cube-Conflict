@@ -280,39 +280,46 @@ void gets2c()           // get updates from the server
             break;
 
         case ENET_EVENT_TYPE_DISCONNECT:
-            if(event.data>=DISC_NUM) event.data = DISC_NONE;
-            if(event.peer==connpeer)
             {
-                conoutf(CON_ERROR, "\f3%s", readstr("Console_Connection_Impossible"));
-                abortconnect();
-            }
-            else
-            {
-                if(!discmillis || event.data)
+                if(event.data>=DISC_NUM) event.data = DISC_NONE;
+                if(event.peer==connpeer)
                 {
-                    const char *msg = readstr(disconnectreason(event.data));
-                    if(msg) conoutf(CON_ERROR, "\f3%s (%s).", readstr("Console_Connection_NetError"), msg);
-                    else conoutf(CON_ERROR, "\f3%s.", readstr("Console_Connection_NetError"));
+                    conoutf(CON_ERROR, "\f3%s", readstr("Console_Connection_Impossible"));
+                    abortconnect();
                 }
-                disconnect();
+                else
+                {
+                    if(!discmillis || event.data)
+                    {
+                        const char *msg = readstr(disconnectreason(event.data));
+                        if(msg) conoutf(CON_ERROR, "\f3%s (%s).", readstr("Console_Connection_NetError"), msg);
+                        else conoutf(CON_ERROR, "\f3%s.", readstr("Console_Connection_NetError"));
+                    }
+                    disconnect();
+                }
+
+                bool showPopUp = true;
+
+                switch(event.data)
+                {
+                    case DISC_OVERFLOW:
+                        discReason = 0;
+                        break;
+                    case DISC_SERVERSTOP:
+                        discReason = 1;
+                        break;
+                    case DISC_MSGERR:
+                    case DISC_SERVMSGERR:
+                        discReason = 2;
+                        break;
+                    case DISC_UNK:
+                        discReason = 3;
+                    default:
+                        showPopUp = false;
+                }
+                if(showPopUp) UI::showui("disconnected");
+                return;
             }
-            switch(event.data)
-            {
-                case DISC_OVERFLOW:
-                    discReason = 0;
-                    break;
-                case DISC_SERVERSTOP:
-                    discReason = 1;
-                    break;
-                case DISC_MSGERR:
-                case DISC_SERVMSGERR:
-                    discReason = 2;
-                    break;
-                default:
-                    discReason = 3;
-            }
-            UI::showui("disconnected");
-            return;
 
         default:
             break;
