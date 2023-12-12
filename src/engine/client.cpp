@@ -81,7 +81,7 @@ void connectserv(const char *servername, int serverport, const char *serverpassw
 {
     if(connpeer)
     {
-        conoutf(CON_INFO, readstr("Console_Connection_Abort"));
+        conoutf(CON_INFO, "%s", readstr("Console_Connection_Abort"));
         IS_ON_OFFICIAL_SERV = false;
         abortconnect();
     }
@@ -113,7 +113,7 @@ void connectserv(const char *servername, int serverport, const char *serverpassw
     {
         setsvar("connectname", "");
         setvar("connectport", 0);
-        conoutf(CON_INFO, readstr("Console_Connection_AttemptLan"));
+        conoutf(CON_INFO, "%s", readstr("Console_Connection_AttemptLan"));
         address.host = ENET_HOST_BROADCAST;
     }
 
@@ -165,7 +165,7 @@ void disconnect(bool async, bool cleanup, bool volontaire)
         }
         curpeer = NULL;
         discmillis = 0;
-        conoutf(CON_INFO, readstr("Console_Connection_Disconnected"));
+        conoutf(CON_INFO, "%s", readstr("Console_Connection_Disconnected"));
         IS_ON_OFFICIAL_SERV = false;
         game::gamedisconnect(cleanup);
         gfx::resetpostfx();
@@ -197,16 +197,16 @@ void trydisconnect(bool local)
     playMusic(language == 2 ? S_MAINMENURU : S_MAINMENU);
     if(connpeer)
     {
-        conoutf(CON_INFO, readstr("Console_Connection_Abort"));
+        conoutf(CON_INFO, "%s", readstr("Console_Connection_Abort"));
         abortconnect();
     }
     else if(curpeer)
     {
-        conoutf(CON_INFO, readstr("Console_Connection_DiscAttempt"));
+        conoutf(CON_INFO, "%s", readstr("Console_Connection_DiscAttempt"));
         disconnect(!discmillis, true, true);
     }
     else if(local && haslocalclients()) localdisconnect();
-    else conoutf(CON_WARN, readstr("Console_Connection_NotConnected"));
+    else conoutf(CON_WARN, "%s", readstr("Console_Connection_NotConnected"));
 }
 
 ICOMMAND(connect, "sis", (char *name, int *port, char *pw), connectserv(name, *port, pw));
@@ -249,7 +249,7 @@ void gets2c()           // get updates from the server
     if(!clienthost) return;
     if(connpeer && totalmillis/3000 > connmillis/3000)
     {
-        conoutf(CON_INFO, readstr("Console_Connection_AttemptWait"));
+        conoutf(CON_INFO, "%s", readstr("Console_Connection_AttemptWait"));
         connmillis = totalmillis;
         ++connattempts;
         if(connattempts > 3)
@@ -267,14 +267,14 @@ void gets2c()           // get updates from the server
             localdisconnect(false);
             curpeer = connpeer;
             connpeer = NULL;
-            conoutf(CON_INFO, readstr("Console_Connection_Success"));
+            conoutf(CON_INFO, "%s", readstr("Console_Connection_Success"));
             throttle();
             if(rate) setrate(rate);
             game::gameconnect(true);
             break;
 
         case ENET_EVENT_TYPE_RECEIVE:
-            if(discmillis) conoutf(CON_INFO, readstr("Console_Connection_Disconnecting"));
+            if(discmillis) conoutf(CON_INFO, "%s", readstr("Console_Connection_Disconnecting"));
             else localservertoclient(event.channelID, event.packet);
             enet_packet_destroy(event.packet);
             break;

@@ -166,7 +166,7 @@ namespace game
     void switchname(const char *name)
     {
         filtertext(player1->name, name, false, false, MAXNAMELEN);
-        if(!player1->name[0]) formatstring(player1->name, readstr("Misc_BadUsername"));
+        if(!player1->name[0]) formatstring(player1->name, "%s", readstr("Misc_BadUsername"));
         addmsg(N_SWITCHNAME, "rs", player1->name);
     }
     void printname()
@@ -190,7 +190,7 @@ namespace game
     }
     void printteam()
     {
-        if((player1->clientnum >= 0 && !m_teammode) || !validteam(player1->team)) conoutf(readstr("Console_User_NoTeam"));
+        if((player1->clientnum >= 0 && !m_teammode) || !validteam(player1->team)) conoutf("%s", readstr("Console_User_NoTeam"));
         else conoutf("%s \fs%s%s\fr", readstr("Console_User_YourTeamIs"), teamtextcode[player1->team], readstr("Team_Names", player1->team));
     }
     ICOMMAND(team, "sN", (char *s, int *numargs),
@@ -301,7 +301,7 @@ namespace game
         else if(m_dmsp) return false;
         if(isconnected() && multiplayer(false) && !m_edit)
         {
-            conoutf(CON_ERROR, readstr("Console_Server_EditModeRequired"));
+            conoutf(CON_ERROR, "%s", readstr("Console_Server_EditModeRequired"));
             return false;
         }
         return execidentbool("allowedittoggle", true);
@@ -1399,13 +1399,13 @@ namespace game
                 }
                 if(val)
                 {
-                    conoutf(a ? readstr("Console_Game_PausedByAdmin") : readstr("Console_Game_Paused"));
+                    conoutf("%s", a ? readstr("Console_Game_PausedByAdmin") : readstr("Console_Game_Paused"));
                     stopAllSounds(true);
                     playMusic(S_PAUSE);
                 }
                 else
                 {
-                    conoutf(a ? readstr("Console_Game_ResumedByAdmin") : readstr("Console_Game_Resumed"));
+                    conoutf("%s", a ? readstr("Console_Game_ResumedByAdmin") : readstr("Console_Game_Resumed"));
                     stopMusic(S_PAUSE);
                     resumeAllSounds();
                 }

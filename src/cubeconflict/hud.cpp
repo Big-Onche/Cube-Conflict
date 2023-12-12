@@ -90,7 +90,7 @@ namespace game
                 if(colortimer>1000) colortimer = 0;
                 if(colortimer > 500) formatstring(col, "\fc");
             }
-            if(intermission) formatstring(s, readstr("Hud_End"));
+            if(intermission) formatstring(s, "%s", readstr("Hud_End"));
             else formatstring(s, "%s%d:%02d", col, secs/60, secs%60);
         }
         result(s);
