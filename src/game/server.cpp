@@ -2812,7 +2812,7 @@ namespace server
         {
             clientinfo *ci = clients[i];
             if(ci->state.state==CS_SPECTATOR || ci->state.aitype != AI_NONE || ci->clientmap[0] || ci->mapcrc >= 0 || (req < 0 && ci->warned)) continue;
-            formatstring(msg, "%s %s", readstr("Console_Server_ModifiedMap"), colorname(ci));
+            formatstring(msg, "%s %s", colorname(ci), readstr("Console_Server_ModifiedMap"));
             sendf(req, 1, "ris", N_SERVMSG, msg);
             if(req < 0) ci->warned = true;
         }
@@ -2823,7 +2823,7 @@ namespace server
             {
                 clientinfo *ci = clients[j];
                 if(ci->state.state==CS_SPECTATOR || ci->state.aitype != AI_NONE || !ci->clientmap[0] || ci->mapcrc != info.crc || (req < 0 && ci->warned)) continue;
-                formatstring(msg, "%s %s", readstr("Console_Server_ModifiedMap"), colorname(ci));
+                formatstring(msg, "%s %s", colorname(ci), readstr("Console_Server_ModifiedMap"));
                 sendf(req, 1, "ris", N_SERVMSG, msg);
                 if(req < 0) ci->warned = true;
             }
