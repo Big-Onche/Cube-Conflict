@@ -2031,8 +2031,6 @@ namespace server
     VARP(servrandommode, 0, 0, 1);
     VARP(servforcemode, -1, 0, 18);
 
-    VARP(gameintro, 0, 1, 1);
-
     void changemap(const char *s, int mode)
     {
         stopdemo();
@@ -2041,7 +2039,7 @@ namespace server
         if(smode) smode->cleanup();
         gamemode = mode;
         gamemillis = 0;
-        gamelimit = gamelength*60000+(gameintro ? 10000 : 0);
+        gamelimit = gamelength*60000;
         interm = 0;
         nextexceeded = 0;
         copystring(smapname, s);
