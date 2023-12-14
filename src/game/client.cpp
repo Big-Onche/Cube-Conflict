@@ -295,13 +295,13 @@ namespace game
         f->printf("name %s\n", escapestring(player1->name));
     }
 
-    bool allowedittoggle()
+    bool allowedittoggle(bool msg)
     {
         if(editmode) return true;
         else if(m_dmsp) return false;
         if(isconnected() && multiplayer(false) && !m_edit)
         {
-            conoutf(CON_ERROR, "%s", readstr("Console_Server_EditModeRequired"));
+            if(msg) conoutf(CON_ERROR, "%s", readstr("Console_Server_EditModeRequired"));
             return false;
         }
         return execidentbool("allowedittoggle", true);

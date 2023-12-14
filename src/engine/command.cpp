@@ -780,7 +780,7 @@ void setvarchecked(ident *id, int val)
 {
     if(id->flags&IDF_READONLY) debugcode("variable %s is read-only", id->name);
 #ifndef STANDALONE
-    else if(!(id->flags&IDF_OVERRIDE) || identflags&IDF_OVERRIDDEN || game::allowedittoggle())
+    else if(!(id->flags&IDF_OVERRIDE) || identflags&IDF_OVERRIDDEN || game::allowedittoggle(false))
 #else
     else
 #endif
@@ -819,7 +819,7 @@ void setfvarchecked(ident *id, float val)
 {
     if(id->flags&IDF_READONLY) debugcode("variable %s is read-only", id->name);
 #ifndef STANDALONE
-    else if(!(id->flags&IDF_OVERRIDE) || identflags&IDF_OVERRIDDEN || game::allowedittoggle())
+    else if(!(id->flags&IDF_OVERRIDE) || identflags&IDF_OVERRIDDEN || game::allowedittoggle(false))
 #else
     else
 #endif
@@ -838,7 +838,7 @@ void setsvarchecked(ident *id, const char *val)
 {
     if(id->flags&IDF_READONLY) debugcode("variable %s is read-only", id->name);
 #ifndef STANDALONE
-    else if(!(id->flags&IDF_OVERRIDE) || identflags&IDF_OVERRIDDEN || game::allowedittoggle())
+    else if(!(id->flags&IDF_OVERRIDE) || identflags&IDF_OVERRIDDEN || game::allowedittoggle(false))
 #else
     else
 #endif
