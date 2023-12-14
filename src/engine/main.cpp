@@ -215,8 +215,8 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
         if(mapname)
         {
             execfile(tempformatstring("media/map/%s.cfg", mapname));
-            const char *name = getalias(tempformatstring("maptitle_%s", readstr("languages", language)));
-            defformatstring(mapprettyname, name);
+            //const char *name = ;
+            defformatstring(mapprettyname, "%s", getalias(tempformatstring("maptitle_%s", readstr("languages", language))));
             int tw = text_width(mapprettyname);
             float tsz = 0.04f*min(screenw, screenh)/70,
                   tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*8.0f*min(screenw, screenh) - 70*tsz;
