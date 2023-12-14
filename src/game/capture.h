@@ -571,12 +571,12 @@ struct captureclientmode : clientmode
             if(!b.name[0])
             {
                 conoutf(CON_GAMEINFO, "%s %s %s \"\fe%d\f7\".", readstr("Misc_Team"), teamcolor(b.owner), readstr("Console_Game_Capture_Lost"), b.tag);
-                if(b.owner==hudplayer()->team) conoutf(CON_HUDCONSOLE, "\f3%s \"\fe%d\f3\".", readstr("Console_Game_Capture_WeLost"), b.tag);
+                if(b.owner==hudplayer()->team) conoutf(CON_HUDCONSOLE, "\fc%s \"\fe%d\f3\".", readstr("Console_Game_Capture_WeLost"), b.tag);
             }
             else
             {
                 conoutf(CON_GAMEINFO, "%s %s %s \"\fe%s\f7\".", readstr("Misc_Team"), teamcolor(b.owner), readstr("Console_Game_Capture_Lost"), b.name);
-                if(b.owner==hudplayer()->team) conoutf(CON_HUDCONSOLE, "\f3%s \"\fe%s\f3\".", readstr("Console_Game_Capture_WeLost"), b.name);
+                if(b.owner==hudplayer()->team) conoutf(CON_HUDCONSOLE, "\fc%s \"\fe%s\f3\".", readstr("Console_Game_Capture_WeLost"), b.name);
             }
             playSound(owner==hudplayer()->team ? S_TERMINAL_LOST : S_TERMINAL_LOST_E, &b.o, 2500, 200, SND_FIXEDPITCH);
         }
