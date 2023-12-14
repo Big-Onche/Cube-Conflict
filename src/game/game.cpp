@@ -718,7 +718,7 @@ namespace game
             {
                 playSound(S_KILL, NULL, 0, 0, SND_FIXEDPITCH|SND_UI);
                 defformatstring(victimname, "%s", dname);
-                conoutf(CON_HUDCONSOLE, "%s \fc%s \f7! \f4(%.1fm)", readstr("GameMessage_YouKilled"), victimname, killdistance);
+                conoutf(CON_HUDCONSOLE, "%s \fc%s%s\f7! \f4(%.1fm)", readstr("GameMessage_YouKilled"), victimname, readstr("Misc_PrePuncSpace"), killdistance);
                 conoutf(contype, "\fd%s\f7 > \fl%s\f7 > %s \fl(%.1fm)", player1->name, readstr(guns[atk].ident), victimname, killdistance);
 
                 if(IS_ON_OFFICIAL_SERV) // now let's check for shittons of achievements if playing online
