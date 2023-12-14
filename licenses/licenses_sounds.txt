@@ -28,6 +28,7 @@ Files :	media/sounds/mapsounds/indoor_1.wav 				license_certificate_R3FY29ABTJ (
 	media/sounds/mapsounds/ufo.wav 					license_certificate_2UYCTV5PRW (ufo.wav).txt
 	media/sounds/mapsounds/seagulls.wav 				license_certificate_E4U3BSCKXH (seagulls.wav).txt
 	media/sounds/mapsounds/waterwaves.wav 				license_certificate_GNEYCPD97J (waterwaves.wav).txt
+	media/sounds/mapsounds/fountain.wav				license_certificate_ZRPEAK8CBG (fountain.wav).txt
 	media/sounds/ent_player/jump_basic_1.wav			license_certificates (jump_basic_X).txt
 	media/sounds/ent_player/jump_basic_2.wav
 	media/sounds/ent_player/jump_basic_3.wav

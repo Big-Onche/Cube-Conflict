@@ -4,9 +4,10 @@ The following files are protected by Envato Elements license, you CANNOT use the
 Les fichiers suivants sont protégés par licence Envato Elements vous ne POUVEZ PAS les utiliser pour vos projets personnels à moins d'acheter les sons.
 
 See "licenses_certificates" folder for every licences / Voir dossier "licenses_certificates" pour chaque licences.
-Files :	media/songs/launcher.mp3 	license_certificate_7XNJRLTEZ8 (launcher.mp3).txt
+Files :	media/songs/launcher.mp3 		license_certificate_7XNJRLTEZ8 (launcher.mp3).txt
 	media/songs/menu.flac 			license_certificate_D4LANQ5B3V (menu.flac).txt
-	media/songs/premission.flac 	license_certificate_LRNY9GTZ4K (premission.flac).txt
+	media/songs/menu_ru.flac		license_certificate_Q8M3GRZS2A (menu_ru.flac).txt
+	media/songs/premission.flac 		license_certificate_LRNY9GTZ4K (premission.flac).txt
 	media/songs/pause.flac 			license_certificate_BJ9VEKD8ZW (pause.flac).txt
 	media/songs/tutorial.flac 		license_certificate_ZKMUR95SEL (tutorial.flac).txt
 	media/songs/village.flac 		license_certificate_6349XQ8FBL (village.flac).txt
