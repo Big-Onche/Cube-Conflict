@@ -721,7 +721,7 @@ namespace game
                 conoutf(CON_HUDCONSOLE, "%s \fc%s%s\f7! \f4(%.1fm)", readstr("GameMessage_YouKilled"), victimname, readstr("Misc_PrePuncSpace"), killdistance);
                 conoutf(contype, "\fd%s\f7 > \fl%s\f7 > %s \fl(%.1fm)", player1->name, readstr(guns[atk].ident), victimname, killdistance);
 
-                if(IS_ON_OFFICIAL_SERV) // now let's check for shittons of achievements if playing online
+                if(IS_ON_OFFICIAL_SERV && !isteam(player1, d)) // now let's check for shittons of achievements if playing online
                 {
                     if(killdistance>=100.f) unlockAchievement(ACH_BEAUTIR);
                     else if(killdistance<1.f && atk==ATK_MOSSBERG_SHOOT) unlockAchievement(ACH_TAKETHAT);
