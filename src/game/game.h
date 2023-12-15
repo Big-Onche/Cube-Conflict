@@ -1059,6 +1059,8 @@ namespace game
     extern void showscores(bool on);
     extern void getbestplayers(vector<gameent *> &best);
     extern void getbestteams(vector<int> &best);
+    extern vector<gameent *> bestplayers;
+    extern vector<int> bestteams;
     extern void clearteaminfo();
     extern void setteaminfo(int team, int frags);
     extern void removegroupedplayer(gameent *d);

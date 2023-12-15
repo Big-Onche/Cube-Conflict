@@ -5,9 +5,6 @@
 
 namespace game
 {
-    vector<gameent *> bestplayers;
-    vector<int> bestteams;
-
     VARP(ragdoll, 0, 1, 1);
     VARP(ragdollmillis, 0, 10000, 300000);
     VARP(ragdollfade, 0, 500, 5000);
@@ -313,13 +310,6 @@ namespace game
             else mdlname =  d->abilitymillis[ABILITY_2] && d->aptitude==APT_PHYSICIEN ? "smileys/phy_2" : gfx::cbfilter && d->team==player1->team ? mdl.cbmodel : mdl.model[validteam(team) && d->team==player1->team ? 1 : 0];
         }
 
-        if(intermission && incrementWinsStat && (validteam(team) ? bestteams.htfind(player1->team)>=0 : bestplayers.find(player1)>=0))
-        {
-            unlockAchievement(ACH_WINNER);
-            updateStat(1, STAT_WINS);
-            incrementWinsStat = false;
-        }
-
         if(d->state==CS_DEAD && d->lastpain)
         {
             flags |= MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY;
@@ -486,14 +476,6 @@ namespace game
     {
         ai::render();
 
-        if(intermission)
-        {
-            bestteams.shrink(0);
-            bestplayers.shrink(0);
-            if(m_teammode) getbestteams(bestteams);
-            else getbestplayers(bestplayers);
-        }
-
         bool third = isthirdperson();
         gameent *f = followingplayer(), *exclude = third ? NULL : f;
         loopv(players)
@@ -513,7 +495,7 @@ namespace game
                 vec pos = d->abovehead();
                 float up = 5 + d->o.dist(camera1->o)/40.f + (((totalmillis - d->lastcurdamage) / 50.f) / (d->o.dist(camera1->o) <= 160 ? 160.f - d->o.dist(camera1->o) : 1)); // particle going up effect
                 float t = clamp(d->o.dist(camera1->o), 0.f, 160.f) / 160.f;
-                pos.z += up - (15 * (1 - t));
+                if(!ispaused()) pos.z += up - (15 * (1 - t));
                 particle_textcopy(pos, tempformatstring("%d", d->curdamage), PART_TEXT, 1, d->curdamagecolor, gfx::zoom ? huddamagesize*(guns[player1->gunselect].maxzoomfov)/100.f : huddamagesize, 0, true);
             }
 

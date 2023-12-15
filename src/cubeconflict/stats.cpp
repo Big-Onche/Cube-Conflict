@@ -43,7 +43,6 @@ ICOMMAND(hudlevelprogress, "", (), floatret(fabs(progress)));
 
 //////////////////////////////////////////////player stats////////////////////////////////////////////
 int stat[NUMSTATS];
-bool incrementWinsStat = true;
 
 void addReward(int xp, int cc) // add xp and cc (cisla coins)
 {

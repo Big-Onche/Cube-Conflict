@@ -789,6 +789,13 @@ namespace game
         ai::killed(d, actor);
     }
 
+    vector<gameent *> bestplayers;
+    vector<int> bestteams;
+
+    VAR(hasnewdamagerecord, 0, 0, 1);
+    VAR(isthebestplayer, 0, 0, 1);
+    VAR(hasthebestteam, 0, 0, 1);
+
     void timeupdate(int secs)
     {
         server::timeupdate(secs);
@@ -804,22 +811,57 @@ namespace game
             int accuracy = (player1->totaldamage*100)/max(player1->totalshots, 1);
             if(m_sp) spsummary(accuracy);
 
+            conoutf(CON_GAMEINFO, "\fa%s", readstr("Announcement_GameOver"));
+
             if(player1->frags>=10)
             {
                 if(accuracy>=50) unlockAchievement(ACH_PRECIS);
                 if(player1->deaths<=5) unlockAchievement(ACH_INCREVABLE);
                 if(player1->frags>=30) unlockAchievement(ACH_KILLER);
             }
+
             if(player1->totaldamage/10 > 10000) unlockAchievement(ACH_DESTRUCTEUR);
 
-            defformatstring(flags, "%d", player1->flags);
+            if(stat[STAT_DAMMAGERECORD] < player1->totaldamage/10)
+            {
+                updateStat(player1->totaldamage/10, STAT_DAMMAGERECORD, true);
+                addReward(30, 15);
+                hasnewdamagerecord = true;
+            }
+            else hasnewdamagerecord = false;
 
-            conoutf(CON_HUDCONSOLE, "\fa%s", readstr("Announcement_GameOver"));
-            /*
-            if(GAME_LANG) conoutf(CON_GAMEINFO, "\f2Kills : %d | Deaths : %d | Total damage : %d | Accuracy : %d%% %s %s", player1->frags, player1->deaths, player1->totaldamage/10, accuracy, m_ctf ? "| Flags :" : "", m_ctf ? flags : "");
-            else conoutf(CON_GAMEINFO, "\f2Éliminations : %d | Morts : %d | Dégats infligés : %d | Précision : %d%% %s %s", player1->frags, player1->deaths, player1->totaldamage/10, accuracy, m_ctf ? "| Drapeaux :" : "", m_ctf ? flags : "");
-            */
-            if(stat[STAT_DAMMAGERECORD] < player1->totaldamage/10) updateStat(player1->totaldamage/10, STAT_DAMMAGERECORD, true);
+            if(player1->deaths <= player1->frags) addReward(40, 20);
+            if(bestplayers.find(player1) >= 0) addReward(100, 50);
+
+            bestteams.shrink(0);
+            bestplayers.shrink(0);
+
+            if(m_teammode)
+            {
+                getbestteams(bestteams);
+                if(bestteams.htfind(player1->team) >= 0)
+                {
+                    hasthebestteam = true;
+                    addReward(50, 25);
+                }
+                else hasthebestteam = false;
+            }
+            else hasthebestteam = false;
+
+            getbestplayers(bestplayers);
+            if(bestplayers.find(player1) >= 0)
+            {
+                isthebestplayer = true;
+                addReward(100, 50);
+            }
+            else isthebestplayer = false;
+
+            if(isthebestplayer || hasthebestteam)
+            {
+                unlockAchievement(ACH_WINNER);
+                updateStat(1, STAT_WINS);
+            }
+
             showscores(true);
             disablezoom();
 
@@ -831,7 +873,7 @@ namespace game
     ICOMMAND(getflags, "", (), intret(player1->flags));
     ICOMMAND(getdeaths, "", (), intret(player1->deaths));
     ICOMMAND(getaccuracy, "", (), intret((player1->totaldamage*100)/max(player1->totalshots, 1)));
-    ICOMMAND(gettotaldamage, "", (), intret(player1->totaldamage));
+    ICOMMAND(gettotaldamage, "", (), intret(player1->totaldamage/10));
     ICOMMAND(gettotalshots, "", (), intret(player1->totalshots));
 
     vector<gameent *> clients;

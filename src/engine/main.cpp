@@ -1160,6 +1160,7 @@ bool initsteam()
 //int newlang = -1;
 bool IS_USING_STEAM = false;
 bool IS_ON_OFFICIAL_SERV = false;
+ICOMMAND(isonofficialserver, "", (), intret(IS_ON_OFFICIAL_SERV));
 
 int main(int argc, char **argv)
 {

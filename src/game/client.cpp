@@ -1473,7 +1473,6 @@ namespace game
                 if(getint(p)) entities::spawnitems();
                 else senditemstoserver = false;
                 ai::loadwaypoints();
-                incrementWinsStat = true;
                 //execute("premission");
                 //playMusic(S_PREMISSION);
                 gfx::resetpostfx();

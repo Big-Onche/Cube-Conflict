@@ -5,7 +5,6 @@
 #include "isteamuserstats.h"
 
 extern int xpForNextLevel, totalXpNeeded;
-extern bool incrementWinsStat;
 
 extern void loadSave();
 extern void writeSave();
