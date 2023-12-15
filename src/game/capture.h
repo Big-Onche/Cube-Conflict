@@ -856,7 +856,7 @@ ICOMMAND(hudbasesstats, "i", (int *team),
 
             if(ci->state.state==CS_ALIVE && (ci->team==1 || ci->team==2) && insidebase(b, ci->state.o, ci->state.state==CS_ALIVE))
             {
-                b.owner==ci->team ? ci->state.flags++ : ci->state.flags+=2;
+                if(b.owner!=ci->team) ci->state.flags+=1;
                 sendf(-1, 1, "ri3", N_SCOREBASE, ci->clientnum, ci->state.flags);
             }
         }
