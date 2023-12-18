@@ -1,4 +1,6 @@
 # How to play on Linux?
+The provided binaries are compiled with GLIBC 2.27, ensuring compatibility with most distributions released after February 2018.
+If you are on an older system, you may need to compile the binaries yourself to run the game.
 
 Please run "native_client" from the root Cube Conflict dir (NOT from inside the "bin_unix"
 directory) to launch it, or set the CC_DATA variable at the top of the "ccunix.sh" 
@@ -30,6 +32,8 @@ to run the game if you want to play too!
 
 
 # Comment jouer sur Linux?
+Les binaires fournis sont compilés avec GLIBC 2.27, garantissant la compatibilité avec la plupart des distributions publiées après février 2018.
+Si vous utilisez un système plus ancien, vous devrez peut-être compiler les binaires vous-même pour exécuter le jeu.
 
 Veuillez à lancer "native_client" à partir du dossier principal Cube Conflict (pas depuis le dossier
 "bin_unix"), ou définissez la variable CC_DATA dans la première ligne du script "ccunix.sh" 
