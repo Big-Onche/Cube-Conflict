@@ -754,6 +754,7 @@ namespace game
 
             case ATK_KAMIKAZE_SHOOT:
             case ATK_ASSISTXPL_SHOOT:
+                playSound(atk==ATK_KAMIKAZE_SHOOT ? S_EXPL_KAMIKAZE : S_EXPL_PARMOR, &soundloc, 400, 150);
                 if(camera1->o.dist(v) >= 300) playSound(S_BIGEXPL_FAR, &soundloc, 2000, 400);
                 if((lookupmaterial(v)==MAT_WATER)) playSound(S_EXPL_INWATER, &v, 300, 100);
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);

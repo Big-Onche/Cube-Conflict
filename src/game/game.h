@@ -407,9 +407,9 @@ static const struct attackinfo { int gun, action, picksound, sound, middistsnd, 
     { GUN_CACMASTER,    ACT_SHOOT, S_WPLOADSWORD,     S_MASTERSWORD,  -1, -1,   5, 600,   430, 1, 1, 20, 0,  -8,  26,  1,  30,  0, 0, 0},
     { GUN_CACFLEAU,     ACT_SHOOT, S_WPLOADCHAINS,    S_FLAIL,        -1, -1,   4, 1150,  750, 1, 1, 10, 0, -10,  32,  1, 125,  0, 0, 0},
     // Armes spéciales
-    { GUN_KAMIKAZE,     ACT_SHOOT, S_WPLOADFASTWOOSH, S_EXPL_KAMIKAZE, S_EXPL_FAR, S_EXPL_FAR,   1, 1000, 3000, 1, 1,  0, 1,  10, 120,  1, 250, 500, 5, 1},
-    { GUN_ASSISTXPL,    ACT_SHOOT, -1,                S_EXPL_PARMOR,   S_EXPL_FAR, S_EXPL_FAR,   1,  220, 2000, 1, 1,  0, 1,  10,  50,  1, 100, 350, 5, 1},
-    { GUN_CACNINJA,     ACT_SHOOT, S_WPLOADSWORD,     S_NINJASABER,            -1,         -1,   8,  400,  800, 1, 1, 30, 0, -10,  36,  1,  25,   0, 0, 0},
+    { GUN_KAMIKAZE,     ACT_SHOOT, S_WPLOADFASTWOOSH, -1,           S_EXPL_FAR, S_EXPL_FAR,   1, 1000, 3000, 1, 1,  0, 1,  10, 120,  1, 250, 500, 5, 1},
+    { GUN_ASSISTXPL,    ACT_SHOOT, -1,                -1,           S_EXPL_FAR, S_EXPL_FAR,   1,  220, 2000, 1, 1,  0, 1,  10,  50,  1, 100, 350, 5, 1},
+    { GUN_CACNINJA,     ACT_SHOOT, S_WPLOADSWORD,     S_NINJASABER, -1,         -1,           8,  400,  800, 1, 1, 30, 0, -10,  36,  1,  25,   0, 0, 0},
 };
 
 static const struct guninfo { const char *ident, *file, *vwep; int maxweapposside, maxweapposup, maxzoomfov, hudrange, attacks[NUMACTS]; } guns[NUMGUNS] =
