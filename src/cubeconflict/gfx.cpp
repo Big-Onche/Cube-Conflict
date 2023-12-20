@@ -53,21 +53,21 @@ namespace gfx
         {
             case ATK_PULSE_SHOOT:
             {
-                particle_splash(PART_FIRESPARK, 15, 150, v, hasroids(owner) ? 0xFF0000 : 0xFF6600, 1.f, 150, 500, 2, champicolor());
+                if(lookupmaterial(v)!=MAT_WATER) particle_splash(PART_FIRESPARK, 15, 150, v, hasroids(owner) ? 0xFF0000 : 0xFF6600, 1.f, 150, 500, 2, champicolor());
                 particle_fireball(v, 9.f, PART_PLASMABURST, 300, hasroids(owner) ? 0xFF0000 : 0xCC9900, 3, champicolor());
                 adddynlight(safe ? v : lightloc, 2*attacks[atk].exprad, vec(1.5f, 0.75f, 0.0f), 150, 50, 0, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
                 return;
             }
             case ATK_GRAP1_SHOOT:
             {
-                particle_splash(PART_SPARK, 20, 100, v, hasroids(owner) ? 0xFF0000 : 0xAA4466, 0.5f, 400, 400, 0, champicolor());
+                if(lookupmaterial(v)!=MAT_WATER) particle_splash(PART_SPARK, 20, 100, v, hasroids(owner) ? 0xFF0000 : 0xAA4466, 0.5f, 400, 400, 0, champicolor());
                 loopi(2)particle_fireball(v, 7.f, PART_EXPLOSION, 200, hasroids(owner) ? 0xFF0000 : 0x550055, 1.f, champicolor());
                 adddynlight(safe ? v : lightloc, 2*attacks[atk].exprad, vec(1.5f, 0.0f, 1.5f), 200, 100, L_NODYNSHADOW, attacks[atk].exprad/2, vec(0.5f, 0.0f, 0.5f));
                 return;
             }
             case ATK_SPOCKGUN_SHOOT:
             {
-                particle_splash(PART_SPARK, 15, 100, v, hasroids(owner) ? 0xFF0000 : 0x00FF66, 0.5f, 250, 250, 0, champicolor());
+                if(lookupmaterial(v)!=MAT_WATER) particle_splash(PART_SPARK, 15, 100, v, hasroids(owner) ? 0xFF0000 : 0x00FF66, 0.5f, 250, 250, 0, champicolor());
                 adddynlight(safe ? v : lightloc, 1.25f*attacks[atk].exprad, vec(0.0f, 1.5f, 0.0f), 200, 50, 0, attacks[atk].exprad/2, vec(1.f, 1.f, 1.f));
                 return;
             }
@@ -213,7 +213,8 @@ namespace gfx
             case ATK_FAMAS_SHOOT:
             case ATK_GLOCK_SHOOT:
             case ATK_ARBALETE_SHOOT:
-                if(atk!=ATK_ARBALETE_SHOOT)particle_splash(PART_SPARK, atk==ATK_MINIGUN_SHOOT || atk==ATK_AK47_SHOOT ? 12 : 9, 50, v, hasroids(owner) ? 0xFF0000 : 0xFF8800, atk==ATK_MINIGUN_SHOOT || atk==ATK_AK47_SHOOT ? 0.3 : 0.2f, 150, 200, 0, champicolor());
+                if(lookupmaterial(v)==MAT_WATER) return;
+                if(atk!=ATK_ARBALETE_SHOOT) particle_splash(PART_SPARK, atk==ATK_MINIGUN_SHOOT || atk==ATK_AK47_SHOOT ? 12 : 9, 50, v, hasroids(owner) ? 0xFF0000 : 0xFF8800, atk==ATK_MINIGUN_SHOOT || atk==ATK_AK47_SHOOT ? 0.3 : 0.2f, 150, 200, 0, champicolor());
                 particle_splash(PART_SMOKE, 3, 600+rnd(300), v, 0x565656, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.35f : 0.3f, 25, 300, 2, champicolor());
                 particle_splash(PART_SMOKE, 6, 350+rnd(300), v, 0x552900, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.35f : 0.3f, 15, 300, 2, champicolor());
                 return;
@@ -221,6 +222,7 @@ namespace gfx
             case ATK_SV98_SHOOT:
             case ATK_SKS_SHOOT:
             case ATK_GAU8_SHOOT:
+                if(lookupmaterial(v)==MAT_WATER) return;
                 particle_splash(PART_SPARK, 12, 80, v, hasroids(owner) ? 0xFF0000 : 0xFF5533, 0.6f,  400, 250, 0, champicolor());
                 particle_splash(PART_SMOKE,  4, 800+rnd(300), v, 0x414141, 0.4f, 25, 300, 2, champicolor());
                 particle_splash(PART_SMOKE,  4, 500+rnd(300), v, 0x442200, 0.4f, 15, 300, 2, champicolor());
@@ -231,12 +233,11 @@ namespace gfx
     void instantrayhit(const vec &from, const vec &to, const vec &muzzle, int atk) //particles and light effects on impact for instant projectiles
     {
         vec dir = vec(from).sub(to).safenormalize();
-        //vec stainloc = vec(to).msub(dir, 2);
 
         switch(atk)
         {
             case ATK_RAIL_SHOOT:
-                particle_splash(PART_SPARK, 50, 150, to, 0xFF4400, 0.45f, 300, 30, 0, champicolor());
+                if(lookupmaterial(to)!=MAT_WATER) particle_splash(PART_SPARK, 50, 150, to, 0xFF4400, 0.45f, 300, 30, 0, champicolor());
                 addstain(STAIN_ELEC_HOLE, to, dir, 3.5f);
                 addstain(STAIN_ELEC_GLOW, to, dir, 1.5f, 0xFF2200);
                 addstain(STAIN_ELEC_GLOW, to, dir, 2.5f, 0xFF8800);
