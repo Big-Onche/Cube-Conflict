@@ -48,7 +48,7 @@ namespace ai
 
     float attackmindist(int atk)
     {
-        return atk==ATK_KAMIKAZE_SHOOT || atk==ATK_NUKE_SHOOT ? true : max(int(attacks[atk].exprad/4), 2);
+        return atk==ATK_KAMIKAZE_SHOOT || atk==ATK_NUKE_SHOOT ? 0 : max(int(attacks[atk].exprad/4), 2);
     }
 
     float attackmaxdist(int atk)

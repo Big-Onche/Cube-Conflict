@@ -82,11 +82,12 @@ namespace gfx
         {
             case ATK_SMAW_SHOOT:
             case ATK_ROQUETTES_SHOOT:
-
-                particle_splash(PART_SMOKE, atk==ATK_ROQUETTES_SHOOT ? 5 : 9, 2000, v, 0x333333, 40.0f, 150+rnd(50), 300+rnd(100), 0, champicolor());
-                particle_splash(PART_SMOKE, atk==ATK_ROQUETTES_SHOOT ? 5 : 9, 1300, v, 0x333333, 25.0f, 150+rnd(50), 600+rnd(100), 0, champicolor());
-                particle_splash(PART_SPARK, atk==ATK_ROQUETTES_SHOOT ? 7 : 10, 300, v, hasroids(owner) ? 0xFF4444 : 0xFFBB55,  1.7f+rnd(2), 3500, 3500, 0, champicolor());
-                loopi(lookupmaterial(v)==MAT_WATER ? 1 : 3) particle_splash(PART_FIRE_BALL, atk==ATK_ROQUETTES_SHOOT ? 9 : 17, 80+rnd(40), v, hasroids(owner) ? 0xFF4444 : i==0 ? 0x383838 : i==1 ? 0x474747: 0x604930, 9.f+rnd(6), atk==ATK_ROQUETTES_SHOOT ? 300+rnd(150) : 400+rnd(200), 800, 20.f, champicolor());
+            {
+                miniRockets = atk == ATK_ROQUETTES_SHOOT;
+                particle_splash(PART_SMOKE, miniRockets ? 5 : 9, 2000, v, 0x333333, 40.0f, 150+rnd(50), 300+rnd(100), 0, champicolor());
+                particle_splash(PART_SMOKE, miniRockets ? 5 : 9, 1300, v, 0x333333, 25.0f, 150+rnd(50), 600+rnd(100), 0, champicolor());
+                particle_splash(PART_SPARK, miniRockets ? 7 : 10, 300, v, hasroids(owner) ? 0xFF4444 : 0xFFBB55,  1.7f+rnd(2), 3500, 3500, 0, champicolor());
+                loopi(lookupmaterial(v)==MAT_WATER ? 1 : 3) particle_splash(PART_FIRE_BALL, miniRockets ? 9 : 17, 80+rnd(40), v, hasroids(owner) ? 0xFF4444 : i==0 ? 0x383838 : i==1 ? 0x474747: 0x604930, 9.f+rnd(6), miniRockets ? 300+rnd(150) : 400+rnd(200), 800, 20.f, champicolor());
 
                 particle_fireball(v, 350, PART_SHOCKWAVE, 300, hasroids(owner) ? 0xFF0000 : 0xFFFFFF, 20.0f, champicolor());
 
@@ -102,7 +103,7 @@ namespace gfx
                     adddynlight(safe ? v : lightloc, 3*attacks[atk].exprad, vec(1.5f, 0.5f, 0.0f), 80, 40, L_VOLUMETRIC|L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(1.0f, 0.f, 0.f));
                 }
                 return;
-
+            }
             case ATK_ARTIFICE_SHOOT:
 
                 particle_splash(PART_FIRE_BALL, 5, 40, v, 0xFFC864, 5, 800, 1600, 0, champicolor());
@@ -144,12 +145,13 @@ namespace gfx
 
             case ATK_KAMIKAZE_SHOOT:
             case ATK_ASSISTXPL_SHOOT:
-
+            {
+                bool kamikaze = atk==ATK_KAMIKAZE_SHOOT;
                 loopi(9)
                 {
                     vec pos = vec(v).add(vec(rnd(35)-rnd(70), rnd(35)-rnd(70), rnd(35)-rnd(70)));
-                    particle_splash(PART_SMOKE, 4, atk==ATK_KAMIKAZE_SHOOT ? 5000 : 3000, pos, 0x333333, 60.f, 200+rnd(75), 100, 0, champicolor());
-                    particle_splash(PART_SMOKE, 3, atk==ATK_KAMIKAZE_SHOOT ? 3000 : 2000, pos, 0x151515, 40.f, 200+rnd(75), 250, 0, champicolor());
+                    particle_splash(PART_SMOKE, 4, kamikaze ? 5000 : 3000, pos, 0x333333, 60.f, 200+rnd(75), 100, 0, champicolor());
+                    particle_splash(PART_SMOKE, 3, kamikaze ? 3000 : 2000, pos, 0x151515, 40.f, 200+rnd(75), 250, 0, champicolor());
                     particle_splash(PART_SPARK, 6, 300, pos, hasroids(owner) ? 0xFF4444 : 0xFFBB55,  1.7f+rnd(2), 3500, 3500, 0, champicolor());
                     loopi(lookupmaterial(v)==MAT_WATER ? 1 : 3) particle_splash(PART_FIRE_BALL, 6, 130+rnd(50), pos, hasroids(owner) ? 0xFF4444 : i==0 ? 0x383838: i==1 ? 0x474747 : 0x6A4A3A, 9.f+rnd(6), 1200+rnd(700), 1200, 20.f, champicolor());
 
@@ -168,7 +170,7 @@ namespace gfx
                     adddynlight(safe ? v : lightloc, 4*attacks[atk].exprad, vec(1.5f, 0.5f, 0.0f), 80, 40, L_VOLUMETRIC|L_NODYNSHADOW|DL_FLASH, attacks[atk].exprad/2, vec(1.f, 0.f, 0.f));
                 }
                 return;
-
+            }
             case ATK_NUKE_SHOOT:
                 loopi(60)
                 {
@@ -213,11 +215,13 @@ namespace gfx
             case ATK_FAMAS_SHOOT:
             case ATK_GLOCK_SHOOT:
             case ATK_ARBALETE_SHOOT:
-                if(atk!=ATK_ARBALETE_SHOOT && lookupmaterial(v)!=MAT_WATER) particle_splash(PART_SPARK, atk==ATK_MINIGUN_SHOOT || atk==ATK_AK47_SHOOT ? 12 : 9, 50, v, hasroids(owner) ? 0xFF0000 : 0xFF8800, atk==ATK_MINIGUN_SHOOT || atk==ATK_AK47_SHOOT ? 0.3 : 0.2f, 150, 200, 0, champicolor());
-                particle_splash(PART_SMOKE, 3, 600+rnd(300), v, 0x565656, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.35f : 0.3f, 25, 300, 2, champicolor());
-                particle_splash(PART_SMOKE, 6, 350+rnd(300), v, 0x552900, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.35f : 0.3f, 15, 300, 2, champicolor());
+            {
+                bool bigGun = atk==ATK_MINIGUN_SHOOT || atk==ATK_AK47_SHOOT;
+                if(atk!=ATK_ARBALETE_SHOOT && lookupmaterial(v)!=MAT_WATER) particle_splash(PART_SPARK, bigGun ? 12 : 9, 50, v, hasroids(owner) ? 0xFF0000 : 0xFF8800, bigGun ? 0.3f : 0.2f, 150, 200, 0, champicolor());
+                particle_splash(PART_SMOKE, 3, 600+rnd(300), v, 0x565656, bigGun ? 0.35f : 0.3f, 25, 300, 2, champicolor());
+                particle_splash(PART_SMOKE, 6, 350+rnd(300), v, 0x552900, bigGun ? 0.35f : 0.3f, 15, 300, 2, champicolor());
                 return;
-
+            }
             case ATK_SV98_SHOOT:
             case ATK_SKS_SHOOT:
             case ATK_GAU8_SHOOT:
@@ -302,18 +306,21 @@ namespace gfx
             case ATK_MINIGUN_SHOOT:
             case ATK_AK47_SHOOT:
             case ATK_GAU8_SHOOT:
+            {
                 vec dest = to;
                 dest.sub(muzzlepos);
                 dest.normalize().mul(800.0f);
-                loopi(atk==ATK_GAU8_SHOOT ? 1 : 2+rnd(3))
+                bool gau = atk == ATK_GAU8_SHOOT;
+                loopi(gau ? 1 : 2+rnd(3))
                 {
                     dest.add(vec(-150+rnd(300), -150+rnd(300), -150+rnd(300)));
                     particle_flying_flare(muzzlepos, dest, 100, PART_SPARK, 0xFF7700, rnd(3)/10.f + 0.1f, 100, 0, champicolor());
-                    particle_flying_flare(muzzlepos, dest, 300, PART_SMOKE, atk==ATK_GAU8_SHOOT ? 0x282828 : 0x444444, 2.f, 500, 4, champicolor());
+                    particle_flying_flare(muzzlepos, dest, 300, PART_SMOKE, gau ? 0x282828 : 0x444444, 2.f, 500, 4, champicolor());
                 }
                 particle_flare(muzzlepos, muzzlepos, 100, PART_MF_BIG, d->boostmillis[B_RAGE] || hasroids(d) ? 0xFF2222 : d->abilitymillis[game::ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xCCAAAA, 3.5f/adaptpartsize(d), d, champicolor());
-                adddynlight(muzzlepos, atk==ATK_GAU8_SHOOT ? 125 : 75, vec(1.25f, 0.75f, 0.3f), 35, 2, lightflags, 0, vec(1.25f, 0.75f, 0.3f), d);
+                adddynlight(muzzlepos, gau ? 125 : 75, vec(1.25f, 0.75f, 0.3f), 35, 2, lightflags, 0, vec(1.25f, 0.75f, 0.3f), d);
                 break;
+            }
         }
     }
 
