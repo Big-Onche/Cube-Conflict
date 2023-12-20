@@ -875,7 +875,7 @@ namespace game
         if(local) return;
 
         loopv(projs)
-            {
+        {
             projectile &p = projs[i];
             if(p.atk == atk && p.owner == d && p.id == id && !p.local)
             {
@@ -1137,12 +1137,9 @@ namespace game
                         origin.add(vec(0.2f-(rnd(5)/10.f), 0.2f-(rnd(5)/10.f), 0.2f-(rnd(5)/10.f)));
                         particle_flare(origin, rays[i], 30, PART_F_SHOTGUN, d->boostmillis[B_ROIDS] ? 0xFF2222 : atk==ATK_HYDRA_SHOOT ? 0xFF8800 : 0xFFFF22, atk==ATK_HYDRA_SHOOT ? 0.15f : 0.2f, d, gfx::champicolor());
                         //if(lookupmaterial(rays[i])==MAT_AIR) break;
-                        if(lookupmaterial(rays[i])!=MAT_WATER)
-                        {
-                            particle_splash(PART_SPARK, 9, 60, rays[i], d->boostmillis[B_ROIDS] ? 0xFF2222 : 0xAA1100, 0.4, 150, 100, 0, gfx::champicolor());
-                            particle_splash(PART_SMOKE, 3, 500+rnd(300), rays[i], 0x797979, 0.2f, 35, 300, 2, gfx::champicolor());
-                            particle_splash(PART_SMOKE, 3, 275+rnd(275), rays[i], 0x553915, 0.15f, 35, 300, 2, gfx::champicolor());
-                        }
+                        if(lookupmaterial(rays[i])!=MAT_WATER) particle_splash(PART_SPARK, 9, 60, rays[i], d->boostmillis[B_ROIDS] ? 0xFF2222 : 0xAA1100, 0.4, 150, 100, 0, gfx::champicolor());
+                        particle_splash(PART_SMOKE, 3, 500+rnd(300), rays[i], 0x797979, 0.2f, 35, 300, 2, gfx::champicolor());
+                        particle_splash(PART_SMOKE, 3, 275+rnd(275), rays[i], 0x553915, 0.15f, 35, 300, 2, gfx::champicolor());
                         gfx::instantrayhit(from, rays[i], d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle, atk);
                         if(d!=hudplayer()) soundNearmiss(S_BULLETFLYBY, from, rays[i], 512);
                     }

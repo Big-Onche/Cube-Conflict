@@ -1351,7 +1351,7 @@ void regularshape(int type, int radius, int color, int dir, int num, int fade, c
 				vec d = vec(to).sub(from).rescale(vel); //velocity
 				particle *n = newparticle(from, d, rnd(fade*3)+1, type, color, size, gravity);
 				if(parts[type]->type&PT_COLLIDE)
-					n->val = from.z - raycube(from, vec(0, 0, -1), parts[type]->stain >= 0 ? COLLIDERADIUS : max(from.z, 0.0f), RAY_CLIPMAT) + (parts[type]->stain >= 0 ? COLLIDEERROR : 0);
+					n->val = from.z - raycube(from, vec(0, 0, -1), parts[type]->stain >= 0 ? COLLIDERADIUS : max(from.z, 0.0f), RAY_CLIPMAT|RAY_POLY) + (parts[type]->stain >= 0 ? COLLIDEERROR : 0);
 			}
 		}
     }

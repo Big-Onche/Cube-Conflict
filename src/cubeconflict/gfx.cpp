@@ -213,8 +213,7 @@ namespace gfx
             case ATK_FAMAS_SHOOT:
             case ATK_GLOCK_SHOOT:
             case ATK_ARBALETE_SHOOT:
-                if(lookupmaterial(v)==MAT_WATER) return;
-                if(atk!=ATK_ARBALETE_SHOOT) particle_splash(PART_SPARK, atk==ATK_MINIGUN_SHOOT || atk==ATK_AK47_SHOOT ? 12 : 9, 50, v, hasroids(owner) ? 0xFF0000 : 0xFF8800, atk==ATK_MINIGUN_SHOOT || atk==ATK_AK47_SHOOT ? 0.3 : 0.2f, 150, 200, 0, champicolor());
+                if(atk!=ATK_ARBALETE_SHOOT && lookupmaterial(v)!=MAT_WATER) particle_splash(PART_SPARK, atk==ATK_MINIGUN_SHOOT || atk==ATK_AK47_SHOOT ? 12 : 9, 50, v, hasroids(owner) ? 0xFF0000 : 0xFF8800, atk==ATK_MINIGUN_SHOOT || atk==ATK_AK47_SHOOT ? 0.3 : 0.2f, 150, 200, 0, champicolor());
                 particle_splash(PART_SMOKE, 3, 600+rnd(300), v, 0x565656, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.35f : 0.3f, 25, 300, 2, champicolor());
                 particle_splash(PART_SMOKE, 6, 350+rnd(300), v, 0x552900, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.35f : 0.3f, 15, 300, 2, champicolor());
                 return;
@@ -222,8 +221,7 @@ namespace gfx
             case ATK_SV98_SHOOT:
             case ATK_SKS_SHOOT:
             case ATK_GAU8_SHOOT:
-                if(lookupmaterial(v)==MAT_WATER) return;
-                particle_splash(PART_SPARK, 12, 80, v, hasroids(owner) ? 0xFF0000 : 0xFF5533, 0.6f,  400, 250, 0, champicolor());
+                if(lookupmaterial(v)!=MAT_WATER) particle_splash(PART_SPARK, 12, 80, v, hasroids(owner) ? 0xFF0000 : 0xFF5533, 0.6f,  400, 250, 0, champicolor());
                 particle_splash(PART_SMOKE,  4, 800+rnd(300), v, 0x414141, 0.4f, 25, 300, 2, champicolor());
                 particle_splash(PART_SMOKE,  4, 500+rnd(300), v, 0x442200, 0.4f, 15, 300, 2, champicolor());
                 return;
@@ -237,7 +235,7 @@ namespace gfx
         switch(atk)
         {
             case ATK_RAIL_SHOOT:
-                if(lookupmaterial(to)!=MAT_WATER) particle_splash(PART_SPARK, 50, 150, to, 0xFF4400, 0.45f, 300, 30, 0, champicolor());
+                if(lookupmaterial(to)!=MAT_WATER) particle_splash(PART_SPARK, 50, 150, to, 0xFF4400, 0.45f, 400, 50, 0, champicolor());
                 addstain(STAIN_ELEC_HOLE, to, dir, 3.5f);
                 addstain(STAIN_ELEC_GLOW, to, dir, 1.5f, 0xFF2200);
                 addstain(STAIN_ELEC_GLOW, to, dir, 2.5f, 0xFF8800);
