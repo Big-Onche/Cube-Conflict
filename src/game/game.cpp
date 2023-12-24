@@ -4,8 +4,7 @@
 
 bool randomevent(int probability)
 {
-    if(game::ispaused()) return false;
-    return probability <= 1 ? true : rnd(probability)==0;
+    return !game::ispaused() && !rnd(max(probability * 100 / game::gamespeed, 1));
 }
 
 namespace game

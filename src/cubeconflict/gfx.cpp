@@ -83,7 +83,7 @@ namespace gfx
             case ATK_SMAW_SHOOT:
             case ATK_ROQUETTES_SHOOT:
             {
-                miniRockets = atk == ATK_ROQUETTES_SHOOT;
+                bool miniRockets = atk == ATK_ROQUETTES_SHOOT;
                 particle_splash(PART_SMOKE, miniRockets ? 5 : 9, 2000, v, 0x333333, 40.0f, 150+rnd(50), 300+rnd(100), 0, champicolor());
                 particle_splash(PART_SMOKE, miniRockets ? 5 : 9, 1300, v, 0x333333, 25.0f, 150+rnd(50), 600+rnd(100), 0, champicolor());
                 particle_splash(PART_SPARK, miniRockets ? 7 : 10, 300, v, hasroids(owner) ? 0xFF4444 : 0xFFBB55,  1.7f+rnd(2), 3500, 3500, 0, champicolor());
