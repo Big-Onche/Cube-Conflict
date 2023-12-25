@@ -530,7 +530,7 @@ namespace game
         return player1->state!=CS_DEAD;
     }
 
-    VARFP(player1_taunt, 0, 0, sizeof(customsdance)/sizeof(customsdance[0])-1,
+    VARFP(player1_taunt, 0, 0, 0, // sizeof(customsdance)/sizeof(customsdance[0])-1,
     {
         //if(!packtaunt) return;
         //if(cust[VOI_CORTEX+player1_danse]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette voix !"); //playsound(S_ERROR); player1_danse=0; return;}

@@ -2,20 +2,30 @@
 #ifndef __CUSTOMS_H__
 #define __CUSTOMS_H__
 
-namespace custom
+extern const char *getcapedir(int cape, bool enemy = false);
+extern const char *getgravedir(int cape);
+
+enum {SMI_HAP = 0, SMI_NOEL, SMI_MALADE, SMI_CONTENT, SMI_COLERE, SMI_SOURNOIS, SMI_FOU, SMI_CLINDOEIL, SMI_COOL, SMI_BUG, NUMSMILEYS}; //+10
+extern int smiley[NUMSMILEYS];
+
+static const struct smileysinfo { const char *ident; int price; } customsmileys[NUMSMILEYS] =
 {
-    extern const char *getcapedir(int cape, bool enemy = false);
-}
+    {"happy",       0},
+    {"xmas",        50},
+    {"sick",        100},
+    {"stoned",      100},
+    {"angry",       250},
+    {"sly",         250},
+    {"crazy",       250},
+    {"wink",        500},
+    {"cool",        500},
+    {"bug",         1500}
+};
 
-enum {SMI_HAP, SMI_NOEL, SMI_MALADE, SMI_CONTENT, SMI_COLERE, SMI_SOURNOIS, SMI_FOU, SMI_CLINDOEIL, SMI_COOL, SMI_BUG, SMI_11, SMI_12, SMI_13, SMI_14, SMI_15, SMI_16, SMI_17, SMI_18, SMI_19, SMI_20,
-        CAPE_CUBE, CAPE_PAINT1, CAPE_PAINT2, CAPE_ANAT, CAPE_ATOME, CAPE_DOUBLE, CAPE_FLAMES, CAPE_BOUCLE, CAPE_VINTAGE, CAPE_ELITE, CAPE_HIGH, CAPE_RAYONSX, CAPE_RISITAS, CAPE_RICHE, CAPE_15, CAPE_16, CAPE_17, CAPE_18, CAPE_19, CAPE_20,
-        TOM_MERDE, TOM_BASIQUE1, TOM_BASIQUE2, TOM_FLEUR, TOM_CRISTAL, TOM_GOLF, TOM_OEIL, TOM_EXCALIBUR, TOM_COURONNE, TOM_CRIME, TOM_FUCK, TOM_MONUMENT, TOM_LINGOT, TOM_14, TOM_15, TOM_16, TOM_17, TOM_18, TOM_19, TOM_20,
-        VOI_CORTEX, VOI_VALOCHE, VOI_VIEILLE, VOI_HENDEK, VOI_MILI1, VOI_MILI2, VOI_MOUNIR, VOI_DELAVIER, VOI_PRAUD, VOI_MALLEVILLE, VOI_11, VOI_12, VOI_13, VOI_14, VOI_15, VOI_16, VOI_17, VOI_18, VOI_19, VOI_20, NUMCUST};
-extern int cust[NUMCUST];
+enum {CAPE_CUBE = 0, CAPE_PAINT1, CAPE_PAINT2, CAPE_ANAT, CAPE_ATOME, CAPE_DOUBLE, CAPE_FLAMES, CAPE_BOUCLE, CAPE_VINTAGE, CAPE_ELITE, CAPE_HIGH, CAPE_RAYONSX, CAPE_RISITAS, CAPE_RICHE, NUMCAPES}; //6
+extern int cape[NUMCAPES];
 
-static const struct smileysinfo { int smileyprice; } customsmileys[10] = { {0}, {50}, {100}, {100}, {250}, {250}, {250}, {500}, {500}, {1500}, };
-
-static const struct capesinfo { const char *capedir; int capeprice; } customscapes[14] =
+static const struct capesinfo { const char *ident; int price; } customscapes[NUMCAPES] =
 {
     {"noob",        0},
     {"paint1",      50},
@@ -30,27 +40,32 @@ static const struct capesinfo { const char *capedir; int capeprice; } customscap
     {"psych",       500},
     {"xrays",       500},
     {"risitas3d",   500},
-    {"rich",        1500},
+    {"rich",        1500}
 };
 
-static const struct tombesinfo { const char *tombedir; int tombeprice; } customstombes[13] =
+enum {TOM_MERDE = 0, TOM_BASIQUE1, TOM_BASIQUE2, TOM_FLEUR, TOM_CRISTAL, TOM_GOLF, TOM_OEIL, TOM_EXCALIBUR, TOM_COURONNE, TOM_CRIME, TOM_FUCK, TOM_MONUMENT, TOM_LINGOT, NUMGRAVES}; //7
+extern int grave[NUMGRAVES];
+
+static const struct gravesinfo { const char *ident; int price; } customstombes[NUMGRAVES] =
 {
-    {"tombes/merde",     0},
-    {"tombes/basique1",  50},
-    {"tombes/basique2",  50},
-    {"tombes/fleur",     100},
-    {"tombes/cristal",   100},
-    {"tombes/minigolf",  100},
-    {"tombes/oeil",      250},
-    {"tombes/excalibur", 250},
-    {"tombes/couronne",  250},
-    {"tombes/crime",     500},
-    {"tombes/fuck",      500},
-    {"tombes/monument",  500},
-    {"tombes/lingots",   1500},
+    {"merde",     0},
+    {"basique1",  50},
+    {"basique2",  50},
+    {"fleur",     100},
+    {"cristal",   100},
+    {"minigolf",  100},
+    {"oeil",      250},
+    {"excalibur", 250},
+    {"couronne",  250},
+    {"crime",     500},
+    {"fuck",      500},
+    {"monument",  500},
+    {"lingots",   1500}
 };
 
-static const struct danceinfo { const char *dancename; int danceprice; } customsdance[11] =
+/*
+enum {VOI_CORTEX = 0, VOI_VALOCHE, VOI_VIEILLE, VOI_HENDEK, VOI_MILI1, VOI_MILI2, VOI_MOUNIR, VOI_DELAVIER, VOI_PRAUD, VOI_MALLEVILLE, NUMVOICES};
+static const struct danceinfo { const char *ident; int price; } customsdance[11] =
 {
     {"Cortex",        0},
     {"Valoche",      50},
@@ -62,7 +77,7 @@ static const struct danceinfo { const char *dancename; int danceprice; } customs
     {"Delavier",    500},
     {"Praud",       500},
     {"Malleville",  1500},
-    {"Raoult",      1500},
+    {"Raoult",      1500}
 };
-
+*/
 #endif

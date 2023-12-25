@@ -104,7 +104,7 @@ namespace game
             case T_PLAYERMODEL: return (seed&0xFFFF)%(sizeof(playermodels)/sizeof(playermodels[0]));
             case T_CAPE: return (seed&0xFFFF)%(sizeof(customscapes)/sizeof(customscapes[0]));
             case T_GRAVE: return (seed&0xFFFF)%(sizeof(customstombes)/sizeof(customstombes[0]));
-            case T_TAUNT: return (seed&0xFFFF)%(sizeof(customsdance)/sizeof(customsdance[0]));
+            case T_TAUNT: return 0; //(seed&0xFFFF)%(sizeof(customsdance)/sizeof(customsdance[0]));
             default: return 0;
         }
     }
@@ -149,7 +149,7 @@ namespace game
 
     void changedplayermodel()
     {
-        if(cust[SMI_HAP+playermodel]<= 0) { conoutf(CON_ERROR, "\f3%s", readstr("Console_Shop_SmileyNotOwned")); playSound(S_ERROR); playermodel = 0; return; }
+        if(!smiley[playermodel]) { conoutf(CON_ERROR, "\f3%s", readstr("Console_Shop_SmileyNotOwned")); playSound(S_ERROR); playermodel = 0; return; }
         if(player1->clientnum < 0) player1->playermodel = playermodel;
         if(player1->ragdoll) cleanragdoll(player1);
         loopv(ragdolls)
@@ -215,19 +215,23 @@ namespace game
             value++;
         }
 
-        loopi(14) //Preloading all capes
+        loopi(sizeof(customscapes) / sizeof(customscapes[0])) //Preloading all capes
         {
-            preloadmodel(custom::getcapedir(i, true));
-            preloadmodel(custom::getcapedir(i, false));
+            preloadmodel(getcapedir(i, true));
+            preloadmodel(getcapedir(i, false));
         }
 
-        loopi(NUMAPTS) //Preloading all classe's hats
+        loopi(sizeof(aptitudes) / sizeof(aptitudes[0])) //Preloading all classe's hats
         {
-            defformatstring(mdldir, "hats/%d", i);
-            preloadmodel(mdldir);
+            defformatstring(dir, "hats/%d", i);
+            preloadmodel(dir);
         }
 
-        loopi(13) preloadmodel(customstombes[i].tombedir); //Preloading all graves
+        loopi(sizeof(customstombes) / sizeof(customstombes[0]))
+        {
+            defformatstring(dir, "graves/%s", customstombes[i].ident);
+            preloadmodel(dir); //Preloading all graves
+        }
 
         loopi(4) getdisguisement(i); //Preloading all spy's disguisement
 
@@ -265,14 +269,14 @@ namespace game
 
     VARFP(player1_cape, 0, 0, sizeof(customscapes)/sizeof(customscapes[0])-1,
     {
-        if(cust[CAPE_CUBE+player1_cape]<= 0) { conoutf(CON_ERROR, "\f3%s", readstr("Console_Shop_SmileyNotOwned")); playSound(S_ERROR); player1_cape=0; return; }
+        if(!cape[player1_cape]) { conoutf(CON_ERROR, "\f3%s", readstr("Console_Shop_SmileyNotOwned")); playSound(S_ERROR); player1_cape=0; return; }
         addmsg(N_SENDCAPE, "ri", player1_cape);
         player1->customcape = player1_cape;
     });
 
     VARFP(player1_tombe, 0, 0, sizeof(customstombes)/sizeof(customstombes[0])-1,
     {
-        if(cust[TOM_MERDE+player1_tombe]<= 0) { conoutf(CON_ERROR, "\f3%s", readstr("Console_Shop_GraveNotOwned")); playSound(S_ERROR); player1_tombe=0; return; }
+        if(!grave[player1_tombe]) { conoutf(CON_ERROR, "\f3%s", readstr("Console_Shop_GraveNotOwned")); playSound(S_ERROR); player1_tombe=0; return; }
         addmsg(N_SENDTOMBE, "ri", player1_tombe);
         player1->customtombe = player1_tombe;
         if(player1->customtombe==10) unlockAchievement(ACH_FUCKYOU);
@@ -280,7 +284,7 @@ namespace game
 
     void rendertombeplayer(gameent *d, float fade)
     {
-         rendermodel(customstombes[d->customtombe].tombedir, ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED, d, NULL, 0, 0, fade); //DEBUG
+         rendermodel(getgravedir(d->customtombe), ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED, d, NULL, 0, 0, fade); //DEBUG
     }
 
     static const int dirs[9] =
@@ -315,7 +319,7 @@ namespace game
             flags |= MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY;
 
             if(d->tombepop<1.0f) d->tombepop += 3.f/gfx::nbfps;
-            rendermodel(customstombes[d->customtombe].tombedir, ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, flags, NULL, NULL, 0, 0, d->tombepop, vec4(vec::hexcolor(color), 5));
+            rendermodel(getgravedir(d->customtombe), ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, flags, NULL, NULL, 0, 0, d->tombepop, vec4(vec::hexcolor(color), 5));
 
             d->skeletonfade -= 3.f/gfx::nbfps;
             if(d->skeletonfade<0.066f) return;
@@ -360,7 +364,7 @@ namespace game
         ////////Customisations////////
         if(d->customcape>=0 && d->customcape<=13)
         {
-            a[ai++] = modelattach("tag_cape", custom::getcapedir(d->customcape, d->team==player1->team ? false : true), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+            a[ai++] = modelattach("tag_cape", getcapedir(d->customcape, d->team==player1->team ? false : true), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
 
         //////////////////////////////////////////////////////////////////ANIMATIONS//////////////////////////////////////////////////////////////////
@@ -452,7 +456,7 @@ namespace game
 
         defformatstring(mdldir, "hats/%d", player1->aptitude);
         a[ai++] = modelattach("tag_hat", mdldir, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-        a[ai++] = modelattach("tag_cape", custom::getcapedir(cape, !team), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+        a[ai++] = modelattach("tag_cape", getcapedir(cape, !team), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
 
         rendermodel(mdlname, anim, o, yaw, pitch, 0, NULL, d, a[0].tag ? a : NULL, 0, 0, 1, vec4(vec::hexcolor(color), 5));
     }

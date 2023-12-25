@@ -113,12 +113,13 @@ ICOMMAND(getstatinfo, "i", (int *statID),
 #define SUPERCRYPTKEY 10;
 char *encryptSave(char savepart[20]) // simple and easily crackable encryption
 {
-    int i;
-
-    for(i = 0; (i < 100 && savepart[i] != '\0'); i++)
-        savepart[i] = savepart[i] - SUPERCRYPTKEY;
-
+    for(int i = 0; (i < 100 && savepart[i] != '\0'); i++) savepart[i] = savepart[i] - SUPERCRYPTKEY;
     return savepart;
+}
+
+void decryptSave(char* line)
+{
+    for (int i = 0; line[i] != '\0'; i++) { line[i] = line[i] + SUPERCRYPTKEY; }
 }
 
 void writeSave() // we write the poorly encrypted value for all stat
@@ -126,50 +127,93 @@ void writeSave() // we write the poorly encrypted value for all stat
     stream *savefile = openutf8file("config/stats.cfg", "w");
     if(!savefile) { conoutf(CON_ERROR, "\fc%s", readstr("Console_Error_WriteSave")); return; }
 
-    int saveID = 0;
-    loopi(NUMSTATS + NUMCUST + NUMACHS)
-    {
-        savefile->printf("%s\n", encryptSave(tempformatstring("%d", saveID >= NUMSTATS + NUMCUST ? achievement[saveID-NUMCUST-NUMSTATS] : saveID >= NUMSTATS ? cust[saveID-NUMSTATS] : stat[saveID])));
-        saveID++;
-    }
+    savefile->printf("version=%d\n", PROTOCOL_VERSION);
+
+    loopi(NUMSTATS) savefile->printf("%s\n", encryptSave(tempformatstring("%s=%d", statslist[i].ident, stat[i])));
+    loopi(NUMSMILEYS) savefile->printf("%s\n", encryptSave(tempformatstring("smiley_%s=%d", customsmileys[i].ident, smiley[i] ? max(rnd(256), 1) : 0)));
+    loopi(NUMCAPES) savefile->printf("%s\n", encryptSave(tempformatstring("cape_%s=%d", customscapes[i].ident, cape[i] ? max(rnd(256), 1) : 0)));
+    loopi(NUMGRAVES) savefile->printf("%s\n", encryptSave(tempformatstring("grave_%s=%d", customstombes[i].ident, grave[i] ? max(rnd(256), 1) : 0)));
+    loopi(NUMACHS) savefile->printf("%s\n", encryptSave(tempformatstring("%s=%d", achievementNames[i], achievement[i] ? max(rnd(256), 1) : 0)));
     savefile->close();
 }
 
 void giveStarterKit() // starter pack
 {
     stat[STAT_LEVEL]++;
-    cust[SMI_HAP] = cust[CAPE_CUBE] = cust[TOM_MERDE] = cust[VOI_CORTEX] = rnd(99)+1;
+    smiley[SMI_HAP] = cape[CAPE_CUBE] = grave[TOM_MERDE] = max(rnd(256), 1);
 }
 
-void loadSave() // we read the poorly encrypted value for all stat
+void loadSave()
 {
     giveStarterKit(); // always give the starter pack in case of missing/corrupted save
+
     stream *savefile = openfile("config/stats.cfg", "r");
     if(!savefile) { calcPlayerLevel(); return; }
 
-    char buf[50];
-    int saveID = 0;
+    char buf[64];
 
-    while(savefile->getline(buf, sizeof(buf)))
+    savefile->getline(buf, sizeof(buf));
+    bool oldSave = strncmp(buf, "version=", 8);
+    savefile->close();
+
+    savefile = openfile("config/stats.cfg", "r");
+
+    if(oldSave) // no version = old save file = we read it the old way, might remove that in 1.0
     {
-        int i;
-        // we decrypt the line
-        for(i = 0; (i < 500 && buf[i] != '\0'); i++)
-            buf[i] = buf[i] + SUPERCRYPTKEY;
+        int line = 0;
+        int skip = 0;
 
-        if(saveID < NUMSTATS) sscanf(buf, "%i", &stat[saveID]);
-        else if(saveID < NUMCUST + NUMSTATS) sscanf(buf, "%i", &cust[saveID-NUMSTATS]);
-        else {int j = 0; sscanf(buf, "%i", &j); achievement[saveID-NUMSTATS-NUMCUST] = j;}
+        while(savefile->getline(buf, sizeof(buf)))
+        {
+            if(skip > 0) { --skip; continue; }
 
-        saveID++;
+            decryptSave(buf);
+
+            if (line < NUMSTATS) {
+                sscanf(buf, "%i", &stat[line]);
+                if (line == NUMSTATS - 1) skip = 10; // skip next 10 lines
+            } else if (line < NUMSTATS + NUMSMILEYS) {
+                sscanf(buf, "%i", &smiley[line - NUMSTATS]);
+                if (line == NUMSTATS + NUMSMILEYS - 1) skip = 10; // skip next 10 lines
+            } else if (line < NUMSTATS + NUMSMILEYS + NUMCAPES) {
+                sscanf(buf, "%i", &cape[line - NUMSTATS - NUMSMILEYS]);
+                if (line == NUMSTATS + NUMSMILEYS + NUMCAPES - 1) skip = 6; // skip next 6 lines
+            } else if (line < NUMSTATS + NUMSMILEYS + NUMCAPES + NUMGRAVES) {
+                sscanf(buf, "%i", &grave[line - NUMSTATS - NUMSMILEYS - NUMCAPES]);
+                if (line == NUMSTATS + NUMSMILEYS + NUMCAPES + NUMGRAVES - 1) skip = 27; // skip next 27 lines
+            } else sscanf(buf, "%i", &achievement[line - NUMSTATS - NUMSMILEYS - NUMCAPES - NUMGRAVES]);
+
+            line++;
+        }
+        writeSave();
     }
+    else
+    {
+        while(savefile->getline(buf, sizeof(buf)))
+        {
+            decryptSave(buf);
+
+            char key[50];
+            int value;
+
+            if(sscanf(buf, "%49[^=]=%d", key, &value) == 2)
+            {
+                loopi(NUMSTATS) { if(!strcmp(key, statslist[i].ident)) { stat[i] = value; break; } }
+                loopi(NUMSMILEYS){ if(!strcmp(key, tempformatstring("smiley_%s", customsmileys[i].ident))) { smiley[i] = value; break; } }
+                loopi(NUMCAPES) { if(!strcmp(key, tempformatstring("cape_%s", customscapes[i].ident))) { cape[i] = value; break; } }
+                loopi(NUMGRAVES) { if(!strcmp(key, tempformatstring("grave_%s", customstombes[i].ident))) { grave[i] = value; break; } }
+                loopi(NUMACHS) { if(!strcmp(key, achievementNames[i])) { achievement[i] = value; break; } }
+            }
+        }
+    }
+
     savefile->close();
     calcPlayerLevel();
     if(IS_USING_STEAM) getsteamachievements();
 }
 
 //////////////////////Achievements//////////////////////
-bool achievement[NUMACHS];
+int achievement[NUMACHS];
 bool isLocked(int achID) { return !achievement[achID]; }
 
 ICOMMAND(unlockach, "i", (int *achID), if(*achID==ACH_PARKOUR || *achID==ACH_EXAM) unlockAchievement(*achID));
@@ -202,7 +246,11 @@ void unlockAchievement(int achID)
 
 void getsteamachievements() // retrieves achievements from steam
 {
-    loopi(NUMACHS) { SteamUserStats()->GetAchievement(achievementNames[i], &achievement[i]); }
+    loopi(NUMACHS) {
+        bool achieved;
+        SteamUserStats()->GetAchievement(achievementNames[i], &achieved);
+        achievement[i] = achieved;
+    }
 }
 
 ICOMMAND(gettotalach, "", (), intret(NUMACHS)); //gets nb of achievements for ui

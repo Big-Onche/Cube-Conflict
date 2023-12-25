@@ -4,16 +4,22 @@
 #include "stats.h"
 #include "customs.h"
 
-int cust[NUMCUST];
+int smiley[NUMSMILEYS];
+int cape[NUMCAPES];
+int grave[NUMGRAVES];
 
-namespace custom
+const char *getcapedir(int cape, bool enemy)
 {
-    const char *getcapedir(int cape, bool enemy)
-    {
-        static char dir[64];
-        sprintf(dir, "capes/%s%s", customscapes[cape].capedir, enemy ? "/enemy" : "");
-        return dir;
-    }
+    static char dir[64];
+    sprintf(dir, "capes/%s%s", customscapes[cape].ident, enemy ? "/enemy" : "");
+    return dir;
+}
+
+const char *getgravedir(int grave)
+{
+    static char dir[64];
+    sprintf(dir, "graves/%s", customstombes[grave].ident);
+    return dir;
 }
 
 enum {CUST_SMILEY = 0, CUST_CAPE, CUST_GRAVE};
@@ -22,9 +28,9 @@ int itemprice(int itemtype, int itemnum)
 {
     switch(itemtype)
     {
-        case CUST_SMILEY: return customsmileys[itemnum].smileyprice;
-        case CUST_CAPE: return customscapes[itemnum].capeprice;
-        case CUST_GRAVE: return customstombes[itemnum].tombeprice;
+        case CUST_SMILEY: return customsmileys[itemnum].price;
+        case CUST_CAPE: return customscapes[itemnum].price;
+        case CUST_GRAVE: return customstombes[itemnum].price;
     }
     return 0;
 }
@@ -34,9 +40,9 @@ int hasitem(int itemtype, int itemnum)
 {
     switch(itemtype)
     {
-        case CUST_SMILEY: return cust[SMI_HAP+itemnum];
-        case CUST_CAPE: return cust[CAPE_CUBE+itemnum];
-        case CUST_GRAVE: return cust[TOM_MERDE+itemnum];
+        case CUST_SMILEY: return smiley[SMI_HAP];
+        case CUST_CAPE: return cape[CAPE_CUBE];
+        case CUST_GRAVE: return grave[TOM_MERDE];
     }
     return 0;
 }
@@ -47,34 +53,34 @@ void buyitem(int itemtype, int itemnum)
     switch(itemtype)
     {
         case CUST_SMILEY:
-            if(customsmileys[itemnum].smileyprice > stat[STAT_CC]) {conoutf(CON_GAMEINFO, "\f3%s", readstr("Console_Shop_SmileyTooExpensive")); playSound(S_ERROR); return; }
-            else if(cust[SMI_HAP+itemnum]) {conoutf(CON_GAMEINFO, "\f3%s", readstr("Console_Shop_SmileyOwned"));  playSound(S_ERROR); return; }
+            if(customsmileys[itemnum].price > stat[STAT_CC]) {conoutf(CON_GAMEINFO, "\f3%s", readstr("Console_Shop_SmileyTooExpensive")); playSound(S_ERROR); return; }
+            else if(smiley[itemnum]) {conoutf(CON_GAMEINFO, "\f3%s", readstr("Console_Shop_SmileyOwned"));  playSound(S_ERROR); return; }
             else
             {
-                stat[STAT_CC] -= customsmileys[itemnum].smileyprice;
-                cust[SMI_HAP+itemnum] = rnd(99)+1;
+                stat[STAT_CC] -= customsmileys[itemnum].price;
+                smiley[itemnum] = max(rnd(256), 1);
                 playSound(S_CAISSEENREGISTREUSE);
                 conoutf(CON_GAMEINFO, "\fe%s", readstr("Console_Shop_SmileyBuyed"));
             }
             break;
         case CUST_CAPE:
-            if(customscapes[itemnum].capeprice > stat[STAT_CC]) {conoutf(CON_GAMEINFO, "\f3%s", readstr("Console_Shop_CapeTooExpensive")); playSound(S_ERROR); return; }
-            else if(cust[CAPE_CUBE+itemnum]) {conoutf(CON_GAMEINFO, "\f3%s", readstr("Console_Shop_CapeOwned")); playSound(S_ERROR); return; }
+            if(customscapes[itemnum].price > stat[STAT_CC]) {conoutf(CON_GAMEINFO, "\f3%s", readstr("Console_Shop_CapeTooExpensive")); playSound(S_ERROR); return; }
+            else if(cape[itemnum]) {conoutf(CON_GAMEINFO, "\f3%s", readstr("Console_Shop_CapeOwned")); playSound(S_ERROR); return; }
             else
             {
-                stat[STAT_CC] -= customscapes[itemnum].capeprice;
-                cust[CAPE_CUBE+itemnum] = rnd(99)+1;
+                stat[STAT_CC] -= customscapes[itemnum].price;
+                cape[itemnum] = max(rnd(256), 1);
                 playSound(S_CAISSEENREGISTREUSE);
                 conoutf(CON_GAMEINFO, "\fe%s", readstr("Console_Shop_CapeBuyed"));
             }
             break;
         case CUST_GRAVE:
-            if(customstombes[itemnum].tombeprice > stat[STAT_CC]) {conoutf(CON_GAMEINFO, "\f3%s", readstr("Console_Shop_GraveTooExpensive")); playSound(S_ERROR); return; }
-            else if(cust[TOM_MERDE+itemnum]) {conoutf(CON_GAMEINFO, "\f3%s", readstr("Console_Shop_GraveOwned")); playSound(S_ERROR); return; }
+            if(customstombes[itemnum].price > stat[STAT_CC]) {conoutf(CON_GAMEINFO, "\f3%s", readstr("Console_Shop_GraveTooExpensive")); playSound(S_ERROR); return; }
+            else if(grave[itemnum]) {conoutf(CON_GAMEINFO, "\f3%s", readstr("Console_Shop_GraveOwned")); playSound(S_ERROR); return; }
             else
             {
-                stat[STAT_CC] -= customstombes[itemnum].tombeprice;
-                cust[TOM_MERDE+itemnum] = rnd(99)+1;
+                stat[STAT_CC] -= customstombes[itemnum].price;
+                grave[itemnum] = max(rnd(256), 1);
                 playSound(S_CAISSEENREGISTREUSE);
                 conoutf(CON_GAMEINFO, "\fe%s", readstr("Console_Shop_GraveBuyed"));
             }

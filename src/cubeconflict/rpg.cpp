@@ -29,7 +29,7 @@ namespace game
         switch(*i)
         {
             case R_TREASURE:
-               if(m_tutorial) cust[TOM_BASIQUE1] = cust[CAPE_PAINT1] = cust[SMI_NOEL] = rnd(99)+1;
+               if(m_tutorial) grave[TOM_BASIQUE1] = cape[CAPE_PAINT1] = smiley[SMI_NOEL] = max(rnd(256), 1);
                break;
         }
     );
