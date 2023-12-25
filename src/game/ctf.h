@@ -751,35 +751,37 @@ struct ctfclientmode : clientmode
             flag &f = flags[j];
             if(f.owner != d)
             {
+
                 static vector<int> targets; // build a list of others who are interested in this
                 targets.setsize(0);
+
                 bool home = f.team == d->team;
-                ai::checkothers(targets, d, home ? ai::AI_S_DEFEND : ai::AI_S_PURSUE, ai::AI_T_AFFINITY, j, true);
-                gameent *e = NULL;
-                loopi(numdynents()) if((e = (gameent *)iterdynents(i)) && !e->ai && e->state == CS_ALIVE && isteam(d->team, e->team))
-                { // try to guess what non ai are doing
-                    vec ep = e->feetpos();
-                    if(targets.find(e->clientnum) < 0 && (ep.squaredist(f.pos()) <= (FLAGRADIUS*FLAGRADIUS*4) || f.owner == e))
-                        targets.add(e->clientnum);
+
+                if(targets.empty())
+                { // attack the flag
+                        ai::interest &n = interests.add();
+                        n.state = ai::AI_S_PURSUE;
+                        n.node = ai::closestwaypoint(f.pos(), ai::SIGHTMIN, true);
+                        n.target = j;
+                        n.targtype = ai::AI_T_AFFINITY;
+                        n.score = pos.dist(f.pos());
                 }
-                if(home)
+                else if(home)
                 {
                     bool guard = false;
                     if((f.owner && f.team != f.owner->team) || f.droptime || targets.empty()) guard = true;
-#if 0
                     else if(d->hasammo(d->ai->weappref))
                     { // see if we can relieve someone who only has a piece of crap
                         gameent *t;
                         loopvk(targets) if((t = getclient(targets[k])))
                         {
-                            if((t->ai && !t->hasammo(t->ai->weappref)) || (!t->ai && t->gunselect == GUN_MELEE))
+                            if((t->ai && !t->hasammo(t->ai->weappref)))
                             {
                                 guard = true;
                                 break;
                             }
                         }
                     }
-#endif
                     if(guard)
                     { // defend the flag
                         ai::interest &n = interests.add();
@@ -787,32 +789,7 @@ struct ctfclientmode : clientmode
                         n.node = ai::closestwaypoint(f.pos(), ai::SIGHTMIN, true);
                         n.target = j;
                         n.targtype = ai::AI_T_AFFINITY;
-                        n.score = 1e9f;
-                    }
-                }
-                else
-                {
-                    if(targets.empty())
-                    { // attack the flag
-                        ai::interest &n = interests.add();
-                        n.state = ai::AI_S_PURSUE;
-                        n.node = ai::closestwaypoint(f.pos(), ai::SIGHTMIN, true);
-                        n.target = j;
-                        n.targtype = ai::AI_T_AFFINITY;
-                        n.score = pos.squaredist(f.pos());
-                    }
-                    else
-                    { // help by defending the attacker
-                        gameent *t;
-                        loopvk(targets) if((t = getclient(targets[k])))
-                        {
-                            ai::interest &n = interests.add();
-                            n.state = ai::AI_S_DEFEND;
-                            n.node = t->lastnode;
-                            n.target = t->clientnum;
-                            n.targtype = ai::AI_T_PLAYER;
-                            n.score = d->o.squaredist(t->o);
-                        }
+                        n.score = 1e3f;
                     }
                 }
             }
