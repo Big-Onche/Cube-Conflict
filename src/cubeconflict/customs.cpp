@@ -8,6 +8,10 @@ int smiley[NUMSMILEYS];
 int cape[NUMCAPES];
 int grave[NUMGRAVES];
 
+ICOMMAND(getnumsmileys, "", (), intret(NUMSMILEYS));
+ICOMMAND(getnumcapes, "", (), intret(NUMCAPES));
+ICOMMAND(getnumgraves, "", (), intret(NUMGRAVES));
+
 const char *getcapedir(int cape, bool enemy)
 {
     static char dir[64];
@@ -40,9 +44,9 @@ int hasitem(int itemtype, int itemnum)
 {
     switch(itemtype)
     {
-        case CUST_SMILEY: return smiley[SMI_HAP];
-        case CUST_CAPE: return cape[CAPE_CUBE];
-        case CUST_GRAVE: return grave[TOM_MERDE];
+        case CUST_SMILEY: return smiley[itemnum];
+        case CUST_CAPE: return cape[itemnum];
+        case CUST_GRAVE: return grave[itemnum];
     }
     return 0;
 }
