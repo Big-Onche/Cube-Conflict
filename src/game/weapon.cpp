@@ -291,6 +291,7 @@ namespace game
                 case BNC_BIGDOUILLES: playSound(S_BIGDOUILLE, &b->o, 125, 75, SND_LOWPRIORITY|SND_FIXEDPITCH); break;
                 case BNC_CARTOUCHES: playSound(S_CARTOUCHE, &b->o, 125, 75, SND_LOWPRIORITY); break;
                 case BNC_GRENADE: playSound(S_RGRENADE, &b->o, 300, 50); break;
+                case BNC_ROBOT: playSound(S_RGRENADE, &b->o, 300, 50); break;
                 case BNC_LIGHT: b->lifetime=0;
             }
         }
@@ -848,7 +849,7 @@ namespace game
                 return;
             case ATK_SPOCKGUN_SHOOT:
                 addstain(STAIN_PLASMA_SCORCH, pos, dir, 5);
-                addstain(STAIN_SPOCK, pos, dir, 5, 0x22FF22);
+                addstain(STAIN_SPOCK, pos, dir, 5, gfx::hasroids(p.owner) ? 0xFF0000 : 0x22FF22);
                 return;
             case ATK_UZI_SHOOT:
             case ATK_ARBALETE_SHOOT:
@@ -980,26 +981,26 @@ namespace game
                     switch(p.atk)
                     {
                         case ATK_PULSE_SHOOT:
-                            particle_splash(PART_PLASMA_FRONT, 1, 1, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFF6600, 2.4f, 150, 20, 0, gfx::champicolor());
-                            particle_flare(tail, head, 1, PART_F_PLASMA, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFF6600, 2.0f, p.owner, gfx::champicolor());
+                            particle_splash(PART_PLASMA_FRONT, 1, 1, pos, gfx::hasroids(p.owner) ? 0xFF4444 : 0xFF6600, 2.4f, 150, 20, 0, gfx::champicolor());
+                            particle_flare(tail, head, 1, PART_F_PLASMA, gfx::hasroids(p.owner) ? 0xFF4444 : 0xFF6600, 2.0f, p.owner, gfx::champicolor());
                             if(lookupmaterial(pos)==MAT_WATER) particle_splash(PART_BUBBLE, 1, 150, v, 0x18181A, 2.0f+rnd(2), 20, -30);
                             break;
                         case ATK_GRAP1_SHOOT:
-                            particle_splash(PART_PLASMA_FRONT, 1, 1, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFF33BB, 3.0f, 150, 20, 0, gfx::champicolor());
-                            particle_flare(tail, head, 1, PART_F_PLASMA, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xEE22AA, 3.0f, p.owner, gfx::champicolor());
+                            particle_splash(PART_PLASMA_FRONT, 1, 1, pos, gfx::hasroids(p.owner) ? 0xFF2222 : 0xFF33BB, 3.0f, 150, 20, 0, gfx::champicolor());
+                            particle_flare(tail, head, 1, PART_F_PLASMA, gfx::hasroids(p.owner) ? 0xFF2222 : 0xEE22AA, 3.0f, p.owner, gfx::champicolor());
                             particle_splash(lookupmaterial(pos)==MAT_WATER ? PART_BUBBLE : PART_SMOKE, 1, lookupmaterial(pos)==MAT_WATER ? 150 : 300, pos, lookupmaterial(pos)&MAT_WATER ? 0x18181A : 0xAAAAAA, 4.0f, 25, 250, 0, gfx::champicolor());
                             break;
                         case ATK_SPOCKGUN_SHOOT:
-                            particle_splash(PART_SPOCK_FRONT, 1, 1, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0x00FF00, 4.f, 150, 20, 0, gfx::champicolor());
-                            particle_flare(tail, head, 1, PART_F_PLASMA, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0x22FF22, 2.5f, p.owner, gfx::champicolor());
+                            particle_splash(PART_SPOCK_FRONT, 1, 1, pos, gfx::hasroids(p.owner) ? 0xFF4444 : 0x00FF00, 4.f, 150, 20, 0, gfx::champicolor());
+                            particle_flare(tail, head, 1, PART_F_PLASMA, gfx::hasroids(p.owner) ? 0xFF4444 : 0x22FF22, 2.5f, p.owner, gfx::champicolor());
                             break;
 
                         case ATK_SV98_SHOOT:
                         case ATK_SKS_SHOOT:
                         case ATK_GAU8_SHOOT:
                             if(lookupmaterial(pos)==MAT_WATER) particle_splash(PART_BUBBLE, 1, 150, v, 0x18181A, 2.0f+rnd(2), 20, -30);
-                            particle_flare(tail, head, 1, PART_F_BULLET, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFFBB88, p.atk==ATK_GAU8_SHOOT ? 0.75f : 0.65f, p.owner, gfx::champicolor());
-                            particle_splash(PART_PLASMA_FRONT, 1, 1, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFFBB88,  p.owner==player1 ? 0.65f : p.atk==ATK_GAU8_SHOOT ? 0.45f : 0.3f, 150, 20, 0, gfx::champicolor());
+                            particle_flare(tail, head, 1, PART_F_BULLET, gfx::hasroids(p.owner) ? 0xFF4444 : 0xFFBB88, p.atk==ATK_GAU8_SHOOT ? 0.75f : 0.65f, p.owner, gfx::champicolor());
+                            particle_splash(PART_PLASMA_FRONT, 1, 1, pos, gfx::hasroids(p.owner) ? 0xFF4444 : 0xFFBB88,  p.owner==player1 ? 0.65f : p.atk==ATK_GAU8_SHOOT ? 0.45f : 0.3f, 150, 20, 0, gfx::champicolor());
                             particle_flare(tail, head, p.atk==ATK_SV98_SHOOT ? 3000 : 2000, PART_F_SMOKE, 0x333333, p.atk==ATK_SV98_SHOOT ? 1.4f : 1.f, p.owner, gfx::champicolor(), 3);
                             break;
 
@@ -1009,8 +1010,8 @@ namespace game
                         case ATK_GLOCK_SHOOT:
                         case ATK_FAMAS_SHOOT:
                             if(lookupmaterial(pos)==MAT_WATER) particle_splash(PART_BUBBLE, 1, 150, v, 0x18181A, 1.0f+rnd(2), 20, -30);
-                            particle_flare(tail, head, 1, PART_F_BULLET, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFFBB88, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.55f : 0.45f, p.owner, gfx::champicolor());
-                            particle_splash(PART_PLASMA_FRONT, 1, 1, pos, p.owner->boostmillis[B_ROIDS] ? 0xFF4444 : 0xFFBB88, p.owner==player1 ? 0.4f : ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.3f : 0.24f, 150, 20, 0, gfx::champicolor());
+                            particle_flare(tail, head, 1, PART_F_BULLET, gfx::hasroids(p.owner) ? 0xFF4444 : 0xFFBB88, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.55f : 0.45f, p.owner, gfx::champicolor());
+                            particle_splash(PART_PLASMA_FRONT, 1, 1, pos, gfx::hasroids(p.owner) ? 0xFF4444 : 0xFFBB88, p.owner==player1 ? 0.4f : ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 0.3f : 0.24f, 150, 20, 0, gfx::champicolor());
                             particle_flare(tail, head, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 2000 : 1250, PART_F_SMOKE, 0x252525, ATK_MINIGUN_SHOOT==1 || ATK_AK47_SHOOT==1 ? 1.f : 0.75f, p.owner, gfx::champicolor(), 3);
                             break;
 

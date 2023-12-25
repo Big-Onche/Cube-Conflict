@@ -68,7 +68,7 @@ namespace gfx
             case ATK_SPOCKGUN_SHOOT:
             {
                 if(lookupmaterial(v)!=MAT_WATER) particle_splash(PART_SPARK, 15, 100, v, hasroids(owner) ? 0xFF0000 : 0x00FF66, 0.5f, 250, 250, 0, champicolor());
-                adddynlight(safe ? v : lightloc, 1.25f*attacks[atk].exprad, vec(0.0f, 1.5f, 0.0f), 200, 50, 0, attacks[atk].exprad/2, vec(1.f, 1.f, 1.f));
+                adddynlight(safe ? v : lightloc, 1.25f*attacks[atk].exprad, gfx::hasroids(owner) ? vec(1.5f, 0.f, 0.f) : vec(0.f, 1.5f, 0.f), 200, 50, 0, attacks[atk].exprad/2, vec(1.f, 1.f, 1.f));
                 return;
             }
         }
@@ -277,8 +277,8 @@ namespace gfx
                 adddynlight(muzzlepos, 75, vec(0.0f, 1.25f, 0.0f), 50, 2, lightflags, 75, vec(0.0f, 1.25f, 0.0f), d);
                 break;
             case ATK_RAIL_SHOOT:
-                loopi(2) particle_flare(muzzlepos, to, 50+rnd(50), PART_LIGHTNING, 0x8888FF, 1.5f+rnd(2), NULL, gfx::champicolor());
-                light_trail(muzzlepos, to, 60, 50+rnd(50), 10, vec(0.2f, 0.6f, 2.f));
+                loopi(2) particle_flare(muzzlepos, to, 50+rnd(50), PART_LIGHTNING, hasroids(d) ? 0xFF0000 : 0x8888FF, 1.5f+rnd(2), NULL, gfx::champicolor());
+                light_trail(muzzlepos, to, 60, 50+rnd(50), 10, hasroids(d) ? vec(2.5f, 0.f, 0.f) :  vec(0.2f, 0.6f, 2.f));
                 particle_flare(muzzlepos, muzzlepos, 140, PART_MF_ELEC, d->boostmillis[B_RAGE] || hasroids(d) ? 0xFF2222 : d->abilitymillis[game::ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0x50CFFF, 4.f/adaptpartsize(d), d, champicolor());
                 adddynlight(muzzlepos, 100, vec(0.25f, 0.75f, 2.0f), 40, 2, lightflags, 0, vec(0.25f, 0.75f, 2.0f), d);
                 break;
