@@ -1117,7 +1117,6 @@ namespace ai
         }
 
         if(d->abilitymillis[ABILITY_3] && d->aptitude==APT_PHYSICIEN && randomevent(17)) d->jumping = true;
-        else if(d->gunselect==GUN_ARTIFICE || d->gunselect==GUN_SMAW || d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_ROQUETTES) d->jumping = true;
 		else if(!d->ai->dontmove || (d->boostmillis[B_JOINT] && randomevent(17))) jumpto(d, b, d->ai->spot);
 
         gameent *e = getclient(d->ai->enemy);
@@ -1180,6 +1179,7 @@ namespace ai
                 {
                     if((canshoot(d, atk, e) && hastarget(d, atk, b, e, yaw, pitch, dp.squaredist(ep))) || (d->aptitude==APT_PRETRE && d->abilitymillis[ABILITY_3]))
                     {
+                        if((d->gunselect==GUN_ARTIFICE || d->gunselect==GUN_SMAW || d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_ROQUETTES) && !idle) d->jumping = true;
                         d->attacking = ACT_SHOOT;
                         d->ai->lastaction = lastmillis;
                         result = 3;
