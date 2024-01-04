@@ -3,7 +3,7 @@ LICENSE
 
 Cube Conflict game, any release.
 
-Copyright (C) 2013-2023 Jean Onche
+Copyright (C) 2013-2024 Jean Onche
 
 This software is provided 'as-is', without any express or implied
 warranty. In no event will the authors be held liable for any damages
@@ -42,20 +42,20 @@ This will prevent you from infringing licenses acquired expressly for Cube Confl
 
 Every license is in "licenses" folder.
 
-"licenses/libraries" are for every library used in the game.
-"licenses/licenses_3dmodels.txt" contains a database of each 3D asset used in the game and a ref to its respective license.
-"licenses/licenses_images.txt" contains a database of each image/texture used in the game and a ref to its respective license.
-"licenses/licenses_songs.txt" contains a database of each music used in the game and a ref to its respective license.
-"licenses/licenses_sounds.txt" contains a database of each sound effect used in the game and a ref to its respective license.
+"docs/licenses/libraries" are for every library used in the game.
+"docs/licenses/licenses_3dmodels.txt" contains a database of each 3D asset used in the game and a ref to its respective license.
+"docs/licenses/licenses_images.txt" contains a database of each image/texture used in the game and a ref to its respective license.
+"docs/licenses/licenses_songs.txt" contains a database of each music used in the game and a ref to its respective license.
+"docs/licenses/licenses_sounds.txt" contains a database of each sound effect used in the game and a ref to its respective license.
 
-"licenses/licenses_certificates" contains every license certificate for any content used in the game, referred to in each database.
+"docs/licenses/licenses_certificates" contains every license certificate for any content used in the game, referred to in each database.
 
 
 DEPENDENCIES
 =============
 
 Cube Conflict uses Tesseract (http://tesseract.gg) as game engine. 
-See "licences/readme_tesseract.txt"
+See "readme_tesseract.txt"
 
 The included enet network library is covered by an MIT-style license, 
 which is however compatible with the above license for all practical purposes.

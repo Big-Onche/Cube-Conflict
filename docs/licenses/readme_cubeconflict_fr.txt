@@ -3,7 +3,7 @@ LICENCE
 
 Cube Conflict, toutes versions confondues.
 
-Copyright (C) 2013-2023 Jean Onche.
+Copyright (C) 2013-2024 Jean Onche.
 
 Ce logiciel est fourni "tel quel", sans aucune garantie formelle ou implicite. 
 En aucun cas, les auteurs ne pourront être tenus responsables de tout dommage
@@ -42,13 +42,13 @@ Cela vous évitera d'enfreindre des licenses acquises expressément pour Cube Co
 
 Chaque licenses se trouve dans le dossier "licenses"
 
-"licenses/libraries" contient toutes les liscenses liées aux librairies utilisées pour le jeu..
-"licenses/licenses_3dmodels.txt" contient une base de donnée de tous les modèles 3D utilisés et une référence pour leurs licenses respectives.
-"licenses/licenses_images.txt" contient une base de donnée de tous les images/textures utilisées et une référence pour leurs licenses respectives.
-"licenses/licenses_songs.txt" contient une base de donnée de toutes les musiques utilisées et une référence pour leurs licenses respectives.
-"licenses/licenses_sounds.txt" contient une base de donnée de tous les effets sonores utilisés et une référence pour leurs licenses respectives.
+"docs/licenses/libraries" contient toutes les liscenses liées aux librairies utilisées pour le jeu..
+"docs/licenses/licenses_3dmodels.txt" contient une base de donnée de tous les modèles 3D utilisés et une référence pour leurs licenses respectives.
+"docs/licenses/licenses_images.txt" contient une base de donnée de tous les images/textures utilisées et une référence pour leurs licenses respectives.
+"docs/licenses/licenses_songs.txt" contient une base de donnée de toutes les musiques utilisées et une référence pour leurs licenses respectives.
+"docs/licenses/licenses_sounds.txt" contient une base de donnée de tous les effets sonores utilisés et une référence pour leurs licenses respectives.
 
-"licenses/licenses_certificates" contient tous les certificats de license pour l'entièreté des fichiers du jeu, référé dans chaque base de donnée.
+"docs/licenses/licenses_certificates" contient tous les certificats de license pour l'entièreté des fichiers du jeu, référé dans chaque base de donnée.
 
 
 DEPENDANCES
