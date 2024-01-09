@@ -1140,7 +1140,7 @@ int getclockmillis()
 }
 
 VAR(numcpus, 1, 1, 16);
-VAR(language, 0, 1, 2);
+VAR(language, 0, 1, 3);
 
 bool initsteam()
 {
@@ -1153,6 +1153,7 @@ bool initsteam()
     else
     {
         logoutf("init: steam api");
+        if(!SteamUserStats()->RequestCurrentStats()) conoutf(CON_ERROR, "\fc%s", readstr("Console_Error_InitSteamAPI"));
         return true;
     }
 }
@@ -1335,13 +1336,14 @@ int main(int argc, char **argv)
 
     identflags |= IDF_PERSIST;
 
-    addpostfx("sobel", 1, 1, 1, 1, vec4(1, 1, 1, 1));
-    addpostfx("mainfilter", 1, 1, 1, 1, vec4(1, 1, 1, 1));
-    addpostfx("deathscreen", 1, 1, 1, 1, vec4(1, 1, 1, 1));
-    addpostfx("protanopia", 1, 1, 1, 1, vec4(1, 1, 1, 1));
-    addpostfx("deuteranopia", 1, 1, 1, 1, vec4(1, 1, 1, 1));
-    addpostfx("tritanopia", 1, 1, 1, 1, vec4(1, 1, 1, 1));
-    addpostfx("achromatopsia", 1, 1, 1, 1, vec4(1, 1, 1, 1));
+    addpostfx("rdblur");
+    addpostfx("sobel");
+    addpostfx("mainfilter");
+    addpostfx("deathscreen");
+    addpostfx("protanopia");
+    addpostfx("deuteranopia");
+    addpostfx("tritanopia");
+    addpostfx("achromatopsia");
     clearpostfx();
 
     logoutf("init: mainloop");

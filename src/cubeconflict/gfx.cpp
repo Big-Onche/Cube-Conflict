@@ -7,15 +7,10 @@ VARP(epilepsyfriendly, 0, 0, 1);
 void setcbfilter(int i)
 {
     clearpostfx();
-    addpostfx("mainfilter", 1, 1, 1, 1, vec4(1, 1, 1, 1));
-
-    switch(i)
-    {
-        case 1: addpostfx("protanopia", 1, 1, 1, 1, vec4(1, 1, 1, 1)); break;
-        case 2: addpostfx("deuteranopia", 1, 1, 1, 1, vec4(1, 1, 1, 1)); break;
-        case 3: addpostfx("tritanopia", 1, 1, 1, 1, vec4(1, 1, 1, 1)); break;
-        case 4: addpostfx("achromatopsia", 1, 1, 1, 1, vec4(1, 1, 1, 1));
-    }
+    addpostfx("mainfilter");
+    if(!gfx::cbfilter) return;
+    defformatstring(s, "%s", gfx::cbfilter==1 ? "protanopia" : gfx::cbfilter==2 ? "deuteranopia" : gfx::cbfilter==3 ? "tritanopia" : "achromatopsia");
+    addpostfx(s);
 }
 
 namespace gfx
@@ -327,13 +322,13 @@ namespace gfx
     void addColorBlindnessFilter()
     {
         defformatstring(s, "%s", cbfilter==1 ? "protanopia" : cbfilter==2 ? "deuteranopia" : cbfilter==3 ? "tritanopia" : "achromatopsia");
-        addpostfx(s, 1, 1, 1, 1, vec4(1, 1, 1, 1));
+        addpostfx(s);
     }
 
     void resetpostfx()
     {
         clearpostfx();
-        addpostfx("mainfilter", 1, 1, 1, 1, vec4(1, 1, 1, 1));
+        addpostfx("mainfilter");
         if(cbfilter) addColorBlindnessFilter();
         fullbrightmodels = 0;
         setShroomsEfx(false);
