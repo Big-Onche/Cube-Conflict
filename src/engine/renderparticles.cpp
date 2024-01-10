@@ -259,6 +259,9 @@ struct partrenderer
                             case STAIN_BULLET_GLOW:
                                 addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size*2.5f, 0xFF6622);
                                 break;
+                            case STAIN_BLOOD:
+                                addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size, bvec(0x60, 0xFF, 0xFF), rnd(4));
+                                break;
                         }
                         blend = 0;
                     }
