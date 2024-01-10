@@ -19,34 +19,42 @@ VARP(minimizedmute, 0, 0, 1);
 VARP(maxsoundsatonce, 32, 96, MAX_SOURCES);
 VARP(soundfreq, 0, 44100, 48000);
 
+int gameSoundId = 0;
 Sound gameSounds[NUMSNDS];
-ICOMMAND(gamesound, "isii", (int *id, char *path, int *alts, int *vol),
-    formatstring(gameSounds[*id].soundPath, "%s", path);
-    gameSounds[*id].numAlts = *alts;
-    gameSounds[*id].soundVol = *vol;
-    gameSounds[*id].loaded = loadSound(gameSounds[*id]);
-    loadSound(gameSounds[*id]);
+ICOMMAND(gamesound, "siii", (char *path, int *alts, int *vol, bool *occl),
+    if(gameSoundId >= NUMSNDS) { conoutf(CON_ERROR, "Unable to load sound: %s (id %d is greater than amount of sounds)", path, gameSoundId); return; }
+    formatstring(gameSounds[gameSoundId].soundPath, "%s", path);
+    gameSounds[gameSoundId].numAlts = *alts;
+    gameSounds[gameSoundId].soundVol = *vol;
+    gameSounds[gameSoundId].noGeomOcclusion = *occl;
+    gameSounds[gameSoundId].loaded = loadSound(gameSounds[gameSoundId]);
+    loadSound(gameSounds[gameSoundId]);
+    gameSoundId++;
 );
 
 #define NUMMAPSNDS 32 // temporary fixed shit
+int mapSoundId = 0;
 Sound mapSounds[NUMMAPSNDS];
-ICOMMAND(mapsound, "isiii", (int *id, char *path, int *alts, int *vol, bool *occl),
-    if(*id>=NUMMAPSNDS) {conoutf(CON_ERROR, "Max amount of map sounds reached"); return; }
-    formatstring(mapSounds[*id].soundPath, "%s", path);
-    mapSounds[*id].numAlts = *alts;
-    mapSounds[*id].soundVol = *vol;
-    mapSounds[*id].noGeomOcclusion = *occl;
-    mapSounds[*id].loaded = loadSound(mapSounds[*id]);
+ICOMMAND(mapsound, "siii", (char *path, int *alts, int *vol, bool *occl),
+    if(mapSoundId >= NUMMAPSNDS) { conoutf(CON_ERROR, "Unable to load map sound: %s (id %d is greater than amount of map sounds)", path, mapSoundId); return; }
+    formatstring(mapSounds[mapSoundId].soundPath, "%s", path);
+    mapSounds[mapSoundId].numAlts = *alts;
+    mapSounds[mapSoundId].soundVol = *vol;
+    mapSounds[mapSoundId].noGeomOcclusion = *occl;
+    mapSounds[mapSoundId].loaded = loadSound(mapSounds[mapSoundId]);
+    mapSoundId++;
 );
 
+int musicId = 0;
 Sound music[NUMSONGS];
-ICOMMAND(gamemusic, "isii", (int *id, char *path, int *alts, int *vol),
-    if(*id>=NUMSONGS) {conoutf(CON_ERROR, "Max amount of songs reached"); return; }
-    formatstring(music[*id].soundPath, "%s", path);
-    music[*id].numAlts = *alts;
-    music[*id].soundVol = *vol;
-    music[*id].noGeomOcclusion = true;
-    music[*id].loaded = loadSound(music[*id], true);
+ICOMMAND(gamemusic, "sii", (char *path, int *alts, int *vol),
+    if(musicId >= NUMSONGS) { conoutf(CON_ERROR, "Unable to load music: %s (id %d is greater than amount of musics)", path, musicId); return; }
+    formatstring(music[musicId].soundPath, "%s", path);
+    music[musicId].numAlts = *alts;
+    music[musicId].soundVol = *vol;
+    music[musicId].noGeomOcclusion = true;
+    music[musicId].loaded = loadSound(music[musicId], true);
+    musicId++;
 );
 
 void reportSoundError(const char* func, const char* filepath, int buffer)
