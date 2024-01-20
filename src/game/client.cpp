@@ -1764,7 +1764,7 @@ namespace game
                 if(player1->aptitude==APT_VIKING && target==player1 && actor!=player1 && player1->state==CS_ALIVE)
                 {
                     player1->boostmillis[B_RAGE]+=damage*5;
-                    if(player1->boostmillis[B_RAGE]>8000 && player1->health>0) unlockAchievement(ACH_RAGE);
+                    if(player1->boostmillis[B_RAGE]>8000) unlockAchievement(ACH_RAGE);
                 }
                 break;
             }
