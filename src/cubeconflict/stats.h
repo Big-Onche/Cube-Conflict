@@ -2,7 +2,6 @@
 #define __STATS_H__
 
 #include "steam_api.h"
-#include "isteamuserstats.h"
 
 extern int xpForNextLevel, totalXpNeeded;
 

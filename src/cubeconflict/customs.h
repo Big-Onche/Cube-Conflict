@@ -63,21 +63,4 @@ static const struct gravesinfo { const char *ident; int price; } customstombes[N
     {"lingots",   1500}
 };
 
-/*
-enum {VOI_CORTEX = 0, VOI_VALOCHE, VOI_VIEILLE, VOI_HENDEK, VOI_MILI1, VOI_MILI2, VOI_MOUNIR, VOI_DELAVIER, VOI_PRAUD, VOI_MALLEVILLE, NUMVOICES};
-static const struct danceinfo { const char *ident; int price; } customsdance[11] =
-{
-    {"Cortex",        0},
-    {"Valoche",      50},
-    {"Vieille",     100},
-    {"Hendek",      100},
-    {"Militaire 1", 250},
-    {"Militaire 2", 250},
-    {"Mounir",      250},
-    {"Delavier",    500},
-    {"Praud",       500},
-    {"Malleville",  1500},
-    {"Raoult",      1500}
-};
-*/
 #endif

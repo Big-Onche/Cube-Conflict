@@ -60,8 +60,7 @@ VARP(autosavesteps, 1, 100, INT_MAX);
 void updateStat(int value, int statId, bool rewrite) // update a stat
 {
     if(!IS_ON_OFFICIAL_SERV) return;
-    if(rewrite) stat[statId] = value;
-    else stat[statId] += value;
+    rewrite ? stat[statId] = value : stat[statId] += value;
 
     autoSave++;
     if(autoSave >= autosavesteps) { writeSave(); autoSave=0; } // save every "autosavesteps"
@@ -72,9 +71,9 @@ float killDeathRatio()
     return (float(stat[STAT_KILLS])/(float(stat[STAT_MORTS]) == 0.f ? 1.f : float(stat[STAT_MORTS])));
 }
 
-//ICOMMAND(gettotalstats, "", (), intret(NUMSTATS)); //gets nb of stats for ui
+ICOMMAND(gettotalstats, "", (), intret(NUMSTATS)); // gets nb of stats for ui
 
-ICOMMAND(getstatlogo, "i", (int *statID), //gets stat logo for ui
+ICOMMAND(getstatlogo, "i", (int *statID), // gets stat logo for ui
     if(*statID<0 || *statID>=NUMSTATS) result("media/texture/game/notexture.png");
     else
     {
@@ -105,7 +104,6 @@ ICOMMAND(getstatinfo, "i", (int *statID),
         }
         default: formatstring(val, "%d%s", stat[*statID], *statID==STAT_MAXKILLDIST ? " m" : "");
     }
-
     result(val);
 );
 
@@ -226,11 +224,11 @@ bool canUnlockOffline(int achID)
 void unlockAchievement(int achID)
 {
     bool newAchievement = isLocked(achID);
-    if(canUnlockOffline(achID) || IS_ON_OFFICIAL_SERV) //Ne débloque que si serveur officiel sauf succès en solo
+    if(canUnlockOffline(achID) || IS_ON_OFFICIAL_SERV)
     {
         if(IS_USING_STEAM)
         {
-            SteamUserStats()->SetAchievement(achievementNames[achID]); //Met le succès à jour côté steam
+            SteamUserStats()->SetAchievement(achievementNames[achID]);
             SteamUserStats()->StoreStats();
         }
 
@@ -246,19 +244,20 @@ void unlockAchievement(int achID)
 
 void getsteamachievements() // retrieves achievements from steam
 {
-    loopi(NUMACHS) {
-        bool achieved;
-        SteamUserStats()->GetAchievement(achievementNames[i], &achieved);
-        achievement[i] = achieved;
+    loopi(NUMACHS)
+    {
+        bool unlocked;
+        SteamUserStats()->GetAchievement(achievementNames[i], &unlocked);
+        achievement[i] = unlocked;
     }
 }
 
-ICOMMAND(gettotalach, "", (), intret(NUMACHS)); //gets nb of achievements for ui
+ICOMMAND(gettotalach, "", (), intret(NUMACHS)); // gets nb of achievements for ui
 
 ICOMMAND(getunlockedach, "", (), //gets nb of unlocked achievements for ui
-    int totalachunlocked = 0;
-    loopi(NUMACHS) { if(!isLocked(i)) totalachunlocked++; }
-    intret(totalachunlocked);
+    int unlocks = 0;
+    loopi(NUMACHS) { if(!isLocked(i)) unlocks++; }
+    intret(unlocks);
 );
 
 ICOMMAND(getachievementslogo, "i", (int *achID), //gets achievement logo for ui
