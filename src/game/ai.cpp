@@ -64,9 +64,16 @@ namespace ai
 
     bool targetable(gameent *d, gameent *e)
     {
-        if(d == e || !canmove(d)) return false;
-        else if((e->aptitude==APT_ESPION && e->abilitymillis[ABILITY_2] && e->attacking==ACT_IDLE && e->physstate!=PHYS_FALL) || (e->aptitude==APT_PHYSICIEN && e->abilitymillis[ABILITY_2])) return false;
-        else return e->state == CS_ALIVE && !isteam(d->team, e->team);
+        if(d == e) return false;
+        if(e->abilitymillis[ABILITY_2])
+        {
+            switch(e->aptitude)
+            {
+                case APT_PHYSICIEN: if(e->o.dist(d->o) > d->skill*5) return false;
+                case APT_ESPION: if(e->attacking==ACT_IDLE && e->physstate!=PHYS_FALL) return false;
+            }
+        }
+        return e->state == CS_ALIVE && !isteam(d->team, e->team);
     }
 
     bool getsight(vec &o, float yaw, float pitch, vec &q, vec &v, float mdist, float fovx, float fovy)
@@ -104,9 +111,9 @@ namespace ai
                 case GUN_SKS:
                 case GUN_HYDRA:
                 case GUN_S_CAMPOUZE:
-                    return d->ammo[attacks[atk].gun] > 0;
+                    return d->ammo[attacks[atk].gun];
                     break;
-                default: return d->ammo[attacks[atk].gun] > 0 && lastmillis - d->lastaction >= d->gunwait;
+                default: return d->ammo[attacks[atk].gun] && lastmillis - d->lastaction >= d->gunwait;
             }
         }
         return false;
@@ -127,34 +134,51 @@ namespace ai
 
     const int aiskew[NUMGUNS] = { 150, 1, 1, 30, 30, 1, 1, 15, 40, 1, 1, 3, 25, 10, 25, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 
+    float randomAimOffset(float radius, float skew, int gun, int skill)
+    {
+        return (rnd(int(radius * (aiskew[gun] * skew)) + 1) - (radius * aiskew[gun])) / max(skill, 1);
+    }
+
     vec getaimpos(gameent *d, int atk, gameent *e)
     {
-        vec o = e->o;
+        vec targetPos = e->o;
 
-        if(e->aptitude==APT_ESPION && e->abilitymillis[ABILITY_1] && randomevent(2))
-        {
-            const int positions[4][2] = { {25, 25}, {-25, -25}, {25, -25}, {-25, 25} };
-            o.add(vec(positions[d->aptiseed][0], positions[d->aptiseed][1], 0));
-        }
         switch(atk)
         {
-            case ATK_PULSE_SHOOT: case ATK_GRAP1_SHOOT: o.z += (e->aboveeye*0.2f)-(0.8f*d->eyeheight); break;
-            case ATK_SMAW_SHOOT: case ATK_NUKE_SHOOT: case ATK_ROQUETTES_SHOOT: case ATK_ARTIFICE_SHOOT: o.z += (e->aboveeye*0.2f)-(0.9f*d->eyeheight); break;
-            default: o.z += (e->aboveeye-e->eyeheight)*0.5f;
+            case ATK_PULSE_SHOOT:
+            case ATK_GRAP1_SHOOT:
+                targetPos.z += (e->aboveeye*0.2f)-(0.8f*d->eyeheight);
+                break;
+            case ATK_SMAW_SHOOT:
+            case ATK_ROQUETTES_SHOOT:
+            case ATK_ARTIFICE_SHOOT:
+                targetPos = e->feetpos();
+        }
+
+        bool changeAim = lastmillis >= d->ai->lastaimrnd;
+
+        if(e->aptitude==APT_ESPION && e->abilitymillis[ABILITY_1] && changeAim && rnd(2))
+        {
+            const int positions[4][2] = { {25, 25}, {-25, -25}, {25, -25}, {-25, 25} };
+            targetPos.add(vec(positions[d->aptiseed][0], positions[d->aptiseed][1], 0));
+        }
+        else if(e->aptitude==APT_PHYSICIEN && e->abilitymillis[ABILITY_2])
+        {
+            targetPos.add(vec(rnd(51)-25, rnd(51)-25, 0));
         }
 
         if(d->skill <= 100)
         {
-            if(lastmillis >= d->ai->lastaimrnd)
+            if(changeAim)
             {
-                #define rndaioffset(r) ((rnd(int(r*aiskew[d->gunselect]*2)+1)-(r*aiskew[d->gunselect]))*(1.f/float(max(d->skill, 1))))
-                loopk(3) d->ai->aimrnd[k] = rndaioffset(e->radius);
-                int dur = (d->skill+10)*10;
-                d->ai->lastaimrnd = lastmillis+dur+rnd(dur);
+                loopk(3) d->ai->aimrnd[k] = randomAimOffset(e->radius, 2.f, d->gunselect, d->skill);
+                int duration = (d->skill + 10) * (d->skill+10)*10;
+                d->ai->lastaimrnd = lastmillis + duration + rnd(duration);
             }
-            loopk(3) o[k] += d->ai->aimrnd[k];
+            loopk(3) targetPos[k] += d->ai->aimrnd[k];
         }
-        return o;
+
+        return targetPos;
     }
 
     void create(gameent *d)
@@ -1019,30 +1043,12 @@ namespace ai
         }
     }
 
-    void fixfullrange(float &yaw, float &pitch, float &roll, bool full)
-    {
-        if(full)
-        {
-            if(pitch < -180.0f) pitch = 180.0f - fmodf(-180.0f - pitch, 360.0f);
-            else if(pitch >= 180.0f) pitch = fmodf(pitch + 180.0f, 360.0f) - 180.0f;
-            if(roll < -180.0f) roll = 180.0f - fmodf(-180.0f - roll, 360.0f);
-            else if(roll >= 180.0f) roll = fmodf(roll + 180.0f, 360.0f) - 180.0f;
-        }
-        else
-        {
-            if(pitch > 89.9f) pitch = 89.9f;
-            else if(pitch < -89.9f) pitch = -89.9f;
-            if(roll > 89.9f) roll = 89.9f;
-            else if(roll < -89.9f) roll = -89.9f;
-        }
-        if(yaw < 0.0f) yaw = 360.0f - fmodf(-yaw, 360.0f);
-        else if(yaw >= 360.0f) yaw = fmodf(yaw, 360.0f);
-    }
-
     void fixrange(float &yaw, float &pitch)
     {
-        float r = 0.f;
-        fixfullrange(yaw, pitch, r, false);
+        if(pitch > 89.9f) pitch = 89.9f;
+        else if(pitch < -89.9f) pitch = -89.9f;
+        if(yaw < 0.0f) yaw = 360.0f - fmodf(-yaw, 360.0f);
+        else if(yaw >= 360.0f) yaw = fmodf(yaw, 360.0f);
     }
 
     void getyawpitch(const vec &from, const vec &pos, float &yaw, float &pitch)
@@ -1262,31 +1268,34 @@ namespace ai
         return false;
     }
 
-    static const int gunprefs[] = {GUN_S_NUKE, GUN_S_CAMPOUZE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_KAMIKAZE, GUN_CACNINJA, GUN_CACFLEAU, GUN_CACMARTEAU, GUN_CACMASTER, GUN_CAC349, GUN_MINIGUN, GUN_PLASMA, GUN_ELEC, GUN_GRAP1, GUN_LANCEFLAMMES, GUN_HYDRA, GUN_SV98, GUN_SMAW, GUN_ARBALETE, GUN_ARTIFICE, GUN_MOSSBERG, GUN_FAMAS, GUN_AK47, GUN_M32, GUN_SKS, GUN_SPOCKGUN, GUN_UZI };
+    static const int gunprefs[] = {GUN_CACFLEAU, GUN_CACMARTEAU, GUN_CACMASTER, GUN_CAC349, GUN_MINIGUN, GUN_PLASMA, GUN_ELEC, GUN_GRAP1, GUN_LANCEFLAMMES, GUN_HYDRA, GUN_SV98, GUN_SMAW, GUN_ARBALETE, GUN_ARTIFICE, GUN_MOSSBERG, GUN_FAMAS, GUN_AK47, GUN_M32, GUN_SKS, GUN_SPOCKGUN, GUN_UZI };
 
     bool request(gameent *d, aistate &b)
     {
         gameent *e = getclient(d->ai->enemy);
-        if(d->armourtype==A_ASSIST && !d->armour && d->ammo[GUN_ASSISTXPL]){gunselect(GUN_ASSISTXPL, d, true); return process(d, b) >= 2;}
-        else if (d->aptitude==APT_KAMIKAZE && hasrange(d, e, GUN_KAMIKAZE) && d->ammo[GUN_KAMIKAZE]) {gunselect(GUN_KAMIKAZE, d); return process(d, b) >= 2;}
-        else {loopi(4) if(d->hasammo(GUN_S_NUKE+i)){gunselect(GUN_S_NUKE+i, d); return process(d, b) >= 2;} }
+        if(d->armourtype==A_ASSIST && !d->armour && d->ammo[GUN_ASSISTXPL]) {gunselect(GUN_ASSISTXPL, d, true); goto process;}
+        else {loopi(4) if(d->hasammo(GUN_S_NUKE+i)) {gunselect(GUN_S_NUKE+i, d); goto process;} }
+
+        switch(d->aptitude)
+        {
+            case APT_KAMIKAZE:
+                if(hasrange(d, e, GUN_KAMIKAZE) && d->ammo[GUN_KAMIKAZE])
+                {
+                    gunselect(GUN_KAMIKAZE, d);
+                    goto process;
+                }
+            case APT_NINJA:
+                if(hasrange(d, e, GUN_CACNINJA))
+                {
+                    gunselect(GUN_CACNINJA, d);
+                    goto process;
+                }
+        }
 
         if(m_identique)
         {
-            switch(d->aptitude)
-            {
-                case APT_KAMIKAZE:
-                    if(hasrange(d, e, GUN_KAMIKAZE) && d->ammo[GUN_KAMIKAZE]) gunselect(GUN_KAMIKAZE, d);
-                    else gunselect(cncurweapon, d);
-                    break;
-                case APT_NINJA:
-                    if(hasrange(d, e, GUN_CACNINJA)) gunselect(GUN_CACNINJA, d);
-                    else gunselect(cncurweapon, d);
-                    break;
-                default:
-                    gunselect(cncurweapon, d);
-            }
-            return process(d, b) >= 2;
+            gunselect(cncurweapon, d);
+            goto process;
         }
 
         if(!d->hasammo(d->gunselect) || !hasrange(d, e, d->gunselect) || (d->gunselect != d->ai->weappref && (!isgoodammo(d->gunselect) || d->hasammo(d->ai->weappref))))
@@ -1303,7 +1312,8 @@ namespace ai
             }
             if(gun >= 0 && gun != d->gunselect) gunselect(gun, d);
         }
-        return process(d, b) >= 2;
+
+        process: return process(d, b) >= 2;
     }
 
     void timeouts(gameent *d, aistate &b)
