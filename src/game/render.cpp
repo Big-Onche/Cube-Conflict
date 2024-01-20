@@ -264,8 +264,6 @@ namespace game
     }
 
     VAR(animoverride, -1, 0, NUMANIMS-1);
-    VAR(testanims, 0, 0, 1);
-    VAR(testpitch, -90, 0, 90);
 
     VARFP(player1_cape, 0, 0, sizeof(customscapes)/sizeof(customscapes[0])-1,
     {
@@ -282,9 +280,15 @@ namespace game
         if(player1->customtombe==10) unlockAchievement(ACH_FUCKYOU);
     });
 
+    bool validCape(int i) { return i >= 0 && i <= NUMCAPES; }
+    bool validGrave(int i) { return i >= 0 && i <= NUMGRAVES; }
+
     void rendertombeplayer(gameent *d, float fade)
     {
-         rendermodel(getgravedir(d->customtombe), ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED, d, NULL, 0, 0, fade); //DEBUG
+        if(validGrave(d->customcape))
+        {
+            rendermodel(getgravedir(d->customtombe), ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED, d, NULL, 0, 0, fade);
+        }
     }
 
     static const int dirs[9] =
@@ -298,76 +302,28 @@ namespace game
 
     void renderplayer(gameent *d, const playermodelinfo &mdl, int color, int team, float fade, int flags = 0, bool mainpass = true)
     {
-        int anim = ANIM_IDLE|ANIM_LOOP, lastaction = d->lastaction;
-
-        float yaw = testanims && d==player1 ? 0 : d->yaw,
-              pitch = testpitch && d==player1 ? testpitch : d->pitch;
-        vec o = d->feetpos();
-        int basetime = 0;
-        if(animoverride) anim = (animoverride<0 ? ANIM_ALL : animoverride)|ANIM_LOOP;
-
-        const char *mdlname;
-        if(d==player1 || m_tutorial) mdlname = (haspowerarmor(player1) ? "smileys/armureassistee" : mdl.model[1]); //player1 always yellow
-        else
-        {
-            if(haspowerarmor(d)) mdlname = d->team==player1->team && validteam(team) ? "smileys/armureassistee" : "smileys/armureassistee/red";
-            else mdlname =  d->abilitymillis[ABILITY_2] && d->aptitude==APT_PHYSICIEN ? "smileys/phy_2" : gfx::cbfilter && d->team==player1->team ? mdl.cbmodel : mdl.model[validteam(team) && d->team==player1->team ? 1 : 0];
-        }
-
+        /////////////////////////// Dead ///////////////////////////
         if(d->state==CS_DEAD && d->lastpain)
         {
             flags |= MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY;
 
-            if(d->tombepop<1.0f) d->tombepop += 3.f/gfx::nbfps;
-            rendermodel(getgravedir(d->customtombe), ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, flags, NULL, NULL, 0, 0, d->tombepop, vec4(vec::hexcolor(color), 5));
+            if(validGrave(d->customtombe))
+            {
+                d->tombepop = min(d->tombepop + (3.f / gfx::nbfps), 1.0f);
+                rendermodel(getgravedir(d->customtombe), ANIM_MAPMODEL|ANIM_LOOP, d->feetpos(), d->yaw, 0, 0, flags, NULL, NULL, 0, 0, d->tombepop, vec4(vec::hexcolor(color), 5));
+            }
 
-            d->skeletonfade -= 3.f/gfx::nbfps;
-            if(d->skeletonfade<0.066f) return;
-            rendermodel("mapmodel/smileys/mort", ANIM_MAPMODEL, o, d->yaw+90, 0, 0, flags, NULL, NULL, 0, 0, d->skeletonfade);
+            d->skeletonfade = max(d->skeletonfade - (3.f / gfx::nbfps), 0.0f);
+            if(d->skeletonfade) rendermodel("mapmodel/smileys/mort", ANIM_MAPMODEL, d->feetpos(), d->yaw+90, 0, 0, flags, NULL, NULL, 0, 0, d->skeletonfade);
             return;
         }
 
-        //////////////////////////////////////////////////////////////////MODELES//////////////////////////////////////////////////////////////////
-        modelattach a[10];
-        int ai = 0;
-        if(d->gunselect>=GUN_ELEC && d->gunselect<=GUN_CACNINJA)
-        {
-            int vanim = ANIM_VWEP_IDLE|ANIM_LOOP, vtime = 0;
-            if(isattacking(d))
-            {
-                vanim = ANIM_VWEP_SHOOT;
-                vtime = lastaction;
-            }
-            a[ai++] = modelattach("tag_weapon", guns[d->gunselect].vwep , vanim, vtime);
-        }
-        if(mainpass && !(flags&MDL_ONLYSHADOW))
-        {
-            d->muzzle = d->balles = vec(-1, -1, -1);
-            if(d->gunselect>=GUN_ELEC && d->gunselect<=GUN_CACNINJA) a[ai++] = modelattach("tag_muzzle", &d->muzzle);
-            if(d->gunselect>=GUN_ELEC && d->gunselect<=GUN_CACNINJA) a[ai++] = modelattach("tag_balles", &d->balles);
-        }
+        /////////////////////////// Animations and gfx ///////////////////////////
+        int anim = ANIM_IDLE|ANIM_LOOP, lastaction = d->lastaction;
 
-        ////////Boucliers////////
-        if(d->armour && camera1->o.dist(d->o) && d->armourtype>=A_WOOD && d->armourtype<=A_ASSIST)
-        {
-            a[ai++] = modelattach("tag_shield", gfx::getshielddir(d->armourtype, d->armour), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-        }
-        ////////Boosts////////
-        if(d->boostmillis[B_JOINT]) a[ai++] = modelattach("tag_boost1", "boosts/joint", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-        if(d->boostmillis[B_ROIDS]) a[ai++] = modelattach("tag_boost1", "boosts/steros", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-        if(d->boostmillis[B_EPO])   a[ai++] = modelattach("tag_boost2", "boosts/epo", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+        int basetime = 0;
+        if(animoverride) anim = (animoverride<0 ? ANIM_ALL : animoverride)|ANIM_LOOP;
 
-        ////////Hats////////
-        defformatstring(mdldir, "hats/%d", d->aptitude);
-        a[ai++] = modelattach("tag_hat", mdldir, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-
-        ////////Customisations////////
-        if(d->customcape>=0 && d->customcape<=13)
-        {
-            a[ai++] = modelattach("tag_cape", getcapedir(d->customcape, d->team==player1->team ? false : true), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-        }
-
-        //////////////////////////////////////////////////////////////////ANIMATIONS//////////////////////////////////////////////////////////////////
         if(d->state==CS_EDITING || d->state==CS_SPECTATOR) anim = ANIM_EDIT|ANIM_LOOP;
         else if(d->state==CS_LAGGED)                       anim = ANIM_LAG|ANIM_LOOP;
 
@@ -376,7 +332,7 @@ namespace game
             anim = ANIM_LOSE|ANIM_LOOP;
             if(validteam(team) ? bestteams.htfind(team)>=0 : bestplayers.find(d)>=0) anim = ANIM_WIN|ANIM_LOOP;
         }
-        //else if(packtaunt && d->lasttaunt && lastmillis-d->lasttaunt<1000)
+        //else if(d->lasttaunt && lastmillis-d->lasttaunt<1000)
         //{
         //    lastaction = d->lasttaunt;
         //    anim = ANIM_TAUNT|ANIM_LOOP;
@@ -402,6 +358,58 @@ namespace game
         }
         if(!((anim>>ANIM_SECONDARY)&ANIM_INDEX)) anim |= (ANIM_IDLE|ANIM_LOOP)<<ANIM_SECONDARY;
 
+        /////////////////////////// Main player model ///////////////////////////
+        const char *mdlname;
+        if(d==player1 || m_tutorial) mdlname = (haspowerarmor(player1) ? "smileys/armureassistee" : mdl.model[1]); // player1 is always yellow
+        else
+        {
+            if(haspowerarmor(d)) mdlname = d->team==player1->team && validteam(team) ? "smileys/armureassistee" : "smileys/armureassistee/red";
+            else mdlname =  d->abilitymillis[ABILITY_2] && d->aptitude==APT_PHYSICIEN ? "smileys/phy_2" : gfx::cbfilter && d->team==player1->team ? mdl.cbmodel : mdl.model[validteam(team) && d->team==player1->team ? 1 : 0];
+        }
+
+        modelattach a[10];
+        int ai = 0;
+
+        /////////////////////////// Gun ///////////////////////////
+        if(validgun(d->gunselect))
+        {
+            int vanim = ANIM_VWEP_IDLE|ANIM_LOOP, vtime = 0;
+            if(isattacking(d))
+            {
+                vanim = ANIM_VWEP_SHOOT;
+                vtime = lastaction;
+            }
+            a[ai++] = modelattach("tag_weapon", guns[d->gunselect].vwep , vanim, vtime);
+
+            if(mainpass && !(flags&MDL_ONLYSHADOW))
+            {
+                d->muzzle = d->balles = vec(-1, -1, -1);
+                a[ai++] = modelattach("tag_muzzle", &d->muzzle);
+                a[ai++] = modelattach("tag_balles", &d->balles);
+            }
+        }
+
+        /////////////////////////// Shield ///////////////////////////
+        if(d->armour && d->armourtype>=A_WOOD && d->armourtype<=A_ASSIST)
+        {
+            a[ai++] = modelattach("tag_shield", gfx::getshielddir(d->armourtype, d->armour), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+        }
+
+        /////////////////////////// Boosts ///////////////////////////
+        if(d->boostmillis[B_JOINT]) a[ai++] = modelattach("tag_boost1", "boosts/joint", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+        if(d->boostmillis[B_ROIDS]) a[ai++] = modelattach("tag_boost1", "boosts/steros", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+        if(d->boostmillis[B_EPO])   a[ai++] = modelattach("tag_boost2", "boosts/epo", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+
+        /////////////////////////// Classe's hat ///////////////////////////
+        defformatstring(mdldir, "hats/%d", d->aptitude);
+        a[ai++] = modelattach("tag_hat", mdldir, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+
+        /////////////////////////// Player's cape ///////////////////////////
+        if(validCape(d->customcape))
+        {
+            a[ai++] = modelattach("tag_cape", getcapedir(d->customcape, d->team==player1->team ? false : true), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+        }
+
         if(d!=player1) flags |= MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY;
         if(d->type==ENT_PLAYER) flags |= MDL_FULLBRIGHT;
         else flags |= MDL_CULL_DIST;
@@ -413,25 +421,25 @@ namespace game
         if(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_1])
         {
             if(d!=hudplayer()) flags = NULL;
-            vec doublepos = o;
+            vec doublepos = d->feetpos();
             const int positions[4][2] = { {25, 25}, {-25, -25}, {25, -25}, {-25, 25} };
             doublepos.add(vec(positions[d->aptiseed][0], positions[d->aptiseed][1], 0));
-            rendermodel(mdlname, anim, doublepos, yaw, d->pitch>12 ? 12 : d->pitch<-25 ? -25 : pitch, 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), d==player1 ? 0.3f : trans));
+            rendermodel(mdlname, anim, doublepos, d->yaw, clamp(d->pitch, -25, 12), 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), d==player1 ? 0.3f : trans));
         }
 
         if(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2])
         {
-            rendermodel(getdisguisement(d->aptiseed), anim, o, yaw, d->pitch>12 ? 12 : d->pitch<-25 ? -25 : pitch, 0, flags, d, NULL, basetime, 0, fade, vec4(vec::hexcolor(color), 1.0f));
+            rendermodel(getdisguisement(d->aptiseed), anim, d->feetpos(), d->yaw, clamp(d->pitch, -25, 12), 0, flags, d, NULL, basetime, 0, fade, vec4(vec::hexcolor(color), 1.0f));
             return;
         }
 
-        rendermodel(mdlname, anim, o, yaw, d->pitch>12 ? 12 : d->pitch<-25 ? -25 : pitch, 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), trans));
+        rendermodel(mdlname, anim, d->feetpos(), d->yaw, clamp(d->pitch, -25, 12), 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), trans));
 
-        //////////////////////////////////////////////////////////////////FIRST PERSON BODY//////////////////////////////////////////////////////////////////
+        /////////////////////////// first person body ///////////////////////////
         if(d==hudplayer() && gfx::forcecampos<0 && !thirdperson)
         {
-            vec pos = o;
-            rendermodel(mdlname, anim, pos.addz(3.5f), yaw, 28, 0, MDL_NOSHADOW, d, NULL, basetime, 0, 1.f, vec4(vec::hexcolor(color), trans));
+            vec pos = d->feetpos();
+            rendermodel(mdlname, anim, pos.addz(3.5f), d->yaw, 28, 0, MDL_NOSHADOW, d, NULL, basetime, 0, 1.f, vec4(vec::hexcolor(color), trans));
         }
     }
 
@@ -449,18 +457,14 @@ namespace game
 
         vec o = d->feetpos();
 
-        float yaw = testanims && d==player1 ? 0 : d->yaw,
-              pitch = testpitch && d==player1 ? testpitch : d->pitch;
-
         const char *mdlname = mdl.model[validteam(team) ? team : 0];
 
         defformatstring(mdldir, "hats/%d", player1->aptitude);
         a[ai++] = modelattach("tag_hat", mdldir, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         a[ai++] = modelattach("tag_cape", getcapedir(cape, !team), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
 
-        rendermodel(mdlname, anim, o, yaw, pitch, 0, NULL, d, a[0].tag ? a : NULL, 0, 0, 1, vec4(vec::hexcolor(color), 5));
+        rendermodel(mdlname, anim, o, d->yaw, d->pitch, 0, NULL, d, a[0].tag ? a : NULL, 0, 0, 1, vec4(vec::hexcolor(color), 5));
     }
-
 
     static inline void renderplayer(gameent *d, float fade = 1, int flags = 0)
     {
@@ -514,7 +518,9 @@ namespace game
                 vec centerplayerpos = d->o;
                 centerplayerpos.sub(vec(0, 0, 8));
 
-                if(d->health<300 && d->health>0) switch(rnd(d->health+gfx::nbfps*2)) {case 0: gibeffect(300, d->o, d);}
+                if(d->health < 300 && randomevent(gfx::nbfps*2.f)) spawnbouncer(d->o, vec(0,0,0), d, BNC_GIBS);
+                if(d->health < 150 && randomevent(gfx::nbfps/5.f)) regular_particle_splash(PART_BLOOD, 1, 9999, d->o, 0x60FFFF, 1.f+rnd(2), 50);
+                if(d->armourtype==A_ASSIST && d->armour && d->armour < 750 && randomevent(gfx::nbfps*2.f)) spawnbouncer(d->o, vec(0,0,0), d, BNC_ROBOT);
 
                 if(d!=hudplayer() && hudplayer()->state==CS_ALIVE)
                 {
