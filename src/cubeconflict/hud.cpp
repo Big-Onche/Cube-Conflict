@@ -8,7 +8,7 @@ namespace game
     // all we need to communicate with soft-coded hud
     ICOMMAND(huddead, "", (), intret(followingplayer(player1)->state==CS_DEAD));
     ICOMMAND(hudhealth, "", (), intret(max(1, followingplayer(player1)->health/10)));
-    ICOMMAND(hudarmour, "", (), intret(max(1, followingplayer(player1)->armour/10)));
+    ICOMMAND(hudarmour, "", (), intret(followingplayer(player1)->armour ? max(1, followingplayer(player1)->armour/10) : 0));
     ICOMMAND(hudarmourtype, "", (), intret(followingplayer(player1)->armourtype));
     ICOMMAND(hudinfammo, "", (),
         bool b = false;
