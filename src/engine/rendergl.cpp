@@ -2497,9 +2497,6 @@ void gl_drawview()
     shadegbuffer();
     GLERROR;
 
-    rendervolumetric();
-    GLERROR;
-
     if(fogmat)
     {
         setfog(fogmat, fogbelow, 1, abovemat);
@@ -2512,7 +2509,8 @@ void gl_drawview()
     rendertransparent();
     GLERROR;
 
-    if(fogmat) setfog(fogmat, fogbelow, 1, abovemat);
+    rendervolumetric();
+    GLERROR;
 
     if(editmode)
     {
