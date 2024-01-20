@@ -925,16 +925,18 @@ void clearbatchedmapmodels()
 VARP(lodmodels, 0, 1, 1);
 VARP(loddistfactor, 1, 6, 12);
 
+int calcLodDistance() { return loddistfactor + (gfx::zoom ? (gfx::zoomfov - 100) / -20 : 0); }
+
 void rendermapmodel(int idx, int anim, const vec &o, float yaw, float pitch, float roll, int flags, int basetime, float size)
 {
     if(!mapmodels.inrange(idx)) return;
     mapmodelinfo &mmi = mapmodels[idx];
 
-    model *tmp = mmi.m ? mmi.m : loadmodel(mmi.name);
-    if(!tmp) return;
+    model *m = mmi.m ? mmi.m : loadmodel(mmi.name);
+    if (!m) return;
 
-    model *m = (o.dist(camera1->o) > (tmp->loddist*(loddistfactor+(gfx::zoom ? (gfx::zoomfov-100)/-20.f : 0))) && lodmodels && tmp->lod) ? (mmi.mlod ? mmi.mlod : loadmodel(mmi.lodname)) : mmi.m;
-    if(!m) return;
+    m = (o.dist(camera1->o) > (m->loddist * calcLodDistance()) && lodmodels && m->lod) ? (mmi.mlod ? mmi.mlod : loadmodel(mmi.lodname)) : mmi.m;
+    if (!m) return;
 
     vec center, bbradius;
     m->boundbox(center, bbradius);
