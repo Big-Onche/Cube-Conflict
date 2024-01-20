@@ -45,7 +45,7 @@ static vector<grassvert> grassverts;
 static GLuint grassvbo = 0;
 static int grassvbosize = 0;
 
-#define MAXGRASS 131072
+#define MAXGRASS 150000
 
 struct grassgroup
 {
