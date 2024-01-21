@@ -10,7 +10,7 @@ bool foundDevice = false;
 bool noSound = true;
 bool noEfx = false;
 
-VAR(debugsounds, 0, 0, 1);
+//VAR(debugsounds, 0, 0, 1);
 VARFP(soundvol, 0, 100, 100, alListenerf(AL_GAIN, soundvol/100.f); );
 extern void updateMusicVol();
 VARFP(musicvol, 0, 50, 100, updateMusicVol());
@@ -58,14 +58,15 @@ ICOMMAND(gamemusic, "sii", (char *path, int *alts, int *vol),
     music[musicId].loaded = loadSound(music[musicId], true);
     musicId++;
 );
-
-void reportSoundError(const char* func, const char* filepath, int buffer)
+/*
+void reportSoundError(const char* func, const char* details, int buffer = 0)
 {
     if(!debugsounds) return;
     ALenum error = alGetError();
-    if(error != AL_NO_ERROR) conoutf(CON_ERROR, "OpenAL Error after %s for %s: %d (Buffer ID: %d)", func, filepath, error, buffer);
+    defformatstring(bufferId, buffer ? " (Buffer ID: %d)" : "", buffer);
+    if(error != AL_NO_ERROR) conoutf(CON_ERROR, "OpenAL Error at %s (%s) %d%s", func, details, error, bufferId);
 }
-
+*/
 bool loadSoundFile(const string& filepath, ALuint buffer) // load a sound using libsndfile
 {
     SNDFILE* file;
@@ -103,7 +104,7 @@ bool loadSoundFile(const string& filepath, ALuint buffer) // load a sound using 
     }
 
     alBufferData(buffer, format, membuf, num_bytes, sfinfo.samplerate); // upload the sound data to the OpenAL buffer
-    reportSoundError("alBufferData", filepath, buffer);
+    //reportSoundError("alBufferData", filepath, buffer);
 
     delete[] membuf; // clean up and free resources
     sf_close(file);
@@ -122,7 +123,7 @@ bool loadSound(Sound& s, bool music) // load a sound including his alts
         if(music) formatstring(fullPath, s.numAlts ? "media/songs/%s_%d.flac" : "media/songs/%s.flac", s.soundPath, i + 1);
 
         alGenBuffers(1, &s.bufferId[i]);
-        reportSoundError("alGenBuffers", s.soundPath, s.bufferId[i]);
+        //reportSoundError("alGenBuffers", s.soundPath, s.bufferId[i]);
         loaded = loadSoundFile(fullPath, s.bufferId[i]);
     }
     return loaded;
@@ -186,14 +187,14 @@ void applyReverbPreset(ALuint auxEffectSlot, const EFXEAXREVERBPROPERTIES& prese
     alEffecti(reverbEffect, AL_REVERB_DECAY_HFLIMIT, AL_TRUE);
 
     alAuxiliaryEffectSloti(auxEffectReverb, AL_EFFECTSLOT_EFFECT, reverbEffect);
-    reportSoundError("applyReverbPreset", "N/A", -1);
+    //reportSoundError("applyReverbPreset", "Error while setting reverb preset");
 }
 
 void setReverbGain(float gain)
 {
     alEffectf(reverbEffect, AL_EAXREVERB_GAIN, clamp(gain, 0, 1));
     alAuxiliaryEffectSloti(auxEffectReverb, AL_EFFECTSLOT_EFFECT, reverbEffect);
-    reportSoundError("setReverbGain", "N/A", -1);
+    //reportSoundError("setReverbGain", "Error while setting reverb gain");
 }
 
 void setReverbPreset(int preset)
@@ -211,10 +212,10 @@ void setOcclusionEffect()
     if(noEfx) return;
 
     alGenFilters(1, &occlusionFilter);
-    reportSoundError("alGenFilters-occlusionFilter", "N/A", -1);
+    //reportSoundError("alGenFilters-occlusionFilter", "Error while initing occlusion filter");
 
     alFilteri(occlusionFilter, AL_FILTER_TYPE, AL_FILTER_LOWPASS);
-    reportSoundError("alFilteri-occlusionFilter", "N/A", -1);
+    //reportSoundError("alFilteri-occlusionFilter", "Error while setting occlusion filter");
 
     alFilterf(occlusionFilter, AL_LOWPASS_GAIN, 0.5f);
     alFilterf(occlusionFilter, AL_LOWPASS_GAINHF, 0.1f);
@@ -227,7 +228,7 @@ void initSoundSources()
     loopi(MAX_SOURCES)
     {
         alGenSources(1, &sources[i].source);
-        reportSoundError("initSoundSources", "N/A", -1);
+        //reportSoundError("initSoundSources", "Error while initing sound sources");
 
         sources[i].isActive = false;
         sources[i].entityId = SIZE_MAX;  // set to SIZE_MAX initially to represent "no entity"
@@ -321,6 +322,11 @@ bool applyUnderwaterFilter(int flags)
     return false;
 }
 
+float getRandomSoundPitch()
+{
+    return (0.92f + 0.16f * static_cast<float>(rand()) / RAND_MAX) * (game::gamespeed / 100.f);
+}
+
 void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRadius, int flags, size_t entityId, int soundType)
 {
     if(soundId < 0 || soundId > NUMSNDS || noSound || mutesounds) return; // invalid index or openal not initialized or mute
@@ -352,13 +358,11 @@ void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRa
     ALuint source = sources[sourceIndex].source;
     if(s.noGeomOcclusion) sources[sourceIndex].noGeomOcclusion = true;
 
-    int altIndex = (s.numAlts > 0) ? rnd(s.numAlts+1) : 0;
-    ALuint buffer = s.bufferId[altIndex];
+    ALuint buffer = s.bufferId[s.numAlts ? rnd(s.numAlts + 1) : 0];
 
     alSourcei(source, AL_BUFFER, buffer); // managing sounds alternatives
     alSourcef(source, AL_GAIN, s.soundVol / 100.f); // managing sound volume
-    float basePitch = (flags & SND_FIXEDPITCH) ? 1.f : (0.92f + 0.16f * static_cast<float>(rand()) / RAND_MAX);
-    alSourcef(source, AL_PITCH, !(flags & SND_MUSIC) ? (basePitch/100.f)*game::gamespeed : 1.f); // managing variations of pitches
+    alSourcef(source, AL_PITCH, !(flags & SND_FIXEDPITCH) && !(flags & SND_MUSIC) ? getRandomSoundPitch() : 1); // managing variations of pitches
     alSourcei(source, AL_LOOPING, (flags & SND_LOOPED) ? AL_TRUE : AL_FALSE); // loop the sound or not
 
     if(!soundPos)
@@ -385,14 +389,15 @@ void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRa
     }
     else if(!noEfx) // apply efx if available
     {
-        bool occluded = applyUnderwaterFilter(flags) ? true : (!(flags & SND_NOOCCLUSION) && checkSoundOcclusion(soundPos));
+        bool occluded = false;
+        if(soundPos && !noEfx && !(flags & SND_NOOCCLUSION)) occluded = applyUnderwaterFilter(flags) || checkSoundOcclusion(soundPos);
 
         alSource3i(source, AL_AUXILIARY_SEND_FILTER, auxEffectReverb, 0, occluded ? occlusionFilter : AL_FILTER_NULL);
         alSourcei(source, AL_DIRECT_FILTER, occluded ? occlusionFilter : AL_FILTER_NULL);
     }
 
     alSourcePlay(source);
-    reportSoundError("alSourcePlay", s.soundPath, s.bufferId[altIndex]);
+    //reportSoundError("alSourcePlay", s.soundPath, buffer);
 }
 
 void stopSound(int soundId, int flags)
@@ -417,15 +422,14 @@ void stopMusic(int soundId)
 
 void manageSources()
 {
-    ALint state, looping;
+    ALint state;
     loopi(maxsoundsatonce)
     {
-        if(sources[i].isActive)
+        if(sources[i].isActive && sources[i].source) // check if the source is active and valid
         {
             alGetSourcei(sources[i].source, AL_SOURCE_STATE, &state);
-            alGetSourcei(sources[i].source, AL_LOOPING, &looping);
-            reportSoundError("alGetSourcei-manageSources", "N/A", -1);
-            if(state == AL_STOPPED) sources[i].isActive = false;
+            //reportSoundError("alGetSourcei-manageSources", "Error querying source state");
+            sources[i].isActive = state != AL_STOPPED; // isActive = false if state is AL_STOPPED
         }
     }
 }
@@ -437,7 +441,7 @@ void updateMusicVol()
         if(sources[i].isActive && (sources[i].soundFlags & SND_MUSIC))
         {
             alSourcef(sources[i].source, AL_GAIN, musicvol/100.f);
-            reportSoundError("alGetSourcei-updateMusicVol", "N/A", -1);
+            //reportSoundError("alGetSourcei-updateMusicVol", "Error updating music volume");
         }
     }
 }
@@ -512,7 +516,7 @@ void stopMapSound(extentity *e)
     if(soundSource)
     {
         alSourceStop(soundSource->source);
-        reportSoundError("alSourceStop-stopMapSound", tempformatstring("Sound %d", e->attr1), soundSource->source);
+        //reportSoundError("alSourceStop-stopMapSound", tempformatstring("Sound %d", e->attr1));
         soundSource->isActive = false;
         e->flags &= ~EF_SOUND;
     }
@@ -563,7 +567,7 @@ void stopLinkedSound(size_t entityId, int soundType)
     if(soundSource)
     {
         alSourceStop(soundSource->source);
-        reportSoundError("alSourceStop-stopLinkedSound", "N/A", soundSource->source);
+        //reportSoundError("alSourceStop-stopLinkedSound", "Error while stopping linked sound");
         alSource3f(soundSource->source, AL_VELOCITY, 0.f, 0.f, 0.f);
         soundSource->isActive = false;
     }
@@ -593,12 +597,10 @@ void resumeAllSounds()
 void updateSounds()
 {
     if(noSound) return;
-
-    alcSuspendContext(context);
+    manageSources();
+    if(!isconnected()) return;
     updateListenerPos();
     checkMapSounds();
-    manageSources();
-    alcProcessContext(context);
 }
 
 void cleanUpSounds()
@@ -645,8 +647,9 @@ ICOMMAND(playSound, "sii", (char *soundName, bool fixedPitch, bool uiSound),
 
 void playMusic(int musicId)
 {
+    if(!musicvol) return;
     if(musicId>=0 && musicId<=NUMSONGS) playSound(musicId, NULL, 0, 0, SND_MUSIC);
-    else conoutf("Invalide music ID (must be 0 to %d)", NUMSONGS);
+    else conoutf("Invalid music ID (must be 0 to %d)", NUMSONGS);
     updateMusicVol();
 }
 ICOMMAND(playmusic, "i", (int *i), playMusic(*i));
