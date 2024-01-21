@@ -45,6 +45,8 @@ ICOMMAND(mapsound, "siii", (char *path, int *alts, int *vol, bool *occl),
     mapSoundId++;
 );
 
+ICOMMAND(resetmapsounds, "", (), mapSoundId = 0);
+
 int musicId = 0;
 Sound music[NUMSONGS];
 ICOMMAND(gamemusic, "sii", (char *path, int *alts, int *vol),
@@ -187,30 +189,20 @@ void applyReverbPreset(ALuint auxEffectSlot, const EFXEAXREVERBPROPERTIES& prese
     reportSoundError("applyReverbPreset", "N/A", -1);
 }
 
-void stopReverb()
+void setReverbGain(float gain)
 {
-    alAuxiliaryEffectSloti(auxEffectReverb, AL_EFFECTSLOT_EFFECT, AL_EFFECT_NULL);
-    alDeleteEffects(1, &reverbEffect);
-    reportSoundError("stopReverb", "N/A", -1);
-}
-
-void muteReverb(bool mute)
-{
-    alEffectf(reverbEffect, AL_EAXREVERB_GAIN, mute ? 0.0 : 0.35);
+    alEffectf(reverbEffect, AL_EAXREVERB_GAIN, clamp(gain, 0, 1));
     alAuxiliaryEffectSloti(auxEffectReverb, AL_EFFECTSLOT_EFFECT, reverbEffect);
-    reportSoundError("muteReverb", "N/A", -1);
+    reportSoundError("setReverbGain", "N/A", -1);
 }
 
-int mapReverb = 0;
-ICOMMAND(mainmapreverb, "i", (int *i),
+void setReverbPreset(int preset)
 {
-    if(*i >= 0 && *i < numPresets)
-    {
-        applyReverbPreset(auxEffectReverb, presets[*i]);
-        mapReverb = *i;
-    }
+    if(preset >= 0 && preset < numPresets) applyReverbPreset(auxEffectReverb, presets[preset]);
     else applyReverbPreset(auxEffectReverb, EFX_REVERB_PRESET_GENERIC);
-});
+}
+
+VARF(mainmapreverb, 0, 0, numPresets, setReverbPreset(mainmapreverb));
 
 ALuint occlusionFilter;
 
@@ -272,8 +264,6 @@ void initSounds()
     {
         getEfxFuncs();
         alGenAuxiliaryEffectSlots(1, &auxEffectReverb);
-        //alEffectf(reverbEffect, AL_EAXREVERB_GAIN, 0);
-        //applyReverbPreset(auxEffectReverb, EFX_REVERB_PRESET_GENERIC);
         setOcclusionEffect();
     }
 
@@ -285,7 +275,7 @@ void initSounds()
 
 bool checkSoundOcclusion(const vec *soundPos)
 {
-    if(!soundPos || noEfx) return false;
+    if(!soundPos || noEfx || (camera1->o.dist(*soundPos) < 50 && camera1->o.dist(*soundPos) > 1000)) return false;
 
     vec dir = vec(camera1->o).sub(*soundPos);
     const float dist = dir.magnitude();
@@ -324,10 +314,10 @@ bool applyUnderwaterFilter(int flags)
 {
     if(lookupmaterial(camera1->o)==MAT_WATER || lookupmaterial(camera1->o)==MAT_LAVA)
     {
-        muteReverb();
+        setReverbGain(0.1);
         return true;
     }
-    else muteReverb(false);
+    else setReverbGain(0.35);
     return false;
 }
 
@@ -340,7 +330,7 @@ void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRa
     size_t sourceIndex = SIZE_MAX; // default to invalid index
     int activeSources = 0;
 
-    loopi(MAX_SOURCES)
+    loopi(maxsoundsatonce)
     {
         if(!sources[i].isActive)
         {
@@ -349,9 +339,8 @@ void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRa
         else activeSources++; // count active sources
     }
 
-    if((flags & SND_LOWPRIORITY) && (activeSources >= 0.5f * MAX_SOURCES)) return; // skip low-priority sounds (distant shoots etc.) when we are already playing a lot of sounds
-
-    if(sourceIndex == SIZE_MAX || maxsoundsatonce <= activeSources) { conoutf(CON_WARN, "Max sounds at once capacity reached (%d)", maxsoundsatonce); return; } // skip sound if max capacity
+    if(sourceIndex == SIZE_MAX) { conoutf(CON_WARN, "Max sounds at once capacity reached (%d)", maxsoundsatonce); return; } // skip sound if max capacity
+    if((flags & SND_LOWPRIORITY) && (activeSources >= maxsoundsatonce / 2)) return; // skip low-priority sounds (distant shoots etc.) when we are already playing a lot of sounds
 
     sources[sourceIndex].isActive = true;       // now the source is set to active
     sources[sourceIndex].entityId = entityId;
@@ -410,7 +399,7 @@ void stopSound(int soundId, int flags)
 {
     if(soundId < 0 || soundId > NUMSNDS || noSound) return; // invalid index or openal not initialized
 
-    loopi(MAX_SOURCES)
+    loopi(maxsoundsatonce)
     {
         if(sources[i].isActive && sources[i].soundId == soundId && sources[i].soundFlags == flags)
         {
@@ -429,7 +418,7 @@ void stopMusic(int soundId)
 void manageSources()
 {
     ALint state, looping;
-    loopi(MAX_SOURCES)
+    loopi(maxsoundsatonce)
     {
         if(sources[i].isActive)
         {
@@ -443,7 +432,7 @@ void manageSources()
 
 void updateMusicVol()
 {
-    loopi(MAX_SOURCES)
+    loopi(maxsoundsatonce)
     {
         if(sources[i].isActive && (sources[i].soundFlags & SND_MUSIC))
         {
@@ -476,7 +465,7 @@ void updateSoundPosition(size_t entityId, const vec &newPosition, const vec &vel
 {
     if(noSound) return;
 
-    loopi(MAX_SOURCES) // loop through all the SoundSources and find the one with the matching entityId
+    loopi(maxsoundsatonce) // loop through all the SoundSources and find the one with the matching entityId
     {
         if(sources[i].entityId == entityId && sources[i].soundType == soundType) // found the correct sound source, now update its position
         {
@@ -515,7 +504,7 @@ void stopMapSound(extentity *e)
     size_t entityId = e->entityId;
 
     SoundSource* soundSource = NULL;
-    loopi(MAX_SOURCES)
+    loopi(maxsoundsatonce)
     {
         if(sources[i].entityId == entityId && sources[i].isActive) { soundSource = &sources[i]; break; }
     }
@@ -569,12 +558,12 @@ void checkMapSounds()
 void stopLinkedSound(size_t entityId, int soundType)
 {
     SoundSource* soundSource = NULL;
-    loopi(MAX_SOURCES) if(sources[i].entityId == entityId && sources[i].soundType == soundType) { soundSource = &sources[i]; break; }
+    loopi(maxsoundsatonce) if(sources[i].entityId == entityId && sources[i].soundType == soundType) { soundSource = &sources[i]; break; }
 
     if(soundSource)
     {
         alSourceStop(soundSource->source);
-        reportSoundError("alSourceStop-stopMapSound", "N/A", soundSource->source);
+        reportSoundError("alSourceStop-stopLinkedSound", "N/A", soundSource->source);
         alSource3f(soundSource->source, AL_VELOCITY, 0.f, 0.f, 0.f);
         soundSource->isActive = false;
     }
@@ -582,7 +571,7 @@ void stopLinkedSound(size_t entityId, int soundType)
 
 void stopAllSounds(bool pause)
 {
-    loopi(MAX_SOURCES)
+    loopi(maxsoundsatonce)
     {
         if(sources[i].isActive && (pause || !(sources[i].soundFlags & SND_MUSIC)))
         {
@@ -595,7 +584,7 @@ void stopAllSounds(bool pause)
 
 void resumeAllSounds()
 {
-    loopi(MAX_SOURCES)
+    loopi(maxsoundsatonce)
     {
         if(sources[i].isActive) alSourcePlay(sources[i].source);
     }
@@ -636,8 +625,7 @@ void cleanUpSounds()
 void setShroomsEfx(bool enable)
 {
     if(enable) applyReverbPreset(auxEffectReverb, EFX_REVERB_PRESET_DRUGGED);
-    else if (mapReverb >= 0 && mapReverb < numPresets) applyReverbPreset(auxEffectReverb, presets[mapReverb]);
-    else applyReverbPreset(auxEffectReverb, EFX_REVERB_PRESET_GENERIC);
+    else setReverbPreset(mainmapreverb);
 }
 
 ICOMMAND(playSound, "sii", (char *soundName, bool fixedPitch, bool uiSound),
