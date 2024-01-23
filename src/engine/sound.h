@@ -48,7 +48,7 @@ enum SoundNames
     S_SHROOMS_PUPOUT, S_ASSISTALARM,
     // physics
     S_DOUILLE, S_BIGDOUILLE, S_CARTOUCHE, S_RGRENADE, S_ECLAIRPROCHE,
-    S_ECLAIRLOIN, S_LAVASPLASH, S_SPARKS,
+    S_ECLAIRLOIN, S_LAVASPLASH, S_SPARKS, S_ARMOURPIECE,
     // classes & spells
     S_SORTLANCE, S_SORTIMPOSSIBLE, S_SORTPRET, S_TIMER, S_FAUCHEUSE,
     S_RAGETIR, S_REGENMEDIGUN, S_REGENJUNKIE, S_WIZ_1, S_WIZ_2,
@@ -139,7 +139,7 @@ extern void resumeAllSounds();
 extern bool loadSound(Sound& s, bool music = false);
 extern void manageSources();
 extern void cleanUpSounds();
-extern void muteReverb(bool mute = true);
+extern void setReverbGain(float gain);
 extern void setShroomsEfx(bool enable);
 extern const char *getmapsoundname(int n);
 

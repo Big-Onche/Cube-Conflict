@@ -250,7 +250,7 @@ namespace game
 
         switch(type)
         {
-            case BNC_ROBOT: bnc.variant = rnd(3); break;
+            case BNC_ROBOT: case BNC_ROCKS: bnc.variant = rnd(3); break;
             case BNC_DEBRIS: bnc.variant = rnd(4); break;
             case BNC_GIBS: bnc.variant = rnd(6); break;
         }
@@ -291,13 +291,12 @@ namespace game
                 case BNC_BIGDOUILLES: playSound(S_BIGDOUILLE, &b->o, 125, 75, SND_LOWPRIORITY|SND_FIXEDPITCH); break;
                 case BNC_CARTOUCHES: playSound(S_CARTOUCHE, &b->o, 125, 75, SND_LOWPRIORITY); break;
                 case BNC_GRENADE: playSound(S_RGRENADE, &b->o, 300, 50); break;
-                case BNC_ROBOT: playSound(S_RGRENADE, &b->o, 300, 50); break;
+                case BNC_ROBOT: playSound(S_ARMOURPIECE, &b->o, 300, 50); break;
                 case BNC_LIGHT: b->lifetime=0;
             }
         }
 
         b->bounces++;
-        if(b->bouncetype == BNC_GIBS && b->bounces < 2 && randomevent(0.05f*gfx::nbfps)) addstain(STAIN_BLOOD, vec(b->o).sub(vec(surface).mul(b->radius)), surface, 2.96f/b->bounces, bvec(0x60, 0xFF, 0xFF), rnd(4));
         if(b->bouncetype == BNC_GRENADE) addstain(STAIN_PLASMA_GLOW, vec(b->o).sub(vec(surface).mul(b->radius)), surface, 4.f, 0x0000FF);
     }
 
@@ -317,6 +316,7 @@ namespace game
                 {
                     case BNC_DOUILLES: case BNC_DOUILLESUZI: case BNC_BIGDOUILLES: case BNC_CARTOUCHES: regular_particle_splash(PART_SMOKE, bnc.bouncetype==BNC_DOUILLESUZI ? randomevent(2) : 1, 150, pos, bnc.bouncetype==BNC_CARTOUCHES ? 0x252525 : 0x404040, bnc.bouncetype==BNC_DOUILLES ? 1.0f : bnc.bouncetype==BNC_DOUILLESUZI ? 0.5f : 1.75f, 50, -20); break;
                     case BNC_DEBRIS: regular_particle_splash(PART_SMOKE, 1, 150, pos, 0x404040, 2.5f, 50, -20); break;
+                    case BNC_ROCKS: regular_particle_splash(PART_SMOKE, 1, 500, pos, 0x151515, 8.f, 50, -20); break;
                     case BNC_GRENADE:
                     {
                         float growth = (1000 - (bnc.lifetime - time))/150.f;
@@ -329,7 +329,6 @@ namespace game
                         regular_particle_splash(lookupmaterial(pos)==MAT_WATER ? PART_BUBBLE : PART_SMOKE, lookupmaterial(pos)==MAT_WATER ? 1 : 3, 250, pos, 0x222222, 2.5f, 50, -50);
                         regular_particle_splash(PART_FIRE_BALL, 2, 75, pos, 0x994400, 0.7f, 30, -30);
                         break;
-                    case BNC_GIBS: if(randomevent(0.6f*gfx::nbfps)) regular_particle_splash(PART_BLOOD, 1, 9999, pos, 0x60FFFF, 1.0f, 50);
                 }
             }
 
@@ -466,7 +465,6 @@ namespace game
                 to.add(vec(rnd(100)-50, rnd(100)-50, rnd(100)-50));
                 break;
             case BNC_ROBOT:
-            case BNC_DEBRIS:
                 to.add(vec(rnd(200)-100, rnd(200)-100, rnd(200)-100));
                 break;
             case BNC_DOUILLESUZI:
@@ -600,7 +598,12 @@ namespace game
     void gibeffect(int damage, const vec &vel, gameent *d)
     {
         if(damage <= 0) return;
-        loopi(damage/300) spawnbouncer(d->o, vec(0,0,0), d, BNC_GIBS);
+        loopi(damage/300)
+        {
+            spawnbouncer(d->o, vec(0,0,0), d, BNC_GIBS);
+            if(d->armourtype==A_ASSIST && d->armour) spawnbouncer(d->o, vec(0,0,0), d, BNC_ROBOT);
+        }
+
     }
 
     int avgdmg[4];
@@ -1133,7 +1136,7 @@ namespace game
                     loopi(attacks[atk].rays)
                     {
 
-                        if(lookupmaterial(rays[i])!=MAT_WATER) playSound(S_LITTLERICOCHET, &rays[i], 250, 100);
+                        if(lookupmaterial(rays[i])!=MAT_WATER) playSound(S_LITTLERICOCHET, &rays[i], 250, 100, SND_LOWPRIORITY);
                         vec origin = d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(gun, d->o, to, d) : d->muzzle;
                         origin.add(vec(0.2f-(rnd(5)/10.f), 0.2f-(rnd(5)/10.f), 0.2f-(rnd(5)/10.f)));
                         particle_flare(origin, rays[i], 30, PART_F_SHOTGUN, d->boostmillis[B_ROIDS] ? 0xFF2222 : atk==ATK_HYDRA_SHOOT ? 0xFF8800 : 0xFFFF22, atk==ATK_HYDRA_SHOOT ? 0.15f : 0.2f, d, gfx::champicolor());
@@ -1160,7 +1163,7 @@ namespace game
                 {
                     loopi(attacks[atk].rays)
                     {
-                        if(lookupmaterial(rays[i])!=MAT_WATER) playSound(S_BIGRICOCHET, &rays[i], 250, 100);
+                        if(lookupmaterial(rays[i])!=MAT_WATER && i<5) playSound(S_BIGRICOCHET, &rays[i], 250, 100);
                         particle_splash(PART_SPARK, 9, 70, rays[i], d->boostmillis[B_ROIDS] ? 0xFF2222 : 0xFF9900, 0.6f, 150, 100, 0, gfx::champicolor());
                         particle_splash(PART_SMOKE, 4, 700+rnd(500), rays[i], 0x797979, 0.2f, 35, 300, 2, gfx::champicolor());
                         particle_splash(PART_SMOKE, 4, 400+rnd(400), rays[i], 0x553915, 0.15f, 35, 300, 2, gfx::champicolor());
@@ -1393,10 +1396,11 @@ namespace game
     void shoot(gameent *d, const vec &targ)
     {
         int prevaction = d->lastaction, attacktime = lastmillis-prevaction;
+        bool specialAbility = d->aptitude==APT_PRETRE && d->abilitymillis[ABILITY_3];
 
         if(d->aitype==AI_BOT && (d->gunselect==GUN_GLOCK || d->gunselect==GUN_SPOCKGUN || d->gunselect==GUN_HYDRA || d->gunselect==GUN_SKS || d->gunselect==GUN_S_CAMPOUZE))
         {
-            switch(rnd(d->gunselect==GUN_GLOCK || d->gunselect==GUN_SPOCKGUN || d->gunselect==GUN_HYDRA ? 5 : 15)) {case 0: d->gunwait+=(d->aptitude==APT_PRETRE && d->abilitymillis[ABILITY_3] ? 500 : 1200)/gfx::nbfps;}
+            switch(rnd(d->gunselect==GUN_GLOCK || d->gunselect==GUN_SPOCKGUN || d->gunselect==GUN_HYDRA ? 5 : 15)) {case 0: d->gunwait+=(specialAbility ? 500 : 1200)/gfx::nbfps; return; }
         }
 
         switch(d->gunselect)
@@ -1409,7 +1413,7 @@ namespace game
             default: d->gunaccel=0;
         }
 
-        if(attacktime < d->gunwait + d->gunaccel*(d->gunselect==GUN_PLASMA ? 50 : d->gunselect==GUN_S_ROQUETTES ? 150 : 8) + (d==player1 || (d->aptitude==APT_PRETRE && d->abilitymillis[ABILITY_3]) ? 0 : attacks[d->gunselect].attackdelay)) return;
+        if(attacktime < d->gunwait + d->gunaccel*(d->gunselect==GUN_PLASMA ? 50 : d->gunselect==GUN_S_ROQUETTES ? 150 : 8) + (d==player1 || specialAbility ? 0 : attacks[d->gunselect].attackdelay)) return;
         d->gunwait = 0;
 
         if(d->aptitude==APT_KAMIKAZE)
@@ -1489,8 +1493,8 @@ namespace game
         //if(d->ai) d->gunwait += int(d->gunwait*(((101-d->skill)+rnd(111-d->skill))/100.f));
         d->boostmillis[B_ROIDS] ? d->totalshots += (attacks[atk].damage*attacks[atk].rays)*2: d->totalshots += attacks[atk].damage*attacks[atk].rays;
 
-        if(d->playerexploded){d->attacking = ACT_IDLE; d->playerexploded = false; execute("getoldweap"); }
-        if(atk==ATK_GLOCK_SHOOT || atk==ATK_SPOCKGUN_SHOOT || atk==ATK_HYDRA_SHOOT || d->gunselect==GUN_SKS || d->gunselect==GUN_S_CAMPOUZE) d->attacking = ACT_IDLE;
+        if(d->playerexploded){d->attacking = ACT_IDLE; execute("getoldweap"); d->playerexploded = false;}
+        if((atk==ATK_GLOCK_SHOOT || atk==ATK_SPOCKGUN_SHOOT || atk==ATK_HYDRA_SHOOT || d->gunselect==GUN_SKS || d->gunselect==GUN_S_CAMPOUZE) && !specialAbility) d->attacking = ACT_IDLE;
     }
 
     void adddynlights()
@@ -1533,6 +1537,7 @@ namespace game
     static const char * const cartouchessnames[1] = { "bouncers/cartouche" };
     static const char * const debrisnames[4] = { "bouncers/pierre_1", "bouncers/pierre_2", "bouncers/pierre_3", "bouncers/pierre_4" };
     static const char * const robotnames[3] = { "bouncers/robot_1", "bouncers/robot_2", "bouncers/robot_3" };
+    static const char * const rocksnames[3] = { "bouncers/bigrock_1", "bouncers/bigrock_2", "bouncers/bigrock_3" };
 
     void preloadbouncers()
     {
@@ -1542,6 +1547,7 @@ namespace game
         loopi(sizeof(cartouchessnames)/sizeof(cartouchessnames[0])) preloadmodel(cartouchessnames[i]);
         loopi(sizeof(debrisnames)/sizeof(debrisnames[0])) preloadmodel(debrisnames[i]);
         loopi(sizeof(robotnames)/sizeof(robotnames[0])) preloadmodel(robotnames[i]);
+        loopi(sizeof(rocksnames)/sizeof(rocksnames[0])) preloadmodel(rocksnames[i]);
     }
 
     void renderbouncers()
@@ -1575,6 +1581,7 @@ namespace game
                     case BNC_GIBS: mdl = gibnames[bnc.variant]; break;
                     case BNC_DEBRIS: mdl = debrisnames[bnc.variant]; break;
                     case BNC_ROBOT: mdl = robotnames[bnc.variant]; break;
+                    case BNC_ROCKS: mdl = rocksnames[bnc.variant]; break;
                     case BNC_DOUILLES: case BNC_DOUILLESUZI: mdl = "bouncers/douille"; break;
                     case BNC_BIGDOUILLES: mdl = "bouncers/douille_big"; break;
                     case BNC_CARTOUCHES: mdl = "bouncers/cartouche"; break;
