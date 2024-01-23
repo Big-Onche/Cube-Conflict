@@ -2548,11 +2548,11 @@ void gl_drawmainmenu()
 }
 
 VARNP(damagecompass, usedamagecompass, 0, 1, 1);
-VARP(damagecompassfade, 1, 500, 10000);
-VARP(damagecompasssize, 1, 20, 100);
-VARP(damagecompassalpha, 1, 80, 100);
-VARP(damagecompassmin, 1, 25, 1000);
-VARP(damagecompassmax, 1, 200, 1000);
+VARP(damagecompassfade, 1, 600, 10000);
+VARP(damagecompasssize, 1, 25, 100);
+VARP(damagecompassalpha, 1, 85, 100);
+VARP(damagecompassmin, 1, 300, 1000);
+VARP(damagecompassmax, 1, 800, 1000);
 
 float damagedirs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
@@ -2572,8 +2572,8 @@ void damagecompass(int n, const vec &loc)
     int dir = (int(yaw+22.5f)%360)/45;
     damagedirs[dir] += max(n, damagecompassmin)/float(damagecompassmax);
     if(damagedirs[dir]>1) damagedirs[dir] = 1;
-
 }
+
 void drawdamagecompass(int w, int h)
 {
     hudnotextureshader->set();
@@ -2582,10 +2582,12 @@ void drawdamagecompass(int w, int h)
     float size = damagecompasssize/100.0f*min(h, w)/2.0f;
     loopi(8) if(damagedirs[i]>0)
     {
+        float pulsatingAlpha = damagecompassalpha/100.0f * (0.5f + 0.5f * sin(totalmillis/100.0f));
+
         if(!dirs)
         {
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            gle::colorf(1, 0, 0, damagecompassalpha/100.0f);
+            gle::colorf(1, 0, 0, pulsatingAlpha);
             gle::defvertex();
             gle::begin(GL_TRIANGLES);
         }
@@ -2615,11 +2617,11 @@ void drawdamagecompass(int w, int h)
 int damageblendmillis = 0;
 
 VARFP(damagescreen, 0, 1, 1, { if(!damagescreen) damageblendmillis = 0; });
-VARP(damagescreenfactor, 1, 5, 100);
+VARP(damagescreenfactor, 1, 2, 100);
 VARP(damagescreenalpha, 1, 80, 100);
-VARP(damagescreenfade, 0, 1000, 1000);
-VARP(damagescreenmin, 1, 10, 1000);
-VARP(damagescreenmax, 1, 500, 1000);
+VARP(damagescreenfade, 0, 300, 1000);
+VARP(damagescreenmin, 1, 100, 1000);
+VARP(damagescreenmax, 1, 300, 1000);
 
 void damageblend(int n)
 {

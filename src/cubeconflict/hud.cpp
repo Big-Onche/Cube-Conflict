@@ -253,7 +253,7 @@ namespace game
             gle::colorf(1, 1, 1, 1);
         }
 
-        if(player1->health<500 && player1->state==CS_ALIVE)
+        if(player1->health<300 && player1->state==CS_ALIVE)
         {
             gle::colorf((-(player1->health)+700)/1000.0f, (-(player1->health)+700)/1000.0f, (-(player1->health)+700)/1000.0f, (-(player1->health)+700)/1000.0f);
             settexture("media/interface/hud/fullscreen/damage.png");
