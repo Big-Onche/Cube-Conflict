@@ -362,7 +362,7 @@ void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRa
 
     alSourcei(source, AL_BUFFER, buffer); // managing sounds alternatives
     alSourcef(source, AL_GAIN, s.soundVol / 100.f); // managing sound volume
-    alSourcef(source, AL_PITCH, !(flags & SND_FIXEDPITCH) && !(flags & SND_MUSIC) ? getRandomSoundPitch() : 1); // managing variations of pitches
+    alSourcef(source, AL_PITCH, !(flags & SND_FIXEDPITCH) && !(flags & SND_MUSIC) ? getRandomSoundPitch() : 1*(game::gamespeed / 100.f)); // managing variations of pitches
     alSourcei(source, AL_LOOPING, (flags & SND_LOOPED) ? AL_TRUE : AL_FALSE); // loop the sound or not
 
     if(!soundPos)
@@ -389,11 +389,10 @@ void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRa
     }
     else if(!noEfx) // apply efx if available
     {
-        bool occluded = false;
-        if(soundPos && !noEfx && !(flags & SND_NOOCCLUSION)) occluded = applyUnderwaterFilter(flags) || checkSoundOcclusion(soundPos);
-
-        alSource3i(source, AL_AUXILIARY_SEND_FILTER, auxEffectReverb, 0, occluded ? occlusionFilter : AL_FILTER_NULL);
-        alSourcei(source, AL_DIRECT_FILTER, occluded ? occlusionFilter : AL_FILTER_NULL);
+        ALuint filter = AL_FILTER_NULL;
+        if(!(flags & SND_UI) && !(flags & SND_MUSIC) && (applyUnderwaterFilter(flags) || checkSoundOcclusion(soundPos))) filter = occlusionFilter;
+        alSource3i(source, AL_AUXILIARY_SEND_FILTER, auxEffectReverb, 0, filter);
+        alSourcei(source, AL_DIRECT_FILTER, filter);
     }
 
     alSourcePlay(source);
@@ -551,7 +550,7 @@ void checkMapSounds()
         {
             if(!(e.flags & EF_SOUND))
             {
-                playSound(e.attr1, &e.o, e.attr2, e.attr3, SND_LOOPED|SND_NOOCCLUSION|SND_MAPSOUND|SND_FIXEDPITCH, e.entityId);
+                playSound(e.attr1, &e.o, e.attr2, e.attr3, SND_LOOPED|SND_MAPSOUND|SND_FIXEDPITCH, e.entityId);
                 e.flags |= EF_SOUND;  // set the flag to indicate that the sound is currently playing
             }
         }
