@@ -501,9 +501,9 @@ namespace game
             if(d->curdamage) // damage dealt displayed on hud
             {
                 vec pos = d->abovehead();
-                float up = 5 + d->o.dist(camera1->o)/40.f + (((totalmillis - d->lastcurdamage) / 50.f) / (d->o.dist(camera1->o) <= 160 ? 160.f - d->o.dist(camera1->o) : 1)); // particle going up effect
-                float t = clamp(d->o.dist(camera1->o), 0.f, 160.f) / 160.f;
-                if(!ispaused()) pos.z += up - (15 * (1 - t));
+                float dist = d->o.dist(camera1->o);
+                float up = 5 + dist/40.f + (((totalmillis - d->lastcurdamage) / 50.f) / (dist <= 160 ? 160.f - dist : 1)); // particle going up effect
+                if(!ispaused()) pos.z += up - (15 * (1 - (clamp(dist, 0.f, 160.f) / 160.f)));
                 particle_textcopy(pos, tempformatstring("%d", d->curdamage), PART_TEXT, 1, d->curdamagecolor, gfx::zoom ? huddamagesize*(guns[player1->gunselect].maxzoomfov)/100.f : huddamagesize, 0, true);
             }
 
