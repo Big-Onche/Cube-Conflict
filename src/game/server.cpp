@@ -2646,11 +2646,11 @@ namespace server
                 {
                     if((distance < 7.5f && receiver.state.health < receiver.state.maxhealth+250) && (m_teammode ? isteam(receiver.team, giver.team) : giver.clientnum==receiver.clientnum))
                     {
-                        receiver.state.health = min(receiver.state.health + 100, receiver.state.maxhealth + 250);
+                        receiver.state.health = min(receiver.state.health + (receiver.aptitude==APT_MEDECIN ? 50 : 100), receiver.state.maxhealth + 250);
                         sendf(-1, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, S_HEALTH, receiver.state.health);
                     }
                 }
-                else if( giver.aptitude==APT_JUNKIE)
+                else if(giver.aptitude==APT_JUNKIE)
                 {
                     if(needmana(receiver.aptitude) && distance < 7.5f && receiver.state.mana < 150)
                     {
