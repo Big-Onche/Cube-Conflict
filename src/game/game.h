@@ -305,7 +305,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
 #define CC_SERVER_PORT 43000
 #define CC_LANINFO_PORT 42998
 #define CC_MASTER_PORT 42999
-#define PROTOCOL_VERSION 960         // bump when protocol changes
+#define PROTOCOL_VERSION 970         // bump when protocol changes
 #define DEMO_VERSION 1               // bump when demo format changes
 #define DEMO_MAGIC "CC_DEMO\0\0"
 
@@ -380,10 +380,10 @@ static const struct attackinfo { int gun, action, picksound, sound, middistsnd, 
     //Armes "normales"
     { GUN_ELEC,         ACT_SHOOT, S_WPLOADFUTUR,     S_ELECRIFLE,    S_ELECRIFLE_FAR,    S_FAR_LIGHT, 10,  350,  325,  35, 105, 0,    0,  10, 8000,  1,    30,   0, 0, 1},
     { GUN_PLASMA,       ACT_SHOOT, S_WPLOADFUTUR,     S_PLASMARIFLE,  S_PLASMARIFLE_FAR,  S_FAR_LIGHT, 25,   90,  180,  45, 135, 0, 2000,   5, 8000,  1,    50,  25, 0, 1},
-    { GUN_SMAW,         ACT_SHOOT, S_WPLOADBIG,       S_SMAW,         S_SMAW_FAR,                  -1,  3, 1250,  850,  20,  60, 2,  700,  15, 8000,  1,   750, 125, 0, 1},
+    { GUN_SMAW,         ACT_SHOOT, S_WPLOADBIG,       S_SMAW,         S_SMAW_FAR,                  -1,  3, 1250, 1000,  20,  60, 2,  700,  15, 8000,  1,   750, 150, 0, 1},
     { GUN_MINIGUN,      ACT_SHOOT, S_WPLOADMID,       S_MINIGUN,      S_MINIGUN_FAR,      S_FAR_LIGHT, 35,   60,  180,  60, 180, 0, 4250,   5, 8000,  1,    15 ,  7, 0, 1},
     { GUN_SPOCKGUN,     ACT_SHOOT, S_WPLOADALIEN,     S_SPOCKGUN,     S_SPOCKGUN_FAR,     S_FAR_LIGHT, 15,  175,  250,  15, 150, 3, 2250,   5, 8000,  1,    30,  15, 0, 1},
-    { GUN_M32,          ACT_SHOOT, S_WPLOADMID,       S_M32,          S_M32_FAR,                   -1,  3, 1000, 1250,  20,  50, 0,  400,  10, 1000,  1,   600, 160, 1000, 1},
+    { GUN_M32,          ACT_SHOOT, S_WPLOADMID,       S_M32,          S_M32_FAR,                   -1,  3, 1000, 1250,  20,  50, 0,  400,  10, 1000,  1,   600, 175, 1000, 1},
     { GUN_LANCEFLAMMES, ACT_SHOOT, S_WPLOADMID,       S_FLAMETHROWER, S_FLAMETHROWER_FAR,          -1, 30,  100,   38, 500, 500, 9,    0,   2,  280, 10,    10 ,  0, 0, 1},
     { GUN_UZI,          ACT_SHOOT, S_WPLOADSMALL,     S_UZI,          S_UZI_FAR,          S_FAR_LIGHT, 35,   75,  150,  50, 150, 0, 4250,   2, 8000,  1,    10,   5, 0, 1},
     { GUN_FAMAS,        ACT_SHOOT, S_WPLOADSMALL,     S_FAMAS,        S_FAMAS_FAR,        S_FAR_LIGHT, 30,   90,  140,  40, 120, 0, 4250,   3, 8000,  1,    20,   5, 0, 1},
@@ -1037,8 +1037,9 @@ namespace game
     extern bool intersect(dynent *d, const vec &from, const vec &to, float margin = 0, float &dist = intersectdist);
     extern dynent *intersectclosest(const vec &from, const vec &to, gameent *at, float margin = 0, float &dist = intersectdist);
     extern int temptrisfade;
-    enum { BNC_GRENADE, BNC_GIBS, BNC_DEBRIS, BNC_DOUILLES, BNC_BIGDOUILLES, BNC_CARTOUCHES, BNC_DOUILLESUZI, BNC_LIGHT, BNC_ROBOT};
+    enum { BNC_GRENADE, BNC_GIBS, BNC_DEBRIS, BNC_DOUILLES, BNC_BIGDOUILLES, BNC_CARTOUCHES, BNC_DOUILLESUZI, BNC_LIGHT, BNC_ROBOT, BNC_ROCKS};
     extern void spawnbouncer(const vec &p, const vec &vel, gameent *d, int type, int lifetime = rnd(temptrisfade)+rnd(5000), bool frommonster = false);
+    extern void newbouncer(const vec &from, const vec &to, bool local, int id, gameent *owner, int type, int lifetime, int speed);
     extern void clearbouncers();
     extern void updatebouncers(int curtime);
     extern void removebouncers(gameent *owner);
