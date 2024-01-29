@@ -249,7 +249,7 @@ namespace gfx
                 return;
 
             case ATK_LANCEFLAMMES_SHOOT:
-                if(randomevent(2)) addstain(STAIN_BURN, to, dir, 20.0f);
+                if(!rnd(2)) addstain(STAIN_BURN, to, dir, 20.0f);
                 return;
         }
     }

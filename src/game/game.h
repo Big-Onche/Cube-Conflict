@@ -1101,7 +1101,7 @@ namespace server
     extern int gamemillis;
 }
 
-extern bool randomevent(int probability);
+extern bool rndevent(int probability);
 extern void addsleep(int *msec, char *cmd);
 extern void createdrop(const vec *o, int type);
 extern void trydisconnect(bool local);

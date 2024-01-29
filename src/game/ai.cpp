@@ -855,7 +855,7 @@ namespace ai
                                 else if (d->mana>=100 && d->o.dist(e->o)>500) launchAbility(d, ABILITY_2);
                                 break;
                             case APT_ESPION:
-                                if(randomevent(2) && d->mana>=40 && d->o.dist(e->o)<700 && !d->abilitymillis[ABILITY_2]) launchAbility(d, ABILITY_1);
+                                if(d->mana>=40 && d->o.dist(e->o)<700 && !d->abilitymillis[ABILITY_2] && !rnd(2)) launchAbility(d, ABILITY_1);
                                 else if(d->mana>=50 && d->o.dist(e->o)<700 && !d->abilitymillis[ABILITY_1]) launchAbility(d, ABILITY_2);
                         }
 
@@ -1122,8 +1122,8 @@ namespace ai
             d->ai->spot = vec(0, 0, 0);
         }
 
-        if(d->abilitymillis[ABILITY_3] && d->aptitude==APT_PHYSICIEN && randomevent(17)) d->jumping = true;
-		else if(!d->ai->dontmove || (d->boostmillis[B_JOINT] && randomevent(17))) jumpto(d, b, d->ai->spot);
+        if(d->abilitymillis[ABILITY_3] && d->aptitude==APT_PHYSICIEN && !rndevent(90)) d->jumping = true;
+		else if(!d->ai->dontmove || (d->boostmillis[B_JOINT] && !rndevent(90))) jumpto(d, b, d->ai->spot);
 
         gameent *e = getclient(d->ai->enemy);
         bool enemyok = e && targetable(d, e);
@@ -1149,7 +1149,7 @@ namespace ai
                             if(d->o.dist(f->o)<500) launchAbility(d, ABILITY_2);
                             break;
                         case APT_ESPION:
-                            if(randomevent(2) && d->mana>=40 && d->o.dist(f->o)<700 && !d->abilitymillis[ABILITY_2]) launchAbility(d, ABILITY_1);
+                            if(d->mana>=40 && d->o.dist(f->o)<700 && !d->abilitymillis[ABILITY_2] && !rnd(2)) launchAbility(d, ABILITY_1);
                             else if(d->mana>=50 && d->o.dist(f->o)<700 && !d->abilitymillis[ABILITY_1]) launchAbility(d, ABILITY_2);
                     }
                     enemyok = true;
@@ -1460,7 +1460,7 @@ namespace ai
                     case APT_PRETRE: if(d->mana>30 && d->health<(d->skill/3)) launchAbility(d, ABILITY_2); break;
                     case APT_SHOSHONE: if(d->mana>=100) launchAbility(d, ABILITY_2); break;
                     case APT_PHYSICIEN:
-                        if(randomevent(70) && d->mana>70) launchAbility(d, ABILITY_3);
+                        if(d->mana>70 && !rnd(70)) launchAbility(d, ABILITY_3);
                         if(d->health<400+d->skill && d->mana>=50) launchAbility(d, ABILITY_2);
                         if(d->armour<200 && d->mana>=40) launchAbility(d, ABILITY_1);
                         break;

@@ -2,9 +2,10 @@
 #include "customs.h"
 #include "stats.h"
 
-bool randomevent(int probability)
+bool rndevent(int probability) // adjust the probability (0-100) based on game speed and frames per second (60 as standard)
 {
-    return !game::ispaused() && !rnd(max(probability * 100 / game::gamespeed, 1));
+    float adjusted = max((((100 - probability) * 100) / game::gamespeed) * (gfx::nbfps / 60.f), 1.f);
+    return !game::ispaused() && !rnd((int)adjusted);
 }
 
 namespace game
@@ -573,7 +574,7 @@ namespace game
             damagecompass(damage, actor->o);
         }
 
-        if(randomevent(2))
+        if(!rnd(2))
         {
             if(d->aptitude==APT_PHYSICIEN && d->abilitymillis[ABILITY_1] && d->armour>0) playSound(S_PHY_1, d==h ? NULL : &d->o, 200, 100, SND_LOWPRIORITY);
             else if(d->armour>0 && actor->gunselect!=GUN_LANCEFLAMMES) playSound(S_IMPACTWOOD+d->armourtype, d==h ? NULL : &d->o, 250, 50, SND_LOWPRIORITY);
@@ -994,11 +995,6 @@ namespace game
         return showmodeinfo && m_valid(gamemode) ? readstr(gamemodes[gamemode - STARTGAMEMODE].modeId) : NULL;
     }
 
-    const char *getscreenshotinfo()
-    {
-        return server::modename(gamemode, NULL);
-    }
-
     void physicstrigger(physent *d, bool local, int floorlevel, int waterlevel, int material)
     {
         vec o = (d==hudplayer() && !isthirdperson()) ? d->feetpos() : d->o;
@@ -1052,7 +1048,7 @@ namespace game
             else
             {
                 playSound(snd, d==hudplayer() ? NULL : &d->o, haspowerarmour ? 300 : 150, 20, haspowerarmour ? NULL : SND_LOWPRIORITY);
-                if(pl->boostmillis[B_EPO]) if(randomevent(4)) playSound(S_EPO_RUN, d==hudplayer() ? NULL : &d->o, 1000, 500);
+                if(pl->boostmillis[B_EPO]) if(!rnd(5)) playSound(S_EPO_RUN, d==hudplayer() ? NULL : &d->o, 1000, 500);
             }
         }
         pl->lastfootstep = lastmillis;

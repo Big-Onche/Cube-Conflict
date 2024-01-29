@@ -342,7 +342,7 @@ namespace game
             if(d->inwater && d->physstate<=PHYS_FALL)
             {
                 anim |= (((d->move || d->strafe) || d->vel.z+d->falling.z>0 ? ANIM_SWIM : ANIM_SINK)|ANIM_LOOP)<<ANIM_SECONDARY;
-                if(d->move && randomevent(0.16f*gfx::nbfps)) particle_splash(PART_WATER, d->armourtype==A_ASSIST ? 3 : 2, 120, d->o, 0x222222, 8.0f+rnd(d->armourtype==A_ASSIST ? 8 : 5), 150, 15);
+                if(d->move && rndevent(95)) particle_splash(PART_WATER, d->armourtype==A_ASSIST ? 3 : 2, 120, d->o, 0x222222, 8.0f+rnd(d->armourtype==A_ASSIST ? 8 : 5), 150, 15);
             }
             else
             {
@@ -350,7 +350,7 @@ namespace game
                 if(d->timeinair>50) anim |= ((ANIM_JUMP) | ANIM_END) << ANIM_SECONDARY;
                 else if(dir) anim |= (dir | ANIM_LOOP) << ANIM_SECONDARY;
 
-                if(d->move && d->physstate==PHYS_FLOOR && randomevent(0.16f*gfx::nbfps)) particle_splash(atmos && (lookupmaterial(d->feetpos())==MAT_WATER || map_atmo==4 || map_atmo==8) ? PART_WATER : PART_SMOKE, d->armourtype==A_ASSIST ? 5 : 3, 120, d->feetpos(), map_atmo==4 && atmos ? 0x131313 : map_atmo==9 ? 0xFFFFFF : 0x333022, 6.0f+rnd(d->armourtype==A_ASSIST ? 10 : 5), 150, 15);
+                if(d->move && d->physstate==PHYS_FLOOR && rndevent(95)) particle_splash(atmos && (lookupmaterial(d->feetpos())==MAT_WATER || map_atmo==4 || map_atmo==8) ? PART_WATER : PART_SMOKE, d->armourtype==A_ASSIST ? 5 : 3, 120, d->feetpos(), map_atmo==4 && atmos ? 0x131313 : map_atmo==9 ? 0xFFFFFF : 0x333022, 6.0f+rnd(d->armourtype==A_ASSIST ? 10 : 5), 150, 15);
             }
             if(d->crouching && d->timeinair<50) anim |= (ANIM_CROUCH|ANIM_END)<<ANIM_SECONDARY;
 
@@ -518,9 +518,9 @@ namespace game
                 vec centerplayerpos = d->o;
                 centerplayerpos.sub(vec(0, 0, 8));
 
-                if(d->health < 300 && randomevent(gfx::nbfps*2.f)) spawnbouncer(d->o, vec(0,0,0), d, BNC_GIBS);
-                if(d->health < 150 && randomevent(gfx::nbfps/5.f)) regular_particle_splash(PART_BLOOD, 1, 9999, d->o, 0x60FFFF, 1.f+rnd(2), 50);
-                if(d->armourtype==A_ASSIST && d->armour && d->armour < 750 && randomevent(gfx::nbfps*2.f)) spawnbouncer(d->o, vec(0,0,0), d, BNC_ROBOT);
+                if(d->health < 300 && rndevent(1)) spawnbouncer(d->o, vec(0,0,0), d, BNC_GIBS);
+                if(d->health < 150 && rndevent(94)) regular_particle_splash(PART_BLOOD, 1, 9999, centerplayerpos, 0x60FFFF, 1.f+rnd(2), 50);
+                if(d->armourtype==A_ASSIST && d->armour && d->armour < 750 && rndevent(1)) spawnbouncer(d->o, vec(0,0,0), d, BNC_ROBOT);
 
                 if(d!=hudplayer() && hudplayer()->state==CS_ALIVE)
                 {
@@ -561,24 +561,24 @@ namespace game
                 {
                     case APT_MAGICIEN:
                         if(d->abilitymillis[ABILITY_1]) particle_splash(PART_SMOKE, 2, 120, d->o, 0xFF33FF, 10+rnd(5), 400,400);
-                        if(d->abilitymillis[ABILITY_3]  && (d!=hudplayer() || thirdperson)) particle_fireball(centerplayerpos, 15.2f, PART_EXPLOSION, 5,  0x880088, 13.0f);
+                        if(d->abilitymillis[ABILITY_3] && (d!=hudplayer() || thirdperson)) particle_fireball(centerplayerpos, 15.2f, PART_EXPLOSION, 5,  0x880088, 13.0f);
                         break;
                     case APT_PHYSICIEN:
-                        if(d->abilitymillis[ABILITY_2] && randomevent(0.05f*gfx::nbfps)) particle_splash(PART_SMOKE, 1, 300, d->o, 0x7777FF, 10+rnd(5), 400, 400);
-                        if(d->abilitymillis[ABILITY_3] && randomevent(0.03f*gfx::nbfps))
+                        if(d->abilitymillis[ABILITY_2] && rndevent(97)) particle_splash(PART_SMOKE, 1, 300, d->o, 0x7777FF, 10+rnd(5), 400, 400);
+                        if(d->abilitymillis[ABILITY_3] && rndevent(98))
                         {
-                            particle_splash(PART_SMOKE,  1,  150, d->feetpos(), 0x8888BB, 7+rnd(4),  100, -200);
-                            particle_splash(PART_FIRE_BALL,  5,  100, d->feetpos(), 0xFF6600, 1+rnd(2),  100, -20);
+                            particle_splash(PART_SMOKE, 1, 200, d->feetpos(), 0x665544, 7+rnd(4), 175, -200);
+                            particle_splash(PART_FIRE_BALL, 4, 150, d->feetpos(), !rnd(2) ? 0xFFAA00 : 0xFF3300, 1+rnd(2), 150, -50);
                         }
                         break;
                     case APT_PRETRE:
                         if(d->abilitymillis[ABILITY_2]) particle_fireball(centerplayerpos , 16.0f, PART_SHOCKWAVE, 5, 0xFFFF00, 16.0f);
                         break;
                     case APT_VIKING:
-                        if(d->boostmillis[B_RAGE] && randomevent(0.03f*gfx::nbfps) && (d!=hudplayer() || thirdperson)) particle_splash(PART_SMOKE, 2, 150, d->o, 0xFF3300, 12+rnd(5), 400, 200);
+                        if(d->boostmillis[B_RAGE] && rndevent(97) && (d!=hudplayer() || thirdperson)) particle_splash(PART_SMOKE, 2, 150, d->o, 0xFF3300, 12+rnd(5), 400, 200);
                         break;
                     case APT_SHOSHONE:
-                        if(randomevent(0.04f*gfx::nbfps))
+                        if(rndevent(98))
                         {
                             if(d->abilitymillis[ABILITY_1]) regularflame(PART_SPARK, d->feetpos(), 12, 2, 0xAAAAAA, 2, 0.4f, 10.f, 500, 0, -2);
                             if(d->abilitymillis[ABILITY_2]) regularflame(PART_SPARK, d->feetpos(), 12, 2, 0xFF33FF, 2, 0.4f, 10.f, 500, 0, -2);
@@ -586,13 +586,13 @@ namespace game
                         }
                 }
 
-                if(d->boostmillis[B_JOINT] && randomevent(0.085f*gfx::nbfps)) regularflame(PART_SMOKE, d->abovehead().add(vec(-12, 5, -19)), 2, 3, 0x888888, 1, 1.6f, 50.0f, 1000.0f, -10);
+                if(d->boostmillis[B_JOINT] && rndevent(93)) regularflame(PART_SMOKE, d->abovehead().add(vec(-12, 5, -19)), 2, 3, 0x888888, 1, 1.6f, 50.0f, 1000.0f, -10);
                 if(d->armourtype==A_ASSIST && d->armour>0)
                 {
-                    if(d->armour<1500 && randomevent(0.13f*gfx::nbfps))
+                    if(d->armour<1500 && rndevent(93))
                     {
-                        regularflame(PART_SMOKE, d->o, 15, 3, d->armour<750 ? 0x222222 : 0x888888, 1, d->armour<750 ? 7.f : 5.f, 50.0f, 1500.0f, -10);
-                        if(d->armour<1000) particle_splash(PART_FIRE_BALL, d->armour<500 ? 2 : 1, 500, d->o, 0x992200, d->armour<500 ? 5.f : 3.f, 50, -20);
+                        regularflame(PART_SMOKE, centerplayerpos, 15, 3, d->armour<750 ? 0x222222 : 0x888888, 1, d->armour<750 ? 7.f : 5.f, 50.0f, 1500.0f, -10);
+                        if(d->armour<1000) particle_splash(PART_FIRE_BALL, d->armour<500 ? 2 : 1, 500, centerplayerpos, 0x992200, d->armour<500 ? 5.f : 3.f, 50, -20);
                     }
                 }
             }
@@ -711,7 +711,7 @@ namespace game
             a[0] = modelattach("tag_joint", &d->weed);
             rendermodel("hudboost/joint", anim, sway3, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
             if(d->weed.x >= 0) d->weed = calcavatarpos(d->weed, 12);
-            if(randomevent(10)) {regularflame(PART_SMOKE, d->weed, 2, 3, 0x888888, 1, 1.3f, 50.0f, 1000.0f, -10); particle_splash(PART_FIRE_BALL,  4, 50, d->weed, 0xFF6600, 0.6f, 20, 150);}
+            if(rndevent(93)) {regularflame(PART_SMOKE, d->weed, 2, 3, 0x888888, 1, 1.3f, 50.0f, 1000.0f, -10); particle_splash(PART_FIRE_BALL,  4, 50, d->weed, 0xFF6600, 0.6f, 20, 150);}
         }
 
         rendermodel(gunname, anim, weapzoom.add(sway), d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));

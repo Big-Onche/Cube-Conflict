@@ -311,7 +311,7 @@ struct captureclientmode : clientmode
                 basepos.sub(pos);
                 basepos.normalize().mul(1300.0f);
 
-                if(randomevent(0.1f*gfx::nbfps)) particle_flying_flare(pos, basepos, 500, randomevent(2) ? PART_ZERO : PART_ONE, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.7f+(rnd(5)/10.f), 100);
+                if(rndevent(93)) particle_flying_flare(pos, basepos, 500, rnd(2) ? PART_ZERO : PART_ONE, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.7f+(rnd(5)/10.f), 100);
 
                 if(oldbase < 0)
                 {
