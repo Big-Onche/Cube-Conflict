@@ -1430,18 +1430,30 @@ void mousemove(int dx, int dy, bool sortprecision)
     modifyorient(dx*cursens, dy*cursens*(invmouse ? 1 : -1));
 }
 
-void screenshake(int shakereduce)
+void randomMouseOffset(int reduceFactor)
 {
-    int factor = 1 + shakereduce;
+    reduceFactor = max(reduceFactor, 1);
+
     switch(game::hudplayer()->aptitude)
     {
-        case APT_SOLDAT: factor*=2; break;
-        case APT_MAGICIEN: if(game::player1->abilitymillis[game::ABILITY_2]) return;
+        case APT_SOLDAT: reduceFactor*=2; break;
+        case APT_MAGICIEN: if(game::hudplayer()->abilitymillis[game::ABILITY_2]) return;
     }
-    camera1->roll = (rnd(100/factor)/(10.f*factor))-(rnd(100/factor)/(10.f*factor));
-    mousemove(rnd(25/factor)+(-rnd(25/factor)), rnd(25/factor)+(-rnd(25/factor)));
+
+    int offset = max(10/reduceFactor, 1);
+    camera1->roll = rnd(offset) - rnd(offset);
+
+    offset *= 2.5f;
+    mousemove(rnd(offset) - rnd(offset), rnd(offset) - rnd(offset));
 }
-ICOMMAND(screenshake, "i", (int *shakereduce), screenshake(*shakereduce));
+ICOMMAND(screenshake, "i", (int *reduceFactor), randomMouseOffset(*reduceFactor));
+
+void shakeScreen(int reduceFactor)
+{
+    defformatstring(cmd, "%s %d", "screenshake", reduceFactor);
+    int sleep = 0;
+    loopi(16){ addsleep(&sleep, cmd); sleep +=25; }
+}
 
 void recomputecamera(int campostag)
 {
@@ -2794,7 +2806,6 @@ void gl_drawhud()
         {
             pushhudscale(conscale);
 
-            int roffset = 0;
             static int lastfps = 0, prevfps[3] = { 0, 0, 0 }, curfps[3] = { 0, 0, 0 };
             if(totalmillis - lastfps >= statrate)
             {
@@ -2804,8 +2815,9 @@ void gl_drawhud()
             int nextfps[3];
             getfps(nextfps[0], nextfps[1], nextfps[2]);
             loopi(3) if(prevfps[i]==curfps[i]) curfps[i] = nextfps[i];
-            gfx::nbfps = curfps[0];
-            roffset += FONTH;
+            gfx::nbfps = max(1, curfps[0]);
+
+            int roffset = FONTH;
 
             printtimers(conw, conh);
 

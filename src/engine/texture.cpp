@@ -3951,7 +3951,7 @@ bool loadimage(const char *filename, ImageData &image)
     return true;
 }
 
-SVARP(screenshotdir, "screenshot");
+SVARP(screenshotdir, "screenshots");
 
 void screenshot(char *filename)
 {
@@ -3978,17 +3978,13 @@ void screenshot(char *filename)
         sstime[min(len, sizeof(sstime)-1)] = '\0';
         concatstring(buf, sstime);
 
-        const char *map = game::getclientmap(), *ssinfo = game::getscreenshotinfo();
+        const char *map = game::getclientmap();
         if(map && map[0])
         {
             concatstring(buf, "_");
             concatstring(buf, map);
         }
-        if(ssinfo && ssinfo[0])
-        {
-            concatstring(buf, "_");
-            concatstring(buf, ssinfo);
-        }
+        else if(!isconnected()) concatstring(buf, "_menus");
 
         for(char *s = &buf[dirlen]; *s; s++) if(iscubespace(*s) || *s == '/' || *s == '\\') *s = '-';
     }
