@@ -124,11 +124,11 @@ namespace game
         int val = 0;
         switch(*stat)
         {
-            case 0: val = aptitudes[*apt].apt_degats-100; break;
-            case 1: val = aptitudes[*apt].apt_resistance-100; break;
-            case 2: val = aptitudes[*apt].apt_precision-100; break;
-            case 3: val = (aptitudes[*apt].apt_vitesse-1000)*-0.1f;
+            case 0: val = aptitudes[*apt].apt_degats; break;
+            case 1: val = aptitudes[*apt].apt_resistance; break;
+            case 2: val = aptitudes[*apt].apt_precision; break;
+            case 3: val = aptitudes[*apt].apt_vitesse;
         }
-        intret((val/5)+9)
+        intret(((val-100) / 5) +9);
     );
 }
