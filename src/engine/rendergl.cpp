@@ -1360,12 +1360,27 @@ void disablezoom()
 void computezoom()
 {
     if(game::player1->state==CS_DEAD || game::intermission) gfx::zoom = 0;
-    if(!gfx::zoom) { zoomprogress = 0; curfov = fov; curavatarfov = avatarfov; return; }
-    if(gfx::zoom > 0) zoomprogress = zoominvel ? min(zoomprogress + float(elapsedtime) / zoominvel, 1.0f) : 1;
+    if(!gfx::zoom)
+    {
+        zoomprogress = 0;
+        curfov = fov;
+        curavatarfov = avatarfov;
+        game::player1->aiming = false;
+        return;
+    }
+    if(gfx::zoom > 0)
+    {
+        game::player1->aiming = true;
+        zoomprogress = zoominvel ? min(zoomprogress + float(elapsedtime) / zoominvel, 1.0f) : 1;
+    }
     else
     {
         zoomprogress = zoomoutvel ? max(zoomprogress - float(elapsedtime) / zoomoutvel, 0.0f) : 0;
-        if(zoomprogress <= 0) gfx::zoom = 0;
+        if(zoomprogress <= 0)
+        {
+            gfx::zoom = 0;
+            game::player1->aiming = false;
+        }
     }
     curfov = gfx::zoomfov*zoomprogress + fov*(1 - zoomprogress);
     curavatarfov = avatarzoomfov*zoomprogress + avatarfov*(1 - zoomprogress);
