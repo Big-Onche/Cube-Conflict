@@ -544,7 +544,7 @@ struct gamestate
         if(type<I_RAIL || type>I_MANA) return;
         itemstat &is = itemstats[type-I_RAIL+rndsweap];
 
-        int itemboost = aptitude==APT_PRETRE && aptisort>0 ? 2 : 1;
+        int itemboost = aptitude==APT_PRETRE && aptisort ? 2 : 1;
 
         switch(type)
         {
@@ -567,7 +567,7 @@ struct gamestate
                     armourtype = A_ASSIST;
                     armour = min(armour+is.add, is.max);
                     health = min(health+300, maxhealth);
-                    if(ammo[GUN_ASSISTXPL]<=1) ammo[GUN_ASSISTXPL] = 1;
+                    if(!ammo[GUN_ASSISTXPL]) ammo[GUN_ASSISTXPL] = 1;
                     return;
                 }
                 else
@@ -579,11 +579,11 @@ struct gamestate
                 }
 
             case I_ROIDS: case I_EPO: case I_JOINT: case I_SHROOMS:
-                {
-                    int boostboost = aptitude==APT_JUNKIE ? 1.5f : itemboost; //cannot find a better var name :)
-                    boostmillis[type-I_ROIDS] = min(boostmillis[type-I_ROIDS]+is.add*boostboost, is.max*boostboost);
-                    return;
-                }
+            {
+                float boostboost = aptitude==APT_JUNKIE ? 1.5f : itemboost; // cannot find a better var name :)
+                boostmillis[type-I_ROIDS] = min(boostmillis[type-I_ROIDS]+is.add*boostboost, is.max*boostboost);
+                return;
+            }
 
             default:
                 float ammoboost = aptitude==APT_AMERICAIN ? 1.5f : 1;
