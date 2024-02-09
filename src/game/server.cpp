@@ -2479,7 +2479,7 @@ namespace server
         float waitfactor = 1;
         if(ci->aptitude==APT_PRETRE && ci->state.abilitymillis[game::ABILITY_3]) waitfactor = 2.5f + ((4000 - ci->state.abilitymillis[game::ABILITY_3])/1000);
 
-        if(gs.boostmillis[B_SHROOMS]) waitfactor*=ci->aptitude==APT_JUNKIE ? 2 : 1.5f;
+        if(gs.boostmillis[B_SHROOMS]) waitfactor *= ci->aptitude==APT_JUNKIE ? 1.75f : 1.5f;
         gs.gunwait = attacks[atk].attackdelay/waitfactor;
 
         sendf(-1, 1, "rii9x", N_SHOTFX, ci->clientnum, atk, id,

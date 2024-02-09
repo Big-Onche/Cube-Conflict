@@ -786,7 +786,7 @@ namespace game
 
     void hitmonster(int damage, monster *m, gameent *at, const vec &vel, int atk)
     {
-        if(player1->boostmillis[B_ROIDS]) damage*=(player1->aptitude==APT_JUNKIE ? 3.f : 2.f);
+        if(player1->boostmillis[B_ROIDS]) damage *= (player1->aptitude==APT_JUNKIE ? 3 : 2);
         m->monsterpain(damage, at, atk);
     }
 
