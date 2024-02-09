@@ -132,7 +132,7 @@ namespace ai
         return false;
     }
 
-    const int aiskew[NUMGUNS] = { 150, 1, 1, 30, 30, 1, 1, 15, 40, 1, 1, 3, 25, 10, 25, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+    const int aiskew[NUMGUNS] = { 175, 1, 1, 30, 30, 1, 1, 15, 40, 1, 1, 3, 25, 10, 25, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 
     float randomAimOffset(float radius, float skew, int gun, int skill)
     {
@@ -1183,8 +1183,12 @@ namespace ai
                 scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, sskew);
                 if(insight || quick || (hasseen && (d->gunselect==GUN_PLASMA || d->gunselect==GUN_MINIGUN || d->gunselect==GUN_S_ROQUETTES)))
                 {
-                    if((canshoot(d, atk, e) && hastarget(d, atk, b, e, yaw, pitch, dp.squaredist(ep))) || (d->aptitude==APT_PRETRE && d->abilitymillis[ABILITY_3]))
+                    int dist = dp.squaredist(ep);
+                    if((canshoot(d, atk, e) && hastarget(d, atk, b, e, yaw, pitch, dist)) || (d->aptitude==APT_PRETRE && d->abilitymillis[ABILITY_3]))
                     {
+                        if(dist < (250 - d->skill)) d->aiming = false;
+                        else d->aiming = true;
+
                         if((d->gunselect==GUN_ARTIFICE || d->gunselect==GUN_SMAW || d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_ROQUETTES) && !idle) d->jumping = true;
                         d->attacking = ACT_SHOOT;
                         d->ai->lastaction = lastmillis;

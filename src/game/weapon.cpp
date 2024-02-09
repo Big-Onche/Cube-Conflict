@@ -168,38 +168,19 @@ namespace game
         playSound(S_NOAMMO);
     });
 
-    void offsetray(const vec &from, const vec &to, int spread, int nozoomspread, float range, vec &dest, gameent *d)
+    void offsetray(const vec &from, const vec &to, float spread, float range, vec &dest, gameent *d)
     {
         vec offset;
         do offset = vec(rndscale(1), rndscale(1), rndscale(1)).sub(0.5f);
         while(offset.squaredlen() > 0.5f*0.5f);
 
-        if(d->boostmillis[B_SHROOMS])
-        {
-            spread/= 1.5f;
-            nozoomspread*= 1.5f;
-        }
-        if(d->aptitude==APT_MAGICIEN && d->abilitymillis[ABILITY_2])
-        {
-            spread/=3;
-            nozoomspread/=3;
-        }
-        if(d->crouching)
-        {
-            spread/=d->aptitude==APT_CAMPEUR ? 2.5f : 1.333f;
-            nozoomspread/=d->aptitude==APT_CAMPEUR ? 2.5f : 1.333f;
-        }
-        if(d->boostmillis[B_ROIDS] || d->boostmillis[B_RAGE])
-        {
-            spread*=1.75f;
-            nozoomspread*=1.75f;
-        }
+        if(d->boostmillis[B_SHROOMS]) spread /= d->aptitude==APT_JUNKIE ? 1.75f : 1.5f;
+        if(d->aptitude==APT_MAGICIEN && d->abilitymillis[ABILITY_2]) spread /= 3.f;
+        if(d->crouching) spread /= d->aptitude==APT_CAMPEUR ? 2.5f : 1.5f;
+        if(d->boostmillis[B_ROIDS] || d->boostmillis[B_RAGE]) spread *= 1.75f;
 
-        spread = (spread*100)/aptitudes[d->aptitude].apt_precision;
-        nozoomspread = (nozoomspread*100)/aptitudes[d->aptitude].apt_precision;
-
-        if(d==player1)offset.mul((to.dist(from)/1024)*(gfx::zoom ? spread : nozoomspread));
-        else offset.mul((to.dist(from)/1024)*spread);
+        spread = (spread*100) / aptitudes[d->aptitude].apt_precision;
+        offset.mul((to.dist(from)/1024) * spread);
 
         offset.z /= 2;
         dest = vec(offset).add(to);
@@ -210,9 +191,11 @@ namespace game
         }
     }
 
+    float spread(int atk, gameent *d) { return d->aiming ? attacks[atk].aimspread : attacks[atk].noaimspread; }
+
     void createrays(int atk, const vec &from, const vec &to, gameent *d)             // create random spread of rays
     {
-        loopi(attacks[atk].rays) offsetray(from, to, attacks[atk].spread, attacks[atk].nozoomspread, attacks[atk].range, rays[i], d);
+        loopi(attacks[atk].rays) offsetray(from, to, spread(atk, d), attacks[atk].range, rays[i], d);
     }
 
     struct bouncer : physent
@@ -641,7 +624,7 @@ namespace game
             }
             else if(at==player1)
             {
-                if(player1->boostmillis[B_ROIDS]) damage*=(player1->aptitude==APT_JUNKIE ? 3.f : 1.5f);
+                if(player1->boostmillis[B_ROIDS]) damage *= (player1->aptitude==APT_JUNKIE ? 3 : 2);
                 switch(player1->aptitude)
                 {
                     case APT_AMERICAIN: {if(atk==ATK_NUKE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_CAMPOUZE_SHOOT) damage *= 1.5f; break;}
@@ -1469,7 +1452,7 @@ namespace game
         if(shorten) to = vec(dir).mul(shorten).add(from);
 
         if(attacks[atk].rays > 1) createrays(atk, from, to, d);
-        else if(attacks[atk].spread) offsetray(from, to, attacks[atk].spread, attacks[atk].nozoomspread, attacks[atk].range, to, d);
+        else if(attacks[atk].aimspread) offsetray(from, to, spread(atk, d), attacks[atk].range, to, d);
 
         hits.setsize(0);
 
@@ -1486,7 +1469,7 @@ namespace game
         }
         float waitfactor = 1;
         if(d->aptitude==APT_PRETRE && d->abilitymillis[ABILITY_3]) waitfactor = 2.5f + ((4000.f - d->abilitymillis[ABILITY_3])/1000.f);
-        if(d->boostmillis[B_SHROOMS]>0) waitfactor*=1.5f;
+        if(d->boostmillis[B_SHROOMS]) waitfactor *= d->aptitude==APT_JUNKIE ? 1.75f : 1.5f;
         d->gunwait = attacks[atk].attackdelay/waitfactor;
         //if(d->ai) d->gunwait += int(d->gunwait*(((101-d->skill)+rnd(111-d->skill))/100.f));
         d->boostmillis[B_ROIDS] ? d->totalshots += (attacks[atk].damage*attacks[atk].rays)*2: d->totalshots += attacks[atk].damage*attacks[atk].rays;
