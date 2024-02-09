@@ -1704,7 +1704,7 @@ FVAR(straferoll, 0, 0.01f, 90);
 FVAR(faderoll, 0, 0.95f, 1);
 VAR(floatspeed, 1, 400, 10000);
 
-void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curtime, int jointmillis, int aptitude, bool assist, int aptisort)
+void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curtime, int epomillis, int jointmillis, int aptitude, bool assist, int aptisort)
 {
     int maxjumps = jointmillis ? 4 : (assist || aptitude==APT_NINJA || (aptitude==APT_KAMIKAZE && aptisort) ? 2 : 1);
 
@@ -1754,15 +1754,27 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
         m.normalize();
     }
 
+
     vec d(m);
     d.mul(pl->maxspeed);
-    if(pl->type==ENT_PLAYER)
+    if(pl->type==ENT_PLAYER && pl==player)
     {
-        if(floating)
+        float speed = aptitudes[aptitude].apt_vitesse;
+        switch(aptitude)
         {
-            if(pl==player) d.mul((aptitude==APT_PHYSICIEN ? 150 : floatspeed)/100.0f);
+            case APT_MAGICIEN: if(aptisort) speed = 650;  break;
+            case APT_SHOSHONE: if(aptisort) speed = 130;  break;
+            case APT_ESPION:   if(aptisort) speed = 25; break;
+            case APT_KAMIKAZE: if(aptisort) speed = 250;  break;
         }
+
+        d.mul(speed/100); // apply classe's speeds
+
+        if(floating) d.mul((aptitude==APT_PHYSICIEN && !editmode ? 150 : floatspeed)/100.0f); // apply
+        else if (pl->crouched() && aptitude!=APT_NINJA) d.mul(0.5f);
+        if(epomillis) d.mul(aptitude==APT_JUNKIE ? 3 : 2);
     }
+
     float fric = water && !floating ? 20.0f : (pl->physstate >= PHYS_SLOPE || floating ? 6.0f : 30.0f);
     pl->vel.lerp(d, pl->vel, pow(1 - 1/fric, curtime/20.0f));
 }
@@ -1804,31 +1816,15 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
 {
     int material = lookupmaterial(vec(pl->o.x, pl->o.y, pl->o.z + (3*pl->aboveeye - pl->eyeheight)/4));
     bool water = isliquid(material&MATF_VOLUME);
-    bool floating = (pl->type==ENT_PLAYER && (pl->state==CS_EDITING || pl->state==CS_SPECTATOR)) || (aptisort>0 && aptitude==APT_PHYSICIEN);
+    bool floating = (pl->type==ENT_PLAYER && (pl->state==CS_EDITING || pl->state==CS_SPECTATOR)) || (aptisort && aptitude==APT_PHYSICIEN);
 
-    // Application de la vitesse des aptitudes
-    float speed = 1000.f;
-
-    switch(aptitude)
-    {
-        case APT_MAGICIEN: if(aptisort) speed = 150.f;  break;
-        case APT_SHOSHONE: if(aptisort) speed = 700.f;  break;
-        case APT_ESPION:   if(aptisort) speed = 4000.f; break;
-        case APT_KAMIKAZE: if(aptisort) speed = 425.f;  break;
-        default : speed = aptitudes[aptitude].apt_vitesse;
-    }
-
-    if(pl->crouched() && aptitude!=APT_NINJA && pl->physstate!=PHYS_FALL) speed*=2.f;
-
-    if(epomillis) speed/=((epomillis + (aptitude==APT_JUNKIE ? 20000.f : 30000.f))/(aptitude==APT_JUNKIE ? 20000.f : 30000.f));
-
-    float secs = curtime/speed;
+    float secs = curtime/1000.0f;
 
     // apply gravity
     if(!floating) modifygravity(pl, water, curtime, jointmillis, aptitude, assist);
 
     // apply any player generated changes in velocity
-    modifyvelocity(pl, local, water, floating, curtime, jointmillis, aptitude, assist, aptisort);
+    modifyvelocity(pl, local, water, floating, curtime, epomillis, jointmillis, aptitude, assist, aptisort);
 
     vec d(pl->vel);
     if(pl==game::player1 && game::player1->aptitude==APT_MAGICIEN && game::player1->boostmillis[B_EPO]>30000 && aptisort) unlockAchievement(ACH_MAXSPEED);
@@ -1844,7 +1840,7 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
         {
             const float f = 1.0f/moveres;
             int collisions = 0;
-                    d.mul(f);
+            d.mul(f);
             loopi(moveres) if(!move(pl, d) && ++collisions<5) i--; // discrete steps collision detection & sliding
         }
         if(pl->physstate != PHYS_FLOAT)

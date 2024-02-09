@@ -461,7 +461,7 @@ void updateListenerPos()
 
     alListenerfv(AL_ORIENTATION, orientation); // set the listener's orientation
     float f = game::hudplayer()->boostmillis[B_SHROOMS] ? 3.f : 70.f;
-    alListener3f(AL_VELOCITY, camera1->vel.x/f, camera1->vel.z/f, camera1->vel.y/f); // set the listener's velocity
+    alListener3f(AL_VELOCITY, game::hudplayer()->vel.x/f, game::hudplayer()->vel.z/f, game::hudplayer()->vel.y/f); // set the listener's velocity
 }
 
 void updateSoundPosition(size_t entityId, const vec &newPosition, const vec &velocity, int soundType)

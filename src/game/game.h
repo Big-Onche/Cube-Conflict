@@ -375,7 +375,7 @@ static struct itemstat { int add, max, sound; const char *ident; int info; } ite
 #define EXP_SELFPUSH 1.0f
 #define EXP_DISTSCALE 0.5f
 
-static const struct attackinfo { int gun, action, picksound, sound, middistsnd, fardistsnd, specialsounddelay, attackdelay, damage, spread, nozoomspread, margin, projspeed, kickamount, range, rays, hitpush, exprad, ttl, use; } attacks[NUMATKS] =
+static const struct attackinfo { int gun, action, picksound, sound, middistsnd, fardistsnd, specialsounddelay, attackdelay, damage, aimspread, noaimspread, margin, projspeed, kickamount, range, rays, hitpush, exprad, ttl, use; } attacks[NUMATKS] =
 {
     //Armes "normales"
     { GUN_ELEC,         ACT_SHOOT, S_WPLOADFUTUR,     S_ELECRIFLE,    S_ELECRIFLE_FAR,    S_FAR_LIGHT, 10,  350,  325,  35, 105, 0,    0,  10, 8000,  1,    30,   0, 0, 1},
@@ -455,21 +455,21 @@ enum {APT_SOLDAT = 0, APT_MEDECIN, APT_AMERICAIN, APT_NINJA, APT_VAMPIRE, APT_MA
 struct ability { const int manacost, duration, cooldown, snd; };
 static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt_vitesse; const char *apt_nomFR, *apt_nomEN; ability abilities[3];} aptitudes[NUMAPTS] =
 {   // classe stats           // classe name               // ability 1               // ability 2                // ability 3
-    { 105,  105,  105,   950, "Soldat",     "Soldier",   { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 0 APT_SOLDAT
-    {  90,  115,   95,   950, "Médecin",    "Medic",     { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 1 APT_MEDECIN
-    { 100,  135,   80,  1300, "Américain",  "American",  { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 2 APT_AMERICAIN
-    {  85,   90,   75,   750, "Ninja",      "Ninja",     { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 3 APT_NINJA
-    { 110,   65,  110,   950, "Vampire",    "Vampire",   { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 4 APT_VAMPIRE
-    { 100,   85,   90,  1000, "Magicien",   "Wizard",    { {30,  250, 2000, S_WIZ_1}, {40,  4000, 5000, S_WIZ_2}, {60, 3000,  6000, S_WIZ_3} } },  // 5 APT_MAGICIEN
-    { 100,  100,   70,   850, "Kamikaze",   "Kamikaze",  { {0,     0,    0,      -1}, {100, 5000, 5000, S_TIMER}, {0,     0,     0,      -1} } },  // 6 APT_KAMIKAZE
-    { 120,   85,   90,  1050, "Faucheuse",  "Reaper",    { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 7 APT_FAUCHEUSE
-    {  90,   85,   85,  1050, "Physicien",  "Physicist", { {40, 4000, 3000, S_PHY_1}, {50,  5000, 7000, S_PHY_2}, {65, 6000,  9000, S_PHY_3} } },  // 8 APT_PHYSICIEN
-    { 100,   60,  135,  1250, "Campeur",    "Camper",    { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 9 APT_CAMPEUR
-    {  90,   85,  120,  1100, "Espion",     "Spy",       { {40, 4000, 7000, S_SPY_1}, {50,  7000, 7000, S_SPY_2}, {60, 5000, 10000, S_SPY_3} } },  // 10 APT_ESPION
-    {  85,  105,   85,   950, "Prêtre",     "Priest",    { {30, 4000, 8000, S_PRI_1}, {10,  8000, 8000, S_PRI_2}, {80, 4000, 10000, S_PRI_3} } },  // 11 APT_PRETRE
-    { 100,  120,   60,  1050, "Viking",     "Viking",    { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 12 APT_VIKING
-    { 100,  110,   85,  1100, "Junkie",     "Junkie",    { {0,     0,    0,     - 1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 13 APT_JUNKIE
-    { 100,  100,   75,  1000, "Shoshone",   "Shoshone",  { {50, 7500, 7500, S_SHO_1}, {50,  7500, 7500, S_SHO_2}, {50, 7500,  7500, S_SHO_3} } }   // 14 APT_SHOSHONE
+    { 105,  105,  105,   105, "Soldat",     "Soldier",   { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 0 APT_SOLDAT
+    {  90,  115,   95,   105, "Médecin",    "Medic",     { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 1 APT_MEDECIN
+    { 100,  135,   80,    85, "Américain",  "American",  { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 2 APT_AMERICAIN
+    {  85,   90,   75,   125, "Ninja",      "Ninja",     { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 3 APT_NINJA
+    { 110,   65,  110,   110, "Vampire",    "Vampire",   { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 4 APT_VAMPIRE
+    { 100,   85,   90,   100, "Magicien",   "Wizard",    { {30,  250, 2000, S_WIZ_1}, {40,  4000, 5000, S_WIZ_2}, {60, 3000,  6000, S_WIZ_3} } },  // 5 APT_MAGICIEN
+    { 100,  100,   70,   115, "Kamikaze",   "Kamikaze",  { {0,     0,    0,      -1}, {100, 5000, 5000, S_TIMER}, {0,     0,     0,      -1} } },  // 6 APT_KAMIKAZE
+    { 120,   85,   90,    95, "Faucheuse",  "Reaper",    { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 7 APT_FAUCHEUSE
+    {  90,   85,   85,    95, "Physicien",  "Physicist", { {40, 4000, 3000, S_PHY_1}, {50,  5000, 7000, S_PHY_2}, {65, 6000,  9000, S_PHY_3} } },  // 8 APT_PHYSICIEN
+    { 100,   60,  135,    80, "Campeur",    "Camper",    { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 9 APT_CAMPEUR
+    {  90,   85,  120,    90, "Espion",     "Spy",       { {40, 4000, 7000, S_SPY_1}, {50,  7000, 7000, S_SPY_2}, {60, 5000, 10000, S_SPY_3} } },  // 10 APT_ESPION
+    {  85,  105,   85,   105, "Prêtre",     "Priest",    { {30, 4000, 8000, S_PRI_1}, {10,  8000, 8000, S_PRI_2}, {80, 4000, 10000, S_PRI_3} } },  // 11 APT_PRETRE
+    { 100,  120,   60,    95, "Viking",     "Viking",    { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 12 APT_VIKING
+    { 100,  110,   85,    90, "Junkie",     "Junkie",    { {0,     0,    0,     - 1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 13 APT_JUNKIE
+    { 100,  100,   75,   100, "Shoshone",   "Shoshone",  { {50, 7500, 7500, S_SHO_1}, {50,  7500, 7500, S_SHO_2}, {50, 7500,  7500, S_SHO_3} } }   // 14 APT_SHOSHONE
 };
 
 #include "ai.h"
@@ -485,6 +485,7 @@ struct gamestate
     int abilitymillis[3], aptiseed;
     int gunselect, gunwait;
     int ammo[NUMGUNS];
+    bool aiming;
     int aitype, skill;
 
     gamestate() : maxhealth(1000), aitype(AI_NONE), skill(0) {}
@@ -548,7 +549,7 @@ struct gamestate
         switch(type)
         {
             case I_BOOSTPV:
-                health = min(health+is.add*(aptitude==APT_MEDECIN ? 1.5f : itemboost), 2500.0f);
+                health = min(health+is.add*(aptitude==APT_JUNKIE ? 1.5f : itemboost), 2500.0f);
                 return;
 
             case I_SANTE:
@@ -601,6 +602,7 @@ struct gamestate
         loopi(3) abilitymillis[i] = 0;
         aptiseed = rnd(4);
         loopi(NUMGUNS) ammo[i] = 0;
+        aiming = false;
     }
 
     void addcacweaps(int gamemode, int aptitude)
@@ -1101,7 +1103,7 @@ namespace server
     extern int gamemillis;
 }
 
-extern bool rndevent(int probability);
+extern bool rndevent(int probability, int probabilityReduce = 0);
 extern void addsleep(int *msec, char *cmd);
 extern void createdrop(const vec *o, int type);
 extern void trydisconnect(bool local);
