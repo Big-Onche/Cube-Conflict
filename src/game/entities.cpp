@@ -153,8 +153,8 @@ namespace entities
 
         if(type>=I_RAIL && type<=I_SUPERARME)
         {
-            if(d!=player1) gunselect(type-9+rndsweap, d);
-            else if(autowield==1) gunselect(type-9+rndsweap, player1);
+            if(d!=hudplayer()) gunselect(type-9+rndsweap, d);
+            else if(autowield>0) gunselect(type-9+rndsweap, player1);
         }
 
         if(d->abilitymillis[ABILITY_1] && d->aptitude==APT_PRETRE)
