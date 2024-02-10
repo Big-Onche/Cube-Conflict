@@ -358,8 +358,8 @@ namespace game
         int horizontaltrans = gfx::zoom ? 2 : -2;
         int verticaltrans = gfx::zoom ? -1 : 1;
 
-        gfx::weapposside = clamp(gfx::weapposside + horizontaltrans * delta, 1, guns[player1->gunselect].maxweapposside);
-        gfx::weapposup = clamp(gfx::weapposup + verticaltrans * delta, 1, guns[player1->gunselect].maxweapposup);
+        gfx::weapposside = clamp(gfx::weapposside + horizontaltrans * delta, 1, guns[hudplayer()->gunselect].maxweapposside);
+        gfx::weapposup = clamp(gfx::weapposup + verticaltrans * delta, 1, guns[hudplayer()->gunselect].maxweapposup);
 
         if(!maptime) { maptime = lastmillis; maprealtime = totalmillis; return; }
         if(!curtime) { gets2c(); if(player1->clientnum>=0) c2sinfo(); return; }

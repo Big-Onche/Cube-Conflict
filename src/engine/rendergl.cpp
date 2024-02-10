@@ -1359,7 +1359,13 @@ void disablezoom()
 
 void computezoom()
 {
-    if(game::player1->state==CS_DEAD || game::intermission) gfx::zoom = 0;
+    if(game::player1->state==CS_SPECTATOR)
+    {
+        if (game::hudplayer()->aiming && game::player1->state==CS_SPECTATOR) gfx::zoom = 1;
+        else gfx::zoom = 0;
+    }
+    else if(game::player1->state==CS_DEAD || game::intermission) gfx::zoom = 0;
+
     if(!gfx::zoom)
     {
         zoomprogress = 0;

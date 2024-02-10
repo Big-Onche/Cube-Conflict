@@ -191,76 +191,47 @@ namespace game
 
     bool enlargefov = true;
 
+
+    void drawFullscreenQuad(int w, int h, const char *texDir, float alpha, float r = 1, float g = 1, float b = 1)
+    {
+        gle::colorf(alpha, alpha, alpha, alpha);
+
+        settexture(texDir);
+        hudquad(0, 0, w, h);
+
+        gle::colorf(r, g, b, 1);
+    }
+
     void gameplayhud(int w, int h)
     {
-        gameent *d = hudplayer();
-        if(d->state==CS_EDITING || d->state==CS_SPECTATOR || d->state==CS_DEAD) return;
+        gameent *hp = hudplayer();
+        if(hp->state==CS_EDITING || hp->state==CS_SPECTATOR || hp->state==CS_DEAD) return;
 
-        gfx::zoomfov = (guns[player1->gunselect].maxzoomfov);
+        gfx::zoomfov = (guns[hp->gunselect].maxzoomfov);
 
         if(ispaused()) {gfx::zoom = 0; return;}
 
-        if((player1->gunselect==GUN_SKS || player1->gunselect==GUN_SV98 || player1->gunselect==GUN_ARBALETE || player1->gunselect==GUN_S_CAMPOUZE || player1->gunselect==GUN_S_ROQUETTES) && gfx::zoom)
+        if((hp->gunselect==GUN_SKS || hp->gunselect==GUN_SV98 || hp->gunselect==GUN_ARBALETE || hp->gunselect==GUN_S_CAMPOUZE || hp->gunselect==GUN_S_ROQUETTES) && gfx::zoom)
         {
-            if(player1->gunselect==GUN_S_ROQUETTES) settexture("media/interface/hud/fullscreen/scope_1.png");
-            if(player1->gunselect==GUN_SKS) settexture("media/interface/hud/fullscreen/scope_3.png");
-            else settexture("media/interface/hud/fullscreen/scope_2.png");
-            hudquad(0, 0, w, h);
-
-            gle::colorf(1, 1, 1, 1);
+            if(hp->gunselect==GUN_S_ROQUETTES) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/scope_1.png", 1);
+            if(hp->gunselect==GUN_SKS) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/scope_3.png", 1);
+            else drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/scope_2.png", 1);
         }
 
-        if(hudplayer()->boostmillis[B_SHROOMS])
+        if(hp->boostmillis[B_SHROOMS]) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/shrooms.png", min(1.0f, hp->boostmillis[B_SHROOMS] / 5000.f));
+        if(hp->boostmillis[B_RAGE]) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/rage.png", min(1.0f, hp->boostmillis[B_RAGE] / 1000.f));
+        if(hp->vampimillis) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/vampire.png", min(1.0f, hp->vampimillis / 500.f));
+
+        if(((hp->abilitymillis[ABILITY_1] || hp->abilitymillis[ABILITY_3]) && hp->aptitude==APT_MAGICIEN) || (hp->abilitymillis[ABILITY_2] && hp->aptitude==APT_PHYSICIEN))
         {
-            float col = hudplayer()->boostmillis[B_SHROOMS]>5000 ? 1 : hudplayer()->boostmillis[B_SHROOMS]/5000.f;
-            gle::colorf(col, col, col, col);
-
-            settexture("media/interface/hud/fullscreen/shrooms.png");
-            hudquad(0, 0, w, h);
-
-            gle::colorf(1, 1, 1, 1);
+            float r, g, b;
+            if(hp->aptitude==APT_MAGICIEN) r = g = b = 1;
+            else { r = 0.3 ; g = 0.6 ; b = 1; }
+            drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/vampire.png", 0.7, r, g, b);
         }
 
-        if(hudplayer()->boostmillis[B_RAGE])
-        {
-            float col = hudplayer()->boostmillis[B_RAGE]>1000 ? 1 :  hudplayer()->boostmillis[B_RAGE]/1000.f;
-            gle::colorf(col, col, col, col);
+        if(hp->health<300 && hp->state==CS_ALIVE) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/damage.png", (- (hp->health) + 700) / 1000.0f);
 
-            settexture("media/interface/hud/fullscreen/rage.png");
-            hudquad(0, 0, w, h);
-
-            gle::colorf(1, 1, 1, 1);
-        }
-
-        if(hudplayer()->vampimillis)
-        {
-            float col = hudplayer()->vampimillis>1000 ? 1 : hudplayer()->vampimillis/1000.f;
-            gle::colorf(col, col, col, col);
-
-            settexture("media/interface/hud/fullscreen/vampire.png");
-            hudquad(0, 0, w, h);
-
-            gle::colorf(1, 1, 1, 1);
-        }
-
-        if(((d->abilitymillis[ABILITY_1] || d->abilitymillis[ABILITY_3]) && d->aptitude==APT_MAGICIEN) || (d->abilitymillis[ABILITY_2] && d->aptitude==APT_PHYSICIEN))
-        {
-            d->aptitude==APT_MAGICIEN ? gle::colorf(1, 1, 1, 0.7f) : gle::colorf(0.3, 0.6, 1, 0.7f);
-
-            settexture("media/interface/hud/fullscreen/ability.png");
-            hudquad(0, 0, w, h);
-
-            gle::colorf(1, 1, 1, 1);
-        }
-
-        if(player1->health<300 && player1->state==CS_ALIVE)
-        {
-            gle::colorf((-(player1->health)+700)/1000.0f, (-(player1->health)+700)/1000.0f, (-(player1->health)+700)/1000.0f, (-(player1->health)+700)/1000.0f);
-            settexture("media/interface/hud/fullscreen/damage.png");
-            hudquad(0, 0, w, h);
-
-            gle::colorf(1, 1, 1, 1);
-        }
         /*
         dynent *o = intersectclosest(d->o, worldpos, d, gfx::zoom ? 40 : 25);
         if(o && o->type==ENT_PLAYER && !isteam(player1->team, ((gameent *)o)->team) && totalmillis-lastshoot<=1000 && player1->o.dist(o->o)<guns[d->gunselect].hudrange)
@@ -284,10 +255,10 @@ namespace game
         */
         if(cmode)
         {
-            cmode->drawhud(d, w, h);
+            cmode->drawhud(hp, w, h);
             pophudmatrix();
         }
-        else if(m_tutorial || m_dmsp) drawrpgminimap(d, w, h);
+        else if(m_tutorial || m_dmsp) drawrpgminimap(hp, w, h);
 
         pushhudmatrix();
     }
