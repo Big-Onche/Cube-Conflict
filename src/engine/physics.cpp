@@ -1754,10 +1754,9 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
         m.normalize();
     }
 
-
     vec d(m);
     d.mul(pl->maxspeed);
-    if(pl->type==ENT_PLAYER && pl==player)
+    if(pl->type==ENT_PLAYER)
     {
         float speed = aptitudes[aptitude].apt_vitesse;
         switch(aptitude)
