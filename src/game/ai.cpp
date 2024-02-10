@@ -1183,10 +1183,9 @@ namespace ai
                 scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, sskew);
                 if(insight || quick || (hasseen && (d->gunselect==GUN_PLASMA || d->gunselect==GUN_MINIGUN || d->gunselect==GUN_S_ROQUETTES)))
                 {
-                    int dist = dp.squaredist(ep);
-                    if((canshoot(d, atk, e) && hastarget(d, atk, b, e, yaw, pitch, dist)) || (d->aptitude==APT_PRETRE && d->abilitymillis[ABILITY_3]))
+                    if(canshoot(d, atk, e) && hastarget(d, atk, b, e, yaw, pitch, dp.squaredist(ep)))
                     {
-                        if(dist < (250 - d->skill)) d->aiming = false;
+                        if(d->o.dist(e->o) < (250 - d->skill)) d->aiming = false;
                         else d->aiming = true;
 
                         if((d->gunselect==GUN_ARTIFICE || d->gunselect==GUN_SMAW || d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_ROQUETTES) && !idle) d->jumping = true;
@@ -1196,11 +1195,15 @@ namespace ai
                     }
                     else result = 2;
                 }
-                else result = 1;
+                else
+                {
+                    d->aiming = false;
+                    result = 1;
+                }
             }
             else
             {
-                if(!d->ai->enemyseen || lastmillis-d->ai->enemyseen > (d->skill*50)+3000)
+                if(!d->ai->enemyseen || lastmillis-d->ai->enemyseen > (d->skill*50) + 3000)
                 {
                     d->ai->enemy = -1;
                     d->ai->enemyseen = d->ai->enemymillis = 0;
@@ -1586,6 +1589,9 @@ namespace ai
                 }
                 if(aidebug >= 3)
                 {
+                    particle_textcopy(pos, d->aiming ? "aiming" : "not aiming", PART_TEXT, 1);
+                    pos.z += 2;
+
                     if(d->ai->weappref >= 0 && d->ai->weappref < NUMGUNS)
                     {
                         particle_textcopy(pos, readstr(guns[d->ai->weappref].ident), PART_TEXT, 1);
