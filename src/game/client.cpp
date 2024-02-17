@@ -1337,6 +1337,7 @@ namespace game
         d->mana = getint(p);
         d->armour = getint(p);
         d->armourtype = getint(p);
+        d->aiming = getint(p);
         if(resume && d==player1)
         {
             getint(p);
@@ -1570,11 +1571,8 @@ namespace game
 
             case N_SENDAPTITUDE:
             {
-                int plclasse = getint(p);
-                if(d)
-                {
-                    d->aptitude = plclasse;
-                }
+                int classe = getint(p);
+                if(d) d->aptitude = classe;
                 break;
             }
 
@@ -1583,9 +1581,10 @@ namespace game
                 int player = getint(p);
                 gameent *pl = getclient(player);
                 int ability = getint(p);
-                pl->abilitymillis[ability] = getint(p);
+                int millis = getint(p);
 
                 if(!pl) break;
+                pl->abilitymillis[ability] = millis;
                 pl->mana -= aptitudes[pl->aptitude].abilities[ability].manacost;
                 launchAbility(pl, ability, false);
                 break;
@@ -1599,10 +1598,12 @@ namespace game
                 int receiver = getint(p);
                 gameent *r = getclient(receiver);
 
-                int stat = getint(p); //0 = health, 1 = mana
+                int stat = getint(p); // 0 = health, 1 = mana
+                int val = getint(p);
 
-                stat ? r->mana = getint(p) : r->health = getint(p);
+                if(!g || !r) break;
 
+                stat ? r->mana = val : r->health = val;
                 if(!stat && r->clientnum == g->clientnum) regularflame(PART_HEALTH, r->o, 15, 2, 0xFFFFFF, 1, 1.f);
                 else
                 {
