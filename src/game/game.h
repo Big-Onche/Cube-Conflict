@@ -332,42 +332,42 @@ enum
 
 static struct itemstat { int add, max, sound; const char *ident; int info; } itemstats[] =
 {   // weapons
-    {15,    60,    S_ITEMAMMO,  "Weapon_ElectricRifle", GUN_ELEC},
-    {32,   128,    S_ITEMAMMO,  "Weapon_PlasmaRifle",   GUN_PLASMA},
-    {5,     20,    S_ITEMAMMO,  "Weapon_Smaw",          GUN_SMAW},
-    {80,   320,    S_ITEMAMMO,  "Weapon_Minigun",       GUN_MINIGUN},
-    {20,    80,    S_ITEMAMMO,  "Weapon_Spockgun",      GUN_SPOCKGUN},
-    {7,     28,    S_ITEMAMMO,  "Weapon_M32",           GUN_M32},
-    {50,   200,    S_ITEMAMMO,  "Weapon_Flamethrower",  GUN_LANCEFLAMMES},
-    {50,   200,    S_ITEMAMMO,  "Weapon_Uzi",           GUN_UZI},
-    {60,   240,    S_ITEMAMMO,  "Weapon_Famas",         GUN_FAMAS},
-    {10,    40,    S_ITEMAMMO,  "Weapon_Mossberg500",   GUN_MOSSBERG},
-    {15,    60,    S_ITEMAMMO,  "Weapon_Hydra",         GUN_HYDRA},
-    {8,     32,    S_ITEMAMMO,  "Weapon_Sv98",          GUN_SV98},
-    {14,    56,    S_ITEMAMMO,  "Weapon_Sks",           GUN_SKS},
-    {12,    48,    S_ITEMAMMO,  "Weapon_Crossbow",      GUN_ARBALETE},
-    {40,   160,    S_ITEMAMMO,  "Weapon_Ak47",          GUN_AK47},
-    {70,   280,    S_ITEMAMMO,  "Weapon_Gapb1",         GUN_GRAP1},
-    {10,    40,    S_ITEMAMMO,  "Weapon_Fireworks",     GUN_ARTIFICE},
-    {30,   120,    S_ITEMAMMO,  "Weapon_Glock",         GUN_GLOCK},
+    {15,    60,    S_ITEMAMMO,  "Weapon_ElectricRifle",     GUN_ELEC},
+    {32,   128,    S_ITEMAMMO,  "Weapon_PlasmaRifle",       GUN_PLASMA},
+    {5,     20,    S_ITEMAMMO,  "Weapon_Smaw",              GUN_SMAW},
+    {80,   320,    S_ITEMAMMO,  "Weapon_Minigun",           GUN_MINIGUN},
+    {20,    80,    S_ITEMAMMO,  "Weapon_Spockgun",          GUN_SPOCKGUN},
+    {7,     28,    S_ITEMAMMO,  "Weapon_M32",               GUN_M32},
+    {50,   200,    S_ITEMAMMO,  "Weapon_Flamethrower",      GUN_LANCEFLAMMES},
+    {50,   200,    S_ITEMAMMO,  "Weapon_Uzi",               GUN_UZI},
+    {60,   240,    S_ITEMAMMO,  "Weapon_Famas",             GUN_FAMAS},
+    {10,    40,    S_ITEMAMMO,  "Weapon_Mossberg500",       GUN_MOSSBERG},
+    {15,    60,    S_ITEMAMMO,  "Weapon_Hydra",             GUN_HYDRA},
+    {8,     32,    S_ITEMAMMO,  "Weapon_Sv98",              GUN_SV98},
+    {14,    56,    S_ITEMAMMO,  "Weapon_Sks",               GUN_SKS},
+    {12,    48,    S_ITEMAMMO,  "Weapon_Crossbow",          GUN_ARBALETE},
+    {40,   160,    S_ITEMAMMO,  "Weapon_Ak47",              GUN_AK47},
+    {70,   280,    S_ITEMAMMO,  "Weapon_Gapb1",             GUN_GRAP1},
+    {10,    40,    S_ITEMAMMO,  "Weapon_Fireworks",         GUN_ARTIFICE},
+    {30,   120,    S_ITEMAMMO,  "Weapon_Glock",             GUN_GLOCK},
     // superweapons
-    {  1,    4,    S_ITEMSUPERAMMO, "BOMBE NUCLEAIRE",  GUN_S_NUKE},
-    {300, 1200,    S_ITEMSUPERAMMO, "GAU-8",            GUN_S_GAU8},
-    { 40,  120,    S_ITEMSUPERAMMO, "MINI-ROQUETTES",   GUN_S_ROQUETTES},
-    { 15,   60,    S_ITEMSUPERAMMO, "CAMPOUZE 2000",    GUN_S_CAMPOUZE},
+    {  1,    4,    S_ITEMSUPERAMMO, "BOMBE NUCLEAIRE",      GUN_S_NUKE},
+    {300, 1200,    S_ITEMSUPERAMMO, "GAU-8",                GUN_S_GAU8},
+    { 40,  120,    S_ITEMSUPERAMMO, "MINI-ROQUETTES",       GUN_S_ROQUETTES},
+    { 15,   60,    S_ITEMSUPERAMMO, "CAMPOUZE 2000",        GUN_S_CAMPOUZE},
     // items
-    {250,     1000, S_ITEMHEALTH,   "Item_Health",      0},
-    {500,     2500, S_COCHON,       "Item_GrilledPig",  0},
-    {30000,  45000, S_ITEMSTEROS,   "STEROIDES",      B_ROIDS},
-    {40000, 120000, S_ITEMCHAMPIS,  "CHAMPIS",        B_SHROOMS},
-    {40000,  60000, S_ITEMEPO,      "EPO",            B_EPO},
-    {30000,  90000, S_ITEMJOINT,    "JOINT",          B_JOINT},
-    {750,      750, S_ITEMBBOIS,    "BOUCLIER EN BOIS",    A_WOOD},
-    {1250,    1250, S_ITEMBFER,     "BOUCLIER DE FER",    A_IRON},
-    {2000,    2000, S_ITEMBOR,      "BOUCLIER D'OR",    A_GOLD},
+    {250,     1000, S_ITEMHEALTH,   "Item_Health",          0},
+    {500,     2500, S_COCHON,       "Item_GrilledPig",      0},
+    {30000,  45000, S_ITEMSTEROS,   "STEROIDES",            B_ROIDS},
+    {40000, 120000, S_ITEMCHAMPIS,  "CHAMPIS",              B_SHROOMS},
+    {40000,  60000, S_ITEMEPO,      "EPO",                  B_EPO},
+    {30000,  90000, S_ITEMJOINT,    "JOINT",                B_JOINT},
+    {750,      750, S_ITEMBBOIS,    "BOUCLIER EN BOIS",     A_WOOD},
+    {1250,    1250, S_ITEMBFER,     "BOUCLIER DE FER",      A_IRON},
+    {2000,    2000, S_ITEMBOR,      "BOUCLIER D'OR",        A_GOLD},
     {1500,    1500, S_ITEMBMAGNET,  "BOUCLIER MAGNETIQUE",  A_MAGNET},
-    {3000,    3000, S_ITEMARMOUR,   "ARMURE ASSISTEE",    A_ASSIST},
-    {50,       150, S_ITEMMANA,     "Item_Mana", 0           }
+    {3000,    3000, S_ITEMARMOUR,   "ARMURE ASSISTEE",      A_ASSIST},
+    {50,       150, S_ITEMMANA,     "Item_Mana",            0}
 };
 
 #define MAXRAYS 25
@@ -398,7 +398,7 @@ static const struct attackinfo { int gun, action, picksound, sound, middistsnd, 
     { GUN_GLOCK,        ACT_SHOOT, S_WPLOADSMALL,     S_GLOCK,        S_GLOCK_FAR,        S_FAR_LIGHT, 10,  100,  280,   5, 150, 0, 4250,   7, 8000,  1,    30,   3, 0, 1},
     // Super armes
     { GUN_S_NUKE,       ACT_SHOOT, S_WPLOADBIG,       S_NUKE,         S_NUKE_FAR,             S_NUKE_FAR,    1, 3000,  3250,  20, 300, 2,  200,  10, 2000,  1,   400, 1500, 6000, 1},
-    { GUN_S_GAU8,       ACT_SHOOT, S_WPLOADBIG,       S_GAU8,         -1,                             -1,   90,   14,   370, 150, 250, 3, 7500,   4, 8000,  1,    80,   20, 0, 1},
+    { GUN_S_GAU8,       ACT_SHOOT, S_WPLOADBIG,       S_GAU8,         -1,                             -1,   90,   14,   300, 150, 250, 3, 7500,   4, 8000,  1,    80,   20, 0, 1},
     { GUN_S_ROQUETTES,  ACT_SHOOT, S_WPLOADBIG,       S_MINIROCKETS,  S_MINIROCKETS_FAR, S_FAR_VERYHEAVY,   14,  170,  2000,  10, 300, 2,  850,   6, 8000,  1,   500,  100, 0, 1},
     { GUN_S_CAMPOUZE,   ACT_SHOOT, S_WPLOADBIG,       S_CAMPOUZE,     S_CAMPOUZE_FAR,    S_FAR_VERYHEAVY,    8,  500,    75,  10,  50, 5,    0,   3, 4000, 10,   150,    8, 0, 1},
     // Armes corps à corps
@@ -688,7 +688,7 @@ struct gamestate
             armour = aptitude==APT_SOLDAT ? 1000 : 750;
             ammo[GUN_GLOCK] = aptitude==APT_AMERICAIN ? 45 : 30;
             ammo[GUN_M32] = aptitude==APT_AMERICAIN ? 3 : 1;
-            gunselect = aptitude==APT_KAMIKAZE ? GUN_KAMIKAZE : aptitude==3 ? GUN_CACNINJA : GUN_GLOCK;
+            gunselect = aptitude==APT_KAMIKAZE ? GUN_KAMIKAZE : aptitude==APT_NINJA ? GUN_CACNINJA : GUN_GLOCK;
         }
 
         if(aptitude==APT_SOLDAT && addsweap) addsweaps();

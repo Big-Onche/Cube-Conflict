@@ -1094,7 +1094,7 @@ namespace game
                 if(atk==ATK_GAU8_SHOOT)
                 {
                     if(d->type==ENT_PLAYER) sound = S_GAU8;
-                     if(d==player1 && player1->aptitude==APT_PRETRE && player1->boostmillis[B_SHROOMS] && player1->abilitymillis[ABILITY_3]) unlockAchievement(ACH_CADENCE);
+                    if(d==player1 && player1->aptitude==APT_PRETRE && player1->boostmillis[B_SHROOMS] && player1->abilitymillis[ABILITY_3]) unlockAchievement(ACH_CADENCE);
                 }
                 spawnbouncer(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? d->o : d->balles, vec(0, 0, 0), d, atk==ATK_GAU8_SHOOT ? BNC_BIGDOUILLES : BNC_DOUILLES);
                 gfx::shootgfx(from, to, d, atk);
@@ -1254,6 +1254,8 @@ namespace game
         bool incraseDist = atk==ATK_ASSISTXPL_SHOOT || atk==ATK_KAMIKAZE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_NUKE_SHOOT;
 
         vec soundOrigin = noMuzzle(atk, d) ? hudgunorigin(d->gunselect, d->o, to, d) : (d->muzzle);
+        int distance = camera1->o.dist(hudgunorigin(gun, d->o, to, d));
+
 
         switch(sound)
         {
@@ -1261,7 +1263,8 @@ namespace game
             case S_GAU8:
                 if(!d->attacksound)
                 {
-                    playSound(sound, d==hudplayer() ? NULL : &soundOrigin, incraseDist ? 800 : 400, incraseDist ? 250 : 150, SND_LOOPED|SND_FIXEDPITCH|SND_NOCULL, d->entityId, PL_ATTACK_SND);
+                    bool fargau = atk==ATK_GAU8_SHOOT && distance >= 500;
+                    playSound(fargau ? S_GAU8_FAR : sound, d==hudplayer() ? NULL : &soundOrigin, incraseDist ? (fargau ? 3000 : 1000) : 400, incraseDist ? (fargau ? 1500 : 500) : 150, SND_LOOPED|SND_FIXEDPITCH|SND_NOCULL, d->entityId, PL_ATTACK_SND);
                     d->attacksound = true;
                 }
                 return;
@@ -1274,10 +1277,10 @@ namespace game
                 playSound(attacks[atk].sound, d==hudplayer() ? NULL : &soundOrigin, incraseDist ? 600 : 400, incraseDist ? 200 : 150);
         }
 
-        if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 300)
+        if(distance > 300)
         {
             playSound(attacks[atk].middistsnd, &soundOrigin, 700, 300, SND_LOWPRIORITY);
-            if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 600) playSound(attacks[atk].fardistsnd, &soundOrigin, 1000, 600, SND_LOWPRIORITY);
+            if(distance > 600) playSound(attacks[atk].fardistsnd, &soundOrigin, 1000, 600, SND_LOWPRIORITY);
         }
     }
 
