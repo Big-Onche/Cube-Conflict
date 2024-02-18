@@ -14,7 +14,10 @@ namespace ai
     VARP(numbots, 0, 5, 49);
     VARP(botlevel, 0, 2, 4);
     ICOMMAND(addbots, "ii", (int *num, int *classe), loopi(*num) addmsg(N_ADDBOT, "rii", (33 + botlevel * 15) + rnd(7), *classe); );
-    ICOMMAND(delbot, "", (), addmsg(N_DELBOT, "r"));
+    ICOMMAND(delbots, "i", (int *num),
+        if(*num <= 0) *num = 1;
+        loopi(*num) addmsg(N_DELBOT, "r");
+    );
     ICOMMAND(botlimit, "i", (int *n), addmsg(N_BOTLIMIT, "ri", *n));
     ICOMMAND(botbalance, "i", (int *n), addmsg(N_BOTBALANCE, "ri", *n));
 
