@@ -354,7 +354,7 @@ namespace game
 
     void updateworld()        // main game update loop
     {
-        int delta = 250 / max(gfx::nbfps, 1);
+        int delta = max((250 / max(gfx::nbfps, 1)) * (game::gamespeed / 100.f), 1.f);
         int horizontaltrans = gfx::zoom ? 2 : -2;
         int verticaltrans = gfx::zoom ? -1 : 1;
 
@@ -917,6 +917,7 @@ namespace game
             removeweapons(d);
             removetrackedparticles(d);
             removetrackeddynlights(d);
+            clearLinkedSounds(d->entityId);
             if(cmode) cmode->removeplayer(d);
             removegroupedplayer(d);
             players.removeobj(d);

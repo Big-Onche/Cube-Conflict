@@ -572,6 +572,11 @@ void stopLinkedSound(size_t entityId, int soundType)
     }
 }
 
+void clearLinkedSounds(size_t entityId)
+{
+    loopi(NUMLINKEDSNDS) stopLinkedSound(entityId, i);
+}
+
 void stopAllSounds(bool pause)
 {
     loopi(maxsoundsatonce)

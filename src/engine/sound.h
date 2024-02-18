@@ -89,7 +89,7 @@ enum SoundFlags
     SND_MUSIC         = 1 << 7      // music
 };
 
-enum PlayerLinkedSounds { PL_NONE = 0, PL_ATTACK_SND, PL_ABI_SND_1, PL_ABI_SND_2, PL_ABI_SND_3, PL_POWERARMOR_SND, PL_UNDERWATER_SND, PL_TAUNT_SND }; // types of sounds that can be linked to a bot/player
+enum PlayerLinkedSounds { PL_NONE = 0, PL_ATTACK_SND, PL_ABI_SND_1, PL_ABI_SND_2, PL_ABI_SND_3, PL_POWERARMOR_SND, PL_UNDERWATER_SND, PL_TAUNT_SND, NUMLINKEDSNDS }; // types of sounds that can be linked to a bot/player
 
 const EFXEAXREVERBPROPERTIES presets[] = // declaration of efx reverb presets
 {
@@ -133,6 +133,7 @@ extern void updateSounds();
 extern void stopSound(int soundId, int flags);
 extern void stopMusic(int soundId);
 extern void stopLinkedSound(size_t entityId, int soundType = 0);
+extern void clearLinkedSounds(size_t entityId);
 extern void stopAllMapSounds();
 extern void stopAllSounds(bool pause = false);
 extern void resumeAllSounds();
