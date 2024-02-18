@@ -4,10 +4,37 @@
 #include "gfx.h"
 #include "stats.h"
 
+bool disabledClasse[NUMAPTS];
+
+ICOMMAND(getclass, "i", (int *i), intret(disabledClasse[*i]) );
+
+ICOMMAND(setclass, "i", (int *i),
+    if(*i < 0 || *i > NUMAPTS-1) return;
+    if(*i == game::player1->aptitude)
+    {
+        conoutf(CON_ERROR, "\f3Cannot deactivate your current classe!");
+        playSound(S_ERROR);
+        return;
+    }
+
+    int maxClasses = NUMAPTS;
+    disabledClasse[*i] = !disabledClasse[*i];
+
+    loopi(NUMAPTS) maxClasses -= disabledClasse[i];
+    if(!maxClasses)
+    {
+        disabledClasse[*i] = !disabledClasse[*i];
+        conoutf(CON_ERROR, "\f3Cannot deactivate all classes!");
+        playSound(S_ERROR);
+        return;
+    }
+);
+
 int getspyability;
 
 namespace game
 {
+
     void abilityeffect(gameent *d, int ability)
     {
         vec sndpos = d->o;

@@ -5,7 +5,7 @@
 #include "sound.h"
 #include "engine.h"
 
-extern int lastshoot, getspyability;
+extern int lastshoot, getspyability, autowield;
 
 // animations
 enum
@@ -1107,6 +1107,8 @@ extern bool rndevent(int probability, int probabilityReduce = 0);
 extern void addsleep(int *msec, char *cmd);
 extern void createdrop(const vec *o, int type);
 extern void trydisconnect(bool local);
+
+extern bool disabledClasse[NUMAPTS];
 
 #endif
 

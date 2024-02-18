@@ -896,6 +896,7 @@ namespace game
         if(*numargs > 0) changegamespeed(clampvar(id, *val, 10, 1000));
         else if(*numargs < 0) intret(gamespeed);
         else printvar(id, gamespeed);
+        stopAllMapSounds();
     });
     ICOMMAND(prettygamespeed, "i", (), result(tempformatstring("%d.%02dx", gamespeed/100, gamespeed%100)));
 
@@ -1337,7 +1338,6 @@ namespace game
         d->mana = getint(p);
         d->armour = getint(p);
         d->armourtype = getint(p);
-        d->aiming = getint(p);
         if(resume && d==player1)
         {
             getint(p);
