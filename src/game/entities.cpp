@@ -4,6 +4,8 @@
 
 size_t GlobalIdGenerator::currentId = 0;
 
+VAR(autowield, -1, 0, 1);
+
 namespace entities
 {
     using namespace game;
@@ -120,8 +122,6 @@ namespace entities
         }
     }
 
-    VAR(autowield, -1, 0, 1);
-
     void addammo(int type, int &v, bool local)
     {
         itemstat &is = itemstats[type-I_RAIL];
@@ -153,8 +153,8 @@ namespace entities
 
         if(type>=I_RAIL && type<=I_SUPERARME)
         {
-            if(d!=hudplayer()) gunselect(type-9+rndsweap, d);
-            else if(autowield>0) gunselect(type-9+rndsweap, player1);
+            if(d!=hudplayer()) gunselect(type - 9 + rndsweap, d);
+            else if(autowield > 0) gunselect(type - 9 + rndsweap, player1);
         }
 
         if(d->abilitymillis[ABILITY_1] && d->aptitude==APT_PRETRE)

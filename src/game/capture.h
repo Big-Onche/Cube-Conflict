@@ -1118,7 +1118,7 @@ case N_BASEREGEN:
     {
         regen->health = health;
         regen->mana = mana;
-        if(ammotype>=GUN_ELEC && ammotype<=GUN_GLOCK) regen->ammo[ammotype] = ammo;
+        if(ammotype >= GUN_ELEC && ammotype <= GUN_GLOCK) regen->ammo[ammotype] = ammo;
         if(!regen->armour) regen->armourtype=A_WOOD;
         regen->armour = armour;
         if(regen->armour==10) playSound(S_ITEMBBOIS, regen==hudplayer() ? NULL : &regen->o, 300, 150);
@@ -1129,6 +1129,7 @@ case N_BASEREGEN:
             case A_GOLD: if(regen->armour>=2000) { regen->armourtype=A_ASSIST; playSound(S_ITEMARMOUR, regen==hudplayer() ? NULL : &regen->o, 300, 50); }
             case A_ASSIST: regen->ammo[GUN_ASSISTXPL] = 1;
         }
+        if(autowield > 0 && player1->gunselect != ammotype) gunselect(ammotype, player1);
     }
     break;
 }
