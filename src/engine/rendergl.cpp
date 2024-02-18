@@ -1341,15 +1341,15 @@ void pushhudtranslate(float tx, float ty, float sx, float sy)
 int vieww = -1, viewh = -1;
 float curfov, curavatarfov, fovy, aspect;
 int farplane;
-VARP(zoominvel, 0, 40, 500);
-VARP(zoomoutvel, 0, 50, 500);
+VARP(zoominvel, 0, 100, 500);
+VARP(zoomoutvel, 0, 100, 500);
 VARP(fov, 10, 100, 150);
 int avatarzoomfov = 40;
 VAR(avatarfov, 10, 40, 100);
 FVAR(avatardepth, 0, 0.2f, 1);
 FVARNP(aspect, forceaspect, 0, 0, 1e3f);
 
-static float zoomprogress = 0;
+float zoomprogress = 0;
 
 void disablezoom()
 {
@@ -1377,11 +1377,13 @@ void computezoom()
     if(gfx::zoom > 0)
     {
         game::player1->aiming = true;
-        zoomprogress = zoominvel ? min(zoomprogress + float(elapsedtime) / zoominvel, 1.0f) : 1;
+        float vel = zoominvel * (100.f / game::gamespeed);
+        zoomprogress = vel ? min(zoomprogress + float(elapsedtime) / vel, 1.0f) : 1;
     }
     else
     {
-        zoomprogress = zoomoutvel ? max(zoomprogress - float(elapsedtime) / zoomoutvel, 0.0f) : 0;
+        float vel = zoomoutvel * (100.f / game::gamespeed);
+        zoomprogress = vel ? max(zoomprogress - float(elapsedtime) / vel, 0.0f) : 0;
         if(zoomprogress <= 0)
         {
             gfx::zoom = 0;

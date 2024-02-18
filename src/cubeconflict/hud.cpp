@@ -213,9 +213,9 @@ namespace game
 
         if((hp->gunselect==GUN_SKS || hp->gunselect==GUN_SV98 || hp->gunselect==GUN_ARBALETE || hp->gunselect==GUN_S_CAMPOUZE || hp->gunselect==GUN_S_ROQUETTES) && gfx::zoom)
         {
-            if(hp->gunselect==GUN_S_ROQUETTES) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/scope_1.png", 1);
-            if(hp->gunselect==GUN_SKS) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/scope_3.png", 1);
-            else drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/scope_2.png", 1);
+            if(hp->gunselect==GUN_S_ROQUETTES) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/scope_1.png", zoomprogress);
+            else if(hp->gunselect==GUN_SKS) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/scope_3.png", zoomprogress);
+            else drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/scope_2.png", zoomprogress);
         }
 
         if(hp->boostmillis[B_SHROOMS]) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/shrooms.png", min(1.0f, hp->boostmillis[B_SHROOMS] / 5000.f));

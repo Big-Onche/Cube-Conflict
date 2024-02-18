@@ -803,6 +803,7 @@ extern int map_atmo;  //Config partie Cube Conflict
 // main graphical effects
 extern bool addpostfx(const char *name, int outputbind = 0, int outputscale = 0, uint inputs = 1, uint freeinputs = 1, const vec4 &params = vec4(1, 1, 1, 1));
 extern void shakeScreen(int reduceFactor);
+extern float zoomprogress;
 extern void clearpostfx();
 extern int fullbrightmodels;
 extern int vsync;
