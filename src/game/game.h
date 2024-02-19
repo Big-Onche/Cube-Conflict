@@ -605,93 +605,110 @@ struct gamestate
         aiming = false;
     }
 
-    void addcacweaps(int gamemode, int aptitude)
+    void addMeleeWeapons(int playerClasse)
     {
-        int cacgun = GUN_CAC349+rnd(4);
-        ammo[cacgun] = 1;
-        gunselect = cacgun;
+        int weapon = playerClasse == APT_NINJA ? GUN_CACNINJA : GUN_CAC349 + rnd(4);
+        ammo[weapon] = 1;
+        gunselect = weapon;
     }
 
-    void addsweaps()
+    void addStarterWeapons(int playerClasse, int glockAmmo, int grenadeAmmo)
     {
-        int supergun = GUN_S_NUKE+rnd(4);
+        ammo[GUN_GLOCK] = glockAmmo;
+        ammo[GUN_M32] = (playerClasse == APT_AMERICAIN ? grenadeAmmo * 3 : grenadeAmmo);
+    }
+
+    void addSuperWeapon(int playerClasse, int gamemode)
+    {
+        if(playerClasse != APT_SOLDAT || gamemode == m_tutorial) return;
+
+        int weapon = GUN_S_NUKE + rnd(4);
         if(!rnd(50))
         {
-            baseammo(supergun, 1);
-            gunselect = supergun;
+            baseammo(weapon, 1);
+            gunselect = weapon;
         }
     }
 
-    void spawnstate(int gamemode, int aptitude)
+    void addArmour(int playerClasse, int gamemode)
     {
-        bool addsweap = true;
-        if(aptitude!=APT_NINJA) addcacweaps(gamemode, aptitude);
+        bool armourBonus = (playerClasse == APT_SOLDAT);
 
-        switch(aptitude)
-        {
-            case APT_NINJA: ammo[GUN_CACNINJA] = 1; break;
-            case APT_KAMIKAZE: ammo[GUN_KAMIKAZE] = 1; break;
-        }
-        if(m_random)
-        {
-            armourtype = A_WOOD;
-            armour = aptitude==APT_SOLDAT ? 1000 : 750;
-            int randomarme = rnd(17);
-            gunselect = aptitude==APT_KAMIKAZE ? GUN_KAMIKAZE : aptitude==APT_NINJA ? GUN_CACNINJA : randomarme;
-            baseammo(randomarme);
-        }
-        else if(m_fullstuff)
+        if(m_fullstuff)
         {
             armourtype = A_IRON;
-            armour = aptitude==APT_SOLDAT ? 1750 : 1250;
-            int spawnguns[3];
-            loopi(3)
-            {
-                int newgun;
-                bool duplicate;
-                do { newgun = rnd(17); duplicate = false;
-                    loopj(i) if (spawnguns[j] == newgun) {duplicate = true; break; }
-                } while (duplicate);
-                spawnguns[i] = newgun;
-                baseammo(spawnguns[i], aptitude == APT_AMERICAIN ? 6 : 4);
-            }
-            gunselect = aptitude==APT_KAMIKAZE ? GUN_KAMIKAZE : aptitude==APT_NINJA ? GUN_CACNINJA : spawnguns[rnd(3)];
+            armour = armourBonus ? 1750 : 1250;
+            return;
         }
-        else if(m_identique)
-        {
-            loopi(17) baseammo(i);
-            armourtype = A_WOOD;
-            armour = aptitude==APT_SOLDAT ? 1000 : 750;
-            gunselect = cncurweapon;
-            if(aptitude==APT_KAMIKAZE) gunselect = GUN_KAMIKAZE;
-            else if(aptitude==APT_NINJA) gunselect = GUN_CACNINJA;
-        }
-        else if(m_capture)
+        else if(m_regencapture)
         {
             armourtype = A_WOOD;
-            armour = m_regencapture ? aptitude==APT_SOLDAT ? 550 : 300 : 750;
-            ammo[GUN_GLOCK] = aptitude==APT_AMERICAIN ? m_regencapture ? 15 : 45 : m_regencapture ? 10 : 30;
-            ammo[GUN_M32] = aptitude==APT_AMERICAIN ? 3 : 1;
-            gunselect = aptitude==APT_KAMIKAZE ? GUN_KAMIKAZE : aptitude==APT_NINJA ? GUN_CACNINJA : GUN_GLOCK;
+            armour = armourBonus ? 550 : 300;
+            return;
         }
-        else if(m_tutorial || m_dmsp)
-        {
-            armourtype = A_WOOD;
-            health = 1000;
-            mana = 100;
-            if(m_tutorial) addsweap = false;
-            else armour = aptitude==APT_SOLDAT ? 550 : 300;
-        }
+        else if(m_tutorial) armour = false;
         else
         {
             armourtype = A_WOOD;
-            armour = aptitude==APT_SOLDAT ? 1000 : 750;
-            ammo[GUN_GLOCK] = aptitude==APT_AMERICAIN ? 45 : 30;
-            ammo[GUN_M32] = aptitude==APT_AMERICAIN ? 3 : 1;
-            gunselect = aptitude==APT_KAMIKAZE ? GUN_KAMIKAZE : aptitude==APT_NINJA ? GUN_CACNINJA : GUN_GLOCK;
+            armour = armourBonus ? 1000 : 750;
         }
+    }
 
-        if(aptitude==APT_SOLDAT && addsweap) addsweaps();
+    void selectGun(int playerClasse, int baseWeapon)
+    {
+        switch(playerClasse)
+        {
+            case APT_KAMIKAZE: gunselect = GUN_KAMIKAZE; break;
+            case APT_NINJA: gunselect = GUN_CACNINJA; break;
+            default: gunselect = baseWeapon;
+        }
+    }
+
+    void spawnstate(int gamemode, int playerClasse)
+    {
+        int selectedWeapon = GUN_GLOCK;
+
+        if(m_random) // random weapon mutator
+        {
+            int weapon = rnd(17);
+            baseammo(weapon);
+            selectedWeapon = weapon;
+        }
+        else if(m_fullstuff) // multiple weapons mutator
+        {
+            int numGuns[3];
+            loopi(3)
+            {
+                int newGun;
+                bool duplicate;
+                do { newGun = rnd(17); duplicate = false;
+                    loopj(i) if (numGuns[j] == newGun) {duplicate = true; break; }
+                } while (duplicate);
+                numGuns[i] = newGun;
+                baseammo(numGuns[i], playerClasse == APT_AMERICAIN ? 6 : 4);
+            }
+            selectedWeapon = numGuns[rnd(3)];
+        }
+        else if(m_identique) // identical weapon mutator
+        {
+            loopi(17) baseammo(i);
+            selectedWeapon = cncurweapon;
+        }
+        else if(m_capture) // base capture
+        {
+            addStarterWeapons(playerClasse, m_regencapture ? 10 : 30, 1);
+        }
+        else if(m_tutorial || m_edit || m_dmsp) // solo game modes
+        {
+            if(m_dmsp) addStarterWeapons(playerClasse, 10, 0);
+        }
+        else addStarterWeapons(playerClasse, 30, 1); // weapon pickup mutator
+
+        if(playerClasse == APT_KAMIKAZE) ammo[GUN_KAMIKAZE] = 1;
+        addArmour(playerClasse, gamemode);
+        addMeleeWeapons(playerClasse);
+        selectGun(playerClasse, selectedWeapon);
+        addSuperWeapon(playerClasse, gamemode);
     }
 
     // just subtract damage here, can set death, etc. later in code calling this
@@ -1000,7 +1017,6 @@ namespace game
     extern void sendposition(gameent *d, bool reliable = false);
 
     // single player
-    enum {D_COMMON = 0, D_UNCOMMON, D_RARE, D_LEGENDARY, D_GODLY, NUMDROPS};
     struct monster;
     extern vector<monster *> monsters;
     extern void npcdrop(const vec *o, int type);
