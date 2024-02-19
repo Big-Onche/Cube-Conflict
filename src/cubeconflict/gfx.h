@@ -18,11 +18,12 @@ namespace gfx
     extern bool champicolor();
     extern bool hasroids(gameent *owner);
     extern void resetpostfx();
-    extern void projgunexplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk);
-    extern void projexplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk);
-    extern void projgunhit(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk);
-    extern void instantrayhit(const vec &from, const vec &to, const vec &muzzle, int atk);
-    extern void shootgfx(const vec &from, const vec &to, gameent *d, int atk);
+    extern void renderProjectilesTrails(gameent *owner, vec &pos, vec dv, vec &from, vec &offset, int atk, bool exploded = false);
+    extern void renderProjectileExplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk);
+    extern void renderExplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk);
+    extern void renderBulletImpact(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk);
+    extern void renderInstantImpact(const vec &from, const vec &to, const vec &muzzle, int atk);
+    extern void renderMuzzleEffects(const vec &from, const vec &to, gameent *d, int atk);
     extern char *getshielddir(int armourtype, int armourval, bool hud = false, bool preload = false);
     extern void addColorBlindnessFilter();
 

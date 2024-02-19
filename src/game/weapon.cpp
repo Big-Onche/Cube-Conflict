@@ -723,7 +723,7 @@ namespace game
             case ATK_GRAP1_SHOOT:
             case ATK_SPOCKGUN_SHOOT:
                 playSound(atk==ATK_GRAP1_SHOOT ? S_IMPACTGRAP1 : atk==ATK_PULSE_SHOOT ? S_IMPACTPLASMA : S_IMPACTSPOCK, &v, 250, 50, SND_LOWPRIORITY);
-                gfx::projgunexplosion(owner, v, vel, safe, atk);
+                gfx::renderProjectileExplosion(owner, v, vel, safe, atk);
                 break;
 
             case ATK_SMAW_SHOOT:
@@ -732,7 +732,7 @@ namespace game
                 if(lookupmaterial(v)==MAT_WATER) playSound(S_EXPL_INWATER, &v, 300, 100);
                 if(camera1->o.dist(v) >= 300) playSound(S_EXPL_FAR, &soundloc, 1500, 400, SND_LOWPRIORITY);
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
-                gfx::projexplosion(owner, v, vel, safe, atk);
+                gfx::renderExplosion(owner, v, vel, safe, atk);
                 startshake(v, 175, atk);
                 break;
 
@@ -743,13 +743,13 @@ namespace game
                 if((lookupmaterial(v)==MAT_WATER)) playSound(S_EXPL_INWATER, &v, 300, 100);
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
                 if(atk==ATK_ASSISTXPL_SHOOT) loopi(10+rnd(5)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_ROBOT);
-                gfx::projexplosion(owner, v, vel, safe, atk);
+                gfx::renderExplosion(owner, v, vel, safe, atk);
                 startshake(v, 225, atk);
                 break;
 
             case ATK_NUKE_SHOOT:
                 playSound(S_EXPL_NUKE);
-                gfx::projexplosion(owner, v, vel, safe, atk);
+                gfx::renderExplosion(owner, v, vel, safe, atk);
                 startshake(v, 5000, atk);
                 break;
 
@@ -757,7 +757,7 @@ namespace game
                 playSound(S_EXPL_FIREWORKS, &soundloc, 300, 100);
                 if(lookupmaterial(v)==MAT_WATER) playSound(S_EXPL_INWATER, &v, 300, 100);
                 if(camera1->o.dist(v) >= 300) playSound(S_FIREWORKSEXPL_FAR, &soundloc, 2000, 400);
-                gfx::projexplosion(owner, v, vel, safe, atk);
+                gfx::renderExplosion(owner, v, vel, safe, atk);
                 startshake(v, 100, atk);
                 break;
 
@@ -766,7 +766,7 @@ namespace game
                 if(lookupmaterial(v)==MAT_WATER) playSound(S_EXPL_INWATER, &v, 300, 100);
                 if(camera1->o.dist(v) >= 300) playSound(S_EXPL_FAR, &v, 2000, 400, SND_LOWPRIORITY);
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
-                gfx::projexplosion(owner, v, vel, safe, atk);
+                gfx::renderExplosion(owner, v, vel, safe, atk);
                 startshake(v, 200, atk);
                 break;
 
@@ -777,7 +777,7 @@ namespace game
             case ATK_GLOCK_SHOOT:
             case ATK_ARBALETE_SHOOT:
                 if(!(lookupmaterial(v)==MAT_WATER)) playSound(atk==ATK_ARBALETE_SHOOT ? S_IMPACTARROW : S_LITTLERICOCHET, &soundloc, 175, 75, SND_LOWPRIORITY);
-                gfx::projgunhit(owner, v, vel, safe, atk);
+                gfx::renderBulletImpact(owner, v, vel, safe, atk);
                 break;
 
             case ATK_SV98_SHOOT:
@@ -789,7 +789,7 @@ namespace game
                     playSound(S_IMPACTLOURDLOIN, &soundloc, 750, 400, SND_LOWPRIORITY);
                     playSound(S_BIGRICOCHET, &soundloc, 250, 75, SND_LOWPRIORITY);
                 }
-                gfx::projgunhit(owner, v, vel, safe, atk);
+                gfx::renderBulletImpact(owner, v, vel, safe, atk);
             }
         }
 
@@ -949,83 +949,13 @@ namespace game
                 {
                     vec pos = vec(p.offset).mul(p.offsetmillis/float(OFFSETMILLIS)).add(v);
 
-                    float len = min(100.f, vec(p.offset).add(p.from).dist(pos));
-                        vec dir = vec(dv).normalize(),
-                        tail = vec(dir).mul(-len).add(pos),
-                        head = vec(dir).mul(2.4f).add(pos);
-
                     if(!p.inwater && lookupmaterial(pos)==MAT_WATER)
                     {
                         p.inwater = true;
                         particle_splash(PART_WATER, 15, 100, v, 0x28282A, 0.75f, 50, -300, 1, gfx::champicolor());
                         playSound(S_IMPACTWATER, &v, 250, 50, SND_LOWPRIORITY);
                     }
-
-                    switch(p.atk)
-                    {
-                        case ATK_PULSE_SHOOT:
-                            particle_splash(PART_PLASMA_FRONT, 1, 1, pos, gfx::hasroids(p.owner) ? 0xFF4444 : 0xFF6600, 2.4f, 150, 20, 0, gfx::champicolor());
-                            particle_flare(tail, head, 1, PART_F_PLASMA, gfx::hasroids(p.owner) ? 0xFF4444 : 0xFF6600, 2.0f, p.owner, gfx::champicolor());
-                            if(p.inwater) particle_splash(PART_BUBBLE, 1, 150, v, 0x18181A, 2.0f+rnd(2), 20, -30);
-                            break;
-
-                        case ATK_GRAP1_SHOOT:
-                            particle_splash(PART_PLASMA_FRONT, 1, 1, pos, gfx::hasroids(p.owner) ? 0xFF2222 : 0xFF33BB, 3.0f, 150, 20, 0, gfx::champicolor());
-                            particle_flare(tail, head, 1, PART_F_PLASMA, gfx::hasroids(p.owner) ? 0xFF2222 : 0xEE22AA, 3.0f, p.owner, gfx::champicolor());
-                            particle_splash(p.inwater ? PART_BUBBLE : PART_SMOKE, 1, p.inwater ? 150 : 300, pos, p.inwater ? 0x18181A : 0xAAAAAA, 4.0f, 25, 250, 0, gfx::champicolor());
-                            break;
-
-                        case ATK_SPOCKGUN_SHOOT:
-                            particle_splash(PART_SPOCK_FRONT, 1, 1, pos, gfx::hasroids(p.owner) ? 0xFF4444 : 0x00FF00, 4.f, 150, 20, 0, gfx::champicolor());
-                            particle_flare(tail, head, 1, PART_F_PLASMA, gfx::hasroids(p.owner) ? 0xFF4444 : 0x22FF22, 2.5f, p.owner, gfx::champicolor());
-                            break;
-
-                        case ATK_SV98_SHOOT:
-                        case ATK_SKS_SHOOT:
-                        case ATK_GAU8_SHOOT:
-                            if(p.inwater) particle_splash(PART_BUBBLE, 1, 150, v, 0x18181A, 2.0f+rnd(2), 20, -30);
-                            particle_flare(tail, head, 1, PART_F_BULLET, gfx::hasroids(p.owner) ? 0xFF4444 : 0xFFBB88, p.atk==ATK_GAU8_SHOOT ? 0.75f : 0.65f, p.owner, gfx::champicolor());
-                            particle_splash(PART_PLASMA_FRONT, 1, 1, pos, gfx::hasroids(p.owner) ? 0xFF4444 : 0xFFBB88,  p.owner==player1 ? 0.65f : p.atk==ATK_GAU8_SHOOT ? 0.45f : 0.3f, 150, 20, 0, gfx::champicolor());
-                            particle_flare(tail, head, p.atk==ATK_SV98_SHOOT ? 3000 : 2000, PART_F_SMOKE, 0x333333, p.atk==ATK_SV98_SHOOT ? 1.4f : 1.f, p.owner, gfx::champicolor(), 3);
-                            break;
-
-                        case ATK_MINIGUN_SHOOT:
-                        case ATK_AK47_SHOOT:
-                        case ATK_UZI_SHOOT:
-                        case ATK_GLOCK_SHOOT:
-                        case ATK_FAMAS_SHOOT:
-                        {
-                            if(p.inwater) particle_splash(PART_BUBBLE, 1, 150, v, 0x18181A, 1.0f+rnd(2), 20, -30);
-                            bool bigBullet = p.atk == ATK_MINIGUN_SHOOT || p.atk == ATK_AK47_SHOOT;
-                            particle_flare(tail, head, 1, PART_F_BULLET, gfx::hasroids(p.owner) ? 0xFF4444 : 0xFFBB88, bigBullet ? 0.55f : 0.45f, p.owner, gfx::champicolor());
-                            particle_splash(PART_PLASMA_FRONT, 1, 1, pos, gfx::hasroids(p.owner) ? 0xFF4444 : 0xFFBB88, p.owner==player1 ? 0.4f : bigBullet ? 0.3f : 0.24f, 150, 20, 0, gfx::champicolor());
-                            particle_flare(tail, head, bigBullet ? 2000 : 1250, PART_F_SMOKE, 0x252525, bigBullet ? 1.f : 0.75f, p.owner, gfx::champicolor(), 3);
-                            break;
-                        }
-
-                        case ATK_MOSSBERG_SHOOT:
-                        case ATK_HYDRA_SHOOT:
-                        {
-                            if(p.inwater) particle_splash(PART_BUBBLE, 1, 150, v, 0x18181A, 1.0f+rnd(2), 20, -30);
-                            particle_flare(tail, head, 1, PART_F_BULLET, gfx::hasroids(p.owner) ? 0xFF4444 : 0xFF7700, p.atk==ATK_MOSSBERG_SHOOT ? 0.45f : 0.35f, p.owner, gfx::champicolor());
-                            particle_splash(PART_PLASMA_FRONT, 1, 1, pos, gfx::hasroids(p.owner) ? 0xFF4444 : 0xFF7700, p.owner==player1 ? 0.4f : p.atk==ATK_MOSSBERG_SHOOT ? 0.3f : 0.24f, 150, 20, 0, gfx::champicolor());
-                            particle_flare(tail, head, p.atk==ATK_MOSSBERG_SHOOT ? 2000 : 1000, PART_F_SMOKE, 0x101010, p.atk==ATK_MOSSBERG_SHOOT ? 0.75f : 0.55f, p.owner, gfx::champicolor(), 3);
-                            break;
-                        }
-
-                        case ATK_ARBALETE_SHOOT:
-                            if(!p.exploded)
-                            {
-                                if(p.inwater) particle_splash(PART_BUBBLE, 1, 150, v, 0x888888, 1.0f+rnd(2), 20, -30);
-                                particle_flare(tail, head, 300, PART_F_SMOKE, 0x444444, 0.60f, p.owner, gfx::champicolor());
-
-                                if(p.owner->boostmillis[B_ROIDS])
-                                {
-                                    particle_flare(tail, head, 1, PART_F_BULLET, 0xFF4444, 0.30f, p.owner, gfx::champicolor());
-                                    particle_splash(PART_PLASMA_FRONT, 1, 1, pos, 0xFF4444, p.owner==player1 ? 0.5f : 0.25f, 150, 20, 0, gfx::champicolor());
-                                }
-                            }
-                    }
+                    gfx::renderProjectilesTrails(p.owner, pos, dv, p.from, p.offset, p.atk, p.exploded);
                 }
 
                 bool bigradius = p.atk==ATK_NUKE_SHOOT || p.atk==ATK_ROQUETTES_SHOOT || p.atk==ATK_ARTIFICE_SHOOT;
@@ -1078,7 +1008,7 @@ namespace game
         {
             case ATK_PULSE_SHOOT: case ATK_SPOCKGUN_SHOOT:
                 if(d->type==ENT_PLAYER && atk==ATK_PULSE_SHOOT) sound = S_PLASMARIFLE_SFX;
-                gfx::shootgfx(from, to, d, atk);
+                gfx::renderMuzzleEffects(from, to, d, atk);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
                 if(d==player1) mousemove((-5+rnd(11))/movefactor, (-5+rnd(11))/movefactor, player1->abilitymillis[ABILITY_2] && player1->aptitude==APT_MAGICIEN ? true : false);
                 break;
@@ -1086,8 +1016,8 @@ namespace game
             case ATK_RAIL_SHOOT:
                 playSound(S_IMPACTELEC, &to, 250, 50, SND_LOWPRIORITY);
                 if(d!=hudplayer()) soundNearmiss(S_FLYBYELEC, from, to);
-                gfx::shootgfx(from, to, d, atk);
-                gfx::instantrayhit(from, to, d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle, atk);
+                gfx::renderMuzzleEffects(from, to, d, atk);
+                gfx::renderInstantImpact(from, to, d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle, atk);
                 break;
 
             case ATK_SMAW_SHOOT:
@@ -1099,7 +1029,7 @@ namespace game
                     unlockAchievement(ACH_ATOME);
                     updateStat(1, STAT_ATOM);
                 }
-                gfx::shootgfx(from, to, d, atk);
+                gfx::renderMuzzleEffects(from, to, d, atk);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
                 if(d==player1 && atk==ATK_ROQUETTES_SHOOT) mousemove((-7+rnd(15))/movefactor, (-7+rnd(15))/movefactor, player1->abilitymillis[ABILITY_2] && player1->aptitude==APT_MAGICIEN ? true : false);
                 break;
@@ -1112,7 +1042,7 @@ namespace game
                     if(d==player1 && player1->aptitude==APT_PRETRE && player1->boostmillis[B_SHROOMS] && player1->abilitymillis[ABILITY_3]) unlockAchievement(ACH_CADENCE);
                 }
                 spawnbouncer(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? d->o : d->balles, vec(0, 0, 0), d, atk==ATK_GAU8_SHOOT ? BNC_BIGDOUILLES : BNC_DOUILLES);
-                gfx::shootgfx(from, to, d, atk);
+                gfx::renderMuzzleEffects(from, to, d, atk);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
                 if(d!=hudplayer()) soundNearmiss(atk==ATK_GAU8_SHOOT ? S_BIGBULLETFLYBY : S_BULLETFLYBY, from, to);
                 if(d==player1) mousemove(atk==ATK_MINIGUN_SHOOT ? (-7+rnd(15))/movefactor : (-3+rnd(7))/movefactor, atk==ATK_MINIGUN_SHOOT ? (-7+rnd(15))/movefactor : (-3+rnd(7))/movefactor, player1->abilitymillis[ABILITY_2] && player1->aptitude==APT_MAGICIEN ? true : false);
@@ -1137,7 +1067,7 @@ namespace game
                         if(lookupmaterial(rays[i])!=MAT_WATER) particle_splash(PART_SPARK, 9, 60, rays[i], d->boostmillis[B_ROIDS] ? 0xFF2222 : 0xAA1100, 0.4, 150, 100, 0, gfx::champicolor());
                         particle_splash(PART_SMOKE, 3, 500+rnd(300), rays[i], 0x797979, 0.2f, 35, 300, 2, gfx::champicolor());
                         particle_splash(PART_SMOKE, 3, 275+rnd(275), rays[i], 0x553915, 0.15f, 35, 300, 2, gfx::champicolor());
-                        gfx::instantrayhit(from, rays[i], d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle, atk);
+                        gfx::renderInstantImpact(from, rays[i], d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle, atk);
                         if(d!=hudplayer()) soundNearmiss(S_BULLETFLYBY, from, rays[i], 512);
                     }
                 }
@@ -1164,7 +1094,7 @@ namespace game
                         vec origin = d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(gun, d->o, to, d) : d->muzzle;
                         origin.add(vec(0.2f-(rnd(5)/10.f), 0.2f-(rnd(5)/10.f), 0.2f-(rnd(5)/10.f)));
                         particle_flare(origin, rays[i], 100, PART_F_SHOTGUN, d->boostmillis[B_ROIDS] ? 0xFF2222 : atk==ATK_HYDRA_SHOOT ? 0xFF8800 : 0xFFFF22, atk==ATK_HYDRA_SHOOT ? 0.3f : 0.4f, d, gfx::champicolor());
-                        gfx::instantrayhit(from, rays[i], d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle, atk);
+                        gfx::renderInstantImpact(from, rays[i], d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle, atk);
                         if(d!=hudplayer()) soundNearmiss(S_BIGBULLETFLYBY, from, rays[i], 512);
                     }
                 }
@@ -1210,7 +1140,7 @@ namespace game
                         default:
                             particle_flying_flare(origin, iflames, 1100, PART_SMOKE, 0x111111, (15.f+rnd(18))/3.f, -20, 15+rnd(10), gfx::champicolor());
                             adddynlight(hudgunorigin(gun, d->o, iflames, d), 50, vec(0.40f, 0.2f, 0.1f), 100, 100, L_NODYNSHADOW, 10, vec(0.50f, 0, 0), d);
-                            gfx::instantrayhit(from, rays[i], d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle, atk);
+                            gfx::renderInstantImpact(from, rays[i], d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle, atk);
                             switch(rnd(2)){case 0: if(d!=hudplayer()) soundNearmiss(S_FLYBYFLAME, from, rays[i]);}
                     }
                 }
@@ -1604,31 +1534,7 @@ namespace game
                 v.mul(3);
                 v.add(pos);
                 rendermodel(p.atk==ATK_SMAW_SHOOT ? "projectiles/missile" : p.atk==ATK_ARTIFICE_SHOOT ? "projectiles/feuartifice" : p.atk==ATK_ROQUETTES_SHOOT ? "projectiles/minimissile" : p.atk==ATK_NUKE_SHOOT ? "projectiles/missilenuke" :"projectiles/fleche", ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, MDL_CULL_VFC|MDL_CULL_OCCLUDED);
-
-                if(ispaused()) return;
-
-                bool inWater = lookupmaterial(pos)==MAT_WATER;
-
-                switch(p.atk)
-                {
-                    case ATK_NUKE_SHOOT:
-                        particle_flare(pos, pos, 1, PART_MF_LITTLE, gfx::hasroids(p.owner) ? 0xFF0000 : 0xFFC864, 10.f+rndscale(8), NULL, gfx::champicolor());
-                        particle_splash(inWater ? PART_BUBBLE : PART_SMOKE, 3, inWater ? 2000 : 5000, pos, inWater ? 0x18181A : 0x222222, 4.0f+rnd(5), 25, 200, 0, gfx::champicolor());
-                        particle_splash(PART_FIRE_BALL, 1, 100, pos, gfx::hasroids(p.owner) ? 0xFF0000 : 0xFF6600, 1.0f+rndscale(4), 50, 500, 0, gfx::champicolor());
-                        regularflare(pos, 0x552500, 600+rnd(400), 75);
-                        break;
-                    case ATK_SMAW_SHOOT:
-                    case ATK_ROQUETTES_SHOOT:
-                        particle_splash(inWater ? PART_BUBBLE : PART_SMOKE, 1, 2000, pos, 0x666666, inWater ? 3.f : 6.f, 25, 250, 0, gfx::champicolor());
-                        particle_flare(pos, pos, 1, PART_MF_LITTLE, gfx::hasroids(p.owner) ? 0xFF0000 : 0xFFC864, 3.0f+rndscale(2), NULL, gfx::champicolor());
-                        regularflare(pos, 0x331200, 300+rnd(300), 50);
-                        break;
-                    case ATK_ARTIFICE_SHOOT:
-                        if(inWater)  particle_splash(PART_BUBBLE, 3, 200, pos, 0x18181A, 2.5f, 25, 100, 0, gfx::champicolor());
-                        particle_splash(PART_SPARK, 8, 100, pos, gfx::hasroids(p.owner) ? 0xFF0000 : 0xFFC864, rnd(4)/10.f+0.1f, 50, 500, 0, gfx::champicolor());
-                        particle_flare(pos, pos, 1, PART_MF_LITTLE, gfx::hasroids(p.owner) ? 0xFF0000 : 0xFFC864, 0.5f+rndscale(2), NULL, gfx::champicolor());
-                        break;
-                }
+                if(p.atk!=ATK_ARBALETE_SHOOT) gfx::renderProjectilesTrails(p.owner, pos, v, p.from, p.offset, p.atk);
             }
         }
     }
