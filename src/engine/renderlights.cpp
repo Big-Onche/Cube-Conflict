@@ -3598,10 +3598,7 @@ bool blinkLight(int blinkSpeed)
     return (blinkSpeed > 0 && (totalmillis % blinkSpeed+1 < blinkSpeed/2)) && !game::ispaused();
 }
 
-bool hideLight(bool var)
-{
-    return var && (map_atmo==3 || map_atmo==6 || map_atmo==9);
-}
+VAR(shutdaytimelights, 0, 0, 1);
 
 void collectlights()
 {
@@ -3622,7 +3619,7 @@ void collectlights()
             if(pvsoccludedsphere(e->o, e->attr1)) continue;
         }
 
-        if(hideLight(e->attr6) || blinkLight(e->attr7)) continue;
+        if((e->attr6 && shutdaytimelights) || blinkLight(e->attr7)) continue;
         else
         {
             lightinfo &l = lights.add(lightinfo(i, *e));
