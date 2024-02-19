@@ -243,7 +243,6 @@ namespace gfx
 
             case ATK_MOSSBERG_SHOOT:
             case ATK_HYDRA_SHOOT:
-                //if(lookupmaterial(stainloc)==MAT_GLASS) addstain(STAIN_BALLE_GLOW, to, dir, 5.f, 0xFF2200);
                 addstain(STAIN_BULLET_HOLE, to, dir, 0.4f);
                 addstain(STAIN_BULLET_GLOW, to, dir, 0.8f, 0x991100);
                 return;
