@@ -23,8 +23,8 @@ namespace gfx
     int weapposside, weapposup, nbfps = 60;
     int zoomfov = 50;
 
-    bool champicolor() { return isconnected() && game::hudplayer()->boostmillis[B_SHROOMS]; } //checks if player 1 or observed player is on shrooms.
-    bool hasroids(gameent *owner) { return owner->boostmillis[B_ROIDS]; }
+    bool champicolor() { return game::hudplayer()->boostmillis[B_SHROOMS]; } //checks if player 1 or observed player is on shrooms.
+    bool hasroids(gameent *d) { return d->boostmillis[B_ROIDS]; }
 
     void lightTrail(const vec &s, const vec &e, int radius, int fade, int peak, const vec &color) //cast lights along a ray
     {
@@ -43,7 +43,7 @@ namespace gfx
 
     void renderProjectileExplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk) //particles and light effects on impact for slow projectiles
     {
-        vec lightloc = vec(v).sub(vec(vel).mul(10));
+        vec lightOrigin = vec(v).sub(vec(vel).mul(10));
 
         switch(atk)
         {
@@ -51,20 +51,20 @@ namespace gfx
             {
                 if(lookupmaterial(v)!=MAT_WATER) particle_splash(PART_FIRESPARK, 15, 150, v, hasroids(owner) ? 0xFF0000 : 0xFF6600, 1.f, 150, 500, 2, champicolor());
                 particle_fireball(v, 9.f, PART_PLASMABURST, 300, hasroids(owner) ? 0xFF0000 : 0xCC9900, 3, champicolor());
-                adddynlight(safe ? v : lightloc, 2*attacks[atk].exprad, vec(1.5f, 0.75f, 0.0f), 150, 50, 0, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
+                adddynlight(safe ? v : lightOrigin, 2*attacks[atk].exprad, vec(1.5f, 0.75f, 0.0f), 150, 50, 0, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
                 return;
             }
             case ATK_GRAP1_SHOOT:
             {
                 if(lookupmaterial(v)!=MAT_WATER) particle_splash(PART_SPARK, 20, 100, v, hasroids(owner) ? 0xFF0000 : 0xAA4466, 0.5f, 400, 400, 0, champicolor());
                 loopi(2)particle_fireball(v, 7.f, PART_EXPLOSION, 200, hasroids(owner) ? 0xFF0000 : 0x550055, 1.f, champicolor());
-                adddynlight(safe ? v : lightloc, 2*attacks[atk].exprad, vec(1.5f, 0.0f, 1.5f), 200, 100, L_NODYNSHADOW, attacks[atk].exprad/2, vec(0.5f, 0.0f, 0.5f));
+                adddynlight(safe ? v : lightOrigin, 2*attacks[atk].exprad, vec(1.5f, 0.0f, 1.5f), 200, 100, L_NODYNSHADOW, attacks[atk].exprad/2, vec(0.5f, 0.0f, 0.5f));
                 return;
             }
             case ATK_SPOCKGUN_SHOOT:
             {
                 if(lookupmaterial(v)!=MAT_WATER) particle_splash(PART_SPARK, 15, 100, v, hasroids(owner) ? 0xFF0000 : 0x00FF66, 0.5f, 250, 250, 0, champicolor());
-                adddynlight(safe ? v : lightloc, 1.25f*attacks[atk].exprad, gfx::hasroids(owner) ? vec(1.5f, 0.f, 0.f) : vec(0.f, 1.5f, 0.f), 200, 50, 0, attacks[atk].exprad/2, vec(1.f, 1.f, 1.f));
+                adddynlight(safe ? v : lightOrigin, 1.25f*attacks[atk].exprad, gfx::hasroids(owner) ? vec(1.5f, 0.f, 0.f) : vec(0.f, 1.5f, 0.f), 200, 50, 0, attacks[atk].exprad/2, vec(1.f, 1.f, 1.f));
                 return;
             }
         }

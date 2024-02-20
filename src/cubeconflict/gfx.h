@@ -16,7 +16,7 @@ namespace gfx
     };
 
     extern bool champicolor();
-    extern bool hasroids(gameent *owner);
+    extern bool hasroids(gameent *d);
     extern void resetpostfx();
     extern void renderProjectilesTrails(gameent *owner, vec &pos, vec dv, vec &from, vec &offset, int atk, bool exploded = false);
     extern void renderProjectileExplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk);

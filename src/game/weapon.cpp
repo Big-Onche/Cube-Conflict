@@ -986,8 +986,6 @@ namespace game
         }
     }
 
-    bool looped;
-
     bool noMuzzle(int atk, gameent *d)
     {
         return (d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2]) || (atk==ATK_CAC349_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACMARTEAU_SHOOT || atk==ATK_CACMASTER_SHOOT || atk==ATK_CACNINJA_SHOOT);
@@ -995,192 +993,210 @@ namespace game
 
     void shoteffects(int atk, const vec &from, const vec &to, gameent *d, bool local, int id, int prevaction)     // create visual effect from a shot
     {
-        if(d==player1) updateStat(1, STAT_MUNSHOOTED);
-
         int gun = attacks[atk].gun;
-        int sound = attacks[atk].sound;
-        if(d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN) playSound(S_WIZ_2, d==hudplayer() ? NULL : &d->muzzle, 400, 200);
-        if(d->abilitymillis[ABILITY_3] && d->aptitude==APT_PRETRE) adddynlight(d->muzzle, 6, vec(1.5f, 1.5f, 0.0f), 80, 40, L_NOSHADOW|L_VOLUMETRIC|DL_FLASH);
+        int gunSound = attacks[atk].sound;
+        bool isHudPlayer = d==hudplayer();
+        int shakeFactor = hudplayer()->aptitude==APT_SOLDAT ? 2 : 1;
+        vec muzzleOrigin = noMuzzle(atk, d) ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle;
+        vec casingOrigin = (d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2]) ? d->o : d->balles;
+        int lightFlags = DL_FLASH|L_NODYNSHADOW;
 
-        int movefactor = game::player1->aptitude==APT_SOLDAT ? 2 : 1;
+        bool wizardAbility = false;
+        if(d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN)
+        {
+            playSound(S_WIZ_2, isHudPlayer ? NULL : &d->muzzle, 400, 200);
+            shakeFactor = 15;
+            wizardAbility = true;
+        }
 
         switch(atk)
         {
-            case ATK_PULSE_SHOOT: case ATK_SPOCKGUN_SHOOT:
-                if(d->type==ENT_PLAYER && atk==ATK_PULSE_SHOOT) sound = S_PLASMARIFLE_SFX;
-                gfx::renderMuzzleEffects(from, to, d, atk);
+            case ATK_PULSE_SHOOT:
+            case ATK_SPOCKGUN_SHOOT:
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
-                if(d==player1) mousemove((-5+rnd(11))/movefactor, (-5+rnd(11))/movefactor, player1->abilitymillis[ABILITY_2] && player1->aptitude==APT_MAGICIEN ? true : false);
+                gfx::renderMuzzleEffects(from, to, d, atk);
+                if(isHudPlayer)
+                {
+                    int amount = (-5 + rnd(11)) / shakeFactor;
+                    mousemove(amount, amount);
+                }
+                if(d->type == ENT_PLAYER && atk == ATK_PULSE_SHOOT) gunSound = S_PLASMARIFLE_SFX;
                 break;
 
             case ATK_RAIL_SHOOT:
-                playSound(S_IMPACTELEC, &to, 250, 50, SND_LOWPRIORITY);
-                if(d!=hudplayer()) soundNearmiss(S_FLYBYELEC, from, to);
                 gfx::renderMuzzleEffects(from, to, d, atk);
-                gfx::renderInstantImpact(from, to, d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle, atk);
+                gfx::renderInstantImpact(from, to, muzzleOrigin, atk);
+                if(!isHudPlayer) soundNearmiss(S_FLYBYELEC, from, to);
+                playSound(S_IMPACTELEC, &to, 250, 50, SND_LOWPRIORITY);
                 break;
 
             case ATK_SMAW_SHOOT:
             case ATK_ROQUETTES_SHOOT:
             case ATK_NUKE_SHOOT:
             case ATK_ARTIFICE_SHOOT:
-                if(d==player1 && atk==ATK_NUKE_SHOOT)
-                {
-                    unlockAchievement(ACH_ATOME);
-                    updateStat(1, STAT_ATOM);
-                }
                 gfx::renderMuzzleEffects(from, to, d, atk);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
-                if(d==player1 && atk==ATK_ROQUETTES_SHOOT) mousemove((-7+rnd(15))/movefactor, (-7+rnd(15))/movefactor, player1->abilitymillis[ABILITY_2] && player1->aptitude==APT_MAGICIEN ? true : false);
-                break;
-            case ATK_MINIGUN_SHOOT:
-            case ATK_AK47_SHOOT:
-            case ATK_GAU8_SHOOT:
-                if(atk==ATK_GAU8_SHOOT)
+                if(isHudPlayer && atk==ATK_ROQUETTES_SHOOT)
                 {
-                    if(d->type==ENT_PLAYER) sound = S_GAU8;
-                    if(d==player1 && player1->aptitude==APT_PRETRE && player1->boostmillis[B_SHROOMS] && player1->abilitymillis[ABILITY_3]) unlockAchievement(ACH_CADENCE);
-                }
-                spawnbouncer(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? d->o : d->balles, vec(0, 0, 0), d, atk==ATK_GAU8_SHOOT ? BNC_BIGDOUILLES : BNC_DOUILLES);
-                gfx::renderMuzzleEffects(from, to, d, atk);
-                newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
-                if(d!=hudplayer()) soundNearmiss(atk==ATK_GAU8_SHOOT ? S_BIGBULLETFLYBY : S_BULLETFLYBY, from, to);
-                if(d==player1) mousemove(atk==ATK_MINIGUN_SHOOT ? (-7+rnd(15))/movefactor : (-3+rnd(7))/movefactor, atk==ATK_MINIGUN_SHOOT ? (-7+rnd(15))/movefactor : (-3+rnd(7))/movefactor, player1->abilitymillis[ABILITY_2] && player1->aptitude==APT_MAGICIEN ? true : false);
-                break;
-            case ATK_MOSSBERG_SHOOT:
-            case ATK_HYDRA_SHOOT:
-                {
-                    if(!local) createrays(gun, d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? d->o : from, to, d);
-                    loopi(atk==ATK_HYDRA_SHOOT ? 3 : 2) spawnbouncer(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(gun, d->o, to, d) : d->balles, vec(0, 0, 0), d, BNC_CARTOUCHES);
-                    particle_flare(d->muzzle, d->muzzle, 140, PART_MF_SHOTGUN, d->boostmillis[B_ROIDS] ? 0xFF2222 : d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xCCAAAA, d==hudplayer() ? gfx::zoom ? 1.25f : 3.50f : 4.5f, d, gfx::champicolor());
-                    if(d->boostmillis[B_RAGE]) particle_flare(d->muzzle, d->muzzle, 140, PART_MF_SHOTGUN, 0xFF2222, d==hudplayer() ? gfx::zoom ? 2.00f : 5.5f : 6.5f, d, gfx::champicolor());
-                    particle_splash(PART_SMOKE,  4, 500, d->muzzle, 0x443333, 3.5f, 20, 500, 0, gfx::champicolor());
-                    particle_splash(PART_SPARK, d==hudplayer() ? 4 : 7, 40, d->muzzle, 0xFF2200, 0.5f, 300, 500, 0, gfx::champicolor());
-                    adddynlight(hudgunorigin(gun, d->o, to, d), 75, vec(1.25f, 0.25f, 0.f), 40, 2, DL_FLASH, 0, vec(1.25f, 0.25f, 0.f), d);
-
-                    loopi(attacks[atk].rays)
+                    int amount = (-7 + rnd(15)) / shakeFactor;
+                    mousemove(amount, amount);
+                    if(d==player1 && atk==ATK_NUKE_SHOOT)
                     {
-                        if(lookupmaterial(rays[i])!=MAT_WATER) playSound(S_LITTLERICOCHET, &rays[i], 250, 100, SND_LOWPRIORITY);
-                        vec origin = d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(gun, d->o, to, d) : d->muzzle;
-                        origin.add(vec(0.2f-(rnd(5)/10.f), 0.2f-(rnd(5)/10.f), 0.2f-(rnd(5)/10.f)));
-                        newprojectile(origin, rays[i], 3000, false, id, d, atk);
-                        if(lookupmaterial(rays[i])!=MAT_WATER) particle_splash(PART_SPARK, 9, 60, rays[i], d->boostmillis[B_ROIDS] ? 0xFF2222 : 0xAA1100, 0.4, 150, 100, 0, gfx::champicolor());
-                        particle_splash(PART_SMOKE, 3, 500+rnd(300), rays[i], 0x797979, 0.2f, 35, 300, 2, gfx::champicolor());
-                        particle_splash(PART_SMOKE, 3, 275+rnd(275), rays[i], 0x553915, 0.15f, 35, 300, 2, gfx::champicolor());
-                        gfx::renderInstantImpact(from, rays[i], d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle, atk);
-                        if(d!=hudplayer()) soundNearmiss(S_BULLETFLYBY, from, rays[i], 512);
+                        unlockAchievement(ACH_ATOME);
+                        updateStat(1, STAT_ATOM);
                     }
                 }
                 break;
+
+            case ATK_MINIGUN_SHOOT:
+            case ATK_AK47_SHOOT:
+            case ATK_GAU8_SHOOT:
+            {
+                bool isGau = (atk == ATK_GAU8_SHOOT);
+                gfx::renderMuzzleEffects(from, to, d, atk);
+                newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
+                if(!isHudPlayer) soundNearmiss(isGau ? S_BIGBULLETFLYBY : S_BULLETFLYBY, from, to);
+                else
+                {
+                    int amount = (atk==ATK_MINIGUN_SHOOT ? (-7 + rnd(15)) / shakeFactor : (-3 + rnd(7)) / shakeFactor);
+                    mousemove(amount, amount);
+                }
+                if(isGau)
+                {
+                    if(d->type==ENT_PLAYER) gunSound = S_GAU8;
+                    if(d==player1 && player1->aptitude==APT_PRETRE && player1->boostmillis[B_SHROOMS] && player1->abilitymillis[ABILITY_3]) unlockAchievement(ACH_CADENCE);
+                }
+                spawnbouncer(casingOrigin, vec(0, 0, 0), d, isGau ? BNC_BIGDOUILLES : BNC_DOUILLES);
+                break;
+            }
+            case ATK_MOSSBERG_SHOOT:
+            case ATK_HYDRA_SHOOT:
+                if(!local) createrays(gun, from, to, d);
+                particle_flare(d->muzzle, d->muzzle, 140, PART_MF_SHOTGUN, gfx::hasroids(d) ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xCCAAAA, isHudPlayer ? gfx::zoom ? 1.25f : 3.50f : 4.5f, d, gfx::champicolor());
+                particle_splash(PART_SMOKE, 4, 500, d->muzzle, 0x443333, 3.5f, 20, 500, 0, gfx::champicolor());
+                particle_splash(PART_SPARK, isHudPlayer ? 4 : 7, 40, d->muzzle, 0xFF2200, 0.5f, 300, 500, 0, gfx::champicolor());
+                if(d->boostmillis[B_RAGE]) particle_flare(d->muzzle, d->muzzle, 140, PART_MF_SHOTGUN, 0xFF2222, isHudPlayer ? gfx::zoom ? 2.00f : 5.5f : 6.5f, d, gfx::champicolor());
+                loopi(attacks[atk].rays)
+                {
+                    float originOffset = 0.4f - (rnd(9) / 10.f);
+                    newprojectile(muzzleOrigin.add(vec(originOffset, originOffset, originOffset)), rays[i], 3000, false, id, d, atk);
+                    particle_splash(PART_SMOKE, 3, 500+rnd(300), rays[i], 0x797979, 0.2f, 35, 300, 2, gfx::champicolor());
+                    particle_splash(PART_SMOKE, 3, 275+rnd(275), rays[i], 0x553915, 0.15f, 35, 300, 2, gfx::champicolor());
+                    gfx::renderInstantImpact(from, rays[i], muzzleOrigin, atk);
+                    if(!isHudPlayer) soundNearmiss(S_BULLETFLYBY, from, rays[i], 512);
+                    if(lookupmaterial(rays[i]) != MAT_WATER && i < 5)
+                    {
+                        particle_splash(PART_SPARK, 9, 60, rays[i], gfx::hasroids(d) ? 0xFF2222 : 0xAA1100, 0.4, 150, 100, 0, gfx::champicolor());
+                        playSound(S_LITTLERICOCHET, &rays[i], 250, 100, SND_LOWPRIORITY);
+                    }
+                }
+                adddynlight(muzzleOrigin, 75, vec(1.25f, 0.25f, 0.f), 40, 2, lightFlags, 0, vec(1.25f, 0.25f, 0.f), d);
+                loopi(atk==ATK_HYDRA_SHOOT ? 3 : 2) spawnbouncer(casingOrigin, vec(0, 0, 0), d, BNC_CARTOUCHES);
+                break;
+
             case ATK_SV98_SHOOT:
             case ATK_SKS_SHOOT:
             case ATK_CAMPOUZE_SHOOT:
-                loopi(atk==ATK_CAMPOUZE_SHOOT ? 3 : 1) spawnbouncer(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? d->o : d->balles, vec(0, 0, 0), d, BNC_BIGDOUILLES);
-                particle_splash(PART_SMOKE, d==hudplayer() ? 4 : 6, d==hudplayer() ? 350 : 600, d->muzzle, 0x222222, d==hudplayer() ? 3.5f : 6.5f, 40, 500, 0, gfx::champicolor());
-                particle_splash(PART_SPARK, d==hudplayer() ? 4 : 7, 40, d->muzzle, 0xFFFFFF, 0.5f, 300, 500, 0, gfx::champicolor());
-                particle_flare(d->muzzle, d->muzzle, 100, PART_MF_LITTLE, d->boostmillis[B_ROIDS] ? 0xFF2222 : d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFFFFFF, 1.25f, d, gfx::champicolor());
-                particle_flare(d->muzzle, d->muzzle, 100, PART_MF_SNIPER, d->boostmillis[B_ROIDS] ? 0xFF2222 : d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFFFFFF, atk==ATK_CAMPOUZE_SHOOT ? 5.0f : 3.5f, d, gfx::champicolor());
+                particle_splash(PART_SMOKE, isHudPlayer ? 4 : 6, isHudPlayer ? 350 : 600, d->muzzle, 0x222222, isHudPlayer ? 3.5f : 6.5f, 40, 500, 0, gfx::champicolor());
+                particle_splash(PART_SPARK, isHudPlayer ? 4 : 7, 40, d->muzzle, 0xFFFFFF, 0.5f, 300, 500, 0, gfx::champicolor());
+                particle_flare(d->muzzle, d->muzzle, 100, PART_MF_LITTLE, gfx::hasroids(d) ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFFFFFF, 1.25f, d, gfx::champicolor());
+                particle_flare(d->muzzle, d->muzzle, 100, PART_MF_SNIPER, gfx::hasroids(d) ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFFFFFF, atk==ATK_CAMPOUZE_SHOOT ? 5.0f : 3.5f, d, gfx::champicolor());
                 if(d->boostmillis[B_RAGE]) particle_flare(d->muzzle, d->muzzle, 75, PART_MF_SNIPER, 0xFF2222, 6.0f, d, gfx::champicolor());
-                adddynlight(hudgunorigin(gun, d->o, to, d), 50, vec(1.25f, 0.75f, 0.3f), 37, 2, DL_FLASH, 0, vec(1.25f, 0.75f, 0.3f), d);
+                adddynlight(hudgunorigin(gun, d->o, to, d), 50, vec(1.25f, 0.75f, 0.3f), 37, 2, lightFlags, 0, vec(1.25f, 0.75f, 0.3f), d);
                 if(atk==ATK_CAMPOUZE_SHOOT)
                 {
                     loopi(attacks[atk].rays)
                     {
-                        if(lookupmaterial(rays[i])!=MAT_WATER && i<5) playSound(S_BIGRICOCHET, &rays[i], 250, 100);
-                        particle_splash(PART_SPARK, 9, 70, rays[i], d->boostmillis[B_ROIDS] ? 0xFF2222 : 0xFF9900, 0.6f, 150, 100, 0, gfx::champicolor());
+                        float originOffset = 0.4f - (rnd(9) / 10.f);
+                        particle_flare(muzzleOrigin.add(vec(originOffset, originOffset, originOffset)), rays[i], 100, PART_F_SHOTGUN, gfx::hasroids(d) ? 0xFF2222 : 0xFFFF22, 0.4f, d, gfx::champicolor());
                         particle_splash(PART_SMOKE, 4, 700+rnd(500), rays[i], 0x797979, 0.2f, 35, 300, 2, gfx::champicolor());
                         particle_splash(PART_SMOKE, 4, 400+rnd(400), rays[i], 0x553915, 0.15f, 35, 300, 2, gfx::champicolor());
                         particle_trail(PART_SMOKE, 800, hudgunorigin(gun, from, to, d), rays[i], 0x999999, 0.6f, 20);
-                        vec origin = d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(gun, d->o, to, d) : d->muzzle;
-                        origin.add(vec(0.2f-(rnd(5)/10.f), 0.2f-(rnd(5)/10.f), 0.2f-(rnd(5)/10.f)));
-                        particle_flare(origin, rays[i], 100, PART_F_SHOTGUN, d->boostmillis[B_ROIDS] ? 0xFF2222 : atk==ATK_HYDRA_SHOOT ? 0xFF8800 : 0xFFFF22, atk==ATK_HYDRA_SHOOT ? 0.3f : 0.4f, d, gfx::champicolor());
-                        gfx::renderInstantImpact(from, rays[i], d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle, atk);
-                        if(d!=hudplayer()) soundNearmiss(S_BIGBULLETFLYBY, from, rays[i], 512);
+                        gfx::renderInstantImpact(from, rays[i], muzzleOrigin, atk);
+                        if(!isHudPlayer) soundNearmiss(S_BIGBULLETFLYBY, from, rays[i], 512);
+                        if(lookupmaterial(rays[i])!=MAT_WATER && i < 5)
+                        {
+                            particle_splash(PART_SPARK, 9, 70, rays[i], gfx::hasroids(d) ? 0xFF2222 : 0xFF9900, 0.6f, 150, 100, 0, gfx::champicolor());
+                            playSound(S_BIGRICOCHET, &rays[i], 250, 100);
+                        }
                     }
+                    loopi(3) spawnbouncer(casingOrigin, vec(0, 0, 0), d, BNC_BIGDOUILLES);
                 }
-                else newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
-                if(d!=hudplayer()) soundNearmiss(S_BIGBULLETFLYBY, from, to);
+                else
+                {
+                    if(!isHudPlayer) soundNearmiss(S_BIGBULLETFLYBY, from, to);
+                    newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
+                    spawnbouncer(casingOrigin, vec(0, 0, 0), d, BNC_BIGDOUILLES);
+                }
                 break;
+
             case ATK_ARBALETE_SHOOT:
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
                 if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK,  8, 500, d->muzzle, 0xFF2222, 1.0f,  50,   200, 0, gfx::champicolor());
-                if(d!=hudplayer()) soundNearmiss(S_FLYBYARROW, from, to);
+                if(!isHudPlayer) soundNearmiss(S_FLYBYARROW, from, to);
                 break;
+
             case ATK_UZI_SHOOT:
             case ATK_FAMAS_SHOOT:
             case ATK_GLOCK_SHOOT:
-                spawnbouncer(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? d->o : d->balles, vec(0, 0, 0), d, atk==ATK_UZI_SHOOT ? BNC_DOUILLESUZI : BNC_DOUILLES);
-                particle_flare(d->muzzle, d->muzzle, 125, PART_MF_LITTLE, d->boostmillis[B_ROIDS] ? 0xFF2222 : d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFFFFFF, d==hudplayer() ? gfx::zoom ? 0.5f : 0.75f : 1.75f, d, gfx::champicolor());
-                particle_flare(d->muzzle, d->muzzle, 75, PART_MF_BIG, d->boostmillis[B_ROIDS] ? 0xFF2222 : d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF22FF : 0xFFAA55, d==hudplayer() ? gfx::zoom ? 0.75f : 2.f : 3.f, d, gfx::champicolor());
-                if(d->boostmillis[B_RAGE]) particle_flare(d->muzzle, d->muzzle, 80, PART_MF_BIG, 0xFF2222, d==hudplayer() ? gfx::zoom ? 1.5f : 4.f : 5.f, d, gfx::champicolor());
-                particle_splash(PART_SMOKE, d==hudplayer() ? 3 : 5, d==hudplayer() ? 350 : 500, d->muzzle, 0x444444, d==hudplayer() ? 3.5f : 4.5f, 20, 500, 0, gfx::champicolor());
-                particle_splash(PART_SPARK, d==hudplayer() ? 3 : 5, 35, d->muzzle, 0xFF4400, 0.35f, 300, 500, 0, gfx::champicolor());
-                adddynlight(hudgunorigin(gun, d->o, to, d), 60, vec(1.25f, 0.75f, 0.3f), 30, 2, DL_FLASH, 0, vec(1.25f, 0.75f, 0.3f), d);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
-                if(d!=hudplayer()) soundNearmiss(S_BULLETFLYBY, from, to);
-                if(d==player1) {if(atk!=ATK_GLOCK_SHOOT) mousemove((-3+rnd(7))/movefactor, (-3+rnd(7))/movefactor, player1->abilitymillis[ABILITY_2] && player1->aptitude==APT_MAGICIEN ? true : false);}
+                particle_flare(d->muzzle, d->muzzle, 125, PART_MF_LITTLE, gfx::hasroids(d) ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFFFFFF, isHudPlayer ? gfx::zoom ? 0.5f : 0.75f : 1.75f, d, gfx::champicolor());
+                particle_flare(d->muzzle, d->muzzle, 75, PART_MF_BIG, gfx::hasroids(d) ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFFAA55, isHudPlayer ? gfx::zoom ? 0.75f : 2.f : 3.f, d, gfx::champicolor());
+                particle_splash(PART_SMOKE, isHudPlayer ? 3 : 5, isHudPlayer ? 350 : 500, d->muzzle, 0x444444, isHudPlayer ? 3.5f : 4.5f, 20, 500, 0, gfx::champicolor());
+                particle_splash(PART_SPARK, isHudPlayer ? 3 : 5, 35, d->muzzle, 0xFF4400, 0.35f, 300, 500, 0, gfx::champicolor());
+                if(d->boostmillis[B_RAGE]) particle_flare(d->muzzle, d->muzzle, 80, PART_MF_BIG, 0xFF2222, isHudPlayer ? gfx::zoom ? 1.5f : 4.f : 5.f, d, gfx::champicolor());
+                adddynlight(hudgunorigin(gun, d->o, to, d), 60, vec(1.25f, 0.75f, 0.3f), 30, 2, lightFlags, 0, vec(1.25f, 0.75f, 0.3f), d);
+                if(!isHudPlayer) soundNearmiss(S_BULLETFLYBY, from, to);
+                else if (atk!=ATK_GLOCK_SHOOT && isHudPlayer)
+                {
+                    int amount = (-3 + rnd(7)) / shakeFactor;
+                    mousemove(amount, amount);
+                }
+                spawnbouncer(casingOrigin, vec(0, 0, 0), d, atk==ATK_UZI_SHOOT ? BNC_DOUILLESUZI : BNC_DOUILLES);
                 break;
+
             case ATK_LANCEFLAMMES_SHOOT:
             {
                 if(!local) createrays(gun, from, to, d);
-                d->type==ENT_AI ? sound = S_PYRO_A : sound = S_FLAMETHROWER;
+                particle_flare(d->muzzle, d->muzzle, 150, PART_MF_ROCKET, gfx::hasroids(d) ? 0x880000 : wizardAbility ? 0x440044 : 0x663311, isHudPlayer ? gfx::zoom ? 2.00f : 3.5f : 4.5f, d, gfx::champicolor());
+                if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK,  3, 500, d->muzzle, 0xFF2222, 1.0f, 50, 200, 0, gfx::champicolor());
                 loopi(attacks[atk].rays)
                 {
-                    vec origin = d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(gun, d->o, to, d) : d->muzzle;
-
-                    vec iflames(rays[i]);
-                    iflames.sub(origin);
-                    iflames.normalize().mul(1450.0f + rnd(200));
-
+                    vec dest = vec(rays[i]).sub(muzzleOrigin).normalize().mul(1450.0f + rnd(200));
                     switch(rnd(4))
                     {
-                        case 0: particle_flying_flare(origin, iflames, 700, PART_FIRE_BALL, d->boostmillis[B_ROIDS] ? 0x881111 :  0x604930, (12.f+rnd(16))/8.f, 100, 10+rnd(5), gfx::champicolor()); break;
-                        case 1: particle_flying_flare(origin, iflames, 700, PART_FIRE_BALL, d->boostmillis[B_ROIDS] ? 0x770000 :  0x474747, (12.f+rnd(16))/8.f, 100, 10+rnd(5), gfx::champicolor()); break;
-                        case 2: particle_flying_flare(origin, iflames, 700, PART_FIRE_BALL, d->boostmillis[B_ROIDS] ? 0x991111 :  0x383838, (12.f+rnd(16))/8.f, 100, 10+rnd(5), gfx::champicolor()); break;
+                        case 0: particle_flying_flare(muzzleOrigin, dest, 700, PART_FIRE_BALL, gfx::hasroids(d) ? 0x881111 : 0x604930, (12.f+rnd(16))/8.f, 100, 10+rnd(5), gfx::champicolor()); break;
+                        case 1: particle_flying_flare(muzzleOrigin, dest, 700, PART_FIRE_BALL, gfx::hasroids(d) ? 0x770000 : 0x474747, (12.f+rnd(16))/8.f, 100, 10+rnd(5), gfx::champicolor()); break;
+                        case 2: particle_flying_flare(muzzleOrigin, dest, 700, PART_FIRE_BALL, gfx::hasroids(d) ? 0x991111 : 0x383838, (12.f+rnd(16))/8.f, 100, 10+rnd(5), gfx::champicolor()); break;
                         default:
-                            particle_flying_flare(origin, iflames, 1100, PART_SMOKE, 0x111111, (15.f+rnd(18))/3.f, -20, 15+rnd(10), gfx::champicolor());
-                            adddynlight(hudgunorigin(gun, d->o, iflames, d), 50, vec(0.40f, 0.2f, 0.1f), 100, 100, L_NODYNSHADOW, 10, vec(0.50f, 0, 0), d);
-                            gfx::renderInstantImpact(from, rays[i], d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle, atk);
-                            switch(rnd(2)){case 0: if(d!=hudplayer()) soundNearmiss(S_FLYBYFLAME, from, rays[i]);}
+                            particle_flying_flare(muzzleOrigin, dest, 1100, PART_SMOKE, 0x111111, (15.f+rnd(18))/3.f, -20, 15+rnd(10), gfx::champicolor());
+                            gfx::renderInstantImpact(from, rays[i], muzzleOrigin, atk);
+                            if(rnd(2) && !isHudPlayer) soundNearmiss(S_FLYBYFLAME, from, rays[i]);
                     }
                 }
-                if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK,  3, 500, d->muzzle, 0xFF2222, 1.0f, 50, 200, 0, gfx::champicolor());
-                particle_flare(d->muzzle, d->muzzle, 150, PART_MF_ROCKET, d->boostmillis[B_ROIDS] ? 0x880000 : d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0x440044 : 0x663311,  d==hudplayer() ? gfx::zoom ? 2.00f : 3.5f : 4.5f, d, gfx::champicolor());
-
-                float dist = from.dist(to);
-                vec up = to;
-                up.z += dist/8;
-                if(!rnd(2)) newbouncer(d==player1 && !thirdperson ? d->muzzle : hudgunorigin(gun, d->o, to, d), up, local, id, d, BNC_LIGHT, 650, 400);
+                adddynlight(muzzleOrigin, 50, vec(0.6f, 0.3f, 0.1f), 100, 100, lightFlags, 10, vec(0.4f, 0, 0), d);
+                if(!rnd(2)) newbouncer(muzzleOrigin, to, local, id, d, BNC_LIGHT, 650, 400);
+                gunSound = (d->type==ENT_AI ? S_PYRO_A : S_FLAMETHROWER);
                 break;
             }
             case ATK_GRAP1_SHOOT:
-            {
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
-                particle_flare(d->muzzle, d->muzzle, 150, PART_MF_PLASMA, d->boostmillis[B_ROIDS] ? 0xFF4444 : d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0xFF00FF : 0xFF55FF, 1.75f, d, gfx::champicolor());
-                if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK,  3, 500, d->muzzle, 0xFF4444, 1.0f, 50, 200, 0, gfx::champicolor());
-                adddynlight(hudgunorigin(gun, d->o, to, d), 70, vec(1.0f, 0.0f, 1.0f), 80, 100, DL_FLASH, 0, vec(0, 0, 0), d);
+                particle_flare(d->muzzle, d->muzzle, 150, PART_MF_PLASMA, gfx::hasroids(d) ? 0xFF4444 : wizardAbility ? 0xFF00FF : 0xFF55FF, 1.75f, d, gfx::champicolor());
+                if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK, 3, 500, d->muzzle, 0xFF4444, 1.0f, 50, 200, 0, gfx::champicolor());
+                adddynlight(hudgunorigin(gun, d->o, to, d), 70, vec(1.0f, 0.0f, 1.0f), 80, 100, lightFlags, 0, vec(0, 0, 0), d);
                 break;
-            }
+
             case ATK_M32_SHOOT:
             {
-                float dist = from.dist(to);
-                vec up = to;
-                up.z += dist/8;
-                particle_splash(PART_SMOKE,  10, 600, d->muzzle, d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN ? 0x550044 : 0x444444, 4.0f, 20, 500, 0, gfx::champicolor());
+                particle_splash(PART_SMOKE, 10, 600, d->muzzle, wizardAbility ? 0x550044 : 0x444444, 4.0f, 20, 500, 0, gfx::champicolor());
                 if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK,  8, 500, d->muzzle, 0xFF4444, 1.0f, 50, 200, 0, gfx::champicolor());
-                newbouncer(d==player1 && !thirdperson ? d->muzzle : hudgunorigin(gun, d->o, to, d), up, local, id, d, BNC_GRENADE, attacks[atk].ttl, attacks[atk].projspeed);
+                float dist = from.dist(to); vec up = to; up.z += dist/8;
+                newbouncer(isHudPlayer && !thirdperson ? d->muzzle : hudgunorigin(gun, d->o, to, d), up, local, id, d, BNC_GRENADE, attacks[atk].ttl, attacks[atk].projspeed);
                 break;
             }
             case ATK_KAMIKAZE_SHOOT:
             case ATK_ASSISTXPL_SHOOT:
-            {
-                float dist = from.dist(to);
-                vec up = to;
-                up.z += dist/8;
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
-                break;
-            }
-            default:
                 break;
         }
 
@@ -1194,36 +1210,36 @@ namespace game
             else if(d->boostmillis[B_RAGE]) playSound(S_RAGETIR, d==hudplayer() ? NULL : &d->o, 500, 100);
         }
 
-        bool incraseDist = atk==ATK_ASSISTXPL_SHOOT || atk==ATK_KAMIKAZE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_NUKE_SHOOT;
+        if(d->abilitymillis[ABILITY_3] && d->aptitude==APT_PRETRE) adddynlight(muzzleOrigin, 6, vec(1.5f, 1.5f, 0.0f), 80, 40, L_NOSHADOW|L_VOLUMETRIC|DL_FLASH);
+        if(d==player1) updateStat(1, STAT_MUNSHOOTED);
 
-        vec soundOrigin = noMuzzle(atk, d) ? hudgunorigin(d->gunselect, d->o, to, d) : (d->muzzle);
+        bool incraseDist = atk==ATK_ASSISTXPL_SHOOT || atk==ATK_KAMIKAZE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_NUKE_SHOOT;
         int distance = camera1->o.dist(hudgunorigin(gun, d->o, to, d));
 
-
-        switch(sound)
+        switch(gunSound)
         {
             case S_FLAMETHROWER:
             case S_GAU8:
                 if(!d->attacksound)
                 {
                     bool fargau = atk==ATK_GAU8_SHOOT && distance >= 500;
-                    playSound(fargau ? S_GAU8_FAR : sound, d==hudplayer() ? NULL : &soundOrigin, incraseDist ? (fargau ? 3000 : 1000) : 400, incraseDist ? (fargau ? 1500 : 500) : 150, SND_LOOPED|SND_FIXEDPITCH|SND_NOCULL, d->entityId, PL_ATTACK_SND);
+                    playSound(fargau ? S_GAU8_FAR : gunSound, d==hudplayer() ? NULL : &muzzleOrigin, incraseDist ? (fargau ? 3000 : 1000) : 400, incraseDist ? (fargau ? 1500 : 500) : 150, SND_LOOPED|SND_FIXEDPITCH|SND_NOCULL, d->entityId, PL_ATTACK_SND);
                     d->attacksound = true;
                 }
                 return;
             default:
-                if(!d->attacksound && sound==S_PLASMARIFLE_SFX)
+                if(gunSound==S_PLASMARIFLE_SFX && !d->attacksound)
                 {
-                    playSound(sound, d==hudplayer() ? NULL : &soundOrigin, 400, 150, SND_LOOPED|SND_FIXEDPITCH|SND_NOCULL, d->entityId, PL_ATTACK_SND);
+                    playSound(gunSound, d==hudplayer() ? NULL : &muzzleOrigin, 400, 150, SND_LOOPED|SND_FIXEDPITCH|SND_NOCULL, d->entityId, PL_ATTACK_SND);
                     d->attacksound = true;
                 }
-                playSound(attacks[atk].sound, d==hudplayer() ? NULL : &soundOrigin, incraseDist ? 600 : 400, incraseDist ? 200 : 150);
+                playSound(attacks[atk].sound, d==hudplayer() ? NULL : &muzzleOrigin, incraseDist ? 600 : 400, incraseDist ? 200 : 150);
         }
 
         if(distance > 300)
         {
-            playSound(attacks[atk].middistsnd, &soundOrigin, 700, 300, SND_LOWPRIORITY);
-            if(distance > 600) playSound(attacks[atk].fardistsnd, &soundOrigin, 1000, 600, SND_LOWPRIORITY);
+            playSound(attacks[atk].middistsnd, &muzzleOrigin, 700, 300, SND_LOWPRIORITY);
+            if(distance > 600) playSound(attacks[atk].fardistsnd, &muzzleOrigin, 1000, 600, SND_LOWPRIORITY);
         }
     }
 
@@ -1417,7 +1433,6 @@ namespace game
         if(d->aptitude==APT_PRETRE && d->abilitymillis[ABILITY_3]) waitfactor = 2.5f + ((4000.f - d->abilitymillis[ABILITY_3])/1000.f);
         if(d->boostmillis[B_SHROOMS]) waitfactor *= d->aptitude==APT_JUNKIE ? 1.75f : 1.5f;
         d->gunwait = attacks[atk].attackdelay/waitfactor;
-        //if(d->ai) d->gunwait += int(d->gunwait*(((101-d->skill)+rnd(111-d->skill))/100.f));
         d->boostmillis[B_ROIDS] ? d->totalshots += (attacks[atk].damage*attacks[atk].rays)*2: d->totalshots += attacks[atk].damage*attacks[atk].rays;
 
         if(d->playerexploded){d->attacking = ACT_IDLE; execute("getoldweap"); d->playerexploded = false;}
@@ -1453,7 +1468,7 @@ namespace game
                 vec pos(bnc.o);
                 pos.add(vec(bnc.offset).mul(bnc.offsetmillis/float(OFFSETMILLIS)));
                 if(bnc.bouncetype==BNC_GRENADE) adddynlight(pos, 40, vec(0.5f, 0.5f, 2.0f));
-                else adddynlight(pos, 80, vec(0.3f, 0.15f, 0.0f), 0, 0, L_VOLUMETRIC|L_NODYNSHADOW|L_NOSHADOW|L_NOSPEC);
+                else adddynlight(pos, 115, vec(0.3f, 0.15f, 0.0f), 0, 0, L_VOLUMETRIC|L_NOSHADOW|L_NOSPEC);
             }
         }
     }
