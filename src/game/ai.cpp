@@ -1125,8 +1125,8 @@ namespace ai
             d->ai->spot = vec(0, 0, 0);
         }
 
-        if(d->abilitymillis[ABILITY_3] && d->aptitude==APT_PHYSICIEN && !rndevent(90)) d->jumping = true;
-		else if(!d->ai->dontmove || (d->boostmillis[B_JOINT] && !rndevent(90))) jumpto(d, b, d->ai->spot);
+        if(d->abilitymillis[ABILITY_3] && d->aptitude==APT_PHYSICIEN && rndevent(85)) d->jumping = true;
+		else if(!d->ai->dontmove || (d->boostmillis[B_JOINT] && rndevent(96))) jumpto(d, b, d->ai->spot);
 
         gameent *e = getclient(d->ai->enemy);
         bool enemyok = e && targetable(d, e);
@@ -1170,7 +1170,7 @@ namespace ai
             float yaw, pitch;
             getyawpitch(dp, ep, yaw, pitch);
             fixrange(yaw, pitch);
-            bool insight = cansee(d, dp, ep), hasseen = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill*10)+3000,
+            bool insight = cansee(d, dp, ep), hasseen = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill * 5) + 500,
                 quick = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= skmod+30;
             if(insight) d->ai->enemyseen = lastmillis;
             if(idle || insight || hasseen || quick)
@@ -1184,7 +1184,7 @@ namespace ai
                     d->ai->becareful = false;
                 }
                 scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, sskew);
-                if(insight || quick || (hasseen && (d->gunselect==GUN_PLASMA || d->gunselect==GUN_MINIGUN || d->gunselect==GUN_S_ROQUETTES)))
+                if(insight || quick || (hasseen && (d->gunselect==GUN_PLASMA || d->gunselect==GUN_MINIGUN || d->gunselect==GUN_S_ROQUETTES || d->gunselect==GUN_S_GAU8)))
                 {
                     if(canshoot(d, atk, e) && hastarget(d, atk, b, e, yaw, pitch, dp.squaredist(ep)))
                     {
