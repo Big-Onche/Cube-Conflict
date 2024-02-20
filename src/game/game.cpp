@@ -285,26 +285,36 @@ namespace game
     {
         if(lookupmaterial(camera1->o)==MAT_WATER && !uwSoundPlaying) // underwater camera sound
         {
-            playSound(S_UNDERWATER, NULL, 0, 0, SND_FIXEDPITCH|SND_LOOPED, hudplayer()->entityId, PL_UNDERWATER_SND);
+            playSound(S_UNDERWATER, NULL, 0, 0, SND_FIXEDPITCH|SND_LOOPED, hudplayer()->entityId, PL_UNDERWATER);
             uwSoundPlaying = true;
         }
-        if(lookupmaterial(camera1->o)!=MAT_WATER) { stopLinkedSound(hudplayer()->entityId, PL_UNDERWATER_SND); uwSoundPlaying = false; }
+        if(lookupmaterial(camera1->o)!=MAT_WATER) { stopLinkedSound(hudplayer()->entityId, PL_UNDERWATER); uwSoundPlaying = false; }
 
         vec playerVel = d->vel;
+        playerVel.div(75);
 
-        if(isattacking(d) && d!=hudplayer()) updateSoundPosition(d->entityId, d->muzzle, playerVel.div(vec(75, 75, 75)), PL_ATTACK_SND); // looped weapon sounds
-        if(!isattacking(d)) { stopLinkedSound(d->entityId, PL_ATTACK_SND); d->attacksound = false; }
+        if(isattacking(d) && d!=hudplayer()) // looped weapon sounds
+        {
+            updateSoundPosition(d->entityId, d->o, playerVel, PL_ATTACK);
+            updateSoundPosition(d->entityId, d->o, playerVel, PL_ATTACK_FAR);
+        }
+        if(!isattacking(d))
+        {
+            stopLinkedSound(d->entityId, PL_ATTACK);
+            stopLinkedSound(d->entityId, PL_ATTACK_FAR);
+            d->attacksound = false;
+        }
 
         if(d->armourtype==A_ASSIST && d->armour && d->armour<1000 && d->state==CS_ALIVE) // power armor alarm sound
         {
             if(!d->powerarmoursound && d->armour)
             {
-                playSound(S_ASSISTALARM, d==hudplayer() ? NULL : &d->o, 250, 100, SND_FIXEDPITCH|SND_LOOPED, d->entityId, PL_POWERARMOR_SND);
+                playSound(S_ASSISTALARM, d==hudplayer() ? NULL : &d->o, 250, 100, SND_FIXEDPITCH|SND_LOOPED, d->entityId, PL_POWERARMOR);
                 d->powerarmoursound = true;
             }
-            else if(d!=hudplayer()) updateSoundPosition(d->entityId, d->o, playerVel.div(vec(75, 75, 75)), PL_POWERARMOR_SND);
+            else if(d!=hudplayer()) updateSoundPosition(d->entityId, d->o, playerVel, PL_POWERARMOR);
         }
-        else if (d->powerarmoursound) { stopLinkedSound(d->entityId, PL_POWERARMOR_SND); d->powerarmoursound = false; }
+        else if (d->powerarmoursound) { stopLinkedSound(d->entityId, PL_POWERARMOR); d->powerarmoursound = false; }
     }
 
     void otherplayers(int curtime)
@@ -596,7 +606,6 @@ namespace game
         d->lastpain = lastmillis;
         d->skeletonfade = 1.0f;
         d->tombepop = 0.0f;
-
         d->deaths++;
         d->killstreak = 0;
         loopi(NUMABILITIES) d->abilityready[i] = true;
@@ -607,10 +616,7 @@ namespace game
         particle_splash(PART_SMOKE,  8, 1500, pos, 0x333333, 12.0f,  125, 400);
         particle_splash(PART_SMOKE,  5, 900, pos, 0x440000, 10.0f,  125, 200);
 
-        loopi(NUMABILITIES)
-        {
-            if(hasAbilityEnabled(d, i)) { stopLinkedSound(d->entityId, PL_ABI_SND_1+i); } // stopping ability(ties) sound(s)
-        }
+        clearLinkedSounds(d->entityId);
 
         if(d==player1)
         {

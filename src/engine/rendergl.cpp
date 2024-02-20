@@ -1431,9 +1431,9 @@ void modifyorient(float yaw, float pitch)
     }
 }
 
-void mousemove(int dx, int dy, bool sortprecision)
+void mousemove(int dx, int dy)
 {
-    if(!game::allowmouselook() || sortprecision) return;
+    if(!game::allowmouselook()) return;
     float cursens = sensitivity, curaccel = mouseaccel;
     if(gfx::zoom)
     {

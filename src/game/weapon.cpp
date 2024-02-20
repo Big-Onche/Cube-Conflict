@@ -714,59 +714,61 @@ namespace game
     void explode(bool local, gameent *owner, const vec &v, const vec &vel, dynent *safe, int damage, int atk)
     {
         vec debrisvel = owner->o==v ? vec(0, 0, 0) : vec(owner->o).sub(v).normalize(), debrisorigin(v);
-        debrisorigin = vec(v).sub(vec(vel).mul(10)).add(vec(5-rnd(10), 5-rnd(10), 5-rnd(10)));
         vec soundloc = vec(v).sub(vec(vel).mul(atk==ATK_SMAW_SHOOT || atk==ATK_ARTIFICE_SHOOT || atk==ATK_ROQUETTES_SHOOT ? 25 : 10)); // avoid false positive for occlusion effect
+        bool inWater = lookupmaterial(v)==MAT_WATER;
+        bool isFar = camera1->o.dist(v) >= 300;
 
         switch(atk)
         {
             case ATK_PULSE_SHOOT:
             case ATK_GRAP1_SHOOT:
             case ATK_SPOCKGUN_SHOOT:
-                playSound(atk==ATK_GRAP1_SHOOT ? S_IMPACTGRAP1 : atk==ATK_PULSE_SHOOT ? S_IMPACTPLASMA : S_IMPACTSPOCK, &v, 250, 50, SND_LOWPRIORITY);
                 gfx::renderProjectileExplosion(owner, v, vel, safe, atk);
+                playSound(atk==ATK_GRAP1_SHOOT ? S_IMPACTGRAP1 : atk==ATK_PULSE_SHOOT ? S_IMPACTPLASMA : S_IMPACTSPOCK, &v, 250, 50, SND_LOWPRIORITY);
                 break;
 
             case ATK_SMAW_SHOOT:
             case ATK_ROQUETTES_SHOOT:
-                playSound(S_EXPL_MISSILE, &soundloc, 400, 150);
-                if(lookupmaterial(v)==MAT_WATER) playSound(S_EXPL_INWATER, &v, 300, 100);
-                if(camera1->o.dist(v) >= 300) playSound(S_EXPL_FAR, &soundloc, 1500, 400, SND_LOWPRIORITY);
                 loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
                 gfx::renderExplosion(owner, v, vel, safe, atk);
+                playSound(S_EXPL_MISSILE, &soundloc, 400, 150);
+                if(inWater) playSound(S_EXPL_INWATER, &v, 300, 100);
+                if(isFar) playSound(S_EXPL_FAR, &soundloc, 1500, 400, SND_LOWPRIORITY);
                 startshake(v, 175, atk);
                 break;
 
             case ATK_KAMIKAZE_SHOOT:
             case ATK_ASSISTXPL_SHOOT:
-                playSound(atk==ATK_KAMIKAZE_SHOOT ? S_EXPL_KAMIKAZE : S_EXPL_PARMOR, &soundloc, 400, 150);
-                if(camera1->o.dist(v) >= 300) playSound(S_BIGEXPL_FAR, &soundloc, 2000, 400);
-                if((lookupmaterial(v)==MAT_WATER)) playSound(S_EXPL_INWATER, &v, 300, 100);
-                loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
+
                 if(atk==ATK_ASSISTXPL_SHOOT) loopi(10+rnd(5)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_ROBOT);
+                else { loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS); }
                 gfx::renderExplosion(owner, v, vel, safe, atk);
+                playSound(atk==ATK_KAMIKAZE_SHOOT ? S_EXPL_KAMIKAZE : S_EXPL_PARMOR, &soundloc, 400, 150);
+                if(inWater) playSound(S_EXPL_INWATER, &v, 300, 100);
+                if(isFar) playSound(S_BIGEXPL_FAR, &soundloc, 2000, 400);
                 startshake(v, 225, atk);
                 break;
 
             case ATK_NUKE_SHOOT:
-                playSound(S_EXPL_NUKE);
                 gfx::renderExplosion(owner, v, vel, safe, atk);
+                playSound(S_EXPL_NUKE);
                 startshake(v, 5000, atk);
                 break;
 
             case ATK_ARTIFICE_SHOOT:
-                playSound(S_EXPL_FIREWORKS, &soundloc, 300, 100);
-                if(lookupmaterial(v)==MAT_WATER) playSound(S_EXPL_INWATER, &v, 300, 100);
-                if(camera1->o.dist(v) >= 300) playSound(S_FIREWORKSEXPL_FAR, &soundloc, 2000, 400);
                 gfx::renderExplosion(owner, v, vel, safe, atk);
+                playSound(S_EXPL_FIREWORKS, &soundloc, 300, 100);
+                if(inWater) playSound(S_EXPL_INWATER, &v, 300, 100);
+                if(isFar) playSound(S_FIREWORKSEXPL_FAR, &soundloc, 2000, 400);
                 startshake(v, 100, atk);
                 break;
 
             case ATK_M32_SHOOT:
-                playSound(S_EXPL_GRENADE, &v, 400, 150);
-                if(lookupmaterial(v)==MAT_WATER) playSound(S_EXPL_INWATER, &v, 300, 100);
-                if(camera1->o.dist(v) >= 300) playSound(S_EXPL_FAR, &v, 2000, 400, SND_LOWPRIORITY);
-                loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
                 gfx::renderExplosion(owner, v, vel, safe, atk);
+                playSound(S_EXPL_GRENADE, &v, 400, 150);
+                if(inWater) playSound(S_EXPL_INWATER, &v, 300, 100);
+                if(isFar) playSound(S_EXPL_FAR, &v, 2000, 400, SND_LOWPRIORITY);
+                loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_DEBRIS);
                 startshake(v, 200, atk);
                 break;
 
@@ -776,20 +778,21 @@ namespace game
             case ATK_FAMAS_SHOOT:
             case ATK_GLOCK_SHOOT:
             case ATK_ARBALETE_SHOOT:
-                if(!(lookupmaterial(v)==MAT_WATER)) playSound(atk==ATK_ARBALETE_SHOOT ? S_IMPACTARROW : S_LITTLERICOCHET, &soundloc, 175, 75, SND_LOWPRIORITY);
                 gfx::renderBulletImpact(owner, v, vel, safe, atk);
+                if(!inWater) playSound(atk==ATK_ARBALETE_SHOOT ? S_IMPACTARROW : S_LITTLERICOCHET, &soundloc, 175, 75, SND_LOWPRIORITY);
                 break;
 
             case ATK_SV98_SHOOT:
             case ATK_SKS_SHOOT:
             case ATK_GAU8_SHOOT:
             {
-                if(!(lookupmaterial(v)==MAT_WATER))
+                gfx::renderBulletImpact(owner, v, vel, safe, atk);
+                if(!inWater)
                 {
                     playSound(S_IMPACTLOURDLOIN, &soundloc, 750, 400, SND_LOWPRIORITY);
                     playSound(S_BIGRICOCHET, &soundloc, 250, 75, SND_LOWPRIORITY);
                 }
-                gfx::renderBulletImpact(owner, v, vel, safe, atk);
+
             }
         }
 
@@ -958,14 +961,14 @@ namespace game
                     gfx::renderProjectilesTrails(p.owner, pos, dv, p.from, p.offset, p.atk, p.exploded);
                 }
 
-                bool bigradius = p.atk==ATK_NUKE_SHOOT || p.atk==ATK_ROQUETTES_SHOOT || p.atk==ATK_ARTIFICE_SHOOT;
+                bool bigradius = p.atk==ATK_NUKE_SHOOT || p.atk==ATK_ARTIFICE_SHOOT;
 
                 if(camera1->o.dist(p.o) < (bigradius ? 800 : 400) && p.projsound) // play and update the sound only if the projectile is passing by
                 {
-                    vec velocity = dv.div(float(time));
+                    vec velocity = dv.div(float(time)*70);
                     if(!p.soundplaying) playSound(p.projsound, &p.o, bigradius ? 800 : 400, 1, SND_LOOPED, p.entityId);
                     p.soundplaying = true;
-                    if(p.entityId) updateSoundPosition(p.entityId, p.o, velocity.mul(vec(70, 70, 70)));
+                    if(p.entityId) updateSoundPosition(p.entityId, p.o, velocity);
                 }
                 else
                 {
@@ -1204,10 +1207,10 @@ namespace game
         {
             if(d->boostmillis[B_ROIDS])
             {
-                playSound(S_ROIDS_SHOOT, d==hudplayer() ? NULL : &d->o, 500, 100);
+                playSound(S_ROIDS_SHOOT, isHudPlayer ? NULL : &d->o, 500, 100);
                 if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 400 && d!=player1) playSound(S_ROIDS_SHOOT_FAR, &d->o, 800, 450);
             }
-            else if(d->boostmillis[B_RAGE]) playSound(S_RAGETIR, d==hudplayer() ? NULL : &d->o, 500, 100);
+            else if(d->boostmillis[B_RAGE]) playSound(S_RAGETIR, isHudPlayer ? NULL : &d->o, 500, 100);
         }
 
         if(d->abilitymillis[ABILITY_3] && d->aptitude==APT_PRETRE) adddynlight(muzzleOrigin, 6, vec(1.5f, 1.5f, 0.0f), 80, 40, L_NOSHADOW|L_VOLUMETRIC|DL_FLASH);
@@ -1215,6 +1218,7 @@ namespace game
 
         bool incraseDist = atk==ATK_ASSISTXPL_SHOOT || atk==ATK_KAMIKAZE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_NUKE_SHOOT;
         int distance = camera1->o.dist(hudgunorigin(gun, d->o, to, d));
+        int loopedSoundFlags = SND_LOOPED|SND_FIXEDPITCH|SND_NOCULL;
 
         switch(gunSound)
         {
@@ -1222,15 +1226,18 @@ namespace game
             case S_GAU8:
                 if(!d->attacksound)
                 {
-                    bool fargau = atk==ATK_GAU8_SHOOT && distance >= 500;
-                    playSound(fargau ? S_GAU8_FAR : gunSound, d==hudplayer() ? NULL : &muzzleOrigin, incraseDist ? (fargau ? 3000 : 1000) : 400, incraseDist ? (fargau ? 1500 : 500) : 150, SND_LOOPED|SND_FIXEDPITCH|SND_NOCULL, d->entityId, PL_ATTACK_SND);
+                    playSound(gunSound, isHudPlayer ? NULL : &muzzleOrigin, incraseDist ? 600 : 400, incraseDist ? 300 : 150, loopedSoundFlags, d->entityId, PL_ATTACK);
+                    if(distance > 300)
+                    {
+                        playSound(attacks[atk].middistsnd, &muzzleOrigin, incraseDist ? 3000 : 850, incraseDist ? 1500 : 400, loopedSoundFlags, d->entityId, PL_ATTACK_FAR);
+                    }
                     d->attacksound = true;
                 }
                 return;
             default:
                 if(gunSound==S_PLASMARIFLE_SFX && !d->attacksound)
                 {
-                    playSound(gunSound, d==hudplayer() ? NULL : &muzzleOrigin, 400, 150, SND_LOOPED|SND_FIXEDPITCH|SND_NOCULL, d->entityId, PL_ATTACK_SND);
+                    playSound(gunSound, d==hudplayer() ? NULL : &muzzleOrigin, 400, 150, loopedSoundFlags, d->entityId, PL_ATTACK);
                     d->attacksound = true;
                 }
                 playSound(attacks[atk].sound, d==hudplayer() ? NULL : &muzzleOrigin, incraseDist ? 600 : 400, incraseDist ? 200 : 150);
@@ -1468,7 +1475,7 @@ namespace game
                 vec pos(bnc.o);
                 pos.add(vec(bnc.offset).mul(bnc.offsetmillis/float(OFFSETMILLIS)));
                 if(bnc.bouncetype==BNC_GRENADE) adddynlight(pos, 40, vec(0.5f, 0.5f, 2.0f));
-                else adddynlight(pos, 115, vec(0.3f, 0.15f, 0.0f), 0, 0, L_VOLUMETRIC|L_NOSHADOW|L_NOSPEC);
+                else adddynlight(pos, 115, vec(0.25f, 0.12f, 0.0f), 0, 0, L_VOLUMETRIC|L_NOSHADOW|L_NOSPEC);
             }
         }
     }
