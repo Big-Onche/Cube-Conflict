@@ -201,9 +201,16 @@ namespace game
         addmsg(N_SENDDANSE, "ri", player1->customdanse);
     }
 
+    const char *getWeaponDir(int weapon, bool hud)
+    {
+        static char dir[32];
+        snprintf(dir, sizeof(dir), "weapons/%s/%s", hud ? "hud" : "ext", guns[weapon].name);
+        return dir;
+    }
+
     char *getShieldDir(int type, int health, bool hud = false)
     {
-        static char dir[64];
+        static char dir[32];
         int armourDir = 20;
         int steps = (armours[type].max / 5);
 
@@ -214,7 +221,21 @@ namespace game
             armourDir += 20;
         }
 
-        sprintf(dir, "shields/%s/%s/%d", hud || type==A_ASSIST ? "hud" : "ext", armours[type].name, armourDir);
+        snprintf(dir, sizeof(dir), "shields/%s/%s/%d", hud || type==A_ASSIST ? "hud" : "ext", armours[type].name, armourDir);
+        return dir;
+    }
+
+    const char *getCapeDir(int cape, bool enemy)
+    {
+        static char dir[32];
+        snprintf(dir, sizeof(dir), "capes/%s%s", customscapes[cape].ident, enemy ? "/enemy" : "");
+        return dir;
+    }
+
+    const char *getGraveDir(int grave)
+    {
+        static char dir[32];
+        snprintf(dir, sizeof(dir), "graves/%s", customstombes[grave].ident);
         return dir;
     }
 
@@ -231,8 +252,8 @@ namespace game
 
         loopi(sizeof(customscapes) / sizeof(customscapes[0])) // Preloading all capes
         {
-            preloadmodel(getcapedir(i, true));
-            preloadmodel(getcapedir(i, false));
+            preloadmodel(getCapeDir(i, true));
+            preloadmodel(getCapeDir(i, false));
         }
 
         loopi(sizeof(aptitudes) / sizeof(aptitudes[0])) // Preloading all classe's hats
@@ -301,7 +322,7 @@ namespace game
     {
         if(validGrave(d->customcape))
         {
-            rendermodel(getgravedir(d->customtombe), ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED, d, NULL, 0, 0, fade);
+            rendermodel(getGraveDir(d->customtombe), ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED, d, NULL, 0, 0, fade);
         }
     }
 
@@ -324,7 +345,7 @@ namespace game
             if(validGrave(d->customtombe))
             {
                 d->tombepop = min(d->tombepop + (3.f / gfx::nbfps), 1.0f);
-                rendermodel(getgravedir(d->customtombe), ANIM_MAPMODEL|ANIM_LOOP, d->feetpos(), d->yaw, 0, 0, flags, NULL, NULL, 0, 0, d->tombepop, vec4(vec::hexcolor(color), 5));
+                rendermodel(getGraveDir(d->customtombe), ANIM_MAPMODEL|ANIM_LOOP, d->feetpos(), d->yaw, 0, 0, flags, NULL, NULL, 0, 0, d->tombepop, vec4(vec::hexcolor(color), 5));
             }
 
             d->skeletonfade = max(d->skeletonfade - (3.f / gfx::nbfps), 0.0f);
@@ -393,7 +414,8 @@ namespace game
                 vanim = ANIM_VWEP_SHOOT;
                 vtime = lastaction;
             }
-            a[ai++] = modelattach("tag_weapon", guns[d->gunselect].vwep , vanim, vtime);
+
+            a[ai++] = modelattach("tag_weapon", getWeaponDir(d->gunselect), vanim, vtime);
 
             if(mainpass && !(flags&MDL_ONLYSHADOW))
             {
@@ -406,22 +428,22 @@ namespace game
         /////////////////////////// Shield ///////////////////////////
         if(d->armour && d->armourtype >= A_WOOD && d->armourtype <= A_MAGNET)
         {
-            a[ai++] = modelattach("tag_shield", getShieldDir(d->armourtype, d->armour), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+            a[ai++] = modelattach("tag_shield", getShieldDir(d->armourtype, d->armour), 0, 0);
         }
 
         /////////////////////////// Boosts ///////////////////////////
-        if(d->boostmillis[B_JOINT]) a[ai++] = modelattach("tag_boost1", "boosts/joint", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-        if(d->boostmillis[B_ROIDS]) a[ai++] = modelattach("tag_boost1", "boosts/steros", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-        if(d->boostmillis[B_EPO])   a[ai++] = modelattach("tag_boost2", "boosts/epo", ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+        if(d->boostmillis[B_JOINT]) a[ai++] = modelattach("tag_boost1", "boosts/joint", 0, 0);
+        if(d->boostmillis[B_ROIDS]) a[ai++] = modelattach("tag_boost1", "boosts/steros", 0, 0);
+        if(d->boostmillis[B_EPO])   a[ai++] = modelattach("tag_boost2", "boosts/epo", 0, 0);
 
         /////////////////////////// Classe's hat ///////////////////////////
         defformatstring(mdldir, "hats/%d", d->aptitude);
-        a[ai++] = modelattach("tag_hat", mdldir, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+        a[ai++] = modelattach("tag_hat", mdldir, 0, 0);
 
         /////////////////////////// Player's cape ///////////////////////////
         if(validCape(d->customcape))
         {
-            a[ai++] = modelattach("tag_cape", getcapedir(d->customcape, d->team==player1->team ? false : true), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+            a[ai++] = modelattach("tag_cape", getCapeDir(d->customcape, d->team==player1->team ? false : true), 0, 0);
         }
 
         if(d!=player1) flags |= MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY;
@@ -463,10 +485,10 @@ namespace game
 
         modelattach a[4];
         int ai = 0;
-        if(guns[d->gunselect].vwep)
+        if(validgun(d->gunselect))
         {
             int vanim = ANIM_VWEP_IDLE|ANIM_LOOP, vtime = 0;
-            a[ai++] = modelattach("tag_weapon", guns[d->gunselect].vwep, vanim, vtime);
+            a[ai++] = modelattach("tag_weapon", getWeaponDir(d->gunselect), vanim, vtime);
         }
 
         vec o = d->feetpos();
@@ -474,8 +496,8 @@ namespace game
         const char *mdlname = mdl.model[validteam(team) ? team : 0];
 
         defformatstring(mdldir, "hats/%d", player1->aptitude);
-        a[ai++] = modelattach("tag_hat", mdldir, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-        a[ai++] = modelattach("tag_cape", getcapedir(cape, !team), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+        a[ai++] = modelattach("tag_hat", mdldir, 0, 0);
+        a[ai++] = modelattach("tag_cape", getCapeDir(cape, !team), 0, 0);
 
         rendermodel(mdlname, anim, o, d->yaw, d->pitch, 0, NULL, d, a[0].tag ? a : NULL, 0, 0, 1, vec4(vec::hexcolor(color), 5));
     }
@@ -678,8 +700,7 @@ namespace game
 
     void drawhudmodel(gameent *d, int anim, int basetime)
     {
-        const char *file = guns[d->gunselect].file;
-        if(!file) return;
+        if(!validgun(d->gunselect)) return;
 
         vec sway;
         vecfromyawpitch(d->yaw, 0, 0, 1, sway);
@@ -698,7 +719,7 @@ namespace game
 
         int team = m_teammode && validteam(d->team) ? d->team : 0,
             color = getplayercolor(d, team);
-        defformatstring(gunname, "hudgun/%s", file);
+
         modelattach a[3];
         int ai = 0;
         d->muzzle = d->balles = vec(-1, -1, -1);
@@ -730,7 +751,7 @@ namespace game
             if(rndevent(93)) {regularflame(PART_SMOKE, d->weed, 2, 3, 0x888888, 1, 1.3f, 50.0f, 1000.0f, -10); particle_splash(PART_FIRE_BALL,  4, 50, d->weed, 0xFF6600, 0.6f, 20, 150);}
         }
 
-        rendermodel(gunname, anim, weapzoom.add(sway), d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
+        rendermodel(getWeaponDir(d->gunselect, true), anim, weapzoom.add(sway), d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
 
         if(d->muzzle.x >= 0) d->muzzle = calcavatarpos(d->muzzle, 12);
         if(d->balles.x >= 0) d->balles = calcavatarpos(d->balles, 12);
@@ -818,14 +839,14 @@ namespace game
     {
         loopi(NUMGUNS)
         {
-            const char *file = guns[i].file;
+            const char *file = guns[i].name;
             if(!file) continue;
             string fname;
 
-            formatstring(fname, "hudgun/%s", file);
+            formatstring(fname, "weapons/hud/%s", file);
             preloadmodel(fname);
 
-            formatstring(fname, "worldgun/%s", file);
+            formatstring(fname, "weapons/ext/%s", file);
             preloadmodel(fname);
         }
     }

@@ -95,8 +95,7 @@ namespace ai
     bool cansee(gameent *d, vec &x, vec &y, vec &targ)
     {
         aistate &b = d->ai->getstate();
-        if(canmove(d) && b.type != AI_S_WAIT)
-            return getsight(x, d->yaw, d->pitch, y, targ, d->ai->views[2], d->ai->views[0], d->ai->views[1]);
+        if(canmove(d) && b.type != AI_S_WAIT) return getsight(x, d->yaw, d->pitch, y, targ, d->ai->views[2], d->ai->views[0], d->ai->views[1]);
         return false;
     }
 
@@ -501,9 +500,9 @@ namespace ai
 
     static void tryitem(gameent *d, extentity &e, int id, aistate &b, vector<interest> &interests, bool force = false)
     {
-        if(d->aptitude==APT_KAMIKAZE && d->abilitymillis[ABILITY_2]) return; //Le kamikaze s'en fout de chopper un item une fois la bombe activée
-        float score = 0;
+        if(d->aptitude==APT_KAMIKAZE && d->abilitymillis[ABILITY_2]) return;
 
+        float score = 0;
         switch(e.type)
         {
             case I_SUPERARME:
@@ -557,7 +556,7 @@ namespace ai
         {
             extentity &e = *(extentity *)entities::ents[i];
             if(!e.spawned() || !d->canpickupitem(e.type, d->aptitude, d->armourtype==A_ASSIST && d->armour)) continue;
-            tryitem(d, e, i, b, interests, force);
+            tryitem(d, e, i, b, interests, e.type == I_SUPERARME ? true : force);
         }
     }
 
@@ -1403,7 +1402,7 @@ namespace ai
             if(!intermission)
             {
                 if(d->ragdoll) cleanragdoll(d);
-                moveplayer(d, 10, true, d->boostmillis[B_EPO], d->boostmillis[B_JOINT], d->aptitude, d->aptitude==APT_MAGICIEN ? d->abilitymillis[ABILITY_1] : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION || d->aptitude==APT_KAMIKAZE ? d->abilitymillis[ABILITY_2] : d->abilitymillis[ABILITY_3], d->armourtype==A_ASSIST && d->armour>0 ? true : false);
+                moveplayer(d, 10, true, d->boostmillis[B_EPO], d->boostmillis[B_JOINT], d->aptitude, d->aptitude==APT_MAGICIEN ? d->abilitymillis[ABILITY_1] : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION || d->aptitude==APT_KAMIKAZE ? d->abilitymillis[ABILITY_2] : d->abilitymillis[ABILITY_3], d->armourtype==A_ASSIST && d->armour ? true : false);
                 if(allowmove && !b.idle) timeouts(d, b);
                 entities::checkitems(d);
                 if(cmode) cmode->checkitems(d);

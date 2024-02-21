@@ -101,7 +101,7 @@ namespace game
         else
         {
             int len = strlen(name);
-            loopi(sizeof(guns)/sizeof(guns[0])) if(!strncasecmp(guns[i].file, name, len)) return i;
+            loopi(sizeof(guns)/sizeof(guns[0])) if(!strncasecmp(guns[i].name, name, len)) return i;
         }
         return -1;
     }
