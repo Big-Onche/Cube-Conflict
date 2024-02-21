@@ -1,4 +1,4 @@
-![Logo of Cube Conflict](https://static.manakeep.com/photos/2023/11/17/59462wwjix_logo.png) 
+![Logo of Cube Conflict](https://static.manakeep.com/photos/2024/02/09/6njjgsomt5_logo.png) 
 # Cube Conflict 
 
 Join the battle in **Cube Conflict**, an FPS game where dumb smileys are locked in a never-ending war! Forked from [Tesseract](http://tesseract.gg). Docs are [here](docs/server.md).
@@ -22,9 +22,9 @@ The mission is to deliver a free, open-source, and exhilarating gaming experienc
 
 ## 🚧 Roadmap for the First Release
 - 🟩🟩🟩🟩🟩 (Done!) Moving to OpenAL soft instead of SDL Mixer
-- 🟩🟩⬛⬛⬛ More maps!
+- 🟩🟩🟩⬛⬛ More maps!
 - 🟩🟩🟩⬛⬛ Simplified map editing with a dedicated GUI.
-- 🟩🟩🟩🟩⬛ Completion of the tutorial map.
+- 🟩🟩🟩⬛⬛ Completion of the tutorial map.
 - 🟩🟩🟩⬛⬛ Seamless integration of stats and achievements with Steam.
 - 🟩🟩🟩🟩🟩 (Done!) Support for multiple language translations.
 
