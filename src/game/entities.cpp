@@ -40,7 +40,7 @@ namespace entities
             "munitions/supercaisse", NULL, NULL, NULL,
             //Objets
             "objets/panachay", "objets/cochongrillay", "objets/steroides", "objets/champis", "objets/epo", "objets/joint",
-            "objets/bouclierbois", "objets/bouclierfer", "objets/bouclieror", "objets/boucliermagnetique", "objets/armureassistee",
+            "shields/ent/wood", "shields/ent/iron", "shields/ent/gold", "shields/ent/magnet", "shields/ent/power",
             "objets/mana",
 
             "objets/teleporteur",

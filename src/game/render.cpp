@@ -199,38 +199,52 @@ namespace game
         addmsg(N_SENDCAPE, "ri", player1->customcape);
         addmsg(N_SENDTOMBE, "ri", player1->customtombe);
         addmsg(N_SENDDANSE, "ri", player1->customdanse);
+    }
 
+    char *getShieldDir(int type, int health, bool hud = false)
+    {
+        static char dir[64];
+        int armourDir = 20;
+        int steps = (armours[type].max / 5);
+
+        loopi(4)
+        {
+            if(health < steps) break;
+            health -= steps;
+            armourDir += 20;
+        }
+
+        sprintf(dir, "shields/%s/%s/%d", hud || type==A_ASSIST ? "hud" : "ext", armours[type].name, armourDir);
+        return dir;
     }
 
     void preloadplayermodel()
     {
-        int value = 1;
-        loopi(5) //Preloading all shields
-        {
-            loopi(5)
-            {
-                preloadmodel(gfx::getshielddir(i, 20*value, false, true));
-                preloadmodel(gfx::getshielddir(i, 20*value, true, true));
+        loopi(5) // Preloading all shields
+        {   // armour health loop (i)
+            loopj(5)
+            {   // armour type loop (j)
+                if(j!=A_ASSIST) preloadmodel(getShieldDir(j, (armours[j].max / 5) * i, false));
+                preloadmodel(getShieldDir(j, (armours[j].max / 5) * i, true));
             }
-            value++;
         }
 
-        loopi(sizeof(customscapes) / sizeof(customscapes[0])) //Preloading all capes
+        loopi(sizeof(customscapes) / sizeof(customscapes[0])) // Preloading all capes
         {
             preloadmodel(getcapedir(i, true));
             preloadmodel(getcapedir(i, false));
         }
 
-        loopi(sizeof(aptitudes) / sizeof(aptitudes[0])) //Preloading all classe's hats
+        loopi(sizeof(aptitudes) / sizeof(aptitudes[0])) // Preloading all classe's hats
         {
             defformatstring(dir, "hats/%d", i);
             preloadmodel(dir);
         }
 
-        loopi(sizeof(customstombes) / sizeof(customstombes[0]))
+        loopi(sizeof(customstombes) / sizeof(customstombes[0])) // Preloading all graves
         {
             defformatstring(dir, "graves/%s", customstombes[i].ident);
-            preloadmodel(dir); //Preloading all graves
+            preloadmodel(dir);
         }
 
         loopi(4) getdisguisement(i); //Preloading all spy's disguisement
@@ -298,7 +312,7 @@ namespace game
         ANIM_LEFT,  ANIM_BACKWARD,  ANIM_RIGHT
     };
 
-    bool haspowerarmor(gameent *d) { return d->armour && d->armourtype==A_ASSIST; }
+    bool hasPowerArmor(gameent *d) { return d->armour && d->armourtype==A_ASSIST; }
 
     void renderplayer(gameent *d, const playermodelinfo &mdl, int color, int team, float fade, int flags = 0, bool mainpass = true)
     {
@@ -360,10 +374,10 @@ namespace game
 
         /////////////////////////// Main player model ///////////////////////////
         const char *mdlname;
-        if(d==player1 || m_tutorial) mdlname = (haspowerarmor(player1) ? "smileys/armureassistee" : mdl.model[1]); // player1 is always yellow
+        if(d==player1 || m_tutorial) mdlname = (hasPowerArmor(player1) ? "smileys/armureassistee" : mdl.model[1]); // player1 is always yellow
         else
         {
-            if(haspowerarmor(d)) mdlname = d->team==player1->team && validteam(team) ? "smileys/armureassistee" : "smileys/armureassistee/red";
+            if(hasPowerArmor(d)) mdlname = d->team==player1->team && validteam(team) ? "smileys/armureassistee" : "smileys/armureassistee/red";
             else mdlname =  d->abilitymillis[ABILITY_2] && d->aptitude==APT_PHYSICIEN ? "smileys/phy_2" : gfx::cbfilter && d->team==player1->team ? mdl.cbmodel : mdl.model[validteam(team) && d->team==player1->team ? 1 : 0];
         }
 
@@ -390,9 +404,9 @@ namespace game
         }
 
         /////////////////////////// Shield ///////////////////////////
-        if(d->armour && d->armourtype>=A_WOOD && d->armourtype<=A_ASSIST)
+        if(d->armour && d->armourtype >= A_WOOD && d->armourtype <= A_MAGNET)
         {
-            a[ai++] = modelattach("tag_shield", gfx::getshielddir(d->armourtype, d->armour), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+            a[ai++] = modelattach("tag_shield", getShieldDir(d->armourtype, d->armour), ANIM_VWEP_IDLE|ANIM_LOOP, 0);
         }
 
         /////////////////////////// Boosts ///////////////////////////
@@ -504,56 +518,66 @@ namespace game
                 float dist = d->o.dist(camera1->o);
                 float up = 5 + dist/40.f + (((totalmillis - d->lastcurdamage) / 50.f) / (dist <= 160 ? 160.f - dist : 1)); // particle going up effect
                 if(!ispaused()) pos.z += up - (15 * (1 - (clamp(dist, 0.f, 160.f) / 160.f)));
-                particle_textcopy(pos, tempformatstring("%d", d->curdamage), PART_TEXT, 1, d->curdamagecolor, gfx::zoom ? huddamagesize*(guns[player1->gunselect].maxzoomfov)/100.f : huddamagesize, 0, true);
+                float size = (gfx::zoom ? huddamagesize * (guns[player1->gunselect].maxzoomfov) / 100.f : huddamagesize) * 1.5f;
+                particle_textcopy(pos, tempformatstring("%d", d->curdamage), PART_TEXT, 1, d->curdamagecolor, size, 0, true);
             }
+
+            float distance = d->o.dist(camera1->o);
 
             if(player1->state==CS_SPECTATOR && showspecplayerinfo)
             {
-                particle_textcopy(d->abovehead(), tempformatstring("%s", d->name), PART_TEXT, 1, d->state==CS_ALIVE ? (d->team==1 ? 0xFFFF00 : 0xFF0000) : 0x595959, gfx::zoom ? 0.045f*(guns[player1->gunselect].maxzoomfov)/100.f : 0.045f, 0, true);
-                if(d->state==CS_ALIVE) particle_meter(d->abovehead(), d->health/1000.0f, PART_METER, 1, rygbGradient(d->health/10), 0x000000, 0.05f, true);
+                float metersize = 0.08f;
+                vec textpos = d->abovehead();
+                textpos.addz(distance/32.f);
+                particle_textcopy(textpos, tempformatstring("%s", d->name), PART_TEXT, 1, d->state==CS_ALIVE ? (d->team==1 ? 0xFFFF00 : 0xFF0000) : 0x595959, metersize, 0, true);
+                if(d->state==CS_ALIVE) particle_meter(d->abovehead(), d->health/1000.0f, PART_METER, 1, rygbGradient(d->health/10), 0x000000, metersize, true);
             }
 
             if(d->state==CS_ALIVE)
             {
-                vec centerplayerpos = d->o;
-                centerplayerpos.sub(vec(0, 0, 8));
-
+                vec center = d->o;
+                center.sub(vec(0, 0, 8));
                 if(d->health < 300 && rndevent(1)) spawnbouncer(d->o, vec(0,0,0), d, BNC_GIBS);
-                if(d->health < 150 && rndevent(94)) regular_particle_splash(PART_BLOOD, 1, 9999, centerplayerpos, 0x60FFFF, 1.f+rnd(2), 50);
-                if(d->armourtype==A_ASSIST && d->armour && d->armour < 750 && rndevent(1)) spawnbouncer(d->o, vec(0,0,0), d, BNC_ROBOT);
+                if(d->health < 150 && rndevent(94)) regular_particle_splash(PART_BLOOD, 1, 9999, center, 0x60FFFF, 1.f+rnd(2), 50);
+
+                if(hasPowerArmor(d))
+                {
+                    bool lowArmour = d->armour < 750;
+                    if(d->armour < 1500 && rndevent(lowArmour ? 98 : 95)) regularflame(PART_SMOKE, center, 15, 3, (lowArmour ? 0x222222 : 0x777777), 1, (lowArmour ? 2.5f : 2), 50, (lowArmour ? 3000 : 1750), -10, 3);
+                    if(d->armour < 1000 && rndevent(lowArmour ? 95 : 92)) particle_splash(PART_FIRE_BALL, (1 + lowArmour), 500, center, rnd(2) ? 0x992200 : 0x886622, (d->armour<500 ? 5 : 3), 50, -20);
+                    if(lowArmour && rndevent(1)) spawnbouncer(d->o, vec(0,0,0), d, BNC_ROBOT);
+                }
 
                 if(d!=hudplayer() && hudplayer()->state==CS_ALIVE)
                 {
                     if(isteam(hudplayer()->team, d->team))
                     {
-                        float distance = d->o.dist(camera1->o);
-                        float metersize = 0.04f / (distance/125);
-
+                        float metersize = 0.08f / (distance / 125);
                         if(hudplayer()->aptitude==APT_MEDECIN)
                         {
                             if(distance <= 250) particle_meter(d->abovehead(), d->health/1000.0f, PART_METER, 1, rygbGradient(d->health/10), 0x000000, metersize, true);
-                            if(d->health < 750)
+                            if(d->health < 500)
                             {
-                                int blinkSpeed = 1001 - (750 - d->health)/2;
-                                particle_hud(PART_HEALTH, centerplayerpos, (totalmillis % blinkSpeed < blinkSpeed / 2) ? 0x111111 : 0xFFFFFF, 0.04f);
+                                int blinkSpeed = 1001 - (500 - d->health) / 2;
+                                particle_hud(PART_HEALTH, center, (totalmillis % blinkSpeed < blinkSpeed / 2) ? 0x111111 : 0xFFFFFF, 0.075f);
                             }
                         }
                         else if(hudplayer()->aptitude==APT_JUNKIE)
                         {
                             if(drawManaStat(d))
                             {
-                                if(distance <= 250)  particle_meter(d->abovehead(), d->mana/100.0f, PART_METER, 1, 0xFF00FF, 0x000000, metersize, true);
-                                if(d->mana < 75)
+                                if(distance <= 250) particle_meter(d->abovehead(), d->mana/150.0f, PART_METER, 1, 0xFF00FF, 0x000000, metersize, true);
+                                if(d->mana < 50)
                                 {
-                                    int blinkSpeed = 1001 - (750 - d->mana*10)/2;
-                                    particle_hud(PART_MANA, centerplayerpos, (totalmillis % blinkSpeed < blinkSpeed / 2) ? 0xFF00FF : 0xFFFFFF, 0.04f);
+                                    int blinkSpeed = 1001 - (50 - d->mana) / 2;
+                                    particle_hud(PART_MANA, center, (totalmillis % blinkSpeed < blinkSpeed / 2) ? 0xFF00FF : 0xFFFFFF, 0.075f);
                                 }
                             }
                         }
                     }
-                    else if ((hudplayer()->aptitude==APT_ESPION && hudplayer()->abilitymillis[ABILITY_3]) || totalmillis-getspyability<2000)
+                    else if ((hudplayer()->aptitude==APT_ESPION && hudplayer()->abilitymillis[ABILITY_3]) || totalmillis - getspyability < 2000)
                     {
-                        particle_hud(PART_VISEUR, centerplayerpos, 0xBBBBBB);
+                        particle_hud(PART_VISEUR, center, 0xBBBBBB);
                     }
                 }
 
@@ -561,7 +585,7 @@ namespace game
                 {
                     case APT_MAGICIEN:
                         if(d->abilitymillis[ABILITY_1]) particle_splash(PART_SMOKE, 2, 120, d->o, 0xFF33FF, 10+rnd(5), 400,400);
-                        if(d->abilitymillis[ABILITY_3] && (d!=hudplayer() || thirdperson)) particle_fireball(centerplayerpos, 15.2f, PART_EXPLOSION, 5,  0x880088, 13.0f);
+                        if(d->abilitymillis[ABILITY_3] && (d!=hudplayer() || thirdperson)) particle_fireball(center, 15.2f, PART_EXPLOSION, 5,  0x880088, 13.0f);
                         break;
                     case APT_PHYSICIEN:
                         if(d->abilitymillis[ABILITY_2] && rndevent(97)) particle_splash(PART_SMOKE, 1, 300, d->o, 0x7777FF, 10+rnd(5), 400, 400);
@@ -572,7 +596,7 @@ namespace game
                         }
                         break;
                     case APT_PRETRE:
-                        if(d->abilitymillis[ABILITY_2]) particle_fireball(centerplayerpos , 16.0f, PART_SHOCKWAVE, 5, 0xFFFF00, 16.0f);
+                        if(d->abilitymillis[ABILITY_2]) particle_fireball(center , 16.0f, PART_SHOCKWAVE, 5, 0xFFFF00, 16.0f);
                         break;
                     case APT_VIKING:
                         if(d->boostmillis[B_RAGE] && rndevent(97) && (d!=hudplayer() || thirdperson)) particle_splash(PART_SMOKE, 2, 150, d->o, 0xFF3300, 12+rnd(5), 400, 200);
@@ -587,14 +611,6 @@ namespace game
                 }
 
                 if(d->boostmillis[B_JOINT] && rndevent(93)) regularflame(PART_SMOKE, d->abovehead().add(vec(-12, 5, -19)), 2, 3, 0x888888, 1, 1.6f, 50.0f, 1000.0f, -10);
-                if(d->armourtype==A_ASSIST && d->armour>0)
-                {
-                    if(d->armour<1500 && rndevent(93))
-                    {
-                        regularflame(PART_SMOKE, centerplayerpos, 15, 3, d->armour<750 ? 0x222222 : 0x888888, 1, d->armour<750 ? 7.f : 5.f, 50.0f, 1500.0f, -10);
-                        if(d->armour<1000) particle_splash(PART_FIRE_BALL, d->armour<500 ? 2 : 1, 500, centerplayerpos, 0x992200, d->armour<500 ? 5.f : 3.f, 50, -20);
-                    }
-                }
             }
         }
         loopv(ragdolls)
@@ -719,8 +735,7 @@ namespace game
         if(d->muzzle.x >= 0) d->muzzle = calcavatarpos(d->muzzle, 12);
         if(d->balles.x >= 0) d->balles = calcavatarpos(d->balles, 12);
 
-        if(!d->armour || d->armourtype<A_WOOD || d->armourtype>A_ASSIST) return;
-        else
+        if(d->armour && d->armourtype >= A_WOOD && d->armourtype < NUMSHIELDS)
         {
             vec sway2;
             vecfromyawpitch(d->yaw, 0, 0, 1, sway2);
@@ -728,18 +743,7 @@ namespace game
             sway2.mul((swayside/swaydiv)*cosf(steps));
             sway2.z += (swayup/swaydiv)*(fabs(sinf(steps)) - 1);
             if(d->armourtype==A_ASSIST || !gfx::zoom) sway2.add(swaydir).add(d->o);
-
-            rendermodel(gfx::getshielddir(d->armourtype, d->armour, true), anim, sway2, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
-
-            if(d->armourtype!=A_ASSIST) return;
-            modelattach a[2];
-            d->assist = vec(-1, -1, -1);
-            a[0] = modelattach("tag_assist", &d->assist);
-            rendermodel("hudshield/armureassistee/tag", anim, sway2, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
-            if(d->assist.x >= 0) d->assist = calcavatarpos(d->assist, 12);
-
-            if(d->armour<1500) {switch(rnd(d->armour<1000 ? 8 : 14)){case 0: regularflame(PART_SMOKE, d->assist, 15, 3, d->armour<750 ? 0x333333 : 0x888888, 1, 3.3f, 50.0f, 1000.0f, -10);}}
-            if(d->armour<1000) {switch(rnd(d->armour<600 ? 8 : 14)){case 0: particle_splash(PART_FIRE_BALL,  1, 500, d->assist.add(vec(rnd(6)-rnd(11), rnd(6)-rnd(11), rnd(6)-rnd(11))), 0x992200, 2.5f, 70, -20);}}
+            rendermodel(getShieldDir(d->armourtype, d->armour, true), anim, sway2, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
         }
     }
 

@@ -433,26 +433,4 @@ namespace gfx
         fullbrightmodels = 0;
         setShroomsEfx(false);
     }
-
-    static const struct armourinfo { int armoursteps; const char *armournames;} armours[] = { { 150, "wood/"}, { 250, "iron/"}, { 400, "gold/"}, { 300, "magnet/"}, { 600, "power/"} };
-
-    char *getshielddir(int armourtype, int armourval, bool hud, bool preload) //récupère l'id d'un bouclier
-    {
-        static char dir[64];
-        int armourvaldir = 20;
-
-        if(!preload)
-        {
-            loopi(4)
-            {
-                if(armourval < armours[armourtype].armoursteps) break;
-                armourval -= armours[armourtype].armoursteps;
-                armourvaldir += 20;
-            }
-        }
-
-        if(armourtype==A_ASSIST && hud) sprintf(dir, "%s%d", "hudshield/power/", preload ? armourval : armourvaldir);
-        else if(armourtype!=A_ASSIST) sprintf(dir, "%s%s%d", hud ? "hudshield/" : "shields/", armours[armourtype].armournames, preload ? armourval : armourvaldir);
-        return dir;
-    }
 }

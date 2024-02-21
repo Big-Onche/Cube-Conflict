@@ -110,7 +110,7 @@ enum { GUN_ELEC = 0, GUN_PLASMA, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_M32, G
        GUN_S_NUKE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_S_CAMPOUZE,
        GUN_CAC349, GUN_CACMARTEAU, GUN_CACMASTER, GUN_CACFLEAU,
        GUN_KAMIKAZE, GUN_ASSISTXPL, GUN_CACNINJA, NUMGUNS };
-enum { A_WOOD = 0, A_IRON, A_GOLD, A_MAGNET, A_ASSIST };
+enum { A_WOOD = 0, A_IRON, A_GOLD, A_MAGNET, A_ASSIST, NUMSHIELDS};
 enum { B_ROIDS = 0, B_SHROOMS, B_EPO, B_JOINT, B_RAGE, NUMBOOSTS};
 enum { ACT_IDLE = 0, ACT_SHOOT, NUMACTS };
 enum {  ATK_RAIL_SHOOT = 0, ATK_PULSE_SHOOT,
@@ -453,7 +453,7 @@ static const struct guninfo { const char *ident, *file, *vwep; int maxweappossid
 enum {APT_SOLDAT = 0, APT_MEDECIN, APT_AMERICAIN, APT_NINJA, APT_VAMPIRE, APT_MAGICIEN, APT_KAMIKAZE, APT_FAUCHEUSE, APT_PHYSICIEN, APT_CAMPEUR, APT_ESPION, APT_PRETRE, APT_VIKING, APT_JUNKIE, APT_SHOSHONE, NUMAPTS};
 
 struct ability { const int manacost, duration, cooldown, snd; };
-static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt_vitesse; const char *apt_nomFR, *apt_nomEN; ability abilities[3];} aptitudes[NUMAPTS] =
+static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precision, apt_vitesse; const char *apt_nomFR, *apt_nomEN; ability abilities[3]; } aptitudes[NUMAPTS] =
 {   // classe stats           // classe name               // ability 1               // ability 2                // ability 3
     { 105,  105,  105,   105, "Soldat",     "Soldier",   { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 0 APT_SOLDAT
     {  90,  115,   95,   105, "Médecin",    "Medic",     { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 1 APT_MEDECIN
@@ -470,6 +470,16 @@ static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precisio
     { 100,  120,   60,    95, "Viking",     "Viking",    { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 12 APT_VIKING
     { 100,  110,   85,    90, "Junkie",     "Junkie",    { {0,     0,    0,     - 1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },  // 13 APT_JUNKIE
     { 100,  100,   75,   100, "Shoshone",   "Shoshone",  { {50, 7500, 7500, S_SHO_1}, {50,  7500, 7500, S_SHO_2}, {50, 7500,  7500, S_SHO_3} } }   // 14 APT_SHOSHONE
+};
+
+
+static const struct armourInfo { const char *name; int absorb, max; } armours[NUMSHIELDS] =
+{
+    { "wood",    25,  750 },
+    { "iron",    50, 1250 },
+    { "gold",    75, 2000 },
+    { "magnet", 100, 1500 },
+    { "power",   85, 3000 }
 };
 
 #include "ai.h"
@@ -529,9 +539,9 @@ struct gamestate
 
             case I_IRONSHIELD: return haspowerarmor ? armour<3000 : armour < (aptitude==APT_SOLDAT ? 1750 : is.max);
 
-            case I_MAGNETSHIELD: return haspowerarmor ? armour<3000 : armour < (aptitude==APT_SOLDAT ? 2500 : is.max);
-
             case I_GOLDSHIELD: return haspowerarmor ? armour<3000 : armour < (aptitude==APT_SOLDAT ? 2750 : is.max);
+
+            case I_MAGNETSHIELD: return haspowerarmor ? armour<3000 : armour < (aptitude==APT_SOLDAT ? 2500 : is.max);
 
             case I_POWERARMOR: return !haspowerarmor;
 
@@ -670,8 +680,7 @@ struct gamestate
 
         if(m_random) // random weapon mutator
         {
-            int weapon = GUN_LANCEFLAMMES;
-            //int weapon = rnd(17);
+            int weapon = rnd(17);
             baseammo(weapon);
             selectedWeapon = weapon;
         }
@@ -712,30 +721,22 @@ struct gamestate
         addSuperWeapon(playerClasse, gamemode);
     }
 
-    // just subtract damage here, can set death, etc. later in code calling this
-    int dodamage(int damage, int aptitude, int aptisort)
+    int dodamage(int damage, int aptitude, int aptisort) // just subtract damage here, can set death, etc. later in code calling this
     {
-        int absorbfactor = 0;
-        switch(armourtype)
+        if(armourtype >= 0 || armourtype < NUMSHIELDS)
         {
-            case A_WOOD: absorbfactor=25; break;
-            case A_IRON: absorbfactor=50; break;
-            case A_GOLD: absorbfactor=75; break;
-            case A_MAGNET: absorbfactor=100; break;
-            case A_ASSIST: absorbfactor=85; break;
-        }
+            int ad = damage*(armours[A_WOOD + armourtype].absorb) / 100.f; // let armour absorb when possible
 
-        int ad = damage*(absorbfactor)/100.f; // let armour absorb when possible
-
-        if(damage>0)
-        {
-            if(ad>armour) ad = armour;
-            if(aptitude==8 && aptisort>0 && armour>0) armour = min(armour+ad, armourtype==A_WOOD ? 750 : armourtype==A_IRON ? 1250 : armourtype==A_GOLD ? 2000 : armourtype==A_MAGNET ? 1500 : 3000);
-            else armour -= ad;
+            if(damage > 0)
+            {
+                if(ad > armour) ad = armour;
+                if(aptitude==APT_PHYSICIEN && aptisort && armour) armour = min(armour+ad, armours[A_WOOD + armourtype].max);
+                else armour -= ad;
+            }
+            damage -= ad;
+            health -= damage;
+            return damage;
         }
-        damage -= ad;
-        health -= damage;
-        return damage;
     }
 
     int doregen(int damage)
@@ -791,7 +792,7 @@ struct gameent : dynent, gamestate
     ai::aiinfo *ai;
     int ownernum, lastnode;
 
-    vec muzzle, weed, balles, assist;
+    vec muzzle, weed, balles;
 
     gameent() : entityId(GlobalIdGenerator::getNewId()), weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0),
                 lifesequence(0), respawned(-1), suicided(-1), lastpain(0), lastfootstep(0), killstreak(0), frags(0), flags(0), deaths(0),
