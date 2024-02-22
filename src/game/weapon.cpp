@@ -246,9 +246,9 @@ namespace game
         }
     }
 
-    const std::string& getBouncerDir(int type, int variant)
+    const char *getBouncerDir(int type, int variant)
     {
-        return bouncersPaths[std::make_pair(type, variant)];
+        return bouncersPaths[std::make_pair(type, variant)].c_str();
     }
 
     void newbouncer(const vec &from, const vec &to, bool local, int id, gameent *owner, int type, int lifetime, int speed)
@@ -1477,8 +1477,8 @@ namespace game
         loopi(NUMBOUNCERS)
         {
             bool hasVariants = bouncers[i].variants;
-            if(!hasVariants) preloadmodel(getBouncerDir(i, 0).c_str());
-            else { loopj(bouncers[i].variants) preloadmodel(getBouncerDir(i, j + 1).c_str()); }
+            if(!hasVariants) preloadmodel(getBouncerDir(i, 0));
+            else { loopj(bouncers[i].variants) preloadmodel(getBouncerDir(i, j + 1)); }
         }
     }
 
@@ -1498,11 +1498,11 @@ namespace game
             else if (isPaused)
             {
                 vectoyawpitch(vel, yaw, pitch);
-                bnc.lastyaw = yaw + 75 + rnd(31);
+                yaw += bnc.bounces < 5 ? 75 + rnd(31) : 90;
                 bnc.lastpitch = pitch;
             }
 
-            rendermodel(getBouncerDir(bnc.bouncetype, bnc.variant).c_str(), ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, 0, MDL_CULL_VFC|MDL_CULL_EXTDIST|MDL_CULL_OCCLUDED);
+            rendermodel(getBouncerDir(bnc.bouncetype, bnc.variant), ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, 0, MDL_CULL_VFC|MDL_CULL_EXTDIST|MDL_CULL_OCCLUDED);
 
             if(!isPaused && ((bnc.vel.magnitude() > 25.f && bnc.bounces < 5) || bnc.bouncetype == BNC_GRENADE))
             {

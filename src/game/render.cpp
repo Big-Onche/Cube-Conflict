@@ -201,11 +201,20 @@ namespace game
         addmsg(N_SENDDANSE, "ri", player1->customdanse);
     }
 
-    const char *getWeaponDir(int weapon, bool hud)
+    std::map<std::pair<int, bool>, std::string> weaponsPaths;
+
+    void initializeWeaponsPaths()
     {
-        static char dir[32];
-        snprintf(dir, sizeof(dir), "weapons/%s/%s", hud ? "hud" : "ext", guns[weapon].name);
-        return dir;
+        for(int weapon = 0; weapon < NUMGUNS; ++weapon)
+        {
+            weaponsPaths[std::make_pair(weapon, true)] = std::string("weapons/hud/") + guns[weapon].name;
+            weaponsPaths[std::make_pair(weapon, false)] = std::string("weapons/ext/") + guns[weapon].name;
+        }
+    }
+
+    const char* getWeaponDir(int weapon, bool hud)
+    {
+        return weaponsPaths[std::make_pair(weapon, hud)].c_str();
     }
 
     char *getShieldDir(int type, int health, bool hud = false)
@@ -837,17 +846,13 @@ namespace game
 
     void preloadweapons()
     {
+        initializeWeaponsPaths();
         loopi(NUMGUNS)
         {
-            const char *file = guns[i].name;
-            if(!file) continue;
-            string fname;
-
-            formatstring(fname, "weapons/hud/%s", file);
-            preloadmodel(fname);
-
-            formatstring(fname, "weapons/ext/%s", file);
-            preloadmodel(fname);
+            preloadmodel(getWeaponDir(i));
+            preloadmodel(getWeaponDir(i, true));
+            conoutf("Preloaded: %s", getWeaponDir(i));
+            conoutf("Preloaded: %s", getWeaponDir(i, true));
         }
     }
 
