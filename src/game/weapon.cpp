@@ -230,12 +230,25 @@ namespace game
         { "scrap",              1.5f, 0.7f,  3,  750, S_B_SCRAP,        160,    0              }
     };
 
-    const char *getBouncerDir(int type, int variant)
+    std::map<std::pair<int, int>, std::string> bouncersPaths;
+
+    void initializeBouncersPaths() // store the path of all bouncers and their variants
     {
-        static char dir[32];
-        if(variant) snprintf(dir, sizeof(dir), "bouncers/%s/%d", bouncers[type].name, variant);
-        else snprintf(dir, sizeof(dir), "bouncers/%s", bouncers[type].name);
-        return dir;
+        for (int type = 0; type < NUMBOUNCERS; ++type)
+        {
+            for (int variant = 0; variant <= bouncers[type].variants; ++variant)
+            {
+                char dir[32];
+                if(variant) snprintf(dir, sizeof(dir), "bouncers/%s/%d", bouncers[type].name, variant);
+                else snprintf(dir, sizeof(dir), "bouncers/%s", bouncers[type].name);
+                bouncersPaths[std::make_pair(type, variant)] = dir;
+            }
+        }
+    }
+
+    const std::string& getBouncerDir(int type, int variant)
+    {
+        return bouncersPaths[std::make_pair(type, variant)];
     }
 
     void newbouncer(const vec &from, const vec &to, bool local, int id, gameent *owner, int type, int lifetime, int speed)
@@ -414,17 +427,9 @@ namespace game
 
     VARP(blood, 0, 1, 1);
 
-    vec dest(vec radius)
-    {
-        int x = (radius.x ? rnd((int)radius.x) - radius.x / 2 : 0);
-        int y = (radius.y ? rnd((int)radius.y) - radius.y / 2 : 0);
-        int z = (radius.z ? rnd((int)radius.z) - radius.z / 2 : 0);
-        return vec(x, y, z);
-    }
-
     void spawnbouncer(const vec &p, const vec &vel, gameent *d, int type, int speed, int lifetime, bool frommonster)
     {
-        if(camera1->o.dist(p) > bouncers[type].cullDist) return; // culling distant ones
+        if((camera1->o.dist(p) > bouncers[type].cullDist) && type!=BNC_GRENADE) return; // culling distant ones, except grenades, grenades are important
 
         vec to = vec(0, 0, 0);
         if(!speed) speed = 50 + rnd(20);
@@ -1460,7 +1465,7 @@ namespace game
             {
                 vec pos(bnc.o);
                 pos.add(vec(bnc.offset).mul(bnc.offsetmillis/float(OFFSETMILLIS)));
-                if(bnc.bouncetype==BNC_GRENADE) adddynlight(pos, 40, vec(0.5f, 0.5f, 2.0f));
+                if(bnc.bouncetype==BNC_GRENADE) adddynlight(pos, 40, vec(0.5f, 0.5f, 2.0f), 0, 0, L_NOSHADOW);
                 else adddynlight(pos, 115, vec(0.25f, 0.12f, 0.0f), 0, 0, L_VOLUMETRIC|L_NOSHADOW|L_NOSPEC);
             }
         }
@@ -1468,22 +1473,12 @@ namespace game
 
     void preloadbouncers()
     {
+        initializeBouncersPaths();
         loopi(NUMBOUNCERS)
         {
             bool hasVariants = bouncers[i].variants;
-            if(!hasVariants)
-            {
-                preloadmodel(getBouncerDir(i, 0));
-                conoutf("Preloaded: %s", getBouncerDir(i, 0));
-            }
-            else
-            {
-                loopj(bouncers[i].variants)
-                {
-                    preloadmodel(getBouncerDir(i, j + 1));
-                    conoutf("Preloaded: %s", getBouncerDir(i, j + 1));
-                }
-            }
+            if(!hasVariants) preloadmodel(getBouncerDir(i, 0).c_str());
+            else { loopj(bouncers[i].variants) preloadmodel(getBouncerDir(i, j + 1).c_str()); }
         }
     }
 
@@ -1507,7 +1502,7 @@ namespace game
                 bnc.lastpitch = pitch;
             }
 
-            rendermodel(getBouncerDir(bnc.bouncetype, bnc.variant), ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, 0, MDL_CULL_VFC|MDL_CULL_EXTDIST|MDL_CULL_OCCLUDED);
+            rendermodel(getBouncerDir(bnc.bouncetype, bnc.variant).c_str(), ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, 0, MDL_CULL_VFC|MDL_CULL_EXTDIST|MDL_CULL_OCCLUDED);
 
             if(!isPaused && ((bnc.vel.magnitude() > 25.f && bnc.bounces < 5) || bnc.bouncetype == BNC_GRENADE))
             {

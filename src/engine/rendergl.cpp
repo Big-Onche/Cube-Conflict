@@ -2738,7 +2738,7 @@ void writecrosshairs(stream *f)
     f->printf("\n");
 }
 
-float chmod = 1000.f;
+float crosshairShrink = 1000.f;
 
 void drawcrosshair(int w, int h)
 {
@@ -2769,8 +2769,8 @@ void drawcrosshair(int w, int h)
             crosshair = crosshairs[index];
         }
 
-        gfx::zoom ? chmod = max(chmod - 1, 1000.f) : chmod = min(chmod + 1, 600.f);
-        chsize = crosshairsize*w/chmod;
+        gfx::zoom ? crosshairShrink = max(crosshairShrink - 1, 1000.f) : crosshairShrink = min(crosshairShrink + 1, 600.f);
+        chsize = (crosshairsize * w) / crosshairShrink;
     }
     if(crosshair->type&Texture::ALPHA) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     else glBlendFunc(GL_ONE, GL_ONE);
