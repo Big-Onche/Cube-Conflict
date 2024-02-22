@@ -2280,7 +2280,7 @@ namespace server
         servstate &as = actor->state;
 
         //Calcul des dommages de base
-        damage = ((damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[target->aptitude].apt_resistance))/(ts.boostmillis[B_JOINT] ? (target->aptitude==APT_JUNKIE ? 1.875f : 1.25f) : 1.f);
+        damage = ((damage*classes[actor->aptitude].damage)/(classes[target->aptitude].resistance))/(ts.boostmillis[B_JOINT] ? (target->aptitude==APT_JUNKIE ? 1.875f : 1.25f) : 1.f);
 
         //Dommages spéciaux d'aptitudes
         switch(actor->aptitude)
@@ -2364,7 +2364,7 @@ namespace server
     {
         if(actor==target || isteam(target->team, actor->team)) return;
 
-        damage = ((damage*100)/aptitudes[target->aptitude].apt_resistance)/2.f;
+        damage = ((damage*100)/classes[target->aptitude].resistance)/2.f;
         if(target->state.abilitymillis[game::ABILITY_3] && target->aptitude==APT_MAGICIEN) damage /= 5.f;
         if(target->state.boostmillis[B_JOINT]) damage /= 1.25f;
 
@@ -3296,7 +3296,7 @@ namespace server
                 loopk(3) p.get();
                 int mag = p.get(); if(flags&(1<<3)) mag |= p.get()<<8;
                 int dir = p.get(); dir |= p.get()<<8;
-                vec vel = vec((dir%360)*RAD, (clamp(dir/360, 0, 180)-90)*RAD).mul(mag/DVELF);
+                //vec vel = vec((dir%360)*RAD, (clamp(dir/360, 0, 180)-90)*RAD).mul(mag/DVELF);
                 if(flags&(1<<4))
                 {
                     p.get(); if(flags&(1<<5)) p.get();
@@ -3306,8 +3306,8 @@ namespace server
                 {
                     if((!ci->local || demorecord || hasnonlocalclients()) && (cp->state.state==CS_ALIVE || cp->state.state==CS_EDITING))
                     {
-                        if(!ci->local && !m_edit && max(vel.magnitude2(), (float)fabs(vel.z)) >= 180)
-                            cp->setexceeded();
+                        //if(!ci->local && !m_edit && max(vel.magnitude2(), (float)fabs(vel.z)) >= cp->state.boostmillis[B_EPO] ? 600 : 300)
+                        //    cp->setexceeded();
                         cp->position.setsize(0);
                         while(curmsg<p.length()) cp->position.add(p.buf[curmsg++]);
                     }
@@ -3612,9 +3612,9 @@ namespace server
             case N_REQABILITY:
             {
                 int ability = getint(p);
-                if(cq->state.mana < aptitudes[cq->aptitude].abilities[ability].manacost) return;
-                cq->state.mana -= aptitudes[cq->aptitude].abilities[ability].manacost;
-                cq->state.abilitymillis[ability] = aptitudes[cq->aptitude].abilities[ability].duration;
+                if(cq->state.mana < classes[cq->aptitude].abilities[ability].manacost) return;
+                cq->state.mana -= classes[cq->aptitude].abilities[ability].manacost;
+                cq->state.abilitymillis[ability] = classes[cq->aptitude].abilities[ability].duration;
                 sendf(-1, 1, "ri4", N_GETABILITY, cq->clientnum, ability, cq->state.abilitymillis[ability]);
                 break;
             }

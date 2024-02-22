@@ -232,7 +232,7 @@ namespace game
 
     std::map<std::pair<int, int>, std::string> bouncersPaths;
 
-    void initializeBouncersPaths() // store the path of all bouncers and their variants
+    void initBouncersPaths() // store the path of all bouncers and their variants
     {
         for (int type = 0; type < NUMBOUNCERS; ++type)
         {
@@ -1473,7 +1473,6 @@ namespace game
 
     void preloadbouncers()
     {
-        initializeBouncersPaths();
         loopi(NUMBOUNCERS)
         {
             bool hasVariants = bouncers[i].variants;

@@ -1098,6 +1098,11 @@ namespace game
     extern void swayhudgun(int curtime);
     extern vec hudgunorigin(int gun, const vec &from, const vec &to, gameent *d);
     extern const char *getWeaponDir(int weapon, bool hud = false);
+    extern void initWeaponsPaths();
+    extern void initCapesPaths();
+    extern void initGravesPaths();
+    extern void initBouncersPaths();
+    extern void initAssetsPaths();
 }
 
 namespace server

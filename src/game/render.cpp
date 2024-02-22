@@ -203,7 +203,7 @@ namespace game
 
     std::map<std::pair<int, bool>, std::string> weaponsPaths;
 
-    void initializeWeaponsPaths()
+    void initWeaponsPaths()
     {
         for(int weapon = 0; weapon < NUMGUNS; ++weapon)
         {
@@ -236,11 +236,11 @@ namespace game
 
     std::map<std::pair<int, bool>, std::string> capesPaths;
 
-    void initializeCapesPaths()
+    void initCapesPaths()
     {
         loopi(sizeof(capes)/sizeof(capes[0]))
         {
-            capesPaths[std::make_pair(i, true)] = std::string("capes/enemy/") + capes[i].name;
+            capesPaths[std::make_pair(i, true)] = std::string("capes/") + capes[i].name + std::string("/enemy");
             capesPaths[std::make_pair(i, false)] = std::string("capes/") + capes[i].name;
         }
     }
@@ -252,7 +252,7 @@ namespace game
 
     std::map<int, std::string> gravesPaths;
 
-    void initializeGravesPaths()
+    void initGravesPaths()
     {
         loopi(sizeof(graves)/sizeof(graves[0])) gravesPaths[i] = std::string("graves/") + graves[i].name;
     }
@@ -268,12 +268,18 @@ namespace game
         {   // armour health loop (i)
             loopj(5)
             {   // armour type loop (j)
-                if(j!=A_ASSIST) preloadmodel(getShieldDir(j, (armours[j].max / 5) * i, false));
+                if(j!=A_ASSIST)
+                {
+                    preloadmodel(getShieldDir(j, (armours[j].max / 5) * i, false));
+                    conoutf("Preloaded %s", getShieldDir(j, (armours[j].max / 5) * i, false));
+                }
+
+
                 preloadmodel(getShieldDir(j, (armours[j].max / 5) * i, true));
+                conoutf("Preloaded %s", getShieldDir(j, (armours[j].max / 5) * i, true));
             }
         }
 
-        initializeCapesPaths();
         loopi(sizeof(capes) / sizeof(capes[0])) // Preloading all capes
         {
             preloadmodel(getCapeDir(i));
@@ -281,10 +287,7 @@ namespace game
         }
 
         loopi(sizeof(classes) / sizeof(classes[0])) preloadmodel(classes[i].hatDir); // Preloading all classe's hats
-
-        initializeGravesPaths();
         loopi(sizeof(graves) / sizeof(graves[0])) preloadmodel(getGraveDir(i)); // Preloading all graves
-
         loopi(4) getdisguisement(i); //Preloading all spy's disguisement
 
         preloadmodel("smileys/armureassistee"); //Preloading powered armor playermodel
@@ -332,6 +335,7 @@ namespace game
         if(player1->customtombe==10) unlockAchievement(ACH_FUCKYOU);
     });
 
+    bool validClasse(int i) { return i >= 0 && i <= NUMCLASSES; }
     bool validCape(int i) { return i >= 0 && i <= NUMCAPES; }
     bool validGrave(int i) { return i >= 0 && i <= NUMGRAVES; }
 
@@ -454,8 +458,7 @@ namespace game
         if(d->boostmillis[B_EPO])   a[ai++] = modelattach("tag_boost2", "boosts/epo", 0, 0);
 
         /////////////////////////// Classe's hat ///////////////////////////
-        defformatstring(mdldir, "hats/%d", d->aptitude);
-        a[ai++] = modelattach("tag_hat", mdldir, 0, 0);
+        if(validClasse(d->aptitude)) a[ai++] = modelattach("tag_hat", classes[d->aptitude].hatDir, 0, 0);
 
         /////////////////////////// Player's cape ///////////////////////////
         if(validCape(d->customcape))
@@ -854,12 +857,19 @@ namespace game
 
     void preloadweapons()
     {
-        initializeWeaponsPaths();
         loopi(NUMGUNS)
         {
             preloadmodel(getWeaponDir(i));
             preloadmodel(getWeaponDir(i, true));
         }
+    }
+
+    void initAssetsPaths()
+    {
+        initWeaponsPaths();
+        initCapesPaths();
+        initGravesPaths();
+        initBouncersPaths();
     }
 
     void preload()
