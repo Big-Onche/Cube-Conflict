@@ -102,7 +102,7 @@ namespace game
         {
             case T_CLASSE: return (seed&0xFFFF)%(sizeof(aptitudes)/sizeof(aptitudes[0]));
             case T_PLAYERMODEL: return (seed&0xFFFF)%(sizeof(playermodels)/sizeof(playermodels[0]));
-            case T_CAPE: return (seed&0xFFFF)%(sizeof(customscapes)/sizeof(customscapes[0]));
+            case T_CAPE: return (seed&0xFFFF)%(sizeof(capes)/sizeof(capes[0]));
             case T_GRAVE: return (seed&0xFFFF)%(sizeof(customstombes)/sizeof(customstombes[0]));
             case T_TAUNT: return 0; //(seed&0xFFFF)%(sizeof(customsdance)/sizeof(customsdance[0]));
             default: return 0;
@@ -234,11 +234,20 @@ namespace game
         return dir;
     }
 
-    const char *getCapeDir(int cape, bool enemy)
+    std::map<std::pair<int, bool>, std::string> capesPaths;
+
+    void initializeCapesPaths()
     {
-        static char dir[32];
-        snprintf(dir, sizeof(dir), "capes/%s%s", customscapes[cape].ident, enemy ? "/enemy" : "");
-        return dir;
+        for(int cape = 0; cape < NUMCAPES; ++cape)
+        {
+            capesPaths[std::make_pair(cape, true)] = std::string("capes/enemy/") + capes[cape].name;
+            capesPaths[std::make_pair(cape, false)] = std::string("capes/") + capes[cape].name;
+        }
+    }
+
+    const char* getCapeDir(int cape, bool enemy = false)
+    {
+        return capesPaths[std::make_pair(cape, enemy)].c_str();
     }
 
     const char *getGraveDir(int grave)
@@ -259,10 +268,11 @@ namespace game
             }
         }
 
-        loopi(sizeof(customscapes) / sizeof(customscapes[0])) // Preloading all capes
+        initializeCapesPaths();
+        loopi(sizeof(capes) / sizeof(capes[0])) // Preloading all capes
         {
+            preloadmodel(getCapeDir(i));
             preloadmodel(getCapeDir(i, true));
-            preloadmodel(getCapeDir(i, false));
         }
 
         loopi(sizeof(aptitudes) / sizeof(aptitudes[0])) // Preloading all classe's hats
@@ -309,9 +319,9 @@ namespace game
 
     VAR(animoverride, -1, 0, NUMANIMS-1);
 
-    VARFP(player1_cape, 0, 0, sizeof(customscapes)/sizeof(customscapes[0])-1,
+    VARFP(player1_cape, 0, 0, sizeof(capes)/sizeof(capes[0])-1,
     {
-        if(!cape[player1_cape]) { conoutf(CON_ERROR, "\f3%s", readstr("Console_Shop_SmileyNotOwned")); playSound(S_ERROR); player1_cape=0; return; }
+        if(!cape[player1_cape]) { conoutf(CON_ERROR, "\f3%s", readstr("Console_Shop_SmileyNotOwned")); playSound(S_ERROR); player1_cape = 0; return; }
         addmsg(N_SENDCAPE, "ri", player1_cape);
         player1->customcape = player1_cape;
     });
@@ -452,7 +462,7 @@ namespace game
         /////////////////////////// Player's cape ///////////////////////////
         if(validCape(d->customcape))
         {
-            a[ai++] = modelattach("tag_cape", getCapeDir(d->customcape, d->team==player1->team ? false : true), 0, 0);
+            a[ai++] = modelattach("tag_cape", getCapeDir(d->customcape, d->team == player1->team ? false : true), 0, 0);
         }
 
         if(d!=player1) flags |= MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY;
@@ -851,8 +861,6 @@ namespace game
         {
             preloadmodel(getWeaponDir(i));
             preloadmodel(getWeaponDir(i, true));
-            conoutf("Preloaded: %s", getWeaponDir(i));
-            conoutf("Preloaded: %s", getWeaponDir(i, true));
         }
     }
 

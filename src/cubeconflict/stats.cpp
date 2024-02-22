@@ -129,7 +129,7 @@ void writeSave() // we write the poorly encrypted value for all stat
 
     loopi(NUMSTATS) savefile->printf("%s\n", encryptSave(tempformatstring("%s=%d", statslist[i].ident, stat[i])));
     loopi(NUMSMILEYS) savefile->printf("%s\n", encryptSave(tempformatstring("smiley_%s=%d", customsmileys[i].ident, smiley[i] ? max(rnd(256), 1) : 0)));
-    loopi(NUMCAPES) savefile->printf("%s\n", encryptSave(tempformatstring("cape_%s=%d", customscapes[i].ident, cape[i] ? max(rnd(256), 1) : 0)));
+    loopi(NUMCAPES) savefile->printf("%s\n", encryptSave(tempformatstring("cape_%s=%d", capes[i].name, cape[i] ? max(rnd(256), 1) : 0)));
     loopi(NUMGRAVES) savefile->printf("%s\n", encryptSave(tempformatstring("grave_%s=%d", customstombes[i].ident, grave[i] ? max(rnd(256), 1) : 0)));
     loopi(NUMACHS) savefile->printf("%s\n", encryptSave(tempformatstring("%s=%d", achievementNames[i], achievement[i] ? max(rnd(256), 1) : 0)));
     savefile->close();
@@ -198,7 +198,7 @@ void loadSave()
             {
                 loopi(NUMSTATS) { if(!strcmp(key, statslist[i].ident)) { stat[i] = value; break; } }
                 loopi(NUMSMILEYS){ if(!strcmp(key, tempformatstring("smiley_%s", customsmileys[i].ident))) { smiley[i] = value; break; } }
-                loopi(NUMCAPES) { if(!strcmp(key, tempformatstring("cape_%s", customscapes[i].ident))) { cape[i] = value; break; } }
+                loopi(NUMCAPES) { if(!strcmp(key, tempformatstring("cape_%s", capes[i].name))) { cape[i] = value; break; } }
                 loopi(NUMGRAVES) { if(!strcmp(key, tempformatstring("grave_%s", customstombes[i].ident))) { grave[i] = value; break; } }
                 loopi(NUMACHS) { if(!strcmp(key, achievementNames[i])) { achievement[i] = value; break; } }
             }

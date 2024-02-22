@@ -1495,7 +1495,7 @@ namespace game
             pitch = -bnc.roll;
 
             if(vel.magnitude() <= 3.f) {yaw = bnc.lastyaw; pitch = bnc.lastpitch;}
-            else if (isPaused)
+            else if (!isPaused)
             {
                 vectoyawpitch(vel, yaw, pitch);
                 yaw += bnc.bounces < 5 ? 75 + rnd(31) : 90;
