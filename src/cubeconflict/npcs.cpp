@@ -1,6 +1,7 @@
 // pimped old monster.cpp from sauerbraten: implements AI for single player monsters, currently client only (now with soft coded monsters!)
 #include "gfx.h"
 #include "stats.h"
+#include "customs.h"
 
 #define MAXNPCS 64 //max amount of different NPCs & monsters for one map/game mode, I think it will be enough
 
@@ -452,9 +453,9 @@ namespace game
                 {
                     switch(mtype)
                     {
-                        case M_KEVIN: case M_DYLAN: loopi(2+rnd(3)) spawnbouncer(o, vec(0, 0, 0), this, BNC_GIBS); break;
-                        case M_UFO: loopi(25) spawnbouncer(o, vec(0, 0, 0), this, BNC_GRENADE, 5000+rnd(2000), true); break;
-                        case M_ARMOR: loopi(10+rnd(5)) spawnbouncer(o, vec(0, 0, 0), this, BNC_ROBOT); break;
+                        case M_KEVIN: case M_DYLAN: loopi(2+rnd(3)) spawnbouncer(o, vec(0, 0, 0), this, BNC_PIXEL); break;
+                        case M_UFO: loopi(25) spawnbouncer(o, vec(0, 0, 0), this, BNC_GRENADE, 100, 5000+rnd(2000), true); break;
+                        case M_ARMOR: loopi(10+rnd(5)) spawnbouncer(o, vec(0, 0, 0), this, BNC_SCRAP, 300); break;
                     }
                 }
             }
@@ -749,28 +750,28 @@ namespace game
                     }
 
                     //////////////////////////////////// Weapon rendering ////////////////////////////////////////////////////////////////////////
-                    int vanim = ANIM_VWEP_IDLE|ANIM_LOOP, vtime = 0;
-                    if(m.lastaction && m.lastattack >= 0 && attacks[m.lastattack].gun==m.gunselect && lastmillis < m.lastaction+250)
+                    if(validgun(m.gunselect))
                     {
-                        vanim = ANIM_VWEP_SHOOT;
-                        vtime = m.lastaction;
-                    }
+                        int vanim = ANIM_VWEP_IDLE|ANIM_LOOP, vtime = 0;
+                        if(m.lastaction && m.lastattack >= 0 && attacks[m.lastattack].gun==m.gunselect && lastmillis < m.lastaction+250)
+                        {
+                            vanim = ANIM_VWEP_SHOOT;
+                            vtime = m.lastaction;
+                        }
 
-                    a[ai++] = modelattach("tag_weapon", guns[m.gunselect].vwep, vanim, vtime);
+                        a[ai++] = modelattach("tag_weapon", getWeaponDir(m.gunselect), vanim, vtime);
 
-                    if(guns[m.gunselect].vwep)
-                    {
                         m.muzzle = m.balles = vec(-1, -1, -1);
                         a[ai++] = modelattach("tag_muzzle", &m.muzzle);
                         a[ai++] = modelattach("tag_balles", &m.balles);
                     }
 
                     //////////////////////////////////// Other mdls rendering ////////////////////////////////////////////////////////////////////////
-                    if(npcs[m.mtype].shieldname) a[ai++] = modelattach("tag_shield", npcs[m.mtype].shieldname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-                    if(npcs[m.mtype].hatname) a[ai++] = modelattach("tag_hat", npcs[m.mtype].hatname, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-                    if(npcs[m.mtype].capename) a[ai++] = modelattach("tag_cape", npcs[m.mtype].capename, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-                    if(npcs[m.mtype].boost1name) a[ai++] = modelattach("tag_boost1", npcs[m.mtype].boost1name, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
-                    if(npcs[m.mtype].boost2name) a[ai++] = modelattach("tag_boost2", npcs[m.mtype].boost2name, ANIM_VWEP_IDLE|ANIM_LOOP, 0);
+                    if(npcs[m.mtype].shieldname) a[ai++] = modelattach("tag_shield", npcs[m.mtype].shieldname, 0, 0);
+                    if(npcs[m.mtype].hatname) a[ai++] = modelattach("tag_hat", npcs[m.mtype].hatname, 0, 0);
+                    if(npcs[m.mtype].capename) a[ai++] = modelattach("tag_cape", npcs[m.mtype].capename, 0, 0);
+                    if(npcs[m.mtype].boost1name) a[ai++] = modelattach("tag_boost1", npcs[m.mtype].boost1name, 0, 0);
+                    if(npcs[m.mtype].boost2name) a[ai++] = modelattach("tag_boost2", npcs[m.mtype].boost2name, 0, 0);
                 }
 
                 rendermodel(npcs[m.mtype].mdlname, anim, o, yaw, pitch, 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY, &m, a[0].tag ? a : NULL, basetime, 0, fade);

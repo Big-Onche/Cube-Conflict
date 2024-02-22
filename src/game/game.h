@@ -472,7 +472,6 @@ static const struct aptitudesinfo { int apt_degats, apt_resistance, apt_precisio
     { 100,  100,   75,   100, "Shoshone",   "Shoshone",  { {50, 7500, 7500, S_SHO_1}, {50,  7500, 7500, S_SHO_2}, {50, 7500,  7500, S_SHO_3} } }   // 14 APT_SHOSHONE
 };
 
-
 static const struct armourInfo { const char *name; int absorb, max; } armours[NUMSHIELDS] =
 {
     { "wood",    25,  750 },
@@ -1057,8 +1056,8 @@ namespace game
     extern bool intersect(dynent *d, const vec &from, const vec &to, float margin = 0, float &dist = intersectdist);
     extern dynent *intersectclosest(const vec &from, const vec &to, gameent *at, float margin = 0, float &dist = intersectdist);
     extern int temptrisfade;
-    enum { BNC_GRENADE, BNC_GIBS, BNC_DEBRIS, BNC_DOUILLES, BNC_BIGDOUILLES, BNC_CARTOUCHES, BNC_DOUILLESUZI, BNC_LIGHT, BNC_ROBOT, BNC_ROCKS};
-    extern void spawnbouncer(const vec &p, const vec &vel, gameent *d, int type, int lifetime = rnd(temptrisfade)+rnd(5000), bool frommonster = false);
+    enum {BNC_GRENADE = 0, BNC_PIXEL, BNC_ROCK, BNC_BIGROCK, BNC_CASING, BNC_BIGCASING, BNC_CARTRIDGE, BNC_SCRAP, BNC_LIGHT, NUMBOUNCERS};
+    extern void spawnbouncer(const vec &p, const vec &vel, gameent *d, int type, int speed = 0, int lifetime = rnd(temptrisfade)+rnd(5000), bool frommonster = false);
     extern void newbouncer(const vec &from, const vec &to, bool local, int id, gameent *owner, int type, int lifetime, int speed);
     extern void clearbouncers();
     extern void updatebouncers(int curtime);

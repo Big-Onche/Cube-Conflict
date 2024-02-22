@@ -30,6 +30,14 @@ ICOMMAND(setclass, "i", (int *i),
     }
 );
 
+ICOMMAND(setallclasses, "i", (int *enabled),
+    loopi(NUMAPTS)
+    {
+        if(!*enabled && i != game::player1->aptitude) disabledClasse[i] = true;
+        else disabledClasse[i] = false;
+    }
+);
+
 int getspyability;
 
 namespace game
@@ -48,7 +56,7 @@ namespace game
         }
 
         if(d==hudplayer()) playSound(S_SORTLANCE);
-        playSound(aptitudes[d->aptitude].abilities[ability].snd, nullsndpos ? NULL : &sndpos, 250, 100, SND_NOCULL|SND_FIXEDPITCH, d->entityId, PL_ABI_SND_1+ability);
+        playSound(aptitudes[d->aptitude].abilities[ability].snd, nullsndpos ? NULL : &sndpos, 250, 100, SND_NOCULL|SND_FIXEDPITCH, d->entityId, PL_ABI_1+ability);
         switch(ability) //here we play some one shot gfx effects
         {
             //case ABILITY_1:
@@ -70,7 +78,7 @@ namespace game
                     if(isteam(hudplayer()->team, d->team))
                     {
                         getspyability = totalmillis;
-                        playSound(S_SPY_3, d==hudplayer() ? NULL : &d->o, 3000, 50, SND_NOCULL|SND_FIXEDPITCH, d->entityId, PL_ABI_SND_3);
+                        playSound(S_SPY_3, d==hudplayer() ? NULL : &d->o, 3000, 50, SND_NOCULL|SND_FIXEDPITCH, d->entityId, PL_ABI_3);
                     }
                 }
             }
@@ -129,7 +137,7 @@ namespace game
             if(hasAbilityEnabled(d, i))
             {
                 vec playerVel = d->vel;
-                if(d!=hudplayer()) updateSoundPosition(d->entityId, d->o, playerVel.div(vec(75, 75, 75)), PL_ABI_SND_1+i);
+                if(d!=hudplayer()) updateSoundPosition(d->entityId, d->o, playerVel.div(75), PL_ABI_1+i);
             }
             else continue; // no need to go further in the loop if ability no enabled
 

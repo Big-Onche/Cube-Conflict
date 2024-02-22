@@ -559,15 +559,15 @@ namespace game
             {
                 vec center = d->o;
                 center.sub(vec(0, 0, 8));
-                if(d->health < 300 && rndevent(1)) spawnbouncer(d->o, vec(0,0,0), d, BNC_GIBS);
+                if(d->health < 300 && rndevent(1)) spawnbouncer(d->o, vec(0,0,0), d, BNC_PIXEL, 75);
                 if(d->health < 150 && rndevent(94)) regular_particle_splash(PART_BLOOD, 1, 9999, center, 0x60FFFF, 1.f+rnd(2), 50);
 
                 if(hasPowerArmor(d))
                 {
                     bool lowArmour = d->armour < 750;
-                    if(d->armour < 1500 && rndevent(lowArmour ? 98 : 95)) regularflame(PART_SMOKE, center, 15, 3, (lowArmour ? 0x222222 : 0x777777), 1, (lowArmour ? 2.5f : 2), 50, (lowArmour ? 3000 : 1750), -10, 3);
+                    if(d->armour < 1500 && rndevent(lowArmour ? 98 : 95)) regularflame(PART_SMOKE, center, 15, 3, (lowArmour ? 0x222222 : 0x777777), 1, (lowArmour ? 2.5f : 2), 50, (lowArmour ? 1750 : 1250), -10, 3);
                     if(d->armour < 1000 && rndevent(lowArmour ? 95 : 92)) particle_splash(PART_FIRE_BALL, (1 + lowArmour), 500, center, rnd(2) ? 0x992200 : 0x886622, (d->armour<500 ? 5 : 3), 50, -20);
-                    if(lowArmour && rndevent(1)) spawnbouncer(d->o, vec(0,0,0), d, BNC_ROBOT);
+                    if(lowArmour && rndevent(1)) spawnbouncer(d->o, vec(0,0,0), d, BNC_SCRAP, 50);
                 }
 
                 if(d!=hudplayer() && hudplayer()->state==CS_ALIVE)
