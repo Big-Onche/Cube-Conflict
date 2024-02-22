@@ -49,7 +49,6 @@ namespace game
 
     //////////////////////////////////// Tutorial ////////////////////////////////////////////////////////////////////////
 
-
     ICOMMAND(checkammo, "i", (int *gun), //checking if p1 has ammo for gun
         intret(player1->ammo[*gun]);
     );
