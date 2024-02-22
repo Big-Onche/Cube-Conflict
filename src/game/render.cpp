@@ -515,8 +515,7 @@ namespace game
 
         const char *mdlname = mdl.model[validteam(team) ? team : 0];
 
-        defformatstring(mdldir, "hats/%d", player1->aptitude);
-        a[ai++] = modelattach("tag_hat", mdldir, 0, 0);
+        a[ai++] = modelattach("tag_hat", classes[player1->aptitude].hatDir, 0, 0);
         a[ai++] = modelattach("tag_cape", getCapeDir(cape, !team), 0, 0);
 
         rendermodel(mdlname, anim, o, d->yaw, d->pitch, 0, NULL, d, a[0].tag ? a : NULL, 0, 0, 1, vec4(vec::hexcolor(color), 5));
