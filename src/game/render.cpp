@@ -100,10 +100,10 @@ namespace game
     {
         switch(trait)
         {
-            case T_CLASSE: return (seed&0xFFFF)%(sizeof(aptitudes)/sizeof(aptitudes[0]));
+            case T_CLASSE: return (seed&0xFFFF)%(sizeof(classes)/sizeof(classes[0]));
             case T_PLAYERMODEL: return (seed&0xFFFF)%(sizeof(playermodels)/sizeof(playermodels[0]));
             case T_CAPE: return (seed&0xFFFF)%(sizeof(capes)/sizeof(capes[0]));
-            case T_GRAVE: return (seed&0xFFFF)%(sizeof(customstombes)/sizeof(customstombes[0]));
+            case T_GRAVE: return (seed&0xFFFF)%(sizeof(graves)/sizeof(graves[0]));
             case T_TAUNT: return 0; //(seed&0xFFFF)%(sizeof(customsdance)/sizeof(customsdance[0]));
             default: return 0;
         }
@@ -238,10 +238,10 @@ namespace game
 
     void initializeCapesPaths()
     {
-        for(int cape = 0; cape < NUMCAPES; ++cape)
+        loopi(sizeof(capes)/sizeof(capes[0]))
         {
-            capesPaths[std::make_pair(cape, true)] = std::string("capes/enemy/") + capes[cape].name;
-            capesPaths[std::make_pair(cape, false)] = std::string("capes/") + capes[cape].name;
+            capesPaths[std::make_pair(i, true)] = std::string("capes/enemy/") + capes[i].name;
+            capesPaths[std::make_pair(i, false)] = std::string("capes/") + capes[i].name;
         }
     }
 
@@ -250,11 +250,16 @@ namespace game
         return capesPaths[std::make_pair(cape, enemy)].c_str();
     }
 
-    const char *getGraveDir(int grave)
+    std::map<int, std::string> gravesPaths;
+
+    void initializeGravesPaths()
     {
-        static char dir[32];
-        snprintf(dir, sizeof(dir), "graves/%s", customstombes[grave].ident);
-        return dir;
+        loopi(sizeof(graves)/sizeof(graves[0])) gravesPaths[i] = std::string("graves/") + graves[i].name;
+    }
+
+    const char* getGraveDir(int grave)
+    {
+        return gravesPaths[grave].c_str();
     }
 
     void preloadplayermodel()
@@ -275,17 +280,10 @@ namespace game
             preloadmodel(getCapeDir(i, true));
         }
 
-        loopi(sizeof(aptitudes) / sizeof(aptitudes[0])) // Preloading all classe's hats
-        {
-            defformatstring(dir, "hats/%d", i);
-            preloadmodel(dir);
-        }
+        loopi(sizeof(classes) / sizeof(classes[0])) preloadmodel(classes[i].hatDir); // Preloading all classe's hats
 
-        loopi(sizeof(customstombes) / sizeof(customstombes[0])) // Preloading all graves
-        {
-            defformatstring(dir, "graves/%s", customstombes[i].ident);
-            preloadmodel(dir);
-        }
+        initializeGravesPaths();
+        loopi(sizeof(graves) / sizeof(graves[0])) preloadmodel(getGraveDir(i)); // Preloading all graves
 
         loopi(4) getdisguisement(i); //Preloading all spy's disguisement
 
@@ -326,7 +324,7 @@ namespace game
         player1->customcape = player1_cape;
     });
 
-    VARFP(player1_tombe, 0, 0, sizeof(customstombes)/sizeof(customstombes[0])-1,
+    VARFP(player1_tombe, 0, 0, sizeof(graves)/sizeof(graves[0])-1,
     {
         if(!grave[player1_tombe]) { conoutf(CON_ERROR, "\f3%s", readstr("Console_Shop_GraveNotOwned")); playSound(S_ERROR); player1_tombe=0; return; }
         addmsg(N_SENDTOMBE, "ri", player1_tombe);
@@ -692,7 +690,7 @@ namespace game
         {
             if(d->physstate >= PHYS_SLOPE)
             {
-                swayspeed = min(sqrtf(d->vel.x*d->vel.x + d->vel.y*d->vel.y), 200-aptitudes[d->aptitude].apt_vitesse*0.12f);
+                swayspeed = min(sqrtf(d->vel.x*d->vel.x + d->vel.y*d->vel.y), 200 - classes[d->aptitude].speed*0.12f);
                 swaydist += swayspeed*curtime/1000.0f;
                 swaydist = fmod(swaydist, 2*swaystep);
                 swayfade = 1;

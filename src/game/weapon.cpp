@@ -179,7 +179,7 @@ namespace game
         if(d->crouching) spread /= d->aptitude==APT_CAMPEUR ? 2.5f : 1.5f;
         if(d->boostmillis[B_ROIDS] || d->boostmillis[B_RAGE]) spread *= 1.75f;
 
-        spread = (spread*100) / aptitudes[d->aptitude].apt_precision;
+        spread = (spread*100) / classes[d->aptitude].accuracy;
         offset.mul((to.dist(from)/1024) * spread);
 
         offset.z /= 2;
@@ -465,7 +465,7 @@ namespace game
         bool teamdmg = false;
         if(actor==hudplayer()) d->curdamagecolor = 0xFFAA00;
 
-        damage = ((damage*aptitudes[actor->aptitude].apt_degats)/(aptitudes[d->aptitude].apt_resistance)); // calc damage based on the class's stats
+        damage = ((damage*classes[actor->aptitude].damage)/(classes[d->aptitude].resistance)); // calc damage based on the class's stats
 
         switch(actor->aptitude) // recalc damage based on the actor's passive/active skills
         {
@@ -606,7 +606,7 @@ namespace game
                     case APT_PRETRE: if(player1->abilitymillis[ABILITY_2] && player1->mana) {player1->mana-=damage/10; damage=0; if(player1->mana<0)player1->mana=0;} break;
                     case APT_SHOSHONE: if(player1->abilitymillis[ABILITY_1]) damage/=1.3f;
                 }
-                damage = (damage/aptitudes[player1->aptitude].apt_resistance)*(m_dmsp ? 15.f : 100);
+                damage = (damage/classes[player1->aptitude].resistance)*(m_dmsp ? 15.f : 100);
                 damageeffect(damage, f, at, atk);
                 damaged(damage, f, at, true, atk);
                 f->hitphyspush(damage, vel, at, atk, f);
@@ -623,7 +623,7 @@ namespace game
                     case APT_VAMPIRE: {player1->health = min(player1->health + damage/2, player1->maxhealth); player1->vampimillis+=damage*1.5f;} break;
                     case APT_SHOSHONE: if(player1->abilitymillis[ABILITY_1]) damage*=1.3f;
                 }
-                damage = (damage*aptitudes[player1->aptitude].apt_degats)/100;
+                damage = (damage*classes[player1->aptitude].damage)/100;
                 hitmonster(damage, (monster *)f, at, vel, atk);
                 avgdmg[dmgsecs[0]] += damage/10.f;
             }

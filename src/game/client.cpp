@@ -1585,7 +1585,7 @@ namespace game
 
                 if(!pl) break;
                 pl->abilitymillis[ability] = millis;
-                pl->mana -= aptitudes[pl->aptitude].abilities[ability].manacost;
+                pl->mana -= classes[pl->aptitude].abilities[ability].manacost;
                 launchAbility(pl, ability, false);
                 break;
             }

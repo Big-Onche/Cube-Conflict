@@ -121,8 +121,8 @@ namespace aiman
         ci->level = skill;
 
         int val;
-        do { val = rnd(NUMAPTS); } while (disabledClasse[val]);
-        ci->aptitude = classe >= 0 && classe < NUMAPTS ? classe : val;
+        do { val = rnd(NUMCLASSES); } while (disabledClasse[val]);
+        ci->aptitude = classe >= 0 && classe < NUMCLASSES ? classe : val;
 
         ci->playermodel = rnd(128);
         ci->customcape = rnd(128);

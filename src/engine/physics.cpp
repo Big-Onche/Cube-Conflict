@@ -1758,7 +1758,7 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
     d.mul(pl->maxspeed);
     if(pl->type==ENT_PLAYER)
     {
-        float speed = aptitudes[aptitude].apt_vitesse;
+        float speed = classes[aptitude].speed;
         switch(aptitude)
         {
             case APT_MAGICIEN: if(aptisort) speed = 650;  break;

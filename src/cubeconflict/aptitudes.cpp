@@ -4,12 +4,12 @@
 #include "gfx.h"
 #include "stats.h"
 
-bool disabledClasse[NUMAPTS];
+bool disabledClasse[NUMCLASSES];
 
 ICOMMAND(getclass, "i", (int *i), intret(disabledClasse[*i]) );
 
 ICOMMAND(setclass, "i", (int *i),
-    if(*i < 0 || *i > NUMAPTS-1) return;
+    if(*i < 0 || *i > NUMCLASSES-1) return;
     if(*i == game::player1->aptitude)
     {
         conoutf(CON_ERROR, "\f3Cannot deactivate your current classe!");
@@ -17,10 +17,10 @@ ICOMMAND(setclass, "i", (int *i),
         return;
     }
 
-    int maxClasses = NUMAPTS;
+    int maxClasses = NUMCLASSES;
     disabledClasse[*i] = !disabledClasse[*i];
 
-    loopi(NUMAPTS) maxClasses -= disabledClasse[i];
+    loopi(NUMCLASSES) maxClasses -= disabledClasse[i];
     if(!maxClasses)
     {
         disabledClasse[*i] = !disabledClasse[*i];
@@ -31,7 +31,7 @@ ICOMMAND(setclass, "i", (int *i),
 );
 
 ICOMMAND(setallclasses, "i", (int *enabled),
-    loopi(NUMAPTS)
+    loopi(NUMCLASSES)
     {
         if(!*enabled && i != game::player1->aptitude) disabledClasse[i] = true;
         else disabledClasse[i] = false;
@@ -56,7 +56,7 @@ namespace game
         }
 
         if(d==hudplayer()) playSound(S_SORTLANCE);
-        playSound(aptitudes[d->aptitude].abilities[ability].snd, nullsndpos ? NULL : &sndpos, 250, 100, SND_NOCULL|SND_FIXEDPITCH, d->entityId, PL_ABI_1+ability);
+        playSound(classes[d->aptitude].abilities[ability].snd, nullsndpos ? NULL : &sndpos, 250, 100, SND_NOCULL|SND_FIXEDPITCH, d->entityId, PL_ABI_1+ability);
         switch(ability) //here we play some one shot gfx effects
         {
             //case ABILITY_1:
@@ -96,7 +96,7 @@ namespace game
         if(request) //player is requesting ability
         {
             if(!canlaunchability(d, ability)) return; //check for basic guards
-            if(!d->abilityready[ability] || d->mana < aptitudes[d->aptitude].abilities[ability].manacost) { if(d==player1) playSound(S_SORTIMPOSSIBLE); return; } //check for game vars (client sided)
+            if(!d->abilityready[ability] || d->mana < classes[d->aptitude].abilities[ability].manacost) { if(d==player1) playSound(S_SORTIMPOSSIBLE); return; } //check for game vars (client sided)
             addmsg(N_REQABILITY, "rci", d, ability); //server sided game vars check
             return; //can stop after this, cuz server call this func with !request
         }
@@ -128,7 +128,7 @@ namespace game
 
         loopi(NUMABILITIES)
         {
-            if(totalmillis-d->lastability[i] >= aptitudes[d->aptitude].abilities[i].cooldown && !d->abilityready[i]) // ability rearm
+            if(totalmillis-d->lastability[i] >= classes[d->aptitude].abilities[i].cooldown && !d->abilityready[i]) // ability rearm
             {
                 if(d==hudplayer()) playSound(S_SORTPRET);
                 d->abilityready[i] = true;
@@ -159,10 +159,10 @@ namespace game
         int val = 0;
         switch(*stat)
         {
-            case 0: val = aptitudes[*apt].apt_degats; break;
-            case 1: val = aptitudes[*apt].apt_resistance; break;
-            case 2: val = aptitudes[*apt].apt_precision; break;
-            case 3: val = aptitudes[*apt].apt_vitesse;
+            case 0: val = classes[*apt].damage; break;
+            case 1: val = classes[*apt].resistance; break;
+            case 2: val = classes[*apt].accuracy; break;
+            case 3: val = classes[*apt].speed;
         }
         intret(((val-100) / 5) +9);
     );

@@ -48,7 +48,7 @@ namespace game
 
     ICOMMAND(npcClass, "i", (int *i),
         if (*i < 0) { conoutf(CON_ERROR, "min value for npc class is 0"); return; }
-        else if (*i > NUMAPTS-1) { conoutf(CON_ERROR, "max value for npc class is %d", NUMAPTS-1); return; }
+        else if (*i > NUMCLASSES-1) { conoutf(CON_ERROR, "max value for npc class is %d", NUMCLASSES-1); return; }
         else npcs[id].npcclass = *i;
     );
 

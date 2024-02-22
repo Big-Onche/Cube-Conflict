@@ -50,7 +50,7 @@ namespace game
         {
             string logodir;
             if(followingplayer(player1)->abilitymillis[*id]) formatstring(logodir, "media/interface/hud/checkbox_on.jpg");
-            else if(!followingplayer(player1)->abilityready[*id] || followingplayer(player1)->mana < aptitudes[followingplayer(player1)->aptitude].abilities[*id].manacost) formatstring(logodir, "media/interface/hud/checkbox_off.jpg");
+            else if(!followingplayer(player1)->abilityready[*id] || followingplayer(player1)->mana < classes[followingplayer(player1)->aptitude].abilities[*id].manacost) formatstring(logodir, "media/interface/hud/checkbox_off.jpg");
             else formatstring(logodir, "media/interface/hud/abilities/%d_%d.png", followingplayer(player1)->aptitude, *id);
             result(logodir);
         }

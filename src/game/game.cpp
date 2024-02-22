@@ -12,7 +12,7 @@ bool rndevent(int probability, int probabilityReduce) // adjust the probability 
 namespace game
 {
     int oldapti;
-    VARFP(player1_aptitude, 0, 0, NUMAPTS-1,
+    VARFP(player1_aptitude, 0, 0, NUMCLASSES-1,
     {
         if(player1->state != CS_DEAD && isconnected() && !intermission && !m_tutorial)
         {
@@ -1052,7 +1052,7 @@ namespace game
             bool haspowerarmour = pl->armourtype == A_ASSIST;
             int snd = haspowerarmour && pl->armour ? S_FOOTSTEP_ASSIST : S_FOOTSTEP;
             if(lookupmaterial(d->feetpos())==MAT_WATER) snd = S_SWIM;
-            if(lastmillis-pl->lastfootstep < (d->vel.magnitude()*(aptitudes[pl->aptitude].apt_vitesse*3.5f)*(pl->crouched() || (pl->abilitymillis[ABILITY_2] && pl->aptitude==APT_ESPION) ? 2 : 1)*(d->inwater ? 2 : 1)*(pl->armourtype==A_ASSIST && pl->armour> 0 ? 2.f : 1)/d->vel.magnitude())) return;
+            if(lastmillis-pl->lastfootstep < (d->vel.magnitude()*(classes[pl->aptitude].speed*3.5f)*(pl->crouched() || (pl->abilitymillis[ABILITY_2] && pl->aptitude==APT_ESPION) ? 2 : 1)*(d->inwater ? 2 : 1)*(pl->armourtype==A_ASSIST && pl->armour> 0 ? 2.f : 1)/d->vel.magnitude())) return;
             else
             {
                 playSound(snd, d==hudplayer() ? NULL : &d->o, haspowerarmour ? 300 : 150, 20, haspowerarmour ? NULL : SND_LOWPRIORITY);
