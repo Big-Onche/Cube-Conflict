@@ -1478,6 +1478,9 @@ void shakeScreen(int reduceFactor)
     loopi(16){ addsleep(&sleep, cmd); sleep +=25; }
 }
 
+VARP(spectatekiller, 0, 1, 1);
+bool animStarted;
+
 void recomputecamera(int campostag)
 {
     game::setupcamera();
@@ -1525,7 +1528,29 @@ void recomputecamera(int campostag)
                 }
             }
         }
-        else if(game::collidecamera())
+
+        bool moveSide = (game::hudplayer()->state != CS_DEAD) || thirdperson;
+
+        if(game::hudplayer()->state == CS_DEAD && lastmillis > game::hudplayer()->lastpain + 1500 && game::hudplayer() != game::hudplayer()->lastkiller && spectatekiller)
+        {
+            float t = clamp((lastmillis - game::hudplayer()->lastpain - 1500) / 500.f, 0.f, 1.f);
+            if(t < 1)
+            {
+                if(!animStarted)
+                {
+                    playSound(S_DEATHWIND);
+                    UI::hideui("scoreboard");
+                    animStarted = true;
+                }
+                vec startpos = game::hudplayer()->o;
+                vec finalpos = game::hudplayer()->lastkiller->o;
+                camera1->o = startpos.add(finalpos.sub(startpos).mul(t));
+            }
+            else camera1->o = game::hudplayer()->lastkiller->o;
+        }
+        else animStarted = false;
+
+        if(game::collidecamera())
         {
             movecamera(camera1, dir, thirdpersondistance, 1);
             movecamera(camera1, dir, clamp(thirdpersondistance - camera1->o.dist(player->o), 0.0f, 1.0f), 0.1f);
@@ -1537,7 +1562,7 @@ void recomputecamera(int campostag)
                 movecamera(camera1, up, dist, 1);
                 movecamera(camera1, up, clamp(dist - camera1->o.dist(pos), 0.0f, 1.0f), 0.1f);
             }
-            if(thirdpersonside)
+            if(moveSide)
             {
                 vec pos = camera1->o;
                 float dist = fabs(thirdpersonside);
@@ -1550,7 +1575,7 @@ void recomputecamera(int campostag)
         {
             camera1->o.add(vec(dir).mul(thirdpersondistance));
             if(thirdpersonup) camera1->o.add(vec(up).mul(thirdpersonup));
-            if(thirdpersonside) camera1->o.add(vec(side).mul(thirdpersonside));
+            if(thirdpersonside && moveSide) camera1->o.add(vec(side).mul(thirdpersonside));
         }
     }
 

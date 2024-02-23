@@ -658,6 +658,7 @@ namespace game
 
     void killed(gameent *d, gameent *actor, int atk)
     {
+        d->lastkiller = actor;
         d->killstreak = 0;
 
         if(d->state==CS_EDITING)

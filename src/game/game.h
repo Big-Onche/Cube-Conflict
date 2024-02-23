@@ -790,6 +790,7 @@ struct gameent : dynent, gamestate
     float skeletonfade, tombepop;
     ai::aiinfo *ai;
     int ownernum, lastnode;
+    gameent *lastkiller;
 
     vec muzzle, weed, balles;
 

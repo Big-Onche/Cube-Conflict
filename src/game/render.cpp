@@ -268,15 +268,8 @@ namespace game
         {   // armour health loop (i)
             loopj(5)
             {   // armour type loop (j)
-                if(j!=A_ASSIST)
-                {
-                    preloadmodel(getShieldDir(j, (armours[j].max / 5) * i, false));
-                    conoutf("Preloaded %s", getShieldDir(j, (armours[j].max / 5) * i, false));
-                }
-
-
+                if(j!=A_ASSIST) preloadmodel(getShieldDir(j, (armours[j].max / 5) * i, false));
                 preloadmodel(getShieldDir(j, (armours[j].max / 5) * i, true));
-                conoutf("Preloaded %s", getShieldDir(j, (armours[j].max / 5) * i, true));
             }
         }
 
