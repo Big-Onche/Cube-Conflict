@@ -28,7 +28,6 @@ ICOMMAND(gamesound, "siii", (char *path, int *alts, int *vol, bool *occl),
     gameSounds[gameSoundId].soundVol = *vol;
     gameSounds[gameSoundId].noGeomOcclusion = *occl;
     gameSounds[gameSoundId].loaded = loadSound(gameSounds[gameSoundId]);
-    loadSound(gameSounds[gameSoundId]);
     gameSoundId++;
 );
 
