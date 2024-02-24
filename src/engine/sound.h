@@ -80,7 +80,7 @@ enum SongNames { S_MAINMENU = 0, S_MAINMENURU, S_PREMISSION, S_PAUSE, S_TUTORIAL
 
 enum SoundFlags
 {
-    SND_NOCULL        = 1 << 0,     // sound will be played even if camera1 is beyond radius
+    SND_NOCULL        = 1 << 0,     // sound will be taken into account even if camera1 is beyond radius
     SND_NOOCCLUSION   = 1 << 1,     // no filter if occlusion
     SND_UI            = 1 << 2,     // ui/notification sounds such as kills, achievements, etc.
     SND_LOWPRIORITY   = 1 << 3,     // sound will not play if source limit is almost reached
@@ -90,18 +90,9 @@ enum SoundFlags
     SND_MUSIC         = 1 << 7      // music
 };
 
+enum reverbSettings { REV_MAIN = 0, REV_SECOND, REV_THIRD, REV_FOURTH, REV_FIFTH, NUMREVERBS };
+
 enum PlayerLinkedSounds { PL_NONE = 0, PL_ATTACK, PL_ATTACK_FAR, PL_ABI_1, PL_ABI_2, PL_ABI_3, PL_POWERARMOR, PL_UNDERWATER, PL_TAUNT, NUMLINKEDSNDS }; // types of sounds that can be linked to a bot/player
-
-const EFXEAXREVERBPROPERTIES presets[] = // declaration of efx reverb presets
-{
-    EFX_REVERB_PRESET_OUTDOORS_ROLLINGPLAINS,
-    EFX_REVERB_PRESET_FACTORY_MEDIUMROOM,
-    EFX_REVERB_PRESET_PLAIN,
-    EFX_REVERB_PRESET_MOUNTAINS,
-    EFX_REVERB_PRESET_CAVE
-};
-
-const int numPresets = sizeof(presets) / sizeof(presets[0]);
 
 struct Sound
 {
@@ -144,5 +135,32 @@ extern void cleanUpSounds();
 extern void setReverbGain(float gain);
 extern void setShroomsEfx(bool enable);
 extern const char *getmapsoundname(int n);
+
+#define EFX_REVERB_PRESET_SMALL_PASSAGE \
+{ \
+    1.0000f,    /* flDensity */ \
+    1.0000f,    /* flDiffusion */ \
+    1.0000f,    /* flGain */ \
+    0.6500f,    /* flGainHF */ \
+    1.0000f,    /* flGainLF */ \
+    1.5000f,    /* flDecayTime */ \
+    0.6000f,    /* flDecayHFRatio */ \
+    0.9000f,    /* flDecayLFRatio */ \
+    3.0000f,    /* flReflectionsGain */ \
+    0.0050f,    /* flReflectionsDelay */ \
+    { 0.0000f, 0.0000f, 0.0000f }, /* flReflectionsPan */ \
+    2.0000f,    /* flLateReverbGain */ \
+    0.0080f,    /* flLateReverbDelay */ \
+    { 0.0000f, 0.0000f, 0.0000f }, /* flLateReverbPan */ \
+    0.2500f,    /* flEchoTime */ \
+    0.2000f,    /* flEchoDepth */ \
+    0.2000f,    /* flModulationTime */ \
+    0.0000f,    /* flModulationDepth */ \
+    0.9943f,    /* flAirAbsorptionGainHF */ \
+    6000.0000f, /* flHFReference */ \
+    300.0000f,  /* flLFReference */ \
+    0.0000f,    /* flRoomRolloffFactor */ \
+    0x1         /* iDecayHFLimit */ \
+}
 
 #endif

@@ -165,6 +165,22 @@ static void getEfxFuncs()
     alGetFilterf                 = (LPALGETFILTERF)                alGetProcAddress("alGetFilterf");
 }
 
+const EFXEAXREVERBPROPERTIES presets[] = // declaration of efx reverb presets
+{
+    EFX_REVERB_PRESET_OUTDOORS_ROLLINGPLAINS,
+    EFX_REVERB_PRESET_FACTORY_MEDIUMROOM,
+    EFX_REVERB_PRESET_PLAIN,
+    EFX_REVERB_PRESET_MOUNTAINS,
+    EFX_REVERB_PRESET_CAVE,
+    EFX_REVERB_PRESET_SMALL_PASSAGE,
+    EFX_REVERB_PRESET_PIPE_RESONANT,
+    EFX_REVERB_PRESET_FACTORY_SMALLROOM,
+    EFX_REVERB_PRESET_PREFAB_WORKSHOP,
+    EFX_REVERB_PRESET_CHAPEL
+};
+
+const int numPresets = sizeof(presets) / sizeof(presets[0]);
+
 ALuint reverbEffect, auxEffectReverb;
 
 void applyReverbPreset(ALuint auxEffectSlot, const EFXEAXREVERBPROPERTIES& preset)
@@ -202,7 +218,19 @@ void setReverbPreset(int preset)
     else applyReverbPreset(auxEffectReverb, EFX_REVERB_PRESET_GENERIC);
 }
 
-VARF(mainmapreverb, 0, 0, numPresets, setReverbPreset(mainmapreverb));
+int reverb[NUMREVERBS];
+
+void configureMapReverbs(int a, int b, int c, int d, int e)
+{
+    int params[] = {a, b, c, d, e};
+    loopi(sizeof(params) / sizeof(params[0]))
+    {
+        if(params[i] >= 0 && params[i] <= numPresets) reverb[i] = params[i];
+        else conoutf(CON_ERROR, "Parameter %d is out of the valid range (0 to %d).", i + 1, numPresets);
+    }
+}
+
+ICOMMAND(mapreverbs, "iiiii", (int *a, int *b, int *c, int *d, int *e), configureMapReverbs(*a, *b, *c, *d, *e) );
 
 ALuint occlusionFilter;
 
@@ -273,9 +301,9 @@ void initSounds()
     initSoundSources();
 }
 
-bool checkSoundOcclusion(const vec *soundPos)
+bool checkSoundOcclusion(const vec *soundPos, int flags = 0)
 {
-    if(!soundPos || noEfx || (camera1->o.dist(*soundPos) < 50 && camera1->o.dist(*soundPos) > 1000)) return false;
+    if((flags & SND_NOOCCLUSION) || !soundPos || noEfx || (camera1->o.dist(*soundPos) < 50 && camera1->o.dist(*soundPos) > 1000)) return false;
 
     vec dir = vec(camera1->o).sub(*soundPos);
     const float dist = dir.magnitude();
@@ -326,6 +354,13 @@ float getRandomSoundPitch()
     return (0.92f + 0.16f * static_cast<float>(rand()) / RAND_MAX) * (game::gamespeed / 100.f);
 }
 
+void checkReverb()
+{
+    if(game::hudplayer()->boostmillis[B_SHROOMS]) return;
+    loopi(4) { if(lookupmaterial(camera1->o) == MAT_REVERB + i) { setReverbPreset(reverb[i + 1]); return; } }
+    setReverbPreset(reverb[REV_MAIN]);
+}
+
 void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRadius, int flags, size_t entityId, int soundType)
 {
     if(soundId < 0 || soundId > NUMSNDS || noSound || mutesounds) return; // invalid index or openal not initialized or mute
@@ -347,6 +382,7 @@ void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRa
     if(sourceIndex == SIZE_MAX) { conoutf(CON_WARN, "Max sounds at once capacity reached (%d)", maxsoundsatonce); return; } // skip sound if max capacity
     if((flags & SND_LOWPRIORITY) && (activeSources >= maxsoundsatonce / 2)) return; // skip low-priority sounds (distant shoots etc.) when we are already playing a lot of sounds
 
+    checkReverb();
     sources[sourceIndex].isActive = true;       // now the source is set to active
     sources[sourceIndex].entityId = entityId;
     sources[sourceIndex].soundType = soundType;
@@ -355,7 +391,7 @@ void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRa
 
     Sound& s = (flags & SND_MUSIC) ? music[soundId] : ( (flags & SND_MAPSOUND) ? mapSounds[soundId] : gameSounds[soundId] );
     ALuint source = sources[sourceIndex].source;
-    if(s.noGeomOcclusion) sources[sourceIndex].noGeomOcclusion = true;
+    sources[sourceIndex].noGeomOcclusion = s.noGeomOcclusion;
 
     ALuint buffer = s.bufferId[s.numAlts ? rnd(s.numAlts + 1) : 0];
 
@@ -389,7 +425,7 @@ void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRa
     else if(!noEfx) // apply efx if available
     {
         ALuint filter = AL_FILTER_NULL;
-        if(!(flags & SND_UI) && !(flags & SND_MUSIC) && (applyUnderwaterFilter(flags) || checkSoundOcclusion(soundPos))) filter = occlusionFilter;
+        if(!(flags & SND_UI) && !(flags & SND_MUSIC) && (applyUnderwaterFilter(flags) || checkSoundOcclusion(soundPos, flags))) filter = occlusionFilter;
         alSource3i(source, AL_AUXILIARY_SEND_FILTER, auxEffectReverb, 0, filter);
         alSourcei(source, AL_DIRECT_FILTER, filter);
     }
@@ -630,7 +666,7 @@ void cleanUpSounds()
 void setShroomsEfx(bool enable)
 {
     if(enable) applyReverbPreset(auxEffectReverb, EFX_REVERB_PRESET_DRUGGED);
-    else setReverbPreset(mainmapreverb);
+    else checkReverb();
 }
 
 ICOMMAND(playSound, "sii", (char *soundName, bool fixedPitch, bool uiSound),

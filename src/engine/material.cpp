@@ -106,6 +106,7 @@ const struct material
     {"water", MAT_WATER}, {"water1", MAT_WATER}, {"water2", MAT_WATER+1}, {"water3", MAT_WATER+2}, {"water4", MAT_WATER+3},
     {"glass", MAT_GLASS}, {"glass1", MAT_GLASS}, {"glass2", MAT_GLASS+1}, {"glass3", MAT_GLASS+2}, {"glass4", MAT_GLASS+3},
     {"lava", MAT_LAVA}, {"lava1", MAT_LAVA}, {"lava2", MAT_LAVA+1}, {"lava3", MAT_LAVA+2}, {"lava4", MAT_LAVA+3},
+    {"reverb", MAT_REVERB}, {"reverb1", MAT_REVERB}, {"reverb2", MAT_REVERB+1}, {"reverb3", MAT_REVERB+2}, {"reverb4", MAT_REVERB+3},
     {"clip", MAT_CLIP},
     {"noclip", MAT_NOCLIP},
     {"gameclip", MAT_GAMECLIP},
@@ -495,9 +496,10 @@ void rendermatgrid()
                 case MAT_NOCLIP:   color = bvec4( 0, 85,  0, 255); break; // green
                 case MAT_LAVA:     color = bvec4(85, 40,  0, 255); break; // orange
                 case MAT_GAMECLIP: color = bvec4(85, 85,  0, 255); break; // yellow
-                case MAT_DEATH:    color = bvec4(40, 40, 40, 255); break; // black
+                case MAT_DEATH:    color = bvec4(30, 30, 30, 255); break; // black
                 case MAT_NOGI:     color = bvec4(40, 30,  0, 255); break; // brown
                 case MAT_ALPHA:    color = bvec4(85,  0, 85, 255); break; // pink
+                case MAT_REVERB:   color = bvec4(95, 95, 95, 255); break; // gray
                 default: continue;
             }
             lastmat = m.material;
@@ -762,6 +764,7 @@ void rendereditmaterials()
                 case MAT_DEATH:    color = bvec4(192, 192, 192, 255); break; // black
                 case MAT_NOGI:     color = bvec4(128, 160, 255, 255); break; // brown
                 case MAT_ALPHA:    color = bvec4(  0, 255,   0, 255); break; // pink
+                case MAT_REVERB:   color = bvec4(64,  64,  64, 255); break; // gray
                 default: continue;
             }
             lastmat = m.material;

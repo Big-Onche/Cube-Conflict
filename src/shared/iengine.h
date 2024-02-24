@@ -25,6 +25,7 @@ enum // cube empty-space materials
     MAT_WATER    = 1 << MATF_VOLUME_SHIFT, // fill with water, showing waves at the surface
     MAT_LAVA     = 2 << MATF_VOLUME_SHIFT, // fill with lava
     MAT_GLASS    = 3 << MATF_VOLUME_SHIFT, // behaves like clip but is blended blueish
+    MAT_REVERB   = 4 << MATF_VOLUME_SHIFT, // sound reverb alternative
 
     MAT_NOCLIP   = 1 << MATF_CLIP_SHIFT,  // collisions always treat cube as empty
     MAT_CLIP     = 2 << MATF_CLIP_SHIFT,  // collisions always treat cube as solid
@@ -356,7 +357,7 @@ extern void particle_trail(int type, int fade, const vec &from, const vec &to, i
 extern void particle_text(const vec &s, const char *t, int type, int fade = 2000, int color = 0xFFFFFF, float size = 2.0f, int gravity = 0);
 extern void particle_textcopy(const vec &s, const char *t, int type, int fade = 2000, int color = 0xFFFFFF, float size = 2.0f, int gravity = 0, bool hud = false);
 extern void particle_icon(const vec &s, int ix, int iy, int type, int fade = 2000, int color = 0xFFFFFF, float size = 2.0f, int gravity = 0);
-extern void particle_hud(int type, const vec &pos, int color, float size = 0.05f);
+extern void particle_hud(int type, const vec &pos, int color, float size = 0.075f);
 extern void particle_meter(const vec &s, float val, int type, int fade = 1, int color = 0xFFFFFF, int color2 = 0xFFFFF, float size = 2.0f, bool ui = false);
 extern void particle_flare(const vec &p, const vec &dest, int fade, int type, int color = 0xFFFFFF, float size = 0.28f, physent *owner = NULL, bool randomcolor = false, int sizemod = 0);
 extern void particle_fireball(const vec &dest, float max, int type, int fade = -1, int color = 0xFFFFFF, float size = 4.0f, bool randomcolor = false);
