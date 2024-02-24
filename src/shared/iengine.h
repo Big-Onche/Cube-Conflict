@@ -364,7 +364,7 @@ extern void particle_fireball(const vec &dest, float max, int type, int fade = -
 extern void regularflare(const vec &p, int color, int flaresize, int viewdist);
 extern void regularflame(int type, const vec &p, float radius, float height, int color, int density = 3, float scale = 2.0f, float speed = 200.0f, float fade = 600.0f, int gravity = -15, int sizemod = -3);
 extern void regularshape(int type, int radius, int color, int dir, int num, int fade, const vec &p, float size, int gravity, float vel = 0, int windoffset = 0, bool weather = false, int height = 0, int sizemod = 0);
-extern void regularsplash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int delay = 0, int sizemod = 0, bool upsplash = false);
+extern void regularsplash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int delay = 0, int sizemod = 0, bool upsplash = false, bool sound = false);
 extern void removetrackedparticles(physent *owner = NULL);
 
 // stain
