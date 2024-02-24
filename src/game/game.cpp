@@ -17,7 +17,7 @@ namespace game
         if(player1->state != CS_DEAD && isconnected() && !intermission && !m_tutorial)
         {
             conoutf(CON_GAMEINFO, "\fc%s", readstr("Console_Game_UnableToChangeClass"));
-            playSound(S_ERROR);
+            playSound(S_ERROR, NULL, 0, 0, SND_FIXEDPITCH);
             player1_aptitude = oldapti;
         }
         else

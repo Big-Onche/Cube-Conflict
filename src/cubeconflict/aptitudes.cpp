@@ -13,7 +13,7 @@ ICOMMAND(setclass, "i", (int *i),
     if(*i == game::player1->aptitude)
     {
         conoutf(CON_ERROR, "\f3Cannot deactivate your current classe!");
-        playSound(S_ERROR);
+        playSound(S_ERROR, NULL, 0, 0, SND_UI);
         return;
     }
 
@@ -25,7 +25,7 @@ ICOMMAND(setclass, "i", (int *i),
     {
         disabledClasse[*i] = !disabledClasse[*i];
         conoutf(CON_ERROR, "\f3Cannot deactivate all classes!");
-        playSound(S_ERROR);
+        playSound(S_ERROR, NULL, 0, 0, SND_UI);
         return;
     }
 );

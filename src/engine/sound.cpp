@@ -238,6 +238,13 @@ void configureMapReverbs(int a, int b, int c, int d, int e)
 
 ICOMMAND(mapreverbs, "iiiii", (int *a, int *b, int *c, int *d, int *e), configureMapReverbs(*a, *b, *c, *d, *e) );
 
+void checkReverb()
+{
+    if(game::hudplayer()->boostmillis[B_SHROOMS]) return;
+    loopi(4) { if(lookupmaterial(camera1->o) == MAT_REVERB + i) { setReverbPreset(reverb[i + 1]); return; } }
+    setReverbPreset(reverb[REV_MAIN]);
+}
+
 ALuint occlusionFilter;
 
 void setOcclusionEffect()
@@ -355,16 +362,10 @@ bool applyUnderwaterFilter(int flags)
     return false;
 }
 
-float getRandomSoundPitch()
+float getRandomSoundPitch(int flags)
 {
+    if((flags & SND_UI) || (flags & SND_MUSIC)) return 1;
     return (0.92f + 0.16f * static_cast<float>(rand()) / RAND_MAX) * (game::gamespeed / 100.f);
-}
-
-void checkReverb()
-{
-    if(game::hudplayer()->boostmillis[B_SHROOMS]) return;
-    loopi(4) { if(lookupmaterial(camera1->o) == MAT_REVERB + i) { setReverbPreset(reverb[i + 1]); return; } }
-    setReverbPreset(reverb[REV_MAIN]);
 }
 
 void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRadius, int flags, size_t entityId, int soundType)
@@ -403,7 +404,7 @@ void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRa
 
     alSourcei(source, AL_BUFFER, buffer); // managing sounds alternatives
     alSourcef(source, AL_GAIN, s.soundVol / 100.f); // managing sound volume
-    alSourcef(source, AL_PITCH, !(flags & SND_FIXEDPITCH) && !(flags & SND_MUSIC) ? getRandomSoundPitch() : 1*(game::gamespeed / 100.f)); // managing variations of pitches
+    alSourcef(source, AL_PITCH, getRandomSoundPitch(flags)); // managing variations of pitches
     alSourcei(source, AL_LOOPING, (flags & SND_LOOPED) ? AL_TRUE : AL_FALSE); // loop the sound or not
 
     if(!soundPos)
@@ -431,7 +432,7 @@ void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRa
     else if(!noEfx) // apply efx if available
     {
         ALuint filter = AL_FILTER_NULL;
-        if(!(flags & SND_UI) && !(flags & SND_MUSIC) && (applyUnderwaterFilter(flags) || checkSoundOcclusion(soundPos, flags))) filter = occlusionFilter;
+        if(applyUnderwaterFilter(flags) || checkSoundOcclusion(soundPos, flags)) filter = occlusionFilter;
         alSource3i(source, AL_AUXILIARY_SEND_FILTER, auxEffectReverb, 0, filter);
         alSourcei(source, AL_DIRECT_FILTER, filter);
     }

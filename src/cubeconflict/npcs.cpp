@@ -583,7 +583,7 @@ namespace game
         {
             if(spawnremain--==monstertotal)
             {
-                playSound(S_INVASION, NULL, 0, 0, SND_FIXEDPITCH);
+                playSound(S_INVASION, NULL, 0, 0, SND_UI);
                 conoutf(CON_HUDCONSOLE, "\f3%s", readstr("GameMessage_InvasionBegun"));
             }
             nextmonster = lastmillis+1000;
