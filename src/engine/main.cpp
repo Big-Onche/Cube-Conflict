@@ -515,11 +515,20 @@ void inputgrab(bool on, bool delay = false)
 
 bool initwindowpos = false;
 
+extern int fullscreen;
+
 void setfullscreen(bool enable)
 {
     if(!screen) return;
-    //initwarning(enable ? "fullscreen" : "windowed");
-    SDL_SetWindowFullscreen(screen, enable ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+    if(!enable && (scr_w > desktopw || scr_h > desktoph))
+    {
+        fullscreen = true;
+        conoutf("Cannot desactivate fake fullscreen while oversampling!");
+        playSound(S_ERROR, NULL, 0, 0, SND_UI);
+        return;
+    }
+
+    SDL_SetWindowFullscreen(screen, enable ? SDL_WINDOW_FULLSCREEN : 0);
     if(!enable)
     {
         SDL_SetWindowSize(screen, scr_w, scr_h);
@@ -544,8 +553,6 @@ void screenres(int w, int h)
     scr_h = clamp(h, SCR_MINH, SCR_MAXH);
     if(screen)
     {
-        scr_w = min(scr_w, desktopw);
-        scr_h = min(scr_h, desktoph);
         if(SDL_GetWindowFlags(screen) & SDL_WINDOW_FULLSCREEN)
         {
             gl_resize();
@@ -629,15 +636,14 @@ void setupscreen()
 
     if(scr_h < 0) scr_h = SCR_DEFAULTH;
     if(scr_w < 0) scr_w = (scr_h*desktopw)/desktoph;
-    scr_w = min(scr_w, desktopw);
-    scr_h = min(scr_h, desktoph);
+    if((scr_w > desktopw || scr_h > desktoph) && !fullscreen) { fullscreen = true; setfullscreen(true); }
 
     int winx = SDL_WINDOWPOS_UNDEFINED, winy = SDL_WINDOWPOS_UNDEFINED, winw = scr_w, winh = scr_h, flags = SDL_WINDOW_RESIZABLE;
     if(fullscreen)
     {
-        winw = desktopw;
-        winh = desktoph;
-        flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+        winw = scr_w;
+        winh = scr_h;
+        flags |= SDL_WINDOW_FULLSCREEN;
         initwindowpos = true;
     }
 
@@ -673,8 +679,8 @@ void setupscreen()
     if(!glcontext) fatal("failed to create OpenGL context: %s", SDL_GetError());
 
     SDL_GetWindowSize(screen, &screenw, &screenh);
-    renderw = min(scr_w, screenw);
-    renderh = min(scr_h, screenh);
+    scr_w = renderw = min(scr_w, screenw);
+    scr_h = renderh = min(scr_h, screenh);
     hudw = screenw;
     hudh = screenh;
 }
@@ -1333,6 +1339,7 @@ int main(int argc, char **argv)
     loadshaders();
     initparticles();
     initstains();
+    game::initAssetsPaths();
 
     identflags |= IDF_PERSIST;
 
