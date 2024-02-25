@@ -124,8 +124,7 @@ extern void soundNearmiss(int sound, const vec &from, const vec &to, int precisi
 extern void updateSounds();
 extern void stopSound(int soundId, int flags);
 extern void stopMusic(int soundId);
-extern void stopLinkedSound(size_t entityId, int soundType = 0);
-extern void clearLinkedSounds(size_t entityId);
+extern void stopLinkedSound(size_t entityId, int soundType = 0, bool clear = false);
 extern void stopAllMapSounds();
 extern void stopAllSounds(bool pause = false);
 extern void resumeAllSounds();

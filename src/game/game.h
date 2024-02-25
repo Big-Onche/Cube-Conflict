@@ -679,7 +679,8 @@ struct gamestate
 
         if(m_random) // random weapon mutator
         {
-            int weapon = rnd(17);
+            int weapon = rnd(2) ? GUN_LANCEFLAMMES : GUN_PLASMA;
+            //int weapon = rnd(17);
             baseammo(weapon);
             selectedWeapon = weapon;
         }
@@ -783,7 +784,8 @@ struct gameent : dynent, gamestate
     int smoothmillis;
 
     int lastability[3];
-    bool abilityready[3], playerexploded, attacksound, powerarmoursound;
+    int attacksound; // 0 = no sound, 1 = close sound, 2 = close + far sound
+    bool abilityready[3], playerexploded, powerarmoursound;
 
     string name, info;
     int team, playermodel, playercolor, customcape, customtombe, customdanse, aptitude, level;
@@ -838,8 +840,8 @@ struct gameent : dynent, gamestate
         loopi(3) abilityready[i] = true;
         gunaccel = 0;
         killstreak = 0;
+        attacksound = 0;
         playerexploded = false;
-        attacksound = false;
         powerarmoursound = false;
     }
 
@@ -1074,7 +1076,7 @@ namespace game
     extern void gunselect(int gun, gameent *d, bool force = false, bool shortcut = false);
     extern void weaponswitch(gameent *d);
     extern void avoidweapons(ai::avoidset &obstacles, float radius);
-    extern bool isattacking(gameent *d);
+    extern bool isAttacking(gameent *d);
 
     // scoreboard
     extern void showscores(bool on);

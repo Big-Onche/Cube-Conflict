@@ -365,8 +365,11 @@ bool applyUnderwaterFilter(int flags)
 float getRandomSoundPitch(int flags)
 {
     if((flags & SND_UI) || (flags & SND_MUSIC)) return 1;
+    if(flags & SND_FIXEDPITCH) return (game::gamespeed / 100.f);
     return (0.92f + 0.16f * static_cast<float>(rand()) / RAND_MAX) * (game::gamespeed / 100.f);
 }
+
+bool warned = false;
 
 void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRadius, int flags, size_t entityId, int soundType)
 {
@@ -379,17 +382,18 @@ void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRa
 
     loopi(maxsoundsatonce)
     {
-        if(!sources[i].isActive)
-        {
-            if(sourceIndex == SIZE_MAX) sourceIndex = i; // find the first inactive source
-        }
-        else activeSources++; // count active sources
+        if(sources[i].isActive) activeSources++; // count active sources
+        else sourceIndex = i; // find the first inactive source
     }
 
-    if(sourceIndex == SIZE_MAX) { conoutf(CON_WARN, "Max sounds at once capacity reached (%d)", maxsoundsatonce); return; } // skip sound if max capacity
+    if(sourceIndex == SIZE_MAX) // no inactive source found, we skip the sound
+    {
+        if(!warned) { conoutf(CON_WARN, "Max sounds at once capacity reached (%d)", maxsoundsatonce);warned = true; }
+        return;
+    }
+
     if((flags & SND_LOWPRIORITY) && (activeSources >= maxsoundsatonce / 2)) return; // skip low-priority sounds (distant shoots etc.) when we are already playing a lot of sounds
 
-    checkReverb();
     sources[sourceIndex].isActive = true;       // now the source is set to active
     sources[sourceIndex].entityId = entityId;
     sources[sourceIndex].soundType = soundType;
@@ -432,6 +436,7 @@ void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRa
     else if(!noEfx) // apply efx if available
     {
         ALuint filter = AL_FILTER_NULL;
+        checkReverb();
         if(applyUnderwaterFilter(flags) || checkSoundOcclusion(soundPos, flags)) filter = occlusionFilter;
         alSource3i(source, AL_AUXILIARY_SEND_FILTER, auxEffectReverb, 0, filter);
         alSourcei(source, AL_DIRECT_FILTER, filter);
@@ -600,23 +605,17 @@ void checkMapSounds()
     }
 }
 
-void stopLinkedSound(size_t entityId, int soundType)
+void stopLinkedSound(size_t entityId, int soundType, bool clear)
 {
-    SoundSource* soundSource = NULL;
-    loopi(maxsoundsatonce) if(sources[i].entityId == entityId && sources[i].soundType == soundType) { soundSource = &sources[i]; break; }
-
-    if(soundSource)
+    loopi(maxsoundsatonce)
     {
-        alSourceStop(soundSource->source);
-        //reportSoundError("alSourceStop-stopLinkedSound", "Error while stopping linked sound");
-        alSource3f(soundSource->source, AL_VELOCITY, 0.f, 0.f, 0.f);
-        soundSource->isActive = false;
+        if(sources[i].entityId == entityId && (sources[i].soundType == soundType || clear))
+        {
+            alSourceStop(sources[i].source);
+            //reportSoundError("alSourceStop-stopLinkedSound", "Error while stopping linked sound");
+            sources[i].isActive = false;
+        }
     }
-}
-
-void clearLinkedSounds(size_t entityId)
-{
-    loopi(NUMLINKEDSNDS) stopLinkedSound(entityId, i);
 }
 
 void stopAllSounds(bool pause)

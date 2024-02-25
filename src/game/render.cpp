@@ -423,7 +423,7 @@ namespace game
         if(validgun(d->gunselect))
         {
             int vanim = ANIM_VWEP_IDLE|ANIM_LOOP, vtime = 0;
-            if(isattacking(d))
+            if(isAttacking(d))
             {
                 vanim = ANIM_VWEP_SHOOT;
                 vtime = lastaction;
@@ -792,7 +792,7 @@ namespace game
 
         int anim = ANIM_GUN_IDLE|ANIM_LOOP, basetime = 0;
 
-        if(isattacking(d)) { anim = ANIM_GUN_SHOOT; basetime = d->lastaction; }
+        if(isAttacking(d)) { anim = ANIM_GUN_SHOOT; basetime = d->lastaction; }
         drawhudmodel(d, anim, basetime);
     }
 
