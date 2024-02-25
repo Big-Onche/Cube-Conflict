@@ -196,8 +196,6 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
 
     if(mapshot || mapname)
     {
-        islaunching = false;
-
         float lh = 0.5f*min(w, h), lw = lh,
               lx = 0.5f*(w - lw), ly = 0.5f*(h - lh);
 
@@ -244,28 +242,25 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
     {
         if(force)
         {
-            islaunching = false;
-
             float ilh = 1.1f*min(w, h), ilw = ilh*1.8f,
                   ilx = 0.5f*(w - ilw), ily = 0.5f*(h - ilh);
 
             settexture(tempformatstring("media/map/%s.png", mapselimg));
             bgquad(ilx-parallaxX/-40, ily-parallaxY/-40, ilw, ilh);
         }
-    }
+        else if (islaunching)
+        {
+            float jlh = 0.5f*min(w, h), jlw = jlh,
+                  jlx = 0.5f*(w - jlw), jly = 0.5f*(h - jlh);
 
-    if(islaunching)
-    {
-        float jlh = 0.5f*min(w, h), jlw = jlh,
-              jlx = 0.5f*(w - jlw), jly = 0.5f*(h - jlh);
-
-        settexture("media/interface/intrologo.png", 3);
-        bgquad(jlx, jly, jlw, jlh);
+            settexture("media/interface/intrologo.png", 3);
+            bgquad(jlx, jly, jlw, jlh);
+        }
     }
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    if(!islaunching) gle::colorf(1, 1, 1, 1);
+    gle::colorf(1, 1, 1, 1);
     settexture("media/interface/shadow.png", 3);
     bgquad(0, 0, w, h);
 
@@ -299,7 +294,7 @@ void renderbackground(const char *caption, Texture *mapshot, const char *mapname
 
     if(force)
     {
-        renderbackgroundview(w, h, caption, mapshot, mapname, mapinfo, tip, true);
+        renderbackgroundview(w, h, caption, mapshot, mapname, mapinfo, tip, force);
         return;
     }
 
@@ -321,7 +316,7 @@ void restorebackground(int w, int h, bool force)
 {
     if(renderedframe && !force) return;
     setbackgroundinfo();
-    renderbackgroundview(w, h, backgroundcaption[0] ? backgroundcaption : NULL, backgroundmapshot, backgroundmapname[0] ? backgroundmapname : NULL, backgroundmapinfo, backgroundtip);
+    renderbackgroundview(w, h, backgroundcaption[0] ? backgroundcaption : NULL, backgroundmapshot, backgroundmapname[0] ? backgroundmapname : NULL, backgroundmapinfo, backgroundtip, true);
 }
 
 float loadprogress = 0;
@@ -331,7 +326,6 @@ int texttimer;
 
 void renderprogressview(int w, int h, float bar, const char *text, bool calc)   // also used during loading
 {
-    if(islaunching) { formatstring(loadingtext, "%s", readstr("Loading_Bar_Quotes", rnd(14))); return; }
     if(!calc) bar = loadprogress/100.f;
 
     hudmatrix.ortho(0, w, h, 0, -1, 1);
@@ -390,7 +384,7 @@ VAR(progressbackground, 0, 0, 1);
 
 void renderprogress(float bar, const char *text, bool background, bool calc)   // also used during loading
 {
-    if(!inbetweenframes || drawtex) return;
+    if(!inbetweenframes || drawtex || islaunching) return;
 
     extern int menufps, maxfps;
     int fps = menufps ? (maxfps ? min(maxfps, menufps) : menufps) : maxfps;
@@ -1201,6 +1195,7 @@ int main(int argc, char **argv)
     execfile("config/vars.cfg", false);
     if(!execfile("config/languages/lib.cfg", false) || !execfile("config/languages/english.cfg", false)) fatal("cannot find languages data files");
     execfile("config/init.cfg", false);
+    formatstring(loadingtext, "%s", readstr("Loading_Bar_Quotes", rnd(14)));
 
     for(int i = 1; i<argc; i++)
     {
@@ -1354,6 +1349,7 @@ int main(int argc, char **argv)
     clearpostfx();
 
     logoutf("init: mainloop");
+    islaunching = false;
 
     if(execfile("once.cfg", false)) remove(findfile("once.cfg", "rb"));
 

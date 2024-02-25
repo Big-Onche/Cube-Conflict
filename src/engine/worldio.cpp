@@ -597,6 +597,11 @@ bool save_world(const char *mname, bool nolms)
         return false;
     }
 
+    defformatstring(text, "Saving map... (do not close the game!)");
+
+    renderprogress(0, text, true, true);
+    renderbackground("Saving map");
+
     setmapfilenames(*mname ? mname : "untitled");
     if(savebak) backup(ogzname, bakname);
     stream *f = opengzfile(ogzname, "wb");
@@ -610,7 +615,6 @@ bool save_world(const char *mname, bool nolms)
     }
 
     savemapprogress = 0;
-    renderprogress(0, "saving map...");
 
     mapheader hdr;
     memcpy(hdr.magic, "TMAP", 4);
@@ -686,14 +690,14 @@ bool save_world(const char *mname, bool nolms)
 
     savevslots(f, numvslots);
 
-    renderprogress(0, "saving octree...");
+    renderprogress(0, text, true, true);
     savec(worldroot, ivec(0, 0, 0), worldsize>>1, f, nolms);
 
     if(!nolms)
     {
-        if(getnumviewcells()>0) { renderprogress(0, "saving pvs..."); savepvs(f); }
+        if(getnumviewcells()>0) { renderprogress(0, text, true, true); savepvs(f); }
     }
-    if(shouldsaveblendmap()) { renderprogress(0, "saving blendmap..."); saveblendmap(f); }
+    if(shouldsaveblendmap()) { renderprogress(0, text, true, true); saveblendmap(f); }
 
     delete f;
     conoutf("wrote map file %s", ogzname);
