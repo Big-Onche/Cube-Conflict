@@ -220,14 +220,14 @@ namespace game
 
     static const struct bouncerConfig { const char *name; float size, bounceIntensity; int variants, cullDist, bounceSound, bounceSoundRad, soundFlag; } bouncers[NUMBOUNCERS] =
     {
-        { "grenade",            1.0f, 1.0f,  0,  750, S_B_GRENADE,      200,    0              },
+        { "grenade",            1.0f, 1.0f,  0,  750, S_B_GRENADE,      220,    0              },
         { "pixel",              1.0f, 0.6f,  8,  750, S_B_PIXEL,        120,    0              },
-        { "rock",               1.0f, 0.8f,  4,  750, S_B_ROCK,         120,    0              },
-        { "rock/big",           2.5f, 0.4f,  3,  750, S_B_BIGROCK,      200,    0              },
+        { "rock",               0.8f, 0.8f,  4,  750, S_B_ROCK,         120,    0              },
+        { "rock/big",           2.5f, 0.4f,  3,  750, S_B_BIGROCK,      300,    0              },
         { "casing",             0.2f, 1.0f,  0,  300, S_B_CASING,       120,    SND_FIXEDPITCH },
         { "casing/big",         0.2f, 1.0f,  0,  300, S_B_BIGCASING,    120,    SND_FIXEDPITCH },
         { "casing/cartridge",   0.2f, 1.0f,  0,  300, S_B_CARTRIDGE,    120,    SND_FIXEDPITCH },
-        { "scrap",              1.5f, 0.7f,  3,  750, S_B_SCRAP,        160,    0              }
+        { "scrap",              1.5f, 0.7f,  3,  750, S_B_SCRAP,        180,    0              }
     };
 
     std::map<std::pair<int, int>, std::string> bouncersPaths;
@@ -374,7 +374,7 @@ namespace game
         loopv(projs)
         {
             projectile &p = projs[i];
-            stopLinkedSound(p.entityId);
+            if(p.soundplaying) stopLinkedSound(p.entityId);
         }
         projs.shrink(0);
     }
@@ -419,10 +419,17 @@ namespace game
     }
 
     void removeprojectiles(gameent *owner)
-    {
-        // can't use loopv here due to strange GCC optimizer bug
+    {   // can't use loopv here due to strange GCC optimizer bug
         int len = projs.length();
-        loopi(len) if(projs[i].owner==owner) { stopLinkedSound(projs[i].entityId); projs.remove(i--); len--; }
+        loopi(len)
+        {
+            if(projs[i].owner==owner)
+            {
+                if(projs[i].soundplaying) stopLinkedSound(projs[i].entityId);
+                projs.remove(i--);
+                len--;
+            }
+        }
     }
 
     VARP(blood, 0, 1, 1);
@@ -455,37 +462,40 @@ namespace game
     {
         vec p = d->o;
         p.z += 0.6f*(d->eyeheight + d->aboveeye) - d->eyeheight;
+        int actorClasse = actor->aptitude;
+        int victimClasse = d->aptitude;
+        bool isHudPlayer = (actor == hudplayer());
 
         if(d->armourtype!=A_MAGNET)
         {
             if(blood) particle_splash(PART_BLOOD, damage > 300 ? 3 : damage/100, 1000, p, 0x60FFFF, 2.96f);
-            gibeffect(!isteam(d->team, actor->team) ? damage : actor->aptitude==APT_MEDECIN ? 0 : actor->aptitude==APT_JUNKIE ? damage/=1.5f : damage/=3.f, vec(0,0,0), d);
+            gibeffect(!isteam(d->team, actor->team) ? damage : actorClasse == APT_MEDECIN ? 0 : actorClasse == APT_JUNKIE ? damage/=1.5f : damage/=3.f, vec(0,0,0), d);
         }
 
-        bool teamdmg = false;
-        if(actor==hudplayer()) d->curdamagecolor = 0xFFAA00;
+        bool teamDamage = false;
+        if(isHudPlayer) d->curdamagecolor = 0xFFAA00;
 
-        damage = ((damage*classes[actor->aptitude].damage)/(classes[d->aptitude].resistance)); // calc damage based on the class's stats
+        damage = ((damage*classes[actorClasse].damage)/(classes[victimClasse].resistance)); // calc damage based on the class's stats
 
-        switch(actor->aptitude) // recalc damage based on the actor's passive/active skills
+        switch(actorClasse) // recalc damage based on the actor's passive/active skills
         {
             case APT_AMERICAIN:
-                if(atk>=ATK_NUKE_SHOOT && atk<=ATK_CAMPOUZE_SHOOT)
+                if(atk >= ATK_NUKE_SHOOT && atk <= ATK_CAMPOUZE_SHOOT)
                 {
                     damage *= 1.5f;
-                    if(actor==hudplayer()) d->curdamagecolor = 0xFF0000;
+                    if(isHudPlayer) d->curdamagecolor = 0xFF0000;
                 }
                 break;
 
             case APT_NINJA:
-                if(atk==ATK_CACNINJA_SHOOT && actor==hudplayer()) d->curdamagecolor = 0xFF0000;
+                if(atk == ATK_CACNINJA_SHOOT && actor==hudplayer()) d->curdamagecolor = 0xFF0000;
                 break;
 
             case APT_MAGICIEN:
                 if(actor->abilitymillis[ABILITY_2])
                 {
                     damage *= 1.25f;
-                    if(actor==hudplayer()) d->curdamagecolor = 0xFF00FF;
+                    if(isHudPlayer) d->curdamagecolor = 0xFF00FF;
                 }
                 break;
 
@@ -497,7 +507,7 @@ namespace game
                 if(actor->boostmillis[B_RAGE])
                 {
                     damage *= 1.25f;
-                    if(actor==hudplayer()) d->curdamagecolor = 0xFF7700;
+                    if(isHudPlayer) d->curdamagecolor = 0xFF7700;
                 }
                 break;
 
@@ -505,12 +515,12 @@ namespace game
                 if(actor->abilitymillis[ABILITY_3])
                 {
                     damage *= 1.3f;
-                    if(actor==hudplayer()) d->curdamagecolor = 0xFF7700;
+                    if(isHudPlayer) d->curdamagecolor = 0xFF7700;
                 }
-                if(d->aptitude==APT_AMERICAIN)
+                if(victimClasse == APT_AMERICAIN)
                 {
                     damage /= 1.25f;
-                    if(actor==hudplayer()) d->curdamagecolor = 0xFFFF00;
+                    if(isHudPlayer) d->curdamagecolor = 0xFFFF00;
                 }
                 break;
 
@@ -518,53 +528,53 @@ namespace game
                 if(d==player1 && actor==player1 && player1->armour && player1->abilitymillis[ABILITY_1]) unlockAchievement(ACH_BRICOLEUR);
         }
 
-        switch(d->aptitude) // recalc damage based on the victim's passive/active
+        switch(victimClasse) // recalc damage based on the victim's passive/active
         {
             case APT_MAGICIEN:
                 if(d->abilitymillis[ABILITY_3]) damage /= 5.0f;
                 break;
 
             case APT_PRETRE:
-                if(actor==hudplayer() && d->abilitymillis[ABILITY_2] && d->aptitude==APT_PRETRE && d->mana) d->curdamagecolor = 0xAA00AA;
+                if(isHudPlayer && d->abilitymillis[ABILITY_2] && victimClasse == APT_PRETRE && d->mana) d->curdamagecolor = 0xAA00AA;
                 break;
 
             case APT_SHOSHONE:
                 if(d->abilitymillis[ABILITY_1]) damage /= 1.3f;
-                if(actor->aptitude==APT_AMERICAIN)
+                if(actorClasse == APT_AMERICAIN)
                 {
                     damage *= 1.25f;
-                    if(actor==hudplayer()) d->curdamagecolor = 0xFF7700;
+                    if(isHudPlayer) d->curdamagecolor = 0xFF7700;
                 }
         }
 
         if(actor->boostmillis[B_ROIDS]) // recalc damage if actor has roids
         {
-            damage *= actor->aptitude==APT_JUNKIE ? 3 : 2;
-            if(actor==hudplayer()) d->curdamagecolor = 0xFF0000;
+            damage *= actorClasse == APT_JUNKIE ? 3 : 2;
+            if(isHudPlayer) d->curdamagecolor = 0xFF0000;
         }
         if(d->boostmillis[B_JOINT]) // recalc victim if actor has joint
         {
-            damage /= d->aptitude==APT_JUNKIE ? 1.875f : 1.25f;
-            if(actor==hudplayer()) d->curdamagecolor = 0xAAAA55;
+            damage /= victimClasse == APT_JUNKIE ? 1.875f : 1.25f;
+            if(isHudPlayer) d->curdamagecolor = 0xAAAA55;
         }
 
-        if(isteam(d->team, actor->team) && actor!=d && actor==hudplayer()) // recalc if ally or not
+        if(isteam(d->team, actor->team) && actor != d && isHudPlayer) // recalc if ally or not
         {
-            if(actor->aptitude==APT_MEDECIN) return;
-            damage /= (actor->aptitude==APT_JUNKIE ? 1.5f : 3.f);
-            if(actor==hudplayer()) d->curdamagecolor = 0x888888;
-            teamdmg = true;
+            if(actorClasse == APT_MEDECIN) return;
+            damage /= (actorClasse == APT_JUNKIE ? 1.5f : 3.f);
+            d->curdamagecolor = 0x888888;
+            teamDamage = true;
         }
 
         damage = damage/10.f; // rescale damage value
 
-        if(actor==hudplayer())
+        if(isHudPlayer)
         {
             d->curdamage += damage;
             d->lastcurdamage = totalmillis;
-            if(!teamdmg && actor==player1) updateStat(damage, STAT_TOTALDAMAGEDEALT);
+            if(!teamDamage && actor == player1) updateStat(damage, STAT_TOTALDAMAGEDEALT);
         }
-        else if(d==player1) updateStat(damage, STAT_TOTALDAMAGERECIE);
+        else if(d == player1) updateStat(damage, STAT_TOTALDAMAGERECIE);
     }
 
     void gibeffect(int damage, const vec &vel, gameent *d)
@@ -860,7 +870,7 @@ namespace game
                 vec pos = vec(p.offset).mul(p.offsetmillis/float(OFFSETMILLIS)).add(p.o);
                 explode(p.local, p.owner, pos, p.dir, NULL, 0, atk);
                 projstain(p, pos, atk);
-                stopLinkedSound(p.entityId);
+                if(p.soundplaying) stopLinkedSound(p.entityId);
                 projs.remove(i);
                 break;
             }
@@ -954,17 +964,20 @@ namespace game
 
                 bool bigradius = p.atk==ATK_NUKE_SHOOT || p.atk==ATK_ARTIFICE_SHOOT;
 
-                if(camera1->o.dist(p.o) < (bigradius ? 800 : 400) && p.projsound) // play and update the sound only if the projectile is passing by
+                if(p.projsound)
                 {
-                    vec velocity = dv.div(float(time)*70);
-                    if(!p.soundplaying) playSound(p.projsound, &p.o, bigradius ? 800 : 400, 1, SND_LOOPED, p.entityId);
-                    p.soundplaying = true;
-                    if(p.entityId) updateSoundPosition(p.entityId, p.o, velocity);
-                }
-                else
-                {
-                    p.soundplaying = false;
-                    stopLinkedSound(p.entityId);
+                    if(camera1->o.dist(p.o) < (bigradius ? 800 : 400)) // play and update the sound only if the projectile is passing by
+                    {
+                        vec velocity = dv.div(float(time)*70);
+                        if(!p.soundplaying) playSound(p.projsound, &p.o, bigradius ? 800 : 400, 1, SND_LOOPED, p.entityId);
+                        p.soundplaying = true;
+                        if(p.entityId) updateSoundPosition(p.entityId, p.o, velocity);
+                    }
+                    else if(p.soundplaying)
+                    {
+                        p.soundplaying = false;
+                        stopLinkedSound(p.entityId);
+                    }
                 }
             }
             if(exploded)
@@ -1211,28 +1224,30 @@ namespace game
         int distance = camera1->o.dist(hudgunorigin(gun, d->o, to, d));
         int loopedSoundFlags = SND_LOOPED|SND_FIXEDPITCH|SND_NOCULL;
 
-        switch(gunSound)
+        if(!d->attacksound)
         {
-            case S_FLAMETHROWER:
-            case S_GAU8:
-                if(!d->attacksound)
-                {
+            switch(gunSound)
+            {
+                case S_FLAMETHROWER:
+                case S_GAU8:
                     playSound(gunSound, isHudPlayer ? NULL : &muzzleOrigin, incraseDist ? 600 : 400, incraseDist ? 300 : 150, loopedSoundFlags, d->entityId, PL_ATTACK);
-                    if(distance > 300)
+                    d->attacksound = 1;
+                    if(distance > 300 && !isHudPlayer)
                     {
                         playSound(attacks[atk].middistsnd, &muzzleOrigin, incraseDist ? 3000 : 850, incraseDist ? 1500 : 400, loopedSoundFlags, d->entityId, PL_ATTACK_FAR);
+                        d->attacksound = 2;
                     }
-                    d->attacksound = true;
-                }
-                return;
-            default:
-                if(gunSound==S_PLASMARIFLE_SFX && !d->attacksound)
-                {
-                    playSound(gunSound, d==hudplayer() ? NULL : &muzzleOrigin, 400, 150, loopedSoundFlags, d->entityId, PL_ATTACK);
-                    d->attacksound = true;
-                }
-                playSound(attacks[atk].sound, d==hudplayer() ? NULL : &muzzleOrigin, incraseDist ? 600 : 400, incraseDist ? 200 : 150);
+                    return;
+
+                case S_PLASMARIFLE_SFX:
+                    playSound(gunSound, isHudPlayer ? NULL : &muzzleOrigin, 300, 150, loopedSoundFlags, d->entityId, PL_ATTACK);
+                    d->attacksound = 1;
+                    break;
+            }
         }
+        else if(gunSound != S_PLASMARIFLE_SFX) return;
+
+        playSound(attacks[atk].sound, isHudPlayer ? NULL : &muzzleOrigin, incraseDist ? 600 : 400, incraseDist ? 200 : 150);
 
         if(distance > 300)
         {
