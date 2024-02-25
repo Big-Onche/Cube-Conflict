@@ -61,10 +61,10 @@ struct flarerenderer : partrenderer
         dir.mul(1/dist);
         if(raycube(o, dir, dist, RAY_CLIPMAT|RAY_POLY) < dist) //simple fade in/out when flare position (=sun) is occluded
         {
-            flarefade-=flarefade>0 ? 0.1f : 0;
-            if(flarefade<=0) return;
+            flarefade = max(flarefade - 0.1f, 0.f);
+            if(!flarefade) return;
         }
-        else if (flarefade<1.f) flarefade+=0.1f;
+        else if(flarefade < 1) flarefade = min(flarefade + 0.1f, 1.f);
 
         flare &f = flares[numflares++];
         f.o = o;
@@ -157,7 +157,7 @@ struct flarerenderer : partrenderer
     }
 
     //square per round hole - use addflare(..) instead
-    particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity = 0, int sizemod = 0, bool hud = false) { return NULL; }
+    particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity = 0, int sizemod = 0, bool sound = false, bool hud = false) { return NULL; }
 };
 static flarerenderer flares("<grey>media/particles/misc/lensflares.png", 64);
 
