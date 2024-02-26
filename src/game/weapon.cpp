@@ -313,7 +313,11 @@ namespace game
             vec old(bnc.o);
 
             bool stopped = false;
-            if(bnc.bouncetype == BNC_GRENADE) stopped = (bounce(&bnc, 0.6f, 0.5f, 0.8f) || (bnc.lifetime -= time) < 0);
+            if(bnc.bouncetype == BNC_GRENADE)
+            {
+                stopped = (bounce(&bnc, 0.6f, 0.5f, 0.8f) || (bnc.lifetime -= time) < 0);
+                if(camera1->o.dist(bnc.o) < 300 && !stopped) updateSoundPosition(bnc.entityId, bnc.o);
+            }
             else
             {
                 for(int rtime = time; rtime > 0;)
@@ -876,7 +880,6 @@ namespace game
                 vec pos = vec(p.offset).mul(p.offsetmillis/float(OFFSETMILLIS)).add(p.o);
                 explode(p.local, p.owner, pos, p.dir, NULL, 0, atk);
                 projstain(p, pos, atk);
-                if(p.soundplaying) stopLinkedSound(p.entityId);
                 projs.remove(i);
                 break;
             }
@@ -968,16 +971,22 @@ namespace game
                     gfx::renderProjectilesTrails(p.owner, pos, dv, p.from, p.offset, p.atk, p.exploded);
                 }
 
-                bool bigradius = p.atk==ATK_NUKE_SHOOT || p.atk==ATK_ARTIFICE_SHOOT;
-
-                if(p.projsound)
+                if(p.projsound) // play and update the sound only if the projectile is passing by
                 {
-                    if(camera1->o.dist(p.o) < (bigradius ? 800 : 400)) // play and update the sound only if the projectile is passing by
+                    bool bigRadius = (p.atk==ATK_NUKE_SHOOT || p.atk==ATK_ARTIFICE_SHOOT);
+
+                    if(camera1->o.dist(p.o) < (bigRadius ? 800 : 400))
                     {
-                        vec velocity = dv.div(float(time)*70);
-                        if(!p.soundplaying) playSound(p.projsound, &p.o, bigradius ? 800 : 400, 1, SND_LOOPED, p.entityId);
-                        p.soundplaying = true;
-                        if(p.entityId) updateSoundPosition(p.entityId, p.o, velocity);
+                        if(!p.soundplaying)
+                        {
+                            playSound(p.projsound, &p.o, bigRadius ? 800 : 400, 1, SND_LOOPED, p.entityId);
+                            p.soundplaying = true;
+                        }
+                        else
+                        {
+                            vec velocity = dv.div(float(time)*70);
+                            updateSoundPosition(p.entityId, p.o, velocity);
+                        }
                     }
                     else if(p.soundplaying)
                     {
@@ -991,7 +1000,7 @@ namespace game
                 if(p.local && !p.exploded) addmsg(N_EXPLODE, "rci3iv", p.owner, lastmillis-maptime, p.atk, p.id-maptime, hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
                 p.exploded = true;
                 if(p.soundplaying) stopLinkedSound(p.entityId);
-
+                p.soundplaying = false;
                 if(p.atk != ATK_ARBALETE_SHOOT) projs.remove(i--);
                 else if((p.lifetime -= time)<0 || removearrow) projs.remove(i--);
             }
@@ -1240,13 +1249,13 @@ namespace game
                     d->attacksound = 1;
                     if(distance > 300 && !isHudPlayer)
                     {
-                        playSound(attacks[atk].middistsnd, &muzzleOrigin, incraseDist ? 3000 : 850, incraseDist ? 1500 : 400, loopedSoundFlags, d->entityId, PL_ATTACK_FAR);
+                        playSound(attacks[atk].middistsnd, &muzzleOrigin, incraseDist ? 3200 : 800, incraseDist ? 1600 : 800, loopedSoundFlags, d->entityId, PL_ATTACK_FAR);
                         d->attacksound = 2;
                     }
                     return;
 
                 case S_PLASMARIFLE_SFX:
-                    playSound(gunSound, isHudPlayer ? NULL : &muzzleOrigin, 300, 150, loopedSoundFlags, d->entityId, PL_ATTACK);
+                    playSound(gunSound, isHudPlayer ? NULL : &muzzleOrigin, 200, 150, loopedSoundFlags, d->entityId, PL_ATTACK);
                     d->attacksound = 1;
                     break;
             }
@@ -1513,6 +1522,7 @@ namespace game
             pos.add(vec(bnc.offset).mul(bnc.offsetmillis/float(OFFSETMILLIS)));
             vec vel(bnc.vel);
             pitch = -bnc.roll;
+            bool inWater = (lookupmaterial(pos)==MAT_WATER);
 
             if(vel.magnitude() <= 3.f) {yaw = bnc.lastyaw; pitch = bnc.lastpitch;}
             else if (!isPaused)
@@ -1550,11 +1560,10 @@ namespace game
                         float growth = (1000 - (bnc.lifetime - curtime))/150.f;
                         particle_fireball(pos, growth, PART_EXPLOSION, 20, gfx::hasroids(bnc.owner) ? 0xFF0000 : 0x0055FF, growth, gfx::champicolor());
                         regular_particle_splash(PART_SMOKE, 1, 150, pos, 0x404088, 2.5f, 50, -20);
-                        updateSoundPosition(bnc.entityId, pos);
                         break;
                     }
                     case BNC_SCRAP:
-                        regular_particle_splash(lookupmaterial(pos)==MAT_WATER ? PART_BUBBLE : PART_SMOKE, lookupmaterial(pos)==MAT_WATER ? 1 : 3, 250, pos, 0x222222, 2.5f, 50, -50);
+                        regular_particle_splash(inWater ? PART_BUBBLE : PART_SMOKE, inWater ? 1 : 3, 250, pos, 0x222222, 2.5f, 50, -50);
                         regular_particle_splash(PART_FIRE_BALL, 2, 75, pos, 0x994400, 0.7f, 30, -30);
                         break;
                 }

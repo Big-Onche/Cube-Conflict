@@ -1191,11 +1191,9 @@ int main(int argc, char **argv)
         break;
     }
 
-
     execfile("config/vars.cfg", false);
     if(!execfile("config/languages/lib.cfg", false) || !execfile("config/languages/english.cfg", false)) fatal("cannot find languages data files");
     execfile("config/init.cfg", false);
-    formatstring(loadingtext, "%s", readstr("Loading_Bar_Quotes", rnd(14)));
 
     for(int i = 1; i<argc; i++)
     {
@@ -1349,6 +1347,9 @@ int main(int argc, char **argv)
     clearpostfx();
 
     logoutf("init: mainloop");
+    formatstring(loadingtext, "%s", readstr("Loading_Bar_Quotes", rnd(14)));
+    playMusic(language == 2 ? S_MAINMENURU : S_MAINMENU);
+
     islaunching = false;
 
     if(execfile("once.cfg", false)) remove(findfile("once.cfg", "rb"));

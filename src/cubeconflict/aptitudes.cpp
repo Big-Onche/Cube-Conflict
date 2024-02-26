@@ -78,7 +78,7 @@ namespace game
                     if(isteam(hudplayer()->team, d->team))
                     {
                         getspyability = totalmillis;
-                        playSound(S_SPY_3, d==hudplayer() ? NULL : &d->o, 3000, 50, SND_NOCULL|SND_FIXEDPITCH, d->entityId, PL_ABI_3);
+                        playSound(S_SPY_3, d==hudplayer() ? NULL : &d->o, 3000, 50, SND_NOCULL|SND_FIXEDPITCH);
                     }
                 }
             }
@@ -137,7 +137,7 @@ namespace game
             if(hasAbilityEnabled(d, i))
             {
                 vec playerVel = d->vel;
-                if(d!=hudplayer()) updateSoundPosition(d->entityId, d->o, playerVel.div(75), PL_ABI_1+i);
+                if(d!=hudplayer() && camera1->o.dist(d->o) < 250) updateSoundPosition(d->entityId, d->o, playerVel.div(75), PL_ABI_1+i);
             }
             else continue; // no need to go further in the loop if ability no enabled
 

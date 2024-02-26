@@ -679,8 +679,7 @@ struct gamestate
 
         if(m_random) // random weapon mutator
         {
-            int weapon = rnd(2) ? GUN_LANCEFLAMMES : GUN_PLASMA;
-            //int weapon = rnd(17);
+            int weapon = rnd(17);
             baseammo(weapon);
             selectedWeapon = weapon;
         }

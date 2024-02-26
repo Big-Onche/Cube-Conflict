@@ -452,7 +452,7 @@ void stopSound(int soundId, int flags)
 
     loopi(maxsoundsatonce)
     {
-        if(sources[i].isActive && sources[i].soundId == soundId && sources[i].soundFlags == flags)
+        if(sources[i].soundId == soundId && sources[i].soundFlags == flags)
         {
             alSourceStop(sources[i].source);
             sources[i].isActive = false;
@@ -517,7 +517,7 @@ void updateSoundPosition(size_t entityId, const vec &newPosition, const vec &vel
 
     loopi(maxsoundsatonce) // loop through all the SoundSources and find the one with the matching entityId
     {
-        if(sources[i].entityId == entityId && sources[i].soundType == soundType) // found the correct sound source, now update its position
+        if(sources[i].isActive && sources[i].entityId == entityId && sources[i].soundType == soundType) // found the correct sound source, now update its position
         {
             bool occlusion = applyUnderwaterFilter(NULL) ? true : ( !sources[i].noGeomOcclusion && (checkSoundOcclusion(&newPosition)) );
             alSourcei(sources[i].source, AL_DIRECT_FILTER, occlusion ? occlusionFilter : AL_FILTER_NULL);
@@ -553,18 +553,15 @@ void stopMapSound(extentity *e)
 
     size_t entityId = e->entityId;
 
-    SoundSource* soundSource = NULL;
     loopi(maxsoundsatonce)
     {
-        if(sources[i].entityId == entityId && sources[i].isActive) { soundSource = &sources[i]; break; }
-    }
-
-    if(soundSource)
-    {
-        alSourceStop(soundSource->source);
-        //reportSoundError("alSourceStop-stopMapSound", tempformatstring("Sound %d", e->attr1));
-        soundSource->isActive = false;
-        e->flags &= ~EF_SOUND;
+        if(sources[i].entityId == entityId)
+        {
+            alSourceStop(sources[i].source);
+            //reportSoundError("alSourceStop-stopMapSound", tempformatstring("Sound %d", e->attr1));
+            sources[i].isActive = false;
+            e->flags &= ~EF_SOUND;
+        }
     }
 }
 
@@ -590,11 +587,12 @@ void checkMapSounds()
     {
         extentity &e = *ents[i];
 
-        if(e.type!=ET_SOUND) continue;
+        if(e.type == ET_EMPTY) stopMapSound(&e);
+        else if(e.type != ET_SOUND) continue;
 
-        if(e.entityId != SIZE_MAX) updateSoundPosition(e.entityId, e.o);
         if(camera1->o.dist(e.o) < e.attr2 + 50) // check for distance + add a slight tolerance for efx sound effects
         {
+            if(e.entityId != SIZE_MAX && editmode) updateSoundPosition(e.entityId, e.o);
             if(!(e.flags & EF_SOUND))
             {
                 playSound(e.attr1, &e.o, e.attr2, e.attr3, SND_LOOPED|SND_MAPSOUND|SND_FIXEDPITCH, e.entityId);
@@ -609,7 +607,7 @@ void stopLinkedSound(size_t entityId, int soundType, bool clear)
 {
     loopi(maxsoundsatonce)
     {
-        if(sources[i].entityId == entityId && (sources[i].soundType == soundType || clear))
+        if(sources[i].isActive && sources[i].entityId == entityId && (sources[i].soundType == soundType || clear))
         {
             alSourceStop(sources[i].source);
             //reportSoundError("alSourceStop-stopLinkedSound", "Error while stopping linked sound");

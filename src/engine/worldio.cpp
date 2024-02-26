@@ -726,6 +726,7 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     resetmap();
 
     Texture *mapshot = textureload(picname, 3, true, false);
+    renderbackground("...", mapshot, mname, game::getmapinfo(), readstr("Loading_Screen_Tips", rnd(17)));
 
     if(!map_atmo) map_atmo = rnd(9)+1;
 
@@ -783,8 +784,6 @@ bool load_world(const char *mname, const char *cname)        // still supports a
         }
     }
     if(dbgvars) conoutf(CON_DEBUG, "read %d vars", hdr.numvars);
-
-    renderbackground("...", mapshot, mname, game::getmapinfo(), readstr("Loading_Screen_Tips", rnd(17)));
 
     setvar("mapversion", hdr.version, true, false);
 

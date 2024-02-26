@@ -17,7 +17,7 @@ namespace game
         if(player1->state != CS_DEAD && isconnected() && !intermission && !m_tutorial)
         {
             conoutf(CON_GAMEINFO, "\fc%s", readstr("Console_Game_UnableToChangeClass"));
-            playSound(S_ERROR, NULL, 0, 0, SND_FIXEDPITCH);
+            playSound(S_ERROR, NULL, 0, 0, SND_UI);
             player1_aptitude = oldapti;
         }
         else
@@ -25,7 +25,7 @@ namespace game
             addmsg(N_SENDAPTITUDE, "ri", player1_aptitude);
             player1->aptitude = player1_aptitude;
             oldapti = player1->aptitude;
-            if(!islaunching) playSound(S_APT_SOLDAT+player1_aptitude, NULL, 0, 0, SND_FIXEDPITCH|SND_UI);
+            if(!islaunching) playSound(S_APT_SOLDAT+player1_aptitude, NULL, 0, 0, SND_UI);
             if(isconnected() && !intermission) unlockAchievement(ACH_UNDECIDED);
         }
     });
@@ -284,6 +284,7 @@ namespace game
     void updatePlayersSounds(gameent *d)
     {
         bool isHudPlayer = (d == hudplayer());
+        float distance = camera1->o.dist(d->o);
         vec playerVel = d->vel;
         playerVel.div(75);
 
@@ -293,12 +294,30 @@ namespace game
         else if(!inWater && uwSoundPlaying) { stopLinkedSound(hudplayer()->entityId, PL_UNDERWATER); uwSoundPlaying = false; }
 
         if(d->state != CS_ALIVE) return;
-        if(isAttacking(d))
+        if(isAttacking(d) && (d->gunselect==GUN_PLASMA || d->gunselect==GUN_LANCEFLAMMES || d->gunselect==GUN_S_GAU8))
         {
+            int closeSoundRadius = 0;
+            int farSoundRadius = 0;
+
+            switch(d->gunselect)
+            {
+                case GUN_PLASMA:
+                    closeSoundRadius = 200;
+                    break;
+                case GUN_LANCEFLAMMES:
+                    closeSoundRadius = 400;
+                    farSoundRadius = 800;
+                    break;
+                case GUN_S_GAU8:
+                    closeSoundRadius = 600;
+                    farSoundRadius = 3200;
+                    break;
+            }
+
             if(!isHudPlayer)
             {
-                updateSoundPosition(d->entityId, d->o, playerVel, PL_ATTACK);
-                updateSoundPosition(d->entityId, d->o, playerVel, PL_ATTACK_FAR);
+                if(distance < closeSoundRadius) updateSoundPosition(d->entityId, d->o, playerVel, PL_ATTACK);
+                if(distance < farSoundRadius && distance > 300) updateSoundPosition(d->entityId, d->o, playerVel, PL_ATTACK_FAR);
             }
         }
         else if(d->attacksound)
@@ -315,7 +334,7 @@ namespace game
                 playSound(S_ASSISTALARM, isHudPlayer ? NULL : &d->o, 250, 100, SND_FIXEDPITCH|SND_LOOPED, d->entityId, PL_POWERARMOR);
                 d->powerarmoursound = true;
             }
-            else if(!isHudPlayer) updateSoundPosition(d->entityId, d->o, playerVel, PL_POWERARMOR);
+            else if(!isHudPlayer && distance < 250) updateSoundPosition(d->entityId, d->o, playerVel, PL_POWERARMOR);
         }
         else if(d->powerarmoursound) { stopLinkedSound(d->entityId, PL_POWERARMOR); d->powerarmoursound = false; }
     }

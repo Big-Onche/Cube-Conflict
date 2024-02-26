@@ -121,6 +121,7 @@ extern void initSounds();
 extern void playMusic(int musicId);
 extern void updateSoundPosition(size_t entityId, const vec &newPosition, const vec &velocity = vec(0,0,0), int soundType = 0);
 extern void soundNearmiss(int sound, const vec &from, const vec &to, int precision = 2048);
+extern void stopMapSound(extentity *e);
 extern void updateSounds();
 extern void stopSound(int soundId, int flags);
 extern void stopMusic(int soundId);
