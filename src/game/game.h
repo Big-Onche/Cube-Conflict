@@ -454,7 +454,7 @@ enum {APT_SOLDAT = 0, APT_MEDECIN, APT_AMERICAIN, APT_NINJA, APT_VAMPIRE, APT_MA
 
 struct ability { const int manacost, duration, cooldown, snd; };
 static const struct classesConfig { const char *hatDir; int damage, resistance, accuracy, speed; ability abilities[3]; } classes[NUMCLASSES] =
-{                   // classe stats                         // ability 1               // ability 2                // ability 3
+{                        // classe stats         // ability 1                 // ability 2                // ability 3
     { "hats/soldier",    105,  105,  105,   105, { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },
     { "hats/medic",       90,  115,   95,   105, { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },
     { "hats/american",   100,  135,   80,    85, { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },
@@ -595,7 +595,7 @@ struct gamestate
             }
 
             default:
-                float ammoboost = aptitude==APT_AMERICAIN ? 1.5f : 1;
+                float ammoboost = ((aptitude == APT_AMERICAIN) ? (type == I_SUPERARME && rndsweap == 0 ? 2 : 1.5f) : 1);
                 ammo[is.info] = min(ammo[is.info]+is.add*itemboost*ammoboost, is.max*ammoboost);
         }
     }
