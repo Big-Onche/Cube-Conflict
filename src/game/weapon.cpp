@@ -168,6 +168,8 @@ namespace game
         playSound(S_NOAMMO);
     });
 
+    bool spreadLimit(gameent *d) { return d->gunselect == GUN_LANCEFLAMMES || d->gunselect == GUN_MOSSBERG || d->gunselect == GUN_HYDRA; }
+
     void offsetray(const vec &from, const vec &to, float spread, float range, vec &dest, gameent *d)
     {
         vec offset;
@@ -176,8 +178,12 @@ namespace game
 
         if(d->boostmillis[B_SHROOMS]) spread /= d->aptitude==APT_JUNKIE ? 1.75f : 1.5f;
         if(d->aptitude==APT_MAGICIEN && d->abilitymillis[ABILITY_2]) spread /= 3.f;
-        if(d->crouching) spread /= d->aptitude==APT_CAMPEUR ? 2.5f : 1.5f;
-        if(d->boostmillis[B_ROIDS] || d->boostmillis[B_RAGE]) spread *= 1.75f;
+
+        if(!spreadLimit(d))
+        {
+            if(d->crouching) spread /= d->aptitude==APT_CAMPEUR ? 2.5f : 1.3f;
+            if(d->boostmillis[B_ROIDS] || d->boostmillis[B_RAGE]) spread *= 1.75f;
+        }
 
         spread = (spread*100) / classes[d->aptitude].accuracy;
         offset.mul((to.dist(from)/1024) * spread);
