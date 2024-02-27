@@ -1249,7 +1249,7 @@ namespace game
                     d->attacksound = 1;
                     if(distance > 300 && !isHudPlayer)
                     {
-                        playSound(attacks[atk].middistsnd, &muzzleOrigin, incraseDist ? 3200 : 800, incraseDist ? 1600 : 800, loopedSoundFlags, d->entityId, PL_ATTACK_FAR);
+                        playSound(attacks[atk].middistsnd, &muzzleOrigin, incraseDist ? 3200 : 600, incraseDist ? 1600 : 400, loopedSoundFlags, d->entityId, PL_ATTACK_FAR);
                         d->attacksound = 2;
                     }
                     return;

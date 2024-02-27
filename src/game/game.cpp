@@ -306,7 +306,7 @@ namespace game
                     break;
                 case GUN_LANCEFLAMMES:
                     closeSoundRadius = 400;
-                    farSoundRadius = 800;
+                    farSoundRadius = 600;
                     break;
                 case GUN_S_GAU8:
                     closeSoundRadius = 600;
