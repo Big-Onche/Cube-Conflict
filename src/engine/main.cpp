@@ -169,7 +169,52 @@ ICOMMAND(getmaptitle, "", (),
     result(getalias(tempformatstring("maptitle_%s", readstr("languages", language))));
 )
 
-void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, const char *mapname, const char *mapinfo, const char *tip, bool force = false)
+void renderMapLoadingScreen(int w, int h, const char *mapname, const char *tip)
+{
+    float lh = 0.5f*min(w, h), lw = lh,
+          lx = 0.5f*(w - lw), ly = 0.5f*(h - lh);
+
+    defformatstring(mshot,"media/map/%s.png", mapname);
+    copystring(backgroundimg, mshot);
+
+    settexture("media/interface/chargement.png", 3);
+    bgquad(lx, ly, lw, lh);
+
+    settexture("media/interface/shadow.png", 3);
+    bgquad(0, 0, w, h);
+
+    float infowidth = 17.5f*FONTH;
+
+    if(mapname)
+    {
+        execfile(tempformatstring("media/map/%s.cfg", mapname));
+        defformatstring(mapprettyname, "%s", getalias(tempformatstring("maptitle_%s", readstr("languages", language))));
+        int tw = text_width(mapprettyname);
+        float tsz = 0.04f*min(screenw, screenh)/70,
+              tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*8.0f*min(screenw, screenh) - 70*tsz;
+        pushhudmatrix();
+        hudmatrix.translate(tx, ty, 0);
+        hudmatrix.scale(tsz, tsz, 1);
+        flushhudmatrix();
+        draw_text(mapprettyname, 0, 0, 0x01, 0x01, 0x01, 0xFF, -1);
+        pophudmatrix();
+    }
+
+    if(tip)
+    {
+        int tw = infowidth+2;
+        float tsz = 0.04f*min(screenw, screenh)/100,
+              tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*7.4f*min(screenw, screenh) - 100*tsz;
+        pushhudmatrix();
+        hudmatrix.translate(tx, ty, 0);
+        hudmatrix.scale(tsz, tsz, 1);
+        flushhudmatrix();
+        draw_text(tip, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, -1, infowidth+2);
+        pophudmatrix();
+    }
+}
+
+void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, const char *mapname, const char *tip, bool force = false)
 {
     static int lastupdate = -1, lastw = -1, lasth = -1;
 
@@ -194,50 +239,7 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-    if(mapshot || mapname)
-    {
-        float lh = 0.5f*min(w, h), lw = lh,
-              lx = 0.5f*(w - lw), ly = 0.5f*(h - lh);
-
-        defformatstring(mshot,"media/map/%s.png", mapname);
-        copystring(backgroundimg, mshot);
-
-        settexture("media/interface/chargement.png", 3);
-        bgquad(lx, ly, lw, lh);
-
-        settexture("media/interface/shadow.png", 3);
-        bgquad(0, 0, w, h);
-
-        float infowidth = 17.5f*FONTH;
-
-        if(mapname)
-        {
-            execfile(tempformatstring("media/map/%s.cfg", mapname));
-            defformatstring(mapprettyname, "%s", getalias(tempformatstring("maptitle_%s", readstr("languages", language))));
-            int tw = text_width(mapprettyname);
-            float tsz = 0.04f*min(screenw, screenh)/70,
-                  tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*8.0f*min(screenw, screenh) - 70*tsz;
-            pushhudmatrix();
-            hudmatrix.translate(tx, ty, 0);
-            hudmatrix.scale(tsz, tsz, 1);
-            flushhudmatrix();
-            draw_text(mapprettyname, 0, 0, 0x01, 0x01, 0x01, 0xFF, -1);
-            pophudmatrix();
-        }
-
-        if(tip)
-        {
-            int tw = infowidth+2;
-            float tsz = 0.04f*min(screenw, screenh)/100,
-                  tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*7.4f*min(screenw, screenh) - 100*tsz;
-            pushhudmatrix();
-            hudmatrix.translate(tx, ty, 0);
-            hudmatrix.scale(tsz, tsz, 1);
-            flushhudmatrix();
-            draw_text(tip, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, -1, infowidth+2);
-            pophudmatrix();
-        }
-    }
+    if(mapshot || mapname) renderMapLoadingScreen(w, h, mapname, tip);
     else
     {
         if(force)
@@ -248,7 +250,7 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
             settexture(tempformatstring("media/map/%s.png", mapselimg));
             bgquad(ilx-parallaxX/-40, ily-parallaxY/-40, ilw, ilh);
         }
-        else if (islaunching)
+        else if(islaunching)
         {
             float jlh = 0.5f*min(w, h), jlw = jlh,
                   jlx = 0.5f*(w - jlw), jly = 0.5f*(h - jlh);
@@ -268,22 +270,16 @@ void renderbackgroundview(int w, int h, const char *caption, Texture *mapshot, c
 }
 
 VARFP(hudscale, 0, 20, 100, if(!islaunching) execute("calcratio"));
-VAR(menumute, 0, 0, 1);
 
-void setbackgroundinfo(const char *caption = NULL, Texture *mapshot = NULL, const char *mapname = NULL, const char *mapinfo = NULL)
+void setbackgroundinfo(const char *caption = NULL, Texture *mapshot = NULL, const char *mapname = NULL)
 {
     renderedframe = false;
     copystring(backgroundcaption, caption ? caption : "");
     backgroundmapshot = mapshot;
     copystring(backgroundmapname, mapname ? mapname : "");
-    if(mapinfo != backgroundmapinfo)
-    {
-        DELETEA(backgroundmapinfo);
-        if(mapinfo) backgroundmapinfo = newstring(mapinfo);
-    }
 }
 
-void renderbackground(const char *caption, Texture *mapshot, const char *mapname, const char *mapinfo, const char *tip, bool force, bool needsound)
+void renderbackground(const char *caption, Texture *mapshot, const char *mapname, const char *tip, bool force)
 {
     if(!inbetweenframes && !force) return;
 
@@ -294,33 +290,31 @@ void renderbackground(const char *caption, Texture *mapshot, const char *mapname
 
     if(force)
     {
-        renderbackgroundview(w, h, caption, mapshot, mapname, mapinfo, tip, force);
+        renderbackgroundview(w, h, caption, mapshot, mapname, tip, force);
         return;
     }
 
     loopi(3)
     {
-        renderbackgroundview(w, h, caption, mapshot, mapname, mapinfo, tip);
+        renderbackgroundview(w, h, caption, mapshot, mapname, tip);
         swapbuffers(false);
     }
 
     renderedframe = false;
     copystring(backgroundcaption, caption ? caption : "");
     backgroundmapshot = mapshot;
-    if(mapinfo != backgroundmapinfo) { DELETEA(backgroundmapinfo); if(mapinfo) backgroundmapinfo = newstring(mapinfo); }
     if(tip != backgroundtip) { DELETEA(backgroundtip); if(tip) backgroundtip = newstring(tip); }
-    setbackgroundinfo(caption, mapshot, mapname, mapinfo);
+    setbackgroundinfo(caption, mapshot, mapname);
 }
 
 void restorebackground(int w, int h, bool force)
 {
     if(renderedframe && !force) return;
-    setbackgroundinfo();
-    renderbackgroundview(w, h, backgroundcaption[0] ? backgroundcaption : NULL, backgroundmapshot, backgroundmapname[0] ? backgroundmapname : NULL, backgroundmapinfo, backgroundtip, true);
+    setbackgroundinfo("...", backgroundmapshot, backgroundmapname);
+    renderbackgroundview(w, h, backgroundcaption[0] ? backgroundcaption : NULL, backgroundmapshot, backgroundmapname[0] ? backgroundmapname : NULL, backgroundtip, true);
 }
 
 float loadprogress = 0;
-bool changedtext = false;
 string loadingtext = "";
 int texttimer;
 
@@ -681,9 +675,8 @@ void setupscreen()
 
 void resetgl()
 {
+    loadprogress = 0;
     clearchanges(CHANGE_GFX|CHANGE_SHADERS);
-
-    renderbackground("resetting OpenGL");
 
     cleanupva();
     cleanupparticles();
@@ -702,6 +695,7 @@ void resetgl()
     inputgrab(grabinput);
 
     gl_init();
+    renderbackground("...", NULL, NULL, NULL, false);
 
     inbetweenframes = false;
     if(!reloadtexture(*notexture) ||
@@ -711,13 +705,17 @@ void resetgl()
        !reloadtexture("media/interface/backgroundimg.png") ||
        !reloadtexture("media/interface/chargement.png"))
         fatal("failed to reload core texture");
+
+    loadprogress = 10;
     reloadfonts();
     inbetweenframes = true;
     restoregamma();
     restorevsync();
     initgbuffer();
     reloadshaders();
+    loadprogress = 35;
     reloadtextures();
+    loadprogress = 90;
     allchanged(true);
 }
 
@@ -1272,13 +1270,15 @@ int main(int argc, char **argv)
     gl_init();
     notexture = textureload("media/texture/game/notexture.png");
     if(!notexture) fatal("could not find core textures");
-    textureload("media/interface/hud/fullscreen/scope_1.png");
-    textureload("media/interface/hud/fullscreen/scope_2.png");
-    textureload("media/interface/hud/fullscreen/scope_3.png");
-    textureload("media/interface/hud/fullscreen/ability.png");
-    textureload("media/interface/hud/fullscreen/vampire.png");
-    textureload("media/interface/hud/fullscreen/rage.png");
-    textureload("media/interface/hud/fullscreen/shrooms.png");
+
+    defformatstring(dir, "media/interface/hud/fullscreen/");
+    textureload(tempformatstring("%s%s", dir, "scope_1.png"));
+    textureload(tempformatstring("%s%s", dir, "scope_2.png"));
+    textureload(tempformatstring("%s%s", dir, "scope_3.png"));
+    textureload(tempformatstring("%s%s", dir, "ability.png"));
+    textureload(tempformatstring("%s%s", dir, "vampire.png"));
+    textureload(tempformatstring("%s%s", dir, "rage.png"));
+    textureload(tempformatstring("%s%s", dir, "shrooms.png"));
 
     logoutf("init: console");
     if(!execfile("config/stdlib.cfg", false)) fatal("cannot find data files (you are running from the wrong folder, try .bat file in the main folder)");
@@ -1347,12 +1347,11 @@ int main(int argc, char **argv)
     clearpostfx();
 
     logoutf("init: mainloop");
-    formatstring(loadingtext, "%s", readstr("Loading_Bar_Quotes", rnd(14)));
     playMusic(language == 2 ? S_MAINMENURU : S_MAINMENU);
+    formatstring(loadingtext, "%s", readstr("Loading_Bar_Quotes", rnd(14)));
+    if(execfile("once.cfg", false)) remove(findfile("once.cfg", "rb"));
 
     islaunching = false;
-
-    if(execfile("once.cfg", false)) remove(findfile("once.cfg", "rb"));
 
     if(load)
     {

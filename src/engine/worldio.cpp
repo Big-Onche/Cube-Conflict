@@ -726,7 +726,7 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     resetmap();
 
     Texture *mapshot = textureload(picname, 3, true, false);
-    renderbackground("...", mapshot, mname, game::getmapinfo(), readstr("Loading_Screen_Tips", rnd(17)));
+    renderbackground("...", mapshot, mname, readstr("Loading_Screen_Tips", rnd(17)));
 
     if(!map_atmo) map_atmo = rnd(9)+1;
 
@@ -886,7 +886,7 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     mapcrc = f->getcrc();
     delete f;
 
-    clearmainmenu();;
+    clearmainmenu();
 
     identflags |= IDF_OVERRIDDEN;
     if(atmos)
@@ -907,12 +907,14 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     entitiesinoctanodes();
     attachentities();
     allchanged(true);
+    renderprogress(100, "...");
 
     startmap(cname ? cname : mname);
     loopi(NUMSONGS) stopMusic(i);
     if(hasvsync) {vsync = 1; restorevsync();}
     addpostfx("mainfilter");
     if(gfx::cbfilter) gfx::addColorBlindnessFilter();
+    loadprogress = 0;
 
     return true;
 }
