@@ -206,7 +206,7 @@ namespace ai
             spot = target = vec(0, 0, 0);
             lastaction = lasthunt = lastcheck = enemyseen = enemymillis = blocktime = huntseq = blockseq = targtime = targseq = lastaimrnd = 0;
             lastrun = jumpseed = lastmillis;
-            jumprand = lastmillis+5000;
+            jumprand = lastmillis + 4000 + rnd(4000);
             targnode = targlast = enemy = -1;
         }
 

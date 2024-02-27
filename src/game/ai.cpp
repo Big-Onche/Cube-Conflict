@@ -126,7 +126,7 @@ namespace ai
         if(attackrange(d, atk, dist) || (d->skill <= 100 && !rnd(d->skill)))
         {
             float skew = clamp(float(lastmillis-d->ai->enemymillis)/float((d->skill*attacks[atk].attackdelay/200.f)), 0.f, attacks[atk].projspeed ? 0.25f : 1e16f),
-                offy = yaw-d->yaw, offp = pitch-d->pitch;
+                  offy = yaw-d->yaw, offp = pitch-d->pitch;
             if(offy > 180) offy -= 360;
             else if(offy < -180) offy += 360;
             if(fabs(offy) <= d->ai->views[0]*skew && fabs(offp) <= d->ai->views[1]*skew) return true;
@@ -155,18 +155,20 @@ namespace ai
             case ATK_ROQUETTES_SHOOT:
             case ATK_ARTIFICE_SHOOT:
                 targetPos = e->feetpos();
+            default:
+                targetPos.subz(7);
         }
 
         bool changeAim = lastmillis >= d->ai->lastaimrnd;
 
-        if(e->aptitude==APT_ESPION && e->abilitymillis[ABILITY_1] && changeAim && rnd(2))
+        if(e->aptitude==APT_ESPION && e->abilitymillis[ABILITY_1] && changeAim)
         {
             const int positions[4][2] = { {25, 25}, {-25, -25}, {25, -25}, {-25, 25} };
             targetPos.add(vec(positions[d->aptiseed][0], positions[d->aptiseed][1], 0));
         }
         else if(e->aptitude==APT_PHYSICIEN && e->abilitymillis[ABILITY_2])
         {
-            targetPos.add(vec(rnd(51)-25, rnd(51)-25, 0));
+            targetPos.add(vec(rnd(61)-30, rnd(61)-30, 0));
         }
 
         if(d->skill <= 100)
@@ -174,8 +176,8 @@ namespace ai
             if(changeAim)
             {
                 loopk(3) d->ai->aimrnd[k] = randomAimOffset(e->radius, 2.f, d->gunselect, d->skill);
-                int duration = (d->skill + 10) * (d->skill+10)*10;
-                d->ai->lastaimrnd = lastmillis + duration + rnd(duration);
+                int duration = rnd(800 - (d->skill * 4));
+                d->ai->lastaimrnd = lastmillis + duration;
             }
             loopk(3) targetPos[k] += d->ai->aimrnd[k];
         }
@@ -1017,8 +1019,9 @@ namespace ai
     {
         if(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2]) return;
         vec off = vec(pos).sub(d->feetpos()), dir(off.x, off.y, 0);
-        bool sequenced = d->ai->blockseq || d->ai->targseq, offground = d->timeinair && !d->inwater,
-            jump = !offground && lastmillis >= d->ai->jumpseed && (sequenced || off.z >= JUMPMIN || lastmillis >= d->ai->jumprand);
+        bool sequenced = d->ai->blockseq || d->ai->targseq, //offground = d->timeinair && !d->inwater,
+             jump = lastmillis >= d->ai->jumpseed && rndevent(70) && (sequenced || off.z >= JUMPMIN || lastmillis >= d->ai->jumprand);
+
         if(jump)
         {
             vec old = d->o;
@@ -1038,7 +1041,7 @@ namespace ai
         if(jump)
         {
             d->jumping = true;
-            int seed = (111-d->skill)*(d->inwater ? 3 : 5);
+            int seed = (111-d->skill)*(d->inwater ? 60 : 100);
             d->ai->jumpseed = lastmillis+seed+rnd(seed);
             seed *= b.idle ? 50 : 25;
             d->ai->jumprand = lastmillis+seed+rnd(seed);
@@ -1190,7 +1193,7 @@ namespace ai
                         if(d->o.dist(e->o) < (250 - d->skill)) d->aiming = false;
                         else d->aiming = true;
 
-                        if((d->gunselect==GUN_ARTIFICE || d->gunselect==GUN_SMAW || d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_ROQUETTES) && !idle) d->jumping = true;
+                        d->jumping = ((d->gunselect==GUN_ARTIFICE || d->gunselect==GUN_SMAW || d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_ROQUETTES) && !idle);
                         d->attacking = ACT_SHOOT;
                         d->ai->lastaction = lastmillis;
                         result = 3;
@@ -1211,6 +1214,7 @@ namespace ai
                     d->ai->enemyseen = d->ai->enemymillis = 0;
                 }
                 enemyok = false;
+                d->aiming = false;
                 result = 0;
             }
         }
@@ -1403,7 +1407,7 @@ namespace ai
             {
                 if(d->ragdoll) cleanragdoll(d);
                 moveplayer(d, 10, true, d->boostmillis[B_EPO], d->boostmillis[B_JOINT], d->aptitude, d->aptitude==APT_MAGICIEN ? d->abilitymillis[ABILITY_1] : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION || d->aptitude==APT_KAMIKAZE ? d->abilitymillis[ABILITY_2] : d->abilitymillis[ABILITY_3], d->armourtype==A_ASSIST && d->armour ? true : false);
-                if(allowmove && !b.idle) timeouts(d, b);
+                if(allowmove && !b.idle && rndevent(92)) timeouts(d, b);
                 entities::checkitems(d);
                 if(cmode) cmode->checkitems(d);
             }
