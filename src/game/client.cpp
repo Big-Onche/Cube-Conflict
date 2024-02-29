@@ -1433,7 +1433,7 @@ namespace game
 
             case N_SOUND:
                 if(!d) return;
-                playSound(getint(p), &d->o, 300, 50);
+                playSound(getint(p), d->o, 300, 50);
                 break;
 
             case N_TEXT:
@@ -1621,7 +1621,7 @@ namespace game
 
                 else if(r==player1) stat ? updateStat(10, STAT_MANAREGAIN) : updateStat(5, STAT_HEALTHREGAIN);
 
-                playSound(stat ? S_REGENJUNKIE : S_REGENMEDIGUN, r==hudplayer() ? NULL : &r->o, 125, 50);
+                playSound(stat ? S_REGENJUNKIE : S_REGENMEDIGUN, (r == hudplayer() ? vec(0, 0, 0) : r->o), 125, 50);
                 break;
             }
 
@@ -1860,7 +1860,7 @@ namespace game
                     stopLinkedSound(d->entityId, PL_ATTACK);
                     if(d->attacksound > 1) stopLinkedSound(d->entityId, PL_ATTACK_FAR);
                 }
-                playSound(attacks[gun-GUN_ELEC].picksound, d==hudplayer() ? NULL : &d->o, 200, 50);
+                playSound(attacks[gun-GUN_ELEC].picksound, d==hudplayer() ? vec(0, 0, 0) : d->o, 200, 50);
                 break;
             }
 
@@ -1891,7 +1891,7 @@ namespace game
                 entities::setspawn(i, true);
                 ai::itemspawned(i);
                 bool superweap = entities::ents[i]->type==I_SUPERARME;
-                playSound(superweap ? S_ALARME : S_ITEMSPAWN, &entities::ents[i]->o, superweap ? 2000 : 250, 50, superweap ? SND_FIXEDPITCH|SND_NOOCCLUSION : NULL);
+                playSound(superweap ? S_ALARME : S_ITEMSPAWN, entities::ents[i]->o, superweap ? 2000 : 250, 50, superweap ? SND_FIXEDPITCH|SND_NOOCCLUSION : NULL);
                 break;
             }
 

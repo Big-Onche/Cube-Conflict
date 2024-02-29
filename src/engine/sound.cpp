@@ -207,7 +207,7 @@ bool isUnderWater(vec pos)
     return (lookupmaterial(pos) == MAT_WATER || lookupmaterial(pos) == MAT_LAVA);
 }
 
-void applyReverbToSource(ALuint source, int reverb)
+void applyReverb(ALuint source, int reverb)
 {
     if(reverb >= 0 && reverb < NUMREVERBS) alSource3i(source, AL_AUXILIARY_SEND_FILTER, auxEffectSlots[reverb], 0, AL_FILTER_NULL);
     else conoutf(CON_ERROR, "Parameter %d is out of the valid range (0 to %d).", reverb, NUMREVERBS);
@@ -215,11 +215,16 @@ void applyReverbToSource(ALuint source, int reverb)
 
 int getReverbZone(vec pos)
 {
+    bool hudSound = (pos == vec(0, 0, 0));
+
     if(game::hudplayer()->boostmillis[B_SHROOMS]) return REV_SHROOMS;
     else if(isUnderWater(camera1->o)) return REV_UNDERWATER;
 
-    if(pos == vec(0,0,0)) pos = camera1->o;
-    loopi(4) { if(lookupmaterial(pos) == MAT_REVERB + i) return REV_SECOND + i; }
+    if(camera1->o.dist(pos) < 600 || hudSound)
+    {
+        if(hudSound) pos = camera1->o;
+        loopi(4) { if(lookupmaterial(pos) == MAT_REVERB + i) return REV_SECOND + i; }
+    }
     return REV_MAIN;
 }
 
@@ -338,11 +343,12 @@ float getRandomSoundPitch(int flags)
 
 bool warned = false;
 
-void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRadius, int flags, size_t entityId, int soundType)
+void playSound(int soundId, vec soundPos, float maxRadius, float maxVolRadius, int flags, size_t entityId, int soundType)
 {
     if(soundId < 0 || soundId > NUMSNDS || noSound || mutesounds) return; // invalid index or openal not initialized or mute
 
-    if(soundPos && !(flags & SND_NOCULL) && camera1->o.dist(*soundPos) > maxRadius + 50) return; // do not play sound too far from camera, except if flag SND_NOCULL
+    bool hasSoundPos = (soundPos != vec(0, 0, 0));
+    if(hasSoundPos && !(flags & SND_NOCULL) && camera1->o.dist(soundPos) > maxRadius + 50) return; // do not play sound too far from camera, except if flag SND_NOCULL
 
     size_t sourceIndex = SIZE_MAX; // default to invalid index
     int activeSources = 0;
@@ -366,7 +372,7 @@ void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRa
     sources[sourceIndex].soundType = soundType;
     sources[sourceIndex].soundId = soundId;
     sources[sourceIndex].soundFlags = flags;
-    soundPos ? sources[sourceIndex].pos = *soundPos : sources[sourceIndex].pos = vec(0, 0, 0);
+    sources[sourceIndex].pos = soundPos;
 
     Sound& s = (flags & SND_MUSIC) ? music[soundId] : ( (flags & SND_MAPSOUND) ? mapSounds[soundId] : gameSounds[soundId] );
     ALuint source = sources[sourceIndex].source;
@@ -378,7 +384,7 @@ void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRa
     alSourcef(source, AL_PITCH, getRandomSoundPitch(flags)); // managing variations of pitches
     alSourcei(source, AL_LOOPING, (flags & SND_LOOPED) ? AL_TRUE : AL_FALSE); // loop the sound or not
 
-    if(!soundPos)
+    if(!hasSoundPos)
     {
         ALfloat sourcePos[] = {0.f, 0.f, 0.f};
         alSourcefv(source, AL_POSITION, sourcePos);
@@ -386,7 +392,7 @@ void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRa
     }
     else
     {
-        ALfloat sourcePos[] = {soundPos->x, soundPos->z, soundPos->y};
+        ALfloat sourcePos[] = {soundPos.x, soundPos.z, soundPos.y};
         alSourcefv(source, AL_POSITION, sourcePos);
         alSourcei(source, AL_SOURCE_RELATIVE, AL_FALSE);
 
@@ -411,7 +417,7 @@ void playSound(int soundId, const vec *soundPos, float maxRadius, float maxVolRa
         sources[sourceIndex].isCurrentlyOccluded = occluded;
 
         alSourcei(source, AL_DIRECT_FILTER, sources[sourceIndex].occlusionFilter);
-        applyReverbToSource(source, getReverbZone(sources[sourceIndex].pos));
+        applyReverb(source, getReverbZone(sources[sourceIndex].pos));
     }
 
     alSourcePlay(source);
@@ -480,7 +486,7 @@ void updateSoundOcclusion(int id)
         sources[id].lastOcclusionChange = totalmillis; // Mark the time of change
     }
 
-    float progress = min(1.0f, (totalmillis - sources[id].lastOcclusionChange) / 300.f); // Calculate transition progress based on time since last change
+    float progress = min(1.0f, (totalmillis - sources[id].lastOcclusionChange) / 500.f); // Calculate transition progress based on time since last change
 
     // Determine target gain based on occlusion
     float targetGain = occlusion ? 0.5f : 1.0f;
@@ -509,10 +515,12 @@ void manageSources()
     ALint state;
     loopi(maxsoundsatonce)
     {
+        ALuint source = sources[i].source;
+
         if(sources[i].isActive && sources[i].source) // check if the source is active and valid
         {
             updateSoundOcclusion(i);
-            alGetSourcei(sources[i].source, AL_SOURCE_STATE, &state);
+            alGetSourcei(source, AL_SOURCE_STATE, &state);
             //reportSoundError("alGetSourcei-manageSources", "Error querying source state");
             sources[i].isActive = state != AL_STOPPED; // isActive = false if state is AL_STOPPED
         }
@@ -527,6 +535,7 @@ void updateSoundPosition(size_t entityId, const vec &newPosition, const vec &vel
     {
         if(sources[i].isActive && sources[i].entityId == entityId && sources[i].soundType == soundType) // found the correct sound source, now update its position
         {
+            applyReverb(sources[i].source, getReverbZone(newPosition));
             alSource3f(sources[i].source, AL_VELOCITY, velocity.x, velocity.z, velocity.y);
             alSource3f(sources[i].source, AL_POSITION, newPosition.x, newPosition.z, newPosition.y);
             break;
@@ -547,7 +556,7 @@ void soundNearmiss(int sound, const vec &from, const vec &to, int precision)
         p.add(v);
         if(camera1->o.dist(p) <= 64)
         {
-            playSound(sound, &p, 64, 32, SND_LOWPRIORITY|SND_NOOCCLUSION);
+            playSound(sound, p, 128, 50, SND_LOWPRIORITY|SND_NOOCCLUSION);
             return;
         }
     }
@@ -601,7 +610,7 @@ void checkMapSounds()
             if(e.entityId != SIZE_MAX) updateSoundPosition(e.entityId, e.o);
             if(!(e.flags & EF_SOUND))
             {
-                playSound(e.attr1, &e.o, e.attr2, e.attr3, SND_LOOPED|SND_MAPSOUND|SND_FIXEDPITCH, e.entityId);
+                playSound(e.attr1, e.o, e.attr2, e.attr3, SND_LOOPED|SND_MAPSOUND|SND_FIXEDPITCH, e.entityId);
                 e.flags |= EF_SOUND;  // set the flag to indicate that the sound is currently playing
             }
         }
@@ -679,7 +688,7 @@ ICOMMAND(playSound, "sii", (char *soundName, bool fixedPitch, bool uiSound),
             int flags = 0;
             if(fixedPitch) flags |= SND_FIXEDPITCH;
             if(uiSound) flags |= SND_UI;
-            playSound(i, NULL, 0, 0, flags);
+            playSound(i, vec(0, 0, 0), 0, 0, flags);
             return;
         }
     }
@@ -689,7 +698,7 @@ ICOMMAND(playSound, "sii", (char *soundName, bool fixedPitch, bool uiSound),
 void playMusic(int musicId)
 {
     if(!musicvol) return;
-    if(musicId>=0 && musicId<=NUMSONGS) playSound(musicId, NULL, 0, 0, SND_MUSIC);
+    if(musicId>=0 && musicId<=NUMSONGS) playSound(musicId, vec(0, 0, 0), 0, 0, SND_MUSIC);
     else conoutf("Invalid music ID (must be 0 to %d)", NUMSONGS);
     updateMusicVol();
 }

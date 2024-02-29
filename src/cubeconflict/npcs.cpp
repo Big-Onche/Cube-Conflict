@@ -293,7 +293,7 @@ namespace game
                         if(raycubelos(o, enemy->o, target))
                         {
                             transition(friendly ? M_FRIENDLY : M_SEARCH, 1, 500, 200);
-                            playSound(npcs[mtype].hellosnd, &o, 200, 50);
+                            playSound(npcs[mtype].hellosnd, o, 200, 50);
                         }
                     }
                     break;
@@ -404,7 +404,7 @@ namespace game
 
         void monsterpain(int damage, gameent *d, int atk)
         {
-            playSound(npcs[mtype].painsnd, &o, 300, 50);
+            playSound(npcs[mtype].painsnd, o, 300, 50);
 
             if(d->type==ENT_AI && !friendly)     // a monster hit us
             {
@@ -427,7 +427,7 @@ namespace game
                     else if(this->monsterstate==M_NEUTRAL)
                     {
                         transition(M_ANGRY, 1, rnd(250), 10);    //if you mess with a neutral pnj, he gets aggressive
-                        playSound(npcs[mtype].angrysnd, &o, 300, 50);
+                        playSound(npcs[mtype].angrysnd, o, 300, 50);
                     }
                     return;
                 }
@@ -441,7 +441,7 @@ namespace game
             {
                 state = CS_DEAD;
                 lastpain = lastmillis;
-                playSound(npcs[mtype].diesnd, &o, 300, 50);
+                playSound(npcs[mtype].diesnd, o, 300, 50);
                 monsterkilled(d);
                 gibeffect(max(-health, 0), vel, this);
                 monsterlastdeath = totalmillis;
@@ -462,7 +462,7 @@ namespace game
             else
             {
                 transition(M_PAIN, 0, npcs[mtype].painlag, 200);      // in this state monster won't attack
-                playSound(npcs[mtype].painsnd, &o, 300, 50);
+                playSound(npcs[mtype].painsnd, o, 300, 50);
             }
         }
     };
@@ -583,7 +583,7 @@ namespace game
         {
             if(spawnremain--==monstertotal)
             {
-                playSound(S_INVASION, NULL, 0, 0, SND_UI);
+                playSound(S_INVASION, vec(0, 0, 0), 0, 0, SND_UI);
                 conoutf(CON_HUDCONSOLE, "\f3%s", readstr("GameMessage_InvasionBegun"));
             }
             nextmonster = lastmillis+1000;

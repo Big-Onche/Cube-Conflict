@@ -17,7 +17,7 @@ namespace game
         if(player1->state != CS_DEAD && isconnected() && !intermission && !m_tutorial)
         {
             conoutf(CON_GAMEINFO, "\fc%s", readstr("Console_Game_UnableToChangeClass"));
-            playSound(S_ERROR, NULL, 0, 0, SND_UI);
+            playSound(S_ERROR, vec(0, 0, 0), 0, 0, SND_UI);
             player1_aptitude = oldapti;
         }
         else
@@ -25,7 +25,7 @@ namespace game
             addmsg(N_SENDAPTITUDE, "ri", player1_aptitude);
             player1->aptitude = player1_aptitude;
             oldapti = player1->aptitude;
-            if(!islaunching) playSound(S_APT_SOLDAT+player1_aptitude, NULL, 0, 0, SND_UI);
+            if(!islaunching) playSound(S_APT_SOLDAT+player1_aptitude, vec(0, 0, 0), 0, 0, SND_UI);
             if(isconnected() && !intermission) unlockAchievement(ACH_UNDECIDED);
         }
     });
@@ -290,7 +290,7 @@ namespace game
 
         // underwater camera sound
         bool inWater = lookupmaterial(camera1->o) == MAT_WATER;
-        if(inWater && !uwSoundPlaying) { playSound(S_UNDERWATER, NULL, 0, 0, SND_FIXEDPITCH|SND_LOOPED, hudplayer()->entityId, PL_UNDERWATER); uwSoundPlaying = true; }
+        if(inWater && !uwSoundPlaying) { playSound(S_UNDERWATER, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH|SND_LOOPED, hudplayer()->entityId, PL_UNDERWATER); uwSoundPlaying = true; }
         else if(!inWater && uwSoundPlaying) { stopLinkedSound(hudplayer()->entityId, PL_UNDERWATER); uwSoundPlaying = false; }
 
         if(d->state != CS_ALIVE) return;
@@ -314,11 +314,8 @@ namespace game
                     break;
             }
 
-            if(!isHudPlayer)
-            {
-                if(distance < closeSoundRadius) updateSoundPosition(d->entityId, d->o, playerVel, PL_ATTACK);
-                if(distance < farSoundRadius && distance > 300) updateSoundPosition(d->entityId, d->o, playerVel, PL_ATTACK_FAR);
-            }
+            if(distance < closeSoundRadius) updateSoundPosition(d->entityId, isHudPlayer ? vec(0, 0, 0) : d->o, playerVel, PL_ATTACK);
+            if(!isHudPlayer && distance < farSoundRadius && distance > 300) updateSoundPosition(d->entityId, d->o, playerVel, PL_ATTACK_FAR);
         }
         else if(d->attacksound)
         {
@@ -331,10 +328,10 @@ namespace game
         {
             if(!d->powerarmoursound)
             {
-                playSound(S_ASSISTALARM, isHudPlayer ? NULL : &d->o, 250, 100, SND_FIXEDPITCH|SND_LOOPED, d->entityId, PL_POWERARMOR);
+                playSound(S_ASSISTALARM, isHudPlayer ? vec(0, 0, 0) : d->o, 250, 100, SND_FIXEDPITCH|SND_LOOPED, d->entityId, PL_POWERARMOR);
                 d->powerarmoursound = true;
             }
-            else if(!isHudPlayer && distance < 250) updateSoundPosition(d->entityId, d->o, playerVel, PL_POWERARMOR);
+            else if(distance < 250) updateSoundPosition(d->entityId, isHudPlayer ? vec(0, 0, 0) : d->o, playerVel, PL_POWERARMOR);
         }
         else if(d->powerarmoursound) { stopLinkedSound(d->entityId, PL_POWERARMOR); d->powerarmoursound = false; }
     }
@@ -597,7 +594,7 @@ namespace game
         gameent *h = hudplayer();
         if(h!=player1 && actor==h && d!=actor)
         {
-            if(hitsound && lasthit != lastmillis) playSound(S_HIT, NULL, 0, 0, SND_UI);
+            if(hitsound && lasthit != lastmillis) playSound(S_HIT, vec(0, 0, 0), 0, 0, SND_UI);
             lasthit = lastmillis;
         }
 
@@ -609,8 +606,8 @@ namespace game
 
         if(!rnd(2))
         {
-            if(d->aptitude==APT_PHYSICIEN && d->abilitymillis[ABILITY_1] && d->armour>0) playSound(S_PHY_1, d==h ? NULL : &d->o, 200, 100, SND_LOWPRIORITY);
-            else if(d->armour>0 && actor->gunselect!=GUN_LANCEFLAMMES) playSound(S_IMPACTWOOD+d->armourtype, d==h ? NULL : &d->o, 250, 50, SND_LOWPRIORITY);
+            if(d->aptitude==APT_PHYSICIEN && d->abilitymillis[ABILITY_1] && d->armour>0) playSound(S_PHY_1, d==h ? vec(0, 0, 0) : d->o, 200, 100, SND_LOWPRIORITY);
+            else if(d->armour>0 && actor->gunselect!=GUN_LANCEFLAMMES) playSound(S_IMPACTWOOD+d->armourtype, d==h ? vec(0, 0, 0) : d->o, 250, 50, SND_LOWPRIORITY);
         }
 
         damageeffect(damage, d, actor, atk);
@@ -650,7 +647,7 @@ namespace game
             gfx::resetpostfx();
             if(!gfx::cbfilter) addpostfx("deathscreen");
             d->roll = 0;
-            playSound(S_DIE_P1, NULL, 0, 0, SND_FIXEDPITCH);
+            playSound(S_DIE_P1, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH);
             if(m_tutorial) execute("deathReset");
         }
         else
@@ -658,7 +655,7 @@ namespace game
             d->move = d->strafe = 0;
             d->resetinterp();
             d->smoothmillis = 0;
-            playSound(S_DIE, &d->o, 300, 50);
+            playSound(S_DIE, d->o, 300, 50);
         }
     }
 
@@ -680,6 +677,7 @@ namespace game
 
     void killed(gameent *d, gameent *actor, int atk)
     {
+        bool isHudPlayer = (actor == hudplayer());
         d->lastkiller = actor;
         d->killstreak = 0;
 
@@ -693,29 +691,31 @@ namespace game
         else if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission) return;
 
         ////////////////////////////// sounds //////////////////////////////
+        int farKillerDistance = (camera1->o.dist(actor->o) > 250);
+
         switch(actor->killstreak) // killstreak
         {
             case 3:
-                playSound(S_KS_X3, actor==player1 ? NULL : &actor->o, 300, 100);
-                if(camera1->o.dist(actor->o) >= 250) playSound(S_KS_X3_FAR, &actor->o, 1500, 200);
+                playSound(S_KS_X3, isHudPlayer ? vec(0, 0, 0) : actor->o, 300, 100);
+                if(farKillerDistance) playSound(S_KS_X3_FAR, actor->o, 1500, 200);
                 break;
             case 5:
-                playSound(S_KS_X5, actor==player1 ? NULL : &actor->o, 300, 100);
-                if(camera1->o.dist(actor->o) >= 250) playSound(S_KS_X5_FAR, &actor->o, 1500, 200);
+                playSound(S_KS_X5, isHudPlayer ? vec(0, 0, 0) : actor->o, 300, 100);
+                if(farKillerDistance) playSound(S_KS_X5_FAR, actor->o, 1500, 200);
                 break;
             case 7:
             case 10:
             case 15:
-                playSound(S_KS_X7, actor==player1 ? NULL : &actor->o, 300, 100);
-                if(camera1->o.dist(actor->o) >= 250) playSound(S_KS_X7_FAR, &actor->o, 1500, 200);
+                playSound(S_KS_X7, isHudPlayer ? vec(0, 0, 0) : actor->o, 300, 100);
+                if(farKillerDistance) playSound(S_KS_X7_FAR, actor->o, 1500, 200);
                 break;
         }
 
         ////////////////////////////// gfx //////////////////////////////
         if(actor->aptitude==APT_FAUCHEUSE)
         {
-            if(camera1->o.dist(d->o) >= 250) playSound(S_ECLAIRLOIN, &d->o, 1000, 100);
-            else playSound(S_ECLAIRPROCHE, &d->o, 300, 100);
+            if(camera1->o.dist(d->o) >= 250) playSound(S_ECLAIRLOIN, d->o, 1000, 100);
+            else playSound(S_ECLAIRPROCHE, d->o, 300, 100);
             adddynlight(d->o.add(vec(0, 0, 20)), 5000, vec(1.5f, 1.5f, 1.5f), 80, 40);
             vec pos(d->o.x, d->o.y, d->o.z-50);
             particle_flare(vec(0, rnd(15000)+rnd(-30000), 20000+rnd(20000)), pos, 175, PART_LIGHTNING, 0xFFFFFF, 40.0f);
@@ -746,7 +746,7 @@ namespace game
             float killdistance = actor->o.dist(d->o)/18.f;
             if(actor==player1) //////////////////// you killed someone ////////////////////
             {
-                playSound(S_KILL, NULL, 0, 0, SND_FIXEDPITCH|SND_UI);
+                playSound(S_KILL, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH|SND_UI);
                 defformatstring(victimname, "%s", dname);
                 conoutf(CON_HUDCONSOLE, "%s \fc%s%s\f7! \f4(%.1fm)", readstr("GameMessage_YouKilled"), victimname, readstr("Misc_PrePuncSpace"), killdistance);
                 conoutf(contype, "\fd%s\f7 > \fl%s\f7 > %s \fl(%.1fm)", player1->name, readstr(guns[atk].ident), victimname, killdistance);
@@ -1028,13 +1028,15 @@ namespace game
 
     void physicstrigger(physent *d, bool local, int floorlevel, int waterlevel, int material)
     {
-        vec o = (d==hudplayer() && !isthirdperson()) ? d->feetpos() : d->o;
+        bool isHudplayer = d==hudplayer();
+        vec o = (isHudplayer && !isthirdperson()) ? d->feetpos() : d->o;
         gameent *pl = (gameent *)d;
+
         if(waterlevel>0)
         {
             if(material&MAT_WATER)
             {
-                playSound(S_WATER, d==hudplayer() ? NULL : &d->o, 200, 30);
+                playSound(S_WATER, isHudplayer ? vec(0, 0, 0) : d->o, 200, 30);
                 particle_splash(PART_WATER, 30, 120, o, 0x18181A, 10.0f+rnd(9), 500, -20);
             }
         }
@@ -1042,12 +1044,12 @@ namespace game
         {
             if(material&MAT_WATER)
             {
-                playSound(S_SPLASH, d==hudplayer() ? NULL : &d->o, 300, 50);
+                playSound(S_SPLASH, isHudplayer ? vec(0, 0, 0) : d->o, 300, 50);
                 particle_splash(PART_WATER, 40, 150, o, 0x18181A, 10.0f+rnd(12), 600, 30);
             }
             else if(material&MAT_LAVA)
             {
-                playSound(S_LAVASPLASH, d==hudplayer() ? NULL : &d->o, 300, 50);
+                playSound(S_LAVASPLASH, isHudplayer ? vec(0, 0, 0) : d->o, 300, 50);
                 particle_splash(PART_SMOKE, 25, 100, o, 0x222222, 10.0f+rnd(5), 400, 20);
                 particle_splash(PART_FIRE_BALL, 7, 120, o, 0xCC7744, 10.00f+rnd(5), 400, 300);
                 loopi(5)regularsplash(PART_FIRESPARK, 0xFFBB55, 500, 10, 500+(rnd(500)), d->o, 1.5f+(rnd(18)/5.f), -10, true);
@@ -1069,6 +1071,7 @@ namespace game
     {
         if(d->blocked) return;
         bool moving = d->move || d->strafe;
+        bool isHudPlayer = d==hudplayer();
         gameent *pl = (gameent *)d;
         if(d->physstate>=PHYS_SLOPE && moving)
         {
@@ -1078,8 +1081,8 @@ namespace game
             if(lastmillis-pl->lastfootstep < (d->vel.magnitude()*(classes[pl->aptitude].speed*3.5f)*(pl->crouched() || (pl->abilitymillis[ABILITY_2] && pl->aptitude==APT_ESPION) ? 2 : 1)*(d->inwater ? 2 : 1)*(pl->armourtype==A_ASSIST && pl->armour> 0 ? 2.f : 1)/d->vel.magnitude())) return;
             else
             {
-                playSound(snd, d==hudplayer() ? NULL : &d->o, haspowerarmour ? 300 : 150, 20, haspowerarmour ? NULL : SND_LOWPRIORITY);
-                if(pl->boostmillis[B_EPO]) if(!rnd(5)) playSound(S_EPO_RUN, d==hudplayer() ? NULL : &d->o, 1000, 500);
+                playSound(snd, isHudPlayer ? vec(0, 0, 0) : d->o, haspowerarmour ? 300 : 150, 20, haspowerarmour ? NULL : SND_LOWPRIORITY);
+                if(pl->boostmillis[B_EPO]) if(!rnd(5)) playSound(S_EPO_RUN, isHudPlayer ? vec(0, 0, 0) : d->o, 1000, 500);
             }
         }
         pl->lastfootstep = lastmillis;
@@ -1103,7 +1106,7 @@ namespace game
         else
         {
             if(d->type==ENT_PLAYER && ((gameent *)d)->ai) addmsg(N_SOUND, "ci", d, n);
-            playSound(n, &d->o, 150, 20);
+            playSound(n, d->o, 150, 20);
         }
     }
 

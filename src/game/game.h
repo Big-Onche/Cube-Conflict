@@ -885,7 +885,7 @@ struct teaminfo
     void reset() { frags = 0; }
 };
 
-extern void playSound(int soundIndex, const vec *soundPos = NULL, float maxRadius = 300.f, float maxVolRadius = 10.f, int flags = NULL, size_t entityId = SIZE_MAX, int soundType = 0);
+extern void playSound(int soundIndex, vec soundPos = vec(0, 0, 0), float maxRadius = 300.f, float maxVolRadius = 10.f, int flags = NULL, size_t entityId = SIZE_MAX, int soundType = 0);
 
 namespace entities
 {

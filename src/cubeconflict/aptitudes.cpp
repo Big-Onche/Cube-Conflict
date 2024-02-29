@@ -13,7 +13,7 @@ ICOMMAND(setclass, "i", (int *i),
     if(*i == game::player1->aptitude)
     {
         conoutf(CON_ERROR, "\f3Cannot deactivate your current classe!");
-        playSound(S_ERROR, NULL, 0, 0, SND_UI);
+        playSound(S_ERROR, vec(0, 0, 0), 0, 0, SND_UI);
         return;
     }
 
@@ -25,7 +25,7 @@ ICOMMAND(setclass, "i", (int *i),
     {
         disabledClasse[*i] = !disabledClasse[*i];
         conoutf(CON_ERROR, "\f3Cannot deactivate all classes!");
-        playSound(S_ERROR, NULL, 0, 0, SND_UI);
+        playSound(S_ERROR, vec(0, 0, 0), 0, 0, SND_UI);
         return;
     }
 );
@@ -42,21 +42,20 @@ int getspyability;
 
 namespace game
 {
-
     void abilityeffect(gameent *d, int ability)
     {
         vec sndpos = d->o;
-        bool nullsndpos = d==hudplayer();
+        bool noSoundPos = d==hudplayer();
 
         if(d->aptitude==APT_ESPION && ability==ABILITY_1) //for spy's ability 1, we play the sound at the decoy's position
         {
             const int positions[4][2] = { {25, 25}, {-25, -25}, {25, -25}, {-25, 25} };
             sndpos.add(vec(positions[d->aptiseed][0], positions[d->aptiseed][1], 0));
-            nullsndpos = false; //even for player1
+            noSoundPos = false; //even for player1
         }
 
         if(d==hudplayer()) playSound(S_SORTLANCE);
-        playSound(classes[d->aptitude].abilities[ability].snd, nullsndpos ? NULL : &sndpos, 250, 100, SND_NOCULL|SND_FIXEDPITCH, d->entityId, PL_ABI_1+ability);
+        playSound(classes[d->aptitude].abilities[ability].snd, noSoundPos ? vec(0, 0, 0) : sndpos, 250, 100, SND_NOCULL|SND_FIXEDPITCH, d->entityId, PL_ABI_1+ability);
         switch(ability) //here we play some one shot gfx effects
         {
             //case ABILITY_1:
@@ -78,7 +77,7 @@ namespace game
                     if(isteam(hudplayer()->team, d->team))
                     {
                         getspyability = totalmillis;
-                        playSound(S_SPY_3, d==hudplayer() ? NULL : &d->o, 3000, 50, SND_NOCULL|SND_FIXEDPITCH);
+                        playSound(S_SPY_3, d==hudplayer() ? vec(0, 0, 0) : d->o, 3000, 50, SND_NOCULL|SND_FIXEDPITCH);
                     }
                 }
             }

@@ -149,7 +149,7 @@ namespace game
 
     void changedplayermodel()
     {
-        if(!smiley[playermodel]) { conoutf(CON_ERROR, "\f3%s", readstr("Console_Shop_SmileyNotOwned")); playSound(S_ERROR, NULL, 0, 0, SND_FIXEDPITCH); playermodel = 0; return; }
+        if(!smiley[playermodel]) { conoutf(CON_ERROR, "\f3%s", readstr("Console_Shop_SmileyNotOwned")); playSound(S_ERROR, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH); playermodel = 0; return; }
         if(player1->clientnum < 0) player1->playermodel = playermodel;
         if(player1->ragdoll) cleanragdoll(player1);
         loopv(ragdolls)
@@ -315,14 +315,14 @@ namespace game
 
     VARFP(player1_cape, 0, 0, sizeof(capes)/sizeof(capes[0])-1,
     {
-        if(!cape[player1_cape]) { conoutf(CON_ERROR, "\f3%s", readstr("Console_Shop_SmileyNotOwned")); playSound(S_ERROR, NULL, 0, 0, SND_FIXEDPITCH); player1_cape = 0; return; }
+        if(!cape[player1_cape]) { conoutf(CON_ERROR, "\f3%s", readstr("Console_Shop_SmileyNotOwned")); playSound(S_ERROR, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH); player1_cape = 0; return; }
         addmsg(N_SENDCAPE, "ri", player1_cape);
         player1->customcape = player1_cape;
     });
 
     VARFP(player1_tombe, 0, 0, sizeof(graves)/sizeof(graves[0])-1,
     {
-        if(!grave[player1_tombe]) { conoutf(CON_ERROR, "\f3%s", readstr("Console_Shop_GraveNotOwned")); playSound(S_ERROR, NULL, 0, 0, SND_FIXEDPITCH); player1_tombe=0; return; }
+        if(!grave[player1_tombe]) { conoutf(CON_ERROR, "\f3%s", readstr("Console_Shop_GraveNotOwned")); playSound(S_ERROR, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH); player1_tombe=0; return; }
         addmsg(N_SENDTOMBE, "ri", player1_tombe);
         player1->customtombe = player1_tombe;
         if(player1->customtombe==10) unlockAchievement(ACH_FUCKYOU);

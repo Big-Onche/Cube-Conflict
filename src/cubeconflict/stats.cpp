@@ -18,7 +18,7 @@ void calcPlayerLevel()
         totalXpNeeded += currentLevel*2;
         if(isconnected())
         {
-            playSound(S_LEVELUP, NULL, 0, 0, SND_UI);
+            playSound(S_LEVELUP, vec(0, 0, 0), 0, 0, SND_UI);
             conoutf(CON_HUDCONSOLE, "\f1%s \fi(%s %d)", readstr("GameMessage_LevelUp"), readstr("Stat_Level"), currentLevel);
         }
     }
@@ -236,7 +236,7 @@ void unlockAchievement(int achID)
         {
             achievement[achID] = true;
             addReward(25, 25);
-            playSound(S_ACHIEVEMENTUNLOCKED, NULL, 0, 0, SND_UI);
+            playSound(S_ACHIEVEMENTUNLOCKED, vec(0, 0, 0), 0, 0, SND_UI);
             conoutf(CON_HUDCONSOLE, "\f1%s\fi (%s)", readstr("GameMessage_AchievementUnlocked"), readstr("Stat_Achievements", achID));
         }
     }

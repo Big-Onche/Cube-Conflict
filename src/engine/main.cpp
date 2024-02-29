@@ -512,7 +512,7 @@ void setfullscreen(bool enable)
     {
         fullscreen = true;
         conoutf("Cannot desactivate fake fullscreen while oversampling!");
-        playSound(S_ERROR, NULL, 0, 0, SND_UI);
+        playSound(S_ERROR, vec(0, 0, 0), 0, 0, SND_UI);
         return;
     }
 

@@ -315,8 +315,8 @@ struct captureclientmode : clientmode
 
                 if(oldbase < 0)
                 {
-                    if(b.owner!=d->team && b.owner) playSound(S_TERMINAL_ALARM, &b.o, 300, 50, SND_FIXEDPITCH);
-                    playSound(S_TERMINAL_ENTER, d==hudplayer() ? 0 : &pos, 150, 50);
+                    if(b.owner!=d->team && b.owner) playSound(S_TERMINAL_ALARM, b.o, 300, 50, SND_FIXEDPITCH);
+                    playSound(S_TERMINAL_ENTER, d==hudplayer() ? vec(0, 0, 0) : pos, 150, 50);
                     particle_splash(PART_ZERO, 12, 250, pos, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.8f, 200, 50);
                     particle_splash(PART_ONE, 12, 250, pos, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.8f, 200, 50);
                 }
@@ -325,7 +325,7 @@ struct captureclientmode : clientmode
         }
         if(d->lastbase < 0 && oldbase >= 0)
         {
-            playSound(S_TERMINAL_ENTER, d==hudplayer() ? 0 : &pos, 150, 50);
+            playSound(S_TERMINAL_ENTER, d==hudplayer() ? vec(0, 0, 0) : pos, 150, 50);
             particle_splash(PART_ZERO, 12, 200, pos, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.8f, 200, 50);
             particle_splash(PART_ONE, 12, 200, pos, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.8f, 200, 50);
         }
@@ -563,7 +563,7 @@ struct captureclientmode : clientmode
                     conoutf(CON_GAMEINFO, "%s %s %s \"\fe%s\f7\".", readstr("Misc_Team"), teamcolor(owner), readstr("Console_Game_Capture_Hack"), b.name);
                     if(owner==hudplayer()->team) conoutf(CON_HUDCONSOLE, "\f9%s \"\fe%s\f9\".", readstr("Console_Game_Capture_WeHacked"), b.name);
                 }
-                playSound(owner==hudplayer()->team ? S_TERMINAL_HACKED : S_TERMINAL_HACKED_E, &b.o, 2500, 200, SND_FIXEDPITCH);
+                playSound(owner==hudplayer()->team ? S_TERMINAL_HACKED : S_TERMINAL_HACKED_E, b.o, 2500, 200, SND_FIXEDPITCH);
             }
         }
         else if(b.owner)
@@ -578,7 +578,7 @@ struct captureclientmode : clientmode
                 conoutf(CON_GAMEINFO, "%s %s %s \"\fe%s\f7\".", readstr("Misc_Team"), teamcolor(b.owner), readstr("Console_Game_Capture_Lost"), b.name);
                 if(b.owner==hudplayer()->team) conoutf(CON_HUDCONSOLE, "\fc%s \"\fe%s\f3\".", readstr("Console_Game_Capture_WeLost"), b.name);
             }
-            playSound(owner==hudplayer()->team ? S_TERMINAL_LOST : S_TERMINAL_LOST_E, &b.o, 2500, 200, SND_FIXEDPITCH);
+            playSound(owner==hudplayer()->team ? S_TERMINAL_LOST : S_TERMINAL_LOST_E, b.o, 2500, 200, SND_FIXEDPITCH);
         }
         if(b.owner!=owner)
         {
@@ -588,7 +588,7 @@ struct captureclientmode : clientmode
         b.owner = owner;
         b.enemy = enemy;
         b.converted = converted;
-        if(ammo>b.ammo) playSound(S_ITEMSPAWN, &b.o, 250, 50);
+        if(ammo>b.ammo) playSound(S_ITEMSPAWN, b.o, 250, 50);
         b.ammo = ammo;
     }
 
@@ -1116,17 +1116,18 @@ case N_BASEREGEN:
     gameent *regen = rcn==player1->clientnum ? player1 : getclient(rcn);
     if(regen && m_capture)
     {
+        vec regenPos = (regen == hudplayer() ? vec(0, 0, 0) : regen->o);
         regen->health = health;
         regen->mana = mana;
         if(ammotype >= GUN_ELEC && ammotype <= GUN_GLOCK) regen->ammo[ammotype] = ammo;
         if(!regen->armour) regen->armourtype=A_WOOD;
         regen->armour = armour;
-        if(regen->armour==10) playSound(S_ITEMBBOIS, regen==hudplayer() ? NULL : &regen->o, 300, 150);
+        if(regen->armour==10) playSound(S_ITEMBBOIS, regenPos, 300, 150);
         switch(regen->armourtype)
         {
-            case A_WOOD: if(regen->armour>=750) { regen->armourtype=A_IRON; playSound(S_ITEMBFER, regen==hudplayer() ? NULL : &regen->o, 300, 50); } break;
-            case A_IRON: if(regen->armour>=1250) { regen->armourtype=A_GOLD; playSound(S_ITEMBOR, regen==hudplayer() ? NULL : &regen->o, 300, 50); } break;
-            case A_GOLD: if(regen->armour>=2000) { regen->armourtype=A_ASSIST; playSound(S_ITEMARMOUR, regen==hudplayer() ? NULL : &regen->o, 300, 50); }
+            case A_WOOD: if(regen->armour>=750) { regen->armourtype=A_IRON; playSound(S_ITEMBFER, regenPos, 300, 50); } break;
+            case A_IRON: if(regen->armour>=1250) { regen->armourtype=A_GOLD; playSound(S_ITEMBOR, regenPos, 300, 50); } break;
+            case A_GOLD: if(regen->armour>=2000) { regen->armourtype=A_ASSIST; playSound(S_ITEMARMOUR, regenPos, 300, 50); }
             case A_ASSIST: regen->ammo[GUN_ASSISTXPL] = 1;
         }
         if(autowield > 0 && player1->gunselect != ammotype) gunselect(ammotype, player1);

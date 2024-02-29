@@ -149,7 +149,7 @@ namespace entities
 
         d->pickupitem(type, d->aptitude, d->abilitymillis[ABILITY_1], d->armourtype==A_ASSIST && d->armour, rndsweap);
 
-        playSound(powerarmorpieces(type, d) ? S_ITEMPIECEROBOTIQUE : itemstats[type-I_RAIL].sound, d==hudplayer() ? NULL : &d->o, 300, 50);
+        playSound(powerarmorpieces(type, d) ? S_ITEMPIECEROBOTIQUE : itemstats[type-I_RAIL].sound, d==hudplayer() ? vec(0, 0, 0) : d->o, 300, 50);
 
         if(type>=I_RAIL && type<=I_SUPERARME)
         {
@@ -160,7 +160,7 @@ namespace entities
         if(d->abilitymillis[ABILITY_1] && d->aptitude==APT_PRETRE)
         {
             adddynlight(d->o, 20, vec(1.5f, 1.5f, 0.0f), 300, 50, L_NOSHADOW|L_VOLUMETRIC);
-            playSound(S_PRI_1, d==hudplayer() ? NULL : &d->o, 300, 150);
+            playSound(S_PRI_1, d==hudplayer() ? vec(0, 0, 0) : d->o, 300, 150);
         }
 
         if(d==player1 && type==I_SHROOMS)
@@ -178,7 +178,7 @@ namespace entities
         if(ents.inrange(tp) && ents[tp]->type == TELEPORT)
         {
             extentity &e = *ents[tp];
-            if(e.attr4 >= 0) playSound(S_TELEPORT, d==hudplayer() ? NULL : &e.o, 300, 50);
+            if(e.attr4 >= 0) playSound(S_TELEPORT, d==hudplayer() ? vec(0, 0, 0) : e.o, 300, 50);
 
             if(d==hudplayer()) shakeScreen(2);
         }
@@ -200,7 +200,7 @@ namespace entities
         if(ents.inrange(jp) && ents[jp]->type == JUMPPAD)
         {
             extentity &e = *ents[jp];
-            playSound(S_JUMPPAD, d==hudplayer() ? NULL : &e.o, 150, 25);
+            playSound(S_JUMPPAD, d==hudplayer() ? vec(0, 0, 0) : e.o, 150, 25);
         }
         if(local && d->clientnum >= 0)
         {
@@ -342,21 +342,22 @@ namespace entities
         }
     }
 
-    bool playendshrooms;
+    bool endingShrooms;
 
     void checkboosts(int time, gameent *d)
     {
+        bool isHudPlayer = (d == hudplayer());
         if(d->boostmillis[B_ROIDS] && (d->boostmillis[B_ROIDS] -= time)<=0)
         {
             d->boostmillis[B_ROIDS] = 0;
-            playSound(S_ROIDS_PUPOUT, d==hudplayer() ? NULL : &d->o, 300, 50);
+            playSound(S_ROIDS_PUPOUT, isHudPlayer ? vec(0, 0, 0) : d->o, 300, 50);
             if(d==player1) conoutf(CON_HUDCONSOLE, "\f8%s", readstr("GameMessage_RoidsEnded"));
         }
 
         if(d->boostmillis[B_EPO] && (d->boostmillis[B_EPO] -= time)<=0)
         {
             d->boostmillis[B_EPO] = 0;
-            playSound(S_EPO_PUPOUT, d==player1 ? NULL : &d->o, 300, 50);
+            playSound(S_EPO_PUPOUT, isHudPlayer ? vec(0, 0, 0) : d->o, 300, 50);
             if(d==player1) conoutf(CON_HUDCONSOLE, "\f8%s", readstr("GameMessage_EpoEnded"));
         }
 
@@ -366,11 +367,11 @@ namespace entities
             if(d==player1) conoutf(CON_HUDCONSOLE, "\f8%s", readstr("GameMessage_JointEnded"));
         }
 
-        if(d==hudplayer() && d->boostmillis[B_SHROOMS] > 4000) playendshrooms = false;
-        else if(!playendshrooms && d==hudplayer() && d->boostmillis[B_SHROOMS] && d->boostmillis[B_SHROOMS] < 4000)
+        if(isHudPlayer && d->boostmillis[B_SHROOMS] > 4000) endingShrooms = false;
+        else if(!endingShrooms && isHudPlayer && d->boostmillis[B_SHROOMS] && d->boostmillis[B_SHROOMS] < 4000)
         {
             playSound(S_SHROOMS_PUPOUT);
-            playendshrooms = true;
+            endingShrooms = true;
         }
 
         if(d->boostmillis[B_SHROOMS] && (d->boostmillis[B_SHROOMS] -= time)<=0)
