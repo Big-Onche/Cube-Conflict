@@ -90,8 +90,6 @@ enum SoundFlags
     SND_MUSIC         = 1 << 7      // music
 };
 
-enum reverbSettings { REV_MAIN = 0, REV_SECOND, REV_THIRD, REV_FOURTH, REV_FIFTH, NUMREVERBS };
-
 enum PlayerLinkedSounds { PL_NONE = 0, PL_ATTACK, PL_ATTACK_FAR, PL_ABI_1, PL_ABI_2, PL_ABI_3, PL_POWERARMOR, PL_UNDERWATER, PL_TAUNT, NUMLINKEDSNDS }; // types of sounds that can be linked to a bot/player
 
 struct Sound
@@ -100,19 +98,23 @@ struct Sound
     int numAlts;                    // number of alternatives for the same sound id
     int soundVol;                   // volume of the sound
     bool loaded;
-    bool noGeomOcclusion;           // never occluded except from liquids
     ALuint bufferId[MAX_ALTS];      // OpenAL buffer ID
 };
 
 struct SoundSource
 {
     ALuint source;
+    vec pos;
     bool isActive;
-    size_t entityId;                // id of the sound linked to an entity
+    size_t entityId;                        // id of the sound linked to an entity
     int soundType;
-    bool noGeomOcclusion;
-    int soundId;                    // register the sound id to stop sound if needed
+    int soundId;                            // register the sound id to stop sound if needed
     int soundFlags;
+    // occlusion
+    ALuint occlusionFilter;
+    bool isCurrentlyOccluded;               // Tracks if the source is occluded
+    float lfOcclusionGain, hfOcclusionGain; // Dynamically updated low freqs and high freqs gains based on occlusion
+    int lastOcclusionChange;                // Last time the occlusion state changed
 };
 
 extern int minimizedmute;
@@ -132,21 +134,19 @@ extern void resumeAllSounds();
 extern bool loadSound(Sound& s, bool music = false);
 extern void manageSources();
 extern void cleanUpSounds();
-extern void setReverbGain(float gain);
-extern void setShroomsEfx(bool enable);
 extern const char *getmapsoundname(int n);
 
-#define EFX_REVERB_PRESET_SMALL_PASSAGE \
+#define EFX_REVERB_PRESET_SMALLPASSAGE \
 { \
     1.0000f,    /* flDensity */ \
     1.0000f,    /* flDiffusion */ \
-    1.0000f,    /* flGain */ \
+    0.7000f,    /* flGain */ \
     0.6500f,    /* flGainHF */ \
     1.0000f,    /* flGainLF */ \
     1.5000f,    /* flDecayTime */ \
     0.6000f,    /* flDecayHFRatio */ \
     0.9000f,    /* flDecayLFRatio */ \
-    3.0000f,    /* flReflectionsGain */ \
+    0.3500f,    /* flReflectionsGain */ \
     0.0050f,    /* flReflectionsDelay */ \
     { 0.0000f, 0.0000f, 0.0000f }, /* flReflectionsPan */ \
     2.0000f,    /* flLateReverbGain */ \
@@ -162,5 +162,31 @@ extern const char *getmapsoundname(int n);
     0.0000f,    /* flRoomRolloffFactor */ \
     0x1         /* iDecayHFLimit */ \
 }
+
+enum reverbSettings { REV_MAIN = 0, REV_SECOND, REV_THIRD, REV_FOURTH, REV_FIFTH, REV_SHROOMS, REV_UNDERWATER, NUMREVERBS };
+
+const EFXEAXREVERBPROPERTIES reverbPresets[] = // declaration of efx reverb presets
+{
+    EFX_REVERB_PRESET_OUTDOORS_ROLLINGPLAINS,       // 0
+    EFX_REVERB_PRESET_FACTORY_MEDIUMROOM,
+    EFX_REVERB_PRESET_PLAIN,
+    EFX_REVERB_PRESET_MOUNTAINS,
+    EFX_REVERB_PRESET_CAVE,
+    EFX_REVERB_PRESET_SMALLPASSAGE,                // 5
+    EFX_REVERB_PRESET_PIPE_RESONANT,
+    EFX_REVERB_PRESET_FACTORY_SMALLROOM,
+    EFX_REVERB_PRESET_PREFAB_WORKSHOP,
+    EFX_REVERB_PRESET_CHAPEL,
+    EFX_REVERB_PRESET_CASTLE_COURTYARD,             // 10
+    EFX_REVERB_PRESET_CASTLE_SMALLROOM,
+    EFX_REVERB_PRESET_CASTLE_MEDIUMROOM,
+    EFX_REVERB_PRESET_CASTLE_LARGEROOM,
+    EFX_REVERB_PRESET_PREFAB_SCHOOLROOM,
+    EFX_REVERB_PRESET_DRUGGED,                      // 15
+    EFX_REVERB_PRESET_UNDERWATER,
+    EFX_REVERB_PRESET_GENERIC
+};
+
+const int numReverbPresets = sizeof(reverbPresets) / sizeof(reverbPresets[0]);
 
 #endif

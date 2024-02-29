@@ -431,6 +431,5 @@ namespace gfx
         addpostfx("mainfilter");
         if(cbfilter) addColorBlindnessFilter();
         fullbrightmodels = 0;
-        setShroomsEfx(false);
     }
 }

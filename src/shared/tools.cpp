@@ -281,3 +281,5 @@ int rygbGradient(int val)
 }
 
 int rgbToHex(int r, int g, int b) { return (r << 16) | (g << 8) | b; }
+
+float lerp(float a, float b, float t) { return a + (b - a) * t; }

@@ -174,7 +174,6 @@ void disconnect(bool async, bool cleanup, bool volontaire)
         game::clearbouncers();
         game::clearprojectiles(); // clean up before showing menu
         loopi(NUMSONGS) stopMusic(i);
-        setReverbGain(0);
         playMusic(language == 2 ? S_MAINMENURU : S_MAINMENU);
         mainmenu = 1;
         if(stat[STAT_DAMMAGERECORD] < game::player1->totaldamage/10) updateStat(game::player1->totaldamage/10, STAT_DAMMAGERECORD, true);
@@ -193,7 +192,6 @@ void trydisconnect(bool local)
     game::clearbouncers();
     game::clearprojectiles();
     loopi(NUMSONGS) stopMusic(i);
-    setReverbGain(0);
     playMusic(language == 2 ? S_MAINMENURU : S_MAINMENU);
     if(connpeer)
     {
