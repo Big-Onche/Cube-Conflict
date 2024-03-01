@@ -294,7 +294,6 @@ void initSounds()
     initSoundSources();
 }
 
-const float toleranceRadius = 20.f;
 const int vertices = 3;
 const float sectorAngle = 2 * M_PI / vertices;
 
@@ -319,6 +318,9 @@ bool checkSoundOcclusion(const vec *soundPos, int flags = 0)
         {
             float theta = i * sectorAngle + ((totalmillis / 50.f) * M_PI); // spinning the triangle to get a circle of points
             vec displacement = right;
+
+            int toleranceRadius = 25 * (distance / 100.f);
+
             displacement.mul(cos(theta) * toleranceRadius);
 
             vec verticalDisplacement = perp;
@@ -465,13 +467,9 @@ void updateListenerPos()
     ALfloat listenerPos[] = {camera1->o.x, camera1->o.z, camera1->o.y}; // updating listener position
     alListenerfv(AL_POSITION, listenerPos);
 
-    camdir.normalize();     // normalize the forward vector
-
-    vec up = vec(0, 0, 1);  // no roll ATM (z-axis is up in cube engine)
-
     ALfloat orientation[] = {               // combine the forward and up vectors for orientation
         camdir.x, camdir.z, camdir.y,       // forward vector (inverted for some obscure reason)
-        up.x, up.z, up.y                    // up vector
+        0.0, 1.0, 0.0                       // up vector
     };
 
     alListenerfv(AL_ORIENTATION, orientation); // set the listener's orientation
