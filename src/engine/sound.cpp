@@ -166,6 +166,8 @@ ALuint auxEffectSlots[NUMREVERBS];
 
 void applyReverbPreset(ALuint effectSlot, const EFXEAXREVERBPROPERTIES& preset)
 {
+    if(noEfx) return;
+
     ALuint reverbEffect;
     alGenEffects(1, &reverbEffect);
     alEffecti(reverbEffect, AL_EFFECT_TYPE, AL_EFFECT_REVERB);
@@ -203,19 +205,21 @@ ICOMMAND(mapreverbs, "iiiii", (int *a, int *b, int *c, int *d, int *e), configur
 
 bool isUnderWater(vec pos)
 {
-    if(pos == vec(0,0,0)) pos = camera1->o;
+    if(lookupmaterial(camera1->o) == MAT_WATER || lookupmaterial(camera1->o) == MAT_LAVA) return true;
+    if(pos.iszero()) pos = camera1->o; // no pos = hud sound = camera position
     return (lookupmaterial(pos) == MAT_WATER || lookupmaterial(pos) == MAT_LAVA);
 }
 
 void applyReverb(ALuint source, int reverb)
 {
+    if(noEfx) return;
     if(reverb >= 0 && reverb < NUMREVERBS) alSource3i(source, AL_AUXILIARY_SEND_FILTER, auxEffectSlots[reverb], 0, AL_FILTER_NULL);
     else conoutf(CON_ERROR, "Parameter %d is out of the valid range (0 to %d).", reverb, NUMREVERBS);
 }
 
 int getReverbZone(vec pos)
 {
-    bool hudSound = (pos == vec(0, 0, 0));
+    bool hudSound = pos.iszero();
 
     if(game::hudplayer()->boostmillis[B_SHROOMS]) return REV_SHROOMS;
     else if(isUnderWater(camera1->o)) return REV_UNDERWATER;
@@ -244,9 +248,7 @@ void initSoundSources()
         if(!noEfx)
         {
             alGenFilters(1, &sources[i].occlusionFilter);
-            if (alGetError() != AL_NO_ERROR) conoutf("Error occl1");
             alFilteri(sources[i].occlusionFilter, AL_FILTER_TYPE, AL_FILTER_LOWPASS);
-            if (alGetError() != AL_NO_ERROR) conoutf("Error occl2");
             sources[i].lfOcclusionGain = 1.0f;
             sources[i].hfOcclusionGain = 1.0f;
             sources[i].isCurrentlyOccluded = false;
@@ -292,37 +294,41 @@ void initSounds()
     initSoundSources();
 }
 
+const float toleranceRadius = 20.f;
+const int vertices = 3;
+const float sectorAngle = 2 * M_PI / vertices;
+
 bool checkSoundOcclusion(const vec *soundPos, int flags = 0)
 {
-    int distance = camera1->o.dist(*soundPos);
-    if((flags & SND_NOOCCLUSION) || !soundPos || noEfx || (distance < 50 || distance > 1000)) return false;
+    if(*soundPos == vec(0, 0, 0) || (flags & SND_NOOCCLUSION) || noEfx) return false;
 
-    vec dir = vec(camera1->o).sub(*soundPos);
-    const float dist = dir.magnitude();
-    dir.mul(1/dist);
+    float distance = camera1->o.dist(*soundPos);
+    if((distance < 50 && (flags & SND_MAPSOUND)) || distance > 1000) return false; // avoid short distance tolerance for map sounds, can be useful with thin walls, also culling distant sounds
 
-    const float toleranceRadius = 25.f;
-
-    const int sectors = 4;
-    const int stacks = 4;
-    const float sectorAngle = 2 * M_PI / sectors;
-    const float stackAngle = M_PI / stacks;
-
-    loopi(sectors)
+    vec hitPos;
+    if(distance > 300) return !raycubelos(*soundPos, camera1->o, hitPos); // simple ray check if the sound is far away
+    else // more complex check with a tolerance if the sound is closer
     {
-        loopj(stacks)
+        vec up(0, 0, 1);
+        vec right = vec(0, 0, 0).cross(camdir, up);
+        vec perp = vec(0, 0, 0).cross(right, camdir);
+        right.normalize();
+        perp.normalize();
+
+        loopi(vertices) // creating a triangle that always faces the camera
         {
-            float theta = i * sectorAngle;
-            float phi = j * stackAngle;
+            float theta = i * sectorAngle + ((totalmillis / 50.f) * M_PI); // spinning the triangle to get a circle of points
+            vec displacement = right;
+            displacement.mul(cos(theta) * toleranceRadius);
+
+            vec verticalDisplacement = perp;
+            verticalDisplacement.mul(sin(theta) * toleranceRadius);
 
             vec samplePoint = *soundPos;
-            samplePoint.x += toleranceRadius * sin(phi) * cos(theta);
-            samplePoint.y += toleranceRadius * sin(phi) * sin(theta);
-            samplePoint.z += toleranceRadius * cos(phi);
+            samplePoint.add(displacement);
+            samplePoint.add(verticalDisplacement);
 
-            const float rayDist = raycube(samplePoint, dir, camera1->o.dist(samplePoint), RAY_CLIPMAT|RAY_POLY);
-
-            if(rayDist >= dist) return false;
+            if(raycubelos(samplePoint, camera1->o, hitPos)) return false; // if one of the vertices is not occluded, no occlusion filter is applied
         }
     }
     return true;
@@ -331,7 +337,7 @@ bool checkSoundOcclusion(const vec *soundPos, int flags = 0)
 bool isOccluded(int id)
 {
     if(sources[id].soundFlags & (SND_MUSIC | SND_UI)) return false;
-    return isUnderWater(sources[id].pos) || (sources[id].pos != vec(0,0,0) && checkSoundOcclusion(&sources[id].pos));
+    return isUnderWater(sources[id].pos) || checkSoundOcclusion(&sources[id].pos);
 }
 
 float getRandomSoundPitch(int flags)
@@ -347,35 +353,35 @@ void playSound(int soundId, vec soundPos, float maxRadius, float maxVolRadius, i
 {
     if(soundId < 0 || soundId > NUMSNDS || noSound || mutesounds) return; // invalid index or openal not initialized or mute
 
-    bool hasSoundPos = (soundPos != vec(0, 0, 0));
+    bool hasSoundPos = !soundPos.iszero();
     if(hasSoundPos && !(flags & SND_NOCULL) && camera1->o.dist(soundPos) > maxRadius + 50) return; // do not play sound too far from camera, except if flag SND_NOCULL
 
-    size_t sourceIndex = SIZE_MAX; // default to invalid index
+    size_t id = SIZE_MAX; // default to invalid index
     int activeSources = 0;
 
     loopi(maxsoundsatonce)
     {
         if(sources[i].isActive) activeSources++; // count active sources
-        else sourceIndex = i; // find the first inactive source
+        else { id = i; break; } // find the first inactive source
     }
 
-    if(sourceIndex == SIZE_MAX) // no inactive source found, we skip the sound
+    if(id == SIZE_MAX) // no inactive source found, we skip the sound
     {
-        if(!warned) { conoutf(CON_WARN, "Max sounds at once capacity reached (%d)", maxsoundsatonce);warned = true; }
+        if(!warned) { conoutf(CON_WARN, "Max sounds at once capacity reached (%d)", maxsoundsatonce); warned = true; }
         return;
     }
 
     if((flags & SND_LOWPRIORITY) && (activeSources >= maxsoundsatonce / 2)) return; // skip low-priority sounds (distant shoots etc.) when we are already playing a lot of sounds
 
-    sources[sourceIndex].isActive = true;       // now the source is set to active
-    sources[sourceIndex].entityId = entityId;
-    sources[sourceIndex].soundType = soundType;
-    sources[sourceIndex].soundId = soundId;
-    sources[sourceIndex].soundFlags = flags;
-    sources[sourceIndex].pos = soundPos;
+    sources[id].isActive = true;       // now the source is set to active
+    sources[id].entityId = entityId;
+    sources[id].soundType = soundType;
+    sources[id].soundId = soundId;
+    sources[id].soundFlags = flags;
+    sources[id].pos = soundPos;
 
     Sound& s = (flags & SND_MUSIC) ? music[soundId] : ( (flags & SND_MAPSOUND) ? mapSounds[soundId] : gameSounds[soundId] );
-    ALuint source = sources[sourceIndex].source;
+    ALuint source = sources[id].source;
 
     ALuint buffer = s.bufferId[s.numAlts ? rnd(s.numAlts + 1) : 0];
 
@@ -384,40 +390,39 @@ void playSound(int soundId, vec soundPos, float maxRadius, float maxVolRadius, i
     alSourcef(source, AL_PITCH, getRandomSoundPitch(flags)); // managing variations of pitches
     alSourcei(source, AL_LOOPING, (flags & SND_LOOPED) ? AL_TRUE : AL_FALSE); // loop the sound or not
 
-    if(!hasSoundPos)
-    {
-        ALfloat sourcePos[] = {0.f, 0.f, 0.f};
-        alSourcefv(source, AL_POSITION, sourcePos);
-        alSourcei(source, AL_SOURCE_RELATIVE, AL_TRUE); // hud sound, make the source relative to the listener
-    }
+    ALfloat sourcePos[] = {soundPos.x, soundPos.z, soundPos.y};
+    alSourcefv(source, AL_POSITION, sourcePos);
+
+    if(!hasSoundPos) alSourcei(source, AL_SOURCE_RELATIVE, AL_TRUE);
     else
     {
-        ALfloat sourcePos[] = {soundPos.x, soundPos.z, soundPos.y};
-        alSourcefv(source, AL_POSITION, sourcePos);
         alSourcei(source, AL_SOURCE_RELATIVE, AL_FALSE);
-
         alSourcef(source, AL_MAX_DISTANCE, maxRadius);
         alSourcef(source, AL_REFERENCE_DISTANCE, maxVolRadius); // Start decreasing volume immediately
         alSourcef(source, AL_ROLLOFF_FACTOR, 1.0f); // For linear decrease over the distance
     }
 
-    if(sources[sourceIndex].soundFlags & (SND_MUSIC | SND_UI))
+    if(sources[id].soundFlags & (SND_MUSIC | SND_UI))
     {
         alSource3i(source, AL_AUXILIARY_SEND_FILTER, AL_FILTER_NULL, 0, AL_FILTER_NULL);
         alSourcei(source, AL_DIRECT_FILTER, AL_FILTER_NULL);
-        sources[sourceIndex].lfOcclusionGain = sources[sourceIndex].hfOcclusionGain = 1.0f;
-        sources[sourceIndex].isCurrentlyOccluded = false;
+        sources[id].lfOcclusionGain = sources[id].hfOcclusionGain = 1.0f;
+        sources[id].isCurrentlyOccluded = false;
+        alFilterf(sources[id].occlusionFilter, AL_LOWPASS_GAIN, sources[id].lfOcclusionGain);
+        alFilterf(sources[id].occlusionFilter, AL_LOWPASS_GAINHF, sources[id].hfOcclusionGain);
     }
     else if(!noEfx) // apply efx if available
     {
-        bool occluded = isOccluded(sourceIndex);
+        bool occluded = isOccluded(id);
 
-        sources[sourceIndex].lfOcclusionGain = occluded ? 0.5f : 1.0f;
-        sources[sourceIndex].hfOcclusionGain = occluded ? 0.1f : 1.0f;
-        sources[sourceIndex].isCurrentlyOccluded = occluded;
+        sources[id].lfOcclusionGain = occluded ? 0.5f : 1.0f;
+        sources[id].hfOcclusionGain = occluded ? 0.1f : 1.0f;
+        sources[id].isCurrentlyOccluded = occluded;
 
-        alSourcei(source, AL_DIRECT_FILTER, sources[sourceIndex].occlusionFilter);
-        applyReverb(source, getReverbZone(sources[sourceIndex].pos));
+        alFilterf(sources[id].occlusionFilter, AL_LOWPASS_GAIN, sources[id].lfOcclusionGain);
+        alFilterf(sources[id].occlusionFilter, AL_LOWPASS_GAINHF, sources[id].hfOcclusionGain);
+        alSourcei(source, AL_DIRECT_FILTER, sources[id].occlusionFilter);
+        applyReverb(source, getReverbZone(sources[id].pos));
     }
 
     alSourcePlay(source);
@@ -434,7 +439,6 @@ void stopSound(int soundId, int flags)
         {
             alSourceStop(sources[i].source);
             sources[i].isActive = false;
-            break;
         }
     }
 }
@@ -486,7 +490,7 @@ void updateSoundOcclusion(int id)
         sources[id].lastOcclusionChange = totalmillis; // Mark the time of change
     }
 
-    float progress = min(1.0f, (totalmillis - sources[id].lastOcclusionChange) / 500.f); // Calculate transition progress based on time since last change
+    float progress = min(1.0f, (totalmillis - sources[id].lastOcclusionChange) / 750.f); // Calculate transition progress based on time since last change
 
     // Determine target gain based on occlusion
     float targetGain = occlusion ? 0.5f : 1.0f;
@@ -511,7 +515,6 @@ void updateSoundOcclusion(int id)
 void manageSources()
 {
     if(noSound) return;
-
     ALint state;
     loopi(maxsoundsatonce)
     {
@@ -535,6 +538,7 @@ void updateSoundPosition(size_t entityId, const vec &newPosition, const vec &vel
     {
         if(sources[i].isActive && sources[i].entityId == entityId && sources[i].soundType == soundType) // found the correct sound source, now update its position
         {
+            sources[i].pos = newPosition;
             applyReverb(sources[i].source, getReverbZone(newPosition));
             alSource3f(sources[i].source, AL_VELOCITY, velocity.x, velocity.z, velocity.y);
             alSource3f(sources[i].source, AL_POSITION, newPosition.x, newPosition.z, newPosition.y);
@@ -670,10 +674,10 @@ void cleanUpSounds()
     loopi(MAX_SOURCES)
     {
         alDeleteSources(1, &sources[i].source);
-        alDeleteFilters(1, &sources[i].occlusionFilter);
+        if(!noEfx) alDeleteFilters(1, &sources[i].occlusionFilter);
     }
 
-    alDeleteAuxiliaryEffectSlots(NUMREVERBS, auxEffectSlots);
+    if(!noEfx) alDeleteAuxiliaryEffectSlots(NUMREVERBS, auxEffectSlots);
     ALCcontext* context = alcGetCurrentContext();
     alcMakeContextCurrent(NULL);
     alcDestroyContext(context);
