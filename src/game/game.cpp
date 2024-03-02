@@ -715,7 +715,7 @@ namespace game
         if(actor->aptitude==APT_FAUCHEUSE)
         {
             if(camera1->o.dist(d->o) >= 250) playSound(S_ECLAIRLOIN, d->o, 1000, 100);
-            else playSound(S_ECLAIRPROCHE, d->o, 300, 100);
+            else playSound(S_ECLAIRPROCHE, d->o, 300, 100, SND_NOOCCLUSION);
             adddynlight(d->o.add(vec(0, 0, 20)), 5000, vec(1.5f, 1.5f, 1.5f), 80, 40);
             vec pos(d->o.x, d->o.y, d->o.z-50);
             particle_flare(vec(0, rnd(15000)+rnd(-30000), 20000+rnd(20000)), pos, 175, PART_LIGHTNING, 0xFFFFFF, 40.0f);

@@ -227,12 +227,12 @@ namespace game
     static const struct bouncerConfig { const char *name; float size, bounceIntensity; int variants, cullDist, bounceSound, bounceSoundRad, soundFlag; } bouncers[NUMBOUNCERS] =
     {
         { "grenade",            1.0f, 1.0f,  0,  750, S_B_GRENADE,      220,    0              },
-        { "pixel",              1.0f, 0.6f,  8,  750, S_B_PIXEL,        120,    0              },
+        { "pixel",              1.0f, 0.6f,  8,  600, S_B_PIXEL,        120,    0              },
         { "rock",               0.8f, 0.8f,  4,  750, S_B_ROCK,         120,    0              },
-        { "rock/big",           2.5f, 0.4f,  3,  750, S_B_BIGROCK,      300,    0              },
-        { "casing",             0.2f, 1.0f,  0,  300, S_B_CASING,       120,    SND_FIXEDPITCH },
-        { "casing/big",         0.2f, 1.0f,  0,  300, S_B_BIGCASING,    120,    SND_FIXEDPITCH },
-        { "casing/cartridge",   0.2f, 1.0f,  0,  300, S_B_CARTRIDGE,    120,    SND_FIXEDPITCH },
+        { "rock/big",           2.5f, 0.4f,  3, 1250, S_B_BIGROCK,      300,    0              },
+        { "casing",             0.2f, 1.0f,  0,  250, S_B_CASING,       120,    SND_FIXEDPITCH },
+        { "casing/big",         0.2f, 1.0f,  0,  250, S_B_BIGCASING,    120,    SND_FIXEDPITCH },
+        { "casing/cartridge",   0.2f, 1.0f,  0,  250, S_B_CARTRIDGE,    120,    SND_FIXEDPITCH },
         { "scrap",              1.5f, 0.7f,  3,  750, S_B_SCRAP,        180,    0              }
     };
 
@@ -326,7 +326,7 @@ namespace game
                     int qtime = min(30, rtime);
                     rtime -= qtime;
                     stopped = (bnc.bounces && bnc.bouncetype == BNC_LIGHT);
-                    if(bnc.bounces <= 6) bounce(&bnc, qtime / 1000.f, 0.6f, 0.5f, 1);
+                    if(bnc.bounces <= 5) bounce(&bnc, qtime / 1000.f, 0.6f, 0.5f, 1);
                     if((bnc.lifetime -= qtime) < 0) { stopped = true; break; }
                 }
             }
@@ -778,9 +778,9 @@ namespace game
 
             case ATK_ARTIFICE_SHOOT:
                 gfx::renderExplosion(owner, v, vel, safe, atk);
-                playSound(S_EXPL_FIREWORKS, safeLoc, 300, 100);
+                playSound(S_EXPL_FIREWORKS, safeLoc, 400, 200);
                 if(inWater) playSound(S_EXPL_INWATER, v, 300, 100);
-                if(isFar) playSound(S_FIREWORKSEXPL_FAR, safeLoc, 2000, 400);
+                if(isFar) playSound(S_FIREWORKSEXPL_FAR, safeLoc, 2000, 750);
                 startshake(v, 100, atk);
                 break;
 
@@ -976,7 +976,7 @@ namespace game
                     {
                         p.inwater = true;
                         particle_splash(PART_WATER, 15, 100, v, 0x28282A, 0.75f, 50, -300, 1, gfx::champicolor());
-                        playSound(S_IMPACTWATER, v, 250, 50, SND_LOWPRIORITY);
+                        playSound(S_IMPACTWATER, v, 250, 50, SND_LOWPRIORITY|SND_NOOCCLUSION);
                     }
                     gfx::renderProjectilesTrails(p.owner, pos, dv, p.from, p.offset, p.atk, p.exploded);
                 }

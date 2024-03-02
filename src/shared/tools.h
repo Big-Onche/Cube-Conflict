@@ -1454,5 +1454,6 @@ struct ipmask
 
 extern int rygbGradient(int val);
 extern int rgbToHex(int r, int g, int b);
+extern float lerp(float a, float b, float t);
 
 #endif

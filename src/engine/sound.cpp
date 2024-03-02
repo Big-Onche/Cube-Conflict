@@ -205,9 +205,7 @@ ICOMMAND(mapreverbs, "iiiii", (int *a, int *b, int *c, int *d, int *e), configur
 
 bool isUnderWater(vec pos)
 {
-    if(lookupmaterial(camera1->o) == MAT_WATER || lookupmaterial(camera1->o) == MAT_LAVA) return true;
-    if(pos.iszero()) pos = camera1->o; // no pos = hud sound = camera position
-    return (lookupmaterial(pos) == MAT_WATER || lookupmaterial(pos) == MAT_LAVA);
+    return (lookupmaterial(pos) == MAT_WATER || lookupmaterial(pos) == MAT_LAVA || lookupmaterial(camera1->o) == MAT_WATER || lookupmaterial(camera1->o) == MAT_LAVA);
 }
 
 void applyReverb(ALuint source, int reverb)
@@ -302,7 +300,7 @@ bool checkSoundOcclusion(const vec *soundPos, int flags = 0)
     if(*soundPos == vec(0, 0, 0) || (flags & SND_NOOCCLUSION) || noEfx) return false;
 
     float distance = camera1->o.dist(*soundPos);
-    if((distance < 50 && (flags & SND_MAPSOUND)) || distance > 1000) return false; // avoid short distance tolerance for map sounds, can be useful with thin walls, also culling distant sounds
+    if((distance < 50 && !(flags & SND_MAPSOUND)) || distance > 1000) return false; // avoid short distance tolerance for map sounds can be useful with thin walls also culling distant sounds
 
     vec hitPos;
     if(distance > 300) return !raycubelos(*soundPos, camera1->o, hitPos); // simple ray check if the sound is far away
@@ -319,7 +317,7 @@ bool checkSoundOcclusion(const vec *soundPos, int flags = 0)
             float theta = i * sectorAngle + ((totalmillis / 50.f) * M_PI); // spinning the triangle to get a circle of points
             vec displacement = right;
 
-            int toleranceRadius = 25 * (distance / 100.f);
+            int toleranceRadius = 25;
 
             displacement.mul(cos(theta) * toleranceRadius);
 
@@ -339,7 +337,7 @@ bool checkSoundOcclusion(const vec *soundPos, int flags = 0)
 bool isOccluded(int id)
 {
     if(sources[id].soundFlags & (SND_MUSIC | SND_UI)) return false;
-    return isUnderWater(sources[id].pos) || checkSoundOcclusion(&sources[id].pos);
+    return isUnderWater(sources[id].pos) || checkSoundOcclusion(&sources[id].pos, sources[id].soundFlags);
 }
 
 float getRandomSoundPitch(int flags)
@@ -417,8 +415,8 @@ void playSound(int soundId, vec soundPos, float maxRadius, float maxVolRadius, i
     {
         bool occluded = isOccluded(id);
 
-        sources[id].lfOcclusionGain = occluded ? 0.5f : 1.0f;
-        sources[id].hfOcclusionGain = occluded ? 0.1f : 1.0f;
+        sources[id].lfOcclusionGain = occluded ? 0.90f : 1.0f;
+        sources[id].hfOcclusionGain = occluded ? 0.10f : 1.0f;
         sources[id].isCurrentlyOccluded = occluded;
 
         alFilterf(sources[id].occlusionFilter, AL_LOWPASS_GAIN, sources[id].lfOcclusionGain);
@@ -491,8 +489,8 @@ void updateSoundOcclusion(int id)
     float progress = min(1.0f, (totalmillis - sources[id].lastOcclusionChange) / 750.f); // Calculate transition progress based on time since last change
 
     // Determine target gain based on occlusion
-    float targetGain = occlusion ? 0.5f : 1.0f;
-    float targetGainHF = occlusion ? 0.1f : 1.0f;
+    float targetGain = occlusion ? 0.90f : 1.0f;
+    float targetGainHF = occlusion ? 0.10f : 1.0f;
 
     if(progress < 1.0f)
     {
