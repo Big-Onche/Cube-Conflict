@@ -925,7 +925,7 @@ void clearbatchedmapmodels()
 VARP(lodmodels, 0, 1, 1);
 VARP(loddistfactor, 1, 6, 12);
 
-int calcLodDistance() { return loddistfactor + (gfx::zoom ? (gfx::zoomfov - 100) / -20 : 0); }
+int calcLodDistance() { return loddistfactor + (game::zoom ? (game::zoomfov - 100) / -20 : 0); }
 
 void rendermapmodel(int idx, int anim, const vec &o, float yaw, float pitch, float roll, int flags, int basetime, float size)
 {

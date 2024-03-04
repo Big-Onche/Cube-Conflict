@@ -207,11 +207,11 @@ namespace game
         gameent *hp = hudplayer();
         if(hp->state==CS_EDITING || hp->state==CS_SPECTATOR || hp->state==CS_DEAD) return;
 
-        gfx::zoomfov = (guns[hp->gunselect].maxzoomfov);
+        zoomfov = (guns[hp->gunselect].maxzoomfov);
 
-        if(ispaused()) {gfx::zoom = 0; return;}
+        if(ispaused()) {zoom = 0; return;}
 
-        if((hp->gunselect==GUN_SKS || hp->gunselect==GUN_SV98 || hp->gunselect==GUN_ARBALETE || hp->gunselect==GUN_S_CAMPOUZE || hp->gunselect==GUN_S_ROQUETTES) && gfx::zoom)
+        if((hp->gunselect==GUN_SKS || hp->gunselect==GUN_SV98 || hp->gunselect==GUN_ARBALETE || hp->gunselect==GUN_S_CAMPOUZE || hp->gunselect==GUN_S_ROQUETTES) && zoom)
         {
             if(hp->gunselect==GUN_S_ROQUETTES) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/scope_1.png", zoomprogress);
             else if(hp->gunselect==GUN_SKS) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/scope_3.png", zoomprogress);
@@ -233,12 +233,12 @@ namespace game
         if(hp->health<300 && hp->state==CS_ALIVE) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/damage.png", (- (hp->health) + 700) / 1000.0f);
 
         /*
-        dynent *o = intersectclosest(d->o, worldpos, d, gfx::zoom ? 40 : 25);
+        dynent *o = intersectclosest(d->o, worldpos, d, zoom ? 40 : 25);
         if(o && o->type==ENT_PLAYER && !isteam(player1->team, ((gameent *)o)->team) && totalmillis-lastshoot<=1000 && player1->o.dist(o->o)<guns[d->gunselect].hudrange)
         {
             float health = ((gameent *)o)->health > ((gameent *)o)->maxhealth ? ((gameent *)o)->health : ((gameent *)o)->maxhealth;
             float healthbar = (((gameent *)o)->health / health);
-            float armour = ((gfx::armours[((gameent *)o)->armourtype].armoursteps)*5.f) + (((gameent *)o)->aptitude==APT_SOLDAT ? (((gameent *)o)->armourtype+1)*250.f : 0);
+            float armour = ((armours[((gameent *)o)->armourtype].armoursteps)*5.f) + (((gameent *)o)->aptitude==APT_SOLDAT ? (((gameent *)o)->armourtype+1)*250.f : 0);
             float armourbar = (((gameent *)o)->armour / armour);
 
             float lxhbarvide = 0.5f*(w - 483), lxhbarpleine = 0.5f*(w - 477);

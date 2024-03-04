@@ -534,17 +534,16 @@ struct gamestate
             case I_ROIDS: case I_EPO: case I_JOINT: case I_SHROOMS:
                 return boostmillis[type-I_ROIDS]<is.max;
 
-            case I_WOODSHIELD: return haspowerarmor ? armour<3000 : armour < (aptitude==APT_SOLDAT ? 1000 : is.max);
-
-            case I_IRONSHIELD: return haspowerarmor ? armour<3000 : armour < (aptitude==APT_SOLDAT ? 1750 : is.max);
-
-            case I_GOLDSHIELD: return haspowerarmor ? armour<3000 : armour < (aptitude==APT_SOLDAT ? 2750 : is.max);
-
-            case I_MAGNETSHIELD: return haspowerarmor ? armour<3000 : armour < (aptitude==APT_SOLDAT ? 2500 : is.max);
+            case I_WOODSHIELD:
+            case I_IRONSHIELD:
+            case I_GOLDSHIELD:
+            case I_MAGNETSHIELD:
+                return haspowerarmor ? (armour < 3000) : (armour < (aptitude==APT_SOLDAT ? is.max+(250*(armourtype+1)) : is.max));
 
             case I_POWERARMOR: return !haspowerarmor;
 
-            default: return ammo[is.info]<is.max*(aptitude==APT_AMERICAIN ? 1.5f : 1);
+            default:
+                return ammo[is.info]<is.max*(aptitude==APT_AMERICAIN ? 1.5f : 1);
         }
     }
 
@@ -582,8 +581,9 @@ struct gamestate
                 else
                 {
                     armourtype = haspowerarmor ? A_ASSIST : is.info;
-                    int armourval = haspowerarmor && armour> 0 ? 500*itemboost : aptitude==APT_SOLDAT ? is.max+(250*(armourtype+1)) : is.max;
-                    armour = min(armour+armourval, haspowerarmor ? 3000 : armourval);
+                    if(!haspowerarmor) ammo[GUN_ASSISTXPL] = 0;
+                    int armourval = haspowerarmor && armour ? (500 * itemboost) : (aptitude==APT_SOLDAT ? is.max+(250*(armourtype+1)) : is.max);
+                    armour = min(armour + armourval, haspowerarmor ? 3000 : armourval);
                     return;
                 }
 
@@ -679,7 +679,7 @@ struct gamestate
 
         if(m_random) // random weapon mutator
         {
-            int weapon = rnd(17);
+            int weapon = rnd(2) ? GUN_HYDRA : GUN_MOSSBERG; //rnd(17);
             baseammo(weapon);
             selectedWeapon = weapon;
         }
@@ -1058,7 +1058,7 @@ namespace game
     extern bool intersect(dynent *d, const vec &from, const vec &to, float margin = 0, float &dist = intersectdist);
     extern dynent *intersectclosest(const vec &from, const vec &to, gameent *at, float margin = 0, float &dist = intersectdist);
     extern int temptrisfade;
-    enum {BNC_GRENADE = 0, BNC_PIXEL, BNC_ROCK, BNC_BIGROCK, BNC_CASING, BNC_BIGCASING, BNC_CARTRIDGE, BNC_SCRAP, BNC_LIGHT, NUMBOUNCERS};
+    enum {BNC_GRENADE = 0, BNC_PIXEL, BNC_GRAVEL, BNC_ROCK, BNC_BIGROCK, BNC_CASING, BNC_BIGCASING, BNC_CARTRIDGE, BNC_SCRAP, BNC_LIGHT, NUMBOUNCERS};
     extern void spawnbouncer(const vec &p, const vec &vel, gameent *d, int type, int speed = 0, int lifetime = rnd(temptrisfade)+rnd(5000), bool frommonster = false);
     extern void newbouncer(const vec &from, const vec &to, bool local, int id, gameent *owner, int type, int lifetime, int speed);
     extern void clearbouncers();
@@ -1088,6 +1088,8 @@ namespace game
     extern void removegroupedplayer(gameent *d);
 
     // render
+    extern bool hasShrooms();
+    extern bool hasRoids(gameent *d);
     struct playermodelinfo { const char *model[MAXTEAMS], *cbmodel; };
     extern void savetombe(gameent *d);
     extern void clearragdolls();

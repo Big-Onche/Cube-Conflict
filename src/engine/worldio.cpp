@@ -913,7 +913,7 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     loopi(NUMSONGS) stopMusic(i);
     if(hasvsync) {vsync = 1; restorevsync();}
     addpostfx("mainfilter");
-    if(gfx::cbfilter) gfx::addColorBlindnessFilter();
+    if(game::cbfilter) game::addColorBlindnessFilter();
     loadprogress = 0;
 
     return true;

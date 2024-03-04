@@ -13,6 +13,9 @@ namespace game
 
     extern int playermodel;
 
+    bool hasShrooms() { return game::hudplayer()->boostmillis[B_SHROOMS]; } // checks if player 1 or observed player is on shrooms.
+    bool hasRoids(gameent *d) { return d->boostmillis[B_ROIDS]; }
+
     vector<gameent *> ragdolls;
 
     void savetombe(gameent *d)
@@ -358,11 +361,11 @@ namespace game
 
             if(validGrave(d->customtombe))
             {
-                d->tombepop = min(d->tombepop + (3.f / gfx::nbfps), 1.0f);
+                d->tombepop = min(d->tombepop + (3.f / nbfps), 1.0f);
                 rendermodel(getGraveDir(d->customtombe), ANIM_MAPMODEL|ANIM_LOOP, d->feetpos(), d->yaw, 0, 0, flags, NULL, NULL, 0, 0, d->tombepop, vec4(vec::hexcolor(color), 5));
             }
 
-            d->skeletonfade = max(d->skeletonfade - (3.f / gfx::nbfps), 0.0f);
+            d->skeletonfade = max(d->skeletonfade - (3.f / nbfps), 0.0f);
             if(d->skeletonfade) rendermodel("mapmodel/smileys/mort", ANIM_MAPMODEL, d->feetpos(), d->yaw+90, 0, 0, flags, NULL, NULL, 0, 0, d->skeletonfade);
             return;
         }
@@ -386,7 +389,7 @@ namespace game
         //    lastaction = d->lasttaunt;
         //    anim = ANIM_TAUNT|ANIM_LOOP;
         //}
-        else if(!intermission && gfx::forcecampos<0)
+        else if(!intermission && forcecampos<0)
         {
             if(d->inwater && d->physstate<=PHYS_FALL)
             {
@@ -409,11 +412,11 @@ namespace game
 
         /////////////////////////// Main player model ///////////////////////////
         const char *mdlname;
-        if(d==player1 || m_tutorial) mdlname = (hasPowerArmor(player1) ? "smileys/armureassistee" : mdl.model[1]); // player1 is always yellow
+        if(d==player1 || m_tutorial) mdlname = (hasPowerArmor(player1) || d->ammo[GUN_ASSISTXPL] ? "smileys/armureassistee" : mdl.model[1]); // player1 is always yellow
         else
         {
-            if(hasPowerArmor(d)) mdlname = d->team==player1->team && validteam(team) ? "smileys/armureassistee" : "smileys/armureassistee/red";
-            else mdlname =  d->abilitymillis[ABILITY_2] && d->aptitude==APT_PHYSICIEN ? "smileys/phy_2" : gfx::cbfilter && d->team==player1->team ? mdl.cbmodel : mdl.model[validteam(team) && d->team==player1->team ? 1 : 0];
+            if(hasPowerArmor(d) || d->ammo[GUN_ASSISTXPL]) mdlname = d->team==player1->team && validteam(team) ? "smileys/armureassistee" : "smileys/armureassistee/red";
+            else mdlname =  d->abilitymillis[ABILITY_2] && d->aptitude==APT_PHYSICIEN ? "smileys/phy_2" : cbfilter && d->team==player1->team ? mdl.cbmodel : mdl.model[validteam(team) && d->team==player1->team ? 1 : 0];
         }
 
         modelattach a[10];
@@ -485,7 +488,7 @@ namespace game
         rendermodel(mdlname, anim, d->feetpos(), d->yaw, clamp(d->pitch, -25, 12), 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), trans));
 
         /////////////////////////// first person body ///////////////////////////
-        if(d==hudplayer() && gfx::forcecampos<0 && !thirdperson)
+        if(d==hudplayer() && forcecampos<0 && !thirdperson)
         {
             vec pos = d->feetpos();
             rendermodel(mdlname, anim, pos.addz(3.5f), d->yaw, 28, 0, MDL_NOSHADOW, d, NULL, basetime, 0, 1.f, vec4(vec::hexcolor(color), trans));
@@ -551,7 +554,7 @@ namespace game
                 float dist = d->o.dist(camera1->o);
                 float up = 5 + dist/40.f + (((totalmillis - d->lastcurdamage) / 50.f) / (dist <= 160 ? 160.f - dist : 1)); // particle going up effect
                 if(!ispaused()) pos.z += up - (15 * (1 - (clamp(dist, 0.f, 160.f) / 160.f)));
-                float size = (gfx::zoom ? huddamagesize * (guns[player1->gunselect].maxzoomfov) / 100.f : huddamagesize) * 1.5f;
+                float size = (zoom ? huddamagesize * (guns[player1->gunselect].maxzoomfov) / 100.f : huddamagesize) * 1.5f;
                 particle_textcopy(pos, tempformatstring("%d", d->curdamage), PART_TEXT, 1, d->curdamagecolor, size, 0, true);
             }
 
@@ -719,14 +722,14 @@ namespace game
         sway.mul((swayside)*cosf(steps));
         vec weapzoom;
 
-        sway.z = -gfx::weapposup - (gfx::zoom ? 2 : 0);
-        if(!gfx::zoom) vecfromyawpitch(d->yaw, 0, -10, gfx::weapposside, weapzoom);
+        sway.z = -weapposup - (zoom ? 2 : 0);
+        if(!zoom) vecfromyawpitch(d->yaw, 0, -10, weapposside, weapzoom);
 
         sway.z += swayup*(fabs(sinf(steps)) - 1);
         sway.add(swaydir).add(d->o);
         if(!hudgunsway) sway = d->o;
 
-        vecfromyawpitch(d->yaw, 0, 0, gfx::weapposside, weapzoom);
+        vecfromyawpitch(d->yaw, 0, 0, weapposside, weapzoom);
 
         int team = m_teammode && validteam(d->team) ? d->team : 0,
             color = getplayercolor(d, team);
@@ -774,7 +777,7 @@ namespace game
             float swaydiv = d->armourtype==A_ASSIST ? 6.f : 3.f;
             sway2.mul((swayside/swaydiv)*cosf(steps));
             sway2.z += (swayup/swaydiv)*(fabs(sinf(steps)) - 1);
-            if(d->armourtype==A_ASSIST || !gfx::zoom) sway2.add(swaydir).add(d->o);
+            if(d->armourtype==A_ASSIST || !zoom) sway2.add(swaydir).add(d->o);
             rendermodel(getShieldDir(d->armourtype, d->armour, true), anim, sway2, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
         }
     }

@@ -1399,7 +1399,7 @@ int main(int argc, char **argv)
         frames++;
 
         // miscellaneous general game effects
-        recomputecamera(gfx::forcecampos);
+        recomputecamera(game::forcecampos);
         updateparticles();
         updateSounds();
 

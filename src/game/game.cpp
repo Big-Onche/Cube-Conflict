@@ -4,7 +4,7 @@
 
 bool rndevent(int probability, int probabilityReduce) // adjust the probability (0-100) based on game speed and frames per second (60 as standard)
 {
-    float adjusted = max((((100 - probability) * 100) / game::gamespeed) * (gfx::nbfps / 60.f), 1.f);
+    float adjusted = max((((100 - probability) * 100) / game::gamespeed) * (game::nbfps / 60.f), 1.f);
     if(probabilityReduce) adjusted *= probabilityReduce;
     return !game::ispaused() && !rnd((int)adjusted);
 }
@@ -172,7 +172,7 @@ namespace game
             lasthit = 0;
             if(cmode) cmode->respawned(player1);
         }
-        gfx::resetpostfx();
+        resetpostfx();
     }
 
     gameent *pointatplayer()
@@ -378,17 +378,17 @@ namespace game
 
     bool onFixedCamera(gameent *d)
     {
-        return gfx::forcecampos >= 0 && d->state!=CS_SPECTATOR;
+        return forcecampos >= 0 && d->state!=CS_SPECTATOR;
     }
 
     void updateworld()        // main game update loop
     {
-        int delta = max((250 / max(gfx::nbfps, 1)) * (game::gamespeed / 100.f), 1.f);
-        int horizontaltrans = gfx::zoom ? 2 : -2;
-        int verticaltrans = gfx::zoom ? -1 : 1;
+        int delta = max((250 / max(nbfps, 1)) * (game::gamespeed / 100.f), 1.f);
+        int horizontaltrans = zoom ? 2 : -2;
+        int verticaltrans = zoom ? -1 : 1;
 
-        gfx::weapposside = clamp(gfx::weapposside + horizontaltrans * delta, 1, guns[hudplayer()->gunselect].maxweapposside);
-        gfx::weapposup = clamp(gfx::weapposup + verticaltrans * delta, 1, guns[hudplayer()->gunselect].maxweapposup);
+        weapposside = clamp(weapposside + horizontaltrans * delta, 1, guns[hudplayer()->gunselect].maxweapposside);
+        weapposup = clamp(weapposup + verticaltrans * delta, 1, guns[hudplayer()->gunselect].maxweapposup);
 
         if(!maptime) { maptime = lastmillis; maprealtime = totalmillis; return; }
         if(!curtime) { gets2c(); if(player1->clientnum>=0) c2sinfo(); return; }
@@ -577,7 +577,7 @@ namespace game
         //if(player1->state!=CS_ALIVE) return;
         //if(lastmillis-player1->lasttaunt<2000){conoutf(CON_GAMEINFO, "\faOn abuse pas des bonnes choses !"); return;}
         //player1->lasttaunt = lastmillis;
-        //playsound(S_CGCORTEX+(player1->customdanse), gfx::forcecampos>=0 ? &player1->o : NULL, NULL, 0, -1, -1, -1, 400);
+        //playsound(S_CGCORTEX+(player1->customdanse), forcecampos>=0 ? &player1->o : NULL, NULL, 0, -1, -1, -1, 400);
         //addmsg(N_TAUNT, "rc", player1);
     }
     COMMAND(taunt, "");
@@ -644,8 +644,8 @@ namespace game
             cleardamagescreen();
             d->boostmillis[B_SHROOMS] = 0;
             d->attacking = ACT_IDLE;
-            gfx::resetpostfx();
-            if(!gfx::cbfilter) addpostfx("deathscreen");
+            resetpostfx();
+            if(!cbfilter) addpostfx("deathscreen");
             d->roll = 0;
             playSound(S_DIE_P1, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH);
             if(m_tutorial) execute("deathReset");
@@ -764,7 +764,7 @@ namespace game
                     {
                         case ATK_ASSISTXPL_SHOOT: if(player1->armourtype==A_ASSIST) unlockAchievement(ACH_KILLASSIST); break;
                         case ATK_LANCEFLAMMES_SHOOT: if(lookupmaterial(d->feetpos())==MAT_WATER) unlockAchievement(ACH_THUGPHYSIQUE); break;
-                        case ATK_SV98_SHOOT: if(gfx::zoom==0) unlockAchievement(ACH_NOSCOPE); break;
+                        case ATK_SV98_SHOOT: if(zoom==0) unlockAchievement(ACH_NOSCOPE); break;
                         case ATK_GLOCK_SHOOT: if(d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_CAMPOUZE || d->gunselect==GUN_S_GAU8 || d->gunselect==GUN_S_ROQUETTES) unlockAchievement(ACH_DAVIDGOLIATH); break;
                         case ATK_CAC349_SHOOT: case ATK_CACFLEAU_SHOOT: case ATK_CACMARTEAU_SHOOT: case ATK_CACMASTER_SHOOT: if(d->aptitude==APT_NINJA) unlockAchievement(ACH_PASLOGIQUE); break;
                         case ATK_NUKE_SHOOT: case ATK_CAMPOUZE_SHOOT: case ATK_GAU8_SHOOT: case ATK_ROQUETTES_SHOOT: if(player1->aptitude==APT_AMERICAIN && player1->boostmillis[B_ROIDS]) unlockAchievement(ACH_JUSTEPOUR);

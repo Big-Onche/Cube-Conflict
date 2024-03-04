@@ -1353,7 +1353,7 @@ float zoomprogress = 0;
 
 void disablezoom()
 {
-    gfx::zoom = 0;
+    game::zoom = 0;
     zoomprogress = 0;
 }
 
@@ -1361,12 +1361,12 @@ void computezoom()
 {
     if(game::player1->state==CS_SPECTATOR)
     {
-        if (game::hudplayer()->aiming && game::player1->state==CS_SPECTATOR) gfx::zoom = 1;
-        else gfx::zoom = 0;
+        if(game::hudplayer()->aiming && game::player1->state==CS_SPECTATOR) game::zoom = 1;
+        else game::zoom = 0;
     }
-    else if(game::player1->state==CS_DEAD || game::intermission) gfx::zoom = 0;
+    else if(game::player1->state==CS_DEAD || game::intermission) game::zoom = 0;
 
-    if(!gfx::zoom)
+    if(!game::zoom)
     {
         zoomprogress = 0;
         curfov = fov;
@@ -1374,7 +1374,7 @@ void computezoom()
         game::player1->aiming = false;
         return;
     }
-    if(gfx::zoom > 0)
+    if(game::zoom > 0)
     {
         game::player1->aiming = true;
         float vel = zoominvel * (100.f / game::gamespeed);
@@ -1386,11 +1386,11 @@ void computezoom()
         zoomprogress = vel ? max(zoomprogress - float(elapsedtime) / vel, 0.0f) : 0;
         if(zoomprogress <= 0)
         {
-            gfx::zoom = 0;
+            game::zoom = 0;
             game::player1->aiming = false;
         }
     }
-    curfov = gfx::zoomfov*zoomprogress + fov*(1 - zoomprogress);
+    curfov = game::zoomfov*zoomprogress + fov*(1 - zoomprogress);
     curavatarfov = avatarzoomfov*zoomprogress + avatarfov*(1 - zoomprogress);
 }
 
@@ -1435,12 +1435,12 @@ void mousemove(int dx, int dy)
 {
     if(!game::allowmouselook()) return;
     float cursens = sensitivity, curaccel = mouseaccel;
-    if(gfx::zoom)
+    if(game::zoom)
     {
         if(zoomautosens)
         {
-            cursens = float(sensitivity*gfx::zoomfov)/fov;
-            curaccel = float(mouseaccel*gfx::zoomfov)/fov;
+            cursens = float(sensitivity*game::zoomfov)/fov;
+            curaccel = float(mouseaccel*game::zoomfov)/fov;
         }
         else
         {
@@ -2794,7 +2794,7 @@ void drawcrosshair(int w, int h)
             crosshair = crosshairs[index];
         }
 
-        gfx::zoom ? crosshairShrink = max(crosshairShrink - 1, 1000.f) : crosshairShrink = min(crosshairShrink + 1, 600.f);
+        game::zoom ? crosshairShrink = max(crosshairShrink - 1, 1000.f) : crosshairShrink = min(crosshairShrink + 1, 600.f);
         chsize = (crosshairsize * w) / crosshairShrink;
     }
     if(crosshair->type&Texture::ALPHA) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -2805,7 +2805,7 @@ void drawcrosshair(int w, int h)
     float y = cy*h - (windowhit ? 0 : chsize/2.0f);
     glBindTexture(GL_TEXTURE_2D, crosshair->id);
 
-    if(windowhit || gfx::forcecampos<0) hudquad(x, y, chsize, chsize);
+    if(windowhit || game::forcecampos<0) hudquad(x, y, chsize, chsize);
 }
 
 VARP(wallclock, 0, 0, 1);
@@ -2863,7 +2863,7 @@ void gl_drawhud()
             int nextfps[3];
             getfps(nextfps[0], nextfps[1], nextfps[2]);
             loopi(3) if(prevfps[i]==curfps[i]) curfps[i] = nextfps[i];
-            gfx::nbfps = max(1, curfps[0]);
+            game::nbfps = max(1, curfps[0]);
 
             int roffset = FONTH;
 
@@ -2913,7 +2913,7 @@ void gl_drawhud()
 }
 
 ICOMMAND(getcurfps, "", (),
-    defformatstring(s, "%sFPS %d", gfx::nbfps<25 ? "\f3" : gfx::nbfps<40 ? "\f9" : gfx::nbfps<59 ? "\f0" : "\f8", gfx::nbfps);
+    defformatstring(s, "%sFPS %d", game::nbfps<25 ? "\f3" : game::nbfps<40 ? "\f9" : game::nbfps<59 ? "\f0" : "\f8", game::nbfps);
     result(s);
 );
 

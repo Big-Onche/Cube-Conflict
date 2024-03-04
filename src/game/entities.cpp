@@ -377,7 +377,7 @@ namespace entities
         if(d->boostmillis[B_SHROOMS] && (d->boostmillis[B_SHROOMS] -= time)<=0)
         {
             d->boostmillis[B_SHROOMS] = 0;
-            gfx::resetpostfx();
+            resetpostfx();
             if(d==player1) conoutf(CON_HUDCONSOLE, "\f8%s", readstr("GameMessage_ShroomsEnded"));
         }
 
