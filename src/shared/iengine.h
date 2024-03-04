@@ -48,6 +48,7 @@ extern float raycube   (const vec &o, const vec &ray,     float radius = 0, int 
 extern float raycubepos(const vec &o, const vec &ray, vec &hit, float radius = 0, int mode = RAY_CLIPMAT, int size = 0);
 extern float rayfloor  (const vec &o, vec &floor, int mode = 0, float radius = 0);
 extern bool  raycubelos(const vec &o, const vec &dest, vec &hitpos);
+extern float rayent(const vec &o, const vec &ray, float radius, int mode, int size, int &orient, int &ent);
 
 extern int thirdperson;
 extern bool isthirdperson();
@@ -334,7 +335,7 @@ enum
     // bullets flares
     PART_F_BULLET, PART_F_SHOTGUN, PART_F_PLASMA, PART_F_SMOKE, PART_SPOCK_FRONT, PART_PLASMA_FRONT,
     // flames and smokes
-    PART_SMOKE, PART_FLAME, PART_FIRE_BALL, PART_FIRESPARK,
+    PART_SMOKE, PART_SMOKE_S, PART_FLAME, PART_FIRE_BALL, PART_FIRESPARK,
     // water
     PART_WATER, PART_DROP, PART_BUBBLE, PART_STEAM,
     // weather
@@ -344,19 +345,16 @@ enum
     // explosions
     PART_SHOCKWAVE, PART_PLASMABURST, PART_PLASMAGRENADE, PART_EXPLOSION,
     // misc
-    PART_BLOOD, PART_SPARK, PART_SPARK_L, PART_TEXT, PART_LENS_FLARE
+    PART_BLOOD, PART_SPARK, PART_SPARK_L, PART_SPARK_VL, PART_TEXT, PART_LENS_FLARE
 };
 
-extern bool canaddparticles();
-extern void particle_explodesplash(const vec &o, int fade, int type, int color, int size, int gravity, int num);
-extern void regular_particle_splash(int type, int num, int fade, const vec &p, int color = 0xFFFFFF, float size = 1.0f, int radius = 150, int gravity = 2, int delay = 0);
+extern bool canEmitParticles();
 extern void particle_flying_flare(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity = 0, int sizemod = 0, bool randomcolor = false);
 extern void regular_particle_flame(int type, const vec &p, float radius, float height, int color, int density = 3, float scale = 2.0f, float speed = 200.0f, float fade = 600.0f, int gravity = -15);
-extern void particle_splash(int type, int num, int fade, const vec &p, int color = 0xFFFFFF, float size = 1.0f, int radius = 150, int gravity = 2, int sizemod = 0, bool randomcolor = false);
+extern void particle_splash(int type, int num, int fade, const vec &p, int color = 0xFFFFFF, float size = 1.0f, int radius = 150, int gravity = 2, int sizemod = 0, bool randomcolor = false, bool sound = false);
 extern void particle_trail(int type, int fade, const vec &from, const vec &to, int color = 0xFFFFFF, float size = 1.0f, int gravity = 20);
 extern void particle_text(const vec &s, const char *t, int type, int fade = 2000, int color = 0xFFFFFF, float size = 2.0f, int gravity = 0);
 extern void particle_textcopy(const vec &s, const char *t, int type, int fade = 2000, int color = 0xFFFFFF, float size = 2.0f, int gravity = 0, bool hud = false);
-extern void particle_icon(const vec &s, int ix, int iy, int type, int fade = 2000, int color = 0xFFFFFF, float size = 2.0f, int gravity = 0);
 extern void particle_hud(int type, const vec &pos, int color, float size = 0.075f);
 extern void particle_meter(const vec &s, float val, int type, int fade = 1, int color = 0xFFFFFF, int color2 = 0xFFFFF, float size = 2.0f, bool ui = false);
 extern void particle_flare(const vec &p, const vec &dest, int fade, int type, int color = 0xFFFFFF, float size = 0.28f, physent *owner = NULL, bool randomcolor = false, int sizemod = 0);
@@ -364,7 +362,13 @@ extern void particle_fireball(const vec &dest, float max, int type, int fade = -
 extern void regularflare(const vec &p, int color, int flaresize, int viewdist);
 extern void regularflame(int type, const vec &p, float radius, float height, int color, int density = 3, float scale = 2.0f, float speed = 200.0f, float fade = 600.0f, int gravity = -15, int sizemod = -3);
 extern void regularshape(int type, int radius, int color, int dir, int num, int fade, const vec &p, float size, int gravity, float vel = 0, int windoffset = 0, bool weather = false, int height = 0, int sizemod = 0);
-extern void regularsplash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int delay = 0, int sizemod = 0, bool upsplash = false, bool sound = false);
+
+namespace particles
+{
+    extern uint32_t getRandomColor();
+    extern void dirSplash(int type, int color, int radius, int num, int fade, const vec &p, const vec &dir, float size, int speed, int sizemod = 0, bool randomColor = false);
+}
+
 extern void removetrackedparticles(physent *owner = NULL);
 
 // stain

@@ -1045,14 +1045,15 @@ namespace game
             if(material&MAT_WATER)
             {
                 playSound(S_SPLASH, isHudplayer ? vec(0, 0, 0) : d->o, 300, 50);
-                particle_splash(PART_WATER, 40, 150, o, 0x18181A, 10.0f+rnd(12), 600, 30);
+                particle_splash(PART_WATER, 40, 150, o, 0x18181A, 10.f + rnd(12), 600, 30);
             }
             else if(material&MAT_LAVA)
             {
                 playSound(S_LAVASPLASH, isHudplayer ? vec(0, 0, 0) : d->o, 300, 50);
-                particle_splash(PART_SMOKE, 25, 100, o, 0x222222, 10.0f+rnd(5), 400, 20);
-                particle_splash(PART_FIRE_BALL, 7, 120, o, 0xCC7744, 10.00f+rnd(5), 400, 300);
-                loopi(5)regularsplash(PART_FIRESPARK, 0xFFBB55, 500, 10, 500+(rnd(500)), d->o, 1.5f+(rnd(18)/5.f), -10, true);
+                particle_splash(PART_SMOKE, 25, 100, o, 0x222222, (10.f + rnd(5)), 400, 20);
+                particle_splash(PART_FIRE_BALL, 7, 120, o, 0xCC7744, (10.f + rnd(5)), 400, 300);
+                loopi(2 + rnd(3)) particles::dirSplash(PART_FIRESPARK, 0xFFBB55, 750, 7, 300 + (rnd(500)), d->feetpos(), vec(0, 0, 1), 3.f+(rnd(30)/6.f), ((i + 1) * 125) + rnd(200), -1);
+                loopi(4) particles::dirSplash(PART_SMOKE, 0x333333, 200, 4, 1500 + rnd(750), d->feetpos(), vec(0, 0, 1), 15.f + rnd(5), 50 + rnd(50), 5);
             }
         }
         if (floorlevel>0)

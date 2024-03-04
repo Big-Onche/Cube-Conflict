@@ -1546,27 +1546,27 @@ namespace game
                     case BNC_CASING:
                     case BNC_BIGCASING:
                     case BNC_CARTRIDGE:
-                        regular_particle_splash(PART_SMOKE, 1, 150, pos, bnc.bouncetype==BNC_CARTRIDGE ? 0x252525 : 0x404040, bnc.bouncetype==BNC_CASING ? 1.0f : 1.75f, 50, -20);
+                        particle_splash(PART_SMOKE, 1, 150, pos, bnc.bouncetype==BNC_CARTRIDGE ? 0x252525 : 0x404040, bnc.bouncetype==BNC_CASING ? 1.0f : 1.75f, 50, -20);
                         break;
 
                     case BNC_ROCK:
-                        regular_particle_splash(PART_SMOKE, 1, 150, pos, 0x404040, 2.5f, 50, -20);
+                        particle_splash(PART_SMOKE, 1, 150, pos, 0x404040, 2.5f, 50, -20);
                         break;
 
                     case BNC_BIGROCK:
-                        regular_particle_splash(PART_SMOKE, 1, 500, pos, 0x151515, 8.f, 50, -20);
+                        particle_splash(PART_SMOKE, 1, 500, pos, 0x151515, 8.f, 50, -20);
                         break;
 
                     case BNC_GRENADE:
                     {
                         float growth = (1000 - (bnc.lifetime - curtime))/150.f;
                         particle_fireball(pos, growth, PART_EXPLOSION, 20, hasRoids(bnc.owner) ? 0xFF0000 : 0x0055FF, growth, hasShrooms());
-                        regular_particle_splash(PART_SMOKE, 1, 150, pos, 0x404088, 2.5f, 50, -20);
+                        particle_splash(PART_SMOKE, 1, 150, pos, 0x404088, 2.5f, 50, -20);
                         break;
                     }
                     case BNC_SCRAP:
-                        regular_particle_splash(inWater ? PART_BUBBLE : PART_SMOKE, inWater ? 1 : 3, 250, pos, 0x222222, 2.5f, 50, -50);
-                        regular_particle_splash(PART_FIRE_BALL, 2, 75, pos, 0x994400, 0.7f, 30, -30);
+                        particle_splash(inWater ? PART_BUBBLE : PART_SMOKE, inWater ? 1 : 3, 250, pos, 0x222222, 2.5f, 50, -50);
+                        particle_splash(PART_FIRE_BALL, 2, 75, pos, 0x994400, 0.7f, 30, -30);
                         break;
                 }
             }

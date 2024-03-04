@@ -1622,7 +1622,7 @@ namespace ai
                     {
                         int ent = obstacles.waypoints[cur];
                         if(iswaypoint(ent))
-                            regular_particle_splash(PART_SPARK, 2, 40, waypoints[ent].o, 0xFF6600, 1.5f);
+                            particle_splash(PART_SPARK, 2, 40, waypoints[ent].o, 0xFF6600, 1.5f);
                     }
                     cur = next;
                 }

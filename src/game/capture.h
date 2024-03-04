@@ -339,7 +339,7 @@ struct captureclientmode : clientmode
 
     void rendergame()
     {
-        if(capturetether && canaddparticles())
+        if(capturetether && canEmitParticles())
         {
             loopv(players)
             {

@@ -21,9 +21,9 @@ VARP(emitmillis, 1, 17, 1000);
 static int lastemitframe = 0, emitoffset = 0;
 static bool canemit = false, regenemitters = false, canstep = false;
 
-static bool canemitparticles()
+bool canEmitParticles()
 {
-    return canemit || emitoffset;
+    return canemit || emitoffset || !minimized;
 }
 
 VARP(showparticles, 0, 1, 1);
@@ -246,7 +246,7 @@ struct partrenderer
                         {
                             case STAIN_RAIN:
                                 addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size/7.5f, 0xFFFFFF, type&PT_RND4 ? (p->flags>>5)&3 : 0);
-                                regularsplash(PART_WATER, 0x303048, 50, 3, 120, vec(o.x, o.y, collidez), 0.08f, 500, 0, 3, true);
+                                particle_splash(PART_WATER, 3, 120, vec(o.x, o.y, collidez), 0x303048, 0.08f, 50, 500, 4);
                                 if(p->sound) playSound(S_WATERDROP, o, 70, 10);
                                 break;
                             case STAIN_SNOW:
@@ -1091,20 +1091,20 @@ static inline particle *newparticle(const vec &o, const vec &d, int fade, int ty
     return parts[type]->addpart(o, d, fade, color, size, gravity, sizemod, sound, hud);
 }
 
-static const struct colorsConfig{ uint32_t color; } colors[] =
-{
-    {0xFF0000},
-    {0x00FF00},
-    {0x0000FF},
-    {0xFFFF00},
-    {0x00FFFF},
-    {0xFF00FF}
-};
-
-uint32_t getRandomColor() { return colors[rnd(sizeof(colors)/sizeof(colors[0]))].color; }
-
 namespace particles
 {
+    static const struct colorsConfig{ uint32_t color; } colors[] =
+    {
+        {0xFF0000},
+        {0x00FF00},
+        {0x0000FF},
+        {0xFFFF00},
+        {0x00FFFF},
+        {0xFF00FF}
+    };
+
+    uint32_t getRandomColor() { return colors[rnd(sizeof(colors)/sizeof(colors[0]))].color; }
+
     static void directionalSplash(int type, int color, int radius, int num, int fade, const vec &p, const vec &dir, float size, int speed, int sizemod)
     {
         int fmin = 1;
@@ -1140,7 +1140,7 @@ namespace particles
     }
 }
 
-static void splash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int sizemod, bool upsplash = false, bool sound = false)
+static void splash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int sizemod, bool sound = false)
 {
     float collidez = parts[type]->type&PT_COLLIDE ? p.z - raycube(p, vec(0, 0, -1), COLLIDERADIUS, RAY_CLIPMAT|RAY_POLY) + (parts[type]->stain >= 0 ? COLLIDEERROR : 0) : -1;
     int fmin = 1;
@@ -1155,45 +1155,28 @@ static void splash(int type, int color, int radius, int num, int fade, const vec
             z = rnd(radius*2)-radius;
         }
         while(x*x+y*y+z*z>radius*radius);
-        vec tmp = vec(upsplash ? (float)x/3.5f : (float)x, upsplash ? (float)y/3.5f : (float)y, (float)z<0 && upsplash ? (float)z==(float)z/-1 : (float)z);
+        vec tmp = vec((float)x, (float)y, (float)z);
         int f = (num < 10) ? (fmin + rnd(fmax)) : (fmax - (i*(fmax-fmin))/(num-1)); //help deallocater by using fade distribution rather than random
-        newparticle(p, tmp, f, type, color, size, upsplash ? gravity*3 : gravity, sizemod, sound)->val = collidez;
+        newparticle(p, tmp, f, type, color, size, gravity, sizemod, sound)->val = collidez;
     }
-}
-
-void regularsplash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int delay, int sizemod, bool upsplash, bool sound)
-{
-    if(minimized || (delay > 0 && rnd(delay) != 0)) return;
-    splash(type, color, radius, num, fade, p, size, gravity, sizemod, upsplash, sound);
 }
 
 void particle_flying_flare(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity, int sizemod, bool randomcolor)
 {
-    newparticle(o, d, fade, type, randomcolor ? getRandomColor() : color, size, gravity, sizemod);
+    newparticle(o, d, fade, type, randomcolor ? particles::getRandomColor() : color, size, gravity, sizemod);
 }
 
-bool canaddparticles()
+void particle_splash(int type, int num, int fade, const vec &p, int color, float size, int radius, int gravity, int sizemod, bool randomcolor, bool sound)
 {
-    return !minimized;
-}
-
-void regular_particle_splash(int type, int num, int fade, const vec &p, int color, float size, int radius, int gravity, int delay)
-{
-    if(!canaddparticles()) return;
-    regularsplash(type, color, radius, num, fade, p, size, gravity, delay);
-}
-
-void particle_splash(int type, int num, int fade, const vec &p, int color, float size, int radius, int gravity, int sizemod, bool randomcolor)
-{
-    if(!canaddparticles()) return;
-    splash(type, randomcolor ? getRandomColor() : color, radius, num, fade, p, size, gravity, sizemod);
+    if(minimized) return;
+    splash(type, randomcolor ? particles::getRandomColor() : color, radius, num, fade, p, size, gravity, sizemod, sound);
 }
 
 VARP(maxtrail, 1, 2000, 10000);
 
 void particle_trail(int type, int fade, const vec &s, const vec &e, int color, float size, int gravity)
 {
-    if(!canaddparticles()) return;
+    if(minimized) return;
     vec v;
     float d = e.dist(s, v);
     int steps = clamp(int(d*2), 1, maxtrail);
@@ -1222,7 +1205,7 @@ VARP(maxparticletextdistance, 0, 4096, 10000);
 
 void particle_text(const vec &s, const char *t, int type, int fade, int color, float size, int gravity)
 {
-    if(!canaddparticles()) return;
+    if(minimized) return;
     if(!particletext || camera1->o.dist(s) > maxparticletextdistance) return;
     particle *p = newparticle(s, vec(0, 0, 1), fade, type, color, size, gravity);
     p->text = t;
@@ -1230,29 +1213,22 @@ void particle_text(const vec &s, const char *t, int type, int fade, int color, f
 
 void particle_textcopy(const vec &s, const char *t, int type, int fade, int color, float size, int gravity, bool hud)
 {
-    if(((!particletext || camera1->o.dist(s) > maxparticletextdistance) || !canaddparticles()) && !hud) return;
+    if(((!particletext || camera1->o.dist(s) > maxparticletextdistance) || !canEmitParticles()) && !hud) return;
     particle *p = newparticle(hud ? computepartpos(s) : s, vec(0, 0, 1), fade, type, color, size, gravity, hud);
     p->text = newstring(t);
     p->flags = 1;
 }
 
-void particle_icon(const vec &s, int ix, int iy, int type, int fade, int color, float size, int gravity)
-{
-    if(!canaddparticles()) return;
-    particle *p = newparticle(s, vec(0, 0, 1), fade, type, color, size, gravity);
-    p->flags |= ix | (iy<<2);
-}
-
 void particle_hud(int type, const vec &pos, int color, float size)
 {
-    if(!canaddparticles()) return;
+    if(minimized) return;
     size = game::zoom ? size*(guns[game::hudplayer()->gunselect].maxzoomfov)/100.f : size;
     newparticle(computepartpos(pos), vec(0, 0, 1), 1, type, color, size, 0);
 }
 
 void particle_meter(const vec &s, float val, int type, int fade, int color, int color2, float size, bool ui)
 {
-    if(!canaddparticles()) return;
+    if(minimized) return;
 
     particle *p = newparticle(ui ? computepartpos(s) : s, vec(0, 0, 1), fade, type, color, size);
     p->color2[0] = color2>>16;
@@ -1263,16 +1239,16 @@ void particle_meter(const vec &s, float val, int type, int fade, int color, int 
 
 void particle_flare(const vec &p, const vec &dest, int fade, int type, int color, float size, physent *owner, bool randomcolor, int sizemod)
 {
-    if(!canaddparticles()) return;
-    newparticle(p, dest, fade, type, randomcolor ? getRandomColor() : color, size, 0, sizemod)->owner = owner;
+    if(!canEmitParticles()) return;
+    newparticle(p, dest, fade, type, randomcolor ? particles::getRandomColor() : color, size, 0, sizemod)->owner = owner;
 }
 
 void particle_fireball(const vec &dest, float maxsize, int type, int fade, int color, float size, bool randomcolor)
 {
-    if(!canaddparticles()) return;
+    if(!canEmitParticles()) return;
     float growth = maxsize - size;
     if(fade < 0) fade = int(growth*20);
-    newparticle(dest, vec(0, 0, 1), fade, type, randomcolor ? getRandomColor() : color, size)->val = growth;
+    newparticle(dest, vec(0, 0, 1), fade, type, randomcolor ? particles::getRandomColor() : color, size)->val = growth;
 }
 
 //dir = 0..6 where 0=up
@@ -1302,7 +1278,7 @@ static inline int colorfromattr(int attr)
  */
 void regularshape(int type, int radius, int color, int dir, int num, int fade, const vec &p, float size, int gravity, float vel, int windoffset, bool weather, int height, int sizemod)
 {
-    if(!canemitparticles()) return;
+    if(!canEmitParticles()) return;
 
     int basetype = parts[type]->type&0xFF;
     bool flare = (basetype == PT_TAPE) || (basetype == PT_LIGHTNING),
@@ -1419,20 +1395,15 @@ void regularshape(int type, int radius, int color, int dir, int num, int fade, c
     }
 }
 
-void particle_explodesplash(const vec &o, int fade, int type, int color, int size, int gravity, int num)
-{
-    regularshape(type, 16, color, 22, num, fade, o, size, gravity, num);
-}
-
 void regular_particle_flame(int type, const vec &p, float radius, float height, int color, int density, float scale, float speed, float fade, int gravity)
 {
-    if(!canaddparticles()) return;
+    if(!canEmitParticles()) return;
     regularflame(type, p, radius, height, color, density, scale, speed, fade, gravity);
 }
 
 void regularflame(int type, const vec &p, float radius, float height, int color, int density, float scale, float speed, float fade, int gravity, int sizemod)
 {
-    if(!canemitparticles()) return;
+    if(!canEmitParticles()) return;
 
     float size = scale * min(radius, height)*1.5f;
     vec v(0, 0, min(1.0f, height)*speed);
@@ -1552,7 +1523,7 @@ static void makeparticles(entity &e)
             regularflame(PART_FLAME, e.o, radius, height, rgbToHex(r, g, b), 2, 2.0f+(rnd(2)), 200.f, 600.f, -15, e.attr8);
             if(e.attr1==1) regularflame(PART_SMOKE, vec(e.o.x, e.o.y, e.o.z + 4.0f*min(radius, height)), radius, height, rgbToHex(smokeGs(), smokeGs(), smokeGs()), 1, 4.0f+(rnd(6)), 100.0f, 2750.0f, -15, e.attr8);
 
-            if(e.attr9 && rndevent(e.attr9)) regularsplash(PART_FIRESPARK, 0xFFFF55, 125, rnd(3)+1, 750+(rnd(750)), offsetvec(e.o, rnd(15)-rnd(31), rnd(15)-rnd(31)), 0.5f + (rnd(18)/12.f), -10, 0);
+            if(e.attr9 && rndevent(e.attr9)) particles::dirSplash(PART_FIRESPARK, 0xFFFF55, 500, rnd(3)+1, 750+(rnd(750)), offsetvec(e.o, rnd(15)-rnd(31), rnd(15)-rnd(31)), vec(0, 0, 1), 0.6f + (rnd(18)/12.f), 150);
             break;
         }
         case 3: // smoke only: attr 2:<radius> 3:<height> 4:<r> 5:<g> 6:<b> 7:<color offset> 8:<grow(+)/shrink(-)>
@@ -1583,8 +1554,7 @@ static void makeparticles(entity &e)
             int r, g, b;
             if(noColors(e.attr4, e.attr5, e.attr6)) { r = 200; g = 200;  b = 200; } // setting default colors for generic steam
             else { r = e.attr4; g = e.attr5; b = e.attr6; } // setting custom colors from r g b attrs
-
-            regularsplash(PART_STEAM, rgbToHex(r, g, b), radius, 1, fade, offsetvec(e.o, e.attr2, rnd(10)), size, -20);
+            particle_splash(PART_STEAM, 1, fade, offsetvec(e.o, e.attr2, rnd(10)), rgbToHex(r, g, b), size, radius, -20, -1);
             break;
         }
         case 5: // energy ball: 2:<type (shockwave, plasma, grenade, explosion)> attr 3:<radius> 4:<r> 5:<g> 6:<b>
@@ -1622,7 +1592,7 @@ static void makeparticles(entity &e)
                 int r, g, b;
                 if(noColors(e.attr4, e.attr5, e.attr6)) { r = 150; g = 40;  b = 0; } // setting default colors for generic sparks
                 else { r = e.attr4; g = e.attr5; b = e.attr6; } // setting custom colors from r g b attrs
-                regularsplash(PART_SPARK_VL, rgbToHex(r, g, b), radius, num, fade, e.o, size/100.f, 2);
+                particle_splash(PART_SPARK_VL, num, fade, e.o, rgbToHex(r, g, b), size/100.f, radius, 2);
                 particle_splash(PART_SMOKE, 4, 600+rnd(300), e.o, 0x454545, 0.4f, 25, 300, 3);
                 playSound(S_SPARKS, e.o, 200, 50);
             }
@@ -1642,7 +1612,7 @@ static void makeparticles(entity &e)
                 int r, g, b;
                 if(noColors(e.attr4, e.attr5, e.attr6)) { r = 170; g = 170;  b = 200; } // setting default colors for generic sparks
                 else { r = e.attr4; g = e.attr5; b = e.attr6; } // setting custom colors from r g b attrs
-                regularsplash(PART_DROP, rgbToHex(r, g, b), radius, num, fade, e.o, size/100.f, 1, 0, 0, false, e.attr2 < 5 ? true : false);
+                particle_splash(PART_DROP, num, fade, e.o, rgbToHex(r, g, b), size/100.f, radius, 1, 0, false, e.attr2 < 3);
             }
             break;
         }
@@ -1655,9 +1625,9 @@ static void makeparticles(entity &e)
                 vec pos = e.o;
                 if(e.attr3) pos.add(vec((- e.attr3 / 2) + rnd(e.attr3), (- e.attr3 / 2) + rnd(e.attr3), 0));
                 playSound(S_LAVASPLASH, e.o, 300, 100);
-                loopi(6)regularsplash(PART_FIRESPARK, 0xFFBB55, 800+rnd(600), 10, 300+(rnd(500)), pos, 3.f+(rnd(30)/6.f), 200, 0, -3.f, true);
-                loopi(4)regularsplash(PART_SMOKE, 0x333333, 400, 3, 1000+(rnd(1000)), pos, 8.f+(rnd(8)), -20, 0, 18.f, true);
-                loopi(2)particle_fireball(pos, 20, PART_EXPLOSION, 500, 0xFF9900, 2.5f, false);
+                loopi(2 + rnd(3)) particles::dirSplash(PART_FIRESPARK, 0xFFBB55, 750, 7, 300 + (rnd(500)), pos, vec(0, 0, 1), 3.f+(rnd(30)/6.f), ((i + 1) * 125) + rnd(200), -1);
+                loopi(4) particles::dirSplash(PART_SMOKE, 0x333333, 200, 4, 1500 + rnd(750), pos, vec(0, 0, 1), 15.f + rnd(5), 50 + rnd(50), 5);
+                loopi(2) particle_fireball(pos, 20, PART_EXPLOSION, 500, 0xFF9900, 2.5f, false);
                 adddynlight(e.o, 200, vec(0.3f, 0.15f, 0), 250, 150, DL_EXPAND|L_NOSHADOW|L_VOLUMETRIC, 50);
             }
             break;

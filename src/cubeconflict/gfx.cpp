@@ -201,7 +201,7 @@ namespace game
             case ATK_ARTIFICE_SHOOT:
 
                 particle_splash(PART_FIRE_BALL, 5, 40, v, 0xFFC864, 5, 800, 1600, 0, hasShrooms());
-                loopi(4) particle_splash(PART_SPARK, 16+rnd(10), 200+rnd(200), v, hasRoids(owner) ? 0xFF0000 : getRandomColor(), 0.2f+(rnd(5)/10.f), 500+rnd(300), 5000+rnd(3000), 2.f, hasShrooms());
+                loopi(4) particle_splash(PART_SPARK, 16+rnd(10), 200+rnd(200), v, hasRoids(owner) ? 0xFF0000 : particles::getRandomColor(), 0.2f+(rnd(5)/10.f), 500+rnd(300), 5000+rnd(3000), 2.f, hasShrooms());
 
                 if(inWater)
                 {

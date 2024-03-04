@@ -574,7 +574,7 @@ namespace game
                 vec center = d->o;
                 center.subz(8);
                 if(d->health < 300 && rndevent(1)) spawnbouncer(d->o, vec(0,0,0), d, BNC_PIXEL, 75);
-                if(d->health < 150 && rndevent(94)) regular_particle_splash(PART_BLOOD, 1, 9999, center, 0x60FFFF, 1.f+rnd(2), 50);
+                if(d->health < 150 && rndevent(94)) particle_splash(PART_BLOOD, 1, 2500, center, 0x60FFFF, 1.f+rnd(2), 50);
 
                 if(hasPowerArmor(d))
                 {
