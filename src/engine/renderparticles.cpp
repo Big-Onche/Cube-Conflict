@@ -1103,39 +1103,41 @@ static const struct colorsConfig{ uint32_t color; } colors[] =
 
 uint32_t getRandomColor() { return colors[rnd(sizeof(colors)/sizeof(colors[0]))].color; }
 
-static void bounceSplash(int type, int color, int radius, int num, int fade, const vec &p, const vec &dir, float size, int speed, int sizemod)
+namespace particles
 {
-    int fmin = 1;
-    int fmax = fade*3;
-    min(speed, 2);
-
-    loopi(num)
+    static void directionalSplash(int type, int color, int radius, int num, int fade, const vec &p, const vec &dir, float size, int speed, int sizemod)
     {
-        int x, y, z;
-        do {
-            x = rnd(radius * 2) - radius;
-            y = rnd(radius * 2) - radius;
-            z = rnd(radius * 2) - radius;
+        int fmin = 1;
+        int fmax = fade*3;
+        min(speed, 2);
+
+        loopi(num)
+        {
+            int x, y, z;
+            do {
+                x = rnd(radius * 2) - radius;
+                y = rnd(radius * 2) - radius;
+                z = rnd(radius * 2) - radius;
+            }
+            while(x*x + y*y + z*z > radius * radius);
+
+            vec dirOffset = vec((float)x / 3, (float)y / 3, (float)z / 3);
+
+            vec tmp = dir;
+            tmp.normalize();
+            tmp.mul(speed + rnd(speed / 2));
+            tmp.add(dirOffset);
+
+            int f = (num < 10) ? (fmin + rnd(fmax)) : (fmax - (i * (fmax - fmin)) / (num - 1));
+            newparticle(p, tmp, f, type, color, size, 50, sizemod);
         }
-        while(x*x + y*y + z*z > radius * radius);
-
-        // Increase the variance for directional offset
-        vec dirOffset = vec((float)x / 3, (float)y / 3, (float)z / 3); // Adjust divisor for more variance
-
-        vec tmp = dir;
-        tmp.normalize();
-        tmp.mul(speed + rnd(speed / 2)); // Randomize speed slightly
-        tmp.add(dirOffset); // Add offset to make the direction spread more pronounced
-
-        int f = (num < 10) ? (fmin + rnd(fmax)) : (fmax - (i * (fmax - fmin)) / (num - 1));
-        newparticle(p, tmp, f, type, color, size, 50, sizemod);
     }
-}
 
-void particleBounceSplash(int type, int color, int radius, int num, int fade, const vec &p, const vec &dir, float size, int speed, int sizemod, bool randomColor)
-{
-    if(minimized) return;
-    bounceSplash(type, randomColor ? getRandomColor() : color, radius, num, fade, p, dir, size, speed, sizemod);
+    void dirSplash(int type, int color, int radius, int num, int fade, const vec &p, const vec &dir, float size, int speed, int sizemod, bool randomColor)
+    {   // spawn particles in a certain direction
+        if(minimized) return;
+        directionalSplash(type, randomColor ? getRandomColor() : color, radius, num, fade, p, dir, size, speed, sizemod);
+    }
 }
 
 static void splash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int sizemod, bool upsplash = false, bool sound = false)

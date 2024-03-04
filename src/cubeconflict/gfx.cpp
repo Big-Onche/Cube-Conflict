@@ -301,19 +301,22 @@ namespace game
     vec getReflection(const vec pos, vec dir)
     {
         vec hitpos;
-        raycubepos(pos, dir, hitpos, 256, RAY_CLIPMAT|RAY_POLY);
+        raycubepos(pos, dir, hitpos, 200, RAY_CLIPMAT|RAY_POLY);
         vec surfaceNormal = hitsurface;
         return vec(dir.sub(surfaceNormal.mul(2 * dir.dot(surfaceNormal))));
     }
 
     void renderBulletImpact(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk) //particles and light effects on impact for fast projectiles
     {
+        int distance = camera1->o.dist(v);
+        if(distance < 15) return;
+
         vec dir = vec(vel).normalize();
         vec bounce;
         bool isClose = false;
         bool inWater = (lookupmaterial(v) == MAT_WATER);
 
-        if(camera1->o.dist(v) < 256) // if close, calculate a bouncing trajectory
+        if(distance < 200) // if close, calculate a bouncing trajectory
         {
             vec r;
             isClose = true;
@@ -334,10 +337,9 @@ namespace game
 
                 if(isClose)
                 {
-                    if(!inWater && !isCrossbow) particleBounceSplash(PART_SPARK, hasRoids(owner) ? 0xFF0000 : 0xFF8800, 500, 6, 85, v, bounce, bigGun ? 0.3f : 0.2f, 150, 0, hasShrooms());
-                    particleBounceSplash(PART_SMOKE_S, 0x565656, 150, 3, 600 + rnd(300), v, bounce, 3.f, 40, 2, hasShrooms());
-                    particleBounceSplash(PART_SMOKE_S, 0x552900, 150, 3, 600 + rnd(300), v, bounce, 3.f, 40, 2, hasShrooms());
-                    if(!isCrossbow && rnd(2)) spawnbouncer(vec(v).msub(dir, 4), bounce, player1, BNC_GRAVEL, 30 + rnd(10));
+                    if(!inWater && !isCrossbow) particles::dirSplash(PART_SPARK, hasRoids(owner) ? 0xFF0000 : 0xFF8800, 500, 6, 85, v, bounce, bigGun ? 0.3f : 0.2f, 150, 0, hasShrooms());
+                    particles::dirSplash(PART_SMOKE_S, 0x565656, 150, 3, 600 + rnd(300), v, bounce, 3.f, 40, 2, hasShrooms());
+                    particles::dirSplash(PART_SMOKE_S, 0x552900, 150, 3, 600 + rnd(300), v, bounce, 3.f, 40, 2, hasShrooms());
                 }
                 else
                 {
@@ -352,10 +354,9 @@ namespace game
             case ATK_GAU8_SHOOT:
                 if(isClose)
                 {
-                    if(!inWater) particleBounceSplash(PART_SPARK, hasRoids(owner) ? 0xFF0000 : 0xFF5500, 800, 7, 100, v, bounce, 0.4f, 600, -0.5f, hasShrooms());
-                    particleBounceSplash(PART_SMOKE_S, 0x414141, 150, 4, 800 + rnd(300), v, bounce, 6.f, 30, 2, hasShrooms());
-                    particleBounceSplash(PART_SMOKE_S, 0x442200, 150, 4, 800 + rnd(300), v, bounce, 6.f, 30, 2, hasShrooms());
-                    loopi(atk == ATK_GAU8_SHOOT ? 1 : 3) spawnbouncer(vec(v).msub(dir, 4), bounce, player1, BNC_GRAVEL, 50 + rnd(15));
+                    if(!inWater) particles::dirSplash(PART_SPARK, hasRoids(owner) ? 0xFF0000 : 0xFF5500, 800, 7, 100, v, bounce, 0.4f, 600, -0.5f, hasShrooms());
+                    particles::dirSplash(PART_SMOKE_S, 0x414141, 150, 4, 800 + rnd(300), v, bounce, 6.f, 30, 2, hasShrooms());
+                    particles::dirSplash(PART_SMOKE_S, 0x442200, 150, 4, 800 + rnd(300), v, bounce, 6.f, 30, 2, hasShrooms());
                 }
                 else
                 {
@@ -369,13 +370,16 @@ namespace game
 
     void renderInstantImpact(const vec &from, const vec &to, const vec &muzzle, int atk, bool hasRoids) //particles and light effects on impact for instant projectiles
     {
+        int distance = camera1->o.dist(to);
+        if(distance < 15) return;
+
         vec dir = vec(from).sub(to).safenormalize();
         vec bounce;
 
         bool isClose = false;
         bool inWater = (lookupmaterial(to) == MAT_WATER);
 
-        if(camera1->o.dist(to) < 256) // if close, calculate a bouncing trajectory
+        if(distance < 256) // if close, calculate a bouncing trajectory
         {
             isClose = true;
             bounce = getReflection(from, vec(to).sub(from).normalize());
@@ -386,7 +390,7 @@ namespace game
             case ATK_RAIL_SHOOT:
                 if(!inWater)
                 {
-                    if(isClose) particleBounceSplash(PART_SPARK_L, 0x4488FF, 800, 20, 125, to, bounce, 0.5f, 600, -1, hasShrooms());
+                    if(isClose) particles::dirSplash(PART_SPARK_L, 0x4488FF, 800, 20, 125, to, bounce, 0.5f, 600, -1, hasShrooms());
                     else
                     {
                         particle_splash(PART_SPARK, 40, 125, to, 0x4488FF, 0.04f, 400, 50, 0, hasShrooms());
@@ -402,10 +406,9 @@ namespace game
             case ATK_HYDRA_SHOOT:
                 if(isClose)
                 {
-                    if(!inWater) particleBounceSplash(PART_SPARK, hasRoids ? 0xFF2222 : 0xFF4400, 500, 6, 85, to, bounce, 0.2f, 150, 0, hasShrooms());
-                    particleBounceSplash(PART_SMOKE_S, 0x696969, 150, 2, 500 + rnd(300), to, bounce, 4.f, 40, 1, hasShrooms());
-                    particleBounceSplash(PART_SMOKE_S, 0x452910, 150, 2, 500 + rnd(300), to, bounce, 4.f, 40, 1, hasShrooms());
-                    if(!rnd(4)) spawnbouncer(vec(to).madd(dir, 2), bounce, player1, BNC_GRAVEL, 30 + rnd(10));
+                    if(!inWater) particles::dirSplash(PART_SPARK, hasRoids ? 0xFF2222 : 0xFF4400, 500, 6, 85, to, bounce, 0.2f, 150, 0, hasShrooms());
+                    particles::dirSplash(PART_SMOKE_S, 0x696969, 150, 2, 500 + rnd(300), to, bounce, 4.f, 40, 1, hasShrooms());
+                    particles::dirSplash(PART_SMOKE_S, 0x452910, 150, 2, 500 + rnd(300), to, bounce, 4.f, 40, 1, hasShrooms());
                 }
                 else
                 {
@@ -424,10 +427,9 @@ namespace game
             case ATK_CAMPOUZE_SHOOT:
                 if(isClose)
                 {
-                    if(!inWater) particleBounceSplash(PART_SPARK, hasRoids ? 0xFF0000 : 0xFFAA00, 1000, 7, 100, to, bounce, 0.4f, 600, -0.5f, hasShrooms());
-                    particleBounceSplash(PART_SMOKE_S, 0x797979, 150, 4, 900 + rnd(400), to, bounce, 6.f, 30, 2, hasShrooms());
-                    particleBounceSplash(PART_SMOKE_S, 0x553915, 150, 4, 900 + rnd(400), to, bounce, 6.f, 30, 2, hasShrooms());
-                    spawnbouncer(vec(to).madd(dir, 2), bounce, player1, BNC_GRAVEL, 50 + rnd(15));
+                    if(!inWater) particles::dirSplash(PART_SPARK, hasRoids ? 0xFF0000 : 0xFFAA00, 1000, 7, 100, to, bounce, 0.4f, 600, -0.5f, hasShrooms());
+                    particles::dirSplash(PART_SMOKE_S, 0x797979, 150, 4, 900 + rnd(400), to, bounce, 6.f, 30, 2, hasShrooms());
+                    particles::dirSplash(PART_SMOKE_S, 0x553915, 150, 4, 900 + rnd(400), to, bounce, 6.f, 30, 2, hasShrooms());
                 }
                 else
                 {
@@ -449,6 +451,7 @@ namespace game
         int flags = DL_FLASH|DL_SHRINK|L_NOSHADOW;
         bool wizardAbility = d->abilitymillis[game::ABILITY_2] && d->aptitude==APT_MAGICIEN;
         bool increasedDamages = d->boostmillis[B_RAGE] || hasRoids(d);
+        vec dir = vec(to).sub(from);
 
         switch(atk)
         {
@@ -470,39 +473,20 @@ namespace game
             case ATK_ROQUETTES_SHOOT:
             case ATK_NUKE_SHOOT:
             case ATK_ARTIFICE_SHOOT:
-                if(atk==ATK_ARBALETE_SHOOT)
-                {
-                    vec dest = to;
-                    dest.sub(pos);
-                    dest.normalize().mul(800.0f);
-                    loopi(5+rnd(5))
-                    {
-                        dest.add(vec(-150+rnd(300), -150+rnd(300), -150+rnd(300)));
-                        particle_flying_flare(pos, dest, 50, PART_SPARK, 0xFFFF00, rnd(3)/10.f + 0.1f, 100, 0, hasShrooms());
-                    }
-                }
-                else
-                {
-                    particle_flare(pos, pos, 250, PART_MF_ROCKET, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFF7700, 3.5f/adaptMuzzleFlash(d), d, hasShrooms());
-                    adddynlight(pos, 100, vec(1.25f, 0.75f, 0.3f), 75, 2, flags, 0, vec(1.25f, 0.75f, 0.3f), d);
-                }
+                particles::dirSplash(PART_SPARK, 0xFF5500, 300, 3 + rnd(3), 100, pos, dir, 0.4f, 400, -1, hasShrooms());
+                particles::dirSplash(PART_SMOKE, atk == ATK_NUKE_SHOOT ? 0x202020 : 0x333333, 75, 2 + rnd(2), 1250, pos, dir, 2.5f, 30, 3, hasShrooms());
+                particle_flare(pos, pos, 250, PART_MF_ROCKET, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFF7700, 3.5f/adaptMuzzleFlash(d), d, hasShrooms());
+                adddynlight(pos, 100, vec(1.25f, 0.75f, 0.3f), 75, 2, flags, 0, vec(1.25f, 0.75f, 0.3f), d);
                 break;
             case ATK_MINIGUN_SHOOT:
             case ATK_AK47_SHOOT:
             case ATK_GAU8_SHOOT:
             {
-                vec dest = to;
-                dest.sub(pos);
-                dest.normalize().mul(800.0f);
-                bool gau = (atk == ATK_GAU8_SHOOT);
-                loopi(gau ? 1 : 2+rnd(3))
-                {
-                    dest.add(vec(-150+rnd(300), -150+rnd(300), -150+rnd(300)));
-                    particle_flying_flare(pos, dest, 100, PART_SPARK, 0xFF7700, rnd(3)/10.f + 0.1f, 100, 0, hasShrooms());
-                    particle_flying_flare(pos, dest, 300, PART_SMOKE, gau ? 0x282828 : 0x444444, 2.f, 500, 4, hasShrooms());
-                }
+                bool isGau = (atk == ATK_GAU8_SHOOT);
+                particles::dirSplash(PART_SPARK, 0xFF5500, 250, 1 + rnd(3), 75, pos, dir, 0.4f, 400, -1, hasShrooms());
+                particles::dirSplash(PART_SMOKE, isGau ? 0x282828 : 0x444444, 100, 1 + rnd(2), 750, pos, dir, 2.5f, 30, 3, hasShrooms());
                 particle_flare(pos, pos, 100, PART_MF_BIG, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xCCAAAA, 3.5f/adaptMuzzleFlash(d), d, hasShrooms());
-                adddynlight(pos, gau ? 125 : 75, vec(1.25f, 0.75f, 0.3f), 35, 2, flags, 0, vec(1.25f, 0.75f, 0.3f), d);
+                adddynlight(pos, isGau ? 125 : 75, vec(1.25f, 0.75f, 0.3f), 35, 2, flags, 0, vec(1.25f, 0.75f, 0.3f), d);
                 break;
             }
         }
