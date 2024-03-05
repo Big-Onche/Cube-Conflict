@@ -379,7 +379,7 @@ struct captureclientmode : clientmode
                 if(b.owner==hudplayer()->team && hudplayer()->state==CS_ALIVE)
                 {
                     vec bpos = b.o;
-                    particle_hud(PART_BLIP, bpos.add(vec(0, 0, 10)), (totalmillis % 1001 < 500) && b.converted ? 0xFF0000 : 0xFFFF00);
+                    particles::hudIcon(PART_BLIP, bpos.add(vec(0, 0, 10)), (totalmillis % 1001 < 500) && b.converted ? 0xFF0000 : 0xFFFF00);
                 }
             }
             else if(b.enemy)
@@ -396,11 +396,11 @@ struct captureclientmode : clientmode
 
             vec above(b.ammopos);
             above.z += AMMOHEIGHT;
-            if(b.info[0]) particle_text(above, b.info, PART_TEXT, 1, tcolor, 3.0f);
+            if(b.info[0]) particles::text(above, b.info, PART_TEXT, 1, tcolor, 3.0f);
             if(mtype>=0)
             {
                 above.z += 3.5f;
-                particle_meter(above, b.converted/float((b.owner ? int(OCCUPYENEMYLIMIT) : int(OCCUPYNEUTRALLIMIT))), mtype, 1, mcolor, mcolor2, 3.0f);
+                particles::meter(above, b.converted/float((b.owner ? int(OCCUPYENEMYLIMIT) : int(OCCUPYNEUTRALLIMIT))), mtype, 1, mcolor, mcolor2, 3.0f);
             }
         }
     }
@@ -604,7 +604,7 @@ struct captureclientmode : clientmode
                 defformatstring(msg, "%d", total);
                 vec above(b.ammopos);
                 above.z += AMMOHEIGHT+1.0f;
-                particle_textcopy(above, msg, PART_TEXT, 1500, isteam(team, player1->team) ? 0xFFFF00 : 0xFF0000, 5.0f, -5);
+                particles::text(above, msg, PART_TEXT, 1500, isteam(team, player1->team) ? 0xFFFF00 : 0xFF0000, 5.0f, -5);
             }
         }
     }
@@ -632,6 +632,14 @@ struct captureclientmode : clientmode
 		return false;
 	}
 
+	int regenFactor(gameent *d, baseinfo *f)
+	{
+	    int regen = 0;
+	    if(d->health < 750 || d->armour < 1000 + d->skill*10) regen = 2;
+        if(!d->hasmaxammo(f->ammotype-1 + I_RAIL) / 2.f) regen = 4;
+        return regen;
+	}
+
 	void aifind(gameent *d, ai::aistate &b, vector<ai::interest> &interests)
 	{
 		vec pos = d->feetpos();
@@ -642,26 +650,21 @@ struct captureclientmode : clientmode
 			targets.setsize(0);
 			ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, j, true);
 			gameent *e = NULL;
-			int regen = !m_regencapture || d->health >= 750 || d->armour >= 1000+d->skill*10 ? 0 : 1;
-			if(m_regencapture)
-			{
-			    if(d->armour < 1000+d->skill*10) regen = 2;
-				if(!d->hasmaxammo(f.ammotype-1+I_RAIL)/2.f) regen = 4;
-			}
+
 			loopi(numdynents()) if((e = (gameent *)iterdynents(i)) && !e->ai && e->state == CS_ALIVE && isteam(d->team, e->team))
 			{ // try to guess what non ai are doing
 				vec ep = e->feetpos();
 				if(targets.find(e->clientnum) < 0 && ep.squaredist(f.o) <= (CAPTURERADIUS*CAPTURERADIUS))
 					targets.add(e->clientnum);
 			}
-			if((regen) || (targets.empty() && (!f.owner || f.owner!=d->team || f.enemy)))
+			if((regenFactor(d, &f)) || (targets.empty() && (!f.owner || f.owner!=d->team || f.enemy)))
 			{
 				ai::interest &n = interests.add();
 				n.state = ai::AI_S_DEFEND;
 				n.node = ai::closestwaypoint(f.o, ai::SIGHTMIN, false);
 				n.target = j;
 				n.targtype = ai::AI_T_AFFINITY;
-				n.score = pos.squaredist(f.o)/(regen ? float(100*regen) : 1.f);
+				n.score = pos.squaredist(f.o)/(regenFactor(d, &f) ? float(100*regenFactor(d, &f)) : 1.f);
 			}
 		}
 	}
@@ -670,16 +673,8 @@ struct captureclientmode : clientmode
 	{
         if(!bases.inrange(b.target)) return false;
         baseinfo &f = bases[b.target];
-		bool regen = !m_regencapture || d->health >= 750 || d->armour >= 1000+d->skill*10 ? false : true;
-		if(!regen && m_regencapture)
-		{
-		    if(d->armour < 1000+d->skill*10) regen = true;
-			int gun = f.ammotype-1+I_RAIL;
-			if(f.ammo > 0 && !d->hasmaxammo(gun))
-				regen = true;
-		}
 		int walk = 0;
-		if(!regen && !f.enemy && f.owner && f.owner==d->team)
+		if(!regenFactor(d, &f) && !f.enemy && f.owner && f.owner==d->team)
 		{
 			static vector<int> targets; // build a list of others who are interested in this
 			targets.setsize(0);

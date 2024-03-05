@@ -1572,7 +1572,7 @@ namespace ai
                         !d->ai->route.empty() ? d->ai->route[0] : -1,
                         d->ai->route.length()
                     );
-                    particle_textcopy(pos, q, PART_TEXT, 1);
+                    particles::text(pos, q, PART_TEXT, 1);
                     pos.z += 2;
                 }
                 bool top = true;
@@ -1585,7 +1585,7 @@ namespace ai
                         lastmillis-b.millis,
                         sttypes[b.targtype+1], b.target
                     );
-                    particle_textcopy(pos, s, PART_TEXT, 1);
+                    particles::text(pos, s, PART_TEXT, 1);
                     pos.z += 2;
                     if(top)
                     {
@@ -1595,18 +1595,18 @@ namespace ai
                 }
                 if(aidebug >= 3)
                 {
-                    particle_textcopy(pos, d->aiming ? "aiming" : "not aiming", PART_TEXT, 1);
+                    particles::text(pos, d->aiming ? "aiming" : "not aiming", PART_TEXT, 1);
                     pos.z += 2;
 
                     if(d->ai->weappref >= 0 && d->ai->weappref < NUMGUNS)
                     {
-                        particle_textcopy(pos, readstr(guns[d->ai->weappref].ident), PART_TEXT, 1);
+                        particles::text(pos, readstr(guns[d->ai->weappref].ident), PART_TEXT, 1);
                         pos.z += 2;
                     }
                     gameent *e = getclient(d->ai->enemy);
                     if(e)
                     {
-                        particle_textcopy(pos, colorname(e), PART_TEXT, 1);
+                        particles::text(pos, colorname(e), PART_TEXT, 1);
                         pos.z += 2;
                     }
                 }

@@ -680,13 +680,13 @@ namespace game
         vec partpos = (entpos.add((campos.mul(vec(3, 3, 3))))).div(vec(4, 4, 4));
 
         defformatstring(s1, "health: %d - %s", m->health, m->health>0 ? "alive" : "dead");
-        particle_textcopy(partpos.addz(1), s1, PART_TEXT, 1, 0xFFFFFF, 1);
+        particles::text(partpos.addz(1), s1, PART_TEXT, 1, 0xFFFFFF, 1);
 
         defformatstring(s2, "state: %s", stnames[m->monsterstate]);
-        particle_textcopy(partpos.addz(1), s2, PART_TEXT, 1, 0xFFFFFF, 1);
+        particles::text(partpos.addz(1), s2, PART_TEXT, 1, 0xFFFFFF, 1);
 
         defformatstring(s3, "friendly? %s", m->friendly ? "yes" : "no");
-        particle_textcopy(partpos.addz(1), s3, PART_TEXT, 1, 0xFFFFFF, 1);
+        particles::text(partpos.addz(1), s3, PART_TEXT, 1, 0xFFFFFF, 1);
     }
 
     static const int dirs[9] =

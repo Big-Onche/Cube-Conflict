@@ -555,7 +555,7 @@ namespace game
                 float up = 5 + dist/40.f + (((totalmillis - d->lastcurdamage) / 50.f) / (dist <= 160 ? 160.f - dist : 1)); // particle going up effect
                 if(!ispaused()) pos.z += up - (15 * (1 - (clamp(dist, 0.f, 160.f) / 160.f)));
                 float size = (zoom ? huddamagesize * (guns[player1->gunselect].maxzoomfov) / 100.f : huddamagesize) * 1.5f;
-                particle_textcopy(pos, tempformatstring("%d", d->curdamage), PART_TEXT, 1, d->curdamagecolor, size, 0, true);
+                particles::text(pos, tempformatstring("%d", d->curdamage), PART_TEXT, 1, d->curdamagecolor, size, 0, true);
             }
 
             float distance = d->o.dist(camera1->o);
@@ -565,8 +565,8 @@ namespace game
                 float metersize = 0.08f;
                 vec textpos = d->abovehead();
                 textpos.addz(distance/32.f);
-                particle_textcopy(textpos, tempformatstring("%s", d->name), PART_TEXT, 1, d->state==CS_ALIVE ? (d->team==1 ? 0xFFFF00 : 0xFF0000) : 0x595959, metersize, 0, true);
-                if(d->state==CS_ALIVE) particle_meter(d->abovehead(), d->health/1000.0f, PART_METER, 1, rygbGradient(d->health/10), 0x000000, metersize, true);
+                particles::text(textpos, tempformatstring("%s", d->name), PART_TEXT, 1, d->state==CS_ALIVE ? (d->team==1 ? 0xFFFF00 : 0xFF0000) : 0x595959, metersize, 0, true);
+                if(d->state==CS_ALIVE) particles::meter(d->abovehead(), d->health/1000.0f, PART_METER, 1, rygbGradient(d->health/10), 0x000000, metersize, true);
             }
 
             if(d->state==CS_ALIVE && !ispaused())
@@ -591,29 +591,29 @@ namespace game
                         float metersize = 0.08f / (distance / 125);
                         if(hudplayer()->aptitude==APT_MEDECIN)
                         {
-                            if(distance <= 250) particle_meter(d->abovehead(), d->health/1000.0f, PART_METER, 1, rygbGradient(d->health/10), 0x000000, metersize, true);
+                            if(distance <= 250) particles::meter(d->abovehead(), d->health/1000.0f, PART_METER, 1, rygbGradient(d->health/10), 0x000000, metersize, true);
                             if(d->health < 500)
                             {
                                 int blinkSpeed = 1001 - (500 - d->health) / 2;
-                                particle_hud(PART_HEALTH, center, (totalmillis % blinkSpeed < blinkSpeed / 2) ? 0x111111 : 0xFFFFFF, 0.075f);
+                                particles::hudIcon(PART_HEALTH, center, (totalmillis % blinkSpeed < blinkSpeed / 2) ? 0x111111 : 0xFFFFFF, 0.075f);
                             }
                         }
                         else if(hudplayer()->aptitude==APT_JUNKIE)
                         {
                             if(drawManaStat(d))
                             {
-                                if(distance <= 250) particle_meter(d->abovehead(), d->mana/150.0f, PART_METER, 1, 0xFF00FF, 0x000000, metersize, true);
+                                if(distance <= 250) particles::meter(d->abovehead(), d->mana/150.0f, PART_METER, 1, 0xFF00FF, 0x000000, metersize, true);
                                 if(d->mana < 50)
                                 {
                                     int blinkSpeed = 1001 - (50 - d->mana) / 2;
-                                    particle_hud(PART_MANA, center, (totalmillis % blinkSpeed < blinkSpeed / 2) ? 0xFF00FF : 0xFFFFFF, 0.075f);
+                                    particles::hudIcon(PART_MANA, center, (totalmillis % blinkSpeed < blinkSpeed / 2) ? 0xFF00FF : 0xFFFFFF, 0.075f);
                                 }
                             }
                         }
                     }
                     else if ((hudplayer()->aptitude==APT_ESPION && hudplayer()->abilitymillis[ABILITY_3]) || totalmillis - getspyability < 2000)
                     {
-                        particle_hud(PART_VISEUR, center, 0xBBBBBB);
+                        particles::hudIcon(PART_VISEUR, center, 0xBBBBBB);
                     }
                 }
 

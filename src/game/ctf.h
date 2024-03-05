@@ -611,7 +611,7 @@ struct ctfclientmode : clientmode
             d->flagpickup &= ~(1<<f.id);
             if(d->feetpos().dist(f.spawnloc) < FLAGRADIUS) d->flagpickup |= 1<<f.id;
         }
-        if(d!=player1) particle_textcopy(d->abovehead(), tempformatstring("%d", score), PART_TEXT, 2000, 0x32FF64, 4.0f, -8);
+        if(d!=player1) particles::text(d->abovehead(), tempformatstring("%d", score), PART_TEXT, 2000, 0x32FF64, 4.0f, -8);
         d->flags = dflags;
         conoutf(CON_GAMEINFO, "%s%s %s %s", teamcolorname(d, readstr("GameMessage_You")), d==player1 ? readstr("GameMessage_Have") : readstr("GameMessage_Has"), readstr("Console_Game_Ctf_FlagScore"), teamcolor(team));
         conoutf(CON_HUDCONSOLE, "%s%s", team==player1->team ? "\fe" : "\fc", team==player1->team ? readstr("GameMessage_Ctf_AlliedScore") : readstr("GameMessage_Ctf_EnemyScore"));
@@ -698,12 +698,11 @@ struct ctfclientmode : clientmode
         vec pos = d->feetpos();
         loopk(2)
         {
-            int goal = 3000;
+            int goal = 5000;
             loopv(flags)
             {
                 flag &g = flags[i];
-                if(g.team == d->team && (k || (!g.owner && !g.droptime)) &&
-                    (!flags.inrange(goal) || g.pos().squaredist(pos) < flags[goal].pos().squaredist(pos)))
+                if(g.team == d->team && (k || (!g.owner && !g.droptime)) && (!flags.inrange(goal) || g.pos().squaredist(pos) < flags[goal].pos().squaredist(pos)))
                 {
                     goal = i;
                 }
@@ -751,7 +750,6 @@ struct ctfclientmode : clientmode
             flag &f = flags[j];
             if(f.owner != d)
             {
-
                 static vector<int> targets; // build a list of others who are interested in this
                 targets.setsize(0);
 
@@ -759,12 +757,12 @@ struct ctfclientmode : clientmode
 
                 if(targets.empty())
                 { // attack the flag
-                        ai::interest &n = interests.add();
-                        n.state = ai::AI_S_PURSUE;
-                        n.node = ai::closestwaypoint(f.pos(), ai::SIGHTMIN, true);
-                        n.target = j;
-                        n.targtype = ai::AI_T_AFFINITY;
-                        n.score = pos.dist(f.pos());
+                    ai::interest &n = interests.add();
+                    n.state = ai::AI_S_PURSUE;
+                    n.node = ai::closestwaypoint(f.pos(), ai::SIGHTMIN, true);
+                    n.target = j;
+                    n.targtype = ai::AI_T_AFFINITY;
+                    n.score = pos.dist(f.pos());
                 }
                 else if(home)
                 {
@@ -828,7 +826,7 @@ struct ctfclientmode : clientmode
                 }
                 else
                 {
-                    walk = 2;
+                    walk = 4;
                     b.millis = lastmillis;
                 }
             }
@@ -843,7 +841,7 @@ struct ctfclientmode : clientmode
                     if(g.droptime && ai::makeroute(d, b, g.pos())) return true;
                 }
             }
-            return ai::defend(d, b, f.pos(), float(FLAGRADIUS*2), float(FLAGRADIUS*(2+(walk*2))), walk);
+            return ai::defend(d, b, f.pos(), float(FLAGRADIUS*4), float(FLAGRADIUS*(2+(walk*2))), walk);
         }
         return false;
     }

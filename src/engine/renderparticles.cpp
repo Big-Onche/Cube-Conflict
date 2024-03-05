@@ -1138,6 +1138,50 @@ namespace particles
         if(minimized) return;
         directionalSplash(type, randomColor ? getRandomColor() : color, radius, num, fade, p, dir, size, speed, sizemod);
     }
+
+    void flare(const vec &p, int color, int flaresize, int viewdist)
+    {
+        vec pos = p;
+        flares.addflare(pos, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, flaresize, viewdist, false, true);
+    }
+
+    vec hudPos(const vec &s)
+    {
+        vec pdir = s;
+        vec cpos = camera1->o;
+        pdir.sub(cpos);
+        pdir.normalize();
+        pdir.mul(3);
+        return cpos.add(pdir);
+    }
+
+    void meter(const vec &s, float val, int type, int fade, int color, int color2, float size, bool hud)
+    {
+        if(minimized) return;
+
+        particle *p = newparticle(hud ? particles::hudPos(s) : s, vec(0, 0, 1), fade, type, color, size);
+        p->color2[0] = color2>>16;
+        p->color2[1] = (color2>>8)&0xFF;
+        p->color2[2] = color2&0xFF;
+        p->progress = clamp(int(val*100), 0, 100);
+    }
+
+    VARP(maxparticletextdistance, 0, 256, 10000);
+
+    void text(const vec &s, const char *t, int type, int fade, int color, float size, int gravity, bool hud)
+    {
+        if(((camera1->o.dist(s) > maxparticletextdistance) || !canEmitParticles()) && !hud) return;
+        particle *p = newparticle(hud ? particles::hudPos(s) : s, vec(0, 0, 1), fade, type, color, size, gravity, hud);
+        p->text = newstring(t);
+        p->flags = 1;
+    }
+
+    void hudIcon(int type, const vec &pos, int color, float size)
+    {
+        if(minimized) return;
+        size = game::zoom ? size*(guns[game::hudplayer()->gunselect].maxzoomfov)/100.f : size;
+        newparticle(hudPos(pos), vec(0, 0, 1), 1, type, color, size, 0);
+    }
 }
 
 static void splash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int sizemod, bool sound = false)
@@ -1188,53 +1232,6 @@ void particle_trail(int type, int fade, const vec &s, const vec &e, int color, f
         vec tmp = vec(float(rnd(11)-5), float(rnd(11)-5), float(rnd(11)-5));
         newparticle(p, tmp, rnd(fade)+fade, type, color, size, gravity);
     }
-}
-
-vec computepartpos(const vec &s)
-{
-    vec pdir = s;
-    vec cpos = camera1->o;
-    pdir.sub(cpos);
-    pdir.normalize();
-    pdir.mul(3);
-    return cpos.add(pdir);
-}
-
-VARP(particletext, 0, 1, 1);
-VARP(maxparticletextdistance, 0, 4096, 10000);
-
-void particle_text(const vec &s, const char *t, int type, int fade, int color, float size, int gravity)
-{
-    if(minimized) return;
-    if(!particletext || camera1->o.dist(s) > maxparticletextdistance) return;
-    particle *p = newparticle(s, vec(0, 0, 1), fade, type, color, size, gravity);
-    p->text = t;
-}
-
-void particle_textcopy(const vec &s, const char *t, int type, int fade, int color, float size, int gravity, bool hud)
-{
-    if(((!particletext || camera1->o.dist(s) > maxparticletextdistance) || !canEmitParticles()) && !hud) return;
-    particle *p = newparticle(hud ? computepartpos(s) : s, vec(0, 0, 1), fade, type, color, size, gravity, hud);
-    p->text = newstring(t);
-    p->flags = 1;
-}
-
-void particle_hud(int type, const vec &pos, int color, float size)
-{
-    if(minimized) return;
-    size = game::zoom ? size*(guns[game::hudplayer()->gunselect].maxzoomfov)/100.f : size;
-    newparticle(computepartpos(pos), vec(0, 0, 1), 1, type, color, size, 0);
-}
-
-void particle_meter(const vec &s, float val, int type, int fade, int color, int color2, float size, bool ui)
-{
-    if(minimized) return;
-
-    particle *p = newparticle(ui ? computepartpos(s) : s, vec(0, 0, 1), fade, type, color, size);
-    p->color2[0] = color2>>16;
-    p->color2[1] = (color2>>8)&0xFF;
-    p->color2[2] = color2&0xFF;
-    p->progress = clamp(int(val*100), 0, 100);
 }
 
 void particle_flare(const vec &p, const vec &dest, int fade, int type, int color, float size, physent *owner, bool randomcolor, int sizemod)
@@ -1414,12 +1411,6 @@ void regularflame(int type, const vec &p, float radius, float height, int color,
         s.y += rndscale(radius*2.0f)-radius;
         newparticle(s, v, rnd(max(int(fade*height), 1))+1, type, color, size, gravity, sizemod);
     }
-}
-
-void regularflare(const vec &p, int color, int flaresize, int viewdist)
-{
-    vec pos = p;
-    flares.addflare(pos, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, flaresize, viewdist, false, true);
 }
 
 int applyRandomOffset(int base, int offset)
@@ -1619,7 +1610,6 @@ static void makeparticles(entity &e)
 
         case 10: // lava bubble: attr 2:<probability> attr 3:<offset>
         {
-            if(!e.attr3) particle_hud(PART_VISEUR, e.o, 0xBBBBBB);
             if(rndevent(e.attr2, 10))
             {
                 vec pos = e.o;
@@ -1683,11 +1673,11 @@ static void makeparticles(entity &e)
             break;
         */
         default:
-            particle_textcopy(e.o, tempformatstring("\fcInvalid particle ID: %d", e.attr1), PART_TEXT, 1, 0xFFFFFF, 4.5f);
-            particle_hud(PART_VISEUR, e.o, 0xBBBBBB);
+            particles::text(e.o, tempformatstring("\fcInvalid particle ID: %d", e.attr1), PART_TEXT, 1, 0xFFFFFF, 4.5f);
+            particles::hudIcon(PART_VISEUR, e.o, 0xBBBBBB);
     }
 
-    if(editmode) particle_textcopy(e.o, tempformatstring("\fe%s", readstr("Map_Editor_PartsTypesList", e.attr1)), PART_TEXT, 1, 0xFFFFFF, 3.0f);
+    if(editmode) particles::text(e.o, tempformatstring("\fe%s", readstr("Map_Editor_PartsTypesList", e.attr1)), PART_TEXT, 1, 0xFFFFFF, 3.0f);
 }
 
 bool printparticles(extentity &e, char *buf, int len)
@@ -1807,7 +1797,7 @@ void updateparticles()
         //loopv(entgroup)
         //{
         //    entity &e = *ents[entgroup[i]];
-        //    particle_textcopy(e.o, entname(e), PART_TEXT, 1, 0xFF4B19, 2.5f);
+        //    particles::text(e.o, entname(e), PART_TEXT, 1, 0xFF4B19, 2.5f);
         //}
         loopv(ents)
         {
@@ -1830,19 +1820,19 @@ void updateparticles()
                 case MAPMODEL:
                 {
                     defformatstring(txt, "%s (\fg%s\f7)", readstr(entreferences[e.type]), mapmodelname(e.attr1));
-                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);
+                    particles::text(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);
                     break;
                 }
                 case ET_LIGHT:
                 {
                     unsigned int color = ((e.attr2 & 0xff) << 16) + ((e.attr3 & 0xff) << 8) + (e.attr4 & 0xff);
-                    particle_textcopy(partpos.addz(1), readstr(entreferences[e.type]), PART_TEXT, 1, color, 1.25f);
+                    particles::text(partpos.addz(1), readstr(entreferences[e.type]), PART_TEXT, 1, color, 1.25f);
                     break;
                 }
                 case ET_PLAYERSTART: case FLAG:
                 {
                     defformatstring(txt, "%s%s", e.attr2==0 ? "\fe" : e.attr2==1? "\fd" : "\fc", readstr(entreferences[e.type]));
-                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);
+                    particles::text(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);
                     partcol = e.attr2==0 ? 0x00FF00 : e.attr2==1? 0xFFFF00 : 0xFF0000;
                     break;
                 }
@@ -1851,14 +1841,14 @@ void updateparticles()
                     defformatstring(alias, "base_%s_%d", readstr("languages", language), e.attr2);
                     const char *name = getalias(alias);
                     defformatstring(txt, "%s - %s", readstr(entreferences[e.type]), name);
-                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);
+                    particles::text(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);
                     partcol = 0x00FF00;
                     break;
                 }
                 case MAPSOUND:
                 {
                     defformatstring(txt, "%s (\fg%s\f7)", readstr(entreferences[e.type]), getmapsoundname(e.attr1));
-                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);
+                    particles::text(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);
                     break;
                 }
                 default:
@@ -1869,7 +1859,7 @@ void updateparticles()
                     else if(e.type >= I_WOODSHIELD && e.type <= I_POWERARMOR) formatstring(gameenttype, "%s", readstr("Ent_Shield"));
                     else if(e.type >= I_BOOSTPV && e.type <= I_JOINT) formatstring(gameenttype, "%s", readstr("Ent_Boost"));
                     defformatstring(txt, "%s%s%s%s", gameenttype, strcmp(gameenttype, "") ? " (\ff" : "", readstr(entreferences[e.type]), strcmp(gameenttype, "") ? "\f7)" : "");
-                    particle_textcopy(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);
+                    particles::text(partpos.addz(1), txt, PART_TEXT, 1, 0xFFFFFF, 1.25f);
                     if(strcmp(gameenttype, "")) partcol = 0x0000FF;
                 }
             }

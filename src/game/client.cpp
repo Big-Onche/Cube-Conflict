@@ -1443,7 +1443,7 @@ namespace game
                 filtertext(text, text, true, true);
                 if(isignored(d->clientnum)) break;
                 if(d->state!=CS_DEAD && d->state!=CS_SPECTATOR)
-                    particle_textcopy(d->abovehead(), text, PART_TEXT, 2000, 0x32FF64, 4.0f, -8);
+                    particles::text(d->abovehead(), text, PART_TEXT, 2000, 0x32FF64, 4.0f, -8);
                 conoutf(CON_CHAT, "%s:%s %s", chatcolorname(d), teamtextcode[0], text);
                 break;
             }
@@ -1457,7 +1457,7 @@ namespace game
                 if(!t || isignored(t->clientnum)) break;
                 int team = validteam(t->team) ? t->team : 0;
                 if(t->state!=CS_DEAD && t->state!=CS_SPECTATOR)
-                    particle_textcopy(t->abovehead(), text, PART_TEXT, 2000, teamtextcolor[team], 4.0f, -8);
+                    particles::text(t->abovehead(), text, PART_TEXT, 2000, teamtextcolor[team], 4.0f, -8);
                 conoutf(CON_TEAMCHAT, "%s:%s %s", chatcolorname(t), teamtextcode[team], text);
                 break;
             }
