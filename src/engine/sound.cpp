@@ -337,7 +337,7 @@ bool checkSoundOcclusion(const vec *soundPos, int flags = 0)
 bool isOccluded(int id)
 {
     if(sources[id].soundFlags & (SND_MUSIC | SND_UI)) return false;
-    return isUnderWater(sources[id].pos) || checkSoundOcclusion(&sources[id].pos, sources[id].soundFlags);
+    return isUnderWater(sources[id].position) || checkSoundOcclusion(&sources[id].position, sources[id].soundFlags);
 }
 
 float getRandomSoundPitch(int flags)
@@ -378,7 +378,8 @@ void playSound(int soundId, vec soundPos, float maxRadius, float maxVolRadius, i
     sources[id].soundType = soundType;
     sources[id].soundId = soundId;
     sources[id].soundFlags = flags;
-    sources[id].pos = soundPos;
+    sources[id].position = soundPos;
+    sources[id].velocity = vec(0, 0, 0);
 
     Sound& s = (flags & SND_MUSIC) ? music[soundId] : ( (flags & SND_MAPSOUND) ? mapSounds[soundId] : gameSounds[soundId] );
     ALuint source = sources[id].source;
@@ -388,10 +389,10 @@ void playSound(int soundId, vec soundPos, float maxRadius, float maxVolRadius, i
     alSourcei(source, AL_BUFFER, buffer); // managing sounds alternatives
     alSourcef(source, AL_GAIN, s.soundVol / 100.f); // managing sound volume
     alSourcef(source, AL_PITCH, getRandomSoundPitch(flags)); // managing variations of pitches
-    alSourcei(source, AL_LOOPING, (flags & SND_LOOPED) ? AL_TRUE : AL_FALSE); // loop the sound or not
-
+    alSourcei(source, AL_LOOPING, (flags & SND_LOOPED)); // loop the sound or not
     ALfloat sourcePos[] = {soundPos.x, soundPos.z, soundPos.y};
     alSourcefv(source, AL_POSITION, sourcePos);
+    alSource3f(source, AL_VELOCITY, 0.f, 0.f, 0.f);
 
     if(!hasSoundPos) alSourcei(source, AL_SOURCE_RELATIVE, AL_TRUE);
     else
@@ -422,7 +423,7 @@ void playSound(int soundId, vec soundPos, float maxRadius, float maxVolRadius, i
         alFilterf(sources[id].occlusionFilter, AL_LOWPASS_GAIN, sources[id].lfOcclusionGain);
         alFilterf(sources[id].occlusionFilter, AL_LOWPASS_GAINHF, sources[id].hfOcclusionGain);
         alSourcei(source, AL_DIRECT_FILTER, sources[id].occlusionFilter);
-        applyReverb(source, getReverbZone(sources[id].pos));
+        applyReverb(source, getReverbZone(sources[id].position));
     }
 
     alSourcePlay(source);
@@ -508,6 +509,17 @@ void updateSoundOcclusion(int id)
     alSourcei(sources[id].source, AL_DIRECT_FILTER, sources[id].occlusionFilter);
 }
 
+void updateSoundPosition(int id)
+{
+    vec pos, vel;
+    getEntMovement(sources[id].entityId, pos, vel);
+    sources[id].position = pos;
+    sources[id].velocity = vel;
+    applyReverb(sources[id].source, getReverbZone(pos));
+    alSource3f(sources[id].source, AL_VELOCITY, vel.x, vel.z, vel.y);
+    alSource3f(sources[id].source, AL_POSITION, pos.x, pos.z, pos.y);
+}
+
 void manageSources()
 {
     if(noSound) return;
@@ -518,27 +530,11 @@ void manageSources()
 
         if(sources[i].isActive && sources[i].source) // check if the source is active and valid
         {
+            if(sources[i].entityId != SIZE_MAX) updateSoundPosition(i);
             updateSoundOcclusion(i);
             alGetSourcei(source, AL_SOURCE_STATE, &state);
             //reportSoundError("alGetSourcei-manageSources", "Error querying source state");
             sources[i].isActive = state != AL_STOPPED; // isActive = false if state is AL_STOPPED
-        }
-    }
-}
-
-void updateSoundPosition(size_t entityId, const vec &newPosition, const vec &velocity, int soundType)
-{
-    if(noSound) return;
-
-    loopi(maxsoundsatonce) // loop through all the SoundSources and find the one with the matching entityId
-    {
-        if(sources[i].isActive && sources[i].entityId == entityId && sources[i].soundType == soundType) // found the correct sound source, now update its position
-        {
-            sources[i].pos = newPosition;
-            applyReverb(sources[i].source, getReverbZone(newPosition));
-            alSource3f(sources[i].source, AL_VELOCITY, velocity.x, velocity.z, velocity.y);
-            alSource3f(sources[i].source, AL_POSITION, newPosition.x, newPosition.z, newPosition.y);
-            break;
         }
     }
 }
@@ -573,6 +569,7 @@ void stopMapSound(extentity *e)
         if(sources[i].entityId == entityId)
         {
             alSourceStop(sources[i].source);
+            removeEntityPos(e->entityId);
             //reportSoundError("alSourceStop-stopMapSound", tempformatstring("Sound %d", e->attr1));
             sources[i].isActive = false;
             e->flags &= ~EF_SOUND;
@@ -607,7 +604,7 @@ void checkMapSounds()
 
         if(camera1->o.dist(e.o) < e.attr2 + 50) // check for distance + add a slight tolerance for efx sound effects
         {
-            if(e.entityId != SIZE_MAX) updateSoundPosition(e.entityId, e.o);
+            updateEntPos(e.entityId, e.o, false);
             if(!(e.flags & EF_SOUND))
             {
                 playSound(e.attr1, e.o, e.attr2, e.attr3, SND_LOOPED|SND_MAPSOUND|SND_FIXEDPITCH, e.entityId);

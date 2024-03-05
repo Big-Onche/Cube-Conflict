@@ -279,45 +279,21 @@ namespace game
         return d->lastaction && d->lastattack >= 0 && attacks[d->lastattack].gun == d->gunselect && lastmillis-d->lastaction<attacks[d->lastattack].attackdelay + 50;
     }
 
-    bool uwSoundPlaying = false;
-
     void updatePlayersSounds(gameent *d)
     {
         bool isHudPlayer = (d == hudplayer());
-        float distance = camera1->o.dist(d->o);
-        vec playerVel = d->vel;
-        playerVel.div(75);
+
+        updateEntPos(d->entityId, isHudPlayer ? vec(0, 0, 0) : d->o, isHudPlayer ? false : true);
 
         // underwater camera sound
         bool inWater = lookupmaterial(camera1->o) == MAT_WATER;
-        if(inWater && !uwSoundPlaying) { playSound(S_UNDERWATER, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH|SND_LOOPED, hudplayer()->entityId, PL_UNDERWATER); uwSoundPlaying = true; }
-        else if(!inWater && uwSoundPlaying) { stopLinkedSound(hudplayer()->entityId, PL_UNDERWATER); uwSoundPlaying = false; }
+        static bool underwaterSound = false;
+        if(inWater && !underwaterSound) { playSound(S_UNDERWATER, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH|SND_LOOPED, hudplayer()->entityId, PL_UNDERWATER); underwaterSound = true; }
+        else if(!inWater && underwaterSound) { stopLinkedSound(hudplayer()->entityId, PL_UNDERWATER); underwaterSound = false; }
 
         if(d->state != CS_ALIVE) return;
-        if(isAttacking(d) && (d->gunselect==GUN_PLASMA || d->gunselect==GUN_LANCEFLAMMES || d->gunselect==GUN_S_GAU8))
-        {
-            int closeSoundRadius = 0;
-            int farSoundRadius = 0;
 
-            switch(d->gunselect)
-            {
-                case GUN_PLASMA:
-                    closeSoundRadius = 200;
-                    break;
-                case GUN_LANCEFLAMMES:
-                    closeSoundRadius = 400;
-                    farSoundRadius = 600;
-                    break;
-                case GUN_S_GAU8:
-                    closeSoundRadius = 600;
-                    farSoundRadius = 3200;
-                    break;
-            }
-
-            if(distance < closeSoundRadius) updateSoundPosition(d->entityId, isHudPlayer ? vec(0, 0, 0) : d->o, playerVel, PL_ATTACK);
-            if(!isHudPlayer && distance < farSoundRadius && distance > 300) updateSoundPosition(d->entityId, d->o, playerVel, PL_ATTACK_FAR);
-        }
-        else if(d->attacksound)
+        if(d->attacksound && (!isAttacking(d) || !(d->gunselect==GUN_PLASMA || d->gunselect==GUN_LANCEFLAMMES || d->gunselect==GUN_S_GAU8)))
         {
             stopLinkedSound(d->entityId, PL_ATTACK);
             if(!isHudPlayer && d->attacksound > 1) stopLinkedSound(d->entityId, PL_ATTACK_FAR);
@@ -328,10 +304,9 @@ namespace game
         {
             if(!d->powerarmoursound)
             {
-                playSound(S_ASSISTALARM, isHudPlayer ? vec(0, 0, 0) : d->o, 250, 100, SND_FIXEDPITCH|SND_LOOPED, d->entityId, PL_POWERARMOR);
+                playSound(S_ASSISTALARM, isHudPlayer ? vec(0, 0, 0) : d->o, 250, 100, SND_NOCULL|SND_FIXEDPITCH|SND_LOOPED, d->entityId, PL_POWERARMOR);
                 d->powerarmoursound = true;
             }
-            else if(distance < 250) updateSoundPosition(d->entityId, isHudPlayer ? vec(0, 0, 0) : d->o, playerVel, PL_POWERARMOR);
         }
         else if(d->powerarmoursound) { stopLinkedSound(d->entityId, PL_POWERARMOR); d->powerarmoursound = false; }
     }
@@ -1082,7 +1057,7 @@ namespace game
             if(lastmillis-pl->lastfootstep < (d->vel.magnitude()*(classes[pl->aptitude].speed*3.5f)*(pl->crouched() || (pl->abilitymillis[ABILITY_2] && pl->aptitude==APT_ESPION) ? 2 : 1)*(d->inwater ? 2 : 1)*(pl->armourtype==A_ASSIST && pl->armour> 0 ? 2.f : 1)/d->vel.magnitude())) return;
             else
             {
-                playSound(snd, isHudPlayer ? vec(0, 0, 0) : d->o, haspowerarmour ? 300 : 150, 20, haspowerarmour ? NULL : SND_LOWPRIORITY);
+                playSound(snd, isHudPlayer ? vec(0, 0, 0) : d->o, haspowerarmour ? 300 : 150, 20, haspowerarmour ? NULL : SND_LOWPRIORITY, pl->entityId);
                 if(pl->boostmillis[B_EPO]) if(!rnd(5)) playSound(S_EPO_RUN, isHudPlayer ? vec(0, 0, 0) : d->o, 1000, 500);
             }
         }

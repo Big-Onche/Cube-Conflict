@@ -216,7 +216,7 @@ namespace game
         int offsetmillis;
         int id;
 
-        bouncer() : entityId(GlobalIdGenerator::getNewId()), bounces(0), roll(0), variant(0)
+        bouncer() : entityId(entitiesIds::getNewId()), bounces(0), roll(0), variant(0)
         {
             type = ENT_BOUNCE;
         }
@@ -318,7 +318,7 @@ namespace game
             if(bnc.bouncetype == BNC_GRENADE)
             {
                 stopped = (bounce(&bnc, 0.6f, 0.5f, 0.8f) || (bnc.lifetime -= time) < 0);
-                if(camera1->o.dist(bnc.o) < 300 && !stopped) updateSoundPosition(bnc.entityId, bnc.o);
+                updateEntPos(bnc.entityId, bnc.o);
             }
             else
             {
@@ -338,6 +338,7 @@ namespace game
                 {
                     hits.setsize(0);
                     explode(bnc.local, bnc.owner, bnc.o, bnc.o, NULL, 1, ATK_M32_SHOOT);
+                    removeEntityPos(bnc.entityId);
                     stopLinkedSound(bnc.entityId);
                     if(bnc.local)
                         addmsg(N_EXPLODE, "rci3iv", bnc.owner, lastmillis-maptime, ATK_M32_SHOOT, bnc.id-maptime,
@@ -377,7 +378,7 @@ namespace game
         bool soundplaying;
 
         projectile()
-            : entityId(GlobalIdGenerator::getNewId()) // initialize the new entityId field here
+            : entityId(entitiesIds::getNewId()) // initialize the new entityId field here
         {}
     };
     vector<projectile> projs;
@@ -984,6 +985,7 @@ namespace game
 
                 if(p.projsound) // play and update the sound only if the projectile is passing by
                 {
+                    updateEntPos(p.entityId, p.o);
                     bool bigRadius = (p.atk==ATK_NUKE_SHOOT || p.atk==ATK_ARTIFICE_SHOOT);
 
                     if(camera1->o.dist(p.o) < (bigRadius ? 800 : 400))
@@ -993,16 +995,12 @@ namespace game
                             playSound(p.projsound, p.o, bigRadius ? 800 : 400, 1, SND_LOOPED, p.entityId);
                             p.soundplaying = true;
                         }
-                        else
-                        {
-                            vec velocity = dv.div(float(time)*70);
-                            updateSoundPosition(p.entityId, p.o, velocity);
-                        }
                     }
                     else if(p.soundplaying)
                     {
                         p.soundplaying = false;
                         stopLinkedSound(p.entityId);
+                        removeEntityPos(p.entityId);
                     }
                 }
             }
@@ -1010,8 +1008,12 @@ namespace game
             {
                 if(p.local && !p.exploded) addmsg(N_EXPLODE, "rci3iv", p.owner, lastmillis-maptime, p.atk, p.id-maptime, hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
                 p.exploded = true;
-                if(p.soundplaying) stopLinkedSound(p.entityId);
-                p.soundplaying = false;
+                if(p.soundplaying)
+                {
+                    stopLinkedSound(p.entityId);
+                    removeEntityPos(p.entityId);
+                    p.soundplaying = false;
+                }
                 if(p.atk != ATK_ARBALETE_SHOOT) projs.remove(i--);
                 else if((p.lifetime -= time)<0 || removearrow) projs.remove(i--);
             }

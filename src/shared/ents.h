@@ -27,7 +27,7 @@ enum
     EF_SPAWNED    = 1<<8
 };
 
-struct GlobalIdGenerator // id given to players, projectiles, or other ents used for sound position update, each one has their own id
+struct entitiesIds // id given to players, projectiles, or other ents used for sound position update, each one has their own id
 {
     static size_t currentId; // current ID counter
     static size_t getNewId() {return currentId++;} // get a new unique ID
@@ -41,7 +41,7 @@ struct extentity : entity                       // part of the entity that doesn
     extentity *attached;
 
     extentity()
-        : entityId(GlobalIdGenerator::getNewId()), // initialize the new entityId field here
+        : entityId(entitiesIds::getNewId()), // initialize the new entityId field here
           flags(0),
           attached(NULL)
     {}

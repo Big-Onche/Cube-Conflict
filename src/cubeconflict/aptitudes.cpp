@@ -133,13 +133,7 @@ namespace game
                 d->abilityready[i] = true;
             }
 
-            if(hasAbilityEnabled(d, i))
-            {
-                vec playerVel = d->vel;
-                if(d!=hudplayer() && camera1->o.dist(d->o) < 250) updateSoundPosition(d->entityId, d->o, playerVel.div(75), PL_ABI_1+i);
-            }
-            else continue; // no need to go further in the loop if ability no enabled
-
+            if(!hasAbilityEnabled(d, i)) continue; // no need to go further if ability no enabled
             if(d->abilitymillis[i] && (d->abilitymillis[i] -= time) <= 0) { d->abilitymillis[i] = 0; continue; } // end of an ability
             if(d->abilitymillis[i]) numEnabled++; // abilities used at the same time (only for achievement below)
         }

@@ -679,7 +679,7 @@ struct gamestate
 
         if(m_random) // random weapon mutator
         {
-            int weapon = rnd(2) ? GUN_HYDRA : GUN_MOSSBERG; //rnd(17);
+            int weapon = GUN_SMAW; //rnd(17);
             baseammo(weapon);
             selectedWeapon = weapon;
         }
@@ -795,7 +795,7 @@ struct gameent : dynent, gamestate
 
     vec muzzle, weed, balles;
 
-    gameent() : entityId(GlobalIdGenerator::getNewId()), weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0),
+    gameent() : entityId(entitiesIds::getNewId()), weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0),
                 lifesequence(0), respawned(-1), suicided(-1), lastpain(0), lastfootstep(0), killstreak(0), frags(0), flags(0), deaths(0),
                 totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0),
                 customcape(0), customtombe(0), customdanse(0), aptitude(0), level(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
@@ -886,6 +886,11 @@ struct teaminfo
 };
 
 extern void playSound(int soundIndex, vec soundPos = vec(0, 0, 0), float maxRadius = 300.f, float maxVolRadius = 10.f, int flags = NULL, size_t entityId = SIZE_MAX, int soundType = 0);
+
+extern bool getEntMovement(size_t entityId, vec& pos, vec& vel);
+extern void updateEntPos(size_t entityId, const vec& newPos, bool moving = true);
+extern void removeEntityPos(size_t entityId);
+extern void clearEntsPos();
 
 namespace entities
 {

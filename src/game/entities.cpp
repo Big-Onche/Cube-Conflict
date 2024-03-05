@@ -2,7 +2,48 @@
 #include "stats.h"
 #include "engine.h"
 
-size_t GlobalIdGenerator::currentId = 0;
+size_t entitiesIds::currentId = 0;
+
+struct entMovement
+{
+    vec pos;
+    vec vel;
+    double lastUpdate;
+};
+
+std::map<size_t, entMovement> entMovements; // Maps entity IDs to positions
+
+bool getEntMovement(size_t entityId, vec& pos, vec& vel)
+{
+    auto it = entMovements.find(entityId);
+    if(it != entMovements.end())
+    {
+        pos = it->second.pos; // Set the output position
+        vel = it->second.vel; // Set the output velocity
+        return true; // Indicate success
+    }
+    else
+    {
+        conoutf(CON_WARN, "Failed to get position and velocity for entity %d", entityId);
+        pos = vel = vec(0, 0, 0);
+        return false; // Indicate failure
+    }
+}
+
+void updateEntPos(size_t entityId, const vec& newPos, bool moving)
+{
+    auto& ent = entMovements[entityId];
+    if(moving && ent.lastUpdate > 0) // Check if this isn't the first update
+    {
+        double timeElapsed = totalmillis - ent.lastUpdate;
+        ent.vel = vec(newPos).sub(ent.pos).mul(75.0 / max(1.0, timeElapsed)); // Ensure no division by zero
+    }
+    ent.pos = newPos;
+    ent.lastUpdate = totalmillis;
+}
+
+void removeEntityPos(size_t entityId) { entMovements.erase(entityId); }
+void clearEntsPos() { entMovements.clear(); }
 
 VAR(autowield, -1, 0, 1);
 
