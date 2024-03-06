@@ -20,24 +20,25 @@ bool getEntMovement(size_t entityId, vec& pos, vec& vel)
     {
         pos = it->second.pos; // Set the output position
         vel = it->second.vel; // Set the output velocity
-        return true; // Indicate success
+        return true;
     }
     else
     {
-        conoutf(CON_WARN, "Failed to get position and velocity for entity %d", entityId);
         pos = vel = vec(0, 0, 0);
-        return false; // Indicate failure
+        return false;
     }
 }
 
-void updateEntPos(size_t entityId, const vec& newPos, bool moving)
+void updateEntPos(size_t entityId, const vec& newPos, vec fixedVel)
 {
     auto& ent = entMovements[entityId];
-    if(moving && ent.lastUpdate > 0) // Check if this isn't the first update
+    if(ent.lastUpdate > 0 && fixedVel.iszero()) // Check if this isn't the first update
     {
         double timeElapsed = totalmillis - ent.lastUpdate;
-        ent.vel = vec(newPos).sub(ent.pos).mul(50.0 / max(1.0, timeElapsed)); // Ensure no division by zero
+        ent.vel = vec(newPos).sub(ent.pos).mul(40.0 / max(1.0, timeElapsed)); // Ensure no division by zero
     }
+    else ent.vel = fixedVel;
+
     ent.pos = newPos;
     ent.lastUpdate = totalmillis;
 }

@@ -885,10 +885,10 @@ struct teaminfo
     void reset() { frags = 0; }
 };
 
-extern void playSound(int soundIndex, vec soundPos = vec(0, 0, 0), float maxRadius = 300.f, float maxVolRadius = 10.f, int flags = NULL, size_t entityId = SIZE_MAX, int soundType = 0);
+extern void playSound(int soundIndex, vec soundPos = vec(0, 0, 0), float maxRadius = 300.f, float maxVolRadius = 10.f, int flags = NULL, size_t entityId = SIZE_MAX, int soundType = 0, float pitch = 0);
 
 extern bool getEntMovement(size_t entityId, vec& pos, vec& vel);
-extern void updateEntPos(size_t entityId, const vec& newPos, bool moving = true);
+extern void updateEntPos(size_t entityId, const vec& newPos, vec fixedVel = vec(0, 0, 0));
 extern void removeEntityPos(size_t entityId);
 extern void clearEntsPos();
 

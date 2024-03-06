@@ -1621,7 +1621,7 @@ namespace game
 
                 else if(r==player1) stat ? updateStat(10, STAT_MANAREGAIN) : updateStat(5, STAT_HEALTHREGAIN);
 
-                playSound(stat ? S_REGENJUNKIE : S_REGENMEDIGUN, (r == hudplayer() ? vec(0, 0, 0) : r->o), 125, 50);
+                playSound(stat ? S_REGENJUNKIE : S_REGENMEDIGUN, (r == hudplayer() ? vec(0, 0, 0) : r->o), 125, 50, NULL, r->entityId);
                 break;
             }
 
@@ -1860,7 +1860,7 @@ namespace game
                     stopLinkedSound(d->entityId, PL_ATTACK);
                     if(d->attacksound > 1) stopLinkedSound(d->entityId, PL_ATTACK_FAR);
                 }
-                playSound(attacks[gun-GUN_ELEC].picksound, d==hudplayer() ? vec(0, 0, 0) : d->o, 200, 50);
+                playSound(attacks[gun-GUN_ELEC].picksound, d==hudplayer() ? vec(0, 0, 0) : d->o, 200, 50, NULL, d->entityId);
                 break;
             }
 

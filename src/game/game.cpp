@@ -284,7 +284,7 @@ namespace game
     {
         bool isHudPlayer = (d == hudplayer());
 
-        updateEntPos(d->entityId, isHudPlayer ? vec(0, 0, 0) : d->o, isHudPlayer ? false : true);
+        updateEntPos(d->entityId, isHudPlayer ? vec(0, 0, 0) : d->o);
 
         // underwater camera sound
         bool inWater = lookupmaterial(camera1->o) == MAT_WATER;
@@ -294,11 +294,32 @@ namespace game
 
         if(d->state != CS_ALIVE) return;
 
-        if(d->attacksound && (!isAttacking(d) || !(d->gunselect==GUN_PLASMA || d->gunselect==GUN_LANCEFLAMMES || d->gunselect==GUN_S_GAU8)))
+        if(d->attacksound)
         {
-            stopLinkedSound(d->entityId, PL_ATTACK);
-            if(!isHudPlayer && d->attacksound > 1) stopLinkedSound(d->entityId, PL_ATTACK_FAR);
-            d->attacksound = 0;
+            if((!isAttacking(d) || !(d->gunselect==GUN_PLASMA || d->gunselect==GUN_LANCEFLAMMES || d->gunselect==GUN_S_GAU8)))
+            {
+                stopLinkedSound(d->entityId, PL_ATTACK);
+                if(!isHudPlayer && d->attacksound > 1) stopLinkedSound(d->entityId, PL_ATTACK_FAR);
+                d->attacksound = 0;
+            }
+
+            if(d->boostmillis[B_SHROOMS])
+            {
+                changeSoundPitch(d->entityId, PL_ATTACK, 1.2f);
+                changeSoundPitch(d->entityId, PL_ATTACK_FAR, 1.2f);
+            }
+            else changeSoundPitch(d->entityId, PL_ATTACK, 1.f);
+
+            if(d->aptitude==APT_PRETRE)
+            {
+                if(d->abilitymillis[ABILITY_3])
+                {
+                    float pitch = 1.5f - (d->abilitymillis[ABILITY_3] / 8000.0f);
+                    changeSoundPitch(d->entityId, PL_ATTACK, pitch);
+                    changeSoundPitch(d->entityId, PL_ATTACK_FAR, pitch);
+                }
+                else changeSoundPitch(d->entityId, PL_ATTACK, 1.f);
+            }
         }
 
         if(d->armourtype==A_ASSIST && d->armour && d->armour < 1000) // power armor alarm sound

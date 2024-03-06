@@ -169,6 +169,7 @@ void applyReverbPreset(ALuint effectSlot, const EFXEAXREVERBPROPERTIES& preset)
     if(noEfx) return;
 
     ALuint reverbEffect;
+
     alGenEffects(1, &reverbEffect);
     alEffecti(reverbEffect, AL_EFFECT_TYPE, AL_EFFECT_REVERB);
     // Set all the reverb parameters from the preset...
@@ -186,7 +187,6 @@ void applyReverbPreset(ALuint effectSlot, const EFXEAXREVERBPROPERTIES& preset)
     alEffecti(reverbEffect, AL_REVERB_DECAY_HFLIMIT, AL_TRUE);
     // Attach the configured effect to the effect slot
     alAuxiliaryEffectSloti(effectSlot, AL_EFFECTSLOT_EFFECT, reverbEffect);
-    if(alGetError() != AL_NO_ERROR) conoutf("Failed setting reverb %d", reverbEffect);
 }
 
 int reverb[NUMREVERBS];
@@ -349,7 +349,7 @@ float getRandomSoundPitch(int flags)
 
 bool warned = false;
 
-void playSound(int soundId, vec soundPos, float maxRadius, float maxVolRadius, int flags, size_t entityId, int soundType)
+void playSound(int soundId, vec soundPos, float maxRadius, float maxVolRadius, int flags, size_t entityId, int soundType, float pitch)
 {
     if(soundId < 0 || soundId > NUMSNDS || noSound || mutesounds) return; // invalid index or openal not initialized or mute
 
@@ -388,7 +388,7 @@ void playSound(int soundId, vec soundPos, float maxRadius, float maxVolRadius, i
 
     alSourcei(source, AL_BUFFER, buffer); // managing sounds alternatives
     alSourcef(source, AL_GAIN, s.soundVol / 100.f); // managing sound volume
-    alSourcef(source, AL_PITCH, getRandomSoundPitch(flags)); // managing variations of pitches
+    alSourcef(source, AL_PITCH, pitch ? pitch : getRandomSoundPitch(flags)); // managing variations of pitches
     alSourcei(source, AL_LOOPING, (flags & SND_LOOPED) ? AL_TRUE : AL_FALSE); // loop the sound or not
     ALfloat sourcePos[] = {soundPos.x, soundPos.z, soundPos.y};
     alSourcefv(source, AL_POSITION, sourcePos);
@@ -604,7 +604,7 @@ void checkMapSounds()
 
         if(camera1->o.dist(e.o) < e.attr2 + 50) // check for distance + add a slight tolerance for efx sound effects
         {
-            updateEntPos(e.entityId, e.o, false);
+            updateEntPos(e.entityId, e.o, vec(0, 0, 0));
             if(!(e.flags & EF_SOUND))
             {
                 playSound(e.attr1, e.o, e.attr2, e.attr3, SND_LOOPED|SND_MAPSOUND|SND_FIXEDPITCH, e.entityId);
@@ -624,6 +624,18 @@ void stopLinkedSound(size_t entityId, int soundType, bool clear)
             alSourceStop(sources[i].source);
             //reportSoundError("alSourceStop-stopLinkedSound", "Error while stopping linked sound");
             sources[i].isActive = false;
+        }
+    }
+}
+
+void changeSoundPitch(size_t entityId, int soundType, float pitch)
+{
+    loopi(maxsoundsatonce)
+    {
+        if(sources[i].isActive && sources[i].entityId == entityId && sources[i].soundType == soundType)
+        {
+            alSourcef(sources[i].source, AL_PITCH, pitch);
+            //reportSoundError("changeSoundPitch", "Error while modifying pitch");
         }
     }
 }

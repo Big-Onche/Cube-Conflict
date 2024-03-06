@@ -234,7 +234,8 @@ namespace game
         { "casing",             0.2f, 1.0f,  0,  250, S_B_CASING,       120,    SND_FIXEDPITCH },
         { "casing/big",         0.2f, 1.0f,  0,  250, S_B_BIGCASING,    120,    SND_FIXEDPITCH },
         { "casing/cartridge",   0.2f, 1.0f,  0,  250, S_B_CARTRIDGE,    120,    SND_FIXEDPITCH },
-        { "scrap",              1.5f, 0.7f,  3,  750, S_B_SCRAP,        180,    0              }
+        { "scrap",              1.5f, 0.7f,  3,  750, S_B_SCRAP,        180,    0              },
+        { NULL,                 1.0f, 1.0f,  0,  500, -1,                 0,    0              }
     };
 
     std::map<std::pair<int, int>, std::string> bouncersPaths;
@@ -1240,6 +1241,7 @@ namespace game
         bool incraseDist = atk==ATK_ASSISTXPL_SHOOT || atk==ATK_KAMIKAZE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_NUKE_SHOOT;
         int distance = camera1->o.dist(hudgunorigin(gun, d->o, to, d));
         int loopedSoundFlags = SND_LOOPED|SND_FIXEDPITCH|SND_NOCULL;
+        float pitch = d->boostmillis[B_SHROOMS] ? 1.2f : (d->aptitude==APT_PRETRE && d->abilitymillis[ABILITY_3] ? (1.5f - (d->abilitymillis[ABILITY_3] / 8000.0f)) : 0);
 
         if(!d->attacksound)
         {
@@ -1247,29 +1249,29 @@ namespace game
             {
                 case S_FLAMETHROWER:
                 case S_GAU8:
-                    playSound(gunSound, isHudPlayer ? vec(0, 0, 0) : muzzleOrigin, incraseDist ? 600 : 400, incraseDist ? 300 : 150, loopedSoundFlags, d->entityId, PL_ATTACK);
+                    playSound(gunSound, isHudPlayer ? vec(0, 0, 0) : d->o, incraseDist ? 600 : 400, incraseDist ? 300 : 150, loopedSoundFlags, d->entityId, PL_ATTACK, pitch);
                     d->attacksound = 1;
                     if(distance > 300 && !isHudPlayer)
                     {
-                        playSound(attacks[atk].middistsnd, muzzleOrigin, incraseDist ? 3200 : 600, incraseDist ? 1600 : 400, loopedSoundFlags, d->entityId, PL_ATTACK_FAR);
+                        playSound(attacks[atk].middistsnd, d->o, incraseDist ? 3200 : 600, incraseDist ? 1600 : 400, loopedSoundFlags, d->entityId, PL_ATTACK_FAR, pitch);
                         d->attacksound = 2;
                     }
                     return;
 
                 case S_PLASMARIFLE_SFX:
-                    playSound(gunSound, isHudPlayer ? vec(0, 0, 0) : muzzleOrigin, 200, 150, loopedSoundFlags, d->entityId, PL_ATTACK);
+                    playSound(gunSound, isHudPlayer ? vec(0, 0, 0) : d->o, 200, 150, loopedSoundFlags, d->entityId, PL_ATTACK, pitch);
                     d->attacksound = 1;
                     break;
             }
         }
         else if(gunSound != S_PLASMARIFLE_SFX) return;
 
-        playSound(attacks[atk].sound, isHudPlayer ? vec(0, 0, 0) : muzzleOrigin, incraseDist ? 600 : 400, incraseDist ? 200 : 150);
+        playSound(attacks[atk].sound, isHudPlayer ? vec(0, 0, 0) : d->o, incraseDist ? 600 : 400, incraseDist ? 200 : 150, NULL, d->entityId, NULL, pitch);
 
         if(distance > 300)
         {
-            playSound(attacks[atk].middistsnd, muzzleOrigin, 700, 300, SND_LOWPRIORITY);
-            if(distance > 600) playSound(attacks[atk].fardistsnd, muzzleOrigin, 1000, 600, SND_LOWPRIORITY);
+            playSound(attacks[atk].middistsnd, d->o, 700, 300, SND_LOWPRIORITY, d->entityId);
+            if(distance > 600) playSound(attacks[atk].fardistsnd, d->o, 1000, 600, SND_LOWPRIORITY, d->entityId, NULL, pitch);
         }
     }
 
@@ -1507,6 +1509,7 @@ namespace game
     {
         loopi(NUMBOUNCERS)
         {
+            if(i == BNC_LIGHT) break;
             bool hasVariants = bouncers[i].variants;
             if(!hasVariants) preloadmodel(getBouncerDir(i, 0));
             else { loopj(bouncers[i].variants) preloadmodel(getBouncerDir(i, j + 1)); }
