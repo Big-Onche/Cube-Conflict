@@ -534,11 +534,15 @@ namespace game
     void rendergame()
     {
         ai::render();
-        bool third = isthirdperson();
-        gameent *f = followingplayer(), *exclude = third ? NULL : f;
+        bool thirdPerson = isthirdperson();
+
+        gameent *f = followingplayer(), *exclude = thirdPerson ? NULL : f;
         loopv(players)
         {
             gameent *d = players[i];
+            bool isHudPlayer = (d==hudplayer());
+            bool canShowEffect = (!isHudPlayer || thirdPerson);
+
             if(d->state==CS_SPECTATOR || d->state==CS_SPAWNING || d->lifesequence < 0 || d == exclude || (d->state==CS_DEAD && hidedead)) continue;
             if(d!=player1) renderplayer(d);
 
@@ -584,7 +588,15 @@ namespace game
                     if(lowArmour && rndevent(1)) spawnbouncer(d->o, vec(0,0,0), d, BNC_SCRAP, 50);
                 }
 
-                if(d!=hudplayer() && hudplayer()->state==CS_ALIVE)
+                if(d->boostmillis[B_SHROOMS] && rndevent(97))
+                {
+                    regularflame(PART_SPARK, d->feetpos(), 12, 2, particles::getRandomColor(), 2, 0.4f, 10.f, 500, 0, -2);
+                    if(canShowEffect) particle_splash(PART_SMOKE, 2, 150, d->o, particles::getRandomColor(), 12+rnd(5), 400, 200);
+                }
+
+                if(d->boostmillis[B_JOINT] && rndevent(93)) regularflame(PART_SMOKE, d->abovehead().add(vec(-12, 5, -19)), 2, 3, 0x888888, 1, 1.6f, 50.0f, 1000.0f, -10);
+
+                if(!isHudPlayer && hudplayer()->state==CS_ALIVE)
                 {
                     if(isteam(hudplayer()->team, d->team))
                     {
@@ -621,7 +633,7 @@ namespace game
                 {
                     case APT_MAGICIEN:
                         if(d->abilitymillis[ABILITY_1]) particle_splash(PART_SMOKE, 2, 120, d->o, 0xFF33FF, 10+rnd(5), 400,400);
-                        if(d->abilitymillis[ABILITY_3] && (d!=hudplayer() || thirdperson)) particle_fireball(center, 15.2f, PART_EXPLOSION, 5,  0x880088, 13.0f);
+                        if(d->abilitymillis[ABILITY_3] && canShowEffect) particle_fireball(center, 15.2f, PART_EXPLOSION, 5,  0x880088, 13.0f);
                         break;
                     case APT_PHYSICIEN:
                         if(d->abilitymillis[ABILITY_2] && rndevent(97)) particle_splash(PART_SMOKE, 1, 300, d->o, 0x7777FF, 10+rnd(5), 400, 400);
@@ -635,7 +647,7 @@ namespace game
                         if(d->abilitymillis[ABILITY_2]) particle_fireball(center , 16.0f, PART_SHOCKWAVE, 5, 0xFFFF00, 16.0f);
                         break;
                     case APT_VIKING:
-                        if(d->boostmillis[B_RAGE] && rndevent(97) && (d!=hudplayer() || thirdperson)) particle_splash(PART_SMOKE, 2, 150, d->o, 0xFF3300, 12+rnd(5), 400, 200);
+                        if(d->boostmillis[B_RAGE] && rndevent(97) && canShowEffect) particle_splash(PART_SMOKE, 2, 150, d->o, 0xFF3300, 12+rnd(5), 400, 200);
                         break;
                     case APT_SHOSHONE:
                         if(rndevent(98))
@@ -645,8 +657,6 @@ namespace game
                             if(d->abilitymillis[ABILITY_3]) regularflame(PART_SPARK, d->feetpos(), 12, 2, 0xFF3333, 2, 0.4f, 10.f, 500, 0, -2);
                         }
                 }
-
-                if(d->boostmillis[B_JOINT] && rndevent(93)) regularflame(PART_SMOKE, d->abovehead().add(vec(-12, 5, -19)), 2, 3, 0x888888, 1, 1.6f, 50.0f, 1000.0f, -10);
             }
         }
         loopv(ragdolls)
@@ -664,8 +674,8 @@ namespace game
 
         if(exclude)
             renderplayer(exclude, 1, MDL_ONLYSHADOW);
-        else if(!f && (player1->state==CS_ALIVE || (player1->state==CS_EDITING && third) || (player1->state==CS_DEAD && !hidedead)))
-            renderplayer(player1, 1, third ? 0 : MDL_ONLYSHADOW);
+        else if(!f && (player1->state==CS_ALIVE || (player1->state==CS_EDITING && thirdPerson) || (player1->state==CS_DEAD && !hidedead)))
+            renderplayer(player1, 1, thirdPerson ? 0 : MDL_ONLYSHADOW);
 
         if(cmode) cmode->rendergame();
     }
