@@ -148,6 +148,7 @@ namespace game
         }
         clearprojectiles();
         clearbouncers();
+        clearEntsPos();
     }
 
     gameent *spawnstate(gameent *d)              // reset player state not persistent accross spawns
@@ -922,6 +923,7 @@ namespace game
             removetrackedparticles(d);
             removetrackeddynlights(d);
             stopLinkedSound(d->entityId, 0, true);
+            removeEntityPos(d->entityId);
             if(cmode) cmode->removeplayer(d);
             removegroupedplayer(d);
             players.removeobj(d);
@@ -955,6 +957,7 @@ namespace game
         clearmonsters();
         clearprojectiles();
         clearbouncers();
+        clearEntsPos();
         clearragdolls();
         clearteaminfo();
 
@@ -1058,7 +1061,7 @@ namespace game
             else
             {
                 playSound(snd, isHudPlayer ? vec(0, 0, 0) : d->o, haspowerarmour ? 300 : 150, 20, haspowerarmour ? NULL : SND_LOWPRIORITY, pl->entityId);
-                if(pl->boostmillis[B_EPO]) if(!rnd(5)) playSound(S_EPO_RUN, isHudPlayer ? vec(0, 0, 0) : d->o, 1000, 500);
+                if(pl->boostmillis[B_EPO]) if(!rnd(5)) playSound(S_EPO_RUN, isHudPlayer ? vec(0, 0, 0) : d->o, 1000, 500, NULL, pl->entityId);
             }
         }
         pl->lastfootstep = lastmillis;

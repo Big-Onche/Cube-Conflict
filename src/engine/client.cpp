@@ -173,6 +173,7 @@ void disconnect(bool async, bool cleanup, bool volontaire)
         stopAllSounds();
         game::clearbouncers();
         game::clearprojectiles(); // clean up before showing menu
+        clearEntsPos();
         loopi(NUMSONGS) stopMusic(i);
         playMusic(language == 2 ? S_MAINMENURU : S_MAINMENU);
         mainmenu = 1;
@@ -191,6 +192,7 @@ void trydisconnect(bool local)
     stopAllSounds();
     game::clearbouncers();
     game::clearprojectiles();
+    clearEntsPos();
     loopi(NUMSONGS) stopMusic(i);
     playMusic(language == 2 ? S_MAINMENURU : S_MAINMENU);
     if(connpeer)

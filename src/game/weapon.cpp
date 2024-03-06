@@ -28,7 +28,7 @@ namespace game
         {
             if(d==player1 && gun!=GUN_ASSISTXPL && !shortcut) player1->lastweap = gun;
             addmsg(N_GUNSELECT, "rci", d, gun);
-            playSound(attacks[gun-GUN_ELEC].picksound, d==hudplayer() ? vec(0, 0, 0) : d->o, 200, 50);
+            playSound(attacks[gun-GUN_ELEC].picksound, d==hudplayer() ? vec(0, 0, 0) : d->o, 200, 50, d->entityId);
         }
         d->gunselect = gun;
     }
@@ -356,7 +356,7 @@ namespace game
 
     void removebouncers(gameent *owner)
     {
-        loopv(curBouncers) if(curBouncers[i]->owner==owner) { delete curBouncers[i]; curBouncers.remove(i--); }
+        loopv(curBouncers) if(curBouncers[i]->owner==owner) { removeEntityPos(curBouncers[i]->entityId); delete curBouncers[i]; curBouncers.remove(i--); }
     }
 
     void clearbouncers() { curBouncers.deletecontents(); }
@@ -440,6 +440,7 @@ namespace game
             if(projs[i].owner==owner)
             {
                 if(projs[i].soundplaying) stopLinkedSound(projs[i].entityId);
+                removeEntityPos(projs[i].entityId);
                 projs.remove(i--);
                 len--;
             }
@@ -892,6 +893,7 @@ namespace game
                 vec pos = vec(p.offset).mul(p.offsetmillis/float(OFFSETMILLIS)).add(p.o);
                 explode(p.local, p.owner, pos, p.dir, NULL, 0, atk);
                 projstain(p, pos, atk);
+                removeEntityPos(p.entityId);
                 projs.remove(i);
                 break;
             }
@@ -903,11 +905,7 @@ namespace game
             {
                 vec pos = vec(b.offset).mul(b.offsetmillis/float(OFFSETMILLIS)).add(b.o);
                 explode(b.local, b.owner, pos, vec(0,0,0), NULL, 0, atk);
-                switch(atk)
-                {
-                    case ATK_M32_SHOOT:
-                    default: break;
-                }
+                removeEntityPos(b.entityId);
                 curBouncers.remove(i);
                 break;
             }
@@ -985,11 +983,11 @@ namespace game
 
                 if(p.projsound) // play and update the sound only if the projectile is passing by
                 {
-                    updateEntPos(p.entityId, p.o);
                     bool bigRadius = (p.atk==ATK_NUKE_SHOOT || p.atk==ATK_ARTIFICE_SHOOT);
 
                     if(camera1->o.dist(p.o) < (bigRadius ? 800 : 400))
                     {
+                        updateEntPos(p.entityId, p.o);
                         if(!p.soundplaying)
                         {
                             playSound(p.projsound, p.o, bigRadius ? 800 : 400, 1, SND_LOOPED, p.entityId);
@@ -1230,8 +1228,8 @@ namespace game
         {
             if(d->boostmillis[B_ROIDS])
             {
-                playSound(S_ROIDS_SHOOT, isHudPlayer ? vec(0, 0, 0) : d->o, 500, 100);
-                if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 400 && d!=player1) playSound(S_ROIDS_SHOOT_FAR, d->o, 800, 450);
+                playSound(S_ROIDS_SHOOT, isHudPlayer ? vec(0, 0, 0) : d->o, 500, 100, NULL, d->entityId);
+                if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 400 && d!=player1) playSound(S_ROIDS_SHOOT_FAR, d->o, 800, 450, NULL, d->entityId);
             }
             else if(d->boostmillis[B_RAGE]) playSound(S_RAGETIR, isHudPlayer ? vec(0, 0, 0) : d->o, 500, 100);
         }

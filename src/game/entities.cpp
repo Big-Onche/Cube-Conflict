@@ -11,7 +11,7 @@ struct entMovement
     double lastUpdate;
 };
 
-std::map<size_t, entMovement> entMovements; // Maps entity IDs to positions
+std::unordered_map<size_t, entMovement> entMovements; // Maps entity IDs to positions
 
 bool getEntMovement(size_t entityId, vec& pos, vec& vel)
 {
@@ -36,13 +36,13 @@ void updateEntPos(size_t entityId, const vec& newPos, bool moving)
     if(moving && ent.lastUpdate > 0) // Check if this isn't the first update
     {
         double timeElapsed = totalmillis - ent.lastUpdate;
-        ent.vel = vec(newPos).sub(ent.pos).mul(75.0 / max(1.0, timeElapsed)); // Ensure no division by zero
+        ent.vel = vec(newPos).sub(ent.pos).mul(50.0 / max(1.0, timeElapsed)); // Ensure no division by zero
     }
     ent.pos = newPos;
     ent.lastUpdate = totalmillis;
 }
 
-void removeEntityPos(size_t entityId) { entMovements.erase(entityId); }
+void removeEntityPos(size_t entityId) { if(entityId != SIZE_MAX) entMovements.erase(entityId); }
 void clearEntsPos() { entMovements.clear(); }
 
 VAR(autowield, -1, 0, 1);
@@ -190,7 +190,7 @@ namespace entities
 
         d->pickupitem(type, d->aptitude, d->abilitymillis[ABILITY_1], d->armourtype==A_ASSIST && d->armour, rndsweap);
 
-        playSound(powerarmorpieces(type, d) ? S_ITEMPIECEROBOTIQUE : itemstats[type-I_RAIL].sound, d==hudplayer() ? vec(0, 0, 0) : d->o, 300, 50);
+        playSound(powerarmorpieces(type, d) ? S_ITEMPIECEROBOTIQUE : itemstats[type-I_RAIL].sound, d==hudplayer() ? vec(0, 0, 0) : d->o, 300, 50, NULL, d->entityId);
 
         if(type>=I_RAIL && type<=I_SUPERARME)
         {
@@ -391,14 +391,14 @@ namespace entities
         if(d->boostmillis[B_ROIDS] && (d->boostmillis[B_ROIDS] -= time)<=0)
         {
             d->boostmillis[B_ROIDS] = 0;
-            playSound(S_ROIDS_PUPOUT, isHudPlayer ? vec(0, 0, 0) : d->o, 300, 50);
+            playSound(S_ROIDS_PUPOUT, isHudPlayer ? vec(0, 0, 0) : d->o, 300, 50, NULL, d->entityId);
             if(d==player1) conoutf(CON_HUDCONSOLE, "\f8%s", readstr("GameMessage_RoidsEnded"));
         }
 
         if(d->boostmillis[B_EPO] && (d->boostmillis[B_EPO] -= time)<=0)
         {
             d->boostmillis[B_EPO] = 0;
-            playSound(S_EPO_PUPOUT, isHudPlayer ? vec(0, 0, 0) : d->o, 300, 50);
+            playSound(S_EPO_PUPOUT, isHudPlayer ? vec(0, 0, 0) : d->o, 300, 50, NULL, d->entityId);
             if(d==player1) conoutf(CON_HUDCONSOLE, "\f8%s", readstr("GameMessage_EpoEnded"));
         }
 
