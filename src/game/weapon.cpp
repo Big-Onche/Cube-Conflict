@@ -228,7 +228,6 @@ namespace game
     {
         { "grenade",            1.0f, 1.0f,  0,  750, S_B_GRENADE,      220,    0              },
         { "pixel",              1.0f, 0.6f,  8,  600, S_B_PIXEL,        120,    0              },
-        { "rock/gravel",        0.2f, 0.8f,  3,  250, -1,                 0,    0              },
         { "rock",               0.8f, 0.8f,  4,  750, S_B_ROCK,         120,    0              },
         { "rock/big",           2.5f, 0.4f,  3, 1250, S_B_BIGROCK,      300,    0              },
         { "casing",             0.2f, 1.0f,  0,  250, S_B_CASING,       120,    SND_FIXEDPITCH },

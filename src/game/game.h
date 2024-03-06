@@ -1063,7 +1063,7 @@ namespace game
     extern bool intersect(dynent *d, const vec &from, const vec &to, float margin = 0, float &dist = intersectdist);
     extern dynent *intersectclosest(const vec &from, const vec &to, gameent *at, float margin = 0, float &dist = intersectdist);
     extern int temptrisfade;
-    enum {BNC_GRENADE = 0, BNC_PIXEL, BNC_GRAVEL, BNC_ROCK, BNC_BIGROCK, BNC_CASING, BNC_BIGCASING, BNC_CARTRIDGE, BNC_SCRAP, BNC_LIGHT, NUMBOUNCERS};
+    enum {BNC_GRENADE = 0, BNC_PIXEL, BNC_ROCK, BNC_BIGROCK, BNC_CASING, BNC_BIGCASING, BNC_CARTRIDGE, BNC_SCRAP, BNC_LIGHT, NUMBOUNCERS};
     extern void spawnbouncer(const vec &p, const vec &vel, gameent *d, int type, int speed = 0, int lifetime = rnd(temptrisfade)+rnd(5000), bool frommonster = false);
     extern void newbouncer(const vec &from, const vec &to, bool local, int id, gameent *owner, int type, int lifetime, int speed);
     extern void clearbouncers();
