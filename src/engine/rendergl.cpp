@@ -1412,7 +1412,7 @@ bool isthirdperson() { return player!=camera1 || detachedcamera; }
 
 void fixcamerarange()
 {
-    const float MAXPITCH = (editmode ? 90.f : 75.0f);
+    const float MAXPITCH = (editmode || game::player1->state==CS_SPECTATOR ? 90.f : 75.0f);
     if(camera1->pitch>MAXPITCH) camera1->pitch = MAXPITCH;
     if(camera1->pitch<-MAXPITCH) camera1->pitch = -MAXPITCH;
     while(camera1->yaw<0.0f) camera1->yaw += 360.0f;
