@@ -215,6 +215,7 @@ namespace game
         vec offset;
         int offsetmillis;
         int id;
+        bool inwater;
 
         bouncer() : entityId(entitiesIds::getNewId()), bounces(0), roll(0), variant(0)
         {
@@ -270,6 +271,7 @@ namespace game
         bnc.owner = owner;
         bnc.bouncetype = type;
         bnc.id = local ? lastmillis : id;
+        bnc.inwater = (lookupmaterial(bnc.o)==MAT_WATER);
         if(bouncers[type].variants) bnc.variant = rnd(bouncers[type].variants) + 1;
         else bnc.variant = 0;
         bnc.collidetype = COLLIDE_ELLIPSE;
@@ -330,6 +332,18 @@ namespace game
                     if(bnc.bounces <= 5) bounce(&bnc, qtime / 1000.f, 0.6f, 0.5f, 1);
                     if((bnc.lifetime -= qtime) < 0) { stopped = true; break; }
                 }
+            }
+
+            if(bnc.type != BNC_LIGHT)
+            {
+                bool inWater = (lookupmaterial(bnc.o) == MAT_WATER);
+                if(!bnc.inwater && inWater) // the bouncer enter in water
+                {
+                    bnc.inwater = true;
+                    particle_splash(PART_WATER, (20 * bnc.radius), 150, bnc.o, 0x28282A, (5.f * bnc.radius), (200.f * bnc.radius), -300, (10.f * bnc.radius), hasShrooms());
+                    if(bnc.radius > 0.5f) playSound(bnc.radius > 1.f ? S_SPLASH : S_IMPACTWATER, vec(bnc.o).addz(5), 250, 100, SND_LOWPRIORITY);
+                }
+                else if(bnc.inwater && !inWater) bnc.inwater = false; // the bouncer bounced outside the water
             }
 
             if(stopped)
@@ -415,7 +429,7 @@ namespace game
         p.exploded = false;
         p.offsetmillis = OFFSETMILLIS;
         p.id = local ? lastmillis : id;
-        p.inwater = owner->inwater ? true : false;
+        p.inwater = (lookupmaterial(p.o)==MAT_WATER);
 
         switch(p.atk)
         {
@@ -975,7 +989,7 @@ namespace game
                     if(!p.inwater && lookupmaterial(pos)==MAT_WATER)
                     {
                         p.inwater = true;
-                        particle_splash(PART_WATER, 15, 100, v, 0x28282A, 0.75f, 50, -300, 1, hasShrooms());
+                        particle_splash(PART_WATER, 15, 100, v, 0x28282A, 1.5f, 50, -300, 3, hasShrooms());
                         playSound(S_IMPACTWATER, v, 250, 50, SND_LOWPRIORITY|SND_NOOCCLUSION);
                     }
                     renderProjectilesTrails(p.owner, pos, dv, p.from, p.offset, p.atk, p.exploded);
@@ -1248,7 +1262,7 @@ namespace game
             {
                 case S_FLAMETHROWER:
                 case S_GAU8:
-                    playSound(gunSound, isHudPlayer ? vec(0, 0, 0) : d->o, incraseDist ? 600 : 400, incraseDist ? 300 : 150, loopedSoundFlags, d->entityId, PL_ATTACK, pitch);
+                    playSound(gunSound, isHudPlayer ? vec(0, 0, 0) : d->o, incraseDist ? 600 : 500, incraseDist ? 350 : 200, loopedSoundFlags, d->entityId, PL_ATTACK, pitch);
                     d->attacksound = 1;
                     if(distance > 300 && !isHudPlayer)
                     {
@@ -1258,16 +1272,16 @@ namespace game
                     return;
 
                 case S_PLASMARIFLE_SFX:
-                    playSound(gunSound, isHudPlayer ? vec(0, 0, 0) : d->o, 200, 150, loopedSoundFlags, d->entityId, PL_ATTACK, pitch);
+                    playSound(gunSound, isHudPlayer ? vec(0, 0, 0) : d->o, 250, 150, loopedSoundFlags, d->entityId, PL_ATTACK, pitch);
                     d->attacksound = 1;
                     break;
             }
         }
         else if(gunSound != S_PLASMARIFLE_SFX) return;
 
-        playSound(attacks[atk].sound, isHudPlayer ? vec(0, 0, 0) : d->o, incraseDist ? 600 : 400, incraseDist ? 200 : 150, NULL, d->entityId, NULL, pitch);
+        playSound(attacks[atk].sound, isHudPlayer ? vec(0, 0, 0) : d->o, incraseDist ? 600 : 500, incraseDist ? 350 : 200, NULL, d->entityId, NULL, pitch);
 
-        if(distance > 300)
+        if(distance > 350)
         {
             playSound(attacks[atk].middistsnd, d->o, 700, 300, SND_LOWPRIORITY, d->entityId);
             if(distance > 600) playSound(attacks[atk].fardistsnd, d->o, 1000, 600, SND_LOWPRIORITY, d->entityId, NULL, pitch);
