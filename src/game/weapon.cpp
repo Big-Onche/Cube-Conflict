@@ -749,8 +749,7 @@ namespace game
 
     void explode(bool local, gameent *owner, const vec &v, const vec &vel, dynent *safe, int damage, int atk)
     {
-        vec debrisvel = owner->o==v ? vec(0, 0, 0) : vec(owner->o).sub(v).normalize(), debrisorigin(v);
-        vec safeLoc = vec(v).sub(vec(vel).mul(atk==ATK_SMAW_SHOOT || atk==ATK_ARTIFICE_SHOOT || atk==ATK_ROQUETTES_SHOOT ? 25 : 10)); // avoid false positive for occlusion effect
+        vec safeLoc = vec(v).sub(vec(vel).mul(15)); // avoid false positive for occlusion effect
         bool inWater = lookupmaterial(v)==MAT_WATER;
         bool isFar = camera1->o.dist(v) >= 300;
 
@@ -766,9 +765,9 @@ namespace game
             case ATK_SMAW_SHOOT:
             case ATK_ROQUETTES_SHOOT:
                 loopi(5+rnd(3)) spawnbouncer(safeLoc, vel, owner, BNC_ROCK, 200);
-                renderExplosion(owner, v, vel, safe, atk);
+                renderExplosion(owner, safeLoc, vel, atk);
                 playSound(S_EXPL_MISSILE, safeLoc, 400, 150);
-                if(inWater) playSound(S_EXPL_INWATER, v, 300, 100);
+                if(inWater) playSound(S_EXPL_INWATER, vec(v).addz(15), 300, 100);
                 if(isFar) playSound(S_EXPL_FAR, safeLoc, 1500, 400, SND_LOWPRIORITY);
                 startshake(v, 175, atk);
                 break;
@@ -777,36 +776,36 @@ namespace game
             case ATK_ASSISTXPL_SHOOT:
                 loopi(10 + rnd(5))
                 {
-                    if(atk==ATK_ASSISTXPL_SHOOT) spawnbouncer(debrisorigin, debrisvel, owner, BNC_SCRAP, 50 + rnd(250));
-                    else spawnbouncer(debrisorigin, debrisvel, owner, rnd(2) ? BNC_PIXEL : BNC_ROCK, 100 + rnd(300));
+                    if(atk==ATK_ASSISTXPL_SHOOT) spawnbouncer(v, owner->vel, owner, BNC_SCRAP, 50 + rnd(250));
+                    else spawnbouncer(v, owner->vel, owner, rnd(2) ? BNC_PIXEL : BNC_ROCK, 100 + rnd(300));
                 }
-                renderExplosion(owner, v, vel, safe, atk);
-                playSound(atk==ATK_KAMIKAZE_SHOOT ? S_EXPL_KAMIKAZE : S_EXPL_PARMOR, safeLoc, 400, 150);
-                if(inWater) playSound(S_EXPL_INWATER, v, 300, 100);
-                if(isFar) playSound(S_BIGEXPL_FAR, safeLoc, 2000, 400);
+                renderExplosion(owner, owner->o, vel, atk);
+                playSound(atk==ATK_KAMIKAZE_SHOOT ? S_EXPL_KAMIKAZE : S_EXPL_PARMOR, owner->o, 400, 150);
+                if(inWater) playSound(S_EXPL_INWATER, vec(owner->o).addz(15), 300, 100);
+                if(isFar) playSound(S_BIGEXPL_FAR, owner->o, 2000, 400);
                 startshake(v, 225, atk);
                 break;
 
             case ATK_NUKE_SHOOT:
-                renderExplosion(owner, v, vel, safe, atk);
-                playSound(S_EXPL_NUKE);
+                renderExplosion(owner, v, vel, atk);
+                playSound(S_EXPL_NUKE, v, 5000, 3000, SND_NOOCCLUSION);
                 startshake(v, 5000, atk);
                 break;
 
             case ATK_ARTIFICE_SHOOT:
-                renderExplosion(owner, v, vel, safe, atk);
+                renderExplosion(owner, safeLoc, vel, atk);
                 playSound(S_EXPL_FIREWORKS, safeLoc, 400, 200);
-                if(inWater) playSound(S_EXPL_INWATER, v, 300, 100);
+                if(inWater) playSound(S_EXPL_INWATER, vec(v).addz(15), 300, 100);
                 if(isFar) playSound(S_FIREWORKSEXPL_FAR, safeLoc, 2000, 750);
                 startshake(v, 100, atk);
                 break;
 
             case ATK_M32_SHOOT:
-                renderExplosion(owner, v, vel, safe, atk);
+                renderExplosion(owner, v, vel, atk);
                 playSound(S_EXPL_GRENADE, v, 400, 150);
-                if(inWater) playSound(S_EXPL_INWATER, v, 300, 100);
+                if(inWater) playSound(S_EXPL_INWATER, vec(v).addz(15), 300, 100);
                 if(isFar) playSound(S_EXPL_FAR, v, 2000, 400, SND_LOWPRIORITY);
-                loopi(5+rnd(3)) spawnbouncer(debrisorigin, debrisvel, owner, BNC_ROCK, 200);
+                loopi(5+rnd(3)) spawnbouncer(v, vel, owner, BNC_ROCK, 200);
                 startshake(v, 200, atk);
                 break;
 
@@ -817,21 +816,19 @@ namespace game
             case ATK_GLOCK_SHOOT:
             case ATK_ARBALETE_SHOOT:
                 renderBulletImpact(owner, v, vel, safe, atk);
-                if(!inWater) playSound(atk==ATK_ARBALETE_SHOOT ? S_IMPACTARROW : S_LITTLERICOCHET, safeLoc, 175, 75, SND_LOWPRIORITY);
+                if(!inWater) playSound(atk==ATK_ARBALETE_SHOOT ? S_IMPACTARROW : S_LITTLERICOCHET, v, 175, 75, SND_LOWPRIORITY);
                 break;
 
             case ATK_SV98_SHOOT:
             case ATK_SKS_SHOOT:
             case ATK_GAU8_SHOOT:
-            {
                 renderBulletImpact(owner, v, vel, safe, atk);
                 if(!inWater)
                 {
-                    playSound(S_IMPACTLOURDLOIN, safeLoc, 750, 400, SND_LOWPRIORITY);
-                    playSound(S_BIGRICOCHET, safeLoc, 250, 75, SND_LOWPRIORITY);
+                    playSound(S_IMPACTLOURDLOIN, v, 750, 400, SND_LOWPRIORITY);
+                    playSound(S_BIGRICOCHET, v, 250, 75, SND_LOWPRIORITY);
                 }
-
-            }
+                break;
         }
 
         if(!local) return;
@@ -1589,6 +1586,23 @@ namespace game
         }
     }
 
+    std::map<int, std::string> projsPaths =
+    {
+        {ATK_SMAW_SHOOT, "projectiles/missile"},
+        {ATK_ARTIFICE_SHOOT, "projectiles/feuartifice"},
+        {ATK_ARBALETE_SHOOT, "projectiles/fleche"},
+        {ATK_ROQUETTES_SHOOT, "projectiles/minimissile"},
+        {ATK_NUKE_SHOOT, "projectiles/missilenuke"}
+    };
+
+    void preloadProjectiles()
+    {
+        for(const auto& pair : projsPaths)
+        {
+            preloadmodel(pair.second.c_str());
+        }
+    }
+
     void renderprojectiles()
     {
         float yaw, pitch;
@@ -1603,8 +1617,7 @@ namespace game
                 vectoyawpitch(v, yaw, pitch);
                 v.mul(3);
                 v.add(pos);
-                rendermodel(p.atk==ATK_SMAW_SHOOT ? "projectiles/missile" : p.atk==ATK_ARTIFICE_SHOOT ? "projectiles/feuartifice" : p.atk==ATK_ROQUETTES_SHOOT ? "projectiles/minimissile" : p.atk==ATK_NUKE_SHOOT ? "projectiles/missilenuke" :"projectiles/fleche", ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, MDL_CULL_VFC|MDL_CULL_OCCLUDED);
-                if(p.atk!=ATK_ARBALETE_SHOOT) renderProjectilesTrails(p.owner, pos, v, p.from, p.offset, p.atk);
+                rendermodel(projsPaths[p.atk].c_str(), ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, MDL_NOSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED);
             }
         }
     }

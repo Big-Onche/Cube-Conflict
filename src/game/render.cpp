@@ -881,6 +881,7 @@ namespace game
         if(hudgun) preloadweapons();
         if(m_tutorial || m_sp || m_dmsp) preloadmonsters();
         preloadbouncers();
+        preloadProjectiles();
         preloadplayermodel();
         entities::preloadentities();
     }

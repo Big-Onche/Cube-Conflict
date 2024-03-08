@@ -72,7 +72,7 @@ namespace game
     void renderProjectilesTrails(gameent *owner, vec &pos, vec dv, vec &from, vec &offset, int atk, bool exploded) //particles and light effects on impact for slow projectiles
     {
         if(game::ispaused()) return;
-        bool inWater = lookupmaterial(pos)==MAT_WATER;
+        bool inWater = (lookupmaterial(pos) == MAT_WATER);
         bool firstPerson = (owner==game::hudplayer());
 
         float len = min(100.f, vec(offset).add(from).dist(pos));
@@ -134,7 +134,7 @@ namespace game
                 if(!exploded)
                 {
                     if(inWater) particle_splash(PART_BUBBLE, 1, 150, pos, 0x888888, 1.0f+rnd(2), 20, -30);
-                    particle_flare(tail, head, 300, PART_F_SMOKE, 0x444444, 0.60f, owner, hasShrooms());
+                    particle_flare(tail, head, 350, PART_F_SMOKE, 0x555555, 0.60f, owner, hasShrooms(), 10);
 
                     if(hasRoids(owner))
                     {
@@ -166,9 +166,8 @@ namespace game
             }
     }
 
-    void renderExplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk) //big laggy flashy explosions
+    void renderExplosion(gameent *owner, const vec &v, const vec &vel, int atk) //big laggy flashy explosions
     {
-        vec lightloc = vec(v).sub(vec(vel).mul(15));
         bool inWater = lookupmaterial(v)==MAT_WATER;
         int initRadius = attacks[atk].exprad/2;
         int flags = L_NODYNSHADOW|DL_FLASH;
@@ -193,8 +192,8 @@ namespace game
 
                 if(!epilepsyfriendly)
                 {
-                    adddynlight(safe ? v : lightloc, 5*attacks[atk].exprad, vec(7.0f, 4.0f, 0.0f), 80, 40, flags, initRadius, vec(1.f, 0.f, 0.f));
-                    adddynlight(safe ? v : lightloc, 3*attacks[atk].exprad, vec(1.5f, 0.5f, 0.0f), 80, 40, L_VOLUMETRIC|flags, initRadius, vec(1.0f, 0.f, 0.f));
+                    adddynlight(v, 5*attacks[atk].exprad, vec(7.0f, 4.0f, 0.0f), 80, 40, flags, initRadius, vec(1.f, 0.f, 0.f));
+                    adddynlight(v, 3*attacks[atk].exprad, vec(1.5f, 0.5f, 0.0f), 80, 40, L_VOLUMETRIC|flags, initRadius, vec(1.0f, 0.f, 0.f));
                 }
                 return;
             }
@@ -211,8 +210,8 @@ namespace game
 
                 if(!epilepsyfriendly)
                 {
-                    adddynlight(safe ? v : lightloc, 6*attacks[atk].exprad, vec(1+rnd(4), 1+rnd(4), 1+rnd(4)), 80, 40, flags, initRadius, vec(1+rnd(4), 1+rnd(4), 1+rnd(4)));
-                    adddynlight(safe ? v : lightloc, 5*attacks[atk].exprad, vec(rnd(15)/10.0f, rnd(15)/10.0f, rnd(15)/10.0f), 80, 40, L_VOLUMETRIC|flags, initRadius, vec(1+rnd(4), 1+rnd(4), 1+rnd(4)));
+                    adddynlight(v, 6*attacks[atk].exprad, vec(1+rnd(4), 1+rnd(4), 1+rnd(4)), 80, 40, flags, initRadius, vec(1+rnd(4), 1+rnd(4), 1+rnd(4)));
+                    adddynlight(v, 5*attacks[atk].exprad, vec(rnd(15)/10.0f, rnd(15)/10.0f, rnd(15)/10.0f), 80, 40, L_VOLUMETRIC|flags, initRadius, vec(1+rnd(4), 1+rnd(4), 1+rnd(4)));
                 }
                 return;
 
@@ -259,8 +258,8 @@ namespace game
 
                 if(!epilepsyfriendly)
                 {
-                    adddynlight(safe ? v : lightloc, 6*attacks[atk].exprad, vec(7.0f, 4.0f, 0.0f), 80, 40, flags, initRadius, vec(1.f, 0.f, 0.f));
-                    adddynlight(safe ? v : lightloc, 4*attacks[atk].exprad, vec(1.5f, 0.5f, 0.0f), 80, 40, L_VOLUMETRIC|flags, initRadius, vec(1.f, 0.f, 0.f));
+                    adddynlight(v, 6*attacks[atk].exprad, vec(7.0f, 4.0f, 0.0f), 80, 40, flags, initRadius, vec(1.f, 0.f, 0.f));
+                    adddynlight(v, 4*attacks[atk].exprad, vec(1.5f, 0.5f, 0.0f), 80, 40, L_VOLUMETRIC|flags, initRadius, vec(1.f, 0.f, 0.f));
                 }
                 return;
             }
@@ -291,8 +290,8 @@ namespace game
                 if(!epilepsyfriendly)
                 {
                     loopi(3) particle_fireball(v, 350, PART_SHOCKWAVE, 600, 0xFFCCAA, 800.0f, hasShrooms());
-                    adddynlight(safe ? v : lightloc, 9*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 300, 40, L_NOSHADOW, initRadius, vec(0.5f, 1.5f, 2.0f));
-                    adddynlight(safe ? v : lightloc, 6*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 300, 40, L_NOSHADOW|L_VOLUMETRIC, initRadius, vec(0.0f, 0.0f, 1.5f));
+                    adddynlight(v, 9*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 300, 40, L_NOSHADOW, initRadius, vec(0.5f, 1.5f, 2.0f));
+                    adddynlight(v, 6*attacks[atk].exprad, vec(8.0f, 4.0f, 0.0f), 300, 40, L_NOSHADOW|L_VOLUMETRIC, initRadius, vec(0.0f, 0.0f, 1.5f));
                 }
                 return;
         }
