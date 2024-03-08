@@ -124,7 +124,7 @@ extern int minimizedmute;
 extern void initSounds();
 extern void playMusic(int musicId);
 extern void soundNearmiss(int sound, const vec &from, const vec &to, int precision = 2048);
-extern void stopMapSound(extentity *e);
+extern void stopMapSound(extentity *e, bool deleteEnt = false);
 extern void updateSounds();
 extern void stopSound(int soundId, int flags);
 extern void stopMusic(int soundId);

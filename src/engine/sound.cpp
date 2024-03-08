@@ -254,8 +254,6 @@ void initSoundSources()
     }
 }
 
-ALCcontext* context = NULL;
-
 void initSounds()
 {
     ALCdevice* device = alcOpenDevice(NULL); // open default device
@@ -267,9 +265,13 @@ void initSounds()
         0
     };
 
-    ALCcontext* context = alcCreateContext(device, attributes);
-    if(!context) { conoutf("Unable to initialize OpenAL (!context)"); return; }
-    alcMakeContextCurrent(context);
+    ALCcontext *context = alcCreateContext(device, attributes);
+    if(!context || !alcMakeContextCurrent(context))
+    {
+        conoutf("Unable to initialize OpenAL (!context)");
+        alcCloseDevice(device);
+        return;
+    }
 
     noSound = false;
 
@@ -300,24 +302,23 @@ bool checkSoundOcclusion(const vec *soundPos, int flags = 0)
     if(*soundPos == vec(0, 0, 0) || (flags & SND_NOOCCLUSION) || noEfx) return false;
 
     float distance = camera1->o.dist(*soundPos);
-    if((distance < 50 && !(flags & SND_MAPSOUND)) || distance > 1000) return false; // avoid short distance tolerance for map sounds can be useful with thin walls also culling distant sounds
+    if(distance > 1000) return false; // cull distant sounds
 
     vec hitPos;
-    if(distance > 300) return !raycubelos(*soundPos, camera1->o, hitPos); // simple ray check if the sound is far away
-    else // more complex check with a tolerance if the sound is closer
+    particle_splash(PART_SPARK, 1, 250, *soundPos, 0x00FF00, 1.f, 1, 0);
+    if(raycubelos(*soundPos, camera1->o, hitPos)) return false; // we first try a direct ray check
+    else if(distance < 300) // more complex check with a tolerance if the sound is closer
     {
-        vec up(0, 0, 1);
-        vec right = vec(0, 0, 0).cross(camdir, up);
-        vec perp = vec(0, 0, 0).cross(right, camdir);
-        right.normalize();
-        perp.normalize();
+        vec dir = vec(camera1->o).sub(*soundPos).normalize(); // Direction vector pointing from sound to camera
+        vec right = vec(0, 0, 0).cross(dir, vec(0, 0, 1)).normalize(); // Recalculating right vector to be orthogonal to dir
+        vec perp = vec(0, 0, 0).cross(right, dir).normalize(); // Recalculating perpendicular vector
 
         loopi(vertices) // creating a triangle that always faces the camera
         {
-            float theta = i * sectorAngle + ((totalmillis / 50.f) * M_PI); // spinning the triangle to get a circle of points
+            float theta = i * sectorAngle + ((totalmillis / 75.f) * M_PI); // spinning the triangle to get a circle of points
             vec displacement = right;
 
-            int toleranceRadius = 25;
+            float toleranceRadius = 25 + (distance / 20.f); // increase tolerance according to distance to simulate sound dispersion
 
             displacement.mul(cos(theta) * toleranceRadius);
 
@@ -327,7 +328,7 @@ bool checkSoundOcclusion(const vec *soundPos, int flags = 0)
             vec samplePoint = *soundPos;
             samplePoint.add(displacement);
             samplePoint.add(verticalDisplacement);
-
+            particle_splash(PART_SPARK, 1, 250, samplePoint, 0x00FF00, 1.f, 1, 0);
             if(raycubelos(samplePoint, camera1->o, hitPos)) return false; // if one of the vertices is not occluded, no occlusion filter is applied
         }
     }
@@ -417,7 +418,7 @@ void playSound(int soundId, vec soundPos, float maxRadius, float maxVolRadius, i
         bool occluded = isOccluded(id);
 
         sources[id].lfOcclusionGain = occluded ? 0.90f : 1.0f;
-        sources[id].hfOcclusionGain = occluded ? 0.10f : 1.0f;
+        sources[id].hfOcclusionGain = occluded ? 0.20f : 1.0f;
         sources[id].isCurrentlyOccluded = occluded;
 
         alFilterf(sources[id].occlusionFilter, AL_LOWPASS_GAIN, sources[id].lfOcclusionGain);
@@ -491,7 +492,7 @@ void updateSoundOcclusion(int id)
 
     // Determine target gain based on occlusion
     float targetGain = occlusion ? 0.90f : 1.0f;
-    float targetGainHF = occlusion ? 0.10f : 1.0f;
+    float targetGainHF = occlusion ? 0.20f : 1.0f;
 
     if(progress < 1.0f)
     {
@@ -523,6 +524,7 @@ void updateSoundPosition(int id)
 void manageSources()
 {
     if(noSound) return;
+
     ALint state;
     loopi(maxsoundsatonce)
     {
@@ -558,7 +560,7 @@ void soundNearmiss(int sound, const vec &from, const vec &to, int precision)
     }
 }
 
-void stopMapSound(extentity *e)
+void stopMapSound(extentity *e, bool deleteEnt)
 {
     if(!e) return;
 
@@ -572,7 +574,7 @@ void stopMapSound(extentity *e)
             removeEntityPos(e->entityId);
             //reportSoundError("alSourceStop-stopMapSound", tempformatstring("Sound %d", e->attr1));
             sources[i].isActive = false;
-            e->flags &= ~EF_SOUND;
+            if(!deleteEnt) e->flags &= ~EF_SOUND;
         }
     }
 }
@@ -599,7 +601,7 @@ void checkMapSounds()
     {
         extentity &e = *ents[i];
 
-        if(e.type == ET_EMPTY) stopMapSound(&e);
+        if(e.type == ET_EMPTY) { stopMapSound(&e, true); continue; }
         else if(e.type != ET_SOUND) continue;
 
         if(camera1->o.dist(e.o) < e.attr2 + 50) // check for distance + add a slight tolerance for efx sound effects
