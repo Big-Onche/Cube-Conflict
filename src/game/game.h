@@ -785,6 +785,8 @@ struct gameent : dynent, gamestate
     int lastability[3];
     int attacksound; // 0 = no sound, 1 = close sound, 2 = close + far sound
     bool abilityready[3], playerexploded, powerarmoursound;
+    int lastOutOfMap;
+    bool isOutOfMap;
 
     string name, info;
     int team, playermodel, playercolor, customcape, customtombe, customdanse, aptitude, level;

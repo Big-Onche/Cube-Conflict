@@ -43,26 +43,27 @@ namespace game
     void renderProjectileExplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk) //particles and light effects on impact for slow projectiles
     {
         vec lightOrigin = vec(v).sub(vec(vel).mul(10));
+        bool inWater = ((lookupmaterial(v) & MAT_WATER) == MAT_WATER);
 
         switch(atk)
         {
             case ATK_PULSE_SHOOT:
             {
-                if(lookupmaterial(v)!=MAT_WATER) particle_splash(PART_FIRESPARK, 15, 150, v, hasRoids(owner) ? 0xFF0000 : 0xFF6600, 1.f, 150, 500, 2, hasShrooms());
+                if(!inWater) particle_splash(PART_FIRESPARK, 15, 150, v, hasRoids(owner) ? 0xFF0000 : 0xFF6600, 1.f, 150, 500, 2, hasShrooms());
                 particle_fireball(v, 9.f, PART_PLASMABURST, 300, hasRoids(owner) ? 0xFF0000 : 0xCC9900, 3, hasShrooms());
                 adddynlight(safe ? v : lightOrigin, 2*attacks[atk].exprad, vec(1.5f, 0.75f, 0.0f), 150, 50, 0, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
                 return;
             }
             case ATK_GRAP1_SHOOT:
             {
-                if(lookupmaterial(v)!=MAT_WATER) particle_splash(PART_SPARK, 20, 100, v, hasRoids(owner) ? 0xFF0000 : 0xAA4466, 0.5f, 400, 400, 0, hasShrooms());
+                if(!inWater) particle_splash(PART_SPARK, 20, 100, v, hasRoids(owner) ? 0xFF0000 : 0xAA4466, 0.5f, 400, 400, 0, hasShrooms());
                 loopi(2)particle_fireball(v, 7.f, PART_EXPLOSION, 200, hasRoids(owner) ? 0xFF0000 : 0x550055, 1.f, hasShrooms());
                 adddynlight(safe ? v : lightOrigin, 2*attacks[atk].exprad, vec(1.5f, 0.0f, 1.5f), 200, 100, L_NODYNSHADOW, attacks[atk].exprad/2, vec(0.5f, 0.0f, 0.5f));
                 return;
             }
             case ATK_SPOCKGUN_SHOOT:
             {
-                if(lookupmaterial(v)!=MAT_WATER) particle_splash(PART_SPARK, 15, 100, v, hasRoids(owner) ? 0xFF0000 : 0x00FF66, 0.5f, 250, 250, 0, hasShrooms());
+                if(!inWater) particle_splash(PART_SPARK, 15, 100, v, hasRoids(owner) ? 0xFF0000 : 0x00FF66, 0.5f, 250, 250, 0, hasShrooms());
                 adddynlight(safe ? v : lightOrigin, 1.25f*attacks[atk].exprad, hasRoids(owner) ? vec(1.5f, 0.f, 0.f) : vec(0.f, 1.5f, 0.f), 200, 50, 0, attacks[atk].exprad/2, vec(1.f, 1.f, 1.f));
                 return;
             }
@@ -72,7 +73,7 @@ namespace game
     void renderProjectilesTrails(gameent *owner, vec &pos, vec dv, vec &from, vec &offset, int atk, bool exploded) //particles and light effects on impact for slow projectiles
     {
         if(game::ispaused()) return;
-        bool inWater = (lookupmaterial(pos) == MAT_WATER);
+        bool inWater = ((lookupmaterial(pos) & MAT_WATER) == MAT_WATER);
         bool firstPerson = (owner==game::hudplayer());
 
         float len = min(100.f, vec(offset).add(from).dist(pos));
@@ -168,7 +169,7 @@ namespace game
 
     void renderExplosion(gameent *owner, const vec &v, const vec &vel, int atk) //big laggy flashy explosions
     {
-        bool inWater = lookupmaterial(v)==MAT_WATER;
+        bool inWater = ((lookupmaterial(v) & MAT_WATER) == MAT_WATER);
         int initRadius = attacks[atk].exprad/2;
         int flags = L_NODYNSHADOW|DL_FLASH;
 
@@ -313,7 +314,7 @@ namespace game
         vec dir = vec(vel).normalize();
         vec bounce;
         bool isClose = false;
-        bool inWater = (lookupmaterial(v) == MAT_WATER);
+        bool inWater = ((lookupmaterial(v) & MAT_WATER) == MAT_WATER);
 
         if(distance < 200) // if close, calculate a bouncing trajectory
         {
@@ -376,7 +377,7 @@ namespace game
         vec bounce;
 
         bool isClose = false;
-        bool inWater = (lookupmaterial(to) == MAT_WATER);
+        bool inWater = ((lookupmaterial(to) & MAT_WATER) == MAT_WATER);
 
         if(distance < 256) // if close, calculate a bouncing trajectory
         {

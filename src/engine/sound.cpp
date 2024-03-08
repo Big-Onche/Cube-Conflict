@@ -205,7 +205,9 @@ ICOMMAND(mapreverbs, "iiiii", (int *a, int *b, int *c, int *d, int *e), configur
 
 bool isUnderWater(vec pos)
 {
-    return (lookupmaterial(pos) == MAT_WATER || lookupmaterial(pos) == MAT_LAVA || lookupmaterial(camera1->o) == MAT_WATER || lookupmaterial(camera1->o) == MAT_LAVA);
+    int matPos = lookupmaterial(pos);
+    int matCam = lookupmaterial(camera1->o);
+    return (matPos & MAT_WATER) == MAT_WATER || (matPos & MAT_LAVA) == MAT_LAVA || (matCam & MAT_WATER) == MAT_WATER || (matCam & MAT_LAVA) == MAT_LAVA;
 }
 
 void applyReverb(ALuint source, int reverb)
@@ -305,7 +307,7 @@ bool checkSoundOcclusion(const vec *soundPos, int flags = 0)
     if(distance > 1000) return false; // cull distant sounds
 
     vec hitPos;
-    particle_splash(PART_SPARK, 1, 250, *soundPos, 0x00FF00, 1.f, 1, 0);
+    //particle_splash(PART_SPARK, 1, 250, *soundPos, 0x00FF00, 1.f, 1, 0);
     if(raycubelos(*soundPos, camera1->o, hitPos)) return false; // we first try a direct ray check
     else if(distance < 300) // more complex check with a tolerance if the sound is closer
     {
@@ -328,7 +330,7 @@ bool checkSoundOcclusion(const vec *soundPos, int flags = 0)
             vec samplePoint = *soundPos;
             samplePoint.add(displacement);
             samplePoint.add(verticalDisplacement);
-            particle_splash(PART_SPARK, 1, 250, samplePoint, 0x00FF00, 1.f, 1, 0);
+            //particle_splash(PART_SPARK, 1, 250, samplePoint, 0x00FF00, 1.f, 1, 0);
             if(raycubelos(samplePoint, camera1->o, hitPos)) return false; // if one of the vertices is not occluded, no occlusion filter is applied
         }
     }

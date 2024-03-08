@@ -764,7 +764,7 @@ void rendereditmaterials()
                 case MAT_DEATH:    color = bvec4(192, 192, 192, 255); break; // black
                 case MAT_NOGI:     color = bvec4(128, 160, 255, 255); break; // brown
                 case MAT_ALPHA:    color = bvec4(  0, 255,   0, 255); break; // pink
-                case MAT_REVERB:   color = bvec4(64,  64,  64, 255); break; // gray
+                case MAT_REVERB:   color = bvec4( 64,  64,  64, 255); break; // gray
                 default: continue;
             }
             lastmat = m.material;
