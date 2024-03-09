@@ -419,8 +419,11 @@ namespace entities
         if(d->boostmillis[B_SHROOMS] && (d->boostmillis[B_SHROOMS] -= time)<=0)
         {
             d->boostmillis[B_SHROOMS] = 0;
-            resetpostfx();
-            if(d==player1) conoutf(CON_HUDCONSOLE, "\f8%s", readstr("GameMessage_ShroomsEnded"));
+            if(d==player1)
+            {
+                conoutf(CON_HUDCONSOLE, "\f8%s", readstr("GameMessage_ShroomsEnded"));
+                resetpostfx();
+            }
         }
 
         if(d->boostmillis[B_RAGE] && (d->boostmillis[B_RAGE] -= time)<=0) d->boostmillis[B_RAGE] = 0;
