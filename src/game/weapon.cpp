@@ -28,7 +28,7 @@ namespace game
         {
             if(d==player1 && gun!=GUN_ASSISTXPL && !shortcut) player1->lastweap = gun;
             addmsg(N_GUNSELECT, "rci", d, gun);
-            playSound(attacks[gun-GUN_ELEC].picksound, d==hudplayer() ? vec(0, 0, 0) : d->o, 200, 50, d->entityId);
+            playSound(attacks[gun-GUN_ELEC].picksound, d==hudplayer() ? vec(0, 0, 0) : d->o, 200, 50, NULL, d->entityId);
         }
         d->gunselect = gun;
     }
@@ -1048,7 +1048,7 @@ namespace game
         bool wizardAbility = false;
         if(d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN)
         {
-            playSound(S_WIZ_2, isHudPlayer ? vec(0, 0, 0) : d->muzzle, 400, 200);
+            playSound(S_WIZ_2, isHudPlayer ? vec(0, 0, 0) : d->muzzle, 250, 150, NULL, d->entityId);
             shakeFactor = 15;
             wizardAbility = true;
         }
