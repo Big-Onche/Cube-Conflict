@@ -287,7 +287,7 @@ namespace game
         updateEntPos(d->entityId, isHudPlayer ? vec(0, 0, 0) : d->o);
 
         // underwater camera sound
-        bool inWater = lookupmaterial(camera1->o) == MAT_WATER;
+        bool inWater = ((lookupmaterial(camera1->o) & MAT_WATER) == MAT_WATER);
         static bool underwaterSound = false;
         if(inWater && !underwaterSound) { playSound(S_UNDERWATER, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH|SND_LOOPED, hudplayer()->entityId, PL_UNDERWATER); underwaterSound = true; }
         else if(!inWater && underwaterSound) { stopLinkedSound(hudplayer()->entityId, PL_UNDERWATER); underwaterSound = false; }
@@ -341,12 +341,36 @@ namespace game
 
             if(isconnected()) updatePlayersSounds(d);
 
-            if(d!=player1 && d->state==CS_ALIVE && !intermission)
+            if(d->state == CS_ALIVE && !intermission)
             {
-                if(d->armourtype==A_ASSIST && d->ammo[GUN_ASSISTXPL] && !d->armour) {gunselect(GUN_ASSISTXPL, d, true); d->gunwait=0;}
-                if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
-                if(hasboost(d)) entities::checkboosts(curtime, d);
-                updateAbilitiesSkills(curtime, d);
+                if(d!=player1)
+                {
+                    if(d->armourtype==A_ASSIST && d->ammo[GUN_ASSISTXPL] && !d->armour) {gunselect(GUN_ASSISTXPL, d, true); d->gunwait=0;}
+                    if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
+                    if(hasboost(d)) entities::checkboosts(curtime, d);
+                    updateAbilitiesSkills(curtime, d);
+                }
+
+                if((lookupmaterial(d->o) & MAT_GAMECLIP) == MAT_GAMECLIP)
+                {
+                    if(!d->isOutOfMap)
+                    {
+                        d->lastOutOfMap = totalmillis;
+                        d->isOutOfMap = true;
+                    }
+                    if(d->lastOutOfMap < totalmillis - 9900)
+                    {
+                        suicide(d);
+                        if(d==hudplayer())
+                        {
+                            playSound(S_ECLAIRPROCHE);
+                            adddynlight(vec(d->abovehead()).addz(30), 500, vec(0.0f, 0.5f, 1.5f), 80, 40, L_NODYNSHADOW);
+                            particle_flare(vec(d->o).add(vec(50 - rnd(101), 50 - rnd(101), 1500)), d->feetpos(), 175, PART_LIGHTNING, 0xFFFFFF, 40.0f);
+                            particle_splash(PART_SMOKE,  15, 2000, d->o, 0x333333, 40.0f, 150, 500);
+                        }
+                    }
+                }
+                else d->isOutOfMap = false;
             }
 
             if(totalmillis - d->lastcurdamage > 500) d->curdamage = 0;
@@ -624,6 +648,7 @@ namespace game
         d->tombepop = 0.0f;
         d->deaths++;
         d->killstreak = 0;
+        d->isOutOfMap = false;
         loopi(NUMABILITIES) d->abilityready[i] = true;
 
         // death gfx effects
@@ -711,12 +736,11 @@ namespace game
         ////////////////////////////// gfx //////////////////////////////
         if(actor->aptitude==APT_FAUCHEUSE)
         {
-            if(camera1->o.dist(d->o) >= 250) playSound(S_ECLAIRLOIN, d->o, 1000, 100);
-            else playSound(S_ECLAIRPROCHE, d->o, 300, 100, SND_NOOCCLUSION);
-            adddynlight(d->o.add(vec(0, 0, 20)), 5000, vec(1.5f, 1.5f, 1.5f), 80, 40);
-            vec pos(d->o.x, d->o.y, d->o.z-50);
-            particle_flare(vec(0, rnd(15000)+rnd(-30000), 20000+rnd(20000)), pos, 175, PART_LIGHTNING, 0xFFFFFF, 40.0f);
-            particle_splash(PART_SMOKE,  15, 2000, d->o, 0x333333, 40.0f,  150,   500);
+            if(camera1->o.dist(d->o) >= 250) playSound(S_ECLAIRLOIN, d->o, 1000, 250);
+            else playSound(S_ECLAIRPROCHE, d==hudplayer() ? vec(0, 0, 0) : d->o, 300, 150);
+            adddynlight(vec(d->abovehead()).addz(30), 500, vec(0.0f, 0.5f, 1.5f), 80, 40, L_NODYNSHADOW|DL_FLASH);
+            particle_flare(vec(d->o).add(vec(50 - rnd(101), 50 - rnd(101), 1500)), d->feetpos(), 175, PART_LIGHTNING, 0xFFFFFF, 30.0f);
+            particle_splash(PART_SMOKE,  15, 2000, d->o, 0x333333, 40.0f, 150, 500);
             if(actor==player1) { playSound(S_FAUCHEUSE); player1->vampimillis=1500; }
         }
 
