@@ -13,8 +13,6 @@ VARP(softparticleblend, 1, 8, 64);
 
 VARR(partcloudcolour, 0, 0x888888, 0xFFFFFF);
 
-VARFP(particleslod, 0, 2, 3, initparticles());
-
 // Check canemitparticles() to limit the rate that paricles can be emitted for models/sparklies
 // Automatically stops particles being emitted when paused or in reflective drawing
 VARP(emitmillis, 1, 17, 1000);
@@ -229,12 +227,10 @@ struct partrenderer
                 o.add(vec(d).mul(t/5000.0f));
                 o.z -= t*t/(2.0f * 5000.0f * p->gravity);
             }
-            if(type&PT_COLLIDE && o.z < p->val && step)
+            if(camera1->o.dist2(p->o) < 300 && type&PT_COLLIDE && o.z < p->val && step) // avoid useless heavy collision computing if the particle is far away except height
             {
                 if(stain >= 0)
                 {
-                    if(camera1->o.dist2(p->o) > 300) return; // avoid heavy useless collision computing if the particle is far away except height
-
                     vec surface;
                     float floorz = rayfloor(vec(o.x, o.y, p->val), surface, RAY_CLIPMAT|RAY_LIQUIDMAT|RAY_POLY, COLLIDERADIUS);
                     float collidez = floorz<0 ? o.z-COLLIDERADIUS : p->val - floorz;
@@ -950,12 +946,9 @@ static partrenderer *parts[] =
 VARFP(maxparticles, 10, 8000, 20000, initparticles());
 VARFP(fewparticles, 10, 500, 10000, initparticles());
 
-int cullDist = 0;
-
 void initparticles()
 {
     if(initing) return;
-    cullDist = 192 * (particleslod + 1);
     if(!particleshader) particleshader = lookupshaderbyname("particle");
     if(!particlenotextureshader) particlenotextureshader = lookupshaderbyname("particlenotexture");
     if(!particlesoftshader) particlesoftshader = lookupshaderbyname("particlesoft");
@@ -1070,7 +1063,11 @@ void renderparticles(int layer)
 
 static int addedparticles = 0;
 
+int spawnDistance = 0;
+VARFP(particleslod, 1, 2, 4, spawnDistance = particleslod * 256);
+
 VARP(maxparticledistance, 128, 1024, 4096);
+
 static inline bool isInRange(vec o, int flags)
 {
     return flags&PT_NOMAXDIST || camera1->o.dist(o) < maxparticledistance;
@@ -1351,7 +1348,7 @@ void regularshape(int type, int radius, int color, int dir, int num, int fade, c
 
         if(weather)
         {
-            if(camera1->o.dist(vec(to.x, to.y, camera1->o.z)) > cullDist && !seedemitter) continue; // culling out distant ones
+            if(camera1->o.dist2(vec(to.x, to.y, camera1->o.z)) > spawnDistance) continue; // culling out distant ones
 
             vec spawnz(to.x, to.y, camera1->o.z + height);
             vec d = spawnz;
@@ -1427,20 +1424,23 @@ int smokeGs() {return 17 + rnd(37);} // setting random smoke grayscale
 
 void popLightning(vec pos, vec flashColor, int lightColor)
 {
-    vec possky = pos, posground = pos;
-    int posx = -1250+rnd(2500), posy = -1250+rnd(2500);
-    possky.add(vec(posx+(-200+(rnd(400))), posy+(-200+(rnd(400))), 800));
-    posground.add(vec(posx, posy, -50));
-    loopi(2)particle_flare(possky, posground, 750, PART_LIGHTNING, lightColor, 15.f+rnd(10), NULL, game::hasShrooms());
+    vec origin = pos, destination = pos;
+    int xCoord = -1250 + rnd(2500), yCoord = -1250 + rnd(2500);
 
-    playSound(S_ECLAIRPROCHE, posground, 400, 100, SND_NOOCCLUSION);
+    origin.add(vec(xCoord + (-300 + rnd(601)), yCoord + (-300 + rnd(601)), 1300));
+    destination.add(vec(xCoord, yCoord, -100));
 
-    vec posA = possky;
-    vec posB = camera1->o;
-    vec flashloc = (posA.add((posB.mul(vec(3, 3, 3))))).div(vec(4, 4, 4));
+    vec hitpos;
+    float groundDist = rayfloor(destination.addz(1400), hitpos, RAY_CLIPMAT|RAY_POLY, 1250);
+    destination.subz(groundDist);
 
-    if(camera1->o.dist(posground) >= 250) playSound(S_ECLAIRLOIN, flashloc, 1500, 300);
-    adddynlight(flashloc, 4000, flashColor, 200, 40, L_NOSHADOW, 2000, flashColor);
+    loopi(2) particle_flare(origin, destination, 750, PART_LIGHTNING, lightColor, 15.f+rnd(10), NULL, game::hasShrooms());
+    playSound(S_ECLAIRPROCHE, destination.addz(50), 300, 200);
+
+    vec flashLoc = (origin.add((vec(camera1->o).mul(vec(3, 3, 3))))).div(vec(4, 4, 4));
+
+    if(camera1->o.dist(destination) >= 250) playSound(S_ECLAIRLOIN, flashLoc, 1500, 300);
+    adddynlight(flashLoc, 4000, flashColor, 200, 40, L_NOSHADOW, 2000, flashColor);
 }
 
 enum {RAIN_LIGHT = 1, RAIN_MODERATE, RAIN_STORM, NUMRAINS};
@@ -1454,34 +1454,36 @@ void spawnRain(vec pos, int rainType, int intensity, int r, int g, int b, int wi
     else if (rainType > NUMRAINS) return; // if force rain, don't go after max rains
 
     if(noColors(r, g, b)) { r = 85; g = 85;  b = 102; } // setting default colors for generic rain
-    if(!intensity) intensity = 600*(rainType*2);
-    if(!wind) wind = 400*(rainType);
-    int vel = - 900 - (500 * rainType);
+    if(!intensity) intensity = (particleslod * 200) * (rainType * 2);
+    else intensity = (intensity * particleslod);
+    if(!wind) wind = 200*(rainType);
+    int vel = - 900 - (600 * rainType);
 
-    regularshape(PART_RAIN, 4000, rgbToHex(r, g, b), 44, intensity, 10000, pos, 5+(rnd(3)), 200, vel, wind, true, 300);
+    regularshape(PART_RAIN, 2000, rgbToHex(r, g, b), 44, intensity, 5000, camera1->o, 5+(rnd(3)), 200, vel, wind, true, 325);
 
-    bool canPopLightning = rainType > RAIN_LIGHT && (map_atmo == 4 || force) && !rnd(50/rainType*game::nbfps);
+    bool canPopLightning = rainType > RAIN_LIGHT && (map_atmo == 4 || force) && rndevent(1, 6);
     if(canPopLightning) popLightning(pos, vec(1.5f, 1.5f, 2.0f), 0x8888FF);
 }
 
 void spawnSnow(vec pos, int intensity, int r, int g, int b, int wind, bool force)
 {
     if(noColors(r, g, b)) { r = 255; g = 255;  b = 255; } // setting default colors for generic snow
-    if(!intensity) intensity = (map_atmo==8 && !force ? 300 : 600);
+    if(!intensity) intensity = (map_atmo==8 && !force ? (particleslod * 75) : (particleslod * 150));
+    else intensity = (intensity * particleslod);
     if(!wind) wind = 1200;
 
-    regularshape(PART_SNOW, 4000, rgbToHex(r, g, b), 44, intensity, 10000, pos, 2+(rnd(3)), 200, -400, wind, true, 200);
+    regularshape(PART_SNOW, 4000, rgbToHex(r, g, b), 44, intensity, 10000, pos, 2+(rnd(3)), 200, -400, wind, true, 325);
 }
 
 void spawnApocalypse(vec pos, int intensity, int r, int g, int b, int wind)
 {
     if(noColors(r, g, b)) { r = 255; g = 150;  b = 0; } // setting default colors for "generic" apocalypse
-    if(!intensity) intensity = 125;
-
+    if(!intensity) intensity = (particleslod * 20);
+    else intensity = (intensity * particleslod);
     if(!wind) wind = 2500;
-    regularshape(PART_FIRESPARK, 4000, rgbToHex(r, g, b), 44, intensity, 10000, pos, 1+(rnd(5)), 200, -500, wind, true, 300);
 
-    if(strcasecmp(game::getclientmap(), "volcano") && rndevent(1)) popLightning(pos, vec(1.5f, 0.5f, 0.0f), 0xFF6622);
+    regularshape(PART_FIRESPARK, 4000, rgbToHex(r, g, b), 44, intensity, 10000, pos, 1+(rnd(5)), 200, -500, wind, true, 325);
+    if(strcasecmp(game::getclientmap(), "volcano") && rndevent(1, 2)) popLightning(pos, vec(1.5f, 0.5f, 0.0f), 0xFF6622);
 }
 
 static void makeparticles(entity &e)
@@ -1512,7 +1514,8 @@ static void makeparticles(entity &e)
             if(b) b = applyRandomOffset(b, e.attr7);
 
             regularflame(PART_FLAME, e.o, radius, height, rgbToHex(r, g, b), 2, 2.0f+(rnd(2)), 200.f, 600.f, -15, e.attr8);
-            if(e.attr1==1) regularflame(PART_SMOKE, vec(e.o.x, e.o.y, e.o.z + 4.0f*min(radius, height)), radius, height, rgbToHex(smokeGs(), smokeGs(), smokeGs()), 1, 4.0f+(rnd(6)), 100.0f, 2750.0f, -15, e.attr8);
+            int gray = smokeGs();
+            if(e.attr1==1) regularflame(PART_SMOKE, vec(e.o.x, e.o.y, e.o.z + 4.0f*min(radius, height)), radius, height, rgbToHex(gray, gray, gray), 1, 4.0f+(rnd(6)), 100.0f, 2750.0f, -15, e.attr8);
 
             if(e.attr9 && rndevent(e.attr9)) particles::dirSplash(PART_FIRESPARK, 0xFFFF55, 500, rnd(3)+1, 750+(rnd(750)), offsetvec(e.o, rnd(15)-rnd(31), rnd(15)-rnd(31)), vec(0, 0, 1), 0.6f + (rnd(18)/12.f), 150);
             break;
@@ -1522,9 +1525,8 @@ static void makeparticles(entity &e)
             float radius = e.attr2 ? float(e.attr2)/100.0f : 1.5f,
                   height = e.attr3 ? float(e.attr3)/100.0f : radius/3;
 
-            int r, g, b;
-
-            if(noColors(e.attr4, e.attr5, e.attr6)) { r = smokeGs(); g = smokeGs();  b = smokeGs(); } // setting default colors for generic smoke
+            int r, g, b, gray = smokeGs();
+            if(noColors(e.attr4, e.attr5, e.attr6)) { r = gray; g = gray;  b = gray; } // setting default colors for generic smoke
             else { r = e.attr4; g = e.attr5; b = e.attr6; } // setting custom colors from r g b attrs
 
             // apply color offset
