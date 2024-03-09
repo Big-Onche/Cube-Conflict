@@ -240,18 +240,10 @@ void initSoundSources()
     {
         alGenSources(1, &sources[i].source);
         //reportSoundError("initSoundSources", "Error while initing sound sources");
-
-        sources[i].isActive = false;
-        sources[i].entityId = SIZE_MAX;  // set to SIZE_MAX initially to represent "no entity"
-        sources[i].soundType = 0;
-
         if(!noEfx)
         {
             alGenFilters(1, &sources[i].occlusionFilter);
             alFilteri(sources[i].occlusionFilter, AL_FILTER_TYPE, AL_FILTER_LOWPASS);
-            sources[i].lfOcclusionGain = 1.0f;
-            sources[i].hfOcclusionGain = 1.0f;
-            sources[i].isCurrentlyOccluded = false;
         }
     }
 }
