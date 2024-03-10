@@ -11,7 +11,6 @@ namespace ai
     vec aitarget(0, 0, 0);
     VAR(aidebug, 0, 0, 6);
     VAR(aiforcegun, -1, -1, NUMGUNS-1);
-    VARP(numbots, 0, 5, 49);
     VARP(botlevel, 0, 2, 4);
     ICOMMAND(addbots, "ii", (int *num, int *classe), loopi(*num) addmsg(N_ADDBOT, "rii", (33 + botlevel * 15) + rnd(7), *classe); );
     ICOMMAND(delbots, "i", (int *num),
@@ -1019,8 +1018,8 @@ namespace ai
     {
         if(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2]) return;
         vec off = vec(pos).sub(d->feetpos()), dir(off.x, off.y, 0);
-        bool sequenced = d->ai->blockseq || d->ai->targseq, //offground = d->timeinair && !d->inwater,
-             jump = lastmillis >= d->ai->jumpseed && rndevent(70) && (sequenced || off.z >= JUMPMIN || lastmillis >= d->ai->jumprand);
+        bool sequenced = d->ai->blockseq || d->ai->targseq, offground = d->timeinair && !d->inwater,
+             jump = !offground && lastmillis >= d->ai->jumpseed && rndevent(70) && (sequenced || off.z >= JUMPMIN || lastmillis >= d->ai->jumprand);
 
         if(jump)
         {
@@ -1041,7 +1040,7 @@ namespace ai
         if(jump)
         {
             d->jumping = true;
-            int seed = (111-d->skill)*(d->inwater ? 60 : 100);
+            int seed = (111-d->skill)*(d->inwater ? 5 : 15);
             d->ai->jumpseed = lastmillis+seed+rnd(seed);
             seed *= b.idle ? 50 : 25;
             d->ai->jumprand = lastmillis+seed+rnd(seed);
@@ -1407,7 +1406,7 @@ namespace ai
             {
                 if(d->ragdoll) cleanragdoll(d);
                 moveplayer(d, 10, true, d->boostmillis[B_EPO], d->boostmillis[B_JOINT], d->aptitude, d->aptitude==APT_MAGICIEN ? d->abilitymillis[ABILITY_1] : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION || d->aptitude==APT_KAMIKAZE ? d->abilitymillis[ABILITY_2] : d->abilitymillis[ABILITY_3], d->armourtype==A_ASSIST && d->armour ? true : false);
-                if(allowmove && !b.idle && rndevent(92)) timeouts(d, b);
+                if(allowmove && !b.idle) timeouts(d, b);
                 entities::checkitems(d);
                 if(cmode) cmode->checkitems(d);
             }
