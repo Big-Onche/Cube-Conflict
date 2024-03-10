@@ -1514,8 +1514,8 @@ bool bounce(physent *d, float secs, float elasticity, float waterfric, float gra
     // make sure bouncers don't start inside geometry
     if(d->physstate!=PHYS_BOUNCE && collide(d, vec(0, 0, 0), 0, false)) return true;
     int mat = lookupmaterial(vec(d->o.x, d->o.y, d->o.z + (d->aboveeye - d->eyeheight)/2));
-    bool water = isliquid(mat);
-    if(water)
+
+    if(isliquid(mat))
     {
         d->vel.z -= grav*GRAVITY/16*secs;
         d->vel.mul(max(1.0f - secs/waterfric, 0.0f));

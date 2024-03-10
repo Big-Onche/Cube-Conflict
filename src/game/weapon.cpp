@@ -467,7 +467,7 @@ namespace game
     {
         if((camera1->o.dist(p) > bouncers[type].cullDist) && type!=BNC_GRENADE) return; // culling distant ones, except grenades, grenades are important
 
-        vec to = vec(0, 0, 0);
+        vec dir;
         if(!speed) speed = 50 + rnd(20);
 
         switch(type)
@@ -475,15 +475,18 @@ namespace game
             case BNC_CASING:
             case BNC_BIGCASING:
             case BNC_CARTRIDGE:
-                to = vec(-10 + rnd(21), -10 + rnd(21), 100);
+                dir = vec(-10 + rnd(21), -10 + rnd(21), 100);
                 break;
             default:
-                to = vec(rnd(100)-50, rnd(100)-50, rnd(100)-50);
+                dir = vec(-50 + rnd(101), -50 + rnd(101), -50 + rnd(101));
         }
 
-        if(to.iszero()) to.z += 1;
-        to.normalize();
-        to.add(p).add(vel);
+        if(dir.iszero()) dir.z += 1;
+        dir.normalize();
+
+        vec to = vec(dir).mul(speed).add(vel); // Combine direction with player's momentum
+        to.add(p);
+
         newbouncer(p, to, true, 0, d, type, lifetime, speed);
     }
 
@@ -611,8 +614,8 @@ namespace game
         if(damage <= 0) return;
         loopi(damage/300)
         {
-            if(d->armourtype != A_ASSIST) spawnbouncer(d->o, vec(0,0,0), d, BNC_PIXEL, 100 + rnd(50));
-            else if(d->armour) spawnbouncer(d->o, vec(0,0,0), d, BNC_SCRAP, 100 + rnd(50));
+            if(d->armourtype != A_ASSIST) spawnbouncer(d->o, d->vel, d, BNC_PIXEL, 100 + rnd(50));
+            else if(d->armour) spawnbouncer(d->o, d->vel, d, BNC_SCRAP, 100 + rnd(50));
         }
 
     }
@@ -764,7 +767,7 @@ namespace game
 
             case ATK_SMAW_SHOOT:
             case ATK_ROQUETTES_SHOOT:
-                loopi(5+rnd(3)) spawnbouncer(safeLoc, vel, owner, BNC_ROCK, 200);
+                loopi(5+rnd(3)) spawnbouncer(safeLoc, vec(0, 0, 0), owner, BNC_ROCK, 200);
                 renderExplosion(owner, safeLoc, vel, atk);
                 playSound(S_EXPL_MISSILE, safeLoc, 400, 150);
                 if(inWater) playSound(S_EXPL_INWATER, vec(v).addz(15), 300, 100);
@@ -805,7 +808,7 @@ namespace game
                 playSound(S_EXPL_GRENADE, v, 400, 150);
                 if(inWater) playSound(S_EXPL_INWATER, vec(v).addz(15), 300, 100);
                 if(isFar) playSound(S_EXPL_FAR, v, 2000, 400, SND_LOWPRIORITY);
-                loopi(5+rnd(3)) spawnbouncer(v, vel, owner, BNC_ROCK, 200);
+                loopi(5+rnd(3)) spawnbouncer(v, vec(0, 0, 0), owner, BNC_ROCK, 200);
                 startshake(v, 200, atk);
                 break;
 
@@ -1110,7 +1113,7 @@ namespace game
                     if(d->type==ENT_PLAYER) gunSound = S_GAU8;
                     if(d==player1 && player1->aptitude==APT_PRETRE && player1->boostmillis[B_SHROOMS] && player1->abilitymillis[ABILITY_3]) unlockAchievement(ACH_CADENCE);
                 }
-                spawnbouncer(casingOrigin, vec(0, 0, 0), d, isGau ? BNC_BIGCASING : BNC_CASING);
+                spawnbouncer(casingOrigin, d->vel, d, isGau ? BNC_BIGCASING : BNC_CASING);
                 break;
             }
             case ATK_MOSSBERG_SHOOT:
@@ -1121,7 +1124,7 @@ namespace game
                 particle_splash(PART_SPARK, isHudPlayer ? 4 : 7, 40, d->muzzle, 0xFF2200, 0.5f, 300, 500, 0, hasShrooms());
                 if(d->boostmillis[B_RAGE]) particle_flare(d->muzzle, d->muzzle, 140, PART_MF_SHOTGUN, 0xFF2222, isHudPlayer ? zoom ? 2.00f : 5.5f : 6.5f, d, hasShrooms());
                 adddynlight(muzzleOrigin, 75, vec(1.25f, 0.25f, 0.f), 40, 2, lightFlags, 0, vec(1.25f, 0.25f, 0.f), d);
-                loopi(atk==ATK_HYDRA_SHOOT ? 3 : 2) spawnbouncer(casingOrigin, vec(0, 0, 0), d, BNC_CARTRIDGE);
+                loopi(atk==ATK_HYDRA_SHOOT ? 3 : 2) spawnbouncer(casingOrigin, d->vel, d, BNC_CARTRIDGE);
                 loopi(attacks[atk].rays)
                 {
                     float originOffset = 0.4f - (rnd(9) / 10.f);
@@ -1155,13 +1158,13 @@ namespace game
                         if(!isHudPlayer) soundNearmiss(S_BIGBULLETFLYBY, from, rays[i], 512);
                         playSound(S_BIGRICOCHET, rays[i], 250, 100);
                     }
-                    loopi(3) spawnbouncer(casingOrigin, vec(0, 0, 0), d, BNC_BIGCASING);
+                    loopi(3) spawnbouncer(casingOrigin, d->vel, d, BNC_BIGCASING);
                 }
                 else
                 {
                     if(!isHudPlayer) soundNearmiss(S_BIGBULLETFLYBY, from, to);
                     newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
-                    spawnbouncer(casingOrigin, vec(0, 0, 0), d, BNC_BIGCASING);
+                    spawnbouncer(casingOrigin, d->vel, d, BNC_BIGCASING);
                 }
                 break;
 
@@ -1187,7 +1190,7 @@ namespace game
                     int amount = (-3 + rnd(7)) / shakeFactor;
                     mousemove(amount, amount);
                 }
-                spawnbouncer(casingOrigin, vec(0, 0, 0), d, BNC_CASING);
+                spawnbouncer(casingOrigin, d->vel, d, BNC_CASING);
                 break;
 
             case ATK_LANCEFLAMMES_SHOOT:
