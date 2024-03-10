@@ -5,6 +5,7 @@
 #include <sndfile.h>
 #include <AL/efx.h>
 #include <AL/alext.h>
+#include <unordered_set>
 
 bool foundDevice = false;
 bool noSound = true;
@@ -232,18 +233,18 @@ int getReverbZone(vec pos)
     return REV_MAIN;
 }
 
-SoundSource sources[MAX_SOURCES];
+SoundSource sounds[MAX_SOURCES];
 
 void initSoundSources()
 {
     loopi(MAX_SOURCES)
     {
-        alGenSources(1, &sources[i].source);
+        alGenSources(1, &sounds[i].alSource);
         //reportSoundError("initSoundSources", "Error while initing sound sources");
         if(!noEfx)
         {
-            alGenFilters(1, &sources[i].occlusionFilter);
-            alFilteri(sources[i].occlusionFilter, AL_FILTER_TYPE, AL_FILTER_LOWPASS);
+            alGenFilters(1, &sounds[i].occlusionFilter);
+            alFilteri(sounds[i].occlusionFilter, AL_FILTER_TYPE, AL_FILTER_LOWPASS);
         }
     }
 }
@@ -331,8 +332,8 @@ bool checkSoundOcclusion(const vec *soundPos, int flags = 0)
 
 bool isOccluded(int id)
 {
-    if(sources[id].soundFlags & (SND_MUSIC | SND_UI)) return false;
-    return isUnderWater(sources[id].position) || checkSoundOcclusion(&sources[id].position, sources[id].soundFlags);
+    if(sounds[id].soundFlags & (SND_MUSIC | SND_UI)) return false;
+    return isUnderWater(sounds[id].position) || checkSoundOcclusion(&sounds[id].position, sounds[id].soundFlags);
 }
 
 float getRandomSoundPitch(int flags)
@@ -342,42 +343,44 @@ float getRandomSoundPitch(int flags)
     return (0.92f + 0.16f * static_cast<float>(rand()) / RAND_MAX) * (game::gamespeed / 100.f);
 }
 
-bool warned = false;
+std::unordered_set<size_t> activeSources;
+
+inline bool canPlaySound(int soundId, int maxRadius, int flags, vec soundPos, bool hasSoundPos)
+{
+    if(soundId < 0 || soundId > NUMSNDS || noSound || mutesounds) return false; // invalid index or openal not initialized or mute
+
+    if(hasSoundPos && !(flags & SND_NOCULL) && camera1->o.dist(soundPos) > maxRadius + 50) return false; // do not play sound too far from camera, except if flag SND_NOCULL
+    if((flags & SND_LOWPRIORITY) && (activeSources.size() >= (size_t)maxsoundsatonce / 2)) return false; // skip low-priority sounds (distant shoots etc.) when we are already playing a lot of sounds
+    if(activeSources.size() >= (size_t)maxsoundsatonce) // no inactive source
+    {
+        static bool warned = false;
+        if(!warned) { conoutf(CON_WARN, "Max sounds at once capacity reached (%d)", maxsoundsatonce); warned = true; }
+        return false;
+    }
+    return true;
+}
 
 void playSound(int soundId, vec soundPos, float maxRadius, float maxVolRadius, int flags, size_t entityId, int soundType, float pitch)
 {
-    if(soundId < 0 || soundId > NUMSNDS || noSound || mutesounds) return; // invalid index or openal not initialized or mute
-
     bool hasSoundPos = !soundPos.iszero();
-    if(hasSoundPos && !(flags & SND_NOCULL) && camera1->o.dist(soundPos) > maxRadius + 50) return; // do not play sound too far from camera, except if flag SND_NOCULL
 
-    size_t id = SIZE_MAX; // default to invalid index
-    int activeSources = 0;
+    if(!canPlaySound(soundId, maxRadius, flags, soundPos, hasSoundPos)) return;
 
-    loopi(maxsoundsatonce)
-    {
-        if(sources[i].isActive) activeSources++; // count active sources
-        else { id = i; break; } // find the first inactive source
-    }
+    int id = 0;
+    loopi(maxsoundsatonce) { if(!sounds[i].isActive) { id = i; break; } } // search after an inactive source
 
-    if(id == SIZE_MAX) // no inactive source found, we skip the sound
-    {
-        if(!warned) { conoutf(CON_WARN, "Max sounds at once capacity reached (%d)", maxsoundsatonce); warned = true; }
-        return;
-    }
-
-    if((flags & SND_LOWPRIORITY) && (activeSources >= maxsoundsatonce / 2)) return; // skip low-priority sounds (distant shoots etc.) when we are already playing a lot of sounds
-
-    sources[id].isActive = true;       // now the source is set to active
-    sources[id].entityId = entityId;
-    sources[id].soundType = soundType;
-    sources[id].soundId = soundId;
-    sources[id].soundFlags = flags;
-    sources[id].position = soundPos;
-    sources[id].velocity = vec(0, 0, 0);
+    // now we set a shitload of sound parameters
+    activeSources.insert(id);
+    sounds[id].isActive = true;       // now the source is set to active
+    sounds[id].entityId = entityId;
+    sounds[id].soundType = soundType;
+    sounds[id].soundId = soundId;
+    sounds[id].soundFlags = flags;
+    sounds[id].position = soundPos;
+    sounds[id].velocity = vec(0, 0, 0);
 
     Sound& s = (flags & SND_MUSIC) ? music[soundId] : ( (flags & SND_MAPSOUND) ? mapSounds[soundId] : gameSounds[soundId] );
-    ALuint source = sources[id].source;
+    ALuint source = sounds[id].alSource;
 
     ALuint buffer = s.bufferId[s.numAlts ? rnd(s.numAlts + 1) : 0];
 
@@ -398,27 +401,27 @@ void playSound(int soundId, vec soundPos, float maxRadius, float maxVolRadius, i
         alSourcef(source, AL_ROLLOFF_FACTOR, 1.0f); // For linear decrease over the distance
     }
 
-    if(sources[id].soundFlags & (SND_MUSIC | SND_UI))
+    if(sounds[id].soundFlags & (SND_MUSIC | SND_UI))
     {
         alSource3i(source, AL_AUXILIARY_SEND_FILTER, AL_FILTER_NULL, 0, AL_FILTER_NULL);
         alSourcei(source, AL_DIRECT_FILTER, AL_FILTER_NULL);
-        sources[id].lfOcclusionGain = sources[id].hfOcclusionGain = 1.0f;
-        sources[id].isCurrentlyOccluded = false;
-        alFilterf(sources[id].occlusionFilter, AL_LOWPASS_GAIN, sources[id].lfOcclusionGain);
-        alFilterf(sources[id].occlusionFilter, AL_LOWPASS_GAINHF, sources[id].hfOcclusionGain);
+        sounds[id].lfOcclusionGain = sounds[id].hfOcclusionGain = 1.0f;
+        sounds[id].isCurrentlyOccluded = false;
+        alFilterf(sounds[id].occlusionFilter, AL_LOWPASS_GAIN, sounds[id].lfOcclusionGain);
+        alFilterf(sounds[id].occlusionFilter, AL_LOWPASS_GAINHF, sounds[id].hfOcclusionGain);
     }
     else if(!noEfx) // apply efx if available
     {
         bool occluded = isOccluded(id);
 
-        sources[id].lfOcclusionGain = occluded ? 0.90f : 1.0f;
-        sources[id].hfOcclusionGain = occluded ? 0.20f : 1.0f;
-        sources[id].isCurrentlyOccluded = occluded;
+        sounds[id].lfOcclusionGain = occluded ? 0.90f : 1.0f;
+        sounds[id].hfOcclusionGain = occluded ? 0.20f : 1.0f;
+        sounds[id].isCurrentlyOccluded = occluded;
 
-        alFilterf(sources[id].occlusionFilter, AL_LOWPASS_GAIN, sources[id].lfOcclusionGain);
-        alFilterf(sources[id].occlusionFilter, AL_LOWPASS_GAINHF, sources[id].hfOcclusionGain);
-        alSourcei(source, AL_DIRECT_FILTER, sources[id].occlusionFilter);
-        applyReverb(source, getReverbZone(sources[id].position));
+        alFilterf(sounds[id].occlusionFilter, AL_LOWPASS_GAIN, sounds[id].lfOcclusionGain);
+        alFilterf(sounds[id].occlusionFilter, AL_LOWPASS_GAINHF, sounds[id].hfOcclusionGain);
+        alSourcei(source, AL_DIRECT_FILTER, sounds[id].occlusionFilter);
+        applyReverb(source, getReverbZone(sounds[id].position));
     }
 
     alSourcePlay(source);
@@ -429,13 +432,16 @@ void stopSound(int soundId, int flags)
 {
     if(soundId < 0 || soundId > NUMSNDS || noSound) return; // invalid index or openal not initialized
 
-    loopi(maxsoundsatonce)
+    for(auto it = activeSources.begin(); it != activeSources.end(); /* no increment here */)
     {
-        if(sources[i].soundId == soundId && sources[i].soundFlags == flags)
+        size_t id = *it;
+        if(sounds[id].soundId == soundId && sounds[id].soundFlags == flags)
         {
-            alSourceStop(sources[i].source);
-            sources[i].isActive = false;
+            alSourceStop(sounds[id].alSource);
+            sounds[id].isActive = false;
+            it = activeSources.erase(it);
         }
+        else it++;
     }
 }
 
@@ -446,11 +452,12 @@ void stopMusic(int soundId)
 
 void updateMusicVol()
 {
-    loopi(maxsoundsatonce)
+    for(auto it = activeSources.begin(); it != activeSources.end(); it++)
     {
-        if(sources[i].isActive && (sources[i].soundFlags & SND_MUSIC))
+        size_t id = *it;
+        if(sounds[id].soundFlags & SND_MUSIC)
         {
-            alSourcef(sources[i].source, AL_GAIN, musicvol/100.f);
+            alSourcef(sounds[id].alSource, AL_GAIN, musicvol/100.f);
             //reportSoundError("alGetSourcei-updateMusicVol", "Error updating music volume");
         }
     }
@@ -476,13 +483,13 @@ void updateSoundOcclusion(int id)
     bool occlusion = isOccluded(id);
 
     // Check for state change or initialize if the last change time is zero
-    if(sources[id].isCurrentlyOccluded != occlusion)
+    if(sounds[id].isCurrentlyOccluded != occlusion)
     {
-        sources[id].isCurrentlyOccluded = occlusion;
-        sources[id].lastOcclusionChange = totalmillis; // Mark the time of change
+        sounds[id].isCurrentlyOccluded = occlusion;
+        sounds[id].lastOcclusionChange = totalmillis; // Mark the time of change
     }
 
-    float progress = min(1.0f, (totalmillis - sources[id].lastOcclusionChange) / 750.f); // Calculate transition progress based on time since last change
+    float progress = min(1.0f, (totalmillis - sounds[id].lastOcclusionChange) / 750.f); // Calculate transition progress based on time since last change
 
     // Determine target gain based on occlusion
     float targetGain = occlusion ? 0.90f : 1.0f;
@@ -490,29 +497,29 @@ void updateSoundOcclusion(int id)
 
     if(progress < 1.0f)
     {
-        sources[id].lfOcclusionGain = lerp(sources[id].lfOcclusionGain, targetGain, progress);
-        sources[id].hfOcclusionGain = lerp(sources[id].hfOcclusionGain, targetGainHF, progress);
+        sounds[id].lfOcclusionGain = lerp(sounds[id].lfOcclusionGain, targetGain, progress);
+        sounds[id].hfOcclusionGain = lerp(sounds[id].hfOcclusionGain, targetGainHF, progress);
     }
     else
     {
-        sources[id].lfOcclusionGain = targetGain;
-        sources[id].hfOcclusionGain = targetGainHF;
+        sounds[id].lfOcclusionGain = targetGain;
+        sounds[id].hfOcclusionGain = targetGainHF;
     }
 
-    alFilterf(sources[id].occlusionFilter, AL_LOWPASS_GAIN, sources[id].lfOcclusionGain);
-    alFilterf(sources[id].occlusionFilter, AL_LOWPASS_GAINHF, sources[id].hfOcclusionGain);
-    alSourcei(sources[id].source, AL_DIRECT_FILTER, sources[id].occlusionFilter);
+    alFilterf(sounds[id].occlusionFilter, AL_LOWPASS_GAIN, sounds[id].lfOcclusionGain);
+    alFilterf(sounds[id].occlusionFilter, AL_LOWPASS_GAINHF, sounds[id].hfOcclusionGain);
+    alSourcei(sounds[id].alSource, AL_DIRECT_FILTER, sounds[id].occlusionFilter);
 }
 
 void updateSoundPosition(int id)
 {
     vec pos, vel;
-    getEntMovement(sources[id].entityId, pos, vel);
-    sources[id].position = pos;
-    sources[id].velocity = vel;
-    applyReverb(sources[id].source, getReverbZone(pos));
-    alSource3f(sources[id].source, AL_VELOCITY, vel.x, vel.z, vel.y);
-    alSource3f(sources[id].source, AL_POSITION, pos.x, pos.z, pos.y);
+    getEntMovement(sounds[id].entityId, pos, vel);
+    sounds[id].position = pos;
+    sounds[id].velocity = vel;
+    applyReverb(sounds[id].alSource, getReverbZone(pos));
+    alSource3f(sounds[id].alSource, AL_VELOCITY, vel.x, vel.z, vel.y);
+    alSource3f(sounds[id].alSource, AL_POSITION, pos.x, pos.z, pos.y);
 }
 
 void manageSources()
@@ -520,18 +527,20 @@ void manageSources()
     if(noSound) return;
 
     ALint state;
-    loopi(maxsoundsatonce)
+    for(auto it = activeSources.begin(); it != activeSources.end(); /* no increment here */)
     {
-        ALuint source = sources[i].source;
+        size_t id = *it;
+        alGetSourcei(sounds[id].alSource, AL_SOURCE_STATE, &state);
 
-        if(sources[i].isActive && sources[i].source) // check if the source is active and valid
+        if(state == AL_STOPPED)
         {
-            if(sources[i].entityId != SIZE_MAX) updateSoundPosition(i);
-            updateSoundOcclusion(i);
-            alGetSourcei(source, AL_SOURCE_STATE, &state);
-            //reportSoundError("alGetSourcei-manageSources", "Error querying source state");
-            sources[i].isActive = state != AL_STOPPED; // isActive = false if state is AL_STOPPED
+            sounds[id].isActive = false;
+            it = activeSources.erase(it); // Erase and advance iterator in one step to avoid invalidating the iterator
         }
+        else ++it; // Only increment iterator if not erasing
+
+        if(sounds[id].entityId != SIZE_MAX) updateSoundPosition(id);
+        updateSoundOcclusion(id);
     }
 }
 
@@ -560,16 +569,19 @@ void stopMapSound(extentity *e, bool deleteEnt)
 
     size_t entityId = e->entityId;
 
-    loopi(maxsoundsatonce)
+    for(auto it = activeSources.begin(); it != activeSources.end(); /* no increment here */)
     {
-        if(sources[i].entityId == entityId)
+        size_t id = *it;
+        if(sounds[id].entityId == entityId)
         {
-            alSourceStop(sources[i].source);
+            alSourceStop(sounds[id].alSource);
+            sounds[id].isActive = false;
+            it = activeSources.erase(it);
+
             removeEntityPos(e->entityId);
-            //reportSoundError("alSourceStop-stopMapSound", tempformatstring("Sound %d", e->attr1));
-            sources[i].isActive = false;
             if(!deleteEnt) e->flags &= ~EF_SOUND;
         }
+        else ++it;
     }
 }
 
@@ -613,24 +625,28 @@ void checkMapSounds()
 
 void stopLinkedSound(size_t entityId, int soundType, bool clear)
 {
-    loopi(maxsoundsatonce)
+    for(auto it = activeSources.begin(); it != activeSources.end(); /* no increment here */)
     {
-        if(sources[i].isActive && sources[i].entityId == entityId && (sources[i].soundType == soundType || clear))
+        size_t id = *it;
+        if(sounds[id].entityId == entityId && (sounds[id].soundType == soundType || clear))
         {
-            alSourceStop(sources[i].source);
+            alSourceStop(sounds[id].alSource);
             //reportSoundError("alSourceStop-stopLinkedSound", "Error while stopping linked sound");
-            sources[i].isActive = false;
+            sounds[id].isActive = false;
+            it = activeSources.erase(it);
         }
+        else it++;
     }
 }
 
 void changeSoundPitch(size_t entityId, int soundType, float pitch)
 {
-    loopi(maxsoundsatonce)
+    for(auto it = activeSources.begin(); it != activeSources.end(); it++)
     {
-        if(sources[i].isActive && sources[i].entityId == entityId && sources[i].soundType == soundType)
+        size_t id = *it;
+        if(sounds[id].entityId == entityId && sounds[id].soundType == soundType)
         {
-            alSourcef(sources[i].source, AL_PITCH, pitch);
+            alSourcef(sounds[id].alSource, AL_PITCH, pitch);
             //reportSoundError("changeSoundPitch", "Error while modifying pitch");
         }
     }
@@ -638,22 +654,33 @@ void changeSoundPitch(size_t entityId, int soundType, float pitch)
 
 void stopAllSounds(bool pause)
 {
-    loopi(maxsoundsatonce)
+    for(auto it = activeSources.begin(); it != activeSources.end(); /* no increment here */)
     {
-        if(sources[i].isActive && (pause || !(sources[i].soundFlags & SND_MUSIC)))
+        size_t id = *it;
+        if(pause || !(sounds[id].soundFlags & SND_MUSIC))
         {
-            if(pause) { alSourcePause(sources[i].source); continue; }
-            alSourceStop(sources[i].source);
-            sources[i].isActive = false;
+            if(pause)
+            {
+                alSourcePause(sounds[id].alSource);
+                it++;
+            }
+            else
+            {
+                alSourceStop(sounds[id].alSource);
+                sounds[id].isActive = false;
+                it = activeSources.erase(it);
+            }
         }
+        else it++;
     }
 }
 
 void resumeAllSounds()
 {
-    loopi(maxsoundsatonce)
+    for(auto it = activeSources.begin(); it != activeSources.end(); it++)
     {
-        if(sources[i].isActive) alSourcePlay(sources[i].source);
+        size_t id = *it;
+        alSourcePlay(sounds[id].alSource);
     }
 }
 
@@ -674,8 +701,8 @@ void cleanUpSounds()
 
     loopi(MAX_SOURCES)
     {
-        alDeleteSources(1, &sources[i].source);
-        if(!noEfx) alDeleteFilters(1, &sources[i].occlusionFilter);
+        alDeleteSources(1, &sounds[i].alSource);
+        if(!noEfx) alDeleteFilters(1, &sounds[i].occlusionFilter);
     }
 
     if(!noEfx) alDeleteAuxiliaryEffectSlots(NUMREVERBS, auxEffectSlots);

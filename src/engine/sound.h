@@ -103,7 +103,7 @@ struct Sound
 
 struct SoundSource
 {
-    ALuint source;
+    ALuint alSource;
     bool isActive;
     size_t entityId;                        // id of the sound linked to an entity
     int soundType;
