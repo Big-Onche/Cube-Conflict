@@ -557,3 +557,4 @@ extern int atmos;
 extern float wateramplitude;
 
 extern int gamesecs;
+extern int curfps;

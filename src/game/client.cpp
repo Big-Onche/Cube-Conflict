@@ -24,6 +24,7 @@ namespace game
     VARP(maxradarscale, 1, 1024, 10000);
     VARP(radarteammates, 0, 1, 1);
     FVARP(minimapalpha, 0, 1, 1);
+    VAR(curping, 1, 1, INT_MAX);
 
     float calcradarscale()
     {
@@ -1407,7 +1408,7 @@ namespace game
                 else
                 {
                     conoutf("%s", a ? readstr("Console_Game_ResumedByAdmin") : readstr("Console_Game_Resumed"));
-                    stopMusic(S_PAUSE);
+                    loopi(NUMSONGS) stopMusic(i);
                     resumeAllSounds();
                 }
                 break;
@@ -2050,6 +2051,7 @@ namespace game
 
             case N_PONG:
                 addmsg(N_CLIENTPING, "i", player1->ping = (player1->ping*5+totalmillis-getint(p))/6);
+                curping = player1->ping;
                 break;
 
             case N_CLIENTPING:

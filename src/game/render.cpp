@@ -361,11 +361,11 @@ namespace game
 
             if(validGrave(d->customtombe))
             {
-                d->tombepop = min(d->tombepop + (3.f / nbfps), 1.0f);
+                d->tombepop = min(d->tombepop + (3.f / curfps), 1.0f);
                 rendermodel(getGraveDir(d->customtombe), ANIM_MAPMODEL|ANIM_LOOP, d->feetpos(), d->yaw, 0, 0, flags, NULL, NULL, 0, 0, d->tombepop, vec4(vec::hexcolor(color), 5));
             }
 
-            d->skeletonfade = max(d->skeletonfade - (3.f / nbfps), 0.0f);
+            d->skeletonfade = max(d->skeletonfade - (3.f / curfps), 0.0f);
             if(d->skeletonfade) rendermodel("mapmodel/smileys/mort", ANIM_MAPMODEL, d->feetpos(), d->yaw+90, 0, 0, flags, NULL, NULL, 0, 0, d->skeletonfade);
             return;
         }

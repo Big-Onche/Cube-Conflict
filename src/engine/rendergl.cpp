@@ -1172,7 +1172,7 @@ void cleanuptimers()
 
 VARFN(timer, usetimers, 0, 0, 1, cleanuptimers());
 VAR(frametimer, 0, 0, 1);
-int framemillis = 0; // frame time (ie does not take into account the swap)
+VAR(framemillis, 0, 0, INT_MAX); // frame time (ie does not take into account the swap)
 
 void printtimers(int conw, int conh)
 {
@@ -1180,13 +1180,6 @@ void printtimers(int conw, int conh)
 
     static int lastprint = 0;
     int offset = 0;
-    if(frametimer)
-    {
-        static int printmillis = 0;
-        if(totalmillis - lastprint >= 200) printmillis = framemillis;
-        draw_textf("frame time %i ms", conw-20*FONTH, conh-FONTH*3/2-offset*9*FONTH/8, printmillis);
-        offset++;
-    }
     if(usetimers) loopv(timerorder)
     {
         timer &t = timers[timerorder[i]];
@@ -2827,6 +2820,29 @@ void resethudshader()
     gle::colorf(1, 1, 1);
 }
 
+const size_t MAX_FPS_SAMPLES = 128;
+int fpsSamples[MAX_FPS_SAMPLES] = {0};
+size_t fpsSampleId = 0;
+size_t totalSamples = 0;
+
+int calculateAverageFramerate()
+{
+    if(totalSamples == 0) return 0; // Avoid division by zero
+    int sum = 0;
+    loopi(totalSamples) sum += fpsSamples[i];
+    return sum / totalSamples;
+}
+
+void addFramerate(int fps)
+{
+    fpsSamples[fpsSampleId] = fps; // Store the new FPS measurement
+    fpsSampleId = (fpsSampleId + 1) % MAX_FPS_SAMPLES; // Move to the next index, wrap around if at the end
+    if(totalSamples < MAX_FPS_SAMPLES) ++totalSamples; // Only increment totalSamples until the buffer is full
+}
+
+VAR(curfps, 1, 30, INT_MAX);
+VAR(avgfps, 1, 30, INT_MAX);
+
 void gl_drawhud()
 {
     int w = hudw, h = hudh;
@@ -2854,16 +2870,25 @@ void gl_drawhud()
         {
             pushhudscale(conscale);
 
-            static int lastfps = 0, prevfps[3] = { 0, 0, 0 }, curfps[3] = { 0, 0, 0 };
-            if(totalmillis - lastfps >= statrate)
+            static int lastFramerate = 0, lastAverageFramerate = 0, prevfps[3] = { 0, 0, 0 }, currentfps[3] = { 0, 0, 0 };
+            if(totalmillis - lastFramerate >= statrate)
             {
-                memcpy(prevfps, curfps, sizeof(prevfps));
-                lastfps = totalmillis - (totalmillis%statrate);
+                memcpy(prevfps, currentfps, sizeof(prevfps));
+                lastFramerate = totalmillis - (totalmillis % statrate);
+
+                int nextfps[3];
+                getfps(nextfps[0], nextfps[1], nextfps[2]); // Assume this updates nextfps array with current FPS values
+                loopi(3) if(prevfps[i] == currentfps[i]) currentfps[i] = nextfps[i];
+
+                addFramerate(currentfps[0]);
+                curfps = max(1, currentfps[0]);
             }
-            int nextfps[3];
-            getfps(nextfps[0], nextfps[1], nextfps[2]);
-            loopi(3) if(prevfps[i]==curfps[i]) curfps[i] = nextfps[i];
-            game::nbfps = max(1, curfps[0]);
+
+            if(totalmillis - lastAverageFramerate >= 1000)
+            {
+                avgfps = calculateAverageFramerate();
+                lastAverageFramerate = totalmillis - (totalmillis % 1000);
+            }
 
             int roffset = FONTH;
 
@@ -2905,23 +2930,17 @@ void gl_drawhud()
 
     popfont();
 
-    if(frametimer)
+    if(showfps)
     {
         glFinish();
-        framemillis = getclockmillis() - totalmillis;
+        static int lastprint = 0;
+        if(totalmillis - lastprint >= statrate)
+        {
+            lastprint = totalmillis;
+            framemillis = getclockmillis() - totalmillis;
+        }
     }
 }
-
-ICOMMAND(getcurfps, "", (),
-    defformatstring(s, "%sFPS %d", game::nbfps<25 ? "\f3" : game::nbfps<40 ? "\f9" : game::nbfps<59 ? "\f0" : "\f8", game::nbfps);
-    result(s);
-);
-
-ICOMMAND(getcurping, "", (),
-    string s = "";
-    if(multiplayer(false) && showmyping) formatstring(s, "%sPING %d", game::player1->ping>100 ? "\f3" : game::player1->ping>75 ? "\f9" : game::player1->ping>40 ? "\f0" : "\f8", game::player1->ping);
-    result(s);
-);
 
 int renderw = 0, renderh = 0, hudw = 0, hudh = 0;
 

@@ -4,7 +4,7 @@
 
 bool rndevent(int probability, int probabilityReduce) // adjust the probability (0-100) based on game speed and frames per second (60 as standard)
 {
-    float adjusted = max((((100 - probability) * 100) / game::gamespeed) * (game::nbfps / 60.f), 1.f);
+    float adjusted = max((((100 - probability) * 100) / game::gamespeed) * (curfps / 60.f), 1.f);
     if(probabilityReduce) adjusted *= probabilityReduce;
     return !game::ispaused() && !rnd((int)adjusted);
 }
@@ -404,7 +404,7 @@ namespace game
 
     void updateworld()        // main game update loop
     {
-        int delta = max((250 / max(nbfps, 1)) * (game::gamespeed / 100.f), 1.f);
+        int delta = max((250 / max(curfps, 1)) * (game::gamespeed / 100.f), 1.f);
         int horizontaltrans = zoom ? 2 : -2;
         int verticaltrans = zoom ? -1 : 1;
 
