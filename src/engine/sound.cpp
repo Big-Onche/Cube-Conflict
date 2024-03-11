@@ -641,6 +641,7 @@ void stopLinkedSound(size_t entityId, int soundType, bool clear)
 
 void changeSoundPitch(size_t entityId, int soundType, float pitch)
 {
+    pitch *= (game::gamespeed / 100.f);
     for(auto it = activeSources.begin(); it != activeSources.end(); it++)
     {
         size_t id = *it;
