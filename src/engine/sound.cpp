@@ -339,8 +339,9 @@ bool isOccluded(int id)
 float getRandomSoundPitch(int flags)
 {
     if(flags & (SND_MUSIC | SND_UI)) return 1;
-    if(flags & SND_FIXEDPITCH) return (game::gamespeed / 100.f);
-    return (0.92f + 0.16f * static_cast<float>(rand()) / RAND_MAX) * (game::gamespeed / 100.f);
+    float pitchSpeed = (game::gamespeed == 100 ? 1.f : (game::gamespeed / 100.f));
+    if(flags & SND_FIXEDPITCH) return pitchSpeed;
+    return (0.92f + 0.16f * static_cast<float>(rand()) / RAND_MAX) * pitchSpeed;
 }
 
 std::unordered_set<size_t> activeSources;
@@ -641,7 +642,7 @@ void stopLinkedSound(size_t entityId, int soundType, bool clear)
 
 void changeSoundPitch(size_t entityId, int soundType, float pitch)
 {
-    pitch *= (game::gamespeed / 100.f);
+    if(game::gamespeed != 100) pitch *= (game::gamespeed / 100.f);
     for(auto it = activeSources.begin(); it != activeSources.end(); it++)
     {
         size_t id = *it;
