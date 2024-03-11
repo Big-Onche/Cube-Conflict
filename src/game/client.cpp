@@ -16,7 +16,7 @@ ICOMMAND(getsteamname, "", (), getsteamname());
 
 bool launch = true;
 VAR(map_atmo, 0, 0, 9);
-int cncurweapon;
+int currentIdenticalWeapon;
 
 namespace game
 {
@@ -1628,7 +1628,7 @@ namespace game
 
             case N_CURWEAPON:
             {
-                cncurweapon = getint(p);
+                currentIdenticalWeapon = getint(p);
                 switch(player1->gunselect)
                 {
                     case GUN_CACNINJA:
@@ -1639,7 +1639,7 @@ namespace game
                     case GUN_S_CAMPOUZE:
                     case GUN_S_ROQUETTES:
                         break;
-                    default: gunselect(cncurweapon, player1);
+                    default: gunselect(currentIdenticalWeapon, player1);
                 }
                 break;
             }

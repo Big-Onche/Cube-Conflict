@@ -106,6 +106,7 @@ struct gameentity : extentity
     gameentity() : triggerstate(TRIGGER_RESET), lasttrigger(0) {}
 };
 
+static int NUMMAINGUNS = 17;
 enum { GUN_ELEC = 0, GUN_PLASMA, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_M32, GUN_LANCEFLAMMES, GUN_UZI, GUN_FAMAS, GUN_MOSSBERG, GUN_HYDRA, GUN_SV98, GUN_SKS, GUN_ARBALETE, GUN_AK47, GUN_GRAP1, GUN_ARTIFICE, GUN_GLOCK,
        GUN_S_NUKE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_S_CAMPOUZE,
        GUN_CAC349, GUN_CACMARTEAU, GUN_CACMASTER, GUN_CACFLEAU,
@@ -483,7 +484,7 @@ static const struct armourInfo { const char *name; int absorb, max; } armours[NU
 
 #include "ai.h"
 
-extern int cncurweapon;
+extern int currentIdenticalWeapon;
 
 // inherited by gameent and server clients
 struct gamestate
@@ -679,7 +680,7 @@ struct gamestate
 
         if(m_random) // random weapon mutator
         {
-            int weapon = GUN_SMAW; //rnd(17);
+            int weapon = rnd(NUMMAINGUNS);
             baseammo(weapon);
             selectedWeapon = weapon;
         }
@@ -690,7 +691,7 @@ struct gamestate
             {
                 int newGun;
                 bool duplicate;
-                do { newGun = rnd(17); duplicate = false;
+                do { newGun = rnd(NUMMAINGUNS); duplicate = false;
                     loopj(i) if (numGuns[j] == newGun) {duplicate = true; break; }
                 } while (duplicate);
                 numGuns[i] = newGun;
@@ -701,7 +702,7 @@ struct gamestate
         else if(m_identique) // identical weapon mutator
         {
             loopi(17) baseammo(i);
-            selectedWeapon = cncurweapon;
+            selectedWeapon = currentIdenticalWeapon;
         }
         else if(m_capture) // base capture
         {

@@ -77,7 +77,7 @@ namespace game
                 switch(rnd(4))
                 {
                     case 0: createdrop(o, I_GLOCK); break;
-                    case 1: createdrop(o, I_RAIL+rnd(17)); break;
+                    case 1: createdrop(o, I_RAIL+rnd(NUMMAINGUNS)); break;
                 }
                 break;
 
@@ -85,7 +85,7 @@ namespace game
                 switch(rnd(6))
                 {
                     case 0: createdrop(o, I_IRONSHIELD); break;
-                    case 1: createdrop(o, I_RAIL+rnd(17)); break;
+                    case 1: createdrop(o, I_RAIL+rnd(NUMMAINGUNS)); break;
                     case 2: createdrop(o, I_BOOSTPV); break;
                 }
                 break;
@@ -94,7 +94,7 @@ namespace game
                 switch(rnd(6))
                 {
                     case 0: createdrop(o, I_MAGNETSHIELD); break;
-                    case 1: createdrop(o, I_RAIL+rnd(17)); break;
+                    case 1: createdrop(o, I_RAIL+rnd(NUMMAINGUNS)); break;
                     case 2: createdrop(o, I_BOOSTPV); break;
                 }
                 break;
@@ -105,7 +105,7 @@ namespace game
                     case 0: createdrop(o, I_GOLDSHIELD); break;
                     case 1: createdrop(o, I_EPO); break;
                     case 2: createdrop(o, I_SHROOMS); break;
-                    case 3: loopi(2) createdrop(o, I_RAIL+rnd(17)); break;
+                    case 3: loopi(2) createdrop(o, I_RAIL+rnd(NUMMAINGUNS)); break;
                 }
                 break;
 
@@ -115,7 +115,7 @@ namespace game
                     case 0: createdrop(o, I_POWERARMOR); break;
                     case 1: createdrop(o, I_SUPERARME); break;
                     case 2: createdrop(o, I_ROIDS); break;
-                    case 3: loopi(2) createdrop(o, I_RAIL+rnd(17)); break;
+                    case 3: loopi(2) createdrop(o, I_RAIL+rnd(NUMMAINGUNS)); break;
                 }
                 break;
         }

@@ -180,7 +180,7 @@ struct captureclientmode : clientmode
         if(bases.length() >= MAXBASES) return;
         baseinfo &b = bases.add();
         b.ammogroup = min(ammotype, 0);
-        b.ammotype = rnd(17);
+        b.ammotype = rnd(NUMMAINGUNS);
 
         b.o = o;
         if(b.ammogroup)
@@ -339,7 +339,7 @@ struct captureclientmode : clientmode
 
     void rendergame()
     {
-        if(capturetether && canEmitParticles())
+        if(capturetether && !minimized)
         {
             loopv(players)
             {

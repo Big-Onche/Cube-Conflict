@@ -687,7 +687,7 @@ namespace ai
                 case APT_NINJA: d->ai->weappref = GUN_CACNINJA; break;
                 default:
                 {
-                    if(m_identique) d->ai->weappref = cncurweapon;
+                    if(m_identique) d->ai->weappref = currentIdenticalWeapon;
                     else d->ai->weappref = rnd(GUN_GLOCK-GUN_ELEC+1)+GUN_ELEC;
                 }
             }
@@ -1306,7 +1306,7 @@ namespace ai
 
         if(m_identique)
         {
-            gunselect(cncurweapon, d);
+            gunselect(currentIdenticalWeapon, d);
             goto process;
         }
 

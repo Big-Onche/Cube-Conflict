@@ -2031,6 +2031,9 @@ namespace server
     VARP(servrandommode, 0, 0, 1);
     VARP(servforcemode, -1, 0, 18);
 
+    int currentWeapon = rnd(NUMMAINGUNS), nextWeapon, lastWeaponChange;
+    static bool changeAnnounced;
+
     void changemap(const char *s, int mode)
     {
         stopdemo();
@@ -2055,6 +2058,14 @@ namespace server
 
         if(!m_mp(gamemode)) kicknonlocalclients(DISC_LOCAL);
         sendf(-1, 1, "riisii", N_MAPCHANGE, servambient, smapname, gamemode, 1);
+        if(m_identique)
+        {
+            currentWeapon = rnd(NUMMAINGUNS);
+            nextWeapon = rnd(NUMMAINGUNS);
+            sendf(-1, 1, "ri2", N_CURWEAPON, currentWeapon);
+            lastWeaponChange = 0;
+            changeAnnounced = false;
+        }
 
         if(m_ctf) smode = &ctfmode;
         else if(m_capture) smode = &capturemode;
@@ -2671,9 +2682,6 @@ namespace server
         regentimer = 0;
     }
 
-    int identiquetimer, nextweapon, curweapon;
-    bool announced = false, firstlaunch = true;
-
     void serverupdate()
     {
         if(shouldstep && !gamepaused)
@@ -2706,20 +2714,20 @@ namespace server
 
                     if(m_identique)
                     {
-                        if(firstlaunch) {curweapon = rnd(17); nextweapon = rnd(17); sendf(-1, 1, "ri2", N_CURWEAPON, curweapon); firstlaunch = false;}
-                        identiquetimer += curtime;
-                        if(identiquetimer>=25000 && !announced)
+                        lastWeaponChange += curtime;
+                        bool endGame = (gamemillis + 15000 >= gamelimit);
+                        if(lastWeaponChange >= 25000 && !changeAnnounced && !endGame)
                         {
-                            while(nextweapon==curweapon) nextweapon = rnd(17);
-                            sendf(-1, 1, "ri3", N_ANNOUNCE, 50, nextweapon);
-                            announced = true;
+                            while(nextWeapon == currentWeapon) nextWeapon = rnd(NUMMAINGUNS); // avoid to have the same weapon multiple times
+                            sendf(-1, 1, "ri3", N_ANNOUNCE, 50, nextWeapon);
+                            changeAnnounced = true;
                         }
-                        else if(identiquetimer>30000)
+                        else if(lastWeaponChange > 30000 && !endGame)
                         {
-                            curweapon = nextweapon;
-                            sendf(-1, 1, "ri2", N_CURWEAPON, curweapon);
-                            identiquetimer = 0;
-                            announced = false;
+                            currentWeapon = nextWeapon;
+                            sendf(-1, 1, "ri2", N_CURWEAPON, currentWeapon);
+                            lastWeaponChange = 0;
+                            changeAnnounced = false;
                         }
                     }
                 }
@@ -3228,7 +3236,7 @@ namespace server
                         }
                     }
 
-                    if(m_identique) sendf(-1, 1, "ri2", N_CURWEAPON, curweapon);
+                    if(m_identique) sendf(-1, 1, "ri2", N_CURWEAPON, currentWeapon);
 
                     logoutf("Infos: %s (%s level %d)", ci->name, readstr("Classes_Names", ci->aptitude), ci->level);
                     break;

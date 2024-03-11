@@ -58,7 +58,7 @@ namespace game
     void getsuperweap() // used to select superweapon with identical weapons mutator
     {
          loopi(4) { if(player1->ammo[GUN_S_NUKE+i]) { gunselect(GUN_S_NUKE+i, player1); return; } }
-         gunselect(cncurweapon, player1);
+         gunselect(currentIdenticalWeapon, player1);
     }
 
     void nextweapon(int dir, bool force = false)
@@ -69,16 +69,16 @@ namespace game
             switch(player1->aptitude)
             {
                 case APT_KAMIKAZE:
-                    if(player1->gunselect==cncurweapon) {dir-1 ? gunselect(GUN_KAMIKAZE, player1) : getsuperweap();}
-                    else gunselect(cncurweapon, player1);
+                    if(player1->gunselect==currentIdenticalWeapon) {dir-1 ? gunselect(GUN_KAMIKAZE, player1) : getsuperweap();}
+                    else gunselect(currentIdenticalWeapon, player1);
                     return;
                 case APT_NINJA:
-                    if(player1->gunselect==cncurweapon){dir-1 ? gunselect(GUN_CACNINJA, player1) : getsuperweap();}
-                    else gunselect(cncurweapon, player1);
+                    if(player1->gunselect==currentIdenticalWeapon){dir-1 ? gunselect(GUN_CACNINJA, player1) : getsuperweap();}
+                    else gunselect(currentIdenticalWeapon, player1);
                     return;
                 default:
-                    if(player1->gunselect==cncurweapon) getsuperweap();
-                    else gunselect(cncurweapon, player1);
+                    if(player1->gunselect==currentIdenticalWeapon) getsuperweap();
+                    else gunselect(currentIdenticalWeapon, player1);
                     return;
             }
         }
