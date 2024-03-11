@@ -235,7 +235,7 @@ namespace game
         { "casing/big",         0.2f, 1.0f,  0,  250, S_B_BIGCASING,    120,    SND_FIXEDPITCH },
         { "casing/cartridge",   0.2f, 1.0f,  0,  250, S_B_CARTRIDGE,    120,    SND_FIXEDPITCH },
         { "scrap",              1.5f, 0.7f,  3,  750, S_B_SCRAP,        180,    0              },
-        { NULL,                 1.0f, 1.0f,  0,  500, -1,                 0,    0              }
+        { NULL,                 0.1f, 1.0f,  0,  500, -1,                 0,    0              }
     };
 
     std::map<std::pair<int, int>, std::string> bouncersPaths;
@@ -982,16 +982,20 @@ namespace game
                     if(!p.exploded) projsplash(p, v, NULL);
                     exploded = true;
                 }
-                else
-                {
-                    vec pos = vec(p.offset).mul(p.offsetmillis/float(OFFSETMILLIS)).add(v);
 
-                    if(!p.inwater && ((lookupmaterial(p.o) & MAT_WATER) == MAT_WATER))
-                    {
-                        p.inwater = true;
-                        particle_splash(PART_WATER, 15, 100, v, 0x28282A, 1.5f, 50, -300, 3, hasShrooms());
-                        playSound(S_IMPACTWATER, v, 250, 50, SND_LOWPRIORITY|SND_NOOCCLUSION);
-                    }
+                vec pos = vec(p.offset).mul(p.offsetmillis/float(OFFSETMILLIS)).add(v);
+
+                if(!p.inwater && ((lookupmaterial(pos) & MAT_WATER) == MAT_WATER))
+                {
+                    p.inwater = true;
+                    vec effectPos = pos;
+                    effectPos.addz(2.5f);
+                    particle_splash(PART_WATER, 15, 100, effectPos, 0x28282A, 1.5f, 50, -300, 6, hasShrooms());
+                    playSound(S_IMPACTWATER, effectPos, 250, 50, SND_LOWPRIORITY|SND_NOOCCLUSION);
+                }
+
+                if(p.atk!=ATK_SMAW_SHOOT && p.atk!=ATK_ARTIFICE_SHOOT && p.atk!=ATK_ROQUETTES_SHOOT && p.atk!=ATK_NUKE_SHOOT)
+                {
                     renderProjectilesTrails(p.owner, pos, dv, p.from, p.offset, p.atk, p.exploded);
                 }
 
@@ -999,12 +1003,12 @@ namespace game
                 {
                     bool bigRadius = (p.atk==ATK_NUKE_SHOOT || p.atk==ATK_ARTIFICE_SHOOT);
 
-                    if(camera1->o.dist(p.o) < (bigRadius ? 800 : 400))
+                    if(camera1->o.dist(pos) < (bigRadius ? 800 : 400))
                     {
-                        updateEntPos(p.entityId, p.o);
+                        updateEntPos(p.entityId, pos);
                         if(!p.soundplaying)
                         {
-                            playSound(p.projsound, p.o, bigRadius ? 800 : 400, 1, SND_LOOPED, p.entityId);
+                            playSound(p.projsound, pos, bigRadius ? 800 : 400, 1, SND_LOOPED, p.entityId);
                             p.soundplaying = true;
                         }
                     }
@@ -1612,15 +1616,20 @@ namespace game
         loopv(projs)
         {
             projectile &p = projs[i];
+
             if(p.atk==ATK_SMAW_SHOOT || p.atk==ATK_ARTIFICE_SHOOT || p.atk==ATK_ARBALETE_SHOOT || p.atk==ATK_ROQUETTES_SHOOT || p.atk==ATK_NUKE_SHOOT)
             {
+
                 float dist = min(p.o.dist(p.to)/32.0f, 1.0f);
                 vec pos = vec(p.o).add(vec(p.offset).mul(dist*p.offsetmillis/float(OFFSETMILLIS))),
                     v = dist < 1e-6f ? p.dir : vec(p.to).sub(pos).normalize();
+
                 vectoyawpitch(v, yaw, pitch);
                 v.mul(3);
                 v.add(pos);
+
                 rendermodel(projsPaths[p.atk].c_str(), ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, MDL_NOSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED);
+                if(p.atk != ATK_ARBALETE_SHOOT) renderProjectilesTrails(p.owner, pos, v, p.from, p.offset, p.atk, p.exploded);
             }
         }
     }

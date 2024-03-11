@@ -348,7 +348,7 @@ enum
     PART_BLOOD, PART_SPARK, PART_SPARK_L, PART_SPARK_VL, PART_TEXT, PART_LENS_FLARE
 };
 
-extern bool canEmitParticles();
+extern bool canemitparticles();
 extern void particle_flying_flare(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity = 0, int sizemod = 0, bool randomcolor = false);
 extern void regular_particle_flame(int type, const vec &p, float radius, float height, int color, int density = 3, float scale = 2.0f, float speed = 200.0f, float fade = 600.0f, int gravity = -15);
 extern void particle_splash(int type, int num, int fade, const vec &p, int color = 0xFFFFFF, float size = 1.0f, int radius = 150, int gravity = 2, int sizemod = 0, bool randomcolor = false, bool sound = false);
@@ -362,7 +362,7 @@ namespace particles
 {
     extern uint32_t getRandomColor();
     extern void dirSplash(int type, int color, int radius, int num, int fade, const vec &p, const vec &dir, float size, int speed, int sizemod = 0, bool randomColor = false);
-    extern void flare(const vec &p, int color, int flaresize, int viewdist);
+    extern void lensFlare(const vec &p, int color, int flaresize, int viewdist);
     extern void meter(const vec &s, float val, int type, int fade = 1, int color = 0xFFFFFF, int color2 = 0xFFFFF, float size = 2.0f, bool hud = false);
     extern void text(const vec &s, const char *t, int type, int fade = 2000, int color = 0xFFFFFF, float size = 2.0f, int gravity = 0, bool hud = false);
     extern void hudIcon(int type, const vec &pos, int color, float size = 0.075f);

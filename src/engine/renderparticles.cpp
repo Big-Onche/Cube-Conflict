@@ -1136,7 +1136,7 @@ namespace particles
         directionalSplash(type, randomColor ? getRandomColor() : color, radius, num, fade, p, dir, size, speed, sizemod);
     }
 
-    void flare(const vec &p, int color, int flaresize, int viewdist)
+    void lensFlare(const vec &p, int color, int flaresize, int viewdist)
     {
         vec pos = p;
         flares.addflare(pos, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, flaresize, viewdist, false, true);
@@ -1167,7 +1167,7 @@ namespace particles
 
     void text(const vec &s, const char *t, int type, int fade, int color, float size, int gravity, bool hud)
     {
-        if(((camera1->o.dist(s) > maxparticletextdistance) || !minimized) && !hud) return;
+        if(((camera1->o.dist(s) > maxparticletextdistance) || minimized) && !hud) return;
         particle *p = newparticle(hud ? particles::hudPos(s) : s, vec(0, 0, 1), fade, type, color, size, gravity, hud);
         p->text = newstring(t);
         p->flags = 1;
@@ -1653,6 +1653,10 @@ static void makeparticles(entity &e)
             break;
         }
 
+        case 12: // flares: attr 2:<size> attr 3:<view dist> 4:<r> 5:<g> 6:<b> 7:<flickering>
+            flares.addflare(e.o, e.attr4, e.attr5, e.attr6, e.attr2, e.attr3, true, e.attr7);
+            break;
+
         /*
         case 4:  //tape - <dir> <length> <rgb>
         case 7:  //lightning
@@ -1782,7 +1786,7 @@ void updateparticles()
 
         if(sunflarecolour != bvec(0, 0, 0)) //sunflare
         {
-            float flaredist = 1250; // distance from the camera to the flare
+            float flaredist = 2000; // distance from the camera to the flare
 
             vec flaredir(
                 flaredist * cos(sunlightpitch * M_PI / 180.0f) * cos(fmod(sunlightyaw + 90.0f, 360.0f) * M_PI / 180.0f),
@@ -1793,7 +1797,7 @@ void updateparticles()
             vec flarepos = camera1->o;
             flarepos.add(flaredir);
 
-            flares.addflare(flarepos, sunflarecolour.r, sunflarecolour.g, sunflarecolour.b, 125, 4000, true, true);
+            flares.addflare(flarepos, sunflarecolour.r, sunflarecolour.g, sunflarecolour.b, 125, 12000, true, true);
         }
 
         if(dbgpcull && (canemit || replayed) && addedparticles) conoutf(CON_DEBUG, "%d emitters, %d particles", emitted, addedparticles);
