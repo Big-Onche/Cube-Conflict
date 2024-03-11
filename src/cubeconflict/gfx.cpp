@@ -72,7 +72,7 @@ namespace game
 
     void renderProjectilesTrails(gameent *owner, vec &pos, vec dv, vec &from, vec &offset, int atk, bool exploded) //particles and light effects on impact for slow projectiles
     {
-        if(game::ispaused()) return;
+        if(!canemitparticles()) return;
         bool inWater = ((lookupmaterial(pos) & MAT_WATER) == MAT_WATER);
         bool firstPerson = (owner==game::hudplayer());
 

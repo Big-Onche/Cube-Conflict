@@ -19,9 +19,9 @@ VARP(emitmillis, 1, 17, 1000);
 static int lastemitframe = 0, emitoffset = 0;
 static bool canemit = false, regenemitters = false, canstep = false;
 
-bool canEmitParticles()
+bool canemitparticles()
 {
-    return canemit || emitoffset || !minimized;
+    return canemit || emitoffset;
 }
 
 VARP(showparticles, 0, 1, 1);
@@ -216,7 +216,7 @@ struct partrenderer
         }
         else
         {
-            if(p->sizemod && !game::ispaused()) p->size = max(p->size + (((p->sizemod / game::nbfps) / 100.f) * game::gamespeed), 0.0f);
+            if(p->sizemod && !game::ispaused()) p->size = max(p->size + (((p->sizemod / curfps) / 100.f) * game::gamespeed), 0.0f);
 
             ts = lastmillis-p->millis;
             blend = max(255 - (ts<<8)/p->fade, 0);
@@ -267,7 +267,7 @@ struct partrenderer
             if(type & (PT_EMITLIGHT | PT_EMITVLIGHT) && camera1->o.dist(o) < (dynlightdist / 2) )
             {
                 int flags = (type & PT_EMITVLIGHT) ? L_NOSHADOW|L_VOLUMETRIC|DL_EXPAND : L_NOSHADOW|DL_EXPAND;
-                adddynlight(o, p->size * 40, vec(p->color.r/1600.f, p->color.g/1600.f, p->color.b/1600.f), 3000.f/game::nbfps, 0, flags, p->size*40);
+                adddynlight(o, p->size * 40, vec(p->color.r/1600.f, p->color.g/1600.f, p->color.b/1600.f), ((3000.f / curfps) / 100.f) * game::gamespeed, 0, flags, p->size*40);
             }
         }
     }
@@ -1167,7 +1167,7 @@ namespace particles
 
     void text(const vec &s, const char *t, int type, int fade, int color, float size, int gravity, bool hud)
     {
-        if(((camera1->o.dist(s) > maxparticletextdistance) || !canEmitParticles()) && !hud) return;
+        if(((camera1->o.dist(s) > maxparticletextdistance) || !minimized) && !hud) return;
         particle *p = newparticle(hud ? particles::hudPos(s) : s, vec(0, 0, 1), fade, type, color, size, gravity, hud);
         p->text = newstring(t);
         p->flags = 1;
@@ -1233,13 +1233,13 @@ void particle_trail(int type, int fade, const vec &s, const vec &e, int color, f
 
 void particle_flare(const vec &p, const vec &dest, int fade, int type, int color, float size, physent *owner, bool randomcolor, int sizemod)
 {
-    if(!canEmitParticles()) return;
+    if(minimized) return;
     newparticle(p, dest, fade, type, randomcolor ? particles::getRandomColor() : color, size, 0, sizemod)->owner = owner;
 }
 
 void particle_fireball(const vec &dest, float maxsize, int type, int fade, int color, float size, bool randomcolor)
 {
-    if(!canEmitParticles()) return;
+    if(minimized) return;
     float growth = maxsize - size;
     if(fade < 0) fade = int(growth*20);
     newparticle(dest, vec(0, 0, 1), fade, type, randomcolor ? particles::getRandomColor() : color, size)->val = growth;
@@ -1272,7 +1272,7 @@ static inline int colorfromattr(int attr)
  */
 void regularshape(int type, int radius, int color, int dir, int num, int fade, const vec &p, float size, int gravity, float vel, int windoffset, bool weather, int height, int sizemod)
 {
-    if(!canEmitParticles()) return;
+    if(minimized) return;
 
     int basetype = parts[type]->type&0xFF;
     bool flare = (basetype == PT_TAPE) || (basetype == PT_LIGHTNING),
@@ -1391,13 +1391,13 @@ void regularshape(int type, int radius, int color, int dir, int num, int fade, c
 
 void regular_particle_flame(int type, const vec &p, float radius, float height, int color, int density, float scale, float speed, float fade, int gravity)
 {
-    if(!canEmitParticles()) return;
+    if(minimized) return;
     regularflame(type, p, radius, height, color, density, scale, speed, fade, gravity);
 }
 
 void regularflame(int type, const vec &p, float radius, float height, int color, int density, float scale, float speed, float fade, int gravity, int sizemod)
 {
-    if(!canEmitParticles()) return;
+    if(minimized) return;
 
     float size = scale * min(radius, height)*1.5f;
     vec v(0, 0, min(1.0f, height)*speed);
@@ -1488,10 +1488,11 @@ void spawnApocalypse(vec pos, int intensity, int r, int g, int b, int wind)
 
 static void makeparticles(entity &e)
 {
-    if(!isconnected() || game::ispaused()) return;
+    if(!isconnected()) return;
     switch(e.attr1)
     {
         case 0: // weather effect: attr 2:<weather type (0 = default else = force weather)> 3:<intensity> 4:<r> 5:<g> 6:<b> 7:<wind>
+            if(!canemitparticles()) return;
             if((map_atmo==4 || map_atmo==8) || (e.attr2 >=1 && e.attr2 <=3)) spawnRain(e.o, e.attr2, e.attr3, e.attr4, e.attr5, e.attr6, e.attr7, e.attr2!=0); // light rain, moderate rain, storm
             if(map_atmo==8 || map_atmo==9 || e.attr2==4) spawnSnow(e.o, e.attr3, e.attr4, e.attr5, e.attr6, e.attr7, e.attr2!=0); // snow
             if(map_atmo==5 || e.attr2==5) spawnApocalypse(e.o, e.attr3, e.attr4, e.attr5, e.attr6, e.attr7); // apocalypse
@@ -1500,6 +1501,7 @@ static void makeparticles(entity &e)
         case 1: // fire and smoke: attr 2:<radius> 3:<height> 4:<r> 5:<g> 6:<b> 7:<color offset> 8:<grow(+)/shrink(-)> 9:<sparks(amount)>
         case 2: // flames only: same attrs as fire and smoke
         {
+            if(!canemitparticles()) return;
             float radius = e.attr2 ? float(e.attr2)/100.0f : 1.5f,
                   height = e.attr3 ? float(e.attr3)/100.0f : radius/3;
 
@@ -1522,6 +1524,7 @@ static void makeparticles(entity &e)
         }
         case 3: // smoke only: attr 2:<radius> 3:<height> 4:<r> 5:<g> 6:<b> 7:<color offset> 8:<grow(+)/shrink(-)>
         {
+            if(!canemitparticles()) return;
             float radius = e.attr2 ? float(e.attr2)/100.0f : 1.5f,
                   height = e.attr3 ? float(e.attr3)/100.0f : radius/3;
 
@@ -1539,6 +1542,7 @@ static void makeparticles(entity &e)
         }
         case 4: // steam vent: attr2: <dir> 3:<size> 4:<r> 5:<g> 6:<b> 7:<radius> 8:<fade>
         {
+            if(!canemitparticles()) return;
             int radius = e.attr7, fade = e.attr8, size = e.attr3;
             if(!radius) radius = 50;
             if(!size) size = 2.5f;
@@ -1552,6 +1556,7 @@ static void makeparticles(entity &e)
         }
         case 5: // energy ball: 2:<type (shockwave, plasma, grenade, explosion)> attr 3:<radius> 4:<r> 5:<g> 6:<b>
         {
+            if(!canemitparticles()) return;
             int r, g, b;
             if(noColors(e.attr4, e.attr5, e.attr6)) { r = 128; g = 128;  b = 128; } // setting default colors for generic energy ball
             else { r = e.attr4; g = e.attr5; b = e.attr6; } // setting custom colors from r g b attrs
@@ -1559,11 +1564,11 @@ static void makeparticles(entity &e)
             newparticle(e.o, vec(0, 0, 1), 1, PART_SHOCKWAVE + clamp((int)e.attr2, 0, 3), rgbToHex(r, g, b), 4.0f)->val = 1+e.attr3;
             break;
         }
-        case 6: // clouds: attr 2:<size> 3:<type(0-5)> 4:<r> 5:<g> 6:<b>
+        case 6: // clouds: attr 2:<size> 3:<type(0-5)> 4:<r> 5:<g> 6:<b> (no canemitparticles check to avoid flickering)
             newparticle(e.o, e.o, 1, PART_CLOUD1 + clamp((int)e.attr3, 0, 5), noColors(e.attr4, e.attr5, e.attr6) ? partcloudcolour : rgbToHex(e.attr4, e.attr5, e.attr6), e.attr2);
             break;
 
-        case 7: // rainbow: attr 2:<size> 3:<force>
+        case 7: // rainbow: attr 2:<size> 3:<force>  (no canemitparticles check to avoid flickering)
             if(map_atmo==8 || e.attr3)
             {
                 int size = e.attr2;
@@ -1574,6 +1579,7 @@ static void makeparticles(entity &e)
 
         case 8: // sparks: attr 2:<quantity> attr 3:<size> 4:<r> 5:<g> 6:<b> 7:<radius> 8:<fade> 9:<probability>
         {
+            if(!canemitparticles()) return;
             if(rndevent(e.attr9))
             {
                 int radius = e.attr7, num = e.attr2, fade = e.attr8, size = e.attr3;
@@ -1594,6 +1600,7 @@ static void makeparticles(entity &e)
 
         case 9: // water: attr 2:<quantity> attr 3:<size> 4:<r> 5:<g> 6:<b> 7:<radius> 8:<fade> 9:<probability>
         {
+            if(!canemitparticles()) return;
             if(rndevent(e.attr9))
             {
                 int radius = e.attr7, num = e.attr2, fade = e.attr8, size = e.attr3;
@@ -1612,6 +1619,7 @@ static void makeparticles(entity &e)
 
         case 10: // lava bubble: attr 2:<probability> attr 3:<offset>
         {
+            if(!canemitparticles()) return;
             if(rndevent(e.attr2, 10))
             {
                 vec pos = e.o;
@@ -1627,6 +1635,7 @@ static void makeparticles(entity &e)
 
         case 11: // rocks debris: attr 2:<probability>
         {
+            if(!canemitparticles()) return;
             if(rndevent(e.attr2, 10))
             {
                 int numLoops = max(1, e.attr7 + (e.attr8 ? rnd(e.attr8) : 0));
@@ -1706,9 +1715,6 @@ void seedparticles()
     }
 }
 
-VARR(sunflarex, -1000, -400, 1000);
-VARR(sunflarey, -1000, 360, 1000);
-VARR(sunflarez, -1000, 135, 1000);
 CVARR(sunflarecolour, 0x000000);
 
 static const char * const entreferences[] =
