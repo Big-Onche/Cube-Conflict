@@ -1014,6 +1014,8 @@ namespace game
             nextmode = gamemode = INT_MAX;
             clientmap[0] = '\0';
         }
+        stopMusic(S_PAUSE);
+        playMusic(language == 2 ? S_MAINMENURU : S_MAINMENU);
     }
 
     VARP(teamcolorchat, 0, 1, 1);
@@ -1408,7 +1410,7 @@ namespace game
                 else
                 {
                     conoutf("%s", a ? readstr("Console_Game_ResumedByAdmin") : readstr("Console_Game_Resumed"));
-                    loopi(NUMSONGS) stopMusic(i);
+                    stopMusic(S_PAUSE);
                     resumeAllSounds();
                 }
                 break;

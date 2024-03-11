@@ -174,8 +174,6 @@ void disconnect(bool async, bool cleanup, bool volontaire)
         game::clearbouncers();
         game::clearprojectiles(); // clean up before showing menu
         clearEntsPos();
-        loopi(NUMSONGS) stopMusic(i);
-        playMusic(language == 2 ? S_MAINMENURU : S_MAINMENU);
         mainmenu = 1;
         if(stat[STAT_DAMMAGERECORD] < game::player1->totaldamage/10) updateStat(game::player1->totaldamage/10, STAT_DAMMAGERECORD, true);
         if(game::player1->totaldamage/10 > 10000) unlockAchievement(ACH_DESTRUCTEUR);
@@ -193,8 +191,6 @@ void trydisconnect(bool local)
     game::clearbouncers();
     game::clearprojectiles();
     clearEntsPos();
-    loopi(NUMSONGS) stopMusic(i);
-    playMusic(language == 2 ? S_MAINMENURU : S_MAINMENU);
     if(connpeer)
     {
         conoutf(CON_INFO, "%s", readstr("Console_Connection_Abort"));
