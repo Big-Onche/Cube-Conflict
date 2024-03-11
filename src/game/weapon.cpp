@@ -563,7 +563,11 @@ namespace game
         switch(victimClasse) // recalc damage based on the victim's passive/active
         {
             case APT_MAGICIEN:
-                if(d->abilitymillis[ABILITY_3]) damage /= 5.0f;
+                if(d->abilitymillis[ABILITY_3])
+                {
+                    damage /= 5.0f;
+                    d->curdamagecolor = 0x8855AA;
+                }
                 break;
 
             case APT_PRETRE:
@@ -617,7 +621,6 @@ namespace game
             if(d->armourtype != A_ASSIST) spawnbouncer(d->o, d->vel, d, BNC_PIXEL, 100 + rnd(50));
             else if(d->armour) spawnbouncer(d->o, d->vel, d, BNC_SCRAP, 100 + rnd(50));
         }
-
     }
 
     int avgdmg[4];
@@ -1420,6 +1423,7 @@ namespace game
 
         if(d->armourtype==A_ASSIST && !d->armour && !d->playerexploded && d->ammo[GUN_ASSISTXPL])
         {
+            d->wasAttacking = d->attacking;
             gunselect(GUN_ASSISTXPL, d, true);
             d->attacking = ACT_SHOOT;
             d->playerexploded = true;
@@ -1484,7 +1488,7 @@ namespace game
         d->gunwait = attacks[atk].attackdelay/waitfactor;
         d->boostmillis[B_ROIDS] ? d->totalshots += (attacks[atk].damage*attacks[atk].rays)*2: d->totalshots += attacks[atk].damage*attacks[atk].rays;
 
-        if(d->playerexploded){d->attacking = ACT_IDLE; execute("getoldweap"); d->playerexploded = false;}
+        if(d->playerexploded) {d->attacking = d->wasAttacking; execute("getoldweap"); d->playerexploded = false;}
         if((atk==ATK_GLOCK_SHOOT || atk==ATK_SPOCKGUN_SHOOT || atk==ATK_HYDRA_SHOOT || d->gunselect==GUN_SKS || d->gunselect==GUN_S_CAMPOUZE) && !specialAbility) d->attacking = ACT_IDLE;
     }
 
