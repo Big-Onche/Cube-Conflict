@@ -47,4 +47,4 @@ We welcome all contributions!
 - Create innovative maps or propose gameplay enhancements.
 
 ## 📜 License
-[Refer to the licensing information.](https://github.com/Big-Onche/Cube-Conflict/tree/master/licenses)
+[Refer to the licensing information.](docs/licenses)
