@@ -2820,7 +2820,7 @@ void resethudshader()
     gle::colorf(1, 1, 1);
 }
 
-const size_t MAX_FPS_SAMPLES = 128;
+const size_t MAX_FPS_SAMPLES = 50;
 int fpsSamples[MAX_FPS_SAMPLES] = {0};
 size_t fpsSampleId = 0;
 size_t totalSamples = 0;
@@ -2932,7 +2932,6 @@ void gl_drawhud()
 
     if(showfps)
     {
-        glFinish();
         static int lastprint = 0;
         if(totalmillis - lastprint >= statrate)
         {
@@ -2993,4 +2992,3 @@ void cleanupgl()
     cleanupscreenquad();
     gle::cleanup();
 }
-
