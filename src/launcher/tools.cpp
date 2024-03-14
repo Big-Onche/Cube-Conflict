@@ -1,5 +1,7 @@
 #include "tools.h"
 
+std::string lineBreak = "\n";
+
 RGBA extractRGBA(int color)
 {
     RGBA colorComponents;

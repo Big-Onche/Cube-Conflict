@@ -121,6 +121,11 @@ namespace buttons
         Button playGame(sdl::renderer, 630, 325, 170, 40, 0xFFFFFFBB, 0xCCCCCCBB, getString("Play_Button"), -1, -1, []() { action::launchGame(); });
         buttons::add(playGame);
 
+        Button openAbout(sdl::renderer, 10, 10, 40, 40, 0, 0, "", TEX_ABOUT, TEX_ABOUT, []() {
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, getString("About_Title").c_str(), getString("About_Content").c_str(), nullptr);
+        });
+        buttons::add(openAbout);
+
         Button exitLauncher(sdl::renderer, SCR_W - 50, 10, 40, 40, 0, 0, "", TEX_REDCROSS, TEX_REDCROSS, []() { closeLauncher(); });
         buttons::add(exitLauncher);
 

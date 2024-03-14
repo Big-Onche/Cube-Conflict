@@ -12,6 +12,7 @@ TextureConfig textures[NUMTEXTURES] =
     {nullptr, "media/interface/flags/spanish.png"},     // TEX_SPANISH
     {nullptr, "media/interface/hud/speaker_on.png"},    // TEX_AUDIOON
     {nullptr, "media/interface/hud/speaker_off.png"},   // TEX_AUDIOOFF
+    {nullptr, "media/interface/hud/info.jpg"},          // TEX_ABOUT
     {nullptr, "media/interface/hud/minimize.png"},      // TEX_MINIMIZE
     {nullptr, "media/interface/hud/checkbox_off.jpg"}   // TEX_REDCROSS
 };
@@ -27,13 +28,13 @@ namespace texture
     {
         SDL_Texture* newTexture = nullptr;
         SDL_Surface* loadedSurface = IMG_Load(path.c_str());
-        if(loadedSurface == nullptr) { error::pop("Error", "Failed to load image:", true); }
+        if(loadedSurface == nullptr) { error::pop(getString("Error_Title").c_str(), getString("Error_IMG_Load").c_str(), true); }
         else
         {
             newTexture = SDL_CreateTextureFromSurface(renderer, loadedSurface);
             if(newTexture == nullptr)
             {
-                error::pop("Error", "Failed to load image:" + path, true);
+                error::pop(getString("Error_Title").c_str(), getString("Error_IMG_Load").c_str() + lineBreak + path, true);
             }
             SDL_FreeSurface(loadedSurface);
         }

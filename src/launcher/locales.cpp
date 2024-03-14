@@ -18,14 +18,15 @@ std::map<std::string, std::string> loadLocales(const std::string& filePath, int 
 
     if(languageCodes.find(languageId) == languageCodes.end())
     {
-        error::pop("Initialization error", "Invalid language ID");
+        error::pop(getString("Error_Title").c_str(), getString("Error_Locale").c_str());
         closeLauncher();
     }
     std::string targetSection = languageCodes[languageId];
 
     if(!file.is_open())
     {
-        error::pop("Initialization error", "Failed to open launcher's configuration file (config/launcher.cfg)");
+        std::string configPath = " (config/launcher.cfg)";
+        error::pop(getString("Error_Title").c_str(), getString("Error_Config").c_str() + configPath);
         closeLauncher();
     }
 

@@ -18,9 +18,9 @@ namespace action
 
         if(system(command.c_str()) != 0)
         {
-            std::string bits = (goodOld32bits ? "32" : "64");
-            std::string message = "Error while launching the game.\nThe " + bits + " bits binary is missing";
-            error::pop("Game launch error", message);
+            std::string bits = (goodOld32bits ? "" : "64");
+            std::string message = getString("Error_Game") + lineBreak + "bin/" + bits + "/cubeconflict.exe " + getString("Error_Missing");
+            error::pop(getString("Error_Title").c_str(), message);
             success = false;
         }
 

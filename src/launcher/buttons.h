@@ -1,7 +1,6 @@
 #ifndef BUTTONS_H
 #define BUTTONS_H
 
-#include <string>
 #include <functional>
 #include <SDL_image.h>
 

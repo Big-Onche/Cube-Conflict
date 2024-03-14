@@ -11,8 +11,8 @@ namespace audio
 
     void init()
     {
-        if(ma_engine_init(NULL, &audioEngine) != MA_SUCCESS) error::pop("Initialization error", "Could not initialize miniaudio");
-        if(ma_sound_init_from_file(&audioEngine, "media/songs/launcher.mp3", 0, NULL, NULL, &launcherSong) != MA_SUCCESS) error::pop("Error", "Error while playing song");
+        if(ma_engine_init(NULL, &audioEngine) != MA_SUCCESS) error::pop(getString("Error_Title").c_str(), getString("Error_MA_Init").c_str());
+        if(ma_sound_init_from_file(&audioEngine, "media/songs/launcher.mp3", 0, NULL, NULL, &launcherSong) != MA_SUCCESS) error::pop(getString("Error_Title").c_str(), getString("Error_MA_Play").c_str());
     }
 
     bool isFadingIn = false;
