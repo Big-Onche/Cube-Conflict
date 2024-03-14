@@ -3,12 +3,13 @@
 
 namespace action
 {
-    void launchGame(bool forceGoodOld32bits)
+    void launchGame(bool dedicatedServer, bool forceGoodOld32bits)
     {
         bool success = true;
         bool goodOld32bits = (forceGoodOld32bits || !is64bits());
         std::string gamePath = goodOld32bits ? "bin/cubeconflict" : "bin64/cubeconflict";
-        std::string gameArgs = "\"-u$HOME/My Games/Cube Conflict\" -glog.txt";
+        std::string gameArgs = dedicatedServer ? "\"-u$HOME/My Games/Cube Conflict\" -gserver_log.txt -d" :
+                                                 "\"-u$HOME/My Games/Cube Conflict\" -glog.txt";
 
     #if defined(_WIN32)
         std::string command = "start " + gamePath + " " + gameArgs; // Windows start code
@@ -24,7 +25,7 @@ namespace action
             success = false;
         }
 
-       if(success) closeLauncher();
+       if(success && !dedicatedServer) closeLauncher();
     }
 
     void setupAudio()

@@ -12,6 +12,7 @@ TextureConfig textures[NUMTEXTURES] =
     {nullptr, "media/interface/flags/spanish.png"},     // TEX_SPANISH
     {nullptr, "media/interface/hud/speaker_on.png"},    // TEX_AUDIOON
     {nullptr, "media/interface/hud/speaker_off.png"},   // TEX_AUDIOOFF
+    {nullptr, "media/interface/hud/ping.png"},          // TEX_SERVER
     {nullptr, "media/interface/hud/info.jpg"},          // TEX_ABOUT
     {nullptr, "media/interface/hud/minimize.png"},      // TEX_MINIMIZE
     {nullptr, "media/interface/hud/checkbox_off.jpg"}   // TEX_REDCROSS

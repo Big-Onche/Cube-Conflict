@@ -3,7 +3,7 @@
 
 namespace action
 {
-    extern void launchGame(bool forceGoodOld32bits = false); // see function name
+    extern void launchGame(bool dedicatedServer = false, bool forceGoodOld32bits = false); // see function name
     extern void setupAudio();
 }
 
