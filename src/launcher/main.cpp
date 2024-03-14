@@ -6,7 +6,7 @@
 
 bool initGameLauncher()
 {
-    setLanguage(ENGLISH, true);
+    detectSystemLanguage();
     if(!sdl::init()) return false;
     audio::init();
     audio::playMusic();

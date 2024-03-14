@@ -78,7 +78,36 @@ void setLanguage(int language, bool init)
         buttons::destroy();
         buttons::init();
     }
+}
 
+void detectSystemLanguage()
+{
+#if defined(_WIN32)
+
+    LANGID id = GetUserDefaultUILanguage();
+    WORD language = PRIMARYLANGID(id);
+
+    switch(language)
+    {
+        case LANG_FRENCH: setLanguage(FRENCH, true); return;
+        case LANG_RUSSIAN: setLanguage(RUSSIAN, true); return;
+        case LANG_SPANISH: setLanguage(SPANISH, true); return;
+        default: setLanguage(ENGLISH, true); return; // fallback to english
+    }
+
+#elif defined(__linux__)
+
+    const char* langEnv = getenv("LANG");
+    if(langEnv != nullptr)
+    {
+        std::string lang = langEnv;
+
+        if(lang.find("fr") == 0) { setLanguage(FRENCH, true); return; }
+        else if(lang.find("ru") == 0) { setLanguage(RUSSIAN, true); return; }
+        else if(lang.find("es") == 0) { setLanguage(SPANISH, true); return; }
+    }
+    setLanguage(ENGLISH, true); // fallback to english
+#endif
 }
 
 std::string getString(const std::string& key)
