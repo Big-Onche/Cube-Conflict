@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Game Launcher" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option platforms="Windows;" />
+				<Option output="../../Launcher debug" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Option projectCompilerOptionsRelation="1" />
+				<Compiler>
+					<Add option="-std=c++17" />
+					<Add option="-m32" />
+					<Add option="-g" />
+					<Add option="-ffast-math" />
+					<Add directory="include" />
+					<Add directory="../include" />
+				</Compiler>
+				<Linker>
+					<Add option="-static-libstdc++" />
+					<Add option="-static-libgcc" />
+					<Add option="-static" />
+					<Add option="-m32" />
+					<Add option="-lSDL2" />
+					<Add option="-lSDL2_image" />
+					<Add option="-lSDL2_ttf" />
+					<Add option="-g" />
+					<Add option="-lsetupapi" />
+					<Add option="-lole32" />
+					<Add option="-limm32" />
+					<Add option="-lversion" />
+					<Add option="-loleaut32" />
+					<Add option="-lwinmm" />
+					<Add option="-lusp10" />
+					<Add option="-lrpcrt4" />
+					<Add option="-mwindows" />
+					<Add library="lib/libSDL2_image.a" />
+					<Add library="lib/libSDL2.a" />
+					<Add library="lib/libSDL2_ttf.a" />
+					<Add directory="lib" />
+				</Linker>
+				<Environment>
+					<Variable name="WINDRES_TARGET" value="pe-i386" />
+				</Environment>
+			</Target>
+			<Target title="Release">
+				<Option platforms="Windows;" />
+				<Option output="../../Cube Conflict" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Option projectCompilerOptionsRelation="1" />
+				<Compiler>
+					<Add option="-fomit-frame-pointer" />
+					<Add option="-O3" />
+					<Add option="-std=c++17" />
+					<Add option="-m32" />
+					<Add option="-ffast-math" />
+					<Add directory="include" />
+					<Add directory="../include" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-m32" />
+					<Add option="-lSDL2" />
+					<Add option="-lSDL2_image" />
+					<Add option="-lSDL2_ttf" />
+					<Add option="-g" />
+					<Add option="-lsetupapi" />
+					<Add option="-lole32" />
+					<Add option="-limm32" />
+					<Add option="-lversion" />
+					<Add option="-loleaut32" />
+					<Add option="-lwinmm" />
+					<Add option="-lusp10" />
+					<Add option="-lrpcrt4" />
+					<Add option="-mwindows" />
+					<Add library="lib/libSDL2_image.a" />
+					<Add library="lib/libSDL2.a" />
+					<Add library="lib/libSDL2_ttf.a" />
+					<Add directory="lib" />
+				</Linker>
+				<Environment>
+					<Variable name="WINDRES_TARGET" value="pe-i386" />
+				</Environment>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+		</Compiler>
+		<Unit filename="actions.cpp" />
+		<Unit filename="actions.h" />
+		<Unit filename="audio.cpp" />
+		<Unit filename="audio.h" />
+		<Unit filename="buttons.cpp" />
+		<Unit filename="buttons.h" />
+		<Unit filename="locales.cpp" />
+		<Unit filename="locales.h" />
+		<Unit filename="logs.cpp" />
+		<Unit filename="logs.h" />
+		<Unit filename="main.cpp" />
+		<Unit filename="main.h" />
+		<Unit filename="resource.h" />
+		<Unit filename="resource.rc">
+			<Option compilerVar="WINDRES" />
+			<Option compiler="gcc" use="1" buildCommand="$rescomp -F $WINDRES_TARGET -i $file -J rc -o $resource_output -O coff $res_includes" />
+		</Unit>
+		<Unit filename="sdl.cpp" />
+		<Unit filename="textures.cpp" />
+		<Unit filename="textures.h" />
+		<Unit filename="tools.cpp" />
+		<Unit filename="tools.h" />
+		<Extensions>
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
