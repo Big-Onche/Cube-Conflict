@@ -8,7 +8,7 @@
 enum {FRENCH = 0, ENGLISH, RUSSIAN, SPANISH};
 
 extern std::map<std::string, std::string> loadLocales(const std::string& filePath, int languageId);
-extern void setLanguage(int language);
+extern void setLanguage(int language, bool init = false);
 extern std::string getString(const std::string& key);
 
 #endif

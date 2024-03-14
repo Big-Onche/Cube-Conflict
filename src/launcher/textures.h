@@ -16,7 +16,8 @@ extern TextureConfig textures[NUMTEXTURES];
 
 namespace texture
 {
-    extern void init(); // load all textures
+    extern bool isValid(int id);    // checks if the texture is valid or not
+    extern void init();             // load all textures
 }
 
 #endif

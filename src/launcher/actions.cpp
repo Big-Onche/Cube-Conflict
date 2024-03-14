@@ -27,18 +27,16 @@ namespace action
        if(success) closeLauncher();
     }
 
-    bool playSong = true;
-
     void setupAudio()
     {
-        if(playSong)
+        if(audio::playSong)
         {
-            playSong = false;
+            audio::playSong = false;
             audio::stopMusic();
         }
         else
         {
-            playSong = true;
+            audio::playSong = true;
             audio::playMusic();
         }
     }

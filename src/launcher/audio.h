@@ -3,8 +3,10 @@
 
 namespace audio
 {
+    extern bool playSong;
+
     extern void init();
-    extern void updateFading(int currentTime);
+    extern void update(int currentTime);
     extern void playMusic();
     extern void stopMusic();
     extern void destroy();

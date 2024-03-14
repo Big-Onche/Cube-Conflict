@@ -1,4 +1,5 @@
 #include "main.h"
+#include "buttons.h"
 
 std::map<int, std::string> languageCodes =
 {
@@ -67,12 +68,16 @@ std::map<std::string, std::string> loadLocales(const std::string& filePath, int 
 }
 
 std::map<std::string, std::string> currentLocale;
-#include "buttons.h"
-void setLanguage(int language)
+
+void setLanguage(int language, bool init)
 {
     currentLocale = loadLocales("config/launcher.cfg", language);
-    buttons::destroy();
-    buttons::init();
+    if(!init)
+    {
+        buttons::destroy();
+        buttons::init();
+    }
+
 }
 
 std::string getString(const std::string& key)

@@ -4,6 +4,8 @@
 
 namespace audio
 {
+    bool playSong = true;
+
     ma_engine audioEngine;
     ma_sound launcherSong;
 
@@ -18,7 +20,7 @@ namespace audio
     uint32_t fadeStartTime = 0;
     float fadeDuration = 750; // Duration in milliseconds
 
-    void updateFading(int currentTime)
+    void update(int currentTime)
     {
         uint32_t elapsedTime = currentTime - fadeStartTime;
 

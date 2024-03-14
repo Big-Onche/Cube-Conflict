@@ -48,9 +48,10 @@ namespace buttons
             }
         }
 
-        if(button.textureId >= 0 && button.textureId < NUMTEXTURES)
+        if(texture::isValid(button.onTex) && texture::isValid(button.offTex))
         {
-            SDL_Texture* buttonTexture = textures[button.textureId].texture;
+            SDL_Texture* buttonTexture = (button.isOn ? textures[button.onTex].texture : textures[button.offTex].texture);
+
             if(buttonTexture != nullptr)
             {
                 int textureWidth, textureHeight;
@@ -109,6 +110,7 @@ namespace buttons
             if(e.type == SDL_MOUSEBUTTONUP && button.isHovered(mouseX, mouseY) && currentClickTime - lastClickTime > 200) // Ensure there's at least a 200ms gap between clicks to avoid double triggers
             {
                 button.click();
+                button.isOn = !button.isOn;
                 lastClickTime = currentClickTime;
             }
         }
@@ -116,13 +118,13 @@ namespace buttons
 
     void init()
     {
-        Button playGame(sdl::renderer, 630, 325, 170, 40, 0xFFFFFFBB, 0xCCCCCCBB, getString("Play_Button"), -1, []() { action::launchGame(); });
+        Button playGame(sdl::renderer, 630, 325, 170, 40, 0xFFFFFFBB, 0xCCCCCCBB, getString("Play_Button"), -1, -1, []() { action::launchGame(); });
         buttons::add(playGame);
 
-        Button exitLauncher(sdl::renderer, SCR_W - 50, 10, 40, 40, 0, 0, "", TEX_REDCROSS, []() { closeLauncher(); });
+        Button exitLauncher(sdl::renderer, SCR_W - 50, 10, 40, 40, 0, 0, "", TEX_REDCROSS, TEX_REDCROSS, []() { closeLauncher(); });
         buttons::add(exitLauncher);
 
-        Button minimizeLauncher(sdl::renderer, SCR_W - 100, 10, 40, 40, 0, 0, "", TEX_MINIMIZE, []() { audio::stopMusic(); SDL_MinimizeWindow(sdl::window); });
+        Button minimizeLauncher(sdl::renderer, SCR_W - 100, 10, 40, 40, 0, 0, "", TEX_MINIMIZE, TEX_MINIMIZE, []() { audio::stopMusic(); SDL_MinimizeWindow(sdl::window); });
         buttons::add(minimizeLauncher);
 
         int flagWidth = 40;
@@ -130,22 +132,22 @@ namespace buttons
         int flagWidthPos = 10;
         int flagHeightPos = SCR_H - (10 + flagHeight);
 
-        Button setFrench(sdl::renderer, flagWidthPos, flagHeightPos, flagWidth, flagHeight, 0, 0, "", TEX_FRENCH, []() { setLanguage(FRENCH); });
+        Button setFrench(sdl::renderer, flagWidthPos, flagHeightPos, flagWidth, flagHeight, 0, 0, "", TEX_FRENCH, TEX_FRENCH, []() { setLanguage(FRENCH); });
         buttons::add(setFrench);
         flagWidthPos += flagWidth + 5;
 
-        Button setEnglish(sdl::renderer, flagWidthPos, flagHeightPos, flagWidth, flagHeight, 0, 0, "", TEX_ENGLISH, []() { setLanguage(ENGLISH); });
+        Button setEnglish(sdl::renderer, flagWidthPos, flagHeightPos, flagWidth, flagHeight, 0, 0, "", TEX_ENGLISH, TEX_ENGLISH, []() { setLanguage(ENGLISH); });
         buttons::add(setEnglish);
         flagWidthPos += flagWidth + 5;
 
-        Button setRussian(sdl::renderer, flagWidthPos, flagHeightPos, flagWidth, flagHeight, 0, 0, "", TEX_RUSSIAN, []() { setLanguage(RUSSIAN); });
+        Button setRussian(sdl::renderer, flagWidthPos, flagHeightPos, flagWidth, flagHeight, 0, 0, "", TEX_RUSSIAN, TEX_RUSSIAN, []() { setLanguage(RUSSIAN); });
         buttons::add(setRussian);
         flagWidthPos += flagWidth + 5;
 
-        Button setSpanish(sdl::renderer, flagWidthPos, flagHeightPos, flagWidth, flagHeight, 0, 0, "", TEX_SPANISH, []() { setLanguage(SPANISH); });
+        Button setSpanish(sdl::renderer, flagWidthPos, flagHeightPos, flagWidth, flagHeight, 0, 0, "", TEX_SPANISH, TEX_SPANISH, []() { setLanguage(SPANISH); });
         buttons::add(setSpanish);
 
-        Button setAudio(sdl::renderer, SCR_W - (10 + flagWidth), flagHeightPos, flagWidth, flagHeight, 0, 0, "", TEX_AUDIOON, []() { action::setupAudio(); });
+        Button setAudio(sdl::renderer, SCR_W - (10 + flagWidth), flagHeightPos, flagWidth, flagHeight, 0, 0, "", TEX_AUDIOON, TEX_AUDIOOFF, []() { action::setupAudio(); });
         buttons::add(setAudio);
     }
 

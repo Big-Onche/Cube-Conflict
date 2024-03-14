@@ -6,12 +6,12 @@
 
 bool initGameLauncher()
 {
-    setLanguage(0);
+    setLanguage(ENGLISH, true);
     if(!sdl::init()) return false;
     audio::init();
     audio::playMusic();
-    buttons::init();
     texture::init();
+    buttons::init();
     return true;
 }
 
@@ -100,40 +100,31 @@ int main()
                 }
             }
 
-            // Clear screen
             SDL_SetRenderDrawColor(sdl::renderer, 0xFF, 0xFF, 0xFF, 0xFF);
-            SDL_RenderClear(sdl::renderer);
+            SDL_RenderClear(sdl::renderer); // Clear screen
 
             SDL_Rect backgroundRect = {0, 0, SCR_W, SCR_H};
-            SDL_RenderCopy(sdl::renderer, textures[TEX_BACKGROUND].texture, nullptr, &backgroundRect);
+            SDL_RenderCopy(sdl::renderer, textures[TEX_BACKGROUND].texture, nullptr, &backgroundRect); // background texture
 
             // Set color modulation for the texture to create a shadow effect (dark and semi-transparent)
             SDL_SetTextureColorMod(textures[TEX_LOGO].texture, 0, 0, 0);  // Set the shadow color (black in this case)
             SDL_SetTextureAlphaMod(textures[TEX_LOGO].texture, 128);     // Semi-transparent
-
-            // Calculate the shadow's position (slightly offset from the logo's position)
-            SDL_Rect shadowRect = {470, 150, 512, 180}; // Adjust these values as needed
-
-            // Render the shadow
-            SDL_RenderCopy(sdl::renderer, textures[TEX_LOGO].texture, nullptr, &shadowRect);
+            SDL_Rect shadowRect = {470, 150, 512, 180}; // Calculate the shadow's position (slightly offset from the logo's position)
+            SDL_RenderCopy(sdl::renderer, textures[TEX_LOGO].texture, nullptr, &shadowRect); // Render the shadow
 
             // Reset color modulation for the texture to render the actual logo normally
             SDL_SetTextureColorMod(textures[TEX_LOGO].texture, 255, 255, 255);  // Reset to default (no color modulation)
             SDL_SetTextureAlphaMod(textures[TEX_LOGO].texture, 255);            // Fully opaque
 
-            // Render the logo over the shadow
             SDL_Rect logoRect = {460, 140, 512, 180};
-            SDL_RenderCopy(sdl::renderer, textures[TEX_LOGO].texture, nullptr, &logoRect);
+            SDL_RenderCopy(sdl::renderer, textures[TEX_LOGO].texture, nullptr, &logoRect); // Render the logo over the shadow
 
             buttons::render(sdl::renderer);
+            audio::update(currentTime);
 
-            // Update screen
-            SDL_RenderPresent(sdl::renderer);
+            SDL_RenderPresent(sdl::renderer); // Update screen
 
             currentTime = SDL_GetTicks();
-
-            audio::updateFading(currentTime);
-
             frameTime = currentTime - frameStart;
             if(frameDelay > frameTime) SDL_Delay(frameDelay - frameTime);
         }

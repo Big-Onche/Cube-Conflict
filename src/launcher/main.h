@@ -16,7 +16,6 @@
 #include "locales.h"
 
 extern int currentTime;
-extern bool playSong;
 extern void closeLauncher();
 
 #endif

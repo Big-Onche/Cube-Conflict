@@ -18,6 +18,11 @@ TextureConfig textures[NUMTEXTURES] =
 
 namespace texture
 {
+    bool isValid(int id)
+    {
+        return id >= 0 && id < NUMTEXTURES;
+    }
+
     SDL_Texture* loadTexture(std::string path, SDL_Renderer* renderer)
     {
         SDL_Texture* newTexture = nullptr;
