@@ -7,7 +7,8 @@ namespace sdl
 {
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;
-    TTF_Font* font = nullptr;
+    TTF_Font* fontMain = nullptr;
+    TTF_Font* fontTiny = nullptr;
 
     bool initSDL()
     {
@@ -57,12 +58,14 @@ namespace sdl
         }
         else
         {   // load the font
-            font = TTF_OpenFont("media/interface/font/default.ttf", fontSize);
-            if(!font)
+            fontMain = TTF_OpenFont("media/interface/font/default.ttf", fontSize);
+            fontTiny = TTF_OpenFont("media/interface/font/default.ttf", fontSize / 1.5f);
+            if(!fontMain || !fontTiny)
             {
                 error::pop(getString("Error_Title").c_str(), getString("Error_TTF_Load").c_str(), false);
                 return false;
             }
+            TTF_SetFontStyle(sdl::fontMain, TTF_STYLE_BOLD);
         }
         return true;
     }
@@ -90,10 +93,16 @@ namespace sdl
             }
         }
 
-        if(sdl::font != nullptr)
+        if(sdl::fontMain != nullptr)
         {
-            TTF_CloseFont(sdl::font);
-            sdl::font = nullptr;
+            TTF_CloseFont(sdl::fontMain);
+            sdl::fontMain = nullptr;
+        }
+
+        if(sdl::fontTiny != nullptr)
+        {
+            TTF_CloseFont(sdl::fontTiny);
+            sdl::fontTiny = nullptr;
         }
 
         TTF_Quit();

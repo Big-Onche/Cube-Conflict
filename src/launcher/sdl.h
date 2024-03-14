@@ -14,7 +14,8 @@ namespace sdl
 
     extern SDL_Window* window;
     extern SDL_Renderer* renderer;
-    extern TTF_Font* font;
+    extern TTF_Font* fontMain;
+    extern TTF_Font* fontTiny;
 
     extern bool init();     // init sdl
     extern void destroy();  // clean up

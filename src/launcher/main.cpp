@@ -48,6 +48,8 @@ void checkWindowEvent(SDL_Event &e)
     }
 }
 
+int mouseX, mouseY;
+
 int main()
 {
     if(initGameLauncher())
@@ -58,13 +60,12 @@ int main()
         {
             frameStart = SDL_GetTicks();
 
-            int mouseX, mouseY;
             SDL_GetMouseState(&mouseX, &mouseY);
             SDL_PumpEvents();
 
             while(SDL_PollEvent(&e) != 0)
             {
-                buttons::update(e, mouseX, mouseY);
+                buttons::update(e);
 
                 switch(e.type)
                 {
