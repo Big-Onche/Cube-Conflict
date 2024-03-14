@@ -1192,6 +1192,7 @@ int main(int argc, char **argv)
     execfile("config/vars.cfg", false);
     if(!execfile("config/languages/lib.cfg", false) || !execfile("config/languages/english.cfg", false)) fatal("cannot find languages data files");
     execfile("config/init.cfg", false);
+    bool languageForced = false;
 
     for(int i = 1; i<argc; i++)
     {
@@ -1209,9 +1210,12 @@ int main(int argc, char **argv)
             case 'w': scr_w = clamp(atoi(&argv[i][2]), SCR_MINW, SCR_MAXW); if(!findarg(argc, argv, "-h")) scr_h = -1; break;
             case 'h': scr_h = clamp(atoi(&argv[i][2]), SCR_MINH, SCR_MAXH); if(!findarg(argc, argv, "-w")) scr_w = -1; break;
             case 'f': fullscreen = atoi(&argv[i][2]); break;
-            //case 'a': newlang = 0; break;
-            //case 'b': newlang = 1; break;
-            case 'l':
+            case '0': case '1': case '2': case '3':
+                language = argv[i][1] - '0';
+                execute(tempformatstring("selectLanguage %d %d", language, false));
+                languageForced = true;
+                break;
+            case 'p':
             {
                 char pkgdir[] = "media/";
                 load = strstr(path(&argv[i][2]), path(pkgdir));
@@ -1313,7 +1317,7 @@ int main(int argc, char **argv)
 
     execfile(game::autoexec(), false);
 
-    execute(tempformatstring("selectLanguage %d %d", language, false));
+    if(!languageForced) execute(tempformatstring("selectLanguage %d %d", language, false));
     if(!execfile(game::savedconfig(), false)) execfile("config/default_binds.cfg");
 
     execfile("config/ui/ui.cfg");

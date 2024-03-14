@@ -1,6 +1,8 @@
 #include "main.h"
 #include "buttons.h"
 
+int currentLanguage = ENGLISH;
+
 std::map<int, std::string> languageCodes =
 {
     {0, "FRENCH"},
@@ -72,6 +74,7 @@ std::map<std::string, std::string> currentLocale;
 
 void setLanguage(int language, bool init)
 {
+    currentLanguage = language;
     currentLocale = loadLocales("config/launcher.cfg", language);
     if(!init)
     {

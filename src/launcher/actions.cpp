@@ -9,7 +9,7 @@ namespace action
         bool goodOld32bits = (forceGoodOld32bits || !is64bits());
         std::string gamePath = goodOld32bits ? "bin/cubeconflict" : "bin64/cubeconflict";
         std::string gameArgs = dedicatedServer ? "\"-u$HOME/My Games/Cube Conflict\" -gserver_log.txt -d" :
-                                                 "\"-u$HOME/My Games/Cube Conflict\" -glog.txt";
+                                                 "\"-u$HOME/My Games/Cube Conflict\" -glog.txt -" + std::to_string(currentLanguage);
 
     #if defined(_WIN32)
         std::string command = "start " + gamePath + " " + gameArgs; // Windows start code
