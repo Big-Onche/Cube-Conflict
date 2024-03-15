@@ -2,7 +2,7 @@
 
 # Windows
 - Install Code::blocks with MinGW-W64 ( https://sourceforge.net/projects/codeblocks/files/Binaries/20.03/Windows/codeblocks-20.03mingw-setup.exe/download )
-- Open "src/project/Cube Conflict.cbp" with Code::blocks.
+- Open "src/launcher/GameLauncher.cbp" with Code::blocks.
 - Go to Project->Build (or CTRL+F9) and that's all!
 
 # Linux
@@ -19,7 +19,7 @@ Optional:
 
 # Windows
 - Installer Code::blocks avec MinGW-W64 ( https://sourceforge.net/projects/codeblocks/files/Binaries/20.03/Windows/codeblocks-20.03mingw-setup.exe/download )
-- Ouvrir "src/project/Cube Conflict.cbp" avec Code::blocks.
+- Ouvrir "src/launcher/GameLauncher.cbp" avec Code::blocks.
 - Aller dans Projet->Compiler (ou CTRL+F9) et c'est tout !
 
 # Linux
