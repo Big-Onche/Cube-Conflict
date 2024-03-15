@@ -9,63 +9,64 @@ INCLUDES= -Ishared -Icubeconflict -Iengine -Igame -Ienet/include -Isteam -Iinclu
 
 STRIP=
 ifeq (,$(findstring -g,$(CXXFLAGS)))
-ifeq (,$(findstring -pg,$(CXXFLAGS)))
-  STRIP=strip
-endif
+	ifeq (,$(findstring -pg,$(CXXFLAGS)))
+	  STRIP=strip
+	endif
 endif
 
 MV=mv
 
 ifneq (,$(findstring MINGW,$(PLATFORM)))
-WINDRES= windres
-ifneq (,$(findstring 64,$(PLATFORM)))
-ifneq (,$(findstring CROSS,$(PLATFORM)))
-  CXX=x86_64-w64-mingw32-g++
-  WINDRES=x86_64-w64-mingw32-windres
-ifneq (,$(STRIP))
-  STRIP=x86_64-w64-mingw32-strip
-endif
-endif
-WINLIB=lib64
-WINBIN=../bin64
-override CXX+= -m64
-override WINDRES+= -F pe-x86-64
-else
-ifneq (,$(findstring CROSS,$(PLATFORM)))
-  CXX=i686-w64-mingw32-g++
-  WINDRES=i686-w64-mingw32-windres
-ifneq (,$(STRIP))
-  STRIP=i686-w64-mingw32-strip
-endif
-endif
-WINLIB=lib
-WINBIN=../bin
-override CXX+= -m32
-override WINDRES+= -F pe-i386
-endif
-CLIENT_INCLUDES= $(INCLUDES) -Iinclude
-STD_LIBS= -static-libgcc -static-libstdc++
-CLIENT_LIBS= -mwindows $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lSDL2 -lSDL2_image -lopenal -lzlib1 -lopengl32 -lsndfile -lsteam_api -lenet -lws2_32 -lwinmm
+	WINDRES= windres
+	ifneq (,$(findstring 64,$(PLATFORM)))
+		ifneq (,$(findstring CROSS,$(PLATFORM)))
+			CXX=x86_64-w64-mingw32-g++
+			WINDRES=x86_64-w64-mingw32-windres
+			ifneq (,$(STRIP))
+				STRIP=x86_64-w64-mingw32-strip
+			endif
+		endif
+		WINLIB=lib64
+		WINBIN=../bin64
+		override CXX+= -m64
+		override WINDRES+= -F pe-x86-64
+	else
+		ifneq (,$(findstring CROSS,$(PLATFORM)))
+			CXX=i686-w64-mingw32-g++
+			WINDRES=i686-w64-mingw32-windres
+			ifneq (,$(STRIP))
+				STRIP=i686-w64-mingw32-strip
+			endif
+		endif
+		WINLIB=lib
+		WINBIN=../bin
+		override CXX+= -m32
+		override WINDRES+= -F pe-i386
+	endif
+	CLIENT_INCLUDES= $(INCLUDES) -Iinclude
+	STD_LIBS= -static-libgcc -static-libstdc++
+	CLIENT_LIBS= -mwindows $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lSDL2 -lSDL2_image -lopenal -lzlib1 -lopengl32 -lsndfile -lsteam_api -lenet -lws2_32 -lwinmm
 else    
-ifneq (,$(findstring DARWIN,$(PLATFORM)))
-OSXMIN= 10.9
-override CC+= -arch x86_64 -mmacosx-version-min=$(OSXMIN)
-override CXX+= -arch x86_64 -mmacosx-version-min=$(OSXMIN)
-CLIENT_INCLUDES= $(INCLUDES) -Iinclude
-CLIENT_LIBS= -F../cubeconflict.app/Contents/Frameworks/ -framework SDL2 -framework SDL2_image
-CLIENT_LIBS+= -framework OpenAL32 -framework CoreAudio -framework AudioToolbox
-CLIENT_LIBS+= -framework AudioUnit -framework OpenGL -framework Cocoa -lz -Lenet -lenet
-else
-CLIENT_INCLUDES= $(INCLUDES) -I/usr/X11R6/include `sdl2-config --cflags`
-CLIENT_LIBS= -Lenet -lenet -L/usr/X11R6/lib -lX11 `sdl2-config --libs` -lSDL2_image -lopenal -lsndfile -lz -lGL -L../bin_unix -lsteam_api
+	ifneq (,$(findstring DARWIN,$(PLATFORM)))
+		OSXMIN= 10.9
+		override CC+= -arch x86_64 -mmacosx-version-min=$(OSXMIN)
+		override CXX+= -arch x86_64 -mmacosx-version-min=$(OSXMIN)
+		CLIENT_INCLUDES= $(INCLUDES) -Iinclude
+		CLIENT_LIBS= -F../cubeconflict.app/Contents/Frameworks/ -framework SDL2 -framework SDL2_image
+		CLIENT_LIBS+= -framework OpenAL32 -framework CoreAudio -framework AudioToolbox
+		CLIENT_LIBS+= -framework AudioUnit -framework OpenGL -framework Cocoa -lz -Lenet -lenet
+	else
+		CLIENT_INCLUDES= $(INCLUDES) -I/usr/X11R6/include `sdl2-config --cflags`
+		CLIENT_LIBS= -Lenet -lenet -L/usr/X11R6/lib -lX11 `sdl2-config --libs` -lSDL2_image -lopenal -lsndfile -lz -lGL -L../bin_unix -lsteam_api
+	endif
 endif
-endif
+
 ifeq ($(PLATFORM),LINUX)
-CLIENT_LIBS+= -lrt
+	CLIENT_LIBS+= -lrt
 else
-ifneq (,$(findstring GNU,$(PLATFORM))) 
-CLIENT_LIBS+= -lrt
-endif 
+	ifneq (,$(findstring GNU,$(PLATFORM))) 
+		CLIENT_LIBS+= -lrt
+	endif 
 endif
 
 CLIENT_OBJS= \
@@ -152,34 +153,24 @@ $(filter game/%,$(CLIENT_OBJS)): $(filter game/%,$(CLIENT_PCH))
 
 ifneq (,$(findstring MINGW,$(PLATFORM)))
 client: $(CLIENT_OBJS)
-	$(WINDRES) -I vcpp -i vcpp/mingw.rc -J rc -o vcpp/mingw.res -O coff 
+	$(WINDRES) -I vcpp -i vcpp/mingw.rc -J rc -o vcpp/mingw.res -O coff
 	$(CXX) $(CXXFLAGS) -o $(WINBIN)/cubeconflict.exe vcpp/mingw.res $(CLIENT_OBJS) $(CLIENT_LIBS)
-
-install: all
 else
 client: libenet $(CLIENT_OBJS)
-	$(CXX) $(CXXFLAGS) -o cc_client $(CLIENT_OBJS) $(CLIENT_LIBS)
-ifneq (,$(findstring DARWIN,$(PLATFORM)))
-	install_name_tool -add_rpath @executable_path/../Frameworks cc_client
+	$(CXX) $(CXXFLAGS) -o ../bin_unix/cubeconflict $(CLIENT_OBJS) $(CLIENT_LIBS)
+	ifneq (,$(findstring DARWIN,$(PLATFORM)))
+		install_name_tool -add_rpath @executable_path/../Frameworks ../bin_unix/cubeconflict
+	endif
 endif
 
-shared/tessfont.o: shared/tessfont.c
-	$(CXX) $(CXXFLAGS) -c -o $@ $< `freetype-config --cflags`
-
-tessfont: shared/tessfont.o
-	$(CXX) $(CXXFLAGS) -o tessfont shared/tessfont.o `freetype-config --libs` -lz
-
-ifneq (,$(findstring DARWIN,$(PLATFORM)))
 install: client
-	cp cc_client ../cubeconflict.app/Contents/MacOS/cubeconflict_universal
-else
-install: all
-	cp -f cc_client       ../bin_unix/$(PLATFORM_PREFIX)_client
-ifneq (,$(STRIP))
-	$(STRIP) ../bin_unix/$(PLATFORM_PREFIX)_client
-endif
-endif
-endif
+	ifneq (,$(findstring DARWIN,$(PLATFORM)))
+		cp ../bin_unix/cubeconflict ../cubeconflict.app/Contents/MacOS/cubeconflict_universal
+	else
+		ifneq (,$(STRIP))
+			$(STRIP) ../bin_unix/cubeconflict
+		endif
+	endif
 
 enet/libenet.a:
 	$(MAKE) -C enet
