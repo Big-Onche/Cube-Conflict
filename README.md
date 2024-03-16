@@ -1,7 +1,7 @@
 ![Logo of Cube Conflict](https://static.manakeep.com/photos/2024/02/09/6njjgsomt5_logo.png) 
 # Cube Conflict 
 
-Join the battle in **Cube Conflict**, an FPS game where dumb smileys are locked in a never-ending war! Forked from [Tesseract](http://tesseract.gg). Docs are [here](docs/server.md).
+Join the battle in **Cube Conflict**, an FPS game where dumb smileys are locked in a never-ending war! Forked from [Tesseract](http://tesseract.gg). Docs are [here](docs/).
 
 🎮 **[Play on Steam now!](https://store.steampowered.com/app/1454700/Cube_Conflict/)**
 
@@ -47,4 +47,4 @@ We welcome all contributions!
 - Create innovative maps or propose gameplay enhancements.
 
 ## 📜 License
-[Refer to the licensing information.](https://github.com/Big-Onche/Cube-Conflict/tree/master/licenses)
+[Refer to the licensing information.](docs/licenses)
