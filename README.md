@@ -38,7 +38,7 @@ The mission is to deliver a free, open-source, and exhilarating gaming experienc
 ## 🖥 Platforms
 Cube Conflict is available on:
 - Windows
-- Linux *(Please note: Linux updates will only occur at major releases or bugfixes. To access the latest version, it's recommended to build the binary manually, more info [here](docs/linux)*
+- Linux *(Please note: Linux updates will only occur at major releases or bugfixes. To access the latest version, it's recommended to build the binary manually, more info [here](docs/linux.md)*
 
 ## 🤝 Contribute
 We welcome all contributions!
