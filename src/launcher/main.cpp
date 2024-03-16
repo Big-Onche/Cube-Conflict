@@ -4,6 +4,8 @@
 #include "audio.h"
 #include "sdl.h"
 
+bool isUsingSteam = false;
+
 bool initGameLauncher()
 {
     detectSystemLanguage();
@@ -50,8 +52,14 @@ void checkWindowEvent(SDL_Event &e)
 
 int mouseX, mouseY;
 
-int main()
+int main(int argc, char* argv[])
 {
+    loopi(argc)
+    {
+        std::string arg = argv[i];
+        if(arg == "-steam") isUsingSteam = true;
+    }
+
     if(initGameLauncher())
     {
         SDL_Event e;

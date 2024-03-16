@@ -7,16 +7,30 @@
 
 namespace action
 {
+    std::string gamePath(bool win32 = false)
+    {
+    #if defined(_WIN32)
+        if(win32) return "bin/cubeconflict";
+        else return "bin64/cubeconflict";
+    #elif defined(__linux__)
+        return "bin_unix/cubeconflict";
+    #endif
+    }
+
+    std::string logsArg() { return "-ggame_log.txt"; }
+    std::string langArg() { return "-" + std::to_string(currentLanguage); }
+    std::string steamArg() { return (isUsingSteam ? "-s" : ""); }
+
 #if defined(_WIN32)
     bool winStart(bool dedicatedServer, bool forceGoodOld32bits) // Windows start code
     {
         bool goodOld32bits = (forceGoodOld32bits || !is64bits());
-        std::string gamePath = goodOld32bits ? "bin/cubeconflict" : "bin64/cubeconflict";
-        std::string gameArgs = dedicatedServer ? "\"-u$HOME/My Games/Cube Conflict\" -gserver_log.txt -d" : "\"-u$HOME/My Games/Cube Conflict\" -ggame_log.txt -" + std::to_string(currentLanguage);
+        std::string gameArgs = dedicatedServer ? "\"-u$HOME/My Games/Cube Conflict\" -gserver_log.txt -d" :
+                                                 "\"-u$HOME/My Games/Cube Conflict\" " + logsArg() + " " + langArg() + " " + steamArg();
 
-        std::string command = "start " + gamePath + " " + gameArgs;
+        std::string execCommand = "start " + gamePath(goodOld32bits) + " " + gameArgs;
 
-        if(system(command.c_str()) != 0)
+        if(system(execCommand.c_str()) != 0)
         {
             std::string bits = (goodOld32bits ? "" : "64");
             std::string message = getString("Error_Game") + lineBreak + "bin/" + bits + "/cubeconflict.exe " + getString("Error_Missing");
@@ -44,19 +58,15 @@ namespace action
         }
         else if(pid == 0) // Child process, execute the game binary
         {
-            std::string execPath = "bin_unix/cubeconflict";
-            std::string savePath = "-u$HOME/.cubeconflict";
-            std::string logsName = "-ggame_log.txt";
-            std::string langArg = "-" + std::to_string(currentLanguage);
+            char* clientArgs[] = {const_cast<char*>(gamePath().c_str()), const_cast<char*>("-u$HOME/.cubeconflict"), const_cast<char*>(logsArg().c_str()), const_cast<char*>(langArg().c_str()), const_cast<char*>(steamArg().c_str()), nullptr};
 
-            char* clientArgs[] = {const_cast<char*>(execPath.c_str()), const_cast<char*>(savePath.c_str()), const_cast<char*>(logsName.c_str()), const_cast<char*>(langArg.c_str()), nullptr};
-
-            std::string serverExec = execPath + " -d";
+            std::string serverExec = gamePath() + " -d";
     		char* serverArgs[] = {const_cast<char*>("xterm"), const_cast<char*>("-e"), const_cast<char*>(serverExec.c_str()), nullptr};
 
     		if(dedicatedServer ? (execvp(serverArgs[0], serverArgs) == -1) : (execvp(clientArgs[0], clientArgs) == -1))
             {
-                error::pop(getString("Error_Title").c_str(), getString("Error_Unix_Exec").c_str());
+                if(dedicatedServer) error::pop(getString("Error_Title").c_str(), getString("Error_Unix_Exec_Serv").c_str());
+                else error::pop(getString("Error_Title").c_str(), getString("Error_Unix_Exec").c_str());
                 perror("execvp");
                 return false;
             }

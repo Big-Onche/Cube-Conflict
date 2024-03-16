@@ -15,6 +15,7 @@
 #include "logs.h"
 #include "locales.h"
 
+extern bool isUsingSteam;
 extern int mouseX, mouseY;
 extern int currentTime;
 extern void closeLauncher();
