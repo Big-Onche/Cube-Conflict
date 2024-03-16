@@ -1,4 +1,4 @@
-![Logo of Cube Conflict](https://static.manakeep.com/photos/2024/02/09/6njjgsomt5_logo.png) 
+![Logo of Cube Conflict](https://static.miraheze.org/cubeconflictwiki/thumb/0/07/Banniere.png/800px-Banniere.png) 
 # Cube Conflict 
 
 Join the battle in **Cube Conflict**, an FPS game where dumb smileys are locked in a never-ending war! Forked from [Tesseract](http://tesseract.gg). Docs are [here](docs/).
@@ -38,7 +38,7 @@ The mission is to deliver a free, open-source, and exhilarating gaming experienc
 ## 🖥 Platforms
 Cube Conflict is available on:
 - Windows
-- Linux *(Please note: Linux updates will only occur at major releases. To access the latest version, it's recommended to build the binary manually with the command: `make -C src install`)*
+- Linux *(Please note: Linux updates will only occur at major releases or bugfixes. To access the latest version, it's recommended to build the binary manually, more info [here](docs/linux)*
 
 ## 🤝 Contribute
 We welcome all contributions!
