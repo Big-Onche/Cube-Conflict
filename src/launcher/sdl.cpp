@@ -19,7 +19,7 @@ namespace sdl
         }
         else
         {   // Create window
-            window = SDL_CreateWindow("Cube Conflict launcher", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCR_W, SCR_H, SDL_WINDOW_SHOWN|SDL_WINDOW_BORDERLESS);
+            window = SDL_CreateWindow("Cube Conflict launcher", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCR_W, SCR_H, SDL_WINDOW_SHOWN|SDL_WINDOW_BORDERLESS|SDL_WINDOW_OPENGL);
             if(window == nullptr)
             {
                 error::pop(getString("Error_Title").c_str(), getString("Error_SDL_Window").c_str(), true);
@@ -27,7 +27,7 @@ namespace sdl
             }
             else
             {   // Create renderer for window
-                renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
+                renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED|SDL_RENDERER_PRESENTVSYNC);
                 if(renderer == nullptr)
                 {
                     error::pop(getString("Error_Title").c_str(), getString("Error_SDL_Renderer").c_str(), true);
@@ -59,7 +59,7 @@ namespace sdl
         else
         {   // load the font
             fontMain = TTF_OpenFont("media/interface/font/default.ttf", fontSize);
-            fontTiny = TTF_OpenFont("media/interface/font/default.ttf", fontSize / 1.5f);
+            fontTiny = TTF_OpenFont("media/interface/font/default.ttf", fontSize / 3.f);
             if(!fontMain || !fontTiny)
             {
                 error::pop(getString("Error_Title").c_str(), getString("Error_TTF_Load").c_str(), false);

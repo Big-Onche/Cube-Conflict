@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <cmath>
 
 #define rnd(x) (rand() % x)
 
@@ -17,8 +18,22 @@
 
 extern bool is64bits();
 
+extern std::string lineBreak;
 struct RGBA { uint8_t r, g, b, a; };
 extern RGBA extractRGBA(int color);
-extern std::string lineBreak;
+
+struct vec2
+{
+    float x, y;
+
+    vec2(float xVal, float yVal) : x(xVal), y(yVal) {}
+
+    vec2 operator+(const vec2& rhs) const { return vec2(x + rhs.x, y + rhs.y); }
+    vec2& operator+=(const vec2& rhs) { x += rhs.x; y += rhs.y; return *this; }
+    vec2 operator-(const vec2& rhs) const { return vec2(x - rhs.x, y - rhs.y); }
+    vec2& operator-=(const vec2& rhs) { x -= rhs.x; y -= rhs.y; return *this; }
+    vec2 operator*(float scalar) const { return vec2(x * scalar, y * scalar); }
+    vec2& operator*=(float scalar) { x *= scalar; y *= scalar; return *this; }
+};
 
 #endif

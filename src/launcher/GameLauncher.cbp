@@ -106,6 +106,10 @@
 		<Unit filename="logs.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="main.h" />
+		<Unit filename="particles.cpp" />
+		<Unit filename="particles.h" />
+		<Unit filename="pong.cpp" />
+		<Unit filename="pong.h" />
 		<Unit filename="resource.h" />
 		<Unit filename="resource.rc">
 			<Option compilerVar="WINDRES" />

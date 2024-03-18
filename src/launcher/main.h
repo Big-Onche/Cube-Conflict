@@ -15,7 +15,11 @@
 #include "logs.h"
 #include "locales.h"
 
+const int SCR_W = 1000;
+const int SCR_H = 540;
+
 extern bool isUsingSteam;
+extern bool playPong;
 extern int mouseX, mouseY;
 extern int currentTime;
 extern void closeLauncher();

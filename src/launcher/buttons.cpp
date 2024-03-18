@@ -8,9 +8,9 @@
 // Button representation
 namespace buttons
 {
-    std::vector<Button> buttonList;
+    std::vector<uiButton> buttonList;
 
-    void renderButton(SDL_Renderer* renderer, const Button& button)
+    void renderButton(SDL_Renderer* renderer, const uiButton& button)
     {
         SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
@@ -37,8 +37,8 @@ namespace buttons
                 if(textTexture != nullptr)
                 {
                     // Calculate text position to center it on the button
-                    int textWidth = textSurface->w;
-                    int textHeight = textSurface->h;
+                    int textWidth = (textSurface->w * button.textSize);
+                    int textHeight = (textSurface->h * button.textSize);
                     SDL_Rect textRect = {button.x + (button.width - textWidth) / 2, button.y + (button.height - textHeight) / 2, textWidth, textHeight};
                     SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
                     SDL_DestroyTexture(textTexture);
@@ -83,18 +83,16 @@ namespace buttons
                     textureRect.y = button.y + (button.height - textureRect.h) / 2;
                 }
 
-
                 if(button.hovered) SDL_SetTextureColorMod(buttonTexture, 180, 180, 180); // Hovering color modulation
                 else SDL_SetTextureColorMod(buttonTexture, 255, 255, 255);
 
                 SDL_RenderCopy(renderer, buttonTexture, nullptr, &textureRect);
-
                 SDL_SetTextureColorMod(buttonTexture, 255, 255, 255);
             }
         }
     }
 
-    void add(const Button& button) { buttonList.push_back(button); }
+    void add(const uiButton& button) { buttonList.push_back(button); }
 
     void renderHoverText(const std::string& hoverText, SDL_Renderer* renderer)
     {
@@ -120,15 +118,9 @@ namespace buttons
                 // Calculate initial x position of the background rect
                 int boxXPos = mouseX - (textWidth / 2) - padding;
 
-                // Adjust x position if the box extends beyond the right side of the window
-                if (boxXPos + textWidth + 2*padding > SCR_W) {
-                    boxXPos = SCR_W - (textWidth + 2*padding);
-                }
+                if (boxXPos + textWidth + 2*padding > SCR_W) boxXPos = SCR_W - (textWidth + 2*padding); // Adjust x position if the box extends beyond the right side of the window
 
-                // Adjust x position if the box extends beyond the left side of the window
-                if (boxXPos < 0) {
-                    boxXPos = 0;
-                }
+                if (boxXPos < 0) boxXPos = 0; // Adjust x position if the box extends beyond the left side of the window
 
                 SDL_Rect backgroundRect = {boxXPos, boxYPos, textWidth + 2*padding, textHeight + 2*padding};
 
@@ -141,8 +133,8 @@ namespace buttons
                 SDL_RenderCopy(renderer, textTexture, nullptr, &textRect);
 
                 SDL_DestroyTexture(textTexture);
+                SDL_FreeSurface(textSurface);
             }
-            SDL_FreeSurface(textSurface);
         }
     }
 
@@ -180,26 +172,26 @@ namespace buttons
 
     void init()
     {
-        Button playGame(sdl::renderer, 630, 325, 170, 40, 0xFFFFFFBB, 0xCCCCCCBB, getString("Play_Button"), "", -1, -1, []() { action::launchGame(); });
+        uiButton playGame(sdl::renderer, 630, 325, 170, 40, 0xFFFFFFBB, 0xCCCCCCBB, getString("Play_Button"), "", -1, -1, 0.5f, []() { action::launchGame(); });
         buttons::add(playGame);
 
         int iconSize = 40;
         int iconWidthPos = 10;
         int iconHeightPos = 10;
 
-        Button launchServer(sdl::renderer, iconWidthPos, iconHeightPos, iconSize, iconSize, 0, 0, "", getString("Info_Server"), TEX_SERVER, TEX_SERVER, []() { action::launchGame(true); });
+        uiButton launchServer(sdl::renderer, iconWidthPos, iconHeightPos, iconSize, iconSize, 0, 0, "", getString("Info_Server"), TEX_SERVER, TEX_SERVER, 1, []() { action::launchGame(true); });
         buttons::add(launchServer);
         iconWidthPos += iconSize + 10;
 
-        Button openAbout(sdl::renderer, iconWidthPos, iconHeightPos, iconSize, iconSize, 0, 0, "", getString("About_Title"), TEX_ABOUT, TEX_ABOUT, []() {
+        uiButton openAbout(sdl::renderer, iconWidthPos, iconHeightPos, iconSize, iconSize, 0, 0, "", getString("About_Title"), TEX_ABOUT, TEX_ABOUT, 1, []() {
             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, getString("About_Title").c_str(), getString("About_Content").c_str(), nullptr);
         });
         buttons::add(openAbout);
 
-        Button exitLauncher(sdl::renderer, SCR_W - 50, 10, iconSize, iconSize, 0, 0, "", "", TEX_REDCROSS, TEX_REDCROSS, []() { closeLauncher(); });
+        uiButton exitLauncher(sdl::renderer, SCR_W - 50, 10, iconSize, iconSize, 0, 0, "", "", TEX_REDCROSS, TEX_REDCROSS, 1, []() { closeLauncher(); });
         buttons::add(exitLauncher);
 
-        Button minimizeLauncher(sdl::renderer, SCR_W - 100, 10, iconSize, iconSize, 0, 0, "", "", TEX_MINIMIZE, TEX_MINIMIZE, []() { audio::stopMusic(); SDL_MinimizeWindow(sdl::window); });
+        uiButton minimizeLauncher(sdl::renderer, SCR_W - 100, 10, iconSize, iconSize, 0, 0, "", "", TEX_MINIMIZE, TEX_MINIMIZE, 1, []() { audio::stopMusic(); SDL_MinimizeWindow(sdl::window); });
         buttons::add(minimizeLauncher);
 
         int flagWidth = 40;
@@ -207,23 +199,29 @@ namespace buttons
         int flagWidthPos = 10;
         int flagHeightPos = SCR_H - (10 + flagHeight);
 
-        Button setFrench(sdl::renderer, flagWidthPos, flagHeightPos, flagWidth, flagHeight, 0, 0, "", getString("Info_Lang"), TEX_FRENCH, TEX_FRENCH, []() { setLanguage(FRENCH); });
+        uiButton setFrench(sdl::renderer, flagWidthPos, flagHeightPos, flagWidth, flagHeight, 0, 0, "", getString("Info_Lang"), TEX_FRENCH, TEX_FRENCH, 1, []() { setLanguage(FRENCH); });
         buttons::add(setFrench);
         flagWidthPos += flagWidth + 5;
 
-        Button setEnglish(sdl::renderer, flagWidthPos, flagHeightPos, flagWidth, flagHeight, 0, 0, "", getString("Info_Lang"), TEX_ENGLISH, TEX_ENGLISH, []() { setLanguage(ENGLISH); });
+        uiButton setEnglish(sdl::renderer, flagWidthPos, flagHeightPos, flagWidth, flagHeight, 0, 0, "", getString("Info_Lang"), TEX_ENGLISH, TEX_ENGLISH, 1, []() { setLanguage(ENGLISH); });
         buttons::add(setEnglish);
         flagWidthPos += flagWidth + 5;
 
-        Button setRussian(sdl::renderer, flagWidthPos, flagHeightPos, flagWidth, flagHeight, 0, 0, "", getString("Info_Lang"), TEX_RUSSIAN, TEX_RUSSIAN, []() { setLanguage(RUSSIAN); });
+        uiButton setRussian(sdl::renderer, flagWidthPos, flagHeightPos, flagWidth, flagHeight, 0, 0, "", getString("Info_Lang"), TEX_RUSSIAN, TEX_RUSSIAN, 1, []() { setLanguage(RUSSIAN); });
         buttons::add(setRussian);
         flagWidthPos += flagWidth + 5;
 
-        Button setSpanish(sdl::renderer, flagWidthPos, flagHeightPos, flagWidth, flagHeight, 0, 0, "", getString("Info_Lang"), TEX_SPANISH, TEX_SPANISH, []() { setLanguage(SPANISH); });
+        uiButton setSpanish(sdl::renderer, flagWidthPos, flagHeightPos, flagWidth, flagHeight, 0, 0, "", getString("Info_Lang"), TEX_SPANISH, TEX_SPANISH, 1, []() { setLanguage(SPANISH); });
         buttons::add(setSpanish);
 
-        Button setAudio(sdl::renderer, SCR_W - (10 + flagWidth), flagHeightPos, flagWidth, flagHeight, 0, 0, "", getString("Info_Music"), TEX_AUDIOON, TEX_AUDIOOFF, []() { action::setupAudio(); });
+        uiButton setAudio(sdl::renderer, SCR_W - (10 + flagWidth), flagHeightPos, flagWidth, flagHeight, 0, 0, "", getString("Info_Music"), TEX_AUDIOON, TEX_AUDIOOFF, 1, []() { action::setupAudio(); });
         buttons::add(setAudio);
+    }
+
+    void add()
+    {
+        uiButton startPong(sdl::renderer, 545, 375, 340, 25, 0xFFFFFFBB, 0xCCCCCCBB, getString("Play_Button_Pong"), "", -1, -1, 0.3f, []() { audio::stopMusic(); playPong = true; });
+        buttons::add(startPong);
     }
 
     void destroy()
