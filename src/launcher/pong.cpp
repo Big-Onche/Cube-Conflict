@@ -16,8 +16,8 @@ namespace pong
         loopi(NUMPLAYERS)
         {
             players[i].pos = vec2((i == PL_HUMAN) ? 30 - centeredPlayer : SCR_W - 30- centeredPlayer, SCR_H / 2.0f - centeredPlayer);
-            players[i].movingUp = false;
-            players[i].movingDown = false;
+            players[i].move[UP] = false;
+            players[i].move[DOWN] = false;
         }
 
         ball.pos = vec2(SCR_W / 2.0f - BALL_SIZE / 2.0f, SCR_H / 2.0f - BALL_SIZE / 2.0f);
@@ -154,20 +154,20 @@ namespace pong
                 switch(e->key.keysym.sym)
                 {
                     case SDLK_ESCAPE: playPong = false; break;
-                    case SDLK_UP: players[PL_HUMAN].movingUp = true; break;
-                    case SDLK_DOWN: players[PL_HUMAN].movingDown = true; break;
-                    case SDLK_LEFT: players[PL_HUMAN].movingLeft = true; break;
-                    case SDLK_RIGHT: players[PL_HUMAN].movingRight = true; break;
+                    case SDLK_UP: players[PL_HUMAN].move[UP] = true; break;
+                    case SDLK_DOWN: players[PL_HUMAN].move[DOWN] = true; break;
+                    case SDLK_LEFT: players[PL_HUMAN].move[LEFT] = true; break;
+                    case SDLK_RIGHT: players[PL_HUMAN].move[RIGHT] = true; break;
                 }
             }
             else if(e->type == SDL_KEYUP) // Handle key up for the player's paddle
             {
                 switch(e->key.keysym.sym)
                 {
-                    case SDLK_UP: players[PL_HUMAN].movingUp = false; break;
-                    case SDLK_DOWN: players[PL_HUMAN].movingDown = false; break;
-                    case SDLK_LEFT: players[PL_HUMAN].movingLeft = false; break;
-                    case SDLK_RIGHT: players[PL_HUMAN].movingRight = false; break;
+                    case SDLK_UP: players[PL_HUMAN].move[UP] = false; break;
+                    case SDLK_DOWN: players[PL_HUMAN].move[DOWN] = false; break;
+                    case SDLK_LEFT: players[PL_HUMAN].move[LEFT] = false; break;
+                    case SDLK_RIGHT: players[PL_HUMAN].move[RIGHT] = false; break;
                 }
             }
         }
@@ -223,13 +223,32 @@ namespace pong
         SDL_RenderPresent(sdl::renderer); // update screen
     }
 
+    void updatePlayer()
+    {
+        auto& playerMove = players[PL_HUMAN].move;
+        bool up = playerMove[UP], down = playerMove[DOWN], left = playerMove[LEFT], right = playerMove[RIGHT];
+
+        int speed = PLAYER_SPEED;
+
+        if((up || down) && (left || right)) speed /= 1.5f;
+
+        int verticalSpeed = 0;
+        int horizontalSpeed = 0;
+
+        if(up) verticalSpeed = -speed;
+        else if(down) verticalSpeed = speed;
+
+        if(left) horizontalSpeed = -speed;
+        else if(right) horizontalSpeed = speed;
+
+        if(verticalSpeed) movePlayer(PL_HUMAN, verticalSpeed);
+        if(horizontalSpeed) movePlayer(PL_HUMAN, horizontalSpeed, true);
+    }
+
     void play(SDL_Event *e)
     {
         updateEvents(e);
-        if(players[PL_HUMAN].movingUp) movePlayer(PL_HUMAN, -PLAYER_SPEED);
-        if(players[PL_HUMAN].movingDown) movePlayer(PL_HUMAN, PLAYER_SPEED);
-        if(players[PL_HUMAN].movingLeft) movePlayer(PL_HUMAN, -PLAYER_SPEED, true);
-        if(players[PL_HUMAN].movingRight) movePlayer(PL_HUMAN, PLAYER_SPEED, true);
+        updatePlayer();
         updateBall();
         updateAi();
         render();

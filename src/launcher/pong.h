@@ -7,6 +7,7 @@
 namespace pong
 {
     enum { PL_HUMAN = 0, PL_AI, NUMPLAYERS };
+    enum { UP = 0, DOWN, LEFT, RIGHT, NUMMOVES };
 
     const int PLAYER_SIZE = 50;
     const int PLAYER_SPEED = 10;
@@ -14,8 +15,11 @@ namespace pong
 
     struct gamePlayer
     {
-        vec2 pos, boundingBox; int score; bool movingUp, movingDown, movingLeft, movingRight;
-        gamePlayer() : pos(0.0f, 0.0f), boundingBox(PLAYER_SIZE, PLAYER_SIZE), score(0), movingUp(false), movingDown(false), movingLeft(false), movingRight(false) {}
+        vec2 pos, boundingBox; int score; bool move[NUMMOVES];
+        gamePlayer() : pos(0.0f, 0.0f), boundingBox(PLAYER_SIZE, PLAYER_SIZE), score(0)
+        {
+            loopi(NUMMOVES) move[i] = false;
+        }
     };
 
     struct gameBall
