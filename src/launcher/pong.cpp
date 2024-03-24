@@ -2,7 +2,6 @@
 #include "textures.h"
 #include "particles.h"
 #include "audio.h"
-#include <algorithm>
 
 namespace pong
 {
@@ -23,17 +22,17 @@ namespace pong
         ball.pos = vec2(SCR_W / 2.0f - BALL_SIZE / 2.0f, SCR_H / 2.0f - BALL_SIZE / 2.0f);
         ball.rot = 0.f;
 
-        vec2 randomStart(((-15 + rnd(31)) / 250.f), ((-15 + rnd(31)) / 250.f));
+        vec2 randomStart(((-50 + rnd(101)) / 100.f), ((-50 + rnd(101)) / 100.f));
 
         if(rnd(2)) // Change the start direction on new game
         {
-            ball.vel = vec2(-1.5f, rnd(2) ? 1.5f : -1.5f) + randomStart;
+            ball.vel = vec2(-1.5f, rnd(2) ? 1.2f : -1.2f) + randomStart;
             ball.toLeft = true;
             ball.toRight = false;
         }
         else
         {
-            ball.vel = vec2(1.5f, rnd(2) ? 1.5f : -1.5f) + randomStart;
+            ball.vel = vec2(1.5f, rnd(2) ? 1.2f : -1.2f) + randomStart;
             ball.toLeft = false;
             ball.toRight = true;
         }
@@ -67,7 +66,7 @@ namespace pong
         {
             ball.vel.x = -ball.vel.x; // Reverse direction
             ball.vel.x += (ball.vel.x > 0) ? 0.5f : -0.5f;
-            ball.vel.y += (ball.vel.y > 0) ? 0.5f : -0.5f;
+            ball.vel.y += (ball.vel.y > 0) ? 0.3f : -0.3f;
         }
 
         return collided;
@@ -79,7 +78,7 @@ namespace pong
 
         if(ball.pos.y <= 0 || ball.pos.y >= SCR_H) // Ball hits the top or bottom wall
         {
-            ball.vel.y = -ball.vel.y;
+            ball.vel.y = -ball.vel.y + (rnd(15) / 100.f);
             particles::explosion(PART_SPARK, ball.pos, 0xFFBB11FF, 5, 15 + rnd(5), 150, 1000);
             audio::playSound(S_GRENADE, ball.pos);
         }
@@ -230,7 +229,7 @@ namespace pong
 
         int speed = PLAYER_SPEED;
 
-        if((up || down) && (left || right)) speed /= 1.5f;
+        if((up || down) && (left || right)) speed /= sqrt(2.0f);
 
         int verticalSpeed = 0;
         int horizontalSpeed = 0;

@@ -4,6 +4,7 @@
 #include "miniaudio.h"
 #include "main.h"
 #include <string>
+#include <algorithm>
 
 enum {S_MUSIC = 0, S_GRENADE, S_PLAYER, S_EXPLOSION, NUMSOUNDS};
 
