@@ -1556,7 +1556,6 @@ static void makeparticles(entity &e)
         }
         case 5: // energy ball: 2:<type (shockwave, plasma, grenade, explosion)> attr 3:<radius> 4:<r> 5:<g> 6:<b>
         {
-            if(!canemitparticles()) return;
             int r, g, b;
             if(noColors(e.attr4, e.attr5, e.attr6)) { r = 128; g = 128;  b = 128; } // setting default colors for generic energy ball
             else { r = e.attr4; g = e.attr5; b = e.attr6; } // setting custom colors from r g b attrs
