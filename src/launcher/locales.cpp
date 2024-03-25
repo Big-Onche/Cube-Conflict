@@ -11,18 +11,21 @@ std::map<int, std::string> languageCodes =
     {3, "SPANISH"}
 };
 
-std::map<std::string, std::string> loadLocales(const std::string& filePath, int languageId)
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <iomanip> // For std::quoted
+
+std::map<std::string, std::vector<std::string>> loadLocales(const std::string& filePath, int languageId)
 {
-    std::map<std::string, std::string> locales;
+    std::map<std::string, std::vector<std::string>> locales;
     std::ifstream file(filePath);
     std::string line, currentSection;
     bool sectionFound = false;
 
-    if(languageCodes.find(languageId) == languageCodes.end())
-    {
-        error::pop(getString("Error_Title").c_str(), getString("Error_Locale").c_str());
-        closeLauncher();
-    }
     std::string targetSection = languageCodes[languageId];
 
     if(!file.is_open())
@@ -36,8 +39,7 @@ std::map<std::string, std::string> loadLocales(const std::string& filePath, int 
     {
         if(line.empty() || line[0] == '#') continue; // Skip comments and empty lines
 
-        if(line[0] == '[') // Check for section headers
-        {
+        if(line[0] == '[') { // Section header
             size_t endPos = line.find(']');
             if (endPos != std::string::npos)
             {
@@ -50,27 +52,42 @@ std::map<std::string, std::string> loadLocales(const std::string& filePath, int 
         if(sectionFound)
         {
             std::istringstream lineStream(line);
-            std::string key;
-            if (std::getline(lineStream, key, '='))
+            std::string key, value;
+            if(std::getline(lineStream, key, '=') && std::getline(lineStream, value))
             {
-                std::string value;
-                if (std::getline(lineStream, value))
-                {
-                    key.erase(0, key.find_first_not_of(" \t"));
-                    key.erase(key.find_last_not_of(" \t") + 1);
-                    value.erase(0, value.find_first_not_of(" \t\""));
-                    value.erase(value.find_last_not_of(" \t\"") + 1);
+                key.erase(0, key.find_first_not_of(" \t"));
+                key.erase(key.find_last_not_of(" \t") + 1);
 
-                    locales[key] = value;
+                // Remove potential starting and ending spaces or quotes
+                value.erase(0, value.find_first_not_of(" \t"));
+                value.erase(value.find_last_not_of(" \t") + 1);
+
+                std::vector<std::string> values;
+
+                if(value.front() == '[' && value.back() == ']') // Check if the value starts with a bracket indicating an array
+                {
+                    value = value.substr(1, value.size() - 2); // Strip the brackets
+                    std::istringstream valueStream(value);
+                    std::string element;
+
+                    while(valueStream >> std::quoted(element)) values.push_back(element); // Extract each quoted element
+
                 }
+                else // It's a single quoted string, not an array
+                {
+                    std::istringstream valueStream(value);
+                    std::string element;
+                    if(valueStream >> std::quoted(element)) values.push_back(element);
+                }
+                locales[key] = values;
             }
         }
     }
-
     return locales;
 }
 
-std::map<std::string, std::string> currentLocale;
+
+std::map<std::string, std::vector<std::string>> currentLocale;
 
 void setLanguage(int language, bool init)
 {
@@ -113,9 +130,13 @@ void detectSystemLanguage()
 #endif
 }
 
-std::string getString(const std::string& key)
+std::string getString(const std::string& key, int index)
 {
     auto it = currentLocale.find(key);
-    if(it != currentLocale.end()) return it->second; // Return the localized string
-    else return key; // Return the key itself as a fallback, or you could return a default message
+    if(it != currentLocale.end())
+    {
+        if(index == -1 && !it->second.empty()) return it->second.front(); // Return the first element as a fallback
+        else if(index >= 0 && index < it->second.size()) return it->second[index];
+    }
+    return key; // Return the key itself as a fallback
 }

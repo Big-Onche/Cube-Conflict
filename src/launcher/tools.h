@@ -8,6 +8,8 @@
 #include <stdint.h>
 #include <string>
 #include <cmath>
+#include <iomanip>
+#include <vector>
 
 #define rnd(x) (rand() % x)
 

@@ -199,19 +199,19 @@ namespace buttons
         int flagWidthPos = 10;
         int flagHeightPos = SCR_H - (10 + flagHeight);
 
-        uiButton setFrench(sdl::renderer, flagWidthPos, flagHeightPos, flagWidth, flagHeight, 0, 0, "", getString("Info_Lang"), TEX_FRENCH, TEX_FRENCH, 1, []() { setLanguage(FRENCH); });
+        uiButton setFrench(sdl::renderer, flagWidthPos, flagHeightPos, flagWidth, flagHeight, 0, 0, "", getString("Info_Lang", 0), TEX_FRENCH, TEX_FRENCH, 1, []() { setLanguage(FRENCH); });
         buttons::add(setFrench);
         flagWidthPos += flagWidth + 5;
 
-        uiButton setEnglish(sdl::renderer, flagWidthPos, flagHeightPos, flagWidth, flagHeight, 0, 0, "", getString("Info_Lang"), TEX_ENGLISH, TEX_ENGLISH, 1, []() { setLanguage(ENGLISH); });
+        uiButton setEnglish(sdl::renderer, flagWidthPos, flagHeightPos, flagWidth, flagHeight, 0, 0, "", getString("Info_Lang", 1), TEX_ENGLISH, TEX_ENGLISH, 1, []() { setLanguage(ENGLISH); });
         buttons::add(setEnglish);
         flagWidthPos += flagWidth + 5;
 
-        uiButton setRussian(sdl::renderer, flagWidthPos, flagHeightPos, flagWidth, flagHeight, 0, 0, "", getString("Info_Lang"), TEX_RUSSIAN, TEX_RUSSIAN, 1, []() { setLanguage(RUSSIAN); });
+        uiButton setRussian(sdl::renderer, flagWidthPos, flagHeightPos, flagWidth, flagHeight, 0, 0, "", getString("Info_Lang", 2), TEX_RUSSIAN, TEX_RUSSIAN, 1, []() { setLanguage(RUSSIAN); });
         buttons::add(setRussian);
         flagWidthPos += flagWidth + 5;
 
-        uiButton setSpanish(sdl::renderer, flagWidthPos, flagHeightPos, flagWidth, flagHeight, 0, 0, "", getString("Info_Lang"), TEX_SPANISH, TEX_SPANISH, 1, []() { setLanguage(SPANISH); });
+        uiButton setSpanish(sdl::renderer, flagWidthPos, flagHeightPos, flagWidth, flagHeight, 0, 0, "", getString("Info_Lang", 3), TEX_SPANISH, TEX_SPANISH, 1, []() { setLanguage(SPANISH); });
         buttons::add(setSpanish);
 
         uiButton setAudio(sdl::renderer, SCR_W - (10 + flagWidth), flagHeightPos, flagWidth, flagHeight, 0, 0, "", getString("Info_Music"), TEX_AUDIOON, TEX_AUDIOOFF, 1, []() { action::setupAudio(); });
