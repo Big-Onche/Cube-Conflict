@@ -1092,6 +1092,7 @@ namespace game
         }
     }
 
+
     void footsteps(physent *d)
     {
         if(d->blocked) return;
@@ -1100,14 +1101,38 @@ namespace game
         gameent *pl = (gameent *)d;
         if(d->physstate>=PHYS_SLOPE && moving)
         {
-            bool haspowerarmour = pl->armourtype == A_ASSIST;
-            int snd = haspowerarmour && pl->armour ? S_FOOTSTEP_ASSIST : S_FOOTSTEP;
-            if(lookupmaterial(d->feetpos())==MAT_WATER) snd = S_SWIM;
-            if(lastmillis-pl->lastfootstep < (d->vel.magnitude()*(classes[pl->aptitude].speed*3.5f)*(pl->crouched() || (pl->abilitymillis[ABILITY_2] && pl->aptitude==APT_ESPION) ? 2 : 1)*(d->inwater ? 2 : 1)*(pl->armourtype==A_ASSIST && pl->armour> 0 ? 2.f : 1)/d->vel.magnitude())) return;
+            bool hasPowerArmor = (pl->armourtype == A_ASSIST && pl->armour);
+            int snd = lookupmaterial(d->feetpos()) == MAT_WATER ? S_SWIM : (hasPowerArmor ? S_FOOTSTEP_ASSIST : S_FOOTSTEP);
+
+            static bool cameraSwayDir = false;
+
+            int freq = (((100 - classes[pl->aptitude].speed) + 75) * 5) ;
+            if(pl->crouched() || (pl->abilitymillis[ABILITY_2] && pl->aptitude==APT_ESPION)) freq *= 2;
+            if(d->inwater) freq *= 1.5f;
+            else if(hasPowerArmor) freq *= 2;
+            if(pl->boostmillis[B_EPO]) freq /= 2.f;
+
+            if(lastmillis-pl->lastfootstep < freq) return;
             else
             {
-                playSound(snd, isHudPlayer ? vec(0, 0, 0) : d->o, haspowerarmour ? 300 : 150, 20, haspowerarmour ? NULL : SND_LOWPRIORITY, pl->entityId);
-                if(pl->boostmillis[B_EPO]) if(!rnd(5)) playSound(S_EPO_RUN, isHudPlayer ? vec(0, 0, 0) : d->o, 1000, 500, NULL, pl->entityId);
+                if(pl==hudplayer())
+                {
+                    float swayValue = 0.15f * ((classes[pl->aptitude].speed / 100.f) * 2);
+                    if(pl->boostmillis[B_EPO]) swayValue *= 2.f;
+
+                    if(cameraSwayDir)
+                    {
+                        startCameraAnimation(CAM_ANIM_SWAY, freq, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0, swayValue));
+                        cameraSwayDir = false;
+                    }
+                    else
+                    {
+                        startCameraAnimation(CAM_ANIM_SWAY, freq, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0, -swayValue));
+                        cameraSwayDir = true;
+                    }
+                }
+                playSound(snd, isHudPlayer ? vec(0, 0, 0) : d->o, hasPowerArmor ? 300 : 150, 20, hasPowerArmor ? NULL : SND_LOWPRIORITY, pl->entityId);
+                if(pl->boostmillis[B_EPO]) if(!rnd(12)) playSound(S_EPO_RUN, isHudPlayer ? vec(0, 0, 0) : d->o, 1000, 500, NULL, pl->entityId);
             }
         }
         pl->lastfootstep = lastmillis;

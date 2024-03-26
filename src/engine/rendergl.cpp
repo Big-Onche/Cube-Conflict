@@ -1490,7 +1490,6 @@ struct CameraAnimations
 
 CameraAnimations cameraAnimations[NUMCAMANIMS];
 
-// Initialize animAdjustment in startCameraAnimation
 void startCameraAnimation(int animation, int duration, vec position, vec maxPosition, vec axis, vec maxAxis)
 {
     if(animation < 0 || animation >= NUMCAMANIMS) return;
@@ -1506,7 +1505,6 @@ void startCameraAnimation(int animation, int duration, vec position, vec maxPosi
     anim.maxAxis = maxAxis;
 }
 
-// Update cameraAnimations to calculate adjustments without applying them directly
 void updateCameraAnimations()
 {
     if(game::ispaused()) return;
@@ -1571,10 +1569,18 @@ void updateCameraAnimations()
             }
             break;
 
+            case CAM_ANIM_SWAY:
+            {
+                float phase = (progress * PI - PI / 2.0f);
+                float swayValue = sin(phase); // Use sine to get a smooth sway value ranging from -1 to 1
+                float newRoll = swayValue * anim.animAxis.z; // Scale swayValue by anim.animAxis.z for the desired amplitude
+                newAxis.z += newRoll;
+            }
+            break;
         }
     }
 
-    camera1->o.add(newPosition); // Apply totalAdjustment to camera1->o after all other camera logic is complete
+    camera1->o.add(newPosition);
     camera1->yaw += newAxis.x;
     camera1->pitch += clamp(newAxis.y, -75, 75);
     camera1->roll += newAxis.z;
