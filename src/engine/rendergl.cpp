@@ -1472,7 +1472,113 @@ void shakeScreen(int reduceFactor)
 }
 
 VARP(spectatekiller, 0, 1, 1);
-bool animStarted;
+
+
+struct CameraAnimations
+{
+    int animStartTime;      // When the animation has started (ms)
+    int animDuration;       // Duration of the animation (ms)
+    vec animPositions;      // Position modifier
+    vec animAxis;           // Axis modifier
+    vec positionModifier;
+    vec axisModifier;
+    vec maxPosition;
+    vec maxAxis;
+    vec positionAccumulation;
+    vec axisAccumulation;
+};
+
+CameraAnimations cameraAnimations[NUMCAMANIMS];
+
+// Initialize animAdjustment in startCameraAnimation
+void startCameraAnimation(int animation, int duration, vec position, vec maxPosition, vec axis, vec maxAxis)
+{
+    if(animation < 0 || animation >= NUMCAMANIMS) return;
+    CameraAnimations& anim = cameraAnimations[animation];
+
+    anim.animStartTime = server::gamemillis;
+    anim.animDuration = duration;
+    anim.animPositions = position;
+    anim.animAxis = axis;
+    anim.positionModifier.add(position);
+    anim.maxPosition = maxPosition;
+    anim.axisModifier.add(axis);
+    anim.maxAxis = maxAxis;
+}
+
+// Update cameraAnimations to calculate adjustments without applying them directly
+void updateCameraAnimations()
+{
+    if(game::ispaused()) return;
+
+    vec newPosition(0, 0, 0);
+    vec newAxis(0, 0, 0);
+
+    loopi(NUMCAMANIMS)
+    {
+        CameraAnimations& anim = cameraAnimations[i];
+        int elapsedTime = server::gamemillis - anim.animStartTime;
+
+        if(elapsedTime < 0 || elapsedTime > anim.animDuration)
+        {
+            anim.positionAccumulation = vec(0, 0, 0);
+            anim.axisAccumulation = vec(0, 0, 0);
+            continue;
+        }
+
+        float progress = static_cast<float>(elapsedTime) / anim.animDuration;
+
+        switch(i)
+        {
+            case CAM_ANIM_LAND:
+            {
+                float newHeight = 0.0f;
+                float newPitch = 0.0f;
+                if(progress < 0.4)
+                {
+                    newHeight = lerp(0, anim.animPositions.z, progress / 0.4);
+                    newPitch = lerp(0, anim.animAxis.y, progress / 0.4);
+                }
+                else
+                {
+                    float np = (progress - 0.4f) / 0.6f; // Normalize progress
+                    newHeight = lerp(anim.animPositions.z, 0, np);
+                    newPitch = (lerp(anim.animAxis.y, 0, np)) / -1.4f;
+                }
+                newPosition.z = newHeight;
+                newAxis.y += newPitch;
+            }
+            break;
+
+            case CAM_ANIM_SHOOT:
+            {
+                float newPitch = 0.0f;
+                if(progress < 0.3) newPitch = lerp(0, anim.animAxis.y, progress / 0.3);
+                else
+                {
+                    float descentProgress = (progress - 0.3f) / 0.7f; // Normalize progress
+                    newPitch = (lerp(anim.animAxis.y, 0, descentProgress)) / -2.33f;
+                }
+
+                if(anim.maxAxis.y)
+                {
+                    anim.axisAccumulation.y += newPitch;
+                    float slowdownFactor = 1.0f - (anim.axisAccumulation.y / anim.maxAxis.y);
+                    slowdownFactor = max(slowdownFactor, 0.2f); // Ensure we don't slow down too much, setting a lower limit
+                    newAxis.y += newPitch * slowdownFactor;
+                }
+                else newAxis.y += newPitch;
+            }
+            break;
+
+        }
+    }
+
+    camera1->o.add(newPosition); // Apply totalAdjustment to camera1->o after all other camera logic is complete
+    camera1->yaw += newAxis.x;
+    camera1->pitch += clamp(newAxis.y, -75, 75);
+    camera1->roll += newAxis.z;
+}
 
 void recomputecamera(int campostag)
 {
@@ -1523,6 +1629,7 @@ void recomputecamera(int campostag)
         }
 
         bool moveSide = (game::hudplayer()->state != CS_DEAD) || thirdperson;
+        static bool animStarted;
 
         if(game::hudplayer()->state == CS_DEAD && lastmillis > game::hudplayer()->lastpain + 1500 && game::hudplayer() != game::hudplayer()->lastkiller && spectatekiller)
         {
@@ -1572,6 +1679,7 @@ void recomputecamera(int campostag)
         }
     }
 
+    updateCameraAnimations();
     setviewcell(camera1->o);
 }
 
