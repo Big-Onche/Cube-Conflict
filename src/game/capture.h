@@ -636,7 +636,7 @@ struct captureclientmode : clientmode
 	{
 	    int regen = 0;
 	    if(d->health < 750 || d->armour < 1000 + d->skill*10) regen = 2;
-        if(!d->hasmaxammo(f->ammotype-1 + I_RAIL) / 2.f) regen = 4;
+        if(!d->hasmaxammo(f->ammotype-1 + I_RAIL)) regen = 4;
         return regen;
 	}
 
