@@ -171,8 +171,8 @@ extern void screenquadoffset(float x, float y, float w, float h);
 extern void screenquadoffset(float x, float y, float w, float h, float x2, float y2, float w2, float h2);
 extern void hudquad(float x, float y, float w, float h, float tx = 0, float ty = 0, float tw = 1, float th = 1);
 extern void debugquad(float x, float y, float w, float h, float tx = 0, float ty = 0, float tw = 1, float th = 1);
-enum {CAM_ANIM_SHOOT = 0, CAM_ANIM_JUMP, CAM_ANIM_LAND, CAM_ANIM_SWAY, NUMCAMANIMS};
-extern void startCameraAnimation(int animation, int duration, vec position, vec maxPosition = vec(0, 0, 0), vec axis = vec(0, 0, 0), vec maxAxis = vec(0, 0, 0));
+enum {CAM_ANIM_SHOOT = 0, CAM_ANIM_JUMP, CAM_ANIM_LAND, CAM_ANIM_SWAY, CAM_ANIM_SHAKE, NUMCAMANIMS};
+extern void startCameraAnimation(int animation, int duration, vec position, vec maxPosition = vec(0, 0, 0), vec axis = vec(0, 0, 0), vec maxAxis = vec(0, 0, 0), float factor = 1.f);
 extern void recomputecamera(int campostag = -1);
 extern float calcfrustumboundsphere(float nearplane, float farplane, const vec &pos, const vec &view, vec &center);
 extern void setfogcolor(const vec &v);
@@ -804,7 +804,7 @@ extern int map_atmo;  //Config partie Cube Conflict
 
 // main graphical effects
 extern bool addpostfx(const char *name, int outputbind = 0, int outputscale = 0, uint inputs = 1, uint freeinputs = 1, const vec4 &params = vec4(1, 1, 1, 1));
-extern void shakeScreen(int reduceFactor);
+extern void shakeScreen(float factor);
 extern float zoomprogress;
 extern void clearpostfx();
 extern int fullbrightmodels;

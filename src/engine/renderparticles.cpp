@@ -1519,7 +1519,7 @@ static void makeparticles(entity &e)
             int gray = smokeGs();
             if(e.attr1==1) regularflame(PART_SMOKE, vec(e.o.x, e.o.y, e.o.z + 4.0f*min(radius, height)), radius, height, rgbToHex(gray, gray, gray), 1, 4.0f+(rnd(6)), 100.0f, 2750.0f, -15, e.attr8);
 
-            if(e.attr9 && rndevent(e.attr9)) particles::dirSplash(PART_FIRESPARK, 0xFFFF55, 500, rnd(3)+1, 750+(rnd(750)), offsetvec(e.o, rnd(15)-rnd(31), rnd(15)-rnd(31)), vec(0, 0, 1), 0.6f + (rnd(18)/12.f), 150);
+            if(e.attr9 && rndevent(e.attr9)) particles::dirSplash(PART_FIRESPARK, 0xFFFF55, 500, rnd(3)+1, 750+(rnd(750)), offsetvec(e.o, rnd(7), rnd(15)-rnd(31)), vec(0, 0, 1), 0.6f + (rnd(18)/12.f), 150);
             break;
         }
         case 3: // smoke only: attr 2:<radius> 3:<height> 4:<r> 5:<g> 6:<b> 7:<color offset> 8:<grow(+)/shrink(-)>
@@ -1619,7 +1619,7 @@ static void makeparticles(entity &e)
         case 10: // lava bubble: attr 2:<probability> attr 3:<offset>
         {
             if(!canemitparticles()) return;
-            if(rndevent(e.attr2, 10))
+            if(rndevent(e.attr2, 20))
             {
                 vec pos = e.o;
                 if(e.attr3) pos.add(vec((- e.attr3 / 2) + rnd(e.attr3), (- e.attr3 / 2) + rnd(e.attr3), 0));
@@ -1647,7 +1647,7 @@ static void makeparticles(entity &e)
                     game::newbouncer(e.o, pos.add(vec(xOffset, zOffset, yOffset)), true, 0, game::player1, game::BNC_BIGROCK, 15000+rnd(5000), e.attr6);
                 }
                 playSound(S_EXPL_VOLCANO, e.o, 3000, 1500, SND_NOOCCLUSION);
-                if(game::hudplayer()->physstate == PHYS_FLOOR) shakeScreen(1 + (camera1->o.dist(e.o) / 250 ));
+                if(game::hudplayer()->physstate == PHYS_FLOOR) shakeScreen(0.2f + (camera1->o.dist(e.o) / 2000.f ));
             }
             break;
         }

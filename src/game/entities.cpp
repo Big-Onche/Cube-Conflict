@@ -222,7 +222,7 @@ namespace entities
             extentity &e = *ents[tp];
             if(e.attr4 >= 0) playSound(S_TELEPORT, d==hudplayer() ? vec(0, 0, 0) : e.o, 300, 50);
 
-            if(d==hudplayer()) shakeScreen(2);
+            if(d==hudplayer()) shakeScreen(1);
         }
         if(local && d->clientnum >= 0)
         {

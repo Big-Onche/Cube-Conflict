@@ -746,11 +746,13 @@ namespace game
         }
     }
 
-    void startshake(const vec &v, int maxdist, int atk)
+    void startShake(const vec &v, int maxdist, int atk)
     {
-        if(camera1->o.dist(v) > maxdist) return;
-        int reduceFactor = atk==ATK_NUKE_SHOOT ? 1 : camera1->o.dist(v) < 75 ? 1 : camera1->o.dist(v) < 125 ? 2 : 4;
-        shakeScreen(reduceFactor);
+        float distance = camera1->o.dist(v);
+        if(distance > maxdist) return;
+        float factor = lerp(1.0f, 0.0f, distance / maxdist); // As normalized distance increases, the factor linearly decreases from 1 to 0
+        if(atk == ATK_NUKE_SHOOT) factor *= 2;
+        shakeScreen(factor);
     }
 
     void explode(bool local, gameent *owner, const vec &v, const vec &vel, dynent *safe, int damage, int atk)
@@ -775,7 +777,7 @@ namespace game
                 playSound(S_EXPL_MISSILE, safeLoc, 400, 150);
                 if(inWater) playSound(S_EXPL_INWATER, vec(v).addz(15), 300, 100);
                 if(isFar) playSound(S_EXPL_FAR, safeLoc, 1500, 400, SND_LOWPRIORITY);
-                startshake(v, 175, atk);
+                startShake(v, 1.25f * attacks[atk].exprad, atk);
                 break;
 
             case ATK_KAMIKAZE_SHOOT:
@@ -789,13 +791,13 @@ namespace game
                 playSound(atk==ATK_KAMIKAZE_SHOOT ? S_EXPL_KAMIKAZE : S_EXPL_PARMOR, owner->o, 400, 150);
                 if(inWater) playSound(S_EXPL_INWATER, vec(owner->o).addz(15), 300, 100);
                 if(isFar) playSound(S_BIGEXPL_FAR, owner->o, 2000, 400);
-                startshake(v, 225, atk);
+                startShake(v, 1.5f * attacks[atk].exprad, atk);
                 break;
 
             case ATK_NUKE_SHOOT:
                 renderExplosion(owner, v, vel, atk);
                 playSound(S_EXPL_NUKE, v, 5000, 3000, SND_NOOCCLUSION);
-                startshake(v, 5000, atk);
+                startShake(v, 2 * attacks[atk].exprad, atk);
                 break;
 
             case ATK_ARTIFICE_SHOOT:
@@ -803,7 +805,7 @@ namespace game
                 playSound(S_EXPL_FIREWORKS, safeLoc, 400, 200);
                 if(inWater) playSound(S_EXPL_INWATER, vec(v).addz(15), 300, 100);
                 if(isFar) playSound(S_FIREWORKSEXPL_FAR, safeLoc, 2000, 750);
-                startshake(v, 100, atk);
+                startShake(v, attacks[atk].exprad, atk);
                 break;
 
             case ATK_M32_SHOOT:
@@ -812,7 +814,7 @@ namespace game
                 if(inWater) playSound(S_EXPL_INWATER, vec(v).addz(15), 300, 100);
                 if(isFar) playSound(S_EXPL_FAR, v, 2000, 400, SND_LOWPRIORITY);
                 loopi(5+rnd(3)) spawnbouncer(v, vec(0, 0, 0), owner, BNC_ROCK, 200);
-                startshake(v, 200, atk);
+                startShake(v, 1.5f * attacks[atk].exprad, atk);
                 break;
 
             case ATK_MINIGUN_SHOOT:
@@ -1575,6 +1577,8 @@ namespace game
             pos.add(vec(bnc.offset).mul(bnc.offsetmillis/float(OFFSETMILLIS)));
             vec vel(bnc.vel);
             pitch = -bnc.roll;
+            yaw = -bnc.yaw;
+
             bool inWater = ((lookupmaterial(pos) & MAT_WATER) == MAT_WATER);
 
             if(vel.magnitude() <= 3.f) {yaw = bnc.lastyaw; pitch = bnc.lastpitch;}

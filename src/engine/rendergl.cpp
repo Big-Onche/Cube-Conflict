@@ -1408,8 +1408,8 @@ void fixcamerarange()
     const float MAXPITCH = (editmode || game::player1->state==CS_SPECTATOR ? 90.f : 75.0f);
     if(camera1->pitch>MAXPITCH) camera1->pitch = MAXPITCH;
     if(camera1->pitch<-MAXPITCH) camera1->pitch = -MAXPITCH;
-    while(camera1->yaw<0.0f) camera1->yaw += 360.0f;
-    while(camera1->yaw>=360.0f) camera1->yaw -= 360.0f;
+    camera1->yaw = fmod(camera1->yaw, 360.0f);
+    if (camera1->yaw < 0.0f) camera1->yaw += 360.0f;
 }
 
 void modifyorient(float yaw, float pitch)
@@ -1446,51 +1446,35 @@ void mousemove(int dx, int dy)
     modifyorient(dx*cursens, dy*cursens*(invmouse ? 1 : -1));
 }
 
-void randomMouseOffset(int reduceFactor)
+void shakeScreen(float factor)
 {
-    reduceFactor = max(reduceFactor, 1);
-
     switch(game::hudplayer()->aptitude)
     {
-        case APT_SOLDAT: reduceFactor*=2; break;
+        case APT_SOLDAT: factor /= 2; break;
         case APT_MAGICIEN: if(game::hudplayer()->abilitymillis[game::ABILITY_2]) return;
     }
 
-    int offset = max(10/reduceFactor, 1);
-    camera1->roll = rnd(offset) - rnd(offset);
-
-    offset *= 2.5f;
-    mousemove(rnd(offset) - rnd(offset), rnd(offset) - rnd(offset));
-}
-ICOMMAND(screenshake, "i", (int *reduceFactor), randomMouseOffset(*reduceFactor));
-
-void shakeScreen(int reduceFactor)
-{
-    defformatstring(cmd, "%s %d", "screenshake", reduceFactor);
-    int sleep = 0;
-    loopi(16){ addsleep(&sleep, cmd); sleep +=25; }
+    startCameraAnimation(CAM_ANIM_SHAKE, 500, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0, 0), vec(0, 0, 0), factor);
 }
 
 VARP(spectatekiller, 0, 1, 1);
 
-
 struct CameraAnimations
 {
-    int animStartTime;      // When the animation has started (ms)
-    int animDuration;       // Duration of the animation (ms)
-    vec animPositions;      // Position modifier
-    vec animAxis;           // Axis modifier
-    vec positionModifier;
-    vec axisModifier;
-    vec maxPosition;
-    vec maxAxis;
-    vec positionAccumulation;
-    vec axisAccumulation;
+    int animStartTime;          // When the animation has started (ms)
+    int animDuration;           // Duration of the animation (ms)
+    float factor;               // adjust animation scale
+    vec animPositions;          // Position modifier (x, y, z)
+    vec animAxis;               // Axis modifier (yaw, pitch, roll)
+    vec maxPosition;            // Maximum position modification
+    vec maxAxis;                // Maximum axis modification
+    vec positionAccumulation;   // total position modification of the animation
+    vec axisAccumulation;       // total axis modification of the animation
 };
 
 CameraAnimations cameraAnimations[NUMCAMANIMS];
 
-void startCameraAnimation(int animation, int duration, vec position, vec maxPosition, vec axis, vec maxAxis)
+void startCameraAnimation(int animation, int duration, vec position, vec maxPosition, vec axis, vec maxAxis, float factor)
 {
     if(animation < 0 || animation >= NUMCAMANIMS) return;
     CameraAnimations& anim = cameraAnimations[animation];
@@ -1499,10 +1483,9 @@ void startCameraAnimation(int animation, int duration, vec position, vec maxPosi
     anim.animDuration = duration;
     anim.animPositions = position;
     anim.animAxis = axis;
-    anim.positionModifier.add(position);
     anim.maxPosition = maxPosition;
-    anim.axisModifier.add(axis);
     anim.maxAxis = maxAxis;
+    anim.factor = factor;
 }
 
 void updateCameraAnimations()
@@ -1592,6 +1575,23 @@ void updateCameraAnimations()
                 float swayValue = sin(phase); // Use sine to get a smooth sway value ranging from -1 to 1
                 float newRoll = swayValue * anim.animAxis.z; // Scale swayValue by anim.animAxis.z for the desired amplitude
                 newAxis.z += newRoll;
+            }
+            break;
+
+            case CAM_ANIM_SHAKE:
+            {
+                float shakeIntensity = max(3.0f * anim.factor, 0.1f); // Intensity factor
+
+                if(progress <= 1.0f)
+                {
+                    float decayFactor = 1.0f - progress; // linear time decay
+
+                    vec positionOffset = vec((rnd(11) - 5) / 10.f, (rnd(11) - 5) / 10.f, (rnd(11) - 5) / 10.f).safenormalize().mul(shakeIntensity * decayFactor);
+                    vec axisOffset = vec((rnd(11) - 5) / 10.f, (rnd(11) - 5) / 10.f, (rnd(11) - 5) / 10.f).safenormalize().mul(shakeIntensity * decayFactor);
+
+                    newPosition.add(positionOffset);
+                    newAxis.add(axisOffset);
+                }
             }
             break;
         }
