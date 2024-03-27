@@ -723,20 +723,18 @@ struct gamestate
 
     int dodamage(int damage, int aptitude, int aptisort) // just subtract damage here, can set death, etc. later in code calling this
     {
-        if(armourtype >= 0 || armourtype < NUMSHIELDS)
-        {
-            int ad = damage*(armours[A_WOOD + armourtype].absorb) / 100.f; // let armour absorb when possible
+        int ad = damage * (armours[A_WOOD + armourtype].absorb) / 100.f; // let armour absorb when possible
 
-            if(damage > 0)
-            {
-                if(ad > armour) ad = armour;
-                if(aptitude==APT_PHYSICIEN && aptisort && armour) armour = min(armour+ad, armours[A_WOOD + armourtype].max);
-                else armour -= ad;
-            }
-            damage -= ad;
-            health -= damage;
-            return damage;
+        if(damage > 0)
+        {
+            if(ad > armour) ad = armour;
+            if(aptitude==APT_PHYSICIEN && aptisort && armour) armour = min(armour+ad, armours[A_WOOD + armourtype].max);
+            else armour -= ad;
         }
+
+        damage -= ad;
+        health -= damage;
+        return damage;
     }
 
     int doregen(int damage)
@@ -1140,7 +1138,6 @@ namespace server
 }
 
 extern bool rndevent(int probability, int probabilityReduce = 0);
-extern void addsleep(int *msec, char *cmd);
 extern void createdrop(const vec *o, int type);
 extern void trydisconnect(bool local);
 
