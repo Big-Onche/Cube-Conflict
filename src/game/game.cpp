@@ -1087,11 +1087,10 @@ namespace game
         else if(floorlevel<0)
         {
             particle_splash(map_atmo==4 && atmos ? PART_WATER : PART_SMOKE, pl->armourtype==A_ASSIST ? 20 : 15, 120, d->feetpos(), map_atmo==4 && atmos ? 0x131313 : map_atmo==9 ? 0xFFFFFF : 0x442211, 7.0f+rnd(pl->armourtype==A_ASSIST ? 10 : 5), 400, 20);
-            if(d==hudplayer()) startCameraAnimation(CAM_ANIM_LAND, 400, vec(0, 0, -5), vec(0, 0, 0), vec(0, -0.8f, 0));
+            if(d==hudplayer()) startCameraAnimation(CAM_ANIM_LAND, 400, vec(0, 0, -3), vec(0, 0, 0), vec(0, -0.7f, 0));
             if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_ASSIST && pl->armour ? S_LAND_ASSIST : S_LAND_BASIC, d);
         }
     }
-
 
     void footsteps(physent *d)
     {
@@ -1104,8 +1103,6 @@ namespace game
             bool hasPowerArmor = (pl->armourtype == A_ASSIST && pl->armour);
             int snd = lookupmaterial(d->feetpos()) == MAT_WATER ? S_SWIM : (hasPowerArmor ? S_FOOTSTEP_ASSIST : S_FOOTSTEP);
 
-            static bool cameraSwayDir = false;
-
             int freq = (((100 - classes[pl->aptitude].speed) + 75) * 5) ;
             if(pl->crouched() || (pl->abilitymillis[ABILITY_2] && pl->aptitude==APT_ESPION)) freq *= 2;
             if(d->inwater) freq *= 1.5f;
@@ -1117,19 +1114,11 @@ namespace game
             {
                 if(pl==hudplayer())
                 {
-                    float swayValue = 0.15f * ((classes[pl->aptitude].speed / 100.f) * 2);
+                    static bool cameraSwayDir = false;
+                    float swayValue = 0.12f * (classes[pl->aptitude].speed / 100.f);
                     if(pl->boostmillis[B_EPO]) swayValue *= 2.f;
-
-                    if(cameraSwayDir)
-                    {
-                        startCameraAnimation(CAM_ANIM_SWAY, freq, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0, swayValue));
-                        cameraSwayDir = false;
-                    }
-                    else
-                    {
-                        startCameraAnimation(CAM_ANIM_SWAY, freq, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0, -swayValue));
-                        cameraSwayDir = true;
-                    }
+                    startCameraAnimation(CAM_ANIM_SWAY, freq, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0, (cameraSwayDir ? swayValue : -swayValue)));
+                    cameraSwayDir = !cameraSwayDir;
                 }
                 playSound(snd, isHudPlayer ? vec(0, 0, 0) : d->o, hasPowerArmor ? 300 : 150, 20, hasPowerArmor ? NULL : SND_LOWPRIORITY, pl->entityId);
                 if(pl->boostmillis[B_EPO]) if(!rnd(12)) playSound(S_EPO_RUN, isHudPlayer ? vec(0, 0, 0) : d->o, 1000, 500, NULL, pl->entityId);
