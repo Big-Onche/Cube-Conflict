@@ -10,7 +10,7 @@ float progress = -1;
 
 void calcPlayerLevel()
 {
-    while(stat[STAT_XP] >= xpForNextLevel) // calc the level based on total xp
+    while(gameStat[STAT_XP] >= xpForNextLevel) // calc the level based on total xp
     {
         currentLevel++;
         xpForPreviousLevel += currentLevel*2;
@@ -23,9 +23,9 @@ void calcPlayerLevel()
         }
     }
 
-    if(stat[STAT_XP]-xpForNextLevel!=0 && totalXpNeeded!=0) progress = float(stat[STAT_XP]-xpForNextLevel)/float(totalXpNeeded);
+    if(gameStat[STAT_XP]-xpForNextLevel!=0 && totalXpNeeded!=0) progress = float(gameStat[STAT_XP]-xpForNextLevel)/float(totalXpNeeded);
 
-    stat[STAT_LEVEL] = currentLevel;
+    gameStat[STAT_LEVEL] = currentLevel;
 
     game::player1->level = currentLevel; // gameent level update
 
@@ -42,16 +42,16 @@ void calcPlayerLevel()
 ICOMMAND(hudlevelprogress, "", (), floatret(fabs(progress)));
 
 //////////////////////////////////////////////player stats////////////////////////////////////////////
-int stat[NUMSTATS];
+int gameStat[NUMSTATS];
 
 void addReward(int xp, int cc) // add xp and cc (cisla coins)
 {
     if(!IS_ON_OFFICIAL_SERV) return;
-    stat[STAT_XP] += xp;
-    stat[STAT_CC] += cc;
+    gameStat[STAT_XP] += xp;
+    gameStat[STAT_CC] += cc;
     calcPlayerLevel();
 
-    if(stat[STAT_CC] > 1500) unlockAchievement(ACH_RICHE);
+    if(gameStat[STAT_CC] > 1500) unlockAchievement(ACH_RICHE);
 }
 
 int autoSave = 0;
@@ -60,7 +60,7 @@ VARP(autosavesteps, 1, 100, INT_MAX);
 void updateStat(int value, int statId, bool rewrite) // update a stat
 {
     if(!IS_ON_OFFICIAL_SERV) return;
-    rewrite ? stat[statId] = value : stat[statId] += value;
+    rewrite ? gameStat[statId] = value : gameStat[statId] += value;
 
     autoSave++;
     if(autoSave >= autosavesteps) { writeSave(); autoSave=0; } // save every "autosavesteps"
@@ -68,7 +68,7 @@ void updateStat(int value, int statId, bool rewrite) // update a stat
 
 float killDeathRatio()
 {
-    return (float(stat[STAT_KILLS])/(float(stat[STAT_MORTS]) == 0.f ? 1.f : float(stat[STAT_MORTS])));
+    return (float(gameStat[STAT_KILLS])/(float(gameStat[STAT_MORTS]) == 0.f ? 1.f : float(gameStat[STAT_MORTS])));
 }
 
 ICOMMAND(gettotalstats, "", (), intret(NUMSTATS)); // gets nb of stats for ui
@@ -95,14 +95,14 @@ ICOMMAND(getstatinfo, "i", (int *statID),
         case STAT_TIMEPLAYED: // easy secs to HH:MM:SS converter and displayer
         case STAT_BASEHACK:
         {
-            int secs = *statID == STAT_TIMEPLAYED ? stat[STAT_TIMEPLAYED] : stat[STAT_BASEHACK];
+            int secs = *statID == STAT_TIMEPLAYED ? gameStat[STAT_TIMEPLAYED] : gameStat[STAT_BASEHACK];
             int h = secs / 3600;
             int m = (secs % 3600) / 60;
             int s = secs % 60;
             formatstring(val, "%02d:%02d:%02d", h, m, s);
             break;
         }
-        default: formatstring(val, "%d%s", stat[*statID], *statID==STAT_MAXKILLDIST ? " m" : "");
+        default: formatstring(val, "%d%s", gameStat[*statID], *statID==STAT_MAXKILLDIST ? " m" : "");
     }
     result(val);
 );
@@ -127,7 +127,7 @@ void writeSave() // we write the poorly encrypted value for all stat
 
     savefile->printf("version=%d\n", PROTOCOL_VERSION);
 
-    loopi(NUMSTATS) savefile->printf("%s\n", encryptSave(tempformatstring("%s=%d", statslist[i].ident, stat[i])));
+    loopi(NUMSTATS) savefile->printf("%s\n", encryptSave(tempformatstring("%s=%d", statslist[i].ident, gameStat[i])));
     loopi(NUMSMILEYS) savefile->printf("%s\n", encryptSave(tempformatstring("smiley_%s=%d", customsmileys[i].ident, smiley[i] ? max(rnd(256), 1) : 0)));
     loopi(NUMCAPES) savefile->printf("%s\n", encryptSave(tempformatstring("cape_%s=%d", capes[i].name, cape[i] ? max(rnd(256), 1) : 0)));
     loopi(NUMGRAVES) savefile->printf("%s\n", encryptSave(tempformatstring("grave_%s=%d", graves[i].name, grave[i] ? max(rnd(256), 1) : 0)));
@@ -137,7 +137,7 @@ void writeSave() // we write the poorly encrypted value for all stat
 
 void giveStarterKit() // starter pack
 {
-    stat[STAT_LEVEL]++;
+    gameStat[STAT_LEVEL]++;
     smiley[SMI_HAP] = cape[CAPE_CUBE] = grave[TOM_MERDE] = max(rnd(256), 1);
 }
 
@@ -168,7 +168,7 @@ void loadSave()
             decryptSave(buf);
 
             if (line < NUMSTATS) {
-                sscanf(buf, "%i", &stat[line]);
+                sscanf(buf, "%i", &gameStat[line]);
                 if (line == NUMSTATS - 1) skip = 10; // skip next 10 lines
             } else if (line < NUMSTATS + NUMSMILEYS) {
                 sscanf(buf, "%i", &smiley[line - NUMSTATS]);
@@ -191,12 +191,12 @@ void loadSave()
         {
             decryptSave(buf);
 
-            char key[50];
+            char key[50] = { 0 };
             int value;
 
             if(sscanf(buf, "%49[^=]=%d", key, &value) == 2)
             {
-                loopi(NUMSTATS) { if(!strcmp(key, statslist[i].ident)) { stat[i] = value; break; } }
+                loopi(NUMSTATS) { if(!strcmp(key, tempformatstring("%s", statslist[i].ident))) { gameStat[i] = value; break; } }
                 loopi(NUMSMILEYS){ if(!strcmp(key, tempformatstring("smiley_%s", customsmileys[i].ident))) { smiley[i] = value; break; } }
                 loopi(NUMCAPES) { if(!strcmp(key, tempformatstring("cape_%s", capes[i].name))) { cape[i] = value; break; } }
                 loopi(NUMGRAVES) { if(!strcmp(key, tempformatstring("grave_%s", graves[i].name))) { grave[i] = value; break; } }

@@ -802,8 +802,8 @@ namespace game
                     //now let's add player stats
                     updateStat(1, STAT_KILLS);
                     addReward(7+player1->killstreak-1, 3+player1->killstreak-1);
-                    if(player1->killstreak > stat[STAT_KILLSTREAK]) updateStat(player1->killstreak, STAT_KILLSTREAK, true);
-                    if(stat[STAT_MAXKILLDIST]<killdistance) updateStat(killdistance, STAT_MAXKILLDIST, true);
+                    if(player1->killstreak > gameStat[STAT_KILLSTREAK]) updateStat(player1->killstreak, STAT_KILLSTREAK, true);
+                    if(gameStat[STAT_MAXKILLDIST]<killdistance) updateStat(killdistance, STAT_MAXKILLDIST, true);
                 }
             }
             else if(d==player1) //////////////////// you were killed ////////////////////
@@ -873,7 +873,7 @@ namespace game
 
             if(player1->totaldamage/10 > 10000) unlockAchievement(ACH_DESTRUCTEUR);
 
-            if(stat[STAT_DAMMAGERECORD] < player1->totaldamage/10)
+            if(gameStat[STAT_DAMMAGERECORD] < player1->totaldamage/10)
             {
                 updateStat(player1->totaldamage/10, STAT_DAMMAGERECORD, true);
                 addReward(30, 15);

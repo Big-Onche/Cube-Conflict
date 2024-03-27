@@ -3372,7 +3372,7 @@ namespace UI
         if(needfloat) BUILD(TextFloat, o, o->setup(nombre, scale, color, wrap), children);
         else if(timestat)
         {
-            defformatstring(horloge, "%s%d:%s%d:%s%d", stat[23]<10 ? "0" : "", stat[23], stat[22]<10 ? "0" : "", stat[22], stat[21]<10 ? "0" : "", stat[21]);
+            defformatstring(horloge, "%s%d:%s%d:%s%d", gameStat[23]<10 ? "0" : "", gameStat[23], gameStat[22]<10 ? "0" : "", gameStat[22], gameStat[21]<10 ? "0" : "", gameStat[21]);
             BUILD(TextString, o, o->setup(horloge, scale, color, wrap), children);
         }
         else BUILD(TextInt, o, o->setup(nombre, scale, color, wrap), children);

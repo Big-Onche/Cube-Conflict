@@ -17,7 +17,7 @@ enum {STAT_CC, STAT_XP, STAT_LEVEL, STAT_KILLS, STAT_MORTS, STAT_KDRATIO, STAT_D
         STAT_PANACHAY, STAT_MANA, STAT_COCHON, STAT_STEROS, STAT_EPO, STAT_JOINT, STAT_CHAMPIS, STAT_ARMES, STAT_SUPERARMES, //Objects
         STAT_ATOM, STAT_MUNSHOOTED, STAT_TOTALDAMAGEDEALT, STAT_TOTALDAMAGERECIE, //Stupid statistics
         NUMSTATS};
-extern int stat[NUMSTATS];
+extern int gameStat[NUMSTATS];
 
 static const struct statsinfo { const char *ident, *statlogo; } statslist[] = // main game stats
 {   // id                       // logo

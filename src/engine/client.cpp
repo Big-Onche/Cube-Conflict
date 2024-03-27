@@ -175,7 +175,7 @@ void disconnect(bool async, bool cleanup, bool volontaire)
         game::clearprojectiles(); // clean up before showing menu
         clearEntsPos();
         mainmenu = 1;
-        if(stat[STAT_DAMMAGERECORD] < game::player1->totaldamage/10) updateStat(game::player1->totaldamage/10, STAT_DAMMAGERECORD, true);
+        if(gameStat[STAT_DAMMAGERECORD] < game::player1->totaldamage/10) updateStat(game::player1->totaldamage/10, STAT_DAMMAGERECORD, true);
         if(game::player1->totaldamage/10 > 10000) unlockAchievement(ACH_DESTRUCTEUR);
     }
     if(!connpeer && clienthost)

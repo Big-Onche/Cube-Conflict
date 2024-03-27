@@ -147,7 +147,7 @@ void unlockRandomItem()
 
     if(!unlockItem)
     {
-        int ccoAmount;
+        int ccoAmount = 0;
         switch(rarity)
         {
             case D_COMMON: ccoAmount = 3; break;
@@ -168,7 +168,7 @@ void buyItem(int type, int num)
 {
     if(!validItem(type, num)) return;
 
-    if(itemPrice(type, num) > stat[STAT_CC]) // no enough money
+    if(itemPrice(type, num) > gameStat[STAT_CC]) // no enough money
     {
         conoutf(CON_GAMEINFO, "\f3%s", readstr(tooExpensive[type]));
         playSound(S_ERROR, vec(0, 0, 0), 0, 0, SND_UI);
@@ -181,7 +181,7 @@ void buyItem(int type, int num)
     }
     else // take the money
     {
-        stat[STAT_CC] -= itemPrice(type, num);
+        gameStat[STAT_CC] -= itemPrice(type, num);
 
         switch(type)
         {

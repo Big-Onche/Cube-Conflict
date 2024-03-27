@@ -65,7 +65,7 @@ namespace game
     );
 
     ICOMMAND(hudxpcount, "", (),
-        defformatstring(s, "%d / %d XP (%s %d)", totalXpNeeded - (xpForNextLevel - stat[STAT_XP]), totalXpNeeded, readstr("Stat_Level"), stat[STAT_LEVEL]);
+        defformatstring(s, "%d / %d XP (%s %d)", totalXpNeeded - (xpForNextLevel - gameStat[STAT_XP]), totalXpNeeded, readstr("Stat_Level"), gameStat[STAT_LEVEL]);
         result(s);
     );
 
