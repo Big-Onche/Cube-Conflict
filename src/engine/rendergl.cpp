@@ -1543,8 +1543,8 @@ void updateCameraAnimations()
 
             case CAM_ANIM_LAND:
             {
-                float newHeight = 0.0f;
-                float newPitch = 0.0f;
+                float newHeight = 0.0f, newPitch = 0.0f;
+
                 if(progress < 0.4)
                 {
                     newHeight = lerp(0, anim.animPositions.z, progress / 0.4);
@@ -1564,6 +1564,7 @@ void updateCameraAnimations()
             case CAM_ANIM_SHOOT:
             {
                 float newPitch = 0.0f;
+
                 if(progress < 0.3) newPitch = lerp(0, anim.animAxis.y, progress / 0.3);
                 else
                 {
@@ -1574,11 +1575,14 @@ void updateCameraAnimations()
                 if(anim.maxAxis.y)
                 {
                     anim.axisAccumulation.y += newPitch;
-                    float slowdownFactor = 1.0f - (anim.axisAccumulation.y / anim.maxAxis.y);
-                    slowdownFactor = max(slowdownFactor, 0.2f); // Ensure we don't slow down too much, setting a lower limit
+                    float slowdownFactor = max(1.0f - (anim.axisAccumulation.y / anim.maxAxis.y), 0.f); // ensure that we don't have an infinite recoil and slowdown being negative
                     newAxis.y += newPitch * slowdownFactor;
+
                 }
                 else newAxis.y += newPitch;
+
+                float newYaw = lerp(0, anim.animAxis.x, progress);
+                newAxis.x += newYaw;
             }
             break;
 
