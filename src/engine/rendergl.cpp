@@ -1528,6 +1528,19 @@ void updateCameraAnimations()
 
         switch(i)
         {
+            case CAM_ANIM_JUMP:
+            {
+                float newPitch = 0.0f;
+                if(progress < 0.4) newPitch = lerp(0, anim.animAxis.y, progress / 0.4);
+                else
+                {
+                    float np = (progress - 0.4f) / 0.6f; // Normalize progress
+                    newPitch = (lerp(anim.animAxis.y, 0, np)) / -1.4f;
+                }
+                newAxis.y += newPitch;
+            }
+            break;
+
             case CAM_ANIM_LAND:
             {
                 float newHeight = 0.0f;

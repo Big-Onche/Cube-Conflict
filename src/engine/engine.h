@@ -171,7 +171,7 @@ extern void screenquadoffset(float x, float y, float w, float h);
 extern void screenquadoffset(float x, float y, float w, float h, float x2, float y2, float w2, float h2);
 extern void hudquad(float x, float y, float w, float h, float tx = 0, float ty = 0, float tw = 1, float th = 1);
 extern void debugquad(float x, float y, float w, float h, float tx = 0, float ty = 0, float tw = 1, float th = 1);
-enum {CAM_ANIM_SHOOT = 0, CAM_ANIM_LAND, CAM_ANIM_SWAY, NUMCAMANIMS};
+enum {CAM_ANIM_SHOOT = 0, CAM_ANIM_JUMP, CAM_ANIM_LAND, CAM_ANIM_SWAY, NUMCAMANIMS};
 extern void startCameraAnimation(int animation, int duration, vec position, vec maxPosition = vec(0, 0, 0), vec axis = vec(0, 0, 0), vec maxAxis = vec(0, 0, 0));
 extern void recomputecamera(int campostag = -1);
 extern float calcfrustumboundsphere(float nearplane, float farplane, const vec &pos, const vec &view, vec &center);
