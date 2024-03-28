@@ -316,12 +316,12 @@ namespace entities
                                     addReward(e->type==I_WOODSHIELD ? 2 : e->type==I_IRONSHIELD ? 3 : 4);
                                 }
                                 break;
-                            case I_POWERARMOR:  updateStat(1, STAT_ARMUREASSIST); addReward(5); break;
+                            case I_POWERARMOR:      updateStat(1, STAT_ARMUREASSIST); addReward(5); break;
                             case I_BOOSTPV:         updateStat(1, STAT_COCHON); addReward(5); break;
-                            case I_ROIDS:     updateStat(1, STAT_STEROS); addReward(5); break;
-                            case I_EPO:    updateStat(1, STAT_EPO); addReward(5); break;
-                            case I_JOINT:    updateStat(1, STAT_JOINT); addReward(5); break;
-                            case I_SHROOMS:  updateStat(1, STAT_CHAMPIS); addReward(5); break;
+                            case I_ROIDS:           updateStat(1, STAT_STEROS); addReward(5); break;
+                            case I_EPO:             updateStat(1, STAT_EPO); addReward(5); break;
+                            case I_JOINT:           updateStat(1, STAT_JOINT); addReward(5); break;
+                            case I_SHROOMS:         updateStat(1, STAT_CHAMPIS); addReward(5); break;
                             case I_SUPERARME:       updateStat(1, STAT_SUPERARMES); addReward(7); break;
                             default: if(e->type>=I_RAIL && e->type<=I_GLOCK) {updateStat(1, STAT_ARMES); addReward(1);}
                         }

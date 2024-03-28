@@ -1558,7 +1558,7 @@ void updateCameraAnimations()
                 if(anim.maxAxis.y)
                 {
                     anim.axisAccumulation.y += newPitch;
-                    float slowdownFactor = max(1.0f - (anim.axisAccumulation.y / anim.maxAxis.y), 0.f); // ensure that we don't have an infinite recoil and slowdown being negative
+                    float slowdownFactor = max(1.0f - (anim.axisAccumulation.y / anim.maxAxis.y), 0.1f); // ensure that we don't have an infinite recoil and slowdown being negative
                     newAxis.y += newPitch * slowdownFactor;
 
                 }
@@ -1596,6 +1596,9 @@ void updateCameraAnimations()
             break;
         }
     }
+
+    newPosition.div(curfps).mul(60);
+    newAxis.div(curfps).mul(60);
 
     camera1->o.add(newPosition);
     camera1->yaw += newAxis.x;
