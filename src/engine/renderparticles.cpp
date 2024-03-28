@@ -1,5 +1,6 @@
 // renderparticles.cpp
 
+#include "engine.h"
 #include "gfx.h"
 
 Shader *particleshader = NULL, *particlenotextureshader = NULL, *particlesoftshader = NULL, *particletextshader = NULL;

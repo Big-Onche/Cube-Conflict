@@ -2,6 +2,7 @@
 #include "customs.h"
 #include "stats.h"
 #include "engine.h"
+#include <string>
 
 namespace game
 {

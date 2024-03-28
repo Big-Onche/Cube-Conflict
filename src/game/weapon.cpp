@@ -3,6 +3,7 @@
 #include "engine.h"
 #include "gfx.h"
 #include "stats.h"
+#include <string>
 
 int lastshoot;
 
