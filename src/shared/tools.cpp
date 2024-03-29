@@ -283,3 +283,6 @@ int rygbGradient(int val)
 int rgbToHex(int r, int g, int b) { return (r << 16) | (g << 8) | b; }
 
 float lerp(float a, float b, float t) { return a + (b - a) * t; }
+
+float rndf(float min, float max) { return min + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (max - min))); }
+
