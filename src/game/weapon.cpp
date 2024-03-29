@@ -1080,7 +1080,7 @@ namespace game
         return (1.0f + (rand() % 20 - 10) / 100.0f) * sin((totalmillis * (2 * M_PI / static_cast<float>(time))) + phaseShift); // Slight random amplitude modulation (±10% variation)
     }
 
-    void shoteffects(int atk, const vec &from, const vec &to, gameent *d, bool local, int id, int prevaction)     // create visual effect from a shot
+    void shoteffects(int atk, const vec &from, const vec &to, gameent *d, bool local, int id, int prevaction, bool isMonster)     // create visual effect from a shot
     {
         int gun = attacks[atk].gun;
         int gunSound = attacks[atk].sound;
@@ -1103,7 +1103,7 @@ namespace game
                 if(isHudPlayer)
                 {
                     float deviationAmount = (isPlasma ? ((0.1f / recoilReduce()) * recoilSide(500)) : 0.f);
-                    startCameraAnimation(CAM_ANIM_SHOOT, isPlasma ? attacks[atk].attackdelay * 2.f : attacks[atk].attackdelay, vec(0, 0, 0), vec(0, 0, 0), vec(deviationAmount / recoilReduce(), (isPlasma ? 0.4f : 0.2f) / recoilReduce(), 0), vec(0, 25, 0));
+                    startCameraAnimation(CAM_ANIM_SHOOT, isPlasma ? attacks[atk].attackdelay * 2.f : attacks[atk].attackdelay, vec(0, 0, 0), vec(0, 0, 0), vec(deviationAmount / recoilReduce(), (isPlasma ? 0.4f : 0.3f) / recoilReduce(), 0), vec(0, 25, 0));
                 }
                 if(d->type == ENT_PLAYER && isPlasma) gunSound = S_PLASMARIFLE_SFX;
                 break;
@@ -1343,7 +1343,7 @@ namespace game
         }
         else if(gunSound != S_PLASMARIFLE_SFX) return;
 
-        playSound(attacks[atk].sound, isHudPlayer ? vec(0, 0, 0) : d->o, incraseDist ? 600 : 500, incraseDist ? 350 : 200, NULL, d->entityId, NULL, pitch);
+        playSound(attacks[atk].sound, isHudPlayer ? vec(0, 0, 0) : d->o, incraseDist ? 600 : 500, incraseDist ? 350 : 200, NULL, (isMonster ? -1 : d->entityId), NULL, pitch);
 
         if(distance > 350)
         {
@@ -1445,7 +1445,7 @@ namespace game
         }
     }
 
-    void shoot(gameent *d, const vec &targ)
+    void shoot(gameent *d, const vec &targ, bool isMonster)
     {
         int prevaction = d->lastaction, attacktime = lastmillis-prevaction;
         bool specialAbility = d->aptitude==APT_PRETRE && d->abilitymillis[ABILITY_3];
@@ -1530,7 +1530,7 @@ namespace game
 
         if(!attacks[atk].projspeed) raydamage(from, to, d, atk);
 
-        shoteffects(atk, from, to, d, true, 0, prevaction);
+        shoteffects(atk, from, to, d, true, 0, prevaction, isMonster);
 
         if(d==player1 || d->ai || d->type==ENT_AI)
         {

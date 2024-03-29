@@ -304,7 +304,7 @@ namespace game
                     {
                         lastaction = 0;
                         attacking = true;
-                        shoot(this, attacktarget);
+                        shoot(this, attacktarget, true);
                         transition(M_ATTACKING, friendly ? 0 : 1, 600, 0);
                         if(friendly) transition(M_NEUTRAL, 1, 100, 200);
                     }
@@ -671,9 +671,9 @@ namespace game
         "none", "searching", "aggro", "retreat", "attacking", "in pain", "sleeping", "aiming", "friendly", "neutral", "angry"
     };
 
-    VAR(dbgpnj, 0, 0, 1);
+    VAR(debugnpcs, 0, 0, 1);
 
-    void debugpnj(monster *m)
+    void debugnpc(monster *m)
     {
         vec entpos = m->abovehead();
         vec campos = camera1->o;
@@ -775,14 +775,14 @@ namespace game
                 }
 
                 rendermodel(npcs[m.mtype].mdlname, anim, o, yaw, pitch, 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY, &m, a[0].tag ? a : NULL, basetime, 0, fade);
-                if(dbgpnj) debugpnj(&m);
+                if(debugnpcs) debugnpc(&m);
             }
         }
     }
 
     void suicidemonster(monster *m)
     {
-        m->monsterpain(400, m, ATK_CAC349_SHOOT);
+        m->monsterpain(5000, m, ATK_CAC349_SHOOT);
     }
 
     void hitmonster(int damage, monster *m, gameent *at, const vec &vel, int atk)

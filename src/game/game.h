@@ -1053,9 +1053,9 @@ namespace game
 
     // weapon
     extern int getweapon(const char *name);
-    extern void shoot(gameent *d, const vec &targ);
+    extern void shoot(gameent *d, const vec &targ, bool isMonster = false);
     extern void doaction(int act);
-    extern void shoteffects(int atk, const vec &from, const vec &to, gameent *d, bool local, int id, int prevaction);
+    extern void shoteffects(int atk, const vec &from, const vec &to, gameent *d, bool local, int id, int prevaction, bool isMonster = false);
     extern void explode(bool local, gameent *owner, const vec &v, const vec &vel, dynent *safe, int dam, int atk);
     extern void explodeeffects(int atk, gameent *d, bool local, int id = 0);
     extern void damageeffect(int damage, gameent *d, gameent *actor, int atk = 0);
