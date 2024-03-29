@@ -1211,10 +1211,16 @@ int main(int argc, char **argv)
             case 'h': scr_h = clamp(atoi(&argv[i][2]), SCR_MINH, SCR_MAXH); if(!findarg(argc, argv, "-w")) scr_w = -1; break;
             case 'f': fullscreen = atoi(&argv[i][2]); break;
             case '0': case '1': case '2': case '3':
-                language = argv[i][1] - '0';
-                execute(tempformatstring("selectLanguage %d %d", language, false));
-                languageForced = true;
+            {
+                int arg = argv[i][1] - '0';
+                if(language != arg)
+                {
+                    language = arg;
+                    execute(tempformatstring("selectLanguage %d %d", language, false));
+                    languageForced = true;
+                }
                 break;
+            }
             case 'p':
             {
                 char pkgdir[] = "media/";
@@ -1317,8 +1323,16 @@ int main(int argc, char **argv)
 
     execfile(game::autoexec(), false);
 
-    if(!languageForced) execute(tempformatstring("selectLanguage %d %d", language, false));
-    if(!execfile(game::savedconfig(), false)) execfile("config/default_binds.cfg");
+    if(languageForced)
+    {
+        execfile(game::savedconfig(), false);
+        execfile("config/default_binds.cfg");
+    }
+    else
+    {
+        execute(tempformatstring("selectLanguage %d %d", language, false));
+        if(!execfile(game::savedconfig(), false)) execfile("config/default_binds.cfg");
+    }
 
     execfile("config/ui/ui.cfg");
 

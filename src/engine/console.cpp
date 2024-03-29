@@ -256,7 +256,11 @@ void bindkey(char *key, char *action, int state, const char *cmd)
 {
     if(identflags&IDF_OVERRIDDEN) { conoutf(CON_ERROR, "cannot override %s \"%s\"", cmd, key); return; }
     keym *km = findbind(key);
-    if(!km) { conoutf(CON_ERROR, "unknown key \"%s\"", key); return; }
+    if(!km)
+    {
+        if(!islaunching) conoutf(CON_ERROR, "unknown key \"%s\"", key);
+        return;
+    }
     char *&binding = km->actions[state];
     if(!keypressed || keyaction!=binding) delete[] binding;
     // trim white-space to make searchbinds more reliable
