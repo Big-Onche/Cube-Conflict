@@ -514,6 +514,7 @@ void updateSoundOcclusion(int id)
 
 void updateSoundPosition(int id)
 {
+    if(game::ispaused()) return;
     vec pos, vel;
     getEntMovement(sounds[id].entityId, pos, vel);
     sounds[id].position = pos;
