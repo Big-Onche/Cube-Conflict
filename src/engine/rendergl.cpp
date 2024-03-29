@@ -1490,7 +1490,7 @@ void startCameraAnimation(int animation, int duration, vec position, vec maxPosi
 
 void updateCameraAnimations()
 {
-    if(game::ispaused()) return;
+    if(game::ispaused() || game::intermission) return;
 
     vec newPosition(0, 0, 0);
     vec newAxis(0, 0, 0);
