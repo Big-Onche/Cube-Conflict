@@ -108,6 +108,7 @@ struct vec
     bool operator!=(const vec &o) const { return x != o.x || y != o.y || z != o.z; }
 
     bool iszero() const { return x==0 && y==0 && z==0; }
+    bool isneg() const { return x<0 && y<0 && z<0; }
     float squaredlen() const { return x*x + y*y + z*z; }
     float dot2(const vec2 &o) const { return x*o.x + y*o.y; }
     float dot2(const vec &o) const { return x*o.x + y*o.y; }

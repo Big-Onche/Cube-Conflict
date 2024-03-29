@@ -1078,7 +1078,7 @@ static inline particle *newparticle(const vec &o, const vec &d, int fade, int ty
 {
     static particle dummy;
 
-    if(!isInRange(o, parts[type]->type)) return &dummy;
+    if(!isInRange(o, parts[type]->type) || o.isneg()) return &dummy;
     if(seedemitter)
     {
         parts[type]->seedemitter(*seedemitter, o, d, fade, size, gravity);

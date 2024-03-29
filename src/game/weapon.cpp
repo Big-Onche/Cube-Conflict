@@ -410,6 +410,7 @@ namespace game
 
     void newprojectile(const vec &from, const vec &to, float speed, bool local, int id, gameent *owner, int atk)
     {
+        if(from.isneg()) return;
         projectile &p = projs.add();
         p.dir = vec(to).sub(from).safenormalize();
         p.o = from;
@@ -466,7 +467,7 @@ namespace game
 
     void spawnbouncer(const vec &p, const vec &vel, gameent *d, int type, int speed, int lifetime, bool frommonster)
     {
-        if((camera1->o.dist(p) > bouncers[type].cullDist) && type!=BNC_GRENADE) return; // culling distant ones, except grenades, grenades are important
+        if(p.isneg() || ((camera1->o.dist(p) > bouncers[type].cullDist) && type!=BNC_GRENADE)) return; // culling distant ones, except grenades, grenades are important
 
         vec dir;
         if(!speed) speed = 50 + rnd(20);
@@ -1005,7 +1006,7 @@ namespace game
                     renderProjectilesTrails(p.owner, pos, dv, p.from, p.offset, p.atk, p.exploded);
                 }
 
-                if(p.projsound) // play and update the sound only if the projectile is passing by
+                if(p.projsound && !game::ispaused()) // play and update the sound only if the projectile is passing by
                 {
                     bool bigRadius = (p.atk==ATK_NUKE_SHOOT || p.atk==ATK_ARTIFICE_SHOOT);
 
