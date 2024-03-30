@@ -1122,7 +1122,12 @@ namespace game
                     cameraSwayDir = !cameraSwayDir;
                 }
                 playSound(snd, isHudPlayer ? vec(0, 0, 0) : d->o, hasPowerArmor ? 300 : 150, 20, hasPowerArmor ? NULL : SND_LOWPRIORITY, pl->entityId);
-                if(pl->boostmillis[B_EPO]) if(!rnd(12)) playSound(S_EPO_RUN, isHudPlayer ? vec(0, 0, 0) : d->o, 1000, 500, NULL, pl->entityId);
+
+                if(pl->boostmillis[B_EPO] && !rnd(15))
+                {
+                    playSound(S_EPO_RUN, isHudPlayer ? vec(0, 0, 0) : d->o, 500, 100, NULL, pl->entityId);
+                    if(camera1->o.dist(d->o) >= 400 && d!=player1) playSound(S_EPO_RUN_FAR, d->o, 1000, 500, NULL, pl->entityId);
+                }
             }
         }
         pl->lastfootstep = lastmillis;
