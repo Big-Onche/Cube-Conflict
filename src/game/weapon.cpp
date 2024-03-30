@@ -1308,7 +1308,7 @@ namespace game
             if(d->boostmillis[B_ROIDS])
             {
                 playSound(S_ROIDS_SHOOT, isHudPlayer ? vec(0, 0, 0) : d->o, 500, 100, NULL, d->entityId);
-                if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 400 && d!=player1) playSound(S_ROIDS_SHOOT_FAR, d->o, 800, 450, NULL, d->entityId);
+                if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 400 && d!=player1) playSound(S_ROIDS_SHOOT_FAR, d->o, 1000, 500, NULL, d->entityId);
             }
             else if(d->boostmillis[B_RAGE]) playSound(S_RAGETIR, isHudPlayer ? vec(0, 0, 0) : d->o, 500, 100);
         }
@@ -1319,7 +1319,7 @@ namespace game
         bool incraseDist = atk==ATK_ASSISTXPL_SHOOT || atk==ATK_KAMIKAZE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_NUKE_SHOOT;
         int distance = camera1->o.dist(hudgunorigin(gun, d->o, to, d));
         int loopedSoundFlags = SND_LOOPED|SND_FIXEDPITCH|SND_NOCULL;
-        float pitch = d->boostmillis[B_SHROOMS] ? 1.2f : (d->aptitude==APT_PRETRE && d->abilitymillis[ABILITY_3] ? (1.5f - (d->abilitymillis[ABILITY_3] / 8000.0f)) : 0);
+        float pitch = d->boostmillis[B_SHROOMS] ? (d->aptitude==APT_JUNKIE ? 1.4f : 1.2f) : (d->aptitude==APT_PRETRE && d->abilitymillis[ABILITY_3] ? (1.5f - (d->abilitymillis[ABILITY_3] / 8000.0f)) : 0);
 
         if(!d->attacksound)
         {
