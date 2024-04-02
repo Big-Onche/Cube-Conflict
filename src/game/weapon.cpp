@@ -1320,6 +1320,7 @@ namespace game
         int distance = camera1->o.dist(hudgunorigin(gun, d->o, to, d));
         int loopedSoundFlags = SND_LOOPED|SND_FIXEDPITCH|SND_NOCULL;
         float pitch = d->boostmillis[B_SHROOMS] ? (d->aptitude==APT_JUNKIE ? 1.4f : 1.2f) : (d->aptitude==APT_PRETRE && d->abilitymillis[ABILITY_3] ? (1.5f - (d->abilitymillis[ABILITY_3] / 8000.0f)) : 0);
+        if(gamespeed!=100) pitch *= (game::gamespeed / 100.f);
 
         if(!d->attacksound)
         {
