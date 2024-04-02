@@ -18,7 +18,7 @@ namespace action
     }
 
     std::string logsArg() { return "-ggame_log.txt"; }
-    std::string langArg() { return "-" + std::to_string(currentLanguage); }
+    std::string langArg() { return "-" + std::to_string(config::get(CONF_LANGUAGE)); }
     std::string steamArg() { return (isUsingSteam ? "-s" : ""); }
 
 #if defined(_WIN32)
@@ -87,14 +87,14 @@ namespace action
 
     void setupAudio()
     {
-        if(audio::playSong)
+        if(config::get(CONF_MUSIC))
         {
-            audio::playSong = false;
+            config::set(CONF_MUSIC, false);
             audio::stopMusic();
         }
         else
         {
-            audio::playSong = true;
+            config::set(CONF_MUSIC, true);
             audio::playMusic();
         }
     }

@@ -1,4 +1,5 @@
 #include "main.h"
+#include "actions.h"
 #include "buttons.h"
 #include "textures.h"
 #include "audio.h"
@@ -9,10 +10,19 @@ bool isUsingSteam = false;
 
 bool initGameLauncher()
 {
-    detectSystemLanguage();
+    config::load();
+
+    if(config::get(CONF_QUICKLAUNCH))
+    {
+        action::launchGame();
+        exit(EXIT_SUCCESS);
+    }
+
+    if(config::get(CONF_FIRSTLAUNCH)) detectSystemLanguage();
+    else setLanguage(config::get(CONF_LANGUAGE), true);
     if(!sdl::init()) return false;
     audio::init();
-    audio::playMusic();
+    if(config::get(CONF_MUSIC)) audio::playMusic();
     texture::init();
     buttons::init();
     pong::init();
@@ -21,6 +31,8 @@ bool initGameLauncher()
 
 void closeLauncher() // Destroy window and quit SDL subsystems
 {
+    config::set(CONF_FIRSTLAUNCH, false);
+    config::write();
     buttons::destroy();
     sdl::destroy();
     audio::destroy();
@@ -40,15 +52,15 @@ int startX = 0, startY = 0;
 
 void checkWindowEvent(SDL_Event &e)
 {
-    switch (e.window.event)
+    switch(e.window.event)
     {
         case SDL_WINDOWEVENT_MINIMIZED:
-        audio::stopMusic();
-        break;
+            if(config::get(CONF_MUSIC)) audio::stopMusic();
+            break;
 
-    case SDL_WINDOWEVENT_RESTORED:
-        audio::playMusic();
-        break;
+        case SDL_WINDOWEVENT_RESTORED:
+            if(config::get(CONF_MUSIC)) audio::playMusic();
+            break;
     }
 }
 
@@ -122,7 +134,7 @@ int main(int argc, char* argv[])
                 texture::render(TEX_BACKGROUND, 0, 0, SCR_W, SCR_H);
                 texture::render(TEX_LOGO, 460, 140, 512, 180, TEX_ALPHA|TEX_SHADOW);
 
-                buttons::render(sdl::renderer);
+                buttons::render();
 
                 SDL_RenderPresent(sdl::renderer); // Update screen
             }

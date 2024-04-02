@@ -3,8 +3,6 @@
 
 namespace audio
 {
-    bool playSong = true;
-
     soundConfig sounds[NUMSOUNDS] =
     {
         {nullptr, "media/songs/launcher.mp3"},              // S_MUSIC

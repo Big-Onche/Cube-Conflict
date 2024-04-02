@@ -14,6 +14,7 @@
 #include "tools.h"
 #include "logs.h"
 #include "locales.h"
+#include "config.h"
 
 const int SCR_W = 1000;
 const int SCR_H = 540;

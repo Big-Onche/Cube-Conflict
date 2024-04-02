@@ -100,6 +100,8 @@
 		<Unit filename="audio.h" />
 		<Unit filename="buttons.cpp" />
 		<Unit filename="buttons.h" />
+		<Unit filename="config.cpp" />
+		<Unit filename="config.h" />
 		<Unit filename="locales.cpp" />
 		<Unit filename="locales.h" />
 		<Unit filename="logs.cpp" />

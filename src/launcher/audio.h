@@ -10,8 +10,6 @@ enum {S_MUSIC = 0, S_GRENADE, S_PLAYER, S_EXPLOSION, NUMSOUNDS};
 
 namespace audio
 {
-    extern bool playSong;
-
     struct soundConfig
     {
         ma_sound *sound;

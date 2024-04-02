@@ -6,6 +6,8 @@ textureConfig textures[NUMTEXTURES] =
 {
     {nullptr, "media/launcher/background.png"},         // TEX_BACKGROUND
     {nullptr, "media/interface/logo.png"},              // TEX_LOGO
+    {nullptr, "media/interface/hud/checkbox_on.jpg"},   // TEX_ON
+    {nullptr, "media/interface/hud/checkbox_off.jpg"},  // TEX_OFF
     {nullptr, "media/interface/flags/french.png"},      // TEX_FRENCH
     {nullptr, "media/interface/flags/english.png"},     // TEX_ENGLISH
     {nullptr, "media/interface/flags/russian.png"},     // TEX_RUSSIAN
@@ -27,10 +29,7 @@ textureConfig textures[NUMTEXTURES] =
 
 namespace texture
 {
-    bool isValid(int id)
-    {
-        return id >= 0 && id < NUMTEXTURES;
-    }
+    bool isValid(int id) { return id >= 0 && id < NUMTEXTURES; }
 
     SDL_Texture* loadTexture(std::string path, SDL_Renderer* renderer)
     {
