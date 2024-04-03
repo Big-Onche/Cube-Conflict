@@ -34,11 +34,12 @@ ICOMMAND(gamesound, "siii", (char *path, int *alts, int *vol),
 #define NUMMAPSNDS 32 // temporary fixed shit
 int mapSoundId = 0;
 Sound mapSounds[NUMMAPSNDS];
-ICOMMAND(mapsound, "siii", (char *path, int *alts, int *vol),
+ICOMMAND(mapsound, "siii", (char *path, int *alts, int *vol, int *occl),
     if(mapSoundId >= NUMMAPSNDS) { conoutf(CON_ERROR, "Unable to load map sound: %s (id %d is greater than amount of map sounds)", path, mapSoundId); return; }
     formatstring(mapSounds[mapSoundId].soundPath, "%s", path);
     mapSounds[mapSoundId].numAlts = *alts;
     mapSounds[mapSoundId].soundVol = *vol;
+    mapSounds[mapSoundId].noGeomOcclusion = *occl;
     mapSounds[mapSoundId].loaded = loadSound(mapSounds[mapSoundId]);
     mapSoundId++;
 );
@@ -383,8 +384,8 @@ void playSound(int soundId, vec soundPos, float maxRadius, float maxVolRadius, i
     Sound& s = (flags & SND_MUSIC) ? music[soundId] : ( (flags & SND_MAPSOUND) ? mapSounds[soundId] : gameSounds[soundId] );
     ALuint source = sounds[id].alSource;
 
+    if(s.noGeomOcclusion) sounds[id].soundFlags |= SND_NOOCCLUSION;
     ALuint buffer = s.bufferId[s.numAlts ? rnd(s.numAlts + 1) : 0];
-
     alSourcei(source, AL_BUFFER, buffer); // managing sounds alternatives
     alSourcef(source, AL_GAIN, s.soundVol / 100.f); // managing sound volume
     alSourcef(source, AL_PITCH, pitch ? pitch : getRandomSoundPitch(flags)); // managing variations of pitches

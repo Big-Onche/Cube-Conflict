@@ -1445,7 +1445,7 @@ CVARR(apocalypsecolor, 0xFF9500);
 void spawnApocalypse()
 {
     int intensity = pow(1.4f, apocalypseintensity);
-    regularshape(PART_FIRESPARK, 4000, rgbToHex(apocalypsecolor.r, apocalypsecolor.g, apocalypsecolor.b), 44, intensity, 10000, camera1->o, 1+(rnd(5)), 200, velocity(apocalypsevelocity), wind(), WEATHER_APOCALYPSE, 325);
+    regularshape(PART_FIRESPARK, 4000, rgbToHex(apocalypsecolor.r, apocalypsecolor.g, apocalypsecolor.b), 44, intensity, 20000, camera1->o, 1+(rnd(5)), 200, velocity(apocalypsevelocity), wind(), WEATHER_APOCALYPSE, 325);
 }
 
 VARR(lightningfrequency, 0, 0, 10);

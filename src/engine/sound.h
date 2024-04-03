@@ -97,6 +97,7 @@ struct Sound
     string soundPath;               // relative path of the sound
     int numAlts;                    // number of alternatives for the same sound id
     int soundVol;                   // volume of the sound
+    bool noGeomOcclusion;           // not affected by geometric occlusion
     bool loaded;
     ALuint bufferId[MAX_ALTS];      // OpenAL buffer ID
 };
