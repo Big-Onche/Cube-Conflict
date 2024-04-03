@@ -1481,7 +1481,7 @@ void updateWeather()
     if(rainintensity) spawnRain();
     if(snowintensity) spawnSnow();
     if(apocalypseintensity) spawnApocalypse();
-    if(lightningfrequency && rndevent(50, 750 - (lightningfrequency * 50))) popLightning();
+    if(lightningfrequency && rndevent(35, 750 - (lightningfrequency * 50))) popLightning();
 }
 
 VARR(showrainbow, 0, 0, 1);
