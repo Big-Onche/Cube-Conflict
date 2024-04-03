@@ -228,7 +228,7 @@ struct partrenderer
                 o.add(vec(d).mul(t/5000.0f));
                 o.z -= t*t/(2.0f * 5000.0f * p->gravity);
             }
-            if(camera1->o.dist2(p->o) < 300 && type&PT_COLLIDE && o.z < p->val && step) // avoid useless heavy collision computing if the particle is far away except height
+            if(camera1->o.dist2(p->o) <= 256 && type&PT_COLLIDE && o.z < p->val && step) // avoid useless heavy collision computing if the particle is far away except height
             {
                 if(stain >= 0)
                 {
@@ -265,6 +265,8 @@ struct partrenderer
                 }
                 else blend = 0;
             }
+            //else if(p->type&PT_COLLIDE && camera1->o.dist2(p->o) > 256) type-=PT_COLLIDE; // remove collide flag if the particle is far away
+
             if(type & (PT_EMITLIGHT | PT_EMITVLIGHT) && camera1->o.dist(o) < (dynlightdist / 2) )
             {
                 int flags = (type & PT_EMITVLIGHT) ? L_NOSHADOW|L_VOLUMETRIC|DL_EXPAND : L_NOSHADOW|DL_EXPAND;
@@ -1064,9 +1066,6 @@ void renderparticles(int layer)
 
 static int addedparticles = 0;
 
-int spawnDistance = 0;
-VARFP(particleslod, 1, 2, 4, spawnDistance = particleslod * 256);
-
 VARP(maxparticledistance, 128, 1024, 4096);
 
 static inline bool isInRange(vec o, int flags)
@@ -1135,6 +1134,24 @@ namespace particles
     {   // spawn particles in a certain direction
         if(minimized) return;
         directionalSplash(type, randomColor ? getRandomColor() : color, radius, num, fade, p, dir, size, speed, sizemod);
+    }
+
+    VARP(maxtrail, 1, 2000, 10000);
+
+    void trail(int type, int fade, const vec &s, const vec &e, int color, float size, int gravity)
+    {
+        if(minimized) return;
+        vec v;
+        float d = e.dist(s, v);
+        int steps = clamp(int(d*2), 1, maxtrail);
+        v.div(steps);
+        vec p = s;
+        loopi(steps)
+        {
+            p.add(v);
+            vec tmp = vec(float(rnd(11)-5), float(rnd(11)-5), float(rnd(11)-5));
+            newparticle(p, tmp, rnd(fade)+fade, type, color, size, gravity);
+        }
     }
 
     void lensFlare(const vec &p, int color, int flaresize, int viewdist)
@@ -1214,24 +1231,6 @@ void particle_splash(int type, int num, int fade, const vec &p, int color, float
     splash(type, randomcolor ? particles::getRandomColor() : color, radius, num, fade, p, size, gravity, sizemod, sound);
 }
 
-VARP(maxtrail, 1, 2000, 10000);
-
-void particle_trail(int type, int fade, const vec &s, const vec &e, int color, float size, int gravity)
-{
-    if(minimized) return;
-    vec v;
-    float d = e.dist(s, v);
-    int steps = clamp(int(d*2), 1, maxtrail);
-    v.div(steps);
-    vec p = s;
-    loopi(steps)
-    {
-        p.add(v);
-        vec tmp = vec(float(rnd(11)-5), float(rnd(11)-5), float(rnd(11)-5));
-        newparticle(p, tmp, rnd(fade)+fade, type, color, size, gravity);
-    }
-}
-
 void particle_flare(const vec &p, const vec &dest, int fade, int type, int color, float size, physent *owner, bool randomcolor, int sizemod)
 {
     if(minimized) return;
@@ -1271,7 +1270,10 @@ static inline int colorfromattr(int attr)
  * 24..26 flat plane
  * +32 to inverse direction
  */
-void regularshape(int type, int radius, int color, int dir, int num, int fade, const vec &p, float size, int gravity, float vel, int windoffset, bool weather, int height, int sizemod)
+
+enum {WEATHER_CLEAR = 0, WEATHER_RAIN, WEATHER_SNOW, WEATHER_APOCALYPSE};
+
+void regularshape(int type, int radius, int color, int dir, int num, int fade, const vec &p, float size, int gravity, float vel, int windoffset, int weather, int height, int sizemod)
 {
     if(minimized) return;
 
@@ -1349,7 +1351,7 @@ void regularshape(int type, int radius, int color, int dir, int num, int fade, c
 
         if(weather)
         {
-            if(camera1->o.dist2(vec(to.x, to.y, camera1->o.z)) > spawnDistance) continue; // culling out distant ones
+            if(camera1->o.dist2(vec(to.x, to.y, camera1->o.z)) > (weather==WEATHER_RAIN ? 256 : 768)) continue; // culling out distant ones
 
             vec spawnz(to.x, to.y, camera1->o.z + height);
             vec d = spawnz;
@@ -1390,12 +1392,6 @@ void regularshape(int type, int radius, int color, int dir, int num, int fade, c
     }
 }
 
-void regular_particle_flame(int type, const vec &p, float radius, float height, int color, int density, float scale, float speed, float fade, int gravity)
-{
-    if(minimized) return;
-    regularflame(type, p, radius, height, color, density, scale, speed, fade, gravity);
-}
-
 void regularflame(int type, const vec &p, float radius, float height, int color, int density, float scale, float speed, float fade, int gravity, int sizemod)
 {
     if(minimized) return;
@@ -1411,92 +1407,100 @@ void regularflame(int type, const vec &p, float radius, float height, int color,
     }
 }
 
-int applyRandomOffset(int base, int offset)
+int applyRandomOffset(int base, int offset) { return clamp(base + rnd(2 * offset + 1) - offset, 0, 255); }
+
+bool noColors(int r, int g, int b) { return !r && !g && !b; }
+
+int smokeGs() { return 17 + rnd(37); } // setting random smoke grayscale
+
+VARR(windintensity, 0, 0, 10);
+int wind() { return 120 * windintensity; }
+
+int velocity(int factor) { return -(200 * factor); }
+
+VARR(rainintensity, 0, 0, 10);
+VARR(rainvelocity, 0, 1, 10);
+CVARR(raincolor, 0x555566);
+
+void spawnRain()
 {
-    return clamp(base + rnd(2 * offset + 1) - offset, 0, 255);
+    int intensity = pow(2, rainintensity);
+    regularshape(PART_RAIN, 2000, rgbToHex(raincolor.r, raincolor.g, raincolor.b), 44, intensity, 5000, camera1->o, 5+(rnd(3)), 200, velocity(rainvelocity), wind(), WEATHER_RAIN, 325);
 }
 
-bool noColors(int r, int g, int b)
+VARR(snowintensity, 0, 0, 10);
+VARR(snowvelocity, 0, 1, 10);
+CVARR(snowcolor, 0xFFFFFF);
+
+void spawnSnow()
 {
-    return !r && !g && !b;
+    int intensity = pow(2, snowintensity);
+    regularshape(PART_SNOW, 4000, rgbToHex(snowcolor.r, snowcolor.g, snowcolor.b), 44, intensity, 10000, camera1->o, 2+(rnd(3)), 200, velocity(snowvelocity), wind(), WEATHER_SNOW, 325);
 }
 
-int smokeGs() {return 17 + rnd(37);} // setting random smoke grayscale
+VARR(apocalypseintensity, 0, 0, 10);
+VARR(apocalypsevelocity, 0, 0, 10);
+CVARR(apocalypsecolor, 0xFF9500);
 
-void popLightning(vec pos, vec flashColor, int lightColor)
+void spawnApocalypse()
 {
-    vec origin = pos, destination = pos;
+    int intensity = pow(1.4f, apocalypseintensity);
+    regularshape(PART_FIRESPARK, 4000, rgbToHex(apocalypsecolor.r, apocalypsecolor.g, apocalypsecolor.b), 44, intensity, 10000, camera1->o, 1+(rnd(5)), 200, velocity(apocalypsevelocity), wind(), WEATHER_APOCALYPSE, 325);
+}
+
+VARR(lightningfrequency, 0, 0, 10);
+CVARR(lightningcolor, 0);
+
+void popLightning()
+{
+    vec origin = camera1->o, destination = camera1->o;
     int xCoord = -1250 + rnd(2500), yCoord = -1250 + rnd(2500);
 
     origin.add(vec(xCoord + (-300 + rnd(601)), yCoord + (-300 + rnd(601)), 1300));
-    destination.add(vec(xCoord, yCoord, -100));
+    destination.add(vec(xCoord, yCoord, -1000));
 
     vec hitpos;
     float groundDist = rayfloor(destination.addz(1400), hitpos, RAY_CLIPMAT|RAY_POLY, 1250);
     destination.subz(groundDist);
 
-    loopi(2) particle_flare(origin, destination, 750, PART_LIGHTNING, lightColor, 15.f+rnd(10), NULL, game::hasShrooms());
+    loopi(2) particle_flare(origin, destination, 750, PART_LIGHTNING, rgbToHex(lightningcolor.r, lightningcolor.g, lightningcolor.b), 15.f+rnd(10), NULL, game::hasShrooms());
     playSound(S_ECLAIRPROCHE, destination.addz(50), 300, 200);
 
-    vec flashLoc = (origin.add((vec(camera1->o).mul(vec(3, 3, 3))))).div(vec(4, 4, 4));
+    vec flashLoc = (origin.add((vec(camera1->o).mul(vec(7, 7, 7))))).div(vec(8, 8, 8));
 
     if(camera1->o.dist(destination) >= 250) playSound(S_ECLAIRLOIN, flashLoc, 1500, 300);
+    else playSound(S_ECLAIRPROCHE, flashLoc, 300, 150, SND_NOOCCLUSION);
+
+    vec flashColor = vec(lightningcolor.r / 100.f, lightningcolor.g / 100.f, lightningcolor.b / 100.f);
+
     adddynlight(flashLoc, 4000, flashColor, 200, 40, L_NOSHADOW, 2000, flashColor);
 }
 
-enum {RAIN_LIGHT = 1, RAIN_MODERATE, RAIN_STORM, NUMRAINS};
-void spawnRain(vec pos, int rainType, int intensity, int r, int g, int b, int wind, bool force)
+void updateWeather()
 {
-    if(!force) // default map atmospheres
-    {
-        if(map_atmo==8) rainType = RAIN_LIGHT;
-        else if(map_atmo==4) rainType = RAIN_MODERATE;
-    }
-    else if (rainType > NUMRAINS) return; // if force rain, don't go after max rains
-
-    if(noColors(r, g, b)) { r = 85; g = 85;  b = 102; } // setting default colors for generic rain
-    if(!intensity) intensity = (particleslod * 200) * (rainType * 2);
-    else intensity = (intensity * particleslod);
-    if(!wind) wind = 200*(rainType);
-    int vel = - 900 - (600 * rainType);
-
-    regularshape(PART_RAIN, 2000, rgbToHex(r, g, b), 44, intensity, 5000, camera1->o, 5+(rnd(3)), 200, vel, wind, true, 325);
-
-    bool canPopLightning = rainType > RAIN_LIGHT && (map_atmo == 4 || force) && rndevent(1, 6);
-    if(canPopLightning) popLightning(pos, vec(1.5f, 1.5f, 2.0f), 0x8888FF);
+    if(rainintensity) spawnRain();
+    if(snowintensity) spawnSnow();
+    if(apocalypseintensity) spawnApocalypse();
+    if(lightningfrequency && rndevent(50, 750 - (lightningfrequency * 50))) popLightning();
 }
 
-void spawnSnow(vec pos, int intensity, int r, int g, int b, int wind, bool force)
-{
-    if(noColors(r, g, b)) { r = 255; g = 255;  b = 255; } // setting default colors for generic snow
-    if(!intensity) intensity = (map_atmo==8 && !force ? (particleslod * 75) : (particleslod * 150));
-    else intensity = (intensity * particleslod);
-    if(!wind) wind = 1200;
-
-    regularshape(PART_SNOW, 4000, rgbToHex(r, g, b), 44, intensity, 10000, pos, 2+(rnd(3)), 200, -400, wind, true, 325);
-}
-
-void spawnApocalypse(vec pos, int intensity, int r, int g, int b, int wind)
-{
-    if(noColors(r, g, b)) { r = 255; g = 150;  b = 0; } // setting default colors for "generic" apocalypse
-    if(!intensity) intensity = (particleslod * 20);
-    else intensity = (intensity * particleslod);
-    if(!wind) wind = 2500;
-
-    regularshape(PART_FIRESPARK, 4000, rgbToHex(r, g, b), 44, intensity, 10000, pos, 1+(rnd(5)), 200, -500, wind, true, 325);
-    if(strcasecmp(game::getclientmap(), "volcano") && rndevent(1, 2)) popLightning(pos, vec(1.5f, 0.5f, 0.0f), 0xFF6622);
-}
+VARR(showrainbow, 0, 0, 1);
 
 static void makeparticles(entity &e)
 {
     if(!isconnected()) return;
+
+    if(canemitparticles()) updateWeather();
+
     switch(e.attr1)
     {
-        case 0: // weather effect: attr 2:<weather type (0 = default else = force weather)> 3:<intensity> 4:<r> 5:<g> 6:<b> 7:<wind>
-            if(!canemitparticles()) return;
-            if((map_atmo==4 || map_atmo==8) || (e.attr2 >=1 && e.attr2 <=3)) spawnRain(e.o, e.attr2, e.attr3, e.attr4, e.attr5, e.attr6, e.attr7, e.attr2!=0); // light rain, moderate rain, storm
-            if(map_atmo==8 || map_atmo==9 || e.attr2==4) spawnSnow(e.o, e.attr3, e.attr4, e.attr5, e.attr6, e.attr7, e.attr2!=0); // snow
-            if(map_atmo==5 || e.attr2==5) spawnApocalypse(e.o, e.attr3, e.attr4, e.attr5, e.attr6, e.attr7); // apocalypse
+        case 0: // rainbow: attr 2:<size> 3:<force> (no canemitparticles check to avoid flickering)
+            if(showrainbow)
+            {
+                int size = e.attr2;
+                vec origin = e.o;
+                newparticle(origin.add(vec(0, 0, size*1.5)), offsetvec(e.o, 0, size*300), 1, PART_RAINBOW, 0xAAAAAA, size*3);
+            }
             break;
 
         case 1: // fire and smoke: attr 2:<radius> 3:<height> 4:<r> 5:<g> 6:<b> 7:<color offset> 8:<grow(+)/shrink(-)> 9:<sparks(amount)>
@@ -1568,13 +1572,7 @@ static void makeparticles(entity &e)
             newparticle(e.o, e.o, 1, PART_CLOUD1 + clamp((int)e.attr3, 0, 5), noColors(e.attr4, e.attr5, e.attr6) ? partcloudcolour : rgbToHex(e.attr4, e.attr5, e.attr6), e.attr2);
             break;
 
-        case 7: // rainbow: attr 2:<size> 3:<force>  (no canemitparticles check to avoid flickering)
-            if(map_atmo==8 || e.attr3)
-            {
-                int size = e.attr2;
-                vec origin = e.o;
-                newparticle(origin.add(vec(0, 0, size*1.5)), offsetvec(e.o, 0, size*300), 1, PART_RAINBOW, 0xAAAAAA, size*3);
-            }
+        case 7: // [OLD RAINBOW SLOT]
             break;
 
         case 8: // sparks: attr 2:<quantity> attr 3:<size> 4:<r> 5:<g> 6:<b> 7:<radius> 8:<fade> 9:<probability>

@@ -1217,7 +1217,7 @@ namespace game
                     {
                         float originOffset = 0.4f - (rnd(9) / 10.f);
                         particle_flare(muzzleOrigin.add(vec(originOffset, originOffset, originOffset)), rays[i], 100, PART_F_SHOTGUN, hasRoids(d) ? 0xFF2222 : 0xFFFF22, 0.4f, d, hasShrooms());
-                        particle_trail(PART_SMOKE, 800, hudgunorigin(gun, from, to, d), rays[i], 0x999999, 0.6f, 20);
+                        particles::trail(PART_SMOKE, 800, hudgunorigin(gun, from, to, d), rays[i], 0x999999, 0.6f, 20);
                         renderInstantImpact(from, rays[i], muzzleOrigin, atk, hasRoids(d));
                         if(!isHudPlayer) soundNearmiss(S_BIGBULLETFLYBY, from, rays[i], 512);
                         playSound(S_BIGRICOCHET, rays[i], 250, 100);
