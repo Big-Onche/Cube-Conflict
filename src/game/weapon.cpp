@@ -337,7 +337,7 @@ namespace game
 
             if(bnc.type != BNC_LIGHT)
             {
-                bool inWater = ((lookupmaterial(bnc.o) & MAT_WATER) == MAT_WATER);
+                bool inWater = ((lookupmaterial(bnc.o) & MATF_VOLUME) == MAT_WATER);
                 if(!bnc.inwater && inWater) // the bouncer enter in water
                 {
                     bnc.inwater = true;
@@ -431,7 +431,7 @@ namespace game
         p.exploded = false;
         p.offsetmillis = OFFSETMILLIS;
         p.id = local ? lastmillis : id;
-        p.inwater = ((lookupmaterial(p.o) & MAT_WATER) == MAT_WATER);
+        p.inwater = (lookupmaterial(camera1->o) & MATF_VOLUME) == MAT_WATER;
 
         switch(p.atk)
         {
@@ -760,7 +760,7 @@ namespace game
     void explode(bool local, gameent *owner, const vec &v, const vec &vel, dynent *safe, int damage, int atk)
     {
         vec safeLoc = vec(v).sub(vec(vel).mul(15)); // avoid false positive for occlusion effect
-        bool inWater = ((lookupmaterial(v) & MAT_WATER) == MAT_WATER);
+        bool inWater = ((lookupmaterial(v) & MATF_VOLUME) == MAT_WATER);
         bool isFar = camera1->o.dist(v) >= 300;
 
         switch(atk)
@@ -992,7 +992,7 @@ namespace game
 
                 vec pos = vec(p.offset).mul(p.offsetmillis/float(OFFSETMILLIS)).add(v);
 
-                if(!p.inwater && ((lookupmaterial(pos) & MAT_WATER) == MAT_WATER))
+                if(!p.inwater && (lookupmaterial(camera1->o) & MATF_VOLUME) == MAT_WATER)
                 {
                     p.inwater = true;
                     vec effectPos = pos;
@@ -1608,7 +1608,7 @@ namespace game
             pitch = -bnc.roll;
             yaw = -bnc.yaw;
 
-            bool inWater = ((lookupmaterial(pos) & MAT_WATER) == MAT_WATER);
+            bool inWater = ((lookupmaterial(pos) & MATF_VOLUME) == MAT_WATER);
 
             if(vel.magnitude() <= 3.f) {yaw = bnc.lastyaw; pitch = bnc.lastpitch;}
             else if (!isPaused)

@@ -40,10 +40,10 @@ namespace game
         }
     }
 
-    void renderProjectileExplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk) //particles and light effects on impact for slow projectiles
+    void renderProjectileExplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk) // particles and light effects on impact for slow projectiles
     {
         vec lightOrigin = vec(v).sub(vec(vel).mul(10));
-        bool inWater = ((lookupmaterial(v) & MAT_WATER) == MAT_WATER);
+        bool inWater = ((lookupmaterial(lightOrigin) & MATF_VOLUME) == MAT_WATER);
 
         switch(atk)
         {
@@ -73,7 +73,7 @@ namespace game
     void renderProjectilesTrails(gameent *owner, vec &pos, vec dv, vec &from, vec &offset, int atk, bool exploded) //particles and light effects on impact for slow projectiles
     {
         bool emitPart = canemitparticles();
-        bool inWater = ((lookupmaterial(pos) & MAT_WATER) == MAT_WATER);
+        bool inWater = ((lookupmaterial(pos) & MATF_VOLUME) == MAT_WATER);
         bool firstPerson = (owner==game::hudplayer());
 
         float len = min(100.f, vec(offset).add(from).dist(pos));
@@ -175,7 +175,7 @@ namespace game
 
     void renderExplosion(gameent *owner, const vec &v, const vec &vel, int atk) //big laggy flashy explosions
     {
-        bool inWater = ((lookupmaterial(v) & MAT_WATER) == MAT_WATER);
+        bool inWater = ((lookupmaterial(v) & MATF_VOLUME) == MAT_WATER);
         int initRadius = attacks[atk].exprad/2;
         int flags = L_NODYNSHADOW|DL_FLASH;
 
@@ -320,7 +320,7 @@ namespace game
         vec dir = vec(vel).normalize();
         vec bounce;
         bool isClose = false;
-        bool inWater = ((lookupmaterial(v) & MAT_WATER) == MAT_WATER);
+        bool inWater = ((lookupmaterial(v) & MATF_VOLUME) == MAT_WATER);
 
         if(distance < 200) // if close, calculate a bouncing trajectory
         {
@@ -383,7 +383,7 @@ namespace game
         vec bounce;
 
         bool isClose = false;
-        bool inWater = ((lookupmaterial(to) & MAT_WATER) == MAT_WATER);
+        bool inWater = ((lookupmaterial(to) & MATF_VOLUME) == MAT_WATER);
 
         if(distance < 256) // if close, calculate a bouncing trajectory
         {

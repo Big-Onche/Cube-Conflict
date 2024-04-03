@@ -287,10 +287,10 @@ namespace game
         updateEntPos(d->entityId, isHudPlayer ? vec(0, 0, 0) : d->o);
 
         // underwater camera sound
-        bool inWater = ((lookupmaterial(camera1->o) & MAT_WATER) == MAT_WATER);
+        bool inLiquid = ((lookupmaterial(camera1->o) & MATF_VOLUME) == MAT_WATER) || ((lookupmaterial(camera1->o) & MATF_VOLUME) == MAT_LAVA);
         static bool underwaterSound = false;
-        if(inWater && !underwaterSound) { playSound(S_UNDERWATER, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH|SND_LOOPED, hudplayer()->entityId, PL_UNDERWATER); underwaterSound = true; }
-        else if(!inWater && underwaterSound) { stopLinkedSound(hudplayer()->entityId, PL_UNDERWATER); underwaterSound = false; }
+        if(inLiquid && !underwaterSound) { playSound(S_UNDERWATER, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH|SND_LOOPED, hudplayer()->entityId, PL_UNDERWATER); underwaterSound = true; }
+        else if(!inLiquid && underwaterSound) { stopLinkedSound(hudplayer()->entityId, PL_UNDERWATER); underwaterSound = false; }
 
         if(d->state != CS_ALIVE) return;
 
