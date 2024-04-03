@@ -1479,10 +1479,10 @@ void startCameraAnimation(int animation, int duration, vec position, vec maxPosi
     if(animation < 0 || animation >= NUMCAMANIMS) return;
     CameraAnimations& anim = cameraAnimations[animation];
 
-    anim.animStartTime = server::gamemillis;
+    anim.animStartTime = lastmillis;
     anim.animDuration = duration;
-    anim.animPositions = position;
-    anim.animAxis = axis;
+    anim.animPositions = position.mul(game::gamespeed / 100.f);
+    anim.animAxis = axis.mul(game::gamespeed / 100.f);
     anim.maxPosition = maxPosition;
     anim.maxAxis = maxAxis;
     anim.factor = factor;
@@ -1498,7 +1498,7 @@ void updateCameraAnimations()
     loopi(NUMCAMANIMS)
     {
         CameraAnimations& anim = cameraAnimations[i];
-        int elapsedTime = server::gamemillis - anim.animStartTime;
+        int elapsedTime = (lastmillis - anim.animStartTime);
 
         if(elapsedTime < 0 || elapsedTime > anim.animDuration)
         {
