@@ -35,13 +35,13 @@ namespace texture
     {
         SDL_Texture* newTexture = nullptr;
         SDL_Surface* loadedSurface = IMG_Load(path.c_str());
-        if(loadedSurface == nullptr) { error::pop(getString("Error_Title").c_str(), getString("Error_IMG_Load").c_str(), true); }
+        if(loadedSurface == nullptr) { error::pop(getString("Error_Title"), getString("Error_IMG_Load"), true); }
         else
         {
             newTexture = SDL_CreateTextureFromSurface(renderer, loadedSurface);
             if(newTexture == nullptr)
             {
-                error::pop(getString("Error_Title").c_str(), getString("Error_IMG_Load").c_str() + lineBreak + path, true);
+                error::pop(getString("Error_Title"), getString("Error_IMG_Load") + lineBreak + path, true);
             }
             SDL_FreeSurface(loadedSurface);
         }

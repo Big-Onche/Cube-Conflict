@@ -14,7 +14,7 @@ namespace sdl
     {
         if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_EVENTS) < 0)
         {
-            error::pop(getString("Error_Title").c_str(), getString("Error_SDL_Init").c_str(), true);
+            error::pop(getString("Error_Title"), getString("Error_SDL_Init"), true);
             return false;
         }
         else
@@ -22,7 +22,7 @@ namespace sdl
             window = SDL_CreateWindow("Cube Conflict launcher", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCR_W, SCR_H, SDL_WINDOW_SHOWN|SDL_WINDOW_BORDERLESS|SDL_WINDOW_OPENGL);
             if(window == nullptr)
             {
-                error::pop(getString("Error_Title").c_str(), getString("Error_SDL_Window").c_str(), true);
+                error::pop(getString("Error_Title"), getString("Error_SDL_Window"), true);
                 return false;
             }
             else
@@ -30,7 +30,7 @@ namespace sdl
                 renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED|SDL_RENDERER_PRESENTVSYNC);
                 if(renderer == nullptr)
                 {
-                    error::pop(getString("Error_Title").c_str(), getString("Error_SDL_Renderer").c_str(), true);
+                    error::pop(getString("Error_Title"), getString("Error_SDL_Renderer"), true);
                     return false;
                 }
             }
@@ -43,7 +43,7 @@ namespace sdl
         int imgFlags = IMG_INIT_PNG;
         if(!(IMG_Init(imgFlags) & imgFlags))
         {
-            error::pop(getString("Error_Title").c_str(), getString("Error_IMG_Init").c_str(), true);
+            error::pop(getString("Error_Title"), getString("Error_IMG_Init"), true);
             return false;
         }
         return true;
@@ -53,7 +53,7 @@ namespace sdl
     {
         if(TTF_Init() == -1)
         {
-            error::pop(getString("Error_Title").c_str(), getString("Error_TTF_Init").c_str(), true);
+            error::pop(getString("Error_Title"), getString("Error_TTF_Init"), true);
             return false;
         }
         else
@@ -62,7 +62,7 @@ namespace sdl
             fontTiny = TTF_OpenFont("media/interface/font/default.ttf", fontSize / 3.f);
             if(!fontMain || !fontTiny)
             {
-                error::pop(getString("Error_Title").c_str(), getString("Error_TTF_Load").c_str(), false);
+                error::pop(getString("Error_Title"), getString("Error_TTF_Load"), false);
                 return false;
             }
             TTF_SetFontStyle(sdl::fontMain, TTF_STYLE_BOLD);

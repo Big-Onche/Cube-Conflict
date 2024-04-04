@@ -29,7 +29,7 @@ std::map<std::string, std::vector<std::string>> loadLocales(const std::string& f
     if(!file.is_open())
     {
         std::string configPath = " (config/launcher.cfg)";
-        error::pop(getString("Error_Title").c_str(), getString("Error_Config").c_str() + configPath);
+        error::pop(getString("Error_Title"), getString("Error_Config") + configPath);
         closeLauncher();
     }
 

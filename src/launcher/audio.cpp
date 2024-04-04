@@ -15,7 +15,7 @@ namespace audio
 
     void init()
     {
-        if(ma_engine_init(NULL, &audioEngine) != MA_SUCCESS) error::pop(getString("Error_Title").c_str(), getString("Error_MA_Init").c_str());
+        if(ma_engine_init(NULL, &audioEngine) != MA_SUCCESS) error::pop(getString("Error_Title"), getString("Error_MA_Init"));
 
         loopi(NUMSOUNDS)
         {
@@ -23,7 +23,7 @@ namespace audio
             if(ma_sound_init_from_file(&audioEngine, sounds[i].path, 0, NULL, NULL, sounds[i].sound) != MA_SUCCESS)
             {
                 std::string message = getString("Error_MA_Load") + " " + sounds[i].path;
-                error::pop(getString("Error_Title").c_str(), message);
+                error::pop(getString("Error_Title"), message);
             }
         }
     }
