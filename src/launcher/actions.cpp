@@ -35,7 +35,7 @@ namespace action
         if(system(execCommand.c_str()) != 0)
         {
             std::string bits = (goodOld32bits ? "" : "64");
-            std::string message = getString("Error_Game") + lineBreak + "bin/" + bits + "/cubeconflict.exe " + getString("Error_Missing");
+            std::string message = getString("Error_Game") + lineBreak + "bin" + bits + "/cubeconflict.exe " + getString("Error_Missing");
             error::pop(getString("Error_Title"), message);
             return false;
         }
