@@ -786,6 +786,7 @@ struct gameent : dynent, gamestate
     bool abilityready[3], playerexploded, powerarmoursound;
     int lastOutOfMap;
     bool wasAttacking, isOutOfMap;
+    bool isConnected;
 
     string name, info;
     int team, playermodel, playercolor, customcape, customtombe, customdanse, aptitude, level;
@@ -1095,6 +1096,7 @@ namespace game
     extern void removegroupedplayer(gameent *d);
 
     // render
+    extern bool hassuicided;
     extern bool hasShrooms();
     extern bool hasRoids(gameent *d);
     struct playermodelinfo { const char *model[MAXTEAMS], *cbmodel; };

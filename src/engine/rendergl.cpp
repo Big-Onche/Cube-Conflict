@@ -1657,24 +1657,28 @@ void recomputecamera(int campostag)
         bool moveSide = (game::hudplayer()->state != CS_DEAD) || thirdperson;
         static bool animStarted;
 
-        if(game::hudplayer()->state == CS_DEAD && lastmillis > game::hudplayer()->lastpain + 1500 && game::hudplayer() != game::hudplayer()->lastkiller && spectatekiller)
+        if(game::hudplayer()->lastkiller->isConnected)
         {
-            float t = clamp((lastmillis - game::hudplayer()->lastpain - 1500) / 500.f, 0.f, 1.f);
-            if(t < 1)
+            if(spectatekiller && !game::hassuicided && game::hudplayer()->state == CS_DEAD && lastmillis > game::hudplayer()->lastpain + 1500)
             {
-                if(!animStarted)
+                float t = clamp((lastmillis - game::hudplayer()->lastpain - 1500) / 500.f, 0.f, 1.f);
+                if(t < 1)
                 {
-                    playSound(S_DEATHWIND);
-                    UI::hideui("scoreboard");
-                    animStarted = true;
+                    if(!animStarted)
+                    {
+                        playSound(S_DEATHWIND);
+                        if(!game::intermission) UI::hideui("scoreboard");
+                        animStarted = true;
+                    }
+                    vec startpos = game::hudplayer()->o;
+                    vec finalpos = game::hudplayer()->lastkiller->o;
+                    camera1->o = startpos.add(finalpos.sub(startpos).mul(t));
                 }
-                vec startpos = game::hudplayer()->o;
-                vec finalpos = game::hudplayer()->lastkiller->o;
-                camera1->o = startpos.add(finalpos.sub(startpos).mul(t));
+                else camera1->o = game::hudplayer()->lastkiller->o;
             }
-            else camera1->o = game::hudplayer()->lastkiller->o;
+            else animStarted = false;
         }
-        else animStarted = false;
+        else game::hudplayer()->lastkiller = game::hudplayer();
 
         if(game::collidecamera())
         {

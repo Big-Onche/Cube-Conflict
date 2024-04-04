@@ -1544,6 +1544,7 @@ namespace game
                 d->customdanse = getint(p);
                 d->aptitude = getint(p);
                 d->level = getint(p);
+                d->isConnected = true;
                 break;
             }
 

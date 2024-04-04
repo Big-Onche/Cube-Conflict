@@ -260,7 +260,7 @@ namespace ai
                 itermillis = totalmillis;
             }
             int count = 0;
-            loopv(players) if(players[i]->ai) think(players[i], ++count == iteration && (totalmillis % 150 < 75) ? true : false);
+            loopv(players) if(players[i]->ai) think(players[i], ++count == iteration ? true : false);
             if(++iteration > count) iteration = 0;
         }
     }
@@ -1406,7 +1406,7 @@ namespace ai
             {
                 if(d->ragdoll) cleanragdoll(d);
                 moveplayer(d, 10, true, d->boostmillis[B_EPO], d->boostmillis[B_JOINT], d->aptitude, d->aptitude==APT_MAGICIEN ? d->abilitymillis[ABILITY_1] : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION || d->aptitude==APT_KAMIKAZE ? d->abilitymillis[ABILITY_2] : d->abilitymillis[ABILITY_3], d->armourtype==A_ASSIST && d->armour ? true : false);
-                if(allowmove && !b.idle && run) timeouts(d, b);
+                if(allowmove && !b.idle) timeouts(d, b);
                 entities::checkitems(d);
                 if(cmode) cmode->checkitems(d);
             }

@@ -964,6 +964,7 @@ namespace game
         if(d)
         {
             if(notify && d->name[0]) conoutf("\f7%s\f4 %s", colorname(d), readstr("GameMessage_Left"));
+            d->isConnected = false;
             removeweapons(d);
             removetrackedparticles(d);
             removetrackeddynlights(d);
