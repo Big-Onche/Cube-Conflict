@@ -1481,7 +1481,7 @@ void updateWeather()
     if(rainintensity) spawnRain();
     if(snowintensity) spawnSnow();
     if(apocalypseintensity) spawnApocalypse();
-    if(lightningfrequency && rndevent(35, 750 - (lightningfrequency * 50))) popLightning();
+    if(lightningfrequency && rndevent(1, 1000 - (lightningfrequency * 95))) popLightning();
 }
 
 VARR(showrainbow, 0, 0, 1);
@@ -1634,7 +1634,7 @@ static void makeparticles(entity &e)
         case 11: // rocks debris: attr 2:<probability>
         {
             if(!canemitparticles()) return;
-            if(rndevent(e.attr2, 10))
+            if(rndevent(e.attr2, 15))
             {
                 int numLoops = max(1, e.attr7 + (e.attr8 ? rnd(e.attr8) : 0));
                 loopi(numLoops)
@@ -1646,7 +1646,7 @@ static void makeparticles(entity &e)
                     game::newbouncer(e.o, pos.add(vec(xOffset, zOffset, yOffset)), true, 0, game::player1, game::BNC_BIGROCK, 15000+rnd(5000), e.attr6);
                 }
                 playSound(S_EXPL_VOLCANO, e.o, 3000, 1500, SND_NOOCCLUSION);
-                if(game::hudplayer()->physstate == PHYS_FLOOR) shakeScreen(0.1f + (camera1->o.dist(e.o) / 3000.f ));
+                if(game::hudplayer()->physstate == PHYS_FLOOR) shakeScreen(0.1f + lerp(0.f, 0.5f, clamp(camera1->o.dist(e.o) / 1000.0f, 0.f, 1.f)));
             }
             break;
         }
