@@ -3,6 +3,8 @@
 
 #if defined(__linux__)
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #endif
 
 namespace action
@@ -34,7 +36,7 @@ namespace action
         {
             std::string bits = (goodOld32bits ? "" : "64");
             std::string message = getString("Error_Game") + lineBreak + "bin/" + bits + "/cubeconflict.exe " + getString("Error_Missing");
-            error::pop(getString("Error_Title").c_str(), message);
+            error::pop(getString("Error_Title"), message);
             return false;
         }
 
@@ -45,15 +47,21 @@ namespace action
     {
         if(setenv("LD_LIBRARY_PATH", "./bin_unix/:$LD_LIBRARY_PATH", 1) == -1) // Set LD_LIBRARY_PATH to include bin_unix directory relative to the launcher's directory
         {
-            error::pop(getString("Error_Title").c_str(), getString("Error_Unix_Setenv").c_str());
+            error::pop(getString("Error_Title"), getString("Error_Unix_Setenv"));
             perror("setenv");
             return false;
+        }
+
+        if(chmod(gamePath().c_str(), S_IRWXU) == -1) // Set execute permissions on the game binary
+        {
+            perror("chmod");
+            error::pop(getString("Error_Title"), getString("Error_Unix_Setperms"));
         }
 
         pid_t pid = fork();
         if(pid == -1)
         {
-            error::pop(getString("Error_Title").c_str(), getString("Error_Unix_Fork").c_str());
+            error::pop(getString("Error_Title"), getString("Error_Unix_Fork"));
             return false;
         }
         else if(pid == 0) // Child process, execute the game binary
@@ -69,8 +77,8 @@ namespace action
 
             if(dedicatedServer ? (execvp(serverArgs[0], serverArgs) == -1) : (execvp(clientArgs[0], clientArgs.data()) == -1))
             {
-                if(dedicatedServer) error::pop(getString("Error_Title").c_str(), getString("Error_Unix_Exec_Serv").c_str());
-                else error::pop(getString("Error_Title").c_str(), getString("Error_Unix_Exec").c_str());
+                if(dedicatedServer) error::pop(getString("Error_Title"), getString("Error_Unix_Exec_Serv"));
+                else error::pop(getString("Error_Title"), getString("Error_Unix_Exec"));
                 perror("execvp");
                 return false;
             }

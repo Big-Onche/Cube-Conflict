@@ -15,51 +15,15 @@ for arg in "$@"; do
     CC_OPTIONS="${CC_OPTIONS} ${arg}"
 done
 
-# SYSTEM_NAME should be set to the name of your operating system.
-#SYSTEM_NAME=Linux
-SYSTEM_NAME=`uname -s`
-
-# MACHINE_NAME should be set to the name of your processor.
-#MACHINE_NAME=i686
-MACHINE_NAME=`uname -m`
-
-case ${SYSTEM_NAME} in
-Linux)
-  SYSTEM_NAME=linux_
-  ;;
-*)
-  SYSTEM_NAME=unknown_
-  ;;
-esac
-
-case ${MACHINE_NAME} in
-i486|i586|i686)
-  MACHINE_NAME=
-  ;;
-x86_64|amd64)
-  MACHINE_NAME=64_
-  ;;
-*)
-  if [ ${SYSTEM_NAME} != native_ ]
-  then
-    SYSTEM_NAME=native_
-  fi
-  MACHINE_NAME=
-  ;;
-esac
-
-if [ -x ${CC_BIN}/native_client ]
-then
-  SYSTEM_NAME=native_
-  MACHINE_NAME=
-fi
-
 export LD_LIBRARY_PATH="${CC_BIN}:$LD_LIBRARY_PATH"
 
-if [ -x ${CC_BIN}/${SYSTEM_NAME}${MACHINE_NAME}client ]
+# Ensure the cubeconflict binary is executable
+chmod +x ${CC_BIN}/cubeconflict
+
+if [ -x ${CC_BIN}/cubeconflict ]
 then
   cd ${CC_DATA}
-  exec ${CC_BIN}/${SYSTEM_NAME}${MACHINE_NAME}client ${CC_OPTIONS} "$@"
+  exec ${CC_BIN}/cubeconflict ${CC_OPTIONS} "$@"
 else
   echo "Your platform does not have a pre-compiled Cube Conflict client."
   echo "Please follow the following steps to build a native client:"
