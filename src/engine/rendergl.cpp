@@ -1657,9 +1657,9 @@ void recomputecamera(int campostag)
         bool moveSide = (game::hudplayer()->state != CS_DEAD) || thirdperson;
         static bool animStarted;
 
-        if(game::hudplayer()->lastkiller->isConnected)
+        if(game::hudplayer()->state == CS_DEAD && lastmillis > game::hudplayer()->lastpain + 1500 && !game::hassuicided && spectatekiller)
         {
-            if(spectatekiller && !game::hassuicided && game::hudplayer()->state == CS_DEAD && lastmillis > game::hudplayer()->lastpain + 1500)
+            if(game::hudplayer()->lastkiller->isConnected)
             {
                 float t = clamp((lastmillis - game::hudplayer()->lastpain - 1500) / 500.f, 0.f, 1.f);
                 if(t < 1)
@@ -1676,9 +1676,9 @@ void recomputecamera(int campostag)
                 }
                 else camera1->o = game::hudplayer()->lastkiller->o;
             }
-            else animStarted = false;
+            else game::hudplayer()->lastkiller = game::hudplayer();
         }
-        else game::hudplayer()->lastkiller = game::hudplayer();
+        else animStarted = false;
 
         if(game::collidecamera())
         {

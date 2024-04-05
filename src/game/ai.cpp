@@ -228,6 +228,7 @@ namespace ai
         d->customcape = chooserandomtraits(cape, T_CAPE);
         d->customtombe = chooserandomtraits(grave, T_GRAVE);
         d->customdanse = chooserandomtraits(taunt, T_TAUNT);
+        d->isConnected = true;
 
         if(resetthisguy) removeweapons(d);
         if(d->ownernum >= 0 && player1->clientnum == d->ownernum)
