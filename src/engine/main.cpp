@@ -3,6 +3,7 @@
 #include "engine.h"
 #include "gfx.h"
 #include "stats.h"
+#include "vr.h"
 
 #include "steam_api.h"
 
@@ -963,6 +964,7 @@ void checkinput()
 
 void swapbuffers(bool overlay)
 {
+    vr::submitRender();
     gle::disable();
     SDL_GL_SwapWindow(screen);
 }
@@ -1298,6 +1300,8 @@ int main(int argc, char **argv)
 
     inbetweenframes = true;
     renderbackground("");
+
+    vr::init();
 
     logoutf("init: world");
     camera1 = player = game::iterdynents(0);

@@ -2,6 +2,7 @@
 
 #include "engine.h"
 #include "gfx.h"
+#include "vr.h"
 
 bool hasVAO = false, hasTR = false, hasTSW = false, hasPBO = false, hasFBO = false, hasAFBO = false, hasDS = false, hasTF = false, hasCBF = false, hasS3TC = false, hasFXT1 = false, hasLATC = false, hasRGTC = false, hasAF = false, hasFBB = false, hasFBMS = false, hasTMS = false, hasMSS = false, hasFBMSBS = false, hasUBO = false, hasMBR = false, hasDB2 = false, hasDBB = false, hasTG = false, hasTQ = false, hasPF = false, hasTRG = false, hasTI = false, hasHFV = false, hasHFP = false, hasDBT = false, hasDC = false, hasDBGO = false, hasEGPU4 = false, hasGPU4 = false, hasGPU5 = false, hasBFE = false, hasEAL = false, hasCR = false, hasOQ2 = false, hasES2 = false, hasES3 = false, hasCB = false, hasCI = false, hasTS = false;
 bool mesa = false, intel = false, amd = false, nvidia = false;
@@ -1409,11 +1410,12 @@ void fixcamerarange()
     if(camera1->pitch>MAXPITCH) camera1->pitch = MAXPITCH;
     if(camera1->pitch<-MAXPITCH) camera1->pitch = -MAXPITCH;
     camera1->yaw = fmod(camera1->yaw, 360.0f);
-    if (camera1->yaw < 0.0f) camera1->yaw += 360.0f;
+    if(camera1->yaw < 0.0f) camera1->yaw += 360.0f;
 }
 
 void modifyorient(float yaw, float pitch)
 {
+    if(vr::isEnabled()) return;
     camera1->yaw += yaw;
     camera1->pitch += pitch;
     fixcamerarange();
@@ -1571,6 +1573,7 @@ void updateCameraAnimations()
 
             case CAM_ANIM_SWAY:
             {
+                if(vr::isEnabled()) return;
                 float phase = (progress * PI - PI / 2.0f);
                 float swayValue = sin(phase); // Use sine to get a smooth sway value ranging from -1 to 1
                 float newRoll = swayValue * anim.animAxis.z; // Scale swayValue by anim.animAxis.z for the desired amplitude
