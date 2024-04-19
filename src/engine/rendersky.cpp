@@ -184,6 +184,7 @@ FVARR(fogdomemax, 0, 0, 1);
 VARR(fogdomecap, 0, 1, 1);
 FVARR(fogdomeclip, 0, 1, 1);
 CVARR(fogdomecolour, 0);
+CVARR(fogdomerayleighcolour, 0);
 VARR(fogdomeclouds, 0, 1, 1);
 VARR(fogdomesquare, 0, 0, 1);
 
@@ -346,9 +347,6 @@ namespace fogdome
     }
 }
 
-CVARR(fogdomerayleighcolour, 0);
-CVARR(fogdomediffusecolour, 0);
-
 static void drawfogdome()
 {
     SETVARIANT(skyfog, fogdomesquare ? 0 : -1, 0);
@@ -363,7 +361,7 @@ static void drawfogdome()
     LOCALPARAM(skymatrix, skyprojmatrix);
     LOCALPARAM(sundir, sunlightdir);
     LOCALPARAM(rayleighcolor, !fogdomerayleighcolour.iszero() ? fogdomerayleighcolour.tocolor() : fogcolour.tocolor());
-    LOCALPARAM(diffusecolor, !fogdomediffusecolour.iszero() ? fogdomediffusecolour.tocolor() : fogcolour.tocolor());
+    LOCALPARAM(diffusecolor, !fogdomecolour.iszero() ? fogdomecolour.tocolor() : fogcolour.tocolor());
     LOCALPARAM(camerapos, camera1->o);
 
     fogdome::draw();

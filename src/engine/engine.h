@@ -813,8 +813,6 @@ extern void restorevsync();
 
 extern bool islaunching;
 
-extern bvec fogdomerayleighcolour;
-
 #endif
 
 #endif

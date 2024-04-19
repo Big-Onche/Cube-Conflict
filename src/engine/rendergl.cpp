@@ -2183,6 +2183,8 @@ float calcfogcull()
     return log(fogcullintensity) / (M_LN2*calcfogdensity(fog - (fog+64)/8));
 }
 
+extern bvec fogdomerayleighcolour;
+
 static void setfog(int fogmat, float below = 0, float blend = 1, int abovemat = MAT_AIR)
 {
     float start = 0, end = 0;
