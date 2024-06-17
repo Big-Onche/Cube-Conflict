@@ -2183,7 +2183,7 @@ float calcfogcull()
     return log(fogcullintensity) / (M_LN2*calcfogdensity(fog - (fog+64)/8));
 }
 
-extern bvec fogdomerayleighcolour;
+extern bvec fograyleighcolour;
 
 static void setfog(int fogmat, float below = 0, float blend = 1, int abovemat = MAT_AIR)
 {
@@ -2196,9 +2196,9 @@ static void setfog(int fogmat, float below = 0, float blend = 1, int abovemat = 
     float alignment = camForward.dot(sunlightdir);
     float t = 1.0 - (alignment * 0.5 + 0.5);
 
-    if(fogdomerayleighcolour.r || fogdomerayleighcolour.g || fogdomerayleighcolour.b)
+    if(fograyleighcolour.r || fograyleighcolour.g || fograyleighcolour.b)
     {
-        vec rayleigh = vec(fogdomerayleighcolour.r/850.f, fogdomerayleighcolour.g/850.f, fogdomerayleighcolour.b/850.f);
+        vec rayleigh = vec(fograyleighcolour.r/850.f, fograyleighcolour.g/850.f, fograyleighcolour.b/850.f);
         curfogcolor.lerp(rayleigh, curfogcolor, t);
     }
 
