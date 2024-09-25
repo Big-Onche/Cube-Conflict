@@ -1480,6 +1480,7 @@ namespace game
                 //execute("premission");
                 //playMusic(S_PREMISSION);
                 resetpostfx();
+                stopAllSounds();
                 break;
             }
             case N_FORCEDEATH:
