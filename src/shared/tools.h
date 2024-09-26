@@ -111,6 +111,8 @@ static inline int bitscan(uint mask)
 #define rndscale(x) (float((randomMT()&0x7FFFFFFF)*double(x)/double(0x7FFFFFFF)))
 #define detrnd(s, x) ((int)(((((uint)(s))*1103515245+12345)>>16)%(x)))
 
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
+
 #define loop(v,m) for(int v = 0; v < int(m); ++v)
 #define loopi(m) loop(i,m)
 #define loopj(m) loop(j,m)
