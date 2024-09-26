@@ -723,24 +723,33 @@ namespace game
         hudent() { type = ENT_CAMERA; }
     } guninterp;
 
+    vec2 hudgunDisp(0, 40);
+
     void drawhudmodel(gameent *d, int anim, int basetime)
     {
         if(!validgun(d->gunselect)) return;
+
+        int delta = max((250 / max(curfps, 1)) * (game::gamespeed / 100.f), 1.f);
+        int h = zoom ? 2 : -2;
+        int v = zoom ? -1 : 1;
+
+        hudgunDisp.x = clamp(int(hudgunDisp.x) + h * delta, 1, int(guns[hudplayer()->gunselect].weapDisp.x));
+        hudgunDisp.y = clamp(int(hudgunDisp.y) + v * delta, 1, int(guns[hudplayer()->gunselect].weapDisp.y));
 
         vec sway;
         vecfromyawpitch(d->yaw, 0, 0, 1, sway);
         float steps = swaydist/swaystep*M_PI;
         sway.mul((swayside)*cosf(steps));
-        vec weapzoom;
+        vec gunAim;
 
-        sway.z = -weapposup - (zoom ? 2 : 0);
-        if(!zoom) vecfromyawpitch(d->yaw, 0, -10, weapposside, weapzoom);
+        sway.z = -hudgunDisp.y - (zoom ? 2 : 0);
+        if(!zoom) vecfromyawpitch(d->yaw, 0, -10, hudgunDisp.x, gunAim);
 
         sway.z += swayup*(fabs(sinf(steps)) - 1);
         sway.add(swaydir).add(d->o);
         if(!hudgunsway) sway = d->o;
 
-        vecfromyawpitch(d->yaw, 0, 0, weapposside, weapzoom);
+        vecfromyawpitch(d->yaw, 0, 0, hudgunDisp.x, gunAim);
 
         int team = m_teammode && validteam(d->team) ? d->team : 0,
             color = getplayercolor(d, team);
@@ -776,7 +785,7 @@ namespace game
             if(rndevent(93)) {regularflame(PART_SMOKE, d->weed, 2, 3, 0x888888, 1, 1.3f, 50.0f, 1000.0f, -10); particle_splash(PART_FIRE_BALL,  4, 50, d->weed, 0xFF6600, 0.6f, 20, 150);}
         }
 
-        rendermodel(getWeaponDir(d->gunselect, true), anim, weapzoom.add(sway), d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
+        rendermodel(getWeaponDir(d->gunselect, true), anim, gunAim.add(sway), d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
 
         if(d->muzzle.x >= 0) d->muzzle = calcavatarpos(d->muzzle, 12);
         if(d->balles.x >= 0) d->balles = calcavatarpos(d->balles, 12);

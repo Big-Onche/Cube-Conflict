@@ -413,41 +413,41 @@ static const struct attackinfo { int gun, action, picksound, sound, middistsnd, 
     { GUN_CACNINJA,     ACT_SHOOT, S_WPLOADSWORD,     S_NINJASABER, -1,         -1,           8,  400,  800, 1, 1, 30, 0, -10,  36,  1,  25,   0, 0, 0},
 };
 
-static const struct guninfo { const char *ident, *name; int maxweapposside, maxweapposup, maxzoomfov, hudrange, attacks[NUMACTS]; } guns[NUMGUNS] =
+static const struct guninfo { const char *ident, *name; vec2 weapDisp; int maxzoomfov, hudrange, attacks[NUMACTS]; } guns[NUMGUNS] =
 {
-    //Armes "normales"
-    { "Weapon_ElectricRifle",   "fusilelectrique",  65, 26, 60, 1000,  { -1, ATK_RAIL_SHOOT }, },
-    { "Weapon_PlasmaRifle",     "fusilplasma",      28, 10, 60,  750,  { -1, ATK_PULSE_SHOOT }, },
-    { "Weapon_Smaw",            "smaw",             8,  8, 85,  500,  { -1, ATK_SMAW_SHOOT }, },
-    { "Weapon_Minigun",         "minigun",          36, 11, 80,  750,  { -1, ATK_MINIGUN_SHOOT }, },
-    { "Weapon_Spockgun",        "spockgun",         52, 20, 70,  500,  { -1, ATK_SPOCKGUN_SHOOT }, },
-    { "Weapon_M32",             "m32",              65, 21, 85,  600,  { -1, ATK_M32_SHOOT }, },
-    { "Weapon_Flamethrower",    "lanceflammes",     40, 15, 95,  280,  { -1, ATK_LANCEFLAMMES_SHOOT }, },
-    { "Weapon_Uzi",             "uzi",              23, 21, 80,  500,  { -1, ATK_UZI_SHOOT }, },
-    { "Weapon_Famas",           "famas",            54, 14, 70,  750,  { -1, ATK_FAMAS_SHOOT }, },
-    { "Weapon_Mossberg500",     "mossberg500",      38, 18, 95,  300,  { -1, ATK_MOSSBERG_SHOOT }, },
-    { "Weapon_Hydra",           "hydra",            44, 20, 95,  300,  { -1, ATK_HYDRA_SHOOT }, },
-    { "Weapon_Sv98",            "sv98",              1,  3, 30, 2000,  { -1, ATK_SV98_SHOOT }, },
-    { "Weapon_Sks",             "sks",               1,  3, 50, 1500,  { -1, ATK_SKS_SHOOT }, },
-    { "Weapon_Crossbow",        "arbalete",          1,  3, 45, 1000,  { -1, ATK_ARBALETE_SHOOT }, },
-    { "Weapon_Ak47",            "ak47",             46, 25, 70,  750,  { -1, ATK_AK47_SHOOT }, },
-    { "Weapon_Gapb1",           "gapb1",            43, 17, 85,  500,  { -1, ATK_GRAP1_SHOOT }, },
-    { "Weapon_Fireworks",       "feuartifice",      70, 30, 85,  500,  { -1, ATK_ARTIFICE_SHOOT }, },
-    { "Weapon_Glock",           "glock",            55, 20, 85,  300,  { -1, ATK_GLOCK_SHOOT }, },
-    //Super armes
-    { "Weapon_Nuke",            "missilenorko",      8,  3, 85, 2000,  { -1, ATK_NUKE_SHOOT }, },
-    { "Weapon_Gau8",            "gau8",             57, 10, 85, 2000,  { -1, ATK_GAU8_SHOOT }, },
-    { "Weapon_Minirockets",     "miniroquettes",    10, 10, 70, 1000,  { -1, ATK_ROQUETTES_SHOOT }, },
-    { "Weapon_Camper2000",      "campouze2000",     10, 10, 60, 3000,  { -1, ATK_CAMPOUZE_SHOOT }, },
-    //Corps à corps
-    { "Weapon_BusterSword",     "epee349",           4,  3, 95,  120,  { -1, ATK_CAC349_SHOOT }, },
-    { "Weapon_BanHammer",       "marteauban",        4,  3, 95,  120,  { -1, ATK_CACMARTEAU_SHOOT }, },
-    { "Weapon_MasterSword",     "mastersword",       4,  3, 95,  120,  { -1, ATK_CACMASTER_SHOOT }, },
-    { "Weapon_Flail",           "fleau",             4,  3, 95,  120,  { -1, ATK_CACFLEAU_SHOOT }, },
-    // Armes spéciales aptitudes
-    { "Weapon_Explosives",      "kamikaze",          4,  3, 95,    0,  { -1, ATK_KAMIKAZE_SHOOT }, },
-    { "Weapon_PowerArmor",      "assistxpl",         4,  3, 95,    0,  { -1, ATK_ASSISTXPL_SHOOT }, },
-    { "Weapon_Saber",           "sabre",             4,  3, 95,  120,  { -1, ATK_CACNINJA_SHOOT }, },
+    // Regular weapons
+    { "Weapon_ElectricRifle",   "fusilelectrique",  vec2(65, 26),  60, 1000,  { -1, ATK_RAIL_SHOOT }, },
+    { "Weapon_PlasmaRifle",     "fusilplasma",      vec2(28, 10),  60,  750,  { -1, ATK_PULSE_SHOOT }, },
+    { "Weapon_Smaw",            "smaw",             vec2( 8,  8),  85,  500,  { -1, ATK_SMAW_SHOOT }, },
+    { "Weapon_Minigun",         "minigun",          vec2(36, 11),  80,  750,  { -1, ATK_MINIGUN_SHOOT }, },
+    { "Weapon_Spockgun",        "spockgun",         vec2(52, 20),  70,  500,  { -1, ATK_SPOCKGUN_SHOOT }, },
+    { "Weapon_M32",             "m32",              vec2(65, 21),  85,  600,  { -1, ATK_M32_SHOOT }, },
+    { "Weapon_Flamethrower",    "lanceflammes",     vec2(40, 15),  95,  280,  { -1, ATK_LANCEFLAMMES_SHOOT }, },
+    { "Weapon_Uzi",             "uzi",              vec2(23, 21),  80,  500,  { -1, ATK_UZI_SHOOT }, },
+    { "Weapon_Famas",           "famas",            vec2(54, 14),  70,  750,  { -1, ATK_FAMAS_SHOOT }, },
+    { "Weapon_Mossberg500",     "mossberg500",      vec2(38, 18),  95,  300,  { -1, ATK_MOSSBERG_SHOOT }, },
+    { "Weapon_Hydra",           "hydra",            vec2(44, 20),  95,  300,  { -1, ATK_HYDRA_SHOOT }, },
+    { "Weapon_Sv98",            "sv98",             vec2( 1,  3),  30, 2000,  { -1, ATK_SV98_SHOOT }, },
+    { "Weapon_Sks",             "sks",              vec2( 1,  3),  50, 1500,  { -1, ATK_SKS_SHOOT }, },
+    { "Weapon_Crossbow",        "arbalete",         vec2( 1,  3),  45, 1000,  { -1, ATK_ARBALETE_SHOOT }, },
+    { "Weapon_Ak47",            "ak47",             vec2(46, 25),  70,  750,  { -1, ATK_AK47_SHOOT }, },
+    { "Weapon_Gapb1",           "gapb1",            vec2(43, 17),  85,  500,  { -1, ATK_GRAP1_SHOOT }, },
+    { "Weapon_Fireworks",       "feuartifice",      vec2(70, 30),  85,  500,  { -1, ATK_ARTIFICE_SHOOT }, },
+    { "Weapon_Glock",           "glock",            vec2(55, 20),  85,  300,  { -1, ATK_GLOCK_SHOOT }, },
+    // Super weapons
+    { "Weapon_Nuke",            "missilenorko",     vec2( 8,  3),  85, 2000,  { -1, ATK_NUKE_SHOOT }, },
+    { "Weapon_Gau8",            "gau8",             vec2(57, 10),  85, 2000,  { -1, ATK_GAU8_SHOOT }, },
+    { "Weapon_Minirockets",     "miniroquettes",    vec2(10, 10),  70, 1000,  { -1, ATK_ROQUETTES_SHOOT }, },
+    { "Weapon_Camper2000",      "campouze2000",     vec2(10, 10),  60, 3000,  { -1, ATK_CAMPOUZE_SHOOT }, },
+    // Melee weapons
+    { "Weapon_BusterSword",     "epee349",          vec2(4, 3),    95,  120,  { -1, ATK_CAC349_SHOOT }, },
+    { "Weapon_BanHammer",       "marteauban",       vec2(4, 3),    95,  120,  { -1, ATK_CACMARTEAU_SHOOT }, },
+    { "Weapon_MasterSword",     "mastersword",      vec2(4, 3),    95,  120,  { -1, ATK_CACMASTER_SHOOT }, },
+    { "Weapon_Flail",           "fleau",            vec2(4, 3),    95,  120,  { -1, ATK_CACFLEAU_SHOOT }, },
+    // Special weapons
+    { "Weapon_Explosives",      "kamikaze",         vec2(4, 3),    95,    0,  { -1, ATK_KAMIKAZE_SHOOT }, },
+    { "Weapon_PowerArmor",      "assistxpl",        vec2(4, 3),    95,    0,  { -1, ATK_ASSISTXPL_SHOOT }, },
+    { "Weapon_Saber",           "sabre",            vec2(4, 3),    95,  120,  { -1, ATK_CACNINJA_SHOOT }, },
 };
 
 //Définition des aptitudes
@@ -1116,6 +1116,7 @@ namespace game
     extern void initGravesPaths();
     extern void initBouncersPaths();
     extern void initAssetsPaths();
+    extern vec2 hudgunDisp;
 }
 
 namespace server

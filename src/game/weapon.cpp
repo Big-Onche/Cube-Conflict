@@ -91,7 +91,7 @@ namespace game
             if(gun==GUN_ASSISTXPL)gun = (gun + dir)%NUMGUNS;
             if(force || player1->ammo[gun]) break;
         }
-        if(gun != player1->gunselect) {gunselect(gun, player1); weapposup=40; }
+        if(gun != player1->gunselect) gunselect(gun, player1);
         else playSound(S_NOAMMO);
     }
     ICOMMAND(nextweapon, "ii", (int *dir, int *force), nextweapon(*dir, *force!=0));
@@ -353,8 +353,8 @@ namespace game
                 {
                     hits.setsize(0);
                     explode(bnc.local, bnc.owner, bnc.o, bnc.o, NULL, 1, ATK_M32_SHOOT);
-                    removeEntityPos(bnc.entityId);
                     stopLinkedSound(bnc.entityId);
+                    removeEntityPos(bnc.entityId);
                     if(bnc.local)
                         addmsg(N_EXPLODE, "rci3iv", bnc.owner, lastmillis-maptime, ATK_M32_SHOOT, bnc.id-maptime,
                                 hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
@@ -926,7 +926,6 @@ namespace game
             {
                 vec pos = vec(b.offset).mul(b.offsetmillis/float(OFFSETMILLIS)).add(b.o);
                 explode(b.local, b.owner, pos, vec(0,0,0), NULL, 0, atk);
-                removeEntityPos(b.entityId);
                 curBouncers.remove(i);
                 break;
             }
@@ -1330,10 +1329,9 @@ namespace game
                 case S_GAU8:
                     playSound(gunSound, isHudPlayer ? vec(0, 0, 0) : d->o, incraseDist ? 600 : 500, incraseDist ? 350 : 200, loopedSoundFlags, d->entityId, PL_ATTACK, pitch);
                     d->attacksound = 1;
-                    if(distance > 300 && !isHudPlayer)
+                    if(!isHudPlayer && distance > 300)
                     {
                         playSound(attacks[atk].middistsnd, d->o, incraseDist ? 3200 : 600, incraseDist ? 1600 : 400, loopedSoundFlags, d->entityId, PL_ATTACK_FAR, pitch);
-                        d->attacksound = 2;
                     }
                     return;
 

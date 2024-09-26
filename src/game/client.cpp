@@ -1860,12 +1860,14 @@ namespace game
                 int gun = getint(p);
                 if(!validgun(gun)) return;
                 d->gunselect = gun;
+                bool isHudPlayer = d==hudplayer();
+                if(isHudPlayer) hudgunDisp.y = 40;
                 if(d->attacksound)
                 {
                     stopLinkedSound(d->entityId, PL_ATTACK);
-                    if(d->attacksound > 1) stopLinkedSound(d->entityId, PL_ATTACK_FAR);
+                    stopLinkedSound(d->entityId, PL_ATTACK_FAR);
                 }
-                playSound(attacks[gun-GUN_ELEC].picksound, d==hudplayer() ? vec(0, 0, 0) : d->o, 200, 50, NULL, d->entityId);
+                playSound(attacks[gun-GUN_ELEC].picksound, isHudPlayer ? vec(0, 0, 0) : d->o, 200, 50, NULL, d->entityId);
                 break;
             }
 
