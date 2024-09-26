@@ -286,11 +286,13 @@ namespace game
 
         updateEntPos(d->entityId, isHudPlayer ? vec(0, 0, 0) : d->o);
 
-        // underwater camera sound
-        bool inLiquid = ((lookupmaterial(camera1->o) & MATF_VOLUME) == MAT_WATER) || ((lookupmaterial(camera1->o) & MATF_VOLUME) == MAT_LAVA);
-        static bool underwaterSound = false;
-        if(inLiquid && !underwaterSound) { playSound(S_UNDERWATER, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH|SND_LOOPED, hudplayer()->entityId, PL_UNDERWATER); underwaterSound = true; }
-        else if(!inLiquid && underwaterSound) { stopLinkedSound(hudplayer()->entityId, PL_UNDERWATER); underwaterSound = false; }
+        if(isHudPlayer) // underwater camera sound
+        {
+            bool inLiquid = ((lookupmaterial(camera1->o) & MATF_VOLUME) == MAT_WATER) || ((lookupmaterial(camera1->o) & MATF_VOLUME) == MAT_LAVA);
+            static bool underwaterSound = false;
+            if(inLiquid && !underwaterSound) { playSound(S_UNDERWATER, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH|SND_LOOPED, hudplayer()->entityId, PL_UNDERWATER); underwaterSound = true; }
+            else if(!inLiquid && underwaterSound) { stopLinkedSound(hudplayer()->entityId, PL_UNDERWATER); underwaterSound = false; }
+        }
 
         if(d->state != CS_ALIVE) return;
 
@@ -299,7 +301,7 @@ namespace game
             if((!isAttacking(d) || !(d->gunselect==GUN_PLASMA || d->gunselect==GUN_LANCEFLAMMES || d->gunselect==GUN_S_GAU8)))
             {
                 stopLinkedSound(d->entityId, PL_ATTACK);
-                if(!isHudPlayer && d->attacksound > 1) stopLinkedSound(d->entityId, PL_ATTACK_FAR);
+                stopLinkedSound(d->entityId, PL_ATTACK_FAR);
                 d->attacksound = 0;
             }
 
@@ -404,13 +406,6 @@ namespace game
 
     void updateworld()        // main game update loop
     {
-        int delta = max((250 / max(curfps, 1)) * (game::gamespeed / 100.f), 1.f);
-        int horizontaltrans = zoom ? 2 : -2;
-        int verticaltrans = zoom ? -1 : 1;
-
-        weapposside = clamp(weapposside + horizontaltrans * delta, 1, guns[hudplayer()->gunselect].maxweapposside);
-        weapposup = clamp(weapposup + verticaltrans * delta, 1, guns[hudplayer()->gunselect].maxweapposup);
-
         if(!maptime) { maptime = lastmillis; maprealtime = totalmillis; return; }
         if(!curtime) { gets2c(); if(player1->clientnum>=0) c2sinfo(); return; }
 
@@ -694,7 +689,7 @@ namespace game
     float killerdistance;
     ICOMMAND(getkilldistance, "", (), floatret(roundf(killerdistance * 10) / 10); );
 
-    bool hassuicided = false;
+    bool hassuicided = true;
     ICOMMAND(hassuicided, "", (), intret(hassuicided); );
 
     void killed(gameent *d, gameent *actor, int atk)
