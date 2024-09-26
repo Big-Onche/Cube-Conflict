@@ -1453,7 +1453,7 @@ void shakeScreen(float factor)
     switch(game::hudplayer()->aptitude)
     {
         case APT_SOLDAT: factor /= 2; break;
-        case APT_MAGICIEN: if(game::hudplayer()->abilitymillis[game::ABILITY_2]) return;
+        case APT_MAGICIEN: if(game::hudplayer()->abilitymillis[ABILITY_2]) return;
     }
 
     startCameraAnimation(CAM_ANIM_SHAKE, 500, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0, 0), vec(0, 0, 0), factor);

@@ -452,9 +452,9 @@ namespace game
 
     void renderMuzzleEffects(const vec &from, const vec &to, gameent *d, int atk)
     {
-        vec pos = d->aptitude==APT_ESPION && d->abilitymillis[game::ABILITY_2] ? game::hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle;
+        vec pos = d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2] ? game::hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle;
         int flags = DL_FLASH|DL_SHRINK|L_NOSHADOW;
-        bool wizardAbility = d->abilitymillis[game::ABILITY_2] && d->aptitude==APT_MAGICIEN;
+        bool wizardAbility = d->abilitymillis[ABILITY_2] && d->aptitude==APT_MAGICIEN;
         bool increasedDamages = d->boostmillis[B_RAGE] || hasRoids(d);
         vec dir = vec(to).sub(from);
 

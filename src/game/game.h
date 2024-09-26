@@ -113,6 +113,8 @@ enum { GUN_ELEC = 0, GUN_PLASMA, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_M32, G
        GUN_KAMIKAZE, GUN_ASSISTXPL, GUN_CACNINJA, NUMGUNS };
 enum { A_WOOD = 0, A_IRON, A_GOLD, A_MAGNET, A_POWERARMOR, NUMSHIELDS};
 enum { B_ROIDS = 0, B_SHROOMS, B_EPO, B_JOINT, B_RAGE, NUMBOOSTS};
+enum { ABILITY_1 = 0, ABILITY_2, ABILITY_3, NUMABILITIES};
+enum { P_FLAMES = 0, P_ELEC, NUMPOST};
 enum { ACT_IDLE = 0, ACT_SHOOT, NUMACTS };
 enum {  ATK_RAIL_SHOOT = 0, ATK_PULSE_SHOOT,
         ATK_SMAW_SHOOT, ATK_MINIGUN_SHOOT,
@@ -491,8 +493,9 @@ struct gamestate
 {
     int health, maxhealth, mana;
     int armour, armourtype;
-    int boostmillis[5], vampimillis;
-    int abilitymillis[3], aptiseed;
+    int boostmillis[NUMBOOSTS], vampimillis;
+    int abilitymillis[NUMABILITIES], aptiseed;
+    int postdmgmillis[NUMPOST];
     int gunselect, gunwait;
     int ammo[NUMGUNS];
     bool aiming;
@@ -927,7 +930,6 @@ namespace game
     extern int getteamfrags(int team);
 
     // abilities
-    enum abilities {ABILITY_1 = 0, ABILITY_2, ABILITY_3, NUMABILITIES};
     extern void launchAbility(gameent *d, int skill, bool request = true);
     extern void updateAbilitiesSkills(int curtime, gameent *d);
     extern bool hasAbilityEnabled(gameent *d, int numAbility);

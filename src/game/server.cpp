@@ -910,7 +910,7 @@ namespace server
         sents[i].spawned = false;
         sents[i].spawntime = spawntime(sents[i].type);
         sendf(-1, 1, "ri4", N_ITEMACC, i, sender, rndsweap);
-        ci->state.pickupitem(sents[i].type, ci->aptitude, ci->state.abilitymillis[game::ABILITY_1], ci->state.armourtype==A_POWERARMOR && ci->state.armour, rndsweap);
+        ci->state.pickupitem(sents[i].type, ci->aptitude, ci->state.abilitymillis[ABILITY_1], ci->state.armourtype==A_POWERARMOR && ci->state.armour, rndsweap);
         return true;
     }
 
@@ -2297,12 +2297,12 @@ namespace server
         switch(actor->aptitude)
         {
             case APT_AMERICAIN: {if(atk==ATK_NUKE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_CAMPOUZE_SHOOT) damage *= 1.5f; break;}
-            case APT_MAGICIEN: {if(as.abilitymillis[game::ABILITY_2]) damage *= 1.25f; break;}
+            case APT_MAGICIEN: {if(as.abilitymillis[ABILITY_2]) damage *= 1.25f; break;}
             case APT_CAMPEUR: damage *= ((as.o.dist(ts.o)/1800.f)+1.f); break;
             case APT_VIKING: {if(as.boostmillis[B_RAGE]) damage *=1.25f;} break;
             case APT_SHOSHONE:
             {
-                if(as.abilitymillis[game::ABILITY_3]) damage *= 1.3f;
+                if(as.abilitymillis[ABILITY_3]) damage *= 1.3f;
                 if(target->aptitude==APT_AMERICAIN) damage /= 1.25f;
             }
         }
@@ -2310,17 +2310,17 @@ namespace server
         //Absorptions et skills spéciaux d'aptitudes
         switch(target->aptitude)
         {
-            case APT_MAGICIEN: {if(ts.abilitymillis[game::ABILITY_3]) damage/=5.f; } break;
+            case APT_MAGICIEN: {if(ts.abilitymillis[ABILITY_3]) damage/=5.f; } break;
             case APT_VIKING: {if(actor!=target) {ts.boostmillis[B_RAGE]+=damage*5; sendf(-1, 1, "ri3", N_VIKING, target->clientnum, ts.boostmillis[B_RAGE]);}} break;
-            case APT_PRETRE: {if(ts.abilitymillis[game::ABILITY_2] && ts.mana) {ts.mana-=damage/10; damage=0; {if(ts.mana<0)ts.mana=0;}; sendf(-1, 1, "ri3", N_PRIEST, target->clientnum, ts.mana);} } break;
+            case APT_PRETRE: {if(ts.abilitymillis[ABILITY_2] && ts.mana) {ts.mana-=damage/10; damage=0; {if(ts.mana<0)ts.mana=0;}; sendf(-1, 1, "ri3", N_PRIEST, target->clientnum, ts.mana);} } break;
             case APT_SHOSHONE:
             {
-                if(as.abilitymillis[game::ABILITY_1]) damage /= 1.3f;
+                if(as.abilitymillis[ABILITY_1]) damage /= 1.3f;
                 if(actor->aptitude==APT_AMERICAIN) damage *= 1.25f;
             }
         }
 
-        ts.dodamage(damage, target->aptitude, ts.abilitymillis[game::ABILITY_1]);
+        ts.dodamage(damage, target->aptitude, ts.abilitymillis[ABILITY_1]);
 
         if(target!=actor && !isteam(target->team, actor->team)) as.damage += damage;
 
@@ -2376,7 +2376,7 @@ namespace server
         if(actor==target || isteam(target->team, actor->team)) return;
 
         damage = ((damage*100)/classes[target->aptitude].resistance)/2.f;
-        if(target->state.abilitymillis[game::ABILITY_3] && target->aptitude==APT_MAGICIEN) damage /= 5.f;
+        if(target->state.abilitymillis[ABILITY_3] && target->aptitude==APT_MAGICIEN) damage /= 5.f;
         if(target->state.boostmillis[B_JOINT]) damage /= 1.25f;
 
         gamestate &as = actor->state;
@@ -2488,7 +2488,7 @@ namespace server
         gs.lastshot = millis;
 
         float waitfactor = 1;
-        if(ci->aptitude==APT_PRETRE && ci->state.abilitymillis[game::ABILITY_3]) waitfactor = 2.5f + ((4000 - ci->state.abilitymillis[game::ABILITY_3])/1000);
+        if(ci->aptitude==APT_PRETRE && ci->state.abilitymillis[ABILITY_3]) waitfactor = 2.5f + ((4000 - ci->state.abilitymillis[ABILITY_3])/1000);
 
         if(gs.boostmillis[B_SHROOMS]) waitfactor *= ci->aptitude==APT_JUNKIE ? 1.75f : 1.5f;
         gs.gunwait = attacks[atk].attackdelay/waitfactor;
@@ -2592,7 +2592,7 @@ namespace server
             if(curtime>0)
             {
                 loopi(NUMBOOSTS) if(ci->state.boostmillis[i]) ci->state.boostmillis[i] = max(ci->state.boostmillis[i]-curtime, 0);
-                loopi(game::NUMABILITIES) if(ci->state.abilitymillis[i]) ci->state.abilitymillis[i] = max(ci->state.abilitymillis[i]-curtime, 0);
+                loopi(NUMABILITIES) if(ci->state.abilitymillis[i]) ci->state.abilitymillis[i] = max(ci->state.abilitymillis[i]-curtime, 0);
             }
             flushevents(ci, gamemillis);
         }
