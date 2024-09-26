@@ -642,7 +642,7 @@ void stopLinkedSound(size_t entityId, int soundType, bool clear)
     }
 }
 
-void changeSoundPitch(size_t entityId, int soundType, float pitch)
+void updateSoundPitch(size_t entityId, int soundType, float pitch)
 {
     if(game::gamespeed != 100) pitch *= (game::gamespeed / 100.f);
     for(auto it = activeSources.begin(); it != activeSources.end(); it++)
@@ -651,7 +651,7 @@ void changeSoundPitch(size_t entityId, int soundType, float pitch)
         if(sounds[id].entityId == entityId && sounds[id].soundType == soundType)
         {
             alSourcef(sounds[id].alSource, AL_PITCH, pitch);
-            //reportSoundError("changeSoundPitch", "Error while modifying pitch");
+            //reportSoundError("updateSoundPitch", "Error while modifying pitch");
         }
     }
 }

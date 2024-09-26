@@ -130,7 +130,7 @@ extern void updateSounds();
 extern void stopSound(int soundId, int flags);
 extern void stopMusic(int soundId);
 extern void stopLinkedSound(size_t entityId, int soundType = 0, bool clear = false);
-extern void changeSoundPitch(size_t entityId, int soundType, float pitch);
+extern void updateSoundPitch(size_t entityId, int soundType, float pitch);
 extern void stopAllMapSounds();
 extern void stopAllSounds(bool pause = false);
 extern void resumeAllSounds();

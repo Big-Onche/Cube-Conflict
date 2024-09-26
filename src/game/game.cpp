@@ -305,25 +305,20 @@ namespace game
                 d->attacksound = 0;
             }
 
-            if(d->boostmillis[B_SHROOMS])
-            {
-                changeSoundPitch(d->entityId, PL_ATTACK, 1.2f);
-                changeSoundPitch(d->entityId, PL_ATTACK_FAR, 1.2f);
-            }
-            else changeSoundPitch(d->entityId, PL_ATTACK, 1.f);
+            bool hasShrooms = d->boostmillis[B_SHROOMS];
 
-            if(d->aptitude==APT_PRETRE)
+            float pitch = (hasShrooms ? 1.2f : 1.0f);
+
+            if(d->aptitude == APT_PRETRE && d->abilitymillis[ABILITY_3])
             {
-                if(d->abilitymillis[ABILITY_3])
-                {
-                    float pitch = 1.5f - (d->abilitymillis[ABILITY_3] / 8000.0f);
-                    changeSoundPitch(d->entityId, PL_ATTACK, pitch);
-                    changeSoundPitch(d->entityId, PL_ATTACK_FAR, pitch);
-                }
-                else changeSoundPitch(d->entityId, PL_ATTACK, 1.f);
+                float abilityPitch = 1.5f - (d->abilitymillis[ABILITY_3] / 8000.0f);
+                pitch *= abilityPitch;
             }
+
+            updateSoundPitch(d->entityId, PL_ATTACK, pitch);
+            updateSoundPitch(d->entityId, PL_ATTACK_FAR, pitch);
+
         }
-
         if(d->armourtype==A_ASSIST && d->armour && d->armour < 1000) // power armor alarm sound
         {
             if(!d->powerarmoursound)
