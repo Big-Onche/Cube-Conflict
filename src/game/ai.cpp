@@ -557,7 +557,7 @@ namespace ai
         loopv(entities::ents)
         {
             extentity &e = *(extentity *)entities::ents[i];
-            if(!e.spawned() || !d->canpickupitem(e.type, d->aptitude, d->armourtype==A_POWERARMOR && d->armour)) continue;
+            if(!e.spawned() || !d->canpickupitem(e.type, d->aptitude, hasPowerArmor(d))) continue;
             tryitem(d, e, i, b, interests, e.type == I_SUPERARME ? true : force);
         }
     }
@@ -608,7 +608,7 @@ namespace ai
                 {
                     int id = nearby[i];
                     extentity &e = *(extentity *)entities::ents[id];
-                    if(d->canpickupitem(e.type, d->aptitude, d->armourtype==A_POWERARMOR && d->armour)) tryitem(d, e, id, b, interests);
+                    if(d->canpickupitem(e.type, d->aptitude, hasPowerArmor(d))) tryitem(d, e, id, b, interests);
                 }
             }
         }
@@ -1406,7 +1406,7 @@ namespace ai
             if(!intermission)
             {
                 if(d->ragdoll) cleanragdoll(d);
-                moveplayer(d, 10, true, d->boostmillis[B_EPO], d->boostmillis[B_JOINT], d->aptitude, d->aptitude==APT_MAGICIEN ? d->abilitymillis[ABILITY_1] : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION || d->aptitude==APT_KAMIKAZE ? d->abilitymillis[ABILITY_2] : d->abilitymillis[ABILITY_3], d->armourtype==A_POWERARMOR && d->armour ? true : false);
+                moveplayer(d, 10, true, d->boostmillis[B_EPO], d->boostmillis[B_JOINT], d->aptitude, d->aptitude==APT_MAGICIEN ? d->abilitymillis[ABILITY_1] : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION || d->aptitude==APT_KAMIKAZE ? d->abilitymillis[ABILITY_2] : d->abilitymillis[ABILITY_3], hasPowerArmor(d));
                 if(allowmove && !b.idle) timeouts(d, b);
                 entities::checkitems(d);
                 if(cmode) cmode->checkitems(d);

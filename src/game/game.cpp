@@ -234,7 +234,7 @@ namespace game
         d->roll = d->newroll;
         if(move)
         {
-            moveplayer(d, 1, false, d->boostmillis[B_EPO], d->boostmillis[B_JOINT], d->aptitude, d->aptitude==APT_MAGICIEN ? d->abilitymillis[ABILITY_1] : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION || d->aptitude==APT_KAMIKAZE ? d->abilitymillis[ABILITY_2] : d->abilitymillis[ABILITY_3], d->armourtype==A_POWERARMOR && d->armour>0 ? true : false);
+            moveplayer(d, 1, false, d->boostmillis[B_EPO], d->boostmillis[B_JOINT], d->aptitude, d->aptitude==APT_MAGICIEN ? d->abilitymillis[ABILITY_1] : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION || d->aptitude==APT_KAMIKAZE ? d->abilitymillis[ABILITY_2] : d->abilitymillis[ABILITY_3], hasPowerArmor(d));
             d->newpos = d->o;
         }
         float k = 1.0f - float(lastmillis - d->smoothmillis)/smoothmove;
@@ -342,7 +342,7 @@ namespace game
             {
                 if(d!=player1)
                 {
-                    if(hasPowerArmor(d) && d->ammo[GUN_ASSISTXPL]) {gunselect(GUN_ASSISTXPL, d, true); d->gunwait=0;}
+                    if(d->armourtype==A_POWERARMOR && !d->armour && d->ammo[GUN_ASSISTXPL]) {gunselect(GUN_ASSISTXPL, d, true); d->gunwait=0;}
                     if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
                     if(hasboost(d)) entities::checkboosts(curtime, d);
                     updateAbilitiesSkills(curtime, d);

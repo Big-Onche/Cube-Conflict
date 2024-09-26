@@ -126,7 +126,7 @@ namespace entities
 
     bool powerarmorpieces(int type, gameent *d)
     {
-        return (d->armourtype==A_POWERARMOR && d->armour) && (type==I_WOODSHIELD || type==I_IRONSHIELD || type == I_MAGNETSHIELD || type==I_GOLDSHIELD);
+        return (hasPowerArmor(d)) && (type==I_WOODSHIELD || type==I_IRONSHIELD || type == I_MAGNETSHIELD || type==I_GOLDSHIELD);
     }
 
     bool canspawnitem(int type)
@@ -189,7 +189,7 @@ namespace entities
         ents[n]->clearspawned();
         if(!d) return;
 
-        d->pickupitem(type, d->aptitude, d->abilitymillis[ABILITY_1], d->armourtype==A_POWERARMOR && d->armour, rndsweap);
+        d->pickupitem(type, d->aptitude, d->abilitymillis[ABILITY_1], hasPowerArmor(d), rndsweap);
 
         playSound(powerarmorpieces(type, d) ? S_ITEMPIECEROBOTIQUE : itemstats[type-I_RAIL].sound, d==hudplayer() ? vec(0, 0, 0) : d->o, 300, 50, NULL, d->entityId);
 
