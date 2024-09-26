@@ -349,7 +349,7 @@ namespace ai
     }
     bool needshield(gameent *d, bool powerarmour)
     {
-        if(powerarmour && d->armour < 1000+d->skill*5 && d->armourtype!=A_ASSIST) return true;
+        if(powerarmour && d->armour < 1000+d->skill*5 && d->armourtype!=A_POWERARMOR) return true;
         switch(d->aptitude)
         {
             case APT_VAMPIRE:
@@ -522,14 +522,14 @@ namespace ai
                 else if (d->aptitude==APT_VAMPIRE) score = d->health < 600 ? 1e4f : 1e3f;
                 break;
             case I_WOODSHIELD: case I_IRONSHIELD:
-                if(d->armourtype==A_ASSIST && d->armour<1500) score = m_ctf ? 1e2f : 1e4f;
+                if(d->armourtype==A_POWERARMOR && d->armour<1500) score = m_ctf ? 1e2f : 1e4f;
                 else if(d->armour<600) score = m_ctf ? 1e3f : 1e5f;
                 break;
             case I_GOLDSHIELD: case I_MAGNETSHIELD:
-                if(d->armourtype==A_ASSIST && d->armour<1500) score = m_ctf ? 1e2f : 1e4f;
+                if(d->armourtype==A_POWERARMOR && d->armour<1500) score = m_ctf ? 1e2f : 1e4f;
                 if(d->armour <= 1250) score =  m_ctf ? 1e3f : 1e6f;
             case I_POWERARMOR:
-                if(d->armourtype!=A_ASSIST) score =  m_ctf ? 1e3f : 1e9f;
+                if(!hasPowerArmor(d)) score =  m_ctf ? 1e3f : 1e9f;
                 break;
             default:
             {
@@ -557,7 +557,7 @@ namespace ai
         loopv(entities::ents)
         {
             extentity &e = *(extentity *)entities::ents[i];
-            if(!e.spawned() || !d->canpickupitem(e.type, d->aptitude, d->armourtype==A_ASSIST && d->armour)) continue;
+            if(!e.spawned() || !d->canpickupitem(e.type, d->aptitude, d->armourtype==A_POWERARMOR && d->armour)) continue;
             tryitem(d, e, i, b, interests, e.type == I_SUPERARME ? true : force);
         }
     }
@@ -608,7 +608,7 @@ namespace ai
                 {
                     int id = nearby[i];
                     extentity &e = *(extentity *)entities::ents[id];
-                    if(d->canpickupitem(e.type, d->aptitude, d->armourtype==A_ASSIST && d->armour)) tryitem(d, e, id, b, interests);
+                    if(d->canpickupitem(e.type, d->aptitude, d->armourtype==A_POWERARMOR && d->armour)) tryitem(d, e, id, b, interests);
                 }
             }
         }
@@ -713,7 +713,7 @@ namespace ai
         extentity &e = *entities::ents[ent];
         if(entities::validitem(e.type))
         {
-            loopv(players) if(players[i] && players[i]->ai && players[i]->aitype == AI_BOT && players[i]->canpickupitem(e.type, players[i]->aptitude, players[i]->armourtype==A_ASSIST && players[i]->armour))
+            loopv(players) if(players[i] && players[i]->ai && players[i]->aitype == AI_BOT && players[i]->canpickupitem(e.type, players[i]->aptitude, players[i]->armourtype==A_POWERARMOR && players[i]->armour))
             {
                 gameent *d = players[i];
                 bool wantsitem = false;
@@ -1286,7 +1286,7 @@ namespace ai
     bool request(gameent *d, aistate &b)
     {
         gameent *e = getclient(d->ai->enemy);
-        if(d->armourtype==A_ASSIST && !d->armour && d->ammo[GUN_ASSISTXPL]) {gunselect(GUN_ASSISTXPL, d, true); goto process;}
+        if(d->armourtype==A_POWERARMOR && !d->armour && d->ammo[GUN_ASSISTXPL]) {gunselect(GUN_ASSISTXPL, d, true); goto process;}
         else {loopi(4) if(d->hasammo(GUN_S_NUKE+i)) {gunselect(GUN_S_NUKE+i, d); goto process;} }
 
         switch(d->aptitude)
@@ -1406,7 +1406,7 @@ namespace ai
             if(!intermission)
             {
                 if(d->ragdoll) cleanragdoll(d);
-                moveplayer(d, 10, true, d->boostmillis[B_EPO], d->boostmillis[B_JOINT], d->aptitude, d->aptitude==APT_MAGICIEN ? d->abilitymillis[ABILITY_1] : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION || d->aptitude==APT_KAMIKAZE ? d->abilitymillis[ABILITY_2] : d->abilitymillis[ABILITY_3], d->armourtype==A_ASSIST && d->armour ? true : false);
+                moveplayer(d, 10, true, d->boostmillis[B_EPO], d->boostmillis[B_JOINT], d->aptitude, d->aptitude==APT_MAGICIEN ? d->abilitymillis[ABILITY_1] : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION || d->aptitude==APT_KAMIKAZE ? d->abilitymillis[ABILITY_2] : d->abilitymillis[ABILITY_3], d->armourtype==A_POWERARMOR && d->armour ? true : false);
                 if(allowmove && !b.idle) timeouts(d, b);
                 entities::checkitems(d);
                 if(cmode) cmode->checkitems(d);

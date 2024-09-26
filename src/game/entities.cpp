@@ -126,7 +126,7 @@ namespace entities
 
     bool powerarmorpieces(int type, gameent *d)
     {
-        return (d->armourtype==A_ASSIST && d->armour) && (type==I_WOODSHIELD || type==I_IRONSHIELD || type == I_MAGNETSHIELD || type==I_GOLDSHIELD);
+        return (d->armourtype==A_POWERARMOR && d->armour) && (type==I_WOODSHIELD || type==I_IRONSHIELD || type == I_MAGNETSHIELD || type==I_GOLDSHIELD);
     }
 
     bool canspawnitem(int type)
@@ -189,7 +189,7 @@ namespace entities
         ents[n]->clearspawned();
         if(!d) return;
 
-        d->pickupitem(type, d->aptitude, d->abilitymillis[ABILITY_1], d->armourtype==A_ASSIST && d->armour, rndsweap);
+        d->pickupitem(type, d->aptitude, d->abilitymillis[ABILITY_1], d->armourtype==A_POWERARMOR && d->armour, rndsweap);
 
         playSound(powerarmorpieces(type, d) ? S_ITEMPIECEROBOTIQUE : itemstats[type-I_RAIL].sound, d==hudplayer() ? vec(0, 0, 0) : d->o, 300, 50, NULL, d->entityId);
 
@@ -294,7 +294,9 @@ namespace entities
         switch(e->type)
         {
             default:
-                if(d->canpickupitem(e->type, d->aptitude, d->armourtype==A_ASSIST && d->armour))
+            {
+                bool powerArmor = hasPowerArmor(d);
+                if(d->canpickupitem(e->type, d->aptitude, powerArmor))
                 {
                     addmsg(N_ITEMPICKUP, "rci", d, n);
                     ents[n]->clearspawned(); // even if someone else gets it first
@@ -309,7 +311,7 @@ namespace entities
                             case I_IRONSHIELD:
                             case I_GOLDSHIELD:
                             case I_MAGNETSHIELD:
-                                if(player1->armourtype==A_ASSIST) updateStat(1, STAT_REPASSIST);
+                                if(powerArmor) updateStat(1, STAT_REPASSIST);
                                 else
                                 {
                                     updateStat(1, e->type==I_WOODSHIELD ? STAT_BOUCLIERBOIS : e->type==I_IRONSHIELD ? STAT_BOUCLIERFER : e->type==I_MAGNETSHIELD ? STAT_BOUCLIERMAGNETIQUE : STAT_BOUCLIEROR);
@@ -328,7 +330,7 @@ namespace entities
                     }
                 }
                 break;
-
+            }
             case TELEPORT:
             {
                 if(d->lastpickup==e->type && lastmillis-d->lastpickupmillis<500) break;

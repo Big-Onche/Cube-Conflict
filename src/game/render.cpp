@@ -234,7 +234,7 @@ namespace game
             armourDir += 20;
         }
 
-        snprintf(dir, sizeof(dir), "shields/%s/%s/%d", hud || type==A_ASSIST ? "hud" : "ext", armours[type].name, armourDir);
+        snprintf(dir, sizeof(dir), "shields/%s/%s/%d", hud || type==A_POWERARMOR ? "hud" : "ext", armours[type].name, armourDir);
         return dir;
     }
 
@@ -272,7 +272,7 @@ namespace game
         {   // armour health loop (i)
             loopj(5)
             {   // armour type loop (j)
-                if(j!=A_ASSIST) preloadmodel(getShieldDir(j, (armours[j].max / 5) * i, false));
+                if(j!=A_POWERARMOR) preloadmodel(getShieldDir(j, (armours[j].max / 5) * i, false));
                 preloadmodel(getShieldDir(j, (armours[j].max / 5) * i, true));
             }
         }
@@ -351,7 +351,7 @@ namespace game
         ANIM_LEFT,  ANIM_BACKWARD,  ANIM_RIGHT
     };
 
-    bool hasPowerArmor(gameent *d) { return d->armour && d->armourtype==A_ASSIST; }
+    bool hasPowerArmor(gameent *d) { return d->armourtype==A_POWERARMOR && d->armour; }
 
     void renderplayer(gameent *d, const playermodelinfo &mdl, int color, int team, float fade, int flags = 0, bool mainpass = true)
     {
@@ -392,10 +392,11 @@ namespace game
         //}
         else if(!intermission && forcecampos<0)
         {
+            bool powerArmor = hasPowerArmor(d);
             if(d->inwater && d->physstate<=PHYS_FALL)
             {
                 anim |= (((d->move || d->strafe) || d->vel.z+d->falling.z>0 ? ANIM_SWIM : ANIM_SINK)|ANIM_LOOP)<<ANIM_SECONDARY;
-                if(d->move && rndevent(95)) particle_splash(PART_WATER, d->armourtype==A_ASSIST ? 3 : 2, 120, d->o, 0x222222, 8.0f+rnd(d->armourtype==A_ASSIST ? 8 : 5), 150, 15);
+                if(d->move && rndevent(95)) particle_splash(PART_WATER, powerArmor ? 3 : 2, 120, d->o, 0x222222, 8.0f+rnd(powerArmor ? 8 : 5), 150, 15);
             }
             else
             {
@@ -403,7 +404,7 @@ namespace game
                 if(d->timeinair>50) anim |= ((ANIM_JUMP) | ANIM_END) << ANIM_SECONDARY;
                 else if(dir) anim |= (dir | ANIM_LOOP) << ANIM_SECONDARY;
 
-                if(d->move && d->physstate==PHYS_FLOOR && rndevent(95)) particle_splash(atmos && (lookupmaterial(d->feetpos())==MAT_WATER || map_atmo==4 || map_atmo==8) ? PART_WATER : PART_SMOKE, d->armourtype==A_ASSIST ? 5 : 3, 120, d->feetpos(), map_atmo==4 && atmos ? 0x131313 : map_atmo==9 ? 0xFFFFFF : 0x333022, 6.0f+rnd(d->armourtype==A_ASSIST ? 10 : 5), 150, 15);
+                if(d->move && d->physstate==PHYS_FLOOR && rndevent(95)) particle_splash(atmos && (lookupmaterial(d->feetpos())==MAT_WATER || map_atmo==4 || map_atmo==8) ? PART_WATER : PART_SMOKE, powerArmor ? 5 : 3, 120, d->feetpos(), map_atmo==4 && atmos ? 0x131313 : map_atmo==9 ? 0xFFFFFF : 0x333022, 6.0f+rnd(d->armourtype==A_POWERARMOR ? 10 : 5), 150, 15);
             }
             if(d->crouching && d->timeinair<50) anim |= (ANIM_CROUCH|ANIM_END)<<ANIM_SECONDARY;
 
@@ -792,12 +793,13 @@ namespace game
 
         if(d->armour && d->armourtype >= A_WOOD && d->armourtype < NUMSHIELDS)
         {
+            bool powerArmor = d->armourtype==A_POWERARMOR;
             vec sway2;
             vecfromyawpitch(d->yaw, 0, 0, 1, sway2);
-            float swaydiv = d->armourtype==A_ASSIST ? 6.f : 3.f;
+            float swaydiv = powerArmor ? 6.f : 3.f;
             sway2.mul((swayside/swaydiv)*cosf(steps));
             sway2.z += (swayup/swaydiv)*(fabs(sinf(steps)) - 1);
-            if(d->armourtype==A_ASSIST || !zoom) sway2.add(swaydir).add(d->o);
+            if(powerArmor || !zoom) sway2.add(swaydir).add(d->o);
             rendermodel(getShieldDir(d->armourtype, d->armour, true), anim, sway2, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
         }
     }

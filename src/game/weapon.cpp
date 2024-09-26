@@ -620,7 +620,7 @@ namespace game
         if(damage <= 0) return;
         loopi(damage/300)
         {
-            if(d->armourtype != A_ASSIST) spawnbouncer(d->o, d->vel, d, BNC_PIXEL, 100 + rnd(50));
+            if(d->armourtype != A_POWERARMOR) spawnbouncer(d->o, d->vel, d, BNC_PIXEL, 100 + rnd(50));
             else if(d->armour) spawnbouncer(d->o, d->vel, d, BNC_SCRAP, 100 + rnd(50));
         }
     }
@@ -1478,7 +1478,7 @@ namespace game
             }
         }
 
-        if(d->armourtype==A_ASSIST && !d->armour && !d->playerexploded && d->ammo[GUN_ASSISTXPL])
+        if(d->armourtype==A_POWERARMOR && !d->armour && !d->playerexploded && d->ammo[GUN_ASSISTXPL])
         {
             d->wasAttacking = d->attacking;
             gunselect(GUN_ASSISTXPL, d, true);

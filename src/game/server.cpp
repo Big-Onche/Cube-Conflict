@@ -902,7 +902,7 @@ namespace server
         clientinfo *ci = getinfo(sender);
         if(!ci) return false;
         int rndsweap = sents[i].type==I_SUPERARME ? rnd(4) : 0;
-        if(!ci->local && !ci->state.canpickupitem(sents[i].type+rndsweap, ci->aptitude, ci->state.armourtype==A_ASSIST && ci->state.armour))
+        if(!ci->local && !ci->state.canpickupitem(sents[i].type+rndsweap, ci->aptitude, ci->state.armourtype==A_POWERARMOR && ci->state.armour))
         {
             sendf(ci->ownernum, 1, "ri4", N_ITEMACC, i, -1, rndsweap);
             return false;
@@ -910,7 +910,7 @@ namespace server
         sents[i].spawned = false;
         sents[i].spawntime = spawntime(sents[i].type);
         sendf(-1, 1, "ri4", N_ITEMACC, i, sender, rndsweap);
-        ci->state.pickupitem(sents[i].type, ci->aptitude, ci->state.abilitymillis[game::ABILITY_1], ci->state.armourtype==A_ASSIST && ci->state.armour, rndsweap);
+        ci->state.pickupitem(sents[i].type, ci->aptitude, ci->state.abilitymillis[game::ABILITY_1], ci->state.armourtype==A_POWERARMOR && ci->state.armour, rndsweap);
         return true;
     }
 
@@ -2476,7 +2476,7 @@ namespace server
         servstate &gs = ci->state;
         int wait = millis - gs.lastshot;
 
-        if(ci->state.armourtype==A_ASSIST && !ci->state.armour && ci->state.ammo[GUN_ASSISTXPL] && ci->state.gunselect==GUN_ASSISTXPL) gs.gunwait=0;
+        if(ci->state.armourtype==A_POWERARMOR && !ci->state.armour && ci->state.ammo[GUN_ASSISTXPL] && ci->state.gunselect==GUN_ASSISTXPL) gs.gunwait=0;
 
         if(!gs.isalive(gamemillis) || wait<gs.gunwait || !validatk(atk)) return;
 

@@ -111,7 +111,7 @@ enum { GUN_ELEC = 0, GUN_PLASMA, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_M32, G
        GUN_S_NUKE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_S_CAMPOUZE,
        GUN_CAC349, GUN_CACMARTEAU, GUN_CACMASTER, GUN_CACFLEAU,
        GUN_KAMIKAZE, GUN_ASSISTXPL, GUN_CACNINJA, NUMGUNS };
-enum { A_WOOD = 0, A_IRON, A_GOLD, A_MAGNET, A_ASSIST, NUMSHIELDS};
+enum { A_WOOD = 0, A_IRON, A_GOLD, A_MAGNET, A_POWERARMOR, NUMSHIELDS};
 enum { B_ROIDS = 0, B_SHROOMS, B_EPO, B_JOINT, B_RAGE, NUMBOOSTS};
 enum { ACT_IDLE = 0, ACT_SHOOT, NUMACTS };
 enum {  ATK_RAIL_SHOOT = 0, ATK_PULSE_SHOOT,
@@ -367,7 +367,7 @@ static struct itemstat { int add, max, sound; const char *ident; int info; } ite
     {1250,    1250, S_ITEMBFER,     "BOUCLIER DE FER",      A_IRON},
     {2000,    2000, S_ITEMBOR,      "BOUCLIER D'OR",        A_GOLD},
     {1500,    1500, S_ITEMBMAGNET,  "BOUCLIER MAGNETIQUE",  A_MAGNET},
-    {3000,    3000, S_ITEMARMOUR,   "ARMURE ASSISTEE",      A_ASSIST},
+    {3000,    3000, S_ITEMARMOUR,   "ARMURE ASSISTEE",      A_POWERARMOR},
     {50,       150, S_ITEMMANA,     "Item_Mana",            0}
 };
 
@@ -573,7 +573,7 @@ struct gamestate
             case I_WOODSHIELD: case I_IRONSHIELD: case I_GOLDSHIELD: case I_MAGNETSHIELD: case I_POWERARMOR:
                 if(type==I_POWERARMOR)
                 {
-                    armourtype = A_ASSIST;
+                    armourtype = A_POWERARMOR;
                     armour = min(armour+is.add, is.max);
                     health = min(health+300, maxhealth);
                     if(!ammo[GUN_ASSISTXPL]) ammo[GUN_ASSISTXPL] = 1;
@@ -581,7 +581,7 @@ struct gamestate
                 }
                 else
                 {
-                    armourtype = haspowerarmor ? A_ASSIST : is.info;
+                    armourtype = haspowerarmor ? A_POWERARMOR : is.info;
                     if(!haspowerarmor) ammo[GUN_ASSISTXPL] = 0;
                     int armourval = haspowerarmor && armour ? (500 * itemboost) : (aptitude==APT_SOLDAT ? is.max+(250*(armourtype+1)) : is.max);
                     armour = min(armour + armourval, haspowerarmor ? 3000 : armourval);
@@ -1099,6 +1099,7 @@ namespace game
     extern bool hassuicided;
     extern bool hasShrooms();
     extern bool hasRoids(gameent *d);
+    extern bool hasPowerArmor(gameent *d);
     struct playermodelinfo { const char *model[MAXTEAMS], *cbmodel; };
     extern void savetombe(gameent *d);
     extern void clearragdolls();

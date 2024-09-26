@@ -234,7 +234,7 @@ namespace game
         d->roll = d->newroll;
         if(move)
         {
-            moveplayer(d, 1, false, d->boostmillis[B_EPO], d->boostmillis[B_JOINT], d->aptitude, d->aptitude==APT_MAGICIEN ? d->abilitymillis[ABILITY_1] : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION || d->aptitude==APT_KAMIKAZE ? d->abilitymillis[ABILITY_2] : d->abilitymillis[ABILITY_3], d->armourtype==A_ASSIST && d->armour>0 ? true : false);
+            moveplayer(d, 1, false, d->boostmillis[B_EPO], d->boostmillis[B_JOINT], d->aptitude, d->aptitude==APT_MAGICIEN ? d->abilitymillis[ABILITY_1] : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION || d->aptitude==APT_KAMIKAZE ? d->abilitymillis[ABILITY_2] : d->abilitymillis[ABILITY_3], d->armourtype==A_POWERARMOR && d->armour>0 ? true : false);
             d->newpos = d->o;
         }
         float k = 1.0f - float(lastmillis - d->smoothmillis)/smoothmove;
@@ -319,7 +319,7 @@ namespace game
             updateSoundPitch(d->entityId, PL_ATTACK_FAR, pitch);
 
         }
-        if(d->armourtype==A_ASSIST && d->armour && d->armour < 1000) // power armor alarm sound
+        if(hasPowerArmor(d) && d->armour < 1000) // power armor alarm sound
         {
             if(!d->powerarmoursound)
             {
@@ -342,7 +342,7 @@ namespace game
             {
                 if(d!=player1)
                 {
-                    if(d->armourtype==A_ASSIST && d->ammo[GUN_ASSISTXPL] && !d->armour) {gunselect(GUN_ASSISTXPL, d, true); d->gunwait=0;}
+                    if(hasPowerArmor(d) && d->ammo[GUN_ASSISTXPL]) {gunselect(GUN_ASSISTXPL, d, true); d->gunwait=0;}
                     if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
                     if(hasboost(d)) entities::checkboosts(curtime, d);
                     updateAbilitiesSkills(curtime, d);
@@ -386,7 +386,7 @@ namespace game
             {
                 crouchplayer(d, 10, false);
                 if(smoothmove && d->smoothmillis>0) predictplayer(d, true);
-                else moveplayer(d, 1, false, d->boostmillis[B_EPO], d->boostmillis[B_JOINT], d->aptitude, d->aptitude==APT_MAGICIEN ? d->abilitymillis[ABILITY_1] : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION || d->aptitude==APT_KAMIKAZE ? d->abilitymillis[ABILITY_2] : d->abilitymillis[ABILITY_3], d->armourtype==A_ASSIST && d->armour>0 ? true : false);
+                else moveplayer(d, 1, false, d->boostmillis[B_EPO], d->boostmillis[B_JOINT], d->aptitude, d->aptitude==APT_MAGICIEN ? d->abilitymillis[ABILITY_1] : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION || d->aptitude==APT_KAMIKAZE ? d->abilitymillis[ABILITY_2] : d->abilitymillis[ABILITY_3], hasPowerArmor(d));
             }
             else if(d->state==CS_DEAD && !d->ragdoll && lastmillis-d->lastpain<2000) moveplayer(d, 1, true, d->boostmillis[B_EPO], d->boostmillis[B_JOINT], d->aptitude, d->aptitude==APT_MAGICIEN ? d->abilitymillis[ABILITY_1] : d->aptitude==APT_SHOSHONE || d->aptitude==APT_ESPION  || d->aptitude==APT_KAMIKAZE ? d->abilitymillis[ABILITY_2] : d->abilitymillis[ABILITY_3], false);
         }
@@ -409,7 +409,7 @@ namespace game
 
         if(player1->state==CS_ALIVE && !intermission)   // checking player1's shits
         {
-            if(player1->armourtype==A_ASSIST && player1->ammo[GUN_ASSISTXPL] && !player1->armour) {gunselect(GUN_ASSISTXPL, player1, true); player1->gunwait=0;}
+            if(player1->armourtype==A_POWERARMOR && player1->ammo[GUN_ASSISTXPL] && !player1->armour) {gunselect(GUN_ASSISTXPL, player1, true); player1->gunwait=0;}
             else if(m_identique)
             {
                 switch(player1->gunselect)
@@ -426,7 +426,7 @@ namespace game
                 if(player1->health>=2000) unlockAchievement(ACH_SACAPV);
                 if(player1->boostmillis[B_ROIDS] && player1->boostmillis[B_EPO] && player1->boostmillis[B_JOINT] && player1->boostmillis[B_SHROOMS]) unlockAchievement(ACH_DEFONCE);
                 if(lookupmaterial(player1->o)==MAT_NOCLIP && !strcasecmp(getclientmap(), "moon")) unlockAchievement(ACH_SPAAACE);
-                if(p1hassuperweapon && player1->boostmillis[B_ROIDS] && player1->armour>0 && player1->armourtype==A_ASSIST) unlockAchievement(ACH_ABUS);
+                if(p1hassuperweapon && player1->boostmillis[B_ROIDS] && player1->armour>0 && player1->armourtype==A_POWERARMOR) unlockAchievement(ACH_ABUS);
                 if(player1->aptitude==APT_KAMIKAZE && player1->ammo[GUN_KAMIKAZE]<=0 && totalmillis-lastshoot>=500 && totalmillis-lastshoot<=750 && isconnected()) unlockAchievement(ACH_SUICIDEFAIL);
                 if(player1->boostmillis[B_EPO] && player1->aptitude==APT_JUNKIE) unlockAchievement(ACH_LANCEEPO);
             }
@@ -458,7 +458,7 @@ namespace game
                 crouchplayer(player1, 10, true);
                 if(canMove || !m_tutorial)
                 {
-                    moveplayer(player1, 10, true, player1->boostmillis[B_EPO], player1->boostmillis[B_JOINT], player1->aptitude, player1->aptitude==APT_MAGICIEN ? player1->abilitymillis[ABILITY_1] : player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || player1->aptitude==APT_KAMIKAZE ? player1->abilitymillis[ABILITY_2] : player1->abilitymillis[ABILITY_3], player1->armourtype==A_ASSIST && player1->armour>0 ? true : false);
+                    moveplayer(player1, 10, true, player1->boostmillis[B_EPO], player1->boostmillis[B_JOINT], player1->aptitude, player1->aptitude==APT_MAGICIEN ? player1->abilitymillis[ABILITY_1] : player1->aptitude==APT_SHOSHONE || player1->aptitude==APT_ESPION || player1->aptitude==APT_KAMIKAZE ? player1->abilitymillis[ABILITY_2] : player1->abilitymillis[ABILITY_3], player1->armourtype==A_POWERARMOR && player1->armour>0 ? true : false);
                     swayhudgun(curtime);
                 }
                 entities::checkitems(player1);
@@ -773,7 +773,7 @@ namespace game
 
                     switch(atk)
                     {
-                        case ATK_ASSISTXPL_SHOOT: if(player1->armourtype==A_ASSIST) unlockAchievement(ACH_KILLASSIST); break;
+                        case ATK_ASSISTXPL_SHOOT: if(player1->armourtype==A_POWERARMOR) unlockAchievement(ACH_KILLASSIST); break;
                         case ATK_LANCEFLAMMES_SHOOT: if(lookupmaterial(d->feetpos())==MAT_WATER) unlockAchievement(ACH_THUGPHYSIQUE); break;
                         case ATK_SV98_SHOOT: if(zoom==0) unlockAchievement(ACH_NOSCOPE); break;
                         case ATK_GLOCK_SHOOT: if(d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_CAMPOUZE || d->gunselect==GUN_S_GAU8 || d->gunselect==GUN_S_ROQUETTES) unlockAchievement(ACH_DAVIDGOLIATH); break;
@@ -1072,15 +1072,15 @@ namespace game
         }
         if(floorlevel>0)
         {
-            particle_splash(map_atmo==4 && atmos ? PART_WATER : PART_SMOKE, pl->armourtype==A_ASSIST ? 12 : 10, 100, d->feetpos(), map_atmo==4 && atmos ? 0x111111 : map_atmo==9 ? 0xFFFFFF : 0x666666, 7.0f+rnd(pl->armourtype==A_ASSIST ? 10 : 5), 400, 20);
+            particle_splash(map_atmo==4 && atmos ? PART_WATER : PART_SMOKE, pl->armourtype==A_POWERARMOR ? 12 : 10, 100, d->feetpos(), map_atmo==4 && atmos ? 0x111111 : map_atmo==9 ? 0xFFFFFF : 0x666666, 7.0f+rnd(pl->armourtype==A_POWERARMOR ? 10 : 5), 400, 20);
             if(d==hudplayer()) startCameraAnimation(CAM_ANIM_JUMP, 600, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0.2f, 0));
-            if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_ASSIST && pl->armour ? S_JUMP_ASSIST : pl->aptitude==APT_NINJA || (pl->aptitude==APT_KAMIKAZE && pl->abilitymillis[ABILITY_2]) ? S_JUMP_NINJA : S_JUMP_BASIC, d);
+            if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_POWERARMOR && pl->armour ? S_JUMP_ASSIST : pl->aptitude==APT_NINJA || (pl->aptitude==APT_KAMIKAZE && pl->abilitymillis[ABILITY_2]) ? S_JUMP_NINJA : S_JUMP_BASIC, d);
         }
         else if(floorlevel<0)
         {
-            particle_splash(map_atmo==4 && atmos ? PART_WATER : PART_SMOKE, pl->armourtype==A_ASSIST ? 20 : 15, 120, d->feetpos(), map_atmo==4 && atmos ? 0x131313 : map_atmo==9 ? 0xFFFFFF : 0x442211, 7.0f+rnd(pl->armourtype==A_ASSIST ? 10 : 5), 400, 20);
+            particle_splash(map_atmo==4 && atmos ? PART_WATER : PART_SMOKE, pl->armourtype==A_POWERARMOR ? 20 : 15, 120, d->feetpos(), map_atmo==4 && atmos ? 0x131313 : map_atmo==9 ? 0xFFFFFF : 0x442211, 7.0f+rnd(pl->armourtype==A_POWERARMOR ? 10 : 5), 400, 20);
             if(d==hudplayer()) startCameraAnimation(CAM_ANIM_LAND, 400, vec(0, 0, -3), vec(0, 0, 0), vec(0, -0.4f, 0));
-            if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_ASSIST && pl->armour ? S_LAND_ASSIST : S_LAND_BASIC, d);
+            if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_POWERARMOR && pl->armour ? S_LAND_ASSIST : S_LAND_BASIC, d);
         }
     }
 
@@ -1092,7 +1092,7 @@ namespace game
         gameent *pl = (gameent *)d;
         if(d->physstate>=PHYS_SLOPE && moving)
         {
-            bool hasPowerArmor = (pl->armourtype == A_ASSIST && pl->armour);
+            bool hasPowerArmor = (pl->armourtype == A_POWERARMOR && pl->armour);
             int snd = lookupmaterial(d->feetpos()) == MAT_WATER ? S_SWIM : (hasPowerArmor ? S_FOOTSTEP_ASSIST : S_FOOTSTEP);
 
             int freq = (((100 - classes[pl->aptitude].speed) + 75) * 5) ;
