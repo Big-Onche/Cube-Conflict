@@ -21,6 +21,7 @@ namespace game
     ICOMMAND(hudammo, "", (), intret(followingplayer(player1)->ammo[followingplayer(player1)->gunselect]));
     ICOMMAND(hudmelee, "", (), intret((player1->gunselect>=GUN_CAC349 && player1->gunselect<=GUN_CACFLEAU) || player1->gunselect==GUN_CACNINJA));
     ICOMMAND(hudboost, "i", (int *id), if(*id>=0 && *id<=3) intret(followingplayer(player1)->boostmillis[*id]/1000););
+    ICOMMAND(hudafterburn, "", (), intret(followingplayer(player1)->afterburnmillis/1000););
     ICOMMAND(hudclass, "", (), intret(followingplayer(player1)->aptitude));
 
     ICOMMAND(hudability, "", (),
@@ -226,6 +227,7 @@ namespace game
         if(hp->boostmillis[B_SHROOMS]) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/shrooms.png", min(1.0f, hp->boostmillis[B_SHROOMS] / 5000.f));
         if(hp->boostmillis[B_RAGE]) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/rage.png", min(1.0f, hp->boostmillis[B_RAGE] / 1000.f));
         if(hp->vampimillis) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/vampire.png", min(1.0f, hp->vampimillis / 500.f));
+        if(hp->afterburnmillis) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/fire.png", min(1.0f, hp->afterburnmillis / 500.f));
 
         if(((hp->abilitymillis[ABILITY_1] || hp->abilitymillis[ABILITY_3]) && hp->aptitude==APT_MAGICIEN) || (hp->abilitymillis[ABILITY_2] && hp->aptitude==APT_PHYSICIEN))
         {
