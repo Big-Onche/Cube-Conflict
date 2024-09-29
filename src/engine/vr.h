@@ -12,7 +12,8 @@ namespace vr
     };
 
     extern bool isEnabled();
-    extern void submitRender();
+    extern void update();
+    extern void render();
     extern bool init();
     extern void clean();
 }

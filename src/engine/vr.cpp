@@ -5,7 +5,7 @@
 #include "engine.h"
 #include "vr.h"
 
-VARFP(virtualreality, 0, 0, 1, vr::init() );
+VARFP(virtualreality, 0, 0, 0, vr::init() );
 
 namespace vr
 {
@@ -145,32 +145,39 @@ namespace vr
         }
     }
 
-    void blitToResolveBuffers()
-    {
-        glBindFramebuffer_(GL_FRAMEBUFFER, 0);
-        loopi(NUMEYES)
-        {
-            glBindFramebuffer_(GL_DRAW_FRAMEBUFFER, eyeBuffer[i].resolvefb);
+VARP(ipd, -500, 0, 500); // 300
 
-            int targetWidth = screenw;
-            int targetHeight = screenh;
+void blitToResolveBuffers() {
+    glBindFramebuffer_(GL_FRAMEBUFFER, 0); // Use the default framebuffer as the source.
 
-            int offsetX = (targetWidth - screenw) / 2;
-            int offsetY = (targetHeight - screenh);
+    for (int i = 0; i < NUMEYES; i++) {
+        glBindFramebuffer_(GL_DRAW_FRAMEBUFFER, eyeBuffer[i].resolvefb); // Bind the framebuffer for each eye.
 
-            // Blit the entire screen to each eye's framebuffer, centered
-            glBlitFramebuffer_(0, 0, screenw, screenh,  // source coordinates
-                               offsetX, offsetY, offsetX + screenw, offsetY + screenh,  // destination coordinates adjusted for centering
-                               GL_COLOR_BUFFER_BIT, GL_LINEAR);
-        }
-        glBindFramebuffer_(GL_FRAMEBUFFER, 0);
+        // Calculate offset based on eye index.
+        int offsetX = (i == EYE_LEFT ? -ipd : ipd);
+
+        // Ensure offsets are clamped to prevent out-of-bounds rendering.
+        offsetX = std::max(0, std::min(screenw, offsetX));
+
+        // Blit the screen to each eye's framebuffer with horizontal offset.
+        glBlitFramebuffer_(0, 0, screenw, screenh,  // source coordinates
+                           offsetX + ipd/2, 0, screenw + offsetX, screenh,  // adjusted destination coordinates
+                           GL_COLOR_BUFFER_BIT, GL_LINEAR);
     }
 
-    void submitRender()
+    glBindFramebuffer_(GL_FRAMEBUFFER, 0); // Unbind any FBO.
+}
+
+    void update()
+    {
+        if(!isEnabled()) return;
+        updatePoses();
+    }
+
+    void render()
     {
         if(!isEnabled()) return;
 
-        updatePoses();
         blitToResolveBuffers();
 
         loopi(NUMEYES)
