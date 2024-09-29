@@ -386,56 +386,6 @@ namespace entities
         }
     }
 
-    bool endingShrooms;
-
-    void checkboosts(int time, gameent *d)
-    {
-        bool isHudPlayer = (d == hudplayer());
-        if(d->boostmillis[B_ROIDS] && (d->boostmillis[B_ROIDS] -= time)<=0)
-        {
-            d->boostmillis[B_ROIDS] = 0;
-            playSound(S_ROIDS_PUPOUT, isHudPlayer ? vec(0, 0, 0) : d->o, 300, 50, NULL, d->entityId);
-            if(d==player1) conoutf(CON_HUDCONSOLE, "\f8%s", readstr("GameMessage_RoidsEnded"));
-        }
-
-        if(d->boostmillis[B_EPO] && (d->boostmillis[B_EPO] -= time)<=0)
-        {
-            d->boostmillis[B_EPO] = 0;
-            playSound(S_EPO_PUPOUT, isHudPlayer ? vec(0, 0, 0) : d->o, 300, 50, NULL, d->entityId);
-            if(d==player1) conoutf(CON_HUDCONSOLE, "\f8%s", readstr("GameMessage_EpoEnded"));
-        }
-
-        if(d->boostmillis[B_JOINT] && (d->boostmillis[B_JOINT] -= time)<=0)
-        {
-            d->boostmillis[B_JOINT] = 0;
-            if(d==player1) conoutf(CON_HUDCONSOLE, "\f8%s", readstr("GameMessage_JointEnded"));
-        }
-
-        if(isHudPlayer && d->boostmillis[B_SHROOMS] > 4000) endingShrooms = false;
-        else if(!endingShrooms && isHudPlayer && d->boostmillis[B_SHROOMS] && d->boostmillis[B_SHROOMS] < 4000)
-        {
-            playSound(S_SHROOMS_PUPOUT);
-            endingShrooms = true;
-        }
-
-        if(d->boostmillis[B_SHROOMS] && (d->boostmillis[B_SHROOMS] -= time)<=0)
-        {
-            d->boostmillis[B_SHROOMS] = 0;
-            if(d==player1)
-            {
-                conoutf(CON_HUDCONSOLE, "\f8%s", readstr("GameMessage_ShroomsEnded"));
-                resetpostfx();
-            }
-        }
-
-        if(d->boostmillis[B_RAGE] && (d->boostmillis[B_RAGE] -= time)<=0) d->boostmillis[B_RAGE] = 0;
-    }
-
-    void checkafterburn(int time, gameent *d)
-    {
-        if(d->afterburnmillis && (d->afterburnmillis -= time)<=0) d->afterburnmillis = 0;
-    }
-
     void putitems(packetbuf &p)            // puts items in network stream and also spawns them locally
     {
         putint(p, N_ITEMLIST);

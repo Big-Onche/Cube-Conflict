@@ -912,8 +912,6 @@ namespace entities
     extern void resettriggers();
     extern void checktriggers();
     extern void checkitems(gameent *d);
-    extern void checkboosts(int time, gameent *d);
-    extern void checkafterburn(int time, gameent *d);
 
     extern void resetspawns();
     extern void spawnitems(bool force = false);

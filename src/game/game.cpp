@@ -330,6 +330,56 @@ namespace game
         else if(d->powerarmoursound) { stopLinkedSound(d->entityId, PL_POWERARMOR); d->powerarmoursound = false; }
     }
 
+    void updatePlayersBoosts(int time, gameent *d)
+    {
+        if(hasboost(d))
+        {
+            bool isHudPlayer = (d == hudplayer());
+
+            if(d->boostmillis[B_ROIDS] && (d->boostmillis[B_ROIDS] -= time)<=0)
+            {
+                d->boostmillis[B_ROIDS] = 0;
+                playSound(S_ROIDS_PUPOUT, isHudPlayer ? vec(0, 0, 0) : d->o, 300, 50, NULL, d->entityId);
+                if(d==player1) conoutf(CON_HUDCONSOLE, "\f8%s", readstr("GameMessage_RoidsEnded"));
+            }
+
+            if(d->boostmillis[B_EPO] && (d->boostmillis[B_EPO] -= time)<=0)
+            {
+                d->boostmillis[B_EPO] = 0;
+                playSound(S_EPO_PUPOUT, isHudPlayer ? vec(0, 0, 0) : d->o, 300, 50, NULL, d->entityId);
+                if(d==player1) conoutf(CON_HUDCONSOLE, "\f8%s", readstr("GameMessage_EpoEnded"));
+            }
+
+            if(d->boostmillis[B_JOINT] && (d->boostmillis[B_JOINT] -= time)<=0)
+            {
+                d->boostmillis[B_JOINT] = 0;
+                if(d==player1) conoutf(CON_HUDCONSOLE, "\f8%s", readstr("GameMessage_JointEnded"));
+            }
+
+            static bool endingShrooms;
+            if(isHudPlayer && d->boostmillis[B_SHROOMS] > 4000) endingShrooms = false;
+            else if(!endingShrooms && isHudPlayer && d->boostmillis[B_SHROOMS] && d->boostmillis[B_SHROOMS] < 4000)
+            {
+                playSound(S_SHROOMS_PUPOUT);
+                endingShrooms = true;
+            }
+
+            if(d->boostmillis[B_SHROOMS] && (d->boostmillis[B_SHROOMS] -= time)<=0)
+            {
+                d->boostmillis[B_SHROOMS] = 0;
+                if(d==player1)
+                {
+                    conoutf(CON_HUDCONSOLE, "\f8%s", readstr("GameMessage_ShroomsEnded"));
+                    resetpostfx();
+                }
+            }
+
+            if(d->boostmillis[B_RAGE] && (d->boostmillis[B_RAGE] -= time)<=0) d->boostmillis[B_RAGE] = 0;
+        }
+
+        if(d->afterburnmillis && (d->afterburnmillis -= time)<=0) d->afterburnmillis = 0;
+    }
+
     void otherplayers(int curtime)
     {
         loopv(players)
@@ -344,8 +394,7 @@ namespace game
                 {
                     if(d->armourtype==A_POWERARMOR && !d->armour && d->ammo[GUN_ASSISTXPL]) {gunselect(GUN_ASSISTXPL, d, true); d->gunwait=0;}
                     if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
-                    if(hasboost(d)) entities::checkboosts(curtime, d);
-                    entities::checkafterburn(curtime, d);
+                    updatePlayersBoosts(curtime, d);
                     updateAbilitiesSkills(curtime, d);
                 }
 
@@ -432,8 +481,7 @@ namespace game
                 if(player1->boostmillis[B_EPO] && player1->aptitude==APT_JUNKIE) unlockAchievement(ACH_LANCEEPO);
             }
 
-            if(hasboost(player1)) entities::checkboosts(curtime, player1);
-            entities::checkafterburn(curtime, player1);
+            updatePlayersBoosts(curtime, player1);
             updateAbilitiesSkills(curtime, player1);
         }
 
