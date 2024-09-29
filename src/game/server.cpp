@@ -2328,7 +2328,7 @@ namespace server
 
         if(atk==ATK_LANCEFLAMMES_SHOOT && !afterBurn)
         {
-            ts.afterburnmillis = 3000;
+            ts.afterburnmillis = 4000;
             ts.lastBurner = actor;
         }
         sendf(-1, 1, "ri8", N_DAMAGE, target->clientnum, actor->clientnum, damage, ts.armour, ts.health, ts.afterburnmillis, atk);
