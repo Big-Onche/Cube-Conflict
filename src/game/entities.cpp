@@ -431,6 +431,11 @@ namespace entities
         if(d->boostmillis[B_RAGE] && (d->boostmillis[B_RAGE] -= time)<=0) d->boostmillis[B_RAGE] = 0;
     }
 
+    void checkafterburn(int time, gameent *d)
+    {
+        if(d->afterburnmillis && (d->afterburnmillis -= time)<=0) d->afterburnmillis = 0;
+    }
+
     void putitems(packetbuf &p)            // puts items in network stream and also spawns them locally
     {
         putint(p, N_ITEMLIST);

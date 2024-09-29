@@ -111,10 +111,9 @@ enum { GUN_ELEC = 0, GUN_PLASMA, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_M32, G
        GUN_S_NUKE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_S_CAMPOUZE,
        GUN_CAC349, GUN_CACMARTEAU, GUN_CACMASTER, GUN_CACFLEAU,
        GUN_KAMIKAZE, GUN_ASSISTXPL, GUN_CACNINJA, NUMGUNS };
-enum { A_WOOD = 0, A_IRON, A_GOLD, A_MAGNET, A_POWERARMOR, NUMSHIELDS};
-enum { B_ROIDS = 0, B_SHROOMS, B_EPO, B_JOINT, B_RAGE, NUMBOOSTS};
-enum { ABILITY_1 = 0, ABILITY_2, ABILITY_3, NUMABILITIES};
-enum { P_FLAMES = 0, P_ELEC, NUMPOST};
+enum { A_WOOD = 0, A_IRON, A_GOLD, A_MAGNET, A_POWERARMOR, NUMSHIELDS };
+enum { B_ROIDS = 0, B_SHROOMS, B_EPO, B_JOINT, B_RAGE, NUMBOOSTS };
+enum { ABILITY_1 = 0, ABILITY_2, ABILITY_3, NUMABILITIES };
 enum { ACT_IDLE = 0, ACT_SHOOT, NUMACTS };
 enum {  ATK_RAIL_SHOOT = 0, ATK_PULSE_SHOOT,
         ATK_SMAW_SHOOT, ATK_MINIGUN_SHOOT,
@@ -243,7 +242,7 @@ enum
 {
     N_CONNECT = 0, N_SERVINFO, N_WELCOME, N_INITCLIENT, N_POS, N_TEXT, N_SOUND, N_CDIS,
     N_SHOOT, N_EXPLODE, N_SUICIDE,
-    N_DIED, N_DAMAGE, N_VAMPIRE, N_REAPER, N_VIKING, N_PRIEST, N_HITPUSH, N_SHOTFX, N_EXPLODEFX,
+    N_DIED, N_DAMAGE, N_VAMPIRE, N_REAPER, N_VIKING, N_PRIEST, N_AFTERBURN, N_HITPUSH, N_SHOTFX, N_EXPLODEFX,
     N_TRYSPAWN, N_SPAWNSTATE, N_SPAWN, N_FORCEDEATH,
     N_GUNSELECT, N_TAUNT,
     N_MAPCHANGE, N_MAPVOTE, N_TEAMINFO, N_ITEMSPAWN, N_ITEMPICKUP, N_ITEMACC, N_TELEPORT, N_JUMPPAD,
@@ -276,7 +275,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
 {
     N_CONNECT, 0, N_SERVINFO, 0, N_WELCOME, 1, N_INITCLIENT, 0, N_POS, 0, N_TEXT, 0, N_SOUND, 2, N_CDIS, 2,
     N_SHOOT, 0, N_EXPLODE, 0, N_SUICIDE, 1,
-    N_DIED, 7, N_DAMAGE, 7, N_VAMPIRE, 4, N_REAPER, 4, N_VIKING, 3, N_PRIEST, 3, N_HITPUSH, 7, N_SHOTFX, 10, N_EXPLODEFX, 4,
+    N_DIED, 7, N_DAMAGE, 8, N_VAMPIRE, 4, N_REAPER, 4, N_VIKING, 3, N_PRIEST, 3, N_AFTERBURN, 3, N_HITPUSH, 7, N_SHOTFX, 10, N_EXPLODEFX, 4,
     N_TRYSPAWN, 1, N_SPAWNSTATE, 39, N_SPAWN, 3, N_FORCEDEATH, 2,
     N_GUNSELECT, 2, N_TAUNT, 1,
     N_MAPCHANGE, 0, N_MAPVOTE, 0, N_TEAMINFO, 0, N_ITEMSPAWN, 2, N_ITEMPICKUP, 2, N_ITEMACC, 4,
@@ -387,7 +386,7 @@ static const struct attackinfo { int gun, action, picksound, sound, middistsnd, 
     { GUN_MINIGUN,      ACT_SHOOT, S_WPLOADMID,       S_MINIGUN,      S_MINIGUN_FAR,         S_FAR_LIGHT,   35,   60,  180,  60, 180, 0, 4250,   5, 8000,  1,    15 ,  7, 0, 1},
     { GUN_SPOCKGUN,     ACT_SHOOT, S_WPLOADALIEN,     S_SPOCKGUN,     S_SPOCKGUN_FAR,        S_FAR_LIGHT,   15,  175,  250,  15, 150, 3, 2250,   5, 8000,  1,    30,  15, 0, 1},
     { GUN_M32,          ACT_SHOOT, S_WPLOADMID,       S_M32,          S_M32_FAR,                      -1,    3, 1000, 1250,  20,  50, 0,  400,  10, 1000,  1,   600, 175, 1000, 1},
-    { GUN_LANCEFLAMMES, ACT_SHOOT, S_WPLOADMID,       S_FLAMETHROWER, S_FLAMETHROWER_FAR,             -1,   30,  100,   38, 500, 500, 9,    0,   2,  280, 10,    10 ,  0, 0, 1},
+    { GUN_LANCEFLAMMES, ACT_SHOOT, S_WPLOADMID,       S_FLAMETHROWER, S_FLAMETHROWER_FAR,             -1,   30,  100,   30, 500, 500, 9,    0,   2,  280, 10,    10 ,  0, 0, 1},
     { GUN_UZI,          ACT_SHOOT, S_WPLOADSMALL,     S_UZI,          S_UZI_FAR,             S_FAR_LIGHT,   35,   75,  150,  50, 150, 0, 4250,   2, 8000,  1,    10,   5, 0, 1},
     { GUN_FAMAS,        ACT_SHOOT, S_WPLOADSMALL,     S_FAMAS,        S_FAMAS_FAR,           S_FAR_LIGHT,   30,   90,  140,  40, 120, 0, 4250,   3, 8000,  1,    20,   5, 0, 1},
     { GUN_MOSSBERG,     ACT_SHOOT, S_WPLOADMID,       S_MOSSBERG,     S_MOSSBERG_FAR,    S_FAR_VERYHEAVY,    3, 1200,  115, 500, 500, 0,    0,  20, 1000, 25,    20,   0, 0, 1},
@@ -493,9 +492,9 @@ struct gamestate
 {
     int health, maxhealth, mana;
     int armour, armourtype;
-    int boostmillis[NUMBOOSTS], vampimillis;
+    int boostmillis[NUMBOOSTS], vampimillis, afterburnmillis;
     int abilitymillis[NUMABILITIES], aptiseed;
-    int postdmgmillis[NUMPOST];
+    bool abilityready[NUMABILITIES];
     int gunselect, gunwait;
     int ammo[NUMGUNS];
     bool aiming;
@@ -609,10 +608,15 @@ struct gamestate
         health = 1000;
         maxhealth = 1000;
         mana = 100;
-        loopi(5) boostmillis[i] = 0;
+        loopi(NUMBOOSTS) boostmillis[i] = 0;
+        loopi(NUMABILITIES)
+        {
+            abilitymillis[i] = 0;
+            abilityready[i] = true;
+        }
         vampimillis = 0;
+        afterburnmillis = 0;
         gunwait = 0;
-        loopi(3) abilitymillis[i] = 0;
         aptiseed = rnd(4);
         loopi(NUMGUNS) ammo[i] = 0;
         aiming = false;
@@ -786,7 +790,7 @@ struct gameent : dynent, gamestate
 
     int lastability[3];
     int attacksound; // 0 = no sound, 1 = close sound, 2 = close + far sound
-    bool abilityready[3], playerexploded, powerarmoursound;
+    bool playerexploded, powerarmoursound;
     int lastOutOfMap;
     bool wasAttacking, isOutOfMap;
     bool isConnected;
@@ -909,6 +913,7 @@ namespace entities
     extern void checktriggers();
     extern void checkitems(gameent *d);
     extern void checkboosts(int time, gameent *d);
+    extern void checkafterburn(int time, gameent *d);
 
     extern void resetspawns();
     extern void spawnitems(bool force = false);

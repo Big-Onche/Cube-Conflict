@@ -496,22 +496,22 @@ namespace game
     {
         vec p = d->o;
         p.z += 0.6f*(d->eyeheight + d->aboveeye) - d->eyeheight;
-        int actorClasse = actor->aptitude;
-        int victimClasse = d->aptitude;
+        int actorClass = actor->aptitude,
+            targetClass = d->aptitude;
         bool isHudPlayer = (actor == hudplayer());
 
         if(d->armourtype!=A_MAGNET)
         {
             if(blood) particle_splash(PART_BLOOD, damage > 300 ? 3 : damage/100, 1000, p, 0x60FFFF, 2.96f);
-            gibeffect(!isteam(d->team, actor->team) ? damage : actorClasse == APT_MEDECIN ? 0 : actorClasse == APT_JUNKIE ? damage/=1.5f : damage/=3.f, vec(0,0,0), d);
+            gibeffect(!isteam(d->team, actor->team) ? damage : actorClass == APT_MEDECIN ? 0 : actorClass == APT_JUNKIE ? damage/=1.5f : damage/=3.f, vec(0,0,0), d);
         }
 
         bool teamDamage = false;
         if(isHudPlayer) d->curdamagecolor = 0xFFAA00;
 
-        damage = ((damage*classes[actorClasse].damage)/(classes[victimClasse].resistance)); // calc damage based on the class's stats
+        damage = ((damage*classes[actorClass].damage)/(classes[targetClass].resistance)); // calc damage based on the class's stats
 
-        switch(actorClasse) // recalc damage based on the actor's passive/active skills
+        switch(actorClass) // recalc damage based on the actor's passive/active skills
         {
             case APT_AMERICAIN:
                 if(atk >= ATK_NUKE_SHOOT && atk <= ATK_CAMPOUZE_SHOOT)
@@ -551,7 +551,7 @@ namespace game
                     damage *= 1.3f;
                     if(isHudPlayer) d->curdamagecolor = 0xFF7700;
                 }
-                if(victimClasse == APT_AMERICAIN)
+                if(targetClass == APT_AMERICAIN)
                 {
                     damage /= 1.25f;
                     if(isHudPlayer) d->curdamagecolor = 0xFFFF00;
@@ -562,7 +562,7 @@ namespace game
                 if(d==player1 && actor==player1 && player1->armour && player1->abilitymillis[ABILITY_1]) unlockAchievement(ACH_BRICOLEUR);
         }
 
-        switch(victimClasse) // recalc damage based on the victim's passive/active
+        switch(targetClass) // recalc damage based on the victim's passive/active
         {
             case APT_MAGICIEN:
                 if(d->abilitymillis[ABILITY_3])
@@ -573,12 +573,12 @@ namespace game
                 break;
 
             case APT_PRETRE:
-                if(isHudPlayer && d->abilitymillis[ABILITY_2] && victimClasse == APT_PRETRE && d->mana) d->curdamagecolor = 0xAA00AA;
+                if(isHudPlayer && d->abilitymillis[ABILITY_2] && targetClass == APT_PRETRE && d->mana) d->curdamagecolor = 0xAA00AA;
                 break;
 
             case APT_SHOSHONE:
                 if(d->abilitymillis[ABILITY_1]) damage /= 1.3f;
-                if(actorClasse == APT_AMERICAIN)
+                if(actorClass == APT_AMERICAIN)
                 {
                     damage *= 1.25f;
                     if(isHudPlayer) d->curdamagecolor = 0xFF7700;
@@ -587,19 +587,19 @@ namespace game
 
         if(actor->boostmillis[B_ROIDS]) // recalc damage if actor has roids
         {
-            damage *= actorClasse == APT_JUNKIE ? 3 : 2;
+            damage *= actorClass == APT_JUNKIE ? 3 : 2;
             if(isHudPlayer) d->curdamagecolor = 0xFF0000;
         }
         if(d->boostmillis[B_JOINT]) // recalc victim if actor has joint
         {
-            damage /= victimClasse == APT_JUNKIE ? 1.875f : 1.25f;
+            damage /= targetClass == APT_JUNKIE ? 1.875f : 1.25f;
             if(isHudPlayer) d->curdamagecolor = 0xAAAA55;
         }
 
         if(isteam(d->team, actor->team) && actor != d && isHudPlayer) // recalc if ally or not
         {
-            if(actorClasse == APT_MEDECIN) return;
-            damage /= (actorClasse == APT_JUNKIE ? 1.5f : 3.f);
+            if(actorClass == APT_MEDECIN) return;
+            damage /= (actorClass == APT_JUNKIE ? 1.5f : 3.f);
             d->curdamagecolor = 0x888888;
             teamDamage = true;
         }

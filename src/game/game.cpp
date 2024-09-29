@@ -345,6 +345,7 @@ namespace game
                     if(d->armourtype==A_POWERARMOR && !d->armour && d->ammo[GUN_ASSISTXPL]) {gunselect(GUN_ASSISTXPL, d, true); d->gunwait=0;}
                     if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
                     if(hasboost(d)) entities::checkboosts(curtime, d);
+                    entities::checkafterburn(curtime, d);
                     updateAbilitiesSkills(curtime, d);
                 }
 
@@ -432,6 +433,7 @@ namespace game
             }
 
             if(hasboost(player1)) entities::checkboosts(curtime, player1);
+            entities::checkafterburn(curtime, player1);
             updateAbilitiesSkills(curtime, player1);
         }
 
@@ -639,7 +641,6 @@ namespace game
         d->deaths++;
         d->killstreak = 0;
         d->isOutOfMap = false;
-        loopi(NUMABILITIES) d->abilityready[i] = true;
 
         // death gfx effects
         vec pos(d->o.x, d->o.y, d->o.z-9);
@@ -691,7 +692,6 @@ namespace game
     {
         bool isHudPlayer = (actor == hudplayer());
         d->lastkiller = actor;
-        d->killstreak = 0;
 
         if(d->state==CS_EDITING)
         {

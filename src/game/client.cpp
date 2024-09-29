@@ -1331,6 +1331,7 @@ namespace game
             d->frags = getint(p);
             d->flags = getint(p);
             d->deaths = getint(p);
+            d->afterburnmillis = getint(p);
             if(d==player1) loopi(NUMBOOSTS) getint(p);
             else loopi(NUMBOOSTS) d->boostmillis[i] = getint(p);
         }
@@ -1686,6 +1687,7 @@ namespace game
                 {
                     if(d->state==CS_DEAD && d->lastpain) savetombe(d);
                     d->respawn();
+                    d->killstreak = 0;
                 }
                 parsestate(d, p);
                 if(!d) break;
@@ -1759,17 +1761,18 @@ namespace game
                     damage = getint(p),
                     armour = getint(p),
                     health = getint(p),
+                    afterburn = getint(p),
                     atk = getint(p);
                 gameent *target = getclient(tcn),
                        *actor = getclient(acn);
                 if(!target || !actor) break;
                 target->armour = armour;
                 target->health = health;
+                target->afterburnmillis = afterburn;
                 if(target->state == CS_ALIVE && actor != player1) target->lastpain = lastmillis;
                 damaged(damage, target, actor, false, atk);
                 if(player1->aptitude==APT_VIKING && target==player1 && actor!=player1 && player1->state==CS_ALIVE)
                 {
-                    player1->boostmillis[B_RAGE]+=damage*5;
                     if(player1->boostmillis[B_RAGE]>8000) unlockAchievement(ACH_RAGE);
                 }
                 break;
@@ -1816,6 +1819,20 @@ namespace game
                 gameent *target = getclient(tcn);
 
                 if(target) target->mana = mana;
+                break;
+            }
+
+            case N_AFTERBURN:
+            {
+                int tcn = getint(p),
+                    acn = getint(p);
+                gameent *target = getclient(tcn);
+                gameent *actor = getclient(acn);
+                if(target && actor)
+                {
+                    damageeffect(40, target, actor, ATK_LANCEFLAMMES_SHOOT);
+                    playSound(S_ADULT_P, target==player1 ? vec(0, 0, 0) : target->o, 250, 100, SND_LOWPRIORITY, target->entityId);
+                }
                 break;
             }
 

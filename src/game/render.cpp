@@ -582,6 +582,8 @@ namespace game
                 if(d->health < 300 && rndevent(1)) spawnbouncer(d->o, d->vel, d, BNC_PIXEL, 75);
                 if(d->health < 150 && rndevent(94)) particle_splash(PART_BLOOD, 1, 2500, center, 0x60FFFF, 1.f+rnd(2), 50);
 
+                if(d->afterburnmillis && rndevent(94)) particle_splash(PART_FIRE_BALL, 2, 500, center, rnd(2) ? 0x992200 : 0x886622, 8, 70, -20);
+
                 if(hasPowerArmor(d))
                 {
                     bool lowArmour = d->armour < 750;

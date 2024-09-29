@@ -129,6 +129,7 @@ namespace server
         int killstreak, frags, flags, deaths, teamkills, shotdamage, damage;
         int lasttimeplayed, timeplayed;
         float effectiveness;
+        clientinfo *lastBurner;
 
         servstate() : state(CS_DEAD), editstate(CS_DEAD), lifesequence(0) {}
 
@@ -1967,6 +1968,7 @@ namespace server
                 putint(p, oi->state.frags);
                 putint(p, oi->state.flags);
                 putint(p, oi->state.deaths);
+                putint(p, oi->state.afterburnmillis);
                 loopi(NUMBOOSTS) putint(p, oi->state.boostmillis[i]);
                 sendstate(oi->state, p);
             }
@@ -1992,8 +1994,8 @@ namespace server
     void sendresume(clientinfo *ci)
     {
         servstate &gs = ci->state;
-        sendf(-1, 1, "ri3i4vi8vi", N_RESUME, ci->clientnum, gs.state,
-            gs.killstreak, gs.frags, gs.flags, gs.deaths,
+        sendf(-1, 1, "ri3i5vi8vi", N_RESUME, ci->clientnum, gs.state,
+            gs.killstreak, gs.frags, gs.flags, gs.deaths, gs.afterburnmillis,
             NUMBOOSTS, gs.boostmillis,
             gs.aptiseed, gs.lifesequence,
             gs.health, gs.maxhealth, gs.mana,
@@ -2271,7 +2273,7 @@ namespace server
 
     void startintermission() { gamelimit = min(gamelimit, gamemillis); checkintermission(true); }
 
-    void dodamage(clientinfo *target, clientinfo *actor, int damage, int atk, const vec &hitpush = vec(0, 0, 0))
+    void dodamage(clientinfo *target, clientinfo *actor, int damage, int atk, const vec &hitpush = vec(0, 0, 0), bool afterBurn = false)
     {
         if(actor!=target && isteam(target->team, actor->team))
         {
@@ -2324,7 +2326,12 @@ namespace server
 
         if(target!=actor && !isteam(target->team, actor->team)) as.damage += damage;
 
-        sendf(-1, 1, "ri7", N_DAMAGE, target->clientnum, actor->clientnum, damage, ts.armour, ts.health, atk);
+        if(atk==ATK_LANCEFLAMMES_SHOOT && !afterBurn)
+        {
+            ts.afterburnmillis = 3000;
+            ts.lastBurner = actor;
+        }
+        sendf(-1, 1, "ri8", N_DAMAGE, target->clientnum, actor->clientnum, damage, ts.armour, ts.health, ts.afterburnmillis, atk);
 
         if(target->aptitude!=APT_AMERICAIN)
         {
@@ -2593,6 +2600,7 @@ namespace server
             {
                 loopi(NUMBOOSTS) if(ci->state.boostmillis[i]) ci->state.boostmillis[i] = max(ci->state.boostmillis[i]-curtime, 0);
                 loopi(NUMABILITIES) if(ci->state.abilitymillis[i]) ci->state.abilitymillis[i] = max(ci->state.abilitymillis[i]-curtime, 0);
+                if(ci->state.afterburnmillis) ci->state.afterburnmillis = max(ci->state.afterburnmillis-curtime, 0);
             }
             flushevents(ci, gamemillis);
         }
@@ -2634,14 +2642,14 @@ namespace server
         }
     }
 
-    int regentimer = 0;
     enum stat {S_HEALTH = 0, S_MANA};
 
-    void regenallies()
+    void updateAlliesRegens()
     {
-        regentimer += curtime;
+        static int tick = 0;
+        tick += curtime;
 
-        if(regentimer <= 1000) return;
+        if(tick <= 1000) return;
 
         loopv(clients)
         {
@@ -2679,7 +2687,31 @@ namespace server
                 }
             }
         }
-        regentimer = 0;
+        tick = 0;
+    }
+
+    void updateAfterburn()
+    {
+        static int tick = 0;
+        tick += curtime;
+
+        if(tick <= 650) return;
+
+        loopv(clients)
+        {
+            clientinfo &target = *clients[i];
+            servstate &ts = target.state;
+
+            if(ts.state==CS_ALIVE && ts.afterburnmillis && ts.lastBurner->connected)
+            {
+                sendf(-1, 1, "ri3", N_AFTERBURN, target.clientnum, ts.lastBurner->clientnum);
+                int acn = ts.lastBurner->clientnum;
+                gameent *actor = game::getclient(acn);
+                if(actor) dodamage(&target, ts.lastBurner, 30, ATK_LANCEFLAMMES_SHOOT, vec(0,0,0), true);
+            }
+            else ts.afterburnmillis = 0;
+        }
+        tick = -100 + rnd(201);
     }
 
     void serverupdate()
@@ -2694,8 +2726,8 @@ namespace server
                 processevents();
                 if(curtime)
                 {
-                    regenallies();
-
+                    updateAlliesRegens();
+                    updateAfterburn();
                     loopv(sents) if(sents[i].spawntime) // spawn entities when timer reached
                     {
                         int oldtime = sents[i].spawntime;
@@ -2908,6 +2940,7 @@ namespace server
         loopv(clients) if(clients[i]->authkickvictim == ci->clientnum) clients[i]->cleanauth();
         if(ci->connected)
         {
+            ci->connected = false;
             if(ci->privilege) setmaster(ci, false);
             if(smode) smode->leavegame(ci, true);
             ci->state.timeplayed += lastmillis - ci->state.lasttimeplayed;
@@ -3236,6 +3269,7 @@ namespace server
                         }
                     }
 
+                    ci->state.lastBurner = NULL;
                     if(m_identique) sendf(-1, 1, "ri2", N_CURWEAPON, currentWeapon);
 
                     logoutf("Infos: %s (%s level %d)", ci->name, readstr("Classes_Names", ci->aptitude), ci->level);
