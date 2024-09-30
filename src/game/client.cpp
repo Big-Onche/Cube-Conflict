@@ -1896,6 +1896,19 @@ namespace game
                 break;
             }
 
+            case N_LAVATOUCHFX:
+            {
+                int player = getint(p);
+                gameent *d = getclient(player);
+                if(!d) return;
+                playSound(S_SPLASH_LAVA, d==hudplayer() ? vec(0, 0, 0) : d->o, 300, 50);
+                particle_splash(PART_SMOKE, 25, 100, d->feetpos(), 0x222222, (10.f + rnd(5)), 400, 20);
+                particle_splash(PART_FIRE_BALL, 7, 120, d->feetpos(), 0xCC7744, (10.f + rnd(5)), 400, 300);
+                loopi(2 + rnd(3)) particles::dirSplash(PART_FIRESPARK, 0xFFBB55, 750, 7, 300 + (rnd(500)), d->feetpos(), vec(0, 0, 1), 3.f+(rnd(30)/6.f), ((i + 1) * 125) + rnd(200), -1);
+                loopi(4) particles::dirSplash(PART_SMOKE, 0x333333, 200, 4, 1500 + rnd(750), d->feetpos(), vec(0, 0, 1), 15.f + rnd(5), 50 + rnd(50), 5);
+                break;
+            }
+
             case N_RESUME:
             {
                 for(;;)

@@ -9,6 +9,8 @@ bool rndevent(int probability, int probabilityReduce) // adjust the probability 
     return !game::ispaused() && !rnd((int)adjusted);
 }
 
+VARR(deadlylava, 0, 1, 1);
+
 namespace game
 {
     int oldapti;
@@ -390,6 +392,16 @@ namespace game
 
             if(d->state == CS_ALIVE && !intermission)
             {
+                if(!deadlylava && lookupmaterial(d->feetpos())&MAT_LAVA && lastmillis - d->lastlavatouch > 250)
+                {
+                    d->lastlavatouch = lastmillis;
+                    addmsg(N_LAVATOUCH, "rc", d);
+                    d->falling = vec(0, 0, 0);
+                    d->physstate = PHYS_FALL;
+                    d->timeinair = 1;
+                    d->vel.z = max(d->vel.z, 300.f);
+                }
+
                 if(d!=player1)
                 {
                     if(d->armourtype==A_POWERARMOR && !d->armour && d->ammo[GUN_ASSISTXPL]) {gunselect(GUN_ASSISTXPL, d, true); d->gunwait=0;}

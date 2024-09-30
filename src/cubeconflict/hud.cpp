@@ -21,7 +21,7 @@ namespace game
     ICOMMAND(hudammo, "", (), intret(followingplayer(player1)->ammo[followingplayer(player1)->gunselect]));
     ICOMMAND(hudmelee, "", (), intret((player1->gunselect>=GUN_CAC349 && player1->gunselect<=GUN_CACFLEAU) || player1->gunselect==GUN_CACNINJA));
     ICOMMAND(hudboost, "i", (int *id), if(*id>=0 && *id<=3) intret(followingplayer(player1)->boostmillis[*id]/1000););
-    ICOMMAND(hudafterburn, "", (), intret(followingplayer(player1)->afterburnmillis/1000););
+    ICOMMAND(hudafterburn, "", (), intret((followingplayer(player1)->afterburnmillis+500)/1000););
     ICOMMAND(hudclass, "", (), intret(followingplayer(player1)->aptitude));
 
     ICOMMAND(hudability, "", (),

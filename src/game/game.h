@@ -242,7 +242,7 @@ enum
 {
     N_CONNECT = 0, N_SERVINFO, N_WELCOME, N_INITCLIENT, N_POS, N_TEXT, N_SOUND, N_CDIS,
     N_SHOOT, N_EXPLODE, N_SUICIDE,
-    N_DIED, N_DAMAGE, N_VAMPIRE, N_REAPER, N_VIKING, N_PRIEST, N_AFTERBURN, N_HITPUSH, N_SHOTFX, N_EXPLODEFX,
+    N_DIED, N_DAMAGE, N_VAMPIRE, N_REAPER, N_VIKING, N_PRIEST, N_AFTERBURN, N_LAVATOUCH, N_LAVATOUCHFX, N_HITPUSH, N_SHOTFX, N_EXPLODEFX,
     N_TRYSPAWN, N_SPAWNSTATE, N_SPAWN, N_FORCEDEATH,
     N_GUNSELECT, N_TAUNT,
     N_MAPCHANGE, N_MAPVOTE, N_TEAMINFO, N_ITEMSPAWN, N_ITEMPICKUP, N_ITEMACC, N_TELEPORT, N_JUMPPAD,
@@ -275,7 +275,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
 {
     N_CONNECT, 0, N_SERVINFO, 0, N_WELCOME, 1, N_INITCLIENT, 0, N_POS, 0, N_TEXT, 0, N_SOUND, 2, N_CDIS, 2,
     N_SHOOT, 0, N_EXPLODE, 0, N_SUICIDE, 1,
-    N_DIED, 7, N_DAMAGE, 8, N_VAMPIRE, 4, N_REAPER, 4, N_VIKING, 3, N_PRIEST, 3, N_AFTERBURN, 3, N_HITPUSH, 7, N_SHOTFX, 10, N_EXPLODEFX, 4,
+    N_DIED, 7, N_DAMAGE, 8, N_VAMPIRE, 4, N_REAPER, 4, N_VIKING, 3, N_PRIEST, 3, N_AFTERBURN, 3, N_LAVATOUCH, 1, N_LAVATOUCHFX, 2, N_HITPUSH, 7, N_SHOTFX, 10, N_EXPLODEFX, 4,
     N_TRYSPAWN, 1, N_SPAWNSTATE, 39, N_SPAWN, 3, N_FORCEDEATH, 2,
     N_GUNSELECT, 2, N_TAUNT, 1,
     N_MAPCHANGE, 0, N_MAPVOTE, 0, N_TEAMINFO, 0, N_ITEMSPAWN, 2, N_ITEMPICKUP, 2, N_ITEMACC, 4,
@@ -781,7 +781,7 @@ struct gameent : dynent, gamestate
     int curdamage, lastcurdamage, curdamagecolor;
     int attacking, gunaccel;
     int lastfootstep;
-    int lasttaunt;
+    int lasttaunt, lastlavatouch;
     int lastpickup, lastpickupmillis, flagpickup, lastbase, lastrepammo, lastweap;
     int killstreak, frags, flags, deaths, totaldamage, totalshots;
     editinfo *edit;
@@ -840,6 +840,7 @@ struct gameent : dynent, gamestate
         lastcurdamage = 0;
         attacking = ACT_IDLE;
         lasttaunt = 0;
+        lastlavatouch = 0;
         lastpickup = -1;
         lastpickupmillis = 0;
         flagpickup = 0;

@@ -2705,9 +2705,7 @@ namespace server
             if(ts.state==CS_ALIVE && ts.afterburnmillis && ts.lastBurner->connected)
             {
                 sendf(-1, 1, "ri3", N_AFTERBURN, target.clientnum, ts.lastBurner->clientnum);
-                int acn = ts.lastBurner->clientnum;
-                gameent *actor = game::getclient(acn);
-                if(actor) dodamage(&target, ts.lastBurner, 30, ATK_LANCEFLAMMES_SHOOT, vec(0,0,0), true);
+                dodamage(&target, ts.lastBurner, 30, ATK_LANCEFLAMMES_SHOOT, vec(0,0,0), true);
             }
             else ts.afterburnmillis = 0;
         }
@@ -3658,6 +3656,14 @@ namespace server
                 cq->state.mana -= classes[cq->aptitude].abilities[ability].manacost;
                 cq->state.abilitymillis[ability] = classes[cq->aptitude].abilities[ability].duration;
                 sendf(-1, 1, "ri4", N_GETABILITY, cq->clientnum, ability, cq->state.abilitymillis[ability]);
+                break;
+            }
+
+            case N_LAVATOUCH:
+            {
+                if(!cq) break;
+                dodamage(ci, ci, 500, ATK_LANCEFLAMMES_SHOOT, vec(0, 0, 0));
+                sendf(-1, 1, "ri2", N_LAVATOUCHFX, ci->clientnum);
                 break;
             }
 
