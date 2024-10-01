@@ -545,155 +545,169 @@ namespace game
         }
     }
 
+    void renderPlayerTextInfo(gameent *d, float dist)
+    {
+        copystring(d->info, colorname(d));
+
+        if(d->curdamage) // damage dealt displayed on hud
+        {
+            vec pos = d->abovehead();
+            float dist = d->o.dist(camera1->o);
+            float up = 5 + dist/40.f + (((totalmillis - d->lastcurdamage) / 50.f) / (dist <= 160 ? 160.f - dist : 1)); // particle going up effect
+            if(!ispaused()) pos.z += up - (15 * (1 - (clamp(dist, 0.f, 160.f) / 160.f)));
+            float size = (zoom ? huddamagesize * (guns[player1->gunselect].maxzoomfov) / 100.f : huddamagesize) * 1.5f;
+            particles::text(pos, tempformatstring("%d", d->curdamage), PART_TEXT, 1, d->curdamagecolor, size, 0, true);
+        }
+
+        if(player1->state==CS_SPECTATOR && showspecplayerinfo)
+        {
+            float metersize = 0.08f;
+            vec textpos = d->abovehead();
+            textpos.addz(dist/32.f);
+            particles::text(textpos, tempformatstring("%s", d->name), PART_TEXT, 1, d->state==CS_ALIVE ? (d->team==1 ? 0xFFFF00 : 0xFF0000) : 0x595959, metersize, 0, true);
+            if(d->state==CS_ALIVE) particles::meter(d->abovehead(), d->health/1000.0f, PART_METER, 1, rygbGradient(d->health/10), 0x000000, metersize, true);
+        }
+    }
+
+    void spawnPlayerBouncers(gameent *d, vec pos)
+    {
+        if(d->health < 300)
+        {
+            if(rndevent(1)) spawnbouncer(d->o, d->vel, d, BNC_PIXEL, 75);
+            if(d->health < 150 && rndevent(94)) particle_splash(PART_BLOOD, 1, 2500, pos, 0x60FFFF, 1.f+rnd(2), 50);
+        }
+
+        if(hasPowerArmor(d) && d->armour < 1500)
+        {
+            bool lowArmour = (d->armour < 750);
+            if(rndevent(lowArmour ? 98 : 95)) regularflame(PART_SMOKE, pos, 15, 3, (lowArmour ? 0x222222 : 0x777777), 1, (lowArmour ? 2.5f : 2), 50, (lowArmour ? 1750 : 1250), -10, 3);
+            if(d->armour < 1000 && rndevent(lowArmour ? 95 : 92)) particle_splash(PART_FIRE_BALL, (1 + lowArmour), 500, pos, rnd(2) ? 0x992200 : 0x886622, (d->armour<500 ? 5 : 3), 50, -20);
+            if(lowArmour && rndevent(1)) spawnbouncer(d->o, d->vel, d, BNC_SCRAP, 50);
+        }
+    }
+
+    void spawnPlayerParticles(gameent *d, vec pos, bool exceptHud)
+    {
+        if(d->afterburnmillis && rndevent(94)) particle_splash(PART_FIRE_BALL, 2, 350, pos, rnd(2) ? 0x992200 : 0x886622, 5, 70, -20, 5);
+
+        if(d->boostmillis[B_SHROOMS] && rndevent(97))
+        {
+            regularflame(PART_SPARK, d->feetpos(), 12, 2, particles::getRandomColor(), 2, 0.4f, 10.f, 500, 0, -2);
+            if(exceptHud) particle_splash(PART_SMOKE, 2, 150, d->o, particles::getRandomColor(), 12+rnd(5), 400, 200);
+        }
+
+        if(d->boostmillis[B_JOINT] && rndevent(93)) regularflame(PART_SMOKE, d->abovehead().add(vec(-12, 5, -19)), 2, 3, 0x888888, 1, 1.6f, 50.0f, 1000.0f, -10);
+
+        switch(d->aptitude)
+        {
+            case APT_MAGICIEN:
+                if(d->abilitymillis[ABILITY_1]) particle_splash(PART_SMOKE, 2, 120, d->o, 0xFF33FF, 10+rnd(5), 400,400);
+                if(d->abilitymillis[ABILITY_3] && exceptHud) particle_fireball(pos, 15.2f, PART_EXPLOSION, 5,  0x880088, 13.0f);
+                break;
+            case APT_PHYSICIEN:
+                if(d->abilitymillis[ABILITY_2] && rndevent(97)) particle_splash(PART_SMOKE, 1, 300, d->o, 0x7777FF, 10+rnd(5), 400, 400);
+                if(d->abilitymillis[ABILITY_3] && rndevent(98))
+                {
+                    particle_splash(PART_SMOKE, 1, 200, d->feetpos(), 0x665544, 7+rnd(4), 175, -200);
+                    particle_splash(PART_FIRE_BALL, 4, 150, d->feetpos(), !rnd(2) ? 0xFFAA00 : 0xFF3300, 1+rnd(2), 150, -50);
+                }
+                break;
+            case APT_PRETRE:
+                if(d->abilitymillis[ABILITY_2]) particle_fireball(pos , 16.0f, PART_SHOCKWAVE, 5, 0xFFFF00, 16.0f);
+                break;
+            case APT_VIKING:
+                if(d->boostmillis[B_RAGE] && rndevent(97) && exceptHud) particle_splash(PART_SMOKE, 2, 150, d->o, 0xFF3300, 12+rnd(5), 400, 200);
+                break;
+            case APT_SHOSHONE:
+                if(rndevent(98))
+                {
+                    if(d->abilitymillis[ABILITY_1]) regularflame(PART_SPARK, d->feetpos(), 12, 2, 0xAAAAAA, 2, 0.4f, 10.f, 500, 0, -2);
+                    if(d->abilitymillis[ABILITY_2]) regularflame(PART_SPARK, d->feetpos(), 12, 2, 0xFF33FF, 2, 0.4f, 10.f, 500, 0, -2);
+                    if(d->abilitymillis[ABILITY_3]) regularflame(PART_SPARK, d->feetpos(), 12, 2, 0xFF3333, 2, 0.4f, 10.f, 500, 0, -2);
+                }
+        }
+    }
+
+    void renderPlayerIcons(gameent *d, vec pos, float dist)
+    {
+        if(isteam(hudplayer()->team, d->team))
+        {
+            float metersize = 0.08f / (dist / 125);
+            if(hudplayer()->aptitude==APT_MEDECIN)
+            {
+                if(dist <= 250) particles::meter(d->abovehead(), d->health/1000.0f, PART_METER, 1, rygbGradient(d->health/10), 0x000000, metersize, true);
+                if(d->health < 500)
+                {
+                    int blinkSpeed = 1001 - (500 - d->health) / 2;
+                    particles::hudIcon(PART_HEALTH, pos, (totalmillis % blinkSpeed < blinkSpeed / 2) ? 0x111111 : 0xFFFFFF, 0.075f);
+                }
+            }
+            else if(hudplayer()->aptitude==APT_JUNKIE)
+            {
+                if(drawManaStat(d))
+                {
+                    if(dist <= 250) particles::meter(d->abovehead(), d->mana/150.0f, PART_METER, 1, 0xFF00FF, 0x000000, metersize, true);
+                    if(d->mana < 50)
+                    {
+                        int blinkSpeed = 1001 - (50 - d->mana) / 2;
+                        particles::hudIcon(PART_MANA, pos, (totalmillis % blinkSpeed < blinkSpeed / 2) ? 0xFF00FF : 0xFFFFFF, 0.075f);
+                    }
+                }
+            }
+        }
+        else if((hudplayer()->aptitude==APT_ESPION && hudplayer()->abilitymillis[ABILITY_3]) || totalmillis - getspyability < 2000)
+        {
+            particles::hudIcon(PART_VISEUR, pos, 0xBBBBBB);
+        }
+    }
+
     void rendergame()
     {
         ai::render();
         bool thirdPerson = isthirdperson();
 
         gameent *f = followingplayer(), *exclude = thirdPerson ? NULL : f;
+
         loopv(players)
         {
             gameent *d = players[i];
+
+            if(d->state==CS_SPECTATOR || d->state==CS_SPAWNING || d->lifesequence < 0 || d == exclude || (d->state==CS_DEAD && hidedead)) continue; // skip invisible players
+
             bool isHudPlayer = (d==hudplayer());
-            bool canShowEffect = (!isHudPlayer || thirdPerson);
-
-            if(d->state==CS_SPECTATOR || d->state==CS_SPAWNING || d->lifesequence < 0 || d == exclude || (d->state==CS_DEAD && hidedead)) continue;
-            if(d!=player1) renderplayer(d);
-
-            vec dir = vec(d->o).sub(camera1->o);
-            float dist = dir.magnitude();
-            dir.div(dist);
-
-            copystring(d->info, colorname(d));
-
-            if(d->curdamage) // damage dealt displayed on hud
-            {
-                vec pos = d->abovehead();
-                float dist = d->o.dist(camera1->o);
-                float up = 5 + dist/40.f + (((totalmillis - d->lastcurdamage) / 50.f) / (dist <= 160 ? 160.f - dist : 1)); // particle going up effect
-                if(!ispaused()) pos.z += up - (15 * (1 - (clamp(dist, 0.f, 160.f) / 160.f)));
-                float size = (zoom ? huddamagesize * (guns[player1->gunselect].maxzoomfov) / 100.f : huddamagesize) * 1.5f;
-                particles::text(pos, tempformatstring("%d", d->curdamage), PART_TEXT, 1, d->curdamagecolor, size, 0, true);
-            }
-
+            bool exceptHud = (!isHudPlayer || thirdPerson);
             float distance = d->o.dist(camera1->o);
 
-            if(player1->state==CS_SPECTATOR && showspecplayerinfo)
-            {
-                float metersize = 0.08f;
-                vec textpos = d->abovehead();
-                textpos.addz(distance/32.f);
-                particles::text(textpos, tempformatstring("%s", d->name), PART_TEXT, 1, d->state==CS_ALIVE ? (d->team==1 ? 0xFFFF00 : 0xFF0000) : 0x595959, metersize, 0, true);
-                if(d->state==CS_ALIVE) particles::meter(d->abovehead(), d->health/1000.0f, PART_METER, 1, rygbGradient(d->health/10), 0x000000, metersize, true);
-            }
+            if(d!=player1) renderplayer(d);
+            renderPlayerTextInfo(d, distance);
 
             if(d->state==CS_ALIVE && !ispaused())
             {
+                vec playerCenter = d->o;
+                playerCenter.subz(8);
+
                 renderWeaponParticles(d);
-
-                vec center = d->o;
-                center.subz(8);
-                if(d->health < 300 && rndevent(1)) spawnbouncer(d->o, d->vel, d, BNC_PIXEL, 75);
-                if(d->health < 150 && rndevent(94)) particle_splash(PART_BLOOD, 1, 2500, center, 0x60FFFF, 1.f+rnd(2), 50);
-
-                if(d->afterburnmillis && rndevent(94)) particle_splash(PART_FIRE_BALL, 2, 500, center, rnd(2) ? 0x992200 : 0x886622, 8, 70, -20);
-
-                if(hasPowerArmor(d))
-                {
-                    bool lowArmour = d->armour < 750;
-                    if(d->armour < 1500 && rndevent(lowArmour ? 98 : 95)) regularflame(PART_SMOKE, center, 15, 3, (lowArmour ? 0x222222 : 0x777777), 1, (lowArmour ? 2.5f : 2), 50, (lowArmour ? 1750 : 1250), -10, 3);
-                    if(d->armour < 1000 && rndevent(lowArmour ? 95 : 92)) particle_splash(PART_FIRE_BALL, (1 + lowArmour), 500, center, rnd(2) ? 0x992200 : 0x886622, (d->armour<500 ? 5 : 3), 50, -20);
-                    if(lowArmour && rndevent(1)) spawnbouncer(d->o, d->vel, d, BNC_SCRAP, 50);
-                }
-
-                if(d->boostmillis[B_SHROOMS] && rndevent(97))
-                {
-                    regularflame(PART_SPARK, d->feetpos(), 12, 2, particles::getRandomColor(), 2, 0.4f, 10.f, 500, 0, -2);
-                    if(canShowEffect) particle_splash(PART_SMOKE, 2, 150, d->o, particles::getRandomColor(), 12+rnd(5), 400, 200);
-                }
-
-                if(d->boostmillis[B_JOINT] && rndevent(93)) regularflame(PART_SMOKE, d->abovehead().add(vec(-12, 5, -19)), 2, 3, 0x888888, 1, 1.6f, 50.0f, 1000.0f, -10);
-
-                if(!isHudPlayer && hudplayer()->state==CS_ALIVE)
-                {
-                    if(isteam(hudplayer()->team, d->team))
-                    {
-                        float metersize = 0.08f / (distance / 125);
-                        if(hudplayer()->aptitude==APT_MEDECIN)
-                        {
-                            if(distance <= 250) particles::meter(d->abovehead(), d->health/1000.0f, PART_METER, 1, rygbGradient(d->health/10), 0x000000, metersize, true);
-                            if(d->health < 500)
-                            {
-                                int blinkSpeed = 1001 - (500 - d->health) / 2;
-                                particles::hudIcon(PART_HEALTH, center, (totalmillis % blinkSpeed < blinkSpeed / 2) ? 0x111111 : 0xFFFFFF, 0.075f);
-                            }
-                        }
-                        else if(hudplayer()->aptitude==APT_JUNKIE)
-                        {
-                            if(drawManaStat(d))
-                            {
-                                if(distance <= 250) particles::meter(d->abovehead(), d->mana/150.0f, PART_METER, 1, 0xFF00FF, 0x000000, metersize, true);
-                                if(d->mana < 50)
-                                {
-                                    int blinkSpeed = 1001 - (50 - d->mana) / 2;
-                                    particles::hudIcon(PART_MANA, center, (totalmillis % blinkSpeed < blinkSpeed / 2) ? 0xFF00FF : 0xFFFFFF, 0.075f);
-                                }
-                            }
-                        }
-                    }
-                    else if ((hudplayer()->aptitude==APT_ESPION && hudplayer()->abilitymillis[ABILITY_3]) || totalmillis - getspyability < 2000)
-                    {
-                        particles::hudIcon(PART_VISEUR, center, 0xBBBBBB);
-                    }
-                }
-
-                switch(d->aptitude)
-                {
-                    case APT_MAGICIEN:
-                        if(d->abilitymillis[ABILITY_1]) particle_splash(PART_SMOKE, 2, 120, d->o, 0xFF33FF, 10+rnd(5), 400,400);
-                        if(d->abilitymillis[ABILITY_3] && canShowEffect) particle_fireball(center, 15.2f, PART_EXPLOSION, 5,  0x880088, 13.0f);
-                        break;
-                    case APT_PHYSICIEN:
-                        if(d->abilitymillis[ABILITY_2] && rndevent(97)) particle_splash(PART_SMOKE, 1, 300, d->o, 0x7777FF, 10+rnd(5), 400, 400);
-                        if(d->abilitymillis[ABILITY_3] && rndevent(98))
-                        {
-                            particle_splash(PART_SMOKE, 1, 200, d->feetpos(), 0x665544, 7+rnd(4), 175, -200);
-                            particle_splash(PART_FIRE_BALL, 4, 150, d->feetpos(), !rnd(2) ? 0xFFAA00 : 0xFF3300, 1+rnd(2), 150, -50);
-                        }
-                        break;
-                    case APT_PRETRE:
-                        if(d->abilitymillis[ABILITY_2]) particle_fireball(center , 16.0f, PART_SHOCKWAVE, 5, 0xFFFF00, 16.0f);
-                        break;
-                    case APT_VIKING:
-                        if(d->boostmillis[B_RAGE] && rndevent(97) && canShowEffect) particle_splash(PART_SMOKE, 2, 150, d->o, 0xFF3300, 12+rnd(5), 400, 200);
-                        break;
-                    case APT_SHOSHONE:
-                        if(rndevent(98))
-                        {
-                            if(d->abilitymillis[ABILITY_1]) regularflame(PART_SPARK, d->feetpos(), 12, 2, 0xAAAAAA, 2, 0.4f, 10.f, 500, 0, -2);
-                            if(d->abilitymillis[ABILITY_2]) regularflame(PART_SPARK, d->feetpos(), 12, 2, 0xFF33FF, 2, 0.4f, 10.f, 500, 0, -2);
-                            if(d->abilitymillis[ABILITY_3]) regularflame(PART_SPARK, d->feetpos(), 12, 2, 0xFF3333, 2, 0.4f, 10.f, 500, 0, -2);
-                        }
-                }
+                spawnPlayerBouncers(d, playerCenter);
+                spawnPlayerParticles(d, playerCenter, exceptHud);
+                if(!isHudPlayer) renderPlayerIcons(d, playerCenter, distance);
             }
         }
+
         loopv(ragdolls)
         {
             gameent *d = ragdolls[i];
             float fade = 1.0f;
-            if(ragdollmillis && ragdollfade)
-                fade -= clamp(float(lastmillis - (d->lastupdate + max(ragdollmillis - ragdollfade, 0)))/min(ragdollmillis, ragdollfade), 0.0f, 1.0f);
+            if(ragdollmillis && ragdollfade) fade -= clamp(float(lastmillis - (d->lastupdate + max(ragdollmillis - ragdollfade, 0)))/min(ragdollmillis, ragdollfade), 0.0f, 1.0f);
             rendertombeplayer(d, fade);
         }
+
         rendermonsters();
         entities::renderentities();
         renderbouncers();
         renderprojectiles();
 
-        if(exclude)
-            renderplayer(exclude, 1, MDL_ONLYSHADOW);
-        else if(!f && (player1->state==CS_ALIVE || (player1->state==CS_EDITING && thirdPerson) || (player1->state==CS_DEAD && !hidedead)))
-            renderplayer(player1, 1, thirdPerson ? 0 : MDL_ONLYSHADOW);
+        if(exclude) renderplayer(exclude, 1, MDL_ONLYSHADOW);
+        else if(!f && (player1->state==CS_ALIVE || (player1->state==CS_EDITING && thirdPerson) || (player1->state==CS_DEAD && !hidedead))) renderplayer(player1, 1, thirdPerson ? 0 : MDL_ONLYSHADOW);
 
         if(cmode) cmode->rendergame();
     }
