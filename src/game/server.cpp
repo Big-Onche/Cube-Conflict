@@ -128,6 +128,7 @@ namespace server
         projectilestate<8> projs, grenades;
         int killstreak, frags, flags, deaths, teamkills, shotdamage, damage;
         int lasttimeplayed, timeplayed;
+        bool inwater;
         float effectiveness;
         clientinfo *lastBurner;
 
@@ -166,6 +167,7 @@ namespace server
             deadflush = 0;
             lastspawn = -1;
             lastshot = 0;
+            inwater = false;
         }
 
         void reassign()
@@ -2275,7 +2277,8 @@ namespace server
 
     void dodamage(clientinfo *target, clientinfo *actor, int damage, int atk, const vec &hitpush = vec(0, 0, 0), bool afterBurn = false)
     {
-        if(actor!=target && isteam(target->team, actor->team))
+        bool teamDamage = (actor!=target && isteam(target->team, actor->team));
+        if(teamDamage)
         {
             if(teamkill)
             {
@@ -2326,13 +2329,31 @@ namespace server
 
         if(target!=actor && !isteam(target->team, actor->team)) as.damage += damage;
 
-        if((atk==ATK_LANCEFLAMMES_SHOOT || atk==ATK_MOLOTOV_SHOOT) && !afterBurn)
+        if(!afterBurn && !ts.inwater)
         {
-            if(atk==ATK_LANCEFLAMMES_SHOOT) ts.afterburnmillis = 4000;
-            else ts.afterburnmillis += 6000;
+            int burnMillis = 0;
+
+            switch(atk)
+            {
+                case ATK_LANCEFLAMMES_SHOOT:
+                    burnMillis = 4000;
+                    break;
+
+                case ATK_MOLOTOV_SHOOT:
+                    burnMillis = 7000;
+                    break;
+            }
+
+            int maxBurnMillis = burnMillis;
+
+            if(teamDamage) burnMillis /= 2;
+
+            ts.afterburnmillis = min(ts.afterburnmillis + burnMillis, maxBurnMillis);
+
             ts.afterburnatk = atk;
             ts.lastBurner = actor;
         }
+
         sendf(-1, 1, "ri8", N_DAMAGE, target->clientnum, actor->clientnum, damage, ts.armour, ts.health, ts.afterburnmillis, atk);
 
         if(target->aptitude!=APT_AMERICAIN)
@@ -3670,8 +3691,17 @@ namespace server
             case N_LAVATOUCH:
             {
                 if(!cq) break;
-                dodamage(ci, ci, 500, ATK_LANCEFLAMMES_SHOOT, vec(0, 0, 0));
-                sendf(-1, 1, "ri2", N_LAVATOUCHFX, ci->clientnum);
+                dodamage(cq, cq, 500, ATK_LANCEFLAMMES_SHOOT, vec(0, 0, 0));
+                sendf(-1, 1, "ri2", N_LAVATOUCHFX, cq->clientnum);
+                break;
+            }
+
+            case N_WATERTOUCH:
+            {
+                bool inWater = getint(p);
+                if(!cq) break;
+                if(inWater) cq->state.afterburnmillis = 0;
+                cq->state.inwater = inWater;
                 break;
             }
 

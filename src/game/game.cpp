@@ -1112,6 +1112,7 @@ namespace game
             {
                 playSound(S_WATER, isHudplayer ? vec(0, 0, 0) : d->o, 200, 30);
                 particle_splash(PART_WATER, 30, 120, o, 0x18181A, 10.0f+rnd(9), 500, -20);
+                addmsg(N_WATERTOUCH, "rci", pl, false);
             }
         }
         else if(waterlevel<0)
@@ -1120,6 +1121,12 @@ namespace game
             {
                 playSound(S_SPLASH, isHudplayer ? vec(0, 0, 0) : d->o, 300, 50);
                 particle_splash(PART_WATER, 40, 150, o, 0x18181A, 10.f + rnd(12), 600, 30);
+                addmsg(N_WATERTOUCH, "rci", pl, true);
+                if(pl->afterburnmillis)
+                {
+                    playSound(S_FIRE_EXT, isHudplayer ? vec(0,0,0) : d->o, 200, 100, NULL, pl->entityId);
+                    pl->afterburnmillis = 0;
+                }
             }
             else if(material&MAT_LAVA)
             {

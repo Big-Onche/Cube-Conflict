@@ -1831,7 +1831,7 @@ namespace game
                 if(target && actor)
                 {
                     damageeffect(target->afterburnatk == ATK_LANCEFLAMMES_SHOOT ? 40 : 80, target, actor, target->afterburnatk);
-                    playSound(S_ADULT_P, target==player1 ? vec(0, 0, 0) : target->o, 250, 100, SND_LOWPRIORITY, target->entityId);
+                    playSound(S_ADULT_P, target==player1 ? vec(0, 0, 0) : target->o, 250, 100, NULL, target->entityId);
                 }
                 break;
             }
