@@ -241,6 +241,30 @@ namespace game
                 }
                 return;
 
+            case ATK_MOLOTOV_SHOOT:
+            {
+                particle_splash(PART_SMOKE, 8, 1800, v, 0x555555, 30.0f, 300+rnd(100), 1200+rnd(400), 5, hasShrooms());
+                particle_splash(PART_SPARK, 5, 250, v, hasRoids(owner) ? 0xFF4444 : 0xFFBB55,  1.0f+rnd(2), 3500, 3500, 0, hasShrooms());
+                loopi(inWater ? 1 : 4)
+                {
+                    vec pos = v;
+                    if(!inWater) pos.add(vec(-30+rnd(61), -30+rnd(61), -10+rnd(21)));
+                    particle_splash(PART_FIRE_BALL, 10, 150+rnd(50), pos, hasRoids(owner) ? 0xFF4444 : i==0 ? 0x484848 : i==1 ? 0x575757: 0x646464, 9.f+rnd(6), 800+rnd(400), 2000, 25, hasShrooms());
+                }
+
+                if(inWater)
+                {
+                    particle_splash(PART_WATER, 50, 200, v, 0x18181A, 12.0f+rnd(14), 600, 300);
+                    particle_splash(PART_BUBBLE, 15, 150, v, 0x18181A, 4.0f+rnd(8), 300, 150);
+                }
+
+                if(!epilepsyfriendly)
+                {
+                    adddynlight(v, 3*attacks[atk].exprad, vec(6.0f, 3.0f, 0.0f), 150, 40, flags, initRadius, vec(2.0f, 1.5f, 0.5f));
+                    adddynlight(v, 2*attacks[atk].exprad, vec(1.5f, 0.5f, 0.0f), 150, 40, L_VOLUMETRIC|flags, initRadius, vec(1.5f, 0.0f, 0.0f));
+                }
+                return;
+            }
             case ATK_KAMIKAZE_SHOOT:
             case ATK_ASSISTXPL_SHOOT:
             {

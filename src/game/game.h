@@ -69,7 +69,7 @@ enum                            // static entity types
     SPOTLIGHT = ET_SPOTLIGHT,
     DECAL = ET_DECAL,
     // weapons
-    I_RAIL, I_PULSE, I_SMAW, I_MINIGUN, I_SPOCKGUN, I_M32, I_LANCEFLAMMES, I_UZI, I_FAMAS, I_MOSSBERG, I_HYDRA, I_SV98, I_SKS, I_ARBALETE, I_AK47, I_GRAP1, I_ARTIFICE, I_GLOCK,
+    I_RAIL, I_PULSE, I_SMAW, I_MINIGUN, I_SPOCKGUN, I_M32, I_LANCEFLAMMES, I_UZI, I_FAMAS, I_MOSSBERG, I_HYDRA, I_SV98, I_SKS, I_ARBALETE, I_AK47, I_GRAP1, I_ARTIFICE, I_MOLOTOV, I_GLOCK,
     I_SUPERARME, I_NULL1, I_NULL2, I_NULL3,
     // items
     I_SANTE, I_BOOSTPV, I_ROIDS, I_SHROOMS, I_EPO, I_JOINT,
@@ -106,8 +106,8 @@ struct gameentity : extentity
     gameentity() : triggerstate(TRIGGER_RESET), lasttrigger(0) {}
 };
 
-static int NUMMAINGUNS = 17;
-enum { GUN_ELEC = 0, GUN_PLASMA, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_M32, GUN_LANCEFLAMMES, GUN_UZI, GUN_FAMAS, GUN_MOSSBERG, GUN_HYDRA, GUN_SV98, GUN_SKS, GUN_ARBALETE, GUN_AK47, GUN_GRAP1, GUN_ARTIFICE, GUN_GLOCK,
+static int NUMMAINGUNS = 18;
+enum { GUN_ELEC = 0, GUN_PLASMA, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_M32, GUN_LANCEFLAMMES, GUN_UZI, GUN_FAMAS, GUN_MOSSBERG, GUN_HYDRA, GUN_SV98, GUN_SKS, GUN_ARBALETE, GUN_AK47, GUN_GRAP1, GUN_ARTIFICE, GUN_MOLOTOV, GUN_GLOCK,
        GUN_S_NUKE, GUN_S_GAU8, GUN_S_ROQUETTES, GUN_S_CAMPOUZE,
        GUN_CAC349, GUN_CACMARTEAU, GUN_CACMASTER, GUN_CACFLEAU,
        GUN_KAMIKAZE, GUN_ASSISTXPL, GUN_CACNINJA, NUMGUNS };
@@ -123,7 +123,8 @@ enum {  ATK_RAIL_SHOOT = 0, ATK_PULSE_SHOOT,
         ATK_HYDRA_SHOOT, ATK_SV98_SHOOT,
         ATK_SKS_SHOOT, ATK_ARBALETE_SHOOT,
         ATK_AK47_SHOOT, ATK_GRAP1_SHOOT,
-        ATK_ARTIFICE_SHOOT, ATK_GLOCK_SHOOT,
+        ATK_ARTIFICE_SHOOT, ATK_MOLOTOV_SHOOT,
+        ATK_GLOCK_SHOOT,
         //Super armes (4 armes)
         ATK_NUKE_SHOOT, ATK_GAU8_SHOOT,
         ATK_ROQUETTES_SHOOT, ATK_CAMPOUZE_SHOOT,
@@ -351,6 +352,7 @@ static struct itemstat { int add, max, sound; const char *ident; int info; } ite
     {40,   160,    S_ITEMAMMO,  "Weapon_Ak47",              GUN_AK47},
     {70,   280,    S_ITEMAMMO,  "Weapon_Gapb1",             GUN_GRAP1},
     {10,    40,    S_ITEMAMMO,  "Weapon_Fireworks",         GUN_ARTIFICE},
+    {8,     32,    S_ITEMAMMO,  "Weapon_Molotov",           GUN_MOLOTOV},
     {30,   120,    S_ITEMAMMO,  "Weapon_Glock",             GUN_GLOCK},
     // superweapons
     {  1,    4,    S_ITEMSUPERAMMO, "BOMBE NUCLEAIRE",      GUN_S_NUKE},
@@ -397,6 +399,7 @@ static const struct attackinfo { int gun, action, picksound, sound, middistsnd, 
     { GUN_AK47,         ACT_SHOOT, S_WPLOADMID,       S_AK47,         S_AK47_FAR,            S_FAR_LIGHT,   30,   92,  170,  60, 180, 0, 4250,   7, 8000,  1,    50,   5, 0, 1},
     { GUN_GRAP1,        ACT_SHOOT, S_WPLOADFUTUR,     S_GRAP1,        S_GRAP1_FAR,                    -1,   12,  200,  250,  30, 300, 3, 1750,  -4, 8000,  1,  -600,  20, 0, 1},
     { GUN_ARTIFICE,     ACT_SHOOT, S_WPLOADSMALL,     S_FIREWORKS,    S_FIREWORKS_FAR,                -1,    3, 1100,  900,  35, 200, 2, 1500,  35,  600,  1,   500,  80, 300, 1},
+    { GUN_MOLOTOV,      ACT_SHOOT, S_WPLOADMID,       S_MOLOTOV,      -1,                             -1,    3, 1350,  500,  20,  50, 0,  300, -10, 1500,  1,   100, 250, 10000, 1},
     { GUN_GLOCK,        ACT_SHOOT, S_WPLOADSMALL,     S_GLOCK,        S_GLOCK_FAR,           S_FAR_LIGHT,   10,  100,  280,   5, 150, 0, 4250,   7, 8000,  1,    30,   3, 0, 1},
     // Super armes
     { GUN_S_NUKE,       ACT_SHOOT, S_WPLOADBIG,       S_NUKE,         S_NUKE_FAR,             S_NUKE_FAR,    1, 3000,  3250,  20, 300, 2,  200,  10, 2000,  1,   400, 1500, 6000, 1},
@@ -434,6 +437,7 @@ static const struct guninfo { const char *ident, *name; vec2 weapDisp; int maxzo
     { "Weapon_Ak47",            "ak47",             vec2(46, 25),  70,  750,  { -1, ATK_AK47_SHOOT }, },
     { "Weapon_Gapb1",           "gapb1",            vec2(43, 17),  85,  500,  { -1, ATK_GRAP1_SHOOT }, },
     { "Weapon_Fireworks",       "feuartifice",      vec2(70, 30),  85,  500,  { -1, ATK_ARTIFICE_SHOOT }, },
+    { "Weapon_Molotov",         "molotov",          vec2( 8,  8),  90,  500,  { -1, ATK_MOLOTOV_SHOOT }, },
     { "Weapon_Glock",           "glock",            vec2(55, 20),  85,  300,  { -1, ATK_GLOCK_SHOOT }, },
     // Super weapons
     { "Weapon_Nuke",            "missilenorko",     vec2( 8,  3),  85, 2000,  { -1, ATK_NUKE_SHOOT }, },
@@ -492,7 +496,7 @@ struct gamestate
 {
     int health, maxhealth, mana;
     int armour, armourtype;
-    int boostmillis[NUMBOOSTS], vampimillis, afterburnmillis;
+    int boostmillis[NUMBOOSTS], vampimillis, afterburnmillis, afterburnatk;
     int abilitymillis[NUMABILITIES], aptiseed;
     bool abilityready[NUMABILITIES];
     int gunselect, gunwait;
@@ -708,7 +712,7 @@ struct gamestate
         }
         else if(m_identique) // identical weapon mutator
         {
-            loopi(17) baseammo(i);
+            loopi(NUMMAINGUNS) baseammo(i);
             selectedWeapon = currentIdenticalWeapon;
         }
         else if(m_capture) // base capture
@@ -1071,7 +1075,7 @@ namespace game
     extern bool intersect(dynent *d, const vec &from, const vec &to, float margin = 0, float &dist = intersectdist);
     extern dynent *intersectclosest(const vec &from, const vec &to, gameent *at, float margin = 0, float &dist = intersectdist);
     extern int temptrisfade;
-    enum {BNC_GRENADE = 0, BNC_PIXEL, BNC_ROCK, BNC_BIGROCK, BNC_CASING, BNC_BIGCASING, BNC_CARTRIDGE, BNC_SCRAP, BNC_LIGHT, NUMBOUNCERS};
+    enum {BNC_GRENADE = 0, BNC_MOLOTOV, BNC_PIXEL, BNC_ROCK, BNC_BIGROCK, BNC_CASING, BNC_BIGCASING, BNC_CARTRIDGE, BNC_SCRAP, BNC_GLASS, BNC_LIGHT, NUMBOUNCERS};
     extern void spawnbouncer(const vec &p, const vec &vel, gameent *d, int type, int speed = 0, int lifetime = rnd(temptrisfade)+rnd(5000), bool frommonster = false);
     extern void newbouncer(const vec &from, const vec &to, bool local, int id, gameent *owner, int type, int lifetime, int speed);
     extern void clearbouncers();

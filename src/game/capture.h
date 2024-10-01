@@ -190,7 +190,7 @@ struct captureclientmode : clientmode
                 b.ammotype = bases[i].ammotype;
                 return;
             }
-            int uses[I_ARTIFICE-I_RAIL+1];
+            int uses[I_MOLOTOV-I_RAIL+1];
             memset(uses, 0, sizeof(uses));
             loopi(bases.length()-1) if(bases[i].ammogroup)
             {
@@ -199,9 +199,9 @@ struct captureclientmode : clientmode
                 nextbase:;
             }
             int mintype = 0;
-            loopi(I_ARTIFICE-I_RAIL+1) if(uses[i] < uses[mintype]) mintype = i;
-            int numavail = 0, avail[I_ARTIFICE-I_RAIL+1];
-            loopi(I_ARTIFICE-I_RAIL+1) if(uses[i] == uses[mintype]) avail[numavail++] = i+1;
+            loopi(I_MOLOTOV-I_RAIL+1) if(uses[i] < uses[mintype]) mintype = i;
+            int numavail = 0, avail[I_MOLOTOV-I_RAIL+1];
+            loopi(I_MOLOTOV-I_RAIL+1) if(uses[i] == uses[mintype]) avail[numavail++] = i+1;
             b.ammotype = avail[rnd(numavail)];
         }
     }
@@ -259,7 +259,7 @@ struct captureclientmode : clientmode
     void receiveammo(gameent *d, int type)
     {
         type += I_RAIL-1;
-        if(type<I_RAIL || type>I_ARTIFICE) return;
+        if(type<I_RAIL || type>I_MOLOTOV) return;
         entities::repammo(d, type, d==player1);
     }
 

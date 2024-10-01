@@ -229,6 +229,7 @@ namespace game
     static const struct bouncerConfig { const char *name; float size, bounceIntensity; int variants, cullDist, bounceSound, bounceSoundRad, soundFlag; } bouncers[NUMBOUNCERS] =
     {
         { "grenade",            1.0f, 1.0f,  0,  750, S_B_GRENADE,      220,    0              },
+        { "molotov",            1.0f, 1.0f,  0,  750, -1,               220,    0              },
         { "pixel",              1.0f, 0.6f,  8,  600, S_B_PIXEL,        120,    0              },
         { "rock",               0.8f, 0.8f,  4,  750, S_B_ROCK,         120,    0              },
         { "rock/big",           2.5f, 0.4f,  3, 1250, S_B_BIGROCK,      300,    0              },
@@ -236,6 +237,7 @@ namespace game
         { "casing/big",         0.2f, 1.0f,  0,  250, S_B_BIGCASING,    120,    SND_FIXEDPITCH },
         { "casing/cartridge",   0.2f, 1.0f,  0,  250, S_B_CARTRIDGE,    120,    SND_FIXEDPITCH },
         { "scrap",              1.5f, 0.7f,  3,  750, S_B_SCRAP,        180,    0              },
+        { "glass",              0.5f, 0.2f,  0,  500, -1,               180,    0              },
         { NULL,                 0.1f, 1.0f,  0,  500, -1,                 0,    0              }
     };
 
@@ -284,11 +286,12 @@ namespace game
 
         avoidcollision(&bnc, dir, owner, 0.1f);
 
-        if(type==BNC_GRENADE)
+        if(type==BNC_GRENADE || type==BNC_MOLOTOV)
         {
-            bnc.offset = hudgunorigin(GUN_M32, from, to, owner);
+            bool isGrenade = (type==BNC_GRENADE);
+            bnc.offset = hudgunorigin(isGrenade ? GUN_M32 : GUN_MOLOTOV, from, to, owner);
             if(owner==hudplayer() && !isthirdperson()) bnc.offset.sub(owner->o).rescale(16).add(owner->o);
-            playSound(S_GRENADE, bnc.o, 300, 100, SND_FIXEDPITCH|SND_NOCULL, bnc.entityId);
+            if(isGrenade) playSound(S_GRENADE, bnc.o, 300, 100, SND_FIXEDPITCH|SND_NOCULL, bnc.entityId);
         }
 
         bnc.offset = from;
@@ -317,7 +320,6 @@ namespace game
             vec old(bnc.o);
 
             bool stopped = false;
-
             if(bnc.bouncetype == BNC_GRENADE)
             {
                 stopped = (bounce(&bnc, 0.6f, 0.5f, 0.8f) || (bnc.lifetime -= time) < 0);
@@ -347,16 +349,17 @@ namespace game
                 else if(bnc.inwater && !inWater) bnc.inwater = false; // the bouncer bounced outside the water
             }
 
-            if(stopped)
+            if(stopped || (bnc.bouncetype == BNC_MOLOTOV && bnc.bounces))
             {
-                if(bnc.bouncetype == BNC_GRENADE)
+                if(bnc.bouncetype == BNC_GRENADE || bnc.bouncetype == BNC_MOLOTOV)
                 {
+                    int atk = (bnc.bouncetype == BNC_GRENADE ? ATK_M32_SHOOT : ATK_MOLOTOV_SHOOT);
                     hits.setsize(0);
-                    explode(bnc.local, bnc.owner, bnc.o, bnc.o, NULL, 1, ATK_M32_SHOOT);
+                    explode(bnc.local, bnc.owner, bnc.o, bnc.o, NULL, 1, atk);
                     stopLinkedSound(bnc.entityId);
                     removeEntityPos(bnc.entityId);
                     if(bnc.local)
-                        addmsg(N_EXPLODE, "rci3iv", bnc.owner, lastmillis-maptime, ATK_M32_SHOOT, bnc.id-maptime,
+                        addmsg(N_EXPLODE, "rci3iv", bnc.owner, lastmillis-maptime, atk, bnc.id-maptime,
                                 hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
                 }
                 delete curBouncers.remove(i--);
@@ -478,6 +481,9 @@ namespace game
             case BNC_BIGCASING:
             case BNC_CARTRIDGE:
                 dir = vec(-10 + rnd(21), -10 + rnd(21), 100);
+                break;
+            case BNC_GLASS:
+                dir = vec(-150 + rnd(301), -150 + rnd(301), rnd(50));
                 break;
             default:
                 dir = vec(-50 + rnd(101), -50 + rnd(101), -50 + rnd(101));
@@ -748,12 +754,12 @@ namespace game
         }
     }
 
-    void startShake(const vec &v, int maxdist, int atk)
+    void startShake(const vec &v, int maxdist, int atk, float factorMod = 1.f)
     {
         float distance = camera1->o.dist(v);
         if(distance > maxdist) return;
         float factor = lerp(1.0f, 0.0f, distance / maxdist); // As normalized distance increases, the factor linearly decreases from 1 to 0
-        if(atk == ATK_NUKE_SHOOT) factor *= 2;
+        factor *= factorMod;
         shakeScreen(factor);
     }
 
@@ -799,7 +805,7 @@ namespace game
             case ATK_NUKE_SHOOT:
                 renderExplosion(owner, v, vel, atk);
                 playSound(S_EXPL_NUKE, v, 5000, 3000, SND_NOOCCLUSION);
-                startShake(v, 2 * attacks[atk].exprad, atk);
+                startShake(v, 2 * attacks[atk].exprad, atk, 2);
                 break;
 
             case ATK_ARTIFICE_SHOOT:
@@ -807,18 +813,30 @@ namespace game
                 playSound(S_EXPL_FIREWORKS, safeLoc, 400, 200);
                 if(inWater) playSound(S_EXPL_INWATER, vec(v).addz(15), 300, 100);
                 if(isFar) playSound(S_FIREWORKSEXPL_FAR, safeLoc, 2000, 750);
-                startShake(v, attacks[atk].exprad, atk);
+                startShake(v, attacks[atk].exprad, atk, 0.75f);
                 break;
 
             case ATK_M32_SHOOT:
+                loopi(5+rnd(3)) spawnbouncer(v, vec(0, 0, 0), owner, BNC_ROCK, 200);
                 renderExplosion(owner, v, vel, atk);
                 playSound(S_EXPL_GRENADE, v, 400, 150);
                 if(inWater) playSound(S_EXPL_INWATER, vec(v).addz(15), 300, 100);
                 if(isFar) playSound(S_EXPL_FAR, v, 2000, 400, SND_LOWPRIORITY);
-                loopi(5+rnd(3)) spawnbouncer(v, vec(0, 0, 0), owner, BNC_ROCK, 200);
                 startShake(v, 1.5f * attacks[atk].exprad, atk);
                 break;
 
+            case ATK_MOLOTOV_SHOOT:
+            {
+                vec debrisLoc = v;
+                debrisLoc.addz(3);
+                loopi(6+rnd(2)) spawnbouncer(debrisLoc, vec(0, 0, 0), owner, BNC_GLASS, 300, 350+rnd(200));
+                renderExplosion(owner, v, vel, atk);
+                playSound(S_EXPL_MOLOTOV, v, 300, 150);
+                if(inWater) playSound(S_EXPL_INWATER, vec(v).addz(15), 300, 100);
+                if(isFar) playSound(S_EXPL_FAR, v, 2000, 400, SND_LOWPRIORITY);
+                startShake(v, 1.25f * attacks[atk].exprad, atk, 0.5f);
+                break;
+            }
             case ATK_MINIGUN_SHOOT:
             case ATK_AK47_SHOOT:
             case ATK_UZI_SHOOT:
@@ -869,6 +887,10 @@ namespace game
                 float rad = attacks[p.atk].exprad*0.35f;
                 addstain(STAIN_EXPL_SCORCH, pos, dir, rad);
                 return;
+            }
+            case ATK_MOLOTOV_SHOOT:
+            {
+               loopi(3) addstain(STAIN_BURN, pos, dir, attacks[p.atk].exprad);
             }
             case ATK_MINIGUN_SHOOT:
             case ATK_SV98_SHOOT:
@@ -922,7 +944,7 @@ namespace game
         loopv(curBouncers)
         {
             bouncer &b = *curBouncers[i];
-            if(b.bouncetype == BNC_GRENADE && b.owner == d && b.id == id && !b.local)
+            if((b.bouncetype == BNC_GRENADE || b.bouncetype == BNC_MOLOTOV) && b.owner == d && b.id == id && !b.local)
             {
                 vec pos = vec(b.offset).mul(b.offsetmillis/float(OFFSETMILLIS)).add(b.o);
                 explode(b.local, b.owner, pos, vec(0,0,0), NULL, 0, atk);
@@ -1296,6 +1318,14 @@ namespace game
                 if(isHudPlayer) startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay / 3, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0.5f / recoilReduce(), 0));
                 break;
             }
+            case ATK_MOLOTOV_SHOOT:
+            {
+                if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK,  8, 500, d->muzzle, 0xFF4444, 1.0f, 50, 200, 0, hasShrooms());
+                float dist = from.dist(to); vec up = to; up.z += dist/6;
+                newbouncer(isHudPlayer && !thirdperson ? d->muzzle : hudgunorigin(gun, d->o, to, d), up, local, id, d, BNC_MOLOTOV, attacks[atk].ttl, attacks[atk].projspeed);
+                if(isHudPlayer) startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay / 3, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0.5f / recoilReduce(), 0));
+                break;
+            }
             case ATK_KAMIKAZE_SHOOT:
             case ATK_ASSISTXPL_SHOOT:
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
@@ -1649,6 +1679,11 @@ namespace game
                     case BNC_SCRAP:
                         particle_splash(inWater ? PART_BUBBLE : PART_SMOKE, inWater ? 1 : 3, 250, pos, 0x222222, 2.5f, 50, -50);
                         particle_splash(PART_FIRE_BALL, 2, 75, pos, 0x994400, 0.7f, 30, -30);
+                        break;
+
+                    case BNC_GLASS:
+                        particle_splash(PART_SMOKE, 1, 1200, pos, 0x303030, 2.5f, 50, -50, 10);
+                        particle_splash(PART_FIRE_BALL, 1, 250, pos, 0x996600, 1.3f, 50, -50, 12);
                         break;
                 }
             }

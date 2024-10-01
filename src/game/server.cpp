@@ -881,7 +881,7 @@ namespace server
         {
             case I_GLOCK: case I_SANTE: case I_MANA: sec = mp*3; break;
             case I_UZI: case I_LANCEFLAMMES: case I_ARBALETE: case I_HYDRA: case I_WOODSHIELD: sec = mp*4; break;
-            case I_MOSSBERG: case I_SMAW: case I_ARTIFICE: case I_SV98: case I_M32: case I_FAMAS: case I_PULSE: case I_AK47: case I_GRAP1: sec = mp*5; break;
+            case I_MOSSBERG: case I_SMAW: case I_ARTIFICE: case I_SV98: case I_M32: case I_MOLOTOV: case I_FAMAS: case I_PULSE: case I_AK47: case I_GRAP1: sec = mp*5; break;
             case I_MINIGUN: case I_RAIL: case I_SPOCKGUN: case I_IRONSHIELD: sec = mp*6;
             case I_MAGNETSHIELD: sec = mp*7; break;
             case I_GOLDSHIELD: sec = mp*8; break;
@@ -2326,9 +2326,11 @@ namespace server
 
         if(target!=actor && !isteam(target->team, actor->team)) as.damage += damage;
 
-        if(atk==ATK_LANCEFLAMMES_SHOOT && !afterBurn)
+        if((atk==ATK_LANCEFLAMMES_SHOOT || atk==ATK_MOLOTOV_SHOOT) && !afterBurn)
         {
-            ts.afterburnmillis = 5000;
+            if(atk==ATK_LANCEFLAMMES_SHOOT) ts.afterburnmillis = 4000;
+            else ts.afterburnmillis += 6000;
+            ts.afterburnatk = atk;
             ts.lastBurner = actor;
         }
         sendf(-1, 1, "ri8", N_DAMAGE, target->clientnum, actor->clientnum, damage, ts.armour, ts.health, ts.afterburnmillis, atk);
@@ -2440,7 +2442,10 @@ namespace server
             case ATK_KAMIKAZE_SHOOT:
                 if(!gs.projs.remove(id)) return;
                 break;
-            case ATK_M32_SHOOT: if(!gs.grenades.remove(id)) return; break;
+            case ATK_M32_SHOOT:
+            case ATK_MOLOTOV_SHOOT:
+                if(!gs.grenades.remove(id)) return;
+                break;
             default:
                 return;
         }
@@ -2529,7 +2534,10 @@ namespace server
             case ATK_ASSISTXPL_SHOOT:
             case ATK_KAMIKAZE_SHOOT:
                 loopi(attacks[atk].rays) {gs.projs.add(id);} break;
-            case ATK_M32_SHOOT: gs.grenades.add(id); break;
+            case ATK_M32_SHOOT:
+            case ATK_MOLOTOV_SHOOT:
+                gs.grenades.add(id);
+                break;
             default:
             {
                 int totalrays = 0, maxrays = attacks[atk].rays;
@@ -2705,7 +2713,7 @@ namespace server
             if(ts.state==CS_ALIVE && ts.afterburnmillis && ts.lastBurner->connected)
             {
                 sendf(-1, 1, "ri3", N_AFTERBURN, target.clientnum, ts.lastBurner->clientnum);
-                dodamage(&target, ts.lastBurner, 30, ATK_LANCEFLAMMES_SHOOT, vec(0,0,0), true);
+                dodamage(&target, ts.lastBurner, ts.afterburnatk == ATK_LANCEFLAMMES_SHOOT ? 40 : 80, ts.afterburnatk, vec(0,0,0), true);
             }
             else ts.afterburnmillis = 0;
         }

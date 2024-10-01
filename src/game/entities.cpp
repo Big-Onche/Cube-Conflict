@@ -78,7 +78,7 @@ namespace entities
             //Armes
             "weapons/ent/fusilelectrique", "weapons/ent/fusilplasma", "weapons/ent/smaw", "weapons/ent/minigun", "weapons/ent/spockgun", "weapons/ent/m32",
             "weapons/ent/lanceflammes", "weapons/ent/uzi", "weapons/ent/famas", "weapons/ent/mossberg500", "weapons/ent/hydra", "weapons/ent/sv98",
-            "weapons/ent/sks", "weapons/ent/arbalete", "weapons/ent/ak47", "weapons/ent/gapb1", "weapons/ent/feuartifice", "weapons/ent/glock",
+            "weapons/ent/sks", "weapons/ent/arbalete", "weapons/ent/ak47", "weapons/ent/gapb1", "weapons/ent/feuartifice", "weapons/ent/molotov", "weapons/ent/glock",
             "weapons/ent/supercaisse", NULL, NULL, NULL,
             //Objets
             "objets/panachay", "objets/cochongrillay", "objets/steroides", "objets/champis", "objets/epo", "objets/joint",
@@ -703,7 +703,7 @@ namespace entities
 
             "electricrifle", "plasmarifle", "smaw", "minigun", "spockgun", "m32",
             "flamethrower", "uzi", "famas", "mossberg500", "hydra", "sv98",
-            "sks", "crossbow", "ak47", "gapb1", "fireworks", "glock",
+            "sks", "crossbow", "ak47", "gapb1", "fireworks", "molotov", "glock",
             "superweapon", "none?", "none?", "none?",
 
             "health", "healthboost", "roids", "shrooms", "epo", "joint",

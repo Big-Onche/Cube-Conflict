@@ -1830,7 +1830,7 @@ namespace game
                 gameent *actor = getclient(acn);
                 if(target && actor)
                 {
-                    damageeffect(40, target, actor, ATK_LANCEFLAMMES_SHOOT);
+                    damageeffect(target->afterburnatk == ATK_LANCEFLAMMES_SHOOT ? 40 : 80, target, actor, target->afterburnatk);
                     playSound(S_ADULT_P, target==player1 ? vec(0, 0, 0) : target->o, 250, 100, SND_LOWPRIORITY, target->entityId);
                 }
                 break;

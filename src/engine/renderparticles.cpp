@@ -1726,7 +1726,7 @@ static const char * const entreferences[] =
 
     "Weapon_ElectricRifle", "Weapon_PlasmaRifle", "Weapon_Smaw", "Weapon_Minigun", "Weapon_Spockgun",
     "Weapon_M32", "Weapon_Flamethrower", "Weapon_Uzi", "Weapon_Famas", "Weapon_Mossberg500", "Weapon_Hydra",
-    "Weapon_Sv98", "Weapon_Sks", "Weapon_Crossbow", "Weapon_Ak47", "Weapon_Gapb1", "Weapon_Fireworks", "Weapon_Glock",
+    "Weapon_Sv98", "Weapon_Sks", "Weapon_Crossbow", "Weapon_Ak47", "Weapon_Gapb1", "Weapon_Fireworks", "Weapon_Molotov", "Weapon_Glock",
     "Weapon_Superweapon", "Ent_Invalid", "Ent_Invalid", "Ent_Invalid",
 
     "Item_Health", "Item_GrilledPig", "Item_Roids", "Item_Shrooms",

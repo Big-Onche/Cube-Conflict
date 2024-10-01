@@ -533,6 +533,18 @@ namespace game
     FVARP(huddamagesize, 0.01f, 0.11f, 1.f);
     VARP(showspecplayerinfo, 0, 0, 1);
 
+    void renderWeaponParticles(gameent *d)
+    {
+        if(!rndevent(95)) return;
+        switch(d->gunselect)
+        {
+            case GUN_MOLOTOV:
+                particle_splash(PART_FIRE_BALL, 2, 80, d->balles, 0xFFC864, 1, 30, 30, 0, hasShrooms());
+                particle_splash(PART_SMOKE, 3, 180, d->balles, 0x444444, 2, 40, 50, 0, hasShrooms());
+                break;
+        }
+    }
+
     void rendergame()
     {
         ai::render();
@@ -577,6 +589,8 @@ namespace game
 
             if(d->state==CS_ALIVE && !ispaused())
             {
+                renderWeaponParticles(d);
+
                 vec center = d->o;
                 center.subz(8);
                 if(d->health < 300 && rndevent(1)) spawnbouncer(d->o, d->vel, d, BNC_PIXEL, 75);
@@ -819,6 +833,7 @@ namespace game
         int anim = ANIM_GUN_IDLE|ANIM_LOOP, basetime = 0;
 
         if(isAttacking(d)) { anim = ANIM_GUN_SHOOT; basetime = d->lastaction; }
+
         drawhudmodel(d, anim, basetime);
     }
 
