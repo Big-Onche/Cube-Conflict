@@ -691,7 +691,7 @@ struct gamestate
 
         if(m_random) // random weapon mutator
         {
-            int weapon = GUN_MOLOTOV; //rnd(NUMMAINGUNS);
+            int weapon = rnd(NUMMAINGUNS);
             baseammo(weapon);
             selectedWeapon = weapon;
         }
