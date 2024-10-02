@@ -368,8 +368,12 @@ namespace game
                 }
 
                 if(physsteps > 0) stacked = NULL;
-                bool ufoMonster = mtype==M_UFO && m_dmsp;
-                if(npcs[mtype].speed) moveplayer(this, 10, true, curtime, 0, ufoMonster ? 999999 : 0, ufoMonster ? APT_PHYSICIEN : 0, 999999, false);        // use physics to move monster
+                if(mtype==M_UFO && m_dmsp)
+                {
+                    abilitymillis[ABILITY_3] = true;
+                    aptitude=APT_PHYSICIEN;
+                }
+                if(npcs[mtype].speed) moveplayer(this, 10, true, curtime);        // use physics to move monster
             }
         }
 
@@ -637,7 +641,7 @@ namespace game
                 if(lastmillis-monsters[i]->lastpain<2000)
                 {
                     monsters[i]->move = monsters[i]->strafe = 0;
-                    if(npcs[monsters[i]->mtype].speed) moveplayer(monsters[i], 5, true, curtime, 0, 0, 0 , 0, false);
+                    if(npcs[monsters[i]->mtype].speed) moveplayer(monsters[i], 5, true, curtime);
                 }
                 if(!m_dmsp) monsters[i]->checkmonstersrespawns();
             }

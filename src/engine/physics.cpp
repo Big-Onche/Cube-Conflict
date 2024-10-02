@@ -1704,9 +1704,13 @@ FVAR(straferoll, 0, 0.01f, 90);
 FVAR(faderoll, 0, 0.95f, 1);
 VAR(floatspeed, 1, 400, 10000);
 
-void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curtime, int epomillis, int jointmillis, int aptitude, bool assist, int aptisort)
+void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curtime)
 {
-    int maxjumps = jointmillis ? 4 : (assist || aptitude==APT_NINJA || (aptitude==APT_KAMIKAZE && aptisort) ? 2 : 1);
+    gameent *d = (gameent *)pl;
+
+    bool tripleJump = (game::hasPowerArmor(d) || d->aptitude==APT_NINJA || (d->aptitude==APT_KAMIKAZE && d->abilitymillis[ABILITY_2]));
+
+    int maxjumps = d->boostmillis[B_JOINT] ? 5 : (tripleJump ? 2 : 1);
 
     if(floating)
     {
@@ -1718,13 +1722,13 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
     }
     else if(((pl->physstate >= PHYS_FALL || lastmillis-pl->lastjump < 280) || water) && pl->jumps < (pl->inwater ? INT_MAX : maxjumps))
     {
-        if(water && !pl->inwater && aptitude!=APT_NINJA) pl->vel.div(8);
+        if(water && !pl->inwater && d->aptitude!=APT_NINJA) pl->vel.div(8);
         if(pl->jumping)
         {
             pl->jumping = false;
-            if(pl->timeinair && (aptitude==APT_NINJA || assist || jointmillis || (aptitude==APT_KAMIKAZE && aptisort))) pl->falling = vec(0, 0, 0);
+            if(pl->timeinair && tripleJump) pl->falling = vec(0, 0, 0);
             pl->vel.z = max(pl->vel.z, JUMPVEL);  // physics impulse upwards
-            if(water && aptitude!=APT_NINJA) { pl->vel.x /= 8.f; pl->vel.y /= 8.f; } // dampen velocity change even harder, gives correct water feel
+            if(water && d->aptitude!=APT_NINJA) { pl->vel.x /= 8.f; pl->vel.y /= 8.f; } // dampen velocity change even harder, gives correct water feel
 
             game::physicstrigger(pl, local, 1, 0);
             pl->jumps++;
@@ -1754,43 +1758,47 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
         m.normalize();
     }
 
-    vec d(m);
-    d.mul(pl->maxspeed);
+    vec vel(m);
+    vel.mul(pl->maxspeed);
     if(pl->type==ENT_PLAYER)
     {
-        float speed = classes[aptitude].speed;
-        switch(aptitude)
+        float speed = classes[d->aptitude].speed;
+
+        switch(d->aptitude)
         {
-            case APT_MAGICIEN: if(aptisort) speed = 650;  break;
-            case APT_SHOSHONE: if(aptisort) speed = 130;  break;
-            case APT_ESPION:   if(aptisort) speed = 25; break;
-            case APT_KAMIKAZE: if(aptisort) speed = 250;  break;
+            case APT_MAGICIEN: if(d->abilitymillis[ABILITY_1]) speed = 650; break;
+            case APT_SHOSHONE: if(d->abilitymillis[ABILITY_2]) speed = 130; break;
+            case APT_ESPION:   if(d->abilitymillis[ABILITY_2]) speed = 25;  break;
+            case APT_KAMIKAZE: if(d->abilitymillis[ABILITY_2]) speed = 250; break;
         }
 
-        d.mul(speed/100); // apply classe's speeds
+        vel.mul(speed/100); // apply classe's speeds
 
-        if(floating) d.mul((aptitude==APT_PHYSICIEN && !editmode ? 150 : floatspeed)/100.0f); // apply
-        else if (pl->crouched() && aptitude!=APT_NINJA) d.mul(0.5f);
-        if(epomillis) d.mul(aptitude==APT_JUNKIE ? 3 : 2);
+        if(floating) vel.mul((d->aptitude==APT_PHYSICIEN && !editmode ? 150 : floatspeed)/100.0f);
+        else if (pl->crouched() && d->aptitude!=APT_NINJA) vel.mul(0.5f);
+        if(d->boostmillis[B_EPO]) vel.mul(d->aptitude==APT_JUNKIE ? 3 : 2);
+        if(d->afterburnmillis) vel.mul(1.2f);
     }
 
     float fric = water && !floating ? 20.0f : (pl->physstate >= PHYS_SLOPE || floating ? 6.0f : 30.0f);
-    pl->vel.lerp(d, pl->vel, pow(1 - 1/fric, curtime/20.0f));
+    pl->vel.lerp(vel, pl->vel, pow(1 - 1/fric, curtime/20.0f));
 }
 
-void modifygravity(physent *pl, bool water, int curtime, int jointmillis, int aptitude, bool assist)
+void modifygravity(physent *pl, bool water, int curtime)
 {
+    gameent *d = (gameent *)pl;
+
     float secs = curtime/1000.0f;
-    if(jointmillis>0) secs = (curtime/((jointmillis/(aptitude==13 ? 7.5f : 15.f)+1000.0f)));
+    int appliedGravity = (d->boostmillis[B_JOINT] ? (d->aptitude==APT_JUNKIE ? GRAVITY / 6 : GRAVITY / 4) : GRAVITY);
 
     vec g(0, 0, 0);
-    if(pl->physstate == PHYS_FALL) g.z -= GRAVITY*secs;
+    if(pl->physstate == PHYS_FALL) g.z -= appliedGravity*secs;
     else if(pl->floor.z > 0 && pl->floor.z < FLOORZ)
     {
         g.z = -1;
         g.project(pl->floor);
         g.normalize();
-        g.mul(GRAVITY*secs);
+        g.mul(appliedGravity*secs);
     }
     if(!water || (!pl->move && !pl->strafe)) pl->falling.add(g);
 
@@ -1799,11 +1807,6 @@ void modifygravity(physent *pl, bool water, int curtime, int jointmillis, int ap
         float fric = water ? 2.0f : 6.0f,
               c = water ? 1.0f : clamp((pl->floor.z - SLOPEZ)/(FLOORZ-SLOPEZ), 0.0f, 1.0f);
         pl->falling.mul(pow(1 - c/fric, curtime/20.0f));
-// old fps friction
-//        float friction = water ? 2.0f : 6.0f,
-//              fpsfric = friction/curtime*20.0f,
-//              c = water ? 1.0f : clamp((pl->floor.z - SLOPEZ)/(FLOORZ-SLOPEZ), 0.0f, 1.0f);
-//        pl->falling.mul(1 - c/fpsfric);
     }
 }
 
@@ -1812,43 +1815,46 @@ void modifygravity(physent *pl, bool water, int curtime, int jointmillis, int ap
 // local is false for multiplayer prediction
 #include "vr.h"
 
-bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis, int jointmillis, int aptitude, int aptisort, bool assist)
+bool moveplayer(physent *pl, int moveres, bool local, int curtime)
 {
+    gameent *d = (gameent *)pl;
+
+    bool jetpackPhysicist = (d->abilitymillis[ABILITY_3] && d->aptitude==APT_PHYSICIEN);
     int material = lookupmaterial(vec(pl->o.x, pl->o.y, pl->o.z + (3*pl->aboveeye - pl->eyeheight)/4));
     bool water = isliquid(material&MATF_VOLUME);
-    bool floating = (pl->type==ENT_PLAYER && (pl->state==CS_EDITING || pl->state==CS_SPECTATOR)) || (aptisort && aptitude==APT_PHYSICIEN);
+    bool isFloating = (jetpackPhysicist || (pl->type==ENT_PLAYER && (pl->state==CS_EDITING || pl->state==CS_SPECTATOR)));
 
     float secs = curtime/1000.0f;
 
     // apply gravity
-    if(!floating) modifygravity(pl, water, curtime, jointmillis, aptitude, assist);
+    if(!isFloating) modifygravity(pl, water, curtime);
 
     // apply any player generated changes in velocity
-    modifyvelocity(pl, local, water, floating, curtime, epomillis, jointmillis, aptitude, assist, aptisort);
+    modifyvelocity(pl, local, water, isFloating, curtime);
 
-    vec d(pl->vel);
-    if(pl==game::player1 && game::player1->aptitude==APT_MAGICIEN && game::player1->boostmillis[B_EPO]>30000 && aptisort) unlockAchievement(ACH_MAXSPEED);
-    if(!floating && water) d.mul(0.5f);
-    d.add(pl->falling);
-    d.mul(secs);
+    vec vel(pl->vel);
+    if(pl==game::player1 && d->aptitude==APT_MAGICIEN && d->boostmillis[B_EPO]>30000 && d->abilitymillis[ABILITY_1] && d->afterburnmillis) unlockAchievement(ACH_MAXSPEED);
+    if(!isFloating && water) vel.mul(0.5f);
+    vel.add(pl->falling);
+    vel.mul(secs);
 
     pl->blocked = false;
 
-    if(floating)                // just apply velocity
+    if(isFloating)                // just apply velocity
     {
-        if(aptisort && aptitude==APT_PHYSICIEN)
+        if(jetpackPhysicist)
         {
             const float f = 1.0f/moveres;
             int collisions = 0;
-            d.mul(f);
-            loopi(moveres) if(!move(pl, d) && ++collisions<5) i--; // discrete steps collision detection & sliding
+            vel.mul(f);
+            loopi(moveres) if(!move(pl, vel) && ++collisions<5) i--; // discrete steps collision detection & sliding
         }
         if(pl->physstate != PHYS_FLOAT)
         {
             pl->physstate = PHYS_FLOAT;
             pl->falling = vec(0, 0, 0);
         }
-        pl->o.add(d);
+        pl->o.add(vel);
     }
     else                        // apply velocity with collision
     {
@@ -1856,13 +1862,13 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime, int epomillis
         const int timeinair = pl->timeinair;
         int collisions = 0;
 
-        d.mul(f);
-        loopi(moveres) if(!move(pl, d) && ++collisions<5) i--; // discrete steps collision detection & sliding
+        vel.mul(f);
+        loopi(moveres) if(!move(pl, vel) && ++collisions<5) i--; // discrete steps collision detection & sliding
         if(timeinair > 800 && !pl->timeinair && !water) game::physicstrigger(pl, local, -1, 0); // if we land after long time must have been a high jump, make thud sound
         game::footsteps(pl);
     }
 
-    if(game::player1->timeinair > 10000 && game::player1->state==CS_ALIVE && lookupmaterial(game::player1->feetpos())==MAT_AIR) {unlockAchievement(ACH_ENVOL);}
+    if(game::player1->timeinair > 10000 && game::player1->state==CS_ALIVE) unlockAchievement(ACH_ENVOL);
 
     if(pl->state==CS_ALIVE) updatedynentcache(pl);
 
@@ -1916,7 +1922,7 @@ void interppos(physent *pl)
     pl->o.add(deltapos);
 }
 
-void moveplayer(physent *pl, int moveres, bool local, int epomillis, int jointmillis, int aptitude, int aptisort, bool assist)
+void moveplayer(physent *pl, int moveres, bool local)
 {
     if(physsteps <= 0)
     {
@@ -1925,9 +1931,9 @@ void moveplayer(physent *pl, int moveres, bool local, int epomillis, int jointmi
     }
 
     if(local) pl->o = pl->newpos;
-    loopi(physsteps-1) moveplayer(pl, moveres, local, physframetime, epomillis, jointmillis, aptitude, aptisort, assist);
+    loopi(physsteps-1) moveplayer(pl, moveres, local, physframetime);
     if(local) pl->deltapos = pl->o;
-    moveplayer(pl, moveres, local, physframetime, epomillis, jointmillis, aptitude, aptisort, assist);
+    moveplayer(pl, moveres, local, physframetime);
     if(local)
     {
         pl->newpos = pl->o;
