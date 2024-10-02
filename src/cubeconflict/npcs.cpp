@@ -338,8 +338,8 @@ namespace game
                             bool melee = false, longrange = false;
                             switch(npcs[mtype].gun)
                             {
-                                case GUN_CAC349: case GUN_CACFLEAU: case GUN_CACMARTEAU: case GUN_CACMASTER: case GUN_CACNINJA: melee = true; break;
-                                case GUN_SV98: case GUN_SKS: case GUN_ARBALETE: case GUN_S_CAMPOUZE: longrange = true; break;
+                                case GUN_C_BUSTER: case GUN_C_FLAIL: case GUN_C_HAMMER: case GUN_C_MASTER: case GUN_CACNINJA: melee = true; break;
+                                case GUN_SV98: case GUN_SKS: case GUN_CROSSBOW: case GUN_S_CAMPER: longrange = true; break;
                             }
                             // the closer the monster is the more likely he wants to shoot,
                             if((!melee || dist<50) && !rnd(longrange ? (int)dist/12+1 : min((int)dist/12+1,6)) && enemy->state==CS_ALIVE)      // get ready to fire

@@ -1641,8 +1641,8 @@ namespace game
                     case GUN_ASSISTXPL:
                     case GUN_S_NUKE:
                     case GUN_S_GAU8:
-                    case GUN_S_CAMPOUZE:
-                    case GUN_S_ROQUETTES:
+                    case GUN_S_CAMPER:
+                    case GUN_S_ROCKETS:
                         break;
                     default: gunselect(currentIdenticalWeapon, player1);
                 }
@@ -1882,7 +1882,7 @@ namespace game
                     stopLinkedSound(d->entityId, PL_ATTACK);
                     stopLinkedSound(d->entityId, PL_ATTACK_FAR);
                 }
-                playSound(attacks[gun-GUN_ELEC].picksound, isHudPlayer ? vec(0, 0, 0) : d->o, 200, 50, NULL, d->entityId);
+                playSound(attacks[gun-GUN_ELECTRIC].picksound, isHudPlayer ? vec(0, 0, 0) : d->o, 200, 50, NULL, d->entityId);
                 break;
             }
 

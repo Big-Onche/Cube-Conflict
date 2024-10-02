@@ -788,7 +788,7 @@ namespace game
         d->muzzle = d->balles = vec(-1, -1, -1);
         a[ai++] = modelattach("tag_muzzle", &d->muzzle);
         a[ai++] = modelattach("tag_balles", &d->balles);
-        if((d->gunselect==GUN_MINIGUN || d->gunselect==GUN_LANCEFLAMMES || d->gunselect==GUN_PLASMA || d->gunselect==GUN_UZI || d->gunselect==GUN_S_GAU8) && anim!=ANIM_GUN_MELEE)
+        if((d->gunselect==GUN_MINIGUN || d->gunselect==GUN_FLAMETHROWER || d->gunselect==GUN_PLASMA || d->gunselect==GUN_UZI || d->gunselect==GUN_S_GAU8) && anim!=ANIM_GUN_MELEE)
         {
             anim |= ANIM_LOOP;
             basetime = 0;
@@ -866,7 +866,7 @@ namespace game
               zrad = height/1.6f;
         vec2 xyrad = vec2(previewent->xradius, previewent->yradius).max(height/3);
         previewent->o = calcmodelpreviewpos(vec(xyrad, zrad), previewent->yaw).addz(previewent->eyeheight - zrad);
-        previewent->gunselect = validgun(weap) ? weap : GUN_ELEC;
+        previewent->gunselect = validgun(weap) ? weap : GUN_ELECTRIC;
         const playermodelinfo *mdlinfo = getplayermodelinfo(model);
         if(!mdlinfo) return;
         renderplayerui(previewent, *mdlinfo, cape, getplayercolor(team, color), team);

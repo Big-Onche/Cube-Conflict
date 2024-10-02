@@ -106,12 +106,12 @@ namespace ai
             {
                 case GUN_MINIGUN:
                 case GUN_PLASMA:
-                case GUN_S_ROQUETTES:
+                case GUN_S_ROCKETS:
                 case GUN_GLOCK:
                 case GUN_SPOCKGUN:
                 case GUN_SKS:
                 case GUN_HYDRA:
-                case GUN_S_CAMPOUZE:
+                case GUN_S_CAMPER:
                     return d->ammo[attacks[atk].gun];
                     break;
                 default: return d->ammo[attacks[atk].gun] && lastmillis - d->lastaction >= d->gunwait;
@@ -326,7 +326,7 @@ namespace ai
 
     int needpursue(gameent *d)
     {
-        if((d->gunselect>=GUN_CAC349 && d->gunselect<=GUN_CACFLEAU) || d->gunselect==GUN_CACNINJA || (d->aptitude==C_KAMIKAZE && d->abilitymillis[ABILITY_2])) return 1;
+        if((d->gunselect>=GUN_C_BUSTER && d->gunselect<=GUN_C_FLAIL) || d->gunselect==GUN_CACNINJA || (d->aptitude==C_KAMIKAZE && d->abilitymillis[ABILITY_2])) return 1;
         else return 0;
     }
 
@@ -476,7 +476,7 @@ namespace ai
         return false;
     }
 
-    int isgoodammo(int gun) { return gun >= GUN_ELEC && gun <= GUN_S_CAMPOUZE; }
+    int isgoodammo(int gun) { return gun >= GUN_ELECTRIC && gun <= GUN_S_CAMPER; }
 
     bool hasgoodammo(gameent *d)
     {
@@ -535,7 +535,7 @@ namespace ai
             {
                 if(e.type >= I_RAIL && e.type <= I_GLOCK && !d->hasmaxammo(e.type) && !m_noammo)
                 {
-                    int gun = e.type - I_RAIL + GUN_ELEC;
+                    int gun = e.type - I_RAIL + GUN_ELECTRIC;
                     if(isgoodammo(gun)) score = hasgoodammo(d) ? m_ctf ? 1e1f : 1e2f : m_ctf ? 1e2f : 1e4f;
                 }
                 break;
@@ -689,7 +689,7 @@ namespace ai
                 default:
                 {
                     if(m_identique) d->ai->weappref = currentIdenticalWeapon;
-                    else d->ai->weappref = rnd(GUN_GLOCK-GUN_ELEC+1)+GUN_ELEC;
+                    else d->ai->weappref = rnd(GUN_GLOCK-GUN_ELECTRIC+1)+GUN_ELECTRIC;
                 }
             }
         }
@@ -1093,7 +1093,7 @@ namespace ai
 
     bool lockon(gameent *d, int atk, gameent *e, float maxdist)
     {
-        if(((d->gunselect>=GUN_CAC349 && d->gunselect<=GUN_CACFLEAU) || d->gunselect==GUN_CACNINJA) && !d->blocked && !d->timeinair)
+        if(((d->gunselect>=GUN_C_BUSTER && d->gunselect<=GUN_C_FLAIL) || d->gunselect==GUN_CACNINJA) && !d->blocked && !d->timeinair)
         {
             vec dir = vec(e->o).sub(d->o);
             float xydist = dir.x*dir.x+dir.y*dir.y, zdist = dir.z*dir.z, mdist = maxdist*maxdist, ddist = d->radius*d->radius+e->radius*e->radius;
@@ -1133,7 +1133,7 @@ namespace ai
         gameent *e = getclient(d->ai->enemy);
         bool enemyok = e && targetable(d, e);
 
-        if(enemyok && (d->aptitude==C_KAMIKAZE || d->aptitude==C_NINJA || d->gunselect==GUN_LANCEFLAMMES))
+        if(enemyok && (d->aptitude==C_KAMIKAZE || d->aptitude==C_NINJA || d->gunselect==GUN_FLAMETHROWER))
         {
             makeroute(d, b, e->o);
             if(d->abilitymillis[ABILITY_2]<500 && d->abilitymillis[ABILITY_2] && d->aptitude==C_KAMIKAZE) d->gunselect=GUN_KAMIKAZE;
@@ -1186,14 +1186,14 @@ namespace ai
                     d->ai->becareful = false;
                 }
                 scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, sskew);
-                if(insight || quick || (hasseen && (d->gunselect==GUN_PLASMA || d->gunselect==GUN_MINIGUN || d->gunselect==GUN_S_ROQUETTES || d->gunselect==GUN_S_GAU8)))
+                if(insight || quick || (hasseen && (d->gunselect==GUN_PLASMA || d->gunselect==GUN_MINIGUN || d->gunselect==GUN_S_ROCKETS || d->gunselect==GUN_S_GAU8)))
                 {
                     if(canshoot(d, atk, e) && hastarget(d, atk, b, e, yaw, pitch, dp.squaredist(ep)))
                     {
                         if(d->o.dist(e->o) < (250 - d->skill)) d->aiming = false;
                         else d->aiming = true;
 
-                        d->jumping = ((d->gunselect==GUN_ARTIFICE || d->gunselect==GUN_SMAW || d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_ROQUETTES) && !idle);
+                        d->jumping = ((d->gunselect==GUN_FIREWORKS || d->gunselect==GUN_SMAW || d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_ROCKETS) && !idle);
                         d->attacking = ACT_SHOOT;
                         d->ai->lastaction = lastmillis;
                         result = 3;
@@ -1281,7 +1281,7 @@ namespace ai
         return false;
     }
 
-    static const int gunprefs[] = {GUN_CACFLEAU, GUN_CACMARTEAU, GUN_CACMASTER, GUN_CAC349, GUN_MINIGUN, GUN_PLASMA, GUN_ELEC, GUN_MOLOTOV, GUN_GRAP1, GUN_LANCEFLAMMES, GUN_HYDRA, GUN_SV98, GUN_SMAW, GUN_ARBALETE, GUN_ARTIFICE, GUN_MOSSBERG, GUN_FAMAS, GUN_AK47, GUN_M32, GUN_SKS, GUN_SPOCKGUN, GUN_UZI };
+    static const int gunprefs[] = {GUN_C_FLAIL, GUN_C_HAMMER, GUN_C_MASTER, GUN_C_BUSTER, GUN_MINIGUN, GUN_PLASMA, GUN_ELECTRIC, GUN_MOLOTOV, GUN_GRAP1, GUN_FLAMETHROWER, GUN_HYDRA, GUN_SV98, GUN_SMAW, GUN_CROSSBOW, GUN_FIREWORKS, GUN_MOSSBERG, GUN_FAMAS, GUN_AK47, GUN_M32, GUN_SKS, GUN_SPOCKGUN, GUN_UZI };
 
     bool request(gameent *d, aistate &b)
     {

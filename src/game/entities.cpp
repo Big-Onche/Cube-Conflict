@@ -174,7 +174,7 @@ namespace entities
 
     void repammo(gameent *d, int type, bool local)
     {
-        addammo(type, d->ammo[type-I_RAIL+GUN_ELEC], local);
+        addammo(type, d->ammo[type-I_RAIL+GUN_ELECTRIC], local);
     }
 
     // these two functions are called when the server acknowledges that you really

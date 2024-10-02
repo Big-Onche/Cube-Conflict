@@ -41,7 +41,7 @@ namespace game
     vector<gameent *> players;       // other clients
 
     bool hasPowerArmor(gameent *d) { return d->armourtype==A_POWERARMOR && d->armour; }
-    bool hasSuperWeapon(gameent *d) { return d->ammo[GUN_S_NUKE] || d->ammo[GUN_S_GAU8] || d->ammo[GUN_S_ROQUETTES] || d->ammo[GUN_S_CAMPOUZE]; }
+    bool hasSuperWeapon(gameent *d) { return d->ammo[GUN_S_NUKE] || d->ammo[GUN_S_GAU8] || d->ammo[GUN_S_ROCKETS] || d->ammo[GUN_S_CAMPER]; }
 
     VAR(teamscoreboardcolor, 0, 0, 1);
     ICOMMAND(getsbcolor, "", (), player1->team == 1 ? teamscoreboardcolor = 1 : teamscoreboardcolor = 0;);
@@ -303,7 +303,7 @@ namespace game
 
         if(d->attacksound)
         {
-            if((!isAttacking(d) || !(d->gunselect==GUN_PLASMA || d->gunselect==GUN_LANCEFLAMMES || d->gunselect==GUN_S_GAU8)))
+            if((!isAttacking(d) || !(d->gunselect==GUN_PLASMA || d->gunselect==GUN_FLAMETHROWER || d->gunselect==GUN_S_GAU8)))
             {
                 stopLinkedSound(d->entityId, PL_ATTACK);
                 stopLinkedSound(d->entityId, PL_ATTACK_FAR);
@@ -479,7 +479,7 @@ namespace game
             {
                 switch(player1->gunselect)
                 {
-                    case GUN_S_NUKE: case GUN_S_GAU8: case GUN_S_CAMPOUZE: case GUN_S_ROQUETTES: break;
+                    case GUN_S_NUKE: case GUN_S_GAU8: case GUN_S_CAMPER: case GUN_S_ROCKETS: break;
                     default: getaptiweap();
                 }
             }
@@ -683,7 +683,7 @@ namespace game
         if(!rnd(2))
         {
             if(d->aptitude==C_PHYSICIST && d->abilitymillis[ABILITY_1] && d->armour>0) playSound(S_PHY_1, d==h ? vec(0, 0, 0) : d->o, 200, 100, SND_LOWPRIORITY);
-            else if(d->armour>0 && actor->gunselect!=GUN_LANCEFLAMMES) playSound(S_IMPACTWOOD+d->armourtype, d==h ? vec(0, 0, 0) : d->o, 250, 50, SND_LOWPRIORITY);
+            else if(d->armour>0 && actor->gunselect!=GUN_FLAMETHROWER) playSound(S_IMPACTWOOD+d->armourtype, d==h ? vec(0, 0, 0) : d->o, 250, 50, SND_LOWPRIORITY);
         }
 
         damageeffect(damage, d, actor, atk);
@@ -839,7 +839,7 @@ namespace game
                         case ATK_ASSISTXPL_SHOOT: if(player1->armourtype==A_POWERARMOR) unlockAchievement(ACH_KILLASSIST); break;
                         case ATK_LANCEFLAMMES_SHOOT: if(lookupmaterial(d->feetpos())==MAT_WATER) unlockAchievement(ACH_THUGPHYSIQUE); break;
                         case ATK_SV98_SHOOT: if(zoom==0) unlockAchievement(ACH_NOSCOPE); break;
-                        case ATK_GLOCK_SHOOT: if(d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_CAMPOUZE || d->gunselect==GUN_S_GAU8 || d->gunselect==GUN_S_ROQUETTES) unlockAchievement(ACH_DAVIDGOLIATH); break;
+                        case ATK_GLOCK_SHOOT: if(d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_CAMPER || d->gunselect==GUN_S_GAU8 || d->gunselect==GUN_S_ROCKETS) unlockAchievement(ACH_DAVIDGOLIATH); break;
                         case ATK_CAC349_SHOOT: case ATK_CACFLEAU_SHOOT: case ATK_CACMARTEAU_SHOOT: case ATK_CACMASTER_SHOOT: if(d->aptitude==C_NINJA) unlockAchievement(ACH_PASLOGIQUE); break;
                         case ATK_NUKE_SHOOT: case ATK_CAMPOUZE_SHOOT: case ATK_GAU8_SHOOT: case ATK_ROQUETTES_SHOOT: if(player1->aptitude==C_AMERICAN && player1->boostmillis[B_ROIDS]) unlockAchievement(ACH_JUSTEPOUR);
                     }

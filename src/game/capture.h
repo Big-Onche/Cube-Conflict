@@ -1054,7 +1054,7 @@ ICOMMAND(hudbasesstats, "i", (int *team),
             vec o;
             loopk(3) o[k] = max(getint(p)/DMF, 0.0f);
             if(p.overread()) break;
-            if(commit && notgotbases) addbase(ammotype>=GUN_ELEC && ammotype<=GUN_GLOCK ? ammotype : min(ammotype, 0), o);
+            if(commit && notgotbases) addbase(ammotype>=GUN_ELECTRIC && ammotype<=GUN_GLOCK ? ammotype : min(ammotype, 0), o);
         }
         if(commit && notgotbases)
         {
@@ -1114,7 +1114,7 @@ case N_BASEREGEN:
         vec regenPos = (regen == hudplayer() ? vec(0, 0, 0) : regen->o);
         regen->health = health;
         regen->mana = mana;
-        if(ammotype >= GUN_ELEC && ammotype <= GUN_GLOCK) regen->ammo[ammotype] = ammo;
+        if(ammotype >= GUN_ELECTRIC && ammotype <= GUN_GLOCK) regen->ammo[ammotype] = ammo;
         if(!regen->armour) regen->armourtype=A_WOOD;
         regen->armour = armour;
         if(regen->armour==10) playSound(S_ITEMBBOIS, regenPos, 300, 150);

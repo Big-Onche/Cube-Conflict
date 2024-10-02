@@ -29,7 +29,7 @@ namespace game
         {
             if(d==player1 && gun!=GUN_ASSISTXPL && !shortcut) player1->lastweap = gun;
             addmsg(N_GUNSELECT, "rci", d, gun);
-            playSound(attacks[gun-GUN_ELEC].picksound, d==hudplayer() ? vec(0, 0, 0) : d->o, 200, 50, NULL, d->entityId);
+            playSound(attacks[gun-GUN_ELECTRIC].picksound, d==hudplayer() ? vec(0, 0, 0) : d->o, 200, 50, NULL, d->entityId);
         }
         d->gunselect = gun;
     }
@@ -49,7 +49,7 @@ namespace game
     ICOMMAND(meleeattack, "", (), // shortcut for melee attack, then select old gun
         if(!isconnected() || m_identique) return;
         if(player1->aptitude==C_NINJA) gunselect(GUN_CACNINJA, player1, false, true);
-        else loopi(4) { if(player1->ammo[GUN_CAC349+i]) { gunselect(GUN_CAC349+i, player1, false, true); break; } }
+        else loopi(4) { if(player1->ammo[GUN_C_BUSTER+i]) { gunselect(GUN_C_BUSTER+i, player1, false, true); break; } }
         doaction(ACT_SHOOT);
         execute("sleep 500 [shoot ; getoldweap]");
     );
@@ -169,7 +169,7 @@ namespace game
         playSound(S_NOAMMO);
     });
 
-    bool spreadLimit(gameent *d) { return d->gunselect == GUN_LANCEFLAMMES || d->gunselect == GUN_MOSSBERG || d->gunselect == GUN_HYDRA; }
+    bool spreadLimit(gameent *d) { return d->gunselect == GUN_FLAMETHROWER || d->gunselect == GUN_MOSSBERG || d->gunselect == GUN_HYDRA; }
 
     void offsetray(const vec &from, const vec &to, float spread, float range, vec &dest, gameent *d)
     {
@@ -1479,7 +1479,7 @@ namespace game
         int prevaction = d->lastaction, attacktime = lastmillis-prevaction;
         bool specialAbility = d->aptitude==C_PRIEST && d->abilitymillis[ABILITY_3];
 
-        if(d->aitype==AI_BOT && (d->gunselect==GUN_GLOCK || d->gunselect==GUN_SPOCKGUN || d->gunselect==GUN_HYDRA || d->gunselect==GUN_SKS || d->gunselect==GUN_S_CAMPOUZE))
+        if(d->aitype==AI_BOT && (d->gunselect==GUN_GLOCK || d->gunselect==GUN_SPOCKGUN || d->gunselect==GUN_HYDRA || d->gunselect==GUN_SKS || d->gunselect==GUN_S_CAMPER))
         {
             switch(rnd(d->gunselect==GUN_GLOCK || d->gunselect==GUN_SPOCKGUN || d->gunselect==GUN_HYDRA ? 5 : 15)) {case 0: d->gunwait+=(specialAbility ? 500 : 1200) / curfps; return; }
         }
@@ -1488,13 +1488,13 @@ namespace game
         {
             case GUN_MINIGUN:
             case GUN_PLASMA:
-            case GUN_S_ROQUETTES:
-                if(!d->attacking) d->gunselect==GUN_PLASMA ? d->gunaccel=4 : d->gunselect==GUN_S_ROQUETTES ? d->gunaccel=3 : d->gunaccel=12;
+            case GUN_S_ROCKETS:
+                if(!d->attacking) d->gunselect==GUN_PLASMA ? d->gunaccel=4 : d->gunselect==GUN_S_ROCKETS ? d->gunaccel=3 : d->gunaccel=12;
                 break;
             default: d->gunaccel=0;
         }
 
-        if(attacktime < d->gunwait + d->gunaccel*(d->gunselect==GUN_PLASMA ? 50 : d->gunselect==GUN_S_ROQUETTES ? 150 : 8) + (d==player1 || specialAbility ? 0 : attacks[d->gunselect].attackdelay)) return;
+        if(attacktime < d->gunwait + d->gunaccel*(d->gunselect==GUN_PLASMA ? 50 : d->gunselect==GUN_S_ROCKETS ? 150 : 8) + (d==player1 || specialAbility ? 0 : attacks[d->gunselect].attackdelay)) return;
         d->gunwait = 0;
 
         if(d->aptitude==C_KAMIKAZE)
@@ -1574,7 +1574,7 @@ namespace game
         d->gunwait = attacks[atk].attackdelay/waitfactor;
         d->totalshots += (attacks[atk].damage*attacks[atk].rays) * (d->boostmillis[B_ROIDS] ? 1 : 2);
         if(d->playerexploded) {d->attacking = d->wasAttacking; execute("getoldweap"); d->playerexploded = false;}
-        if((atk==ATK_GLOCK_SHOOT || atk==ATK_SPOCKGUN_SHOOT || atk==ATK_HYDRA_SHOOT || d->gunselect==GUN_SKS || d->gunselect==GUN_S_CAMPOUZE) && !specialAbility) d->attacking = ACT_IDLE;
+        if((atk==ATK_GLOCK_SHOOT || atk==ATK_SPOCKGUN_SHOOT || atk==ATK_HYDRA_SHOOT || d->gunselect==GUN_SKS || d->gunselect==GUN_S_CAMPER) && !specialAbility) d->attacking = ACT_IDLE;
     }
 
     void adddynlights()
