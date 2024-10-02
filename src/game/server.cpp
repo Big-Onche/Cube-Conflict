@@ -2275,36 +2275,32 @@ namespace server
 
     void startintermission() { gamelimit = min(gamelimit, gamemillis); checkintermission(true); }
 
-    void dodamage(clientinfo *target, clientinfo *actor, int damage, int atk, const vec &hitpush = vec(0, 0, 0), bool afterBurn = false)
+    int calcDamage(int baseDamage, int atk, clientinfo *target, clientinfo *actor)
     {
-        bool teamDamage = (actor!=target && isteam(target->team, actor->team));
-        if(teamDamage)
-        {
-            if(teamkill)
-            {
-                switch(actor->aptitude)
-                {
-                    case APT_MEDECIN: return;
-                    case APT_JUNKIE: damage/=1.5f; break;
-                    default: damage/=3.f;
-                }
-            }
-            else return;
-        }
-
         servstate &ts = target->state;
         servstate &as = actor->state;
 
-        //Calcul des dommages de base
-        damage = ((damage*classes[actor->aptitude].damage)/(classes[target->aptitude].resistance))/(ts.boostmillis[B_JOINT] ? (target->aptitude==APT_JUNKIE ? 1.875f : 1.25f) : 1.f);
+        int damage = (baseDamage*classes[actor->aptitude].damage) / (classes[target->aptitude].resistance); // main class damage/resistance multiplier
+        if(target->state.boostmillis[B_JOINT]) damage /= (target->aptitude==APT_JUNKIE ? 1.875f : 1.25f); // joint damage reduce
 
-        //Dommages spéciaux d'aptitudes
-        switch(actor->aptitude)
+        switch(actor->aptitude) // Skill and class damage boost/reduction from actor
         {
-            case APT_AMERICAIN: {if(atk==ATK_NUKE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_CAMPOUZE_SHOOT) damage *= 1.5f; break;}
-            case APT_MAGICIEN: {if(as.abilitymillis[ABILITY_2]) damage *= 1.25f; break;}
-            case APT_CAMPEUR: damage *= ((as.o.dist(ts.o)/1800.f)+1.f); break;
-            case APT_VIKING: {if(as.boostmillis[B_RAGE]) damage *=1.25f;} break;
+            case APT_AMERICAIN:
+                if(atk==ATK_NUKE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_CAMPOUZE_SHOOT) damage *= 1.5f;
+                break;
+
+            case APT_MAGICIEN:
+                if(as.abilitymillis[ABILITY_2]) damage *= 1.25f;
+                break;
+
+            case APT_CAMPEUR:
+                damage *= ((as.o.dist(ts.o)/1800.f)+1.f);
+                break;
+
+            case APT_VIKING:
+                if(as.boostmillis[B_RAGE]) damage *= 1.25f;
+                break;
+
             case APT_SHOSHONE:
             {
                 if(as.abilitymillis[ABILITY_3]) damage *= 1.3f;
@@ -2312,12 +2308,29 @@ namespace server
             }
         }
 
-        //Absorptions et skills spéciaux d'aptitudes
-        switch(target->aptitude)
+        switch(target->aptitude) // Skill and class damage boost/reduction from target
         {
-            case APT_MAGICIEN: {if(ts.abilitymillis[ABILITY_3]) damage/=5.f; } break;
-            case APT_VIKING: {if(actor!=target) {ts.boostmillis[B_RAGE]+=damage*5; sendf(-1, 1, "ri3", N_VIKING, target->clientnum, ts.boostmillis[B_RAGE]);}} break;
-            case APT_PRETRE: {if(ts.abilitymillis[ABILITY_2] && ts.mana) {ts.mana-=damage/10; damage=0; {if(ts.mana<0)ts.mana=0;}; sendf(-1, 1, "ri3", N_PRIEST, target->clientnum, ts.mana);} } break;
+            case APT_MAGICIEN:
+                if(ts.abilitymillis[ABILITY_3]) damage /= 5.f;
+                break;
+
+            case APT_VIKING:
+                if(actor!=target)
+                {
+                    ts.boostmillis[B_RAGE] += (damage * 5);
+                    sendf(-1, 1, "ri3", N_VIKING, target->clientnum, ts.boostmillis[B_RAGE]);
+                }
+                break;
+
+            case APT_PRETRE:
+                if(ts.abilitymillis[ABILITY_2] && ts.mana)
+                {
+                    ts.mana -= max(0, damage/10);
+                    damage = 0;
+                    sendf(-1, 1, "ri3", N_PRIEST, target->clientnum, ts.mana);
+                }
+                break;
+
             case APT_SHOSHONE:
             {
                 if(as.abilitymillis[ABILITY_1]) damage /= 1.3f;
@@ -2325,11 +2338,33 @@ namespace server
             }
         }
 
-        ts.dodamage(damage, target->aptitude, ts.abilitymillis[ABILITY_1]);
+        return damage;
+    }
 
-        if(target!=actor && !isteam(target->team, actor->team)) as.damage += damage;
+    void dodamage(clientinfo *target, clientinfo *actor, int baseDamage, int atk, const vec &hitpush = vec(0, 0, 0), bool afterBurn = false)
+    {
+        servstate &ts = target->state;
+        servstate &as = actor->state;
 
-        if(!afterBurn && !ts.inwater)
+        int damage = calcDamage(baseDamage, atk, target, actor);
+
+        bool teamDamage = (actor!=target && isteam(target->team, actor->team));
+
+        if(teamDamage) // damages from teammates
+        {
+            if(teamkill)
+            {
+                switch(actor->aptitude)
+                {
+                    case APT_MEDECIN: return;
+                    case APT_JUNKIE: damage /= 1.5f; break;
+                    default: damage /= 3.f;
+                }
+            }
+            else return;
+        }
+
+        if(!afterBurn && !ts.inwater) // after burn init
         {
             int burnMillis = 0;
 
@@ -2349,21 +2384,27 @@ namespace server
             if(teamDamage) burnMillis /= 2;
 
             ts.afterburnmillis = min(ts.afterburnmillis + burnMillis, maxBurnMillis);
-
             ts.afterburnatk = atk;
             ts.lastBurner = actor;
         }
 
+        ts.dodamage(damage, target->aptitude==APT_PHYSICIEN && ts.abilitymillis[ABILITY_1]); // update target hp and shield
         sendf(-1, 1, "ri8", N_DAMAGE, target->clientnum, actor->clientnum, damage, ts.armour, ts.health, ts.afterburnmillis, atk);
+        if(target!=actor && !isteam(target->team, actor->team)) as.damage += damage; // damage server stat
 
-        if(target->aptitude!=APT_AMERICAIN)
+        if(target->aptitude!=APT_AMERICAIN) // physical hit push
         {
             ivec v(vec(hitpush).rescale(DNF));
             sendf(ts.health<=0 ? -1 : target->ownernum, 1, "ri7", N_HITPUSH, target->clientnum, atk, damage, v.x, v.y, v.z);
             target->setpushed();
         }
-        if(ts.health<=0)
+
+        if(ts.health<=0) // target dead
         {
+            target->state.deaths++;
+            if(!isteam(target->team, actor->team)) actor->state.killstreak++;
+            target->state.killstreak = 0;
+
             if(actor->aptitude==APT_FAUCHEUSE && !isteam(target->team, actor->team)) // reaper's passive ability
             {
                 if(as.maxhealth < 1500) {as.maxhealth += 500; as.health += 500;} // add health boost if first kill
@@ -2371,9 +2412,6 @@ namespace server
                 sendf(-1, 1, "ri4", N_REAPER, actor->clientnum, as.health, as.maxhealth);
             }
 
-            target->state.deaths++;
-            if(!isteam(target->team, actor->team))actor->state.killstreak++;
-            target->state.killstreak = 0;
             int fragvalue = smode ? smode->fragvalue(target, actor, atk) : (target==actor || isteam(target->team, actor->team) ? atk==ATK_KAMIKAZE_SHOOT ? 0 : -1 : 1);
             actor->state.frags += fragvalue;
             if(fragvalue>0)
@@ -2401,17 +2439,15 @@ namespace server
         }
     }
 
-    void doregen(clientinfo *target, clientinfo *actor, int damage, int gun, const vec &hitpush = vec(0, 0, 0))
+    void doregen(clientinfo *target, clientinfo *actor, int baseDamage)
     {
-        if(actor==target || isteam(target->team, actor->team)) return;
-
-        damage = ((damage*100)/classes[target->aptitude].resistance)/2.f;
-        if(target->state.abilitymillis[ABILITY_3] && target->aptitude==APT_MAGICIEN) damage /= 5.f;
-        if(target->state.boostmillis[B_JOINT]) damage /= 1.25f;
+        if(isteam(target->team, actor->team) || actor==target) return; // no regen for self or team damage
 
         gamestate &as = actor->state;
-        as.doregen(damage);
 
+        int damage = calcDamage(baseDamage, NULL, target, actor);
+
+        as.doregen(damage); // update actor hp
         sendf(-1, 1, "ri4", N_VAMPIRE, actor->clientnum, damage, as.health);
     }
 
@@ -2494,7 +2530,7 @@ namespace server
             if(damage > 0)
             {
                 dodamage(target, ci, max(int(damage), 1), atk, h.dir);
-                if(ci->aptitude==APT_VAMPIRE) doregen(target, ci, damage, atk, h.dir);
+                if(ci->aptitude==APT_VAMPIRE) doregen(target, ci, damage);
             }
         }
     }
@@ -2574,7 +2610,7 @@ namespace server
                     if(gs.boostmillis[B_ROIDS]) damage*=ci->aptitude==APT_JUNKIE ? 3 : 2;
                     if(gs.boostmillis[B_RAGE]) gs.shotdamage*=1.25f;
                     dodamage(target, ci, damage, atk, h.dir);
-                    if(ci->aptitude==APT_VAMPIRE) doregen(target, ci, damage, atk, h.dir);
+                    if(ci->aptitude==APT_VAMPIRE) doregen(target, ci, damage);
                 }
                 break;
             }
@@ -2733,8 +2769,10 @@ namespace server
 
             if(ts.state==CS_ALIVE && ts.afterburnmillis && ts.lastBurner->connected)
             {
+                int afterburnDamage = (ts.afterburnatk == ATK_LANCEFLAMMES_SHOOT ? 40 : 80);
                 sendf(-1, 1, "ri3", N_AFTERBURN, target.clientnum, ts.lastBurner->clientnum);
-                dodamage(&target, ts.lastBurner, ts.afterburnatk == ATK_LANCEFLAMMES_SHOOT ? 40 : 80, ts.afterburnatk, vec(0,0,0), true);
+                dodamage(&target, ts.lastBurner, afterburnDamage, ts.afterburnatk, vec(0,0,0), true);
+                if(ts.lastBurner->aptitude==APT_VAMPIRE) doregen(&target, ts.lastBurner, afterburnDamage);
             }
             else ts.afterburnmillis = 0;
         }

@@ -661,7 +661,7 @@ namespace game
     {
         if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission) return;
 
-        if(local) damage = d->dodamage(damage, d->aptitude, d->abilitymillis[ABILITY_1]);
+        if(local) damage = d->dodamage(damage, d->aptitude==APT_PHYSICIEN && d->abilitymillis[ABILITY_1]);
         else if(actor==player1) return;
 
         gameent *h = hudplayer();

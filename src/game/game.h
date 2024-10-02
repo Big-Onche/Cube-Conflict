@@ -691,7 +691,7 @@ struct gamestate
 
         if(m_random) // random weapon mutator
         {
-            int weapon = rnd(NUMMAINGUNS);
+            int weapon = GUN_MOLOTOV; //rnd(NUMMAINGUNS);
             baseammo(weapon);
             selectedWeapon = weapon;
         }
@@ -732,14 +732,14 @@ struct gamestate
         addSuperWeapon(playerClasse, gamemode);
     }
 
-    int dodamage(int damage, int aptitude, int aptisort) // just subtract damage here, can set death, etc. later in code calling this
+    int dodamage(int damage, bool shieldRegen = false) // just subtract damage here, can set death, etc. later in code calling this
     {
         int ad = damage * (armours[A_WOOD + armourtype].absorb) / 100.f; // let armour absorb when possible
 
         if(damage > 0)
         {
             if(ad > armour) ad = armour;
-            if(aptitude==APT_PHYSICIEN && aptisort && armour) armour = min(armour+ad, armours[A_WOOD + armourtype].max);
+            if(shieldRegen && armour) armour = min(armour+ad, armours[A_WOOD + armourtype].max);
             else armour -= ad;
         }
 
