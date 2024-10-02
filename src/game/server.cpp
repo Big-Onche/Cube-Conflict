@@ -2364,7 +2364,7 @@ namespace server
             else return;
         }
 
-        if(!afterBurn && !ts.inwater) // after burn init
+        if(!afterBurn && !ts.inwater && (atk==ATK_LANCEFLAMMES_SHOOT || atk==ATK_MOLOTOV_SHOOT)) // after burn init
         {
             int burnMillis = 0;
 
