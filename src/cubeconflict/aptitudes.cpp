@@ -47,7 +47,7 @@ namespace game
         vec sndpos = d->o;
         bool noSoundPos = d==hudplayer();
 
-        if(d->aptitude==APT_ESPION && ability==ABILITY_1) //for spy's ability 1, we play the sound at the decoy's position
+        if(d->aptitude==C_SPY && ability==ABILITY_1) //for spy's ability 1, we play the sound at the decoy's position
         {
             const int positions[4][2] = { {25, 25}, {-25, -25}, {25, -25}, {-25, 25} };
             sndpos.add(vec(positions[d->aptiseed][0], positions[d->aptiseed][1], 0));
@@ -62,7 +62,7 @@ namespace game
             //break;
 
             case ABILITY_2:
-                if(d->aptitude==APT_ESPION)
+                if(d->aptitude==C_SPY)
                 {
                     loopi(1)particle_fireball(d->o,  50, PART_SHOCKWAVE, 300, 0xBBBBBB, 1.f);
                     particle_splash(PART_SMOKE, 7, 400, d->o, 0x666666, 15+rnd(5), 200, -10);
@@ -71,7 +71,7 @@ namespace game
 
             case ABILITY_3:
             {
-                if(d->aptitude==APT_ESPION)
+                if(d->aptitude==C_SPY)
                 {
                     particle_fireball(d->o, 1000, PART_RADAR, 1000, 0xAAAAAA, 20.f);
                     if(isteam(hudplayer()->team, d->team))
@@ -87,7 +87,7 @@ namespace game
     bool canlaunchability(gameent *d, int ability)
     {
         if(d->state!=CS_ALIVE || !isconnected() || forcecampos>=0 || intermission || (ability<ABILITY_1 && ability>ABILITY_3)) return false;
-        else return d->aptitude==APT_MAGICIEN || d->aptitude==APT_PHYSICIEN || d->aptitude==APT_ESPION || d->aptitude==APT_PRETRE || d->aptitude==APT_SHOSHONE || d->aptitude==APT_KAMIKAZE;
+        else return d->aptitude==C_WIZARD || d->aptitude==C_PHYSICIST || d->aptitude==C_SPY || d->aptitude==C_PRIEST || d->aptitude==C_SHOSHONE || d->aptitude==C_KAMIKAZE;
     }
 
     void launchAbility(gameent *d, int ability, bool request) //abilities commands
@@ -107,7 +107,7 @@ namespace game
     }
 
     ICOMMAND(aptitude, "i", (int *ability),  // player1 abilities commands
-        if(player1->aptitude != APT_KAMIKAZE) launchAbility(player1, *ability);
+        if(player1->aptitude != C_KAMIKAZE) launchAbility(player1, *ability);
         else *ability == ABILITY_1 ? gunselect(GUN_KAMIKAZE, player1) : launchAbility(player1, *ability);
     );
 
@@ -138,7 +138,7 @@ namespace game
             if(d->abilitymillis[i]) numEnabled++; // abilities used at the same time (only for achievement below)
         }
 
-        if(d==player1 && player1->aptitude==APT_SHOSHONE && numEnabled==3) unlockAchievement(ACH_WASHAKIE);
+        if(d==player1 && player1->aptitude==C_SHOSHONE && numEnabled==3) unlockAchievement(ACH_WASHAKIE);
     }
 
     ICOMMAND(getclasslogo, "ii", (int *cn, int *numapt),

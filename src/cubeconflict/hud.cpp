@@ -27,13 +27,13 @@ namespace game
     ICOMMAND(hudability, "", (),
         switch(followingplayer(player1)->aptitude)
         {
-            case APT_MAGICIEN: case APT_PHYSICIEN: case APT_PRETRE: case APT_SHOSHONE: case APT_ESPION:
+            case C_WIZARD: case C_PHYSICIST: case C_PRIEST: case C_SHOSHONE: case C_SPY:
                 intret(followingplayer(player1)->mana);
                 break;
-            case APT_KAMIKAZE:
+            case C_KAMIKAZE:
                 if(followingplayer(player1)->abilitymillis[ABILITY_2]) intret((followingplayer(player1)->abilitymillis[ABILITY_2]-1500)/1000);
                 break;
-            case APT_VIKING:
+            case C_VIKING:
                 intret(followingplayer(player1)->boostmillis[B_RAGE]/1000);
                 break;
             default:
@@ -60,7 +60,7 @@ namespace game
     ICOMMAND(hudshowabilities, "", (),
         switch(followingplayer(player1)->aptitude)
         {
-           case APT_MAGICIEN: case APT_PHYSICIEN: case APT_PRETRE: case APT_SHOSHONE: case APT_ESPION: case APT_KAMIKAZE: intret(true); break;
+           case C_WIZARD: case C_PHYSICIST: case C_PRIEST: case C_SHOSHONE: case C_SPY: case C_KAMIKAZE: intret(true); break;
            default: intret(false);
         }
     );
@@ -229,10 +229,10 @@ namespace game
         if(hp->vampimillis) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/vampire.png", min(1.0f, hp->vampimillis / 500.f));
         if(hp->afterburnmillis) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/fire.png", min(1.0f, hp->afterburnmillis / 500.f));
 
-        if(((hp->abilitymillis[ABILITY_1] || hp->abilitymillis[ABILITY_3]) && hp->aptitude==APT_MAGICIEN) || (hp->abilitymillis[ABILITY_2] && hp->aptitude==APT_PHYSICIEN))
+        if(((hp->abilitymillis[ABILITY_1] || hp->abilitymillis[ABILITY_3]) && hp->aptitude==C_WIZARD) || (hp->abilitymillis[ABILITY_2] && hp->aptitude==C_PHYSICIST))
         {
             float r, g, b;
-            if(hp->aptitude==APT_MAGICIEN) r = g = b = 1;
+            if(hp->aptitude==C_WIZARD) r = g = b = 1;
             else { r = 0.3 ; g = 0.6 ; b = 1; }
             drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/vampire.png", 0.7, r, g, b);
         }

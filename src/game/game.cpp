@@ -27,7 +27,7 @@ namespace game
             addmsg(N_SENDAPTITUDE, "ri", player1_aptitude);
             player1->aptitude = player1_aptitude;
             oldapti = player1->aptitude;
-            if(!islaunching) playSound(S_APT_SOLDAT+player1_aptitude, vec(0, 0, 0), 0, 0, SND_UI);
+            if(!islaunching) playSound(S_C_SOLDIER+player1_aptitude, vec(0, 0, 0), 0, 0, SND_UI);
             if(isconnected() && !intermission) unlockAchievement(ACH_UNDECIDED);
         }
     });
@@ -39,6 +39,9 @@ namespace game
 
     gameent *player1 = NULL;         // our client
     vector<gameent *> players;       // other clients
+
+    bool hasPowerArmor(gameent *d) { return d->armourtype==A_POWERARMOR && d->armour; }
+    bool hasSuperWeapon(gameent *d) { return d->ammo[GUN_S_NUKE] || d->ammo[GUN_S_GAU8] || d->ammo[GUN_S_ROQUETTES] || d->ammo[GUN_S_CAMPOUZE]; }
 
     VAR(teamscoreboardcolor, 0, 0, 1);
     ICOMMAND(getsbcolor, "", (), player1->team == 1 ? teamscoreboardcolor = 1 : teamscoreboardcolor = 0;);
@@ -255,10 +258,10 @@ namespace game
     {
         switch(player1->aptitude)
         {
-            case APT_KAMIKAZE:
+            case C_KAMIKAZE:
                 if(player1->gunselect!=GUN_KAMIKAZE) gunselect(currentIdenticalWeapon, player1);
                 break;
-            case APT_NINJA:
+            case C_NINJA:
                 if(player1->gunselect!=GUN_CACNINJA) gunselect(currentIdenticalWeapon, player1);
                 break;
             default: gunselect(currentIdenticalWeapon, player1);
@@ -311,7 +314,7 @@ namespace game
 
             float pitch = (hasShrooms ? 1.2f : 1.0f);
 
-            if(d->aptitude == APT_PRETRE && d->abilitymillis[ABILITY_3])
+            if(d->aptitude == C_PRIEST && d->abilitymillis[ABILITY_3])
             {
                 float abilityPitch = 1.5f - (d->abilitymillis[ABILITY_3] / 8000.0f);
                 pitch *= abilityPitch;
@@ -489,8 +492,8 @@ namespace game
                 bool hasSuperWeapon = false;
                 loopi(4) if(player1->ammo[GUN_S_NUKE+i]>0) hasSuperWeapon = true;
                 if(hasSuperWeapon && player1->boostmillis[B_ROIDS] && player1->armour && player1->armourtype==A_POWERARMOR) unlockAchievement(ACH_ABUS);
-                if(player1->aptitude==APT_KAMIKAZE && !player1->ammo[GUN_KAMIKAZE] && totalmillis-lastshoot>=500 && totalmillis-lastshoot<=750 && isconnected()) unlockAchievement(ACH_SUICIDEFAIL);
-                if(player1->boostmillis[B_EPO] && player1->aptitude==APT_JUNKIE) unlockAchievement(ACH_LANCEEPO);
+                if(player1->aptitude==C_KAMIKAZE && !player1->ammo[GUN_KAMIKAZE] && totalmillis-lastshoot>=500 && totalmillis-lastshoot<=750 && isconnected()) unlockAchievement(ACH_SUICIDEFAIL);
+                if(player1->boostmillis[B_EPO] && player1->aptitude==C_JUNKIE) unlockAchievement(ACH_LANCEEPO);
             }
 
             updatePlayersBoosts(curtime, player1);
@@ -661,7 +664,7 @@ namespace game
     {
         if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission) return;
 
-        if(local) damage = d->dodamage(damage, d->aptitude==APT_PHYSICIEN && d->abilitymillis[ABILITY_1]);
+        if(local) damage = d->dodamage(damage, d->aptitude==C_PHYSICIST && d->abilitymillis[ABILITY_1]);
         else if(actor==player1) return;
 
         gameent *h = hudplayer();
@@ -679,7 +682,7 @@ namespace game
 
         if(!rnd(2))
         {
-            if(d->aptitude==APT_PHYSICIEN && d->abilitymillis[ABILITY_1] && d->armour>0) playSound(S_PHY_1, d==h ? vec(0, 0, 0) : d->o, 200, 100, SND_LOWPRIORITY);
+            if(d->aptitude==C_PHYSICIST && d->abilitymillis[ABILITY_1] && d->armour>0) playSound(S_PHY_1, d==h ? vec(0, 0, 0) : d->o, 200, 100, SND_LOWPRIORITY);
             else if(d->armour>0 && actor->gunselect!=GUN_LANCEFLAMMES) playSound(S_IMPACTWOOD+d->armourtype, d==h ? vec(0, 0, 0) : d->o, 250, 50, SND_LOWPRIORITY);
         }
 
@@ -784,7 +787,7 @@ namespace game
         }
 
         ////////////////////////////// gfx //////////////////////////////
-        if(actor->aptitude==APT_FAUCHEUSE)
+        if(actor->aptitude==C_REAPER)
         {
             if(camera1->o.dist(d->o) >= 250) playSound(S_ECLAIRLOIN, d->o, 1000, 250);
             else playSound(S_ECLAIRPROCHE, d==hudplayer() ? vec(0, 0, 0) : d->o, 300, 150);
@@ -837,14 +840,14 @@ namespace game
                         case ATK_LANCEFLAMMES_SHOOT: if(lookupmaterial(d->feetpos())==MAT_WATER) unlockAchievement(ACH_THUGPHYSIQUE); break;
                         case ATK_SV98_SHOOT: if(zoom==0) unlockAchievement(ACH_NOSCOPE); break;
                         case ATK_GLOCK_SHOOT: if(d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_CAMPOUZE || d->gunselect==GUN_S_GAU8 || d->gunselect==GUN_S_ROQUETTES) unlockAchievement(ACH_DAVIDGOLIATH); break;
-                        case ATK_CAC349_SHOOT: case ATK_CACFLEAU_SHOOT: case ATK_CACMARTEAU_SHOOT: case ATK_CACMASTER_SHOOT: if(d->aptitude==APT_NINJA) unlockAchievement(ACH_PASLOGIQUE); break;
-                        case ATK_NUKE_SHOOT: case ATK_CAMPOUZE_SHOOT: case ATK_GAU8_SHOOT: case ATK_ROQUETTES_SHOOT: if(player1->aptitude==APT_AMERICAIN && player1->boostmillis[B_ROIDS]) unlockAchievement(ACH_JUSTEPOUR);
+                        case ATK_CAC349_SHOOT: case ATK_CACFLEAU_SHOOT: case ATK_CACMARTEAU_SHOOT: case ATK_CACMASTER_SHOOT: if(d->aptitude==C_NINJA) unlockAchievement(ACH_PASLOGIQUE); break;
+                        case ATK_NUKE_SHOOT: case ATK_CAMPOUZE_SHOOT: case ATK_GAU8_SHOOT: case ATK_ROQUETTES_SHOOT: if(player1->aptitude==C_AMERICAN && player1->boostmillis[B_ROIDS]) unlockAchievement(ACH_JUSTEPOUR);
                     }
 
                     switch(player1->aptitude)
                     {
-                        case APT_AMERICAIN: if(d->aptitude==APT_SHOSHONE) unlockAchievement(ACH_FUCKYEAH); break;
-                        case APT_ESPION: if(player1->abilitymillis[ABILITY_2]) unlockAchievement(ACH_ESPIONDEGUISE);
+                        case C_AMERICAN: if(d->aptitude==C_SHOSHONE) unlockAchievement(ACH_FUCKYEAH); break;
+                        case C_SPY: if(player1->abilitymillis[ABILITY_2]) unlockAchievement(ACH_ESPIONDEGUISE);
                     }
 
                     switch(player1->killstreak) {case 3: unlockAchievement(ACH_TRIPLETTE); break; case 5: unlockAchievement(ACH_PENTAPLETTE); break; case 10: unlockAchievement(ACH_DECAPLETTE);}
@@ -1141,7 +1144,7 @@ namespace game
         {
             particle_splash(map_atmo==4 && atmos ? PART_WATER : PART_SMOKE, pl->armourtype==A_POWERARMOR ? 12 : 10, 100, d->feetpos(), map_atmo==4 && atmos ? 0x111111 : map_atmo==9 ? 0xFFFFFF : 0x666666, 7.0f+rnd(pl->armourtype==A_POWERARMOR ? 10 : 5), 400, 20);
             if(d==hudplayer()) startCameraAnimation(CAM_ANIM_JUMP, 600, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0.2f, 0));
-            if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_POWERARMOR && pl->armour ? S_JUMP_ASSIST : pl->aptitude==APT_NINJA || (pl->aptitude==APT_KAMIKAZE && pl->abilitymillis[ABILITY_2]) ? S_JUMP_NINJA : S_JUMP_BASIC, d);
+            if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_POWERARMOR && pl->armour ? S_JUMP_ASSIST : pl->aptitude==C_NINJA || (pl->aptitude==C_KAMIKAZE && pl->abilitymillis[ABILITY_2]) ? S_JUMP_NINJA : S_JUMP_BASIC, d);
         }
         else if(floorlevel<0)
         {
@@ -1163,7 +1166,7 @@ namespace game
             int snd = lookupmaterial(d->feetpos()) == MAT_WATER ? S_SWIM : (hasPowerArmor ? S_FOOTSTEP_ASSIST : S_FOOTSTEP);
 
             int freq = (((100 - classes[pl->aptitude].speed) + 75) * 5) ;
-            if(pl->crouched() || (pl->abilitymillis[ABILITY_2] && pl->aptitude==APT_ESPION)) freq *= 2;
+            if(pl->crouched() || (pl->abilitymillis[ABILITY_2] && pl->aptitude==C_SPY)) freq *= 2;
             if(d->inwater) freq *= 1.5f;
             else if(hasPowerArmor) freq *= 2;
             if(pl->boostmillis[B_EPO]) freq /= 2.f;

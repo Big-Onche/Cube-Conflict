@@ -1621,7 +1621,7 @@ namespace game
 
                 if(g==player1)
                 {
-                    if(player1->aptitude==APT_JUNKIE && isteam(g->team, r->team) && r->aptitude==APT_VAMPIRE) unlockAchievement(ACH_NATURO);
+                    if(player1->aptitude==C_JUNKIE && isteam(g->team, r->team) && r->aptitude==C_VAMPIRE) unlockAchievement(ACH_NATURO);
                     stat ? updateStat(10, STAT_MANAREGEN) : updateStat(5, STAT_HEALTHREGEN);
                 }
 
@@ -1714,7 +1714,7 @@ namespace game
                 else findplayerspawn(s, -1, m_teammode && !m_capture ? s->team : 0);
                 if(s == player1)
                 {
-                    if(player1->aptitude==APT_SOLDAT && (player1->ammo[GUN_S_NUKE] || player1->ammo[GUN_S_GAU8] || player1->ammo[GUN_S_ROQUETTES] || player1->ammo[GUN_S_CAMPOUZE])) unlockAchievement(ACH_CHANCE);
+                    if(player1->aptitude==C_SOLDIER && hasSuperWeapon(player1)) unlockAchievement(ACH_CHANCE);
                     showscores(false);
                     lasthit = 0;
                     player1->lastweap = player1->gunselect;
@@ -1771,7 +1771,7 @@ namespace game
                 target->afterburnmillis = afterburn;
                 if(target->state == CS_ALIVE && actor != player1) target->lastpain = lastmillis;
                 damaged(damage, target, actor, false, atk);
-                if(player1->aptitude==APT_VIKING && target==player1 && actor!=player1 && player1->state==CS_ALIVE)
+                if(player1->aptitude==C_VIKING && target==player1 && actor!=player1 && player1->state==CS_ALIVE)
                 {
                     if(player1->boostmillis[B_RAGE]>8000) unlockAchievement(ACH_RAGE);
                 }
@@ -1780,32 +1780,32 @@ namespace game
 
             case N_VAMPIRE:
             {
-                int acn = getint(p),
-                    damage = getint(p),
-                    health = getint(p);
-                gameent *actor = getclient(acn);
+                int acn = getint(p), damage = getint(p), health = getint(p);
 
+                gameent *actor = getclient(acn);
                 if(!actor) break;
+
                 actor->health = health;
-                actor->vampimillis+=damage*2.f;
+                actor->vampimillis += damage * 2;
                 break;
             }
 
             case N_REAPER:
             {
-                int acn = getint(p),
-                    health = getint(p),
-                    maxhealth = getint(p);
-                gameent *actor = getclient(acn);
+                int acn = getint(p), health = getint(p), maxhealth = getint(p);
 
-                if(actor) { actor->health = health; actor->maxhealth = maxhealth; }
+                gameent *actor = getclient(acn);
+                if(!actor) break;
+
+                actor->health = health;
+                actor->maxhealth = maxhealth;
                 break;
             }
 
             case N_VIKING:
             {
-                int tcn = getint(p),
-                    ragemillis = getint(p);
+                int tcn = getint(p), ragemillis = getint(p);
+
                 gameent *target = getclient(tcn);
 
                 if(target) target->boostmillis[B_RAGE] = ragemillis;
@@ -1814,8 +1814,8 @@ namespace game
 
             case N_PRIEST:
             {
-                int tcn = getint(p),
-                    mana = getint(p);
+                int tcn = getint(p), mana = getint(p);
+
                 gameent *target = getclient(tcn);
 
                 if(target) target->mana = mana;
@@ -1824,16 +1824,14 @@ namespace game
 
             case N_AFTERBURN:
             {
-                int tcn = getint(p),
-                    acn = getint(p);
+                int tcn = getint(p), acn = getint(p);
                 gameent *target = getclient(tcn);
                 gameent *actor = getclient(acn);
-                if(target && actor)
-                {
-                    damageeffect(target->afterburnatk == ATK_LANCEFLAMMES_SHOOT ? 40 : 80, target, actor, target->afterburnatk);
-                    playSound(S_ADULT_P, target==player1 ? vec(0, 0, 0) : target->o, 250, 100, NULL, target->entityId);
-                }
-                break;
+
+                if(!target || !actor) break;
+
+                damageeffect(target->afterburnatk == ATK_LANCEFLAMMES_SHOOT ? 40 : 80, target, actor, target->afterburnatk);
+                playSound(S_ADULT_P, target==player1 ? vec(0, 0, 0) : target->o, 250, 100, NULL, target->entityId);
             }
 
             case N_HITPUSH:

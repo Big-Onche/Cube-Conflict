@@ -71,8 +71,8 @@ namespace ai
         {
             switch(e->aptitude)
             {
-                case APT_PHYSICIEN: if(e->o.dist(d->o) > d->skill*5) return false;
-                case APT_ESPION: if(e->attacking==ACT_IDLE && e->physstate!=PHYS_FALL) return false;
+                case C_PHYSICIST: if(e->o.dist(d->o) > d->skill*5) return false;
+                case C_SPY: if(e->attacking==ACT_IDLE && e->physstate!=PHYS_FALL) return false;
             }
         }
         return e->state == CS_ALIVE && !isteam(d->team, e->team);
@@ -160,12 +160,12 @@ namespace ai
 
         bool changeAim = lastmillis >= d->ai->lastaimrnd;
 
-        if(e->aptitude==APT_ESPION && e->abilitymillis[ABILITY_1] && changeAim)
+        if(e->aptitude==C_SPY && e->abilitymillis[ABILITY_1] && changeAim)
         {
             const int positions[4][2] = { {25, 25}, {-25, -25}, {25, -25}, {-25, 25} };
             targetPos.add(vec(positions[d->aptiseed][0], positions[d->aptiseed][1], 0));
         }
-        else if(e->aptitude==APT_PHYSICIEN && e->abilitymillis[ABILITY_2])
+        else if(e->aptitude==C_PHYSICIST && e->abilitymillis[ABILITY_2])
         {
             targetPos.add(vec(rnd(61)-30, rnd(61)-30, 0));
         }
@@ -326,7 +326,7 @@ namespace ai
 
     int needpursue(gameent *d)
     {
-        if((d->gunselect>=GUN_CAC349 && d->gunselect<=GUN_CACFLEAU) || d->gunselect==GUN_CACNINJA || (d->aptitude==APT_KAMIKAZE && d->abilitymillis[ABILITY_2])) return 1;
+        if((d->gunselect>=GUN_CAC349 && d->gunselect<=GUN_CACFLEAU) || d->gunselect==GUN_CACNINJA || (d->aptitude==C_KAMIKAZE && d->abilitymillis[ABILITY_2])) return 1;
         else return 0;
     }
 
@@ -336,11 +336,11 @@ namespace ai
     {
         switch(d->aptitude)
         {
-            case APT_ESPION:
-            case APT_MAGICIEN:
-            case APT_SHOSHONE:
-            case APT_PRETRE:
-            case APT_PHYSICIEN:
+            case C_SPY:
+            case C_WIZARD:
+            case C_SHOSHONE:
+            case C_PRIEST:
+            case C_PHYSICIST:
                  return d->mana<=100;
             break;
             default:
@@ -352,10 +352,10 @@ namespace ai
         if(powerarmour && d->armour < 1000+d->skill*5 && d->armourtype!=A_POWERARMOR) return true;
         switch(d->aptitude)
         {
-            case APT_VAMPIRE:
-            case APT_FAUCHEUSE:
-            case APT_NINJA:
-            case APT_CAMPEUR:
+            case C_VAMPIRE:
+            case C_REAPER:
+            case C_NINJA:
+            case C_CAMPER:
                 return d->armour < 1500;
             default:
                 return d->armour < 750;
@@ -502,7 +502,7 @@ namespace ai
 
     static void tryitem(gameent *d, extentity &e, int id, aistate &b, vector<interest> &interests, bool force = false)
     {
-        if(d->aptitude==APT_KAMIKAZE && d->abilitymillis[ABILITY_2]) return;
+        if(d->aptitude==C_KAMIKAZE && d->abilitymillis[ABILITY_2]) return;
 
         float score = 0;
         switch(e.type)
@@ -511,15 +511,15 @@ namespace ai
                 score = m_ctf ? 1e3f : 1e9f;
                 break;
             case I_ROIDS: case I_JOINT: case I_SHROOMS: case I_BOOSTPV: case I_EPO:
-                d->aptitude==APT_JUNKIE ? score = 1e9f : score = m_ctf ? 1e2f : 1e7f;
+                d->aptitude==C_JUNKIE ? score = 1e9f : score = m_ctf ? 1e2f : 1e7f;
                 break;
             case I_SANTE:
                 if(d->health<800){score = m_ctf || d->health > 400 ? 1e2f : 1e5f; }
-                if(d->mana>40 && d->aptitude==APT_PRETRE && d->health<=300) launchAbility(d, ABILITY_1);
+                if(d->mana>40 && d->aptitude==C_PRIEST && d->health<=300) launchAbility(d, ABILITY_1);
                 break;
             case I_MANA:
-                if(d->mana < 100 && d->aptitude!=APT_VAMPIRE) score = m_ctf ? 1e2f : 1e5f;
-                else if (d->aptitude==APT_VAMPIRE) score = d->health < 600 ? 1e4f : 1e3f;
+                if(d->mana < 100 && d->aptitude!=C_VAMPIRE) score = m_ctf ? 1e2f : 1e5f;
+                else if (d->aptitude==C_VAMPIRE) score = d->health < 600 ? 1e4f : 1e3f;
                 break;
             case I_WOODSHIELD: case I_IRONSHIELD:
                 if(d->armourtype==A_POWERARMOR && d->armour<1500) score = m_ctf ? 1e2f : 1e4f;
@@ -684,8 +684,8 @@ namespace ai
         {
             switch(d->aptitude)
             {
-                case APT_KAMIKAZE: d->ai->weappref = GUN_KAMIKAZE; break;
-                case APT_NINJA: d->ai->weappref = GUN_CACNINJA; break;
+                case C_KAMIKAZE: d->ai->weappref = GUN_KAMIKAZE; break;
+                case C_NINJA: d->ai->weappref = GUN_CACNINJA; break;
                 default:
                 {
                     if(m_identique) d->ai->weappref = currentIdenticalWeapon;
@@ -721,7 +721,7 @@ namespace ai
                 {
                     case I_SANTE: case I_BOOSTPV: wantsitem = badhealth(d); break;
                     case I_MANA:
-                        d->aptitude==APT_VAMPIRE ? wantsitem = badhealth(d) : wantsitem = needmana(d);
+                        d->aptitude==C_VAMPIRE ? wantsitem = badhealth(d) : wantsitem = needmana(d);
                         break;
                     case I_GOLDSHIELD:
                     case I_MAGNETSHIELD:
@@ -854,11 +854,11 @@ namespace ai
                     {
                         switch(d->aptitude)
                         {
-                            case APT_MAGICIEN:
+                            case C_WIZARD:
                                 if(d->mana>60 && d->o.dist(e->o)<500) launchAbility(d, ABILITY_1);
                                 else if (d->mana>=100 && d->o.dist(e->o)>500) launchAbility(d, ABILITY_2);
                                 break;
-                            case APT_ESPION:
+                            case C_SPY:
                                 if(d->mana>=40 && d->o.dist(e->o)<700 && !d->abilitymillis[ABILITY_2] && !rnd(2)) launchAbility(d, ABILITY_1);
                                 else if(d->mana>=50 && d->o.dist(e->o)<700 && !d->abilitymillis[ABILITY_1]) launchAbility(d, ABILITY_2);
                         }
@@ -1017,7 +1017,7 @@ namespace ai
 
     void jumpto(gameent *d, aistate &b, const vec &pos)
     {
-        if(d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2]) return;
+        if(d->aptitude==C_SPY && d->abilitymillis[ABILITY_2]) return;
         vec off = vec(pos).sub(d->feetpos()), dir(off.x, off.y, 0);
         bool sequenced = d->ai->blockseq || d->ai->targseq, offground = d->timeinair && !d->inwater,
              jump = !offground && lastmillis >= d->ai->jumpseed && rndevent(70) && (sequenced || off.z >= JUMPMIN || lastmillis >= d->ai->jumprand);
@@ -1127,16 +1127,16 @@ namespace ai
             d->ai->spot = vec(0, 0, 0);
         }
 
-        if(d->abilitymillis[ABILITY_3] && d->aptitude==APT_PHYSICIEN && rndevent(85)) d->jumping = true;
+        if(d->abilitymillis[ABILITY_3] && d->aptitude==C_PHYSICIST && rndevent(85)) d->jumping = true;
 		else if(!d->ai->dontmove || (d->boostmillis[B_JOINT] && rndevent(96))) jumpto(d, b, d->ai->spot);
 
         gameent *e = getclient(d->ai->enemy);
         bool enemyok = e && targetable(d, e);
 
-        if(enemyok && (d->aptitude==APT_KAMIKAZE || d->aptitude==APT_NINJA || d->gunselect==GUN_LANCEFLAMMES))
+        if(enemyok && (d->aptitude==C_KAMIKAZE || d->aptitude==C_NINJA || d->gunselect==GUN_LANCEFLAMMES))
         {
             makeroute(d, b, e->o);
-            if(d->abilitymillis[ABILITY_2]<500 && d->abilitymillis[ABILITY_2] && d->aptitude==APT_KAMIKAZE) d->gunselect=GUN_KAMIKAZE;
+            if(d->abilitymillis[ABILITY_2]<500 && d->abilitymillis[ABILITY_2] && d->aptitude==C_KAMIKAZE) d->gunselect=GUN_KAMIKAZE;
         }
 
         if(!enemyok || d->skill >= 50)
@@ -1149,11 +1149,11 @@ namespace ai
                     if(!enemyok) violence(d, b, f, needpursue(d));
                     switch(d->aptitude)
                     {
-                        case APT_PRETRE: case APT_SHOSHONE: if(d->mana>70 && d->o.dist(f->o)<750) launchAbility(d, ABILITY_3); break;
-                        case APT_KAMIKAZE:
+                        case C_PRIEST: case C_SHOSHONE: if(d->mana>70 && d->o.dist(f->o)<750) launchAbility(d, ABILITY_3); break;
+                        case C_KAMIKAZE:
                             if(d->o.dist(f->o)<500) launchAbility(d, ABILITY_2);
                             break;
-                        case APT_ESPION:
+                        case C_SPY:
                             if(d->mana>=40 && d->o.dist(f->o)<700 && !d->abilitymillis[ABILITY_2] && !rnd(2)) launchAbility(d, ABILITY_1);
                             else if(d->mana>=50 && d->o.dist(f->o)<700 && !d->abilitymillis[ABILITY_1]) launchAbility(d, ABILITY_2);
                     }
@@ -1291,13 +1291,13 @@ namespace ai
 
         switch(d->aptitude)
         {
-            case APT_KAMIKAZE:
+            case C_KAMIKAZE:
                 if(hasrange(d, e, GUN_KAMIKAZE) && d->ammo[GUN_KAMIKAZE])
                 {
                     gunselect(GUN_KAMIKAZE, d);
                     goto process;
                 }
-            case APT_NINJA:
+            case C_NINJA:
                 if(hasrange(d, e, GUN_CACNINJA))
                 {
                     gunselect(GUN_CACNINJA, d);
@@ -1469,15 +1469,15 @@ namespace ai
 
                 switch(d->aptitude)
                 {
-                    case APT_MAGICIEN: if(d->health<250+d->skill*2 && d->mana>=60) launchAbility(d, ABILITY_3); break;
-                    case APT_PRETRE: if(d->mana>30 && d->health<(d->skill/3)) launchAbility(d, ABILITY_2); break;
-                    case APT_SHOSHONE: if(d->mana>=100) launchAbility(d, ABILITY_2); break;
-                    case APT_PHYSICIEN:
+                    case C_WIZARD: if(d->health<250+d->skill*2 && d->mana>=60) launchAbility(d, ABILITY_3); break;
+                    case C_PRIEST: if(d->mana>30 && d->health<(d->skill/3)) launchAbility(d, ABILITY_2); break;
+                    case C_SHOSHONE: if(d->mana>=100) launchAbility(d, ABILITY_2); break;
+                    case C_PHYSICIST:
                         if(d->mana>70 && !rnd(70)) launchAbility(d, ABILITY_3);
                         if(d->health<400+d->skill && d->mana>=50) launchAbility(d, ABILITY_2);
                         if(d->armour<200 && d->mana>=40) launchAbility(d, ABILITY_1);
                         break;
-                    case APT_ESPION:
+                    case C_SPY:
                         if(d->mana>100) launchAbility(d, ABILITY_3);
                 }
                 //if(randomevent(2.5f*nbfps) && packtaunt) bottaunt(d);

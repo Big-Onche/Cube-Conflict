@@ -48,7 +48,7 @@ namespace game
 
     ICOMMAND(meleeattack, "", (), // shortcut for melee attack, then select old gun
         if(!isconnected() || m_identique) return;
-        if(player1->aptitude==APT_NINJA) gunselect(GUN_CACNINJA, player1, false, true);
+        if(player1->aptitude==C_NINJA) gunselect(GUN_CACNINJA, player1, false, true);
         else loopi(4) { if(player1->ammo[GUN_CAC349+i]) { gunselect(GUN_CAC349+i, player1, false, true); break; } }
         doaction(ACT_SHOOT);
         execute("sleep 500 [shoot ; getoldweap]");
@@ -69,11 +69,11 @@ namespace game
         {
             switch(player1->aptitude)
             {
-                case APT_KAMIKAZE:
+                case C_KAMIKAZE:
                     if(player1->gunselect==currentIdenticalWeapon) {dir-1 ? gunselect(GUN_KAMIKAZE, player1) : getsuperweap();}
                     else gunselect(currentIdenticalWeapon, player1);
                     return;
-                case APT_NINJA:
+                case C_NINJA:
                     if(player1->gunselect==currentIdenticalWeapon){dir-1 ? gunselect(GUN_CACNINJA, player1) : getsuperweap();}
                     else gunselect(currentIdenticalWeapon, player1);
                     return;
@@ -177,12 +177,12 @@ namespace game
         do offset = vec(rndscale(1), rndscale(1), rndscale(1)).sub(0.5f);
         while(offset.squaredlen() > 0.5f*0.5f);
 
-        if(d->boostmillis[B_SHROOMS]) spread /= d->aptitude==APT_JUNKIE ? 1.75f : 1.5f;
-        if(d->aptitude==APT_MAGICIEN && d->abilitymillis[ABILITY_2]) spread /= 3.f;
+        if(d->boostmillis[B_SHROOMS]) spread /= d->aptitude==C_JUNKIE ? 1.75f : 1.5f;
+        if(d->aptitude==C_WIZARD && d->abilitymillis[ABILITY_2]) spread /= 3.f;
 
         if(!spreadLimit(d))
         {
-            if(d->crouching) spread /= d->aptitude==APT_CAMPEUR ? 2.5f : 1.3f;
+            if(d->crouching) spread /= d->aptitude==C_CAMPER ? 2.5f : 1.3f;
             if(d->boostmillis[B_ROIDS] || d->boostmillis[B_RAGE]) spread *= 1.75f;
         }
 
@@ -502,24 +502,18 @@ namespace game
     {
         vec p = d->o;
         p.z += 0.6f*(d->eyeheight + d->aboveeye) - d->eyeheight;
-        int actorClass = actor->aptitude,
-            targetClass = d->aptitude;
+
+        int actorClass = actor->aptitude, targetClass = d->aptitude;
         bool isHudPlayer = (actor == hudplayer());
+        bool teamDamage = (isteam(d->team, actor->team) && d!=actor);
 
-        if(d->armourtype!=A_MAGNET)
-        {
-            if(blood) particle_splash(PART_BLOOD, damage > 300 ? 3 : damage/100, 1000, p, 0x60FFFF, 2.96f);
-            gibeffect(!isteam(d->team, actor->team) ? damage : actorClass == APT_MEDECIN ? 0 : actorClass == APT_JUNKIE ? damage/=1.5f : damage/=3.f, vec(0,0,0), d);
-        }
-
-        bool teamDamage = false;
         if(isHudPlayer) d->curdamagecolor = 0xFFAA00;
 
         damage = ((damage*classes[actorClass].damage)/(classes[targetClass].resistance)); // calc damage based on the class's stats
 
         switch(actorClass) // recalc damage based on the actor's passive/active skills
         {
-            case APT_AMERICAIN:
+            case C_AMERICAN:
                 if(atk >= ATK_NUKE_SHOOT && atk <= ATK_CAMPOUZE_SHOOT)
                 {
                     damage *= 1.5f;
@@ -527,11 +521,11 @@ namespace game
                 }
                 break;
 
-            case APT_NINJA:
+            case C_NINJA:
                 if(atk == ATK_CACNINJA_SHOOT && actor==hudplayer()) d->curdamagecolor = 0xFF0000;
                 break;
 
-            case APT_MAGICIEN:
+            case C_WIZARD:
                 if(actor->abilitymillis[ABILITY_2])
                 {
                     damage *= 1.25f;
@@ -539,11 +533,11 @@ namespace game
                 }
                 break;
 
-            case APT_CAMPEUR:
+            case C_CAMPER:
                 damage *= ((actor->o.dist(d->o)/1800.f)+1.f);
                 break;
 
-            case APT_VIKING:
+            case C_VIKING:
                 if(actor->boostmillis[B_RAGE])
                 {
                     damage *= 1.25f;
@@ -551,26 +545,26 @@ namespace game
                 }
                 break;
 
-            case APT_SHOSHONE:
+            case C_SHOSHONE:
                 if(actor->abilitymillis[ABILITY_3])
                 {
                     damage *= 1.3f;
                     if(isHudPlayer) d->curdamagecolor = 0xFF7700;
                 }
-                if(targetClass == APT_AMERICAIN)
+                if(targetClass == C_AMERICAN)
                 {
                     damage /= 1.25f;
                     if(isHudPlayer) d->curdamagecolor = 0xFFFF00;
                 }
                 break;
 
-            case APT_PHYSICIEN:
+            case C_PHYSICIST:
                 if(d==player1 && actor==player1 && player1->armour && player1->abilitymillis[ABILITY_1]) unlockAchievement(ACH_BRICOLEUR);
         }
 
         switch(targetClass) // recalc damage based on the victim's passive/active
         {
-            case APT_MAGICIEN:
+            case C_WIZARD:
                 if(d->abilitymillis[ABILITY_3])
                 {
                     damage /= 5.0f;
@@ -578,13 +572,13 @@ namespace game
                 }
                 break;
 
-            case APT_PRETRE:
-                if(isHudPlayer && d->abilitymillis[ABILITY_2] && targetClass == APT_PRETRE && d->mana) d->curdamagecolor = 0xAA00AA;
+            case C_PRIEST:
+                if(isHudPlayer && d->abilitymillis[ABILITY_2] && targetClass == C_PRIEST && d->mana) d->curdamagecolor = 0xAA00AA;
                 break;
 
-            case APT_SHOSHONE:
+            case C_SHOSHONE:
                 if(d->abilitymillis[ABILITY_1]) damage /= 1.3f;
-                if(actorClass == APT_AMERICAIN)
+                if(actorClass == C_AMERICAN)
                 {
                     damage *= 1.25f;
                     if(isHudPlayer) d->curdamagecolor = 0xFF7700;
@@ -593,24 +587,29 @@ namespace game
 
         if(actor->boostmillis[B_ROIDS]) // recalc damage if actor has roids
         {
-            damage *= actorClass == APT_JUNKIE ? 3 : 2;
+            damage *= actorClass == C_JUNKIE ? 3 : 2;
             if(isHudPlayer) d->curdamagecolor = 0xFF0000;
         }
         if(d->boostmillis[B_JOINT]) // recalc victim if actor has joint
         {
-            damage /= targetClass == APT_JUNKIE ? 1.875f : 1.25f;
+            damage /= targetClass == C_JUNKIE ? 1.875f : 1.25f;
             if(isHudPlayer) d->curdamagecolor = 0xAAAA55;
         }
 
-        if(isteam(d->team, actor->team) && actor != d && isHudPlayer) // recalc if ally or not
+        if(teamDamage && isHudPlayer) // recalc if ally or not
         {
-            if(actorClass == APT_MEDECIN) return;
-            damage /= (actorClass == APT_JUNKIE ? 1.5f : 3.f);
+            if(actorClass == C_MEDIC) return;
+            damage /= (actorClass == C_JUNKIE ? 1.5f : 3.f);
             d->curdamagecolor = 0x888888;
-            teamDamage = true;
         }
 
-        damage = damage/10.f; // rescale damage value
+        if(!d->armour || d->armourtype!=A_MAGNET)
+        {
+            if(blood) particle_splash(PART_BLOOD, damage > 300 ? 3 : damage/100, 1000, p, 0x60FFFF, 2.96f);
+            gibeffect(damage, vec(0,0,0), d);
+        }
+
+        damage /= 10.f; // rescale damage value
 
         if(isHudPlayer)
         {
@@ -651,13 +650,13 @@ namespace game
         {
             if(f==player1)
             {
-                if(player1->boostmillis[B_JOINT]) damage/=(player1->aptitude==APT_JUNKIE ? 1.875f : 1.25f);
+                if(player1->boostmillis[B_JOINT]) damage/=(player1->aptitude==C_JUNKIE ? 1.875f : 1.25f);
                 switch(player1->aptitude)
                 {
-                    case APT_MAGICIEN: {if(player1->abilitymillis[ABILITY_3]) damage/=5.f; } break;
-                    case APT_VIKING: player1->boostmillis[B_RAGE]+=damage; break;
-                    case APT_PRETRE: if(player1->abilitymillis[ABILITY_2] && player1->mana) {player1->mana-=damage/10; damage=0; if(player1->mana<0)player1->mana=0;} break;
-                    case APT_SHOSHONE: if(player1->abilitymillis[ABILITY_1]) damage/=1.3f;
+                    case C_WIZARD: {if(player1->abilitymillis[ABILITY_3]) damage/=5.f; } break;
+                    case C_VIKING: player1->boostmillis[B_RAGE]+=damage; break;
+                    case C_PRIEST: if(player1->abilitymillis[ABILITY_2] && player1->mana) {player1->mana-=damage/10; damage=0; if(player1->mana<0)player1->mana=0;} break;
+                    case C_SHOSHONE: if(player1->abilitymillis[ABILITY_1]) damage/=1.3f;
                 }
                 damage = (damage/classes[player1->aptitude].resistance)*(m_dmsp ? 15.f : 100);
                 damageeffect(damage, f, at, atk);
@@ -666,15 +665,15 @@ namespace game
             }
             else if(at==player1)
             {
-                if(player1->boostmillis[B_ROIDS]) damage *= (player1->aptitude==APT_JUNKIE ? 3 : 2);
+                if(player1->boostmillis[B_ROIDS]) damage *= (player1->aptitude==C_JUNKIE ? 3 : 2);
                 switch(player1->aptitude)
                 {
-                    case APT_AMERICAIN: {if(atk==ATK_NUKE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_CAMPOUZE_SHOOT) damage *= 1.5f; break;}
-                    case APT_VIKING: if(player1->boostmillis[B_RAGE]) damage*=1.25f; break;
-                    case APT_MAGICIEN: {if(player1->abilitymillis[ABILITY_2]) damage *= 1.25f; break;}
-                    case APT_CAMPEUR: damage *= ((player1->o.dist(f->o)/1800.f)+1.f); break;
-                    case APT_VAMPIRE: {player1->health = min(player1->health + damage/2, player1->maxhealth); player1->vampimillis+=damage*1.5f;} break;
-                    case APT_SHOSHONE: if(player1->abilitymillis[ABILITY_1]) damage*=1.3f;
+                    case C_AMERICAN: {if(atk==ATK_NUKE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_CAMPOUZE_SHOOT) damage *= 1.5f; break;}
+                    case C_VIKING: if(player1->boostmillis[B_RAGE]) damage*=1.25f; break;
+                    case C_WIZARD: {if(player1->abilitymillis[ABILITY_2]) damage *= 1.25f; break;}
+                    case C_CAMPER: damage *= ((player1->o.dist(f->o)/1800.f)+1.f); break;
+                    case C_VAMPIRE: {player1->health = min(player1->health + damage/2, player1->maxhealth); player1->vampimillis+=damage*1.5f;} break;
+                    case C_SHOSHONE: if(player1->abilitymillis[ABILITY_1]) damage*=1.3f;
                 }
                 damage = (damage*classes[player1->aptitude].damage)/100;
                 hitmonster(damage, (monster *)f, at, vel, atk);
@@ -695,7 +694,7 @@ namespace game
 
             int impactSound = S_IMPACTWOOD + f->armourtype;
             int regenSound = S_PHY_1_WOOD + f->armourtype;
-            bool hasRegenAbility = f->aptitude==APT_PHYSICIEN && f->abilitymillis[ABILITY_1];
+            bool hasRegenAbility = f->aptitude==C_PHYSICIST && f->abilitymillis[ABILITY_1];
 
             if(at==player1)
             {
@@ -1067,7 +1066,7 @@ namespace game
 
     bool noMuzzle(int atk, gameent *d)
     {
-        return (d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2]) || (atk==ATK_CAC349_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACMARTEAU_SHOOT || atk==ATK_CACMASTER_SHOOT || atk==ATK_CACNINJA_SHOOT);
+        return (d->aptitude==C_SPY && d->abilitymillis[ABILITY_2]) || (atk==ATK_CAC349_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACMARTEAU_SHOOT || atk==ATK_CACMASTER_SHOOT || atk==ATK_CACNINJA_SHOOT);
     }
 
     float recoilReduce()
@@ -1076,13 +1075,13 @@ namespace game
 
         switch(hudplayer()->aptitude)
         {
-            case APT_SOLDAT:
+            case C_SOLDIER:
                 return factor *= 2;
 
-            case APT_VIKING:
+            case C_VIKING:
                 return (hudplayer()->boostmillis[B_RAGE] ? (factor * 0.75f) : factor);
 
-            case APT_MAGICIEN:
+            case C_WIZARD:
                 return (hudplayer()->abilitymillis[ABILITY_2] ? (factor * 5) : factor);
         }
 
@@ -1108,10 +1107,10 @@ namespace game
         int gunSound = attacks[atk].sound;
         bool isHudPlayer = d==hudplayer();
         vec muzzleOrigin = noMuzzle(atk, d) ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle;
-        vec casingOrigin = (d->aptitude==APT_ESPION && d->abilitymillis[ABILITY_2]) ? d->o : d->balles;
+        vec casingOrigin = (d->aptitude==C_SPY && d->abilitymillis[ABILITY_2]) ? d->o : d->balles;
         int lightFlags = DL_FLASH|L_NODYNSHADOW;
 
-        bool wizardAbility = (d->aptitude==APT_MAGICIEN && d->abilitymillis[ABILITY_2]);
+        bool wizardAbility = (d->aptitude==C_WIZARD && d->abilitymillis[ABILITY_2]);
         if(wizardAbility) playSound(S_WIZ_2, isHudPlayer ? vec(0, 0, 0) : d->muzzle, 250, 150, NULL, d->entityId);
 
         switch(atk)
@@ -1180,7 +1179,7 @@ namespace game
                 if(isGau)
                 {
                     if(d->type==ENT_PLAYER) gunSound = S_GAU8;
-                    if(d==player1 && player1->aptitude==APT_PRETRE && player1->boostmillis[B_SHROOMS] && player1->abilitymillis[ABILITY_3]) unlockAchievement(ACH_CADENCE);
+                    if(d==player1 && player1->aptitude==C_PRIEST && player1->boostmillis[B_SHROOMS] && player1->abilitymillis[ABILITY_3]) unlockAchievement(ACH_CADENCE);
                 }
                 spawnbouncer(casingOrigin, d->vel, d, isGau ? BNC_BIGCASING : BNC_CASING);
                 break;
@@ -1342,13 +1341,13 @@ namespace game
             else if(d->boostmillis[B_RAGE]) playSound(S_RAGETIR, isHudPlayer ? vec(0, 0, 0) : d->o, 500, 100);
         }
 
-        if(d->abilitymillis[ABILITY_3] && d->aptitude==APT_PRETRE) adddynlight(muzzleOrigin, 6, vec(1.5f, 1.5f, 0.0f), 80, 40, L_NOSHADOW|L_VOLUMETRIC|DL_FLASH);
+        if(d->abilitymillis[ABILITY_3] && d->aptitude==C_PRIEST) adddynlight(muzzleOrigin, 6, vec(1.5f, 1.5f, 0.0f), 80, 40, L_NOSHADOW|L_VOLUMETRIC|DL_FLASH);
         if(d==player1) updateStat(1, STAT_MUNSHOOTED);
 
         bool incraseDist = atk==ATK_ASSISTXPL_SHOOT || atk==ATK_KAMIKAZE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_NUKE_SHOOT;
         int distance = camera1->o.dist(hudgunorigin(gun, d->o, to, d));
         int loopedSoundFlags = SND_LOOPED|SND_FIXEDPITCH|SND_NOCULL;
-        float pitch = d->boostmillis[B_SHROOMS] ? (d->aptitude==APT_JUNKIE ? 1.4f : 1.2f) : (d->aptitude==APT_PRETRE && d->abilitymillis[ABILITY_3] ? (1.5f - (d->abilitymillis[ABILITY_3] / 8000.0f)) : 0);
+        float pitch = d->boostmillis[B_SHROOMS] ? (d->aptitude==C_JUNKIE ? 1.4f : 1.2f) : (d->aptitude==C_PRIEST && d->abilitymillis[ABILITY_3] ? (1.5f - (d->abilitymillis[ABILITY_3] / 8000.0f)) : 0);
         if(gamespeed!=100) pitch *= (game::gamespeed / 100.f);
 
         if(!d->attacksound)
@@ -1478,7 +1477,7 @@ namespace game
     void shoot(gameent *d, const vec &targ, bool isMonster)
     {
         int prevaction = d->lastaction, attacktime = lastmillis-prevaction;
-        bool specialAbility = d->aptitude==APT_PRETRE && d->abilitymillis[ABILITY_3];
+        bool specialAbility = d->aptitude==C_PRIEST && d->abilitymillis[ABILITY_3];
 
         if(d->aitype==AI_BOT && (d->gunselect==GUN_GLOCK || d->gunselect==GUN_SPOCKGUN || d->gunselect==GUN_HYDRA || d->gunselect==GUN_SKS || d->gunselect==GUN_S_CAMPOUZE))
         {
@@ -1498,7 +1497,7 @@ namespace game
         if(attacktime < d->gunwait + d->gunaccel*(d->gunselect==GUN_PLASMA ? 50 : d->gunselect==GUN_S_ROQUETTES ? 150 : 8) + (d==player1 || specialAbility ? 0 : attacks[d->gunselect].attackdelay)) return;
         d->gunwait = 0;
 
-        if(d->aptitude==APT_KAMIKAZE)
+        if(d->aptitude==C_KAMIKAZE)
         {
             if(d->abilitymillis[ABILITY_2]>0 && d->abilitymillis[ABILITY_2]<2000 && d->ammo[GUN_KAMIKAZE]>0 && !d->playerexploded)
             {
@@ -1543,8 +1542,8 @@ namespace game
         vec from = d->o, to = targ, dir = vec(to).sub(from).safenormalize();
         float dist = to.dist(from);
 
-        int kickfactor = (m_tutorial && !canMove) || d->aptitude==APT_AMERICAIN ? 0 : (d->crouched() ? -1.25f : -2.5f);
-        vec kickback = (d->aptitude==APT_AMERICAIN ? vec(0, 0, 0) : vec(dir).mul(attacks[atk].kickamount*kickfactor));
+        int kickfactor = (m_tutorial && !canMove) || d->aptitude==C_AMERICAN ? 0 : (d->crouched() ? -1.25f : -2.5f);
+        vec kickback = (d->aptitude==C_AMERICAN ? vec(0, 0, 0) : vec(dir).mul(attacks[atk].kickamount*kickfactor));
         d->vel.add(kickback);
 
         float shorten = attacks[atk].range && dist > attacks[atk].range ? attacks[atk].range : 0,
@@ -1570,8 +1569,8 @@ namespace game
                    hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
         }
         float waitfactor = 1;
-        if(d->aptitude==APT_PRETRE && d->abilitymillis[ABILITY_3]) waitfactor = 2.5f + ((4000.f - d->abilitymillis[ABILITY_3])/1000.f);
-        if(d->boostmillis[B_SHROOMS]) waitfactor *= d->aptitude==APT_JUNKIE ? 1.75f : 1.5f;
+        if(d->aptitude==C_PRIEST && d->abilitymillis[ABILITY_3]) waitfactor = 2.5f + ((4000.f - d->abilitymillis[ABILITY_3])/1000.f);
+        if(d->boostmillis[B_SHROOMS]) waitfactor *= d->aptitude==C_JUNKIE ? 1.75f : 1.5f;
         d->gunwait = attacks[atk].attackdelay/waitfactor;
         d->totalshots += (attacks[atk].damage*attacks[atk].rays) * (d->boostmillis[B_ROIDS] ? 1 : 2);
         if(d->playerexploded) {d->attacking = d->wasAttacking; execute("getoldweap"); d->playerexploded = false;}

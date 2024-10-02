@@ -381,7 +381,7 @@ static struct itemstat { int add, max, sound; const char *ident; int info; } ite
 
 static const struct attackinfo { int gun, action, picksound, sound, middistsnd, fardistsnd, specialsounddelay, attackdelay, damage, aimspread, noaimspread, margin, projspeed, kickamount, range, rays, hitpush, exprad, ttl, use; } attacks[NUMATKS] =
 {
-    //Armes "normales"
+    // Regular weapons
     { GUN_ELEC,         ACT_SHOOT, S_WPLOADFUTUR,     S_ELECRIFLE,    S_ELECRIFLE_FAR,       S_FAR_LIGHT,   10,  350,  325,  35, 105, 0,    0,  10, 8000,  1,    30,   0, 0, 1},
     { GUN_PLASMA,       ACT_SHOOT, S_WPLOADFUTUR,     S_PLASMARIFLE,  S_PLASMARIFLE_FAR,     S_FAR_LIGHT,   25,   90,  180,  45, 135, 0, 2000,   5, 8000,  1,    50,  25, 0, 1},
     { GUN_SMAW,         ACT_SHOOT, S_WPLOADBIG,       S_SMAW,         S_SMAW_FAR,                     -1,    3, 1250, 1000,  20,  60, 2,  700,  15, 8000,  1,   750, 150, 0, 1},
@@ -399,19 +399,19 @@ static const struct attackinfo { int gun, action, picksound, sound, middistsnd, 
     { GUN_AK47,         ACT_SHOOT, S_WPLOADMID,       S_AK47,         S_AK47_FAR,            S_FAR_LIGHT,   30,   92,  170,  60, 180, 0, 4250,   7, 8000,  1,    50,   5, 0, 1},
     { GUN_GRAP1,        ACT_SHOOT, S_WPLOADFUTUR,     S_GRAP1,        S_GRAP1_FAR,                    -1,   12,  200,  250,  30, 300, 3, 1750,  -4, 8000,  1,  -600,  20, 0, 1},
     { GUN_ARTIFICE,     ACT_SHOOT, S_WPLOADSMALL,     S_FIREWORKS,    S_FIREWORKS_FAR,                -1,    3, 1100,  900,  35, 200, 2, 1500,  35,  600,  1,   500,  80, 300, 1},
-    { GUN_MOLOTOV,      ACT_SHOOT, S_WPLOADWHOOSH,    S_MOLOTOV,      -1,                             -1,    3, 1350,  500,  20,  50, 0,  300, -10, 1500,  1,   100, 250, 10000, 1},
+    { GUN_MOLOTOV,      ACT_SHOOT, S_WPLOADSLOWWOOSH, S_MOLOTOV,      -1,                             -1,    3, 1350,  500,  20,  50, 0,  300, -10, 1500,  1,   100, 250, 10000, 1},
     { GUN_GLOCK,        ACT_SHOOT, S_WPLOADSMALL,     S_GLOCK,        S_GLOCK_FAR,           S_FAR_LIGHT,   10,  100,  280,   5, 150, 0, 4250,   7, 8000,  1,    30,   3, 0, 1},
-    // Super armes
+    // Super weapons
     { GUN_S_NUKE,       ACT_SHOOT, S_WPLOADBIG,       S_NUKE,         S_NUKE_FAR,             S_NUKE_FAR,    1, 3000,  3250,  20, 300, 2,  200,  10, 2000,  1,   400, 1500, 6000, 1},
     { GUN_S_GAU8,       ACT_SHOOT, S_WPLOADBIG,       S_GAU8,         S_GAU8_FAR,                     -1,   90,   14,   300, 150, 250, 3, 7500,   4, 8000,  1,    80,   20, 0, 1},
     { GUN_S_ROQUETTES,  ACT_SHOOT, S_WPLOADBIG,       S_MINIROCKETS,  S_MINIROCKETS_FAR, S_FAR_VERYHEAVY,   14,  170,  2000,  10, 300, 2,  850,   6, 8000,  1,   500,  100, 0, 1},
     { GUN_S_CAMPOUZE,   ACT_SHOOT, S_WPLOADBIG,       S_CAMPOUZE,     S_CAMPOUZE_FAR,    S_FAR_VERYHEAVY,    8,  500,    75,  10,  50, 5,    0,   3, 4000, 10,   150,    8, 0, 1},
-    // Armes corps à corps
+    // Melee weapons
     { GUN_CAC349,       ACT_SHOOT, S_WPLOADWHOOSH,    S_SWORD349,     -1, -1,   4, 1000,  600, 1, 1, 20, 0, -10,  28,  1,  50,  0, 0, 0},
     { GUN_CACMARTEAU,   ACT_SHOOT, S_WPLOADSLOWWOOSH, S_BANHAMMER,    -1, -1,   3, 1500, 1000, 1, 1, 15, 0,  -5,  30,  1,  10,  0, 0, 0},
     { GUN_CACMASTER,    ACT_SHOOT, S_WPLOADWHOOSH,    S_MASTERSWORD,  -1, -1,   5, 600,   430, 1, 1, 20, 0,  -8,  26,  1,  30,  0, 0, 0},
     { GUN_CACFLEAU,     ACT_SHOOT, S_WPLOADCHAINS,    S_FLAIL,        -1, -1,   4, 1150,  750, 1, 1, 10, 0, -10,  32,  1, 125,  0, 0, 0},
-    // Armes spéciales
+    // Special weapons
     { GUN_KAMIKAZE,     ACT_SHOOT, S_WPLOADFASTWOOSH, -1,           S_EXPL_FAR, S_EXPL_FAR,   1, 1000, 3000, 1, 1,  0, 1,  10, 120,  1, 250, 500, 5, 1},
     { GUN_ASSISTXPL,    ACT_SHOOT, -1,                -1,           S_EXPL_FAR, S_EXPL_FAR,   1,  220, 2000, 1, 1,  0, 1,  10,  50,  1, 100, 350, 5, 1},
     { GUN_CACNINJA,     ACT_SHOOT, S_WPLOADWHOOSH,    S_NINJASABER, -1,         -1,           8,  400,  800, 1, 1, 30, 0, -10,  36,  1,  25,   0, 0, 0},
@@ -455,8 +455,8 @@ static const struct guninfo { const char *ident, *name; vec2 weapDisp; int maxzo
     { "Weapon_Saber",           "sabre",            vec2(4, 3),    95,  120,  { -1, ATK_CACNINJA_SHOOT }, },
 };
 
-//Définition des aptitudes
-enum {APT_SOLDAT = 0, APT_MEDECIN, APT_AMERICAIN, APT_NINJA, APT_VAMPIRE, APT_MAGICIEN, APT_KAMIKAZE, APT_FAUCHEUSE, APT_PHYSICIEN, APT_CAMPEUR, APT_ESPION, APT_PRETRE, APT_VIKING, APT_JUNKIE, APT_SHOSHONE, NUMCLASSES};
+// Definition of player's classes
+enum {C_SOLDIER = 0, C_MEDIC, C_AMERICAN, C_NINJA, C_VAMPIRE, C_WIZARD, C_KAMIKAZE, C_REAPER, C_PHYSICIST, C_CAMPER, C_SPY, C_PRIEST, C_VIKING, C_JUNKIE, C_SHOSHONE, NUMCLASSES};
 
 struct ability { const int manacost, duration, cooldown, snd; };
 static const struct classesConfig { const char *hatDir; int damage, resistance, accuracy, speed; ability abilities[3]; } classes[NUMCLASSES] =
@@ -523,56 +523,56 @@ struct gamestate
        return ammo[type-I_RAIL+GUN_ELEC]>=is.max;
     }
 
-    bool canpickupitem(int type, int aptitude, bool haspowerarmor)
+    bool canpickupitem(int type, int playerClass, bool hasPowerArmor)
     {
         if(type<I_RAIL || type>I_MANA) return false;
         itemstat &is = itemstats[type-I_RAIL];
 
         switch(type)
         {
-            case I_SANTE: return health<maxhealth;
+            case I_SANTE: return health < maxhealth;
 
-            case I_BOOSTPV: return maxhealth<is.max;
+            case I_BOOSTPV: return maxhealth < is.max;
 
             case I_MANA:
-                if(aptitude==APT_VAMPIRE) return health<maxhealth;
-                else return (aptitude==APT_MAGICIEN || aptitude==APT_PHYSICIEN || aptitude==APT_PRETRE || aptitude==APT_ESPION || aptitude==APT_SHOSHONE) && mana<is.max;
+                if(playerClass==C_VAMPIRE) return health < maxhealth;
+                else return (playerClass==C_WIZARD || playerClass==C_PHYSICIST || playerClass==C_PRIEST || playerClass==C_SPY || playerClass==C_SHOSHONE) && mana<is.max;
 
             case I_ROIDS: case I_EPO: case I_JOINT: case I_SHROOMS:
-                return boostmillis[type-I_ROIDS]<is.max;
+                return boostmillis[type-I_ROIDS] < is.max;
 
             case I_WOODSHIELD:
             case I_IRONSHIELD:
             case I_GOLDSHIELD:
             case I_MAGNETSHIELD:
-                return haspowerarmor ? (armour < 3000) : (armour < (aptitude==APT_SOLDAT ? is.max+(250*(armourtype+1)) : is.max));
+                return hasPowerArmor ? (armour < 3000) : (armour < (playerClass==C_SOLDIER ? is.max+(250*(armourtype+1)) : is.max));
 
-            case I_POWERARMOR: return !haspowerarmor;
+            case I_POWERARMOR: return !hasPowerArmor;
 
             default:
-                return ammo[is.info]<is.max*(aptitude==APT_AMERICAIN ? 1.5f : 1);
+                return ammo[is.info] < is.max*(playerClass==C_AMERICAN ? 1.5f : 1);
         }
     }
 
-    void pickupitem(int type, int aptitude, int aptisort, bool haspowerarmor, int rndsweap)
+    void pickupitem(int type, int playerClass, int aptisort, bool haspowerarmor, int rndsweap)
     {
         if(type<I_RAIL || type>I_MANA) return;
         itemstat &is = itemstats[type-I_RAIL+rndsweap];
 
-        int itemboost = aptitude==APT_PRETRE && aptisort ? 2 : 1;
+        int itemboost = playerClass==C_PRIEST && aptisort ? 2 : 1;
 
         switch(type)
         {
             case I_BOOSTPV:
-                health = min(health+is.add*(aptitude==APT_JUNKIE ? 1.5f : itemboost), 2500.0f);
+                health = min(health+is.add*(playerClass==C_JUNKIE ? 1.5f : itemboost), 2500.0f);
                 return;
 
             case I_SANTE:
-                health = min(health+is.add*(aptitude==APT_MEDECIN ? 2 : itemboost), maxhealth);
+                health = min(health+is.add*(playerClass==C_MEDIC ? 2 : itemboost), maxhealth);
                 return;
 
             case I_MANA:
-                if(aptitude!=APT_VAMPIRE) mana = min(mana+is.add, is.max);
+                if(playerClass!=C_VAMPIRE) mana = min(mana+is.add, is.max);
                 else health = min(health+250, maxhealth);
                 return;
 
@@ -589,20 +589,20 @@ struct gamestate
                 {
                     armourtype = haspowerarmor ? A_POWERARMOR : is.info;
                     if(!haspowerarmor) ammo[GUN_ASSISTXPL] = 0;
-                    int armourval = haspowerarmor && armour ? (500 * itemboost) : (aptitude==APT_SOLDAT ? is.max+(250*(armourtype+1)) : is.max);
+                    int armourval = haspowerarmor && armour ? (500 * itemboost) : (playerClass==C_SOLDIER ? is.max+(250*(armourtype+1)) : is.max);
                     armour = min(armour + armourval, haspowerarmor ? 3000 : armourval);
                     return;
                 }
 
             case I_ROIDS: case I_EPO: case I_JOINT: case I_SHROOMS:
             {
-                float boostboost = aptitude==APT_JUNKIE ? 1.5f : itemboost; // cannot find a better var name :)
+                float boostboost = playerClass==C_JUNKIE ? 1.5f : itemboost; // cannot find a better var name :)
                 boostmillis[type-I_ROIDS] = min(boostmillis[type-I_ROIDS]+is.add*boostboost, is.max*boostboost);
                 return;
             }
 
             default:
-                float ammoboost = ((aptitude == APT_AMERICAIN) ? (type == I_SUPERARME && rndsweap == 0 ? 2 : 1.5f) : 1);
+                float ammoboost = ((playerClass == C_AMERICAN) ? (type == I_SUPERARME && rndsweap == 0 ? 2 : 1.5f) : 1);
                 ammo[is.info] = min(ammo[is.info]+is.add*itemboost*ammoboost, is.max*ammoboost);
         }
     }
@@ -626,22 +626,22 @@ struct gamestate
         aiming = false;
     }
 
-    void addMeleeWeapons(int playerClasse)
+    void addMeleeWeapons(int playerClass)
     {
-        int weapon = playerClasse == APT_NINJA ? GUN_CACNINJA : GUN_CAC349 + rnd(4);
+        int weapon = (playerClass == C_NINJA ? GUN_CACNINJA : GUN_CAC349 + rnd(4));
         ammo[weapon] = 1;
         gunselect = weapon;
     }
 
-    void addStarterWeapons(int playerClasse, int glockAmmo, int grenadeAmmo)
+    void addStarterWeapons(int playerClass, int glockAmmo, int grenadeAmmo)
     {
         ammo[GUN_GLOCK] = glockAmmo;
-        ammo[GUN_M32] = (playerClasse == APT_AMERICAIN ? grenadeAmmo * 3 : grenadeAmmo);
+        ammo[GUN_M32] = (playerClass == C_AMERICAN ? grenadeAmmo * 3 : grenadeAmmo);
     }
 
-    void addSuperWeapon(int playerClasse, int gamemode)
+    void addSuperWeapon(int playerClass, int gamemode)
     {
-        if(playerClasse != APT_SOLDAT || gamemode == m_tutorial) return;
+        if(playerClass != C_SOLDIER || gamemode == m_tutorial) return;
 
         int weapon = GUN_S_NUKE + rnd(4);
         if(!rnd(50))
@@ -651,9 +651,9 @@ struct gamestate
         }
     }
 
-    void addArmour(int playerClasse, int gamemode)
+    void addArmour(int playerClass, int gamemode)
     {
-        bool armourBonus = (playerClasse == APT_SOLDAT);
+        bool armourBonus = (playerClass == C_SOLDIER);
 
         if(m_fullstuff)
         {
@@ -675,17 +675,17 @@ struct gamestate
         }
     }
 
-    void selectGun(int playerClasse, int baseWeapon)
+    void selectGun(int playerClass, int baseWeapon)
     {
-        switch(playerClasse)
+        switch(playerClass)
         {
-            case APT_KAMIKAZE: gunselect = GUN_KAMIKAZE; break;
-            case APT_NINJA: gunselect = GUN_CACNINJA; break;
+            case C_KAMIKAZE: gunselect = GUN_KAMIKAZE; break;
+            case C_NINJA: gunselect = GUN_CACNINJA; break;
             default: gunselect = baseWeapon;
         }
     }
 
-    void spawnstate(int gamemode, int playerClasse)
+    void spawnstate(int gamemode, int playerClass)
     {
         int selectedWeapon = GUN_GLOCK;
 
@@ -706,7 +706,7 @@ struct gamestate
                     loopj(i) if (numGuns[j] == newGun) {duplicate = true; break; }
                 } while (duplicate);
                 numGuns[i] = newGun;
-                baseammo(numGuns[i], playerClasse == APT_AMERICAIN ? 6 : 4);
+                baseammo(numGuns[i], playerClass == C_AMERICAN ? 6 : 4);
             }
             selectedWeapon = numGuns[rnd(3)];
         }
@@ -717,19 +717,19 @@ struct gamestate
         }
         else if(m_capture) // base capture
         {
-            addStarterWeapons(playerClasse, m_regencapture ? 10 : 30, 1);
+            addStarterWeapons(playerClass, m_regencapture ? 10 : 30, 1);
         }
         else if(m_tutorial || m_edit || m_dmsp) // solo game modes
         {
-            if(m_dmsp) addStarterWeapons(playerClasse, 10, 0);
+            if(m_dmsp) addStarterWeapons(playerClass, 10, 0);
         }
-        else addStarterWeapons(playerClasse, 30, 1); // weapon pickup mutator
+        else addStarterWeapons(playerClass, 30, 1); // weapon pickup mutator
 
-        if(playerClasse == APT_KAMIKAZE) ammo[GUN_KAMIKAZE] = 1;
-        addArmour(playerClasse, gamemode);
-        addMeleeWeapons(playerClasse);
-        selectGun(playerClasse, selectedWeapon);
-        addSuperWeapon(playerClasse, gamemode);
+        if(playerClass == C_KAMIKAZE) ammo[GUN_KAMIKAZE] = 1;
+        addArmour(playerClass, gamemode);
+        addMeleeWeapons(playerClass);
+        selectGun(playerClass, selectedWeapon);
+        addSuperWeapon(playerClass, gamemode);
     }
 
     int dodamage(int damage, bool shieldRegen = false) // just subtract damage here, can set death, etc. later in code calling this
@@ -827,7 +827,7 @@ struct gameent : dynent, gamestate
 
     void hitphyspush(int damage, const vec &dir, gameent *actor, int atk, gameent *target)
     {
-        if(target->aptitude==APT_AMERICAIN) return;
+        if(target->aptitude==C_AMERICAN) return;
         vec push(dir);
         push.mul((actor==this && attacks[atk].exprad ? EXP_SELFPUSH : 1.0f)*attacks[atk].hitpush*(damage/10)/weight);
         vel.add(push);
@@ -1110,6 +1110,7 @@ namespace game
     extern bool hasShrooms();
     extern bool hasRoids(gameent *d);
     extern bool hasPowerArmor(gameent *d);
+    extern bool hasSuperWeapon(gameent *d);
     struct playermodelinfo { const char *model[MAXTEAMS], *cbmodel; };
     extern void savetombe(gameent *d);
     extern void clearragdolls();
