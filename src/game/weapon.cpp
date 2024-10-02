@@ -833,7 +833,7 @@ namespace game
                 renderExplosion(owner, v, vel, atk);
                 playSound(S_EXPL_MOLOTOV, v, 300, 150);
                 if(inWater) playSound(S_EXPL_INWATER, vec(v).addz(15), 300, 100);
-                if(isFar) playSound(S_EXPL_FAR, v, 2000, 400, SND_LOWPRIORITY);
+                if(isFar) playSound(S_MOLOTOVEXPL_FAR, v, 1500, 750, SND_LOWPRIORITY);
                 startShake(v, 1.25f * attacks[atk].exprad, atk, 0.5f);
                 break;
             }
