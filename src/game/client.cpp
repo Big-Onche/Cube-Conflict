@@ -1634,6 +1634,7 @@ namespace game
             case N_CURWEAPON:
             {
                 currentIdenticalWeapon = getint(p);
+
                 switch(player1->gunselect)
                 {
                     case GUN_CACNINJA:

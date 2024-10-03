@@ -229,15 +229,16 @@ namespace game
     static const struct bouncerConfig { const char *name; float size, bounceIntensity; int variants, cullDist, bounceSound, bounceSoundRad, soundFlag; } bouncers[NUMBOUNCERS] =
     {
         { "grenade",            1.0f, 1.0f,  0,  750, S_B_GRENADE,      220,    0              },
-        { "molotov",            1.0f, 1.0f,  0,  750, -1,               220,    0              },
+        { "molotov",            1.0f, 1.0f,  0,  750, -1,                 0,    0              },
         { "pixel",              1.0f, 0.6f,  8,  600, S_B_PIXEL,        120,    0              },
+        { "debris",             0.5f, 0.5f,  0, 1000, -1,                 0,    0              },
         { "rock",               0.8f, 0.8f,  4,  750, S_B_ROCK,         120,    0              },
         { "rock/big",           2.5f, 0.4f,  3, 1250, S_B_BIGROCK,      300,    0              },
         { "casing",             0.2f, 1.0f,  0,  250, S_B_CASING,       120,    SND_FIXEDPITCH },
         { "casing/big",         0.2f, 1.0f,  0,  250, S_B_BIGCASING,    120,    SND_FIXEDPITCH },
         { "casing/cartridge",   0.2f, 1.0f,  0,  250, S_B_CARTRIDGE,    120,    SND_FIXEDPITCH },
         { "scrap",              1.5f, 0.7f,  3,  750, S_B_SCRAP,        180,    0              },
-        { "glass",              0.5f, 0.2f,  0,  500, -1,               180,    0              },
+        { "glass",              0.5f, 0.2f,  0,  500, -1,                 0,    0              },
         { NULL,                 0.1f, 1.0f,  0,  500, -1,                 0,    0              }
     };
 
@@ -765,7 +766,7 @@ namespace game
 
     void explode(bool local, gameent *owner, const vec &v, const vec &vel, dynent *safe, int damage, int atk)
     {
-        vec safeLoc = vec(v).sub(vec(vel).mul(15)); // avoid false positive for occlusion effect
+        vec safeLoc = vec(v).sub(vec(vel).mul(15)); // avoid spawn in wall
         bool inWater = ((lookupmaterial(v) & MATF_VOLUME) == MAT_WATER);
         bool isFar = camera1->o.dist(v) >= 300;
 
@@ -780,7 +781,13 @@ namespace game
 
             case ATK_SMAW_SHOOT:
             case ATK_ROQUETTES_SHOOT:
-                loopi(5+rnd(3)) spawnbouncer(safeLoc, vec(0, 0, 0), owner, BNC_ROCK, 200);
+                loopi(atk==ATK_ROQUETTES_SHOOT ? 3 : 4 + rnd(3))
+                {
+                    vec pos = safeLoc;
+                    pos.add(vec(-4 + rnd(8), -4 + rnd(8), -4 + rnd(8)));
+                    spawnbouncer(pos, vec(0, 0, 0), owner, BNC_ROCK, 200);
+                    spawnbouncer(pos, vec(0, 0, 0), owner, BNC_BURNINGDEBRIS, 250, 400);
+                }
                 renderExplosion(owner, safeLoc, vel, atk);
                 playSound(S_EXPL_MISSILE, safeLoc, 400, 150);
                 if(inWater) playSound(S_EXPL_INWATER, vec(v).addz(15), 300, 100);
@@ -1662,28 +1669,35 @@ namespace game
                         break;
 
                     case BNC_ROCK:
-                        particle_splash(PART_SMOKE, 1, 150, pos, 0x404040, 2.5f, 50, -20);
+                        particle_splash(PART_SMOKE, 1, 150, pos, 0x404040, 2.5f, 50, -20, 0, hasShrooms());
                         break;
 
                     case BNC_BIGROCK:
-                        particle_splash(PART_SMOKE, 1, 500, pos, 0x151515, 8.f, 50, -20);
+                        particle_splash(PART_SMOKE, 1, 500, pos, 0x151515, 8.f, 50, -20, 0, hasShrooms());
                         break;
 
                     case BNC_GRENADE:
                     {
                         float growth = (1000 - (bnc.lifetime - curtime))/150.f;
                         particle_fireball(pos, growth, PART_EXPLOSION, 20, hasRoids(bnc.owner) ? 0xFF0000 : 0x0055FF, growth, hasShrooms());
-                        particle_splash(PART_SMOKE, 1, 150, pos, 0x404088, 2.5f, 50, -20);
+                        particle_splash(PART_SMOKE, 1, 150, pos, 0x404088, 2.5f, 50, -20, 0, hasShrooms());
                         break;
                     }
                     case BNC_SCRAP:
-                        particle_splash(inWater ? PART_BUBBLE : PART_SMOKE, inWater ? 1 : 3, 250, pos, 0x222222, 2.5f, 50, -50);
-                        particle_splash(PART_FIRE_BALL, 2, 75, pos, 0x994400, 0.7f, 30, -30);
+                        particle_splash(inWater ? PART_BUBBLE : PART_SMOKE, inWater ? 1 : 3, 250, pos, 0x222222, 2.5f, 50, -50, 0, hasShrooms());
+                        particle_splash(PART_FIRE_BALL, 2, 75, pos, 0x994400, 0.7f, 30, -30, 0, hasShrooms());
                         break;
 
                     case BNC_GLASS:
-                        particle_splash(PART_SMOKE, 1, 1200, pos, 0x303030, 2.5f, 50, -50, 10);
-                        particle_splash(PART_FIRE_BALL, 1, 250, pos, 0x996600, 1.3f, 50, -50, 12);
+                        particle_splash(PART_SMOKE, 1, 1200, pos, 0x303030, 2.5f, 50, -50, 10, hasShrooms());
+                        particle_splash(PART_FIRE_BALL, 1, 250, pos, 0x996600, 1.3f, 50, -50, 12, hasShrooms());
+                        break;
+
+                    case BNC_BURNINGDEBRIS:
+                        int flamesColor = (rnd(2) ? 0x993A00 : 0x856611);
+                        if(!rnd(2)) particle_splash(PART_SMOKE, 1, 1800 + rnd(400), pos, 0x282828, 2.f, 50, -100, 12, hasShrooms());
+                        particle_splash(PART_FIRE_BALL, 1, 175, pos, flamesColor, 1.f, 20, 0, 4, hasShrooms());
+                        particle_splash(PART_FIRE_BALL, 1, 175, bnc.o, flamesColor, 1.f, 20, 0, 4, hasShrooms());
                         break;
                 }
             }

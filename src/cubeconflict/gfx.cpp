@@ -172,7 +172,9 @@ namespace game
             }
     }
 
-    void renderExplosion(gameent *owner, const vec &v, const vec &vel, int atk) //big laggy flashy explosions
+    int flamesColor[3] = {0x383838, 0x474747, 0x604930};
+
+    void renderExplosion(gameent *d, const vec &v, const vec &vel, int atk) //big laggy flashy explosions
     {
         bool inWater = ((lookupmaterial(v) & MATF_VOLUME) == MAT_WATER);
         int initRadius = attacks[atk].exprad/2;
@@ -184,16 +186,23 @@ namespace game
             case ATK_ROQUETTES_SHOOT:
             {
                 bool miniRockets = (atk == ATK_ROQUETTES_SHOOT);
-                particle_splash(PART_SMOKE, miniRockets ? 5 : 9, 2000, v, 0x333333, 40.0f, 150+rnd(50), 300+rnd(100), 0, hasShrooms());
-                particle_splash(PART_SMOKE, miniRockets ? 5 : 9, 1300, v, 0x333333, 25.0f, 150+rnd(50), 600+rnd(100), 0, hasShrooms());
-                particle_splash(PART_SPARK, miniRockets ? 7 : 10, 300, v, hasRoids(owner) ? 0xFF4444 : 0xFFBB55,  1.7f+rnd(2), 3500, 3500, 0, hasShrooms());
-                loopi(inWater ? 1 : 3) particle_splash(PART_FIRE_BALL, miniRockets ? 9 : 17, 80+rnd(40), v, hasRoids(owner) ? 0xFF4444 : i==0 ? 0x383838 : i==1 ? 0x474747: 0x604930, 9.f+rnd(6), miniRockets ? 300+rnd(150) : 400+rnd(200), 800, 20.f, hasShrooms());
-                particle_fireball(v, 350, PART_SHOCKWAVE, 300, hasRoids(owner) ? 0xFF0000 : 0xFFFFFF, 20.0f, hasShrooms());
 
-                if(inWater)
+                particle_fireball(v, 350, PART_SHOCKWAVE, 300, hasRoids(d) ? 0xFF0000 : 0xFFFFFF, 20.0f, hasShrooms());
+
+                loopi(inWater ? 3 : 8)
                 {
-                    particle_splash(PART_WATER, 40, 200, v, 0x18181A, 12.0f+rnd(14), 600, 300);
-                    particle_splash(PART_BUBBLE, 15, 150, v, 0x18181A, 4.0f+rnd(8), 300, 150);
+                    vec pos = v;
+                    pos.add(vec(-6+rnd(13), -6+rnd(13), -3+rnd(7)));
+
+                    if(!inWater) particle_splash(PART_SPARK, miniRockets ? 1 : 2, 300, pos, hasRoids(d) ? 0xFF4444 : 0xFFBB55,  1.2f+rnd(2), 2500, 2500, -1, hasShrooms());
+                    particle_splash(PART_FIRE_BALL, miniRockets ? 2 : 6, 150+rnd(75), pos, hasRoids(d) ? 0xFF4444 : flamesColor[rnd(3)], 9.f+rnd(6), miniRockets ? 300+rnd(150) : 400+rnd(200), 800, 20.f, hasShrooms());
+
+                    if(inWater)
+                    {
+                        particle_splash(PART_WATER, 16, 200, pos, 0x18181A, 12.0f+rnd(14), 600, 300);
+                        particle_splash(PART_BUBBLE, 5, 150, pos, 0x18181A, 4.0f+rnd(8), 300, 150);
+                    }
+
                 }
 
                 if(!epilepsyfriendly)
@@ -206,7 +215,7 @@ namespace game
             case ATK_ARTIFICE_SHOOT:
 
                 particle_splash(PART_FIRE_BALL, 5, 40, v, 0xFFC864, 5, 800, 1600, 0, hasShrooms());
-                loopi(4) particle_splash(PART_SPARK, 16+rnd(10), 200+rnd(200), v, hasRoids(owner) ? 0xFF0000 : particles::getRandomColor(), 0.2f+(rnd(5)/10.f), 500+rnd(300), 5000+rnd(3000), 2.f, hasShrooms());
+                loopi(4) particle_splash(PART_SPARK, 16+rnd(10), 200+rnd(200), v, hasRoids(d) ? 0xFF0000 : particles::getRandomColor(), 0.2f+(rnd(5)/10.f), 500+rnd(300), 5000+rnd(3000), 2.f, hasShrooms());
 
                 if(inWater)
                 {
@@ -223,10 +232,10 @@ namespace game
 
             case ATK_M32_SHOOT:
 
-                loopi(3) particle_splash(PART_SPARK, 8, 150+rnd(150), v, hasRoids(owner) ? 0xFF0000 : 0xFFFFFF,  2.0f+rnd(2), 1500+rnd(2250), 1500+rnd(2250), 0, hasShrooms());
+                loopi(3) particle_splash(PART_SPARK, 8, 150+rnd(150), v, hasRoids(d) ? 0xFF0000 : 0xFFFFFF,  1.2f, 1500+rnd(2250), 1500+rnd(2250), 0, hasShrooms());
                 loopi(2) particle_splash(PART_SMOKE, 7, 1300+rnd(800), v, 0x555555, 40.0f, 150+rnd(150), 300+rnd(700), 0, hasShrooms());
-                loopi(3) particle_fireball(v, 40+rnd(50), PART_PLASMAGRENADE, 300, hasRoids(owner) ? 0xFF0000 : 0xFFFFFF, 1.0f, hasShrooms());
-                particle_fireball(v, 400, PART_SHOCKWAVE, 300, hasRoids(owner) ? 0xFF0000 : 0xFFFFFF, 20.0f, hasShrooms());
+                loopi(3) particle_fireball(v, 40+rnd(50), PART_PLASMAGRENADE, 300, hasRoids(d) ? 0xFF0000 : 0xFFFFFF, 1.0f, hasShrooms());
+                particle_fireball(v, 400, PART_SHOCKWAVE, 300, hasRoids(d) ? 0xFF0000 : 0xFFFFFF, 20.0f, hasShrooms());
 
                 if(inWater)
                 {
@@ -244,12 +253,12 @@ namespace game
             case ATK_MOLOTOV_SHOOT:
             {
                 particle_splash(PART_SMOKE, 8, 1800, v, 0x555555, 30.0f, 300+rnd(100), 1200+rnd(400), 5, hasShrooms());
-                particle_splash(PART_SPARK, 5, 250, v, hasRoids(owner) ? 0xFF4444 : 0xFFBB55,  1.0f+rnd(2), 3500, 3500, 0, hasShrooms());
+                particle_splash(PART_SPARK, 5, 250, v, hasRoids(d) ? 0xFF4444 : 0xFFBB55,  1.0f+rnd(2), 3500, 3500, 0, hasShrooms());
                 loopi(inWater ? 1 : 4)
                 {
                     vec pos = v;
                     if(!inWater) pos.add(vec(-30+rnd(61), -30+rnd(61), -10+rnd(21)));
-                    particle_splash(PART_FIRE_BALL, 10, 150+rnd(50), pos, hasRoids(owner) ? 0xFF4444 : i==0 ? 0x484848 : i==1 ? 0x575757: 0x646464, 9.f+rnd(6), 800+rnd(400), 2000, 25, hasShrooms());
+                    particle_splash(PART_FIRE_BALL, 10, 150+rnd(50), pos, hasRoids(d) ? 0xFF4444 : i==0 ? 0x484848 : i==1 ? 0x575757: 0x646464, 9.f+rnd(6), 800+rnd(400), 2000, 25, hasShrooms());
                 }
 
                 if(inWater)
@@ -274,8 +283,8 @@ namespace game
                     vec pos = vec(v).add(vec(rnd(35)-rnd(70), rnd(35)-rnd(70), rnd(35)-rnd(70)));
                     particle_splash(PART_SMOKE, 4, kamikaze ? 5000 : 3000, pos, 0x333333, 60.f, 200+rnd(75), 100, 0, hasShrooms());
                     particle_splash(PART_SMOKE, 3, kamikaze ? 3000 : 2000, pos, 0x151515, 40.f, 200+rnd(75), 250, 0, hasShrooms());
-                    particle_splash(PART_SPARK, 6, 300, pos, hasRoids(owner) ? 0xFF4444 : 0xFFBB55,  1.7f+rnd(2), 3500, 3500, 0, hasShrooms());
-                    loopi(inWater ? 1 : 3) particle_splash(PART_FIRE_BALL, 6, 130+rnd(50), pos, hasRoids(owner) ? 0xFF4444 : i==0 ? 0x383838: i==1 ? 0x474747 : 0x6A4A3A, 9.f+rnd(6), 1200+rnd(700), 1200, 20.f, hasShrooms());
+                    particle_splash(PART_SPARK, 6, 300, pos, hasRoids(d) ? 0xFF4444 : 0xFFBB55,  1.7f+rnd(2), 3500, 3500, 0, hasShrooms());
+                    loopi(inWater ? 1 : 3) particle_splash(PART_FIRE_BALL, 6, 130+rnd(50), pos, hasRoids(d) ? 0xFF4444 : i==0 ? 0x383838: i==1 ? 0x474747 : 0x6A4A3A, 9.f+rnd(6), 1200+rnd(700), 1200, 20.f, hasShrooms());
 
                     if(inWater)
                     {
@@ -284,7 +293,7 @@ namespace game
                     }
                 }
 
-                particle_fireball(v, 400, PART_SHOCKWAVE, 300, hasRoids(owner) ? 0xFF0000 : 0xFFFFFF, 20.0f, hasShrooms());
+                particle_fireball(v, 400, PART_SHOCKWAVE, 300, hasRoids(d) ? 0xFF0000 : 0xFFFFFF, 20.0f, hasShrooms());
 
                 if(!epilepsyfriendly)
                 {
@@ -313,8 +322,8 @@ namespace game
                     particle_splash(PART_SMOKE, 1, 2000,  pos, 0x212121, 150.0f,  700,  70, 1, hasShrooms());
                     particle_splash(PART_SMOKE, 1, 15000, pos, 0x222222, 200.0f,  150, 300, 1, hasShrooms());
                     particle_splash(PART_SMOKE, 2, 5000,  pos, 0x333333, 250.0f, 1000, 500, 1, hasShrooms());
-                    particle_splash(PART_FIRE_BALL, 7, 1000+rnd(300), pos, hasRoids(owner) ? 0xFF0000 : i<16 ? 0xFFFF00 : i<32 ? 0x224400 : 0xFFAA22, 20+rnd(15), 400, 200, 3.f, hasShrooms());
-                    if(i>30) particle_fireball(pos, 50+rnd(150), PART_EXPLOSION, 750, hasRoids(owner) ? 0xFF0000 : i<37 ? 0xFFFF00 : i<43 ? 0x224400 : 0xFFAA22, 10+rnd(15), hasShrooms());
+                    particle_splash(PART_FIRE_BALL, 7, 1000+rnd(300), pos, hasRoids(d) ? 0xFF0000 : i<16 ? 0xFFFF00 : i<32 ? 0x224400 : 0xFFAA22, 20+rnd(15), 400, 200, 3.f, hasShrooms());
+                    if(i>30) particle_fireball(pos, 50+rnd(150), PART_EXPLOSION, 750, hasRoids(d) ? 0xFF0000 : i<37 ? 0xFFFF00 : i<43 ? 0x224400 : 0xFFAA22, 10+rnd(15), hasShrooms());
                 }
 
                 if(!epilepsyfriendly)
