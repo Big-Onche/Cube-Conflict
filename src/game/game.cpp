@@ -722,6 +722,7 @@ namespace game
         d->deaths++;
         d->killstreak = 0;
         d->isOutOfMap = false;
+        loopi(NUMABILITIES) d->abilitymillis[i] = 0;
 
         // death gfx effects
         vec pos(d->o.x, d->o.y, d->o.z-9);
