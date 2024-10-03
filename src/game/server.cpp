@@ -835,7 +835,7 @@ namespace server
         virtual void spawned(clientinfo *ci) {}
         virtual int fragvalue(clientinfo *victim, clientinfo *actor, int atk = -1)
         {
-            if(victim==actor || isteam(victim->team, actor->team)) return atk==ATK_KAMIKAZE_SHOOT ? 0 : -1;
+            if(victim==actor || isteam(victim->team, actor->team)) return atk==ATK_KAMIKAZE ? 0 : -1;
             else return 1;
         }
         virtual void died(clientinfo *victim, clientinfo *actor) {}
@@ -2286,7 +2286,7 @@ namespace server
         switch(actor->aptitude) // Skill and class damage boost/reduction from actor
         {
             case C_AMERICAN:
-                if(atk==ATK_NUKE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_CAMPOUZE_SHOOT) damage *= 1.5f;
+                if(atk==ATK_S_NUKE || atk==ATK_S_GAU8 || atk==ATK_S_ROCKETS || atk==ATK_S_CAMPER) damage *= 1.5f;
                 break;
 
             case C_WIZARD:
@@ -2365,17 +2365,17 @@ namespace server
             else return;
         }
 
-        if(!afterBurn && !ts.inwater && (atk==ATK_LANCEFLAMMES_SHOOT || atk==ATK_MOLOTOV_SHOOT)) // after burn init
+        if(!afterBurn && !ts.inwater && (atk==ATK_FLAMETHROWER || atk==ATK_MOLOTOV)) // after burn init
         {
             int burnMillis = 0;
 
             switch(atk)
             {
-                case ATK_LANCEFLAMMES_SHOOT:
+                case ATK_FLAMETHROWER:
                     burnMillis = 4000;
                     break;
 
-                case ATK_MOLOTOV_SHOOT:
+                case ATK_MOLOTOV:
                     burnMillis = 7000;
                     break;
             }
@@ -2413,7 +2413,7 @@ namespace server
                 sendf(-1, 1, "ri4", N_REAPER, actor->clientnum, as.health, as.maxhealth);
             }
 
-            int fragvalue = smode ? smode->fragvalue(target, actor, atk) : (target==actor || isteam(target->team, actor->team) ? atk==ATK_KAMIKAZE_SHOOT ? 0 : -1 : 1);
+            int fragvalue = smode ? smode->fragvalue(target, actor, atk) : (target==actor || isteam(target->team, actor->team) ? atk==ATK_KAMIKAZE ? 0 : -1 : 1);
             actor->state.frags += fragvalue;
             if(fragvalue>0)
             {
@@ -2480,28 +2480,28 @@ namespace server
         servstate &gs = ci->state;
         switch(atk)
         {
-            case ATK_PULSE_SHOOT:
-            case ATK_SMAW_SHOOT:
-            case ATK_MINIGUN_SHOOT:
-            case ATK_SPOCKGUN_SHOOT:
-            case ATK_UZI_SHOOT:
-            case ATK_FAMAS_SHOOT:
-            case ATK_SV98_SHOOT:
-            case ATK_SKS_SHOOT:
-            case ATK_ARBALETE_SHOOT:
-            case ATK_AK47_SHOOT:
-            case ATK_ARTIFICE_SHOOT:
-            case ATK_GLOCK_SHOOT:
-            case ATK_NUKE_SHOOT:
-            case ATK_GAU8_SHOOT:
-            case ATK_ROQUETTES_SHOOT:
-            case ATK_GRAP1_SHOOT:
-            case ATK_ASSISTXPL_SHOOT:
-            case ATK_KAMIKAZE_SHOOT:
+            case ATK_PLASMA:
+            case ATK_SMAW:
+            case ATK_MINIGUN:
+            case ATK_SPOCKGUN:
+            case ATK_UZI:
+            case ATK_FAMAS:
+            case ATK_SV98:
+            case ATK_SKS:
+            case ATK_CROSSBOW:
+            case ATK_AK47:
+            case ATK_FIREWORKS:
+            case ATK_GLOCK:
+            case ATK_S_NUKE:
+            case ATK_S_GAU8:
+            case ATK_S_ROCKETS:
+            case ATK_GRAP1:
+            case ATK_POWERARMOR:
+            case ATK_KAMIKAZE:
                 if(!gs.projs.remove(id)) return;
                 break;
-            case ATK_M32_SHOOT:
-            case ATK_MOLOTOV_SHOOT:
+            case ATK_M32:
+            case ATK_MOLOTOV:
                 if(!gs.grenades.remove(id)) return;
                 break;
             default:
@@ -2524,8 +2524,8 @@ namespace server
             {
                 switch(atk)
                 {
-                    case ATK_ASSISTXPL_SHOOT: damage = 0; break;
-                    case ATK_KAMIKAZE_SHOOT: damage*=1.33f;
+                    case ATK_POWERARMOR: damage = 0; break;
+                    case ATK_KAMIKAZE: damage*=1.33f;
                 }
             }
             if(damage > 0)
@@ -2538,7 +2538,7 @@ namespace server
 
     bool noInfiniteAmmo(int atk)
     {
-        return atk==ATK_GAU8_SHOOT || atk==ATK_NUKE_SHOOT || atk==ATK_CAMPOUZE_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_KAMIKAZE_SHOOT || atk==ATK_ASSISTXPL_SHOOT;
+        return atk==ATK_S_GAU8 || atk==ATK_S_NUKE || atk==ATK_S_CAMPER || atk==ATK_S_ROCKETS || atk==ATK_KAMIKAZE || atk==ATK_POWERARMOR;
     }
 
     void shotevent::process(clientinfo *ci)
@@ -2546,7 +2546,7 @@ namespace server
         servstate &gs = ci->state;
         int wait = millis - gs.lastshot;
 
-        if(ci->state.armourtype==A_POWERARMOR && !ci->state.armour && ci->state.ammo[GUN_ASSISTXPL] && ci->state.gunselect==GUN_ASSISTXPL) gs.gunwait=0;
+        if(ci->state.armourtype==A_POWERARMOR && !ci->state.armour && ci->state.ammo[GUN_POWERARMOR] && ci->state.gunselect==GUN_POWERARMOR) gs.gunwait=0;
 
         if(!gs.isalive(gamemillis) || wait<gs.gunwait || !validatk(atk)) return;
 
@@ -2573,27 +2573,27 @@ namespace server
 
         switch(atk)
         {
-            case ATK_PULSE_SHOOT:
-            case ATK_SMAW_SHOOT:
-            case ATK_MINIGUN_SHOOT:
-            case ATK_SPOCKGUN_SHOOT:
-            case ATK_UZI_SHOOT:
-            case ATK_FAMAS_SHOOT:
-            case ATK_SV98_SHOOT:
-            case ATK_SKS_SHOOT:
-            case ATK_ARBALETE_SHOOT:
-            case ATK_AK47_SHOOT:
-            case ATK_ARTIFICE_SHOOT:
-            case ATK_GLOCK_SHOOT:
-            case ATK_NUKE_SHOOT:
-            case ATK_GAU8_SHOOT:
-            case ATK_ROQUETTES_SHOOT:
-            case ATK_GRAP1_SHOOT:
-            case ATK_ASSISTXPL_SHOOT:
-            case ATK_KAMIKAZE_SHOOT:
+            case ATK_PLASMA:
+            case ATK_SMAW:
+            case ATK_MINIGUN:
+            case ATK_SPOCKGUN:
+            case ATK_UZI:
+            case ATK_FAMAS:
+            case ATK_SV98:
+            case ATK_SKS:
+            case ATK_CROSSBOW:
+            case ATK_AK47:
+            case ATK_FIREWORKS:
+            case ATK_GLOCK:
+            case ATK_S_NUKE:
+            case ATK_S_GAU8:
+            case ATK_S_ROCKETS:
+            case ATK_GRAP1:
+            case ATK_POWERARMOR:
+            case ATK_KAMIKAZE:
                 loopi(attacks[atk].rays) {gs.projs.add(id);} break;
-            case ATK_M32_SHOOT:
-            case ATK_MOLOTOV_SHOOT:
+            case ATK_M32:
+            case ATK_MOLOTOV:
                 gs.grenades.add(id);
                 break;
             default:
@@ -2770,7 +2770,7 @@ namespace server
 
             if(ts.state==CS_ALIVE && ts.afterburnmillis && ts.lastBurner->connected)
             {
-                int afterburnDamage = (ts.afterburnatk == ATK_LANCEFLAMMES_SHOOT ? 40 : 80);
+                int afterburnDamage = (ts.afterburnatk == ATK_FLAMETHROWER ? 40 : 80);
                 sendf(-1, 1, "ri3", N_AFTERBURN, target.clientnum, ts.lastBurner->clientnum);
                 dodamage(&target, ts.lastBurner, afterburnDamage, ts.afterburnatk, vec(0,0,0), true);
                 if(ts.lastBurner->aptitude==C_VAMPIRE) doregen(&target, ts.lastBurner, afterburnDamage);
@@ -3730,7 +3730,7 @@ namespace server
             case N_LAVATOUCH:
             {
                 if(!cq) break;
-                dodamage(cq, cq, 500, ATK_LANCEFLAMMES_SHOOT, vec(0, 0, 0));
+                dodamage(cq, cq, 500, ATK_FLAMETHROWER, vec(0, 0, 0));
                 sendf(-1, 1, "ri2", N_LAVATOUCHFX, cq->clientnum);
                 break;
             }

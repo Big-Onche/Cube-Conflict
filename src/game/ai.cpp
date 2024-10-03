@@ -50,7 +50,7 @@ namespace ai
 
     float attackmindist(int atk)
     {
-        return atk==ATK_KAMIKAZE_SHOOT || atk==ATK_NUKE_SHOOT ? 0 : max(int(attacks[atk].exprad/4), 2);
+        return atk==ATK_KAMIKAZE || atk==ATK_S_NUKE ? 0 : max(int(attacks[atk].exprad/4), 2);
     }
 
     float attackmaxdist(int atk)
@@ -146,13 +146,13 @@ namespace ai
 
         switch(atk)
         {
-            case ATK_PULSE_SHOOT:
-            case ATK_GRAP1_SHOOT:
+            case ATK_PLASMA:
+            case ATK_GRAP1:
                 targetPos.z += (e->aboveeye*0.2f)-(0.8f*d->eyeheight);
                 break;
-            case ATK_SMAW_SHOOT:
-            case ATK_ROQUETTES_SHOOT:
-            case ATK_ARTIFICE_SHOOT:
+            case ATK_SMAW:
+            case ATK_S_ROCKETS:
+            case ATK_FIREWORKS:
                 targetPos = e->feetpos();
             default:
                 targetPos.subz(7);
@@ -326,7 +326,7 @@ namespace ai
 
     int needpursue(gameent *d)
     {
-        if((d->gunselect>=GUN_C_BUSTER && d->gunselect<=GUN_C_FLAIL) || d->gunselect==GUN_CACNINJA || (d->aptitude==C_KAMIKAZE && d->abilitymillis[ABILITY_2])) return 1;
+        if((d->gunselect>=GUN_M_BUSTER && d->gunselect<=GUN_M_FLAIL) || d->gunselect==GUN_NINJA || (d->aptitude==C_KAMIKAZE && d->abilitymillis[ABILITY_2])) return 1;
         else return 0;
     }
 
@@ -685,7 +685,7 @@ namespace ai
             switch(d->aptitude)
             {
                 case C_KAMIKAZE: d->ai->weappref = GUN_KAMIKAZE; break;
-                case C_NINJA: d->ai->weappref = GUN_CACNINJA; break;
+                case C_NINJA: d->ai->weappref = GUN_NINJA; break;
                 default:
                 {
                     if(m_identique) d->ai->weappref = currentIdenticalWeapon;
@@ -1093,7 +1093,7 @@ namespace ai
 
     bool lockon(gameent *d, int atk, gameent *e, float maxdist)
     {
-        if(((d->gunselect>=GUN_C_BUSTER && d->gunselect<=GUN_C_FLAIL) || d->gunselect==GUN_CACNINJA) && !d->blocked && !d->timeinair)
+        if(((d->gunselect>=GUN_M_BUSTER && d->gunselect<=GUN_M_FLAIL) || d->gunselect==GUN_NINJA) && !d->blocked && !d->timeinair)
         {
             vec dir = vec(e->o).sub(d->o);
             float xydist = dir.x*dir.x+dir.y*dir.y, zdist = dir.z*dir.z, mdist = maxdist*maxdist, ddist = d->radius*d->radius+e->radius*e->radius;
@@ -1281,12 +1281,12 @@ namespace ai
         return false;
     }
 
-    static const int gunprefs[] = {GUN_C_FLAIL, GUN_C_HAMMER, GUN_C_MASTER, GUN_C_BUSTER, GUN_MINIGUN, GUN_PLASMA, GUN_ELECTRIC, GUN_MOLOTOV, GUN_GRAP1, GUN_FLAMETHROWER, GUN_HYDRA, GUN_SV98, GUN_SMAW, GUN_CROSSBOW, GUN_FIREWORKS, GUN_MOSSBERG, GUN_FAMAS, GUN_AK47, GUN_M32, GUN_SKS, GUN_SPOCKGUN, GUN_UZI };
+    static const int gunprefs[] = {GUN_M_FLAIL, GUN_M_HAMMER, GUN_M_MASTER, GUN_M_BUSTER, GUN_MINIGUN, GUN_PLASMA, GUN_ELECTRIC, GUN_MOLOTOV, GUN_GRAP1, GUN_FLAMETHROWER, GUN_HYDRA, GUN_SV98, GUN_SMAW, GUN_CROSSBOW, GUN_FIREWORKS, GUN_MOSSBERG, GUN_FAMAS, GUN_AK47, GUN_M32, GUN_SKS, GUN_SPOCKGUN, GUN_UZI };
 
     bool request(gameent *d, aistate &b)
     {
         gameent *e = getclient(d->ai->enemy);
-        if(d->armourtype==A_POWERARMOR && !d->armour && d->ammo[GUN_ASSISTXPL]) {gunselect(GUN_ASSISTXPL, d, true); goto process;}
+        if(d->armourtype==A_POWERARMOR && !d->armour && d->ammo[GUN_POWERARMOR]) {gunselect(GUN_POWERARMOR, d, true); goto process;}
         else {loopi(4) if(d->hasammo(GUN_S_NUKE+i)) {gunselect(GUN_S_NUKE+i, d); goto process;} }
 
         switch(d->aptitude)
@@ -1298,9 +1298,9 @@ namespace ai
                     goto process;
                 }
             case C_NINJA:
-                if(hasrange(d, e, GUN_CACNINJA))
+                if(hasrange(d, e, GUN_NINJA))
                 {
-                    gunselect(GUN_CACNINJA, d);
+                    gunselect(GUN_NINJA, d);
                     goto process;
                 }
         }

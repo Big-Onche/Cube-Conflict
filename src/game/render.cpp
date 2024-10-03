@@ -412,10 +412,10 @@ namespace game
 
         /////////////////////////// Main player model ///////////////////////////
         const char *mdlname;
-        if(d==player1 || m_tutorial) mdlname = (hasPowerArmor(player1) || d->ammo[GUN_ASSISTXPL] ? "smileys/armureassistee" : mdl.model[1]); // player1 is always yellow
+        if(d==player1 || m_tutorial) mdlname = (hasPowerArmor(player1) || d->ammo[GUN_POWERARMOR] ? "smileys/armureassistee" : mdl.model[1]); // player1 is always yellow
         else
         {
-            if(hasPowerArmor(d) || d->ammo[GUN_ASSISTXPL]) mdlname = d->team==player1->team && validteam(team) ? "smileys/armureassistee" : "smileys/armureassistee/red";
+            if(hasPowerArmor(d) || d->ammo[GUN_POWERARMOR]) mdlname = d->team==player1->team && validteam(team) ? "smileys/armureassistee" : "smileys/armureassistee/red";
             else mdlname =  d->abilitymillis[ABILITY_2] && d->aptitude==C_PHYSICIST ? "smileys/phy_2" : cbfilter && d->team==player1->team ? mdl.cbmodel : mdl.model[validteam(team) && d->team==player1->team ? 1 : 0];
         }
 

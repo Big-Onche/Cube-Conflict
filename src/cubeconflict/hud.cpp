@@ -13,13 +13,13 @@ namespace game
     ICOMMAND(hudinfammo, "", (),
         bool b = false;
         if((m_identique || m_random) && followingplayer(player1)->gunselect<GUN_S_NUKE) b = true;
-        if((followingplayer(player1)->gunselect>=GUN_C_BUSTER && followingplayer(player1)->gunselect<=GUN_C_FLAIL) || followingplayer(player1)->gunselect==GUN_CACNINJA) b = true;
+        if((followingplayer(player1)->gunselect>=GUN_M_BUSTER && followingplayer(player1)->gunselect<=GUN_M_FLAIL) || followingplayer(player1)->gunselect==GUN_NINJA) b = true;
         intret(b);
     );
     ICOMMAND(hudcapture, "", (), intret(m_capture));
     ICOMMAND(hudctf, "", (), intret(m_ctf));
     ICOMMAND(hudammo, "", (), intret(followingplayer(player1)->ammo[followingplayer(player1)->gunselect]));
-    ICOMMAND(hudmelee, "", (), intret((player1->gunselect>=GUN_C_BUSTER && player1->gunselect<=GUN_C_FLAIL) || player1->gunselect==GUN_CACNINJA));
+    ICOMMAND(hudmelee, "", (), intret((player1->gunselect>=GUN_M_BUSTER && player1->gunselect<=GUN_M_FLAIL) || player1->gunselect==GUN_NINJA));
     ICOMMAND(hudboost, "i", (int *id), if(*id>=0 && *id<=3) intret(followingplayer(player1)->boostmillis[*id]/1000););
     ICOMMAND(hudafterburn, "", (), intret((followingplayer(player1)->afterburnmillis+500)/1000););
     ICOMMAND(hudclass, "", (), intret(followingplayer(player1)->aptitude));

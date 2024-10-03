@@ -338,7 +338,7 @@ namespace game
                             bool melee = false, longrange = false;
                             switch(npcs[mtype].gun)
                             {
-                                case GUN_C_BUSTER: case GUN_C_FLAIL: case GUN_C_HAMMER: case GUN_C_MASTER: case GUN_CACNINJA: melee = true; break;
+                                case GUN_M_BUSTER: case GUN_M_FLAIL: case GUN_M_HAMMER: case GUN_M_MASTER: case GUN_NINJA: melee = true; break;
                                 case GUN_SV98: case GUN_SKS: case GUN_CROSSBOW: case GUN_S_CAMPER: longrange = true; break;
                             }
                             // the closer the monster is the more likely he wants to shoot,
@@ -786,7 +786,7 @@ namespace game
 
     void suicidemonster(monster *m)
     {
-        m->monsterpain(5000, m, ATK_CAC349_SHOOT);
+        m->monsterpain(5000, m, ATK_M_BUSTER);
     }
 
     void hitmonster(int damage, monster *m, gameent *at, const vec &vel, int atk)

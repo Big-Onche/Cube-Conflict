@@ -262,7 +262,7 @@ namespace game
                 if(player1->gunselect!=GUN_KAMIKAZE) gunselect(currentIdenticalWeapon, player1);
                 break;
             case C_NINJA:
-                if(player1->gunselect!=GUN_CACNINJA) gunselect(currentIdenticalWeapon, player1);
+                if(player1->gunselect!=GUN_NINJA) gunselect(currentIdenticalWeapon, player1);
                 break;
             default: gunselect(currentIdenticalWeapon, player1);
         }
@@ -407,7 +407,7 @@ namespace game
 
                 if(d!=player1)
                 {
-                    if(d->armourtype==A_POWERARMOR && !d->armour && d->ammo[GUN_ASSISTXPL]) {gunselect(GUN_ASSISTXPL, d, true); d->gunwait=0;}
+                    if(d->armourtype==A_POWERARMOR && !d->armour && d->ammo[GUN_POWERARMOR]) {gunselect(GUN_POWERARMOR, d, true); d->gunwait=0;}
                     if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
                     updatePlayersBoosts(curtime, d);
                     updateAbilitiesSkills(curtime, d);
@@ -474,7 +474,7 @@ namespace game
 
         if(player1->state==CS_ALIVE && !intermission)   // checking player1's shits
         {
-            if(player1->armourtype==A_POWERARMOR && player1->ammo[GUN_ASSISTXPL] && !player1->armour) {gunselect(GUN_ASSISTXPL, player1, true); player1->gunwait=0;}
+            if(player1->armourtype==A_POWERARMOR && player1->ammo[GUN_POWERARMOR] && !player1->armour) {gunselect(GUN_POWERARMOR, player1, true); player1->gunwait=0;}
             else if(m_identique)
             {
                 switch(player1->gunselect)
@@ -810,7 +810,7 @@ namespace game
             {
                 hassuicided = true;
                 updateStat(1, STAT_MORTS); updateStat(1, STAT_SUICIDES);
-                if(atk==ATK_M32_SHOOT) unlockAchievement(ACH_M32SUICIDE);
+                if(atk==ATK_M32) unlockAchievement(ACH_M32SUICIDE);
                 conoutf(contype, "\fd%s %s", readstr("GameMessage_You"), readstr("Console_Game_Suicided"));
             }
             else conoutf(contype, "%s > \fl%s", dname, readstr("GameMessage_Suicide"));
@@ -829,19 +829,19 @@ namespace game
                 else if(IS_ON_OFFICIAL_SERV && !isteam(d->team, player1->team)) // now let's check for shittons of achievements if playing online
                 {
                     if(killdistance>=100.f) unlockAchievement(ACH_BEAUTIR);
-                    else if(killdistance<1.f && atk==ATK_MOSSBERG_SHOOT) unlockAchievement(ACH_TAKETHAT);
+                    else if(killdistance<1.f && atk==ATK_MOSSBERG) unlockAchievement(ACH_TAKETHAT);
                     else if(killdistance>=69.f && killdistance<70.f ) unlockAchievement(ACH_NICE);
                     if(player1->state==CS_DEAD && player1->lastpain > 200) unlockAchievement(ACH_TUEURFANTOME);
                     if(player1->health<=10 && player1->state==CS_ALIVE) unlockAchievement(ACH_1HPKILL);
 
                     switch(atk)
                     {
-                        case ATK_ASSISTXPL_SHOOT: if(player1->armourtype==A_POWERARMOR) unlockAchievement(ACH_KILLASSIST); break;
-                        case ATK_LANCEFLAMMES_SHOOT: if(lookupmaterial(d->feetpos())==MAT_WATER) unlockAchievement(ACH_THUGPHYSIQUE); break;
-                        case ATK_SV98_SHOOT: if(zoom==0) unlockAchievement(ACH_NOSCOPE); break;
-                        case ATK_GLOCK_SHOOT: if(d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_CAMPER || d->gunselect==GUN_S_GAU8 || d->gunselect==GUN_S_ROCKETS) unlockAchievement(ACH_DAVIDGOLIATH); break;
-                        case ATK_CAC349_SHOOT: case ATK_CACFLEAU_SHOOT: case ATK_CACMARTEAU_SHOOT: case ATK_CACMASTER_SHOOT: if(d->aptitude==C_NINJA) unlockAchievement(ACH_PASLOGIQUE); break;
-                        case ATK_NUKE_SHOOT: case ATK_CAMPOUZE_SHOOT: case ATK_GAU8_SHOOT: case ATK_ROQUETTES_SHOOT: if(player1->aptitude==C_AMERICAN && player1->boostmillis[B_ROIDS]) unlockAchievement(ACH_JUSTEPOUR);
+                        case ATK_POWERARMOR: if(player1->armourtype==A_POWERARMOR) unlockAchievement(ACH_KILLASSIST); break;
+                        case ATK_FLAMETHROWER: if(lookupmaterial(d->feetpos())==MAT_WATER) unlockAchievement(ACH_THUGPHYSIQUE); break;
+                        case ATK_SV98: if(zoom==0) unlockAchievement(ACH_NOSCOPE); break;
+                        case ATK_GLOCK: if(d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_CAMPER || d->gunselect==GUN_S_GAU8 || d->gunselect==GUN_S_ROCKETS) unlockAchievement(ACH_DAVIDGOLIATH); break;
+                        case ATK_M_BUSTER: case ATK_M_FLAIL: case ATK_M_HAMMER: case ATK_M_MASTER: if(d->aptitude==C_NINJA) unlockAchievement(ACH_PASLOGIQUE); break;
+                        case ATK_S_NUKE: case ATK_S_CAMPER: case ATK_S_GAU8: case ATK_S_ROCKETS: if(player1->aptitude==C_AMERICAN && player1->boostmillis[B_ROIDS]) unlockAchievement(ACH_JUSTEPOUR);
                     }
 
                     switch(player1->aptitude)

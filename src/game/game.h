@@ -107,34 +107,21 @@ struct gameentity : extentity
 };
 
 static int NUMMAINGUNS = 18;
+enum { ACT_IDLE = 0, ACT_SHOOT, NUMACTS };
+
 enum { GUN_ELECTRIC = 0, GUN_PLASMA, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_M32, GUN_FLAMETHROWER, GUN_UZI, GUN_FAMAS, GUN_MOSSBERG, GUN_HYDRA, GUN_SV98, GUN_SKS, GUN_CROSSBOW, GUN_AK47, GUN_GRAP1, GUN_FIREWORKS, GUN_MOLOTOV, GUN_GLOCK,
        GUN_S_NUKE, GUN_S_GAU8, GUN_S_ROCKETS, GUN_S_CAMPER,
-       GUN_C_BUSTER, GUN_C_HAMMER, GUN_C_MASTER, GUN_C_FLAIL,
-       GUN_KAMIKAZE, GUN_ASSISTXPL, GUN_CACNINJA, NUMGUNS };
+       GUN_M_BUSTER, GUN_M_HAMMER, GUN_M_MASTER, GUN_M_FLAIL,
+       GUN_KAMIKAZE, GUN_POWERARMOR, GUN_NINJA, NUMGUNS };
+
+enum { ATK_ELECTRIC = 0, ATK_PLASMA, ATK_SMAW, ATK_MINIGUN, ATK_SPOCKGUN, ATK_M32, ATK_FLAMETHROWER, ATK_UZI, ATK_FAMAS, ATK_MOSSBERG, ATK_HYDRA, ATK_SV98,ATK_SKS, ATK_CROSSBOW, ATK_AK47, ATK_GRAP1, ATK_FIREWORKS, ATK_MOLOTOV, ATK_GLOCK,
+       ATK_S_NUKE, ATK_S_GAU8, ATK_S_ROCKETS, ATK_S_CAMPER,
+       ATK_M_BUSTER, ATK_M_HAMMER, ATK_M_MASTER, ATK_M_FLAIL,
+       ATK_KAMIKAZE, ATK_POWERARMOR, ATK_NINJA, ATK_NONE, NUMATKS };
+
 enum { A_WOOD = 0, A_IRON, A_GOLD, A_MAGNET, A_POWERARMOR, NUMSHIELDS };
 enum { B_ROIDS = 0, B_SHROOMS, B_EPO, B_JOINT, B_RAGE, NUMBOOSTS };
 enum { ABILITY_1 = 0, ABILITY_2, ABILITY_3, NUMABILITIES };
-enum { ACT_IDLE = 0, ACT_SHOOT, NUMACTS };
-enum {  ATK_RAIL_SHOOT = 0, ATK_PULSE_SHOOT,
-        ATK_SMAW_SHOOT, ATK_MINIGUN_SHOOT,
-        ATK_SPOCKGUN_SHOOT, ATK_M32_SHOOT,
-        ATK_LANCEFLAMMES_SHOOT, ATK_UZI_SHOOT,
-        ATK_FAMAS_SHOOT, ATK_MOSSBERG_SHOOT,
-        ATK_HYDRA_SHOOT, ATK_SV98_SHOOT,
-        ATK_SKS_SHOOT, ATK_ARBALETE_SHOOT,
-        ATK_AK47_SHOOT, ATK_GRAP1_SHOOT,
-        ATK_ARTIFICE_SHOOT, ATK_MOLOTOV_SHOOT,
-        ATK_GLOCK_SHOOT,
-        //Super armes (4 armes)
-        ATK_NUKE_SHOOT, ATK_GAU8_SHOOT,
-        ATK_ROQUETTES_SHOOT, ATK_CAMPOUZE_SHOOT,
-        //Corps à corps (4 armes)
-        ATK_CAC349_SHOOT, ATK_CACMARTEAU_SHOOT,
-        ATK_CACMASTER_SHOOT, ATK_CACFLEAU_SHOOT,
-        //Spéciales aptitudes/objets (3 armes)
-        ATK_KAMIKAZE_SHOOT, ATK_ASSISTXPL_SHOOT, ATK_CACNINJA_SHOOT,
-        ATK_NONE, NUMATKS
-};
 enum { M_NONE = 0, M_SEARCH, M_AGGRO, M_RETREAT, M_ATTACKING, M_PAIN, M_SLEEP, M_AIMING, M_FRIENDLY, M_NEUTRAL, M_ANGRY, M_MAX};  // monster states
 
 #define validgun(n) ((n) >= 0 && (n) < NUMGUNS)
@@ -407,52 +394,52 @@ static const struct attackinfo { int gun, action, picksound, sound, middistsnd, 
     { GUN_S_ROCKETS,    ACT_SHOOT, S_WPLOADBIG,       S_MINIROCKETS,  S_MINIROCKETS_FAR, S_FAR_VERYHEAVY,   14,  170,  2000,  10, 300, 2,  850,   6, 8000,  1,   500,  100, 0, 1},
     { GUN_S_CAMPER,     ACT_SHOOT, S_WPLOADBIG,       S_CAMPOUZE,     S_CAMPOUZE_FAR,    S_FAR_VERYHEAVY,    8,  500,    75,  10,  50, 5,    0,   3, 4000, 10,   150,    8, 0, 1},
     // Melee weapons
-    { GUN_C_BUSTER,     ACT_SHOOT, S_WPLOADWHOOSH,    S_SWORD349,     -1, -1,   4, 1000,  600, 1, 1, 20, 0, -10,  28,  1,  50,  0, 0, 0},
-    { GUN_C_HAMMER,     ACT_SHOOT, S_WPLOADSLOWWOOSH, S_BANHAMMER,    -1, -1,   3, 1500, 1000, 1, 1, 15, 0,  -5,  30,  1,  10,  0, 0, 0},
-    { GUN_C_MASTER,     ACT_SHOOT, S_WPLOADWHOOSH,    S_MASTERSWORD,  -1, -1,   5, 600,   430, 1, 1, 20, 0,  -8,  26,  1,  30,  0, 0, 0},
-    { GUN_C_FLAIL,      ACT_SHOOT, S_WPLOADCHAINS,    S_FLAIL,        -1, -1,   4, 1150,  750, 1, 1, 10, 0, -10,  32,  1, 125,  0, 0, 0},
+    { GUN_M_BUSTER,     ACT_SHOOT, S_WPLOADWHOOSH,    S_SWORD349,     -1, -1,   4, 1000,  600, 1, 1, 20, 0, -10,  28,  1,  50,  0, 0, 0},
+    { GUN_M_HAMMER,     ACT_SHOOT, S_WPLOADSLOWWOOSH, S_BANHAMMER,    -1, -1,   3, 1500, 1000, 1, 1, 15, 0,  -5,  30,  1,  10,  0, 0, 0},
+    { GUN_M_MASTER,     ACT_SHOOT, S_WPLOADWHOOSH,    S_MASTERSWORD,  -1, -1,   5, 600,   430, 1, 1, 20, 0,  -8,  26,  1,  30,  0, 0, 0},
+    { GUN_M_FLAIL,      ACT_SHOOT, S_WPLOADCHAINS,    S_FLAIL,        -1, -1,   4, 1150,  750, 1, 1, 10, 0, -10,  32,  1, 125,  0, 0, 0},
     // Special weapons
     { GUN_KAMIKAZE,     ACT_SHOOT, S_WPLOADFASTWOOSH, -1,           S_EXPL_FAR, S_EXPL_FAR,   1, 1000, 3000, 1, 1,  0, 1,  10, 120,  1, 250, 500, 5, 1},
-    { GUN_ASSISTXPL,    ACT_SHOOT, -1,                -1,           S_EXPL_FAR, S_EXPL_FAR,   1,  220, 2000, 1, 1,  0, 1,  10,  50,  1, 100, 350, 5, 1},
-    { GUN_CACNINJA,     ACT_SHOOT, S_WPLOADWHOOSH,    S_NINJASABER, -1,         -1,           8,  400,  800, 1, 1, 30, 0, -10,  36,  1,  25,   0, 0, 0},
+    { GUN_POWERARMOR,    ACT_SHOOT, -1,                -1,           S_EXPL_FAR, S_EXPL_FAR,   1,  220, 2000, 1, 1,  0, 1,  10,  50,  1, 100, 350, 5, 1},
+    { GUN_NINJA,     ACT_SHOOT, S_WPLOADWHOOSH,    S_NINJASABER, -1,         -1,           8,  400,  800, 1, 1, 30, 0, -10,  36,  1,  25,   0, 0, 0},
 };
 
 static const struct guninfo { const char *ident, *name; vec2 weapDisp; int maxzoomfov, hudrange, attacks[NUMACTS]; } guns[NUMGUNS] =
 {
     // Regular weapons
-    { "Weapon_ElectricRifle",   "fusilelectrique",  vec2(65, 26),  60, 1000,  { -1, ATK_RAIL_SHOOT }, },
-    { "Weapon_PlasmaRifle",     "fusilplasma",      vec2(28, 10),  60,  750,  { -1, ATK_PULSE_SHOOT }, },
-    { "Weapon_Smaw",            "smaw",             vec2( 8,  8),  85,  500,  { -1, ATK_SMAW_SHOOT }, },
-    { "Weapon_Minigun",         "minigun",          vec2(36, 11),  80,  750,  { -1, ATK_MINIGUN_SHOOT }, },
-    { "Weapon_Spockgun",        "spockgun",         vec2(52, 20),  70,  500,  { -1, ATK_SPOCKGUN_SHOOT }, },
-    { "Weapon_M32",             "m32",              vec2(65, 21),  85,  600,  { -1, ATK_M32_SHOOT }, },
-    { "Weapon_Flamethrower",    "lanceflammes",     vec2(40, 15),  95,  280,  { -1, ATK_LANCEFLAMMES_SHOOT }, },
-    { "Weapon_Uzi",             "uzi",              vec2(23, 21),  80,  500,  { -1, ATK_UZI_SHOOT }, },
-    { "Weapon_Famas",           "famas",            vec2(54, 14),  70,  750,  { -1, ATK_FAMAS_SHOOT }, },
-    { "Weapon_Mossberg500",     "mossberg500",      vec2(38, 18),  95,  300,  { -1, ATK_MOSSBERG_SHOOT }, },
-    { "Weapon_Hydra",           "hydra",            vec2(44, 20),  95,  300,  { -1, ATK_HYDRA_SHOOT }, },
-    { "Weapon_Sv98",            "sv98",             vec2( 1,  3),  30, 2000,  { -1, ATK_SV98_SHOOT }, },
-    { "Weapon_Sks",             "sks",              vec2( 1,  3),  50, 1500,  { -1, ATK_SKS_SHOOT }, },
-    { "Weapon_Crossbow",        "arbalete",         vec2( 1,  3),  45, 1000,  { -1, ATK_ARBALETE_SHOOT }, },
-    { "Weapon_Ak47",            "ak47",             vec2(46, 25),  70,  750,  { -1, ATK_AK47_SHOOT }, },
-    { "Weapon_Gapb1",           "gapb1",            vec2(43, 17),  85,  500,  { -1, ATK_GRAP1_SHOOT }, },
-    { "Weapon_Fireworks",       "feuartifice",      vec2(70, 30),  85,  500,  { -1, ATK_ARTIFICE_SHOOT }, },
-    { "Weapon_Molotov",         "molotov",          vec2( 8,  8),  90,  500,  { -1, ATK_MOLOTOV_SHOOT }, },
-    { "Weapon_Glock",           "glock",            vec2(55, 20),  85,  300,  { -1, ATK_GLOCK_SHOOT }, },
+    { "Weapon_ElectricRifle",   "fusilelectrique",  vec2(65, 26),  60, 1000,  { -1, ATK_ELECTRIC }, },
+    { "Weapon_PlasmaRifle",     "fusilplasma",      vec2(28, 10),  60,  750,  { -1, ATK_PLASMA }, },
+    { "Weapon_Smaw",            "smaw",             vec2( 8,  8),  85,  500,  { -1, ATK_SMAW }, },
+    { "Weapon_Minigun",         "minigun",          vec2(36, 11),  80,  750,  { -1, ATK_MINIGUN }, },
+    { "Weapon_Spockgun",        "spockgun",         vec2(52, 20),  70,  500,  { -1, ATK_SPOCKGUN }, },
+    { "Weapon_M32",             "m32",              vec2(65, 21),  85,  600,  { -1, ATK_M32 }, },
+    { "Weapon_Flamethrower",    "lanceflammes",     vec2(40, 15),  95,  280,  { -1, ATK_FLAMETHROWER }, },
+    { "Weapon_Uzi",             "uzi",              vec2(23, 21),  80,  500,  { -1, ATK_UZI }, },
+    { "Weapon_Famas",           "famas",            vec2(54, 14),  70,  750,  { -1, ATK_FAMAS }, },
+    { "Weapon_Mossberg500",     "mossberg500",      vec2(38, 18),  95,  300,  { -1, ATK_MOSSBERG }, },
+    { "Weapon_Hydra",           "hydra",            vec2(44, 20),  95,  300,  { -1, ATK_HYDRA }, },
+    { "Weapon_Sv98",            "sv98",             vec2( 1,  3),  30, 2000,  { -1, ATK_SV98 }, },
+    { "Weapon_Sks",             "sks",              vec2( 1,  3),  50, 1500,  { -1, ATK_SKS }, },
+    { "Weapon_Crossbow",        "arbalete",         vec2( 1,  3),  45, 1000,  { -1, ATK_CROSSBOW }, },
+    { "Weapon_Ak47",            "ak47",             vec2(46, 25),  70,  750,  { -1, ATK_AK47 }, },
+    { "Weapon_Gapb1",           "gapb1",            vec2(43, 17),  85,  500,  { -1, ATK_GRAP1 }, },
+    { "Weapon_Fireworks",       "feuartifice",      vec2(70, 30),  85,  500,  { -1, ATK_FIREWORKS }, },
+    { "Weapon_Molotov",         "molotov",          vec2( 8,  8),  90,  500,  { -1, ATK_MOLOTOV }, },
+    { "Weapon_Glock",           "glock",            vec2(55, 20),  85,  300,  { -1, ATK_GLOCK }, },
     // Super weapons
-    { "Weapon_Nuke",            "missilenorko",     vec2( 8,  3),  85, 2000,  { -1, ATK_NUKE_SHOOT }, },
-    { "Weapon_Gau8",            "gau8",             vec2(57, 10),  85, 2000,  { -1, ATK_GAU8_SHOOT }, },
-    { "Weapon_Minirockets",     "miniroquettes",    vec2(10, 10),  70, 1000,  { -1, ATK_ROQUETTES_SHOOT }, },
-    { "Weapon_Camper2000",      "campouze2000",     vec2(10, 10),  60, 3000,  { -1, ATK_CAMPOUZE_SHOOT }, },
+    { "Weapon_Nuke",            "missilenorko",     vec2( 8,  3),  85, 2000,  { -1, ATK_S_NUKE }, },
+    { "Weapon_Gau8",            "gau8",             vec2(57, 10),  85, 2000,  { -1, ATK_S_GAU8 }, },
+    { "Weapon_Minirockets",     "miniroquettes",    vec2(10, 10),  70, 1000,  { -1, ATK_S_ROCKETS }, },
+    { "Weapon_Camper2000",      "campouze2000",     vec2(10, 10),  60, 3000,  { -1, ATK_S_CAMPER }, },
     // Melee weapons
-    { "Weapon_BusterSword",     "epee349",          vec2(4, 3),    95,  120,  { -1, ATK_CAC349_SHOOT }, },
-    { "Weapon_BanHammer",       "marteauban",       vec2(4, 3),    95,  120,  { -1, ATK_CACMARTEAU_SHOOT }, },
-    { "Weapon_MasterSword",     "mastersword",      vec2(4, 3),    95,  120,  { -1, ATK_CACMASTER_SHOOT }, },
-    { "Weapon_Flail",           "fleau",            vec2(4, 3),    95,  120,  { -1, ATK_CACFLEAU_SHOOT }, },
+    { "Weapon_BusterSword",     "epee349",          vec2(4, 3),    95,  120,  { -1, ATK_M_BUSTER }, },
+    { "Weapon_BanHammer",       "marteauban",       vec2(4, 3),    95,  120,  { -1, ATK_M_HAMMER }, },
+    { "Weapon_MasterSword",     "mastersword",      vec2(4, 3),    95,  120,  { -1, ATK_M_MASTER }, },
+    { "Weapon_Flail",           "fleau",            vec2(4, 3),    95,  120,  { -1, ATK_M_FLAIL }, },
     // Special weapons
-    { "Weapon_Explosives",      "kamikaze",         vec2(4, 3),    95,    0,  { -1, ATK_KAMIKAZE_SHOOT }, },
-    { "Weapon_PowerArmor",      "assistxpl",        vec2(4, 3),    95,    0,  { -1, ATK_ASSISTXPL_SHOOT }, },
-    { "Weapon_Saber",           "sabre",            vec2(4, 3),    95,  120,  { -1, ATK_CACNINJA_SHOOT }, },
+    { "Weapon_Explosives",      "kamikaze",         vec2(4, 3),    95,    0,  { -1, ATK_KAMIKAZE }, },
+    { "Weapon_PowerArmor",      "assistxpl",        vec2(4, 3),    95,    0,  { -1, ATK_POWERARMOR }, },
+    { "Weapon_Saber",           "sabre",            vec2(4, 3),    95,  120,  { -1, ATK_NINJA }, },
 };
 
 // Definition of player's classes
@@ -583,13 +570,13 @@ struct gamestate
                     armourtype = A_POWERARMOR;
                     armour = min(armour+is.add, is.max);
                     health = min(health+300, maxhealth);
-                    if(!ammo[GUN_ASSISTXPL]) ammo[GUN_ASSISTXPL] = 1;
+                    if(!ammo[GUN_POWERARMOR]) ammo[GUN_POWERARMOR] = 1;
                     return;
                 }
                 else
                 {
                     armourtype = haspowerarmor ? A_POWERARMOR : is.info;
-                    if(!haspowerarmor) ammo[GUN_ASSISTXPL] = 0;
+                    if(!haspowerarmor) ammo[GUN_POWERARMOR] = 0;
                     int armourval = haspowerarmor && armour ? (500 * itemboost) : (playerClass==C_SOLDIER ? is.max+(250*(armourtype+1)) : is.max);
                     armour = min(armour + armourval, haspowerarmor ? 3000 : armourval);
                     return;
@@ -629,7 +616,7 @@ struct gamestate
 
     void addMeleeWeapons(int playerClass)
     {
-        int weapon = (playerClass == C_NINJA ? GUN_CACNINJA : GUN_C_BUSTER + rnd(4));
+        int weapon = (playerClass == C_NINJA ? GUN_NINJA : GUN_M_BUSTER + rnd(4));
         ammo[weapon] = 1;
         gunselect = weapon;
     }
@@ -681,7 +668,7 @@ struct gamestate
         switch(playerClass)
         {
             case C_KAMIKAZE: gunselect = GUN_KAMIKAZE; break;
-            case C_NINJA: gunselect = GUN_CACNINJA; break;
+            case C_NINJA: gunselect = GUN_NINJA; break;
             default: gunselect = baseWeapon;
         }
     }

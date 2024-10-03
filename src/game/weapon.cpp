@@ -24,10 +24,10 @@ namespace game
 
     void gunselect(int gun, gameent *d, bool force, bool shortcut)
     {
-        if((gun==GUN_ASSISTXPL && !force) || !validgun(gun)) return;
+        if((gun==GUN_POWERARMOR && !force) || !validgun(gun)) return;
         if(gun!=d->gunselect)
         {
-            if(d==player1 && gun!=GUN_ASSISTXPL && !shortcut) player1->lastweap = gun;
+            if(d==player1 && gun!=GUN_POWERARMOR && !shortcut) player1->lastweap = gun;
             addmsg(N_GUNSELECT, "rci", d, gun);
             playSound(attacks[gun-GUN_ELECTRIC].picksound, d==hudplayer() ? vec(0, 0, 0) : d->o, 200, 50, NULL, d->entityId);
         }
@@ -48,8 +48,8 @@ namespace game
 
     ICOMMAND(meleeattack, "", (), // shortcut for melee attack, then select old gun
         if(!isconnected() || m_identique) return;
-        if(player1->aptitude==C_NINJA) gunselect(GUN_CACNINJA, player1, false, true);
-        else loopi(4) { if(player1->ammo[GUN_C_BUSTER+i]) { gunselect(GUN_C_BUSTER+i, player1, false, true); break; } }
+        if(player1->aptitude==C_NINJA) gunselect(GUN_NINJA, player1, false, true);
+        else loopi(4) { if(player1->ammo[GUN_M_BUSTER+i]) { gunselect(GUN_M_BUSTER+i, player1, false, true); break; } }
         doaction(ACT_SHOOT);
         execute("sleep 500 [shoot ; getoldweap]");
     );
@@ -74,7 +74,7 @@ namespace game
                     else gunselect(currentIdenticalWeapon, player1);
                     return;
                 case C_NINJA:
-                    if(player1->gunselect==currentIdenticalWeapon){dir-1 ? gunselect(GUN_CACNINJA, player1) : getsuperweap();}
+                    if(player1->gunselect==currentIdenticalWeapon){dir-1 ? gunselect(GUN_NINJA, player1) : getsuperweap();}
                     else gunselect(currentIdenticalWeapon, player1);
                     return;
                 default:
@@ -88,7 +88,7 @@ namespace game
         loopi(NUMGUNS)
         {
             gun = (gun + dir)%NUMGUNS;
-            if(gun==GUN_ASSISTXPL)gun = (gun + dir)%NUMGUNS;
+            if(gun==GUN_POWERARMOR)gun = (gun + dir)%NUMGUNS;
             if(force || player1->ammo[gun]) break;
         }
         if(gun != player1->gunselect) gunselect(gun, player1);
@@ -110,7 +110,7 @@ namespace game
     void setweapon(const char *name, bool force = false)
     {
         int gun = getweapon(name);
-        if(player1->state!=CS_ALIVE || !validgun(gun) || gun==GUN_ASSISTXPL) return;
+        if(player1->state!=CS_ALIVE || !validgun(gun) || gun==GUN_POWERARMOR) return;
         if(force || player1->ammo[gun]) gunselect(gun, player1);
         else playSound(S_NOAMMO);
     }
@@ -124,7 +124,7 @@ namespace game
         loopi(numguns)
         {
             int gun = guns[(i+offset)%numguns];
-            if(gun>=0 && gun<NUMGUNS && (force || player1->ammo[gun]) && gun!=GUN_ASSISTXPL)
+            if(gun>=0 && gun<NUMGUNS && (force || player1->ammo[gun]) && gun!=GUN_POWERARMOR)
             {
                 gunselect(gun, player1);
                 return;
@@ -146,7 +146,7 @@ namespace game
 
         loopi(NUMGUNS)
         {
-            if(d->ammo[i] && d->gunselect!=i && i!=GUN_ASSISTXPL)
+            if(d->ammo[i] && d->gunselect!=i && i!=GUN_POWERARMOR)
             {
                 gunselect(i, d);
                 break;
@@ -163,7 +163,7 @@ namespace game
             if(name[0])
             {
                 int gun = getweapon(name);
-                if(validgun(gun) && gun != player1->gunselect && player1->ammo[gun] && gun!=GUN_ASSISTXPL) { gunselect(gun, player1); return; }
+                if(validgun(gun) && gun != player1->gunselect && player1->ammo[gun] && gun!=GUN_POWERARMOR) { gunselect(gun, player1); return; }
             } else { weaponswitch(player1); return; }
         }
         playSound(S_NOAMMO);
@@ -354,7 +354,7 @@ namespace game
             {
                 if(bnc.bouncetype == BNC_GRENADE || bnc.bouncetype == BNC_MOLOTOV)
                 {
-                    int atk = (bnc.bouncetype == BNC_GRENADE ? ATK_M32_SHOOT : ATK_MOLOTOV_SHOOT);
+                    int atk = (bnc.bouncetype == BNC_GRENADE ? ATK_M32 : ATK_MOLOTOV);
                     hits.setsize(0);
                     explode(bnc.local, bnc.owner, bnc.o, bnc.o, NULL, 1, atk);
                     stopLinkedSound(bnc.entityId);
@@ -428,8 +428,8 @@ namespace game
         p.atk = atk;
         switch(p.atk)
         {
-            case ATK_ARTIFICE_SHOOT: p.lifetime=attacks[atk].ttl+rnd(400); break;
-            case ATK_ARBALETE_SHOOT: p.lifetime=temptrisfade+rnd(5000); break;
+            case ATK_FIREWORKS: p.lifetime=attacks[atk].ttl+rnd(400); break;
+            case ATK_CROSSBOW: p.lifetime=temptrisfade+rnd(5000); break;
             default: p.lifetime = attacks[atk].ttl;
         }
         p.exploded = false;
@@ -439,13 +439,13 @@ namespace game
 
         switch(p.atk)
         {
-            case ATK_PULSE_SHOOT: p.projsound = S_FLYBYPLASMA; break;
-            case ATK_GRAP1_SHOOT: p.projsound = S_FLYBYGRAP1; break;
-            case ATK_SPOCKGUN_SHOOT: p.projsound = S_FLYBYSPOCK; break;
-            case ATK_SMAW_SHOOT: p.projsound = S_ROCKET; break;
-            case ATK_ROQUETTES_SHOOT: p.projsound = S_MINIROCKET; break;
-            case ATK_NUKE_SHOOT: p.projsound = S_MISSILENUKE; break;
-            case ATK_ARTIFICE_SHOOT: p.projsound = S_FLYBYFIREWORKS;
+            case ATK_PLASMA: p.projsound = S_FLYBYPLASMA; break;
+            case ATK_GRAP1: p.projsound = S_FLYBYGRAP1; break;
+            case ATK_SPOCKGUN: p.projsound = S_FLYBYSPOCK; break;
+            case ATK_SMAW: p.projsound = S_ROCKET; break;
+            case ATK_S_ROCKETS: p.projsound = S_MINIROCKET; break;
+            case ATK_S_NUKE: p.projsound = S_MISSILENUKE; break;
+            case ATK_FIREWORKS: p.projsound = S_FLYBYFIREWORKS;
             default: p.projsound = 0;
         }
 
@@ -516,7 +516,7 @@ namespace game
         switch(actorClass) // recalc damage based on the actor's passive/active skills
         {
             case C_AMERICAN:
-                if(atk >= ATK_NUKE_SHOOT && atk <= ATK_CAMPOUZE_SHOOT)
+                if(atk >= ATK_S_NUKE && atk <= ATK_S_CAMPER)
                 {
                     damage *= 1.5f;
                     if(isHudPlayer) d->curdamagecolor = 0xFF0000;
@@ -524,7 +524,7 @@ namespace game
                 break;
 
             case C_NINJA:
-                if(atk == ATK_CACNINJA_SHOOT && actor==hudplayer()) d->curdamagecolor = 0xFF0000;
+                if(atk == ATK_NINJA && actor==hudplayer()) d->curdamagecolor = 0xFF0000;
                 break;
 
             case C_WIZARD:
@@ -670,7 +670,7 @@ namespace game
                 if(player1->boostmillis[B_ROIDS]) damage *= (player1->aptitude==C_JUNKIE ? 3 : 2);
                 switch(player1->aptitude)
                 {
-                    case C_AMERICAN: {if(atk==ATK_NUKE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_ROQUETTES_SHOOT || atk==ATK_CAMPOUZE_SHOOT) damage *= 1.5f; break;}
+                    case C_AMERICAN: {if(atk==ATK_S_NUKE || atk==ATK_S_GAU8 || atk==ATK_S_ROCKETS || atk==ATK_S_CAMPER) damage *= 1.5f; break;}
                     case C_VIKING: if(player1->boostmillis[B_RAGE]) damage*=1.25f; break;
                     case C_WIZARD: {if(player1->abilitymillis[ABILITY_2]) damage *= 1.25f; break;}
                     case C_CAMPER: damage *= ((player1->o.dist(f->o)/1800.f)+1.f); break;
@@ -710,7 +710,7 @@ namespace game
                     if(player1->armour)
                     {
                         if(hasRegenAbility) { playSound(S_PHY_1); playSound(regenSound); }
-                        else if(!rnd(atk==ATK_LANCEFLAMMES_SHOOT ? 5 : 2)) playSound(impactSound);
+                        else if(!rnd(atk==ATK_FLAMETHROWER ? 5 : 2)) playSound(impactSound);
                     }
                     else playSound(S_IMPACTBODY);
                 }
@@ -720,7 +720,7 @@ namespace game
                 if(f->armour)
                 {
                     if(hasRegenAbility) { playSound(S_PHY_1, f->o, 200, 100, SND_LOWPRIORITY); playSound(regenSound, f->o, 200, 100, SND_LOWPRIORITY); }
-                    else if(!rnd(atk==ATK_LANCEFLAMMES_SHOOT ? 5 : 2)) playSound(impactSound, f->o, 250, 50, SND_LOWPRIORITY);
+                    else if(!rnd(atk==ATK_FLAMETHROWER ? 5 : 2)) playSound(impactSound, f->o, 250, 50, SND_LOWPRIORITY);
                 }
             }
         }
@@ -750,7 +750,7 @@ namespace game
         float dist = projdist(o, dir, v, vel);
         if(dist<attacks[atk].exprad)
         {
-            float damage = o==at && atk==ATK_ASSISTXPL_SHOOT ? 0 : attacks[atk].damage*(1-dist/EXP_DISTSCALE/attacks[atk].exprad);
+            float damage = o==at && atk==ATK_POWERARMOR ? 0 : attacks[atk].damage*(1-dist/EXP_DISTSCALE/attacks[atk].exprad);
             if(damage > 0) hit(max(int(damage), 1), o, at, dir, atk, dist);
         }
     }
@@ -772,16 +772,16 @@ namespace game
 
         switch(atk)
         {
-            case ATK_PULSE_SHOOT:
-            case ATK_GRAP1_SHOOT:
-            case ATK_SPOCKGUN_SHOOT:
+            case ATK_PLASMA:
+            case ATK_GRAP1:
+            case ATK_SPOCKGUN:
                 renderProjectileExplosion(owner, v, vel, safe, atk);
-                playSound(atk==ATK_GRAP1_SHOOT ? S_IMPACTGRAP1 : atk==ATK_PULSE_SHOOT ? S_IMPACTPLASMA : S_IMPACTSPOCK, v, 250, 50, SND_LOWPRIORITY);
+                playSound(atk==ATK_GRAP1 ? S_IMPACTGRAP1 : atk==ATK_PLASMA ? S_IMPACTPLASMA : S_IMPACTSPOCK, v, 250, 50, SND_LOWPRIORITY);
                 break;
 
-            case ATK_SMAW_SHOOT:
-            case ATK_ROQUETTES_SHOOT:
-                loopi(atk==ATK_ROQUETTES_SHOOT ? 3 : 4 + rnd(3))
+            case ATK_SMAW:
+            case ATK_S_ROCKETS:
+                loopi(atk==ATK_S_ROCKETS ? 3 : 4 + rnd(3))
                 {
                     vec pos = safeLoc;
                     pos.add(vec(-4 + rnd(8), -4 + rnd(8), -4 + rnd(8)));
@@ -795,27 +795,27 @@ namespace game
                 startShake(v, 1.25f * attacks[atk].exprad, atk);
                 break;
 
-            case ATK_KAMIKAZE_SHOOT:
-            case ATK_ASSISTXPL_SHOOT:
+            case ATK_KAMIKAZE:
+            case ATK_POWERARMOR:
                 loopi(10 + rnd(5))
                 {
-                    if(atk==ATK_ASSISTXPL_SHOOT) spawnbouncer(v, owner->vel, owner, BNC_SCRAP, 50 + rnd(250));
+                    if(atk==ATK_POWERARMOR) spawnbouncer(v, owner->vel, owner, BNC_SCRAP, 50 + rnd(250));
                     else spawnbouncer(v, owner->vel, owner, rnd(2) ? BNC_PIXEL : BNC_ROCK, 100 + rnd(300));
                 }
                 renderExplosion(owner, owner->o, vel, atk);
-                playSound(atk==ATK_KAMIKAZE_SHOOT ? S_EXPL_KAMIKAZE : S_EXPL_PARMOR, owner->o, 400, 150);
+                playSound(atk==ATK_KAMIKAZE ? S_EXPL_KAMIKAZE : S_EXPL_PARMOR, owner->o, 400, 150);
                 if(inWater) playSound(S_EXPL_INWATER, vec(owner->o).addz(15), 300, 100);
                 if(isFar) playSound(S_BIGEXPL_FAR, owner->o, 2000, 400);
                 startShake(v, 1.5f * attacks[atk].exprad, atk);
                 break;
 
-            case ATK_NUKE_SHOOT:
+            case ATK_S_NUKE:
                 renderExplosion(owner, v, vel, atk);
                 playSound(S_EXPL_NUKE, v, 5000, 3000, SND_NOOCCLUSION);
                 startShake(v, 2 * attacks[atk].exprad, atk, 2);
                 break;
 
-            case ATK_ARTIFICE_SHOOT:
+            case ATK_FIREWORKS:
                 renderExplosion(owner, safeLoc, vel, atk);
                 playSound(S_EXPL_FIREWORKS, safeLoc, 400, 200);
                 if(inWater) playSound(S_EXPL_INWATER, vec(v).addz(15), 300, 100);
@@ -823,7 +823,7 @@ namespace game
                 startShake(v, attacks[atk].exprad, atk, 0.75f);
                 break;
 
-            case ATK_M32_SHOOT:
+            case ATK_M32:
                 loopi(5+rnd(3)) spawnbouncer(v, vec(0, 0, 0), owner, BNC_ROCK, 200);
                 renderExplosion(owner, v, vel, atk);
                 playSound(S_EXPL_GRENADE, v, 400, 150);
@@ -832,7 +832,7 @@ namespace game
                 startShake(v, 1.5f * attacks[atk].exprad, atk);
                 break;
 
-            case ATK_MOLOTOV_SHOOT:
+            case ATK_MOLOTOV:
             {
                 vec debrisLoc = v;
                 debrisLoc.addz(3);
@@ -844,19 +844,19 @@ namespace game
                 startShake(v, 1.25f * attacks[atk].exprad, atk, 0.5f);
                 break;
             }
-            case ATK_MINIGUN_SHOOT:
-            case ATK_AK47_SHOOT:
-            case ATK_UZI_SHOOT:
-            case ATK_FAMAS_SHOOT:
-            case ATK_GLOCK_SHOOT:
-            case ATK_ARBALETE_SHOOT:
+            case ATK_MINIGUN:
+            case ATK_AK47:
+            case ATK_UZI:
+            case ATK_FAMAS:
+            case ATK_GLOCK:
+            case ATK_CROSSBOW:
                 renderBulletImpact(owner, v, vel, safe, atk);
-                if(!inWater) playSound(atk==ATK_ARBALETE_SHOOT ? S_IMPACTARROW : S_LITTLERICOCHET, v, 175, 75, SND_LOWPRIORITY);
+                if(!inWater) playSound(atk==ATK_CROSSBOW ? S_IMPACTARROW : S_LITTLERICOCHET, v, 175, 75, SND_LOWPRIORITY);
                 break;
 
-            case ATK_SV98_SHOOT:
-            case ATK_SKS_SHOOT:
-            case ATK_GAU8_SHOOT:
+            case ATK_SV98:
+            case ATK_SKS:
+            case ATK_S_GAU8:
                 renderBulletImpact(owner, v, vel, safe, atk);
                 if(!inWater)
                 {
@@ -882,43 +882,43 @@ namespace game
 
         switch(atk)
         {
-            case ATK_PULSE_SHOOT:
+            case ATK_PLASMA:
                 addstain(STAIN_PLASMA_SCORCH, pos, dir, 7.5f);
                 addstain(STAIN_BULLET_HOLE, pos, dir, 7.5f, 0x882200);
                 return;
-            case ATK_SMAW_SHOOT:
-            case ATK_KAMIKAZE_SHOOT:
-            case ATK_ASSISTXPL_SHOOT:
-            case ATK_ROQUETTES_SHOOT:
+            case ATK_SMAW:
+            case ATK_KAMIKAZE:
+            case ATK_POWERARMOR:
+            case ATK_S_ROCKETS:
             {
                 float rad = attacks[p.atk].exprad*0.35f;
                 addstain(STAIN_EXPL_SCORCH, pos, dir, rad);
                 return;
             }
-            case ATK_MOLOTOV_SHOOT:
+            case ATK_MOLOTOV:
             {
                loopi(3) addstain(STAIN_BURN, pos, dir, attacks[p.atk].exprad);
             }
-            case ATK_MINIGUN_SHOOT:
-            case ATK_SV98_SHOOT:
-            case ATK_AK47_SHOOT:
-            case ATK_GAU8_SHOOT:
-            case ATK_SKS_SHOOT:
+            case ATK_MINIGUN:
+            case ATK_SV98:
+            case ATK_AK47:
+            case ATK_S_GAU8:
+            case ATK_SKS:
                 addstain(STAIN_BULLET_HOLE, pos, dir, 1.5f+(rnd(2)));
                 addstain(STAIN_BULLET_GLOW, pos, dir, 2.0f+(rnd(2)), 0x883300);
                 return;
-            case ATK_SPOCKGUN_SHOOT:
+            case ATK_SPOCKGUN:
                 addstain(STAIN_PLASMA_SCORCH, pos, dir, 5);
                 addstain(STAIN_SPOCK, pos, dir, 5, hasRoids(p.owner) ? 0xFF0000 : 0x22FF22);
                 return;
-            case ATK_UZI_SHOOT:
-            case ATK_ARBALETE_SHOOT:
-            case ATK_GLOCK_SHOOT:
-            case ATK_FAMAS_SHOOT:
+            case ATK_UZI:
+            case ATK_CROSSBOW:
+            case ATK_GLOCK:
+            case ATK_FAMAS:
                 addstain(STAIN_BULLET_HOLE, pos, dir, 0.5f);
                 addstain(STAIN_BULLET_GLOW, pos, dir, 1.0f, 0x883300);
                 return;
-            case ATK_GRAP1_SHOOT:
+            case ATK_GRAP1:
                 addstain(STAIN_ELEC_GLOW, pos, dir, 5.f, 0x992299);
                 addstain(STAIN_PLASMA_SCORCH, pos, dir, 5);
                 return;
@@ -988,7 +988,7 @@ namespace game
             bool exploded = false;
             hits.setsize(0);
 
-            if((p.lifetime -= time)<0 && (p.atk==ATK_ARTIFICE_SHOOT || p.atk==ATK_NUKE_SHOOT || p.atk==ATK_KAMIKAZE_SHOOT || p.atk==ATK_ASSISTXPL_SHOOT))
+            if((p.lifetime -= time)<0 && (p.atk==ATK_FIREWORKS || p.atk==ATK_S_NUKE || p.atk==ATK_KAMIKAZE || p.atk==ATK_POWERARMOR))
             {
                 projsplash(p, v, NULL);
                 exploded = true;
@@ -1029,14 +1029,14 @@ namespace game
                     playSound(S_IMPACTWATER, effectPos, 250, 50, SND_LOWPRIORITY|SND_NOOCCLUSION);
                 }
 
-                if(p.atk!=ATK_SMAW_SHOOT && p.atk!=ATK_ARTIFICE_SHOOT && p.atk!=ATK_ROQUETTES_SHOOT && p.atk!=ATK_NUKE_SHOOT)
+                if(p.atk!=ATK_SMAW && p.atk!=ATK_FIREWORKS && p.atk!=ATK_S_ROCKETS && p.atk!=ATK_S_NUKE)
                 {
                     renderProjectilesTrails(p.owner, pos, dv, p.from, p.offset, p.atk, p.exploded);
                 }
 
                 if(p.projsound && !game::ispaused()) // play and update the sound only if the projectile is passing by
                 {
-                    bool bigRadius = (p.atk==ATK_NUKE_SHOOT || p.atk==ATK_ARTIFICE_SHOOT);
+                    bool bigRadius = (p.atk==ATK_S_NUKE || p.atk==ATK_FIREWORKS);
 
                     if(camera1->o.dist(pos) < (bigRadius ? 800 : 400))
                     {
@@ -1065,7 +1065,7 @@ namespace game
                     removeEntityPos(p.entityId);
                     p.soundplaying = false;
                 }
-                if(p.atk != ATK_ARBALETE_SHOOT) projs.remove(i--);
+                if(p.atk != ATK_CROSSBOW) projs.remove(i--);
                 else if((p.lifetime -= time)<0 || removearrow) projs.remove(i--);
             }
             else p.o = v;
@@ -1074,7 +1074,7 @@ namespace game
 
     bool noMuzzle(int atk, gameent *d)
     {
-        return (d->aptitude==C_SPY && d->abilitymillis[ABILITY_2]) || (atk==ATK_CAC349_SHOOT || atk==ATK_CACFLEAU_SHOOT || atk==ATK_CACMARTEAU_SHOOT || atk==ATK_CACMASTER_SHOOT || atk==ATK_CACNINJA_SHOOT);
+        return (d->aptitude==C_SPY && d->abilitymillis[ABILITY_2]) || (atk==ATK_M_BUSTER || atk==ATK_M_FLAIL || atk==ATK_M_HAMMER || atk==ATK_M_MASTER || atk==ATK_NINJA);
     }
 
     float recoilReduce()
@@ -1123,10 +1123,10 @@ namespace game
 
         switch(atk)
         {
-            case ATK_PULSE_SHOOT:
-            case ATK_SPOCKGUN_SHOOT:
+            case ATK_PLASMA:
+            case ATK_SPOCKGUN:
             {
-                bool isPlasma = (atk == ATK_PULSE_SHOOT);
+                bool isPlasma = (atk == ATK_PLASMA);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
                 renderMuzzleEffects(from, to, d, atk);
                 if(isHudPlayer)
@@ -1138,7 +1138,7 @@ namespace game
                 break;
             }
 
-            case ATK_RAIL_SHOOT:
+            case ATK_ELECTRIC:
                 renderMuzzleEffects(from, to, d, atk);
                 renderInstantImpact(from, to, muzzleOrigin, atk, hasRoids(d));
                 if(isHudPlayer) startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay / 2.f, vec(0, 0, 0), vec(0, 0, 0), vec((0.1f * recoilSide(300)) / recoilReduce(), 0.1f / recoilReduce(), 0));
@@ -1146,20 +1146,20 @@ namespace game
                 playSound(S_IMPACTELEC, to, 250, 50, SND_LOWPRIORITY);
                 break;
 
-            case ATK_SMAW_SHOOT:
-            case ATK_ROQUETTES_SHOOT:
-            case ATK_NUKE_SHOOT:
-            case ATK_ARTIFICE_SHOOT:
+            case ATK_SMAW:
+            case ATK_S_ROCKETS:
+            case ATK_S_NUKE:
+            case ATK_FIREWORKS:
             {
-                bool isNuke = (atk==ATK_NUKE_SHOOT);
-                bool isRockets = (atk==ATK_ROQUETTES_SHOOT);
+                bool isNuke = (atk==ATK_S_NUKE);
+                bool isRockets = (atk==ATK_S_ROCKETS);
                 renderMuzzleEffects(from, to, d, atk);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
                 if(isHudPlayer)
                 {
-                    float recoilAmount = (isNuke ? 3.5f : (atk==ATK_ARTIFICE_SHOOT || isRockets ? 0.8f : 0.4f)) / recoilReduce();
+                    float recoilAmount = (isNuke ? 3.5f : (atk==ATK_FIREWORKS || isRockets ? 0.8f : 0.4f)) / recoilReduce();
                     startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay / (isNuke ? 3.5f : (isRockets ? 1.25f : 3.5f)), vec(0, 0, 0), vec(0, 0, 0), vec(0, recoilAmount, 0));
-                    if(d==player1 && atk==ATK_NUKE_SHOOT)
+                    if(d==player1 && atk==ATK_S_NUKE)
                     {
                         unlockAchievement(ACH_ATOME);
                         updateStat(1, STAT_ATOM);
@@ -1168,11 +1168,11 @@ namespace game
                 break;
             }
 
-            case ATK_MINIGUN_SHOOT:
-            case ATK_AK47_SHOOT:
-            case ATK_GAU8_SHOOT:
+            case ATK_MINIGUN:
+            case ATK_AK47:
+            case ATK_S_GAU8:
             {
-                bool isGau = (atk == ATK_GAU8_SHOOT);
+                bool isGau = (atk == ATK_S_GAU8);
                 renderMuzzleEffects(from, to, d, atk);
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
                 if(isHudPlayer)
@@ -1180,7 +1180,7 @@ namespace game
                     float recoilAccel = (hudplayer()->gunaccel ? (recoilReduce() * hudplayer()->gunaccel) : 1.f);
                     float recoilAmount = (isGau ? 0.3f : 0.4f) / recoilAccel;
                     float deviationAmount = ((isGau ? 0.5f : 0.3f) / recoilAccel) * recoilSide(isGau ? 500 : 1250);
-                    startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay * (isGau ? 10 : 3), vec(0, 0, 0), vec(0, 0, 0), vec(deviationAmount, recoilAmount, 0), vec(0, atk==ATK_AK47_SHOOT ? 35 : 45, 0));
+                    startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay * (isGau ? 10 : 3), vec(0, 0, 0), vec(0, 0, 0), vec(deviationAmount, recoilAmount, 0), vec(0, atk==ATK_AK47 ? 35 : 45, 0));
                 }
                 else soundNearmiss(isGau ? S_BIGBULLETFLYBY : S_BULLETFLYBY, from, to);
 
@@ -1192,10 +1192,10 @@ namespace game
                 spawnbouncer(casingOrigin, d->vel, d, isGau ? BNC_BIGCASING : BNC_CASING);
                 break;
             }
-            case ATK_MOSSBERG_SHOOT:
-            case ATK_HYDRA_SHOOT:
+            case ATK_MOSSBERG:
+            case ATK_HYDRA:
             {
-                bool isHydra = (atk==ATK_HYDRA_SHOOT);
+                bool isHydra = (atk==ATK_HYDRA);
                 if(!local) createrays(gun, from, to, d);
                 particle_flare(d->muzzle, d->muzzle, 140, PART_MF_SHOTGUN, hasRoids(d) ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xCCAAAA, isHudPlayer ? zoom ? 1.25f : 3.50f : 4.5f, d, hasShrooms());
                 particle_splash(PART_SMOKE, 4, 500, d->muzzle, 0x443333, 3.5f, 20, 500, 0, hasShrooms());
@@ -1223,15 +1223,15 @@ namespace game
                 break;
             }
 
-            case ATK_SV98_SHOOT:
-            case ATK_SKS_SHOOT:
-            case ATK_CAMPOUZE_SHOOT:
+            case ATK_SV98:
+            case ATK_SKS:
+            case ATK_S_CAMPER:
             {
-                bool isSv98 = (atk==ATK_SV98_SHOOT);
+                bool isSv98 = (atk==ATK_SV98);
                 particle_splash(PART_SMOKE, isHudPlayer ? 4 : 6, isHudPlayer ? 350 : 600, d->muzzle, 0x222222, isHudPlayer ? 3.5f : 6.5f, 40, 500, 0, hasShrooms());
                 particle_splash(PART_SPARK, isHudPlayer ? 4 : 7, 40, d->muzzle, 0xFFFFFF, 0.5f, 300, 500, 0, hasShrooms());
                 particle_flare(d->muzzle, d->muzzle, 100, PART_MF_LITTLE, hasRoids(d) ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFFFFFF, 1.25f, d, hasShrooms());
-                particle_flare(d->muzzle, d->muzzle, 100, PART_MF_SNIPER, hasRoids(d) ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFFFFFF, atk==ATK_CAMPOUZE_SHOOT ? 5.0f : 3.5f, d, hasShrooms());
+                particle_flare(d->muzzle, d->muzzle, 100, PART_MF_SNIPER, hasRoids(d) ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFFFFFF, atk==ATK_S_CAMPER ? 5.0f : 3.5f, d, hasShrooms());
                 if(d->boostmillis[B_RAGE]) particle_flare(d->muzzle, d->muzzle, 75, PART_MF_SNIPER, 0xFF2222, 6.0f, d, hasShrooms());
                 adddynlight(hudgunorigin(gun, d->o, to, d), 50, vec(1.25f, 0.75f, 0.3f), 37, 2, lightFlags, 0, vec(1.25f, 0.75f, 0.3f), d);
                 if(isHudPlayer)
@@ -1239,7 +1239,7 @@ namespace game
                     float recoilAmount = (isSv98 ? 1.5f : 0.5f) / recoilReduce();
                     startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay / (isSv98 ? 2.7f : 1.5f), vec(0, 0, 0), vec(0, 0, 0), vec(0, recoilAmount, 0));
                 }
-                if(atk==ATK_CAMPOUZE_SHOOT)
+                if(atk==ATK_S_CAMPER)
                 {
                     loopi(attacks[atk].rays)
                     {
@@ -1261,16 +1261,16 @@ namespace game
                 break;
             }
 
-            case ATK_ARBALETE_SHOOT:
+            case ATK_CROSSBOW:
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
                 if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK,  8, 500, d->muzzle, 0xFF2222, 1.0f,  50, 200, 0, hasShrooms());
                 if(isHudPlayer) startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay / 1.5f, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0.2f / recoilReduce(), 0));
                 else soundNearmiss(S_FLYBYARROW, from, to);
                 break;
 
-            case ATK_UZI_SHOOT:
-            case ATK_FAMAS_SHOOT:
-            case ATK_GLOCK_SHOOT:
+            case ATK_UZI:
+            case ATK_FAMAS:
+            case ATK_GLOCK:
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
                 particle_flare(d->muzzle, d->muzzle, 125, PART_MF_LITTLE, hasRoids(d) ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFFFFFF, isHudPlayer ? zoom ? 0.5f : 0.75f : 1.75f, d, hasShrooms());
                 particle_flare(d->muzzle, d->muzzle, 75, PART_MF_BIG, hasRoids(d) ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFFAA55, isHudPlayer ? zoom ? 0.75f : 2.f : 3.f, d, hasShrooms());
@@ -1278,12 +1278,12 @@ namespace game
                 particle_splash(PART_SPARK, isHudPlayer ? 3 : 5, 35, d->muzzle, 0xFF4400, 0.35f, 300, 500, 0, hasShrooms());
                 if(d->boostmillis[B_RAGE]) particle_flare(d->muzzle, d->muzzle, 80, PART_MF_BIG, 0xFF2222, isHudPlayer ? zoom ? 1.5f : 4.f : 5.f, d, hasShrooms());
                 adddynlight(hudgunorigin(gun, d->o, to, d), 60, vec(1.25f, 0.75f, 0.3f), 30, 2, lightFlags, 0, vec(1.25f, 0.75f, 0.3f), d);
-                if(isHudPlayer) startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay * 3, vec(0, 0, 0), vec(0, 0, 0), vec(0, (atk==ATK_GLOCK_SHOOT ? 0.2f : 0.5f) / recoilReduce(), 0), vec(0, 30, 0));
+                if(isHudPlayer) startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay * 3, vec(0, 0, 0), vec(0, 0, 0), vec(0, (atk==ATK_GLOCK ? 0.2f : 0.5f) / recoilReduce(), 0), vec(0, 30, 0));
                 else soundNearmiss(S_BULLETFLYBY, from, to);
                 spawnbouncer(casingOrigin, d->vel, d, BNC_CASING);
                 break;
 
-            case ATK_LANCEFLAMMES_SHOOT:
+            case ATK_FLAMETHROWER:
             {
                 if(!local) createrays(gun, from, to, d);
                 particle_flare(d->muzzle, d->muzzle, 150, PART_MF_ROCKET, hasRoids(d) ? 0x880000 : wizardAbility ? 0x440044 : 0x663311, isHudPlayer ? zoom ? 2.00f : 3.5f : 4.5f, d, hasShrooms());
@@ -1308,7 +1308,7 @@ namespace game
                 gunSound = (d->type==ENT_AI ? S_PYRO_A : S_FLAMETHROWER);
                 break;
             }
-            case ATK_GRAP1_SHOOT:
+            case ATK_GRAP1:
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
                 particle_flare(d->muzzle, d->muzzle, 150, PART_MF_PLASMA, hasRoids(d) ? 0xFF4444 : wizardAbility ? 0xFF00FF : 0xFF55FF, 1.75f, d, hasShrooms());
                 if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK, 3, 500, d->muzzle, 0xFF4444, 1.0f, 50, 200, 0, hasShrooms());
@@ -1316,7 +1316,7 @@ namespace game
                 if(isHudPlayer) startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay / 1.5f, vec(0, 0, 0), vec(0, 0, 0), vec((0.1f * recoilSide(1500)) / recoilReduce(), 0.15f / recoilReduce(), 0), vec(0, 12, 0));
                 break;
 
-            case ATK_M32_SHOOT:
+            case ATK_M32:
             {
                 particle_splash(PART_SMOKE, 10, 600, d->muzzle, wizardAbility ? 0x550044 : 0x444444, 4.0f, 20, 500, 0, hasShrooms());
                 if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK,  8, 500, d->muzzle, 0xFF4444, 1.0f, 50, 200, 0, hasShrooms());
@@ -1325,7 +1325,7 @@ namespace game
                 if(isHudPlayer) startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay / 3, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0.5f / recoilReduce(), 0));
                 break;
             }
-            case ATK_MOLOTOV_SHOOT:
+            case ATK_MOLOTOV:
             {
                 if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK,  8, 500, d->muzzle, 0xFF4444, 1.0f, 50, 200, 0, hasShrooms());
                 float dist = from.dist(to); vec up = to; up.z += dist/6;
@@ -1333,8 +1333,8 @@ namespace game
                 if(isHudPlayer) startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay / 3, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0.5f / recoilReduce(), 0));
                 break;
             }
-            case ATK_KAMIKAZE_SHOOT:
-            case ATK_ASSISTXPL_SHOOT:
+            case ATK_KAMIKAZE:
+            case ATK_POWERARMOR:
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
                 break;
         }
@@ -1352,7 +1352,7 @@ namespace game
         if(d->abilitymillis[ABILITY_3] && d->aptitude==C_PRIEST) adddynlight(muzzleOrigin, 6, vec(1.5f, 1.5f, 0.0f), 80, 40, L_NOSHADOW|L_VOLUMETRIC|DL_FLASH);
         if(d==player1) updateStat(1, STAT_MUNSHOOTED);
 
-        bool incraseDist = atk==ATK_ASSISTXPL_SHOOT || atk==ATK_KAMIKAZE_SHOOT || atk==ATK_GAU8_SHOOT || atk==ATK_NUKE_SHOOT;
+        bool incraseDist = atk==ATK_POWERARMOR || atk==ATK_KAMIKAZE || atk==ATK_S_GAU8 || atk==ATK_S_NUKE;
         int distance = camera1->o.dist(hudgunorigin(gun, d->o, to, d));
         int loopedSoundFlags = SND_LOOPED|SND_FIXEDPITCH|SND_NOCULL;
         float pitch = d->boostmillis[B_SHROOMS] ? (d->aptitude==C_JUNKIE ? 1.4f : 1.2f) : (d->aptitude==C_PRIEST && d->abilitymillis[ABILITY_3] ? (1.5f - (d->abilitymillis[ABILITY_3] / 8000.0f)) : 0);
@@ -1515,10 +1515,10 @@ namespace game
             }
         }
 
-        if(d->armourtype==A_POWERARMOR && !d->armour && !d->playerexploded && d->ammo[GUN_ASSISTXPL])
+        if(d->armourtype==A_POWERARMOR && !d->armour && !d->playerexploded && d->ammo[GUN_POWERARMOR])
         {
             d->wasAttacking = d->attacking;
-            gunselect(GUN_ASSISTXPL, d, true);
+            gunselect(GUN_POWERARMOR, d, true);
             d->attacking = ACT_SHOOT;
             d->playerexploded = true;
         }
@@ -1533,7 +1533,7 @@ namespace game
         if(d==player1)
         {
             lastshoot = totalmillis;
-            if(atk==ATK_SMAW_SHOOT || atk==ATK_NUKE_SHOOT || atk==ATK_CACMARTEAU_SHOOT || atk == ATK_MOSSBERG_SHOOT || atk == ATK_SV98_SHOOT) lastshoot+=750;
+            if(atk==ATK_SMAW || atk==ATK_S_NUKE || atk==ATK_M_HAMMER || atk == ATK_MOSSBERG || atk == ATK_SV98) lastshoot+=750;
         }
 
         if(!d->ammo[gun])
@@ -1582,7 +1582,7 @@ namespace game
         d->gunwait = attacks[atk].attackdelay/waitfactor;
         d->totalshots += (attacks[atk].damage*attacks[atk].rays) * (d->boostmillis[B_ROIDS] ? 1 : 2);
         if(d->playerexploded) {d->attacking = d->wasAttacking; execute("getoldweap"); d->playerexploded = false;}
-        if((atk==ATK_GLOCK_SHOOT || atk==ATK_SPOCKGUN_SHOOT || atk==ATK_HYDRA_SHOOT || d->gunselect==GUN_SKS || d->gunselect==GUN_S_CAMPER) && !specialAbility) d->attacking = ACT_IDLE;
+        if((atk==ATK_GLOCK || atk==ATK_SPOCKGUN || atk==ATK_HYDRA || d->gunselect==GUN_SKS || d->gunselect==GUN_S_CAMPER) && !specialAbility) d->attacking = ACT_IDLE;
     }
 
     void adddynlights()
@@ -1597,13 +1597,13 @@ namespace game
 
             switch(p.atk)
             {
-                case ATK_PULSE_SHOOT: adddynlight(pos, 30, vec(1.00f, 0.75f, 0.0f)); break;
-                case ATK_SPOCKGUN_SHOOT: adddynlight(pos, 30, vec(0.00f, 1.00f, 0.0f)); break;
-                case ATK_GRAP1_SHOOT: adddynlight(pos, 50, vec(0.3f, 0.00f, 0.2f)); break;
-                case ATK_ARTIFICE_SHOOT:
-                case ATK_SMAW_SHOOT:
-                case ATK_ROQUETTES_SHOOT: adddynlight(pos, 50+lightradiusvar, vec(1.2f, 0.75f, 0.0f)); break;
-                case ATK_NUKE_SHOOT: adddynlight(pos, 100, vec(1.2f, 0.75f, 0.0f)); break;
+                case ATK_PLASMA: adddynlight(pos, 30, vec(1.00f, 0.75f, 0.0f)); break;
+                case ATK_SPOCKGUN: adddynlight(pos, 30, vec(0.00f, 1.00f, 0.0f)); break;
+                case ATK_GRAP1: adddynlight(pos, 50, vec(0.3f, 0.00f, 0.2f)); break;
+                case ATK_FIREWORKS:
+                case ATK_SMAW:
+                case ATK_S_ROCKETS: adddynlight(pos, 50+lightradiusvar, vec(1.2f, 0.75f, 0.0f)); break;
+                case ATK_S_NUKE: adddynlight(pos, 100, vec(1.2f, 0.75f, 0.0f)); break;
             }
         }
         loopv(curBouncers)
@@ -1706,11 +1706,11 @@ namespace game
 
     std::map<int, std::string> projsPaths =
     {
-        {ATK_SMAW_SHOOT, "projectiles/missile"},
-        {ATK_ARTIFICE_SHOOT, "projectiles/feuartifice"},
-        {ATK_ARBALETE_SHOOT, "projectiles/fleche"},
-        {ATK_ROQUETTES_SHOOT, "projectiles/minimissile"},
-        {ATK_NUKE_SHOOT, "projectiles/missilenuke"}
+        {ATK_SMAW, "projectiles/missile"},
+        {ATK_FIREWORKS, "projectiles/feuartifice"},
+        {ATK_CROSSBOW, "projectiles/fleche"},
+        {ATK_S_ROCKETS, "projectiles/minimissile"},
+        {ATK_S_NUKE, "projectiles/missilenuke"}
     };
 
     void preloadProjectiles()
@@ -1728,7 +1728,7 @@ namespace game
         {
             projectile &p = projs[i];
 
-            if(p.atk==ATK_SMAW_SHOOT || p.atk==ATK_ARTIFICE_SHOOT || p.atk==ATK_ARBALETE_SHOOT || p.atk==ATK_ROQUETTES_SHOOT || p.atk==ATK_NUKE_SHOOT)
+            if(p.atk==ATK_SMAW || p.atk==ATK_FIREWORKS || p.atk==ATK_CROSSBOW || p.atk==ATK_S_ROCKETS || p.atk==ATK_S_NUKE)
             {
 
                 float dist = min(p.o.dist(p.to)/32.0f, 1.0f);
@@ -1740,7 +1740,7 @@ namespace game
                 v.add(pos);
 
                 rendermodel(projsPaths[p.atk].c_str(), ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, MDL_NOSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED);
-                if(p.atk != ATK_ARBALETE_SHOOT) renderProjectilesTrails(p.owner, pos, v, p.from, p.offset, p.atk, p.exploded);
+                if(p.atk != ATK_CROSSBOW) renderProjectilesTrails(p.owner, pos, v, p.from, p.offset, p.atk, p.exploded);
             }
         }
     }

@@ -890,7 +890,7 @@ ICOMMAND(hudbasesstats, "i", (int *team),
 
                     case A_IRON: if(ci->state.armour>1250) ci->state.armourtype = A_GOLD; break;
 
-                    case A_GOLD: if(ci->state.armour>2000) {ci->state.armourtype = A_POWERARMOR; if(!ci->state.ammo[GUN_ASSISTXPL]) ci->state.ammo[GUN_ASSISTXPL] = 1;}
+                    case A_GOLD: if(ci->state.armour>2000) {ci->state.armourtype = A_POWERARMOR; if(!ci->state.ammo[GUN_POWERARMOR]) ci->state.ammo[GUN_POWERARMOR] = 1;}
                 }
 
                 if(!ci->state.hasmaxammo(b.ammotype))
@@ -1123,7 +1123,7 @@ case N_BASEREGEN:
             case A_WOOD: if(regen->armour>=750) { regen->armourtype=A_IRON; playSound(S_ITEMBFER, regenPos, 300, 50); } break;
             case A_IRON: if(regen->armour>=1250) { regen->armourtype=A_GOLD; playSound(S_ITEMBOR, regenPos, 300, 50); } break;
             case A_GOLD: if(regen->armour>=2000) { regen->armourtype=A_POWERARMOR; playSound(S_ITEMARMOUR, regenPos, 300, 50); }
-            case A_POWERARMOR: regen->ammo[GUN_ASSISTXPL] = 1;
+            case A_POWERARMOR: regen->ammo[GUN_POWERARMOR] = 1;
         }
         if(autowield > 0 && player1->gunselect != ammotype) gunselect(ammotype, player1);
     }

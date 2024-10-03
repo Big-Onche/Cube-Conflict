@@ -1637,9 +1637,9 @@ namespace game
 
                 switch(player1->gunselect)
                 {
-                    case GUN_CACNINJA:
+                    case GUN_NINJA:
                     case GUN_KAMIKAZE:
-                    case GUN_ASSISTXPL:
+                    case GUN_POWERARMOR:
                     case GUN_S_NUKE:
                     case GUN_S_GAU8:
                     case GUN_S_CAMPER:
@@ -1831,7 +1831,7 @@ namespace game
 
                 if(!target || !actor) break;
 
-                damageeffect(target->afterburnatk == ATK_LANCEFLAMMES_SHOOT ? 40 : 80, target, actor, target->afterburnatk);
+                damageeffect(target->afterburnatk == ATK_FLAMETHROWER ? 40 : 80, target, actor, target->afterburnatk);
                 playSound(S_ADULT_P, target==player1 ? vec(0, 0, 0) : target->o, 250, 100, NULL, target->entityId);
             }
 
