@@ -385,6 +385,22 @@ namespace game
         if(d->afterburnmillis && (d->afterburnmillis -= time)<=0) d->afterburnmillis = 0;
     }
 
+    void checkFire(gameent *d)
+    {
+        static int tick = 0;
+        tick += curtime;
+
+        if(tick < 500 && d->afterburnmillis) return;
+
+        loopv(entities::ents)
+        {
+            gameentity &e = *(gameentity *)entities::ents[i];
+            if(e.type == ET_PARTICLES && (e.attr1==1 || e.attr1==2) && d->o.dist(e.o) < e.attr2 / 25) addmsg(N_FIRETOUCH, "rc", d);
+        }
+
+        tick = 0;
+    }
+
     void otherplayers(int curtime)
     {
         loopv(players)
@@ -395,6 +411,8 @@ namespace game
 
             if(d->state == CS_ALIVE && !intermission)
             {
+                checkFire(d);
+
                 if(!deadlylava && lookupmaterial(d->feetpos())&MAT_LAVA && lastmillis - d->lastlavatouch > 250)
                 {
                     d->lastlavatouch = lastmillis;

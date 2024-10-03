@@ -3744,6 +3744,13 @@ namespace server
                 break;
             }
 
+            case N_FIRETOUCH:
+            {
+                if(!cq) break;
+                dodamage(cq, cq, 0, ATK_FLAMETHROWER, vec(0, 0, 0));
+                break;
+            }
+
             case N_MAPVOTE:
             {
                 getstring(text, p);
