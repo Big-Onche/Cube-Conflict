@@ -226,7 +226,7 @@ namespace game
 
         if(hp->boostmillis[B_SHROOMS]) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/shrooms.png", min(1.0f, hp->boostmillis[B_SHROOMS] / 5000.f));
         if(hp->boostmillis[B_RAGE]) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/rage.png", min(1.0f, hp->boostmillis[B_RAGE] / 1000.f));
-        if(hp->vampimillis) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/vampire.png", min(1.0f, hp->vampimillis / 500.f));
+        if(hp->vampiremillis) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/vampire.png", min(1.0f, hp->vampiremillis / 500.f));
         if(hp->afterburnmillis) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/fire.png", min(1.0f, hp->afterburnmillis / 500.f));
 
         if(((hp->abilitymillis[ABILITY_1] || hp->abilitymillis[ABILITY_3]) && hp->aptitude==C_WIZARD) || (hp->abilitymillis[ABILITY_2] && hp->aptitude==C_PHYSICIST))

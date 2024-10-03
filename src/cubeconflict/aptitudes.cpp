@@ -12,7 +12,7 @@ ICOMMAND(setclass, "i", (int *i),
     if(*i < 0 || *i > NUMCLASSES-1) return;
     if(*i == game::player1->aptitude)
     {
-        conoutf(CON_ERROR, "\f3Cannot deactivate your current classe!");
+        conoutf(CON_ERROR, "\f3Cannot deactivate your current class!");
         playSound(S_ERROR, vec(0, 0, 0), 0, 0, SND_UI);
         return;
     }
@@ -42,7 +42,7 @@ int getspyability;
 
 namespace game
 {
-    void abilityeffect(gameent *d, int ability)
+    void abilityEffect(gameent *d, int ability)
     {
         vec sndpos = d->o;
         bool noSoundPos = d==hudplayer();
@@ -50,7 +50,7 @@ namespace game
         if(d->aptitude==C_SPY && ability==ABILITY_1) //for spy's ability 1, we play the sound at the decoy's position
         {
             const int positions[4][2] = { {25, 25}, {-25, -25}, {25, -25}, {-25, 25} };
-            sndpos.add(vec(positions[d->aptiseed][0], positions[d->aptiseed][1], 0));
+            sndpos.add(vec(positions[d->seed][0], positions[d->seed][1], 0));
             noSoundPos = false; //even for player1
         }
 
@@ -84,7 +84,7 @@ namespace game
         }
     }
 
-    bool canlaunchability(gameent *d, int ability)
+    bool canLaunchAbility(gameent *d, int ability)
     {
         if(d->state!=CS_ALIVE || !isconnected() || forcecampos>=0 || intermission || (ability<ABILITY_1 && ability>ABILITY_3)) return false;
         else return d->aptitude==C_WIZARD || d->aptitude==C_PHYSICIST || d->aptitude==C_SPY || d->aptitude==C_PRIEST || d->aptitude==C_SHOSHONE || d->aptitude==C_KAMIKAZE;
@@ -94,7 +94,7 @@ namespace game
     {
         if(request) //player is requesting ability
         {
-            if(!canlaunchability(d, ability)) return; //check for basic guards
+            if(!canLaunchAbility(d, ability)) return; //check for basic guards
             if(!d->abilityready[ability] || d->mana < classes[d->aptitude].abilities[ability].manacost) { if(d==player1) playSound(S_SORTIMPOSSIBLE); return; } //check for game vars (client sided)
             addmsg(N_REQABILITY, "rci", d, ability); //server sided game vars check
             return; //can stop after this, cuz server call this func with !request
@@ -102,7 +102,7 @@ namespace game
         //if all good, we let the ability begin
         d->abilityready[ability] = false;
         d->lastability[ability] = totalmillis;
-        abilityeffect(d, ability);
+        abilityEffect(d, ability);
         if(d==player1) updateStat(1, STAT_ABILITES);
     }
 
@@ -123,7 +123,7 @@ namespace game
     void updateAbilitiesSkills(int time, gameent *d)
     {
         int numEnabled = 0;
-        if(d->vampimillis && (d->vampimillis -= time)<=0) d->vampimillis = 0; // only for vampire screen gfx
+        if(d->vampiremillis && (d->vampiremillis -= time)<=0) d->vampiremillis = 0; // only for vampire screen gfx
 
         loopi(NUMABILITIES)
         {

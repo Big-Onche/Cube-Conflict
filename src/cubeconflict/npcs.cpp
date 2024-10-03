@@ -345,7 +345,7 @@ namespace game
                             if((!melee || dist<50) && !rnd(longrange ? (int)dist/12+1 : min((int)dist/12+1,6)) && enemy->state==CS_ALIVE)      // get ready to fire
                             {
                                 attacktarget = target;
-                                if(player1->aptitude==C_SPY && player1->abilitymillis[ABILITY_1]) attacktarget.add(vec(positions[player1->aptiseed][0], positions[player1->aptiseed][1], 0));
+                                if(player1->aptitude==C_SPY && player1->abilitymillis[ABILITY_1]) attacktarget.add(vec(positions[player1->seed][0], positions[player1->seed][1], 0));
                                 transition(M_AIMING, friendly ? 0 : 1, 1, 10);
                             }
                             else                                                        // track player some more

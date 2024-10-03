@@ -498,6 +498,7 @@ namespace game
         newbouncer(p, to, true, 0, d, type, lifetime, speed);
     }
 
+
     void damageeffect(int damage, gameent *d, gameent *actor, int atk)
     {
         vec p = d->o;
@@ -672,7 +673,7 @@ namespace game
                     case C_VIKING: if(player1->boostmillis[B_RAGE]) damage*=1.25f; break;
                     case C_WIZARD: {if(player1->abilitymillis[ABILITY_2]) damage *= 1.25f; break;}
                     case C_CAMPER: damage *= ((player1->o.dist(f->o)/1800.f)+1.f); break;
-                    case C_VAMPIRE: {player1->health = min(player1->health + damage/2, player1->maxhealth); player1->vampimillis+=damage*1.5f;} break;
+                    case C_VAMPIRE: {player1->health = min(player1->health + damage/2, player1->maxhealth); player1->vampiremillis+=damage*1.5f;} break;
                     case C_SHOSHONE: if(player1->abilitymillis[ABILITY_1]) damage*=1.3f;
                 }
                 damage = (damage*classes[player1->aptitude].damage)/100;

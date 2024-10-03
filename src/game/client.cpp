@@ -1335,7 +1335,7 @@ namespace game
             if(d==player1) loopi(NUMBOOSTS) getint(p);
             else loopi(NUMBOOSTS) d->boostmillis[i] = getint(p);
         }
-        d->aptiseed = getint(p);
+        d->seed = getint(p);
         d->lifesequence = getint(p);
         d->health = getint(p);
         d->maxhealth = getint(p);
@@ -1786,7 +1786,7 @@ namespace game
                 if(!actor) break;
 
                 actor->health = health;
-                actor->vampimillis += damage * 2;
+                actor->vampiremillis += damage * 2;
                 break;
             }
 
@@ -1804,11 +1804,11 @@ namespace game
 
             case N_VIKING:
             {
-                int tcn = getint(p), ragemillis = getint(p);
+                int tcn = getint(p), rage = getint(p);
 
                 gameent *target = getclient(tcn);
 
-                if(target) target->boostmillis[B_RAGE] = ragemillis;
+                if(target) target->boostmillis[B_RAGE] = rage;
                 break;
             }
 

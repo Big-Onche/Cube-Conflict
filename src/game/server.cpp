@@ -1772,7 +1772,7 @@ namespace server
     template<class T>
     void sendstate(servstate &gs, T &p)
     {
-        putint(p, gs.aptiseed);
+        putint(p, gs.seed);
         putint(p, gs.lifesequence);
         putint(p, gs.health);
         putint(p, gs.maxhealth);
@@ -1788,7 +1788,7 @@ namespace server
         servstate &gs = ci->state;
         gs.spawnstate(gamemode, ci->aptitude);
         gs.state = CS_ALIVE;
-        gs.aptiseed = rnd(4);
+        gs.seed = rnd(4);
         gs.lifesequence = (gs.lifesequence + 1)&0x7F;
     }
 
@@ -1796,7 +1796,7 @@ namespace server
     {
         servstate &gs = ci->state;
         spawnstate(ci);
-        sendf(ci->ownernum, 1, "rii9v", N_SPAWNSTATE, ci->clientnum, gs.aptiseed, gs.lifesequence,
+        sendf(ci->ownernum, 1, "rii9v", N_SPAWNSTATE, ci->clientnum, gs.seed, gs.lifesequence,
             gs.health, gs.maxhealth, gs.mana,
             gs.armour, gs.armourtype,
             gs.gunselect, NUMGUNS, gs.ammo);
@@ -1999,7 +1999,7 @@ namespace server
         sendf(-1, 1, "ri3i5vi8vi", N_RESUME, ci->clientnum, gs.state,
             gs.killstreak, gs.frags, gs.flags, gs.deaths, gs.afterburnmillis,
             NUMBOOSTS, gs.boostmillis,
-            gs.aptiseed, gs.lifesequence,
+            gs.seed, gs.lifesequence,
             gs.health, gs.maxhealth, gs.mana,
             gs.armour, gs.armourtype,
             gs.gunselect, NUMGUNS, gs.ammo, -1);
@@ -2325,7 +2325,8 @@ namespace server
             case C_PRIEST:
                 if(ts.abilitymillis[ABILITY_2] && ts.mana)
                 {
-                    ts.mana -= max(0, damage/10);
+                    int mana = max(0, ts.mana - damage/10);
+                    ts.mana = mana;
                     damage = 0;
                     sendf(-1, 1, "ri3", N_PRIEST, target->clientnum, ts.mana);
                 }

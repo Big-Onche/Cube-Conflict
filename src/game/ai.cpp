@@ -163,7 +163,7 @@ namespace ai
         if(e->aptitude==C_SPY && e->abilitymillis[ABILITY_1] && changeAim)
         {
             const int positions[4][2] = { {25, 25}, {-25, -25}, {25, -25}, {-25, 25} };
-            targetPos.add(vec(positions[d->aptiseed][0], positions[d->aptiseed][1], 0));
+            targetPos.add(vec(positions[d->seed][0], positions[d->seed][1], 0));
         }
         else if(e->aptitude==C_PHYSICIST && e->abilitymillis[ABILITY_2])
         {

@@ -794,7 +794,7 @@ namespace game
             adddynlight(vec(d->abovehead()).addz(30), 500, vec(0.0f, 0.5f, 1.5f), 80, 40, L_NODYNSHADOW|DL_FLASH);
             particle_flare(vec(d->o).add(vec(50 - rnd(101), 50 - rnd(101), 1500)), d->feetpos(), 175, PART_LIGHTNING, 0xFFFFFF, 30.0f);
             particle_splash(PART_SMOKE,  15, 2000, d->o, 0x333333, 40.0f, 150, 500);
-            if(actor==player1) { playSound(S_FAUCHEUSE); player1->vampimillis=1500; }
+            if(actor==player1) { playSound(S_FAUCHEUSE); player1->vampiremillis=1500; }
         }
 
         ////////////////////////////// game messages //////////////////////////////

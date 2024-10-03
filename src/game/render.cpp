@@ -475,13 +475,13 @@ namespace game
             if(d!=hudplayer()) flags = NULL;
             vec doublepos = d->feetpos();
             const int positions[4][2] = { {25, 25}, {-25, -25}, {25, -25}, {-25, 25} };
-            doublepos.add(vec(positions[d->aptiseed][0], positions[d->aptiseed][1], 0));
+            doublepos.add(vec(positions[d->seed][0], positions[d->seed][1], 0));
             rendermodel(mdlname, anim, doublepos, d->yaw, clamp(d->pitch, -25, 12), 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), d==player1 ? 0.3f : trans));
         }
 
         if(d->aptitude==C_SPY && d->abilitymillis[ABILITY_2])
         {
-            rendermodel(getdisguisement(d->aptiseed), anim, d->feetpos(), d->yaw, clamp(d->pitch, -25, 12), 0, flags, d, NULL, basetime, 0, fade, vec4(vec::hexcolor(color), 1.0f));
+            rendermodel(getdisguisement(d->seed), anim, d->feetpos(), d->yaw, clamp(d->pitch, -25, 12), 0, flags, d, NULL, basetime, 0, fade, vec4(vec::hexcolor(color), 1.0f));
             return;
         }
 
