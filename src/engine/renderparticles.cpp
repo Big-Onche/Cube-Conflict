@@ -1125,9 +1125,9 @@ void renderarparticles(GLuint airrefractiontex)
     glBindTexture(GL_TEXTURE_RECTANGLE, airrefractiontex);
     glActiveTexture_(GL_TEXTURE0);
 
-    GLOBALPARAMF(arstrenght, arpstrenght);
+    GLOBALPARAMF(arstrenght, ar::scale(arpstrenght));
     float scroll = ar::scroll();
-    GLOBALPARAMF(artexgen, arpscalex, arpscaley, arpscrollx * scroll, arpscrolly * scroll);
+    GLOBALPARAMF(artexgen, ar::scale(arpscalex, true), ar::scale(arpscaley, true), arpscrollx * scroll, arpscrolly * scroll);
     GLOBALPARAMF(arparams, 1.0f/arpdist, 1.0f/arpmargin);
 
     particlearshader->set();

@@ -516,7 +516,12 @@ namespace ar
 
     static inline float scroll()
     {
-        return lastmillis/1000.0f;
+        return lastmillis / 1000.0f;
+    }
+
+    static inline float scale(float f, bool inv = false)
+    {
+        return inv ? (f * (curfov / 100.f)) : (f * (100.f / curfov));
     }
 
     extern void init();

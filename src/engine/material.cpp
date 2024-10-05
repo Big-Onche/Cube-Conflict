@@ -885,10 +885,10 @@ namespace ar
             else glBindTexture(GL_TEXTURE_RECTANGLE, gdepthtex);
             glActiveTexture_(GL_TEXTURE0);
 
-            GLOBALPARAMF(arstrenght, arstrenght);
+            GLOBALPARAMF(arstrenght, ar::scale(arstrenght));
             GLOBALPARAMF(arparams, armindist, 1.0f/maxdist(), 1.0f/armargin, arblend);
 
-            GLOBALPARAMF(artexgen, arscalex, arscaley, arscrollx*scroll(), arscrolly*scroll());
+            GLOBALPARAMF(artexgen, scale(arscalex, true), scale(arscaley, true), arscrollx*scroll(), arscrolly*scroll());
             glBindTexture(GL_TEXTURE_2D, artexture->id);
             SETSHADER(arstex);
 
