@@ -503,9 +503,8 @@ extern int visiblematerial(const cube &c, int orient, const ivec &co, int size, 
 
 namespace ar
 {
-    extern int airrefraction;
+    extern int ar;
     extern float armargin;
-    extern float arblend;
     extern float armindist;
     extern float armaxdist;
 

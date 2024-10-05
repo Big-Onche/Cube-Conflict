@@ -996,7 +996,6 @@ void debugparticles()
 bool arparticles = false;
 Texture *arptexture = NULL;
 
-VAR(arp, 0, 1, 1);
 SVARF(arptex, "media/texture/mat_air/refraction.png", arptexture = textureload(arptex, 0, true, false));
 FVAR(arpstrenght, 1e-6f, 12, 25);
 FVAR(arpblend, 0, 1, 1);
@@ -1026,7 +1025,7 @@ void renderparticles(int layer)
 
         if(p->type&PT_AR)
         {
-            if(arp) arparticles = true;
+            if(ar::ar) arparticles = true;
             else p->reset();
             continue;
         }
@@ -1100,7 +1099,7 @@ bool particleartexture()
 // I won't lie, this is heavily inspired by Red Eclipse's 'haze' code https://github.com/redeclipse/base
 void renderarparticles(GLuint airrefractiontex)
 {
-    if(!arp || !particleartexture())
+    if(!ar::ar || !particleartexture())
     {
         arparticles = false;
         return;
