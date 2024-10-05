@@ -1746,6 +1746,7 @@ void allchanged(bool load)
     if(filltjoints) findtjoints();
     octarender();
     if(load) precachetextures();
+    ar::init();
     setupmaterials();
     clearshadowcache();
     updatevabbs(true);

@@ -795,3 +795,123 @@ void renderminimapmaterials()
     glEnable(GL_CULL_FACE);
 }
 
+namespace ar
+{
+    Texture *artexture = NULL;
+    GLuint airrefractiontex = 0, airrefractionfbo = 0;
+    int artexwidth = 0, artexheight = 0;
+
+    VARFP(ar, 0, 1, 1, ar ? ar::init() : ar::cleanup());
+    VARFR(airrefraction, 0, 0, 1, ar::init());
+    SVARFR(artex, "media/texture/mat_air/refraction.png", ar::init());
+    FVARR(arstrenght, 1e-6f, 2, 10);
+    FVARR(arblend, 0, 1, 1);
+    FVARR(armindist, 0, 512, 1e6f);
+    FVARR(armaxdist, 0, 1024, 1e6f);
+    FVARR(armargin, 1e-6f, 512, 1e6f);
+    FVARR(arscalex, 1e-6f, 1, 1e6f);
+    FVARR(arscaley, 1e-6f, 2, 1e6f);
+    FVARR(arscrollx, -1e6f, 0.05f, 1e6f);
+    FVARR(arscrolly, -1e6f, -0.1f, 1e6f);
+    VARF(arprecision, 0, 1, 1, ar::cleanup());
+
+    void init()
+    {
+        if(!airrefraction || !ar) return;
+        artexture = textureload(artex, 0, true, true);
+        if(artexture && artexture != notexture) useshaderbyname("arstex");
+        else
+        {
+            airrefraction = false;
+            conoutf(CON_ERROR, "Missing air refraction texture, effect deactivated");
+        }
+    }
+
+    // I won't lie, this is heavily inspired by Red Eclipse's 'haze' code https://github.com/redeclipse/base
+    void render()
+    {
+        if(!ar || (!airrefraction && !arparticles)) return;
+
+        if(vieww != artexwidth || viewh != artexheight)
+        {
+            ar::cleanup();
+            artexwidth = vieww * 1.25f;
+            artexheight = viewh * 1.25f;
+        }
+
+        if(!airrefractiontex)
+        {
+            glGenTextures(1, &airrefractiontex);
+            createtexture(airrefractiontex, artexwidth, artexheight, NULL, 3, 1, (arprecision ? GL_RGB16F : GL_RGB8), GL_TEXTURE_RECTANGLE);
+        }
+
+        if(msaalight && !airrefractionfbo)
+        {
+            glGenFramebuffers_(1, &airrefractionfbo);
+            glBindFramebuffer_(GL_FRAMEBUFFER, airrefractionfbo);
+            glFramebufferTexture2D_(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, airrefractiontex, 0);
+            if(glCheckFramebufferStatus_(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) fatal("Failed allocating air refraction buffer!");
+            glBindFramebuffer_(GL_FRAMEBUFFER, mshdrfbo);
+        }
+        GLERROR;
+
+        if(arparticles)
+        {
+            if(msaalight)
+            {
+                glBindFramebuffer_(GL_READ_FRAMEBUFFER, mshdrfbo);
+                glBindFramebuffer_(GL_DRAW_FRAMEBUFFER, airrefractionfbo);
+                glBlitFramebuffer_(0, 0, artexwidth, artexheight, 0, 0, artexwidth, artexheight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+                glBindFramebuffer_(GL_FRAMEBUFFER, mshdrfbo);
+            }
+            else
+            {
+                glBindTexture(GL_TEXTURE_RECTANGLE, airrefractiontex);
+                glCopyTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, 0, 0, artexwidth, artexheight);
+            }
+        }
+
+        if(airrefraction)
+        {
+            glDisable(GL_DEPTH_TEST);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+            glActiveTexture_(GL_TEXTURE8);
+            glBindTexture(GL_TEXTURE_RECTANGLE, airrefractiontex);
+
+            glActiveTexture_(GL_TEXTURE9);
+            if(msaalight) glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msdepthtex);
+            else glBindTexture(GL_TEXTURE_RECTANGLE, gdepthtex);
+            glActiveTexture_(GL_TEXTURE0);
+
+            GLOBALPARAMF(arstrenght, arstrenght);
+            GLOBALPARAMF(arparams, armindist, 1.0f/maxdist(), 1.0f/armargin, arblend);
+
+            GLOBALPARAMF(artexgen, arscalex, arscaley, arscrollx*scroll(), arscrolly*scroll());
+            glBindTexture(GL_TEXTURE_2D, artexture->id);
+            SETSHADER(arstex);
+
+            screenquad();
+
+            glDisable(GL_BLEND);
+            glEnable(GL_DEPTH_TEST);
+        }
+
+        if(arparticles) renderarparticles(airrefractiontex);
+    }
+
+    void cleanup()
+    {
+        if(airrefractionfbo)
+        {
+            glDeleteFramebuffers_(1, &airrefractionfbo);
+            airrefractionfbo = 0;
+        }
+        if(airrefractiontex)
+        {
+            glDeleteTextures(1, &airrefractiontex);
+            airrefractiontex = 0;
+        }
+    }
+}

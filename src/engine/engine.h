@@ -282,7 +282,7 @@ enum { SM_NONE = 0, SM_REFLECT, SM_CUBEMAP, SM_CASCADE, SM_SPOT };
 extern int shadowmapping;
 
 extern vec shadoworigin, shadowdir;
-extern float shadowradius, shadowbias;
+extern float shadowradius, shadowbias, refractdepth;
 extern int shadowside, shadowspot, shadowtransparent;
 extern matrix4 shadowmatrix;
 
@@ -330,15 +330,17 @@ static inline bool bbinsidespot(const vec &origin, const vec &dir, int spot, con
     return sphereinsidespot(dir, spot, center.sub(origin), radius.magnitude());
 }
 
-extern matrix4 worldmatrix, screenmatrix;
+extern matrix4 eyematrix, worldmatrix, screenmatrix;
 
 extern int transparentlayer;
 
+extern GLenum hdrformat;
 extern int gw, gh, gdepthformat, ghasstencil;
-extern GLuint gdepthtex, gcolortex, gnormaltex, gglowtex, gdepthrb, gstencilrb;
+extern GLuint hdrtex, gdepthtex, gcolortex, gnormaltex, gglowtex, gdepthrb, gstencilrb, refracttex;
 extern int msaasamples, msaalight;
-extern GLuint msdepthtex, mscolortex, msnormaltex, msglowtex, msdepthrb, msstencilrb;
+extern GLuint mshdrtex, msdepthtex, mscolortex, msnormaltex, msglowtex, msdepthrb, msstencilrb, msrefracttex;
 extern vector<vec2> msaapositions;
+extern GLuint hdrfbo, mshdrfbo;
 enum { AA_UNUSED = 0, AA_LUMA, AA_MASKED, AA_SPLIT, AA_SPLIT_LUMA, AA_SPLIT_MASKED };
 
 extern void cleanupgbuffer();
@@ -498,6 +500,29 @@ extern void rendersolidmaterials();
 extern void rendereditmaterials();
 extern void renderminimapmaterials();
 extern int visiblematerial(const cube &c, int orient, const ivec &co, int size, ushort matmask = MATF_VOLUME);
+
+namespace ar
+{
+    extern int airrefraction;
+    extern float armargin;
+    extern float arblend;
+    extern float armindist;
+    extern float armaxdist;
+
+    static inline float maxdist()
+    {
+        return max(armindist, armaxdist - armindist + armargin);
+    }
+
+    static inline float scroll()
+    {
+        return lastmillis/1000.0f;
+    }
+
+    extern void init();
+    extern void render();
+    extern void cleanup();
+}
 
 // water
 extern int vertwater, waterreflect, caustics;
@@ -696,6 +721,7 @@ static inline mapmodelinfo *getmminfo(int n) { return mapmodels.inrange(n) ? &ma
 
 // renderparticles
 extern int particlelayers;
+extern bool arparticles;
 
 enum { PL_ALL = 0, PL_UNDER, PL_OVER, PL_NOLAYER };
 
@@ -706,6 +732,7 @@ extern void seedparticles();
 extern void updateparticles();
 extern void debugparticles();
 extern void renderparticles(int layer = PL_ALL);
+extern void renderarparticles(GLuint airrefractiontex);
 extern bool printparticles(extentity &e, char *buf, int len);
 extern void cleanupparticles();
 

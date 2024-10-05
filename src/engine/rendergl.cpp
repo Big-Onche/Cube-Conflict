@@ -2708,14 +2708,21 @@ void gl_drawview()
     rendervolumetric();
     GLERROR;
 
+    if(!drawtex)
+    {
+        renderparticles();
+        GLERROR;
+
+        ar::render();
+        GLERROR;
+    }
+
     if(editmode)
     {
         extern int outline;
         if(!wireframe && outline) renderoutline();
         GLERROR;
         rendereditmaterials();
-        GLERROR;
-        renderparticles();
         GLERROR;
 
         extern int hidehud;

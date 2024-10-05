@@ -688,6 +688,7 @@ void resetgl()
     cleanuptextures();
     cleanupblendmap();
     cleanuplights();
+    ar::cleanup();
     cleanupshaders();
     cleanupgl();
 

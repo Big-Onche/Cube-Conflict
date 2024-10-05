@@ -1560,6 +1560,7 @@ void resetshaders()
     clearchanges(CHANGE_SHADERS);
 
     cleanuplights();
+    ar::cleanup();
     cleanupmodels();
     cleanupshaders();
     setupshaders();

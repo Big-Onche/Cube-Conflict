@@ -3,7 +3,7 @@
 #include "engine.h"
 #include "gfx.h"
 
-Shader *particleshader = NULL, *particlenotextureshader = NULL, *particlesoftshader = NULL, *particletextshader = NULL;
+Shader *particleshader = NULL, *particlenotextureshader = NULL, *particlesoftshader = NULL, *particlearshader = NULL, *particletextshader = NULL;
 
 VARP(particlelayers, 0, 1, 1);
 FVARP(particlebright, 0, 1.75, 100);
@@ -11,8 +11,6 @@ VARP(particlesize, 20, 100, 500);
 
 VARP(softparticles, 0, 1, 1);
 VARP(softparticleblend, 1, 8, 64);
-
-VARR(partcloudcolour, 0, 0x888888, 0xFFFFFF);
 
 // Check canemitparticles() to limit the rate that paricles can be emitted for models/sparklies
 // Automatically stops particles being emitted when paused or in reflective drawing
@@ -126,6 +124,7 @@ enum
     PT_NOMAXDIST    = 1<<25,
     PT_EMITLIGHT    = 1<<26,
     PT_EMITVLIGHT   = 1<<27,
+    PT_AR           = 1<<28,
     PT_FLIP         = PT_HFLIP | PT_VFLIP | PT_ROT
 };
 
@@ -375,7 +374,7 @@ struct listrenderer : partrenderer
         p->size = size;
         p->owner = NULL;
         p->flags = 0;
-        p->sizemod = clamp(sizemod, -25, 25);
+        p->sizemod = clamp(sizemod, -50, 50);
         p->hud = hud;
         p->sound = sound;
         return p;
@@ -940,8 +939,10 @@ static partrenderer *parts[] =
     // misc
     new quadrenderer("<grey>media/particles/misc/blood.png", PT_PART|PT_FLIP|PT_MOD|PT_RND4|PT_COLLIDE, STAIN_BLOOD),        // PART_BLOOD (note: rgb is inverted)
     new quadrenderer("media/particles/misc/spark.png", PT_PART|PT_FLIP|PT_BRIGHT),                                           // PART_SPARK
-    new quadrenderer("media/particles/misc/spark.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_EMITLIGHT),                             // PART_SPARK_L
+    new quadrenderer("media/particles/misc/spark.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_EMITLIGHT),                              // PART_SPARK_L
     new quadrenderer("media/particles/misc/spark.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_EMITVLIGHT|PT_COLLIDE, STAIN_BULLET_GLOW),// PART_SPARK_VL
+    new quadrenderer("media/particles/game/basic.png", PT_PART|PT_AR|PT_FLIP|PT_FLIP),                                       // PART_AR
+    new quadrenderer("media/particles/game/basic.png", PT_PART|PT_AR|PT_FLIP|PT_FEW|PT_TRACK),                               // PART_F_AR
     &texts,                                                                                                                  // PART_TEXT
     &flares                                                                                                                  // PART_LENS_FLARE - must be done last
 };
@@ -955,6 +956,7 @@ void initparticles()
     if(!particleshader) particleshader = lookupshaderbyname("particle");
     if(!particlenotextureshader) particlenotextureshader = lookupshaderbyname("particlenotexture");
     if(!particlesoftshader) particlesoftshader = lookupshaderbyname("particlesoft");
+    if(!particlearshader) particlearshader = lookupshaderbyname("particleairrefraction");
     if(!particletextshader) particletextshader = lookupshaderbyname("particletext");
     loopi(sizeof(parts)/sizeof(parts[0])) parts[i]->init(parts[i]->type&PT_FEW ? min(fewparticles, maxparticles) : maxparticles);
     loopi(sizeof(parts)/sizeof(parts[0])) parts[i]->preload();
@@ -991,6 +993,20 @@ void debugparticles()
     pophudmatrix();
 }
 
+bool arparticles = false;
+Texture *arptexture = NULL;
+
+VAR(arp, 0, 1, 1);
+SVARF(arptex, "media/texture/mat_air/refraction.png", arptexture = textureload(arptex, 0, true, false));
+FVAR(arpstrenght, 1e-6f, 12, 25);
+FVAR(arpblend, 0, 1, 1);
+FVAR(arpdist, 0, 128, 1e6f);
+FVAR(arpmargin, 0, 8, 1e6f);
+FVAR(arpscalex, 1e-6f, 0.4f, 1e6f);
+FVAR(arpscaley, 1e-6f, 0.4f, 1e6f);
+FVAR(arpscrollx, -1e6f, 0.4f, 1e6f);
+FVAR(arpscrolly, -1e6f, 0.4f, 1e6f);
+
 void renderparticles(int layer)
 {
     canstep = layer != PL_UNDER;
@@ -1007,6 +1023,13 @@ void renderparticles(int layer)
     {
         partrenderer *p = parts[i];
         if((p->type&PT_NOLAYER) == excludemask || !p->haswork()) continue;
+
+        if(p->type&PT_AR)
+        {
+            if(arp) arparticles = true;
+            else p->reset();
+            continue;
+        }
 
         if(!rendered)
         {
@@ -1062,6 +1085,66 @@ void renderparticles(int layer)
         glDisable(GL_BLEND);
         glDepthMask(GL_TRUE);
     }
+}
+
+bool particleartexture()
+{
+    if(!arptexture)
+    {
+        arptexture = textureload(arptex, 0, true, false);
+        if (!arptexture || arptexture == notexture) return false;
+    }
+    return true;
+}
+
+// I won't lie, this is heavily inspired by Red Eclipse's 'haze' code https://github.com/redeclipse/base
+void renderarparticles(GLuint airrefractiontex)
+{
+    if(!arp || !particleartexture())
+    {
+        arparticles = false;
+        return;
+    }
+
+    canstep = true;
+
+    GLboolean olddepthmask;
+    glGetBooleanv(GL_DEPTH_WRITEMASK, &olddepthmask);
+
+    glDepthMask(GL_FALSE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glActiveTexture_(GL_TEXTURE2);
+
+    if(msaalight) glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msdepthtex);
+    else glBindTexture(GL_TEXTURE_RECTANGLE, gdepthtex);
+
+    glActiveTexture_(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, arptexture->id);
+    glActiveTexture_(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_RECTANGLE, airrefractiontex);
+    glActiveTexture_(GL_TEXTURE0);
+
+    GLOBALPARAMF(arstrenght, arpstrenght);
+    float scroll = ar::scroll();
+    GLOBALPARAMF(artexgen, arpscalex, arpscaley, arpscrollx * scroll, arpscrolly * scroll);
+    GLOBALPARAMF(arparams, 1.0f/arpdist, 1.0f/arpmargin);
+
+    particlearshader->set();
+
+    LOCALPARAMF(colorscale, 1, 1, 1, arpblend);
+
+    loopi(sizeof(parts)/sizeof(parts[0]))
+    {
+        partrenderer *p = parts[i];
+        if(!(p->type&PT_AR) || !p->haswork()) continue;
+        p->render();
+    }
+
+    glDisable(GL_BLEND);
+    glDepthMask(olddepthmask);
+
+    arparticles = false;
 }
 
 static int addedparticles = 0;
@@ -1485,6 +1568,7 @@ void updateWeather()
 }
 
 VARR(showrainbow, 0, 0, 1);
+VARR(partcloudcolour, 0, 0x888888, 0xFFFFFF);
 
 static void makeparticles(entity &e)
 {
@@ -1520,6 +1604,7 @@ static void makeparticles(entity &e)
             if(g) g = applyRandomOffset(g, e.attr7);
             if(b) b = applyRandomOffset(b, e.attr7);
 
+            if(rnd(2)) regularflame(PART_AR, e.o, radius, height, rgbToHex(r, g, b), 1, 9.f, 200.f, 600.f, -15, e.attr8 + 8);
             regularflame(PART_FLAME, e.o, radius, height, rgbToHex(r, g, b), 2, 2.0f+(rnd(2)), 200.f, 600.f, -15, e.attr8);
             int gray = smokeGs();
             if(e.attr1==1) regularflame(PART_SMOKE, vec(e.o.x, e.o.y, e.o.z + 4.0f*min(radius, height)), radius, height, rgbToHex(gray, gray, gray), 1, 4.0f+(rnd(6)), 100.0f, 2750.0f, -15, e.attr8);
@@ -1652,7 +1737,9 @@ static void makeparticles(entity &e)
         }
 
         case 12: // flares: attr 2:<size> attr 3:<view dist> 4:<r> 5:<g> 6:<b> 7:<flickering>
-            flares.addflare(e.o, e.attr4, e.attr5, e.attr6, e.attr2, e.attr3, true, e.attr7);
+            particle_splash(PART_AR, 1, 1, e.o, 0xFFFFFF, 10, 1, 0, 0, false);
+            //particle_splash(PART_SPARK, 1, 1, e.o, 0x00ff00, 10, 1, 0, 0, false);
+            //flares.addflare(e.o, e.attr4, e.attr5, e.attr6, e.attr2, e.attr3, true, e.attr7);
             break;
 
         /*
