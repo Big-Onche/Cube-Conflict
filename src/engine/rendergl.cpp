@@ -2980,7 +2980,7 @@ int calculateAverageFramerate()
     if(totalSamples == 0) return 0; // Avoid division by zero
     int sum = 0;
     loopi(totalSamples) sum += fpsSamples[i];
-    return sum / totalSamples;
+    return (sum + totalSamples / 2) / totalSamples;
 }
 
 void addFramerate(int fps)
