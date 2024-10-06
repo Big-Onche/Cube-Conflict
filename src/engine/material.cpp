@@ -855,20 +855,17 @@ namespace ar
         }
         GLERROR;
 
-        if(arparticles)
+        if(msaalight)
         {
-            if(msaalight)
-            {
-                glBindFramebuffer_(GL_READ_FRAMEBUFFER, mshdrfbo);
-                glBindFramebuffer_(GL_DRAW_FRAMEBUFFER, airrefractionfbo);
-                glBlitFramebuffer_(0, 0, artexwidth, artexheight, 0, 0, artexwidth, artexheight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-                glBindFramebuffer_(GL_FRAMEBUFFER, mshdrfbo);
-            }
-            else
-            {
-                glBindTexture(GL_TEXTURE_RECTANGLE, airrefractiontex);
-                glCopyTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, 0, 0, artexwidth, artexheight);
-            }
+            glBindFramebuffer_(GL_READ_FRAMEBUFFER, mshdrfbo);
+            glBindFramebuffer_(GL_DRAW_FRAMEBUFFER, airrefractionfbo);
+            glBlitFramebuffer_(0, 0, artexwidth, artexheight, 0, 0, artexwidth, artexheight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+            glBindFramebuffer_(GL_FRAMEBUFFER, mshdrfbo);
+        }
+        else
+        {
+            glBindTexture(GL_TEXTURE_RECTANGLE, airrefractiontex);
+            glCopyTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, 0, 0, artexwidth, artexheight);
         }
 
         if(airrefraction)
