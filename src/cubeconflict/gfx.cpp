@@ -188,7 +188,7 @@ namespace game
                 bool miniRockets = (atk == ATK_S_ROCKETS);
 
                 particle_fireball(v, 350, PART_SHOCKWAVE, 300, hasRoids(d) ? 0xFF0000 : 0xFFFFFF, 20.0f, hasShrooms());
-                particle_splash(PART_AR, 5, 350, v, 0xFFFFFF, 50, 300, 800, 40);
+                particle_splash(PART_AR, 5, 350, v, 0xCCCCCC, 50, 300, 800, 40);
 
                 loopi(inWater ? 3 : 8)
                 {
@@ -232,7 +232,7 @@ namespace game
                 return;
 
             case ATK_M32:
-                particle_splash(PART_AR, 5, 300, v, 0xFFFFFF, 85, 200, 200, 50);
+                particle_splash(PART_AR, 6, 300, v, 0xFFFFFF, 85, 200, 200, 50);
                 loopi(3) particle_splash(PART_SPARK, 8, 150+rnd(150), v, hasRoids(d) ? 0xFF0000 : 0xFFFFFF,  1.2f, 1500+rnd(2250), 1500+rnd(2250), 0, hasShrooms());
                 loopi(2) particle_splash(PART_SMOKE, 7, 1300+rnd(800), v, 0x555555, 40.0f, 150+rnd(150), 300+rnd(700), 0, hasShrooms());
                 loopi(3) particle_fireball(v, 40+rnd(50), PART_PLASMAGRENADE, 300, hasRoids(d) ? 0xFF0000 : 0xFFFFFF, 1.0f, hasShrooms());
@@ -280,7 +280,7 @@ namespace game
             {
                 bool kamikaze = (atk==ATK_KAMIKAZE);
 
-                particle_splash(PART_AR, 6, 450, v, 0xFFFFFF, 60, 300, 800, 50);
+                particle_splash(PART_AR, 6, 450, v, 0xCCCCCC, 60, 300, 800, 50);
 
                 loopi(9)
                 {
@@ -323,7 +323,7 @@ namespace game
                     pos.y += r * sin(theta) * sin(phi);
                     pos.z += r * cos(theta);
 
-                    if(!rnd(2)) particle_splash(PART_AR, 1, 3000, v, 0xFFFFFF, 150, 150, 300, 1);
+                    if(!rnd(2)) particle_splash(PART_AR, 1, 3000, v, 0xCCCCCC, 150, 150, 300, 1);
 
                     particle_splash(PART_SMOKE, 1, 2000,  pos, 0x212121, 150.0f,  700,  70, 1, hasShrooms());
                     particle_splash(PART_SMOKE, 1, 15000, pos, 0x222222, 200.0f,  150, 300, 1, hasShrooms());
@@ -487,7 +487,7 @@ namespace game
         }
     }
 
-    float adaptMuzzleFlash(gameent *d) { return (d==game::hudplayer() && !thirdperson ? zoom ? 2.5f : 1.5f : 1.f)*(d->boostmillis[B_RAGE] ? 1.33f : 1.f); }
+    float adaptMuzzleFlash(gameent *d) { return (d==game::hudplayer() && !thirdperson ? zoom ? 2.7f : 1.5f : 1.f)*(d->boostmillis[B_RAGE] ? 1.33f : 1.f); }
 
     void renderMuzzleEffects(const vec &from, const vec &to, gameent *d, int atk)
     {
@@ -497,14 +497,16 @@ namespace game
         bool increasedDamages = d->boostmillis[B_RAGE] || hasRoids(d);
         vec dir = vec(to).sub(from);
 
-        particle_flare(pos, pos, 200, PART_F_AR, 0xFFFFFF, 2.5f/adaptMuzzleFlash(d), d, false, 20);
-
         switch(atk)
         {
             case ATK_PLASMA:
-                particle_flare(pos, pos, 100, PART_MF_PLASMA, increasedDamages ? 0xFF4444 : wizardAbility ? 0xFF44FF : 0xFF7911, 2.f/adaptMuzzleFlash(d), d, hasShrooms());
+            {
+                float mfSize = 1.5f/adaptMuzzleFlash(d);
+                particle_flare(pos, pos, 125, PART_MF_PLASMA, increasedDamages ? 0xFF4444 : wizardAbility ? 0xFF44FF : 0xFF7911, mfSize, d, hasShrooms(), 3);
+                if(!d->gunaccel) particle_flare(pos, pos, 200, PART_F_AR, 0xFFFFFF, mfSize, d, false, 10);
                 adddynlight(pos, 100, vec(1.25f, 0.2f, 0.0f), 40, 2, flags, 100, vec(1.25f, 0.2f, 0.0f), d);
                 break;
+            }
             case ATK_SPOCKGUN:
                 particle_flare(pos, pos, 150, PART_MF_PLASMA, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0x22FF22, 1.5f/adaptMuzzleFlash(d), d, hasShrooms());
                 adddynlight(pos, 75, vec(0.0f, 1.25f, 0.0f), 50, 2, flags, 75, vec(0.0f, 1.25f, 0.0f), d);

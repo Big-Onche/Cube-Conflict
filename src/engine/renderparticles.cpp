@@ -997,12 +997,12 @@ bool arparticles = false;
 Texture *arptexture = NULL;
 
 SVARF(arptex, "media/texture/mat_air/refraction.png", arptexture = textureload(arptex, 0, true, false));
-FVAR(arpstrenght, 1e-6f, 12, 25);
+FVAR(arpstrenght, 1e-6f, 16, 50);
 FVAR(arpblend, 0, 1, 1);
 FVAR(arpdist, 0, 128, 1e6f);
 FVAR(arpmargin, 0, 8, 1e6f);
-FVAR(arpscalex, 1e-6f, 0.4f, 1e6f);
-FVAR(arpscaley, 1e-6f, 0.4f, 1e6f);
+FVAR(arpscalex, 1e-6f, 0.2f, 1e6f);
+FVAR(arpscaley, 1e-6f, 0.2f, 1e6f);
 FVAR(arpscrollx, -1e6f, 0.4f, 1e6f);
 FVAR(arpscrolly, -1e6f, 0.4f, 1e6f);
 
@@ -1568,6 +1568,7 @@ void updateWeather()
 
 VARR(showrainbow, 0, 0, 1);
 VARR(partcloudcolour, 0, 0x888888, 0xFFFFFF);
+VAR(showarpmask, 0, 1, 1);
 
 static void makeparticles(entity &e)
 {
@@ -1603,7 +1604,7 @@ static void makeparticles(entity &e)
             if(g) g = applyRandomOffset(g, e.attr7);
             if(b) b = applyRandomOffset(b, e.attr7);
 
-            if(rnd(2)) regularflame(PART_AR, e.o, radius, height, rgbToHex(r, g, b), 1, 9.f, 200.f, 600.f, -15, e.attr8 + 8);
+            if(rnd(2)) regularflame(PART_AR, e.o, radius, height, 0xFFFFFF, 1, 12.f, 200.f, 600.f, -12, e.attr8 + 12);
             regularflame(PART_FLAME, e.o, radius, height, rgbToHex(r, g, b), 2, 2.0f+(rnd(2)), 200.f, 600.f, -15, e.attr8);
             int gray = smokeGs();
             if(e.attr1==1) regularflame(PART_SMOKE, vec(e.o.x, e.o.y, e.o.z + 4.0f*min(radius, height)), radius, height, rgbToHex(gray, gray, gray), 1, 4.0f+(rnd(6)), 100.0f, 2750.0f, -15, e.attr8);
@@ -1689,7 +1690,7 @@ static void makeparticles(entity &e)
                 if(!radius) radius = 50;
                 if(!num) num = 5;
                 if(!size) size = 0.2f;
-                if(!fade) fade = 200; // 0x18181A
+                if(!fade) fade = 200;
 
                 int r, g, b;
                 if(noColors(e.attr4, e.attr5, e.attr6)) { r = 170; g = 170;  b = 200; } // setting default colors for generic sparks
@@ -1710,6 +1711,7 @@ static void makeparticles(entity &e)
                 loopi(2 + rnd(3)) particles::dirSplash(PART_FIRESPARK, 0xFFBB55, 750, 7, 300 + (rnd(500)), pos, vec(0, 0, 1), 3.f+(rnd(30)/6.f), ((i + 1) * 125) + rnd(200), -1);
                 loopi(4) particles::dirSplash(PART_SMOKE, 0x333333, 200, 4, 1500 + rnd(750), pos, vec(0, 0, 1), 15.f + rnd(5), 50 + rnd(50), 5);
                 loopi(2) particle_fireball(pos, 20, PART_EXPLOSION, 500, 0xFF9900, 2.5f, false);
+                particles::dirSplash(PART_AR, 0xFFFFFF, 200, 2, 1000 + rnd(500), pos, vec(0, 0, 1), 25.f, 50, 15);
                 adddynlight(e.o, 200, vec(0.3f, 0.15f, 0), 250, 150, DL_EXPAND|L_NOSHADOW|L_VOLUMETRIC, 50);
             }
             break;
@@ -1736,10 +1738,18 @@ static void makeparticles(entity &e)
         }
 
         case 12: // flares: attr 2:<size> attr 3:<view dist> 4:<r> 5:<g> 6:<b> 7:<flickering>
-            particle_splash(PART_AR, 1, 1, e.o, 0xFFFFFF, 10, 1, 0, 0, false);
-            //particle_splash(PART_SPARK, 1, 1, e.o, 0x00ff00, 10, 1, 0, 0, false);
-            //flares.addflare(e.o, e.attr4, e.attr5, e.attr6, e.attr2, e.attr3, true, e.attr7);
+            flares.addflare(e.o, e.attr4, e.attr5, e.attr6, e.attr2, e.attr3, true, e.attr7);
             break;
+
+        case 13: // air refraction: attr 2:<size> attr 3:<intensity>
+        {
+            if(!canemitparticles()) return;
+
+            particle_splash(PART_AR, 1, 100, e.o, rgbToHex(e.attr3, e.attr3, e.attr3), e.attr2, 10, -200);
+            if(editmode && showarpmask) particle_splash(PART_BASIC, 1, 100, e.o, 0x201000, e.attr2, 10, -200);
+            break;
+        }
+
 
         /*
         case 4:  //tape - <dir> <length> <rgb>

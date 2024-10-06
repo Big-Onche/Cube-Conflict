@@ -1291,7 +1291,7 @@ namespace game
                 loopi(attacks[atk].rays)
                 {
                     vec dest = vec(rays[i]).sub(muzzleOrigin).normalize().mul(1450.0f + rnd(200));
-                    if(rnd(2)) particle_flying_flare(muzzleOrigin, dest, 950, PART_AR, 0xFFFFFF, 15.f, 100, 40);
+                    if(rnd(2)) particle_flying_flare(muzzleOrigin, dest, 900, PART_AR, 0xEEEEEE, 15.f, 100, 50);
                     switch(rnd(4))
                     {
                         case 0: particle_flying_flare(muzzleOrigin, dest, 700, PART_FIRE_BALL, hasRoids(d) ? 0x881111 : 0x604930, (12.f+rnd(16))/8.f, 100, 10+rnd(5), hasShrooms()); break;
@@ -1692,7 +1692,7 @@ namespace game
                     case BNC_GLASS:
                         particle_splash(PART_SMOKE, 1, 1200, pos, 0x303030, 2.5f, 50, -50, 10, hasShrooms());
                         particle_splash(PART_FIRE_BALL, 1, 250, pos, (hasRoids(bnc.owner) ? 0xFF0000 : 0x996600), 1.3f, 50, -50, 12, hasShrooms());
-                        if(rnd(2)) particle_splash(PART_AR, 1, 400, pos, 0xFFFFFF, 8.f, 50, -25, 35, hasShrooms());
+                        if(rnd(2)) particle_splash(PART_AR, 1, 500, pos, 0xFFFFFF, 12.f, 50, -25, 50, hasShrooms());
                         break;
 
                     case BNC_BURNINGDEBRIS:

@@ -835,8 +835,8 @@ namespace ar
         if(vieww != artexwidth || viewh != artexheight)
         {
             ar::cleanup();
-            artexwidth = vieww * 1.25f;
-            artexheight = viewh * 1.25f;
+            artexwidth = vieww;
+            artexheight = viewh;
         }
 
         if(!airrefractiontex)
