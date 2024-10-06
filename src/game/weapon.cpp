@@ -1020,12 +1020,13 @@ namespace game
 
                 vec pos = vec(p.offset).mul(p.offsetmillis/float(OFFSETMILLIS)).add(v);
 
-                if(!p.inwater && (lookupmaterial(camera1->o) & MATF_VOLUME) == MAT_WATER)
+                if(!p.inwater && (lookupmaterial(p.o) & MATF_VOLUME) == MAT_WATER)
                 {
                     p.inwater = true;
-                    vec effectPos = pos;
+                    vec effectPos = p.o;
                     effectPos.addz(2.5f);
-                    particle_splash(PART_WATER, 15, 100, effectPos, 0x28282A, 1.5f, 50, -300, 6, hasShrooms());
+                    particles::dirSplash(PART_WATER, 0x40403A, 150, 10, 75, effectPos, vec(0, 0, 1), 2.f, 300, 15, hasShrooms());
+                    particles::dirSplash(PART_WATER, 0x50503A, 500, 5, 150, effectPos, vec(0, 0, 1), 3.f, 150, 15, hasShrooms());
                     playSound(S_IMPACTWATER, effectPos, 250, 50, SND_LOWPRIORITY|SND_NOOCCLUSION);
                 }
 
