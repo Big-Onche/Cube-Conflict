@@ -762,8 +762,11 @@ namespace game
         int h = zoom ? 2 : -2;
         int v = zoom ? -1 : 1;
 
-        hudgunDisp.x = clamp(int(hudgunDisp.x) + h * delta, 1, int(guns[hudplayer()->gunselect].weapDisp.x));
-        hudgunDisp.y = clamp(int(hudgunDisp.y) + v * delta, 1, int(guns[hudplayer()->gunselect].weapDisp.y));
+        if(!ispaused())
+        {
+            hudgunDisp.x = clamp(int(hudgunDisp.x) + h * delta, 1, int(guns[hudplayer()->gunselect].weapDisp.x));
+            hudgunDisp.y = clamp(int(hudgunDisp.y) + v * delta, 1, int(guns[hudplayer()->gunselect].weapDisp.y));
+        }
 
         vec sway;
         vecfromyawpitch(d->yaw, 0, 0, 1, sway);

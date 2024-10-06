@@ -1612,7 +1612,7 @@ void updateCameraAnimations()
 void recomputecamera(int campostag)
 {
     game::setupcamera();
-    computezoom();
+    if(!game::ispaused()) computezoom();
 
     bool shoulddetach = thirdperson > 1 || game::detachcamera() || campostag>=0;
     if(!thirdperson && !shoulddetach)
@@ -2742,6 +2742,7 @@ void gl_drawview()
 
     doaa(setuppostfx(vieww, viewh, scalefbo), processhdr);
     renderpostfx(scalefbo);
+    postfx::render(scalefbo);
     if(scalefbo) doscale();
 }
 
