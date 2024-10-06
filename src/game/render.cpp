@@ -539,6 +539,7 @@ namespace game
             case GUN_MOLOTOV:
                 particle_splash(PART_FIRE_BALL, 2, 80, d->balles, 0xFFC864, 1, 30, 30, 0, hasShrooms());
                 particle_splash(PART_SMOKE, 3, 180, d->balles, 0x444444, 2, 40, 50, 0, hasShrooms());
+                particle_splash(PART_AR, 2, 250, d->balles, 0xFFFFFF, 2, 40, 50, 5);
                 break;
         }
     }

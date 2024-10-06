@@ -1116,8 +1116,6 @@ namespace game
         bool isHudPlayer = d==hudplayer();
         vec muzzleOrigin = noMuzzle(atk, d) ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle;
         vec casingOrigin = (d->aptitude==C_SPY && d->abilitymillis[ABILITY_2]) ? d->o : d->balles;
-        int lightFlags = DL_FLASH|L_NODYNSHADOW;
-
         bool wizardAbility = (d->aptitude==C_WIZARD && d->abilitymillis[ABILITY_2]);
         if(wizardAbility) playSound(S_WIZ_2, isHudPlayer ? vec(0, 0, 0) : d->muzzle, 250, 150, NULL, d->entityId);
 
@@ -1196,12 +1194,8 @@ namespace game
             case ATK_HYDRA:
             {
                 bool isHydra = (atk==ATK_HYDRA);
+                renderMuzzleEffects(from, to, d, atk);
                 if(!local) createrays(gun, from, to, d);
-                particle_flare(d->muzzle, d->muzzle, 140, PART_MF_SHOTGUN, hasRoids(d) ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xCCAAAA, isHudPlayer ? zoom ? 1.25f : 3.50f : 4.5f, d, hasShrooms());
-                particle_splash(PART_SMOKE, 4, 500, d->muzzle, 0x443333, 3.5f, 20, 500, 0, hasShrooms());
-                particle_splash(PART_SPARK, isHudPlayer ? 4 : 7, 40, d->muzzle, 0xFF2200, 0.5f, 300, 500, 0, hasShrooms());
-                if(d->boostmillis[B_RAGE]) particle_flare(d->muzzle, d->muzzle, 140, PART_MF_SHOTGUN, 0xFF2222, isHudPlayer ? zoom ? 2.00f : 5.5f : 6.5f, d, hasShrooms());
-                adddynlight(muzzleOrigin, 75, vec(1.25f, 0.25f, 0.f), 40, 2, lightFlags, 0, vec(1.25f, 0.25f, 0.f), d);
                 loopi(isHydra ? 3 : 2) spawnbouncer(casingOrigin, d->vel, d, BNC_CARTRIDGE);
                 if(isHudPlayer)
                 {
@@ -1228,12 +1222,7 @@ namespace game
             case ATK_S_CAMPER:
             {
                 bool isSv98 = (atk==ATK_SV98);
-                particle_splash(PART_SMOKE, isHudPlayer ? 4 : 6, isHudPlayer ? 350 : 600, d->muzzle, 0x222222, isHudPlayer ? 3.5f : 6.5f, 40, 500, 0, hasShrooms());
-                particle_splash(PART_SPARK, isHudPlayer ? 4 : 7, 40, d->muzzle, 0xFFFFFF, 0.5f, 300, 500, 0, hasShrooms());
-                particle_flare(d->muzzle, d->muzzle, 100, PART_MF_LITTLE, hasRoids(d) ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFFFFFF, 1.25f, d, hasShrooms());
-                particle_flare(d->muzzle, d->muzzle, 100, PART_MF_SNIPER, hasRoids(d) ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFFFFFF, atk==ATK_S_CAMPER ? 5.0f : 3.5f, d, hasShrooms());
-                if(d->boostmillis[B_RAGE]) particle_flare(d->muzzle, d->muzzle, 75, PART_MF_SNIPER, 0xFF2222, 6.0f, d, hasShrooms());
-                adddynlight(hudgunorigin(gun, d->o, to, d), 50, vec(1.25f, 0.75f, 0.3f), 37, 2, lightFlags, 0, vec(1.25f, 0.75f, 0.3f), d);
+                renderMuzzleEffects(from, to, d, atk);
                 if(isHudPlayer)
                 {
                     float recoilAmount = (isSv98 ? 1.5f : 0.5f) / recoilReduce();
@@ -1272,12 +1261,7 @@ namespace game
             case ATK_FAMAS:
             case ATK_GLOCK:
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
-                particle_flare(d->muzzle, d->muzzle, 125, PART_MF_LITTLE, hasRoids(d) ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFFFFFF, isHudPlayer ? zoom ? 0.5f : 0.75f : 1.75f, d, hasShrooms());
-                particle_flare(d->muzzle, d->muzzle, 75, PART_MF_BIG, hasRoids(d) ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFFAA55, isHudPlayer ? zoom ? 0.75f : 2.f : 3.f, d, hasShrooms());
-                particle_splash(PART_SMOKE, isHudPlayer ? 3 : 5, isHudPlayer ? 350 : 500, d->muzzle, 0x444444, isHudPlayer ? 3.5f : 4.5f, 20, 500, 0, hasShrooms());
-                particle_splash(PART_SPARK, isHudPlayer ? 3 : 5, 35, d->muzzle, 0xFF4400, 0.35f, 300, 500, 0, hasShrooms());
-                if(d->boostmillis[B_RAGE]) particle_flare(d->muzzle, d->muzzle, 80, PART_MF_BIG, 0xFF2222, isHudPlayer ? zoom ? 1.5f : 4.f : 5.f, d, hasShrooms());
-                adddynlight(hudgunorigin(gun, d->o, to, d), 60, vec(1.25f, 0.75f, 0.3f), 30, 2, lightFlags, 0, vec(1.25f, 0.75f, 0.3f), d);
+                renderMuzzleEffects(from, to, d, atk);
                 if(isHudPlayer) startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay * 3, vec(0, 0, 0), vec(0, 0, 0), vec(0, (atk==ATK_GLOCK ? 0.2f : 0.5f) / recoilReduce(), 0), vec(0, 30, 0));
                 else soundNearmiss(S_BULLETFLYBY, from, to);
                 spawnbouncer(casingOrigin, d->vel, d, BNC_CASING);
@@ -1286,8 +1270,7 @@ namespace game
             case ATK_FLAMETHROWER:
             {
                 if(!local) createrays(gun, from, to, d);
-                particle_flare(d->muzzle, d->muzzle, 150, PART_MF_ROCKET, hasRoids(d) ? 0x880000 : wizardAbility ? 0x440044 : 0x663311, isHudPlayer ? zoom ? 2.00f : 3.5f : 4.5f, d, hasShrooms());
-                if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK,  3, 500, d->muzzle, 0xFF2222, 1.0f, 50, 200, 0, hasShrooms());
+                renderMuzzleEffects(from, to, d, atk);
                 loopi(attacks[atk].rays)
                 {
                     vec dest = vec(rays[i]).sub(muzzleOrigin).normalize().mul(1450.0f + rnd(200));
@@ -1303,7 +1286,6 @@ namespace game
                             if(rnd(2) && !isHudPlayer) soundNearmiss(S_FLYBYFLAME, from, rays[i]);
                     }
                 }
-                adddynlight(muzzleOrigin, 50, vec(0.6f, 0.3f, 0.1f), 100, 100, lightFlags, 10, vec(0.4f, 0, 0), d);
                 if(!rnd(2)) newbouncer(muzzleOrigin, to, local, id, d, BNC_LIGHT, 650, 400);
                 if(isHudPlayer) startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay * 1.5f, vec(0, 0, 0), vec(0, 0, 0), vec((0.15f * recoilSide(300)) / recoilReduce(), 0, 0));
                 gunSound = (d->type==ENT_AI ? S_PYRO_A : S_FLAMETHROWER);
@@ -1311,9 +1293,7 @@ namespace game
             }
             case ATK_GRAP1:
                 newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
-                particle_flare(d->muzzle, d->muzzle, 150, PART_MF_PLASMA, hasRoids(d) ? 0xFF4444 : wizardAbility ? 0xFF00FF : 0xFF55FF, 1.75f, d, hasShrooms());
-                if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK, 3, 500, d->muzzle, 0xFF4444, 1.0f, 50, 200, 0, hasShrooms());
-                adddynlight(hudgunorigin(gun, d->o, to, d), 70, vec(1.0f, 0.0f, 1.0f), 80, 100, lightFlags, 0, vec(0, 0, 0), d);
+                renderMuzzleEffects(from, to, d, atk);
                 if(isHudPlayer) startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay / 1.5f, vec(0, 0, 0), vec(0, 0, 0), vec((0.1f * recoilSide(1500)) / recoilReduce(), 0.15f / recoilReduce(), 0), vec(0, 12, 0));
                 break;
 
@@ -1692,7 +1672,11 @@ namespace game
                     case BNC_GLASS:
                         particle_splash(PART_SMOKE, 1, 1200, pos, 0x303030, 2.5f, 50, -50, 10, hasShrooms());
                         particle_splash(PART_FIRE_BALL, 1, 250, pos, (hasRoids(bnc.owner) ? 0xFF0000 : 0x996600), 1.3f, 50, -50, 12, hasShrooms());
-                        if(rnd(2)) particle_splash(PART_AR, 1, 500, pos, 0xFFFFFF, 12.f, 50, -25, 50, hasShrooms());
+                        if(rnd(2)) particle_splash(PART_AR, 1, 500, pos, 0xFFFFFF, 12.f, 50, -25, 50);
+                        break;
+
+                    case BNC_MOLOTOV:
+                        particle_splash(PART_SMOKE, 3, 180, pos, 0x6A6A6A, 2, 40, 50, 0, hasShrooms());
                         break;
 
                     case BNC_BURNINGDEBRIS:

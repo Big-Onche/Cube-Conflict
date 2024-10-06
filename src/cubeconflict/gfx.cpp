@@ -499,6 +499,16 @@ namespace game
 
         switch(atk)
         {
+            case ATK_ELECTRIC:
+            {
+                float mfSize = 4.f/adaptMuzzleFlash(d);
+                loopi(2) particle_flare(pos, to, 50+rnd(50), PART_LIGHTNING, hasRoids(d) ? 0xFF0000 : 0x8888FF, 1.5f+rnd(2), NULL, hasShrooms());
+                lightTrail(pos, to, 60, 50+rnd(50), 10, hasRoids(d) ? vec(2.5f, 0.f, 0.f) :  vec(0.2f, 0.6f, 2.f));
+                particle_flare(pos, pos, 140, PART_MF_ELEC, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0x50CFFF, mfSize, d, hasShrooms());
+                particle_flare(pos, pos, 200, PART_F_AR, 0xFFFFFF, mfSize, d, false, 10);
+                adddynlight(pos, 100, vec(0.25f, 0.75f, 2.0f), 40, 2, flags, 0, vec(0.25f, 0.75f, 2.0f), d);
+                break;
+            }
             case ATK_PLASMA:
             {
                 float mfSize = 1.5f/adaptMuzzleFlash(d);
@@ -508,33 +518,91 @@ namespace game
                 break;
             }
             case ATK_SPOCKGUN:
-                particle_flare(pos, pos, 150, PART_MF_PLASMA, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0x22FF22, 1.5f/adaptMuzzleFlash(d), d, hasShrooms());
+            {
+                float mfSize = 1.5f/adaptMuzzleFlash(d);
+                particle_flare(pos, pos, 150, PART_MF_PLASMA, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0x22FF22, mfSize, d, hasShrooms());
+                particle_flare(pos, pos, 200, PART_F_AR, 0xFFFFFF, mfSize, d, false, 10);
                 adddynlight(pos, 75, vec(0.0f, 1.25f, 0.0f), 50, 2, flags, 75, vec(0.0f, 1.25f, 0.0f), d);
                 break;
-            case ATK_ELECTRIC:
-                loopi(2) particle_flare(pos, to, 50+rnd(50), PART_LIGHTNING, hasRoids(d) ? 0xFF0000 : 0x8888FF, 1.5f+rnd(2), NULL, hasShrooms());
-                lightTrail(pos, to, 60, 50+rnd(50), 10, hasRoids(d) ? vec(2.5f, 0.f, 0.f) :  vec(0.2f, 0.6f, 2.f));
-                particle_flare(pos, pos, 140, PART_MF_ELEC, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0x50CFFF, 4.f/adaptMuzzleFlash(d), d, hasShrooms());
-                adddynlight(pos, 100, vec(0.25f, 0.75f, 2.0f), 40, 2, flags, 0, vec(0.25f, 0.75f, 2.0f), d);
-                break;
+            }
+
             case ATK_SMAW:
             case ATK_S_ROCKETS:
             case ATK_S_NUKE:
             case ATK_FIREWORKS:
+            {
+                float mfSize = 1.5f/adaptMuzzleFlash(d);
                 particles::dirSplash(PART_SPARK, 0xFF5500, 300, 3 + rnd(3), 100, pos, dir, 0.4f, 400, -1, hasShrooms());
                 particles::dirSplash(PART_SMOKE, atk == ATK_S_NUKE ? 0x202020 : 0x333333, 75, 2 + rnd(2), 1250, pos, dir, 2.5f, 30, 3, hasShrooms());
-                particle_flare(pos, pos, 250, PART_MF_ROCKET, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFF7700, 3.5f/adaptMuzzleFlash(d), d, hasShrooms());
                 adddynlight(pos, 100, vec(1.25f, 0.75f, 0.3f), 75, 2, flags, 0, vec(1.25f, 0.75f, 0.3f), d);
+                if(atk==ATK_FIREWORKS) break;
+                particle_flare(pos, pos, 250, PART_MF_ROCKET, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFF7700, mfSize, d, hasShrooms(), 12);
+                particle_flare(pos, pos, 600, PART_F_AR, 0xFFFFFF, mfSize, d, false, 10);
                 break;
+            }
             case ATK_MINIGUN:
             case ATK_AK47:
             case ATK_S_GAU8:
             {
                 bool isGau = (atk == ATK_S_GAU8);
+                float mfSize = 3.0f/adaptMuzzleFlash(d);
                 particles::dirSplash(PART_SPARK, 0xFF5500, 250, 1 + rnd(3), 75, pos, dir, 0.4f, 400, -1, hasShrooms());
                 particles::dirSplash(PART_SMOKE, isGau ? 0x282828 : 0x444444, 100, 1 + rnd(2), 750, pos, dir, 2.5f, 30, 3, hasShrooms());
-                particle_flare(pos, pos, 100, PART_MF_BIG, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xCCAAAA, 3.5f/adaptMuzzleFlash(d), d, hasShrooms());
+                particle_flare(pos, pos, 100, PART_MF_BIG, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xCCAAAA, mfSize - (d->gunaccel / 5.f), d, hasShrooms());
+                if(!d->gunaccel) particle_flare(pos, pos, 200, PART_F_AR, 0xFFFFFF, mfSize, d, false, 10);
                 adddynlight(pos, isGau ? 125 : 75, vec(1.25f, 0.75f, 0.3f), 35, 2, flags, 0, vec(1.25f, 0.75f, 0.3f), d);
+                break;
+            }
+            case ATK_UZI:
+            case ATK_FAMAS:
+            case ATK_GLOCK:
+            {
+                float mfSize = 2.0f/adaptMuzzleFlash(d);
+                particles::dirSplash(PART_SPARK, 0xFF8800, 300, 1 + rnd(3), 500, pos, dir, 0.3f, 400, -1, hasShrooms());
+                particles::dirSplash(PART_SMOKE, 0x444444, 300, 5, 500, pos, dir, 4.0f, 30, 2, hasShrooms());
+                particle_flare(pos, pos, 125, PART_MF_LITTLE, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFFFFFF, mfSize / 2.f, d, hasShrooms());
+                particle_flare(pos, pos, 75, PART_MF_BIG, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFFAA55, mfSize, d, hasShrooms());
+                particle_flare(pos, pos, 200, PART_F_AR, 0xFFFFFF, mfSize, d, false, 10);
+                adddynlight(pos, 60, vec(1.25f, 0.75f, 0.3f), 30, 2, flags, 0, vec(1.25f, 0.75f, 0.3f), d);
+                break;
+            }
+            case ATK_MOSSBERG:
+            case ATK_HYDRA:
+            {
+                float mfSize = 1.0f/adaptMuzzleFlash(d);
+                particles::dirSplash(PART_SPARK, 0xFF2200, 300, 7, 150, pos, dir, 0.4f, 400, -1, hasShrooms());
+                particles::dirSplash(PART_SMOKE, 0x443333, 300, 4, 750, pos, dir, 3.5f, 30, 4, hasShrooms());
+                particle_flare(pos, pos, 140, PART_MF_SHOTGUN, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xCCAAAA, mfSize, d, hasShrooms(), 15);
+                particle_flare(pos, pos, 300, PART_F_AR, 0xFFFFFF, (mfSize*2), d, false, 10);
+                adddynlight(pos, 75, vec(1.25f, 0.25f, 0.f), 40, 2, flags, 0, vec(1.25f, 0.25f, 0.f), d);
+                break;
+            }
+            case ATK_SV98:
+            case ATK_SKS:
+            case ATK_S_CAMPER:
+            {
+                float mfSize = 5.0f/adaptMuzzleFlash(d);
+                particles::dirSplash(PART_SPARK, 0xFFAA00, 400, 7, 50, pos, dir, 0.3f, 400, -1, hasShrooms());
+                particles::dirSplash(PART_SMOKE, 0x222222, 300, 6, 600, pos, dir, 3.5f, 30, 3, hasShrooms());
+                particle_flare(pos, pos, 100, PART_MF_LITTLE, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFFFFFF, 1.25f, d, hasShrooms());
+                particle_flare(pos, pos, 100, PART_MF_SNIPER, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFFFFFF, (atk==ATK_S_CAMPER ? mfSize * 1.2 : mfSize), d, hasShrooms());
+                particle_flare(pos, pos, 400, PART_F_AR, 0xFFFFFF, (mfSize*2), d, false, 10);
+                adddynlight(pos, 50, vec(1.25f, 0.75f, 0.3f), 37, 2, flags, 0, vec(1.25f, 0.75f, 0.3f), d);
+                break;
+            }
+            case ATK_FLAMETHROWER:
+            {
+                float mfSize = 1.8f/adaptMuzzleFlash(d);
+                particle_flare(pos, pos, 175, PART_MF_ROCKET, increasedDamages ? 0x880000 : wizardAbility ? 0x440044 : 0x663311, mfSize, d, hasShrooms(), 7);
+                particle_flare(pos, pos, 1500, PART_F_AR, 0xFFFFFF, mfSize * 2, d);
+                adddynlight(pos, 50, vec(0.6f, 0.3f, 0.1f), 100, 100, flags, 10, vec(0.4f, 0, 0), d);
+                break;
+            }
+            case ATK_GRAP1:
+            {
+                particle_flare(pos, pos, 150, PART_MF_PLASMA, increasedDamages ? 0xFF4444 : wizardAbility ? 0xFF00FF : 0xFF55FF, 1.75f, d, hasShrooms());
+                particle_flare(pos, pos, 600, PART_F_AR, 0xFFFFFF, 1.5f, d, false, 10);
+                adddynlight(pos, 70, vec(1.0f, 0.0f, 1.0f), 80, 100, flags, 0, vec(0, 0, 0), d);
                 break;
             }
         }
