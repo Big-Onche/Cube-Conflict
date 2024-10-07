@@ -1555,12 +1555,127 @@ void reloadshaders()
     });
 }
 
+namespace postfx
+{
+    GLuint radialblurtex = 0, radialblurfbo = 0;
+    int rbtexwidth = 0, rbtexheight = 0;
+
+    VARFP(rb, 0, 1, 1, rb ? postfx::init(POSTFX_RADIALBLUR) : postfx::cleanup(POSTFX_RADIALBLUR));
+    VAR(rbsteps, 20, 25, 50);
+    int radialBlurStrenght = 0;
+
+    const int MAXBLUR = 200;
+    const float MAXSPEED = 250.0f;
+
+    void updateRadialBlur(vec velocity, int shroomsMillis)
+    {
+        radialBlurStrenght = 0;
+        if(!rb && !shroomsMillis) return;
+
+        int shroomsBlur = 0;
+        if(shroomsMillis) shroomsBlur = 200 * min(1.0f, shroomsMillis / 5000.f);
+
+        float overallSpeed = sqrt(velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z);
+
+        vec cameraForward = camdir;
+
+        // Normalize the camera forward vector
+        float cameraForwardMag = sqrt(cameraForward.x * cameraForward.x + cameraForward.y * cameraForward.y + cameraForward.z * cameraForward.z);
+        if(cameraForwardMag > 0.0f)
+        {
+            cameraForward.x /= cameraForwardMag;
+            cameraForward.y /= cameraForwardMag;
+            cameraForward.z /= cameraForwardMag;
+        }
+
+        vec velocityNormalized(0, 0, 0);
+        if(overallSpeed > 0.0f) velocityNormalized = vec(velocity.x / overallSpeed, velocity.y / overallSpeed, velocity.z / overallSpeed);
+
+        // Adjust radial blur strenght based on the absolute value of the dot product (for forward and backward motion) using the exponential of normalized speed value + adding shrooms effect
+        radialBlurStrenght = 0 + (pow(clamp(overallSpeed / MAXSPEED, 0.0f, 1.0f), 3.f) * (MAXBLUR - 0) * clamp(fabs(cameraForward.dot(velocityNormalized)), 0.0f, 1.0f)) + (shroomsBlur);
+    }
+
+    void initRadialBlur()
+    {
+        useshaderbyname("rbpostfx");
+    }
+
+    void cleanupRadialBlur()
+    {
+        if(radialblurfbo)
+        {
+            glDeleteFramebuffers_(1, &radialblurfbo);
+            radialblurfbo = 0;
+        }
+        if(radialblurtex)
+        {
+            glDeleteTextures(1, &radialblurtex);
+            radialblurtex = 0;
+        }
+    }
+
+    void renderRadialBlur()
+    {
+        if(vieww != rbtexheight || viewh != rbtexwidth)
+        {
+            postfx::cleanupRadialBlur();
+            rbtexwidth = vieww;
+            rbtexheight = viewh;
+        }
+
+        if(!radialBlurStrenght) return;
+
+        if(!radialblurtex)
+        {
+            glGenTextures(1, &radialblurtex);
+            createtexture(radialblurtex, rbtexwidth, rbtexheight, NULL, 3, 1, GL_RGB8, GL_TEXTURE_RECTANGLE);
+        }
+
+        glBindFramebuffer_(GL_FRAMEBUFFER, radialblurtex);
+
+        glBindTexture(GL_TEXTURE_RECTANGLE, radialblurtex);
+        glCopyTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, 0, 0, rbtexwidth, rbtexheight);
+
+        SETSHADER(rbpostfx);
+        LOCALPARAMF(params, rbsteps, radialBlurStrenght);
+
+        glActiveTexture_(GL_TEXTURE0);
+        screenquad(vieww, viewh);
+    }
+
+    void init(int postfx)
+    {
+        switch(postfx)
+        {
+            case POSTFX_RADIALBLUR:
+                initRadialBlur();
+                break;
+        }
+    }
+
+    void cleanup(int postfx)
+    {
+        switch(postfx)
+        {
+            case POSTFX_RADIALBLUR:
+                cleanupRadialBlur();
+                break;
+        }
+    }
+
+    void render()
+    {
+        if(rb) renderRadialBlur();
+    }
+}
+
 void resetshaders()
 {
     clearchanges(CHANGE_SHADERS);
 
     cleanuplights();
     ar::cleanup();
+    loopi(postfx::NUMPOSTFX) postfx::cleanup(i);
     cleanupmodels();
     cleanupshaders();
     setupshaders();

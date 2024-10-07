@@ -528,6 +528,17 @@ namespace ar
     extern void cleanup();
 }
 
+namespace postfx
+{
+    enum {POSTFX_RADIALBLUR = 0, POSTFX_FILTERS, NUMPOSTFX};
+
+    extern void init(int postfx);
+    extern void cleanup(int postfx);
+    extern void render();
+
+    extern void updateRadialBlur(vec velocity, int shroomsMillis);
+}
+
 // water
 extern int vertwater, waterreflect, caustics;
 extern float watersx1, watersy1, watersx2, watersy2;

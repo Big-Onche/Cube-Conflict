@@ -771,7 +771,7 @@ struct gameent : dynent, gamestate
     int weight;                         // affects the effectiveness of hitpush
     int clientnum, privilege, lastupdate, plag, ping;
     int lifesequence;                   // sequence id for each respawn, used in damage test
-    int respawned, suicided;
+    int respawned, lastspawn, suicided;
     int lastpain;
     int lastaction, lastattack;
     int curdamage, lastcurdamage, curdamagecolor;
@@ -832,6 +832,7 @@ struct gameent : dynent, gamestate
         respawned = suicided = -1;
         lastaction = 0;
         lastattack = -1;
+        lastspawn = lastmillis;
         curdamage = 0;
         lastcurdamage = 0;
         attacking = ACT_IDLE;

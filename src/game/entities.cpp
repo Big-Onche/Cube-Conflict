@@ -208,7 +208,6 @@ namespace entities
         if(d==player1 && type==I_SHROOMS)
         {
             addpostfx("sobel");
-            addpostfx("rdblur", 0, 0, 1, 1, vec4(25, 100, 0, 0));
             fullbrightmodels = 200;
         }
     }

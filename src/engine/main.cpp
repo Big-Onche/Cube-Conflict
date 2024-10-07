@@ -689,6 +689,7 @@ void resetgl()
     cleanupblendmap();
     cleanuplights();
     ar::cleanup();
+    loopi(postfx::NUMPOSTFX) postfx::cleanup(i);
     cleanupshaders();
     cleanupgl();
 
@@ -1359,7 +1360,6 @@ int main(int argc, char **argv)
 
     identflags |= IDF_PERSIST;
 
-    addpostfx("rdblur");
     addpostfx("sobel");
     addpostfx("mainfilter");
     addpostfx("deathscreen");

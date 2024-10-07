@@ -2717,6 +2717,9 @@ void gl_drawview()
         GLERROR;
     }
 
+    postfx::render();
+    GLERROR;
+
     if(editmode)
     {
         extern int outline;
@@ -2742,7 +2745,6 @@ void gl_drawview()
 
     doaa(setuppostfx(vieww, viewh, scalefbo), processhdr);
     renderpostfx(scalefbo);
-    postfx::render(scalefbo);
     if(scalefbo) doscale();
 }
 

@@ -482,6 +482,27 @@ namespace game
         return forcecampos >= 0 && d->state!=CS_SPECTATOR;
     }
 
+    vec getPlayerVelocity()
+    {
+        static vec prevPos(0, 0, 0);
+        static vec smoothVel(0, 0, 0);
+        static int prevTime = 0;
+
+        int currentTime = totalmillis;
+        int timeElapsed = currentTime - prevTime; // Time elapsed since the last frame in milliseconds
+
+        vec velocity = vec(hudplayer()->o).sub(prevPos); // Calculate raw velocity
+
+        if(timeElapsed > 0) velocity = velocity.mul(1000.0f / timeElapsed); // Convert milliseconds to seconds for velocity calculation
+
+        smoothVel = smoothVel.mul(1.0f - 0.4f).add(velocity.mul(0.4f)); // Smoothing the velocity using an exponential moving average (EMA), 0.4f = smoothing factor
+
+        prevPos = hudplayer()->o;
+        prevTime = currentTime;
+
+        return smoothVel;
+    }
+
     void updateworld()        // main game update loop
     {
         if(!maptime) { maptime = lastmillis; maprealtime = totalmillis; return; }
@@ -489,6 +510,8 @@ namespace game
 
         physicsframe();
         ai::navigate();
+
+        postfx::updateRadialBlur(getPlayerVelocity(), hudplayer()->boostmillis[B_SHROOMS]);
 
         if(player1->state==CS_ALIVE && !intermission)   // checking player1's shits
         {
