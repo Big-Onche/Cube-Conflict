@@ -1561,7 +1561,7 @@ namespace postfx
     int rbtexwidth = 0, rbtexheight = 0;
 
     VARFP(rb, 0, 1, 1, rb ? postfx::init(POSTFX_RADIALBLUR) : postfx::cleanup(POSTFX_RADIALBLUR));
-    VAR(rbsteps, 20, 25, 50);
+    VAR(rbsteps, 3, 10, 25);
     int radialBlurStrenght = 0;
 
     const int MAXBLUR = 200;
@@ -1595,11 +1595,6 @@ namespace postfx
         radialBlurStrenght = 0 + (pow(clamp(overallSpeed / MAXSPEED, 0.0f, 1.0f), 3.f) * (MAXBLUR - 0) * clamp(fabs(cameraForward.dot(velocityNormalized)), 0.0f, 1.0f)) + (shroomsBlur);
     }
 
-    void initRadialBlur()
-    {
-        useshaderbyname("rbpostfx");
-    }
-
     void cleanupRadialBlur()
     {
         if(radialblurfbo)
@@ -1628,7 +1623,7 @@ namespace postfx
         if(!radialblurtex)
         {
             glGenTextures(1, &radialblurtex);
-            createtexture(radialblurtex, rbtexwidth, rbtexheight, NULL, 3, 1, GL_RGB8, GL_TEXTURE_RECTANGLE);
+            createtexture(radialblurtex, rbtexwidth, rbtexheight, NULL, 3, 1, GL_RGB16F, GL_TEXTURE_RECTANGLE);
         }
 
         glBindFramebuffer_(GL_FRAMEBUFFER, radialblurtex);
@@ -1636,7 +1631,7 @@ namespace postfx
         glBindTexture(GL_TEXTURE_RECTANGLE, radialblurtex);
         glCopyTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, 0, 0, rbtexwidth, rbtexheight);
 
-        SETSHADER(rbpostfx);
+        SETSHADER(radialblur);
         LOCALPARAMF(params, rbsteps, radialBlurStrenght);
 
         glActiveTexture_(GL_TEXTURE0);
@@ -1648,7 +1643,7 @@ namespace postfx
         switch(postfx)
         {
             case POSTFX_RADIALBLUR:
-                initRadialBlur();
+                useshaderbyname("radialblur");
                 break;
         }
     }
