@@ -2717,9 +2717,6 @@ void gl_drawview()
         GLERROR;
     }
 
-    postfx::render();
-    GLERROR;
-
     if(editmode)
     {
         extern int outline;
@@ -2736,6 +2733,11 @@ void gl_drawview()
             rendereditcursor();
             glDepthMask(GL_TRUE);
         }
+    }
+    else
+    {
+        postfx::renderRadialBlur();
+        GLERROR;
     }
 
     glDisable(GL_CULL_FACE);

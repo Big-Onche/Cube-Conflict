@@ -1465,6 +1465,32 @@ void renderpostfx(GLuint outfbo)
     endtimer(postfxtimer);
 }
 
+bool updatepostfx(const char *name, const vec4 &params)
+{
+    loopv(postfxpasses)
+    {
+        if(postfxpasses[i].shader && strcmp(postfxpasses[i].shader->name, name) == 0)
+        {
+            postfxpasses[i].params = params;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool deletepostfx(const char *name)
+{
+    loopv(postfxpasses)
+    {
+        if(postfxpasses[i].shader && strcmp(postfxpasses[i].shader->name, name) == 0)
+        {
+            postfxpasses.remove(i);
+            return true;
+        }
+    }
+    return false;
+}
+
 bool addpostfx(const char *name, int outputbind, int outputscale, uint inputs, uint freeinputs, const vec4 &params)
 {
     if(!*name) return false;
@@ -1517,6 +1543,11 @@ ICOMMAND(setpostfx, "sffff", (char *name, float *x, float *y, float *z, float *w
     if(name[0]) addpostfx(name, 0, 0, 1, 1, vec4(*x, *y, *z, *w));
 });
 
+ICOMMAND(updatepostfx, "sffff", (char *name, float *x, float *y, float *z, float *w),
+{
+    if(!updatepostfx(name, vec4(*x, *y, *z, *w))) conoutf(CON_ERROR, "PostFX not found.");
+});
+
 void cleanupshaders()
 {
     cleanuppostfx(true);
@@ -1557,10 +1588,10 @@ void reloadshaders()
 
 namespace postfx
 {
-    GLuint radialblurtex = 0, radialblurfbo = 0;
-    int rbtexwidth = 0, rbtexheight = 0;
+    GLuint radialblurtex = 0;
+    int texWidth = 0, texHeight = 0;
 
-    VARFP(rb, 0, 1, 1, rb ? postfx::init(POSTFX_RADIALBLUR) : postfx::cleanup(POSTFX_RADIALBLUR));
+    VARFP(rb, 0, 1, 1, rb ? postfx::initRadialBlur() : postfx::cleanupRadialBlur());
     VAR(rbsteps, 3, 10, 25);
     int radialBlurStrenght = 0;
 
@@ -1569,7 +1600,6 @@ namespace postfx
 
     void updateRadialBlur(vec velocity, int shroomsMillis)
     {
-        radialBlurStrenght = 0;
         if(!rb && !shroomsMillis) return;
 
         int shroomsBlur = 0;
@@ -1595,41 +1625,32 @@ namespace postfx
         radialBlurStrenght = 0 + (pow(clamp(overallSpeed / MAXSPEED, 0.0f, 1.0f), 3.f) * (MAXBLUR - 0) * clamp(fabs(cameraForward.dot(velocityNormalized)), 0.0f, 1.0f)) + (shroomsBlur);
     }
 
-    void cleanupRadialBlur()
+    void checkRadialBlur()
     {
-        if(radialblurfbo)
+        if(vieww != texWidth || viewh != texHeight)
         {
-            glDeleteFramebuffers_(1, &radialblurfbo);
-            radialblurfbo = 0;
+            postfx::cleanupRadialBlur();
+            texWidth = vieww;
+            texHeight = viewh;
         }
-        if(radialblurtex)
+
+        if(!radialblurtex)
         {
-            glDeleteTextures(1, &radialblurtex);
-            radialblurtex = 0;
+            glGenTextures(1, &radialblurtex);
+            createtexture(radialblurtex, texWidth, texHeight, NULL, 3, 1, GL_RGB16F, GL_TEXTURE_RECTANGLE);
         }
     }
 
     void renderRadialBlur()
     {
-        if(vieww != rbtexheight || viewh != rbtexwidth)
-        {
-            postfx::cleanupRadialBlur();
-            rbtexwidth = vieww;
-            rbtexheight = viewh;
-        }
-
         if(!radialBlurStrenght) return;
 
-        if(!radialblurtex)
-        {
-            glGenTextures(1, &radialblurtex);
-            createtexture(radialblurtex, rbtexwidth, rbtexheight, NULL, 3, 1, GL_RGB16F, GL_TEXTURE_RECTANGLE);
-        }
+        checkRadialBlur();
 
         glBindFramebuffer_(GL_FRAMEBUFFER, radialblurtex);
 
         glBindTexture(GL_TEXTURE_RECTANGLE, radialblurtex);
-        glCopyTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, 0, 0, rbtexwidth, rbtexheight);
+        glCopyTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, 0, 0, texWidth, texHeight);
 
         SETSHADER(radialblur);
         LOCALPARAMF(params, rbsteps, radialBlurStrenght);
@@ -1638,29 +1659,38 @@ namespace postfx
         screenquad(vieww, viewh);
     }
 
-    void init(int postfx)
+    void initRadialBlur()
     {
-        switch(postfx)
+        useshaderbyname("radialblur");
+    }
+
+    void cleanupRadialBlur()
+    {
+        if(radialblurtex)
         {
-            case POSTFX_RADIALBLUR:
-                useshaderbyname("radialblur");
-                break;
+            glDeleteTextures(1, &radialblurtex);
+            radialblurtex = 0;
         }
     }
 
-    void cleanup(int postfx)
+    void updateLensDistortion(bool enable, int gun)
     {
-        switch(postfx)
-        {
-            case POSTFX_RADIALBLUR:
-                cleanupRadialBlur();
-                break;
-        }
-    }
+        static bool lensDistortion = false;
 
-    void render()
-    {
-        if(rb) renderRadialBlur();
+        if(enable)
+        {
+            if(!lensDistortion)
+            {
+                addpostfx("lensdistortion");
+                lensDistortion = true;
+            }
+            updatepostfx("lensdistortion", vec4((gun==11 || gun==22 ? 0.15f : 0.22f) * zoomprogress, 0.07f * zoomprogress, 0.f, 0.f)); // 11 = GUN_SV98, 22 = GUN_S_CAMPER
+        }
+        else if(lensDistortion)
+        {
+            deletepostfx("lensdistortion");
+            lensDistortion = false;
+        }
     }
 }
 
@@ -1670,7 +1700,7 @@ void resetshaders()
 
     cleanuplights();
     ar::cleanup();
-    loopi(postfx::NUMPOSTFX) postfx::cleanup(i);
+    postfx::cleanupRadialBlur();
     cleanupmodels();
     cleanupshaders();
     setupshaders();

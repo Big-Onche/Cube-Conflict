@@ -215,14 +215,23 @@ namespace game
 
         zoomfov = (guns[hp->gunselect].maxzoomfov);
 
-        if(ispaused()) {zoom = 0; return;}
+        if(ispaused())
+        {
+            zoom = 0;
+            zoomprogress = 0;
+            postfx::updateLensDistortion(false);
+            return;
+        }
 
         if((hp->gunselect==GUN_SKS || hp->gunselect==GUN_SV98 || hp->gunselect==GUN_CROSSBOW || hp->gunselect==GUN_S_CAMPER || hp->gunselect==GUN_S_ROCKETS) && zoom)
         {
             if(hp->gunselect==GUN_S_ROCKETS) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/scope_1.png", zoomprogress);
             else if(hp->gunselect==GUN_SKS) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/scope_3.png", zoomprogress);
             else drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/scope_2.png", zoomprogress);
+            postfx::updateLensDistortion(true, hp->gunselect);
+
         }
+        else postfx::updateLensDistortion(false);
 
         if(hp->boostmillis[B_SHROOMS]) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/shrooms.png", min(1.0f, hp->boostmillis[B_SHROOMS] / 5000.f));
         if(hp->boostmillis[B_RAGE]) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/rage.png", min(1.0f, hp->boostmillis[B_RAGE] / 1000.f));

@@ -1747,7 +1747,7 @@ void allchanged(bool load)
     octarender();
     if(load) precachetextures();
     ar::init();
-    loopi(postfx::NUMPOSTFX) postfx::init(i);
+    postfx::initRadialBlur();
     setupmaterials();
     clearshadowcache();
     updatevabbs(true);

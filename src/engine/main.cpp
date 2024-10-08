@@ -689,7 +689,7 @@ void resetgl()
     cleanupblendmap();
     cleanuplights();
     ar::cleanup();
-    loopi(postfx::NUMPOSTFX) postfx::cleanup(i);
+    postfx::cleanupRadialBlur();
     cleanupshaders();
     cleanupgl();
 
@@ -1362,6 +1362,7 @@ int main(int argc, char **argv)
 
     addpostfx("sobel");
     addpostfx("mainfilter");
+    addpostfx("lensdistortion");
     addpostfx("deathscreen");
     addpostfx("protanopia");
     addpostfx("deuteranopia");

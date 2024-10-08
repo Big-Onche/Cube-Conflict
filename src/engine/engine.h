@@ -530,13 +530,12 @@ namespace ar
 
 namespace postfx
 {
-    enum {POSTFX_RADIALBLUR = 0, POSTFX_FILTERS, NUMPOSTFX};
-
-    extern void init(int postfx);
-    extern void cleanup(int postfx);
-    extern void render();
-
+    extern void initRadialBlur();
+    extern void cleanupRadialBlur();
+    extern void renderRadialBlur();
     extern void updateRadialBlur(vec velocity, int shroomsMillis);
+
+    extern void updateLensDistortion(bool enable, int gun = 0);
 }
 
 // water
@@ -846,6 +845,8 @@ extern int map_atmo;  //Config partie Cube Conflict
 
 // main graphical effects
 extern bool addpostfx(const char *name, int outputbind = 0, int outputscale = 0, uint inputs = 1, uint freeinputs = 1, const vec4 &params = vec4(1, 1, 1, 1));
+extern bool updatepostfx(const  char *name,  const vec4 &params);
+extern bool deletepostfx(const char *name);
 extern void shakeScreen(float factor);
 extern float zoomprogress;
 extern void clearpostfx();
