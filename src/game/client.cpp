@@ -679,7 +679,6 @@ namespace game
     void changemap(const char *name)
     {
         changemap(name, m_valid(nextmode) ? nextmode : (remote ? 1 : 0));
-        resetpostfx();
     }
     ICOMMAND(map, "s", (char *name), changemap(name));
 
@@ -1480,7 +1479,8 @@ namespace game
                 ai::loadwaypoints();
                 //execute("premission");
                 //playMusic(S_PREMISSION);
-                resetpostfx();
+                postfx::clearShroomsEffect();
+                postfx::updateMainFilter();
                 stopAllSounds();
                 break;
             }
@@ -2190,7 +2190,8 @@ namespace game
                         if(editmode) toggleedit();
                         if(s->state==CS_DEAD) showscores(false);
                         disablezoom();
-                        resetpostfx();
+                        postfx::clearShroomsEffect();
+                        postfx::updateMainFilter();
                     }
                     s->state = CS_SPECTATOR;
                 }

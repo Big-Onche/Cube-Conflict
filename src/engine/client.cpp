@@ -168,7 +168,8 @@ void disconnect(bool async, bool cleanup, bool volontaire)
         conoutf(CON_INFO, "%s", readstr("Console_Connection_Disconnected"));
         IS_ON_OFFICIAL_SERV = false;
         game::gamedisconnect(cleanup);
-        game::resetpostfx();
+        postfx::clearShroomsEffect();
+        postfx::updateMainFilter();
         clearsleep();
         stopAllSounds();
         game::clearbouncers();

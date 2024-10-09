@@ -1693,6 +1693,19 @@ namespace postfx
             lensDistortion = false;
         }
     }
+
+    VARFP(cbfilter, 0, 0, 4, if(!islaunching) postfx::updateMainFilter());
+
+    void updateMainFilter(int i)
+    {
+        updatepostfx("mainfilter", vec4((cbfilter ? (FILTER_DEATH + cbfilter) : i), 0, 0, 0));
+    }
+
+    void clearShroomsEffect()
+    {
+        deletepostfx("sobel");
+        fullbrightmodels = 0;
+    }
 }
 
 void resetshaders()

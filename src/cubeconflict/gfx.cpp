@@ -5,22 +5,12 @@
 
 VARP(epilepsyfriendly, 0, 0, 1);
 
-void setcbfilter(int i)
-{
-    clearpostfx();
-    addpostfx("mainfilter");
-    if(!game::cbfilter) return;
-    defformatstring(s, "%s", game::cbfilter==1 ? "protanopia" : game::cbfilter==2 ? "deuteranopia" : game::cbfilter==3 ? "tritanopia" : "achromatopsia");
-    addpostfx(s);
-}
-
 extern vec hitsurface;
 
 namespace game
 {
     VAR(forcecampos, -1, -1, 1000);
     VAR(zoom, -1, 0, 1);
-    VARFP(cbfilter, 0, 0, 4, if(!islaunching) setcbfilter(cbfilter));
 
     void lightTrail(const vec &s, const vec &e, int radius, int fade, int peak, const vec &color) //cast lights along a ray
     {
@@ -604,19 +594,5 @@ namespace game
                 break;
             }
         }
-    }
-
-    void addColorBlindnessFilter()
-    {
-        defformatstring(s, "%s", cbfilter==1 ? "protanopia" : cbfilter==2 ? "deuteranopia" : cbfilter==3 ? "tritanopia" : "achromatopsia");
-        addpostfx(s);
-    }
-
-    void resetpostfx()
-    {
-        clearpostfx();
-        addpostfx("mainfilter");
-        if(cbfilter) addColorBlindnessFilter();
-        fullbrightmodels = 0;
     }
 }

@@ -211,20 +211,13 @@ namespace game
     void gameplayhud(int w, int h)
     {
         gameent *hp = hudplayer();
-        if(hp->state==CS_EDITING || hp->state==CS_SPECTATOR || hp->state==CS_DEAD) return;
 
-        if(ispaused())
-        {
-            zoom = 0;
-            zoomprogress = 0;
-            postfx::updateLensDistortion(false);
-            return;
-        }
+        if(hp->state==CS_EDITING || hp->state==CS_SPECTATOR || hp->state==CS_DEAD) return;
+        if(ispaused()) { disablezoom(); return; }
 
         if((hp->gunselect==GUN_SKS || hp->gunselect==GUN_SV98 || hp->gunselect==GUN_CROSSBOW || hp->gunselect==GUN_S_CAMPER || hp->gunselect==GUN_S_ROCKETS) && zoom)
         {
             postfx::updateLensDistortion(true, hp->gunselect);
-
         }
         else postfx::updateLensDistortion(false);
 

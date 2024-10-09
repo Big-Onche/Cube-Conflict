@@ -178,7 +178,7 @@ namespace game
             lasthit = 0;
             if(cmode) cmode->respawned(player1);
         }
-        resetpostfx();
+        postfx::updateMainFilter();
     }
 
     gameent *pointatplayer()
@@ -375,7 +375,7 @@ namespace game
                 if(d==player1)
                 {
                     conoutf(CON_HUDCONSOLE, "\f8%s", readstr("GameMessage_ShroomsEnded"));
-                    resetpostfx();
+                    postfx::clearShroomsEffect();
                 }
             }
 
@@ -744,6 +744,8 @@ namespace game
         d->tombepop = 0.0f;
         d->deaths++;
         d->killstreak = 0;
+        d->afterburnmillis = 0;
+        d->boostmillis[B_SHROOMS] = 0;
         d->isOutOfMap = false;
         loopi(NUMABILITIES) d->abilitymillis[i] = 0;
 
@@ -760,10 +762,9 @@ namespace game
             if(deathscore) showscores(true);
             disablezoom();
             cleardamagescreen();
-            d->boostmillis[B_SHROOMS] = 0;
             d->attacking = ACT_IDLE;
-            resetpostfx();
-            if(!cbfilter) addpostfx("deathscreen");
+            postfx::clearShroomsEffect();
+            postfx::updateMainFilter(postfx::FILTER_DEATH);
             d->roll = 0;
             playSound(S_DIE_P1, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH);
             if(m_tutorial) execute("deathReset");

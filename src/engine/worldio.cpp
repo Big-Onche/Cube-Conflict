@@ -713,7 +713,7 @@ bool load_world(const char *mname, const char *cname)        // still supports a
 {
     loadprogress = 0;
     bool hasvsync = false;
-    if(vsync) {vsync = 0; restorevsync(); hasvsync = true; }
+    if(vsync) {vsync = 0; restorevsync(); hasvsync = true; } // hack for faster loading when vsync enabled
     setmapfilenames(mname, cname);
     stream *f = opengzfile(ogzname, "rb");
     if(!f) { conoutf(CON_ERROR, "could not read map %s", ogzname); return false; }
@@ -912,8 +912,6 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     startmap(cname ? cname : mname);
     loopi(NUMSONGS) stopMusic(i);
     if(hasvsync) {vsync = 1; restorevsync();}
-    addpostfx("mainfilter");
-    if(game::cbfilter) game::addColorBlindnessFilter();
     loadprogress = 0;
 
     return true;

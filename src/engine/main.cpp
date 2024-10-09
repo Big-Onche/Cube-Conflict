@@ -1358,14 +1358,9 @@ int main(int argc, char **argv)
     identflags |= IDF_PERSIST;
 
     addpostfx("sobel");
-    addpostfx("mainfilter");
-    addpostfx("telescopicsight");
-    addpostfx("deathscreen");
-    addpostfx("protanopia");
-    addpostfx("deuteranopia");
-    addpostfx("tritanopia");
-    addpostfx("achromatopsia");
     clearpostfx();
+
+    addpostfx("mainfilter");
 
     logoutf("init: mainloop");
     playMusic(language == 2 ? S_MAINMENURU : S_MAINMENU);

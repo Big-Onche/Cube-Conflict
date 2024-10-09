@@ -536,6 +536,11 @@ namespace postfx
     extern void updateRadialBlur(vec velocity, int shroomsMillis);
 
     extern void updateLensDistortion(bool enable, int gun = 0);
+
+    enum {FILTER_NORMAL = 0, FILTER_DEATH, FILTER_PROTANOPIA, FILTER_DEUTERANOPIA, FILTER_TRITANOPIA, FILTER_ACHROMATOPSIA};
+    extern int cbfilter;
+    extern void updateMainFilter(int i = 0);
+    extern void clearShroomsEffect();
 }
 
 // water
