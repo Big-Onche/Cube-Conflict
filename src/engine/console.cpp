@@ -77,7 +77,7 @@ float rendercommand(float x, float y, float w)
 VARP(consize, 0, 5, 100);
 VARP(miniconsize, 0, 5, 100);
 VARP(hudconsize, 0, 5, 100);
-VARP(miniconwidth, 0, 40, 100);
+VARP(miniconwidth, 0, 30, 100);
 VARP(confade, 0, 15, 60);
 VARP(miniconfade, 0, 20, 60);
 VARP(hudconfade, 0, 3, 10);
@@ -124,8 +124,7 @@ float drawconlines(int conskip, int confade, float conwidth, float conheight, fl
         }
         else offset--;
     }
-
-    int totalheight = 0;
+    float totalheight = 0;
     loopi(numl) //determine visible height
     {
         // shuffle backwards to fill if necessary
@@ -163,6 +162,74 @@ float renderfullconsole(float w, float h)
     return conheight + 2*conpad;
 }
 
+struct ConsoleMetrics {
+    float totalHeight;
+    int numVisibleLines;
+};
+
+ConsoleMetrics calculateConsoleMetrics(int conskip, int confade, float conwidth, float conheight, int filter)
+{
+    ConsoleMetrics metrics = {0, 0};
+    filter &= CON_FLAGS;
+    int numl = conlines.length(), offset = min(conskip, numl);
+
+    if(confade)
+    {
+        if(!conskip)
+        {
+            numl = 0;
+            loopvrev(conlines) if(totalmillis-conlines[i].outtime < confade*1000) { numl = i+1; break; }
+        }
+        else offset--;
+    }
+
+    loopi(numl)
+    {
+        int idx = offset+i < numl ? offset+i : --offset;
+        if(!(conlines[idx].type&filter)) continue;
+        char *line = conlines[idx].line;
+        float width, height;
+        text_boundsf(line, width, height, conwidth);
+        if(metrics.totalHeight + height > conheight) { numl = i; if(offset == idx) ++offset; break; }
+        metrics.totalHeight += height;
+        metrics.numVisibleLines++;
+    }
+
+    return metrics;
+}
+
+void drawMiniConsoleBackground(int w, int h, float aboveHud, float conWidth, float conHeight, float conPadding, float contentHeight)
+{
+    if(contentHeight <= 0) return; // Only draw if there's actual content
+
+    hudnotextureshader->set();
+    gle::colorf(0.1f, 0.1f, 0.1f, 0.5f);
+
+    float horizontalPadding = FONTH/6.0f;
+    float verticalPadding = FONTH/8.0f;
+
+    // Calculate width based on miniconwidth percentage and add padding
+    float width = (miniconwidth * (w - 2 * conPadding)) / 100.0f + (2 * horizontalPadding);
+    float height = contentHeight + (2 * verticalPadding);
+
+    // Position x at half the width (plus padding) to center the background
+    float x = conPadding + width/2.0f - horizontalPadding;
+    float y = aboveHud + height/2.0f - verticalPadding;
+
+    gle::defvertex();
+    gle::begin(GL_QUADS);
+    matrix4x3 m;
+    m.identity();
+    m.settranslation(x, y, 0);
+    m.scale(width/2.0f, height/2.0f, 0);
+
+    gle::attrib(m.transform(vec2(1, 1)));
+    gle::attrib(m.transform(vec2(1, -1)));
+    gle::attrib(m.transform(vec2(-1, -1)));
+    gle::attrib(m.transform(vec2(-1, 1)));
+    gle::end();
+}
+
 float renderconsole(float w, float h, float abovehud)
 {
     float conpad = FONTH/2,
@@ -171,7 +238,20 @@ float renderconsole(float w, float h, float abovehud)
     float y = drawconlines(conskip, confade, conwidth, conheight, conpad, confilter);
     if(isconnected()) drawconlines(conskip, hudconfade, conwidth, min(float(FONTH*hudconsize), h - 2*conpad), conpad, 0x4000, 0, 1, true); // hud centered console
     if(miniconsize && miniconwidth)
-        drawconlines(miniconskip, miniconfade, (miniconwidth*(w - 2*conpad))/100, min(float(FONTH*miniconsize), abovehud - y), conpad, miniconfilter, abovehud, -1);
+    {
+        abovehud = (h / 1.2f); // move the miniconsole a little more upwards
+        conpad *= 3; // move the miniconsole a little more to the right
+        float miniconheight = min(float(FONTH * miniconsize), h - 2 * conpad);
+
+        ConsoleMetrics metrics = calculateConsoleMetrics(miniconskip, miniconfade, (miniconwidth*(w - 2*(conpad)))/100, miniconheight, miniconfilter); // Calculate actual content height before drawing
+
+        if(metrics.numVisibleLines > 0)
+        {
+            drawMiniConsoleBackground(w, h, abovehud - metrics.totalHeight, conwidth, miniconheight, conpad, metrics.totalHeight);
+            drawconlines(miniconskip, miniconfade, (miniconwidth*(w - 2*(conpad)))/100, miniconheight, conpad, miniconfilter, abovehud, -1);
+        }
+    }
+
     game::rendersoftmessages(y);
     return y;
 }
