@@ -14,7 +14,7 @@ namespace game
     extern void renderMuzzleEffects(const vec &from, const vec &to, gameent *d, int atk);
     extern void addColorBlindnessFilter();
 
-    extern int zoomfov, zoom, crosshairsize, forcecampos, cbfilter;
+    extern int zoom, crosshairsize, forcecampos, cbfilter;
 }
 
 #endif

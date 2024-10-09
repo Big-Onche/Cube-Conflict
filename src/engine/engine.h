@@ -844,6 +844,8 @@ extern void bgquad(float x, float y, float w, float h, float tx = 0, float ty = 
 extern int map_atmo;  //Config partie Cube Conflict
 
 // main graphical effects
+extern int updateAimFov();
+extern int updateAimAvatarFov();
 extern bool addpostfx(const char *name, int outputbind = 0, int outputscale = 0, uint inputs = 1, uint freeinputs = 1, const vec4 &params = vec4(1, 1, 1, 1));
 extern bool updatepostfx(const  char *name,  const vec4 &params);
 extern bool deletepostfx(const char *name);

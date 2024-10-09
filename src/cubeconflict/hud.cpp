@@ -213,8 +213,6 @@ namespace game
         gameent *hp = hudplayer();
         if(hp->state==CS_EDITING || hp->state==CS_SPECTATOR || hp->state==CS_DEAD) return;
 
-        zoomfov = (guns[hp->gunselect].maxzoomfov);
-
         if(ispaused())
         {
             zoom = 0;

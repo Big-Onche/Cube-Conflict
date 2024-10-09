@@ -1338,7 +1338,6 @@ int farplane;
 VARP(zoominvel, 0, 100, 500);
 VARP(zoomoutvel, 0, 100, 500);
 VARP(fov, 10, 100, 150);
-int avatarzoomfov = 40;
 VAR(avatarfov, 10, 40, 100);
 FVAR(avatardepth, 0, 0.2f, 1);
 FVARNP(aspect, forceaspect, 0, 0, 1e3f);
@@ -1351,26 +1350,40 @@ void disablezoom()
     zoomprogress = 0;
 }
 
+int updateAimFov()
+{
+    return guns[game::hudplayer()->gunselect].maxzoomfov;
+}
+
+int updateAimAvatarFov()
+{
+    int gun = game::hudplayer()->gunselect;
+    if(gun==GUN_SV98 || gun==GUN_CROSSBOW || gun==GUN_SKS || gun==GUN_S_CAMPER || gun==GUN_S_ROCKETS) return (avatarfov / 2.5f);
+    else return avatarfov;
+}
+
 void computezoom()
 {
-    if(game::player1->state==CS_SPECTATOR)
+    gameent *hp = game::hudplayer();
+
+    if(hp->state==CS_SPECTATOR)
     {
-        if(game::hudplayer()->aiming && game::player1->state==CS_SPECTATOR) game::zoom = 1;
+        if(hp->aiming && hp->state==CS_SPECTATOR) game::zoom = 1;
         else game::zoom = 0;
     }
-    else if(game::player1->state==CS_DEAD || game::intermission) game::zoom = 0;
+    else if(hp->state==CS_DEAD || game::intermission) game::zoom = 0;
 
     if(!game::zoom)
     {
         zoomprogress = 0;
         curfov = fov;
         curavatarfov = avatarfov;
-        game::player1->aiming = false;
+        hp->aiming = false;
         return;
     }
     if(game::zoom > 0)
     {
-        game::player1->aiming = true;
+        hp->aiming = true;
         float vel = zoominvel * (100.f / game::gamespeed);
         zoomprogress = vel ? min(zoomprogress + float(elapsedtime) / vel, 1.0f) : 1;
     }
@@ -1381,11 +1394,12 @@ void computezoom()
         if(zoomprogress <= 0)
         {
             game::zoom = 0;
-            game::player1->aiming = false;
+            hp->aiming = false;
         }
     }
-    curfov = game::zoomfov*zoomprogress + fov*(1 - zoomprogress);
-    curavatarfov = avatarzoomfov*zoomprogress + avatarfov*(1 - zoomprogress);
+
+    curfov = updateAimFov() * zoomprogress + fov * (1 - zoomprogress);
+    curavatarfov = updateAimAvatarFov() * zoomprogress + avatarfov * (1 - zoomprogress);
 }
 
 FVARP(zoomsens, 1e-4f, 4.5f, 1e4f);
@@ -1434,8 +1448,8 @@ void mousemove(int dx, int dy)
     {
         if(zoomautosens)
         {
-            cursens = float(sensitivity*game::zoomfov)/fov;
-            curaccel = float(mouseaccel*game::zoomfov)/fov;
+            cursens = float(sensitivity * updateAimFov()) / fov;
+            curaccel = float(mouseaccel * updateAimFov()) / fov;
         }
         else
         {

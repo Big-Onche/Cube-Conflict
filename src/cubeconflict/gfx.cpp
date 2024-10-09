@@ -22,8 +22,6 @@ namespace game
     VAR(zoom, -1, 0, 1);
     VARFP(cbfilter, 0, 0, 4, if(!islaunching) setcbfilter(cbfilter));
 
-    int zoomfov = 50;
-
     void lightTrail(const vec &s, const vec &e, int radius, int fade, int peak, const vec &color) //cast lights along a ray
     {
         vec v;
