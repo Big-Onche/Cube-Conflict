@@ -1286,9 +1286,6 @@ int main(int argc, char **argv)
     if(!notexture) fatal("could not find core textures");
 
     defformatstring(dir, "media/interface/hud/fullscreen/");
-    textureload(tempformatstring("%s%s", dir, "scope_1.png"));
-    textureload(tempformatstring("%s%s", dir, "scope_2.png"));
-    textureload(tempformatstring("%s%s", dir, "scope_3.png"));
     textureload(tempformatstring("%s%s", dir, "ability.png"));
     textureload(tempformatstring("%s%s", dir, "vampire.png"));
     textureload(tempformatstring("%s%s", dir, "rage.png"));
@@ -1362,7 +1359,7 @@ int main(int argc, char **argv)
 
     addpostfx("sobel");
     addpostfx("mainfilter");
-    addpostfx("lensdistortion");
+    addpostfx("telescopicsight");
     addpostfx("deathscreen");
     addpostfx("protanopia");
     addpostfx("deuteranopia");

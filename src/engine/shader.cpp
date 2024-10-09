@@ -1681,14 +1681,15 @@ namespace postfx
         {
             if(!lensDistortion)
             {
-                addpostfx("lensdistortion");
+                addpostfx("telescopicsight");
                 lensDistortion = true;
             }
-            updatepostfx("lensdistortion", vec4((gun==11 || gun==22 ? 0.15f : 0.22f) * zoomprogress, 0.07f * zoomprogress, 0.f, 0.f)); // 11 = GUN_SV98, 22 = GUN_S_CAMPER
+
+            updatepostfx("telescopicsight", vec4((gun==11 || gun==22 ? 0.13f : 0.18f) * zoomprogress, 0.07f * zoomprogress, zoomprogress, gun==21 ? 0xFF5500 : 0x0022FF)); // 11 = GUN_SV98, 21 = GUN_S_ROCKETS, 22 = GUN_S_CAMPER
         }
         else if(lensDistortion)
         {
-            deletepostfx("lensdistortion");
+            deletepostfx("telescopicsight");
             lensDistortion = false;
         }
     }

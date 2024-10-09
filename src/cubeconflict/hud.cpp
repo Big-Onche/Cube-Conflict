@@ -223,9 +223,6 @@ namespace game
 
         if((hp->gunselect==GUN_SKS || hp->gunselect==GUN_SV98 || hp->gunselect==GUN_CROSSBOW || hp->gunselect==GUN_S_CAMPER || hp->gunselect==GUN_S_ROCKETS) && zoom)
         {
-            if(hp->gunselect==GUN_S_ROCKETS) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/scope_1.png", zoomprogress);
-            else if(hp->gunselect==GUN_SKS) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/scope_3.png", zoomprogress);
-            else drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/scope_2.png", zoomprogress);
             postfx::updateLensDistortion(true, hp->gunselect);
 
         }
