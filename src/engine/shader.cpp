@@ -1694,11 +1694,12 @@ namespace postfx
         }
     }
 
-    VARFP(cbfilter, 0, 0, 4, if(!islaunching) postfx::updateMainFilter());
+    VARFP(cbfilter, 0, 0, 4, postfx::updateMainFilter());
+    VARFP(coloranomaly, 0, 1, 1, postfx::updateMainFilter());
 
     void updateMainFilter(int i)
     {
-        updatepostfx("mainfilter", vec4((cbfilter ? (FILTER_DEATH + cbfilter) : i), 0, 0, 0));
+        updatepostfx("mainfilter", vec4((cbfilter ? (FILTER_DEATH + cbfilter) : i), coloranomaly, 0, 0));
     }
 
     void clearShroomsEffect()
