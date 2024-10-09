@@ -3089,7 +3089,6 @@ void gl_drawhud()
     abovehud = min(abovehud, conh*UI::abovehud());
 
     pushhudscale(conscale);
-    abovehud -= rendercommand(FONTH/2, abovehud - FONTH/2, conw-FONTH);
     if(!hidehud && !UI::uivisible("fullconsole")) renderconsole(conw, conh, abovehud - FONTH/2);
     pophudmatrix();
 

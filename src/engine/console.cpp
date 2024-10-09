@@ -59,7 +59,7 @@ ICOMMAND(fullconsole, "iN$", (int *val, int *numargs, ident *id),
 });
 ICOMMAND(toggleconsole, "", (), UI::toggleui("fullconsole"));
 
-float rendercommand(float x, float y, float w)
+float rendercommand(float x, float y, float w, bool getheight = false)
 {
     if(commandmillis < 0) return 0;
 
@@ -70,7 +70,7 @@ float rendercommand(float x, float y, float w)
     float width, height;
     text_boundsf(buf, width, height, w);
     y -= height;
-    draw_text(buf, x, y, 0xFF, 0xFF, 0xFF, 0xFF, commandpos>=0 ? commandpos+1 + strlen(prompt) : strlen(buf), w);
+    if(!getheight) draw_text(buf, x, y, 0xFF, 0xFF, 0xFF, 0xFF, commandpos>=0 ? commandpos+1 + strlen(prompt) : strlen(buf), w);
     return height;
 }
 
@@ -198,12 +198,12 @@ ConsoleMetrics calculateConsoleMetrics(int conskip, int confade, float conwidth,
     return metrics;
 }
 
-void drawMiniConsoleBackground(int w, int h, float aboveHud, float conWidth, float conHeight, float conPadding, float contentHeight)
+void drawMiniConsoleBackground(int w, int h, float aboveHud, float conWidth, float conHeight, float conPadding, float contentHeight, vec4 color)
 {
     if(contentHeight <= 0) return; // Only draw if there's actual content
 
     hudnotextureshader->set();
-    gle::colorf(0.1f, 0.1f, 0.1f, 0.5f);
+    gle::colorf(color.x, color.y, color.z, color.w);
 
     float horizontalPadding = FONTH/6.0f;
     float verticalPadding = FONTH/8.0f;
@@ -237,7 +237,7 @@ float renderconsole(float w, float h, float abovehud)
           conwidth = w - 2*conpad - game::clipconsole(w, h);
     float y = drawconlines(conskip, confade, conwidth, conheight, conpad, confilter);
     if(isconnected()) drawconlines(conskip, hudconfade, conwidth, min(float(FONTH*hudconsize), h - 2*conpad), conpad, 0x4000, 0, 1, true); // hud centered console
-    if(miniconsize && miniconwidth)
+    if((miniconsize && miniconwidth) || commandmillis > 0)
     {
         abovehud = (h / 1.2f); // move the miniconsole a little more upwards
         conpad *= 3; // move the miniconsole a little more to the right
@@ -245,10 +245,14 @@ float renderconsole(float w, float h, float abovehud)
 
         ConsoleMetrics metrics = calculateConsoleMetrics(miniconskip, miniconfade, (miniconwidth*(w - 2*(conpad)))/100, miniconheight, miniconfilter); // Calculate actual content height before drawing
 
-        if(metrics.numVisibleLines > 0)
+        if(metrics.numVisibleLines > 0 || commandmillis > 0)
         {
-            drawMiniConsoleBackground(w, h, abovehud - metrics.totalHeight, conwidth, miniconheight, conpad, metrics.totalHeight);
+            drawMiniConsoleBackground(w, h, abovehud - metrics.totalHeight, conwidth, miniconheight, conpad, metrics.totalHeight, vec4(0.1, 0.1, 0.1, 0.5));
             drawconlines(miniconskip, miniconfade, (miniconwidth*(w - 2*(conpad)))/100, miniconheight, conpad, miniconfilter, abovehud, -1);
+            abovehud += FONTH * 1.25f;
+            float commandHeight = rendercommand(conpad, abovehud, conwidth, true);
+            drawMiniConsoleBackground(w, h, abovehud - commandHeight, conwidth, miniconheight, conpad, commandHeight, vec4(0.2, 0.2, 0.2, 0.5));
+            rendercommand(conpad, abovehud, conwidth);
         }
     }
 
