@@ -254,7 +254,10 @@ void renderCommand(float x, float y, float w)
     prepareCommand(buf, width, height, w * 4);
 
     y -= height;
-    draw_text(buf, x, y, 0xFF, 0xFF, 0xFF, 0xFF, commandpos >= 0 ? commandpos + 1 + strlen(commandprompt ? commandprompt : ">") : strlen(buf), getMaxWidth(miniconwidth - 1, w));
+
+    int col = buf[2] == '/' ? 0xBB : 0xFF;
+
+    draw_text(buf, x, y, col, col, col, col, commandpos >= 0 ? commandpos + 1 + strlen(commandprompt ? commandprompt : ">") : strlen(buf), getMaxWidth(miniconwidth - 1, w));
 }
 
 float renderconsole(float w, float h, float abovehud)
