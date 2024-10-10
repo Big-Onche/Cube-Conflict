@@ -489,13 +489,14 @@ namespace game
         static int prevTime = 0;
 
         int currentTime = totalmillis;
-        int timeElapsed = currentTime - prevTime; // Time elapsed since the last frame in milliseconds
+        int timeElapsed = max(currentTime - prevTime, 1); // Time elapsed since the last frame in milliseconds
 
         vec velocity = vec(hudplayer()->o).sub(prevPos); // Calculate raw velocity
 
         if(timeElapsed > 0) velocity = velocity.mul(1000.0f / timeElapsed); // Convert milliseconds to seconds for velocity calculation
 
-        smoothVel = smoothVel.mul(1.0f - 0.4f).add(velocity.mul(0.4f)); // Smoothing the velocity using an exponential moving average (EMA), 0.4f = smoothing factor
+        float smoothingFactor = clamp(1.0f - (timeElapsed / 100.0f), 0.1f, 0.9f); // smoothing factor scaled with refresh rate
+        smoothVel = smoothVel.mul(1.0f - smoothingFactor).add(velocity.mul(smoothingFactor)); // Smoothing the velocity using an exponential moving average (EMA)
 
         prevPos = hudplayer()->o;
         prevTime = currentTime;
