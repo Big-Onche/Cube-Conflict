@@ -88,8 +88,7 @@ namespace game
     extern void dynlighttrack(physent *owner, vec &o, vec &hud);
     extern int maxsoundradius(int n);
     extern bool needminimap();
-    extern void rendermessages(char *line, int y);
-    extern void rendersoftmessages(int y);
+    extern void rendersoftmessages(float w, float h);
     extern void dotime();
     extern int dmgsecs[2], avgdmg[4];
 }

@@ -59,27 +59,12 @@ ICOMMAND(fullconsole, "iN$", (int *val, int *numargs, ident *id),
 });
 ICOMMAND(toggleconsole, "", (), UI::toggleui("fullconsole"));
 
-float rendercommand(float x, float y, float w, bool getheight = false)
-{
-    if(commandmillis < 0) return 0;
-
-    char buf[CONSTRLEN];
-    const char *prompt = commandprompt ? commandprompt : ">";
-    formatstring(buf, "%s %s", prompt, commandbuf);
-
-    float width, height;
-    text_boundsf(buf, width, height, w);
-    y -= height;
-    if(!getheight) draw_text(buf, x, y, 0xFF, 0xFF, 0xFF, 0xFF, commandpos>=0 ? commandpos+1 + strlen(prompt) : strlen(buf), w);
-    return height;
-}
-
 VARP(consize, 0, 5, 100);
 VARP(miniconsize, 0, 5, 100);
 VARP(hudconsize, 0, 5, 100);
 VARP(miniconwidth, 0, 30, 100);
 VARP(confade, 0, 15, 60);
-VARP(miniconfade, 0, 20, 60);
+VARP(miniconfade, 0, 25, 60);
 VARP(hudconfade, 0, 3, 10);
 VARP(fullconsize, 0, 75, 100);
 HVARP(confilter, 0, 0x1F00, 0xFFFFFF);
@@ -110,7 +95,14 @@ ICOMMAND(miniconskip, "i", (int *n), setconskip(miniconskip, miniconfilter, *n))
 
 ICOMMAND(clearconsole, "", (), { while(conlines.length()) delete[] conlines.pop().line; });
 
-float drawconlines(int conskip, int confade, float conwidth, float conheight, float conoff, int filter, float y = 0, int dir = 1, bool hudconsole = false)
+void renderHudConsole(char *line, float w, float h, int y)
+{
+    float width, height;
+    text_boundsf(line, width, height);
+    draw_text(line, (w - width) / 2.f, h / 3.85f + y);
+}
+
+float drawconlines(int conskip, int confade, float conwidth, float conheight, float conoff, int filter, float y = 0, int dir = 1, bool hudconsole = false, float w = 0, float h = 0)
 {
     filter &= CON_FLAGS;
     int numl = conlines.length(), offset = min(conskip, numl);
@@ -146,7 +138,7 @@ float drawconlines(int conskip, int confade, float conwidth, float conheight, fl
         float width, height;
         text_boundsf(line, width, height, conwidth);
         if(dir <= 0) y -= height;
-        if(hudconsole) game::rendermessages(line, y);
+        if(hudconsole) renderHudConsole(line, w, h, y);
         else draw_text(line, conoff, y, 0xFF, 0xFF, 0xFF, 0xFF, -1, conwidth);
         if(dir > 0) y += height;
     }
@@ -198,18 +190,41 @@ ConsoleMetrics calculateConsoleMetrics(int conskip, int confade, float conwidth,
     return metrics;
 }
 
-void drawMiniConsoleBackground(int w, int h, float aboveHud, float conWidth, float conHeight, float conPadding, float contentHeight, vec4 color)
+float getMaxWidth(int conWidth, float w)
+{
+    return (conWidth * (w - 2 * (FONTH / 2))) / 100;
+}
+
+template<size_t N>
+void prepareCommand(char (&buf)[N], float& width, float& height, float w)
+{
+    if(commandmillis < 0) return;
+
+    const char *prompt = commandprompt ? commandprompt : ">";
+    formatstring(buf, "%s %s", prompt, commandbuf);
+
+    text_boundsf(buf, width, height, w);
+}
+
+float getCommandHeight(float w)
+{
+    if(commandmillis < 0) return 0;
+
+    char buf[CONSTRLEN];
+    float width, height;
+    prepareCommand(buf, width, height, getMaxWidth(miniconwidth, w));
+    return height;
+}
+
+void drawMiniConsoleBackground(int w, int h, float aboveHud, float conWidth, float conHeight, float conPadding, float contentHeight, vec4 color, float verticalPadding = FONTH/8.0f, float horizontalPadding = FONTH/6.0f)
 {
     if(contentHeight <= 0) return; // Only draw if there's actual content
 
     hudnotextureshader->set();
     gle::colorf(color.x, color.y, color.z, color.w);
 
-    float horizontalPadding = FONTH/6.0f;
-    float verticalPadding = FONTH/8.0f;
-
     // Calculate width based on miniconwidth percentage and add padding
-    float width = (miniconwidth * (w - 2 * conPadding)) / 100.0f + (2 * horizontalPadding);
+    float width = (conWidth * (w - 2 * conPadding)) / 100.0f + (2 * horizontalPadding);
     float height = contentHeight + (2 * verticalPadding);
 
     // Position x at half the width (plus padding) to center the background
@@ -230,13 +245,40 @@ void drawMiniConsoleBackground(int w, int h, float aboveHud, float conWidth, flo
     gle::end();
 }
 
+float getCommandWidth(float w)
+{
+    if(commandmillis < 0) return 0;
+
+    char buf[CONSTRLEN];
+    float width, height;
+    prepareCommand(buf, width, height, w);
+    width /= (screenw / 34.0f);
+
+    return min(getMaxWidth(miniconwidth, w), max(width, miniconwidth / 2.f));  // Return the actual calculated width
+}
+
+void renderCommand(float x, float y, float w)
+{
+    if(commandmillis < 0) return;
+
+    char buf[CONSTRLEN];
+    float width, height;
+    prepareCommand(buf, width, height, w);
+
+    y -= height;
+    draw_text(buf, x, y, 0xFF, 0xFF, 0xFF, 0xFF, commandpos >= 0 ? commandpos + 1 + strlen(commandprompt ? commandprompt : ">") : strlen(buf), getMaxWidth(miniconwidth, w));
+}
+
 float renderconsole(float w, float h, float abovehud)
 {
     float conpad = FONTH/2,
           conheight = min(float(FONTH*consize), h - 2*conpad),
           conwidth = w - 2*conpad - game::clipconsole(w, h);
+
     float y = drawconlines(conskip, confade, conwidth, conheight, conpad, confilter);
-    if(isconnected()) drawconlines(conskip, hudconfade, conwidth, min(float(FONTH*hudconsize), h - 2*conpad), conpad, 0x4000, 0, 1, true); // hud centered console
+
+    if(isconnected()) drawconlines(conskip, hudconfade, conwidth, min(float(FONTH*hudconsize), h - 2*conpad), conpad, 0x4000, 0, 1, true, w, h); // hud centered console
+
     if((miniconsize && miniconwidth) || commandmillis > 0)
     {
         abovehud = (h / 1.2f); // move the miniconsole a little more upwards
@@ -247,16 +289,16 @@ float renderconsole(float w, float h, float abovehud)
 
         if(metrics.numVisibleLines > 0 || commandmillis > 0)
         {
-            drawMiniConsoleBackground(w, h, abovehud - metrics.totalHeight, conwidth, miniconheight, conpad, metrics.totalHeight, vec4(0.1, 0.1, 0.1, 0.5));
-            drawconlines(miniconskip, miniconfade, (miniconwidth*(w - 2*(conpad)))/100, miniconheight, conpad, miniconfilter, abovehud, -1);
-            abovehud += FONTH * 1.25f;
-            float commandHeight = rendercommand(conpad, abovehud, conwidth, true);
-            drawMiniConsoleBackground(w, h, abovehud - commandHeight, conwidth, miniconheight, conpad, commandHeight, vec4(0.2, 0.2, 0.2, 0.5));
-            rendercommand(conpad, abovehud, conwidth);
+            drawMiniConsoleBackground(w, h, abovehud - metrics.totalHeight, miniconwidth, miniconheight, conpad, metrics.totalHeight, vec4(0.1, 0.1, 0.1, 0.5));
+            drawconlines(miniconskip, miniconfade, getMaxWidth(miniconwidth, w), miniconheight, conpad, miniconfilter, abovehud, -1);
+            float commandHeight = getCommandHeight(w);
+            abovehud += FONTH * 1.3f;
+            drawMiniConsoleBackground(w, h, abovehud - FONTH, miniconwidth, miniconheight, conpad, commandHeight, vec4(0.2, 0.2, 0.2, 0.5));
+            renderCommand(conpad, abovehud, conwidth);
         }
     }
 
-    game::rendersoftmessages(y);
+    game::rendersoftmessages(w, h);
     return y;
 }
 

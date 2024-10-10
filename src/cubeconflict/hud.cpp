@@ -143,7 +143,7 @@ namespace game
         formatstring(interractmsg, "%s", msg);
     });
 
-    void rendersoftmessages(int y)
+    void rendersoftmessages(float w, float h)
     {
         if(!isconnected())
         {
@@ -154,49 +154,19 @@ namespace game
         if(totalmillis - msgmillis[MSG_INTERRACT] <= 1)
         {
             defformatstring(s, "%s", interractmsg);
-
-            float tsz = 0.35f + hudscale/300.f,
-                  tx = 0.5f*(screenw - text_width(s)*tsz);
-
-            pushhudscale(3);
-            hudmatrix.translate(tx, screenh/1.5f, 0);
-            hudmatrix.scale(tsz, tsz, 1);
-            flushhudmatrix();
-            draw_text(s, 0, 0);
-            pophudmatrix();
+            float width, height;
+            text_boundsf(s, width, height);
+            draw_text(s, (w - width) / 2.f, h / 1.5f);
         }
 
         if(totalmillis < msgmillis[MSG_CUSTOM])
         {
             defformatstring(s, "%s", custommsg);
-
-            float tsz = 0.35f + hudscale/300.f,
-                  tx = 0.5f*(screenw - text_width(s)*tsz);
-
-            pushhudscale(3);
-            hudmatrix.translate(tx, screenh/4.f, 0);
-            hudmatrix.scale(tsz, tsz, 1);
-            flushhudmatrix();
-            draw_text(s, 0, 0);
-            pophudmatrix();
+            float width, height;
+            text_boundsf(s, width, height);
+            draw_text(s, (w - width) / 2.f, h / 4.0f);
         }
     }
-
-    void rendermessages(char *line, int y)
-    {
-        float tsz = 0.35f + hudscale/300.f,
-              tx = 0.5f*(screenw - text_width(line)*tsz);
-
-        pushhudscale(3);
-        hudmatrix.translate(tx, screenh/4.f, 0);
-        hudmatrix.scale(tsz, tsz, 1);
-        flushhudmatrix();
-        draw_text(line, 0, y);
-        pophudmatrix();
-    }
-
-    bool enlargefov = true;
-
 
     void drawFullscreenQuad(int w, int h, const char *texDir, float alpha, float r = 1, float g = 1, float b = 1)
     {
