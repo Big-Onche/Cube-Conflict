@@ -67,9 +67,10 @@ VARP(confade, 0, 15, 60);
 VARP(miniconfade, 0, 25, 60);
 VARP(hudconfade, 0, 3, 10);
 VARP(fullconsize, 0, 75, 100);
-HVARP(confilter, 0, 0x1F00, 0xFFFFFF);
+HVARP(confilter, 0, 0x001C00, 0xFFFFFF);
+HVARP(hudconfilter, 0, 0x004000, 0xFFFFFF);
 HVARP(fullconfilter, 0, 0xFFFFFF, 0xFFFFFF);
-HVARP(miniconfilter, 0, 0, 0xFFFFFF);
+HVARP(miniconfilter, 0, 0x000300, 0xFFFFFF);
 
 int conskip = 0, miniconskip = 0;
 
@@ -268,7 +269,7 @@ float renderconsole(float w, float h, float abovehud)
 
     float y = drawconlines(conskip, confade, conwidth, conheight, conpad, confilter);
 
-    if(isconnected()) drawconlines(conskip, hudconfade, conwidth, min(float(FONTH*hudconsize), h - 2*conpad), conpad, 0x4000, 0, 1, true, w, h); // hud centered console
+    if(isconnected()) drawconlines(conskip, hudconfade, conwidth, min(float(FONTH*hudconsize), h - 2*conpad), conpad, hudconfilter, 0, 1, true, w, h); // hud centered console
 
     if((miniconsize && miniconwidth) || commandmillis > 0)
     {

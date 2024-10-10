@@ -2981,7 +2981,7 @@ VARP(showfpsrange, 0, 0, 1);
 VARP(showmyping, 0, 0, 1);
 VAR(statrate, 1, 200, 1000);
 
-FVARP(conscale, 1e-3f, 0.4f, 1e3f);
+FVARP(conscale, 1e-3f, 0.36f, 1e3f);
 
 void resethudshader()
 {
