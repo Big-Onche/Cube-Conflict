@@ -212,7 +212,7 @@ float getCommandHeight(float w)
 
     char buf[CONSTRLEN];
     float width, height;
-    prepareCommand(buf, width, height, getMaxWidth(miniconwidth, w));
+    prepareCommand(buf, width, height, getMaxWidth(miniconwidth - 2, w));
     return height;
 }
 
@@ -245,28 +245,16 @@ void drawMiniConsoleBackground(int w, int h, float aboveHud, float conWidth, flo
     gle::end();
 }
 
-float getCommandWidth(float w)
-{
-    if(commandmillis < 0) return 0;
-
-    char buf[CONSTRLEN];
-    float width, height;
-    prepareCommand(buf, width, height, w);
-    width /= (screenw / 34.0f);
-
-    return min(getMaxWidth(miniconwidth, w), max(width, miniconwidth / 2.f));  // Return the actual calculated width
-}
-
 void renderCommand(float x, float y, float w)
 {
     if(commandmillis < 0) return;
 
     char buf[CONSTRLEN];
     float width, height;
-    prepareCommand(buf, width, height, w);
+    prepareCommand(buf, width, height, w * 4);
 
     y -= height;
-    draw_text(buf, x, y, 0xFF, 0xFF, 0xFF, 0xFF, commandpos >= 0 ? commandpos + 1 + strlen(commandprompt ? commandprompt : ">") : strlen(buf), getMaxWidth(miniconwidth, w));
+    draw_text(buf, x, y, 0xFF, 0xFF, 0xFF, 0xFF, commandpos >= 0 ? commandpos + 1 + strlen(commandprompt ? commandprompt : ">") : strlen(buf), getMaxWidth(miniconwidth - 1, w));
 }
 
 float renderconsole(float w, float h, float abovehud)
@@ -281,7 +269,7 @@ float renderconsole(float w, float h, float abovehud)
 
     if((miniconsize && miniconwidth) || commandmillis > 0)
     {
-        abovehud = (h / 1.2f); // move the miniconsole a little more upwards
+        abovehud = (h / 1.3f); // move the miniconsole a little more upwards
         conpad *= 3; // move the miniconsole a little more to the right
         float miniconheight = min(float(FONTH * miniconsize), h - 2 * conpad);
 
