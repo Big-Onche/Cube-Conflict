@@ -182,8 +182,12 @@ namespace game
     {
         gameent *hp = hudplayer();
 
-        if(hp->state==CS_EDITING || hp->state==CS_SPECTATOR || hp->state==CS_DEAD) return;
-        if(ispaused()) { disablezoom(); return; }
+        if(hp->state==CS_EDITING || hp->state==CS_SPECTATOR || hp->state==CS_DEAD || ispaused())
+        {
+            postfx::updateLensDistortion(false);
+            disablezoom();
+            return;
+        }
 
         if((hp->gunselect==GUN_SKS || hp->gunselect==GUN_SV98 || hp->gunselect==GUN_CROSSBOW || hp->gunselect==GUN_S_CAMPER || hp->gunselect==GUN_S_ROCKETS) && zoom)
         {
