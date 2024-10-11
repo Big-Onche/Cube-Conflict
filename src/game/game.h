@@ -127,6 +127,7 @@ enum { M_NONE = 0, M_SEARCH, M_AGGRO, M_RETREAT, M_ATTACKING, M_PAIN, M_SLEEP, M
 #define validgun(n) ((n) >= 0 && (n) < NUMGUNS)
 #define validact(n) ((n) >= 0 && (n) < NUMACTS)
 #define validatk(n) ((n) >= 0 && (n) < NUMATKS)
+#define validAbility(n) ((n) >= 0 && (n) < NUMABILITIES)
 
 enum
 {
@@ -253,7 +254,7 @@ enum
     N_SWITCHNAME, N_SWITCHMODEL, N_SWITCHCOLOR, N_SWITCHTEAM,
     N_SERVCMD,
     N_DEMOPACKET,
-    N_SENDCAPE, N_SENDTOMBE, N_SENDDANSE, N_SENDAPTITUDE, N_REGENALLIES,
+    N_SENDCAPE, N_SENDTOMBE, N_SENDDANSE, N_SENDCLASS, N_REGENALLIES,
     N_REQABILITY, N_GETABILITY,
     N_ANNOUNCE,
     N_CURWEAPON,
@@ -288,7 +289,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_SWITCHNAME, 0, N_SWITCHMODEL, 2, N_SWITCHCOLOR, 2, N_SWITCHTEAM, 2,
     N_SERVCMD, 0,
     N_DEMOPACKET, 0,
-    N_SENDCAPE, 2, N_SENDTOMBE, 2, N_SENDDANSE, 2, N_SENDAPTITUDE, 2, N_REGENALLIES, 5,
+    N_SENDCAPE, 2, N_SENDTOMBE, 2, N_SENDDANSE, 2, N_SENDCLASS, 2, N_REGENALLIES, 5,
     N_REQABILITY, 2, N_GETABILITY, 4,
     N_ANNOUNCE, 3,
     N_CURWEAPON, 2,
@@ -448,6 +449,7 @@ static const struct guninfo { const char *ident, *name; vec2 weapDisp; int maxzo
 
 // Definition of player's classes
 enum {C_SOLDIER = 0, C_MEDIC, C_AMERICAN, C_NINJA, C_VAMPIRE, C_WIZARD, C_KAMIKAZE, C_REAPER, C_PHYSICIST, C_CAMPER, C_SPY, C_PRIEST, C_VIKING, C_JUNKIE, C_SHOSHONE, NUMCLASSES};
+#define validClass(n) ((n) >= 0 && (n) < NUMCLASSES)
 
 struct ability { const int manacost, duration, cooldown, snd; };
 static const struct classesConfig { const char *hatDir; int damage, resistance, accuracy, speed; ability abilities[3]; } classes[NUMCLASSES] =

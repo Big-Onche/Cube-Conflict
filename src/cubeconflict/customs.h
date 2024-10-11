@@ -6,6 +6,7 @@ enum {D_COMMON = 0, D_UNCOMMON, D_RARE, D_LEGENDARY, D_GODLY, NUMDROPS};
 
 enum {SMI_HAP = 0, SMI_NOEL, SMI_MALADE, SMI_CONTENT, SMI_COLERE, SMI_SOURNOIS, SMI_FOU, SMI_CLINDOEIL, SMI_COOL, SMI_BUG, NUMSMILEYS}; //+10
 extern int smiley[NUMSMILEYS];
+#define validSmiley(n) ((n) >= 0 && (n) < NUMSMILEYS)
 
 static const struct smileysinfo { const char *ident; int oldprice, price, value; } customsmileys[NUMSMILEYS] =
 {
@@ -23,6 +24,7 @@ static const struct smileysinfo { const char *ident; int oldprice, price, value;
 
 enum {CAPE_CUBE = 0, CAPE_PAINT1, CAPE_PAINT2, CAPE_ANAT, CAPE_ATOME, CAPE_DOUBLE, CAPE_FLAMES, CAPE_BOUCLE, CAPE_VINTAGE, CAPE_ELITE, CAPE_HIGH, CAPE_RAYONSX, CAPE_RISITAS, CAPE_RICHE, NUMCAPES}; //6
 extern int cape[NUMCAPES];
+#define validCape(n) ((n) >= 0 && (n) < NUMCAPES)
 
 static const struct capesConfig { const char *name; int price, value; } capes[NUMCAPES] =
 {
@@ -44,6 +46,7 @@ static const struct capesConfig { const char *name; int price, value; } capes[NU
 
 enum {TOM_MERDE = 0, TOM_BASIQUE1, TOM_BASIQUE2, TOM_FLEUR, TOM_CRISTAL, TOM_GOLF, TOM_OEIL, TOM_EXCALIBUR, TOM_COURONNE, TOM_CRIME, TOM_FUCK, TOM_MONUMENT, TOM_LINGOT, NUMGRAVES}; //7
 extern int grave[NUMGRAVES];
+#define validGrave(n) ((n) >= 0 && (n) < NUMGRAVES)
 
 static const struct gravesConfig { const char *name; int price, value; } graves[NUMGRAVES] =
 {

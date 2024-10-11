@@ -2344,6 +2344,8 @@ namespace server
 
     void dodamage(clientinfo *target, clientinfo *actor, int baseDamage, int atk, const vec &hitpush = vec(0, 0, 0), bool afterBurn = false)
     {
+        if(!validClass(actor->aptitude) || !validClass(target->aptitude) || !validatk(atk)) return;
+
         servstate &ts = target->state;
         servstate &as = actor->state;
 
@@ -2548,7 +2550,7 @@ namespace server
 
         if(ci->state.armourtype==A_POWERARMOR && !ci->state.armour && ci->state.ammo[GUN_POWERARMOR] && ci->state.gunselect==GUN_POWERARMOR) gs.gunwait=0;
 
-        if(!gs.isalive(gamemillis) || wait<gs.gunwait || !validatk(atk)) return;
+        if(!gs.isalive(gamemillis) || wait<gs.gunwait || !validatk(atk) || !validClass(ci->aptitude)) return;
 
         int gun = attacks[atk].gun;
         if(gs.ammo[gun]<=0 || (attacks[atk].range && from.dist(to) > attacks[atk].range + 1)) return;
@@ -3710,9 +3712,10 @@ namespace server
                 break;
             }
 
-            case N_SENDAPTITUDE:
+            case N_SENDCLASS:
             {
-                ci->aptitude = getint(p);
+                int playerClass = getint(p);
+                if(validClass(playerClass)) ci->aptitude = playerClass;
                 QUEUE_MSG;
                 break;
             }
@@ -3720,6 +3723,7 @@ namespace server
             case N_REQABILITY:
             {
                 int ability = getint(p);
+                if(!cq || !validClass(cq->aptitude) || !validAbility(ability)) break;
                 if(cq->state.mana < classes[cq->aptitude].abilities[ability].manacost) return;
                 cq->state.mana -= classes[cq->aptitude].abilities[ability].manacost;
                 cq->state.abilitymillis[ability] = classes[cq->aptitude].abilities[ability].duration;
@@ -3746,8 +3750,7 @@ namespace server
 
             case N_FIRETOUCH:
             {
-                if(!cq) break;
-                dodamage(cq, cq, 0, ATK_FLAMETHROWER, vec(0, 0, 0));
+                if(cq) dodamage(cq, cq, 0, ATK_FLAMETHROWER, vec(0, 0, 0));
                 break;
             }
 

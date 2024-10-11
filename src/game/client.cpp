@@ -1438,6 +1438,7 @@ namespace game
 
             case N_TEXT:
             {
+                                conoutf("TEXT RECEIVED");
                 if(!d) return;
                 getstring(text, p);
                 filtertext(text, text, true, true);
@@ -1572,10 +1573,10 @@ namespace game
                 break;
             }
 
-            case N_SENDAPTITUDE:
+            case N_SENDCLASS:
             {
-                int classe = getint(p);
-                if(d) d->aptitude = classe;
+                int playerClass = getint(p);
+                if(d && validClass(playerClass)) d->aptitude = playerClass;
                 break;
             }
 

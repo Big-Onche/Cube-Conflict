@@ -332,10 +332,6 @@ namespace game
         if(player1->customtombe==10) unlockAchievement(ACH_FUCKYOU);
     });
 
-    bool validClasse(int i) { return i >= 0 && i <= NUMCLASSES; }
-    bool validCape(int i) { return i >= 0 && i <= NUMCAPES; }
-    bool validGrave(int i) { return i >= 0 && i <= NUMGRAVES; }
-
     void rendertombeplayer(gameent *d, float fade)
     {
         if(validGrave(d->customcape))
@@ -454,7 +450,7 @@ namespace game
         if(d->boostmillis[B_EPO])   a[ai++] = modelattach("tag_boost2", "boosts/epo", 0, 0);
 
         /////////////////////////// Classe's hat ///////////////////////////
-        if(validClasse(d->aptitude)) a[ai++] = modelattach("tag_hat", classes[d->aptitude].hatDir, 0, 0);
+        if(validClass(d->aptitude)) a[ai++] = modelattach("tag_hat", classes[d->aptitude].hatDir, 0, 0);
 
         /////////////////////////// Player's cape ///////////////////////////
         if(validCape(d->customcape))

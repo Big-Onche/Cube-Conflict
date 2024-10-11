@@ -24,7 +24,7 @@ namespace game
         }
         else
         {
-            addmsg(N_SENDAPTITUDE, "ri", player1_aptitude);
+            addmsg(N_SENDCLASS, "ri", player1_aptitude);
             player1->aptitude = player1_aptitude;
             oldapti = player1->aptitude;
             if(!islaunching) playSound(S_C_SOLDIER+player1_aptitude, vec(0, 0, 0), 0, 0, SND_UI);

@@ -704,7 +704,11 @@ namespace ai
 
     void killed(gameent *d, gameent *e)
     {
-        if(d->ai) d->ai->reset();
+        if(d->ai)
+        {
+            //addmsg(N_TEXT, "rcs", d, "CONNARD!");
+            d->ai->reset();
+        }
     }
 
     void itemspawned(int ent)

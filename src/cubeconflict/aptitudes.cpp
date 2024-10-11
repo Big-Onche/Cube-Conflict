@@ -9,7 +9,11 @@ bool disabledClasse[NUMCLASSES];
 ICOMMAND(getclass, "i", (int *i), intret(disabledClasse[*i]) );
 
 ICOMMAND(setclass, "i", (int *i),
-    if(*i < 0 || *i > NUMCLASSES-1) return;
+    if(!validClass(*i))
+    {
+        conoutf(CON_ERROR, "\f3Invalid class ID! (must be 0 to %d)", NUMCLASSES);
+        return;
+    }
     if(*i == game::player1->aptitude)
     {
         conoutf(CON_ERROR, "\f3Cannot deactivate your current class!");
