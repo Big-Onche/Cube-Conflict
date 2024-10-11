@@ -1295,12 +1295,11 @@ namespace game
         return name;
     }
 
-    VARP(teamcolortext, 0, 1, 1);
-
     const char *teamcolorname(gameent *d, const char *alt)
     {
-        if(!teamcolortext || !m_teammode || !validteam(d->team) || d->state == CS_SPECTATOR) return colorname(d, NULL, alt);
-        return colorname(d, NULL, alt, d->team!=player1->team ? teamtextcode[2] : teamtextcode[1]);
+        if(d->state == CS_SPECTATOR) return colorname(d, NULL, alt, "\f1"); // spectator (blue)
+        if((isteam(hudplayer()->team, d->team) && m_teammode) || d==hudplayer()) return colorname(d, NULL, alt, "\fd"); // team mate (yellow)
+        return colorname(d, NULL, alt, "\fc"); // enemies (red)
     }
 
     const char *teamcolor(int team)
