@@ -2859,15 +2859,21 @@ namespace UI
     struct ModelPreview : Preview
     {
         char *name;
-        int anim;
+        int anim, yaw, pitch, roll;
+        bool rot;
 
         ModelPreview() : name(NULL) {}
         ~ModelPreview() { delete[] name; }
 
-        void setup(const char *name_, const char *animspec, float minw_, float minh_)
+        void setup(const char *name_, const char *animspec, float minw_, float minh_, int yaw_, int pitch_, int roll_, bool rot_)
         {
             Preview::setup(minw_, minh_);
             SETSTR(name, name_);
+
+            yaw = yaw_;
+            pitch = pitch_;
+            roll = roll_;
+            rot = rot_;
 
             anim = ANIM_ALL;
             if(animspec[0])
@@ -2905,9 +2911,9 @@ namespace UI
             {
                 vec center, radius;
                 m->boundbox(center, radius);
-                float yaw;
-                vec o = calcmodelpreviewpos(radius, yaw).sub(center);
-                rendermodel(name, anim, o, yaw, 0, 0, 0, NULL, NULL, 0);
+                if(rot) yaw = fmod(lastmillis/20000.0f*360.0f, 360.0f);
+                vec o = calcmodelpreviewpos(radius).sub(center);
+                rendermodel(name, anim, o, yaw, pitch, roll, 0, NULL, NULL, 0);
             }
             if(clipstack.length()) clipstack.last().scissor();
             modelpreview::end();
@@ -2918,8 +2924,9 @@ namespace UI
     struct PlayerPreview : Preview
     {
         int model, cape, color, team, weapon;
+        bool rot;
 
-        void setup(int model_, int cape_, int color_, int team_, int weapon_, float minw_, float minh_)
+        void setup(int model_, int cape_, int color_, int team_, int weapon_, float minw_, float minh_, bool rot_)
         {
             Preview::setup(minw_, minh_);
             model = model_;
@@ -2927,6 +2934,7 @@ namespace UI
             color = color_;
             team = team_;
             weapon = weapon_;
+            rot = rot_;
         }
 
         static const char *typestr() { return "#PlayerPreview"; }
@@ -2941,7 +2949,7 @@ namespace UI
             int sx1, sy1, sx2, sy2;
             window->calcscissor(sx, sy, sx+w, sy+h, sx1, sy1, sx2, sy2, false);
             modelpreview::start(sx1, sy1, sx2-sx1, sy2-sy1, false, clipstack.length() > 0);
-            game::renderplayerpreview(model, cape, color, team, weapon);
+            game::renderplayerpreview(model, cape, color, team, weapon, rot);
             if(clipstack.length()) clipstack.last().scissor();
             modelpreview::end();
         }
@@ -3470,11 +3478,11 @@ namespace UI
             o->setup(tex, *minw, *minh, *tilew <= 0 ? 1 : *tilew, *tileh <= 0 ? 1 : *tileh);
         }, children));
 
-    ICOMMAND(uimodelpreview, "ssffe", (char *model, char *animspec, float *minw, float *minh, uint *children),
-        BUILD(ModelPreview, o, o->setup(model, animspec, *minw, *minh), children));
+    ICOMMAND(uimodelpreview, "ssffiiiie", (char *model, char *animspec, float *minw, float *minh, int *yaw, int *pitch, int *roll, int *rot, uint *children),
+        BUILD(ModelPreview, o, o->setup(model, animspec, *minw, *minh, *yaw, *pitch, *roll, *rot), children));
 
-    ICOMMAND(uiplayerpreview, "iiiiiffe", (int *model, int *cape, int *color, int *team, int *weapon, float *minw, float *minh, uint *children),
-        BUILD(PlayerPreview, o, o->setup(*model, *cape, *color, *team, *weapon, *minw, *minh), children));
+    ICOMMAND(uiplayerpreview, "iiiiiffie", (int *model, int *cape, int *color, int *team, int *weapon, float *minw, float *minh, int *rot, uint *children),
+        BUILD(PlayerPreview, o, o->setup(*model, *cape, *color, *team, *weapon, *minw, *minh, *rot), children));
 
     ICOMMAND(uiprefabpreview, "siffe", (char *prefab, int *color, float *minw, float *minh, uint *children),
         BUILD(PrefabPreview, o, o->setup(prefab, *color, *minw, *minh), children));

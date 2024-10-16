@@ -20,7 +20,20 @@ namespace game
     };
     vector<hitmsg> hits;
 
-    ICOMMAND(getweapon, "", (), intret(player1->gunselect));
+    ICOMMAND(currentgun, "", (), intret(player1->gunselect));
+
+    void findSpecialWeapon(gameent *d, int baseWeapon, int maxWeapons, inventoryCallback callback, bool terminate)
+    {
+        loopi(maxWeapons)
+        {
+            int gunId = baseWeapon + i;
+            if(d->ammo[gunId])
+            {
+                callback(gunId);
+                if(terminate) return;
+            }
+        }
+    }
 
     void gunselect(int gun, gameent *d, bool force, bool shortcut)
     {
@@ -47,9 +60,10 @@ namespace game
     });
 
     ICOMMAND(meleeattack, "", (), // shortcut for melee attack, then select old gun
-        if(!isconnected() || m_identique) return;
+        if(!isconnected()) return;
         if(player1->aptitude==C_NINJA) gunselect(GUN_NINJA, player1, false, true);
-        else loopi(4) { if(player1->ammo[GUN_M_BUSTER+i]) { gunselect(GUN_M_BUSTER+i, player1, false, true); break; } }
+        else if (m_identique) return;
+        else findSpecialWeapon(player1, GUN_M_BUSTER, NUMMELEEWEAPONS, [](int gunId) { gunselect(gunId, player1); }, false);
         doaction(ACT_SHOOT);
         execute("sleep 500 [shoot ; getoldweap]");
     );

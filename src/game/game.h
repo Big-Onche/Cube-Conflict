@@ -106,7 +106,9 @@ struct gameentity : extentity
     gameentity() : triggerstate(TRIGGER_RESET), lasttrigger(0) {}
 };
 
-static int NUMMAINGUNS = 18;
+const int NUMMAINGUNS = 19;
+const int NUMMELEEWEAPONS = 4;
+const int NUMSUPERWEAPONS = 4;
 enum { ACT_IDLE = 0, ACT_SHOOT, NUMACTS };
 
 enum { GUN_ELECTRIC = 0, GUN_PLASMA, GUN_SMAW, GUN_MINIGUN, GUN_SPOCKGUN, GUN_M32, GUN_FLAMETHROWER, GUN_UZI, GUN_FAMAS, GUN_MOSSBERG, GUN_HYDRA, GUN_SV98, GUN_SKS, GUN_CROSSBOW, GUN_AK47, GUN_GRAP1, GUN_FIREWORKS, GUN_MOLOTOV, GUN_GLOCK,
@@ -1058,6 +1060,9 @@ namespace game
     extern void drawteammate(gameent *d, float x, float y, float s, gameent *o, float scale, float blipsize = 1);
 
     // weapon
+    extern int currentgun;
+    typedef void (*inventoryCallback)(int gunId);
+    extern void findSpecialWeapon(gameent *d, int baseWeapon, int maxWeapons, inventoryCallback callback, bool terminate = true);
     extern int getweapon(const char *name);
     extern void shoot(gameent *d, const vec &targ, bool isMonster = false);
     extern void doaction(int act);

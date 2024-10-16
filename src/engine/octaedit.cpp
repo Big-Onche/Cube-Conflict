@@ -1482,9 +1482,8 @@ void previewprefab(const char *name, const vec &color)
     if(p)
     {
         block3 &b = *p->copy;
-        float yaw;
-        vec o = calcmodelpreviewpos(vec(b.s).mul(b.grid*0.5f), yaw);
-        renderprefab(*p, o, yaw, 0, 0, 1, color);
+        vec o = calcmodelpreviewpos(vec(b.s).mul(b.grid*0.5f));
+        renderprefab(*p, o, fmod(lastmillis/20000.0f*360.0f, 360.0f), 0, 0, 1, color);
     }
 }
 

@@ -2631,12 +2631,8 @@ namespace modelpreview
     }
 }
 
-VAR(mdlpreviewyaw, 0, 200, 360);
-
-vec calcmodelpreviewpos(const vec &radius, float &yaw)
+vec calcmodelpreviewpos(const vec &radius)
 {
-    yaw = UI::uivisible("account") ? mdlpreviewyaw : fmod(lastmillis/20000.0f*360.0f, 360.0f);
-
     float dist = max(radius.magnitude2()/aspect, radius.magnitude())/sinf(fovy/2*RAD);
     return vec(0, dist, 0).rotate_around_x(camera1->pitch*RAD);
 }

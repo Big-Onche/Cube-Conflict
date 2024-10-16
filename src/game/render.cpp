@@ -854,7 +854,7 @@ namespace game
         drawhudgun();
     }
 
-    void renderplayerpreview(int model, int cape, int color, int team, int weap)
+    void renderplayerpreview(int model, int cape, int color, int team, int weap, bool rot)
     {
         static gameent *previewent = NULL;
         if(!previewent)
@@ -865,7 +865,8 @@ namespace game
         float height = previewent->eyeheight + previewent->aboveeye,
               zrad = height/1.6f;
         vec2 xyrad = vec2(previewent->xradius, previewent->yradius).max(height/3);
-        previewent->o = calcmodelpreviewpos(vec(xyrad, zrad), previewent->yaw).addz(previewent->eyeheight - zrad);
+        if(rot) previewent->yaw = fmod(lastmillis/20000.0f*360.0f, 360.0f);
+        previewent->o = calcmodelpreviewpos(vec(xyrad, zrad)).addz(previewent->eyeheight - zrad);
         previewent->gunselect = validgun(weap) ? weap : GUN_ELECTRIC;
         const playermodelinfo *mdlinfo = getplayermodelinfo(model);
         if(!mdlinfo) return;
