@@ -118,6 +118,7 @@ CLIENT_OBJS= \
         cubeconflict/stats.o \
         cubeconflict/npcs.o \
         cubeconflict/rpg.o \
+        game/inventory.o \
         game/ai.o \
         game/client.o \
         game/entities.o \

@@ -20,9 +20,7 @@ namespace game
     };
     vector<hitmsg> hits;
 
-    ICOMMAND(currentgun, "", (), intret(player1->gunselect));
-
-    void findSpecialWeapon(gameent *d, int baseWeapon, int maxWeapons, inventoryCallback callback, bool terminate)
+    void findSpecialWeapon(gameent *d, int baseWeapon, int maxWeapons, inventoryCallback callback)
     {
         loopi(maxWeapons)
         {
@@ -30,7 +28,7 @@ namespace game
             if(d->ammo[gunId])
             {
                 callback(gunId);
-                if(terminate) return;
+                return;
             }
         }
     }
@@ -38,9 +36,9 @@ namespace game
     void gunselect(int gun, gameent *d, bool force, bool shortcut)
     {
         if((gun==GUN_POWERARMOR && !force) || !validgun(gun)) return;
-        if(gun!=d->gunselect)
+        if(gun != d->gunselect)
         {
-            if(d==player1 && gun!=GUN_POWERARMOR && !shortcut) player1->lastweap = gun;
+            if(d==player1 && gun != GUN_POWERARMOR && !shortcut) player1->lastweap = gun;
             addmsg(N_GUNSELECT, "rci", d, gun);
             playSound(attacks[gun-GUN_ELECTRIC].picksound, d==hudplayer() ? vec(0, 0, 0) : d->o, 200, 50, NULL, d->entityId);
         }
@@ -63,46 +61,40 @@ namespace game
         if(!isconnected()) return;
         if(player1->aptitude==C_NINJA) gunselect(GUN_NINJA, player1, false, true);
         else if (m_identique) return;
-        else findSpecialWeapon(player1, GUN_M_BUSTER, NUMMELEEWEAPONS, [](int gunId) { gunselect(gunId, player1); }, false);
+        else findSpecialWeapon(player1, GUN_M_BUSTER, NUMMELEEWEAPONS, [](int gunId) { gunselect(gunId, player1, false, true); });
         doaction(ACT_SHOOT);
         execute("sleep 500 [shoot ; getoldweap]");
     );
 
     ICOMMAND(getoldweap, "", (), { if(isconnected() || !m_identique) gunselect(player1->lastweap, player1); });
 
-    void getsuperweap() // used to select superweapon with identical weapons mutator
-    {
-         loopi(4) { if(player1->ammo[GUN_S_NUKE+i]) { gunselect(GUN_S_NUKE+i, player1); return; } }
-         gunselect(currentIdenticalWeapon, player1);
-    }
-
     void nextweapon(int dir, bool force = false)
     {
         if(player1->state!=CS_ALIVE) return;
         if(m_identique)
         {
+            int gunId;
             switch(player1->aptitude)
             {
-                case C_KAMIKAZE:
-                    if(player1->gunselect==currentIdenticalWeapon) {dir-1 ? gunselect(GUN_KAMIKAZE, player1) : getsuperweap();}
-                    else gunselect(currentIdenticalWeapon, player1);
-                    return;
-                case C_NINJA:
-                    if(player1->gunselect==currentIdenticalWeapon){dir-1 ? gunselect(GUN_NINJA, player1) : getsuperweap();}
-                    else gunselect(currentIdenticalWeapon, player1);
-                    return;
-                default:
-                    if(player1->gunselect==currentIdenticalWeapon) getsuperweap();
-                    else gunselect(currentIdenticalWeapon, player1);
-                    return;
+                case C_KAMIKAZE: gunId = GUN_KAMIKAZE; break;
+                case C_NINJA: gunId = GUN_NINJA; break;
+                default: gunId = currentIdenticalWeapon;
             }
+
+            if(player1->gunselect == currentIdenticalWeapon)
+            {
+                if(dir - 1) gunselect(gunId, player1);
+                else findSpecialWeapon(player1, GUN_S_NUKE, NUMSUPERWEAPONS, [](int gunId) { gunselect(gunId, player1); });
+            }
+            else gunselect(currentIdenticalWeapon, player1);
+            return;
         }
         dir = (dir < 0 ? NUMGUNS-1 : 1);
         int gun = player1->gunselect;
         loopi(NUMGUNS)
         {
             gun = (gun + dir)%NUMGUNS;
-            if(gun==GUN_POWERARMOR)gun = (gun + dir)%NUMGUNS;
+            if(gun==GUN_POWERARMOR) gun = (gun + dir)%NUMGUNS;
             if(force || player1->ammo[gun]) break;
         }
         if(gun != player1->gunselect) gunselect(gun, player1);

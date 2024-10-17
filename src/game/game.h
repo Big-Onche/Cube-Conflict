@@ -1060,9 +1060,9 @@ namespace game
     extern void drawteammate(gameent *d, float x, float y, float s, gameent *o, float scale, float blipsize = 1);
 
     // weapon
-    extern int currentgun;
+    extern void checkInventoryGuns();
     typedef void (*inventoryCallback)(int gunId);
-    extern void findSpecialWeapon(gameent *d, int baseWeapon, int maxWeapons, inventoryCallback callback, bool terminate = true);
+    extern void findSpecialWeapon(gameent *d, int baseWeapon, int maxWeapons, inventoryCallback callback);
     extern int getweapon(const char *name);
     extern void shoot(gameent *d, const vec &targ, bool isMonster = false);
     extern void doaction(int act);
