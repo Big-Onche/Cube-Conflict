@@ -133,7 +133,7 @@ namespace ai
         return false;
     }
 
-    const int aiskew[NUMGUNS] = { 175, 1, 1, 30, 30, 1, 1, 15, 40, 1, 1, 3, 25, 10, 25, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+    const int aiskew[NUMGUNS] = { 175, 1, 1, 30, 30, 1, 1, 15, 40, 1, 1, 3, 25, 10, 25, 1, 5, 1, 30, 1, 1, 1, 1, 1, 1, 1, 1 };
 
     float randomAimOffset(float radius, float skew, int gun, int skill)
     {

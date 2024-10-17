@@ -122,8 +122,7 @@ namespace aiman
 
         int val;
         do { val = rnd(NUMCLASSES); } while (disabledClasse[val]);
-        ci->aptitude = classe >= 0 && classe < NUMCLASSES ? classe : val;
-
+        ci->aptitude = validClass(classe) ? classe : val;
         ci->playermodel = rnd(128);
         ci->customcape = rnd(128);
         ci->customtombe = rnd(128);
