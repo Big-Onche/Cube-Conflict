@@ -12,35 +12,35 @@ namespace game
     VARP(forceplayermodels, 0, 0, 1);
     VARP(hidedead, 0, 0, 1);
 
-    vector<gameent *> ragdolls;
+    vector<gameent *> curGraves;
 
-    void savetombe(gameent *d)
+    void saveGrave(gameent *d)
     {
         if(!ragdollmillis || (!ragdollfade && lastmillis > d->lastpain + ragdollmillis)) return;
         gameent *r = new gameent(*d);
         r->lastupdate = ragdollfade && lastmillis > d->lastpain + max(ragdollmillis - ragdollfade, 0) ? lastmillis - max(ragdollmillis - ragdollfade, 0) : d->lastpain;
         r->edit = NULL;
         r->ai = NULL;
-        ragdolls.add(r);
+        curGraves.add(r);
         d->ragdoll = NULL;
     }
 
-    void clearragdolls()
+    void clearGraves()
     {
-        ragdolls.deletecontents();
+        curGraves.deletecontents();
     }
 
-    void moveragdolls()
+    void moveGraves()
     {
-        loopv(ragdolls)
+        loopv(curGraves)
         {
-            gameent *d = ragdolls[i];
+            gameent *d = curGraves[i];
             if(lastmillis > d->lastupdate + ragdollmillis)
             {
-                delete ragdolls.remove(i--);
+                delete curGraves.remove(i--);
                 continue;
             }
-            moveragdoll(d);
+            moveGrave(d);
         }
     }
 
@@ -150,17 +150,17 @@ namespace game
     {
         if(!smiley[playermodel]) { conoutf(CON_ERROR, "\f3%s", readstr("Console_Shop_SmileyNotOwned")); playSound(S_ERROR, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH); playermodel = 0; return; }
         if(player1->clientnum < 0) player1->playermodel = playermodel;
-        if(player1->ragdoll) cleanragdoll(player1);
-        loopv(ragdolls)
+        if(player1->ragdoll) cleanGrave(player1);
+        loopv(curGraves)
         {
-            gameent *d = ragdolls[i];
+            gameent *d = curGraves[i];
             if(!d->ragdoll) continue;
             if(!forceplayermodels)
             {
                 const playermodelinfo *mdl = getplayermodelinfo(d->playermodel);
                 if(mdl) continue;
             }
-            cleanragdoll(d);
+            cleanGrave(d);
         }
         loopv(players)
         {
@@ -171,7 +171,7 @@ namespace game
                 const playermodelinfo *mdl = getplayermodelinfo(d->playermodel);
                 if(mdl) continue;
             }
-            cleanragdoll(d);
+            cleanGrave(d);
         }
     }
 
@@ -327,9 +327,9 @@ namespace game
         if(player1->customtombe==10) unlockAchievement(ACH_FUCKYOU);
     });
 
-    void rendertombeplayer(gameent *d, float fade)
+    void renderGrave(gameent *d, float fade)
     {
-        if(validGrave(d->customcape))
+        if(validGrave(d->customtombe))
         {
             rendermodel(getGraveDir(d->customtombe), ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED, d, NULL, 0, 0, fade);
         }
@@ -682,12 +682,12 @@ namespace game
             }
         }
 
-        loopv(ragdolls)
+        loopv(curGraves)
         {
-            gameent *d = ragdolls[i];
+            gameent *d = curGraves[i];
             float fade = 1.0f;
             if(ragdollmillis && ragdollfade) fade -= clamp(float(lastmillis - (d->lastupdate + max(ragdollmillis - ragdollfade, 0)))/min(ragdollmillis, ragdollfade), 0.0f, 1.0f);
-            rendertombeplayer(d, fade);
+            renderGrave(d, fade);
         }
 
         rendermonsters();

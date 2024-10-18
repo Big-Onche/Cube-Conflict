@@ -467,8 +467,8 @@ namespace UI
 
 // ragdoll
 
-extern void moveragdoll(dynent *d);
-extern void cleanragdoll(dynent *d);
+extern void moveGrave(dynent *d);
+extern void cleanGrave(dynent *d);
 
 // server
 #define MAXCLIENTS 128                 // DO NOT set this any higher

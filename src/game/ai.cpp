@@ -1409,7 +1409,7 @@ namespace ai
             }
             if(!intermission)
             {
-                if(d->ragdoll) cleanragdoll(d);
+                if(d->ragdoll) cleanGrave(d);
                 moveplayer(d, 10, true);
                 if(allowmove && !b.idle) timeouts(d, b);
                 entities::checkitems(d);
@@ -1418,7 +1418,7 @@ namespace ai
         }
         else if(d->state == CS_DEAD)
         {
-            if(d->ragdoll) moveragdoll(d);
+            if(d->ragdoll) moveGrave(d);
             else
             {
                 d->move = d->strafe = 0;

@@ -1112,9 +1112,9 @@ namespace game
     inline bool hasPowerArmor(gameent *d) { return d->armourtype==A_POWERARMOR && d->armour; }
     inline bool hasSuperWeapon(gameent *d) { return d->ammo[GUN_S_NUKE] || d->ammo[GUN_S_GAU8] || d->ammo[GUN_S_ROCKETS] || d->ammo[GUN_S_CAMPER]; }
     struct playermodelinfo { const char *model[MAXTEAMS], *cbmodel; };
-    extern void savetombe(gameent *d);
-    extern void clearragdolls();
-    extern void moveragdolls();
+    extern void saveGrave(gameent *d);
+    extern void clearGraves();
+    extern void moveGraves();
     extern const playermodelinfo &getplayermodelinfo(gameent *d);
     extern int getplayercolor(gameent *d, int team);
     enum {T_CLASSE = 0, T_PLAYERMODEL, T_CAPE, T_GRAVE, T_TAUNT};

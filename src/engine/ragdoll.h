@@ -509,7 +509,7 @@ void ragdolldata::move(dynent *pl, float ts)
 FVAR(ragdolleyesmooth, 0, 0.5f, 1);
 VAR(ragdolleyesmoothmillis, 1, 250, 10000);
 
-void moveragdoll(dynent *d)
+void moveGrave(dynent *d)
 {
     if(!curtime || !d->ragdoll) return;
 
@@ -530,7 +530,7 @@ void moveragdoll(dynent *d)
     d->o.lerp(eye, 1-k);
 }
 
-void cleanragdoll(dynent *d)
+void cleanGrave(dynent *d)
 {
     DELETEP(d->ragdoll);
 }

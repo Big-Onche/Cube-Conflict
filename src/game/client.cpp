@@ -1568,7 +1568,7 @@ namespace game
                 if(d)
                 {
                     d->playermodel = model;
-                    if(d->ragdoll) cleanragdoll(d);
+                    if(d->ragdoll) cleanGrave(d);
                 }
                 break;
             }
@@ -1684,7 +1684,7 @@ namespace game
             {
                 if(d)
                 {
-                    if(d->state==CS_DEAD && d->lastpain) savetombe(d);
+                    if(d->state==CS_DEAD && d->lastpain) saveGrave(d);
                     d->respawn();
                     d->killstreak = 0;
                 }
@@ -1701,7 +1701,7 @@ namespace game
                 int scn = getint(p);
                 gameent *s = getclient(scn);
                 if(!s) { parsestate(NULL, p); break; }
-                if(s->state==CS_DEAD && s->lastpain) savetombe(s);
+                if(s->state==CS_DEAD && s->lastpain) saveGrave(s);
                 if(s==player1)
                 {
                     if(editmode) toggleedit();

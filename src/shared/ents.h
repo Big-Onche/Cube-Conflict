@@ -193,8 +193,8 @@ struct dynent : physent                         // animated characters, or chara
     ~dynent()
     {
 #ifndef STANDALONE
-        extern void cleanragdoll(dynent *d);
-        if(ragdoll) cleanragdoll(this);
+        extern void cleanGrave(dynent *d);
+        if(ragdoll) cleanGrave(this);
 #endif
     }
 

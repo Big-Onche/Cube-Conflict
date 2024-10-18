@@ -453,7 +453,7 @@ namespace game
             if(totalmillis - d->lastcurdamage > 500) d->curdamage = 0;
 
             if(d == player1 || d->ai) continue;
-            if(d->state==CS_DEAD && d->ragdoll) moveragdoll(d);
+            if(d->state==CS_DEAD && d->ragdoll) moveGrave(d);
 
             const int lagtime = totalmillis-d->lastupdate;
             if(!lagtime || intermission) continue;
@@ -541,14 +541,14 @@ namespace game
         updateweapons(curtime);
         otherplayers(curtime);
         ai::update();
-        moveragdolls();
+        moveGraves();
         gets2c();
         updatemonsters(curtime);
         if(connected)
         {
             if(player1->state == CS_DEAD)
             {
-                if(player1->ragdoll) moveragdoll(player1);
+                if(player1->ragdoll) moveGrave(player1);
                 else
                 {
                     player1->move = player1->strafe = 0;
@@ -557,7 +557,7 @@ namespace game
             }
             else if(!intermission && !onFixedCamera(player1))
             {
-                if(player1->ragdoll) cleanragdoll(player1);
+                if(player1->ragdoll) cleanGrave(player1);
                 crouchplayer(player1, 10, true);
                 if(canMove || !m_tutorial)
                 {
@@ -1097,7 +1097,7 @@ namespace game
         clearprojectiles();
         clearbouncers();
         clearEntsPos();
-        clearragdolls();
+        clearGraves();
         clearteaminfo();
 
         // reset perma-state
