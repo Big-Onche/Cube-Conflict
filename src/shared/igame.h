@@ -71,7 +71,7 @@ namespace game
     extern int numdynents();
     extern void rendergame();
     extern void renderavatar();
-    extern void renderplayerpreview(int model, int cape, int color, int team, int weap, bool rot);
+    extern void renderplayerpreview(int model, int cape, int color, int team, int weap, int yaw, bool rot);
     extern int numanims();
     extern void findanims(const char *pattern, vector<int> &anims);
     extern void writegamedata(vector<char> &extras);

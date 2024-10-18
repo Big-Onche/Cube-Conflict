@@ -2923,10 +2923,10 @@ namespace UI
 
     struct PlayerPreview : Preview
     {
-        int model, cape, color, team, weapon;
+        int model, cape, color, team, weapon, yaw;
         bool rot;
 
-        void setup(int model_, int cape_, int color_, int team_, int weapon_, float minw_, float minh_, bool rot_)
+        void setup(int model_, int cape_, int color_, int team_, int weapon_, float minw_, float minh_, int yaw_, bool rot_)
         {
             Preview::setup(minw_, minh_);
             model = model_;
@@ -2934,6 +2934,7 @@ namespace UI
             color = color_;
             team = team_;
             weapon = weapon_;
+            yaw = yaw_;
             rot = rot_;
         }
 
@@ -2949,7 +2950,7 @@ namespace UI
             int sx1, sy1, sx2, sy2;
             window->calcscissor(sx, sy, sx+w, sy+h, sx1, sy1, sx2, sy2, false);
             modelpreview::start(sx1, sy1, sx2-sx1, sy2-sy1, false, clipstack.length() > 0);
-            game::renderplayerpreview(model, cape, color, team, weapon, rot);
+            game::renderplayerpreview(model, cape, color, team, weapon, yaw, rot);
             if(clipstack.length()) clipstack.last().scissor();
             modelpreview::end();
         }
@@ -3481,8 +3482,8 @@ namespace UI
     ICOMMAND(uimodelpreview, "ssffiiiie", (char *model, char *animspec, float *minw, float *minh, int *yaw, int *pitch, int *roll, int *rot, uint *children),
         BUILD(ModelPreview, o, o->setup(model, animspec, *minw, *minh, *yaw, *pitch, *roll, *rot), children));
 
-    ICOMMAND(uiplayerpreview, "iiiiiffie", (int *model, int *cape, int *color, int *team, int *weapon, float *minw, float *minh, int *rot, uint *children),
-        BUILD(PlayerPreview, o, o->setup(*model, *cape, *color, *team, *weapon, *minw, *minh, *rot), children));
+    ICOMMAND(uiplayerpreview, "iiiiiffiie", (int *model, int *cape, int *color, int *team, int *weapon, float *minw, float *minh, int *yaw, int *rot, uint *children),
+        BUILD(PlayerPreview, o, o->setup(*model, *cape, *color, *team, *weapon, *minw, *minh, *yaw, *rot), children));
 
     ICOMMAND(uiprefabpreview, "siffe", (char *prefab, int *color, float *minw, float *minh, uint *children),
         BUILD(PrefabPreview, o, o->setup(prefab, *color, *minw, *minh), children));
