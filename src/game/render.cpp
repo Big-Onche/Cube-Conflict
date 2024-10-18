@@ -195,9 +195,7 @@ namespace game
             addmsg(N_SWITCHCOLOR, "ri", player1->playercolor);
         }
 
-        addmsg(N_SENDCAPE, "ri", player1->customcape);
-        addmsg(N_SENDTOMBE, "ri", player1->customtombe);
-        addmsg(N_SENDDANSE, "ri", player1->customdanse);
+        loopi(NUMSKINS) addmsg(N_SENDSKIN, "ri2", i, player1->skin[i]);
     }
 
     std::map<std::pair<int, bool>, std::string> weaponsPaths;
@@ -289,6 +287,7 @@ namespace game
         preloadmodel("boosts/joint");
         preloadmodel("boosts/steros");
         preloadmodel("hudboost/joint");
+        preloadmodel("mapmodel/smileys/mort");
 
         loopi(sizeof(playermodels)/sizeof(playermodels[0]))
         {
@@ -312,26 +311,11 @@ namespace game
 
     VAR(animoverride, -1, 0, NUMANIMS-1);
 
-    VARFP(player1_cape, 0, 0, sizeof(capes)/sizeof(capes[0])-1,
-    {
-        if(!cape[player1_cape]) { conoutf(CON_ERROR, "\f3%s", readstr("Console_Shop_SmileyNotOwned")); playSound(S_ERROR, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH); player1_cape = 0; return; }
-        addmsg(N_SENDCAPE, "ri", player1_cape);
-        player1->customcape = player1_cape;
-    });
-
-    VARFP(player1_tombe, 0, 0, sizeof(graves)/sizeof(graves[0])-1,
-    {
-        if(!grave[player1_tombe]) { conoutf(CON_ERROR, "\f3%s", readstr("Console_Shop_GraveNotOwned")); playSound(S_ERROR, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH); player1_tombe=0; return; }
-        addmsg(N_SENDTOMBE, "ri", player1_tombe);
-        player1->customtombe = player1_tombe;
-        if(player1->customtombe==10) unlockAchievement(ACH_FUCKYOU);
-    });
-
     void renderGrave(gameent *d, float fade)
     {
-        if(validGrave(d->customtombe))
+        if(validGrave(d->skin[SKIN_GRAVE]))
         {
-            rendermodel(getGraveDir(d->customtombe), ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED, d, NULL, 0, 0, fade);
+            rendermodel(getGraveDir(d->skin[SKIN_GRAVE]), ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED, d, NULL, 0, 0, fade);
         }
     }
 
@@ -349,10 +333,10 @@ namespace game
         {
             flags |= MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY;
 
-            if(validGrave(d->customtombe))
+            if(validGrave(d->skin[SKIN_GRAVE]))
             {
                 d->tombepop = min(d->tombepop + (3.f / curfps), 1.0f);
-                rendermodel(getGraveDir(d->customtombe), ANIM_MAPMODEL|ANIM_LOOP, d->feetpos(), d->yaw, 0, 0, flags, NULL, NULL, 0, 0, d->tombepop, vec4(vec::hexcolor(color), 5));
+                rendermodel(getGraveDir(d->skin[SKIN_GRAVE]), ANIM_MAPMODEL|ANIM_LOOP, d->feetpos(), d->yaw, 0, 0, flags, NULL, NULL, 0, 0, d->tombepop, vec4(vec::hexcolor(color), 5));
             }
 
             d->skeletonfade = max(d->skeletonfade - (3.f / curfps), 0.0f);
@@ -447,9 +431,9 @@ namespace game
         if(validClass(d->aptitude)) a[ai++] = modelattach("tag_hat", classes[d->aptitude].hatDir, 0, 0);
 
         /////////////////////////// Player's cape ///////////////////////////
-        if(validCape(d->customcape))
+        if(validCape(d->skin[SKIN_CAPE]))
         {
-            a[ai++] = modelattach("tag_cape", getCapeDir(d->customcape, d->team == player1->team ? false : true), 0, 0);
+            a[ai++] = modelattach("tag_cape", getCapeDir(d->skin[SKIN_CAPE], d->team == player1->team ? false : true), 0, 0);
         }
 
         if(d!=player1) flags |= MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY;

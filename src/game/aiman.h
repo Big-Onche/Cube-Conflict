@@ -124,9 +124,7 @@ namespace aiman
         do { val = rnd(NUMCLASSES); } while (disabledClasse[val]);
         ci->aptitude = validClass(classe) ? classe : val;
         ci->playermodel = rnd(128);
-        ci->customcape = rnd(128);
-        ci->customtombe = rnd(128);
-        ci->customdanse = rnd(128);
+        loopi(NUMSKINS) ci->skin[i] = rnd(128);
         ci->aireinit = 2;
         ci->connected = true;
 
@@ -162,7 +160,7 @@ namespace aiman
         if(ci->ownernum < 0) deleteai(ci);
         else if(ci->aireinit >= 1)
         {
-            sendf(-1, 1, "riiii9s", N_INITAI, ci->clientnum, ci->ownernum, ci->state.aitype, ci->aptitude, ci->customcape, ci->customtombe, ci->customdanse, ci->state.skill, ci->playermodel, ci->playercolor, ci->team, ci->name);
+            sendf(-1, 1, "riiii9s", N_INITAI, ci->clientnum, ci->ownernum, ci->state.aitype, ci->aptitude, ci->skin[SKIN_CAPE], ci->skin[SKIN_GRAVE], ci->skin[SKIN_TAUNT], ci->state.skill, ci->playermodel, ci->playercolor, ci->team, ci->name);
             if(ci->aireinit == 2)
             {
                 ci->reassign();

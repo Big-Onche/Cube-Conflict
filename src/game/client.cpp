@@ -1163,9 +1163,7 @@ namespace game
         sendstring(player1->name, p);
         putint(p, player1->playermodel);
         putint(p, player1->playercolor);
-        putint(p, player1->customcape);
-        putint(p, player1->customtombe);
-        putint(p, player1->customdanse);
+        loopi(NUMSKINS) putint(p, player1->skin[i]);
         putint(p, player1->aptitude);
         putint(p, player1->level);
         string hash = "";
@@ -1539,9 +1537,7 @@ namespace game
                 if(!validteam(d->team)) d->team = 0;
                 d->playermodel = getint(p);
                 d->playercolor = getint(p);
-                d->customcape = getint(p);
-                d->customtombe = getint(p);
-                d->customdanse = getint(p);
+                loopi(NUMSKINS) d->skin[i] = getint(p);
                 d->aptitude = getint(p);
                 d->level = getint(p);
                 d->isConnected = true;
@@ -1655,24 +1651,11 @@ namespace game
                 break;
             }
 
-            case N_SENDCAPE:
+            case N_SENDSKIN:
             {
-                int cape = getint(p);
-                if(d) d->customcape = cape;
-                break;
-            }
-
-            case N_SENDTOMBE:
-            {
-                int grave = getint(p);
-                if(d) d->customtombe = grave;
-                break;
-            }
-
-            case N_SENDDANSE:
-            {
-                int danse = getint(p);
-                if(d) d->customdanse = danse;
+                int skinType = getint(p);
+                int skinId = getint(p);
+                if(d) d->skin[skinType] = skinId;
                 break;
             }
 

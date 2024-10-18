@@ -218,7 +218,7 @@ namespace server
         int clientnum, ownernum, connectmillis, sessionid, overflow;
         string name, mapvote;
         int team, playermodel, playercolor;
-        int customcape, customtombe, customdanse, aptitude, level;
+        int skin[NUMSKINS], aptitude, level;
         int modevote;
         int privilege;
         bool connected, local, timesync;
@@ -341,9 +341,7 @@ namespace server
             team = 0;
             playermodel = -1;
             playercolor = 0;
-            customcape = 0;
-            customtombe = 0;
-            customdanse = 0;
+            loopi(NUMSKINS) skin[i] = 0;
             aptitude = 0;
             privilege = PRIV_NONE;
             connected = local = false;
@@ -1819,9 +1817,7 @@ namespace server
             putint(p, ci->ownernum);
             putint(p, ci->state.aitype);
             putint(p, ci->aptitude);
-            putint(p, ci->customcape);
-            putint(p, ci->customtombe);
-            putint(p, ci->customdanse);
+            loopi(NUMSKINS) putint(p, ci->skin[i]);
             putint(p, ci->state.skill);
             putint(p, ci->playermodel);
             putint(p, ci->playercolor);
@@ -1836,9 +1832,7 @@ namespace server
             putint(p, ci->team);
             putint(p, ci->playermodel);
             putint(p, ci->playercolor);
-            putint(p, ci->customcape);
-            putint(p, ci->customtombe);
-            putint(p, ci->customdanse);
+            loopi(NUMSKINS) putint(p, ci->skin[i]);
             putint(p, ci->aptitude);
             putint(p, ci->level);
         }
@@ -3305,9 +3299,7 @@ namespace server
                     copystring(ci->name, text, MAXNAMELEN+1);
                     ci->playermodel = getint(p);
                     ci->playercolor = getint(p);
-                    ci->customcape = getint(p);
-                    ci->customtombe = getint(p);
-                    ci->customdanse = getint(p);
+                    loopi(NUMSKINS) ci->skin[i] = getint(p);
                     ci->aptitude = getint(p);
                     ci->level = getint(p);
 
@@ -3678,6 +3670,14 @@ namespace server
                 break;
             }
 
+            case N_SENDSKIN:
+            {
+                int skinType = getint(p);
+                ci->skin[skinType] = getint(p);
+                QUEUE_MSG;
+                break;
+            }
+
             case N_SWITCHTEAM:
             {
                 int team = getint(p);
@@ -3688,27 +3688,6 @@ namespace server
                     aiman::changeteam(ci);
                     sendf(-1, 1, "riiii", N_SETTEAM, sender, ci->team, ci->state.state==CS_SPECTATOR ? -1 : 0);
                 }
-                break;
-            }
-
-            case N_SENDCAPE:
-            {
-                ci->customcape = getint(p);
-                QUEUE_MSG;
-                break;
-            }
-
-            case N_SENDTOMBE:
-            {
-                ci->customtombe = getint(p);
-                QUEUE_MSG;
-                break;
-            }
-
-            case N_SENDDANSE:
-            {
-                ci->customdanse = getint(p);
-                QUEUE_MSG;
                 break;
             }
 

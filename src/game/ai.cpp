@@ -225,9 +225,9 @@ namespace ai
         d->playercolor = col;
         d->aptitude = chooserandomtraits(classe, T_CLASSE);
         d->playermodel = chooserandomtraits(pm, T_PLAYERMODEL);
-        d->customcape = chooserandomtraits(cape, T_CAPE);
-        d->customtombe = chooserandomtraits(grave, T_GRAVE);
-        d->customdanse = chooserandomtraits(taunt, T_TAUNT);
+        d->skin[SKIN_CAPE] = chooserandomtraits(cape, T_CAPE);
+        d->skin[SKIN_GRAVE] = chooserandomtraits(grave, T_GRAVE);
+        d->skin[SKIN_TAUNT] = chooserandomtraits(taunt, T_TAUNT);
         d->isConnected = true;
 
         if(resetthisguy) removeweapons(d);

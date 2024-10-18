@@ -10,6 +10,37 @@ int smiley[NUMSMILEYS];
 int cape[NUMCAPES];
 int grave[NUMGRAVES];
 
+VARFP(capeskin, 0, 0, sizeof(capes)/sizeof(capes[0])-1,
+{
+    if(!cape[capeskin])
+    {
+        conoutf(CON_ERROR, "\f3%s", readstr("Console_Shop_SmileyNotOwned"));
+        playSound(S_ERROR, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH);
+        capeskin = 0;
+    }
+    else
+    {
+        game::addmsg(N_SENDSKIN, "ri2", SKIN_CAPE, capeskin);
+        game::player1->skin[SKIN_CAPE] = capeskin;
+    }
+});
+
+VARFP(graveskin, 0, 0, sizeof(graves)/sizeof(graves[0])-1,
+{
+    if(!grave[graveskin])
+    {
+        conoutf(CON_ERROR, "\f3%s", readstr("Console_Shop_GraveNotOwned"));
+        playSound(S_ERROR, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH);
+        graveskin = 0;
+    }
+    else
+    {
+        game::addmsg(N_SENDSKIN, "ri2", SKIN_GRAVE, graveskin);
+        game::player1->skin[SKIN_GRAVE] = graveskin;
+        if(game::player1->skin[SKIN_GRAVE]==10) unlockAchievement(ACH_FUCKYOU);
+    }
+});
+
 bool validItem(int type, int num)
 {
     switch(type)

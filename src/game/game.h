@@ -4,6 +4,7 @@
 #include "cube.h"
 #include "sound.h"
 #include "engine.h"
+#include "customs.h"
 
 extern int lastshoot, getspyability, autowield;
 
@@ -256,7 +257,7 @@ enum
     N_SWITCHNAME, N_SWITCHMODEL, N_SWITCHCOLOR, N_SWITCHTEAM,
     N_SERVCMD,
     N_DEMOPACKET,
-    N_SENDCAPE, N_SENDTOMBE, N_SENDDANSE, N_SENDCLASS, N_REGENALLIES,
+    N_SENDSKIN, N_SENDCLASS, N_REGENALLIES,
     N_REQABILITY, N_GETABILITY,
     N_ANNOUNCE,
     N_CURWEAPON,
@@ -291,7 +292,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_SWITCHNAME, 0, N_SWITCHMODEL, 2, N_SWITCHCOLOR, 2, N_SWITCHTEAM, 2,
     N_SERVCMD, 0,
     N_DEMOPACKET, 0,
-    N_SENDCAPE, 2, N_SENDTOMBE, 2, N_SENDDANSE, 2, N_SENDCLASS, 2, N_REGENALLIES, 5,
+    N_SENDSKIN, 3, N_SENDCLASS, 2, N_REGENALLIES, 5,
     N_REQABILITY, 2, N_GETABILITY, 4,
     N_ANNOUNCE, 3,
     N_CURWEAPON, 2,
@@ -796,7 +797,7 @@ struct gameent : dynent, gamestate
     bool isConnected;
 
     string name, info;
-    int team, playermodel, playercolor, customcape, customtombe, customdanse, aptitude, level;
+    int team, playermodel, playercolor, skin[NUMSKINS], aptitude, level;
     float skeletonfade, tombepop;
     ai::aiinfo *ai;
     int ownernum, lastnode;
@@ -807,7 +808,7 @@ struct gameent : dynent, gamestate
     gameent() : entityId(entitiesIds::getNewId()), weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0),
                 lifesequence(0), respawned(-1), suicided(-1), lastpain(0), lastfootstep(0), killstreak(0), frags(0), flags(0), deaths(0),
                 totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0),
-                customcape(0), customtombe(0), customdanse(0), aptitude(0), level(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
+                skin{0, 0, 0}, aptitude(0), level(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
     {
         loopi(3) lastability[i] = -1;
         name[0] = info[0] = 0;
