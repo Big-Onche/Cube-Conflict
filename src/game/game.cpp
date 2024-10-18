@@ -40,9 +40,6 @@ namespace game
     gameent *player1 = NULL;         // our client
     vector<gameent *> players;       // other clients
 
-    bool hasPowerArmor(gameent *d) { return d->armourtype==A_POWERARMOR && d->armour; }
-    bool hasSuperWeapon(gameent *d) { return d->ammo[GUN_S_NUKE] || d->ammo[GUN_S_GAU8] || d->ammo[GUN_S_ROCKETS] || d->ammo[GUN_S_CAMPER]; }
-
     VAR(teamscoreboardcolor, 0, 0, 1);
     ICOMMAND(getsbcolor, "", (), player1->team == 1 ? teamscoreboardcolor = 1 : teamscoreboardcolor = 0;);
 
@@ -532,9 +529,7 @@ namespace game
                 if(player1->health>=2000) unlockAchievement(ACH_SACAPV);
                 if(player1->boostmillis[B_ROIDS] && player1->boostmillis[B_EPO] && player1->boostmillis[B_JOINT] && player1->boostmillis[B_SHROOMS]) unlockAchievement(ACH_DEFONCE);
                 if(lookupmaterial(player1->o)==MAT_NOCLIP && !strcasecmp(getclientmap(), "moon")) unlockAchievement(ACH_SPAAACE);
-                bool hasSuperWeapon = false;
-                loopi(4) if(player1->ammo[GUN_S_NUKE+i]>0) hasSuperWeapon = true;
-                if(hasSuperWeapon && player1->boostmillis[B_ROIDS] && player1->armour && player1->armourtype==A_POWERARMOR) unlockAchievement(ACH_ABUS);
+                if(hasSuperWeapon(player1) && player1->boostmillis[B_ROIDS] && player1->armour && player1->armourtype==A_POWERARMOR) unlockAchievement(ACH_ABUS);
                 if(player1->aptitude==C_KAMIKAZE && !player1->ammo[GUN_KAMIKAZE] && totalmillis-lastshoot>=500 && totalmillis-lastshoot<=750 && isconnected()) unlockAchievement(ACH_SUICIDEFAIL);
                 if(player1->boostmillis[B_EPO] && player1->aptitude==C_JUNKIE) unlockAchievement(ACH_LANCEEPO);
             }
@@ -1207,13 +1202,13 @@ namespace game
         gameent *pl = (gameent *)d;
         if(d->physstate>=PHYS_SLOPE && moving)
         {
-            bool hasPowerArmor = (pl->armourtype == A_POWERARMOR && pl->armour);
-            int snd = lookupmaterial(d->feetpos()) == MAT_WATER ? S_SWIM : (hasPowerArmor ? S_FOOTSTEP_ASSIST : S_FOOTSTEP);
+            bool powerArmor = hasPowerArmor(pl);
+            int snd = lookupmaterial(d->feetpos()) == MAT_WATER ? S_SWIM : (powerArmor ? S_FOOTSTEP_ASSIST : S_FOOTSTEP);
 
             int freq = (((100 - classes[pl->aptitude].speed) + 75) * 5) ;
             if(pl->crouched() || (pl->abilitymillis[ABILITY_2] && pl->aptitude==C_SPY)) freq *= 2;
             if(d->inwater) freq *= 1.5f;
-            else if(hasPowerArmor) freq *= 2;
+            else if(powerArmor) freq *= 2;
             if(pl->boostmillis[B_EPO]) freq /= 2.f;
 
             if(lastmillis-pl->lastfootstep < freq) return;
@@ -1227,7 +1222,7 @@ namespace game
                     startCameraAnimation(CAM_ANIM_SWAY, freq, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0, (cameraSwayDir ? swayValue : -swayValue)));
                     cameraSwayDir = !cameraSwayDir;
                 }
-                playSound(snd, isHudPlayer ? vec(0, 0, 0) : d->o, hasPowerArmor ? 300 : 150, 20, hasPowerArmor ? NULL : SND_LOWPRIORITY, pl->entityId);
+                playSound(snd, isHudPlayer ? vec(0, 0, 0) : d->o, powerArmor ? 300 : 150, 20, powerArmor ? NULL : SND_LOWPRIORITY, pl->entityId);
 
                 if(pl->boostmillis[B_EPO] && !rnd(15))
                 {

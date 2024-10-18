@@ -1107,10 +1107,10 @@ namespace game
 
     // render
     extern bool hassuicided;
-    extern bool hasShrooms();
-    extern bool hasRoids(gameent *d);
-    extern bool hasPowerArmor(gameent *d);
-    extern bool hasSuperWeapon(gameent *d);
+    inline bool hasShrooms() { return game::hudplayer()->boostmillis[B_SHROOMS]; }
+    inline bool hasRoids(gameent *d) { return d->boostmillis[B_ROIDS]; }
+    inline bool hasPowerArmor(gameent *d) { return d->armourtype==A_POWERARMOR && d->armour; }
+    inline bool hasSuperWeapon(gameent *d) { return d->ammo[GUN_S_NUKE] || d->ammo[GUN_S_GAU8] || d->ammo[GUN_S_ROCKETS] || d->ammo[GUN_S_CAMPER]; }
     struct playermodelinfo { const char *model[MAXTEAMS], *cbmodel; };
     extern void savetombe(gameent *d);
     extern void clearragdolls();

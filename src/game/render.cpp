@@ -12,11 +12,6 @@ namespace game
     VARP(forceplayermodels, 0, 0, 1);
     VARP(hidedead, 0, 0, 1);
 
-    extern int playermodel;
-
-    bool hasShrooms() { return game::hudplayer()->boostmillis[B_SHROOMS]; } // checks if player 1 or observed player is on shrooms.
-    bool hasRoids(gameent *d) { return d->boostmillis[B_ROIDS]; }
-
     vector<gameent *> ragdolls;
 
     void savetombe(gameent *d)
@@ -366,8 +361,8 @@ namespace game
         }
 
         /////////////////////////// Animations and gfx ///////////////////////////
+        bool powerArmor = hasPowerArmor(d);
         int anim = ANIM_IDLE|ANIM_LOOP, lastaction = d->lastaction;
-
         int basetime = 0;
         if(animoverride) anim = (animoverride<0 ? ANIM_ALL : animoverride)|ANIM_LOOP;
 
@@ -386,7 +381,6 @@ namespace game
         //}
         else if(!intermission && forcecampos<0)
         {
-            bool powerArmor = hasPowerArmor(d);
             if(d->inwater && d->physstate<=PHYS_FALL)
             {
                 anim |= (((d->move || d->strafe) || d->vel.z+d->falling.z>0 ? ANIM_SWIM : ANIM_SINK)|ANIM_LOOP)<<ANIM_SECONDARY;
@@ -408,10 +402,10 @@ namespace game
 
         /////////////////////////// Main player model ///////////////////////////
         const char *mdlname;
-        if(d==player1 || m_tutorial) mdlname = (hasPowerArmor(player1) || d->ammo[GUN_POWERARMOR] ? "smileys/armureassistee" : mdl.model[1]); // player1 is always yellow
+        if(d==player1 || m_tutorial) mdlname = (powerArmor || d->ammo[GUN_POWERARMOR] ? "smileys/armureassistee" : mdl.model[1]); // player1 is always yellow
         else
         {
-            if(hasPowerArmor(d) || d->ammo[GUN_POWERARMOR]) mdlname = d->team==player1->team && validteam(team) ? "smileys/armureassistee" : "smileys/armureassistee/red";
+            if(powerArmor || d->ammo[GUN_POWERARMOR]) mdlname = d->team==player1->team && validteam(team) ? "smileys/armureassistee" : "smileys/armureassistee/red";
             else mdlname =  d->abilitymillis[ABILITY_2] && d->aptitude==C_PHYSICIST ? "smileys/phy_2" : postfx::cbfilter && d->team==player1->team ? mdl.cbmodel : mdl.model[validteam(team) && d->team==player1->team ? 1 : 0];
         }
 
