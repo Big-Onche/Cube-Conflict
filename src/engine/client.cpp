@@ -150,6 +150,7 @@ void reconnect(const char *serverpassword)
 
 void disconnect(bool async, bool cleanup, bool volontaire)
 {
+    UI::hideui("scoreboard");
     if(curpeer)
     {
         if(!discmillis || volontaire)
@@ -188,6 +189,7 @@ void disconnect(bool async, bool cleanup, bool volontaire)
 
 void trydisconnect(bool local)
 {
+    UI::hideui("scoreboard");
     stopAllSounds();
     game::clearbouncers();
     game::clearprojectiles();
