@@ -160,7 +160,7 @@ namespace ai
             case ATK_MOLOTOV:
             {
                 float dist = e->o.dist(d->o);
-                if(dist > 250 && !strcasecmp(getclientmap(), "moon")) targetPos.addz(dist * 0.25f);
+                if(dist > 250 && strcasecmp(getclientmap(), "moon")) targetPos.addz(dist * 0.25f);
                 break;
             }
 
@@ -192,6 +192,11 @@ namespace ai
         }
 
         return targetPos;
+    }
+
+    bool canRequestAbility(gameent *d)
+    {
+        return totalmillis - d->lastabilityrequest > 100;
     }
 
     void create(gameent *d)
@@ -525,8 +530,11 @@ namespace ai
                 d->character==C_JUNKIE ? score = 1e9f : score = m_ctf ? 1e2f : 1e7f;
                 break;
             case I_SANTE:
-                if(d->health<800){score = m_ctf || d->health > 400 ? 1e2f : 1e5f; }
-                if(d->mana>40 && d->character==C_PRIEST && d->health<=300) launchAbility(d, ABILITY_1);
+                if(d->health < 800)
+                {
+                    score = m_ctf || d->health > 400 ? 1e2f : 1e5f;
+                    if(d->character==C_PRIEST && d->health <= 300 && d->mana > 40 && canRequestAbility(d)) requestAbility(d, ABILITY_1);
+                }
                 break;
             case I_MANA:
                 if(d->mana < 100 && d->character!=C_VAMPIRE) score = m_ctf ? 1e2f : 1e5f;
@@ -867,15 +875,20 @@ namespace ai
                     gameent *e = getclient(b.target);
                     if(e && e->state == CS_ALIVE)
                     {
-                        switch(d->character)
+                        if(canRequestAbility(d))
                         {
-                            case C_WIZARD:
-                                if(d->mana>60 && d->o.dist(e->o)<500) launchAbility(d, ABILITY_1);
-                                else if (d->mana>=100 && d->o.dist(e->o)>500) launchAbility(d, ABILITY_2);
-                                break;
-                            case C_SPY:
-                                if(d->mana>=40 && d->o.dist(e->o)<700 && !d->abilitymillis[ABILITY_2] && !rnd(2)) launchAbility(d, ABILITY_1);
-                                else if(d->mana>=50 && d->o.dist(e->o)<700 && !d->abilitymillis[ABILITY_1]) launchAbility(d, ABILITY_2);
+                            float enemyDistance = d->o.dist(e->o);
+                            switch(d->character)
+                            {
+                                case C_WIZARD:
+                                    if(d->mana > 60 && enemyDistance < 500) requestAbility(d, ABILITY_1);
+                                    else if (d->mana >= 100 && enemyDistance > 500) requestAbility(d, ABILITY_2);
+                                    break;
+                                case C_SPY:
+                                    if(d->mana >= 40 && enemyDistance < 700 && !d->abilitymillis[ABILITY_2] && !rnd(2)) requestAbility(d, ABILITY_1);
+                                    else if(d->mana >= 50 && enemyDistance < 700 && !d->abilitymillis[ABILITY_1]) requestAbility(d, ABILITY_2);
+                                    break;
+                            }
                         }
 
                         int atk = guns[d->gunselect].attacks[ACT_SHOOT];
@@ -1162,16 +1175,21 @@ namespace ai
                 if(targetable(d, f))
                 {
                     if(!enemyok) violence(d, b, f, needpursue(d));
-                    switch(d->character)
+                    if(canRequestAbility(d))
                     {
-                        case C_PRIEST: case C_SHOSHONE: if(d->mana>70 && d->o.dist(f->o)<750) launchAbility(d, ABILITY_3); break;
-                        case C_KAMIKAZE:
-                            if(d->o.dist(f->o)<500) launchAbility(d, ABILITY_2);
-                            break;
-                        case C_SPY:
-                            if(d->mana>=40 && d->o.dist(f->o)<700 && !d->abilitymillis[ABILITY_2] && !rnd(2)) launchAbility(d, ABILITY_1);
-                            else if(d->mana>=50 && d->o.dist(f->o)<700 && !d->abilitymillis[ABILITY_1]) launchAbility(d, ABILITY_2);
+                        float targetDistance = d->o.dist(f->o);
+                        switch(d->character)
+                        {
+                            case C_PRIEST: case C_SHOSHONE: if(d->mana > 70 && targetDistance < 750) requestAbility(d, ABILITY_3); break;
+                            case C_KAMIKAZE:
+                                if(targetDistance < 500 && d->mana == 100) requestAbility(d, ABILITY_2);
+                                break;
+                            case C_SPY:
+                                if(d->mana >= 40 && targetDistance < 700 && !d->abilitymillis[ABILITY_2] && !rnd(2)) requestAbility(d, ABILITY_1);
+                                else if(d->mana>= 50 && targetDistance < 700 && !d->abilitymillis[ABILITY_1]) requestAbility(d, ABILITY_2);
+                        }
                     }
+
                     enemyok = true;
                     e = f;
                 }
@@ -1482,19 +1500,23 @@ namespace ai
                 int result = 0;
                 c.idle = 0;
 
-                switch(d->character)
+                if(canRequestAbility(d))
                 {
-                    case C_WIZARD: if(d->health<250+d->skill*2 && d->mana>=60) launchAbility(d, ABILITY_3); break;
-                    case C_PRIEST: if(d->mana>30 && d->health<(d->skill/3)) launchAbility(d, ABILITY_2); break;
-                    case C_SHOSHONE: if(d->mana>=100) launchAbility(d, ABILITY_2); break;
-                    case C_PHYSICIST:
-                        if(d->mana>70 && !rnd(70)) launchAbility(d, ABILITY_3);
-                        if(d->health<400+d->skill && d->mana>=50) launchAbility(d, ABILITY_2);
-                        if(d->armour<200 && d->mana>=40) launchAbility(d, ABILITY_1);
-                        break;
-                    case C_SPY:
-                        if(d->mana>100) launchAbility(d, ABILITY_3);
+                    switch(d->character)
+                    {
+                        case C_WIZARD: if(d->health < (250 + d->skill * 2) && d->mana >= 60) requestAbility(d, ABILITY_3); break;
+                        case C_PRIEST: if(d->mana > 30 && d->health<(d->skill/3)) requestAbility(d, ABILITY_2); break;
+                        case C_SHOSHONE: if(d->mana >= 100) requestAbility(d, ABILITY_2); break;
+                        case C_PHYSICIST:
+                            if(d->mana > 70 && !rnd(70)) requestAbility(d, ABILITY_3);
+                            if(d->health < (400 + d->skill) && d->mana >= 50) requestAbility(d, ABILITY_2);
+                            if(d->armour < 200 && d->mana >= 40) requestAbility(d, ABILITY_1);
+                            break;
+                        case C_SPY:
+                            if(d->mana > 100) requestAbility(d, ABILITY_3);
+                    }
                 }
+
                 //if(randomevent(2.5f*nbfps) && packtaunt) bottaunt(d);
 
                 switch(c.type)

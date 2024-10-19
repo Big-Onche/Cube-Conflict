@@ -1579,14 +1579,10 @@ namespace game
             case N_GETABILITY:
             {
                 int player = getint(p);
-                gameent *pl = getclient(player);
+                gameent *d = getclient(player);
                 int ability = getint(p);
                 int millis = getint(p);
-
-                if(!pl) break;
-                pl->abilitymillis[ability] = millis;
-                pl->mana -= classes[pl->character].abilities[ability].manacost;
-                launchAbility(pl, ability, false);
+                if(d) launchAbility(d, ability, millis);
                 break;
             }
 

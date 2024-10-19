@@ -789,7 +789,7 @@ struct gameent : dynent, gamestate
     float deltayaw, deltapitch, deltaroll, newyaw, newpitch, newroll;
     int smoothmillis;
 
-    int lastability[3];
+    int lastability[3], lastabilityrequest;
     int attacksound; // 0 = no sound, 1 = close sound, 2 = close + far sound
     bool playerexploded, powerarmoursound;
     int lastOutOfMap;
@@ -939,7 +939,8 @@ namespace game
     extern float killerDistance;
 
     // abilities
-    extern void launchAbility(gameent *d, int skill, bool request = true);
+    extern void requestAbility(gameent *d, int ability);
+    extern void launchAbility(gameent *d, int ability, int millis);
     extern void updateAbilitiesSkills(int curtime, gameent *d);
     extern bool hasAbilities(gameent *d);
     extern bool hasAbilityEnabled(gameent *d, int numAbility);

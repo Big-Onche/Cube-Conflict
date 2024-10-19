@@ -105,29 +105,34 @@ namespace game
         else return hasAbilities(d) || d->character == C_KAMIKAZE;
     }
 
-    void launchAbility(gameent *d, int ability, bool request) //abilities commands
+    void launchAbility(gameent *d, int ability, int millis)
     {
-        if(request) //player is requesting ability
-        {
-            if(!canLaunchAbility(d, ability)) return; //check for basic guards
-            if(!d->abilityready[ability] || d->mana < classes[d->character].abilities[ability].manacost) { if(d==player1) playSound(S_SORTIMPOSSIBLE); return; } //check for game vars (client sided)
-            addmsg(N_REQABILITY, "rci", d, ability); //server sided game vars check
-            return; //can stop after this, cuz server call this func with !request
-        }
-        //if all good, we let the ability begin
+        d->mana -= classes[d->character].abilities[ability].manacost;
         d->abilityready[ability] = false;
+        d->abilitymillis[ability] = millis;
         d->lastability[ability] = totalmillis;
         abilityEffect(d, ability);
         if(d==player1) updateStat(1, STAT_ABILITES);
+    }
+
+    void requestAbility(gameent *d, int ability) //abilities commands
+    {
+        if(!d->abilityready[ability] || d->mana < classes[d->character].abilities[ability].manacost || !canLaunchAbility(d, ability)) //check for game vars (client sided)
+        {
+            if(d==player1) playSound(S_SORTIMPOSSIBLE);
+            return;
+        }
+        d->lastabilityrequest = totalmillis;
+        addmsg(N_REQABILITY, "rci", d, ability); //server sided game vars check
     }
 
     ICOMMAND(aptitude, "i", (int *ability),  // player1 abilities commands
         if(player1->character == C_KAMIKAZE)
         {
             if(*ability == ABILITY_1) gunselect(GUN_KAMIKAZE, player1);
-            else if(*ability == ABILITY_2) launchAbility(player1, *ability);
+            else if(*ability == ABILITY_2) requestAbility(player1, *ability);
         }
-        else launchAbility(player1, *ability);
+        else requestAbility(player1, *ability);
     );
 
     char *getdisguisement(int seed) //spy's ability 2

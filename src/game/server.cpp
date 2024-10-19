@@ -3708,7 +3708,15 @@ namespace server
             {
                 int ability = getint(p);
                 if(!cq || !validClass(cq->character) || !validAbility(ability)) break;
-                if(cq->state.mana < classes[cq->character].abilities[ability].manacost) return;
+                if(cq->state.mana < classes[cq->character].abilities[ability].manacost)
+                {
+                    if(cq->state.aitype != AI_BOT)
+                    {
+                        if(isdedicatedserver()) logoutf("%s tried to launch an ability without enough mana!", ci->name);
+                        disconnect_client(ci->clientnum, DISC_KICK);
+                    }
+                    break;
+                }
                 cq->state.mana -= classes[cq->character].abilities[ability].manacost;
                 cq->state.abilitymillis[ability] = classes[cq->character].abilities[ability].duration;
                 sendf(-1, 1, "ri4", N_GETABILITY, cq->clientnum, ability, cq->state.abilitymillis[ability]);

@@ -15,7 +15,7 @@ namespace game
 {
     VARFP(playerclass, 0, 0, NUMCLASSES-1,
     {
-        if(player1->state != CS_DEAD && isconnected() && !intermission && !m_tutorial)
+        if(player1->state == CS_ALIVE && isconnected() && !intermission && !m_tutorial)
         {
             conoutf(CON_GAMEINFO, "\fc%s", readstr("Console_Game_UnableToChangeClass"));
             playSound(S_ERROR, vec(0, 0, 0), 0, 0, SND_UI);
