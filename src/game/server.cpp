@@ -3694,7 +3694,12 @@ namespace server
             case N_SENDCLASS:
             {
                 int character = getint(p);
-                if(validClass(character) && ci->state.state==CS_ALIVE) ci->character = character;
+                if(validClass(character) && ci->state.state!=CS_ALIVE) ci->character = character;
+                else
+                {
+                    if(isdedicatedserver()) logoutf("%s tried to change class while alive!", ci->name);
+                    disconnect_client(ci->clientnum, DISC_KICK);
+                }
                 QUEUE_MSG;
                 break;
             }

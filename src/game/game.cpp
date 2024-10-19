@@ -13,21 +13,19 @@ VARR(deadlylava, 0, 1, 1);
 
 namespace game
 {
-    int oldapti;
-    VARFP(player1_aptitude, 0, 0, NUMCLASSES-1,
+    VARFP(playerclass, 0, 0, NUMCLASSES-1,
     {
         if(player1->state != CS_DEAD && isconnected() && !intermission && !m_tutorial)
         {
             conoutf(CON_GAMEINFO, "\fc%s", readstr("Console_Game_UnableToChangeClass"));
             playSound(S_ERROR, vec(0, 0, 0), 0, 0, SND_UI);
-            player1_aptitude = oldapti;
+            playerclass = player1->character;
         }
         else
         {
-            addmsg(N_SENDCLASS, "ri", player1_aptitude);
-            player1->character = player1_aptitude;
-            oldapti = player1->character;
-            if(!islaunching) playSound(S_C_SOLDIER+player1_aptitude, vec(0, 0, 0), 0, 0, SND_UI);
+            addmsg(N_SENDCLASS, "ri", playerclass);
+            player1->character = playerclass;
+            if(!islaunching) playSound(S_C_SOLDIER + playerclass, vec(0, 0, 0), 0, 0, SND_UI);
             if(isconnected() && !intermission) unlockAchievement(ACH_UNDECIDED);
         }
     });
@@ -1066,7 +1064,7 @@ namespace game
         player1 = spawnstate(new gameent);
         filtertext(player1->name, readstr("Misc_BadUsername"), false, false, MAXNAMELEN);
         players.add(player1);
-        player1->character = player1_aptitude;
+        player1->character = playerclass;
     }
 
     VARP(showmodeinfo, 0, 0, 1);

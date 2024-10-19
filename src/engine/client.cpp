@@ -311,6 +311,10 @@ void gets2c()           // get updates from the server
                         break;
                     case DISC_UNK:
                         discReason = 3;
+                        break;
+                    case DISC_KICK:
+                        discReason = 4;
+                        break;
                     default:
                         showPopUp = false;
                 }
