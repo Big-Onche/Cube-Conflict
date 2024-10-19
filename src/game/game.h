@@ -797,7 +797,7 @@ struct gameent : dynent, gamestate
     bool isConnected;
 
     string name, info;
-    int team, playermodel, playercolor, skin[NUMSKINS], aptitude, level;
+    int team, playermodel, playercolor, skin[NUMSKINS], character, level;
     float skeletonfade, tombepop;
     ai::aiinfo *ai;
     int ownernum, lastnode;
@@ -808,7 +808,7 @@ struct gameent : dynent, gamestate
     gameent() : entityId(entitiesIds::getNewId()), weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0),
                 lifesequence(0), respawned(-1), suicided(-1), lastpain(0), lastfootstep(0), killstreak(0), frags(0), flags(0), deaths(0),
                 totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0),
-                skin{0, 0, 0}, aptitude(0), level(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
+                skin{0, 0, 0}, character(0), level(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
     {
         loopi(3) lastability[i] = -1;
         name[0] = info[0] = 0;
@@ -824,7 +824,7 @@ struct gameent : dynent, gamestate
 
     void hitphyspush(int damage, const vec &dir, gameent *actor, int atk, gameent *target)
     {
-        if(target->aptitude==C_AMERICAN) return;
+        if(target->character == C_AMERICAN) return;
         vec push(dir);
         push.mul((actor==this && attacks[atk].exprad ? EXP_SELFPUSH : 1.0f)*attacks[atk].hitpush*(damage/10)/weight);
         vel.add(push);
@@ -934,10 +934,14 @@ namespace game
     //hud
     extern void drawrpgminimap(gameent *d, int w, int h);
     extern int getteamfrags(int team);
+    extern string killerName;
+    extern int killerWeapon, killerCharacter, killerLevel;
+    extern float killerDistance;
 
     // abilities
     extern void launchAbility(gameent *d, int skill, bool request = true);
     extern void updateAbilitiesSkills(int curtime, gameent *d);
+    extern bool hasAbilities(gameent *d);
     extern bool hasAbilityEnabled(gameent *d, int numAbility);
     extern char *getdisguisement(int seed);
 
@@ -1157,7 +1161,7 @@ extern bool rndevent(int probability, int probabilityReduce = 0);
 extern void createdrop(const vec *o, int type);
 extern void trydisconnect(bool local);
 
-extern bool disabledClasse[NUMCLASSES];
+extern bool disabledClass[NUMCLASSES];
 
 #endif
 

@@ -69,7 +69,7 @@ namespace ai
         if(d == e) return false;
         if(e->abilitymillis[ABILITY_2])
         {
-            switch(e->aptitude)
+            switch(e->character)
             {
                 case C_PHYSICIST: if(e->o.dist(d->o) > d->skill*5) return false;
                 case C_SPY: if(e->attacking==ACT_IDLE && e->physstate!=PHYS_FALL) return false;
@@ -150,22 +150,32 @@ namespace ai
             case ATK_GRAP1:
                 targetPos.z += (e->aboveeye*0.2f)-(0.8f*d->eyeheight);
                 break;
+
             case ATK_SMAW:
             case ATK_S_ROCKETS:
             case ATK_FIREWORKS:
                 targetPos = e->feetpos();
+                break;
+
+            case ATK_MOLOTOV:
+            {
+                float dist = e->o.dist(d->o);
+                if(dist > 250 && !strcasecmp(getclientmap(), "moon")) targetPos.addz(dist * 0.25f);
+                break;
+            }
+
             default:
                 targetPos.subz(7);
         }
 
         bool changeAim = lastmillis >= d->ai->lastaimrnd;
 
-        if(e->aptitude==C_SPY && e->abilitymillis[ABILITY_1] && changeAim)
+        if(e->character == C_SPY && e->abilitymillis[ABILITY_1] && changeAim)
         {
             const int positions[4][2] = { {25, 25}, {-25, -25}, {25, -25}, {-25, 25} };
             targetPos.add(vec(positions[d->seed][0], positions[d->seed][1], 0));
         }
-        else if(e->aptitude==C_PHYSICIST && e->abilitymillis[ABILITY_2])
+        else if(e->character == C_PHYSICIST && e->abilitymillis[ABILITY_2])
         {
             targetPos.add(vec(rnd(61)-30, rnd(61)-30, 0));
         }
@@ -223,7 +233,7 @@ namespace ai
         d->plag = 0;
         d->skill = d->level = sk;
         d->playercolor = col;
-        d->aptitude = chooserandomtraits(classe, T_CLASSE);
+        d->character = chooserandomtraits(classe, T_CLASSE);
         d->playermodel = chooserandomtraits(pm, T_PLAYERMODEL);
         d->skin[SKIN_CAPE] = chooserandomtraits(cape, T_CAPE);
         d->skin[SKIN_GRAVE] = chooserandomtraits(grave, T_GRAVE);
@@ -326,31 +336,32 @@ namespace ai
 
     int needpursue(gameent *d)
     {
-        if((d->gunselect>=GUN_M_BUSTER && d->gunselect<=GUN_M_FLAIL) || d->gunselect==GUN_NINJA || (d->aptitude==C_KAMIKAZE && d->abilitymillis[ABILITY_2])) return 1;
+        if((d->gunselect>=GUN_M_BUSTER && d->gunselect<=GUN_M_FLAIL) || d->gunselect==GUN_NINJA || (d->character==C_KAMIKAZE && d->abilitymillis[ABILITY_2])) return 1;
         else return 0;
     }
 
-    bool badhealth(gameent *d) { return d->health < 300+d->skill*5; }
+    bool badhealth(gameent *d) { return d->health < (300 + (d->skill * 5)); }
 
     bool needmana(gameent *d)
     {
-        switch(d->aptitude)
+        switch(d->character)
         {
             case C_SPY:
             case C_WIZARD:
             case C_SHOSHONE:
             case C_PRIEST:
             case C_PHYSICIST:
-                 return d->mana<=100;
-            break;
+                return d->mana <= 100;
+                break;
             default:
                 return false;
         }
     }
+
     bool needshield(gameent *d, bool powerarmour)
     {
-        if(powerarmour && d->armour < 1000+d->skill*5 && d->armourtype!=A_POWERARMOR) return true;
-        switch(d->aptitude)
+        if(powerarmour && d->armour < (1000 + (d->skill * 5)) && d->armourtype!=A_POWERARMOR) return true;
+        switch(d->character)
         {
             case C_VAMPIRE:
             case C_REAPER:
@@ -502,7 +513,7 @@ namespace ai
 
     static void tryitem(gameent *d, extentity &e, int id, aistate &b, vector<interest> &interests, bool force = false)
     {
-        if(d->aptitude==C_KAMIKAZE && d->abilitymillis[ABILITY_2]) return;
+        if(d->character==C_KAMIKAZE && d->abilitymillis[ABILITY_2]) return;
 
         float score = 0;
         switch(e.type)
@@ -511,15 +522,15 @@ namespace ai
                 score = m_ctf ? 1e3f : 1e9f;
                 break;
             case I_ROIDS: case I_JOINT: case I_SHROOMS: case I_BOOSTPV: case I_EPO:
-                d->aptitude==C_JUNKIE ? score = 1e9f : score = m_ctf ? 1e2f : 1e7f;
+                d->character==C_JUNKIE ? score = 1e9f : score = m_ctf ? 1e2f : 1e7f;
                 break;
             case I_SANTE:
                 if(d->health<800){score = m_ctf || d->health > 400 ? 1e2f : 1e5f; }
-                if(d->mana>40 && d->aptitude==C_PRIEST && d->health<=300) launchAbility(d, ABILITY_1);
+                if(d->mana>40 && d->character==C_PRIEST && d->health<=300) launchAbility(d, ABILITY_1);
                 break;
             case I_MANA:
-                if(d->mana < 100 && d->aptitude!=C_VAMPIRE) score = m_ctf ? 1e2f : 1e5f;
-                else if (d->aptitude==C_VAMPIRE) score = d->health < 600 ? 1e4f : 1e3f;
+                if(d->mana < 100 && d->character!=C_VAMPIRE) score = m_ctf ? 1e2f : 1e5f;
+                else if (d->character==C_VAMPIRE) score = d->health < 600 ? 1e4f : 1e3f;
                 break;
             case I_WOODSHIELD: case I_IRONSHIELD:
                 if(d->armourtype==A_POWERARMOR && d->armour<1500) score = m_ctf ? 1e2f : 1e4f;
@@ -557,7 +568,7 @@ namespace ai
         loopv(entities::ents)
         {
             extentity &e = *(extentity *)entities::ents[i];
-            if(!e.spawned() || !d->canpickupitem(e.type, d->aptitude, hasPowerArmor(d))) continue;
+            if(!e.spawned() || !d->canpickupitem(e.type, d->character, hasPowerArmor(d))) continue;
             tryitem(d, e, i, b, interests, e.type == I_SUPERARME ? true : force);
         }
     }
@@ -608,7 +619,7 @@ namespace ai
                 {
                     int id = nearby[i];
                     extentity &e = *(extentity *)entities::ents[id];
-                    if(d->canpickupitem(e.type, d->aptitude, hasPowerArmor(d))) tryitem(d, e, id, b, interests);
+                    if(d->canpickupitem(e.type, d->character, hasPowerArmor(d))) tryitem(d, e, id, b, interests);
                 }
             }
         }
@@ -682,7 +693,7 @@ namespace ai
         if(forcegun >= 0 && forcegun < NUMGUNS) d->ai->weappref = forcegun;
         else
         {
-            switch(d->aptitude)
+            switch(d->character)
             {
                 case C_KAMIKAZE: d->ai->weappref = GUN_KAMIKAZE; break;
                 case C_NINJA: d->ai->weappref = GUN_NINJA; break;
@@ -704,11 +715,7 @@ namespace ai
 
     void killed(gameent *d, gameent *e)
     {
-        if(d->ai)
-        {
-            //addmsg(N_TEXT, "rcs", d, "CONNARD!");
-            d->ai->reset();
-        }
+        if(d->ai) d->ai->reset();
     }
 
     void itemspawned(int ent)
@@ -717,40 +724,44 @@ namespace ai
         extentity &e = *entities::ents[ent];
         if(entities::validitem(e.type))
         {
-            loopv(players) if(players[i] && players[i]->ai && players[i]->aitype == AI_BOT && players[i]->canpickupitem(e.type, players[i]->aptitude, players[i]->armourtype==A_POWERARMOR && players[i]->armour))
+            loopv(players)
             {
-                gameent *d = players[i];
-                bool wantsitem = false;
-                switch(e.type)
+                if(players[i] && players[i]->ai && players[i]->aitype == AI_BOT && players[i]->canpickupitem(e.type, players[i]->character, players[i]->armourtype==A_POWERARMOR && players[i]->armour))
                 {
-                    case I_SANTE: case I_BOOSTPV: wantsitem = badhealth(d); break;
-                    case I_MANA:
-                        d->aptitude==C_VAMPIRE ? wantsitem = badhealth(d) : wantsitem = needmana(d);
-                        break;
-                    case I_GOLDSHIELD:
-                    case I_MAGNETSHIELD:
-                    case I_IRONSHIELD:
-                    case I_WOODSHIELD:
-                    case I_POWERARMOR:
-                        wantsitem = needshield(d, e.type==I_POWERARMOR ? true : false);
-                        break;
-                    case I_SUPERARME: case I_ROIDS: case I_JOINT: case I_SHROOMS: case I_EPO:
-                        wantsitem = true;
-                }
-                if(wantsitem)
-                {
-                    aistate &b = d->ai->getstate();
-                    if(b.targtype == AI_T_AFFINITY) continue;
-                    if(b.type == AI_S_INTEREST && b.targtype == AI_T_ENTITY)
+                    gameent *d = players[i];
+                    bool wantsitem = false;
+                    switch(e.type)
                     {
-                        if(entities::ents.inrange(b.target))
-                        {
-                            if(d->o.squaredist(entities::ents[ent]->o) < d->o.squaredist(entities::ents[b.target]->o))
-                                d->ai->switchstate(b, AI_S_INTEREST, AI_T_ENTITY, ent);
-                        }
-                        continue;
+                        case I_SANTE: case I_BOOSTPV: wantsitem = badhealth(d); break;
+                        case I_MANA:
+                            d->character==C_VAMPIRE ? wantsitem = badhealth(d) : wantsitem = needmana(d);
+                            break;
+                        case I_GOLDSHIELD:
+                        case I_MAGNETSHIELD:
+                        case I_IRONSHIELD:
+                        case I_WOODSHIELD:
+                        case I_POWERARMOR:
+                            wantsitem = needshield(d, e.type==I_POWERARMOR ? true : false);
+                            break;
+                        case I_SUPERARME: case I_ROIDS: case I_JOINT: case I_SHROOMS: case I_EPO:
+                            wantsitem = true;
                     }
-                    d->ai->switchstate(b, AI_S_INTEREST, AI_T_ENTITY, ent);
+
+                    if(wantsitem)
+                    {
+                        aistate &b = d->ai->getstate();
+                        if(b.targtype == AI_T_AFFINITY) continue;
+                        if(b.type == AI_S_INTEREST && b.targtype == AI_T_ENTITY)
+                        {
+                            if(entities::ents.inrange(b.target))
+                            {
+                                if(d->o.squaredist(entities::ents[ent]->o) < d->o.squaredist(entities::ents[b.target]->o))
+                                    d->ai->switchstate(b, AI_S_INTEREST, AI_T_ENTITY, ent);
+                            }
+                            continue;
+                        }
+                        d->ai->switchstate(b, AI_S_INTEREST, AI_T_ENTITY, ent);
+                    }
                 }
             }
         }
@@ -856,7 +867,7 @@ namespace ai
                     gameent *e = getclient(b.target);
                     if(e && e->state == CS_ALIVE)
                     {
-                        switch(d->aptitude)
+                        switch(d->character)
                         {
                             case C_WIZARD:
                                 if(d->mana>60 && d->o.dist(e->o)<500) launchAbility(d, ABILITY_1);
@@ -1021,7 +1032,7 @@ namespace ai
 
     void jumpto(gameent *d, aistate &b, const vec &pos)
     {
-        if(d->aptitude==C_SPY && d->abilitymillis[ABILITY_2]) return;
+        if(d->character==C_SPY && d->abilitymillis[ABILITY_2]) return;
         vec off = vec(pos).sub(d->feetpos()), dir(off.x, off.y, 0);
         bool sequenced = d->ai->blockseq || d->ai->targseq, offground = d->timeinair && !d->inwater,
              jump = !offground && lastmillis >= d->ai->jumpseed && rndevent(70) && (sequenced || off.z >= JUMPMIN || lastmillis >= d->ai->jumprand);
@@ -1131,16 +1142,16 @@ namespace ai
             d->ai->spot = vec(0, 0, 0);
         }
 
-        if(d->abilitymillis[ABILITY_3] && d->aptitude==C_PHYSICIST && rndevent(85)) d->jumping = true;
+        if(d->abilitymillis[ABILITY_3] && d->character==C_PHYSICIST && rndevent(85)) d->jumping = true;
 		else if(!d->ai->dontmove || (d->boostmillis[B_JOINT] && rndevent(96))) jumpto(d, b, d->ai->spot);
 
         gameent *e = getclient(d->ai->enemy);
         bool enemyok = e && targetable(d, e);
 
-        if(enemyok && (d->aptitude==C_KAMIKAZE || d->aptitude==C_NINJA || d->gunselect==GUN_FLAMETHROWER))
+        if(enemyok && (d->character==C_KAMIKAZE || d->character==C_NINJA || d->gunselect==GUN_FLAMETHROWER))
         {
             makeroute(d, b, e->o);
-            if(d->abilitymillis[ABILITY_2]<500 && d->abilitymillis[ABILITY_2] && d->aptitude==C_KAMIKAZE) d->gunselect=GUN_KAMIKAZE;
+            if(d->abilitymillis[ABILITY_2]<500 && d->abilitymillis[ABILITY_2] && d->character==C_KAMIKAZE) d->gunselect=GUN_KAMIKAZE;
         }
 
         if(!enemyok || d->skill >= 50)
@@ -1151,7 +1162,7 @@ namespace ai
                 if(targetable(d, f))
                 {
                     if(!enemyok) violence(d, b, f, needpursue(d));
-                    switch(d->aptitude)
+                    switch(d->character)
                     {
                         case C_PRIEST: case C_SHOSHONE: if(d->mana>70 && d->o.dist(f->o)<750) launchAbility(d, ABILITY_3); break;
                         case C_KAMIKAZE:
@@ -1293,7 +1304,7 @@ namespace ai
         if(d->armourtype==A_POWERARMOR && !d->armour && d->ammo[GUN_POWERARMOR]) {gunselect(GUN_POWERARMOR, d, true); goto process;}
         else {loopi(4) if(d->hasammo(GUN_S_NUKE+i)) {gunselect(GUN_S_NUKE+i, d); goto process;} }
 
-        switch(d->aptitude)
+        switch(d->character)
         {
             case C_KAMIKAZE:
                 if(hasrange(d, e, GUN_KAMIKAZE) && d->ammo[GUN_KAMIKAZE])
@@ -1471,7 +1482,7 @@ namespace ai
                 int result = 0;
                 c.idle = 0;
 
-                switch(d->aptitude)
+                switch(d->character)
                 {
                     case C_WIZARD: if(d->health<250+d->skill*2 && d->mana>=60) launchAbility(d, ABILITY_3); break;
                     case C_PRIEST: if(d->mana>30 && d->health<(d->skill/3)) launchAbility(d, ABILITY_2); break;

@@ -25,8 +25,8 @@ namespace game
         else
         {
             addmsg(N_SENDCLASS, "ri", player1_aptitude);
-            player1->aptitude = player1_aptitude;
-            oldapti = player1->aptitude;
+            player1->character = player1_aptitude;
+            oldapti = player1->character;
             if(!islaunching) playSound(S_C_SOLDIER+player1_aptitude, vec(0, 0, 0), 0, 0, SND_UI);
             if(isconnected() && !intermission) unlockAchievement(ACH_UNDECIDED);
         }
@@ -156,7 +156,7 @@ namespace game
     gameent *spawnstate(gameent *d)              // reset player state not persistent accross spawns
     {
         d->respawn();
-        d->spawnstate(gamemode, d->aptitude);
+        d->spawnstate(gamemode, d->character);
         return d;
     }
 
@@ -251,9 +251,9 @@ namespace game
         }
     }
 
-    void getaptiweap()
+    void getClassWeapon()
     {
-        switch(player1->aptitude)
+        switch(player1->character)
         {
             case C_KAMIKAZE:
                 if(player1->gunselect!=GUN_KAMIKAZE) gunselect(currentIdenticalWeapon, player1);
@@ -265,11 +265,7 @@ namespace game
         }
     }
 
-    bool hasAbilityEnabled(gameent *d, int numAbility)
-    {
-        if(d->abilitymillis[numAbility]) return true;
-        return false;
-    }
+
 
     bool hasboost(gameent *d)
     {
@@ -307,11 +303,9 @@ namespace game
                 d->attacksound = 0;
             }
 
-            bool hasShrooms = d->boostmillis[B_SHROOMS];
+            float pitch = (d->boostmillis[B_SHROOMS] ? (d->character==C_JUNKIE ? 1.4f : 1.2f) : 1.0f);
 
-            float pitch = (hasShrooms ? 1.2f : 1.0f);
-
-            if(d->aptitude == C_PRIEST && d->abilitymillis[ABILITY_3])
+            if(d->character == C_PRIEST && d->abilitymillis[ABILITY_3])
             {
                 float abilityPitch = 1.5f - (d->abilitymillis[ABILITY_3] / 8000.0f);
                 pitch *= abilityPitch;
@@ -520,7 +514,7 @@ namespace game
                 switch(player1->gunselect)
                 {
                     case GUN_S_NUKE: case GUN_S_GAU8: case GUN_S_CAMPER: case GUN_S_ROCKETS: break;
-                    default: getaptiweap();
+                    default: getClassWeapon();
                 }
             }
 
@@ -530,8 +524,8 @@ namespace game
                 if(player1->boostmillis[B_ROIDS] && player1->boostmillis[B_EPO] && player1->boostmillis[B_JOINT] && player1->boostmillis[B_SHROOMS]) unlockAchievement(ACH_DEFONCE);
                 if(lookupmaterial(player1->o)==MAT_NOCLIP && !strcasecmp(getclientmap(), "moon")) unlockAchievement(ACH_SPAAACE);
                 if(hasSuperWeapon(player1) && player1->boostmillis[B_ROIDS] && player1->armour && player1->armourtype==A_POWERARMOR) unlockAchievement(ACH_ABUS);
-                if(player1->aptitude==C_KAMIKAZE && !player1->ammo[GUN_KAMIKAZE] && totalmillis-lastshoot>=500 && totalmillis-lastshoot<=750 && isconnected()) unlockAchievement(ACH_SUICIDEFAIL);
-                if(player1->boostmillis[B_EPO] && player1->aptitude==C_JUNKIE) unlockAchievement(ACH_LANCEEPO);
+                if(player1->character==C_KAMIKAZE && !player1->ammo[GUN_KAMIKAZE] && totalmillis-lastshoot>=500 && totalmillis-lastshoot<=750 && isconnected()) unlockAchievement(ACH_SUICIDEFAIL);
+                if(player1->boostmillis[B_EPO] && player1->character==C_JUNKIE) unlockAchievement(ACH_LANCEEPO);
             }
 
             updatePlayersBoosts(curtime, player1);
@@ -702,7 +696,7 @@ namespace game
     {
         if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission) return;
 
-        if(local) damage = d->dodamage(damage, d->aptitude==C_PHYSICIST && d->abilitymillis[ABILITY_1]);
+        if(local) damage = d->dodamage(damage, d->character==C_PHYSICIST && d->abilitymillis[ABILITY_1]);
         else if(actor==player1) return;
 
         gameent *h = hudplayer();
@@ -720,8 +714,8 @@ namespace game
 
         if(!rnd(2))
         {
-            if(d->aptitude==C_PHYSICIST && d->abilitymillis[ABILITY_1] && d->armour>0) playSound(S_PHY_1, d==h ? vec(0, 0, 0) : d->o, 200, 100, SND_LOWPRIORITY);
-            else if(d->armour>0 && actor->gunselect!=GUN_FLAMETHROWER) playSound(S_IMPACTWOOD+d->armourtype, d==h ? vec(0, 0, 0) : d->o, 250, 50, SND_LOWPRIORITY);
+            if(d->character==C_PHYSICIST && d->abilitymillis[ABILITY_1] && d->armour) playSound(S_PHY_1, d==h ? vec(0, 0, 0) : d->o, 200, 100, SND_LOWPRIORITY);
+            else if(d->armour && actor->gunselect!=GUN_FLAMETHROWER) playSound(S_IMPACTWOOD+d->armourtype, d==h ? vec(0, 0, 0) : d->o, 250, 50, SND_LOWPRIORITY);
         }
 
         damageeffect(damage, d, actor, atk);
@@ -777,20 +771,6 @@ namespace game
 
     VARP(teamcolorfrags, 0, 1, 1);
 
-    string killername;
-    ICOMMAND(getkillername, "", (), result(killername); );
-
-    int killerclass, killerlevel, killerweapon;
-    ICOMMAND(getkillerweapon, "", (), intret(killerweapon); );
-    ICOMMAND(getkillerclass, "", (), intret(killerclass); );
-    ICOMMAND(getkillerlevel, "", (), intret(killerlevel); );
-
-    float killerdistance;
-    ICOMMAND(getkilldistance, "", (), floatret(roundf(killerdistance * 10) / 10); );
-
-    bool hassuicided = true;
-    ICOMMAND(hassuicided, "", (), intret(hassuicided); );
-
     void killed(gameent *d, gameent *actor, int atk)
     {
         bool isHudPlayer = (actor == hudplayer());
@@ -827,7 +807,7 @@ namespace game
         }
 
         ////////////////////////////// gfx //////////////////////////////
-        if(actor->aptitude==C_REAPER)
+        if(actor->character==C_REAPER)
         {
             if(camera1->o.dist(d->o) >= 250) playSound(S_ECLAIRLOIN, d->o, 1000, 250);
             else playSound(S_ECLAIRPROCHE, d==hudplayer() ? vec(0, 0, 0) : d->o, 300, 150);
@@ -857,20 +837,20 @@ namespace game
         }
         else // Kill ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
-            float killdistance = actor->o.dist(d->o)/18.f;
+            float killDistance = actor->o.dist(d->o)/18.f;
             if(actor==player1) //////////////////// you killed someone ////////////////////
             {
                 playSound(S_KILL, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH|SND_UI);
                 defformatstring(victimname, "%s", dname);
-                conoutf(CON_HUDCONSOLE, "%s \fc%s%s\f7! \f4(%.1fm)", readstr("GameMessage_YouKilled"), victimname, readstr("Misc_PrePuncSpace"), killdistance);
-                conoutf(contype, "\fd%s\f7 > \fl%s\f7 > %s \fl(%.1fm)", player1->name, readstr(guns[atk].ident), victimname, killdistance);
+                conoutf(CON_HUDCONSOLE, "%s \fc%s%s\f7! \f4(%.1fm)", readstr("GameMessage_YouKilled"), victimname, readstr("Misc_PrePuncSpace"), killDistance);
+                conoutf(contype, "\fd%s\f7 > \fl%s\f7 > %s \fl(%.1fm)", player1->name, readstr(guns[atk].ident), victimname, killDistance);
 
                 if(IS_ON_OFFICIAL_SERV && isteam(d->team, player1->team)) unlockAchievement(ACH_CPASBIEN);
                 else if(IS_ON_OFFICIAL_SERV && !isteam(d->team, player1->team)) // now let's check for shittons of achievements if playing online
                 {
-                    if(killdistance>=100.f) unlockAchievement(ACH_BEAUTIR);
-                    else if(killdistance<1.f && atk==ATK_MOSSBERG) unlockAchievement(ACH_TAKETHAT);
-                    else if(killdistance>=69.f && killdistance<70.f ) unlockAchievement(ACH_NICE);
+                    if(killDistance>=100.f) unlockAchievement(ACH_BEAUTIR);
+                    else if(killDistance<1.f && atk==ATK_MOSSBERG) unlockAchievement(ACH_TAKETHAT);
+                    else if(killDistance>=69.f && killDistance<70.f ) unlockAchievement(ACH_NICE);
                     if(player1->state==CS_DEAD && player1->lastpain > 200) unlockAchievement(ACH_TUEURFANTOME);
                     if(player1->health<=10 && player1->state==CS_ALIVE) unlockAchievement(ACH_1HPKILL);
 
@@ -880,13 +860,13 @@ namespace game
                         case ATK_FLAMETHROWER: if(lookupmaterial(d->feetpos())==MAT_WATER) unlockAchievement(ACH_THUGPHYSIQUE); break;
                         case ATK_SV98: if(zoom==0) unlockAchievement(ACH_NOSCOPE); break;
                         case ATK_GLOCK: if(d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_CAMPER || d->gunselect==GUN_S_GAU8 || d->gunselect==GUN_S_ROCKETS) unlockAchievement(ACH_DAVIDGOLIATH); break;
-                        case ATK_M_BUSTER: case ATK_M_FLAIL: case ATK_M_HAMMER: case ATK_M_MASTER: if(d->aptitude==C_NINJA) unlockAchievement(ACH_PASLOGIQUE); break;
-                        case ATK_S_NUKE: case ATK_S_CAMPER: case ATK_S_GAU8: case ATK_S_ROCKETS: if(player1->aptitude==C_AMERICAN && player1->boostmillis[B_ROIDS]) unlockAchievement(ACH_JUSTEPOUR);
+                        case ATK_M_BUSTER: case ATK_M_FLAIL: case ATK_M_HAMMER: case ATK_M_MASTER: if(d->character==C_NINJA) unlockAchievement(ACH_PASLOGIQUE); break;
+                        case ATK_S_NUKE: case ATK_S_CAMPER: case ATK_S_GAU8: case ATK_S_ROCKETS: if(player1->character==C_AMERICAN && player1->boostmillis[B_ROIDS]) unlockAchievement(ACH_JUSTEPOUR);
                     }
 
-                    switch(player1->aptitude)
+                    switch(player1->character)
                     {
-                        case C_AMERICAN: if(d->aptitude==C_SHOSHONE) unlockAchievement(ACH_FUCKYEAH); break;
+                        case C_AMERICAN: if(d->character==C_SHOSHONE) unlockAchievement(ACH_FUCKYEAH); break;
                         case C_SPY: if(player1->abilitymillis[ABILITY_2]) unlockAchievement(ACH_ESPIONDEGUISE);
                     }
 
@@ -896,23 +876,23 @@ namespace game
                     updateStat(1, STAT_KILLS);
                     addReward(7+player1->killstreak-1, 3+player1->killstreak-1);
                     if(player1->killstreak > gameStat[STAT_KILLSTREAK]) updateStat(player1->killstreak, STAT_KILLSTREAK, true);
-                    if(gameStat[STAT_MAXKILLDIST]<killdistance) updateStat(killdistance, STAT_MAXKILLDIST, true);
+                    if(gameStat[STAT_MAXKILLDIST]<killDistance) updateStat(killDistance, STAT_MAXKILLDIST, true);
                 }
             }
             else if(d==player1) //////////////////// you were killed ////////////////////
             {
                 hassuicided = false;
-                conoutf(contype, "%s\f7 > \fl%s\f7 > \fd%s \fl(%.1fm)", aname, readstr(guns[atk].ident), player1->name, killdistance);
+                conoutf(contype, "%s\f7 > \fl%s\f7 > \fd%s \fl(%.1fm)", aname, readstr(guns[atk].ident), player1->name, killDistance);
                 updateStat(1, STAT_MORTS);
-                formatstring(killername, "%s", aname);
-                killerweapon = atk;
-                killerclass = actor->aptitude;
-                killerlevel = actor->level;
-                killerdistance = killdistance;
+                formatstring(killerName, "%s", aname);
+                killerWeapon = atk;
+                killerCharacter = actor->character;
+                killerLevel = actor->level;
+                killerDistance = killDistance;
             }
             else //////////////////// someone killed someone ////////////////////
             {
-                conoutf(contype, "%s\f7 > \fl%s\f7 > %s \fl(%.1fm)", aname, readstr(guns[atk].ident), dname, killdistance);
+                conoutf(contype, "%s\f7 > \fl%s\f7 > %s \fl(%.1fm)", aname, readstr(guns[atk].ident), dname, killDistance);
             }
 
             //////////////////// someone is killin' it ////////////////////
@@ -1086,7 +1066,7 @@ namespace game
         player1 = spawnstate(new gameent);
         filtertext(player1->name, readstr("Misc_BadUsername"), false, false, MAXNAMELEN);
         players.add(player1);
-        player1->aptitude = player1_aptitude;
+        player1->character = player1_aptitude;
     }
 
     VARP(showmodeinfo, 0, 0, 1);
@@ -1184,7 +1164,7 @@ namespace game
         {
             particle_splash(map_atmo==4 && atmos ? PART_WATER : PART_SMOKE, pl->armourtype==A_POWERARMOR ? 12 : 10, 100, d->feetpos(), map_atmo==4 && atmos ? 0x111111 : map_atmo==9 ? 0xFFFFFF : 0x666666, 7.0f+rnd(pl->armourtype==A_POWERARMOR ? 10 : 5), 400, 20);
             if(d==hudplayer()) startCameraAnimation(CAM_ANIM_JUMP, 600, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0.2f, 0));
-            if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_POWERARMOR && pl->armour ? S_JUMP_ASSIST : pl->aptitude==C_NINJA || (pl->aptitude==C_KAMIKAZE && pl->abilitymillis[ABILITY_2]) ? S_JUMP_NINJA : S_JUMP_BASIC, d);
+            if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_POWERARMOR && pl->armour ? S_JUMP_ASSIST : pl->character==C_NINJA || (pl->character==C_KAMIKAZE && pl->abilitymillis[ABILITY_2]) ? S_JUMP_NINJA : S_JUMP_BASIC, d);
         }
         else if(floorlevel<0)
         {
@@ -1205,8 +1185,8 @@ namespace game
             bool powerArmor = hasPowerArmor(pl);
             int snd = lookupmaterial(d->feetpos()) == MAT_WATER ? S_SWIM : (powerArmor ? S_FOOTSTEP_ASSIST : S_FOOTSTEP);
 
-            int freq = (((100 - classes[pl->aptitude].speed) + 75) * 5) ;
-            if(pl->crouched() || (pl->abilitymillis[ABILITY_2] && pl->aptitude==C_SPY)) freq *= 2;
+            int freq = (((100 - classes[pl->character].speed) + 75) * 5) ;
+            if(pl->crouched() || (pl->abilitymillis[ABILITY_2] && pl->character==C_SPY)) freq *= 2;
             if(d->inwater) freq *= 1.5f;
             else if(powerArmor) freq *= 2;
             if(pl->boostmillis[B_EPO]) freq /= 2.f;
@@ -1217,7 +1197,7 @@ namespace game
                 if(pl==hudplayer())
                 {
                     static bool cameraSwayDir = false;
-                    float swayValue = 0.12f * (classes[pl->aptitude].speed / 100.f);
+                    float swayValue = 0.12f * (classes[pl->character].speed / 100.f);
                     if(pl->boostmillis[B_EPO]) swayValue *= 2.f;
                     startCameraAnimation(CAM_ANIM_SWAY, freq, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0, (cameraSwayDir ? swayValue : -swayValue)));
                     cameraSwayDir = !cameraSwayDir;

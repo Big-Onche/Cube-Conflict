@@ -59,7 +59,7 @@ namespace game
 
     ICOMMAND(meleeattack, "", (), // shortcut for melee attack, then select old gun
         if(!isconnected()) return;
-        if(player1->aptitude==C_NINJA) gunselect(GUN_NINJA, player1, false, true);
+        if(player1->character==C_NINJA) gunselect(GUN_NINJA, player1, false, true);
         else if (m_identique) return;
         else findSpecialWeapon(player1, GUN_M_BUSTER, NUMMELEEWEAPONS, [](int gunId) { gunselect(gunId, player1, false, true); });
         doaction(ACT_SHOOT);
@@ -74,7 +74,7 @@ namespace game
         if(m_identique)
         {
             int gunId;
-            switch(player1->aptitude)
+            switch(player1->character)
             {
                 case C_KAMIKAZE: gunId = GUN_KAMIKAZE; break;
                 case C_NINJA: gunId = GUN_NINJA; break;
@@ -183,16 +183,16 @@ namespace game
         do offset = vec(rndscale(1), rndscale(1), rndscale(1)).sub(0.5f);
         while(offset.squaredlen() > 0.5f*0.5f);
 
-        if(d->boostmillis[B_SHROOMS]) spread /= d->aptitude==C_JUNKIE ? 1.75f : 1.5f;
-        if(d->aptitude==C_WIZARD && d->abilitymillis[ABILITY_2]) spread /= 3.f;
+        if(d->boostmillis[B_SHROOMS]) spread /= d->character==C_JUNKIE ? 1.75f : 1.5f;
+        if(d->character==C_WIZARD && d->abilitymillis[ABILITY_2]) spread /= 3.f;
 
         if(!spreadLimit(d))
         {
-            if(d->crouching) spread /= d->aptitude==C_CAMPER ? 2.5f : 1.3f;
+            if(d->crouching) spread /= d->character==C_CAMPER ? 2.5f : 1.3f;
             if(d->boostmillis[B_ROIDS] || d->boostmillis[B_RAGE]) spread *= 1.75f;
         }
 
-        spread = (spread*100) / classes[d->aptitude].accuracy;
+        spread = (spread*100) / classes[d->character].accuracy;
         offset.mul((to.dist(from)/1024) * spread);
 
         offset.z /= 2;
@@ -511,7 +511,7 @@ namespace game
         vec p = d->o;
         p.z += 0.6f*(d->eyeheight + d->aboveeye) - d->eyeheight;
 
-        int actorClass = actor->aptitude, targetClass = d->aptitude;
+        int actorClass = actor->character, targetClass = d->character;
         bool isHudPlayer = (actor == hudplayer());
         bool teamDamage = (isteam(d->team, actor->team) && d!=actor);
 
@@ -658,23 +658,23 @@ namespace game
         {
             if(f==player1)
             {
-                if(player1->boostmillis[B_JOINT]) damage/=(player1->aptitude==C_JUNKIE ? 1.875f : 1.25f);
-                switch(player1->aptitude)
+                if(player1->boostmillis[B_JOINT]) damage/=(player1->character==C_JUNKIE ? 1.875f : 1.25f);
+                switch(player1->character)
                 {
                     case C_WIZARD: {if(player1->abilitymillis[ABILITY_3]) damage/=5.f; } break;
                     case C_VIKING: player1->boostmillis[B_RAGE]+=damage; break;
                     case C_PRIEST: if(player1->abilitymillis[ABILITY_2] && player1->mana) {player1->mana-=damage/10; damage=0; if(player1->mana<0)player1->mana=0;} break;
                     case C_SHOSHONE: if(player1->abilitymillis[ABILITY_1]) damage/=1.3f;
                 }
-                damage = (damage/classes[player1->aptitude].resistance)*(m_dmsp ? 15.f : 100);
+                damage = (damage/classes[player1->character].resistance)*(m_dmsp ? 15.f : 100);
                 damageeffect(damage, f, at, atk);
                 damaged(damage, f, at, true, atk);
                 f->hitphyspush(damage, vel, at, atk, f);
             }
             else if(at==player1)
             {
-                if(player1->boostmillis[B_ROIDS]) damage *= (player1->aptitude==C_JUNKIE ? 3 : 2);
-                switch(player1->aptitude)
+                if(player1->boostmillis[B_ROIDS]) damage *= (player1->character==C_JUNKIE ? 3 : 2);
+                switch(player1->character)
                 {
                     case C_AMERICAN: {if(atk==ATK_S_NUKE || atk==ATK_S_GAU8 || atk==ATK_S_ROCKETS || atk==ATK_S_CAMPER) damage *= 1.5f; break;}
                     case C_VIKING: if(player1->boostmillis[B_RAGE]) damage*=1.25f; break;
@@ -683,7 +683,7 @@ namespace game
                     case C_VAMPIRE: {player1->health = min(player1->health + damage/2, player1->maxhealth); player1->vampiremillis+=damage*1.5f;} break;
                     case C_SHOSHONE: if(player1->abilitymillis[ABILITY_1]) damage*=1.3f;
                 }
-                damage = (damage*classes[player1->aptitude].damage)/100;
+                damage = (damage*classes[player1->character].damage)/100;
                 hitmonster(damage, (monster *)f, at, vel, atk);
                 avgdmg[dmgsecs[0]] += damage/10.f;
             }
@@ -702,7 +702,7 @@ namespace game
 
             int impactSound = S_IMPACTWOOD + f->armourtype;
             int regenSound = S_PHY_1_WOOD + f->armourtype;
-            bool hasRegenAbility = f->aptitude==C_PHYSICIST && f->abilitymillis[ABILITY_1];
+            bool hasRegenAbility = f->character==C_PHYSICIST && f->abilitymillis[ABILITY_1];
 
             if(at==player1)
             {
@@ -1081,14 +1081,14 @@ namespace game
 
     bool noMuzzle(int atk, gameent *d)
     {
-        return (d->aptitude==C_SPY && d->abilitymillis[ABILITY_2]) || (atk==ATK_M_BUSTER || atk==ATK_M_FLAIL || atk==ATK_M_HAMMER || atk==ATK_M_MASTER || atk==ATK_NINJA);
+        return (d->character==C_SPY && d->abilitymillis[ABILITY_2]) || (atk==ATK_M_BUSTER || atk==ATK_M_FLAIL || atk==ATK_M_HAMMER || atk==ATK_M_MASTER || atk==ATK_NINJA);
     }
 
     float recoilReduce()
     {
         float factor = (hudplayer()->boostmillis[B_ROIDS] ? 0.75f : 1.f);
 
-        switch(hudplayer()->aptitude)
+        switch(hudplayer()->character)
         {
             case C_SOLDIER:
                 return factor *= 2;
@@ -1100,7 +1100,7 @@ namespace game
                 return (hudplayer()->abilitymillis[ABILITY_2] ? (factor * 5) : factor);
         }
 
-        return factor * (classes[hudplayer()->aptitude].accuracy / 100.f);
+        return factor * (classes[hudplayer()->character].accuracy / 100.f);
     }
 
     float recoilSide(int time)
@@ -1122,8 +1122,8 @@ namespace game
         int gunSound = attacks[atk].sound;
         bool isHudPlayer = d==hudplayer();
         vec muzzleOrigin = noMuzzle(atk, d) ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle;
-        vec casingOrigin = (d->aptitude==C_SPY && d->abilitymillis[ABILITY_2]) ? d->o : d->balles;
-        bool wizardAbility = (d->aptitude==C_WIZARD && d->abilitymillis[ABILITY_2]);
+        vec casingOrigin = (d->character==C_SPY && d->abilitymillis[ABILITY_2]) ? d->o : d->balles;
+        bool wizardAbility = (d->character==C_WIZARD && d->abilitymillis[ABILITY_2]);
         if(wizardAbility) playSound(S_WIZ_2, isHudPlayer ? vec(0, 0, 0) : d->muzzle, 250, 150, NULL, d->entityId);
 
         switch(atk)
@@ -1192,7 +1192,7 @@ namespace game
                 if(isGau)
                 {
                     if(d->type==ENT_PLAYER) gunSound = S_GAU8;
-                    if(d==player1 && player1->aptitude==C_PRIEST && player1->boostmillis[B_SHROOMS] && player1->abilitymillis[ABILITY_3]) unlockAchievement(ACH_CADENCE);
+                    if(d==player1 && player1->character==C_PRIEST && player1->boostmillis[B_SHROOMS] && player1->abilitymillis[ABILITY_3]) unlockAchievement(ACH_CADENCE);
                 }
                 spawnbouncer(casingOrigin, d->vel, d, isGau ? BNC_BIGCASING : BNC_CASING);
                 break;
@@ -1337,13 +1337,13 @@ namespace game
             else if(d->boostmillis[B_RAGE]) playSound(S_RAGETIR, isHudPlayer ? vec(0, 0, 0) : d->o, 500, 100);
         }
 
-        if(d->abilitymillis[ABILITY_3] && d->aptitude==C_PRIEST) adddynlight(muzzleOrigin, 6, vec(1.5f, 1.5f, 0.0f), 80, 40, L_NOSHADOW|L_VOLUMETRIC|DL_FLASH);
+        if(d->abilitymillis[ABILITY_3] && d->character==C_PRIEST) adddynlight(muzzleOrigin, 6, vec(1.5f, 1.5f, 0.0f), 80, 40, L_NOSHADOW|L_VOLUMETRIC|DL_FLASH);
         if(d==player1) updateStat(1, STAT_MUNSHOOTED);
 
         bool incraseDist = atk==ATK_POWERARMOR || atk==ATK_KAMIKAZE || atk==ATK_S_GAU8 || atk==ATK_S_NUKE;
         int distance = camera1->o.dist(hudgunorigin(gun, d->o, to, d));
         int loopedSoundFlags = SND_LOOPED|SND_FIXEDPITCH|SND_NOCULL;
-        float pitch = d->boostmillis[B_SHROOMS] ? (d->aptitude==C_JUNKIE ? 1.4f : 1.2f) : (d->aptitude==C_PRIEST && d->abilitymillis[ABILITY_3] ? (1.5f - (d->abilitymillis[ABILITY_3] / 8000.0f)) : 0);
+        float pitch = d->boostmillis[B_SHROOMS] ? (d->character==C_JUNKIE ? 1.4f : 1.2f) : (d->character==C_PRIEST && d->abilitymillis[ABILITY_3] ? (1.5f - (d->abilitymillis[ABILITY_3] / 8000.0f)) : 0);
         if(gamespeed!=100) pitch *= (game::gamespeed / 100.f);
 
         if(!d->attacksound)
@@ -1473,7 +1473,7 @@ namespace game
     void shoot(gameent *d, const vec &targ, bool isMonster)
     {
         int prevaction = d->lastaction, attacktime = lastmillis-prevaction;
-        bool specialAbility = d->aptitude==C_PRIEST && d->abilitymillis[ABILITY_3];
+        bool specialAbility = d->character==C_PRIEST && d->abilitymillis[ABILITY_3];
 
         if(d->aitype==AI_BOT && (d->gunselect==GUN_GLOCK || d->gunselect==GUN_SPOCKGUN || d->gunselect==GUN_HYDRA || d->gunselect==GUN_SKS || d->gunselect==GUN_S_CAMPER))
         {
@@ -1493,7 +1493,7 @@ namespace game
         if(attacktime < d->gunwait + d->gunaccel*(d->gunselect==GUN_PLASMA ? 50 : d->gunselect==GUN_S_ROCKETS ? 150 : 8) + (d==player1 || specialAbility ? 0 : attacks[d->gunselect].attackdelay)) return;
         d->gunwait = 0;
 
-        if(d->aptitude==C_KAMIKAZE)
+        if(d->character==C_KAMIKAZE)
         {
             if(d->abilitymillis[ABILITY_2]>0 && d->abilitymillis[ABILITY_2]<2000 && d->ammo[GUN_KAMIKAZE]>0 && !d->playerexploded)
             {
@@ -1538,8 +1538,8 @@ namespace game
         vec from = d->o, to = targ, dir = vec(to).sub(from).safenormalize();
         float dist = to.dist(from);
 
-        int kickfactor = (m_tutorial && !canMove) || d->aptitude==C_AMERICAN ? 0 : (d->crouched() ? -1.25f : -2.5f);
-        vec kickback = (d->aptitude==C_AMERICAN ? vec(0, 0, 0) : vec(dir).mul(attacks[atk].kickamount*kickfactor));
+        int kickfactor = (m_tutorial && !canMove) || d->character==C_AMERICAN ? 0 : (d->crouched() ? -1.25f : -2.5f);
+        vec kickback = (d->character==C_AMERICAN ? vec(0, 0, 0) : vec(dir).mul(attacks[atk].kickamount*kickfactor));
         d->vel.add(kickback);
 
         float shorten = attacks[atk].range && dist > attacks[atk].range ? attacks[atk].range : 0,
@@ -1565,8 +1565,8 @@ namespace game
                    hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
         }
         float waitfactor = 1;
-        if(d->aptitude==C_PRIEST && d->abilitymillis[ABILITY_3]) waitfactor = 2.5f + ((4000.f - d->abilitymillis[ABILITY_3])/1000.f);
-        if(d->boostmillis[B_SHROOMS]) waitfactor *= d->aptitude==C_JUNKIE ? 1.75f : 1.5f;
+        if(d->character==C_PRIEST && d->abilitymillis[ABILITY_3]) waitfactor = 2.5f + ((4000.f - d->abilitymillis[ABILITY_3])/1000.f);
+        if(d->boostmillis[B_SHROOMS]) waitfactor *= d->character==C_JUNKIE ? 1.75f : 1.5f;
         d->gunwait = attacks[atk].attackdelay/waitfactor;
         d->totalshots += (attacks[atk].damage*attacks[atk].rays) * (d->boostmillis[B_ROIDS] ? 1 : 2);
         if(d->playerexploded) {d->attacking = d->wasAttacking; execute("getoldweap"); d->playerexploded = false;}

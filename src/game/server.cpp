@@ -218,7 +218,7 @@ namespace server
         int clientnum, ownernum, connectmillis, sessionid, overflow;
         string name, mapvote;
         int team, playermodel, playercolor;
-        int skin[NUMSKINS], aptitude, level;
+        int skin[NUMSKINS], character, level;
         int modevote;
         int privilege;
         bool connected, local, timesync;
@@ -342,7 +342,7 @@ namespace server
             playermodel = -1;
             playercolor = 0;
             loopi(NUMSKINS) skin[i] = 0;
-            aptitude = 0;
+            character = 0;
             privilege = PRIV_NONE;
             connected = local = false;
             connectauth = 0;
@@ -903,7 +903,7 @@ namespace server
         clientinfo *ci = getinfo(sender);
         if(!ci) return false;
         int rndsweap = sents[i].type==I_SUPERARME ? rnd(4) : 0;
-        if(!ci->local && !ci->state.canpickupitem(sents[i].type+rndsweap, ci->aptitude, ci->state.armourtype==A_POWERARMOR && ci->state.armour))
+        if(!ci->local && !ci->state.canpickupitem(sents[i].type+rndsweap, ci->character, ci->state.armourtype==A_POWERARMOR && ci->state.armour))
         {
             sendf(ci->ownernum, 1, "ri4", N_ITEMACC, i, -1, rndsweap);
             return false;
@@ -911,7 +911,7 @@ namespace server
         sents[i].spawned = false;
         sents[i].spawntime = spawntime(sents[i].type);
         sendf(-1, 1, "ri4", N_ITEMACC, i, sender, rndsweap);
-        ci->state.pickupitem(sents[i].type, ci->aptitude, ci->state.abilitymillis[ABILITY_1], ci->state.armourtype==A_POWERARMOR && ci->state.armour, rndsweap);
+        ci->state.pickupitem(sents[i].type, ci->character, ci->state.abilitymillis[ABILITY_1], ci->state.armourtype==A_POWERARMOR && ci->state.armour, rndsweap);
         return true;
     }
 
@@ -1784,7 +1784,7 @@ namespace server
     void spawnstate(clientinfo *ci)
     {
         servstate &gs = ci->state;
-        gs.spawnstate(gamemode, ci->aptitude);
+        gs.spawnstate(gamemode, ci->character);
         gs.state = CS_ALIVE;
         gs.seed = rnd(4);
         gs.lifesequence = (gs.lifesequence + 1)&0x7F;
@@ -1816,7 +1816,7 @@ namespace server
             putint(p, ci->clientnum);
             putint(p, ci->ownernum);
             putint(p, ci->state.aitype);
-            putint(p, ci->aptitude);
+            putint(p, ci->character);
             loopi(NUMSKINS) putint(p, ci->skin[i]);
             putint(p, ci->state.skill);
             putint(p, ci->playermodel);
@@ -1833,7 +1833,7 @@ namespace server
             putint(p, ci->playermodel);
             putint(p, ci->playercolor);
             loopi(NUMSKINS) putint(p, ci->skin[i]);
-            putint(p, ci->aptitude);
+            putint(p, ci->character);
             putint(p, ci->level);
         }
     }
@@ -2274,10 +2274,10 @@ namespace server
         servstate &ts = target->state;
         servstate &as = actor->state;
 
-        int damage = (baseDamage*classes[actor->aptitude].damage) / (classes[target->aptitude].resistance); // main class damage/resistance multiplier
-        if(target->state.boostmillis[B_JOINT]) damage /= (target->aptitude==C_JUNKIE ? 1.875f : 1.25f); // joint damage reduce
+        int damage = (baseDamage*classes[actor->character].damage) / (classes[target->character].resistance); // main class damage/resistance multiplier
+        if(target->state.boostmillis[B_JOINT]) damage /= (target->character==C_JUNKIE ? 1.875f : 1.25f); // joint damage reduce
 
-        switch(actor->aptitude) // Skill and class damage boost/reduction from actor
+        switch(actor->character) // Skill and class damage boost/reduction from actor
         {
             case C_AMERICAN:
                 if(atk==ATK_S_NUKE || atk==ATK_S_GAU8 || atk==ATK_S_ROCKETS || atk==ATK_S_CAMPER) damage *= 1.5f;
@@ -2298,11 +2298,11 @@ namespace server
             case C_SHOSHONE:
             {
                 if(as.abilitymillis[ABILITY_3]) damage *= 1.3f;
-                if(target->aptitude==C_AMERICAN) damage /= 1.25f;
+                if(target->character==C_AMERICAN) damage /= 1.25f;
             }
         }
 
-        switch(target->aptitude) // Skill and class damage boost/reduction from target
+        switch(target->character) // Skill and class damage boost/reduction from target
         {
             case C_WIZARD:
                 if(ts.abilitymillis[ABILITY_3]) damage /= 5.f;
@@ -2329,7 +2329,7 @@ namespace server
             case C_SHOSHONE:
             {
                 if(as.abilitymillis[ABILITY_1]) damage /= 1.3f;
-                if(actor->aptitude==C_AMERICAN) damage *= 1.25f;
+                if(actor->character==C_AMERICAN) damage *= 1.25f;
             }
         }
 
@@ -2338,7 +2338,7 @@ namespace server
 
     void dodamage(clientinfo *target, clientinfo *actor, int baseDamage, int atk, const vec &hitpush = vec(0, 0, 0), bool afterBurn = false)
     {
-        if(!validClass(actor->aptitude) || !validClass(target->aptitude) || !validatk(atk)) return;
+        if(!validClass(actor->character) || !validClass(target->character) || !validatk(atk)) return;
 
         servstate &ts = target->state;
         servstate &as = actor->state;
@@ -2351,7 +2351,7 @@ namespace server
         {
             if(teamkill)
             {
-                switch(actor->aptitude)
+                switch(actor->character)
                 {
                     case C_MEDIC: return;
                     case C_JUNKIE: damage /= 1.5f; break;
@@ -2385,11 +2385,11 @@ namespace server
             ts.lastBurner = actor;
         }
 
-        ts.dodamage(damage, target->aptitude==C_PHYSICIST && ts.abilitymillis[ABILITY_1]); // update target hp and shield
+        ts.dodamage(damage, target->character==C_PHYSICIST && ts.abilitymillis[ABILITY_1]); // update target hp and shield
         sendf(-1, 1, "ri8", N_DAMAGE, target->clientnum, actor->clientnum, damage, ts.armour, ts.health, ts.afterburnmillis, atk);
         if(target!=actor && !isteam(target->team, actor->team)) as.damage += damage; // damage server stat
 
-        if(target->aptitude!=C_AMERICAN) // physical hit push
+        if(target->character!=C_AMERICAN) // physical hit push
         {
             ivec v(vec(hitpush).rescale(DNF));
             sendf(ts.health<=0 ? -1 : target->ownernum, 1, "ri7", N_HITPUSH, target->clientnum, atk, damage, v.x, v.y, v.z);
@@ -2402,7 +2402,7 @@ namespace server
             if(!isteam(target->team, actor->team)) actor->state.killstreak++;
             target->state.killstreak = 0;
 
-            if(actor->aptitude==C_REAPER && !isteam(target->team, actor->team)) // reaper's passive ability
+            if(actor->character==C_REAPER && !isteam(target->team, actor->team)) // reaper's passive ability
             {
                 if(as.maxhealth < 1500) {as.maxhealth += 500; as.health += 500;} // add health boost if first kill
                 else as.health = min(as.health+500, as.maxhealth); // otherwise just add health
@@ -2515,7 +2515,7 @@ namespace server
             if(dup) continue;
 
             float damage = attacks[atk].damage*(1-h.dist/EXP_DISTSCALE/attacks[atk].exprad);
-            if(gs.boostmillis[B_ROIDS]) damage*= ci->aptitude==C_JUNKIE ? 3 : 2;
+            if(gs.boostmillis[B_ROIDS]) damage*= ci->character==C_JUNKIE ? 3 : 2;
             if(target==ci)
             {
                 switch(atk)
@@ -2527,7 +2527,7 @@ namespace server
             if(damage > 0)
             {
                 dodamage(target, ci, max(int(damage), 1), atk, h.dir);
-                if(ci->aptitude==C_VAMPIRE) doregen(target, ci, damage);
+                if(ci->character==C_VAMPIRE) doregen(target, ci, damage);
             }
         }
     }
@@ -2544,7 +2544,7 @@ namespace server
 
         if(ci->state.armourtype==A_POWERARMOR && !ci->state.armour && ci->state.ammo[GUN_POWERARMOR] && ci->state.gunselect==GUN_POWERARMOR) gs.gunwait=0;
 
-        if(!gs.isalive(gamemillis) || wait<gs.gunwait || !validatk(atk) || !validClass(ci->aptitude)) return;
+        if(!gs.isalive(gamemillis) || wait<gs.gunwait || !validatk(atk) || !validClass(ci->character)) return;
 
         int gun = attacks[atk].gun;
         if(gs.ammo[gun]<=0 || (attacks[atk].range && from.dist(to) > attacks[atk].range + 1)) return;
@@ -2554,9 +2554,9 @@ namespace server
         gs.lastshot = millis;
 
         float waitfactor = 1;
-        if(ci->aptitude==C_PRIEST && ci->state.abilitymillis[ABILITY_3]) waitfactor = 2.5f + ((4000 - ci->state.abilitymillis[ABILITY_3])/1000);
+        if(ci->character==C_PRIEST && ci->state.abilitymillis[ABILITY_3]) waitfactor = 2.5f + ((4000 - ci->state.abilitymillis[ABILITY_3])/1000);
 
-        if(gs.boostmillis[B_SHROOMS]) waitfactor *= ci->aptitude==C_JUNKIE ? 1.75f : 1.5f;
+        if(gs.boostmillis[B_SHROOMS]) waitfactor *= ci->character==C_JUNKIE ? 1.75f : 1.5f;
         gs.gunwait = attacks[atk].attackdelay/waitfactor;
 
         sendf(-1, 1, "rii9x", N_SHOTFX, ci->clientnum, atk, id,
@@ -2564,7 +2564,7 @@ namespace server
                 int(to.x*DMF), int(to.y*DMF), int(to.z*DMF),
                 ci->ownernum);
         gs.shotdamage += attacks[atk].damage*attacks[atk].rays;
-        if(gs.boostmillis[B_ROIDS]) gs.shotdamage*=ci->aptitude==C_JUNKIE ? 3 : 2;
+        if(gs.boostmillis[B_ROIDS]) gs.shotdamage*=ci->character==C_JUNKIE ? 3 : 2;
         if(gs.boostmillis[B_RAGE]) gs.shotdamage*=1.25f;
 
         switch(atk)
@@ -2604,10 +2604,10 @@ namespace server
                     totalrays += h.rays;
                     if(totalrays>maxrays) continue;
                     int damage = h.rays*attacks[atk].damage;
-                    if(gs.boostmillis[B_ROIDS]) damage*=ci->aptitude==C_JUNKIE ? 3 : 2;
+                    if(gs.boostmillis[B_ROIDS]) damage*=ci->character==C_JUNKIE ? 3 : 2;
                     if(gs.boostmillis[B_RAGE]) gs.shotdamage*=1.25f;
                     dodamage(target, ci, damage, atk, h.dir);
-                    if(ci->aptitude==C_VAMPIRE) doregen(target, ci, damage);
+                    if(ci->character==C_VAMPIRE) doregen(target, ci, damage);
                 }
                 break;
             }
@@ -2723,24 +2723,24 @@ namespace server
                 if(!(giver.state.state==CS_ALIVE && receiver.state.state==CS_ALIVE)) continue;
                 float distance = giver.state.o.dist(receiver.state.o)/18.f;
 
-                if(giver.aptitude==C_MEDIC)
+                if(giver.character==C_MEDIC)
                 {
                     if((distance < 7.5f && receiver.state.health < receiver.state.maxhealth+250) && (m_teammode ? isteam(receiver.team, giver.team) : giver.clientnum==receiver.clientnum))
                     {
-                        receiver.state.health = min(receiver.state.health + (receiver.aptitude==C_MEDIC ? 50 : 100), receiver.state.maxhealth + 250);
+                        receiver.state.health = min(receiver.state.health + (receiver.character==C_MEDIC ? 50 : 100), receiver.state.maxhealth + 250);
                         sendf(-1, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, S_HEALTH, receiver.state.health);
                     }
                 }
-                else if(giver.aptitude==C_JUNKIE)
+                else if(giver.character==C_JUNKIE)
                 {
-                    if(needmana(receiver.aptitude) && distance < 7.5f && receiver.state.mana < 150)
+                    if(needmana(receiver.character) && distance < 7.5f && receiver.state.mana < 150)
                     {
-                        if(receiver.aptitude==C_VAMPIRE && receiver.state.health < receiver.state.maxhealth+250)
+                        if(receiver.character==C_VAMPIRE && receiver.state.health < receiver.state.maxhealth+250)
                         {
                             receiver.state.health = min(receiver.state.health + 100, receiver.state.maxhealth + 250);
                             sendf(-1, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, S_HEALTH, receiver.state.health); //vampire gets health instead of mana
                         }
-                        else if(receiver.aptitude!=C_VAMPIRE) //other classes needing mana : receive mana
+                        else if(receiver.character!=C_VAMPIRE) //other classes needing mana : receive mana
                         {
                             receiver.state.mana = min(receiver.state.mana + 10, 150);
                             sendf(-1, 1, "ri5", N_REGENALLIES, giver.clientnum, receiver.clientnum, S_MANA, receiver.state.mana);
@@ -2769,7 +2769,7 @@ namespace server
                 int afterburnDamage = (ts.afterburnatk == ATK_FLAMETHROWER ? 40 : 80);
                 sendf(-1, 1, "ri3", N_AFTERBURN, target.clientnum, ts.lastBurner->clientnum);
                 dodamage(&target, ts.lastBurner, afterburnDamage, ts.afterburnatk, vec(0,0,0), true);
-                if(ts.lastBurner->aptitude==C_VAMPIRE) doregen(&target, ts.lastBurner, afterburnDamage);
+                if(ts.lastBurner->character==C_VAMPIRE) doregen(&target, ts.lastBurner, afterburnDamage);
             }
             else ts.afterburnmillis = 0;
         }
@@ -3300,7 +3300,7 @@ namespace server
                     ci->playermodel = getint(p);
                     ci->playercolor = getint(p);
                     loopi(NUMSKINS) ci->skin[i] = getint(p);
-                    ci->aptitude = getint(p);
+                    ci->character = getint(p);
                     ci->level = getint(p);
 
                     string password, authdesc, authname;
@@ -3332,7 +3332,7 @@ namespace server
                     ci->state.lastBurner = NULL;
                     if(m_identique) sendf(-1, 1, "ri2", N_CURWEAPON, currentWeapon);
 
-                    logoutf("Infos: %s (%s level %d)", ci->name, readstr("Classes_Names", ci->aptitude), ci->level);
+                    logoutf("Infos: %s (%s level %d)", ci->name, readstr("Classes_Names", ci->character), ci->level);
                     break;
                 }
 
@@ -3693,8 +3693,8 @@ namespace server
 
             case N_SENDCLASS:
             {
-                int playerClass = getint(p);
-                if(validClass(playerClass)) ci->aptitude = playerClass;
+                int character = getint(p);
+                if(validClass(character) && ci->state.state==CS_ALIVE) ci->character = character;
                 QUEUE_MSG;
                 break;
             }
@@ -3702,10 +3702,10 @@ namespace server
             case N_REQABILITY:
             {
                 int ability = getint(p);
-                if(!cq || !validClass(cq->aptitude) || !validAbility(ability)) break;
-                if(cq->state.mana < classes[cq->aptitude].abilities[ability].manacost) return;
-                cq->state.mana -= classes[cq->aptitude].abilities[ability].manacost;
-                cq->state.abilitymillis[ability] = classes[cq->aptitude].abilities[ability].duration;
+                if(!cq || !validClass(cq->character) || !validAbility(ability)) break;
+                if(cq->state.mana < classes[cq->character].abilities[ability].manacost) return;
+                cq->state.mana -= classes[cq->character].abilities[ability].manacost;
+                cq->state.abilitymillis[ability] = classes[cq->character].abilities[ability].duration;
                 sendf(-1, 1, "ri4", N_GETABILITY, cq->clientnum, ability, cq->state.abilitymillis[ability]);
                 break;
             }

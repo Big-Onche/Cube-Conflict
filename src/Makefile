@@ -113,7 +113,7 @@ CLIENT_OBJS= \
         engine/worldio.o \
         cubeconflict/gfx.o \
         cubeconflict/customs.o \
-        cubeconflict/aptitudes.o \
+        game/classes.o \
         cubeconflict/hud.o \
         cubeconflict/stats.o \
         cubeconflict/npcs.o \

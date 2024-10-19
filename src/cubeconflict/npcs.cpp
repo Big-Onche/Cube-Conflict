@@ -137,7 +137,7 @@ namespace game
             pitch = 0;
             roll = 0;
             state = CS_ALIVE;
-            aptitude = t.npcclass;
+            character = t.npcclass;
             anger = 0;
             friendly = t.friendly;
             monsterlastdeath = 0;
@@ -273,7 +273,7 @@ namespace game
                 case M_PAIN:
                 case M_ATTACKING:
                 case M_SEARCH:
-                    if(player1->aptitude==C_SPY && player1->abilitymillis[ABILITY_2]) break;
+                    if(player1->character==C_SPY && player1->abilitymillis[ABILITY_2]) break;
                     if(trigger<lastmillis) transition(M_AGGRO, 1, 100, 200);
                     break;
 
@@ -323,7 +323,7 @@ namespace game
                     targetyaw = enemyyaw;
 
                     if(dist > npcs[mtype].npctrigdist()*(friendly ? 15 : 2) && !m_dmsp) {transition(friendly ? M_NEUTRAL : M_RETREAT, 0, 600, 0); break;}
-                    else if(player1->aptitude==C_SPY && player1->abilitymillis[ABILITY_2]) {transition(M_SEARCH, 0, 600, 0); break;}
+                    else if(player1->character==C_SPY && player1->abilitymillis[ABILITY_2]) {transition(M_SEARCH, 0, 600, 0); break;}
 
                     if(trigger<lastmillis)
                     {
@@ -345,7 +345,7 @@ namespace game
                             if((!melee || dist<50) && !rnd(longrange ? (int)dist/12+1 : min((int)dist/12+1,6)) && enemy->state==CS_ALIVE)      // get ready to fire
                             {
                                 attacktarget = target;
-                                if(player1->aptitude==C_SPY && player1->abilitymillis[ABILITY_1]) attacktarget.add(vec(positions[player1->seed][0], positions[player1->seed][1], 0));
+                                if(player1->character==C_SPY && player1->abilitymillis[ABILITY_1]) attacktarget.add(vec(positions[player1->seed][0], positions[player1->seed][1], 0));
                                 transition(M_AIMING, friendly ? 0 : 1, 1, 10);
                             }
                             else                                                        // track player some more
@@ -371,7 +371,7 @@ namespace game
                 if(mtype==M_UFO && m_dmsp)
                 {
                     abilitymillis[ABILITY_3] = true;
-                    aptitude=C_PHYSICIST;
+                    character = C_PHYSICIST;
                 }
                 if(npcs[mtype].speed) moveplayer(this, 10, true, curtime);        // use physics to move monster
             }
@@ -452,7 +452,7 @@ namespace game
                 defformatstring(id, "monster_dead_%d", tag);
                 if(identexists(id)) execute(id);
                 if(m_dmsp && gamesecs<599) npcdrop(&monsterhurtpos, npcs[mtype].dropval);
-                if(player1->aptitude==C_REAPER && player1->health<1500) player1->health = min(player1->health+50, 1500);
+                if(player1->character==C_REAPER && player1->health<1500) player1->health = min(player1->health+50, 1500);
                 if(m_dmsp)
                 {
                     switch(mtype)
@@ -791,7 +791,7 @@ namespace game
 
     void hitmonster(int damage, monster *m, gameent *at, const vec &vel, int atk)
     {
-        if(player1->boostmillis[B_ROIDS]) damage *= (player1->aptitude==C_JUNKIE ? 3 : 2);
+        if(player1->boostmillis[B_ROIDS]) damage *= (player1->character==C_JUNKIE ? 3 : 2);
         m->monsterpain(damage, at, atk);
     }
 

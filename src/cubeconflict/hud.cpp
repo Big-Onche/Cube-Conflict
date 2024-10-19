@@ -22,10 +22,10 @@ namespace game
     ICOMMAND(hudmelee, "", (), intret((player1->gunselect>=GUN_M_BUSTER && player1->gunselect<=GUN_M_FLAIL) || player1->gunselect==GUN_NINJA));
     ICOMMAND(hudboost, "i", (int *id), if(*id>=0 && *id<=3) intret(followingplayer(player1)->boostmillis[*id]/1000););
     ICOMMAND(hudafterburn, "", (), intret((followingplayer(player1)->afterburnmillis+500)/1000););
-    ICOMMAND(hudclass, "", (), intret(followingplayer(player1)->aptitude));
+    ICOMMAND(hudclass, "", (), intret(followingplayer(player1)->character));
 
     ICOMMAND(hudability, "", (),
-        switch(followingplayer(player1)->aptitude)
+        switch(followingplayer(player1)->character)
         {
             case C_WIZARD: case C_PHYSICIST: case C_PRIEST: case C_SHOSHONE: case C_SPY:
                 intret(followingplayer(player1)->mana);
@@ -42,7 +42,7 @@ namespace game
     );
 
     ICOMMAND(hudabilitylogo, "i", (int *id),
-        defformatstring(logodir, "media/interface/hud/abilities/%d_%d.png", followingplayer(player1)->aptitude, *id);
+        defformatstring(logodir, "media/interface/hud/abilities/%d_%d.png", followingplayer(player1)->character, *id);
         result(logodir);
     );
 
@@ -51,18 +51,15 @@ namespace game
         {
             string logodir;
             if(followingplayer(player1)->abilitymillis[*id]) formatstring(logodir, "media/interface/hud/checkbox_on.jpg");
-            else if(!followingplayer(player1)->abilityready[*id] || followingplayer(player1)->mana < classes[followingplayer(player1)->aptitude].abilities[*id].manacost) formatstring(logodir, "media/interface/hud/checkbox_off.jpg");
-            else formatstring(logodir, "media/interface/hud/abilities/%d_%d.png", followingplayer(player1)->aptitude, *id);
+            else if(!followingplayer(player1)->abilityready[*id] || followingplayer(player1)->mana < classes[followingplayer(player1)->character].abilities[*id].manacost) formatstring(logodir, "media/interface/hud/checkbox_off.jpg");
+            else formatstring(logodir, "media/interface/hud/abilities/%d_%d.png", followingplayer(player1)->character, *id);
             result(logodir);
         }
     );
 
     ICOMMAND(hudshowabilities, "", (),
-        switch(followingplayer(player1)->aptitude)
-        {
-           case C_WIZARD: case C_PHYSICIST: case C_PRIEST: case C_SHOSHONE: case C_SPY: case C_KAMIKAZE: intret(true); break;
-           default: intret(false);
-        }
+        if(hasAbilities(followingplayer(player1)) || followingplayer(player1)->character==C_KAMIKAZE) intret(true);
+        else intret(false);
     );
 
     ICOMMAND(hudxpcount, "", (),
@@ -78,24 +75,38 @@ namespace game
         result(s);
     );
 
-    int colortimer;
     ICOMMAND(hudtimer, "", (),
-        string s = " ";
+        static int tick;
+        string s;
         if(((m_timed && getclientmap()) && (maplimit >= 0 || intermission)) || m_dmsp)
         {
             int secs = m_dmsp ? gamesecs : max(maplimit-lastmillis + 999, 0)/1000;
             defformatstring(col, "\f7");
             if(secs/60<1 && secs%60<30 && !m_dmsp)
             {
-                colortimer += curtime;
-                if(colortimer>1000) colortimer = 0;
-                if(colortimer > 500) formatstring(col, "\fc");
+                tick += curtime;
+                if(tick > 1000) tick = 0;
+                if(tick > 500) formatstring(col, "\fc");
             }
             if(intermission) formatstring(s, "%s", readstr("Hud_End"));
             else formatstring(s, "%s%d:%02d", col, secs/60, secs%60);
         }
         result(s);
     );
+
+    string killerName;
+    ICOMMAND(getkillername, "", (), result(killerName); );
+
+    int killerCharacter, killerLevel, killerWeapon;
+    ICOMMAND(getkillerweapon, "", (), intret(killerWeapon); );
+    ICOMMAND(getkillerclass, "", (), intret(killerCharacter); );
+    ICOMMAND(getkillerlevel, "", (), intret(killerLevel); );
+
+    float killerDistance;
+    ICOMMAND(getkilldistance, "", (), floatret(roundf(killerDistance * 10) / 10); );
+
+    bool hassuicided = true;
+    ICOMMAND(hassuicided, "", (), intret(hassuicided); );
 
     ICOMMAND(hudspecname, "", (),
         if(player1->state==CS_SPECTATOR)
@@ -200,12 +211,11 @@ namespace game
         if(hp->vampiremillis) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/vampire.png", min(1.0f, hp->vampiremillis / 500.f));
         if(hp->afterburnmillis) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/fire.png", min(1.0f, hp->afterburnmillis / 500.f));
 
-        if(((hp->abilitymillis[ABILITY_1] || hp->abilitymillis[ABILITY_3]) && hp->aptitude==C_WIZARD) || (hp->abilitymillis[ABILITY_2] && hp->aptitude==C_PHYSICIST))
+        if(((hp->abilitymillis[ABILITY_1] || hp->abilitymillis[ABILITY_3]) && hp->character==C_WIZARD) || (hp->abilitymillis[ABILITY_2] && hp->character==C_PHYSICIST))
         {
-            float r, g, b;
-            if(hp->aptitude==C_WIZARD) r = g = b = 1;
-            else { r = 0.3 ; g = 0.6 ; b = 1; }
-            drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/vampire.png", 0.7, r, g, b);
+            float r = 1.f, g = 1.f, b = 1.f;
+            if(hp->character==C_PHYSICIST) {r = 0.3 ; g = 0.6 ; b = 1;}
+            drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/ability.png", 0.7, r, g, b);
         }
 
         if(hp->health<300 && hp->state==CS_ALIVE) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/damage.png", (- (hp->health) + 700) / 1000.0f);

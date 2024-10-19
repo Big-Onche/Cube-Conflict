@@ -1464,7 +1464,7 @@ void mousemove(int dx, int dy)
 
 void shakeScreen(float factor)
 {
-    switch(game::hudplayer()->aptitude)
+    switch(game::hudplayer()->character)
     {
         case C_SOLDIER: factor /= 2; break;
         case C_WIZARD: if(game::hudplayer()->abilitymillis[ABILITY_2]) return;

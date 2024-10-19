@@ -1708,7 +1708,8 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
 {
     gameent *d = (gameent *)pl;
 
-    bool tripleJump = (game::hasPowerArmor(d) || d->aptitude==C_NINJA || (d->aptitude==C_KAMIKAZE && d->abilitymillis[ABILITY_2]));
+    bool ninjaSkills = d->character==C_NINJA || (d->character==C_KAMIKAZE && d->abilitymillis[ABILITY_2]);
+    bool tripleJump = (game::hasPowerArmor(d) || ninjaSkills);
 
     int maxjumps = d->boostmillis[B_JOINT] ? 5 : (tripleJump ? 2 : 1);
 
@@ -1722,13 +1723,13 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
     }
     else if(((pl->physstate >= PHYS_FALL || lastmillis-pl->lastjump < 280) || water) && pl->jumps < (pl->inwater ? INT_MAX : maxjumps))
     {
-        if(water && !pl->inwater && d->aptitude!=C_NINJA) pl->vel.div(8);
+        if(water && !pl->inwater && !ninjaSkills) pl->vel.div(8);
         if(pl->jumping)
         {
             pl->jumping = false;
             if(pl->timeinair && tripleJump) pl->falling = vec(0, 0, 0);
             pl->vel.z = max(pl->vel.z, JUMPVEL);  // physics impulse upwards
-            if(water && d->aptitude!=C_NINJA) { pl->vel.x /= 8.f; pl->vel.y /= 8.f; } // dampen velocity change even harder, gives correct water feel
+            if(water && !ninjaSkills) { pl->vel.x /= 8.f; pl->vel.y /= 8.f; } // dampen velocity change even harder, gives correct water feel
 
             game::physicstrigger(pl, local, 1, 0);
             pl->jumps++;
@@ -1762,9 +1763,9 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
     vel.mul(pl->maxspeed);
     if(pl->type==ENT_PLAYER)
     {
-        float speed = classes[d->aptitude].speed;
+        float speed = classes[d->character].speed;
 
-        switch(d->aptitude)
+        switch(d->character)
         {
             case C_WIZARD: if(d->abilitymillis[ABILITY_1]) speed = 650; break;
             case C_SHOSHONE: if(d->abilitymillis[ABILITY_2]) speed = 130; break;
@@ -1772,11 +1773,11 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
             case C_KAMIKAZE: if(d->abilitymillis[ABILITY_2]) speed = 250; break;
         }
 
-        vel.mul(speed/100); // apply classe's speeds
+        vel.mul(speed/100); // apply classes speeds
 
-        if(floating) vel.mul((d->aptitude==C_PHYSICIST && !editmode ? 150 : floatspeed)/100.0f);
-        else if (pl->crouched() && d->aptitude!=C_NINJA) vel.mul(0.5f);
-        if(d->boostmillis[B_EPO]) vel.mul(d->aptitude==C_JUNKIE ? 3 : 2);
+        if(floating) vel.mul((d->character==C_PHYSICIST && !editmode ? 150 : floatspeed)/100.0f);
+        else if (pl->crouched() && d->character!=C_NINJA) vel.mul(0.5f);
+        if(d->boostmillis[B_EPO]) vel.mul(d->character==C_JUNKIE ? 3 : 2);
         if(d->afterburnmillis) vel.mul(1.2f);
     }
 
@@ -1789,7 +1790,7 @@ void modifygravity(physent *pl, bool water, int curtime)
     gameent *d = (gameent *)pl;
 
     float secs = curtime/1000.0f;
-    int appliedGravity = (d->boostmillis[B_JOINT] ? (d->aptitude==C_JUNKIE ? GRAVITY / 6 : GRAVITY / 4) : GRAVITY);
+    int appliedGravity = (d->boostmillis[B_JOINT] ? (d->character==C_JUNKIE ? GRAVITY / 6 : GRAVITY / 4) : GRAVITY);
 
     vec g(0, 0, 0);
     if(pl->physstate == PHYS_FALL) g.z -= appliedGravity*secs;
@@ -1819,7 +1820,7 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime)
 {
     gameent *d = (gameent *)pl;
 
-    bool jetpackPhysicist = (d->abilitymillis[ABILITY_3] && d->aptitude==C_PHYSICIST);
+    bool jetpackPhysicist = (d->abilitymillis[ABILITY_3] && d->character==C_PHYSICIST);
     int material = lookupmaterial(vec(pl->o.x, pl->o.y, pl->o.z + (3*pl->aboveeye - pl->eyeheight)/4));
     bool water = isliquid(material&MATF_VOLUME);
     bool isFloating = (jetpackPhysicist || (pl->type==ENT_PLAYER && (pl->state==CS_EDITING || pl->state==CS_SPECTATOR)));
@@ -1833,7 +1834,7 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime)
     modifyvelocity(pl, local, water, isFloating, curtime);
 
     vec vel(pl->vel);
-    if(pl==game::player1 && d->aptitude==C_WIZARD && d->boostmillis[B_EPO]>30000 && d->abilitymillis[ABILITY_1] && d->afterburnmillis) unlockAchievement(ACH_MAXSPEED);
+    if(pl==game::player1 && d->character==C_WIZARD && d->boostmillis[B_EPO]>30000 && d->abilitymillis[ABILITY_1] && d->afterburnmillis) unlockAchievement(ACH_MAXSPEED);
     if(!isFloating && water) vel.mul(0.5f);
     vel.add(pl->falling);
     vel.mul(secs);

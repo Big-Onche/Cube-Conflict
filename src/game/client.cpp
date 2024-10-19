@@ -373,7 +373,7 @@ namespace game
     ICOMMAND(getclientaptitude, "i", (int *cn),
     {
         gameent *d = getclient(*cn);
-        if(d) intret(d->aptitude);
+        if(d) intret(d->character);
     });
 
     ICOMMAND(getclientlevel, "i", (int *cn),
@@ -1164,7 +1164,7 @@ namespace game
         putint(p, player1->playermodel);
         putint(p, player1->playercolor);
         loopi(NUMSKINS) putint(p, player1->skin[i]);
-        putint(p, player1->aptitude);
+        putint(p, player1->character);
         putint(p, player1->level);
         string hash = "";
         if(connectpass[0])
@@ -1538,7 +1538,7 @@ namespace game
                 d->playermodel = getint(p);
                 d->playercolor = getint(p);
                 loopi(NUMSKINS) d->skin[i] = getint(p);
-                d->aptitude = getint(p);
+                d->character = getint(p);
                 d->level = getint(p);
                 d->isConnected = true;
                 break;
@@ -1571,8 +1571,8 @@ namespace game
 
             case N_SENDCLASS:
             {
-                int playerClass = getint(p);
-                if(d && validClass(playerClass)) d->aptitude = playerClass;
+                int character = getint(p);
+                if(d && validClass(character)) d->character = character;
                 break;
             }
 
@@ -1585,7 +1585,7 @@ namespace game
 
                 if(!pl) break;
                 pl->abilitymillis[ability] = millis;
-                pl->mana -= classes[pl->aptitude].abilities[ability].manacost;
+                pl->mana -= classes[pl->character].abilities[ability].manacost;
                 launchAbility(pl, ability, false);
                 break;
             }
@@ -1615,7 +1615,7 @@ namespace game
 
                 if(g==player1)
                 {
-                    if(player1->aptitude==C_JUNKIE && isteam(g->team, r->team) && r->aptitude==C_VAMPIRE) unlockAchievement(ACH_NATURO);
+                    if(player1->character==C_JUNKIE && isteam(g->team, r->team) && r->character==C_VAMPIRE) unlockAchievement(ACH_NATURO);
                     stat ? updateStat(10, STAT_MANAREGEN) : updateStat(5, STAT_HEALTHREGEN);
                 }
 
@@ -1696,7 +1696,7 @@ namespace game
                 else findplayerspawn(s, -1, m_teammode && !m_capture ? s->team : 0);
                 if(s == player1)
                 {
-                    if(player1->aptitude==C_SOLDIER && hasSuperWeapon(player1)) unlockAchievement(ACH_CHANCE);
+                    if(player1->character==C_SOLDIER && hasSuperWeapon(player1)) unlockAchievement(ACH_CHANCE);
                     showscores(false);
                     lasthit = 0;
                     player1->lastweap = player1->gunselect;
@@ -1753,7 +1753,7 @@ namespace game
                 target->afterburnmillis = afterburn;
                 if(target->state == CS_ALIVE && actor != player1) target->lastpain = lastmillis;
                 damaged(damage, target, actor, false, atk);
-                if(player1->aptitude==C_VIKING && target==player1 && actor!=player1 && player1->state==CS_ALIVE)
+                if(player1->character==C_VIKING && target==player1 && actor!=player1 && player1->state==CS_ALIVE)
                 {
                     if(player1->boostmillis[B_RAGE]>8000) unlockAchievement(ACH_RAGE);
                 }

@@ -41,7 +41,7 @@ namespace game
             else
             {
                 int maxAmmo = itemstats[playerWeapons[*i]].max;
-                intret(player1->aptitude == C_AMERICAN ? maxAmmo * 1.5f : maxAmmo);
+                intret(player1->character == C_AMERICAN ? maxAmmo * 1.5f : maxAmmo);
             }
         }
         else result(tempformatstring("Invalid gun (%d)", *i));
@@ -67,7 +67,7 @@ namespace game
     ICOMMAND(getmeleeweaponmodel, "", (), findSpecialWeapon(player1, GUN_M_BUSTER, NUMMELEEWEAPONS, [](int gunId) { result(getWeaponDir(gunId)); }); );
     ICOMMAND(getmeleeweaponname, "", (), findSpecialWeapon(player1, GUN_M_BUSTER, NUMMELEEWEAPONS, [](int gunId) { result(readstr(guns[gunId].ident)); }); );
     ICOMMAND(selectmeleeweapon, "", (),
-        if(player1->aptitude==C_NINJA)
+        if(player1->character==C_NINJA)
         {
             gunselect(GUN_NINJA, player1);
             return;

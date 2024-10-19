@@ -4,9 +4,9 @@
 #include "gfx.h"
 #include "stats.h"
 
-bool disabledClasse[NUMCLASSES];
+bool disabledClass[NUMCLASSES];
 
-ICOMMAND(getclass, "i", (int *i), intret(disabledClasse[*i]) );
+ICOMMAND(getclass, "i", (int *i), intret(disabledClass[*i]) );
 
 ICOMMAND(setclass, "i", (int *i),
     if(!validClass(*i))
@@ -14,7 +14,7 @@ ICOMMAND(setclass, "i", (int *i),
         conoutf(CON_ERROR, "\f3Invalid class ID! (must be 0 to %d)", NUMCLASSES);
         return;
     }
-    if(*i == game::player1->aptitude)
+    if(*i == game::player1->character)
     {
         conoutf(CON_ERROR, "\f3Cannot deactivate your current class!");
         playSound(S_ERROR, vec(0, 0, 0), 0, 0, SND_UI);
@@ -22,12 +22,12 @@ ICOMMAND(setclass, "i", (int *i),
     }
 
     int maxClasses = NUMCLASSES;
-    disabledClasse[*i] = !disabledClasse[*i];
+    disabledClass[*i] = !disabledClass[*i];
 
-    loopi(NUMCLASSES) maxClasses -= disabledClasse[i];
+    loopi(NUMCLASSES) maxClasses -= disabledClass[i];
     if(!maxClasses)
     {
-        disabledClasse[*i] = !disabledClasse[*i];
+        disabledClass[*i] = !disabledClass[*i];
         conoutf(CON_ERROR, "\f3Cannot deactivate all classes!");
         playSound(S_ERROR, vec(0, 0, 0), 0, 0, SND_UI);
         return;
@@ -37,8 +37,8 @@ ICOMMAND(setclass, "i", (int *i),
 ICOMMAND(setallclasses, "i", (int *enabled),
     loopi(NUMCLASSES)
     {
-        if(!*enabled && i != game::player1->aptitude) disabledClasse[i] = true;
-        else disabledClasse[i] = false;
+        if(!*enabled && i != game::player1->character) disabledClass[i] = true;
+        else disabledClass[i] = false;
     }
 );
 
@@ -51,7 +51,7 @@ namespace game
         vec sndpos = d->o;
         bool noSoundPos = d==hudplayer();
 
-        if(d->aptitude==C_SPY && ability==ABILITY_1) //for spy's ability 1, we play the sound at the decoy's position
+        if(d->character==C_SPY && ability==ABILITY_1) //for spy's ability 1, we play the sound at the decoy's position
         {
             const int positions[4][2] = { {25, 25}, {-25, -25}, {25, -25}, {-25, 25} };
             sndpos.add(vec(positions[d->seed][0], positions[d->seed][1], 0));
@@ -59,14 +59,14 @@ namespace game
         }
 
         if(d==hudplayer()) playSound(S_SORTLANCE);
-        playSound(classes[d->aptitude].abilities[ability].snd, noSoundPos ? vec(0, 0, 0) : sndpos, 250, 100, SND_NOCULL|SND_FIXEDPITCH, d->entityId, PL_ABI_1+ability);
+        playSound(classes[d->character].abilities[ability].snd, noSoundPos ? vec(0, 0, 0) : sndpos, 250, 100, SND_NOCULL|SND_FIXEDPITCH, d->entityId, PL_ABI_1+ability);
         switch(ability) //here we play some one shot gfx effects
         {
             //case ABILITY_1:
             //break;
 
             case ABILITY_2:
-                if(d->aptitude==C_SPY)
+                if(d->character==C_SPY)
                 {
                     loopi(1)particle_fireball(d->o,  50, PART_SHOCKWAVE, 300, 0xBBBBBB, 1.f);
                     particle_splash(PART_SMOKE, 7, 400, d->o, 0x666666, 15+rnd(5), 200, -10);
@@ -75,7 +75,7 @@ namespace game
 
             case ABILITY_3:
             {
-                if(d->aptitude==C_SPY)
+                if(d->character==C_SPY)
                 {
                     particle_fireball(d->o, 1000, PART_RADAR, 1000, 0xAAAAAA, 20.f);
                     if(isteam(hudplayer()->team, d->team))
@@ -88,10 +88,21 @@ namespace game
         }
     }
 
+    bool hasAbilities(gameent *d)
+    {
+        return d->character==C_WIZARD || d->character==C_PHYSICIST || d->character==C_PRIEST || d->character==C_SHOSHONE || d->character==C_SPY;
+    }
+
+    bool hasAbilityEnabled(gameent *d, int numAbility)
+    {
+        if(d->abilitymillis[numAbility]) return true;
+        return false;
+    }
+
     bool canLaunchAbility(gameent *d, int ability)
     {
-        if(d->state!=CS_ALIVE || !isconnected() || forcecampos>=0 || intermission || (ability<ABILITY_1 && ability>ABILITY_3)) return false;
-        else return d->aptitude==C_WIZARD || d->aptitude==C_PHYSICIST || d->aptitude==C_SPY || d->aptitude==C_PRIEST || d->aptitude==C_SHOSHONE || d->aptitude==C_KAMIKAZE;
+        if(d->state != CS_ALIVE || !isconnected() || forcecampos>=0 || intermission || (!validAbility(ability))) return false;
+        else return hasAbilities(d) || d->character == C_KAMIKAZE;
     }
 
     void launchAbility(gameent *d, int ability, bool request) //abilities commands
@@ -99,7 +110,7 @@ namespace game
         if(request) //player is requesting ability
         {
             if(!canLaunchAbility(d, ability)) return; //check for basic guards
-            if(!d->abilityready[ability] || d->mana < classes[d->aptitude].abilities[ability].manacost) { if(d==player1) playSound(S_SORTIMPOSSIBLE); return; } //check for game vars (client sided)
+            if(!d->abilityready[ability] || d->mana < classes[d->character].abilities[ability].manacost) { if(d==player1) playSound(S_SORTIMPOSSIBLE); return; } //check for game vars (client sided)
             addmsg(N_REQABILITY, "rci", d, ability); //server sided game vars check
             return; //can stop after this, cuz server call this func with !request
         }
@@ -111,8 +122,12 @@ namespace game
     }
 
     ICOMMAND(aptitude, "i", (int *ability),  // player1 abilities commands
-        if(player1->aptitude != C_KAMIKAZE) launchAbility(player1, *ability);
-        else *ability == ABILITY_1 ? gunselect(GUN_KAMIKAZE, player1) : launchAbility(player1, *ability);
+        if(player1->character == C_KAMIKAZE)
+        {
+            if(*ability == ABILITY_1) gunselect(GUN_KAMIKAZE, player1);
+            else if(*ability == ABILITY_2) launchAbility(player1, *ability);
+        }
+        else launchAbility(player1, *ability);
     );
 
     char *getdisguisement(int seed) //spy's ability 2
@@ -131,7 +146,7 @@ namespace game
 
         loopi(NUMABILITIES)
         {
-            if(totalmillis-d->lastability[i] >= classes[d->aptitude].abilities[i].cooldown && !d->abilityready[i]) // ability rearm
+            if(totalmillis-d->lastability[i] >= classes[d->character].abilities[i].cooldown && !d->abilityready[i]) // ability rearm
             {
                 if(d==hudplayer()) playSound(S_SORTPRET);
                 d->abilityready[i] = true;
@@ -142,12 +157,12 @@ namespace game
             if(d->abilitymillis[i]) numEnabled++; // abilities used at the same time (only for achievement below)
         }
 
-        if(d==player1 && player1->aptitude==C_SHOSHONE && numEnabled==3) unlockAchievement(ACH_WASHAKIE);
+        if(d==player1 && player1->character==C_SHOSHONE && numEnabled==3) unlockAchievement(ACH_WASHAKIE);
     }
 
     ICOMMAND(getclasslogo, "ii", (int *cn, int *numapt),
-        if(*numapt==-1 && isconnected()) {gameent *d = getclient(*cn); *numapt = d->aptitude; }
-        else if(*numapt==-2) *numapt = player1->aptitude;
+        if(*numapt==-1 && isconnected()) {gameent *d = getclient(*cn); *numapt = d->character; }
+        else if(*numapt==-2) *numapt = player1->character;
         defformatstring(logodir, "media/interface/apt_logo/%d.png", *numapt);
         result(logodir);
     );

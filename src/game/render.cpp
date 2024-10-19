@@ -288,6 +288,7 @@ namespace game
         preloadmodel("boosts/steros");
         preloadmodel("hudboost/joint");
         preloadmodel("mapmodel/smileys/mort");
+        preloadmodel("smileys/phy_2");
 
         loopi(sizeof(playermodels)/sizeof(playermodels[0]))
         {
@@ -390,7 +391,7 @@ namespace game
         else
         {
             if(powerArmor || d->ammo[GUN_POWERARMOR]) mdlname = d->team==player1->team && validteam(team) ? "smileys/armureassistee" : "smileys/armureassistee/red";
-            else mdlname =  d->abilitymillis[ABILITY_2] && d->aptitude==C_PHYSICIST ? "smileys/phy_2" : postfx::cbfilter && d->team==player1->team ? mdl.cbmodel : mdl.model[validteam(team) && d->team==player1->team ? 1 : 0];
+            else mdlname =  d->abilitymillis[ABILITY_2] && d->character==C_PHYSICIST ? "smileys/phy_2" : postfx::cbfilter && d->team==player1->team ? mdl.cbmodel : mdl.model[validteam(team) && d->team==player1->team ? 1 : 0];
         }
 
         modelattach a[10];
@@ -428,7 +429,7 @@ namespace game
         if(d->boostmillis[B_EPO])   a[ai++] = modelattach("tag_boost2", "boosts/epo", 0, 0);
 
         /////////////////////////// Classe's hat ///////////////////////////
-        if(validClass(d->aptitude)) a[ai++] = modelattach("tag_hat", classes[d->aptitude].hatDir, 0, 0);
+        if(validClass(d->character)) a[ai++] = modelattach("tag_hat", classes[d->character].hatDir, 0, 0);
 
         /////////////////////////// Player's cape ///////////////////////////
         if(validCape(d->skin[SKIN_CAPE]))
@@ -441,22 +442,25 @@ namespace game
         else flags |= MDL_CULL_DIST;
         if(!mainpass) flags &= ~(MDL_FULLBRIGHT | MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY | MDL_CULL_DIST);
         float trans = d->state == CS_LAGGED ? 0.5f : 1.0f;
-        if(d->abilitymillis[ABILITY_2] && d->aptitude==C_PHYSICIST) trans = 0.f;
-        else if(d->abilitymillis[ABILITY_1] && d->aptitude==C_WIZARD) trans = 0.7f;
 
-        if(d->aptitude==C_SPY && d->abilitymillis[ABILITY_1])
+        if(d->character==C_PHYSICIST && d->abilitymillis[ABILITY_2]) trans = 0.f;
+        else if(d->character==C_WIZARD && d->abilitymillis[ABILITY_1]) trans = 0.7f;
+        else if(d->character==C_SPY)
         {
-            if(d!=hudplayer()) flags = NULL;
-            vec doublepos = d->feetpos();
-            const int positions[4][2] = { {25, 25}, {-25, -25}, {25, -25}, {-25, 25} };
-            doublepos.add(vec(positions[d->seed][0], positions[d->seed][1], 0));
-            rendermodel(mdlname, anim, doublepos, d->yaw, clamp(d->pitch, -25, 12), 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), d==player1 ? 0.3f : trans));
-        }
+            if(d->abilitymillis[ABILITY_1])
+            {
+                if(d!=hudplayer()) flags = NULL;
+                vec doublepos = d->feetpos();
+                const int positions[4][2] = { {25, 25}, {-25, -25}, {25, -25}, {-25, 25} };
+                doublepos.add(vec(positions[d->seed][0], positions[d->seed][1], 0));
+                rendermodel(mdlname, anim, doublepos, d->yaw, clamp(d->pitch, -25, 12), 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), d==player1 ? 0.3f : trans));
+            }
 
-        if(d->aptitude==C_SPY && d->abilitymillis[ABILITY_2])
-        {
-            rendermodel(getdisguisement(d->seed), anim, d->feetpos(), d->yaw, clamp(d->pitch, -25, 12), 0, flags, d, NULL, basetime, 0, fade, vec4(vec::hexcolor(color), 1.0f));
-            return;
+            if(d->abilitymillis[ABILITY_2])
+            {
+                rendermodel(getdisguisement(d->seed), anim, d->feetpos(), d->yaw, clamp(d->pitch, -25, 12), 0, flags, d, NULL, basetime, 0, fade, vec4(vec::hexcolor(color), 1.0f));
+                return;
+            }
         }
 
         rendermodel(mdlname, anim, d->feetpos(), d->yaw, clamp(d->pitch, -25, 12), 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), trans));
@@ -485,7 +489,7 @@ namespace game
 
         const char *mdlname = mdl.model[validteam(team) ? team : 0];
 
-        a[ai++] = modelattach("tag_hat", classes[player1->aptitude].hatDir, 0, 0);
+        a[ai++] = modelattach("tag_hat", classes[player1->character].hatDir, 0, 0);
         a[ai++] = modelattach("tag_cape", getCapeDir(cape, !team), 0, 0);
 
         rendermodel(mdlname, anim, o, d->yaw, d->pitch, 0, NULL, d, a[0].tag ? a : NULL, 0, 0, 1, vec4(vec::hexcolor(color), 5));
@@ -495,11 +499,6 @@ namespace game
     {
         int team = m_teammode && validteam(d->team) ? d->team : 0;
         renderplayer(d, getplayermodelinfo(d), getplayercolor(d, team), team, fade, flags);
-    }
-
-    bool drawManaStat(gameent *d)
-    {
-        return d->aptitude==C_WIZARD || d->aptitude==C_PHYSICIST || d->aptitude==C_PRIEST || d->aptitude==C_SHOSHONE || d->aptitude==C_SPY;
     }
 
     FVARP(huddamagesize, 0.01f, 0.11f, 1.f);
@@ -571,7 +570,7 @@ namespace game
 
         if(d->boostmillis[B_JOINT] && rndevent(93)) regularflame(PART_SMOKE, d->abovehead().add(vec(-12, 5, -19)), 2, 3, 0x888888, 1, 1.6f, 50.0f, 1000.0f, -10);
 
-        switch(d->aptitude)
+        switch(d->character)
         {
             case C_WIZARD:
                 if(d->abilitymillis[ABILITY_1]) particle_splash(PART_SMOKE, 2, 120, d->o, 0xFF33FF, 10+rnd(5), 400,400);
@@ -598,6 +597,7 @@ namespace game
                     if(d->abilitymillis[ABILITY_2]) regularflame(PART_SPARK, d->feetpos(), 12, 2, 0xFF33FF, 2, 0.4f, 10.f, 500, 0, -2);
                     if(d->abilitymillis[ABILITY_3]) regularflame(PART_SPARK, d->feetpos(), 12, 2, 0xFF3333, 2, 0.4f, 10.f, 500, 0, -2);
                 }
+                break;
         }
     }
 
@@ -606,7 +606,7 @@ namespace game
         if(isteam(hudplayer()->team, d->team))
         {
             float metersize = 0.08f / (dist / 125);
-            if(hudplayer()->aptitude==C_MEDIC)
+            if(hudplayer()->character==C_MEDIC)
             {
                 if(dist <= 250) particles::meter(d->abovehead(), d->health/1000.0f, PART_METER, 1, rygbGradient(d->health/10), 0x000000, metersize, true);
                 if(d->health < 500)
@@ -615,9 +615,9 @@ namespace game
                     particles::hudIcon(PART_HEALTH, pos, (totalmillis % blinkSpeed < blinkSpeed / 2) ? 0x111111 : 0xFFFFFF, 0.075f);
                 }
             }
-            else if(hudplayer()->aptitude==C_JUNKIE)
+            else if(hudplayer()->character==C_JUNKIE)
             {
-                if(drawManaStat(d))
+                if(hasAbilities(d))
                 {
                     if(dist <= 250) particles::meter(d->abovehead(), d->mana/150.0f, PART_METER, 1, 0xFF00FF, 0x000000, metersize, true);
                     if(d->mana < 50)
@@ -628,7 +628,7 @@ namespace game
                 }
             }
         }
-        else if((hudplayer()->aptitude==C_SPY && hudplayer()->abilitymillis[ABILITY_3]) || totalmillis - getspyability < 2000)
+        else if((hudplayer()->character==C_SPY && hudplayer()->abilitymillis[ABILITY_3]) || totalmillis - getspyability < 2000)
         {
             particles::hudIcon(PART_VISEUR, pos, 0xBBBBBB);
         }
@@ -656,9 +656,7 @@ namespace game
 
             if(d->state==CS_ALIVE && !ispaused())
             {
-                vec playerCenter = d->o;
-                playerCenter.subz(8);
-
+                vec playerCenter = vec(d->o).subz(8);
                 renderWeaponParticles(d);
                 spawnPlayerBouncers(d, playerCenter);
                 spawnPlayerParticles(d, playerCenter, exceptHud);
@@ -702,7 +700,7 @@ namespace game
         {
             if(d->physstate >= PHYS_SLOPE)
             {
-                swayspeed = min(sqrtf(d->vel.x*d->vel.x + d->vel.y*d->vel.y), 200 - classes[d->aptitude].speed*0.12f);
+                swayspeed = min(sqrtf(d->vel.x*d->vel.x + d->vel.y*d->vel.y), 200 - classes[d->character].speed*0.12f);
                 swaydist += swayspeed*curtime/1000.0f;
                 swaydist = fmod(swaydist, 2*swaystep);
                 swayfade = 1;
@@ -773,8 +771,8 @@ namespace game
         }
 
         float trans = 1.0f;
-        if(d->abilitymillis[ABILITY_2] && d->aptitude==C_PHYSICIST) trans = 0.08f;
-        else if(d->abilitymillis[ABILITY_1] && d->aptitude==C_WIZARD) trans = 0.7f;
+        if(d->abilitymillis[ABILITY_2] && d->character==C_PHYSICIST) trans = 0.08f;
+        else if(d->abilitymillis[ABILITY_1] && d->character==C_WIZARD) trans = 0.7f;
 
         if(d->boostmillis[B_JOINT])
         {
