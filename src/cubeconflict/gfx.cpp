@@ -481,7 +481,7 @@ namespace game
     {
         vec pos = d->character==C_SPY && d->abilitymillis[ABILITY_2] ? game::hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle;
         int lightFlags = DL_FLASH|DL_SHRINK|L_NOSHADOW;
-        bool wizardAbility = d->character==C_WIZARD || d->abilitymillis[ABILITY_2];
+        bool wizardAbility = d->character==C_WIZARD && d->abilitymillis[ABILITY_2];
         bool increasedDamages = d->boostmillis[B_RAGE] || hasRoids(d);
         vec dir = vec(to).sub(from);
 
