@@ -313,6 +313,7 @@ namespace game
             updateSoundPitch(d->entityId, PL_ATTACK_FAR, pitch);
 
         }
+
         if(hasPowerArmor(d) && d->armour < 1000) // power armor alarm sound
         {
             if(!d->powerarmoursound)

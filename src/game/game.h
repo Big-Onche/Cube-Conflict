@@ -128,6 +128,7 @@ enum { ABILITY_1 = 0, ABILITY_2, ABILITY_3, NUMABILITIES };
 enum { M_NONE = 0, M_SEARCH, M_AGGRO, M_RETREAT, M_ATTACKING, M_PAIN, M_SLEEP, M_AIMING, M_FRIENDLY, M_NEUTRAL, M_ANGRY, M_MAX};  // monster states
 
 #define validgun(n) ((n) >= 0 && (n) < NUMGUNS)
+#define validshield(n) ((n) >= 0 && (n) < NUMSHIELDS)
 #define validact(n) ((n) >= 0 && (n) < NUMACTS)
 #define validatk(n) ((n) >= 0 && (n) < NUMATKS)
 #define validAbility(n) ((n) >= 0 && (n) < NUMABILITIES)
@@ -425,7 +426,7 @@ static const struct guninfo { const char *ident, *name; vec2 weapDisp; int maxzo
     { "Weapon_Uzi",             "uzi",              vec2(23, 21),  80,  500,  { -1, ATK_UZI }, },
     { "Weapon_Famas",           "famas",            vec2(54, 14),  70,  750,  { -1, ATK_FAMAS }, },
     { "Weapon_Mossberg500",     "mossberg500",      vec2(38, 18),  95,  300,  { -1, ATK_MOSSBERG }, },
-    { "Weapon_Hydra",           "hydra",            vec2(44, 20),  95,  300,  { -1, ATK_HYDRA }, },
+    { "Weapon_Hydra",           "hydra",            vec2(42, 20),  95,  300,  { -1, ATK_HYDRA }, },
     { "Weapon_Sv98",            "sv98",             vec2( 1,  3),  30, 2000,  { -1, ATK_SV98 }, },
     { "Weapon_Sks",             "sks",              vec2( 1,  3),  50, 1500,  { -1, ATK_SKS }, },
     { "Weapon_Crossbow",        "arbalete",         vec2( 1,  3),  45, 1000,  { -1, ATK_CROSSBOW }, },
@@ -778,7 +779,7 @@ struct gameent : dynent, gamestate
     int lifesequence;                   // sequence id for each respawn, used in damage test
     int respawned, lastspawn, suicided;
     int lastpain;
-    int lastaction, lastattack;
+    int lastaction, lastattack, lastgunselect, lastshieldswitch;
     int curdamage, lastcurdamage, curdamagecolor;
     int attacking, gunaccel;
     int lastfootstep;
@@ -838,6 +839,8 @@ struct gameent : dynent, gamestate
         lastaction = 0;
         lastattack = -1;
         lastspawn = lastmillis;
+        lastgunselect = lastmillis;
+        lastshieldswitch = lastmillis;
         curdamage = 0;
         lastcurdamage = 0;
         attacking = ACT_IDLE;

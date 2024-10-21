@@ -727,31 +727,56 @@ namespace game
 
     vec2 hudgunDisp(0, 40);
 
+    float switchAnim(int lastSwitch)
+    {
+        const int animMillis = 175;
+        float pitch = 0;
+        int timeSinceSwitch = lastmillis - lastSwitch;
+
+        if(timeSinceSwitch < animMillis)
+        {
+            float t = timeSinceSwitch / (float)animMillis;
+            pitch = 25 * (1 - t);
+        }
+
+        return pitch;
+    }
+
+    int gunSwitchAnim(gameent *d)
+    {
+        return switchAnim(d->lastgunselect);
+    }
+
+    int shieldSwitchAnim(gameent *d)
+    {
+        return switchAnim(d->lastshieldswitch);
+    }
+
     void drawhudmodel(gameent *d, int anim, int basetime)
     {
         if(!validgun(d->gunselect)) return;
 
-        int delta = max((250 / max(curfps, 1)) * (game::gamespeed / 100.f), 1.f);
-        int h = zoom ? 2 : -2;
-        int v = zoom ? -1 : 1;
-
         if(!ispaused())
         {
-            hudgunDisp.x = clamp(int(hudgunDisp.x) + h * delta, 1, int(guns[hudplayer()->gunselect].weapDisp.x));
-            hudgunDisp.y = clamp(int(hudgunDisp.y) + v * delta, 1, int(guns[hudplayer()->gunselect].weapDisp.y));
+            float targetX = zoom ? guns[hudplayer()->gunselect].weapDisp.x : 1;
+
+            hudgunDisp.x = 1 + (targetX - 1) * zoomprogress;
+            hudgunDisp.y = guns[hudplayer()->gunselect].weapDisp.y + (1 - guns[hudplayer()->gunselect].weapDisp.y) * zoomprogress;
         }
+
+        float steps = swaydist/swaystep*M_PI;
 
         vec sway;
         vecfromyawpitch(d->yaw, 0, 0, 1, sway);
-        float steps = swaydist/swaystep*M_PI;
         sway.mul((swayside)*cosf(steps));
-        vec gunAim;
 
+        vec gunAim;
         sway.z = -hudgunDisp.y - (zoom ? 2 : 0);
         if(!zoom) vecfromyawpitch(d->yaw, 0, -10, hudgunDisp.x, gunAim);
 
         sway.z += swayup*(fabs(sinf(steps)) - 1);
         sway.add(swaydir).add(d->o);
+
         if(!hudgunsway) sway = d->o;
 
         vecfromyawpitch(d->yaw, 0, 0, hudgunDisp.x, gunAim);
@@ -764,53 +789,68 @@ namespace game
         d->muzzle = d->balles = vec(-1, -1, -1);
         a[ai++] = modelattach("tag_muzzle", &d->muzzle);
         a[ai++] = modelattach("tag_balles", &d->balles);
+
         if((d->gunselect==GUN_MINIGUN || d->gunselect==GUN_FLAMETHROWER || d->gunselect==GUN_PLASMA || d->gunselect==GUN_UZI || d->gunselect==GUN_S_GAU8) && anim!=ANIM_GUN_MELEE)
         {
             anim |= ANIM_LOOP;
             basetime = 0;
         }
 
-        float trans = 1.0f;
-        if(d->abilitymillis[ABILITY_2] && d->character==C_PHYSICIST) trans = 0.08f;
-        else if(d->abilitymillis[ABILITY_1] && d->character==C_WIZARD) trans = 0.7f;
-
-        if(d->boostmillis[B_JOINT])
-        {
-            vec sway3;
-            vecfromyawpitch(d->yaw, 0, 0, 1, sway3);
-            sway3.mul((swayside/1.5f)*cosf(steps));
-            sway3.z += (swayup/1.5f)*(fabs(sinf(steps)) - 1);
-            sway3.add(swaydir).add(d->o);
-
-            modelattach a[2];
-            d->weed = vec(-1, -1, -1);
-            a[0] = modelattach("tag_joint", &d->weed);
-            rendermodel("hudboost/joint", anim, sway3, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
-            if(d->weed.x >= 0) d->weed = calcavatarpos(d->weed, 12);
-            if(rndevent(93)) {regularflame(PART_SMOKE, d->weed, 2, 3, 0x888888, 1, 1.3f, 50.0f, 1000.0f, -10); particle_splash(PART_FIRE_BALL,  4, 50, d->weed, 0xFF6600, 0.6f, 20, 150);}
-        }
-
-        rendermodel(getWeaponDir(d->gunselect, true), anim, gunAim.add(sway), d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
+        rendermodel(getWeaponDir(d->gunselect, true), anim, gunAim.add(sway), d->yaw, d->pitch - gunSwitchAnim(d), 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), 1.f));
 
         if(d->muzzle.x >= 0) d->muzzle = calcavatarpos(d->muzzle, 12);
         if(d->balles.x >= 0) d->balles = calcavatarpos(d->balles, 12);
+    }
 
-        if(d->armour && d->armourtype >= A_WOOD && d->armourtype < NUMSHIELDS)
+    void drawJointModel(gameent *d)
+    {
+        float steps = swaydist/swaystep*M_PI;
+
+        vec sway;
+        vecfromyawpitch(d->yaw, 0, 0, 1, sway);
+        sway.mul((swayside/2.f)*cosf(steps));
+        sway.z += (swayup/2.f)*(fabs(sinf(steps)) - 1);
+        sway.add(swaydir).add(d->o);
+
+        modelattach a[2];
+        d->weed = vec(-1, -1, -1);
+        a[0] = modelattach("tag_joint", &d->weed);
+        rendermodel("hudboost/joint", NULL, sway, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a);
+        if(d->weed.x >= 0) d->weed = calcavatarpos(d->weed, 12);
+
+        if(rndevent(93))
         {
-            bool powerArmor = d->armourtype==A_POWERARMOR;
-            vec sway2;
-            vecfromyawpitch(d->yaw, 0, 0, 1, sway2);
-            float swaydiv = powerArmor ? 6.f : 3.f;
-            sway2.mul((swayside/swaydiv)*cosf(steps));
-            sway2.z += (swayup/swaydiv)*(fabs(sinf(steps)) - 1);
-            if(powerArmor || !zoom) sway2.add(swaydir).add(d->o);
-            rendermodel(getShieldDir(d->armourtype, d->armour, true), anim, sway2, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), trans));
+            regularflame(PART_SMOKE, d->weed, 2, 3, 0x888888, 1, 1.3f, 50.0f, 1000.0f, -10);
+            particle_splash(PART_FIRE_BALL,  4, 50, d->weed, 0xFF6600, 0.6f, 20, 150);
         }
     }
 
-    void drawhudgun()
+    void drawShieldModel(gameent *d)
+    {
+        float steps = swaydist/swaystep*M_PI;
+
+        bool powerArmor = (d->armourtype == A_POWERARMOR);
+
+        vec sway;
+        vecfromyawpitch(d->yaw, 0, 0, 1, sway);
+        float swaydiv = powerArmor ? 6.f : 3.f;
+        sway.mul(((swayside)/swaydiv)*cosf(steps));
+        sway.z += (swayup/swaydiv)*(fabs(sinf(steps)) - 1);
+        sway.add(swaydir).add(d->o);
+
+        vec disp;
+        vecfromyawpitch(d->yaw, 0, 0, zoomprogress * 3.f, disp);
+
+        rendermodel(getShieldDir(d->armourtype, d->armour, true), NULL, disp.add(sway), d->yaw, d->pitch - shieldSwitchAnim(d), 0, MDL_NOBATCH);
+    }
+
+    void renderHudModels()
     {
         gameent *d = hudplayer();
+
+        if(d->boostmillis[B_JOINT]) drawJointModel(d);
+        if(d->armour && validshield(d->armourtype)) drawShieldModel(d);
+
         if(d->state==CS_SPECTATOR || d->state==CS_EDITING || !hudgun || editmode)
         {
             d->muzzle = player1->muzzle = vec(-1, -1, -1);
@@ -823,11 +863,6 @@ namespace game
         if(isAttacking(d)) { anim = ANIM_GUN_SHOOT; basetime = d->lastaction; }
 
         drawhudmodel(d, anim, basetime);
-    }
-
-    void renderavatar()
-    {
-        drawhudgun();
     }
 
     void renderplayerpreview(int model, int cape, int color, int team, int weap, int yaw, bool rot)

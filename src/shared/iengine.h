@@ -345,7 +345,7 @@ enum
     // explosions
     PART_SHOCKWAVE, PART_PLASMABURST, PART_PLASMAGRENADE, PART_EXPLOSION,
     // misc
-    PART_BLOOD, PART_SPARK, PART_SPARK_L, PART_SPARK_VL, PART_AR, PART_F_AR, PART_TEXT, PART_LENS_FLARE
+    PART_BLOOD, PART_SPARK, PART_SPARK_L, PART_SPARK_VL, PART_SPARK_P, PART_AR, PART_F_AR, PART_TEXT, PART_LENS_FLARE
 };
 
 extern bool canemitparticles();
@@ -419,7 +419,7 @@ extern void physicsframe();
 extern void dropenttofloor(entity *e);
 extern bool droptofloor(vec &o, float radius, float height);
 
-extern void vecfromyawpitch(float yaw, float pitch, int move, int strafe, vec &m, int up = 0);
+extern void vecfromyawpitch(float yaw, float pitch, int move, float strafe, vec &m, int up = 0);
 extern void vectoyawpitch(const vec &v, float &yaw, float &pitch);
 extern void updatephysstate(physent *d);
 extern void cleardynentcache();

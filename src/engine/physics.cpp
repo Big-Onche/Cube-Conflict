@@ -1656,7 +1656,7 @@ void phystest()
 
 COMMAND(phystest, "");
 
-void vecfromyawpitch(float yaw, float pitch, int move, int strafe, vec &m, int up)
+void vecfromyawpitch(float yaw, float pitch, int move, float strafe, vec &m, int up)
 {
     if(move)
     {

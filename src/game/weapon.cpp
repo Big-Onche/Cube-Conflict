@@ -41,6 +41,7 @@ namespace game
             if(d==player1 && gun != GUN_POWERARMOR && !shortcut) player1->lastweap = gun;
             addmsg(N_GUNSELECT, "rci", d, gun);
             playSound(attacks[gun-GUN_ELECTRIC].picksound, d==hudplayer() ? vec(0, 0, 0) : d->o, 200, 50, NULL, d->entityId);
+            d->lastgunselect = lastmillis;
         }
         d->gunselect = gun;
     }

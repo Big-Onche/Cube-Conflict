@@ -1792,7 +1792,7 @@ void renderavatar()
     glDepthRange(0.0, 0.05); // restricted depth range for the avatar's gun and shield
 
     enableavatarmask();
-    game::renderavatar();
+    game::renderHudModels();
     disableavatarmask();
 
     glDepthRange(0.0, 1.0);
