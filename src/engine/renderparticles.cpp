@@ -124,7 +124,8 @@ enum
     PT_NOMAXDIST    = 1<<25,
     PT_EMITLIGHT    = 1<<26,
     PT_EMITVLIGHT   = 1<<27,
-    PT_AR           = 1<<28,
+    PT_EMITPART     = 1<<28,
+    PT_AR           = 1<<29,
     PT_FLIP         = PT_HFLIP | PT_VFLIP | PT_ROT
 };
 
@@ -270,6 +271,12 @@ struct partrenderer
             {
                 int flags = (type & PT_EMITVLIGHT) ? L_NOSHADOW|L_VOLUMETRIC|DL_EXPAND : L_NOSHADOW|DL_EXPAND;
                 adddynlight(o, p->size * 40, vec(p->color.r/1600.f, p->color.g/1600.f, p->color.b/1600.f), ((3000.f / curfps) / 100.f) * game::gamespeed, 0, flags, p->size*40);
+            }
+
+            if(type & PT_EMITPART)
+            {
+                particle_splash(PART_SPARK, 1, 50, o, rgbToHex(p->color.r, p->color.g, p->color.b), 0.4f, 10, 10, -1, game::hasShrooms());
+                if(!rnd(12)) particle_splash(PART_SMOKE, 1, 1750, o, 0x80809A, 3.f, 50, 50, 4, game::hasShrooms());
             }
         }
     }
@@ -941,6 +948,7 @@ static partrenderer *parts[] =
     new quadrenderer("media/particles/misc/spark.png", PT_PART|PT_FLIP|PT_BRIGHT),                                           // PART_SPARK
     new quadrenderer("media/particles/misc/spark.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_EMITLIGHT),                              // PART_SPARK_L
     new quadrenderer("media/particles/misc/spark.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_EMITVLIGHT|PT_COLLIDE, STAIN_BULLET_GLOW),// PART_SPARK_VL
+    new quadrenderer("media/particles/misc/spark.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_EMITPART),                               // PART_SPARK_P
     new quadrenderer("media/particles/game/basic.png", PT_PART|PT_AR|PT_FLIP|PT_FLIP),                                       // PART_AR
     new quadrenderer("media/particles/game/basic.png", PT_PART|PT_AR|PT_FLIP|PT_FEW|PT_TRACK),                               // PART_F_AR
     &texts,                                                                                                                  // PART_TEXT
@@ -1182,7 +1190,7 @@ namespace particles
         {0xFF00FF}
     };
 
-    uint32_t getRandomColor() { return colors[rnd(sizeof(colors)/sizeof(colors[0]))].color; }
+    uint32_t getRandomColor() { return colors[rnd(ARRAY_SIZE(colors))].color; }
 
     static void directionalSplash(int type, int color, int radius, int num, int fade, const vec &p, const vec &dir, float size, int speed, int sizemod)
     {
@@ -1591,6 +1599,7 @@ static void makeparticles(entity &e)
         case 2: // flames only: same attrs as fire and smoke
         {
             if(!canemitparticles()) return;
+
             float radius = e.attr2 ? float(e.attr2)/100.0f : 1.5f,
                   height = e.attr3 ? float(e.attr3)/100.0f : radius/3;
 

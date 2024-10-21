@@ -162,6 +162,19 @@ namespace game
 
     int flamesColor[3] = {0x383838, 0x474747, 0x604930};
 
+    static const struct colorsConfig{ uint32_t color; } colors[] =
+    {
+        {0xFF8888},
+        {0x88FF88},
+        {0x8888FF},
+        {0xFFFF44},
+        {0x44FFFF},
+        {0xFF44FF}
+    };
+
+    uint32_t fireworkColor() { return colors[rnd(ARRAY_SIZE(colors))].color; }
+
+
     void renderExplosion(gameent *d, const vec &v, const vec &vel, int atk) //big laggy flashy explosions
     {
         bool inWater = ((lookupmaterial(v) & MATF_VOLUME) == MAT_WATER);
@@ -204,7 +217,7 @@ namespace game
             case ATK_FIREWORKS:
 
                 particle_splash(PART_FIRE_BALL, 5, 40, v, 0xFFC864, 5, 800, 1600, 0, hasShrooms());
-                loopi(4) particle_splash(PART_SPARK, 16+rnd(10), 200+rnd(200), v, hasRoids(d) ? 0xFF0000 : particles::getRandomColor(), 0.2f+(rnd(5)/10.f), 500+rnd(300), 5000+rnd(3000), 2.f, hasShrooms());
+                loopi(4) particle_splash(PART_SPARK_P, 16+rnd(10), 200+rnd(200), v, hasRoids(d) ? 0xFF0000 : fireworkColor(), (0.2f + (rnd(5)*0.1f)), 500+rnd(300), 10, 1, hasShrooms());
 
                 if(inWater)
                 {
@@ -214,8 +227,8 @@ namespace game
 
                 if(!epilepsyfriendly)
                 {
-                    adddynlight(v, 6*attacks[atk].exprad, vec(1+rnd(4), 1+rnd(4), 1+rnd(4)), 80, 40, flags, initRadius, vec(1+rnd(4), 1+rnd(4), 1+rnd(4)));
-                    adddynlight(v, 5*attacks[atk].exprad, vec(rnd(15)/10.0f, rnd(15)/10.0f, rnd(15)/10.0f), 80, 40, L_VOLUMETRIC|flags, initRadius, vec(1+rnd(4), 1+rnd(4), 1+rnd(4)));
+                    adddynlight(v, 5*attacks[atk].exprad, vec(1.0f, 1.0f, 0.6f), 80, 40, flags, initRadius, vec(1.0f, 1.0f, 0.6f));
+                    adddynlight(v, 2*attacks[atk].exprad, vec(0.5f, 0.5f, 0.3f), 80, 40, L_VOLUMETRIC|flags, initRadius, vec(0.5f, 0.5f, 0.3f));
                 }
                 return;
 
