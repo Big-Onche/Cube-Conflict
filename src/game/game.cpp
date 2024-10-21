@@ -384,7 +384,11 @@ namespace game
         loopv(entities::ents)
         {
             gameentity &e = *(gameentity *)entities::ents[i];
-            if(e.type == ET_PARTICLES && (e.attr1==1 || e.attr1==2) && d->o.dist(e.o) < e.attr2 / 25) addmsg(N_FIRETOUCH, "rc", d);
+            if(e.type == ET_PARTICLES && (e.attr1==1 || e.attr1==2))
+            {
+                float fireDamageRadius = e.attr2 / 25.f;
+                if(d->o.dist(e.o) < fireDamageRadius || d->feetpos().dist(e.o) < fireDamageRadius) addmsg(N_FIRETOUCH, "rc", d);
+            }
         }
 
         tick = 0;

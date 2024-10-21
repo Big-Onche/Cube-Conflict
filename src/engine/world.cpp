@@ -817,6 +817,13 @@ void renderentradius(extentity &e, bool color)
             break;
         }
 
+        case ET_PARTICLES:
+        {
+            if(color) gle::colorf(0, 1, 1);
+            if(e.attr1 == 1 || e.attr1 == 2) renderentsphere(e, e.attr2 / 25.f);
+            break;
+        }
+
         default:
             if(e.type>=ET_GAMESPECIFIC)
             {
