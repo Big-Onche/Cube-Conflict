@@ -2399,6 +2399,8 @@ namespace server
         if(ts.health<=0) // target dead
         {
             target->state.deaths++;
+            loopi(NUMBOOSTS) target->state.boostmillis[i] = 0;
+
             if(!isteam(target->team, actor->team)) actor->state.killstreak++;
             target->state.killstreak = 0;
 

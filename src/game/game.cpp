@@ -737,9 +737,9 @@ namespace game
         d->skeletonfade = 1.0f;
         d->tombepop = 0.0f;
         d->deaths++;
+        loopi(NUMBOOSTS) d->boostmillis[i] = 0;
         d->killstreak = 0;
         d->afterburnmillis = 0;
-        d->boostmillis[B_SHROOMS] = 0;
         d->isOutOfMap = false;
         loopi(NUMABILITIES) d->abilitymillis[i] = 0;
 
