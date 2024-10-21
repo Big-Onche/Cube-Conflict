@@ -3494,6 +3494,18 @@ namespace UI
     ICOMMAND(uivslotview, "iffe", (int *index, float *minw, float *minh, uint *children),
         BUILD(VSlotViewer, o, o->setup(*index, *minw, *minh), children));
 
+    ICOMMAND(uibump, "ifi", (int *millis, float *bumpSize, bool *fixed),
+        if(*fixed) floatret(1 + *bumpSize);
+        else
+        {
+            float size = 1 + *bumpSize;
+            float t = (totalmillis % *millis) * (1.0f / (float)*millis);
+            float phase = 2 * M_PI * t - M_PI / 2;
+            float bumpValue = 1 + (size - 1) * (0.5f * (1 + sin(phase)));
+            floatret(bumpValue);
+        }
+    );
+
     FVARP(uisensitivity, 1e-4f, 1, 1e4f);
 
     bool hascursor()

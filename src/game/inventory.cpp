@@ -25,8 +25,9 @@ namespace game
     ICOMMAND(maxweapons, "", (), intret(MAXWEAPONS));
     ICOMMAND(selectgun, "i", (int *i), gunselect(playerWeapons[*i], player1));
 
-    ICOMMAND(getweaponcurammo, "i", (int *i),
-        if(validInventoryWeapon(*i))
+    ICOMMAND(getweaponcurammo, "ii", (int *i, bool *superWeapon),
+        if(*superWeapon) findSpecialWeapon(player1, GUN_S_NUKE, NUMSUPERWEAPONS, [](int gunId) { intret(player1->ammo[gunId]); });
+        else if(validInventoryWeapon(*i))
         {
             if(!validgun(playerWeapons[*i])) intret(0);
             else intret(player1->ammo[playerWeapons[*i]]);
@@ -34,8 +35,9 @@ namespace game
         else result(tempformatstring("Invalid gun (%d)", *i));
     );
 
-    ICOMMAND(getweaponmaxammo, "i", (int *i),
-        if(validInventoryWeapon(*i))
+    ICOMMAND(getweaponmaxammo, "ii", (int *i, bool *superWeapon),
+        if(*superWeapon) findSpecialWeapon(player1, GUN_S_NUKE, NUMSUPERWEAPONS, [](int gunId) { intret(itemstats[gunId].max); });
+        else if(validInventoryWeapon(*i))
         {
             if(!validgun(playerWeapons[*i])) intret(0);
             else
@@ -62,8 +64,7 @@ namespace game
         else result(tempformatstring("Invalid gun (%d)", *i));
     );
 
-    ICOMMAND(hassuperweapon, "", (), intret(hasSuperWeapon(player1)));
-
+    ICOMMAND(meleeweaponselected, "", (), intret((player1->gunselect >= GUN_M_BUSTER && player1->gunselect <= GUN_M_FLAIL) || player1->gunselect == GUN_NINJA));
     ICOMMAND(getmeleeweaponmodel, "", (), findSpecialWeapon(player1, GUN_M_BUSTER, NUMMELEEWEAPONS, [](int gunId) { result(getWeaponDir(gunId)); }); );
     ICOMMAND(getmeleeweaponname, "", (), findSpecialWeapon(player1, GUN_M_BUSTER, NUMMELEEWEAPONS, [](int gunId) { result(readstr(guns[gunId].ident)); }); );
     ICOMMAND(selectmeleeweapon, "", (),
@@ -75,6 +76,8 @@ namespace game
         findSpecialWeapon(player1, GUN_M_BUSTER, NUMMELEEWEAPONS, [](int gunId) { gunselect(gunId, player1); });
     );
 
+    ICOMMAND(hassuperweapon, "", (), intret(hasSuperWeapon(player1)));
+    ICOMMAND(superweaponselected, "", (), intret(player1->gunselect >= GUN_S_NUKE && player1->gunselect <= GUN_S_CAMPER));
     ICOMMAND(getsuperweaponmodel, "", (), findSpecialWeapon(player1, GUN_S_NUKE, NUMSUPERWEAPONS, [](int gunId) { result(getWeaponDir(gunId)); }); );
     ICOMMAND(getsuperweaponname, "", (), findSpecialWeapon(player1, GUN_S_NUKE, NUMSUPERWEAPONS, [](int gunId) { result(readstr(guns[gunId].ident)); }); );
     ICOMMAND(selectsuperweapon, "", (), findSpecialWeapon(player1, GUN_S_NUKE, NUMSUPERWEAPONS, [](int gunId) { gunselect(gunId, player1); }); );
