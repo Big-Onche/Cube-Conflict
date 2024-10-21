@@ -2715,9 +2715,6 @@ void gl_drawview()
     rendertransparent();
     GLERROR;
 
-    rendervolumetric();
-    GLERROR;
-
     if(!drawtex)
     {
         renderparticles();
@@ -2726,6 +2723,9 @@ void gl_drawview()
         ar::render();
         GLERROR;
     }
+
+    rendervolumetric();
+    GLERROR;
 
     if(editmode)
     {
