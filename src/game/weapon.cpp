@@ -488,7 +488,8 @@ namespace game
             case BNC_CASING:
             case BNC_BIGCASING:
             case BNC_CARTRIDGE:
-                dir = vec(-10 + rnd(21), -10 + rnd(21), 100);
+                vecfromyawpitch(d->yaw, 0, 0, -50, dir);
+                dir.add(vec(-10 + rnd(21), -10 + rnd(21), 100));
                 break;
             case BNC_GLASS:
                 dir = vec(-150 + rnd(301), -150 + rnd(301), rnd(50));

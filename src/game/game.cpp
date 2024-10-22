@@ -263,8 +263,6 @@ namespace game
         }
     }
 
-
-
     bool hasboost(gameent *d)
     {
         loopi(NUMBOOSTS) { if(d->boostmillis[i]) return true; }
