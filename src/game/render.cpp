@@ -850,8 +850,8 @@ namespace game
     {
         gameent *d = hudplayer();
 
-        if(d->boostmillis[B_JOINT]) drawJointModel(d);
         if(d->armour && validshield(d->armourtype)) drawShieldModel(d);
+        if(d->boostmillis[B_JOINT]) drawJointModel(d);
 
         if(d->state==CS_SPECTATOR || d->state==CS_EDITING || !hudgun || editmode)
         {
