@@ -1834,7 +1834,7 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime)
     modifyvelocity(pl, local, water, isFloating, curtime);
 
     vec vel(pl->vel);
-    if(pl==game::player1 && d->character==C_WIZARD && d->boostmillis[B_EPO]>30000 && d->abilitymillis[ABILITY_1] && d->afterburnmillis) unlockAchievement(ACH_MAXSPEED);
+    if(pl==game::player1 && d->character==C_WIZARD && d->boostmillis[B_EPO] && d->abilitymillis[ABILITY_1] && d->afterburnmillis) unlockAchievement(ACH_MAXSPEED);
     if(!isFloating && water) vel.mul(0.5f);
     vel.add(pl->falling);
     vel.mul(secs);
