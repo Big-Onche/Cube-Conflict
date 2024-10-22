@@ -2060,7 +2060,7 @@ namespace server
         {
             currentWeapon = rnd(NUMMAINGUNS);
             nextWeapon = rnd(NUMMAINGUNS);
-            sendf(-1, 1, "ri2", N_CURWEAPON, currentWeapon);
+            sendf(-1, 1, "ri3", N_CURWEAPON, currentWeapon, true);
             lastWeaponChange = 0;
             changeAnnounced = false;
         }
@@ -2079,6 +2079,7 @@ namespace server
             ci->mapchange();
             ci->state.lasttimeplayed = lastmillis;
             if(m_mp(gamemode) && ci->state.state!=CS_SPECTATOR) sendspawn(ci);
+            ci->state.ammo[currentWeapon] = 1;
         }
 
         aiman::changemap();
@@ -2820,8 +2821,14 @@ namespace server
                         }
                         else if(lastWeaponChange > 30000 && !endGame)
                         {
+                            loopv(clients)
+                            {
+                                clientinfo *ci = clients[i];
+                                ci->state.ammo[currentWeapon] = 0;
+                                ci->state.ammo[nextWeapon] = 1;
+                            }
                             currentWeapon = nextWeapon;
-                            sendf(-1, 1, "ri2", N_CURWEAPON, currentWeapon);
+                            sendf(-1, 1, "ri3", N_CURWEAPON, currentWeapon, false);
                             lastWeaponChange = 0;
                             changeAnnounced = false;
                         }
@@ -3332,7 +3339,12 @@ namespace server
                     }
 
                     ci->state.lastBurner = NULL;
-                    if(m_identique) sendf(-1, 1, "ri2", N_CURWEAPON, currentWeapon);
+                    if(m_identique)
+                    {
+                        ci->state.ammo[currentWeapon] = 1;
+                        sendf(-1, 1, "ri3", N_CURWEAPON, currentWeapon, true);
+                    }
+
 
                     logoutf("Infos: %s (%s level %d)", ci->name, readstr("Classes_Names", ci->character), ci->level);
                     break;

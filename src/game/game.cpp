@@ -249,20 +249,6 @@ namespace game
         }
     }
 
-    void getClassWeapon()
-    {
-        switch(player1->character)
-        {
-            case C_KAMIKAZE:
-                if(player1->gunselect!=GUN_KAMIKAZE) gunselect(currentIdenticalWeapon, player1);
-                break;
-            case C_NINJA:
-                if(player1->gunselect!=GUN_NINJA) gunselect(currentIdenticalWeapon, player1);
-                break;
-            default: gunselect(currentIdenticalWeapon, player1);
-        }
-    }
-
     bool hasboost(gameent *d)
     {
         loopi(NUMBOOSTS) { if(d->boostmillis[i]) return true; }
@@ -520,14 +506,6 @@ namespace game
         {
             checkInventoryGuns();
             if(player1->armourtype==A_POWERARMOR && player1->ammo[GUN_POWERARMOR] && !player1->armour) {gunselect(GUN_POWERARMOR, player1, true); player1->gunwait=0;}
-            else if(m_identique)
-            {
-                switch(player1->gunselect)
-                {
-                    case GUN_S_NUKE: case GUN_S_GAU8: case GUN_S_CAMPER: case GUN_S_ROCKETS: break;
-                    default: getClassWeapon();
-                }
-            }
 
             if(IS_ON_OFFICIAL_SERV) // checking for achievements
             {

@@ -1623,20 +1623,21 @@ namespace game
 
             case N_CURWEAPON:
             {
+                int oldWeapon = currentIdenticalWeapon;
                 currentIdenticalWeapon = getint(p);
+                bool reset = getint(p);
 
-                switch(player1->gunselect)
+                loopv(players)
                 {
-                    case GUN_NINJA:
-                    case GUN_KAMIKAZE:
-                    case GUN_POWERARMOR:
-                    case GUN_S_NUKE:
-                    case GUN_S_GAU8:
-                    case GUN_S_CAMPER:
-                    case GUN_S_ROCKETS:
-                        break;
-                    default: gunselect(currentIdenticalWeapon, player1);
+                    gameent *d = players[i];
+
+                    if(reset) loopi(NUMMAINGUNS) d->ammo[i] = 0;
+                    else d->ammo[oldWeapon] = 0;
+
+                    d->ammo[currentIdenticalWeapon] = 1;
+                    if(d==player1 && player1->gunselect > NUMMAINGUNS) gunselect(currentIdenticalWeapon, d);
                 }
+
                 break;
             }
 

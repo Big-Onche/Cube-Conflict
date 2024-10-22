@@ -296,7 +296,7 @@ static const int msgsizes[] =               // size inclusive message token, 0 f
     N_SENDSKIN, 3, N_SENDCLASS, 2, N_REGENALLIES, 5,
     N_REQABILITY, 2, N_GETABILITY, 4,
     N_ANNOUNCE, 3,
-    N_CURWEAPON, 2,
+    N_CURWEAPON, 3,
     N_BASES, 0, N_BASEINFO, 0, N_BASESCORE, 0, N_SCOREBASE, 3, N_REPAMMO, 1, N_BASEREGEN, 7,
     -1
 };
@@ -689,9 +689,9 @@ struct gamestate
 
         if(m_random) // random weapon mutator
         {
-            int weapon = rnd(NUMMAINGUNS);
-            baseammo(weapon);
-            selectedWeapon = weapon;
+            int ranndomWeapon = rnd(NUMMAINGUNS);
+            ammo[ranndomWeapon] = 1;
+            selectedWeapon = ranndomWeapon;
         }
         else if(m_fullstuff) // multiple weapons mutator
         {
@@ -710,7 +710,7 @@ struct gamestate
         }
         else if(m_identique) // identical weapon mutator
         {
-            loopi(NUMMAINGUNS) baseammo(i);
+            ammo[currentIdenticalWeapon] = 1;
             selectedWeapon = currentIdenticalWeapon;
         }
         else if(m_capture) // base capture

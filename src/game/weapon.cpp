@@ -72,24 +72,7 @@ namespace game
     void nextweapon(int dir, bool force = false)
     {
         if(player1->state!=CS_ALIVE) return;
-        if(m_identique)
-        {
-            int gunId;
-            switch(player1->character)
-            {
-                case C_KAMIKAZE: gunId = GUN_KAMIKAZE; break;
-                case C_NINJA: gunId = GUN_NINJA; break;
-                default: gunId = currentIdenticalWeapon;
-            }
 
-            if(player1->gunselect == currentIdenticalWeapon)
-            {
-                if(dir - 1) gunselect(gunId, player1);
-                else findSpecialWeapon(player1, GUN_S_NUKE, NUMSUPERWEAPONS, [](int gunId) { gunselect(gunId, player1); });
-            }
-            else gunselect(currentIdenticalWeapon, player1);
-            return;
-        }
         dir = (dir < 0 ? NUMGUNS-1 : 1);
         int gun = player1->gunselect;
         loopi(NUMGUNS)
