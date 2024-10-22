@@ -316,13 +316,13 @@ namespace game
 
         if(hasPowerArmor(d) && d->armour < 1000) // power armor alarm sound
         {
-            if(!d->powerarmoursound)
+            if(!d->powerarmorsound)
             {
                 playSound(S_ASSISTALARM, isHudPlayer ? vec(0, 0, 0) : d->o, 250, 100, SND_NOCULL|SND_FIXEDPITCH|SND_LOOPED, d->entityId, PL_POWERARMOR);
-                d->powerarmoursound = true;
+                d->powerarmorsound = true;
             }
         }
-        else if(d->powerarmoursound) { stopLinkedSound(d->entityId, PL_POWERARMOR); d->powerarmoursound = false; }
+        else if(d->powerarmorsound) { stopLinkedSound(d->entityId, PL_POWERARMOR); d->powerarmorsound = false; }
     }
 
     void updatePlayersBoosts(int time, gameent *d)
@@ -377,6 +377,16 @@ namespace game
 
     void checkFire(gameent *d)
     {
+        if(!deadlylava && lookupmaterial(d->feetpos())&MAT_LAVA && lastmillis - d->lastlavatouch > 250)
+        {
+            d->lastlavatouch = lastmillis;
+            addmsg(N_LAVATOUCH, "rc", d);
+            d->falling = vec(0, 0, 0);
+            d->physstate = PHYS_FALL;
+            d->timeinair = 1;
+            d->vel.z = max(d->vel.z, 300.f);
+        }
+
         static int tick = 0;
         tick += curtime;
 
@@ -395,6 +405,15 @@ namespace game
         tick = 0;
     }
 
+    void checkShield(gameent *d)
+    {
+        if(!d->shieldbroken && d->armourtype >= A_WOOD && d->armourtype <= A_MAGNET && !d->armour)
+        {
+            d->shieldbroken = true;
+            playSound(S_WOOD_BROKEN + d->armourtype, d==hudplayer() ? vec(0, 0, 0) : d->o, 250, 100, NULL, d->entityId);
+        }
+    }
+
     void otherplayers(int curtime)
     {
         loopv(players)
@@ -406,16 +425,7 @@ namespace game
             if(d->state == CS_ALIVE && !intermission)
             {
                 checkFire(d);
-
-                if(!deadlylava && lookupmaterial(d->feetpos())&MAT_LAVA && lastmillis - d->lastlavatouch > 250)
-                {
-                    d->lastlavatouch = lastmillis;
-                    addmsg(N_LAVATOUCH, "rc", d);
-                    d->falling = vec(0, 0, 0);
-                    d->physstate = PHYS_FALL;
-                    d->timeinair = 1;
-                    d->vel.z = max(d->vel.z, 300.f);
-                }
+                checkShield(d);
 
                 if(d!=player1)
                 {
@@ -734,8 +744,8 @@ namespace game
     {
         d->state = CS_DEAD;
         d->lastpain = lastmillis;
-        d->skeletonfade = 1.0f;
-        d->tombepop = 0.0f;
+        d->skeletonSize = 1.0f;
+        d->graveSize = 0.0f;
         d->deaths++;
         loopi(NUMBOOSTS) d->boostmillis[i] = 0;
         d->killstreak = 0;

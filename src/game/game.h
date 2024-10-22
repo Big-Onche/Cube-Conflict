@@ -792,14 +792,14 @@ struct gameent : dynent, gamestate
 
     int lastability[3], lastabilityrequest;
     int attacksound; // 0 = no sound, 1 = close sound, 2 = close + far sound
-    bool playerexploded, powerarmoursound;
+    bool shieldbroken, powerarmorexploded, powerarmorsound;
     int lastOutOfMap;
     bool wasAttacking, isOutOfMap;
     bool isConnected;
 
     string name, info;
     int team, playermodel, playercolor, skin[NUMSKINS], character, level;
-    float skeletonfade, tombepop;
+    float skeletonSize, graveSize;
     ai::aiinfo *ai;
     int ownernum, lastnode;
     gameent *lastkiller;
@@ -855,8 +855,9 @@ struct gameent : dynent, gamestate
         gunaccel = 0;
         killstreak = 0;
         attacksound = 0;
-        playerexploded = false;
-        powerarmoursound = false;
+        powerarmorexploded = false;
+        powerarmorsound = false;
+        shieldbroken = false;
     }
 
     int respawnwait(int secs, int delay = 0)

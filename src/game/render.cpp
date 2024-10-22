@@ -336,19 +336,21 @@ namespace game
 
             if(validGrave(d->skin[SKIN_GRAVE]))
             {
-                d->tombepop = min(d->tombepop + (3.f / curfps), 1.0f);
-                rendermodel(getGraveDir(d->skin[SKIN_GRAVE]), ANIM_MAPMODEL|ANIM_LOOP, d->feetpos(), d->yaw, 0, 0, flags, NULL, NULL, 0, 0, d->tombepop, vec4(vec::hexcolor(color), 5));
+                if(d->graveSize < 1.0f) d->graveSize = min(d->graveSize + (3.f / curfps), 1.0f);
+                rendermodel(getGraveDir(d->skin[SKIN_GRAVE]), ANIM_MAPMODEL|ANIM_LOOP, d->feetpos(), d->yaw, 0, 0, flags, NULL, NULL, 0, 0, d->graveSize);
             }
 
-            d->skeletonfade = max(d->skeletonfade - (3.f / curfps), 0.0f);
-            if(d->skeletonfade) rendermodel("mapmodel/smileys/mort", ANIM_MAPMODEL, d->feetpos(), d->yaw+90, 0, 0, flags, NULL, NULL, 0, 0, d->skeletonfade);
+            if(d->skeletonSize)
+            {
+                d->skeletonSize = max(d->skeletonSize - (3.f / curfps), 0.0f);
+                rendermodel("mapmodel/smileys/mort", ANIM_MAPMODEL|ANIM_LOOP, d->feetpos(), d->yaw+90, 0, 0, flags, NULL, NULL, 0, 0, d->skeletonSize);
+            }
             return;
         }
 
         /////////////////////////// Animations and gfx ///////////////////////////
         bool powerArmor = hasPowerArmor(d);
         int anim = ANIM_IDLE|ANIM_LOOP, lastaction = d->lastaction;
-        int basetime = 0;
         if(animoverride) anim = (animoverride<0 ? ANIM_ALL : animoverride)|ANIM_LOOP;
 
         if(d->state==CS_EDITING || d->state==CS_SPECTATOR) anim = ANIM_EDIT|ANIM_LOOP;
@@ -453,23 +455,23 @@ namespace game
                 vec doublepos = d->feetpos();
                 const int positions[4][2] = { {25, 25}, {-25, -25}, {25, -25}, {-25, 25} };
                 doublepos.add(vec(positions[d->seed][0], positions[d->seed][1], 0));
-                rendermodel(mdlname, anim, doublepos, d->yaw, clamp(d->pitch, -25, 12), 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), d==player1 ? 0.3f : trans));
+                rendermodel(mdlname, anim, doublepos, d->yaw, clamp(d->pitch, -25, 12), 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY, d, a[0].tag ? a : NULL, 0, 0, fade, vec4(vec::hexcolor(color), d==player1 ? 0.3f : trans));
             }
 
             if(d->abilitymillis[ABILITY_2])
             {
-                rendermodel(getdisguisement(d->seed), anim, d->feetpos(), d->yaw, clamp(d->pitch, -25, 12), 0, flags, d, NULL, basetime, 0, fade, vec4(vec::hexcolor(color), 1.0f));
+                rendermodel(getdisguisement(d->seed), anim, d->feetpos(), d->yaw, clamp(d->pitch, -25, 12), 0, flags, d, NULL, 0, 0, fade, vec4(vec::hexcolor(color), 1.0f));
                 return;
             }
         }
 
-        rendermodel(mdlname, anim, d->feetpos(), d->yaw, clamp(d->pitch, -25, 12), 0, flags, d, a[0].tag ? a : NULL, basetime, 0, fade, vec4(vec::hexcolor(color), trans));
+        rendermodel(mdlname, anim, d->feetpos(), d->yaw, clamp(d->pitch, -25, 12), 0, flags, d, a[0].tag ? a : NULL, 0, 0, fade, vec4(vec::hexcolor(color), trans));
 
         /////////////////////////// first person body ///////////////////////////
         if(d==hudplayer() && forcecampos<0 && !thirdperson)
         {
             vec pos = d->feetpos();
-            rendermodel(mdlname, anim, pos.addz(3.5f), d->yaw, 28, 0, MDL_NOSHADOW, d, NULL, basetime, 0, 1.f, vec4(vec::hexcolor(color), trans));
+            rendermodel(mdlname, anim, pos.addz(3.5f), d->yaw, 28, 0, MDL_NOSHADOW, d, NULL, 0, 0, 1.f, vec4(vec::hexcolor(color), trans));
         }
     }
 

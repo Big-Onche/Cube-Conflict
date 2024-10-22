@@ -1496,20 +1496,20 @@ namespace game
 
         if(d->character==C_KAMIKAZE)
         {
-            if(d->abilitymillis[ABILITY_2]>0 && d->abilitymillis[ABILITY_2]<2000 && d->ammo[GUN_KAMIKAZE]>0 && !d->playerexploded)
+            if(d->abilitymillis[ABILITY_2]>0 && d->abilitymillis[ABILITY_2]<2000 && d->ammo[GUN_KAMIKAZE]>0 && !d->powerarmorexploded)
             {
                 gunselect(GUN_KAMIKAZE, d);
                 d->attacking = ACT_SHOOT;
-                d->playerexploded = true;
+                d->powerarmorexploded = true;
             }
         }
 
-        if(d->armourtype==A_POWERARMOR && !d->armour && !d->playerexploded && d->ammo[GUN_POWERARMOR])
+        if(d->armourtype==A_POWERARMOR && !d->armour && !d->powerarmorexploded && d->ammo[GUN_POWERARMOR])
         {
             d->wasAttacking = d->attacking;
             gunselect(GUN_POWERARMOR, d, true);
             d->attacking = ACT_SHOOT;
-            d->playerexploded = true;
+            d->powerarmorexploded = true;
         }
 
         if(!d->attacking) return;
@@ -1570,7 +1570,7 @@ namespace game
         if(d->boostmillis[B_SHROOMS]) waitfactor *= d->character==C_JUNKIE ? 1.75f : 1.5f;
         d->gunwait = attacks[atk].attackdelay/waitfactor;
         d->totalshots += (attacks[atk].damage*attacks[atk].rays) * (d->boostmillis[B_ROIDS] ? 1 : 2);
-        if(d->playerexploded) {d->attacking = d->wasAttacking; execute("getoldweap"); d->playerexploded = false;}
+        if(d->powerarmorexploded) {d->attacking = d->wasAttacking; execute("getoldweap"); d->powerarmorexploded = false;}
         if((atk==ATK_GLOCK || atk==ATK_SPOCKGUN || atk==ATK_HYDRA || d->gunselect==GUN_SKS || d->gunselect==GUN_S_CAMPER) && !specialAbility) d->attacking = ACT_IDLE;
     }
 
