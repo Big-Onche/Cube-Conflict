@@ -841,7 +841,7 @@ namespace game
         sway.add(swaydir).add(d->o);
 
         vec disp;
-        vecfromyawpitch(d->yaw, 0, 0, zoomprogress * 3.f, disp);
+        if(!powerArmor) vecfromyawpitch(d->yaw, 0, 0, zoomprogress * 3.f, disp);
 
         rendermodel(getShieldDir(d->armourtype, d->armour, true), NULL, disp.add(sway), d->yaw, d->pitch - shieldSwitchAnim(d), 0, MDL_NOBATCH);
     }

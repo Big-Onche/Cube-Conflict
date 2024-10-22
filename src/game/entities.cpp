@@ -191,12 +191,13 @@ namespace entities
 
         d->pickupitem(type, d->character, d->abilitymillis[ABILITY_1], hasPowerArmor(d), rndsweap);
 
+        bool powerArmor = powerarmorpieces(type, d);
         if(type >= I_WOODSHIELD && type <= I_MAGNETSHIELD)
         {
-            d->lastshieldswitch = lastmillis;
+            if(!powerArmor) d->lastshieldswitch = lastmillis;
             d->shieldbroken = false;
         }
-        playSound(powerarmorpieces(type, d) ? S_ITEMPIECEROBOTIQUE : itemstats[type-I_RAIL].sound, d==hudplayer() ? vec(0, 0, 0) : d->o, 300, 50, NULL, d->entityId);
+        playSound(powerArmor ? S_ITEMPIECEROBOTIQUE : itemstats[type-I_RAIL].sound, d==hudplayer() ? vec(0, 0, 0) : d->o, 300, 50, NULL, d->entityId);
 
         if(type>=I_RAIL && type<=I_SUPERARME)
         {
