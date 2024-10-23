@@ -5,6 +5,11 @@
 
 namespace game
 {
+    float roundOne(float f)
+    {
+        return round(f * 10) / 10;
+    }
+
     // all we need to communicate with soft-coded hud
     ICOMMAND(huddead, "", (), intret(followingplayer(player1)->state==CS_DEAD));
     ICOMMAND(hudhealth, "", (), intret(max(1, followingplayer(player1)->health/10)));
@@ -20,8 +25,15 @@ namespace game
     ICOMMAND(hudctf, "", (), intret(m_ctf));
     ICOMMAND(hudammo, "", (), intret(followingplayer(player1)->ammo[followingplayer(player1)->gunselect]));
     ICOMMAND(hudmelee, "", (), intret((player1->gunselect>=GUN_M_BUSTER && player1->gunselect<=GUN_M_FLAIL) || player1->gunselect==GUN_NINJA));
-    ICOMMAND(hudboost, "i", (int *id), if(*id>=0 && *id<=3) intret(followingplayer(player1)->boostmillis[*id]/1000););
-    ICOMMAND(hudafterburn, "", (), intret((followingplayer(player1)->afterburnmillis+500)/1000););
+    ICOMMAND(hudboost, "i", (int *id),
+        if(*id >= 0 && *id <= 3)
+        {
+            float timer = followingplayer(player1)->boostmillis[*id] / 1000.f;
+            if(timer >= 9.95f) intret(timer);
+            else floatret(roundOne(timer));
+        }
+    );
+    ICOMMAND(hudafterburn, "", (), floatret(roundOne((followingplayer(player1)->afterburnmillis) / 1000.f)); );
     ICOMMAND(hudclass, "", (), intret(followingplayer(player1)->character));
 
     ICOMMAND(hudability, "", (),
@@ -31,13 +43,20 @@ namespace game
                 intret(followingplayer(player1)->mana);
                 break;
             case C_KAMIKAZE:
-                if(followingplayer(player1)->abilitymillis[ABILITY_2]) intret((followingplayer(player1)->abilitymillis[ABILITY_2]-1500)/1000);
+                if(followingplayer(player1)->abilitymillis[ABILITY_2])
+                {
+                    floatret(roundOne((followingplayer(player1)->abilitymillis[ABILITY_2]) / 1000.f));
+                }
                 break;
             case C_VIKING:
-                intret(followingplayer(player1)->boostmillis[B_RAGE]/1000);
+            {
+                float timer = followingplayer(player1)->boostmillis[B_RAGE] / 1000.f;
+                if(timer >= 9.95f) intret(timer);
+                else floatret(roundOne(timer));
                 break;
+            }
             default:
-                intret(false);
+                intret(0);
         }
     );
 
@@ -103,7 +122,7 @@ namespace game
     ICOMMAND(getkillerlevel, "", (), intret(killerLevel); );
 
     float killerDistance;
-    ICOMMAND(getkilldistance, "", (), floatret(roundf(killerDistance * 10) / 10); );
+    ICOMMAND(getkilldistance, "", (), floatret(roundOne(killerDistance)); );
 
     bool hassuicided = true;
     ICOMMAND(hassuicided, "", (), intret(hassuicided); );
@@ -133,7 +152,7 @@ namespace game
     );
 
     ICOMMAND(hudoutofmap, "", (), intret(hudplayer()->isOutOfMap));
-    ICOMMAND(hudoutofmaptimer, "", (), floatret((roundf((((hudplayer()->lastOutOfMap + 9900) - totalmillis) / 1000.f) * 10) / 10)));
+    ICOMMAND(hudoutofmaptimer, "", (), floatret(roundOne(((hudplayer()->lastOutOfMap + 9900) - totalmillis) / 1000.f)) );
 
     ICOMMAND(blink, "i", (int *blinkSpeed), intret(*blinkSpeed > 0 && (totalmillis % *blinkSpeed+1 < *blinkSpeed/2)));
 
