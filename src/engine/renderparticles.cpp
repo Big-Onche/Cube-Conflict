@@ -1738,7 +1738,7 @@ static void makeparticles(entity &e)
                     int xOffset = e.attr3 ? rnd(e.attr3) - e.attr3 / 2 : 0;
                     int zOffset = e.attr4 ? rnd(e.attr4) - e.attr4 / 2 : 0;
                     int yOffset = e.attr5 ? (e.attr5 > 0 ? rnd(e.attr5) + e.attr5 : (e.attr5 < 0 ? rnd(-e.attr5) - e.attr5 : 0)) : 0;
-                    game::newbouncer(e.o, pos.add(vec(xOffset, zOffset, yOffset)), true, 0, game::player1, game::BNC_BIGROCK, 15000+rnd(5000), e.attr6);
+                    bouncers::add(e.o, pos.add(vec(xOffset, zOffset, yOffset)), true, 0, game::player1, BNC_BIGROCK, 15000+rnd(5000), e.attr6);
                 }
                 playSound(S_EXPL_VOLCANO, e.o, 3000, 1500, SND_NOOCCLUSION);
                 if(game::hudplayer()->physstate == PHYS_FLOOR) shakeScreen(0.1f + lerp(0.f, 0.5f, clamp(camera1->o.dist(e.o) / 1000.0f, 0.f, 1.f)));

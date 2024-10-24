@@ -173,7 +173,7 @@ void disconnect(bool async, bool cleanup, bool volontaire)
         postfx::updateMainFilter();
         clearsleep();
         stopAllSounds();
-        game::clearbouncers();
+        bouncers::clear();
         game::clearprojectiles(); // clean up before showing menu
         clearEntsPos();
         mainmenu = 1;
@@ -191,7 +191,7 @@ void trydisconnect(bool local)
 {
     UI::hideui("scoreboard");
     stopAllSounds();
-    game::clearbouncers();
+    bouncers::clear();
     game::clearprojectiles();
     clearEntsPos();
     if(connpeer)

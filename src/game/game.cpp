@@ -147,7 +147,7 @@ namespace game
             entities::resettriggers();
         }
         clearprojectiles();
-        clearbouncers();
+        bouncers::clear();
         clearEntsPos();
     }
 
@@ -1064,7 +1064,7 @@ namespace game
     {
         clearmonsters();
         clearprojectiles();
-        clearbouncers();
+        bouncers::clear();
         clearEntsPos();
         clearGraves();
         clearteaminfo();

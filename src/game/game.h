@@ -1071,6 +1071,15 @@ namespace game
     extern void drawteammate(gameent *d, float x, float y, float s, gameent *o, float scale, float blipsize = 1);
 
     // weapon
+    struct hitmsg
+    {
+        int target, lifesequence, info1, info2;
+        ivec dir;
+    };
+
+    extern vector<hitmsg> hits;
+
+    static const int OFFSETMILLIS = 500;
     extern void checkInventoryGuns();
     typedef void (*inventoryCallback)(int gunId);
     extern void findSpecialWeapon(gameent *d, int baseWeapon, int maxWeapons, inventoryCallback callback);
@@ -1085,20 +1094,11 @@ namespace game
     extern float intersectdist;
     extern bool intersect(dynent *d, const vec &from, const vec &to, float margin = 0, float &dist = intersectdist);
     extern dynent *intersectclosest(const vec &from, const vec &to, gameent *at, float margin = 0, float &dist = intersectdist);
-    extern int temptrisfade;
-    enum {BNC_GRENADE = 0, BNC_MOLOTOV, BNC_PIXEL, BNC_BURNINGDEBRIS, BNC_ROCK, BNC_BIGROCK, BNC_CASING, BNC_BIGCASING, BNC_CARTRIDGE, BNC_SCRAP, BNC_GLASS, BNC_LIGHT, NUMBOUNCERS};
-    extern void spawnbouncer(const vec &p, const vec &vel, gameent *d, int type, int speed = 0, int lifetime = rnd(temptrisfade)+rnd(5000), bool frommonster = false);
-    extern void newbouncer(const vec &from, const vec &to, bool local, int id, gameent *owner, int type, int lifetime, int speed);
-    extern void clearbouncers();
-    extern void updatebouncers(int curtime);
-    extern void removebouncers(gameent *owner);
-    extern void renderbouncers();
     extern void clearprojectiles();
     extern void updateprojectiles(int curtime);
     extern void removeprojectiles(gameent *owner);
     extern void preloadProjectiles();
     extern void renderprojectiles();
-    extern void preloadbouncers();
     extern void removeweapons(gameent *owner);
     extern void updateweapons(int curtime);
     extern void gunselect(int gun, gameent *d, bool force = false, bool shortcut = false);
@@ -1137,9 +1137,46 @@ namespace game
     extern void initWeaponsPaths();
     extern void initCapesPaths();
     extern void initGravesPaths();
-    extern void initBouncersPaths();
     extern void initAssetsPaths();
     extern vec2 hudgunDisp;
+}
+
+enum {BNC_GRENADE = 0, BNC_MOLOTOV, BNC_PIXEL, BNC_BURNINGDEBRIS, BNC_ROCK, BNC_BIGROCK, BNC_CASING, BNC_BIGCASING, BNC_CARTRIDGE, BNC_SCRAP, BNC_GLASS, BNC_LIGHT, NUMBOUNCERS};
+
+namespace bouncers
+{
+    extern int bouncersfade;
+
+    struct bouncer : physent
+    {
+        size_t entityId;
+        int lifetime, bounces;
+        float lastyaw, lastpitch, roll;
+        bool local;
+        gameent *owner;
+        int bouncetype, variant, gun;
+        vec offset;
+        int offsetmillis;
+        int id;
+        bool inwater;
+
+        bouncer() : entityId(entitiesIds::getNewId()), bounces(0), roll(0), variant(0)
+        {
+            type = ENT_BOUNCE;
+        }
+    };
+
+    extern vector<bouncer *> curBouncers;
+
+    extern void initPaths();
+    extern void preload();
+    extern void add(const vec &from, const vec &to, bool local, int id, gameent *owner, int type, int lifetime, int speed);
+    extern void spawn(const vec &p, const vec &vel, gameent *d, int type, int speed = 0, int lifetime = rnd(bouncersfade) + rnd(5000), bool frommonster = false);
+    extern void bounced(physent *d, const vec &surface);
+    extern void update(int curtime);
+    extern void render();
+    extern void remove(gameent *owner);
+    extern void clear();
 }
 
 namespace server

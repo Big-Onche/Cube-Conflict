@@ -457,9 +457,9 @@ namespace game
                 {
                     switch(mtype)
                     {
-                        case M_KEVIN: case M_DYLAN: loopi(2+rnd(3)) spawnbouncer(o, vec(0, 0, 0), this, BNC_PIXEL); break;
-                        case M_UFO: loopi(25) spawnbouncer(o, vec(0, 0, 0), this, BNC_GRENADE, 100, 5000+rnd(2000), true); break;
-                        case M_ARMOR: loopi(10+rnd(5)) spawnbouncer(o, vec(0, 0, 0), this, BNC_SCRAP, 300); break;
+                        case M_KEVIN: case M_DYLAN: loopi(2+rnd(3)) bouncers::spawn(o, vec(0, 0, 0), this, BNC_PIXEL); break;
+                        case M_UFO: loopi(25)  bouncers::spawn(o, vec(0, 0, 0), this, BNC_GRENADE, 100, 5000+rnd(2000), true); break;
+                        case M_ARMOR: loopi(10+rnd(5))  bouncers::spawn(o, vec(0, 0, 0), this, BNC_SCRAP, 300); break;
                     }
                 }
             }

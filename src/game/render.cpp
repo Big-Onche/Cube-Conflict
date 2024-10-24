@@ -547,7 +547,7 @@ namespace game
     {
         if(d->health < 300)
         {
-            if(rndevent(1)) spawnbouncer(d->o, d->vel, d, BNC_PIXEL, 75);
+            if(rndevent(1)) bouncers::spawn(d->o, d->vel, d, BNC_PIXEL, 75);
             if(d->health < 150 && rndevent(94)) particle_splash(PART_BLOOD, 1, 2500, pos, 0x60FFFF, 1.f+rnd(2), 50);
         }
 
@@ -556,7 +556,7 @@ namespace game
             bool lowArmour = (d->armour < 750);
             if(rndevent(lowArmour ? 98 : 95)) regularflame(PART_SMOKE, pos, 15, 3, (lowArmour ? 0x222222 : 0x777777), 1, (lowArmour ? 2.5f : 2), 50, (lowArmour ? 1750 : 1250), -10, 3);
             if(d->armour < 1000 && rndevent(lowArmour ? 95 : 92)) particle_splash(PART_FIRE_BALL, (1 + lowArmour), 500, pos, rnd(2) ? 0x992200 : 0x886622, (d->armour<500 ? 5 : 3), 50, -20);
-            if(lowArmour && rndevent(1)) spawnbouncer(d->o, d->vel, d, BNC_SCRAP, 50);
+            if(lowArmour && rndevent(1)) bouncers::spawn(d->o, d->vel, d, BNC_SCRAP, 50);
         }
     }
 
@@ -676,7 +676,7 @@ namespace game
 
         rendermonsters();
         entities::renderentities();
-        renderbouncers();
+        bouncers::render();
         renderprojectiles();
 
         if(exclude) renderplayer(exclude, 1, MDL_ONLYSHADOW);
@@ -929,14 +929,14 @@ namespace game
         initWeaponsPaths();
         initCapesPaths();
         initGravesPaths();
-        initBouncersPaths();
+        bouncers::initPaths();
     }
 
     void preload()
     {
         if(hudgun) preloadweapons();
         if(m_tutorial || m_sp || m_dmsp) preloadmonsters();
-        preloadbouncers();
+        bouncers::preload();
         preloadProjectiles();
         preloadplayermodel();
         entities::preloadentities();

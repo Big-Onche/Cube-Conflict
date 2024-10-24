@@ -127,6 +127,7 @@ CLIENT_OBJS= \
         game/scoreboard.o \
         game/server.o \
         game/waypoint.o \
+        game/bouncers.o \
         game/weapon.o
 
 CLIENT_PCH= shared/cube.h.gch engine/engine.h.gch game/game.h.gch cubeconflict/gfx.h.gch cubeconflict/stats.h.gch cubeconflict/customs.h.gch
