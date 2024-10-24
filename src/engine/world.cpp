@@ -14,7 +14,9 @@ VAR(entselradius, 0, 3, 10);
 
 static inline void transformbb(const entity &e, vec &center, vec &radius)
 {
-    if(e.attr5 > 0) { float scale = e.attr5/100.0f; center.mul(scale); radius.mul(scale); }
+    float scale = e.attr5 > 0 ? e.attr5/100.0f : 1;
+    center.mul(scale);
+    radius.mul(scale);
     rotatebb(center, radius, e.attr2, e.attr3, e.attr4);
 }
 
