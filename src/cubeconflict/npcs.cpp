@@ -304,7 +304,7 @@ namespace game
                     {
                         lastaction = 0;
                         attacking = true;
-                        shoot(this, attacktarget, true);
+                        updateAttacks(this, attacktarget, true);
                         transition(M_ATTACKING, friendly ? 0 : 1, 600, 0);
                         if(friendly) transition(M_NEUTRAL, 1, 100, 200);
                     }

@@ -202,7 +202,7 @@ namespace game
         float lastyaw, lastpitch, roll;
         bool local;
         gameent *owner;
-        int bouncetype, variant;
+        int bouncetype, variant, gun;
         vec offset;
         int offsetmillis;
         int id;
@@ -268,6 +268,7 @@ namespace game
         bnc.inwater = ((lookupmaterial(bnc.o) & MAT_WATER) == MAT_WATER);
         if(bouncers[type].variants) bnc.variant = rnd(bouncers[type].variants) + 1;
         else bnc.variant = 0;
+
         bnc.collidetype = COLLIDE_ELLIPSE;
 
         vec dir(to);
@@ -328,7 +329,7 @@ namespace game
                 }
             }
 
-            if(bnc.type != BNC_LIGHT)
+            if(bnc.bouncetype != BNC_LIGHT)
             {
                 bool inWater = ((lookupmaterial(bnc.o) & MATF_VOLUME) == MAT_WATER);
                 if(!bnc.inwater && inWater) // the bouncer enter in water
@@ -1455,64 +1456,86 @@ namespace game
         }
     }
 
-    void shoot(gameent *d, const vec &targ, bool isMonster)
+    bool updateWeaponsCadencies(gameent *d, int gun, int attacktime, bool specialAbility)
     {
-        int prevaction = d->lastaction, attacktime = lastmillis-prevaction;
-        bool specialAbility = d->character==C_PRIEST && d->abilitymillis[ABILITY_3];
+        int weaponDelay = d->gunwait;
 
-        if(d->aitype==AI_BOT && (d->gunselect==GUN_GLOCK || d->gunselect==GUN_SPOCKGUN || d->gunselect==GUN_HYDRA || d->gunselect==GUN_SKS || d->gunselect==GUN_S_CAMPER))
+        if(d->aitype == AI_BOT) // gives a natural rate of fire with semi automatic weapons for bots
         {
-            switch(rnd(d->gunselect==GUN_GLOCK || d->gunselect==GUN_SPOCKGUN || d->gunselect==GUN_HYDRA ? 5 : 15)) {case 0: d->gunwait+=(specialAbility ? 500 : 1200) / curfps; return; }
-        }
+            const bool isFastSemoAutoGun = (gun == GUN_GLOCK || gun == GUN_SPOCKGUN || gun == GUN_HYDRA);
+            const bool isSemiAutoGun = isFastSemoAutoGun ||  gun == GUN_SKS || gun == GUN_S_CAMPER;
 
-        switch(d->gunselect)
-        {
-            case GUN_MINIGUN:
-            case GUN_PLASMA:
-            case GUN_S_ROCKETS:
-                if(!d->attacking) d->gunselect==GUN_PLASMA ? d->gunaccel=4 : d->gunselect==GUN_S_ROCKETS ? d->gunaccel=3 : d->gunaccel=12;
-                break;
-            default: d->gunaccel=0;
-        }
-
-        if(attacktime < d->gunwait + d->gunaccel*(d->gunselect==GUN_PLASMA ? 50 : d->gunselect==GUN_S_ROCKETS ? 150 : 8) + (d==player1 || specialAbility ? 0 : attacks[d->gunselect].attackdelay)) return;
-        d->gunwait = 0;
-
-        if(d->character==C_KAMIKAZE)
-        {
-            if(d->abilitymillis[ABILITY_2]>0 && d->abilitymillis[ABILITY_2]<2000 && d->ammo[GUN_KAMIKAZE]>0 && !d->powerarmorexploded)
+            if(isSemiAutoGun)
             {
-                gunselect(GUN_KAMIKAZE, d);
-                d->attacking = ACT_SHOOT;
-                d->powerarmorexploded = true;
+                const int randomRange = isFastSemoAutoGun ? 3 : 6;
+                if(!rnd(randomRange))
+                {
+                    weaponDelay += (specialAbility ? 1250 : 2500) / curfps;
+                    return false;
+                }
             }
+        }
+
+        if(!d->attacking || lastmillis - d->lastgunselect < 50)
+        {
+            switch(gun)
+            {
+                case GUN_MINIGUN:   d->gunaccel = 12;   break;
+                case GUN_PLASMA:    d->gunaccel = 4;    break;
+                case GUN_S_ROCKETS: d->gunaccel = 3;    break;
+                default: d->gunaccel = 0;
+            }
+        }
+
+        if(gun == GUN_PLASMA) weaponDelay += d->gunaccel * 50;
+        else if (gun == GUN_S_ROCKETS) weaponDelay += d->gunaccel * 150;
+        else weaponDelay += d->gunaccel * 8;
+
+        if(d != player1 && !specialAbility) weaponDelay += attacks[d->gunselect].attackdelay;
+
+        if(attacktime < weaponDelay) return false;
+
+        d->gunwait = 0;
+        return true;
+    }
+
+    void updateAttacks(gameent *d, const vec &targ, bool isMonster)
+    {
+        bool specialAbility = d->character==C_PRIEST && d->abilitymillis[ABILITY_3];
+        int gun = d->gunselect,
+            prevaction = d->lastaction,
+            attacktime = lastmillis - prevaction;
+
+        if(!updateWeaponsCadencies(d, gun, attacktime, specialAbility)) return;
+
+        if(d->character == C_KAMIKAZE && !d->mana && !d->abilitymillis[ABILITY_2] && d->ammo[GUN_KAMIKAZE])
+        {
+            gunselect(GUN_KAMIKAZE, d);
+            gun = GUN_KAMIKAZE;
+            d->attacking = ACT_SHOOT;
         }
 
         if(d->armourtype==A_POWERARMOR && !d->armour && !d->powerarmorexploded && d->ammo[GUN_POWERARMOR])
         {
             d->wasAttacking = d->attacking;
             gunselect(GUN_POWERARMOR, d, true);
+            gun = GUN_POWERARMOR;
             d->attacking = ACT_SHOOT;
             d->powerarmorexploded = true;
         }
 
         if(!d->attacking) return;
-        int gun = d->gunselect, act = d->attacking, atk = guns[gun].attacks[act];
+        int act = d->attacking,
+            atk = guns[gun].attacks[act];
 
         if(d->gunaccel) d->gunaccel -= 1;
         d->lastaction = lastmillis;
         d->lastattack = atk;
 
-        if(d==player1)
-        {
-            lastshoot = totalmillis;
-            if(atk==ATK_SMAW || atk==ATK_S_NUKE || atk==ATK_M_HAMMER || atk == ATK_MOSSBERG || atk == ATK_SV98) lastshoot+=750;
-        }
-
         if(!d->ammo[gun])
         {
             if(d==player1) msgsound(S_NOAMMO, d);
-            d->gunwait = 600;
+            d->gunwait = 500;
             d->lastattack = -1;
             weaponswitch(d);
             return;
@@ -1555,12 +1578,13 @@ namespace game
         d->gunwait = attacks[atk].attackdelay/waitfactor;
         d->totalshots += (attacks[atk].damage*attacks[atk].rays) * (d->boostmillis[B_ROIDS] ? 1 : 2);
         if(d->powerarmorexploded) {d->attacking = d->wasAttacking; execute("getoldweap"); d->powerarmorexploded = false;}
-        if((atk==ATK_GLOCK || atk==ATK_SPOCKGUN || atk==ATK_HYDRA || d->gunselect==GUN_SKS || d->gunselect==GUN_S_CAMPER) && !specialAbility) d->attacking = ACT_IDLE;
+        if((atk==ATK_GLOCK || atk==ATK_SPOCKGUN || atk==ATK_HYDRA || gun==GUN_SKS || gun==GUN_S_CAMPER) && !specialAbility) d->attacking = ACT_IDLE;
     }
 
     void adddynlights()
     {
         int lightradiusvar = 0;
+
         loopv(projs)
         {
             projectile &p = projs[i];
@@ -1577,17 +1601,6 @@ namespace game
                 case ATK_SMAW:
                 case ATK_S_ROCKETS: adddynlight(pos, 50+lightradiusvar, vec(1.2f, 0.75f, 0.0f)); break;
                 case ATK_S_NUKE: adddynlight(pos, 100, vec(1.2f, 0.75f, 0.0f)); break;
-            }
-        }
-        loopv(curBouncers)
-        {
-            bouncer &bnc = *curBouncers[i];
-            if(bnc.bouncetype==BNC_GRENADE || bnc.bouncetype==BNC_LIGHT)
-            {
-                vec pos(bnc.o);
-                pos.add(vec(bnc.offset).mul(bnc.offsetmillis/float(OFFSETMILLIS)));
-                if(bnc.bouncetype==BNC_GRENADE) adddynlight(pos, 40, vec(0.5f, 0.5f, 2.0f), 0, 0, L_NOSHADOW);
-                else adddynlight(pos, 115, vec(0.25f, 0.12f, 0.0f), 0, 0, L_VOLUMETRIC|L_NOSHADOW|L_NOSPEC);
             }
         }
     }
@@ -1618,13 +1631,21 @@ namespace game
 
             bool inWater = ((lookupmaterial(pos) & MATF_VOLUME) == MAT_WATER);
 
-            if(vel.magnitude() <= 3.f) {yaw = bnc.lastyaw; pitch = bnc.lastpitch;}
-            else if (!isPaused)
+            if(!isPaused)
             {
-                vectoyawpitch(vel, yaw, pitch);
-                yaw += bnc.bounces < 5 ? 75 + rnd(31) : 90;
-                bnc.lastpitch = pitch;
+                if(vel.magnitude() <= 3.f)
+                {
+                    yaw = bnc.lastyaw;
+                    pitch = bnc.lastpitch;
+                }
+                else
+                {
+                    vectoyawpitch(vel, yaw, pitch);
+                    yaw += bnc.bounces < 5 ? 75 + rnd(31) : 90;
+                    bnc.lastpitch = pitch;
+                }
             }
+
 
             rendermodel(getBouncerDir(bnc.bouncetype, bnc.variant), ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, 0, MDL_CULL_VFC|MDL_CULL_EXTDIST|MDL_CULL_OCCLUDED);
 
@@ -1654,6 +1675,7 @@ namespace game
                         float growth = (1000 - (bnc.lifetime - curtime))/150.f;
                         particle_fireball(pos, growth, PART_EXPLOSION, 20, hasRoids(bnc.owner) ? 0xFF0000 : 0x0055FF, growth, hasShrooms());
                         particle_splash(PART_SMOKE, 1, 150, pos, 0x404088, 2.5f, 50, -20, 0, hasShrooms());
+                        adddynlight(pos, 40, vec(0.5f, 0.5f, 2.0f), 0, 0, L_NOSHADOW);
                         break;
                     }
                     case BNC_SCRAP:
@@ -1672,10 +1694,15 @@ namespace game
                         break;
 
                     case BNC_BURNINGDEBRIS:
+                    {
                         int flamesColor = (rnd(2) ? 0x993A00 : 0x856611);
                         if(!rnd(2)) particle_splash(PART_SMOKE, 1, 1800 + rnd(400), pos, 0x282828, 2.f, 50, -100, 12, hasShrooms());
                         particle_splash(PART_FIRE_BALL, 1, 175, pos, flamesColor, 1.f, 20, 0, 4, hasShrooms());
                         particle_splash(PART_FIRE_BALL, 1, 175, bnc.o, flamesColor, 1.f, 20, 0, 4, hasShrooms());
+                        break;
+                    }
+                    case BNC_LIGHT:
+                        adddynlight(pos, 115, vec(0.25f, 0.12f, 0.0f), 0, 0, L_VOLUMETRIC|L_NOSHADOW|L_NOSPEC);
                         break;
                 }
             }
@@ -1732,7 +1759,7 @@ namespace game
     void updateweapons(int curtime)
     {
         updateprojectiles(curtime);
-        if(player1->clientnum>=0 && player1->state==CS_ALIVE) shoot(player1, worldpos); // only shoot when connected to server
+        if(player1->clientnum>=0 && player1->state==CS_ALIVE) updateAttacks(player1, worldpos); // only shoot when connected to server
         updatebouncers(curtime); // need to do this after the player shoots so bouncers don't end up inside player's BB next frame
         gameent *following = followingplayer();
         if(!following) following = player1;

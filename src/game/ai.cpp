@@ -339,10 +339,16 @@ namespace ai
         return randomnode(d, b, d->feetpos(), guard, wander);
     }
 
-    int needpursue(gameent *d)
+    bool shortRangeGun(int gun)
     {
-        if((d->gunselect>=GUN_M_BUSTER && d->gunselect<=GUN_M_FLAIL) || d->gunselect==GUN_NINJA || (d->character==C_KAMIKAZE && d->abilitymillis[ABILITY_2])) return 1;
-        else return 0;
+        return (gun == GUN_FLAMETHROWER || gun == GUN_MOSSBERG || gun == GUN_MOLOTOV || gun == GUN_HYDRA);
+    }
+
+    bool needpursue(gameent *d)
+    {
+        int gun = d->gunselect;
+        if(shortRangeGun(gun) || (gun>=GUN_M_BUSTER && gun<=GUN_M_FLAIL) || gun==GUN_NINJA || (d->character==C_KAMIKAZE && d->abilitymillis[ABILITY_2])) return true;
+        else return false;
     }
 
     bool badhealth(gameent *d) { return d->health < (300 + (d->skill * 5)); }
@@ -1132,6 +1138,7 @@ namespace ai
 
     int process(gameent *d, aistate &b)
     {
+        int gun = d->gunselect;
         int result = 0, stupify = d->skill <= 10+rnd(15) ? rnd(d->skill*1000) : 0, skmod = 101-d->skill;
         float frame = d->skill <= 100 ? float(lastmillis-d->ai->lastrun)/float(max(skmod,1)*10) : 1;
         vec dp = d->headpos();
@@ -1155,17 +1162,18 @@ namespace ai
             d->ai->spot = vec(0, 0, 0);
         }
 
-        if(d->abilitymillis[ABILITY_3] && d->character==C_PHYSICIST && rndevent(85)) d->jumping = true;
+        if(d->character==C_KAMIKAZE && !d->mana && d->abilitymillis[ABILITY_2] < 100 )
+        {
+            gunselect(GUN_KAMIKAZE, d);
+            gun = GUN_KAMIKAZE;
+        }
+        if(d->character==C_PHYSICIST && d->abilitymillis[ABILITY_3] && rndevent(85)) d->jumping = true;
 		else if(!d->ai->dontmove || (d->boostmillis[B_JOINT] && rndevent(96))) jumpto(d, b, d->ai->spot);
 
         gameent *e = getclient(d->ai->enemy);
         bool enemyok = e && targetable(d, e);
 
-        if(enemyok && (d->character==C_KAMIKAZE || d->character==C_NINJA || d->gunselect==GUN_FLAMETHROWER))
-        {
-            makeroute(d, b, e->o);
-            if(d->abilitymillis[ABILITY_2]<500 && d->abilitymillis[ABILITY_2] && d->character==C_KAMIKAZE) d->gunselect=GUN_KAMIKAZE;
-        }
+        if(enemyok && (d->character==C_KAMIKAZE || d->character==C_NINJA || shortRangeGun(gun))) makeroute(d, b, e->o);
 
         if(!enemyok || d->skill >= 50)
         {
@@ -1182,7 +1190,7 @@ namespace ai
                         {
                             case C_PRIEST: case C_SHOSHONE: if(d->mana > 70 && targetDistance < 750) requestAbility(d, ABILITY_3); break;
                             case C_KAMIKAZE:
-                                if(targetDistance < 500 && d->mana == 100) requestAbility(d, ABILITY_2);
+                                if(targetDistance < 500 && d->mana) requestAbility(d, ABILITY_2);
                                 break;
                             case C_SPY:
                                 if(d->mana >= 40 && targetDistance < 700 && !d->abilitymillis[ABILITY_2] && !rnd(2)) requestAbility(d, ABILITY_1);
@@ -1200,7 +1208,7 @@ namespace ai
         }
         if(enemyok)
         {
-            int atk = guns[d->gunselect].attacks[ACT_SHOOT];
+            int atk = guns[gun].attacks[ACT_SHOOT];
             vec ep = getaimpos(d, atk, e);
             float yaw, pitch;
             getyawpitch(dp, ep, yaw, pitch);
@@ -1219,14 +1227,14 @@ namespace ai
                     d->ai->becareful = false;
                 }
                 scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, sskew);
-                if(insight || quick || (hasseen && (d->gunselect==GUN_PLASMA || d->gunselect==GUN_MINIGUN || d->gunselect==GUN_S_ROCKETS || d->gunselect==GUN_S_GAU8)))
+                if(insight || quick || (hasseen && (gun==GUN_PLASMA || gun==GUN_MINIGUN || gun==GUN_S_ROCKETS || gun==GUN_S_GAU8)))
                 {
                     if(canshoot(d, atk, e) && hastarget(d, atk, b, e, yaw, pitch, dp.squaredist(ep)))
                     {
                         if(d->o.dist(e->o) < (250 - d->skill)) d->aiming = false;
                         else d->aiming = true;
 
-                        d->jumping = ((d->gunselect==GUN_FIREWORKS || d->gunselect==GUN_SMAW || d->gunselect==GUN_S_NUKE || d->gunselect==GUN_S_ROCKETS) && !idle);
+                        d->jumping = ((gun==GUN_FIREWORKS || gun==GUN_SMAW || gun==GUN_S_NUKE || gun==GUN_S_ROCKETS) && !idle);
                         d->attacking = ACT_SHOOT;
                         d->ai->lastaction = lastmillis;
                         result = 3;
@@ -1434,7 +1442,7 @@ namespace ai
             if(allowmove)
             {
                 if(!request(d, b)) target(d, b, needpursue(d) ? 1 : 0, b.idle ? true : false);
-                shoot(d, d->ai->target);
+                updateAttacks(d, d->ai->target);
             }
             if(!intermission)
             {

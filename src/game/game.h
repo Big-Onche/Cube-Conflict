@@ -358,17 +358,18 @@ static struct itemstat { int add, max, sound; const char *ident; int info; } ite
     // items
     {250,     1000, S_ITEMHEALTH,   "Item_Health",          0},
     {500,     2500, S_COCHON,       "Item_GrilledPig",      0},
-    {30000,  45000, S_ITEMSTEROS,   "STEROIDES",            B_ROIDS},
-    {40000, 120000, S_ITEMCHAMPIS,  "CHAMPIS",              B_SHROOMS},
-    {40000,  60000, S_ITEMEPO,      "EPO",                  B_EPO},
-    {30000,  90000, S_ITEMJOINT,    "JOINT",                B_JOINT},
-    {750,      750, S_ITEMBBOIS,    "BOUCLIER EN BOIS",     A_WOOD},
-    {1250,    1250, S_ITEMBFER,     "BOUCLIER DE FER",      A_IRON},
-    {2000,    2000, S_ITEMBOR,      "BOUCLIER D'OR",        A_GOLD},
-    {1500,    1500, S_ITEMBMAGNET,  "BOUCLIER MAGNETIQUE",  A_MAGNET},
-    {3000,    3000, S_ITEMARMOUR,   "ARMURE ASSISTEE",      A_POWERARMOR},
+    {30000,  45000, S_ITEMSTEROS,   "Item_Roids",           B_ROIDS},
+    {40000, 120000, S_ITEMCHAMPIS,  "Item_Shrooms",         B_SHROOMS},
+    {25000,  50000, S_ITEMEPO,      "Item_Epo",             B_EPO},
+    {30000,  90000, S_ITEMJOINT,    "Item_Joint",           B_JOINT},
+    {750,      750, S_ITEMBBOIS,    "Item_WoodShield",      A_WOOD},
+    {1250,    1250, S_ITEMBFER,     "Item_IronShield",      A_IRON},
+    {2000,    2000, S_ITEMBOR,      "Item_GoldShield",      A_GOLD},
+    {1500,    1500, S_ITEMBMAGNET,  "Item_MagnetShield",    A_MAGNET},
+    {3000,    3000, S_ITEMARMOUR,   "Item_PowerArmor",      A_POWERARMOR},
     {50,       150, S_ITEMMANA,     "Item_Mana",            0}
 };
+
 
 #define MAXRAYS 25
 #define EXP_SELFDAMDIV 1
@@ -464,7 +465,7 @@ static const struct classesConfig { const char *hatDir; int damage, resistance, 
     { "hats/ninja",       85,   90,   75,   125, { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },
     { "hats/vampire",    110,   65,  110,   110, { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },
     { "hats/wizard",     100,   85,   90,   100, { {30,  250, 2000, S_WIZ_1}, {40,  4000, 5000, S_WIZ_2}, {60, 3000,  6000, S_WIZ_3} } },
-    { "hats/kamikaze",   100,  100,   70,   115, { {0,     0,    0,      -1}, {100, 5000, 5000, S_TIMER}, {0,     0,     0,      -1} } },
+    { "hats/kamikaze",   100,  100,   70,   115, { {0,     0,    0,      -1}, {100, 3000, 3000, S_TIMER}, {0,     0,     0,      -1} } },
     { "hats/reaper",     120,   85,   90,    95, { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },
     { "hats/physicist",   90,   85,   85,    95, { {40, 4000, 3000, S_PHY_1}, {50,  5000, 7000, S_PHY_2}, {65, 6000,  9000, S_PHY_3} } },
     { "hats/camper",     100,   60,  135,    80, { {0,     0,    0,      -1}, {0,      0,    0,      -1}, {0,     0,     0,      -1} } },
@@ -1074,7 +1075,7 @@ namespace game
     typedef void (*inventoryCallback)(int gunId);
     extern void findSpecialWeapon(gameent *d, int baseWeapon, int maxWeapons, inventoryCallback callback);
     extern int getweapon(const char *name);
-    extern void shoot(gameent *d, const vec &targ, bool isMonster = false);
+    extern void updateAttacks(gameent *d, const vec &targ, bool isMonster = false);
     extern void doaction(int act);
     extern void shoteffects(int atk, const vec &from, const vec &to, gameent *d, bool local, int id, int prevaction, bool isMonster = false);
     extern void explode(bool local, gameent *owner, const vec &v, const vec &vel, dynent *safe, int dam, int atk);
