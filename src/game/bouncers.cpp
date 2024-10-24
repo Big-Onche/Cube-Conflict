@@ -245,15 +245,29 @@ namespace bouncers
                     if(numBounces)
                     {
                         bool oddBounces = (numBounces % 2 != 0);
-
                         bnc.yaw += oddBounces ? - rot : rot;
                         bnc.pitch += oddBounces ? rot : - rot;
                     }
 
-                    if(bouncerType==BNC_MOLOTOV || bouncerType == BNC_GRENADE) bnc.roll += (bnc.seed ? 2 : -2);
+                    if(bouncerType==BNC_MOLOTOV || bouncerType == BNC_GRENADE)
+                    {
+                        int rot = (bnc.seed ? 2 : -2);
+                        if(bouncerType == BNC_GRENADE) rot *= 3;
+                        bnc.roll += rot;
+                        bnc.yaw -= rot;
+                        bnc.pitch += rot;
+                    }
                     else bnc.roll += rot;
                 }
                 else bnc.pitch = lerp(bnc.pitch, 180, 0.5f);
+            }
+
+            if(bouncerType == BNC_MOLOTOV)
+            {
+                modelattach a[2];
+                bnc.particles = vec(-1, -1, -1);
+                a[0] = modelattach("tag_particles", &bnc.particles);
+                rendermodel(getPath(bouncerType, bnc.variant), ANIM_MAPMODEL|ANIM_LOOP, pos, bnc.yaw, bnc.pitch, bnc.roll, MDL_NOBATCH, NULL, a[0].tag ? a : NULL);
             }
 
             rendermodel(getPath(bouncerType, bnc.variant), ANIM_MAPMODEL|ANIM_LOOP, pos, bnc.yaw, bnc.pitch, bnc.roll, MDL_CULL_VFC|MDL_CULL_EXTDIST|MDL_CULL_OCCLUDED);
@@ -305,7 +319,10 @@ namespace bouncers
                         break;
 
                     case BNC_MOLOTOV:
-                        particle_splash(PART_SMOKE, 3, 180, pos, 0x6A6A6A, 2, 40, 50, 0, hasShrooms());
+                        particle_splash(PART_FIRE_BALL, 2, 80, bnc.particles, 0xFFC864, 1, 30, 30, 0, hasShrooms());
+                        particle_splash(PART_SMOKE, 3, 180, bnc.particles, 0x444444, 2, 40, 50, 0, hasShrooms());
+                        particle_splash(PART_AR, 2, 250, bnc.particles, 0xFFFFFF, 2, 40, 50, 5);
+                        //particle_splash(PART_SMOKE, 3, 180, pos, 0x6A6A6A, 2, 40, 50, 0, hasShrooms());
                         break;
 
                     case BNC_BURNINGDEBRIS:

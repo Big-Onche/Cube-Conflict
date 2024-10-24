@@ -810,7 +810,7 @@ struct gameent : dynent, gamestate
     gameent() : entityId(entitiesIds::getNewId()), weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0),
                 lifesequence(0), respawned(-1), suicided(-1), lastpain(0), lastfootstep(0), killstreak(0), frags(0), flags(0), deaths(0),
                 totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0),
-                skin{0, 0, 0}, character(0), level(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1)
+                skin{0, 0, 0}, character(0), level(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1), weed(-1, -1, -1), balles(-1, -1, -1)
     {
         loopi(3) lastability[i] = -1;
         name[0] = info[0] = 0;
@@ -1159,8 +1159,9 @@ namespace bouncers
         int offsetmillis;
         int id;
         bool inwater;
+        vec particles;
 
-        bouncer() : entityId(entitiesIds::getNewId()), bounces(0), roll(0), variant(0)
+        bouncer() : entityId(entitiesIds::getNewId()), bounces(0), roll(0), variant(0), particles(-1, -1, -1)
         {
             type = ENT_BOUNCE;
         }
