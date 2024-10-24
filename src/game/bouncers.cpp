@@ -62,7 +62,7 @@ namespace bouncers
 
     vector<bouncer *> curBouncers;
 
-    void add(const vec &from, const vec &to, bool local, int id, gameent *owner, int type, int lifetime, int speed)
+    void add(const vec &from, const vec &to, bool local, int id, gameent *owner, int type, int lifetime, int speed, vec2 yawPitch)
     {
         bouncer &bnc = *curBouncers.add(new bouncer);
         bnc.o = from;
@@ -75,6 +75,14 @@ namespace bouncers
         bnc.bouncetype = type;
         bnc.id = local ? lastmillis : id;
         bnc.inwater = ((lookupmaterial(bnc.o) & MAT_WATER) == MAT_WATER);
+        bnc.seed = rnd(2);
+
+        if(!yawPitch.iszero())
+        {
+            bnc.yaw = yawPitch.x;
+            bnc.pitch = yawPitch.y;
+        }
+
         if(bouncers[type].variants) bnc.variant = rnd(bouncers[type].variants) + 1;
         else bnc.variant = 0;
 
@@ -107,6 +115,7 @@ namespace bouncers
         if(p.isneg() || ((camera1->o.dist(p) > bouncers[type].cullDist) && type!=BNC_GRENADE)) return; // culling distant ones, except grenades, grenades are important
 
         vec dir;
+        vec2 yawPitch;
         if(!speed) speed = 50 + rnd(20);
 
         switch(type)
@@ -116,6 +125,8 @@ namespace bouncers
             case BNC_CARTRIDGE:
                 vecfromyawpitch(d->yaw, 0, 0, -50, dir);
                 dir.add(vec(-10 + rnd(21), -10 + rnd(21), 100));
+                yawPitch.x = camera1->yaw;
+                yawPitch.y = camera1->pitch;
                 break;
             case BNC_GLASS:
                 dir = vec(-150 + rnd(301), -150 + rnd(301), rnd(50));
@@ -130,16 +141,25 @@ namespace bouncers
         vec to = vec(dir).mul(speed).add(vel); // Combine direction with player's momentum
         to.add(p);
 
-        add(p, to, true, 0, d, type, lifetime, speed);
+        add(p, to, true, 0, d, type, lifetime, speed, yawPitch);
     }
 
-    void bounced(physent *d, const vec &surface)
+    void bounceEffect(physent *d, const vec &surface)
     {
-        if(d->type != ENT_BOUNCE) return;
         bouncer *b = (bouncer *)d;
 
-        if(bouncers[b->bouncetype].bounceSoundRad && b->bounces < 5 && b->type != BNC_LIGHT) playSound(bouncers[b->bouncetype].bounceSound, b->o, bouncers[b->bouncetype].bounceSoundRad, bouncers[b->bouncetype].bounceSoundRad / 2, SND_LOWPRIORITY|bouncers[b->bouncetype].soundFlag);
-        if(b->bouncetype == BNC_GRENADE) addstain(STAIN_PLASMA_GLOW, vec(b->o).sub(vec(surface).mul(b->radius)), surface, 4.f, 0x0000FF);
+        if(d->type != ENT_BOUNCE || b->type == BNC_LIGHT) return;
+
+        if(bouncers[b->bouncetype].bounceSoundRad && b->bounces < 5)
+        {
+            int soundRadius = bouncers[b->bouncetype].bounceSoundRad;
+            playSound(bouncers[b->bouncetype].bounceSound, b->o, soundRadius, soundRadius * 0.5f, SND_LOWPRIORITY|bouncers[b->bouncetype].soundFlag);
+        }
+
+        if(b->bouncetype == BNC_GRENADE)
+        {
+            addstain(STAIN_PLASMA_GLOW, vec(b->o).sub(vec(surface).mul(b->radius)), surface, 4.f, 0x0000FF);
+        }
 
         b->bounces++;
     }
@@ -196,57 +216,65 @@ namespace bouncers
                 }
                 delete curBouncers.remove(i--);
             }
-            else
-            {
-                bnc.roll += old.sub(bnc.o).magnitude()/(4*RAD);
-                bnc.offsetmillis = max(bnc.offsetmillis-time, 0);
-            }
+            else bnc.offsetmillis = max(bnc.offsetmillis-time, 0);
         }
     }
 
     void render()
     {
         bool isPaused = game::ispaused();
-        float yaw, pitch;
+
         loopv(curBouncers)
         {
             bouncer &bnc = *curBouncers[i];
             vec pos(bnc.o);
             pos.add(vec(bnc.offset).mul(bnc.offsetmillis/float(OFFSETMILLIS)));
-            vec vel(bnc.vel);
-            pitch = -bnc.roll;
-            yaw = -bnc.yaw;
 
             bool inWater = ((lookupmaterial(pos) & MATF_VOLUME) == MAT_WATER);
+            int bouncerType = bnc.bouncetype;
+            int numBounces = bnc.bounces;
+            float magnitude = bnc.vel.magnitude();
+            bool stopped = (numBounces > 4);
 
             if(!isPaused)
             {
-                if(vel.magnitude() <= 3.f)
+                if(!stopped)
                 {
-                    yaw = bnc.lastyaw;
-                    pitch = bnc.lastpitch;
+                    float rot = (magnitude / 4.f);
+
+                    if(numBounces)
+                    {
+                        bool oddBounces = (numBounces % 2 != 0);
+
+                        bnc.yaw += oddBounces ? - rot : rot;
+                        bnc.pitch += oddBounces ? rot : - rot;
+                    }
+
+                    if(bouncerType==BNC_MOLOTOV || bouncerType == BNC_GRENADE) bnc.roll += (bnc.seed ? 2 : -2);
+                    else bnc.roll += rot;
                 }
-                else
-                {
-                    vectoyawpitch(vel, yaw, pitch);
-                    yaw += bnc.bounces < 5 ? 75 + rnd(31) : 90;
-                    bnc.lastpitch = pitch;
-                }
+                else bnc.pitch = lerp(bnc.pitch, 180, 0.5f);
             }
 
-            rendermodel(getPath(bnc.bouncetype, bnc.variant), ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, 0, MDL_CULL_VFC|MDL_CULL_EXTDIST|MDL_CULL_OCCLUDED);
+            rendermodel(getPath(bouncerType, bnc.variant), ANIM_MAPMODEL|ANIM_LOOP, pos, bnc.yaw, bnc.pitch, bnc.roll, MDL_CULL_VFC|MDL_CULL_EXTDIST|MDL_CULL_OCCLUDED);
 
-            if(!isPaused && ((bnc.vel.magnitude() > 25.f && bnc.bounces < 5) || bnc.bouncetype == BNC_GRENADE))
+            if(!isPaused && (!stopped || bouncerType == BNC_GRENADE))
             {
                 vec pos(bnc.o);
                 pos.add(vec(bnc.offset).mul(bnc.offsetmillis/float(OFFSETMILLIS)));
 
-                switch(bnc.bouncetype)
+                switch(bouncerType)
                 {
                     case BNC_CASING:
+                        particle_splash(PART_SMOKE, 1, 150, pos, 0x505050, 0.8f, 50, -20, 1);
+                        break;
+
                     case BNC_BIGCASING:
+                        particle_splash(PART_SMOKE, 1, 150, pos, 0x404040, 1.75f, 50, -20, 2);
+                        break;
+
                     case BNC_CARTRIDGE:
-                        particle_splash(PART_SMOKE, 1, 150, pos, bnc.bouncetype==BNC_CARTRIDGE ? 0x252525 : 0x404040, bnc.bouncetype==BNC_CASING ? 1.0f : 1.75f, 50, -20);
+                        particle_splash(PART_SMOKE, 1, 150, pos, 0x252525, 1.5f, 50, -20, 3);
                         break;
 
                     case BNC_ROCK:

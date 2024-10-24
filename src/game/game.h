@@ -1150,8 +1150,8 @@ namespace bouncers
     struct bouncer : physent
     {
         size_t entityId;
-        int lifetime, bounces;
-        float lastyaw, lastpitch, roll;
+        int lifetime, bounces, seed;
+        float roll;
         bool local;
         gameent *owner;
         int bouncetype, variant, gun;
@@ -1170,9 +1170,9 @@ namespace bouncers
 
     extern void initPaths();
     extern void preload();
-    extern void add(const vec &from, const vec &to, bool local, int id, gameent *owner, int type, int lifetime, int speed);
+    extern void add(const vec &from, const vec &to, bool local, int id, gameent *owner, int type, int lifetime, int speed, vec2 yawPitch = vec2(0, 0));
     extern void spawn(const vec &p, const vec &vel, gameent *d, int type, int speed = 0, int lifetime = rnd(bouncersfade) + rnd(5000), bool frommonster = false);
-    extern void bounced(physent *d, const vec &surface);
+    extern void bounceEffect(physent *d, const vec &surface);
     extern void update(int curtime);
     extern void render();
     extern void remove(gameent *owner);
