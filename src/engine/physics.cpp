@@ -751,8 +751,6 @@ static bool fuzzycollideellipse(physent *d, const vec &dir, float cutoff, const 
     return true;
 }
 
-VAR(testtricol, 0, 2, 2);
-
 bool mmcollide(physent *d, const vec &dir, float cutoff, octaentities &oc) // collide with a mapmodel
 {
     const vector<extentity *> &ents = entities::getents();
@@ -777,10 +775,10 @@ bool mmcollide(physent *d, const vec &dir, float cutoff, octaentities &oc) // co
         if(d->o.reject(e.o, d->radius + rejectradius*scale)) continue;
 
         int yaw = e.attr2, pitch = e.attr3, roll = e.attr4;
-        if(mcol == COLLIDE_TRI || testtricol)
+        if(mcol == COLLIDE_TRI)
         {
             if(!m->bih && !m->setBIH()) continue;
-            switch(testtricol ? testtricol : d->collidetype)
+            switch(d==game::player1 ? COLLIDE_OBB : d->collidetype)
             {
                 case COLLIDE_ELLIPSE:
                     if(m->bih->ellipsecollide(d, dir, cutoff, e.o, yaw, pitch, roll, scale)) return true;
