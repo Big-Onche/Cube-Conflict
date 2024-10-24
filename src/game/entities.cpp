@@ -205,7 +205,7 @@ namespace entities
             else if(autowield > 0) gunselect(type - 9 + rndsweap, player1);
         }
 
-        if(d->abilitymillis[ABILITY_1] && d->character==C_PRIEST)
+        if(d->character==C_PRIEST && d->abilitymillis[ABILITY_1] && type < I_WOODSHIELD)
         {
             adddynlight(d->o, 20, vec(1.5f, 1.5f, 0.0f), 300, 50, L_NOSHADOW|L_VOLUMETRIC);
             playSound(S_PRI_1, d==hudplayer() ? vec(0, 0, 0) : d->o, 300, 150);
