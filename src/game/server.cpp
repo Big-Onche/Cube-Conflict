@@ -2545,7 +2545,8 @@ namespace server
         servstate &gs = ci->state;
         int wait = millis - gs.lastshot;
 
-        if(ci->state.armourtype==A_POWERARMOR && !ci->state.armour && ci->state.ammo[GUN_POWERARMOR] && ci->state.gunselect==GUN_POWERARMOR) gs.gunwait=0;
+        if(gs.armourtype == A_POWERARMOR && !gs.armour && gs.ammo[GUN_POWERARMOR] && gs.gunselect==GUN_POWERARMOR) gs.gunwait=0;
+        if(ci->character == C_KAMIKAZE && !gs.mana && !gs.abilitymillis[ABILITY_2] && gs.ammo[GUN_KAMIKAZE]) gs.gunwait = 0;
 
         if(!gs.isalive(gamemillis) || wait<gs.gunwait || !validatk(atk) || !validClass(ci->character)) return;
 
@@ -2557,7 +2558,7 @@ namespace server
         gs.lastshot = millis;
 
         float waitfactor = 1;
-        if(ci->character==C_PRIEST && ci->state.abilitymillis[ABILITY_3]) waitfactor = 2.5f + ((4000 - ci->state.abilitymillis[ABILITY_3])/1000);
+        if(ci->character==C_PRIEST && gs.abilitymillis[ABILITY_3]) waitfactor = 2.5f + ((4000 - gs.abilitymillis[ABILITY_3])/1000);
 
         if(gs.boostmillis[B_SHROOMS]) waitfactor *= ci->character==C_JUNKIE ? 1.75f : 1.5f;
         gs.gunwait = attacks[atk].attackdelay/waitfactor;

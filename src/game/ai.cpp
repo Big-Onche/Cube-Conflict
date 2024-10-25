@@ -133,7 +133,7 @@ namespace ai
         return false;
     }
 
-    const int aiskew[NUMGUNS] = { 175, 1, 1, 30, 30, 1, 1, 15, 40, 1, 1, 3, 25, 10, 25, 1, 5, 1, 30, 1, 1, 1, 1, 1, 1, 1, 1 };
+    const int aiskew[NUMGUNS] = { 175, 1, 1, 30, 30, 1, 1, 15, 40, 1, 1, 3, 25, 10, 25, 1, 5, 1, 50, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 
     float randomAimOffset(float radius, float skew, int gun, int skill)
     {
@@ -1162,7 +1162,7 @@ namespace ai
             d->ai->spot = vec(0, 0, 0);
         }
 
-        if(d->character==C_KAMIKAZE && !d->mana && d->abilitymillis[ABILITY_2] < 100 )
+        if(d->character==C_KAMIKAZE && kamikazeExploding(d))
         {
             gunselect(GUN_KAMIKAZE, d);
             gun = GUN_KAMIKAZE;
@@ -1333,7 +1333,7 @@ namespace ai
         switch(d->character)
         {
             case C_KAMIKAZE:
-                if(hasrange(d, e, GUN_KAMIKAZE) && d->ammo[GUN_KAMIKAZE])
+                if((hasrange(d, e, GUN_KAMIKAZE) && d->ammo[GUN_KAMIKAZE]) || kamikazeExploding(d))
                 {
                     gunselect(GUN_KAMIKAZE, d);
                     goto process;

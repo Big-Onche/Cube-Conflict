@@ -397,7 +397,7 @@ static const struct attackinfo { int gun, action, picksound, sound, middistsnd, 
     { GUN_GRAP1,        ACT_SHOOT, S_WPLOADFUTUR,     S_GRAP1,        S_GRAP1_FAR,                    -1,   12,  200,  250,  30, 300, 3, 1750,  -4, 8000,  1,  -600,  20, 0, 1},
     { GUN_FIREWORKS,    ACT_SHOOT, S_WPLOADSMALL,     S_FIREWORKS,    S_FIREWORKS_FAR,                -1,    3, 1100,  900,  35, 200, 2, 1500,  35,  600,  1,   500,  80, 300, 1},
     { GUN_MOLOTOV,      ACT_SHOOT, S_WPLOADSLOWWOOSH, S_MOLOTOV,      -1,                             -1,    3, 1350,  500,  20,  50, 0,  300, -10, 1500,  1,   100, 250, 10000, 1},
-    { GUN_GLOCK,        ACT_SHOOT, S_WPLOADSMALL,     S_GLOCK,        S_GLOCK_FAR,           S_FAR_LIGHT,   10,  100,  280,   5, 150, 0, 4250,   7, 8000,  1,    30,   3, 0, 1},
+    { GUN_GLOCK,        ACT_SHOOT, S_WPLOADSMALL,     S_GLOCK,        S_GLOCK_FAR,           S_FAR_LIGHT,   10,  150,  280,  25, 150, 0, 4250,   7, 8000,  1,    30,   3, 0, 1},
     // Super weapons
     { GUN_S_NUKE,       ACT_SHOOT, S_WPLOADBIG,       S_NUKE,         S_NUKE_FAR,             S_NUKE_FAR,    1, 3000,  3250,  20, 300, 2,  200,  10, 2000,  1,   400, 1500, 6000, 1},
     { GUN_S_GAU8,       ACT_SHOOT, S_WPLOADBIG,       S_GAU8,         S_GAU8_FAR,                     -1,   90,   14,   300, 150, 250, 3, 7500,   4, 8000,  1,    80,   20, 0, 1},
@@ -1011,6 +1011,8 @@ namespace game
     extern void startgame();
     extern float proximityscore(float x, float lower, float upper);
     extern void spawnplayer(gameent *);
+    extern bool powerArmorExploding(gameent *d);
+    extern bool kamikazeExploding(gameent *d);
     extern void deathstate(gameent *d, bool restore = false);
     extern void damaged(int damage, gameent *d, gameent *actor, bool local = true, int atk = 0);
     extern void killed(gameent *d, gameent *actor, int atk);

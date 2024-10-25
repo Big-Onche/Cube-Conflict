@@ -413,8 +413,9 @@ namespace game
 
                 if(d!=player1)
                 {
-                    if(d->armourtype==A_POWERARMOR && !d->armour && d->ammo[GUN_POWERARMOR]) {gunselect(GUN_POWERARMOR, d, true); d->gunwait=0;}
                     if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
+                    if(powerArmorExploding(d)) { gunselect(GUN_POWERARMOR, d, true); d->gunwait = 0; }
+                    if(kamikazeExploding(d)) { gunselect(GUN_KAMIKAZE, d); d->gunwait = 0; }
                     updatePlayersBoosts(curtime, d);
                     updateAbilitiesSkills(curtime, d);
                 }
@@ -492,6 +493,16 @@ namespace game
         return smoothVel;
     }
 
+    bool powerArmorExploding(gameent *d)
+    {
+        return !player1->armour && d->ammo[GUN_POWERARMOR] && d->armourtype == A_POWERARMOR;
+    }
+
+    bool kamikazeExploding(gameent *d)
+    {
+        return !d->mana && !d->abilitymillis[ABILITY_2] && d->ammo[GUN_KAMIKAZE];
+    }
+
     void updateworld()        // main game update loop
     {
         if(!maptime) { maptime = lastmillis; maprealtime = totalmillis; return; }
@@ -505,7 +516,8 @@ namespace game
         if(player1->state==CS_ALIVE && !intermission)   // checking player1's shits
         {
             checkInventoryGuns();
-            if(player1->armourtype==A_POWERARMOR && player1->ammo[GUN_POWERARMOR] && !player1->armour) {gunselect(GUN_POWERARMOR, player1, true); player1->gunwait=0;}
+            if(powerArmorExploding(player1)) { gunselect(GUN_POWERARMOR, player1, true); player1->gunwait = 0; }
+            if(kamikazeExploding(player1)) { gunselect(GUN_KAMIKAZE, player1); player1->gunwait = 0; }
 
             if(IS_ON_OFFICIAL_SERV) // checking for achievements
             {

@@ -27,14 +27,12 @@ namespace game
 
     void gunselect(int gun, gameent *d, bool force, bool shortcut)
     {
-        if((gun==GUN_POWERARMOR && !force) || !validgun(gun)) return;
-        if(gun != d->gunselect)
-        {
-            if(d==player1 && gun != GUN_POWERARMOR && !shortcut) player1->lastweap = gun;
-            addmsg(N_GUNSELECT, "rci", d, gun);
-            playSound(attacks[gun-GUN_ELECTRIC].picksound, d==hudplayer() ? vec(0, 0, 0) : d->o, 200, 50, NULL, d->entityId);
-            d->lastgunselect = lastmillis;
-        }
+        if((gun==GUN_POWERARMOR && !force) || !validgun(gun) || gun==d->gunselect) return;
+
+        if(d==player1 && gun != GUN_POWERARMOR && !shortcut) player1->lastweap = gun;
+        addmsg(N_GUNSELECT, "rci", d, gun);
+        playSound(attacks[gun-GUN_ELECTRIC].picksound, d==hudplayer() ? vec(0, 0, 0) : d->o, 200, 50, NULL, d->entityId);
+        d->lastgunselect = lastmillis;
         d->gunselect = gun;
     }
 
@@ -1027,17 +1025,15 @@ namespace game
 
         if(!updateWeaponsCadencies(d, gun, attacktime, specialAbility)) return;
 
-        if(d->character == C_KAMIKAZE && !d->mana && !d->abilitymillis[ABILITY_2] && d->ammo[GUN_KAMIKAZE])
+        if(d->character == C_KAMIKAZE && kamikazeExploding(d))
         {
-            gunselect(GUN_KAMIKAZE, d);
             gun = GUN_KAMIKAZE;
             d->attacking = ACT_SHOOT;
         }
 
-        if(d->armourtype==A_POWERARMOR && !d->armour && !d->powerarmorexploded && d->ammo[GUN_POWERARMOR])
+        if(powerArmorExploding(d) && !d->powerarmorexploded)
         {
             d->wasAttacking = d->attacking;
-            gunselect(GUN_POWERARMOR, d, true);
             gun = GUN_POWERARMOR;
             d->attacking = ACT_SHOOT;
             d->powerarmorexploded = true;
