@@ -3,8 +3,6 @@
 #include "engine.h"
 #include "gfx.h"
 #include "stats.h"
-#include "vr.h"
-
 #include "steam_api.h"
 
 #ifdef SDL_VIDEO_DRIVER_X11
@@ -509,7 +507,7 @@ extern int fullscreen;
 void setfullscreen(bool enable)
 {
     if(!screen) return;
-    if(!enable && (scr_w > desktopw || scr_h > desktoph) && !virtualreality)
+    if(!enable && (scr_w > desktopw || scr_h > desktoph))
     {
         fullscreen = true;
         conoutf("Cannot desactivate fake fullscreen while oversampling!");
@@ -625,7 +623,7 @@ void setupscreen()
 
     if(scr_h < 0) scr_h = SCR_DEFAULTH;
     if(scr_w < 0) scr_w = (scr_h*desktopw)/desktoph;
-    if((scr_w > desktopw || scr_h > desktoph) && !fullscreen && !virtualreality) { fullscreen = true; setfullscreen(true); }
+    if((scr_w > desktopw || scr_h > desktoph) && !fullscreen) { fullscreen = true; setfullscreen(true); }
 
     int winx = SDL_WINDOWPOS_UNDEFINED, winy = SDL_WINDOWPOS_UNDEFINED, winw = scr_w, winh = scr_h, flags = SDL_WINDOW_RESIZABLE;
     if(fullscreen)
@@ -966,7 +964,6 @@ void checkinput()
 
 void swapbuffers(bool overlay)
 {
-    vr::render();
     gle::disable();
     SDL_GL_SwapWindow(screen);
 }
@@ -1300,8 +1297,6 @@ int main(int argc, char **argv)
     inbetweenframes = true;
     renderbackground("");
 
-    vr::init();
-
     logoutf("init: world");
     camera1 = player = game::iterdynents(0);
     emptymap(0, true, NULL, false);
@@ -1400,7 +1395,6 @@ int main(int argc, char **argv)
         updatetime();
         game::dotime();
 
-        vr::update();
         checkinput();
         UI::update();
         menuprocess();

@@ -1812,7 +1812,6 @@ void modifygravity(physent *pl, bool water, int curtime)
 // main physics routine, moves a player/monster for a curtime step
 // moveres indicated the physics precision (which is lower for monsters and multiplayer prediction)
 // local is false for multiplayer prediction
-#include "vr.h"
 
 bool moveplayer(physent *pl, int moveres, bool local, int curtime)
 {
@@ -1873,7 +1872,7 @@ bool moveplayer(physent *pl, int moveres, bool local, int curtime)
 
     // automatically apply smooth roll when strafing
 
-    if(pl->strafe && maxroll && !vr::isEnabled()) pl->roll = clamp(pl->roll - pow(clamp(1.0f + pl->strafe*pl->roll/maxroll, 0.0f, 1.0f), 0.33f)*pl->strafe*curtime*straferoll, -maxroll, maxroll);
+    if(pl->strafe && maxroll) pl->roll = clamp(pl->roll - pow(clamp(1.0f + pl->strafe*pl->roll/maxroll, 0.0f, 1.0f), 0.33f)*pl->strafe*curtime*straferoll, -maxroll, maxroll);
     else pl->roll *= curtime == PHYSFRAMETIME ? faderoll : pow(faderoll, curtime/float(PHYSFRAMETIME));
 
     // play sounds on water transitions
