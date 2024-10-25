@@ -2743,6 +2743,7 @@ void gl_drawview()
     }
     else
     {
+        postfx::updateRadialBlur(game::getPlayerVelocity(), game::hudplayer()->boostmillis[B_SHROOMS]);
         postfx::renderRadialBlur();
         GLERROR;
     }

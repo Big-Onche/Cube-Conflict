@@ -511,8 +511,6 @@ namespace game
         physicsframe();
         ai::navigate();
 
-        postfx::updateRadialBlur(getPlayerVelocity(), hudplayer()->boostmillis[B_SHROOMS]);
-
         if(player1->state==CS_ALIVE && !intermission)   // checking player1's shits
         {
             checkInventoryGuns();
