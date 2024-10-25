@@ -127,6 +127,7 @@ CLIENT_OBJS= \
         game/scoreboard.o \
         game/server.o \
         game/waypoint.o \
+        game/projectiles.o \
         game/bouncers.o \
         game/weapon.o
 

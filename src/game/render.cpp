@@ -677,7 +677,7 @@ namespace game
         rendermonsters();
         entities::renderentities();
         bouncers::render();
-        renderprojectiles();
+        projectiles::render(curtime);
 
         if(exclude) renderplayer(exclude, 1, MDL_ONLYSHADOW);
         else if(!f && (player1->state==CS_ALIVE || (player1->state==CS_EDITING && thirdPerson) || (player1->state==CS_DEAD && !hidedead))) renderplayer(player1, 1, thirdPerson ? 0 : MDL_ONLYSHADOW);
@@ -936,7 +936,7 @@ namespace game
         if(hudgun) preloadweapons();
         if(m_tutorial || m_sp || m_dmsp) preloadmonsters();
         bouncers::preload();
-        preloadProjectiles();
+        projectiles::preload();
         preloadplayermodel();
         entities::preloadentities();
     }

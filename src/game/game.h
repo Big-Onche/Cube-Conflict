@@ -1091,19 +1091,14 @@ namespace game
     extern void explodeeffects(int atk, gameent *d, bool local, int id = 0);
     extern void damageeffect(int damage, gameent *d, gameent *actor, int atk = 0);
     extern void gibeffect(int damage, const vec &vel, gameent *d);
+    extern void hit(int damage, dynent *d, gameent *at, const vec &vel, int atk, float info1, int info2 = 1);
     extern float intersectdist;
     extern bool intersect(dynent *d, const vec &from, const vec &to, float margin = 0, float &dist = intersectdist);
     extern dynent *intersectclosest(const vec &from, const vec &to, gameent *at, float margin = 0, float &dist = intersectdist);
-    extern void clearprojectiles();
-    extern void updateprojectiles(int curtime);
-    extern void removeprojectiles(gameent *owner);
-    extern void preloadProjectiles();
-    extern void renderprojectiles();
     extern void removeweapons(gameent *owner);
     extern void updateweapons(int curtime);
     extern void gunselect(int gun, gameent *d, bool force = false, bool shortcut = false);
     extern void weaponswitch(gameent *d);
-    extern void avoidweapons(ai::avoidset &obstacles, float radius);
     extern bool isAttacking(gameent *d);
 
     // scoreboard
@@ -1139,6 +1134,42 @@ namespace game
     extern void initGravesPaths();
     extern void initAssetsPaths();
     extern vec2 hudgunDisp;
+}
+
+namespace projectiles
+{
+    struct projectile
+    {
+        size_t entityId;
+        vec dir, o, from, to, offset;
+        float speed;
+        gameent *owner;
+        int atk;
+        bool local;
+        int offsetmillis;
+        int id;
+        int lifetime;
+        bool exploded;
+        bool inwater;
+        int projsound;
+        bool soundplaying;
+
+        projectile()
+            : entityId(entitiesIds::getNewId()) // initialize the new entityId field here
+        {}
+    };
+
+    extern vector<projectile> curProjectiles;
+
+    extern void preload();
+    extern void add(const vec &from, const vec &to, float speed, bool local, int id, gameent *owner, int atk);
+    extern void stain(const projectile &p, const vec &pos, int atk);
+    extern float distance(dynent *o, vec &dir, const vec &v, const vec &vel);
+    extern void update(int curtime);
+    extern void render(int curtime);
+    extern void avoid(ai::avoidset &obstacles, float radius);
+    extern void remove(gameent *owner);
+    extern void clear();
 }
 
 enum {BNC_GRENADE = 0, BNC_MOLOTOV, BNC_PIXEL, BNC_BURNINGDEBRIS, BNC_ROCK, BNC_BIGROCK, BNC_CASING, BNC_BIGCASING, BNC_CARTRIDGE, BNC_SCRAP, BNC_GLASS, BNC_LIGHT, NUMBOUNCERS};

@@ -1479,7 +1479,7 @@ namespace ai
         }
         extern avoidset wpavoid;
         obstacles.add(wpavoid);
-        avoidweapons(obstacles, guessradius);
+        projectiles::avoid(obstacles, guessradius);
     }
 
     void think(gameent *d, bool run)

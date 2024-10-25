@@ -146,7 +146,7 @@ namespace game
             clearmonsters();                 // all monsters back at their spawns for editing
             entities::resettriggers();
         }
-        clearprojectiles();
+        projectiles::clear();
         bouncers::clear();
         clearEntsPos();
     }
@@ -1063,7 +1063,7 @@ namespace game
     void startgame()
     {
         clearmonsters();
-        clearprojectiles();
+        projectiles::clear();
         bouncers::clear();
         clearEntsPos();
         clearGraves();

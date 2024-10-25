@@ -174,7 +174,7 @@ void disconnect(bool async, bool cleanup, bool volontaire)
         clearsleep();
         stopAllSounds();
         bouncers::clear();
-        game::clearprojectiles(); // clean up before showing menu
+        projectiles::clear(); // clean up before showing menu
         clearEntsPos();
         mainmenu = 1;
         if(gameStat[STAT_DAMMAGERECORD] < game::player1->totaldamage/10) updateStat(game::player1->totaldamage/10, STAT_DAMMAGERECORD, true);
@@ -192,7 +192,7 @@ void trydisconnect(bool local)
     UI::hideui("scoreboard");
     stopAllSounds();
     bouncers::clear();
-    game::clearprojectiles();
+    projectiles::clear();
     clearEntsPos();
     if(connpeer)
     {

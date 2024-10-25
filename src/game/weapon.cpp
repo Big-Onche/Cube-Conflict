@@ -187,93 +187,6 @@ namespace game
         loopi(attacks[atk].rays) offsetray(from, to, spread(atk, d), attacks[atk].range, rays[i], d);
     }
 
-    struct projectile
-    {
-        size_t entityId;
-        vec dir, o, from, to, offset;
-        float speed;
-        gameent *owner;
-        int atk;
-        bool local;
-        int offsetmillis;
-        int id;
-        int lifetime;
-        bool exploded;
-        bool inwater;
-        int projsound;
-        bool soundplaying;
-
-        projectile()
-            : entityId(entitiesIds::getNewId()) // initialize the new entityId field here
-        {}
-    };
-    vector<projectile> projs;
-
-    void clearprojectiles()
-    {
-        loopv(projs)
-        {
-            projectile &p = projs[i];
-            if(p.soundplaying) stopLinkedSound(p.entityId);
-        }
-        projs.shrink(0);
-    }
-
-    void newprojectile(const vec &from, const vec &to, float speed, bool local, int id, gameent *owner, int atk)
-    {
-        if(from.isneg()) return;
-        projectile &p = projs.add();
-        p.dir = vec(to).sub(from).safenormalize();
-        p.o = from;
-        p.from = from;
-        p.to = to;
-        p.offset = hudgunorigin(attacks[atk].gun, from, to, owner);
-        p.offset.sub(from);
-        p.speed = speed;
-        p.local = local;
-        p.owner = owner;
-        p.atk = atk;
-        switch(p.atk)
-        {
-            case ATK_FIREWORKS: p.lifetime= attacks[atk].ttl + rnd(400); break;
-            case ATK_CROSSBOW: p.lifetime = bouncers::bouncersfade + rnd(5000); break;
-            default: p.lifetime = attacks[atk].ttl;
-        }
-        p.exploded = false;
-        p.offsetmillis = OFFSETMILLIS;
-        p.id = local ? lastmillis : id;
-        p.inwater = (lookupmaterial(camera1->o) & MATF_VOLUME) == MAT_WATER;
-
-        switch(p.atk)
-        {
-            case ATK_PLASMA: p.projsound = S_FLYBYPLASMA; break;
-            case ATK_GRAP1: p.projsound = S_FLYBYGRAP1; break;
-            case ATK_SPOCKGUN: p.projsound = S_FLYBYSPOCK; break;
-            case ATK_SMAW: p.projsound = S_ROCKET; break;
-            case ATK_S_ROCKETS: p.projsound = S_MINIROCKET; break;
-            case ATK_S_NUKE: p.projsound = S_MISSILENUKE; break;
-            case ATK_FIREWORKS: p.projsound = S_FLYBYFIREWORKS;
-            default: p.projsound = 0;
-        }
-
-        p.soundplaying = false;
-    }
-
-    void removeprojectiles(gameent *owner)
-    {   // can't use loopv here due to strange GCC optimizer bug
-        int len = projs.length();
-        loopi(len)
-        {
-            if(projs[i].owner==owner)
-            {
-                if(projs[i].soundplaying) stopLinkedSound(projs[i].entityId);
-                removeEntityPos(projs[i].entityId);
-                projs.remove(i--);
-                len--;
-            }
-        }
-    }
-
     VARP(blood, 0, 1, 1);
 
     void damageeffect(int damage, gameent *d, gameent *actor, int atk)
@@ -410,7 +323,7 @@ namespace game
 
     int avgdmg[4];
 
-    void hit(int damage, dynent *d, gameent *at, const vec &vel, int atk, float info1, int info2 = 1)
+    void hit(int damage, dynent *d, gameent *at, const vec &vel, int atk, float info1, int info2)
     {
         if(at==player1 && d!=at)
         {
@@ -507,23 +420,11 @@ namespace game
         hit(damage, d, at, vec(to).sub(from).safenormalize(), atk, from.dist(to), rays);
     }
 
-    float projdist(dynent *o, vec &dir, const vec &v, const vec &vel)
-    {
-        vec middle = o->o;
-        middle.z += (o->aboveeye-o->eyeheight)/2;
-        dir = vec(middle).sub(v).add(vec(vel).mul(5)).safenormalize();
-
-        float low = min(o->o.z - o->eyeheight + o->radius, middle.z),
-              high = max(o->o.z + o->aboveeye - o->radius, middle.z);
-        vec closest(o->o.x, o->o.y, clamp(v.z, low, high));
-        return max(closest.dist(v) - o->radius, 0.0f);
-    }
-
     void radialeffect(dynent *o, const vec &v, const vec &vel, int qdam, gameent *at, int atk)
     {
         if(o->state!=CS_ALIVE) return;
         vec dir;
-        float dist = projdist(o, dir, v, vel);
+        float dist = projectiles::distance(o, dir, v, vel);
         if(dist<attacks[atk].exprad)
         {
             float damage = o==at && atk==ATK_POWERARMOR ? 0 : attacks[atk].damage*(1-dist/EXP_DISTSCALE/attacks[atk].exprad);
@@ -652,75 +553,20 @@ namespace game
         }
     }
 
-    void projstain(const projectile &p, const vec &pos, int atk)
-    {
-        vec dir = vec(p.dir).neg();
-
-        switch(atk)
-        {
-            case ATK_PLASMA:
-                addstain(STAIN_PLASMA_SCORCH, pos, dir, 7.5f);
-                addstain(STAIN_BULLET_HOLE, pos, dir, 7.5f, 0x882200);
-                return;
-            case ATK_SMAW:
-            case ATK_KAMIKAZE:
-            case ATK_POWERARMOR:
-            case ATK_S_ROCKETS:
-            {
-                float rad = attacks[p.atk].exprad*0.35f;
-                addstain(STAIN_EXPL_SCORCH, pos, dir, rad);
-                return;
-            }
-            case ATK_MOLOTOV:
-            {
-               loopi(3) addstain(STAIN_BURN, pos, dir, attacks[p.atk].exprad);
-            }
-            case ATK_MINIGUN:
-            case ATK_SV98:
-            case ATK_AK47:
-            case ATK_S_GAU8:
-            case ATK_SKS:
-                addstain(STAIN_BULLET_HOLE, pos, dir, 1.5f+(rnd(2)));
-                addstain(STAIN_BULLET_GLOW, pos, dir, 2.0f+(rnd(2)), 0x883300);
-                return;
-            case ATK_SPOCKGUN:
-                addstain(STAIN_PLASMA_SCORCH, pos, dir, 5);
-                addstain(STAIN_SPOCK, pos, dir, 5, hasRoids(p.owner) ? 0xFF0000 : 0x22FF22);
-                return;
-            case ATK_UZI:
-            case ATK_CROSSBOW:
-            case ATK_GLOCK:
-            case ATK_FAMAS:
-                addstain(STAIN_BULLET_HOLE, pos, dir, 0.5f);
-                addstain(STAIN_BULLET_GLOW, pos, dir, 1.0f, 0x883300);
-                return;
-            case ATK_GRAP1:
-                addstain(STAIN_ELEC_GLOW, pos, dir, 5.f, 0x992299);
-                addstain(STAIN_PLASMA_SCORCH, pos, dir, 5);
-                return;
-        }
-    }
-
-    void projsplash(projectile &p, const vec &v, dynent *safe)
-    {
-        explode(p.local, p.owner, v, p.dir, safe, attacks[p.atk].damage, p.atk);
-        projstain(p, v, p.atk);
-    }
-
     void explodeeffects(int atk, gameent *d, bool local, int id)
     {
         if(local) return;
 
-        loopv(projs)
+        loopv(projectiles::curProjectiles)
         {
-            projectile &p = projs[i];
+            projectiles::projectile &p = projectiles::curProjectiles[i];
             if(p.atk == atk && p.owner == d && p.id == id && !p.local)
             {
                 vec pos = vec(p.offset).mul(p.offsetmillis/float(OFFSETMILLIS)).add(p.o);
                 explode(p.local, p.owner, pos, p.dir, NULL, 0, atk);
-                projstain(p, pos, atk);
+                projectiles::stain(p, pos, atk);
                 removeEntityPos(p.entityId);
-                projs.remove(i);
+                projectiles::curProjectiles.remove(i);
                 break;
             }
         }
@@ -735,118 +581,6 @@ namespace game
                 bouncers::curBouncers.remove(i);
                 break;
             }
-        }
-    }
-
-    bool projdamage(dynent *o, projectile &p, const vec &v)
-    {
-        if(o->state!=CS_ALIVE) return false;
-        if(!intersect(o, p.o, v, attacks[p.atk].margin)) return false;
-        projsplash(p, v, o);
-        vec dir;
-        projdist(o, dir, v, p.dir);
-        hit(attacks[p.atk].damage, o, p.owner, dir, p.atk, 0);
-        return true;
-    }
-
-    void updateprojectiles(int time)
-    {
-        bool removearrow = false;
-
-        if(projs.empty()) return;
-        loopv(projs)
-        {
-            projectile &p = projs[i];
-            p.offsetmillis = max(p.offsetmillis-time, 0);
-            vec dv;
-            float dist = p.to.dist(p.o, dv);
-            dv.mul(time/max(dist*1000/p.speed, float(time)));
-            vec v = vec(p.o).add(dv);
-            bool exploded = false;
-            hits.setsize(0);
-
-            if((p.lifetime -= time)<0 && (p.atk==ATK_FIREWORKS || p.atk==ATK_S_NUKE || p.atk==ATK_KAMIKAZE || p.atk==ATK_POWERARMOR))
-            {
-                projsplash(p, v, NULL);
-                exploded = true;
-            }
-
-            if(p.local)
-            {
-                vec halfdv = vec(dv).mul(0.5f), bo = vec(p.o).add(halfdv);
-                float br = max(fabs(halfdv.x), fabs(halfdv.y)) + 1 + attacks[p.atk].margin;
-                loopj(numdynents())
-                {
-                    dynent *o = iterdynents(j);
-                    if(p.owner==o || o->o.reject(bo, o->radius + br)) continue;
-                    if(projdamage(o, p, v)) {exploded = true; removearrow = true; break; }
-                }
-            }
-
-            if(!exploded)
-            {
-                if(dist<4)
-                {
-                    if(p.o!=p.to) // if original target was moving, reevaluate endpoint
-                    {
-                        if(raycubepos(p.o, p.dir, p.to, 0, RAY_CLIPMAT|RAY_ALPHAPOLY)>=4) continue;
-                    }
-                    if(!p.exploded) projsplash(p, v, NULL);
-                    exploded = true;
-                }
-
-                vec pos = vec(p.offset).mul(p.offsetmillis/float(OFFSETMILLIS)).add(v);
-
-                if(!p.inwater && (lookupmaterial(p.o) & MATF_VOLUME) == MAT_WATER)
-                {
-                    p.inwater = true;
-                    vec effectPos = p.o;
-                    effectPos.addz(2.5f);
-                    particles::dirSplash(PART_WATER, 0x40403A, 150, 10, 75, effectPos, vec(0, 0, 1), 2.f, 300, 15, hasShrooms());
-                    particles::dirSplash(PART_WATER, 0x50503A, 500, 5, 150, effectPos, vec(0, 0, 1), 3.f, 150, 15, hasShrooms());
-                    playSound(S_IMPACTWATER, effectPos, 250, 50, SND_LOWPRIORITY|SND_NOOCCLUSION);
-                }
-
-                if(p.atk!=ATK_SMAW && p.atk!=ATK_FIREWORKS && p.atk!=ATK_S_ROCKETS && p.atk!=ATK_S_NUKE)
-                {
-                    renderProjectilesTrails(p.owner, pos, dv, p.from, p.offset, p.atk, p.exploded);
-                }
-
-                if(p.projsound && !game::ispaused()) // play and update the sound only if the projectile is passing by
-                {
-                    bool bigRadius = (p.atk==ATK_S_NUKE || p.atk==ATK_FIREWORKS);
-
-                    if(camera1->o.dist(pos) < (bigRadius ? 800 : 400))
-                    {
-                        updateEntPos(p.entityId, pos);
-                        if(!p.soundplaying)
-                        {
-                            playSound(p.projsound, pos, bigRadius ? 800 : 400, 1, SND_LOOPED, p.entityId);
-                            p.soundplaying = true;
-                        }
-                    }
-                    else if(p.soundplaying)
-                    {
-                        p.soundplaying = false;
-                        stopLinkedSound(p.entityId);
-                        removeEntityPos(p.entityId);
-                    }
-                }
-            }
-            if(exploded)
-            {
-                if(p.local && !p.exploded) addmsg(N_EXPLODE, "rci3iv", p.owner, lastmillis-maptime, p.atk, p.id-maptime, hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
-                p.exploded = true;
-                if(p.soundplaying)
-                {
-                    stopLinkedSound(p.entityId);
-                    removeEntityPos(p.entityId);
-                    p.soundplaying = false;
-                }
-                if(p.atk != ATK_CROSSBOW) projs.remove(i--);
-                else if((p.lifetime -= time)<0 || removearrow) projs.remove(i--);
-            }
-            else p.o = v;
         }
     }
 
@@ -903,7 +637,7 @@ namespace game
             case ATK_SPOCKGUN:
             {
                 bool isPlasma = (atk == ATK_PLASMA);
-                newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
+                projectiles::add(from, to, attacks[atk].projspeed, local, id, d, atk);
                 renderMuzzleEffects(from, to, d, atk);
                 if(isHudPlayer)
                 {
@@ -930,7 +664,7 @@ namespace game
                 bool isNuke = (atk==ATK_S_NUKE);
                 bool isRockets = (atk==ATK_S_ROCKETS);
                 renderMuzzleEffects(from, to, d, atk);
-                newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
+                projectiles::add(from, to, attacks[atk].projspeed, local, id, d, atk);
                 if(isHudPlayer)
                 {
                     float recoilAmount = (isNuke ? 3.5f : (atk==ATK_FIREWORKS || isRockets ? 0.8f : 0.4f)) / recoilReduce();
@@ -950,7 +684,7 @@ namespace game
             {
                 bool isGau = (atk == ATK_S_GAU8);
                 renderMuzzleEffects(from, to, d, atk);
-                newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
+                projectiles::add(from, to, attacks[atk].projspeed, local, id, d, atk);
                 if(isHudPlayer)
                 {
                     float recoilAccel = (hudplayer()->gunaccel ? (recoilReduce() * hudplayer()->gunaccel) : 1.f);
@@ -984,7 +718,7 @@ namespace game
                 loopi(attacks[atk].rays)
                 {
                     float originOffset = 0.4f - (rnd(9) / 10.f);
-                    newprojectile(muzzleOrigin.add(vec(originOffset, originOffset, originOffset)), rays[i], 3000, false, id, d, atk);
+                    projectiles::add(muzzleOrigin.add(vec(originOffset, originOffset, originOffset)), rays[i], 3000, false, id, d, atk);
                     renderInstantImpact(from, rays[i], muzzleOrigin, atk, hasRoids(d));
                     if(i < 6)
                     {
@@ -1022,14 +756,14 @@ namespace game
                 else
                 {
                     if(!isHudPlayer) soundNearmiss(S_BIGBULLETFLYBY, from, to);
-                    newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
+                    projectiles::add(from, to, attacks[atk].projspeed, local, id, d, atk);
                     bouncers::spawn(casingOrigin, d->vel, d, BNC_BIGCASING);
                 }
                 break;
             }
 
             case ATK_CROSSBOW:
-                newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
+                projectiles::add(from, to, attacks[atk].projspeed, local, id, d, atk);
                 if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK,  8, 500, d->muzzle, 0xFF2222, 1.0f,  50, 200, 0, hasShrooms());
                 if(isHudPlayer) startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay / 1.5f, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0.2f / recoilReduce(), 0));
                 else soundNearmiss(S_FLYBYARROW, from, to);
@@ -1038,7 +772,7 @@ namespace game
             case ATK_UZI:
             case ATK_FAMAS:
             case ATK_GLOCK:
-                newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
+                projectiles::add(from, to, attacks[atk].projspeed, local, id, d, atk);
                 renderMuzzleEffects(from, to, d, atk);
                 if(isHudPlayer) startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay * 3, vec(0, 0, 0), vec(0, 0, 0), vec(0, (atk==ATK_GLOCK ? 0.2f : 0.5f) / recoilReduce(), 0), vec(0, 30, 0));
                 else soundNearmiss(S_BULLETFLYBY, from, to);
@@ -1070,7 +804,7 @@ namespace game
                 break;
             }
             case ATK_GRAP1:
-                newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
+                projectiles::add(from, to, attacks[atk].projspeed, local, id, d, atk);
                 renderMuzzleEffects(from, to, d, atk);
                 if(isHudPlayer) startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay / 1.5f, vec(0, 0, 0), vec(0, 0, 0), vec((0.1f * recoilSide(1500)) / recoilReduce(), 0.15f / recoilReduce(), 0), vec(0, 12, 0));
                 break;
@@ -1094,7 +828,7 @@ namespace game
             }
             case ATK_KAMIKAZE:
             case ATK_POWERARMOR:
-                newprojectile(from, to, attacks[atk].projspeed, local, id, d, atk);
+                projectiles::add(from, to, attacks[atk].projspeed, local, id, d, atk);
                 break;
         }
 
@@ -1366,92 +1100,18 @@ namespace game
         if((atk==ATK_GLOCK || atk==ATK_SPOCKGUN || atk==ATK_HYDRA || gun==GUN_SKS || gun==GUN_S_CAMPER) && !specialAbility) d->attacking = ACT_IDLE;
     }
 
-    void adddynlights()
-    {
-        int lightradiusvar = 0;
-
-        loopv(projs)
-        {
-            projectile &p = projs[i];
-            vec pos(p.o);
-            pos.add(vec(p.offset).mul(p.offsetmillis/float(OFFSETMILLIS)));
-            if(!ispaused()) lightradiusvar = rnd(30);
-
-            switch(p.atk)
-            {
-                case ATK_PLASMA: adddynlight(pos, 30, vec(1.00f, 0.75f, 0.0f)); break;
-                case ATK_SPOCKGUN: adddynlight(pos, 30, vec(0.00f, 1.00f, 0.0f)); break;
-                case ATK_GRAP1: adddynlight(pos, 50, vec(0.3f, 0.00f, 0.2f)); break;
-                case ATK_FIREWORKS:
-                case ATK_SMAW:
-                case ATK_S_ROCKETS: adddynlight(pos, 50+lightradiusvar, vec(1.2f, 0.75f, 0.0f)); break;
-                case ATK_S_NUKE: adddynlight(pos, 100, vec(1.2f, 0.75f, 0.0f)); break;
-            }
-        }
-    }
-
-    std::map<int, std::string> projsPaths =
-    {
-        {ATK_SMAW, "projectiles/missile"},
-        {ATK_FIREWORKS, "projectiles/feuartifice"},
-        {ATK_CROSSBOW, "projectiles/fleche"},
-        {ATK_S_ROCKETS, "projectiles/minimissile"},
-        {ATK_S_NUKE, "projectiles/missilenuke"}
-    };
-
-    void preloadProjectiles()
-    {
-        for(const auto& pair : projsPaths)
-        {
-            preloadmodel(pair.second.c_str());
-        }
-    }
-
-    void renderprojectiles()
-    {
-        float yaw, pitch;
-        loopv(projs)
-        {
-            projectile &p = projs[i];
-
-            if(p.atk==ATK_SMAW || p.atk==ATK_FIREWORKS || p.atk==ATK_CROSSBOW || p.atk==ATK_S_ROCKETS || p.atk==ATK_S_NUKE)
-            {
-
-                float dist = min(p.o.dist(p.to)/32.0f, 1.0f);
-                vec pos = vec(p.o).add(vec(p.offset).mul(dist*p.offsetmillis/float(OFFSETMILLIS))),
-                    v = dist < 1e-6f ? p.dir : vec(p.to).sub(pos).normalize();
-
-                vectoyawpitch(v, yaw, pitch);
-                v.mul(3);
-                v.add(pos);
-
-                rendermodel(projsPaths[p.atk].c_str(), ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, MDL_NOSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED);
-                if(p.atk != ATK_CROSSBOW) renderProjectilesTrails(p.owner, pos, v, p.from, p.offset, p.atk, p.exploded);
-            }
-        }
-    }
-
     void removeweapons(gameent *d)
     {
         bouncers::remove(d);
-        removeprojectiles(d);
+        projectiles::remove(d);
     }
 
     void updateweapons(int curtime)
     {
-        updateprojectiles(curtime);
+        projectiles::update(curtime);
         if(player1->clientnum>=0 && player1->state==CS_ALIVE) updateAttacks(player1, worldpos); // only shoot when connected to server
         bouncers::update(curtime); // need to do this after the player shoots so bouncers don't end up inside player's BB next frame
         gameent *following = followingplayer();
         if(!following) following = player1;
-    }
-
-    void avoidweapons(ai::avoidset &obstacles, float radius)
-    {
-        loopv(projs)
-        {
-            projectile &p = projs[i];
-            obstacles.avoidnear(NULL, p.o.z + attacks[p.atk].exprad + 1, p.o, radius + attacks[p.atk].exprad);
-        }
     }
 };

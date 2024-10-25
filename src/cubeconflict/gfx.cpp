@@ -74,17 +74,20 @@ namespace game
                 particle_splash(PART_PLASMA_FRONT, 1, 1, pos, hasRoids(owner) ? 0xFF4444 : 0xFF6600, 2.4f, 150, 20, 0, hasShrooms());
                 particle_flare(tail, head, 1, PART_F_PLASMA, hasRoids(owner) ? 0xFF4444 : 0xFF6600, 2.f, owner, hasShrooms());
                 if(inWater && emitPart) particle_splash(PART_BUBBLE, 1, 150, pos, 0x18181A, 2.0f+rnd(2), 20, -30);
+                adddynlight(pos, 30, vec(1.00f, 0.75f, 0.0f));
                 break;
 
             case ATK_GRAP1:
                 particle_splash(PART_PLASMA_FRONT, 1, 1, pos, hasRoids(owner) ? 0xFF2222 : 0xFF33BB, 3.0f, 150, 20, 0, hasShrooms());
                 particle_flare(tail, head, 1, PART_F_PLASMA, hasRoids(owner) ? 0xFF2222 : 0xEE22AA, 3.0f, owner, hasShrooms());
                 if(emitPart) particle_splash(inWater ? PART_BUBBLE : PART_SMOKE, 1, inWater ? 150 : 300, pos, inWater ? 0x18181A : 0xAAAAAA, 4.0f, 25, 250, 0, hasShrooms());
+                adddynlight(pos, 50, vec(0.3f, 0.00f, 0.2f));
                 break;
 
             case ATK_SPOCKGUN:
                 particle_splash(PART_SPOCK_FRONT, 1, 1, pos, hasRoids(owner) ? 0xFF4444 : 0x00FF00, 4.f, 150, 20, 0, hasShrooms());
                 particle_flare(tail, head, 1, PART_F_PLASMA, hasRoids(owner) ? 0xFF4444 : 0x22FF22, 2.5f, owner, hasShrooms());
+                adddynlight(pos, 30, vec(0.00f, 1.00f, 0.0f));
                 break;
 
             case ATK_SV98:
@@ -140,6 +143,7 @@ namespace game
                 if(emitPart) particle_splash(inWater ? PART_BUBBLE : PART_SMOKE, 1, 2000, pos, 0x666666, inWater ? 3.f : 6.f, 25, 250, 0, hasShrooms());
                 particle_flare(pos, pos, 2, PART_MF_LITTLE, hasRoids(owner) ? 0xFF0000 : 0xFFC864, 3.0f + rndscale(2), NULL, hasShrooms());
                 particles::lensFlare(pos, 0x331200, 300+rnd(300), 50);
+                adddynlight(pos, (ispaused() ? 65 : 50 + rnd(31)), vec(1.2f, 0.75f, 0.0f));
                 break;
 
             case ATK_FIREWORKS:
@@ -156,6 +160,7 @@ namespace game
                 particle_flare(pos, pos, 2, PART_MF_LITTLE, hasRoids(owner) ? 0xFF0000 : 0xFFC864, 10.f+rndscale(8), NULL, hasShrooms());
                 particle_splash(PART_FIRE_BALL, 1, 100, pos, hasRoids(owner) ? 0xFF0000 : 0xFF6600, 1.0f+rndscale(4), 50, 500, 0, hasShrooms());
                 particles::lensFlare(pos, 0x552500, 600+rnd(400), 75);
+                adddynlight(pos, 100, vec(1.2f, 0.75f, 0.0f));
                 break;
             }
     }
