@@ -2700,6 +2700,7 @@ static void genshadowmeshmapmodels(shadowmesh &m, int sides, shadowdrawinfo draw
         if(e.attr3) orient.rotate_around_x(sincosmod360(e.attr3));
         if(e.attr4) orient.rotate_around_y(sincosmod360(-e.attr4));
         if(e.attr5 > 0) orient.scale(e.attr5/100.0f);
+        else orient.scale(1.0f);
         orient.settranslation(e.o);
         tris.setsize(0);
         mm->genshadowmesh(tris, orient);

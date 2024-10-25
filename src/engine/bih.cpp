@@ -314,7 +314,7 @@ bool mmintersect(const extentity &e, const vec &o, const vec &ray, float maxdist
     if(!m) return false;
     if((mode&RAY_ENTS)!=RAY_ENTS && (!m->collide || e.flags&EF_NOCOLLIDE)) return false;
     if(!m->bih && !m->setBIH()) return false;
-    float scale = e.attr5 > 0 ? e.attr5/100.0f : 1;
+    float scale = e.attr5 > 0 ? 100.0f/e.attr5 : 1.0f;
     vec mo = vec(o).sub(e.o).mul(scale), mray(ray);
     float v = mo.dot(mray), inside = m->bih->entradius - mo.squaredlen();
     if((inside < 0 && v > 0) || inside + v*v < 0) return false;
