@@ -206,7 +206,7 @@ namespace projectiles
         }
     }
 
-    void checkSound(projectile &p, int atk)
+    void checkSound(projectile &p, int atk, vec dv)
     {
         if(p.projsound && !game::ispaused()) // play and update the sound only if the projectile is passing by
         {
@@ -214,7 +214,7 @@ namespace projectiles
 
             if(camera1->o.dist(p.o) < (bigRadius ? 800 : 400))
             {
-                updateEntPos(p.entityId, p.o);
+                updateEntPos(p.entityId, p.o, dv.mul(5));
                 if(!p.soundplaying)
                 {
                     playSound(p.projsound, p.o, bigRadius ? 800 : 400, 1, SND_LOOPED, p.entityId);
@@ -257,7 +257,7 @@ namespace projectiles
             vec v = vec(p.o).add(dv);
             vec pos = vec(p.offset).mul(p.offsetmillis/float(OFFSETMILLIS)).add(v);
 
-            checkSound(p, atk);
+            checkSound(p, atk, dv);
             checkWater(p);
 
             if(atk==ATK_SMAW || atk==ATK_FIREWORKS || atk==ATK_CROSSBOW || atk==ATK_S_ROCKETS || atk==ATK_S_NUKE)
