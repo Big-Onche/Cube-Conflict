@@ -214,7 +214,7 @@ namespace projectiles
 
             if(camera1->o.dist(p.o) < (bigRadius ? 800 : 400))
             {
-                updateEntPos(p.entityId, p.o, dv.mul(5));
+                updateEntPos(p.entityId, p.o, dv.mul(4));
                 if(!p.soundplaying)
                 {
                     playSound(p.projsound, p.o, bigRadius ? 800 : 400, 1, SND_LOOPED, p.entityId);

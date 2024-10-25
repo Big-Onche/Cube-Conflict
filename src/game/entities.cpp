@@ -36,11 +36,11 @@ void updateEntPos(size_t entityId, const vec& newPos, vec fixedVel)
     {
         double timeElapsed = totalmillis - ent.lastUpdate;
         ent.vel = vec(newPos).sub(ent.pos).mul(40.0 / max(1.0, timeElapsed)); // Ensure no division by zero
+        ent.lastUpdate = totalmillis;
     }
     else ent.vel = fixedVel;
 
     ent.pos = newPos;
-    ent.lastUpdate = totalmillis;
 }
 
 void removeEntityPos(size_t entityId) { if(entityId != SIZE_MAX) entMovements.erase(entityId); }
