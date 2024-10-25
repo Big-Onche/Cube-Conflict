@@ -1442,7 +1442,7 @@ namespace ai
             if(allowmove)
             {
                 if(!request(d, b)) target(d, b, needpursue(d) ? 1 : 0, b.idle ? true : false);
-                updateAttacks(d, d->ai->target);
+                if(server::gamemillis > 1000) updateAttacks(d, d->ai->target);
             }
             if(!intermission)
             {
