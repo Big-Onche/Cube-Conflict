@@ -166,10 +166,11 @@ namespace bouncers
         loopv(curBouncers)
         {
             bouncer &bnc = *curBouncers[i];
+            bool isGrenade = (bnc.bouncetype == BNC_GRENADE);
             vec old(bnc.o);
 
             bool stopped = false;
-            if(bnc.bouncetype == BNC_GRENADE)
+            if(isGrenade)
             {
                 stopped = (bounce(&bnc, 0.6f, 0.5f, 0.8f) || (bnc.lifetime -= time) < 0);
                 updateEntPos(bnc.entityId, bnc.o);
@@ -200,16 +201,23 @@ namespace bouncers
 
             if(stopped || (bnc.bouncetype == BNC_MOLOTOV && bnc.bounces))
             {
-                if(bnc.bouncetype == BNC_GRENADE || bnc.bouncetype == BNC_MOLOTOV)
+                if(isGrenade || bnc.bouncetype == BNC_MOLOTOV)
                 {
-                    int atk = (bnc.bouncetype == BNC_GRENADE ? ATK_M32 : ATK_MOLOTOV);
+                    int atk = (isGrenade ? ATK_M32 : ATK_MOLOTOV);
                     hits.setsize(0);
                     explode(bnc.local, bnc.owner, bnc.o, bnc.o, NULL, 1, atk);
-                    stopLinkedSound(bnc.entityId);
-                    removeEntityPos(bnc.entityId);
+
+                    if(isGrenade)
+                    {
+                        stopLinkedSound(bnc.entityId);
+                        removeEntityPos(bnc.entityId);
+                    }
+
                     if(bnc.local)
-                        addmsg(N_EXPLODE, "rci3iv", bnc.owner, lastmillis-maptime, atk, bnc.id-maptime,
-                                hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
+                    {
+                        addmsg(N_EXPLODE, "rci3iv", bnc.owner, lastmillis-maptime, atk, bnc.id-maptime, hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
+                    }
+
                 }
                 delete curBouncers.remove(i--);
             }
@@ -271,9 +279,6 @@ namespace bouncers
 
             if(!isPaused && (!stopped || bouncerType == BNC_GRENADE))
             {
-                vec pos(bnc.o);
-                pos.add(vec(bnc.offset).mul(bnc.offsetmillis/float(OFFSETMILLIS)));
-
                 switch(bouncerType)
                 {
                     case BNC_CASING:
@@ -353,6 +358,15 @@ namespace bouncers
 
     void clear()
     {
+        loopv(curBouncers)
+        {
+            bouncer &bnc = *curBouncers[i];
+            if(bnc.bouncetype == BNC_GRENADE)
+            {
+                stopLinkedSound(bnc.entityId);
+                removeEntityPos(bnc.entityId);
+            }
+        }
         curBouncers.deletecontents();
     }
 }

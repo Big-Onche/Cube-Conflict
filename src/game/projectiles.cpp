@@ -285,10 +285,11 @@ namespace projectiles
         int len = curProjectiles.length();
         loopi(len)
         {
-            if(curProjectiles[i].owner==owner)
+            projectile &p = curProjectiles[i];
+            if(curProjectiles[i].owner == owner)
             {
-                if(curProjectiles[i].soundplaying) stopLinkedSound(curProjectiles[i].entityId);
-                removeEntityPos(curProjectiles[i].entityId);
+                if(p.soundplaying) stopLinkedSound(p.entityId);
+                removeEntityPos(p.entityId);
                 curProjectiles.remove(i--);
                 len--;
             }
@@ -301,6 +302,7 @@ namespace projectiles
         {
             projectile &p = curProjectiles[i];
             if(p.soundplaying) stopLinkedSound(p.entityId);
+            removeEntityPos(p.entityId);
         }
         curProjectiles.shrink(0);
     }
