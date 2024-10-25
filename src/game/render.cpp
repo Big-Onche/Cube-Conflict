@@ -850,21 +850,20 @@ namespace game
     {
         gameent *d = hudplayer();
 
-        if(d->armour && validshield(d->armourtype)) drawShieldModel(d);
-        if(d->boostmillis[B_JOINT]) drawJointModel(d);
+        d->muzzle = player1->muzzle = vec(-1, -1, -1);
+        d->balles = player1->balles = vec(-1, -1, -1);
 
-        if(d->state==CS_SPECTATOR || d->state==CS_EDITING || !hudgun || editmode)
+        if(d->state==CS_ALIVE && hudgun)
         {
-            d->muzzle = player1->muzzle = vec(-1, -1, -1);
-            d->balles = player1->balles = vec(-1, -1, -1);
-            return;
+            if(d->armour && validshield(d->armourtype)) drawShieldModel(d);
+            if(d->boostmillis[B_JOINT]) drawJointModel(d);
+
+            int anim = ANIM_GUN_IDLE|ANIM_LOOP, basetime = 0;
+
+            if(isAttacking(d)) { anim = ANIM_GUN_SHOOT; basetime = d->lastaction; }
+
+            drawhudmodel(d, anim, basetime);
         }
-
-        int anim = ANIM_GUN_IDLE|ANIM_LOOP, basetime = 0;
-
-        if(isAttacking(d)) { anim = ANIM_GUN_SHOOT; basetime = d->lastaction; }
-
-        drawhudmodel(d, anim, basetime);
     }
 
     void renderplayerpreview(int model, int cape, int color, int team, int weap, int yaw, bool rot)
