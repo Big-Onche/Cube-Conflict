@@ -1120,10 +1120,15 @@ case N_BASEREGEN:
         if(regen->armour==10) playSound(S_ITEMBBOIS, regenPos, 300, 150);
         switch(regen->armourtype)
         {
-            case A_WOOD: if(regen->armour>=750) { regen->armourtype=A_IRON; playSound(S_ITEMBFER, regenPos, 300, 50); } break;
-            case A_IRON: if(regen->armour>=1250) { regen->armourtype=A_GOLD; playSound(S_ITEMBOR, regenPos, 300, 50); } break;
-            case A_GOLD: if(regen->armour>=2000) { regen->armourtype=A_POWERARMOR; playSound(S_ITEMARMOUR, regenPos, 300, 50); }
-            case A_POWERARMOR: regen->ammo[GUN_POWERARMOR] = 1;
+            case A_WOOD:
+                if(regen->armour>=750) { regen->armourtype=A_IRON; playSound(S_ITEMBFER, regenPos, 300, 50); regen->lastshieldswitch = lastmillis; }
+                break;
+            case A_IRON:
+                if(regen->armour>=1250) { regen->armourtype=A_GOLD; playSound(S_ITEMBOR, regenPos, 300, 50); regen->lastshieldswitch = lastmillis; }
+                break;
+            case A_GOLD:
+                if(regen->armour>=2000) { regen->armourtype=A_POWERARMOR; regen->ammo[GUN_POWERARMOR] = 1; playSound(S_ITEMARMOUR, regenPos, 300, 50); }
+                break;
         }
         if(autowield > 0 && player1->gunselect != ammotype) gunselect(ammotype, player1);
     }
