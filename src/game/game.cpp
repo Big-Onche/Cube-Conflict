@@ -470,7 +470,7 @@ namespace game
         return forcecampos >= 0 && d->state!=CS_SPECTATOR;
     }
 
-    vec getPlayerVelocity()
+    vec getCameraVelocity()
     {
         static vec prevPos(0, 0, 0);
         static vec smoothVel(0, 0, 0);
@@ -479,14 +479,14 @@ namespace game
         int currentTime = totalmillis;
         int timeElapsed = max(currentTime - prevTime, 1); // Time elapsed since the last frame in milliseconds
 
-        vec velocity = vec(hudplayer()->o).sub(prevPos); // Calculate raw velocity
+        vec velocity = vec(camera1->o).sub(prevPos); // Calculate raw velocity
 
         if(timeElapsed > 0) velocity = velocity.mul(1000.0f / timeElapsed); // Convert milliseconds to seconds for velocity calculation
 
         float smoothingFactor = clamp(1.0f - (timeElapsed / 100.0f), 0.1f, 0.9f); // smoothing factor scaled with refresh rate
         smoothVel = smoothVel.mul(1.0f - smoothingFactor).add(velocity.mul(smoothingFactor)); // Smoothing the velocity using an exponential moving average (EMA)
 
-        prevPos = hudplayer()->o;
+        prevPos = camera1->o;
         prevTime = currentTime;
 
         return smoothVel;
