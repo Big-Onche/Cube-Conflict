@@ -540,7 +540,9 @@ namespace postfx
     enum {FILTER_NORMAL = 0, FILTER_DEATH, FILTER_PROTANOPIA, FILTER_DEUTERANOPIA, FILTER_TRITANOPIA, FILTER_ACHROMATOPSIA};
     extern int cbfilter;
     extern void updateMainFilter(int i = 0);
-    extern void clearShroomsEffect();
+    extern int fullbrightmodels;
+    extern float shroomsFadeIn();
+    extern void updateShroomsEffect(int shroomsMillis, int lastShrooms);
 }
 
 // water
@@ -856,7 +858,6 @@ extern bool deletepostfx(const char *name);
 extern void shakeScreen(float factor);
 extern float zoomprogress;
 extern void clearpostfx();
-extern int fullbrightmodels;
 extern int vsync;
 extern void restorevsync();
 

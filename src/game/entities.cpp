@@ -189,6 +189,8 @@ namespace entities
         ents[n]->clearspawned();
         if(!d) return;
 
+        if(type==I_SHROOMS && !d->boostmillis[B_SHROOMS]) d->lastshrooms = lastmillis;
+
         d->pickupitem(type, d->character, d->abilitymillis[ABILITY_1], hasPowerArmor(d), rndsweap);
 
         bool powerArmor = powerarmorpieces(type, d);
@@ -209,12 +211,6 @@ namespace entities
         {
             adddynlight(d->o, 20, vec(1.5f, 1.5f, 0.0f), 300, 50, L_NOSHADOW|L_VOLUMETRIC);
             playSound(S_PRI_1, d==hudplayer() ? vec(0, 0, 0) : d->o, 300, 150);
-        }
-
-        if(d==player1 && type==I_SHROOMS)
-        {
-            addpostfx("sobel");
-            fullbrightmodels = 200;
         }
     }
 

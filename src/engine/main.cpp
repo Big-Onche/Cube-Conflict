@@ -1352,9 +1352,6 @@ int main(int argc, char **argv)
 
     identflags |= IDF_PERSIST;
 
-    addpostfx("sobel");
-    clearpostfx();
-
     addpostfx("mainfilter");
 
     logoutf("init: mainloop");

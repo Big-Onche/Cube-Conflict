@@ -780,7 +780,7 @@ struct gameent : dynent, gamestate
     int lifesequence;                   // sequence id for each respawn, used in damage test
     int respawned, lastspawn, suicided;
     int lastpain;
-    int lastaction, lastattack, lastgunselect, lastshieldswitch;
+    int lastaction, lastattack, lastgunselect, lastshieldswitch, lastshrooms;
     int curdamage, lastcurdamage, curdamagecolor;
     int attacking, gunaccel;
     int lastfootstep;

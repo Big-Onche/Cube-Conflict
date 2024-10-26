@@ -1,4 +1,3 @@
-int fullbrightmodels = 0;
 VAR(testtags, 0, 0, 1);
 VARF(dbgcolmesh, 0, 0, 1,
 {
@@ -150,7 +149,7 @@ struct animmodel : model
             else LOCALPARAMF(colorscale, color.r, color.g, color.b, colorscale.a);
 
             if(fullbright) LOCALPARAMF(fullbright, 0.0f, fullbright);
-            else LOCALPARAMF(fullbright, 1.0f, as->cur.anim&ANIM_FULLBRIGHT ? 0.5f*fullbrightmodels/100.0f : 0.0f);
+            else LOCALPARAMF(fullbright, 1.0f, as->cur.anim&ANIM_FULLBRIGHT ? 0.5f*postfx::fullbrightmodels/100.0f : 0.0f);
 
             float curglow = glow;
             if(glowpulse > 0)

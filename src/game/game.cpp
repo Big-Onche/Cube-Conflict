@@ -349,7 +349,6 @@ namespace game
                 if(d==player1)
                 {
                     conoutf(CON_HUDCONSOLE, "\f8%s", readstr("GameMessage_ShroomsEnded"));
-                    postfx::clearShroomsEffect();
                 }
             }
 
@@ -531,6 +530,7 @@ namespace game
             updateAbilitiesSkills(curtime, player1);
         }
 
+        postfx::updateShroomsEffect(hudplayer()->boostmillis[B_SHROOMS], hudplayer()->lastshrooms);
         updateweapons(curtime);
         otherplayers(curtime);
         ai::update();
@@ -753,7 +753,6 @@ namespace game
             disablezoom();
             cleardamagescreen();
             d->attacking = ACT_IDLE;
-            postfx::clearShroomsEffect();
             postfx::updateMainFilter(postfx::FILTER_DEATH);
             d->roll = 0;
             playSound(S_DIE_P1, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH);

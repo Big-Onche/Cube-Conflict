@@ -1586,6 +1586,7 @@ void reloadshaders()
     });
 }
 
+#include "game.h"
 namespace postfx
 {
     GLuint radialblurtex = 0;
@@ -1603,7 +1604,7 @@ namespace postfx
         if(!rb && !shroomsMillis) return;
 
         int shroomsBlur = 0;
-        if(shroomsMillis) shroomsBlur = 200 * min(1.0f, shroomsMillis / 5000.f);
+        if(shroomsMillis) shroomsBlur = 200 * min(1.0f * shroomsFadeIn(), shroomsMillis / 5000.f);
 
         float overallSpeed = sqrt(velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z);
 
@@ -1702,10 +1703,42 @@ namespace postfx
         updatepostfx("mainfilter", vec4((cbfilter ? (FILTER_DEATH + cbfilter) : i), coloranomaly, 0, 0));
     }
 
-    void clearShroomsEffect()
+    const float shroomsFade = 5000.f;
+    int fullbrightmodels = 0;
+
+    float shroomsFadeIn()
     {
-        deletepostfx("sobel");
-        fullbrightmodels = 0;
+        int shroomsTime = lastmillis - game::hudplayer()->lastshrooms;
+        return min(1.f, shroomsTime / shroomsFade);
+    }
+
+    void updateShroomsEffect(int shroomsMillis, int lastShrooms)
+    {
+        static bool shroomsEffect = false;
+
+        if(shroomsMillis)
+        {
+            if(!shroomsEffect)
+            {
+                addpostfx("sobel");
+                shroomsEffect = true;
+            }
+
+            float shroomsStrenght = 0.f;
+
+            if(lastmillis - lastShrooms < shroomsFade) shroomsStrenght = 0.25f * shroomsFadeIn(); // fade in
+            else shroomsStrenght = min(0.25f, shroomsMillis / (shroomsFade * 4)); // max strenght and fade out
+
+            fullbrightmodels = min(200.f, shroomsMillis / shroomsFade);
+
+            updatepostfx("sobel", vec4(1.f + shroomsStrenght, shroomsStrenght * 5, 0, 0));
+        }
+        else if(shroomsEffect && !shroomsMillis)
+        {
+            deletepostfx("sobel");
+            fullbrightmodels = 0;
+            shroomsEffect = false;
+        }
     }
 }
 

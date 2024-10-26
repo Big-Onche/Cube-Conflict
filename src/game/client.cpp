@@ -1475,7 +1475,6 @@ namespace game
                 ai::loadwaypoints();
                 //execute("premission");
                 //playMusic(S_PREMISSION);
-                postfx::clearShroomsEffect();
                 postfx::updateMainFilter();
                 stopAllSounds();
                 break;
@@ -2168,7 +2167,6 @@ namespace game
                         if(editmode) toggleedit();
                         if(s->state==CS_DEAD) showscores(false);
                         disablezoom();
-                        postfx::clearShroomsEffect();
                         postfx::updateMainFilter();
                     }
                     s->state = CS_SPECTATOR;
