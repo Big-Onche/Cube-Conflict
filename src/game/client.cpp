@@ -1634,7 +1634,7 @@ namespace game
                     else d->ammo[oldWeapon] = 0;
 
                     d->ammo[currentIdenticalWeapon] = 1;
-                    if(d==player1 && player1->gunselect > NUMMAINGUNS) gunselect(currentIdenticalWeapon, d);
+                    if(d==player1 && player1->gunselect <= NUMMAINGUNS) gunselect(currentIdenticalWeapon, d);
                 }
 
                 break;
