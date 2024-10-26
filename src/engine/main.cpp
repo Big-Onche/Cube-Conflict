@@ -1352,6 +1352,7 @@ int main(int argc, char **argv)
 
     identflags |= IDF_PERSIST;
 
+    postfx::init();
     addpostfx("mainfilter");
 
     logoutf("init: mainloop");

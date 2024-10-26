@@ -727,7 +727,7 @@ struct gamestate
         if(playerClass == C_KAMIKAZE) ammo[GUN_KAMIKAZE] = 1;
         addArmour(playerClass, gamemode);
         addMeleeWeapons(playerClass);
-        selectGun(playerClass, selectedWeapon);
+        if(!m_tutorial) selectGun(playerClass, selectedWeapon);
         addSuperWeapon(playerClass, gamemode);
     }
 

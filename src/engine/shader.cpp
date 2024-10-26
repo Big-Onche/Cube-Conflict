@@ -1674,6 +1674,14 @@ namespace postfx
         }
     }
 
+    void init()
+    {
+        addpostfx("telescopicsight");
+        addpostfx("sobel");
+        addpostfx("shrooms");
+        clearpostfx();
+    }
+
     void updateLensDistortion(bool enable, int gun)
     {
         static bool lensDistortion = false;
@@ -1712,7 +1720,38 @@ namespace postfx
         return min(1.f, shroomsTime / shroomsFade);
     }
 
-    void updateShroomsEffect(int shroomsMillis, int lastShrooms)
+    bool hasHallucination = false;
+
+    void checkHallucinations(int shroomsTime, int shroomsMillis)
+    {
+        float strenght = 0.f;
+
+        static float hallucinationDuration,
+                     lastHallucination;
+
+        if(!hasHallucination && shroomsTime > 10000)
+        {
+            hallucinationDuration = 10000 + rnd(7500);
+            lastHallucination = lastmillis;
+            hasHallucination = true;
+            addpostfx("shrooms");
+        }
+
+        if(hasHallucination)
+        {
+            float hallucinationTime = (lastmillis - lastHallucination),
+                  hallucinationMillis = (hallucinationDuration - hallucinationTime);
+
+            float fadeDuration = hallucinationDuration / 3.f;
+            if(lastmillis - lastHallucination < fadeDuration) strenght = 1.0f * (hallucinationTime / fadeDuration); // fade in
+            else strenght = min(1.0f, hallucinationMillis / fadeDuration); // max strenght and fade out
+            updatepostfx("shrooms", vec4(strenght, totalmillis, 0, 0));
+
+            if(hallucinationMillis <= 0) deletepostfx("shrooms");
+        }
+    }
+
+    void updateShroomsEffect(int shroomsMillis, int lastShrooms, int jointMillis)
     {
         static bool shroomsEffect = false;
 
@@ -1725,19 +1764,23 @@ namespace postfx
             }
 
             float shroomsStrenght = 0.f;
+            int shroomsTime = lastmillis - lastShrooms;
 
-            if(lastmillis - lastShrooms < shroomsFade) shroomsStrenght = 0.25f * shroomsFadeIn(); // fade in
+            if(shroomsTime < shroomsFade) shroomsStrenght = 0.25f * shroomsFadeIn(); // fade in
             else shroomsStrenght = min(0.25f, shroomsMillis / (shroomsFade * 4)); // max strenght and fade out
 
             fullbrightmodels = min(200.f, shroomsMillis / shroomsFade);
 
             updatepostfx("sobel", vec4(1.f + shroomsStrenght, shroomsStrenght * 5, 0, 0));
+            checkHallucinations(shroomsTime, shroomsMillis);
         }
         else if(shroomsEffect && !shroomsMillis)
         {
             deletepostfx("sobel");
+            deletepostfx("shrooms");
             fullbrightmodels = 0;
             shroomsEffect = false;
+            hasHallucination = false;
         }
     }
 }

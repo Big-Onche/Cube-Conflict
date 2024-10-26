@@ -494,7 +494,7 @@ namespace game
 
     bool powerArmorExploding(gameent *d)
     {
-        return !player1->armour && d->ammo[GUN_POWERARMOR] && d->armourtype == A_POWERARMOR;
+        return !d->armour && d->ammo[GUN_POWERARMOR] && d->armourtype == A_POWERARMOR;
     }
 
     bool kamikazeExploding(gameent *d)
@@ -530,7 +530,7 @@ namespace game
             updateAbilitiesSkills(curtime, player1);
         }
 
-        postfx::updateShroomsEffect(hudplayer()->boostmillis[B_SHROOMS], hudplayer()->lastshrooms);
+        postfx::updateShroomsEffect(hudplayer()->boostmillis[B_SHROOMS], hudplayer()->lastshrooms, hudplayer()->boostmillis[B_JOINT]);
         updateweapons(curtime);
         otherplayers(curtime);
         ai::update();

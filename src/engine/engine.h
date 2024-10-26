@@ -539,10 +539,11 @@ namespace postfx
 
     enum {FILTER_NORMAL = 0, FILTER_DEATH, FILTER_PROTANOPIA, FILTER_DEUTERANOPIA, FILTER_TRITANOPIA, FILTER_ACHROMATOPSIA};
     extern int cbfilter;
+    extern void init();
     extern void updateMainFilter(int i = 0);
     extern int fullbrightmodels;
     extern float shroomsFadeIn();
-    extern void updateShroomsEffect(int shroomsMillis, int lastShrooms);
+    extern void updateShroomsEffect(int shroomsMillis, int lastShrooms, int jointMillis);
 }
 
 // water
