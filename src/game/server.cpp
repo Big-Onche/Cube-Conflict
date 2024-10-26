@@ -2320,9 +2320,11 @@ namespace server
             case C_PRIEST:
                 if(ts.abilitymillis[ABILITY_2] && ts.mana)
                 {
-                    int mana = max(0, ts.mana - damage/10);
-                    ts.mana = mana;
-                    damage = 0;
+                    float manaUsed = min(damage/10.f, (float)ts.mana),
+                          damageReduction = manaUsed * 10;
+
+                    damage = max(0.f, damage - damageReduction);
+                    ts.mana -= manaUsed;
                     sendf(-1, 1, "ri3", N_PRIEST, target->clientnum, ts.mana);
                 }
                 break;
