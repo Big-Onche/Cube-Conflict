@@ -101,4 +101,6 @@ namespace game
     ICOMMAND(getclasswweaponid, "", (), intret(classWeapon()));
     ICOMMAND(getclasswweaponname, "", (), result(readstr(guns[classWeapon()].ident)));
     ICOMMAND(selectclasswweapon, "", (), gunselect(classWeapon(), player1));
+
+    ICOMMAND(infiniteammo, "", (), intret(m_muninfinie));
 }
