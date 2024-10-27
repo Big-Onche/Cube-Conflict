@@ -127,8 +127,9 @@ namespace game
     }
 
     ICOMMAND(aptitude, "i", (int *ability),  // player1 abilities commands
-        if(!hasAbilities(player1)) return;
-        if(player1->character == C_KAMIKAZE)
+        bool isKamikaze = (player1->character == C_KAMIKAZE);
+        if(!hasAbilities(player1) && !isKamikaze) return;
+        if(isKamikaze)
         {
             if(*ability == ABILITY_1) gunselect(GUN_KAMIKAZE, player1);
             else if(*ability == ABILITY_2) requestAbility(player1, *ability);
