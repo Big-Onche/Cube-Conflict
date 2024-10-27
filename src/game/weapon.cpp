@@ -973,23 +973,27 @@ namespace game
         }
     }
 
+    inline bool isFastSemoAutoGun(int gun)
+    {
+        return (gun == GUN_GLOCK || gun == GUN_SPOCKGUN || gun == GUN_HYDRA);
+    }
+
+    inline bool isSemiAutoGun(int gun)
+    {
+        return (isFastSemoAutoGun(gun) || gun == GUN_SKS || gun == GUN_S_CAMPER);
+    }
+
     bool updateWeaponsCadencies(gameent *d, int gun, int attacktime, bool specialAbility)
     {
         int weaponDelay = d->gunwait;
 
-        if(d->aitype == AI_BOT) // gives a natural rate of fire with semi automatic weapons for bots
+        if(d->aitype == AI_BOT && isSemiAutoGun(gun)) // gives a natural rate of fire with semi automatic weapons for bots
         {
-            const bool isFastSemoAutoGun = (gun == GUN_GLOCK || gun == GUN_SPOCKGUN || gun == GUN_HYDRA);
-            const bool isSemiAutoGun = isFastSemoAutoGun ||  gun == GUN_SKS || gun == GUN_S_CAMPER;
-
-            if(isSemiAutoGun)
+            const int randomRange = isFastSemoAutoGun(gun) ? 3 : 6;
+            if(!rnd(randomRange))
             {
-                const int randomRange = isFastSemoAutoGun ? 3 : 6;
-                if(!rnd(randomRange))
-                {
-                    weaponDelay += (specialAbility ? 1250 : 2500) / curfps;
-                    return false;
-                }
+                weaponDelay += (specialAbility ? 1250 : 2500) / curfps;
+                return false;
             }
         }
 
@@ -1018,7 +1022,7 @@ namespace game
 
     void updateAttacks(gameent *d, const vec &targ, bool isMonster)
     {
-        bool specialAbility = d->character==C_PRIEST && d->abilitymillis[ABILITY_3];
+        bool specialAbility = (d->character==C_PRIEST && d->abilitymillis[ABILITY_3]) || d->boostmillis[B_SHROOMS];
         int gun = d->gunselect,
             prevaction = d->lastaction,
             attacktime = lastmillis - prevaction;
@@ -1093,7 +1097,7 @@ namespace game
         d->gunwait = attacks[atk].attackdelay/waitfactor;
         d->totalshots += (attacks[atk].damage*attacks[atk].rays) * (d->boostmillis[B_ROIDS] ? 1 : 2);
         if(d->powerarmorexploded) {d->attacking = d->wasAttacking; execute("getoldweap"); d->powerarmorexploded = false;}
-        if((atk==ATK_GLOCK || atk==ATK_SPOCKGUN || atk==ATK_HYDRA || gun==GUN_SKS || gun==GUN_S_CAMPER) && !specialAbility) d->attacking = ACT_IDLE;
+        if(d==player1 && isSemiAutoGun(gun) && !specialAbility) d->attacking = ACT_IDLE;
     }
 
     void removeweapons(gameent *d)

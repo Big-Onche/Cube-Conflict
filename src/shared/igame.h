@@ -88,7 +88,7 @@ namespace game
     extern bool needminimap();
     extern void rendersoftmessages(float w, float h);
     extern void dotime();
-    extern vec getPlayerVelocity();
+    extern vec getCameraVelocity();
     extern int dmgsecs[2], avgdmg[4];
 }
 
