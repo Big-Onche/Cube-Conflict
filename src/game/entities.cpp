@@ -157,8 +157,8 @@ namespace entities
             const char *mdlname = powerarmorpieces(e.type, game::hudplayer()) ? "objets/piecerobotique" : entmodel(e);
             if(mdlname)
             {
-                   vec p = e.o;
-                p.z += 1+sinf(lastmillis/100.0+e.o.x+e.o.y)/20;
+                vec p = e.o;
+                p.z += 1 + sinf(lastmillis/100.0+e.o.x+e.o.y) / 8.f;
                 rendermodel(mdlname, ANIM_MAPMODEL|ANIM_LOOP, p, lastmillis/(float)revs, 0, 0, MDL_CULL_VFC | MDL_CULL_EXTDIST | MDL_CULL_OCCLUDED);
             }
         }

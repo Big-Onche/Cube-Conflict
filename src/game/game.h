@@ -351,10 +351,10 @@ static struct itemstat { int add, max, sound; const char *ident; int info; } ite
     {8,     32,    S_ITEMAMMO,  "Weapon_Molotov",           GUN_MOLOTOV},
     {30,   120,    S_ITEMAMMO,  "Weapon_Glock",             GUN_GLOCK},
     // superweapons
-    {  1,    4,    S_ITEMSUPERAMMO, "BOMBE NUCLEAIRE",      GUN_S_NUKE},
-    {300, 1200,    S_ITEMSUPERAMMO, "GAU-8",                GUN_S_GAU8},
-    { 40,  120,    S_ITEMSUPERAMMO, "MINI-ROQUETTES",       GUN_S_ROCKETS},
-    { 15,   60,    S_ITEMSUPERAMMO, "CAMPOUZE 2000",        GUN_S_CAMPER},
+    {  1,    4,    S_ITEMSUPERAMMO, "Weapon_Nuke",          GUN_S_NUKE},
+    {300, 1200,    S_ITEMSUPERAMMO, "Weapon_Gau8",          GUN_S_GAU8},
+    { 40,  120,    S_ITEMSUPERAMMO, "Weapon_Minirockets",   GUN_S_ROCKETS},
+    { 15,   60,    S_ITEMSUPERAMMO, "Weapon_Camper2000",    GUN_S_CAMPER},
     // items
     {250,     1000, S_ITEMHEALTH,   "Item_Health",          0},
     {500,     2500, S_COCHON,       "Item_GrilledPig",      0},
@@ -410,8 +410,8 @@ static const struct attackinfo { int gun, action, picksound, sound, middistsnd, 
     { GUN_M_FLAIL,      ACT_SHOOT, S_WPLOADCHAINS,    S_FLAIL,        -1, -1,   4, 1150,  750, 1, 1, 10, 0, -10,  32,  1, 125,  0, 0, 0},
     // Special weapons
     { GUN_KAMIKAZE,     ACT_SHOOT, S_WPLOADFASTWOOSH, -1,           S_EXPL_FAR, S_EXPL_FAR,   1, 1000, 3000, 1, 1,  0, 1,  10, 120,  1, 250, 500, 5, 1},
-    { GUN_POWERARMOR,    ACT_SHOOT, -1,                -1,           S_EXPL_FAR, S_EXPL_FAR,   1,  220, 2000, 1, 1,  0, 1,  10,  50,  1, 100, 350, 5, 1},
-    { GUN_NINJA,     ACT_SHOOT, S_WPLOADWHOOSH,    S_NINJASABER, -1,         -1,           8,  400,  800, 1, 1, 30, 0, -10,  36,  1,  25,   0, 0, 0},
+    { GUN_POWERARMOR,   ACT_SHOOT, -1,                -1,           S_EXPL_FAR, S_EXPL_FAR,   1,  220, 2000, 1, 1,  0, 1,  10,  50,  1, 100, 350, 5, 1},
+    { GUN_NINJA,        ACT_SHOOT, S_WPLOADWHOOSH,    S_NINJASABER, -1,         -1,           8,  400,  800, 1, 1, 30, 0, -10,  36,  1,  25,   0, 0, 0},
 };
 
 static const struct guninfo { const char *ident, *name; vec2 weapDisp; int maxzoomfov, hudrange, attacks[NUMACTS]; } guns[NUMGUNS] =

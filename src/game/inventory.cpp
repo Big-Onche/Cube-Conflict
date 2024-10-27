@@ -54,8 +54,8 @@ namespace game
         else result(tempformatstring("Invalid gun (%d)", *i));
     );
 
-    ICOMMAND(getweaponmodel, "i", (int *i),
-        if(validInventoryWeapon(*i) && validgun(playerWeapons[*i])) result(getWeaponDir(playerWeapons[*i]));
+    ICOMMAND(getweaponid, "i", (int *i),
+        if(validInventoryWeapon(*i) && validgun(playerWeapons[*i])) intret(playerWeapons[*i]);
         else result(tempformatstring("Invalid gun (%d)", *i));
     );
 
@@ -65,7 +65,7 @@ namespace game
     );
 
     ICOMMAND(meleeweaponselected, "", (), intret((player1->gunselect >= GUN_M_BUSTER && player1->gunselect <= GUN_M_FLAIL) || player1->gunselect == GUN_NINJA));
-    ICOMMAND(getmeleeweaponmodel, "", (), findSpecialWeapon(player1, GUN_M_BUSTER, NUMMELEEWEAPONS, [](int gunId) { result(getWeaponDir(gunId)); }); );
+    ICOMMAND(getmeleeweaponid, "", (), findSpecialWeapon(player1, GUN_M_BUSTER, NUMMELEEWEAPONS, [](int gunId) { intret(gunId); }); );
     ICOMMAND(getmeleeweaponname, "", (), findSpecialWeapon(player1, GUN_M_BUSTER, NUMMELEEWEAPONS, [](int gunId) { result(readstr(guns[gunId].ident)); }); );
     ICOMMAND(selectmeleeweapon, "", (),
         if(player1->character==C_NINJA)
@@ -78,7 +78,27 @@ namespace game
 
     ICOMMAND(hassuperweapon, "", (), intret(hasSuperWeapon(player1)));
     ICOMMAND(superweaponselected, "", (), intret(player1->gunselect >= GUN_S_NUKE && player1->gunselect <= GUN_S_CAMPER));
-    ICOMMAND(getsuperweaponmodel, "", (), findSpecialWeapon(player1, GUN_S_NUKE, NUMSUPERWEAPONS, [](int gunId) { result(getWeaponDir(gunId)); }); );
+    ICOMMAND(getsuperweaponid, "", (), findSpecialWeapon(player1, GUN_S_NUKE, NUMSUPERWEAPONS, [](int gunId) { intret(gunId); }); );
     ICOMMAND(getsuperweaponname, "", (), findSpecialWeapon(player1, GUN_S_NUKE, NUMSUPERWEAPONS, [](int gunId) { result(readstr(guns[gunId].ident)); }); );
     ICOMMAND(selectsuperweapon, "", (), findSpecialWeapon(player1, GUN_S_NUKE, NUMSUPERWEAPONS, [](int gunId) { gunselect(gunId, player1); }); );
+
+    int classWeapon(bool maxAmmo = false)
+    {
+        switch(player1->character)
+        {
+            case C_KAMIKAZE:
+                if(maxAmmo) return 1;
+                else return GUN_KAMIKAZE;
+                break;
+            default:
+                return 0;
+        }
+    }
+
+    ICOMMAND(getclassweaponcurammo, "", (), intret(player1->ammo[classWeapon()]));
+    ICOMMAND(getclassweaponmaxammo, "", (), intret(classWeapon(true)));
+    ICOMMAND(classweaponselected, "", (), intret(player1->gunselect == classWeapon()));
+    ICOMMAND(getclasswweaponid, "", (), intret(classWeapon()));
+    ICOMMAND(getclasswweaponname, "", (), result(readstr(guns[classWeapon()].ident)));
+    ICOMMAND(selectclasswweapon, "", (), gunselect(classWeapon(), player1));
 }
