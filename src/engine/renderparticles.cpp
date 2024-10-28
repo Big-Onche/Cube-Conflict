@@ -202,6 +202,8 @@ struct partrenderer
         if(texname && !tex) tex = textureload(texname, texclamp);
     }
 
+    VARP(particlecollisiondist, 0, 256, 1024);
+
     //blend = 0 => remove it
     void calc(particle *p, int &blend, int &ts, vec &o, vec &d, bool step = true)
     {
@@ -228,15 +230,21 @@ struct partrenderer
                 o.add(vec(d).mul(t/5000.0f));
                 o.z -= t*t/(2.0f * 5000.0f * p->gravity);
             }
-            if(camera1->o.dist2(p->o) <= 256 && type&PT_COLLIDE && o.z < p->val && step) // avoid useless heavy collision computing if the particle is far away except height
+
+            if(type&PT_COLLIDE && camera1->o.dist2(p->o) <= particlecollisiondist && o.z < p->val && step) // avoid useless heavy collision computing if the particle is far away except height
             {
                 if(stain >= 0)
                 {
-                    vec surface;
-                    float floorz = rayfloor(vec(o.x, o.y, p->val), surface, RAY_CLIPMAT|RAY_LIQUIDMAT|RAY_POLY, COLLIDERADIUS);
-                    float collidez = floorz<0 ? o.z-COLLIDERADIUS : p->val - floorz;
-                    float collideVal = collidez+COLLIDEERROR;
-                    if(o.z >= collideVal) p->val = collideVal;
+                    vec hitpos;
+
+                    float dist = raycubepos(vec(o.x, o.y, o.z), vec(0, 0, -1), hitpos, COLLIDERADIUS, RAY_POLY|RAY_CLIPMAT|RAY_LIQUIDMAT);
+
+                    if(dist < 0 || dist > COLLIDERADIUS) return; // Skip if no collision found or collision is too far
+
+                    float collidez = hitpos.z;
+                    float collideVal = collidez + COLLIDEERROR;
+
+                    if(o.z >= collideVal) p->val = collideVal; // Only process collision if we're actually at or below the collision point
                     else
                     {
                         switch(stain)
@@ -265,7 +273,6 @@ struct partrenderer
                 }
                 else blend = 0;
             }
-            //else if(p->type&PT_COLLIDE && camera1->o.dist2(p->o) > 256) type-=PT_COLLIDE; // remove collide flag if the particle is far away
 
             if(type & (PT_EMITLIGHT | PT_EMITVLIGHT) && camera1->o.dist(o) < (dynlightdist / 2) )
             {
