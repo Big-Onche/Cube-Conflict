@@ -1679,6 +1679,7 @@ namespace postfx
         addpostfx("telescopicsight");
         addpostfx("sobel");
         addpostfx("shrooms");
+        addpostfx("underwaterwobble");
         clearpostfx();
     }
 
@@ -1745,7 +1746,7 @@ namespace postfx
             float fadeDuration = hallucinationDuration / 3.f;
             if(lastmillis - lastHallucination < fadeDuration) strenght = 1.0f * (hallucinationTime / fadeDuration); // fade in
             else strenght = min(1.0f, hallucinationMillis / fadeDuration); // max strenght and fade out
-            updatepostfx("shrooms", vec4(strenght, totalmillis, 0, 0));
+            updatepostfx("shrooms", vec4(strenght, server::gamemillis, 0, 0));
 
             if(hallucinationMillis <= 0) deletepostfx("shrooms");
         }
@@ -1781,6 +1782,27 @@ namespace postfx
             fullbrightmodels = 0;
             shroomsEffect = false;
             hasHallucination = false;
+        }
+    }
+
+    void updateUnderwaterEffect(bool underwater)
+    {
+        static float fade = 0.f;
+
+        if(underwater)
+        {
+            if(fade < 1.f)
+            {
+                if(fade <= 0.f) addpostfx("underwaterwobble"); // the camera has entered water
+                fade += 0.05f;
+            }
+            updatepostfx("underwaterwobble", vec4(fade / 2.f, server::gamemillis, 0, 0));
+        }
+        else
+        {
+            if(fade > 0.f) fade -= 0.05f; // the camera exited water
+            else deletepostfx("underwaterwobble");
+            updatepostfx("underwaterwobble", vec4(fade / 2.f, server::gamemillis, 0, 0));
         }
     }
 }

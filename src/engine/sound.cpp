@@ -205,13 +205,6 @@ void configureMapReverbs(int a, int b, int c, int d, int e)
 
 ICOMMAND(mapreverbs, "iiiii", (int *a, int *b, int *c, int *d, int *e), configureMapReverbs(*a, *b, *c, *d, *e) );
 
-bool isUnderWater(vec pos)
-{
-    int matPos = lookupmaterial(pos);
-    int matCam = lookupmaterial(camera1->o);
-    return (matPos & MAT_WATER) == MAT_WATER || (matPos & MAT_LAVA) == MAT_LAVA || (matCam & MAT_WATER) == MAT_WATER || (matCam & MAT_LAVA) == MAT_LAVA;
-}
-
 void applyReverb(ALuint source, int reverb)
 {
     if(noEfx) return;

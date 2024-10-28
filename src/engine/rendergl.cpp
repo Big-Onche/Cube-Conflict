@@ -1473,6 +1473,13 @@ void shakeScreen(float factor)
 
 VARP(spectatekiller, 0, 1, 1);
 
+bool isUnderWater(vec pos)
+{
+    int matPos = lookupmaterial(pos);
+    int matCam = lookupmaterial(camera1->o);
+    return (matPos & MAT_WATER) == MAT_WATER || (matPos & MAT_LAVA) == MAT_LAVA || (matCam & MAT_WATER) == MAT_WATER || (matCam & MAT_LAVA) == MAT_LAVA;
+}
+
 struct CameraAnimations
 {
     int animStartTime;          // When the animation has started (ms)
@@ -2716,13 +2723,16 @@ void gl_drawview()
     {
         renderparticles();
         GLERROR;
-
-        ar::render();
-        GLERROR;
     }
 
     rendervolumetric();
     GLERROR;
+
+    if(!drawtex)
+    {
+        ar::render();
+        GLERROR;
+    }
 
     if(editmode)
     {
@@ -2743,6 +2753,7 @@ void gl_drawview()
     }
     else
     {
+        postfx::updateUnderwaterEffect(fogbelow > 0.6f);
         postfx::updateRadialBlur(game::getCameraVelocity(), game::hudplayer()->boostmillis[B_SHROOMS]);
         postfx::renderRadialBlur();
         GLERROR;
