@@ -231,47 +231,42 @@ struct partrenderer
                 o.z -= t*t/(2.0f * 5000.0f * p->gravity);
             }
 
-            if(type&PT_COLLIDE && camera1->o.dist2(p->o) <= particlecollisiondist && o.z < p->val && step) // avoid useless heavy collision computing if the particle is far away except height
+            if(isvisiblesphere(p->size, o) == VFC_NOT_VISIBLE) return;
+
+            if(type&PT_COLLIDE && camera1->o.dist2(p->o) <= particlecollisiondist && o.z < p->val) // avoid useless heavy collision computing if the particle is far away except height
             {
-                if(stain >= 0)
+                vec hitpos;
+                raycubepos(vec(o.x, o.y, o.z), vec(0, 0, -1), hitpos, COLLIDERADIUS, RAY_CLIPMAT|RAY_LIQUIDMAT|RAY_POLY);
+
+                float collidez = hitpos.z;
+                float collideVal = collidez + COLLIDEERROR;
+
+                if(o.z >= collideVal) p->val = collideVal; // Only process collision if we're actually at or below the collision point
+                else
                 {
-                    vec hitpos;
-
-                    float dist = raycubepos(vec(o.x, o.y, o.z), vec(0, 0, -1), hitpos, COLLIDERADIUS, RAY_POLY|RAY_CLIPMAT|RAY_LIQUIDMAT);
-
-                    if(dist < 0 || dist > COLLIDERADIUS) return; // Skip if no collision found or collision is too far
-
-                    float collidez = hitpos.z;
-                    float collideVal = collidez + COLLIDEERROR;
-
-                    if(o.z >= collideVal) p->val = collideVal; // Only process collision if we're actually at or below the collision point
-                    else
+                    blend = 0;
+                    switch(stain)
                     {
-                        switch(stain)
-                        {
-                            case STAIN_RAIN:
-                                addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size/7.5f, 0xFFFFFF, type&PT_RND4 ? (p->flags>>5)&3 : 0);
-                                particle_splash(PART_WATER, 3, 120, vec(o.x, o.y, collidez), 0x303048, 0.08f, 50, 500, 4);
-                                if(p->sound) playSound(S_WATERDROP, o, 70, 10);
-                                break;
-                            case STAIN_SNOW:
-                                addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size, p->color, type&PT_RND4 ? (p->flags>>5)&3 : 0);
-                                break;
-                            case STAIN_BURN:
-                                addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size*1.5f, 0x222222, type&PT_RND4 ? (p->flags>>5)&3 : 0);
-                                addstain(STAIN_BULLET_GLOW, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size, 0xFF6622, type&PT_RND4 ? (p->flags>>5)&3 : 0);
-                                break;
-                            case STAIN_BULLET_GLOW:
-                                addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size*2.5f, 0xFF6622);
-                                break;
-                            case STAIN_BLOOD:
-                                addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size, bvec(0x60, 0xFF, 0xFF), rnd(4));
-                                break;
-                        }
-                        blend = 0;
+                        case STAIN_RAIN:
+                            addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size/7.5f, 0xFFFFFF, type&PT_RND4 ? (p->flags>>5)&3 : 0);
+                            particle_splash(PART_WATER, 3, 120, vec(o.x, o.y, collidez), 0x303048, 0.08f, 50, 500, 4);
+                            if(p->sound) playSound(S_WATERDROP, o, 70, 10);
+                            break;
+                        case STAIN_SNOW:
+                            addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size, p->color, type&PT_RND4 ? (p->flags>>5)&3 : 0);
+                            break;
+                        case STAIN_BURN:
+                            addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size*1.5f, 0x222222, type&PT_RND4 ? (p->flags>>5)&3 : 0);
+                            addstain(STAIN_BULLET_GLOW, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size, 0xFF6622, type&PT_RND4 ? (p->flags>>5)&3 : 0);
+                            break;
+                        case STAIN_BULLET_GLOW:
+                            addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size*2.5f, 0xFF6622);
+                            break;
+                        case STAIN_BLOOD:
+                            addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size, bvec(0x60, 0xFF, 0xFF), rnd(4));
+                            break;
                     }
                 }
-                else blend = 0;
             }
 
             if(type & (PT_EMITLIGHT | PT_EMITVLIGHT) && camera1->o.dist(o) < (dynlightdist / 2) )
@@ -1368,6 +1363,9 @@ static inline int colorfromattr(int attr)
  * +32 to inverse direction
  */
 
+VARP(rainparticlesdist, 0, 256, 1024);
+VARP(snowparticlesdist, 0, 1024, 4096);
+
 enum {WEATHER_CLEAR = 0, WEATHER_RAIN, WEATHER_SNOW, WEATHER_APOCALYPSE};
 
 void regularshape(int type, int radius, int color, int dir, int num, int fade, const vec &p, float size, int gravity, float vel, int windoffset, int weather, int height, int sizemod)
@@ -1448,7 +1446,7 @@ void regularshape(int type, int radius, int color, int dir, int num, int fade, c
 
         if(weather)
         {
-            if(camera1->o.dist2(vec(to.x, to.y, camera1->o.z)) > (weather==WEATHER_RAIN ? 256 : 768)) continue; // culling out distant ones
+            if(camera1->o.dist2(vec(to.x, to.y, camera1->o.z)) > (weather == WEATHER_RAIN ? rainparticlesdist : snowparticlesdist)) continue; // culling out distant ones
 
             vec spawnz(to.x, to.y, camera1->o.z + height);
             vec d = spawnz;
