@@ -1707,7 +1707,7 @@ void modifyvelocity(physent *pl, bool local, bool water, bool floating, int curt
     gameent *d = (gameent *)pl;
 
     bool ninjaSkills = d->character==C_NINJA || (d->character==C_KAMIKAZE && d->abilitymillis[ABILITY_2]);
-    bool tripleJump = (game::hasPowerArmor(d) || ninjaSkills);
+    bool tripleJump = (d->hasPowerArmor() || ninjaSkills);
 
     int maxjumps = d->boostmillis[B_JOINT] ? 5 : (tripleJump ? 2 : 1);
 

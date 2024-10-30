@@ -126,7 +126,7 @@ namespace entities
 
     bool powerarmorpieces(int type, gameent *d)
     {
-        return hasPowerArmor(d) && type>=I_WOODSHIELD && type<=I_MAGNETSHIELD;
+        return d->hasPowerArmor() && type>=I_WOODSHIELD && type<=I_MAGNETSHIELD;
     }
 
     bool canspawnitem(int type)
@@ -191,7 +191,7 @@ namespace entities
 
         if(type==I_SHROOMS && !d->boostmillis[B_SHROOMS]) d->lastshrooms = lastmillis;
 
-        d->pickupitem(type, d->character, d->abilitymillis[ABILITY_1], hasPowerArmor(d), rndsweap);
+        d->pickupitem(type, d->character, d->abilitymillis[ABILITY_1], rndsweap);
 
         bool powerArmor = powerarmorpieces(type, d);
         if(type >= I_WOODSHIELD && type <= I_MAGNETSHIELD)
@@ -296,8 +296,7 @@ namespace entities
         {
             default:
             {
-                bool powerArmor = hasPowerArmor(d);
-                if(d->canpickupitem(e->type, d->character, hasSuperWeapon(d), powerArmor))
+                if(d->canpickupitem(e->type, d->character))
                 {
                     addmsg(N_ITEMPICKUP, "rci", d, n);
                     ents[n]->clearspawned(); // even if someone else gets it first
@@ -312,7 +311,7 @@ namespace entities
                             case I_IRONSHIELD:
                             case I_GOLDSHIELD:
                             case I_MAGNETSHIELD:
-                                if(powerArmor) updateStat(1, STAT_REPASSIST);
+                                if(d->hasPowerArmor()) updateStat(1, STAT_REPASSIST);
                                 else
                                 {
                                     updateStat(1, e->type==I_WOODSHIELD ? STAT_BOUCLIERBOIS : e->type==I_IRONSHIELD ? STAT_BOUCLIERFER : e->type==I_MAGNETSHIELD ? STAT_BOUCLIERMAGNETIQUE : STAT_BOUCLIEROR);

@@ -1692,7 +1692,7 @@ namespace game
                 else findplayerspawn(s, -1, m_teammode && !m_capture ? s->team : 0);
                 if(s == player1)
                 {
-                    if(player1->character==C_SOLDIER && hasSuperWeapon(player1)) unlockAchievement(ACH_CHANCE);
+                    if(player1->character==C_SOLDIER && player1->hasSuperWeapon()) unlockAchievement(ACH_CHANCE);
                     showscores(false);
                     lasthit = 0;
                     player1->lastweap = player1->gunselect;

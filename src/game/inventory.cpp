@@ -76,7 +76,7 @@ namespace game
         findSpecialWeapon(player1, GUN_M_BUSTER, NUMMELEEWEAPONS, [](int gunId) { gunselect(gunId, player1); });
     );
 
-    ICOMMAND(hassuperweapon, "", (), intret(hasSuperWeapon(player1)));
+    ICOMMAND(hassuperweapon, "", (), intret(player1->hasSuperWeapon()));
     ICOMMAND(superweaponselected, "", (), intret(player1->gunselect >= GUN_S_NUKE && player1->gunselect <= GUN_S_CAMPER));
     ICOMMAND(getsuperweaponid, "", (), findSpecialWeapon(player1, GUN_S_NUKE, NUMSUPERWEAPONS, [](int gunId) { intret(gunId); }); );
     ICOMMAND(getsuperweaponname, "", (), findSpecialWeapon(player1, GUN_S_NUKE, NUMSUPERWEAPONS, [](int gunId) { result(readstr(guns[gunId].ident)); }); );

@@ -522,7 +522,17 @@ struct gamestate
        return ammo[type-I_RAIL+GUN_ELECTRIC]>=is.max;
     }
 
-    bool canpickupitem(int type, int playerClass, bool hasSuperWeapon, bool hasPowerArmor)
+    bool hasPowerArmor()
+    {
+        return armourtype==A_POWERARMOR && armour;
+    }
+
+    bool hasSuperWeapon()
+    {
+        return ammo[GUN_S_NUKE] || ammo[GUN_S_GAU8] || ammo[GUN_S_ROCKETS] || ammo[GUN_S_CAMPER];
+    }
+
+    bool canpickupitem(int type, int playerClass)
     {
         if(type<I_RAIL || type>I_MANA) return false;
         itemstat &is = itemstats[type-I_RAIL];
@@ -544,17 +554,17 @@ struct gamestate
             case I_IRONSHIELD:
             case I_GOLDSHIELD:
             case I_MAGNETSHIELD:
-                return hasPowerArmor ? (armour < 3000) : (armour < (playerClass==C_SOLDIER ? is.max+(250*(armourtype+1)) : is.max));
+                return hasPowerArmor() ? (armour < 3000) : (armour < (playerClass==C_SOLDIER ? is.max+(250*(armourtype+1)) : is.max));
 
-            case I_POWERARMOR: return !hasPowerArmor;
+            case I_POWERARMOR: return !hasPowerArmor();
 
             default:
-                if(type >= I_SUPERARME && type < I_SUPERARME + NUMSUPERWEAPONS && hasSuperWeapon) return false;
+                if(type >= I_SUPERARME && type < I_SUPERARME + NUMSUPERWEAPONS && hasSuperWeapon()) return false;
                 else return ammo[is.info] < is.max * (playerClass==C_AMERICAN ? 1.5f : 1);
         }
     }
 
-    void pickupitem(int type, int playerClass, int aptisort, bool haspowerarmor, int rndsweap)
+    void pickupitem(int type, int playerClass, int aptisort, int rndsweap)
     {
         if(type<I_RAIL || type>I_MANA) return;
         itemstat &is = itemstats[type-I_RAIL+rndsweap];
@@ -587,10 +597,10 @@ struct gamestate
                 }
                 else
                 {
-                    armourtype = haspowerarmor ? A_POWERARMOR : is.info;
-                    if(!haspowerarmor) ammo[GUN_POWERARMOR] = 0;
-                    int armourval = haspowerarmor && armour ? (500 * itemboost) : (playerClass==C_SOLDIER ? is.max+(250*(armourtype+1)) : is.max);
-                    armour = min(armour + armourval, haspowerarmor ? 3000 : armourval);
+                    armourtype = hasPowerArmor() ? A_POWERARMOR : is.info;
+                    if(!hasPowerArmor() ) ammo[GUN_POWERARMOR] = 0;
+                    int armourval = hasPowerArmor()  && armour ? (500 * itemboost) : (playerClass==C_SOLDIER ? is.max+(250*(armourtype+1)) : is.max);
+                    armour = min(armour + armourval, hasPowerArmor() ? 3000 : armourval);
                     return;
                 }
 
@@ -1118,8 +1128,6 @@ namespace game
     extern bool hassuicided;
     inline bool hasShrooms() { return game::hudplayer()->boostmillis[B_SHROOMS]; }
     inline bool hasRoids(gameent *d) { return d->boostmillis[B_ROIDS]; }
-    inline bool hasPowerArmor(gameent *d) { return d->armourtype==A_POWERARMOR && d->armour; }
-    inline bool hasSuperWeapon(gameent *d) { return d->ammo[GUN_S_NUKE] || d->ammo[GUN_S_GAU8] || d->ammo[GUN_S_ROCKETS] || d->ammo[GUN_S_CAMPER]; }
     struct playermodelinfo { const char *model[MAXTEAMS], *cbmodel; };
     extern void saveGrave(gameent *d);
     extern void clearGraves();

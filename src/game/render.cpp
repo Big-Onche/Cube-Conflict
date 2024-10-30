@@ -349,7 +349,7 @@ namespace game
         }
 
         /////////////////////////// Animations and gfx ///////////////////////////
-        bool powerArmor = hasPowerArmor(d);
+        bool powerArmor = d->hasPowerArmor();
         int anim = ANIM_IDLE|ANIM_LOOP, lastaction = d->lastaction;
         if(animoverride) anim = (animoverride<0 ? ANIM_ALL : animoverride)|ANIM_LOOP;
 
@@ -551,7 +551,7 @@ namespace game
             if(d->health < 150 && rndevent(94)) particle_splash(PART_BLOOD, 1, 2500, pos, 0x60FFFF, 1.f+rnd(2), 50);
         }
 
-        if(hasPowerArmor(d) && d->armour < 1500)
+        if(d->hasPowerArmor() && d->armour < 1500)
         {
             bool lowArmour = (d->armour < 750);
             if(rndevent(lowArmour ? 98 : 95)) regularflame(PART_SMOKE, pos, 15, 3, (lowArmour ? 0x222222 : 0x777777), 1, (lowArmour ? 2.5f : 2), 50, (lowArmour ? 1750 : 1250), -10, 3);

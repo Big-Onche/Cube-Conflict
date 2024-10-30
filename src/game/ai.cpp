@@ -554,7 +554,7 @@ namespace ai
                 if(d->armourtype==A_POWERARMOR && d->armour<1500) score = m_ctf ? 1e2f : 1e4f;
                 if(d->armour <= 1250) score =  m_ctf ? 1e3f : 1e6f;
             case I_POWERARMOR:
-                if(!hasPowerArmor(d)) score =  m_ctf ? 1e3f : 1e9f;
+                if(!d->hasPowerArmor()) score =  m_ctf ? 1e3f : 1e9f;
                 break;
             default:
             {
@@ -582,7 +582,7 @@ namespace ai
         loopv(entities::ents)
         {
             extentity &e = *(extentity *)entities::ents[i];
-            if(!e.spawned() || !d->canpickupitem(e.type, d->character, hasSuperWeapon(d), hasPowerArmor(d))) continue;
+            if(!e.spawned() || !d->canpickupitem(e.type, d->character)) continue;
             tryitem(d, e, i, b, interests, e.type == I_SUPERARME ? true : force);
         }
     }
@@ -633,7 +633,7 @@ namespace ai
                 {
                     int id = nearby[i];
                     extentity &e = *(extentity *)entities::ents[id];
-                    if(d->canpickupitem(e.type, d->character, hasSuperWeapon(d), hasPowerArmor(d))) tryitem(d, e, id, b, interests);
+                    if(d->canpickupitem(e.type, d->character)) tryitem(d, e, id, b, interests);
                 }
             }
         }
@@ -740,7 +740,7 @@ namespace ai
         {
             loopv(players)
             {
-                if(players[i] && players[i]->ai && players[i]->aitype == AI_BOT && players[i]->canpickupitem(e.type, players[i]->character, hasSuperWeapon(players[i]), hasPowerArmor(players[i])))
+                if(players[i] && players[i]->ai && players[i]->aitype == AI_BOT && players[i]->canpickupitem(e.type, players[i]->character))
                 {
                     gameent *d = players[i];
                     bool wantsitem = false;

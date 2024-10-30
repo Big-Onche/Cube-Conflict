@@ -298,7 +298,7 @@ namespace game
 
         }
 
-        if(hasPowerArmor(d) && d->armour < 1000) // power armor alarm sound
+        if(d->hasPowerArmor() && d->armour < 1000) // power armor alarm sound
         {
             if(!d->powerarmorsound)
             {
@@ -521,7 +521,7 @@ namespace game
                 if(player1->health>=2000) unlockAchievement(ACH_SACAPV);
                 if(player1->boostmillis[B_ROIDS] && player1->boostmillis[B_EPO] && player1->boostmillis[B_JOINT] && player1->boostmillis[B_SHROOMS]) unlockAchievement(ACH_DEFONCE);
                 if(lookupmaterial(player1->o)==MAT_NOCLIP && !strcasecmp(getclientmap(), "moon")) unlockAchievement(ACH_SPAAACE);
-                if(hasSuperWeapon(player1) && player1->boostmillis[B_ROIDS] && player1->armour && player1->armourtype==A_POWERARMOR) unlockAchievement(ACH_ABUS);
+                if(player1->hasSuperWeapon() && player1->boostmillis[B_ROIDS] && player1->armour && player1->armourtype==A_POWERARMOR) unlockAchievement(ACH_ABUS);
                 if(player1->character==C_KAMIKAZE && !player1->ammo[GUN_KAMIKAZE] && totalmillis-lastshoot>=500 && totalmillis-lastshoot<=750 && isconnected()) unlockAchievement(ACH_SUICIDEFAIL);
                 if(player1->boostmillis[B_EPO] && player1->character==C_JUNKIE) unlockAchievement(ACH_LANCEEPO);
             }
@@ -1180,7 +1180,7 @@ namespace game
         gameent *pl = (gameent *)d;
         if(d->physstate>=PHYS_SLOPE && moving)
         {
-            bool powerArmor = hasPowerArmor(pl);
+            bool powerArmor = pl->hasPowerArmor();
             int snd = lookupmaterial(d->feetpos()) == MAT_WATER ? S_SWIM : (powerArmor ? S_FOOTSTEP_ASSIST : S_FOOTSTEP);
 
             int freq = (((100 - classes[pl->character].speed) + 75) * 5) ;
