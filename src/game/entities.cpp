@@ -297,7 +297,7 @@ namespace entities
             default:
             {
                 bool powerArmor = hasPowerArmor(d);
-                if(d->canpickupitem(e->type, d->character, powerArmor))
+                if(d->canpickupitem(e->type, d->character, hasSuperWeapon(d), powerArmor))
                 {
                     addmsg(N_ITEMPICKUP, "rci", d, n);
                     ents[n]->clearspawned(); // even if someone else gets it first

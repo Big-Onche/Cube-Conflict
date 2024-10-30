@@ -522,7 +522,7 @@ struct gamestate
        return ammo[type-I_RAIL+GUN_ELECTRIC]>=is.max;
     }
 
-    bool canpickupitem(int type, int playerClass, bool hasPowerArmor)
+    bool canpickupitem(int type, int playerClass, bool hasSuperWeapon, bool hasPowerArmor)
     {
         if(type<I_RAIL || type>I_MANA) return false;
         itemstat &is = itemstats[type-I_RAIL];
@@ -549,7 +549,8 @@ struct gamestate
             case I_POWERARMOR: return !hasPowerArmor;
 
             default:
-                return ammo[is.info] < is.max*(playerClass==C_AMERICAN ? 1.5f : 1);
+                if(type >= I_SUPERARME && type < I_SUPERARME + NUMSUPERWEAPONS && hasSuperWeapon) return false;
+                else return ammo[is.info] < is.max * (playerClass==C_AMERICAN ? 1.5f : 1);
         }
     }
 

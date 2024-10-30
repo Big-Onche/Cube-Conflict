@@ -897,13 +897,18 @@ namespace server
         return (type==I_SUPERARME || (type>=I_BOOSTPV && type<=I_JOINT) || (type>=I_IRONSHIELD && type<=I_POWERARMOR));
     }
 
+    bool hasSuperWeapon(clientinfo *ci)
+    {
+        return ci->state.ammo[GUN_S_NUKE] || ci->state.ammo[GUN_S_GAU8] || ci->state.ammo[GUN_S_ROCKETS] ||ci->state.ammo[GUN_S_CAMPER];
+    }
+
     bool pickup(int i, int sender)         // server side item pickup, acknowledge first client that gets it
     {
         if((m_timed && gamemillis>=gamelimit) || !sents.inrange(i) || !sents[i].spawned) return false;
         clientinfo *ci = getinfo(sender);
         if(!ci) return false;
         int rndsweap = sents[i].type==I_SUPERARME ? rnd(4) : 0;
-        if(!ci->local && !ci->state.canpickupitem(sents[i].type+rndsweap, ci->character, ci->state.armourtype==A_POWERARMOR && ci->state.armour))
+        if(!ci->local && !ci->state.canpickupitem(sents[i].type+rndsweap, ci->character, hasSuperWeapon(ci), ci->state.armourtype==A_POWERARMOR && ci->state.armour))
         {
             sendf(ci->ownernum, 1, "ri4", N_ITEMACC, i, -1, rndsweap);
             return false;
