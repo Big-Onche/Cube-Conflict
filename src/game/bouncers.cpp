@@ -304,7 +304,7 @@ namespace bouncers
                     case BNC_GRENADE:
                     {
                         float growth = (1000 - (bnc.lifetime - curtime))/150.f;
-                        particle_fireball(pos, growth, PART_EXPLOSION, 20, hasRoids(bnc.owner) ? 0xFF0000 : 0x0055FF, growth, hasShrooms());
+                        particle_fireball(pos, growth, PART_EXPLOSION, 20, bnc.owner->hasRoids() ? 0xFF0000 : 0x0055FF, growth, hasShrooms());
                         particle_splash(PART_SMOKE, 1, 150, pos, 0x404088, 2.5f, 50, -20, 0, hasShrooms());
                         adddynlight(pos, 40, vec(0.5f, 0.5f, 2.0f), 0, 0, L_NOSHADOW);
                         break;
@@ -316,7 +316,7 @@ namespace bouncers
 
                     case BNC_GLASS:
                         particle_splash(PART_SMOKE, 1, 1200, pos, 0x303030, 2.5f, 50, -50, 10, hasShrooms());
-                        particle_splash(PART_FIRE_BALL, 1, 250, pos, (hasRoids(bnc.owner) ? 0xFF0000 : 0x996600), 1.3f, 50, -50, 12, hasShrooms());
+                        particle_splash(PART_FIRE_BALL, 1, 250, pos, bnc.owner->hasRoids() ? 0xFF0000 : 0x996600, 1.3f, 50, -50, 12, hasShrooms());
                         if(rnd(2)) particle_splash(PART_AR, 1, 500, pos, 0xFFFFFF, 12.f, 50, -25, 50);
                         break;
 

@@ -163,7 +163,7 @@ namespace game
         if(!spreadLimit(d))
         {
             if(d->crouching) spread /= d->character==C_CAMPER ? 2.5f : 1.3f;
-            if(d->boostmillis[B_ROIDS] || d->boostmillis[B_RAGE]) spread *= 1.75f;
+            if(d->hasRoids() || d->boostmillis[B_RAGE]) spread *= 1.75f;
         }
 
         spread = (spread*100) / classes[d->character].accuracy;
@@ -274,7 +274,7 @@ namespace game
                 }
         }
 
-        if(actor->boostmillis[B_ROIDS]) // recalc damage if actor has roids
+        if(actor->hasRoids()) // recalc damage if actor has roids
         {
             damage *= actorClass == C_JUNKIE ? 3 : 2;
             if(isHudPlayer) d->curdamagecolor = 0xFF0000;
@@ -354,7 +354,7 @@ namespace game
             }
             else if(at==player1)
             {
-                if(player1->boostmillis[B_ROIDS]) damage *= (player1->character==C_JUNKIE ? 3 : 2);
+                if(player1->hasRoids()) damage *= (player1->character==C_JUNKIE ? 3 : 2);
                 switch(player1->character)
                 {
                     case C_AMERICAN: {if(atk==ATK_S_NUKE || atk==ATK_S_GAU8 || atk==ATK_S_ROCKETS || atk==ATK_S_CAMPER) damage *= 1.5f; break;}
@@ -589,7 +589,7 @@ namespace game
 
     float recoilReduce()
     {
-        float factor = (hudplayer()->boostmillis[B_ROIDS] ? 0.75f : 1.f);
+        float factor = (hudplayer()->hasRoids() ? 0.75f : 1.f);
 
         switch(hudplayer()->character)
         {
@@ -648,7 +648,7 @@ namespace game
 
             case ATK_ELECTRIC:
                 renderMuzzleEffects(from, to, d, atk);
-                renderInstantImpact(from, to, muzzleOrigin, atk, hasRoids(d));
+                renderInstantImpact(from, to, muzzleOrigin, atk, d->hasRoids());
                 if(isHudPlayer) startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay / 2.f, vec(0, 0, 0), vec(0, 0, 0), vec((0.1f * recoilSide(300)) / recoilReduce(), 0.1f / recoilReduce(), 0));
                 else soundNearmiss(S_FLYBYELEC, from, to);
                 playSound(S_IMPACTELEC, to, 250, 50, SND_LOWPRIORITY);
@@ -704,6 +704,7 @@ namespace game
             case ATK_HYDRA:
             {
                 bool isHydra = (atk==ATK_HYDRA);
+                bool hasRoids = d->hasRoids();
                 renderMuzzleEffects(from, to, d, atk);
                 if(!local) createrays(gun, from, to, d);
                 loopi(isHydra ? 3 : 2) bouncers::spawn(casingOrigin, d->vel, d, BNC_CARTRIDGE);
@@ -717,7 +718,7 @@ namespace game
                 {
                     float originOffset = 0.4f - (rnd(9) / 10.f);
                     projectiles::add(muzzleOrigin.add(vec(originOffset, originOffset, originOffset)), rays[i], 3000, false, id, d, atk);
-                    renderInstantImpact(from, rays[i], muzzleOrigin, atk, hasRoids(d));
+                    renderInstantImpact(from, rays[i], muzzleOrigin, atk, hasRoids);
                     if(i < 6)
                     {
                         playSound(S_LITTLERICOCHET, rays[i], 250, 100, SND_LOWPRIORITY);
@@ -732,6 +733,7 @@ namespace game
             case ATK_S_CAMPER:
             {
                 bool isSv98 = (atk==ATK_SV98);
+                bool hasRoids = d->hasRoids();
                 renderMuzzleEffects(from, to, d, atk);
                 if(isHudPlayer)
                 {
@@ -743,9 +745,9 @@ namespace game
                     loopi(attacks[atk].rays)
                     {
                         float originOffset = 0.4f - (rnd(9) / 10.f);
-                        particle_flare(muzzleOrigin.add(vec(originOffset, originOffset, originOffset)), rays[i], 100, PART_F_SHOTGUN, hasRoids(d) ? 0xFF2222 : 0xFFFF22, 0.4f, d, hasShrooms());
+                        particle_flare(muzzleOrigin.add(vec(originOffset, originOffset, originOffset)), rays[i], 100, PART_F_SHOTGUN, hasRoids ? 0xFF2222 : 0xFFFF22, 0.4f, d, hasShrooms());
                         particles::trail(PART_SMOKE, 800, hudgunorigin(gun, from, to, d), rays[i], 0x999999, 0.6f, 20);
-                        renderInstantImpact(from, rays[i], muzzleOrigin, atk, hasRoids(d));
+                        renderInstantImpact(from, rays[i], muzzleOrigin, atk, hasRoids);
                         if(!isHudPlayer) soundNearmiss(S_BIGBULLETFLYBY, from, rays[i], 512);
                         playSound(S_BIGRICOCHET, rays[i], 250, 100);
                     }
@@ -779,6 +781,7 @@ namespace game
 
             case ATK_FLAMETHROWER:
             {
+                bool hasRoids = d->hasRoids();
                 if(!local) createrays(gun, from, to, d);
                 renderMuzzleEffects(from, to, d, atk);
                 loopi(attacks[atk].rays)
@@ -787,12 +790,12 @@ namespace game
                     if(rnd(2)) particle_flying_flare(muzzleOrigin, dest, 900, PART_AR, 0xEEEEEE, 15.f, 100, 50);
                     switch(rnd(4))
                     {
-                        case 0: particle_flying_flare(muzzleOrigin, dest, 700, PART_FIRE_BALL, hasRoids(d) ? 0x881111 : 0x604930, (12.f+rnd(16))/8.f, 100, 10+rnd(5), hasShrooms()); break;
-                        case 1: particle_flying_flare(muzzleOrigin, dest, 700, PART_FIRE_BALL, hasRoids(d) ? 0x770000 : 0x474747, (12.f+rnd(16))/8.f, 100, 10+rnd(5), hasShrooms()); break;
-                        case 2: particle_flying_flare(muzzleOrigin, dest, 700, PART_FIRE_BALL, hasRoids(d) ? 0x991111 : 0x383838, (12.f+rnd(16))/8.f, 100, 10+rnd(5), hasShrooms()); break;
+                        case 0: particle_flying_flare(muzzleOrigin, dest, 700, PART_FIRE_BALL, hasRoids ? 0x881111 : 0x604930, (12.f+rnd(16))/8.f, 100, 10+rnd(5), hasShrooms()); break;
+                        case 1: particle_flying_flare(muzzleOrigin, dest, 700, PART_FIRE_BALL, hasRoids ? 0x770000 : 0x474747, (12.f+rnd(16))/8.f, 100, 10+rnd(5), hasShrooms()); break;
+                        case 2: particle_flying_flare(muzzleOrigin, dest, 700, PART_FIRE_BALL, hasRoids ? 0x991111 : 0x383838, (12.f+rnd(16))/8.f, 100, 10+rnd(5), hasShrooms()); break;
                         default:
                             particle_flying_flare(muzzleOrigin, dest, 1100, PART_SMOKE, 0x111111, (15.f+rnd(18))/3.f, -20, 15+rnd(10), hasShrooms());
-                            renderInstantImpact(from, rays[i], muzzleOrigin, atk, hasRoids(d));
+                            renderInstantImpact(from, rays[i], muzzleOrigin, atk, hasRoids);
                             if(rnd(2) && !isHudPlayer) soundNearmiss(S_FLYBYFLAME, from, rays[i]);
                     }
                 }
@@ -832,7 +835,7 @@ namespace game
 
         if(!rnd(attacks[atk].specialsounddelay))
         {
-            if(d->boostmillis[B_ROIDS])
+            if(d->hasRoids())
             {
                 playSound(S_ROIDS_SHOOT, isHudPlayer ? vec(0, 0, 0) : d->o, 500, 100, NULL, d->entityId);
                 if(camera1->o.dist(hudgunorigin(gun, d->o, to, d)) >= 400 && d!=player1) playSound(S_ROIDS_SHOOT_FAR, d->o, 1000, 500, NULL, d->entityId);
@@ -1095,7 +1098,7 @@ namespace game
         if(d->character==C_PRIEST && d->abilitymillis[ABILITY_3]) waitfactor = 2.5f + ((4000.f - d->abilitymillis[ABILITY_3])/1000.f);
         if(d->boostmillis[B_SHROOMS]) waitfactor *= d->character==C_JUNKIE ? 1.75f : 1.5f;
         d->gunwait = attacks[atk].attackdelay/waitfactor;
-        d->totalshots += (attacks[atk].damage*attacks[atk].rays) * (d->boostmillis[B_ROIDS] ? 1 : 2);
+        d->totalshots += (attacks[atk].damage*attacks[atk].rays) * (d->hasRoids() ? 1 : 2);
         if(d->powerarmorexploded) {d->attacking = d->wasAttacking; execute("getoldweap"); d->powerarmorexploded = false;}
         if(d==player1 && isSemiAutoGun(gun) && !specialAbility) d->attacking = ACT_IDLE;
     }

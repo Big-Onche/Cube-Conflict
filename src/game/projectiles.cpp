@@ -97,7 +97,7 @@ namespace projectiles
                 return;
             case ATK_SPOCKGUN:
                 addstain(STAIN_PLASMA_SCORCH, pos, dir, 5);
-                addstain(STAIN_SPOCK, pos, dir, 5, hasRoids(p.owner) ? 0xFF0000 : 0x22FF22);
+                addstain(STAIN_SPOCK, pos, dir, 5, p.owner->hasRoids() ? 0xFF0000 : 0x22FF22);
                 return;
             case ATK_UZI:
             case ATK_CROSSBOW:

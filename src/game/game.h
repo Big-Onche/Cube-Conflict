@@ -522,6 +522,11 @@ struct gamestate
        return ammo[type-I_RAIL+GUN_ELECTRIC]>=is.max;
     }
 
+    bool hasRoids()
+    {
+        return boostmillis[B_ROIDS];
+    }
+
     bool hasPowerArmor()
     {
         return armourtype==A_POWERARMOR && armour;
@@ -1127,7 +1132,6 @@ namespace game
     // render
     extern bool hassuicided;
     inline bool hasShrooms() { return game::hudplayer()->boostmillis[B_SHROOMS]; }
-    inline bool hasRoids(gameent *d) { return d->boostmillis[B_ROIDS]; }
     struct playermodelinfo { const char *model[MAXTEAMS], *cbmodel; };
     extern void saveGrave(gameent *d);
     extern void clearGraves();

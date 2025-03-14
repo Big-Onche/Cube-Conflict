@@ -2520,7 +2520,7 @@ namespace server
             if(dup) continue;
 
             float damage = attacks[atk].damage*(1-h.dist/EXP_DISTSCALE/attacks[atk].exprad);
-            if(gs.boostmillis[B_ROIDS]) damage*= ci->character==C_JUNKIE ? 3 : 2;
+            if(gs.hasRoids()) damage*= ci->character==C_JUNKIE ? 3 : 2;
             if(target==ci)
             {
                 switch(atk)
@@ -2570,7 +2570,7 @@ namespace server
                 int(to.x*DMF), int(to.y*DMF), int(to.z*DMF),
                 ci->ownernum);
         gs.shotdamage += attacks[atk].damage*attacks[atk].rays;
-        if(gs.boostmillis[B_ROIDS]) gs.shotdamage*=ci->character==C_JUNKIE ? 3 : 2;
+        if(gs.hasRoids()) gs.shotdamage*=ci->character==C_JUNKIE ? 3 : 2;
         if(gs.boostmillis[B_RAGE]) gs.shotdamage*=1.25f;
 
         switch(atk)
@@ -2610,7 +2610,7 @@ namespace server
                     totalrays += h.rays;
                     if(totalrays>maxrays) continue;
                     int damage = h.rays*attacks[atk].damage;
-                    if(gs.boostmillis[B_ROIDS]) damage*=ci->character==C_JUNKIE ? 3 : 2;
+                    if(gs.hasRoids()) damage*=ci->character==C_JUNKIE ? 3 : 2;
                     if(gs.boostmillis[B_RAGE]) gs.shotdamage*=1.25f;
                     dodamage(target, ci, damage, atk, h.dir);
                     if(ci->character==C_VAMPIRE) doregen(target, ci, damage);

@@ -519,9 +519,9 @@ namespace game
             if(IS_ON_OFFICIAL_SERV) // checking for achievements
             {
                 if(player1->health>=2000) unlockAchievement(ACH_SACAPV);
-                if(player1->boostmillis[B_ROIDS] && player1->boostmillis[B_EPO] && player1->boostmillis[B_JOINT] && player1->boostmillis[B_SHROOMS]) unlockAchievement(ACH_DEFONCE);
+                if(player1->hasRoids() && player1->boostmillis[B_EPO] && player1->boostmillis[B_JOINT] && player1->boostmillis[B_SHROOMS]) unlockAchievement(ACH_DEFONCE);
                 if(lookupmaterial(player1->o)==MAT_NOCLIP && !strcasecmp(getclientmap(), "moon")) unlockAchievement(ACH_SPAAACE);
-                if(player1->hasSuperWeapon() && player1->boostmillis[B_ROIDS] && player1->armour && player1->armourtype==A_POWERARMOR) unlockAchievement(ACH_ABUS);
+                if(player1->hasSuperWeapon() && player1->hasRoids() && player1->armour && player1->armourtype==A_POWERARMOR) unlockAchievement(ACH_ABUS);
                 if(player1->character==C_KAMIKAZE && !player1->ammo[GUN_KAMIKAZE] && totalmillis-lastshoot>=500 && totalmillis-lastshoot<=750 && isconnected()) unlockAchievement(ACH_SUICIDEFAIL);
                 if(player1->boostmillis[B_EPO] && player1->character==C_JUNKIE) unlockAchievement(ACH_LANCEEPO);
             }
