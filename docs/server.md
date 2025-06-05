@@ -1,8 +1,8 @@
 # How to launch server via terminal (GNU/Linux method)
 
 1. You need to [build](../bin_unix/readme.md) the game.
-2. Use `ccunix.sh` with `-d` flag.
-3. Now you can connect to server via game client (`ccunix.sh` without `-d` flag).
+2. Use `play.sh` with `-d` flag.
+3. Now you can connect to server via game client (`play.sh` without `-d` flag).
 
 ## Edit server settings 
 
