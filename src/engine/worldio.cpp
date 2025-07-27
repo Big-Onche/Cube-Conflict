@@ -728,7 +728,7 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     Texture *mapshot = textureload(picname, 3, true, false);
     renderbackground("...", mapshot, mname, readstr("Loading_Screen_Tips", rnd(17)));
 
-    if(!map_atmo) map_atmo = rnd(9)+1;
+    if(!mapatmosphere) mapatmosphere = rnd(10)+1; // if mapatmosphere = 0, pick a random one
 
     loopi(hdr.numvars)
     {
@@ -891,10 +891,10 @@ bool load_world(const char *mname, const char *cname)        // still supports a
     identflags |= IDF_OVERRIDDEN;
     if(atmos)
     {
-        formatstring(ambname, "config/atmos/atmo_%d.cfg", map_atmo);
+        formatstring(ambname, "config/atmos/atmo_%d.cfg", mapatmosphere);
         execfile(ambname, false);
     }
-    else map_atmo = 0;
+    else mapatmosphere = 0;
     execfile("config/default_map_settings.cfg", false);
     execfile(cfgname, false);
     identflags &= ~IDF_OVERRIDDEN;

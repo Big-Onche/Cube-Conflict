@@ -1158,15 +1158,20 @@ namespace game
                 loopi(4) particles::dirSplash(PART_SMOKE, 0x333333, 200, 4, 1500 + rnd(750), d->feetpos(), vec(0, 0, 1), 15.f + rnd(5), 50 + rnd(50), 5);
             }
         }
+
+        bool isRaining = mapatmosphere == 4 || mapatmosphere == 8;
+        bool isSnowing = mapatmosphere == 9;
+
         if(floorlevel>0)
         {
-            particle_splash(map_atmo==4 && atmos ? PART_WATER : PART_SMOKE, pl->armourtype==A_POWERARMOR ? 12 : 10, 100, d->feetpos(), map_atmo==4 && atmos ? 0x111111 : map_atmo==9 ? 0xFFFFFF : 0x666666, 7.0f+rnd(pl->armourtype==A_POWERARMOR ? 10 : 5), 400, 20);
+
+            particle_splash(isRaining && atmos ? PART_WATER : PART_SMOKE, pl->armourtype==A_POWERARMOR ? 12 : 10, 100, d->feetpos(), isRaining && atmos ? 0x111111 : isSnowing ? 0xFFFFFF : 0x666666, 7.0f+rnd(pl->armourtype==A_POWERARMOR ? 10 : 5), 400, 20);
             if(d==hudplayer()) startCameraAnimation(CAM_ANIM_JUMP, 600, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0.2f, 0));
             if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_POWERARMOR && pl->armour ? S_JUMP_ASSIST : pl->character==C_NINJA || (pl->character==C_KAMIKAZE && pl->abilitymillis[ABILITY_2]) ? S_JUMP_NINJA : S_JUMP_BASIC, d);
         }
         else if(floorlevel<0)
         {
-            particle_splash(map_atmo==4 && atmos ? PART_WATER : PART_SMOKE, pl->armourtype==A_POWERARMOR ? 20 : 15, 120, d->feetpos(), map_atmo==4 && atmos ? 0x131313 : map_atmo==9 ? 0xFFFFFF : 0x442211, 7.0f+rnd(pl->armourtype==A_POWERARMOR ? 10 : 5), 400, 20);
+            particle_splash(isRaining && atmos ? PART_WATER : PART_SMOKE, pl->armourtype==A_POWERARMOR ? 20 : 15, 120, d->feetpos(), isRaining && atmos ? 0x131313 : isSnowing ? 0xFFFFFF : 0x442211, 7.0f+rnd(pl->armourtype==A_POWERARMOR ? 10 : 5), 400, 20);
             if(d==hudplayer()) startCameraAnimation(CAM_ANIM_LAND, 400, vec(0, 0, -3), vec(0, 0, 0), vec(0, -0.4f, 0));
             if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_POWERARMOR && pl->armour ? S_LAND_ASSIST : S_LAND_BASIC, d);
         }

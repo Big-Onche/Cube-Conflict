@@ -412,7 +412,7 @@ struct vacollect : verthash
 
     bool canShowDecal(extentity *e)
     {
-        if(e->attr6) return map_atmo==4 || map_atmo==8 || map_atmo==9;
+        if(e->attr6) return mapatmosphere == 4 || mapatmosphere == 8 || mapatmosphere == 9;
         else return true;
     }
 

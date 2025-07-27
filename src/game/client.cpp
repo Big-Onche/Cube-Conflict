@@ -15,7 +15,7 @@ void getsteamname()
 ICOMMAND(getsteamname, "", (), getsteamname());
 
 bool launch = true;
-VAR(map_atmo, 0, 0, 9);
+VAR(mapatmosphere, 0, 0, 10);
 int currentIdenticalWeapon;
 
 namespace game
@@ -1463,8 +1463,8 @@ namespace game
 
             case N_MAPCHANGE:
             {
-                int atmofromserv = getint(p);
-                if(multiplayer(false)) map_atmo = atmofromserv;
+                int servermapatmosphere = getint(p);
+                if(multiplayer(false)) mapatmosphere = servermapatmosphere;
                 getstring(text, p);
                 filtertext(text, text, false);
                 fixmapname(text);
