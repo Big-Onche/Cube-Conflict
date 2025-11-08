@@ -113,25 +113,27 @@ CLIENT_OBJS= \
         engine/worldio.o \
         cubeconflict/gfx.o \
         cubeconflict/customs.o \
-        game/classes.o \
         cubeconflict/hud.o \
         cubeconflict/stats.o \
         cubeconflict/npcs.o \
         cubeconflict/rpg.o \
-        game/inventory.o \
         game/ai.o \
+        game/bouncers.o \
+        game/classes.o \
         game/client.o \
         game/entities.o \
         game/game.o \
+        game/inventory.o \
+        game/projectiles.o \
         game/render.o \
         game/scoreboard.o \
         game/server.o \
         game/waypoint.o \
-        game/projectiles.o \
-        game/bouncers.o \
         game/weapon.o
 
 CLIENT_PCH= shared/cube.h.gch engine/engine.h.gch game/game.h.gch cubeconflict/gfx.h.gch cubeconflict/stats.h.gch cubeconflict/customs.h.gch
+
+.PHONY: default all client install libenet clean fixspace depend
 
 default: all
 
@@ -141,7 +143,7 @@ clean:
 	-$(RM) $(CLIENT_PCH) $(CLIENT_OBJS) cc_client
 
 fixspace:
-	sed -i 's/[ \t]*$$//; :rep; s/^\([ ]*\)\t/\1    /g; trep' shared/*.c shared/*.cpp shared/*.h cubeconflict/*.cpp cubeconflict/*.h engine/*.cpp engine/*.h game/*.cpp game/*.h
+	sed -i.bak 's/[ \t]*$$//; :rep; s/^\([ ]*\)\t/\1    /g; trep' shared/*.c shared/*.cpp shared/*.h cubeconflict/*.cpp cubeconflict/*.h engine/*.cpp engine/*.h game/*.cpp game/*.h
 
 $(filter-out shared/%,$(CLIENT_PCH)): $(filter shared/%,$(CLIENT_PCH))
 $(CLIENT_PCH): %.h.gch: %.h
@@ -155,35 +157,34 @@ $(filter engine/%,$(CLIENT_OBJS)): $(filter engine/%,$(CLIENT_PCH))
 $(filter game/%,$(CLIENT_OBJS)): $(filter game/%,$(CLIENT_PCH))
 
 ifneq (,$(findstring MINGW,$(PLATFORM)))
-client: $(CLIENT_OBJS)
+client: libenet $(CLIENT_OBJS)
 	$(WINDRES) -I vcpp -i vcpp/mingw.rc -J rc -o vcpp/mingw.res -O coff
 	$(CXX) $(CXXFLAGS) -o $(WINBIN)/cubeconflict.exe vcpp/mingw.res $(CLIENT_OBJS) $(CLIENT_LIBS)
 else
 client: libenet $(CLIENT_OBJS)
 	$(CXX) $(CXXFLAGS) -o ../bin_unix/cubeconflict $(CLIENT_OBJS) $(CLIENT_LIBS)
-	ifneq (,$(findstring DARWIN,$(PLATFORM)))
-		install_name_tool -add_rpath @executable_path/../Frameworks ../bin_unix/cubeconflict
-	endif
+ifneq (,$(findstring DARWIN,$(PLATFORM)))
+	install_name_tool -add_rpath @executable_path/../Frameworks ../bin_unix/cubeconflict
+endif
 endif
 
 install: client
-	ifneq (,$(findstring DARWIN,$(PLATFORM)))
-		cp ../bin_unix/cubeconflict ../cubeconflict.app/Contents/MacOS/cubeconflict_universal
-	else
-		ifneq (,$(STRIP))
-			$(STRIP) ../bin_unix/cubeconflict
-		endif
-	endif
+ifneq (,$(findstring DARWIN,$(PLATFORM)))
+	cp ../bin_unix/cubeconflict ../cubeconflict.app/Contents/MacOS/cubeconflict_universal
+else
+ifneq (,$(STRIP))
+	$(STRIP) ../bin_unix/cubeconflict
+endif
+endif
 
 enet/libenet.a:
 	$(MAKE) -C enet
+
 libenet: enet/libenet.a
 
 depend:
 	makedepend -Y -Ishared -Iengine -Igame -Icubeconflict $(CLIENT_OBJS:.o=.cpp)
 	makedepend -a -o.h.gch -Y -Ishared -Icubeconflict -Iengine -Igame $(CLIENT_PCH:.h.gch=.h)
-	makedepend -a -pstandalone/ -Y -DSTANDALONE -Ishared -Icubeconflict -Iengine -Igame $(SERVER_MASTER_OBJS:standalone/%.o=%.cpp)
-	makedepend -a -pstandalone/ -o.h.gch -Y -DSTANDALONE -Ishared -Iengine -Igame -Icubeconflict $(SERVER_PCH:standalone/%.h.gch=%.h)
 
 # DO NOT DELETE
 
@@ -385,6 +386,12 @@ engine/worldio.o: engine/texture.h engine/bih.h engine/model.h
 game/ai.o: game/game.h shared/cube.h shared/tools.h shared/geom.h
 game/ai.o: shared/ents.h shared/command.h shared/glexts.h shared/glemu.h
 game/ai.o: shared/iengine.h shared/igame.h game/ai.h
+game/bouncers.o: game/game.h shared/cube.h shared/tools.h shared/geom.h
+game/bouncers.o: shared/ents.h shared/command.h shared/glexts.h shared/glemu.h
+game/bouncers.o: shared/iengine.h shared/igame.h game/ai.h
+game/classes.o: game/game.h shared/cube.h shared/tools.h shared/geom.h
+game/classes.o: shared/ents.h shared/command.h shared/glexts.h shared/glemu.h
+game/classes.o: shared/iengine.h shared/igame.h game/ai.h
 game/client.o: game/game.h shared/cube.h shared/tools.h shared/geom.h
 game/client.o: shared/ents.h shared/command.h shared/glexts.h shared/glemu.h
 game/client.o: shared/iengine.h shared/igame.h game/ai.h game/ctf.h
@@ -394,6 +401,12 @@ game/entities.o: shared/glemu.h shared/iengine.h shared/igame.h game/ai.h
 game/game.o: game/game.h shared/cube.h shared/tools.h shared/geom.h
 game/game.o: shared/ents.h shared/command.h shared/glexts.h shared/glemu.h
 game/game.o: shared/iengine.h shared/igame.h game/ai.h
+game/inventory.o: game/game.h shared/cube.h shared/tools.h shared/geom.h
+game/inventory.o: shared/ents.h shared/command.h shared/glexts.h shared/glemu.h
+game/inventory.o: shared/iengine.h shared/igame.h game/ai.h
+game/projectiles.o: game/game.h shared/cube.h shared/tools.h shared/geom.h
+game/projectiles.o: shared/ents.h shared/command.h shared/glexts.h shared/glemu.h
+game/projectiles.o: shared/iengine.h shared/igame.h game/ai.h
 game/render.o: game/game.h shared/cube.h shared/tools.h shared/geom.h
 game/render.o: shared/ents.h shared/command.h shared/glexts.h shared/glemu.h
 game/render.o: shared/iengine.h shared/igame.h game/ai.h
@@ -410,6 +423,10 @@ game/waypoint.o: shared/glemu.h shared/iengine.h shared/igame.h game/ai.h
 game/weapon.o: game/game.h shared/cube.h shared/tools.h shared/geom.h
 game/weapon.o: shared/ents.h shared/command.h shared/glexts.h shared/glemu.h
 game/weapon.o: shared/iengine.h shared/igame.h game/ai.h
+cubeconflict/gfx.o: cubeconflict/gfx.h
+cubeconflict/customs.o: cubeconflict/customs.h
+cubeconflict/aptitudes.o: cubeconflict/aptitudes.h
+cubeconflict/stats.o: cubeconflict/stats.h
 
 shared/cube.h.gch: shared/tools.h shared/geom.h shared/ents.h
 shared/cube.h.gch: shared/command.h shared/glexts.h shared/glemu.h
@@ -462,3 +479,6 @@ standalone/engine/engine.h.gch: engine/world.h
 standalone/game/game.h.gch: shared/cube.h shared/tools.h shared/geom.h
 standalone/game/game.h.gch: shared/ents.h shared/command.h shared/iengine.h
 standalone/game/game.h.gch: shared/igame.h game/ai.h
+cubeconflict/gfx.h.gch: cubeconflict/gfx.h
+cubeconflict/stats.h.gch: cubeconflict/stats.h
+cubeconflict/customs.h.gch: cubeconflict/customs.h
