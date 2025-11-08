@@ -1,3 +1,4 @@
+#include <cstdint>
 #include "gfx.h"
 #include "stats.h"
 #include "engine.h"

@@ -229,7 +229,7 @@ struct captureclientmode : clientmode
 
     bool insidebase(const baseinfo &b, const vec &o, bool isalive)
     {
-        if(!isalive || game::intermission) return false;
+        if(!isalive) return false;
         float dx = (b.o.x-o.x), dy = (b.o.y-o.y), dz = (b.o.z-o.z);
         return dx*dx + dy*dy <= CAPTURERADIUS*CAPTURERADIUS && fabs(dz) <= CAPTUREHEIGHT;
     }

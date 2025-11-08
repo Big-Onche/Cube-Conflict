@@ -1,5 +1,6 @@
 
 #include "gfx.h"
+#include <string>
 
 using namespace game;
 

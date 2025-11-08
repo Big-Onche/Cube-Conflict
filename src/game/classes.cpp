@@ -4,8 +4,6 @@
 #include "gfx.h"
 #include "stats.h"
 
-bool disabledClass[NUMCLASSES];
-
 ICOMMAND(getclass, "i", (int *i), intret(disabledClass[*i]) );
 
 ICOMMAND(setclass, "i", (int *i),

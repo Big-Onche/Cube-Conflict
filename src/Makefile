@@ -48,16 +48,29 @@ ifneq (,$(findstring MINGW,$(PLATFORM)))
 	CLIENT_LIBS= -mwindows $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lSDL2 -lSDL2_image -lopenal -lzlib1 -lopengl32 -lsndfile -lsteam_api -lenet -lws2_32 -lwinmm
 else    
 	ifneq (,$(findstring DARWIN,$(PLATFORM)))
-		OSXMIN= 10.9
-		override CC+= -arch x86_64 -mmacosx-version-min=$(OSXMIN)
-		override CXX+= -arch x86_64 -mmacosx-version-min=$(OSXMIN)
-		CLIENT_INCLUDES= $(INCLUDES) -Iinclude
-		CLIENT_LIBS= -F../cubeconflict.app/Contents/Frameworks/ -framework SDL2 -framework SDL2_image
-		CLIENT_LIBS+= -framework OpenAL32 -framework CoreAudio -framework AudioToolbox
-		CLIENT_LIBS+= -framework AudioUnit -framework OpenGL -framework Cocoa -lz -Lenet -lenet
+		OSXMIN := 10.13
+		ifneq (,$(findstring arm64,$(PLATFORM_ARCH)))
+			override CC  += -arch arm64 -mmacosx-version-min=$(OSXMIN)
+			override CXX += -arch arm64 -mmacosx-version-min=$(OSXMIN)
+		else
+			override CC  += -arch x86_64 -mmacosx-version-min=$(OSXMIN)
+			override CXX += -arch x86_64 -mmacosx-version-min=$(OSXMIN)
+		endif
+
+		CLIENT_INCLUDES = $(INCLUDES) -Iinclude \
+											$(shell pkg-config --cflags sndfile 2>/dev/null)
+
+		CLIENT_LIBS = -F../cubeconflict.app/Contents/Frameworks \
+									-framework SDL2 -framework SDL2_image \
+									-framework OpenAL -framework CoreAudio -framework AudioToolbox \
+									-framework AudioUnit -framework OpenGL -framework Cocoa \
+									-lz -Lenet -lenet \
+									$(shell pkg-config --libs sndfile 2>/dev/null || echo -lsndfile) \
+									-L../cubeconflict.app/Contents/Frameworks -lsteam_api
 	else
-		CLIENT_INCLUDES= $(INCLUDES) -I/usr/X11R6/include `sdl2-config --cflags`
-		CLIENT_LIBS= -Lenet -lenet -L/usr/X11R6/lib -lX11 `sdl2-config --libs` -lSDL2_image -lopenal -lsndfile -lz -lGL -L../bin_unix -lsteam_api
+		CLIENT_INCLUDES = $(INCLUDES) -I/usr/X11R6/include `sdl2-config --cflags`
+		CLIENT_LIBS = -Lenet -lenet -L/usr/X11R6/lib -lX11 `sdl2-config --libs` \
+									-lSDL2_image -lopenal -lsndfile -lz -lGL -L../bin_unix -lsteam_api
 	endif
 endif
 
@@ -131,60 +144,115 @@ CLIENT_OBJS= \
         game/waypoint.o \
         game/weapon.o
 
-CLIENT_PCH= shared/cube.h.gch engine/engine.h.gch game/game.h.gch cubeconflict/gfx.h.gch cubeconflict/stats.h.gch cubeconflict/customs.h.gch
+CLIENT_PCH= shared/cube.h.gch engine/engine.h.gch game/game.h.gch
 
-.PHONY: default all client install libenet clean fixspace depend
+ifneq (,$(findstring MINGW,$(PLATFORM)))
+SERVER_INCLUDES= -DSTANDALONE $(INCLUDES) -Iinclude
+SERVER_LIBS= -mwindows $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lzlib1 -lenet -lws2_32 -lwinmm
+MASTER_LIBS= $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lzlib1 -lenet -lws2_32 -lwinmm
+else
+SERVER_INCLUDES= -DSTANDALONE $(INCLUDES)
+SERVER_LIBS= -Lenet -lenet -lz
+MASTER_LIBS= $(SERVER_LIBS)
+endif
+SERVER_OBJS= \
+	shared/crypto-standalone.o \
+	shared/stream-standalone.o \
+	shared/tools-standalone.o \
+	engine/command-standalone.o \
+	engine/server-standalone.o \
+	engine/worldio-standalone.o \
+	game/entities-standalone.o \
+	game/server-standalone.o
+
+MASTER_OBJS= \
+	shared/crypto-standalone.o \
+	shared/stream-standalone.o \
+	shared/tools-standalone.o \
+	engine/command-standalone.o \
+	engine/master-standalone.o
+
+SERVER_MASTER_OBJS= $(SERVER_OBJS) $(filter-out $(SERVER_OBJS),$(MASTER_OBJS))
 
 default: all
 
-all: client
+all: client server
 
 clean:
-	-$(RM) $(CLIENT_PCH) $(CLIENT_OBJS) cc_client
-
-fixspace:
-	sed -i.bak 's/[ \t]*$$//; :rep; s/^\([ ]*\)\t/\1    /g; trep' shared/*.c shared/*.cpp shared/*.h cubeconflict/*.cpp cubeconflict/*.h engine/*.cpp engine/*.h game/*.cpp game/*.h
+	-$(RM) $(CLIENT_PCH) $(CLIENT_OBJS) $(SERVER_MASTER_OBJS) cc_client cc_server cc_master
 
 $(filter-out shared/%,$(CLIENT_PCH)): $(filter shared/%,$(CLIENT_PCH))
-$(CLIENT_PCH): %.h.gch: %.h
+
+%.h.gch: %.h
 	$(CXX) $(CXXFLAGS) -x c++-header -o $@.tmp $<
 	$(MV) $@.tmp $@
 
+%-standalone.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
 $(CLIENT_OBJS): CXXFLAGS += $(CLIENT_INCLUDES)
 $(filter shared/%,$(CLIENT_OBJS)): $(filter shared/%,$(CLIENT_PCH))
-$(filter cubeconflict/%,$(CLIENT_OBJS)): $(filter cubeconflict/%,$(CLIENT_PCH))
 $(filter engine/%,$(CLIENT_OBJS)): $(filter engine/%,$(CLIENT_PCH))
 $(filter game/%,$(CLIENT_OBJS)): $(filter game/%,$(CLIENT_PCH))
 
+$(SERVER_MASTER_OBJS): CXXFLAGS += $(SERVER_INCLUDES)
+
 ifneq (,$(findstring MINGW,$(PLATFORM)))
-client: libenet $(CLIENT_OBJS)
+client: $(CLIENT_OBJS)
 	$(WINDRES) -I vcpp -i vcpp/mingw.rc -J rc -o vcpp/mingw.res -O coff
 	$(CXX) $(CXXFLAGS) -o $(WINBIN)/cubeconflict.exe vcpp/mingw.res $(CLIENT_OBJS) $(CLIENT_LIBS)
+
+server: $(SERVER_OBJS)
+	$(WINDRES) -I vcpp -i vcpp/mingw.rc -J rc -o vcpp/mingw.res -O coff
+	$(CXX) $(CXXFLAGS) -o $(WINBIN)/cc_server.exe vcpp/mingw.res $(SERVER_OBJS) $(SERVER_LIBS)
+
+master: $(MASTER_OBJS)
+	$(CXX) $(CXXFLAGS) -o $(WINBIN)/cc_master.exe $(MASTER_OBJS) $(MASTER_LIBS)
+
+install: all
 else
-client: libenet $(CLIENT_OBJS)
-	$(CXX) $(CXXFLAGS) -o ../bin_unix/cubeconflict $(CLIENT_OBJS) $(CLIENT_LIBS)
+client:	libenet $(CLIENT_OBJS)
+	$(CXX) $(CXXFLAGS) -o ../bin_unix/cc_client $(CLIENT_OBJS) $(CLIENT_LIBS)
 ifneq (,$(findstring DARWIN,$(PLATFORM)))
-	install_name_tool -add_rpath @executable_path/../Frameworks ../bin_unix/cubeconflict
-endif
+	install_name_tool -add_rpath @executable_path/../Frameworks cc_client
 endif
 
-install: client
+server:	libenet $(SERVER_OBJS)
+	$(CXX) $(CXXFLAGS) -o ../bin_unix/cc_server $(SERVER_OBJS) $(SERVER_LIBS)
+
+master: libenet $(MASTER_OBJS)
+	$(CXX) $(CXXFLAGS) -o ../bin_unix/cc_master $(MASTER_OBJS) $(MASTER_LIBS)
+
+shared/cube2font.o: shared/cube2font.c
+	$(CXX) $(CXXFLAGS) -c -o $@ $< `freetype-config --cflags`
+
+cube2font: shared/cube2font.o
+	$(CXX) $(CXXFLAGS) -o cube2font shared/cube2font.o `freetype-config --libs` -lz
+
 ifneq (,$(findstring DARWIN,$(PLATFORM)))
-	cp ../bin_unix/cubeconflict ../cubeconflict.app/Contents/MacOS/cubeconflict_universal
+install: client
+	cp cc_client ../cubeconflict.app/Contents/MacOS/cubeconflict_universal
 else
+install: all
+	cp cc_client	../bin_unix/$(PLATFORM_PREFIX)_client
+	cp cc_server	../bin_unix/$(PLATFORM_PREFIX)_server
+	cp cc_master	../bin_unix/$(PLATFORM_PREFIX)_master
 ifneq (,$(STRIP))
-	$(STRIP) ../bin_unix/cubeconflict
+	$(STRIP) ../bin_unix/$(PLATFORM_PREFIX)_client
+	$(STRIP) ../bin_unix/$(PLATFORM_PREFIX)_server
+	$(STRIP) ../bin_unix/$(PLATFORM_PREFIX)_master
+endif
 endif
 endif
 
 enet/libenet.a:
-	$(MAKE) -C enet
-
+	$(MAKE) -C enet CC='$(CC)' AR='$(AR)'
 libenet: enet/libenet.a
 
 depend:
-	makedepend -Y -Ishared -Iengine -Igame -Icubeconflict $(CLIENT_OBJS:.o=.cpp)
-	makedepend -a -o.h.gch -Y -Ishared -Icubeconflict -Iengine -Igame $(CLIENT_PCH:.h.gch=.h)
+	makedepend -Y -Ishared -Iengine -Ifpsgame $(CLIENT_OBJS:.o=.cpp)
+	makedepend -a -o.h.gch -Y -Ishared -Iengine -Ifpsgame $(CLIENT_PCH:.h.gch=.h)
+	makedepend -a -o-standalone.o -Y -DSTANDALONE -Ishared -Iengine -Ifpsgame $(SERVER_MASTER_OBJS:-standalone.o=.cpp)
 
 # DO NOT DELETE
 

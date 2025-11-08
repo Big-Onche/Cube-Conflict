@@ -16,7 +16,6 @@ ICOMMAND(getsteamname, "", (), getsteamname());
 
 bool launch = true;
 VAR(mapatmosphere, 0, 0, 10);
-int currentIdenticalWeapon;
 
 namespace game
 {

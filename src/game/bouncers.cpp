@@ -1,4 +1,5 @@
 #include "game.h"
+#include <string>
 
 using namespace game;
 

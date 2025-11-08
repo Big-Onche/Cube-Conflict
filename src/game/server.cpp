@@ -1,7 +1,11 @@
+#include <cstdint>
 #include "game.h"
 #include "engine.h"
 
 VARP(gamelength, 1, 10, 60);
+
+int currentIdenticalWeapon;
+bool disabledClass[NUMCLASSES];
 
 int servambient = rnd(9)+1;
 
@@ -3331,7 +3335,8 @@ namespace server
                     }
                     else connected(ci);
 
-                    if(servaddbots && multiplayer(false))
+                    #ifndef STANDALONE
+                    if(servaddbots)
                     {
                         int botamount = servaddbots - numclients(-1, true, false);
                         if(botamount)
@@ -3340,6 +3345,7 @@ namespace server
                             if(numclients(-1, true, false) > servaddbots+1) aiman::deleteai();
                         }
                     }
+                    #endif
 
                     ci->state.lastBurner = NULL;
                     if(m_identique)

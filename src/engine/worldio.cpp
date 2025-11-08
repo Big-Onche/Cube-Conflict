@@ -2,7 +2,6 @@
 
 #include "engine.h"
 #include "sound.h"
-#include "gfx.h"
 
 void validmapname(char *dst, const char *src, const char *prefix = NULL, const char *alt = "untitled", size_t maxlen = 100)
 {
