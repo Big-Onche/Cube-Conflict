@@ -712,8 +712,8 @@ void cleanUpSounds()
     if(!noEfx) alDeleteAuxiliaryEffectSlots(NUMREVERBS, auxEffectSlots);
     ALCcontext* context = alcGetCurrentContext();
     alcMakeContextCurrent(NULL);
-    alcDestroyContext(context);
     alcCloseDevice(alcGetContextsDevice(context));
+    alcDestroyContext(context);
 }
 
 ICOMMAND(playSound, "sii", (char *soundName, bool fixedPitch, bool uiSound),
