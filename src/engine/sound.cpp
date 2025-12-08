@@ -427,7 +427,7 @@ void playSound(int soundId, vec soundPos, float maxRadius, float maxVolRadius, i
 
 void stopSound(int soundId, int flags)
 {
-    if(soundId < 0 || soundId > NUMSNDS || noSound) return; // invalid index or openal not initialized
+    if(soundId < 0 || soundId >= NUMSNDS || noSound) return; // invalid index or openal not initialized
 
     for(auto it = activeSources.begin(); it != activeSources.end(); /* no increment here */)
     {
@@ -742,6 +742,6 @@ ICOMMAND(playmusic, "i", (int *i), playMusic(*i));
 
 const char *getmapsoundname(int n)
 {
-    if(n < 0 || !mapSounds[n].loaded) return readstr("Misc_InvalidId");
+    if(n < 0 || n >= NUMMAPSNDS || !mapSounds[n].loaded) return readstr("Misc_InvalidId");
     else return mapSounds[n].soundPath;
 }
