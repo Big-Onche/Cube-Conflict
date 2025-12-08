@@ -189,6 +189,8 @@ void applyReverbPreset(ALuint effectSlot, const EFXEAXREVERBPROPERTIES& preset)
     alEffecti(reverbEffect, AL_REVERB_DECAY_HFLIMIT, AL_TRUE);
     // Attach the configured effect to the effect slot
     alAuxiliaryEffectSloti(effectSlot, AL_EFFECTSLOT_EFFECT, reverbEffect);
+
+    alDeleteEffects(1, &reverbEffect); // DELETE THE EFFECT AFTER ATTACHING - the slot holds a reference
 }
 
 int reverb[NUMREVERBS];
