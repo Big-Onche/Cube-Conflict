@@ -112,19 +112,42 @@ bool loadSoundFile(const string& filepath, ALuint buffer) // load a sound using 
 bool loadSound(Sound& s, bool music) // load a sound including his alts
 {
     if(noSound) return false;
-    bool loaded = false;
-    loopi(s.numAlts ? s.numAlts+1 : 1)
+
+    bool allLoaded = true;
+
+    loopi(s.numAlts ? s.numAlts + 1 : 1)
     {
-        if(s.bufferId[i]) alDeleteBuffers(1, &s.bufferId[i]); // delete the buffer if it already exists.
+
+        if(s.bufferId[i]) // delete existing buffer if it's valid
+        {
+            if(alIsBuffer(s.bufferId[i])) alDeleteBuffers(1, &s.bufferId[i]);
+            s.bufferId[i] = 0;
+        }
 
         defformatstring(fullPath, s.numAlts ? "media/sounds/%s_%d.wav" : "media/sounds/%s.wav", s.soundPath, i + 1);
         if(music) formatstring(fullPath, s.numAlts ? "media/songs/%s_%d.flac" : "media/songs/%s.flac", s.soundPath, i + 1);
 
         alGenBuffers(1, &s.bufferId[i]);
-        //reportSoundError("alGenBuffers", s.soundPath, s.bufferId[i]);
-        loaded = loadSoundFile(fullPath, s.bufferId[i]);
+        ALenum error = alGetError();
+        if(error != AL_NO_ERROR)
+        {
+            conoutf(CON_ERROR, "Failed to generate buffer for %s: OpenAL error %d", s.soundPath, error);
+            s.bufferId[i] = 0;
+            allLoaded = false;
+            continue;
+        }
+
+        bool loaded = loadSoundFile(fullPath, s.bufferId[i]);
+        if(!loaded) // if loading failed, delete the unused buffer to prevent leak
+        {
+            alDeleteBuffers(1, &s.bufferId[i]);
+            s.bufferId[i] = 0;
+            allLoaded = false;
+            conoutf(CON_WARN, "Failed to load sound variant %d for %s", i + 1, s.soundPath);
+        }
     }
-    return loaded;
+
+    return allLoaded;
 }
 
 LPALGENAUXILIARYEFFECTSLOTS    alGenAuxiliaryEffectSlots    = NULL;
@@ -711,9 +734,10 @@ void cleanUpSounds()
 
     if(!noEfx) alDeleteAuxiliaryEffectSlots(NUMREVERBS, auxEffectSlots);
     ALCcontext* context = alcGetCurrentContext();
+    ALCdevice* device = alcGetContextsDevice(context);
     alcMakeContextCurrent(NULL);
-    alcCloseDevice(alcGetContextsDevice(context));
     alcDestroyContext(context);
+    alcCloseDevice(device);
 }
 
 ICOMMAND(playSound, "sii", (char *soundName, bool fixedPitch, bool uiSound),
