@@ -477,28 +477,33 @@ void updateSoundOcclusion(int id)
 {
     bool occlusion = isOccluded(id);
 
-    // Check for state change or initialize if the last change time is zero
-    if(sounds[id].isCurrentlyOccluded != occlusion)
+    // only update if changing or if we are mid-transition
+    bool changed = (sounds[id].isCurrentlyOccluded != occlusion);
+    bool transitioning = (sounds[id].lfOcclusionGain != (occlusion ? 0.90f : 1.0f)
+                       || sounds[id].hfOcclusionGain != (occlusion ? 0.20f : 1.0f));
+
+    if(!changed && !transitioning) return;
+
+    if(changed)
     {
         sounds[id].isCurrentlyOccluded = occlusion;
-        sounds[id].lastOcclusionChange = totalmillis; // Mark the time of change
+        sounds[id].lastOcclusionChange = totalmillis;
     }
 
-    float progress = min(1.0f, (totalmillis - sounds[id].lastOcclusionChange) / 750.f); // Calculate transition progress based on time since last change
+    float progress = min(1.0f, (totalmillis - sounds[id].lastOcclusionChange) / 750.f);
 
-    // Determine target gain based on occlusion
-    float targetGain = occlusion ? 0.90f : 1.0f;
-    float targetGainHF = occlusion ? 0.20f : 1.0f;
+    float targetLF = occlusion ? 0.90f : 1.0f;
+    float targetHF = occlusion ? 0.20f : 1.0f;
 
     if(progress < 1.0f)
     {
-        sounds[id].lfOcclusionGain = lerp(sounds[id].lfOcclusionGain, targetGain, progress);
-        sounds[id].hfOcclusionGain = lerp(sounds[id].hfOcclusionGain, targetGainHF, progress);
+        sounds[id].lfOcclusionGain = lerp(sounds[id].lfOcclusionGain, targetLF, progress);
+        sounds[id].hfOcclusionGain = lerp(sounds[id].hfOcclusionGain, targetHF, progress);
     }
     else
     {
-        sounds[id].lfOcclusionGain = targetGain;
-        sounds[id].hfOcclusionGain = targetGainHF;
+        sounds[id].lfOcclusionGain = targetLF;
+        sounds[id].hfOcclusionGain = targetHF;
     }
 
     alFilterf(sounds[id].occlusionFilter, AL_LOWPASS_GAIN, sounds[id].lfOcclusionGain);
