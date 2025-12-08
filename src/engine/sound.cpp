@@ -342,7 +342,7 @@ std::unordered_set<size_t> activeSources;
 
 inline bool canPlaySound(int soundId, int maxRadius, int flags, vec soundPos, bool hasSoundPos)
 {
-    if(soundId < 0 || soundId > NUMSNDS || noSound || mutesounds) return false; // invalid index or openal not initialized or mute
+    if(soundId < 0 || soundId >= NUMSNDS || noSound || mutesounds) return false; // invalid index or openal not initialized or mute
 
     if(hasSoundPos && !(flags & SND_NOCULL) && camera1->o.dist(soundPos) > maxRadius + 50) return false; // do not play sound too far from camera, except if flag SND_NOCULL
     if((flags & SND_LOWPRIORITY) && (activeSources.size() >= (size_t)maxsoundsatonce / 2)) return false; // skip low-priority sounds (distant shoots etc.) when we are already playing a lot of sounds
