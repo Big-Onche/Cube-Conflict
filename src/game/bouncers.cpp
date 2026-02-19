@@ -109,6 +109,8 @@ namespace bouncers
         bnc.type = ENT_BOUNCE;
         bnc.bounces = 0;
         bnc.roll = 0;
+        bnc.spinrot = 0;
+        bnc.spinvelsq = -1;
         bnc.variant = 0;
         bnc.gun = 0;
         bnc.particles = vec(-1, -1, -1);
@@ -321,7 +323,16 @@ namespace bouncers
             {
                 if(!stopped)
                 {
-                    float rot = (bnc.vel.magnitude() / 4.f);
+                    float velSq = bnc.vel.squaredlen();
+                    float velDelta = velSq - bnc.spinvelsq;
+                    if(velDelta < 0.f) velDelta = -velDelta;
+                    // Cache spin speed and only refresh when velocity changed enough.
+                    if(velDelta > 0.01f)
+                    {
+                        bnc.spinvelsq = velSq;
+                        bnc.spinrot = sqrtf(velSq) * 0.25f;
+                    }
+                    float rot = bnc.spinrot;
 
                     if(numBounces)
                     {

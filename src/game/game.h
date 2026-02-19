@@ -1198,6 +1198,7 @@ namespace bouncers
         size_t entityId;
         int lifetime, bounces, seed;
         float roll;
+        float spinrot, spinvelsq;
         bool local;
         gameent *owner;
         int bouncetype, variant, gun;
@@ -1207,7 +1208,7 @@ namespace bouncers
         bool inwater;
         vec particles;
 
-        bouncer() : entityId(entitiesIds::getNewId()), bounces(0), roll(0), variant(0), particles(-1, -1, -1)
+        bouncer() : entityId(entitiesIds::getNewId()), bounces(0), roll(0), spinrot(0), spinvelsq(-1), variant(0), particles(-1, -1, -1)
         {
             type = ENT_BOUNCE;
         }
@@ -1254,4 +1255,3 @@ extern void trydisconnect(bool local);
 extern bool disabledClass[NUMCLASSES];
 
 #endif
-
