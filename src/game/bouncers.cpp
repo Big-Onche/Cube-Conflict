@@ -61,10 +61,16 @@ namespace bouncers
     {
         loopi(NUMBOUNCERS)
         {
-            if(i == BNC_LIGHT) break;
-            bool hasVariants = bouncers[i].variants;
-            if(!hasVariants) preloadmodel(getPath(i, 0));
-            else loopj(bouncers[i].variants) preloadmodel(getPath(i, j + 1));
+            if(i == BNC_LIGHT) continue;
+
+            int variants = bouncers[i].variants;
+            if(variants <= 0)
+            {
+                preloadmodel(getPath(i, 0));
+                continue;
+            }
+
+            for(int variant = 1; variant <= variants; ++variant) preloadmodel(getPath(i, variant));
         }
     }
 
