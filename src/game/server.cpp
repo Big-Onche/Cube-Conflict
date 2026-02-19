@@ -1,6 +1,7 @@
 #include <cstdint>
 #include "game.h"
 #include "engine.h"
+// #include "yyjson.h"
 
 VARP(gamelength, 1, 10, 60);
 
@@ -223,6 +224,7 @@ namespace server
         string name, mapvote;
         int team, playermodel, playercolor;
         int skin[NUMSKINS], character, level;
+        // int gameStat[41]; // NUMSTATS ###WIP###
         int modevote;
         int privilege;
         bool connected, local, timesync;
@@ -2261,6 +2263,121 @@ namespace server
         return true;
     }
 
+    /*
+    static bool fileExists(const char *path)
+    {
+        FILE *f = fopen(path, "rb");
+        if(f) { fclose(f); return true; }
+        return false;
+    }
+
+    static void sanitizeFilename(char *s)
+    {
+        for(char *p = s; *p; ++p)
+        {
+            if(*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r') *p = '_';
+        }
+    }
+
+    static int getLogName(char *out, size_t outlen, const char *mode, const char *map, const char *time)
+    {
+        if(!out || outlen == 0 || !mode || !map || !time) return 0;
+
+        snprintf(out, outlen, "%s_%s_%s.json", mode, map, time);
+        out[outlen - 1] = '\0';
+        sanitizeFilename(out);
+
+        if(!fileExists(out)) return 1;
+
+        for(int n = 1; n <= 999; ++n)
+        {
+            snprintf(out, outlen, "%s_%s_%s_%03d.json", mode, map, time, n);
+            out[outlen - 1] = '\0';
+            sanitizeFilename(out);
+
+            if(!fileExists(out)) return 1;
+        }
+        return 0;
+    }
+
+    int writeGameLog(void)
+    {
+        string servtime;
+        time_t t = time(NULL);
+        size_t len = strftime(servtime, sizeof(servtime),
+                              "%d-%m-%Y %Hh %Mmin %Ssec",
+                              localtime(&t));
+        servtime[min(len, sizeof(servtime)-1)] = '\0';
+
+        const char *map = (smapname && smapname[0]) ? smapname : "unknownmap";
+
+        string logName;
+        if(!getLogName(logName, sizeof(logName), modename(gamemode), map, servtime))
+        {
+            conoutf("Failed to find a free log filename");
+            return 0;
+        }
+
+        yyjson_mut_doc *doc = yyjson_mut_doc_new(NULL);
+        if(!doc)
+        {
+            conoutf("Failed to alloc yyjson doc");
+            return 0;
+        }
+
+        yyjson_mut_val *root = yyjson_mut_obj(doc);
+        yyjson_mut_doc_set_root(doc, root);
+
+        yyjson_mut_obj_add_str(doc, root, "Server", serverdescfr ? serverdescfr : "");
+        yyjson_mut_obj_add_str(doc, root, "Mode", modename(gamemode));
+        yyjson_mut_obj_add_str(doc, root, "Map", map);
+        yyjson_mut_obj_add_str(doc, root, "Time", servtime);
+
+        yyjson_mut_val *jclients = yyjson_mut_arr(doc);
+        yyjson_mut_obj_add_val(doc, root, "clients", jclients);
+
+        loopv(clients)
+        {
+            clientinfo *ci = clients[i];
+            if(!ci) continue;
+
+            yyjson_mut_val *jci = yyjson_mut_obj(doc);
+
+            yyjson_mut_obj_add_int(doc, jci, "id", i);
+            yyjson_mut_obj_add_str(doc, jci, "name", ci->name ? ci->name : "");
+            yyjson_mut_obj_add_int(doc, jci, "class", ci->character);
+
+            yyjson_mut_val *stats = yyjson_mut_arr(doc);
+            loopj(41) yyjson_mut_arr_add_int(doc, stats, ci->gameStat[j]); // NUMSTATS
+            yyjson_mut_obj_add_val(doc, jci, "stats", stats);
+
+            yyjson_mut_arr_add_val(jclients, jci);
+        }
+
+        yyjson_write_err err;
+        if(!yyjson_mut_write_file(logName, doc, YYJSON_WRITE_PRETTY, NULL, &err))
+        {
+            conoutf("Failed to write game log (%u): %s", err.code, err.msg);
+            yyjson_mut_doc_free(doc);
+            return 0;
+        }
+
+        conoutf("Wrote game log: %s", logName);
+
+        loopv(clients)
+        {
+            clientinfo *ci = clients[i];
+            if(!ci) continue;
+            loopj(41) ci->gameStat[j] = 0; // NUMSTATS
+        }
+
+        yyjson_mut_doc_free(doc);
+        return 1;
+    }
+
+    ICOMMAND(testlog, "", (), writeGameLog());
+    */
+
     void checkintermission(bool force = false)
     {
         if(gamemillis >= gamelimit && !interm && (force || !checkovertime()))
@@ -2269,6 +2386,7 @@ namespace server
             if(smode) smode->intermission();
             changegamespeed(100);
             interm = gamemillis + 10000;
+            // writeGameLog();
         }
     }
 
