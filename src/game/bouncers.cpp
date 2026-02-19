@@ -24,8 +24,11 @@ namespace bouncers
 
     static constexpr int MAXBOUNCERVARIANTS = 8;
     static constexpr int MAXBOUNCERPATHLEN = 64;
+    static constexpr int MAXBOUNCERSUBSTEPS = 4;
+    static constexpr float WATERCHECKMOVEDSQ = 0.25f;
     static char bouncerPaths[NUMBOUNCERS][MAXBOUNCERVARIANTS + 1][MAXBOUNCERPATHLEN];
     static int maxBouncerVariants = 0;
+    static int bouncerWaterCheckFrame = 0;
 
     void initPaths() // store the path of all bouncers and their variants
     {
@@ -198,10 +201,13 @@ namespace bouncers
 
     void update(int time)
     {
+        ++bouncerWaterCheckFrame;
+
         loopv(curBouncers)
         {
             bouncer &bnc = *curBouncers[i];
             bool isGrenade = (bnc.bouncetype == BNC_GRENADE);
+            bool isLight = (bnc.bouncetype == BNC_LIGHT);
             vec old(bnc.o);
 
             bool stopped = false;
@@ -212,26 +218,31 @@ namespace bouncers
             }
             else
             {
-                for(int rtime = time; rtime > 0;)
+                for(int rtime = time, step = 0; rtime > 0;)
                 {
-                    int qtime = min(30, rtime);
+                    int qtime = (step < MAXBOUNCERSUBSTEPS - 1) ? min(30, rtime) : rtime;
                     rtime -= qtime;
-                    stopped = (bnc.bounces && bnc.bouncetype == BNC_LIGHT);
+                    stopped = (bnc.bounces && isLight);
                     if(bnc.bounces <= 5) bounce(&bnc, qtime / 1000.f, 0.6f, 0.5f, 1);
                     if((bnc.lifetime -= qtime) < 0) { stopped = true; break; }
+                    step++;
                 }
             }
 
-            if(bnc.bouncetype != BNC_LIGHT)
+            if(!isLight)
             {
-                bool inWater = ((lookupmaterial(bnc.o) & MATF_VOLUME) == MAT_WATER);
-                if(!bnc.inwater && inWater) // the bouncer enter in water
+                bool shouldCheckWater = bnc.o.fastsquaredist(old) > WATERCHECKMOVEDSQ || ((bouncerWaterCheckFrame + i) & 3) == 0;
+                if(shouldCheckWater)
                 {
-                    bnc.inwater = true;
-                    particle_splash(PART_WATER, (20 * bnc.radius), 150, bnc.o, 0x28282A, (5.f * bnc.radius), (200.f * bnc.radius), -300, (10.f * bnc.radius), hasShrooms());
-                    if(bnc.radius > 0.5f) playSound(bnc.radius > 1.f ? S_SPLASH : S_IMPACTWATER, vec(bnc.o).addz(5), 250, 100, SND_LOWPRIORITY);
+                    bool inWater = ((lookupmaterial(bnc.o) & MATF_VOLUME) == MAT_WATER);
+                    if(!bnc.inwater && inWater) // the bouncer enter in water
+                    {
+                        bnc.inwater = true;
+                        particle_splash(PART_WATER, (20 * bnc.radius), 150, bnc.o, 0x28282A, (5.f * bnc.radius), (200.f * bnc.radius), -300, (10.f * bnc.radius), hasShrooms());
+                        if(bnc.radius > 0.5f) playSound(bnc.radius > 1.f ? S_SPLASH : S_IMPACTWATER, vec(bnc.o).addz(5), 250, 100, SND_LOWPRIORITY);
+                    }
+                    else if(bnc.inwater && !inWater) bnc.inwater = false; // the bouncer bounced outside the water
                 }
-                else if(bnc.inwater && !inWater) bnc.inwater = false; // the bouncer bounced outside the water
             }
 
             if(stopped || (bnc.bouncetype == BNC_MOLOTOV && bnc.bounces))
