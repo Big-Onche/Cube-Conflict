@@ -28,6 +28,7 @@ namespace bouncers
 
     static constexpr int MAXBOUNCERVARIANTS = 8;
     static constexpr int MAXBOUNCERPATHLEN = 64;
+    static constexpr int MAX_FREE_BOUNCERS = 512;
     static constexpr int MAXBOUNCERSUBSTEPS = 4;
     static constexpr float WATERCHECKMOVEDSQ = 0.25f;
     static char bouncerPaths[NUMBOUNCERS][MAXBOUNCERVARIANTS + 1][MAXBOUNCERPATHLEN];
@@ -91,7 +92,11 @@ namespace bouncers
 
     static inline bouncer *allocBouncer() { return freeBouncers.empty() ? new bouncer : freeBouncers.pop(); }
 
-    static inline void freeBouncer(bouncer *bnc) { freeBouncers.add(bnc); }
+    static inline void freeBouncer(bouncer *bnc)
+    {
+        if(freeBouncers.length() >= MAX_FREE_BOUNCERS) delete bnc;
+        else freeBouncers.add(bnc);
+    }
 
     void add(const vec &from, const vec &to, bool local, int id, gameent *owner, int type, int lifetime, int speed, vec2 yawPitch)
     {
@@ -104,6 +109,7 @@ namespace bouncers
         bnc.bounces = 0;
         bnc.roll = 0;
         bnc.variant = 0;
+        bnc.gun = 0;
         bnc.particles = vec(-1, -1, -1);
         bnc.yaw = 0;
         bnc.pitch = 0;
