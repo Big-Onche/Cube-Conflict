@@ -75,12 +75,30 @@ namespace bouncers
     }
 
     vector<bouncer *> curBouncers;
+    static vector<bouncer *> freeBouncers;
+
+    static inline bouncer *allocBouncer() { return freeBouncers.empty() ? new bouncer : freeBouncers.pop(); }
+
+    static inline void freeBouncer(bouncer *bnc) { freeBouncers.add(bnc); }
 
     void add(const vec &from, const vec &to, bool local, int id, gameent *owner, int type, int lifetime, int speed, vec2 yawPitch)
     {
-        bouncer &bnc = *curBouncers.add(new bouncer);
+        bouncer &bnc = *curBouncers.add(allocBouncer());
+        const auto &cfg = bouncers[type];
+
+        bnc.reset();
+        bnc.entityId = entitiesIds::getNewId();
+        bnc.type = ENT_BOUNCE;
+        bnc.bounces = 0;
+        bnc.roll = 0;
+        bnc.variant = 0;
+        bnc.particles = vec(-1, -1, -1);
+        bnc.yaw = 0;
+        bnc.pitch = 0;
+        bnc.offset = vec(0, 0, 0);
+
         bnc.o = from;
-        bnc.radius = bnc.xradius = bnc.yradius = bouncers[type].size;
+        bnc.radius = bnc.xradius = bnc.yradius = cfg.size;
         bnc.eyeheight = bnc.radius;
         bnc.aboveeye = bnc.radius;
         bnc.lifetime = lifetime;
@@ -88,7 +106,7 @@ namespace bouncers
         bnc.owner = owner;
         bnc.bouncetype = type;
         bnc.id = local ? lastmillis : id;
-        bnc.inwater = ((lookupmaterial(bnc.o) & MAT_WATER) == MAT_WATER);
+        bnc.inwater = ((lookupmaterial(from) & MAT_WATER) == MAT_WATER);
         bnc.seed = rnd(2);
 
         if(!yawPitch.iszero())
@@ -97,15 +115,14 @@ namespace bouncers
             bnc.pitch = yawPitch.y;
         }
 
-        if(bouncers[type].variants) bnc.variant = rnd(bouncers[type].variants) + 1;
-        else bnc.variant = 0;
+        int variants = cfg.variants;
+        if(variants > MAXBOUNCERVARIANTS) variants = MAXBOUNCERVARIANTS;
+        if(variants > 0) bnc.variant = rnd(variants) + 1;
 
         bnc.collidetype = COLLIDE_ELLIPSE;
 
-        vec dir(to);
-        dir.sub(from).safenormalize();
-        bnc.vel = dir;
-        bnc.vel.mul(speed);
+        vec dir = vec(to).sub(from).safenormalize();
+        bnc.vel = vec(dir).mul(speed);
 
         avoidcollision(&bnc, dir, owner, 0.1f);
 
@@ -114,11 +131,10 @@ namespace bouncers
             bool isGrenade = (type==BNC_GRENADE);
             bnc.offset = hudgunorigin(isGrenade ? GUN_M32 : GUN_MOLOTOV, from, to, owner);
             if(owner==hudplayer() && !isthirdperson()) bnc.offset.sub(owner->o).rescale(16).add(owner->o);
+            bnc.offset.sub(from);
             if(isGrenade) playSound(S_GRENADE, bnc.o, 300, 100, SND_FIXEDPITCH|SND_NOCULL, bnc.entityId);
         }
 
-        bnc.offset = from;
-        bnc.offset.sub(bnc.o);
         bnc.offsetmillis = OFFSETMILLIS;
 
         bnc.resetinterp();
@@ -236,7 +252,7 @@ namespace bouncers
                     }
 
                 }
-                delete curBouncers.remove(i--);
+                freeBouncer(curBouncers.remove(i--));
             }
             else bnc.offsetmillis = max(bnc.offsetmillis-time, 0);
         }
@@ -367,8 +383,7 @@ namespace bouncers
             if(curBouncers[i]->owner == owner)
             {
                 removeEntityPos(curBouncers[i]->entityId);
-                delete curBouncers[i];
-                curBouncers.remove(i--);
+                freeBouncer(curBouncers.remove(i--));
             }
         }
     }
@@ -384,6 +399,6 @@ namespace bouncers
                 removeEntityPos(bnc.entityId);
             }
         }
-        curBouncers.deletecontents();
+        while(!curBouncers.empty()) freeBouncer(curBouncers.pop());
     }
 }
