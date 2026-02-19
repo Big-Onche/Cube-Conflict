@@ -273,7 +273,9 @@ namespace bouncers
 
     void render()
     {
-        bool isPaused = game::ispaused();
+        const bool isPaused = game::ispaused();
+        const bool shrooms = hasShrooms();
+        const vec &camPos = camera1->o;
 
         loopv(curBouncers)
         {
@@ -281,17 +283,19 @@ namespace bouncers
             vec pos(bnc.o);
             pos.add(vec(bnc.offset).mul(bnc.offsetmillis/float(OFFSETMILLIS)));
 
-            bool inWater = ((lookupmaterial(pos) & MATF_VOLUME) == MAT_WATER);
             int bouncerType = bnc.bouncetype;
             int numBounces = bnc.bounces;
-            float magnitude = bnc.vel.magnitude();
             bool stopped = (numBounces > 4);
+            const auto &cfg = bouncers[bouncerType];
+            const bool inWater = bnc.inwater;
+            const bool roids = bnc.owner && bnc.owner->hasRoids();
+            const char *path = getPath(bouncerType, bnc.variant);
 
             if(!isPaused)
             {
                 if(!stopped)
                 {
-                    float rot = (magnitude / 4.f);
+                    float rot = (bnc.vel.magnitude() / 4.f);
 
                     if(numBounces)
                     {
@@ -302,11 +306,11 @@ namespace bouncers
 
                     if(bouncerType==BNC_MOLOTOV || bouncerType == BNC_GRENADE)
                     {
-                        int rot = (bnc.seed ? 2 : -2);
-                        if(bouncerType == BNC_GRENADE) rot *= 3;
-                        bnc.roll += rot;
-                        bnc.yaw -= rot;
-                        bnc.pitch += rot;
+                        int spin = (bnc.seed ? 2 : -2);
+                        if(bouncerType == BNC_GRENADE) spin *= 3;
+                        bnc.roll += spin;
+                        bnc.yaw -= spin;
+                        bnc.pitch += spin;
                     }
                     else bnc.roll += rot;
                 }
@@ -315,76 +319,81 @@ namespace bouncers
 
             if(bouncerType == BNC_MOLOTOV)
             {
-                modelattach a[2];
+                modelattach attachments[2];
                 bnc.particles = vec(-1, -1, -1);
-                a[0] = modelattach("tag_particles", &bnc.particles);
-                rendermodel(getPath(bouncerType, bnc.variant), ANIM_MAPMODEL|ANIM_LOOP, pos, bnc.yaw, bnc.pitch, bnc.roll, MDL_NOBATCH, NULL, a[0].tag ? a : NULL);
+                attachments[0] = modelattach("tag_particles", &bnc.particles);
+                rendermodel(path, ANIM_MAPMODEL|ANIM_LOOP, pos, bnc.yaw, bnc.pitch, bnc.roll, MDL_NOBATCH, NULL, attachments[0].tag ? attachments : NULL);
             }
 
-            rendermodel(getPath(bouncerType, bnc.variant), ANIM_MAPMODEL|ANIM_LOOP, pos, bnc.yaw, bnc.pitch, bnc.roll, MDL_CULL_VFC|MDL_CULL_EXTDIST|MDL_CULL_OCCLUDED);
+            rendermodel(path, ANIM_MAPMODEL|ANIM_LOOP, pos, bnc.yaw, bnc.pitch, bnc.roll, MDL_CULL_VFC|MDL_CULL_EXTDIST|MDL_CULL_OCCLUDED);
 
-            if(!isPaused && (!stopped || bouncerType == BNC_GRENADE))
+            const float fxCullDist = float(cfg.cullDist) * (bouncerType == BNC_GRENADE ? 1.5f : 1.f);
+            const bool canRenderFx = !isPaused && (!stopped || bouncerType == BNC_GRENADE) && camPos.fastsquaredist(pos) <= fxCullDist*fxCullDist;
+            if(!canRenderFx) continue;
+            const bool sparseFx = ((lastmillis + i + bnc.seed) & 3) == 0;
+
+            switch(bouncerType)
             {
-                switch(bouncerType)
+                case BNC_CASING:
+                    particle_splash(PART_SMOKE, 1, 150, pos, 0x505050, 0.8f, 50, -20, 1);
+                    break;
+
+                case BNC_BIGCASING:
+                    particle_splash(PART_SMOKE, 1, 150, pos, 0x404040, 1.75f, 50, -20, 2);
+                    break;
+
+                case BNC_CARTRIDGE:
+                    particle_splash(PART_SMOKE, 1, 150, pos, 0x252525, 1.5f, 50, -20, 3);
+                    break;
+
+                case BNC_ROCK:
+                    particle_splash(PART_SMOKE, 1, 150, pos, 0x404040, 2.5f, 50, -20, 0, shrooms);
+                    break;
+
+                case BNC_BIGROCK:
+                    particle_splash(PART_SMOKE, 1, 500, pos, 0x151515, 8.f, 50, -20, 0, shrooms);
+                    break;
+
+                case BNC_GRENADE:
                 {
-                    case BNC_CASING:
-                        particle_splash(PART_SMOKE, 1, 150, pos, 0x505050, 0.8f, 50, -20, 1);
-                        break;
-
-                    case BNC_BIGCASING:
-                        particle_splash(PART_SMOKE, 1, 150, pos, 0x404040, 1.75f, 50, -20, 2);
-                        break;
-
-                    case BNC_CARTRIDGE:
-                        particle_splash(PART_SMOKE, 1, 150, pos, 0x252525, 1.5f, 50, -20, 3);
-                        break;
-
-                    case BNC_ROCK:
-                        particle_splash(PART_SMOKE, 1, 150, pos, 0x404040, 2.5f, 50, -20, 0, hasShrooms());
-                        break;
-
-                    case BNC_BIGROCK:
-                        particle_splash(PART_SMOKE, 1, 500, pos, 0x151515, 8.f, 50, -20, 0, hasShrooms());
-                        break;
-
-                    case BNC_GRENADE:
-                    {
-                        float growth = (1000 - (bnc.lifetime - curtime))/150.f;
-                        particle_fireball(pos, growth, PART_EXPLOSION, 20, bnc.owner->hasRoids() ? 0xFF0000 : 0x0055FF, growth, hasShrooms());
-                        particle_splash(PART_SMOKE, 1, 150, pos, 0x404088, 2.5f, 50, -20, 0, hasShrooms());
-                        adddynlight(pos, 40, vec(0.5f, 0.5f, 2.0f), 0, 0, L_NOSHADOW);
-                        break;
-                    }
-                    case BNC_SCRAP:
-                        particle_splash(inWater ? PART_BUBBLE : PART_SMOKE, inWater ? 1 : 3, 250, pos, 0x222222, 2.5f, 50, -50, 0, hasShrooms());
-                        particle_splash(PART_FIRE_BALL, 2, 75, pos, 0x994400, 0.7f, 30, -30, 0, hasShrooms());
-                        break;
-
-                    case BNC_GLASS:
-                        particle_splash(PART_SMOKE, 1, 1200, pos, 0x303030, 2.5f, 50, -50, 10, hasShrooms());
-                        particle_splash(PART_FIRE_BALL, 1, 250, pos, bnc.owner->hasRoids() ? 0xFF0000 : 0x996600, 1.3f, 50, -50, 12, hasShrooms());
-                        if(rnd(2)) particle_splash(PART_AR, 1, 500, pos, 0xFFFFFF, 12.f, 50, -25, 50);
-                        break;
-
-                    case BNC_MOLOTOV:
-                        particle_splash(PART_FIRE_BALL, 2, 80, bnc.particles, 0xFFC864, 1, 30, 30, 0, hasShrooms());
-                        particle_splash(PART_SMOKE, 3, 180, bnc.particles, 0x444444, 2, 40, 50, 0, hasShrooms());
-                        particle_splash(PART_AR, 2, 250, bnc.particles, 0xFFFFFF, 2, 40, 50, 5);
-                        //particle_splash(PART_SMOKE, 3, 180, pos, 0x6A6A6A, 2, 40, 50, 0, hasShrooms());
-                        break;
-
-                    case BNC_BURNINGDEBRIS:
-                    {
-                        int flamesColor = (rnd(2) ? 0x993A00 : 0x856611);
-                        if(!rnd(2)) particle_splash(PART_SMOKE, 1, 1800 + rnd(400), pos, 0x282828, 2.f, 50, -100, 12, hasShrooms());
-                        particle_splash(PART_FIRE_BALL, 1, 175, pos, flamesColor, 1.f, 20, 0, 4, hasShrooms());
-                        particle_splash(PART_FIRE_BALL, 1, 175, bnc.o, flamesColor, 1.f, 20, 0, 4, hasShrooms());
-                        break;
-                    }
-                    case BNC_LIGHT:
-                        adddynlight(pos, 115, vec(0.25f, 0.12f, 0.0f), 0, 0, L_VOLUMETRIC|L_NOSHADOW|L_NOSPEC);
-                        break;
+                    float growth = (1000 - (bnc.lifetime - curtime))/150.f;
+                    particle_fireball(pos, growth, PART_EXPLOSION, 20, roids ? 0xFF0000 : 0x0055FF, growth, shrooms);
+                    particle_splash(PART_SMOKE, 1, 150, pos, 0x404088, 2.5f, 50, -20, 0, shrooms);
+                    adddynlight(pos, 40, vec(0.5f, 0.5f, 2.0f), 0, 0, L_NOSHADOW);
+                    break;
                 }
+                case BNC_SCRAP:
+                    particle_splash(inWater ? PART_BUBBLE : PART_SMOKE, inWater ? 1 : 3, 250, pos, 0x222222, 2.5f, 50, -50, 0, shrooms);
+                    particle_splash(PART_FIRE_BALL, 2, 75, pos, 0x994400, 0.7f, 30, -30, 0, shrooms);
+                    break;
+
+                case BNC_GLASS:
+                    particle_splash(PART_SMOKE, 1, 1200, pos, 0x303030, 2.5f, 50, -50, 10, shrooms);
+                    particle_splash(PART_FIRE_BALL, 1, 250, pos, roids ? 0xFF0000 : 0x996600, 1.3f, 50, -50, 12, shrooms);
+                    if(sparseFx) particle_splash(PART_AR, 1, 500, pos, 0xFFFFFF, 12.f, 50, -25, 50);
+                    break;
+
+                case BNC_MOLOTOV:
+                    particle_splash(PART_FIRE_BALL, 2, 80, bnc.particles, 0xFFC864, 1, 30, 30, 0, shrooms);
+                    particle_splash(PART_SMOKE, 3, 180, bnc.particles, 0x444444, 2, 40, 50, 0, shrooms);
+                    particle_splash(PART_AR, 2, 250, bnc.particles, 0xFFFFFF, 2, 40, 50, 5);
+                    break;
+
+                case BNC_BURNINGDEBRIS:
+                {
+                    int flamesColor = (bnc.seed ? 0x993A00 : 0x856611);
+                    if(sparseFx)
+                    {
+                        int smokeLife = 1800 + ((lastmillis + i*53 + bnc.bounces*17) % 400);
+                        particle_splash(PART_SMOKE, 1, smokeLife, pos, 0x282828, 2.f, 50, -100, 12, shrooms);
+                    }
+                    particle_splash(PART_FIRE_BALL, 1, 175, pos, flamesColor, 1.f, 20, 0, 4, shrooms);
+                    particle_splash(PART_FIRE_BALL, 1, 175, bnc.o, flamesColor, 1.f, 20, 0, 4, shrooms);
+                    break;
+                }
+                case BNC_LIGHT:
+                    adddynlight(pos, 115, vec(0.25f, 0.12f, 0.0f), 0, 0, L_VOLUMETRIC|L_NOSHADOW|L_NOSPEC);
+                    break;
             }
         }
     }
