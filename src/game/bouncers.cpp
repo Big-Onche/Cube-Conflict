@@ -315,8 +315,6 @@ namespace bouncers
             const auto &cfg = bouncers[bouncerType];
             const bool inWater = bnc.inwater;
             const bool roids = bnc.owner && bnc.owner->hasRoids();
-
-            if((unsigned)bnc.variant > (unsigned)variantsClamp[bouncerType]) continue;
             const char *path = getPathFast(bouncerType, bnc.variant);
 
             if(!isPaused)
