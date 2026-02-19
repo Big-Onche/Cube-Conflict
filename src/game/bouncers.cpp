@@ -1,5 +1,4 @@
 #include "game.h"
-#include <string>
 
 using namespace game;
 
@@ -23,25 +22,39 @@ namespace bouncers
         { NULL,                 0.1f, 1.0f,  0,  500, -1,                 0,    0              }
     };
 
-    std::map<std::pair<int, int>, std::string> bouncersPaths;
+    static constexpr int MAXBOUNCERVARIANTS = 8;
+    static constexpr int MAXBOUNCERPATHLEN = 64;
+    static char bouncerPaths[NUMBOUNCERS][MAXBOUNCERVARIANTS + 1][MAXBOUNCERPATHLEN];
+    static int maxBouncerVariants = 0;
 
     void initPaths() // store the path of all bouncers and their variants
     {
-        for (int type = 0; type < NUMBOUNCERS; ++type)
+        maxBouncerVariants = 0;
+
+        loopi(NUMBOUNCERS)
         {
-            for (int variant = 0; variant <= bouncers[type].variants; ++variant)
+            int variants = bouncers[i].variants;
+            if(variants > MAXBOUNCERVARIANTS) variants = MAXBOUNCERVARIANTS;
+            if(variants > maxBouncerVariants) maxBouncerVariants = variants;
+
+            for (int variant = 0; variant <= variants; ++variant)
             {
-                char dir[32];
-                if(variant) snprintf(dir, sizeof(dir), "bouncers/%s/%d", bouncers[type].name, variant);
-                else snprintf(dir, sizeof(dir), "bouncers/%s", bouncers[type].name);
-                bouncersPaths[std::make_pair(type, variant)] = dir;
+                if(!bouncers[i].name)
+                {
+                    bouncerPaths[i][variant][0] = '\0';
+                    continue;
+                }
+
+                if(variant) snprintf(bouncerPaths[i][variant], MAXBOUNCERPATHLEN, "bouncers/%s/%d", bouncers[i].name, variant);
+                else snprintf(bouncerPaths[i][variant], MAXBOUNCERPATHLEN, "bouncers/%s", bouncers[i].name);
             }
         }
     }
 
     inline const char *getPath(int type, int variant)
     {
-        return bouncersPaths[std::make_pair(type, variant)].c_str();
+        if(type < 0 || type >= NUMBOUNCERS || variant < 0 || variant > maxBouncerVariants) return "";
+        return bouncerPaths[type][variant];
     }
 
     void preload()
@@ -51,10 +64,7 @@ namespace bouncers
             if(i == BNC_LIGHT) break;
             bool hasVariants = bouncers[i].variants;
             if(!hasVariants) preloadmodel(getPath(i, 0));
-            else
-            {
-                loopj(bouncers[i].variants) preloadmodel(getPath(i, j + 1));
-            }
+            else loopj(bouncers[i].variants) preloadmodel(getPath(i, j + 1));
         }
     }
 
