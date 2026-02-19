@@ -150,6 +150,7 @@ struct vec
     vec &safenormalize()     { float m = magnitude(); if(m) div(m); return *this; }
     bool isnormalized() const { float m = squaredlen(); return (m>0.99f && m<1.01f); }
     float squaredist(const vec &e) const { return vec(*this).sub(e).squaredlen(); }
+    float fastsquaredist(const vec &o) const {float dx = x - o.x, dy = y - o.y, dz = z - o.z; return dx*dx + dy*dy + dz*dz; }
     float dist(const vec &e) const { return sqrtf(squaredist(e)); }
     float dist(const vec &e, vec &t) const { t = *this; t.sub(e); return t.magnitude(); }
     float dist2(const vec &o) const { float dx = x-o.x, dy = y-o.y; return sqrtf(dx*dx + dy*dy); }

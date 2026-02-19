@@ -142,7 +142,9 @@ namespace bouncers
 
     void spawn(const vec &p, const vec &vel, gameent *d, int type, int speed, int lifetime, bool frommonster)
     {
-        if(p.isneg() || ((camera1->o.dist(p) > bouncers[type].cullDist) && type!=BNC_GRENADE)) return; // culling distant ones, except grenades, grenades are important
+        const auto &cfg = bouncers[type];
+        const float maxd = float(cfg.cullDist);
+        if(p.isneg() || (type!=BNC_GRENADE && camera1->o.fastsquaredist(p) > maxd*maxd)) return; // culling distant ones, except grenades, grenades are important
 
         vec dir;
         vec2 yawPitch;
@@ -168,8 +170,7 @@ namespace bouncers
         if(dir.iszero()) dir.z += 1;
         dir.normalize();
 
-        vec to = vec(dir).mul(speed).add(vel); // Combine direction with player's momentum
-        to.add(p);
+        vec to = vec(dir).mul(speed).add(vel).add(p); // Combine direction with player's momentum
 
         add(p, to, true, 0, d, type, lifetime, speed, yawPitch);
     }
