@@ -100,6 +100,8 @@ namespace bouncers
 
     void add(const vec &from, const vec &to, bool local, int id, gameent *owner, int type, int lifetime, int speed, vec2 yawPitch)
     {
+        if((unsigned)type >= (unsigned)NUMBOUNCERS) return;
+
         bouncer &bnc = *curBouncers.add(allocBouncer());
         const auto &cfg = bouncers[type];
 
