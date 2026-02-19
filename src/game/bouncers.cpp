@@ -179,15 +179,16 @@ namespace bouncers
     {
         bouncer *b = (bouncer *)d;
 
-        if(d->type != ENT_BOUNCE || b->type == BNC_LIGHT) return;
+        if(d->type != ENT_BOUNCE || b->bouncetype == BNC_LIGHT) return;
+        const auto &cfg = bouncers[b->bouncetype];
 
-        if(bouncers[b->bouncetype].bounceSoundRad && b->bounces < 5)
+        if(cfg.bounceSound >= 0 && cfg.bounceSoundRad && b->bounces < 5)
         {
-            int soundRadius = bouncers[b->bouncetype].bounceSoundRad;
-            playSound(bouncers[b->bouncetype].bounceSound, b->o, soundRadius, soundRadius * 0.5f, SND_LOWPRIORITY|bouncers[b->bouncetype].soundFlag);
+            int soundRadius = cfg.bounceSoundRad;
+            playSound(cfg.bounceSound, b->o, soundRadius, soundRadius * 0.5f, SND_LOWPRIORITY|cfg.soundFlag);
         }
 
-        if(b->bouncetype == BNC_GRENADE)
+        if(b->bouncetype == BNC_GRENADE && !(b->bounces & 1))
         {
             addstain(STAIN_PLASMA_GLOW, vec(b->o).sub(vec(surface).mul(b->radius)), surface, 4.f, 0x0000FF);
         }
