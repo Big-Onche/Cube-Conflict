@@ -32,26 +32,22 @@ namespace bouncers
     static constexpr int MAXBOUNCERSUBSTEPS = 4;
     static constexpr float WATERCHECKMOVEDSQ = 0.25f;
     static char bouncerPaths[NUMBOUNCERS][MAXBOUNCERVARIANTS + 1][MAXBOUNCERPATHLEN];
-    static int maxBouncerVariants = 0;
+    static uint8_t variantsClamp[NUMBOUNCERS];
     static int bouncerWaterCheckFrame = 0;
 
     void initPaths() // store the path of all bouncers and their variants
     {
-        maxBouncerVariants = 0;
-
         loopi(NUMBOUNCERS)
         {
             int variants = bouncers[i].variants;
+            if(variants < 0) variants = 0;
             if(variants > MAXBOUNCERVARIANTS) variants = MAXBOUNCERVARIANTS;
-            if(variants > maxBouncerVariants) maxBouncerVariants = variants;
+            variantsClamp[i] = uint8_t(variants);
 
-            for (int variant = 0; variant <= variants; ++variant)
+            for(int variant = 0; variant <= MAXBOUNCERVARIANTS; ++variant)
             {
-                if(!bouncers[i].name)
-                {
-                    bouncerPaths[i][variant][0] = '\0';
-                    continue;
-                }
+                bouncerPaths[i][variant][0] = '\0';
+                if(variant > variants || !bouncers[i].name) continue;
 
                 if(variant) snprintf(bouncerPaths[i][variant], MAXBOUNCERPATHLEN, "bouncers/%s/%d", bouncers[i].name, variant);
                 else snprintf(bouncerPaths[i][variant], MAXBOUNCERPATHLEN, "bouncers/%s", bouncers[i].name);
@@ -61,16 +57,13 @@ namespace bouncers
 
     inline const char *getPath(int type, int variant)
     {
-        if(type < 0 || type >= NUMBOUNCERS || variant < 0 || variant > maxBouncerVariants) return "";
+        if((unsigned)type >= (unsigned)NUMBOUNCERS) return "";
+        if((unsigned)variant > (unsigned)variantsClamp[type]) return "";
         return bouncerPaths[type][variant];
     }
 
-    static uint8_t variantsClamp[NUMBOUNCERS];
-
     inline const char* getPathFast(int type, int variant)
     {
-        if((unsigned)type >= (unsigned)NUMBOUNCERS) return "";
-        if((unsigned)variant > (unsigned)variantsClamp[type]) return "";
         return bouncerPaths[type][variant];
     }
 
@@ -80,7 +73,7 @@ namespace bouncers
         {
             if(i == BNC_LIGHT) continue;
 
-            int variants = bouncers[i].variants;
+            int variants = variantsClamp[i];
             if(variants <= 0)
             {
                 preloadmodel(getPath(i, 0));
@@ -102,9 +95,11 @@ namespace bouncers
         else freeBouncers.add(bnc);
     }
 
+    static inline bool isValid(int type) { return (unsigned)type < (unsigned)NUMBOUNCERS; }
+
     void add(const vec &from, const vec &to, bool local, int id, gameent *owner, int type, int lifetime, int speed, vec2 yawPitch)
     {
-        if((unsigned)type >= (unsigned)NUMBOUNCERS) return;
+        if(!isValid(type)) return;
 
         bouncer &bnc = *curBouncers.add(allocBouncer());
         const auto &cfg = bouncers[type];
@@ -139,8 +134,7 @@ namespace bouncers
             bnc.pitch = yawPitch.y;
         }
 
-        int variants = cfg.variants;
-        if(variants > MAXBOUNCERVARIANTS) variants = MAXBOUNCERVARIANTS;
+        int variants = variantsClamp[type];
         if(variants > 0) bnc.variant = rnd(variants) + 1;
 
         bnc.collidetype = COLLIDE_ELLIPSE;
@@ -166,6 +160,8 @@ namespace bouncers
 
     void spawn(const vec &p, const vec &vel, gameent *d, int type, int speed, int lifetime, bool frommonster)
     {
+        if(!isValid(type)) return;
+
         const auto &cfg = bouncers[type];
         const float maxd = float(cfg.cullDist);
         if(p.isneg() || (type!=BNC_GRENADE && camera1->o.fastsquaredist(p) > maxd*maxd)) return; // culling distant ones, except grenades, grenades are important
@@ -203,7 +199,8 @@ namespace bouncers
     {
         bouncer *b = (bouncer *)d;
 
-        if(d->type != ENT_BOUNCE || b->bouncetype == BNC_LIGHT) return;
+        if(d->type != ENT_BOUNCE || !isValid(b->bouncetype) || b->bouncetype == BNC_LIGHT) return;
+
         const auto &cfg = bouncers[b->bouncetype];
 
         if(cfg.bounceSound >= 0 && cfg.bounceSoundRad && b->bounces < 5)
@@ -309,11 +306,15 @@ namespace bouncers
             pos.add(vec(bnc.offset).mul(bnc.offsetmillis/float(OFFSETMILLIS)));
 
             int bouncerType = bnc.bouncetype;
+            if(!isValid(bouncerType)) continue;
+
             int numBounces = bnc.bounces;
             bool stopped = (numBounces > 4);
             const auto &cfg = bouncers[bouncerType];
             const bool inWater = bnc.inwater;
             const bool roids = bnc.owner && bnc.owner->hasRoids();
+
+            if((unsigned)bnc.variant > (unsigned)variantsClamp[bouncerType]) continue;
             const char *path = getPathFast(bouncerType, bnc.variant);
 
             if(!isPaused)
