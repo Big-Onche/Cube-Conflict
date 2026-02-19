@@ -6,21 +6,25 @@ namespace bouncers
 {
     VARP(bouncersfade, 2500, 15000, 120000);
 
-    static const struct bouncerConfig { const char *name; float size, bounceIntensity; int variants, cullDist, bounceSound, bounceSoundRad, soundFlag; } bouncers[NUMBOUNCERS] =
-    {
-        { "grenade",            1.0f, 1.0f,  0,  750, S_B_GRENADE,      220,    0              },
-        { "molotov",            1.0f, 1.0f,  0,  750, -1,                 0,    0              },
-        { "pixel",              1.0f, 0.6f,  8,  600, S_B_PIXEL,        120,    0              },
-        { "debris",             0.5f, 0.5f,  0, 1000, -1,                 0,    0              },
-        { "rock",               0.8f, 0.8f,  4,  750, S_B_ROCK,         120,    0              },
-        { "rock/big",           2.5f, 0.4f,  3, 1250, S_B_BIGROCK,      300,    0              },
-        { "casing",             0.2f, 1.0f,  0,  250, S_B_CASING,       120,    SND_FIXEDPITCH },
-        { "casing/big",         0.2f, 1.0f,  0,  250, S_B_BIGCASING,    120,    SND_FIXEDPITCH },
-        { "casing/cartridge",   0.2f, 1.0f,  0,  250, S_B_CARTRIDGE,    120,    SND_FIXEDPITCH },
-        { "scrap",              1.5f, 0.7f,  3,  750, S_B_SCRAP,        180,    0              },
-        { "glass",              0.5f, 0.2f,  0,  500, -1,                 0,    0              },
-        { NULL,                 0.1f, 1.0f,  0,  500, -1,                 0,    0              }
+#define BOUNCERCFG(NAME, SIZE, BOUNCE, VARIANTS, CULLDIST, BOUNCESND, BOUNCESNDRAD, SNDFLAG, FXMULT) \
+    { NAME, SIZE, BOUNCE, VARIANTS, CULLDIST, BOUNCESND, BOUNCESNDRAD, SNDFLAG, float(CULLDIST)*float(CULLDIST)*(FXMULT)*(FXMULT) }
+
+    static const struct bouncerConfig { const char *name; float size, bounceIntensity; int variants, cullDist, bounceSound, bounceSoundRad, soundFlag; float fxCullDistSq; } bouncers[NUMBOUNCERS] = {
+        BOUNCERCFG("grenade",          1.0f, 1.0f, 0,  750, S_B_GRENADE,   220, 0,              1.5f),
+        BOUNCERCFG("molotov",          1.0f, 1.0f, 0,  750, -1,              0, 0,              1.0f),
+        BOUNCERCFG("pixel",            1.0f, 0.6f, 8,  600, S_B_PIXEL,     120, 0,              1.0f),
+        BOUNCERCFG("debris",           0.5f, 0.5f, 0, 1000, -1,              0, 0,              1.0f),
+        BOUNCERCFG("rock",             0.8f, 0.8f, 4,  750, S_B_ROCK,      120, 0,              1.0f),
+        BOUNCERCFG("rock/big",         2.5f, 0.4f, 3, 1250, S_B_BIGROCK,   300, 0,              1.0f),
+        BOUNCERCFG("casing",           0.2f, 1.0f, 0,  250, S_B_CASING,    120, SND_FIXEDPITCH, 1.0f),
+        BOUNCERCFG("casing/big",       0.2f, 1.0f, 0,  250, S_B_BIGCASING, 120, SND_FIXEDPITCH, 1.0f),
+        BOUNCERCFG("casing/cartridge", 0.2f, 1.0f, 0,  250, S_B_CARTRIDGE, 120, SND_FIXEDPITCH, 1.0f),
+        BOUNCERCFG("scrap",            1.5f, 0.7f, 3,  750, S_B_SCRAP,     180, 0,              1.0f),
+        BOUNCERCFG("glass",            0.5f, 0.2f, 0,  500, -1,              0, 0,              1.0f),
+        BOUNCERCFG(NULL,               0.1f, 1.0f, 0,  500, -1,              0, 0,              1.0f)
     };
+
+#undef BOUNCERCFG
 
     static constexpr int MAXBOUNCERVARIANTS = 8;
     static constexpr int MAXBOUNCERPATHLEN = 64;
@@ -57,6 +61,11 @@ namespace bouncers
     inline const char *getPath(int type, int variant)
     {
         if(type < 0 || type >= NUMBOUNCERS || variant < 0 || variant > maxBouncerVariants) return "";
+        return bouncerPaths[type][variant];
+    }
+
+    inline const char *getPathFast(int type, int variant)
+    {
         return bouncerPaths[type][variant];
     }
 
@@ -231,7 +240,7 @@ namespace bouncers
 
             if(!isLight)
             {
-                bool shouldCheckWater = bnc.o.fastsquaredist(old) > WATERCHECKMOVEDSQ || ((bouncerWaterCheckFrame + i) & 3) == 0;
+                bool shouldCheckWater = ((bouncerWaterCheckFrame + i) & 3) == 0 || bnc.o.fastsquaredist(old) > WATERCHECKMOVEDSQ;
                 if(shouldCheckWater)
                 {
                     bool inWater = ((lookupmaterial(bnc.o) & MATF_VOLUME) == MAT_WATER);
@@ -265,7 +274,11 @@ namespace bouncers
                     }
 
                 }
-                freeBouncer(curBouncers.remove(i--));
+                bouncer *removed = curBouncers[i];
+                curBouncers[i] = curBouncers.last();
+                curBouncers.pop();
+                freeBouncer(removed);
+                i--;
             }
             else bnc.offsetmillis = max(bnc.offsetmillis-time, 0);
         }
@@ -289,7 +302,7 @@ namespace bouncers
             const auto &cfg = bouncers[bouncerType];
             const bool inWater = bnc.inwater;
             const bool roids = bnc.owner && bnc.owner->hasRoids();
-            const char *path = getPath(bouncerType, bnc.variant);
+            const char *path = getPathFast(bouncerType, bnc.variant);
 
             if(!isPaused)
             {
@@ -327,9 +340,8 @@ namespace bouncers
 
             rendermodel(path, ANIM_MAPMODEL|ANIM_LOOP, pos, bnc.yaw, bnc.pitch, bnc.roll, MDL_CULL_VFC|MDL_CULL_EXTDIST|MDL_CULL_OCCLUDED);
 
-            const float fxCullDist = float(cfg.cullDist) * (bouncerType == BNC_GRENADE ? 1.5f : 1.f);
-            const bool canRenderFx = !isPaused && (!stopped || bouncerType == BNC_GRENADE) && camPos.fastsquaredist(pos) <= fxCullDist*fxCullDist;
-            if(!canRenderFx) continue;
+            if(isPaused || (stopped && bouncerType != BNC_GRENADE)) continue;
+            if(camPos.fastsquaredist(pos) > cfg.fxCullDistSq) continue;
             const bool sparseFx = ((lastmillis + i + bnc.seed) & 3) == 0;
 
             switch(bouncerType)
@@ -402,25 +414,34 @@ namespace bouncers
     {
         loopv(curBouncers)
         {
-            if(curBouncers[i]->owner == owner)
+            bouncer *bnc = curBouncers[i];
+            if(bnc->owner == owner)
             {
-                removeEntityPos(curBouncers[i]->entityId);
-                freeBouncer(curBouncers.remove(i--));
+                if(bnc->bouncetype == BNC_GRENADE)
+                {
+                    stopLinkedSound(bnc->entityId);
+                    removeEntityPos(bnc->entityId);
+                }
+                bouncer *removed = bnc;
+                curBouncers[i] = curBouncers.last();
+                curBouncers.pop();
+                freeBouncer(removed);
+                i--;
             }
         }
     }
 
     void clear()
     {
-        loopv(curBouncers)
+        while(!curBouncers.empty())
         {
-            bouncer &bnc = *curBouncers[i];
-            if(bnc.bouncetype == BNC_GRENADE)
+            bouncer *bnc = curBouncers.pop();
+            if(bnc->bouncetype == BNC_GRENADE)
             {
-                stopLinkedSound(bnc.entityId);
-                removeEntityPos(bnc.entityId);
+                stopLinkedSound(bnc->entityId);
+                removeEntityPos(bnc->entityId);
             }
+            freeBouncer(bnc);
         }
-        while(!curBouncers.empty()) freeBouncer(curBouncers.pop());
     }
 }
