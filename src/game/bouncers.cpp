@@ -65,8 +65,12 @@ namespace bouncers
         return bouncerPaths[type][variant];
     }
 
-    inline const char *getPathFast(int type, int variant)
+    static uint8_t variantsClamp[NUMBOUNCERS];
+
+    inline const char* getPathFast(int type, int variant)
     {
+        if((unsigned)type >= (unsigned)NUMBOUNCERS) return "";
+        if((unsigned)variant > (unsigned)variantsClamp[type]) return "";
         return bouncerPaths[type][variant];
     }
 
