@@ -10,6 +10,15 @@ namespace ai
     static const float viewFieldxScale = (VIEWMIN + (VIEWMAX - VIEWMIN)) / 100.f;
     static float attackMinDists[NUMATKS], attackMaxDists[NUMATKS];
     static float attackMinDistSq[NUMATKS], attackMaxDistSq[NUMATKS];
+    static float attackDelayScale[NUMATKS];
+
+    static inline float angleDiff(float a, float b)
+    {
+        float d = a - b;
+        if(d > 180.f) d -= 360.f;
+        else if(d < -180.f) d += 360.f;
+        return d;
+    }
 
     struct attackRangeConfig
     {
@@ -24,6 +33,7 @@ namespace ai
                 attackMaxDists[i] = fmaxdist;
                 attackMinDistSq[i] = fmindist*fmindist;
                 attackMaxDistSq[i] = fmaxdist*fmaxdist;
+                attackDelayScale[i] = attacks[i].attackdelay/200.f;
             }
         }
     } attackRangeCache;
@@ -111,9 +121,7 @@ namespace ai
         const float dist2 = o.squaredist(q);
         if(dist2 > mdistsq) return false;
 
-        float y = -atan2(q.x-o.x, q.y-o.y)/RAD - yaw;
-        if(y < -180.f) y += 360.f;
-        else if(y > 180.f) y -= 360.f;
+        const float y = angleDiff(-atan2(q.x-o.x, q.y-o.y)/RAD, yaw);
         if(fabs(y) > fovy) return false;
 
         const float dist = dist2 > 0 ? sqrtf(dist2) : 0;
@@ -136,6 +144,9 @@ namespace ai
     {
         if(attackrange(d, atk, e->o.squaredist(d->o)) && targetable(d, e))
         {
+            const int gun = attacks[atk].gun;
+            const bool hasammo = d->ammo[gun] != 0;
+
             switch(d->gunselect)
             {
                 case GUN_MINIGUN:
@@ -146,9 +157,8 @@ namespace ai
                 case GUN_SKS:
                 case GUN_HYDRA:
                 case GUN_S_CAMPER:
-                    return d->ammo[attacks[atk].gun];
-                    break;
-                default: return d->ammo[attacks[atk].gun] && lastmillis - d->lastaction >= d->gunwait;
+                    return hasammo;
+                default: return hasammo && lastmillis - d->lastaction >= d->gunwait;
             }
         }
         return false;
@@ -158,10 +168,8 @@ namespace ai
     { // add margins of error
         if(attackrange(d, atk, dist) || (d->skill <= 100 && !rnd(d->skill)))
         {
-            float skew = clamp(float(lastmillis-d->ai->enemymillis)/float((d->skill*attacks[atk].attackdelay/200.f)), 0.f, attacks[atk].projspeed ? 0.25f : 1e16f),
-                  offy = yaw-d->yaw, offp = pitch-d->pitch;
-            if(offy > 180) offy -= 360;
-            else if(offy < -180) offy += 360;
+            const float skew = clamp(float(lastmillis-d->ai->enemymillis)/float(d->skill*attackDelayScale[atk]), 0.f, attacks[atk].projspeed ? 0.25f : 1e16f);
+            const float offy = angleDiff(yaw, d->yaw), offp = pitch-d->pitch;
             if(fabs(offy) <= d->ai->views[0]*skew && fabs(offp) <= d->ai->views[1]*skew) return true;
         }
         return false;
