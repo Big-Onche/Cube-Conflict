@@ -6,8 +6,27 @@ namespace ai
 {
     using namespace game;
 
-    static const float viewdistscale = (SIGHTMIN + (SIGHTMAX - SIGHTMIN)) / 100.f;
-    static const float viewfieldxscale = (VIEWMIN + (VIEWMAX - VIEWMIN)) / 100.f;
+    static const float viewDistScale = (SIGHTMIN + (SIGHTMAX - SIGHTMIN)) / 100.f;
+    static const float viewFieldxScale = (VIEWMIN + (VIEWMAX - VIEWMIN)) / 100.f;
+    static float attackMinDists[NUMATKS], attackMaxDists[NUMATKS];
+    static float attackMinDistSq[NUMATKS], attackMaxDistSq[NUMATKS];
+
+    struct attackRangeConfig
+    {
+        attackRangeConfig()
+        {
+            loopi(NUMATKS)
+            {
+                const int mindist = i==ATK_KAMIKAZE || i==ATK_S_NUKE ? 0 : max(attacks[i].exprad/4, 2);
+                const int maxdist = attacks[i].range + 100;
+                const float fmindist = float(mindist), fmaxdist = float(maxdist);
+                attackMinDists[i] = fmindist;
+                attackMaxDists[i] = fmaxdist;
+                attackMinDistSq[i] = fmindist*fmindist;
+                attackMaxDistSq[i] = fmaxdist*fmaxdist;
+            }
+        }
+    } attackRangeCache;
 
     avoidset obstacles;
     int updatemillis = 0, iteration = 0, itermillis = 0, forcegun = -1;
@@ -34,12 +53,12 @@ namespace ai
     float viewdist(int x)
     {
         const float ffog = float(fog);
-        return x <= 100 ? clamp(viewdistscale * float(x), float(SIGHTMIN), ffog) : ffog;
+        return x <= 100 ? clamp(viewDistScale * float(x), float(SIGHTMIN), ffog) : ffog;
     }
 
     float viewfieldx(int x)
     {
-        return x <= 100 ? clamp(viewfieldxscale * float(x), float(VIEWMIN), float(VIEWMAX)) : float(VIEWMAX);
+        return x <= 100 ? clamp(viewFieldxScale * float(x), float(VIEWMIN), float(VIEWMAX)) : float(VIEWMAX);
     }
 
     float viewfieldy(int x)
@@ -54,18 +73,17 @@ namespace ai
 
     float attackmindist(int atk)
     {
-        return atk==ATK_KAMIKAZE || atk==ATK_S_NUKE ? 0 : max(int(attacks[atk].exprad/4), 2);
+        return attackMinDists[atk];
     }
 
     float attackmaxdist(int atk)
     {
-        return attacks[atk].range + 100;
+        return attackMaxDists[atk];
     }
 
     bool attackrange(gameent *d, int atk, float dist)
     {
-        float mindist = attackmindist(atk), maxdist = attackmaxdist(atk);
-        return dist >= mindist*mindist && dist <= maxdist*maxdist;
+        return dist >= attackMinDistSq[atk] && dist <= attackMaxDistSq[atk];
     }
 
     bool targetable(gameent *d, gameent *e)
