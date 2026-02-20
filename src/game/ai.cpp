@@ -674,7 +674,7 @@ namespace ai
         return false;
     }
 
-    bool target(gameent *d, aistate &b, int pursue = 0, bool force = false, float mindist = 0.f)
+    bool target(gameent *d, aistate &b, int pursue = 0, bool force = false, float mindist = 0.f, bool forcefallback = false)
     {
         static vector<int> triedstamp;
         static int stamp = 0;
@@ -688,11 +688,12 @@ namespace ai
         vec dp = d->headpos();
         const bool useRoughPrune = guns[d->gunselect].attacks[ACT_SHOOT] != ATK_MOLOTOV;
         const float roughSlack = 4096.f;
+        const bool allowfallback = forcefallback && !force;
         while(true)
         {
-            float dist = 1e16f;
-            gameent *t = NULL;
-            int tindex = -1;
+            float dist = 1e16f, forceddist = 1e16f;
+            gameent *t = NULL, *forced = NULL;
+            int tindex = -1, forcedindex = -1;
             int atk = guns[d->gunselect].attacks[ACT_SHOOT];
             loopv(players)
             {
@@ -705,18 +706,51 @@ namespace ai
                 if(useRoughPrune)
                 {
                     if(mindist > 0.f && roughdist > mindist + roughSlack) continue;
-                    if(t && roughdist > dist + roughSlack) continue;
+                    const float prunedist = force ? forceddist : min(dist, forceddist);
+                    if(prunedist < 1e15f && roughdist > prunedist + roughSlack) continue;
                 }
 
                 vec ep = getaimpos(d, atk, e);
                 float v = ep.squaredist(dp);
-                if((!t || v < dist) && (mindist <= 0 || v <= mindist) && (force || cansee(d, b, dp, ep)))
+                if(mindist > 0.f && v > mindist) continue;
+
+                if(force)
                 {
-                    t = e;
-                    dist = v;
-                    tindex = i;
+                    if(!forced || v < forceddist)
+                    {
+                        forced = e;
+                        forceddist = v;
+                        forcedindex = i;
+                    }
+                }
+                else if(cansee(d, b, dp, ep))
+                {
+                    if(!t || v < dist)
+                    {
+                        t = e;
+                        dist = v;
+                        tindex = i;
+                    }
+                }
+                else if(allowfallback && (!forced || v < forceddist))
+                {
+                    forced = e;
+                    forceddist = v;
+                    forcedindex = i;
                 }
             }
+
+            if(force)
+            {
+                t = forced;
+                tindex = forcedindex;
+            }
+            else if(!t && allowfallback)
+            {
+                t = forced;
+                tindex = forcedindex;
+            }
+
             if(t)
             {
                 if(violence(d, b, t, pursue)) return true;
@@ -995,9 +1029,9 @@ namespace ai
         {
             loopv(players)
             {
-                if(players[i] && players[i]->ai && players[i]->aitype == AI_BOT && players[i]->canpickupitem(e.type, players[i]->character))
+                gameent *d = players[i];
+                if(d && d->ai && d->aitype == AI_BOT && d->state == CS_ALIVE && d->canpickupitem(e.type, d->character))
                 {
-                    gameent *d = players[i];
                     bool wantsitem = false;
                     switch(e.type)
                     {
@@ -1046,8 +1080,7 @@ namespace ai
     {
         d->ai->clear(true); // ensure they're clean
         if(check(d, b) || find(d, b)) return 1;
-        if(target(d, b, 4, false)) return 1;
-        if(target(d, b, 4, true)) return 1;
+        if(target(d, b, 4, false, 0.f, true)) return 1;
         if(randomnode(d, b, SIGHTMIN, 1e16f))
         {
             d->ai->switchstate(b, AI_S_INTEREST, AI_T_NODE, d->ai->route[0]);
@@ -1058,30 +1091,28 @@ namespace ai
 
     int dodefend(gameent *d, aistate &b)
     {
-        if(d->state == CS_ALIVE)
+        if(d->state != CS_ALIVE) return 0;
+
+        if((b.targtype == AI_T_NODE || b.targtype == AI_T_ENTITY || b.targtype == AI_T_PLAYER) && check(d, b)) return 1;
+
+        switch(b.targtype)
         {
-            switch(b.targtype)
+            case AI_T_NODE:
+                if(iswaypoint(b.target)) return defend(d, b, waypoints[b.target].o) ? 1 : 0;
+                break;
+            case AI_T_ENTITY:
+                if(entities::ents.inrange(b.target)) return defend(d, b, entities::ents[b.target]->o) ? 1 : 0;
+                break;
+            case AI_T_AFFINITY:
+                if(cmode) return cmode->aidefend(d, b) ? 1 : 0;
+                break;
+            case AI_T_PLAYER:
             {
-                case AI_T_NODE:
-                    if(check(d, b)) return 1;
-                    if(iswaypoint(b.target)) return defend(d, b, waypoints[b.target].o) ? 1 : 0;
-                    break;
-                case AI_T_ENTITY:
-                    if(check(d, b)) return 1;
-                    if(entities::ents.inrange(b.target)) return defend(d, b, entities::ents[b.target]->o) ? 1 : 0;
-                    break;
-                case AI_T_AFFINITY:
-                    if(cmode) return cmode->aidefend(d, b) ? 1 : 0;
-                    break;
-                case AI_T_PLAYER:
-                {
-                    if(check(d, b)) return 1;
-                    gameent *e = getclient(b.target);
-                    if(e && e->state == CS_ALIVE) return defend(d, b, e->feetpos()) ? 1 : 0;
-                    break;
-                }
-                default: break;
+                gameent *e = getclient(b.target);
+                if(e && e->state == CS_ALIVE) return defend(d, b, e->feetpos()) ? 1 : 0;
+                break;
             }
+            default: break;
         }
         return 0;
     }
@@ -1089,12 +1120,13 @@ namespace ai
     int dointerest(gameent *d, aistate &b)
     {
         if(d->state != CS_ALIVE) return 0;
+        const bool checked = b.targtype == AI_T_NODE ? check(d, b) : false;
         switch(b.targtype)
         {
             case AI_T_NODE: // this is like a wait state without sitting still..
-                if(check(d, b) || find(d, b)) return 1;
+                if(checked || find(d, b)) return 1;
                 if(target(d, b, 4, true)) return 1;
-                if(iswaypoint(b.target) && vec(waypoints[b.target].o).sub(d->feetpos()).magnitude() > CLOSEDIST)
+                if(iswaypoint(b.target) && d->feetpos().squaredist(waypoints[b.target].o) > CLOSEDIST*CLOSEDIST)
                     return makeroute(d, b, waypoints[b.target].o) ? 1 : 0;
                 break;
             case AI_T_ENTITY:
@@ -1112,54 +1144,53 @@ namespace ai
 
     int dopursue(gameent *d, aistate &b)
     {
-        if(d->state == CS_ALIVE)
+        if(d->state != CS_ALIVE) return 0;
+        const bool checked = b.targtype == AI_T_NODE ? check(d, b) : false;
+        switch(b.targtype)
         {
-            switch(b.targtype)
+            case AI_T_NODE:
             {
-                case AI_T_NODE:
-                {
-                    if(check(d, b)) return 1;
-                    if(iswaypoint(b.target))
-                        return defend(d, b, waypoints[b.target].o) ? 1 : 0;
-                    break;
-                }
-
-                case AI_T_AFFINITY:
-                {
-                    if(cmode) return cmode->aipursue(d, b) ? 1 : 0;
-                    break;
-                }
-
-                case AI_T_PLAYER:
-                {
-                    //if(check(d, b)) return 1;
-                    gameent *e = getclient(b.target);
-                    if(e && e->state == CS_ALIVE)
-                    {
-                        if(canRequestAbility(d))
-                        {
-                            float enemyDistance = d->o.dist(e->o);
-                            switch(d->character)
-                            {
-                                case C_WIZARD:
-                                    if(d->mana > 60 && enemyDistance < 500) requestAbility(d, ABILITY_1);
-                                    else if (d->mana >= 100 && enemyDistance > 500) requestAbility(d, ABILITY_2);
-                                    break;
-                                case C_SPY:
-                                    if(d->mana >= 40 && enemyDistance < 700 && !d->abilitymillis[ABILITY_2] && !rnd(2)) requestAbility(d, ABILITY_1);
-                                    else if(d->mana >= 50 && enemyDistance < 700 && !d->abilitymillis[ABILITY_1]) requestAbility(d, ABILITY_2);
-                                    break;
-                            }
-                        }
-
-                        int atk = guns[d->gunselect].attacks[ACT_SHOOT];
-                        float guard = SIGHTMIN, wander = attacks[atk].range;
-                        return patrol(d, b, e->feetpos(), needpursue(d) ? 0.f : guard, wander) ? 1 : 0;
-                    }
-                    break;
-                }
-                default: break;
+                if(checked) return 1;
+                if(iswaypoint(b.target))
+                    return defend(d, b, waypoints[b.target].o) ? 1 : 0;
+                break;
             }
+
+            case AI_T_AFFINITY:
+            {
+                if(cmode) return cmode->aipursue(d, b) ? 1 : 0;
+                break;
+            }
+
+            case AI_T_PLAYER:
+            {
+                //if(check(d, b)) return 1;
+                gameent *e = getclient(b.target);
+                if(e && e->state == CS_ALIVE)
+                {
+                    if(canRequestAbility(d))
+                    {
+                        const float enemyDistanceSq = d->o.squaredist(e->o);
+                        switch(d->character)
+                        {
+                            case C_WIZARD:
+                                if(d->mana > 60 && enemyDistanceSq < 500.f*500.f) requestAbility(d, ABILITY_1);
+                                else if (d->mana >= 100 && enemyDistanceSq > 500.f*500.f) requestAbility(d, ABILITY_2);
+                                break;
+                            case C_SPY:
+                                if(d->mana >= 40 && enemyDistanceSq < 700.f*700.f && !d->abilitymillis[ABILITY_2] && !rnd(2)) requestAbility(d, ABILITY_1);
+                                else if(d->mana >= 50 && enemyDistanceSq < 700.f*700.f && !d->abilitymillis[ABILITY_1]) requestAbility(d, ABILITY_2);
+                                break;
+                        }
+                    }
+
+                    int atk = guns[d->gunselect].attacks[ACT_SHOOT];
+                    float guard = SIGHTMIN, wander = attacks[atk].range;
+                    return patrol(d, b, e->feetpos(), needpursue(d) ? 0.f : guard, wander) ? 1 : 0;
+                }
+                break;
+            }
+            default: break;
         }
         return 0;
     }
