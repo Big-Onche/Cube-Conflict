@@ -25,6 +25,38 @@ namespace ai
     static vector<vec> itemEntNodePos;
     static int itemEntCount = -1;
 
+    static inline int activeroutelen(const aiinfo &ai)
+    {
+        return min(ai.routeend, ai.route.length());
+    }
+
+    static inline bool activerouteempty(const aiinfo &ai)
+    {
+        return activeroutelen(ai) <= 0;
+    }
+
+    static inline bool activerouteinrange(const aiinfo &ai, int i)
+    {
+        return i >= 0 && i < activeroutelen(ai);
+    }
+
+    static inline int activerouteat(const aiinfo &ai, int i)
+    {
+        return ai.route[i];
+    }
+
+    static inline void activerouteadd(aiinfo &ai, int n)
+    {
+        if(ai.routeend < ai.route.length()) ai.route.setsize(ai.routeend);
+        ai.route.add(n);
+        ai.routeend = ai.route.length();
+    }
+
+    static inline void activeroutesetlen(aiinfo &ai, int len)
+    {
+        ai.routeend = clamp(len, 0, ai.route.length());
+    }
+
     static void buildItemCache()
     {
         itemEntIds.setsize(0);
@@ -476,12 +508,13 @@ namespace ai
     bool makeroute(gameent *d, aistate &b, int node, bool changed, int retries)
     {
         if(!iswaypoint(d->lastnode) || !iswaypoint(node)) return false;
-        if(changed && d->ai->route.length() > 1 && d->ai->route[0] == node) return true;
+        if(changed && activeroutelen(*d->ai) > 1 && activerouteat(*d->ai, 0) == node) return true;
         // retry fails: 0 = first attempt, 1 = try ignoring obstacles, 2 = try ignoring prevnodes too
         for(int attempt = retries; attempt <= 2; ++attempt)
         {
             if(route(d, d->lastnode, node, d->ai->route, obstacles, attempt))
             {
+                d->ai->routeend = d->ai->route.length();
                 b.override = false;
                 return true;
             }
@@ -628,7 +661,7 @@ namespace ai
                 b.override = true;
                 return true;
             }
-            else if(d->ai->route.empty())
+            else if(activerouteempty(*d->ai))
             {
                 if(!retry)
                 {
@@ -1087,7 +1120,7 @@ namespace ai
         if(target(d, b, 4, false, 0.f, true)) return 1;
         if(randomnode(d, b, SIGHTMIN, 1e16f))
         {
-            d->ai->switchstate(b, AI_S_INTEREST, AI_T_NODE, d->ai->route[0]);
+            d->ai->switchstate(b, AI_S_INTEREST, AI_T_NODE, activerouteat(*d->ai, 0));
             return 1;
         }
         return 0; // but don't pop the state
@@ -1201,15 +1234,17 @@ namespace ai
 
     int closenode(gameent *d)
     {
+        const aiinfo &ai = *d->ai;
         vec pos = d->feetpos();
         int node1 = -1, node2 = -1;
         float mindist1 = closeDistSq, mindist2 = closeDistSq;
-        loopv(d->ai->route) if(iswaypoint(d->ai->route[i]))
+        const int routelen = activeroutelen(ai);
+        loopi(routelen) if(iswaypoint(ai.route[i]))
         {
-            vec epos = waypoints[d->ai->route[i]].o;
+            vec epos = waypoints[ai.route[i]].o;
             float dist = epos.squaredist(pos);
             if(dist > farDistSq) continue;
-            int entid = obstacles.remap(d, d->ai->route[i], epos);
+            int entid = obstacles.remap(d, ai.route[i], epos);
             if(entid >= 0)
             {
                 if(entid != i) dist = epos.squaredist(pos);
@@ -1241,7 +1276,7 @@ namespace ai
         if(iswaypoint(n) && waypoints[n].haslinks())
         {
             aiinfo &ai = *d->ai;
-            const int routelen = ai.route.length();
+            const int routelen = activeroutelen(ai);
             uint routehash = 2166136261u;
             loopi(routelen)
             {
@@ -1298,8 +1333,8 @@ namespace ai
                     if(iswaypoint(n)) chain.add(n);
                     else break;
                 }
-                loopirev(chain.length()) d->ai->route.add(chain[i]);
-                d->ai->route.add(d->lastnode);
+                loopirev(chain.length()) activerouteadd(*d->ai, chain[i]);
+                activerouteadd(*d->ai, d->lastnode);
                 return true;
             }
         }
@@ -1310,7 +1345,8 @@ namespace ai
     {
         aiinfo &ai = *d->ai;
         vector<int> &routevec = ai.route;
-        if(routevec.empty() || !routevec.inrange(n)) return false;
+        const int routelen = activeroutelen(ai);
+        if(routelen <= 0 || n < 0 || n >= routelen) return false;
         int last = d->ai->lastcheck ? lastmillis-d->ai->lastcheck : 0;
         if(last < routeCheckInterval || n < 3) return false; // route length is too short
         ai.lastcheck = lastmillis;
@@ -1330,8 +1366,14 @@ namespace ai
                         static vector<int> remap; remap.setsize(0);
                         if(route(d, w, t, remap, obstacles))
                         { // kill what we don't want and put the remap in
-                            while(routevec.length() > i) routevec.pop();
-                            loopvk(remap) routevec.add(remap[k]);
+                            int newlen = i;
+                            loopvk(remap)
+                            {
+                                if(routevec.inrange(newlen)) routevec[newlen] = remap[k];
+                                else routevec.add(remap[k]);
+                                newlen++;
+                            }
+                            activeroutesetlen(ai, newlen);
                             return true;
                         }
                         return false; // we failed
@@ -1345,19 +1387,19 @@ namespace ai
 
     bool hunt(gameent *d, aistate &b)
     {
-        if(!d->ai->route.empty())
+        if(!activerouteempty(*d->ai))
         {
             int n = closenode(d);
-            if(d->ai->route.inrange(n))
+            if(activerouteinrange(*d->ai, n))
             {
                 const int sincecheck = d->ai->lastcheck ? lastmillis-d->ai->lastcheck : 0;
                 if(sincecheck >= routeCheckInterval && n >= 3 && checkroute(d, n)) n = closenode(d);
             }
-            if(d->ai->route.inrange(n))
+            if(activerouteinrange(*d->ai, n))
             {
                 if(!n)
                 {
-                    switch(wpspot(d, d->ai->route[n], true))
+                    switch(wpspot(d, activerouteat(*d->ai, n), true))
                     {
                         case 2: d->ai->clear(false);
                         case 1: return true; // not close enough to pop it yet
@@ -1366,9 +1408,9 @@ namespace ai
                 }
                 else
                 {
-                    while(d->ai->route.length() > n+1) d->ai->route.pop(); // waka-waka-waka-waka
+                    activeroutesetlen(*d->ai, n+1); // waka-waka-waka-waka
                     int m = n-1; // next, please!
-                    if(d->ai->route.inrange(m) && wpspot(d, d->ai->route[m])) return true;
+                    if(activerouteinrange(*d->ai, m) && wpspot(d, activerouteat(*d->ai, m))) return true;
                 }
             }
         }
@@ -1899,12 +1941,14 @@ namespace ai
 
     void drawroute(gameent *d, float amt = 1.f)
     {
+        const aiinfo &ai = *d->ai;
+        const int routelen = activeroutelen(ai);
         int last = -1;
-        loopvrev(d->ai->route)
+        for(int i = routelen-1; i >= 0; --i)
         {
-            if(d->ai->route.inrange(last))
+            if(last >= 0)
             {
-                int index = d->ai->route[i], prev = d->ai->route[last];
+                int index = ai.route[i], prev = ai.route[last];
                 if(iswaypoint(index) && iswaypoint(prev))
                 {
                     waypoint &e = waypoints[index], &f = waypoints[prev];
@@ -1956,8 +2000,8 @@ namespace ai
                 {
                     defformatstring(q, "node: %d route: %d (%d)",
                         d->lastnode,
-                        !d->ai->route.empty() ? d->ai->route[0] : -1,
-                        d->ai->route.length()
+                        !activerouteempty(*d->ai) ? activerouteat(*d->ai, 0) : -1,
+                        activeroutelen(*d->ai)
                     );
                     particles::text(pos, q, PART_TEXT, 1);
                     pos.z += 2;

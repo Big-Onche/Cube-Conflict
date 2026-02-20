@@ -190,7 +190,7 @@ namespace ai
         vec target, spot, orienthead;
         int enemy, enemyseen, enemymillis, weappref, prevnodes[NUMPREVNODES], targnode, targlast, targtime, targseq,
             lastrun, lasthunt, lastaction, lastcheck, jumpseed, jumprand, blocktime, huntseq, blockseq, lastaimrnd, orientmillis,
-            routebitslen, routebitswplen;
+            routebitslen, routebitswplen, routeend;
         uint routebitshash;
         float targyaw, targpitch, orientyaw, orientpitch, views[3], aimrnd[3];
         bool dontmove, becareful, tryreset, trywipe;
@@ -213,6 +213,7 @@ namespace ai
             routebits.setsize(0);
             routebitshash = 0;
             routebitslen = routebitswplen = -1;
+            routeend = 0;
             lastrun = jumpseed = lastmillis;
             jumprand = lastmillis + 4000 + rnd(4000);
             targnode = targlast = enemy = -1;
@@ -222,6 +223,7 @@ namespace ai
         {
             if(prev) memset(prevnodes, -1, sizeof(prevnodes));
             route.setsize(0);
+            routeend = 0;
         }
 
         void wipe(bool prev = false)
