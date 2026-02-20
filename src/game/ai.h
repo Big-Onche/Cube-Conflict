@@ -290,6 +290,7 @@ namespace ai
     extern bool cansee(gameent *d, vec &x, vec &y, vec &targ = aitarget);
 
     extern void init(gameent *d, int at, int on, int apti, int cape, int tombe, int danse, int sk, int bn, int pm, int col, const char *name, int team);
+    extern void maploaded();
     extern void update();
     extern void avoid();
     extern void think(gameent *d, bool run);
@@ -314,5 +315,4 @@ namespace ai
 
     extern void render();
 }
-
 

@@ -11,6 +11,8 @@ namespace ai
     static float attackMinDists[NUMATKS], attackMaxDists[NUMATKS];
     static float attackMinDistSq[NUMATKS], attackMaxDistSq[NUMATKS];
     static float attackDelayScale[NUMATKS];
+    static const int spyAimOffsets[4][2] = { { 25, 25 }, { -25, -25 }, { 25, -25 }, { -25, 25 } };
+    static bool reducedGravity = false;
 
     static inline float angleDiff(float a, float b)
     {
@@ -58,6 +60,12 @@ namespace ai
         //if(lastmillis-d->lasttaunt<7500) return;
         //d->lasttaunt = lastmillis;
         //addmsg(N_TAUNT, "rc", d);
+    }
+
+    void maploaded()
+    {
+        const char *mname = getclientmap();
+        reducedGravity = mname && !strcasecmp(mname, "moon");
     }
 
     float viewdist(int x)
@@ -179,8 +187,12 @@ namespace ai
 
     float randomAimOffset(float radius, float skew, int gun, int skill)
     {
-        return (rnd(int(radius * (aiskew[gun] * skew)) + 1) - (radius * aiskew[gun])) / max(skill, 1);
+        const float gunSkew = aiskew[gun] * skew;
+        const float baseSkew = radius * aiskew[gun];
+        return (rnd(int(radius * gunSkew) + 1) - baseSkew) / skill;
     }
+
+    constexpr float molotovMinDistSq = 250.f * 250.f;
 
     vec getaimpos(gameent *d, int atk, gameent *e)
     {
@@ -201,8 +213,12 @@ namespace ai
 
             case ATK_MOLOTOV:
             {
-                float dist = e->o.dist(d->o);
-                if(dist > 250 && strcasecmp(getclientmap(), "moon")) targetPos.addz(dist * 0.25f);
+                if(!reducedGravity)
+                {
+                    const float dist2 = e->o.squaredist(d->o);
+
+                    if(dist2 > molotovMinDistSq) targetPos.addz(sqrtf(dist2) * 0.25f);
+                }
                 break;
             }
 
@@ -214,8 +230,7 @@ namespace ai
 
         if(e->character == C_SPY && e->abilitymillis[ABILITY_1] && changeAim)
         {
-            const int positions[4][2] = { {25, 25}, {-25, -25}, {25, -25}, {-25, 25} };
-            targetPos.add(vec(positions[d->seed][0], positions[d->seed][1], 0));
+            targetPos.add(vec(spyAimOffsets[d->seed][0], spyAimOffsets[d->seed][1], 0));
         }
         else if(e->character == C_PHYSICIST && e->abilitymillis[ABILITY_2])
         {
@@ -224,13 +239,20 @@ namespace ai
 
         if(d->skill <= 100)
         {
+            const int aimSkill = max(d->skill, 1);
             if(changeAim)
             {
-                loopk(3) d->ai->aimrnd[k] = randomAimOffset(e->radius, 2.f, d->gunselect, d->skill);
-                int duration = rnd(800 - (d->skill * 4));
+                loopk(3)
+                {
+                    const float off = randomAimOffset(e->radius, 2.f, d->gunselect, aimSkill);
+                    d->ai->aimrnd[k] = off;
+                    targetPos[k] += off;
+                }
+                const int durationRange = max(800 - (d->skill * 4), 1);
+                int duration = rnd(durationRange);
                 d->ai->lastaimrnd = lastmillis + duration;
             }
-            loopk(3) targetPos[k] += d->ai->aimrnd[k];
+            else loopk(3) targetPos[k] += d->ai->aimrnd[k];
         }
 
         return targetPos;

@@ -1113,7 +1113,7 @@ namespace game
         else findplayerspawn(player1, -1, m_teammode && !m_capture ? player1->team : 0);
         entities::resetspawns();
         copystring(clientmap, name ? name : "");
-
+        ai::maploaded();
         sendmapinfo();
     }
 
