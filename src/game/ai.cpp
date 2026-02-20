@@ -15,28 +15,50 @@ namespace ai
     static const int spyAimOffsets[4][2] = { { 25, 25 }, { -25, -25 }, { 25, -25 }, { -25, 25 } };
     static bool reducedGravity = false;
     static vector<int> itemEntIds;
+    static vector<int> itemEntNodes;
+    static vector<vec> itemEntNodePos;
     static int itemEntCount = -1;
 
     static void buildItemCache()
     {
         itemEntIds.setsize(0);
+        itemEntNodes.setsize(0);
+        itemEntNodePos.setsize(0);
 
-        const int numents = entities::ents.length();
-        itemEntIds.reserve(numents);
+        const int numEnts = entities::ents.length();
+        itemEntIds.reserve(numEnts);
+        itemEntNodes.reserve(numEnts);
+        itemEntNodePos.reserve(numEnts);
 
-        loopi(numents)
+        loopi(numEnts)
         {
-            const int type = entities::ents[i]->type;
-            if(type < I_RAIL && type > I_MANA) continue;
-            itemEntIds.add(i);
+            extentity &e = *entities::ents[i];
+            const bool isPickable = e.type >= I_RAIL && e.type <= I_MANA;
+            itemEntNodes.add(isPickable ? closestwaypoint(e.o, SIGHTMIN, true) : -1);
+            itemEntNodePos.add(e.o);
+            if(isPickable) itemEntIds.add(i);
         }
 
-        itemEntCount = numents;
+        itemEntCount = numEnts;
     }
 
     static inline void checkItemCache()
     {
         if(itemEntCount != entities::ents.length()) buildItemCache();
+    }
+
+    static inline int cachedItemNode(int id, const extentity &e)
+    {
+        if(!itemEntNodes.inrange(id) || !itemEntNodePos.inrange(id))
+            return closestwaypoint(e.o, SIGHTMIN, true);
+
+        if(!(itemEntNodePos[id] == e.o))
+        {
+            itemEntNodePos[id] = e.o;
+            itemEntNodes[id] = closestwaypoint(e.o, SIGHTMIN, true);
+        }
+
+        return itemEntNodes[id];
     }
 
     static inline float angleDiff(float a, float b)
@@ -710,7 +732,7 @@ namespace ai
         }
     }
 
-    static void tryitem(gameent *d, extentity &e, int id, const vec &feet, aistate &b, vector<interest> &interests, bool force = false)
+    static void tryitem(gameent *d, extentity &e, int id, const vec &feet, aistate &b, vector<interest> &interests, bool force = false, int node = -2)
     {
         if(d->character==C_KAMIKAZE && d->abilitymillis[ABILITY_2]) return;
 
@@ -759,7 +781,7 @@ namespace ai
         {
             interest &n = interests.add();
             n.state = AI_S_INTEREST;
-            n.node = closestwaypoint(e.o, SIGHTMIN, true);
+            n.node = node == -2 ? closestwaypoint(e.o, SIGHTMIN, true) : node;
             n.target = id;
             n.targtype = AI_T_ENTITY;
             n.score = feet.squaredist(e.o)/(force ? -1 : score);
@@ -776,7 +798,7 @@ namespace ai
             const int id = itemEntIds[i];
             extentity &e = *(extentity *)entities::ents[id];
             if(!e.spawned() || !d->canpickupitem(e.type, d->character)) continue;
-            tryitem(d, e, id, feet, b, interests, force || e.type == I_SUPERARME);
+            tryitem(d, e, id, feet, b, interests, force || e.type == I_SUPERARME, cachedItemNode(id, e));
         }
     }
 
@@ -819,6 +841,7 @@ namespace ai
                 items(d, b, interests);
             else
             {
+                checkItemCache();
                 static vector<int> nearby;
                 nearby.setsize(0);
                 const vec feet = d->feetpos();
@@ -827,7 +850,7 @@ namespace ai
                 {
                     int id = nearby[i];
                     extentity &e = *(extentity *)entities::ents[id];
-                    if(d->canpickupitem(e.type, d->character)) tryitem(d, e, id, feet, b, interests);
+                    if(d->canpickupitem(e.type, d->character)) tryitem(d, e, id, feet, b, interests, false, cachedItemNode(id, e));
                 }
             }
         }
