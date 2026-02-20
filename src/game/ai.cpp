@@ -491,10 +491,48 @@ namespace ai
         vec dp = d->headpos();
         float mindist = guard*guard, bestdist = 1e16f;
         int atk = guns[d->gunselect].attacks[ACT_SHOOT];
+        const int topk = 6;
+        gameent *candidates[topk];
+        float roughdists[topk];
+        int numcandidates = 0;
+
         loopv(players)
         {
             gameent *e = players[i];
-            if(e == d || !targetable(d, e)) continue;
+            if(!e || e == d || e->state != CS_ALIVE) continue;
+            if(isteam(d->team, e->team) || !targetable(d, e)) continue;
+
+            const float roughdist = e->o.squaredist(dp);
+
+            if(numcandidates < topk)
+            {
+                int j = numcandidates++;
+                while(j > 0 && roughdist < roughdists[j-1])
+                {
+                    roughdists[j] = roughdists[j-1];
+                    candidates[j] = candidates[j-1];
+                    --j;
+                }
+                roughdists[j] = roughdist;
+                candidates[j] = e;
+            }
+            else if(roughdist < roughdists[topk-1])
+            {
+                int j = topk-1;
+                while(j > 0 && roughdist < roughdists[j-1])
+                {
+                    roughdists[j] = roughdists[j-1];
+                    candidates[j] = candidates[j-1];
+                    --j;
+                }
+                roughdists[j] = roughdist;
+                candidates[j] = e;
+            }
+        }
+
+        loopi(numcandidates)
+        {
+            gameent *e = candidates[i];
             vec ep = getaimpos(d, atk, e);
             float dist = ep.squaredist(dp);
             if(dist < bestdist && (cansee(d, b, dp, ep) || dist <= mindist))
@@ -503,6 +541,7 @@ namespace ai
                 bestdist = dist;
             }
         }
+
         if(t && violence(d, b, t, pursue)) return true;
         return false;
     }
