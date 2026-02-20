@@ -19,6 +19,18 @@ namespace ai
     static const float closeDistSq = CLOSEDIST*CLOSEDIST;
     static const float farDistSq = FARDIST*FARDIST;
     static const float minWpDistSq = MINWPDIST*MINWPDIST;
+    struct aimdir { int move, strafe, offset; };
+    static const aimdir aimdirs[8] =
+    {
+        {  1,  0,   0 },
+        {  1, -1,  45 },
+        {  0, -1,  90 },
+        { -1, -1, 135 },
+        { -1,  0, 180 },
+        { -1,  1, 225 },
+        {  0,  1, 270 },
+        {  1,  1, 315 }
+    };
     static bool reducedGravity = false;
     static vector<int> itemEntIds;
     static vector<int> itemEntNodes;
@@ -1029,6 +1041,7 @@ namespace ai
     {
         aiinfo &ai = *d->ai;
         const bool first = ai.orientmillis == 0;
+        if(!first && ai.orientmillis == lastmillis) return;
         const bool timeout = !first && lastmillis - ai.orientmillis >= orientMinInterval;
         const bool turned = !first && (fabsf(angleDiff(d->yaw, ai.orientyaw)) >= orientYawEpsilon ||
                                        fabsf(d->pitch - ai.orientpitch) >= orientPitchEpsilon);
@@ -1469,10 +1482,8 @@ namespace ai
         }
     }
 
-    static inline void fixrange(float &yaw, float &pitch)
+    static inline float wrapyaw(float yaw)
     {
-        if(pitch > 89.9f) pitch = 89.9f;
-        else if(pitch < -89.9f) pitch = -89.9f;
         if(yaw < 0.0f)
         {
             yaw += 360.0f;
@@ -1483,6 +1494,14 @@ namespace ai
             yaw -= 360.0f;
             if(yaw >= 360.0f) yaw = fmodf(yaw, 360.0f);
         }
+        return yaw;
+    }
+
+    static inline void fixrange(float &yaw, float &pitch)
+    {
+        if(pitch > 89.9f) pitch = 89.9f;
+        else if(pitch < -89.9f) pitch = -89.9f;
+        yaw = wrapyaw(yaw);
     }
 
     void getyawpitch(const vec &from, const vec &pos, float &yaw, float &pitch)
@@ -1572,24 +1591,26 @@ namespace ai
 
         if(!enemyok || d->skill >= 50)
         {
+            bool pursue = false;
+            if(!enemyok) pursue = needpursue(d);
             gameent *f = (gameent *)intersectclosest(dp, d->ai->target, d, 1);
             if(f)
             {
                 if(targetable(d, f))
                 {
-                    if(!enemyok) violence(d, b, f, needpursue(d));
+                    if(!enemyok) violence(d, b, f, pursue);
                     if(canRequestAbility(d))
                     {
-                        float targetDistance = d->o.dist(f->o);
+                        const float targetDistanceSq = d->o.squaredist(f->o);
                         switch(d->character)
                         {
-                            case C_PRIEST: case C_SHOSHONE: if(d->mana > 70 && targetDistance < 750) requestAbility(d, ABILITY_3); break;
+                            case C_PRIEST: case C_SHOSHONE: if(d->mana > 70 && targetDistanceSq < 750.f*750.f) requestAbility(d, ABILITY_3); break;
                             case C_KAMIKAZE:
-                                if(targetDistance < 500 && d->mana) requestAbility(d, ABILITY_2);
+                                if(targetDistanceSq < 500.f*500.f && d->mana) requestAbility(d, ABILITY_2);
                                 break;
                             case C_SPY:
-                                if(d->mana >= 40 && targetDistance < 700 && !d->abilitymillis[ABILITY_2] && !rnd(2)) requestAbility(d, ABILITY_1);
-                                else if(d->mana>= 50 && targetDistance < 700 && !d->abilitymillis[ABILITY_1]) requestAbility(d, ABILITY_2);
+                                if(d->mana >= 40 && targetDistanceSq < 700.f*700.f && !d->abilitymillis[ABILITY_2] && !rnd(2)) requestAbility(d, ABILITY_1);
+                                else if(d->mana>= 50 && targetDistanceSq < 700.f*700.f && !d->abilitymillis[ABILITY_1]) requestAbility(d, ABILITY_2);
                         }
                     }
 
@@ -1598,7 +1619,7 @@ namespace ai
                 }
                 else enemyok = false;
             }
-            else if(!enemyok && target(d, b, needpursue(d) ? 1 : 0, false, SIGHTMIN))
+            else if(!enemyok && target(d, b, pursue ? 1 : 0, false, SIGHTMIN))
                 enemyok = (e = getclient(d->ai->enemy)) != NULL;
         }
         if(enemyok)
@@ -1624,10 +1645,30 @@ namespace ai
                 scaleyawpitch(d->yaw, d->pitch, yaw, pitch, frame, sskew);
                 if(insight || quick || (hasseen && (gun==GUN_PLASMA || gun==GUN_MINIGUN || gun==GUN_S_ROCKETS || gun==GUN_S_GAU8)))
                 {
-                    if(canshoot(d, atk, e) && hastarget(d, atk, b, e, yaw, pitch, dp.squaredist(ep)))
+                    const float enemyDistSq = d->o.squaredist(e->o);
+                    const float aimDistSq = dp.squaredist(ep);
+                    const int atkgun = attacks[atk].gun;
+                    const bool hasammo = d->ammo[atkgun] != 0;
+                    bool gunready = true;
+                    switch(d->gunselect)
                     {
-                        if(d->o.dist(e->o) < (250 - d->skill)) d->aiming = false;
-                        else d->aiming = true;
+                        case GUN_MINIGUN:
+                        case GUN_PLASMA:
+                        case GUN_S_ROCKETS:
+                        case GUN_GLOCK:
+                        case GUN_SPOCKGUN:
+                        case GUN_SKS:
+                        case GUN_HYDRA:
+                        case GUN_S_CAMPER:
+                            break;
+                        default:
+                            gunready = lastmillis - d->lastaction >= d->gunwait;
+                            break;
+                    }
+                    if(hasammo && gunready && attackrange(d, atk, enemyDistSq) && targetable(d, e) && hastarget(d, atk, b, e, yaw, pitch, aimDistSq))
+                    {
+                        const float aimStop = float(250 - d->skill);
+                        d->aiming = aimStop > 0.f && enemyDistSq < aimStop*aimStop ? false : true;
 
                         d->jumping = ((gun==GUN_FIREWORKS || gun==GUN_SMAW || gun==GUN_S_NUKE || gun==GUN_S_ROCKETS) && !idle);
                         d->attacking = ACT_SHOOT;
@@ -1681,20 +1722,7 @@ namespace ai
         if(d->ai->dontmove) d->move = d->strafe = 0;
         else
         { // our guys move one way.. but turn another?! :)
-            const struct aimdir { int move, strafe, offset; } aimdirs[8] =
-            {
-                {  1,  0,   0 },
-                {  1,  -1,  45 },
-                {  0,  -1,  90 },
-                { -1,  -1, 135 },
-                { -1,  0, 180 },
-                { -1, 1, 225 },
-                {  0, 1, 270 },
-                {  1, 1, 315 }
-            };
-            float yaw = d->ai->targyaw-d->yaw;
-            if(yaw < 0.0f) yaw = 360.0f - fmodf(-yaw, 360.0f);
-            else if(yaw >= 360.0f) yaw = fmodf(yaw, 360.0f);
+            float yaw = wrapyaw(d->ai->targyaw-d->yaw);
             int r = clamp(((int)floor((yaw+22.5f)/45.0f))&7, 0, 7);
             const aimdir &ad = aimdirs[r];
             d->move = ad.move;
