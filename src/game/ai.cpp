@@ -6,6 +6,9 @@ namespace ai
 {
     using namespace game;
 
+    static const float viewdistscale = (SIGHTMIN + (SIGHTMAX - SIGHTMIN)) / 100.f;
+    static const float viewfieldxscale = (VIEWMIN + (VIEWMAX - VIEWMIN)) / 100.f;
+
     avoidset obstacles;
     int updatemillis = 0, iteration = 0, itermillis = 0, forcegun = -1;
     vec aitarget(0, 0, 0);
@@ -30,12 +33,13 @@ namespace ai
 
     float viewdist(int x)
     {
-        return x <= 100 ? clamp((SIGHTMIN+(SIGHTMAX-SIGHTMIN))/100.f*float(x), float(SIGHTMIN), float(fog)) : float(fog);
+        const float ffog = float(fog);
+        return x <= 100 ? clamp(viewdistscale * float(x), float(SIGHTMIN), ffog) : ffog;
     }
 
     float viewfieldx(int x)
     {
-        return x <= 100 ? clamp((VIEWMIN+(VIEWMAX-VIEWMIN))/100.f*float(x), float(VIEWMIN), float(VIEWMAX)) : float(VIEWMAX);
+        return x <= 100 ? clamp(viewfieldxscale * float(x), float(VIEWMIN), float(VIEWMAX)) : float(VIEWMAX);
     }
 
     float viewfieldy(int x)
@@ -251,8 +255,9 @@ namespace ai
             create(d);
             if(d->ai)
             {
-                d->ai->views[0] = viewfieldx(d->skill);
-                d->ai->views[1] = viewfieldy(d->skill);
+                const float fovx = viewfieldx(d->skill);
+                d->ai->views[0] = fovx;
+                d->ai->views[1] = fovx * 3.f/4.f;
                 d->ai->views[2] = viewdist(d->skill);
             }
         }
