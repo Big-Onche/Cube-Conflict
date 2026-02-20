@@ -2014,9 +2014,10 @@ namespace ai
         // it or pops the stack and goes back along the history until it finds a suitable command to execute
         bool cleannext = false;
         if(d->ai->state.empty()) d->ai->updateState(AI_S_WAIT);
-        loopvrev(d->ai->state)
+        int stateidx = d->ai->state.length()-1;
+        while(stateidx >= 0)
         {
-            aistate &c = d->ai->state[i];
+            aistate &c = d->ai->state[stateidx];
             if(cleannext)
             {
                 c.millis = lastmillis;
@@ -2066,8 +2067,14 @@ namespace ai
                     {
                         switch(result)
                         {
-                            case 0: default: d->ai->removestate(i); cleannext = true; break;
-                            case -1: i = d->ai->state.length()-1; break;
+                            case 0: default:
+                                d->ai->removestate(stateidx);
+                                cleannext = true;
+                                stateidx = d->ai->state.length()-1;
+                                break;
+                            case -1:
+                                stateidx--;
+                                break;
                         }
                         continue; // shouldn't interfere
                     }
