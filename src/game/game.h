@@ -1201,7 +1201,7 @@ namespace bouncers
         float spinrot, spinvelsq;
         bool local;
         gameent *owner;
-        int bouncetype, variant, gun;
+        int bouncetype, variant;
         vec offset;
         int offsetmillis;
         int id;

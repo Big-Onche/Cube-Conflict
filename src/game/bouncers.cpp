@@ -112,7 +112,6 @@ namespace bouncers
         bnc.spinrot = 0;
         bnc.spinvelsq = -1;
         bnc.variant = 0;
-        bnc.gun = 0;
         bnc.particles = vec(-1, -1, -1);
         bnc.yaw = 0;
         bnc.pitch = 0;
@@ -322,7 +321,7 @@ namespace bouncers
                 if(!stopped)
                 {
                     float velSq = bnc.vel.squaredlen();
-                    float velDelta = velSq - bnc.spinvelsq;
+                    float velDelta = fabs(velSq - bnc.spinvelsq);
                     if(velDelta < 0.f) velDelta = -velDelta;
                     // Cache spin speed and only refresh when velocity changed enough.
                     if(velDelta > 0.01f)
@@ -421,8 +420,7 @@ namespace bouncers
                         int smokeLife = 1800 + ((lastmillis + i*53 + bnc.bounces*17) % 400);
                         particle_splash(PART_SMOKE, 1, smokeLife, pos, 0x282828, 2.f, 50, -100, 12, shrooms);
                     }
-                    particle_splash(PART_FIRE_BALL, 1, 175, pos, flamesColor, 1.f, 20, 0, 4, shrooms);
-                    particle_splash(PART_FIRE_BALL, 1, 175, bnc.o, flamesColor, 1.f, 20, 0, 4, shrooms);
+                    particle_splash(PART_FIRE_BALL, 2, 175, bnc.o, flamesColor, 1.f, 20, 0, 4, shrooms);
                     break;
                 }
                 case BNC_LIGHT:
