@@ -748,48 +748,58 @@ struct ctfclientmode : clientmode
         loopvj(flags)
         {
             flag &f = flags[j];
-            if(f.owner != d)
-            {
-                static vector<int> targets; // build a list of others who are interested in this
-                targets.setsize(0);
+            if(f.owner == d) continue;
 
-                bool home = f.team == d->team;
+            const bool home = f.team == d->team;
+            const bool needrecover = home && ((f.owner && f.team != f.owner->team) || f.droptime);
+            const float dist2 = pos.squaredist(f.pos());
 
-                if(targets.empty())
-                { // attack the flag
-                    ai::interest &n = interests.add();
-                    n.state = ai::AI_S_PURSUE;
-                    n.node = ai::closestwaypoint(f.pos(), ai::SIGHTMIN, true);
-                    n.target = j;
-                    n.targtype = ai::AI_T_AFFINITY;
-                    n.score = pos.dist(f.pos());
-                }
-                else if(home)
+            if(!home)
+            { // CTF objective: enemy flag capture is top priority over normal interests/items.
+                ai::interest &n = interests.add();
+                n.state = ai::AI_S_PURSUE;
+                n.node = ai::closestwaypoint(f.pos(), ai::SIGHTMIN, true);
+                n.target = j;
+                n.targtype = ai::AI_T_AFFINITY;
+                n.score = -1e12f + dist2*1e-3f;
+                continue;
+            }
+
+            if(needrecover)
+            { // recover own flag when stolen/dropped so captures can complete.
+                ai::interest &n = interests.add();
+                n.state = ai::AI_S_PURSUE;
+                n.node = ai::closestwaypoint(f.pos(), ai::SIGHTMIN, true);
+                n.target = j;
+                n.targtype = ai::AI_T_AFFINITY;
+                n.score = -9e11f + dist2*1e-3f;
+                continue;
+            }
+
+            static vector<int> targets; // build a list of others who are interested in this
+            targets.setsize(0);
+            ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, j, true);
+            bool guard = targets.empty();
+            if(!guard && d->hasammo(d->ai->weappref))
+            { // see if we can relieve someone who only has a piece of crap
+                gameent *t;
+                loopvk(targets) if((t = getclient(targets[k])))
                 {
-                    bool guard = false;
-                    if((f.owner && f.team != f.owner->team) || f.droptime || targets.empty()) guard = true;
-                    else if(d->hasammo(d->ai->weappref))
-                    { // see if we can relieve someone who only has a piece of crap
-                        gameent *t;
-                        loopvk(targets) if((t = getclient(targets[k])))
-                        {
-                            if((t->ai && !t->hasammo(t->ai->weappref)))
-                            {
-                                guard = true;
-                                break;
-                            }
-                        }
-                    }
-                    if(guard)
-                    { // defend the flag
-                        ai::interest &n = interests.add();
-                        n.state = ai::AI_S_DEFEND;
-                        n.node = ai::closestwaypoint(f.pos(), ai::SIGHTMIN, true);
-                        n.target = j;
-                        n.targtype = ai::AI_T_AFFINITY;
-                        n.score = 1e3f;
+                    if((t->ai && !t->hasammo(t->ai->weappref)))
+                    {
+                        guard = true;
+                        break;
                     }
                 }
+            }
+            if(guard)
+            { // defend the home flag
+                ai::interest &n = interests.add();
+                n.state = ai::AI_S_DEFEND;
+                n.node = ai::closestwaypoint(f.pos(), ai::SIGHTMIN, true);
+                n.target = j;
+                n.targtype = ai::AI_T_AFFINITY;
+                n.score = 1e3f;
             }
         }
     }
@@ -956,4 +966,3 @@ case N_RESETFLAG:
 }
 
 #endif
-
