@@ -1738,9 +1738,63 @@ namespace ai
         if(targetable(d, e))
         {
             int atk = guns[weap].attacks[ACT_SHOOT];
+            const float roughDistSq = e->o.squaredist(d->o);
+
+            const bool changeAim = lastmillis >= d->ai->lastaimrnd;
+            const bool getAimHasSideEffects =
+                (d->skill <= 100 && changeAim) ||
+                (e->character == C_PHYSICIST && e->abilitymillis[ABILITY_2]);
+
+            if(!getAimHasSideEffects)
+            {
+                // Conservative bound for how far getaimpos() can move the target away from e->o.
+                float targetOffsetMax = 0.f;
+                switch(atk)
+                {
+                    case ATK_PLASMA:
+                    case ATK_GRAP1:
+                        targetOffsetMax += fabsf((e->aboveeye*0.2f) - (0.8f*d->eyeheight));
+                        break;
+                    case ATK_SMAW:
+                    case ATK_S_ROCKETS:
+                    case ATK_FIREWORKS:
+                        targetOffsetMax += fabsf(e->eyeheight);
+                        break;
+                    case ATK_MOLOTOV:
+                        if(!reducedGravity && roughDistSq > molotovMinDistSq) targetOffsetMax += 0.25f * sqrtf(roughDistSq);
+                        break;
+                    default:
+                        targetOffsetMax += 7.f;
+                        break;
+                }
+
+                if(e->character == C_SPY && e->abilitymillis[ABILITY_1] && changeAim) targetOffsetMax += 50.f; // |x|+|y| <= 25+25
+                else if(e->character == C_PHYSICIST && e->abilitymillis[ABILITY_2]) targetOffsetMax += 60.f; // |x|+|y| <= 30+30
+
+                if(d->skill <= 100)
+                {
+                    if(changeAim)
+                    {
+                        const float aimSkill = float(max(d->skill, 1));
+                        const float axisMax = (e->radius * aiskew[d->gunselect]) / aimSkill;
+                        targetOffsetMax += axisMax * 3.f; // |x|+|y|+|z| upper bound
+                    }
+                    else targetOffsetMax += fabsf(d->ai->aimrnd[0]) + fabsf(d->ai->aimrnd[1]) + fabsf(d->ai->aimrnd[2]);
+                }
+
+                const float minDist = attackMinDists[atk];
+                const float maxDist = attackMaxDists[atk];
+                const float maxCheck = maxDist + targetOffsetMax;
+                if(roughDistSq > maxCheck*maxCheck) return false;
+                if(minDist > targetOffsetMax)
+                {
+                    const float minCheck = minDist - targetOffsetMax;
+                    if(roughDistSq < minCheck*minCheck) return false;
+                }
+            }
+
             vec ep = getaimpos(d, atk, e);
-            float dist = ep.squaredist(d->headpos());
-            if(attackrange(d, atk, dist)) return true;
+            if(attackrange(d, atk, ep.squaredist(d->o))) return true;
         }
         return false;
     }
