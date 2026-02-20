@@ -186,10 +186,10 @@ namespace ai
     {
         vector<aistate> state;
         vector<int> route;
-        vec target, spot;
+        vec target, spot, orienthead;
         int enemy, enemyseen, enemymillis, weappref, prevnodes[NUMPREVNODES], targnode, targlast, targtime, targseq,
-            lastrun, lasthunt, lastaction, lastcheck, jumpseed, jumprand, blocktime, huntseq, blockseq, lastaimrnd;
-        float targyaw, targpitch, views[3], aimrnd[3];
+            lastrun, lasthunt, lastaction, lastcheck, jumpseed, jumprand, blocktime, huntseq, blockseq, lastaimrnd, orientmillis;
+        float targyaw, targpitch, orientyaw, orientpitch, views[3], aimrnd[3];
         bool dontmove, becareful, tryreset, trywipe;
 
         aiinfo()
@@ -203,8 +203,10 @@ namespace ai
         void clearsetup()
         {
             weappref = GUN_GLOCK;
-            spot = target = vec(0, 0, 0);
+            orienthead = spot = target = vec(0, 0, 0);
             lastaction = lasthunt = lastcheck = enemyseen = enemymillis = blocktime = huntseq = blockseq = targtime = targseq = lastaimrnd = 0;
+            orientmillis = 0;
+            orientyaw = orientpitch = 0.f;
             lastrun = jumpseed = lastmillis;
             jumprand = lastmillis + 4000 + rnd(4000);
             targnode = targlast = enemy = -1;

@@ -13,6 +13,8 @@ namespace ai
     static float attackDelayScale[NUMATKS];
     static bool shortRangeGuns[NUMGUNS];
     static const int spyAimOffsets[4][2] = { { 25, 25 }, { -25, -25 }, { 25, -25 }, { -25, 25 } };
+    static const int orientMinInterval = 33;
+    static const float orientYawEpsilon = 0.25f, orientPitchEpsilon = 0.25f, orientHeadMoveSq = 4.f;
     static bool reducedGravity = false;
     static vector<int> itemEntIds;
     static vector<int> itemEntNodes;
@@ -918,6 +920,7 @@ namespace ai
             if(other == d || !other->ai || other->state != CS_ALIVE) continue;
 
             aistate &ob = other->ai->getstate();
+            if(ob.type != AI_S_DEFEND || ob.targtype != AI_T_PLAYER || ob.target != d->clientnum) continue;
 
             gameent *t = getclient(clientnum);
             if(!t || !t->ai || !canmove(t) || !targetable(t, e)) continue;
@@ -932,6 +935,23 @@ namespace ai
         vecfromyawpitch(yaw, pitch, 1, 0, dir);
         if(raycubepos(o, dir, pos, 0, RAY_CLIPMAT|RAY_SKIPFIRST) == -1)
             pos = dir.mul(2*getworldsize()).add(o); //otherwise 3dgui won't work when outside of map
+    }
+
+    static inline void updateorientation(gameent *d, vec &head)
+    {
+        aiinfo &ai = *d->ai;
+        const bool first = ai.orientmillis == 0;
+        const bool timeout = !first && lastmillis - ai.orientmillis >= orientMinInterval;
+        const bool turned = !first && (fabsf(angleDiff(d->yaw, ai.orientyaw)) >= orientYawEpsilon ||
+                                       fabsf(d->pitch - ai.orientpitch) >= orientPitchEpsilon);
+        const bool moved = !first && head.squaredist(ai.orienthead) >= orientHeadMoveSq;
+        if(!(first || timeout || turned || moved)) return;
+
+        findorientation(head, d->yaw, d->pitch, ai.target);
+        ai.orientmillis = lastmillis;
+        ai.orientyaw = d->yaw;
+        ai.orientpitch = d->pitch;
+        ai.orienthead = head;
     }
 
     void setup(gameent *d)
@@ -954,7 +974,7 @@ namespace ai
             }
         }
         vec dp = d->headpos();
-        findorientation(dp, d->yaw, d->pitch, d->ai->target);
+        updateorientation(d, dp);
     }
 
     void spawned(gameent *d)
@@ -1540,7 +1560,7 @@ namespace ai
             d->move = ad.move;
             d->strafe = ad.strafe;
         }
-        findorientation(dp, d->yaw, d->pitch, d->ai->target);
+        updateorientation(d, dp);
         return result;
     }
 
