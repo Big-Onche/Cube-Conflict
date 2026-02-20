@@ -186,9 +186,12 @@ namespace ai
     {
         vector<aistate> state;
         vector<int> route;
+        vector<uint> routebits;
         vec target, spot, orienthead;
         int enemy, enemyseen, enemymillis, weappref, prevnodes[NUMPREVNODES], targnode, targlast, targtime, targseq,
-            lastrun, lasthunt, lastaction, lastcheck, jumpseed, jumprand, blocktime, huntseq, blockseq, lastaimrnd, orientmillis;
+            lastrun, lasthunt, lastaction, lastcheck, jumpseed, jumprand, blocktime, huntseq, blockseq, lastaimrnd, orientmillis,
+            routebitslen, routebitswplen;
+        uint routebitshash;
         float targyaw, targpitch, orientyaw, orientpitch, views[3], aimrnd[3];
         bool dontmove, becareful, tryreset, trywipe;
 
@@ -207,6 +210,9 @@ namespace ai
             lastaction = lasthunt = lastcheck = enemyseen = enemymillis = blocktime = huntseq = blockseq = targtime = targseq = lastaimrnd = 0;
             orientmillis = 0;
             orientyaw = orientpitch = 0.f;
+            routebits.setsize(0);
+            routebitshash = 0;
+            routebitslen = routebitswplen = -1;
             lastrun = jumpseed = lastmillis;
             jumprand = lastmillis + 4000 + rnd(4000);
             targnode = targlast = enemy = -1;

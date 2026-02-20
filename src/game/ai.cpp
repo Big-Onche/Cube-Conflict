@@ -14,6 +14,7 @@ namespace ai
     static bool shortRangeGuns[NUMGUNS];
     static const int spyAimOffsets[4][2] = { { 25, 25 }, { -25, -25 }, { 25, -25 }, { -25, 25 } };
     static const int orientMinInterval = 33;
+    static const int routeCheckInterval = 500;
     static const float orientYawEpsilon = 0.25f, orientPitchEpsilon = 0.25f, orientHeadMoveSq = 4.f;
     static const float closeDistSq = CLOSEDIST*CLOSEDIST;
     static const float farDistSq = FARDIST*FARDIST;
@@ -1239,13 +1240,41 @@ namespace ai
     {
         if(iswaypoint(n) && waypoints[n].haslinks())
         {
+            aiinfo &ai = *d->ai;
+            const int routelen = ai.route.length();
+            uint routehash = 2166136261u;
+            loopi(routelen)
+            {
+                routehash ^= uint(ai.route[i] + 1);
+                routehash *= 16777619u;
+            }
+            const int wplen = waypoints.length();
+            if(ai.routebitslen != routelen || ai.routebitswplen != wplen || ai.routebitshash != routehash)
+            {
+                ai.routebits.setsize(0);
+                const int words = (wplen + 31) >> 5;
+                ai.routebits.reserve(words);
+                loopi(words) ai.routebits.add(0u);
+                loopi(routelen)
+                {
+                    const int wp = ai.route[i];
+                    if((uint)wp >= (uint)wplen) continue;
+                    ai.routebits[wp >> 5] |= 1u << (wp & 31);
+                }
+                ai.routebitshash = routehash;
+                ai.routebitslen = routelen;
+                ai.routebitswplen = wplen;
+            }
+
             waypoint &w = waypoints[n];
             static vector<int> linkmap; linkmap.setsize(0);
             loopi(MAXWAYPOINTLINKS)
             {
                 if(!w.links[i]) break;
-                if(iswaypoint(w.links[i]) && !d->ai->hasprevnode(w.links[i]) && d->ai->route.find(w.links[i]) < 0)
-                    linkmap.add(w.links[i]);
+                const int link = w.links[i];
+                if(!iswaypoint(link) || ai.hasprevnode(link)) continue;
+                if((uint)link < (uint)ai.routebitswplen && (ai.routebits[link >> 5] & (1u << (link & 31)))) continue;
+                linkmap.add(link);
             }
             if(!linkmap.empty()) return linkmap[rnd(linkmap.length())];
         }
@@ -1257,17 +1286,20 @@ namespace ai
         if(iswaypoint(d->lastnode)) loopk(2)
         {
             d->ai->clear(k ? true : false);
+            static vector<int> chain;
+            chain.setsize(0);
             int n = randomlink(d, d->lastnode);
             if(wpspot(d, n))
             {
-                d->ai->route.add(n);
-                d->ai->route.add(d->lastnode);
+                chain.add(n);
                 loopi(len)
                 {
                     n = randomlink(d, n);
-                    if(iswaypoint(n)) d->ai->route.insert(0, n);
+                    if(iswaypoint(n)) chain.add(n);
                     else break;
                 }
+                loopirev(chain.length()) d->ai->route.add(chain[i]);
+                d->ai->route.add(d->lastnode);
                 return true;
             }
         }
@@ -1276,28 +1308,30 @@ namespace ai
 
     bool checkroute(gameent *d, int n)
     {
-        if(d->ai->route.empty() || !d->ai->route.inrange(n)) return false;
+        aiinfo &ai = *d->ai;
+        vector<int> &routevec = ai.route;
+        if(routevec.empty() || !routevec.inrange(n)) return false;
         int last = d->ai->lastcheck ? lastmillis-d->ai->lastcheck : 0;
-        if(last < 500 || n < 3) return false; // route length is too short
-        d->ai->lastcheck = lastmillis;
-        int w = iswaypoint(d->lastnode) ? d->lastnode : d->ai->route[n], c = min(n-1, NUMPREVNODES);
+        if(last < routeCheckInterval || n < 3) return false; // route length is too short
+        ai.lastcheck = lastmillis;
+        int w = iswaypoint(d->lastnode) ? d->lastnode : routevec[n], c = min(n-1, NUMPREVNODES);
         loopj(c) // check ahead to see if we need to go around something
         {
-            int p = n-j-1, v = d->ai->route[p];
-            if(d->ai->hasprevnode(v) || obstacles.find(v, d)) // something is in the way, try to remap around it
+            int p = n-j-1, v = routevec[p];
+            if(ai.hasprevnode(v) || obstacles.find(v, d)) // something is in the way, try to remap around it
             {
                 int m = p-1;
                 if(m < 3) return false; // route length is too short from this point
                 loopirev(m)
                 {
-                    int t = d->ai->route[i];
-                    if(!d->ai->hasprevnode(t) && !obstacles.find(t, d))
+                    int t = routevec[i];
+                    if(!ai.hasprevnode(t) && !obstacles.find(t, d))
                     {
                         static vector<int> remap; remap.setsize(0);
                         if(route(d, w, t, remap, obstacles))
                         { // kill what we don't want and put the remap in
-                            while(d->ai->route.length() > i) d->ai->route.pop();
-                            loopvk(remap) d->ai->route.add(remap[k]);
+                            while(routevec.length() > i) routevec.pop();
+                            loopvk(remap) routevec.add(remap[k]);
                             return true;
                         }
                         return false; // we failed
@@ -1314,7 +1348,11 @@ namespace ai
         if(!d->ai->route.empty())
         {
             int n = closenode(d);
-            if(d->ai->route.inrange(n) && checkroute(d, n)) n = closenode(d);
+            if(d->ai->route.inrange(n))
+            {
+                const int sincecheck = d->ai->lastcheck ? lastmillis-d->ai->lastcheck : 0;
+                if(sincecheck >= routeCheckInterval && n >= 3 && checkroute(d, n)) n = closenode(d);
+            }
             if(d->ai->route.inrange(n))
             {
                 if(!n)
