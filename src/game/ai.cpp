@@ -11,6 +11,7 @@ namespace ai
     static float attackMinDists[NUMATKS], attackMaxDists[NUMATKS];
     static float attackMinDistSq[NUMATKS], attackMaxDistSq[NUMATKS];
     static float attackDelayScale[NUMATKS];
+    static bool shortRangeGuns[NUMGUNS];
     static const int spyAimOffsets[4][2] = { { 25, 25 }, { -25, -25 }, { 25, -25 }, { -25, 25 } };
     static bool reducedGravity = false;
 
@@ -36,6 +37,15 @@ namespace ai
                 attackMinDistSq[i] = fmindist*fmindist;
                 attackMaxDistSq[i] = fmaxdist*fmaxdist;
                 attackDelayScale[i] = attacks[i].attackdelay/200.f;
+            }
+            loopi(NUMGUNS)
+            {
+                shortRangeGuns[i] = i == GUN_FLAMETHROWER ||
+                                    i == GUN_MOSSBERG ||
+                                    i == GUN_MOLOTOV ||
+                                    i == GUN_HYDRA ||
+                                    i == GUN_NINJA  ||
+                                    (i >= GUN_M_BUSTER && i <= GUN_M_FLAIL);
             }
         }
     } attackRangeCache;
@@ -434,14 +444,13 @@ namespace ai
 
     bool shortRangeGun(int gun)
     {
-        return (gun == GUN_FLAMETHROWER || gun == GUN_MOSSBERG || gun == GUN_MOLOTOV || gun == GUN_HYDRA);
+        return validgun(gun) ? shortRangeGuns[gun] : false;
     }
 
     bool needpursue(gameent *d)
     {
-        int gun = d->gunselect;
-        if(shortRangeGun(gun) || (gun>=GUN_M_BUSTER && gun<=GUN_M_FLAIL) || gun==GUN_NINJA || (d->character==C_KAMIKAZE && d->abilitymillis[ABILITY_2])) return true;
-        else return false;
+        const int gun = d->gunselect;
+        return (validgun(gun) ? shortRangeGuns[gun] : false) || (d->character==C_KAMIKAZE && d->abilitymillis[ABILITY_2]);
     }
 
     bool badhealth(gameent *d) { return d->health < (300 + (d->skill * 5)); }
@@ -456,7 +465,6 @@ namespace ai
             case C_PRIEST:
             case C_PHYSICIST:
                 return d->mana <= 100;
-                break;
             default:
                 return false;
         }
@@ -475,7 +483,6 @@ namespace ai
             default:
                 return d->armour < 750;
         }
-        return false;
     }
 
     bool enemy(gameent *d, aistate &b, const vec &pos, float guard = SIGHTMIN, int pursue = 0)
