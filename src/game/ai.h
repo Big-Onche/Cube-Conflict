@@ -287,6 +287,7 @@ namespace ai
     extern float viewfieldx(int x = 101);
     extern float viewfieldy(int x = 101);
     extern bool targetable(gameent *d, gameent *e);
+    extern bool cansee(gameent *d, aistate &b, vec &x, vec &y, vec &targ = aitarget);
     extern bool cansee(gameent *d, vec &x, vec &y, vec &targ = aitarget);
 
     extern void init(gameent *d, int at, int on, int apti, int cape, int tombe, int danse, int sk, int bn, int pm, int col, const char *name, int team);
@@ -315,4 +316,3 @@ namespace ai
 
     extern void render();
 }
-

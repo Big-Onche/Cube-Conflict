@@ -141,11 +141,15 @@ namespace ai
         return raycubelos(o, q, v);
     }
 
-    bool cansee(gameent *d, vec &x, vec &y, vec &targ)
+    bool cansee(gameent *d, aistate &b, vec &x, vec &y, vec &targ)
     {
-        aistate &b = d->ai->getstate();
         if(canmove(d) && b.type != AI_S_WAIT) return getsight(x, d->yaw, d->pitch, y, targ, d->ai->views[2], d->ai->views[0], d->ai->views[1]);
         return false;
+    }
+
+    bool cansee(gameent *d, vec &x, vec &y, vec &targ)
+    {
+        return cansee(d, d->ai->getstate(), x, y, targ);
     }
 
     bool canshoot(gameent *d, int atk, gameent *e)
@@ -462,7 +466,7 @@ namespace ai
             if(e == d || !targetable(d, e)) continue;
             vec ep = getaimpos(d, atk, e);
             float dist = ep.squaredist(dp);
-            if(dist < bestdist && (cansee(d, dp, ep) || dist <= mindist))
+            if(dist < bestdist && (cansee(d, b, dp, ep) || dist <= mindist))
             {
                 t = e;
                 bestdist = dist;
@@ -547,7 +551,7 @@ namespace ai
                 if(e == d || hastried.find(e) >= 0 || !targetable(d, e)) continue;
                 vec ep = getaimpos(d, atk, e);
                 float v = ep.squaredist(dp);
-                if((!t || v < dist) && (mindist <= 0 || v <= mindist) && (force || cansee(d, dp, ep)))
+                if((!t || v < dist) && (mindist <= 0 || v <= mindist) && (force || cansee(d, b, dp, ep)))
                 {
                     t = e;
                     dist = v;
@@ -1278,7 +1282,7 @@ namespace ai
             float yaw, pitch;
             getyawpitch(dp, ep, yaw, pitch);
             fixrange(yaw, pitch);
-            bool insight = cansee(d, dp, ep), hasseen = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill * 5) + 500,
+            bool insight = cansee(d, b, dp, ep), hasseen = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= (d->skill * 5) + 500,
                 quick = d->ai->enemyseen && lastmillis-d->ai->enemyseen <= skmod+30;
             if(insight) d->ai->enemyseen = lastmillis;
             if(idle || insight || hasseen || quick)
