@@ -91,10 +91,15 @@ namespace ai
         if(d == e) return false;
         if(e->abilitymillis[ABILITY_2])
         {
+            const int skillDist = d->skill * 5;
             switch(e->character)
             {
-                case C_PHYSICIST: if(e->o.dist(d->o) > d->skill*5) return false;
-                case C_SPY: if(e->attacking==ACT_IDLE && e->physstate!=PHYS_FALL) return false;
+                case C_PHYSICIST:
+                    if(e->o.squaredist(d->o) > skillDist * skillDist) return false;
+                    break;
+                case C_SPY:
+                    if(e->attacking==ACT_IDLE && e->physstate!=PHYS_FALL)
+                        return false;
             }
         }
         return e->state == CS_ALIVE && !isteam(d->team, e->team);
