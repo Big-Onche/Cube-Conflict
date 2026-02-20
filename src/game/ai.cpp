@@ -670,6 +670,8 @@ namespace ai
 
     void assist(gameent *d, aistate &b, vector<interest> &interests, bool all, bool force)
     {
+        const bool hasAmmo = hasgoodammo(d);
+        const float scoreScale = hasAmmo ? 1e-8f : (force ? 1e-4f : 1e-2f);
         loopv(players)
         {
             gameent *e = players[i];
@@ -679,7 +681,7 @@ namespace ai
             n.node = e->lastnode;
             n.target = e->clientnum;
             n.targtype = AI_T_PLAYER;
-            n.score = e->o.squaredist(d->o)/(hasgoodammo(d) ? 1e8f : (force ? 1e4f : 1e2f));
+            n.score = e->o.squaredist(d->o) * scoreScale;
         }
     }
 
