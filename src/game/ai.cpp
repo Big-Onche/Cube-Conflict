@@ -1732,71 +1732,81 @@ namespace ai
         return result;
     }
 
-    bool hasrange(gameent *d, gameent *e, int weap)
+    static inline bool canhitrough(gameent *d, gameent *e, int atk, float roughDistSq)
+    {
+        const bool changeAim = lastmillis >= d->ai->lastaimrnd;
+        const bool getAimHasSideEffects =
+            (d->skill <= 100 && changeAim) ||
+            (e->character == C_PHYSICIST && e->abilitymillis[ABILITY_2]);
+        if(getAimHasSideEffects) return true;
+
+        // Conservative bound for how far getaimpos() can move the target away from e->o.
+        float targetOffsetMax = 0.f;
+        switch(atk)
+        {
+            case ATK_PLASMA:
+            case ATK_GRAP1:
+                targetOffsetMax += fabsf((e->aboveeye*0.2f) - (0.8f*d->eyeheight));
+                break;
+            case ATK_SMAW:
+            case ATK_S_ROCKETS:
+            case ATK_FIREWORKS:
+                targetOffsetMax += fabsf(e->eyeheight);
+                break;
+            case ATK_MOLOTOV:
+                if(!reducedGravity && roughDistSq > molotovMinDistSq) targetOffsetMax += 0.25f * sqrtf(roughDistSq);
+                break;
+            default:
+                targetOffsetMax += 7.f;
+                break;
+        }
+
+        if(e->character == C_SPY && e->abilitymillis[ABILITY_1] && changeAim) targetOffsetMax += 50.f; // |x|+|y| <= 25+25
+        else if(e->character == C_PHYSICIST && e->abilitymillis[ABILITY_2]) targetOffsetMax += 60.f; // |x|+|y| <= 30+30
+
+        if(d->skill <= 100)
+        {
+            if(changeAim)
+            {
+                const float aimSkill = float(max(d->skill, 1));
+                const float axisMax = (e->radius * aiskew[d->gunselect]) / aimSkill;
+                targetOffsetMax += axisMax * 3.f; // |x|+|y|+|z| upper bound
+            }
+            else targetOffsetMax += fabsf(d->ai->aimrnd[0]) + fabsf(d->ai->aimrnd[1]) + fabsf(d->ai->aimrnd[2]);
+        }
+
+        const float minDist = attackMinDists[atk];
+        const float maxDist = attackMaxDists[atk];
+        const float maxCheck = maxDist + targetOffsetMax;
+        if(roughDistSq > maxCheck*maxCheck) return false;
+        if(minDist > targetOffsetMax)
+        {
+            const float minCheck = minDist - targetOffsetMax;
+            if(roughDistSq < minCheck*minCheck) return false;
+        }
+
+        return true;
+    }
+
+    static inline bool hasrange(gameent *d, gameent *e, int weap, bool enemyok, float roughDistSq, bool roughchecked = false)
     {
         if(!e) return true;
-        if(targetable(d, e))
+        if(enemyok)
         {
             int atk = guns[weap].attacks[ACT_SHOOT];
-            const float roughDistSq = e->o.squaredist(d->o);
-
-            const bool changeAim = lastmillis >= d->ai->lastaimrnd;
-            const bool getAimHasSideEffects =
-                (d->skill <= 100 && changeAim) ||
-                (e->character == C_PHYSICIST && e->abilitymillis[ABILITY_2]);
-
-            if(!getAimHasSideEffects)
-            {
-                // Conservative bound for how far getaimpos() can move the target away from e->o.
-                float targetOffsetMax = 0.f;
-                switch(atk)
-                {
-                    case ATK_PLASMA:
-                    case ATK_GRAP1:
-                        targetOffsetMax += fabsf((e->aboveeye*0.2f) - (0.8f*d->eyeheight));
-                        break;
-                    case ATK_SMAW:
-                    case ATK_S_ROCKETS:
-                    case ATK_FIREWORKS:
-                        targetOffsetMax += fabsf(e->eyeheight);
-                        break;
-                    case ATK_MOLOTOV:
-                        if(!reducedGravity && roughDistSq > molotovMinDistSq) targetOffsetMax += 0.25f * sqrtf(roughDistSq);
-                        break;
-                    default:
-                        targetOffsetMax += 7.f;
-                        break;
-                }
-
-                if(e->character == C_SPY && e->abilitymillis[ABILITY_1] && changeAim) targetOffsetMax += 50.f; // |x|+|y| <= 25+25
-                else if(e->character == C_PHYSICIST && e->abilitymillis[ABILITY_2]) targetOffsetMax += 60.f; // |x|+|y| <= 30+30
-
-                if(d->skill <= 100)
-                {
-                    if(changeAim)
-                    {
-                        const float aimSkill = float(max(d->skill, 1));
-                        const float axisMax = (e->radius * aiskew[d->gunselect]) / aimSkill;
-                        targetOffsetMax += axisMax * 3.f; // |x|+|y|+|z| upper bound
-                    }
-                    else targetOffsetMax += fabsf(d->ai->aimrnd[0]) + fabsf(d->ai->aimrnd[1]) + fabsf(d->ai->aimrnd[2]);
-                }
-
-                const float minDist = attackMinDists[atk];
-                const float maxDist = attackMaxDists[atk];
-                const float maxCheck = maxDist + targetOffsetMax;
-                if(roughDistSq > maxCheck*maxCheck) return false;
-                if(minDist > targetOffsetMax)
-                {
-                    const float minCheck = minDist - targetOffsetMax;
-                    if(roughDistSq < minCheck*minCheck) return false;
-                }
-            }
-
+            if(!roughchecked && !canhitrough(d, e, atk, roughDistSq)) return false;
             vec ep = getaimpos(d, atk, e);
             if(attackrange(d, atk, ep.squaredist(d->o))) return true;
         }
         return false;
+    }
+
+    bool hasrange(gameent *d, gameent *e, int weap)
+    {
+        if(!e) return true;
+        const bool enemyok = targetable(d, e);
+        const float roughDistSq = enemyok ? e->o.squaredist(d->o) : 0.f;
+        return hasrange(d, e, weap, enemyok, roughDistSq, false);
     }
 
     static const int gunprefs[] = {GUN_M_FLAIL, GUN_M_HAMMER, GUN_M_MASTER, GUN_M_BUSTER, GUN_MINIGUN, GUN_PLASMA, GUN_ELECTRIC, GUN_MOLOTOV, GUN_GRAP1, GUN_FLAMETHROWER, GUN_HYDRA, GUN_SV98, GUN_SMAW, GUN_CROSSBOW, GUN_FIREWORKS, GUN_MOSSBERG, GUN_FAMAS, GUN_AK47, GUN_M32, GUN_SKS, GUN_SPOCKGUN, GUN_UZI };
@@ -1804,19 +1814,22 @@ namespace ai
     bool request(gameent *d, aistate &b)
     {
         gameent *e = getclient(d->ai->enemy);
+        const bool enemyok = e && targetable(d, e);
+        const float enemyDistSq = enemyok ? d->o.squaredist(e->o) : 0.f;
+
         if(d->armourtype==A_POWERARMOR && !d->armour && d->ammo[GUN_POWERARMOR]) {gunselect(GUN_POWERARMOR, d, true); goto process;}
         else {loopi(4) if(d->hasammo(GUN_S_NUKE+i)) {gunselect(GUN_S_NUKE+i, d); goto process;} }
 
         switch(d->character)
         {
             case C_KAMIKAZE:
-                if((hasrange(d, e, GUN_KAMIKAZE) && d->ammo[GUN_KAMIKAZE]) || kamikazeExploding(d))
+                if((hasrange(d, e, GUN_KAMIKAZE, enemyok, enemyDistSq, false) && d->ammo[GUN_KAMIKAZE]) || kamikazeExploding(d))
                 {
                     gunselect(GUN_KAMIKAZE, d);
                     goto process;
                 }
             case C_NINJA:
-                if(hasrange(d, e, GUN_NINJA))
+                if(hasrange(d, e, GUN_NINJA, enemyok, enemyDistSq, false))
                 {
                     gunselect(GUN_NINJA, d);
                     goto process;
@@ -1829,16 +1842,36 @@ namespace ai
             goto process;
         }
 
-        if(!d->hasammo(d->gunselect) || !hasrange(d, e, d->gunselect) || (d->gunselect != d->ai->weappref && (!isgoodammo(d->gunselect) || d->hasammo(d->ai->weappref))))
+        if(!d->hasammo(d->gunselect) || !hasrange(d, e, d->gunselect, enemyok, enemyDistSq, false) || (d->gunselect != d->ai->weappref && (!isgoodammo(d->gunselect) || d->hasammo(d->ai->weappref))))
         {
             int gun = -1;
-            if(d->hasammo(d->ai->weappref) && hasrange(d, e, d->ai->weappref)) gun = d->ai->weappref;
+            if(d->hasammo(d->ai->weappref) && hasrange(d, e, d->ai->weappref, enemyok, enemyDistSq, false)) gun = d->ai->weappref;
             else
             {
-                loopi(sizeof(gunprefs)/sizeof(gunprefs[0])) if(d->hasammo(gunprefs[i]) && hasrange(d, e, gunprefs[i]))
+                enum { numgunprefs = sizeof(gunprefs)/sizeof(gunprefs[0]) };
+                int candidates[numgunprefs], numcandidates = 0;
+
+                loopi(numgunprefs)
                 {
-                    gun = gunprefs[i];
-                    break;
+                    const int pref = gunprefs[i];
+                    if(!d->hasammo(pref)) continue;
+                    if(e)
+                    {
+                        if(!enemyok) continue;
+                        const int atk = guns[pref].attacks[ACT_SHOOT];
+                        if(!canhitrough(d, e, atk, enemyDistSq)) continue;
+                    }
+                    candidates[numcandidates++] = pref;
+                }
+
+                loopi(numcandidates)
+                {
+                    const int pref = candidates[i];
+                    if(hasrange(d, e, pref, enemyok, enemyDistSq, enemyok))
+                    {
+                        gun = pref;
+                        break;
+                    }
                 }
             }
             if(gun >= 0 && gun != d->gunselect) gunselect(gun, d);
