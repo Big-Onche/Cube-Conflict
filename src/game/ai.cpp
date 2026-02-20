@@ -1469,12 +1469,20 @@ namespace ai
         }
     }
 
-    void fixrange(float &yaw, float &pitch)
+    static inline void fixrange(float &yaw, float &pitch)
     {
         if(pitch > 89.9f) pitch = 89.9f;
         else if(pitch < -89.9f) pitch = -89.9f;
-        if(yaw < 0.0f) yaw = 360.0f - fmodf(-yaw, 360.0f);
-        else if(yaw >= 360.0f) yaw = fmodf(yaw, 360.0f);
+        if(yaw < 0.0f)
+        {
+            yaw += 360.0f;
+            if(yaw <= 0.0f) yaw = 360.0f - fmodf(-yaw, 360.0f);
+        }
+        else if(yaw >= 360.0f)
+        {
+            yaw -= 360.0f;
+            if(yaw >= 360.0f) yaw = fmodf(yaw, 360.0f);
+        }
     }
 
     void getyawpitch(const vec &from, const vec &pos, float &yaw, float &pitch)
