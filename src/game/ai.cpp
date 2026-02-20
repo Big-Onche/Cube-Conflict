@@ -821,6 +821,21 @@ namespace ai
         }
     }
 
+    static inline void nearbyitems(gameent *d, aistate &b, vector<interest> &interests, const vec &feet)
+    {
+        checkItemCache();
+        static vector<int> nearby;
+        nearby.setsize(0);
+        findents(I_RAIL, I_MANA, false, feet, vec(32, 32, 24), nearby);
+        loopv(nearby)
+        {
+            const int id = nearby[i];
+            extentity &e = *(extentity *)entities::ents[id];
+            if(!d->canpickupitem(e.type, d->character)) continue;
+            tryitem(d, e, id, feet, b, interests, false, cachedItemNode(id, e));
+        }
+    }
+
     static vector<int> targets;
 
     bool parseinterests(gameent *d, aistate &b, vector<interest> &interests, bool override, bool ignore)
@@ -857,22 +872,10 @@ namespace ai
         interests.setsize(0);
         if(!m_noitems)
         {
-            if(!hasgoodammo(d) || badhealth(d) || needmana(d) || needshield(d, false))
+            const vec feet = d->feetpos();
+            nearbyitems(d, b, interests, feet); // default: cheap spatial query first
+            if(interests.empty() && (!hasgoodammo(d) || badhealth(d) || needmana(d) || needshield(d, false)))
                 items(d, b, interests);
-            else
-            {
-                checkItemCache();
-                static vector<int> nearby;
-                nearby.setsize(0);
-                const vec feet = d->feetpos();
-                findents(I_RAIL, I_MANA, false, feet, vec(32, 32, 24), nearby);
-                loopv(nearby)
-                {
-                    int id = nearby[i];
-                    extentity &e = *(extentity *)entities::ents[id];
-                    if(d->canpickupitem(e.type, d->character)) tryitem(d, e, id, feet, b, interests, false, cachedItemNode(id, e));
-                }
-            }
         }
         if(cmode) cmode->aifind(d, b, interests);
         if(m_teammode) assist(d, b, interests);
@@ -884,30 +887,7 @@ namespace ai
         static vector<interest> interests;
         interests.setsize(0);
         assist(d, b, interests);
-        if(interests.empty()) return false;
-
-        interests.sort(interestsort());
-        loopv(interests)
-        {
-            const interest &n = interests[i];
-            bool proceed = true;
-            switch(n.state)
-            {
-                case AI_S_DEFEND: // don't get into herds
-                {
-                    int members = 0;
-                    proceed = !checkothers(targets, d, n.state, n.targtype, n.target, true, &members) && members > 1;
-                    break;
-                }
-                default: break;
-            }
-            if(proceed && makeroute(d, b, n.node))
-            {
-                d->ai->switchstate(b, n.state, n.targtype, n.target);
-                return true;
-            }
-        }
-        return false;
+        return parseinterests(d, b, interests, override);
     }
 
     void damaged(gameent *d, gameent *e)
