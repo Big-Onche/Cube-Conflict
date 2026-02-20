@@ -107,15 +107,22 @@ namespace ai
 
     bool getsight(vec &o, float yaw, float pitch, vec &q, vec &v, float mdist, float fovx, float fovy)
     {
-        float dist = o.dist(q);
+        const float mdistsq = mdist*mdist;
+        const float dist2 = o.squaredist(q);
+        if(dist2 > mdistsq) return false;
 
-        if(dist <= mdist)
-        {
-            float x = fmod(fabs((dist > 0 ? asin((q.z-o.z)/dist)/RAD : 0) - pitch), 360);
-            float y = fmod(fabs(-atan2(q.x-o.x, q.y-o.y)/RAD-yaw), 360);
-            if(min(x, 360-x) <= fovx && min(y, 360-y) <= fovy) return raycubelos(o, q, v);
-        }
-        return false;
+        float y = -atan2(q.x-o.x, q.y-o.y)/RAD - yaw;
+        if(y < -180.f) y += 360.f;
+        else if(y > 180.f) y -= 360.f;
+        if(fabs(y) > fovy) return false;
+
+        const float dist = dist2 > 0 ? sqrtf(dist2) : 0;
+        float x = (dist > 0 ? asin((q.z-o.z)/dist)/RAD : 0) - pitch;
+        if(x < 0.f) x = -x;
+        if(x > 180.f) x = 360.f - x;
+        if(x > fovx) return false;
+
+        return raycubelos(o, q, v);
     }
 
     bool cansee(gameent *d, vec &x, vec &y, vec &targ)
