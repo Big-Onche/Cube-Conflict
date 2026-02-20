@@ -897,15 +897,32 @@ namespace ai
             aistate &b = d->ai->getstate();
             if(violence(d, b, e, needpursue(d))) return;
         }
-        if(checkothers(targets, d, AI_S_DEFEND, AI_T_PLAYER, d->clientnum, true))
+
+        uint seen[(MAXCLIENTS + 31) / 32];
+        memset(seen, 0, sizeof(seen));
+        loopv(players)
         {
-            loopv(targets)
+            gameent *other = players[i];
+            if(!other) continue;
+
+            const int clientnum = other->clientnum;
+            if((uint)clientnum < MAXCLIENTS)
             {
-                gameent *t = getclient(targets[i]);
-                if(!t->ai || !canmove(t) || !targetable(t, e)) continue;
-                aistate &c = t->ai->getstate();
-                if(violence(t, c, e, needpursue(d))) return;
+                uint &word = seen[clientnum >> 5];
+                const uint mask = 1u << (clientnum & 31);
+                if(word & mask) continue;
+                word |= mask;
             }
+
+            if(!isteam(d->team, other->team)) continue;
+            if(other == d || !other->ai || other->state != CS_ALIVE) continue;
+
+            aistate &ob = other->ai->getstate();
+
+            gameent *t = getclient(clientnum);
+            if(!t || !t->ai || !canmove(t) || !targetable(t, e)) continue;
+            aistate &c = t->ai->getstate();
+            if(violence(t, c, e, needpursue(d))) return;
         }
     }
 
