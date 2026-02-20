@@ -425,16 +425,19 @@ namespace ai
     { // checks the states of other ai for a match
         targets.setsize(0);
         if(members) *members = 0;
-        bool seen[MAXCLIENTS];
+        uint seen[(MAXCLIENTS + 31) / 32];
         memset(seen, 0, sizeof(seen));
         loopv(players)
         {
             gameent *e = players[i];
             if(!e) continue;
-            if(e->clientnum >= 0 && e->clientnum < MAXCLIENTS)
+            const int clientnum = e->clientnum;
+            if((uint)clientnum < MAXCLIENTS)
             {
-                if(seen[e->clientnum]) continue;
-                seen[e->clientnum] = true;
+                uint &word = seen[clientnum >> 5];
+                const uint mask = 1u << (clientnum & 31);
+                if(word & mask) continue;
+                word |= mask;
             }
             if(teams && d && !isteam(d->team, e->team)) continue;
             if(members) (*members)++;
@@ -447,6 +450,22 @@ namespace ai
         }
         return !targets.empty();
     }
+
+    struct interestsort
+    {
+        bool operator()(const interest &x, const interest &y) const
+        {
+            if(x.score < y.score) return true;
+            if(x.score > y.score) return false;
+            if(x.state < y.state) return true;
+            if(x.state > y.state) return false;
+            if(x.targtype < y.targtype) return true;
+            if(x.targtype > y.targtype) return false;
+            if(x.target < y.target) return true;
+            if(x.target > y.target) return false;
+            return x.node < y.node;
+        }
+    };
 
     bool makeroute(gameent *d, aistate &b, int node, bool changed, int retries)
     {
@@ -806,11 +825,12 @@ namespace ai
 
     bool parseinterests(gameent *d, aistate &b, vector<interest> &interests, bool override, bool ignore)
     {
-        while(!interests.empty())
+        if(interests.empty()) return false;
+
+        interests.sort(interestsort());
+        loopv(interests)
         {
-            int q = interests.length()-1;
-            loopi(interests.length()-1) if(interests[i].score < interests[q].score) q = i;
-            interest n = interests.removeunordered(q);
+            const interest &n = interests[i];
             bool proceed = true;
             if(!ignore) switch(n.state)
             {
@@ -864,11 +884,12 @@ namespace ai
         static vector<interest> interests;
         interests.setsize(0);
         assist(d, b, interests);
-        while(!interests.empty())
+        if(interests.empty()) return false;
+
+        interests.sort(interestsort());
+        loopv(interests)
         {
-            int q = interests.length()-1;
-            loopi(interests.length()-1) if(interests[i].score < interests[q].score) q = i;
-            interest n = interests.removeunordered(q);
+            const interest &n = interests[i];
             bool proceed = true;
             switch(n.state)
             {
