@@ -24,6 +24,8 @@ namespace ai
     static vector<int> itemEntNodes;
     static vector<vec> itemEntNodePos;
     static int itemEntCount = -1;
+    static vector<int> jumpPadEntIds;
+    static int jumpPadEntCount = -1;
 
     static inline int activeroutelen(const aiinfo &ai)
     {
@@ -80,9 +82,23 @@ namespace ai
         itemEntCount = numEnts;
     }
 
+    static void buildJumpPadCache()
+    {
+        jumpPadEntIds.setsize(0);
+        const int numEnts = entities::ents.length();
+        jumpPadEntIds.reserve(numEnts);
+        loopi(numEnts) if(entities::ents[i]->type == JUMPPAD) jumpPadEntIds.add(i);
+        jumpPadEntCount = numEnts;
+    }
+
     static inline void checkItemCache()
     {
         if(itemEntCount != entities::ents.length()) buildItemCache();
+    }
+
+    static inline void checkJumpPadCache()
+    {
+        if(jumpPadEntCount != entities::ents.length()) buildJumpPadCache();
     }
 
     static inline int cachedItemNode(int id, const extentity &e)
@@ -161,6 +177,7 @@ namespace ai
         const char *mname = getclientmap();
         reducedGravity = mname && !strcasecmp(mname, "moon");
         buildItemCache();
+        buildJumpPadCache();
     }
 
     float viewdist(int x)
@@ -1433,11 +1450,12 @@ namespace ai
             d->o = old;
             if(jump)
             {
-                float radius = 18*18;
-                loopv(entities::ents) if(entities::ents[i]->type == JUMPPAD)
+                const float radius2 = 18.f*18.f;
+                checkJumpPadCache();
+                loopv(jumpPadEntIds)
                 {
-                    gameentity &e = *(gameentity *)entities::ents[i];
-                    if(e.o.squaredist(pos) <= radius) { jump = false; break; }
+                    gameentity &e = *(gameentity *)entities::ents[jumpPadEntIds[i]];
+                    if(e.o.squaredist(pos) <= radius2) { jump = false; break; }
                 }
             }
         }
