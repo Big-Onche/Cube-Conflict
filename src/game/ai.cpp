@@ -15,6 +15,9 @@ namespace ai
     static const int spyAimOffsets[4][2] = { { 25, 25 }, { -25, -25 }, { 25, -25 }, { -25, 25 } };
     static const int orientMinInterval = 33;
     static const float orientYawEpsilon = 0.25f, orientPitchEpsilon = 0.25f, orientHeadMoveSq = 4.f;
+    static const float closeDistSq = CLOSEDIST*CLOSEDIST;
+    static const float farDistSq = FARDIST*FARDIST;
+    static const float minWpDistSq = MINWPDIST*MINWPDIST;
     static bool reducedGravity = false;
     static vector<int> itemEntIds;
     static vector<int> itemEntNodes;
@@ -1126,7 +1129,7 @@ namespace ai
             case AI_T_NODE: // this is like a wait state without sitting still..
                 if(checked || find(d, b)) return 1;
                 if(target(d, b, 4, true)) return 1;
-                if(iswaypoint(b.target) && d->feetpos().squaredist(waypoints[b.target].o) > CLOSEDIST*CLOSEDIST)
+                if(iswaypoint(b.target) && d->feetpos().squaredist(waypoints[b.target].o) > closeDistSq)
                     return makeroute(d, b, waypoints[b.target].o) ? 1 : 0;
                 break;
             case AI_T_ENTITY:
@@ -1199,12 +1202,12 @@ namespace ai
     {
         vec pos = d->feetpos();
         int node1 = -1, node2 = -1;
-        float mindist1 = CLOSEDIST*CLOSEDIST, mindist2 = CLOSEDIST*CLOSEDIST;
+        float mindist1 = closeDistSq, mindist2 = closeDistSq;
         loopv(d->ai->route) if(iswaypoint(d->ai->route[i]))
         {
             vec epos = waypoints[d->ai->route[i]].o;
             float dist = epos.squaredist(pos);
-            if(dist > FARDIST*FARDIST) continue;
+            if(dist > farDistSq) continue;
             int entid = obstacles.remap(d, d->ai->route[i], epos);
             if(entid >= 0)
             {
@@ -1226,7 +1229,7 @@ namespace ai
             {
                 d->ai->spot = epos;
                 d->ai->targnode = entid;
-                return !check || d->feetpos().squaredist(epos) > MINWPDIST*MINWPDIST ? 1 : 2;
+                return !check || d->feetpos().squaredist(epos) > minWpDistSq ? 1 : 2;
             }
         }
         return 0;
