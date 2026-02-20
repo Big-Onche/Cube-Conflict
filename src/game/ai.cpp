@@ -330,7 +330,15 @@ namespace ai
 
     void update()
     {
-        if(intermission) { loopv(players) if(players[i]->ai) players[i]->stopmoving(); }
+        if(intermission)
+        {
+            loopv(players)
+            {
+                gameent *p = players[i];
+                if(!p || !p->ai) continue;
+                p->stopmoving();
+            }
+        }
         else // fixed rate logic done out-of-sequence at 1 frame per second for each ai
         {
             if(totalmillis-updatemillis > 1000)
@@ -345,7 +353,13 @@ namespace ai
                 itermillis = totalmillis;
             }
             int count = 0;
-            loopv(players) if(players[i]->ai) think(players[i], ++count == iteration ? true : false);
+            loopv(players)
+            {
+                gameent *p = players[i];
+                if(!p || !p->ai) continue;
+                const bool run = ++count == iteration;
+                think(p, run);
+            }
             if(++iteration > count) iteration = 0;
         }
     }
@@ -1553,6 +1567,21 @@ namespace ai
 
     void think(gameent *d, bool run)
     {
+        if(!run)
+        {
+            if(d->ai->state.empty()) d->ai->updateState(AI_S_WAIT);
+            aistate &c = d->ai->state.last();
+            if(d->state == CS_DEAD && (!cmode || cmode->respawnwait(d, 100+rnd(400)) <= 0) && lastmillis - d->lastpain >= 3000)
+            {
+                addmsg(N_TRYSPAWN, "rc", d);
+                d->respawned = d->lifesequence;
+            }
+            logic(d, c, false);
+            if(d->ai->trywipe) d->ai->wipe();
+            d->ai->lastrun = lastmillis;
+            return;
+        }
+
         // the state stack works like a chain of commands, certain commands simply replace each other
         // others spawn new commands to the stack the ai reads the top command from the stack and executes
         // it or pops the stack and goes back along the history until it finds a suitable command to execute
@@ -1572,7 +1601,7 @@ namespace ai
                 addmsg(N_TRYSPAWN, "rc", d);
                 d->respawned = d->lifesequence;
             }
-            else if(d->state == CS_ALIVE && run)
+            else if(d->state == CS_ALIVE)
             {
                 int result = 0;
                 c.idle = 0;
