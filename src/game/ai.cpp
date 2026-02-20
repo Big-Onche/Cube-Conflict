@@ -608,29 +608,51 @@ namespace ai
 
     bool target(gameent *d, aistate &b, int pursue = 0, bool force = false, float mindist = 0.f)
     {
-        static vector<gameent *> hastried; hastried.setsize(0);
+        static vector<int> triedstamp;
+        static int stamp = 0;
+        if(++stamp <= 0)
+        {
+            stamp = 1;
+            loopi(triedstamp.length()) triedstamp[i] = 0;
+        }
+        const int numplayers = players.length();
+        while(triedstamp.length() < numplayers) triedstamp.add(0);
         vec dp = d->headpos();
+        const bool useRoughPrune = guns[d->gunselect].attacks[ACT_SHOOT] != ATK_MOLOTOV;
+        const float roughSlack = 4096.f;
         while(true)
         {
             float dist = 1e16f;
             gameent *t = NULL;
+            int tindex = -1;
             int atk = guns[d->gunselect].attacks[ACT_SHOOT];
             loopv(players)
             {
+                if(triedstamp[i] == stamp) continue;
                 gameent *e = players[i];
-                if(e == d || hastried.find(e) >= 0 || !targetable(d, e)) continue;
+                if(!e || e == d || e->state != CS_ALIVE || isteam(d->team, e->team)) continue;
+                if(!targetable(d, e)) continue;
+
+                const float roughdist = e->o.squaredist(dp);
+                if(useRoughPrune)
+                {
+                    if(mindist > 0.f && roughdist > mindist + roughSlack) continue;
+                    if(t && roughdist > dist + roughSlack) continue;
+                }
+
                 vec ep = getaimpos(d, atk, e);
                 float v = ep.squaredist(dp);
                 if((!t || v < dist) && (mindist <= 0 || v <= mindist) && (force || cansee(d, b, dp, ep)))
                 {
                     t = e;
                     dist = v;
+                    tindex = i;
                 }
             }
             if(t)
             {
                 if(violence(d, b, t, pursue)) return true;
-                hastried.add(t);
+                if(tindex >= 0) triedstamp[tindex] = stamp;
             }
             else break;
         }
