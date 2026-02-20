@@ -393,15 +393,17 @@ namespace ai
 
     bool makeroute(gameent *d, aistate &b, int node, bool changed, int retries)
     {
-        if(!iswaypoint(d->lastnode)) return false;
+        if(!iswaypoint(d->lastnode) || !iswaypoint(node)) return false;
         if(changed && d->ai->route.length() > 1 && d->ai->route[0] == node) return true;
-        if(route(d, d->lastnode, node, d->ai->route, obstacles, retries))
-        {
-            b.override = false;
-            return true;
-        }
         // retry fails: 0 = first attempt, 1 = try ignoring obstacles, 2 = try ignoring prevnodes too
-        if(retries <= 1) return makeroute(d, b, node, false, retries+1);
+        for(int attempt = retries; attempt <= 2; ++attempt)
+        {
+            if(route(d, d->lastnode, node, d->ai->route, obstacles, attempt))
+            {
+                b.override = false;
+                return true;
+            }
+        }
         return false;
     }
 
