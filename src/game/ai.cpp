@@ -14,6 +14,30 @@ namespace ai
     static bool shortRangeGuns[NUMGUNS];
     static const int spyAimOffsets[4][2] = { { 25, 25 }, { -25, -25 }, { 25, -25 }, { -25, 25 } };
     static bool reducedGravity = false;
+    static vector<int> itemEntIds;
+    static int itemEntCount = -1;
+
+    static void buildItemCache()
+    {
+        itemEntIds.setsize(0);
+
+        const int numents = entities::ents.length();
+        itemEntIds.reserve(numents);
+
+        loopi(numents)
+        {
+            const int type = entities::ents[i]->type;
+            if(type < I_RAIL && type > I_MANA) continue;
+            itemEntIds.add(i);
+        }
+
+        itemEntCount = numents;
+    }
+
+    static inline void checkItemCache()
+    {
+        if(itemEntCount != entities::ents.length()) buildItemCache();
+    }
 
     static inline float angleDiff(float a, float b)
     {
@@ -76,6 +100,7 @@ namespace ai
     {
         const char *mname = getclientmap();
         reducedGravity = mname && !strcasecmp(mname, "moon");
+        buildItemCache();
     }
 
     float viewdist(int x)
@@ -743,12 +768,15 @@ namespace ai
 
     void items(gameent *d, aistate &b, vector<interest> &interests, bool force = false)
     {
+        checkItemCache();
         const vec feet = d->feetpos();
-        loopv(entities::ents)
+        const int nitems = itemEntIds.length();
+        loopi(nitems)
         {
-            extentity &e = *(extentity *)entities::ents[i];
+            const int id = itemEntIds[i];
+            extentity &e = *(extentity *)entities::ents[id];
             if(!e.spawned() || !d->canpickupitem(e.type, d->character)) continue;
-            tryitem(d, e, i, feet, b, interests, e.type == I_SUPERARME ? true : force);
+            tryitem(d, e, id, feet, b, interests, force || e.type == I_SUPERARME);
         }
     }
 
