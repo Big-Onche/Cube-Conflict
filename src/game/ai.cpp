@@ -853,6 +853,23 @@ namespace ai
         }
     }
 
+    static inline bool ispriorityitemtype(int type)
+    {
+        switch(type)
+        {
+            case I_GOLDSHIELD:
+            case I_MAGNETSHIELD:
+            case I_SUPERARME:
+            case I_EPO:
+            case I_ROIDS:
+            case I_SHROOMS:
+            case I_JOINT:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     static void tryitem(gameent *d, extentity &e, int id, const vec &feet, aistate &b, vector<interest> &interests, bool force = false, int node = -2)
     {
         if(d->character==C_KAMIKAZE && d->abilitymillis[ABILITY_2]) return;
@@ -898,6 +915,11 @@ namespace ai
                 break;
             }
         }
+        if(score > 0.f && ispriorityitemtype(e.type))
+        {
+            if(e.type == I_SUPERARME) score = max(score, 1e9f);
+            else score = max(score, 1e8f);
+        }
         if(score != 0)
         {
             interest &n = interests.add();
@@ -933,8 +955,23 @@ namespace ai
         {
             const int id = nearby[i];
             extentity &e = *(extentity *)entities::ents[id];
+            if(ispriorityitemtype(e.type)) continue;
             if(!d->canpickupitem(e.type, d->character)) continue;
             tryitem(d, e, id, feet, b, interests, false, cachedItemNode(id, e));
+        }
+    }
+
+    static inline void priorityitems(gameent *d, aistate &b, vector<interest> &interests, const vec &feet)
+    {
+        checkItemCache();
+        const int nitems = itemEntIds.length();
+        loopi(nitems)
+        {
+            const int id = itemEntIds[i];
+            extentity &e = *(extentity *)entities::ents[id];
+            if(!ispriorityitemtype(e.type)) continue;
+            if(!e.spawned() || !d->canpickupitem(e.type, d->character)) continue;
+            tryitem(d, e, id, feet, b, interests, e.type == I_SUPERARME, cachedItemNode(id, e));
         }
     }
 
@@ -976,6 +1013,7 @@ namespace ai
         {
             const vec feet = d->feetpos();
             nearbyitems(d, b, interests, feet); // default: cheap spatial query first
+            priorityitems(d, b, interests, feet); // always consider high-value map pickups globally
             if(interests.empty() && (!hasgoodammo(d) || badhealth(d) || needmana(d) || needshield(d, false)))
                 items(d, b, interests);
         }
