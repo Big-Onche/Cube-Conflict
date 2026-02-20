@@ -367,10 +367,18 @@ namespace ai
     bool checkothers(vector<int> &targets, gameent *d, int state, int targtype, int target, bool teams, int *members)
     { // checks the states of other ai for a match
         targets.setsize(0);
+        if(members) *members = 0;
+        bool seen[MAXCLIENTS];
+        memset(seen, 0, sizeof(seen));
         loopv(players)
         {
             gameent *e = players[i];
-            if(targets.find(e->clientnum) >= 0) continue;
+            if(!e) continue;
+            if(e->clientnum >= 0 && e->clientnum < MAXCLIENTS)
+            {
+                if(seen[e->clientnum]) continue;
+                seen[e->clientnum] = true;
+            }
             if(teams && d && !isteam(d->team, e->team)) continue;
             if(members) (*members)++;
             if(e == d || !e->ai || e->state != CS_ALIVE) continue;
