@@ -685,7 +685,7 @@ namespace ai
         }
     }
 
-    static void tryitem(gameent *d, extentity &e, int id, aistate &b, vector<interest> &interests, bool force = false)
+    static void tryitem(gameent *d, extentity &e, int id, const vec &feet, aistate &b, vector<interest> &interests, bool force = false)
     {
         if(d->character==C_KAMIKAZE && d->abilitymillis[ABILITY_2]) return;
 
@@ -716,6 +716,7 @@ namespace ai
             case I_GOLDSHIELD: case I_MAGNETSHIELD:
                 if(d->armourtype==A_POWERARMOR && d->armour<1500) score = m_ctf ? 1e2f : 1e4f;
                 if(d->armour <= 1250) score =  m_ctf ? 1e3f : 1e6f;
+                break;
             case I_POWERARMOR:
                 if(!d->hasPowerArmor()) score =  m_ctf ? 1e3f : 1e9f;
                 break;
@@ -736,17 +737,18 @@ namespace ai
             n.node = closestwaypoint(e.o, SIGHTMIN, true);
             n.target = id;
             n.targtype = AI_T_ENTITY;
-            n.score = d->feetpos().squaredist(e.o)/(force ? -1 : score);
+            n.score = feet.squaredist(e.o)/(force ? -1 : score);
         }
     }
 
     void items(gameent *d, aistate &b, vector<interest> &interests, bool force = false)
     {
+        const vec feet = d->feetpos();
         loopv(entities::ents)
         {
             extentity &e = *(extentity *)entities::ents[i];
             if(!e.spawned() || !d->canpickupitem(e.type, d->character)) continue;
-            tryitem(d, e, i, b, interests, e.type == I_SUPERARME ? true : force);
+            tryitem(d, e, i, feet, b, interests, e.type == I_SUPERARME ? true : force);
         }
     }
 
@@ -791,12 +793,13 @@ namespace ai
             {
                 static vector<int> nearby;
                 nearby.setsize(0);
-                findents(I_RAIL, I_MANA, false, d->feetpos(), vec(32, 32, 24), nearby);
+                const vec feet = d->feetpos();
+                findents(I_RAIL, I_MANA, false, feet, vec(32, 32, 24), nearby);
                 loopv(nearby)
                 {
                     int id = nearby[i];
                     extentity &e = *(extentity *)entities::ents[id];
-                    if(d->canpickupitem(e.type, d->character)) tryitem(d, e, id, b, interests);
+                    if(d->canpickupitem(e.type, d->character)) tryitem(d, e, id, feet, b, interests);
                 }
             }
         }
