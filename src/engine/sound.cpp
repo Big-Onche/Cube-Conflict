@@ -214,6 +214,14 @@ static void getEfxFuncs()
     alFilteri                    = (LPALFILTERI)                   alGetProcAddress("alFilteri");
     alFilterf                    = (LPALFILTERF)                   alGetProcAddress("alFilterf");
     alGetFilterf                 = (LPALGETFILTERF)                alGetProcAddress("alGetFilterf");
+
+    if(!alGenAuxiliaryEffectSlots || !alDeleteAuxiliaryEffectSlots || !alAuxiliaryEffectSloti ||
+       !alGenEffects || !alDeleteEffects || !alEffecti || !alEffectf ||
+       !alGenFilters || !alDeleteFilters || !alFilteri || !alFilterf)
+    {
+        conoutf(CON_WARN, "EFX function table incomplete, disabling EFX.");
+        noEfx = true;
+    }
 }
 
 ALuint auxEffectSlots[NUMREVERBS];
@@ -365,9 +373,12 @@ void initSounds()
     else
     {
         getEfxFuncs();
-        alGenAuxiliaryEffectSlots(NUMREVERBS, auxEffectSlots);
-        applyReverbPreset(auxEffectSlots[REV_SHROOMS], EFX_REVERB_PRESET_DRUGGED);
-        applyReverbPreset(auxEffectSlots[REV_UNDERWATER], EFX_REVERB_PRESET_UNDERWATER);
+        if(!noEfx)
+        {
+            alGenAuxiliaryEffectSlots(NUMREVERBS, auxEffectSlots);
+            applyReverbPreset(auxEffectSlots[REV_SHROOMS], EFX_REVERB_PRESET_DRUGGED);
+            applyReverbPreset(auxEffectSlots[REV_UNDERWATER], EFX_REVERB_PRESET_UNDERWATER);
+        }
     }
 
     alDistanceModel(AL_LINEAR_DISTANCE);
