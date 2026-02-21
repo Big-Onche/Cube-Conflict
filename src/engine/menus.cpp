@@ -58,7 +58,13 @@ ICOMMAND(pendingchanges, "b", (int *idx), { if(needsapply.inrange(*idx)) result(
 
 VARP(veryfirstlaunch, 0, 1, 1);
 static int lastmainmenu = -1;
-ICOMMAND(usingsteam, "", (), intret(IS_USING_STEAM));
+ICOMMAND(usingsteam, "", (),
+#if defined(STEAM)
+    intret(SteamEnabled);
+#else
+    intret(false);
+#endif
+);
 
 void menuprocess()
 {
@@ -71,8 +77,12 @@ void menuprocess()
     {
         if(veryfirstlaunch)
         {
-            if(IS_USING_STEAM) {getsteamname();}
+#if defined(STEAM)
+            if(SteamEnabled) {getsteamname();}
             else execute("createNickname $TRUE");
+#else
+            execute("createNickname $TRUE");
+#endif
             UI::showui("firstlaunch");
         }
         else

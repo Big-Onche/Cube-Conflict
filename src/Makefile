@@ -7,6 +7,23 @@ PLATFORM_PREFIX= native
 
 INCLUDES= -Ishared -Icubeconflict -Iengine -Igame -Ienet/include -Isteam -Iinclude
 
+# 0 = no Steam (default), 1 = Steam enabled
+USE_STEAM ?= 0
+
+ifeq (,$(findstring 64,$(PLATFORM)))
+    STEAM_LIBNAME := steam_api.lib
+else
+    STEAM_LIBNAME := steam_api64.lib
+endif
+
+STEAM_DEFINES :=
+STEAM_CLIENT_LIBS :=
+
+ifeq ($(USE_STEAM),1)
+    STEAM_DEFINES += -DSTEAM
+    STEAM_CLIENT_LIBS += -l:$(STEAM_LIBNAME)
+endif
+
 STRIP=
 ifeq (,$(findstring -g,$(CXXFLAGS)))
 	ifeq (,$(findstring -pg,$(CXXFLAGS)))
@@ -43,9 +60,9 @@ ifneq (,$(findstring MINGW,$(PLATFORM)))
 		override CXX+= -m32
 		override WINDRES+= -F pe-i386
 	endif
-	CLIENT_INCLUDES= $(INCLUDES) -Iinclude
+	CLIENT_INCLUDES= $(INCLUDES) -Iinclude $(STEAM_DEFINES)
 	STD_LIBS= -static-libgcc -static-libstdc++
-	CLIENT_LIBS= -mwindows $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lSDL2 -lSDL2_image -lopenal -lzlib1 -lopengl32 -lsndfile -lsteam_api -lenet -lws2_32 -lwinmm
+	CLIENT_LIBS= -mwindows $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lSDL2 -lSDL2_image -lopenal -lzlib1 -lopengl32 -lsndfile $(STEAM_CLIENT_LIBS) -lenet -lws2_32 -lwinmm
 else    
 	ifneq (,$(findstring DARWIN,$(PLATFORM)))
 		OSXMIN := 10.13
@@ -57,7 +74,7 @@ else
 			override CXX += -arch x86_64 -mmacosx-version-min=$(OSXMIN)
 		endif
 
-		CLIENT_INCLUDES = $(INCLUDES) -Iinclude \
+		CLIENT_INCLUDES = $(INCLUDES) -Iinclude $(STEAM_DEFINES) \
 											$(shell pkg-config --cflags sndfile 2>/dev/null)
 
 		CLIENT_LIBS = -F../cubeconflict.app/Contents/Frameworks \
@@ -66,20 +83,12 @@ else
 									-framework AudioUnit -framework OpenGL -framework Cocoa \
 									-lz -Lenet -lenet \
 									$(shell pkg-config --libs sndfile 2>/dev/null || echo -lsndfile) \
-									-L../cubeconflict.app/Contents/Frameworks -lsteam_api
+									-L../cubeconflict.app/Contents/Frameworks $(STEAM_CLIENT_LIBS)
 	else
-		CLIENT_INCLUDES = $(INCLUDES) -I/usr/X11R6/include `sdl2-config --cflags`
+		CLIENT_INCLUDES = $(INCLUDES) -I/usr/X11R6/include $(STEAM_DEFINES) `sdl2-config --cflags`
 		CLIENT_LIBS = -Lenet -lenet -L/usr/X11R6/lib -lX11 `sdl2-config --libs` \
-									-lSDL2_image -lopenal -lsndfile -lz -lGL -L../bin_unix -lsteam_api
+									-lSDL2_image -lopenal -lsndfile -lz -lGL -L../bin_unix $(STEAM_CLIENT_LIBS)
 	endif
-endif
-
-ifeq ($(PLATFORM),LINUX)
-	CLIENT_LIBS+= -lrt
-else
-	ifneq (,$(findstring GNU,$(PLATFORM))) 
-		CLIENT_LIBS+= -lrt
-	endif 
 endif
 
 CLIENT_OBJS= \
@@ -199,12 +208,12 @@ $(SERVER_MASTER_OBJS): CXXFLAGS += $(SERVER_INCLUDES)
 
 ifneq (,$(findstring MINGW,$(PLATFORM)))
 client: $(CLIENT_OBJS)
-	$(WINDRES) -I vcpp -i vcpp/mingw.rc -J rc -o vcpp/mingw.res -O coff
-	$(CXX) $(CXXFLAGS) -o $(WINBIN)/cubeconflict.exe vcpp/mingw.res $(CLIENT_OBJS) $(CLIENT_LIBS)
+	$(WINDRES) -I vcpp -i project/mingw.rc -J rc -o project/mingw.res -O coff
+	$(CXX) $(CXXFLAGS) -o $(WINBIN)/cubeconflict.exe project/mingw.res $(CLIENT_OBJS) $(CLIENT_LIBS)
 
 server: $(SERVER_OBJS)
-	$(WINDRES) -I vcpp -i vcpp/mingw.rc -J rc -o vcpp/mingw.res -O coff
-	$(CXX) $(CXXFLAGS) -o $(WINBIN)/cc_server.exe vcpp/mingw.res $(SERVER_OBJS) $(SERVER_LIBS)
+	$(WINDRES) -I vcpp -i project/mingw.rc -J rc -o project/mingw.res -O coff
+	$(CXX) $(CXXFLAGS) -o $(WINBIN)/cc_server.exe project/mingw.res $(SERVER_OBJS) $(SERVER_LIBS)
 
 master: $(MASTER_OBJS)
 	$(CXX) $(CXXFLAGS) -o $(WINBIN)/cc_master.exe $(MASTER_OBJS) $(MASTER_LIBS)

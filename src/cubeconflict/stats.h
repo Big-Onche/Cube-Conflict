@@ -1,7 +1,9 @@
 #ifndef __STATS_H__
 #define __STATS_H__
 
+#if defined(STEAM)
 #include "steam_api.h"
+#endif
 
 extern int xpForNextLevel, totalXpNeeded;
 

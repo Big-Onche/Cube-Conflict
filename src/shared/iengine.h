@@ -1,4 +1,5 @@
 // the interface the game uses to access the engine
+#include <cstdint>
 
 extern int curtime;                     // current frame time
 extern int lastmillis;                  // last time
@@ -547,7 +548,7 @@ extern void freechallenge(void *answer);
 extern bool checkchallenge(const char *answerstr, void *correct);
 
 // elementary configuration
-extern bool IS_USING_STEAM, IS_ON_OFFICIAL_SERV;
+extern bool SteamEnabled, IS_ON_OFFICIAL_SERV;
 extern int language;
 extern void getsteamname();
 

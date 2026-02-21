@@ -207,7 +207,9 @@ void loadSave()
 
     savefile->close();
     calcPlayerLevel();
-    if(IS_USING_STEAM) getsteamachievements();
+#if defined(STEAM)
+    if(SteamEnabled) getsteamachievements();
+#endif
 }
 
 //////////////////////Achievements//////////////////////
@@ -226,11 +228,14 @@ void unlockAchievement(int achID)
     bool newAchievement = isLocked(achID);
     if(canUnlockOffline(achID) || IS_ON_OFFICIAL_SERV)
     {
-        if(IS_USING_STEAM)
+#if defined(STEAM)
+        if(SteamEnabled)
         {
             SteamUserStats()->SetAchievement(achievementNames[achID]);
             SteamUserStats()->StoreStats();
         }
+#endif
+
 
         if(newAchievement) // update achievement status and give reward if new achievement
         {
@@ -242,6 +247,7 @@ void unlockAchievement(int achID)
     }
 }
 
+#if defined(STEAM)
 void getsteamachievements() // retrieves achievements from steam
 {
     loopi(NUMACHS)
@@ -251,6 +257,7 @@ void getsteamachievements() // retrieves achievements from steam
         achievement[i] = unlocked;
     }
 }
+#endif
 
 ICOMMAND(gettotalach, "", (), intret(NUMACHS)); // gets nb of achievements for ui
 

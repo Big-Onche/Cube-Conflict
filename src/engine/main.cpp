@@ -3,7 +3,10 @@
 #include "engine.h"
 #include "gfx.h"
 #include "stats.h"
+
+#if defined(STEAM)
 #include "steam_api.h"
+#endif
 
 #ifdef SDL_VIDEO_DRIVER_X11
 #include "SDL_syswm.h"
@@ -47,7 +50,9 @@ void quit(bool savecfgs = true)                      // normal exit
     disconnect(false, true, true);
     localdisconnect();
     cleanup();
-    if(IS_USING_STEAM) SteamAPI_Shutdown();
+#if defined(STEAM)
+    if(SteamEnabled) SteamAPI_Shutdown();
+#endif
     exit(EXIT_SUCCESS);
 }
 
@@ -1141,12 +1146,13 @@ int getclockmillis()
 VAR(numcpus, 1, 1, 16);
 VAR(language, 0, 1, 3);
 
+#if defined(STEAM)
 bool initsteam()
 {
     if(!SteamAPI_Init())
     {
         conoutf(CON_ERROR, "\fc%s", readstr("Console_Error_InitSteamAPI"));
-        IS_USING_STEAM = false;
+        SteamEnabled = false;
         return false;
     }
     else
@@ -1157,8 +1163,10 @@ bool initsteam()
     }
 }
 
-//int newlang = -1;
-bool IS_USING_STEAM = false;
+bool SteamEnabled = false;
+#endif
+
+
 bool IS_ON_OFFICIAL_SERV = false;
 ICOMMAND(isonofficialserver, "", (), intret(IS_ON_OFFICIAL_SERV));
 
@@ -1231,7 +1239,9 @@ int main(int argc, char **argv)
                 break;
             }
             case 'x': initscript = &argv[i][2]; break;
-            case 's': IS_USING_STEAM = true; break;
+#if defined(STEAM)
+            case 's': SteamEnabled = true; break;
+#endif
             default: if(!serveroption(argv[i])) gameargs.add(argv[i]); break;
         }
         else gameargs.add(argv[i]);
@@ -1241,8 +1251,9 @@ int main(int argc, char **argv)
 
     if(dedicated <= 1)
     {
-        if(IS_USING_STEAM && SteamAPI_RestartAppIfNecessary(1454700)) quit(false);
-
+#if defined(STEAM)
+        if(SteamEnabled && SteamAPI_RestartAppIfNecessary(1454700)) quit(false);
+#endif
         logoutf("init: sdl");
 
         if(SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO|SDL_INIT_AUDIO)<0) fatal("Unable to initialize SDL: %s", SDL_GetError());
@@ -1265,8 +1276,9 @@ int main(int argc, char **argv)
     initserver(dedicated>0, dedicated>1);  // never returns if dedicated
     ASSERT(dedicated <= 1);
     game::initclient();
-    if(IS_USING_STEAM) initsteam();
-
+#if defined(STEAM)
+    if(SteamEnabled) initsteam();
+#endif
     logoutf("init: video");
     SDL_SetHint(SDL_HINT_GRAB_KEYBOARD, "0");
     #if !defined(WIN32) && !defined(__APPLE__)
@@ -1420,8 +1432,9 @@ int main(int argc, char **argv)
         gl_drawframe();
         swapbuffers();
         renderedframe = inbetweenframes = true;
-
-        if(IS_USING_STEAM) SteamAPI_RunCallbacks();
+#if defined(STEAM)
+        if(SteamEnabled) SteamAPI_RunCallbacks();
+#endif
     }
 
     ASSERT(0);

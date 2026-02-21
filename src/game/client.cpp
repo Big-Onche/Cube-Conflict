@@ -5,12 +5,16 @@
 VARP(usesteamname, 0, 1, 1);
 void getsteamname()
 {
-    if(!IS_USING_STEAM) {conoutf(CON_ERROR, "\fc%s", readstr("Console_Error_SteamAPINotInit")); return;}
+#if defined(STEAM)
+    if(!SteamEnabled) {conoutf(CON_ERROR, "\fc%s", readstr("Console_Error_SteamAPINotInit")); return;}
     else if(usesteamname)
     {
         copystring(game::player1->name, SteamFriends()->GetPersonaName());
         game::addmsg(N_SWITCHNAME, "rs", game::player1->name);
     }
+#else
+    conoutf(CON_ERROR, "\fc%s", readstr("Console_Error_SteamAPINotInit"));
+#endif
 }
 ICOMMAND(getsteamname, "", (), getsteamname());
 
