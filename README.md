@@ -22,10 +22,10 @@ The mission is to deliver a free, open-source, and exhilarating gaming experienc
 
 ## 🚧 Roadmap for the First Release
 - 🟩🟩🟩🟩🟩 (Done!) Moving to OpenAL soft instead of SDL Mixer
-- 🟩🟩🟩⬛⬛ More maps!
+- 🟩🟩🟩🟩⬛ More maps!
 - 🟩🟩🟩⬛⬛ Simplified map editing with a dedicated GUI.
 - 🟩🟩🟩⬛⬛ Completion of the tutorial map.
-- 🟩🟩🟩🟩⬛ Seamless integration of stats and achievements with Steam.
+- 🟩🟩🟩⬛⬛ [CubeLog](https://github.com/Big-Onche/CubeLog) to store your stats and achievements online
 - 🟩🟩🟩🟩🟩 (Done!) Support for multiple language translations.
 
 ## 📅 Upcoming Features
