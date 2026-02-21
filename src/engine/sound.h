@@ -121,6 +121,7 @@ struct SoundSource
     bool isCurrentlyOccluded;               // Tracks if the source is occluded
     float lfOcclusionGain, hfOcclusionGain; // Dynamically updated low freqs and high freqs gains based on occlusion
     int lastOcclusionChange;                // Last time the occlusion state changed
+    int nextOcclusionCheck;                 // Next time (millis) we should run occlusion tests
 };
 
 extern int minimizedmute;

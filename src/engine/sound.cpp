@@ -300,6 +300,8 @@ void initSoundSources()
         }
         sounds[i].isActive = false;
         activeIndexInList[i] = -1;
+        sounds[i].nextOcclusionCheck = 0;
+        sounds[i].lastOcclusionChange = 0;
     }
     loopirev(MAX_SOURCES) freeSourceIds.add(i);
 }
@@ -344,42 +346,51 @@ void initSounds()
     initSoundSources();
 }
 
-const int vertices = 3;
-const float sectorAngle = 2 * M_PI / vertices;
+static const float OCCLUSION_MAX_DIST = 1000.f;
+static const float OCCLUSION_MAX_DIST_SQ = OCCLUSION_MAX_DIST * OCCLUSION_MAX_DIST;
+static const float OCCLUSION_SAMPLE_DIST = 300.f;
+static const float OCCLUSION_SAMPLE_DIST_SQ = OCCLUSION_SAMPLE_DIST * OCCLUSION_SAMPLE_DIST;
+static const float OCCLUSION_TRIANGLE_AXES[3][2] =
+{
+    { 1.0f, 0.0f },
+    { -0.5f, 0.8660254f },
+    { -0.5f, -0.8660254f }
+};
 
 bool checkSoundOcclusion(const vec *soundPos, int flags = 0)
 {
     if(*soundPos == vec(0, 0, 0) || (flags & SND_NOOCCLUSION) || noEfx) return false;
 
-    float distance = camera1->o.dist(*soundPos);
-    if(distance > 1000) return false; // cull distant sounds
+    const vec &cameraPos = camera1->o;
+    float distanceSq = cameraPos.fastsquaredist(*soundPos);
+    if(distanceSq > OCCLUSION_MAX_DIST_SQ) return false; // cull distant sounds
 
     vec hitPos;
     //particle_splash(PART_SPARK, 1, 250, *soundPos, 0x00FF00, 1.f, 1, 0);
-    if(raycubelos(*soundPos, camera1->o, hitPos)) return false; // we first try a direct ray check
-    else if(distance < 300) // more complex check with a tolerance if the sound is closer
+    if(raycubelos(*soundPos, cameraPos, hitPos)) return false; // we first try a direct ray check
+    else if(distanceSq < OCCLUSION_SAMPLE_DIST_SQ) // more complex check with a tolerance if the sound is closer
     {
-        vec dir = vec(camera1->o).sub(*soundPos).normalize(); // Direction vector pointing from sound to camera
-        vec right = vec(0, 0, 0).cross(dir, vec(0, 0, 1)).normalize(); // Recalculating right vector to be orthogonal to dir
-        vec perp = vec(0, 0, 0).cross(right, dir).normalize(); // Recalculating perpendicular vector
+        if(distanceSq <= 1e-6f) return false;
+        vec dir = vec(cameraPos).sub(*soundPos).normalize(); // Direction vector pointing from sound to camera
+        vec right = vec(dir.y, -dir.x, 0.0f);
+        float rightLenSq = right.squaredlen();
+        if(rightLenSq < 1e-6f) right = vec(1.0f, 0.0f, 0.0f); // fallback when direction is almost vertical
+        else right.mul(1.0f / sqrtf(rightLenSq));
+        vec perp = vec(0, 0, 0).cross(right, dir); // orthonormal basis for sampling
 
-        loopi(vertices) // creating a triangle that always faces the camera
+        float distance = sqrtf(distanceSq);
+        float toleranceRadius = 25.f + (distance / 20.f); // increase tolerance according to distance to simulate sound dispersion
+        loopi(3) // static triangle sample pattern
         {
-            float theta = i * sectorAngle + ((totalmillis / 75.f) * M_PI); // spinning the triangle to get a circle of points
-            vec displacement = right;
-
-            float toleranceRadius = 25 + (distance / 20.f); // increase tolerance according to distance to simulate sound dispersion
-
-            displacement.mul(cos(theta) * toleranceRadius);
-
-            vec verticalDisplacement = perp;
-            verticalDisplacement.mul(sin(theta) * toleranceRadius);
-
-            vec samplePoint = *soundPos;
-            samplePoint.add(displacement);
-            samplePoint.add(verticalDisplacement);
+            const float sampleX = OCCLUSION_TRIANGLE_AXES[i][0];
+            const float sampleY = OCCLUSION_TRIANGLE_AXES[i][1];
+            vec samplePoint(
+                soundPos->x + (right.x * sampleX + perp.x * sampleY) * toleranceRadius,
+                soundPos->y + (right.y * sampleX + perp.y * sampleY) * toleranceRadius,
+                soundPos->z + (right.z * sampleX + perp.z * sampleY) * toleranceRadius
+            );
             //particle_splash(PART_SPARK, 1, 250, samplePoint, 0x00FF00, 1.f, 1, 0);
-            if(raycubelos(samplePoint, camera1->o, hitPos)) return false; // if one of the vertices is not occluded, no occlusion filter is applied
+            if(raycubelos(samplePoint, cameraPos, hitPos)) return false; // if one of the vertices is not occluded, no occlusion filter is applied
         }
     }
     return true;
@@ -389,6 +400,14 @@ bool isOccluded(int id)
 {
     if(sounds[id].soundFlags & (SND_MUSIC | SND_UI)) return false;
     return isUnderWater(sounds[id].position) || checkSoundOcclusion(&sounds[id].position, sounds[id].soundFlags);
+}
+
+static inline int getOcclusionCheckInterval(int id)
+{
+    float distRatio = clamp(camera1->o.fastsquaredist(sounds[id].position) / OCCLUSION_MAX_DIST_SQ, 0.0f, 1.0f);
+    float speedRatio = clamp(sounds[id].velocity.squaredlen() / (250.0f * 250.0f), 0.0f, 1.0f);
+    int interval = int(100.0f + distRatio * 150.0f - speedRatio * 75.0f);
+    return clamp(interval, 100, 250);
 }
 
 float getRandomSoundPitch(int flags)
@@ -432,6 +451,8 @@ void playSound(int soundId, vec soundPos, float maxRadius, float maxVolRadius, i
     sounds[id].soundFlags = flags;
     sounds[id].position = soundPos;
     sounds[id].velocity = vec(0, 0, 0);
+    sounds[id].lastOcclusionChange = totalmillis;
+    sounds[id].nextOcclusionCheck = totalmillis;
 
     Sound& s = (flags & SND_MUSIC) ? music[soundId] : ( (flags & SND_MAPSOUND) ? mapSounds[soundId] : gameSounds[soundId] );
     ALuint source = sounds[id].alSource;
@@ -533,25 +554,24 @@ void updateListenerPos()
 
 void updateSoundOcclusion(int id)
 {
-    bool occlusion = isOccluded(id);
-
-    // only update if changing or if we are mid-transition
-    bool changed = (sounds[id].isCurrentlyOccluded != occlusion);
-    bool transitioning = (sounds[id].lfOcclusionGain != (occlusion ? 0.90f : 1.0f)
-                       || sounds[id].hfOcclusionGain != (occlusion ? 0.20f : 1.0f));
-
-    if(!changed && !transitioning) return;
-
-    if(changed)
+    if(totalmillis >= sounds[id].nextOcclusionCheck)
     {
-        sounds[id].isCurrentlyOccluded = occlusion;
-        sounds[id].lastOcclusionChange = totalmillis;
+        bool occlusion = isOccluded(id);
+        if(sounds[id].isCurrentlyOccluded != occlusion)
+        {
+            sounds[id].isCurrentlyOccluded = occlusion;
+            sounds[id].lastOcclusionChange = totalmillis;
+        }
+        sounds[id].nextOcclusionCheck = totalmillis + getOcclusionCheckInterval(id);
     }
 
-    float progress = min(1.0f, (totalmillis - sounds[id].lastOcclusionChange) / 750.f);
-
+    bool occlusion = sounds[id].isCurrentlyOccluded;
     float targetLF = occlusion ? 0.90f : 1.0f;
     float targetHF = occlusion ? 0.20f : 1.0f;
+    bool transitioning = (sounds[id].lfOcclusionGain != targetLF || sounds[id].hfOcclusionGain != targetHF);
+    if(!transitioning) return;
+
+    float progress = min(1.0f, (totalmillis - sounds[id].lastOcclusionChange) / 750.f);
 
     if(progress < 1.0f)
     {
