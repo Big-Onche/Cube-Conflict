@@ -33,6 +33,9 @@ ICOMMAND(gamesound, "siii", (char *path, int *alts, int *vol),
 #define NUMMAPSNDS 32 // temporary fixed shit
 int mapSoundId = 0;
 Sound mapSounds[NUMMAPSNDS];
+static vector<int> mapSoundIds;
+static int nextMapSoundsUpdate = 0;
+static const int MAP_SOUNDS_UPDATE_INTERVAL = 250;
 ICOMMAND(mapsound, "siii", (char *path, int *alts, int *vol, int *occl),
     if(mapSoundId >= NUMMAPSNDS) { conoutf(CON_ERROR, "Unable to load map sound: %s (id %d is greater than amount of map sounds)", path, mapSoundId); return; }
     formatstring(mapSounds[mapSoundId].soundPath, "%s", path);
@@ -43,7 +46,11 @@ ICOMMAND(mapsound, "siii", (char *path, int *alts, int *vol, int *occl),
     mapSoundId++;
 );
 
-ICOMMAND(resetmapsounds, "", (), mapSoundId = 0);
+ICOMMAND(resetmapsounds, "", (),
+    mapSoundId = 0;
+    mapSoundIds.shrink(0);
+    nextMapSoundsUpdate = 0;
+);
 
 int musicId = 0;
 Sound music[NUMSONGS];
@@ -677,19 +684,52 @@ void stopAllMapSounds()
 }
 ICOMMAND(stopmapsounds, "", (), stopAllMapSounds());
 
+static inline void updateMapSoundCache(const vector<extentity *> &ents)
+{
+    mapSoundIds.shrink(0);
+    mapSoundIds.reserve(ents.length());
+    loopv(ents)
+    {
+        extentity *e = ents[i];
+        if(!e) continue;
+        if(e->type == ET_SOUND || (e->flags & EF_SOUND)) mapSoundIds.add(i);
+    }
+    nextMapSoundsUpdate = totalmillis + MAP_SOUNDS_UPDATE_INTERVAL;
+    conoutf("updated");
+}
+
 void checkMapSounds()
 {
     if(mainmenu) return;
     const vector<extentity *> &ents = entities::getents();
 
-    loopv(ents)
+    if(editmode && totalmillis >= nextMapSoundsUpdate) updateMapSoundCache(ents);
+
+    const vec &cameraPos = camera1->o;
+    for(int i = 0; i < mapSoundIds.length(); )
     {
-        extentity &e = *ents[i];
+        int entIndex = mapSoundIds[i];
+        if(!ents.inrange(entIndex)) { mapSoundIds.removeunordered(i); continue; }
 
-        if(e.type == ET_EMPTY) { stopMapSound(&e, true); continue; }
-        else if(e.type != ET_SOUND) continue;
+        extentity *entity = ents[entIndex];
+        if(!entity) { mapSoundIds.removeunordered(i); continue; }
+        extentity &e = *entity;
 
-        if(camera1->o.dist(e.o) < e.attr2 + 50) // check for distance + add a slight tolerance for efx sound effects
+        if(e.type == ET_EMPTY)
+        {
+            stopMapSound(&e, true);
+            mapSoundIds.removeunordered(i);
+            continue;
+        }
+        else if(e.type != ET_SOUND)
+        {
+            if(!(e.flags & EF_SOUND)) mapSoundIds.removeunordered(i);
+            else ++i;
+            continue;
+        }
+
+        float maxDist = e.attr2 + 50.f;
+        if(maxDist > 0.f && cameraPos.fastsquaredist(e.o) < maxDist * maxDist) // check for distance + add a slight tolerance for efx sound effects
         {
             updateEntPos(e.entityId, e.o, vec(0, 0, 0));
             if(!(e.flags & EF_SOUND))
@@ -699,6 +739,7 @@ void checkMapSounds()
             }
         }
         else if(e.flags & EF_SOUND) stopMapSound(&e);
+        ++i;
     }
 }
 
