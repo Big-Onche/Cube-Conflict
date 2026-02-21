@@ -5,6 +5,8 @@
 #include <sndfile.h>
 #include <AL/efx.h>
 #include <AL/alext.h>
+#include <limits>
+#include <vector>
 
 bool foundDevice = false;
 bool noSound = true;
@@ -73,27 +75,15 @@ void reportSoundError(const char* func, const char* details, int buffer = 0)
 */
 bool loadSoundFile(const string& filepath, ALuint buffer) // load a sound using libsndfile
 {
+    static std::vector<short> soundLoadScratch;
+    static bool warnedSampleConversion = false;
+
     SNDFILE* file;
     SF_INFO sfinfo;
-    short* membuf;
-    sf_count_t num_frames;
     ALsizei num_bytes;
 
     file = sf_open(tempformatstring("%s", filepath), SFM_READ, &sfinfo); // open the audio file and check if valid
     if(!file) { conoutf(CON_WARN, "Could not load audio file: %s", filepath); return false; }
-
-    num_frames = sfinfo.frames; // get the number of frames in the sound file
-    membuf = new short[num_frames * sfinfo.channels];
-    if(membuf == nullptr)
-    {
-        conoutf(CON_ERROR, "Could not allocate memory for the sound data.");
-        sf_close(file);
-        return false;
-    }
-
-    // read the sound data into the memory buffer
-    num_frames = sf_readf_short(file, membuf, num_frames);
-    num_bytes = num_frames * sizeof(short) * sfinfo.channels;
 
     ALenum format;
     switch(sfinfo.channels) // determine the OpenAL format from the number of channels
@@ -102,15 +92,48 @@ bool loadSoundFile(const string& filepath, ALuint buffer) // load a sound using 
         case 2: format = AL_FORMAT_STEREO16; break;
         default:
             conoutf(CON_ERROR, "Unsupported channel count in %s (%d instead of 1 or 2)", filepath, sfinfo.channels);
-            delete[] membuf;
             sf_close(file);
             return false;
     }
 
-    alBufferData(buffer, format, membuf, num_bytes, sfinfo.samplerate); // upload the sound data to the OpenAL buffer
+    const sf_count_t num_frames = sfinfo.frames; // get the number of frames in the sound file
+    if(num_frames < 0)
+    {
+        conoutf(CON_WARN, "Audio file has invalid frame count: %s", filepath);
+        sf_close(file);
+        return false;
+    }
+
+    const size_t sampleCount = size_t(num_frames) * size_t(sfinfo.channels);
+    const size_t maxBytes = size_t(std::numeric_limits<ALsizei>::max());
+    if(sampleCount > maxBytes / sizeof(short))
+    {
+        conoutf(CON_ERROR, "Audio file too large for OpenAL buffer: %s", filepath);
+        sf_close(file);
+        return false;
+    }
+
+    if(soundLoadScratch.size() < sampleCount) soundLoadScratch.resize(sampleCount);
+
+    if(!warnedSampleConversion && (sfinfo.format & SF_FORMAT_SUBMASK) != SF_FORMAT_PCM_16)
+    {
+        conoutf(CON_WARN, "Audio source is not PCM16, libsndfile converts at load time: %s", filepath);
+        warnedSampleConversion = true;
+    }
+
+    // read the sound data into the memory buffer
+    sf_count_t framesRead = sf_readf_short(file, soundLoadScratch.data(), num_frames);
+    if(framesRead < 0)
+    {
+        conoutf(CON_WARN, "Could not read audio frames from: %s", filepath);
+        sf_close(file);
+        return false;
+    }
+
+    num_bytes = ALsizei(framesRead * sfinfo.channels * sizeof(short));
+    alBufferData(buffer, format, soundLoadScratch.data(), num_bytes, sfinfo.samplerate); // upload the sound data to the OpenAL buffer
     //reportSoundError("alBufferData", filepath, buffer);
 
-    delete[] membuf; // clean up and free resources
     sf_close(file);
     return true;
 }
@@ -631,7 +654,7 @@ void manageSources()
     }
 }
 
-void soundNearmiss(int sound, const vec &from, const vec &to)
+void soundNearmiss(int sound, const vec &from, const vec &to, int precision)
 {
     if(noSound) return;
     const vec &cameraPos = camera1->o;
