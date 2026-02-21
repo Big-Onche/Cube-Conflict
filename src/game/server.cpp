@@ -630,8 +630,7 @@ namespace server
     VAR(restrictpausegame, 0, 1, 1);
     VAR(restrictgamespeed, 0, 1, 1);
 
-    SVAR(serverdescen, "");
-    SVAR(serverdescfr, "");
+    SVAR(serverdesc, "");
     SVAR(serverpass, "");
     SVAR(adminpass, "");
     VARF(publicserver, 0, 0, 2, {
@@ -2328,7 +2327,7 @@ namespace server
         yyjson_mut_val *root = yyjson_mut_obj(doc);
         yyjson_mut_doc_set_root(doc, root);
 
-        yyjson_mut_obj_add_str(doc, root, "Server", serverdescfr ? serverdescfr : "");
+        yyjson_mut_obj_add_str(doc, root, "Server", serverdesc ? serverdesc : "");
         yyjson_mut_obj_add_str(doc, root, "Mode", modename(gamemode));
         yyjson_mut_obj_add_str(doc, root, "Map", map);
         yyjson_mut_obj_add_str(doc, root, "Time", servtime);
@@ -3090,7 +3089,7 @@ namespace server
 
     void sendservinfo(clientinfo *ci)
     {
-        sendf(ci->clientnum, 1, "ri5ss", N_SERVINFO, ci->clientnum, PROTOCOL_VERSION, ci->sessionid, serverpass[0] ? 1 : 0, serverdescen, serverdescfr, serverauth);
+        sendf(ci->clientnum, 1, "ri5ss", N_SERVINFO, ci->clientnum, PROTOCOL_VERSION, ci->sessionid, serverpass[0] ? 1 : 0, serverdesc, serverauth);
     }
 
     void noclients()
@@ -4342,8 +4341,7 @@ namespace server
             putint(p, gamespeed);
         }
         sendstring(smapname, p);
-        sendstring(serverdescen, p);
-        sendstring(serverdescfr, p);
+        sendstring(serverdesc, p);
         sendserverinforeply(p);
     }
 

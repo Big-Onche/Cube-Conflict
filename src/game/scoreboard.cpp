@@ -184,7 +184,7 @@ namespace game
         const ENetAddress *address = connectedpeer();
         if(address && player1->clientnum >= 0)
         {
-            if(servdesc[0]) result(servdesc);
+            if(servdesc[0]) result(localizedservdesc());
             else
             {
                 string hostname;

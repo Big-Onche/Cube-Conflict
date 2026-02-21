@@ -165,6 +165,14 @@ namespace game
     int sessionid = 0, mastermode = MM_OPEN, gamespeed = 100;
     string servdesc = "", servauth = "", connectpass = "";
 
+    const char *localizedservdesc()
+    {
+        static string desc;
+        localizeserverdesc(servdesc, language, desc, sizeof(desc));
+        filtertext(desc, desc, true, true);
+        return desc;
+    }
+
     VARP(deadpush, 1, 2, 20);
 
     void switchname(const char *name)
@@ -604,7 +612,7 @@ namespace game
     ICOMMAND(sauth, "", (), if(servauth[0]) tryauth(servauth));
     ICOMMAND(dauth, "s", (char *desc), if(desc[0]) tryauth(desc));
 
-    ICOMMAND(getservdesc, "", (), result(servdesc));
+    ICOMMAND(getservdesc, "", (), result(localizedservdesc()));
     ICOMMAND(getservauth, "", (), result(servauth));
 
     void togglespectator(int val, const char *who)

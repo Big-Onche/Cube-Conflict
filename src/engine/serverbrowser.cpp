@@ -256,6 +256,42 @@ struct pingattempts
 };
 
 static int currentprotocol = server::protocolversion();
+static const char serverdescsep = '~';
+
+void copyserverdesclang(const char *all, int lang, char *out, size_t outlen)
+{
+    if(!outlen) return;
+    out[0] = '\0';
+    if(!all || !all[0] || lang < 0) return;
+
+    const char *segment = all;
+    loopi(lang)
+    {
+        const char *sep = strchr(segment, serverdescsep);
+        if(!sep) return;
+        segment = sep + 1;
+    }
+
+    size_t n = 0;
+    while(segment[n] && segment[n] != serverdescsep && n + 1 < outlen)
+    {
+        out[n] = segment[n];
+        n++;
+    }
+    out[n] = '\0';
+}
+
+void localizeserverdesc(const char *all, int lang, char *out, size_t outlen)
+{
+    if(!outlen) return;
+    out[0] = '\0';
+    if(!all || !all[0]) return;
+
+    const int target = clamp(lang, 0, 3);
+    copyserverdesclang(all, target, out, outlen); // selected language
+    if(!out[0] && target != 1) copyserverdesclang(all, 1, out, outlen); // fallback: English
+    if(!out[0] && target != 0) copyserverdesclang(all, 0, out, outlen); // fallback: French
+}
 
 enum { UNRESOLVED = 0, RESOLVING, RESOLVED };
 
@@ -275,8 +311,9 @@ struct serverinfo : servinfo, pingattempts
     const char *password;
 
     serverinfo()
-     : resolved(UNRESOLVED), keep(false), password(NULL)
+        : resolved(UNRESOLVED), keep(false), password(NULL)
     {
+        name[0] = map[0] = desc[0] = '\0';
         clearpings();
         setoffset();
     }
@@ -542,9 +579,7 @@ void checkpings()
         getstring(text, p);
         filtertext(si->map, text, false);
         getstring(text, p);
-        filtertext(si->descen, text, true, true);
-        getstring(text, p);
-        filtertext(si->descfr, text, true, true);
+        filtertext(si->desc, text, true, true);
     }
 }
 
@@ -589,7 +624,10 @@ ICOMMAND(servinfodesc, "i", (int *i),
     GETSERVERINFO_(*i, si,
     {
         const char *status = si.status();
-        result(status ? status : language ? si.descen : si.descfr);
+        string desc;
+        localizeserverdesc(si.desc, language, desc, sizeof(desc));
+        filtertext(desc, desc, true, true);
+        result(status ? status : desc);
     }));
 ICOMMAND(servinfoname, "i", (int *i), GETSERVERINFO_(*i, si, result(si.name)));
 ICOMMAND(servinfoport, "i", (int *i), GETSERVERINFO_(*i, si, intret(si.address.port)));

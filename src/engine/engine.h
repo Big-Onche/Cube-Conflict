@@ -613,7 +613,8 @@ extern bool resolverwait(const char *name, ENetAddress *address);
 extern int connectwithtimeout(ENetSocket sock, const char *hostname, const ENetAddress &address);
 extern void addserver(const char *name, int port = 0, const char *password = NULL, bool keep = false);
 extern void writeservercfg();
-
+extern void copyserverdesclang(const char *all, int lang, char *out, size_t outlen);
+extern void localizeserverdesc(const char *all, int lang, char *out, size_t outlen);
 // client
 extern void localdisconnect(bool cleanup = true);
 extern void localservertoclient(int chan, ENetPacket *packet);
