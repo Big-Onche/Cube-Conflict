@@ -132,7 +132,15 @@ bool loadSoundFile(const string& filepath, ALuint buffer) // load a sound using 
     }
 
     num_bytes = ALsizei(framesRead * sfinfo.channels * sizeof(short));
+    while(alGetError() != AL_NO_ERROR) {} // clear stale AL errors before upload
     alBufferData(buffer, format, soundLoadScratch.data(), num_bytes, sfinfo.samplerate); // upload the sound data to the OpenAL buffer
+    ALenum uploadError = alGetError();
+    if(uploadError != AL_NO_ERROR)
+    {
+        conoutf(CON_ERROR, "Failed to upload audio buffer for %s: OpenAL error %d", filepath, uploadError);
+        sf_close(file);
+        return false;
+    }
     //reportSoundError("alBufferData", filepath, buffer);
 
     sf_close(file);
@@ -142,6 +150,11 @@ bool loadSoundFile(const string& filepath, ALuint buffer) // load a sound using 
 bool loadSound(Sound& s, bool music) // load a sound including his alts
 {
     if(noSound) return false;
+    if(soundContext && alcGetCurrentContext() != soundContext && !alcMakeContextCurrent(soundContext))
+    {
+        conoutf(CON_ERROR, "Failed to make OpenAL context current while loading sound %s", s.soundPath);
+        return false;
+    }
 
     bool allLoaded = true;
 
@@ -157,9 +170,10 @@ bool loadSound(Sound& s, bool music) // load a sound including his alts
         defformatstring(fullPath, s.numAlts ? "media/sounds/%s_%d.wav" : "media/sounds/%s.wav", s.soundPath, i + 1);
         if(music) formatstring(fullPath, s.numAlts ? "media/songs/%s_%d.flac" : "media/songs/%s.flac", s.soundPath, i + 1);
 
+        while(alGetError() != AL_NO_ERROR) {} // clear stale AL errors from earlier calls
         alGenBuffers(1, &s.bufferId[i]);
         ALenum error = alGetError();
-        if(error != AL_NO_ERROR)
+        if(error != AL_NO_ERROR || !s.bufferId[i] || !alIsBuffer(s.bufferId[i]))
         {
             conoutf(CON_ERROR, "Failed to generate buffer for %s: OpenAL error %d", s.soundPath, error);
             s.bufferId[i] = 0;
@@ -608,6 +622,8 @@ void updateListenerPos()
 
 void updateSoundOcclusion(int id)
 {
+    const float occlusionEpsilon = 0.001f;
+
     if(totalmillis >= sounds[id].nextOcclusionCheck)
     {
         bool occlusion = isOccluded(id);
@@ -622,8 +638,17 @@ void updateSoundOcclusion(int id)
     bool occlusion = sounds[id].isCurrentlyOccluded;
     float targetLF = occlusion ? 0.90f : 1.0f;
     float targetHF = occlusion ? 0.20f : 1.0f;
-    bool transitioning = (sounds[id].lfOcclusionGain != targetLF || sounds[id].hfOcclusionGain != targetHF);
-    if(!transitioning) return;
+    float lfDelta = sounds[id].lfOcclusionGain - targetLF;
+    if(lfDelta < 0.0f) lfDelta = -lfDelta;
+    float hfDelta = sounds[id].hfOcclusionGain - targetHF;
+    if(hfDelta < 0.0f) hfDelta = -hfDelta;
+    bool transitioning = (lfDelta > occlusionEpsilon || hfDelta > occlusionEpsilon);
+    if(!transitioning)
+    {
+        sounds[id].lfOcclusionGain = targetLF;
+        sounds[id].hfOcclusionGain = targetHF;
+        return;
+    }
 
     float progress = min(1.0f, (totalmillis - sounds[id].lastOcclusionChange) / 750.f);
 
@@ -754,12 +779,12 @@ static inline void updateMapSoundCache(const vector<extentity *> &ents)
     nextMapSoundsUpdate = totalmillis + MAP_SOUNDS_UPDATE_INTERVAL;
 }
 
-void checkMapSounds(bool force)
+void checkMapSounds()
 {
     if(mainmenu) return;
     const vector<extentity *> &ents = entities::getents();
 
-    if((editmode && totalmillis >= nextMapSoundsUpdate) || force) updateMapSoundCache(ents);
+    if(totalmillis >= nextMapSoundsUpdate) updateMapSoundCache(ents);
 
     const vec &cameraPos = camera1->o;
     for(int i = 0; i < mapSoundIds.length(); )
@@ -797,6 +822,7 @@ void checkMapSounds(bool force)
         else if(e.flags & EF_SOUND) stopMapSound(&e);
         ++i;
     }
+
 }
 
 void stopLinkedSound(size_t entityId, int soundType, bool clear)
