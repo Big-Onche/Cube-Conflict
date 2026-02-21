@@ -118,6 +118,7 @@ struct SoundSource
     vec velocity;
     // occlusion
     ALuint occlusionFilter;
+    int currentReverbZone;                  // Last applied reverb zone for this source
     bool isCurrentlyOccluded;               // Tracks if the source is occluded
     float lfOcclusionGain, hfOcclusionGain; // Dynamically updated low freqs and high freqs gains based on occlusion
     int lastOcclusionChange;                // Last time the occlusion state changed

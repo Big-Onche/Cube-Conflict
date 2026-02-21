@@ -343,6 +343,7 @@ void initSoundSources()
         }
         sounds[i].isActive = false;
         activeIndexInList[i] = -1;
+        sounds[i].currentReverbZone = -1;
         sounds[i].nextOcclusionCheck = 0;
         sounds[i].lastOcclusionChange = 0;
     }
@@ -500,6 +501,7 @@ void playSound(int soundId, vec soundPos, float maxRadius, float maxVolRadius, i
     sounds[id].soundFlags = flags;
     sounds[id].position = soundPos;
     sounds[id].velocity = vec(0, 0, 0);
+    sounds[id].currentReverbZone = -1;
     sounds[id].lastOcclusionChange = totalmillis;
     sounds[id].nextOcclusionCheck = totalmillis;
 
@@ -545,7 +547,9 @@ void playSound(int soundId, vec soundPos, float maxRadius, float maxVolRadius, i
         alFilterf(sounds[id].occlusionFilter, AL_LOWPASS_GAIN, sounds[id].lfOcclusionGain);
         alFilterf(sounds[id].occlusionFilter, AL_LOWPASS_GAINHF, sounds[id].hfOcclusionGain);
         alSourcei(source, AL_DIRECT_FILTER, sounds[id].occlusionFilter);
-        applyReverb(source, getReverbZone(sounds[id].position));
+        int reverbZone = getReverbZone(sounds[id].position);
+        sounds[id].currentReverbZone = reverbZone;
+        applyReverb(source, reverbZone);
     }
 
     alSourcePlay(source);
@@ -646,7 +650,15 @@ void updateSoundPosition(int id)
     getEntMovement(sounds[id].entityId, pos, vel);
     sounds[id].position = pos;
     sounds[id].velocity = vel;
-    applyReverb(sounds[id].alSource, getReverbZone(pos));
+    if(!noEfx)
+    {
+        int reverbZone = getReverbZone(pos);
+        if(reverbZone != sounds[id].currentReverbZone)
+        {
+            sounds[id].currentReverbZone = reverbZone;
+            applyReverb(sounds[id].alSource, reverbZone);
+        }
+    }
     alSource3f(sounds[id].alSource, AL_VELOCITY, vel.x, vel.z, vel.y);
     alSource3f(sounds[id].alSource, AL_POSITION, pos.x, pos.z, pos.y);
 }
