@@ -631,18 +631,20 @@ void manageSources()
     }
 }
 
-void soundNearmiss(int sound, const vec &from, const vec &to, int precision)
+void soundNearmiss(int sound, const vec &from, const vec &to)
 {
     if(noSound) return;
+    const vec &cameraPos = camera1->o;
+    const float nearMissRadiusSq = 64.f * 64.f;
     vec v;
     float d = to.dist(from, v);
-    int steps = clamp(int(d*2), 1, 1024);
+    int steps = clamp(int(d*2), 1, precision);
     v.div(steps);
     vec p = from;
     loopi(steps)
     {
         p.add(v);
-        if(camera1->o.dist(p) <= 64)
+        if(cameraPos.fastsquaredist(p) <= nearMissRadiusSq)
         {
             playSound(sound, p, 128, 50, SND_LOWPRIORITY|SND_NOOCCLUSION);
             return;
