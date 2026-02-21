@@ -8,9 +8,10 @@
 #include <limits>
 #include <vector>
 
-bool foundDevice = false;
 bool noSound = true;
 bool noEfx = false;
+static ALCdevice *soundDevice = NULL;
+static ALCcontext *soundContext = NULL;
 
 //VAR(debugsounds, 0, 0, 1);
 VARFP(soundvol, 0, 100, 100, alListenerf(AL_GAIN, soundvol/100.f); );
@@ -350,8 +351,8 @@ void initSoundSources()
 
 void initSounds()
 {
-    ALCdevice* device = alcOpenDevice(NULL); // open default device
-    if(!device) { conoutf("Unable to initialize OpenAL (no audio device detected)"); return; }
+    soundDevice = alcOpenDevice(NULL); // open default device
+    if(!soundDevice) { conoutf("Unable to initialize OpenAL (no audio device detected)"); return; }
 
     ALCint attributes[] = {
         ALC_FREQUENCY, soundfreq,
@@ -359,17 +360,20 @@ void initSounds()
         0
     };
 
-    ALCcontext *context = alcCreateContext(device, attributes);
-    if(!context || !alcMakeContextCurrent(context))
+    soundContext = alcCreateContext(soundDevice, attributes);
+    if(!soundContext || !alcMakeContextCurrent(soundContext))
     {
         conoutf("Unable to initialize OpenAL (!context)");
-        alcCloseDevice(device);
+        if(soundContext) { alcDestroyContext(soundContext); soundContext = NULL; }
+        alcCloseDevice(soundDevice);
+        soundDevice = NULL;
         return;
     }
 
     noSound = false;
+    noEfx = false;
 
-    if(!alcIsExtensionPresent(device, "ALC_EXT_EFX")) // check for EFX extension support
+    if(!alcIsExtensionPresent(soundDevice, "ALC_EXT_EFX")) // check for EFX extension support
     {
         conoutf(CON_WARN, "EFX extension not available.");
         noEfx = true;
@@ -864,11 +868,20 @@ void cleanUpSounds()
     }
 
     if(!noEfx) alDeleteAuxiliaryEffectSlots(NUMREVERBS, auxEffectSlots);
-    ALCcontext* context = alcGetCurrentContext();
-    ALCdevice* device = alcGetContextsDevice(context);
-    alcMakeContextCurrent(NULL);
-    alcDestroyContext(context);
-    alcCloseDevice(device);
+
+    if(soundContext)
+    {
+        if(alcGetCurrentContext() == soundContext) alcMakeContextCurrent(NULL);
+        alcDestroyContext(soundContext);
+        soundContext = NULL;
+    }
+    if(soundDevice)
+    {
+        alcCloseDevice(soundDevice);
+        soundDevice = NULL;
+    }
+
+    noSound = true;
 }
 
 ICOMMAND(playSound, "sii", (char *soundName, bool fixedPitch, bool uiSound),
