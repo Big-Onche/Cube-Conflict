@@ -258,10 +258,11 @@ int reverb[NUMREVERBS];
 void configureMapReverbs(int a, int b, int c, int d, int e)
 {
     int params[] = {a, b, c, d, e};
+
     loopi(sizeof(params) / sizeof(params[0]))
     {
-        if(params[i] >= 0 && params[i] <= numReverbPresets) applyReverbPreset(auxEffectSlots[i], reverbPresets[params[i]]);
-        else conoutf(CON_ERROR, "Parameter %d is out of the valid range (0 to %d).", i + 1, numReverbPresets);
+        if(params[i] >= 0 && params[i] < numReverbPresets) applyReverbPreset(auxEffectSlots[i], reverbPresets[params[i]]);
+        else conoutf(CON_ERROR, "Parameter %d is out of the valid range (0 to %d).", i + 1, numReverbPresets - 1);
     }
 }
 
