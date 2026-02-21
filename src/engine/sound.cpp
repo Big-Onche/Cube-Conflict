@@ -720,15 +720,14 @@ static inline void updateMapSoundCache(const vector<extentity *> &ents)
         if(e->type == ET_SOUND || (e->flags & EF_SOUND)) mapSoundIds.add(i);
     }
     nextMapSoundsUpdate = totalmillis + MAP_SOUNDS_UPDATE_INTERVAL;
-    conoutf("updated");
 }
 
-void checkMapSounds()
+void checkMapSounds(bool force)
 {
     if(mainmenu) return;
     const vector<extentity *> &ents = entities::getents();
 
-    if(editmode && totalmillis >= nextMapSoundsUpdate) updateMapSoundCache(ents);
+    if((editmode && totalmillis >= nextMapSoundsUpdate) || force) updateMapSoundCache(ents);
 
     const vec &cameraPos = camera1->o;
     for(int i = 0; i < mapSoundIds.length(); )
