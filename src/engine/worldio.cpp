@@ -488,8 +488,9 @@ void savevslot(stream *f, VSlot &vs, int prev)
 void savevslots(stream *f, int numvslots)
 {
     if(vslots.empty()) return;
+    if(numvslots <= 0) return;
     int *prev = new int[numvslots];
-    memset(prev, -1, numvslots*sizeof(int));
+    memset(prev, -1, (size_t)numvslots*sizeof(int));
     loopi(numvslots)
     {
         VSlot *vs = vslots[i];
@@ -564,9 +565,10 @@ void loadvslot(stream *f, VSlot &vs, int changed)
 
 void loadvslots(stream *f, int numvslots)
 {
+    if(numvslots <= 0) return;
     int *prev = new (false) int[numvslots];
     if(!prev) return;
-    memset(prev, -1, numvslots*sizeof(int));
+    memset(prev, -1, (size_t)numvslots*sizeof(int));
     while(numvslots > 0)
     {
         int changed = f->getlil<int>();
