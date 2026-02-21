@@ -5,7 +5,6 @@
 #include <sndfile.h>
 #include <AL/efx.h>
 #include <AL/alext.h>
-#include <unordered_set>
 
 bool foundDevice = false;
 bool noSound = true;
@@ -253,9 +252,43 @@ int getReverbZone(vec pos)
 }
 
 SoundSource sounds[MAX_SOURCES];
+vector<int> activeSourceIds;
+vector<int> freeSourceIds;
+int activeIndexInList[MAX_SOURCES];
+
+static inline int activeSourceCount() { return activeSourceIds.length(); }
+
+static inline void activateSource(int id)
+{
+    sounds[id].isActive = true;
+    activeIndexInList[id] = activeSourceIds.length();
+    activeSourceIds.add(id);
+}
+
+static inline void recycleSource(int activeListIndex)
+{
+    ASSERT(activeSourceIds.inrange(activeListIndex));
+    int id = activeSourceIds[activeListIndex];
+    ASSERT(activeIndexInList[id] == activeListIndex);
+    int lastIndex = activeSourceIds.length() - 1;
+    int movedId = activeSourceIds[lastIndex];
+
+    activeSourceIds[activeListIndex] = movedId;
+    activeIndexInList[movedId] = activeListIndex;
+    activeSourceIds.pop();
+
+    activeIndexInList[id] = -1;
+    sounds[id].isActive = false;
+    freeSourceIds.add(id);
+}
 
 void initSoundSources()
 {
+    activeSourceIds.shrink(0);
+    freeSourceIds.shrink(0);
+    activeSourceIds.reserve(MAX_SOURCES);
+    freeSourceIds.reserve(MAX_SOURCES);
+
     loopi(MAX_SOURCES)
     {
         alGenSources(1, &sounds[i].alSource);
@@ -265,7 +298,10 @@ void initSoundSources()
             alGenFilters(1, &sounds[i].occlusionFilter);
             alFilteri(sounds[i].occlusionFilter, AL_FILTER_TYPE, AL_FILTER_LOWPASS);
         }
+        sounds[i].isActive = false;
+        activeIndexInList[i] = -1;
     }
+    loopirev(MAX_SOURCES) freeSourceIds.add(i);
 }
 
 void initSounds()
@@ -363,15 +399,14 @@ float getRandomSoundPitch(int flags)
     return (0.92f + 0.16f * static_cast<float>(rand()) / RAND_MAX) * pitchSpeed;
 }
 
-std::unordered_set<size_t> activeSources;
-
 inline bool canPlaySound(int soundId, int maxRadius, int flags, vec soundPos, bool hasSoundPos)
 {
     if(soundId < 0 || soundId >= NUMSNDS || noSound || mutesounds) return false; // invalid index or openal not initialized or mute
 
     if(hasSoundPos && !(flags & SND_NOCULL) && camera1->o.dist(soundPos) > maxRadius + 50) return false; // do not play sound too far from camera, except if flag SND_NOCULL
-    if((flags & SND_LOWPRIORITY) && (activeSources.size() >= (size_t)maxsoundsatonce / 2)) return false; // skip low-priority sounds (distant shoots etc.) when we are already playing a lot of sounds
-    if(activeSources.size() >= (size_t)maxsoundsatonce) // no inactive source
+    int activeCount = activeSourceCount();
+    if((flags & SND_LOWPRIORITY) && (activeCount >= maxsoundsatonce / 2)) return false; // skip low-priority sounds (distant shoots etc.) when we are already playing a lot of sounds
+    if(activeCount >= maxsoundsatonce) // no inactive source
     {
         static bool warned = false;
         if(!warned) { conoutf(CON_WARN, "Max sounds at once capacity reached (%d)", maxsoundsatonce); warned = true; }
@@ -385,13 +420,12 @@ void playSound(int soundId, vec soundPos, float maxRadius, float maxVolRadius, i
     bool hasSoundPos = !soundPos.iszero();
 
     if(!canPlaySound(soundId, maxRadius, flags, soundPos, hasSoundPos)) return;
+    if(freeSourceIds.empty()) return;
 
-    int id = 0;
-    loopi(maxsoundsatonce) { if(!sounds[i].isActive) { id = i; break; } } // search after an inactive source
+    int id = freeSourceIds.pop();
 
     // now we set a shitload of sound parameters
-    activeSources.insert(id);
-    sounds[id].isActive = true;       // now the source is set to active
+    activateSource(id);               // now the source is set to active
     sounds[id].entityId = entityId;
     sounds[id].soundType = soundType;
     sounds[id].soundId = soundId;
@@ -452,16 +486,15 @@ void stopSound(int soundId, int flags)
 {
     if(soundId < 0 || soundId >= NUMSNDS || noSound) return; // invalid index or openal not initialized
 
-    for(auto it = activeSources.begin(); it != activeSources.end(); /* no increment here */)
+    loopi(activeSourceIds.length())
     {
-        size_t id = *it;
+        int id = activeSourceIds[i];
         if(sounds[id].soundId == soundId && sounds[id].soundFlags == flags)
         {
             alSourceStop(sounds[id].alSource);
-            sounds[id].isActive = false;
-            it = activeSources.erase(it);
+            recycleSource(i);
         }
-        else it++;
+        else ++i;
     }
 }
 
@@ -472,9 +505,9 @@ void stopMusic(int soundId)
 
 void updateMusicVol()
 {
-    for(auto it = activeSources.begin(); it != activeSources.end(); it++)
+    loopv(activeSourceIds)
     {
-        size_t id = *it;
+        int id = activeSourceIds[i];
         if(sounds[id].soundFlags & SND_MUSIC)
         {
             alSourcef(sounds[id].alSource, AL_GAIN, musicvol/100.f);
@@ -553,20 +586,20 @@ void manageSources()
     if(noSound) return;
 
     ALint state;
-    for(auto it = activeSources.begin(); it != activeSources.end(); /* no increment here */)
+    loopi(activeSourceIds.length())
     {
-        size_t id = *it;
+        int id = activeSourceIds[i];
         alGetSourcei(sounds[id].alSource, AL_SOURCE_STATE, &state);
 
         if(state == AL_STOPPED)
         {
-            sounds[id].isActive = false;
-            it = activeSources.erase(it); // Erase and advance iterator in one step to avoid invalidating the iterator
+            recycleSource(i);
+            continue;
         }
-        else ++it; // Only increment iterator if not erasing
 
         if(sounds[id].entityId != SIZE_MAX) updateSoundPosition(id);
         updateSoundOcclusion(id);
+        ++i;
     }
 }
 
@@ -595,19 +628,18 @@ void stopMapSound(extentity *e, bool deleteEnt)
 
     size_t entityId = e->entityId;
 
-    for(auto it = activeSources.begin(); it != activeSources.end(); /* no increment here */)
+    loopi(activeSourceIds.length())
     {
-        size_t id = *it;
+        int id = activeSourceIds[i];
         if(sounds[id].entityId == entityId)
         {
             alSourceStop(sounds[id].alSource);
-            sounds[id].isActive = false;
-            it = activeSources.erase(it);
+            recycleSource(i);
 
             removeEntityPos(e->entityId);
             if(!deleteEnt) e->flags &= ~EF_SOUND;
         }
-        else ++it;
+        else ++i;
     }
 }
 
@@ -651,26 +683,25 @@ void checkMapSounds()
 
 void stopLinkedSound(size_t entityId, int soundType, bool clear)
 {
-    for(auto it = activeSources.begin(); it != activeSources.end(); /* no increment here */)
+    loopi(activeSourceIds.length())
     {
-        size_t id = *it;
+        int id = activeSourceIds[i];
         if(sounds[id].entityId == entityId && (sounds[id].soundType == soundType || clear))
         {
             alSourceStop(sounds[id].alSource);
             //reportSoundError("alSourceStop-stopLinkedSound", "Error while stopping linked sound");
-            sounds[id].isActive = false;
-            it = activeSources.erase(it);
+            recycleSource(i);
         }
-        else it++;
+        else ++i;
     }
 }
 
 void updateSoundPitch(size_t entityId, int soundType, float pitch)
 {
     if(game::gamespeed != 100) pitch *= (game::gamespeed / 100.f);
-    for(auto it = activeSources.begin(); it != activeSources.end(); it++)
+    loopv(activeSourceIds)
     {
-        size_t id = *it;
+        int id = activeSourceIds[i];
         if(sounds[id].entityId == entityId && sounds[id].soundType == soundType)
         {
             alSourcef(sounds[id].alSource, AL_PITCH, pitch);
@@ -681,32 +712,31 @@ void updateSoundPitch(size_t entityId, int soundType, float pitch)
 
 void stopAllSounds(bool pause)
 {
-    for(auto it = activeSources.begin(); it != activeSources.end(); /* no increment here */)
+    loopi(activeSourceIds.length())
     {
-        size_t id = *it;
+        int id = activeSourceIds[i];
         if(pause || !(sounds[id].soundFlags & SND_MUSIC))
         {
             if(pause)
             {
                 alSourcePause(sounds[id].alSource);
-                it++;
+                ++i;
             }
             else
             {
                 alSourceStop(sounds[id].alSource);
-                sounds[id].isActive = false;
-                it = activeSources.erase(it);
+                recycleSource(i);
             }
         }
-        else it++;
+        else ++i;
     }
 }
 
 void resumeAllSounds()
 {
-    for(auto it = activeSources.begin(); it != activeSources.end(); it++)
+    loopv(activeSourceIds)
     {
-        size_t id = *it;
+        int id = activeSourceIds[i];
         alSourcePlay(sounds[id].alSource);
     }
 }
