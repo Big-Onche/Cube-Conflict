@@ -486,7 +486,7 @@ void stopSound(int soundId, int flags)
 {
     if(soundId < 0 || soundId >= NUMSNDS || noSound) return; // invalid index or openal not initialized
 
-    loopi(activeSourceIds.length())
+    for(int i = 0; i < activeSourceIds.length(); )
     {
         int id = activeSourceIds[i];
         if(sounds[id].soundId == soundId && sounds[id].soundFlags == flags)
@@ -586,7 +586,8 @@ void manageSources()
     if(noSound) return;
 
     ALint state;
-    loopi(activeSourceIds.length())
+    const int nonOcclusionFlags = SND_MUSIC | SND_UI;
+    for(int i = 0; i < activeSourceIds.length(); )
     {
         int id = activeSourceIds[i];
         alGetSourcei(sounds[id].alSource, AL_SOURCE_STATE, &state);
@@ -598,7 +599,7 @@ void manageSources()
         }
 
         if(sounds[id].entityId != SIZE_MAX) updateSoundPosition(id);
-        updateSoundOcclusion(id);
+        if(!(sounds[id].soundFlags & nonOcclusionFlags)) updateSoundOcclusion(id);
         ++i;
     }
 }
@@ -628,7 +629,7 @@ void stopMapSound(extentity *e, bool deleteEnt)
 
     size_t entityId = e->entityId;
 
-    loopi(activeSourceIds.length())
+    for(int i = 0; i < activeSourceIds.length(); )
     {
         int id = activeSourceIds[i];
         if(sounds[id].entityId == entityId)
@@ -683,7 +684,7 @@ void checkMapSounds()
 
 void stopLinkedSound(size_t entityId, int soundType, bool clear)
 {
-    loopi(activeSourceIds.length())
+    for(int i = 0; i < activeSourceIds.length(); )
     {
         int id = activeSourceIds[i];
         if(sounds[id].entityId == entityId && (sounds[id].soundType == soundType || clear))
@@ -712,7 +713,7 @@ void updateSoundPitch(size_t entityId, int soundType, float pitch)
 
 void stopAllSounds(bool pause)
 {
-    loopi(activeSourceIds.length())
+    for(int i = 0; i < activeSourceIds.length(); )
     {
         int id = activeSourceIds[i];
         if(pause || !(sounds[id].soundFlags & SND_MUSIC))
