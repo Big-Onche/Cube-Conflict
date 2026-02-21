@@ -588,6 +588,7 @@ void updateMusicVol()
 
 void updateListenerPos()
 {
+    gameent *hud = game::hudplayer();
     ALfloat listenerPos[] = {camera1->o.x, camera1->o.z, camera1->o.y}; // updating listener position
     alListenerfv(AL_POSITION, listenerPos);
 
@@ -597,8 +598,8 @@ void updateListenerPos()
     };
 
     alListenerfv(AL_ORIENTATION, orientation); // set the listener's orientation
-    float f = game::hudplayer()->boostmillis[B_SHROOMS] ? 3.f : (game::hudplayer()->boostmillis[B_EPO] ? 20 : 70.f);
-    alListener3f(AL_VELOCITY, game::hudplayer()->vel.x/f, game::hudplayer()->vel.z/f, game::hudplayer()->vel.y/f); // set the listener's velocity
+    float f = hud->boostmillis[B_SHROOMS] ? 3.f : (hud->boostmillis[B_EPO] ? 20 : 70.f);
+    alListener3f(AL_VELOCITY, hud->vel.x/f, hud->vel.z/f, hud->vel.y/f); // set the listener's velocity
 }
 
 void updateSoundOcclusion(int id)
