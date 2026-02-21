@@ -771,11 +771,11 @@ namespace game
                     }
 
                     //////////////////////////////////// Other mdls rendering ////////////////////////////////////////////////////////////////////////
-                    if(npcs[m.mtype].shieldname) a[ai++] = modelattach("tag_shield", npcs[m.mtype].shieldname, 0, 0);
-                    if(npcs[m.mtype].hatname) a[ai++] = modelattach("tag_hat", npcs[m.mtype].hatname, 0, 0);
-                    if(npcs[m.mtype].capename) a[ai++] = modelattach("tag_cape", npcs[m.mtype].capename, 0, 0);
-                    if(npcs[m.mtype].boost1name) a[ai++] = modelattach("tag_boost1", npcs[m.mtype].boost1name, 0, 0);
-                    if(npcs[m.mtype].boost2name) a[ai++] = modelattach("tag_boost2", npcs[m.mtype].boost2name, 0, 0);
+                    if(npcs[m.mtype].shieldname[0]) a[ai++] = modelattach("tag_shield", npcs[m.mtype].shieldname, 0, 0);
+                    if(npcs[m.mtype].hatname[0]) a[ai++] = modelattach("tag_hat", npcs[m.mtype].hatname, 0, 0);
+                    if(npcs[m.mtype].capename[0]) a[ai++] = modelattach("tag_cape", npcs[m.mtype].capename, 0, 0);
+                    if(npcs[m.mtype].boost1name[0]) a[ai++] = modelattach("tag_boost1", npcs[m.mtype].boost1name, 0, 0);
+                    if(npcs[m.mtype].boost2name[0]) a[ai++] = modelattach("tag_boost2", npcs[m.mtype].boost2name, 0, 0);
                 }
 
                 rendermodel(npcs[m.mtype].mdlname, anim, o, yaw, pitch, 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY, &m, a[0].tag ? a : NULL, basetime, 0, fade);
