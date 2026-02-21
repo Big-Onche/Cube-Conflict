@@ -278,14 +278,17 @@ void applyReverb(ALuint source, int reverb)
 int getReverbZone(vec pos)
 {
     bool hudSound = pos.iszero();
+    const vec &cameraPos = camera1->o;
+    const float reverbCheckRadiusSq = 600.f * 600.f;
 
     if(game::hudplayer()->boostmillis[B_SHROOMS]) return REV_SHROOMS;
-    else if(isUnderWater(camera1->o)) return REV_UNDERWATER;
+    else if(isUnderWater(cameraPos)) return REV_UNDERWATER;
 
-    if(camera1->o.dist(pos) < 600 || hudSound)
+    if(hudSound || cameraPos.fastsquaredist(pos) < reverbCheckRadiusSq)
     {
-        if(hudSound) pos = camera1->o;
-        loopi(4) { if(lookupmaterial(pos) == MAT_REVERB + i) return REV_SECOND + i; }
+        if(hudSound) pos = cameraPos;
+        int mat = lookupmaterial(pos);
+        if(mat >= MAT_REVERB && mat < MAT_REVERB + 4) return REV_SECOND + (mat - MAT_REVERB);
     }
     return REV_MAIN;
 }
