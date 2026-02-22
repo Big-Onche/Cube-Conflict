@@ -604,18 +604,19 @@ namespace ai
         }
     }
 
-    bool needshield(gameent *d, bool powerarmour)
+    bool needShield(gameent *d, bool powerArmor)
     {
-        if(powerarmour && d->armour < (1000 + (d->skill * 5)) && d->armourtype!=A_POWERARMOR) return true;
+        if(powerArmor && d->armourtype != A_POWERARMOR) return true;
+
         switch(d->character)
         {
             case C_VAMPIRE:
             case C_REAPER:
             case C_NINJA:
             case C_CAMPER:
-                return d->armour < 1500;
+                return d->armour < (1500 + (d->skill * 7.5f));
             default:
-                return d->armour < 750;
+                return d->armour < (1000 + (d->skill * 5));
         }
     }
 
@@ -857,6 +858,7 @@ namespace ai
     {
         switch(type)
         {
+            case I_POWERARMOR:
             case I_GOLDSHIELD:
             case I_MAGNETSHIELD:
             case I_SUPERARME:
@@ -878,10 +880,10 @@ namespace ai
         switch(e.type)
         {
             case I_SUPERARME:
-                score = m_ctf ? 1e3f : 1e9f;
+                score = m_ctf ? 1e5f : 1e9f;
                 break;
             case I_ROIDS: case I_JOINT: case I_SHROOMS: case I_BOOSTPV: case I_EPO:
-                d->character==C_JUNKIE ? score = 1e9f : score = m_ctf ? 1e2f : 1e7f;
+                d->character==C_JUNKIE ? score = 1e9f : score = m_ctf ? 1e4f : 1e7f;
                 break;
             case I_SANTE:
                 if(d->health < 800)
@@ -903,7 +905,8 @@ namespace ai
                 if(d->armour <= 1250) score =  m_ctf ? 1e3f : 1e6f;
                 break;
             case I_POWERARMOR:
-                if(!d->hasPowerArmor()) score =  m_ctf ? 1e3f : 1e9f;
+                if(d->hasPowerArmor()) score = 0;
+                else score =  m_ctf ? 1e4f : 1e9f;
                 break;
             default:
             {
@@ -1014,7 +1017,7 @@ namespace ai
             const vec feet = d->feetpos();
             nearbyitems(d, b, interests, feet); // default: cheap spatial query first
             priorityitems(d, b, interests, feet); // always consider high-value map pickups globally
-            if(interests.empty() && (!hasgoodammo(d) || badhealth(d) || needmana(d) || needshield(d, false)))
+            if(interests.empty() && (!hasgoodammo(d) || badhealth(d) || needmana(d) || needShield(d, false)))
                 items(d, b, interests);
         }
         if(cmode) cmode->aifind(d, b, interests);
@@ -1132,13 +1135,14 @@ namespace ai
         extentity &e = *entities::ents[ent];
         if(entities::validitem(e.type))
         {
+            int item = e.type;
             loopv(players)
             {
                 gameent *d = players[i];
-                if(d && d->ai && d->aitype == AI_BOT && d->state == CS_ALIVE && d->canpickupitem(e.type, d->character))
+                if(d && d->ai && d->aitype == AI_BOT && d->state == CS_ALIVE && d->canpickupitem(item, d->character))
                 {
                     bool wantsitem = false;
-                    switch(e.type)
+                    switch(item)
                     {
                         case I_SANTE: case I_BOOSTPV: wantsitem = badhealth(d); break;
                         case I_MANA:
@@ -1149,7 +1153,7 @@ namespace ai
                         case I_IRONSHIELD:
                         case I_WOODSHIELD:
                         case I_POWERARMOR:
-                            wantsitem = needshield(d, e.type==I_POWERARMOR ? true : false);
+                            wantsitem = needShield(d, item==I_POWERARMOR ? true : false);
                             break;
                         case I_SUPERARME: case I_ROIDS: case I_JOINT: case I_SHROOMS: case I_EPO:
                             wantsitem = true;
