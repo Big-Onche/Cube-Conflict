@@ -2391,12 +2391,13 @@ namespace server
 
     void startintermission() { gamelimit = min(gamelimit, gamemillis); checkintermission(true); }
 
-    int calcDamage(int baseDamage, int atk, clientinfo *target, clientinfo *actor)
+    int calcDamage(int baseDamage, int atk, clientinfo *target, clientinfo *actor, bool skipTarget = false)
     {
         servstate &ts = target->state;
         servstate &as = actor->state;
 
         int damage = (baseDamage*classes[actor->character].damage) / (classes[target->character].resistance); // main class damage/resistance multiplier
+        if(actor->state.boostmillis[B_ROIDS]) damage *= (target->character==C_JUNKIE ? 3 : 2);
         if(target->state.boostmillis[B_JOINT]) damage /= (target->character==C_JUNKIE ? 1.875f : 1.25f); // joint damage reduce
 
         switch(actor->character) // Skill and class damage boost/reduction from actor
@@ -2424,41 +2425,46 @@ namespace server
             }
         }
 
-        switch(target->character) // Skill and class damage boost/reduction from target
+        if(!skipTarget)
         {
-            case C_WIZARD:
-                if(ts.abilitymillis[ABILITY_3]) damage /= 5.f;
-                break;
-
-            case C_VIKING:
-                if(actor!=target)
-                {
-                    ts.boostmillis[B_RAGE] += (damage * 5);
-                    sendf(-1, 1, "ri3", N_VIKING, target->clientnum, ts.boostmillis[B_RAGE]);
-                }
-                break;
-
-            case C_PRIEST:
-                if(ts.abilitymillis[ABILITY_2] && ts.mana)
-                {
-                    float manaUsed = min(damage/10.f, (float)ts.mana),
-                          damageReduction = manaUsed * 10;
-
-                    damage = max(0.f, damage - damageReduction);
-                    ts.mana -= manaUsed;
-                    sendf(-1, 1, "ri3", N_PRIEST, target->clientnum, ts.mana);
-                }
-                break;
-
-            case C_SHOSHONE:
+            switch(target->character) // Skill and class damage boost/reduction from target
             {
-                if(as.abilitymillis[ABILITY_1]) damage /= 1.3f;
-                if(actor->character==C_AMERICAN) damage *= 1.25f;
+                case C_WIZARD:
+                    if(ts.abilitymillis[ABILITY_3]) damage /= 5.f;
+                    break;
+
+                case C_VIKING:
+                    if(actor!=target)
+                    {
+                        ts.boostmillis[B_RAGE] += (damage * 5);
+                        sendf(-1, 1, "ri3", N_VIKING, target->clientnum, ts.boostmillis[B_RAGE]);
+                    }
+                    break;
+
+                case C_PRIEST:
+                    if(ts.abilitymillis[ABILITY_2] && ts.mana)
+                    {
+                        float manaUsed = min(damage/10.f, (float)ts.mana),
+                        damageReduction = manaUsed * 10;
+
+                        damage = max(0.f, damage - damageReduction);
+                        ts.mana -= manaUsed;
+                        sendf(-1, 1, "ri3", N_PRIEST, target->clientnum, ts.mana);
+                    }
+                    break;
+
+                case C_SHOSHONE:
+                {
+                    if(as.abilitymillis[ABILITY_1]) damage /= 1.3f;
+                    if(actor->character==C_AMERICAN) damage *= 1.25f;
+                }
             }
         }
-
         return damage;
     }
+
+    bool canExplode(const servstate &gs);
+    void destroyPowerArmor(clientinfo *owner);
 
     void dodamage(clientinfo *target, clientinfo *actor, int baseDamage, int atk, const vec &hitpush = vec(0, 0, 0), bool afterBurn = false)
     {
@@ -2512,6 +2518,7 @@ namespace server
         ts.dodamage(damage, target->character==C_PHYSICIST && ts.abilitymillis[ABILITY_1]); // update target hp and shield
         sendf(-1, 1, "ri8", N_DAMAGE, target->clientnum, actor->clientnum, damage, ts.armour, ts.health, ts.afterburnmillis, atk);
         if(target!=actor && !isteam(target->team, actor->team)) as.damage += damage; // damage server stat
+        if(canExplode(ts)) destroyPowerArmor(target);
 
         if(target->character!=C_AMERICAN) // physical hit push
         {
@@ -2522,6 +2529,7 @@ namespace server
 
         if(ts.health<=0) // target dead
         {
+            if(canExplode(ts)) destroyPowerArmor(target);
             target->state.deaths++;
             loopi(NUMBOOSTS) target->state.boostmillis[i] = 0;
 
@@ -2578,10 +2586,12 @@ namespace server
     {
         servstate &gs = ci->state;
         if(gs.state!=CS_ALIVE) return;
+        if(canExplode(gs)) destroyPowerArmor(ci);
         int fragvalue = smode ? smode->fragvalue(ci, ci) : -1;
         ci->state.frags += fragvalue;
         ci->state.killstreak = 0;
         ci->state.deaths++;
+        ci->state.health = 0;
         teaminfo *t = m_teammode && validteam(ci->team) ? &teaminfos[ci->team-1] : NULL;
         if(t) t->frags += fragvalue;
         sendf(-1, 1, "ri7", N_DIED, ci->clientnum, ci->clientnum, gs.frags, 0, t ? t->frags : 0, 0);
@@ -2595,6 +2605,47 @@ namespace server
     void suicideevent::process(clientinfo *ci)
     {
         suicide(ci);
+    }
+
+    bool canExplode(const servstate &gs)
+    {
+        return ((gs.armour <= 0 || gs.health <= 0) && gs.ammo[GUN_POWERARMOR] && gs.armourtype == A_POWERARMOR);
+    }
+
+    void destroyPowerArmor(clientinfo *owner)
+    {
+        if(!owner) return;
+
+        servstate &os = owner->state;
+
+        os.ammo[GUN_POWERARMOR] = 0;
+
+        int id = lastmillis;
+        vec from = os.o;
+
+        sendf(-1, 1, "rii9", N_SHOTFX, owner->clientnum, ATK_POWERARMOR, id,
+              int(from.x*DMF), int(from.y*DMF), int(from.z*DMF),
+              int(from.x*DMF), int(from.y*DMF), int(from.z*DMF),
+              owner->ownernum);
+        sendf(-1, 1, "ri4", N_EXPLODEFX, owner->clientnum, ATK_POWERARMOR, id);
+
+        loopv(clients)
+        {
+            clientinfo *target = clients[i];
+            if(!target || target==owner || target->state.state!=CS_ALIVE) continue;
+
+            float dist = target->state.o.dist(from);
+            if(dist >= attacks[ATK_POWERARMOR].exprad) continue;
+
+            float damage = attacks[ATK_POWERARMOR].damage*(1-dist/EXP_DISTSCALE/attacks[ATK_POWERARMOR].exprad);
+            if(damage <= 0) continue;
+
+            vec dir = vec(target->state.o).sub(from);
+            if(dir.iszero()) dir = vec(0, 0, 1);
+            else dir.normalize();
+
+            dodamage(target, owner, max(int(damage), 1), ATK_POWERARMOR, dir);
+        }
     }
 
     void explodeevent::process(clientinfo *ci)
@@ -2641,7 +2692,7 @@ namespace server
             if(dup) continue;
 
             float damage = attacks[atk].damage*(1-h.dist/EXP_DISTSCALE/attacks[atk].exprad);
-            if(gs.hasRoids()) damage*= ci->character==C_JUNKIE ? 3 : 2;
+
             if(target==ci)
             {
                 switch(atk)
@@ -2652,6 +2703,7 @@ namespace server
             }
             if(damage > 0)
             {
+                gs.shotdamage += calcDamage(damage, atk, target, ci);
                 dodamage(target, ci, max(int(damage), 1), atk, h.dir);
                 if(ci->character==C_VAMPIRE) doregen(target, ci, damage);
             }
@@ -2668,8 +2720,7 @@ namespace server
         servstate &gs = ci->state;
         int wait = millis - gs.lastshot;
 
-        if(gs.armourtype == A_POWERARMOR && !gs.armour && gs.ammo[GUN_POWERARMOR] && gs.gunselect==GUN_POWERARMOR) gs.gunwait=0;
-        if(ci->character == C_KAMIKAZE && !gs.mana && !gs.abilitymillis[ABILITY_2] && gs.ammo[GUN_KAMIKAZE]) gs.gunwait = 0;
+        if(ci->character == C_KAMIKAZE && !gs.abilitymillis[ABILITY_2] && gs.ammo[GUN_KAMIKAZE]) gs.gunwait = 0;
 
         if(!gs.isalive(gamemillis) || wait<gs.gunwait || !validatk(atk) || !validClass(ci->character)) return;
 
@@ -2690,9 +2741,6 @@ namespace server
                 int(from.x*DMF), int(from.y*DMF), int(from.z*DMF),
                 int(to.x*DMF), int(to.y*DMF), int(to.z*DMF),
                 ci->ownernum);
-        gs.shotdamage += attacks[atk].damage*attacks[atk].rays;
-        if(gs.hasRoids()) gs.shotdamage*=ci->character==C_JUNKIE ? 3 : 2;
-        if(gs.boostmillis[B_RAGE]) gs.shotdamage*=1.25f;
 
         switch(atk)
         {
@@ -2731,8 +2779,7 @@ namespace server
                     totalrays += h.rays;
                     if(totalrays>maxrays) continue;
                     int damage = h.rays*attacks[atk].damage;
-                    if(gs.hasRoids()) damage*=ci->character==C_JUNKIE ? 3 : 2;
-                    if(gs.boostmillis[B_RAGE]) gs.shotdamage*=1.25f;
+                    gs.shotdamage += calcDamage(damage, atk, target, ci);
                     dodamage(target, ci, damage, atk, h.dir);
                     if(ci->character==C_VAMPIRE) doregen(target, ci, damage);
                 }

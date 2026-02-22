@@ -1855,8 +1855,7 @@ namespace ai
         const bool enemyok = e && targetable(d, e);
         const float enemyDistSq = enemyok ? d->o.squaredist(e->o) : 0.f;
 
-        if(d->armourtype==A_POWERARMOR && !d->armour && d->ammo[GUN_POWERARMOR]) {gunselect(GUN_POWERARMOR, d, true); goto process;}
-        else {loopi(4) if(d->hasammo(GUN_S_NUKE+i)) {gunselect(GUN_S_NUKE+i, d); goto process;} }
+        loopi(4) if(d->hasammo(GUN_S_NUKE+i)) {gunselect(GUN_S_NUKE+i, d); goto process;}
 
         switch(d->character)
         {

@@ -672,7 +672,8 @@ struct gamestate
 
         if(m_fullstuff)
         {
-            armourtype = A_IRON;
+            ammo[GUN_POWERARMOR] = 1;
+            armourtype = A_POWERARMOR;
             armour = armourBonus ? 1750 : 1250;
             return;
         }
@@ -809,7 +810,7 @@ struct gameent : dynent, gamestate
 
     int lastability[3], lastabilityrequest;
     int attacksound; // 0 = no sound, 1 = close sound, 2 = close + far sound
-    bool shieldbroken, powerarmorexploded, powerarmorsound;
+    bool shieldbroken, powerarmorsound;
     int lastOutOfMap;
     bool wasAttacking, isOutOfMap;
     bool isConnected;
@@ -872,7 +873,6 @@ struct gameent : dynent, gamestate
         gunaccel = 0;
         killstreak = 0;
         attacksound = 0;
-        powerarmorexploded = false;
         powerarmorsound = false;
         shieldbroken = false;
     }
@@ -1027,7 +1027,6 @@ namespace game
     extern void startgame();
     extern float proximityscore(float x, float lower, float upper);
     extern void spawnplayer(gameent *);
-    extern bool powerArmorExploding(gameent *d);
     extern bool kamikazeExploding(gameent *d);
     extern void deathstate(gameent *d, bool restore = false);
     extern void damaged(int damage, gameent *d, gameent *actor, bool local = true, int atk = 0);

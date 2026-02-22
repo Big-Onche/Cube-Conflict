@@ -1724,7 +1724,7 @@ namespace game
                 gameent *s = getclient(scn);
                 if(!s || !validatk(atk)) break;
                 int gun = attacks[atk].gun;
-                s->gunselect = gun;
+                if(gun!=GUN_POWERARMOR) s->gunselect = gun;
                 if(!m_muninfinie || server::noInfiniteAmmo(atk)) s->ammo[gun] -= attacks[atk].use;
                 s->gunwait = attacks[atk].attackdelay;
                 int prevaction = s->lastaction;

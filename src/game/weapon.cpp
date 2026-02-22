@@ -292,7 +292,7 @@ namespace game
             d->curdamagecolor = 0x888888;
         }
 
-        if(!d->armour || d->armourtype!=A_MAGNET)
+        if(d->armour <= 0 || d->armourtype!=A_MAGNET)
         {
             if(blood) particle_splash(PART_BLOOD, damage > 300 ? 3 : damage/100, 1000, p, 0x60FFFF, 2.96f);
             gibeffect(damage, vec(0,0,0), d);
@@ -1038,13 +1038,6 @@ namespace game
             d->attacking = ACT_SHOOT;
         }
 
-        if(powerArmorExploding(d) && !d->powerarmorexploded)
-        {
-            d->wasAttacking = d->attacking;
-            gun = GUN_POWERARMOR;
-            d->attacking = ACT_SHOOT;
-            d->powerarmorexploded = true;
-        }
 
         if(!d->attacking) return;
         int act = d->attacking,
@@ -1099,7 +1092,6 @@ namespace game
         if(d->boostmillis[B_SHROOMS]) waitfactor *= d->character==C_JUNKIE ? 1.75f : 1.5f;
         d->gunwait = attacks[atk].attackdelay/waitfactor;
         d->totalshots += (attacks[atk].damage*attacks[atk].rays) * (d->hasRoids() ? 1 : 2);
-        if(d->powerarmorexploded) {d->attacking = d->wasAttacking; execute("getoldweap"); d->powerarmorexploded = false;}
         if(d==player1 && isSemiAutoGun(gun) && !specialAbility) d->attacking = ACT_IDLE;
     }
 

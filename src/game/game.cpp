@@ -391,7 +391,7 @@ namespace game
 
     void checkShield(gameent *d)
     {
-        if(!d->shieldbroken && d->armourtype >= A_WOOD && d->armourtype <= A_MAGNET && !d->armour)
+        if(!d->shieldbroken && d->armourtype >= A_WOOD && d->armourtype <= A_MAGNET && d->armour <= 0)
         {
             d->shieldbroken = true;
             playSound(S_WOOD_BROKEN + d->armourtype, d==hudplayer() ? vec(0, 0, 0) : d->o, 250, 100, NULL, d->entityId);
@@ -414,7 +414,6 @@ namespace game
                 if(d!=player1)
                 {
                     if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
-                    if(powerArmorExploding(d)) { gunselect(GUN_POWERARMOR, d, true); d->gunwait = 0; }
                     if(kamikazeExploding(d)) { gunselect(GUN_KAMIKAZE, d); d->gunwait = 0; }
                     updatePlayersBoosts(curtime, d);
                     updateAbilitiesSkills(curtime, d);
@@ -493,11 +492,6 @@ namespace game
         return smoothVel;
     }
 
-    bool powerArmorExploding(gameent *d)
-    {
-        return !d->armour && d->ammo[GUN_POWERARMOR] && d->armourtype == A_POWERARMOR;
-    }
-
     bool kamikazeExploding(gameent *d)
     {
         return !d->mana && !d->abilitymillis[ABILITY_2] && d->ammo[GUN_KAMIKAZE];
@@ -514,7 +508,6 @@ namespace game
         if(player1->state==CS_ALIVE && !intermission)   // checking player1's shits
         {
             checkInventoryGuns();
-            if(powerArmorExploding(player1)) { gunselect(GUN_POWERARMOR, player1, true); player1->gunwait = 0; }
             if(kamikazeExploding(player1)) { gunselect(GUN_KAMIKAZE, player1); player1->gunwait = 0; }
 
             if(IS_ON_OFFICIAL_SERV) // checking for achievements
