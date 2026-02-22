@@ -672,8 +672,7 @@ struct gamestate
 
         if(m_fullstuff)
         {
-            ammo[GUN_POWERARMOR] = 1;
-            armourtype = A_POWERARMOR;
+            armourtype = A_IRON;
             armour = armourBonus ? 1750 : 1250;
             return;
         }
