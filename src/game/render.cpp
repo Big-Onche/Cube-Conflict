@@ -523,8 +523,6 @@ namespace game
 
     void renderPlayerTextInfo(gameent *d, float dist)
     {
-        copystring(d->info, colorname(d));
-
         if(d->curdamage) // damage dealt displayed on hud
         {
             vec pos = d->abovehead();
