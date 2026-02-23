@@ -125,6 +125,7 @@ namespace game
     }
 
     ICOMMAND(aptitude, "i", (int *ability),  // player1 abilities commands
+        if(!isconnected()) return;
         bool isKamikaze = (player1->character == C_KAMIKAZE);
         if(!hasAbilities(player1) && !isKamikaze) return;
         if(isKamikaze)
