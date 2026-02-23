@@ -56,6 +56,8 @@ void quit(bool savecfgs = true)                      // normal exit
     exit(EXIT_SUCCESS);
 }
 
+ICOMMAND(quit, "", (), quit());
+
 void fatal(const char *s, ...)    // failure exit
 {
     static int errors = 0;
@@ -131,8 +133,6 @@ void writeinitcfg()
     f->printf("language %d\n", language);
     delete f;
 }
-
-COMMAND(quit, "");
 
 static void getbackgroundres(int &w, int &h)
 {
