@@ -450,6 +450,9 @@ namespace game
             if(!lagtime || intermission) continue;
             else if(lagtime>1000 && d->state==CS_ALIVE)
             {
+                stopLinkedSound(d->entityId, 0, true);
+                d->attacksound = 0;
+                d->powerarmorsound = false;
                 d->state = CS_LAGGED;
                 continue;
             }

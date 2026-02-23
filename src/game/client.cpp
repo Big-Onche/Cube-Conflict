@@ -1501,6 +1501,9 @@ namespace game
                     if(deathscore) showscores(true);
                 }
                 else d->resetinterp();
+                stopLinkedSound(d->entityId, 0, true);
+                d->attacksound = 0;
+                d->powerarmorsound = false;
                 d->state = CS_DEAD;
                 checkfollow();
                 break;
@@ -2107,7 +2110,13 @@ namespace game
             case N_DEMOPLAYBACK:
             {
                 int on = getint(p);
-                if(on) player1->state = CS_SPECTATOR;
+                if(on)
+                {
+                    stopLinkedSound(player1->entityId, 0, true);
+                    player1->attacksound = 0;
+                    player1->powerarmorsound = false;
+                    player1->state = CS_SPECTATOR;
+                }
                 else clearclients();
                 demoplayback = on!=0;
                 player1->clientnum = getint(p);
@@ -2148,6 +2157,9 @@ namespace game
                 if(!d) break;
                 if(val)
                 {
+                    stopLinkedSound(d->entityId, 0, true);
+                    d->attacksound = 0;
+                    d->powerarmorsound = false;
                     d->editstate = d->state;
                     d->state = CS_EDITING;
                 }
@@ -2180,6 +2192,9 @@ namespace game
                         disablezoom();
                         postfx::updateMainFilter();
                     }
+                    stopLinkedSound(s->entityId, 0, true);
+                    s->attacksound = 0;
+                    s->powerarmorsound = false;
                     s->state = CS_SPECTATOR;
                 }
                 else if(s->state==CS_SPECTATOR) deathstate(s, true);
