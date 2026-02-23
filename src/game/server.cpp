@@ -2397,7 +2397,7 @@ namespace server
         servstate &as = actor->state;
 
         int damage = (baseDamage*classes[actor->character].damage) / (classes[target->character].resistance); // main class damage/resistance multiplier
-        if(actor->state.boostmillis[B_ROIDS]) damage *= (target->character==C_JUNKIE ? 3 : 2);
+        if(actor->state.boostmillis[B_ROIDS]) damage *= (actor->character==C_JUNKIE ? 3 : 2);
         if(target->state.boostmillis[B_JOINT]) damage /= (target->character==C_JUNKIE ? 1.875f : 1.25f); // joint damage reduce
 
         switch(actor->character) // Skill and class damage boost/reduction from actor
@@ -2455,7 +2455,7 @@ namespace server
 
                 case C_SHOSHONE:
                 {
-                    if(as.abilitymillis[ABILITY_1]) damage /= 1.3f;
+                    if(ts.abilitymillis[ABILITY_1]) damage /= 1.3f;
                     if(actor->character==C_AMERICAN) damage *= 1.25f;
                 }
             }
