@@ -2035,6 +2035,7 @@ namespace ai
 
     void think(gameent *d, bool run)
     {
+        static int aiwipes = 0, aiwipeslast = 0;
         if(!run)
         {
             if(d->ai->state.empty()) d->ai->updateState(AI_S_WAIT);
@@ -2045,7 +2046,7 @@ namespace ai
                 d->respawned = d->lifesequence;
             }
             logic(d, c, false);
-            if(d->ai->trywipe) d->ai->wipe();
+            d->ai->flushwipe();
             d->ai->lastrun = lastmillis;
             return;
         }
@@ -2124,7 +2125,7 @@ namespace ai
             logic(d, c, run);
             break;
         }
-        if(d->ai->trywipe) d->ai->wipe();
+        d->ai->flushwipe();
         d->ai->lastrun = lastmillis;
     }
 

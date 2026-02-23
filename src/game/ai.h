@@ -229,9 +229,24 @@ namespace ai
         void wipe(bool prev = false)
         {
             clear(prev);
-            state.setsize(0);
-            updateState(AI_S_WAIT);
+            if(state.empty()) updateState(AI_S_WAIT);
+            else
+            {
+                // Preserve exact post-wipe state without tearing down/re-adding the vector head.
+                state.setsize(1);
+                aistate &s = state[0];
+                s.type = AI_S_WAIT;
+                s.millis = lastmillis;
+                s.targtype = -1;
+                s.target = -1;
+                s.reset();
+            }
             trywipe = false;
+        }
+
+        void flushwipe()
+        {
+            if(trywipe) wipe();
         }
 
         void clean(bool tryit = false)
