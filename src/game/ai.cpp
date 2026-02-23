@@ -2035,7 +2035,6 @@ namespace ai
 
     void think(gameent *d, bool run)
     {
-        static int aiwipes = 0, aiwipeslast = 0;
         if(!run)
         {
             if(d->ai->state.empty()) d->ai->updateState(AI_S_WAIT);
