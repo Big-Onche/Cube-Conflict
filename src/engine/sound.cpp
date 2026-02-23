@@ -923,7 +923,7 @@ void cleanUpSounds()
     noSound = true;
 }
 
-ICOMMAND(playSound, "sii", (char *soundName, bool fixedPitch, bool uiSound),
+ICOMMAND(playSound, "sii", (char *soundName, int *fixedPitch, int *uiSound),
     loopi(NUMSNDS)
     {
         if(!strcasecmp(soundName, gameSounds[i].soundPath))
