@@ -3,6 +3,7 @@
 	<FileVersion major="1" minor="6" />
 	<Project>
 		<Option title="Cube Conflict" />
+		<Option makefile="../Makefile" />
 		<Option default_target="client64" />
 		<Option compiler="gcc" />
 		<Build>
@@ -12,7 +13,7 @@
 				<Option object_output="obj64" />
 				<Option type="0" />
 				<Option compiler="gcc" />
-				<Option parameters='-w1280 -h720 -f0 -u&quot;Devel config&quot; -glog.txt' />
+				<Option parameters='-d -w1280 -h720 -f0 -u&quot;Devel config&quot; -glog.txt' />
 				<Option projectCompilerOptionsRelation="1" />
 				<Compiler>
 					<Add option="-fomit-frame-pointer" />
@@ -23,7 +24,6 @@
 					<Add option="-fsigned-char" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
-					<Add option="-Wformat=2" />
 					<Add directory="../enet/include" />
 					<Add directory="../include" />
 					<Add directory="../engine" />
@@ -208,18 +208,11 @@
 			<Add alias="All" targets="client32;client64;" />
 		</VirtualTargets>
 		<Compiler>
-			<Add option="-fomit-frame-pointer" />
-			<Add option="-O3" />
-			<Add option="-Wall" />
 			<Add option="-ffast-math" />
 			<Add option="-fsigned-char" />
 			<Add option="-fno-exceptions" />
 			<Add option="-fno-rtti" />
 		</Compiler>
-		<Linker>
-			<Add option="-s" />
-		</Linker>
-		<Unit filename="../cubeconflict/aptitudes.cpp" />
 		<Unit filename="../cubeconflict/customs.cpp" />
 		<Unit filename="../cubeconflict/customs.h" />
 		<Unit filename="../cubeconflict/gfx.cpp" />
@@ -291,10 +284,16 @@
 		<Unit filename="../engine/world.cpp" />
 		<Unit filename="../engine/world.h" />
 		<Unit filename="../engine/worldio.cpp" />
+		<Unit filename="../engine/yyjson.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../engine/yyjson.h" />
 		<Unit filename="../game/ai.cpp" />
 		<Unit filename="../game/ai.h" />
 		<Unit filename="../game/aiman.h" />
+		<Unit filename="../game/bouncers.cpp" />
 		<Unit filename="../game/capture.h" />
+		<Unit filename="../game/classes.cpp" />
 		<Unit filename="../game/client.cpp" />
 		<Unit filename="../game/ctf.h" />
 		<Unit filename="../game/entities.cpp" />
@@ -304,6 +303,8 @@
 			<Option compile="1" />
 			<Option weight="0" />
 		</Unit>
+		<Unit filename="../game/inventory.cpp" />
+		<Unit filename="../game/projectiles.cpp" />
 		<Unit filename="../game/render.cpp" />
 		<Unit filename="../game/scoreboard.cpp" />
 		<Unit filename="../game/server.cpp" />
