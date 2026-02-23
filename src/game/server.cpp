@@ -2703,7 +2703,7 @@ namespace server
             }
             if(damage > 0)
             {
-                gs.shotdamage += calcDamage(damage, atk, target, ci);
+                gs.shotdamage += calcDamage(damage, atk, target, ci, true);
                 dodamage(target, ci, max(int(damage), 1), atk, h.dir);
                 if(ci->character==C_VAMPIRE) doregen(target, ci, damage);
             }
@@ -2779,7 +2779,7 @@ namespace server
                     totalrays += h.rays;
                     if(totalrays>maxrays) continue;
                     int damage = h.rays*attacks[atk].damage;
-                    gs.shotdamage += calcDamage(damage, atk, target, ci);
+                    gs.shotdamage += calcDamage(damage, atk, target, ci, true);
                     dodamage(target, ci, damage, atk, h.dir);
                     if(ci->character==C_VAMPIRE) doregen(target, ci, damage);
                 }
