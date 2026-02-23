@@ -58,13 +58,11 @@ ICOMMAND(pendingchanges, "b", (int *idx), { if(needsapply.inrange(*idx)) result(
 
 VARP(veryfirstlaunch, 0, 1, 1);
 static int lastmainmenu = -1;
-ICOMMAND(usingsteam, "", (),
 #if defined(STEAM)
-    intret(SteamEnabled);
+ICOMMAND(usingsteam, "", (), intret(SteamEnabled));
 #else
-    intret(false);
+ICOMMAND(usingsteam, "", (), intret(0));
 #endif
-);
 
 void menuprocess()
 {
