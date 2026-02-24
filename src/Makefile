@@ -62,7 +62,9 @@ ifneq (,$(findstring MINGW,$(PLATFORM)))
 	endif
 	CLIENT_INCLUDES= $(INCLUDES) -Iinclude $(STEAM_DEFINES)
 	STD_LIBS= -static-libgcc -static-libstdc++
-	CLIENT_LIBS= -mwindows $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lSDL2 -lSDL2_image -lopenal -lzlib1 -lopengl32 -lsndfile $(STEAM_CLIENT_LIBS) -lenet -lws2_32 -lwinmm
+	CLIENT_LIBS= -mwindows $(STD_LIBS) -L$(WINBIN) -L$(USER_LIBS_DIR) \
+    -lSDL2 -lSDL2_image $(USER_LIBS_DIR)/$(OPENAL_IMPORT_LIB) -lzlib1 -lopengl32 -lsndfile \
+    $(STEAM_CLIENT_LIBS) -lenet -lws2_32 -lwinmm
 else    
 	ifneq (,$(findstring DARWIN,$(PLATFORM)))
 		OSXMIN := 10.13
@@ -156,6 +158,9 @@ CLIENT_OBJS= \
 CLIENT_PCH= shared/cube.h.gch engine/engine.h.gch game/game.h.gch
 
 ifneq (,$(findstring MINGW,$(PLATFORM)))
+USER_LIBS_DIR ?= $(WINLIB)
+USER_DLLS_DIR ?= $(WINBIN)
+OPENAL_IMPORT_LIB ?= OpenAL32.lib
 SERVER_INCLUDES= -DSTANDALONE $(INCLUDES) -Iinclude
 SERVER_LIBS= -mwindows $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lzlib1 -lenet -lws2_32 -lwinmm
 MASTER_LIBS= $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lzlib1 -lenet -lws2_32 -lwinmm
