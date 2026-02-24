@@ -916,14 +916,19 @@ namespace ar
 namespace vclouds
 {
     GLuint tvcloudtex = 0, tvcloudfbo = 0;
-    int tvcloudw = 0, tvcloudh = 0;
+    GLuint tvcloudbilateraltex = 0, tvcloudbilateralfbo = 0;
+    int tvcloudw = 0, tvcloudh = 0, tvcloudfullw = 0, tvcloudfullh = 0;
 
-    VAR(testvolumetrics, 0, 0, 1);
+    VAR(testvolumetrics, 0, 1, 1);
+    VARP(vcblur, 0, 1, 1);
+    VARP(vcblurscale, 1, 1, 4);
+    FVARR(tvcloudbilateraledge, 1e-5f, 0.02f, 1.0f);
 
     void init()
     {
         if(!testvolumetrics) return;
         useshaderbyname("testvolumetricclouds");
+        useshaderbyname("tvcloudsbilateral");
         useshaderbyname("scalelinear");
     }
 
@@ -932,20 +937,28 @@ namespace vclouds
         if(!testvolumetrics) return;
 
         Shader *cloudshader = useshaderbyname("testvolumetricclouds");
+        Shader *bilateralshader = useshaderbyname("tvcloudsbilateral");
         if(!cloudshader) return;
 
         int targetw = max(vieww/2, 1), targeth = max(viewh/2, 1);
-        if(targetw != tvcloudw || targeth != tvcloudh)
+        if(targetw != tvcloudw || targeth != tvcloudh || vieww != tvcloudfullw || viewh != tvcloudfullh)
         {
             cleanup();
             tvcloudw = targetw;
             tvcloudh = targeth;
+            tvcloudfullw = vieww;
+            tvcloudfullh = viewh;
         }
 
         if(!tvcloudtex)
         {
             glGenTextures(1, &tvcloudtex);
             createtexture(tvcloudtex, tvcloudw, tvcloudh, NULL, 3, 1, GL_RGBA8, GL_TEXTURE_RECTANGLE);
+        }
+        if(!tvcloudbilateraltex)
+        {
+            glGenTextures(1, &tvcloudbilateraltex);
+            createtexture(tvcloudbilateraltex, vieww, viewh, NULL, 3, 1, GL_RGBA8, GL_TEXTURE_RECTANGLE);
         }
 
         if(!tvcloudfbo)
@@ -954,6 +967,14 @@ namespace vclouds
             glBindFramebuffer_(GL_FRAMEBUFFER, tvcloudfbo);
             glFramebufferTexture2D_(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, tvcloudtex, 0);
             if(glCheckFramebufferStatus_(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) fatal("Failed allocating volumetric cloud buffer!");
+            glBindFramebuffer_(GL_FRAMEBUFFER, msaalight ? mshdrfbo : hdrfbo);
+        }
+        if(!tvcloudbilateralfbo)
+        {
+            glGenFramebuffers_(1, &tvcloudbilateralfbo);
+            glBindFramebuffer_(GL_FRAMEBUFFER, tvcloudbilateralfbo);
+            glFramebufferTexture2D_(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, tvcloudbilateraltex, 0);
+            if(glCheckFramebufferStatus_(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) fatal("Failed allocating volumetric cloud bilateral buffer!");
             glBindFramebuffer_(GL_FRAMEBUFFER, msaalight ? mshdrfbo : hdrfbo);
         }
 
@@ -982,16 +1003,39 @@ namespace vclouds
         cloudshader->set();
         screenquad(tvcloudw, tvcloudh);
 
+        GLuint compositetex = tvcloudtex;
+        int compositetexw = tvcloudw, compositetexh = tvcloudh;
+
+        if(vcblur && bilateralshader)
+        {
+            glBindFramebuffer_(GL_FRAMEBUFFER, tvcloudbilateralfbo);
+            glViewport(0, 0, vieww, viewh);
+            glDisable(GL_BLEND);
+            glClearColor(0, 0, 0, 0);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            glActiveTexture_(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_RECTANGLE, tvcloudtex);
+            GLOBALPARAMF(tvbilateraldepthscale, 1.0f / max(float(farplane) * tvcloudbilateraledge, 1e-4f));
+            GLOBALPARAMF(vcblurscale, float(vcblurscale));
+            bilateralshader->set();
+            screenquad(vieww, viewh);
+
+            compositetex = tvcloudbilateraltex;
+            compositetexw = vieww;
+            compositetexh = viewh;
+        }
+
         glBindFramebuffer_(GL_FRAMEBUFFER, msaalight ? mshdrfbo : hdrfbo);
         glViewport(0, 0, vieww, viewh);
 
         glActiveTexture_(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_RECTANGLE, tvcloudtex);
+        glBindTexture(GL_TEXTURE_RECTANGLE, compositetex);
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         SETSHADER(scalelinear);
-        screenquad(tvcloudw, tvcloudh);
+        screenquad(compositetexw, compositetexh);
 
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
@@ -1009,6 +1053,16 @@ namespace vclouds
             glDeleteTextures(1, &tvcloudtex);
             tvcloudtex = 0;
         }
-        tvcloudw = tvcloudh = 0;
+        if(tvcloudbilateralfbo)
+        {
+            glDeleteFramebuffers_(1, &tvcloudbilateralfbo);
+            tvcloudbilateralfbo = 0;
+        }
+        if(tvcloudbilateraltex)
+        {
+            glDeleteTextures(1, &tvcloudbilateraltex);
+            tvcloudbilateraltex = 0;
+        }
+        tvcloudw = tvcloudh = tvcloudfullw = tvcloudfullh = 0;
     }
 }
