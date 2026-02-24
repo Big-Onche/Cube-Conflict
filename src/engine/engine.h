@@ -531,6 +531,15 @@ namespace ar
     extern void cleanup();
 }
 
+namespace vclouds
+{
+    extern int testvolumetrics;
+
+    extern void init();
+    extern void render();
+    extern void cleanup();
+}
+
 namespace postfx
 {
     extern void initRadialBlur();

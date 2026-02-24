@@ -912,3 +912,48 @@ namespace ar
         }
     }
 }
+
+namespace vclouds
+{
+    VAR(testvolumetrics, 0, 0, 1);
+
+    void init()
+    {
+        if(testvolumetrics) useshaderbyname("testvolumetricclouds");
+    }
+
+    void render()
+    {
+        if(!testvolumetrics) return;
+
+        Shader *s = useshaderbyname("testvolumetricclouds");
+        if(!s) return;
+
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        glActiveTexture_(GL_TEXTURE9);
+        if(msaalight) glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msdepthtex);
+        else glBindTexture(GL_TEXTURE_RECTANGLE, gdepthtex);
+        glActiveTexture_(GL_TEXTURE0);
+
+        float ws = max(float(worldsize), 1.0f);
+        float base = ws * 0.55f, top = ws * 0.72f;
+        if(top <= base + 1.0f) top = base + 1.0f;
+
+        GLOBALPARAMF(tvcloudbounds, base, top, max(float(farplane), ws), lastmillis / 1000.0f);
+        GLOBALPARAMF(tvcloudnoise, 1.0f / max(ws * 0.18f, 1.0f), 1.0f / max(ws * 0.06f, 1.0f), 0.50f, 0.95f);
+        GLOBALPARAMF(tvcloudcolor, 1.00f, 0.98f, 0.95f, 0.75f);
+
+        s->set();
+        screenquad();
+
+        glDisable(GL_BLEND);
+        glEnable(GL_DEPTH_TEST);
+    }
+
+    void cleanup()
+    {
+    }
+}
