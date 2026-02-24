@@ -922,7 +922,12 @@ namespace vclouds
     VAR(testvolumetrics, 0, 1, 1);
     VARP(vcblur, 0, 1, 1);
     VARP(vcblurscale, 1, 1, 4);
+    FVARR(vcscale, 0.25f, 0.5f, 2.0f);
     FVARR(vcbilateraledge, 1e-5f, 0.02f, 1.0f);
+    FVARR(vclouddensity, 0.0f, 1.0f, 2.0f);
+    FVARR(vcloudalpha, 0.0f, 0.75f, 1.0f);
+    FVARR(vcloudthickness, 0.0f, 4.0f, 8.0f);
+    CVARR(vcloudcolour, 0xFFFFFF);
 
     void init()
     {
@@ -940,7 +945,8 @@ namespace vclouds
         Shader *bilateralshader = useshaderbyname("tvcloudsbilateral");
         if(!cloudshader) return;
 
-        int targetw = max(vieww/2, 1), targeth = max(viewh/2, 1);
+        int targetw = max(int(ceilf(vieww * vcscale)), 1),
+            targeth = max(int(ceilf(viewh * vcscale)), 1);
         if(targetw != tvcloudw || targeth != tvcloudh || vieww != tvcloudfullw || viewh != tvcloudfullh)
         {
             cleanup();
@@ -990,8 +996,11 @@ namespace vclouds
 
         GLOBALPARAMF(tvcloudbounds, base, top, max(float(farplane), ws), lastmillis / 1000.0f);
         GLOBALPARAMF(tvcloudnoise, 1.0f / max(ws * 0.18f, 1.0f), 1.0f / max(ws * 0.06f, 1.0f), 0.50f, 0.95f);
-        GLOBALPARAMF(tvcloudcolor, 1.00f, 0.98f, 0.95f, 0.75f);
         GLOBALPARAMF(tvcloudscale, float(vieww)/tvcloudw, float(viewh)/tvcloudh, float(tvcloudw)/vieww, float(tvcloudh)/viewh);
+        GLOBALPARAMF(vclouddensity, vclouddensity);
+        GLOBALPARAMF(vcloudalpha, vcloudalpha);
+        GLOBALPARAMF(vcloudthickness, vcloudthickness);
+        GLOBALPARAM(vcloudcolour, vcloudcolour.tocolor());
         GLOBALPARAM(sunlightdir, sunlightdir);
 
         glBindFramebuffer_(GL_FRAMEBUFFER, tvcloudfbo);
@@ -1016,7 +1025,7 @@ namespace vclouds
 
             glActiveTexture_(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_RECTANGLE, tvcloudtex);
-            GLOBALPARAMF(tvbilateraldepthscale, 1.0f / max(float(farplane) * tvcloudbilateraledge, 1e-4f));
+            GLOBALPARAMF(tvbilateraldepthscale, 1.0f / max(float(farplane) * vcbilateraledge, 1e-4f));
             GLOBALPARAMF(vcblurscale, float(vcblurscale));
             bilateralshader->set();
             screenquad(vieww, viewh);
