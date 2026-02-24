@@ -1042,7 +1042,8 @@ namespace vclouds
         glBindTexture(GL_TEXTURE_RECTANGLE, compositetex);
 
         glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        // Cloud shader output is premultiplied (rgb already multiplied by alpha/transmittance).
+        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
         SETSHADER(scalelinear);
         screenquad(compositetexw, compositetexh);
 
