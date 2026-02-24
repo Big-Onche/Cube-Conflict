@@ -922,7 +922,7 @@ namespace vclouds
     VAR(testvolumetrics, 0, 1, 1);
     VARP(vcblur, 0, 1, 1);
     VARP(vcblurscale, 1, 1, 4);
-    FVARR(tvcloudbilateraledge, 1e-5f, 0.02f, 1.0f);
+    FVARR(vcbilateraledge, 1e-5f, 0.02f, 1.0f);
 
     void init()
     {
