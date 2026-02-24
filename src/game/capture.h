@@ -629,23 +629,78 @@ struct captureclientmode : clientmode
 
 	bool aicheck(gameent *d, ai::aistate &b)
 	{
+        if(m_regencapture && needsregen(d) && b.targtype == ai::AI_T_AFFINITY && bases.inrange(b.target))
+        {
+            baseinfo &f = bases[b.target];
+            if(f.owner && f.owner != d->team && hassaferegenbase(d))
+            {
+                d->ai->trywipe = true;
+                return true;
+            }
+        }
 		return false;
 	}
+
+    int regenarmourtarget(gameent *d)
+    {
+        if(!m_regencapture) return 1000 + d->skill*10;
+        return min(2500, 1250 + d->skill*13);
+    }
+
+    bool hashalfammoweapon(gameent *d)
+    {
+        loopi(NUMMAINGUNS)
+        {
+            if(m_regencapture && i == GUN_GLOCK) continue; // force a real regen-base ammo refill before pushing
+            if(d->ammo[i] >= max(1, (itemstats[i].max+1)/2)) return true;
+        }
+        return false;
+    }
+
+    bool hassaferegenbase(gameent *d)
+    {
+        loopv(bases)
+        {
+            baseinfo &f = bases[i];
+            if(!f.owner || f.owner==d->team) return true;
+        }
+        return false;
+    }
+
+    bool needsregen(gameent *d)
+    {
+        if(d->health < 750 || d->armour < regenarmourtarget(d)) return true;
+        return m_regencapture && !hashalfammoweapon(d);
+    }
 
 	int regenFactor(gameent *d, baseinfo *f)
 	{
 	    int regen = 0;
-	    if(d->health < 750 || d->armour < 1000 + d->skill*10) regen = 2;
-        if(!d->hasmaxammo(f->ammotype-1 + I_RAIL)) regen = 4;
+        if(d->health < 750 || d->armour < regenarmourtarget(d)) regen = 2;
+        if(m_regencapture)
+        {
+            if(!hashalfammoweapon(d)) regen = max(regen, 4);
+        }
+        else if(!d->hasmaxammo(f->ammotype-1 + I_RAIL)) regen = 4;
         return regen;
 	}
 
 	void aifind(gameent *d, ai::aistate &b, vector<ai::interest> &interests)
 	{
 		vec pos = d->feetpos();
+        const bool needregen = m_regencapture && needsregen(d);
+        bool hasneutral = false, hassafebase = false;
+        if(m_regencapture) loopv(bases)
+        {
+            baseinfo &f = bases[i];
+            if(!f.owner) hasneutral = true;
+            if(!f.owner || f.owner==d->team) hassafebase = true;
+        }
 		loopvj(bases)
 		{
 			baseinfo &f = bases[j];
+            const bool isneutral = !f.owner, isfriendly = f.owner && f.owner==d->team, isenemy = f.owner && f.owner!=d->team;
+            const int regen = regenFactor(d, &f);
 			static vector<int> targets; // build a list of others who are interested in this
 			targets.setsize(0);
 			ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, j, true);
@@ -657,14 +712,31 @@ struct captureclientmode : clientmode
 				if(targets.find(e->clientnum) < 0 && ep.squaredist(f.o) <= (CAPTURERADIUS*CAPTURERADIUS))
 					targets.add(e->clientnum);
 			}
-			if((regenFactor(d, &f)) || (targets.empty() && (!f.owner || f.owner!=d->team || f.enemy)))
+            const bool attacktarget = targets.empty() && (!f.owner || f.owner!=d->team || f.enemy);
+            if(m_regencapture && needregen && isenemy && hassafebase) continue;
+            if(m_regencapture && !needregen && hasneutral && isenemy) continue;
+			if(regen || attacktarget)
 			{
 				ai::interest &n = interests.add();
 				n.state = ai::AI_S_DEFEND;
 				n.node = ai::closestwaypoint(f.o, ai::SIGHTMIN, false);
 				n.target = j;
 				n.targtype = ai::AI_T_AFFINITY;
-				n.score = pos.squaredist(f.o)/(regenFactor(d, &f) ? float(100*regenFactor(d, &f)) : 1.f);
+                float score = pos.squaredist(f.o)/(regen ? float(100*regen) : 1.f);
+                if(m_regencapture)
+                {
+                    if(!needregen && hasneutral)
+                    {
+                        if(isneutral) score *= 0.2f;
+                        else if(isenemy) score *= 5.0f;
+                    }
+                    else if(needregen)
+                    {
+                        if(isfriendly) score *= 0.5f;
+                        else if(isneutral) score *= 0.75f;
+                    }
+                }
+				n.score = score;
 			}
 		}
 	}
@@ -673,31 +745,36 @@ struct captureclientmode : clientmode
 	{
         if(!bases.inrange(b.target)) return false;
         baseinfo &f = bases[b.target];
+        if(m_regencapture && needsregen(d) && f.owner && f.owner != d->team && hassaferegenbase(d))
+        {
+            d->ai->trywipe = true; // enemy push is invalid while under regen thresholds
+            return true;
+        }
 		int walk = 0;
 		if(!regenFactor(d, &f) && !f.enemy && f.owner && f.owner==d->team)
 		{
-			static vector<int> targets; // build a list of others who are interested in this
-			targets.setsize(0);
-			ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, b.target, true);
-			gameent *e = NULL;
-			loopi(numdynents()) if((e = (gameent *)iterdynents(i)) && !e->ai && e->state == CS_ALIVE && isteam(d->team, e->team))
-			{ // try to guess what non ai are doing
-				vec ep = e->feetpos();
-				if(targets.find(e->clientnum) < 0 && (ep.squaredist(f.o) <= (CAPTURERADIUS*CAPTURERADIUS*4)))
-					targets.add(e->clientnum);
-			}
-			if(!targets.empty())
-			{
-				if(lastmillis-b.millis >= (201-d->skill)*33)
-				{
-					d->ai->trywipe = true; // re-evaluate so as not to herd
-					return true;
-				}
-				else walk = 2;
-			}
-			else walk = 1;
-			b.millis = lastmillis;
-		}
+            static vector<int> targets; // build a list of others who are interested in this
+            targets.setsize(0);
+            ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, b.target, true);
+            gameent *e = NULL;
+            loopi(numdynents()) if((e = (gameent *)iterdynents(i)) && !e->ai && e->state == CS_ALIVE && isteam(d->team, e->team))
+            { // try to guess what non ai are doing
+                vec ep = e->feetpos();
+                if(targets.find(e->clientnum) < 0 && (ep.squaredist(f.o) <= (CAPTURERADIUS*CAPTURERADIUS*4)))
+                    targets.add(e->clientnum);
+            }
+            if(!targets.empty())
+            {
+                if(lastmillis-b.millis >= (201-d->skill)*33)
+                {
+                    d->ai->trywipe = true; // re-evaluate so as not to herd
+                    return true;
+                }
+                else walk = 2;
+            }
+            else walk = 1;
+            b.millis = lastmillis;
+        }
 		return ai::defend(d, b, f.o, float(CAPTURERADIUS), float(CAPTURERADIUS*(2+(walk*2))), walk); // less wander than ctf
 	}
 
