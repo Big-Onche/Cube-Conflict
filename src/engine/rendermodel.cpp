@@ -1032,7 +1032,9 @@ hasboundbox:
             }
             return;
         }
-        enableaamask();
+        // Preserve the active transparent stencil layer for immediate (MDL_NOBATCH) draws,
+        // e.g. transparent HUD models rendered in a dedicated transparent pass.
+        enableaamask(transparentlayer);
         if(flags&MDL_CULL_QUERY)
         {
             d->query = newquery(d);

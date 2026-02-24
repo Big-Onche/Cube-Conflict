@@ -686,6 +686,7 @@ namespace game
 
     VARP(hudgun, 0, 1, 1);
     VARP(hudgunsway, 0, 1, 1);
+    int hudmodelalpha = 100;
 
     FVAR(swaystep, 1, 35.0f, 100);
     FVAR(swayside, 0, 3, 3);
@@ -753,7 +754,12 @@ namespace game
         return switchAnim(d->lastshieldswitch);
     }
 
-    void drawhudmodel(gameent *d, int anim, int basetime)
+    static inline float gethudmodelalpha()
+    {
+        return clamp(hudmodelalpha/100.0f, 0.0f, 1.0f);
+    }
+
+    void drawhudmodel(gameent *d, int anim, int basetime, float alpha)
     {
         if(!validgun(d->gunselect)) return;
 
@@ -797,13 +803,13 @@ namespace game
             basetime = 0;
         }
 
-        rendermodel(getWeaponDir(d->gunselect, true), anim, gunAim.add(sway), d->yaw, d->pitch - gunSwitchAnim(d), 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), 1.f));
+        rendermodel(getWeaponDir(d->gunselect, true), anim, gunAim.add(sway), d->yaw, d->pitch - gunSwitchAnim(d), 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), alpha));
 
         if(d->muzzle.x >= 0) d->muzzle = calcavatarpos(d->muzzle, 12);
         if(d->balles.x >= 0) d->balles = calcavatarpos(d->balles, 12);
     }
 
-    void drawJointModel(gameent *d)
+    void drawJointModel(gameent *d, float alpha)
     {
         float steps = swaydist/swaystep*M_PI;
 
@@ -816,7 +822,7 @@ namespace game
         modelattach a[2];
         d->weed = vec(-1, -1, -1);
         a[0] = modelattach("tag_joint", &d->weed);
-        rendermodel("hudboost/joint", NULL, sway, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a);
+        rendermodel("hudboost/joint", NULL, sway, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, 0, 0, 1, vec4(1, 1, 1, alpha));
         if(d->weed.x >= 0) d->weed = calcavatarpos(d->weed, 12);
 
         if(rndevent(93))
@@ -826,7 +832,7 @@ namespace game
         }
     }
 
-    void drawShieldModel(gameent *d)
+    void drawShieldModel(gameent *d, float alpha)
     {
         float steps = swaydist/swaystep*M_PI;
 
@@ -842,27 +848,49 @@ namespace game
         vec disp;
         if(!powerArmor) vecfromyawpitch(d->yaw, 0, 0, zoomprogress * 3.f, disp);
 
-        rendermodel(getShieldDir(d->armourtype, d->armour, true), NULL, disp.add(sway), d->yaw, d->pitch - shieldSwitchAnim(d), 0, MDL_NOBATCH);
+        rendermodel(getShieldDir(d->armourtype, d->armour, true), NULL, disp.add(sway), d->yaw, d->pitch - shieldSwitchAnim(d), 0, MDL_NOBATCH, NULL, NULL, 0, 0, 1, vec4(1, 1, 1, alpha));
     }
 
-    void renderHudModels()
+    static void renderHudModels(bool transparent)
     {
         gameent *d = hudplayer();
+        float alpha = gethudmodelalpha();
+        bool wantsTransparentPass = alpha < 1.0f;
 
         d->muzzle = player1->muzzle = vec(-1, -1, -1);
         d->balles = player1->balles = vec(-1, -1, -1);
 
+        if(transparent != wantsTransparentPass) return;
+
         if(d->state==CS_ALIVE && hudgun)
         {
-            if(d->armour && validshield(d->armourtype)) drawShieldModel(d);
-            if(d->boostmillis[B_JOINT]) drawJointModel(d);
+            if(d->armour && validshield(d->armourtype)) drawShieldModel(d, alpha);
+            if(d->boostmillis[B_JOINT]) drawJointModel(d, alpha);
 
             int anim = ANIM_GUN_IDLE|ANIM_LOOP, basetime = 0;
 
             if(isAttacking(d)) { anim = ANIM_GUN_SHOOT; basetime = d->lastaction; }
 
-            drawhudmodel(d, anim, basetime);
+            drawhudmodel(d, anim, basetime, alpha);
         }
+    }
+
+    bool checkTransparentHudModels()
+    {
+        gameent *d = hudplayer();
+        if(d->character == C_PHYSICIST && d->abilitymillis[ABILITY_2]) hudmodelalpha = 15;
+        else hudmodelalpha = 100;
+        return hudgun && d && d->state==CS_ALIVE && gethudmodelalpha() < 1.0f;
+    }
+
+    void renderSolidHudModels()
+    {
+        renderHudModels(false);
+    }
+
+    void renderTransparentHudModels()
+    {
+        renderHudModels(true);
     }
 
     void renderplayerpreview(int model, int cape, int color, int team, int weap, int yaw, bool rot)

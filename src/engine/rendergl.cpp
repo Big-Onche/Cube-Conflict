@@ -1784,25 +1784,31 @@ vec calcavatarpos(const vec &pos, float dist)
     return dir.add(camera1->o);
 }
 
-void renderavatar()
+void renderavatar(bool transparent)
 {
     if(isthirdperson()) return;
+    if(transparent && !game::checkTransparentHudModels()) return;
 
-    matrix4 oldprojmatrix = nojittermatrix;
+    const matrix4 oldprojmatrix = nojittermatrix;
+
     projmatrix.perspective(curavatarfov, aspect, nearplane(), farplane);
     projmatrix.scalez(avatardepth);
-    setcamprojmatrix(false);
 
-    glDepthRange(0.0, 0.05); // restricted depth range for the avatar's gun and shield
+    setcamprojmatrix(!transparent);
+    if(transparent) syncgbufferparams();
+
+    glDepthRange(0.0, 0.05); // restricted depth range for avatar gun/shield
 
     enableavatarmask();
-    game::renderHudModels();
+    if(transparent) rendertransparenthud();
+    else game::renderSolidHudModels();
     disableavatarmask();
 
     glDepthRange(0.0, 1.0);
 
     projmatrix = oldprojmatrix;
-    setcamprojmatrix(false);
+    setcamprojmatrix(!transparent);
+    if(transparent) syncgbufferparams();
 }
 
 FVAR(polygonoffsetfactor, -1e4f, -3.0f, 1e4f);
@@ -2692,8 +2698,8 @@ void gl_drawview()
     renderao();
     GLERROR;
 
-    // render avatar after AO to avoid weird contact shadows
-    renderavatar();
+    // render solid avatar after AO to avoid weird contact shadows
+    renderavatar(false);
     GLERROR;
 
     glFlush();
@@ -2717,6 +2723,9 @@ void gl_drawview()
     }
 
     rendertransparent();
+    GLERROR;
+
+    renderavatar(true); // render transparent avatar right after other transparents
     GLERROR;
 
     if(!drawtex)

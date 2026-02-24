@@ -69,7 +69,9 @@ namespace game
     extern dynent *iterdynents(int i);
     extern int numdynents();
     extern void rendergame();
-    extern void renderHudModels();
+    extern bool checkTransparentHudModels();
+    extern void renderSolidHudModels();
+    extern void renderTransparentHudModels();
     extern void renderplayerpreview(int model, int cape, int color, int team, int weap, int yaw, bool rot);
     extern int numanims();
     extern void findanims(const char *pattern, vector<int> &anims);
@@ -121,4 +123,3 @@ namespace server
     extern bool ispaused();
     extern int scaletime(int t);
 }
-

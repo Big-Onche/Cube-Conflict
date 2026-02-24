@@ -182,7 +182,7 @@ extern void resetfogcolor();
 extern float calcfogdensity(float dist);
 extern float calcfogcull();
 extern void writecrosshairs(stream *f);
-extern void renderavatar();
+extern void renderavatar(bool transparent);
 
 namespace modelpreview
 {
@@ -348,6 +348,7 @@ extern void cleanupgbuffer();
 extern void initgbuffer();
 extern bool usepacknorm();
 extern void maskgbuffer(const char *mask);
+extern void syncgbufferparams();
 extern void bindgdepth();
 extern void preparegbuffer(bool depthclear = true);
 extern void rendergbuffer(bool depthclear = true);
@@ -356,6 +357,7 @@ extern void shadegbuffer();
 extern void shademinimap(const vec &color = vec(-1, -1, -1));
 extern void shademodelpreview(int x, int y, int w, int h, bool background = true, bool scissor = false);
 extern void rendertransparent();
+extern void rendertransparenthud();
 extern void renderao();
 extern void loadhdrshaders(int aa = AA_UNUSED);
 extern void processhdr(GLuint outfbo = 0, int aa = AA_UNUSED);
@@ -870,4 +872,3 @@ extern bool islaunching;
 #endif
 
 #endif
-

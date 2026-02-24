@@ -5096,34 +5096,54 @@ void rendertransparent()
     else renderparticles();
 }
 
+void rendertransparenthud()
+{
+    if(drawtex || !ghasstencil || !game::checkTransparentHudModels()) return;
+
+    static const int HUD_TRANSPARENT_LAYER = 5;
+
+    matrix4 raymatrix(vec(-0.5f*vieww*projmatrix.a.x, 0, 0.5f*vieww - 0.5f*vieww*projmatrix.c.x),
+                      vec(0, -0.5f*viewh*projmatrix.b.y, 0.5f*viewh - 0.5f*viewh*projmatrix.c.y));
+    raymatrix.muld(cammatrix);
+    GLOBALPARAM(raymatrix, raymatrix);
+    GLOBALPARAM(linearworldmatrix, linearworldmatrix);
+
+    glBindFramebuffer_(GL_FRAMEBUFFER, msaalight ? msfbo : gfbo);
+    if(ghasstencil)
+    {
+        glEnable(GL_STENCIL_TEST);
+        glStencilFunc(GL_ALWAYS, HUD_TRANSPARENT_LAYER | avatarmask, ~0);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+    }
+    maskgbuffer("cndg");
+
+    int oldtransparentlayer = transparentlayer;
+    transparentlayer = HUD_TRANSPARENT_LAYER;
+
+    game::renderTransparentHudModels();
+
+    transparentlayer = oldtransparentlayer;
+
+    if(msaalight)
+    {
+        glBindFramebuffer_(GL_FRAMEBUFFER, mshdrfbo);
+        if((ghasstencil && msaaedgedetect) || msaalight==2) loopi(2) renderlights(-1, -1, 1, 1, NULL, HUD_TRANSPARENT_LAYER, i+1, true);
+        else renderlights(-1, -1, 1, 1, NULL, HUD_TRANSPARENT_LAYER, 3, true);
+    }
+    else
+    {
+        glBindFramebuffer_(GL_FRAMEBUFFER, hdrfbo);
+        renderlights(-1, -1, 1, 1, NULL, HUD_TRANSPARENT_LAYER, 0, true);
+    }
+
+    if(!avatarmask) glDisable(GL_STENCIL_TEST);
+}
+
 VAR(gdepthclear, 0, 1, 1);
 VAR(gcolorclear, 0, 1, 1);
 
-void preparegbuffer(bool depthclear)
+static void syncgbufferparams_internal()
 {
-    glBindFramebuffer_(GL_FRAMEBUFFER, msaasamples && (msaalight || !drawtex) ? msfbo : gfbo);
-    glViewport(0, 0, vieww, viewh);
-
-    if(drawtex && gdepthinit)
-    {
-        glEnable(GL_SCISSOR_TEST);
-        glScissor(0, 0, vieww, viewh);
-    }
-    if(gdepthformat && gdepthclear)
-    {
-        maskgbuffer("d");
-        if(gdepthformat == 1) glClearColor(1, 1, 1, 1);
-        else glClearColor(-farplane, 0, 0, 0);
-        glClear(GL_COLOR_BUFFER_BIT);
-        maskgbuffer("cn");
-    }
-    else maskgbuffer("cnd");
-    if(gcolorclear) glClearColor(0, 0, 0, 0);
-    glClear((depthclear ? GL_DEPTH_BUFFER_BIT : 0)|(gcolorclear ? GL_COLOR_BUFFER_BIT : 0)|(depthclear && ghasstencil && (!msaasamples || msaalight || ghasstencil > 1) ? GL_STENCIL_BUFFER_BIT : 0));
-    if(gdepthformat && gdepthclear) maskgbuffer("cnd");
-    if(drawtex && gdepthinit) glDisable(GL_SCISSOR_TEST);
-    gdepthinit = true;
-
     matrix4 invscreenmatrix;
     invscreenmatrix.identity();
     invscreenmatrix.settranslation(-1.0f, -1.0f, -1.0f);
@@ -5168,6 +5188,39 @@ void preparegbuffer(bool depthclear)
     GLOBALPARAMF(hdrgamma, hdrgamma, 1.0f/hdrgamma);
     GLOBALPARAM(camera, camera1->o);
     GLOBALPARAMF(millis, lastmillis/1000.0f);
+}
+
+void syncgbufferparams()
+{
+    syncgbufferparams_internal();
+}
+
+void preparegbuffer(bool depthclear)
+{
+    glBindFramebuffer_(GL_FRAMEBUFFER, msaasamples && (msaalight || !drawtex) ? msfbo : gfbo);
+    glViewport(0, 0, vieww, viewh);
+
+    if(drawtex && gdepthinit)
+    {
+        glEnable(GL_SCISSOR_TEST);
+        glScissor(0, 0, vieww, viewh);
+    }
+    if(gdepthformat && gdepthclear)
+    {
+        maskgbuffer("d");
+        if(gdepthformat == 1) glClearColor(1, 1, 1, 1);
+        else glClearColor(-farplane, 0, 0, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
+        maskgbuffer("cn");
+    }
+    else maskgbuffer("cnd");
+    if(gcolorclear) glClearColor(0, 0, 0, 0);
+    glClear((depthclear ? GL_DEPTH_BUFFER_BIT : 0)|(gcolorclear ? GL_COLOR_BUFFER_BIT : 0)|(depthclear && ghasstencil && (!msaasamples || msaalight || ghasstencil > 1) ? GL_STENCIL_BUFFER_BIT : 0));
+    if(gdepthformat && gdepthclear) maskgbuffer("cnd");
+    if(drawtex && gdepthinit) glDisable(GL_SCISSOR_TEST);
+    gdepthinit = true;
+
+    syncgbufferparams_internal();
 
     GLERROR;
 
