@@ -692,6 +692,7 @@ void resetgl()
     cleanupblendmap();
     cleanuplights();
     ar::cleanup();
+    vclouds::cleanup();
     postfx::cleanupRadialBlur();
     cleanupshaders();
     cleanupgl();

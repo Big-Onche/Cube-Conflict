@@ -915,23 +915,47 @@ namespace ar
 
 namespace vclouds
 {
+    GLuint tvcloudtex = 0, tvcloudfbo = 0;
+    int tvcloudw = 0, tvcloudh = 0;
+
     VAR(testvolumetrics, 0, 0, 1);
 
     void init()
     {
-        if(testvolumetrics) useshaderbyname("testvolumetricclouds");
+        if(!testvolumetrics) return;
+        useshaderbyname("testvolumetricclouds");
+        useshaderbyname("scalelinear");
     }
 
     void render()
     {
         if(!testvolumetrics) return;
 
-        Shader *s = useshaderbyname("testvolumetricclouds");
-        if(!s) return;
+        Shader *cloudshader = useshaderbyname("testvolumetricclouds");
+        if(!cloudshader) return;
 
-        glDisable(GL_DEPTH_TEST);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        int targetw = max(vieww/2, 1), targeth = max(viewh/2, 1);
+        if(targetw != tvcloudw || targeth != tvcloudh)
+        {
+            cleanup();
+            tvcloudw = targetw;
+            tvcloudh = targeth;
+        }
+
+        if(!tvcloudtex)
+        {
+            glGenTextures(1, &tvcloudtex);
+            createtexture(tvcloudtex, tvcloudw, tvcloudh, NULL, 3, 1, GL_RGBA8, GL_TEXTURE_RECTANGLE);
+        }
+
+        if(!tvcloudfbo)
+        {
+            glGenFramebuffers_(1, &tvcloudfbo);
+            glBindFramebuffer_(GL_FRAMEBUFFER, tvcloudfbo);
+            glFramebufferTexture2D_(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, tvcloudtex, 0);
+            if(glCheckFramebufferStatus_(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) fatal("Failed allocating volumetric cloud buffer!");
+            glBindFramebuffer_(GL_FRAMEBUFFER, msaalight ? mshdrfbo : hdrfbo);
+        }
 
         glActiveTexture_(GL_TEXTURE9);
         if(msaalight) glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msdepthtex);
@@ -939,15 +963,35 @@ namespace vclouds
         glActiveTexture_(GL_TEXTURE0);
 
         float ws = max(float(worldsize), 1.0f);
-        float base = ws * 0.55f, top = ws * 0.72f;
+        float cloudheightoffset = -ws * 0.25f;
+        float base = ws * 0.55f + cloudheightoffset, top = ws * 0.72f + cloudheightoffset;
         if(top <= base + 1.0f) top = base + 1.0f;
 
         GLOBALPARAMF(tvcloudbounds, base, top, max(float(farplane), ws), lastmillis / 1000.0f);
         GLOBALPARAMF(tvcloudnoise, 1.0f / max(ws * 0.18f, 1.0f), 1.0f / max(ws * 0.06f, 1.0f), 0.50f, 0.95f);
         GLOBALPARAMF(tvcloudcolor, 1.00f, 0.98f, 0.95f, 0.75f);
+        GLOBALPARAMF(tvcloudscale, float(vieww)/tvcloudw, float(viewh)/tvcloudh, float(tvcloudw)/vieww, float(tvcloudh)/viewh);
+        GLOBALPARAM(sunlightdir, sunlightdir);
 
-        s->set();
-        screenquad();
+        glBindFramebuffer_(GL_FRAMEBUFFER, tvcloudfbo);
+        glViewport(0, 0, tvcloudw, tvcloudh);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_BLEND);
+        glClearColor(0, 0, 0, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
+        cloudshader->set();
+        screenquad(tvcloudw, tvcloudh);
+
+        glBindFramebuffer_(GL_FRAMEBUFFER, msaalight ? mshdrfbo : hdrfbo);
+        glViewport(0, 0, vieww, viewh);
+
+        glActiveTexture_(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_RECTANGLE, tvcloudtex);
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        SETSHADER(scalelinear);
+        screenquad(tvcloudw, tvcloudh);
 
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
@@ -955,5 +999,16 @@ namespace vclouds
 
     void cleanup()
     {
+        if(tvcloudfbo)
+        {
+            glDeleteFramebuffers_(1, &tvcloudfbo);
+            tvcloudfbo = 0;
+        }
+        if(tvcloudtex)
+        {
+            glDeleteTextures(1, &tvcloudtex);
+            tvcloudtex = 0;
+        }
+        tvcloudw = tvcloudh = 0;
     }
 }
