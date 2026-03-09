@@ -2955,6 +2955,8 @@ static void bindlighttexs(int msaapass = 0, bool transparent = false)
         glActiveTexture_(GL_TEXTURE11);
         glBindTexture(GL_TEXTURE_RECTANGLE, smfilter ? shadowfiltertex : shadowcolortex);
     }
+    glActiveTexture_(GL_TEXTURE12);
+    if(!bindcloudlayershadow()) glBindTexture(GL_TEXTURE_2D, notexture->id);
     glActiveTexture_(GL_TEXTURE0);
 }
 
@@ -2975,6 +2977,9 @@ static inline void setlightglobals(bool transparent = false)
         }
     }
     float lightscale = 2.0f*ldrscaleb;
+    vec4 cloudshadowparams(0, 0, 0, 0), cloudshadowtransform(0, 0, 1, 0);
+    vec cloudshadowcolor(1, 1, 1);
+    float cloudshadowstrength = 0.0f;
     if(!drawtex && editmode && fullbright)
         GLOBALPARAMF(lightscale, fullbrightlevel*lightscale, fullbrightlevel*lightscale, fullbrightlevel*lightscale, 255*lightscale);
     else
@@ -2997,8 +3002,19 @@ static inline void setlightglobals(bool transparent = false)
             GLOBALPARAMF(sunlightcolor, sunlight.x*lightscale*sunlightscale, sunlight.y*lightscale*sunlightscale, sunlight.z*lightscale*sunlightscale);
             GLOBALPARAMF(giscale, 2*giscale);
             GLOBALPARAMF(skylightcolor, 2*giaoscale*skylight.x*lightscale*skylightscale, 2*giaoscale*skylight.y*lightscale*skylightscale, 2*giaoscale*skylight.z*lightscale*skylightscale);
+            if(hascloudlayershadow())
+            {
+                getcloudlayershadowparams(cloudshadowparams, cloudshadowtransform);
+                cloudshadowcolor = getcloudlayershadowcolour().tocolor();
+                cloudshadowstrength = getcloudlayershadowstrength();
+            }
         }
     }
+
+    GLOBALPARAM(cloudshadowcolor, cloudshadowcolor);
+    GLOBALPARAM(cloudshadowparams, cloudshadowparams);
+    GLOBALPARAM(cloudshadowtransform, cloudshadowtransform);
+    GLOBALPARAMF(cloudshadowstrength, cloudshadowstrength);
 
     matrix4 lightmatrix;
     lightmatrix.identity();

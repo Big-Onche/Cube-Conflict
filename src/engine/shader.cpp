@@ -1813,7 +1813,6 @@ void resetshaders()
 
     cleanuplights();
     ar::cleanup();
-    vclouds::cleanup();
     postfx::cleanupRadialBlur();
     cleanupmodels();
     cleanupshaders();

@@ -531,15 +531,6 @@ namespace ar
     extern void cleanup();
 }
 
-namespace vclouds
-{
-    extern int testvolumetrics;
-
-    extern void init();
-    extern void render();
-    extern void cleanup();
-}
-
 namespace postfx
 {
     extern void initRadialBlur();
@@ -557,6 +548,11 @@ namespace postfx
     extern float shroomsFadeIn();
     extern void updateShroomsEffect(int shroomsMillis, int lastShrooms, int jointMillis);
     extern void updateUnderwaterEffect(bool underwater);
+}
+
+namespace godRays
+{
+
 }
 
 // water
@@ -789,6 +785,12 @@ extern void drawskybox(bool clear = false);
 extern bool hasskybox();
 extern bool limitsky();
 extern bool renderexplicitsky(bool outline = false);
+extern bool hascloudlayershadow();
+extern bool bindcloudlayershadow();
+extern float getcloudlayershadowstrength();
+extern const bvec &getcloudlayershadowcolour();
+extern void getcloudlayershadowparams(vec4 &params, vec4 &transform);
+extern void getskycubetints(vec colors[6], vec2 &front);
 extern void cleanupsky();
 
 // ui

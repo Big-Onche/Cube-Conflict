@@ -2730,9 +2730,6 @@ void gl_drawview()
 
     if(!drawtex)
     {
-        vclouds::render();
-        GLERROR;
-
         renderparticles();
         GLERROR;
     }
