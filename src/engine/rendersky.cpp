@@ -635,6 +635,23 @@ bool hascloudlayershadow()
     return cloudlayer[0] && cloudheight != 0.0f && cloudalpha > 0.0f && cloudshadow > 0.0f && cloudscale > 1.0e-4f && cloudoverlay && cloudoverlay != notexture;
 }
 
+bool hasCloudLayerProjection()
+{
+    return cloudlayer[0] && cloudheight != 0.0f && cloudscale > 1.0e-4f && (cloudalpha > 0.0f || cloudshadow > 0.0f) && cloudoverlay && cloudoverlay != notexture;
+}
+
+bool bindCloudLayer()
+{
+    if(!hasCloudLayerProjection()) return false;
+    glBindTexture(GL_TEXTURE_2D, cloudoverlay->id);
+    return true;
+}
+
+float getCloudLayerOpacity()
+{
+    return clamp(cloudalpha, 0.0f, 1.0f);
+}
+
 bool bindcloudlayershadow()
 {
     if(!hascloudlayershadow()) return false;
@@ -662,6 +679,11 @@ void getcloudlayershadowparams(vec4 &params, vec4 &transform)
     params = vec4(cloudz, 1.0f / max(float(farplane) * cloudscale, 1.0e-4f), fadestart, outerradius);
     transform = vec4(cloudoffsetx + cloudscrollx * time, cloudoffsety + cloudscrolly * time, cosf(angle), sinf(angle));
     adjustcloudreach(angle, transform.x, transform.y);
+}
+
+void getCloudLayerParams(vec4 &params, vec4 &transform)
+{
+    getcloudlayershadowparams(params, transform);
 }
 
 void getskycubetints(vec colors[6], vec2 &front)

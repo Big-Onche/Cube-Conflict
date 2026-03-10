@@ -552,7 +552,8 @@ namespace postfx
 
 namespace godRays
 {
-
+    extern void render();
+    extern void cleanup();
 }
 
 // water
@@ -785,6 +786,10 @@ extern void drawskybox(bool clear = false);
 extern bool hasskybox();
 extern bool limitsky();
 extern bool renderexplicitsky(bool outline = false);
+extern bool hasCloudLayerProjection();
+extern bool bindCloudLayer();
+extern float getCloudLayerOpacity();
+extern void getCloudLayerParams(vec4 &params, vec4 &transform);
 extern bool hascloudlayershadow();
 extern bool bindcloudlayershadow();
 extern float getcloudlayershadowstrength();

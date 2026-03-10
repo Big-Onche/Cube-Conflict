@@ -751,6 +751,7 @@ void setupgbuffer()
     cleanupbloom();
     cleanupao();
     cleanupvolumetric();
+    godRays::cleanup();
     cleanupaa();
     cleanuppostfx();
 
@@ -872,6 +873,7 @@ void cleanupgbuffer()
     if(refracttex) { glDeleteTextures(1, &refracttex); refracttex = 0; }
     gw = gh = -1;
     cleanupscale();
+    godRays::cleanup();
     cleanupmsbuffer();
     cleardeferredlightshaders();
 }

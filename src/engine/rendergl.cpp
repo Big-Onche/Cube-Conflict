@@ -2737,6 +2737,9 @@ void gl_drawview()
     rendervolumetric();
     GLERROR;
 
+    godRays::render();
+    GLERROR;
+
     if(!drawtex)
     {
         ar::render();
