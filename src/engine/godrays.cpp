@@ -7,6 +7,7 @@ namespace godRays
     // Settings vars
     VARFP(godrays, 0, 1, 1, if(!godrays) cleanup());
     VARP(godrayssteps, 1, 24, 64);
+    FVARP(godraysscale, 0.25f, 0.5f, 1.0f);
 
     // Map vars
     FVARR(godraysstrength, 0.0f, 0.5f, 1.0f);
@@ -25,12 +26,13 @@ namespace godRays
         bufferWidth = targetWidth;
         bufferHeight = targetHeight;
         passFormat = hasAFBO && hasTF ? GL_RGBA16F : GL_RGBA8;
+        const int passFilter = (bufferWidth < vieww || bufferHeight < viewh) ? 1 : 0;
 
         if(!rayTex) glGenTextures(1, &rayTex);
         if(!rayFbo) glGenFramebuffers_(1, &rayFbo);
 
         glBindFramebuffer_(GL_FRAMEBUFFER, rayFbo);
-        createtexture(rayTex, bufferWidth, bufferHeight, NULL, 3, 0, passFormat, GL_TEXTURE_RECTANGLE);
+        createtexture(rayTex, bufferWidth, bufferHeight, NULL, 3, passFilter, passFormat, GL_TEXTURE_RECTANGLE);
         glFramebufferTexture2D_(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, rayTex, 0);
         if(glCheckFramebufferStatus_(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             fatal("failed allocating god rays buffers!");
@@ -42,13 +44,16 @@ namespace godRays
     {
         if(vieww <= 0 || viewh <= 0) return false;
 
+        const float renderScale = clamp(godraysscale, 0.25f, 1.0f);
+        const int targetWidth = max(int(ceilf(vieww*renderScale)), 1),
+                  targetHeight = max(int(ceilf(viewh*renderScale)), 1);
         const GLenum targetFormat = hasAFBO && hasTF ? GL_RGBA16F : GL_RGBA8;
         if(rayTex && rayFbo &&
-           bufferWidth == vieww && bufferHeight == viewh &&
+           bufferWidth == targetWidth && bufferHeight == targetHeight &&
            passFormat == targetFormat) return true;
 
         cleanup();
-        setupBuffers(vieww, viewh);
+        setupBuffers(targetWidth, targetHeight);
         return true;
     }
 
@@ -115,7 +120,7 @@ namespace godRays
         glBlendFunc(GL_ONE, GL_ONE);
         glBindTexture(GL_TEXTURE_RECTANGLE, rayTex);
         SETSHADER(scalelinear);
-        screenquad(vieww, viewh);
+        screenquad(bufferWidth, bufferHeight);
         glDisable(GL_BLEND);
 
         glDepthMask(GL_TRUE);
