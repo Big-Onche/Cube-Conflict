@@ -23,6 +23,7 @@ VAR(mapatmosphere, 0, 0, 10);
 
 namespace game
 {
+    VARP(soloplayteam, 0, 0, 2);
     VARP(minradarscale, 0, 384, 10000);
     VARP(maxradarscale, 1, 1024, 10000);
     VARP(radarteammates, 0, 1, 1);

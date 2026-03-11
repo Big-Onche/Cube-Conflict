@@ -1044,6 +1044,7 @@ namespace game
     extern string servdesc;
     extern const char *localizedservdesc();
     extern vector<uchar> messages;
+    extern int soloplayteam;
 
     extern int parseplayer(const char *arg);
     extern void ignore(int cn);

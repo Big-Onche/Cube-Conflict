@@ -927,6 +927,11 @@ namespace server
         loopi(MAXTEAMS) teaminfos[i].reset();
     }
 
+    static inline int getpreferredteam(clientinfo *ci)
+    {
+        return ci && ci->local && ci->state.aitype == AI_NONE && m_teammode && validteam(game::soloplayteam) ? game::soloplayteam : 0;
+    }
+
     clientinfo *choosebestclient(float &bestrank)
     {
         clientinfo *best = NULL;
@@ -947,7 +952,22 @@ namespace server
     {
         vector<clientinfo *> team[MAXTEAMS];
         float teamrank[MAXTEAMS] = {0};
-        for(int round = 0, remaining = clients.length(); remaining>=0; round++)
+        int remaining = clients.length();
+        loopv(clients)
+        {
+            clientinfo *ci = clients[i];
+            int preferred = getpreferredteam(ci);
+            if(!preferred) continue;
+
+            float rank = ci->state.state!=CS_SPECTATOR ? ci->state.effectiveness/max(ci->state.timeplayed, 1) : -1;
+            if(smode && smode->hidefrags() && ci->state.state!=CS_SPECTATOR) rank = 1;
+            ci->state.timeplayed = -1;
+            team[preferred-1].add(ci);
+            if(rank > 0) teamrank[preferred-1] += rank;
+            remaining--;
+        }
+
+        for(int round = 0; remaining > 0; round++)
         {
             int first = round&1, second = (round+1)&1, selected = 0;
             while(teamrank[first] <= teamrank[second])
@@ -971,8 +991,9 @@ namespace server
             loopvj(team[i])
             {
                 clientinfo *ci = team[i][j];
+                int preferred = getpreferredteam(ci);
                 if(ci->team == 1+i) continue;
-                if(persistteams && validteam(ci->team) && (!smode || smode->canchangeteam(ci, 1+i, ci->team))) continue;
+                if(!preferred && persistteams && validteam(ci->team) && (!smode || smode->canchangeteam(ci, 1+i, ci->team))) continue;
                 ci->team = 1+i;
                 sendf(-1, 1, "riiii", N_SETTEAM, ci->clientnum, ci->team, -1);
             }
@@ -3446,7 +3467,8 @@ namespace server
         if(mastermode>=MM_LOCKED) ci->state.state = CS_SPECTATOR;
         ci->state.lasttimeplayed = lastmillis;
 
-        ci->team = m_teammode ? chooseworstteam(ci) : 0;
+        int preferred = getpreferredteam(ci);
+        ci->team = m_teammode ? (preferred ? preferred : chooseworstteam(ci)) : 0;
 
         sendwelcome(ci);
         if(restorescore(ci)) sendresume(ci);
