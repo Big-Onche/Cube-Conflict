@@ -11,6 +11,7 @@ namespace godRays
     VARP(godraysatrous, 0, 1, 1);
     VARP(godraysatrousiter, 1, 2, 3);
     FVARP(godraysatrousalphak, 0.0f, 0.0f, 256.0f);
+    FVARP(godraysupsampledepth, 256.0f, 4096.0f, 65536.0f);
 
     // Map vars
     FVARR(godraysstrength, 0.0f, 0.5f, 1.0f);
@@ -40,6 +41,7 @@ namespace godRays
     static GLuint rayFilterFbo = 0, rayFilterTex = 0;
     static GLuint rayGuideFbo = 0, rayGuideTex = 0;
     static GLenum passFormat = GL_RGBA8;
+    static GLenum guideFormat = GL_RGBA8;
 
     static void setupBuffers(int targetWidth, int targetHeight)
     {
@@ -68,7 +70,8 @@ namespace godRays
             fatal("failed allocating god rays filter buffers!");
 
         glBindFramebuffer_(GL_FRAMEBUFFER, rayGuideFbo);
-        createtexture(rayGuideTex, bufferWidth, bufferHeight, NULL, 3, 0, GL_RGBA8, GL_TEXTURE_RECTANGLE);
+        guideFormat = hasAFBO && hasTF ? GL_RGBA16F : GL_RGBA8;
+        createtexture(rayGuideTex, bufferWidth, bufferHeight, NULL, 3, 0, guideFormat, GL_TEXTURE_RECTANGLE);
         glFramebufferTexture2D_(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, rayGuideTex, 0);
         if(glCheckFramebufferStatus_(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             fatal("failed allocating god rays depth guide buffer!");
@@ -83,10 +86,10 @@ namespace godRays
         const float renderScale = clamp(godraysscale, 0.25f, 1.0f);
         const int targetWidth = max(int(ceilf(vieww*renderScale)), 1),
                   targetHeight = max(int(ceilf(viewh*renderScale)), 1);
-        const GLenum targetFormat = hasAFBO && hasTF ? GL_RGBA16F : GL_RGBA8;
+        const GLenum targetGuideFormat = hasAFBO && hasTF ? GL_RGBA16F : GL_RGBA8;
         if(rayTex && rayFbo && rayFilterTex && rayFilterFbo && rayGuideTex && rayGuideFbo &&
            bufferWidth == targetWidth && bufferHeight == targetHeight &&
-           passFormat == targetFormat) return true;
+           guideFormat == targetGuideFormat) return true;
 
         cleanup();
         setupBuffers(targetWidth, targetHeight);
@@ -232,7 +235,7 @@ namespace godRays
                 glActiveTexture_(GL_TEXTURE1);
                 glBindTexture(GL_TEXTURE_RECTANGLE, rayGuideTex);
                 glActiveTexture_(GL_TEXTURE0);
-                SETSHADER(godRayATrousFilter);
+                SETSHADER(aTrousFilter);
                 LOCALPARAMF(aTrousSize, float(bufferWidth), float(bufferHeight));
                 LOCALPARAMF(aTrousParams, float(1<<i), atrousDepthStrength, 0.0f, 0.0f);
                 screenquad(bufferWidth, bufferHeight);
@@ -250,14 +253,14 @@ namespace godRays
         glActiveTexture_(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_RECTANGLE, compositeTex);
         glActiveTexture_(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_RECTANGLE, rayGuideTex);
-        glActiveTexture_(GL_TEXTURE2);
         if(msaalight) glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msdepthtex);
         else glBindTexture(GL_TEXTURE_RECTANGLE, gdepthtex);
         glActiveTexture_(GL_TEXTURE0);
         SETSHADER(godRayUpsample);
-        LOCALPARAMF(godRaySourceSize, float(bufferWidth), float(bufferHeight));
-        LOCALPARAMF(godRayUpsampleDepth, 0.0f, 0.0f, 0.0f, 0.0f);
+        LOCALPARAMF(godrayScale,
+                    float(vieww)/float(bufferWidth), float(viewh)/float(bufferHeight),
+                    float(bufferWidth)/float(vieww), float(bufferHeight)/float(viewh));
+        LOCALPARAMF(bilateralDepthScale, godraysupsampledepth);
         screenquad(bufferWidth, bufferHeight, vieww, viewh);
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
         glDisable(GL_BLEND);
