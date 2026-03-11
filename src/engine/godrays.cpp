@@ -1,4 +1,4 @@
-// godrays.cpp: cloud-driven atmospheric crepuscular rays
+// godrays.cpp: atmospheric and world-space crepuscular rays
 
 #include "engine.h"
 
@@ -7,21 +7,33 @@ namespace godRays
     // Settings vars
     VARFP(godrays, 0, 1, 1, if(!godrays) cleanup());
     VARP(godrayssteps, 1, 24, 64);
-    FVARP(godraysscale, 0.25f, 0.25f, 1.0f);
+    FVARP(godraysscale, 0.125f, 0.25f, 1.0f);
     VARP(godraysatrous, 0, 1, 1);
     VARP(godraysatrousiter, 1, 2, 3);
     FVARP(godraysatrousalphak, 0.0f, 0.0f, 256.0f);
-    FVARP(godraysatrousdepth, 0.0f, 2048.0f, 8192.0f);
-    FVARP(godraysupscaledepth, 0.0f, 2048.0f, 8192.0f);
 
     // Map vars
     FVARR(godraysstrength, 0.0f, 0.5f, 1.0f);
     FVARR(godraysdensity, 0.25f, 3.0f, 16.0f);
     FVARR(godraysmaxaccum, 0.0f, 2.0f, 64.0f);
     FVARR(godraysmaxdist, 0.05f, 0.3f, 2.0f);
-    FVARR(godraysnearstart, 0.0f, 1024.0f, 4096.0f);
-    FVARR(godraysnearend, 1.0f, 4096.0f, 8192.0f);
+    FVARR(godraysnearstart, 0.0f, 0.0f, 4096.0f);
+    FVARR(godraysnearend, 1.0f, 128.0f, 8192.0f);
     FVARR(godraysforwardexp, 0.25f, 1.0f, 32.0f);
+
+    // Settings vars
+    VARP(godraysgeom, 0, 1, 1);
+    VARP(godraysgeomsteps, 1, 32, 64);
+    FVARP(godraysgeomshadowbias, 0.0f, 2.0f, 32.0f);
+    FVARP(godraysgeomforwardexp, 0.25f, 16.0f, 32.0f);
+    FVARP(godraysgeomdecay, 0.0f, 0.93f, 1.0f);
+    FVARP(godraysgeomthreshold, 0.0f, 0.15f, 1.0f);
+
+    // Map vars
+    FVARR(godraysgeomstrength, 0.0f, 2.0f, 4.0f);
+    FVARR(godraysgeomdensity, 0.25f, 0.85f, 4.0f);
+    FVARR(godraysgeommaxdist, 0.01f, 0.14f, 1.0f);
+
 
     static int bufferWidth = -1, bufferHeight = -1;
     static GLuint rayFbo = 0, rayTex = 0;
@@ -94,15 +106,26 @@ namespace godRays
 
     void render()
     {
-        if(!godrays || drawtex || !hasCloudLayerProjection() || godraysdensity <= 0.0f || godrayssteps <= 0) return;
+        const bool wantCloudPass = godrays && hasCloudLayerProjection() && godraysdensity > 0.0f && godrayssteps > 0;
+        const bool wantGeomPass = godraysgeom && csmshadowmap && shadowatlastex && csmsplits > 0 &&
+                                  godraysgeomstrength > 0.0f && godraysgeomdensity > 0.0f &&
+                                  godraysgeomsteps > 0 && godraysgeommaxdist > 0.0f;
+        if(drawtex || (!wantCloudPass && !wantGeomPass)) return;
         if(sunlight.iszero() || sunlightscale <= 0.0f || sunlightdir.z <= 1.0e-4f) return;
         if(!ensureBuffers()) return;
 
         vec4 cloudShadowParams(0, 0, 0, 0), cloudShadowTransform(0, 0, 1, 0);
         vec cloudShadowColor = getcloudlayershadowcolour().tocolor();
-        float cloudShadowStrength = max(getcloudlayershadowstrength(), getCloudLayerOpacity());
-        getCloudLayerParams(cloudShadowParams, cloudShadowTransform);
-        if(cloudShadowStrength <= 1.0e-4f) return;
+        float cloudShadowStrength = 0.0f;
+        bool renderCloudPass = false;
+        if(wantCloudPass)
+        {
+            cloudShadowStrength = max(getcloudlayershadowstrength(), getCloudLayerOpacity());
+            getCloudLayerParams(cloudShadowParams, cloudShadowTransform);
+            renderCloudPass = cloudShadowStrength > 1.0e-4f;
+        }
+        const bool renderGeomPass = wantGeomPass;
+        if(!renderCloudPass && !renderGeomPass) return;
 
         vec sunColor = sunlight.tocolor().mul(max(sunlightscale, 0.0f)).mul(ldrscale * 2.0f);
         if(sunColor.squaredlen() <= 1.0e-8f) return;
@@ -111,14 +134,16 @@ namespace godRays
                     nearEnd   = max(godraysnearend, nearStart + 1.0f);
 
         const float maxDistance = clamp(float(farplane) * max(godraysmaxdist, 0.05f), 1.0f, float(farplane));
+        const float geomMaxDistance = clamp(float(farplane) * max(godraysgeommaxdist, 0.01f), 1.0f, float(farplane));
 
         const float stepCount = clamp(float(godrayssteps), 1.0f, 64.0f);
-        const float atrousDepthStrength = clamp(godraysatrousalphak > 0.0f ? godraysatrousalphak : godraysatrousdepth, 0.0f, 8192.0f);
-        const float upsampleDepthStrength = clamp(godraysupscaledepth, 0.0f, 8192.0f);
+        const float geomStepCount = clamp(float(godraysgeomsteps), 1.0f, 64.0f);
+        const float atrousDepthStrength = clamp(godraysatrousalphak, 0.0f, 8192.0f);
 
         timer *godRayTimer = begintimer("god rays");
 
         glDisable(GL_DEPTH_TEST);
+        glDisable(GL_BLEND);
         glDepthMask(GL_FALSE);
 
         glBindFramebuffer_(GL_FRAMEBUFFER, rayFbo);
@@ -126,23 +151,59 @@ namespace godRays
         glClearColor(0, 0, 0, 0);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glActiveTexture_(GL_TEXTURE0);
-        if(msaalight) glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msdepthtex);
-        else glBindTexture(GL_TEXTURE_RECTANGLE, gdepthtex);
-        glActiveTexture_(GL_TEXTURE1);
-        if(!bindCloudLayer()) glBindTexture(GL_TEXTURE_2D, notexture->id);
-        glActiveTexture_(GL_TEXTURE0);
+        if(renderCloudPass)
+        {
+            glActiveTexture_(GL_TEXTURE0);
+            if(msaalight) glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msdepthtex);
+            else glBindTexture(GL_TEXTURE_RECTANGLE, gdepthtex);
+            glActiveTexture_(GL_TEXTURE1);
+            if(!bindCloudLayer()) glBindTexture(GL_TEXTURE_2D, notexture->id);
+            glActiveTexture_(GL_TEXTURE0);
 
-        SETSHADER(cloudCrepuscularRays);
-        LOCALPARAM(sunDir, sunlightdir);
-        LOCALPARAM(sunColor, sunColor);
-        LOCALPARAM(cloudShadowParams, cloudShadowParams);
-        LOCALPARAM(cloudShadowTransform, cloudShadowTransform);
-        LOCALPARAM(cloudShadowColor, cloudShadowColor);
-        LOCALPARAMF(cloudShadowStrength, cloudShadowStrength);
-        LOCALPARAMF(godRayMarchParams, max(godraysforwardexp, 0.25f), max(godraysdensity, 0.25f), maxDistance, max(godraysmaxaccum, 0.0f));
-        LOCALPARAMF(godRayDistanceParams, nearStart, nearEnd, stepCount, clamp(godraysstrength, 0.0f, 1.0f));
-        screenquad(vieww, viewh);
+            SETSHADER(cloudCrepuscularRays);
+            LOCALPARAM(sunDir, sunlightdir);
+            LOCALPARAM(sunColor, sunColor);
+            LOCALPARAM(cloudShadowParams, cloudShadowParams);
+            LOCALPARAM(cloudShadowTransform, cloudShadowTransform);
+            LOCALPARAM(cloudShadowColor, cloudShadowColor);
+            LOCALPARAMF(cloudShadowStrength, cloudShadowStrength);
+            LOCALPARAMF(godRayMarchParams, max(godraysforwardexp, 0.25f), max(godraysdensity, 0.25f), maxDistance, max(godraysmaxaccum, 0.0f));
+            LOCALPARAMF(godRayDistanceParams, nearStart, nearEnd, stepCount, clamp(godraysstrength, 0.0f, 1.0f));
+            screenquad(vieww, viewh);
+        }
+
+        if(renderGeomPass)
+        {
+            if(renderCloudPass)
+            {
+                glEnable(GL_BLEND);
+                glBlendFunc(GL_ONE, GL_ONE);
+            }
+
+            glActiveTexture_(GL_TEXTURE0);
+            if(msaalight) glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msdepthtex);
+            else glBindTexture(GL_TEXTURE_RECTANGLE, gdepthtex);
+            glActiveTexture_(GL_TEXTURE2);
+            glBindTexture(shadowatlastarget, shadowatlastex);
+            glTexParameteri(shadowatlastarget, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+            glTexParameteri(shadowatlastarget, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+            glTexParameteri(shadowatlastarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(shadowatlastarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glActiveTexture_(GL_TEXTURE0);
+
+            if(shadowatlastarget == GL_TEXTURE_2D) SETSHADER(geometryCrepuscularRays2D);
+            else SETSHADER(geometryCrepuscularRaysRect);
+            LOCALPARAM(sunDir, sunlightdir);
+            LOCALPARAM(sunColor, sunColor);
+            LOCALPARAMF(godRayGeomParams, max(godraysgeomdensity, 0.25f), clamp(godraysgeomdecay, 0.0f, 1.0f), geomMaxDistance, max(godraysgeomforwardexp, 0.25f));
+            LOCALPARAMI(godRayGeomSteps, int(geomStepCount));
+            LOCALPARAMF(godRayGeomDistanceParams, clamp(godraysgeomstrength, 0.0f, 2.0f), 0.0f, 0.0f, 0.0f);
+            LOCALPARAMF(godRayGeomShapeParams, max(godraysgeomshadowbias, 0.0f), clamp(godraysgeomthreshold, 0.0f, 1.0f), 0.0f, 0.0f);
+            LOCALPARAMI(csmcount, csmsplits);
+            screenquad(vieww, viewh);
+
+            if(renderCloudPass) glDisable(GL_BLEND);
+        }
 
         glBindFramebuffer_(GL_FRAMEBUFFER, rayGuideFbo);
         glViewport(0, 0, bufferWidth, bufferHeight);
@@ -196,7 +257,7 @@ namespace godRays
         glActiveTexture_(GL_TEXTURE0);
         SETSHADER(godRayUpsample);
         LOCALPARAMF(godRaySourceSize, float(bufferWidth), float(bufferHeight));
-        LOCALPARAMF(godRayUpsampleDepth, upsampleDepthStrength, 0.0f, 0.0f, 0.0f);
+        LOCALPARAMF(godRayUpsampleDepth, 0.0f, 0.0f, 0.0f, 0.0f);
         screenquad(bufferWidth, bufferHeight, vieww, viewh);
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
         glDisable(GL_BLEND);

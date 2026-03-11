@@ -286,6 +286,9 @@ extern vec shadoworigin, shadowdir;
 extern float shadowradius, shadowbias, refractdepth;
 extern int shadowside, shadowspot, shadowtransparent;
 extern matrix4 shadowmatrix;
+extern GLuint shadowatlastex;
+extern GLenum shadowatlastarget;
+extern int csmshadowmap, csmsplits;
 
 extern void loaddeferredlightshaders();
 extern void cleardeferredlightshaders();
