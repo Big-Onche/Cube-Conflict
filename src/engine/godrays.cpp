@@ -4,6 +4,8 @@
 
 namespace godRays
 {
+    void cleanup();
+
     // Settings vars
     VARFP(godrays, 0, 1, 1, if(!godrays) cleanup());
     VARP(godrayssteps, 1, 24, 64);
@@ -46,11 +48,22 @@ namespace godRays
     static GLenum passFormat = GL_RGBA8;
     static GLenum guideFormat = GL_RGBA8;
 
-    static void setupBuffers(int targetWidth, int targetHeight)
+    static bool disable(const char *msg)
+    {
+        glBindFramebuffer_(GL_FRAMEBUFFER, 0);
+        cleanup();
+        godrays = 0;
+        godraysgeom = 0;
+        conoutf(CON_ERROR, "%s, effect deactivated", msg);
+        return false;
+    }
+
+    static bool setupBuffers(int targetWidth, int targetHeight, GLenum targetPassFormat, GLenum targetGuideFormat)
     {
         bufferWidth = targetWidth;
         bufferHeight = targetHeight;
-        passFormat = hasAFBO && hasTF ? GL_RGBA16F : GL_RGBA8;
+        passFormat = targetPassFormat;
+        guideFormat = targetGuideFormat;
         const int passFilter = (bufferWidth < vieww || bufferHeight < viewh) ? 1 : 0;
 
         if(!rayTex) glGenTextures(1, &rayTex);
@@ -64,29 +77,29 @@ namespace godRays
         createtexture(rayTex, bufferWidth, bufferHeight, NULL, 3, passFilter, passFormat, GL_TEXTURE_RECTANGLE);
         glFramebufferTexture2D_(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, rayTex, 0);
         if(glCheckFramebufferStatus_(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            fatal("failed allocating god rays buffers!");
+            return disable("failed allocating god rays buffers");
 
         glBindFramebuffer_(GL_FRAMEBUFFER, rayFilterFbo);
         createtexture(rayFilterTex, bufferWidth, bufferHeight, NULL, 3, passFilter, passFormat, GL_TEXTURE_RECTANGLE);
         glFramebufferTexture2D_(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, rayFilterTex, 0);
         if(glCheckFramebufferStatus_(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            fatal("failed allocating god rays filter buffers!");
+            return disable("failed allocating god rays filter buffers");
 
         glBindFramebuffer_(GL_FRAMEBUFFER, rayGuideFbo);
-        guideFormat = hasAFBO && hasTF ? GL_RGBA16F : GL_RGBA8;
         createtexture(rayGuideTex, bufferWidth, bufferHeight, NULL, 3, 0, guideFormat, GL_TEXTURE_RECTANGLE);
         glFramebufferTexture2D_(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, rayGuideTex, 0);
         if(glCheckFramebufferStatus_(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            fatal("failed allocating god rays depth guide buffer!");
+            return disable("failed allocating god rays depth guide buffer");
 
         glBindFramebuffer_(GL_FRAMEBUFFER, 0);
+        return true;
     }
 
     static bool ensureBuffers()
     {
         if(vieww <= 0 || viewh <= 0) return false;
 
-        const float renderScale = clamp(godraysscale, 0.25f, 1.0f);
+        const float renderScale = godraysscale;
         const int targetWidth = max(int(ceilf(vieww*renderScale)), 1),
                   targetHeight = max(int(ceilf(viewh*renderScale)), 1);
         const GLenum targetPassFormat = hasAFBO && hasTF ? GL_RGBA16F : GL_RGBA8;
@@ -97,8 +110,7 @@ namespace godRays
            guideFormat == targetGuideFormat) return true;
 
         cleanup();
-        setupBuffers(targetWidth, targetHeight);
-        return true;
+        return setupBuffers(targetWidth, targetHeight, targetPassFormat, targetGuideFormat);
     }
 
     void cleanup()
@@ -115,7 +127,8 @@ namespace godRays
 
     void render()
     {
-        const bool wantCloudPass = godrays && hasCloudLayerProjection() && godraysdensity > 0.0f && godrayssteps > 0;
+        const bool wantCloudPass = godrays && hasCloudLayerProjection() && godraysstrength > 0.0f &&
+                                   godraysdensity > 0.0f && godrayssteps > 0;
         const bool wantGeomPass = godraysgeom && csmshadowmap && shadowatlastex && csmsplits > 0 &&
                                   godraysgeomstrength > 0.0f && godraysgeomdensity > 0.0f &&
                                   godraysgeomsteps > 0 && godraysgeommaxdist > 0.0f;
@@ -124,7 +137,6 @@ namespace godRays
         if(!ensureBuffers()) return;
 
         vec4 cloudShadowParams(0, 0, 0, 0), cloudShadowTransform(0, 0, 1, 0);
-        vec cloudShadowColor = getcloudlayershadowcolour().tocolor();
         float cloudShadowStrength = 0.0f;
         bool renderCloudPass = false;
         if(wantCloudPass)
@@ -139,15 +151,8 @@ namespace godRays
         vec sunColor = sunlight.tocolor().mul(max(sunlightscale, 0.0f)).mul(ldrscale * 2.0f);
         if(sunColor.squaredlen() <= 1.0e-8f) return;
 
-        const float nearStart = max(godraysnearstart, 0.0f),
-                    nearEnd   = max(godraysnearend, nearStart + 1.0f);
-
         const float maxDistance = clamp(float(farplane) * max(godraysmaxdist, 0.05f), 1.0f, float(farplane));
         const float geomMaxDistance = clamp(float(farplane) * max(godraysgeommaxdist, 0.01f), 1.0f, float(farplane));
-
-        const float stepCount = clamp(float(godrayssteps), 1.0f, 64.0f);
-        const float geomStepCount = clamp(float(godraysgeomsteps), 1.0f, 64.0f);
-        const float atrousDepthStrength = clamp(godraysatrousalphak, 0.0f, 8192.0f);
 
         timer *godRayTimer = begintimer("god rays");
 
@@ -174,10 +179,10 @@ namespace godRays
             LOCALPARAM(sunColor, sunColor);
             LOCALPARAM(cloudShadowParams, cloudShadowParams);
             LOCALPARAM(cloudShadowTransform, cloudShadowTransform);
-            LOCALPARAM(cloudShadowColor, cloudShadowColor);
+            LOCALPARAM(cloudShadowColor, getcloudlayershadowcolour().tocolor());
             LOCALPARAMF(cloudShadowStrength, cloudShadowStrength);
             LOCALPARAMF(godRayMarchParams, max(godraysforwardexp, 0.25f), max(godraysdensity, 0.25f), maxDistance, max(godraysmaxaccum, 0.0f));
-            LOCALPARAMF(godRayDistanceParams, nearStart, nearEnd, stepCount, clamp(godraysstrength, 0.0f, 1.0f));
+            LOCALPARAMF(godRayDistanceParams, godraysnearstart, max(godraysnearend, godraysnearstart + 1.0f), godrayssteps, clamp(godraysstrength, 0.0f, 1.0f));
             screenquad(vieww, viewh);
         }
 
@@ -205,7 +210,7 @@ namespace godRays
             LOCALPARAM(sunDir, sunlightdir);
             LOCALPARAM(sunColor, sunColor);
             LOCALPARAMF(godRayGeomParams, max(godraysgeomdensity, 0.25f), clamp(godraysgeomdecay, 0.0f, 1.0f), geomMaxDistance, max(godraysgeomforwardexp, 0.25f));
-            LOCALPARAMI(godRayGeomSteps, int(geomStepCount));
+            LOCALPARAMI(godRayGeomSteps, godraysgeomsteps);
             LOCALPARAMF(godRayGeomDistanceParams, clamp(godraysgeomstrength, 0.0f, 2.0f), 0.0f, 0.0f, 0.0f);
             LOCALPARAMF(godRayGeomShapeParams, max(godraysgeomshadowbias, 0.0f), clamp(godraysgeomthreshold, 0.0f, 1.0f), 0.0f, 0.0f);
             LOCALPARAMI(csmcount, csmsplits);
@@ -243,7 +248,7 @@ namespace godRays
                 glActiveTexture_(GL_TEXTURE0);
                 SETSHADER(aTrousFilter);
                 LOCALPARAMF(aTrousSize, float(bufferWidth), float(bufferHeight));
-                LOCALPARAMF(aTrousParams, float(1<<i), atrousDepthStrength, 0.0f, 0.0f);
+                LOCALPARAMF(aTrousParams, float(1<<i), godraysatrousalphak, 0.0f, 0.0f);
                 screenquad(bufferWidth, bufferHeight);
 
                 swap(sourceIndex, targetIndex);
