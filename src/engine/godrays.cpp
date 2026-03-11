@@ -10,8 +10,10 @@ namespace godRays
     FVARP(godraysscale, 0.125f, 0.25f, 1.0f);
     VARP(godraysatrous, 0, 1, 1);
     VARP(godraysatrousiter, 1, 2, 3);
-    FVARP(godraysatrousalphak, 0.0f, 0.0f, 256.0f);
-    FVARP(godraysupsampledepth, 256.0f, 4096.0f, 65536.0f);
+
+    // Tunables
+    FVAR(godraysatrousalphak, 0.0f, 0.0f, 256.0f);
+    FVAR(godraysupscaleedge, 0.0f, 0.02f, 1.0f);
 
     // Map vars
     FVARR(godraysstrength, 0.0f, 0.5f, 1.0f);
@@ -27,14 +29,15 @@ namespace godRays
     VARP(godraysgeomsteps, 1, 32, 64);
     FVARP(godraysgeomshadowbias, 0.0f, 2.0f, 32.0f);
     FVARP(godraysgeomforwardexp, 0.25f, 16.0f, 32.0f);
-    FVARP(godraysgeomdecay, 0.0f, 0.93f, 1.0f);
-    FVARP(godraysgeomthreshold, 0.0f, 0.15f, 1.0f);
+
+    // Tunables
+    FVAR(godraysgeomdecay, 0.0f, 0.93f, 1.0f);
+    FVAR(godraysgeomthreshold, 0.0f, 0.15f, 1.0f);
 
     // Map vars
     FVARR(godraysgeomstrength, 0.0f, 2.0f, 4.0f);
     FVARR(godraysgeomdensity, 0.25f, 0.85f, 4.0f);
     FVARR(godraysgeommaxdist, 0.01f, 0.14f, 1.0f);
-
 
     static int bufferWidth = -1, bufferHeight = -1;
     static GLuint rayFbo = 0, rayTex = 0;
@@ -86,9 +89,11 @@ namespace godRays
         const float renderScale = clamp(godraysscale, 0.25f, 1.0f);
         const int targetWidth = max(int(ceilf(vieww*renderScale)), 1),
                   targetHeight = max(int(ceilf(viewh*renderScale)), 1);
+        const GLenum targetPassFormat = hasAFBO && hasTF ? GL_RGBA16F : GL_RGBA8;
         const GLenum targetGuideFormat = hasAFBO && hasTF ? GL_RGBA16F : GL_RGBA8;
         if(rayTex && rayFbo && rayFilterTex && rayFilterFbo && rayGuideTex && rayGuideFbo &&
            bufferWidth == targetWidth && bufferHeight == targetHeight &&
+           passFormat == targetPassFormat &&
            guideFormat == targetGuideFormat) return true;
 
         cleanup();
@@ -104,6 +109,7 @@ namespace godRays
         if(rayFilterTex) { glDeleteTextures(1, &rayFilterTex); rayFilterTex = 0; }
         if(rayGuideFbo) { glDeleteFramebuffers_(1, &rayGuideFbo); rayGuideFbo = 0; }
         if(rayGuideTex) { glDeleteTextures(1, &rayGuideTex); rayGuideTex = 0; }
+        passFormat = guideFormat = GL_RGBA8;
         bufferWidth = bufferHeight = -1;
     }
 
@@ -260,7 +266,7 @@ namespace godRays
         LOCALPARAMF(godrayScale,
                     float(vieww)/float(bufferWidth), float(viewh)/float(bufferHeight),
                     float(bufferWidth)/float(vieww), float(bufferHeight)/float(viewh));
-        LOCALPARAMF(bilateralDepthScale, godraysupsampledepth);
+        LOCALPARAMF(bilateralDepthScale, 1.0f / max(float(farplane) * godraysupscaleedge, 1.0e-4f));
         screenquad(bufferWidth, bufferHeight, vieww, viewh);
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
         glDisable(GL_BLEND);
