@@ -503,7 +503,7 @@ struct gamestate
     bool aiming;
     int aitype, skill;
 
-    gamestate() : maxhealth(1000), aitype(AI_NONE), skill(0) {}
+    gamestate() : maxhealth(1000), armour(0), armourtype(A_WOOD), aitype(AI_NONE), skill(0) {}
 
     void baseammo(int gun, int k = 1)
     {
@@ -627,6 +627,8 @@ struct gamestate
         health = 1000;
         maxhealth = 1000;
         mana = 100;
+        armour = 0;
+        armourtype = A_WOOD;
         loopi(NUMBOOSTS) boostmillis[i] = 0;
         loopi(NUMABILITIES)
         {
