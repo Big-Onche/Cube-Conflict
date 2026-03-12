@@ -135,9 +135,10 @@ namespace server
         int lasttimeplayed, timeplayed;
         bool inwater;
         float effectiveness;
-        clientinfo *lastBurner;
+        int lastBurnerClientNum;
+        uintptr_t lastBurnerToken;
 
-        servstate() : state(CS_DEAD), editstate(CS_DEAD), lifesequence(0) {}
+        servstate() : state(CS_DEAD), editstate(CS_DEAD), lifesequence(0), lastBurnerClientNum(-1), lastBurnerToken(0) {}
 
         bool isalive(int gamemillis)
         {
@@ -173,6 +174,9 @@ namespace server
             lastspawn = -1;
             lastshot = 0;
             inwater = false;
+            afterburnatk = 0;
+            lastBurnerClientNum = -1;
+            lastBurnerToken = 0;
         }
 
         void reassign()
@@ -728,6 +732,33 @@ namespace server
         if(n < MAXCLIENTS) return (clientinfo *)getclientinfo(n);
         n -= MAXCLIENTS;
         return bots.inrange(n) ? bots[n] : NULL;
+    }
+
+    static inline clientinfo *resolveafterburnowner(const servstate &ts)
+    {
+        if(ts.lastBurnerClientNum < 0) return NULL;
+
+        clientinfo *burner = getinfo(ts.lastBurnerClientNum);
+        if(!burner || !burner->connected) return NULL;
+
+        return reinterpret_cast<uintptr_t>(burner) == ts.lastBurnerToken ? burner : NULL;
+    }
+
+    static inline void clearafterburnowner(clientinfo *burner)
+    {
+        if(!burner) return;
+
+        uintptr_t token = reinterpret_cast<uintptr_t>(burner);
+        loopv(clients)
+        {
+            servstate &ts = clients[i]->state;
+            if(ts.lastBurnerClientNum != burner->clientnum || ts.lastBurnerToken != token) continue;
+
+            ts.afterburnmillis = 0;
+            ts.afterburnatk = 0;
+            ts.lastBurnerClientNum = -1;
+            ts.lastBurnerToken = 0;
+        }
     }
 
     uint mcrc = 0;
@@ -2533,7 +2564,8 @@ namespace server
 
             ts.afterburnmillis = min(ts.afterburnmillis + burnMillis, maxBurnMillis);
             ts.afterburnatk = atk;
-            ts.lastBurner = actor;
+            ts.lastBurnerClientNum = actor->clientnum;
+            ts.lastBurnerToken = reinterpret_cast<uintptr_t>(actor);
         }
 
         ts.dodamage(damage, target->character==C_PHYSICIST && ts.abilitymillis[ABILITY_1]); // update target hp and shield
@@ -2958,15 +2990,22 @@ namespace server
         {
             clientinfo &target = *clients[i];
             servstate &ts = target.state;
+            clientinfo *burner = resolveafterburnowner(ts);
 
-            if(ts.state==CS_ALIVE && ts.afterburnmillis && ts.lastBurner->connected)
+            if(ts.state==CS_ALIVE && ts.afterburnmillis && burner)
             {
                 int afterburnDamage = (ts.afterburnatk == ATK_FLAMETHROWER ? 40 : 80);
-                sendf(-1, 1, "ri3", N_AFTERBURN, target.clientnum, ts.lastBurner->clientnum);
-                dodamage(&target, ts.lastBurner, afterburnDamage, ts.afterburnatk, vec(0,0,0), true);
-                if(ts.lastBurner->character==C_VAMPIRE) doregen(&target, ts.lastBurner, afterburnDamage);
+                sendf(-1, 1, "ri3", N_AFTERBURN, target.clientnum, burner->clientnum);
+                dodamage(&target, burner, afterburnDamage, ts.afterburnatk, vec(0,0,0), true);
+                if(burner->character==C_VAMPIRE) doregen(&target, burner, afterburnDamage);
             }
-            else ts.afterburnmillis = 0;
+            else
+            {
+                ts.afterburnmillis = 0;
+                ts.afterburnatk = 0;
+                ts.lastBurnerClientNum = -1;
+                ts.lastBurnerToken = 0;
+            }
         }
         tick = -100 + rnd(201);
     }
@@ -3201,6 +3240,7 @@ namespace server
     {
         clientinfo *ci = getinfo(n);
         loopv(clients) if(clients[i]->authkickvictim == ci->clientnum) clients[i]->cleanauth();
+        clearafterburnowner(ci);
         if(ci->connected)
         {
             ci->connected = false;
@@ -3533,7 +3573,8 @@ namespace server
                     }
                     #endif
 
-                    ci->state.lastBurner = NULL;
+                    ci->state.lastBurnerClientNum = -1;
+                    ci->state.lastBurnerToken = 0;
                     if(m_identique)
                     {
                         ci->state.ammo[currentWeapon] = 1;
