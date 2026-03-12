@@ -970,7 +970,8 @@ ICOMMAND(hudbasesstats, "i", (int *team),
                     case A_GOLD: if(ci->state.armour>2000) {ci->state.armourtype = A_POWERARMOR; if(!ci->state.ammo[GUN_POWERARMOR]) ci->state.ammo[GUN_POWERARMOR] = 1;}
                 }
 
-                if(!ci->state.hasmaxammo(b.ammotype))
+                // Regen bases store gun ids, but hasmaxammo() expects an ammo entity type.
+                if(!ci->state.hasmaxammo(I_RAIL + b.ammotype))
                 {
                     ci->state.addammo(b.ammotype, ticks*REGENAMMO, 100);
                     notify = true;
