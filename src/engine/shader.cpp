@@ -1590,6 +1590,7 @@ void reloadshaders()
 namespace postfx
 {
     GLuint radialblurtex = 0;
+    GLuint radialblurfbo = 0;
     int texWidth = 0, texHeight = 0;
 
     VARFP(rb, 0, 1, 1, rb ? postfx::initRadialBlur() : postfx::cleanupRadialBlur());
@@ -1604,7 +1605,7 @@ namespace postfx
         if(!rb && !shroomsMillis) return;
 
         int shroomsBlur = 0;
-        if(shroomsMillis) shroomsBlur = 200 * min(1.0f * shroomsFadeIn(), shroomsMillis / 5000.f);
+        if(shroomsMillis) shroomsBlur = int(MAXBLUR * min(1.0f * shroomsFadeIn(), shroomsMillis / 5000.f));
 
         float overallSpeed = sqrt(velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z);
 
@@ -1640,6 +1641,15 @@ namespace postfx
             glGenTextures(1, &radialblurtex);
             createtexture(radialblurtex, texWidth, texHeight, NULL, 3, 1, GL_RGB16F, GL_TEXTURE_RECTANGLE);
         }
+
+        if(msaalight && !radialblurfbo)
+        {
+            glGenFramebuffers_(1, &radialblurfbo);
+            glBindFramebuffer_(GL_FRAMEBUFFER, radialblurfbo);
+            glFramebufferTexture2D_(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, radialblurtex, 0);
+            if(glCheckFramebufferStatus_(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) fatal("Failed allocating radial blur buffer!");
+            glBindFramebuffer_(GL_FRAMEBUFFER, mshdrfbo);
+        }
     }
 
     void renderRadialBlur()
@@ -1647,16 +1657,25 @@ namespace postfx
         if(!radialBlurStrenght) return;
 
         checkRadialBlur();
+        glActiveTexture_(GL_TEXTURE0);
 
-        glBindFramebuffer_(GL_FRAMEBUFFER, radialblurtex);
+        if(msaalight)
+        {
+            glBindFramebuffer_(GL_READ_FRAMEBUFFER, mshdrfbo);
+            glBindFramebuffer_(GL_DRAW_FRAMEBUFFER, radialblurfbo);
+            glBlitFramebuffer_(0, 0, texWidth, texHeight, 0, 0, texWidth, texHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+            glBindFramebuffer_(GL_FRAMEBUFFER, mshdrfbo);
+        }
+        else
+        {
+            glBindTexture(GL_TEXTURE_RECTANGLE, radialblurtex);
+            glCopyTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, 0, 0, texWidth, texHeight);
+        }
 
         glBindTexture(GL_TEXTURE_RECTANGLE, radialblurtex);
-        glCopyTexSubImage2D(GL_TEXTURE_RECTANGLE, 0, 0, 0, 0, 0, texWidth, texHeight);
-
         SETSHADER(radialblur);
         LOCALPARAMF(params, rbsteps, radialBlurStrenght);
 
-        glActiveTexture_(GL_TEXTURE0);
         screenquad(vieww, viewh);
     }
 
@@ -1667,6 +1686,12 @@ namespace postfx
 
     void cleanupRadialBlur()
     {
+        if(radialblurfbo)
+        {
+            glDeleteFramebuffers_(1, &radialblurfbo);
+            radialblurfbo = 0;
+        }
+
         if(radialblurtex)
         {
             glDeleteTextures(1, &radialblurtex);
