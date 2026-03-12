@@ -1012,6 +1012,7 @@ namespace game
         messagereliable = false;
         messagecn = -1;
         player1->respawn();
+        player1->shieldbroken = true;
         player1->lifesequence = 0;
         player1->state = CS_ALIVE;
         player1->privilege = PRIV_NONE;
