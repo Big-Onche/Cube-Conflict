@@ -108,6 +108,7 @@ struct gameentity : extentity
 };
 
 const int NUMMAINGUNS = 19;
+const int MAXWEAPONS = 8;
 const int NUMMELEEWEAPONS = 4;
 const int NUMSUPERWEAPONS = 4;
 enum { ACT_IDLE = 0, ACT_SHOOT, NUMACTS };
@@ -537,6 +538,13 @@ struct gamestate
         return ammo[GUN_S_NUKE] || ammo[GUN_S_GAU8] || ammo[GUN_S_ROCKETS] || ammo[GUN_S_CAMPER];
     }
 
+    int countMainWeapons()
+    {
+        int count = 0;
+        for(int gun = GUN_ELECTRIC; gun <= GUN_GLOCK; ++gun) if(ammo[gun] > 0) count++;
+        return count;
+    }
+
     bool canpickupitem(int type, int playerClass)
     {
         if(type<I_RAIL || type>I_MANA) return false;
@@ -564,6 +572,7 @@ struct gamestate
             case I_POWERARMOR: return !hasPowerArmor();
 
             default:
+                if(type >= I_RAIL && type <= I_GLOCK && !ammo[is.info] && countMainWeapons() >= MAXWEAPONS) return false;
                 if(type >= I_SUPERARME && type < I_SUPERARME + NUMSUPERWEAPONS && hasSuperWeapon()) return false;
                 else return ammo[is.info] < is.max * (playerClass==C_AMERICAN ? 1.5f : 1);
         }

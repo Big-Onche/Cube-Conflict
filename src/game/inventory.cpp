@@ -2,7 +2,6 @@
 
 namespace game
 {
-    const int MAXWEAPONS = 8;
     bool validInventoryWeapon(int i) { return i >= 0 && i < MAXWEAPONS; }
     int playerWeapons[MAXWEAPONS];
 
@@ -15,9 +14,9 @@ namespace game
         {
             if(player1->hasammo(i))
             {
+                if(!validInventoryWeapon(weaponAmount)) return;
                 if(playerWeapons[weaponAmount] < 0) playerWeapons[weaponAmount] = i;
                 weaponAmount++;
-                if(!validInventoryWeapon(weaponAmount)) return;
             }
         }
     }
