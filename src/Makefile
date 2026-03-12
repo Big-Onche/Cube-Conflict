@@ -108,6 +108,8 @@ CLIENT_OBJS= \
         engine/console.o \
         engine/dynlight.o \
         engine/grass.o \
+        engine/godrays.o \
+        engine/lensflare.o \
         engine/light.o \
         engine/main.o \
         engine/material.o \
@@ -324,6 +326,11 @@ engine/grass.o: engine/engine.h shared/cube.h shared/tools.h shared/geom.h
 engine/grass.o: shared/ents.h shared/command.h shared/glexts.h shared/glemu.h
 engine/grass.o: shared/iengine.h shared/igame.h engine/world.h engine/octa.h
 engine/grass.o: engine/light.h engine/texture.h engine/bih.h engine/model.h
+engine/lensflare.o: engine/engine.h shared/cube.h shared/tools.h shared/geom.h
+engine/lensflare.o: shared/ents.h shared/command.h shared/glexts.h
+engine/lensflare.o: shared/glemu.h shared/iengine.h shared/igame.h
+engine/lensflare.o: engine/world.h engine/octa.h engine/light.h
+engine/lensflare.o: engine/texture.h engine/bih.h engine/model.h
 engine/light.o: engine/engine.h shared/cube.h shared/tools.h shared/geom.h
 engine/light.o: shared/ents.h shared/command.h shared/glexts.h shared/glemu.h
 engine/light.o: shared/iengine.h shared/igame.h engine/world.h engine/octa.h
@@ -400,7 +407,7 @@ engine/renderparticles.o: shared/glexts.h shared/glemu.h shared/iengine.h
 engine/renderparticles.o: shared/igame.h engine/world.h engine/octa.h
 engine/renderparticles.o: engine/light.h engine/texture.h engine/bih.h
 engine/renderparticles.o: engine/model.h engine/explosion.h
-engine/renderparticles.o: engine/lensflare.h engine/lightning.h
+engine/renderparticles.o: engine/lightning.h
 engine/rendersky.o: engine/engine.h shared/cube.h shared/tools.h
 engine/rendersky.o: shared/geom.h shared/ents.h shared/command.h
 engine/rendersky.o: shared/glexts.h shared/glemu.h shared/iengine.h

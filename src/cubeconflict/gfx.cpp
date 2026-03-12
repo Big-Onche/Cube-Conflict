@@ -144,7 +144,7 @@ namespace game
             case ATK_S_ROCKETS:
                 if(emitPart) particle_splash(inWater ? PART_BUBBLE : PART_SMOKE, 1, 2000, pos, 0x666666, inWater ? 3.f : 6.f, 25, 250, 0, hasShrooms());
                 particle_flare(pos, pos, 2, PART_MF_LITTLE, hasRoids ? 0xFF0000 : 0xFFC864, 3.0f + rndscale(2), NULL, hasShrooms());
-                particles::lensFlare(pos, 0x331200, 300+rnd(300), 50);
+                lensFlares::addFlares(pos, 0x552800, 30.0f, false, true, 600);
                 adddynlight(pos, (ispaused() ? 65 : 50 + rnd(31)), vec(1.2f, 0.75f, 0.0f));
                 break;
 
@@ -161,7 +161,7 @@ namespace game
                 if(emitPart) particle_splash(inWater ? PART_BUBBLE : PART_SMOKE, 3, inWater ? 2000 : 5000, pos, inWater ? 0x18181A : 0x222222, 4.0f+rnd(5), 25, 200, 0, hasShrooms());
                 particle_flare(pos, pos, 2, PART_MF_LITTLE, hasRoids ? 0xFF0000 : 0xFFC864, 10.f+rndscale(8), NULL, hasShrooms());
                 particle_splash(PART_FIRE_BALL, 1, 100, pos, hasRoids ? 0xFF0000 : 0xFF6600, 1.0f+rndscale(4), 50, 500, 0, hasShrooms());
-                particles::lensFlare(pos, 0x552500, 600+rnd(400), 75);
+                lensFlares::addFlares(pos, 0x774000, 40.0f, false, true, 600);
                 adddynlight(pos, 100, vec(1.2f, 0.75f, 0.0f));
                 break;
             }

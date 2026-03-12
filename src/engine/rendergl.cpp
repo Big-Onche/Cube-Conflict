@@ -1794,7 +1794,8 @@ void renderavatar(bool transparent)
     projmatrix.perspective(curavatarfov, aspect, nearplane(), farplane);
     projmatrix.scalez(avatardepth);
 
-    setcamprojmatrix(!transparent);
+    // calcavatarpos() needs the world inverse projection matrices while the avatar uses its own projection.
+    setcamprojmatrix(false);
     if(transparent) syncgbufferparams();
 
     glDepthRange(0.0, 0.05); // restricted depth range for avatar gun/shield
@@ -1807,7 +1808,7 @@ void renderavatar(bool transparent)
     glDepthRange(0.0, 1.0);
 
     projmatrix = oldprojmatrix;
-    setcamprojmatrix(!transparent);
+    setcamprojmatrix(false);
     if(transparent) syncgbufferparams();
 }
 
@@ -2775,6 +2776,8 @@ void gl_drawview()
     glDisable(GL_DEPTH_TEST);
 
     if(fogoverlay && fogmat != MAT_AIR) drawfogoverlay(fogmat, fogbelow, clamp(fogbelow, 0.0f, 1.0f), abovemat);
+
+    lensFlares::render();
 
     doaa(setuppostfx(vieww, viewh, scalefbo), processhdr);
     renderpostfx(scalefbo);

@@ -559,6 +559,13 @@ namespace godRays
     extern void cleanup();
 }
 
+namespace lensFlares
+{
+    extern void addFlares(const vec &o, int color, float size, bool unlimitedDistance, bool lensGhosts, int maxDistance);
+    extern void render();
+    extern void cleanup();
+}
+
 // water
 extern int vertwater, waterreflect, caustics;
 extern float watersx1, watersy1, watersx2, watersy2;

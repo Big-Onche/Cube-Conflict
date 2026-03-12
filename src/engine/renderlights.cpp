@@ -5414,6 +5414,8 @@ void cleanuplights()
     cleanupbloom();
     cleanupao();
     cleanupvolumetric();
+    godRays::cleanup();
+    lensFlares::cleanup();
     cleanupshadowatlas();
     cleanupradiancehints();
     lightsphere::cleanup();

@@ -236,10 +236,11 @@
 			<Option weight="0" />
 		</Unit>
 		<Unit filename="../engine/explosion.h" />
+		<Unit filename="../engine/godrays.cpp" />
 		<Unit filename="../engine/grass.cpp" />
 		<Unit filename="../engine/hitzone.h" />
 		<Unit filename="../engine/iqm.h" />
-		<Unit filename="../engine/lensflare.h" />
+		<Unit filename="../engine/lensflare.cpp" />
 		<Unit filename="../engine/light.cpp" />
 		<Unit filename="../engine/light.h" />
 		<Unit filename="../engine/lightning.h" />

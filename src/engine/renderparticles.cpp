@@ -878,7 +878,6 @@ typedef varenderer<PT_TAPE> taperenderer;
 typedef varenderer<PT_TRAIL> trailrenderer;
 
 #include "explosion.h"
-#include "lensflare.h"
 #include "lightning.h"
 
 struct softquadrenderer : quadrenderer
@@ -954,7 +953,6 @@ static partrenderer *parts[] =
     new quadrenderer("media/particles/game/basic.png", PT_PART|PT_AR|PT_FLIP|PT_FLIP),                                       // PART_AR
     new quadrenderer("media/particles/game/basic.png", PT_PART|PT_AR|PT_FLIP|PT_FEW|PT_TRACK),                               // PART_F_AR
     &texts,                                                                                                                  // PART_TEXT
-    &flares                                                                                                                  // PART_LENS_FLARE - must be done last
 };
 
 VARFP(maxparticles, 10, 8000, 20000, initparticles());
@@ -1244,12 +1242,6 @@ namespace particles
             vec tmp = vec(float(rnd(11)-5), float(rnd(11)-5), float(rnd(11)-5));
             newparticle(p, tmp, rnd(fade)+fade, type, color, size, gravity);
         }
-    }
-
-    void lensFlare(const vec &p, int color, int flaresize, int viewdist)
-    {
-        vec pos = p;
-        flares.addflare(pos, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, flaresize, viewdist, false, true);
     }
 
     vec hudPos(const vec &s)
@@ -1752,7 +1744,7 @@ static void makeparticles(entity &e)
         }
 
         case 12: // flares: attr 2:<size> attr 3:<view dist> 4:<r> 5:<g> 6:<b> 7:<flickering>
-            flares.addflare(e.o, e.attr4, e.attr5, e.attr6, e.attr2, e.attr3, true, e.attr7);
+            // flares.addflare(e.o, e.attr4, e.attr5, e.attr6, e.attr2, e.attr3, true, e.attr7);
             break;
 
         case 13: // air refraction: attr 2:<size> attr 3:<intensity>
@@ -1827,8 +1819,6 @@ void seedparticles()
     }
 }
 
-CVARR(sunflarecolour, 0x000000);
-
 static const char * const entreferences[] =
 {
     "Ent_Invalid", "Ent_Light", "Ent_Mapmodel", "Ent_Respawn",
@@ -1890,22 +1880,6 @@ void updateparticles()
                 emitoffset = 0;
             }
             pe.lastemit = lastmillis;
-        }
-
-        if(sunflarecolour != bvec(0, 0, 0)) //sunflare
-        {
-            float flaredist = 2000; // distance from the camera to the flare
-
-            vec flaredir(
-                flaredist * cos(sunlightpitch * M_PI / 180.0f) * cos(fmod(sunlightyaw + 90.0f, 360.0f) * M_PI / 180.0f),
-                flaredist * cos(sunlightpitch * M_PI / 180.0f) * sin(fmod(sunlightyaw + 90.0f, 360.0f) * M_PI / 180.0f),
-                flaredist * sin(sunlightpitch * M_PI / 180.0f)
-            );
-
-            vec flarepos = camera1->o;
-            flarepos.add(flaredir);
-
-            flares.addflare(flarepos, sunflarecolour.r, sunflarecolour.g, sunflarecolour.b, 125, 12000, true, true);
         }
 
         if(dbgpcull && (canemit || replayed) && addedparticles) conoutf(CON_DEBUG, "%d emitters, %d particles", emitted, addedparticles);
