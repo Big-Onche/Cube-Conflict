@@ -12,6 +12,7 @@ namespace godRays
     FVARP(godraysscale, 0.125f, 0.25f, 1.0f);
     VARP(godraysatrous, 0, 1, 1);
     VARP(godraysatrousiter, 1, 2, 3);
+    VARP(godraysglobalstrength, 0, 0, 1); // subtle or cinematic
 
     // Tunables
     FVAR(godraysatrousalphak, 0.0f, 0.0f, 256.0f);
@@ -182,7 +183,7 @@ namespace godRays
             LOCALPARAM(cloudShadowColor, getcloudlayershadowcolour().tocolor());
             LOCALPARAMF(cloudShadowStrength, cloudShadowStrength);
             LOCALPARAMF(godRayMarchParams, max(godraysforwardexp, 0.25f), max(godraysdensity, 0.25f), maxDistance, max(godraysmaxaccum, 0.0f));
-            LOCALPARAMF(godRayDistanceParams, godraysnearstart, max(godraysnearend, godraysnearstart + 1.0f), godrayssteps, clamp(godraysstrength, 0.0f, 1.0f));
+            LOCALPARAMF(godRayDistanceParams, godraysnearstart, max(godraysnearend, godraysnearstart + 1.0f), godrayssteps, clamp(godraysglobalstrength ? godraysstrength : godraysstrength*0.5f, 0.0f, 1.0f));
             screenquad(vieww, viewh);
         }
 
@@ -211,7 +212,7 @@ namespace godRays
             LOCALPARAM(sunColor, sunColor);
             LOCALPARAMF(godRayGeomParams, max(godraysgeomdensity, 0.25f), clamp(godraysgeomdecay, 0.0f, 1.0f), geomMaxDistance, max(godraysgeomforwardexp, 0.25f));
             LOCALPARAMI(godRayGeomSteps, godraysgeomsteps);
-            LOCALPARAMF(godRayGeomDistanceParams, clamp(godraysgeomstrength, 0.0f, 2.0f), 0.0f, 0.0f, 0.0f);
+            LOCALPARAMF(godRayGeomDistanceParams, clamp(godraysglobalstrength ? godraysgeomstrength : godraysgeomstrength*0.5f, 0.0f, 2.0f), 0.0f, 0.0f, 0.0f);
             LOCALPARAMF(godRayGeomShapeParams, max(godraysgeomshadowbias, 0.0f), clamp(godraysgeomthreshold, 0.0f, 1.0f), 0.0f, 0.0f);
             LOCALPARAMI(csmcount, csmsplits);
             screenquad(vieww, viewh);
