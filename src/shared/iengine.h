@@ -362,7 +362,6 @@ namespace particles
     extern uint32_t getRandomColor();
     extern void dirSplash(int type, int color, int radius, int num, int fade, const vec &p, const vec &dir, float size, int speed, int sizemod = 0, bool randomColor = false);
     extern void trail(int type, int fade, const vec &from, const vec &to, int color = 0xFFFFFF, float size = 1.0f, int gravity = 20);
-    extern void lensFlare(const vec &p, int color, int flaresize, int viewdist);
     extern void meter(const vec &s, float val, int type, int fade = 1, int color = 0xFFFFFF, int color2 = 0xFFFFF, float size = 2.0f, bool hud = false);
     extern void text(const vec &s, const char *t, int type, int fade = 2000, int color = 0xFFFFFF, float size = 2.0f, int gravity = 0, bool hud = false);
     extern void hudIcon(int type, const vec &pos, int color, float size = 0.075f);

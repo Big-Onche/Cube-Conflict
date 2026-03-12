@@ -25,8 +25,9 @@ namespace lensFlares
     VARP(flares, 0, 1, 1);
     VARP(flareghosts, 0, 1, 1);
     VARP(sunflares, 0, 1, 1);
+    VARP(flarestrength, 0, 0, 1); // subtle or cinematic
     FVAR(sunflarehalo, 0.0f, 0.2f, 4.0f);
-    FVAR(flarebranchthickness, 0.25f, 4.0f, 8.0f);
+    FVAR(flarebranchthickness, 0.25f, 8.0f, 16.0f);
 
     // Map vars
     VARR(sunflareshaftsize, 1, 50, 400);
@@ -102,6 +103,11 @@ namespace lensFlares
         return max(radiusPixels, 1.0f);
     }
 
+    static float getFlareStrength(float sourceBoost)
+    {
+        return ((sunflarestrength / 50.0f) * sourceBoost) * (flarestrength ? 1 : 0.2f);
+    }
+
     static bool initSun(vec4 &sunScreen, vec4 &sunParams, vec &sunColor, float &ghostStrength, vec4 &layerWeights, vec4 &visibilityOverride, float &sizeScale)
     {
         if(!shouldRender(true)) return false;
@@ -136,7 +142,7 @@ namespace lensFlares
         sunColor = vec(baseColor).mul(1.0f / colorMax);
 
         float sourceBoost = clamp(0.5f + sqrtf(sunLuma), 0.5f, 4.0f);
-        float strength = (sunflarestrength / 50.0f) * sourceBoost;
+        float strength = getFlareStrength(sourceBoost);
         sunParams = vec4(strength, colorMax, lastmillis / 1000.0f, sourceBoost);
         ghostStrength = flareghosts ? 0.5f : 0.0f;
         layerWeights = vec4(1.0f, sunflarehalo, 1.0f, flareghosts ? 1.0f : 0.0f);
@@ -189,7 +195,7 @@ namespace lensFlares
 
         float flareLuma = 0.2126f * baseColor.x + 0.7152f * baseColor.y + 0.0722f * baseColor.z;
         float sourceBoost = clamp(0.5f + sqrtf(flareLuma), 0.5f, 2.5f);
-        float strength = (sunflarestrength / 50.0f) * sourceBoost;
+        float strength = getFlareStrength(sourceBoost);
         vec2 linearDepthScale = projmatrix.lineardepthscale();
         float sourceDepth = linearDepthScale.x*flareClip.z + linearDepthScale.y*flareClip.w;
         float occlusionRadiusPixels = projectedRadiusPixels(source.o, flareNdc, occlusionRadius);
