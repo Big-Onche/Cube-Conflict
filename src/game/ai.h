@@ -192,7 +192,7 @@ namespace ai
             lastrun, lasthunt, lastaction, lastcheck, jumpseed, jumprand, blocktime, huntseq, blockseq, lastaimrnd, orientmillis,
             routebitslen, routebitswplen, routeend;
         uint routebitshash;
-        float targyaw, targpitch, orientyaw, orientpitch, views[3], aimrnd[3];
+        float targyaw, targpitch, orientyaw, orientpitch, views[3], aimrnd[3], ballisticrnd;
         bool dontmove, becareful, tryreset, trywipe;
 
         aiinfo()
@@ -210,6 +210,7 @@ namespace ai
             lastaction = lasthunt = lastcheck = enemyseen = enemymillis = blocktime = huntseq = blockseq = targtime = targseq = lastaimrnd = 0;
             orientmillis = 0;
             orientyaw = orientpitch = 0.f;
+            ballisticrnd = 1.f;
             routebits.setsize(0);
             routebitshash = 0;
             routebitslen = routebitswplen = -1;

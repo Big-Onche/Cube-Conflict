@@ -1030,6 +1030,9 @@ namespace game
             prevaction = d->lastaction,
             attacktime = lastmillis - prevaction;
 
+        if(!validgun(gun)) return;
+        if(targ.x != targ.x || targ.y != targ.y || targ.z != targ.z) return;
+
         if(!updateWeaponsCadencies(d, gun, attacktime, specialAbility)) return;
 
         if(d->character == C_KAMIKAZE && kamikazeExploding(d))
@@ -1038,10 +1041,11 @@ namespace game
             d->attacking = ACT_SHOOT;
         }
 
-
         if(!d->attacking) return;
-        int act = d->attacking,
-            atk = guns[gun].attacks[act];
+        int act = d->attacking;
+        if(act < 0 || act >= NUMACTS) return;
+        int atk = guns[gun].attacks[act];
+        if(!validatk(atk)) return;
 
         if(d->gunaccel) d->gunaccel -= 1;
         d->lastaction = lastmillis;
@@ -1110,3 +1114,4 @@ namespace game
         if(!following) following = player1;
     }
 };
+

@@ -1,6 +1,7 @@
 #include "gfx.h"
 
 extern int fog;
+extern int GRAVITY;
 
 namespace ai
 {
@@ -320,11 +321,60 @@ namespace ai
         return (rnd(int(radius * gunSkew) + 1) - baseSkew) / skill;
     }
 
+    static inline bool usesBallisticAim(int atk)
+    {
+        return atk == ATK_SMAW && attacks[atk].projspeed > 0 && attacks[atk].projgravity > 0.f;
+    }
+
+    static inline bool validaimpos(const vec &pos)
+    {
+        return pos.x == pos.x && pos.y == pos.y && pos.z == pos.z &&
+               fabsf(pos.x) < 1e6f && fabsf(pos.y) < 1e6f && fabsf(pos.z) < 1e6f;
+    }
+
+    static inline float ballisticErrorScale(int skill)
+    {
+        const float clampedSkill = clamp(float(skill), 0.0f, 100.0f);
+        const float maxError = 0.5f*(1.0f - clampedSkill/100.0f);
+        return 1.0f + rndscale(maxError*2.0f) - maxError;
+    }
+
+    static inline bool getballisticaimpos(const vec &from, const vec &target, int atk, float errorScale, vec &aimPos)
+    {
+        if(!usesBallisticAim(atk)) return false;
+
+        const float speed = float(attacks[atk].projspeed);
+        const float gravityScale = attacks[atk].projgravity;
+        const float ballisticGravity = 2.0f*gravityScale*GRAVITY;
+        if(speed <= 1e-3f || ballisticGravity <= 0.0f) return false;
+
+        vec flat(target.x - from.x, target.y - from.y, 0.0f);
+        const float x = flat.magnitude();
+        if(x <= 1e-3f) return false;
+
+        const float y = target.z - from.z;
+        const float speed2 = speed*speed;
+        const float discriminant = speed2*speed2 - ballisticGravity*(ballisticGravity*x*x + 2.0f*y*speed2);
+        if(discriminant < 0.0f) return false;
+
+        const float tanTheta = (speed2 - sqrtf(discriminant))/(ballisticGravity*x);
+        const float cosTheta = 1.0f/sqrtf(1.0f + tanTheta*tanTheta);
+        const float horizontalSpeed = speed*cosTheta;
+        if(horizontalSpeed <= 1e-3f) return false;
+
+        const float travelTime = x/horizontalSpeed;
+        aimPos = target;
+        aimPos.z += gravityScale*GRAVITY*travelTime*travelTime*errorScale;
+        return validaimpos(aimPos);
+    }
+
     constexpr float molotovMinDistSq = 250.f * 250.f;
 
     vec getaimpos(gameent *d, int atk, gameent *e)
     {
         vec targetPos = e->o;
+        vec fallbackTarget = targetPos;
+        const bool changeAim = lastmillis >= d->ai->lastaimrnd;
 
         switch(atk)
         {
@@ -353,8 +403,16 @@ namespace ai
             default:
                 targetPos.subz(7);
         }
+        fallbackTarget = targetPos;
 
-        bool changeAim = lastmillis >= d->ai->lastaimrnd;
+        if(usesBallisticAim(atk))
+        {
+            if(d->skill <= 100 && changeAim) d->ai->ballisticrnd = ballisticErrorScale(d->skill);
+            else if(d->skill > 100) d->ai->ballisticrnd = 1.0f;
+
+            vec ballisticAim;
+            if(getballisticaimpos(d->o, targetPos, atk, d->ai->ballisticrnd, ballisticAim)) targetPos = ballisticAim;
+        }
 
         if(e->character == C_SPY && e->abilitymillis[ABILITY_1] && changeAim)
         {
@@ -383,6 +441,7 @@ namespace ai
             else loopk(3) targetPos[k] += d->ai->aimrnd[k];
         }
 
+        if(!validaimpos(targetPos)) targetPos = fallbackTarget;
         return targetPos;
     }
 
@@ -1776,6 +1835,8 @@ namespace ai
 
     static inline bool canhitrough(gameent *d, gameent *e, int atk, float roughDistSq)
     {
+        if(usesBallisticAim(atk)) return true;
+
         const bool changeAim = lastmillis >= d->ai->lastaimrnd;
         const bool getAimHasSideEffects =
             (d->skill <= 100 && changeAim) ||

@@ -4,6 +4,8 @@
 
 using namespace game;
 
+extern int GRAVITY;
+
 namespace projectiles
 {
     std::map<int, std::string> projsPaths =
@@ -25,20 +27,78 @@ namespace projectiles
 
     vector<projectile> curProjectiles;
 
+    static inline bool usesBallisticPath(int atk)
+    {
+        return validatk(atk) && attacks[atk].projspeed > 0 && attacks[atk].projgravity > 0.0f;
+    }
+
+    static inline float projectileTravelTime(const vec &from, const vec &to, float speed)
+    {
+        return max(from.dist(to)*1000.0f/max(speed, 1e-6f), 1.0f);
+    }
+
+    static inline float ballisticDrop(float gravity, float gravityScale, float millis)
+    {
+        float secs = millis/1000.0f;
+        return gravityScale*gravity*secs*secs;
+    }
+
+    static inline vec ballisticPosition(const projectile &p, float millis)
+    {
+        float clamped = min(millis, p.traveltime);
+        float secs = clamped/1000.0f;
+        vec pos = vec(p.from).add(vec(p.vel).mul(secs));
+        pos.z -= ballisticDrop(p.gravity, attacks[p.atk].projgravity, clamped);
+        return pos;
+    }
+
+    static inline bool ballisticStep(const projectile &p, int time, vec &v, vec &dv)
+    {
+        float nextelapsed = min(p.elapsed + float(time), p.traveltime);
+        v = ballisticPosition(p, nextelapsed);
+        dv = vec(v).sub(p.o);
+        return nextelapsed >= p.traveltime;
+    }
+
+    static inline bool worldCollision(const vec &from, const vec &to, vec &hit)
+    {
+        vec ray = vec(to).sub(from);
+        float dist = ray.magnitude();
+        if(dist <= 1e-6f)
+        {
+            hit = to;
+            return false;
+        }
+
+        ray.div(dist);
+        return raycubepos(from, ray, hit, dist, RAY_CLIPMAT|RAY_ALPHAPOLY) < dist;
+    }
+
     void add(const vec &from, const vec &to, float speed, bool local, int id, gameent *owner, int atk)
     {
         if(from.isneg()) return;
         projectile &p = curProjectiles.add();
-        p.dir = vec(to).sub(from).safenormalize();
+        vec aimdir = vec(to).sub(from).safenormalize();
         p.o = from;
         p.from = from;
         p.to = to;
+        p.speed = speed;
+        p.traveltime = projectileTravelTime(from, to, speed);
+        p.elapsed = 0;
+        p.gravity = 0;
+        p.atk = atk;
+        p.ballistic = usesBallisticPath(atk);
+        p.dir = aimdir;
+        p.vel = vec(aimdir).mul(speed);
+        if(p.ballistic)
+        {
+            p.gravity = GRAVITY;
+            p.to = ballisticPosition(p, p.traveltime);
+        }
         p.offset = hudgunorigin(attacks[atk].gun, from, to, owner);
         p.offset.sub(from);
-        p.speed = speed;
         p.local = local;
         p.owner = owner;
-        p.atk = atk;
         switch(p.atk)
         {
             case ATK_FIREWORKS: p.lifetime= attacks[atk].ttl + rnd(400); break;
@@ -153,9 +213,19 @@ namespace projectiles
             projectile &p = curProjectiles[i];
             p.offsetmillis = max(p.offsetmillis-time, 0);
             vec dv;
-            float dist = p.to.dist(p.o, dv);
-            dv.mul(time/max(dist*1000/p.speed, float(time)));
-            vec v = vec(p.o).add(dv);
+            vec v;
+            float dist = 0;
+            bool reachedEnd = false;
+            if(p.ballistic)
+            {
+                reachedEnd = ballisticStep(p, time, v, dv);
+            }
+            else
+            {
+                dist = p.to.dist(p.o, dv);
+                dv.mul(time/max(dist*1000/p.speed, float(time)));
+                v = vec(p.o).add(dv);
+            }
             bool exploded = false;
             hits.setsize(0);
 
@@ -163,6 +233,21 @@ namespace projectiles
             {
                 splash(p, v, NULL);
                 exploded = true;
+            }
+
+            if(!exploded && !dv.iszero()) p.dir = vec(dv).normalize();
+
+            bool hitWorld = false;
+            if(!exploded && p.ballistic)
+            {
+                vec hitpos;
+                if(worldCollision(p.o, v, hitpos))
+                {
+                    v = hitpos;
+                    dv = vec(v).sub(p.o);
+                    if(!dv.iszero()) p.dir = vec(dv).normalize();
+                    hitWorld = true;
+                }
             }
 
             if(p.local)
@@ -179,7 +264,15 @@ namespace projectiles
 
             if(!exploded)
             {
-                if(dist<4)
+                if(p.ballistic)
+                {
+                    if(hitWorld || reachedEnd)
+                    {
+                        if(!p.exploded) splash(p, v, NULL);
+                        exploded = true;
+                    }
+                }
+                else if(dist<4)
                 {
                     if(p.o!=p.to) // if original target was moving, reevaluate endpoint
                     {
@@ -203,7 +296,11 @@ namespace projectiles
                 if(p.atk != ATK_CROSSBOW) curProjectiles.remove(i--);
                 else if((p.lifetime -= time)<0 || removearrow) curProjectiles.remove(i--);
             }
-            else p.o = v;
+            else
+            {
+                p.o = v;
+                if(p.ballistic) p.elapsed = min(p.elapsed + float(time), p.traveltime);
+            }
         }
     }
 
@@ -253,9 +350,18 @@ namespace projectiles
             int atk = p.atk;
 
             vec dv;
-            float dist = p.to.dist(p.o, dv);
-            dv.mul(time/max(dist*1000/p.speed, float(time)));
-            vec v = vec(p.o).add(dv);
+            vec v;
+            float dist = 0;
+            if(p.ballistic)
+            {
+                ballisticStep(p, time, v, dv);
+            }
+            else
+            {
+                dist = p.to.dist(p.o, dv);
+                dv.mul(time/max(dist*1000/p.speed, float(time)));
+                v = vec(p.o).add(dv);
+            }
             vec pos = vec(p.offset).mul(p.offsetmillis/float(OFFSETMILLIS)).add(v);
 
             checkSound(p, atk, dv);
@@ -264,7 +370,9 @@ namespace projectiles
             if(atk==ATK_SMAW || atk==ATK_FIREWORKS || atk==ATK_CROSSBOW || atk==ATK_S_ROCKETS || atk==ATK_S_NUKE)
             {
                 float yaw, pitch;
-                vectoyawpitch((dist < 1e-6f ? p.dir : vec(p.to).sub(pos).normalize()), yaw, pitch);
+                vec traj = (!dv.iszero() ? vec(dv).normalize() : p.dir);
+                if(!p.ballistic && dist >= 1e-6f) traj = vec(p.to).sub(pos).normalize();
+                vectoyawpitch(traj, yaw, pitch);
                 rendermodel(projsPaths[atk].c_str(), ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, MDL_NOSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED);
                 renderProjectilesTrails(p.owner, pos, dv, p.from, p.offset, atk, p.exploded);
             }

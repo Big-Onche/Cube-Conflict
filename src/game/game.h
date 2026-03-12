@@ -376,42 +376,42 @@ static struct itemstat { int add, max, sound; const char *ident; int info; } ite
 #define EXP_SELFPUSH 1.0f
 #define EXP_DISTSCALE 0.5f
 
-static const struct attackinfo { int gun, action, picksound, sound, middistsnd, fardistsnd, specialsounddelay, attackdelay, damage, aimspread, noaimspread, margin, projspeed, kickamount, range, rays, hitpush, exprad, ttl, use; } attacks[NUMATKS] =
+static const struct attackinfo { int gun, action, picksound, sound, middistsnd, fardistsnd, specialsounddelay, attackdelay, damage, aimspread, noaimspread, margin, projspeed; float projgravity; int kickamount, range, rays, hitpush, exprad, ttl, use; } attacks[NUMATKS] =
 {
     // Regular weapons
-    { GUN_ELECTRIC,     ACT_SHOOT, S_WPLOADFUTUR,     S_ELECRIFLE,    S_ELECRIFLE_FAR,       S_FAR_LIGHT,   10,  350,  325,  35, 105, 0,    0,  10, 8000,  1,    30,   0, 0, 1},
-    { GUN_PLASMA,       ACT_SHOOT, S_WPLOADFUTUR,     S_PLASMARIFLE,  S_PLASMARIFLE_FAR,     S_FAR_LIGHT,   25,   90,  180,  45, 135, 0, 2000,   5, 8000,  1,    50,  25, 0, 1},
-    { GUN_SMAW,         ACT_SHOOT, S_WPLOADBIG,       S_SMAW,         S_SMAW_FAR,                     -1,    3, 1250, 1150,  20,  60, 2,  700,  15, 8000,  1,   750, 160, 0, 1},
-    { GUN_MINIGUN,      ACT_SHOOT, S_WPLOADMID,       S_MINIGUN,      S_MINIGUN_FAR,         S_FAR_LIGHT,   35,   60,  180,  60, 180, 0, 4250,   5, 8000,  1,    15 ,  7, 0, 1},
-    { GUN_SPOCKGUN,     ACT_SHOOT, S_WPLOADALIEN,     S_SPOCKGUN,     S_SPOCKGUN_FAR,        S_FAR_LIGHT,   15,  175,  250,  15, 150, 3, 2250,   5, 8000,  1,    30,  15, 0, 1},
-    { GUN_M32,          ACT_SHOOT, S_WPLOADMID,       S_M32,          S_M32_FAR,                      -1,    3, 1000, 1250,  20,  50, 0,  400,  10, 1000,  1,   600, 185, 1000, 1},
-    { GUN_FLAMETHROWER, ACT_SHOOT, S_WPLOADMID,       S_FLAMETHROWER, S_FLAMETHROWER_FAR,             -1,   30,  100,   30, 500, 500, 9,    0,   2,  280, 10,    10 ,  0, 0, 1},
-    { GUN_UZI,          ACT_SHOOT, S_WPLOADSMALL,     S_UZI,          S_UZI_FAR,             S_FAR_LIGHT,   35,   75,  150,  50, 150, 0, 4250,   2, 8000,  1,    10,   5, 0, 1},
-    { GUN_FAMAS,        ACT_SHOOT, S_WPLOADSMALL,     S_FAMAS,        S_FAMAS_FAR,           S_FAR_LIGHT,   30,   90,  140,  40, 120, 0, 4250,   3, 8000,  1,    20,   5, 0, 1},
-    { GUN_MOSSBERG,     ACT_SHOOT, S_WPLOADMID,       S_MOSSBERG,     S_MOSSBERG_FAR,    S_FAR_VERYHEAVY,    3, 1200,  115, 500, 500, 0,    0,  20, 1000, 25,    20,   0, 0, 1},
-    { GUN_HYDRA,        ACT_SHOOT, S_WPLOADSMALL,     S_HYDRA,        S_HYDRA_FAR,       S_FAR_VERYHEAVY,    4,  315,   75, 300, 300, 0,    0,  15,  600, 15,    20,   0, 0, 1},
-    { GUN_SV98,         ACT_SHOOT, S_WPLOADMID,       S_SV98,         S_SV98_FAR,            S_FAR_HEAVY,    2, 1500, 1000,   1, 200, 0, 5250,  30, 8000,  1,    80,   7, 0, 1},
-    { GUN_SKS,          ACT_SHOOT, S_WPLOADMID,       S_SKS,          S_SKS_FAR,             S_FAR_HEAVY,   10,  420,  500,   5, 125, 0, 4250,  25, 8000,  1,    50,   7, 0, 1},
-    { GUN_CROSSBOW,     ACT_SHOOT, S_WPLOADMID,       S_CROSSBOW,     S_CROSSBOW_FAR,                 -1,    5,  800,  850,  10,  90, 0, 3000,   7, 8000,  1,    20,   3, 45000, 1},
-    { GUN_AK47,         ACT_SHOOT, S_WPLOADMID,       S_AK47,         S_AK47_FAR,            S_FAR_LIGHT,   30,   92,  170,  60, 180, 0, 4250,   7, 8000,  1,    50,   5, 0, 1},
-    { GUN_GRAP1,        ACT_SHOOT, S_WPLOADFUTUR,     S_GRAP1,        S_GRAP1_FAR,                    -1,   12,  200,  250,  30, 300, 3, 1750,  -4, 8000,  1,  -600,  20, 0, 1},
-    { GUN_FIREWORKS,    ACT_SHOOT, S_WPLOADSMALL,     S_FIREWORKS,    S_FIREWORKS_FAR,                -1,    3, 1100,  900,  35, 200, 2, 1500,  35,  600,  1,   500,  80, 300, 1},
-    { GUN_MOLOTOV,      ACT_SHOOT, S_WPLOADSLOWWOOSH, S_MOLOTOV,      -1,                             -1,    3, 1350,  500,  20,  50, 0,  300, -10, 1500,  1,   100, 250, 10000, 1},
-    { GUN_GLOCK,        ACT_SHOOT, S_WPLOADSMALL,     S_GLOCK,        S_GLOCK_FAR,           S_FAR_LIGHT,   10,  150,  280,  25, 150, 0, 4250,   7, 8000,  1,    30,   3, 0, 1},
+    { GUN_ELECTRIC,     ACT_SHOOT, S_WPLOADFUTUR,     S_ELECRIFLE,    S_ELECRIFLE_FAR,       S_FAR_LIGHT,   10,  350,  325,  35, 105, 0,    0, 0.0f,  10, 8000,  1,    30,   0, 0, 1},
+    { GUN_PLASMA,       ACT_SHOOT, S_WPLOADFUTUR,     S_PLASMARIFLE,  S_PLASMARIFLE_FAR,     S_FAR_LIGHT,   25,   90,  180,  45, 135, 0, 2000, 0.5f,   5, 8000,  1,    50,  25, 0, 1},
+    { GUN_SMAW,         ACT_SHOOT, S_WPLOADBIG,       S_SMAW,         S_SMAW_FAR,                     -1,    3, 1250, 1300,  20,  60, 2,  700, 0.4f,  15, 8000,  1,   750, 160, 0, 1},
+    { GUN_MINIGUN,      ACT_SHOOT, S_WPLOADMID,       S_MINIGUN,      S_MINIGUN_FAR,         S_FAR_LIGHT,   35,   60,  180,  60, 180, 0, 4250, 0.7f,   5, 8000,  1,    15 ,  7, 0, 1},
+    { GUN_SPOCKGUN,     ACT_SHOOT, S_WPLOADALIEN,     S_SPOCKGUN,     S_SPOCKGUN_FAR,        S_FAR_LIGHT,   15,  175,  250,  15, 150, 3, 2250, 0.5f,   5, 8000,  1,    30,  15, 0, 1},
+    { GUN_M32,          ACT_SHOOT, S_WPLOADMID,       S_M32,          S_M32_FAR,                      -1,    3, 1000, 1250,  20,  50, 0,  400, 0.0f,  10, 1000,  1,   600, 185, 1000, 1},
+    { GUN_FLAMETHROWER, ACT_SHOOT, S_WPLOADMID,       S_FLAMETHROWER, S_FLAMETHROWER_FAR,             -1,   30,  100,   30, 500, 500, 9,    0, 0.0f,   2,  280, 10,    10 ,  0, 0, 1},
+    { GUN_UZI,          ACT_SHOOT, S_WPLOADSMALL,     S_UZI,          S_UZI_FAR,             S_FAR_LIGHT,   35,   75,  150,  50, 150, 0, 4250, 0.7f,   2, 8000,  1,    10,   5, 0, 1},
+    { GUN_FAMAS,        ACT_SHOOT, S_WPLOADSMALL,     S_FAMAS,        S_FAMAS_FAR,           S_FAR_LIGHT,   30,   90,  140,  40, 120, 0, 4250, 0.6f,   3, 8000,  1,    20,   5, 0, 1},
+    { GUN_MOSSBERG,     ACT_SHOOT, S_WPLOADMID,       S_MOSSBERG,     S_MOSSBERG_FAR,    S_FAR_VERYHEAVY,    3, 1200,  115, 500, 500, 0,    0, 0.0f,  20, 1000, 25,    20,   0, 0, 1},
+    { GUN_HYDRA,        ACT_SHOOT, S_WPLOADSMALL,     S_HYDRA,        S_HYDRA_FAR,       S_FAR_VERYHEAVY,    4,  315,   75, 300, 300, 0,    0, 0.0f,  15,  600, 15,    20,   0, 0, 1},
+    { GUN_SV98,         ACT_SHOOT, S_WPLOADMID,       S_SV98,         S_SV98_FAR,            S_FAR_HEAVY,    2, 1500, 1000,   1, 200, 0, 5250, 0.7f,  30, 8000,  1,    80,   7, 0, 1},
+    { GUN_SKS,          ACT_SHOOT, S_WPLOADMID,       S_SKS,          S_SKS_FAR,             S_FAR_HEAVY,   10,  420,  600,   5, 125, 0, 4250, 0.8f,  25, 8000,  1,    50,   7, 0, 1},
+    { GUN_CROSSBOW,     ACT_SHOOT, S_WPLOADMID,       S_CROSSBOW,     S_CROSSBOW_FAR,                 -1,    5,  800,  900,  10,  90, 0, 3000, 0.9f,   7, 8000,  1,    20,   3, 45000, 1},
+    { GUN_AK47,         ACT_SHOOT, S_WPLOADMID,       S_AK47,         S_AK47_FAR,            S_FAR_LIGHT,   30,   92,  170,  60, 180, 0, 4250, 0.7f,   7, 8000,  1,    50,   5, 0, 1},
+    { GUN_GRAP1,        ACT_SHOOT, S_WPLOADFUTUR,     S_GRAP1,        S_GRAP1_FAR,                    -1,   12,  200,  250,  30, 300, 3, 1750, 0.6f,  -4, 8000,  1,  -600,  20, 0, 1},
+    { GUN_FIREWORKS,    ACT_SHOOT, S_WPLOADSMALL,     S_FIREWORKS,    S_FIREWORKS_FAR,                -1,    3,  900,  900,  35, 200, 2, 1500, 1.0f,  35,  600,  1,   500,  80, 300, 1},
+    { GUN_MOLOTOV,      ACT_SHOOT, S_WPLOADSLOWWOOSH, S_MOLOTOV,      -1,                             -1,    3, 1350,  500,  20,  50, 0,  300, 0.0f, -10, 1500,  1,   100, 250, 10000, 1},
+    { GUN_GLOCK,        ACT_SHOOT, S_WPLOADSMALL,     S_GLOCK,        S_GLOCK_FAR,           S_FAR_LIGHT,   10,  150,  280,  25, 150, 0, 4250, 0.8f,   7, 8000,  1,    30,   3, 0, 1},
     // Super weapons
-    { GUN_S_NUKE,       ACT_SHOOT, S_WPLOADBIG,       S_NUKE,         S_NUKE_FAR,             S_NUKE_FAR,    1, 3000,  3250,  20, 300, 2,  200,  10, 2000,  1,   400, 1500, 6000, 1},
-    { GUN_S_GAU8,       ACT_SHOOT, S_WPLOADBIG,       S_GAU8,         S_GAU8_FAR,                     -1,   90,   14,   300, 150, 250, 3, 7500,   4, 8000,  1,    80,   20, 0, 1},
-    { GUN_S_ROCKETS,    ACT_SHOOT, S_WPLOADBIG,       S_MINIROCKETS,  S_MINIROCKETS_FAR, S_FAR_VERYHEAVY,   14,  170,  2000,  10, 300, 2,  850,   6, 8000,  1,   500,  100, 0, 1},
-    { GUN_S_CAMPER,     ACT_SHOOT, S_WPLOADBIG,       S_CAMPOUZE,     S_CAMPOUZE_FAR,    S_FAR_VERYHEAVY,    8,  500,    75,  10,  50, 5,    0,   3, 4000, 10,   150,    8, 0, 1},
+    { GUN_S_NUKE,       ACT_SHOOT, S_WPLOADBIG,       S_NUKE,         S_NUKE_FAR,             S_NUKE_FAR,    1, 3000,  3250,  20, 300, 2,  200, 0.05f, 10, 2000,  1,   400, 1500, 6000, 1},
+    { GUN_S_GAU8,       ACT_SHOOT, S_WPLOADBIG,       S_GAU8,         S_GAU8_FAR,                     -1,   90,   14,   300, 150, 250, 3, 7500, 0.3f,   4, 8000,  1,    80,   20, 0, 1},
+    { GUN_S_ROCKETS,    ACT_SHOOT, S_WPLOADBIG,       S_MINIROCKETS,  S_MINIROCKETS_FAR, S_FAR_VERYHEAVY,   14,  170,  2250,  10, 300, 2,  850, 0.5f,   6, 8000,  1,   500,  100, 0, 1},
+    { GUN_S_CAMPER,     ACT_SHOOT, S_WPLOADBIG,       S_CAMPOUZE,     S_CAMPOUZE_FAR,    S_FAR_VERYHEAVY,    8,  500,    75,  10,  50, 5,    0, 0.0f,   3, 4000, 10,   150,    8, 0, 1},
     // Melee weapons
-    { GUN_M_BUSTER,     ACT_SHOOT, S_WPLOADWHOOSH,    S_SWORD349,     -1, -1,   4, 1000,  600, 1, 1, 20, 0, -10,  28,  1,  50,  0, 0, 0},
-    { GUN_M_HAMMER,     ACT_SHOOT, S_WPLOADSLOWWOOSH, S_BANHAMMER,    -1, -1,   3, 1500, 1000, 1, 1, 15, 0,  -5,  30,  1,  10,  0, 0, 0},
-    { GUN_M_MASTER,     ACT_SHOOT, S_WPLOADWHOOSH,    S_MASTERSWORD,  -1, -1,   5, 600,   430, 1, 1, 20, 0,  -8,  26,  1,  30,  0, 0, 0},
-    { GUN_M_FLAIL,      ACT_SHOOT, S_WPLOADCHAINS,    S_FLAIL,        -1, -1,   4, 1150,  750, 1, 1, 10, 0, -10,  32,  1, 125,  0, 0, 0},
+    { GUN_M_BUSTER,     ACT_SHOOT, S_WPLOADWHOOSH,    S_SWORD349,     -1, -1,   4, 1000,  600, 1, 1, 20, 0, 0.0f, -10,  28,  1,  50,  0, 0, 0},
+    { GUN_M_HAMMER,     ACT_SHOOT, S_WPLOADSLOWWOOSH, S_BANHAMMER,    -1, -1,   3, 1500, 1000, 1, 1, 15, 0, 0.0f,  -5,  30,  1,  10,  0, 0, 0},
+    { GUN_M_MASTER,     ACT_SHOOT, S_WPLOADWHOOSH,    S_MASTERSWORD,  -1, -1,   5, 600,   430, 1, 1, 20, 0, 0.0f,  -8,  26,  1,  30,  0, 0, 0},
+    { GUN_M_FLAIL,      ACT_SHOOT, S_WPLOADCHAINS,    S_FLAIL,        -1, -1,   4, 1150,  750, 1, 1, 10, 0, 0.0f, -10,  32,  1, 125,  0, 0, 0},
     // Special weapons
-    { GUN_KAMIKAZE,     ACT_SHOOT, S_WPLOADFASTWOOSH, -1,           S_EXPL_FAR, S_EXPL_FAR,   1, 1000, 3000, 1, 1,  0, 1,  10, 120,  1, 250, 500, 5, 1},
-    { GUN_POWERARMOR,   ACT_SHOOT, -1,                -1,           S_EXPL_FAR, S_EXPL_FAR,   1,  220, 2000, 1, 1,  0, 1,  10,  50,  1, 100, 350, 5, 1},
-    { GUN_NINJA,        ACT_SHOOT, S_WPLOADWHOOSH,    S_NINJASABER, -1,         -1,           8,  400,  800, 1, 1, 30, 0, -10,  36,  1,  25,   0, 0, 0},
+    { GUN_KAMIKAZE,     ACT_SHOOT, S_WPLOADFASTWOOSH, -1,           S_EXPL_FAR, S_EXPL_FAR,   1, 1000, 3000, 1, 1,  0, 1, 0.0f,  10, 120,  1, 250, 500, 5, 1},
+    { GUN_POWERARMOR,   ACT_SHOOT, -1,                -1,           S_EXPL_FAR, S_EXPL_FAR,   1,  220, 2000, 1, 1,  0, 1, 0.0f,  10,  50,  1, 100, 350, 5, 1},
+    { GUN_NINJA,        ACT_SHOOT, S_WPLOADWHOOSH,    S_NINJASABER, -1,         -1,           8,  400,  800, 1, 1, 30, 0, 0.0f, -10,  36,  1,  25,   0, 0, 0},
 };
 
 static const struct guninfo { const char *ident, *name; vec2 weapDisp; int maxzoomfov, hudrange, attacks[NUMACTS]; } guns[NUMGUNS] =
@@ -1156,11 +1156,11 @@ namespace projectiles
     struct projectile
     {
         size_t entityId;
-        vec dir, o, from, to, offset;
-        float speed;
+        vec dir, vel, o, from, to, offset;
+        float speed, traveltime, elapsed, gravity;
         gameent *owner;
         int atk;
-        bool local;
+        bool local, ballistic;
         int offsetmillis;
         int id;
         int lifetime;
@@ -1170,7 +1170,22 @@ namespace projectiles
         bool soundplaying;
 
         projectile()
-            : entityId(entitiesIds::getNewId()) // initialize the new entityId field here
+            : entityId(entitiesIds::getNewId()),
+              speed(0),
+              traveltime(0),
+              elapsed(0),
+              gravity(0),
+              owner(NULL),
+              atk(-1),
+              local(false),
+              ballistic(false),
+              offsetmillis(0),
+              id(0),
+              lifetime(0),
+              exploded(false),
+              inwater(false),
+              projsound(0),
+              soundplaying(false)
         {}
     };
 
