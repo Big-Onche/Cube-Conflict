@@ -3714,6 +3714,37 @@ See below for some tips on improving performance.
 #ifndef miniaudio_h
 #define miniaudio_h
 
+/*
+Launcher trim:
+The launcher only uses engine-backed playback from WAV/MP3 files, so keep the
+required device/resource-manager/engine code paths and disable the rest to
+reduce compile time and binary size.
+*/
+#ifndef MA_NO_ENCODING
+    #define MA_NO_ENCODING
+#endif
+#ifndef MA_NO_GENERATION
+    #define MA_NO_GENERATION
+#endif
+#ifndef MA_NO_FLAC
+    #define MA_NO_FLAC
+#endif
+#ifndef MA_NO_VORBIS
+    #define MA_NO_VORBIS
+#endif
+
+#if defined(__linux__)
+    #ifndef MA_ENABLE_ONLY_SPECIFIC_BACKENDS
+        #define MA_ENABLE_ONLY_SPECIFIC_BACKENDS
+    #endif
+    #ifndef MA_ENABLE_ALSA
+        #define MA_ENABLE_ALSA
+    #endif
+    #ifndef MA_ENABLE_PULSEAUDIO
+        #define MA_ENABLE_PULSEAUDIO
+    #endif
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

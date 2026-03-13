@@ -12,18 +12,27 @@ namespace audio
     };
 
     ma_engine audioEngine;
+    bool engineInitialized = false;
 
     void init()
     {
-        if(ma_engine_init(NULL, &audioEngine) != MA_SUCCESS) error::pop(getString("Error_Title"), getString("Error_MA_Init"));
+        if(ma_engine_init(NULL, &audioEngine) != MA_SUCCESS)
+        {
+            error::pop(getString("Error_Title"), getString("Error_MA_Init"));
+            return;
+        }
+
+        engineInitialized = true;
 
         loopi(NUMSOUNDS)
         {
-            sounds[i].sound = new ma_sound;
+            sounds[i].sound = new ma_sound{};
             if(ma_sound_init_from_file(&audioEngine, sounds[i].path, 0, NULL, NULL, sounds[i].sound) != MA_SUCCESS)
             {
                 std::string message = getString("Error_MA_Load") + " " + sounds[i].path;
                 error::pop(getString("Error_Title"), message);
+                delete sounds[i].sound;
+                sounds[i].sound = nullptr;
             }
         }
     }
@@ -98,10 +107,18 @@ namespace audio
     {
         loopi(NUMSOUNDS)
         {
-            ma_sound_uninit(sounds[i].sound);
-            delete sounds[i].sound;
+            if(sounds[i].sound != nullptr)
+            {
+                ma_sound_uninit(sounds[i].sound);
+                delete sounds[i].sound;
+                sounds[i].sound = nullptr;
+            }
         }
 
-        ma_engine_uninit(&audioEngine);
+        if(engineInitialized)
+        {
+            ma_engine_uninit(&audioEngine);
+            engineInitialized = false;
+        }
     }
 }
