@@ -61,7 +61,7 @@ namespace texture
         if(texture != nullptr)
         {
             bool rotate = (rotation != 0.f);
-            if(rotate) std::fmod(rotation, 360.0f);
+            if(rotate) rotation = std::fmod(rotation, 360.0f);
 
             if(flags & TEX_SHADOW)
             {

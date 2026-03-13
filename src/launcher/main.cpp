@@ -48,7 +48,6 @@ Uint32 frameStart;
 int frameTime;
 
 bool isDragging = false;
-int startX = 0, startY = 0;
 
 void checkWindowEvent(SDL_Event &e)
 {
@@ -104,8 +103,6 @@ int main(int argc, char* argv[])
                             if(e.button.button == SDL_BUTTON_LEFT)
                             {
                                 isDragging = true;
-                                startX = e.button.x;
-                                startY = e.button.y;
                             }
                             break;
 

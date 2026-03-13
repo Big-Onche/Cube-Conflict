@@ -138,9 +138,7 @@ namespace pong
             float xTarget = retreat ? (SCR_W - (30 + (PLAYER_SIZE / 2.f))) : ((SCR_W / 2) - (20 * ball.vel.x));
             float xDiff = xTarget - players[PL_AI].pos.x;
             float xStep = std::clamp(xDiff * 0.25f, (float)-PLAYER_SPEED, (float)PLAYER_SPEED);
-
-            if(retreat) movePlayer(PL_AI, xStep, true);
-            else movePlayer(PL_AI, xStep, true);
+            movePlayer(PL_AI, xStep, true);
         }
     }
 
