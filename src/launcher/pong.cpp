@@ -195,12 +195,12 @@ namespace pong
         SDL_Surface* textSurface = TTF_RenderUTF8_Blended(sdl::fontMain, scores.c_str(), textColor);
         SDL_Surface* shadowSurface = TTF_RenderUTF8_Blended(sdl::fontMain, scores.c_str(), shadowColor);
 
-        if(textSurface != nullptr || shadowSurface != nullptr)
+        if(textSurface != nullptr && shadowSurface != nullptr)
         {
             SDL_Texture* textTexture = SDL_CreateTextureFromSurface(sdl::renderer, textSurface);
             SDL_Texture* shadowTexture = SDL_CreateTextureFromSurface(sdl::renderer, shadowSurface);
 
-            if(textTexture != nullptr || shadowTexture != nullptr)
+            if(textTexture != nullptr && shadowTexture != nullptr)
             {
                 int textWidth = textSurface->w;
                 int textHeight = textSurface->h;
@@ -210,13 +210,18 @@ namespace pong
 
                 SDL_RenderCopy(sdl::renderer, shadowTexture, nullptr, &shadowRect);
                 SDL_RenderCopy(sdl::renderer, textTexture, nullptr, &textRect);
-
-                SDL_DestroyTexture(textTexture);
-                SDL_DestroyTexture(shadowTexture);
             }
+
+            if(textTexture != nullptr) SDL_DestroyTexture(textTexture);
+            if(shadowTexture != nullptr) SDL_DestroyTexture(shadowTexture);
 
             SDL_FreeSurface(textSurface);
             SDL_FreeSurface(shadowSurface);
+        }
+        else
+        {
+            if(textSurface != nullptr) SDL_FreeSurface(textSurface);
+            if(shadowSurface != nullptr) SDL_FreeSurface(shadowSurface);
         }
 
         SDL_RenderPresent(sdl::renderer); // update screen
