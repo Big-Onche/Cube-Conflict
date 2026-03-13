@@ -12,10 +12,10 @@ namespace action
     std::string gamePath(bool win32 = false)
     {
     #if defined(_WIN32)
-        if(win32) return "bin/cubeconflict";
-        else return "bin64/cubeconflict";
+        if(win32) return "bins/cc_client32";
+        else return "bins/cc_client64";
     #elif defined(__linux__)
-        return "bin_unix/cubeconflict";
+        return "bins/cc_client";
     #endif
     }
 
@@ -34,8 +34,8 @@ namespace action
 
         if(system(execCommand.c_str()) != 0)
         {
-            std::string bits = (goodOld32bits ? "" : "64");
-            std::string message = getString("Error_Game") + lineBreak + "bin" + bits + "/cubeconflict.exe " + getString("Error_Missing");
+            std::string bits = (goodOld32bits ? "32" : "64");
+            std::string message = getString("Error_Game") + lineBreak + "bins" + "/cc_client" + bits + ".exe " + getString("Error_Missing");
             error::pop(getString("Error_Title"), message);
             return false;
         }
@@ -45,7 +45,7 @@ namespace action
 #elif defined(__linux__)
     bool linuxStart(bool dedicatedServer) // Linux start code
     {
-        if(setenv("LD_LIBRARY_PATH", "./bin_unix/:$LD_LIBRARY_PATH", 1) == -1) // Set LD_LIBRARY_PATH to include bin_unix directory relative to the launcher's directory
+        if(setenv("LD_LIBRARY_PATH", "./bins/:$LD_LIBRARY_PATH", 1) == -1) // Set LD_LIBRARY_PATH to include bin_unix directory relative to the launcher's directory
         {
             error::pop(getString("Error_Title"), getString("Error_Unix_Setenv"));
             perror("setenv");
