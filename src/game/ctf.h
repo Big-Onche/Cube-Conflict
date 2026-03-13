@@ -693,9 +693,19 @@ struct ctfclientmode : clientmode
         return d->respawnwait(RESPAWNSECS, delay);
     }
 
+    static inline void setflagstate(ai::aistate &b, int state, int target)
+    {
+        b.type = state;
+        b.targtype = ai::AI_T_AFFINITY;
+        b.target = target;
+        b.millis = lastmillis;
+        b.reset();
+    }
+
 	bool aihomerun(gameent *d, ai::aistate &b)
 	{
         vec pos = d->feetpos();
+        int fallbackgoal = -1;
         loopk(2)
         {
             int goal = 5000;
@@ -709,14 +719,14 @@ struct ctfclientmode : clientmode
             }
             if(flags.inrange(goal) && ai::makeroute(d, b, flags[goal].pos()))
             {
-                d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, goal);
+                setflagstate(b, ai::AI_S_PURSUE, goal);
                 return true;
             }
+            if(flags.inrange(goal) && fallbackgoal < 0) fallbackgoal = goal;
         }
-	    if(b.type == ai::AI_S_INTEREST && b.targtype == ai::AI_T_NODE) return true; // we already did this..
 		if(randomnode(d, b, ai::SIGHTMIN, 1e16f))
 		{
-            d->ai->switchstate(b, ai::AI_S_INTEREST, ai::AI_T_NODE, d->ai->route[0]);
+            if(flags.inrange(fallbackgoal)) setflagstate(b, ai::AI_S_PURSUE, fallbackgoal);
             return true;
 		}
 		return false;
@@ -736,7 +746,7 @@ struct ctfclientmode : clientmode
         if(!takenflags.empty())
         {
             int flag = takenflags.length() > 2 ? rnd(takenflags.length()) : 0;
-            d->ai->switchstate(b, ai::AI_S_PURSUE, ai::AI_T_AFFINITY, takenflags[flag]);
+            setflagstate(b, ai::AI_S_PURSUE, takenflags[flag]);
             return true;
         }
 		return false;
