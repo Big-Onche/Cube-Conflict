@@ -48,6 +48,7 @@ Uint32 frameStart;
 int frameTime;
 
 bool isDragging = false;
+int dragOffsetX = 0, dragOffsetY = 0;
 
 void checkWindowEvent(SDL_Event &e)
 {
@@ -103,6 +104,8 @@ int main(int argc, char* argv[])
                             if(e.button.button == SDL_BUTTON_LEFT)
                             {
                                 isDragging = true;
+                                dragOffsetX = e.button.x;
+                                dragOffsetY = e.button.y;
                             }
                             break;
 
@@ -113,9 +116,9 @@ int main(int argc, char* argv[])
                         case SDL_MOUSEMOTION:
                             if(isDragging)
                             {
-                                int x, y;
-                                SDL_GetWindowPosition(sdl::window, &x, &y);
-                                SDL_SetWindowPosition(sdl::window, x + e.motion.xrel / 1.4, y + e.motion.yrel / 1.4);
+                                int globalMouseX, globalMouseY;
+                                SDL_GetGlobalMouseState(&globalMouseX, &globalMouseY);
+                                SDL_SetWindowPosition(sdl::window, globalMouseX - dragOffsetX, globalMouseY - dragOffsetY);
                             }
                             break;
 
