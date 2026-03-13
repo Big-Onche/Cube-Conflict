@@ -130,6 +130,7 @@ namespace server
         int state, editstate;
         int lastdeath, deadflush, lastspawn, lifesequence;
         int lastshot;
+        int lastability[NUMABILITIES];
         projectilestate<8> projs, grenades;
         int killstreak, frags, flags, deaths, teamkills, shotdamage, damage;
         int lasttimeplayed, timeplayed;
@@ -138,7 +139,10 @@ namespace server
         int lastBurnerClientNum;
         uintptr_t lastBurnerToken;
 
-        servstate() : state(CS_DEAD), editstate(CS_DEAD), lifesequence(0), lastBurnerClientNum(-1), lastBurnerToken(0) {}
+        servstate() : state(CS_DEAD), editstate(CS_DEAD), lifesequence(0), lastBurnerClientNum(-1), lastBurnerToken(0)
+        {
+            loopi(NUMABILITIES) lastability[i] = -1;
+        }
 
         bool isalive(int gamemillis)
         {
@@ -174,6 +178,7 @@ namespace server
             lastspawn = -1;
             lastshot = 0;
             inwater = false;
+            loopi(NUMABILITIES) lastability[i] = -1;
             afterburnatk = 0;
             lastBurnerClientNum = -1;
             lastBurnerToken = 0;
@@ -240,6 +245,7 @@ namespace server
         int wslen;
         vector<clientinfo *> bots;
         int ping, aireinit;
+        int invalidabilityreqs, lastinvalidabilityreq;
         string clientmap;
         int mapcrc;
         bool warned, gameclip;
@@ -312,6 +318,8 @@ namespace server
             lastevent = 0;
             exceeded = 0;
             pushed = 0;
+            invalidabilityreqs = 0;
+            lastinvalidabilityreq = 0;
             clientmap[0] = '\0';
             mapcrc = 0;
             warned = false;
@@ -324,6 +332,8 @@ namespace server
             events.deletecontents();
             timesync = false;
             lastevent = 0;
+            invalidabilityreqs = 0;
+            lastinvalidabilityreq = 0;
         }
 
         void cleanclipboard(bool fullclean = true)
@@ -360,6 +370,8 @@ namespace server
             messages.setsize(0);
             ping = 0;
             aireinit = 0;
+            invalidabilityreqs = 0;
+            lastinvalidabilityreq = 0;
             needclipboard = 0;
             cleanclipboard();
             cleanauth();
@@ -761,6 +773,49 @@ namespace server
         }
     }
 
+    static inline bool hasabilities(int character)
+    {
+        switch(character)
+        {
+            case C_WIZARD:
+            case C_PHYSICIST:
+            case C_PRIEST:
+            case C_SHOSHONE:
+            case C_SPY:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    static inline bool canlaunchability(clientinfo *ci, int ability)
+    {
+        if(!ci || !validClass(ci->character) || !validAbility(ability) || ci->state.state != CS_ALIVE || interm) return false;
+        return ci->character == C_KAMIKAZE ? ability == ABILITY_2 : hasabilities(ci->character);
+    }
+
+    static inline bool handleinvalidabilityrequest(clientinfo *ci, const char *reason)
+    {
+        if(!ci || ci->local || ci->state.aitype == AI_BOT || !isdedicatedserver()) return false;
+
+        static const int ABILITYREQ_GRACE_MILLIS = 60000;
+        static const int ABILITYREQ_MAX_ERRORS = 3;
+
+        if(totalmillis - ci->lastinvalidabilityreq > ABILITYREQ_GRACE_MILLIS) ci->invalidabilityreqs = 0;
+        ci->lastinvalidabilityreq = totalmillis;
+        ci->invalidabilityreqs++;
+
+        if(ci->invalidabilityreqs < ABILITYREQ_MAX_ERRORS)
+        {
+            logoutf("%s sent an invalid ability request (%s) [%d/%d]", ci->name, reason, ci->invalidabilityreqs, ABILITYREQ_MAX_ERRORS);
+            return false;
+        }
+
+        logoutf("%s sent repeated invalid ability requests (%s), kicking", ci->name, reason);
+        disconnect_client(ci->clientnum, DISC_KICK);
+        return true;
+    }
+
     uint mcrc = 0;
     vector<entity> ments;
     vector<server_entity> sents;
@@ -963,6 +1018,11 @@ namespace server
         return ci && ci->local && ci->state.aitype == AI_NONE && m_teammode && validteam(game::soloplayteam) ? game::soloplayteam : 0;
     }
 
+    static inline bool randomsoloteam(clientinfo *ci)
+    {
+        return ci && ci->local && ci->state.aitype == AI_NONE && m_teammode && game::soloplayteam == 0;
+    }
+
     clientinfo *choosebestclient(float &bestrank)
     {
         clientinfo *best = NULL;
@@ -988,6 +1048,7 @@ namespace server
         {
             clientinfo *ci = clients[i];
             int preferred = getpreferredteam(ci);
+            if(!preferred && randomsoloteam(ci)) preferred = rnd(MAXTEAMS) + 1;
             if(!preferred) continue;
 
             float rank = ci->state.state!=CS_SPECTATOR ? ci->state.effectiveness/max(ci->state.timeplayed, 1) : -1;
@@ -1022,7 +1083,7 @@ namespace server
             loopvj(team[i])
             {
                 clientinfo *ci = team[i][j];
-                int preferred = getpreferredteam(ci);
+                bool preferred = getpreferredteam(ci) || randomsoloteam(ci);
                 if(ci->team == 1+i) continue;
                 if(!preferred && persistteams && validteam(ci->team) && (!smode || smode->canchangeteam(ci, 1+i, ci->team))) continue;
                 ci->team = 1+i;
@@ -2888,7 +2949,15 @@ namespace server
             if(curtime>0)
             {
                 loopi(NUMBOOSTS) if(ci->state.boostmillis[i]) ci->state.boostmillis[i] = max(ci->state.boostmillis[i]-curtime, 0);
-                loopi(NUMABILITIES) if(ci->state.abilitymillis[i]) ci->state.abilitymillis[i] = max(ci->state.abilitymillis[i]-curtime, 0);
+                if(validClass(ci->character))
+                {
+                    loopi(NUMABILITIES)
+                    {
+                        if(!ci->state.abilityready[i] && gamemillis - ci->state.lastability[i] >= classes[ci->character].abilities[i].cooldown) ci->state.abilityready[i] = true;
+                        if(ci->state.abilitymillis[i]) ci->state.abilitymillis[i] = max(ci->state.abilitymillis[i]-curtime, 0);
+                    }
+                }
+                else loopi(NUMABILITIES) if(ci->state.abilitymillis[i]) ci->state.abilitymillis[i] = max(ci->state.abilitymillis[i]-curtime, 0);
                 if(ci->state.afterburnmillis) ci->state.afterburnmillis = max(ci->state.afterburnmillis-curtime, 0);
             }
             flushevents(ci, gamemillis);
@@ -3508,6 +3577,7 @@ namespace server
         ci->state.lasttimeplayed = lastmillis;
 
         int preferred = getpreferredteam(ci);
+        if(!preferred && randomsoloteam(ci)) preferred = rnd(MAXTEAMS) + 1;
         ci->team = m_teammode ? (preferred ? preferred : chooseworstteam(ci)) : 0;
 
         sendwelcome(ci);
@@ -3956,20 +4026,43 @@ namespace server
 
             case N_REQABILITY:
             {
-                int ability = getint(p);
-                if(!cq || !validClass(cq->character) || !validAbility(ability)) break;
-                if(cq->state.mana < classes[cq->character].abilities[ability].manacost)
+                int abilityId = getint(p);
+                if(!cq) break;
+                if(!validAbility(abilityId))
                 {
-                    if(cq->state.aitype != AI_BOT)
-                    {
-                        if(isdedicatedserver()) logoutf("%s tried to launch an ability without enough mana!", ci->name);
-                        disconnect_client(ci->clientnum, DISC_KICK);
-                    }
+                    if(handleinvalidabilityrequest(cq, "invalid ability id")) return;
                     break;
                 }
-                cq->state.mana -= classes[cq->character].abilities[ability].manacost;
-                cq->state.abilitymillis[ability] = classes[cq->character].abilities[ability].duration;
-                sendf(-1, 1, "ri4", N_GETABILITY, cq->clientnum, ability, cq->state.abilitymillis[ability]);
+                if(!validClass(cq->character))
+                {
+                    if(handleinvalidabilityrequest(cq, "invalid class state")) return;
+                    break;
+                }
+                if(!canlaunchability(cq, abilityId))
+                {
+                    if(handleinvalidabilityrequest(cq, "ability unavailable")) return;
+                    break;
+                }
+                if(!cq->state.abilityready[abilityId])
+                {
+                    if(handleinvalidabilityrequest(cq, "ability on cooldown")) return;
+                    break;
+                }
+
+                const ability &abilityInfo = classes[cq->character].abilities[abilityId];
+                if(cq->state.mana < abilityInfo.manacost)
+                {
+                    if(handleinvalidabilityrequest(cq, "not enough mana")) return;
+                    break;
+                }
+
+                cq->state.mana -= abilityInfo.manacost;
+                cq->state.abilityready[abilityId] = false;
+                cq->state.lastability[abilityId] = gamemillis;
+                cq->state.abilitymillis[abilityId] = abilityInfo.duration;
+                cq->invalidabilityreqs = 0;
+                cq->lastinvalidabilityreq = 0;
+                sendf(-1, 1, "ri4", N_GETABILITY, cq->clientnum, abilityId, cq->state.abilitymillis[abilityId]);
                 break;
             }
 
