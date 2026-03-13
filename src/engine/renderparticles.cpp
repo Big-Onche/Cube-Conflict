@@ -17,6 +17,7 @@ VARP(softparticleblend, 1, 8, 64);
 VARP(emitmillis, 1, 17, 1000);
 static int lastemitframe = 0, emitoffset = 0;
 static bool canemit = false, regenemitters = false, canstep = false;
+static int nextlightningmillis = 0, lastlightningfrequency = -1;
 
 bool canemitparticles()
 {
@@ -974,6 +975,8 @@ void clearparticles()
 {
     loopi(sizeof(parts)/sizeof(parts[0])) parts[i]->reset();
     clearparticleemitters();
+    nextlightningmillis = 0;
+    lastlightningfrequency = -1;
 }
 
 void cleanupparticles()
@@ -1538,6 +1541,12 @@ void spawnApocalypse()
 VARR(lightningfrequency, 0, 0, 10);
 CVARR(lightningcolor, 0);
 
+static inline void resetlightningtimer()
+{
+    nextlightningmillis = lightningfrequency ? lastmillis + 2000 + rnd(8000) : 0;
+    lastlightningfrequency = lightningfrequency;
+}
+
 void popLightning()
 {
     vec origin = camera1->o, destination = camera1->o;
@@ -1568,7 +1577,8 @@ void updateWeather()
     if(rainintensity) spawnRain();
     if(snowintensity) spawnSnow();
     if(apocalypseintensity) spawnApocalypse();
-    if(lightningfrequency && rndevent(1, 1000 - (lightningfrequency * 95))) popLightning();
+    if(lastlightningfrequency != lightningfrequency) resetlightningtimer();
+    if(lightningfrequency && lastmillis >= nextlightningmillis && rndevent(1, 1000 - (lightningfrequency * 95))) popLightning();
 }
 
 VARR(showrainbow, 0, 0, 1);
