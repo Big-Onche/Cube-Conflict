@@ -202,6 +202,8 @@ namespace buttons
 
         uiButton setQuickLaunch(SCR_W - 240, flagHeightPos, 185, flagHeight, 0xCBCBCBFF, 0xCCCCCCFF, false, getString("QuickLaunch_Button"), getString("Info_QuickLaunch"), -1, -1, 0.3f, true, []() { config::set(CONF_QUICKLAUNCH, !config::configVars[CONF_QUICKLAUNCH].value); }, &config::configVars[CONF_QUICKLAUNCH].value);
         buttons::add(setQuickLaunch);
+
+        if(addedPong) add();
     }
 
     void add()

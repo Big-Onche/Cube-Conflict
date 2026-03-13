@@ -21,6 +21,7 @@ const int SCR_H = 540;
 
 extern bool isUsingSteam;
 extern bool playPong;
+extern bool addedPong;
 extern int mouseX, mouseY;
 extern int currentTime;
 extern void closeLauncher();
