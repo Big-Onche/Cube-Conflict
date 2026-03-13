@@ -25,7 +25,7 @@ namespace lensFlares
     VARP(flares, 0, 1, 1);
     VARP(flareghosts, 0, 1, 1);
     VARP(sunflares, 0, 1, 1);
-    VARP(flarestrength, 0, 0, 1); // subtle or cinematic
+    VARP(flarestrength, 0, 0, 3);  // subtle, normal, intense or cinematic
     FVAR(sunflarehalo, 0.0f, 0.2f, 4.0f);
     FVAR(flarebranchthickness, 0.25f, 8.0f, 16.0f);
 
@@ -105,7 +105,7 @@ namespace lensFlares
 
     static float getFlareStrength(float sourceBoost)
     {
-        return ((sunflarestrength / 50.0f) * sourceBoost) * (flarestrength ? 1 : 0.2f);
+        return ((sunflarestrength / 50.0f) * sourceBoost) * (0.15f + (0.15f * flarestrength));
     }
 
     static bool initSun(vec4 &sunScreen, vec4 &sunParams, vec &sunColor, float &ghostStrength, vec4 &layerWeights, vec4 &visibilityOverride, float &sizeScale)
