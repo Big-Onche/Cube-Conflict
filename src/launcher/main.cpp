@@ -5,6 +5,7 @@
 #include "audio.h"
 #include "sdl.h"
 #include "pong.h"
+#include "server.h"
 
 bool isUsingSteam = false;
 
@@ -92,7 +93,8 @@ int main(int argc, char* argv[])
             {
                 while(SDL_PollEvent(&e) != 0)
                 {
-                    buttons::update(e);
+                    if(serverui::blocksLauncherInput()) serverui::update(e);
+                    else buttons::update(e);
 
                     switch(e.type)
                     {
@@ -101,7 +103,7 @@ int main(int argc, char* argv[])
                             break;
 
                         case SDL_MOUSEBUTTONDOWN:
-                            if(e.button.button == SDL_BUTTON_LEFT)
+                            if(e.button.button == SDL_BUTTON_LEFT && !serverui::blocksLauncherInput())
                             {
                                 isDragging = true;
                                 dragOffsetX = e.button.x;
@@ -135,6 +137,7 @@ int main(int argc, char* argv[])
                 texture::render(TEX_LOGO, 460, 140, 512, 180, TEX_ALPHA|TEX_SHADOW);
 
                 buttons::render();
+                serverui::render();
 
                 SDL_RenderPresent(sdl::renderer); // Update screen
             }

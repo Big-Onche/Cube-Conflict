@@ -119,6 +119,8 @@
 		</Unit>
 		<Unit filename="sdl.cpp" />
 		<Unit filename="sdl.h" />
+		<Unit filename="server.cpp" />
+		<Unit filename="server.h" />
 		<Unit filename="textures.cpp" />
 		<Unit filename="textures.h" />
 		<Unit filename="tools.cpp" />

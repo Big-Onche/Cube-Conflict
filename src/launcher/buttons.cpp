@@ -4,6 +4,7 @@
 #include "audio.h"
 #include "actions.h"
 #include "sdl.h"
+#include "server.h"
 
 // Button representation
 namespace buttons
@@ -162,7 +163,7 @@ namespace buttons
         int iconWidthPos = 10;
         int iconHeightPos = 10;
 
-        uiButton launchServer(iconWidthPos, iconHeightPos, iconSize, iconSize, 0, 0, false, "", getString("Info_Server"), TEX_SERVER, TEX_SERVER, 1, false, []() { action::launchGame(true); });
+        uiButton launchServer(iconWidthPos, iconHeightPos, iconSize, iconSize, 0, 0, false, "", getString("Info_Server"), TEX_SERVER, TEX_SERVER, 1, false, []() { serverui::open(); });
         buttons::add(launchServer);
         iconWidthPos += iconSize + 10;
 
