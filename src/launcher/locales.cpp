@@ -62,7 +62,7 @@ std::map<std::string, std::vector<std::string>> loadLocales(const std::string& f
 
                 std::vector<std::string> values;
 
-                if(value.front() == '[' && value.back() == ']') // Check if the value starts with a bracket indicating an array
+                if(!value.empty() && value.front() == '[' && value.back() == ']') // Check if the value starts with a bracket indicating an array
                 {
                     value = value.substr(1, value.size() - 2); // Strip the brackets
                     std::istringstream valueStream(value);
