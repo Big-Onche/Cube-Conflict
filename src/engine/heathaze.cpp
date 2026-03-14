@@ -17,6 +17,8 @@ namespace heatHaze
     FVARR(worldheathazemargin, 1.0f, 1024.0f, 1e5f);
     FVARR(worldheathazescrollx, -2.0f, 0.02f, 1.0f);
     FVARR(worldheathazescrolly, -2.0f, -0.1f, 1.0f);
+    FVARR(worldheathazeupdot, -1.0f, 0.15f, 1.0f);
+    FVARR(worldheathazeupfade, 1e-3f, 0.20f, 4.0f);
 
     VARP(heathaze, 0, 1, 1);
     FVARP(heathazestrength, 0, 32.0f, 64.0f);
@@ -97,10 +99,13 @@ namespace heatHaze
         float invMargin = 1.0f/max(worldheathazemargin, 1.0f);
         float scrollTime = lastmillis*0.001f;
         float texScale = 0.30f/max(worldheathazetexsize, 1e-3f);
+        float upDot = clamp(worldheathazeupdot, -1.0f, 1.0f);
+        float invUpFade = 1.0f/max(worldheathazeupfade, 1e-3f);
 
         LOCALPARAMF(strenght, max(worldheathazestrength * getfovscale(100.0f), 0.0f));
         LOCALPARAMF(params, startDist, invMargin, invMargin, 1.0f);
         LOCALPARAMF(color, 1.0f, 1.0f, 1.0f, 0.0f);
+        LOCALPARAMF(upmask, upDot, invUpFade, 0.0f, 0.0f);
         LOCALPARAMF(texgen, texScale, texScale, scrollTime*worldheathazescrollx, scrollTime*worldheathazescrolly);
     }
 
@@ -114,6 +119,8 @@ namespace heatHaze
 
         glActiveTexture_(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, (worldhazenormaltex ? worldhazenormaltex : notexture)->id);
+        glActiveTexture_(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_RECTANGLE, gnormaltex);
         glActiveTexture_(GL_TEXTURE8);
         glBindTexture(GL_TEXTURE_RECTANGLE, refracttex);
         glActiveTexture_(GL_TEXTURE9);
