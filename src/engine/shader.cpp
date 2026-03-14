@@ -1837,7 +1837,6 @@ void resetshaders()
     clearchanges(CHANGE_SHADERS);
 
     cleanuplights();
-    ar::cleanup();
     postfx::cleanupRadialBlur();
     cleanupmodels();
     cleanupshaders();

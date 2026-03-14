@@ -346,7 +346,7 @@ enum
     // explosions
     PART_SHOCKWAVE, PART_PLASMABURST, PART_PLASMAGRENADE, PART_EXPLOSION,
     // misc
-    PART_BLOOD, PART_SPARK, PART_SPARK_L, PART_SPARK_VL, PART_SPARK_P, PART_AR, PART_F_AR, PART_TEXT, PART_LENS_FLARE
+    PART_BLOOD, PART_SPARK, PART_SPARK_L, PART_SPARK_VL, PART_SPARK_P, PART_HAZE_SMALL, PART_HAZE_BIG, PART_HAZE_MUZZLE, PART_TEXT
 };
 
 extern bool canemitparticles();
@@ -354,7 +354,7 @@ extern void particle_flying_flare(const vec &o, const vec &d, int fade, int type
 extern void particle_splash(int type, int num, int fade, const vec &p, int color = 0xFFFFFF, float size = 1.0f, int radius = 150, int gravity = 2, int sizemod = 0, bool randomcolor = false, bool sound = false);
 extern void particle_flare(const vec &p, const vec &dest, int fade, int type, int color = 0xFFFFFF, float size = 0.28f, physent *owner = NULL, bool randomcolor = false, int sizemod = 0);
 extern void particle_fireball(const vec &dest, float max, int type, int fade = -1, int color = 0xFFFFFF, float size = 4.0f, bool randomcolor = false);
-extern void regularflame(int type, const vec &p, float radius, float height, int color, int density = 3, float scale = 2.0f, float speed = 200.0f, float fade = 600.0f, int gravity = -15, int sizemod = -3);
+extern void regularflame(int type, const vec &p, float radius, float height, int color, int density = 3, float scale = 2.0f, float speed = 200.0f, float fade = 600.0f, int gravity = -15, int sizemod = -3, float sizeMin = 0.f, float sizeMax = 0.f);
 extern void regularshape(int type, int radius, int color, int dir, int num, int fade, const vec &p, float size, int gravity, float vel = 0, int windoffset = 0, int weather = 0, int height = 0, int sizemod = 0);
 
 namespace particles

@@ -1746,7 +1746,6 @@ void allchanged(bool load)
     if(filltjoints) findtjoints();
     octarender();
     if(load) precachetextures();
-    ar::init();
     postfx::initRadialBlur();
     setupmaterials();
     clearshadowcache();

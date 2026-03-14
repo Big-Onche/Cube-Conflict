@@ -1,9 +1,9 @@
 // renderparticles.cpp
 
-#include "engine.h"
 #include "gfx.h"
+#include "engine.h"
 
-Shader *particleshader = NULL, *particlenotextureshader = NULL, *particlesoftshader = NULL, *particlearshader = NULL, *particletextshader = NULL;
+Shader *particleshader = NULL, *particlenotextureshader = NULL, *particlesoftshader = NULL, *particletextshader = NULL, *particleHazeShader = NULL;
 
 VARP(particlelayers, 0, 1, 1);
 FVARP(particlebright, 0, 1.75, 100);
@@ -126,7 +126,9 @@ enum
     PT_EMITLIGHT    = 1<<26,
     PT_EMITVLIGHT   = 1<<27,
     PT_EMITPART     = 1<<28,
-    PT_AR           = 1<<29,
+    PT_HAZE         = 1<<29,
+    PT_SCROLL       = 1<<30,
+    PT_FADE         = 1<<31,
     PT_FLIP         = PT_HFLIP | PT_VFLIP | PT_ROT
 };
 
@@ -729,10 +731,10 @@ struct varenderer : partrenderer
         p->gravity = gravity;
         p->fade = fade;
         p->millis = lastmillis + emitoffset;
-        p->color = bvec::hexcolor(color);
         p->size = size;
         p->owner = NULL;
         p->flags = 0x80 | (rndmask ? rnd(0x80) & rndmask : 0);
+        p->color = (p->flags & PT_HAZE) ? bvec::hexcolor(heatHaze::strengthToColor(color)) : bvec::hexcolor(color);
         p->sizemod = sizemod;
         p->hud = hud;
         p->sound = sound;
@@ -767,7 +769,7 @@ struct varenderer : partrenderer
         calc(p, blend, ts, o, d);
         if(blend <= 1 || p->fade <= 5) p->fade = -1; //mark to remove on next pass (i.e. after render)
 
-        modifyblend<T>(o, blend);
+        if(!(type&PT_SHADER)) modifyblend<T>(o, blend);
 
         if(regen)
         {
@@ -889,6 +891,33 @@ struct softquadrenderer : quadrenderer
     }
 };
 
+struct hazeRenderer : quadrenderer
+{
+    hazeRenderer(const char *texname, int type)
+        : quadrenderer(texname, type|PT_SHADER)
+    {
+    }
+
+    void render()
+    {
+        if(!heatHaze::shouldRender()) return;
+        if(particleHazeShader && heatHaze::bindSceneTexture())
+        {
+            particleHazeShader->set();
+            heatHaze::setShaderParams((type&PT_SCROLL) != 0, (type&PT_FADE) != 0);
+            quadrenderer::render();
+            return;
+        }
+        else if(particleshader)
+        {
+            particleshader->set();
+            LOCALPARAMF(colorscale, ldrscale, ldrscale, ldrscale, 1);
+        }
+        else return;
+        quadrenderer::render();
+    }
+};
+
 static partrenderer *parts[] =
 {
     new quadrenderer("media/particles/game/basic.png", PT_PART|PT_FLIP|PT_BRIGHT),                                           // PART_BASIC
@@ -951,8 +980,9 @@ static partrenderer *parts[] =
     new quadrenderer("media/particles/misc/spark.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_EMITLIGHT),                              // PART_SPARK_L
     new quadrenderer("media/particles/misc/spark.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_EMITVLIGHT|PT_COLLIDE, STAIN_BULLET_GLOW),// PART_SPARK_VL
     new quadrenderer("media/particles/misc/spark.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_EMITPART),                               // PART_SPARK_P
-    new quadrenderer("media/particles/game/basic.png", PT_PART|PT_AR|PT_FLIP|PT_FLIP),                                       // PART_AR
-    new quadrenderer("media/particles/game/basic.png", PT_PART|PT_AR|PT_FLIP|PT_FEW|PT_TRACK),                               // PART_F_AR
+    new hazeRenderer("media/particles/haze/noise_1.png", PT_HAZE|PT_PART|PT_FEW|PT_LERP|PT_SCROLL|PT_FADE),                  // PART_HAZE_SMALL
+    new hazeRenderer("media/particles/haze/noise_2.png", PT_HAZE|PT_PART|PT_FEW|PT_LERP|PT_SCROLL|PT_FADE),                  // PART_HAZE_BIG
+    new hazeRenderer("media/particles/haze/noise_2.png", PT_HAZE|PT_PART|PT_FEW|PT_TRACK|PT_LERP|PT_SCROLL|PT_FADE),         // PART_HAZE_MUZZLE
     &texts,                                                                                                                  // PART_TEXT
 };
 
@@ -965,8 +995,8 @@ void initparticles()
     if(!particleshader) particleshader = lookupshaderbyname("particle");
     if(!particlenotextureshader) particlenotextureshader = lookupshaderbyname("particlenotexture");
     if(!particlesoftshader) particlesoftshader = lookupshaderbyname("particlesoft");
-    if(!particlearshader) particlearshader = lookupshaderbyname("particleairrefraction");
     if(!particletextshader) particletextshader = lookupshaderbyname("particletext");
+    if(!particleHazeShader) particleHazeShader = lookupshaderbyname("particleHaze");
     loopi(sizeof(parts)/sizeof(parts[0])) parts[i]->init(parts[i]->type&PT_FEW ? min(fewparticles, maxparticles) : maxparticles);
     loopi(sizeof(parts)/sizeof(parts[0])) parts[i]->preload();
 }
@@ -1004,19 +1034,6 @@ void debugparticles()
     pophudmatrix();
 }
 
-bool arparticles = false;
-Texture *arptexture = NULL;
-
-SVARF(arptex, "media/texture/mat_air/refraction.png", arptexture = textureload(arptex, 0, true, false));
-FVAR(arpstrenght, 1e-6f, 16, 50);
-FVAR(arpblend, 0, 1, 1);
-FVAR(arpdist, 0, 128, 1e6f);
-FVAR(arpmargin, 0, 8, 1e6f);
-FVAR(arpscalex, 1e-6f, 0.2f, 1e6f);
-FVAR(arpscaley, 1e-6f, 0.2f, 1e6f);
-FVAR(arpscrollx, -1e6f, 0.4f, 1e6f);
-FVAR(arpscrolly, -1e6f, 0.4f, 1e6f);
-
 void renderparticles(int layer)
 {
     canstep = layer != PL_UNDER;
@@ -1033,13 +1050,6 @@ void renderparticles(int layer)
     {
         partrenderer *p = parts[i];
         if((p->type&PT_NOLAYER) == excludemask || !p->haswork()) continue;
-
-        if(p->type&PT_AR)
-        {
-            if(ar::ar) arparticles = true;
-            else p->reset();
-            continue;
-        }
 
         if(!rendered)
         {
@@ -1097,66 +1107,6 @@ void renderparticles(int layer)
     }
 }
 
-bool particleartexture()
-{
-    if(!arptexture)
-    {
-        arptexture = textureload(arptex, 0, true, false);
-        if (!arptexture || arptexture == notexture) return false;
-    }
-    return true;
-}
-
-// I won't lie, this is heavily inspired by Red Eclipse's 'haze' code https://github.com/redeclipse/base
-void renderarparticles(GLuint airrefractiontex)
-{
-    if(!ar::ar || !particleartexture())
-    {
-        arparticles = false;
-        return;
-    }
-
-    canstep = true;
-
-    GLboolean olddepthmask;
-    glGetBooleanv(GL_DEPTH_WRITEMASK, &olddepthmask);
-
-    glDepthMask(GL_FALSE);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glActiveTexture_(GL_TEXTURE2);
-
-    if(msaalight) glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msdepthtex);
-    else glBindTexture(GL_TEXTURE_RECTANGLE, gdepthtex);
-
-    glActiveTexture_(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D, arptexture->id);
-    glActiveTexture_(GL_TEXTURE4);
-    glBindTexture(GL_TEXTURE_RECTANGLE, airrefractiontex);
-    glActiveTexture_(GL_TEXTURE0);
-
-    GLOBALPARAMF(arstrenght, ar::scale(arpstrenght));
-    float scroll = ar::scroll();
-    GLOBALPARAMF(artexgen, ar::scale(arpscalex, true), ar::scale(arpscaley, true), arpscrollx * scroll, arpscrolly * scroll);
-    GLOBALPARAMF(arparams, 1.0f/arpdist, 1.0f/arpmargin);
-
-    particlearshader->set();
-
-    LOCALPARAMF(colorscale, 1, 1, 1, arpblend);
-
-    loopi(sizeof(parts)/sizeof(parts[0]))
-    {
-        partrenderer *p = parts[i];
-        if(!(p->type&PT_AR) || !p->haswork()) continue;
-        p->render();
-    }
-
-    glDisable(GL_BLEND);
-    glDepthMask(olddepthmask);
-
-    arparticles = false;
-}
-
 static int addedparticles = 0;
 
 VARP(maxparticledistance, 128, 1024, 4096);
@@ -1164,6 +1114,11 @@ VARP(maxparticledistance, 128, 1024, 4096);
 static inline bool isInRange(vec o, int flags)
 {
     return flags&PT_NOMAXDIST || camera1->o.dist(o) < maxparticledistance;
+}
+
+static inline bool isHaze(int type)
+{
+    return type == PART_HAZE_SMALL || type == PART_HAZE_BIG || type == PART_HAZE_MUZZLE;
 }
 
 static inline particle *newparticle(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity = 0, int sizemod = 0, bool sound = false, bool hud = false)
@@ -1178,6 +1133,7 @@ static inline particle *newparticle(const vec &o, const vec &d, int fade, int ty
     }
     if(fade + emitoffset < 0) return &dummy;
     addedparticles++;
+    if(isHaze(type)) color = heatHaze::strengthToColor(color);
     return parts[type]->addpart(o, d, fade, color, size, gravity, sizemod, sound, hud);
 }
 
@@ -1482,11 +1438,14 @@ void regularshape(int type, int radius, int color, int dir, int num, int fade, c
     }
 }
 
-void regularflame(int type, const vec &p, float radius, float height, int color, int density, float scale, float speed, float fade, int gravity, int sizemod)
+void regularflame(int type, const vec &p, float radius, float height, int color, int density, float scale, float speed, float fade, int gravity, int sizemod, float sizeMin, float sizeMax)
 {
     if(minimized) return;
 
     float size = scale * min(radius, height)*1.5f;
+
+    if(sizeMin && sizeMax) clamp(scale, sizeMin, sizeMax);
+
     vec v(0, 0, min(1.0f, height)*speed);
     loopi(density)
     {
@@ -1583,7 +1542,7 @@ void updateWeather()
 
 VARR(showrainbow, 0, 0, 1);
 VARR(partcloudcolour, 0, 0x888888, 0xFFFFFF);
-VAR(showarpmask, 0, 1, 1);
+VAR(showhazemask, 0, 1, 1);
 
 static void makeparticles(entity &e)
 {
@@ -1620,7 +1579,13 @@ static void makeparticles(entity &e)
             if(g) g = applyRandomOffset(g, e.attr7);
             if(b) b = applyRandomOffset(b, e.attr7);
 
-            if(rnd(2)) regularflame(PART_AR, e.o, radius, height, 0xFFFFFF, 1, 12.f, 200.f, 600.f, -12, e.attr8 + 12);
+            if(rndevent(50))
+            {
+                const int hazeSize = e.attr8 + 12;
+                regularflame(PART_HAZE_SMALL, vec(e.o).addz(4), radius, height, 100, 1, 12.f, 200.f, 1000.f, 200, hazeSize, 4.f, 500.f);
+                regularflame(PART_HAZE_SMALL, vec(e.o).addz(height*0.5f), radius, height, 100, 1, 12.f, 200.f, 1000.f, 200, hazeSize, 4.f, 500.f);
+            }
+
             regularflame(PART_FLAME, e.o, radius, height, rgbToHex(r, g, b), 2, 2.0f+(rnd(2)), 200.f, 600.f, -15, e.attr8);
             int gray = smokeGs();
             if(e.attr1==1) regularflame(PART_SMOKE, vec(e.o.x, e.o.y, e.o.z + 4.0f*min(radius, height)), radius, height, rgbToHex(gray, gray, gray), 1, 4.0f+(rnd(6)), 100.0f, 2750.0f, -15, e.attr8);
@@ -1727,7 +1692,7 @@ static void makeparticles(entity &e)
                 loopi(2 + rnd(3)) particles::dirSplash(PART_FIRESPARK, 0xFFBB55, 750, 7, 300 + (rnd(500)), pos, vec(0, 0, 1), 3.f+(rnd(30)/6.f), ((i + 1) * 125) + rnd(200), -1);
                 loopi(4) particles::dirSplash(PART_SMOKE, 0x333333, 200, 4, 1500 + rnd(750), pos, vec(0, 0, 1), 15.f + rnd(5), 50 + rnd(50), 5);
                 loopi(2) particle_fireball(pos, 20, PART_EXPLOSION, 500, 0xFF9900, 2.5f, false);
-                particles::dirSplash(PART_AR, 0xFFFFFF, 200, 2, 1000 + rnd(500), pos, vec(0, 0, 1), 25.f, 50, 15);
+                particles::dirSplash(PART_HAZE_SMALL, 100, 200, 2, 1000 + rnd(500), pos, vec(0, 0, 1), 30.f, 50, 15);
                 adddynlight(e.o, 200, vec(0.3f, 0.15f, 0), 250, 150, DL_EXPAND|L_NOSHADOW|L_VOLUMETRIC, 50);
             }
             break;
@@ -1757,12 +1722,12 @@ static void makeparticles(entity &e)
             // flares.addflare(e.o, e.attr4, e.attr5, e.attr6, e.attr2, e.attr3, true, e.attr7);
             break;
 
-        case 13: // air refraction: attr 2:<size> attr 3:<intensity>
+        case 13: // heat haze - <size> <strength 0..100>
         {
-            if(!canemitparticles()) return;
-
-            particle_splash(PART_AR, 1, 100, e.o, rgbToHex(e.attr3, e.attr3, e.attr3), e.attr2, 10, -200);
-            if(editmode && showarpmask) particle_splash(PART_BASIC, 1, 100, e.o, 0x201000, e.attr2, 10, -200);
+            int color = clamp(e.attr3, 0, 100);
+            float size = e.attr2 > 0 ? max(float(e.attr2)/10.0f, 0.1f) : 500.0f;
+            newparticle(e.o, vec(0, 0, 0), 1, PART_HAZE_SMALL, color, size, 0);
+            if(editmode && showhazemask) particle_splash(PART_BASIC, 1, 1, e.o, 0x201000, size, 10, 0);
             break;
         }
 

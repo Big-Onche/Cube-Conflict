@@ -787,7 +787,7 @@ namespace game
                 loopi(attacks[atk].rays)
                 {
                     vec dest = vec(rays[i]).sub(muzzleOrigin).normalize().mul(1450.0f + rnd(200));
-                    if(rnd(2)) particle_flying_flare(muzzleOrigin, dest, 900, PART_AR, 0xEEEEEE, 15.f, 100, 50);
+                    if(rnd(2)) particle_flying_flare(muzzleOrigin, dest, 900, PART_HAZE_SMALL, 50, 10.f, 100, 65);
                     switch(rnd(4))
                     {
                         case 0: particle_flying_flare(muzzleOrigin, dest, 700, PART_FIRE_BALL, hasRoids ? 0x881111 : 0x604930, (12.f+rnd(16))/8.f, 100, 10+rnd(5), hasShrooms()); break;

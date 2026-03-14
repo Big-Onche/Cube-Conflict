@@ -507,31 +507,18 @@ extern void rendereditmaterials();
 extern void renderminimapmaterials();
 extern int visiblematerial(const cube &c, int orient, const ivec &co, int size, ushort matmask = MATF_VOLUME);
 
-namespace ar
+namespace heatHaze
 {
-    extern int ar;
-    extern float armargin;
-    extern float armindist;
-    extern float armaxdist;
+    extern bool shouldRender();
+    extern bool bindSceneTexture();
+    extern void setShaderParams(bool scroll = true, bool fade = true);
 
-    static inline float maxdist()
+    static inline int strengthToColor(int strength)
     {
-        return max(armindist, armaxdist - armindist + armargin);
+        int clamped = clamp(strength, 0, 100);
+        int level = (clamped*255 + 50)/100;
+        return (level<<16) | (level<<8) | level;
     }
-
-    static inline float scroll()
-    {
-        return lastmillis / 1000.0f;
-    }
-
-    static inline float scale(float f, bool inv = false)
-    {
-        return inv ? (f * (curfov / 100.f)) : (f * (100.f / curfov));
-    }
-
-    extern void init();
-    extern void render();
-    extern void cleanup();
 }
 
 namespace postfx
@@ -763,7 +750,6 @@ static inline mapmodelinfo *getmminfo(int n) { return mapmodels.inrange(n) ? &ma
 
 // renderparticles
 extern int particlelayers;
-extern bool arparticles;
 
 enum { PL_ALL = 0, PL_UNDER, PL_OVER, PL_NOLAYER };
 
@@ -774,7 +760,6 @@ extern void seedparticles();
 extern void updateparticles();
 extern void debugparticles();
 extern void renderparticles(int layer = PL_ALL);
-extern void renderarparticles(GLuint airrefractiontex);
 extern bool printparticles(extentity &e, char *buf, int len);
 extern void cleanupparticles();
 

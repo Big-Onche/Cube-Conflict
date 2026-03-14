@@ -2741,12 +2741,6 @@ void gl_drawview()
     godRays::render();
     GLERROR;
 
-    if(!drawtex)
-    {
-        ar::render();
-        GLERROR;
-    }
-
     if(editmode)
     {
         extern int outline;

@@ -413,7 +413,7 @@ namespace bouncers
                         particle_splash(PART_SMOKE, 1, 1200, pos, 0x303030, 2.5f, 50, -50, 10, shrooms);
                         particle_splash(PART_FIRE_BALL, 1, 250, pos, roids ? 0xFF0000 : 0x996600, 1.3f, 50, -50, 12, shrooms);
                     }
-                    if(sparseFx) particle_splash(PART_AR, 1, 500, pos, 0xFFFFFF, 12.f, 50, -25, 50);
+                    if(sparseFx) particle_splash(PART_HAZE_SMALL, 1, 500, pos, 85, 12.f, 50, -25, 50);
                     break;
 
                 case BNC_MOLOTOV:
@@ -421,7 +421,7 @@ namespace bouncers
                     {
                         particle_splash(PART_FIRE_BALL, 2, 80, bnc.particles, 0xFFC864, 1, 30, 30, 0, shrooms);
                         particle_splash(PART_SMOKE, 3, 180, bnc.particles, 0x444444, 2, 40, 50, 0, shrooms);
-                        particle_splash(PART_AR, 2, 250, bnc.particles, 0xFFFFFF, 2, 40, 50, 5);
+                        particle_splash(PART_HAZE_SMALL, 2, 250, bnc.particles, 85, 2, 40, 50, 5);
                     }
                     break;
 
