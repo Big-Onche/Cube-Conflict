@@ -78,7 +78,7 @@ namespace heatHaze
 
     bool shouldRenderWorldHaze()
     {
-        return worldheathaze && worldheathazestrength > 0;
+        return worldheathaze && heathaze && worldheathazestrength > 0;
     }
 
     void setShaderParams(bool scroll, bool fade)

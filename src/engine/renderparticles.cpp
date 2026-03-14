@@ -1579,7 +1579,7 @@ static void makeparticles(entity &e)
             if(g) g = applyRandomOffset(g, e.attr7);
             if(b) b = applyRandomOffset(b, e.attr7);
 
-            if(rndevent(50))
+            if(rndevent(90))
             {
                 const int hazeSize = e.attr8 + 12;
                 regularflame(PART_HAZE_SMALL, vec(e.o).addz(4), radius, height, 100, 1, 12.f, 200.f, 1000.f, 200, hazeSize, 4.f, 500.f);
