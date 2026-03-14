@@ -900,7 +900,7 @@ struct hazeRenderer : quadrenderer
 
     void render()
     {
-        if(!heatHaze::shouldRender()) return;
+        if(!heatHaze::shouldRenderHazeParticles()) return;
         if(particleHazeShader && heatHaze::bindSceneTexture())
         {
             particleHazeShader->set();

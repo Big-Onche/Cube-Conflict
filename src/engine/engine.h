@@ -129,6 +129,7 @@ enum { DRAWTEX_NONE = 0, DRAWTEX_ENVMAP, DRAWTEX_MINIMAP, DRAWTEX_MODELPREVIEW }
 extern int vieww, viewh;
 extern int fov;
 extern float curfov, fovy, aspect, forceaspect;
+extern float getfovscale(float referenceFov = 100.0f);
 extern float nearplane();
 extern int farplane;
 extern bool hdrfloat;
@@ -509,9 +510,11 @@ extern int visiblematerial(const cube &c, int orient, const ivec &co, int size, 
 
 namespace heatHaze
 {
-    extern bool shouldRender();
+    extern bool shouldRenderHazeParticles();
+    extern bool shouldRenderWorldHaze();
     extern bool bindSceneTexture();
     extern void setShaderParams(bool scroll = true, bool fade = true);
+    extern void renderWorld();
 
     static inline int strengthToColor(int strength)
     {

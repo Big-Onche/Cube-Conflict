@@ -1,7 +1,7 @@
 // rendergl.cpp: core opengl rendering stuff
 
-#include "engine.h"
 #include "gfx.h"
+#include "engine.h"
 
 bool hasVAO = false, hasTR = false, hasTSW = false, hasPBO = false, hasFBO = false, hasAFBO = false, hasDS = false, hasTF = false, hasCBF = false, hasS3TC = false, hasFXT1 = false, hasLATC = false, hasRGTC = false, hasAF = false, hasFBB = false, hasFBMS = false, hasTMS = false, hasMSS = false, hasFBMSBS = false, hasUBO = false, hasMBR = false, hasDB2 = false, hasDBB = false, hasTG = false, hasTQ = false, hasPF = false, hasTRG = false, hasTI = false, hasHFV = false, hasHFP = false, hasDBT = false, hasDC = false, hasDBGO = false, hasEGPU4 = false, hasGPU4 = false, hasGPU5 = false, hasBFE = false, hasEAL = false, hasCR = false, hasOQ2 = false, hasES2 = false, hasES3 = false, hasCB = false, hasCI = false, hasTS = false;
 bool mesa = false, intel = false, amd = false, nvidia = false;
@@ -1340,6 +1340,11 @@ VARP(fov, 10, 100, 150);
 VAR(avatarfov, 10, 40, 100);
 FVAR(avatardepth, 0, 0.2f, 1);
 FVARNP(aspect, forceaspect, 0, 0, 1e3f);
+
+float getfovscale(float referenceFov)
+{
+    return clamp(tanf(0.5f * referenceFov * RAD) / max(tanf(0.5f * curfov * RAD), 1.0e-4f), 0.25f, 8.0f);
+}
 
 float zoomprogress = 0;
 
@@ -2724,6 +2729,9 @@ void gl_drawview()
     }
 
     rendertransparent();
+    GLERROR;
+
+    heatHaze::renderWorld();
     GLERROR;
 
     renderavatar(true); // render transparent avatar right after other transparents

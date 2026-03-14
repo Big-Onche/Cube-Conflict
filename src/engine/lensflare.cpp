@@ -3,10 +3,10 @@
 #include "engine.h"
 
 extern GLuint hdrfbo, mshdrfbo;
+extern float getfovscale(float referenceFov);
 
 namespace lensFlares
 {
-    static const float referenceFov = 100.0f;
     static const float occlusionRadius = 10.0f;
 
     struct queuedFlare
@@ -38,11 +38,6 @@ namespace lensFlares
     {
         if(!flares || (sun && sunflarestrength <= 0)) return false;
         return !sun || (sunflares && !sunlight.iszero() && sunlightscale > 1.0e-4f);
-    }
-
-    static float getFovScale()
-    {
-        return clamp(tanf(0.5f * referenceFov * RAD) / max(tanf(0.5f * curfov * RAD), 1.0e-4f), 0.25f, 8.0f);
     }
 
     void addFlares(const vec &o, int color, float size, bool unlimitedDistance, bool lensGhosts, int maxDistance)
@@ -254,7 +249,7 @@ namespace lensFlares
         if(glBlendFuncSeparate_) glBlendFuncSeparate_(GL_SRC_ALPHA, GL_ONE, GL_ZERO, GL_ONE);
         else glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-        GLOBALPARAMF(sunFlareFovScale, getFovScale());
+        GLOBALPARAMF(sunFlareFovScale, getfovscale(100.0f));
         GLOBALPARAMF(sunFlareBranchThickness, max(flarebranchthickness, 0.05f));
         if(renderSun) drawFlare(flareShader, sunScreen, sunParams, sunColor, sunGhostStrength, sunLayerWeights, sunVisibilityOverride, sunSizeScale);
         loopv(queuedFlares)
