@@ -513,6 +513,8 @@ namespace game
 
     vector<monster *> monsters;
 
+    static const int MAX_DMSP_ALIVE_MONSTERS = 64;
+
     int nextmonster, spawnremain, numkilled, monstertotal, mtimestart, remain;
 
     int totmfreq()
@@ -522,8 +524,50 @@ namespace game
         return n;
     }
 
+    static bool isDespawnCandidate(int mtype)
+    {
+        return mtype==M_KEVIN || mtype==M_DYLAN || mtype==M_YALIEN;
+    }
+
+    static bool capMonster()
+    {
+        if(!m_dmsp) return true;
+
+        int alive = 0;
+        monster *candidate = NULL;
+        float bestdist = -1.0f;
+
+        loopv(monsters)
+        {
+            monster *m = monsters[i];
+            if(m->state!=CS_ALIVE) continue;
+            alive++;
+            if(!isDespawnCandidate(m->mtype)) continue;
+
+            const float dist = m->o.squaredist(player1->o);
+            if(!candidate || dist > bestdist)
+            {
+                candidate = m;
+                bestdist = dist;
+            }
+        }
+
+        if(alive < MAX_DMSP_ALIVE_MONSTERS) return true;
+        if(!candidate) return false;
+
+        // Hard despawn: no death reward/effects, and hide body immediately.
+        candidate->state = CS_DEAD;
+        candidate->health = 0;
+        candidate->move = candidate->strafe = 0;
+        candidate->lastpain = lastmillis - 10000;
+        cleardynentcache();
+        return true;
+    }
+
     void spawnmonster(bool boss = false, int type = 0)     // spawn a random monster according to freq distribution in DMSP
     {
+        if(!capMonster()) return;
+
         if(boss)
         {
             monsters.add(new monster(type, rnd(360), 0, 0, M_SEARCH, 1000, 1));
