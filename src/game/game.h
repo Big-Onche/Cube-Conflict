@@ -790,6 +790,128 @@ struct gamestate
     }
 };
 
+enum
+{
+    DCF_APPLY_ACTOR_SCALE      = 1<<0,
+    DCF_APPLY_TARGET_RESIST    = 1<<1,
+    DCF_APPLY_ACTOR_MODIFIERS  = 1<<2,
+    DCF_APPLY_TARGET_MODIFIERS = 1<<3,
+    DCF_APPLY_ACTOR_BOOSTS     = 1<<4,
+    DCF_APPLY_TARGET_BOOSTS    = 1<<5,
+    DCF_MUTATE_TARGET_STATE    = 1<<6
+};
+
+struct totalDamage
+{
+    int damage, mana, rage;
+    bool usedMana, rageGained;
+};
+
+static inline bool isSuperWeapon(int atk)
+{
+    return atk==ATK_S_NUKE || atk==ATK_S_GAU8 || atk==ATK_S_ROCKETS || atk==ATK_S_CAMPER;
+}
+
+static inline totalDamage getDamage(int baseDamage, int atk, int actorClass, const gamestate *actorState, int targetClass, gamestate *targetState, float dist, int flags, bool actorIsTarget = false)
+{
+    totalDamage result;
+    result.damage = max(baseDamage, 0);
+    result.mana = targetState ? targetState->mana : 0;
+    result.rage = 0;
+    result.usedMana = false;
+    result.rageGained = false;
+
+    if(!validClass(actorClass) || !validClass(targetClass)) return result;
+
+    const int actorScale = (flags & DCF_APPLY_ACTOR_SCALE) ? classes[actorClass].damage : 100;
+    int targetResist = (flags & DCF_APPLY_TARGET_RESIST) ? classes[targetClass].resistance : 100;
+    if(targetResist <= 0) targetResist = 1;
+
+    int damage = (baseDamage*actorScale)/targetResist;
+
+    if((flags & DCF_APPLY_ACTOR_BOOSTS) && actorState && actorState->boostmillis[B_ROIDS]) damage *= (actorClass==C_JUNKIE ? 3 : 2);
+    if((flags & DCF_APPLY_TARGET_BOOSTS) && targetState && targetState->boostmillis[B_JOINT]) damage /= (targetClass==C_JUNKIE ? 1.875f : 1.25f);
+
+    if(flags & DCF_APPLY_ACTOR_MODIFIERS)
+    {
+        switch(actorClass)
+        {
+            case C_AMERICAN:
+                if(isSuperWeapon(atk)) damage *= 1.5f;
+                break;
+
+            case C_WIZARD:
+                if(actorState && actorState->abilitymillis[ABILITY_2]) damage *= 1.25f;
+                break;
+
+            case C_CAMPER:
+                damage *= ((dist/1800.f)+1.f);
+                break;
+
+            case C_VIKING:
+                if(actorState && actorState->boostmillis[B_RAGE]) damage *= 1.25f;
+                break;
+
+            case C_SHOSHONE:
+                if(actorState && actorState->abilitymillis[ABILITY_3]) damage *= 1.3f;
+                if(targetClass == C_AMERICAN) damage /= 1.25f;
+                break;
+        }
+    }
+
+    if((flags & DCF_APPLY_TARGET_MODIFIERS) && targetState)
+    {
+        switch(targetClass)
+        {
+            case C_WIZARD:
+                if(targetState->abilitymillis[ABILITY_3]) damage /= 5.f;
+                break;
+
+            case C_VIKING:
+                if(!actorIsTarget)
+                {
+                    result.rage = damage * 5;
+                    if(flags & DCF_MUTATE_TARGET_STATE)
+                    {
+                        targetState->boostmillis[B_RAGE] += result.rage;
+                        result.rageGained = result.rage != 0;
+                    }
+                }
+                break;
+
+            case C_PRIEST:
+                if(targetState->abilitymillis[ABILITY_2] && targetState->mana)
+                {
+                    float manaUsed = min(damage/10.f, (float)targetState->mana),
+                          damageReduction = manaUsed * 10.f;
+                    damage = max(0.f, damage - damageReduction);
+
+                    if(flags & DCF_MUTATE_TARGET_STATE)
+                    {
+                        int oldmana = targetState->mana;
+                        targetState->mana -= manaUsed;
+                        if(targetState->mana < 0) targetState->mana = 0;
+                        result.mana = targetState->mana;
+                        result.usedMana = targetState->mana != oldmana;
+                    }
+                    else
+                    {
+                        result.mana = max(0, int(targetState->mana - manaUsed));
+                    }
+                }
+                break;
+
+            case C_SHOSHONE:
+                if(targetState->abilitymillis[ABILITY_1]) damage /= 1.3f;
+                if(actorClass == C_AMERICAN) damage *= 1.25f;
+                break;
+        }
+    }
+
+    result.damage = max(damage, 0);
+    return result;
+}
+
 #define MAXTEAMS 2
 static const char * const teamnames[1+MAXTEAMS] = { "", "1", "2" };
 static const char * const teamtextcode[1+MAXTEAMS] = { "\fc", "\fd", "\fc" };

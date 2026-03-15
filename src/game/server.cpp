@@ -2508,72 +2508,24 @@ namespace server
     {
         servstate &ts = target->state;
         servstate &as = actor->state;
+        int flags = DCF_APPLY_ACTOR_SCALE |
+                    DCF_APPLY_TARGET_RESIST |
+                    DCF_APPLY_ACTOR_MODIFIERS |
+                    DCF_APPLY_ACTOR_BOOSTS |
+                    DCF_APPLY_TARGET_BOOSTS |
+                    DCF_MUTATE_TARGET_STATE;
+        if(!skipTarget) flags |= DCF_APPLY_TARGET_MODIFIERS;
 
-        int damage = (baseDamage*classes[actor->character].damage) / (classes[target->character].resistance); // main class damage/resistance multiplier
-        if(actor->state.boostmillis[B_ROIDS]) damage *= (actor->character==C_JUNKIE ? 3 : 2);
-        if(target->state.boostmillis[B_JOINT]) damage /= (target->character==C_JUNKIE ? 1.875f : 1.25f); // joint damage reduce
-
-        switch(actor->character) // Skill and class damage boost/reduction from actor
-        {
-            case C_AMERICAN:
-                if(atk==ATK_S_NUKE || atk==ATK_S_GAU8 || atk==ATK_S_ROCKETS || atk==ATK_S_CAMPER) damage *= 1.5f;
-                break;
-
-            case C_WIZARD:
-                if(as.abilitymillis[ABILITY_2]) damage *= 1.25f;
-                break;
-
-            case C_CAMPER:
-                damage *= ((as.o.dist(ts.o)/1800.f)+1.f);
-                break;
-
-            case C_VIKING:
-                if(as.boostmillis[B_RAGE]) damage *= 1.25f;
-                break;
-
-            case C_SHOSHONE:
-            {
-                if(as.abilitymillis[ABILITY_3]) damage *= 1.3f;
-                if(target->character==C_AMERICAN) damage /= 1.25f;
-            }
-        }
+        const int oldmana = ts.mana;
+        const int oldrage = ts.boostmillis[B_RAGE];
+        totalDamage calc = getDamage(baseDamage, atk, actor->character, &as, target->character, &ts, as.o.dist(ts.o), flags, actor==target);
 
         if(!skipTarget)
         {
-            switch(target->character) // Skill and class damage boost/reduction from target
-            {
-                case C_WIZARD:
-                    if(ts.abilitymillis[ABILITY_3]) damage /= 5.f;
-                    break;
-
-                case C_VIKING:
-                    if(actor!=target)
-                    {
-                        ts.boostmillis[B_RAGE] += (damage * 5);
-                        sendf(-1, 1, "ri3", N_VIKING, target->clientnum, ts.boostmillis[B_RAGE]);
-                    }
-                    break;
-
-                case C_PRIEST:
-                    if(ts.abilitymillis[ABILITY_2] && ts.mana)
-                    {
-                        float manaUsed = min(damage/10.f, (float)ts.mana),
-                        damageReduction = manaUsed * 10;
-
-                        damage = max(0.f, damage - damageReduction);
-                        ts.mana -= manaUsed;
-                        sendf(-1, 1, "ri3", N_PRIEST, target->clientnum, ts.mana);
-                    }
-                    break;
-
-                case C_SHOSHONE:
-                {
-                    if(ts.abilitymillis[ABILITY_1]) damage /= 1.3f;
-                    if(actor->character==C_AMERICAN) damage *= 1.25f;
-                }
-            }
+            if(ts.boostmillis[B_RAGE] != oldrage) sendf(-1, 1, "ri3", N_VIKING, target->clientnum, ts.boostmillis[B_RAGE]);
+            if(ts.mana != oldmana) sendf(-1, 1, "ri3", N_PRIEST, target->clientnum, ts.mana);
         }
-        return damage;
+        return calc.damage;
     }
 
     bool canExplode(const servstate &gs);

@@ -186,7 +186,6 @@ namespace game
     }
 
     VARP(blood, 0, 1, 1);
-
     void damageeffect(int damage, gameent *d, gameent *actor, int atk)
     {
         vec p = d->o;
@@ -198,92 +197,59 @@ namespace game
 
         if(isHudPlayer) d->curdamagecolor = 0xFFAA00;
 
-        damage = ((damage*classes[actorClass].damage)/(classes[targetClass].resistance)); // calc damage based on the class's stats
+        const int calcflags = DCF_APPLY_ACTOR_SCALE |
+                              DCF_APPLY_TARGET_RESIST |
+                              DCF_APPLY_ACTOR_MODIFIERS |
+                              DCF_APPLY_TARGET_MODIFIERS |
+                              DCF_APPLY_ACTOR_BOOSTS |
+                              DCF_APPLY_TARGET_BOOSTS;
+        totalDamage calc = getDamage(damage, atk, actorClass, actor, targetClass, d, actor->o.dist(d->o), calcflags, actor==d);
+        damage = calc.damage;
 
-        switch(actorClass) // recalc damage based on the actor's passive/active skills
+        switch(actorClass)
         {
             case C_AMERICAN:
-                if(atk >= ATK_S_NUKE && atk <= ATK_S_CAMPER)
-                {
-                    damage *= 1.5f;
-                    if(isHudPlayer) d->curdamagecolor = 0xFF0000;
-                }
+                if(isSuperWeapon(atk) && isHudPlayer) d->curdamagecolor = 0xFF0000;
                 break;
 
             case C_NINJA:
-                if(atk == ATK_NINJA && actor==hudplayer()) d->curdamagecolor = 0xFF0000;
+                if(atk == ATK_NINJA && isHudPlayer) d->curdamagecolor = 0xFF0000;
                 break;
 
             case C_WIZARD:
-                if(actor->abilitymillis[ABILITY_2])
-                {
-                    damage *= 1.25f;
-                    if(isHudPlayer) d->curdamagecolor = 0xFF00FF;
-                }
-                break;
-
-            case C_CAMPER:
-                damage *= ((actor->o.dist(d->o)/1800.f)+1.f);
+                if(actor->abilitymillis[ABILITY_2] && isHudPlayer) d->curdamagecolor = 0xFF00FF;
                 break;
 
             case C_VIKING:
-                if(actor->boostmillis[B_RAGE])
-                {
-                    damage *= 1.25f;
-                    if(isHudPlayer) d->curdamagecolor = 0xFF7700;
-                }
+                if(actor->boostmillis[B_RAGE] && isHudPlayer) d->curdamagecolor = 0xFF7700;
                 break;
 
             case C_SHOSHONE:
-                if(actor->abilitymillis[ABILITY_3])
-                {
-                    damage *= 1.3f;
-                    if(isHudPlayer) d->curdamagecolor = 0xFF7700;
-                }
-                if(targetClass == C_AMERICAN)
-                {
-                    damage /= 1.25f;
-                    if(isHudPlayer) d->curdamagecolor = 0xFFFF00;
-                }
+                if(actor->abilitymillis[ABILITY_3] && isHudPlayer) d->curdamagecolor = 0xFF7700;
+                if(targetClass == C_AMERICAN && isHudPlayer) d->curdamagecolor = 0xFFFF00;
                 break;
 
             case C_PHYSICIST:
                 if(d==player1 && actor==player1 && player1->armour && player1->abilitymillis[ABILITY_1]) unlockAchievement(ACH_BRICOLEUR);
         }
 
-        switch(targetClass) // recalc damage based on the victim's passive/active
+        switch(targetClass)
         {
             case C_WIZARD:
-                if(d->abilitymillis[ABILITY_3])
-                {
-                    damage /= 5.0f;
-                    d->curdamagecolor = 0x8855AA;
-                }
+                if(d->abilitymillis[ABILITY_3]) d->curdamagecolor = 0x8855AA;
                 break;
 
             case C_PRIEST:
-                if(isHudPlayer && d->abilitymillis[ABILITY_2] && targetClass == C_PRIEST && d->mana) d->curdamagecolor = 0xAA00AA;
+                if(isHudPlayer && d->abilitymillis[ABILITY_2] && d->mana) d->curdamagecolor = 0xAA00AA;
                 break;
 
             case C_SHOSHONE:
-                if(d->abilitymillis[ABILITY_1]) damage /= 1.3f;
-                if(actorClass == C_AMERICAN)
-                {
-                    damage *= 1.25f;
-                    if(isHudPlayer) d->curdamagecolor = 0xFF7700;
-                }
+                if(actorClass == C_AMERICAN && isHudPlayer) d->curdamagecolor = 0xFF7700;
+                break;
         }
 
-        if(actor->hasRoids()) // recalc damage if actor has roids
-        {
-            damage *= actorClass == C_JUNKIE ? 3 : 2;
-            if(isHudPlayer) d->curdamagecolor = 0xFF0000;
-        }
-        if(d->boostmillis[B_JOINT]) // recalc victim if actor has joint
-        {
-            damage /= targetClass == C_JUNKIE ? 1.875f : 1.25f;
-            if(isHudPlayer) d->curdamagecolor = 0xAAAA55;
-        }
+        if(actor->hasRoids() && isHudPlayer) d->curdamagecolor = 0xFF0000;
+        if(d->boostmillis[B_JOINT] && isHudPlayer) d->curdamagecolor = 0xAAAA55;
 
         if(teamDamage && isHudPlayer) // recalc if ally or not
         {
@@ -298,7 +264,7 @@ namespace game
             gibeffect(damage, vec(0,0,0), d);
         }
 
-        damage /= 10.f; // rescale damage value
+        damage *= 0.1f; // rescale damage value
 
         if(isHudPlayer)
         {
@@ -334,37 +300,31 @@ namespace game
 
         f->lastpain = lastmillis;
         if(at->type==ENT_PLAYER && !isteam(at->team, f->team)) at->totaldamage += damage;
-
         if(m_dmsp || m_classicsp || m_tutorial)
         {
             if(f==player1)
             {
-                if(player1->boostmillis[B_JOINT]) damage/=(player1->character==C_JUNKIE ? 1.875f : 1.25f);
-                switch(player1->character)
-                {
-                    case C_WIZARD: {if(player1->abilitymillis[ABILITY_3]) damage/=5.f; } break;
-                    case C_VIKING: player1->boostmillis[B_RAGE]+=damage; break;
-                    case C_PRIEST: if(player1->abilitymillis[ABILITY_2] && player1->mana) {player1->mana-=damage/10; damage=0; if(player1->mana<0)player1->mana=0;} break;
-                    case C_SHOSHONE: if(player1->abilitymillis[ABILITY_1]) damage/=1.3f;
-                }
-                damage = (damage/classes[player1->character].resistance)*(m_dmsp ? 15.f : 100);
+                const int calcflags = DCF_APPLY_TARGET_RESIST |
+                                      DCF_APPLY_TARGET_MODIFIERS |
+                                      DCF_APPLY_TARGET_BOOSTS |
+                                      DCF_MUTATE_TARGET_STATE;
+                totalDamage calc = getDamage(damage, atk, at->character, at, f->character, f, at->o.dist(f->o), calcflags, at==f);
+                damage = calc.damage*(m_dmsp ? 15 : 100);
                 damageeffect(damage, f, at, atk);
                 damaged(damage, f, at, true, atk);
                 f->hitphyspush(damage, vel, at, atk, f);
             }
             else if(at==player1)
             {
-                if(player1->hasRoids()) damage *= (player1->character==C_JUNKIE ? 3 : 2);
-                switch(player1->character)
+                const int calcflags = DCF_APPLY_ACTOR_MODIFIERS | DCF_APPLY_ACTOR_BOOSTS;
+                totalDamage calc = getDamage(damage, atk, at->character, at, f->character, f, at->o.dist(f->o), calcflags, at==f);
+                int rawdamage = calc.damage;
+                if(player1->character==C_VAMPIRE)
                 {
-                    case C_AMERICAN: {if(atk==ATK_S_NUKE || atk==ATK_S_GAU8 || atk==ATK_S_ROCKETS || atk==ATK_S_CAMPER) damage *= 1.5f; break;}
-                    case C_VIKING: if(player1->boostmillis[B_RAGE]) damage*=1.25f; break;
-                    case C_WIZARD: {if(player1->abilitymillis[ABILITY_2]) damage *= 1.25f; break;}
-                    case C_CAMPER: damage *= ((player1->o.dist(f->o)/1800.f)+1.f); break;
-                    case C_VAMPIRE: {player1->health = min(player1->health + damage/2, player1->maxhealth); player1->vampiremillis+=damage*1.5f;} break;
-                    case C_SHOSHONE: if(player1->abilitymillis[ABILITY_1]) damage*=1.3f;
+                    player1->health = min(player1->health + rawdamage/2, player1->maxhealth);
+                    player1->vampiremillis += rawdamage*1.5f;
                 }
-                damage = (damage*classes[player1->character].damage)/100;
+                damage = (rawdamage*classes[player1->character].damage)/100;
                 hitmonster(damage, (monster *)f, at, vel, atk);
                 avgdmg[dmgsecs[0]] += damage/10.f;
             }
