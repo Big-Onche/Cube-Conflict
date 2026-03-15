@@ -100,12 +100,14 @@ namespace game
         physent *stacked;
         vec stackpos;
         vec spawnpos;
+        gameent *afterburner;
         int spawnyaw, monsterlastdeath;
 
         monster(int _type, int _yaw, int _pitch, int _tag, int _state, int _trigger, int _move) :
             monsterstate(_state), tag(_tag),
             stacked(NULL),
-            stackpos(0, 10, 0)
+            stackpos(0, 10, 0),
+            afterburner(NULL)
         {
             type = ENT_AI;
             respawn();
@@ -142,6 +144,29 @@ namespace game
             friendly = t.friendly;
             monsterlastdeath = 0;
             copystring(name, t.name);
+        }
+
+        bool inWater() const
+        {
+            return (lookupmaterial(feetpos()) & MAT_WATER) != 0;
+        }
+
+        void stopAfterburn()
+        {
+            afterburnmillis = 0;
+            afterburnatk = 0;
+            afterburner = NULL;
+        }
+
+        void startAfterburn(int atk, gameent *burner)
+        {
+            if(atk!=ATK_FLAMETHROWER && atk!=ATK_MOLOTOV) return;
+            if(inWater()) return;
+
+            const int burnmillis = atk==ATK_FLAMETHROWER ? 4000 : 7000;
+            afterburnmillis = min(afterburnmillis + burnmillis, burnmillis);
+            afterburnatk = atk;
+            afterburner = burner ? burner : this;
         }
 
         void normalize_yaw(float angle)
@@ -420,10 +445,11 @@ namespace game
                 targetyaw = spawnyaw;
                 state = CS_ALIVE;
                 health = npcs[mtype].npchealth();
+                stopAfterburn();
             }
         }
 
-        void monsterpain(int damage, gameent *d, int atk)
+        void monsterpain(int damage, gameent *d, int atk, bool fromafterburn = false)
         {
             playSound(npcs[mtype].painsnd, o, 300, 50);
 
@@ -457,10 +483,12 @@ namespace game
                 monsterhurt = true;
                 monsterhurtpos = o;
             }
+            if(!fromafterburn) startAfterburn(atk, d);
             damageeffect(damage, this, d, atk);
             if((health -= damage)<=0)
             {
                 state = CS_DEAD;
+                stopAfterburn();
                 lastpain = lastmillis;
                 playSound(npcs[mtype].diesnd, o, 300, 50);
                 monsterkilled(d);
@@ -564,6 +592,19 @@ namespace game
         return true;
     }
 
+    static bool checkFires(const monster &m)
+    {
+        loopv(entities::ents)
+        {
+            extentity &e = *entities::ents[i];
+            if(e.type!=ET_PARTICLES || (e.attr1!=1 && e.attr1!=2)) continue;
+
+            const float firedamageradius = e.attr2 / 25.f;
+            if(m.o.dist(e.o) < firedamageradius || m.feetpos().dist(e.o) < firedamageradius) return true;
+        }
+        return false;
+    }
+
     void spawnmonster(bool boss = false, int type = 0)     // spawn a random monster according to freq distribution in DMSP
     {
         if(!capMonster()) return;
@@ -661,6 +702,16 @@ namespace game
     void updatemonsters(int curtime)
     {
         if(!isconnected()) return;
+
+        static int afterburntick = 0;
+        static int firetouchtick = 0;
+        afterburntick += curtime;
+        firetouchtick += curtime;
+        const bool applyafterburn = afterburntick > 650;
+        const bool checkfiretouch = firetouchtick >= 500;
+        if(applyafterburn) afterburntick = -100 + rnd(201);
+        if(checkfiretouch) firetouchtick = 0;
+
         if(m_dmsp && spawnremain && lastmillis>nextmonster && player1->state==CS_ALIVE)
         {
             if(spawnremain--==monstertotal)
@@ -709,19 +760,47 @@ namespace game
 
         loopv(monsters)
         {
-            if(monsters[i]->state==CS_ALIVE)
+            monster *m = monsters[i];
+            if(m->state==CS_ALIVE)
             {
-                monsters[i]->monsteraction(curtime);
-                if(!m_dmsp) monsters[i]->checkmonsterstriggers();
-            }
-            else if(monsters[i]->state==CS_DEAD)
-            {
-                if(lastmillis-monsters[i]->lastpain<2000)
+                if(m->afterburnmillis)
                 {
-                    monsters[i]->move = monsters[i]->strafe = 0;
-                    if(npcs[monsters[i]->mtype].speed) moveplayer(monsters[i], 5, true, curtime);
+                    if(m->inWater()) m->stopAfterburn();
+                    else
+                    {
+                        m->afterburnmillis = max(m->afterburnmillis-curtime, 0);
+                        if(applyafterburn && m->afterburnmillis > 0)
+                        {
+                            gameent *burner = m->afterburner ? m->afterburner : m;
+                            const int afterburndamage = m->afterburnatk==ATK_FLAMETHROWER ? 40 : 80;
+                            m->monsterpain(afterburndamage, burner, m->afterburnatk, true);
+
+                            if(burner==player1 && player1->character==C_VAMPIRE)
+                            {
+                                player1->health = min(player1->health + afterburndamage/2, player1->maxhealth);
+                                player1->vampiremillis += afterburndamage*1.5f;
+                            }
+                        }
+                    }
+
                 }
-                if(!m_dmsp) monsters[i]->checkmonstersrespawns();
+
+                if(checkfiretouch && checkFires(*m)) m->startAfterburn(ATK_FLAMETHROWER, m);
+
+                if(m->state==CS_ALIVE)
+                {
+                    m->monsteraction(curtime);
+                    if(!m_dmsp) m->checkmonsterstriggers();
+                }
+            }
+            else if(m->state==CS_DEAD)
+            {
+                if(lastmillis-m->lastpain<2000)
+                {
+                    m->move = m->strafe = 0;
+                    if(npcs[m->mtype].speed) moveplayer(m, 5, true, curtime);
+                }
+                if(!m_dmsp) m->checkmonstersrespawns();
             }
         }
 
@@ -805,6 +884,9 @@ namespace game
                 }
                 else
                 {
+                    if(m.afterburnmillis && rndevent(94))
+                        particle_splash(PART_FIRE_BALL, 2, 350, o, rnd(2) ? 0x992200 : 0x886622, 5, 70, -20, 5);
+
                     //////////////////////////////////// Npc's anims ////////////////////////////////////////////////////////////////////////
                     if(!npcs[m.mtype].friendly)
                     {
