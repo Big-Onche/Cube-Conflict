@@ -309,7 +309,7 @@ namespace game
                                       DCF_APPLY_TARGET_BOOSTS |
                                       DCF_MUTATE_TARGET_STATE;
                 totalDamage calc = getDamage(damage, atk, at->character, at, f->character, f, at->o.dist(f->o), calcflags, at==f);
-                damage = calc.damage*(m_dmsp ? 15 : 100);
+                damage = calc.damage / 5;
                 damageeffect(damage, f, at, atk);
                 damaged(damage, f, at, true, atk);
                 f->hitphyspush(damage, vel, at, atk, f);
