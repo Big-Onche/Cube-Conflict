@@ -35,7 +35,7 @@ namespace game
 
     ICOMMAND(setNpcId, "i", (int *i),
         if (*i < 0) { conoutf(CON_ERROR, "min value for npc id is 0"); return; }
-        else if (*i > MAXNPCS) { conoutf(CON_ERROR, "max value for npc id is %d", MAXNPCS); return; }
+        else if (*i >= MAXNPCS) { conoutf(CON_ERROR, "max value for npc id is %d", MAXNPCS-1); return; }
         else id = *i;
     );
 
@@ -190,7 +190,10 @@ namespace game
         void monsteraction(int curtime)           // main AI thinking routine, called every frame for every monster
         {
             if(player1->state==CS_SPECTATOR || player1->state==CS_EDITING) return;
-            if(enemy->state==CS_DEAD) { enemy = player1; anger = 0; }
+            if(!enemy || enemy->state==CS_DEAD) { enemy = player1; anger = 0; }
+
+            const npc &cfg = npcs[mtype];
+            const int trigdist = cfg.npctrigdist();
 
             float dist = enemy->o.dist(o);
 
@@ -206,7 +209,7 @@ namespace game
                 if(targetyaw>yaw) yaw = targetyaw;
             }
 
-            if(dist < npcs[mtype].npctrigdist()*(friendly ? 4 : 2))
+            if(dist < trigdist*(friendly ? 4 : 2))
             {
                 targetpitch < -45 ? targetpitch = -45 : targetpitch > 45 ? targetpitch = 45 : targetpitch;
                 normalize_pitch(targetpitch);
@@ -226,9 +229,16 @@ namespace game
             {
                 case M_SLEEP: targetpitch = 0; break;
                 default:
-                    int trigdist = dist*(player1->crouched() ? 2 : 1);
-                    if(trigdist < npcs[mtype].npctrigdist()) targetpitch = asin((enemy->o.z - o.z) / dist) / RAD; // if player1 is close to npc, npc look at the player
+                {
+                    const float lookdist = dist*(player1->crouched() ? 2.f : 1.f);
+                    if(lookdist < trigdist && dist > 1e-3f)
+                    {
+                        const float zoff = (enemy->o.z - o.z)/dist;
+                        targetpitch = asinf(clamp(zoff, -1.0f, 1.0f))/RAD; // if player1 is close to npc, npc look at the player
+                    }
                     else targetpitch = 0;
+                    break;
+                }
             }
 
             if(mtype==M_UFO && m_dmsp) if(timeinair<2000 && rnd(2)) jumping = true;
@@ -236,7 +246,9 @@ namespace game
             if(blocked)                                                            // special case: if we run into scenery
             {
                 blocked = false;
-                if(!rnd(2500/npcs[mtype].npcspeed())) jumping = true;               // try to jump over obstackle (rare)
+                const int jumpspeed = max(cfg.npcspeed(), 1);
+                const int jumpchance = max(1, 2500/jumpspeed);
+                if(!rnd(jumpchance)) jumping = true;                                 // try to jump over obstacle (rare)
                 else if(trigger<lastmillis && (((monsterstate!=M_AGGRO) && (monsterstate!=M_RETREAT)) || !rnd(5)))    // search for a way around (common)
                 {
                     targetyaw += 90+rnd(180);                                      // patented "random walk" AI pathfinding (tm) ;)
@@ -258,7 +270,7 @@ namespace game
                 case M_NEUTRAL: if(trigger+10000<lastmillis) transition(M_FRIENDLY, 1, 100, 200);
 
                 case M_FRIENDLY:
-                    if(dist < npcs[mtype].npctrigdist())
+                    if(dist < trigdist)
                     {
                         targetyaw = enemyyaw;
                         if(pissoffnpc)
@@ -283,17 +295,19 @@ namespace game
 
                     normalize_yaw(enemyyaw);
                     float angle = (float)fabs(enemyyaw-yaw);
-                    if(dist < npcs[mtype].npctrigdist()/(friendly ? 2 : 4)                   // the better the angle to the player, the further the monster can see/hear
-                    ||(dist < npcs[mtype].npctrigdist()/(friendly ? 1.5f : 3) && angle<135)
-                    ||(dist < npcs[mtype].npctrigdist()/(friendly ? 1 : 2) && angle<90)
-                    ||(dist < npcs[mtype].npctrigdist() && angle<45)
-                    ||(monsterhurt && o.dist(player1->o) < npcs[mtype].npctrigdist()*(friendly ? 4 : 2)))
+                    const float hurttrig = trigdist*(friendly ? 4.f : 2.f);
+                    const float hurttrigsq = hurttrig*hurttrig;
+                    if(dist < trigdist/(friendly ? 2.f : 4.f)                       // the better the angle to the player, the further the monster can see/hear
+                    ||(dist < trigdist/(friendly ? 1.5f : 3.f) && angle<135)
+                    ||(dist < trigdist/(friendly ? 1.f : 2.f) && angle<90)
+                    ||(dist < trigdist && angle<45)
+                    ||(monsterhurt && o.squaredist(player1->o) < hurttrigsq))
                     {
                         vec target;
                         if(raycubelos(o, enemy->o, target))
                         {
                             transition(friendly ? M_FRIENDLY : M_SEARCH, 1, 500, 200);
-                            playSound(npcs[mtype].hellosnd, o, 200, 50);
+                            playSound(cfg.hellosnd, o, 200, 50);
                         }
                     }
                     break;
@@ -322,7 +336,7 @@ namespace game
                 case M_AGGRO:                        // monster has visual contact, heads straight for player and may want to shoot at any time
                     targetyaw = enemyyaw;
 
-                    if(dist > npcs[mtype].npctrigdist()*(friendly ? 15 : 2) && !m_dmsp) {transition(friendly ? M_NEUTRAL : M_RETREAT, 0, 600, 0); break;}
+                    if(dist > trigdist*(friendly ? 15 : 2) && !m_dmsp) {transition(friendly ? M_NEUTRAL : M_RETREAT, 0, 600, 0); break;}
                     else if(player1->character==C_SPY && player1->abilitymillis[ABILITY_2]) {transition(M_SEARCH, 0, 600, 0); break;}
 
                     if(trigger<lastmillis)
@@ -336,16 +350,21 @@ namespace game
                         else
                         {
                             bool melee = false, longrange = false;
-                            switch(npcs[mtype].gun)
+                            switch(cfg.gun)
                             {
                                 case GUN_M_BUSTER: case GUN_M_FLAIL: case GUN_M_HAMMER: case GUN_M_MASTER: case GUN_NINJA: melee = true; break;
                                 case GUN_SV98: case GUN_SKS: case GUN_CROSSBOW: case GUN_S_CAMPER: longrange = true; break;
                             }
                             // the closer the monster is the more likely he wants to shoot,
-                            if((!melee || dist<50) && !rnd(longrange ? (int)dist/12+1 : min((int)dist/12+1,6)) && enemy->state==CS_ALIVE)      // get ready to fire
+                            const int shootroll = longrange ? (int)dist/12+1 : min((int)dist/12+1, 6);
+                            if((!melee || dist<50) && !rnd(max(shootroll, 1)) && enemy->state==CS_ALIVE)      // get ready to fire
                             {
                                 attacktarget = target;
-                                if(player1->character==C_SPY && player1->abilitymillis[ABILITY_1]) attacktarget.add(vec(positions[player1->seed][0], positions[player1->seed][1], 0));
+                                if(player1->character==C_SPY && player1->abilitymillis[ABILITY_1])
+                                {
+                                    const int seed = clamp(player1->seed, 0, 3);
+                                    attacktarget.add(vec(positions[seed][0], positions[seed][1], 0));
+                                }
                                 transition(M_AIMING, friendly ? 0 : 1, 1, 10);
                             }
                             else                                                        // track player some more
@@ -363,8 +382,7 @@ namespace game
                 loopv(teleports) // equivalent of player entity touch, but only teleports are used
                 {
                     entity &e = *entities::ents[teleports[i]];
-                    float dist = e.o.dist(pos);
-                    if(dist<16) entities::teleport(teleports[i], this);
+                    if(e.o.squaredist(pos) < 16.0f*16.0f) entities::teleport(teleports[i], this);
                 }
 
                 if(physsteps > 0) stacked = NULL;
@@ -373,7 +391,7 @@ namespace game
                     abilitymillis[ABILITY_3] = true;
                     character = C_PHYSICIST;
                 }
-                if(npcs[mtype].speed) moveplayer(this, 10, true, curtime);        // use physics to move monster
+                if(cfg.speed) moveplayer(this, 10, true, curtime);        // use physics to move monster
             }
         }
 
@@ -381,17 +399,16 @@ namespace game
 
         void checkmonsterstriggers()
         {
-            if(npcs[mtype].friendly && player1->o.dist(this->o) < 40 && (this->monsterstate==M_FRIENDLY || this->monsterstate==M_NEUTRAL) && forcecampos==-1)
+            const bool shouldactivate =
+                npcs[mtype].friendly &&
+                player1->o.squaredist(this->o) < 40.0f*40.0f &&
+                (this->monsterstate==M_FRIENDLY || this->monsterstate==M_NEUTRAL) &&
+                forcecampos==-1;
+            if(shouldactivate != activetrigger)
             {
-                defformatstring(id, "npc_interaction_%d %d", tag, true);
+                defformatstring(id, "npc_interaction_%d %d", tag, shouldactivate);
                 execute(id);
-                activetrigger = true;
-            }
-            else if(activetrigger)
-            {
-                defformatstring(id, "npc_interaction_%d %d", tag, false);
-                execute(id);
-                activetrigger = false;
+                activetrigger = shouldactivate;
             }
         }
 
@@ -458,8 +475,8 @@ namespace game
                     switch(mtype)
                     {
                         case M_KEVIN: case M_DYLAN: loopi(2+rnd(3)) bouncers::spawn(o, vec(0, 0, 0), this, BNC_PIXEL); break;
-                        case M_UFO: loopi(25)  bouncers::spawn(o, vec(0, 0, 0), this, BNC_GRENADE, 100, 5000+rnd(2000), true); break;
-                        case M_ARMOR: loopi(10+rnd(5))  bouncers::spawn(o, vec(0, 0, 0), this, BNC_SCRAP, 300); break;
+                        case M_UFO: loopi(25) bouncers::spawn(o, vec(0, 0, 0), this, BNC_GRENADE, 100, 5000+rnd(2000), true); break;
+                        case M_ARMOR: loopi(10+rnd(5)) bouncers::spawn(o, vec(0, 0, 0), this, BNC_SCRAP, 300); break;
                     }
                 }
             }
@@ -507,13 +524,30 @@ namespace game
 
     void spawnmonster(bool boss = false, int type = 0)     // spawn a random monster according to freq distribution in DMSP
     {
-        if(boss) monsters.add(new monster(type, rnd(360), 0, 0, M_SEARCH, 1000, 1));
+        if(boss)
+        {
+            monsters.add(new monster(type, rnd(360), 0, 0, M_SEARCH, 1000, 1));
+            return;
+        }
+
+        int chosentype = 0;
+        const int totalfreq = totmfreq();
+        if(totalfreq > 0)
+        {
+            int n = rnd(totalfreq);
+            chosentype = NUMMONSTERS-1;
+            loopi(NUMMONSTERS) if((n -= npcs[i].spawnfreq)<0) { chosentype = i; break; }
+        }
         else
         {
-            int n = rnd(totmfreq()), type;
-            for(int i = 0; ; i++) if((n -= npcs[i].spawnfreq)<0) { type = i; break; }
-            monsters.add(new monster(type, rnd(360), 0, 0, M_SEARCH, 1000, 1));
+            static bool warnednofreq = false;
+            if(!warnednofreq)
+            {
+                conoutf(CON_WARN, "warning: total npc spawn frequency is 0, defaulting to npc id 0");
+                warnednofreq = true;
+            }
         }
+        monsters.add(new monster(chosentype, rnd(360), 0, 0, M_SEARCH, 1000, 1));
     }
 
     void clearmonsters()     // called after map start or when toggling edit mode to reset/spawn all monsters to initial state
