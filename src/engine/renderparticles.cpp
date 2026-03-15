@@ -27,6 +27,8 @@ bool canemitparticles()
 VARP(showparticles, 0, 1, 1);
 VAR(cullparticles, 0, 1, 1);
 VAR(replayparticles, 0, 1, 1);
+VARP(particleillumination, 0, 1, 1);
+VAR(particleilluminationscale, 0, 40, 100);
 VARN(seedparticles, seedmillis, 0, 3000, 10000);
 VAR(dbgpcull, 0, 0, 1);
 VAR(dbgpseed, 0, 0, 1);
@@ -114,7 +116,7 @@ enum
     PT_HFLIP        = 1<<14,
     PT_VFLIP        = 1<<15,
     PT_ROT          = 1<<16,
-    PT_CULL         = 1<<17,
+    PT_ILLUMINATE   = 1<<17, // blend base particle color with local world lighting
     PT_FEW          = 1<<18,
     PT_ICON         = 1<<19,
     PT_NOTEX        = 1<<20,
@@ -133,6 +135,112 @@ enum
 };
 
 const char *partnames[] = { "part", "tape", "trail", "text", "textup", "meter", "metervs", "fireball", "lightning", "flare" };
+
+static inline uchar clampcol(float c)
+{
+    return uchar(clamp(c, 0.0f, 255.0f));
+}
+
+extern int shutdaytimelights;
+
+static inline bool particlelightblinking(int blinkspeed)
+{
+    return blinkspeed > 0 && (totalmillis % (blinkspeed + 1) < blinkspeed/2) && !game::ispaused();
+}
+
+struct particledynlightsample
+{
+    vec o, color;
+    float radius;
+};
+
+struct particlelightsampler
+{
+    int frame;
+    bvec ambientcolor;
+    vector<particledynlightsample> dynlights;
+    vector<particledynlightsample> maplights;
+
+    particlelightsampler() : frame(-1), ambientcolor(0, 0, 0) {}
+
+    void update()
+    {
+        if(frame == lastmillis) return;
+        frame = lastmillis;
+
+        vec ambientsample = vec(ambient.r, ambient.g, ambient.b).mul(ambientscale);
+        ambientcolor = bvec(clampcol(ambientsample.x), clampcol(ambientsample.y), clampcol(ambientsample.z));
+
+        maplights.setsize(0);
+        const vector<extentity *> &ents = entities::getents();
+        loopv(ents)
+        {
+            const extentity *e = ents[i];
+            if(!e || e->type != ET_LIGHT || e->attr1 <= 0) continue;
+            if((e->attr6 && shutdaytimelights) || particlelightblinking(e->attr7)) continue;
+            if(isfoggedsphere(e->attr1, e->o) || pvsoccludedsphere(e->o, e->attr1)) continue;
+
+            particledynlightsample &sample = maplights.add();
+            sample.o = e->o;
+            sample.color = vec(e->attr2, e->attr3, e->attr4).max(0);
+            sample.radius = e->attr1;
+        }
+
+        dynlights.setsize(0);
+        updatedynlights();
+        int numdynlights = finddynlights();
+        loopi(numdynlights)
+        {
+            vec o, color, dir;
+            float radius;
+            int spot, flags;
+            if(!getdynlight(i, o, radius, color, dir, spot, flags)) continue;
+            particledynlightsample &sample = dynlights.add();
+            sample.o = o;
+            sample.color = color;
+            sample.radius = radius;
+        }
+    }
+
+    bvec sample(const vec &o)
+    {
+        update();
+
+        vec light(ambientcolor.r, ambientcolor.g, ambientcolor.b);
+        loopv(dynlights)
+        {
+            particledynlightsample &sample = dynlights[i];
+            if(sample.radius <= 0) continue;
+            float dist = o.dist(sample.o);
+            if(dist >= sample.radius) continue;
+            float atten = 1.0f - dist/sample.radius;
+            light.add(vec(sample.color).mul(255.0f*atten));
+        }
+        loopv(maplights)
+        {
+            particledynlightsample &sample = maplights[i];
+            if(sample.radius <= 0) continue;
+            float dist = o.dist(sample.o);
+            if(dist >= sample.radius) continue;
+            float atten = 1.0f - dist/sample.radius;
+            light.add(vec(sample.color).mul(atten));
+        }
+        return bvec(clampcol(light.x), clampcol(light.y), clampcol(light.z));
+    }
+};
+
+static particlelightsampler particlelightstate;
+
+static inline bvec particleilluminatedcolor(const vec &origin, const bvec &basecolor)
+{
+    bvec lightcolor = particlelightstate.sample(origin);
+    int baseweight = 100 - particleilluminationscale;
+    return bvec(
+        (basecolor.r*baseweight + lightcolor.r*particleilluminationscale + 50)/100,
+        (basecolor.g*baseweight + lightcolor.g*particleilluminationscale + 50)/100,
+        (basecolor.b*baseweight + lightcolor.b*particleilluminationscale + 50)/100
+    );
+}
 
 struct particle
 {
@@ -295,6 +403,7 @@ struct partrenderer
         if(type&PT_TRACK) concatstring(info, "t,");
         if(type&PT_FLIP) concatstring(info, "f,");
         if(type&PT_COLLIDE) concatstring(info, "c,");
+        if(type&PT_ILLUMINATE) concatstring(info, "i,");
         int len = strlen(info);
         info[len-1] = info[len-1] == ',' ? ')' : '\0';
         if(texname)
@@ -771,6 +880,9 @@ struct varenderer : partrenderer
 
         if(!(type&PT_SHADER)) modifyblend<T>(o, blend);
 
+        bool illuminate = (type&PT_ILLUMINATE) && particleillumination != 0;
+        bvec color = illuminate ? particleilluminatedcolor(o, p->color) : p->color;
+
         if(regen)
         {
             p->flags &= ~0x80;
@@ -805,11 +917,15 @@ struct varenderer : partrenderer
                 bvec4 col(r, g, b, a); \
                 loopi(4) vs[i].color = col; \
             } while(0)
-            #define SETMODCOLOR SETCOLOR((p->color.r*blend)>>8, (p->color.g*blend)>>8, (p->color.b*blend)>>8, 255)
+            #define SETMODCOLOR SETCOLOR((color.r*blend)>>8, (color.g*blend)>>8, (color.b*blend)>>8, 255)
             if(type&PT_MOD) SETMODCOLOR;
-            else SETCOLOR(p->color.r, p->color.g, p->color.b, blend);
+            else SETCOLOR(color.r, color.g, color.b, blend);
         }
-        else if(type&PT_MOD) SETMODCOLOR;
+        else if((type&PT_MOD) || illuminate)
+        {
+            if(type&PT_MOD) SETMODCOLOR;
+            else SETCOLOR(color.r, color.g, color.b, blend);
+        }
         else loopi(4) vs[i].color.a = blend;
 
         if(type&PT_ROT) genrotpos<T>(o, d, p->size, ts, p->gravity, vs, (p->flags>>2)&0x1F);
@@ -937,8 +1053,8 @@ static partrenderer *parts[] =
     new quadrenderer("media/particles/trails/spock_front.png", PT_PART|PT_FEW|PT_HFLIP|PT_BRIGHT),                           // PART_SPOCK_FRONT
     new quadrenderer("media/particles/trails/plasma_front.png", PT_PART|PT_FLIP|PT_FEW|PT_OVERBRIGHT),                       // PART_PLASMA_FRONT
     // flames and smokes
-    new quadrenderer("media/particles/fire/smoke.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_LERP|PT_RND4),                           // PART_SMOKE
-    new quadrenderer("media/particles/fire/smoke.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_LERP|PT_RND4|PT_SOFT),                   // PART_SMOKE_S
+    new quadrenderer("media/particles/fire/smoke.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_LERP|PT_RND4|PT_ILLUMINATE),             // PART_SMOKE
+    new quadrenderer("media/particles/fire/smoke.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_LERP|PT_RND4|PT_SOFT|PT_ILLUMINATE),     // PART_SMOKE_S
     new quadrenderer("media/particles/fire/flames.png", PT_PART|PT_HFLIP|PT_RND4|PT_OVERBRIGHT),                             // PART_FLAME
     new quadrenderer("media/particles/fire/fire_ball.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_RND4),                               // PART_FIRE_BALL
     new quadrenderer("media/particles/fire/firespark.png", PT_PART|PT_FLIP|PT_RND4|PT_OVERBRIGHT|PT_COLLIDE, STAIN_BURN),    // PART_FIRESPARK
@@ -946,7 +1062,7 @@ static partrenderer *parts[] =
     new quadrenderer("media/particles/water/water.png", PT_PART|PT_FLIP|PT_RND4|PT_BRIGHT),                                  // PART_WATER
     new quadrenderer("media/particles/water/waterdrops.png", PT_PART|PT_FLIP|PT_RND4|PT_COLLIDE, STAIN_RAIN),                // PART_DROP
     new quadrenderer("media/particles/water/bubbles.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_RND4),                                // PART_BUBBLE
-    new quadrenderer("<grey>media/particles/water/steam.png", PT_PART|PT_FLIP|PT_RND4|PT_SOFT),                              // PART_STEAM
+    new quadrenderer("<grey>media/particles/water/steam.png", PT_PART|PT_FLIP|PT_RND4|PT_SOFT|PT_ILLUMINATE),                // PART_STEAM
     // weather
     new quadrenderer("media/particles/weather/snow.png", PT_PART|PT_FLIP|PT_RND4|PT_COLLIDE, STAIN_SNOW),                    // PART_SNOW
     new trailrenderer("media/particles/weather/rain.png", PT_PART|PT_COLLIDE, STAIN_RAIN),                                   // PART_RAIN
