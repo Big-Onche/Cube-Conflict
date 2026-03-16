@@ -253,14 +253,14 @@ namespace bouncers
                 bool shouldCheckWater = ((bouncerWaterCheckFrame + i) & 3) == 0 || bnc.o.fastsquaredist(old) > WATERCHECKMOVEDSQ;
                 if(shouldCheckWater)
                 {
-                    bool inWater = ((lookupmaterial(bnc.o) & MATF_VOLUME) == MAT_WATER);
-                    if(!bnc.inwater && inWater) // the bouncer enter in water
+                    bool isInWater = inWater(bnc.o);
+                    if(!bnc.inwater && isInWater) // the bouncer enter in water
                     {
                         bnc.inwater = true;
                         particle_splash(PART_WATER, (20 * bnc.radius), 150, bnc.o, 0x28282A, (5.f * bnc.radius), (200.f * bnc.radius), -300, (10.f * bnc.radius), hasShrooms());
                         if(bnc.radius > 0.5f) playSound(bnc.radius > 1.f ? S_SPLASH : S_IMPACTWATER, vec(bnc.o).addz(5), 250, 100, SND_LOWPRIORITY);
                     }
-                    else if(bnc.inwater && !inWater) bnc.inwater = false; // the bouncer bounced outside the water
+                    else if(bnc.inwater && !isInWater) bnc.inwater = false; // the bouncer bounced outside the water
                 }
             }
 

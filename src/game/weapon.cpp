@@ -310,6 +310,7 @@ namespace game
                                       DCF_MUTATE_TARGET_STATE;
                 totalDamage calc = getDamage(damage, atk, at->character, at, f->character, f, at->o.dist(f->o), calcflags, at==f);
                 damage = calc.damage / 5;
+                doLocalAfterburn(f, at, atk);
                 damageeffect(damage, f, at, atk);
                 damaged(damage, f, at, true, atk);
                 f->hitphyspush(damage, vel, at, atk, f);
@@ -402,7 +403,6 @@ namespace game
     void explode(bool local, gameent *owner, const vec &v, const vec &vel, dynent *safe, int damage, int atk)
     {
         vec safeLoc = vec(v).sub(vec(vel).mul(15)); // avoid spawn in wall
-        bool inWater = ((lookupmaterial(v) & MATF_VOLUME) == MAT_WATER);
         bool isFar = camera1->o.dist(v) >= 300;
 
         switch(atk)
@@ -425,7 +425,7 @@ namespace game
                 }
                 renderExplosion(owner, safeLoc, vel, atk);
                 playSound(S_EXPL_MISSILE, safeLoc, 400, 150);
-                if(inWater) playSound(S_EXPL_INWATER, vec(v).addz(15), 300, 100);
+                if(inWater(v)) playSound(S_EXPL_INWATER, vec(v).addz(15), 300, 100);
                 if(isFar) playSound(S_EXPL_FAR, safeLoc, 1500, 400, SND_LOWPRIORITY);
                 startShake(v, 1.25f * attacks[atk].exprad, atk);
                 break;
@@ -439,7 +439,7 @@ namespace game
                 }
                 renderExplosion(owner, owner->o, vel, atk);
                 playSound(atk==ATK_KAMIKAZE ? S_EXPL_KAMIKAZE : S_EXPL_PARMOR, owner->o, 400, 150);
-                if(inWater) playSound(S_EXPL_INWATER, vec(owner->o).addz(15), 300, 100);
+                if(inWater(v)) playSound(S_EXPL_INWATER, vec(owner->o).addz(15), 300, 100);
                 if(isFar) playSound(S_BIGEXPL_FAR, owner->o, 2000, 400);
                 startShake(v, 1.5f * attacks[atk].exprad, atk);
                 break;
@@ -453,7 +453,7 @@ namespace game
             case ATK_FIREWORKS:
                 renderExplosion(owner, safeLoc, vel, atk);
                 playSound(S_EXPL_FIREWORKS, safeLoc, 400, 200);
-                if(inWater) playSound(S_EXPL_INWATER, vec(v).addz(15), 300, 100);
+                if(inWater(v)) playSound(S_EXPL_INWATER, vec(v).addz(15), 300, 100);
                 if(isFar) playSound(S_FIREWORKSEXPL_FAR, safeLoc, 2000, 750);
                 startShake(v, attacks[atk].exprad, atk, 0.75f);
                 break;
@@ -462,7 +462,7 @@ namespace game
                 loopi(5+rnd(3)) bouncers::spawn(v, vec(0, 0, 0), owner, BNC_ROCK, 200);
                 renderExplosion(owner, v, vel, atk);
                 playSound(S_EXPL_GRENADE, v, 400, 150);
-                if(inWater) playSound(S_EXPL_INWATER, vec(v).addz(15), 300, 100);
+                if(inWater(v)) playSound(S_EXPL_INWATER, vec(v).addz(15), 300, 100);
                 if(isFar) playSound(S_EXPL_FAR, v, 2000, 400, SND_LOWPRIORITY);
                 startShake(v, 1.5f * attacks[atk].exprad, atk);
                 break;
@@ -474,7 +474,7 @@ namespace game
                 loopi(6+rnd(2)) bouncers::spawn(debrisLoc, vec(0, 0, 0), owner, BNC_GLASS, 300, 350+rnd(200));
                 renderExplosion(owner, v, vel, atk);
                 playSound(S_EXPL_MOLOTOV, v, 300, 150);
-                if(inWater) playSound(S_EXPL_INWATER, vec(v).addz(15), 300, 100);
+                if(inWater(v)) playSound(S_EXPL_INWATER, vec(v).addz(15), 300, 100);
                 if(isFar) playSound(S_MOLOTOVEXPL_FAR, v, 1500, 750, SND_LOWPRIORITY);
                 startShake(v, 1.25f * attacks[atk].exprad, atk, 0.5f);
                 break;
@@ -486,14 +486,14 @@ namespace game
             case ATK_GLOCK:
             case ATK_CROSSBOW:
                 renderBulletImpact(owner, v, vel, safe, atk);
-                if(!inWater) playSound(atk==ATK_CROSSBOW ? S_IMPACTARROW : S_LITTLERICOCHET, v, 175, 75, SND_LOWPRIORITY);
+                if(!inWater(v)) playSound(atk==ATK_CROSSBOW ? S_IMPACTARROW : S_LITTLERICOCHET, v, 175, 75, SND_LOWPRIORITY);
                 break;
 
             case ATK_SV98:
             case ATK_SKS:
             case ATK_S_GAU8:
                 renderBulletImpact(owner, v, vel, safe, atk);
-                if(!inWater)
+                if(!inWater(v))
                 {
                     playSound(S_IMPACTLOURDLOIN, v, 750, 400, SND_LOWPRIORITY);
                     playSound(S_BIGRICOCHET, v, 250, 75, SND_LOWPRIORITY);

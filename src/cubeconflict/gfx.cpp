@@ -30,14 +30,13 @@ namespace game
     void renderProjectileExplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk) // particles and light effects on impact for slow projectiles
     {
         vec lightOrigin = vec(v).sub(vec(vel).mul(10));
-        bool inWater = ((lookupmaterial(lightOrigin) & MATF_VOLUME) == MAT_WATER);
         bool hasRoids = owner->hasRoids();
 
         switch(atk)
         {
             case ATK_PLASMA:
             {
-                if(!inWater) particle_splash(PART_FIRESPARK, 15, 150, v, hasRoids ? 0xFF0000 : 0xFF6600, 1.f, 150, 500, 2, hasShrooms());
+                if(!inWater(lightOrigin)) particle_splash(PART_FIRESPARK, 15, 150, v, hasRoids ? 0xFF0000 : 0xFF6600, 1.f, 150, 500, 2, hasShrooms());
                 particle_fireball(v, 9.f, PART_PLASMABURST, 300, hasRoids ? 0xFF0000 : 0xCC9900, 3, hasShrooms());
                 particle_splash(PART_HAZE_BIG, 4, 300, v, 100, 7.f, 50, 100, 40);
                 adddynlight(safe ? v : lightOrigin, 2*attacks[atk].exprad, vec(1.5f, 0.75f, 0.0f), 150, 50, 0, attacks[atk].exprad/2, vec(0.5f, 1.5f, 2.0f));
@@ -45,7 +44,7 @@ namespace game
             }
             case ATK_GRAP1:
             {
-                if(!inWater) particle_splash(PART_SPARK, 20, 100, v, hasRoids ? 0xFF0000 : 0xAA4466, 0.5f, 400, 400, 0, hasShrooms());
+                if(!inWater(lightOrigin)) particle_splash(PART_SPARK, 20, 100, v, hasRoids ? 0xFF0000 : 0xAA4466, 0.5f, 400, 400, 0, hasShrooms());
                 loopi(2) particle_fireball(v, 7.f, PART_EXPLOSION, 200, hasRoids ? 0xFF0000 : 0x550055, 1.f, hasShrooms());
                 particle_splash(PART_HAZE_BIG, 4, 300, v, 100, 7.f, 50, 100, 40);
                 adddynlight(safe ? v : lightOrigin, 2*attacks[atk].exprad, vec(1.5f, 0.0f, 1.5f), 200, 100, L_NODYNSHADOW, attacks[atk].exprad/2, vec(0.5f, 0.0f, 0.5f));
@@ -53,7 +52,7 @@ namespace game
             }
             case ATK_SPOCKGUN:
             {
-                if(!inWater) particle_splash(PART_SPARK, 15, 100, v, hasRoids ? 0xFF0000 : 0x00FF66, 0.5f, 250, 250, 0, hasShrooms());
+                if(!inWater(lightOrigin)) particle_splash(PART_SPARK, 15, 100, v, hasRoids ? 0xFF0000 : 0x00FF66, 0.5f, 250, 250, 0, hasShrooms());
                 particle_splash(PART_HAZE_BIG, 4, 300, v, 100, 7.f, 50, 100, 40);
                 adddynlight(safe ? v : lightOrigin, 1.25f*attacks[atk].exprad, hasRoids ? vec(1.5f, 0.f, 0.f) : vec(0.f, 1.5f, 0.f), 200, 50, 0, attacks[atk].exprad/2, vec(1.f, 1.f, 1.f));
                 return;
@@ -64,7 +63,7 @@ namespace game
     void renderProjectilesTrails(gameent *owner, vec &pos, vec dv, vec &from, vec &offset, int atk, bool exploded) //particles and light effects on impact for slow projectiles
     {
         bool emitPart = canemitparticles();
-        bool inWater = ((lookupmaterial(pos) & MATF_VOLUME) == MAT_WATER);
+        bool isInWater = inWater(pos);
         bool firstPerson = (owner==game::hudplayer());
         bool hasRoids = owner->hasRoids();
 
@@ -78,14 +77,14 @@ namespace game
             case ATK_PLASMA:
                 particle_splash(PART_PLASMA_FRONT, 1, 1, pos, hasRoids ? 0xFF4444 : 0xFF6600, 2.4f, 150, 20, 0, hasShrooms());
                 particle_flare(tail, head, 1, PART_F_PLASMA, hasRoids ? 0xFF4444 : 0xFF6600, 2.f, owner, hasShrooms());
-                if(inWater && emitPart) particle_splash(PART_BUBBLE, 1, 150, pos, 0x18181A, 2.0f+rnd(2), 20, -30);
+                if(isInWater && emitPart) particle_splash(PART_BUBBLE, 1, 150, pos, 0x18181A, 2.0f+rnd(2), 20, -30);
                 adddynlight(pos, 30, vec(1.00f, 0.75f, 0.0f));
                 break;
 
             case ATK_GRAP1:
                 particle_splash(PART_PLASMA_FRONT, 1, 1, pos, hasRoids ? 0xFF2222 : 0xFF33BB, 3.0f, 150, 20, 0, hasShrooms());
                 particle_flare(tail, head, 1, PART_F_PLASMA, hasRoids ? 0xFF2222 : 0xEE22AA, 3.0f, owner, hasShrooms());
-                if(emitPart) particle_splash(inWater ? PART_BUBBLE : PART_SMOKE, 1, inWater ? 150 : 300, pos, inWater ? 0x18181A : 0xAAAAAA, 4.0f, 25, 250, 0, hasShrooms());
+                if(emitPart) particle_splash(isInWater ? PART_BUBBLE : PART_SMOKE, 1, isInWater ? 150 : 300, pos, isInWater ? 0x18181A : 0xAAAAAA, 4.0f, 25, 250, 0, hasShrooms());
                 adddynlight(pos, 50, vec(0.3f, 0.00f, 0.2f));
                 break;
 
@@ -98,7 +97,7 @@ namespace game
             case ATK_SV98:
             case ATK_SKS:
             case ATK_S_GAU8:
-                if(inWater && emitPart) particle_splash(PART_BUBBLE, 1, 150, pos, 0x18181A, 2.0f+rnd(2), 20, -30);
+                if(isInWater && emitPart) particle_splash(PART_BUBBLE, 1, 150, pos, 0x18181A, 2.0f+rnd(2), 20, -30);
                 particle_flare(tail, head, 1, PART_F_BULLET, hasRoids ? 0xFF4444 : 0xFFBB88, atk==ATK_S_GAU8 ? 0.75f : 0.65f, owner, hasShrooms());
                 particle_splash(PART_PLASMA_FRONT, 1, 1, pos, hasRoids ? 0xFF4444 : 0xFFBB88, firstPerson ? 0.65f : atk==ATK_S_GAU8 ? 0.45f : 0.3f, 150, 20, 0, hasShrooms());
                 if(emitPart) particle_flare(tail, head, atk==ATK_SV98 ? 3000 : 2000, PART_F_SMOKE, 0x333333, atk==ATK_SV98 ? 1.4f : 1.f, owner, hasShrooms(), 3);
@@ -110,7 +109,7 @@ namespace game
             case ATK_GLOCK:
             case ATK_FAMAS:
             {
-                if(inWater && emitPart) particle_splash(PART_BUBBLE, 1, 150, pos, 0x18181A, 1.0f+rnd(2), 20, -30);
+                if(isInWater && emitPart) particle_splash(PART_BUBBLE, 1, 150, pos, 0x18181A, 1.0f+rnd(2), 20, -30);
                 bool bigBullet = (atk == ATK_MINIGUN || atk == ATK_AK47);
                 particle_flare(tail, head, 1, PART_F_BULLET, hasRoids ? 0xFF4444 : 0xFFBB88, bigBullet ? 0.55f : 0.45f, owner, hasShrooms());
                 particle_splash(PART_PLASMA_FRONT, 1, 1, pos, hasRoids ? 0xFF4444 : 0xFFBB88, firstPerson ? 0.4f : bigBullet ? 0.3f : 0.24f, 150, 20, 0, hasShrooms());
@@ -120,7 +119,7 @@ namespace game
 
             case ATK_MOSSBERG:
             case ATK_HYDRA:
-                if(inWater && emitPart) particle_splash(PART_BUBBLE, 1, 150, pos, 0x18181A, 1.0f+rnd(2), 20, -30);
+                if(isInWater && emitPart) particle_splash(PART_BUBBLE, 1, 150, pos, 0x18181A, 1.0f+rnd(2), 20, -30);
                 particle_flare(tail, head, 1, PART_F_BULLET, hasRoids ? 0xFF4444 : 0xFF7700, atk==ATK_MOSSBERG ? 0.45f : 0.35f, owner, hasShrooms());
                 particle_splash(PART_PLASMA_FRONT, 1, 1, pos, hasRoids ? 0xFF4444 : 0xFF7700, firstPerson ? 0.4f : atk==ATK_MOSSBERG ? 0.3f : 0.24f, 150, 20, 0, hasShrooms());
                 if(emitPart) particle_flare(tail, head, atk==ATK_MOSSBERG ? 2000 : 1000, PART_F_SMOKE, 0x101010, atk==ATK_MOSSBERG ? 0.75f : 0.55f, owner, hasShrooms(), 3);
@@ -131,7 +130,7 @@ namespace game
                 {
                     if(emitPart)
                     {
-                        if(inWater) particle_splash(PART_BUBBLE, 1, 150, pos, 0x888888, 1.0f+rnd(2), 20, -30);
+                        if(isInWater) particle_splash(PART_BUBBLE, 1, 150, pos, 0x888888, 1.0f+rnd(2), 20, -30);
                         particle_flare(tail, head, 350, PART_F_SMOKE, 0x555555, 0.60f, owner, hasShrooms(), 10);
                     }
 
@@ -145,7 +144,7 @@ namespace game
 
             case ATK_SMAW:
             case ATK_S_ROCKETS:
-                if(emitPart) particle_splash(inWater ? PART_BUBBLE : PART_SMOKE, 1, 2000, pos, 0x666666, inWater ? 3.f : 6.f, 25, 250, 0, hasShrooms());
+                if(emitPart) particle_splash(isInWater ? PART_BUBBLE : PART_SMOKE, 1, 2000, pos, 0x666666, isInWater ? 3.f : 6.f, 25, 250, 0, hasShrooms());
                 particle_flare(pos, pos, 2, PART_GLARE, hasRoids ? 0xFF0000 : 0xFFC864, 2.0f + rndscale(2), NULL, hasShrooms());
                 adddynlight(pos, (ispaused() ? 65 : 50 + rnd(31)), vec(1.2f, 0.75f, 0.0f));
                 break;
@@ -153,14 +152,14 @@ namespace game
             case ATK_FIREWORKS:
                 if(emitPart)
                 {
-                    if(inWater) particle_splash(PART_BUBBLE, 3, 200, pos, 0x18181A, 2.5f, 25, 100, 0, hasShrooms());
+                    if(isInWater) particle_splash(PART_BUBBLE, 3, 200, pos, 0x18181A, 2.5f, 25, 100, 0, hasShrooms());
                     particle_splash(PART_SPARK, 8, 100, pos, hasRoids ? 0xFF0000 : 0xFFC864, rnd(4)/10.f+0.1f, 50, 500, 0, hasShrooms());
                 }
                 particle_flare(pos, pos, 1, PART_MF_LITTLE, hasRoids ? 0xFF0000 : 0xFFC864, 0.5f+rndscale(2), NULL, hasShrooms());
                 break;
 
             case ATK_S_NUKE:
-                if(emitPart) particle_splash(inWater ? PART_BUBBLE : PART_SMOKE, 3, inWater ? 2000 : 5000, pos, inWater ? 0x18181A : 0x222222, 4.0f+rnd(5), 25, 200, 0, hasShrooms());
+                if(emitPart) particle_splash(isInWater ? PART_BUBBLE : PART_SMOKE, 3, isInWater ? 2000 : 5000, pos, isInWater ? 0x18181A : 0x222222, 4.0f+rnd(5), 25, 200, 0, hasShrooms());
                 particle_flare(pos, pos, 2, PART_GLARE, hasRoids ? 0xFF0000 : 0xFFC864, 5.f+rndscale(5), NULL, hasShrooms());
                 particle_splash(PART_FIRE_BALL, 1, 100, pos, hasRoids ? 0xFF0000 : 0xFF6600, 1.0f+rndscale(4), 50, 500, 0, hasShrooms());
                 adddynlight(pos, 100, vec(1.2f, 0.75f, 0.0f));
@@ -185,7 +184,7 @@ namespace game
 
     void renderExplosion(gameent *owner, const vec &v, const vec &vel, int atk) //big laggy flashy explosions
     {
-        bool inWater = ((lookupmaterial(v) & MATF_VOLUME) == MAT_WATER);
+        bool isInWater = inWater(v);
         int initRadius = attacks[atk].exprad/2;
         int flags = L_NODYNSHADOW|DL_FLASH;
         bool hasRoids = owner->hasRoids();
@@ -200,15 +199,15 @@ namespace game
                 particle_fireball(v, 350, PART_SHOCKWAVE, 300, hasRoids ? 0xFF0000 : 0xFFFFFF, 20.0f, hasShrooms());
                 particle_splash(PART_HAZE_SMALL, 5, 400, v, 80, 50, 300, 800, 40);
 
-                loopi(inWater ? 3 : 8)
+                loopi(isInWater ? 3 : 8)
                 {
                     vec pos = v;
                     pos.add(vec(-6+rnd(13), -6+rnd(13), -3+rnd(7)));
 
-                    if(!inWater) particle_splash(PART_SPARK, miniRockets ? 1 : 2, 300, pos, hasRoids ? 0xFF4444 : 0xFFBB55,  1.2f+rnd(2), 2500, 2500, -1, hasShrooms());
+                    if(!isInWater) particle_splash(PART_SPARK, miniRockets ? 1 : 2, 300, pos, hasRoids ? 0xFF4444 : 0xFFBB55,  1.2f+rnd(2), 2500, 2500, -1, hasShrooms());
                     particle_splash(PART_FIRE_BALL, miniRockets ? 2 : 6, 150+rnd(75), pos, hasRoids ? 0xFF4444 : flamesColor[rnd(3)], 9.f+rnd(6), miniRockets ? 300+rnd(150) : 400+rnd(200), 800, 20.f, hasShrooms());
 
-                    if(inWater)
+                    if(isInWater)
                     {
                         particle_splash(PART_WATER, 16, 200, pos, 0x18181A, 12.0f+rnd(14), 600, 300);
                         particle_splash(PART_BUBBLE, 5, 150, pos, 0x18181A, 4.0f+rnd(8), 300, 150);
@@ -228,7 +227,7 @@ namespace game
                 particle_splash(PART_FIRE_BALL, 5, 40, v, 0xFFC864, 5, 800, 1600, 0, hasShrooms());
                 loopi(4) particle_splash(PART_SPARK_P, 16+rnd(10), 200+rnd(200), v, hasRoids ? 0xFF0000 : fireworkColor(), (0.2f + (rnd(5)*0.1f)), 500+rnd(300), 10, 1, hasShrooms());
 
-                if(inWater)
+                if(isInWater)
                 {
                     particle_splash(PART_WATER, 50, 200, v, 0x18181A, 12.0f+rnd(14), 600, 300);
                     particle_splash(PART_BUBBLE, 15, 150, v, 0x18181A, 4.0f+rnd(8), 300, 150);
@@ -248,7 +247,7 @@ namespace game
                 loopi(3) particle_fireball(v, 40+rnd(50), PART_PLASMAGRENADE, 300, hasRoids ? 0xFF0000 : 0xFFFFFF, 1.0f, hasShrooms());
                 particle_fireball(v, 400, PART_SHOCKWAVE, 300, hasRoids ? 0xFF0000 : 0xFFFFFF, 20.0f, hasShrooms());
 
-                if(inWater)
+                if(isInWater)
                 {
                     particle_splash(PART_WATER, 50, 200, v, 0x18181A, 12.0f+rnd(14), 600, 300);
                     particle_splash(PART_BUBBLE, 15, 150, v, 0x18181A, 4.0f+rnd(8), 300, 150);
@@ -265,14 +264,14 @@ namespace game
             {
                 particle_splash(PART_SMOKE, 8, 1800, v, 0x555555, 30.0f, 300+rnd(100), 1200+rnd(400), 5, hasShrooms());
                 particle_splash(PART_SPARK, 5, 250, v, hasRoids ? 0xFF4444 : 0xFFBB55,  1.0f+rnd(2), 3500, 3500, 0, hasShrooms());
-                loopi(inWater ? 1 : 4)
+                loopi(isInWater ? 1 : 4)
                 {
                     vec pos = v;
-                    if(!inWater) pos.add(vec(-30+rnd(61), -30+rnd(61), -10+rnd(21)));
+                    if(!isInWater) pos.add(vec(-30+rnd(61), -30+rnd(61), -10+rnd(21)));
                     particle_splash(PART_FIRE_BALL, 10, 150+rnd(50), pos, hasRoids ? 0xFF4444 : i==0 ? 0x484848 : i==1 ? 0x575757: 0x646464, 9.f+rnd(6), 800+rnd(400), 2000, 25, hasShrooms());
                 }
 
-                if(inWater)
+                if(isInWater)
                 {
                     particle_splash(PART_WATER, 50, 200, v, 0x18181A, 12.0f+rnd(14), 600, 300);
                     particle_splash(PART_BUBBLE, 15, 150, v, 0x18181A, 4.0f+rnd(8), 300, 150);
@@ -298,9 +297,9 @@ namespace game
                     particle_splash(PART_SMOKE, 4, kamikaze ? 5000 : 3000, pos, 0x333333, 60.f, 200+rnd(75), 100, 0, hasShrooms());
                     particle_splash(PART_SMOKE, 3, kamikaze ? 3000 : 2000, pos, 0x151515, 40.f, 200+rnd(75), 250, 0, hasShrooms());
                     particle_splash(PART_SPARK, 6, 300, pos, hasRoids ? 0xFF4444 : 0xFFBB55,  1.7f+rnd(2), 3500, 3500, 0, hasShrooms());
-                    loopi(inWater ? 1 : 3) particle_splash(PART_FIRE_BALL, 6, 130+rnd(50), pos, hasRoids ? 0xFF4444 : i==0 ? 0x383838: i==1 ? 0x474747 : 0x6A4A3A, 9.f+rnd(6), 1200+rnd(700), 1200, 20.f, hasShrooms());
+                    loopi(isInWater ? 1 : 3) particle_splash(PART_FIRE_BALL, 6, 130+rnd(50), pos, hasRoids ? 0xFF4444 : i==0 ? 0x383838: i==1 ? 0x474747 : 0x6A4A3A, 9.f+rnd(6), 1200+rnd(700), 1200, 20.f, hasShrooms());
 
-                    if(inWater)
+                    if(isInWater)
                     {
                         particle_splash(PART_WATER, 20, 200, pos, 0x18181A, 12.0f+rnd(14), 600, 300);
                         particle_splash(PART_BUBBLE, 10, 150, pos, 0x18181A, 4.0f+rnd(8), 300, 150);
@@ -368,7 +367,6 @@ namespace game
         vec dir = vec(vel).normalize();
         vec bounce;
         bool isClose = false;
-        bool inWater = ((lookupmaterial(v) & MATF_VOLUME) == MAT_WATER);
 
         if(distance < 200) // if close, calculate a bouncing trajectory
         {
@@ -391,13 +389,13 @@ namespace game
 
                 if(isClose)
                 {
-                    if(!inWater && !isCrossbow) particles::dirSplash(PART_SPARK, owner->hasRoids() ? 0xFF0000 : 0xFF8800, 500, 6, 85, v, bounce, bigGun ? 0.3f : 0.2f, 150, 0, hasShrooms());
+                    if(!inWater(v) && !isCrossbow) particles::dirSplash(PART_SPARK, owner->hasRoids() ? 0xFF0000 : 0xFF8800, 500, 6, 85, v, bounce, bigGun ? 0.3f : 0.2f, 150, 0, hasShrooms());
                     particles::dirSplash(PART_SMOKE_S, 0x565656, 150, 3, 600 + rnd(300), v, bounce, 3.f, 40, 2, hasShrooms());
                     particles::dirSplash(PART_SMOKE_S, 0x552900, 150, 3, 600 + rnd(300), v, bounce, 3.f, 40, 2, hasShrooms());
                 }
                 else
                 {
-                    if(!inWater && !isCrossbow) particle_splash(PART_SPARK, 5, 75, v, owner->hasRoids() ? 0xFF0000 : 0xFF8800, bigGun ? 0.3f : 0.2f, 150, 200, 0, hasShrooms());
+                    if(!inWater(v) && !isCrossbow) particle_splash(PART_SPARK, 5, 75, v, owner->hasRoids() ? 0xFF0000 : 0xFF8800, bigGun ? 0.3f : 0.2f, 150, 200, 0, hasShrooms());
                     particle_splash(PART_SMOKE, 3, 600+rnd(300), v, 0x565656, bigGun ? 0.35f : 0.3f, 25, 300, 2, hasShrooms());
                     particle_splash(PART_SMOKE, 6, 350+rnd(300), v, 0x552900, bigGun ? 0.35f : 0.3f, 15, 300, 2, hasShrooms());
                 }
@@ -408,13 +406,13 @@ namespace game
             case ATK_S_GAU8:
                 if(isClose)
                 {
-                    if(!inWater) particles::dirSplash(PART_SPARK, owner->hasRoids() ? 0xFF0000 : 0xFF5500, 800, 7, 100, v, bounce, 0.4f, 600, -0.5f, hasShrooms());
+                    if(!inWater(v)) particles::dirSplash(PART_SPARK, owner->hasRoids() ? 0xFF0000 : 0xFF5500, 800, 7, 100, v, bounce, 0.4f, 600, -0.5f, hasShrooms());
                     particles::dirSplash(PART_SMOKE_S, 0x414141, 150, 4, 800 + rnd(300), v, bounce, 6.f, 30, 2, hasShrooms());
                     particles::dirSplash(PART_SMOKE_S, 0x442200, 150, 4, 800 + rnd(300), v, bounce, 6.f, 30, 2, hasShrooms());
                 }
                 else
                 {
-                    if(!inWater) particle_splash(PART_SPARK, 5, 85, v, owner->hasRoids() ? 0xFF0000 : 0xFF5500, 0.5f, 150, 200, 0, hasShrooms());
+                    if(!inWater(v)) particle_splash(PART_SPARK, 5, 85, v, owner->hasRoids() ? 0xFF0000 : 0xFF5500, 0.5f, 150, 200, 0, hasShrooms());
                     particle_splash(PART_SMOKE, 3, 600+rnd(300), v, 0x414141, 0.4f, 25, 300, 2, hasShrooms());
                     particle_splash(PART_SMOKE, 3, 350+rnd(300), v, 0x442200, 0.4f, 15, 300, 2, hasShrooms());
                 }
@@ -431,7 +429,6 @@ namespace game
         vec bounce;
 
         bool isClose = false;
-        bool inWater = ((lookupmaterial(to) & MATF_VOLUME) == MAT_WATER);
 
         if(distance < 256) // if close, calculate a bouncing trajectory
         {
@@ -442,7 +439,7 @@ namespace game
         switch(atk)
         {
             case ATK_ELECTRIC:
-                if(!inWater)
+                if(!inWater(to))
                 {
                     if(isClose) particles::dirSplash(PART_SPARK_L, 0x4488FF, 800, 20, 125, to, bounce, 0.5f, 600, -1, hasShrooms());
                     else
@@ -460,13 +457,13 @@ namespace game
             case ATK_HYDRA:
                 if(isClose)
                 {
-                    if(!inWater) particles::dirSplash(PART_SPARK, hasRoids ? 0xFF2222 : 0xFF4400, 500, 6, 85, to, bounce, 0.2f, 150, 0, hasShrooms());
+                    if(!inWater(to)) particles::dirSplash(PART_SPARK, hasRoids ? 0xFF2222 : 0xFF4400, 500, 6, 85, to, bounce, 0.2f, 150, 0, hasShrooms());
                     particles::dirSplash(PART_SMOKE_S, 0x696969, 150, 2, 500 + rnd(300), to, bounce, 4.f, 40, 1, hasShrooms());
                     particles::dirSplash(PART_SMOKE_S, 0x452910, 150, 2, 500 + rnd(300), to, bounce, 4.f, 40, 1, hasShrooms());
                 }
                 else
                 {
-                    if(!inWater) particle_splash(PART_SPARK, 5, 75, to, hasRoids ? 0xFF2222 : 0xFF4400, 0.3f, 150, 100, 0, hasShrooms());
+                    if(!inWater(to)) particle_splash(PART_SPARK, 5, 75, to, hasRoids ? 0xFF2222 : 0xFF4400, 0.3f, 150, 100, 0, hasShrooms());
                     particle_splash(PART_SMOKE, 3, 500+rnd(300), to, 0x696969, 0.5f, 35, 200, 2, hasShrooms());
                     particle_splash(PART_SMOKE, 3, 500+rnd(300), to, 0x452910, 0.4f, 35, 200, 2, hasShrooms());
                 }
@@ -481,13 +478,13 @@ namespace game
             case ATK_S_CAMPER:
                 if(isClose)
                 {
-                    if(!inWater) particles::dirSplash(PART_SPARK, hasRoids ? 0xFF0000 : 0xFFAA00, 1000, 7, 100, to, bounce, 0.4f, 600, -0.5f, hasShrooms());
+                    if(!inWater(to)) particles::dirSplash(PART_SPARK, hasRoids ? 0xFF0000 : 0xFFAA00, 1000, 7, 100, to, bounce, 0.4f, 600, -0.5f, hasShrooms());
                     particles::dirSplash(PART_SMOKE_S, 0x797979, 150, 4, 900 + rnd(400), to, bounce, 6.f, 30, 2, hasShrooms());
                     particles::dirSplash(PART_SMOKE_S, 0x553915, 150, 4, 900 + rnd(400), to, bounce, 6.f, 30, 2, hasShrooms());
                 }
                 else
                 {
-                    if(!inWater) particle_splash(PART_SPARK, 9, 70, to, hasRoids ? 0xFF2222 : 0xFF9900, 0.6f, 150, 100, 0, hasShrooms());
+                    if(!inWater(to)) particle_splash(PART_SPARK, 9, 70, to, hasRoids ? 0xFF2222 : 0xFF9900, 0.6f, 150, 100, 0, hasShrooms());
                     particle_splash(PART_SMOKE, 4, 700+rnd(500), to, 0x797979, 0.2f, 35, 300, 2, hasShrooms());
                     particle_splash(PART_SMOKE, 4, 400+rnd(400), to, 0x553915, 0.15f, 35, 300, 2, hasShrooms());
                 }

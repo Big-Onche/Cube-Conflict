@@ -646,6 +646,7 @@ struct gamestate
         }
         vampiremillis = 0;
         afterburnmillis = 0;
+        afterburnatk = 0;
         gunwait = 0;
         seed = rnd(4);
         loopi(NUMGUNS) ammo[i] = 0;
@@ -789,6 +790,16 @@ struct gamestate
         return validgun(gun) && gun != exclude && ammo[gun] > 0;
     }
 };
+
+static inline bool afterburnAttack(int atk)
+{
+    return atk==ATK_FLAMETHROWER || atk==ATK_MOLOTOV;
+}
+
+static inline bool inWater(vec pos)
+{
+    return (lookupmaterial(pos) & MATF_VOLUME) == MAT_WATER;
+}
 
 enum
 {
@@ -953,6 +964,7 @@ struct gameent : dynent, gamestate
     ai::aiinfo *ai;
     int ownernum, lastnode;
     gameent *lastkiller;
+    gameent *afterburner;
 
     vec muzzle, weed, balles;
 
@@ -1007,6 +1019,7 @@ struct gameent : dynent, gamestate
         attacksound = 0;
         powerarmorsound = false;
         shieldbroken = false;
+        afterburner = NULL;
     }
 
     int respawnwait(int secs, int delay = 0)
@@ -1163,6 +1176,7 @@ namespace game
     extern void deathstate(gameent *d, bool restore = false);
     extern void damaged(int damage, gameent *d, gameent *actor, bool local = true, int atk = 0);
     extern void killed(gameent *d, gameent *actor, int atk);
+    extern void doLocalAfterburn(gameent *target, gameent *burner, int atk);
     extern void timeupdate(int timeremain);
     extern void msgsound(int n, physent *d = NULL);
     const char *mastermodecolor(int n, const char *unknown);

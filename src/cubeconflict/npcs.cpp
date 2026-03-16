@@ -149,11 +149,6 @@ namespace game
             copystring(name, t.name);
         }
 
-        bool inWater() const
-        {
-            return (lookupmaterial(feetpos()) & MAT_WATER) != 0;
-        }
-
         void stopAfterburn()
         {
             afterburnmillis = 0;
@@ -164,7 +159,7 @@ namespace game
         void startAfterburn(int atk, gameent *burner)
         {
             if(atk!=ATK_FLAMETHROWER && atk!=ATK_MOLOTOV) return;
-            if(inWater()) return;
+            if(inWater(burner->feetpos())) return;
 
             const int burnmillis = atk==ATK_FLAMETHROWER ? 4000 : 7000;
             afterburnmillis = min(afterburnmillis + burnmillis, burnmillis);
@@ -782,7 +777,7 @@ namespace game
             {
                 if(m->afterburnmillis)
                 {
-                    if(m->inWater()) m->stopAfterburn();
+                    if(inWater(m->feetpos())) m->stopAfterburn();
                     else
                     {
                         m->afterburnmillis = max(m->afterburnmillis-curtime, 0);

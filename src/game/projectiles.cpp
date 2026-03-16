@@ -108,7 +108,7 @@ namespace projectiles
         p.exploded = false;
         p.offsetmillis = OFFSETMILLIS;
         p.id = local ? lastmillis : id;
-        p.inwater = (lookupmaterial(camera1->o) & MATF_VOLUME) == MAT_WATER;
+        p.inwater = inWater(p.o);
 
         switch(p.atk)
         {
@@ -330,7 +330,7 @@ namespace projectiles
 
     void checkWater(projectile &p)
     {
-        if(!p.inwater && (lookupmaterial(p.o) & MATF_VOLUME) == MAT_WATER)
+        if(!p.inwater && inWater(p.o))
         {
             p.inwater = true;
             vec effectPos = p.o;

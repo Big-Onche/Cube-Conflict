@@ -270,7 +270,7 @@ namespace game
 
         if(isHudPlayer) // underwater camera sound
         {
-            bool inLiquid = ((lookupmaterial(camera1->o) & MATF_VOLUME) == MAT_WATER) || ((lookupmaterial(camera1->o) & MATF_VOLUME) == MAT_LAVA);
+            bool inLiquid = inWater(camera1->o) || ((lookupmaterial(camera1->o) & MATF_VOLUME) == MAT_LAVA);
             static bool underwaterSound = false;
             if(inLiquid && !underwaterSound) { playSound(S_UNDERWATER, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH|SND_LOOPED, hudplayer()->entityId, PL_UNDERWATER); underwaterSound = true; }
             else if(!inLiquid && underwaterSound) { stopLinkedSound(hudplayer()->entityId, PL_UNDERWATER); underwaterSound = false; }
@@ -357,7 +357,47 @@ namespace game
             if(d->boostmillis[B_RAGE] && (d->boostmillis[B_RAGE] -= time)<=0) d->boostmillis[B_RAGE] = 0;
         }
 
-        if(d->afterburnmillis && (d->afterburnmillis -= time)<=0) d->afterburnmillis = 0;
+        if(d->afterburnmillis && (d->afterburnmillis -= time)<=0)
+        {
+            d->afterburnmillis = 0;
+            d->afterburnatk = 0;
+            d->afterburner = NULL;
+        }
+    }
+
+    static inline bool localAfterburn()
+    {
+        return m_sp || m_dmsp || m_tutorial;
+    }
+
+    static inline void clearAfterburn(gameent *d)
+    {
+        d->afterburnmillis = 0;
+        d->afterburnatk = 0;
+        d->afterburner = NULL;
+    }
+
+    void doLocalAfterburn(gameent *target, gameent *burner, int atk)
+    {
+        if(!localAfterburn() || !afterburnAttack(atk) || inWater(target->o)) return;
+
+        const int burnmillis = atk==ATK_FLAMETHROWER ? 4000 : 7000;
+        target->afterburnmillis = min(target->afterburnmillis + burnmillis, burnmillis);
+        target->afterburnatk = atk;
+        target->afterburner = burner ? burner : target;
+    }
+
+    static bool touchingFire(gameent *d)
+    {
+        loopv(entities::ents)
+        {
+            gameentity &e = *(gameentity *)entities::ents[i];
+            if(e.type != ET_PARTICLES || (e.attr1!=1 && e.attr1!=2)) continue;
+
+            float firedamageradius = e.attr2 / 25.f;
+            if(d->o.dist(e.o) < firedamageradius || d->feetpos().dist(e.o) < firedamageradius) return true;
+        }
+        return false;
     }
 
     void checkFire(gameent *d)
@@ -377,17 +417,42 @@ namespace game
 
         if(tick < 500 && d->afterburnmillis) return;
 
-        loopv(entities::ents)
+        if(touchingFire(d))
         {
-            gameentity &e = *(gameentity *)entities::ents[i];
-            if(e.type == ET_PARTICLES && (e.attr1==1 || e.attr1==2))
-            {
-                float fireDamageRadius = e.attr2 / 25.f;
-                if(d->o.dist(e.o) < fireDamageRadius || d->feetpos().dist(e.o) < fireDamageRadius) addmsg(N_FIRETOUCH, "rc", d);
-            }
+            if(localAfterburn()) doLocalAfterburn(d, d, ATK_FLAMETHROWER);
+            else addmsg(N_FIRETOUCH, "rc", d);
+        }
+        tick = 0;
+    }
+
+    static void updateLocalAfterburn(int time, gameent *d)
+    {
+        if(!localAfterburn() || d->state != CS_ALIVE || !d->afterburnmillis) return;
+        if(!afterburnAttack(d->afterburnatk) || inWater(d->o))
+        {
+            clearAfterburn(d);
+            return;
         }
 
-        tick = 0;
+        static int tick = 0;
+        tick += time;
+        if(tick <= 650) return;
+        tick = -100 + rnd(201);
+
+        gameent *burner = d->afterburner ? d->afterburner : d;
+        const int calcflags = DCF_APPLY_TARGET_RESIST |
+                              DCF_APPLY_TARGET_MODIFIERS |
+                              DCF_APPLY_TARGET_BOOSTS |
+                              DCF_MUTATE_TARGET_STATE;
+        const int baseburn = d->afterburnatk==ATK_FLAMETHROWER ? 40 : 80;
+        totalDamage calc = getDamage(baseburn, d->afterburnatk, burner->character, burner, d->character, d, burner->o.dist(d->o), calcflags, burner==d);
+        const int damage = calc.damage / 5;
+
+        if(damage > 0)
+        {
+            damaged(damage, d, burner, true, d->afterburnatk);
+            playSound(S_ADULT_P, d==player1 ? vec(0, 0, 0) : d->o, 250, 100, NULL, d->entityId);
+        }
     }
 
     void checkShield(gameent *d)
@@ -526,6 +591,11 @@ namespace game
 
             updatePlayersBoosts(curtime, player1);
             updateAbilitiesSkills(curtime, player1);
+            if(localAfterburn())
+            {
+                checkFire(player1);
+                updateLocalAfterburn(curtime, player1);
+            }
         }
 
         postfx::updateShroomsEffect(hudplayer()->boostmillis[B_SHROOMS], hudplayer()->lastshrooms, hudplayer()->boostmillis[B_JOINT]);
@@ -733,7 +803,7 @@ namespace game
         d->deaths++;
         loopi(NUMBOOSTS) d->boostmillis[i] = 0;
         d->killstreak = 0;
-        d->afterburnmillis = 0;
+        clearAfterburn(d);
         d->isOutOfMap = false;
         loopi(NUMABILITIES) d->abilitymillis[i] = 0;
 
@@ -1144,7 +1214,7 @@ namespace game
                 if(pl->afterburnmillis)
                 {
                     playSound(S_FIRE_EXT, isHudplayer ? vec(0,0,0) : d->o, 200, 100, NULL, pl->entityId);
-                    pl->afterburnmillis = 0;
+                    clearAfterburn(pl);
                 }
             }
             else if(material&MAT_LAVA)
