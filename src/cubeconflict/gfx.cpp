@@ -514,8 +514,8 @@ namespace game
             case ATK_ELECTRIC:
             {
                 float mfSize = 4.f/adaptMuzzleFlash(d);
-                loopi(2) particle_flare(pos, to, 50+rnd(50), PART_LIGHTNING, d->hasRoids() ? 0xFF0000 : 0x8888FF, 1.5f+rnd(2), NULL, hasShrooms());
-                lightTrail(pos, to, 60, 50+rnd(50), 10, d->hasRoids() ? vec(2.5f, 0.f, 0.f) :  vec(0.2f, 0.6f, 2.f));
+                loopi(2) particle_flare(pos, to, 150, PART_LIGHTNING, d->hasRoids() ? 0xFF0000 : 0x8888FF, 1.5f+rnd(2), d, hasShrooms());
+                lightTrail(pos, to, 60, 150, 10, d->hasRoids() ? vec(2.5f, 0.f, 0.f) :  vec(0.2f, 0.6f, 2.f));
                 particle_flare(pos, pos, 140, PART_MF_ELEC, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0x50CFFF, mfSize, d, hasShrooms());
                 particle_flare(pos, pos, 200, PART_HAZE_MUZZLE, 100, mfSize*2, d, false, 10);
                 adddynlight(pos, 100, vec(0.25f, 0.75f, 2.0f), 40, 2, lightFlags, 0, vec(0.25f, 0.75f, 2.0f), d);
