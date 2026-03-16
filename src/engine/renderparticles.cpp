@@ -28,7 +28,10 @@ VARP(showparticles, 0, 1, 1);
 VAR(cullparticles, 0, 1, 1);
 VAR(replayparticles, 0, 1, 1);
 VARP(particleillumination, 0, 1, 1);
-VAR(particleilluminationscale, 0, 40, 100);
+VAR(particleilluminationscale, 0, 100, 100);
+VAR(particleilluminationfalloff, 0, 96, 128);
+VAR(particleilluminationfalloffradius, 0, 64, 8192);
+VARP(particleilluminationlightcap, 0, 175, 1000);
 VARN(seedparticles, seedmillis, 0, 3000, 10000);
 VAR(dbgpcull, 0, 0, 1);
 VAR(dbgpseed, 0, 0, 1);
@@ -143,9 +146,28 @@ static inline uchar clampcol(float c)
 
 extern int shutdaytimelights;
 
-static inline bool particlelightblinking(int blinkspeed)
+static inline bool isBlinking(int blinkspeed)
 {
     return blinkspeed > 0 && (totalmillis % (blinkspeed + 1) < blinkspeed/2) && !game::ispaused();
+}
+
+static inline float lightFade(float dist, float radius) // cheap light absorption simulation for large lights
+{
+    if(radius <= 1e-3f) return 0.0f;
+    float d = clamp(dist/radius, 0.0f, 1.0f);
+    if(radius <= particleilluminationfalloffradius) return 1.0f - d;
+    return exp2f(-particleilluminationfalloff*d*d);
+}
+
+static inline vec lightClamp(const vec &lightcolor)
+{
+    int cap = max(particleilluminationlightcap, 0);
+    if(cap <= 0) return vec(0, 0, 0);
+
+    vec clamped = vec(lightcolor).max(0);
+    float peak = max(max(clamped.x, clamped.y), clamped.z);
+    if(peak <= cap || peak <= 1e-3f) return clamped;
+    return clamped.mul(float(cap)/peak);
 }
 
 struct particledynlightsample
@@ -177,12 +199,12 @@ struct particlelightsampler
         {
             const extentity *e = ents[i];
             if(!e || e->type != ET_LIGHT || e->attr1 <= 0) continue;
-            if((e->attr6 && shutdaytimelights) || particlelightblinking(e->attr7)) continue;
+            if((e->attr6 && shutdaytimelights) || isBlinking(e->attr7)) continue;
             if(isfoggedsphere(e->attr1, e->o) || pvsoccludedsphere(e->o, e->attr1)) continue;
 
             particledynlightsample &sample = maplights.add();
             sample.o = e->o;
-            sample.color = vec(e->attr2, e->attr3, e->attr4).max(0);
+            sample.color = lightClamp(vec(e->attr2, e->attr3, e->attr4));
             sample.radius = e->attr1;
         }
 
@@ -197,7 +219,7 @@ struct particlelightsampler
             if(!getdynlight(i, o, radius, color, dir, spot, flags)) continue;
             particledynlightsample &sample = dynlights.add();
             sample.o = o;
-            sample.color = color;
+            sample.color = lightClamp(vec(color).mul(255.0f));
             sample.radius = radius;
         }
     }
@@ -213,8 +235,8 @@ struct particlelightsampler
             if(sample.radius <= 0) continue;
             float dist = o.dist(sample.o);
             if(dist >= sample.radius) continue;
-            float atten = 1.0f - dist/sample.radius;
-            light.add(vec(sample.color).mul(255.0f*atten));
+            float atten = lightFade(dist, sample.radius);
+            light.add(vec(sample.color).mul(atten));
         }
         loopv(maplights)
         {
@@ -222,7 +244,7 @@ struct particlelightsampler
             if(sample.radius <= 0) continue;
             float dist = o.dist(sample.o);
             if(dist >= sample.radius) continue;
-            float atten = 1.0f - dist/sample.radius;
+            float atten = lightFade(dist, sample.radius);
             light.add(vec(sample.color).mul(atten));
         }
         return bvec(clampcol(light.x), clampcol(light.y), clampcol(light.z));
@@ -1576,7 +1598,7 @@ int applyRandomOffset(int base, int offset) { return clamp(base + rnd(2 * offset
 
 bool noColors(int r, int g, int b) { return !r && !g && !b; }
 
-int smokeGs() { return 17 + rnd(37); } // setting random smoke grayscale
+int smokeGs() { return 5 + rnd(15); } // setting random smoke grayscale
 
 VARR(windintensity, 0, 0, 10);
 int wind() { return 120 * windintensity; }
