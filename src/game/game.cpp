@@ -156,6 +156,7 @@ namespace game
     {
         d->respawn();
         d->spawnstate(gamemode, d->character);
+        d->shieldbroken = d->armour <= 0 || d->armourtype < A_WOOD || d->armourtype > A_MAGNET;
         return d;
     }
 
