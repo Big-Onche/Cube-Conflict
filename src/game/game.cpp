@@ -446,7 +446,7 @@ namespace game
                               DCF_MUTATE_TARGET_STATE;
         const int baseburn = d->afterburnatk==ATK_FLAMETHROWER ? 40 : 80;
         totalDamage calc = getDamage(baseburn, d->afterburnatk, burner->character, burner, d->character, d, burner->o.dist(d->o), calcflags, burner==d);
-        const int damage = calc.damage / 5;
+        const int damage = calc.damage/(m_dmsp ? 5 : 2);
 
         if(damage > 0)
         {
@@ -564,6 +564,32 @@ namespace game
     bool kamikazeExploding(gameent *d)
     {
         return !d->mana && !d->abilitymillis[ABILITY_2] && d->ammo[GUN_KAMIKAZE];
+    }
+
+    static inline bool canExplodePowerArmor(gameent *d)
+    {
+        return d && d->ammo[GUN_POWERARMOR] && d->armourtype == A_POWERARMOR && (d->armour <= 0 || d->health <= 0);
+    }
+
+    static void destroyLocalPowerArmor(gameent *owner)
+    {
+        if(!canExplodePowerArmor(owner)) return;
+
+        owner->ammo[GUN_POWERARMOR] = 0;
+        if(owner->powerarmorsound)
+        {
+            stopLinkedSound(owner->entityId, PL_POWERARMOR);
+            owner->powerarmorsound = false;
+        }
+
+        vec origin = owner->o;
+        explode(true, owner, origin, owner->vel, NULL, 0, ATK_POWERARMOR);
+
+        projectiles::projectile powerArmorFx;
+        powerArmorFx.owner = owner;
+        powerArmorFx.atk = ATK_POWERARMOR;
+        powerArmorFx.dir = vec(0, 0, 1);
+        projectiles::stain(powerArmorFx, origin, ATK_POWERARMOR);
     }
 
     void updateworld()        // main game update loop
@@ -789,6 +815,7 @@ namespace game
 
         ai::damaged(d, actor);
 
+        if(local) destroyLocalPowerArmor(d);
         if(d->health<=0) {if(local) killed(d, actor, atk);}
     }
 

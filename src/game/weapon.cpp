@@ -309,7 +309,7 @@ namespace game
                                       DCF_APPLY_TARGET_BOOSTS |
                                       DCF_MUTATE_TARGET_STATE;
                 totalDamage calc = getDamage(damage, atk, at->character, at, f->character, f, at->o.dist(f->o), calcflags, at==f);
-                damage = calc.damage / 5;
+                damage = calc.damage/(m_dmsp ? 5 : 2);
                 doLocalAfterburn(f, at, atk);
                 damageeffect(damage, f, at, atk);
                 damaged(damage, f, at, true, atk);
