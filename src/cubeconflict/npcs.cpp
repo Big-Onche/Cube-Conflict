@@ -101,15 +101,18 @@ namespace game
         vec stackpos;
         vec spawnpos;
         gameent *afterburner;
+        int blockedmillis;
         int spawnyaw, monsterlastdeath;
 
         monster(int _type, int _yaw, int _pitch, int _tag, int _state, int _trigger, int _move) :
             monsterstate(_state), tag(_tag),
             stacked(NULL),
             stackpos(0, 10, 0),
-            afterburner(NULL)
+            afterburner(NULL),
+            blockedmillis(0)
         {
             type = ENT_AI;
+            if(!ai) ai = new ai::aiinfo;
             respawn();
             if(_type>=MAXNPCS || _type < 0)
             {
@@ -271,6 +274,7 @@ namespace game
             if(blocked)                                                            // special case: if we run into scenery
             {
                 blocked = false;
+                blockedmillis = min(blockedmillis + curtime, 4000);
                 const int jumpspeed = max(cfg.npcspeed(), 1);
                 const int jumpchance = max(1, 2500/jumpspeed);
                 if(!rnd(jumpchance)) jumping = true;                                 // try to jump over obstacle (rare)
@@ -280,6 +284,7 @@ namespace game
                     transition(M_SEARCH, 1, 100, 1000);
                 }
             }
+            else blockedmillis = 0;
 
             float enemyyaw = -atan2(enemy->o.x - o.x, enemy->o.y - o.y)/RAD;
 
@@ -416,7 +421,7 @@ namespace game
                     abilitymillis[ABILITY_3] = true;
                     character = C_PHYSICIST;
                 }
-                if(cfg.speed) moveplayer(this, 10, true, curtime);        // use physics to move monster
+                if(cfg.speed) moveplayer(this, 10, true, curtime);        // same movement path as bots (physicsframe-stepped)
             }
         }
 
@@ -561,35 +566,47 @@ namespace game
     {
         if(!m_dmsp) return true;
 
-        int alive = 0;
-        monster *candidate = NULL;
-        float bestdist = -1.0f;
-
-        loopv(monsters)
+        while(true)
         {
-            monster *m = monsters[i];
-            if(m->state!=CS_ALIVE) continue;
-            alive++;
-            if(!isDespawnCandidate(m->mtype)) continue;
+            int alive = 0;
+            int blockedcandidate = -1;
+            int candidate = -1;
+            float blockedbestdist = -1.0f;
+            float bestdist = -1.0f;
 
-            const float dist = m->o.squaredist(player1->o);
-            if(!candidate || dist > bestdist)
+            loopv(monsters)
             {
-                candidate = m;
-                bestdist = dist;
+                monster *m = monsters[i];
+                if(m->state!=CS_ALIVE) continue;
+                alive++;
+                if(!isDespawnCandidate(m->mtype)) continue;
+
+                const float dist = m->o.squaredist(player1->o);
+                if(m->blocked)
+                {
+                    if(blockedcandidate < 0 || dist > blockedbestdist)
+                    {
+                        blockedcandidate = i;
+                        blockedbestdist = dist;
+                    }
+                }
+                else if(candidate < 0 || dist > bestdist)
+                {
+                    candidate = i;
+                    bestdist = dist;
+                }
             }
+
+            // Keep one free slot for the spawn that is about to happen.
+            if(alive < MAX_DMSP_ALIVE_MONSTERS) return true;
+            if(blockedcandidate >= 0) candidate = blockedcandidate;
+            if(candidate < 0) return false;
+
+            // Hard despawn: remove entity entirely, no death reward/effects.
+            DELETEP(monsters[candidate]);
+            monsters.removeunordered(candidate);
+            cleardynentcache();
         }
-
-        if(alive < MAX_DMSP_ALIVE_MONSTERS) return true;
-        if(!candidate) return false;
-
-        // Hard despawn: no death reward/effects, and hide body immediately.
-        candidate->state = CS_DEAD;
-        candidate->health = 0;
-        candidate->move = candidate->strafe = 0;
-        candidate->lastpain = lastmillis - 10000;
-        cleardynentcache();
-        return true;
     }
 
     static bool checkFires(const monster &m)
