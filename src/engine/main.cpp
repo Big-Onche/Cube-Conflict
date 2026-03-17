@@ -175,15 +175,11 @@ ICOMMAND(getmaptitle, "", (),
 
 void renderMapLoadingScreen(int w, int h, const char *mapname, const char *tip)
 {
-    float lh = 0.5f*min(w, h), lw = lh,
-          lx = 0.5f*(w - lw), ly = 0.5f*(h - lh);
-
+    float lh = 0.5f*min(w, h), lw = lh, lx = 0.5f*(w - lw), ly = 0.5f*(h - lh);
     defformatstring(mshot,"media/map/%s.png", mapname);
     copystring(backgroundimg, mshot);
-
     settexture("media/interface/chargement.png", 3);
     bgquad(lx, ly, lw, lh);
-
     settexture("media/interface/shadow.png", 3);
     bgquad(0, 0, w, h);
 
@@ -194,8 +190,9 @@ void renderMapLoadingScreen(int w, int h, const char *mapname, const char *tip)
         execfile(tempformatstring("media/map/%s.cfg", mapname));
         defformatstring(mapprettyname, "%s", getalias(tempformatstring("maptitle_%s", readstr("languages", language))));
         int tw = text_width(mapprettyname);
-        float tsz = 0.04f*min(screenw, screenh)/70,
-              tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*8.0f*min(screenw, screenh) - 70*tsz;
+        float tsz = 0.04f*min(w, h)/70;
+        float tx = 0.5f*(w - tw*tsz);
+        float ty = h - 0.075f*8.0f*min(w, h) - 70*tsz;
         pushhudmatrix();
         hudmatrix.translate(tx, ty, 0);
         hudmatrix.scale(tsz, tsz, 1);
@@ -207,8 +204,9 @@ void renderMapLoadingScreen(int w, int h, const char *mapname, const char *tip)
     if(tip)
     {
         int tw = infowidth+2;
-        float tsz = 0.04f*min(screenw, screenh)/100,
-              tx = 0.5f*(screenw - tw*tsz), ty = screenh - 0.075f*7.4f*min(screenw, screenh) - 100*tsz;
+        float tsz = 0.04f*min(w, h)/100;
+        float tx = 0.5f*(w - tw*tsz);  // <-- w
+        float ty = h - 0.075f*7.4f*min(w, h) - 100*tsz;  // <-- h, w
         pushhudmatrix();
         hudmatrix.translate(tx, ty, 0);
         hudmatrix.scale(tsz, tsz, 1);
