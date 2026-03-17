@@ -31,7 +31,9 @@ VARP(showparticles, 0, 1, 1);
 VAR(cullparticles, 0, 1, 1);
 VAR(replayparticles, 0, 1, 1);
 VARP(particleillumination, 0, 1, 1);
-VAR(particleilluminationscale, 0, 100, 100);
+VARR(particleilluminationambientscale, 0, 75, 100);
+VARR(particleilluminationsunscale, 0, 25, 100);
+VARR(particleilluminationdynlightscale, 0, 100, 100);
 VAR(particleilluminationfalloff, 0, 96, 128);
 VAR(particleilluminationfalloffradius, 0, 64, 8192);
 VARP(particleilluminationlightcap, 0, 175, 1000);
@@ -180,6 +182,13 @@ struct particledynlightsample
     float radius;
 };
 
+struct particlelightcomponents
+{
+    vec ambient, sunlight, dynlights;
+
+    particlelightcomponents() : ambient(0, 0, 0), sunlight(0, 0, 0), dynlights(0, 0, 0) {}
+};
+
 static const float PARTICLE_SUNLIGHT_CACHE_GRIDSIZE = 32.0f;
 
 static inline ivec particlesunlightcell(const vec &o)
@@ -268,11 +277,12 @@ struct particlelightsampler
         }
     }
 
-    bvec sample(const vec &o)
+    particlelightcomponents sample(const vec &o)
     {
         update();
 
-        vec light(ambientcolor.r, ambientcolor.g, ambientcolor.b);
+        particlelightcomponents components;
+        components.ambient = vec(ambientcolor.r, ambientcolor.g, ambientcolor.b);
         if(sunlightcolor.r || sunlightcolor.g || sunlightcolor.b)
         {
             ivec cell = particlesunlightcell(o);
@@ -299,7 +309,7 @@ struct particlelightsampler
             }
             state.lastupdate = frame;
 
-            if(state.factor > 1e-3f) light.add(vec(sunlightcolor.r, sunlightcolor.g, sunlightcolor.b).mul(state.factor));
+            if(state.factor > 1e-3f) components.sunlight = vec(sunlightcolor.r, sunlightcolor.g, sunlightcolor.b).mul(state.factor);
         }
         loopv(dynlights)
         {
@@ -308,7 +318,7 @@ struct particlelightsampler
             float dist = o.dist(sample.o);
             if(dist >= sample.radius) continue;
             float atten = lightFade(dist, sample.radius);
-            light.add(vec(sample.color).mul(atten));
+            components.dynlights.add(vec(sample.color).mul(atten));
         }
         loopv(maplights)
         {
@@ -317,9 +327,9 @@ struct particlelightsampler
             float dist = o.dist(sample.o);
             if(dist >= sample.radius) continue;
             float atten = lightFade(dist, sample.radius);
-            light.add(vec(sample.color).mul(atten));
+            components.dynlights.add(vec(sample.color).mul(atten));
         }
-        return bvec(clampcol(light.x), clampcol(light.y), clampcol(light.z));
+        return components;
     }
 };
 
@@ -327,12 +337,19 @@ static particlelightsampler particlelightstate;
 
 static inline bvec particleilluminatedcolor(const vec &origin, const bvec &basecolor)
 {
-    bvec lightcolor = particlelightstate.sample(origin);
-    int baseweight = 100 - particleilluminationscale;
+    particlelightcomponents light = particlelightstate.sample(origin);
+    float ambientweight = particleilluminationambientscale/100.0f,
+          sunweight = particleilluminationsunscale/100.0f,
+          dynweight = particleilluminationdynlightscale/100.0f,
+          baseweight = max(1.0f - max(ambientweight, max(sunweight, dynweight)), 0.0f);
+    vec color = vec(basecolor.r, basecolor.g, basecolor.b).mul(baseweight);
+    color.add(light.ambient.mul(ambientweight));
+    color.add(light.sunlight.mul(sunweight));
+    color.add(light.dynlights.mul(dynweight));
     return bvec(
-        (basecolor.r*baseweight + lightcolor.r*particleilluminationscale + 50)/100,
-        (basecolor.g*baseweight + lightcolor.g*particleilluminationscale + 50)/100,
-        (basecolor.b*baseweight + lightcolor.b*particleilluminationscale + 50)/100
+        clampcol(color.x),
+        clampcol(color.y),
+        clampcol(color.z)
     );
 }
 
