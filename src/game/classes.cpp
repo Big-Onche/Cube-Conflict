@@ -124,7 +124,7 @@ namespace game
         addmsg(N_REQABILITY, "rci", d, ability); //server sided game vars check
     }
 
-    ICOMMAND(aptitude, "i", (int *ability),  // player1 abilities commands
+    ICOMMAND(ability, "i", (int *ability),  // player1 abilities commands
         if(!isconnected()) return;
         bool isKamikaze = (player1->character == C_KAMIKAZE);
         if(!hasAbilities(player1) && !isKamikaze) return;
