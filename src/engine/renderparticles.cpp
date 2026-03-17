@@ -31,8 +31,8 @@ VARP(showparticles, 0, 1, 1);
 VAR(cullparticles, 0, 1, 1);
 VAR(replayparticles, 0, 1, 1);
 VARP(particleillumination, 0, 1, 1);
-VARR(particleilluminationambientscale, 0, 75, 100);
-VARR(particleilluminationsunscale, 0, 25, 100);
+VARR(particleilluminationambientscale, 0, 80, 100);
+VARR(particleilluminationsunscale, 0, 80, 100);
 VARR(particleilluminationdynlightscale, 0, 100, 100);
 VAR(particleilluminationfalloff, 0, 96, 128);
 VAR(particleilluminationfalloffradius, 0, 64, 8192);
@@ -335,17 +335,32 @@ struct particlelightsampler
 
 static particlelightsampler particlelightstate;
 
+static inline float particlelightreceptivity(const bvec &basecolor)
+{
+    float brightness = (0.2126f*basecolor.r + 0.7152f*basecolor.g + 0.0722f*basecolor.b)/255.0f;
+    return 0.15f + 0.85f*brightness;
+}
+
+static inline void brightenparticlecolor(vec &color, const vec &light, float weight, float receptivity)
+{
+    if(weight <= 0) return;
+    vec contribution = vec(light).mul(clamp(weight*receptivity, 0.0f, 1.0f)).max(0).min(255.0f);
+    color.x += contribution.x * (1.0f - color.x/255.0f);
+    color.y += contribution.y * (1.0f - color.y/255.0f);
+    color.z += contribution.z * (1.0f - color.z/255.0f);
+}
+
 static inline bvec particleilluminatedcolor(const vec &origin, const bvec &basecolor)
 {
     particlelightcomponents light = particlelightstate.sample(origin);
     float ambientweight = particleilluminationambientscale/100.0f,
           sunweight = particleilluminationsunscale/100.0f,
-          dynweight = particleilluminationdynlightscale/100.0f,
-          baseweight = max(1.0f - max(ambientweight, max(sunweight, dynweight)), 0.0f);
-    vec color = vec(basecolor.r, basecolor.g, basecolor.b).mul(baseweight);
-    color.add(light.ambient.mul(ambientweight));
-    color.add(light.sunlight.mul(sunweight));
-    color.add(light.dynlights.mul(dynweight));
+          dynweight = particleilluminationdynlightscale/100.0f;
+    float receptivity = particlelightreceptivity(basecolor);
+    vec color(basecolor.r, basecolor.g, basecolor.b);
+    brightenparticlecolor(color, light.ambient, ambientweight, receptivity);
+    brightenparticlecolor(color, light.sunlight, sunweight, receptivity);
+    brightenparticlecolor(color, light.dynlights, dynweight, receptivity);
     return bvec(
         clampcol(color.x),
         clampcol(color.y),
