@@ -1705,7 +1705,7 @@ struct shadowcacheval;
 struct shadowmapinfo
 {
     ushort x, y, size;
-    uchar sidemask, transparent;
+    uchar sidemask, transparent, particletransparent;
     int light;
     shadowcacheval *cached;
 };
@@ -1713,10 +1713,10 @@ struct shadowmapinfo
 struct shadowcacheval
 {
     ushort x, y, size;
-    uchar sidemask, transparent;
+    uchar sidemask, transparent, particletransparent;
 
     shadowcacheval() {}
-    shadowcacheval(const shadowmapinfo &sm) : x(sm.x), y(sm.y), size(sm.size), sidemask(sm.sidemask), transparent(sm.transparent) {}
+    shadowcacheval(const shadowmapinfo &sm) : x(sm.x), y(sm.y), size(sm.size), sidemask(sm.sidemask), transparent(sm.transparent), particletransparent(sm.particletransparent) {}
 };
 
 struct shadowcache : hashtable<shadowcachekey, shadowcacheval>
@@ -1749,6 +1749,7 @@ extern int usetexgather;
 static inline bool usegatherforsm() { return smfilter > 1 && smgather && hasTG && usetexgather; }
 static inline bool usesmcomparemode() { return !usegatherforsm() || (hasTG && hasGPU5 && usetexgather > 1); }
 static inline bool useparticleshadowcolors() { return particleshadow && particleshadowalpha > 0; }
+static inline bool uselocalparticleshadowcolors() { return smalpha > 1 && useparticleshadowcolors(); }
 static inline bool usealphashadowcolors() { return smalpha && alphashadow; }
 static inline bool useshadowcolors() { return usealphashadowcolors() || useparticleshadowcolors(); }
 
@@ -2060,6 +2061,7 @@ static shadowmapinfo *addshadowmap(ushort x, ushort y, int size, int &idx, int l
     sm->light = light;
     sm->sidemask = 0;
     sm->transparent = 0;
+    sm->particletransparent = 0;
     sm->cached = cached;
     return sm;
 }
@@ -2553,7 +2555,7 @@ Shader *loadvolumetricshader()
     common[commonlen] = '\0';
 
     shadow[shadowlen++] = 'p';
-    if(smalpha > 1 && alphashadow && volumetricsmalphalights) shadow[shadowlen++] = 'P';
+    if((smalpha > 1 && alphashadow && volumetricsmalphalights) || uselocalparticleshadowcolors()) shadow[shadowlen++] = 'P';
     shadow[shadowlen] = '\0';
 
     defformatstring(name, "volumetric%s%s%d", common, shadow, volsteps);
@@ -2665,7 +2667,7 @@ Shader *loaddeferredlightshader(const char *type = NULL)
     common[commonlen] = '\0';
 
     shadow[shadowlen++] = 'p';
-    if(smalpha > 1 && alphashadow > (smalphalights ? 0 : 1)) shadow[shadowlen++] = 'P';
+    if((smalpha > 1 && alphashadow > (smalphalights ? 0 : 1)) || uselocalparticleshadowcolors()) shadow[shadowlen++] = 'P';
     shadow[shadowlen] = '\0';
 
     int usecsm = 0, userh = 0;
@@ -3389,7 +3391,7 @@ void rendervolumetric()
     glActiveTexture_(GL_TEXTURE4);
     glBindTexture(shadowatlastarget, shadowatlastex);
     if(usesmcomparemode()) setsmcomparemode(); else setsmnoncomparemode();
-    if(smalpha > 1 && alphashadow && volumetricsmalphalights)
+    if((smalpha > 1 && alphashadow && volumetricsmalphalights) || uselocalparticleshadowcolors())
     {
         glActiveTexture_(GL_TEXTURE11);
         glBindTexture(GL_TEXTURE_RECTANGLE, smfilter ? shadowfiltertex : shadowcolortex);
@@ -3425,7 +3427,7 @@ void rendervolumetric()
         lightmatrix.scale(l.radius*lightradiustweak);
         GLOBALPARAM(lightmatrix, lightmatrix);
 
-        bool colorshadow = l.colorshadow() && l.shadowmap >= 0 && shadowmaps[l.shadowmap].transparent;
+        bool colorshadow = l.shadowmap >= 0 && shadowmaps[l.shadowmap].transparent;
         if(l.spot > 0)
         {
             volumetricshader->setvariant(0, l.shadowmap >= 0 ? (colorshadow ? 4 : 3) : 2);
@@ -4656,10 +4658,33 @@ void rendershadowmaps(int offset = 0)
         shadowmesh *mesh = e ? findshadowmesh(l.ent, *e) : NULL;
 
         findshadowvas(smalpha > 1 && alphashadow > (l.colorshadow() ? 0 : 1));
-        if(shadowtransparent)
+
+        int particleshadowtransparent = 0;
+        if(uselocalparticleshadowcolors() && !(l.flags&L_NODYNSHADOW))
         {
-            sm.transparent = shadowtransparent;
+            if(shadowmapping == SM_SPOT)
+            {
+                shadowside = 0;
+                if(hasshadowparticles()) particleshadowtransparent = 1;
+            }
+            else loop(side, 6) if(sidemask&(1<<side))
+            {
+                shadowside = side;
+                if(hasshadowparticles()) particleshadowtransparent |= 1<<side;
+            }
+        }
+
+        int transparentmask = shadowtransparent | particleshadowtransparent;
+        if(transparentmask)
+        {
+            sm.transparent = transparentmask;
+            sm.particletransparent = particleshadowtransparent;
             if(batchrects.inrange(l.batched)) batchrects[l.batched].group |= BF_SMALPHA;
+        }
+        else
+        {
+            sm.transparent = 0;
+            sm.particletransparent = 0;
         }
         findshadowmms();
 
@@ -4671,9 +4696,11 @@ void rendershadowmaps(int offset = 0)
         if(smcache)
         {
             int dynmask = smcache <= 1 ? (batcheddynamicmodels() | dynamicshadowvas()) : 0;
+            dynmask |= particleshadowtransparent;
             cached = sm.cached;
             if(cached)
             {
+                dynmask |= cached->particletransparent;
                 if(!debugshadowatlas) cachemask = cached->sidemask & ~dynmask;
                 sm.sidemask |= cachemask;
             }
@@ -4708,10 +4735,10 @@ void rendershadowmaps(int offset = 0)
             if(mesh) rendershadowmesh(mesh); else rendershadowmapworld();
             rendershadowmodelbatches();
 
-            if(shadowtransparent)
+            if(transparentmask)
             {
                 setupshadowtransparent();
-                rendershadowtransparent(i, 0, (l.dir.z >= 0) == !smcullside);
+                rendershadowtransparent(i, 0, (l.dir.z >= 0) == !smcullside, (particleshadowtransparent&1) != 0);
                 cleanupshadowtransparent();
             }
         }
@@ -4746,12 +4773,12 @@ void rendershadowmaps(int offset = 0)
                 if(mesh) rendershadowmesh(mesh); else rendershadowmapworld();
                 rendershadowmodelbatches();
             }
-            if(shadowtransparent)
+            if(transparentmask)
             {
                 setupshadowtransparent();
                 loop(side, 6) if(sidemask&(1<<side))
                 {
-                    if(clearshadowtransparent(i, side)) continue;
+                    if(clearshadowtransparent(i, side, transparentmask)) continue;
 
                     matrix4 cubematrix(cubeshadowviewmatrix[side]);
                     cubematrix.scale(1.0f/l.radius);
@@ -4759,7 +4786,7 @@ void rendershadowmaps(int offset = 0)
                     shadowmatrix.mul(smprojmatrix, cubematrix);
                     GLOBALPARAM(shadowmatrix, shadowmatrix);
 
-                    rendershadowtransparent(i, side, (side & 1) ^ (side >> 2) ^ smcullside);
+                    rendershadowtransparent(i, side, (side & 1) ^ (side >> 2) ^ smcullside, (particleshadowtransparent&(1<<side)) != 0);
                 }
                 cleanupshadowtransparent();
             }

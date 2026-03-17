@@ -796,9 +796,28 @@ inline void genrotpos<PT_PART>(const vec &o, const vec &d, float size, int grav,
     vs[3].pos = vec(o).madd(camright, coeffs[3].x*size).madd(camup, coeffs[3].y*size);
 }
 
-static inline void getshadowbillboardbasis(vec &right, vec &up)
+static inline bool particleshadowmapping()
 {
-    vec dir = shadowdir;
+    return shadowmapping == SM_CASCADE || shadowmapping == SM_SPOT || shadowmapping == SM_CUBEMAP;
+}
+
+static inline void getshadowbillboardbasis(const vec &o, vec &right, vec &up)
+{
+    vec dir;
+    switch(shadowmapping)
+    {
+        case SM_CASCADE:
+            dir = shadowdir;
+            break;
+        case SM_SPOT:
+        case SM_CUBEMAP:
+            dir = vec(o).sub(shadoworigin);
+            if(dir.squaredlen() <= 1e-6f && shadowmapping == SM_SPOT) dir = shadowdir;
+            break;
+        default:
+            dir = vec(0, 0, 1);
+            break;
+    }
     if(dir.squaredlen() <= 1e-6f)
     {
         right = vec(1, 0, 0);
@@ -1006,7 +1025,7 @@ struct varenderer : partrenderer
 
     bool calcshadowinfo(particle *p, vec &o, float &size, int &blend)
     {
-        if(shadowmapping != SM_CASCADE || !shadowverts || p->fade < 0) return false;
+        if(!particleshadowmapping() || !shadowverts || p->fade < 0) return false;
 
         o = p->o;
         vec d = p->d;
@@ -1034,15 +1053,30 @@ struct varenderer : partrenderer
             }
         }
 
-        return (calcspherecsmsplits(o, size*SQRT2) & (1<<shadowside)) != 0;
+        float radius = size*SQRT2;
+        switch(shadowmapping)
+        {
+            case SM_CASCADE:
+                return (calcspherecsmsplits(o, radius) & (1<<shadowside)) != 0;
+            case SM_SPOT:
+            {
+                vec scenter = vec(o).sub(shadoworigin);
+                float sradius = radius + shadowradius;
+                return scenter.squaredlen() < sradius*sradius && sphereinsidespot(shadowdir, shadowspot, scenter, radius);
+            }
+            case SM_CUBEMAP:
+            {
+                vec scenter = vec(o).sub(shadoworigin);
+                float sradius = radius + shadowradius;
+                return scenter.squaredlen() < sradius*sradius && (calcspheresidemask(scenter, radius, shadowbias) & (1<<shadowside)) != 0;
+            }
+        }
+        return false;
     }
 
     int genshadowverts()
     {
-        if(!shadowverts || shadowmapping != SM_CASCADE) return 0;
-
-        vec right, up;
-        getshadowbillboardbasis(right, up);
+        if(!shadowverts || !particleshadowmapping()) return 0;
 
         int shadowparts = 0;
         loopi(numparts)
@@ -1057,6 +1091,8 @@ struct varenderer : partrenderer
             setparticletexcoords(type, p, vs);
             bvec4 shadowcolor(255, 255, 255, uchar(blend));
             loopk(4) vs[k].color = shadowcolor;
+            vec right, up;
+            getshadowbillboardbasis(o, right, up);
             if(type&PT_ROT) genrotshadowpos(o, right, up, size, vs, (p->flags>>2)&0x1F);
             else genshadowpos(o, right, up, size, vs);
             shadowparts++;
@@ -1067,7 +1103,7 @@ struct varenderer : partrenderer
 
     bool hasshadow()
     {
-        if(!shadowverts || !particleshadow || shadowmapping != SM_CASCADE || particleshadowalpha <= 0) return false;
+        if(!shadowverts || !particleshadow || !particleshadowmapping() || particleshadowalpha <= 0) return false;
 
         loopi(numparts)
         {
@@ -1142,7 +1178,7 @@ struct varenderer : partrenderer
 
     bool rendershadow()
     {
-        if(!shadowverts || !tex || shadowmapping != SM_CASCADE || particleshadowalpha <= 0) return false;
+        if(!shadowverts || !tex || !particleshadowmapping() || particleshadowalpha <= 0) return false;
 
         int shadowparts = genshadowverts();
         if(!shadowparts) return false;
@@ -1337,7 +1373,7 @@ void debugparticles()
 
 bool rendershadowparticles()
 {
-    if(!particleshadow || shadowmapping != SM_CASCADE || !particleshadowshader || particleshadowalpha <= 0) return false;
+    if(!particleshadow || !particleshadowmapping() || !particleshadowshader || particleshadowalpha <= 0) return false;
 
     bool hadcull = glIsEnabled(GL_CULL_FACE) != 0;
     if(hadcull) glDisable(GL_CULL_FACE);
@@ -1356,7 +1392,7 @@ bool rendershadowparticles()
 
 bool hasshadowparticles()
 {
-    if(!particleshadow || shadowmapping != SM_CASCADE || particleshadowalpha <= 0) return false;
+    if(!particleshadow || !particleshadowmapping() || particleshadowalpha <= 0) return false;
 
     loopi(sizeof(parts)/sizeof(parts[0]))
     {
