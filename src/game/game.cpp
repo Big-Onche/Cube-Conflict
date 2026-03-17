@@ -545,6 +545,13 @@ namespace game
         static vec smoothVel(0, 0, 0);
         static int prevTime = 0;
 
+        if(lastmillis - hudplayer()->lastspawn < 100) // resetting on respawn
+        {
+            prevPos = hudplayer()->o;
+            smoothVel = vec(0, 0, 0);
+            return vec(0, 0, 0);
+        }
+
         int currentTime = totalmillis;
         int timeElapsed = max(currentTime - prevTime, 1); // Time elapsed since the last frame in milliseconds
 
