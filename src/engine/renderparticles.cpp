@@ -3,7 +3,7 @@
 #include "gfx.h"
 #include "engine.h"
 
-Shader *particleshader = NULL, *particlenotextureshader = NULL, *particlesoftshader = NULL, *particletextshader = NULL, *particleHazeShader = NULL;
+Shader *particleshader = NULL, *particlenotextureshader = NULL, *particlesoftshader = NULL, *particletextshader = NULL, *particleHazeShader = NULL, *particleshadowshader = NULL;
 
 VARP(particlelayers, 0, 1, 1);
 FVARP(particlebright, 0, 1.75, 100);
@@ -11,6 +11,9 @@ VARP(particlesize, 20, 100, 500);
 
 VARP(softparticles, 0, 1, 1);
 VARP(softparticleblend, 1, 8, 64);
+VARFP(particleshadow, 0, 1, 1, { cleardeferredlightshaders(); cleanupshadowatlas(); });
+FVARFR(particleshadowalpha, 0.0f, 2.0f, 4.0f, { cleardeferredlightshaders(); cleanupshadowatlas(); });
+FVAR(particleshadowblur, 0.0f, 4.0f, 8.0f);
 
 // Check canemitparticles() to limit the rate that paricles can be emitted for models/sparklies
 // Automatically stops particles being emitted when paused or in reflective drawing
@@ -119,7 +122,7 @@ enum
     PT_HFLIP        = 1<<14,
     PT_VFLIP        = 1<<15,
     PT_ROT          = 1<<16,
-    PT_ILLUMINATE   = 1<<17, // blend base particle color with local world lighting
+    PT_LABSORPTION  = 1<<17, // particles absorbing light
     PT_FEW          = 1<<18,
     PT_ICON         = 1<<19,
     PT_NOTEX        = 1<<20,
@@ -292,6 +295,34 @@ struct partvert
     vec2 tc;
 };
 
+static inline void setparticletexcoords(int type, const particle *p, partvert *vs)
+{
+    float u1 = 0, u2 = 1, v1 = 0, v2 = 1;
+    if(type&PT_RND4)
+    {
+        float tx = 0.5f*((p->flags>>5)&1), ty = 0.5f*((p->flags>>6)&1);
+        u1 = tx;
+        u2 = tx + 0.5f;
+        v1 = ty;
+        v2 = ty + 0.5f;
+        if(p->flags&0x01) swap(u1, u2);
+        if(p->flags&0x02) swap(v1, v2);
+    }
+    else if(type&PT_ICON)
+    {
+        float tx = 0.25f*(p->flags&3), ty = 0.25f*((p->flags>>2)&3);
+        u1 = tx;
+        u2 = tx + 0.25f;
+        v1 = ty;
+        v2 = ty + 0.25f;
+    }
+
+    vs[0].tc = vec2(u1, v1);
+    vs[1].tc = vec2(u2, v1);
+    vs[2].tc = vec2(u2, v2);
+    vs[3].tc = vec2(u1, v2);
+}
+
 #define COLLIDERADIUS 8.0f
 #define COLLIDEERROR 1.0f
 
@@ -322,6 +353,8 @@ struct partrenderer
     virtual particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity = 0, int sizemod = 0, bool sound = false, bool hud = false) = 0;
     virtual void update() { }
     virtual void render() = 0;
+    virtual bool rendershadow() { return false; }
+    virtual bool hasshadow() { return false; }
     virtual bool haswork() = 0;
     virtual int count() = 0; //for debug
     virtual void cleanup() {}
@@ -425,7 +458,7 @@ struct partrenderer
         if(type&PT_TRACK) concatstring(info, "t,");
         if(type&PT_FLIP) concatstring(info, "f,");
         if(type&PT_COLLIDE) concatstring(info, "c,");
-        if(type&PT_ILLUMINATE) concatstring(info, "i,");
+        if(type&PT_LABSORPTION) concatstring(info, "i,");
         int len = strlen(info);
         info[len-1] = info[len-1] == ',' ? ')' : '\0';
         if(texname)
@@ -763,6 +796,43 @@ inline void genrotpos<PT_PART>(const vec &o, const vec &d, float size, int grav,
     vs[3].pos = vec(o).madd(camright, coeffs[3].x*size).madd(camup, coeffs[3].y*size);
 }
 
+static inline void getshadowbillboardbasis(vec &right, vec &up)
+{
+    vec dir = shadowdir;
+    if(dir.squaredlen() <= 1e-6f)
+    {
+        right = vec(1, 0, 0);
+        up = vec(0, 1, 0);
+        return;
+    }
+
+    dir.normalize();
+    vec axis = fabs(dir.z) < 0.999f ? vec(0, 0, 1) : vec(0, 1, 0);
+    right.cross(axis, dir);
+    if(right.squaredlen() <= 1e-6f) right = vec(1, 0, 0);
+    else right.normalize();
+    up.cross(dir, right).normalize();
+}
+
+static inline void genshadowpos(const vec &o, const vec &right, const vec &up, float size, partvert *vs)
+{
+    vec udir = vec(up).sub(right).mul(size);
+    vec vdir = vec(up).add(right).mul(size);
+    vs[0].pos = vec(o).add(udir);
+    vs[1].pos = vec(o).add(vdir);
+    vs[2].pos = vec(o).sub(udir);
+    vs[3].pos = vec(o).sub(vdir);
+}
+
+static inline void genrotshadowpos(const vec &o, const vec &right, const vec &up, float size, partvert *vs, int rot)
+{
+    const vec2 *coeffs = rotcoeffs[rot];
+    vs[0].pos = vec(o).madd(right, coeffs[0].x*size).madd(up, coeffs[0].y*size);
+    vs[1].pos = vec(o).madd(right, coeffs[1].x*size).madd(up, coeffs[1].y*size);
+    vs[2].pos = vec(o).madd(right, coeffs[2].x*size).madd(up, coeffs[2].y*size);
+    vs[3].pos = vec(o).madd(right, coeffs[3].x*size).madd(up, coeffs[3].y*size);
+}
+
 template<int T>
 static inline void seedpos(particleemitter &pe, const vec &o, const vec &d, int fade, float size, int grav)
 {
@@ -797,13 +867,14 @@ template<int T>
 struct varenderer : partrenderer
 {
     partvert *verts;
+    partvert *shadowverts;
     particle *parts;
     int maxparts, numparts, lastupdate, rndmask;
-    GLuint vbo;
+    GLuint vbo, shadowvbo;
 
     varenderer(const char *texname, int type, int stain = -1)
         : partrenderer(texname, 3, type, stain),
-          verts(NULL), parts(NULL), maxparts(0), numparts(0), lastupdate(-1), rndmask(0), vbo(0)
+          verts(NULL), shadowverts(NULL), parts(NULL), maxparts(0), numparts(0), lastupdate(-1), rndmask(0), vbo(0), shadowvbo(0)
     {
         if(type & PT_HFLIP) rndmask |= 0x01;
         if(type & PT_VFLIP) rndmask |= 0x02;
@@ -814,14 +885,17 @@ struct varenderer : partrenderer
     void cleanup()
     {
         if(vbo) { glDeleteBuffers_(1, &vbo); vbo = 0; }
+        if(shadowvbo) { glDeleteBuffers_(1, &shadowvbo); shadowvbo = 0; }
     }
 
     void init(int n)
     {
         DELETEA(parts);
         DELETEA(verts);
+        DELETEA(shadowverts);
         parts = new particle[n];
         verts = new partvert[n*4];
+        if((type&PT_LABSORPTION) && (type&0xFF) == PT_PART) shadowverts = new partvert[n*4];
         maxparts = n;
         numparts = 0;
         lastupdate = -1;
@@ -902,37 +976,13 @@ struct varenderer : partrenderer
 
         if(!(type&PT_SHADER)) modifyblend<T>(o, blend);
 
-        bool illuminate = (type&PT_ILLUMINATE) && particleillumination != 0;
+        bool illuminate = (type&PT_LABSORPTION) && particleillumination != 0;
         bvec color = illuminate ? particleilluminatedcolor(o, p->color) : p->color;
 
         if(regen)
         {
             p->flags &= ~0x80;
-
-            #define SETTEXCOORDS(u1c, u2c, v1c, v2c, body) \
-            { \
-                float u1 = u1c, u2 = u2c, v1 = v1c, v2 = v2c; \
-                body; \
-                vs[0].tc = vec2(u1, v1); \
-                vs[1].tc = vec2(u2, v1); \
-                vs[2].tc = vec2(u2, v2); \
-                vs[3].tc = vec2(u1, v2); \
-            }
-            if(type&PT_RND4)
-            {
-                float tx = 0.5f*((p->flags>>5)&1), ty = 0.5f*((p->flags>>6)&1);
-                SETTEXCOORDS(tx, tx + 0.5f, ty, ty + 0.5f,
-                {
-                    if(p->flags&0x01) swap(u1, u2);
-                    if(p->flags&0x02) swap(v1, v2);
-                });
-            }
-            else if(type&PT_ICON)
-            {
-                float tx = 0.25f*(p->flags&3), ty = 0.25f*((p->flags>>2)&3);
-                SETTEXCOORDS(tx, tx + 0.25f, ty, ty + 0.25f, {});
-            }
-            else SETTEXCOORDS(0, 1, 0, 1, {});
+            setparticletexcoords(type, p, vs);
 
             #define SETCOLOR(r, g, b, a) \
             do { \
@@ -952,6 +1002,82 @@ struct varenderer : partrenderer
 
         if(type&PT_ROT) genrotpos<T>(o, d, p->size, ts, p->gravity, vs, (p->flags>>2)&0x1F);
         else genpos<T>(o, d, p->size, ts, p->gravity, vs);
+    }
+
+    bool calcshadowinfo(particle *p, vec &o, float &size, int &blend)
+    {
+        if(shadowmapping != SM_CASCADE || !shadowverts || p->fade < 0) return false;
+
+        o = p->o;
+        vec d = p->d;
+        if(type&PT_TRACK && p->owner) game::particletrack(p->owner, o, d);
+
+        size = p->size;
+        if(size <= 0) return false;
+
+        if(p->fade <= 5) blend = 255;
+        else
+        {
+            if(p->sizemod && !game::ispaused()) size = max(size + (((p->sizemod / curfps) / 100.f) * game::gamespeed), 0.0f);
+            if(size <= 0) return false;
+
+            int ts = max(lastmillis - p->millis, 0);
+            blend = clamp(255 - (ts<<8)/p->fade, 0, 255);
+            if(!blend) return false;
+
+            if(p->gravity)
+            {
+                ts = min(ts, p->fade);
+                float t = ts;
+                o.add(vec(d).mul(t/5000.0f));
+                o.z -= t*t/(2.0f * 5000.0f * p->gravity);
+            }
+        }
+
+        return (calcspherecsmsplits(o, size*SQRT2) & (1<<shadowside)) != 0;
+    }
+
+    int genshadowverts()
+    {
+        if(!shadowverts || shadowmapping != SM_CASCADE) return 0;
+
+        vec right, up;
+        getshadowbillboardbasis(right, up);
+
+        int shadowparts = 0;
+        loopi(numparts)
+        {
+            particle *p = &parts[i];
+            vec o;
+            float size;
+            int blend;
+            if(!calcshadowinfo(p, o, size, blend)) continue;
+
+            partvert *vs = &shadowverts[shadowparts*4];
+            setparticletexcoords(type, p, vs);
+            bvec4 shadowcolor(255, 255, 255, uchar(blend));
+            loopk(4) vs[k].color = shadowcolor;
+            if(type&PT_ROT) genrotshadowpos(o, right, up, size, vs, (p->flags>>2)&0x1F);
+            else genshadowpos(o, right, up, size, vs);
+            shadowparts++;
+        }
+
+        return shadowparts;
+    }
+
+    bool hasshadow()
+    {
+        if(!shadowverts || !particleshadow || shadowmapping != SM_CASCADE || particleshadowalpha <= 0) return false;
+
+        loopi(numparts)
+        {
+            particle *p = &parts[i];
+            vec o;
+            float size;
+            int blend;
+            if(calcshadowinfo(p, o, size, blend)) return true;
+        }
+        return false;
     }
 
     void genverts()
@@ -1012,6 +1138,41 @@ struct varenderer : partrenderer
         gle::disabletexcoord0();
         gle::disablecolor();
         gle::clearvbo();
+    }
+
+    bool rendershadow()
+    {
+        if(!shadowverts || !tex || shadowmapping != SM_CASCADE || particleshadowalpha <= 0) return false;
+
+        int shadowparts = genshadowverts();
+        if(!shadowparts) return false;
+
+        if(!shadowvbo) glGenBuffers_(1, &shadowvbo);
+
+        particleshadowshader->set();
+        LOCALPARAMF(particleshadowparams, particleshadowalpha, particleshadowblur, 1.0f/max(tex->xs, 1), 1.0f/max(tex->ys, 1));
+        glBindTexture(GL_TEXTURE_2D, tex->id);
+        gle::bindvbo(shadowvbo);
+        glBufferData_(GL_ARRAY_BUFFER, shadowparts*4*sizeof(partvert), NULL, GL_STREAM_DRAW);
+        glBufferSubData_(GL_ARRAY_BUFFER, 0, shadowparts*4*sizeof(partvert), shadowverts);
+
+        const partvert *ptr = 0;
+        gle::vertexpointer(sizeof(partvert), ptr->pos.v);
+        gle::texcoord0pointer(sizeof(partvert), ptr->tc.v);
+        gle::colorpointer(sizeof(partvert), ptr->color.v);
+        gle::enablevertex();
+        gle::enabletexcoord0();
+        gle::enablecolor();
+        gle::enablequads();
+
+        gle::drawquads(0, shadowparts);
+
+        gle::disablequads();
+        gle::disablevertex();
+        gle::disabletexcoord0();
+        gle::disablecolor();
+        gle::clearvbo();
+        return true;
     }
 };
 typedef varenderer<PT_PART> quadrenderer;
@@ -1075,8 +1236,8 @@ static partrenderer *parts[] =
     new quadrenderer("media/particles/trails/spock_front.png", PT_PART|PT_FEW|PT_HFLIP|PT_BRIGHT),                           // PART_SPOCK_FRONT
     new quadrenderer("media/particles/trails/plasma_front.png", PT_PART|PT_FLIP|PT_FEW|PT_OVERBRIGHT),                       // PART_PLASMA_FRONT
     // flames and smokes
-    new quadrenderer("media/particles/fire/smoke.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_LERP|PT_RND4|PT_ILLUMINATE),             // PART_SMOKE
-    new quadrenderer("media/particles/fire/smoke.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_LERP|PT_RND4|PT_SOFT|PT_ILLUMINATE),     // PART_SMOKE_S
+    new quadrenderer("media/particles/fire/smoke.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_LERP|PT_RND4|PT_LABSORPTION),            // PART_SMOKE
+    new quadrenderer("media/particles/fire/smoke.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_LERP|PT_RND4|PT_SOFT|PT_LABSORPTION),    // PART_SMOKE_S
     new quadrenderer("media/particles/fire/flames.png", PT_PART|PT_HFLIP|PT_RND4|PT_OVERBRIGHT),                             // PART_FLAME
     new quadrenderer("media/particles/fire/fire_ball.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_RND4),                               // PART_FIRE_BALL
     new quadrenderer("media/particles/fire/firespark.png", PT_PART|PT_FLIP|PT_RND4|PT_OVERBRIGHT|PT_COLLIDE, STAIN_BURN),    // PART_FIRESPARK
@@ -1084,7 +1245,7 @@ static partrenderer *parts[] =
     new quadrenderer("media/particles/water/water.png", PT_PART|PT_FLIP|PT_RND4|PT_BRIGHT),                                  // PART_WATER
     new quadrenderer("media/particles/water/waterdrops.png", PT_PART|PT_FLIP|PT_RND4|PT_COLLIDE, STAIN_RAIN),                // PART_DROP
     new quadrenderer("media/particles/water/bubbles.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_RND4),                                // PART_BUBBLE
-    new quadrenderer("<grey>media/particles/water/steam.png", PT_PART|PT_FLIP|PT_RND4|PT_SOFT|PT_ILLUMINATE),                // PART_STEAM
+    new quadrenderer("<grey>media/particles/water/steam.png", PT_PART|PT_FLIP|PT_RND4|PT_SOFT|PT_LABSORPTION),                // PART_STEAM
     // weather
     new quadrenderer("media/particles/weather/snow.png", PT_PART|PT_FLIP|PT_RND4|PT_COLLIDE, STAIN_SNOW),                    // PART_SNOW
     new trailrenderer("media/particles/weather/rain.png", PT_PART|PT_COLLIDE, STAIN_RAIN),                                   // PART_RAIN
@@ -1132,6 +1293,7 @@ void initparticles()
 {
     if(initing) return;
     if(!particleshader) particleshader = lookupshaderbyname("particle");
+    if(!particleshadowshader) particleshadowshader = lookupshaderbyname("particleshadow");
     if(!particlenotextureshader) particlenotextureshader = lookupshaderbyname("particlenotexture");
     if(!particlesoftshader) particlesoftshader = lookupshaderbyname("particlesoft");
     if(!particletextshader) particletextshader = lookupshaderbyname("particletext");
@@ -1171,6 +1333,38 @@ void debugparticles()
     flushhudmatrix();
     loopi(n) draw_text(parts[i]->info, FONTH, (i+n/2)*FONTH);
     pophudmatrix();
+}
+
+bool rendershadowparticles()
+{
+    if(!particleshadow || shadowmapping != SM_CASCADE || !particleshadowshader || particleshadowalpha <= 0) return false;
+
+    bool hadcull = glIsEnabled(GL_CULL_FACE) != 0;
+    if(hadcull) glDisable(GL_CULL_FACE);
+
+    bool rendered = false;
+    loopi(sizeof(parts)/sizeof(parts[0]))
+    {
+        partrenderer *p = parts[i];
+        if(!(p->type&PT_LABSORPTION) || !p->haswork()) continue;
+        rendered |= p->rendershadow();
+    }
+
+    if(hadcull) glEnable(GL_CULL_FACE);
+    return rendered;
+}
+
+bool hasshadowparticles()
+{
+    if(!particleshadow || shadowmapping != SM_CASCADE || particleshadowalpha <= 0) return false;
+
+    loopi(sizeof(parts)/sizeof(parts[0]))
+    {
+        partrenderer *p = parts[i];
+        if(!(p->type&PT_LABSORPTION) || !p->haswork()) continue;
+        if(p->hasshadow()) return true;
+    }
+    return false;
 }
 
 void renderparticles(int layer)

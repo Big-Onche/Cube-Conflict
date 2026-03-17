@@ -1729,7 +1729,8 @@ struct shadowcache : hashtable<shadowcachekey, shadowcacheval>
     }
 };
 
-extern int smcache, smfilter, smgather, smalpha, smalphaprec, alphashadow;
+extern int smcache, smfilter, smgather, smalpha, smalphaprec, alphashadow, particleshadow;
+extern float particleshadowalpha;
 
 #define SHADOWCACHE_EVICT 2
 
@@ -1747,12 +1748,15 @@ Shader *smalphaworldshader = NULL;
 extern int usetexgather;
 static inline bool usegatherforsm() { return smfilter > 1 && smgather && hasTG && usetexgather; }
 static inline bool usesmcomparemode() { return !usegatherforsm() || (hasTG && hasGPU5 && usetexgather > 1); }
+static inline bool useparticleshadowcolors() { return particleshadow && particleshadowalpha > 0; }
+static inline bool usealphashadowcolors() { return smalpha && alphashadow; }
+static inline bool useshadowcolors() { return usealphashadowcolors() || useparticleshadowcolors(); }
 
 void loadsmshaders()
 {
-    if(smalpha && alphashadow)
+    if(useshadowcolors())
     {
-        smalphaworldshader = useshaderbyname("smalphaworld");
+        smalphaworldshader = usealphashadowcolors() ? useshaderbyname("smalphaworld") : NULL;
         if(smfilter)
         {
             useshaderbyname("smalphaclear");
@@ -1826,7 +1830,7 @@ void setupshadowatlas()
     glTexParameteri(shadowatlastarget, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 
     smalign = 0;
-    if(smalpha && alphashadow)
+    if(useshadowcolors())
     {
         if(!shadowcolortex) glGenTextures(1, &shadowcolortex);
 
@@ -2669,7 +2673,7 @@ Shader *loaddeferredlightshader(const char *type = NULL)
     {
         usecsm = csmsplits;
         sun[sunlen++] = 'c';
-        if(smalpha && alphashadow) sun[sunlen++] = 'C';
+        if(useshadowcolors()) sun[sunlen++] = 'C';
         sun[sunlen++] = '0' + csmsplits;
         if(!minimap)
         {
@@ -2950,7 +2954,7 @@ static void bindlighttexs(int msaapass = 0, bool transparent = false)
         glActiveTexture_(GL_TEXTURE6 + i);
         glBindTexture(GL_TEXTURE_3D, rhtex[i]);
     }
-    if(smalpha && alphashadow)
+    if(useshadowcolors())
     {
         glActiveTexture_(GL_TEXTURE10);
         glBindTexture(GL_TEXTURE_RECTANGLE, csm.rendered > 1 ? (smfilter ? shadowfiltertex : shadowcolortex) : shadowblanktex);
@@ -4427,7 +4431,17 @@ static inline bool clearshadowtransparent(int idx, int side)
     return true;
 }
 
-void rendershadowtransparent(int idx, int side, bool cullside = false)
+static inline bool clearshadowtransparent(int idx, int side, int transparentmask)
+{
+    if(transparentmask&(1<<side)) return false;
+    shadowcolorclears.add(idx * 6 + side);
+    return true;
+}
+
+extern bool rendershadowparticles();
+extern bool hasshadowparticles();
+
+bool rendershadowtransparent(int idx, int side, bool cullside = false, bool particlepass = false)
 {
     const shadowmapinfo &sm = shadowmaps[idx];
     int sidex = 0, sidey = 0;
@@ -4442,9 +4456,16 @@ void rendershadowtransparent(int idx, int side, bool cullside = false)
 
     shadowside = side;
 
-    renderalphashadow(cullside);
+    bool rendered = false;
+    if(shadowtransparent&(1<<side))
+    {
+        renderalphashadow(cullside);
+        rendered = true;
+    }
+    if(particlepass) rendered |= rendershadowparticles();
 
-    if(smfilter) shadowcolorblurs.add(idx * 6 + side);
+    if(rendered && smfilter) shadowcolorblurs.add(idx * 6 + side);
+    return rendered;
 }
 
 void rendercsmshadowmaps()
@@ -4481,12 +4502,12 @@ void rendercsmshadowmaps()
 
     glEnable(GL_SCISSOR_TEST);
 
-    findshadowvas(smalpha && alphashadow);
-    if(shadowtransparent) csm.rendered = 2;
+    findshadowvas(usealphashadowcolors());
     findshadowmms();
 
     shadowmaskbatchedmodels(smdynshadow!=0);
     batchshadowmapmodels();
+    int particleshadowtransparent = 0;
 
     loopi(csmsplits) if(csm.splits[i].idx >= 0)
     {
@@ -4504,20 +4525,23 @@ void rendercsmshadowmaps()
 
         rendershadowmapworld();
         rendershadowmodelbatches();
+        if(hasshadowparticles()) particleshadowtransparent |= 1<<i;
     }
 
-    if(shadowtransparent)
+    int transparentmask = shadowtransparent | particleshadowtransparent;
+    if(transparentmask)
     {
+        csm.rendered = 2;
         setupshadowtransparent();
         loopi(csmsplits) if(csm.splits[i].idx >= 0)
         {
             const cascadedshadowmap::splitinfo &split = csm.splits[i];
-            if(clearshadowtransparent(split.idx, i)) continue;
+            if(clearshadowtransparent(split.idx, i, transparentmask)) continue;
 
             shadowmatrix.mul(split.proj, csm.model);
             GLOBALPARAM(shadowmatrix, shadowmatrix);
 
-            rendershadowtransparent(split.idx, i);
+            rendershadowtransparent(split.idx, i, false, (particleshadowtransparent&(1<<i)) != 0);
         }
         cleanupshadowtransparent();
     }

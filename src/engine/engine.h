@@ -293,6 +293,7 @@ extern int csmshadowmap, csmsplits;
 
 extern void loaddeferredlightshaders();
 extern void cleardeferredlightshaders();
+extern void cleanupshadowatlas();
 extern void clearshadowcache();
 
 extern void rendervolumetric();
@@ -762,6 +763,8 @@ extern void clearparticleemitters();
 extern void seedparticles();
 extern void updateparticles();
 extern void debugparticles();
+extern bool rendershadowparticles();
+extern bool hasshadowparticles();
 extern void renderparticles(int layer = PL_ALL);
 extern bool printparticles(extentity &e, char *buf, int len);
 extern void cleanupparticles();
