@@ -35,6 +35,7 @@ VAR(particleilluminationscale, 0, 100, 100);
 VAR(particleilluminationfalloff, 0, 96, 128);
 VAR(particleilluminationfalloffradius, 0, 64, 8192);
 VARP(particleilluminationlightcap, 0, 175, 1000);
+VAR(particleilluminationsunlightfade, 0, 250, 2000);
 VARN(seedparticles, seedmillis, 0, 3000, 10000);
 VAR(dbgpcull, 0, 0, 1);
 VAR(dbgpseed, 0, 0, 1);
@@ -179,14 +180,39 @@ struct particledynlightsample
     float radius;
 };
 
+static const float PARTICLE_SUNLIGHT_CACHE_GRIDSIZE = 32.0f;
+
+static inline ivec particlesunlightcell(const vec &o)
+{
+    return ivec(int(floor(o.x/PARTICLE_SUNLIGHT_CACHE_GRIDSIZE)),
+                int(floor(o.y/PARTICLE_SUNLIGHT_CACHE_GRIDSIZE)),
+                int(floor(o.z/PARTICLE_SUNLIGHT_CACHE_GRIDSIZE)));
+}
+
+static inline float particlesunlighttracedist()
+{
+    return SQRT3*worldsize;
+}
+
+struct particlesunlightstate
+{
+    float factor;
+    int lastupdate, lastquery, lastused;
+    uchar visible;
+
+    particlesunlightstate() : factor(-1), lastupdate(-1), lastquery(-1), lastused(-1), visible(0) {}
+};
+
 struct particlelightsampler
 {
     int frame;
-    bvec ambientcolor;
+    bvec ambientcolor, sunlightcolor;
     vector<particledynlightsample> dynlights;
     vector<particledynlightsample> maplights;
+    hashtable<ivec, particlesunlightstate> sunlightvisibility;
+    int lastsunlightprune;
 
-    particlelightsampler() : frame(-1), ambientcolor(0, 0, 0) {}
+    particlelightsampler() : frame(-1), ambientcolor(0, 0, 0), sunlightcolor(0, 0, 0), sunlightvisibility(1<<10), lastsunlightprune(0) {}
 
     void update()
     {
@@ -195,6 +221,21 @@ struct particlelightsampler
 
         vec ambientsample = vec(ambient.r, ambient.g, ambient.b).mul(ambientscale);
         ambientcolor = bvec(clampcol(ambientsample.x), clampcol(ambientsample.y), clampcol(ambientsample.z));
+
+        vec sunsample(0, 0, 0);
+        if(sunlightscale > 0 && sunlightdir.z > 0) sunsample = vec(sunlight.r, sunlight.g, sunlight.b).mul(sunlightscale);
+        sunlightcolor = bvec(clampcol(sunsample.x), clampcol(sunsample.y), clampcol(sunsample.z));
+
+        if(frame - lastsunlightprune >= 5000)
+        {
+            vector<ivec> stale;
+            enumeratekt(sunlightvisibility, ivec, cell, particlesunlightstate, state,
+            {
+                if(state.lastused >= 0 && frame - state.lastused > 10000) stale.add(cell);
+            });
+            loopv(stale) sunlightvisibility.remove(stale[i]);
+            lastsunlightprune = frame;
+        }
 
         maplights.setsize(0);
         const vector<extentity *> &ents = entities::getents();
@@ -232,6 +273,34 @@ struct particlelightsampler
         update();
 
         vec light(ambientcolor.r, ambientcolor.g, ambientcolor.b);
+        if(sunlightcolor.r || sunlightcolor.g || sunlightcolor.b)
+        {
+            ivec cell = particlesunlightcell(o);
+            particlesunlightstate &state = sunlightvisibility[cell];
+            state.lastused = frame;
+
+            bool sunvisible;
+            if(state.lastquery == frame) sunvisible = state.visible == 1;
+            else
+            {
+                vec start = vec(o).madd(sunlightdir, 1.0f), hitpos;
+                vec dest = vec(start).madd(sunlightdir, particlesunlighttracedist());
+                sunvisible = raycubelos(start, dest, hitpos);
+                state.lastquery = frame;
+                state.visible = sunvisible ? 1 : 2;
+            }
+
+            float target = sunvisible ? 1.0f : 0.0f;
+            if(state.factor < 0 || state.lastupdate < 0) state.factor = target;
+            else if(state.lastupdate != frame)
+            {
+                float step = particleilluminationsunlightfade > 0 ? clamp(float(frame - state.lastupdate)/particleilluminationsunlightfade, 0.0f, 1.0f) : 1.0f;
+                state.factor += (target - state.factor)*step;
+            }
+            state.lastupdate = frame;
+
+            if(state.factor > 1e-3f) light.add(vec(sunlightcolor.r, sunlightcolor.g, sunlightcolor.b).mul(state.factor));
+        }
         loopv(dynlights)
         {
             particledynlightsample &sample = dynlights[i];
