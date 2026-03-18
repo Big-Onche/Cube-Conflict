@@ -47,6 +47,8 @@ void loadshaders()
     nullshader->set();
 
     loadedshaders = true;
+
+    useshaderbyname("lensflare"); // warm deferred lens flares up front so the first look at the sun doesn't hitch.
 }
 
 Shader *lookupshaderbyname(const char *name)
