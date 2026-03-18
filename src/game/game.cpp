@@ -1228,7 +1228,6 @@ namespace game
         bool isHudplayer = d==hudplayer();
         vec feetPos = d->feetpos();
         vec o = (isHudplayer && !isthirdperson()) ? feetPos : d->o;
-        int smokeType = camera1->o.squaredist(o) < 200 * 200 ? PART_SMOKE : PART_SMOKE_L;
         gameent *pl = (gameent *)d;
 
         if(waterlevel>0)
@@ -1256,10 +1255,10 @@ namespace game
             else if(material&MAT_LAVA)
             {
                 playSound(S_LAVASPLASH, isHudplayer ? vec(0, 0, 0) : d->o, 300, 50);
-                particle_splash(smokeType, 12, 100, o, 0x222222, (10.f + rnd(5)), 400, 20);
+                particle_splash(PART_SMOKE, 12, 100, o, 0x222222, (10.f + rnd(5)), 400, 20);
                 particle_splash(PART_FIRE_BALL, 7, 120, o, 0xCC7744, (10.f + rnd(5)), 400, 300);
                 loopi(2 + rnd(3)) particles::dirSplash(PART_FIRESPARK, 0xFFBB55, 750, 7, 300 + (rnd(500)), feetPos, vec(0, 0, 1), 3.f+(rnd(30)/6.f), ((i + 1) * 125) + rnd(200), -1);
-                loopi(4) particles::dirSplash(smokeType, 0x333333, 200, 2, 1500 + rnd(750), feetPos, vec(0, 0, 1), 15.f + rnd(5), 50 + rnd(50), 5);
+                loopi(4) particles::dirSplash(PART_SMOKE, 0x333333, 200, 2, 1500 + rnd(750), feetPos, vec(0, 0, 1), 15.f + rnd(5), 50 + rnd(50), 5);
             }
         }
 
@@ -1270,13 +1269,13 @@ namespace game
 
         if(floorlevel>0)
         {
-            particle_splash(isRaining && atmos ? PART_WATER : smokeType, powerArmor ? 8 : 5, 100, feetPos, isRaining && atmos ? 0x111111 : isSnowing ? 0xFFFFFF : 0x666666, 7.0f+rnd(powerArmor ? 10 : 5), 400, 20);
+            particle_splash(isRaining && atmos ? PART_WATER : PART_SMOKE, powerArmor ? 8 : 5, 100, feetPos, isRaining && atmos ? 0x111111 : isSnowing ? 0xFFFFFF : 0x666666, 7.0f+rnd(powerArmor ? 10 : 5), 400, 20);
             if(isHudplayer) startCameraAnimation(CAM_ANIM_JUMP, 600, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0.2f, 0));
             if(d==player1 || d->type!=ENT_PLAYER || pl->ai) msgsound(powerArmor ? S_JUMP_ASSIST : playerClass==C_NINJA || (playerClass==C_KAMIKAZE && pl->abilitymillis[ABILITY_2]) ? S_JUMP_NINJA : S_JUMP_BASIC, d);
         }
         else if(floorlevel<0)
         {
-            particle_splash(isRaining && atmos ? PART_WATER : smokeType, powerArmor ? 15 : 10, 120, feetPos, isRaining && atmos ? 0x131313 : isSnowing ? 0xFFFFFF : 0x442211, 7.0f+rnd(powerArmor ? 10 : 5), 400, 20);
+            particle_splash(isRaining && atmos ? PART_WATER : PART_SMOKE, powerArmor ? 15 : 10, 120, feetPos, isRaining && atmos ? 0x131313 : isSnowing ? 0xFFFFFF : 0x442211, 7.0f+rnd(powerArmor ? 10 : 5), 400, 20);
             if(isHudplayer) startCameraAnimation(CAM_ANIM_LAND, 400, vec(0, 0, -3), vec(0, 0, 0), vec(0, -0.4f, 0));
             if(d==player1 || d->type!=ENT_PLAYER || pl->ai) msgsound(powerArmor ? S_LAND_ASSIST : S_LAND_BASIC, d);
         }

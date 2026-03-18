@@ -36,8 +36,12 @@ VAR(dbgpcull, 0, 0, 1);
 VAR(dbgpseed, 0, 0, 1);
 
 VARP(particleillumination, 0, 1, 1);
-VARP(particleilluminationmaxdist, 128, 512, 16384);
+VARP(particleilluminationmaxdist, 128, 768, 16384);
+VARP(particleilluminationfadedist, 0, 512, 16384);
 VARP(particleilluminationcachegridsize, 4, 32, 128);
+VARP(particlesmokelodmindist, 32, 128, 2048);
+FVARP(particlesmokelodscaledist, 1.0f, 512.0f, 1024.0f);
+VARP(particlesmokelodmaxdist, 64, 1024, 4096);
 
 VARR(particleilluminationambientscale, 0, 100, 100);
 VARR(particleilluminationsunscale, 0, 100, 100);
@@ -386,6 +390,39 @@ static inline bvec particleilluminatedcolor(const vec &origin, const bvec &basec
     brightenparticlecolor(color, light.ambient, ambientweight * brightenblend, receptivity);
     brightenparticlecolor(color, light.sunlight, sunweight * brightenblend, receptivity);
     brightenparticlecolor(color, light.dynlights, dynweight * brightenblend, receptivity);
+
+    return bvec(
+        clampcol(color.x),
+        clampcol(color.y),
+        clampcol(color.z)
+    );
+}
+
+static inline float particleilluminationamount(const vec &origin)
+{
+    if(!camera1 || particleillumination == 0) return 0.0f;
+
+    float maxdist = max(float(particleilluminationmaxdist), 0.0f);
+    if(maxdist <= 0.0f) return 0.0f;
+
+    float fadedist = clamp(float(particleilluminationfadedist), 0.0f, maxdist);
+    float dist = origin.dist2(camera1->o);
+    if(dist <= fadedist) return 1.0f;
+    if(dist >= maxdist) return 0.0f;
+
+    float range = maxdist - fadedist;
+    if(range <= 1e-3f) return 0.0f;
+    return 1.0f - (dist - fadedist)/range;
+}
+
+static inline bvec particleilluminatedcolor(const vec &origin, const bvec &basecolor, float amount)
+{
+    if(amount <= 0.0f) return basecolor;
+    if(amount >= 1.0f) return particleilluminatedcolor(origin, basecolor);
+
+    bvec lit = particleilluminatedcolor(origin, basecolor);
+    vec color = vec(basecolor.r, basecolor.g, basecolor.b).mul(1.0f - amount)
+        .add(vec(lit.r, lit.g, lit.b).mul(amount));
 
     return bvec(
         clampcol(color.x),
@@ -1122,8 +1159,8 @@ struct varenderer : partrenderer
 
         if(!(type&PT_SHADER)) modifyblend<T>(o, blend);
 
-        bool illuminate = (type&PT_LABSORPTION) && particleillumination != 0 && p->o.dist2(camera1->o) < particleilluminationmaxdist ;
-        bvec color = illuminate ? particleilluminatedcolor(o, p->color) : p->color;
+        float illuminate = (type&PT_LABSORPTION) ? particleilluminationamount(o) : 0.0f;
+        bvec color = illuminate > 0.0f ? particleilluminatedcolor(o, p->color, illuminate) : p->color;
 
         if(regen)
         {
@@ -1139,7 +1176,7 @@ struct varenderer : partrenderer
             if(type&PT_MOD) SETMODCOLOR;
             else SETCOLOR(color.r, color.g, color.b, blend);
         }
-        else if((type&PT_MOD) || illuminate)
+        else if((type&PT_MOD) || illuminate > 0.0f)
         {
             if(type&PT_MOD) SETMODCOLOR;
             else SETCOLOR(color.r, color.g, color.b, blend);
@@ -1618,6 +1655,14 @@ static inline bool isHaze(int type)
     return type == PART_HAZE_SMALL || type == PART_HAZE_BIG || type == PART_HAZE_MUZZLE;
 }
 
+static inline int resolvesmoketype(int type, const vec &o, float size)
+{
+    if((type != PART_SMOKE && type != PART_SMOKE_S) || !camera1) return type;
+
+    float loddist = clamp(max(size, 0.0f)*particlesmokelodscaledist, float(particlesmokelodmindist), float(particlesmokelodmaxdist));
+    return camera1->o.squaredist(o) <= loddist*loddist ? type : PART_SMOKE_L;
+}
+
 static inline particle *newparticle(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity = 0, int sizemod = 0, bool sound = false, bool hud = false)
 {
     static particle dummy;
@@ -1650,6 +1695,7 @@ namespace particles
 
     static void directionalSplash(int type, int color, int radius, int num, int fade, const vec &p, const vec &dir, float size, int speed, int sizemod)
     {
+        type = resolvesmoketype(type, p, size);
         int fmin = 1;
         int fmax = fade*3;
         min(speed, 2);
@@ -1687,6 +1733,7 @@ namespace particles
     void trail(int type, int fade, const vec &s, const vec &e, int color, float size, int gravity)
     {
         if(minimized) return;
+        type = resolvesmoketype(type, vec(s).add(e).mul(0.5f), size);
         vec v;
         float d = e.dist(s, v);
         int steps = clamp(int(d*2), 1, maxtrail);
@@ -1743,6 +1790,7 @@ namespace particles
 
 static void splash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int sizemod, bool sound = false)
 {
+    type = resolvesmoketype(type, p, size);
     float collidez = parts[type]->type&PT_COLLIDE ? p.z - raycube(p, vec(0, 0, -1), COLLIDERADIUS, RAY_CLIPMAT|RAY_POLY) + (parts[type]->stain >= 0 ? COLLIDEERROR : 0) : -1;
     int fmin = 1;
     int fmax = fade*3;
@@ -1764,6 +1812,7 @@ static void splash(int type, int color, int radius, int num, int fade, const vec
 
 void particle_flying_flare(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity, int sizemod, bool randomcolor)
 {
+    type = resolvesmoketype(type, o, size);
     newparticle(o, d, fade, type, randomcolor ? particles::getRandomColor() : color, size, gravity, sizemod);
 }
 
@@ -1821,6 +1870,7 @@ enum {WEATHER_CLEAR = 0, WEATHER_RAIN, WEATHER_SNOW, WEATHER_APOCALYPSE};
 void regularshape(int type, int radius, int color, int dir, int num, int fade, const vec &p, float size, int gravity, float vel, int windoffset, int weather, int height, int sizemod)
 {
     if(minimized) return;
+    type = resolvesmoketype(type, p, size);
 
     int basetype = parts[type]->type&0xFF;
     bool flare = (basetype == PT_TAPE) || (basetype == PT_LIGHTNING),
@@ -1942,6 +1992,7 @@ void regularflame(int type, const vec &p, float radius, float height, int color,
     if(minimized) return;
 
     float size = scale * min(radius, height)*1.5f;
+    type = resolvesmoketype(type, p, size);
 
     if(sizeMin && sizeMax) clamp(scale, sizeMin, sizeMax);
 
