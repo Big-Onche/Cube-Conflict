@@ -36,7 +36,7 @@ VAR(dbgpcull, 0, 0, 1);
 VAR(dbgpseed, 0, 0, 1);
 
 VARP(particleillumination, 0, 1, 1);
-VARP(particleilluminationmaxdist, 128, 768, 16384);
+VARP(particleilluminationmaxdist, 128, 2048, 16384);
 VARP(particleilluminationfadedist, 0, 512, 16384);
 VARP(particleilluminationcachegridsize, 4, 32, 128);
 VARP(particlesmokelodmindist, 32, 128, 2048);
@@ -47,7 +47,7 @@ VARR(particleilluminationambientscale, 0, 100, 100);
 VARR(particleilluminationsunscale, 0, 100, 100);
 VARR(particleilluminationdynlightscale, 0, 100, 100);
 VARR(particleilluminationlightcap, 0, 255, 1000);
-VARR(particlelightabsorption, 0, 92, 100);
+VARR(particlelightabsorption, 0, 85, 100);
 
 VAR(particleilluminationbrightenblend, 0, 30, 100);
 VAR(particleilluminationfalloff, 0, 96, 128);
@@ -390,6 +390,9 @@ static inline bvec particleilluminatedcolor(const vec &origin, const bvec &basec
     brightenparticlecolor(color, light.ambient, ambientweight * brightenblend, receptivity);
     brightenparticlecolor(color, light.sunlight, sunweight * brightenblend, receptivity);
     brightenparticlecolor(color, light.dynlights, dynweight * brightenblend, receptivity);
+
+    // Keep the particle's authored color as the floor so dark lighting never muddies it.
+    color.max(vec(basecolor.r / 2, basecolor.g / 2, basecolor.b / 2));
 
     return bvec(
         clampcol(color.x),
@@ -1189,7 +1192,7 @@ struct varenderer : partrenderer
 
     bool calcshadowinfo(particle *p, vec &o, float &size, int &blend)
     {
-        if(p->o.dist2(camera1->o) > particleshadowmaxdist || !particleshadowmapping() || !shadowverts || p->fade < 0) return false;
+        if(p->o.squaredist(camera1->o) > particleshadowmaxdist*particleshadowmaxdist || !particleshadowmapping() || !shadowverts || p->fade < 0) return false;
 
         o = p->o;
         vec d = p->d;
@@ -1659,7 +1662,7 @@ static inline int resolvesmoketype(int type, const vec &o, float size)
 {
     if((type != PART_SMOKE && type != PART_SMOKE_S) || !camera1) return type;
 
-    float loddist = clamp(max(size, 0.0f)*particlesmokelodscaledist, float(particlesmokelodmindist), float(particlesmokelodmaxdist));
+    float loddist = clamp(max(size, 0.0f)*particlesmokelodscaledist, float(particlesmokelodmindist), float(particleilluminationmaxdist));
     return camera1->o.squaredist(o) <= loddist*loddist ? type : PART_SMOKE_L;
 }
 
