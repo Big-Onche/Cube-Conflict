@@ -706,7 +706,7 @@ namespace game
                     {
                         float originOffset = 0.4f - (rnd(9) / 10.f);
                         particle_flare(muzzleOrigin.add(vec(originOffset, originOffset, originOffset)), rays[i], 100, PART_F_SHOTGUN, hasRoids ? 0xFF2222 : 0xFFFF22, 0.4f, d, hasShrooms());
-                        particles::trail(PART_SMOKE, 800, hudgunorigin(gun, from, to, d), rays[i], 0x999999, 0.6f, 20);
+                        particles::trail(PART_SMOKE, 600, hudgunorigin(gun, from, to, d), rays[i], 0x999999, 0.6f, 20);
                         renderInstantImpact(from, rays[i], muzzleOrigin, atk, hasRoids);
                         if(!isHudPlayer) soundNearmiss(S_BIGBULLETFLYBY, from, rays[i], 512);
                         playSound(S_BIGRICOCHET, rays[i], 250, 100);
@@ -754,7 +754,7 @@ namespace game
                         case 1: particle_flying_flare(muzzleOrigin, dest, 700, PART_FIRE_BALL, hasRoids ? 0x770000 : 0x474747, (12.f+rnd(16))/8.f, 100, 10+rnd(5), hasShrooms()); break;
                         case 2: particle_flying_flare(muzzleOrigin, dest, 700, PART_FIRE_BALL, hasRoids ? 0x991111 : 0x383838, (12.f+rnd(16))/8.f, 100, 10+rnd(5), hasShrooms()); break;
                         default:
-                            particle_flying_flare(muzzleOrigin, dest, 1100, PART_SMOKE, 0x111111, (15.f+rnd(18))/3.f, -20, 15+rnd(10), hasShrooms());
+                            particle_flying_flare(muzzleOrigin, dest, 1100, PART_SMOKE, 0x000000, (15.f+rnd(18))/3.f, -20, 15+rnd(10), hasShrooms());
                             renderInstantImpact(from, rays[i], muzzleOrigin, atk, hasRoids);
                             if(rnd(2) && !isHudPlayer) soundNearmiss(S_FLYBYFLAME, from, rays[i]);
                     }
@@ -772,7 +772,7 @@ namespace game
 
             case ATK_M32:
             {
-                particle_splash(PART_SMOKE, 10, 600, d->muzzle, wizardAbility ? 0x550044 : 0x444444, 4.0f, 20, 500, 0, hasShrooms());
+                particle_splash(PART_SMOKE, 5, 600, d->muzzle, wizardAbility ? 0x550044 : 0x444444, 4.0f, 20, 500, 0, hasShrooms());
                 if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK,  8, 500, d->muzzle, 0xFF4444, 1.0f, 50, 200, 0, hasShrooms());
                 float dist = from.dist(to); vec up = to; up.z += dist/8;
                 bouncers::add(isHudPlayer && !thirdperson ? d->muzzle : hudgunorigin(gun, d->o, to, d), up, local, id, d, BNC_GRENADE, attacks[atk].ttl, attacks[atk].projspeed);

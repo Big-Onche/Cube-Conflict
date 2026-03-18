@@ -12,6 +12,7 @@ VARP(particlesize, 20, 100, 500);
 VARP(softparticles, 0, 1, 1);
 VARP(softparticleblend, 1, 8, 64);
 VARFP(particleshadow, 0, 1, 1, { cleardeferredlightshaders(); cleanupshadowatlas(); });
+VARP(particleshadowmaxdist, 128, 512, 16384);
 FVARFR(particleshadowalpha, 0.0f, 2.0f, 4.0f, { cleardeferredlightshaders(); cleanupshadowatlas(); });
 FVAR(particleshadowblur, 0.0f, 4.0f, 8.0f);
 
@@ -30,17 +31,24 @@ bool canemitparticles()
 VARP(showparticles, 0, 1, 1);
 VAR(cullparticles, 0, 1, 1);
 VAR(replayparticles, 0, 1, 1);
-VARP(particleillumination, 0, 1, 1);
-VARR(particleilluminationambientscale, 0, 80, 100);
-VARR(particleilluminationsunscale, 0, 80, 100);
-VARR(particleilluminationdynlightscale, 0, 100, 100);
-VAR(particleilluminationfalloff, 0, 96, 128);
-VAR(particleilluminationfalloffradius, 0, 64, 8192);
-VARP(particleilluminationlightcap, 0, 175, 1000);
-VAR(particleilluminationsunlightfade, 0, 250, 2000);
 VARN(seedparticles, seedmillis, 0, 3000, 10000);
 VAR(dbgpcull, 0, 0, 1);
 VAR(dbgpseed, 0, 0, 1);
+
+VARP(particleillumination, 0, 1, 1);
+VARP(particleilluminationmaxdist, 128, 512, 16384);
+VARP(particleilluminationcachegridsize, 4, 32, 128);
+
+VARR(particleilluminationambientscale, 0, 100, 100);
+VARR(particleilluminationsunscale, 0, 100, 100);
+VARR(particleilluminationdynlightscale, 0, 100, 100);
+VARR(particleilluminationlightcap, 0, 255, 1000);
+VARR(particlelightabsorption, 0, 92, 100);
+
+VAR(particleilluminationbrightenblend, 0, 30, 100);
+VAR(particleilluminationfalloff, 0, 96, 128);
+VAR(particleilluminationfalloffradius, 0, 64, 8192);
+VAR(particleilluminationsunlightfade, 0, 1000, 2000);
 
 struct particleemitter
 {
@@ -161,8 +169,15 @@ static inline float lightFade(float dist, float radius) // cheap light absorptio
 {
     if(radius <= 1e-3f) return 0.0f;
     float d = clamp(dist/radius, 0.0f, 1.0f);
-    if(radius <= particleilluminationfalloffradius) return 1.0f - d;
-    return exp2f(-particleilluminationfalloff*d*d);
+    float linear = 1.0f - d;
+    if(particleilluminationfalloff <= 0) return linear;
+
+    float powered = exp2f(-particleilluminationfalloff*d*d);
+    if(particleilluminationfalloffradius <= 0) return powered;
+
+    float blend = clamp(radius/float(particleilluminationfalloffradius), 0.0f, 1.0f);
+    blend = blend*blend*(3.0f - 2.0f*blend);
+    return linear + (powered - linear)*blend;
 }
 
 static inline vec lightClamp(const vec &lightcolor)
@@ -189,13 +204,11 @@ struct particlelightcomponents
     particlelightcomponents() : ambient(0, 0, 0), sunlight(0, 0, 0), dynlights(0, 0, 0) {}
 };
 
-static const float PARTICLE_SUNLIGHT_CACHE_GRIDSIZE = 32.0f;
-
 static inline ivec particlesunlightcell(const vec &o)
 {
-    return ivec(int(floor(o.x/PARTICLE_SUNLIGHT_CACHE_GRIDSIZE)),
-                int(floor(o.y/PARTICLE_SUNLIGHT_CACHE_GRIDSIZE)),
-                int(floor(o.z/PARTICLE_SUNLIGHT_CACHE_GRIDSIZE)));
+    return ivec(int(floor(o.x/particleilluminationcachegridsize)),
+                int(floor(o.y/particleilluminationcachegridsize)),
+                int(floor(o.z/particleilluminationcachegridsize)));
 }
 
 static inline float particlesunlighttracedist()
@@ -335,10 +348,12 @@ struct particlelightsampler
 
 static particlelightsampler particlelightstate;
 
-static inline float particlelightreceptivity(const bvec &basecolor)
+static inline float calcparticlelightreceptivity(const bvec &basecolor)
 {
     float brightness = (0.2126f*basecolor.r + 0.7152f*basecolor.g + 0.0722f*basecolor.b)/255.0f;
-    return 0.15f + 0.85f*brightness;
+    float target = 0.15f + 0.85f*brightness;
+    float strength = clamp(particlelightabsorption/100.0f, 0.0f, 1.0f);
+    return 1.0f + (target - 1.0f)*strength;
 }
 
 static inline void brightenparticlecolor(vec &color, const vec &light, float weight, float receptivity)
@@ -355,12 +370,23 @@ static inline bvec particleilluminatedcolor(const vec &origin, const bvec &basec
     particlelightcomponents light = particlelightstate.sample(origin);
     float ambientweight = particleilluminationambientscale/100.0f,
           sunweight = particleilluminationsunscale/100.0f,
-          dynweight = particleilluminationdynlightscale/100.0f;
-    float receptivity = particlelightreceptivity(basecolor);
-    vec color(basecolor.r, basecolor.g, basecolor.b);
-    brightenparticlecolor(color, light.ambient, ambientweight, receptivity);
-    brightenparticlecolor(color, light.sunlight, sunweight, receptivity);
-    brightenparticlecolor(color, light.dynlights, dynweight, receptivity);
+          dynweight = particleilluminationdynlightscale/100.0f,
+          baseweight = max(1.0f - max(ambientweight, max(sunweight, dynweight)), 0.0f);
+
+    float receptivity = calcparticlelightreceptivity(basecolor);
+    float brightenblend = clamp(particleilluminationbrightenblend/100.0f, 0.0f, 1.0f);
+
+    // linear pass (preserves light color, forms the base)
+    vec color = vec(basecolor.r, basecolor.g, basecolor.b).mul(baseweight);
+    color.add(vec(light.ambient).mul(ambientweight * receptivity));
+    color.add(vec(light.sunlight).mul(sunweight * receptivity));
+    color.add(vec(light.dynlights).mul(dynweight * receptivity));
+
+    // screen-blend pass (adds perceived brightness, scaled back by blend factor)
+    brightenparticlecolor(color, light.ambient, ambientweight * brightenblend, receptivity);
+    brightenparticlecolor(color, light.sunlight, sunweight * brightenblend, receptivity);
+    brightenparticlecolor(color, light.dynlights, dynweight * brightenblend, receptivity);
+
     return bvec(
         clampcol(color.x),
         clampcol(color.y),
@@ -1096,7 +1122,7 @@ struct varenderer : partrenderer
 
         if(!(type&PT_SHADER)) modifyblend<T>(o, blend);
 
-        bool illuminate = (type&PT_LABSORPTION) && particleillumination != 0;
+        bool illuminate = (type&PT_LABSORPTION) && particleillumination != 0 && p->o.dist2(camera1->o) < particleilluminationmaxdist ;
         bvec color = illuminate ? particleilluminatedcolor(o, p->color) : p->color;
 
         if(regen)
@@ -1126,7 +1152,7 @@ struct varenderer : partrenderer
 
     bool calcshadowinfo(particle *p, vec &o, float &size, int &blend)
     {
-        if(!particleshadowmapping() || !shadowverts || p->fade < 0) return false;
+        if(p->o.dist2(camera1->o) > particleshadowmaxdist || !particleshadowmapping() || !shadowverts || p->fade < 0) return false;
 
         o = p->o;
         vec d = p->d;
@@ -1375,6 +1401,7 @@ static partrenderer *parts[] =
     // flames and smokes
     new quadrenderer("media/particles/fire/smoke.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_LERP|PT_RND4|PT_LABSORPTION),            // PART_SMOKE
     new quadrenderer("media/particles/fire/smoke.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_LERP|PT_RND4|PT_SOFT|PT_LABSORPTION),    // PART_SMOKE_S
+    new quadrenderer("media/particles/fire/smoke.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_LERP|PT_RND4),                           // PART_SMOKE_L // cheaper one
     new quadrenderer("media/particles/fire/flames.png", PT_PART|PT_HFLIP|PT_RND4|PT_OVERBRIGHT),                             // PART_FLAME
     new quadrenderer("media/particles/fire/fire_ball.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_RND4),                               // PART_FIRE_BALL
     new quadrenderer("media/particles/fire/firespark.png", PT_PART|PT_FLIP|PT_RND4|PT_OVERBRIGHT|PT_COLLIDE, STAIN_BURN),    // PART_FIRESPARK
@@ -1663,6 +1690,8 @@ namespace particles
         vec v;
         float d = e.dist(s, v);
         int steps = clamp(int(d*2), 1, maxtrail);
+        if(type == PART_SMOKE) steps /= 2;
+
         v.div(steps);
         vec p = s;
         loopi(steps)
@@ -2058,14 +2087,14 @@ static void makeparticles(entity &e)
 
             regularflame(PART_FLAME, e.o, radius, height, rgbToHex(r, g, b), 2, 2.0f+(rnd(2)), 200.f, 600.f, -15, e.attr8);
             int gray = smokeGs();
-            if(e.attr1==1) regularflame(PART_SMOKE, vec(e.o.x, e.o.y, e.o.z + 4.0f*min(radius, height)), radius, height, rgbToHex(gray, gray, gray), 1, 4.0f+(rnd(6)), 100.0f, 2750.0f, -15, e.attr8);
+            if(e.attr1==1 && !rnd(2)) regularflame(PART_SMOKE, vec(e.o.x, e.o.y, e.o.z + 4.0f*min(radius, height)), radius, height, rgbToHex(gray, gray, gray), 1, 4.0f+(rnd(6)), 100.0f, 2750.0f, -15, e.attr8);
 
             if(e.attr9 && rndevent(e.attr9)) particles::dirSplash(PART_FIRESPARK, 0xFFFF55, 500, rnd(3)+1, 750+(rnd(750)), offsetvec(e.o, rnd(7), rnd(15)-rnd(31)), vec(0, 0, 1), 0.6f + (rnd(18)/12.f), 150);
             break;
         }
         case 3: // smoke only: attr 2:<radius> 3:<height> 4:<r> 5:<g> 6:<b> 7:<color offset> 8:<grow(+)/shrink(-)>
         {
-            if(!canemitparticles()) return;
+            if(!canemitparticles() || !rnd(2)) return;
             float radius = e.attr2 ? float(e.attr2)/100.0f : 1.5f,
                   height = e.attr3 ? float(e.attr3)/100.0f : radius/3;
 
@@ -2160,7 +2189,7 @@ static void makeparticles(entity &e)
                 if(e.attr3) pos.add(vec((- e.attr3 / 2) + rnd(e.attr3), (- e.attr3 / 2) + rnd(e.attr3), 0));
                 playSound(S_LAVASPLASH, e.o, 300, 100);
                 loopi(2 + rnd(3)) particles::dirSplash(PART_FIRESPARK, 0xFFBB55, 750, 7, 300 + (rnd(500)), pos, vec(0, 0, 1), 3.f+(rnd(30)/6.f), ((i + 1) * 125) + rnd(200), -1);
-                loopi(4) particles::dirSplash(PART_SMOKE, 0x333333, 200, 4, 1500 + rnd(750), pos, vec(0, 0, 1), 15.f + rnd(5), 50 + rnd(50), 5);
+                loopi(4) particles::dirSplash(PART_SMOKE, 0x333333, 200, 2, 1500 + rnd(750), pos, vec(0, 0, 1), 15.f + rnd(5), 50 + rnd(50), 5);
                 loopi(2) particle_fireball(pos, 20, PART_EXPLOSION, 500, 0xFF9900, 2.5f, false);
                 particles::dirSplash(PART_HAZE_SMALL, 100, 200, 2, 1000 + rnd(500), pos, vec(0, 0, 1), 30.f, 50, 15);
                 adddynlight(e.o, 200, vec(0.3f, 0.15f, 0), 250, 150, DL_EXPAND|L_NOSHADOW|L_VOLUMETRIC, 50);

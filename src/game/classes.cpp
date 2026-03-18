@@ -67,7 +67,7 @@ namespace game
                 if(d->character==C_SPY)
                 {
                     loopi(1)particle_fireball(d->o,  50, PART_SHOCKWAVE, 300, 0xBBBBBB, 1.f);
-                    particle_splash(PART_SMOKE, 7, 400, d->o, 0x666666, 15+rnd(5), 200, -10);
+                    particle_splash(PART_SMOKE, 4, 400, d->o, 0x666666, 15+rnd(5), 200, -10);
                 }
                 break;
 

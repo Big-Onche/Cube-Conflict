@@ -500,7 +500,7 @@ namespace game
                             playSound(S_ECLAIRPROCHE);
                             adddynlight(vec(d->abovehead()).addz(30), 500, vec(0.0f, 0.5f, 1.5f), 80, 40, L_NODYNSHADOW);
                             particle_flare(vec(d->o).add(vec(50 - rnd(101), 50 - rnd(101), 1500)), d->feetpos(), 175, PART_LIGHTNING, 0xFFFFFF, 40.0f);
-                            particle_splash(PART_SMOKE,  15, 2000, d->o, 0x333333, 40.0f, 150, 500);
+                            particle_splash(PART_SMOKE, 7, 2000, d->o, 0x333333, 40.0f, 150, 500);
                         }
                     }
                 }
@@ -844,8 +844,8 @@ namespace game
         // death gfx effects
         vec pos(d->o.x, d->o.y, d->o.z-9);
         gibeffect(4000, d->vel, d);
-        particle_splash(PART_SMOKE,  8, 1500, pos, 0x333333, 12.0f,  125, 400);
-        particle_splash(PART_SMOKE,  5, 900, pos, 0x440000, 10.0f,  125, 200);
+        particle_splash(PART_SMOKE,  4, 1500, pos, 0x333333, 12.0f,  125, 400);
+        particle_splash(PART_SMOKE,  3, 900, pos, 0x440000, 10.0f,  125, 200);
 
         stopLinkedSound(d->entityId, 0, true);
 
@@ -913,7 +913,7 @@ namespace game
             else playSound(S_ECLAIRPROCHE, d==hudplayer() ? vec(0, 0, 0) : d->o, 300, 150);
             adddynlight(vec(d->abovehead()).addz(30), 500, vec(0.0f, 0.5f, 1.5f), 80, 40, L_NODYNSHADOW|DL_FLASH);
             particle_flare(vec(d->o).add(vec(50 - rnd(101), 50 - rnd(101), 1500)), d->feetpos(), 175, PART_LIGHTNING, 0xFFFFFF, 30.0f);
-            particle_splash(PART_SMOKE,  15, 2000, d->o, 0x333333, 40.0f, 150, 500);
+            particle_splash(PART_SMOKE, 7, 2000, d->o, 0x333333, 40.0f, 150, 500);
             if(actor==player1) { playSound(S_FAUCHEUSE); player1->vampiremillis=1500; }
         }
 
@@ -1226,7 +1226,9 @@ namespace game
     void physicstrigger(physent *d, bool local, int floorlevel, int waterlevel, int material)
     {
         bool isHudplayer = d==hudplayer();
-        vec o = (isHudplayer && !isthirdperson()) ? d->feetpos() : d->o;
+        vec feetPos = d->feetpos();
+        vec o = (isHudplayer && !isthirdperson()) ? feetPos : d->o;
+        int smokeType = camera1->o.squaredist(o) < 200 * 200 ? PART_SMOKE : PART_SMOKE_L;
         gameent *pl = (gameent *)d;
 
         if(waterlevel>0)
@@ -1254,47 +1256,53 @@ namespace game
             else if(material&MAT_LAVA)
             {
                 playSound(S_LAVASPLASH, isHudplayer ? vec(0, 0, 0) : d->o, 300, 50);
-                particle_splash(PART_SMOKE, 25, 100, o, 0x222222, (10.f + rnd(5)), 400, 20);
+                particle_splash(smokeType, 12, 100, o, 0x222222, (10.f + rnd(5)), 400, 20);
                 particle_splash(PART_FIRE_BALL, 7, 120, o, 0xCC7744, (10.f + rnd(5)), 400, 300);
-                loopi(2 + rnd(3)) particles::dirSplash(PART_FIRESPARK, 0xFFBB55, 750, 7, 300 + (rnd(500)), d->feetpos(), vec(0, 0, 1), 3.f+(rnd(30)/6.f), ((i + 1) * 125) + rnd(200), -1);
-                loopi(4) particles::dirSplash(PART_SMOKE, 0x333333, 200, 4, 1500 + rnd(750), d->feetpos(), vec(0, 0, 1), 15.f + rnd(5), 50 + rnd(50), 5);
+                loopi(2 + rnd(3)) particles::dirSplash(PART_FIRESPARK, 0xFFBB55, 750, 7, 300 + (rnd(500)), feetPos, vec(0, 0, 1), 3.f+(rnd(30)/6.f), ((i + 1) * 125) + rnd(200), -1);
+                loopi(4) particles::dirSplash(smokeType, 0x333333, 200, 2, 1500 + rnd(750), feetPos, vec(0, 0, 1), 15.f + rnd(5), 50 + rnd(50), 5);
             }
         }
 
         bool isRaining = mapatmosphere == 4 || mapatmosphere == 8;
         bool isSnowing = mapatmosphere == 9;
+        bool powerArmor = pl->hasPowerArmor();
+        int playerClass = pl->character;
 
         if(floorlevel>0)
         {
-
-            particle_splash(isRaining && atmos ? PART_WATER : PART_SMOKE, pl->armourtype==A_POWERARMOR ? 12 : 10, 100, d->feetpos(), isRaining && atmos ? 0x111111 : isSnowing ? 0xFFFFFF : 0x666666, 7.0f+rnd(pl->armourtype==A_POWERARMOR ? 10 : 5), 400, 20);
-            if(d==hudplayer()) startCameraAnimation(CAM_ANIM_JUMP, 600, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0.2f, 0));
-            if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_POWERARMOR && pl->armour ? S_JUMP_ASSIST : pl->character==C_NINJA || (pl->character==C_KAMIKAZE && pl->abilitymillis[ABILITY_2]) ? S_JUMP_NINJA : S_JUMP_BASIC, d);
+            particle_splash(isRaining && atmos ? PART_WATER : smokeType, powerArmor ? 8 : 5, 100, feetPos, isRaining && atmos ? 0x111111 : isSnowing ? 0xFFFFFF : 0x666666, 7.0f+rnd(powerArmor ? 10 : 5), 400, 20);
+            if(isHudplayer) startCameraAnimation(CAM_ANIM_JUMP, 600, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0.2f, 0));
+            if(d==player1 || d->type!=ENT_PLAYER || pl->ai) msgsound(powerArmor ? S_JUMP_ASSIST : playerClass==C_NINJA || (playerClass==C_KAMIKAZE && pl->abilitymillis[ABILITY_2]) ? S_JUMP_NINJA : S_JUMP_BASIC, d);
         }
         else if(floorlevel<0)
         {
-            particle_splash(isRaining && atmos ? PART_WATER : PART_SMOKE, pl->armourtype==A_POWERARMOR ? 20 : 15, 120, d->feetpos(), isRaining && atmos ? 0x131313 : isSnowing ? 0xFFFFFF : 0x442211, 7.0f+rnd(pl->armourtype==A_POWERARMOR ? 10 : 5), 400, 20);
-            if(d==hudplayer()) startCameraAnimation(CAM_ANIM_LAND, 400, vec(0, 0, -3), vec(0, 0, 0), vec(0, -0.4f, 0));
-            if(d==player1 || d->type!=ENT_PLAYER || ((gameent *)d)->ai) msgsound(pl->armourtype==A_POWERARMOR && pl->armour ? S_LAND_ASSIST : S_LAND_BASIC, d);
+            particle_splash(isRaining && atmos ? PART_WATER : smokeType, powerArmor ? 15 : 10, 120, feetPos, isRaining && atmos ? 0x131313 : isSnowing ? 0xFFFFFF : 0x442211, 7.0f+rnd(powerArmor ? 10 : 5), 400, 20);
+            if(isHudplayer) startCameraAnimation(CAM_ANIM_LAND, 400, vec(0, 0, -3), vec(0, 0, 0), vec(0, -0.4f, 0));
+            if(d==player1 || d->type!=ENT_PLAYER || pl->ai) msgsound(powerArmor ? S_LAND_ASSIST : S_LAND_BASIC, d);
         }
     }
 
     void footsteps(physent *d)
     {
         if(d->blocked) return;
+
         bool moving = d->move || d->strafe;
-        bool isHudPlayer = d==hudplayer();
         gameent *pl = (gameent *)d;
+
         if(d->physstate>=PHYS_SLOPE && moving)
         {
+            bool isHudPlayer = d==hudplayer();
             bool powerArmor = pl->hasPowerArmor();
+            bool hasEpo = pl->boostmillis[B_EPO];
             int snd = lookupmaterial(d->feetpos()) == MAT_WATER ? S_SWIM : (powerArmor ? S_FOOTSTEP_ASSIST : S_FOOTSTEP);
+            int freq = (((100 - classes[pl->character].speed) + 75) * 5);
 
-            int freq = (((100 - classes[pl->character].speed) + 75) * 5) ;
             if(pl->crouched() || (pl->abilitymillis[ABILITY_2] && pl->character==C_SPY)) freq *= 2;
+
             if(d->inwater) freq *= 1.5f;
             else if(powerArmor) freq *= 2;
-            if(pl->boostmillis[B_EPO]) freq /= 2.f;
+
+            if(hasEpo) freq /= 2.f;
 
             if(lastmillis-pl->lastfootstep < freq) return;
             else
@@ -1303,13 +1311,13 @@ namespace game
                 {
                     static bool cameraSwayDir = false;
                     float swayValue = 0.12f * (classes[pl->character].speed / 100.f);
-                    if(pl->boostmillis[B_EPO]) swayValue *= 2.f;
+                    if(hasEpo) swayValue *= 2.f;
                     startCameraAnimation(CAM_ANIM_SWAY, freq, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0, (cameraSwayDir ? swayValue : -swayValue)));
                     cameraSwayDir = !cameraSwayDir;
                 }
                 playSound(snd, isHudPlayer ? vec(0, 0, 0) : d->o, powerArmor ? 300 : 150, 20, powerArmor ? NULL : SND_LOWPRIORITY, pl->entityId);
 
-                if(pl->boostmillis[B_EPO] && !rnd(15))
+                if(hasEpo && !rnd(15))
                 {
                     playSound(S_EPO_RUN, isHudPlayer ? vec(0, 0, 0) : d->o, 500, 100, NULL, pl->entityId);
                     if(camera1->o.dist(d->o) >= 400 && d!=player1) playSound(S_EPO_RUN_FAR, d->o, 1000, 500, NULL, pl->entityId);

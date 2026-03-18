@@ -515,7 +515,7 @@ namespace game
         {
             case GUN_MOLOTOV:
                 particle_splash(PART_FIRE_BALL, 2, 80, d->balles, 0xFFC864, 1, 30, 30, 0, hasShrooms());
-                particle_splash(PART_SMOKE, 3, 180, d->balles, 0x444444, 2, 40, 50, 0, hasShrooms());
+                particle_splash(PART_SMOKE, 2, 180, d->balles, 0x444444, 2, 40, 50, 0, hasShrooms());
                 particle_splash(PART_HAZE_SMALL, 2, 250, d->balles, 85, 2, 40, 50, 5);
                 break;
         }
@@ -553,7 +553,7 @@ namespace game
         if(d->hasPowerArmor() && d->armour < 1500)
         {
             bool lowArmour = (d->armour < 750);
-            if(rndevent(lowArmour ? 98 : 95)) regularflame(PART_SMOKE, pos, 15, 3, (lowArmour ? 0x222222 : 0x777777), 1, (lowArmour ? 2.5f : 2), 50, (lowArmour ? 1750 : 1250), -10, 3);
+            if(rndevent(lowArmour ? 98 : 95)) regularflame(PART_SMOKE, pos, 8, 3, (lowArmour ? 0x222222 : 0x777777), 1, (lowArmour ? 2.5f : 2), 50, (lowArmour ? 1750 : 1250), -10, 3);
             if(d->armour < 1000 && rndevent(lowArmour ? 95 : 92)) particle_splash(PART_FIRE_BALL, (1 + lowArmour), 500, pos, rnd(2) ? 0x992200 : 0x886622, (d->armour<500 ? 5 : 3), 50, -20);
             if(lowArmour && rndevent(1)) bouncers::spawn(d->o, d->vel, d, BNC_SCRAP, 50);
         }
@@ -586,10 +586,10 @@ namespace game
                 }
                 break;
             case C_PRIEST:
-                if(d->abilitymillis[ABILITY_2]) particle_fireball(pos , 16.0f, PART_SHOCKWAVE, 5, 0xFFFF00, 16.0f);
+                if(d->abilitymillis[ABILITY_2]) particle_fireball(pos, 16.0f, PART_SHOCKWAVE, 5, 0xFFFF00, 16.0f);
                 break;
             case C_VIKING:
-                if(d->boostmillis[B_RAGE] && rndevent(97) && exceptHud) particle_splash(PART_SMOKE, 2, 150, d->o, 0xFF3300, 12+rnd(5), 400, 200);
+                if(d->boostmillis[B_RAGE] && rndevent(97) && exceptHud) particle_splash(PART_SMOKE, 1, 150, d->o, 0xFF3300, 12+rnd(5), 400, 200);
                 break;
             case C_SHOSHONE:
                 if(rndevent(98))
@@ -609,10 +609,11 @@ namespace game
             float metersize = 0.08f / (dist / 125);
             if(hudplayer()->character==C_MEDIC)
             {
-                if(dist <= 250) particles::meter(d->abovehead(), d->health/1000.0f, PART_METER, 1, rygbGradient(d->health/10), 0x000000, metersize, true);
-                if(d->health < 500)
+                int health = d->health;
+                if(dist <= 250) particles::meter(d->abovehead(), health/1000.0f, PART_METER, 1, rygbGradient(health/10), 0x000000, metersize, true);
+                if(health < 500)
                 {
-                    int blinkSpeed = 1001 - (500 - d->health) / 2;
+                    int blinkSpeed = 1001 - (500 - health) / 2;
                     particles::hudIcon(PART_HEALTH, pos, (totalmillis % blinkSpeed < blinkSpeed / 2) ? 0x111111 : 0xFFFFFF, 0.075f);
                 }
             }

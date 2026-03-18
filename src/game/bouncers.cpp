@@ -381,7 +381,7 @@ namespace bouncers
                     break;
 
                 case BNC_ROCK:
-                    if(emitPart) particle_splash(PART_SMOKE, 1, 150, pos, 0x404040, 2.5f, 50, -20, 0, shrooms);
+                    if(emitPart) particle_splash(PART_SMOKE, 1, 150, pos, 0x202020, 2.5f, 50, -20, 0, shrooms);
                     break;
 
                 case BNC_BIGROCK:
@@ -402,7 +402,7 @@ namespace bouncers
                 case BNC_SCRAP:
                     if(emitPart)
                     {
-                        particle_splash(inWater ? PART_BUBBLE : PART_SMOKE, inWater ? 1 : 3, 250, pos, 0x222222, 2.5f, 50, -50, 0, shrooms);
+                        particle_splash(inWater ? PART_BUBBLE : PART_SMOKE, inWater ? 1 : 2, 250, pos, 0x222222, 2.5f, 50, -50, 0, shrooms);
                         particle_splash(PART_FIRE_BALL, 2, 75, pos, 0x994400, 0.7f, 30, -30, 0, shrooms);
                     }
                     break;
@@ -420,7 +420,7 @@ namespace bouncers
                     if(emitPart)
                     {
                         particle_splash(PART_FIRE_BALL, 2, 80, bnc.particles, 0xFFC864, 1, 30, 30, 0, shrooms);
-                        particle_splash(PART_SMOKE, 3, 180, bnc.particles, 0x444444, 2, 40, 50, 0, shrooms);
+                        particle_splash(PART_SMOKE, 1, 180, bnc.particles, 0x444444, 2, 40, 50, 0, shrooms);
                         particle_splash(PART_HAZE_SMALL, 2, 250, bnc.particles, 85, 2, 40, 50, 5);
                     }
                     break;
