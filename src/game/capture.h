@@ -476,7 +476,7 @@ struct captureclientmode : clientmode
         float margin = 0.04f, roffset = s*margin, rsize = s + 2*roffset;
         setradartex();
         drawradar(x - roffset, y - roffset, rsize);
-        settexture("media/interface/hud/boussole.png", 3);
+        settexture("media/interface/hud/compass.png", 3);
         pushhudmatrix();
         hudmatrix.translate(x - roffset + 0.5f*rsize, y - roffset + 0.5f*rsize, 0);
         hudmatrix.rotate_around_z((camera1->yaw + 180)*-RAD);
