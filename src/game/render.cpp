@@ -513,7 +513,6 @@ namespace game
         switch(d->gunselect)
         {
             case GUN_FLAMETHROWER:
-                conoutf("%d; %d", lastmillis, d->lastaction);
                 if(lastmillis - d->lastaction < 1000 && !d->attacking)
                 {
                     if(rndevent(85)) particle_splash(PART_SMOKE, 1, 700, d->muzzle, 0x282828, 0.75f, 10, -15, 6, hasShrooms());
