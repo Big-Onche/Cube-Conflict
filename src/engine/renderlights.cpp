@@ -1731,6 +1731,7 @@ struct shadowcache : hashtable<shadowcachekey, shadowcacheval>
 
 extern int smcache, smfilter, smgather, smalpha, smalphaprec, alphashadow, particleshadow;
 extern float particleshadowalpha;
+extern float particleshadowblur;
 
 #define SHADOWCACHE_EVICT 2
 
@@ -1749,16 +1750,18 @@ extern int usetexgather;
 static inline bool usegatherforsm() { return smfilter > 1 && smgather && hasTG && usetexgather; }
 static inline bool usesmcomparemode() { return !usegatherforsm() || (hasTG && hasGPU5 && usetexgather > 1); }
 static inline bool useparticleshadowcolors() { return particleshadow && particleshadowalpha > 0; }
+static inline bool useparticleshadowfilter() { return useparticleshadowcolors() && particleshadowblur > 0; }
 static inline bool uselocalparticleshadowcolors() { return smalpha > 1 && useparticleshadowcolors(); }
 static inline bool usealphashadowcolors() { return smalpha && alphashadow; }
 static inline bool useshadowcolors() { return usealphashadowcolors() || useparticleshadowcolors(); }
+static inline bool useshadowcolorfilter() { return smfilter || useparticleshadowfilter(); }
 
 void loadsmshaders()
 {
     if(useshadowcolors())
     {
         smalphaworldshader = usealphashadowcolors() ? useshaderbyname("smalphaworld") : NULL;
-        if(smfilter)
+        if(useshadowcolorfilter())
         {
             useshaderbyname("smalphaclear");
             useshaderbyname(usegatherforsm() ? "smalphablur2d" : "smalphablurrect");
@@ -1842,7 +1845,7 @@ void setupshadowatlas()
         static const uchar blank[4] = {255, 255, 255, 255};
         createtexture(shadowblanktex, 1, 1, blank, 3, 1, GL_RGB, GL_TEXTURE_RECTANGLE);
 
-        if(smfilter)
+        if(useshadowcolorfilter())
         {
             smalign = 1;
 
@@ -2959,9 +2962,9 @@ static void bindlighttexs(int msaapass = 0, bool transparent = false)
     if(useshadowcolors())
     {
         glActiveTexture_(GL_TEXTURE10);
-        glBindTexture(GL_TEXTURE_RECTANGLE, csm.rendered > 1 ? (smfilter ? shadowfiltertex : shadowcolortex) : shadowblanktex);
+        glBindTexture(GL_TEXTURE_RECTANGLE, csm.rendered > 1 ? (useshadowcolorfilter() ? shadowfiltertex : shadowcolortex) : shadowblanktex);
         glActiveTexture_(GL_TEXTURE11);
-        glBindTexture(GL_TEXTURE_RECTANGLE, smfilter ? shadowfiltertex : shadowcolortex);
+        glBindTexture(GL_TEXTURE_RECTANGLE, useshadowcolorfilter() ? shadowfiltertex : shadowcolortex);
     }
     glActiveTexture_(GL_TEXTURE12);
     if(!bindcloudlayershadow()) glBindTexture(GL_TEXTURE_2D, notexture->id);
@@ -3394,7 +3397,7 @@ void rendervolumetric()
     if((smalpha > 1 && alphashadow && volumetricsmalphalights) || uselocalparticleshadowcolors())
     {
         glActiveTexture_(GL_TEXTURE11);
-        glBindTexture(GL_TEXTURE_RECTANGLE, smfilter ? shadowfiltertex : shadowcolortex);
+        glBindTexture(GL_TEXTURE_RECTANGLE, useshadowcolorfilter() ? shadowfiltertex : shadowcolortex);
     }
     glActiveTexture_(GL_TEXTURE0);
 
@@ -4466,7 +4469,7 @@ bool rendershadowtransparent(int idx, int side, bool cullside = false, bool part
     }
     if(particlepass) rendered |= rendershadowparticles();
 
-    if(rendered && smfilter) shadowcolorblurs.add(idx * 6 + side);
+    if(rendered && useshadowcolorfilter()) shadowcolorblurs.add(idx * 6 + side);
     return rendered;
 }
 
