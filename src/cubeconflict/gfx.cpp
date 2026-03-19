@@ -603,8 +603,8 @@ namespace game
             case ATK_FLAMETHROWER:
             {
                 float mfSize = 1.8f/adaptMuzzleFlash(d);
-                particle_flare(pos, pos, 175, PART_MF_ROCKET, increasedDamages ? 0x880000 : wizardAbility ? 0x440044 : 0x663311, mfSize, d, hasShrooms(), 7);
-                particle_flare(pos, pos, 1500, PART_HAZE_MUZZLE, 100, mfSize*2, d);
+                particle_flare(pos, pos, 225, PART_MF_ROCKET, increasedDamages ? 0x880000 : wizardAbility ? 0x440044 : 0x663311, mfSize, d, hasShrooms(), 7);
+                particle_flare(pos, pos, 1000, PART_HAZE_MUZZLE, 100, mfSize*2, d);
                 adddynlight(pos, 50, vec(0.6f, 0.3f, 0.1f), 100, 100, lightFlags, 10, vec(0.4f, 0, 0), d);
                 break;
             }

@@ -510,10 +510,23 @@ namespace game
 
     void renderWeaponParticles(gameent *d)
     {
-        if(!rndevent(95)) return;
         switch(d->gunselect)
         {
+            case GUN_FLAMETHROWER:
+                conoutf("%d; %d", lastmillis, d->lastaction);
+                if(lastmillis - d->lastaction < 1000 && !d->attacking)
+                {
+                    if(rndevent(85)) particle_splash(PART_SMOKE, 1, 700, d->muzzle, 0x282828, 0.75f, 10, -15, 6, hasShrooms());
+                    if(rndevent(95))
+                    {
+                        particle_splash(PART_FLAME, 2, 300, d->muzzle, 0xFF5500, 1.0f, 10, -10, -2, hasShrooms());
+                        particle_flare(d->muzzle, d->muzzle, 1000, PART_HAZE_MUZZLE, 50, 4.0f, d);
+                    }
+                }
+                break;
+
             case GUN_MOLOTOV:
+                if(!rndevent(95)) return;
                 particle_splash(PART_FIRE_BALL, 2, 80, d->balles, 0xFFC864, 1, 30, 30, 0, hasShrooms());
                 particle_splash(PART_SMOKE, 2, 180, d->balles, 0x444444, 2, 40, 50, 0, hasShrooms());
                 particle_splash(PART_HAZE_SMALL, 2, 250, d->balles, 85, 2, 40, 50, 5);
