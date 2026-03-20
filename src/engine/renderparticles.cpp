@@ -895,19 +895,30 @@ struct varenderer : partrenderer
         int index;
         vec o;
         float size;
-
-        bool operator<(const particlelightentry &p) const
-        {
-            return key < p.key || (key == p.key && index < p.index);
-        }
+        float depth;
     };
 
     struct particlelightdraw
     {
         int offset, count;
         vec center, bbmin, bbmax;
-        float radius;
+        float radius, depth;
     };
+
+    static inline bool sortparticlelightentriesbykey(const particlelightentry &a, const particlelightentry &b)
+    {
+        return a.key < b.key || (a.key == b.key && a.index < b.index);
+    }
+
+    static inline bool sortparticlelightentriesbydepth(const particlelightentry &a, const particlelightentry &b)
+    {
+        return a.depth > b.depth || (a.depth == b.depth && a.index < b.index);
+    }
+
+    static inline bool sortparticlelightdrawsbydepth(const particlelightdraw &a, const particlelightdraw &b)
+    {
+        return a.depth > b.depth || (a.depth == b.depth && a.offset < b.offset);
+    }
 
     partvert *verts;
     partvert *shadowverts;
@@ -1277,17 +1288,19 @@ struct varenderer : partrenderer
             entry.index = i;
             entry.o = o;
             entry.size = max(p.size, 0.0f);
+            entry.depth = camera1->o.squaredist(o);
         }
 
         if(lightentries.empty()) return;
 
-        lightentries.sort();
+        lightentries.sort(sortparticlelightentriesbykey);
         lightverts.reserve(lightentries.length() * 4);
 
         for(int start = 0; start < lightentries.length();)
         {
             int end = start + 1;
             while(end < lightentries.length() && lightentries[end].key == lightentries[start].key) end++;
+            lightentries.sort(sortparticlelightentriesbydepth, start, end - start);
 
             for(int chunkstart = start; chunkstart < end; chunkstart += MAXPARTICLELIGHTCHUNK)
             {
@@ -1297,12 +1310,14 @@ struct varenderer : partrenderer
                 draw.count = 0;
                 draw.bbmin = vec(1e16f, 1e16f, 1e16f);
                 draw.bbmax = vec(-1e16f, -1e16f, -1e16f);
+                draw.depth = 0.0f;
 
                 for(int i = chunkstart; i < chunkend; ++i)
                 {
                     const particlelightentry &entry = lightentries[i];
                     lightverts.put(&verts[entry.index*4], 4);
                     draw.count++;
+                    draw.depth = max(draw.depth, entry.depth);
                     draw.bbmin.x = min(draw.bbmin.x, entry.o.x - entry.size);
                     draw.bbmin.y = min(draw.bbmin.y, entry.o.y - entry.size);
                     draw.bbmin.z = min(draw.bbmin.z, entry.o.z - entry.size);
@@ -1317,6 +1332,8 @@ struct varenderer : partrenderer
 
             start = end;
         }
+
+        lightdraws.sort(sortparticlelightdrawsbydepth);
     }
 
     void genlightvbo()
