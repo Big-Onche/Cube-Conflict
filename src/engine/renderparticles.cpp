@@ -18,6 +18,7 @@ VARP(particlelighting, 0, 1, 1);
 VARP(particlelightingdynlights, 0, 1, 1);
 VARP(particlelightingdist, 256, 1024, 8192);
 VARP(particlelightingfadedist, 128, 768, 4096);
+VARP(particlelightingshadowmapblur, 1, 8, 16);
 
 FVAR(particlemaplightintensity, 0.0f, 1.5f, 32.0f);
 VARP(particlemaplightcolorinfluence, 0, 200, 200);
@@ -32,6 +33,7 @@ VARP(particlesunlightdebug, 0, 0, 2);
 VARFP(particleshadow, 0, 1, 1, { cleardeferredlightshaders(); cleanupshadowatlas(); });
 FVARFR(particleshadowalpha, 0.0f, 1.5f, 4.0f, { cleardeferredlightshaders(); cleanupshadowatlas(); });
 FVAR(particleshadowblur, 0.0f, 4.0f, 8.0f);
+
 
 static inline float getparticlelightingfade(const vec &center)
 {
@@ -62,12 +64,14 @@ struct particlelightuploadcache
     int sunlightdebug, locallightdebug;
     int sunlightdarkabsorb, sunlightcolorinfluence, maplightcolorinfluence;
     float sunlightintensity;
+    int shadowmapscale;
 
     particlelightuploadcache()
       : valid(false), shader(NULL), center(0, 0, 0), bbmin(0, 0, 0), bbmax(0, 0, 0),
         radius(0.0f), locallightintensity(0.0f), enablelocallights(false),
         sunlightdebug(0), locallightdebug(0), sunlightdarkabsorb(0),
-        sunlightcolorinfluence(0), maplightcolorinfluence(0), sunlightintensity(0.0f)
+        sunlightcolorinfluence(0), maplightcolorinfluence(0), sunlightintensity(0.0f),
+        shadowmapscale(1)
     {
     }
 };
@@ -98,7 +102,8 @@ static inline void bindcachedparticlelightparams(const vec &center, float radius
        particlelightcache.sunlightdarkabsorb == particlesunlightdarkabsorb &&
        particlelightcache.sunlightintensity == particlesunlightintensity &&
        particlelightcache.sunlightcolorinfluence == particlesunlightcolorinfluence &&
-       particlelightcache.maplightcolorinfluence == particlemaplightcolorinfluence)
+       particlelightcache.maplightcolorinfluence == particlemaplightcolorinfluence &&
+       particlelightcache.shadowmapscale == particlelightingshadowmapblur)
     {
         return;
     }
@@ -109,6 +114,7 @@ static inline void bindcachedparticlelightparams(const vec &center, float radius
     LOCALPARAMF(particlesunlightparams, particlesunlightdarkabsorb, particlesunlightintensity, 0, 0);
     LOCALPARAMF(particlelightcolorparams, particlesunlightcolorinfluence, particlemaplightcolorinfluence, 0, 0);
     LOCALPARAMF(particlelocallightintensity, locallightintensity, 0, 0, 0);
+    LOCALPARAMF(particlelightshadowmapscale, max(float(particlelightingshadowmapblur), 1.0f));
 
     particlelightcache.valid = true;
     particlelightcache.shader = shader;
@@ -124,6 +130,7 @@ static inline void bindcachedparticlelightparams(const vec &center, float radius
     particlelightcache.sunlightintensity = particlesunlightintensity;
     particlelightcache.sunlightcolorinfluence = particlesunlightcolorinfluence;
     particlelightcache.maplightcolorinfluence = particlemaplightcolorinfluence;
+    particlelightcache.shadowmapscale = particlelightingshadowmapblur;
 }
 
 // Check canemitparticles() to limit the rate that paricles can be emitted for models/sparklies
