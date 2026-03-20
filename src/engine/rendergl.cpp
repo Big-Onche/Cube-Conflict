@@ -2737,17 +2737,17 @@ void gl_drawview()
     renderavatar(true); // render transparent avatar right after other transparents
     GLERROR;
 
+    godRays::render();
+    GLERROR;
+
+    rendervolumetric();
+    GLERROR;
+
     if(!drawtex)
     {
         renderparticles();
         GLERROR;
     }
-
-    rendervolumetric();
-    GLERROR;
-
-    godRays::render();
-    GLERROR;
 
     if(editmode)
     {

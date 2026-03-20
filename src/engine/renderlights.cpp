@@ -1733,6 +1733,7 @@ struct shadowcache : hashtable<shadowcachekey, shadowcacheval>
 extern int smcache, smfilter, smgather, smalpha, smalphaprec, alphashadow, particleshadow;
 extern float particleshadowalpha;
 extern float particleshadowblur;
+extern int particletransmittance;
 
 #define SHADOWCACHE_EVICT 2
 
@@ -3227,6 +3228,7 @@ static inline void clearparticlelightparams()
     loopi(MAXPARTICLELIGHTS) resetparticlelightslot(i);
     LOCALPARAMI(csmcount, 0);
     LOCALPARAMI(particlelightcount, 0);
+    LOCALPARAMI(particletransmittanceatlas, 0);
     LOCALPARAMV(particlelightpos, particlelightposv, MAXPARTICLELIGHTS);
     LOCALPARAMV(particlelightcolor, particlelightcolorv, MAXPARTICLELIGHTS);
     LOCALPARAMV(particlelightspot, particlelightspotv, MAXPARTICLELIGHTS);
@@ -3304,11 +3306,18 @@ static int collectparticlelights(const vec &center, float /*radius*/, const vec 
 void bindparticlelightparams(const vec &center, float radius, const vec &bbmin, const vec &bbmax, bool enablelocallights)
 {
     int sunlightsplits = 0;
+    bool hasparticletransmittanceatlas = false;
     if(shadowatlastex && shadowatlastarget != GL_NONE)
     {
         glActiveTexture_(GL_TEXTURE1);
         glBindTexture(shadowatlastarget, shadowatlastex);
         setsmcomparemode();
+        if(particletransmittance && shadowcolortex)
+        {
+            glActiveTexture_(GL_TEXTURE3);
+            glBindTexture(shadowatlastarget, shadowcolortex);
+            hasparticletransmittanceatlas = true;
+        }
         glActiveTexture_(GL_TEXTURE0);
 
         GLOBALPARAMF(shadowatlasscale, 1.0f/shadowatlaspacker.w, 1.0f/shadowatlaspacker.h);
@@ -3334,6 +3343,7 @@ void bindparticlelightparams(const vec &center, float radius, const vec &bbmin, 
     }
 
     LOCALPARAMI(csmcount, sunlightsplits);
+    LOCALPARAMI(particletransmittanceatlas, hasparticletransmittanceatlas ? 1 : 0);
     if(!enablelocallights)
     {
         loopi(MAXPARTICLELIGHTS) resetparticlelightslot(i);

@@ -18,12 +18,14 @@ VARP(particlelighting, 0, 1, 1);
 VARP(particlelightingdynlights, 0, 1, 1);
 VARP(particlelightingdist, 256, 1024, 8192);
 VARP(particlelightingfadedist, 128, 768, 4096);
-VARP(particlelightingshadowmapblur, 1, 8, 16);
+VARP(particlelightingshadowmapblur, 1, 3, 16);
+VARP(particletransmittance, 0, 1, 1);
+FVARP(particletransmittanceextinction, 0.0f, 1.0f, 8.0f);
 
 FVAR(particlemaplightintensity, 0.0f, 1.5f, 32.0f);
 VARP(particlemaplightcolorinfluence, 0, 200, 200);
 
-VAR(particlesunlightdarkabsorb, 0, 100, 100);
+VAR(particlesunlightdarkabsorb, 0, 88, 100);
 FVARR(particlesunlightintensity, 0.0f, 1.5f, 8.0f);
 VARP(particlesunlightcolorinfluence, 0, 100, 100);
 
@@ -1428,7 +1430,7 @@ struct varenderer : partrenderer
         if(!shadowvbo) glGenBuffers_(1, &shadowvbo);
 
         particleshadowshader->set();
-        LOCALPARAMF(particleshadowparams, particleshadowalpha, 0, 0, 0);
+        LOCALPARAMF(particleshadowparams, particleshadowalpha, particletransmittanceextinction, particletransmittance ? 1 : 0, 0);
         glBindTexture(GL_TEXTURE_2D, tex->id);
         gle::bindvbo(shadowvbo);
         glBufferData_(GL_ARRAY_BUFFER, shadowparts*4*sizeof(partvert), NULL, GL_STREAM_DRAW);
@@ -1704,7 +1706,7 @@ struct particleshadowbatcher
         }
 
         particleshadowshader->set();
-        LOCALPARAMF(particleshadowparams, particleshadowalpha, 0, 0, 0);
+        LOCALPARAMF(particleshadowparams, particleshadowalpha, particletransmittanceextinction, particletransmittance ? 1 : 0, 0);
 
         gle::bindvbo(vbo);
         const partvert *ptr = 0;
@@ -2254,7 +2256,7 @@ int applyRandomOffset(int base, int offset) { return clamp(base + rnd(2 * offset
 
 bool noColors(int r, int g, int b) { return !r && !g && !b; }
 
-int smokeGs() { return 5 + rnd(15); } // setting random smoke grayscale
+int smokeGs() { return 30 + rnd(15); } // setting random smoke grayscale
 
 VARR(windintensity, 0, 0, 10);
 int wind() { return 120 * windintensity; }
