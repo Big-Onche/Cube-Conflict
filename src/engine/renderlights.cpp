@@ -3259,6 +3259,7 @@ static inline void insertparticlelightcandidate(const vec &center, const vec &bb
     const vec &scaledcolor = src.scaledcolor;
     float lightluma = max(scaledcolor.x*0.2126f + scaledcolor.y*0.7152f + scaledcolor.z*0.0722f, 0.0f);
     if(lightluma <= 1.0e-4f) return;
+    vec chroma = vec(scaledcolor).div(lightluma).max(0.0f).min(3.0f);
 
     float score = particlelightscore(center, bbmin, bbmax, lightpos, lightradius);
     int insert = -1;
@@ -3277,7 +3278,7 @@ static inline void insertparticlelightcandidate(const vec &center, const vec &bb
 
     scores[insert] = score;
     particlelightposv[insert] = vec4(lightpos, 1).div(lightradius);
-    particlelightcolorv[insert] = vec4(scaledcolor, lightluma);
+    particlelightcolorv[insert] = vec4(chroma, lightluma);
     particlelightspotv[insert] = src.spot > 0 ? vec4(vec(src.dir).neg(), 1/(1 - cos360(src.spot))) : vec4(0, 0, 0, 0);
     particlelightshadowv[insert] = src.shadowparams;
     particlelightoffsetv[insert] = src.shadowoffset;
