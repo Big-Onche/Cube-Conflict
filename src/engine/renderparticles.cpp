@@ -1541,6 +1541,42 @@ static partrenderer *parts[] =
     &texts,                                                                                                                  // PART_TEXT
 };
 
+static const uint particlerenderflagmask = PT_LERP|PT_MOD|PT_BRIGHT|PT_NOTEX|PT_SOFT|PT_SHADER|PT_LABSORPTION;
+
+static inline uint getparticlerenderflags(const partrenderer *p)
+{
+    return p->type & particlerenderflagmask;
+}
+
+static inline uint getparticlerendersortflags(int index)
+{
+    if(index == PART_FLAME)
+    {
+        // Keep flame behind smoke by sorting it with the dense smoke family,
+        // while still using its real additive render state at draw time.
+        return PT_LERP|PT_BRIGHT|PT_SOFT|PT_LABSORPTION;
+    }
+    return getparticlerenderflags(parts[index]);
+}
+
+enum { numpartrenderers = sizeof(parts)/sizeof(parts[0]) };
+
+static int particlerenderorder[numpartrenderers];
+static bool particlerenderorderbuilt = false;
+
+static inline bool sortparticlerenderers(const int &a, const int &b)
+{
+    uint aflags = getparticlerendersortflags(a), bflags = getparticlerendersortflags(b);
+    return aflags < bflags || (aflags == bflags && a < b);
+}
+
+static void buildparticlerenderorder()
+{
+    loopi(numpartrenderers) particlerenderorder[i] = i;
+    quicksort(particlerenderorder, numpartrenderers, sortparticlerenderers);
+    particlerenderorderbuilt = true;
+}
+
 struct particleshadowdraw
 {
     Texture *tex;
@@ -1689,6 +1725,7 @@ void initparticles()
     if(!particlesoftlight2dshader) particlesoftlight2dshader = useshaderbyname("particlesoftlight2d");
     if(!particletextshader) particletextshader = lookupshaderbyname("particletext");
     if(!particleHazeShader) particleHazeShader = lookupshaderbyname("particleHaze");
+    if(!particlerenderorderbuilt) buildparticlerenderorder();
     loopi(sizeof(parts)/sizeof(parts[0])) parts[i]->init(parts[i]->type&PT_FEW ? min(fewparticles, maxparticles) : maxparticles);
     loopi(sizeof(parts)/sizeof(parts[0])) parts[i]->preload();
 }
@@ -1750,18 +1787,18 @@ void renderparticles(int layer)
 {
     canstep = layer != PL_UNDER;
     resetparticlelightcache();
+    if(!particlerenderorderbuilt) buildparticlerenderorder();
 
     //want to debug BEFORE the lastpass render (that would delete particles)
     if(dbgparts && (layer == PL_ALL || layer == PL_UNDER)) loopi(sizeof(parts)/sizeof(parts[0])) parts[i]->debuginfo();
 
     bool rendered = false;
     uint lastflags = PT_LERP|PT_SHADER,
-         flagmask = PT_LERP|PT_MOD|PT_BRIGHT|PT_NOTEX|PT_SOFT|PT_SHADER|PT_LABSORPTION,
          excludemask = layer == PL_ALL ? ~0 : (layer != PL_NOLAYER ? PT_NOLAYER : 0);
 
-    loopi(sizeof(parts)/sizeof(parts[0]))
+    loopi(numpartrenderers)
     {
-        partrenderer *p = parts[i];
+        partrenderer *p = parts[particlerenderorder[i]];
         if((p->type&PT_NOLAYER) == excludemask || !p->haswork()) continue;
 
         if(!rendered)
@@ -1777,7 +1814,7 @@ void renderparticles(int layer)
             glActiveTexture_(GL_TEXTURE0);
         }
 
-        uint flags = p->type & flagmask, changedbits = flags ^ lastflags;
+        uint flags = getparticlerenderflags(p), changedbits = flags ^ lastflags;
         if(changedbits)
         {
             if(changedbits&PT_LERP) { if(flags&PT_LERP) resetfogcolor(); else zerofogcolor(); }
