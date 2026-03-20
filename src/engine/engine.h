@@ -290,6 +290,7 @@ extern matrix4 shadowmatrix;
 extern GLuint shadowatlastex;
 extern GLenum shadowatlastarget;
 extern int csmshadowmap, csmsplits;
+extern void bindparticlelightparams(const vec &center, float radius, const vec &bbmin, const vec &bbmax, bool enablelocallights = true);
 
 extern void loaddeferredlightshaders();
 extern void cleardeferredlightshaders();
@@ -481,7 +482,11 @@ extern void rendershadowmesh(shadowmesh *m);
 
 extern void updatedynlights();
 extern int finddynlights();
+extern int finddynlights(const vec &center, float radius);
 extern bool getdynlight(int n, vec &o, float &radius, vec &color, vec &dir, int &spot, int &flags);
+extern int getdynlightid(int n);
+extern int getnumactivedynlights();
+extern bool getactivedynlight(int n, vec &o, float &radius, vec &color, vec &dir, int &spot, int &flags);
 
 // material
 

@@ -101,7 +101,7 @@ void updatedynlights()
     }
 }
 
-int finddynlights()
+static int collectdynlights(const vec *center, float radius)
 {
     closedynlights.setsize(0);
     if(!usedynlights) return 0;
@@ -111,9 +111,16 @@ int finddynlights()
     {
         dynlight &d = dynlights[j];
         if(d.curradius <= 0) continue;
-        d.dist = camera1->o.dist(d.o) - d.curradius;
-        if(d.dist > dynlightdist || isfoggedsphere(d.curradius, d.o) || pvsoccludedsphere(d.o, d.curradius))
-            continue;
+        if(center)
+        {
+            d.dist = center->dist(d.o) - (radius + d.curradius);
+        }
+        else
+        {
+            d.dist = camera1->o.dist(d.o) - d.curradius;
+            if(d.dist > dynlightdist || isfoggedsphere(d.curradius, d.o) || pvsoccludedsphere(d.o, d.curradius))
+                continue;
+        }
         e.o = d.o;
         e.radius = e.xradius = e.yradius = e.eyeheight = e.aboveeye = d.curradius;
         if(!collide(&e, vec(0, 0, 0), 0, false)) continue;
@@ -125,10 +132,45 @@ int finddynlights()
     return closedynlights.length();
 }
 
+int finddynlights()
+{
+    return collectdynlights(NULL, 0.0f);
+}
+
+int finddynlights(const vec &center, float radius)
+{
+    return collectdynlights(&center, radius);
+}
+
 bool getdynlight(int n, vec &o, float &radius, vec &color, vec &dir, int &spot, int &flags)
 {
     if(!closedynlights.inrange(n)) return false;
     dynlight &d = *closedynlights[n];
+    o = d.o;
+    radius = d.curradius;
+    color = d.curcolor;
+    spot = d.spot;
+    dir = d.dir;
+    flags = d.flags & 0xFF;
+    return true;
+}
+
+int getdynlightid(int n)
+{
+    if(!closedynlights.inrange(n) || dynlights.empty()) return -1;
+    return int(closedynlights[n] - dynlights.getbuf());
+}
+
+int getnumactivedynlights()
+{
+    return dynlights.length();
+}
+
+bool getactivedynlight(int n, vec &o, float &radius, vec &color, vec &dir, int &spot, int &flags)
+{
+    if(!dynlights.inrange(n)) return false;
+    dynlight &d = dynlights[n];
+    if(d.curradius <= 0) return false;
     o = d.o;
     radius = d.curradius;
     color = d.curcolor;

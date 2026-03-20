@@ -18,6 +18,7 @@ GLuint aofbo[4] = { 0, 0, 0, 0 }, aotex[4] = { 0, 0, 0, 0 }, aonoisetex = 0;
 matrix4 eyematrix, worldmatrix, linearworldmatrix, screenmatrix;
 
 extern int amd_pf_bug;
+extern int particlelightingdynlights;
 
 int gethdrformat(int prec, int fallback = GL_RGB)
 {
@@ -1588,7 +1589,7 @@ extern int smminradius;
 
 struct lightinfo
 {
-    int ent, shadowmap;
+    int ent, shadowmap, dynlightid;
     ushort flags, batched;
     vec o, color;
     float radius, dist;
@@ -1598,8 +1599,8 @@ struct lightinfo
     occludequery *query;
 
     lightinfo() {}
-    lightinfo(const vec &o, const vec &color, float radius, ushort flags = 0, const vec &dir = vec(0, 0, 0), int spot = 0)
-      : ent(-1), shadowmap(-1), flags(flags), batched(~0),
+    lightinfo(const vec &o, const vec &color, float radius, ushort flags = 0, const vec &dir = vec(0, 0, 0), int spot = 0, int dynlightid = -1)
+      : ent(-1), shadowmap(-1), dynlightid(dynlightid), flags(flags), batched(~0),
         o(o), color(color), radius(radius), dist(camera1->o.dist(o)),
         dir(dir), spot(spot), query(NULL)
     {
@@ -1607,7 +1608,7 @@ struct lightinfo
         calcscissor();
     }
     lightinfo(int i, const extentity &e)
-      : ent(i), shadowmap(-1), flags(e.attr5), batched(~0),
+      : ent(i), shadowmap(-1), dynlightid(-1), flags(e.attr5), batched(~0),
         o(e.o), color(vec(e.attr2, e.attr3, e.attr4).max(0)), radius(e.attr1), dist(camera1->o.dist(e.o)),
         dir(0, 0, 0), spot(0), query(NULL)
     {
@@ -2729,6 +2730,8 @@ static inline bool sortlights(int x, int y)
     return xl.dist - xl.radius < yl.dist - yl.radius;
 }
 
+static inline void clearparticlelightsourcecache();
+
 VAR(lighttilealignw, 1, 16, 256);
 VAR(lighttilealignh, 1, 16, 256);
 VARN(lighttilew, lighttilemaxw, 1, 10, LIGHTTILE_MAXW);
@@ -2747,6 +2750,7 @@ void calctilesize()
 void resetlights()
 {
     shadowcache.reset();
+    clearparticlelightsourcecache();
     if(smcache)
     {
         int evictx = ((evictshadowcache%SHADOWCACHE_EVICT)*shadowatlaspacker.w)/SHADOWCACHE_EVICT,
@@ -3032,6 +3036,324 @@ static inline void setlightglobals(bool transparent = false)
     GLOBALPARAM(lightmatrix, lightmatrix);
 }
 
+enum { MAXPARTICLELIGHTS = 4 };
+
+static vec4 particlelightposv[MAXPARTICLELIGHTS], particlelightcolorv[MAXPARTICLELIGHTS], particlelightspotv[MAXPARTICLELIGHTS], particlelightshadowv[MAXPARTICLELIGHTS];
+static vec2 particlelightoffsetv[MAXPARTICLELIGHTS];
+struct particlelightsource
+{
+    vec o, rawcolor, scaledcolor, dir;
+    float radius;
+    int spot;
+    vec4 shadowparams;
+    vec2 shadowoffset;
+};
+static vector<particlelightsource> particlelightsources;
+static vector<vec4> particlelightentshadowv, particlelightdynshadowv;
+static vector<vec2> particlelightentoffsetv, particlelightdynoffsetv;
+static int particlelightsourceframe = -1;
+
+void collectlights();
+bool blinkLight(int blinkSpeed);
+extern int shutdaytimelights;
+
+static inline void resetparticlelightslot(int index)
+{
+    particlelightposv[index] = vec4(0, 0, 0, 1);
+    particlelightcolorv[index] = vec4(0, 0, 0, 0);
+    particlelightspotv[index] = vec4(0, 0, 0, 0);
+    particlelightshadowv[index] = vec4(0, 0, 0, 0);
+    particlelightoffsetv[index] = vec2(-1, -1);
+}
+
+static inline bool getlightshadowparams(const lightinfo &l, vec4 &shadowparams, vec2 &shadowoffset)
+{
+    if(!shadowmaps.inrange(l.shadowmap) || l.radius <= 0)
+    {
+        shadowparams = vec4(0, 0, 0, 0);
+        shadowoffset = vec2(-1, -1);
+        return false;
+    }
+
+    shadowmapinfo &sm = shadowmaps[l.shadowmap];
+    float smnearclip = SQRT3 / l.radius, smfarclip = SQRT3,
+          bias = (smfilter > 2 || shadowatlaspacker.w > SHADOWATLAS_SIZE ? smbias2 : smbias) * (smcullside ? 1 : -1) * smnearclip * (1024.0f / sm.size);
+    int border = smfilter > 2 ? smborder2 : smborder;
+    if(l.spot > 0)
+    {
+        shadowparams = vec4(
+            -0.5f * sm.size * cotan360(l.spot),
+            (-smnearclip * smfarclip / (smfarclip - smnearclip) - 0.5f*bias),
+            1 / (1 + fabs(l.dir.z)),
+            0.5f + 0.5f * (smfarclip + smnearclip) / (smfarclip - smnearclip));
+    }
+    else
+    {
+        shadowparams = vec4(
+            -0.5f * (sm.size - border),
+            -smnearclip * smfarclip / (smfarclip - smnearclip) - 0.5f*bias,
+            sm.size,
+            0.5f + 0.5f * (smfarclip + smnearclip) / (smfarclip - smnearclip));
+    }
+    shadowoffset = vec2(sm.x + 0.5f*sm.size, sm.y + 0.5f*sm.size);
+    return true;
+}
+
+static inline void clearparticlelightsourcecache()
+{
+    particlelightsources.shrink(0);
+    particlelightentshadowv.shrink(0);
+    particlelightdynshadowv.shrink(0);
+    particlelightentoffsetv.shrink(0);
+    particlelightdynoffsetv.shrink(0);
+    particlelightsourceframe = -1;
+}
+
+static inline void resetparticlelightshadowcache(vector<vec4> &shadowparamsv, vector<vec2> &shadowoffsetv, int count)
+{
+    shadowparamsv.shrink(0);
+    shadowoffsetv.shrink(0);
+    loopi(count)
+    {
+        shadowparamsv.add(vec4(0, 0, 0, 0));
+        shadowoffsetv.add(vec2(-1, -1));
+    }
+}
+
+static inline void ensureparticlelightsources()
+{
+    if(particlelightsourceframe == lastmillis) return;
+    particlelightsourceframe = lastmillis;
+    particlelightsources.shrink(0);
+
+    const vector<extentity *> &ents = entities::getents();
+    resetparticlelightshadowcache(particlelightentshadowv, particlelightentoffsetv, ents.length());
+
+    int numactivedynlights = 0;
+    if(particlelightingdynlights && !drawtex)
+    {
+        updatedynlights();
+        numactivedynlights = getnumactivedynlights();
+    }
+    resetparticlelightshadowcache(particlelightdynshadowv, particlelightdynoffsetv, numactivedynlights);
+
+    loopv(lights)
+    {
+        const lightinfo &l = lights[i];
+        if(l.shadowmap < 0) continue;
+        vec4 shadowparams;
+        vec2 shadowoffset;
+        if(!getlightshadowparams(l, shadowparams, shadowoffset)) continue;
+        if(l.ent >= 0 && particlelightentshadowv.inrange(l.ent))
+        {
+            particlelightentshadowv[l.ent] = shadowparams;
+            particlelightentoffsetv[l.ent] = shadowoffset;
+        }
+        else if(l.dynlightid >= 0 && particlelightdynshadowv.inrange(l.dynlightid))
+        {
+            particlelightdynshadowv[l.dynlightid] = shadowparams;
+            particlelightdynoffsetv[l.dynlightid] = shadowoffset;
+        }
+    }
+
+    float lightscale = 2.0f*ldrscaleb;
+    loopv(ents)
+    {
+        const extentity *e = ents[i];
+        if(e->type != ET_LIGHT || e->attr1 <= 0) continue;
+        if((e->attr6 && shutdaytimelights) || blinkLight(e->attr7)) continue;
+
+        particlelightsource &src = particlelightsources.add();
+        src.o = e->o;
+        src.rawcolor = vec(e->attr2, e->attr3, e->attr4).max(0);
+        src.scaledcolor = vec(src.rawcolor).mul(lightscale);
+        src.radius = e->attr1;
+        src.dir = vec(0, 0, 0);
+        src.spot = 0;
+        if(e->attached && e->attached->type == ET_SPOTLIGHT)
+        {
+            src.dir = vec(e->attached->o).sub(e->o).normalize();
+            src.spot = clamp(int(e->attached->attr1), 1, 89);
+        }
+        if(particlelightentshadowv.inrange(i))
+        {
+            src.shadowparams = particlelightentshadowv[i];
+            src.shadowoffset = particlelightentoffsetv[i];
+        }
+        else
+        {
+            src.shadowparams = vec4(0, 0, 0, 0);
+            src.shadowoffset = vec2(-1, -1);
+        }
+    }
+
+    if(!particlelightingdynlights) return;
+
+    physent dynprobe;
+    dynprobe.type = ENT_CAMERA;
+    loopi(numactivedynlights)
+    {
+        vec o, color, dir;
+        float radius;
+        int spot, flags;
+        if(!getactivedynlight(i, o, radius, color, dir, spot, flags)) continue;
+        (void)flags;
+        dynprobe.o = o;
+        dynprobe.radius = dynprobe.xradius = dynprobe.yradius = dynprobe.eyeheight = dynprobe.aboveeye = radius;
+        if(!collide(&dynprobe, vec(0, 0, 0), 0, false)) continue;
+
+        particlelightsource &src = particlelightsources.add();
+        src.o = o;
+        src.rawcolor = vec(color).mul(255).max(0);
+        src.scaledcolor = vec(src.rawcolor).mul(lightscale);
+        src.radius = radius;
+        src.dir = dir;
+        src.spot = spot;
+        if(particlelightdynshadowv.inrange(i))
+        {
+            src.shadowparams = particlelightdynshadowv[i];
+            src.shadowoffset = particlelightdynoffsetv[i];
+        }
+        else
+        {
+            src.shadowparams = vec4(0, 0, 0, 0);
+            src.shadowoffset = vec2(-1, -1);
+        }
+    }
+}
+
+static inline void clearparticlelightparams()
+{
+    loopi(MAXPARTICLELIGHTS) resetparticlelightslot(i);
+    LOCALPARAMI(csmcount, 0);
+    LOCALPARAMI(particlelightcount, 0);
+    LOCALPARAMV(particlelightpos, particlelightposv, MAXPARTICLELIGHTS);
+    LOCALPARAMV(particlelightcolor, particlelightcolorv, MAXPARTICLELIGHTS);
+    LOCALPARAMV(particlelightspot, particlelightspotv, MAXPARTICLELIGHTS);
+    LOCALPARAMV(particlelightshadow, particlelightshadowv, MAXPARTICLELIGHTS);
+    LOCALPARAMV(particlelightoffset, particlelightoffsetv, MAXPARTICLELIGHTS);
+}
+
+static inline float particlelightscore(const vec &center, const vec &bbmin, const vec &bbmax, const vec &lightpos, float lightradius)
+{
+    float invradius = 1.0f/max(lightradius, 1.0f);
+    float boxdist = lightpos.dist_to_bb(bbmin, bbmax) * invradius;
+    float bestprobedist = center.dist(lightpos) * invradius;
+    loopi(8)
+    {
+        vec corner(i&1 ? bbmax.x : bbmin.x, i&2 ? bbmax.y : bbmin.y, i&4 ? bbmax.z : bbmin.z);
+        bestprobedist = min(bestprobedist, corner.dist(lightpos) * invradius);
+    }
+    return boxdist*4.0f + bestprobedist;
+}
+
+static inline void insertparticlelightcandidate(const vec &center, const vec &bbmin, const vec &bbmax, const particlelightsource &src, float *scores)
+{
+    const vec &lightpos = src.o;
+    float lightradius = src.radius;
+    if(lightradius <= 0) return;
+
+    float boxdist = lightpos.dist_to_bb(bbmin, bbmax);
+    if(boxdist >= lightradius) return;
+
+    const vec &scaledcolor = src.scaledcolor;
+    float lightluma = max(scaledcolor.x*0.2126f + scaledcolor.y*0.7152f + scaledcolor.z*0.0722f, 0.0f);
+    if(lightluma <= 1.0e-4f) return;
+
+    float score = particlelightscore(center, bbmin, bbmax, lightpos, lightradius);
+    int insert = -1;
+    loopj(MAXPARTICLELIGHTS) if(score < scores[j]) { insert = j; break; }
+    if(insert < 0) return;
+
+    for(int j = MAXPARTICLELIGHTS-1; j > insert; --j)
+    {
+        scores[j] = scores[j-1];
+        particlelightposv[j] = particlelightposv[j-1];
+        particlelightcolorv[j] = particlelightcolorv[j-1];
+        particlelightspotv[j] = particlelightspotv[j-1];
+        particlelightshadowv[j] = particlelightshadowv[j-1];
+        particlelightoffsetv[j] = particlelightoffsetv[j-1];
+    }
+
+    scores[insert] = score;
+    particlelightposv[insert] = vec4(lightpos, 1).div(lightradius);
+    particlelightcolorv[insert] = vec4(scaledcolor, lightluma);
+    particlelightspotv[insert] = src.spot > 0 ? vec4(vec(src.dir).neg(), 1/(1 - cos360(src.spot))) : vec4(0, 0, 0, 0);
+    particlelightshadowv[insert] = src.shadowparams;
+    particlelightoffsetv[insert] = src.shadowoffset;
+}
+
+static int collectparticlelights(const vec &center, float /*radius*/, const vec &bbmin, const vec &bbmax)
+{
+    float scores[MAXPARTICLELIGHTS];
+    loopi(MAXPARTICLELIGHTS)
+    {
+        scores[i] = 1e16f;
+        resetparticlelightslot(i);
+    }
+
+    ensureparticlelightsources();
+    loopv(particlelightsources) insertparticlelightcandidate(center, bbmin, bbmax, particlelightsources[i], scores);
+
+    int numparticlelights = 0;
+    loopi(MAXPARTICLELIGHTS) if(particlelightcolorv[i].a > 1.0e-4f) numparticlelights++;
+    return numparticlelights;
+}
+
+void bindparticlelightparams(const vec &center, float radius, const vec &bbmin, const vec &bbmax, bool enablelocallights)
+{
+    int sunlightsplits = 0;
+    if(shadowatlastex && shadowatlastarget != GL_NONE)
+    {
+        glActiveTexture_(GL_TEXTURE1);
+        glBindTexture(shadowatlastarget, shadowatlastex);
+        setsmcomparemode();
+        glActiveTexture_(GL_TEXTURE0);
+
+        GLOBALPARAMF(shadowatlasscale, 1.0f/shadowatlaspacker.w, 1.0f/shadowatlaspacker.h);
+        if(csm.rendered)
+        {
+            csm.bindparams();
+            sunlightsplits = csmsplits;
+        }
+    }
+
+    if(!drawtex && editmode && fullbright)
+    {
+        GLOBALPARAMF(sunlightdir, 0, 0, 0);
+        GLOBALPARAMF(sunlightcolor, 0, 0, 0);
+        clearparticlelightparams();
+        return;
+    }
+    else
+    {
+        float lightscale = 2.0f*ldrscaleb;
+        GLOBALPARAM(sunlightdir, sunlightdir);
+        GLOBALPARAMF(sunlightcolor, sunlight.x*lightscale*sunlightscale, sunlight.y*lightscale*sunlightscale, sunlight.z*lightscale*sunlightscale);
+    }
+
+    LOCALPARAMI(csmcount, sunlightsplits);
+    if(!enablelocallights)
+    {
+        loopi(MAXPARTICLELIGHTS) resetparticlelightslot(i);
+        LOCALPARAMI(particlelightcount, 0);
+        LOCALPARAMV(particlelightpos, particlelightposv, MAXPARTICLELIGHTS);
+        LOCALPARAMV(particlelightcolor, particlelightcolorv, MAXPARTICLELIGHTS);
+        LOCALPARAMV(particlelightspot, particlelightspotv, MAXPARTICLELIGHTS);
+        LOCALPARAMV(particlelightshadow, particlelightshadowv, MAXPARTICLELIGHTS);
+        LOCALPARAMV(particlelightoffset, particlelightoffsetv, MAXPARTICLELIGHTS);
+        return;
+    }
+    int numparticlelights = collectparticlelights(center, radius, bbmin, bbmax);
+
+    LOCALPARAMI(particlelightcount, numparticlelights);
+    LOCALPARAMV(particlelightpos, particlelightposv, MAXPARTICLELIGHTS);
+    LOCALPARAMV(particlelightcolor, particlelightcolorv, MAXPARTICLELIGHTS);
+    LOCALPARAMV(particlelightspot, particlelightspotv, MAXPARTICLELIGHTS);
+    LOCALPARAMV(particlelightshadow, particlelightshadowv, MAXPARTICLELIGHTS);
+    LOCALPARAMV(particlelightoffset, particlelightoffsetv, MAXPARTICLELIGHTS);
+}
+
 static LocalShaderParam lightpos("lightpos"), lightcolor("lightcolor"), spotparams("spotparams"), shadowparams("shadowparams"), shadowoffset("shadowoffset");
 static vec4 lightposv[8], lightcolorv[8], spotparamsv[8], shadowparamsv[8];
 static vec2 shadowoffsetv[8];
@@ -3041,30 +3363,7 @@ static inline void setlightparams(int i, const lightinfo &l)
     lightposv[i] = vec4(l.o, 1).div(l.radius);
     lightcolorv[i] = vec4(vec(l.color).mul(2*ldrscaleb), l.nospec() ? 0 : 1);
     if(l.spot > 0) spotparamsv[i] = vec4(vec(l.dir).neg(), 1/(1 - cos360(l.spot)));
-    if(l.shadowmap >= 0)
-    {
-        shadowmapinfo &sm = shadowmaps[l.shadowmap];
-        float smnearclip = SQRT3 / l.radius, smfarclip = SQRT3,
-              bias = (smfilter > 2 || shadowatlaspacker.w > SHADOWATLAS_SIZE ? smbias2 : smbias) * (smcullside ? 1 : -1) * smnearclip * (1024.0f / sm.size);
-        int border = smfilter > 2 ? smborder2 : smborder;
-        if(l.spot > 0)
-        {
-            shadowparamsv[i] = vec4(
-                -0.5f * sm.size * cotan360(l.spot),
-                (-smnearclip * smfarclip / (smfarclip - smnearclip) - 0.5f*bias),
-                1 / (1 + fabs(l.dir.z)),
-                0.5f + 0.5f * (smfarclip + smnearclip) / (smfarclip - smnearclip));
-        }
-        else
-        {
-            shadowparamsv[i] = vec4(
-                -0.5f * (sm.size - border),
-                -smnearclip * smfarclip / (smfarclip - smnearclip) - 0.5f*bias,
-                sm.size,
-                0.5f + 0.5f * (smfarclip + smnearclip) / (smfarclip - smnearclip));
-        }
-        shadowoffsetv[i] = vec2(sm.x + 0.5f*sm.size, sm.y + 0.5f*sm.size);
-    }
+    if(l.shadowmap >= 0) getlightshadowparams(l, shadowparamsv[i], shadowoffsetv[i]);
 }
 
 static inline void setlightshader(Shader *s, int n, bool baselight, bool shadowmap, bool spotlight, bool transparent = false, bool colorshadow = false, bool avatar = false)
@@ -3666,8 +3965,8 @@ void collectlights()
         float radius;
         int spot, flags;
         if(!getdynlight(i, o, radius, color, dir, spot, flags)) continue;
-
-        lightinfo &l = lights.add(lightinfo(o, vec(color).mul(255).max(0), radius, flags, dir, spot));
+        int dynlightid = getdynlightid(i);
+        lightinfo &l = lights.add(lightinfo(o, vec(color).mul(255).max(0), radius, flags, dir, spot, dynlightid));
         if(l.validscissor()) lightorder.add(lights.length()-1);
     }
 

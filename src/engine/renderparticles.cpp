@@ -3,17 +3,54 @@
 #include "gfx.h"
 #include "engine.h"
 
-Shader *particleshader = NULL, *particlenotextureshader = NULL, *particlesoftshader = NULL, *particletextshader = NULL, *particleHazeShader = NULL, *particleshadowshader = NULL;
+Shader *particleshader = NULL, *particlenotextureshader = NULL, *particlesoftshader = NULL, *particletextshader = NULL,
+       *particleHazeShader = NULL, *particleshadowshader = NULL, *particlelightrectshader = NULL,
+       *particlelight2dshader = NULL, *particlesoftlightrectshader = NULL, *particlesoftlight2dshader = NULL;
 
 VARP(particlelayers, 0, 1, 1);
 FVARP(particlebright, 0, 1.75, 100);
 VARP(particlesize, 20, 100, 500);
 
 VARP(softparticles, 0, 1, 1);
-VARP(softparticleblend, 1, 8, 64);
+VARP(softparticleblend, 1, 3, 64);
+
+VARP(particlelighting, 0, 1, 1);
+VARP(particlelightingdynlights, 0, 1, 1);
+VARP(particlelightingdist, 256, 1024, 8192);
+VARP(particlelightingfadedist, 128, 768, 4096);
+
+FVAR(particlemaplightintensity, 0.0f, 1.5f, 32.0f);
+VARP(particlemaplightcolorinfluence, 0, 200, 200);
+
+VAR(particlesunlightdarkabsorb, 0, 100, 100);
+FVARR(particlesunlightintensity, 0.0f, 1.5f, 8.0f);
+VARP(particlesunlightcolorinfluence, 0, 100, 100);
+
+VARP(particlelocallightdebug, 0, 0, 4);
+VARP(particlesunlightdebug, 0, 0, 2);
+
 VARFP(particleshadow, 0, 1, 1, { cleardeferredlightshaders(); cleanupshadowatlas(); });
-FVARFR(particleshadowalpha, 0.0f, 2.0f, 4.0f, { cleardeferredlightshaders(); cleanupshadowatlas(); });
+FVARFR(particleshadowalpha, 0.0f, 1.5f, 4.0f, { cleardeferredlightshaders(); cleanupshadowatlas(); });
 FVAR(particleshadowblur, 0.0f, 4.0f, 8.0f);
+
+static inline float getparticlelightingfade(const vec &center)
+{
+    float enddist = max(float(particlelightingdist), 0.0f);
+    if(enddist <= 0.0f) return 0.0f;
+
+    float startdist = clamp(float(particlelightingfadedist), 0.0f, enddist);
+    float cameradist = camera1->o.dist(center);
+    if(cameradist >= enddist) return 0.0f;
+    if(cameradist <= startdist || startdist >= enddist) return 1.0f;
+
+    return 1.0f - (cameradist - startdist) / (enddist - startdist);
+}
+
+static inline float getparticlelocallightintensity(const vec &center)
+{
+    if(!particlelighting) return 0.0f;
+    return particlemaplightintensity * getparticlelightingfade(center);
+}
 
 // Check canemitparticles() to limit the rate that paricles can be emitted for models/sparklies
 // Automatically stops particles being emitted when paused or in reflective drawing
@@ -138,6 +175,21 @@ enum
 
 const char *partnames[] = { "part", "tape", "trail", "text", "textup", "meter", "metervs", "fireball", "lightning", "flare" };
 
+static inline Shader *getparticlelightshader(bool usesoft)
+{
+    switch(shadowatlastarget)
+    {
+        case GL_TEXTURE_RECTANGLE:
+            return usesoft ? particlesoftlightrectshader : particlelightrectshader;
+
+        case GL_TEXTURE_2D:
+            return usesoft ? particlesoftlight2dshader : particlelight2dshader;
+
+        default:
+            return usesoft ? particlesoftlight2dshader : particlelight2dshader;
+    }
+}
+
 struct particle
 {
     vec o, d;
@@ -165,6 +217,9 @@ struct partvert
     bvec4 color;
     vec2 tc;
 };
+
+static const int MAXPARTICLELIGHTCHUNK = 64;
+static const float PARTICLELIGHTCELLSIZE = 64.0f;
 
 static inline void setparticletexcoords(int type, const particle *p, partvert *vs)
 {
@@ -229,6 +284,7 @@ struct partrenderer
     virtual const partvert *shadowvertexdata() const { return NULL; }
     virtual bool hasshadow() { return false; }
     virtual bool haswork() = 0;
+    virtual bool getlightprobe(vec &center, float &radius, vec &bbmin, vec &bbmax) { return false; }
     virtual int count() = 0; //for debug
     virtual void cleanup() {}
 
@@ -758,11 +814,34 @@ inline void seedpos<PT_TRAIL>(particleemitter &pe, const vec &o, const vec &d, i
 template<int T>
 struct varenderer : partrenderer
 {
+    struct particlelightentry
+    {
+        ullong key;
+        int index;
+        vec o;
+        float size;
+
+        bool operator<(const particlelightentry &p) const
+        {
+            return key < p.key || (key == p.key && index < p.index);
+        }
+    };
+
+    struct particlelightdraw
+    {
+        int offset, count;
+        vec center, bbmin, bbmax;
+        float radius;
+    };
+
     partvert *verts;
     partvert *shadowverts;
     particle *parts;
     int maxparts, numparts, lastupdate, rndmask;
     GLuint vbo, shadowvbo;
+    vector<partvert> lightverts;
+    vector<particlelightentry> lightentries;
+    vector<particlelightdraw> lightdraws;
 
     varenderer(const char *texname, int type, int stain = -1)
         : partrenderer(texname, 3, type, stain),
@@ -778,6 +857,9 @@ struct varenderer : partrenderer
     {
         if(vbo) { glDeleteBuffers_(1, &vbo); vbo = 0; }
         if(shadowvbo) { glDeleteBuffers_(1, &shadowvbo); shadowvbo = 0; }
+        lightverts.setsize(0);
+        lightentries.setsize(0);
+        lightdraws.setsize(0);
     }
 
     void init(int n)
@@ -818,6 +900,38 @@ struct varenderer : partrenderer
     bool haswork()
     {
         return (numparts > 0);
+    }
+
+    bool getlightprobe(vec &center, float &radius, vec &bbmin, vec &bbmax)
+    {
+        if(!numparts) return false;
+
+        bbmin = vec(1e16f, 1e16f, 1e16f);
+        bbmax = vec(-1e16f, -1e16f, -1e16f);
+        int counted = 0;
+        loopi(numparts)
+        {
+            particle &p = parts[i];
+            if(p.fade < 0 || p.size <= 0) continue;
+
+            vec o = p.o, d = p.d;
+            if(type&PT_TRACK && p.owner) game::particletrack(p.owner, o, d);
+
+            float size = max(p.size, 0.0f);
+            bbmin.x = min(bbmin.x, o.x - size);
+            bbmin.y = min(bbmin.y, o.y - size);
+            bbmin.z = min(bbmin.z, o.z - size);
+            bbmax.x = max(bbmax.x, o.x + size);
+            bbmax.y = max(bbmax.y, o.y + size);
+            bbmax.z = max(bbmax.z, o.z + size);
+            counted++;
+        }
+
+        if(!counted) return false;
+
+        center = vec(bbmin).add(bbmax).mul(0.5f);
+        radius = max(bbmin.dist(bbmax)*0.5f, 1.0f);
+        return true;
     }
 
     particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity, int sizemod, bool sound, bool hud)
@@ -1051,9 +1165,123 @@ struct varenderer : partrenderer
         gle::clearvbo();
     }
 
+    static inline uint particlelightcellcoord(int n)
+    {
+        return uint(n) & 0x1FFFFF;
+    }
+
+    static inline ullong particlelightcellkey(const vec &o)
+    {
+        ivec cell = ivec::floor(vec(o).div(PARTICLELIGHTCELLSIZE));
+        return (ullong(particlelightcellcoord(cell.x)) << 42) |
+               (ullong(particlelightcellcoord(cell.y)) << 21) |
+               ullong(particlelightcellcoord(cell.z));
+    }
+
+    void buildlightdraws()
+    {
+        lightentries.setsize(0);
+        lightdraws.setsize(0);
+        lightverts.setsize(0);
+
+        loopi(numparts)
+        {
+            particle &p = parts[i];
+            if(p.fade < 0 || p.size <= 0) continue;
+
+            vec o = p.o, d = p.d;
+            if(type&PT_TRACK && p.owner) game::particletrack(p.owner, o, d);
+
+            particlelightentry &entry = lightentries.add();
+            entry.key = particlelightcellkey(o);
+            entry.index = i;
+            entry.o = o;
+            entry.size = max(p.size, 0.0f);
+        }
+
+        if(lightentries.empty()) return;
+
+        lightentries.sort();
+        lightverts.reserve(lightentries.length() * 4);
+
+        for(int start = 0; start < lightentries.length();)
+        {
+            int end = start + 1;
+            while(end < lightentries.length() && lightentries[end].key == lightentries[start].key) end++;
+
+            for(int chunkstart = start; chunkstart < end; chunkstart += MAXPARTICLELIGHTCHUNK)
+            {
+                int chunkend = min(chunkstart + MAXPARTICLELIGHTCHUNK, end);
+                particlelightdraw &draw = lightdraws.add();
+                draw.offset = lightverts.length() / 4;
+                draw.count = 0;
+                draw.bbmin = vec(1e16f, 1e16f, 1e16f);
+                draw.bbmax = vec(-1e16f, -1e16f, -1e16f);
+
+                for(int i = chunkstart; i < chunkend; ++i)
+                {
+                    const particlelightentry &entry = lightentries[i];
+                    lightverts.put(&verts[entry.index*4], 4);
+                    draw.count++;
+                    draw.bbmin.x = min(draw.bbmin.x, entry.o.x - entry.size);
+                    draw.bbmin.y = min(draw.bbmin.y, entry.o.y - entry.size);
+                    draw.bbmin.z = min(draw.bbmin.z, entry.o.z - entry.size);
+                    draw.bbmax.x = max(draw.bbmax.x, entry.o.x + entry.size);
+                    draw.bbmax.y = max(draw.bbmax.y, entry.o.y + entry.size);
+                    draw.bbmax.z = max(draw.bbmax.z, entry.o.z + entry.size);
+                }
+
+                draw.center = vec(draw.bbmin).add(draw.bbmax).mul(0.5f);
+                draw.radius = max(draw.bbmin.dist(draw.bbmax)*0.5f, 1.0f);
+            }
+
+            start = end;
+        }
+    }
+
+    void genlightvbo()
+    {
+        if(lastmillis == lastupdate && vbo) return;
+        lastupdate = lastmillis;
+
+        genverts();
+        buildlightdraws();
+
+        if(!vbo) glGenBuffers_(1, &vbo);
+        gle::bindvbo(vbo);
+        int vertslen = max(lightverts.length(), 1);
+        glBufferData_(GL_ARRAY_BUFFER, vertslen*sizeof(partvert), NULL, GL_STREAM_DRAW);
+        if(!lightverts.empty()) glBufferSubData_(GL_ARRAY_BUFFER, 0, lightverts.length()*sizeof(partvert), lightverts.getbuf());
+        gle::clearvbo();
+    }
+
+    void getchunklightprobe(int start, int count, vec &center, float &radius, vec &bbmin, vec &bbmax)
+    {
+        bbmin = vec(1e16f, 1e16f, 1e16f);
+        bbmax = vec(-1e16f, -1e16f, -1e16f);
+        loopi(count)
+        {
+            particle &p = parts[start + i];
+            vec o = p.o, d = p.d;
+            if(type&PT_TRACK && p.owner) game::particletrack(p.owner, o, d);
+
+            float size = max(p.size, 0.0f);
+            bbmin.x = min(bbmin.x, o.x - size);
+            bbmin.y = min(bbmin.y, o.y - size);
+            bbmin.z = min(bbmin.z, o.z - size);
+            bbmax.x = max(bbmax.x, o.x + size);
+            bbmax.y = max(bbmax.y, o.y + size);
+            bbmax.z = max(bbmax.z, o.z + size);
+        }
+
+        center = vec(bbmin).add(bbmax).mul(0.5f);
+        radius = max(bbmin.dist(bbmax)*0.5f, 1.0f);
+    }
+
     void render()
     {
-        genvbo();
+        if(type&PT_LABSORPTION) genlightvbo();
+        else genvbo();
 
         glBindTexture(GL_TEXTURE_2D, tex->id);
 
@@ -1067,7 +1295,22 @@ struct varenderer : partrenderer
         gle::enablecolor();
         gle::enablequads();
 
-        gle::drawquads(0, numparts);
+        if(type&PT_LABSORPTION)
+        {
+            loopv(lightdraws)
+            {
+                const particlelightdraw &draw = lightdraws[i];
+                float locallightintensity = getparticlelocallightintensity(draw.center);
+                bindparticlelightparams(draw.center, draw.radius, draw.bbmin, draw.bbmax, locallightintensity > 0.0f);
+                LOCALPARAMI(particlesunlightdebug, particlesunlightdebug);
+                LOCALPARAMI(particlelocallightdebug, particlelocallightdebug);
+                LOCALPARAMF(particlesunlightparams, particlesunlightdarkabsorb, particlesunlightintensity, 0, 0);
+                LOCALPARAMF(particlelightcolorparams, particlesunlightcolorinfluence, particlemaplightcolorinfluence, 0, 0);
+                LOCALPARAMF(particlelocallightintensity, locallightintensity, 0, 0, 0);
+                gle::drawquads(draw.offset, draw.count);
+            }
+        }
+        else gle::drawquads(0, numparts);
 
         gle::disablequads();
         gle::disablevertex();
@@ -1165,7 +1408,7 @@ static partrenderer *parts[] =
     new quadrenderer("media/particles/flashes/shotgun.png", PT_PART|PT_FEW|PT_BRIGHT|PT_TRACK),                              // PART_MF_SHOTGUN
     new quadrenderer("media/particles/flashes/sniper.png", PT_PART|PT_FEW|PT_BRIGHT|PT_TRACK),                               // PART_MF_SNIPER
     // bullets flares
-    new taperenderer("media/particles/trails/bullet_side.png", PT_TAPE|PT_FEW|PT_OVERBRIGHT),                                // PART_F_BULLET
+    new taperenderer("media/particles/trails/bullet_side.png", PT_TAPE|PT_FEW|PT_OVERBRIGHT|PT_LABSORPTION),                 // PART_F_BULLET
     new taperenderer("media/particles/trails/shotgun_side.png", PT_TAPE|PT_OVERBRIGHT),                                      // PART_F_SHOTGUN
     new taperenderer("media/particles/trails/plasma_side.png", PT_TAPE|PT_FEW|PT_OVERBRIGHT),                                // PART_F_PLASMA
     new taperenderer("media/particles/trails/smoke_side.png", PT_TAPE|PT_FLIP|PT_FEW|PT_SOFT),                               // PART_F_SMOKE
@@ -1365,6 +1608,10 @@ void initparticles()
     if(!particleshadowshader) particleshadowshader = lookupshaderbyname("particleshadow");
     if(!particlenotextureshader) particlenotextureshader = lookupshaderbyname("particlenotexture");
     if(!particlesoftshader) particlesoftshader = lookupshaderbyname("particlesoft");
+    if(!particlelightrectshader) particlelightrectshader = useshaderbyname("particlelightrect");
+    if(!particlelight2dshader) particlelight2dshader = useshaderbyname("particlelight2d");
+    if(!particlesoftlightrectshader) particlesoftlightrectshader = useshaderbyname("particlesoftlightrect");
+    if(!particlesoftlight2dshader) particlesoftlight2dshader = useshaderbyname("particlesoftlight2d");
     if(!particletextshader) particletextshader = lookupshaderbyname("particletext");
     if(!particleHazeShader) particleHazeShader = lookupshaderbyname("particleHaze");
     loopi(sizeof(parts)/sizeof(parts[0])) parts[i]->init(parts[i]->type&PT_FEW ? min(fewparticles, maxparticles) : maxparticles);
@@ -1433,7 +1680,7 @@ void renderparticles(int layer)
 
     bool rendered = false;
     uint lastflags = PT_LERP|PT_SHADER,
-         flagmask = PT_LERP|PT_MOD|PT_BRIGHT|PT_NOTEX|PT_SOFT|PT_SHADER,
+         flagmask = PT_LERP|PT_MOD|PT_BRIGHT|PT_NOTEX|PT_SOFT|PT_SHADER|PT_LABSORPTION,
          excludemask = layer == PL_ALL ? ~0 : (layer != PL_NOLAYER ? PT_NOLAYER : 0);
 
     loopi(sizeof(parts)/sizeof(parts[0]))
@@ -1466,17 +1713,41 @@ void renderparticles(int layer)
             }
             if(!(flags&PT_SHADER))
             {
-                if(changedbits&(PT_LERP|PT_SOFT|PT_NOTEX|PT_SHADER))
+                const bool usesoftshader = (flags&PT_SOFT) && softparticles;
+                Shader *lightshader = (flags&PT_LABSORPTION) ? getparticlelightshader(usesoftshader) : NULL;
+                vec lightprobe = camera1->o;
+                float lightproberadius = 0.0f;
+                vec lightbbmin = lightprobe, lightbbmax = lightprobe;
+                if(lightshader) p->getlightprobe(lightprobe, lightproberadius, lightbbmin, lightbbmax);
+                if(changedbits&(PT_LERP|PT_SOFT|PT_NOTEX|PT_SHADER|PT_LABSORPTION))
                 {
-                    if(flags&PT_SOFT && softparticles)
+                    if(usesoftshader)
                     {
-                        particlesoftshader->set();
+                        if(lightshader)
+                        {
+                            lightshader->set();
+                        }
+                        else particlesoftshader->set();
                         LOCALPARAMF(softparams, -1.0f/softparticleblend, 0, 0);
                     }
                     else if(flags&PT_NOTEX) particlenotextureshader->set();
+                    else if(lightshader)
+                    {
+                        lightshader->set();
+                    }
                     else particleshader->set();
                 }
-                if(changedbits&(PT_MOD|PT_BRIGHT|PT_SOFT|PT_NOTEX|PT_SHADER))
+                if(lightshader)
+                {
+                    float locallightintensity = getparticlelocallightintensity(lightprobe);
+                    bindparticlelightparams(lightprobe, lightproberadius, lightbbmin, lightbbmax, locallightintensity > 0.0f);
+                    LOCALPARAMI(particlesunlightdebug, particlesunlightdebug);
+                    LOCALPARAMI(particlelocallightdebug, particlelocallightdebug);
+                    LOCALPARAMF(particlesunlightparams, particlesunlightdarkabsorb, particlesunlightintensity, 0, 0);
+                    LOCALPARAMF(particlelightcolorparams, particlesunlightcolorinfluence, particlemaplightcolorinfluence, 0, 0);
+                    LOCALPARAMF(particlelocallightintensity, locallightintensity, 0, 0, 0);
+                }
+                if(changedbits&(PT_MOD|PT_BRIGHT|PT_SOFT|PT_NOTEX|PT_SHADER|PT_LABSORPTION))
                 {
                     float colorscale = flags&PT_MOD ? 1 : ldrscale;
                     if(flags&PT_BRIGHT || flags&PT_OVERBRIGHT) colorscale *= particlebright*(flags&PT_OVERBRIGHT ? 1.5f : 1);
