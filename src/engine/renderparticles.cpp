@@ -52,6 +52,80 @@ static inline float getparticlelocallightintensity(const vec &center)
     return particlemaplightintensity * getparticlelightingfade(center);
 }
 
+struct particlelightuploadcache
+{
+    bool valid;
+    Shader *shader;
+    vec center, bbmin, bbmax;
+    float radius, locallightintensity;
+    bool enablelocallights;
+    int sunlightdebug, locallightdebug;
+    int sunlightdarkabsorb, sunlightcolorinfluence, maplightcolorinfluence;
+    float sunlightintensity;
+
+    particlelightuploadcache()
+      : valid(false), shader(NULL), center(0, 0, 0), bbmin(0, 0, 0), bbmax(0, 0, 0),
+        radius(0.0f), locallightintensity(0.0f), enablelocallights(false),
+        sunlightdebug(0), locallightdebug(0), sunlightdarkabsorb(0),
+        sunlightcolorinfluence(0), maplightcolorinfluence(0), sunlightintensity(0.0f)
+    {
+    }
+};
+static particlelightuploadcache particlelightcache;
+
+static inline void resetparticlelightcache()
+{
+    particlelightcache.valid = false;
+    particlelightcache.shader = NULL;
+}
+
+static inline void bindcachedparticlelightparams(const vec &center, float radius, const vec &bbmin, const vec &bbmax, float locallightintensity)
+{
+    Shader *shader = Shader::lastshader;
+    if(!shader) return;
+
+    bool enablelocallights = locallightintensity > 0.0f;
+    if(particlelightcache.valid &&
+       particlelightcache.shader == shader &&
+       particlelightcache.center == center &&
+       particlelightcache.radius == radius &&
+       particlelightcache.bbmin == bbmin &&
+       particlelightcache.bbmax == bbmax &&
+       particlelightcache.locallightintensity == locallightintensity &&
+       particlelightcache.enablelocallights == enablelocallights &&
+       particlelightcache.sunlightdebug == particlesunlightdebug &&
+       particlelightcache.locallightdebug == particlelocallightdebug &&
+       particlelightcache.sunlightdarkabsorb == particlesunlightdarkabsorb &&
+       particlelightcache.sunlightintensity == particlesunlightintensity &&
+       particlelightcache.sunlightcolorinfluence == particlesunlightcolorinfluence &&
+       particlelightcache.maplightcolorinfluence == particlemaplightcolorinfluence)
+    {
+        return;
+    }
+
+    bindparticlelightparams(center, radius, bbmin, bbmax, enablelocallights);
+    LOCALPARAMI(particlesunlightdebug, particlesunlightdebug);
+    LOCALPARAMI(particlelocallightdebug, particlelocallightdebug);
+    LOCALPARAMF(particlesunlightparams, particlesunlightdarkabsorb, particlesunlightintensity, 0, 0);
+    LOCALPARAMF(particlelightcolorparams, particlesunlightcolorinfluence, particlemaplightcolorinfluence, 0, 0);
+    LOCALPARAMF(particlelocallightintensity, locallightintensity, 0, 0, 0);
+
+    particlelightcache.valid = true;
+    particlelightcache.shader = shader;
+    particlelightcache.center = center;
+    particlelightcache.radius = radius;
+    particlelightcache.bbmin = bbmin;
+    particlelightcache.bbmax = bbmax;
+    particlelightcache.locallightintensity = locallightintensity;
+    particlelightcache.enablelocallights = enablelocallights;
+    particlelightcache.sunlightdebug = particlesunlightdebug;
+    particlelightcache.locallightdebug = particlelocallightdebug;
+    particlelightcache.sunlightdarkabsorb = particlesunlightdarkabsorb;
+    particlelightcache.sunlightintensity = particlesunlightintensity;
+    particlelightcache.sunlightcolorinfluence = particlesunlightcolorinfluence;
+    particlelightcache.maplightcolorinfluence = particlemaplightcolorinfluence;
+}
+
 // Check canemitparticles() to limit the rate that paricles can be emitted for models/sparklies
 // Automatically stops particles being emitted when paused or in reflective drawing
 VARP(emitmillis, 1, 17, 1000);
@@ -285,6 +359,7 @@ struct partrenderer
     virtual bool hasshadow() { return false; }
     virtual bool haswork() = 0;
     virtual bool getlightprobe(vec &center, float &radius, vec &bbmin, vec &bbmax) { return false; }
+    virtual bool handlesparticlelightparams() const { return false; }
     virtual int count() = 0; //for debug
     virtual void cleanup() {}
 
@@ -902,6 +977,11 @@ struct varenderer : partrenderer
         return (numparts > 0);
     }
 
+    bool handlesparticlelightparams() const
+    {
+        return (type&PT_LABSORPTION) != 0;
+    }
+
     bool getlightprobe(vec &center, float &radius, vec &bbmin, vec &bbmax)
     {
         if(!numparts) return false;
@@ -1301,12 +1381,7 @@ struct varenderer : partrenderer
             {
                 const particlelightdraw &draw = lightdraws[i];
                 float locallightintensity = getparticlelocallightintensity(draw.center);
-                bindparticlelightparams(draw.center, draw.radius, draw.bbmin, draw.bbmax, locallightintensity > 0.0f);
-                LOCALPARAMI(particlesunlightdebug, particlesunlightdebug);
-                LOCALPARAMI(particlelocallightdebug, particlelocallightdebug);
-                LOCALPARAMF(particlesunlightparams, particlesunlightdarkabsorb, particlesunlightintensity, 0, 0);
-                LOCALPARAMF(particlelightcolorparams, particlesunlightcolorinfluence, particlemaplightcolorinfluence, 0, 0);
-                LOCALPARAMF(particlelocallightintensity, locallightintensity, 0, 0, 0);
+                bindcachedparticlelightparams(draw.center, draw.radius, draw.bbmin, draw.bbmax, locallightintensity);
                 gle::drawquads(draw.offset, draw.count);
             }
         }
@@ -1674,6 +1749,7 @@ bool hasshadowparticles()
 void renderparticles(int layer)
 {
     canstep = layer != PL_UNDER;
+    resetparticlelightcache();
 
     //want to debug BEFORE the lastpass render (that would delete particles)
     if(dbgparts && (layer == PL_ALL || layer == PL_UNDER)) loopi(sizeof(parts)/sizeof(parts[0])) parts[i]->debuginfo();
@@ -1715,10 +1791,11 @@ void renderparticles(int layer)
             {
                 const bool usesoftshader = (flags&PT_SOFT) && softparticles;
                 Shader *lightshader = (flags&PT_LABSORPTION) ? getparticlelightshader(usesoftshader) : NULL;
+                bool handleslightparams = lightshader && p->handlesparticlelightparams();
                 vec lightprobe = camera1->o;
                 float lightproberadius = 0.0f;
                 vec lightbbmin = lightprobe, lightbbmax = lightprobe;
-                if(lightshader) p->getlightprobe(lightprobe, lightproberadius, lightbbmin, lightbbmax);
+                if(lightshader && !handleslightparams) p->getlightprobe(lightprobe, lightproberadius, lightbbmin, lightbbmax);
                 if(changedbits&(PT_LERP|PT_SOFT|PT_NOTEX|PT_SHADER|PT_LABSORPTION))
                 {
                     if(usesoftshader)
@@ -1737,15 +1814,10 @@ void renderparticles(int layer)
                     }
                     else particleshader->set();
                 }
-                if(lightshader)
+                if(lightshader && !handleslightparams)
                 {
                     float locallightintensity = getparticlelocallightintensity(lightprobe);
-                    bindparticlelightparams(lightprobe, lightproberadius, lightbbmin, lightbbmax, locallightintensity > 0.0f);
-                    LOCALPARAMI(particlesunlightdebug, particlesunlightdebug);
-                    LOCALPARAMI(particlelocallightdebug, particlelocallightdebug);
-                    LOCALPARAMF(particlesunlightparams, particlesunlightdarkabsorb, particlesunlightintensity, 0, 0);
-                    LOCALPARAMF(particlelightcolorparams, particlesunlightcolorinfluence, particlemaplightcolorinfluence, 0, 0);
-                    LOCALPARAMF(particlelocallightintensity, locallightintensity, 0, 0, 0);
+                    bindcachedparticlelightparams(lightprobe, lightproberadius, lightbbmin, lightbbmax, locallightintensity);
                 }
                 if(changedbits&(PT_MOD|PT_BRIGHT|PT_SOFT|PT_NOTEX|PT_SHADER|PT_LABSORPTION))
                 {
