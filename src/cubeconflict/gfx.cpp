@@ -555,9 +555,8 @@ namespace game
             case ATK_S_GAU8:
             {
                 bool isGau = (atk == ATK_S_GAU8);
-                float mfSize = 3.0f/adaptMuzzleFlash(d);
-                particles::dirSplash(PART_SPARK, 0xFF5500, 250, 1 + rnd(3), 75, pos, dir, 0.4f, 400, -1, hasShrooms());
-                particles::dirSplash(PART_SMOKE, isGau ? 0x282828 : 0x444444, 100, 1 + rnd(2), 750, pos, dir, 2.5f, 30, 3, hasShrooms());
+                float mfSize = isGau ? (3.0f / adaptMuzzleFlash(d)) : (2.5f / adaptMuzzleFlash(d));
+                particles::dirSplash(PART_SMOKE, isGau ? 0x282828 : 0x444444, 100, 1, 500, pos, dir, isGau ? 0.5f : 0.2f, 100, 5, hasShrooms());
                 particle_flare(pos, pos, 100, PART_MF_BIG, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xCCAAAA, mfSize - (d->gunaccel / 5.f), d, hasShrooms());
                 if(!d->gunaccel) particle_flare(pos, pos, 200, PART_HAZE_MUZZLE, 100, mfSize*2, d, false, 10);
                 adddynlight(pos, isGau ? 125 : 75, vec(1.25f, 0.75f, 0.3f), 35, 2, lightFlags, 0, vec(1.25f, 0.75f, 0.3f), d);
@@ -567,9 +566,8 @@ namespace game
             case ATK_FAMAS:
             case ATK_GLOCK:
             {
-                float mfSize = 2.0f/adaptMuzzleFlash(d);
-                particles::dirSplash(PART_SPARK, 0xFF8800, 300, 1 + rnd(3), 500, pos, dir, 0.3f, 400, -1, hasShrooms());
-                particles::dirSplash(PART_SMOKE, 0x444444, 300, 2, 500, pos, dir, 2.5f, 30, 3, hasShrooms());
+                float mfSize = atk == ATK_GLOCK ? (1.25f / adaptMuzzleFlash(d)) : (2.0f / adaptMuzzleFlash(d));
+                particles::dirSplash(PART_SMOKE, 0x444444, 100, 1, 500, pos, dir, 0.2f, 100, 5, hasShrooms());
                 particle_flare(pos, pos, 125, PART_MF_LITTLE, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFFFFFF, mfSize / 2.f, d, hasShrooms());
                 particle_flare(pos, pos, 75, PART_MF_BIG, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFFAA55, mfSize, d, hasShrooms());
                 particle_flare(pos, pos, 200, PART_HAZE_MUZZLE, 100, mfSize*2, d, false, 10);
