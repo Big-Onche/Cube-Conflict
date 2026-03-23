@@ -32,9 +32,21 @@ namespace projectiles
         return validatk(atk) && attacks[atk].projspeed > 0 && attacks[atk].projgravity > 0.0f;
     }
 
+    static inline float projectileTravelTime(float dist, float speed)
+    {
+        return max(dist*1000.0f/max(speed, 1e-6f), 1.0f);
+    }
+
     static inline float projectileTravelTime(const vec &from, const vec &to, float speed)
     {
-        return max(from.dist(to)*1000.0f/max(speed, 1e-6f), 1.0f);
+        return projectileTravelTime(from.dist(to), speed);
+    }
+
+    static inline float ballisticTravelTime(const vec &from, const vec &to, float speed, int atk)
+    {
+        if(!validatk(atk)) return projectileTravelTime(from, to, speed);
+        const float maxdist = attacks[atk].range > 0 ? float(attacks[atk].range) : from.dist(to);
+        return projectileTravelTime(maxdist, speed);
     }
 
     static inline float ballisticDrop(float gravity, float gravityScale, float millis)
@@ -93,6 +105,9 @@ namespace projectiles
         if(p.ballistic)
         {
             p.gravity = GRAVITY;
+            // Keep the aim direction from the crosshair hit, but let ballistic shots
+            // fly until a real collision, explicit lifetime, or weapon range limit.
+            p.traveltime = ballisticTravelTime(from, to, speed, atk);
             p.to = ballisticPosition(p, p.traveltime);
         }
         p.offset = hudgunorigin(attacks[atk].gun, from, to, owner);
