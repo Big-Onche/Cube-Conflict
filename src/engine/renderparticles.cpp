@@ -20,10 +20,11 @@ VARP(particlelightingdist, 256, 1024, 8192);
 VARP(particlelightingfadedist, 128, 768, 4096);
 VARP(particlelightingshadowmapblur, 1, 3, 16);
 VARP(particletransmittance, 0, 1, 1);
-FVARP(particletransmittanceextinction, 0.0f, 1.0f, 8.0f);
+FVAR(particletransmittanceextinction, 0.0f, 2.0f, 8.0f);
 
 FVAR(particlemaplightintensity, 0.0f, 1.5f, 32.0f);
 VARP(particlemaplightcolorinfluence, 0, 200, 200);
+FVAR(particlebacklightintensity, 0.0f, 5.0f, 8.0f);
 
 VAR(particlesunlightdarkabsorb, 0, 88, 100);
 FVARR(particlesunlightintensity, 0.0f, 1.5f, 8.0f);
@@ -65,7 +66,7 @@ struct particlelightuploadcache
     bool enablelocallights;
     int sunlightdebug, locallightdebug;
     int sunlightdarkabsorb, sunlightcolorinfluence, maplightcolorinfluence;
-    float sunlightintensity;
+    float sunlightintensity, backlightintensity;
     int shadowmapscale;
 
     particlelightuploadcache()
@@ -73,6 +74,7 @@ struct particlelightuploadcache
         radius(0.0f), locallightintensity(0.0f), enablelocallights(false),
         sunlightdebug(0), locallightdebug(0), sunlightdarkabsorb(0),
         sunlightcolorinfluence(0), maplightcolorinfluence(0), sunlightintensity(0.0f),
+        backlightintensity(0.0f),
         shadowmapscale(1)
     {
     }
@@ -90,6 +92,12 @@ static inline void bindcachedparticlelightparams(const vec &center, float radius
     Shader *shader = Shader::lastshader;
     if(!shader) return;
 
+    // Backlight direction depends on the current camera basis, so do not let
+    // the light-probe cache leave these uniforms stale across camera motion.
+    LOCALPARAM(particlebillboardright, camright);
+    LOCALPARAM(particlebillboardup, camup);
+    LOCALPARAM(particlebillboarddir, camdir);
+
     bool enablelocallights = locallightintensity > 0.0f;
     if(particlelightcache.valid &&
        particlelightcache.shader == shader &&
@@ -103,6 +111,7 @@ static inline void bindcachedparticlelightparams(const vec &center, float radius
        particlelightcache.locallightdebug == particlelocallightdebug &&
        particlelightcache.sunlightdarkabsorb == particlesunlightdarkabsorb &&
        particlelightcache.sunlightintensity == particlesunlightintensity &&
+       particlelightcache.backlightintensity == particlebacklightintensity &&
        particlelightcache.sunlightcolorinfluence == particlesunlightcolorinfluence &&
        particlelightcache.maplightcolorinfluence == particlemaplightcolorinfluence &&
        particlelightcache.shadowmapscale == particlelightingshadowmapblur)
@@ -114,7 +123,7 @@ static inline void bindcachedparticlelightparams(const vec &center, float radius
     LOCALPARAMI(particlesunlightdebug, particlesunlightdebug);
     LOCALPARAMI(particlelocallightdebug, particlelocallightdebug);
     LOCALPARAMF(particlesunlightparams, particlesunlightdarkabsorb, particlesunlightintensity, 0, 0);
-    LOCALPARAMF(particlelightcolorparams, particlesunlightcolorinfluence, particlemaplightcolorinfluence, 0, 0);
+    LOCALPARAMF(particlelightcolorparams, particlesunlightcolorinfluence, particlemaplightcolorinfluence, particlebacklightintensity, 0);
     LOCALPARAMF(particlelocallightintensity, locallightintensity, 0, 0, 0);
     LOCALPARAMF(particlelightshadowmapscale, max(float(particlelightingshadowmapblur), 1.0f));
 
@@ -130,6 +139,7 @@ static inline void bindcachedparticlelightparams(const vec &center, float radius
     particlelightcache.locallightdebug = particlelocallightdebug;
     particlelightcache.sunlightdarkabsorb = particlesunlightdarkabsorb;
     particlelightcache.sunlightintensity = particlesunlightintensity;
+    particlelightcache.backlightintensity = particlebacklightintensity;
     particlelightcache.sunlightcolorinfluence = particlesunlightcolorinfluence;
     particlelightcache.maplightcolorinfluence = particlemaplightcolorinfluence;
     particlelightcache.shadowmapscale = particlelightingshadowmapblur;
@@ -299,6 +309,7 @@ struct partvert
     vec pos;
     bvec4 color;
     vec2 tc;
+    vec2 tc2;
 };
 
 static const int MAXPARTICLELIGHTCHUNK = 64;
@@ -330,6 +341,10 @@ static inline void setparticletexcoords(int type, const particle *p, partvert *v
     vs[1].tc = vec2(u2, v1);
     vs[2].tc = vec2(u2, v2);
     vs[3].tc = vec2(u1, v2);
+    vs[0].tc2 = vec2(-1.0f, -1.0f);
+    vs[1].tc2 = vec2( 1.0f, -1.0f);
+    vs[2].tc2 = vec2( 1.0f,  1.0f);
+    vs[3].tc2 = vec2(-1.0f,  1.0f);
 }
 
 #define COLLIDERADIUS 8.0f
@@ -1094,6 +1109,10 @@ struct varenderer : partrenderer
                 vs[1].tc = vec2(u2, v1); \
                 vs[2].tc = vec2(u2, v2); \
                 vs[3].tc = vec2(u1, v2); \
+                vs[0].tc2 = vec2(-1.0f, -1.0f); \
+                vs[1].tc2 = vec2( 1.0f, -1.0f); \
+                vs[2].tc2 = vec2( 1.0f,  1.0f); \
+                vs[3].tc2 = vec2(-1.0f,  1.0f); \
             }
             if(type&PT_RND4)
             {
@@ -1395,9 +1414,11 @@ struct varenderer : partrenderer
         const partvert *ptr = 0;
         gle::vertexpointer(sizeof(partvert), ptr->pos.v);
         gle::texcoord0pointer(sizeof(partvert), ptr->tc.v);
+        gle::texcoord1pointer(sizeof(partvert), ptr->tc2.v);
         gle::colorpointer(sizeof(partvert), ptr->color.v);
         gle::enablevertex();
         gle::enabletexcoord0();
+        gle::enabletexcoord1();
         gle::enablecolor();
         gle::enablequads();
 
@@ -1416,6 +1437,7 @@ struct varenderer : partrenderer
         gle::disablequads();
         gle::disablevertex();
         gle::disabletexcoord0();
+        gle::disabletexcoord1();
         gle::disablecolor();
         gle::clearvbo();
     }
