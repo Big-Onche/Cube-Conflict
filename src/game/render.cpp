@@ -806,7 +806,6 @@ namespace game
 
         vec gunAim;
         sway.z = -hudgunDisp.y - (zoom ? 2 : 0);
-        if(!zoom) vecfromyawpitch(d->yaw, 0, -10, hudgunDisp.x, gunAim);
 
         sway.z += swayup*(fabs(sinf(steps)) - 1);
         sway.add(swaydir).add(d->o);
