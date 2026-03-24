@@ -291,7 +291,7 @@ struct particle
     vec o, d;
     int gravity, fade, millis;
     bool hud, sound;
-    bvec color;
+    bvec4 color;
     uchar flags;
     float size, sizemod;
     union
@@ -314,6 +314,40 @@ struct partvert
     vec2 tc;
     vec2 tc2;
 };
+
+static inline bool isHaze(int type)
+{
+    return type == PART_HAZE_SMALL || type == PART_HAZE_BIG || type == PART_HAZE_MUZZLE;
+}
+
+static inline bvec4 decodeparticlecolor(int color)
+{
+    uint packed = uint(color);
+    return packed > 0xFFFFFFu
+        ? bvec4((packed>>24)&0xFF, (packed>>16)&0xFF, (packed>>8)&0xFF, packed&0xFF)
+        : bvec4((packed>>16)&0xFF, (packed>>8)&0xFF, packed&0xFF, 0xFF);
+}
+
+static inline bvec4 decodeparticlehazecolor(int color)
+{
+    uint packed = uint(color);
+    if(packed > 0xFFFFFFu) return decodeparticlecolor(color);
+
+    int strength = heatHaze::strengthToColor(color);
+    return bvec4((strength>>16)&0xFF, (strength>>8)&0xFF, strength&0xFF, 0xFF);
+}
+
+static inline bvec4 decodeparticlecolor(int type, int color)
+{
+    return isHaze(type) ? decodeparticlehazecolor(color) : decodeparticlecolor(color);
+}
+
+static inline uchar particlecoloralpha(int blend, uchar alpha)
+{
+    return uchar((blend*int(alpha) + 127)/255);
+}
+
+static void splash(int type, const bvec4 &color, int radius, int num, int fade, const vec &p, float size, int gravity, int sizemod, bool sound = false);
 
 static const int MAXPARTICLELIGHTCHUNK = 64;
 static const float PARTICLELIGHTCELLSIZE = 64.0f;
@@ -377,7 +411,7 @@ struct partrenderer
     virtual void init(int n) { }
     virtual void reset() = 0;
     virtual void resettracked(physent *owner) { }
-    virtual particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity = 0, int sizemod = 0, bool sound = false, bool hud = false) = 0;
+    virtual particle *addpart(const vec &o, const vec &d, int fade, const bvec4 &color, float size, int gravity = 0, int sizemod = 0, bool sound = false, bool hud = false) = 0;
     virtual void update() { }
     virtual void render() = 0;
     virtual bool rendershadow() { return false; }
@@ -450,7 +484,7 @@ struct partrenderer
                             if(p->sound) playSound(S_WATERDROP, o, 70, 10);
                             break;
                         case STAIN_SNOW:
-                            addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size, p->color, type&PT_RND4 ? (p->flags>>5)&3 : 0);
+                            addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size, bvec(p->color), type&PT_RND4 ? (p->flags>>5)&3 : 0);
                             break;
                         case STAIN_BURN:
                             addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size*1.5f, 0x222222, type&PT_RND4 ? (p->flags>>5)&3 : 0);
@@ -472,10 +506,10 @@ struct partrenderer
                 adddynlight(o, p->size * 40, vec(p->color.r/1600.f, p->color.g/1600.f, p->color.b/1600.f), ((3000.f / curfps) / 100.f) * game::gamespeed, 0, flags, p->size*40);
             }
 
-            if(type & PT_EMITPART)
+            if(type & PT_EMITPART && canemitparticles())
             {
-                particle_splash(PART_SPARK, 1, 50, o, rgbToHex(p->color.r, p->color.g, p->color.b), 0.4f, 10, 10, -1, game::hasShrooms());
-                if(!rnd(12)) particle_splash(PART_SMOKE, 1, 1750, o, 0x80809A, 3.f, 50, 50, 4, game::hasShrooms());
+                splash(PART_SPARK, p->color, 10, 1, 50, o, 0.4f, 10, -1);
+                particle_splash(PART_SMOKE, 1, 1750, o, 0x80809A05, 3.f, 50, 50, 4, game::hasShrooms());
             }
         }
     }
@@ -559,7 +593,7 @@ struct listrenderer : partrenderer
         }
     }
 
-    particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity, int sizemod, bool sound, bool hud)
+    particle *addpart(const vec &o, const vec &d, int fade, const bvec4 &color, float size, int gravity, int sizemod, bool sound, bool hud)
     {
         if(!parempty)
         {
@@ -577,7 +611,7 @@ struct listrenderer : partrenderer
         p->gravity = gravity;
         p->fade = fade;
         p->millis = lastmillis + emitoffset;
-        p->color = bvec::hexcolor(color);
+        p->color = color;
         p->size = size;
         p->owner = NULL;
         p->flags = 0;
@@ -644,18 +678,18 @@ struct meterrenderer : listrenderer
 
     void startrender()
     {
-         glDisable(GL_BLEND);
          gle::defvertex();
     }
 
     void endrender()
     {
-         glEnable(GL_BLEND);
     }
 
     void renderpart(listparticle *p, const vec &o, const vec &d, int blend, int ts)
     {
         int basetype = type&0xFF;
+        uchar alpha = particlecoloralpha(blend, p->color.a);
+        if(!alpha) return;
         float scale = FONTH*p->size/80.0f, right = 8, left = p->progress/100.0f*right;
         matrix4x3 m(camright, vec(camup).neg(), vec(camdir).neg(), o);
         m.scale(scale);
@@ -663,7 +697,7 @@ struct meterrenderer : listrenderer
 
         if(outlinemeters)
         {
-            gle::colorf(0, 0, 0);
+            gle::colorub(0, 0, 0, alpha);
             gle::begin(GL_TRIANGLE_STRIP);
             loopk(2)
             {
@@ -675,8 +709,8 @@ struct meterrenderer : listrenderer
             gle::end();
         }
 
-        if(basetype==PT_METERVS) gle::colorub(p->color2[0], p->color2[1], p->color2[2]);
-        else gle::colorf(0, 0, 0);
+        if(basetype==PT_METERVS) gle::colorub(p->color2[0], p->color2[1], p->color2[2], alpha);
+        else gle::colorub(0, 0, 0, alpha);
         loopk(2)
         {
             const vec2 &sc = sincos360[k*(180/(2-1))];
@@ -688,7 +722,7 @@ struct meterrenderer : listrenderer
 
         if(outlinemeters)
         {
-            gle::colorf(0, 0, 0);
+            gle::colorub(0, 0, 0, alpha);
             gle::begin(GL_TRIANGLE_FAN);
             loopk(2)
             {
@@ -699,7 +733,7 @@ struct meterrenderer : listrenderer
             gle::end();
         }
 
-        gle::color(p->color);
+        gle::colorub(p->color.r, p->color.g, p->color.b, alpha);
         gle::begin(GL_TRIANGLE_STRIP);
         loopk(2)
         {
@@ -741,6 +775,8 @@ struct textrenderer : listrenderer
 
     void renderpart(listparticle *p, const vec &o, const vec &d, int blend, int ts)
     {
+        int alpha = particlecoloralpha(blend, p->color.a);
+        if(!alpha) return;
         float scale = p->size/80.0f, xoff = -text_width(p->text)/2, yoff = 0;
         if((type&0xFF)==PT_TEXTUP) { xoff += detrnd((size_t)p, 100)-50; yoff -= detrnd((size_t)p, 101); }
 
@@ -749,7 +785,7 @@ struct textrenderer : listrenderer
         m.translate(xoff, yoff, 50);
 
         textmatrix = &m;
-        draw_text(p->text, 0, 0, p->color.r, p->color.g, p->color.b, blend);
+        draw_text(p->text, 0, 0, p->color.r, p->color.g, p->color.b, alpha);
         textmatrix = NULL;
     }
 };
@@ -1052,7 +1088,7 @@ struct varenderer : partrenderer
         return true;
     }
 
-    particle *addpart(const vec &o, const vec &d, int fade, int color, float size, int gravity, int sizemod, bool sound, bool hud)
+    particle *addpart(const vec &o, const vec &d, int fade, const bvec4 &color, float size, int gravity, int sizemod, bool sound, bool hud)
     {
         particle *p = parts + (numparts < maxparts ? numparts++ : rnd(maxparts)); //next free slot, or kill a random kitten
         p->o = o;
@@ -1063,7 +1099,7 @@ struct varenderer : partrenderer
         p->size = size;
         p->owner = NULL;
         p->flags = 0x80 | (rndmask ? rnd(0x80) & rndmask : 0);
-        p->color = (p->flags & PT_HAZE) ? bvec::hexcolor(heatHaze::strengthToColor(color)) : bvec::hexcolor(color);
+        p->color = color;
         p->sizemod = sizemod;
         p->hud = hud;
         p->sound = sound;
@@ -1138,12 +1174,17 @@ struct varenderer : partrenderer
                 bvec4 col(r, g, b, a); \
                 loopi(4) vs[i].color = col; \
             } while(0)
-            #define SETMODCOLOR SETCOLOR((p->color.r*blend)>>8, (p->color.g*blend)>>8, (p->color.b*blend)>>8, 255)
+            uchar alpha = particlecoloralpha(blend, p->color.a);
+            #define SETMODCOLOR SETCOLOR((p->color.r*alpha)>>8, (p->color.g*alpha)>>8, (p->color.b*alpha)>>8, 255)
             if(type&PT_MOD) SETMODCOLOR;
-            else SETCOLOR(p->color.r, p->color.g, p->color.b, blend);
+            else SETCOLOR(p->color.r, p->color.g, p->color.b, alpha);
         }
-        else if(type&PT_MOD) SETMODCOLOR;
-        else loopi(4) vs[i].color.a = blend;
+        else
+        {
+            uchar alpha = particlecoloralpha(blend, p->color.a);
+            if(type&PT_MOD) SETMODCOLOR;
+            else loopi(4) vs[i].color.a = alpha;
+        }
 
         if(type&PT_ROT) genrotpos<T>(o, d, p->size, ts, p->gravity, vs, (p->flags>>2)&0x1F);
         else genpos<T>(o, d, p->size, ts, p->gravity, vs);
@@ -1178,6 +1219,9 @@ struct varenderer : partrenderer
                 o.z -= t*t/(2.0f * 5000.0f * p->gravity);
             }
         }
+
+        blend = particlecoloralpha(blend, p->color.a);
+        if(!blend) return false;
 
         float radius = size*SQRT2;
         switch(shadowmapping)
@@ -1937,12 +1981,7 @@ static inline bool isInRange(vec o, int flags)
     return flags&PT_NOMAXDIST || camera1->o.dist(o) < maxparticledistance;
 }
 
-static inline bool isHaze(int type)
-{
-    return type == PART_HAZE_SMALL || type == PART_HAZE_BIG || type == PART_HAZE_MUZZLE;
-}
-
-static inline particle *newparticle(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity = 0, int sizemod = 0, bool sound = false, bool hud = false)
+static inline particle *newparticle(const vec &o, const vec &d, int fade, int type, const bvec4 &color, float size, int gravity = 0, int sizemod = 0, bool sound = false, bool hud = false)
 {
     static particle dummy;
 
@@ -1954,8 +1993,12 @@ static inline particle *newparticle(const vec &o, const vec &d, int fade, int ty
     }
     if(fade + emitoffset < 0) return &dummy;
     addedparticles++;
-    if(isHaze(type)) color = heatHaze::strengthToColor(color);
     return parts[type]->addpart(o, d, fade, color, size, gravity, sizemod, sound, hud);
+}
+
+static inline particle *newparticle(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity = 0, int sizemod = 0, bool sound = false, bool hud = false)
+{
+    return newparticle(o, d, fade, type, decodeparticlecolor(type, color), size, gravity, sizemod, sound, hud);
 }
 
 namespace particles
@@ -1974,6 +2017,7 @@ namespace particles
 
     static void directionalSplash(int type, int color, int radius, int num, int fade, const vec &p, const vec &dir, float size, int speed, int sizemod)
     {
+        bvec4 decoded = decodeparticlecolor(type, color);
         int fmin = 1;
         int fmax = fade*3;
         min(speed, 2);
@@ -1996,7 +2040,7 @@ namespace particles
             tmp.add(dirOffset);
 
             int f = (num < 10) ? (fmin + rnd(fmax)) : (fmax - (i * (fmax - fmin)) / (num - 1));
-            newparticle(p, tmp, f, type, color, size, 50, sizemod);
+            newparticle(p, tmp, f, type, decoded, size, 50, sizemod);
         }
     }
 
@@ -2011,6 +2055,7 @@ namespace particles
     void trail(int type, int fade, const vec &s, const vec &e, int color, float size, int gravity)
     {
         if(minimized) return;
+        bvec4 decoded = decodeparticlecolor(type, color);
         vec v;
         float d = e.dist(s, v);
         int steps = clamp(int(d*2), 1, maxtrail);
@@ -2020,7 +2065,7 @@ namespace particles
         {
             p.add(v);
             vec tmp = vec(float(rnd(11)-5), float(rnd(11)-5), float(rnd(11)-5));
-            newparticle(p, tmp, rnd(fade)+fade, type, color, size, gravity);
+            newparticle(p, tmp, rnd(fade)+fade, type, decoded, size, gravity);
         }
     }
 
@@ -2039,9 +2084,10 @@ namespace particles
         if(minimized) return;
 
         particle *p = newparticle(hud ? particles::hudPos(s) : s, vec(0, 0, 1), fade, type, color, size);
-        p->color2[0] = color2>>16;
-        p->color2[1] = (color2>>8)&0xFF;
-        p->color2[2] = color2&0xFF;
+        bvec4 color2rgb = decodeparticlecolor(color2);
+        p->color2[0] = color2rgb.r;
+        p->color2[1] = color2rgb.g;
+        p->color2[2] = color2rgb.b;
         p->progress = clamp(int(val*100), 0, 100);
     }
 
@@ -2063,7 +2109,7 @@ namespace particles
     }
 }
 
-static void splash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int sizemod, bool sound = false)
+static void splash(int type, const bvec4 &color, int radius, int num, int fade, const vec &p, float size, int gravity, int sizemod, bool sound)
 {
     float collidez = parts[type]->type&PT_COLLIDE ? p.z - raycube(p, vec(0, 0, -1), COLLIDERADIUS, RAY_CLIPMAT|RAY_POLY) + (parts[type]->stain >= 0 ? COLLIDEERROR : 0) : -1;
     int fmin = 1;
@@ -2082,6 +2128,11 @@ static void splash(int type, int color, int radius, int num, int fade, const vec
         int f = (num < 10) ? (fmin + rnd(fmax)) : (fmax - (i*(fmax-fmin))/(num-1)); //help deallocater by using fade distribution rather than random
         newparticle(p, tmp, f, type, color, size, gravity, sizemod, sound)->val = collidez;
     }
+}
+
+static void splash(int type, int color, int radius, int num, int fade, const vec &p, float size, int gravity, int sizemod, bool sound = false)
+{
+    splash(type, decodeparticlecolor(type, color), radius, num, fade, p, size, gravity, sizemod, sound);
 }
 
 void particle_flying_flare(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity, int sizemod, bool randomcolor)

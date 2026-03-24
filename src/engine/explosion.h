@@ -139,6 +139,8 @@ struct fireballrenderer : listrenderer
         float pmax = p->val,
               size = p->fade ? float(ts)/p->fade : 1,
               psize = p->size + pmax * size;
+        int alphablend = particlecoloralpha(blend, p->color.a);
+        if(!alphablend) return;
 
         if(isfoggedsphere(psize*WOBBLE, p->o)) return;
 
@@ -172,15 +174,15 @@ struct fireballrenderer : listrenderer
         LOCALPARAMF(blendparams, inside ? 0.5f : 4, inside ? 0.25f : 0);
         if(2*(p->size + pmax)*WOBBLE >= softexplosionblend)
         {
-            LOCALPARAMF(softparams, -1.0f/softexplosionblend, 0, inside ? blend/(2*255.0f) : 0);
+            LOCALPARAMF(softparams, -1.0f/softexplosionblend, 0, inside ? alphablend/(2*255.0f) : 0);
         }
         else
         {
-            LOCALPARAMF(softparams, 0, -1, inside ? blend/(2*255.0f) : 0);
+            LOCALPARAMF(softparams, 0, -1, inside ? alphablend/(2*255.0f) : 0);
         }
 
-        vec color = p->color.tocolor().mul(ldrscale);
-        float alpha = blend/255.0f;
+        vec color = bvec(p->color).tocolor().mul(ldrscale);
+        float alpha = alphablend/255.0f;
 
         loopi(inside ? 2 : 1)
         {
