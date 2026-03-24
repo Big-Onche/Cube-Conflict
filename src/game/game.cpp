@@ -70,9 +70,8 @@ namespace game
         {
             updateStat(1, STAT_TIMEPLAYED);
             lasttimeupdate = totalmillis;
-            dmgsecs[0]==3 ? dmgsecs[0]=0 : dmgsecs[0]++;
-            dmgsecs[1]==5 ? dmgsecs[1]=2 : dmgsecs[1]++;
-            avgdmg[dmgsecs[1]-2] = 0;
+            dmgsecs[0] = (dmgsecs[0] + 1) % 4;
+            avgdmg[dmgsecs[0]] = 0;
         }
     }
 
