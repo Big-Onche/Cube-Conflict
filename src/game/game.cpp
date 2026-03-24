@@ -411,17 +411,15 @@ namespace game
             d->vel.z = max(d->vel.z, 300.f);
         }
 
-        static int tick = 0;
-        tick += curtime;
-
-        if(tick < 500 && d->afterburnmillis) return;
+        if(d->lastfirecheck == lastmillis) return;
+        if(d->afterburnmillis && lastmillis - d->lastfirecheck < 500) return;
 
         if(touchingFire(d))
         {
             if(localAfterburn()) doLocalAfterburn(d, d, ATK_FLAMETHROWER);
             else addmsg(N_FIRETOUCH, "rc", d);
         }
-        tick = 0;
+        d->lastfirecheck = lastmillis;
     }
 
     static void updateLocalAfterburn(int time, gameent *d)
