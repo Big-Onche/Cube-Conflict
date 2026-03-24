@@ -694,6 +694,12 @@ namespace game
 
             vec dir = vec(o->o).sub(loc);
             float dist = dir.squaredlen();
+            // Treat exact/near-exact overlap as the worst possible spawn proximity.
+            if(dist <= 1e-6f)
+            {
+                minplayerdist = 0.0f;
+                break;
+            }
             if(dist >= minplayerdist*minplayerdist) continue;
             dist = sqrtf(dist);
             dir.mul(1/dist);
