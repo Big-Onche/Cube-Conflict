@@ -538,8 +538,10 @@ namespace game
         if(d->curdamage) // damage dealt displayed on hud
         {
             vec pos = d->abovehead();
-            float up = 5 + dist/40.f + (((totalmillis - d->lastcurdamage) / 50.f) / (dist <= 160 ? 160.f - dist : 1)); // particle going up effect
-            if(!ispaused()) pos.z += up - (15 * (1 - (clamp(dist, 0.f, 160.f) / 160.f)));
+            float clampedDist = clamp(dist, 0.f, 160.f);
+            float riseDivisor = max(160.f - clampedDist, 1.0f);
+            float up = 5 + dist/40.f + (((totalmillis - d->lastcurdamage) / 50.f) / riseDivisor); // particle going up effect
+            if(!ispaused()) pos.z += up - (15 * (1 - (clampedDist / 160.f)));
             float size = (zoom ? huddamagesize * (guns[player1->gunselect].maxzoomfov) / 100.f : huddamagesize) * 1.5f;
             particles::text(pos, tempformatstring("%d", d->curdamage), PART_TEXT, 1, d->curdamagecolor, size, 0, true);
         }
