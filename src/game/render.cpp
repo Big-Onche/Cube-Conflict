@@ -648,6 +648,15 @@ namespace game
         }
     }
 
+    static inline bool visiblePlayer(gameent *d, bool isHudPlayer)
+    {
+        if(isHudPlayer) return true;
+
+        const float radius = max(max(d->radius, max(d->xradius, d->yradius)), (d->eyeheight + d->aboveeye) * 0.5f) + 8.0f;
+        vec center = d->feetpos((d->eyeheight + d->aboveeye) * 0.5f);
+        return !isfoggedsphere(radius, center) && !pvsoccludedsphere(center, radius);
+    }
+
     void rendergame()
     {
         ai::render();
@@ -671,9 +680,12 @@ namespace game
             if(d->state==CS_ALIVE && !ispaused())
             {
                 vec playerCenter = vec(d->o).subz(8);
-                renderWeaponParticles(d);
-                spawnPlayerBouncers(d, playerCenter);
-                spawnPlayerParticles(d, playerCenter, exceptHud);
+                if(visiblePlayer(d, isHudPlayer))
+                {
+                    renderWeaponParticles(d);
+                    spawnPlayerBouncers(d, playerCenter);
+                    spawnPlayerParticles(d, playerCenter, exceptHud);
+                }
                 if(!isHudPlayer) renderPlayerIcons(d, playerCenter, distance);
             }
         }
