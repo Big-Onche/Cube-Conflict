@@ -1510,6 +1510,53 @@ namespace UI
 
     Texture *Image::lasttex = NULL;
 
+    struct Logo : Image
+    {
+        Color color;
+
+        void setup(Texture *tex_, const Color &color_, float minw_ = 0, float minh_ = 0)
+        {
+            Image::setup(tex_, minw_, minh_);
+            color = color_;
+        }
+
+        static const char *typestr() { return "#Logo"; }
+        const char *gettype() const { return typestr(); }
+
+        void startdraw()
+        {
+            lasttex = NULL;
+
+            hudlogoshader->set();
+            gle::defvertex(2);
+            gle::deftexcoord0();
+            gle::begin(GL_QUADS);
+        }
+
+        void bindlogotex()
+        {
+            changedraw(CHANGE_SHADER | CHANGE_COLOR);
+            if(lasttex != tex)
+            {
+                if(lasttex) gle::end();
+                lasttex = tex;
+                glBindTexture(GL_TEXTURE_2D, tex->id);
+            }
+        }
+
+        void draw(float sx, float sy)
+        {
+            if(tex != notexture)
+            {
+                bindlogotex();
+                color.init();
+                quads(sx, sy, w, h);
+            }
+
+            Object::draw(sx, sy);
+        }
+    };
+
     struct CroppedImage : Image
     {
         float cropx, cropy, cropw, croph;
@@ -3436,6 +3483,9 @@ namespace UI
 
     ICOMMAND(uiimage, "sffe", (char *texname, float *minw, float *minh, uint *children),
         BUILD(Image, o, o->setup(textureload(texname, 3, true, false), *minw, *minh), children));
+
+    ICOMMAND(uilogo, "sffife", (char *texname, float *minw, float *minh, int *c, float *alpha, uint *children),
+        BUILD(Logo, o, o->setup(textureload(texname, 3, true, false), Color(*c, uchar(clamp(*alpha, 0.0f, 1.0f) * 255.0f)), *minw, *minh), children));
 
     ICOMMAND(uistretchedimage, "sffe", (char *texname, float *minw, float *minh, uint *children),
         BUILD(StretchedImage, o, o->setup(textureload(texname, 3, true, false), *minw, *minh), children));
