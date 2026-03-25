@@ -1685,7 +1685,8 @@ void recomputecamera(int campostag)
 
         if(game::hudplayer()->state == CS_DEAD && lastmillis > game::hudplayer()->lastpain + 1500 && !game::hassuicided && spectatekiller)
         {
-            if(game::hudplayer()->lastkiller->isConnected)
+            gameent *killer = game::getLastKiller(game::hudplayer());
+            if(killer && killer->isConnected)
             {
                 float t = clamp((lastmillis - game::hudplayer()->lastpain - 1500) / 500.f, 0.f, 1.f);
                 if(t < 1)
@@ -1697,12 +1698,11 @@ void recomputecamera(int campostag)
                         animStarted = true;
                     }
                     vec startpos = game::hudplayer()->o;
-                    vec finalpos = game::hudplayer()->lastkiller->o;
+                    vec finalpos = killer->o;
                     camera1->o = startpos.add(finalpos.sub(startpos).mul(t));
                 }
-                else camera1->o = game::hudplayer()->lastkiller->o;
+                else camera1->o = killer->o;
             }
-            else game::hudplayer()->lastkiller = game::hudplayer();
         }
         else animStarted = false;
 

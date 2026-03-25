@@ -411,17 +411,15 @@ namespace game
             d->vel.z = max(d->vel.z, 300.f);
         }
 
-        static int tick = 0;
-        tick += curtime;
-
-        if(tick < 500 && d->afterburnmillis) return;
+        if(d->lastfirecheck == lastmillis) return;
+        if(d->afterburnmillis && lastmillis - d->lastfirecheck < 500) return;
 
         if(touchingFire(d))
         {
             if(localAfterburn()) doLocalAfterburn(d, d, ATK_FLAMETHROWER);
             else addmsg(N_FIRETOUCH, "rc", d);
         }
-        tick = 0;
+        d->lastfirecheck = lastmillis;
     }
 
     static void updateLocalAfterburn(int time, gameent *d)
@@ -699,6 +697,7 @@ namespace game
                 minplayerdist = 0.0f;
                 break;
             }
+
             if(dist >= minplayerdist*minplayerdist) continue;
             dist = sqrtf(dist);
             dir.mul(1/dist);
@@ -879,7 +878,7 @@ namespace game
     void killed(gameent *d, gameent *actor, int atk)
     {
         bool isHudPlayer = (actor == hudplayer());
-        d->lastkiller = actor;
+        d->lastkillerId = actor ? actor->entityId : SIZE_MAX;
 
         if(d->state==CS_EDITING)
         {
@@ -1132,6 +1131,22 @@ namespace game
     {
         if(cn == player1->clientnum) return player1;
         return clients.inrange(cn) ? clients[cn] : NULL;
+    }
+
+    static gameent *findPlayerByEntityId(size_t entityId)
+    {
+        if(entityId == SIZE_MAX) return NULL;
+        loopv(players) if(players[i] && players[i]->entityId == entityId) return players[i];
+        return NULL;
+    }
+
+    gameent *getLastKiller(gameent *d)
+    {
+        if(!d) return NULL;
+        gameent *killer = findPlayerByEntityId(d->lastkillerId);
+        if(killer) return killer;
+        d->lastkillerId = SIZE_MAX;
+        return NULL;
     }
 
     void clientdisconnected(int cn, bool notify)
