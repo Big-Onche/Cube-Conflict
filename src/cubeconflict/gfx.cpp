@@ -84,7 +84,7 @@ namespace game
             case ATK_GRAP1:
                 particle_splash(PART_PLASMA_FRONT, 1, 1, pos, hasRoids ? 0xFF2222 : 0xFF33BB, 3.0f, 150, 20, 0, hasShrooms());
                 particle_flare(tail, head, 1, PART_F_PLASMA, hasRoids ? 0xFF2222 : 0xEE22AA, 3.0f, owner, hasShrooms());
-                if(emitPart) particle_splash(isInWater ? PART_BUBBLE : PART_SMOKE, 1, isInWater ? 150 : 300, pos, isInWater ? 0x18181A : 0xAAAAAA, 4.0f, 25, 250, 0, hasShrooms());
+                if(emitPart) particle_splash(isInWater ? PART_BUBBLE : PART_SMOKE, 1, isInWater ? 150 : 300, pos, isInWater ? 0x18181A : 0xAAAAAA22, 4.0f, 25, 250, 0, hasShrooms());
                 adddynlight(pos, 50, vec(0.3f, 0.00f, 0.2f));
                 break;
 
@@ -144,7 +144,7 @@ namespace game
 
             case ATK_SMAW:
             case ATK_S_ROCKETS:
-                if(emitPart) particle_splash(isInWater ? PART_BUBBLE : PART_SMOKE, 1, 2000, pos, 0x666666, isInWater ? 3.f : 6.f, 25, 250, 0, hasShrooms());
+                if(emitPart) particle_splash(isInWater ? PART_BUBBLE : PART_SMOKE, 1, 2000, pos, 0x50505022, isInWater ? 3.f : 6.f, 25, 250, 0, hasShrooms());
                 particle_flare(pos, pos, 2, PART_GLARE, hasRoids ? 0xFF0000 : 0xFFC864, 2.0f + rndscale(2), NULL, hasShrooms());
                 adddynlight(pos, (ispaused() ? 65 : 50 + rnd(31)), vec(1.2f, 0.75f, 0.0f));
                 break;
@@ -159,7 +159,7 @@ namespace game
                 break;
 
             case ATK_S_NUKE:
-                if(emitPart) particle_splash(isInWater ? PART_BUBBLE : PART_SMOKE, 2, isInWater ? 2000 : 5000, pos, isInWater ? 0x18181A : 0x222222, 4.0f+rnd(5), 25, 200, 0, hasShrooms());
+                if(emitPart) particle_splash(isInWater ? PART_BUBBLE : PART_SMOKE, 2, isInWater ? 2000 : 5000, pos, isInWater ? 0x18181A : 0x22222277, 4.0f+rnd(5), 25, 200, 0, hasShrooms());
                 particle_flare(pos, pos, 2, PART_GLARE, hasRoids ? 0xFF0000 : 0xFFC864, 5.f+rndscale(5), NULL, hasShrooms());
                 particle_splash(PART_FIRE_BALL, 1, 100, pos, hasRoids ? 0xFF0000 : 0xFF6600, 1.0f+rndscale(4), 50, 500, 0, hasShrooms());
                 adddynlight(pos, 100, vec(1.2f, 0.75f, 0.0f));
@@ -225,7 +225,7 @@ namespace game
             case ATK_FIREWORKS:
 
                 particle_splash(PART_FIRE_BALL, 5, 40, v, 0xFFC864, 5, 800, 1600, 0, hasShrooms());
-                loopi(4) particle_splash(PART_SPARK_P, 16+rnd(10), 200+rnd(200), v, hasRoids ? 0xFF0000 : fireworkColor(), (0.2f + (rnd(5)*0.1f)), 500+rnd(300), 10, 1, hasShrooms());
+                loopi(4) particle_splash(PART_SPARK_P, 8, 200+rnd(200), v, hasRoids ? 0xFF0000 : fireworkColor(), (0.2f + (rnd(5)*0.1f)), 500+rnd(300), 10, 1, hasShrooms());
 
                 if(isInWater)
                 {
