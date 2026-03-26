@@ -31,14 +31,14 @@ namespace godRays
     VARP(godraysgeom, 0, 1, 1);
     VARP(godraysgeomsteps, 1, 32, 64);
     FVARP(godraysgeomshadowbias, 0.0f, 2.0f, 32.0f);
-    FVARP(godraysgeomforwardexp, 0.25f, 16.0f, 32.0f);
+    FVARP(godraysgeomforwardexp, 0.25f, 5.0f, 32.0f);
 
     // Tunables
     FVAR(godraysgeomdecay, 0.0f, 0.93f, 1.0f);
     FVAR(godraysgeomthreshold, 0.0f, 0.15f, 1.0f);
 
     // Map vars
-    FVARR(godraysgeomstrength, 0.0f, 2.0f, 4.0f);
+    FVARR(godraysgeomstrength, 0.0f, 0.75f, 4.0f);
     FVARR(godraysgeomdensity, 0.25f, 0.85f, 4.0f);
     FVARR(godraysgeommaxdist, 0.01f, 0.14f, 1.0f);
 
@@ -217,7 +217,7 @@ namespace godRays
             LOCALPARAM(sunColor, sunColor);
             LOCALPARAMF(godRayGeomParams, max(godraysgeomdensity, 0.25f), clamp(godraysgeomdecay, 0.0f, 1.0f), geomMaxDistance, max(godraysgeomforwardexp, 0.25f));
             LOCALPARAMI(godRayGeomSteps, godraysgeomsteps);
-            LOCALPARAMF(godRayGeomDistanceParams, godraysstrength*getGodraysStrength(), 0.0f, 0.0f, 0.0f);
+            LOCALPARAMF(godRayGeomDistanceParams, godraysgeomstrength*getGodraysStrength(), 0.0f, 0.0f, 0.0f);
             LOCALPARAMF(godRayGeomShapeParams, max(godraysgeomshadowbias, 0.0f), clamp(godraysgeomthreshold, 0.0f, 1.0f), 0.0f, 0.0f);
             LOCALPARAMI(csmcount, csmsplits);
             screenquad(vieww, viewh);
