@@ -1,6 +1,7 @@
 #include "engine.h"
 #include "customs.h"
 #include "sound.h"
+#include "game.h"
 
 ICOMMAND(updateui, "", (), execfile("config/ui/ui.cfg"));
 
@@ -85,11 +86,16 @@ void menuprocess()
         }
         else
         {
-            UI::showui("main");
             UI::hideui("hud");
+            UI::hideui("hitlog");
+            UI::showui("main");
         }
     }
-    else if (isconnected() && !UI::uivisible("main") && !UI::uivisible("settings") && !UI::uivisible("classes") && !UI::uivisible("quit")) UI::showui("hud");
+    else if(isconnected() && !UI::uivisible("main") && !UI::uivisible("settings") && !UI::uivisible("classes") && !UI::uivisible("quit"))
+    {
+        UI::showui("hud");
+        game::updateHitlogUi();
+    }
 }
 
 VAR(mainmenu, 1, 1, 0);

@@ -113,16 +113,9 @@ namespace game
         result(s);
     );
 
-    string killerName;
-    ICOMMAND(getkillername, "", (), result(killerName); );
-
-    int killerCharacter, killerLevel, killerWeapon;
-    ICOMMAND(getkillerweapon, "", (), intret(killerWeapon); );
+    int killerCharacter, killerLevel;
     ICOMMAND(getkillerclass, "", (), intret(killerCharacter); );
     ICOMMAND(getkillerlevel, "", (), intret(killerLevel); );
-
-    float killerDistance;
-    ICOMMAND(getkilldistance, "", (), floatret(roundOne(killerDistance)); );
 
     bool hassuicided = true;
     ICOMMAND(hassuicided, "", (), intret(hassuicided); );

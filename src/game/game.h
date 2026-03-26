@@ -6,7 +6,7 @@
 #include "engine.h"
 #include "customs.h"
 
-extern int lastshoot, getspyability, autowield;
+extern int getspyability, autowield;
 
 // animations
 enum
@@ -504,7 +504,18 @@ struct gamestate
     bool aiming;
     int aitype, skill;
 
-    gamestate() : maxhealth(1000), armour(0), armourtype(A_WOOD), aitype(AI_NONE), skill(0) {}
+    gamestate() : seed(0), health(1000), maxhealth(1000), mana(100), armour(0), armourtype(A_WOOD),
+                  vampiremillis(0), afterburnmillis(0), afterburnatk(0), gunselect(GUN_GLOCK), gunwait(0),
+                  aiming(false), aitype(AI_NONE), skill(0)
+    {
+        loopi(NUMBOOSTS) boostmillis[i] = 0;
+        loopi(NUMABILITIES)
+        {
+            abilitymillis[i] = 0;
+            abilityready[i] = true;
+        }
+        loopi(NUMGUNS) ammo[i] = 0;
+    }
 
     void baseammo(int gun, int k = 1)
     {
@@ -526,6 +537,12 @@ struct gamestate
     bool hasRoids()
     {
         return boostmillis[B_ROIDS];
+    }
+
+    bool hasboost()
+    {
+        loopi(NUMBOOSTS) { if(boostmillis[i]) return true; }
+        return false;
     }
 
     bool hasPowerArmor()
@@ -647,6 +664,7 @@ struct gamestate
         vampiremillis = 0;
         afterburnmillis = 0;
         afterburnatk = 0;
+        gunselect = GUN_GLOCK;
         gunwait = 0;
         seed = rnd(4);
         loopi(NUMGUNS) ammo[i] = 0;
@@ -932,9 +950,26 @@ static inline int teamnumber(const char *name) { loopi(MAXTEAMS) if(!strcmp(team
 #define validteam(n) ((n) >= 1 && (n) <= MAXTEAMS)
 #define teamname(n) (teamnames[validteam(n) ? (n) : 0])
 
+// Hit log
+static const int DAMAGE_LOG_LENGTH = 30;
+
+struct DamageLog
+{
+    string actorName, victimName;
+    int weapon, damage, hits, millis;
+    float distance;
+    bool isActor, isAfterburn, friendlyActor, friendlyVictim, killHit;
+
+    DamageLog();
+    void clear();
+    void set(const char *actorName, const char *victimName, int weapon, int damage, bool isActor, bool isAfterburn, float distance, int millis, bool friendlyActor, bool friendlyVictim);
+    bool matchesBurst(const char *actorName, const char *victimName, int weapon, bool isActor, bool isAfterburn) const;
+    void mergeBurst(const char *actorName, const char *victimName, int damage, bool isAfterburn, float distance, int millis, bool friendlyActor, bool friendlyVictim);
+};
+
 struct gameent : dynent, gamestate
 {
-    size_t entityId;
+    size_t entityId, lastkillerId;
     int weight;                         // affects the effectiveness of hitpush
     int clientnum, privilege, lastupdate, plag, ping;
     int lifesequence;                   // sequence id for each respawn, used in damage test
@@ -944,12 +979,14 @@ struct gameent : dynent, gamestate
     int curdamage, lastcurdamage, curdamagecolor;
     int attacking, gunaccel;
     int lastfootstep;
-    int lasttaunt, lastlavatouch;
+    int lasttaunt, lastlavatouch, lastfirecheck;
     int lastpickup, lastpickupmillis, flagpickup, lastbase, lastrepammo, lastweap;
     int killstreak, frags, flags, deaths, totaldamage, totalshots;
     editinfo *edit;
     float deltayaw, deltapitch, deltaroll, newyaw, newpitch, newroll;
     int smoothmillis;
+    DamageLog lastdamage[DAMAGE_LOG_LENGTH];
+    int lastDamageOffset, numLastDamage;
 
     int lastability[3], lastabilityrequest;
     int attacksound; // 0 = no sound, 1 = close sound, 2 = close + far sound
@@ -963,15 +1000,24 @@ struct gameent : dynent, gamestate
     float skeletonSize, graveSize;
     ai::aiinfo *ai;
     int ownernum, lastnode;
-    gameent *lastkiller;
     gameent *afterburner;
 
     vec muzzle, weed, balles;
 
-    gameent() : entityId(entitiesIds::getNewId()), weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0),
-                lifesequence(0), respawned(-1), suicided(-1), lastpain(0), lastfootstep(0), killstreak(0), frags(0), flags(0), deaths(0),
-                totaldamage(0), totalshots(0), edit(NULL), smoothmillis(-1), team(0), playermodel(-1), playercolor(0),
-                skin{0, 0, 0}, character(0), level(0), ai(NULL), ownernum(-1), muzzle(-1, -1, -1), weed(-1, -1, -1), balles(-1, -1, -1)
+    gameent() : entityId(entitiesIds::getNewId()), lastkillerId(SIZE_MAX), weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0),
+                lifesequence(0), respawned(-1), lastspawn(0), suicided(-1), lastpain(0),
+                lastaction(0), lastattack(-1), lastgunselect(0), lastshieldswitch(0), lastshrooms(0),
+                curdamage(0), lastcurdamage(0), curdamagecolor(0xFFFFFF), attacking(ACT_IDLE), gunaccel(0), lastfootstep(0),
+                lasttaunt(0), lastlavatouch(0), lastfirecheck(0),
+                lastpickup(-1), lastpickupmillis(0), flagpickup(0), lastbase(-1), lastrepammo(-1), lastweap(GUN_GLOCK),
+                killstreak(0), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0),
+                edit(NULL), deltayaw(0), deltapitch(0), deltaroll(0), newyaw(0), newpitch(0), newroll(0),
+                smoothmillis(-1), lastDamageOffset(0), numLastDamage(0),
+                lastabilityrequest(0), attacksound(0), shieldbroken(false), powerarmorsound(false),
+                lastOutOfMap(0), wasAttacking(false), isOutOfMap(false), isConnected(false),
+                team(0), playermodel(-1), playercolor(0), skin{0, 0, 0}, character(0), level(0),
+                skeletonSize(0.0f), graveSize(0.0f), ai(NULL), ownernum(-1), lastnode(-1), afterburner(NULL),
+                muzzle(-1, -1, -1), weed(-1, -1, -1), balles(-1, -1, -1)
     {
         loopi(3) lastability[i] = -1;
         name[0] = info[0] = 0;
@@ -979,7 +1025,6 @@ struct gameent : dynent, gamestate
     }
     ~gameent()
     {
-        freeeditinfo(edit);
         freeeditinfo(edit);
 
         if(ai) delete ai;
@@ -992,6 +1037,12 @@ struct gameent : dynent, gamestate
         push.mul((actor==this && attacks[atk].exprad ? EXP_SELFPUSH : 1.0f)*attacks[atk].hitpush*(damage/10)/weight);
         vel.add(push);
     }
+    void clearDamageLog();
+    void clearKillHitLog();
+    void markKillHit(const char *actorName, const char *victimName, int weapon, bool isActor = false);
+    void logLastHit(const char *actorName, const char *victimName, int weapon, int damage, bool isActor, bool isAfterburn, float distance, bool friendlyActor, bool friendlyVictim);
+    const DamageLog *getLastDamage(int index) const;
+    int getKillIndex() const;
 
     void respawn()
     {
@@ -1003,23 +1054,41 @@ struct gameent : dynent, gamestate
         lastspawn = lastmillis;
         lastgunselect = lastmillis;
         lastshieldswitch = lastmillis;
+        lastshrooms = 0;
         curdamage = 0;
         lastcurdamage = 0;
+        curdamagecolor = 0xFFFFFF;
         attacking = ACT_IDLE;
         lasttaunt = 0;
         lastlavatouch = 0;
+        lastfirecheck = 0;
         lastpickup = -1;
         lastpickupmillis = 0;
         flagpickup = 0;
         lastbase = lastrepammo = -1;
+        lastweap = gunselect;
+        deltayaw = deltapitch = deltaroll = 0;
+        newyaw = yaw;
+        newpitch = pitch;
+        newroll = roll;
+        smoothmillis = -1;
         lastnode = -1;
+        lastabilityrequest = 0;
         loopi(3) abilityready[i] = true;
         gunaccel = 0;
         killstreak = 0;
         attacksound = 0;
         powerarmorsound = false;
         shieldbroken = false;
+        lastOutOfMap = 0;
+        wasAttacking = false;
+        isOutOfMap = false;
+        skeletonSize = 0.0f;
+        graveSize = 0.0f;
+        lastkillerId = SIZE_MAX;
         afterburner = NULL;
+        resetinterp();
+        clearDamageLog();
     }
 
     int respawnwait(int secs, int delay = 0)
@@ -1100,9 +1169,10 @@ namespace game
     //hud
     extern void drawrpgminimap(gameent *d, int w, int h);
     extern int getteamfrags(int team);
-    extern string killerName;
-    extern int killerWeapon, killerCharacter, killerLevel;
-    extern float killerDistance;
+    extern int killerCharacter, killerLevel;
+    extern void updateHitlogUi();
+    extern void updateHitlogKill(gameent *victim, gameent *actor, int atk);
+    extern void recordHitlogDamage(gameent *actor, gameent *victim, int atk, int damage, bool isAfterburnHit, float hitdistance);
 
     // abilities
     extern void requestAbility(gameent *d, int ability);
@@ -1158,12 +1228,14 @@ namespace game
     extern bool clientoption(const char *arg);
     extern gameent *getclient(int cn);
     extern gameent *newclient(int cn);
+    extern gameent *getLastKiller(gameent *d);
     extern const char *colorname(gameent *d, const char *name = NULL, const char *alt = NULL, const char *color = "");
     extern const char *teamcolorname(gameent *d, const char *alt);
     extern const char *teamcolor(int team);
     extern gameent *pointatplayer();
     extern gameent *hudplayer();
     extern gameent *followingplayer(gameent *fallback = NULL);
+
     extern void stopfollowing();
     extern void checkfollow();
     extern void nextfollow(int dir = 1);
@@ -1174,7 +1246,7 @@ namespace game
     extern void spawnplayer(gameent *);
     extern bool kamikazeExploding(gameent *d);
     extern void deathstate(gameent *d, bool restore = false);
-    extern void damaged(int damage, gameent *d, gameent *actor, bool local = true, int atk = 0);
+    extern void damaged(int damage, gameent *d, gameent *actor, bool local = true, int atk = 0, bool isAfterburnHit = false);
     extern void killed(gameent *d, gameent *actor, int atk);
     extern void doLocalAfterburn(gameent *target, gameent *burner, int atk);
     extern void timeupdate(int timeremain);
@@ -1254,7 +1326,7 @@ namespace game
     extern void shoteffects(int atk, const vec &from, const vec &to, gameent *d, bool local, int id, int prevaction, bool isMonster = false);
     extern void explode(bool local, gameent *owner, const vec &v, const vec &vel, dynent *safe, int dam, int atk);
     extern void explodeeffects(int atk, gameent *d, bool local, int id = 0);
-    extern void damageeffect(int damage, gameent *d, gameent *actor, int atk = 0);
+    extern void damageeffect(int damage, gameent *d, gameent *actor, int atk = 0, bool isAfterburnHit = false);
     extern void gibeffect(int damage, const vec &vel, gameent *d);
     extern void hit(int damage, dynent *d, gameent *at, const vec &vel, int atk, float info1, int info2 = 1);
     extern float intersectdist;
@@ -1265,6 +1337,7 @@ namespace game
     extern void gunselect(int gun, gameent *d, bool force = false, bool shortcut = false);
     extern void weaponswitch(gameent *d);
     extern bool isAttacking(gameent *d);
+    extern void updateAiming();
 
     // scoreboard
     extern void showscores(bool on);
@@ -1411,6 +1484,7 @@ namespace server
 }
 
 extern bool rndevent(int probability, int probabilityReduce = 0);
+extern float distToMeter(float distance);
 extern void createdrop(const vec *o, int type);
 extern void trydisconnect(bool local);
 

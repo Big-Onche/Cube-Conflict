@@ -484,7 +484,7 @@ namespace game
                 monsterhurtpos = o;
             }
             if(!fromafterburn) startAfterburn(atk, d);
-            damageeffect(damage, this, d, atk);
+            damageeffect(damage, this, d, atk, fromafterburn);
             if((health -= damage)<=0)
             {
                 state = CS_DEAD;

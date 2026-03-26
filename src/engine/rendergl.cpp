@@ -1382,12 +1382,11 @@ void computezoom()
         zoomprogress = 0;
         curfov = fov;
         curavatarfov = avatarfov;
-        hp->aiming = false;
+        game::updateAiming();
         return;
     }
     if(game::zoom > 0)
     {
-        hp->aiming = true;
         float vel = zoominvel * (100.f / game::gamespeed);
         zoomprogress = vel ? min(zoomprogress + float(elapsedtime) / vel, 1.0f) : 1;
     }
@@ -1398,12 +1397,12 @@ void computezoom()
         if(zoomprogress <= 0)
         {
             game::zoom = 0;
-            hp->aiming = false;
         }
     }
 
     curfov = updateAimFov() * zoomprogress + fov * (1 - zoomprogress);
     curavatarfov = updateAimAvatarFov() * zoomprogress + avatarfov * (1 - zoomprogress);
+    game::updateAiming();
 }
 
 FVARP(zoomsens, 1e-4f, 4.5f, 1e4f);
@@ -1429,6 +1428,31 @@ void fixcamerarange()
     if(camera1->pitch<-MAXPITCH) camera1->pitch = -MAXPITCH;
     camera1->yaw = fmod(camera1->yaw, 360.0f);
     if(camera1->yaw < 0.0f) camera1->yaw += 360.0f;
+}
+
+static inline void getCameraOffsetBasis(float yaw, float pitch, float roll, vec &dir, vec &side, vec &up)
+{
+    matrix3 orient;
+    orient.identity();
+    orient.rotate_around_z(yaw*RAD);
+    orient.rotate_around_x(pitch*RAD);
+    orient.rotate_around_y(roll*-RAD);
+    dir = vec(orient.b).neg();
+    side = vec(orient.a).neg();
+    up = orient.c;
+}
+
+static inline float getKillCamYaw()
+{
+    return atan(tan(curfov*RAD/2.5f) * 0.5f) / RAD;
+}
+
+static inline void updateKillCamFraming(physent *camera, gameent *killer)
+{
+    camera->yaw = killer->yaw + getKillCamYaw();
+    camera->pitch = killer->pitch;
+    camera->roll = killer->roll;
+    fixcamerarange();
 }
 
 void modifyorient(float yaw, float pitch)
@@ -1658,13 +1682,6 @@ void recomputecamera(int campostag)
         camera1->move = -1;
         camera1->eyeheight = camera1->aboveeye = camera1->radius = camera1->xradius = camera1->yradius = 2;
 
-        matrix3 orient;
-        orient.identity();
-        orient.rotate_around_z(camera1->yaw*RAD);
-        orient.rotate_around_x(camera1->pitch*RAD);
-        orient.rotate_around_y(camera1->roll*-RAD);
-        vec dir = vec(orient.b).neg(), side = vec(orient.a).neg(), up = orient.c;
-
         if(campostag>=0)
         {
             loopv(entities::ents)
@@ -1682,10 +1699,11 @@ void recomputecamera(int campostag)
 
         bool moveSide = (game::hudplayer()->state != CS_DEAD) || thirdperson;
         static bool animStarted;
+        gameent *killer = NULL;
 
         if(game::hudplayer()->state == CS_DEAD && lastmillis > game::hudplayer()->lastpain + 1500 && !game::hassuicided && spectatekiller)
         {
-            gameent *killer = game::getLastKiller(game::hudplayer());
+            killer = game::getLastKiller(game::hudplayer());
             if(killer && killer->isConnected)
             {
                 float t = clamp((lastmillis - game::hudplayer()->lastpain - 1500) / 500.f, 0.f, 1.f);
@@ -1705,6 +1723,13 @@ void recomputecamera(int campostag)
             }
         }
         else animStarted = false;
+
+        bool killCamActive = killer && killer->isConnected;
+        if(killCamActive) updateKillCamFraming(camera1, killer);
+
+        vec dir, side, up;
+        if(killCamActive) getCameraOffsetBasis(killer->yaw, killer->pitch, killer->roll, dir, side, up);
+        else getCameraOffsetBasis(camera1->yaw, camera1->pitch, camera1->roll, dir, side, up);
 
         if(game::collidecamera())
         {

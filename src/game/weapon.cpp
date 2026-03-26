@@ -5,8 +5,6 @@
 #include "stats.h"
 #include <string>
 
-int lastshoot;
-
 namespace game
 {
     vec rays[MAXRAYS];
@@ -178,7 +176,37 @@ namespace game
         }
     }
 
-    float spread(int atk, gameent *d) { return d->aiming ? attacks[atk].aimspread : attacks[atk].noaimspread; }
+    static inline float getAimProgress(gameent *d)
+    {
+        if(!d) return 0.0f;
+        if(d != player1 || d != hudplayer()) return d->aiming ? 1.0f : 0.0f;
+        if(!validgun(d->gunselect)) return d->aiming ? 1.0f : 0.0f;
+
+        float zoomRange = fabsf(float(fov - guns[d->gunselect].maxzoomfov));
+        if(zoomRange <= 0.0f) return d->aiming ? 1.0f : 0.0f;
+
+        float zoomOffset = fabsf(float(fov) - curfov);
+        return clamp(zoomOffset / zoomRange, 0.0f, 1.0f);
+    }
+
+    void updateAiming()
+    {
+        if(!player1) return;
+
+        if(player1 != hudplayer())
+        {
+            player1->aiming = false;
+            return;
+        }
+
+        player1->aiming = getAimProgress(player1) > 0.0f;
+    }
+
+    float spread(int atk, gameent *d)
+    {
+        float aimProgress = getAimProgress(d);
+        return lerp((float)attacks[atk].noaimspread, (float)attacks[atk].aimspread, aimProgress);
+    }
 
     void createrays(int atk, const vec &from, const vec &to, gameent *d)             // create random spread of rays
     {
@@ -186,7 +214,7 @@ namespace game
     }
 
     VARP(blood, 0, 1, 1);
-    void damageeffect(int damage, gameent *d, gameent *actor, int atk)
+    void damageeffect(int damage, gameent *d, gameent *actor, int atk, bool isAfterburnHit)
     {
         vec p = d->o;
         p.z += 0.6f*(d->eyeheight + d->aboveeye) - d->eyeheight;
@@ -203,7 +231,8 @@ namespace game
                               DCF_APPLY_TARGET_MODIFIERS |
                               DCF_APPLY_ACTOR_BOOSTS |
                               DCF_APPLY_TARGET_BOOSTS;
-        totalDamage calc = getDamage(damage, atk, actorClass, actor, targetClass, d, actor->o.dist(d->o), calcflags, actor==d);
+        float hitdistance = actor->o.dist(d->o);
+        totalDamage calc = getDamage(damage, atk, actorClass, actor, targetClass, d, hitdistance, calcflags, actor==d);
         damage = calc.damage;
 
         switch(actorClass)
@@ -265,6 +294,8 @@ namespace game
         }
 
         damage *= 0.1f; // rescale damage value
+        if(damage <= 0) return;
+        recordHitlogDamage(actor, d, atk, damage, isAfterburnHit, hitdistance);
 
         if(isHudPlayer)
         {
@@ -576,7 +607,7 @@ namespace game
             lastUpdate = totalmillis;
         }
 
-        return (1.0f + (rand() % 20 - 10) / 100.0f) * sin((totalmillis * (2 * M_PI / static_cast<float>(time))) + phaseShift); // Slight random amplitude modulation (±10% variation)
+        return (1.0f + (rand() % 20 - 10) / 100.0f) * sin((totalmillis * (2 * M_PI / static_cast<float>(time))) + phaseShift); // Slight random amplitude modulation (+/-10% variation)
     }
 
     void shoteffects(int atk, const vec &from, const vec &to, gameent *d, bool local, int id, int prevaction, bool isMonster)     // create visual effect from a shot
@@ -750,11 +781,11 @@ namespace game
                     if(rnd(2)) particle_flying_flare(muzzleOrigin, dest, 900, PART_HAZE_SMALL, 50, 10.f, 100, 65);
                     switch(rnd(4))
                     {
-                        case 0: particle_flying_flare(muzzleOrigin, dest, 700, PART_FIRE_BALL, hasRoids ? 0x881111 : 0x604930, (12.f+rnd(16))/8.f, 100, 10+rnd(5), hasShrooms()); break;
-                        case 1: particle_flying_flare(muzzleOrigin, dest, 700, PART_FIRE_BALL, hasRoids ? 0x770000 : 0x474747, (12.f+rnd(16))/8.f, 100, 10+rnd(5), hasShrooms()); break;
-                        case 2: particle_flying_flare(muzzleOrigin, dest, 700, PART_FIRE_BALL, hasRoids ? 0x991111 : 0x383838, (12.f+rnd(16))/8.f, 100, 10+rnd(5), hasShrooms()); break;
+                        case 0: particle_flying_flare(muzzleOrigin, dest, 700, PART_FIRE_BALL, hasRoids ? 0x881111 : 0x604930, 1.25f, 100, 16, hasShrooms()); break;
+                        case 1: particle_flying_flare(muzzleOrigin, dest, 700, PART_FIRE_BALL, hasRoids ? 0x770000 : 0x474747, 1.25f, 100, 16, hasShrooms()); break;
+                        case 2: particle_flying_flare(muzzleOrigin, dest, 700, PART_FIRE_BALL, hasRoids ? 0x991111 : 0x383838, 1.25f, 100, 16, hasShrooms()); break;
                         default:
-                            particle_flying_flare(muzzleOrigin, dest, 1100, PART_SMOKE, 0x000000, (15.f+rnd(18))/3.f, -20, 15+rnd(10), hasShrooms());
+                            particle_flying_flare(muzzleOrigin, dest, 1100, PART_SMOKE, 0x000000, 3.5f, -20, 25, hasShrooms());
                             renderInstantImpact(from, rays[i], muzzleOrigin, atk, hasRoids);
                             if(rnd(2) && !isHudPlayer) soundNearmiss(S_FLYBYFLAME, from, rays[i]);
                     }

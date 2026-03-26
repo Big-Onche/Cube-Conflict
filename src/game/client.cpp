@@ -1362,13 +1362,12 @@ namespace game
         }
     }
 
-    extern int deathscore;
-
     void parsemessages(int cn, gameent *d, ucharbuf &p)
     {
         static char text[MAXTRANS];
         int type;
         bool mapchanged = false, demopacket = false;
+        static int pendingAfterburnTarget = -1, pendingAfterburnActor = -1, pendingAfterburnAtk = -1;
 
         while(p.remaining()) switch(type = getint(p))
         {
@@ -1500,7 +1499,6 @@ namespace game
                 if(d==player1)
                 {
                     if(editmode) toggleedit();
-                    if(deathscore) showscores(true);
                 }
                 else d->resetinterp();
                 stopLinkedSound(d->entityId, 0, true);
@@ -1760,11 +1758,15 @@ namespace game
                 gameent *target = getclient(tcn),
                        *actor = getclient(acn);
                 if(!target || !actor) break;
+                const bool isAfterburnHit = pendingAfterburnTarget == tcn && pendingAfterburnActor == acn && pendingAfterburnAtk == atk;
+                if(isAfterburnHit) pendingAfterburnTarget = pendingAfterburnActor = pendingAfterburnAtk = -1;
                 target->armour = armour;
                 target->health = health;
                 target->afterburnmillis = afterburn;
+                if(afterburnAttack(atk)) target->afterburnatk = atk;
+                else if(!afterburn) target->afterburnatk = 0;
                 if(target->state == CS_ALIVE && actor != player1) target->lastpain = lastmillis;
-                damaged(damage, target, actor, false, atk);
+                damaged(damage, target, actor, false, atk, isAfterburnHit);
                 if(player1->character==C_VIKING && target==player1 && actor!=player1 && player1->state==CS_ALIVE)
                 {
                     if(player1->boostmillis[B_RAGE]>8000) unlockAchievement(ACH_RAGE);
@@ -1824,7 +1826,9 @@ namespace game
 
                 if(!target || !actor) break;
 
-                damageeffect(target->afterburnatk == ATK_FLAMETHROWER ? 40 : 80, target, actor, target->afterburnatk);
+                pendingAfterburnTarget = tcn;
+                pendingAfterburnActor = acn;
+                pendingAfterburnAtk = target->afterburnatk;
                 playSound(S_ADULT_P, target==player1 ? vec(0, 0, 0) : target->o, 250, 100, NULL, target->entityId);
             }
 

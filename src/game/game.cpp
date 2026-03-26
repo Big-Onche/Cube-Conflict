@@ -10,6 +10,11 @@ bool rndevent(int probability, int probabilityReduce) // adjust the probability 
     return !game::ispaused() && !rnd((int)adjusted);
 }
 
+float distToMeter(float distance)
+{
+    return distance / 18.0f;
+}
+
 VARR(deadlylava, 0, 1, 1);
 
 namespace game
@@ -250,12 +255,6 @@ namespace game
         }
     }
 
-    bool hasboost(gameent *d)
-    {
-        loopi(NUMBOOSTS) { if(d->boostmillis[i]) return true; }
-        return false;
-    }
-
     bool isAttacking(gameent *d)
     {
         return d->lastaction && d->lastattack >= 0 && attacks[d->lastattack].gun == d->gunselect && lastmillis-d->lastaction<attacks[d->lastattack].attackdelay + 50;
@@ -312,7 +311,7 @@ namespace game
 
     void updatePlayersBoosts(int time, gameent *d)
     {
-        if(hasboost(d))
+        if(d->hasboost())
         {
             bool isHudPlayer = (d == hudplayer());
 
@@ -447,7 +446,7 @@ namespace game
 
         if(damage > 0)
         {
-            damaged(damage, d, burner, true, d->afterburnatk);
+            damaged(damage, d, burner, true, d->afterburnatk, true);
             playSound(S_ADULT_P, d==player1 ? vec(0, 0, 0) : d->o, 250, 100, NULL, d->entityId);
         }
     }
@@ -609,13 +608,13 @@ namespace game
             checkInventoryGuns();
             if(kamikazeExploding(player1)) { gunselect(GUN_KAMIKAZE, player1); player1->gunwait = 0; }
 
-            if(IS_ON_OFFICIAL_SERV) // checking for achievements
+            if(IS_ON_OFFICIAL_SERV && isconnected()) // checking for achievements
             {
                 if(player1->health>=2000) unlockAchievement(ACH_SACAPV);
                 if(player1->hasRoids() && player1->boostmillis[B_EPO] && player1->boostmillis[B_JOINT] && player1->boostmillis[B_SHROOMS]) unlockAchievement(ACH_DEFONCE);
                 if(lookupmaterial(player1->o)==MAT_NOCLIP && !strcasecmp(getclientmap(), "moon")) unlockAchievement(ACH_SPAAACE);
                 if(player1->hasSuperWeapon() && player1->hasRoids() && player1->armour && player1->armourtype==A_POWERARMOR) unlockAchievement(ACH_ABUS);
-                if(player1->character==C_KAMIKAZE && !player1->ammo[GUN_KAMIKAZE] && totalmillis-lastshoot>=500 && totalmillis-lastshoot<=750 && isconnected()) unlockAchievement(ACH_SUICIDEFAIL);
+                if(player1->character==C_KAMIKAZE && !player1->ammo[GUN_KAMIKAZE] && player1->state==CS_ALIVE && lastmillis-player1->lastaction>500) unlockAchievement(ACH_SUICIDEFAIL);
                 if(player1->boostmillis[B_EPO] && player1->character==C_JUNKIE) unlockAchievement(ACH_LANCEEPO);
             }
 
@@ -776,7 +775,7 @@ namespace game
     VARFP(player1_taunt, 0, 0, 0, // sizeof(customsdance)/sizeof(customsdance[0])-1,
     {
         //if(!packtaunt) return;
-        //if(cust[VOI_CORTEX+player1_danse]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possédez pas cette voix !"); //playsound(S_ERROR); player1_danse=0; return;}
+        //if(cust[VOI_CORTEX+player1_danse]<= 0) {conoutf(CON_GAMEINFO, "\f3Vous ne possedez pas cette voix !"); //playsound(S_ERROR); player1_danse=0; return;}
         //addmsg(N_SENDDANSE, "ri", player1_danse);
         //stopsounds();
         //player1->customdanse = player1_danse;
@@ -796,12 +795,12 @@ namespace game
 
     VARP(hitsound, 0, 0, 1);
 
-    void damaged(int damage, gameent *d, gameent *actor, bool local, int atk)
+    void damaged(int damage, gameent *d, gameent *actor, bool local, int atk, bool isAfterburnHit)
     {
         if((d->state!=CS_ALIVE && d->state != CS_LAGGED && d->state != CS_SPAWNING) || intermission) return;
 
         if(local) damage = d->dodamage(damage, d->character==C_PHYSICIST && d->abilitymillis[ABILITY_1]);
-        else if(actor==player1) return;
+        else if(actor==player1 && !isAfterburnHit) return;
 
         gameent *h = hudplayer();
         if(h!=player1 && actor==h && d!=actor)
@@ -822,15 +821,13 @@ namespace game
             else if(d->armour && actor->gunselect!=GUN_FLAMETHROWER) playSound(S_IMPACTWOOD+d->armourtype, d==h ? vec(0, 0, 0) : d->o, 250, 50, SND_LOWPRIORITY);
         }
 
-        damageeffect(damage, d, actor, atk);
+        damageeffect(damage, d, actor, atk, isAfterburnHit);
 
         ai::damaged(d, actor);
 
         if(local) destroyLocalPowerArmor(d);
         if(d->health<=0) {if(local) killed(d, actor, atk);}
     }
-
-    VARP(deathscore, 0, 1, 1);
 
     void deathstate(gameent *d, bool restore)
     {
@@ -855,7 +852,6 @@ namespace game
 
         if(d==player1)
         {
-            if(deathscore) showscores(true);
             disablezoom();
             cleardamagescreen();
             d->attacking = ACT_IDLE;
@@ -927,7 +923,7 @@ namespace game
 
         defformatstring(dname, "%s", m_teammode && teamcolorfrags ? teamcolorname(d, readstr("GameMessage_You")) : colorname(d, NULL, readstr("GameMessage_You"), "\fc"));
         defformatstring(aname, "%s", m_teammode && teamcolorfrags ? teamcolorname(actor, readstr("GameMessage_You")) : colorname(actor, NULL, readstr("GameMessage_You"), "\fc"));
-
+        updateHitlogKill(d, actor, atk);
         if(d==actor) // suicide ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
             if(d==player1)
@@ -941,7 +937,7 @@ namespace game
         }
         else // Kill ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         {
-            float killDistance = actor->o.dist(d->o)/18.f;
+            float killDistance = distToMeter(actor->o.dist(d->o));
             if(actor==player1) //////////////////// you killed someone ////////////////////
             {
                 playSound(S_KILL, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH|SND_UI);
@@ -988,11 +984,8 @@ namespace game
                 hassuicided = false;
                 conoutf(contype, "%s\f7 > \fl%s\f7 > \fd%s \fl(%.1fm)", aname, readstr(guns[atk].ident), player1->name, killDistance);
                 updateStat(1, STAT_MORTS);
-                formatstring(killerName, "%s", aname);
-                killerWeapon = atk;
                 killerCharacter = actor->character;
                 killerLevel = actor->level;
-                killerDistance = killDistance;
             }
             else //////////////////// someone killed someone ////////////////////
             {
@@ -1014,6 +1007,7 @@ namespace game
             }
         }
         deathstate(d);
+        if(d == hudplayer()) updateHitlogUi();
         ai::killed(d, actor);
     }
 

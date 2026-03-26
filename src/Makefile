@@ -44,7 +44,7 @@ ifneq (,$(findstring MINGW,$(PLATFORM)))
 			endif
 		endif
 		WINLIB=lib64
-		WINBIN=../bin64
+		WINBIN=../bins
 		override CXX+= -m64
 		override WINDRES+= -F pe-x86-64
 	else
@@ -56,7 +56,7 @@ ifneq (,$(findstring MINGW,$(PLATFORM)))
 			endif
 		endif
 		WINLIB=lib
-		WINBIN=../bin
+		WINBIN=../bins
 		override CXX+= -m32
 		override WINDRES+= -F pe-i386
 	endif
@@ -89,7 +89,7 @@ else
 	else
 		CLIENT_INCLUDES = $(INCLUDES) -I/usr/X11R6/include $(STEAM_DEFINES) `sdl2-config --cflags`
 		CLIENT_LIBS = -Lenet -lenet -L/usr/X11R6/lib -lX11 `sdl2-config --libs` \
-									-lSDL2_image -lopenal -lsndfile -lz -lGL -L../bin_unix $(STEAM_CLIENT_LIBS)
+									-lSDL2_image -lopenal -lsndfile -lz -lGL -L../bins $(STEAM_CLIENT_LIBS)
 	endif
 endif
 
@@ -108,6 +108,7 @@ CLIENT_OBJS= \
         engine/console.o \
         engine/dynlight.o \
         engine/grass.o \
+        engine/heathaze.o \
         engine/godrays.o \
         engine/lensflare.o \
         engine/light.o \
@@ -149,6 +150,7 @@ CLIENT_OBJS= \
         game/client.o \
         game/entities.o \
         game/game.o \
+        game/hitlog.o \
         game/inventory.o \
         game/projectiles.o \
         game/render.o \
@@ -228,16 +230,16 @@ master: $(MASTER_OBJS)
 install: all
 else
 client:	libenet $(CLIENT_OBJS)
-	$(CXX) $(CXXFLAGS) -o ../bin_unix/cc_client $(CLIENT_OBJS) $(CLIENT_LIBS)
+	$(CXX) $(CXXFLAGS) -o ../bins/cc_client $(CLIENT_OBJS) $(CLIENT_LIBS)
 ifneq (,$(findstring DARWIN,$(PLATFORM)))
 	install_name_tool -add_rpath @executable_path/../Frameworks cc_client
 endif
 
 server:	libenet $(SERVER_OBJS)
-	$(CXX) $(CXXFLAGS) -o ../bin_unix/cc_server $(SERVER_OBJS) $(SERVER_LIBS)
+	$(CXX) $(CXXFLAGS) -o ../bins/cc_server $(SERVER_OBJS) $(SERVER_LIBS)
 
 master: libenet $(MASTER_OBJS)
-	$(CXX) $(CXXFLAGS) -o ../bin_unix/cc_master $(MASTER_OBJS) $(MASTER_LIBS)
+	$(CXX) $(CXXFLAGS) -o ../bins/cc_master $(MASTER_OBJS) $(MASTER_LIBS)
 
 shared/cube2font.o: shared/cube2font.c
 	$(CXX) $(CXXFLAGS) -c -o $@ $< `freetype-config --cflags`
@@ -250,13 +252,13 @@ install: client
 	cp cc_client ../cubeconflict.app/Contents/MacOS/cubeconflict_universal
 else
 install: all
-	cp cc_client	../bin_unix/$(PLATFORM_PREFIX)_client
-	cp cc_server	../bin_unix/$(PLATFORM_PREFIX)_server
-	cp cc_master	../bin_unix/$(PLATFORM_PREFIX)_master
+	cp cc_client	../bins/$(PLATFORM_PREFIX)_client
+	cp cc_server	../bins/$(PLATFORM_PREFIX)_server
+	cp cc_master	../bins/$(PLATFORM_PREFIX)_master
 ifneq (,$(STRIP))
-	$(STRIP) ../bin_unix/$(PLATFORM_PREFIX)_client
-	$(STRIP) ../bin_unix/$(PLATFORM_PREFIX)_server
-	$(STRIP) ../bin_unix/$(PLATFORM_PREFIX)_master
+	$(STRIP) ../bins/$(PLATFORM_PREFIX)_client
+	$(STRIP) ../bins/$(PLATFORM_PREFIX)_server
+	$(STRIP) ../bins/$(PLATFORM_PREFIX)_master
 endif
 endif
 endif
