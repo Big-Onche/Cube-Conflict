@@ -20,7 +20,7 @@ VARP(particlelightingdist, 256, 1024, 8192);
 VARP(particlelightingfadedist, 128, 768, 4096);
 VARP(particlelightingshadowmapblur, 1, 3, 16);
 VARP(particletransmittance, 0, 1, 1);
-FVAR(particletransmittanceextinction, 0.0f, 2.0f, 8.0f);
+FVAR(particletransmittanceextinction, 0.0f, 0.75f, 8.0f);
 
 FVAR(particlemaplightintensity, 0.0f, 1.5f, 32.0f);
 VARP(particlemaplightcolorinfluence, 0, 200, 200);
@@ -506,10 +506,10 @@ struct partrenderer
                 adddynlight(o, p->size * 40, vec(p->color.r/1600.f, p->color.g/1600.f, p->color.b/1600.f), ((3000.f / curfps) / 100.f) * game::gamespeed, 0, flags, p->size*40);
             }
 
-            if(type & PT_EMITPART && canemitparticles())
+            if(type & PT_EMITPART && canemitparticles() && rnd(2))
             {
                 splash(PART_SPARK, p->color, 10, 1, 50, o, 0.4f, 10, -1);
-                particle_splash(PART_SMOKE, 1, 1750, o, 0x80809A05, 3.f, 50, 50, 4, game::hasShrooms());
+                particle_splash(PART_SMOKE, 1, 1750, o, 0x80809A10, 3.f, 50, 50, 4, game::hasShrooms());
             }
         }
     }
