@@ -369,23 +369,23 @@ namespace bouncers
             switch(bouncerType)
             {
                 case BNC_CASING:
-                    if(emitPart) particle_splash(PART_SMOKE, 1, 150, pos, 0x505050, 0.8f, 50, -20, 1);
+                    if(emitPart) particle_splash(PART_SMOKE, 1, 150, pos, 0x50505044, 0.8f, 50, -20, 1);
                     break;
 
                 case BNC_BIGCASING:
-                    if(emitPart) particle_splash(PART_SMOKE, 1, 150, pos, 0x404040, 1.75f, 50, -20, 2);
+                    if(emitPart) particle_splash(PART_SMOKE, 1, 150, pos, 0x40404066, 1.75f, 50, -20, 2);
                     break;
 
                 case BNC_CARTRIDGE:
-                    if(emitPart) particle_splash(PART_SMOKE, 1, 150, pos, 0x252525, 1.5f, 50, -20, 3);
+                    if(emitPart) particle_splash(PART_SMOKE, 1, 150, pos, 0x25252544, 1.5f, 50, -20, 3);
                     break;
 
                 case BNC_ROCK:
-                    if(emitPart) particle_splash(PART_SMOKE, 1, 150, pos, 0x202020, 2.5f, 50, -20, 0, shrooms);
+                    if(emitPart) particle_splash(PART_SMOKE, 1, 400, pos, 0x202020AA, 2.5f, 50, -20, 0, shrooms);
                     break;
 
                 case BNC_BIGROCK:
-                    if(emitPart) particle_splash(PART_SMOKE, 1, 500, pos, 0x151515, 8.f, 50, -20, 0, shrooms);
+                    if(emitPart) particle_splash(PART_SMOKE, 1, 700, pos, 0x151515AA, 8.f, 50, -20, 0, shrooms);
                     break;
 
                 case BNC_GRENADE:
@@ -402,7 +402,7 @@ namespace bouncers
                 case BNC_SCRAP:
                     if(emitPart)
                     {
-                        particle_splash(inWater ? PART_BUBBLE : PART_SMOKE, inWater ? 1 : 2, 250, pos, 0x222222, 2.5f, 50, -50, 0, shrooms);
+                        particle_splash(inWater ? PART_BUBBLE : PART_SMOKE, inWater ? 1 : 2, 250, pos, 0x222222AA, 2.5f, 50, -50, 0, shrooms);
                         particle_splash(PART_FIRE_BALL, 2, 75, pos, 0x994400, 0.7f, 30, -30, 0, shrooms);
                     }
                     break;
@@ -410,7 +410,7 @@ namespace bouncers
                 case BNC_GLASS:
                     if(emitPart)
                     {
-                        particle_splash(PART_SMOKE, 1, 1200, pos, 0x303030, 2.5f, 50, -50, 10, shrooms);
+                        particle_splash(PART_SMOKE, 1, 1200, pos, 0x30303066, 2.5f, 50, -50, 10, shrooms);
                         particle_splash(PART_FIRE_BALL, 1, 250, pos, roids ? 0xFF0000 : 0x996600, 1.3f, 50, -50, 12, shrooms);
                     }
                     if(sparseFx) particle_splash(PART_HAZE_SMALL, 1, 500, pos, 85, 12.f, 50, -25, 50);
@@ -431,7 +431,7 @@ namespace bouncers
                     if(sparseFx)
                     {
                         int smokeLife = 1800 + ((lastmillis + i*53 + bnc.bounces*17) % 400);
-                        particle_splash(PART_SMOKE, 1, smokeLife, pos, 0x282828, 2.f, 50, -100, 12, shrooms);
+                        particle_splash(PART_SMOKE, 1, smokeLife, pos, 0x28282888, 2.f, 50, -100, 12, shrooms);
                     }
                     if(emitPart) particle_splash(PART_FIRE_BALL, 2, 175, bnc.o, flamesColor, 1.f, 20, 0, 4, shrooms);
                     break;
