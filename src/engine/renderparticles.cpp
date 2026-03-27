@@ -976,7 +976,7 @@ struct varenderer : partrenderer
     {
         int offset, count;
         vec center, bbmin, bbmax;
-        float radius, depth;
+        float radius, depth, lightfade;
     };
 
     static inline bool sortparticlelightentriesbykey(const particlelightentry &a, const particlelightentry &b)
@@ -1418,6 +1418,7 @@ struct varenderer : partrenderer
 
                 draw.center = vec(draw.bbmin).add(draw.bbmax).mul(0.5f);
                 draw.radius = max(draw.bbmin.dist(draw.bbmax)*0.5f, 1.0f);
+                draw.lightfade = getparticlelightingfade(draw.center);
             }
 
             start = end;
@@ -1487,11 +1488,31 @@ struct varenderer : partrenderer
 
         if(useparticlelighting(type))
         {
+            const bool usesoftshader = (type&PT_SOFT) && softparticles;
+            Shader *lightshader = getparticlelightshader(usesoftshader);
+            Shader *baseshader = usesoftshader ? particlesoftshader : particleshader;
+            Shader *activeshader = Shader::lastshader;
+            float shadercolorscale = type&PT_MOD ? 1 : ldrscale;
+            if(type&PT_BRIGHT || type&PT_OVERBRIGHT) shadercolorscale *= particlebright*(type&PT_OVERBRIGHT ? 1.5f : 1);
+            auto binddrawshader = [&](Shader *shader)
+            {
+                if(activeshader == shader) return;
+                shader->set();
+                if(usesoftshader) LOCALPARAMF(softparams, -1.0f/softparticleblend, 0, 0);
+                LOCALPARAMF(colorscale, shadercolorscale, shadercolorscale, shadercolorscale, 1);
+                activeshader = shader;
+            };
+
             loopv(lightdraws)
             {
                 const particlelightdraw &draw = lightdraws[i];
-                float locallightintensity = getparticlelocallightintensity(draw.center);
-                bindcachedparticlelightparams(draw.center, draw.radius, draw.bbmin, draw.bbmax, locallightintensity);
+                if(draw.lightfade > 0.0f)
+                {
+                    binddrawshader(lightshader);
+                    float locallightintensity = particlemaplightintensity * draw.lightfade;
+                    bindcachedparticlelightparams(draw.center, draw.radius, draw.bbmin, draw.bbmax, locallightintensity);
+                }
+                else binddrawshader(baseshader);
                 gle::drawquads(draw.offset, draw.count);
             }
         }
