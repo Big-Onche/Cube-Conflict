@@ -68,8 +68,8 @@ struct particlelightuploadcache
 {
     bool valid;
     Shader *shader;
-    vec center, bbmin, bbmax;
-    float radius, locallightintensity;
+    ullong lightkey;
+    float locallightintensity;
     bool enablelocallights;
     int sunlightdebug, locallightdebug;
     int sunlightdarkabsorb, sunlightcolorinfluence, maplightcolorinfluence;
@@ -77,8 +77,7 @@ struct particlelightuploadcache
     int shadowmapscale;
 
     particlelightuploadcache()
-      : valid(false), shader(NULL), center(0, 0, 0), bbmin(0, 0, 0), bbmax(0, 0, 0),
-        radius(0.0f), locallightintensity(0.0f), enablelocallights(false),
+      : valid(false), shader(NULL), lightkey(0), locallightintensity(0.0f), enablelocallights(false),
         sunlightdebug(0), locallightdebug(0), sunlightdarkabsorb(0),
         sunlightcolorinfluence(0), maplightcolorinfluence(0), sunlightintensity(0.0f),
         backlightintensity(0.0f), shadowapplyintensity(1.0f),
@@ -94,7 +93,7 @@ static inline void resetparticlelightcache()
     particlelightcache.shader = NULL;
 }
 
-static inline void bindcachedparticlelightparams(const vec &center, float radius, const vec &bbmin, const vec &bbmax, float locallightintensity)
+static inline void bindcachedparticlelightparams(ullong lightkey, const vec &center, float radius, const vec &bbmin, const vec &bbmax, float locallightintensity)
 {
     Shader *shader = Shader::lastshader;
     if(!shader) return;
@@ -106,13 +105,9 @@ static inline void bindcachedparticlelightparams(const vec &center, float radius
     LOCALPARAM(particlebillboarddir, camdir);
 
     bool enablelocallights = locallightintensity > 0.0f;
-    if(particlelightcache.valid &&
+    bool samebaseparams = particlelightcache.valid &&
        particlelightcache.shader == shader &&
-       particlelightcache.center == center &&
-       particlelightcache.radius == radius &&
-       particlelightcache.bbmin == bbmin &&
-       particlelightcache.bbmax == bbmax &&
-       particlelightcache.locallightintensity == locallightintensity &&
+       particlelightcache.lightkey == lightkey &&
        particlelightcache.enablelocallights == enablelocallights &&
        particlelightcache.sunlightdebug == particlesunlightdebug &&
        particlelightcache.locallightdebug == particlelocallightdebug &&
@@ -122,25 +117,26 @@ static inline void bindcachedparticlelightparams(const vec &center, float radius
        particlelightcache.shadowapplyintensity == particleshadowapplyintensity &&
        particlelightcache.sunlightcolorinfluence == particlesunlightcolorinfluence &&
        particlelightcache.maplightcolorinfluence == particlemaplightcolorinfluence &&
-       particlelightcache.shadowmapscale == particlelightingshadowmapblur)
+       particlelightcache.shadowmapscale == particlelightingshadowmapblur;
+    if(samebaseparams && particlelightcache.locallightintensity == locallightintensity)
     {
         return;
     }
 
-    bindparticlelightparams(center, radius, bbmin, bbmax, enablelocallights);
-    LOCALPARAMI(particlesunlightdebug, particlesunlightdebug);
-    LOCALPARAMI(particlelocallightdebug, particlelocallightdebug);
-    LOCALPARAMF(particlesunlightparams, particlesunlightdarkabsorb, particlesunlightintensity, 0, 0);
-    LOCALPARAMF(particlelightcolorparams, particlesunlightcolorinfluence, particlemaplightcolorinfluence, particlebacklightintensity, particleshadowapplyintensity);
+    if(!samebaseparams)
+    {
+        bindparticlelightparams(lightkey, center, radius, bbmin, bbmax, enablelocallights);
+        LOCALPARAMI(particlesunlightdebug, particlesunlightdebug);
+        LOCALPARAMI(particlelocallightdebug, particlelocallightdebug);
+        LOCALPARAMF(particlesunlightparams, particlesunlightdarkabsorb, particlesunlightintensity, 0, 0);
+        LOCALPARAMF(particlelightcolorparams, particlesunlightcolorinfluence, particlemaplightcolorinfluence, particlebacklightintensity, particleshadowapplyintensity);
+        LOCALPARAMF(particlelightshadowmapscale, max(float(particlelightingshadowmapblur), 1.0f));
+    }
     LOCALPARAMF(particlelocallightintensity, locallightintensity, 0, 0, 0);
-    LOCALPARAMF(particlelightshadowmapscale, max(float(particlelightingshadowmapblur), 1.0f));
 
     particlelightcache.valid = true;
     particlelightcache.shader = shader;
-    particlelightcache.center = center;
-    particlelightcache.radius = radius;
-    particlelightcache.bbmin = bbmin;
-    particlelightcache.bbmax = bbmax;
+    particlelightcache.lightkey = lightkey;
     particlelightcache.locallightintensity = locallightintensity;
     particlelightcache.enablelocallights = enablelocallights;
     particlelightcache.sunlightdebug = particlesunlightdebug;
@@ -360,8 +356,21 @@ static inline uchar particlecoloralpha(int blend, uchar alpha)
 
 static void splash(int type, const bvec4 &color, int radius, int num, int fade, const vec &p, float size, int gravity, int sizemod, bool sound = false);
 
-static const int MAXPARTICLELIGHTCHUNK = 64;
+static const int MAXPARTICLELIGHTCHUNK = 32;
 static const float PARTICLELIGHTCELLSIZE = 64.0f;
+
+static inline uint particlelightcellcoord(int n)
+{
+    return uint(n) & 0x1FFFFF;
+}
+
+static inline ullong particlelightcellkey(const vec &o)
+{
+    ivec cell = ivec::floor(vec(o).div(PARTICLELIGHTCELLSIZE));
+    return (ullong(particlelightcellcoord(cell.x)) << 42) |
+           (ullong(particlelightcellcoord(cell.y)) << 21) |
+           ullong(particlelightcellcoord(cell.z));
+}
 
 static inline void setparticletexcoords(int type, const particle *p, partvert *vs)
 {
@@ -975,8 +984,16 @@ struct varenderer : partrenderer
     struct particlelightdraw
     {
         int offset, count;
+        int cellindex;
         vec center, bbmin, bbmax;
         float radius, depth, lightfade;
+    };
+
+    struct particlelightcellinfo
+    {
+        ullong key;
+        vec center, bbmin, bbmax;
+        float radius;
     };
 
     static inline bool sortparticlelightentriesbykey(const particlelightentry &a, const particlelightentry &b)
@@ -1002,6 +1019,7 @@ struct varenderer : partrenderer
     GLuint vbo, shadowvbo;
     vector<partvert> lightverts;
     vector<particlelightentry> lightentries;
+    vector<particlelightcellinfo> lightcells;
     vector<particlelightdraw> lightdraws;
 
     varenderer(const char *texname, int type, int stain = -1)
@@ -1020,6 +1038,7 @@ struct varenderer : partrenderer
         if(shadowvbo) { glDeleteBuffers_(1, &shadowvbo); shadowvbo = 0; }
         lightverts.setsize(0);
         lightentries.setsize(0);
+        lightcells.setsize(0);
         lightdraws.setsize(0);
     }
 
@@ -1035,6 +1054,7 @@ struct varenderer : partrenderer
         numparts = 0;
         lastupdate = -1;
         uselightvbo = false;
+        lightcells.setsize(0);
     }
 
     void reset()
@@ -1346,22 +1366,10 @@ struct varenderer : partrenderer
         gle::clearvbo();
     }
 
-    static inline uint particlelightcellcoord(int n)
-    {
-        return uint(n) & 0x1FFFFF;
-    }
-
-    static inline ullong particlelightcellkey(const vec &o)
-    {
-        ivec cell = ivec::floor(vec(o).div(PARTICLELIGHTCELLSIZE));
-        return (ullong(particlelightcellcoord(cell.x)) << 42) |
-               (ullong(particlelightcellcoord(cell.y)) << 21) |
-               ullong(particlelightcellcoord(cell.z));
-    }
-
     void buildlightdraws()
     {
         lightentries.setsize(0);
+        lightcells.setsize(0);
         lightdraws.setsize(0);
         lightverts.setsize(0);
 
@@ -1390,6 +1398,24 @@ struct varenderer : partrenderer
         {
             int end = start + 1;
             while(end < lightentries.length() && lightentries[end].key == lightentries[start].key) end++;
+
+            particlelightcellinfo &cell = lightcells.add();
+            cell.key = lightentries[start].key;
+            cell.bbmin = vec(1e16f, 1e16f, 1e16f);
+            cell.bbmax = vec(-1e16f, -1e16f, -1e16f);
+            for(int i = start; i < end; ++i)
+            {
+                const particlelightentry &entry = lightentries[i];
+                cell.bbmin.x = min(cell.bbmin.x, entry.o.x - entry.size);
+                cell.bbmin.y = min(cell.bbmin.y, entry.o.y - entry.size);
+                cell.bbmin.z = min(cell.bbmin.z, entry.o.z - entry.size);
+                cell.bbmax.x = max(cell.bbmax.x, entry.o.x + entry.size);
+                cell.bbmax.y = max(cell.bbmax.y, entry.o.y + entry.size);
+                cell.bbmax.z = max(cell.bbmax.z, entry.o.z + entry.size);
+            }
+            cell.center = vec(cell.bbmin).add(cell.bbmax).mul(0.5f);
+            cell.radius = max(cell.bbmin.dist(cell.bbmax)*0.5f, 1.0f);
+
             lightentries.sort(sortparticlelightentriesbydepth, start, end - start);
 
             for(int chunkstart = start; chunkstart < end; chunkstart += MAXPARTICLELIGHTCHUNK)
@@ -1398,6 +1424,7 @@ struct varenderer : partrenderer
                 particlelightdraw &draw = lightdraws.add();
                 draw.offset = lightverts.length() / 4;
                 draw.count = 0;
+                draw.cellindex = lightcells.length() - 1;
                 draw.bbmin = vec(1e16f, 1e16f, 1e16f);
                 draw.bbmax = vec(-1e16f, -1e16f, -1e16f);
                 draw.depth = 0.0f;
@@ -1506,11 +1533,12 @@ struct varenderer : partrenderer
             loopv(lightdraws)
             {
                 const particlelightdraw &draw = lightdraws[i];
+                const particlelightcellinfo &cell = lightcells[draw.cellindex];
                 if(draw.lightfade > 0.0f)
                 {
                     binddrawshader(lightshader);
                     float locallightintensity = particlemaplightintensity * draw.lightfade;
-                    bindcachedparticlelightparams(draw.center, draw.radius, draw.bbmin, draw.bbmax, locallightintensity);
+                    bindcachedparticlelightparams(cell.key, cell.center, cell.radius, cell.bbmin, cell.bbmax, locallightintensity);
                 }
                 else binddrawshader(baseshader);
                 gle::drawquads(draw.offset, draw.count);
@@ -1984,7 +2012,7 @@ void renderparticles(int layer)
                 if(lightshader && !handleslightparams)
                 {
                     float locallightintensity = getparticlelocallightintensity(lightprobe);
-                    bindcachedparticlelightparams(lightprobe, lightproberadius, lightbbmin, lightbbmax, locallightintensity);
+                    bindcachedparticlelightparams(particlelightcellkey(lightprobe), lightprobe, lightproberadius, lightbbmin, lightbbmax, locallightintensity);
                 }
                 if(changedbits&(PT_MOD|PT_BRIGHT|PT_SOFT|PT_NOTEX|PT_SHADER|PT_LABSORPTION))
                 {

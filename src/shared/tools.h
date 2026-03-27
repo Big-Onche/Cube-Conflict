@@ -599,6 +599,16 @@ static inline bool htcmp(int x, int y)
     return x==y;
 }
 
+static inline uint hthash(ullong key)
+{
+    return uint(key ^ (key >> 32));
+}
+
+static inline bool htcmp(ullong x, ullong y)
+{
+    return x==y;
+}
+
 #ifndef STANDALONE
 static inline uint hthash(GLuint key)
 {

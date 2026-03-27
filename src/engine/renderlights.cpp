@@ -3041,6 +3041,12 @@ enum { MAXPARTICLELIGHTS = 4 };
 
 static vec4 particlelightposv[MAXPARTICLELIGHTS], particlelightcolorv[MAXPARTICLELIGHTS], particlelightspotv[MAXPARTICLELIGHTS], particlelightshadowv[MAXPARTICLELIGHTS];
 static vec2 particlelightoffsetv[MAXPARTICLELIGHTS];
+struct particlelightselection
+{
+    int count;
+    vec4 posv[MAXPARTICLELIGHTS], colorv[MAXPARTICLELIGHTS], spotv[MAXPARTICLELIGHTS], shadowv[MAXPARTICLELIGHTS];
+    vec2 offsetv[MAXPARTICLELIGHTS];
+};
 struct particlelightsource
 {
     vec o, rawcolor, scaledcolor, dir;
@@ -3052,6 +3058,7 @@ struct particlelightsource
 static vector<particlelightsource> particlelightsources;
 static vector<vec4> particlelightentshadowv, particlelightdynshadowv;
 static vector<vec2> particlelightentoffsetv, particlelightdynoffsetv;
+static hashtable<ullong, particlelightselection> particlelightcellcache(1<<10);
 static int particlelightsourceframe = -1;
 
 void collectlights();
@@ -3107,6 +3114,7 @@ static inline void clearparticlelightsourcecache()
     particlelightdynshadowv.shrink(0);
     particlelightentoffsetv.shrink(0);
     particlelightdynoffsetv.shrink(0);
+    particlelightcellcache.recycle();
     particlelightsourceframe = -1;
 }
 
@@ -3126,6 +3134,7 @@ static inline void ensureparticlelightsources()
     if(particlelightsourceframe == lastmillis) return;
     particlelightsourceframe = lastmillis;
     particlelightsources.shrink(0);
+    particlelightcellcache.recycle();
 
     const vector<extentity *> &ents = entities::getents();
     resetparticlelightshadowcache(particlelightentshadowv, particlelightentoffsetv, ents.length());
@@ -3236,6 +3245,31 @@ static inline void clearparticlelightparams()
     LOCALPARAMV(particlelightoffset, particlelightoffsetv, MAXPARTICLELIGHTS);
 }
 
+static inline void resetparticlelightselectionslot(particlelightselection &selection, int index)
+{
+    selection.posv[index] = vec4(0, 0, 0, 1);
+    selection.colorv[index] = vec4(0, 0, 0, 0);
+    selection.spotv[index] = vec4(0, 0, 0, 0);
+    selection.shadowv[index] = vec4(0, 0, 0, 0);
+    selection.offsetv[index] = vec2(-1, -1);
+}
+
+static inline void resetparticlelightselection(particlelightselection &selection)
+{
+    selection.count = 0;
+    loopi(MAXPARTICLELIGHTS) resetparticlelightselectionslot(selection, i);
+}
+
+static inline void uploadparticlelightselection(const particlelightselection &selection)
+{
+    LOCALPARAMI(particlelightcount, selection.count);
+    LOCALPARAMV(particlelightpos, selection.posv, MAXPARTICLELIGHTS);
+    LOCALPARAMV(particlelightcolor, selection.colorv, MAXPARTICLELIGHTS);
+    LOCALPARAMV(particlelightspot, selection.spotv, MAXPARTICLELIGHTS);
+    LOCALPARAMV(particlelightshadow, selection.shadowv, MAXPARTICLELIGHTS);
+    LOCALPARAMV(particlelightoffset, selection.offsetv, MAXPARTICLELIGHTS);
+}
+
 static inline float particlelightscore(const vec &center, const vec &bbmin, const vec &bbmax, const vec &lightpos, float lightradius)
 {
     float invradius = 1.0f/max(lightradius, 1.0f);
@@ -3249,7 +3283,7 @@ static inline float particlelightscore(const vec &center, const vec &bbmin, cons
     return boxdist*4.0f + bestprobedist;
 }
 
-static inline void insertparticlelightcandidate(const vec &center, const vec &bbmin, const vec &bbmax, const particlelightsource &src, float *scores)
+static inline void insertparticlelightcandidate(const vec &center, const vec &bbmin, const vec &bbmax, const particlelightsource &src, float *scores, particlelightselection &selection)
 {
     const vec &lightpos = src.o;
     float lightradius = src.radius;
@@ -3271,39 +3305,38 @@ static inline void insertparticlelightcandidate(const vec &center, const vec &bb
     for(int j = MAXPARTICLELIGHTS-1; j > insert; --j)
     {
         scores[j] = scores[j-1];
-        particlelightposv[j] = particlelightposv[j-1];
-        particlelightcolorv[j] = particlelightcolorv[j-1];
-        particlelightspotv[j] = particlelightspotv[j-1];
-        particlelightshadowv[j] = particlelightshadowv[j-1];
-        particlelightoffsetv[j] = particlelightoffsetv[j-1];
+        selection.posv[j] = selection.posv[j-1];
+        selection.colorv[j] = selection.colorv[j-1];
+        selection.spotv[j] = selection.spotv[j-1];
+        selection.shadowv[j] = selection.shadowv[j-1];
+        selection.offsetv[j] = selection.offsetv[j-1];
     }
 
     scores[insert] = score;
-    particlelightposv[insert] = vec4(lightpos, 1).div(lightradius);
-    particlelightcolorv[insert] = vec4(chroma, lightluma);
-    particlelightspotv[insert] = src.spot > 0 ? vec4(vec(src.dir).neg(), 1/(1 - cos360(src.spot))) : vec4(0, 0, 0, 0);
-    particlelightshadowv[insert] = src.shadowparams;
-    particlelightoffsetv[insert] = src.shadowoffset;
+    selection.posv[insert] = vec4(lightpos, 1).div(lightradius);
+    selection.colorv[insert] = vec4(chroma, lightluma);
+    selection.spotv[insert] = src.spot > 0 ? vec4(vec(src.dir).neg(), 1/(1 - cos360(src.spot))) : vec4(0, 0, 0, 0);
+    selection.shadowv[insert] = src.shadowparams;
+    selection.offsetv[insert] = src.shadowoffset;
 }
 
-static int collectparticlelights(const vec &center, float /*radius*/, const vec &bbmin, const vec &bbmax)
+static const particlelightselection &collectparticlelights(ullong lightkey, const vec &center, float /*radius*/, const vec &bbmin, const vec &bbmax)
 {
-    float scores[MAXPARTICLELIGHTS];
-    loopi(MAXPARTICLELIGHTS)
-    {
-        scores[i] = 1e16f;
-        resetparticlelightslot(i);
-    }
-
     ensureparticlelightsources();
-    loopv(particlelightsources) insertparticlelightcandidate(center, bbmin, bbmax, particlelightsources[i], scores);
+    if(particlelightselection *cached = particlelightcellcache.access(lightkey)) return *cached;
 
-    int numparticlelights = 0;
-    loopi(MAXPARTICLELIGHTS) if(particlelightcolorv[i].a > 1.0e-4f) numparticlelights++;
-    return numparticlelights;
+    particlelightselection &selection = particlelightcellcache[lightkey];
+    resetparticlelightselection(selection);
+    float scores[MAXPARTICLELIGHTS];
+    loopi(MAXPARTICLELIGHTS) scores[i] = 1e16f;
+
+    loopv(particlelightsources) insertparticlelightcandidate(center, bbmin, bbmax, particlelightsources[i], scores, selection);
+
+    loopi(MAXPARTICLELIGHTS) if(selection.colorv[i].a > 1.0e-4f) selection.count++;
+    return selection;
 }
 
-void bindparticlelightparams(const vec &center, float radius, const vec &bbmin, const vec &bbmax, bool enablelocallights)
+void bindparticlelightparams(ullong lightkey, const vec &center, float radius, const vec &bbmin, const vec &bbmax, bool enablelocallights)
 {
     int sunlightsplits = 0;
     bool hasparticletransmittanceatlas = false;
@@ -3355,14 +3388,8 @@ void bindparticlelightparams(const vec &center, float radius, const vec &bbmin, 
         LOCALPARAMV(particlelightoffset, particlelightoffsetv, MAXPARTICLELIGHTS);
         return;
     }
-    int numparticlelights = collectparticlelights(center, radius, bbmin, bbmax);
-
-    LOCALPARAMI(particlelightcount, numparticlelights);
-    LOCALPARAMV(particlelightpos, particlelightposv, MAXPARTICLELIGHTS);
-    LOCALPARAMV(particlelightcolor, particlelightcolorv, MAXPARTICLELIGHTS);
-    LOCALPARAMV(particlelightspot, particlelightspotv, MAXPARTICLELIGHTS);
-    LOCALPARAMV(particlelightshadow, particlelightshadowv, MAXPARTICLELIGHTS);
-    LOCALPARAMV(particlelightoffset, particlelightoffsetv, MAXPARTICLELIGHTS);
+    const particlelightselection &selection = collectparticlelights(lightkey, center, radius, bbmin, bbmax);
+    uploadparticlelightselection(selection);
 }
 
 static LocalShaderParam lightpos("lightpos"), lightcolor("lightcolor"), spotparams("spotparams"), shadowparams("shadowparams"), shadowoffset("shadowoffset");

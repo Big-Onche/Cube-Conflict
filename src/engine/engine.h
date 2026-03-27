@@ -290,7 +290,7 @@ extern matrix4 shadowmatrix;
 extern GLuint shadowatlastex;
 extern GLenum shadowatlastarget;
 extern int csmshadowmap, csmsplits;
-extern void bindparticlelightparams(const vec &center, float radius, const vec &bbmin, const vec &bbmax, bool enablelocallights = true);
+extern void bindparticlelightparams(ullong lightkey, const vec &center, float radius, const vec &bbmin, const vec &bbmax, bool enablelocallights = true);
 
 extern void loaddeferredlightshaders();
 extern void cleardeferredlightshaders();
