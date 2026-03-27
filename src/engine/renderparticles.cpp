@@ -7,6 +7,12 @@ Shader *particleshader = NULL, *particlenotextureshader = NULL, *particlesoftsha
        *particleHazeShader = NULL, *particleshadowshader = NULL, *particlelightrectshader = NULL,
        *particlelight2dshader = NULL, *particlesoftlightrectshader = NULL, *particlesoftlight2dshader = NULL;
 
+static inline void refreshparticlelighting()
+{
+    cleardeferredlightshaders();
+    cleanupshadowatlas();
+}
+
 VARP(particlelayers, 0, 1, 1);
 FVARP(particlebright, 0, 1.75, 100);
 VARP(particlesize, 20, 100, 500);
@@ -14,7 +20,7 @@ VARP(particlesize, 20, 100, 500);
 VARP(softparticles, 0, 1, 1);
 VARP(softparticleblend, 1, 3, 64);
 
-VARP(particlelighting, 0, 1, 1);
+VARFP(particlelighting, 0, 1, 1, refreshparticlelighting());
 VARP(particlelightingdynlights, 0, 1, 1);
 VARP(particlelightingdist, 256, 1024, 8192);
 VARP(particlelightingfadedist, 128, 768, 4096);
@@ -270,6 +276,11 @@ enum
 };
 
 const char *partnames[] = { "part", "tape", "trail", "text", "textup", "meter", "metervs", "fireball", "lightning", "flare" };
+
+static inline bool useparticlelighting(int type)
+{
+    return particlelighting && (type&PT_LABSORPTION) != 0;
+}
 
 static inline Shader *getparticlelightshader(bool usesoft)
 {
@@ -987,6 +998,7 @@ struct varenderer : partrenderer
     partvert *shadowverts;
     particle *parts;
     int maxparts, numparts, lastupdate, rndmask;
+    bool uselightvbo;
     GLuint vbo, shadowvbo;
     vector<partvert> lightverts;
     vector<particlelightentry> lightentries;
@@ -994,7 +1006,7 @@ struct varenderer : partrenderer
 
     varenderer(const char *texname, int type, int stain = -1)
         : partrenderer(texname, 3, type, stain),
-          verts(NULL), shadowverts(NULL), parts(NULL), maxparts(0), numparts(0), lastupdate(-1), rndmask(0), vbo(0), shadowvbo(0)
+          verts(NULL), shadowverts(NULL), parts(NULL), maxparts(0), numparts(0), lastupdate(-1), rndmask(0), uselightvbo(false), vbo(0), shadowvbo(0)
     {
         if(type & PT_HFLIP) rndmask |= 0x01;
         if(type & PT_VFLIP) rndmask |= 0x02;
@@ -1022,12 +1034,14 @@ struct varenderer : partrenderer
         maxparts = n;
         numparts = 0;
         lastupdate = -1;
+        uselightvbo = false;
     }
 
     void reset()
     {
         numparts = 0;
         lastupdate = -1;
+        uselightvbo = false;
     }
 
     void resettracked(physent *owner)
@@ -1319,8 +1333,9 @@ struct varenderer : partrenderer
 
     void genvbo()
     {
-        if(lastmillis == lastupdate && vbo) return;
+        if(lastmillis == lastupdate && vbo && !uselightvbo) return;
         lastupdate = lastmillis;
+        uselightvbo = false;
 
         genverts();
 
@@ -1413,8 +1428,9 @@ struct varenderer : partrenderer
 
     void genlightvbo()
     {
-        if(lastmillis == lastupdate && vbo) return;
+        if(lastmillis == lastupdate && vbo && uselightvbo) return;
         lastupdate = lastmillis;
+        uselightvbo = true;
 
         genverts();
         buildlightdraws();
@@ -1452,7 +1468,7 @@ struct varenderer : partrenderer
 
     void render()
     {
-        if(type&PT_LABSORPTION) genlightvbo();
+        if(useparticlelighting(type)) genlightvbo();
         else genvbo();
 
         glBindTexture(GL_TEXTURE_2D, tex->id);
@@ -1469,7 +1485,7 @@ struct varenderer : partrenderer
         gle::enablecolor();
         gle::enablequads();
 
-        if(type&PT_LABSORPTION)
+        if(useparticlelighting(type))
         {
             loopv(lightdraws)
             {
@@ -1920,7 +1936,7 @@ void renderparticles(int layer)
             if(!(flags&PT_SHADER))
             {
                 const bool usesoftshader = (flags&PT_SOFT) && softparticles;
-                Shader *lightshader = (flags&PT_LABSORPTION) ? getparticlelightshader(usesoftshader) : NULL;
+                Shader *lightshader = useparticlelighting(p->type) ? getparticlelightshader(usesoftshader) : NULL;
                 bool handleslightparams = lightshader && p->handlesparticlelightparams();
                 vec lightprobe = camera1->o;
                 float lightproberadius = 0.0f;
