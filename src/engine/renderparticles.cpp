@@ -18,7 +18,8 @@ FVARP(particlebright, 0, 1.75, 100);
 VARP(particlesize, 20, 100, 500);
 
 VARP(softparticles, 0, 1, 1);
-VARP(softparticleblend, 1, 3, 64);
+VARP(softparticleblend, 1, 8, 64);
+VARP(softparticlemaxdist, 64, 768, 2048);
 
 VARFP(particlelighting, 0, 1, 1, refreshparticlelighting());
 VARP(particlelightingdynlights, 0, 1, 1);
@@ -297,7 +298,7 @@ struct particle
 {
     vec o, d;
     int gravity, fade, millis;
-    bool hud, sound;
+    bool hud, sound, usesoft;
     bvec4 color;
     uchar flags;
     float size, sizemod;
@@ -402,6 +403,13 @@ static inline void setparticletexcoords(int type, const particle *p, partvert *v
     vs[1].tc2 = vec2( 1.0f, -1.0f);
     vs[2].tc2 = vec2( 1.0f,  1.0f);
     vs[3].tc2 = vec2(-1.0f,  1.0f);
+}
+
+static inline bool shouldusesoftparticle(const vec &o, int flags)
+{
+    if((flags&PT_SOFT) == 0) return false;
+    float maxdist = max(float(softparticlemaxdist), 0.0f);
+    return camera1->o.squaredist(o) <= maxdist*maxdist;
 }
 
 #define COLLIDERADIUS 8.0f
@@ -635,6 +643,7 @@ struct listrenderer : partrenderer
         p->size = size;
         p->owner = NULL;
         p->flags = 0;
+        p->usesoft = shouldusesoftparticle(o, type);
         p->sizemod = clamp(sizemod, -50, 50);
         p->hud = hud;
         p->sound = sound;
@@ -978,7 +987,14 @@ struct varenderer : partrenderer
         int index;
         vec o;
         float size;
+        bool usesoft;
         float depth;
+    };
+
+    struct vbodraw
+    {
+        int offset, count;
+        bool usesoft;
     };
 
     struct particlelightdraw
@@ -986,6 +1002,7 @@ struct varenderer : partrenderer
         int offset, count;
         int cellindex;
         vec center, bbmin, bbmax;
+        bool usesoft;
         float radius, depth, lightfade;
     };
 
@@ -1017,6 +1034,7 @@ struct varenderer : partrenderer
     int maxparts, numparts, lastupdate, rndmask;
     bool uselightvbo;
     GLuint vbo, shadowvbo;
+    vector<vbodraw> vbodraws;
     vector<partvert> lightverts;
     vector<particlelightentry> lightentries;
     vector<particlelightcellinfo> lightcells;
@@ -1036,6 +1054,7 @@ struct varenderer : partrenderer
     {
         if(vbo) { glDeleteBuffers_(1, &vbo); vbo = 0; }
         if(shadowvbo) { glDeleteBuffers_(1, &shadowvbo); shadowvbo = 0; }
+        vbodraws.setsize(0);
         lightverts.setsize(0);
         lightentries.setsize(0);
         lightcells.setsize(0);
@@ -1054,6 +1073,7 @@ struct varenderer : partrenderer
         numparts = 0;
         lastupdate = -1;
         uselightvbo = false;
+        vbodraws.setsize(0);
         lightcells.setsize(0);
     }
 
@@ -1062,6 +1082,7 @@ struct varenderer : partrenderer
         numparts = 0;
         lastupdate = -1;
         uselightvbo = false;
+        vbodraws.setsize(0);
     }
 
     void resettracked(physent *owner)
@@ -1133,6 +1154,7 @@ struct varenderer : partrenderer
         p->size = size;
         p->owner = NULL;
         p->flags = 0x80 | (rndmask ? rnd(0x80) & rndmask : 0);
+        p->usesoft = shouldusesoftparticle(o, type);
         p->color = color;
         p->sizemod = sizemod;
         p->hud = hud;
@@ -1359,6 +1381,22 @@ struct varenderer : partrenderer
 
         genverts();
 
+        vbodraws.setsize(0);
+        if(type&PT_SOFT)
+        {
+            for(int start = 0; start < numparts;)
+            {
+                bool usesoft = parts[start].usesoft;
+                int end = start + 1;
+                while(end < numparts && parts[end].usesoft == usesoft) end++;
+                vbodraw &draw = vbodraws.add();
+                draw.offset = start;
+                draw.count = end - start;
+                draw.usesoft = usesoft;
+                start = end;
+            }
+        }
+
         if(!vbo) glGenBuffers_(1, &vbo);
         gle::bindvbo(vbo);
         glBufferData_(GL_ARRAY_BUFFER, maxparts*4*sizeof(partvert), NULL, GL_STREAM_DRAW);
@@ -1386,6 +1424,7 @@ struct varenderer : partrenderer
             entry.index = i;
             entry.o = o;
             entry.size = max(p.size, 0.0f);
+            entry.usesoft = p.usesoft;
             entry.depth = camera1->o.squaredist(o);
         }
 
@@ -1418,20 +1457,22 @@ struct varenderer : partrenderer
 
             lightentries.sort(sortparticlelightentriesbydepth, start, end - start);
 
-            for(int chunkstart = start; chunkstart < end; chunkstart += MAXPARTICLELIGHTCHUNK)
+            for(int chunkstart = start; chunkstart < end;)
             {
-                int chunkend = min(chunkstart + MAXPARTICLELIGHTCHUNK, end);
+                bool usesoft = lightentries[chunkstart].usesoft;
+                int chunkend = chunkstart;
                 particlelightdraw &draw = lightdraws.add();
                 draw.offset = lightverts.length() / 4;
                 draw.count = 0;
                 draw.cellindex = lightcells.length() - 1;
                 draw.bbmin = vec(1e16f, 1e16f, 1e16f);
                 draw.bbmax = vec(-1e16f, -1e16f, -1e16f);
+                draw.usesoft = usesoft;
                 draw.depth = 0.0f;
 
-                for(int i = chunkstart; i < chunkend; ++i)
+                while(chunkend < end && draw.count < MAXPARTICLELIGHTCHUNK && lightentries[chunkend].usesoft == usesoft)
                 {
-                    const particlelightentry &entry = lightentries[i];
+                    const particlelightentry &entry = lightentries[chunkend];
                     lightverts.put(&verts[entry.index*4], 4);
                     draw.count++;
                     draw.depth = max(draw.depth, entry.depth);
@@ -1441,11 +1482,13 @@ struct varenderer : partrenderer
                     draw.bbmax.x = max(draw.bbmax.x, entry.o.x + entry.size);
                     draw.bbmax.y = max(draw.bbmax.y, entry.o.y + entry.size);
                     draw.bbmax.z = max(draw.bbmax.z, entry.o.z + entry.size);
+                    chunkend++;
                 }
 
                 draw.center = vec(draw.bbmin).add(draw.bbmax).mul(0.5f);
                 draw.radius = max(draw.bbmin.dist(draw.bbmax)*0.5f, 1.0f);
                 draw.lightfade = getparticlelightingfade(draw.center);
+                chunkstart = chunkend;
             }
 
             start = end;
@@ -1515,14 +1558,15 @@ struct varenderer : partrenderer
 
         if(useparticlelighting(type))
         {
-            const bool usesoftshader = (type&PT_SOFT) && softparticles;
-            Shader *lightshader = getparticlelightshader(usesoftshader);
-            Shader *baseshader = usesoftshader ? particlesoftshader : particleshader;
-            Shader *activeshader = Shader::lastshader;
+            Shader *softlightshader = getparticlelightshader(true);
+            Shader *hardlightshader = getparticlelightshader(false);
+            Shader *activeshader = NULL;
             float shadercolorscale = type&PT_MOD ? 1 : ldrscale;
             if(type&PT_BRIGHT || type&PT_OVERBRIGHT) shadercolorscale *= particlebright*(type&PT_OVERBRIGHT ? 1.5f : 1);
-            auto binddrawshader = [&](Shader *shader)
+            auto binddrawshader = [&](bool usesoftdraw, bool uselightshader)
             {
+                bool usesoftshader = usesoftdraw && softparticles;
+                Shader *shader = uselightshader ? (usesoftshader ? softlightshader : hardlightshader) : (usesoftshader ? particlesoftshader : particleshader);
                 if(activeshader == shader) return;
                 shader->set();
                 if(usesoftshader) LOCALPARAMF(softparams, -1.0f/softparticleblend, 0, 0);
@@ -1536,12 +1580,33 @@ struct varenderer : partrenderer
                 const particlelightcellinfo &cell = lightcells[draw.cellindex];
                 if(draw.lightfade > 0.0f)
                 {
-                    binddrawshader(lightshader);
+                    binddrawshader(draw.usesoft, true);
                     float locallightintensity = particlemaplightintensity * draw.lightfade;
                     bindcachedparticlelightparams(cell.key, cell.center, cell.radius, cell.bbmin, cell.bbmax, locallightintensity);
                 }
-                else binddrawshader(baseshader);
+                else binddrawshader(draw.usesoft, false);
                 gle::drawquads(draw.offset, draw.count);
+            }
+        }
+        else if(type&PT_SOFT)
+        {
+            Shader *activeshader = NULL;
+            float shadercolorscale = type&PT_MOD ? 1 : ldrscale;
+            if(type&PT_BRIGHT || type&PT_OVERBRIGHT) shadercolorscale *= particlebright*(type&PT_OVERBRIGHT ? 1.5f : 1);
+            auto binddrawshader = [&](bool usesoftdraw)
+            {
+                bool usesoftshader = usesoftdraw && softparticles;
+                Shader *shader = usesoftshader ? particlesoftshader : particleshader;
+                if(activeshader == shader) return;
+                shader->set();
+                if(usesoftshader) LOCALPARAMF(softparams, -1.0f/softparticleblend, 0, 0);
+                LOCALPARAMF(colorscale, shadercolorscale, shadercolorscale, shadercolorscale, 1);
+                activeshader = shader;
+            };
+            loopv(vbodraws)
+            {
+                binddrawshader(vbodraws[i].usesoft);
+                gle::drawquads(vbodraws[i].offset, vbodraws[i].count);
             }
         }
         else gle::drawquads(0, numparts);
