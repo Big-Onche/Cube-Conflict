@@ -929,95 +929,188 @@ void writeobj(char *name)
     defformatstring(fname, "%s.obj", name);
     stream *f = openfile(path(fname), "w");
     if(!f) return;
+
     f->printf("# obj file of Cube 2 level\n\n");
+
     defformatstring(mtlname, "%s.mtl", name);
     path(mtlname);
     f->printf("mtllib %s\n\n", mtlname);
-    vector<vec> verts, texcoords;
-    hashtable<vec, int> shareverts(1<<16), sharetc(1<<16);
-    hashtable<int, vector<ivec2> > mtls(1<<8);
+    f->printf("s off\n\n");
+
+    struct objtri
+    {
+        vec pos[3];
+        vec2 tc[3];
+        vec normal;
+        int texture;
+    };
+
+    vector<objtri> tris;
     vector<int> usedmtl;
+
     vec bbmin(1e16f, 1e16f, 1e16f), bbmax(-1e16f, -1e16f, -1e16f);
+
     loopv(valist)
     {
         vtxarray &va = *valist[i];
         if(!va.edata || !va.vdata) continue;
+
         ushort *edata = va.edata + va.eoffset;
         vertex *vdata = va.vdata;
         ushort *idx = edata;
+
         loopj(va.texs)
         {
             elementset &es = va.texelems[j];
             if(usedmtl.find(es.texture) < 0) usedmtl.add(es.texture);
-            vector<ivec2> &keys = mtls[es.texture];
-            loopk(es.length)
+
+            for(int k = 0; k + 2 < es.length; k += 3)
             {
-                const vertex &v = vdata[idx[k]];
-                const vec &pos = v.pos;
-                const vec &tc = v.tc;
-                ivec2 &key = keys.add();
-                key.x = shareverts.access(pos, verts.length());
-                if(key.x == verts.length())
+                const vertex &v0 = vdata[idx[k + 0]];
+                const vertex &v1 = vdata[idx[k + 1]];
+                const vertex &v2 = vdata[idx[k + 2]];
+
+                objtri &t = tris.add();
+                t.texture = es.texture;
+
+                t.pos[0] = v0.pos;
+                t.pos[1] = v1.pos;
+                t.pos[2] = v2.pos;
+
+                t.tc[0] = vec2(v0.tc.x, v0.tc.y);
+                t.tc[1] = vec2(v1.tc.x, v1.tc.y);
+                t.tc[2] = vec2(v2.tc.x, v2.tc.y);
+
+                loopi(3)
                 {
-                    verts.add(pos);
-                    bbmin.min(pos);
-                    bbmax.max(pos);
+                    bbmin.min(t.pos[i]);
+                    bbmax.max(t.pos[i]);
                 }
-                key.y = sharetc.access(tc, texcoords.length());
-                if(key.y == texcoords.length()) texcoords.add(tc);
+
+                vec e1 = vec(t.pos[1]).sub(t.pos[0]);
+                vec e2 = vec(t.pos[2]).sub(t.pos[0]);
+                t.normal.cross(e1, e2);
+
+                float len = t.normal.magnitude();
+                if(len > 1e-6f) t.normal.div(len);
+                else t.normal = vec(0, 0, 1);
             }
+
             idx += es.length;
         }
     }
 
-    vec center(-(bbmax.x + bbmin.x)/2, -(bbmax.y + bbmin.y)/2, -bbmin.z);
-    loopv(verts)
-    {
-        vec v = verts[i];
-        v.add(center);
-        if(v.y != floor(v.y)) f->printf("v %.3f ", -v.y); else f->printf("v %d ", int(-v.y));
-        if(v.z != floor(v.z)) f->printf("%.3f ", v.z); else f->printf("%d ", int(v.z));
-        if(v.x != floor(v.x)) f->printf("%.3f\n", v.x); else f->printf("%d\n", int(v.x));
-    }
-    f->printf("\n");
-    loopv(texcoords)
-    {
-        const vec &tc = texcoords[i];
-        f->printf("vt %.6f %.6f\n", tc.x, 1-tc.y);
-    }
-    f->printf("\n");
+    vec center(-(bbmax.x + bbmin.x) / 2, -(bbmax.y + bbmin.y) / 2, -bbmin.z);
 
-    usedmtl.sort();
-    loopv(usedmtl)
+    struct trilist
     {
-        vector<ivec2> &keys = mtls[usedmtl[i]];
-        f->printf("g slot%d\n", usedmtl[i]);
-        f->printf("usemtl slot%d\n\n", usedmtl[i]);
-        for(int i = 0; i < keys.length(); i += 3)
+        int texture;
+        vector<int> tris;
+    };
+    hashtable<int, int> mtlindex(1<<8);
+    vector<trilist> groups;
+
+    loopv(tris)
+    {
+        int *found = mtlindex.access(tris[i].texture);
+        int gi;
+        if(found) gi = *found;
+        else
         {
-            f->printf("f");
-            loopk(3) f->printf(" %d/%d", keys[i+2-k].x+1, keys[i+2-k].y+1);
-            f->printf("\n");
+            gi = groups.length();
+            trilist &g = groups.add();
+            g.texture = tris[i].texture;
+            mtlindex[tris[i].texture] = gi;
         }
-        f->printf("\n");
+        groups[gi].tris.add(i);
     }
+
+    int objindex = 1;
+
+    loopv(groups)
+    {
+        const trilist &g = groups[i];
+
+        f->printf("g slot%d\n", g.texture);
+        f->printf("usemtl slot%d\n", g.texture);
+        f->printf("s off\n\n");
+
+        loopvj(g.tris)
+        {
+            const objtri &t = tris[g.tris[j]];
+
+            int vbase = objindex;
+            int vtbase = objindex;
+            int vnbase = objindex;
+
+            for(int n = 0; n < 3; ++n)
+            {
+                vec v = t.pos[n];
+                v.add(center);
+
+                // Cube -> OBJ axis conversion
+                // x_obj = -y_cube
+                // y_obj =  z_cube
+                // z_obj =  x_cube
+                float ox = -v.y;
+                float oy =  v.z;
+                float oz =  v.x;
+
+                f->printf("v %.6f %.6f %.6f\n", ox, oy, oz);
+            }
+
+            for(int n = 0; n < 3; ++n)
+            {
+                f->printf("vt %.6f %.6f\n", t.tc[n].x, 1.0f - t.tc[n].y);
+            }
+
+            {
+                vec n = t.normal;
+
+                // same axis conversion as positions
+                float onx = -n.y;
+                float ony =  n.z;
+                float onz =  n.x;
+
+                for(int k = 0; k < 3; ++k)
+                {
+                    f->printf("vn %.6f %.6f %.6f\n", onx, ony, onz);
+                }
+            }
+
+            // Reverse winding because of axis flip parity
+            f->printf("f %d/%d/%d %d/%d/%d %d/%d/%d\n\n",
+                vbase + 2, vtbase + 2, vnbase + 2,
+                vbase + 1, vtbase + 1, vnbase + 1,
+                vbase + 0, vtbase + 0, vnbase + 0);
+
+            objindex += 3;
+        }
+    }
+
     delete f;
 
     f = openfile(mtlname, "w");
     if(!f) return;
+
     f->printf("# mtl file of Cube 2 level\n\n");
+
+    usedmtl.sort();
     loopv(usedmtl)
     {
         VSlot &vslot = lookupvslot(usedmtl[i], false);
         f->printf("newmtl slot%d\n", usedmtl[i]);
-        f->printf("map_Kd %s\n", vslot.slot->sts.empty() ? notexture->name : path(makerelpath("media", vslot.slot->sts[0].name)));
+        f->printf("map_Kd %s\n",
+            vslot.slot->sts.empty()
+                ? notexture->name
+                : path(makerelpath("media", vslot.slot->sts[0].name)));
         f->printf("\n");
     }
+
     delete f;
 
     conoutf("generated model %s", fname);
 }
-
 COMMAND(writeobj, "s");
 
 void writecollideobj(char *name)
