@@ -737,7 +737,7 @@ namespace game
                     {
                         float originOffset = 0.4f - (rnd(9) / 10.f);
                         particle_flare(muzzleOrigin.add(vec(originOffset, originOffset, originOffset)), rays[i], 100, PART_F_SHOTGUN, hasRoids ? 0xFF2222 : 0xFFFF22, 0.4f, d, hasShrooms());
-                        particles::trail(PART_SMOKE, 600, hudgunorigin(gun, from, to, d), rays[i], 0x999999, 0.6f, 20);
+                        particles::trail(PART_CSMOKE, 600, hudgunorigin(gun, from, to, d), rays[i], 0x99999988, 0.6f, 20);
                         renderInstantImpact(from, rays[i], muzzleOrigin, atk, hasRoids);
                         if(!isHudPlayer) soundNearmiss(S_BIGBULLETFLYBY, from, rays[i], 512);
                         playSound(S_BIGRICOCHET, rays[i], 250, 100);
@@ -803,7 +803,7 @@ namespace game
 
             case ATK_M32:
             {
-                particle_splash(PART_SMOKE, 5, 600, d->muzzle, wizardAbility ? 0x550044 : 0x444444, 4.0f, 20, 500, 0, hasShrooms());
+                particle_splash(PART_SMOKE, 2, 600, d->muzzle, wizardAbility ? 0x550044 : 0x444444, 0.5f, 10, 200, 15, hasShrooms());
                 if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK,  8, 500, d->muzzle, 0xFF4444, 1.0f, 50, 200, 0, hasShrooms());
                 float dist = from.dist(to); vec up = to; up.z += dist/8;
                 bouncers::add(isHudPlayer && !thirdperson ? d->muzzle : hudgunorigin(gun, d->o, to, d), up, local, id, d, BNC_GRENADE, attacks[atk].ttl, attacks[atk].projspeed);

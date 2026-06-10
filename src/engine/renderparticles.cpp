@@ -76,13 +76,14 @@ struct particlelightuploadcache
     int sunlightdarkabsorb, sunlightcolorinfluence, maplightcolorinfluence;
     float sunlightintensity, backlightintensity, shadowapplyintensity;
     int shadowmapscale;
+    vec camright, camup, camdir;
 
     particlelightuploadcache()
       : valid(false), shader(NULL), lightkey(0), locallightintensity(0.0f), enablelocallights(false),
         sunlightdebug(0), locallightdebug(0), sunlightdarkabsorb(0),
         sunlightcolorinfluence(0), maplightcolorinfluence(0), sunlightintensity(0.0f),
         backlightintensity(0.0f), shadowapplyintensity(1.0f),
-        shadowmapscale(1)
+        shadowmapscale(1), camright(0, 0, 0), camup(0, 0, 0), camdir(0, 0, 0)
     {
     }
 };
@@ -99,11 +100,22 @@ static inline void bindcachedparticlelightparams(ullong lightkey, const vec &cen
     Shader *shader = Shader::lastshader;
     if(!shader) return;
 
-    // Backlight direction depends on the current camera basis, so do not let
-    // the light-probe cache leave these uniforms stale across camera motion.
-    LOCALPARAM(particlebillboardright, camright);
-    LOCALPARAM(particlebillboardup, camup);
-    LOCALPARAM(particlebillboarddir, camdir);
+    bool samecamera = particlelightcache.valid &&
+       particlelightcache.shader == shader &&
+       particlelightcache.camright == camright &&
+       particlelightcache.camup == camup &&
+       particlelightcache.camdir == camdir;
+    if(!samecamera)
+    {
+        // Backlight direction depends on the current camera basis, so keep it
+        // cached per shader and refresh it whenever the view basis changes.
+        LOCALPARAM(particlebillboardright, camright);
+        LOCALPARAM(particlebillboardup, camup);
+        LOCALPARAM(particlebillboarddir, camdir);
+        particlelightcache.camright = camright;
+        particlelightcache.camup = camup;
+        particlelightcache.camdir = camdir;
+    }
 
     bool enablelocallights = locallightintensity > 0.0f;
     bool samebaseparams = particlelightcache.valid &&
@@ -878,7 +890,7 @@ static const vec2 rotcoeffs[32][4] =
 {
     ROTCOEFFS(0),  ROTCOEFFS(1),  ROTCOEFFS(2),  ROTCOEFFS(3),  ROTCOEFFS(4),  ROTCOEFFS(5),  ROTCOEFFS(6),  ROTCOEFFS(7),
     ROTCOEFFS(8),  ROTCOEFFS(9),  ROTCOEFFS(10), ROTCOEFFS(11), ROTCOEFFS(12), ROTCOEFFS(13), ROTCOEFFS(14), ROTCOEFFS(15),
-    ROTCOEFFS(16), ROTCOEFFS(17), ROTCOEFFS(18), ROTCOEFFS(19), ROTCOEFFS(20), ROTCOEFFS(21), ROTCOEFFS(22), ROTCOEFFS(7),
+    ROTCOEFFS(16), ROTCOEFFS(17), ROTCOEFFS(18), ROTCOEFFS(19), ROTCOEFFS(20), ROTCOEFFS(21), ROTCOEFFS(22), ROTCOEFFS(23),
     ROTCOEFFS(24), ROTCOEFFS(25), ROTCOEFFS(26), ROTCOEFFS(27), ROTCOEFFS(28), ROTCOEFFS(29), ROTCOEFFS(30), ROTCOEFFS(31),
 };
 
@@ -1716,6 +1728,7 @@ static partrenderer *parts[] =
     new quadrenderer("media/particles/trails/plasma_front.png", PT_PART|PT_FLIP|PT_FEW|PT_OVERBRIGHT),                       // PART_PLASMA_FRONT
     // flames and smokes
     new quadrenderer("media/particles/fire/smoke.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_LERP|PT_RND4|PT_SOFT|PT_LABSORPTION),    // PART_SMOKE
+    new quadrenderer("media/particles/fire/smoke.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_LERP|PT_RND4),                           // PART_CSMOKE // cheap one
     new quadrenderer("media/particles/fire/flames.png", PT_PART|PT_HFLIP|PT_RND4|PT_OVERBRIGHT),                             // PART_FLAME
     new quadrenderer("media/particles/fire/fire_ball.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_RND4),                               // PART_FIRE_BALL
     new quadrenderer("media/particles/fire/firespark.png", PT_PART|PT_FLIP|PT_RND4|PT_OVERBRIGHT|PT_COLLIDE, STAIN_BURN),    // PART_FIRESPARK
@@ -2104,9 +2117,11 @@ static int addedparticles = 0;
 
 VARP(maxparticledistance, 128, 1024, 4096);
 
-static inline bool isInRange(vec o, int flags)
+static inline bool isInRange(const vec &o, int flags)
 {
-    return flags&PT_NOMAXDIST || camera1->o.dist(o) < maxparticledistance;
+    if(flags & PT_NOMAXDIST) return true;
+    float maxdist = float(maxparticledistance);
+    return camera1->o.squaredist(o) < maxdist * maxdist;
 }
 
 static inline particle *newparticle(const vec &o, const vec &d, int fade, int type, const bvec4 &color, float size, int gravity = 0, int sizemod = 0, bool sound = false, bool hud = false)
@@ -2120,6 +2135,7 @@ static inline particle *newparticle(const vec &o, const vec &d, int fade, int ty
         return &dummy;
     }
     if(fade + emitoffset < 0) return &dummy;
+
     addedparticles++;
     return parts[type]->addpart(o, d, fade, color, size, gravity, sizemod, sound, hud);
 }
@@ -2148,7 +2164,7 @@ namespace particles
         bvec4 decoded = decodeparticlecolor(type, color);
         int fmin = 1;
         int fmax = fade*3;
-        min(speed, 2);
+        speed = min(speed, 2);
 
         loopi(num)
         {
@@ -2245,13 +2261,12 @@ static void splash(int type, const bvec4 &color, int radius, int num, int fade, 
     loopi(num)
     {
         int x, y, z;
-        do
-        {
+        int attempts = 0;
+        do {
             x = rnd(radius*2)-radius;
             y = rnd(radius*2)-radius;
             z = rnd(radius*2)-radius;
-        }
-        while(x*x+y*y+z*z>radius*radius);
+        } while(x*x + y*y + z*z > radius*radius && ++attempts < 8);
         vec tmp = vec((float)x, (float)y, (float)z);
         int f = (num < 10) ? (fmin + rnd(fmax)) : (fmax - (i*(fmax-fmin))/(num-1)); //help deallocater by using fade distribution rather than random
         newparticle(p, tmp, f, type, color, size, gravity, sizemod, sound)->val = collidez;

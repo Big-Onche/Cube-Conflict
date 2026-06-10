@@ -913,7 +913,7 @@ namespace game
             else playSound(S_ECLAIRPROCHE, d==hudplayer() ? vec(0, 0, 0) : d->o, 300, 150);
             adddynlight(vec(d->abovehead()).addz(30), 500, vec(0.0f, 0.5f, 1.5f), 80, 40, L_NODYNSHADOW|DL_FLASH);
             particle_flare(vec(d->o).add(vec(50 - rnd(101), 50 - rnd(101), 1500)), d->feetpos(), 175, PART_LIGHTNING, 0xFFFFFF, 30.0f);
-            particle_splash(PART_SMOKE, 7, 2000, d->o, 0x333333, 40.0f, 150, 500);
+            particle_splash(PART_SMOKE, 4, 1500, d->o, 0x333333, 25.0f, 50, 500);
             if(actor==player1) { playSound(S_FAUCHEUSE); player1->vampiremillis=1500; }
         }
 
@@ -1269,7 +1269,7 @@ namespace game
             else if(material&MAT_LAVA)
             {
                 playSound(S_LAVASPLASH, isHudplayer ? vec(0, 0, 0) : d->o, 300, 50);
-                particle_splash(PART_SMOKE, 12, 100, o, 0x222222, (10.f + rnd(5)), 400, 20);
+                particle_splash(PART_SMOKE, 8, 100, o, 0x222222, (10.f + rnd(5)), 400, 20);
                 particle_splash(PART_FIRE_BALL, 7, 120, o, 0xCC7744, (10.f + rnd(5)), 400, 300);
                 loopi(2 + rnd(3)) particles::dirSplash(PART_FIRESPARK, 0xFFBB55, 750, 7, 300 + (rnd(500)), feetPos, vec(0, 0, 1), 3.f+(rnd(30)/6.f), ((i + 1) * 125) + rnd(200), -1);
                 loopi(4) particles::dirSplash(PART_SMOKE, 0x333333, 200, 2, 1500 + rnd(750), feetPos, vec(0, 0, 1), 15.f + rnd(5), 50 + rnd(50), 5);
