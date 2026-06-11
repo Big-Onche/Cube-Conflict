@@ -20,12 +20,15 @@
 					<Add option="-O3" />
 					<Add option="-Wall" />
 					<Add option="-m64" />
+					<Add option="-std=c++17" />
+					<Add option="-DTRACY_ENABLE" />
 					<Add option="-ffast-math" />
 					<Add option="-fsigned-char" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
 					<Add directory="../enet/include" />
 					<Add directory="../include" />
+					<Add directory="../include/tracy/public" />
 					<Add directory="../engine" />
 					<Add directory="../shared" />
 					<Add directory="../project" />
@@ -47,6 +50,7 @@
 					<Add library="enet" />
 					<Add library="ws2_32" />
 					<Add library="winmm" />
+					<Add library="dbghelp" />
 					<Add library="steam_api64" />
 					<Add library="OpenAL32" />
 					<Add library="sndfile" />
@@ -70,12 +74,15 @@
 					<Add option="-O3" />
 					<Add option="-Wall" />
 					<Add option="-m32" />
+					<Add option="-std=c++17" />
+					<Add option="-DTRACY_ENABLE" />
 					<Add option="-ffast-math" />
 					<Add option="-fsigned-char" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
 					<Add directory="../enet/include" />
 					<Add directory="../include" />
+					<Add directory="../include/tracy/public" />
 					<Add directory="../engine" />
 					<Add directory="../shared" />
 					<Add directory="../project" />
@@ -97,6 +104,7 @@
 					<Add library="enet" />
 					<Add library="ws2_32" />
 					<Add library="winmm" />
+					<Add library="dbghelp" />
 					<Add library="steam_api" />
 					<Add library="OpenAL32" />
 					<Add library="sndfile" />
@@ -119,12 +127,15 @@
 					<Add option="-Wall" />
 					<Add option="-m64" />
 					<Add option="-g" />
+					<Add option="-std=c++17" />
+					<Add option="-DTRACY_ENABLE" />
 					<Add option="-ffast-math" />
 					<Add option="-fsigned-char" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
 					<Add directory="../enet/include" />
 					<Add directory="../include" />
+					<Add directory="../include/tracy/public" />
 					<Add directory="../engine" />
 					<Add directory="../shared" />
 					<Add directory="../project" />
@@ -145,6 +156,7 @@
 					<Add library="enet" />
 					<Add library="ws2_32" />
 					<Add library="winmm" />
+					<Add library="dbghelp" />
 					<Add library="steam_api64" />
 					<Add library="OpenAL32" />
 					<Add library="sndfile" />
@@ -167,12 +179,15 @@
 					<Add option="-Wall" />
 					<Add option="-m32" />
 					<Add option="-g" />
+					<Add option="-std=c++17" />
+					<Add option="-DTRACY_ENABLE" />
 					<Add option="-ffast-math" />
 					<Add option="-fsigned-char" />
 					<Add option="-fno-exceptions" />
 					<Add option="-fno-rtti" />
 					<Add directory="../enet/include" />
 					<Add directory="../include" />
+					<Add directory="../include/tracy/public" />
 					<Add directory="../engine" />
 					<Add directory="../shared" />
 					<Add directory="../project" />
@@ -193,6 +208,7 @@
 					<Add library="enet" />
 					<Add library="ws2_32" />
 					<Add library="winmm" />
+					<Add library="dbghelp" />
 					<Add library="steam_api" />
 					<Add library="OpenAL32" />
 					<Add library="sndfile" />
@@ -313,6 +329,7 @@
 		<Unit filename="../game/server.cpp" />
 		<Unit filename="../game/waypoint.cpp" />
 		<Unit filename="../game/weapon.cpp" />
+		<Unit filename="../include/tracy/public/TracyClient.cpp" />
 		<Unit filename="../shared/command.h" />
 		<Unit filename="../shared/crypto.cpp" />
 		<Unit filename="../shared/cube.h">

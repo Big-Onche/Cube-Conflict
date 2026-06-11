@@ -5,10 +5,12 @@ PLATFORM= $(shell uname -s | tr '[:lower:]' '[:upper:]')
 PLATFORM_ARCH= $(shell uname -m)
 PLATFORM_PREFIX= native
 
-INCLUDES= -Ishared -Icubeconflict -Iengine -Igame -Ienet/include -Isteam -Iinclude
+INCLUDES= -Ishared -Icubeconflict -Iengine -Igame -Ienet/include -Isteam -Iinclude -Iinclude/tracy/public
 
 # 0 = no Steam (default), 1 = Steam enabled
 USE_STEAM ?= 0
+# 0 = no Tracy (default), 1 = Tracy enabled
+USE_TRACY ?= 0
 
 ifeq (,$(findstring 64,$(PLATFORM)))
     STEAM_LIBNAME := steam_api.lib
@@ -18,10 +20,18 @@ endif
 
 STEAM_DEFINES :=
 STEAM_CLIENT_LIBS :=
+TRACY_DEFINES :=
+TRACY_CLIENT_OBJS :=
+TRACY_CLIENT_LIBS :=
 
 ifeq ($(USE_STEAM),1)
     STEAM_DEFINES += -DSTEAM
     STEAM_CLIENT_LIBS += -l:$(STEAM_LIBNAME)
+endif
+
+ifeq ($(USE_TRACY),1)
+    TRACY_DEFINES += -DTRACY_ENABLE
+    TRACY_CLIENT_OBJS += include/tracy/public/TracyClient.o
 endif
 
 STRIP=
@@ -60,13 +70,20 @@ ifneq (,$(findstring MINGW,$(PLATFORM)))
 		override CXX+= -m32
 		override WINDRES+= -F pe-i386
 	endif
-	CLIENT_INCLUDES= $(INCLUDES) -Iinclude $(STEAM_DEFINES)
+	ifeq ($(USE_TRACY),1)
+		TRACY_CLIENT_LIBS += -ldbghelp
+	endif
+	CLIENT_INCLUDES= $(INCLUDES) -Iinclude $(STEAM_DEFINES) $(TRACY_DEFINES)
 	STD_LIBS= -static-libgcc -static-libstdc++
 	CLIENT_LIBS= -mwindows $(STD_LIBS) -L$(WINBIN) -L$(USER_LIBS_DIR) \
     -lSDL2 -lSDL2_image $(USER_LIBS_DIR)/$(OPENAL_IMPORT_LIB) -lzlib1 -lopengl32 -lsndfile \
-    $(STEAM_CLIENT_LIBS) -lenet -lws2_32 -lwinmm
+    $(STEAM_CLIENT_LIBS) -lenet -lws2_32 -lwinmm $(TRACY_CLIENT_LIBS)
 else    
 	ifneq (,$(findstring DARWIN,$(PLATFORM)))
+		ifeq ($(USE_TRACY),1)
+			TRACY_CLIENT_LIBS += -lpthread
+		endif
+
 		OSXMIN := 10.13
 		ifneq (,$(findstring arm64,$(PLATFORM_ARCH)))
 			override CC  += -arch arm64 -mmacosx-version-min=$(OSXMIN)
@@ -77,6 +94,7 @@ else
 		endif
 
 		CLIENT_INCLUDES = $(INCLUDES) -Iinclude $(STEAM_DEFINES) \
+											$(TRACY_DEFINES) \
 											$(shell pkg-config --cflags sndfile 2>/dev/null)
 
 		CLIENT_LIBS = -F../cubeconflict.app/Contents/Frameworks \
@@ -85,11 +103,15 @@ else
 									-framework AudioUnit -framework OpenGL -framework Cocoa \
 									-lz -Lenet -lenet \
 									$(shell pkg-config --libs sndfile 2>/dev/null || echo -lsndfile) \
-									-L../cubeconflict.app/Contents/Frameworks $(STEAM_CLIENT_LIBS)
+									-L../cubeconflict.app/Contents/Frameworks $(STEAM_CLIENT_LIBS) $(TRACY_CLIENT_LIBS)
 	else
-		CLIENT_INCLUDES = $(INCLUDES) -I/usr/X11R6/include $(STEAM_DEFINES) `sdl2-config --cflags`
+		ifeq ($(USE_TRACY),1)
+			TRACY_CLIENT_LIBS += -lpthread -ldl
+		endif
+
+		CLIENT_INCLUDES = $(INCLUDES) -I/usr/X11R6/include $(STEAM_DEFINES) $(TRACY_DEFINES) `sdl2-config --cflags`
 		CLIENT_LIBS = -Lenet -lenet -L/usr/X11R6/lib -lX11 `sdl2-config --libs` \
-									-lSDL2_image -lopenal -lsndfile -lz -lGL -L../bins $(STEAM_CLIENT_LIBS)
+									-lSDL2_image -lopenal -lsndfile -lz -lGL -L../bins $(STEAM_CLIENT_LIBS) $(TRACY_CLIENT_LIBS)
 	endif
 endif
 
@@ -100,6 +122,7 @@ CLIENT_OBJS= \
         shared/stream.o \
         shared/tools.o \
         shared/zip.o \
+        $(TRACY_CLIENT_OBJS) \
         engine/aa.o \
         engine/bih.o \
         engine/blend.o \
@@ -197,7 +220,7 @@ default: all
 all: client server
 
 clean:
-	-$(RM) $(CLIENT_PCH) $(CLIENT_OBJS) $(SERVER_MASTER_OBJS) cc_client cc_server cc_master
+	-$(RM) $(CLIENT_PCH) $(CLIENT_OBJS) include/tracy/public/TracyClient.o $(SERVER_MASTER_OBJS) cc_client cc_server cc_master
 
 $(filter-out shared/%,$(CLIENT_PCH)): $(filter shared/%,$(CLIENT_PCH))
 
@@ -209,6 +232,7 @@ $(filter-out shared/%,$(CLIENT_PCH)): $(filter shared/%,$(CLIENT_PCH))
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(CLIENT_OBJS): CXXFLAGS += $(CLIENT_INCLUDES)
+include/tracy/public/TracyClient.o: CXXFLAGS += -std=c++17
 $(filter shared/%,$(CLIENT_OBJS)): $(filter shared/%,$(CLIENT_PCH))
 $(filter engine/%,$(CLIENT_OBJS)): $(filter engine/%,$(CLIENT_PCH))
 $(filter game/%,$(CLIENT_OBJS)): $(filter game/%,$(CLIENT_PCH))
