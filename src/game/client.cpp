@@ -1280,25 +1280,25 @@ namespace game
                 d->physstate = physstate&7;
                 updatephysstate(d);
                 updatepos(d);
-                if(smoothmove && d->smoothmillis>=0 && oldpos.dist(d->o) < smoothdist)
+                if(smoothmove && d->interp.smoothMillis>=0 && oldpos.dist(d->o) < smoothdist)
                 {
                     d->newpos = d->o;
-                    d->newyaw = d->yaw;
-                    d->newpitch = d->pitch;
-                    d->newroll = d->roll;
+                    d->interp.newYaw = d->yaw;
+                    d->interp.newPitch = d->pitch;
+                    d->interp.newRoll = d->roll;
                     d->o = oldpos;
                     d->yaw = oldyaw;
                     d->pitch = oldpitch;
                     d->roll = oldroll;
                     (d->deltapos = oldpos).sub(d->newpos);
-                    d->deltayaw = oldyaw - d->newyaw;
-                    if(d->deltayaw > 180) d->deltayaw -= 360;
-                    else if(d->deltayaw < -180) d->deltayaw += 360;
-                    d->deltapitch = oldpitch - d->newpitch;
-                    d->deltaroll = oldroll - d->newroll;
-                    d->smoothmillis = lastmillis;
+                    d->interp.deltaYaw = oldyaw - d->interp.newYaw;
+                    if(d->interp.deltaYaw > 180) d->interp.deltaYaw -= 360;
+                    else if(d->interp.deltaYaw < -180) d->interp.deltaYaw += 360;
+                    d->interp.deltaPitch = oldpitch - d->interp.newPitch;
+                    d->interp.deltaRoll = oldroll - d->interp.newRoll;
+                    d->interp.smoothMillis = lastmillis;
                 }
-                else d->smoothmillis = 0;
+                else d->interp.smoothMillis = 0;
                 if(d->state==CS_LAGGED || d->state==CS_SPAWNING) d->state = CS_ALIVE;
                 break;
             }

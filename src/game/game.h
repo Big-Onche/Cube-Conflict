@@ -1017,6 +1017,43 @@ struct MatchStats
     }
 };
 
+struct InterpolationState
+{
+    float deltaYaw;
+    float deltaPitch;
+    float deltaRoll;
+
+    float newYaw;
+    float newPitch;
+    float newRoll;
+
+    int smoothMillis;
+
+    InterpolationState()
+        : deltaYaw(0),
+          deltaPitch(0),
+          deltaRoll(0),
+          newYaw(0),
+          newPitch(0),
+          newRoll(0),
+          smoothMillis(-1)
+    {
+    }
+
+    void reset(float yaw, float pitch, float roll)
+    {
+        deltaYaw = 0;
+        deltaPitch = 0;
+        deltaRoll = 0;
+
+        newYaw = yaw;
+        newPitch = pitch;
+        newRoll = roll;
+
+        smoothMillis = -1;
+    }
+};
+
 struct gameent : dynent, gamestate
 {
     size_t entityId, lastkillerId;
@@ -1033,8 +1070,7 @@ struct gameent : dynent, gamestate
     int lastpickup, lastpickupmillis, flagpickup, lastbase, lastrepammo, lastweap;
     MatchStats stats;
     editinfo *edit;
-    float deltayaw, deltapitch, deltaroll, newyaw, newpitch, newroll;
-    int smoothmillis;
+    InterpolationState interp;
     DamageHistory damageHistory;
 
     int lastability[3], lastabilityrequest;
@@ -1060,8 +1096,7 @@ struct gameent : dynent, gamestate
                 lasttaunt(0), lastlavatouch(0), lastfirecheck(0),
                 lastpickup(-1), lastpickupmillis(0), flagpickup(0), lastbase(-1), lastrepammo(-1), lastweap(GUN_GLOCK),
                 stats(),
-                edit(NULL), deltayaw(0), deltapitch(0), deltaroll(0), newyaw(0), newpitch(0), newroll(0),
-                smoothmillis(-1), damageHistory(),
+                edit(NULL), interp(), damageHistory(),
                 lastabilityrequest(0), attacksound(0), shieldbroken(false), powerarmorsound(false),
                 lastOutOfMap(0), wasAttacking(false), isOutOfMap(false), isConnected(false),
                 team(0), playermodel(-1), playercolor(0), skin{0, 0, 0}, character(0), level(0),
@@ -1134,11 +1169,7 @@ private:
     void resetVisualRuntime()
     {
         lasttaunt = 0;
-        deltayaw = deltapitch = deltaroll = 0;
-        newyaw = yaw;
-        newpitch = pitch;
-        newroll = roll;
-        smoothmillis = -1;
+        interp.reset(yaw, pitch, roll);
         skeletonSize = 0.0f;
         graveSize = 0.0f;
     }
