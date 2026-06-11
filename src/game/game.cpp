@@ -835,9 +835,9 @@ namespace game
         d->lastpain = lastmillis;
         d->skeletonSize = 1.0f;
         d->graveSize = 0.0f;
-        d->deaths++;
+        d->stats.deaths++;
         loopi(NUMBOOSTS) d->boostmillis[i] = 0;
-        d->killstreak = 0;
+        d->stats.streak = 0;
         clearAfterburn(d);
         d->isOutOfMap = false;
         loopi(NUMABILITIES) d->abilitymillis[i] = 0;
@@ -879,7 +879,7 @@ namespace game
         if(d->state==CS_EDITING)
         {
             d->editstate = CS_DEAD;
-            d->deaths++;
+            d->stats.deaths++;
             if(d!=player1) d->resetinterp();
             return;
         }
@@ -888,7 +888,7 @@ namespace game
         ////////////////////////////// sounds //////////////////////////////
         int farKillerDistance = (camera1->o.dist(actor->o) > 250);
 
-        switch(actor->killstreak) // killstreak
+        switch(actor->stats.streak) // killstreak
         {
             case 3:
                 playSound(S_KS_X3, isHudPlayer ? vec(0, 0, 0) : actor->o, 300, 100);
@@ -970,12 +970,12 @@ namespace game
                         case C_SPY: if(player1->abilitymillis[ABILITY_2]) unlockAchievement(ACH_ESPIONDEGUISE);
                     }
 
-                    switch(player1->killstreak) {case 3: unlockAchievement(ACH_TRIPLETTE); break; case 5: unlockAchievement(ACH_PENTAPLETTE); break; case 10: unlockAchievement(ACH_DECAPLETTE);}
+                    switch(player1->stats.streak) {case 3: unlockAchievement(ACH_TRIPLETTE); break; case 5: unlockAchievement(ACH_PENTAPLETTE); break; case 10: unlockAchievement(ACH_DECAPLETTE);}
 
                     //now let's add player stats
                     updateStat(1, STAT_KILLS);
-                    addReward(7+player1->killstreak-1, 3+player1->killstreak-1);
-                    if(player1->killstreak > gameStat[STAT_KILLSTREAK]) updateStat(player1->killstreak, STAT_KILLSTREAK, true);
+                    addReward(7+player1->stats.streak-1, 3+player1->stats.streak-1);
+                    if(player1->stats.streak > gameStat[STAT_KILLSTREAK]) updateStat(player1->stats.streak, STAT_KILLSTREAK, true);
                     if(gameStat[STAT_MAXKILLDIST]<killDistance) updateStat(killDistance, STAT_MAXKILLDIST, true);
                 }
             }
@@ -996,12 +996,12 @@ namespace game
             defformatstring(verb, "%s", (actor==player1 ? readstr("GameMessage_Are") : readstr("GameMessage_Is") ));
             defformatstring(name, "%s", actor==player1 ? readstr("GameMessage_You")  : aname);
 
-            if(actor->killstreak == 3 || actor->killstreak == 5 || actor->killstreak == 7 || actor->killstreak == 10 || actor->killstreak == 15)
+            if(actor->stats.streak == 3 || actor->stats.streak == 5 || actor->stats.streak == 7 || actor->stats.streak == 10 || actor->stats.streak == 15)
             {
-                defformatstring(KillStreakIdent, "GameMessage_Kill%s", actor->killstreak == 3 ? "X3" :
-                                                                       actor->killstreak == 5 ? "X5" :
-                                                                       actor->killstreak == 7 ? "X7" :
-                                                                       actor->killstreak == 10 ? "X10" : "X15");
+                defformatstring(KillStreakIdent, "GameMessage_Kill%s", actor->stats.streak == 3 ? "X3" :
+                                                                       actor->stats.streak == 5 ? "X5" :
+                                                                       actor->stats.streak == 7 ? "X7" :
+                                                                       actor->stats.streak == 10 ? "X10" : "X15");
 
                 conoutf(CON_HUDCONSOLE, "%s\f7%s %s", name, verb, readstr(KillStreakIdent));
             }
@@ -1030,29 +1030,29 @@ namespace game
             intermission = true;
             player1->attacking = ACT_IDLE;
             if(cmode) cmode->gameover();
-            int accuracy = (player1->totaldamage*100)/max(player1->totalshots, 1);
+            int accuracy = (player1->stats.damage*100)/max(player1->stats.shots, 1);
             if(m_sp) spsummary(accuracy);
 
             conoutf(CON_GAMEINFO, "\fa%s", readstr("Announcement_GameOver"));
 
-            if(player1->frags>=10)
+            if(player1->stats.frags>=10)
             {
                 if(accuracy>=50) unlockAchievement(ACH_PRECIS);
-                if(player1->deaths<=5) unlockAchievement(ACH_INCREVABLE);
-                if(player1->frags>=30) unlockAchievement(ACH_KILLER);
+                if(player1->stats.deaths<=5) unlockAchievement(ACH_INCREVABLE);
+                if(player1->stats.frags>=30) unlockAchievement(ACH_KILLER);
             }
 
-            if(player1->totaldamage/10 > 10000) unlockAchievement(ACH_DESTRUCTEUR);
+            if(player1->stats.damage/10 > 10000) unlockAchievement(ACH_DESTRUCTEUR);
 
-            if(gameStat[STAT_DAMMAGERECORD] < player1->totaldamage/10)
+            if(gameStat[STAT_DAMMAGERECORD] < player1->stats.damage/10)
             {
-                updateStat(player1->totaldamage/10, STAT_DAMMAGERECORD, true);
+                updateStat(player1->stats.damage/10, STAT_DAMMAGERECORD, true);
                 addReward(30, 15);
                 hasnewdamagerecord = true;
             }
             else hasnewdamagerecord = false;
 
-            if(player1->deaths <= player1->frags) addReward(40, 20);
+            if(player1->stats.deaths <= player1->stats.frags) addReward(40, 20);
             if(bestplayers.find(player1) >= 0) addReward(100, 50);
 
             bestteams.shrink(0);
@@ -1091,12 +1091,12 @@ namespace game
         }
     }
 
-    ICOMMAND(getfrags, "", (), intret(player1->frags));
-    ICOMMAND(getflags, "", (), intret(player1->flags));
-    ICOMMAND(getdeaths, "", (), intret(player1->deaths));
-    ICOMMAND(getaccuracy, "", (), intret((player1->totaldamage*100)/max(player1->totalshots, 1)));
-    ICOMMAND(gettotaldamage, "", (), intret(player1->totaldamage/10));
-    ICOMMAND(gettotalshots, "", (), intret(player1->totalshots));
+    ICOMMAND(getfrags, "", (), intret(player1->stats.frags));
+    ICOMMAND(getflags, "", (), intret(player1->stats.flags));
+    ICOMMAND(getdeaths, "", (), intret(player1->stats.deaths));
+    ICOMMAND(getaccuracy, "", (), intret((player1->stats.damage*100)/max(player1->stats.shots, 1)));
+    ICOMMAND(gettotaldamage, "", (), intret(player1->stats.damage/10));
+    ICOMMAND(gettotalshots, "", (), intret(player1->stats.shots));
 
     vector<gameent *> clients;
 

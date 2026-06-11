@@ -704,8 +704,8 @@ namespace game
         if(d==player1)
         {
             numkilled++;
-            player1->frags = numkilled;
-            if(player1->frags>=200) unlockAchievement(ACH_ELIMINATOR);
+            player1->stats.frags = numkilled;
+            if(player1->stats.frags>=200) unlockAchievement(ACH_ELIMINATOR);
         }
         remain = monstertotal-numkilled;
     }
@@ -972,7 +972,7 @@ namespace game
         conoutf(CON_GAMEINFO, "\f2--- single player time score: ---");
         int pen, score = 0;
         pen = ((lastmillis-maptime)*100)/(1000*getvar("gamespeed")); score += pen; if(pen) conoutf(CON_GAMEINFO, "\f2time taken: %d seconds (%d simulated seconds)", pen, (lastmillis-maptime)/1000);
-        pen = player1->deaths*60; score += pen; if(pen) conoutf(CON_GAMEINFO, "\f2time penalty for %d deaths (1 minute each): %d seconds", player1->deaths, pen);
+        pen = player1->stats.deaths*60; score += pen; if(pen) conoutf(CON_GAMEINFO, "\f2time penalty for %d deaths (1 minute each): %d seconds", player1->stats.deaths, pen);
         pen = remain*10;          score += pen; if(pen) conoutf(CON_GAMEINFO, "\f2time penalty for %d monsters remaining (10 seconds each): %d seconds", remain, pen);
         pen = (10-skill)*20;      score += pen; if(pen) conoutf(CON_GAMEINFO, "\f2time penalty for lower skill level (20 seconds each): %d seconds", pen);
         pen = 100-accuracy;       score += pen; if(pen) conoutf(CON_GAMEINFO, "\f2time penalty for missed shots (1 second each %%): %d seconds", pen);

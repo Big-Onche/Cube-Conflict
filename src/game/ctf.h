@@ -612,7 +612,7 @@ struct ctfclientmode : clientmode
             if(d->feetpos().dist(f.spawnloc) < FLAGRADIUS) d->flagpickup |= 1<<f.id;
         }
         if(d!=player1) particles::text(d->abovehead(), tempformatstring("%d", score), PART_TEXT, 2000, 0x32FF64, 4.0f, -8);
-        d->flags = dflags;
+        d->stats.flags = dflags;
         conoutf(CON_GAMEINFO, "%s%s %s %s", teamcolorname(d, readstr("GameMessage_You")), d==player1 ? readstr("GameMessage_Have") : readstr("GameMessage_Has"), readstr("Console_Game_Ctf_FlagScore"), teamcolor(team));
         conoutf(CON_HUDCONSOLE, "%s%s", team==player1->team ? "\fe" : "\fc", team==player1->team ? readstr("GameMessage_Ctf_AlliedScore") : readstr("GameMessage_Ctf_EnemyScore"));
 

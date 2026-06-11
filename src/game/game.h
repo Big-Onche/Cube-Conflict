@@ -967,6 +967,36 @@ struct DamageLog
     void mergeBurst(const char *actorName, const char *victimName, int damage, bool isAfterburn, float distance, int millis, bool friendlyActor, bool friendlyVictim);
 };
 
+struct MatchStats
+{
+    int streak; // kill streak
+    int frags;  // total frags
+    int flags;  // captured flags
+    int deaths; // total deaths
+    int damage; // total damage
+    int shots;  // total shots
+
+    MatchStats()
+    {
+        resetMatch();
+    }
+
+    void resetMatch()
+    {
+        streak = 0;
+        frags = 0;
+        flags = 0;
+        deaths = 0;
+        damage = 0;
+        shots = 0;
+    }
+
+    void resetSpawn()
+    {
+        streak = 0;
+    }
+};
+
 struct gameent : dynent, gamestate
 {
     size_t entityId, lastkillerId;
@@ -981,7 +1011,7 @@ struct gameent : dynent, gamestate
     int lastfootstep;
     int lasttaunt, lastlavatouch, lastfirecheck;
     int lastpickup, lastpickupmillis, flagpickup, lastbase, lastrepammo, lastweap;
-    int killstreak, frags, flags, deaths, totaldamage, totalshots;
+    MatchStats stats;
     editinfo *edit;
     float deltayaw, deltapitch, deltaroll, newyaw, newpitch, newroll;
     int smoothmillis;
@@ -1010,7 +1040,7 @@ struct gameent : dynent, gamestate
                 curdamage(0), lastcurdamage(0), curdamagecolor(0xFFFFFF), attacking(ACT_IDLE), gunaccel(0), lastfootstep(0),
                 lasttaunt(0), lastlavatouch(0), lastfirecheck(0),
                 lastpickup(-1), lastpickupmillis(0), flagpickup(0), lastbase(-1), lastrepammo(-1), lastweap(GUN_GLOCK),
-                killstreak(0), frags(0), flags(0), deaths(0), totaldamage(0), totalshots(0),
+                stats(),
                 edit(NULL), deltayaw(0), deltapitch(0), deltaroll(0), newyaw(0), newpitch(0), newroll(0),
                 smoothmillis(-1), lastDamageOffset(0), numLastDamage(0),
                 lastabilityrequest(0), attacksound(0), shieldbroken(false), powerarmorsound(false),
@@ -1049,7 +1079,7 @@ private:
     {
         respawned = suicided = -1;
         lastspawn = lastmillis;
-        killstreak = 0;
+        stats.resetSpawn();
     }
 
     void resetActionRuntime()
@@ -1114,12 +1144,6 @@ private:
         loopi(3) abilityready[i] = true;
     }
 
-    void resetMatchStats()
-    {
-        killstreak = frags = flags = deaths = 0;
-        totaldamage = totalshots = 0;
-    }
-
 public:
     void respawn()
     {
@@ -1149,7 +1173,7 @@ public:
 
     void startgame()
     {
-        resetMatchStats();
+        stats.resetMatch();
 
         maxhealth = 1000;
         lifesequence = -1;

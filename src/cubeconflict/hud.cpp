@@ -88,7 +88,7 @@ namespace game
 
     ICOMMAND(hudscores, "i", (int *uicoltxt),
         string s;
-        if(!m_teammode) formatstring(s, "%s%d %sfrag%s", *uicoltxt ? "" : "\fd", followingplayer(player1)->frags, *uicoltxt ? "" : "\f7", followingplayer(player1)->frags>1 ? "s" : ""); // solo dm
+        if(!m_teammode) formatstring(s, "%s%d %sfrag%s", *uicoltxt ? "" : "\fd", followingplayer(player1)->stats.frags, *uicoltxt ? "" : "\f7", followingplayer(player1)->stats.frags>1 ? "s" : ""); // solo dm
         else if(m_ctf || m_capture) formatstring(s, "%s%d %s- %s%d", *uicoltxt ? "" : "\fd", cmode->getteamscore(followingplayer(player1)->team), *uicoltxt ? "" : "\f7", *uicoltxt ? "" : "\fc", cmode->getteamscore(followingplayer(player1)->team == 1 ? 2 : 1)); // ctf, domination mode
         else formatstring(s, "%s%d %s- %s%d", *uicoltxt ? "" : "\fd", getteamfrags(followingplayer(player1)->team), *uicoltxt ? "" : "\f7", *uicoltxt ? "" : "\fc", getteamfrags(followingplayer(player1)->team == 1 ? 2 : 1)); //  team dm
         result(s);

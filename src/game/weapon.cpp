@@ -330,7 +330,7 @@ namespace game
         gameent *f = (gameent *)d;
 
         f->lastpain = lastmillis;
-        if(at->type==ENT_PLAYER && !isteam(at->team, f->team)) at->totaldamage += damage;
+        if(at->type==ENT_PLAYER && !isteam(at->team, f->team)) at->stats.damage += damage;
         if(m_dmsp || m_classicsp || m_tutorial)
         {
             if(f==player1)
@@ -1086,7 +1086,7 @@ namespace game
         if(d->character==C_PRIEST && d->abilitymillis[ABILITY_3]) waitfactor = 2.5f + ((4000.f - d->abilitymillis[ABILITY_3])/1000.f);
         if(d->boostmillis[B_SHROOMS]) waitfactor *= d->character==C_JUNKIE ? 1.75f : 1.5f;
         d->gunwait = attacks[atk].attackdelay/waitfactor;
-        d->totalshots += (attacks[atk].damage*attacks[atk].rays) * (d->hasRoids() ? 1 : 2);
+        d->stats.shots += (attacks[atk].damage*attacks[atk].rays) * (d->hasRoids() ? 1 : 2);
         if(d==player1 && isSemiAutoGun(gun) && !specialAbility) d->attacking = ACT_IDLE;
     }
 

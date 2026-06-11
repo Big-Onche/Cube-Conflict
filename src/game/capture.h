@@ -611,7 +611,7 @@ struct captureclientmode : clientmode
 
     void cnbasescore(gameent *d, int score)
     {
-        d->flags = score;
+        d->stats.flags = score;
     }
 
     // prefer spawning near friendly base

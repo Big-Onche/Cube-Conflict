@@ -367,19 +367,19 @@ namespace game
     ICOMMAND(getclientfrags, "i", (int *cn),
     {
         gameent *d = getclient(*cn);
-        if(d) intret(d->frags);
+        if(d) intret(d->stats.frags);
     });
 
     ICOMMAND(getclientflags, "i", (int *cn),
     {
         gameent *d = getclient(*cn);
-        if(d) intret(d->flags);
+        if(d) intret(d->stats.flags);
     });
 
     ICOMMAND(getclientdeaths, "i", (int *cn),
     {
         gameent *d = getclient(*cn);
-        if(d) intret(d->deaths);
+        if(d) intret(d->stats.deaths);
     });
 
     ICOMMAND(getclientaptitude, "i", (int *cn),
@@ -1334,10 +1334,10 @@ namespace game
         {
             if(d==player1) getint(p);
             else d->state = getint(p);
-            d->killstreak = getint(p);
-            d->frags = getint(p);
-            d->flags = getint(p);
-            d->deaths = getint(p);
+            d->stats.streak = getint(p);
+            d->stats.frags = getint(p);
+            d->stats.flags = getint(p);
+            d->stats.deaths = getint(p);
             d->afterburnmillis = getint(p);
             if(d==player1) loopi(NUMBOOSTS) getint(p);
             else loopi(NUMBOOSTS) d->boostmillis[i] = getint(p);
@@ -1679,7 +1679,7 @@ namespace game
                 {
                     if(d->state==CS_DEAD && d->lastpain) saveGrave(d);
                     d->respawn();
-                    d->killstreak = 0;
+                    d->stats.streak = 0;
                 }
                 parsestate(d, p);
                 if(!d) break;
@@ -1846,15 +1846,15 @@ namespace game
 
             case N_DIED:
             {
-                int vcn = getint(p), acn = getint(p), frags = getint(p), killstreak = getint(p), tfrags = getint(p), atk = getint(p);
+                int vcn = getint(p), acn = getint(p), frags = getint(p), streak = getint(p), tfrags = getint(p), atk = getint(p);
                 gameent *victim = getclient(vcn),
                        *actor = getclient(acn);
                 if(!actor) break;
-                actor->frags = frags;
-                actor->killstreak = killstreak;
+                actor->stats.frags = frags;
+                actor->stats.streak = streak;
                 if(m_teammode) setteaminfo(actor->team, tfrags);
                 if(!victim) break;
-                victim->killstreak = 0;
+                victim->stats.streak = 0;
                 killed(victim, actor, atk);
                 break;
             }

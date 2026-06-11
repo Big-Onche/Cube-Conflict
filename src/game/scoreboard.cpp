@@ -36,11 +36,11 @@ namespace game
         else if(b->state==CS_SPECTATOR) return true;
         if(m_ctf || m_capture)
         {
-            if(a->flags > b->flags) return true;
-            if(a->flags < b->flags) return false;
+            if(a->stats.flags > b->stats.flags) return true;
+            if(a->stats.flags < b->stats.flags) return false;
         }
-        if(a->frags > b->frags) return true;
-        if(a->frags < b->frags) return false;
+        if(a->stats.frags > b->stats.frags) return true;
+        if(a->stats.frags < b->stats.frags) return false;
         return strcmp(a->name, b->name) < 0;
     }
 
@@ -52,7 +52,7 @@ namespace game
             if(o->state!=CS_SPECTATOR) best.add(o);
         }
         best.sort(playersort);
-        while(best.length() > 1 && best.last()->frags < best[0]->frags) best.drop();
+        while(best.length() > 1 && best.last()->stats.frags < best[0]->stats.frags) best.drop();
     }
 
     void getbestteams(vector<int> &best)
