@@ -1709,7 +1709,7 @@ namespace game
                     if(player1->character==C_SOLDIER && player1->hasSuperWeapon()) unlockAchievement(ACH_CHANCE);
                     showscores(false);
                     lasthit = 0;
-                    player1->lastweap = player1->gunselect;
+                    player1->pickups.lastWeapon = player1->gunselect;
                 }
                 if(cmode) cmode->respawned(s);
                 ai::spawned(s);

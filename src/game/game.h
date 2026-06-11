@@ -1054,6 +1054,31 @@ struct InterpolationState
     }
 };
 
+struct PickupState
+{
+    int lastType;       // Pickup type
+    int lastMillis;     // Last pickup timestamp
+    int flag;           // Bitmask of CTF flags
+    int lastBase;       // Capture base currently tethering player
+    int lastRepAmmo;    // Capture base that last requested ammo refill
+    int lastWeapon;     // Previous weapon restored after temporary attacks -> TODO move this shit
+
+    PickupState()
+    {
+        reset(GUN_GLOCK);
+    }
+
+    void reset(int currentGun)
+    {
+        lastType = -1;
+        lastMillis = 0;
+        flag = 0;
+        lastBase = -1;
+        lastRepAmmo = -1;
+        lastWeapon = currentGun;
+    }
+};
+
 struct gameent : dynent, gamestate
 {
     size_t entityId, lastkillerId;
@@ -1067,7 +1092,7 @@ struct gameent : dynent, gamestate
     int attacking, gunaccel;
     int lastfootstep;
     int lasttaunt, lastlavatouch, lastfirecheck;
-    int lastpickup, lastpickupmillis, flagpickup, lastbase, lastrepammo, lastweap;
+    PickupState pickups;
     MatchStats stats;
     editinfo *edit;
     InterpolationState interp;
@@ -1094,8 +1119,7 @@ struct gameent : dynent, gamestate
                 lastaction(0), lastattack(-1), lastgunselect(0), lastshieldswitch(0), lastshrooms(0),
                 curdamage(0), lastcurdamage(0), curdamagecolor(0xFFFFFF), attacking(ACT_IDLE), gunaccel(0), lastfootstep(0),
                 lasttaunt(0), lastlavatouch(0), lastfirecheck(0),
-                lastpickup(-1), lastpickupmillis(0), flagpickup(0), lastbase(-1), lastrepammo(-1), lastweap(GUN_GLOCK),
-                stats(),
+                pickups(), stats(),
                 edit(NULL), interp(), damageHistory(),
                 lastabilityrequest(0), attacksound(0), shieldbroken(false), powerarmorsound(false),
                 lastOutOfMap(0), wasAttacking(false), isOutOfMap(false), isConnected(false),
@@ -1150,11 +1174,7 @@ private:
 
     void resetPickupRuntime()
     {
-        lastpickup = -1;
-        lastpickupmillis = 0;
-        flagpickup = 0;
-        lastbase = lastrepammo = -1;
-        lastweap = gunselect;
+        pickups.reset(gunselect);
     }
 
     void resetDamageRuntime()

@@ -272,23 +272,23 @@ struct captureclientmode : clientmode
             baseinfo &b = bases[i];
             if(insidebase(b, d->feetpos(), d->state==CS_ALIVE) && b.owner==d->team && b.o.dist(o) < 12)
             {
-                if(d->lastrepammo!=i)
+                if(d->pickups.lastRepAmmo!=i)
                 {
                     if(b.ammo > 0 && !player1->hasmaxammo(b.ammotype-1+I_RAIL)) addmsg(N_REPAMMO, "rc", d);
-                    d->lastrepammo = i;
+                    d->pickups.lastRepAmmo = i;
                 }
                 return;
             }
         }
-        d->lastrepammo = -1;
+        d->pickups.lastRepAmmo = -1;
     }
 
     int insidebasetimer = 0;
 
     void rendertether(gameent *d)
     {
-        int oldbase = d->lastbase;
-        d->lastbase = -1;
+        int oldbase = d->pickups.lastBase;
+        d->pickups.lastBase = -1;
         vec pos(d->o.x, d->o.y, d->o.z + (d->aboveeye - d->eyeheight)/2);
         if(d->state==CS_ALIVE)
         {
@@ -304,7 +304,7 @@ struct captureclientmode : clientmode
                 }
 
                 if(!insidebase(b, d->feetpos(), d->state==CS_ALIVE) || (b.owner!=d->team && b.enemy!=d->team)) continue;
-                if(d->lastbase < 0 && (lookupmaterial(d->feetpos())&MATF_CLIP) == MAT_GAMECLIP) break;
+                if(d->pickups.lastBase < 0 && (lookupmaterial(d->feetpos())&MATF_CLIP) == MAT_GAMECLIP) break;
 
                 vec basepos(b.o);
                 basepos.add(vec(-10+rnd(20), -10+rnd(20), -10+rnd(20)));
@@ -320,10 +320,10 @@ struct captureclientmode : clientmode
                     particle_splash(PART_ZERO, 12, 250, pos, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.8f, 200, 50);
                     particle_splash(PART_ONE, 12, 250, pos, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.8f, 200, 50);
                 }
-                d->lastbase = i;
+                d->pickups.lastBase = i;
             }
         }
-        if(d->lastbase < 0 && oldbase >= 0)
+        if(d->pickups.lastBase < 0 && oldbase >= 0)
         {
             playSound(S_TERMINAL_ENTER, d==hudplayer() ? vec(0, 0, 0) : pos, 150, 50);
             particle_splash(PART_ZERO, 12, 200, pos, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.8f, 200, 50);

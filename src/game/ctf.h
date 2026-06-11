@@ -39,7 +39,7 @@ struct ctfclientmode : clientmode
             owner = dropper = -1;
             owntime = 0;
 #else
-            if(id >= 0) loopv(players) players[i]->flagpickup &= ~(1<<id);
+            if(id >= 0) loopv(players) players[i]->pickups.flag &= ~(1<<id);
             owner = NULL;
             dropangle = spawnangle = 0;
             interploc = vec(0, 0, 0);
@@ -99,7 +99,7 @@ struct ctfclientmode : clientmode
         else f.dropcount = 0;
         f.dropper = -1;
 #else
-        loopv(players) players[i]->flagpickup &= ~(1<<f.id);
+        loopv(players) players[i]->pickups.flag &= ~(1<<f.id);
 #endif
     }
 
@@ -118,7 +118,7 @@ struct ctfclientmode : clientmode
         f.dropper = dropper;
         f.owner = -1;
 #else
-        loopv(players) players[i]->flagpickup &= ~(1<<f.id);
+        loopv(players) players[i]->pickups.flag &= ~(1<<f.id);
         f.owner = NULL;
         f.dropangle = yaw;
 #endif
@@ -136,7 +136,7 @@ struct ctfclientmode : clientmode
         f.dropcount = 0;
         f.owner = f.dropper = -1;
 #else
-        loopv(players) players[i]->flagpickup &= ~(1<<f.id);
+        loopv(players) players[i]->pickups.flag &= ~(1<<f.id);
         f.owner = NULL;
 #endif
     }
@@ -535,7 +535,7 @@ struct ctfclientmode : clientmode
         f.interploc = interpflagpos(f, f.interpangle);
         f.interptime = lastmillis;
         dropflag(i, droploc, d->yaw, lastmillis);
-        d->flagpickup |= 1<<f.id;
+        d->pickups.flag |= 1<<f.id;
         if(!droptofloor(f.droploc.addz(4), 4, 0))
         {
             f.droploc = vec(-1, -1, -1);
@@ -608,8 +608,8 @@ struct ctfclientmode : clientmode
             else flageffect(goal, team, interpflagpos(f), vec(f.spawnloc).addz(FLAGFLOAT+FLAGCENTER));
             f.interptime = 0;
             returnflag(relay >= 0 ? relay : goal);
-            d->flagpickup &= ~(1<<f.id);
-            if(d->feetpos().dist(f.spawnloc) < FLAGRADIUS) d->flagpickup |= 1<<f.id;
+            d->pickups.flag &= ~(1<<f.id);
+            if(d->feetpos().dist(f.spawnloc) < FLAGRADIUS) d->pickups.flag |= 1<<f.id;
         }
         if(d!=player1) particles::text(d->abovehead(), tempformatstring("%d", score), PART_TEXT, 2000, 0x32FF64, 4.0f, -8);
         d->stats.flags = dflags;
@@ -650,15 +650,15 @@ struct ctfclientmode : clientmode
             const vec &loc = f.droptime ? f.droploc : f.spawnloc;
             if(o.dist(loc) < FLAGRADIUS)
             {
-                if(d->flagpickup&(1<<f.id)) continue;
+                if(d->pickups.flag&(1<<f.id)) continue;
                 if((lookupmaterial(o)&MATF_CLIP) != MAT_GAMECLIP && (lookupmaterial(loc)&MATF_CLIP) != MAT_GAMECLIP)
                 {
                     tookflag = true;
                     addmsg(N_TAKEFLAG, "rcii", d, i, f.version);
                 }
-                d->flagpickup |= 1<<f.id;
+                d->pickups.flag |= 1<<f.id;
             }
-            else d->flagpickup &= ~(1<<f.id);
+            else d->pickups.flag &= ~(1<<f.id);
         }
         loopv(flags)
         {
@@ -667,24 +667,24 @@ struct ctfclientmode : clientmode
             const vec &loc = f.droptime ? f.droploc : f.spawnloc;
             if(o.dist(loc) < FLAGRADIUS)
             {
-                if(!tookflag && d->flagpickup&(1<<f.id)) continue;
+                if(!tookflag && d->pickups.flag&(1<<f.id)) continue;
                 if((lookupmaterial(o)&MATF_CLIP) != MAT_GAMECLIP && (lookupmaterial(loc)&MATF_CLIP) != MAT_GAMECLIP)
                     addmsg(N_TAKEFLAG, "rcii", d, i, f.version);
-                d->flagpickup |= 1<<f.id;
+                d->pickups.flag |= 1<<f.id;
             }
-            else d->flagpickup &= ~(1<<f.id);
+            else d->pickups.flag &= ~(1<<f.id);
        }
     }
 
     void respawned(gameent *d)
     {
         vec o = d->feetpos();
-        d->flagpickup = 0;
+        d->pickups.flag = 0;
         loopv(flags)
         {
             flag &f = flags[i];
             if(!validteam(f.team) || f.owner || (f.droptime && f.droploc.x<0)) continue;
-            if(o.dist(f.droptime ? f.droploc : f.spawnloc) < FLAGRADIUS) d->flagpickup |= 1<<f.id;
+            if(o.dist(f.droptime ? f.droploc : f.spawnloc) < FLAGRADIUS) d->pickups.flag |= 1<<f.id;
        }
     }
 

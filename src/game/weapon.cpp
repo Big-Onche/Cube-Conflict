@@ -27,7 +27,7 @@ namespace game
     {
         if((gun==GUN_POWERARMOR && !force) || !validgun(gun) || gun==d->gunselect) return;
 
-        if(d==player1 && gun != GUN_POWERARMOR && !shortcut) player1->lastweap = gun;
+        if(d==player1 && gun != GUN_POWERARMOR && !shortcut) player1->pickups.lastWeapon = gun;
         addmsg(N_GUNSELECT, "rci", d, gun);
         playSound(attacks[gun-GUN_ELECTRIC].picksound, d==hudplayer() ? vec(0, 0, 0) : d->o, 200, 50, NULL, d->entityId);
         d->lastgunselect = lastmillis;
@@ -55,7 +55,7 @@ namespace game
         execute("sleep 500 [shoot ; getoldweap]");
     );
 
-    ICOMMAND(getoldweap, "", (), { if(isconnected() || !m_identique) gunselect(player1->lastweap, player1); });
+    ICOMMAND(getoldweap, "", (), { if(isconnected() || !m_identique) gunselect(player1->pickups.lastWeapon, player1); });
 
     void nextweapon(int dir, bool force = false)
     {

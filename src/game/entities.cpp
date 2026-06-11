@@ -334,15 +334,15 @@ namespace entities
             }
             case TELEPORT:
             {
-                if(d->lastpickup==e->type && lastmillis-d->lastpickupmillis<500) break;
+                if(d->pickups.lastType==e->type && lastmillis-d->pickups.lastMillis<500) break;
                 if(!teleteam && m_teammode) break;
                 if(e->type > 0)
                 {
                     defformatstring(hookname, "can_teleport_%d", e->type);
                     if(!execidentbool(hookname, true)) break;
                 }
-                d->lastpickup = e->type;
-                d->lastpickupmillis = lastmillis;
+                d->pickups.lastType = e->type;
+                d->pickups.lastMillis = lastmillis;
                 teleport(n, d);
                 break;
             }
@@ -359,9 +359,9 @@ namespace entities
 
             case JUMPPAD:
             {
-                if(d->lastpickup==e->type && lastmillis-d->lastpickupmillis<300) break;
-                d->lastpickup = e->type;
-                d->lastpickupmillis = lastmillis;
+                if(d->pickups.lastType==e->type && lastmillis-d->pickups.lastMillis<300) break;
+                d->pickups.lastType = e->type;
+                d->pickups.lastMillis = lastmillis;
                 jumppadeffects(d, n, true);
                 if(d->ai) d->ai->becareful = true;
                 d->falling = vec(0, 0, 0);
