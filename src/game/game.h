@@ -1114,6 +1114,12 @@ private:
         loopi(3) abilityready[i] = true;
     }
 
+    void resetMatchStats()
+    {
+        killstreak = frags = flags = deaths = 0;
+        totaldamage = totalshots = 0;
+    }
+
 public:
     void respawn()
     {
@@ -1143,8 +1149,8 @@ public:
 
     void startgame()
     {
-        killstreak = frags = flags = deaths = 0;
-        totaldamage = totalshots = 0;
+        resetMatchStats();
+
         maxhealth = 1000;
         lifesequence = -1;
         respawned = suicided = -2;
