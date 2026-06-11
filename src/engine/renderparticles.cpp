@@ -417,6 +417,42 @@ static inline void setparticletexcoords(int type, const particle *p, partvert *v
     vs[3].tc2 = vec2(-1.0f,  1.0f);
 }
 
+static inline void setparticleshadowtexcoords(int type, const particle *p, partvert *vs)
+{
+    float u1 = 0, u2 = 1, v1 = 0, v2 = 1;
+    if(type&PT_RND4)
+    {
+        float tx = 0.5f*((p->flags>>5)&1), ty = 0.5f*((p->flags>>6)&1);
+        u1 = tx;
+        u2 = tx + 0.5f;
+        v1 = ty;
+        v2 = ty + 0.5f;
+        if(p->flags&0x01) swap(u1, u2);
+        if(p->flags&0x02) swap(v1, v2);
+    }
+    else if(type&PT_ICON)
+    {
+        float tx = 0.25f*(p->flags&3), ty = 0.25f*((p->flags>>2)&3);
+        u1 = tx;
+        u2 = tx + 0.25f;
+        v1 = ty;
+        v2 = ty + 0.25f;
+    }
+
+    vs[0].tc = vec2(u1, v1);
+    vs[1].tc = vec2(u2, v1);
+    vs[2].tc = vec2(u2, v2);
+    vs[3].tc = vec2(u1, v2);
+}
+
+static inline void setdefaultshadowtexcoords(partvert *vs)
+{
+    vs[0].tc = vec2(0, 0);
+    vs[1].tc = vec2(1, 0);
+    vs[2].tc = vec2(1, 1);
+    vs[3].tc = vec2(0, 1);
+}
+
 static inline bool shouldusesoftparticle(const vec &o, int flags)
 {
     if((flags&PT_SOFT) == 0) return false;
@@ -909,6 +945,25 @@ static inline bool particleshadowmapping()
     return shadowmapping == SM_CASCADE || shadowmapping == SM_SPOT || shadowmapping == SM_CUBEMAP;
 }
 
+static inline void getshadowbillboardbasisfromdir(vec dir, vec &right, vec &up)
+{
+    float dirlen = dir.squaredlen();
+    if(dirlen <= 1e-6f)
+    {
+        right = vec(1, 0, 0);
+        up = vec(0, 1, 0);
+        return;
+    }
+
+    dir.div(sqrtf(dirlen));
+    vec axis = fabs(dir.z) < 0.999f ? vec(0, 0, 1) : vec(0, 1, 0);
+    right.cross(axis, dir);
+    float rightlen = right.squaredlen();
+    if(rightlen <= 1e-6f) right = vec(1, 0, 0);
+    else right.div(sqrtf(rightlen));
+    up.cross(dir, right).normalize();
+}
+
 static inline void getshadowbillboardbasis(const vec &o, vec &right, vec &up)
 {
     vec dir;
@@ -926,19 +981,7 @@ static inline void getshadowbillboardbasis(const vec &o, vec &right, vec &up)
             dir = vec(0, 0, 1);
             break;
     }
-    if(dir.squaredlen() <= 1e-6f)
-    {
-        right = vec(1, 0, 0);
-        up = vec(0, 1, 0);
-        return;
-    }
-
-    dir.normalize();
-    vec axis = fabs(dir.z) < 0.999f ? vec(0, 0, 1) : vec(0, 1, 0);
-    right.cross(axis, dir);
-    if(right.squaredlen() <= 1e-6f) right = vec(1, 0, 0);
-    else right.normalize();
-    up.cross(dir, right).normalize();
+    getshadowbillboardbasisfromdir(dir, right, up);
 }
 
 static inline void genshadowpos(const vec &o, const vec &right, const vec &up, float size, partvert *vs)
@@ -1258,9 +1301,9 @@ struct varenderer : partrenderer
         else genpos<T>(o, d, p->size, ts, p->gravity, vs);
     }
 
-    bool calcshadowinfo(particle *p, vec &o, float &size, int &blend)
+    bool calcshadowbase(particle *p, vec &o, float &size, int &blend)
     {
-        if(!particleshadowmapping() || !shadowverts || p->fade < 0) return false;
+        if(p->fade < 0) return false;
 
         o = p->o;
         vec d = p->d;
@@ -1291,6 +1334,13 @@ struct varenderer : partrenderer
         blend = particlecoloralpha(blend, p->color.a);
         if(!blend) return false;
 
+        return true;
+    }
+
+    bool calcshadowinfo(particle *p, vec &o, float &size, int &blend)
+    {
+        if(!particleshadowmapping() || !shadowverts || !calcshadowbase(p, o, size, blend)) return false;
+
         float radius = size*SQRT2;
         switch(shadowmapping)
         {
@@ -1314,34 +1364,82 @@ struct varenderer : partrenderer
         return false;
     }
 
-    int genshadowverts()
+    void emitshadowvert(particle *p, const vec &o, float size, int blend, const vec &right, const vec &up, bool statictex, int &shadowparts)
     {
-        if(!shadowverts || !particleshadowmapping()) return 0;
+        partvert *vs = &shadowverts[shadowparts*4];
+        if(statictex) setdefaultshadowtexcoords(vs);
+        else setparticleshadowtexcoords(type, p, vs);
 
-        const bool fixedbasis = shadowmapping == SM_CASCADE;
-        vec right, up;
-        if(fixedbasis) getshadowbillboardbasis(vec(0, 0, 0), right, up);
+        bvec4 shadowcolor(255, 255, 255, uchar(blend));
+        vs[0].color = vs[1].color = vs[2].color = vs[3].color = shadowcolor;
+
+        if(type&PT_ROT) genrotshadowpos(o, right, up, size, vs, (p->flags>>2)&0x1F);
+        else genshadowpos(o, right, up, size, vs);
+        shadowparts++;
+    }
+
+    template<int M>
+    int genshadowvertsmode()
+    {
+        const bool statictex = (type&(PT_RND4|PT_ICON)) == 0;
+        const int sidebit = 1<<shadowside;
+        const vec localorigin = shadoworigin, localdir = shadowdir;
+        const float localradius = shadowradius, localbias = shadowbias;
+        const int localspot = shadowspot;
 
         int shadowparts = 0;
+        vec right, up;
+        if(M == SM_CASCADE) getshadowbillboardbasisfromdir(localdir, right, up);
+
         loopi(numparts)
         {
             particle *p = &parts[i];
             vec o;
             float size;
             int blend;
-            if(!calcshadowinfo(p, o, size, blend)) continue;
+            if(!calcshadowbase(p, o, size, blend)) continue;
 
-            partvert *vs = &shadowverts[shadowparts*4];
-            setparticletexcoords(type, p, vs);
-            bvec4 shadowcolor(255, 255, 255, uchar(blend));
-            loopk(4) vs[k].color = shadowcolor;
-            if(!fixedbasis) getshadowbillboardbasis(o, right, up);
-            if(type&PT_ROT) genrotshadowpos(o, right, up, size, vs, (p->flags>>2)&0x1F);
-            else genshadowpos(o, right, up, size, vs);
-            shadowparts++;
+            float radius = size*SQRT2;
+            if(M == SM_CASCADE)
+            {
+                if(!(calcspherecsmsplits(o, radius)&sidebit)) continue;
+            }
+            else
+            {
+                vec scenter = vec(o).sub(localorigin);
+                float dist = scenter.squaredlen(), sradius = radius + localradius;
+                if(dist >= sradius*sradius) continue;
+
+                if(M == SM_SPOT)
+                {
+                    if(!sphereinsidespot(localdir, localspot, scenter, radius)) continue;
+                    getshadowbillboardbasisfromdir(dist <= 1e-6f ? localdir : scenter, right, up);
+                }
+                else
+                {
+                    if(!(calcspheresidemask(scenter, radius, localbias)&sidebit)) continue;
+                    getshadowbillboardbasisfromdir(scenter, right, up);
+                }
+            }
+
+            emitshadowvert(p, o, size, blend, right, up, statictex, shadowparts);
         }
 
         return shadowparts;
+    }
+
+    int genshadowverts()
+    {
+        if(!shadowverts || !particleshadowmapping()) return 0;
+
+        switch(shadowmapping)
+        {
+            case SM_CASCADE: return genshadowvertsmode<SM_CASCADE>();
+            case SM_SPOT: return genshadowvertsmode<SM_SPOT>();
+            case SM_CUBEMAP: return genshadowvertsmode<SM_CUBEMAP>();
+        }
+
+        return 0;
     }
 
     const partvert *shadowvertexdata() const
