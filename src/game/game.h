@@ -1044,49 +1044,94 @@ struct gameent : dynent, gamestate
     const DamageLog *getLastDamage(int index) const;
     int getKillIndex() const;
 
-    void respawn()
+private:
+    void resetSpawnRuntime()
     {
-        dynent::reset();
-        gamestate::respawn();
         respawned = suicided = -1;
+        lastspawn = lastmillis;
+        killstreak = 0;
+    }
+
+    void resetActionRuntime()
+    {
         lastaction = 0;
         lastattack = -1;
-        lastspawn = lastmillis;
         lastgunselect = lastmillis;
         lastshieldswitch = lastmillis;
         lastshrooms = 0;
-        curdamage = 0;
-        lastcurdamage = 0;
-        curdamagecolor = 0xFFFFFF;
         attacking = ACT_IDLE;
-        lasttaunt = 0;
-        lastlavatouch = 0;
-        lastfirecheck = 0;
+        gunaccel = 0;
+        wasAttacking = false;
+    }
+
+    void resetPickupRuntime()
+    {
         lastpickup = -1;
         lastpickupmillis = 0;
         flagpickup = 0;
         lastbase = lastrepammo = -1;
         lastweap = gunselect;
+    }
+
+    void resetDamageRuntime()
+    {
+        curdamage = 0;
+        lastcurdamage = 0;
+        curdamagecolor = 0xFFFFFF;
+        shieldbroken = false;
+        lastkillerId = SIZE_MAX;
+    }
+
+    void resetVisualRuntime()
+    {
+        lasttaunt = 0;
         deltayaw = deltapitch = deltaroll = 0;
         newyaw = yaw;
         newpitch = pitch;
         newroll = roll;
         smoothmillis = -1;
-        lastnode = -1;
-        lastabilityrequest = 0;
-        loopi(3) abilityready[i] = true;
-        gunaccel = 0;
-        killstreak = 0;
-        attacksound = 0;
-        powerarmorsound = false;
-        shieldbroken = false;
-        lastOutOfMap = 0;
-        wasAttacking = false;
-        isOutOfMap = false;
         skeletonSize = 0.0f;
         graveSize = 0.0f;
-        lastkillerId = SIZE_MAX;
+    }
+
+    void resetAudioRuntime()
+    {
+        attacksound = 0;
+        powerarmorsound = false;
+    }
+
+    void resetMapRuntime()
+    {
+        lastlavatouch = 0;
+        lastfirecheck = 0;
+        lastOutOfMap = 0;
+        isOutOfMap = false;
+    }
+
+    void resetAbilityRuntime()
+    {
+        lastabilityrequest = 0;
+        loopi(3) abilityready[i] = true;
+    }
+
+public:
+    void respawn()
+    {
+        dynent::reset();
+        gamestate::respawn();
+
+        resetSpawnRuntime();
+        resetActionRuntime();
+        resetPickupRuntime();
+        resetDamageRuntime();
+        resetVisualRuntime();
+        resetAudioRuntime();
+        resetMapRuntime();
+        resetAbilityRuntime();
+
+        lastnode = -1;
         afterburner = NULL;
+
         resetinterp();
         clearDamageLog();
     }
