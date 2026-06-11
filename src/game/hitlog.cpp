@@ -74,24 +74,22 @@ void DamageLog::mergeBurst(const char *actorName, const char *victimName, int da
 
 void gameent::clearDamageLog()
 {
-    lastDamageOffset = 0;
-    numLastDamage = 0;
-    loopi(DAMAGE_LOG_LENGTH) lastdamage[i].clear();
+    damageHistory.clear();
 }
 
 void gameent::clearKillHitLog()
 {
-    loopi(numLastDamage) lastdamage[(lastDamageOffset + i) % DAMAGE_LOG_LENGTH].killHit = false;
+    loopi(damageHistory.count) damageHistory.entries[(damageHistory.offset + i) % DAMAGE_LOG_LENGTH].killHit = false;
 }
 
 void gameent::markKillHit(const char *actorName, const char *victimName, int weapon, bool isActor)
 {
     clearKillHitLog();
 
-    for(int index = numLastDamage - 1; index >= 0; --index)
+    for(int index = damageHistory.count - 1; index >= 0; --index)
     {
-        int slot = (lastDamageOffset + index) % DAMAGE_LOG_LENGTH;
-        DamageLog &entry = lastdamage[slot];
+        int slot = (damageHistory.offset + index) % DAMAGE_LOG_LENGTH;
+        DamageLog &entry = damageHistory.entries[slot];
         if(entry.weapon != weapon ||
             entry.isActor != isActor ||
             strcmp(entry.actorName, actorName ? actorName : "") ||
@@ -111,10 +109,10 @@ void gameent::logLastHit(const char *actorName, const char *victimName, int weap
 
     if(burstWindow > 0)
     {
-        for(int index = numLastDamage - 1; index >= 0; --index)
+        for(int index = damageHistory.count - 1; index >= 0; --index)
         {
-            int slot = (lastDamageOffset + index) % DAMAGE_LOG_LENGTH;
-            DamageLog &entry = lastdamage[slot];
+            int slot = (damageHistory.offset + index) % DAMAGE_LOG_LENGTH;
+            DamageLog &entry = damageHistory.entries[slot];
             if(!entry.matchesBurst(actorName, victimName, weapon, isActor, isAfterburn)) continue;
             if(millis - entry.millis > burstWindow) break;
 
@@ -123,26 +121,26 @@ void gameent::logLastHit(const char *actorName, const char *victimName, int weap
         }
     }
 
-    int slot = (lastDamageOffset + numLastDamage) % DAMAGE_LOG_LENGTH;
-    if(numLastDamage >= DAMAGE_LOG_LENGTH)
+    int slot = (damageHistory.offset + damageHistory.count) % DAMAGE_LOG_LENGTH;
+    if(damageHistory.count >= DAMAGE_LOG_LENGTH)
     {
-        slot = lastDamageOffset;
-        lastDamageOffset = (lastDamageOffset + 1) % DAMAGE_LOG_LENGTH;
+        slot = damageHistory.offset;
+        damageHistory.offset = (damageHistory.offset + 1) % DAMAGE_LOG_LENGTH;
     }
-    else numLastDamage++;
+    else damageHistory.count++;
 
-    lastdamage[slot].set(actorName, victimName, weapon, damage, isActor, isAfterburn, distance, millis, friendlyActor, friendlyVictim);
+    damageHistory.entries[slot].set(actorName, victimName, weapon, damage, isActor, isAfterburn, distance, millis, friendlyActor, friendlyVictim);
 }
 
 const DamageLog *gameent::getLastDamage(int index) const
 {
-    if(index < 0 || index >= numLastDamage) return NULL;
-    return &lastdamage[(lastDamageOffset + numLastDamage - 1 - index + DAMAGE_LOG_LENGTH) % DAMAGE_LOG_LENGTH];
+    if(index < 0 || index >= damageHistory.count) return NULL;
+    return &damageHistory.entries[(damageHistory.offset + damageHistory.count - 1 - index + DAMAGE_LOG_LENGTH) % DAMAGE_LOG_LENGTH];
 }
 
 int gameent::getKillIndex() const
 {
-    loopi(numLastDamage)
+    loopi(damageHistory.count)
     {
         const DamageLog *entry = getLastDamage(i);
         if(entry && entry->killHit) return i;
@@ -211,7 +209,7 @@ namespace game
 
     ICOMMAND(gethitloglength, "", (),
         gameent *hp = hudplayer();
-        intret(hp ? hp->numLastDamage : 0);
+        intret(hp ? hp->damageHistory.count : 0);
     );
 
     ICOMMAND(gethitlogkillindex, "", (),

@@ -967,6 +967,26 @@ struct DamageLog
     void mergeBurst(const char *actorName, const char *victimName, int damage, bool isAfterburn, float distance, int millis, bool friendlyActor, bool friendlyVictim);
 };
 
+struct DamageHistory
+{
+    DamageLog entries[DAMAGE_LOG_LENGTH];
+    int offset;
+    int count;
+
+    DamageHistory()
+        : offset(0),
+          count(0)
+    {
+    }
+
+    void clear()
+    {
+        offset = 0;
+        count = 0;
+        memset(entries, 0, sizeof(entries));
+    }
+};
+
 struct MatchStats
 {
     int streak; // kill streak
@@ -1015,8 +1035,7 @@ struct gameent : dynent, gamestate
     editinfo *edit;
     float deltayaw, deltapitch, deltaroll, newyaw, newpitch, newroll;
     int smoothmillis;
-    DamageLog lastdamage[DAMAGE_LOG_LENGTH];
-    int lastDamageOffset, numLastDamage;
+    DamageHistory damageHistory;
 
     int lastability[3], lastabilityrequest;
     int attacksound; // 0 = no sound, 1 = close sound, 2 = close + far sound
@@ -1042,7 +1061,7 @@ struct gameent : dynent, gamestate
                 lastpickup(-1), lastpickupmillis(0), flagpickup(0), lastbase(-1), lastrepammo(-1), lastweap(GUN_GLOCK),
                 stats(),
                 edit(NULL), deltayaw(0), deltapitch(0), deltaroll(0), newyaw(0), newpitch(0), newroll(0),
-                smoothmillis(-1), lastDamageOffset(0), numLastDamage(0),
+                smoothmillis(-1), damageHistory(),
                 lastabilityrequest(0), attacksound(0), shieldbroken(false), powerarmorsound(false),
                 lastOutOfMap(0), wasAttacking(false), isOutOfMap(false), isConnected(false),
                 team(0), playermodel(-1), playercolor(0), skin{0, 0, 0}, character(0), level(0),
