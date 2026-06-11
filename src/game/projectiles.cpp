@@ -86,6 +86,23 @@ namespace projectiles
         return raycubepos(from, ray, hit, dist, RAY_CLIPMAT|RAY_ALPHAPOLY) < dist;
     }
 
+    static inline bool isStuckArrow(const projectile &p)
+    {
+        return p.atk == ATK_CROSSBOW && p.exploded;
+    }
+
+    static inline void stickArrow(projectile &p, const vec &pos)
+    {
+        p.o = pos;
+        p.from = pos;
+        p.to = pos;
+        p.vel = vec(0, 0, 0);
+        p.gravity = 0;
+        p.elapsed = 0;
+        p.offset = vec(0, 0, 0);
+        p.offsetmillis = 0;
+    }
+
     void add(const vec &from, const vec &to, float speed, bool local, int id, gameent *owner, int atk)
     {
         if(from.isneg()) return;
@@ -220,13 +237,18 @@ namespace projectiles
 
     void update(int time)
     {
-        bool removearrow = false;
-
         if(curProjectiles.empty()) return;
         loopv(curProjectiles)
         {
             projectile &p = curProjectiles[i];
             p.offsetmillis = max(p.offsetmillis-time, 0);
+            if(isStuckArrow(p))
+            {
+                if((p.lifetime -= time)<0) curProjectiles.remove(i--);
+                continue;
+            }
+
+            bool removearrow = false;
             vec dv;
             vec v;
             float dist = 0;
@@ -309,7 +331,8 @@ namespace projectiles
                     p.soundplaying = false;
                 }
                 if(p.atk != ATK_CROSSBOW) curProjectiles.remove(i--);
-                else if((p.lifetime -= time)<0 || removearrow) curProjectiles.remove(i--);
+                else if(removearrow || (p.lifetime -= time)<0) curProjectiles.remove(i--);
+                else stickArrow(p, v);
             }
             else
             {
@@ -367,7 +390,12 @@ namespace projectiles
             vec dv;
             vec v;
             float dist = 0;
-            if(p.ballistic)
+            if(isStuckArrow(p))
+            {
+                v = p.o;
+                dv = vec(0, 0, 0);
+            }
+            else if(p.ballistic)
             {
                 ballisticStep(p, time, v, dv);
             }
