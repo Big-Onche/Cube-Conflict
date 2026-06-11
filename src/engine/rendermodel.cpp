@@ -511,7 +511,7 @@ struct batchedmodel
     vec pos, center;
     float radius, yaw, pitch, roll, sizescale;
     vec4 colorscale;
-    int anim, basetime, basetime2, flags, attached;
+    int anim, basetime, basetime2, flags, attached, batch;
     union
     {
         int visible;
@@ -523,17 +523,27 @@ struct batchedmodel
 struct modelbatch
 {
     model *m;
-    int flags, batched;
+    int flags, batched, shadowmask;
 };
 static vector<batchedmodel> batchedmodels;
 static vector<modelbatch> batches;
 static vector<modelattach> modelattached;
+static vector<int> shadowbatches;
 
 void resetmodelbatches()
 {
     batchedmodels.setsize(0);
     batches.setsize(0);
     modelattached.setsize(0);
+    shadowbatches.setsize(0);
+}
+
+static inline void markshadowbatch(int idx, int mask)
+{
+    if(!mask || !batches.inrange(idx)) return;
+    modelbatch &b = batches[idx];
+    if(!b.shadowmask) shadowbatches.add(idx);
+    b.shadowmask |= mask;
 }
 
 void addbatchedmodel(model *m, batchedmodel &bm, int idx)
@@ -551,11 +561,14 @@ void addbatchedmodel(model *m, batchedmodel &bm, int idx)
     b->m = m;
     b->flags = 0;
     b->batched = -1;
+    b->shadowmask = 0;
 
 foundbatch:
     b->flags |= bm.flags;
+    bm.batch = m->batch;
     bm.next = b->batched;
     b->batched = idx;
+    if(bm.visible && !(bm.flags&MDL_NOSHADOW) && b->m->shadow) markshadowbatch(m->batch, bm.visible);
 }
 
 static inline void renderbatchedmodel(model *m, const batchedmodel &b)
@@ -642,11 +655,19 @@ static inline int shadowmaskmodel(const vec &center, float radius)
 
 void shadowmaskbatchedmodels(bool dynshadow)
 {
+    shadowbatches.setsize(0);
+    loopv(batches) batches[i].shadowmask = 0;
     loopv(batchedmodels)
     {
         batchedmodel &b = batchedmodels[i];
-        if(b.flags&(MDL_MAPMODEL | MDL_NOSHADOW)) break;
-        b.visible = dynshadow && (b.colorscale.a >= 1 || b.flags&(MDL_ONLYSHADOW | MDL_FORCESHADOW)) ? shadowmaskmodel(b.center, b.radius) : 0;
+        if(b.flags&MDL_MAPMODEL) break;
+        if(!dynshadow || (b.flags&MDL_NOSHADOW) || (b.colorscale.a < 1 && !(b.flags&(MDL_ONLYSHADOW | MDL_FORCESHADOW))))
+        {
+            b.visible = 0;
+            continue;
+        }
+        b.visible = shadowmaskmodel(b.center, b.radius);
+        if(b.visible && batches.inrange(b.batch) && batches[b.batch].m->shadow) markshadowbatch(b.batch, b.visible);
     }
 }
 
@@ -708,10 +729,13 @@ int batcheddynamicmodelbounds(int mask, vec &bbmin, vec &bbmax)
 
 void rendershadowmodelbatches(bool dynmodel)
 {
-    loopv(batches)
+    loopv(shadowbatches)
     {
-        modelbatch &b = batches[i];
-        if(!b.m->shadow || (!dynmodel && (!(b.flags&MDL_MAPMODEL) || b.m->animated()))) continue;
+        int batchidx = shadowbatches[i];
+        if(!batches.inrange(batchidx)) continue;
+        modelbatch &b = batches[batchidx];
+        if(!(b.shadowmask&(1<<shadowside)) || !b.m->shadow || (!dynmodel && (!(b.flags&MDL_MAPMODEL) || b.m->animated()))) continue;
+
         bool rendered = false;
         for(int j = b.batched; j >= 0;)
         {
