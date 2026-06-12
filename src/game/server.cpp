@@ -130,7 +130,6 @@ namespace server
         int state, editstate;
         int lastdeath, deadflush, lastspawn, lifesequence;
         int lastshot;
-        int lastability[NUMABILITIES];
         projectilestate<8> projs, grenades;
         int killstreak, frags, flags, deaths, teamkills, shotdamage, damage;
         int lasttimeplayed, timeplayed;
@@ -141,7 +140,6 @@ namespace server
 
         servstate() : state(CS_DEAD), editstate(CS_DEAD), lifesequence(0), lastBurnerClientNum(-1), lastBurnerToken(0)
         {
-            loopi(NUMABILITIES) lastability[i] = -1;
         }
 
         bool isalive(int gamemillis)
@@ -178,7 +176,7 @@ namespace server
             lastspawn = -1;
             lastshot = 0;
             inwater = false;
-            loopi(NUMABILITIES) lastability[i] = -1;
+            abilities.resetFull();
             afterburnatk = 0;
             lastBurnerClientNum = -1;
             lastBurnerToken = 0;
@@ -2905,7 +2903,7 @@ namespace server
                 {
                     loopi(NUMABILITIES)
                     {
-                        if(!ci->state.abilityready[i] && gamemillis - ci->state.lastability[i] >= classes[ci->character].abilities[i].cooldown) ci->state.abilityready[i] = true;
+                        if(!ci->state.abilities.isReady[i] && gamemillis - ci->state.abilities.lastAbility[i] >= classes[ci->character].abilities[i].cooldown) ci->state.abilities.isReady[i] = true;
                         if(ci->state.abilitymillis[i]) ci->state.abilitymillis[i] = max(ci->state.abilitymillis[i]-curtime, 0);
                     }
                 }
@@ -3995,7 +3993,7 @@ namespace server
                     if(handleinvalidabilityrequest(cq, "ability unavailable")) return;
                     break;
                 }
-                if(!cq->state.abilityready[abilityId])
+                if(!cq->state.abilities.isReady[abilityId])
                 {
                     if(handleinvalidabilityrequest(cq, "ability on cooldown")) return;
                     break;
@@ -4009,8 +4007,8 @@ namespace server
                 }
 
                 cq->state.mana -= abilityInfo.manacost;
-                cq->state.abilityready[abilityId] = false;
-                cq->state.lastability[abilityId] = gamemillis;
+                cq->state.abilities.isReady[abilityId] = false;
+                cq->state.abilities.lastAbility[abilityId] = gamemillis;
                 cq->state.abilitymillis[abilityId] = abilityInfo.duration;
                 cq->invalidabilityreqs = 0;
                 cq->lastinvalidabilityreq = 0;

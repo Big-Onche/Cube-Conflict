@@ -490,6 +490,30 @@ static const struct armourInfo { const char *name; int absorb, max; } armours[NU
 
 extern int currentIdenticalWeapon;
 
+struct AbilityRuntimeState
+{
+    int lastAbility[NUMABILITIES];
+    int lastRequest;
+    bool isReady[NUMABILITIES];
+
+    AbilityRuntimeState()
+    {
+        resetFull();
+    }
+
+    void resetFull()
+    {
+        loopi(NUMABILITIES) lastAbility[i] = -1;
+        resetSpawn();
+    }
+
+    void resetSpawn()
+    {
+        lastRequest = 0;
+        loopi(NUMABILITIES) isReady[i] = true;
+    }
+};
+
 // inherited by gameent and server clients
 struct gamestate
 {
@@ -497,7 +521,7 @@ struct gamestate
     int health, maxhealth, mana;
     int armour, armourtype;
     int boostmillis[NUMBOOSTS], abilitymillis[NUMABILITIES], vampiremillis;
-    bool abilityready[NUMABILITIES];
+    AbilityRuntimeState abilities;
     int afterburnmillis, afterburnatk;
     int gunselect, gunwait;
     int ammo[NUMGUNS];
@@ -509,11 +533,7 @@ struct gamestate
                   aiming(false), aitype(AI_NONE), skill(0)
     {
         loopi(NUMBOOSTS) boostmillis[i] = 0;
-        loopi(NUMABILITIES)
-        {
-            abilitymillis[i] = 0;
-            abilityready[i] = true;
-        }
+        loopi(NUMABILITIES) abilitymillis[i] = 0;
         loopi(NUMGUNS) ammo[i] = 0;
     }
 
@@ -656,11 +676,8 @@ struct gamestate
         armour = 0;
         armourtype = A_WOOD;
         loopi(NUMBOOSTS) boostmillis[i] = 0;
-        loopi(NUMABILITIES)
-        {
-            abilitymillis[i] = 0;
-            abilityready[i] = true;
-        }
+        loopi(NUMABILITIES) abilitymillis[i] = 0;
+        abilities.resetSpawn();
         vampiremillis = 0;
         afterburnmillis = 0;
         afterburnatk = 0;
@@ -1172,7 +1189,6 @@ struct gameent : dynent, gamestate
     DamageHistory damageHistory;
     MapHazardState hazards;
 
-    int lastability[3], lastabilityrequest;
     SoundState sound;
     bool shieldbroken;
     bool isConnected;
@@ -1193,13 +1209,12 @@ struct gameent : dynent, gamestate
                 lasttaunt(0),
                 pickups(), stats(),
                 edit(NULL), interp(), damageHistory(), hazards(),
-                lastabilityrequest(0), sound(), shieldbroken(false),
+                sound(), shieldbroken(false),
                 isConnected(false),
                 team(0), playermodel(-1), playercolor(0), skin{0, 0, 0}, character(0), level(0),
                 skeletonSize(0.0f), graveSize(0.0f), ai(NULL), ownernum(-1), lastnode(-1), afterburner(NULL),
                 muzzle(-1, -1, -1), weed(-1, -1, -1), balles(-1, -1, -1)
     {
-        loopi(3) lastability[i] = -1;
         name[0] = info[0] = 0;
         respawn();
     }
@@ -1271,8 +1286,7 @@ private:
 
     void resetAbilityRuntime()
     {
-        lastabilityrequest = 0;
-        loopi(3) abilityready[i] = true;
+        abilities.resetSpawn();
     }
 
 public:

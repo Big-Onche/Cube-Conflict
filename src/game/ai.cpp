@@ -447,7 +447,7 @@ namespace ai
 
     bool canRequestAbility(gameent *d)
     {
-        return totalmillis - d->lastabilityrequest > 100;
+        return totalmillis - d->abilities.lastRequest > 100;
     }
 
     void create(gameent *d)

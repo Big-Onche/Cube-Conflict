@@ -106,21 +106,21 @@ namespace game
     void launchAbility(gameent *d, int ability, int millis)
     {
         d->mana -= classes[d->character].abilities[ability].manacost;
-        d->abilityready[ability] = false;
+        d->abilities.isReady[ability] = false;
         d->abilitymillis[ability] = millis;
-        d->lastability[ability] = totalmillis;
+        d->abilities.lastAbility[ability] = totalmillis;
         abilityEffect(d, ability);
         if(d==player1) updateStat(1, STAT_ABILITES);
     }
 
     void requestAbility(gameent *d, int ability) //abilities commands
     {
-        if(!d->abilityready[ability] || d->mana < classes[d->character].abilities[ability].manacost || !canLaunchAbility(d, ability)) //check for game vars (client sided)
+        if(!d->abilities.isReady[ability] || d->mana < classes[d->character].abilities[ability].manacost || !canLaunchAbility(d, ability)) //check for game vars (client sided)
         {
             if(d==player1) playSound(S_SORTIMPOSSIBLE);
             return;
         }
-        d->lastabilityrequest = totalmillis;
+        d->abilities.lastRequest = totalmillis;
         addmsg(N_REQABILITY, "rci", d, ability); //server sided game vars check
     }
 
@@ -152,10 +152,10 @@ namespace game
 
         loopi(NUMABILITIES)
         {
-            if(totalmillis-d->lastability[i] >= classes[d->character].abilities[i].cooldown && !d->abilityready[i]) // ability rearm
+            if(totalmillis-d->abilities.lastAbility[i] >= classes[d->character].abilities[i].cooldown && !d->abilities.isReady[i]) // ability rearm
             {
                 if(d==hudplayer()) playSound(S_SORTPRET);
-                d->abilityready[i] = true;
+                d->abilities.isReady[i] = true;
             }
 
             if(!hasAbilityEnabled(d, i)) continue; // no need to go further if ability no enabled
