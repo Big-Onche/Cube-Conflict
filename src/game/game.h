@@ -1241,11 +1241,31 @@ struct GameplayProfile
     }
 };
 
+struct NetworkState
+{
+    int clientNum;
+    int privilege;
+    int lastUpdate;
+    int plag;
+    int ping;
+    bool isConnected;
+
+    NetworkState()
+        : clientNum(-1),
+          privilege(PRIV_NONE),
+          lastUpdate(0),
+          plag(0),
+          ping(0),
+          isConnected(false)
+    {
+    }
+};
+
 struct gameent : dynent, gamestate
 {
     size_t entityId, lastkillerId;
     int weight;                         // affects the effectiveness of hitpush
-    int clientnum, privilege, lastupdate, plag, ping;
+    NetworkState net;
     int lifesequence;                   // sequence id for each respawn, used in damage test
     int respawned, lastspawn, suicided;
     int lastpain;
@@ -1264,13 +1284,12 @@ struct gameent : dynent, gamestate
 
     SoundState sound;
     bool shieldbroken;
-    bool isConnected;
 
     ai::aiinfo *ai;
     int ownernum, lastnode;
     gameent *afterburner;
 
-    gameent() : entityId(entitiesIds::getNewId()), lastkillerId(SIZE_MAX), weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0),
+    gameent() : entityId(entitiesIds::getNewId()), lastkillerId(SIZE_MAX), weight(100), net(),
                 lifesequence(0), respawned(-1), lastspawn(0), suicided(-1), lastpain(0),
                 action(),
                 curdamage(0), lastcurdamage(0), curdamagecolor(0xFFFFFF), lastfootstep(0),
@@ -1278,7 +1297,6 @@ struct gameent : dynent, gamestate
                 pickups(), stats(),
                 edit(NULL), damageHistory(), hazards(), info(), render(), gameplay(),
                 sound(), shieldbroken(false),
-                isConnected(false),
                 ai(NULL), ownernum(-1), lastnode(-1), afterburner(NULL)
     {
         respawn();

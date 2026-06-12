@@ -18,7 +18,7 @@ namespace game
     {
         if(!ragdollmillis || (!ragdollfade && lastmillis > d->lastpain + ragdollmillis)) return;
         gameent *r = new gameent(*d);
-        r->lastupdate = ragdollfade && lastmillis > d->lastpain + max(ragdollmillis - ragdollfade, 0) ? lastmillis - max(ragdollmillis - ragdollfade, 0) : d->lastpain;
+        r->net.lastUpdate = ragdollfade && lastmillis > d->lastpain + max(ragdollmillis - ragdollfade, 0) ? lastmillis - max(ragdollmillis - ragdollfade, 0) : d->lastpain;
         r->edit = NULL;
         r->ai = NULL;
         curGraves.add(r);
@@ -35,7 +35,7 @@ namespace game
         loopv(curGraves)
         {
             gameent *d = curGraves[i];
-            if(lastmillis > d->lastupdate + ragdollmillis)
+            if(lastmillis > d->net.lastUpdate + ragdollmillis)
             {
                 delete curGraves.remove(i--);
                 continue;
@@ -149,7 +149,7 @@ namespace game
     void changedplayermodel()
     {
         if(!smiley[playermodel]) { conoutf(CON_ERROR, "\f3%s", readstr("Console_Shop_SmileyNotOwned")); playSound(S_ERROR, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH); playermodel = 0; return; }
-        if(player1->clientnum < 0) player1->render.model = playermodel;
+        if(player1->net.clientNum < 0) player1->render.model = playermodel;
         if(player1->ragdoll) cleanGrave(player1);
         loopv(curGraves)
         {
@@ -177,7 +177,7 @@ namespace game
 
     void changedplayercolor()
     {
-        if(player1->clientnum < 0) player1->render.color = playercolor | (playercolorazul<<5) | (playercolorrojo<<10);
+        if(player1->net.clientNum < 0) player1->render.color = playercolor | (playercolorazul<<5) | (playercolorrojo<<10);
     }
 
     void syncplayer()
@@ -702,7 +702,7 @@ namespace game
         {
             gameent *d = curGraves[i];
             float fade = 1.0f;
-            if(ragdollmillis && ragdollfade) fade -= clamp(float(lastmillis - (d->lastupdate + max(ragdollmillis - ragdollfade, 0)))/min(ragdollmillis, ragdollfade), 0.0f, 1.0f);
+            if(ragdollmillis && ragdollfade) fade -= clamp(float(lastmillis - (d->net.lastUpdate + max(ragdollmillis - ragdollfade, 0)))/min(ragdollmillis, ragdollfade), 0.0f, 1.0f);
             renderGrave(d, fade);
         }
 

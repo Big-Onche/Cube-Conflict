@@ -709,8 +709,8 @@ struct captureclientmode : clientmode
 			loopi(numdynents()) if((e = (gameent *)iterdynents(i)) && !e->ai && e->state == CS_ALIVE && isteam(d->gameplay.team, e->gameplay.team))
 			{ // try to guess what non ai are doing
 				vec ep = e->feetpos();
-				if(targets.find(e->clientnum) < 0 && ep.squaredist(f.o) <= (CAPTURERADIUS*CAPTURERADIUS))
-					targets.add(e->clientnum);
+				if(targets.find(e->net.clientNum) < 0 && ep.squaredist(f.o) <= (CAPTURERADIUS*CAPTURERADIUS))
+					targets.add(e->net.clientNum);
 			}
             const bool attacktarget = targets.empty() && (!f.owner || f.owner!=d->gameplay.team || f.enemy);
             if(m_regencapture && needregen && isenemy && hassafebase) continue;
@@ -760,8 +760,8 @@ struct captureclientmode : clientmode
             loopi(numdynents()) if((e = (gameent *)iterdynents(i)) && !e->ai && e->state == CS_ALIVE && isteam(d->gameplay.team, e->gameplay.team))
             { // try to guess what non ai are doing
                 vec ep = e->feetpos();
-                if(targets.find(e->clientnum) < 0 && (ep.squaredist(f.o) <= (CAPTURERADIUS*CAPTURERADIUS*4)))
-                    targets.add(e->clientnum);
+                if(targets.find(e->net.clientNum) < 0 && (ep.squaredist(f.o) <= (CAPTURERADIUS*CAPTURERADIUS*4)))
+                    targets.add(e->net.clientNum);
             }
             if(!targets.empty())
             {
@@ -1178,7 +1178,7 @@ case N_BASEINFO:
 case N_SCOREBASE:
 {
     int ocn = getint(p), score = getint(p);
-    gameent *o = ocn==player1->clientnum ? player1 : newclient(ocn);
+    gameent *o = ocn==player1->net.clientNum ? player1 : newclient(ocn);
     if(o && m_capture) capturemode.cnbasescore(o, score);
     break;
 }
@@ -1186,7 +1186,7 @@ case N_SCOREBASE:
 case N_BASEREGEN:
 {
     int rcn = getint(p), health = getint(p), armour = getint(p), mana = getint(p), ammotype = getint(p), ammo = getint(p);
-    gameent *regen = rcn==player1->clientnum ? player1 : getclient(rcn);
+    gameent *regen = rcn==player1->net.clientNum ? player1 : getclient(rcn);
     if(regen && m_capture)
     {
         vec regenPos = (regen == hudplayer() ? vec(0, 0, 0) : regen->o);
@@ -1236,7 +1236,7 @@ case N_BASESCORE:
 case N_REPAMMO:
 {
     int rcn = getint(p), ammotype = getint(p);
-    gameent *r = rcn==player1->clientnum ? player1 : getclient(rcn);
+    gameent *r = rcn==player1->net.clientNum ? player1 : getclient(rcn);
     if(r && m_capture) capturemode.receiveammo(r, ammotype);
     break;
 }

@@ -1704,7 +1704,7 @@ void recomputecamera(int campostag)
         if(game::hudplayer()->state == CS_DEAD && lastmillis > game::hudplayer()->lastpain + 1500 && !game::hassuicided && spectatekiller)
         {
             killer = game::getLastKiller(game::hudplayer());
-            if(killer && killer->isConnected)
+            if(killer && killer->net.isConnected)
             {
                 float t = clamp((lastmillis - game::hudplayer()->lastpain - 1500) / 500.f, 0.f, 1.f);
                 if(t < 1)
@@ -1724,7 +1724,7 @@ void recomputecamera(int campostag)
         }
         else animStarted = false;
 
-        bool killCamActive = killer && killer->isConnected;
+        bool killCamActive = killer && killer->net.isConnected;
         if(killCamActive) updateKillCamFraming(camera1, killer);
 
         vec dir, side, up;

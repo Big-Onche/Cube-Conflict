@@ -226,12 +226,12 @@ namespace entities
 
             if(d==hudplayer()) shakeScreen(1);
         }
-        if(local && d->clientnum >= 0)
+        if(local && d->net.clientNum >= 0)
         {
             sendposition(d);
             packetbuf p(32, ENET_PACKET_FLAG_RELIABLE);
             putint(p, N_TELEPORT);
-            putint(p, d->clientnum);
+            putint(p, d->net.clientNum);
             putint(p, tp);
             putint(p, td);
             sendclientpacket(p.finalize(), 0);
@@ -246,12 +246,12 @@ namespace entities
             extentity &e = *ents[jp];
             playSound(S_JUMPPAD, d==hudplayer() ? vec(0, 0, 0) : e.o, 150, 25);
         }
-        if(local && d->clientnum >= 0)
+        if(local && d->net.clientNum >= 0)
         {
             sendposition(d);
             packetbuf p(16, ENET_PACKET_FLAG_RELIABLE);
             putint(p, N_JUMPPAD);
-            putint(p, d->clientnum);
+            putint(p, d->net.clientNum);
             putint(p, jp);
             sendclientpacket(p.finalize(), 0);
             flushclient();

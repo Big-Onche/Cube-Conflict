@@ -119,7 +119,7 @@ namespace game
         vector<gameent *> &p = *team < 0 ? spectators : teamplayers[*team];
         loopv(p)
         {
-            loopiter(id, stack, p[i]->clientnum);
+            loopiter(id, stack, p[i]->net.clientNum);
             execute(body);
         }
         loopend(id, stack);
@@ -142,9 +142,9 @@ namespace game
         if(d)
         {
             int status = d->state!=CS_DEAD ? 0xFFFFFF : 0x7D6666;
-            if(d->privilege)
+            if(d->net.privilege)
             {
-                status = d->privilege>=PRIV_ADMIN ? 0xFF8000 : 0x40FF80;
+                status = d->net.privilege>=PRIV_ADMIN ? 0xFF8000 : 0x40FF80;
                 if(d->state==CS_DEAD) status = (status>>1)&0x7F7F7F;
             }
             intret(status);
@@ -157,7 +157,7 @@ namespace game
         if(d && d != player1)
         {
             if(d->state==CS_LAGGED) result("LAG");
-            else intret(d->plag);
+            else intret(d->net.plag);
         }
     });
 
@@ -167,22 +167,22 @@ namespace game
         if(d)
         {
             if(!showpj && d->state==CS_LAGGED) result("LAG");
-            else intret(d->ping);
+            else intret(d->net.ping);
         }
     });
 
     ICOMMAND(scoreboardshowfrags, "", (), intret(cmode && cmode->hidefrags() && hidefrags ? 0 : 1));
-    ICOMMAND(scoreboardshowclientnum, "", (), intret(showclientnum || player1->privilege>=PRIV_MASTER ? 1 : 0));
+    ICOMMAND(scoreboardshowclientnum, "", (), intret(showclientnum || player1->net.privilege>=PRIV_MASTER ? 1 : 0));
     ICOMMAND(scoreboardmultiplayer, "", (), intret(multiplayer(false) || demoplayback ? 1 : 0));
 
     ICOMMAND(scoreboardhighlight, "i", (int *cn),
-        intret(*cn == player1->clientnum && highlightscore && (multiplayer(false) || demoplayback || players.length() > 1) ? 0x808080 : 0));
+        intret(*cn == player1->net.clientNum && highlightscore && (multiplayer(false) || demoplayback || players.length() > 1) ? 0x808080 : 0));
 
     ICOMMAND(scoreboardservinfo, "", (),
     {
         if(!showservinfo) return;
         const ENetAddress *address = connectedpeer();
-        if(address && player1->clientnum >= 0)
+        if(address && player1->net.clientNum >= 0)
         {
             if(servdesc[0]) result(localizedservdesc());
             else

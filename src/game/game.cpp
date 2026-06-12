@@ -85,7 +85,7 @@ namespace game
     ICOMMAND(getfollow, "", (),
     {
         gameent *f = followingplayer();
-        intret(f ? f->clientnum : -1);
+        intret(f ? f->net.clientNum : -1);
     });
 
     void stopfollowing()
@@ -101,7 +101,7 @@ namespace game
         {
             if(player1->state != CS_SPECTATOR) return;
             cn = parseplayer(arg);
-            if(cn == player1->clientnum) cn = -1;
+            if(cn == player1->net.clientNum) cn = -1;
         }
         if(cn < 0 && (following < 0 || specmode)) return;
         following = cn;
@@ -508,7 +508,7 @@ namespace game
             if(d == player1 || d->ai) continue;
             if(d->state==CS_DEAD && d->ragdoll) moveGrave(d);
 
-            const int lagtime = totalmillis-d->lastupdate;
+            const int lagtime = totalmillis-d->net.lastUpdate;
             if(!lagtime || intermission) continue;
             else if(lagtime>1000 && d->state==CS_ALIVE)
             {
@@ -598,7 +598,7 @@ namespace game
     void updateworld()        // main game update loop
     {
         if(!maptime) { maptime = lastmillis; maprealtime = totalmillis; return; }
-        if(!curtime) { gets2c(); if(player1->clientnum>=0) c2sinfo(); return; }
+        if(!curtime) { gets2c(); if(player1->net.clientNum>=0) c2sinfo(); return; }
 
         physicsframe();
         ai::navigate();
@@ -659,7 +659,7 @@ namespace game
                 else if(cmode) cmode->checkitems(player1);
             }
         }
-        if(player1->clientnum>=0) c2sinfo();   // do this last, to reduce the effective frame lag
+        if(player1->net.clientNum>=0) c2sinfo();   // do this last, to reduce the effective frame lag
     }
 
     float proximityscore(float x, float lower, float upper)
@@ -1108,13 +1108,13 @@ namespace game
             return NULL;
         }
 
-        if(cn == player1->clientnum) return player1;
+        if(cn == player1->net.clientNum) return player1;
 
         while(cn >= clients.length()) clients.add(NULL);
         if(!clients[cn])
         {
             gameent *d = new gameent;
-            d->clientnum = cn;
+            d->net.clientNum = cn;
             clients[cn] = d;
             players.add(d);
         }
@@ -1123,7 +1123,7 @@ namespace game
 
     gameent *getclient(int cn)   // ensure valid entity
     {
-        if(cn == player1->clientnum) return player1;
+        if(cn == player1->net.clientNum) return player1;
         return clients.inrange(cn) ? clients[cn] : NULL;
     }
 
@@ -1151,7 +1151,7 @@ namespace game
         if(d)
         {
             if(notify && d->info.name[0]) conoutf("\f7%s\f4 %s", colorname(d), readstr("GameMessage_Left"));
-            d->isConnected = false;
+            d->net.isConnected = false;
             removeweapons(d);
             removetrackedparticles(d);
             removetrackeddynlights(d);
@@ -1389,7 +1389,7 @@ namespace game
         {
             if(dup)
             {
-                if(d->aitype == AI_NONE) return tempformatstring("\fs%s%s \f5(%d)\fr", color, name, d->clientnum);
+                if(d->aitype == AI_NONE) return tempformatstring("\fs%s%s \f5(%d)\fr", color, name, d->net.clientNum);
                 else return tempformatstring("\fs%s[%s]%s\fr", color, readstr("Misc_Bot"), name);
             }
             return tempformatstring("\fs%s%s\fr", color, name);

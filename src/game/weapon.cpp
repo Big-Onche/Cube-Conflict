@@ -367,7 +367,7 @@ namespace game
         else
         {
             hitmsg &h = hits.add();
-            h.target = f->clientnum;
+            h.target = f->net.clientNum;
             h.lifesequence = f->lifesequence;
             h.info1 = int(info1*DMF);
             h.info2 = info2;
@@ -1099,7 +1099,7 @@ namespace game
     void updateweapons(int curtime)
     {
         projectiles::update(curtime);
-        if(player1->clientnum>=0 && player1->state==CS_ALIVE) updateAttacks(player1, worldpos); // only shoot when connected to server
+        if(player1->net.clientNum>=0 && player1->state==CS_ALIVE) updateAttacks(player1, worldpos); // only shoot when connected to server
         bouncers::update(curtime); // need to do this after the player shoots so bouncers don't end up inside player's BB next frame
         gameent *following = followingplayer();
         if(!following) following = player1;

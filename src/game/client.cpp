@@ -198,21 +198,21 @@ namespace game
     {
         int num = isdigit(team[0]) ? parseint(team) : teamnumber(team);
         if(!validteam(num)) return;
-        if(player1->clientnum < 0) player1->gameplay.team = num;
+        if(player1->net.clientNum < 0) player1->gameplay.team = num;
         else addmsg(N_SWITCHTEAM, "ri", num);
     }
     void printteam()
     {
-        if((player1->clientnum >= 0 && !m_teammode) || !validteam(player1->gameplay.team)) conoutf("%s", readstr("Console_User_NoTeam"));
+        if((player1->net.clientNum >= 0 && !m_teammode) || !validteam(player1->gameplay.team)) conoutf("%s", readstr("Console_User_NoTeam"));
         else conoutf("%s \fs%s%s\fr", readstr("Console_User_YourTeamIs"), teamtextcode[player1->gameplay.team], readstr("Team_Names", player1->gameplay.team));
     }
     ICOMMAND(team, "sN", (char *s, int *numargs),
     {
         if(*numargs > 0) switchteam(s);
         else if(!*numargs) printteam();
-        else if((player1->clientnum < 0 || m_teammode) && validteam(player1->gameplay.team)) result(tempformatstring("\fs%s%s\fr", teamtextcode[player1->gameplay.team], readstr("Team_Names", player1->gameplay.team)));
+        else if((player1->net.clientNum < 0 || m_teammode) && validteam(player1->gameplay.team)) result(tempformatstring("\fs%s%s\fr", teamtextcode[player1->gameplay.team], readstr("Team_Names", player1->gameplay.team)));
     });
-    ICOMMAND(getteam, "", (), intret((player1->clientnum < 0 || m_teammode) && validteam(player1->gameplay.team) ? player1->gameplay.team : 0));
+    ICOMMAND(getteam, "", (), intret((player1->net.clientNum < 0 || m_teammode) && validteam(player1->gameplay.team) ? player1->gameplay.team : 0));
     ICOMMAND(getteamname, "i", (int *num), result(teamname(*num)));
 
     struct authkey
@@ -300,7 +300,7 @@ namespace game
     {
         if(!connected) return;
         sendcrc = true;
-        if(player1->state!=CS_SPECTATOR || player1->privilege || !remote) senditemstoserver = true;
+        if(player1->state!=CS_SPECTATOR || player1->net.privilege || !remote) senditemstoserver = true;
     }
 
     void writeclientinfo(stream *f)
@@ -397,21 +397,21 @@ namespace game
     bool ismaster(int cn)
     {
         gameent *d = getclient(cn);
-        return d && d->privilege >= PRIV_MASTER;
+        return d && d->net.privilege >= PRIV_MASTER;
     }
     ICOMMAND(ismaster, "i", (int *cn), intret(ismaster(*cn) ? 1 : 0));
 
     bool isauth(int cn)
     {
         gameent *d = getclient(cn);
-        return d && d->privilege >= PRIV_AUTH;
+        return d && d->net.privilege >= PRIV_AUTH;
     }
     ICOMMAND(isauth, "i", (int *cn), intret(isauth(*cn) ? 1 : 0));
 
     bool isadmin(int cn)
     {
         gameent *d = getclient(cn);
-        return d && d->privilege >= PRIV_ADMIN;
+        return d && d->net.privilege >= PRIV_ADMIN;
     }
     ICOMMAND(isadmin, "i", (int *cn), intret(isadmin(*cn) ? 1 : 0));
 
@@ -453,20 +453,20 @@ namespace game
         int n = strtol(arg, &end, 10);
         if(*arg && !*end)
         {
-            if(n!=player1->clientnum && !clients.inrange(n)) return -1;
+            if(n!=player1->net.clientNum && !clients.inrange(n)) return -1;
             return n;
         }
         // try case sensitive first
         loopv(players)
         {
             gameent *o = players[i];
-            if(!strcmp(arg, o->info.name)) return o->clientnum;
+            if(!strcmp(arg, o->info.name)) return o->net.clientNum;
         }
         // nothing found, try case insensitive
         loopv(players)
         {
             gameent *o = players[i];
-            if(cubecaseequal(o->info.name, arg)) return o->clientnum;
+            if(cubecaseequal(o->info.name, arg)) return o->net.clientNum;
         }
         int len = strlen(arg);
         if(playersearch && len >= playersearch)
@@ -475,18 +475,18 @@ namespace game
             loopv(players)
             {
                 gameent *o = players[i];
-                if(cubecaseequal(o->info.name, arg, len)) return o->clientnum;
+                if(cubecaseequal(o->info.name, arg, len)) return o->net.clientNum;
             }
             // try case insensitive substring
             loopv(players)
             {
                 gameent *o = players[i];
-                if(cubecasefind(o->info.name, arg)) return o->clientnum;
+                if(cubecasefind(o->info.name, arg)) return o->net.clientNum;
             }
         }
         return -1;
     }
-    ICOMMAND(getclientnum, "s", (char *name), intret(name[0] ? parseplayer(name) : player1->clientnum));
+    ICOMMAND(getclientnum, "s", (char *name), intret(name[0] ? parseplayer(name) : player1->net.clientNum));
 
     void listclients(bool local, bool bots)
     {
@@ -495,13 +495,13 @@ namespace game
         int numclients = 0;
         if(local && connected)
         {
-            formatstring(cn, "%d", player1->clientnum);
+            formatstring(cn, "%d", player1->net.clientNum);
             buf.put(cn, strlen(cn));
             numclients++;
         }
         loopv(clients) if(clients[i] && (bots || clients[i]->aitype == AI_NONE))
         {
-            formatstring(cn, "%d", clients[i]->clientnum);
+            formatstring(cn, "%d", clients[i]->net.clientNum);
             if(numclients++) buf.add(' ');
             buf.put(cn, strlen(cn));
         }
@@ -519,7 +519,7 @@ namespace game
     void kick(const char *victim, const char *reason)
     {
         int vn = parseplayer(victim);
-        if(vn>=0 && vn!=player1->clientnum) addmsg(N_KICK, "ris", vn, reason);
+        if(vn>=0 && vn!=player1->net.clientNum) addmsg(N_KICK, "ris", vn, reason);
     }
     COMMAND(kick, "ss");
 
@@ -527,7 +527,7 @@ namespace game
     {
         authkey *a = findauthkey(desc);
         int vn = parseplayer(victim);
-        if(a && vn>=0 && vn!=player1->clientnum)
+        if(a && vn>=0 && vn!=player1->net.clientNum)
         {
             a->lastauth = lastmillis;
             addmsg(N_AUTHKICK, "rssis", a->desc, a->name, vn, reason);
@@ -573,9 +573,9 @@ namespace game
 
     void hashpwd(const char *pwd)
     {
-        if(player1->clientnum<0) return;
+        if(player1->net.clientNum<0) return;
         string hash;
-        server::hashpassword(player1->clientnum, sessionid, pwd, hash);
+        server::hashpassword(player1->net.clientNum, sessionid, pwd, hash);
         result(hash);
     }
     COMMAND(hashpwd, "s");
@@ -583,7 +583,7 @@ namespace game
     void setmaster(const char *arg, const char *who)
     {
         if(!arg[0]) return;
-        int val = 1, cn = player1->clientnum;
+        int val = 1, cn = player1->net.clientNum;
         if(who[0])
         {
             cn = parseplayer(who);
@@ -593,8 +593,8 @@ namespace game
         if(!arg[1] && isdigit(arg[0])) val = parseint(arg);
         else
         {
-            if(cn != player1->clientnum) return;
-            server::hashpassword(player1->clientnum, sessionid, arg, hash);
+            if(cn != player1->net.clientNum) return;
+            server::hashpassword(player1->net.clientNum, sessionid, arg, hash);
         }
         addmsg(N_SETMASTER, "riis", cn, val, hash);
     }
@@ -618,7 +618,7 @@ namespace game
 
     void togglespectator(int val, const char *who)
     {
-        int i = who[0] ? parseplayer(who) : player1->clientnum;
+        int i = who[0] ? parseplayer(who) : player1->net.clientNum;
         if(i>=0) addmsg(N_SPECTATOR, "rii", i, val);
     }
     ICOMMAND(spectator, "is", (int *val, char *who), togglespectator(*val, who));
@@ -685,7 +685,7 @@ namespace game
             server::forcemap(name, mode);
             if(!isconnected()) localconnect();
         }
-        else if(player1->state!=CS_SPECTATOR || player1->privilege) addmsg(N_MAPVOTE, "rsi", name, mode);
+        else if(player1->state!=CS_SPECTATOR || player1->net.privilege) addmsg(N_MAPVOTE, "rsi", name, mode);
     }
 
     void changemap(const char *name)
@@ -936,7 +936,7 @@ namespace game
                 case 'c':
                 {
                     gameent *d = va_arg(args, gameent *);
-                    mcn = !d || d == player1 ? -1 : d->clientnum;
+                    mcn = !d || d == player1 ? -1 : d->net.clientNum;
                     break;
                 }
                 case 'v':
@@ -1002,7 +1002,7 @@ namespace game
         if(remote) stopfollowing();
         ignores.setsize(0);
         connected = remote = false;
-        player1->clientnum = -1;
+        player1->net.clientNum = -1;
         servdesc[0] = '\0';
         servauth[0] = '\0';
         if(editmode) toggleedit();
@@ -1015,7 +1015,7 @@ namespace game
         player1->shieldbroken = true;
         player1->lifesequence = 0;
         player1->state = CS_ALIVE;
-        player1->privilege = PRIV_NONE;
+        player1->net.privilege = PRIV_NONE;
         sendcrc = senditemstoserver = false;
         demoplayback = false;
         gamepaused = false;
@@ -1041,7 +1041,7 @@ namespace game
     static void sendposition(gameent *d, packetbuf &q)
     {
         putint(q, N_POS);
-        putuint(q, d->clientnum);
+        putuint(q, d->net.clientNum);
         // 3 bits phys state, 1 bit life sequence, 2 bits move, 2 bits strafe
         uchar physstate = d->physstate | ((d->lifesequence&1)<<3) | ((d->move&3)<<4) | ((d->strafe&3)<<6);
         q.put(physstate);
@@ -1182,7 +1182,7 @@ namespace game
         string hash = "";
         if(connectpass[0])
         {
-            server::hashpassword(player1->clientnum, sessionid, connectpass, hash);
+            server::hashpassword(player1->net.clientNum, sessionid, connectpass, hash);
             memset(connectpass, 0, sizeof(connectpass));
         }
         sendstring(hash, p);
@@ -1218,11 +1218,11 @@ namespace game
             if(fx<fy) d->o.y += dy<0 ? r-fy : -(r-fy);  // push aside
             else      d->o.x += dx<0 ? r-fx : -(r-fx);
         }
-        int lagtime = totalmillis-d->lastupdate;
+        int lagtime = totalmillis-d->net.lastUpdate;
         if(lagtime)
         {
-            if(d->state!=CS_SPAWNING && d->lastupdate) d->plag = (d->plag*5+lagtime)/6;
-            d->lastupdate = totalmillis;
+            if(d->state!=CS_SPAWNING && d->net.lastUpdate) d->net.plag = (d->net.plag*5+lagtime)/6;
+            d->net.lastUpdate = totalmillis;
         }
     }
 
@@ -1383,7 +1383,7 @@ namespace game
                     return;
                 }
                 sessionid = getint(p);
-                player1->clientnum = mycn;      // we are now connected
+                player1->net.clientNum = mycn;      // we are now connected
                 if(getint(p) > 0) conoutf("this server is password protected");
                 getstring(servdesc, p, sizeof(servdesc));
                 getstring(servauth, p, sizeof(servauth));
@@ -1452,7 +1452,7 @@ namespace game
                 if(!d) return;
                 getstring(text, p);
                 filtertext(text, text, true, true);
-                if(isignored(d->clientnum)) break;
+                if(isignored(d->net.clientNum)) break;
                 if(d->state!=CS_DEAD && d->state!=CS_SPECTATOR)
                     particles::text(d->abovehead(), text, PART_TEXT, 2000, 0x32FF64, 4.0f, -8);
                 conoutf(CON_CHAT, "%s\f4:\f7 %s", teamcolorname(d, NULL), text);
@@ -1465,7 +1465,7 @@ namespace game
                 gameent *t = getclient(tcn);
                 getstring(text, p);
                 filtertext(text, text, true, true);
-                if(!t || isignored(t->clientnum)) break;
+                if(!t || isignored(t->net.clientNum)) break;
                 int team = validteam(t->gameplay.team) ? t->gameplay.team : 0;
                 if(t->state!=CS_DEAD && t->state!=CS_SPECTATOR)
                     particles::text(t->abovehead(), text, PART_TEXT, 2000, teamtextcolor[team], 4.0f, -8);
@@ -1494,7 +1494,7 @@ namespace game
             case N_FORCEDEATH:
             {
                 int cn = getint(p);
-                gameent *d = cn==player1->clientnum ? player1 : newclient(cn);
+                gameent *d = cn==player1->net.clientNum ? player1 : newclient(cn);
                 if(!d) break;
                 if(d==player1)
                 {
@@ -1537,7 +1537,7 @@ namespace game
                 if(!text[0]) copystring(text, readstr("Misc_BadUsername"));
                 if(d->info.name[0])          // already connected
                 {
-                    if(strcmp(d->info.name, text) && !isignored(d->clientnum))
+                    if(strcmp(d->info.name, text) && !isignored(d->net.clientNum))
                         conoutf("%s %s %s", colorname(d), readstr("Console_User_ChangedName"), colorname(d, text));
                 }
                 else                    // new client
@@ -1553,7 +1553,7 @@ namespace game
                 loopi(NUMSKINS) d->render.skin[i] = getint(p);
                 d->gameplay.classId = getint(p);
                 d->gameplay.level = getint(p);
-                d->isConnected = true;
+                d->net.isConnected = true;
                 break;
             }
 
@@ -1565,7 +1565,7 @@ namespace game
                     if(!text[0]) formatstring(text, "%s", executestr("createNickname $FALSE"));
                     if(strcmp(text, d->info.name))
                     {
-                        if(!isignored(d->clientnum)) conoutf("%s %s %s", colorname(d), readstr("Console_User_ChangedName"), colorname(d, text));
+                        if(!isignored(d->net.clientNum)) conoutf("%s %s %s", colorname(d), readstr("Console_User_ChangedName"), colorname(d, text));
                         copystring(d->info.name, text, MAXNAMELEN+1);
                     }
                 }
@@ -1613,13 +1613,13 @@ namespace game
                 if(!g || !r) break;
 
                 stat ? r->mana = val : r->health = val;
-                if(!stat && r->clientnum == g->clientnum) regularflame(PART_HEALTH, r->o, 15, 2, 0xFFFFFF, 1, 1.f);
+                if(!stat && r->net.clientNum == g->net.clientNum) regularflame(PART_HEALTH, r->o, 15, 2, 0xFFFFFF, 1, 1.f);
                 else
                 {
                     vec effectpos(r->o);
                     effectpos.sub(g->o);
                     effectpos.normalize().mul(1300.0f);
-                    particle_flying_flare(g->o, r->clientnum==g->clientnum ? g->o : effectpos, 400, stat ? PART_MANA : PART_HEALTH, 0xFFFFFF, 1.2f+rnd(2), 100);
+                    particle_flying_flare(g->o, r->net.clientNum==g->net.clientNum ? g->o : effectpos, 400, stat ? PART_MANA : PART_HEALTH, 0xFFFFFF, 1.2f+rnd(2), 100);
                 }
 
                 if(g==player1)
@@ -1911,7 +1911,7 @@ namespace game
                 {
                     int cn = getint(p);
                     if(p.overread() || cn<0) break;
-                    gameent *d = (cn == player1->clientnum ? player1 : newclient(cn));
+                    gameent *d = (cn == player1->net.clientNum ? player1 : newclient(cn));
                     parsestate(d, p, true);
                 }
                 break;
@@ -2082,13 +2082,13 @@ namespace game
             }
 
             case N_PONG:
-                addmsg(N_CLIENTPING, "i", player1->ping = (player1->ping*5+totalmillis-getint(p))/6);
-                curping = player1->ping;
+                addmsg(N_CLIENTPING, "i", player1->net.ping = (player1->net.ping*5+totalmillis-getint(p))/6);
+                curping = player1->net.ping;
                 break;
 
             case N_CLIENTPING:
                 if(!d) return;
-                d->ping = getint(p);
+                d->net.ping = getint(p);
                 break;
 
             case N_TIMEUP:
@@ -2125,7 +2125,7 @@ namespace game
                 }
                 else clearclients();
                 demoplayback = on!=0;
-                player1->clientnum = getint(p);
+                player1->net.clientNum = getint(p);
                 gamepaused = false;
                 checkfollow();
                 execident(on ? "demostart" : "demoend");
@@ -2135,12 +2135,12 @@ namespace game
             case N_CURRENTMASTER:
             {
                 int mm = getint(p), mn;
-                loopv(players) players[i]->privilege = PRIV_NONE;
+                loopv(players) players[i]->net.privilege = PRIV_NONE;
                 while((mn = getint(p))>=0 && !p.overread())
                 {
-                    gameent *m = mn==player1->clientnum ? player1 : newclient(mn);
+                    gameent *m = mn==player1->net.clientNum ? player1 : newclient(mn);
                     int priv = getint(p);
-                    if(m) m->privilege = priv;
+                    if(m) m->net.privilege = priv;
                 }
                 if(mm != mastermode)
                 {
@@ -2182,10 +2182,10 @@ namespace game
             {
                 int sn = getint(p), val = getint(p);
                 gameent *s;
-                if(sn==player1->clientnum)
+                if(sn==player1->net.clientNum)
                 {
                     s = player1;
-                    if(val && remote && !player1->privilege) senditemstoserver = false;
+                    if(val && remote && !player1->net.privilege) senditemstoserver = false;
                 }
                 else s = newclient(sn);
                 if(!s) return;
@@ -2399,7 +2399,7 @@ namespace game
     {
         if(remote)
         {
-            if(player1->privilege<PRIV_MASTER) return;
+            if(player1->net.privilege<PRIV_MASTER) return;
             addmsg(N_STOPDEMO, "r");
         }
         else server::stopdemo();
@@ -2408,14 +2408,14 @@ namespace game
 
     void recorddemo(int val)
     {
-        if(remote && player1->privilege<PRIV_MASTER) return;
+        if(remote && player1->net.privilege<PRIV_MASTER) return;
         addmsg(N_RECORDDEMO, "ri", val);
     }
     ICOMMAND(recorddemo, "i", (int *val), recorddemo(*val));
 
     void cleardemos(int val)
     {
-        if(remote && player1->privilege<PRIV_MASTER) return;
+        if(remote && player1->net.privilege<PRIV_MASTER) return;
         addmsg(N_CLEARDEMOS, "ri", val);
     }
     ICOMMAND(cleardemos, "i", (int *val), cleardemos(*val));
@@ -2448,7 +2448,7 @@ namespace game
 
     void sendmap()
     {
-        if(!m_edit || (player1->state==CS_SPECTATOR && remote && !player1->privilege)) { conoutf(CON_ERROR, "\"sendmap\" only works in coop edit mode"); return; }
+        if(!m_edit || (player1->state==CS_SPECTATOR && remote && !player1->net.privilege)) { conoutf(CON_ERROR, "\"sendmap\" only works in coop edit mode"); return; }
         conoutf("sending map...");
         defformatstring(mname, "sendmap_%d", lastmillis);
         save_world(mname, true);

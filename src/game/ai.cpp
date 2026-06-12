@@ -486,7 +486,7 @@ namespace ai
 
         d->gameplay.team = validteam(team) ? team : 0;
         d->ownernum = ocn;
-        d->plag = 0;
+        d->net.plag = 0;
         d->skill = d->gameplay.level = sk;
         d->render.color = col;
         d->gameplay.classId = chooserandomtraits(classe, T_CLASSE);
@@ -494,10 +494,10 @@ namespace ai
         d->render.skin[SKIN_CAPE] = chooserandomtraits(cape, T_CAPE);
         d->render.skin[SKIN_GRAVE] = chooserandomtraits(grave, T_GRAVE);
         d->render.skin[SKIN_TAUNT] = chooserandomtraits(taunt, T_TAUNT);
-        d->isConnected = true;
+        d->net.isConnected = true;
 
         if(resetthisguy) removeweapons(d);
-        if(d->ownernum >= 0 && player1->clientnum == d->ownernum)
+        if(d->ownernum >= 0 && player1->net.clientNum == d->ownernum)
         {
             create(d);
             if(d->ai)
@@ -557,7 +557,7 @@ namespace ai
         {
             gameent *e = players[i];
             if(!e) continue;
-            const int clientnum = e->clientnum;
+            const int clientnum = e->net.clientNum;
             if((uint)clientnum < MAXCLIENTS)
             {
                 uint &word = seen[clientnum >> 5];
@@ -572,7 +572,7 @@ namespace ai
             if(state >= 0 && b.type != state) continue;
             if(target >= 0 && b.target != target) continue;
             if(targtype >=0 && b.targtype != targtype) continue;
-            targets.add(e->clientnum);
+            targets.add(e->net.clientNum);
         }
         return !targets.empty();
     }
@@ -787,13 +787,13 @@ namespace ai
             if(pursue)
             {
                 if((b.targtype != AI_T_AFFINITY || !(pursue%2)) && makeroute(d, b, e->lastnode))
-                    d->ai->switchstate(b, AI_S_PURSUE, AI_T_PLAYER, e->clientnum);
+                    d->ai->switchstate(b, AI_S_PURSUE, AI_T_PLAYER, e->net.clientNum);
                 else if(pursue >= 3) return false; // can't pursue
             }
-            if(d->ai->enemy != e->clientnum)
+            if(d->ai->enemy != e->net.clientNum)
             {
                 d->ai->enemyseen = d->ai->enemymillis = lastmillis;
-                d->ai->enemy = e->clientnum;
+                d->ai->enemy = e->net.clientNum;
             }
             return true;
         }
@@ -907,7 +907,7 @@ namespace ai
             interest &n = interests.add();
             n.state = AI_S_DEFEND;
             n.node = e->lastnode;
-            n.target = e->clientnum;
+            n.target = e->net.clientNum;
             n.targtype = AI_T_PLAYER;
             n.score = e->o.squaredist(d->o) * scoreScale;
         }
@@ -1107,7 +1107,7 @@ namespace ai
             gameent *other = players[i];
             if(!other) continue;
 
-            const int clientnum = other->clientnum;
+            const int clientnum = other->net.clientNum;
             if((uint)clientnum < MAXCLIENTS)
             {
                 uint &word = seen[clientnum >> 5];
@@ -1120,7 +1120,7 @@ namespace ai
             if(other == d || !other->ai || other->state != CS_ALIVE) continue;
 
             aistate &ob = other->ai->getstate();
-            if(ob.type != AI_S_DEFEND || ob.targtype != AI_T_PLAYER || ob.target != d->clientnum) continue;
+            if(ob.type != AI_S_DEFEND || ob.targtype != AI_T_PLAYER || ob.target != d->net.clientNum) continue;
 
             gameent *t = getclient(clientnum);
             if(!t || !t->ai || !canmove(t) || !targetable(t, e)) continue;

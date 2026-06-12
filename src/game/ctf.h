@@ -501,7 +501,7 @@ struct ctfclientmode : clientmode
             {
                 flag &f = flags[i];
                 f.version = version;
-                f.owner = owner>=0 ? (owner==player1->clientnum ? player1 : newclient(owner)) : NULL;
+                f.owner = owner>=0 ? (owner==player1->net.clientNum ? player1 : newclient(owner)) : NULL;
                 f.owntime = owner>=0 ? lastmillis : 0;
                 f.droptime = dropped ? lastmillis : 0;
                 f.droploc = dropped ? droploc : f.spawnloc;
@@ -836,8 +836,8 @@ struct ctfclientmode : clientmode
                 loopi(numdynents()) if((e = (gameent *)iterdynents(i)) && !e->ai && e->state == CS_ALIVE && isteam(d->gameplay.team, e->gameplay.team))
                 { // try to guess what non ai are doing
                     vec ep = e->feetpos();
-                    if(targets.find(e->clientnum) < 0 && (ep.squaredist(f.pos()) <= (FLAGRADIUS*FLAGRADIUS*4) || f.owner == e))
-                        targets.add(e->clientnum);
+                    if(targets.find(e->net.clientNum) < 0 && (ep.squaredist(f.pos()) <= (FLAGRADIUS*FLAGRADIUS*4) || f.owner == e))
+                        targets.add(e->net.clientNum);
                 }
                 if(!targets.empty())
                 {
@@ -939,7 +939,7 @@ case N_DROPFLAG:
     int ocn = getint(p), flag = getint(p), version = getint(p);
     vec droploc;
     loopk(3) droploc[k] = getint(p)/DMF;
-    gameent *o = ocn==player1->clientnum ? player1 : newclient(ocn);
+    gameent *o = ocn==player1->net.clientNum ? player1 : newclient(ocn);
     if(o && m_ctf) ctfmode.dropflag(o, flag, version, droploc);
     break;
 }
@@ -947,7 +947,7 @@ case N_DROPFLAG:
 case N_SCOREFLAG:
 {
     int ocn = getint(p), relayflag = getint(p), relayversion = getint(p), goalflag = getint(p), goalversion = getint(p), team = getint(p), score = getint(p), oflags = getint(p);
-    gameent *o = ocn==player1->clientnum ? player1 : newclient(ocn);
+    gameent *o = ocn==player1->net.clientNum ? player1 : newclient(ocn);
     if(o && m_ctf) ctfmode.scoreflag(o, relayflag, relayversion, goalflag, goalversion, team, score, oflags);
     break;
 }
@@ -955,7 +955,7 @@ case N_SCOREFLAG:
 case N_RETURNFLAG:
 {
     int ocn = getint(p), flag = getint(p), version = getint(p);
-    gameent *o = ocn==player1->clientnum ? player1 : newclient(ocn);
+    gameent *o = ocn==player1->net.clientNum ? player1 : newclient(ocn);
     if(o && m_ctf) ctfmode.returnflag(o, flag, version);
     break;
 }
@@ -963,7 +963,7 @@ case N_RETURNFLAG:
 case N_TAKEFLAG:
 {
     int ocn = getint(p), flag = getint(p), version = getint(p);
-    gameent *o = ocn==player1->clientnum ? player1 : newclient(ocn);
+    gameent *o = ocn==player1->net.clientNum ? player1 : newclient(ocn);
     if(o && m_ctf) ctfmode.takeflag(o, flag, version);
     break;
 }
