@@ -144,8 +144,8 @@ namespace game
         intret(cmode ? cmode->respawnwait(followingplayer(player1)) : respawnwait(followingplayer(player1)));
     );
 
-    ICOMMAND(hudoutofmap, "", (), intret(hudplayer()->isOutOfMap));
-    ICOMMAND(hudoutofmaptimer, "", (), floatret(roundOne(((hudplayer()->lastOutOfMap + 9900) - totalmillis) / 1000.f)) );
+    ICOMMAND(hudoutofmap, "", (), intret(hudplayer()->hazards.isOutOfMap));
+    ICOMMAND(hudoutofmaptimer, "", (), floatret(roundOne(((hudplayer()->hazards.lastOutOfMap + 9900) - totalmillis) / 1000.f)) );
 
     ICOMMAND(blink, "i", (int *blinkSpeed), intret(*blinkSpeed > 0 && (totalmillis % *blinkSpeed+1 < *blinkSpeed/2)));
 

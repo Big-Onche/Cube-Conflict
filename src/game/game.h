@@ -1132,6 +1132,27 @@ struct SoundState
     }
 };
 
+struct MapHazardState
+{
+    int lastLavaTouch;
+    int lastFireCheck;
+    int lastOutOfMap;
+    bool isOutOfMap;
+
+    MapHazardState()
+    {
+        reset();
+    }
+
+    void reset()
+    {
+        lastLavaTouch = 0;
+        lastFireCheck = 0;
+        lastOutOfMap = 0;
+        isOutOfMap = false;
+    }
+};
+
 struct gameent : dynent, gamestate
 {
     size_t entityId, lastkillerId;
@@ -1143,18 +1164,17 @@ struct gameent : dynent, gamestate
     ActionState action;
     int curdamage, lastcurdamage, curdamagecolor;
     int lastfootstep;
-    int lasttaunt, lastlavatouch, lastfirecheck;
+    int lasttaunt;
     PickupState pickups;
     MatchStats stats;
     editinfo *edit;
     InterpolationState interp;
     DamageHistory damageHistory;
+    MapHazardState hazards;
 
     int lastability[3], lastabilityrequest;
     SoundState sound;
     bool shieldbroken;
-    int lastOutOfMap;
-    bool isOutOfMap;
     bool isConnected;
 
     string name, info;
@@ -1170,11 +1190,11 @@ struct gameent : dynent, gamestate
                 lifesequence(0), respawned(-1), lastspawn(0), suicided(-1), lastpain(0),
                 action(),
                 curdamage(0), lastcurdamage(0), curdamagecolor(0xFFFFFF), lastfootstep(0),
-                lasttaunt(0), lastlavatouch(0), lastfirecheck(0),
+                lasttaunt(0),
                 pickups(), stats(),
-                edit(NULL), interp(), damageHistory(),
+                edit(NULL), interp(), damageHistory(), hazards(),
                 lastabilityrequest(0), sound(), shieldbroken(false),
-                lastOutOfMap(0), isOutOfMap(false), isConnected(false),
+                isConnected(false),
                 team(0), playermodel(-1), playercolor(0), skin{0, 0, 0}, character(0), level(0),
                 skeletonSize(0.0f), graveSize(0.0f), ai(NULL), ownernum(-1), lastnode(-1), afterburner(NULL),
                 muzzle(-1, -1, -1), weed(-1, -1, -1), balles(-1, -1, -1)
@@ -1246,10 +1266,7 @@ private:
 
     void resetMapRuntime()
     {
-        lastlavatouch = 0;
-        lastfirecheck = 0;
-        lastOutOfMap = 0;
-        isOutOfMap = false;
+        hazards.reset();
     }
 
     void resetAbilityRuntime()

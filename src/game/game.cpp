@@ -400,9 +400,9 @@ namespace game
 
     void checkFire(gameent *d)
     {
-        if(!deadlylava && lookupmaterial(d->feetpos())&MAT_LAVA && lastmillis - d->lastlavatouch > 250)
+        if(!deadlylava && lookupmaterial(d->feetpos())&MAT_LAVA && lastmillis - d->hazards.lastLavaTouch > 250)
         {
-            d->lastlavatouch = lastmillis;
+            d->hazards.lastLavaTouch = lastmillis;
             addmsg(N_LAVATOUCH, "rc", d);
             d->falling = vec(0, 0, 0);
             d->physstate = PHYS_FALL;
@@ -410,15 +410,15 @@ namespace game
             d->vel.z = max(d->vel.z, 300.f);
         }
 
-        if(d->lastfirecheck == lastmillis) return;
-        if(d->afterburnmillis && lastmillis - d->lastfirecheck < 500) return;
+        if(d->hazards.lastFireCheck == lastmillis) return;
+        if(d->afterburnmillis && lastmillis - d->hazards.lastFireCheck < 500) return;
 
         if(touchingFire(d))
         {
             if(localAfterburn()) doLocalAfterburn(d, d, ATK_FLAMETHROWER);
             else addmsg(N_FIRETOUCH, "rc", d);
         }
-        d->lastfirecheck = lastmillis;
+        d->hazards.lastFireCheck = lastmillis;
     }
 
     static void updateLocalAfterburn(int time, gameent *d)
@@ -483,12 +483,12 @@ namespace game
 
                 if((lookupmaterial(d->o) & MAT_GAMECLIP) == MAT_GAMECLIP)
                 {
-                    if(!d->isOutOfMap)
+                    if(!d->hazards.isOutOfMap)
                     {
-                        d->lastOutOfMap = totalmillis;
-                        d->isOutOfMap = true;
+                        d->hazards.lastOutOfMap = totalmillis;
+                        d->hazards.isOutOfMap = true;
                     }
-                    if(d->lastOutOfMap < totalmillis - 9900)
+                    if(d->hazards.lastOutOfMap < totalmillis - 9900)
                     {
                         suicide(d);
                         if(d==hudplayer())
@@ -500,7 +500,7 @@ namespace game
                         }
                     }
                 }
-                else d->isOutOfMap = false;
+                else d->hazards.isOutOfMap = false;
             }
 
             if(totalmillis - d->lastcurdamage > 500) d->curdamage = 0;
@@ -839,7 +839,7 @@ namespace game
         loopi(NUMBOOSTS) d->boostmillis[i] = 0;
         d->stats.streak = 0;
         clearAfterburn(d);
-        d->isOutOfMap = false;
+        d->hazards.isOutOfMap = false;
         loopi(NUMABILITIES) d->abilitymillis[i] = 0;
 
         // death gfx effects
