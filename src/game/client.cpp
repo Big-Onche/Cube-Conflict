@@ -1406,7 +1406,7 @@ namespace game
                 if(!demopacket)
                 {
                     gamepaused = val;
-                    player1->attacking = ACT_IDLE;
+                    player1->action.attackAction = ACT_IDLE;
                 }
                 if(val)
                 {
@@ -1730,9 +1730,9 @@ namespace game
                 if(gun!=GUN_POWERARMOR) s->gunselect = gun;
                 if(!m_muninfinie || server::noInfiniteAmmo(atk)) s->ammo[gun] -= attacks[atk].use;
                 s->gunwait = attacks[atk].attackdelay;
-                int prevaction = s->lastaction;
-                s->lastaction = lastmillis;
-                s->lastattack = atk;
+                int prevaction = s->action.lastAttack;
+                s->action.lastAttack = lastmillis;
+                s->action.lastAttackType = atk;
                 shoteffects(atk, from, to, s, false, id, prevaction);
                 break;
             }

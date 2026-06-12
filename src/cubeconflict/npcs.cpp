@@ -341,8 +341,8 @@ namespace game
                 case M_AIMING:                      // this state is the delay between wanting to shoot and actually firing
                     if(trigger<lastmillis)
                     {
-                        lastaction = 0;
-                        attacking = true;
+                        action.lastAttack = 0;
+                        action.attackAction = ACT_SHOOT;
                         updateAttacks(this, attacktarget, true);
                         transition(M_ATTACKING, friendly ? 0 : 1, 600, 0);
                         if(friendly) transition(M_NEUTRAL, 1, 100, 200);
@@ -919,9 +919,9 @@ namespace game
 
                     if((anim&ANIM_INDEX)==ANIM_IDLE && (anim>>ANIM_SECONDARY)&ANIM_INDEX) anim >>= ANIM_SECONDARY;
                     if(!((anim>>ANIM_SECONDARY)&ANIM_INDEX)) anim |= (ANIM_IDLE|ANIM_LOOP)<<ANIM_SECONDARY;
-                    if(m.lastaction && m.lastattack >= 0 && lastmillis < m.lastaction+250)
+                    if(m.action.lastAttack && m.action.lastAttackType >= 0 && lastmillis < m.action.lastAttack+250)
                     {
-                        basetime = m.lastaction;
+                        basetime = m.action.lastAttack;
                         anim = ANIM_MELEE;
                     }
 
@@ -929,10 +929,10 @@ namespace game
                     if(validgun(m.gunselect))
                     {
                         int vanim = ANIM_VWEP_IDLE|ANIM_LOOP, vtime = 0;
-                        if(m.lastaction && m.lastattack >= 0 && attacks[m.lastattack].gun==m.gunselect && lastmillis < m.lastaction+250)
+                        if(m.action.lastAttack && m.action.lastAttackType >= 0 && attacks[m.action.lastAttackType].gun==m.gunselect && lastmillis < m.action.lastAttack+250)
                         {
                             vanim = ANIM_VWEP_SHOOT;
-                            vtime = m.lastaction;
+                            vtime = m.action.lastAttack;
                         }
 
                         a[ai++] = modelattach("tag_weapon", getWeaponDir(m.gunselect), vanim, vtime);

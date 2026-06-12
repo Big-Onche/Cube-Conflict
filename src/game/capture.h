@@ -1199,10 +1199,10 @@ case N_BASEREGEN:
         switch(regen->armourtype)
         {
             case A_WOOD:
-                if(regen->armour>=750) { regen->armourtype=A_IRON; playSound(S_ITEMBFER, regenPos, 300, 50); regen->lastshieldswitch = lastmillis; }
+                if(regen->armour>=750) { regen->armourtype=A_IRON; playSound(S_ITEMBFER, regenPos, 300, 50); regen->action.lastShield = lastmillis; }
                 break;
             case A_IRON:
-                if(regen->armour>=1250) { regen->armourtype=A_GOLD; playSound(S_ITEMBOR, regenPos, 300, 50); regen->lastshieldswitch = lastmillis; }
+                if(regen->armour>=1250) { regen->armourtype=A_GOLD; playSound(S_ITEMBOR, regenPos, 300, 50); regen->action.lastShield = lastmillis; }
                 break;
             case A_GOLD:
                 if(regen->armour>=2000) { regen->armourtype=A_POWERARMOR; regen->ammo[GUN_POWERARMOR] = 1; playSound(S_ITEMARMOUR, regenPos, 300, 50); }

@@ -1079,6 +1079,42 @@ struct PickupState
     }
 };
 
+struct ActionState
+{
+    int lastAttack;       // Timestamp of the last completed attack
+    int lastAttackType;   // Attack id
+    int lastGun;          // Timestamp of the last weapon switch
+    int lastShield;       // Timestamp of the last shield tier change
+    int lastShrooms;      // Timestamp when shrooms was picked up
+    int attackAction;     // Current requested attack action
+    int gunAcceleration;  // Wind-up/slowdown counter for accelerating guns
+    bool wasAttacking;    // Previous-frame attack input state
+
+    ActionState()
+        : lastAttack(0),
+          lastAttackType(-1),
+          lastGun(0),
+          lastShield(0),
+          lastShrooms(0),
+          attackAction(ACT_IDLE),
+          gunAcceleration(0),
+          wasAttacking(false)
+    {
+    }
+
+    void reset(int millis)
+    {
+        lastAttack = 0;
+        lastAttackType = -1;
+        lastGun = millis;
+        lastShield = millis;
+        lastShrooms = 0;
+        attackAction = ACT_IDLE;
+        gunAcceleration = 0;
+        wasAttacking = false;
+    }
+};
+
 struct gameent : dynent, gamestate
 {
     size_t entityId, lastkillerId;
@@ -1087,9 +1123,8 @@ struct gameent : dynent, gamestate
     int lifesequence;                   // sequence id for each respawn, used in damage test
     int respawned, lastspawn, suicided;
     int lastpain;
-    int lastaction, lastattack, lastgunselect, lastshieldswitch, lastshrooms;
+    ActionState action;
     int curdamage, lastcurdamage, curdamagecolor;
-    int attacking, gunaccel;
     int lastfootstep;
     int lasttaunt, lastlavatouch, lastfirecheck;
     PickupState pickups;
@@ -1102,7 +1137,7 @@ struct gameent : dynent, gamestate
     int attacksound; // 0 = no sound, 1 = close sound, 2 = close + far sound
     bool shieldbroken, powerarmorsound;
     int lastOutOfMap;
-    bool wasAttacking, isOutOfMap;
+    bool isOutOfMap;
     bool isConnected;
 
     string name, info;
@@ -1116,13 +1151,13 @@ struct gameent : dynent, gamestate
 
     gameent() : entityId(entitiesIds::getNewId()), lastkillerId(SIZE_MAX), weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0),
                 lifesequence(0), respawned(-1), lastspawn(0), suicided(-1), lastpain(0),
-                lastaction(0), lastattack(-1), lastgunselect(0), lastshieldswitch(0), lastshrooms(0),
-                curdamage(0), lastcurdamage(0), curdamagecolor(0xFFFFFF), attacking(ACT_IDLE), gunaccel(0), lastfootstep(0),
+                action(),
+                curdamage(0), lastcurdamage(0), curdamagecolor(0xFFFFFF), lastfootstep(0),
                 lasttaunt(0), lastlavatouch(0), lastfirecheck(0),
                 pickups(), stats(),
                 edit(NULL), interp(), damageHistory(),
                 lastabilityrequest(0), attacksound(0), shieldbroken(false), powerarmorsound(false),
-                lastOutOfMap(0), wasAttacking(false), isOutOfMap(false), isConnected(false),
+                lastOutOfMap(0), isOutOfMap(false), isConnected(false),
                 team(0), playermodel(-1), playercolor(0), skin{0, 0, 0}, character(0), level(0),
                 skeletonSize(0.0f), graveSize(0.0f), ai(NULL), ownernum(-1), lastnode(-1), afterburner(NULL),
                 muzzle(-1, -1, -1), weed(-1, -1, -1), balles(-1, -1, -1)
@@ -1162,14 +1197,7 @@ private:
 
     void resetActionRuntime()
     {
-        lastaction = 0;
-        lastattack = -1;
-        lastgunselect = lastmillis;
-        lastshieldswitch = lastmillis;
-        lastshrooms = 0;
-        attacking = ACT_IDLE;
-        gunaccel = 0;
-        wasAttacking = false;
+        action.reset(lastmillis);
     }
 
     void resetPickupRuntime()

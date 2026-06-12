@@ -190,14 +190,14 @@ namespace entities
         ents[n]->clearspawned();
         if(!d) return;
 
-        if(type==I_SHROOMS && !d->boostmillis[B_SHROOMS]) d->lastshrooms = lastmillis;
+        if(type==I_SHROOMS && !d->boostmillis[B_SHROOMS]) d->action.lastShrooms = lastmillis;
 
         d->pickupitem(type, d->character, d->abilitymillis[ABILITY_1], rndsweap);
 
         bool powerArmor = powerarmorpieces(type, d);
         if(type >= I_WOODSHIELD && type <= I_MAGNETSHIELD)
         {
-            if(!powerArmor) d->lastshieldswitch = lastmillis;
+            if(!powerArmor) d->action.lastShield = lastmillis;
             d->shieldbroken = false;
         }
         playSound(powerArmor ? S_ITEMPIECEROBOTIQUE : itemstats[type-I_RAIL].sound, d==hudplayer() ? vec(0, 0, 0) : d->o, 300, 50, NULL, d->entityId);

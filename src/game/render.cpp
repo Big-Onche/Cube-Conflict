@@ -350,7 +350,7 @@ namespace game
 
         /////////////////////////// Animations and gfx ///////////////////////////
         bool powerArmor = d->hasPowerArmor();
-        int anim = ANIM_IDLE|ANIM_LOOP, lastaction = d->lastaction;
+        int anim = ANIM_IDLE|ANIM_LOOP, lastaction = d->action.lastAttack;
         if(animoverride) anim = (animoverride<0 ? ANIM_ALL : animoverride)|ANIM_LOOP;
 
         if(d->state==CS_EDITING || d->state==CS_SPECTATOR) anim = ANIM_EDIT|ANIM_LOOP;
@@ -513,7 +513,7 @@ namespace game
         switch(d->gunselect)
         {
             case GUN_FLAMETHROWER:
-                if(lastmillis - d->lastaction < 1000 && !d->attacking)
+                if(lastmillis - d->action.lastAttack < 1000 && !d->action.attackAction)
                 {
                     if(rndevent(85)) particle_splash(PART_SMOKE, 1, 700, d->muzzle, 0x282828, 0.75f, 10, -15, 6, hasShrooms());
                     if(rndevent(95))
@@ -773,12 +773,12 @@ namespace game
 
     int gunSwitchAnim(gameent *d)
     {
-        return switchAnim(d->lastgunselect);
+        return switchAnim(d->action.lastGun);
     }
 
     int shieldSwitchAnim(gameent *d)
     {
-        return switchAnim(d->lastshieldswitch);
+        return switchAnim(d->action.lastShield);
     }
 
     static inline float gethudmodelalpha()
@@ -895,7 +895,7 @@ namespace game
 
             int anim = ANIM_GUN_IDLE|ANIM_LOOP, basetime = 0;
 
-            if(isAttacking(d)) { anim = ANIM_GUN_SHOOT; basetime = d->lastaction; }
+            if(isAttacking(d)) { anim = ANIM_GUN_SHOOT; basetime = d->action.lastAttack; }
 
             drawhudmodel(d, anim, basetime, alpha);
         }

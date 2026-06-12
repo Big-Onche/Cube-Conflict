@@ -241,7 +241,7 @@ namespace ai
                     if(e->o.squaredist(d->o) > skillDist * skillDist) return false;
                     break;
                 case C_SPY:
-                    if(e->attacking==ACT_IDLE && e->physstate!=PHYS_FALL)
+                    if(e->action.attackAction==ACT_IDLE && e->physstate!=PHYS_FALL)
                         return false;
             }
         }
@@ -295,7 +295,7 @@ namespace ai
                 case GUN_HYDRA:
                 case GUN_S_CAMPER:
                     return hasammo;
-                default: return hasammo && lastmillis - d->lastaction >= d->gunwait;
+                default: return hasammo && lastmillis - d->action.lastAttack >= d->gunwait;
             }
         }
         return false;
@@ -1763,7 +1763,7 @@ namespace ai
                         case GUN_S_CAMPER:
                             break;
                         default:
-                            gunready = lastmillis - d->lastaction >= d->gunwait;
+                            gunready = lastmillis - d->action.lastAttack >= d->gunwait;
                             break;
                     }
                     if(hasammo && gunready && attackrange(d, atk, enemyDistSq) && targetable(d, e) && hastarget(d, atk, b, e, yaw, pitch, aimDistSq))
@@ -1772,7 +1772,7 @@ namespace ai
                         d->aiming = aimStop > 0.f && enemyDistSq < aimStop*aimStop ? false : true;
 
                         d->jumping = ((gun==GUN_FIREWORKS || gun==GUN_SMAW || gun==GUN_S_NUKE || gun==GUN_S_ROCKETS) && !idle);
-                        d->attacking = ACT_SHOOT;
+                        d->action.attackAction = ACT_SHOOT;
                         d->ai->lastaction = lastmillis;
                         result = 3;
                     }
@@ -2074,7 +2074,7 @@ namespace ai
                 moveplayer(d, 10, false);
             }
         }
-        d->attacking = ACT_IDLE;
+        d->action.attackAction = ACT_IDLE;
         d->jumping = false;
     }
 

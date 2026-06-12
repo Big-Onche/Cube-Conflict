@@ -1763,7 +1763,7 @@ namespace postfx
 
     float shroomsFadeIn()
     {
-        int shroomsTime = lastmillis - game::hudplayer()->lastshrooms;
+        int shroomsTime = lastmillis - game::hudplayer()->action.lastShrooms;
         return min(1.f, shroomsTime / shroomsFade);
     }
 

@@ -257,7 +257,7 @@ namespace game
 
     bool isAttacking(gameent *d)
     {
-        return d->lastaction && d->lastattack >= 0 && attacks[d->lastattack].gun == d->gunselect && lastmillis-d->lastaction<attacks[d->lastattack].attackdelay + 50;
+        return d->action.lastAttack && d->action.lastAttackType >= 0 && attacks[d->action.lastAttackType].gun == d->gunselect && lastmillis-d->action.lastAttack<attacks[d->action.lastAttackType].attackdelay + 50;
     }
 
     void updatePlayersSounds(gameent *d)
@@ -475,7 +475,7 @@ namespace game
 
                 if(d!=player1)
                 {
-                    if(lastmillis - d->lastaction >= d->gunwait) d->gunwait = 0;
+                    if(lastmillis - d->action.lastAttack >= d->gunwait) d->gunwait = 0;
                     if(kamikazeExploding(d)) { gunselect(GUN_KAMIKAZE, d); d->gunwait = 0; }
                     updatePlayersBoosts(curtime, d);
                     updateAbilitiesSkills(curtime, d);
@@ -614,7 +614,7 @@ namespace game
                 if(player1->hasRoids() && player1->boostmillis[B_EPO] && player1->boostmillis[B_JOINT] && player1->boostmillis[B_SHROOMS]) unlockAchievement(ACH_DEFONCE);
                 if(lookupmaterial(player1->o)==MAT_NOCLIP && !strcasecmp(getclientmap(), "moon")) unlockAchievement(ACH_SPAAACE);
                 if(player1->hasSuperWeapon() && player1->hasRoids() && player1->armour && player1->armourtype==A_POWERARMOR) unlockAchievement(ACH_ABUS);
-                if(player1->character==C_KAMIKAZE && !player1->ammo[GUN_KAMIKAZE] && player1->state==CS_ALIVE && lastmillis-player1->lastaction>500) unlockAchievement(ACH_SUICIDEFAIL);
+                if(player1->character==C_KAMIKAZE && !player1->ammo[GUN_KAMIKAZE] && player1->state==CS_ALIVE && lastmillis-player1->action.lastAttack>500) unlockAchievement(ACH_SUICIDEFAIL);
                 if(player1->boostmillis[B_EPO] && player1->character==C_JUNKIE) unlockAchievement(ACH_LANCEEPO);
             }
 
@@ -627,7 +627,7 @@ namespace game
             }
         }
 
-        postfx::updateShroomsEffect(hudplayer()->boostmillis[B_SHROOMS], hudplayer()->lastshrooms, hudplayer()->boostmillis[B_JOINT]);
+        postfx::updateShroomsEffect(hudplayer()->boostmillis[B_SHROOMS], hudplayer()->action.lastShrooms, hudplayer()->boostmillis[B_JOINT]);
         updateweapons(curtime);
         otherplayers(curtime);
         ai::update();
@@ -731,7 +731,7 @@ namespace game
     {
         if(player1->state==CS_DEAD)
         {
-            player1->attacking = ACT_IDLE;
+            player1->action.attackAction = ACT_IDLE;
             int wait = cmode ? cmode->respawnwait(player1) : 0;
             if(wait>0)
             {
@@ -752,7 +752,7 @@ namespace game
     void doaction(int act)
     {
         if(!connected || intermission || onFixedCamera(player1)) return;
-        if((player1->attacking = act) && attackspawn) respawn();
+        if((player1->action.attackAction = act) && attackspawn) respawn();
     }
 
     ICOMMAND(shoot, "D", (int *down), doaction(*down ? ACT_SHOOT : ACT_IDLE));
@@ -854,7 +854,7 @@ namespace game
         {
             disablezoom();
             cleardamagescreen();
-            d->attacking = ACT_IDLE;
+            d->action.attackAction = ACT_IDLE;
             postfx::updateMainFilter(postfx::FILTER_DEATH);
             d->roll = 0;
             playSound(S_DIE_P1, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH);
@@ -1028,7 +1028,7 @@ namespace game
         else
         {
             intermission = true;
-            player1->attacking = ACT_IDLE;
+            player1->action.attackAction = ACT_IDLE;
             if(cmode) cmode->gameover();
             int accuracy = (player1->stats.damage*100)/max(player1->stats.shots, 1);
             if(m_sp) spsummary(accuracy);

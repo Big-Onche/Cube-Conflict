@@ -30,7 +30,7 @@ namespace game
         if(d==player1 && gun != GUN_POWERARMOR && !shortcut) player1->pickups.lastWeapon = gun;
         addmsg(N_GUNSELECT, "rci", d, gun);
         playSound(attacks[gun-GUN_ELECTRIC].picksound, d==hudplayer() ? vec(0, 0, 0) : d->o, 200, 50, NULL, d->entityId);
-        d->lastgunselect = lastmillis;
+        d->action.lastGun = lastmillis;
         d->gunselect = gun;
     }
 
@@ -676,7 +676,7 @@ namespace game
                 projectiles::add(from, to, attacks[atk].projspeed, local, id, d, atk);
                 if(isHudPlayer)
                 {
-                    float recoilAccel = (hudplayer()->gunaccel ? (recoilReduce() * hudplayer()->gunaccel) : 1.f);
+                    float recoilAccel = (hudplayer()->action.gunAcceleration ? (recoilReduce() * hudplayer()->action.gunAcceleration) : 1.f);
                     float recoilAmount = (isGau ? 0.3f : 0.4f) / recoilAccel;
                     float deviationAmount = ((isGau ? 0.5f : 0.3f) / recoilAccel) * recoilSide(isGau ? 500 : 1250);
                     startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay * (isGau ? 10 : 3), vec(0, 0, 0), vec(0, 0, 0), vec(deviationAmount, recoilAmount, 0), vec(0, atk==ATK_AK47 ? 35 : 45, 0));
@@ -878,7 +878,7 @@ namespace game
     {
         if(owner->type!=ENT_PLAYER && owner->type!=ENT_AI) return;
         gameent *pl = (gameent *)owner;
-        if(pl->muzzle.x < 0 || pl->lastattack < 0 || attacks[pl->lastattack].gun != pl->gunselect) return;
+        if(pl->muzzle.x < 0 || pl->action.lastAttackType < 0 || attacks[pl->action.lastAttackType].gun != pl->gunselect) return;
         float dist = o.dist(d);
         o = pl->muzzle;
         if(dist <= 0) d = o;
@@ -894,7 +894,7 @@ namespace game
     {
         if(owner->type!=ENT_PLAYER && owner->type!=ENT_AI) return;
         gameent *pl = (gameent *)owner;
-        if(pl->muzzle.x < 0 || pl->lastattack < 0 || attacks[pl->lastattack].gun != pl->gunselect) return;
+        if(pl->muzzle.x < 0 || pl->action.lastAttackType < 0 || attacks[pl->action.lastAttackType].gun != pl->gunselect) return;
         o = pl->muzzle;
         hud = owner == followingplayer(player1) ? vec(pl->o).add(vec(0, 0, 2)) : pl->muzzle;
     }
@@ -991,20 +991,20 @@ namespace game
             }
         }
 
-        if(!d->attacking || lastmillis - d->lastgunselect < 50)
+        if(!d->action.attackAction || lastmillis - d->action.lastGun < 50)
         {
             switch(gun)
             {
-                case GUN_MINIGUN:   d->gunaccel = 12;   break;
-                case GUN_PLASMA:    d->gunaccel = 4;    break;
-                case GUN_S_ROCKETS: d->gunaccel = 3;    break;
-                default: d->gunaccel = 0;
+                case GUN_MINIGUN:   d->action.gunAcceleration = 12;   break;
+                case GUN_PLASMA:    d->action.gunAcceleration = 4;    break;
+                case GUN_S_ROCKETS: d->action.gunAcceleration = 3;    break;
+                default: d->action.gunAcceleration = 0;
             }
         }
 
-        if(gun == GUN_PLASMA) weaponDelay += d->gunaccel * 50;
-        else if (gun == GUN_S_ROCKETS) weaponDelay += d->gunaccel * 150;
-        else weaponDelay += d->gunaccel * 8;
+        if(gun == GUN_PLASMA) weaponDelay += d->action.gunAcceleration * 50;
+        else if (gun == GUN_S_ROCKETS) weaponDelay += d->action.gunAcceleration * 150;
+        else weaponDelay += d->action.gunAcceleration * 8;
 
         if(d != player1 && !specialAbility) weaponDelay += attacks[d->gunselect].attackdelay;
 
@@ -1018,7 +1018,7 @@ namespace game
     {
         bool specialAbility = (d->character==C_PRIEST && d->abilitymillis[ABILITY_3]) || d->boostmillis[B_SHROOMS];
         int gun = d->gunselect,
-            prevaction = d->lastaction,
+            prevaction = d->action.lastAttack,
             attacktime = lastmillis - prevaction;
 
         if(!validgun(gun)) return;
@@ -1029,24 +1029,24 @@ namespace game
         if(d->character == C_KAMIKAZE && kamikazeExploding(d))
         {
             gun = GUN_KAMIKAZE;
-            d->attacking = ACT_SHOOT;
+            d->action.attackAction = ACT_SHOOT;
         }
 
-        if(!d->attacking) return;
-        int act = d->attacking;
+        if(!d->action.attackAction) return;
+        int act = d->action.attackAction;
         if(act < 0 || act >= NUMACTS) return;
         int atk = guns[gun].attacks[act];
         if(!validatk(atk)) return;
 
-        if(d->gunaccel) d->gunaccel -= 1;
-        d->lastaction = lastmillis;
-        d->lastattack = atk;
+        if(d->action.gunAcceleration) d->action.gunAcceleration -= 1;
+        d->action.lastAttack = lastmillis;
+        d->action.lastAttackType = atk;
 
         if(!d->ammo[gun])
         {
             if(d==player1) msgsound(S_NOAMMO, d);
             d->gunwait = 500;
-            d->lastattack = -1;
+            d->action.lastAttackType = -1;
             weaponswitch(d);
             return;
         }
@@ -1087,7 +1087,7 @@ namespace game
         if(d->boostmillis[B_SHROOMS]) waitfactor *= d->character==C_JUNKIE ? 1.75f : 1.5f;
         d->gunwait = attacks[atk].attackdelay/waitfactor;
         d->stats.shots += (attacks[atk].damage*attacks[atk].rays) * (d->hasRoids() ? 1 : 2);
-        if(d==player1 && isSemiAutoGun(gun) && !specialAbility) d->attacking = ACT_IDLE;
+        if(d==player1 && isSemiAutoGun(gun) && !specialAbility) d->action.attackAction = ACT_IDLE;
     }
 
     void removeweapons(gameent *d)
