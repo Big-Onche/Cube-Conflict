@@ -1280,25 +1280,25 @@ namespace game
                 d->physstate = physstate&7;
                 updatephysstate(d);
                 updatepos(d);
-                if(smoothmove && d->interp.smoothMillis>=0 && oldpos.dist(d->o) < smoothdist)
+                if(smoothmove && d->render.smoothMillis>=0 && oldpos.dist(d->o) < smoothdist)
                 {
                     d->newpos = d->o;
-                    d->interp.newYaw = d->yaw;
-                    d->interp.newPitch = d->pitch;
-                    d->interp.newRoll = d->roll;
+                    d->render.newYaw = d->yaw;
+                    d->render.newPitch = d->pitch;
+                    d->render.newRoll = d->roll;
                     d->o = oldpos;
                     d->yaw = oldyaw;
                     d->pitch = oldpitch;
                     d->roll = oldroll;
                     (d->deltapos = oldpos).sub(d->newpos);
-                    d->interp.deltaYaw = oldyaw - d->interp.newYaw;
-                    if(d->interp.deltaYaw > 180) d->interp.deltaYaw -= 360;
-                    else if(d->interp.deltaYaw < -180) d->interp.deltaYaw += 360;
-                    d->interp.deltaPitch = oldpitch - d->interp.newPitch;
-                    d->interp.deltaRoll = oldroll - d->interp.newRoll;
-                    d->interp.smoothMillis = lastmillis;
+                    d->render.deltaYaw = oldyaw - d->render.newYaw;
+                    if(d->render.deltaYaw > 180) d->render.deltaYaw -= 360;
+                    else if(d->render.deltaYaw < -180) d->render.deltaYaw += 360;
+                    d->render.deltaPitch = oldpitch - d->render.newPitch;
+                    d->render.deltaRoll = oldroll - d->render.newRoll;
+                    d->render.smoothMillis = lastmillis;
                 }
-                else d->interp.smoothMillis = 0;
+                else d->render.smoothMillis = 0;
                 if(d->state==CS_LAGGED || d->state==CS_SPAWNING) d->state = CS_ALIVE;
                 break;
             }

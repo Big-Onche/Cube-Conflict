@@ -235,23 +235,23 @@ namespace game
     void predictplayer(gameent *d, bool move)
     {
         d->o = d->newpos;
-        d->yaw = d->interp.newYaw;
-        d->pitch = d->interp.newPitch;
-        d->roll = d->interp.newRoll;
+        d->yaw = d->render.newYaw;
+        d->pitch = d->render.newPitch;
+        d->roll = d->render.newRoll;
         if(move)
         {
             moveplayer(d, 1, false);
             d->newpos = d->o;
         }
-        float k = 1.0f - float(lastmillis - d->interp.smoothMillis)/smoothmove;
+        float k = 1.0f - float(lastmillis - d->render.smoothMillis)/smoothmove;
         if(k>0)
         {
             d->o.add(vec(d->deltapos).mul(k));
-            d->yaw += d->interp.deltaYaw*k;
+            d->yaw += d->render.deltaYaw*k;
             if(d->yaw<0) d->yaw += 360;
             else if(d->yaw>=360) d->yaw -= 360;
-            d->pitch += d->interp.deltaPitch*k;
-            d->roll += d->interp.deltaRoll*k;
+            d->pitch += d->render.deltaPitch*k;
+            d->roll += d->render.deltaRoll*k;
         }
     }
 
@@ -521,7 +521,7 @@ namespace game
             if(d->state==CS_ALIVE || d->state==CS_EDITING)
             {
                 crouchplayer(d, 10, false);
-                if(smoothmove && d->interp.smoothMillis>0) predictplayer(d, true);
+                if(smoothmove && d->render.smoothMillis>0) predictplayer(d, true);
                 else moveplayer(d, 1, false);
             }
             else if(d->state==CS_DEAD && !d->ragdoll && lastmillis-d->lastpain<2000) moveplayer(d, 1, true);
@@ -864,7 +864,7 @@ namespace game
         {
             d->move = d->strafe = 0;
             d->resetinterp();
-            d->interp.smoothMillis = 0;
+            d->render.smoothMillis = 0;
             playSound(S_DIE, d->o, 300, 50);
         }
     }

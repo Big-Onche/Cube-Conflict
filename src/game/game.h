@@ -1034,43 +1034,6 @@ struct MatchStats
     }
 };
 
-struct InterpolationState
-{
-    float deltaYaw;
-    float deltaPitch;
-    float deltaRoll;
-
-    float newYaw;
-    float newPitch;
-    float newRoll;
-
-    int smoothMillis;
-
-    InterpolationState()
-        : deltaYaw(0),
-          deltaPitch(0),
-          deltaRoll(0),
-          newYaw(0),
-          newPitch(0),
-          newRoll(0),
-          smoothMillis(-1)
-    {
-    }
-
-    void reset(float yaw, float pitch, float roll)
-    {
-        deltaYaw = 0;
-        deltaPitch = 0;
-        deltaRoll = 0;
-
-        newYaw = yaw;
-        newPitch = pitch;
-        newRoll = roll;
-
-        smoothMillis = -1;
-    }
-};
-
 struct PickupState
 {
     int lastType;       // Pickup type
@@ -1188,6 +1151,16 @@ struct PlayerInfo
 
 struct RenderState
 {
+    float deltaYaw;
+    float deltaPitch;
+    float deltaRoll;
+
+    float newYaw;
+    float newPitch;
+    float newRoll;
+
+    int smoothMillis;
+
     int model;
     int color;
     int skin[NUMSKINS];
@@ -1199,7 +1172,14 @@ struct RenderState
     vec casingPos;
 
     RenderState()
-        : model(-1),
+        : deltaYaw(0),
+          deltaPitch(0),
+          deltaRoll(0),
+          newYaw(0),
+          newPitch(0),
+          newRoll(0),
+          smoothMillis(-1),
+          model(-1),
           color(0),
           skeletonSize(0.0f),
           graveSize(0.0f),
@@ -1226,6 +1206,19 @@ struct RenderState
         muzzlePos = vec(-1, -1, -1);
         weedPos = vec(-1, -1, -1);
         casingPos = vec(-1, -1, -1);
+    }
+
+    void resetInterpolation(float yaw, float pitch, float roll)
+    {
+        deltaYaw = 0;
+        deltaPitch = 0;
+        deltaRoll = 0;
+
+        newYaw = yaw;
+        newPitch = pitch;
+        newRoll = roll;
+
+        smoothMillis = -1;
     }
 };
 
@@ -1263,7 +1256,6 @@ struct gameent : dynent, gamestate
     PickupState pickups;
     MatchStats stats;
     editinfo *edit;
-    InterpolationState interp;
     DamageHistory damageHistory;
     MapHazardState hazards;
     PlayerInfo info;
@@ -1284,7 +1276,7 @@ struct gameent : dynent, gamestate
                 curdamage(0), lastcurdamage(0), curdamagecolor(0xFFFFFF), lastfootstep(0),
                 lasttaunt(0),
                 pickups(), stats(),
-                edit(NULL), interp(), damageHistory(), hazards(), info(), render(), gameplay(),
+                edit(NULL), damageHistory(), hazards(), info(), render(), gameplay(),
                 sound(), shieldbroken(false),
                 isConnected(false),
                 ai(NULL), ownernum(-1), lastnode(-1), afterburner(NULL)
@@ -1342,7 +1334,7 @@ private:
     void resetVisualRuntime()
     {
         lasttaunt = 0;
-        interp.reset(yaw, pitch, roll);
+        render.resetInterpolation(yaw, pitch, roll);
         render.resetRuntime();
     }
 
