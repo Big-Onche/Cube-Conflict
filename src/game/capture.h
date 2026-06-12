@@ -270,7 +270,7 @@ struct captureclientmode : clientmode
         loopv(bases)
         {
             baseinfo &b = bases[i];
-            if(insidebase(b, d->feetpos(), d->state==CS_ALIVE) && b.owner==d->team && b.o.dist(o) < 12)
+            if(insidebase(b, d->feetpos(), d->state==CS_ALIVE) && b.owner==d->gameplay.team && b.o.dist(o) < 12)
             {
                 if(d->pickups.lastRepAmmo!=i)
                 {
@@ -303,7 +303,7 @@ struct captureclientmode : clientmode
                     insidebasetimer = totalmillis;
                 }
 
-                if(!insidebase(b, d->feetpos(), d->state==CS_ALIVE) || (b.owner!=d->team && b.enemy!=d->team)) continue;
+                if(!insidebase(b, d->feetpos(), d->state==CS_ALIVE) || (b.owner!=d->gameplay.team && b.enemy!=d->gameplay.team)) continue;
                 if(d->pickups.lastBase < 0 && (lookupmaterial(d->feetpos())&MATF_CLIP) == MAT_GAMECLIP) break;
 
                 vec basepos(b.o);
@@ -311,14 +311,14 @@ struct captureclientmode : clientmode
                 basepos.sub(pos);
                 basepos.normalize().mul(1300.0f);
 
-                if(rndevent(93)) particle_flying_flare(pos, basepos, 500, rnd(2) ? PART_ZERO : PART_ONE, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.7f+(rnd(5)/10.f), 100);
+                if(rndevent(93)) particle_flying_flare(pos, basepos, 500, rnd(2) ? PART_ZERO : PART_ONE, isteam(player1->gameplay.team, d->gameplay.team) ? 0xFFFF00 : 0xFF0000, 0.7f+(rnd(5)/10.f), 100);
 
                 if(oldbase < 0)
                 {
-                    if(b.owner!=d->team && b.owner) playSound(S_TERMINAL_ALARM, b.o, 300, 50, SND_FIXEDPITCH);
+                    if(b.owner!=d->gameplay.team && b.owner) playSound(S_TERMINAL_ALARM, b.o, 300, 50, SND_FIXEDPITCH);
                     playSound(S_TERMINAL_ENTER, d==hudplayer() ? vec(0, 0, 0) : pos, 150, 50);
-                    particle_splash(PART_ZERO, 12, 250, pos, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.8f, 200, 50);
-                    particle_splash(PART_ONE, 12, 250, pos, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.8f, 200, 50);
+                    particle_splash(PART_ZERO, 12, 250, pos, isteam(player1->gameplay.team, d->gameplay.team) ? 0xFFFF00 : 0xFF0000, 0.8f, 200, 50);
+                    particle_splash(PART_ONE, 12, 250, pos, isteam(player1->gameplay.team, d->gameplay.team) ? 0xFFFF00 : 0xFF0000, 0.8f, 200, 50);
                 }
                 d->pickups.lastBase = i;
             }
@@ -326,8 +326,8 @@ struct captureclientmode : clientmode
         if(d->pickups.lastBase < 0 && oldbase >= 0)
         {
             playSound(S_TERMINAL_ENTER, d==hudplayer() ? vec(0, 0, 0) : pos, 150, 50);
-            particle_splash(PART_ZERO, 12, 200, pos, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.8f, 200, 50);
-            particle_splash(PART_ONE, 12, 200, pos, isteam(player1->team, d->team) ? 0xFFFF00 : 0xFF0000, 0.8f, 200, 50);
+            particle_splash(PART_ZERO, 12, 200, pos, isteam(player1->gameplay.team, d->gameplay.team) ? 0xFFFF00 : 0xFF0000, 0.8f, 200, 50);
+            particle_splash(PART_ONE, 12, 200, pos, isteam(player1->gameplay.team, d->gameplay.team) ? 0xFFFF00 : 0xFF0000, 0.8f, 200, 50);
         }
     }
 
@@ -351,7 +351,7 @@ struct captureclientmode : clientmode
         loopv(bases)
         {
             baseinfo &b = bases[i];
-            const char *basename = b.owner ? (b.owner!=hudplayer()->team ? "base/red" : "base/yellow") : "base/neutral";
+            const char *basename = b.owner ? (b.owner!=hudplayer()->gameplay.team ? "base/red" : "base/yellow") : "base/neutral";
             rendermodel(basename, ANIM_MAPMODEL|ANIM_LOOP, b.o, 0, 0, 0, MDL_CULL_VFC | MDL_CULL_OCCLUDED);
 
             const char *ammoname = entities::entmdlname(I_RAIL+b.ammotype);
@@ -368,15 +368,15 @@ struct captureclientmode : clientmode
 
             if(b.owner)
             {
-                defformatstring(baseteam, "%s", b.converted ? readstr("Capture_Contested") : (b.owner==hudplayer()->team ? readstr("Capture_Allied") : readstr("Capture_Enemy")));
-                bool isowner = b.owner==hudplayer()->team;
+                defformatstring(baseteam, "%s", b.converted ? readstr("Capture_Contested") : (b.owner==hudplayer()->gameplay.team ? readstr("Capture_Allied") : readstr("Capture_Enemy")));
+                bool isowner = b.owner==hudplayer()->gameplay.team;
                 if(b.enemy) { mtype = PART_METER_VS; mcolor = 0xFF0000; mcolor2 = 0xFFFF00; if(!isowner) swap(mcolor, mcolor2); }
                 if(!b.name[0]) formatstring(b.info, "%s %d - %s", readstr("Capture_Terminal"), b.tag, baseteam);
                 else if(basenumbers) formatstring(b.info, "%s (%d) - %s", b.name, b.tag, baseteam);
                 else formatstring(b.info, "%s - %s", b.name, baseteam);
                 tcolor = isowner ? 0xFFFF00 : 0xFF0000;
 
-                if(b.owner==hudplayer()->team && hudplayer()->state==CS_ALIVE)
+                if(b.owner==hudplayer()->gameplay.team && hudplayer()->state==CS_ALIVE)
                 {
                     vec bpos = b.o;
                     particles::hudIcon(PART_BLIP, bpos.add(vec(0, 0, 10)), (totalmillis % 1001 < 500) && b.converted ? 0xFF0000 : 0xFFFF00);
@@ -387,7 +387,7 @@ struct captureclientmode : clientmode
                 if(!b.name[0]) formatstring(b.info, "%s %d - %s", readstr("Capture_Terminal"), b.tag, readstr("Capture_Hacking"));
                 else if(basenumbers) formatstring(b.info, "%s (%d) - %s", b.name, b.tag, readstr("Capture_Hacking"));
                 else formatstring(b.info, "%s - %s", b.name, readstr("Capture_Hacking"));
-                if(b.enemy!=hudplayer()->team) { tcolor = 0xFF0000; mtype = PART_METER; mcolor = 0xFF0000; }
+                if(b.enemy!=hudplayer()->gameplay.team) { tcolor = 0xFF0000; mtype = PART_METER; mcolor = 0xFF0000; }
                 else { tcolor = 0xFFFF00; mtype = PART_METER; mcolor = 0xFFFF00; }
             }
             else if(!b.name[0]) formatstring(b.info, "%s %d", readstr("Capture_Terminal"), b.tag);
@@ -415,10 +415,10 @@ struct captureclientmode : clientmode
             if(skipenemy && b.enemy) continue;
             switch(type)
             {
-                case 1: if(!b.owner || b.owner!=hudplayer()->team) continue; break;
+                case 1: if(!b.owner || b.owner!=hudplayer()->gameplay.team) continue; break;
                 case 0: if(b.owner) continue; break;
-                case -1: if(!b.owner || b.owner==hudplayer()->team) continue; break;
-                case -2: if(!b.enemy || b.enemy==hudplayer()->team) continue; break;
+                case -1: if(!b.owner || b.owner==hudplayer()->gameplay.team) continue; break;
+                case -2: if(!b.enemy || b.enemy==hudplayer()->gameplay.team) continue; break;
             }
             vec dir(d->o);
             dir.sub(b.o).div(scale);
@@ -556,14 +556,14 @@ struct captureclientmode : clientmode
                 if(!b.name[0])
                 {
                     conoutf(CON_GAMEINFO, "%s %s %s \"\fe%d\f7\".", readstr("Misc_Team"), teamcolor(owner), readstr("Console_Game_Capture_Hack"), b.tag);
-                    if(owner==hudplayer()->team) conoutf(CON_HUDCONSOLE, "\f9%s \"\fe%d\f9\".", readstr("Console_Game_Capture_WeHacked"), b.tag);
+                    if(owner==hudplayer()->gameplay.team) conoutf(CON_HUDCONSOLE, "\f9%s \"\fe%d\f9\".", readstr("Console_Game_Capture_WeHacked"), b.tag);
                 }
                 else
                 {
                     conoutf(CON_GAMEINFO, "%s %s %s \"\fe%s\f7\".", readstr("Misc_Team"), teamcolor(owner), readstr("Console_Game_Capture_Hack"), b.name);
-                    if(owner==hudplayer()->team) conoutf(CON_HUDCONSOLE, "\f9%s \"\fe%s\f9\".", readstr("Console_Game_Capture_WeHacked"), b.name);
+                    if(owner==hudplayer()->gameplay.team) conoutf(CON_HUDCONSOLE, "\f9%s \"\fe%s\f9\".", readstr("Console_Game_Capture_WeHacked"), b.name);
                 }
-                playSound(owner==hudplayer()->team ? S_TERMINAL_HACKED : S_TERMINAL_HACKED_E, b.o, 2500, 200, SND_FIXEDPITCH);
+                playSound(owner==hudplayer()->gameplay.team ? S_TERMINAL_HACKED : S_TERMINAL_HACKED_E, b.o, 2500, 200, SND_FIXEDPITCH);
             }
         }
         else if(b.owner)
@@ -571,18 +571,18 @@ struct captureclientmode : clientmode
             if(!b.name[0])
             {
                 conoutf(CON_GAMEINFO, "%s %s %s \"\fe%d\f7\".", readstr("Misc_Team"), teamcolor(b.owner), readstr("Console_Game_Capture_Lost"), b.tag);
-                if(b.owner==hudplayer()->team) conoutf(CON_HUDCONSOLE, "\fc%s \"\fe%d\f3\".", readstr("Console_Game_Capture_WeLost"), b.tag);
+                if(b.owner==hudplayer()->gameplay.team) conoutf(CON_HUDCONSOLE, "\fc%s \"\fe%d\f3\".", readstr("Console_Game_Capture_WeLost"), b.tag);
             }
             else
             {
                 conoutf(CON_GAMEINFO, "%s %s %s \"\fe%s\f7\".", readstr("Misc_Team"), teamcolor(b.owner), readstr("Console_Game_Capture_Lost"), b.name);
-                if(b.owner==hudplayer()->team) conoutf(CON_HUDCONSOLE, "\fc%s \"\fe%s\f3\".", readstr("Console_Game_Capture_WeLost"), b.name);
+                if(b.owner==hudplayer()->gameplay.team) conoutf(CON_HUDCONSOLE, "\fc%s \"\fe%s\f3\".", readstr("Console_Game_Capture_WeLost"), b.name);
             }
-            playSound(owner==hudplayer()->team ? S_TERMINAL_LOST : S_TERMINAL_LOST_E, b.o, 2500, 200, SND_FIXEDPITCH);
+            playSound(owner==hudplayer()->gameplay.team ? S_TERMINAL_LOST : S_TERMINAL_LOST_E, b.o, 2500, 200, SND_FIXEDPITCH);
         }
         if(b.owner!=owner)
         {
-            loopi(2) particle_splash(PART_ZERO+i, 12, 500, b.ammopos, owner ? (owner==hudplayer()->team ? 0xFFFF00 : 0xFF0000) : 0x777777, 1.f, 400, -50);
+            loopi(2) particle_splash(PART_ZERO+i, 12, 500, b.ammopos, owner ? (owner==hudplayer()->gameplay.team ? 0xFFFF00 : 0xFF0000) : 0x777777, 1.f, 400, -50);
         }
 
         b.owner = owner;
@@ -604,7 +604,7 @@ struct captureclientmode : clientmode
                 defformatstring(msg, "%d", total);
                 vec above(b.ammopos);
                 above.z += AMMOHEIGHT+1.0f;
-                particles::text(above, msg, PART_TEXT, 1500, isteam(team, player1->team) ? 0xFFFF00 : 0xFF0000, 5.0f, -5);
+                particles::text(above, msg, PART_TEXT, 1500, isteam(team, player1->gameplay.team) ? 0xFFFF00 : 0xFF0000, 5.0f, -5);
             }
         }
     }
@@ -621,7 +621,7 @@ struct captureclientmode : clientmode
         loopv(bases)
         {
             baseinfo &b = bases[i];
-            if(!b.owner || b.owner!=d->team) continue;
+            if(!b.owner || b.owner!=d->gameplay.team) continue;
             minbasedist = min(minbasedist, e.o.dist(b.o));
         }
         return minbasedist < 1e16f ? proximityscore(minbasedist, 128.0f, 512.0f) : 1.0f;
@@ -632,7 +632,7 @@ struct captureclientmode : clientmode
         if(m_regencapture && needsregen(d) && b.targtype == ai::AI_T_AFFINITY && bases.inrange(b.target))
         {
             baseinfo &f = bases[b.target];
-            if(f.owner && f.owner != d->team && hassaferegenbase(d))
+            if(f.owner && f.owner != d->gameplay.team && hassaferegenbase(d))
             {
                 d->ai->trywipe = true;
                 return true;
@@ -662,7 +662,7 @@ struct captureclientmode : clientmode
         loopv(bases)
         {
             baseinfo &f = bases[i];
-            if(!f.owner || f.owner==d->team) return true;
+            if(!f.owner || f.owner==d->gameplay.team) return true;
         }
         return false;
     }
@@ -694,25 +694,25 @@ struct captureclientmode : clientmode
         {
             baseinfo &f = bases[i];
             if(!f.owner) hasneutral = true;
-            if(!f.owner || f.owner==d->team) hassafebase = true;
+            if(!f.owner || f.owner==d->gameplay.team) hassafebase = true;
         }
 		loopvj(bases)
 		{
 			baseinfo &f = bases[j];
-            const bool isneutral = !f.owner, isfriendly = f.owner && f.owner==d->team, isenemy = f.owner && f.owner!=d->team;
+            const bool isneutral = !f.owner, isfriendly = f.owner && f.owner==d->gameplay.team, isenemy = f.owner && f.owner!=d->gameplay.team;
             const int regen = regenFactor(d, &f);
 			static vector<int> targets; // build a list of others who are interested in this
 			targets.setsize(0);
 			ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, j, true);
 			gameent *e = NULL;
 
-			loopi(numdynents()) if((e = (gameent *)iterdynents(i)) && !e->ai && e->state == CS_ALIVE && isteam(d->team, e->team))
+			loopi(numdynents()) if((e = (gameent *)iterdynents(i)) && !e->ai && e->state == CS_ALIVE && isteam(d->gameplay.team, e->gameplay.team))
 			{ // try to guess what non ai are doing
 				vec ep = e->feetpos();
 				if(targets.find(e->clientnum) < 0 && ep.squaredist(f.o) <= (CAPTURERADIUS*CAPTURERADIUS))
 					targets.add(e->clientnum);
 			}
-            const bool attacktarget = targets.empty() && (!f.owner || f.owner!=d->team || f.enemy);
+            const bool attacktarget = targets.empty() && (!f.owner || f.owner!=d->gameplay.team || f.enemy);
             if(m_regencapture && needregen && isenemy && hassafebase) continue;
             if(m_regencapture && !needregen && hasneutral && isenemy) continue;
 			if(regen || attacktarget)
@@ -745,19 +745,19 @@ struct captureclientmode : clientmode
 	{
         if(!bases.inrange(b.target)) return false;
         baseinfo &f = bases[b.target];
-        if(m_regencapture && needsregen(d) && f.owner && f.owner != d->team && hassaferegenbase(d))
+        if(m_regencapture && needsregen(d) && f.owner && f.owner != d->gameplay.team && hassaferegenbase(d))
         {
             d->ai->trywipe = true; // enemy push is invalid while under regen thresholds
             return true;
         }
 		int walk = 0;
-		if(!regenFactor(d, &f) && !f.enemy && f.owner && f.owner==d->team)
+		if(!regenFactor(d, &f) && !f.enemy && f.owner && f.owner==d->gameplay.team)
 		{
             static vector<int> targets; // build a list of others who are interested in this
             targets.setsize(0);
             ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, b.target, true);
             gameent *e = NULL;
-            loopi(numdynents()) if((e = (gameent *)iterdynents(i)) && !e->ai && e->state == CS_ALIVE && isteam(d->team, e->team))
+            loopi(numdynents()) if((e = (gameent *)iterdynents(i)) && !e->ai && e->state == CS_ALIVE && isteam(d->gameplay.team, e->gameplay.team))
             { // try to guess what non ai are doing
                 vec ep = e->feetpos();
                 if(targets.find(e->clientnum) < 0 && (ep.squaredist(f.o) <= (CAPTURERADIUS*CAPTURERADIUS*4)))
@@ -815,7 +815,7 @@ ICOMMAND(hudbasesstats, "i", (int *team),
         {
             captureclientmode::baseinfo &b = capturemode.bases[i];
             totalbases++;
-            b.owner ? (b.owner!=hudplayer()->team ? baseteam[2]++ : baseteam[1]++) : baseteam[0]++;
+            b.owner ? (b.owner!=hudplayer()->gameplay.team ? baseteam[2]++ : baseteam[1]++) : baseteam[0]++;
         }
         float pcts[3];
         loopi(3) pcts[i] = ((float)baseteam[i] / totalbases) * 100;

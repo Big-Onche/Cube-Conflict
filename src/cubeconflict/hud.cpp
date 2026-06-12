@@ -34,10 +34,10 @@ namespace game
         }
     );
     ICOMMAND(hudafterburn, "", (), floatret(roundOne((followingplayer(player1)->afterburnmillis) / 1000.f)); );
-    ICOMMAND(hudclass, "", (), intret(followingplayer(player1)->character));
+    ICOMMAND(hudclass, "", (), intret(followingplayer(player1)->gameplay.classId));
 
     ICOMMAND(hudability, "", (),
-        switch(followingplayer(player1)->character)
+        switch(followingplayer(player1)->gameplay.classId)
         {
             case C_WIZARD: case C_PHYSICIST: case C_PRIEST: case C_SHOSHONE: case C_SPY:
                 intret(followingplayer(player1)->mana);
@@ -61,7 +61,7 @@ namespace game
     );
 
     ICOMMAND(hudabilitylogo, "i", (int *id),
-        defformatstring(logodir, "media/interface/hud/abilities/%d_%d.png", followingplayer(player1)->character, *id);
+        defformatstring(logodir, "media/interface/hud/abilities/%d_%d.png", followingplayer(player1)->gameplay.classId, *id);
         result(logodir);
     );
 
@@ -70,14 +70,14 @@ namespace game
         {
             string logodir;
             if(followingplayer(player1)->abilitymillis[*id]) formatstring(logodir, "media/interface/hud/checkbox_on.jpg");
-            else if(!followingplayer(player1)->abilities.isReady[*id] || followingplayer(player1)->mana < classes[followingplayer(player1)->character].abilities[*id].manacost) formatstring(logodir, "media/interface/hud/checkbox_off.jpg");
-            else formatstring(logodir, "media/interface/hud/abilities/%d_%d.png", followingplayer(player1)->character, *id);
+            else if(!followingplayer(player1)->abilities.isReady[*id] || followingplayer(player1)->mana < classes[followingplayer(player1)->gameplay.classId].abilities[*id].manacost) formatstring(logodir, "media/interface/hud/checkbox_off.jpg");
+            else formatstring(logodir, "media/interface/hud/abilities/%d_%d.png", followingplayer(player1)->gameplay.classId, *id);
             result(logodir);
         }
     );
 
     ICOMMAND(hudshowabilities, "", (),
-        if(hasAbilities(followingplayer(player1)) || followingplayer(player1)->character==C_KAMIKAZE) intret(true);
+        if(hasAbilities(followingplayer(player1)) || followingplayer(player1)->gameplay.classId==C_KAMIKAZE) intret(true);
         else intret(false);
     );
 
@@ -89,8 +89,8 @@ namespace game
     ICOMMAND(hudscores, "i", (int *uicoltxt),
         string s;
         if(!m_teammode) formatstring(s, "%s%d %sfrag%s", *uicoltxt ? "" : "\fd", followingplayer(player1)->stats.frags, *uicoltxt ? "" : "\f7", followingplayer(player1)->stats.frags>1 ? "s" : ""); // solo dm
-        else if(m_ctf || m_capture) formatstring(s, "%s%d %s- %s%d", *uicoltxt ? "" : "\fd", cmode->getteamscore(followingplayer(player1)->team), *uicoltxt ? "" : "\f7", *uicoltxt ? "" : "\fc", cmode->getteamscore(followingplayer(player1)->team == 1 ? 2 : 1)); // ctf, domination mode
-        else formatstring(s, "%s%d %s- %s%d", *uicoltxt ? "" : "\fd", getteamfrags(followingplayer(player1)->team), *uicoltxt ? "" : "\f7", *uicoltxt ? "" : "\fc", getteamfrags(followingplayer(player1)->team == 1 ? 2 : 1)); //  team dm
+        else if(m_ctf || m_capture) formatstring(s, "%s%d %s- %s%d", *uicoltxt ? "" : "\fd", cmode->getteamscore(followingplayer(player1)->gameplay.team), *uicoltxt ? "" : "\f7", *uicoltxt ? "" : "\fc", cmode->getteamscore(followingplayer(player1)->gameplay.team == 1 ? 2 : 1)); // ctf, domination mode
+        else formatstring(s, "%s%d %s- %s%d", *uicoltxt ? "" : "\fd", getteamfrags(followingplayer(player1)->gameplay.team), *uicoltxt ? "" : "\f7", *uicoltxt ? "" : "\fc", getteamfrags(followingplayer(player1)->gameplay.team == 1 ? 2 : 1)); //  team dm
         result(s);
     );
 
@@ -127,7 +127,7 @@ namespace game
             if(!followingplayer()) formatstring(s, "%s", readstr("Hud_FreeCamera"));
             else
             {
-                formatstring(s, "%s", followingplayer(player1)->name);
+                formatstring(s, "%s", followingplayer(player1)->info.name);
             }
             result(s);
         }
@@ -223,10 +223,10 @@ namespace game
         if(hp->vampiremillis) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/vampire.png", min(1.0f, hp->vampiremillis / 500.f));
         if(hp->afterburnmillis) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/fire.png", min(1.0f, hp->afterburnmillis / 500.f));
 
-        if(((hp->abilitymillis[ABILITY_1] || hp->abilitymillis[ABILITY_3]) && hp->character==C_WIZARD) || (hp->abilitymillis[ABILITY_2] && hp->character==C_PHYSICIST))
+        if(((hp->abilitymillis[ABILITY_1] || hp->abilitymillis[ABILITY_3]) && hp->gameplay.classId==C_WIZARD) || (hp->abilitymillis[ABILITY_2] && hp->gameplay.classId==C_PHYSICIST))
         {
             float r = 1.f, g = 1.f, b = 1.f;
-            if(hp->character==C_PHYSICIST) {r = 0.3 ; g = 0.6 ; b = 1;}
+            if(hp->gameplay.classId==C_PHYSICIST) {r = 0.3 ; g = 0.6 ; b = 1;}
             drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/ability.png", 0.7, r, g, b);
         }
 
@@ -234,7 +234,7 @@ namespace game
 
         /*
         dynent *o = intersectclosest(d->o, worldpos, d, zoom ? 40 : 25);
-        if(o && o->type==ENT_PLAYER && !isteam(player1->team, ((gameent *)o)->team) && totalmillis-lastshoot<=1000 && player1->o.dist(o->o)<guns[d->gunselect].hudrange)
+        if(o && o->type==ENT_PLAYER && !isteam(player1->gameplay.team, ((gameent *)o)->gameplay.team) && totalmillis-lastshoot<=1000 && player1->o.dist(o->o)<guns[d->gunselect].hudrange)
         {
             float health = ((gameent *)o)->health > ((gameent *)o)->maxhealth ? ((gameent *)o)->health : ((gameent *)o)->maxhealth;
             float healthbar = (((gameent *)o)->health / health);

@@ -30,7 +30,7 @@ namespace game
     {
         if(a->state==CS_SPECTATOR)
         {
-            if(b->state==CS_SPECTATOR) return strcmp(a->name, b->name) < 0;
+            if(b->state==CS_SPECTATOR) return strcmp(a->info.name, b->info.name) < 0;
             else return false;
         }
         else if(b->state==CS_SPECTATOR) return true;
@@ -41,7 +41,7 @@ namespace game
         }
         if(a->stats.frags > b->stats.frags) return true;
         if(a->stats.frags < b->stats.frags) return false;
-        return strcmp(a->name, b->name) < 0;
+        return strcmp(a->info.name, b->info.name) < 0;
     }
 
     void getbestplayers(vector<gameent *> &best)
@@ -90,9 +90,9 @@ namespace game
         loopv(players)
         {
             gameent *o = players[i];
-            if(!showconnecting && !o->name[0]) continue;
+            if(!showconnecting && !o->info.name[0]) continue;
             if(o->state==CS_SPECTATOR) { spectators.add(o); continue; }
-            int team = m_teammode && validteam(o->team) ? o->team : 0;
+            int team = m_teammode && validteam(o->gameplay.team) ? o->gameplay.team : 0;
             teamplayers[team].add(o);
         }
         loopi(1+MAXTEAMS) teamplayers[i].sort(playersort);

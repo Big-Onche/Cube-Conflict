@@ -12,7 +12,7 @@ ICOMMAND(setclass, "i", (int *i),
         conoutf(CON_ERROR, "\f3Invalid class ID! (must be 0 to %d)", NUMCLASSES);
         return;
     }
-    if(*i == game::player1->character)
+    if(*i == game::player1->gameplay.classId)
     {
         conoutf(CON_ERROR, "\f3Cannot deactivate your current class!");
         playSound(S_ERROR, vec(0, 0, 0), 0, 0, SND_UI);
@@ -35,7 +35,7 @@ ICOMMAND(setclass, "i", (int *i),
 ICOMMAND(setallclasses, "i", (int *enabled),
     loopi(NUMCLASSES)
     {
-        if(!*enabled && i != game::player1->character) disabledClass[i] = true;
+        if(!*enabled && i != game::player1->gameplay.classId) disabledClass[i] = true;
         else disabledClass[i] = false;
     }
 );
@@ -49,7 +49,7 @@ namespace game
         vec sndpos = d->o;
         bool noSoundPos = d==hudplayer();
 
-        if(d->character==C_SPY && ability==ABILITY_1) //for spy's ability 1, we play the sound at the decoy's position
+        if(d->gameplay.classId==C_SPY && ability==ABILITY_1) //for spy's ability 1, we play the sound at the decoy's position
         {
             const int positions[4][2] = { {25, 25}, {-25, -25}, {25, -25}, {-25, 25} };
             sndpos.add(vec(positions[d->seed][0], positions[d->seed][1], 0));
@@ -57,14 +57,14 @@ namespace game
         }
 
         if(d==hudplayer()) playSound(S_SORTLANCE);
-        playSound(classes[d->character].abilities[ability].snd, noSoundPos ? vec(0, 0, 0) : sndpos, 250, 100, SND_NOCULL|SND_FIXEDPITCH, d->entityId, PL_ABI_1+ability);
+        playSound(classes[d->gameplay.classId].abilities[ability].snd, noSoundPos ? vec(0, 0, 0) : sndpos, 250, 100, SND_NOCULL|SND_FIXEDPITCH, d->entityId, PL_ABI_1+ability);
         switch(ability) //here we play some one shot gfx effects
         {
             //case ABILITY_1:
             //break;
 
             case ABILITY_2:
-                if(d->character==C_SPY)
+                if(d->gameplay.classId==C_SPY)
                 {
                     loopi(1)particle_fireball(d->o,  50, PART_SHOCKWAVE, 300, 0xBBBBBB, 1.f);
                     particle_splash(PART_SMOKE, 4, 400, d->o, 0x666666, 15+rnd(5), 200, -10);
@@ -73,10 +73,10 @@ namespace game
 
             case ABILITY_3:
             {
-                if(d->character==C_SPY)
+                if(d->gameplay.classId==C_SPY)
                 {
                     particle_fireball(d->o, 1000, PART_RADAR, 1000, 0xAAAAAA, 20.f);
-                    if(isteam(hudplayer()->team, d->team))
+                    if(isteam(hudplayer()->gameplay.team, d->gameplay.team))
                     {
                         getspyability = totalmillis;
                         playSound(S_SPY_3, d==hudplayer() ? vec(0, 0, 0) : d->o, 3000, 50, SND_NOCULL|SND_FIXEDPITCH);
@@ -88,7 +88,7 @@ namespace game
 
     bool hasAbilities(gameent *d)
     {
-        return d->character==C_WIZARD || d->character==C_PHYSICIST || d->character==C_PRIEST || d->character==C_SHOSHONE || d->character==C_SPY;
+        return d->gameplay.classId==C_WIZARD || d->gameplay.classId==C_PHYSICIST || d->gameplay.classId==C_PRIEST || d->gameplay.classId==C_SHOSHONE || d->gameplay.classId==C_SPY;
     }
 
     bool hasAbilityEnabled(gameent *d, int numAbility)
@@ -100,12 +100,12 @@ namespace game
     bool canLaunchAbility(gameent *d, int ability)
     {
         if(d->state != CS_ALIVE || !isconnected() || forcecampos>=0 || intermission || (!validAbility(ability))) return false;
-        else return hasAbilities(d) || d->character == C_KAMIKAZE;
+        else return hasAbilities(d) || d->gameplay.classId == C_KAMIKAZE;
     }
 
     void launchAbility(gameent *d, int ability, int millis)
     {
-        d->mana -= classes[d->character].abilities[ability].manacost;
+        d->mana -= classes[d->gameplay.classId].abilities[ability].manacost;
         d->abilities.isReady[ability] = false;
         d->abilitymillis[ability] = millis;
         d->abilities.lastAbility[ability] = totalmillis;
@@ -115,7 +115,7 @@ namespace game
 
     void requestAbility(gameent *d, int ability) //abilities commands
     {
-        if(!d->abilities.isReady[ability] || d->mana < classes[d->character].abilities[ability].manacost || !canLaunchAbility(d, ability)) //check for game vars (client sided)
+        if(!d->abilities.isReady[ability] || d->mana < classes[d->gameplay.classId].abilities[ability].manacost || !canLaunchAbility(d, ability)) //check for game vars (client sided)
         {
             if(d==player1) playSound(S_SORTIMPOSSIBLE);
             return;
@@ -126,7 +126,7 @@ namespace game
 
     ICOMMAND(ability, "i", (int *ability),  // player1 abilities commands
         if(!isconnected()) return;
-        bool isKamikaze = (player1->character == C_KAMIKAZE);
+        bool isKamikaze = (player1->gameplay.classId == C_KAMIKAZE);
         if(!hasAbilities(player1) && !isKamikaze) return;
         if(isKamikaze)
         {
@@ -152,7 +152,7 @@ namespace game
 
         loopi(NUMABILITIES)
         {
-            if(totalmillis-d->abilities.lastAbility[i] >= classes[d->character].abilities[i].cooldown && !d->abilities.isReady[i]) // ability rearm
+            if(totalmillis-d->abilities.lastAbility[i] >= classes[d->gameplay.classId].abilities[i].cooldown && !d->abilities.isReady[i]) // ability rearm
             {
                 if(d==hudplayer()) playSound(S_SORTPRET);
                 d->abilities.isReady[i] = true;
@@ -163,12 +163,12 @@ namespace game
             if(d->abilitymillis[i]) numEnabled++; // abilities used at the same time (only for achievement below)
         }
 
-        if(d==player1 && player1->character==C_SHOSHONE && numEnabled==3) unlockAchievement(ACH_WASHAKIE);
+        if(d==player1 && player1->gameplay.classId==C_SHOSHONE && numEnabled==3) unlockAchievement(ACH_WASHAKIE);
     }
 
     ICOMMAND(getclasslogo, "ii", (int *cn, int *numapt),
-        if(*numapt==-1 && isconnected()) {gameent *d = getclient(*cn); *numapt = d->character; }
-        else if(*numapt==-2) *numapt = player1->character;
+        if(*numapt==-1 && isconnected()) {gameent *d = getclient(*cn); *numapt = d->gameplay.classId; }
+        else if(*numapt==-2) *numapt = player1->gameplay.classId;
         defformatstring(logodir, "media/interface/apt_logo/%d.png", *numapt);
         result(logodir);
     );

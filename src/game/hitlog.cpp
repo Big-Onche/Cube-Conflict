@@ -152,7 +152,7 @@ namespace game
 {
     static inline bool teamDamage(gameent *d)
     {
-        return d && player1 && (d == player1 || isteam(player1->team, d->team));
+        return d && player1 && (d == player1 || isteam(player1->gameplay.team, d->gameplay.team));
     }
 
     static inline const DamageLog *getDamageLog(int index)

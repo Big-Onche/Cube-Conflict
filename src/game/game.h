@@ -1170,6 +1170,84 @@ struct MapHazardState
     }
 };
 
+struct PlayerInfo
+{
+    string name;
+    string info;
+
+    PlayerInfo()
+    {
+        clear();
+    }
+
+    void clear()
+    {
+        name[0] = info[0] = 0;
+    }
+};
+
+struct RenderState
+{
+    int model;
+    int color;
+    int skin[NUMSKINS];
+    float skeletonSize;
+    float graveSize;
+
+    vec muzzlePos;
+    vec weedPos;
+    vec casingPos;
+
+    RenderState()
+        : model(-1),
+          color(0),
+          skeletonSize(0.0f),
+          graveSize(0.0f),
+          muzzlePos(-1, -1, -1),
+          weedPos(-1, -1, -1),
+          casingPos(-1, -1, -1)
+    {
+        loopi(NUMSKINS) skin[i] = 0;
+    }
+
+    void reset()
+    {
+        model = -1;
+        color = 0;
+        loopi(NUMSKINS) skin[i] = 0;
+        resetRuntime();
+    }
+
+    void resetRuntime()
+    {
+        skeletonSize = 0.0f;
+        graveSize = 0.0f;
+
+        muzzlePos = vec(-1, -1, -1);
+        weedPos = vec(-1, -1, -1);
+        casingPos = vec(-1, -1, -1);
+    }
+};
+
+struct GameplayProfile
+{
+    int team;
+    int classId;
+    int level;
+
+    GameplayProfile()
+        : team(0),
+          classId(0),
+          level(0)
+    {
+    }
+
+    void resetMatch()
+    {
+        level = 0;
+    }
+};
+
 struct gameent : dynent, gamestate
 {
     size_t entityId, lastkillerId;
@@ -1188,19 +1266,17 @@ struct gameent : dynent, gamestate
     InterpolationState interp;
     DamageHistory damageHistory;
     MapHazardState hazards;
+    PlayerInfo info;
+    RenderState render;
+    GameplayProfile gameplay;
 
     SoundState sound;
     bool shieldbroken;
     bool isConnected;
 
-    string name, info;
-    int team, playermodel, playercolor, skin[NUMSKINS], character, level;
-    float skeletonSize, graveSize;
     ai::aiinfo *ai;
     int ownernum, lastnode;
     gameent *afterburner;
-
-    vec muzzle, weed, balles;
 
     gameent() : entityId(entitiesIds::getNewId()), lastkillerId(SIZE_MAX), weight(100), clientnum(-1), privilege(PRIV_NONE), lastupdate(0), plag(0), ping(0),
                 lifesequence(0), respawned(-1), lastspawn(0), suicided(-1), lastpain(0),
@@ -1208,14 +1284,11 @@ struct gameent : dynent, gamestate
                 curdamage(0), lastcurdamage(0), curdamagecolor(0xFFFFFF), lastfootstep(0),
                 lasttaunt(0),
                 pickups(), stats(),
-                edit(NULL), interp(), damageHistory(), hazards(),
+                edit(NULL), interp(), damageHistory(), hazards(), info(), render(), gameplay(),
                 sound(), shieldbroken(false),
                 isConnected(false),
-                team(0), playermodel(-1), playercolor(0), skin{0, 0, 0}, character(0), level(0),
-                skeletonSize(0.0f), graveSize(0.0f), ai(NULL), ownernum(-1), lastnode(-1), afterburner(NULL),
-                muzzle(-1, -1, -1), weed(-1, -1, -1), balles(-1, -1, -1)
+                ai(NULL), ownernum(-1), lastnode(-1), afterburner(NULL)
     {
-        name[0] = info[0] = 0;
         respawn();
     }
     ~gameent()
@@ -1227,7 +1300,7 @@ struct gameent : dynent, gamestate
 
     void hitphyspush(int damage, const vec &dir, gameent *actor, int atk, gameent *target)
     {
-        if(target->character == C_AMERICAN) return;
+        if(target->gameplay.classId == C_AMERICAN) return;
         vec push(dir);
         push.mul((actor==this && attacks[atk].exprad ? EXP_SELFPUSH : 1.0f)*attacks[atk].hitpush*(damage/10)/weight);
         vel.add(push);
@@ -1270,8 +1343,7 @@ private:
     {
         lasttaunt = 0;
         interp.reset(yaw, pitch, roll);
-        skeletonSize = 0.0f;
-        graveSize = 0.0f;
+        render.resetRuntime();
     }
 
     void resetAudioRuntime()
@@ -1418,7 +1490,7 @@ namespace game
         virtual void checkitems(gameent *d) {}
         virtual int respawnwait(gameent *d, int delay = 0) { return 0; }
         virtual float ratespawn(gameent *d, const extentity &e) { return 1.0f; }
-        virtual void pickspawn(gameent *d) { findplayerspawn(d, -1, m_teammode && !m_capture ? d->team : 0); }
+        virtual void pickspawn(gameent *d) { findplayerspawn(d, -1, m_teammode && !m_capture ? d->gameplay.team : 0); }
         virtual void senditems(packetbuf &p) {}
         virtual void removeplayer(gameent *d) {}
         virtual void gameover() {}

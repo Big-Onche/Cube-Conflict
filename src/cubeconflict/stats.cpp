@@ -27,7 +27,7 @@ void calcPlayerLevel()
 
     gameStat[STAT_LEVEL] = currentLevel;
 
-    game::player1->level = currentLevel; // gameent level update
+    game::player1->gameplay.level = currentLevel; // gameent level update
 
     switch(currentLevel) // check for achievement
     {

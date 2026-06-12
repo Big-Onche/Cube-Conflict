@@ -142,11 +142,11 @@ namespace game
             pitch = 0;
             roll = 0;
             state = CS_ALIVE;
-            character = t.npcclass;
+            gameplay.classId = t.npcclass;
             anger = 0;
             friendly = t.friendly;
             monsterlastdeath = 0;
-            copystring(name, t.name);
+            copystring(info.name, t.name);
         }
 
         void stopAfterburn()
@@ -310,7 +310,7 @@ namespace game
                 case M_PAIN:
                 case M_ATTACKING:
                 case M_SEARCH:
-                    if(player1->character==C_SPY && player1->abilitymillis[ABILITY_2]) break;
+                    if(player1->gameplay.classId==C_SPY && player1->abilitymillis[ABILITY_2]) break;
                     if(trigger<lastmillis) transition(M_AGGRO, 1, 100, 200);
                     break;
 
@@ -362,7 +362,7 @@ namespace game
                     targetyaw = enemyyaw;
 
                     if(dist > trigdist*(friendly ? 15 : 2) && !m_dmsp) {transition(friendly ? M_NEUTRAL : M_RETREAT, 0, 600, 0); break;}
-                    else if(player1->character==C_SPY && player1->abilitymillis[ABILITY_2]) {transition(M_SEARCH, 0, 600, 0); break;}
+                    else if(player1->gameplay.classId==C_SPY && player1->abilitymillis[ABILITY_2]) {transition(M_SEARCH, 0, 600, 0); break;}
 
                     if(trigger<lastmillis)
                     {
@@ -385,7 +385,7 @@ namespace game
                             if((!melee || dist<50) && !rnd(max(shootroll, 1)) && enemy->state==CS_ALIVE)      // get ready to fire
                             {
                                 attacktarget = target;
-                                if(player1->character==C_SPY && player1->abilitymillis[ABILITY_1])
+                                if(player1->gameplay.classId==C_SPY && player1->abilitymillis[ABILITY_1])
                                 {
                                     const int seed = clamp(player1->seed, 0, 3);
                                     attacktarget.add(vec(positions[seed][0], positions[seed][1], 0));
@@ -414,7 +414,7 @@ namespace game
                 if(mtype==M_UFO && m_dmsp)
                 {
                     abilitymillis[ABILITY_3] = true;
-                    character = C_PHYSICIST;
+                    gameplay.classId = C_PHYSICIST;
                 }
                 if(cfg.speed) moveplayer(this, 10, true, curtime);        // same movement path as bots (physicsframe-stepped)
             }
@@ -497,7 +497,7 @@ namespace game
                 defformatstring(id, "monster_dead_%d", tag);
                 if(identexists(id)) execute(id);
                 if(m_dmsp && gamesecs<599) npcdrop(&monsterhurtpos, npcs[mtype].dropval);
-                if(player1->character==C_REAPER && player1->health<1500) player1->health = min(player1->health+50, 1500);
+                if(player1->gameplay.classId==C_REAPER && player1->health<1500) player1->health = min(player1->health+50, 1500);
                 if(m_dmsp)
                 {
                     switch(mtype)
@@ -787,7 +787,7 @@ namespace game
                             const int afterburndamage = m->afterburnatk==ATK_FLAMETHROWER ? 40 : 80;
                             m->monsterpain(afterburndamage, burner, m->afterburnatk, true);
 
-                            if(burner==player1 && player1->character==C_VAMPIRE)
+                            if(burner==player1 && player1->gameplay.classId==C_VAMPIRE)
                             {
                                 player1->health = min(player1->health + afterburndamage/2, player1->maxhealth);
                                 player1->vampiremillis += afterburndamage*1.5f;
@@ -937,9 +937,9 @@ namespace game
 
                         a[ai++] = modelattach("tag_weapon", getWeaponDir(m.gunselect), vanim, vtime);
 
-                        m.muzzle = m.balles = vec(-1, -1, -1);
-                        a[ai++] = modelattach("tag_muzzle", &m.muzzle);
-                        a[ai++] = modelattach("tag_balles", &m.balles);
+                        m.render.muzzlePos = m.render.casingPos = vec(-1, -1, -1);
+                        a[ai++] = modelattach("tag_muzzle", &m.render.muzzlePos);
+                        a[ai++] = modelattach("tag_balles", &m.render.casingPos);
                     }
 
                     //////////////////////////////////// Other mdls rendering ////////////////////////////////////////////////////////////////////////
@@ -963,7 +963,7 @@ namespace game
 
     void hitmonster(int damage, monster *m, gameent *at, const vec &vel, int atk)
     {
-        if(player1->hasRoids()) damage *= (player1->character==C_JUNKIE ? 3 : 2);
+        if(player1->hasRoids()) damage *= (player1->gameplay.classId==C_JUNKIE ? 3 : 2);
         m->monsterpain(damage, at, atk);
     }
 

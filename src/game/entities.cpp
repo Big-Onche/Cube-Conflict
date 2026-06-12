@@ -192,7 +192,7 @@ namespace entities
 
         if(type==I_SHROOMS && !d->boostmillis[B_SHROOMS]) d->action.lastShrooms = lastmillis;
 
-        d->pickupitem(type, d->character, d->abilitymillis[ABILITY_1], rndsweap);
+        d->pickupitem(type, d->gameplay.classId, d->abilitymillis[ABILITY_1], rndsweap);
 
         bool powerArmor = powerarmorpieces(type, d);
         if(type >= I_WOODSHIELD && type <= I_MAGNETSHIELD)
@@ -208,7 +208,7 @@ namespace entities
             else if(autowield > 0) gunselect(type - 9 + rndsweap, player1);
         }
 
-        if(d->character==C_PRIEST && d->abilitymillis[ABILITY_1] && type < I_WOODSHIELD)
+        if(d->gameplay.classId==C_PRIEST && d->abilitymillis[ABILITY_1] && type < I_WOODSHIELD)
         {
             adddynlight(d->o, 20, vec(1.5f, 1.5f, 0.0f), 300, 50, L_NOSHADOW|L_VOLUMETRIC);
             playSound(S_PRI_1, d==hudplayer() ? vec(0, 0, 0) : d->o, 300, 150);
@@ -297,7 +297,7 @@ namespace entities
         {
             default:
             {
-                if(d->canpickupitem(e->type, d->character))
+                if(d->canpickupitem(e->type, d->gameplay.classId))
                 {
                     addmsg(N_ITEMPICKUP, "rci", d, n);
                     ents[n]->clearspawned(); // even if someone else gets it first

@@ -48,7 +48,7 @@ namespace game
 
     ICOMMAND(meleeattack, "", (), // shortcut for melee attack, then select old gun
         if(!isconnected()) return;
-        if(player1->character==C_NINJA) gunselect(GUN_NINJA, player1, false, true);
+        if(player1->gameplay.classId==C_NINJA) gunselect(GUN_NINJA, player1, false, true);
         else if (m_identique) return;
         else findSpecialWeapon(player1, GUN_M_BUSTER, NUMMELEEWEAPONS, [](int gunId) { gunselect(gunId, player1, false, true); });
         doaction(ACT_SHOOT);
@@ -155,16 +155,16 @@ namespace game
         do offset = vec(rndscale(1), rndscale(1), rndscale(1)).sub(0.5f);
         while(offset.squaredlen() > 0.5f*0.5f);
 
-        if(d->boostmillis[B_SHROOMS]) spread /= d->character==C_JUNKIE ? 1.75f : 1.5f;
-        if(d->character==C_WIZARD && d->abilitymillis[ABILITY_2]) spread /= 3.f;
+        if(d->boostmillis[B_SHROOMS]) spread /= d->gameplay.classId==C_JUNKIE ? 1.75f : 1.5f;
+        if(d->gameplay.classId==C_WIZARD && d->abilitymillis[ABILITY_2]) spread /= 3.f;
 
         if(!spreadLimit(d))
         {
-            if(d->crouching) spread /= d->character==C_CAMPER ? 2.5f : 1.3f;
+            if(d->crouching) spread /= d->gameplay.classId==C_CAMPER ? 2.5f : 1.3f;
             if(d->hasRoids() || d->boostmillis[B_RAGE]) spread *= 1.75f;
         }
 
-        spread = (spread*100) / classes[d->character].accuracy;
+        spread = (spread*100) / classes[d->gameplay.classId].accuracy;
         offset.mul((to.dist(from)/1024) * spread);
 
         offset.z /= 2;
@@ -219,9 +219,9 @@ namespace game
         vec p = d->o;
         p.z += 0.6f*(d->eyeheight + d->aboveeye) - d->eyeheight;
 
-        int actorClass = actor->character, targetClass = d->character;
+        int actorClass = actor->gameplay.classId, targetClass = d->gameplay.classId;
         bool isHudPlayer = (actor == hudplayer());
-        bool teamDamage = (isteam(d->team, actor->team) && d!=actor);
+        bool teamDamage = (isteam(d->gameplay.team, actor->gameplay.team) && d!=actor);
 
         if(isHudPlayer) d->curdamagecolor = 0xFFAA00;
 
@@ -330,7 +330,7 @@ namespace game
         gameent *f = (gameent *)d;
 
         f->lastpain = lastmillis;
-        if(at->type==ENT_PLAYER && !isteam(at->team, f->team)) at->stats.damage += damage;
+        if(at->type==ENT_PLAYER && !isteam(at->gameplay.team, f->gameplay.team)) at->stats.damage += damage;
         if(m_dmsp || m_classicsp || m_tutorial)
         {
             if(f==player1)
@@ -339,7 +339,7 @@ namespace game
                                       DCF_APPLY_TARGET_MODIFIERS |
                                       DCF_APPLY_TARGET_BOOSTS |
                                       DCF_MUTATE_TARGET_STATE;
-                totalDamage calc = getDamage(damage, atk, at->character, at, f->character, f, at->o.dist(f->o), calcflags, at==f);
+                totalDamage calc = getDamage(damage, atk, at->gameplay.classId, at, f->gameplay.classId, f, at->o.dist(f->o), calcflags, at==f);
                 damage = calc.damage/(m_dmsp ? 5 : 2);
                 doLocalAfterburn(f, at, atk);
                 damageeffect(damage, f, at, atk);
@@ -349,14 +349,14 @@ namespace game
             else if(at==player1)
             {
                 const int calcflags = DCF_APPLY_ACTOR_MODIFIERS | DCF_APPLY_ACTOR_BOOSTS;
-                totalDamage calc = getDamage(damage, atk, at->character, at, f->character, f, at->o.dist(f->o), calcflags, at==f);
+                totalDamage calc = getDamage(damage, atk, at->gameplay.classId, at, f->gameplay.classId, f, at->o.dist(f->o), calcflags, at==f);
                 int rawdamage = calc.damage;
-                if(player1->character==C_VAMPIRE)
+                if(player1->gameplay.classId==C_VAMPIRE)
                 {
                     player1->health = min(player1->health + rawdamage/2, player1->maxhealth);
                     player1->vampiremillis += rawdamage*1.5f;
                 }
-                damage = (rawdamage*classes[player1->character].damage)/100;
+                damage = (rawdamage*classes[player1->gameplay.classId].damage)/100;
                 hitmonster(damage, (monster *)f, at, vel, atk);
                 avgdmg[dmgsecs[0]] += damage/10.f;
             }
@@ -375,7 +375,7 @@ namespace game
 
             int impactSound = S_IMPACTWOOD + f->armourtype;
             int regenSound = S_PHY_1_WOOD + f->armourtype;
-            bool hasRegenAbility = f->character==C_PHYSICIST && f->abilitymillis[ABILITY_1];
+            bool hasRegenAbility = f->gameplay.classId==C_PHYSICIST && f->abilitymillis[ABILITY_1];
 
             if(at==player1)
             {
@@ -575,14 +575,14 @@ namespace game
 
     bool noMuzzle(int atk, gameent *d)
     {
-        return (d->character==C_SPY && d->abilitymillis[ABILITY_2]) || (atk==ATK_M_BUSTER || atk==ATK_M_FLAIL || atk==ATK_M_HAMMER || atk==ATK_M_MASTER || atk==ATK_NINJA);
+        return (d->gameplay.classId==C_SPY && d->abilitymillis[ABILITY_2]) || (atk==ATK_M_BUSTER || atk==ATK_M_FLAIL || atk==ATK_M_HAMMER || atk==ATK_M_MASTER || atk==ATK_NINJA);
     }
 
     float recoilReduce()
     {
         float factor = (hudplayer()->hasRoids() ? 0.75f : 1.f);
 
-        switch(hudplayer()->character)
+        switch(hudplayer()->gameplay.classId)
         {
             case C_SOLDIER:
                 return factor *= 2;
@@ -594,7 +594,7 @@ namespace game
                 return (hudplayer()->abilitymillis[ABILITY_2] ? (factor * 5) : factor);
         }
 
-        return factor * (classes[hudplayer()->character].accuracy / 100.f);
+        return factor * (classes[hudplayer()->gameplay.classId].accuracy / 100.f);
     }
 
     float recoilSide(int time)
@@ -615,10 +615,10 @@ namespace game
         int gun = attacks[atk].gun;
         int gunSound = attacks[atk].sound;
         bool isHudPlayer = d==hudplayer();
-        vec muzzleOrigin = noMuzzle(atk, d) ? hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle;
-        vec casingOrigin = (d->character==C_SPY && d->abilitymillis[ABILITY_2]) ? d->o : d->balles;
-        bool wizardAbility = (d->character==C_WIZARD && d->abilitymillis[ABILITY_2]);
-        if(wizardAbility) playSound(S_WIZ_2, isHudPlayer ? vec(0, 0, 0) : d->muzzle, 250, 150, NULL, d->entityId);
+        vec muzzleOrigin = noMuzzle(atk, d) ? hudgunorigin(d->gunselect, d->o, to, d) : d->render.muzzlePos;
+        vec casingOrigin = (d->gameplay.classId==C_SPY && d->abilitymillis[ABILITY_2]) ? d->o : d->render.casingPos;
+        bool wizardAbility = (d->gameplay.classId==C_WIZARD && d->abilitymillis[ABILITY_2]);
+        if(wizardAbility) playSound(S_WIZ_2, isHudPlayer ? vec(0, 0, 0) : muzzleOrigin, 250, 150, NULL, d->entityId);
 
         switch(atk)
         {
@@ -686,7 +686,7 @@ namespace game
                 if(isGau)
                 {
                     if(d->type==ENT_PLAYER) gunSound = S_GAU8;
-                    if(d==player1 && player1->character==C_PRIEST && player1->boostmillis[B_SHROOMS] && player1->abilitymillis[ABILITY_3]) unlockAchievement(ACH_CADENCE);
+                    if(d==player1 && player1->gameplay.classId==C_PRIEST && player1->boostmillis[B_SHROOMS] && player1->abilitymillis[ABILITY_3]) unlockAchievement(ACH_CADENCE);
                 }
                 bouncers::spawn(casingOrigin, d->vel, d, isGau ? BNC_BIGCASING : BNC_CASING);
                 break;
@@ -755,7 +755,7 @@ namespace game
 
             case ATK_CROSSBOW:
                 projectiles::add(from, to, attacks[atk].projspeed, local, id, d, atk);
-                if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK,  8, 500, d->muzzle, 0xFF2222, 1.0f,  50, 200, 0, hasShrooms());
+                if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK,  8, 500, muzzleOrigin, 0xFF2222, 1.0f,  50, 200, 0, hasShrooms());
                 if(isHudPlayer) startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay / 1.5f, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0.2f / recoilReduce(), 0));
                 else soundNearmiss(S_FLYBYARROW, from, to);
                 break;
@@ -803,18 +803,18 @@ namespace game
 
             case ATK_M32:
             {
-                particle_splash(PART_SMOKE, 2, 600, d->muzzle, wizardAbility ? 0x550044 : 0x444444, 0.5f, 10, 200, 15, hasShrooms());
-                if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK,  8, 500, d->muzzle, 0xFF4444, 1.0f, 50, 200, 0, hasShrooms());
+                particle_splash(PART_SMOKE, 2, 600, muzzleOrigin, wizardAbility ? 0x550044 : 0x444444, 0.5f, 10, 200, 15, hasShrooms());
+                if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK,  8, 500, muzzleOrigin, 0xFF4444, 1.0f, 50, 200, 0, hasShrooms());
                 float dist = from.dist(to); vec up = to; up.z += dist/8;
-                bouncers::add(isHudPlayer && !thirdperson ? d->muzzle : hudgunorigin(gun, d->o, to, d), up, local, id, d, BNC_GRENADE, attacks[atk].ttl, attacks[atk].projspeed);
+                bouncers::add(isHudPlayer && !thirdperson ? muzzleOrigin : hudgunorigin(gun, d->o, to, d), up, local, id, d, BNC_GRENADE, attacks[atk].ttl, attacks[atk].projspeed);
                 if(isHudPlayer) startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay / 3, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0.5f / recoilReduce(), 0));
                 break;
             }
             case ATK_MOLOTOV:
             {
-                if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK,  8, 500, d->muzzle, 0xFF4444, 1.0f, 50, 200, 0, hasShrooms());
+                if(d->boostmillis[B_RAGE]) particle_splash(PART_SPARK,  8, 500, muzzleOrigin, 0xFF4444, 1.0f, 50, 200, 0, hasShrooms());
                 float dist = from.dist(to); vec up = to; up.z += dist/6;
-                bouncers::add(isHudPlayer && !thirdperson ? d->muzzle : hudgunorigin(gun, d->o, to, d), up, local, id, d, BNC_MOLOTOV, attacks[atk].ttl, attacks[atk].projspeed);
+                bouncers::add(isHudPlayer && !thirdperson ? muzzleOrigin : hudgunorigin(gun, d->o, to, d), up, local, id, d, BNC_MOLOTOV, attacks[atk].ttl, attacks[atk].projspeed);
                 if(isHudPlayer) startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay / 3, vec(0, 0, 0), vec(0, 0, 0), vec(0, 0.5f / recoilReduce(), 0));
                 break;
             }
@@ -834,13 +834,13 @@ namespace game
             else if(d->boostmillis[B_RAGE]) playSound(S_RAGETIR, isHudPlayer ? vec(0, 0, 0) : d->o, 500, 100);
         }
 
-        if(d->abilitymillis[ABILITY_3] && d->character==C_PRIEST) adddynlight(muzzleOrigin, 6, vec(1.5f, 1.5f, 0.0f), 80, 40, L_NOSHADOW|L_VOLUMETRIC|DL_FLASH);
+        if(d->abilitymillis[ABILITY_3] && d->gameplay.classId==C_PRIEST) adddynlight(muzzleOrigin, 6, vec(1.5f, 1.5f, 0.0f), 80, 40, L_NOSHADOW|L_VOLUMETRIC|DL_FLASH);
         if(d==player1) updateStat(1, STAT_MUNSHOOTED);
 
         bool incraseDist = atk==ATK_POWERARMOR || atk==ATK_KAMIKAZE || atk==ATK_S_GAU8 || atk==ATK_S_NUKE;
         int distance = camera1->o.dist(hudgunorigin(gun, d->o, to, d));
         int loopedSoundFlags = SND_LOOPED|SND_FIXEDPITCH|SND_NOCULL;
-        float pitch = d->boostmillis[B_SHROOMS] ? (d->character==C_JUNKIE ? 1.4f : 1.2f) : (d->character==C_PRIEST && d->abilitymillis[ABILITY_3] ? (1.5f - (d->abilitymillis[ABILITY_3] / 8000.0f)) : 0);
+        float pitch = d->boostmillis[B_SHROOMS] ? (d->gameplay.classId==C_JUNKIE ? 1.4f : 1.2f) : (d->gameplay.classId==C_PRIEST && d->abilitymillis[ABILITY_3] ? (1.5f - (d->abilitymillis[ABILITY_3] / 8000.0f)) : 0);
         if(gamespeed!=100) pitch *= (game::gamespeed / 100.f);
 
         if(!d->sound.currentAttack)
@@ -878,9 +878,9 @@ namespace game
     {
         if(owner->type!=ENT_PLAYER && owner->type!=ENT_AI) return;
         gameent *pl = (gameent *)owner;
-        if(pl->muzzle.x < 0 || pl->action.lastAttackType < 0 || attacks[pl->action.lastAttackType].gun != pl->gunselect) return;
+        if(pl->render.muzzlePos.x < 0 || pl->action.lastAttackType < 0 || attacks[pl->action.lastAttackType].gun != pl->gunselect) return;
         float dist = o.dist(d);
-        o = pl->muzzle;
+        o = pl->render.muzzlePos;
         if(dist <= 0) d = o;
         else
         {
@@ -894,9 +894,9 @@ namespace game
     {
         if(owner->type!=ENT_PLAYER && owner->type!=ENT_AI) return;
         gameent *pl = (gameent *)owner;
-        if(pl->muzzle.x < 0 || pl->action.lastAttackType < 0 || attacks[pl->action.lastAttackType].gun != pl->gunselect) return;
-        o = pl->muzzle;
-        hud = owner == followingplayer(player1) ? vec(pl->o).add(vec(0, 0, 2)) : pl->muzzle;
+        if(pl->render.muzzlePos.x < 0 || pl->action.lastAttackType < 0 || attacks[pl->action.lastAttackType].gun != pl->gunselect) return;
+        o = pl->render.muzzlePos;
+        hud = owner == followingplayer(player1) ? vec(pl->o).add(vec(0, 0, 2)) : pl->render.muzzlePos;
     }
 
     float intersectdist = 1e16f;
@@ -1016,7 +1016,7 @@ namespace game
 
     void updateAttacks(gameent *d, const vec &targ, bool isMonster)
     {
-        bool specialAbility = (d->character==C_PRIEST && d->abilitymillis[ABILITY_3]) || d->boostmillis[B_SHROOMS];
+        bool specialAbility = (d->gameplay.classId==C_PRIEST && d->abilitymillis[ABILITY_3]) || d->boostmillis[B_SHROOMS];
         int gun = d->gunselect,
             prevaction = d->action.lastAttack,
             attacktime = lastmillis - prevaction;
@@ -1026,7 +1026,7 @@ namespace game
 
         if(!updateWeaponsCadencies(d, gun, attacktime, specialAbility)) return;
 
-        if(d->character == C_KAMIKAZE && kamikazeExploding(d))
+        if(d->gameplay.classId == C_KAMIKAZE && kamikazeExploding(d))
         {
             gun = GUN_KAMIKAZE;
             d->action.attackAction = ACT_SHOOT;
@@ -1056,8 +1056,8 @@ namespace game
         vec from = d->o, to = targ, dir = vec(to).sub(from).safenormalize();
         float dist = to.dist(from);
 
-        int kickfactor = (m_tutorial && !canMove) || d->character==C_AMERICAN ? 0 : (d->crouched() ? -1.25f : -2.5f);
-        vec kickback = (d->character==C_AMERICAN ? vec(0, 0, 0) : vec(dir).mul(attacks[atk].kickamount*kickfactor));
+        int kickfactor = (m_tutorial && !canMove) || d->gameplay.classId==C_AMERICAN ? 0 : (d->crouched() ? -1.25f : -2.5f);
+        vec kickback = (d->gameplay.classId==C_AMERICAN ? vec(0, 0, 0) : vec(dir).mul(attacks[atk].kickamount*kickfactor));
         d->vel.add(kickback);
 
         float shorten = attacks[atk].range && dist > attacks[atk].range ? attacks[atk].range : 0,
@@ -1083,8 +1083,8 @@ namespace game
                    hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
         }
         float waitfactor = 1;
-        if(d->character==C_PRIEST && d->abilitymillis[ABILITY_3]) waitfactor = 2.5f + ((4000.f - d->abilitymillis[ABILITY_3])/1000.f);
-        if(d->boostmillis[B_SHROOMS]) waitfactor *= d->character==C_JUNKIE ? 1.75f : 1.5f;
+        if(d->gameplay.classId==C_PRIEST && d->abilitymillis[ABILITY_3]) waitfactor = 2.5f + ((4000.f - d->abilitymillis[ABILITY_3])/1000.f);
+        if(d->boostmillis[B_SHROOMS]) waitfactor *= d->gameplay.classId==C_JUNKIE ? 1.75f : 1.5f;
         d->gunwait = attacks[atk].attackdelay/waitfactor;
         d->stats.shots += (attacks[atk].damage*attacks[atk].rays) * (d->hasRoids() ? 1 : 2);
         if(d==player1 && isSemiAutoGun(gun) && !specialAbility) d->action.attackAction = ACT_IDLE;

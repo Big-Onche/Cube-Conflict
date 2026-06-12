@@ -9,8 +9,8 @@ void getsteamname()
     if(!SteamEnabled) {conoutf(CON_ERROR, "\fc%s", readstr("Console_Error_SteamAPINotInit")); return;}
     else if(usesteamname)
     {
-        copystring(game::player1->name, SteamFriends()->GetPersonaName());
-        game::addmsg(N_SWITCHNAME, "rs", game::player1->name);
+        copystring(game::player1->info.name, SteamFriends()->GetPersonaName());
+        game::addmsg(N_SWITCHNAME, "rs", game::player1->info.name);
     }
 #else
     conoutf(CON_ERROR, "\fc%s", readstr("Console_Error_SteamAPINotInit"));
@@ -98,7 +98,7 @@ namespace game
     {
         if(d->state != CS_ALIVE && d->state != CS_DEAD) return;
         float scale = calcradarscale();
-        setbliptex(player1->team==d->team ? 1 : 2, d->state == CS_DEAD ? "_dead" : "_alive");
+        setbliptex(player1->gameplay.team==d->gameplay.team ? 1 : 2, d->state == CS_DEAD ? "_dead" : "_alive");
         gle::defvertex(2);
         gle::deftexcoord0();
         gle::begin(GL_QUADS);
@@ -114,11 +114,11 @@ namespace game
         loopv(players)
         {
             gameent *o = players[i];
-            if(o != d && o->state == CS_ALIVE && o->team == d->team)
+            if(o != d && o->state == CS_ALIVE && o->gameplay.team == d->gameplay.team)
             {
                 if(!alive++)
                 {
-                    setbliptex(player1->team==d->team ? 1 : 2, "_alive");
+                    setbliptex(player1->gameplay.team==d->gameplay.team ? 1 : 2, "_alive");
                     gle::defvertex(2);
                     gle::deftexcoord0();
                     gle::begin(GL_QUADS);
@@ -130,11 +130,11 @@ namespace game
         loopv(players)
         {
             gameent *o = players[i];
-            if(o != d && o->state == CS_DEAD && o->team == d->team)
+            if(o != d && o->state == CS_DEAD && o->gameplay.team == d->gameplay.team)
             {
                 if(!dead++)
                 {
-                    setbliptex(d->team, "_dead");
+                    setbliptex(d->gameplay.team, "_dead");
                     gle::defvertex(2);
                     gle::deftexcoord0();
                     gle::begin(GL_QUADS);
@@ -178,9 +178,9 @@ namespace game
 
     void switchname(const char *name)
     {
-        filtertext(player1->name, name, false, false, MAXNAMELEN);
-        if(!player1->name[0]) formatstring(player1->name, "%s", readstr("Misc_BadUsername"));
-        addmsg(N_SWITCHNAME, "rs", player1->name);
+        filtertext(player1->info.name, name, false, false, MAXNAMELEN);
+        if(!player1->info.name[0]) formatstring(player1->info.name, "%s", readstr("Misc_BadUsername"));
+        addmsg(N_SWITCHNAME, "rs", player1->info.name);
     }
     void printname()
     {
@@ -192,27 +192,27 @@ namespace game
         else if(!*numargs) printname();
         else result(colorname(player1));
     });
-    ICOMMAND(getname, "", (), result(player1->name));
+    ICOMMAND(getname, "", (), result(player1->info.name));
 
     void switchteam(const char *team)
     {
         int num = isdigit(team[0]) ? parseint(team) : teamnumber(team);
         if(!validteam(num)) return;
-        if(player1->clientnum < 0) player1->team = num;
+        if(player1->clientnum < 0) player1->gameplay.team = num;
         else addmsg(N_SWITCHTEAM, "ri", num);
     }
     void printteam()
     {
-        if((player1->clientnum >= 0 && !m_teammode) || !validteam(player1->team)) conoutf("%s", readstr("Console_User_NoTeam"));
-        else conoutf("%s \fs%s%s\fr", readstr("Console_User_YourTeamIs"), teamtextcode[player1->team], readstr("Team_Names", player1->team));
+        if((player1->clientnum >= 0 && !m_teammode) || !validteam(player1->gameplay.team)) conoutf("%s", readstr("Console_User_NoTeam"));
+        else conoutf("%s \fs%s%s\fr", readstr("Console_User_YourTeamIs"), teamtextcode[player1->gameplay.team], readstr("Team_Names", player1->gameplay.team));
     }
     ICOMMAND(team, "sN", (char *s, int *numargs),
     {
         if(*numargs > 0) switchteam(s);
         else if(!*numargs) printteam();
-        else if((player1->clientnum < 0 || m_teammode) && validteam(player1->team)) result(tempformatstring("\fs%s%s\fr", teamtextcode[player1->team], readstr("Team_Names", player1->team)));
+        else if((player1->clientnum < 0 || m_teammode) && validteam(player1->gameplay.team)) result(tempformatstring("\fs%s%s\fr", teamtextcode[player1->gameplay.team], readstr("Team_Names", player1->gameplay.team)));
     });
-    ICOMMAND(getteam, "", (), intret((player1->clientnum < 0 || m_teammode) && validteam(player1->team) ? player1->team : 0));
+    ICOMMAND(getteam, "", (), intret((player1->clientnum < 0 || m_teammode) && validteam(player1->gameplay.team) ? player1->gameplay.team : 0));
     ICOMMAND(getteamname, "i", (int *num), result(teamname(*num)));
 
     struct authkey
@@ -237,7 +237,7 @@ namespace game
 
     authkey *findauthkey(const char *desc = "")
     {
-        loopv(authkeys) if(!strcmp(authkeys[i]->desc, desc) && !strcasecmp(authkeys[i]->name, player1->name)) return authkeys[i];
+        loopv(authkeys) if(!strcmp(authkeys[i]->desc, desc) && !strcasecmp(authkeys[i]->name, player1->info.name)) return authkeys[i];
         loopv(authkeys) if(!strcmp(authkeys[i]->desc, desc)) return authkeys[i];
         return NULL;
     }
@@ -305,7 +305,7 @@ namespace game
 
     void writeclientinfo(stream *f)
     {
-        f->printf("name %s\n", escapestring(player1->name));
+        f->printf("name %s\n", escapestring(player1->info.name));
     }
 
     bool allowedittoggle(bool msg)
@@ -333,7 +333,7 @@ namespace game
     const char *getclientname(int cn)
     {
         gameent *d = getclient(cn);
-        return d ? d->name : "";
+        return d ? d->info.name : "";
     }
     ICOMMAND(getclientname, "i", (int *cn), result(getclientname(*cn)));
 
@@ -346,21 +346,21 @@ namespace game
     int getclientteam(int cn)
     {
         gameent *d = getclient(cn);
-        return m_teammode && d && validteam(d->team) ? d->team : 0;
+        return m_teammode && d && validteam(d->gameplay.team) ? d->gameplay.team : 0;
     }
     ICOMMAND(getclientteam, "i", (int *cn), intret(getclientteam(*cn)));
 
     int getclientmodel(int cn)
     {
         gameent *d = getclient(cn);
-        return d ? d->playermodel : -1;
+        return d ? d->render.model : -1;
     }
     ICOMMAND(getclientmodel, "i", (int *cn), intret(getclientmodel(*cn)));
 
     int getclientcolor(int cn)
     {
         gameent *d = getclient(cn);
-        return d && d->state!=CS_SPECTATOR ? getplayercolor(d, m_teammode && validteam(d->team) ? d->team : 0) : 0xFFFFFF;
+        return d && d->state!=CS_SPECTATOR ? getplayercolor(d, m_teammode && validteam(d->gameplay.team) ? d->gameplay.team : 0) : 0xFFFFFF;
     }
     ICOMMAND(getclientcolor, "i", (int *cn), intret(getclientcolor(*cn)));
 
@@ -385,13 +385,13 @@ namespace game
     ICOMMAND(getclientaptitude, "i", (int *cn),
     {
         gameent *d = getclient(*cn);
-        if(d) intret(d->character);
+        if(d) intret(d->gameplay.classId);
     });
 
     ICOMMAND(getclientlevel, "i", (int *cn),
     {
         gameent *d = getclient(*cn);
-        if(d) intret(d->level);
+        if(d) intret(d->gameplay.level);
     });
 
     bool ismaster(int cn)
@@ -460,13 +460,13 @@ namespace game
         loopv(players)
         {
             gameent *o = players[i];
-            if(!strcmp(arg, o->name)) return o->clientnum;
+            if(!strcmp(arg, o->info.name)) return o->clientnum;
         }
         // nothing found, try case insensitive
         loopv(players)
         {
             gameent *o = players[i];
-            if(cubecaseequal(o->name, arg)) return o->clientnum;
+            if(cubecaseequal(o->info.name, arg)) return o->clientnum;
         }
         int len = strlen(arg);
         if(playersearch && len >= playersearch)
@@ -475,13 +475,13 @@ namespace game
             loopv(players)
             {
                 gameent *o = players[i];
-                if(cubecaseequal(o->name, arg, len)) return o->clientnum;
+                if(cubecaseequal(o->info.name, arg, len)) return o->clientnum;
             }
             // try case insensitive substring
             loopv(players)
             {
                 gameent *o = players[i];
-                if(cubecasefind(o->name, arg)) return o->clientnum;
+                if(cubecasefind(o->info.name, arg)) return o->clientnum;
             }
         }
         return -1;
@@ -543,7 +543,7 @@ namespace game
     {
         gameent *d = getclient(cn);
         if(!d || d == player1) return;
-        conoutf("ignoring %s", d->name);
+        conoutf("ignoring %s", d->info.name);
         if(ignores.find(cn) < 0) ignores.add(cn);
     }
 
@@ -551,7 +551,7 @@ namespace game
     {
         if(ignores.find(cn) < 0) return;
         gameent *d = getclient(cn);
-        if(d) conoutf("stopped ignoring %s", d->name);
+        if(d) conoutf("stopped ignoring %s", d->info.name);
         ignores.removeobj(cn);
     }
 
@@ -1033,7 +1033,7 @@ namespace game
     void toserver(char *text) { conoutf(CON_CHAT, "%s\f4:\f7 %s", teamcolorname(player1, NULL), text); addmsg(N_TEXT, "rcs", player1, text); }
     COMMANDN(say, toserver, "C");
 
-    void sayteam(char *text) { if(!m_teammode || !validteam(player1->team)) return; conoutf(CON_TEAMCHAT, "%s\f4:\fd %s", teamcolorname(player1, NULL), text); addmsg(N_SAYTEAM, "rcs", player1, text); }
+    void sayteam(char *text) { if(!m_teammode || !validteam(player1->gameplay.team)) return; conoutf(CON_TEAMCHAT, "%s\f4:\fd %s", teamcolorname(player1, NULL), text); addmsg(N_SAYTEAM, "rcs", player1, text); }
     COMMAND(sayteam, "C");
 
     ICOMMAND(servcmd, "C", (char *cmd), addmsg(N_SERVCMD, "rs", cmd));
@@ -1173,12 +1173,12 @@ namespace game
     {
         packetbuf p(MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
         putint(p, N_CONNECT);
-        sendstring(player1->name, p);
-        putint(p, player1->playermodel);
-        putint(p, player1->playercolor);
-        loopi(NUMSKINS) putint(p, player1->skin[i]);
-        putint(p, player1->character);
-        putint(p, player1->level);
+        sendstring(player1->info.name, p);
+        putint(p, player1->render.model);
+        putint(p, player1->render.color);
+        loopi(NUMSKINS) putint(p, player1->render.skin[i]);
+        putint(p, player1->gameplay.classId);
+        putint(p, player1->gameplay.level);
         string hash = "";
         if(connectpass[0])
         {
@@ -1466,7 +1466,7 @@ namespace game
                 getstring(text, p);
                 filtertext(text, text, true, true);
                 if(!t || isignored(t->clientnum)) break;
-                int team = validteam(t->team) ? t->team : 0;
+                int team = validteam(t->gameplay.team) ? t->gameplay.team : 0;
                 if(t->state!=CS_DEAD && t->state!=CS_SPECTATOR)
                     particles::text(t->abovehead(), text, PART_TEXT, 2000, teamtextcolor[team], 4.0f, -8);
                 conoutf(CON_TEAMCHAT, "%s\f4:\f7 %s", teamcolorname(d, NULL), text);
@@ -1535,9 +1535,9 @@ namespace game
                 getstring(text, p);
                 filtertext(text, text, false, false, MAXNAMELEN);
                 if(!text[0]) copystring(text, readstr("Misc_BadUsername"));
-                if(d->name[0])          // already connected
+                if(d->info.name[0])          // already connected
                 {
-                    if(strcmp(d->name, text) && !isignored(d->clientnum))
+                    if(strcmp(d->info.name, text) && !isignored(d->clientnum))
                         conoutf("%s %s %s", colorname(d), readstr("Console_User_ChangedName"), colorname(d, text));
                 }
                 else                    // new client
@@ -1545,14 +1545,14 @@ namespace game
                     conoutf("\f7%s\f4 %s", colorname(d, text), readstr("Console_Game_Joined"));
                     if(needclipboard >= 0) needclipboard++;
                 }
-                copystring(d->name, text, MAXNAMELEN+1);
-                d->team = getint(p);
-                if(!validteam(d->team)) d->team = 0;
-                d->playermodel = getint(p);
-                d->playercolor = getint(p);
-                loopi(NUMSKINS) d->skin[i] = getint(p);
-                d->character = getint(p);
-                d->level = getint(p);
+                copystring(d->info.name, text, MAXNAMELEN+1);
+                d->gameplay.team = getint(p);
+                if(!validteam(d->gameplay.team)) d->gameplay.team = 0;
+                d->render.model = getint(p);
+                d->render.color = getint(p);
+                loopi(NUMSKINS) d->render.skin[i] = getint(p);
+                d->gameplay.classId = getint(p);
+                d->gameplay.level = getint(p);
                 d->isConnected = true;
                 break;
             }
@@ -1563,10 +1563,10 @@ namespace game
                 {
                     filtertext(text, text, false, false, MAXNAMELEN);
                     if(!text[0]) formatstring(text, "%s", executestr("createNickname $FALSE"));
-                    if(strcmp(text, d->name))
+                    if(strcmp(text, d->info.name))
                     {
                         if(!isignored(d->clientnum)) conoutf("%s %s %s", colorname(d), readstr("Console_User_ChangedName"), colorname(d, text));
-                        copystring(d->name, text, MAXNAMELEN+1);
+                        copystring(d->info.name, text, MAXNAMELEN+1);
                     }
                 }
                 break;
@@ -1576,7 +1576,7 @@ namespace game
                 int model = getint(p);
                 if(d)
                 {
-                    d->playermodel = model;
+                    d->render.model = model;
                     if(d->ragdoll) cleanGrave(d);
                 }
                 break;
@@ -1585,7 +1585,7 @@ namespace game
             case N_SENDCLASS:
             {
                 int character = getint(p);
-                if(d && validClass(character)) d->character = character;
+                if(d && validClass(character)) d->gameplay.classId = character;
                 break;
             }
 
@@ -1624,7 +1624,7 @@ namespace game
 
                 if(g==player1)
                 {
-                    if(player1->character==C_JUNKIE && isteam(g->team, r->team) && r->character==C_VAMPIRE) unlockAchievement(ACH_NATURO);
+                    if(player1->gameplay.classId==C_JUNKIE && isteam(g->gameplay.team, r->gameplay.team) && r->gameplay.classId==C_VAMPIRE) unlockAchievement(ACH_NATURO);
                     stat ? updateStat(10, STAT_MANAREGEN) : updateStat(5, STAT_HEALTHREGEN);
                 }
 
@@ -1657,7 +1657,7 @@ namespace game
             case N_SWITCHCOLOR:
             {
                 int color = getint(p);
-                if(d) d->playercolor = color;
+                if(d) d->render.color = color;
                 break;
             }
 
@@ -1665,7 +1665,7 @@ namespace game
             {
                 int skinType = getint(p);
                 int skinId = getint(p);
-                if(d) d->skin[skinType] = skinId;
+                if(d) d->render.skin[skinType] = skinId;
                 break;
             }
 
@@ -1703,10 +1703,10 @@ namespace game
                 parsestate(s, p);
                 s->state = CS_ALIVE;
                 if(cmode) cmode->pickspawn(s);
-                else findplayerspawn(s, -1, m_teammode && !m_capture ? s->team : 0);
+                else findplayerspawn(s, -1, m_teammode && !m_capture ? s->gameplay.team : 0);
                 if(s == player1)
                 {
-                    if(player1->character==C_SOLDIER && player1->hasSuperWeapon()) unlockAchievement(ACH_CHANCE);
+                    if(player1->gameplay.classId==C_SOLDIER && player1->hasSuperWeapon()) unlockAchievement(ACH_CHANCE);
                     showscores(false);
                     lasthit = 0;
                     player1->pickups.lastWeapon = player1->gunselect;
@@ -1767,7 +1767,7 @@ namespace game
                 else if(!afterburn) target->afterburnatk = 0;
                 if(target->state == CS_ALIVE && actor != player1) target->lastpain = lastmillis;
                 damaged(damage, target, actor, false, atk, isAfterburnHit);
-                if(player1->character==C_VIKING && target==player1 && actor!=player1 && player1->state==CS_ALIVE)
+                if(player1->gameplay.classId==C_VIKING && target==player1 && actor!=player1 && player1->state==CS_ALIVE)
                 {
                     if(player1->boostmillis[B_RAGE]>8000) unlockAchievement(ACH_RAGE);
                 }
@@ -1852,7 +1852,7 @@ namespace game
                 if(!actor) break;
                 actor->stats.frags = frags;
                 actor->stats.streak = streak;
-                if(m_teammode) setteaminfo(actor->team, tfrags);
+                if(m_teammode) setteaminfo(actor->gameplay.team, tfrags);
                 if(!victim) break;
                 victim->stats.streak = 0;
                 killed(victim, actor, atk);
@@ -2213,8 +2213,8 @@ namespace game
                 int wn = getint(p), team = getint(p), reason = getint(p);
                 gameent *w = getclient(wn);
                 if(!w) return;
-                w->team = validteam(team) ? team : 0;
-                if(reason>=0) conoutf(CON_GAMEINFO, "%s %s %s", colorname(w), reason ? readstr("Console_User_TeamSwitch") : readstr("Console_User_ForcedTeamSwitch"), readstr("Team_Names", w->team));
+                w->gameplay.team = validteam(team) ? team : 0;
+                if(reason>=0) conoutf(CON_GAMEINFO, "%s %s %s", colorname(w), reason ? readstr("Console_User_TeamSwitch") : readstr("Console_User_ForcedTeamSwitch"), readstr("Team_Names", w->gameplay.team));
                 break;
             }
 

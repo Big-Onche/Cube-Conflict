@@ -116,7 +116,7 @@ namespace game
 
     const playermodelinfo &getplayermodelinfo(gameent *d)
     {
-        const playermodelinfo *mdl = getplayermodelinfo(d==player1 || forceplayermodels ? playermodel : d->playermodel);
+        const playermodelinfo *mdl = getplayermodelinfo(d==player1 || forceplayermodels ? playermodel : d->render.model);
         if(!mdl) mdl = getplayermodelinfo(playermodel);
         return *mdl;
     }
@@ -143,13 +143,13 @@ namespace game
             case 2: return getplayercolor(2, playercolorrojo);
             default: return getplayercolor(0, playercolor);
         }
-        else return getplayercolor(team, (d->playercolor>>(5*team))&0x1F);
+        else return getplayercolor(team, (d->render.color>>(5*team))&0x1F);
     }
 
     void changedplayermodel()
     {
         if(!smiley[playermodel]) { conoutf(CON_ERROR, "\f3%s", readstr("Console_Shop_SmileyNotOwned")); playSound(S_ERROR, vec(0, 0, 0), 0, 0, SND_FIXEDPITCH); playermodel = 0; return; }
-        if(player1->clientnum < 0) player1->playermodel = playermodel;
+        if(player1->clientnum < 0) player1->render.model = playermodel;
         if(player1->ragdoll) cleanGrave(player1);
         loopv(curGraves)
         {
@@ -157,7 +157,7 @@ namespace game
             if(!d->ragdoll) continue;
             if(!forceplayermodels)
             {
-                const playermodelinfo *mdl = getplayermodelinfo(d->playermodel);
+                const playermodelinfo *mdl = getplayermodelinfo(d->render.model);
                 if(mdl) continue;
             }
             cleanGrave(d);
@@ -168,7 +168,7 @@ namespace game
             if(d == player1 || !d->ragdoll) continue;
             if(!forceplayermodels)
             {
-                const playermodelinfo *mdl = getplayermodelinfo(d->playermodel);
+                const playermodelinfo *mdl = getplayermodelinfo(d->render.model);
                 if(mdl) continue;
             }
             cleanGrave(d);
@@ -177,25 +177,25 @@ namespace game
 
     void changedplayercolor()
     {
-        if(player1->clientnum < 0) player1->playercolor = playercolor | (playercolorazul<<5) | (playercolorrojo<<10);
+        if(player1->clientnum < 0) player1->render.color = playercolor | (playercolorazul<<5) | (playercolorrojo<<10);
     }
 
     void syncplayer()
     {
-        if(player1->playermodel != playermodel)
+        if(player1->render.model != playermodel)
         {
-            player1->playermodel = playermodel;
-            addmsg(N_SWITCHMODEL, "ri", player1->playermodel);
+            player1->render.model = playermodel;
+            addmsg(N_SWITCHMODEL, "ri", player1->render.model);
         }
 
         int col = playercolor | (playercolorazul<<5) | (playercolorrojo<<10);
-        if(player1->playercolor != col)
+        if(player1->render.color != col)
         {
-            player1->playercolor = col;
-            addmsg(N_SWITCHCOLOR, "ri", player1->playercolor);
+            player1->render.color = col;
+            addmsg(N_SWITCHCOLOR, "ri", player1->render.color);
         }
 
-        loopi(NUMSKINS) addmsg(N_SENDSKIN, "ri2", i, player1->skin[i]);
+        loopi(NUMSKINS) addmsg(N_SENDSKIN, "ri2", i, player1->render.skin[i]);
     }
 
     std::map<std::pair<int, bool>, std::string> weaponsPaths;
@@ -314,9 +314,9 @@ namespace game
 
     void renderGrave(gameent *d, float fade)
     {
-        if(validGrave(d->skin[SKIN_GRAVE]))
+        if(validGrave(d->render.skin[SKIN_GRAVE]))
         {
-            rendermodel(getGraveDir(d->skin[SKIN_GRAVE]), ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED, d, NULL, 0, 0, fade);
+            rendermodel(getGraveDir(d->render.skin[SKIN_GRAVE]), ANIM_MAPMODEL|ANIM_LOOP, vec(d->o.x, d->o.y, d->o.z-16.0f), d->yaw, 0, 0, MDL_CULL_VFC|MDL_CULL_DIST|MDL_CULL_OCCLUDED, d, NULL, 0, 0, fade);
         }
     }
 
@@ -334,16 +334,16 @@ namespace game
         {
             flags |= MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY;
 
-            if(validGrave(d->skin[SKIN_GRAVE]))
+            if(validGrave(d->render.skin[SKIN_GRAVE]))
             {
-                if(d->graveSize < 1.0f) d->graveSize = min(d->graveSize + (3.f / curfps), 1.0f);
-                rendermodel(getGraveDir(d->skin[SKIN_GRAVE]), ANIM_MAPMODEL|ANIM_LOOP, d->feetpos(), d->yaw, 0, 0, flags, NULL, NULL, 0, 0, d->graveSize);
+                if(d->render.graveSize < 1.0f) d->render.graveSize = min(d->render.graveSize + (3.f / curfps), 1.0f);
+                rendermodel(getGraveDir(d->render.skin[SKIN_GRAVE]), ANIM_MAPMODEL|ANIM_LOOP, d->feetpos(), d->yaw, 0, 0, flags, NULL, NULL, 0, 0, d->render.graveSize);
             }
 
-            if(d->skeletonSize)
+            if(d->render.skeletonSize)
             {
-                d->skeletonSize = max(d->skeletonSize - (3.f / curfps), 0.0f);
-                rendermodel("mapmodel/smileys/mort", ANIM_MAPMODEL|ANIM_LOOP, d->feetpos(), d->yaw+90, 0, 0, flags, NULL, NULL, 0, 0, d->skeletonSize);
+                d->render.skeletonSize = max(d->render.skeletonSize - (3.f / curfps), 0.0f);
+                rendermodel("mapmodel/smileys/mort", ANIM_MAPMODEL|ANIM_LOOP, d->feetpos(), d->yaw+90, 0, 0, flags, NULL, NULL, 0, 0, d->render.skeletonSize);
             }
             return;
         }
@@ -394,8 +394,8 @@ namespace game
         if(d==player1 || m_tutorial) mdlname = (powerArmor || d->ammo[GUN_POWERARMOR] ? "smileys/armureassistee" : mdl.model[1]); // player1 is always yellow
         else
         {
-            if(powerArmor || d->ammo[GUN_POWERARMOR]) mdlname = d->team==player1->team && validteam(team) ? "smileys/armureassistee" : "smileys/armureassistee/red";
-            else mdlname =  d->abilitymillis[ABILITY_2] && d->character==C_PHYSICIST ? "smileys/phy_2" : postfx::cbfilter && d->team==player1->team ? mdl.cbmodel : mdl.model[validteam(team) && d->team==player1->team ? 1 : 0];
+            if(powerArmor || d->ammo[GUN_POWERARMOR]) mdlname = d->gameplay.team==player1->gameplay.team && validteam(team) ? "smileys/armureassistee" : "smileys/armureassistee/red";
+            else mdlname =  d->abilitymillis[ABILITY_2] && d->gameplay.classId==C_PHYSICIST ? "smileys/phy_2" : postfx::cbfilter && d->gameplay.team==player1->gameplay.team ? mdl.cbmodel : mdl.model[validteam(team) && d->gameplay.team==player1->gameplay.team ? 1 : 0];
         }
 
         modelattach a[10];
@@ -415,9 +415,9 @@ namespace game
 
             if(mainpass && !(flags&MDL_ONLYSHADOW))
             {
-                d->muzzle = d->balles = vec(-1, -1, -1);
-                a[ai++] = modelattach("tag_muzzle", &d->muzzle);
-                a[ai++] = modelattach("tag_balles", &d->balles);
+                d->render.muzzlePos = d->render.casingPos = vec(-1, -1, -1);
+                a[ai++] = modelattach("tag_muzzle", &d->render.muzzlePos);
+                a[ai++] = modelattach("tag_balles", &d->render.casingPos);
             }
         }
 
@@ -433,12 +433,12 @@ namespace game
         if(d->boostmillis[B_EPO])   a[ai++] = modelattach("tag_boost2", "boosts/epo", 0, 0);
 
         /////////////////////////// Classe's hat ///////////////////////////
-        if(validClass(d->character)) a[ai++] = modelattach("tag_hat", classes[d->character].hatDir, 0, 0);
+        if(validClass(d->gameplay.classId)) a[ai++] = modelattach("tag_hat", classes[d->gameplay.classId].hatDir, 0, 0);
 
         /////////////////////////// Player's cape ///////////////////////////
-        if(validCape(d->skin[SKIN_CAPE]))
+        if(validCape(d->render.skin[SKIN_CAPE]))
         {
-            a[ai++] = modelattach("tag_cape", getCapeDir(d->skin[SKIN_CAPE], d->team == player1->team ? false : true), 0, 0);
+            a[ai++] = modelattach("tag_cape", getCapeDir(d->render.skin[SKIN_CAPE], d->gameplay.team == player1->gameplay.team ? false : true), 0, 0);
         }
 
         if(d!=player1) flags |= MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY;
@@ -447,9 +447,9 @@ namespace game
         if(!mainpass) flags &= ~(MDL_FULLBRIGHT | MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY | MDL_CULL_DIST);
         float trans = d->state == CS_LAGGED ? 0.5f : 1.0f;
 
-        if(d->character==C_PHYSICIST && d->abilitymillis[ABILITY_2]) trans = 0.f;
-        else if(d->character==C_WIZARD && d->abilitymillis[ABILITY_1]) trans = 0.7f;
-        else if(d->character==C_SPY)
+        if(d->gameplay.classId==C_PHYSICIST && d->abilitymillis[ABILITY_2]) trans = 0.f;
+        else if(d->gameplay.classId==C_WIZARD && d->abilitymillis[ABILITY_1]) trans = 0.7f;
+        else if(d->gameplay.classId==C_SPY)
         {
             if(d->abilitymillis[ABILITY_1])
             {
@@ -493,7 +493,7 @@ namespace game
 
         const char *mdlname = mdl.model[validteam(team) ? team : 0];
 
-        a[ai++] = modelattach("tag_hat", classes[player1->character].hatDir, 0, 0);
+        a[ai++] = modelattach("tag_hat", classes[player1->gameplay.classId].hatDir, 0, 0);
         a[ai++] = modelattach("tag_cape", getCapeDir(cape, !team), 0, 0);
 
         rendermodel(mdlname, anim, o, d->yaw, d->pitch, 0, NULL, d, a[0].tag ? a : NULL, 0, 0, 1, vec4(vec::hexcolor(color), 5));
@@ -501,7 +501,7 @@ namespace game
 
     static inline void renderplayer(gameent *d, float fade = 1, int flags = 0)
     {
-        int team = m_teammode && validteam(d->team) ? d->team : 0;
+        int team = m_teammode && validteam(d->gameplay.team) ? d->gameplay.team : 0;
         renderplayer(d, getplayermodelinfo(d), getplayercolor(d, team), team, fade, flags);
     }
 
@@ -513,23 +513,29 @@ namespace game
         switch(d->gunselect)
         {
             case GUN_FLAMETHROWER:
+            {
+
+                vec muzzlePos = d->render.muzzlePos;
                 if(lastmillis - d->action.lastAttack < 1000 && !d->action.attackAction)
                 {
-                    if(rndevent(85)) particle_splash(PART_SMOKE, 1, 700, d->muzzle, 0x282828, 0.75f, 10, -15, 6, hasShrooms());
+                    if(rndevent(85)) particle_splash(PART_SMOKE, 1, 700, muzzlePos, 0x282828, 0.75f, 10, -15, 6, hasShrooms());
                     if(rndevent(95))
                     {
-                        particle_splash(PART_FLAME, 2, 300, d->muzzle, 0xFF5500, 1.0f, 10, -10, -2, hasShrooms());
-                        particle_flare(d->muzzle, d->muzzle, 1000, PART_HAZE_MUZZLE, 50, 4.0f, d);
+                        particle_splash(PART_FLAME, 2, 300, muzzlePos, 0xFF5500, 1.0f, 10, -10, -2, hasShrooms());
+                        particle_flare(muzzlePos, muzzlePos, 1000, PART_HAZE_MUZZLE, 50, 4.0f, d);
                     }
                 }
                 break;
-
+            }
             case GUN_MOLOTOV:
+            {
                 if(!rndevent(95)) return;
-                particle_splash(PART_FIRE_BALL, 2, 80, d->balles, 0xFFC864, 1, 30, 30, 0, hasShrooms());
-                particle_splash(PART_SMOKE, 2, 180, d->balles, 0x444444, 2, 40, 50, 0, hasShrooms());
-                particle_splash(PART_HAZE_SMALL, 2, 250, d->balles, 85, 2, 40, 50, 5);
+                vec casingPos = d->render.casingPos;
+                particle_splash(PART_FIRE_BALL, 2, 80, casingPos, 0xFFC864, 1, 30, 30, 0, hasShrooms());
+                particle_splash(PART_SMOKE, 2, 180, casingPos, 0x444444, 2, 40, 50, 0, hasShrooms());
+                particle_splash(PART_HAZE_SMALL, 2, 250, casingPos, 85, 2, 40, 50, 5);
                 break;
+            }
         }
     }
 
@@ -551,7 +557,7 @@ namespace game
             float metersize = 0.08f;
             vec textpos = d->abovehead();
             textpos.addz(dist/32.f);
-            particles::text(textpos, tempformatstring("%s", d->name), PART_TEXT, 1, d->state==CS_ALIVE ? (d->team==1 ? 0xFFFF00 : 0xFF0000) : 0x595959, metersize, 0, true);
+            particles::text(textpos, tempformatstring("%s", d->info.name), PART_TEXT, 1, d->state==CS_ALIVE ? (d->gameplay.team==1 ? 0xFFFF00 : 0xFF0000) : 0x595959, metersize, 0, true);
             if(d->state==CS_ALIVE) particles::meter(d->abovehead(), d->health/1000.0f, PART_METER, 1, rygbGradient(d->health/10), 0x000000, metersize, true);
         }
     }
@@ -585,7 +591,7 @@ namespace game
 
         if(d->boostmillis[B_JOINT] && rndevent(93)) regularflame(PART_SMOKE, d->abovehead().add(vec(-12, 5, -19)), 2, 3, 0x888888, 1, 1.6f, 50.0f, 1000.0f, -10);
 
-        switch(d->character)
+        switch(d->gameplay.classId)
         {
             case C_WIZARD:
                 if(d->abilitymillis[ABILITY_1]) particle_splash(PART_SMOKE, 2, 120, d->o, 0xFF33FF, 10+rnd(5), 400,400);
@@ -618,10 +624,10 @@ namespace game
 
     void renderPlayerIcons(gameent *d, vec pos, float dist)
     {
-        if(isteam(hudplayer()->team, d->team))
+        if(isteam(hudplayer()->gameplay.team, d->gameplay.team))
         {
             float metersize = 0.08f / (dist / 125);
-            if(hudplayer()->character==C_MEDIC)
+            if(hudplayer()->gameplay.classId==C_MEDIC)
             {
                 int health = d->health;
                 if(dist <= 250) particles::meter(d->abovehead(), health/1000.0f, PART_METER, 1, rygbGradient(health/10), 0x000000, metersize, true);
@@ -631,7 +637,7 @@ namespace game
                     particles::hudIcon(PART_HEALTH, pos, (totalmillis % blinkSpeed < blinkSpeed / 2) ? 0x111111 : 0xFFFFFF, 0.075f);
                 }
             }
-            else if(hudplayer()->character==C_JUNKIE)
+            else if(hudplayer()->gameplay.classId==C_JUNKIE)
             {
                 if(hasAbilities(d))
                 {
@@ -644,7 +650,7 @@ namespace game
                 }
             }
         }
-        else if((hudplayer()->character==C_SPY && hudplayer()->abilitymillis[ABILITY_3]) || totalmillis - getspyability < 2000)
+        else if((hudplayer()->gameplay.classId==C_SPY && hudplayer()->abilitymillis[ABILITY_3]) || totalmillis - getspyability < 2000)
         {
             particles::hudIcon(PART_VISEUR, pos, 0xBBBBBB);
         }
@@ -729,7 +735,7 @@ namespace game
         {
             if(d->physstate >= PHYS_SLOPE)
             {
-                swayspeed = min(sqrtf(d->vel.x*d->vel.x + d->vel.y*d->vel.y), 200 - classes[d->character].speed*0.12f);
+                swayspeed = min(sqrtf(d->vel.x*d->vel.x + d->vel.y*d->vel.y), 200 - classes[d->gameplay.classId].speed*0.12f);
                 swaydist += swayspeed*curtime/1000.0f;
                 swaydist = fmod(swaydist, 2*swaystep);
                 swayfade = 1;
@@ -814,14 +820,14 @@ namespace game
 
         vecfromyawpitch(d->yaw, 0, 0, hudgunDisp.x, gunAim);
 
-        int team = m_teammode && validteam(d->team) ? d->team : 0,
+        int team = m_teammode && validteam(d->gameplay.team) ? d->gameplay.team : 0,
             color = getplayercolor(d, team);
 
         modelattach a[3];
         int ai = 0;
-        d->muzzle = d->balles = vec(-1, -1, -1);
-        a[ai++] = modelattach("tag_muzzle", &d->muzzle);
-        a[ai++] = modelattach("tag_balles", &d->balles);
+        d->render.muzzlePos = d->render.casingPos = vec(-1, -1, -1);
+        a[ai++] = modelattach("tag_muzzle", &d->render.muzzlePos);
+        a[ai++] = modelattach("tag_balles", &d->render.casingPos);
 
         if((d->gunselect==GUN_MINIGUN || d->gunselect==GUN_FLAMETHROWER || d->gunselect==GUN_PLASMA || d->gunselect==GUN_UZI || d->gunselect==GUN_S_GAU8) && anim!=ANIM_GUN_MELEE)
         {
@@ -831,8 +837,8 @@ namespace game
 
         rendermodel(getWeaponDir(d->gunselect, true), anim, gunAim.add(sway), d->yaw, d->pitch - gunSwitchAnim(d), 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), alpha));
 
-        if(d->muzzle.x >= 0) d->muzzle = calcavatarpos(d->muzzle, 12);
-        if(d->balles.x >= 0) d->balles = calcavatarpos(d->balles, 12);
+        if(d->render.muzzlePos.x >= 0) d->render.muzzlePos = calcavatarpos(d->render.muzzlePos, 12);
+        if(d->render.casingPos.x >= 0) d->render.casingPos = calcavatarpos(d->render.casingPos, 12);
     }
 
     void drawJointModel(gameent *d, float alpha)
@@ -846,15 +852,15 @@ namespace game
         sway.add(swaydir).add(d->o);
 
         modelattach a[2];
-        d->weed = vec(-1, -1, -1);
-        a[0] = modelattach("tag_joint", &d->weed);
+        d->render.weedPos = vec(-1, -1, -1);
+        a[0] = modelattach("tag_joint", &d->render.weedPos);
         rendermodel("hudboost/joint", NULL, sway, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, 0, 0, 1, vec4(1, 1, 1, alpha));
-        if(d->weed.x >= 0) d->weed = calcavatarpos(d->weed, 12);
+        if(d->render.weedPos.x >= 0) d->render.weedPos = calcavatarpos(d->render.weedPos, 12);
 
         if(rndevent(93))
         {
-            regularflame(PART_SMOKE, d->weed, 2, 3, 0x888888, 1, 1.3f, 50.0f, 1000.0f, -10);
-            particle_splash(PART_FIRE_BALL,  4, 50, d->weed, 0xFF6600, 0.6f, 20, 150);
+            regularflame(PART_SMOKE, d->render.weedPos, 2, 3, 0x888888, 1, 1.3f, 50.0f, 1000.0f, -10);
+            particle_splash(PART_FIRE_BALL,  4, 50, d->render.weedPos, 0xFF6600, 0.6f, 20, 150);
         }
     }
 
@@ -883,8 +889,8 @@ namespace game
         float alpha = gethudmodelalpha();
         bool wantsTransparentPass = alpha < 1.0f;
 
-        d->muzzle = player1->muzzle = vec(-1, -1, -1);
-        d->balles = player1->balles = vec(-1, -1, -1);
+        d->render.muzzlePos = player1->render.muzzlePos = vec(-1, -1, -1);
+        d->render.casingPos = player1->render.casingPos = vec(-1, -1, -1);
 
         if(transparent != wantsTransparentPass) return;
 
@@ -904,7 +910,7 @@ namespace game
     bool checkTransparentHudModels()
     {
         gameent *d = hudplayer();
-        if(d->character == C_PHYSICIST && d->abilitymillis[ABILITY_2]) hudmodelalpha = 15;
+        if(d->gameplay.classId == C_PHYSICIST && d->abilitymillis[ABILITY_2]) hudmodelalpha = 15;
         else hudmodelalpha = 100;
         return hudgun && d && d->state==CS_ALIVE && gethudmodelalpha() < 1.0f;
     }
@@ -941,7 +947,7 @@ namespace game
 
     vec hudgunorigin(int gun, const vec &from, const vec &to, gameent *d)
     {
-        if(d->muzzle.x >= 0) return d->muzzle;
+        if(d->render.muzzlePos.x >= 0) return d->render.muzzlePos;
         vec offset(from);
         if(d!=hudplayer() || isthirdperson())
         {

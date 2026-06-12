@@ -360,7 +360,7 @@ struct ctfclientmode : clientmode
     void drawblip(gameent *d, float x, float y, float s, int i, bool flagblip)
     {
         flag &f = flags[i];
-        setbliptex(player1->team!=f.team ? 2 : 1, flagblip ? "_flag" : "");
+        setbliptex(player1->gameplay.team!=f.team ? 2 : 1, flagblip ? "_flag" : "");
         drawblip(d, x, y, s, flagblip ? (f.owner ? f.owner->o : (f.droptime ? f.droploc : f.spawnloc)) : f.spawnloc, flagblip);
     }
 
@@ -445,7 +445,7 @@ struct ctfclientmode : clientmode
         {
             flag &f = flags[i];
             if(!f.owner && f.droptime && f.droploc.x < 0) continue;
-            const char *flagname = player1->team==f.team ? "drapeau/jaune" : "drapeau/rouge";
+            const char *flagname = player1->gameplay.team==f.team ? "drapeau/jaune" : "drapeau/rouge";
             float angle;
             vec pos = interpflagpos(f, angle);
             rendermodel(flagname, ANIM_MAPMODEL|ANIM_LOOP,
@@ -549,7 +549,7 @@ struct ctfclientmode : clientmode
     {
         int fcolor;
         vec color;
-        if(player1->team==team) { fcolor = 0xFF0000; color = vec(0.25f, 0.25f, 1); }
+        if(player1->gameplay.team==team) { fcolor = 0xFF0000; color = vec(0.25f, 0.25f, 1); }
         else { fcolor = 0xFFFF22; color = vec(1, 0.25f, 0.25f); }
         particle_fireball(loc, 30, PART_EXPLOSION, -1, fcolor, 4.8f);
         adddynlight(loc, 35, color, 900, 100);
@@ -564,7 +564,7 @@ struct ctfclientmode : clientmode
         if(to.x >= 0)
             flagexplosion(i, team, to);
         if(from.x >= 0 && to.x >= 0)
-            particle_flare(from, to, 600, PART_LIGHTNING, player1->team==team ? 0xFF2222 : 0xFFFF00, 1.0f);
+            particle_flare(from, to, 600, PART_LIGHTNING, player1->gameplay.team==team ? 0xFF2222 : 0xFFFF00, 1.0f);
     }
 
     void returnflag(gameent *d, int i, int version)
@@ -576,7 +576,7 @@ struct ctfclientmode : clientmode
         f.interptime = 0;
         returnflag(i);
         conoutf(CON_GAMEINFO, "%s%s %s %s", teamcolorname(d, readstr("GameMessage_You")), d==player1 ? readstr("GameMessage_Have") : readstr("GameMessage_Has"), readstr("Console_Game_Ctf_FlagRecovered"), teamcolorflag(f));
-        conoutf(CON_HUDCONSOLE, "%s%s", f.team==player1->team ? "\fe" : "\fc", f.team==player1->team ? readstr("GameMessage_Ctf_AlliedRecovered") : readstr("GameMessage_Ctf_EnemyRecovered"));
+        conoutf(CON_HUDCONSOLE, "%s%s", f.team==player1->gameplay.team ? "\fe" : "\fc", f.team==player1->gameplay.team ? readstr("GameMessage_Ctf_AlliedRecovered") : readstr("GameMessage_Ctf_EnemyRecovered"));
         if(d==player1) {updateStat(1, STAT_DRAPEAUXALYREC); addReward(10, 3);}
         playSound(S_DRAPEAURESET);
     }
@@ -614,11 +614,11 @@ struct ctfclientmode : clientmode
         if(d!=player1) particles::text(d->abovehead(), tempformatstring("%d", score), PART_TEXT, 2000, 0x32FF64, 4.0f, -8);
         d->stats.flags = dflags;
         conoutf(CON_GAMEINFO, "%s%s %s %s", teamcolorname(d, readstr("GameMessage_You")), d==player1 ? readstr("GameMessage_Have") : readstr("GameMessage_Has"), readstr("Console_Game_Ctf_FlagScore"), teamcolor(team));
-        conoutf(CON_HUDCONSOLE, "%s%s", team==player1->team ? "\fe" : "\fc", team==player1->team ? readstr("GameMessage_Ctf_AlliedScore") : readstr("GameMessage_Ctf_EnemyScore"));
+        conoutf(CON_HUDCONSOLE, "%s%s", team==player1->gameplay.team ? "\fe" : "\fc", team==player1->gameplay.team ? readstr("GameMessage_Ctf_AlliedScore") : readstr("GameMessage_Ctf_EnemyScore"));
 
         if(d==player1) { updateStat(1, STAT_DRAPEAUXENRAP); addReward(20, 10); if(player1->boostmillis[B_EPO]) unlockAchievement(ACH_EPOFLAG); }
 
-        playSound(team==player1->team ? S_DRAPEAUSCORE : S_DRAPEAUTOMBE);
+        playSound(team==player1->gameplay.team ? S_DRAPEAUSCORE : S_DRAPEAUTOMBE);
 
         if(score >= FLAGLIMIT) conoutf(CON_GAMEINFO, "%s \f7%s \fr%s", readstr("Misc_Team"), teamcolor(team), readstr("Console_Game_Won"));
     }
@@ -631,7 +631,7 @@ struct ctfclientmode : clientmode
         f.interploc = interpflagpos(f, f.interpangle);
         f.interptime = lastmillis;
         conoutf(CON_GAMEINFO, "%s%s %s %s", teamcolorname(d, readstr("GameMessage_You")), d==player1 ? readstr("GameMessage_Have") : readstr("GameMessage_Has"), readstr("Console_Game_Ctf_FlagStolen"), teamcolorflag(f));
-        conoutf(CON_HUDCONSOLE, "%s%s", f.team==player1->team ? "\fc" : "\fe", f.team!=player1->team ? readstr("GameMessage_Ctf_EnemyFlagStolen") : readstr("GameMessage_Ctf_AlliedFlagStolen"));
+        conoutf(CON_HUDCONSOLE, "%s%s", f.team==player1->gameplay.team ? "\fc" : "\fe", f.team!=player1->gameplay.team ? readstr("GameMessage_Ctf_EnemyFlagStolen") : readstr("GameMessage_Ctf_AlliedFlagStolen"));
 
         if(d==player1) {updateStat(1, STAT_DRAPEAUXENVOL); addReward(5, 2);}
         ownflag(i, d, lastmillis);
@@ -646,7 +646,7 @@ struct ctfclientmode : clientmode
         loopv(flags)
         {
             flag &f = flags[i];
-            if(!validteam(f.team) || f.team==player1->team || f.owner || (f.droptime && f.droploc.x<0)) continue;
+            if(!validteam(f.team) || f.team==player1->gameplay.team || f.owner || (f.droptime && f.droploc.x<0)) continue;
             const vec &loc = f.droptime ? f.droploc : f.spawnloc;
             if(o.dist(loc) < FLAGRADIUS)
             {
@@ -663,7 +663,7 @@ struct ctfclientmode : clientmode
         loopv(flags)
         {
             flag &f = flags[i];
-            if(!validteam(f.team) || f.team!=player1->team || f.owner || (f.droptime && f.droploc.x<0)) continue;
+            if(!validteam(f.team) || f.team!=player1->gameplay.team || f.owner || (f.droptime && f.droploc.x<0)) continue;
             const vec &loc = f.droptime ? f.droploc : f.spawnloc;
             if(o.dist(loc) < FLAGRADIUS)
             {
@@ -712,7 +712,7 @@ struct ctfclientmode : clientmode
             loopv(flags)
             {
                 flag &g = flags[i];
-                if(g.team == d->team && (k || (!g.owner && !g.droptime)) && (!flags.inrange(goal) || g.pos().squaredist(pos) < flags[goal].pos().squaredist(pos)))
+                if(g.team == d->gameplay.team && (k || (!g.owner && !g.droptime)) && (!flags.inrange(goal) || g.pos().squaredist(pos) < flags[goal].pos().squaredist(pos)))
                 {
                     goal = i;
                 }
@@ -740,7 +740,7 @@ struct ctfclientmode : clientmode
         {
             flag &g = flags[i];
             if(g.owner == d) return aihomerun(d, b);
-            else if(g.team == d->team && ((g.owner && g.team != g.owner->team) || g.droptime))
+            else if(g.team == d->gameplay.team && ((g.owner && g.team != g.owner->gameplay.team) || g.droptime))
                 takenflags.add(i);
         }
         if(!takenflags.empty())
@@ -760,8 +760,8 @@ struct ctfclientmode : clientmode
             flag &f = flags[j];
             if(f.owner == d) continue;
 
-            const bool home = f.team == d->team;
-            const bool needrecover = home && ((f.owner && f.team != f.owner->team) || f.droptime);
+            const bool home = f.team == d->gameplay.team;
+            const bool needrecover = home && ((f.owner && f.team != f.owner->gameplay.team) || f.droptime);
             const float dist2 = pos.squaredist(f.pos());
 
             if(!home)
@@ -833,7 +833,7 @@ struct ctfclientmode : clientmode
                 targets.setsize(0);
                 ai::checkothers(targets, d, ai::AI_S_DEFEND, ai::AI_T_AFFINITY, b.target, true);
                 gameent *e = NULL;
-                loopi(numdynents()) if((e = (gameent *)iterdynents(i)) && !e->ai && e->state == CS_ALIVE && isteam(d->team, e->team))
+                loopi(numdynents()) if((e = (gameent *)iterdynents(i)) && !e->ai && e->state == CS_ALIVE && isteam(d->gameplay.team, e->gameplay.team))
                 { // try to guess what non ai are doing
                     vec ep = e->feetpos();
                     if(targets.find(e->clientnum) < 0 && (ep.squaredist(f.pos()) <= (FLAGRADIUS*FLAGRADIUS*4) || f.owner == e))
@@ -857,7 +857,7 @@ struct ctfclientmode : clientmode
                 flag &g = flags[i];
                 if(pos.squaredist(g.pos()) <= mindist)
                 {
-                    if(g.owner && g.owner->team == d->team) walk = 1;
+                    if(g.owner && g.owner->gameplay.team == d->gameplay.team) walk = 1;
                     if(g.droptime && ai::makeroute(d, b, g.pos())) return true;
                 }
             }
@@ -872,7 +872,7 @@ struct ctfclientmode : clientmode
         {
             flag &f = flags[b.target];
             if(f.owner == d) return aihomerun(d, b);
-            if(f.team == d->team)
+            if(f.team == d->gameplay.team)
             {
                 if(f.droptime) return ai::makeroute(d, b, f.pos());
                 if(f.owner) return ai::violence(d, b, f.owner, 4);
