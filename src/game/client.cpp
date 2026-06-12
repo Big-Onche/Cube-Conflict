@@ -326,7 +326,7 @@ namespace game
         if(player1->state==CS_DEAD) deathstate(player1, true);
         else if(player1->state==CS_EDITING && player1->editstate==CS_DEAD) showscores(false);
         disablezoom();
-        player1->suicided = player1->respawned = -2;
+        player1->spawn.suicided = player1->spawn.respawned = -2;
         checkfollow();
     }
 
@@ -1013,7 +1013,7 @@ namespace game
         messagecn = -1;
         player1->respawn();
         player1->shieldbroken = true;
-        player1->lifesequence = 0;
+        player1->spawn.lifeSequence = 0;
         player1->state = CS_ALIVE;
         player1->net.privilege = PRIV_NONE;
         sendcrc = senditemstoserver = false;
@@ -1043,7 +1043,7 @@ namespace game
         putint(q, N_POS);
         putuint(q, d->net.clientNum);
         // 3 bits phys state, 1 bit life sequence, 2 bits move, 2 bits strafe
-        uchar physstate = d->physstate | ((d->lifesequence&1)<<3) | ((d->move&3)<<4) | ((d->strafe&3)<<6);
+        uchar physstate = d->physstate | ((d->spawn.lifeSequence&1)<<3) | ((d->move&3)<<4) | ((d->strafe&3)<<6);
         q.put(physstate);
         ivec o = ivec(vec(d->o.x, d->o.y, d->o.z-d->eyeheight).mul(DMF));
         uint vel = min(int(d->vel.magnitude()*DVELF), 0xFFFF), fall = min(int(d->falling.magnitude()*DVELF), 0xFFFF);
@@ -1264,7 +1264,7 @@ namespace game
                 else falling = vec(0, 0, 0);
                 int seqcolor = (physstate>>3)&1;
                 gameent *d = getclient(cn);
-                if(!d || d->lifesequence < 0 || seqcolor!=(d->lifesequence&1) || d->state==CS_DEAD) continue;
+                if(!d || d->spawn.lifeSequence < 0 || seqcolor!=(d->spawn.lifeSequence&1) || d->state==CS_DEAD) continue;
                 float oldyaw = d->yaw, oldpitch = d->pitch, oldroll = d->roll;
                 d->yaw = yaw;
                 d->pitch = pitch;
@@ -1307,7 +1307,7 @@ namespace game
             {
                 int cn = getint(p), tp = getint(p), td = getint(p);
                 gameent *d = getclient(cn);
-                if(!d || d->lifesequence < 0 || d->state==CS_DEAD) continue;
+                if(!d || d->spawn.lifeSequence < 0 || d->state==CS_DEAD) continue;
                 entities::teleporteffects(d, tp, td, false);
                 break;
             }
@@ -1316,7 +1316,7 @@ namespace game
             {
                 int cn = getint(p), jp = getint(p);
                 gameent *d = getclient(cn);
-                if(!d || d->lifesequence < 0 || d->state==CS_DEAD) continue;
+                if(!d || d->spawn.lifeSequence < 0 || d->state==CS_DEAD) continue;
                 entities::jumppadeffects(d, jp, false);
                 break;
             }
@@ -1343,7 +1343,7 @@ namespace game
             else loopi(NUMBOOSTS) d->boostmillis[i] = getint(p);
         }
         d->seed = getint(p);
-        d->lifesequence = getint(p);
+        d->spawn.lifeSequence = getint(p);
         d->health = getint(p);
         d->maxhealth = getint(p);
         d->mana = getint(p);
@@ -1677,7 +1677,7 @@ namespace game
             {
                 if(d)
                 {
-                    if(d->state==CS_DEAD && d->lastpain) saveGrave(d);
+                    if(d->state==CS_DEAD && d->spawn.lastPain) saveGrave(d);
                     d->respawn();
                     d->stats.streak = 0;
                 }
@@ -1694,7 +1694,7 @@ namespace game
                 int scn = getint(p);
                 gameent *s = getclient(scn);
                 if(!s) { parsestate(NULL, p); break; }
-                if(s->state==CS_DEAD && s->lastpain) saveGrave(s);
+                if(s->state==CS_DEAD && s->spawn.lastPain) saveGrave(s);
                 if(s==player1)
                 {
                     if(editmode) toggleedit();
@@ -1714,7 +1714,7 @@ namespace game
                 if(cmode) cmode->respawned(s);
                 ai::spawned(s);
                 checkfollow();
-                addmsg(N_SPAWN, "rcii", s, s->lifesequence, s->gunselect);
+                addmsg(N_SPAWN, "rcii", s, s->spawn.lifeSequence, s->gunselect);
                 break;
             }
 
@@ -1765,7 +1765,7 @@ namespace game
                 target->afterBurnMillis = afterburn;
                 if(afterburnAttack(atk)) target->afterBurnAttack = atk;
                 else if(!afterburn) target->afterBurnAttack = 0;
-                if(target->state == CS_ALIVE && actor != player1) target->lastpain = lastmillis;
+                if(target->state == CS_ALIVE && actor != player1) target->spawn.lastPain = lastmillis;
                 damaged(damage, target, actor, false, atk, isAfterburnHit);
                 if(player1->gameplay.classId==C_VIKING && target==player1 && actor!=player1 && player1->state==CS_ALIVE)
                 {

@@ -490,7 +490,7 @@ namespace game
             {
                 state = CS_DEAD;
                 stopAfterburn();
-                lastpain = lastmillis;
+                spawn.lastPain = lastmillis;
                 playSound(npcs[mtype].diesnd, o, 300, 50);
                 monsterkilled(d);
                 gibeffect(max(-health, 0), vel, this);
@@ -700,7 +700,7 @@ namespace game
     {
         loopv(monsters)
         {
-            monsters[i]->lastpain = lastmillis;
+            monsters[i]->spawn.lastPain = lastmillis;
             monsters[i]->state = CS_DEAD;
         }
         conoutf(CON_HUDCONSOLE, "\f2%s", readstr("GameMessage_InvasionEnded"));
@@ -820,7 +820,7 @@ namespace game
             }
             else if(m->state==CS_DEAD)
             {
-                if(lastmillis-m->lastpain<2000)
+                if(lastmillis-m->spawn.lastPain<2000)
                 {
                     m->move = m->strafe = 0;
                     if(npcs[m->mtype].speed) moveplayer(m, 5, true, curtime);
@@ -888,7 +888,7 @@ namespace game
         {
             monster &m = *monsters[i];
 
-            if(m.state!=CS_DEAD || lastmillis-m.lastpain<10000)
+            if(m.state!=CS_DEAD || lastmillis-m.spawn.lastPain<10000)
             {
                 float yaw = m.yaw,
                       pitch = m.pitch;
@@ -902,9 +902,9 @@ namespace game
 
                 if(m.state==CS_DEAD)
                 {
-                    fade -= clamp(float(lastmillis - (m.lastpain + 9000))/1000, 0.0f, 1.0f);
+                    fade -= clamp(float(lastmillis - (m.spawn.lastPain + 9000))/1000, 0.0f, 1.0f);
                     anim = ANIM_DYING;
-                    basetime = m.lastpain;
+                    basetime = m.spawn.lastPain;
                     if(lastmillis-basetime>1000) anim = ANIM_DEAD|ANIM_LOOP;
                 }
                 else

@@ -329,7 +329,7 @@ namespace game
 
         gameent *f = (gameent *)d;
 
-        f->lastpain = lastmillis;
+        f->spawn.lastPain = lastmillis;
         if(at->type==ENT_PLAYER && !isteam(at->gameplay.team, f->gameplay.team)) at->stats.damage += damage;
         if(m_dmsp || m_classicsp || m_tutorial)
         {
@@ -368,7 +368,7 @@ namespace game
         {
             hitmsg &h = hits.add();
             h.target = f->net.clientNum;
-            h.lifesequence = f->lifesequence;
+            h.lifesequence = f->spawn.lifeSequence;
             h.info1 = int(info1*DMF);
             h.info2 = info2;
             h.dir = f==at ? ivec(0, 0, 0) : ivec(vec(vel).mul(DNF));

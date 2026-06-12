@@ -16,9 +16,9 @@ namespace game
 
     void saveGrave(gameent *d)
     {
-        if(!ragdollmillis || (!ragdollfade && lastmillis > d->lastpain + ragdollmillis)) return;
+        if(!ragdollmillis || (!ragdollfade && lastmillis > d->spawn.lastPain + ragdollmillis)) return;
         gameent *r = new gameent(*d);
-        r->net.lastUpdate = ragdollfade && lastmillis > d->lastpain + max(ragdollmillis - ragdollfade, 0) ? lastmillis - max(ragdollmillis - ragdollfade, 0) : d->lastpain;
+        r->net.lastUpdate = ragdollfade && lastmillis > d->spawn.lastPain + max(ragdollmillis - ragdollfade, 0) ? lastmillis - max(ragdollmillis - ragdollfade, 0) : d->spawn.lastPain;
         r->edit = NULL;
         r->ai = NULL;
         curGraves.add(r);
@@ -330,7 +330,7 @@ namespace game
     void renderplayer(gameent *d, const playermodelinfo &mdl, int color, int team, float fade, int flags = 0, bool mainpass = true)
     {
         /////////////////////////// Dead ///////////////////////////
-        if(d->state==CS_DEAD && d->lastpain)
+        if(d->state==CS_DEAD && d->spawn.lastPain)
         {
             flags |= MDL_CULL_VFC | MDL_CULL_OCCLUDED | MDL_CULL_QUERY;
 
@@ -676,7 +676,7 @@ namespace game
         {
             gameent *d = players[i];
 
-            if(d->state==CS_SPECTATOR || d->state==CS_SPAWNING || d->lifesequence < 0 || d == exclude || (d->state==CS_DEAD && hidedead)) continue; // skip invisible players
+            if(d->state==CS_SPECTATOR || d->state==CS_SPAWNING || d->spawn.lifeSequence < 0 || d == exclude || (d->state==CS_DEAD && hidedead)) continue; // skip invisible players
 
             bool isHudPlayer = (d==hudplayer());
             bool exceptHud = (!isHudPlayer || thirdPerson);

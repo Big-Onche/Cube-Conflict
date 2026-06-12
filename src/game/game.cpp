@@ -169,8 +169,8 @@ namespace game
         if(ispaused()) return;
         if(m_mp(gamemode))
         {
-            int seq = (player1->lifesequence<<16)|((lastmillis/1000)&0xFFFF);
-            if(player1->respawned!=seq) { addmsg(N_TRYSPAWN, "rc", player1); player1->respawned = seq; }
+            int seq = (player1->spawn.lifeSequence<<16)|((lastmillis/1000)&0xFFFF);
+            if(player1->spawn.respawned!=seq) { addmsg(N_TRYSPAWN, "rc", player1); player1->spawn.respawned = seq; }
         }
         else
         {
@@ -529,7 +529,7 @@ namespace game
                 if(smoothmove && d->render.smoothMillis>0) predictplayer(d, true);
                 else moveplayer(d, 1, false);
             }
-            else if(d->state==CS_DEAD && !d->ragdoll && lastmillis-d->lastpain<2000) moveplayer(d, 1, true);
+            else if(d->state==CS_DEAD && !d->ragdoll && lastmillis-d->spawn.lastPain<2000) moveplayer(d, 1, true);
         }
     }
 
@@ -546,7 +546,7 @@ namespace game
         static vec smoothVel(0, 0, 0);
         static int prevTime = 0;
 
-        if(lastmillis - hudplayer()->lastspawn < 100) // resetting on respawn
+        if(lastmillis - hudplayer()->spawn.lastSpawn < 100) // resetting on respawn
         {
             prevPos = hudplayer()->o;
             smoothVel = vec(0, 0, 0);
@@ -689,7 +689,7 @@ namespace game
             const gameent *o = players[i];
             if(o == p)
             {
-                if(m_noitems || (o->state != CS_ALIVE && lastmillis - o->lastpain > 3000)) continue;
+                if(m_noitems || (o->state != CS_ALIVE && lastmillis - o->spawn.lastPain > 3000)) continue;
             }
             else if(o->state != CS_ALIVE || isteam(o->gameplay.team, p->gameplay.team)) continue;
 
@@ -744,7 +744,7 @@ namespace game
                 //conoutf(CON_GAMEINFO, "\f2you must wait %d second%s before respawn!", wait, wait!=1 ? "s" : "");
                 return;
             }
-            if(lastmillis < player1->lastpain + spawnwait) return;
+            if(lastmillis < player1->spawn.lastPain + spawnwait) return;
             if(m_dmsp) { changemap(clientmap, gamemode); return; }    // if we die in SP we try the same map again
             respawnself();
         }
@@ -837,7 +837,7 @@ namespace game
     void deathstate(gameent *d, bool restore)
     {
         d->state = CS_DEAD;
-        d->lastpain = lastmillis;
+        d->spawn.lastPain = lastmillis;
         d->render.skeletonSize = 1.0f;
         d->render.graveSize = 0.0f;
         d->stats.deaths++;
@@ -956,7 +956,7 @@ namespace game
                     if(killDistance>=100.f) unlockAchievement(ACH_BEAUTIR);
                     else if(killDistance<1.f && atk==ATK_MOSSBERG) unlockAchievement(ACH_TAKETHAT);
                     else if(killDistance>=69.f && killDistance<70.f ) unlockAchievement(ACH_NICE);
-                    if(player1->state==CS_DEAD && player1->lastpain > 200) unlockAchievement(ACH_TUEURFANTOME);
+                    if(player1->state==CS_DEAD && player1->spawn.lastPain > 200) unlockAchievement(ACH_TUEURFANTOME);
                     if(player1->health<=10 && player1->state==CS_ALIVE) unlockAchievement(ACH_1HPKILL);
 
                     switch(atk)
@@ -1423,8 +1423,8 @@ namespace game
             if(!m_mp(gamemode)) killed(pl, pl, 0);
             else
             {
-                int seq = (pl->lifesequence<<16)|((lastmillis/1000)&0xFFFF);
-                if(pl->suicided!=seq) { addmsg(N_SUICIDE, "rc", pl); pl->suicided = seq; }
+                int seq = (pl->spawn.lifeSequence<<16)|((lastmillis/1000)&0xFFFF);
+                if(pl->spawn.suicided!=seq) { addmsg(N_SUICIDE, "rc", pl); pl->spawn.suicided = seq; }
             }
         }
         else if(d->type==ENT_AI) suicidemonster((monster *)d);

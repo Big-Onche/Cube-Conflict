@@ -290,7 +290,7 @@ namespace game
             draw_textf("Tué par %s %s", w*1800/h - tw - pw, 1650 - th - fh + 50, str_pseudotueur, strclassetueur); //, strclassetueur
             draw_textf("Avec %s", w*1800/h - tw - pw, 1650 - th - fh + 100, str_armetueur);
 
-            int wait = cmode ? cmode->respawnwait(player1) : (lastmillis < player1->lastpain + 1000) ? 1 : 0 ;
+            int wait = cmode ? cmode->respawnwait(player1) : (lastmillis < player1->spawn.lastPain + 1000) ? 1 : 0 ;
             if(wait>0) draw_textf("Respawn possible dans %d seconde%s", w*1800/h - tw - pw, 1650 - th - fh + 150, wait, wait<=1?"":"s");
             else draw_textf("Appuie n'importe où pour revivre ! ", w*1800/h - tw - pw, 1650 - th - fh + 150);
             resethudshader();

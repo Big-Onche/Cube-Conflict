@@ -2100,10 +2100,10 @@ namespace ai
         {
             if(d->ai->state.empty()) d->ai->updateState(AI_S_WAIT);
             aistate &c = d->ai->state.last();
-            if(d->state == CS_DEAD && (!cmode || cmode->respawnwait(d, 100+rnd(400)) <= 0) && lastmillis - d->lastpain >= 3000)
+            if(d->state == CS_DEAD && (!cmode || cmode->respawnwait(d, 100+rnd(400)) <= 0) && lastmillis - d->spawn.lastPain >= 3000)
             {
                 addmsg(N_TRYSPAWN, "rc", d);
-                d->respawned = d->lifesequence;
+                d->spawn.respawned = d->spawn.lifeSequence;
             }
             logic(d, c, false);
             d->ai->flushwipe();
@@ -2126,10 +2126,10 @@ namespace ai
                 c.override = false;
                 cleannext = false;
             }
-            if(d->state == CS_DEAD && (!cmode || cmode->respawnwait(d, 100+rnd(400)) <= 0) && lastmillis - d->lastpain >= 3000)
+            if(d->state == CS_DEAD && (!cmode || cmode->respawnwait(d, 100+rnd(400)) <= 0) && lastmillis - d->spawn.lastPain >= 3000)
             {
                 addmsg(N_TRYSPAWN, "rc", d);
-                d->respawned = d->lifesequence;
+                d->spawn.respawned = d->spawn.lifeSequence;
             }
             else if(d->state == CS_ALIVE)
             {

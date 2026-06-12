@@ -1261,14 +1261,49 @@ struct NetworkState
     }
 };
 
+struct SpawnState
+{
+    int lifeSequence;
+    int respawned;
+    int lastSpawn;
+    int suicided;
+    int lastPain;
+
+    SpawnState()
+        : lifeSequence(0),
+          respawned(-1),
+          lastSpawn(0),
+          suicided(-1),
+          lastPain(0)
+    {
+    }
+
+    void resetSpawn(int millis)
+    {
+        respawned = -1;
+        suicided = -1;
+        lastSpawn = millis;
+    }
+
+    void resetMatch()
+    {
+        lifeSequence = -1;
+        respawned = -2;
+        suicided = -2;
+    }
+
+    int respawnWait(int secs, int delay, int millis) const
+    {
+        return max(0, secs - (millis - lastPain - delay) / 1000);
+    }
+};
+
 struct gameent : dynent, gamestate
 {
     size_t entityId, lastkillerId;
     int weight;                         // affects the effectiveness of hitpush
     NetworkState net;
-    int lifesequence;                   // sequence id for each respawn, used in damage test
-    int respawned, lastspawn, suicided;
-    int lastpain;
+    SpawnState spawn;
     ActionState action;
     int curdamage, lastcurdamage, curdamagecolor;
     int lastfootstep;
@@ -1290,7 +1325,7 @@ struct gameent : dynent, gamestate
     size_t afterBurnerId;
 
     gameent() : entityId(entitiesIds::getNewId()), lastkillerId(INVALID_ENTITY_ID), weight(100), net(),
-                lifesequence(0), respawned(-1), lastspawn(0), suicided(-1), lastpain(0),
+                spawn(),
                 action(),
                 curdamage(0), lastcurdamage(0), curdamagecolor(0xFFFFFF), lastfootstep(0),
                 lasttaunt(0),
@@ -1334,8 +1369,7 @@ struct gameent : dynent, gamestate
 private:
     void resetSpawnRuntime()
     {
-        respawned = suicided = -1;
-        lastspawn = lastmillis;
+        spawn.resetSpawn(lastmillis);
         stats.resetSpawn();
     }
 
@@ -1404,7 +1438,7 @@ public:
 
     int respawnwait(int secs, int delay = 0)
     {
-        return max(0, secs - (::lastmillis - lastpain - delay)/1000);
+        return spawn.respawnWait(secs, delay, ::lastmillis);
     }
 
     void startgame()
@@ -1412,8 +1446,7 @@ public:
         stats.resetMatch();
 
         maxhealth = 1000;
-        lifesequence = -1;
-        respawned = suicided = -2;
+        spawn.resetMatch();
     }
 };
 

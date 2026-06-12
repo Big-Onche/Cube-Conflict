@@ -1701,12 +1701,12 @@ void recomputecamera(int campostag)
         static bool animStarted;
         gameent *killer = NULL;
 
-        if(game::hudplayer()->state == CS_DEAD && lastmillis > game::hudplayer()->lastpain + 1500 && !game::hassuicided && spectatekiller)
+        if(game::hudplayer()->state == CS_DEAD && lastmillis > game::hudplayer()->spawn.lastPain + 1500 && !game::hassuicided && spectatekiller)
         {
             killer = game::getLastKiller(game::hudplayer());
             if(killer && killer->net.isConnected)
             {
-                float t = clamp((lastmillis - game::hudplayer()->lastpain - 1500) / 500.f, 0.f, 1.f);
+                float t = clamp((lastmillis - game::hudplayer()->spawn.lastPain - 1500) / 500.f, 0.f, 1.f);
                 if(t < 1)
                 {
                     if(!animStarted)
