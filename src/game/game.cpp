@@ -276,13 +276,13 @@ namespace game
 
         if(d->state != CS_ALIVE) return;
 
-        if(d->attacksound)
+        if(d->sound.currentAttack)
         {
             if((!isAttacking(d) || !(d->gunselect==GUN_PLASMA || d->gunselect==GUN_FLAMETHROWER || d->gunselect==GUN_S_GAU8)))
             {
                 stopLinkedSound(d->entityId, PL_ATTACK);
                 stopLinkedSound(d->entityId, PL_ATTACK_FAR);
-                d->attacksound = 0;
+                d->sound.currentAttack = 0;
             }
 
             float pitch = (d->boostmillis[B_SHROOMS] ? (d->character==C_JUNKIE ? 1.4f : 1.2f) : 1.0f);
@@ -300,13 +300,13 @@ namespace game
 
         if(d->hasPowerArmor() && d->armour < 1000) // power armor alarm sound
         {
-            if(!d->powerarmorsound)
+            if(!d->sound.powerArmorAlarm)
             {
                 playSound(S_ASSISTALARM, isHudPlayer ? vec(0, 0, 0) : d->o, 250, 100, SND_NOCULL|SND_FIXEDPITCH|SND_LOOPED, d->entityId, PL_POWERARMOR);
-                d->powerarmorsound = true;
+                d->sound.powerArmorAlarm = true;
             }
         }
-        else if(d->powerarmorsound) { stopLinkedSound(d->entityId, PL_POWERARMOR); d->powerarmorsound = false; }
+        else if(d->sound.powerArmorAlarm) { stopLinkedSound(d->entityId, PL_POWERARMOR); d->sound.powerArmorAlarm = false; }
     }
 
     void updatePlayersBoosts(int time, gameent *d)
@@ -513,8 +513,8 @@ namespace game
             else if(lagtime>1000 && d->state==CS_ALIVE)
             {
                 stopLinkedSound(d->entityId, 0, true);
-                d->attacksound = 0;
-                d->powerarmorsound = false;
+                d->sound.currentAttack = 0;
+                d->sound.powerArmorAlarm = false;
                 d->state = CS_LAGGED;
                 continue;
             }
@@ -579,10 +579,10 @@ namespace game
         if(!canExplodePowerArmor(owner)) return;
 
         owner->ammo[GUN_POWERARMOR] = 0;
-        if(owner->powerarmorsound)
+        if(owner->sound.powerArmorAlarm)
         {
             stopLinkedSound(owner->entityId, PL_POWERARMOR);
-            owner->powerarmorsound = false;
+            owner->sound.powerArmorAlarm = false;
         }
 
         vec origin = owner->o;

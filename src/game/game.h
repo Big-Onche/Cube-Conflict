@@ -1115,6 +1115,23 @@ struct ActionState
     }
 };
 
+struct SoundState
+{
+    int currentAttack;     // 0 = no sound, 1 = close sound, 2 = close + far sound
+    bool powerArmorAlarm;  // Power armor loop is currently playing
+
+    SoundState()
+    {
+        reset();
+    }
+
+    void reset()
+    {
+        currentAttack = 0;
+        powerArmorAlarm = false;
+    }
+};
+
 struct gameent : dynent, gamestate
 {
     size_t entityId, lastkillerId;
@@ -1134,8 +1151,8 @@ struct gameent : dynent, gamestate
     DamageHistory damageHistory;
 
     int lastability[3], lastabilityrequest;
-    int attacksound; // 0 = no sound, 1 = close sound, 2 = close + far sound
-    bool shieldbroken, powerarmorsound;
+    SoundState sound;
+    bool shieldbroken;
     int lastOutOfMap;
     bool isOutOfMap;
     bool isConnected;
@@ -1156,7 +1173,7 @@ struct gameent : dynent, gamestate
                 lasttaunt(0), lastlavatouch(0), lastfirecheck(0),
                 pickups(), stats(),
                 edit(NULL), interp(), damageHistory(),
-                lastabilityrequest(0), attacksound(0), shieldbroken(false), powerarmorsound(false),
+                lastabilityrequest(0), sound(), shieldbroken(false),
                 lastOutOfMap(0), isOutOfMap(false), isConnected(false),
                 team(0), playermodel(-1), playercolor(0), skin{0, 0, 0}, character(0), level(0),
                 skeletonSize(0.0f), graveSize(0.0f), ai(NULL), ownernum(-1), lastnode(-1), afterburner(NULL),
@@ -1224,8 +1241,7 @@ private:
 
     void resetAudioRuntime()
     {
-        attacksound = 0;
-        powerarmorsound = false;
+        sound.reset();
     }
 
     void resetMapRuntime()

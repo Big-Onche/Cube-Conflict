@@ -843,14 +843,14 @@ namespace game
         float pitch = d->boostmillis[B_SHROOMS] ? (d->character==C_JUNKIE ? 1.4f : 1.2f) : (d->character==C_PRIEST && d->abilitymillis[ABILITY_3] ? (1.5f - (d->abilitymillis[ABILITY_3] / 8000.0f)) : 0);
         if(gamespeed!=100) pitch *= (game::gamespeed / 100.f);
 
-        if(!d->attacksound)
+        if(!d->sound.currentAttack)
         {
             switch(gunSound)
             {
                 case S_FLAMETHROWER:
                 case S_GAU8:
                     playSound(gunSound, isHudPlayer ? vec(0, 0, 0) : d->o, incraseDist ? 600 : 500, incraseDist ? 350 : 200, loopedSoundFlags, d->entityId, PL_ATTACK, pitch);
-                    d->attacksound = 1;
+                    d->sound.currentAttack = 1;
                     if(!isHudPlayer && distance > 300)
                     {
                         playSound(attacks[atk].middistsnd, d->o, incraseDist ? 3200 : 600, incraseDist ? 1600 : 400, loopedSoundFlags, d->entityId, PL_ATTACK_FAR, pitch);
@@ -859,7 +859,7 @@ namespace game
 
                 case S_PLASMARIFLE_SFX:
                     playSound(gunSound, isHudPlayer ? vec(0, 0, 0) : d->o, 250, 150, loopedSoundFlags, d->entityId, PL_ATTACK, pitch);
-                    d->attacksound = 1;
+                    d->sound.currentAttack = 1;
                     break;
             }
         }

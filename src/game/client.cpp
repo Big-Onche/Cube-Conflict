@@ -1502,8 +1502,8 @@ namespace game
                 }
                 else d->resetinterp();
                 stopLinkedSound(d->entityId, 0, true);
-                d->attacksound = 0;
-                d->powerarmorsound = false;
+                d->sound.currentAttack = 0;
+                d->sound.powerArmorAlarm = false;
                 d->state = CS_DEAD;
                 checkfollow();
                 break;
@@ -1875,7 +1875,7 @@ namespace game
                 d->gunselect = gun;
                 bool isHudPlayer = d==hudplayer();
                 if(isHudPlayer) hudgunDisp.y = 40;
-                if(d->attacksound)
+                if(d->sound.currentAttack)
                 {
                     stopLinkedSound(d->entityId, PL_ATTACK);
                     stopLinkedSound(d->entityId, PL_ATTACK_FAR);
@@ -2119,8 +2119,8 @@ namespace game
                 if(on)
                 {
                     stopLinkedSound(player1->entityId, 0, true);
-                    player1->attacksound = 0;
-                    player1->powerarmorsound = false;
+                    player1->sound.currentAttack = 0;
+                    player1->sound.powerArmorAlarm = false;
                     player1->state = CS_SPECTATOR;
                 }
                 else clearclients();
@@ -2164,8 +2164,8 @@ namespace game
                 if(val)
                 {
                     stopLinkedSound(d->entityId, 0, true);
-                    d->attacksound = 0;
-                    d->powerarmorsound = false;
+                    d->sound.currentAttack = 0;
+                    d->sound.powerArmorAlarm = false;
                     d->editstate = d->state;
                     d->state = CS_EDITING;
                 }
@@ -2199,8 +2199,8 @@ namespace game
                         postfx::updateMainFilter();
                     }
                     stopLinkedSound(s->entityId, 0, true);
-                    s->attacksound = 0;
-                    s->powerarmorsound = false;
+                    s->sound.currentAttack = 0;
+                    s->sound.powerArmorAlarm = false;
                     s->state = CS_SPECTATOR;
                 }
                 else if(s->state==CS_SPECTATOR) deathstate(s, true);
