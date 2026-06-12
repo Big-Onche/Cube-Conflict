@@ -27,6 +27,11 @@ namespace projectiles
 
     vector<projectile> curProjectiles;
 
+    static inline gameent *ownerOf(const projectile &p)
+    {
+        return findEntityById(p.ownerId);
+    }
+
     static inline bool usesBallisticPath(int atk)
     {
         return validatk(atk) && attacks[atk].projspeed > 0 && attacks[atk].projgravity > 0.0f;
@@ -130,7 +135,7 @@ namespace projectiles
         p.offset = hudgunorigin(attacks[atk].gun, from, to, owner);
         p.offset.sub(from);
         p.local = local;
-        p.owner = owner;
+        p.ownerId = owner ? owner->entityId : INVALID_ENTITY_ID;
         switch(p.atk)
         {
             case ATK_FIREWORKS: p.lifetime= attacks[atk].ttl + rnd(400); break;
@@ -189,9 +194,12 @@ namespace projectiles
                 addstain(STAIN_BULLET_GLOW, pos, dir, 2.0f+(rnd(2)), 0x883300);
                 return;
             case ATK_SPOCKGUN:
+            {
                 addstain(STAIN_PLASMA_SCORCH, pos, dir, 5);
-                addstain(STAIN_SPOCK, pos, dir, 5, p.owner->hasRoids() ? 0xFF0000 : 0x22FF22);
+                gameent *owner = ownerOf(p);
+                addstain(STAIN_SPOCK, pos, dir, 5, owner && owner->hasRoids() ? 0xFF0000 : 0x22FF22);
                 return;
+            }
             case ATK_UZI:
             case ATK_CROSSBOW:
             case ATK_GLOCK:
@@ -208,7 +216,9 @@ namespace projectiles
 
     void splash(projectile &p, const vec &v, dynent *safe)
     {
-        explode(p.local, p.owner, v, p.dir, safe, attacks[p.atk].damage, p.atk);
+        gameent *owner = ownerOf(p);
+        if(!owner) return;
+        explode(p.local, owner, v, p.dir, safe, attacks[p.atk].damage, p.atk);
         stain(p, v, p.atk);
     }
 
@@ -231,7 +241,9 @@ namespace projectiles
         splash(p, v, o);
         vec dir;
         distance(o, dir, v, p.dir);
-        hit(attacks[p.atk].damage, o, p.owner, dir, p.atk, 0);
+        gameent *owner = ownerOf(p);
+        if(!owner) return false;
+        hit(attacks[p.atk].damage, o, owner, dir, p.atk, 0);
         return true;
     }
 
@@ -241,6 +253,14 @@ namespace projectiles
         loopv(curProjectiles)
         {
             projectile &p = curProjectiles[i];
+            gameent *owner = ownerOf(p);
+            if(p.local && !owner)
+            {
+                if(p.soundplaying) stopLinkedSound(p.entityId);
+                removeEntityPos(p.entityId);
+                curProjectiles.remove(i--);
+                continue;
+            }
             p.offsetmillis = max(p.offsetmillis-time, 0);
             if(isStuckArrow(p))
             {
@@ -294,7 +314,7 @@ namespace projectiles
                 loopj(numdynents())
                 {
                     dynent *o = iterdynents(j);
-                    if(p.owner==o || o->o.reject(bo, o->radius + br)) continue;
+                    if((owner && owner==o) || o->o.reject(bo, o->radius + br)) continue;
                     if(damage(o, p, v)) {exploded = true; removearrow = true; break; }
                 }
             }
@@ -322,7 +342,7 @@ namespace projectiles
 
             if(exploded)
             {
-                if(p.local && !p.exploded) addmsg(N_EXPLODE, "rci3iv", p.owner, lastmillis-maptime, p.atk, p.id-maptime, hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
+                if(p.local && owner && !p.exploded) addmsg(N_EXPLODE, "rci3iv", owner, lastmillis-maptime, p.atk, p.id-maptime, hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
                 p.exploded = true;
                 if(p.soundplaying)
                 {
@@ -385,6 +405,7 @@ namespace projectiles
         loopv(curProjectiles)
         {
             projectile &p = curProjectiles[i];
+            gameent *owner = ownerOf(p);
             int atk = p.atk;
 
             vec dv;
@@ -417,9 +438,9 @@ namespace projectiles
                 if(!p.ballistic && dist >= 1e-6f) traj = vec(p.to).sub(pos).normalize();
                 vectoyawpitch(traj, yaw, pitch);
                 rendermodel(projsPaths[atk].c_str(), ANIM_MAPMODEL|ANIM_LOOP, pos, yaw, pitch, MDL_NOSHADOW|MDL_CULL_VFC|MDL_CULL_OCCLUDED);
-                renderProjectilesTrails(p.owner, pos, dv, p.from, p.offset, atk, p.exploded);
+                renderProjectilesTrails(owner, pos, dv, p.from, p.offset, atk, p.exploded);
             }
-            else renderProjectilesTrails(p.owner, pos, dv, p.from, p.offset, atk, p.exploded);
+            else renderProjectilesTrails(owner, pos, dv, p.from, p.offset, atk, p.exploded);
         }
     }
 
@@ -438,7 +459,7 @@ namespace projectiles
         loopi(len)
         {
             projectile &p = curProjectiles[i];
-            if(curProjectiles[i].owner == owner)
+            if(curProjectiles[i].ownerId == (owner ? owner->entityId : INVALID_ENTITY_ID))
             {
                 if(p.soundplaying) stopLinkedSound(p.entityId);
                 removeEntityPos(p.entityId);

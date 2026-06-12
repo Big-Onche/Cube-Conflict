@@ -27,6 +27,8 @@ enum
     EF_SPAWNED    = 1<<8
 };
 
+static const size_t INVALID_ENTITY_ID = SIZE_MAX;
+
 struct entitiesIds // id given to players, projectiles, or other ents used for sound position update, each one has their own id
 {
     static size_t currentId; // current ID counter

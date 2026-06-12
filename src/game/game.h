@@ -522,14 +522,14 @@ struct gamestate
     int armour, armourtype;
     int boostmillis[NUMBOOSTS], abilitymillis[NUMABILITIES], vampiremillis;
     AbilityRuntimeState abilities;
-    int afterburnmillis, afterburnatk;
+    int afterBurnMillis, afterBurnAttack;
     int gunselect, gunwait;
     int ammo[NUMGUNS];
     bool aiming;
     int aitype, skill;
 
     gamestate() : seed(0), health(1000), maxhealth(1000), mana(100), armour(0), armourtype(A_WOOD),
-                  vampiremillis(0), afterburnmillis(0), afterburnatk(0), gunselect(GUN_GLOCK), gunwait(0),
+                  vampiremillis(0), afterBurnMillis(0), afterBurnAttack(0), gunselect(GUN_GLOCK), gunwait(0),
                   aiming(false), aitype(AI_NONE), skill(0)
     {
         loopi(NUMBOOSTS) boostmillis[i] = 0;
@@ -679,8 +679,8 @@ struct gamestate
         loopi(NUMABILITIES) abilitymillis[i] = 0;
         abilities.resetSpawn();
         vampiremillis = 0;
-        afterburnmillis = 0;
-        afterburnatk = 0;
+        afterBurnMillis = 0;
+        afterBurnAttack = 0;
         gunselect = GUN_GLOCK;
         gunwait = 0;
         seed = rnd(4);
@@ -1287,9 +1287,9 @@ struct gameent : dynent, gamestate
 
     ai::aiinfo *ai;
     int ownernum, lastnode;
-    gameent *afterburner;
+    size_t afterBurnerId;
 
-    gameent() : entityId(entitiesIds::getNewId()), lastkillerId(SIZE_MAX), weight(100), net(),
+    gameent() : entityId(entitiesIds::getNewId()), lastkillerId(INVALID_ENTITY_ID), weight(100), net(),
                 lifesequence(0), respawned(-1), lastspawn(0), suicided(-1), lastpain(0),
                 action(),
                 curdamage(0), lastcurdamage(0), curdamagecolor(0xFFFFFF), lastfootstep(0),
@@ -1297,7 +1297,7 @@ struct gameent : dynent, gamestate
                 pickups(), stats(),
                 edit(NULL), damageHistory(), hazards(), info(), render(), gameplay(),
                 sound(), shieldbroken(false),
-                ai(NULL), ownernum(-1), lastnode(-1), afterburner(NULL)
+                ai(NULL), ownernum(-1), lastnode(-1), afterBurnerId(INVALID_ENTITY_ID)
     {
         respawn();
     }
@@ -1346,7 +1346,7 @@ private:
         lastcurdamage = 0;
         curdamagecolor = 0xFFFFFF;
         shieldbroken = false;
-        lastkillerId = SIZE_MAX;
+        lastkillerId = INVALID_ENTITY_ID;
     }
 
     void resetVisualRuntime()
@@ -1387,7 +1387,7 @@ public:
         resetAbilityRuntime();
 
         lastnode = -1;
-        afterburner = NULL;
+        afterBurnerId = INVALID_ENTITY_ID;
 
         resetinterp();
         clearDamageLog();
@@ -1530,6 +1530,7 @@ namespace game
     extern bool clientoption(const char *arg);
     extern gameent *getclient(int cn);
     extern gameent *newclient(int cn);
+    extern gameent *findEntityById(size_t entityId);
     extern gameent *getLastKiller(gameent *d);
     extern const char *colorname(gameent *d, const char *name = NULL, const char *alt = NULL, const char *color = "");
     extern const char *teamcolorname(gameent *d, const char *alt);
@@ -1586,6 +1587,7 @@ namespace game
     // single player
     struct monster;
     extern vector<monster *> monsters;
+    extern gameent *findMonsterByEntityId(size_t entityId);
     extern void npcdrop(const vec *o, int type);
     extern void clearmonsters();
     extern void preloadmonsters();
@@ -1680,7 +1682,7 @@ namespace projectiles
         size_t entityId;
         vec dir, vel, o, from, to, offset;
         float speed, traveltime, elapsed, gravity;
-        gameent *owner;
+        size_t ownerId;
         int atk;
         bool local, ballistic;
         int offsetmillis;
@@ -1697,7 +1699,7 @@ namespace projectiles
               traveltime(0),
               elapsed(0),
               gravity(0),
-              owner(NULL),
+              ownerId(INVALID_ENTITY_ID),
               atk(-1),
               local(false),
               ballistic(false),
@@ -1737,7 +1739,7 @@ namespace bouncers
         float roll;
         float spinrot, spinvelsq;
         bool local;
-        gameent *owner;
+        size_t ownerId;
         int bouncetype, variant;
         vec offset;
         int offsetmillis;
@@ -1745,7 +1747,8 @@ namespace bouncers
         bool inwater;
         vec particles;
 
-        bouncer() : entityId(entitiesIds::getNewId()), bounces(0), roll(0), spinrot(0), spinvelsq(-1), variant(0), particles(-1, -1, -1)
+        bouncer() : entityId(entitiesIds::getNewId()), lifetime(0), bounces(0), seed(0), roll(0), spinrot(0), spinvelsq(-1), local(false),
+                    ownerId(INVALID_ENTITY_ID), bouncetype(0), variant(0), offsetmillis(0), id(0), inwater(false), particles(-1, -1, -1)
         {
             type = ENT_BOUNCE;
         }

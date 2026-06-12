@@ -581,7 +581,7 @@ namespace game
 
     void spawnPlayerParticles(gameent *d, vec pos, bool exceptHud)
     {
-        if(d->afterburnmillis && rndevent(94)) particle_splash(PART_FIRE_BALL, 2, 350, pos, rnd(2) ? 0x992200 : 0x886622, 5, 70, -20, 5);
+        if(d->afterBurnMillis && rndevent(94)) particle_splash(PART_FIRE_BALL, 2, 350, pos, rnd(2) ? 0x992200 : 0x886622, 5, 70, -20, 5);
 
         if(d->boostmillis[B_SHROOMS] && rndevent(97))
         {

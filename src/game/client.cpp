@@ -1338,7 +1338,7 @@ namespace game
             d->stats.frags = getint(p);
             d->stats.flags = getint(p);
             d->stats.deaths = getint(p);
-            d->afterburnmillis = getint(p);
+            d->afterBurnMillis = getint(p);
             if(d==player1) loopi(NUMBOOSTS) getint(p);
             else loopi(NUMBOOSTS) d->boostmillis[i] = getint(p);
         }
@@ -1367,7 +1367,7 @@ namespace game
         static char text[MAXTRANS];
         int type;
         bool mapchanged = false, demopacket = false;
-        static int pendingAfterburnTarget = -1, pendingAfterburnActor = -1, pendingAfterburnAtk = -1;
+        static int pendingAfterburnTarget = -1, pendingAfterburnActor = -1, pendingafterBurnAttack = -1;
 
         while(p.remaining()) switch(type = getint(p))
         {
@@ -1758,13 +1758,13 @@ namespace game
                 gameent *target = getclient(tcn),
                        *actor = getclient(acn);
                 if(!target || !actor) break;
-                const bool isAfterburnHit = pendingAfterburnTarget == tcn && pendingAfterburnActor == acn && pendingAfterburnAtk == atk;
-                if(isAfterburnHit) pendingAfterburnTarget = pendingAfterburnActor = pendingAfterburnAtk = -1;
+                const bool isAfterburnHit = pendingAfterburnTarget == tcn && pendingAfterburnActor == acn && pendingafterBurnAttack == atk;
+                if(isAfterburnHit) pendingAfterburnTarget = pendingAfterburnActor = pendingafterBurnAttack = -1;
                 target->armour = armour;
                 target->health = health;
-                target->afterburnmillis = afterburn;
-                if(afterburnAttack(atk)) target->afterburnatk = atk;
-                else if(!afterburn) target->afterburnatk = 0;
+                target->afterBurnMillis = afterburn;
+                if(afterburnAttack(atk)) target->afterBurnAttack = atk;
+                else if(!afterburn) target->afterBurnAttack = 0;
                 if(target->state == CS_ALIVE && actor != player1) target->lastpain = lastmillis;
                 damaged(damage, target, actor, false, atk, isAfterburnHit);
                 if(player1->gameplay.classId==C_VIKING && target==player1 && actor!=player1 && player1->state==CS_ALIVE)
@@ -1828,7 +1828,7 @@ namespace game
 
                 pendingAfterburnTarget = tcn;
                 pendingAfterburnActor = acn;
-                pendingAfterburnAtk = target->afterburnatk;
+                pendingafterBurnAttack = target->afterBurnAttack;
                 playSound(S_ADULT_P, target==player1 ? vec(0, 0, 0) : target->o, 250, 100, NULL, target->entityId);
             }
 

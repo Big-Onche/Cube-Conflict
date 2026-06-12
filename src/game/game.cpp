@@ -355,11 +355,11 @@ namespace game
             if(d->boostmillis[B_RAGE] && (d->boostmillis[B_RAGE] -= time)<=0) d->boostmillis[B_RAGE] = 0;
         }
 
-        if(d->afterburnmillis && (d->afterburnmillis -= time)<=0)
+        if(d->afterBurnMillis && (d->afterBurnMillis -= time)<=0)
         {
-            d->afterburnmillis = 0;
-            d->afterburnatk = 0;
-            d->afterburner = NULL;
+            d->afterBurnMillis = 0;
+            d->afterBurnAttack = 0;
+            d->afterBurnerId = INVALID_ENTITY_ID;
         }
     }
 
@@ -370,9 +370,9 @@ namespace game
 
     static inline void clearAfterburn(gameent *d)
     {
-        d->afterburnmillis = 0;
-        d->afterburnatk = 0;
-        d->afterburner = NULL;
+        d->afterBurnMillis = 0;
+        d->afterBurnAttack = 0;
+        d->afterBurnerId = INVALID_ENTITY_ID;
     }
 
     void doLocalAfterburn(gameent *target, gameent *burner, int atk)
@@ -380,9 +380,9 @@ namespace game
         if(!localAfterburn() || !afterburnAttack(atk) || inWater(target->o)) return;
 
         const int burnmillis = atk==ATK_FLAMETHROWER ? 4000 : 7000;
-        target->afterburnmillis = min(target->afterburnmillis + burnmillis, burnmillis);
-        target->afterburnatk = atk;
-        target->afterburner = burner ? burner : target;
+        target->afterBurnMillis = min(target->afterBurnMillis + burnmillis, burnmillis);
+        target->afterBurnAttack = atk;
+        target->afterBurnerId = burner ? burner->entityId : target->entityId;
     }
 
     static bool touchingFire(gameent *d)
@@ -411,7 +411,7 @@ namespace game
         }
 
         if(d->hazards.lastFireCheck == lastmillis) return;
-        if(d->afterburnmillis && lastmillis - d->hazards.lastFireCheck < 500) return;
+        if(d->afterBurnMillis && lastmillis - d->hazards.lastFireCheck < 500) return;
 
         if(touchingFire(d))
         {
@@ -423,8 +423,8 @@ namespace game
 
     static void updateLocalAfterburn(int time, gameent *d)
     {
-        if(!localAfterburn() || d->state != CS_ALIVE || !d->afterburnmillis) return;
-        if(!afterburnAttack(d->afterburnatk) || inWater(d->o))
+        if(!localAfterburn() || d->state != CS_ALIVE || !d->afterBurnMillis) return;
+        if(!afterburnAttack(d->afterBurnAttack) || inWater(d->o))
         {
             clearAfterburn(d);
             return;
@@ -435,18 +435,23 @@ namespace game
         if(tick <= 650) return;
         tick = -100 + rnd(201);
 
-        gameent *burner = d->afterburner ? d->afterburner : d;
+        gameent *burner = findEntityById(d->afterBurnerId);
+        if(!burner)
+        {
+            d->afterBurnerId = INVALID_ENTITY_ID;
+            burner = d;
+        }
         const int calcflags = DCF_APPLY_TARGET_RESIST |
                               DCF_APPLY_TARGET_MODIFIERS |
                               DCF_APPLY_TARGET_BOOSTS |
                               DCF_MUTATE_TARGET_STATE;
-        const int baseburn = d->afterburnatk==ATK_FLAMETHROWER ? 40 : 80;
-        totalDamage calc = getDamage(baseburn, d->afterburnatk, burner->gameplay.classId, burner, d->gameplay.classId, d, burner->o.dist(d->o), calcflags, burner==d);
+        const int baseburn = d->afterBurnAttack==ATK_FLAMETHROWER ? 40 : 80;
+        totalDamage calc = getDamage(baseburn, d->afterBurnAttack, burner->gameplay.classId, burner, d->gameplay.classId, d, burner->o.dist(d->o), calcflags, burner==d);
         const int damage = calc.damage/(m_dmsp ? 5 : 2);
 
         if(damage > 0)
         {
-            damaged(damage, d, burner, true, d->afterburnatk, true);
+            damaged(damage, d, burner, true, d->afterBurnAttack, true);
             playSound(S_ADULT_P, d==player1 ? vec(0, 0, 0) : d->o, 250, 100, NULL, d->entityId);
         }
     }
@@ -589,7 +594,7 @@ namespace game
         explode(true, owner, origin, owner->vel, NULL, 0, ATK_POWERARMOR);
 
         projectiles::projectile powerArmorFx;
-        powerArmorFx.owner = owner;
+        powerArmorFx.ownerId = owner->entityId;
         powerArmorFx.atk = ATK_POWERARMOR;
         powerArmorFx.dir = vec(0, 0, 1);
         projectiles::stain(powerArmorFx, origin, ATK_POWERARMOR);
@@ -874,7 +879,7 @@ namespace game
     void killed(gameent *d, gameent *actor, int atk)
     {
         bool isHudPlayer = (actor == hudplayer());
-        d->lastkillerId = actor ? actor->entityId : SIZE_MAX;
+        d->lastkillerId = actor ? actor->entityId : INVALID_ENTITY_ID;
 
         if(d->state==CS_EDITING)
         {
@@ -1127,19 +1132,19 @@ namespace game
         return clients.inrange(cn) ? clients[cn] : NULL;
     }
 
-    static gameent *findPlayerByEntityId(size_t entityId)
+    gameent *findEntityById(size_t entityId)
     {
-        if(entityId == SIZE_MAX) return NULL;
+        if(entityId == INVALID_ENTITY_ID) return NULL;
         loopv(players) if(players[i] && players[i]->entityId == entityId) return players[i];
-        return NULL;
+        return findMonsterByEntityId(entityId);
     }
 
     gameent *getLastKiller(gameent *d)
     {
         if(!d) return NULL;
-        gameent *killer = findPlayerByEntityId(d->lastkillerId);
+        gameent *killer = findEntityById(d->lastkillerId);
         if(killer) return killer;
-        d->lastkillerId = SIZE_MAX;
+        d->lastkillerId = INVALID_ENTITY_ID;
         return NULL;
     }
 
@@ -1260,7 +1265,7 @@ namespace game
                 playSound(S_SPLASH, isHudplayer ? vec(0, 0, 0) : d->o, 300, 50);
                 particle_splash(PART_WATER, 40, 150, o, 0x18181A, 10.f + rnd(12), 600, 30);
                 addmsg(N_WATERTOUCH, "rci", pl, true);
-                if(pl->afterburnmillis)
+                if(pl->afterBurnMillis)
                 {
                     playSound(S_FIRE_EXT, isHudplayer ? vec(0,0,0) : d->o, 200, 100, NULL, pl->entityId);
                     clearAfterburn(pl);

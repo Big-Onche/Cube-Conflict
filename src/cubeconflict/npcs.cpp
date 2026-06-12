@@ -100,7 +100,7 @@ namespace game
         physent *stacked;
         vec stackpos;
         vec spawnpos;
-        gameent *afterburner;
+        size_t afterBurnerId;
         int blockedmillis;
         int spawnyaw, monsterlastdeath;
 
@@ -108,7 +108,7 @@ namespace game
             monsterstate(_state), tag(_tag),
             stacked(NULL),
             stackpos(0, 10, 0),
-            afterburner(NULL),
+            afterBurnerId(INVALID_ENTITY_ID),
             blockedmillis(0)
         {
             type = ENT_AI;
@@ -151,20 +151,21 @@ namespace game
 
         void stopAfterburn()
         {
-            afterburnmillis = 0;
-            afterburnatk = 0;
-            afterburner = NULL;
+            afterBurnMillis = 0;
+            afterBurnAttack = 0;
+            afterBurnerId = INVALID_ENTITY_ID;
         }
 
         void startAfterburn(int atk, gameent *burner)
         {
             if(atk!=ATK_FLAMETHROWER && atk!=ATK_MOLOTOV) return;
-            if(inWater(burner->feetpos())) return;
+            gameent *source = burner ? burner : this;
+            if(inWater(source->feetpos())) return;
 
             const int burnmillis = atk==ATK_FLAMETHROWER ? 4000 : 7000;
-            afterburnmillis = min(afterburnmillis + burnmillis, burnmillis);
-            afterburnatk = atk;
-            afterburner = burner ? burner : this;
+            afterBurnMillis = min(afterBurnMillis + burnmillis, burnmillis);
+            afterBurnAttack = atk;
+            afterBurnerId = source->entityId;
         }
 
         void normalize_yaw(float angle)
@@ -541,6 +542,13 @@ namespace game
 
     vector<monster *> monsters;
 
+    gameent *findMonsterByEntityId(size_t entityId)
+    {
+        if(entityId == INVALID_ENTITY_ID) return NULL;
+        loopv(monsters) if(monsters[i] && monsters[i]->entityId == entityId) return monsters[i];
+        return NULL;
+    }
+
     static const int MAX_DMSP_ALIVE_MONSTERS = 64;
 
     int nextmonster, spawnremain, numkilled, monstertotal, mtimestart, remain;
@@ -775,17 +783,22 @@ namespace game
             monster *m = monsters[i];
             if(m->state==CS_ALIVE)
             {
-                if(m->afterburnmillis)
+                if(m->afterBurnMillis)
                 {
                     if(inWater(m->feetpos())) m->stopAfterburn();
                     else
                     {
-                        m->afterburnmillis = max(m->afterburnmillis-curtime, 0);
-                        if(applyafterburn && m->afterburnmillis > 0)
+                        m->afterBurnMillis = max(m->afterBurnMillis-curtime, 0);
+                        if(applyafterburn && m->afterBurnMillis > 0)
                         {
-                            gameent *burner = m->afterburner ? m->afterburner : m;
-                            const int afterburndamage = m->afterburnatk==ATK_FLAMETHROWER ? 40 : 80;
-                            m->monsterpain(afterburndamage, burner, m->afterburnatk, true);
+                            gameent *burner = findEntityById(m->afterBurnerId);
+                            if(!burner)
+                            {
+                                m->afterBurnerId = INVALID_ENTITY_ID;
+                                burner = m;
+                            }
+                            const int afterburndamage = m->afterBurnAttack==ATK_FLAMETHROWER ? 40 : 80;
+                            m->monsterpain(afterburndamage, burner, m->afterBurnAttack, true);
 
                             if(burner==player1 && player1->gameplay.classId==C_VAMPIRE)
                             {
@@ -896,7 +909,7 @@ namespace game
                 }
                 else
                 {
-                    if(m.afterburnmillis && rndevent(94))
+                    if(m.afterBurnMillis && rndevent(94))
                         particle_splash(PART_FIRE_BALL, 2, 350, o, rnd(2) ? 0x992200 : 0x886622, 5, 70, -20, 5);
 
                     //////////////////////////////////// Npc's anims ////////////////////////////////////////////////////////////////////////

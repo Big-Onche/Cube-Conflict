@@ -549,10 +549,10 @@ namespace game
         loopv(projectiles::curProjectiles)
         {
             projectiles::projectile &p = projectiles::curProjectiles[i];
-            if(p.atk == atk && p.owner == d && p.id == id && !p.local)
+            if(p.atk == atk && p.ownerId == d->entityId && p.id == id && !p.local)
             {
                 vec pos = vec(p.offset).mul(p.offsetmillis/float(OFFSETMILLIS)).add(p.o);
-                explode(p.local, p.owner, pos, p.dir, NULL, 0, atk);
+                explode(p.local, d, pos, p.dir, NULL, 0, atk);
                 projectiles::stain(p, pos, atk);
                 removeEntityPos(p.entityId);
                 projectiles::curProjectiles.remove(i);
@@ -563,10 +563,10 @@ namespace game
         loopv(bouncers::curBouncers)
         {
             bouncers::bouncer &b = *bouncers::curBouncers[i];
-            if((b.bouncetype == BNC_GRENADE || b.bouncetype == BNC_MOLOTOV) && b.owner == d && b.id == id && !b.local)
+            if((b.bouncetype == BNC_GRENADE || b.bouncetype == BNC_MOLOTOV) && b.ownerId == d->entityId && b.id == id && !b.local)
             {
                 vec pos = vec(b.offset).mul(b.offsetmillis/float(OFFSETMILLIS)).add(b.o);
-                explode(b.local, b.owner, pos, vec(0,0,0), NULL, 0, atk);
+                explode(b.local, d, pos, vec(0,0,0), NULL, 0, atk);
                 bouncers::curBouncers.remove(i);
                 break;
             }

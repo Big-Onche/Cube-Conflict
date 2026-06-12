@@ -87,6 +87,11 @@ namespace bouncers
     vector<bouncer *> curBouncers;
     static vector<bouncer *> freeBouncers;
 
+    static inline gameent *ownerOf(const bouncer &bnc)
+    {
+        return findEntityById(bnc.ownerId);
+    }
+
     static inline bouncer *allocBouncer() { return freeBouncers.empty() ? new bouncer : freeBouncers.pop(); }
 
     static inline void freeBouncer(bouncer *bnc)
@@ -123,7 +128,7 @@ namespace bouncers
         bnc.aboveeye = bnc.radius;
         bnc.lifetime = lifetime;
         bnc.local = local;
-        bnc.owner = owner;
+        bnc.ownerId = owner ? owner->entityId : INVALID_ENTITY_ID;
         bnc.bouncetype = type;
         bnc.id = local ? lastmillis : id;
         bnc.inwater = ((lookupmaterial(from) & MAT_WATER) == MAT_WATER);
@@ -225,6 +230,7 @@ namespace bouncers
         loopv(curBouncers)
         {
             bouncer &bnc = *curBouncers[i];
+            gameent *owner = ownerOf(bnc);
             bool isGrenade = (bnc.bouncetype == BNC_GRENADE);
             bool isLight = (bnc.bouncetype == BNC_LIGHT);
             vec old(bnc.o);
@@ -270,7 +276,17 @@ namespace bouncers
                 {
                     int atk = (isGrenade ? ATK_M32 : ATK_MOLOTOV);
                     hits.setsize(0);
-                    explode(bnc.local, bnc.owner, bnc.o, bnc.o, NULL, 1, atk);
+                    if(!owner)
+                    {
+                        bouncer *removed = curBouncers[i];
+                        curBouncers[i] = curBouncers.last();
+                        curBouncers.pop();
+                        freeBouncer(removed);
+                        i--;
+                        continue;
+                    }
+
+                    explode(bnc.local, owner, bnc.o, bnc.o, NULL, 1, atk);
 
                     if(isGrenade)
                     {
@@ -280,7 +296,7 @@ namespace bouncers
 
                     if(bnc.local)
                     {
-                        addmsg(N_EXPLODE, "rci3iv", bnc.owner, lastmillis-maptime, atk, bnc.id-maptime, hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
+                        addmsg(N_EXPLODE, "rci3iv", owner, lastmillis-maptime, atk, bnc.id-maptime, hits.length(), hits.length()*sizeof(hitmsg)/sizeof(int), hits.getbuf());
                     }
 
                 }
@@ -303,6 +319,7 @@ namespace bouncers
         loopv(curBouncers)
         {
             bouncer &bnc = *curBouncers[i];
+            gameent *owner = ownerOf(bnc);
             vec pos(bnc.o);
             pos.add(vec(bnc.offset).mul(bnc.offsetmillis/float(OFFSETMILLIS)));
 
@@ -313,7 +330,7 @@ namespace bouncers
             bool stopped = (numBounces > 4);
             const auto &cfg = bouncers[bouncerType];
             const bool inWater = bnc.inwater;
-            const bool roids = bnc.owner && bnc.owner->hasRoids();
+            const bool roids = owner && owner->hasRoids();
             const char *path = getPathFast(bouncerType, bnc.variant);
 
             if(!isPaused)
@@ -448,7 +465,7 @@ namespace bouncers
         loopv(curBouncers)
         {
             bouncer *bnc = curBouncers[i];
-            if(bnc->owner == owner)
+            if(bnc->ownerId == (owner ? owner->entityId : INVALID_ENTITY_ID))
             {
                 if(bnc->bouncetype == BNC_GRENADE)
                 {

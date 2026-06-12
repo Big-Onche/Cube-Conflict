@@ -177,7 +177,7 @@ namespace server
             lastshot = 0;
             inwater = false;
             abilities.resetFull();
-            afterburnatk = 0;
+            afterBurnAttack = 0;
             lastBurnerClientNum = -1;
             lastBurnerToken = 0;
         }
@@ -764,8 +764,8 @@ namespace server
             servstate &ts = clients[i]->state;
             if(ts.lastBurnerClientNum != burner->clientnum || ts.lastBurnerToken != token) continue;
 
-            ts.afterburnmillis = 0;
-            ts.afterburnatk = 0;
+            ts.afterBurnMillis = 0;
+            ts.afterBurnAttack = 0;
             ts.lastBurnerClientNum = -1;
             ts.lastBurnerToken = 0;
         }
@@ -2080,7 +2080,7 @@ namespace server
                 putint(p, oi->state.frags);
                 putint(p, oi->state.flags);
                 putint(p, oi->state.deaths);
-                putint(p, oi->state.afterburnmillis);
+                putint(p, oi->state.afterBurnMillis);
                 loopi(NUMBOOSTS) putint(p, oi->state.boostmillis[i]);
                 sendstate(oi->state, p);
             }
@@ -2107,7 +2107,7 @@ namespace server
     {
         servstate &gs = ci->state;
         sendf(-1, 1, "ri3i5vi8vi", N_RESUME, ci->clientnum, gs.state,
-            gs.killstreak, gs.frags, gs.flags, gs.deaths, gs.afterburnmillis,
+            gs.killstreak, gs.frags, gs.flags, gs.deaths, gs.afterBurnMillis,
             NUMBOOSTS, gs.boostmillis,
             gs.seed, gs.lifesequence,
             gs.health, gs.maxhealth, gs.mana,
@@ -2573,14 +2573,14 @@ namespace server
 
             if(teamDamage) burnMillis /= 2;
 
-            ts.afterburnmillis = min(ts.afterburnmillis + burnMillis, maxBurnMillis);
-            ts.afterburnatk = atk;
+            ts.afterBurnMillis = min(ts.afterBurnMillis + burnMillis, maxBurnMillis);
+            ts.afterBurnAttack = atk;
             ts.lastBurnerClientNum = actor->clientnum;
             ts.lastBurnerToken = reinterpret_cast<uintptr_t>(actor);
         }
 
         ts.dodamage(damage, target->character==C_PHYSICIST && ts.abilitymillis[ABILITY_1]); // update target hp and shield
-        sendf(-1, 1, "ri8", N_DAMAGE, target->clientnum, actor->clientnum, damage, ts.armour, ts.health, ts.afterburnmillis, atk);
+        sendf(-1, 1, "ri8", N_DAMAGE, target->clientnum, actor->clientnum, damage, ts.armour, ts.health, ts.afterBurnMillis, atk);
         if(target!=actor && !isteam(target->team, actor->team)) as.damage += damage; // damage server stat
         if(canExplode(ts)) destroyPowerArmor(target);
 
@@ -2908,7 +2908,7 @@ namespace server
                     }
                 }
                 else loopi(NUMABILITIES) if(ci->state.abilitymillis[i]) ci->state.abilitymillis[i] = max(ci->state.abilitymillis[i]-curtime, 0);
-                if(ci->state.afterburnmillis) ci->state.afterburnmillis = max(ci->state.afterburnmillis-curtime, 0);
+                if(ci->state.afterBurnMillis) ci->state.afterBurnMillis = max(ci->state.afterBurnMillis-curtime, 0);
             }
             flushevents(ci, gamemillis);
         }
@@ -3011,17 +3011,17 @@ namespace server
             servstate &ts = target.state;
             clientinfo *burner = resolveafterburnowner(ts);
 
-            if(ts.state==CS_ALIVE && ts.afterburnmillis && burner)
+            if(ts.state==CS_ALIVE && ts.afterBurnMillis && burner)
             {
-                int afterburnDamage = (ts.afterburnatk == ATK_FLAMETHROWER ? 40 : 80);
+                int afterburnDamage = (ts.afterBurnAttack == ATK_FLAMETHROWER ? 40 : 80);
                 sendf(-1, 1, "ri3", N_AFTERBURN, target.clientnum, burner->clientnum);
-                dodamage(&target, burner, afterburnDamage, ts.afterburnatk, vec(0,0,0), true);
+                dodamage(&target, burner, afterburnDamage, ts.afterBurnAttack, vec(0,0,0), true);
                 if(burner->character==C_VAMPIRE) doregen(&target, burner, afterburnDamage);
             }
             else
             {
-                ts.afterburnmillis = 0;
-                ts.afterburnatk = 0;
+                ts.afterBurnMillis = 0;
+                ts.afterBurnAttack = 0;
                 ts.lastBurnerClientNum = -1;
                 ts.lastBurnerToken = 0;
             }
@@ -4028,7 +4028,7 @@ namespace server
             {
                 bool inWater = getint(p);
                 if(!cq) break;
-                if(inWater) cq->state.afterburnmillis = 0;
+                if(inWater) cq->state.afterBurnMillis = 0;
                 cq->state.inwater = inWater;
                 break;
             }

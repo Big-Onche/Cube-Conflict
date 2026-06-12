@@ -33,7 +33,7 @@ namespace game
             else floatret(roundOne(timer));
         }
     );
-    ICOMMAND(hudafterburn, "", (), floatret(roundOne((followingplayer(player1)->afterburnmillis) / 1000.f)); );
+    ICOMMAND(hudafterburn, "", (), floatret(roundOne((followingplayer(player1)->afterBurnMillis) / 1000.f)); );
     ICOMMAND(hudclass, "", (), intret(followingplayer(player1)->gameplay.classId));
 
     ICOMMAND(hudability, "", (),
@@ -221,7 +221,7 @@ namespace game
         if(hp->boostmillis[B_SHROOMS]) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/shrooms.png", min(1.0f * postfx::shroomsFadeIn(), hp->boostmillis[B_SHROOMS] / 5000.f));
         if(hp->boostmillis[B_RAGE]) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/rage.png", min(1.0f, hp->boostmillis[B_RAGE] / 1000.f));
         if(hp->vampiremillis) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/vampire.png", min(1.0f, hp->vampiremillis / 500.f));
-        if(hp->afterburnmillis) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/fire.png", min(1.0f, hp->afterburnmillis / 500.f));
+        if(hp->afterBurnMillis) drawFullscreenQuad(w, h, "media/interface/hud/fullscreen/fire.png", min(1.0f, hp->afterBurnMillis / 500.f));
 
         if(((hp->abilitymillis[ABILITY_1] || hp->abilitymillis[ABILITY_3]) && hp->gameplay.classId==C_WIZARD) || (hp->abilitymillis[ABILITY_2] && hp->gameplay.classId==C_PHYSICIST))
         {
