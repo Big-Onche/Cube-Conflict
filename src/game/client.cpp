@@ -1840,7 +1840,7 @@ namespace game
                 vec dir;
                 loopk(3) dir[k] = getint(p)/DNF;
                 if(!target || !validatk(atk)) break;
-                target->hitphyspush(damage * (target->health<=0 ? deadpush : 1), dir, NULL, atk, target);
+                target->applyHitPush(damage * (target->health<=0 ? deadpush : 1), dir, NULL, atk);
                 break;
             }
 

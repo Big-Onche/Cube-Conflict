@@ -344,7 +344,7 @@ namespace game
                 doLocalAfterburn(f, at, atk);
                 damageeffect(damage, f, at, atk);
                 damaged(damage, f, at, true, atk);
-                f->hitphyspush(damage, vel, at, atk, f);
+                f->applyHitPush(damage, vel, at, atk);
             }
             else if(at==player1)
             {
@@ -362,7 +362,7 @@ namespace game
             }
         }
 
-        if(!m_mp(gamemode) || f==at) f->hitphyspush(damage, vel, at, atk, f);
+        if(!m_mp(gamemode) || f==at) f->applyHitPush(damage, vel, at, atk);
         if(!m_mp(gamemode)) damaged(damage, f, at, false, atk);
         else
         {

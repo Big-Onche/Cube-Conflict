@@ -1308,11 +1308,20 @@ struct gameent : dynent, gamestate
         if(ai) delete ai;
     }
 
-    void hitphyspush(int damage, const vec &dir, gameent *actor, int atk, gameent *target)
+    void applyHitPush(int damage, const vec &dir, gameent *actor, int atk)
     {
-        if(target->gameplay.classId == C_AMERICAN) return;
+        if(gameplay.classId == C_AMERICAN) return;
+
+        const attackinfo &attack = attacks[atk];
+
+        const float selfPushScale = actor == this && attack.exprad ? EXP_SELFPUSH : 1.0f;
+
+        const float damageScale = float(damage) / 10.0f;
+        const float weightScale = 1.0f / max(weight, 1);
+
         vec push(dir);
-        push.mul((actor==this && attacks[atk].exprad ? EXP_SELFPUSH : 1.0f)*attacks[atk].hitpush*(damage/10)/weight);
+        push.mul(selfPushScale * attack.hitpush * damageScale * weightScale);
+
         vel.add(push);
     }
     void clearDamageLog();

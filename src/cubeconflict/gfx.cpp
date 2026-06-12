@@ -488,10 +488,10 @@ namespace game
 
     void renderMuzzleEffects(const vec &from, const vec &to, gameent *d, int atk)
     {
-        vec pos = d->character==C_SPY && d->abilitymillis[ABILITY_2] ? game::hudgunorigin(d->gunselect, d->o, to, d) : d->muzzle;
+        vec pos = d->gameplay.classId==C_SPY && d->abilitymillis[ABILITY_2] ? game::hudgunorigin(d->gunselect, d->o, to, d) : d->render.muzzlePos;
 
         int lightFlags = DL_FLASH|DL_SHRINK|L_NOSHADOW;
-        bool wizardAbility = d->character==C_WIZARD && d->abilitymillis[ABILITY_2];
+        bool wizardAbility = d->gameplay.classId==C_WIZARD && d->abilitymillis[ABILITY_2];
         bool increasedDamages = d->boostmillis[B_RAGE] || d->hasRoids();
         vec dir = vec(to).sub(from);
 
@@ -511,7 +511,7 @@ namespace game
             {
                 float mfSize = 1.5f/adaptMuzzleFlash(d);
                 particle_flare(pos, pos, 125, PART_MF_PLASMA, increasedDamages ? 0xFF4444 : wizardAbility ? 0xFF44FF : 0xFF7911, mfSize, d, hasShrooms(), 3);
-                if(!d->gunaccel) particle_flare(pos, pos, 200, PART_HAZE_MUZZLE, 100, mfSize*2.5f, d, false, 10);
+                if(!d->action.gunAcceleration) particle_flare(pos, pos, 200, PART_HAZE_MUZZLE, 100, mfSize*2.5f, d, false, 10);
                 adddynlight(pos, 100, vec(1.25f, 0.2f, 0.0f), 40, 2, lightFlags, 100, vec(1.25f, 0.2f, 0.0f), d);
                 break;
             }
@@ -546,8 +546,8 @@ namespace game
                 bool isGau = (atk == ATK_S_GAU8);
                 float mfSize = isGau ? (3.0f / adaptMuzzleFlash(d)) : (2.5f / adaptMuzzleFlash(d));
                 particles::dirSplash(PART_SMOKE, isGau ? 0x282828 : 0x444444, 100, 1, 500, pos, dir, isGau ? 0.5f : 0.2f, 100, 5, hasShrooms());
-                particle_flare(pos, pos, 100, PART_MF_BIG, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xCCAAAA, mfSize - (d->gunaccel / 5.f), d, hasShrooms());
-                if(!d->gunaccel) particle_flare(pos, pos, 200, PART_HAZE_MUZZLE, 100, mfSize*2, d, false, 10);
+                particle_flare(pos, pos, 100, PART_MF_BIG, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xCCAAAA, mfSize - (d->action.gunAcceleration / 5.f), d, hasShrooms());
+                if(!d->action.gunAcceleration) particle_flare(pos, pos, 200, PART_HAZE_MUZZLE, 100, mfSize*2, d, false, 10);
                 adddynlight(pos, isGau ? 125 : 75, vec(1.25f, 0.75f, 0.3f), 35, 2, lightFlags, 0, vec(1.25f, 0.75f, 0.3f), d);
                 break;
             }
