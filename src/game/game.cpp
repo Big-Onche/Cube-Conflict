@@ -160,7 +160,7 @@ namespace game
     {
         d->respawn();
         d->spawnstate(gamemode, d->gameplay.classId);
-        d->shieldbroken = d->armour <= 0 || d->armourtype < A_WOOD || d->armourtype > A_MAGNET;
+        d->sound.shieldbroken = d->armour <= 0 || d->armourtype < A_WOOD || d->armourtype > A_MAGNET;
         return d;
     }
 
@@ -458,9 +458,9 @@ namespace game
 
     void checkShield(gameent *d)
     {
-        if(!d->shieldbroken && d->armourtype >= A_WOOD && d->armourtype <= A_MAGNET && d->armour <= 0)
+        if(!d->sound.shieldbroken && d->armourtype >= A_WOOD && d->armourtype <= A_MAGNET && d->armour <= 0)
         {
-            d->shieldbroken = true;
+            d->sound.shieldbroken = true;
             playSound(S_WOOD_BROKEN + d->armourtype, d==hudplayer() ? vec(0, 0, 0) : d->o, 250, 100, NULL, d->entityId);
         }
     }
@@ -507,8 +507,6 @@ namespace game
                 }
                 else d->hazards.isOutOfMap = false;
             }
-
-            if(totalmillis - d->lastcurdamage > 500) d->curdamage = 0;
 
             if(d == player1 || d->ai) continue;
             if(d->state==CS_DEAD && d->ragdoll) moveGrave(d);
@@ -791,8 +789,8 @@ namespace game
     {
         //if(!packtaunt) return;
         //if(player1->state!=CS_ALIVE) return;
-        //if(lastmillis-player1->lasttaunt<2000){conoutf(CON_GAMEINFO, "\faOn abuse pas des bonnes choses !"); return;}
-        //player1->lasttaunt = lastmillis;
+        //if(lastmillis-player1->render.lasttaunt<2000){conoutf(CON_GAMEINFO, "\faOn abuse pas des bonnes choses !"); return;}
+        //player1->render.lasttaunt = lastmillis;
         //playsound(S_CGCORTEX+(player1->customdanse), forcecampos>=0 ? &player1->o : NULL, NULL, 0, -1, -1, -1, 400);
         //addmsg(N_TAUNT, "rc", player1);
     }
@@ -1322,7 +1320,7 @@ namespace game
 
             if(hasEpo) freq /= 2.f;
 
-            if(lastmillis-pl->lastfootstep < freq) return;
+            if(lastmillis-pl->sound.lastfootstep < freq) return;
             else
             {
                 if(pl==hudplayer())
@@ -1342,7 +1340,7 @@ namespace game
                 }
             }
         }
-        pl->lastfootstep = lastmillis;
+        pl->sound.lastfootstep = lastmillis;
     }
 
     void dynentcollide(physent *d, physent *o, const vec &dir)

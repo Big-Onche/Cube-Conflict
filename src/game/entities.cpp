@@ -198,7 +198,7 @@ namespace entities
         if(type >= I_WOODSHIELD && type <= I_MAGNETSHIELD)
         {
             if(!powerArmor) d->action.lastShield = lastmillis;
-            d->shieldbroken = false;
+            d->sound.shieldbroken = false;
         }
         playSound(powerArmor ? S_ITEMPIECEROBOTIQUE : itemstats[type-I_RAIL].sound, d==hudplayer() ? vec(0, 0, 0) : d->o, 300, 50, NULL, d->entityId);
 

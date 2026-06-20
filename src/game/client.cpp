@@ -1012,7 +1012,7 @@ namespace game
         messagereliable = false;
         messagecn = -1;
         player1->respawn();
-        player1->shieldbroken = true;
+        player1->sound.shieldbroken = true;
         player1->spawn.lifeSequence = 0;
         player1->state = CS_ALIVE;
         player1->net.privilege = PRIV_NONE;
@@ -1887,7 +1887,7 @@ namespace game
             case N_TAUNT:
             {
                 if(!d) return;
-                d->lasttaunt = lastmillis;
+                d->render.lasttaunt = lastmillis;
                 //d->dansechan = //playsound(S_CGCORTEX+(d->customdanse), d==hudplayer() ? NULL : &d->o, NULL, 0, 0, 150, d->dansechan, 400);
                 break;
             }

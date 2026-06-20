@@ -180,8 +180,8 @@ namespace ai
     void bottaunt(gameent *d)
     {
         //if(d->state!=CS_ALIVE || d->physstate<PHYS_SLOPE) return;
-        //if(lastmillis-d->lasttaunt<7500) return;
-        //d->lasttaunt = lastmillis;
+        //if(lastmillis-d->render.lasttaunt<7500) return;
+        //d->render.lasttaunt = lastmillis;
         //addmsg(N_TAUNT, "rc", d);
     }
 

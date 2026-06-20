@@ -1324,7 +1324,7 @@ int main(int argc, char **argv)
     initSounds();
     execfile("config/sound.cfg");
 
-    game::player1->playermodel = 0;
+    game::player1->render.model = 0;
 
     identflags |= IDF_PERSIST;
 
