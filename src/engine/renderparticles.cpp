@@ -369,8 +369,8 @@ static inline uchar particlecoloralpha(int blend, uchar alpha)
 
 static void splash(int type, const bvec4 &color, int radius, int num, int fade, const vec &p, float size, int gravity, int sizemod, bool sound = false);
 
-static const int MAXPARTICLELIGHTCHUNK = 32;
-static const float PARTICLELIGHTCELLSIZE = 64.0f;
+static const int MAXPARTICLELIGHTCHUNK = 128;
+static const float PARTICLELIGHTCELLSIZE = 256.0f;
 
 static inline uint particlelightcellcoord(int n)
 {
