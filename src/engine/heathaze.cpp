@@ -9,6 +9,10 @@ extern float getfovscale(float referenceFov);
 namespace heatHaze
 {
     static Texture *worldhazenormaltex = NULL;
+    static int scenetextureserial = 1, copiedserial = 0, copiedmillis = -1;
+    static bool copiedmsaa = false;
+    static GLuint copiedsrcfbo = 0, copieddstfbo = 0, copiedtex = 0;
+    static int copiedvieww = 0, copiedviewh = 0;
 
     VARR(worldheathaze, 0, 0, 1);
     FVARR(worldheathazestrength, 0.0f, 3.0f, 100.0f);
@@ -36,8 +40,27 @@ namespace heatHaze
         return heathaze && heathazestrength > 0 && (heathazenearstrength > 0 || heathazefarstrength > 0);
     }
 
+    void invalidateSceneTexture()
+    {
+        scenetextureserial++;
+        copiedserial = 0;
+    }
+
+    static inline bool bindCopiedSceneTexture(bool msaa, GLuint tex)
+    {
+        glActiveTexture_(GL_TEXTURE1);
+        if(msaa) glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, tex);
+        else glBindTexture(GL_TEXTURE_RECTANGLE, tex);
+        glActiveTexture_(GL_TEXTURE0);
+        return true;
+    }
+
     bool bindSceneTexture()
     {
+        bool msaa = msaalight != 0;
+        GLuint srcfbo = msaa ? mshdrfbo : hdrfbo,
+               dstfbo = msaa ? msrefractfbo : refractfbo,
+               tex = msaa ? msrefracttex : refracttex;
         if(msaalight)
         {
             if(!mshdrfbo || !msrefractfbo || !msrefracttex) return false;
@@ -45,6 +68,18 @@ namespace heatHaze
         else
         {
             if(!hdrfbo || !refractfbo || !refracttex) return false;
+        }
+
+        if(copiedserial == scenetextureserial &&
+           copiedmillis == lastmillis &&
+           copiedmsaa == msaa &&
+           copiedsrcfbo == srcfbo &&
+           copieddstfbo == dstfbo &&
+           copiedtex == tex &&
+           copiedvieww == vieww &&
+           copiedviewh == viewh)
+        {
+            return bindCopiedSceneTexture(msaa, tex);
         }
 
         double debugstart = startparticledebugtimer();
@@ -60,8 +95,6 @@ namespace heatHaze
             glBindFramebuffer_(GL_DRAW_FRAMEBUFFER, msrefractfbo);
             glBlitFramebuffer_(0, 0, vieww, viewh, 0, 0, vieww, viewh, GL_COLOR_BUFFER_BIT, GL_NEAREST);
             glBindFramebuffer_(GL_FRAMEBUFFER, mshdrfbo);
-            glActiveTexture_(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msrefracttex);
         }
         else
         {
@@ -69,13 +102,20 @@ namespace heatHaze
             glBindFramebuffer_(GL_DRAW_FRAMEBUFFER, refractfbo);
             glBlitFramebuffer_(0, 0, vieww, viewh, 0, 0, vieww, viewh, GL_COLOR_BUFFER_BIT, GL_NEAREST);
             glBindFramebuffer_(GL_FRAMEBUFFER, hdrfbo);
-            glActiveTexture_(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_RECTANGLE, refracttex);
         }
 
-        glActiveTexture_(GL_TEXTURE0);
+        bindCopiedSceneTexture(msaa, tex);
         if(hadScissor) glEnable(GL_SCISSOR_TEST);
         stopparticledebugtimer("particle haze copy", debugstart);
+
+        copiedserial = scenetextureserial;
+        copiedmillis = lastmillis;
+        copiedmsaa = msaa;
+        copiedsrcfbo = srcfbo;
+        copieddstfbo = dstfbo;
+        copiedtex = tex;
+        copiedvieww = vieww;
+        copiedviewh = viewh;
         return true;
     }
 
@@ -114,6 +154,7 @@ namespace heatHaze
 
     void renderWorld()
     {
+        invalidateSceneTexture();
         if(!shouldRenderWorldHaze() || !bindSceneTexture()) return;
 
         double debugstart = startparticledebugtimer();

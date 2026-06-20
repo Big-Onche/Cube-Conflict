@@ -519,6 +519,7 @@ namespace heatHaze
 {
     extern bool shouldRenderHazeParticles();
     extern bool shouldRenderWorldHaze();
+    extern void invalidateSceneTexture();
     extern bool bindSceneTexture();
     extern void setShaderParams(bool scroll = true, bool fade = true);
     extern void renderWorld();

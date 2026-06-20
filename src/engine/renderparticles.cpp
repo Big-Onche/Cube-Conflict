@@ -2287,6 +2287,7 @@ void renderparticles(int layer)
     particledebugscope debugscope(particledebugrendername(layer));
     canstep = layer != PL_UNDER;
     resetparticlelightcache();
+    heatHaze::invalidateSceneTexture();
     if(!particlerenderorderbuilt) buildparticlerenderorder();
 
     //want to debug BEFORE the lastpass render (that would delete particles)
