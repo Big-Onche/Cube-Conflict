@@ -340,6 +340,7 @@ static inline bool bbinsidespot(const vec &origin, const vec &dir, int spot, con
 extern matrix4 eyematrix, worldmatrix, screenmatrix;
 
 extern int transparentlayer;
+extern bool renderedtransparentparticles;
 
 extern GLenum hdrformat;
 extern int gw, gh, gdepthformat, ghasstencil;
@@ -768,6 +769,8 @@ extern void clearparticleemitters();
 extern void seedparticles();
 extern void updateparticles();
 extern void debugparticles();
+extern double startparticledebugtimer();
+extern void stopparticledebugtimer(const char *name, double start);
 extern bool rendershadowparticles();
 extern bool hasshadowparticles();
 extern void renderparticles(int layer = PL_ALL);

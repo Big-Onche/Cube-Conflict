@@ -47,6 +47,8 @@ namespace heatHaze
             if(!hdrfbo || !refractfbo || !refracttex) return false;
         }
 
+        double debugstart = startparticledebugtimer();
+
         // The transparent pass can leave scissor enabled for particle layers.
         // Ensure we always copy the full resolved scene into the haze source.
         bool hadScissor = glIsEnabled(GL_SCISSOR_TEST) != 0;
@@ -73,6 +75,7 @@ namespace heatHaze
 
         glActiveTexture_(GL_TEXTURE0);
         if(hadScissor) glEnable(GL_SCISSOR_TEST);
+        stopparticledebugtimer("particle haze copy", debugstart);
         return true;
     }
 
@@ -113,7 +116,12 @@ namespace heatHaze
     {
         if(!shouldRenderWorldHaze() || !bindSceneTexture()) return;
 
-        if(msaalight) return; // This shader variant expects rectangle color fetches.
+        double debugstart = startparticledebugtimer();
+        if(msaalight)
+        {
+            stopparticledebugtimer("particle world haze", debugstart);
+            return; // This shader variant expects rectangle color fetches.
+        }
 
         if(!worldhazenormaltex) worldhazenormaltex = textureload("media/texture/mat_air/refraction.png", 0, true, false);
 
@@ -146,5 +154,6 @@ namespace heatHaze
         if(haddepthtest) glEnable(GL_DEPTH_TEST);
         if(hadblend) glEnable(GL_BLEND);
         if(hadscissor) glEnable(GL_SCISSOR_TEST);
+        stopparticledebugtimer("particle world haze", debugstart);
     }
 }

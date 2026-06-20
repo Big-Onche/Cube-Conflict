@@ -2085,21 +2085,185 @@ void removetrackedparticles(physent *owner)
     loopi(sizeof(parts)/sizeof(parts[0])) parts[i]->resettracked(owner);
 }
 
-VARN(debugparticles, dbgparts, 0, 0, 1);
+VARN(debugparticles, dbgparts, 0, 0, 2);
+
+struct particledebugmetric
+{
+    const char *name;
+    float millis;
+};
+
+static particledebugmetric particledebugmetrics[] =
+{
+    { "particle update", 0 },
+    { "particle render all", 0 },
+    { "particle render under", 0 },
+    { "particle render over", 0 },
+    { "particle render nolayer", 0 },
+    { "particle shadow prepare", 0 },
+    { "particle shadow render", 0 },
+    { "particle haze copy", 0 },
+    { "particle world haze", 0 },
+};
+
+static int particledebugframe = -1;
+static bool particledebugfreezeframe = false;
+static const float PARTICLEDEBUGFREEZEMILLIS = 8.0f;
+
+static inline bool particledebugtiming()
+{
+    return dbgparts >= 2;
+}
+
+static inline void resetparticledebugframe()
+{
+    if(particledebugframe == totalmillis) return;
+    particledebugframe = totalmillis;
+    loopi(sizeof(particledebugmetrics)/sizeof(particledebugmetrics[0])) particledebugmetrics[i].millis = 0;
+}
+
+static inline double particledebugclockmillis()
+{
+    static double scale = 0;
+    if(!scale) scale = 1000.0/double(SDL_GetPerformanceFrequency());
+    return double(SDL_GetPerformanceCounter())*scale;
+}
+
+double startparticledebugtimer()
+{
+    if(!particledebugtiming()) return 0;
+    resetparticledebugframe();
+    return particledebugclockmillis();
+}
+
+void stopparticledebugtimer(const char *name, double start)
+{
+    if(!start || !particledebugtiming()) return;
+    resetparticledebugframe();
+    float elapsed = max(float(particledebugclockmillis() - start), 0.0f);
+    loopi(sizeof(particledebugmetrics)/sizeof(particledebugmetrics[0])) if(!strcmp(particledebugmetrics[i].name, name))
+    {
+        particledebugmetrics[i].millis += elapsed;
+        return;
+    }
+}
+
+static void checkparticledebugfreezeframe(float total)
+{
+    if(total <= PARTICLEDEBUGFREEZEMILLIS)
+    {
+        particledebugfreezeframe = false;
+        return;
+    }
+    if(particledebugfreezeframe) return;
+
+    particledebugfreezeframe = true;
+    conoutf(CON_WARN, "particle debug freeze frame: %.2f ms total above %.2f ms", total, PARTICLEDEBUGFREEZEMILLIS);
+    loopi(sizeof(particledebugmetrics)/sizeof(particledebugmetrics[0]))
+    {
+        const particledebugmetric &metric = particledebugmetrics[i];
+        conoutf(CON_WARN, "  %s: %.2f ms", metric.name, metric.millis);
+    }
+}
+
+struct particledebugscope
+{
+    const char *name;
+    double start;
+
+    particledebugscope(const char *name) : name(name), start(startparticledebugtimer()) {}
+    ~particledebugscope() { stopparticledebugtimer(name, start); }
+};
+
+static inline const char *particledebugrendername(int layer)
+{
+    switch(layer)
+    {
+        case PL_UNDER: return "particle render under";
+        case PL_OVER: return "particle render over";
+        case PL_NOLAYER: return "particle render nolayer";
+        default: return "particle render all";
+    }
+}
+
+static void drawparticledebugtexture(const char *label, GLuint tex, bool msaa, int x, int y, int w, int h)
+{
+    if(!tex) return;
+
+    gle::colorf(1, 1, 1, 1);
+    glActiveTexture_(GL_TEXTURE0);
+    if(msaa)
+    {
+        Shader *shader = useshaderbyname("hudmsrect");
+        if(!shader) return;
+        shader->set();
+        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, tex);
+    }
+    else
+    {
+        SETSHADER(hudrect);
+        glBindTexture(GL_TEXTURE_RECTANGLE, tex);
+    }
+    debugquad(x, y, w, h, 0, 0, gw, gh);
+    draw_text(label, x, y + h + FONTH/4);
+}
+
+static void drawparticledebugfbos()
+{
+    int w = min(hudw, hudh)/4, h = max((w*max(viewh, 1))/max(vieww, 1), FONTH*4),
+        pad = FONTH, x = hudw - w - pad, y = pad;
+
+    drawparticledebugtexture(msaalight ? "particle scene FBO (MSAA)" : "particle scene FBO", msaalight ? mshdrtex : hdrtex, msaalight != 0, x, y, w, h);
+    y += h + FONTH*3/2;
+    drawparticledebugtexture(msaalight ? "particle refract FBO (MSAA)" : "particle refract FBO", msaalight ? msrefracttex : refracttex, msaalight != 0, x, y, w, h);
+}
+
+static void drawparticledebugtimings()
+{
+    float total = 0;
+    loopi(sizeof(particledebugmetrics)/sizeof(particledebugmetrics[0])) total += particledebugmetrics[i].millis;
+    checkparticledebugfreezeframe(total);
+
+    const float scale = 0.65f;
+    int line = 0, x = int(FONTH/scale), y = int(FONTH/scale);
+
+    pushhudscale(scale);
+    draw_textf("particles total %5.2f ms", x, y + line++*FONTH, total);
+    loopi(sizeof(particledebugmetrics)/sizeof(particledebugmetrics[0]))
+    {
+        const particledebugmetric &metric = particledebugmetrics[i];
+        if(metric.millis <= 0.0f) continue;
+        draw_textf("%s %5.2f ms", x, y + line++*FONTH, metric.name, metric.millis);
+    }
+    pophudmatrix();
+}
+
+static void drawparticledebuglist()
+{
+    const int n = sizeof(parts)/sizeof(parts[0]);
+    float pad = FONTH, scale = min(1.0f, max((hudh - 2.0f*pad)/max(float(n)*FONTH, 1.0f), 0.5f));
+    pushhudscale(scale);
+    loopi(n) draw_text(parts[i]->info, pad/scale, pad/scale + i*FONTH);
+    pophudmatrix();
+}
 
 void debugparticles()
 {
     if(!dbgparts) return;
-    int n = sizeof(parts)/sizeof(parts[0]);
-    pushhudmatrix();
-    hudmatrix.ortho(0, FONTH*n*2*vieww/float(viewh), FONTH*n*2, 0, -1, 1); // squeeze into top-left corner
-    flushhudmatrix();
-    loopi(n) draw_text(parts[i]->info, FONTH, (i+n/2)*FONTH);
-    pophudmatrix();
+    if(dbgparts >= 2)
+    {
+        resetparticledebugframe();
+        drawparticledebugfbos();
+        drawparticledebugtimings();
+        return;
+    }
+
+    drawparticledebuglist();
 }
 
 bool rendershadowparticles()
 {
+    particledebugscope debugscope("particle shadow render");
     if(!particleshadow || !particleshadowmapping() || !particleshadowshader || particleshadowalpha <= 0) return false;
 
     bool hadcull = glIsEnabled(GL_CULL_FACE) != 0;
@@ -2113,12 +2277,14 @@ bool rendershadowparticles()
 
 bool hasshadowparticles()
 {
+    particledebugscope debugscope("particle shadow prepare");
     if(!particleshadow || !particleshadowmapping() || particleshadowalpha <= 0) return false;
     return particleshadowbatches.prepare();
 }
 
 void renderparticles(int layer)
 {
+    particledebugscope debugscope(particledebugrendername(layer));
     canstep = layer != PL_UNDER;
     resetparticlelightcache();
     if(!particlerenderorderbuilt) buildparticlerenderorder();
@@ -2927,6 +3093,7 @@ static const char * const entreferences[] =
 
 void updateparticles()
 {
+    particledebugscope debugscope("particle update");
     if(regenemitters) addparticleemitters();
 
     if(minimized) { canemit = false; return; }
