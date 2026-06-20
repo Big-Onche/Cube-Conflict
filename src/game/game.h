@@ -973,15 +973,15 @@ static const int DAMAGE_LOG_LENGTH = 30;
 struct DamageLog
 {
     string actorName, victimName;
-    int weapon, damage, hits, millis;
+    int weapon, damage, hits, millis, color;
     float distance;
     bool isActor, isAfterburn, friendlyActor, friendlyVictim, killHit;
 
     DamageLog();
     void clear();
-    void set(const char *actorName, const char *victimName, int weapon, int damage, bool isActor, bool isAfterburn, float distance, int millis, bool friendlyActor, bool friendlyVictim);
+    void set(const char *actorName, const char *victimName, int weapon, int damage, bool isActor, bool isAfterburn, float distance, int millis, bool friendlyActor, bool friendlyVictim, int color);
     bool matchesBurst(const char *actorName, const char *victimName, int weapon, bool isActor, bool isAfterburn) const;
-    void mergeBurst(const char *actorName, const char *victimName, int damage, bool isAfterburn, float distance, int millis, bool friendlyActor, bool friendlyVictim);
+    void mergeBurst(const char *actorName, const char *victimName, int damage, bool isAfterburn, float distance, int millis, bool friendlyActor, bool friendlyVictim, int color);
 };
 
 struct DamageHistory
@@ -1099,6 +1099,8 @@ struct SoundState
 {
     int currentAttack;     // 0 = no sound, 1 = close sound, 2 = close + far sound
     bool powerArmorAlarm;  // Power armor loop is currently playing
+    int lastfootstep;      // foot step time stamp
+    bool shieldbroken;     // broken shield sound state
 
     SoundState()
     {
@@ -1109,6 +1111,8 @@ struct SoundState
     {
         currentAttack = 0;
         powerArmorAlarm = false;
+        lastfootstep = 0;
+        shieldbroken = false;
     }
 };
 
@@ -1166,6 +1170,7 @@ struct RenderState
     int skin[NUMSKINS];
     float skeletonSize;
     float graveSize;
+    int lasttaunt;
 
     vec muzzlePos;
     vec weedPos;
@@ -1183,6 +1188,7 @@ struct RenderState
           color(0),
           skeletonSize(0.0f),
           graveSize(0.0f),
+          lasttaunt(0),
           muzzlePos(-1, -1, -1),
           weedPos(-1, -1, -1),
           casingPos(-1, -1, -1)
@@ -1202,6 +1208,7 @@ struct RenderState
     {
         skeletonSize = 0.0f;
         graveSize = 0.0f;
+        lasttaunt = 0;
 
         muzzlePos = vec(-1, -1, -1);
         weedPos = vec(-1, -1, -1);
@@ -1305,9 +1312,7 @@ struct gameent : dynent, gamestate
     NetworkState net;
     SpawnState spawn;
     ActionState action;
-    int curdamage, lastcurdamage, curdamagecolor;
-    int lastfootstep;
-    int lasttaunt;
+
     PickupState pickups;
     MatchStats stats;
     editinfo *edit;
@@ -1318,7 +1323,7 @@ struct gameent : dynent, gamestate
     GameplayProfile gameplay;
 
     SoundState sound;
-    bool shieldbroken;
+
 
     ai::aiinfo *ai;
     int ownernum, lastnode;
@@ -1327,11 +1332,9 @@ struct gameent : dynent, gamestate
     gameent() : entityId(entitiesIds::getNewId()), lastkillerId(INVALID_ENTITY_ID), weight(100), net(),
                 spawn(),
                 action(),
-                curdamage(0), lastcurdamage(0), curdamagecolor(0xFFFFFF), lastfootstep(0),
-                lasttaunt(0),
                 pickups(), stats(),
                 edit(NULL), damageHistory(), hazards(), info(), render(), gameplay(),
-                sound(), shieldbroken(false),
+                sound(),
                 ai(NULL), ownernum(-1), lastnode(-1), afterBurnerId(INVALID_ENTITY_ID)
     {
         respawn();
@@ -1363,7 +1366,9 @@ struct gameent : dynent, gamestate
     void clearKillHitLog();
     void markKillHit(const char *actorName, const char *victimName, int weapon, bool isActor = false);
     void logLastHit(const char *actorName, const char *victimName, int weapon, int damage, bool isActor, bool isAfterburn, float distance, bool friendlyActor, bool friendlyVictim);
+    void logLastHit(const char *actorName, const char *victimName, int weapon, int damage, bool isActor, bool isAfterburn, float distance, bool friendlyActor, bool friendlyVictim, int color);
     const DamageLog *getLastDamage(int index) const;
+    const DamageLog *getDamageFeedback(int millis, int maxAge = 500) const;
     int getKillIndex() const;
 
 private:
@@ -1385,16 +1390,12 @@ private:
 
     void resetDamageRuntime()
     {
-        curdamage = 0;
-        lastcurdamage = 0;
-        curdamagecolor = 0xFFFFFF;
-        shieldbroken = false;
+        sound.shieldbroken = false;
         lastkillerId = INVALID_ENTITY_ID;
     }
 
     void resetVisualRuntime()
     {
-        lasttaunt = 0;
         render.resetInterpolation(yaw, pitch, roll);
         render.resetRuntime();
     }
@@ -1516,7 +1517,7 @@ namespace game
     extern int killerCharacter, killerLevel;
     extern void updateHitlogUi();
     extern void updateHitlogKill(gameent *victim, gameent *actor, int atk);
-    extern void recordHitlogDamage(gameent *actor, gameent *victim, int atk, int damage, bool isAfterburnHit, float hitdistance);
+    extern void recordHitlogDamage(gameent *actor, gameent *victim, int atk, int damage, bool isAfterburnHit, float hitdistance, int feedbackColor = 0);
 
     // abilities
     extern void requestAbility(gameent *d, int ability);

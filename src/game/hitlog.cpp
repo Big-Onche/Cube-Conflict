@@ -9,6 +9,7 @@ DamageLog::DamageLog() :
     damage(0),
     hits(0),
     millis(0),
+    color(0),
     distance(0),
     isActor(false),
     isAfterburn(false),
@@ -26,6 +27,7 @@ void DamageLog::clear()
     weapon = -1;
     damage = 0;
     millis = 0;
+    color = 0;
     distance = 0;
     isActor = false;
     isAfterburn = false;
@@ -34,7 +36,7 @@ void DamageLog::clear()
     killHit = false;
 }
 
-void DamageLog::set(const char *actorName, const char *victimName, int weapon, int damage, bool isActor, bool isAfterburn, float distance, int millis, bool friendlyActor, bool friendlyVictim)
+void DamageLog::set(const char *actorName, const char *victimName, int weapon, int damage, bool isActor, bool isAfterburn, float distance, int millis, bool friendlyActor, bool friendlyVictim, int color)
 {
     copystring(this->actorName, actorName ? actorName : "");
     copystring(this->victimName, victimName ? victimName : "");
@@ -42,6 +44,7 @@ void DamageLog::set(const char *actorName, const char *victimName, int weapon, i
     this->weapon = weapon;
     this->damage = damage;
     this->millis = millis;
+    this->color = color;
     this->distance = distance;
     this->isActor = isActor;
     this->isAfterburn = isAfterburn;
@@ -59,13 +62,14 @@ bool DamageLog::matchesBurst(const char *actorName, const char *victimName, int 
            !strcmp(this->victimName, victimName ? victimName : "");
 }
 
-void DamageLog::mergeBurst(const char *actorName, const char *victimName, int damage, bool isAfterburn, float distance, int millis, bool friendlyActor, bool friendlyVictim)
+void DamageLog::mergeBurst(const char *actorName, const char *victimName, int damage, bool isAfterburn, float distance, int millis, bool friendlyActor, bool friendlyVictim, int color)
 {
     copystring(this->actorName, actorName ? actorName : "");
     copystring(this->victimName, victimName ? victimName : "");
     hits++;
     this->damage += damage;
     this->millis = millis;
+    if(color) this->color = color;
     this->distance = distance;
     this->isAfterburn = isAfterburn;
     this->friendlyActor = friendlyActor;
@@ -102,6 +106,11 @@ void gameent::markKillHit(const char *actorName, const char *victimName, int wea
 
 void gameent::logLastHit(const char *actorName, const char *victimName, int weapon, int damage, bool isActor, bool isAfterburn, float distance, bool friendlyActor, bool friendlyVictim)
 {
+    logLastHit(actorName, victimName, weapon, damage, isActor, isAfterburn, distance, friendlyActor, friendlyVictim, 0);
+}
+
+void gameent::logLastHit(const char *actorName, const char *victimName, int weapon, int damage, bool isActor, bool isAfterburn, float distance, bool friendlyActor, bool friendlyVictim, int color)
+{
     if(damage <= 0) return;
 
     const int millis = lastmillis;
@@ -116,7 +125,7 @@ void gameent::logLastHit(const char *actorName, const char *victimName, int weap
             if(!entry.matchesBurst(actorName, victimName, weapon, isActor, isAfterburn)) continue;
             if(millis - entry.millis > burstWindow) break;
 
-            entry.mergeBurst(actorName, victimName, damage, isAfterburn, distance, millis, friendlyActor, friendlyVictim);
+            entry.mergeBurst(actorName, victimName, damage, isAfterburn, distance, millis, friendlyActor, friendlyVictim, color);
             return;
         }
     }
@@ -129,13 +138,25 @@ void gameent::logLastHit(const char *actorName, const char *victimName, int weap
     }
     else damageHistory.count++;
 
-    damageHistory.entries[slot].set(actorName, victimName, weapon, damage, isActor, isAfterburn, distance, millis, friendlyActor, friendlyVictim);
+    damageHistory.entries[slot].set(actorName, victimName, weapon, damage, isActor, isAfterburn, distance, millis, friendlyActor, friendlyVictim, color);
 }
 
 const DamageLog *gameent::getLastDamage(int index) const
 {
     if(index < 0 || index >= damageHistory.count) return NULL;
     return &damageHistory.entries[(damageHistory.offset + damageHistory.count - 1 - index + DAMAGE_LOG_LENGTH) % DAMAGE_LOG_LENGTH];
+}
+
+const DamageLog *gameent::getDamageFeedback(int millis, int maxAge) const
+{
+    loopi(damageHistory.count)
+    {
+        const DamageLog *entry = getLastDamage(i);
+        if(!entry || !entry->color) continue;
+        if(millis - entry->millis > maxAge) return NULL;
+        return entry;
+    }
+    return NULL;
 }
 
 int gameent::getKillIndex() const
@@ -195,7 +216,7 @@ namespace game
         victim->markKillHit(hitlogActorName, hitlogVictimName, atk, victim == actor);
     }
 
-    void recordHitlogDamage(gameent *actor, gameent *victim, int weapon, int damage, bool afterburnHit, float distance)
+    void recordHitlogDamage(gameent *actor, gameent *victim, int weapon, int damage, bool afterburnHit, float distance, int feedbackColor)
     {
         if(!actor || !victim || damage <= 0) return;
 
@@ -204,7 +225,7 @@ namespace game
         bool friendlyActor = teamDamage(actor);
         bool friendlyVictim = teamDamage(victim);
         actor->logLastHit(actorName, victimName, weapon, damage, true, afterburnHit, distance, friendlyActor, friendlyVictim);
-        if(actor != victim) victim->logLastHit(actorName, victimName, weapon, damage, false, afterburnHit, distance, friendlyActor, friendlyVictim);
+        if(actor != victim) victim->logLastHit(actorName, victimName, weapon, damage, false, afterburnHit, distance, friendlyActor, friendlyVictim, feedbackColor);
     }
 
     ICOMMAND(gethitloglength, "", (),

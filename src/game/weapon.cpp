@@ -222,8 +222,7 @@ namespace game
         int actorClass = actor->gameplay.classId, targetClass = d->gameplay.classId;
         bool isHudPlayer = (actor == hudplayer());
         bool teamDamage = (isteam(d->gameplay.team, actor->gameplay.team) && d!=actor);
-
-        if(isHudPlayer) d->curdamagecolor = 0xFFAA00;
+        int feedbackColor = 0xFFAA00;
 
         const int calcflags = DCF_APPLY_ACTOR_SCALE |
                               DCF_APPLY_TARGET_RESIST |
@@ -238,24 +237,24 @@ namespace game
         switch(actorClass)
         {
             case C_AMERICAN:
-                if(isSuperWeapon(atk) && isHudPlayer) d->curdamagecolor = 0xFF0000;
+                if(isSuperWeapon(atk) && isHudPlayer) feedbackColor = 0xFF0000;
                 break;
 
             case C_NINJA:
-                if(atk == ATK_NINJA && isHudPlayer) d->curdamagecolor = 0xFF0000;
+                if(atk == ATK_NINJA && isHudPlayer) feedbackColor = 0xFF0000;
                 break;
 
             case C_WIZARD:
-                if(actor->abilitymillis[ABILITY_2] && isHudPlayer) d->curdamagecolor = 0xFF00FF;
+                if(actor->abilitymillis[ABILITY_2] && isHudPlayer) feedbackColor = 0xFF00FF;
                 break;
 
             case C_VIKING:
-                if(actor->boostmillis[B_RAGE] && isHudPlayer) d->curdamagecolor = 0xFF7700;
+                if(actor->boostmillis[B_RAGE] && isHudPlayer) feedbackColor = 0xFF7700;
                 break;
 
             case C_SHOSHONE:
-                if(actor->abilitymillis[ABILITY_3] && isHudPlayer) d->curdamagecolor = 0xFF7700;
-                if(targetClass == C_AMERICAN && isHudPlayer) d->curdamagecolor = 0xFFFF00;
+                if(actor->abilitymillis[ABILITY_3] && isHudPlayer) feedbackColor = 0xFF7700;
+                if(targetClass == C_AMERICAN && isHudPlayer) feedbackColor = 0xFFFF00;
                 break;
 
             case C_PHYSICIST:
@@ -265,26 +264,26 @@ namespace game
         switch(targetClass)
         {
             case C_WIZARD:
-                if(d->abilitymillis[ABILITY_3]) d->curdamagecolor = 0x8855AA;
+                if(d->abilitymillis[ABILITY_3] && isHudPlayer) feedbackColor = 0x8855AA;
                 break;
 
             case C_PRIEST:
-                if(isHudPlayer && d->abilitymillis[ABILITY_2] && d->mana) d->curdamagecolor = 0xAA00AA;
+                if(isHudPlayer && d->abilitymillis[ABILITY_2] && d->mana) feedbackColor = 0xAA00AA;
                 break;
 
             case C_SHOSHONE:
-                if(actorClass == C_AMERICAN && isHudPlayer) d->curdamagecolor = 0xFF7700;
+                if(actorClass == C_AMERICAN && isHudPlayer) feedbackColor = 0xFF7700;
                 break;
         }
 
-        if(actor->hasRoids() && isHudPlayer) d->curdamagecolor = 0xFF0000;
-        if(d->boostmillis[B_JOINT] && isHudPlayer) d->curdamagecolor = 0xAAAA55;
+        if(actor->hasRoids() && isHudPlayer) feedbackColor = 0xFF0000;
+        if(d->boostmillis[B_JOINT] && isHudPlayer) feedbackColor = 0xAAAA55;
 
         if(teamDamage && isHudPlayer) // recalc if ally or not
         {
             if(actorClass == C_MEDIC) return;
             damage /= (actorClass == C_JUNKIE ? 1.5f : 3.f);
-            d->curdamagecolor = 0x888888;
+            feedbackColor = 0x888888;
         }
 
         if(d->armour <= 0 || d->armourtype!=A_MAGNET)
@@ -295,12 +294,10 @@ namespace game
 
         damage *= 0.1f; // rescale damage value
         if(damage <= 0) return;
-        recordHitlogDamage(actor, d, atk, damage, isAfterburnHit, hitdistance);
+        recordHitlogDamage(actor, d, atk, damage, isAfterburnHit, hitdistance, isHudPlayer ? feedbackColor : 0);
 
         if(isHudPlayer)
         {
-            d->curdamage += damage;
-            d->lastcurdamage = totalmillis;
             if(!teamDamage && actor == player1) updateStat(damage, STAT_TOTALDAMAGEDEALT);
         }
         else if(d == player1) updateStat(damage, STAT_TOTALDAMAGERECIE);

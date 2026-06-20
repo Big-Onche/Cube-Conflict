@@ -361,9 +361,9 @@ namespace game
             anim = ANIM_LOSE|ANIM_LOOP;
             if(validteam(team) ? bestteams.htfind(team)>=0 : bestplayers.find(d)>=0) anim = ANIM_WIN|ANIM_LOOP;
         }
-        //else if(d->lasttaunt && lastmillis-d->lasttaunt<1000)
+        //else if(d->render.lasttaunt && lastmillis-d->render.lasttaunt<1000)
         //{
-        //    lastaction = d->lasttaunt;
+        //    lastaction = d->render.lasttaunt;
         //    anim = ANIM_TAUNT|ANIM_LOOP;
         //}
         else if(!intermission && forcecampos<0)
@@ -541,15 +541,16 @@ namespace game
 
     void renderPlayerTextInfo(gameent *d, float dist)
     {
-        if(d->curdamage) // damage dealt displayed on hud
+        const DamageLog *feedback = d->getDamageFeedback(lastmillis);
+        if(feedback) // damage dealt displayed on hud
         {
             vec pos = d->abovehead();
             float clampedDist = clamp(dist, 0.f, 160.f);
             float riseDivisor = max(160.f - clampedDist, 1.0f);
-            float up = 5 + dist/40.f + (((totalmillis - d->lastcurdamage) / 50.f) / riseDivisor); // particle going up effect
+            float up = 5 + dist/40.f + (((lastmillis - feedback->millis) / 50.f) / riseDivisor); // particle going up effect
             if(!ispaused()) pos.z += up - (15 * (1 - (clampedDist / 160.f)));
             float size = (zoom ? huddamagesize * (guns[player1->gunselect].maxzoomfov) / 100.f : huddamagesize) * 1.5f;
-            particles::text(pos, tempformatstring("%d", d->curdamage), PART_TEXT, 1, d->curdamagecolor, size, 0, true);
+            particles::text(pos, tempformatstring("%d", feedback->damage), PART_TEXT, 1, feedback->color, size, 0, true);
         }
 
         if(player1->state==CS_SPECTATOR && showspecplayerinfo)
