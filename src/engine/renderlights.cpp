@@ -5296,19 +5296,22 @@ FVAR(refractmargin, 0, 0.1f, 1);
 FVAR(refractdepth, 1e-3f, 16, 1e3f);
 
 int transparentlayer = 0;
+bool renderedtransparentparticles = false;
 
 void rendertransparent()
 {
+    renderedtransparentparticles = false;
+
     int hasalphavas = findalphavas();
     int hasmats = findmaterials();
     bool hasmodels = transmdlsx1 < transmdlsx2 && transmdlsy1 < transmdlsy2;
     if(!hasalphavas && !hasmats && !hasmodels)
     {
-        if(!editmode) renderparticles();
+        if(!editmode) { renderparticles(); renderedtransparentparticles = true; }
         return;
     }
 
-    if(!editmode && particlelayers && ghasstencil) renderparticles(PL_UNDER);
+    if(!editmode && particlelayers && ghasstencil) { renderparticles(PL_UNDER); renderedtransparentparticles = true; }
 
     timer *transtimer = begintimer("transparent");
 
@@ -5501,8 +5504,9 @@ void rendertransparent()
         if(scissor) glDisable(GL_SCISSOR_TEST);
 
         renderparticles(PL_NOLAYER);
+        renderedtransparentparticles = true;
     }
-    else renderparticles();
+    else { renderparticles(); renderedtransparentparticles = true; }
 }
 
 void rendertransparenthud()

@@ -2768,7 +2768,7 @@ void gl_drawview()
     rendervolumetric();
     GLERROR;
 
-    if(!drawtex)
+    if(!drawtex && !renderedtransparentparticles)
     {
         renderparticles();
         GLERROR;
