@@ -59,6 +59,15 @@ static inline float getparticlelightingfade(const vec &center)
     return 1.0f - (cameradist - startdist) / (enddist - startdist);
 }
 
+static inline bool particlelightingcanreach(const vec &center, float radius = 0.0f)
+{
+    float enddist = max(float(particlelightingdist), 0.0f);
+    if(enddist <= 0.0f) return false;
+
+    float reach = enddist + max(radius, 0.0f);
+    return camera1->o.squaredist(center) < reach*reach;
+}
+
 static inline float getparticlelocallightintensity(const vec &center)
 {
     if(!particlelighting) return 0.0f;
@@ -1198,6 +1207,15 @@ struct varenderer : partrenderer
         return true;
     }
 
+    bool needslightvbo()
+    {
+        if(!useparticlelighting(type)) return false;
+
+        vec center, bbmin, bbmax;
+        float radius = 0.0f;
+        return getlightprobe(center, radius, bbmin, bbmax) && particlelightingcanreach(center, radius);
+    }
+
     particle *addpart(const vec &o, const vec &d, int fade, const bvec4 &color, float size, int gravity, int sizemod, bool sound, bool hud)
     {
         particle *p = parts + (numparts < maxparts ? numparts++ : rnd(maxparts)); //next free slot, or kill a random kitten
@@ -1649,7 +1667,8 @@ struct varenderer : partrenderer
 
     void render()
     {
-        if(useparticlelighting(type)) genlightvbo();
+        bool uselightpath = needslightvbo();
+        if(uselightpath) genlightvbo();
         else genvbo();
 
         glBindTexture(GL_TEXTURE_2D, tex->id);
@@ -1666,7 +1685,7 @@ struct varenderer : partrenderer
         gle::enablecolor();
         gle::enablequads();
 
-        if(useparticlelighting(type))
+        if(uselightpath)
         {
             Shader *softlightshader = getparticlelightshader(true);
             Shader *hardlightshader = getparticlelightshader(false);
