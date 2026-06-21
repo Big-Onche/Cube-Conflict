@@ -311,7 +311,7 @@ static inline bool useparticlelighting(int type)
 
 static inline bool useparticleshadows()
 {
-    return particleshadow && (!particlelayers || particlelayerlighting);
+    return particleshadow != 0;
 }
 
 static inline Shader *getparticlelightshader(bool usesoft)
