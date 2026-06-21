@@ -14,6 +14,7 @@ static inline void refreshparticlelighting()
 }
 
 VARP(particlelayers, 0, 1, 1);
+VARFP(particlelayerlighting, 0, 0, 1, refreshparticlelighting());
 FVARP(particlebright, 0, 1.75, 100);
 VARP(particlesize, 20, 100, 500);
 
@@ -295,9 +296,22 @@ enum
 
 const char *partnames[] = { "part", "tape", "trail", "text", "textup", "meter", "metervs", "fireball", "lightning", "flare" };
 
+static int currentparticlelayer = PL_ALL;
+
+static inline bool isparticlemateriallayer(int layer)
+{
+    return layer == PL_UNDER || layer == PL_OVER;
+}
+
 static inline bool useparticlelighting(int type)
 {
-    return particlelighting && (type&PT_LABSORPTION) != 0;
+    if(!particlelighting || (type&PT_LABSORPTION) == 0) return false;
+    return particlelayerlighting || !isparticlemateriallayer(currentparticlelayer);
+}
+
+static inline bool useparticleshadows()
+{
+    return particleshadow && (!particlelayers || particlelayerlighting);
 }
 
 static inline Shader *getparticlelightshader(bool usesoft)
@@ -2283,7 +2297,7 @@ void debugparticles()
 bool rendershadowparticles()
 {
     particledebugscope debugscope("particle shadow render");
-    if(!particleshadow || !particleshadowmapping() || !particleshadowshader || particleshadowalpha <= 0) return false;
+    if(!useparticleshadows() || !particleshadowmapping() || !particleshadowshader || particleshadowalpha <= 0) return false;
 
     bool hadcull = glIsEnabled(GL_CULL_FACE) != 0;
     if(hadcull) glDisable(GL_CULL_FACE);
@@ -2297,13 +2311,14 @@ bool rendershadowparticles()
 bool hasshadowparticles()
 {
     particledebugscope debugscope("particle shadow prepare");
-    if(!particleshadow || !particleshadowmapping() || particleshadowalpha <= 0) return false;
+    if(!useparticleshadows() || !particleshadowmapping() || particleshadowalpha <= 0) return false;
     return particleshadowbatches.prepare();
 }
 
 void renderparticles(int layer)
 {
     particledebugscope debugscope(particledebugrendername(layer));
+    currentparticlelayer = layer;
     canstep = layer != PL_UNDER;
     resetparticlelightcache();
     heatHaze::invalidateSceneTexture();
@@ -2395,6 +2410,8 @@ void renderparticles(int layer)
         glDisable(GL_BLEND);
         glDepthMask(GL_TRUE);
     }
+
+    currentparticlelayer = PL_ALL;
 }
 
 static int addedparticles = 0;
