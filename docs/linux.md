@@ -1,91 +1,97 @@
-# Cube Conflict: Linux Installation Guide
+# Building and running Cube Conflict on Linux
 
-## Playing Cube Conflict on Linux
+Official releases include Linux binaries. When building from a source-only checkout, run the build from the repository root; the Makefile places the client and dedicated server in `bins/`.
 
-### Prerequisites
-- The provided binaries require **GLIBC 2.22** or higher, ensuring compatibility with most up-to-date distributions.
-- For older systems, compiling the binaries is necessary to run the game.
+## Requirements
 
-### Running the Game
-- **Using the Game Launcher**: Execute `./game_launcher` in the terminal to start the game or a dedicated game server.
-- **Using `play.sh` Script**: Run `./play.sh` to launch the game. This script, along with the game launcher, writes files (e.g., saves, configs, screenshots) into `~/.cubeconflict` in the user's home directory. This path is customizable.
+- GNU Make, a C++ compiler, and `pkg-config`
+- SDL 2 and SDL2_image development files
+- OpenAL Soft and libsndfile development files
+- OpenGL, X11, and zlib development files
 
-### Important Notes
-- Directly running the **`cubeconflict`** executable in the `bin_unix` directory will not work.
-- **Bonus**: Compiling the game launcher (`make -C src/launcher` in the main folder) generates a `cc_launcher.desktop` file. Move it to `/usr/share/applications/` to add the game to your applications menu.
+Debian and Ubuntu:
 
-### Required Libraries
-The launcher and the game require several dynamic link libraries:
-- **Launcher Libraries**:
-  - SDL2 (>= 2.0.0)
-  - SDL2_image
-  - SDL2_ttf
-- **Game Libraries**:
-  - libGL (OpenGL)
-  - SDL2 (>= 2.0.0)
-  - SDL2_image
-  - libopenal
-  - libsndfile
-  - libpng
-  - libjpeg
-  - zlib
+```sh
+sudo apt update
+sudo apt install build-essential pkg-config libsdl2-dev libsdl2-image-dev libopenal-dev libsndfile1-dev libgl-dev libx11-dev zlib1g-dev
+```
 
-## Compiling Cube Conflict and the Launcher
+Fedora:
 
-If the provided binaries do not work for your platform or you have an older version of GLIBC:
-1. Ensure you have the **DEVELOPMENT VERSIONS** of the required libraries installed.
-2. Compile the game: Run `make -C src` in the game's main folder.
-3. Compile the launcher: Execute `make -C src/launcher` in the main folder.
+```sh
+sudo dnf install gcc-c++ make pkgconf-pkg-config SDL2-devel SDL2_image-devel openal-soft-devel libsndfile-devel libglvnd-devel libX11-devel zlib-devel
+```
 
-For detailed compilation instructions, see `src/README.md`.
+Arch Linux:
 
-## Running a Cube Conflict Server
+```sh
+sudo pacman -S --needed base-devel pkgconf sdl2 sdl2_image openal libsndfile libglvnd libx11 zlib
+```
 
-- **Using the Game Launcher**: You can run a server directly with `game_launcher`.
-- **Modifying `play.sh`**: Edit `play.sh` and replace the 12th line with `CC_OPTIONS="-u${HOME}/.cubeconflict -d"` to launch as a game server.
-- **Note**: Running the game server with the game launcher requires **xterm** to be installed (`sudo apt-get install xterm`).
+Package names may differ on derivative or older distributions. The required `pkg-config` modules are `sdl2`, `SDL2_image`, `openal`, `sndfile`, `x11`, `gl`, and `zlib`.
+
+## Build
+
+Build the client and dedicated server:
+
+```sh
+make -C src -j"$(nproc)"
+```
+
+On systems without `nproc`, omit `-j"$(nproc)"`. Useful individual targets are `client`, `server`, and `master`. `make -C src install` remains available as a compatibility alias that builds and strips the client and server; it does not install files system-wide.
+
+Steam support is disabled by default. A normal source build therefore does not need the Steam SDK. Maintainers with the SDK and matching library can use `USE_STEAM=1`.
+
+## Run
+
+The launch script is location-independent and must remain next to `config/`, `media/`, and `bins/`:
+
+```sh
+./run.sh
+./run.sh client -w1920 -h1080
+./run.sh server
+```
+
+Game options are forwarded unchanged, including arguments containing spaces. User-writable files are stored under `${XDG_DATA_HOME:-$HOME/.local/share}/cubeconflict`. Override `XDG_DATA_HOME` before launching if another location is required.
+
+The program loads assets relative to the source-release root, so moving only `bins/cc_client` or starting it directly from an unrelated working directory is unsupported. Use `run.sh`.
+
+## Dedicated server
+
+Only a compiler, GNU Make, and zlib development files are needed when building just the standalone server:
+
+```sh
+make -C src -j"$(nproc)" server
+./run.sh server
+```
+
+Server output is copied to `${XDG_DATA_HOME:-$HOME/.local/share}/cubeconflict/logs`. See [server.md](server.md) for configuration and a systemd example.
+
+## Clean rebuild and diagnostics
+
+```sh
+make -C src clean
+make -C src -j"$(nproc)"
+pkg-config --cflags --libs sdl2 SDL2_image openal sndfile x11 gl zlib
+```
+
+If the dependency check fails, install the development package that provides the missing `.pc` module. Runtime graphics and audio still depend on working GPU drivers and an SDL/OpenAL-supported desktop environment.
 
 ---
 
-# Comment jouer sur Linux ?
+# Compiler et lancer Cube Conflict sous Linux
 
-## Prérequis
-- Les binaires nécessitent **GLIBC 2.22** ou supérieur, garantissant la compatibilité avec la plupart des distributions récentes.
-- Pour les systèmes plus anciens, il est nécessaire de compiler les binaires pour exécuter le jeu.
+Les versions officielles contiennent les binaires Linux. Pour une copie contenant uniquement les sources, installez les dépendances indiquées ci-dessus, puis compilez depuis la racine du dépôt avec :
 
-## Lancer le Jeu
-- **Avec le Lanceur de Jeu** : Exécutez `./game_launcher` dans le terminal pour démarrer le jeu ou un serveur de jeu dédié.
-- **Avec le Script `play.sh`** : Lancez `./play.sh` pour démarrer le jeu. Ce script et le lanceur de jeu enregistrent les fichiers (sauvegardes, configurations, captures d'écran) dans `~/.cubeconflict` dans le répertoire personnel de l'utilisateur. Ce chemin est personnalisable.
+```sh
+make -C src -j"$(nproc)"
+```
 
-## Notes Importantes
-- L'exécution directe de l'exécutable **`cubeconflict`** dans le répertoire `bin_unix` ne fonctionnera pas.
-- **Bonus** : La compilation du lanceur de jeu (`make -C src/launcher` dans le dossier principal) génère un fichier `cc_launcher.desktop`. Déplacez-le dans `/usr/share/applications/` pour ajouter le jeu à votre menu d'applications.
+Les exécutables `bins/cc_client` et `bins/cc_server` sont créés. Lancez-les avec le script fourni afin de conserver le bon dossier de travail :
 
-### Required Libraries
-Le jeu aura besoin des bibliothèques suivantes :
-- **Bibliothèques pour le lanceur de jeu**:
-  - SDL2 (>= 2.0.0)
-  - SDL2_image
-  - SDL2_ttf
-- **Bibliothèques pour le jeu**:
-  - libGL (OpenGL)
-  - SDL2 (>= 2.0.0)
-  - SDL2_image
-  - libopenal
-  - libsndfile
-  - libpng
-  - libjpeg
-  - zlib
+```sh
+./run.sh
+./run.sh server
+```
 
-## Comment compiler le jeu et le lanceur du jeu?
-Si les binaires de votre plate-forme ne sont pas inclus ou si vous disposez d'une version antérieure à GLIBC 2.22, essayez ce qui suit :
-1. Assurez-vous que les **VERSIONS DE DÉVELOPPEMENT** des bibliothèques ci-dessus sont installées.
-2. Dans un terminal, tapez `make -C src` dans le dossier principal des fichiers du jeu pour compiler le jeu.
-3. Dans un terminal, tapez `make -C src/launcher` dans le dossier principal des fichiers du jeu pour compiler le lanceur de jeu.
-
-Pour davantage d'informations sur la compilation, consulter "src/README.md".
-
-## Exécution d'un serveur pour Cube Conflict
-- **Utilisation du Game Launcher** : Vous pouvez exécuter un serveur directement avec `game_launcher`.
-- **Modification de `play.sh`** : Modifiez `play.sh` et remplacez la 12ème ligne par `CC_OPTIONS="-u${HOME}/.cubeconflict -d"` pour lancer en tant que serveur de jeu.
-- **Remarque** : L'exécution du serveur de jeu avec le lanceur de jeu nécessite l'installation de **xterm** (`sudo apt-get install xterm`).
+Les fichiers modifiables sont enregistrés dans `${XDG_DATA_HOME:-$HOME/.local/share}/cubeconflict`. Pour compiler uniquement le serveur dédié, utilisez `make -C src -j"$(nproc)" server`. Consultez [server.md](server.md) pour la configuration du service.

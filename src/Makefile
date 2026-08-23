@@ -3,7 +3,7 @@ override CXXFLAGS += -Wall -fsigned-char -fno-exceptions -fno-rtti
 
 PLATFORM= $(shell uname -s | tr '[:lower:]' '[:upper:]')
 PLATFORM_ARCH= $(shell uname -m)
-PLATFORM_PREFIX= native
+BIN_DIR= ../bins
 
 INCLUDES= -Ishared -Icubeconflict -Iengine -Igame -Ienet/include -Isteam -Iinclude -Iinclude/tracy/public
 
@@ -11,12 +11,6 @@ INCLUDES= -Ishared -Icubeconflict -Iengine -Igame -Ienet/include -Isteam -Iinclu
 USE_STEAM ?= 0
 # 0 = no Tracy (default), 1 = Tracy enabled
 USE_TRACY ?= 0
-
-ifeq (,$(findstring 64,$(PLATFORM)))
-    STEAM_LIBNAME := steam_api.lib
-else
-    STEAM_LIBNAME := steam_api64.lib
-endif
 
 STEAM_DEFINES :=
 STEAM_CLIENT_LIBS :=
@@ -26,7 +20,15 @@ TRACY_CLIENT_LIBS :=
 
 ifeq ($(USE_STEAM),1)
     STEAM_DEFINES += -DSTEAM
-    STEAM_CLIENT_LIBS += -l:$(STEAM_LIBNAME)
+    ifneq (,$(findstring MINGW,$(PLATFORM)))
+        ifeq (,$(findstring 64,$(PLATFORM)))
+            STEAM_CLIENT_LIBS += -l:steam_api.lib
+        else
+            STEAM_CLIENT_LIBS += -l:steam_api64.lib
+        endif
+    else
+        STEAM_CLIENT_LIBS += -lsteam_api
+    endif
 endif
 
 ifeq ($(USE_TRACY),1)
@@ -109,9 +111,12 @@ else
 			TRACY_CLIENT_LIBS += -lpthread -ldl
 		endif
 
-		CLIENT_INCLUDES = $(INCLUDES) -I/usr/X11R6/include $(STEAM_DEFINES) $(TRACY_DEFINES) `sdl2-config --cflags`
-		CLIENT_LIBS = -Lenet -lenet -L/usr/X11R6/lib -lX11 `sdl2-config --libs` \
-									-lSDL2_image -lopenal -lsndfile -lz -lGL -L../bins $(STEAM_CLIENT_LIBS) $(TRACY_CLIENT_LIBS)
+		PKG_CONFIG ?= pkg-config
+		LINUX_CLIENT_PACKAGES = sdl2 SDL2_image openal sndfile x11 gl zlib
+		CLIENT_INCLUDES = $(INCLUDES) $(STEAM_DEFINES) $(TRACY_DEFINES) \
+			$(shell $(PKG_CONFIG) --cflags $(LINUX_CLIENT_PACKAGES))
+		CLIENT_LIBS = -Lenet -lenet $(shell $(PKG_CONFIG) --libs $(LINUX_CLIENT_PACKAGES)) -L$(BIN_DIR) \
+			$(STEAM_CLIENT_LIBS) $(TRACY_CLIENT_LIBS)
 	endif
 endif
 
@@ -219,8 +224,11 @@ default: all
 
 all: client server
 
+.PHONY: default all client server master install clean libenet check-deps
+
 clean:
-	-$(RM) $(CLIENT_PCH) $(CLIENT_OBJS) include/tracy/public/TracyClient.o $(SERVER_MASTER_OBJS) cc_client cc_server cc_master
+	-$(RM) $(CLIENT_PCH) $(CLIENT_OBJS) include/tracy/public/TracyClient.o $(SERVER_MASTER_OBJS) $(BIN_DIR)/cc_client $(BIN_DIR)/cc_server \
+		$(BIN_DIR)/cc_master
 
 $(filter-out shared/%,$(CLIENT_PCH)): $(filter shared/%,$(CLIENT_PCH))
 
@@ -253,17 +261,23 @@ master: $(MASTER_OBJS)
 
 install: all
 else
-client:	libenet $(CLIENT_OBJS)
-	$(CXX) $(CXXFLAGS) -o ../bins/cc_client $(CLIENT_OBJS) $(CLIENT_LIBS)
+client: check-deps $(BIN_DIR)/cc_client
+
+$(BIN_DIR)/cc_client: enet/libenet.a $(CLIENT_OBJS) | $(BIN_DIR)
+	$(CXX) $(CXXFLAGS) -o $@ $(CLIENT_OBJS) $(CLIENT_LIBS)
 ifneq (,$(findstring DARWIN,$(PLATFORM)))
-	install_name_tool -add_rpath @executable_path/../Frameworks cc_client
+	install_name_tool -add_rpath @executable_path/../Frameworks $@
 endif
 
-server:	libenet $(SERVER_OBJS)
-	$(CXX) $(CXXFLAGS) -o ../bins/cc_server $(SERVER_OBJS) $(SERVER_LIBS)
+server: $(BIN_DIR)/cc_server
 
-master: libenet $(MASTER_OBJS)
-	$(CXX) $(CXXFLAGS) -o ../bins/cc_master $(MASTER_OBJS) $(MASTER_LIBS)
+$(BIN_DIR)/cc_server: enet/libenet.a $(SERVER_OBJS) | $(BIN_DIR)
+	$(CXX) $(CXXFLAGS) -o $@ $(SERVER_OBJS) $(SERVER_LIBS)
+
+master: $(BIN_DIR)/cc_master
+
+$(BIN_DIR)/cc_master: enet/libenet.a $(MASTER_OBJS) | $(BIN_DIR)
+	$(CXX) $(CXXFLAGS) -o $@ $(MASTER_OBJS) $(MASTER_LIBS)
 
 shared/cube2font.o: shared/cube2font.c
 	$(CXX) $(CXXFLAGS) -c -o $@ $< `freetype-config --cflags`
@@ -273,18 +287,27 @@ cube2font: shared/cube2font.o
 
 ifneq (,$(findstring DARWIN,$(PLATFORM)))
 install: client
-	cp cc_client ../cubeconflict.app/Contents/MacOS/cubeconflict_universal
+	cp $(BIN_DIR)/cc_client ../cubeconflict.app/Contents/MacOS/cubeconflict_universal
 else
 install: all
-	cp cc_client	../bins/$(PLATFORM_PREFIX)_client
-	cp cc_server	../bins/$(PLATFORM_PREFIX)_server
-	cp cc_master	../bins/$(PLATFORM_PREFIX)_master
 ifneq (,$(STRIP))
-	$(STRIP) ../bins/$(PLATFORM_PREFIX)_client
-	$(STRIP) ../bins/$(PLATFORM_PREFIX)_server
-	$(STRIP) ../bins/$(PLATFORM_PREFIX)_master
+	$(STRIP) $(BIN_DIR)/cc_client
+	$(STRIP) $(BIN_DIR)/cc_server
 endif
 endif
+endif
+
+$(BIN_DIR):
+	mkdir -p $@
+
+ifneq (,$(findstring LINUX,$(PLATFORM)))
+check-deps:
+	@$(PKG_CONFIG) --exists $(LINUX_CLIENT_PACKAGES) || { \
+		echo "Missing Linux client development packages. See docs/linux.md." >&2; \
+		exit 1; \
+	}
+else
+check-deps:
 endif
 
 enet/libenet.a:

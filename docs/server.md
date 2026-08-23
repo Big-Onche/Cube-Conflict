@@ -4,12 +4,11 @@
 ### 🧰 2. Install dependencies
 `sudo apt update`
 
-`sudo apt -y install git build-essential pkg-config zlib1g-dev libenet-dev libcurl4-openssl-dev libopenal-dev libsdl2-dev libsdl2-image-dev libpng-dev libsndfile1-dev tmux ufw`
+`sudo apt -y install git build-essential pkg-config zlib1g-dev ufw`
 
-* build-essential – compiler tools
-* libenet-dev / zlib1g-dev – networking + compression
-* libsdl2, libopenal-dev, libsndfile1-dev – graphics/audio deps (needed to compile even for server)
-* ufw / tmux – firewall + optional terminal session tool
+* `build-essential` – compiler and build tools
+* `zlib1g-dev` – compression support (ENet is built from the bundled source)
+* `ufw` – optional firewall management
 
 ### 📦 3. Clone & build Cube Conflict
 `cd /opt`
@@ -20,7 +19,7 @@
 
 `cd Cube-Conflict`
 
-` make -j"$(nproc)" -C src server`
+`make -j"$(nproc)" -C src server`
 
 ### ⚙️ 4. Configure the server
 Edit your server config:
@@ -44,7 +43,7 @@ Set:
 
 `cd /opt/Cube-Conflict`
 
-`LD_LIBRARY_PATH=./bin_unix ./bin_unix/cc_server -d"./"`
+`./run.sh server`
 
 You should see:
 
@@ -56,12 +55,12 @@ Stop with Ctrl + C.
 `sudo chmod +x /opt/Cube-Conflict/run.sh`
 
 ### 👤 8. (If not already done) Create a non-root service user
-`sudo useradd -r -m -s /usr/sbin/nologin mycubeserv || true`
+`sudo useradd -r -m -s /usr/sbin/nologin cubeserv || true`
 
-`sudo chown -R mycubeserv:mycubeserv /opt/Cube-Conflict`
+`sudo chown -R cubeserv:cubeserv /opt/Cube-Conflict`
 
 ### 🧩 9. Create the systemd service
-```json
+```ini
 sudo tee /etc/systemd/system/cube-conflict.service >/dev/null <<'EOF'
 [Unit]
 Description=Cube Conflict Dedicated Server
@@ -72,7 +71,9 @@ Wants=network-online.target
 User=cubeserv
 Group=cubeserv
 WorkingDirectory=/opt/Cube-Conflict
+Environment=XDG_DATA_HOME=/var/lib
 ExecStart=/opt/Cube-Conflict/run.sh server
+StateDirectory=cubeconflict
 Restart=always
 RestartSec=5
 LimitNOFILE=65535
@@ -103,9 +104,9 @@ EOF
 `ss -lunp | grep 43000`
 
 #### See server logs
-`ls -l /opt/Cube-Conflict/logs`
+`sudo ls -l /var/lib/cubeconflict/logs`
 
-`tail -f /opt/Cube-Conflict/logs/server_*.log`
+`sudo tail -f /var/lib/cubeconflict/logs/server_*.log`
 
 #### You should see:
 `Server started | ... | Port: 43000`
@@ -118,7 +119,7 @@ EOF
 #### then reconnect
 `sudo systemctl status cube-conflict --no-pager`
 
-`tail -f /opt/Cube-Conflict/logs/server_*.log`
+`sudo tail -f /var/lib/cubeconflict/logs/server_*.log`
 
 ## Edit server settings 
 

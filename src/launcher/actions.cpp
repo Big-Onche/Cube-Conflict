@@ -4,7 +4,6 @@
 #if defined(__linux__)
 #include <unistd.h>
 #include <sys/types.h>
-#include <sys/stat.h>
 #endif
 
 namespace action
@@ -45,17 +44,12 @@ namespace action
 #elif defined(__linux__)
     bool linuxStart(bool dedicatedServer) // Linux start code
     {
-        if(setenv("LD_LIBRARY_PATH", "./bins/:$LD_LIBRARY_PATH", 1) == -1) // Set LD_LIBRARY_PATH to include bin_unix directory relative to the launcher's directory
+        const char *script = "./run.sh";
+        if(access(script, X_OK) == -1)
         {
-            error::pop(getString("Error_Title"), getString("Error_Unix_Setenv"));
-            perror("setenv");
-            return false;
-        }
-
-        if(chmod(gamePath().c_str(), S_IRWXU) == -1) // Set execute permissions on the game binary
-        {
-            perror("chmod");
             error::pop(getString("Error_Title"), getString("Error_Unix_Setperms"));
+            perror("access");
+            return false;
         }
 
         pid_t pid = fork();
@@ -66,22 +60,20 @@ namespace action
         }
         else if(pid == 0) // Child process, execute the game binary
         {
-            std::vector<std::string> args = {gamePath(), "-u$HOME/.cubeconflict", langArg()};
-            std::vector<char*> clientArgs;
-            for (const auto& arg : args) clientArgs.push_back(const_cast<char*>(arg.c_str()));
-            if(isUsingSteam) clientArgs.push_back(const_cast<char*>("-s"));
-            clientArgs.push_back(nullptr); // Add a null terminator
-
-            std::string serverExec = gamePath() + " -d";
-    		char* serverArgs[] = {const_cast<char*>("xterm"), const_cast<char*>("-e"), const_cast<char*>(serverExec.c_str()), nullptr};
-
-            if(dedicatedServer ? (execvp(serverArgs[0], serverArgs) == -1) : (execvp(clientArgs[0], clientArgs.data()) == -1))
+            std::vector<std::string> args = { script, dedicatedServer ? "server" : "client" };
+            if(!dedicatedServer)
             {
-                if(dedicatedServer) error::pop(getString("Error_Title"), getString("Error_Unix_Exec_Serv"));
-                else error::pop(getString("Error_Title"), getString("Error_Unix_Exec"));
-                perror("execvp");
-                return false;
+                args.push_back(langArg());
+                if(isUsingSteam) args.push_back("-s");
             }
+            std::vector<char *> execArgs;
+            for(auto &arg : args) execArgs.push_back(const_cast<char *>(arg.c_str()));
+            execArgs.push_back(nullptr);
+
+            execv(script, execArgs.data());
+            error::pop(getString("Error_Title"), dedicatedServer ? getString("Error_Unix_Exec_Serv") : getString("Error_Unix_Exec"));
+            perror("execv");
+            _exit(EXIT_FAILURE);
         }
         return true;
     }

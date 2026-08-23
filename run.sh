@@ -1,75 +1,70 @@
 #!/bin/sh
-# Save dir ($HOME/.local/share by default)
-CC_DATA=${XDG_DATA_HOME:-$HOME/.local/share}/cubeconflict
-# Executables dir
-CC_BIN=${CC_DATA}/bin_unix
 
-# Check for mode argument
-MODE=${1:-client}
+set -u
+
+GAME_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd) || exit 1
+CC_BIN="$GAME_DIR/bins"
+CC_DATA="${XDG_DATA_HOME:-${HOME:?HOME is not set}/.local/share}/cubeconflict"
+
+MODE=client
+if [ "$#" -gt 0 ]; then
+    case "$1" in
+        client|server)
+            MODE=$1
+            shift
+            ;;
+        -h|--help)
+            echo "Usage: $0 [client|server] [game options]"
+            exit 0
+            ;;
+    esac
+fi
 
 case "$MODE" in
     client)
-        EXECUTABLE="${CC_BIN}/cc_client"
-        # Engine options: point user directory (-u) to CC_DATA 
-        CC_OPTIONS="-u${CC_DATA}"
-        
-        # Append all arguments passed to this script (except the first)
-        shift
-        for arg in "$@"; do
-            CC_OPTIONS="${CC_OPTIONS} ${arg}"
-        done
-        
-        # Create user directories
-        mkdir -p "${CC_DATA}/config" "${CC_DATA}/screenshots" \
-                 "${CC_DATA}/packages/base" "${CC_BIN}"
-        
-        cd "${CC_DATA}"
+        EXECUTABLE="$CC_BIN/cc_client"
+        mkdir -p "$CC_DATA/config" "$CC_DATA/screenshots" "$CC_DATA/media/map/base" || exit 1
         ;;
-        
     server)
-        EXECUTABLE="${CC_BIN}/cubeconflict"
-        # Server arg
-        CC_OPTIONS="-d./"
-        
-        # Append all arguments passed to this script (except the first)
-        shift
-        for arg in "$@"; do
-            CC_OPTIONS="${CC_OPTIONS} ${arg}"
-        done
-        
-        # Create logs directory
-        mkdir -p "${CC_DATA}/logs"
-        
-        # Keep only the 20 most recent logs
-        find "${CC_DATA}/logs" -maxdepth 1 -type f -name 'server_*.log' -printf '%T@ %p\n' \
-          | sort -nr | tail -n +21 | cut -d' ' -f2- | xargs -r rm --
-        
-        LOGFILE="${CC_DATA}/logs/server_$(date '+%Y-%m-%d_%H-%M-%S').log"
-        
-        cd "${CC_DATA}"
-        ;;
-        
-    *)
-        echo "Usage: $0 {client|server} [options]"
-        echo "  client - Run Cube Conflict client"
-        echo "  server - Run Cube Conflict dedicated server"
-        exit 1
+        EXECUTABLE="$CC_BIN/cc_server"
+        mkdir -p "$CC_DATA/logs" || exit 1
+        rotate_server_logs()
+        {
+            set -- "$CC_DATA"/logs/server_*.log
+            [ -e "$1" ] || return
+            while [ "$#" -ge 20 ]; do
+                rm -f "$1"
+                shift
+            done
+        }
+        rotate_server_logs
         ;;
 esac
 
-export LD_LIBRARY_PATH="${CC_BIN}:$LD_LIBRARY_PATH"
-
-# Ensure binary exists and is executable
-if [ ! -x "${EXECUTABLE}" ]; then
-    echo "Cube Conflict ${MODE} not found or not executable:"
-    echo "  ${EXECUTABLE}"
-    echo "Please build with: make -C src install"
+if [ ! -x "$EXECUTABLE" ]; then
+    echo "Cube Conflict $MODE not found or not executable:" >&2
+    echo "  $EXECUTABLE" >&2
+    echo "Build it from the repository root with: make -C src" >&2
     exit 1
 fi
 
-# Execute the appropriate binary
-if [ "$MODE" = "server" ]; then
-    exec "${EXECUTABLE}" ${CC_OPTIONS} >>"$LOGFILE" 2>&1
+if [ -n "${LD_LIBRARY_PATH:-}" ]; then
+    LD_LIBRARY_PATH="$CC_BIN:$LD_LIBRARY_PATH"
 else
-    exec "${EXECUTABLE}" ${CC_OPTIONS}
+    LD_LIBRARY_PATH="$CC_BIN"
 fi
+export LD_LIBRARY_PATH
+
+cd "$GAME_DIR" || exit 1
+
+if [ "$MODE" = server ]; then
+    LOGFILE="$CC_DATA/logs/server_$(date '+%Y-%m-%d_%H-%M-%S').log"
+    echo "Server log: $LOGFILE"
+    if [ -t 1 ]; then
+        "$EXECUTABLE" "-u$CC_DATA" "$@" 2>&1 | tee -a "$LOGFILE"
+        exit $?
+    fi
+    exec "$EXECUTABLE" "-u$CC_DATA" "$@" >>"$LOGFILE" 2>&1
+fi
+
+exec "$EXECUTABLE" "-u$CC_DATA" "$@"
