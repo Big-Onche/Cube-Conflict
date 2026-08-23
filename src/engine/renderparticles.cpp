@@ -30,6 +30,8 @@ VARP(particlelightingfadedist, 128, 768, 4096);
 VARP(particlelightingshadowmapblur, 1, 3, 16);
 VARP(particletransmittance, 0, 1, 1);
 FVAR(particletransmittanceextinction, 0.0f, 0.75f, 8.0f);
+FVARP(particletransmittancepower, 0.1f, 0.35f, 8.0f);
+FVARP(particletransmittancescatter, 0.0f, 0.25f, 1.0f);
 
 FVAR(particlemaplightintensity, 0.0f, 1.5f, 32.0f);
 VARP(particlemaplightcolorinfluence, 0, 200, 200);
@@ -57,7 +59,7 @@ struct particlelightuploadcache
     bool enablelocallights;
     int sunlightdebug, locallightdebug;
     int sunlightdarkabsorb, sunlightcolorinfluence, maplightcolorinfluence;
-    float sunlightintensity, backlightintensity, shadowapplyintensity;
+    float sunlightintensity, backlightintensity, shadowapplyintensity, transmittancepower, transmittancescatter;
     int shadowmapscale;
     vec camright, camup, camdir;
 
@@ -65,7 +67,7 @@ struct particlelightuploadcache
       : valid(false), shader(NULL), lightkey(0), locallightintensity(0.0f), enablelocallights(false),
         sunlightdebug(0), locallightdebug(0), sunlightdarkabsorb(0),
         sunlightcolorinfluence(0), maplightcolorinfluence(0), sunlightintensity(0.0f),
-        backlightintensity(0.0f), shadowapplyintensity(1.0f),
+        backlightintensity(0.0f), shadowapplyintensity(1.0f), transmittancepower(1.0f), transmittancescatter(0.0f),
         shadowmapscale(1), camright(0, 0, 0), camup(0, 0, 0), camdir(0, 0, 0)
     {
     }
@@ -111,6 +113,8 @@ static inline void bindcachedparticlelightparams(ullong lightkey, const vec &cen
        particlelightcache.sunlightintensity == particlesunlightintensity &&
        particlelightcache.backlightintensity == particlebacklightintensity &&
        particlelightcache.shadowapplyintensity == particleshadowapplyintensity &&
+       particlelightcache.transmittancepower == particletransmittancepower &&
+       particlelightcache.transmittancescatter == particletransmittancescatter &&
        particlelightcache.sunlightcolorinfluence == particlesunlightcolorinfluence &&
        particlelightcache.maplightcolorinfluence == particlemaplightcolorinfluence &&
        particlelightcache.shadowmapscale == particlelightingshadowmapblur;
@@ -124,7 +128,8 @@ static inline void bindcachedparticlelightparams(ullong lightkey, const vec &cen
         bindparticlelightparams(lightkey, center, radius, bbmin, bbmax, enablelocallights);
         LOCALPARAMI(particlesunlightdebug, particlesunlightdebug);
         LOCALPARAMI(particlelocallightdebug, particlelocallightdebug);
-        LOCALPARAMF(particlesunlightparams, particlesunlightdarkabsorb, particlesunlightintensity, 0, 0);
+        LOCALPARAMF(particlesunlightparams, particlesunlightdarkabsorb, particlesunlightintensity,
+                    particletransmittancepower, particletransmittancescatter);
         LOCALPARAMF(particlelightcolorparams, particlesunlightcolorinfluence, particlemaplightcolorinfluence, particlebacklightintensity, particleshadowapplyintensity);
         LOCALPARAMF(particlelightshadowmapscale, max(float(particlelightingshadowmapblur), 1.0f));
     }
@@ -141,6 +146,8 @@ static inline void bindcachedparticlelightparams(ullong lightkey, const vec &cen
     particlelightcache.sunlightintensity = particlesunlightintensity;
     particlelightcache.backlightintensity = particlebacklightintensity;
     particlelightcache.shadowapplyintensity = particleshadowapplyintensity;
+    particlelightcache.transmittancepower = particletransmittancepower;
+    particlelightcache.transmittancescatter = particletransmittancescatter;
     particlelightcache.sunlightcolorinfluence = particlesunlightcolorinfluence;
     particlelightcache.maplightcolorinfluence = particlemaplightcolorinfluence;
     particlelightcache.shadowmapscale = particlelightingshadowmapblur;

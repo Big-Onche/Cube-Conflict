@@ -5007,10 +5007,17 @@ void rendershadowmaps(int offset = 0)
                 shadowside = 0;
                 if(hasshadowparticles()) particleshadowtransparent = 1;
             }
-            else loop(side, 6) if(sidemask&(1<<side))
+            else
             {
-                shadowside = side;
-                if(hasshadowparticles()) particleshadowtransparent |= 1<<side;
+                shadowside = 0;
+                if(hasshadowparticles())
+                {
+                    // Screen-facing particle quads can span cubemap directions that the opaque-receiver frustum cull does not cover. Leaving those
+                    // faces unrendered exposes the cubemap selection boundaries as bright or dark 45-degree cones across a particle.
+                    sidemask = 0x3F;
+                    sm.sidemask = sidemask;
+                    particleshadowtransparent = sidemask;
+                }
             }
         }
 
