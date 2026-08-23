@@ -30,12 +30,12 @@ VARP(particlelightingfadedist, 128, 768, 4096);
 VARP(particlelightingshadowmapblur, 1, 3, 16);
 VARP(particletransmittance, 0, 1, 1);
 FVAR(particletransmittanceextinction, 0.0f, 0.75f, 8.0f);
-FVARP(particletransmittancepower, 0.1f, 0.35f, 8.0f);
-FVARP(particletransmittancescatter, 0.0f, 0.25f, 1.0f);
+FVARP(particletransmittancepower, 0.1f, 2.0f, 8.0f);
+FVARP(particletransmittancescatter, 0.0f, 0.6f, 1.0f);
 
 FVAR(particlemaplightintensity, 0.0f, 1.5f, 32.0f);
 VARP(particlemaplightcolorinfluence, 0, 200, 200);
-FVAR(particlebacklightintensity, 0.0f, 5.0f, 8.0f);
+FVAR(particlebacklightintensity, 0.0f, 1.5f, 8.0f);
 FVAR(particleshadowapplyintensity, 0.0f, 1.0f, 8.0f);
 
 VAR(particlesunlightdarkabsorb, 0, 88, 100);
