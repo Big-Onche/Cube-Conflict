@@ -19,8 +19,6 @@
 #define loopj(m) loop(j,m)
 #define space "\n"
 
-extern bool is64bits();
-
 extern std::string lineBreak;
 struct RGBA { uint8_t r, g, b, a; };
 extern RGBA extractRGBA(int color);

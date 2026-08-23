@@ -8,11 +8,10 @@
 
 namespace action
 {
-    std::string gamePath(bool win32 = false)
+    std::string gamePath()
     {
     #if defined(_WIN32)
-        if(win32) return "bins/cc_client32";
-        else return "bins/cc_client64";
+        return "bins/cc_client64";
     #elif defined(__linux__)
         return "bins/cc_client";
     #endif
@@ -23,18 +22,16 @@ namespace action
     std::string steamArg() { return (isUsingSteam ? "-s" : ""); }
 
 #if defined(_WIN32)
-    bool winStart(bool dedicatedServer, bool forceGoodOld32bits) // Windows start code
+    bool winStart(bool dedicatedServer) // Windows start code
     {
-        bool goodOld32bits = (forceGoodOld32bits || !is64bits());
         std::string gameArgs = dedicatedServer ? "\"-u$HOME/My Games/Cube Conflict\" -gserver_log.txt -d" :
                                                  "\"-u$HOME/My Games/Cube Conflict\" " + logsArg() + " " + langArg() + " " + steamArg();
 
-        std::string execCommand = "start " + gamePath(goodOld32bits) + " " + gameArgs;
+        std::string execCommand = "start " + gamePath() + " " + gameArgs;
 
         if(system(execCommand.c_str()) != 0)
         {
-            std::string bits = (goodOld32bits ? "32" : "64");
-            std::string message = getString("Error_Game") + lineBreak + "bins" + "/cc_client" + bits + ".exe " + getString("Error_Missing");
+            std::string message = getString("Error_Game") + lineBreak + "bins/cc_client64.exe " + getString("Error_Missing");
             error::pop(getString("Error_Title"), message);
             return false;
         }
@@ -79,10 +76,10 @@ namespace action
     }
 #endif
 
-    void launchGame(bool dedicatedServer, bool forceGoodOld32bits)
+    void launchGame(bool dedicatedServer)
     {
     #if defined(_WIN32)
-        bool success = winStart(dedicatedServer, forceGoodOld32bits);
+        bool success = winStart(dedicatedServer);
     #elif defined(__linux__)
         bool success = linuxStart(dedicatedServer);
     #endif

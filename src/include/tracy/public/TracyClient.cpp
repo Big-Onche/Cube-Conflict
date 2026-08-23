@@ -18,8 +18,11 @@
 #  ifndef _WIN32_WINNT
 #    define _WIN32_WINNT 0x0601
 #  endif
-#  ifndef RelationProcessorDie
-#    define RelationProcessorDie RelationProcessorPackage
+#  if defined(__MINGW32__)
+#    include <_mingw_mac.h>
+#    if __MINGW64_VERSION_MAJOR < 10
+#      define RelationProcessorDie RelationProcessorPackage
+#    endif
 #  endif
 #endif
 

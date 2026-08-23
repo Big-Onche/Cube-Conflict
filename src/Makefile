@@ -21,11 +21,7 @@ TRACY_CLIENT_LIBS :=
 ifeq ($(USE_STEAM),1)
     STEAM_DEFINES += -DSTEAM
     ifneq (,$(findstring MINGW,$(PLATFORM)))
-        ifeq (,$(findstring 64,$(PLATFORM)))
-            STEAM_CLIENT_LIBS += -l:steam_api.lib
-        else
-            STEAM_CLIENT_LIBS += -l:steam_api64.lib
-        endif
+        STEAM_CLIENT_LIBS += -l:steam_api64.lib
     else
         STEAM_CLIENT_LIBS += -lsteam_api
     endif
@@ -46,32 +42,21 @@ endif
 MV=mv
 
 ifneq (,$(findstring MINGW,$(PLATFORM)))
-	WINDRES= windres
-	ifneq (,$(findstring 64,$(PLATFORM)))
-		ifneq (,$(findstring CROSS,$(PLATFORM)))
-			CXX=x86_64-w64-mingw32-g++
-			WINDRES=x86_64-w64-mingw32-windres
-			ifneq (,$(STRIP))
-				STRIP=x86_64-w64-mingw32-strip
-			endif
-		endif
-		WINLIB=lib64
-		WINBIN=../bins
-		override CXX+= -m64
-		override WINDRES+= -F pe-x86-64
-	else
-		ifneq (,$(findstring CROSS,$(PLATFORM)))
-			CXX=i686-w64-mingw32-g++
-			WINDRES=i686-w64-mingw32-windres
-			ifneq (,$(STRIP))
-				STRIP=i686-w64-mingw32-strip
-			endif
-		endif
-		WINLIB=lib
-		WINBIN=../bins
-		override CXX+= -m32
-		override WINDRES+= -F pe-i386
+	ifeq (,$(findstring 64,$(PLATFORM)))
+		$(error 32-bit Windows builds are no longer supported; use PLATFORM=MINGW64)
 	endif
+	WINDRES= windres
+	ifneq (,$(findstring CROSS,$(PLATFORM)))
+		CXX=x86_64-w64-mingw32-g++
+		WINDRES=x86_64-w64-mingw32-windres
+		ifneq (,$(STRIP))
+			STRIP=x86_64-w64-mingw32-strip
+		endif
+	endif
+	WINLIB=lib64
+	WINBIN=../bins
+	override CXX+= -m64
+	override WINDRES+= -F pe-x86-64
 	ifeq ($(USE_TRACY),1)
 		TRACY_CLIENT_LIBS += -ldbghelp
 	endif
@@ -250,7 +235,7 @@ $(SERVER_MASTER_OBJS): CXXFLAGS += $(SERVER_INCLUDES)
 ifneq (,$(findstring MINGW,$(PLATFORM)))
 client: $(CLIENT_OBJS)
 	$(WINDRES) -I vcpp -i project/mingw.rc -J rc -o project/mingw.res -O coff
-	$(CXX) $(CXXFLAGS) -o $(WINBIN)/cubeconflict.exe project/mingw.res $(CLIENT_OBJS) $(CLIENT_LIBS)
+	$(CXX) $(CXXFLAGS) -o $(WINBIN)/cc_client64.exe project/mingw.res $(CLIENT_OBJS) $(CLIENT_LIBS)
 
 server: $(SERVER_OBJS)
 	$(WINDRES) -I vcpp -i project/mingw.rc -J rc -o project/mingw.res -O coff

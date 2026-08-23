@@ -6,16 +6,16 @@
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
-			<Target title="Debug">
+			<Target title="debug64">
 				<Option platforms="Windows;" />
-				<Option output="../../Launcher debug" prefix_auto="1" extension_auto="1" />
-				<Option object_output="obj/Debug/" />
+				<Option output="../../Cube Conflict debug" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug64/" />
 				<Option type="0" />
 				<Option compiler="gcc" />
 				<Option projectCompilerOptionsRelation="1" />
 				<Compiler>
 					<Add option="-std=c++17" />
-					<Add option="-m32" />
+					<Add option="-m64" />
 					<Add option="-g" />
 					<Add option="-ffast-math" />
 					<Add directory="include" />
@@ -25,11 +25,11 @@
 					<Add option="-static-libstdc++" />
 					<Add option="-static-libgcc" />
 					<Add option="-static" />
-					<Add option="-m32" />
-					<Add option="-lSDL2" />
-					<Add option="-lSDL2_image" />
-					<Add option="-lSDL2_ttf" />
+					<Add option="-m64" />
 					<Add option="-g" />
+					<Add option="lib/libSDL2_image.a" />
+					<Add option="lib/libSDL2_ttf.a" />
+					<Add option="lib/libSDL2.a" />
 					<Add option="-lsetupapi" />
 					<Add option="-lole32" />
 					<Add option="-limm32" />
@@ -39,19 +39,16 @@
 					<Add option="-lusp10" />
 					<Add option="-lrpcrt4" />
 					<Add option="-mwindows" />
-					<Add library="lib/libSDL2_image.a" />
-					<Add library="lib/libSDL2.a" />
-					<Add library="lib/libSDL2_ttf.a" />
 					<Add directory="lib" />
 				</Linker>
 				<Environment>
-					<Variable name="WINDRES_TARGET" value="pe-i386" />
+					<Variable name="WINDRES_TARGET" value="pe-x86-64" />
 				</Environment>
 			</Target>
-			<Target title="Release">
+			<Target title="release64">
 				<Option platforms="Windows;" />
 				<Option output="../../Cube Conflict" prefix_auto="1" extension_auto="1" />
-				<Option object_output="obj/Release/" />
+				<Option object_output="obj/Release64/" />
 				<Option type="0" />
 				<Option compiler="gcc" />
 				<Option projectCompilerOptionsRelation="1" />
@@ -59,18 +56,17 @@
 					<Add option="-fomit-frame-pointer" />
 					<Add option="-O3" />
 					<Add option="-std=c++17" />
-					<Add option="-m32" />
+					<Add option="-m64" />
 					<Add option="-ffast-math" />
 					<Add directory="include" />
 					<Add directory="../include" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add option="-m32" />
-					<Add option="-lSDL2" />
-					<Add option="-lSDL2_image" />
-					<Add option="-lSDL2_ttf" />
-					<Add option="-g" />
+					<Add option="-m64" />
+					<Add option="lib/libSDL2_image.a" />
+					<Add option="lib/libSDL2_ttf.a" />
+					<Add option="lib/libSDL2.a" />
 					<Add option="-lsetupapi" />
 					<Add option="-lole32" />
 					<Add option="-limm32" />
@@ -80,13 +76,10 @@
 					<Add option="-lusp10" />
 					<Add option="-lrpcrt4" />
 					<Add option="-mwindows" />
-					<Add library="lib/libSDL2_image.a" />
-					<Add library="lib/libSDL2.a" />
-					<Add library="lib/libSDL2_ttf.a" />
 					<Add directory="lib" />
 				</Linker>
 				<Environment>
-					<Variable name="WINDRES_TARGET" value="pe-i386" />
+					<Variable name="WINDRES_TARGET" value="pe-x86-64" />
 				</Environment>
 			</Target>
 		</Build>

@@ -21,7 +21,59 @@
 					<Add option="-Wall" />
 					<Add option="-m64" />
 					<Add option="-std=c++17" />
-					<Add option="-DTRACY_ENABLE" />
+					<Add option="-ffast-math" />
+					<Add option="-fsigned-char" />
+					<Add option="-fno-exceptions" />
+					<Add option="-fno-rtti" />
+					<Add directory="../enet/include" />
+					<Add directory="../include" />
+					<Add directory="../include/tracy/public" />
+					<Add directory="../engine" />
+					<Add directory="../shared" />
+					<Add directory="../project" />
+					<Add directory="../game" />
+					<Add directory="../cubeconflict" />
+					<Add directory="../steam" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="../project" />
+				</ResourceCompiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-m64" />
+					<Add option="-mwindows" />
+					<Add library="SDL2" />
+					<Add library="SDL2_image" />
+					<Add library="zlib1" />
+					<Add library="opengl32" />
+					<Add library="enet" />
+					<Add library="ws2_32" />
+					<Add library="winmm" />
+					<Add library="dbghelp" />
+					<Add library="OpenAL32" />
+					<Add library="sndfile" />
+					<Add directory="../../bins" />
+					<Add directory="../lib64" />
+				</Linker>
+				<Environment>
+					<Variable name="WINDRES_TARGET" value="pe-x86-64" />
+				</Environment>
+			</Target>
+			<Target title="client64-steam">
+				<Option output="../../bins/cc_client64.exe" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../../" />
+				<Option object_output="obj64_steam" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Option parameters='-w1280 -h720 -f0 -u&quot;Devel config&quot; -glog.txt' />
+				<Option projectCompilerOptionsRelation="1" />
+				<Compiler>
+					<Add option="-fomit-frame-pointer" />
+					<Add option="-O3" />
+					<Add option="-Wall" />
+					<Add option="-m64" />
+					<Add option="-std=c++17" />
+					<Add option="-DSTEAM" />
 					<Add option="-ffast-math" />
 					<Add option="-fsigned-char" />
 					<Add option="-fno-exceptions" />
@@ -59,60 +111,6 @@
 				</Linker>
 				<Environment>
 					<Variable name="WINDRES_TARGET" value="pe-x86-64" />
-				</Environment>
-			</Target>
-			<Target title="client32">
-				<Option output="../../bins/cc_client32.exe" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="../../" />
-				<Option object_output="obj32" />
-				<Option type="0" />
-				<Option compiler="gcc" />
-				<Option parameters='-w1280 -h720 -f0 -u&quot;Devel config&quot; -glog.txt' />
-				<Option projectCompilerOptionsRelation="1" />
-				<Compiler>
-					<Add option="-fomit-frame-pointer" />
-					<Add option="-O3" />
-					<Add option="-Wall" />
-					<Add option="-m32" />
-					<Add option="-std=c++17" />
-					<Add option="-DTRACY_ENABLE" />
-					<Add option="-ffast-math" />
-					<Add option="-fsigned-char" />
-					<Add option="-fno-exceptions" />
-					<Add option="-fno-rtti" />
-					<Add directory="../enet/include" />
-					<Add directory="../include" />
-					<Add directory="../include/tracy/public" />
-					<Add directory="../engine" />
-					<Add directory="../shared" />
-					<Add directory="../project" />
-					<Add directory="../game" />
-					<Add directory="../cubeconflict" />
-					<Add directory="../steam" />
-				</Compiler>
-				<ResourceCompiler>
-					<Add directory="../project" />
-				</ResourceCompiler>
-				<Linker>
-					<Add option="-s" />
-					<Add option="-m32" />
-					<Add option="-mwindows" />
-					<Add library="SDL2" />
-					<Add library="SDL2_image" />
-					<Add library="zlib1" />
-					<Add library="opengl32" />
-					<Add library="enet" />
-					<Add library="ws2_32" />
-					<Add library="winmm" />
-					<Add library="dbghelp" />
-					<Add library="steam_api" />
-					<Add library="OpenAL32" />
-					<Add library="sndfile" />
-					<Add directory="../../bins" />
-					<Add directory="../lib" />
-				</Linker>
-				<Environment>
-					<Variable name="WINDRES_TARGET" value="pe-i386" />
 				</Environment>
 			</Target>
 			<Target title="debug64">
@@ -128,6 +126,57 @@
 					<Add option="-m64" />
 					<Add option="-g" />
 					<Add option="-std=c++17" />
+					<Add option="-ffast-math" />
+					<Add option="-fsigned-char" />
+					<Add option="-fno-exceptions" />
+					<Add option="-fno-rtti" />
+					<Add directory="../enet/include" />
+					<Add directory="../include" />
+					<Add directory="../include/tracy/public" />
+					<Add directory="../engine" />
+					<Add directory="../shared" />
+					<Add directory="../project" />
+					<Add directory="../game" />
+					<Add directory="../cubeconflict" />
+					<Add directory="../steam" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="../project" />
+				</ResourceCompiler>
+				<Linker>
+					<Add option="-m64" />
+					<Add option="-mwindows" />
+					<Add library="SDL2" />
+					<Add library="SDL2_image" />
+					<Add library="zlib1" />
+					<Add library="opengl32" />
+					<Add library="enet" />
+					<Add library="ws2_32" />
+					<Add library="winmm" />
+					<Add library="dbghelp" />
+					<Add library="OpenAL32" />
+					<Add library="sndfile" />
+					<Add directory="../../bins" />
+					<Add directory="../lib64" />
+				</Linker>
+				<Environment>
+					<Variable name="WINDRES_TARGET" value="pe-x86-64" />
+				</Environment>
+			</Target>
+			<Target title="profile64">
+				<Option output="../../bins/cc_profile64.exe" prefix_auto="0" extension_auto="0" />
+				<Option working_dir="../../" />
+				<Option object_output="obj64_profile" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Option parameters='-w1280 -h720 -f0 -u&quot;Devel config&quot; -glog.txt' />
+				<Option projectCompilerOptionsRelation="1" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-m64" />
+					<Add option="-g" />
+					<Add option="-O2" />
+					<Add option="-std=c++17" />
 					<Add option="-DTRACY_ENABLE" />
 					<Add option="-ffast-math" />
 					<Add option="-fsigned-char" />
@@ -157,7 +206,6 @@
 					<Add library="ws2_32" />
 					<Add library="winmm" />
 					<Add library="dbghelp" />
-					<Add library="steam_api64" />
 					<Add library="OpenAL32" />
 					<Add library="sndfile" />
 					<Add directory="../../bins" />
@@ -167,61 +215,9 @@
 					<Variable name="WINDRES_TARGET" value="pe-x86-64" />
 				</Environment>
 			</Target>
-			<Target title="debug32">
-				<Option output="../../bins/cc_dbg32.exe" prefix_auto="0" extension_auto="0" />
-				<Option working_dir="../../" />
-				<Option object_output="obj32_dbg" />
-				<Option type="0" />
-				<Option compiler="gcc" />
-				<Option parameters='-w1280 -h720 -f0 -u&quot;Devel config&quot; -glog.txt' />
-				<Option projectCompilerOptionsRelation="1" />
-				<Compiler>
-					<Add option="-Wall" />
-					<Add option="-m32" />
-					<Add option="-g" />
-					<Add option="-std=c++17" />
-					<Add option="-DTRACY_ENABLE" />
-					<Add option="-ffast-math" />
-					<Add option="-fsigned-char" />
-					<Add option="-fno-exceptions" />
-					<Add option="-fno-rtti" />
-					<Add directory="../enet/include" />
-					<Add directory="../include" />
-					<Add directory="../include/tracy/public" />
-					<Add directory="../engine" />
-					<Add directory="../shared" />
-					<Add directory="../project" />
-					<Add directory="../game" />
-					<Add directory="../cubeconflict" />
-					<Add directory="../steam" />
-				</Compiler>
-				<ResourceCompiler>
-					<Add directory="../project" />
-				</ResourceCompiler>
-				<Linker>
-					<Add option="-m32" />
-					<Add option="-mwindows" />
-					<Add library="SDL2" />
-					<Add library="SDL2_image" />
-					<Add library="zlib1" />
-					<Add library="opengl32" />
-					<Add library="enet" />
-					<Add library="ws2_32" />
-					<Add library="winmm" />
-					<Add library="dbghelp" />
-					<Add library="steam_api" />
-					<Add library="OpenAL32" />
-					<Add library="sndfile" />
-					<Add directory="../../bins" />
-					<Add directory="../lib" />
-				</Linker>
-				<Environment>
-					<Variable name="WINDRES_TARGET" value="pe-i386" />
-				</Environment>
-			</Target>
 		</Build>
 		<VirtualTargets>
-			<Add alias="All" targets="client32;client64;" />
+			<Add alias="All" targets="client64;client64-steam;debug64;profile64;" />
 		</VirtualTargets>
 		<Compiler>
 			<Add option="-ffast-math" />

@@ -1,9 +1,12 @@
 # How to compile the game launcher?
 
 # Windows
-- Install Code::blocks with MinGW-W64 ( https://sourceforge.net/projects/codeblocks/files/Binaries/20.03/Windows/codeblocks-20.03mingw-setup.exe/download )
-- Open "src/launcher/GameLauncher.cbp" with Code::blocks.
-- Go to Project->Build (or CTRL+F9) and that's all!
+- Install Code::Blocks with an x86_64 MinGW-w64 compiler.
+- Open `src/launcher/GameLauncher.cbp` in Code::Blocks.
+- Select the `release64` target and choose **Build** (Ctrl+F9). Use `debug64` for a debug build.
+- The launcher is created as `Cube Conflict.exe` in the repository root.
+
+See [the Windows build and packaging guide](../../docs/windows.md) for the full game build and release checklist.
 
 # Linux
 - If not already installed: Install the following SDL2 dev libs (libsdl2-dev, libsdl2-image-dev, libsdl2-ttf-dev), and GCC compiler (build-essential).
@@ -30,4 +33,3 @@ Optional:
 Facultatif:
 - Un fichier "cc_launcher.desktop" sera généré à côté du lanceur de jeu dans le dossier principal.
 - Si vous souhaitez lancer le jeu directement depuis les applications, déplacez ce fichier vers /usr/share/applications/ en faisant "mv cc_launcher.desktop /usr/share/applications/"
-
