@@ -1000,7 +1000,7 @@ struct DamageHistory
     {
         offset = 0;
         count = 0;
-        memset(entries, 0, sizeof(entries));
+        loopi(DAMAGE_LOG_LENGTH) entries[i].clear();
     }
 };
 
