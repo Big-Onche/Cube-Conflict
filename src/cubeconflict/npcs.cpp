@@ -430,11 +430,17 @@ namespace game
                 player1->o.squaredist(this->o) < 40.0f*40.0f &&
                 (this->monsterstate==M_FRIENDLY || this->monsterstate==M_NEUTRAL) &&
                 forcecampos==-1;
-            if(shouldactivate != activetrigger)
+            if(shouldactivate)
             {
-                defformatstring(id, "npc_interaction_%d %d", tag, shouldactivate);
+                defformatstring(id, "npc_interaction_%d %d", tag, true);
                 execute(id);
-                activetrigger = shouldactivate;
+                activetrigger = true;
+            }
+            else if(activetrigger)
+            {
+                defformatstring(id, "npc_interaction_%d %d", tag, false);
+                execute(id);
+                activetrigger = false;
             }
         }
 
