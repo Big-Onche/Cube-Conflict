@@ -25,8 +25,6 @@ VARP(softparticlemaxdist, 64, 768, 2048);
 
 VARFP(particlelighting, 0, 1, 1, refreshparticlelighting());
 VARP(particlelightingdynlights, 0, 1, 1);
-VARP(particlelightingdist, 256, 1024, 8192);
-VARP(particlelightingfadedist, 128, 768, 4096);
 VARP(particlelightingshadowmapblur, 1, 3, 16);
 VARP(particletransmittance, 0, 1, 1);
 FVAR(particletransmittanceextinction, 0.0f, 0.75f, 8.0f);
@@ -352,6 +350,22 @@ struct gpuparticlecorner
 
     gpuparticlecorner() {}
     gpuparticlecorner(float x, float y) : pos(x, y) {}
+};
+
+struct gpuparticlelightentry
+{
+    ullong key;
+    int index;
+    vec o;
+    float size, depth;
+};
+
+struct gpuparticlelightdraw
+{
+    ullong key;
+    int offset, count;
+    vec center, bbmin, bbmax;
+    float radius, depth;
 };
 
 static inline bool isHaze(int type)
@@ -931,19 +945,38 @@ struct varenderer : partrenderer
         bool usesoft;
     };
 
+    static inline bool sortgpuparticlelightentriesbykey(const gpuparticlelightentry &a, const gpuparticlelightentry &b)
+    {
+        return a.key < b.key || (a.key == b.key && a.index < b.index);
+    }
+
+    static inline bool sortgpuparticlelightentriesbydepth(const gpuparticlelightentry &a, const gpuparticlelightentry &b)
+    {
+        return a.depth > b.depth || (a.depth == b.depth && a.index < b.index);
+    }
+
+    static inline bool sortgpuparticlelightdrawsbydepth(const gpuparticlelightdraw &a, const gpuparticlelightdraw &b)
+    {
+        return a.depth > b.depth || (a.depth == b.depth && a.offset < b.offset);
+    }
+
     partvert *verts;
     particle *parts;
     int maxparts, numparts, lastupdate, rndmask;
     GLuint vbo;
     gpuparticlestate *gpuinstances;
-    GLuint gpuquadvbo, gpuinstancevbo;
+    GLuint gpuquadvbo, gpuinstancevbo, gpulightinstancevbo;
     int gpudirtymin, gpudirtymax, gpunext, gpulastmillis;
     vector<vbodraw> vbodraws;
+    vector<gpuparticlelightentry> gpulightentries;
+    vector<gpuparticlestate> gpulightinstances;
+    vector<gpuparticlelightdraw> gpulightdraws;
 
     varenderer(const char *texname, int type, int stain = -1)
         : partrenderer(texname, 3, type, stain),
           verts(NULL), parts(NULL), maxparts(0), numparts(0), lastupdate(-1), rndmask(0), vbo(0),
-          gpuinstances(NULL), gpuquadvbo(0), gpuinstancevbo(0), gpudirtymin(0), gpudirtymax(-1), gpunext(0), gpulastmillis(0)
+          gpuinstances(NULL), gpuquadvbo(0), gpuinstancevbo(0), gpulightinstancevbo(0), gpudirtymin(0), gpudirtymax(-1), gpunext(0),
+          gpulastmillis(0)
     {
         if(type & PT_HFLIP) rndmask |= 0x01;
         if(type & PT_VFLIP) rndmask |= 0x02;
@@ -956,7 +989,11 @@ struct varenderer : partrenderer
         if(vbo) { glDeleteBuffers_(1, &vbo); vbo = 0; }
         if(gpuquadvbo) { glDeleteBuffers_(1, &gpuquadvbo); gpuquadvbo = 0; }
         if(gpuinstancevbo) { glDeleteBuffers_(1, &gpuinstancevbo); gpuinstancevbo = 0; }
+        if(gpulightinstancevbo) { glDeleteBuffers_(1, &gpulightinstancevbo); gpulightinstancevbo = 0; }
         vbodraws.setsize(0);
+        gpulightentries.setsize(0);
+        gpulightinstances.setsize(0);
+        gpulightdraws.setsize(0);
     }
 
     void init(int n)
@@ -975,6 +1012,9 @@ struct varenderer : partrenderer
         gpudirtymax = -1;
         gpunext = 0;
         gpulastmillis = 0;
+        gpulightentries.setsize(0);
+        gpulightinstances.setsize(0);
+        gpulightdraws.setsize(0);
     }
 
     void reset()
@@ -986,6 +1026,9 @@ struct varenderer : partrenderer
         gpudirtymax = -1;
         gpunext = 0;
         gpulastmillis = 0;
+        gpulightentries.setsize(0);
+        gpulightinstances.setsize(0);
+        gpulightdraws.setsize(0);
     }
 
     void resettracked(physent *owner)
@@ -1233,15 +1276,95 @@ struct varenderer : partrenderer
         gle::clearvbo();
     }
 
-    void setupgpuparticleattribs()
+    bool getgpuparticlelightbounds(const gpuparticlestate &state, vec &o, float &size) const
+    {
+        float age = max(float(lastmillis) - state.lifeflags.x, 0.0f), fade = state.lifeflags.y;
+        if((fade <= 5.0f && age >= 0.5f) || (fade > 5.0f && age > fade)) return false;
+
+        float motionage = fade <= 5.0f ? 0.0f : min(age, fade);
+        o = vec(state.originsize.x, state.originsize.y, state.originsize.z);
+        o.add(vec(state.velocitygravity.x, state.velocitygravity.y, state.velocitygravity.z).mul(motionage/5000.0f));
+        if(fabs(state.velocitygravity.w) > 1.0e-5f)
+            o.z -= motionage*motionage/(2.0f*5000.0f*state.velocitygravity.w);
+
+        size = max(state.originsize.w + state.lifeflags.z*float(game::gamespeed)*motionage/100000.0f, 0.0f);
+        return size > 0.0f;
+    }
+
+    void uploadgpuparticlelightdraws()
+    {
+        gpulightentries.setsize(0);
+        gpulightinstances.setsize(0);
+        gpulightdraws.setsize(0);
+
+        loopi(numparts)
+        {
+            vec o;
+            float size;
+            if(!getgpuparticlelightbounds(gpuinstances[i], o, size)) continue;
+
+            gpuparticlelightentry &entry = gpulightentries.add();
+            entry.key = particlelightcellkey(o);
+            entry.index = i;
+            entry.o = o;
+            entry.size = size;
+            entry.depth = camera1->o.squaredist(o);
+        }
+
+        if(!gpulightentries.empty())
+        {
+            gpulightentries.sort(sortgpuparticlelightentriesbykey);
+            gpulightinstances.reserve(gpulightentries.length());
+
+            for(int start = 0; start < gpulightentries.length();)
+            {
+                int end = start + 1;
+                while(end < gpulightentries.length() && gpulightentries[end].key == gpulightentries[start].key) end++;
+                gpulightentries.sort(sortgpuparticlelightentriesbydepth, start, end - start);
+
+                gpuparticlelightdraw &draw = gpulightdraws.add();
+                draw.key = gpulightentries[start].key;
+                draw.offset = gpulightinstances.length();
+                draw.count = end - start;
+                draw.bbmin = vec(1e16f, 1e16f, 1e16f);
+                draw.bbmax = vec(-1e16f, -1e16f, -1e16f);
+                draw.depth = 0.0f;
+                for(int i = start; i < end; ++i)
+                {
+                    const gpuparticlelightentry &entry = gpulightentries[i];
+                    gpulightinstances.add(gpuinstances[entry.index]);
+                    draw.bbmin.x = min(draw.bbmin.x, entry.o.x - entry.size);
+                    draw.bbmin.y = min(draw.bbmin.y, entry.o.y - entry.size);
+                    draw.bbmin.z = min(draw.bbmin.z, entry.o.z - entry.size);
+                    draw.bbmax.x = max(draw.bbmax.x, entry.o.x + entry.size);
+                    draw.bbmax.y = max(draw.bbmax.y, entry.o.y + entry.size);
+                    draw.bbmax.z = max(draw.bbmax.z, entry.o.z + entry.size);
+                    draw.depth = max(draw.depth, entry.depth);
+                }
+                draw.center = vec(draw.bbmin).add(draw.bbmax).mul(0.5f);
+                draw.radius = max(draw.bbmin.dist(draw.bbmax)*0.5f, 1.0f);
+                start = end;
+            }
+            gpulightdraws.sort(sortgpuparticlelightdrawsbydepth);
+        }
+
+        if(!gpulightinstancevbo) glGenBuffers_(1, &gpulightinstancevbo);
+        gle::bindvbo(gpulightinstancevbo);
+        glBufferData_(GL_ARRAY_BUFFER, max(gpulightinstances.length(), 1)*sizeof(gpuparticlestate), NULL, GL_STREAM_DRAW);
+        if(!gpulightinstances.empty())
+            glBufferSubData_(GL_ARRAY_BUFFER, 0, gpulightinstances.length()*sizeof(gpuparticlestate), gpulightinstances.getbuf());
+        gle::clearvbo();
+    }
+
+    void setupgpuparticleattribs(GLuint instancevbo = 0, int instanceoffset = 0)
     {
         gle::bindvbo(gpuquadvbo);
         glVertexAttribPointer_(gle::ATTRIB_VERTEX, 2, GL_FLOAT, GL_FALSE, sizeof(gpuparticlecorner), (const void *)0);
         glEnableVertexAttribArray_(gle::ATTRIB_VERTEX);
         glVertexAttribDivisor_(gle::ATTRIB_VERTEX, 0);
 
-        gle::bindvbo(gpuinstancevbo);
-        const gpuparticlestate *state = 0;
+        gle::bindvbo(instancevbo ? instancevbo : gpuinstancevbo);
+        const gpuparticlestate *state = (const gpuparticlestate *)(size_t(instanceoffset)*sizeof(gpuparticlestate));
         glVertexAttribPointer_(gle::ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(gpuparticlestate), state->color.v);
         glVertexAttribPointer_(gle::ATTRIB_TEXCOORD0, 4, GL_FLOAT, GL_FALSE, sizeof(gpuparticlestate), state->originsize.v);
         glVertexAttribPointer_(gle::ATTRIB_TEXCOORD1, 4, GL_FLOAT, GL_FALSE, sizeof(gpuparticlestate), state->velocitygravity.v);
@@ -1280,13 +1403,9 @@ struct varenderer : partrenderer
         LOCALPARAM(camera, camera1->o);
     }
 
-    void bindgpuparticlelightparams()
+    void bindgpuparticlelightparams(const gpuparticlelightdraw &draw)
     {
-        float enddist = max(float(particlelightingdist), 0.0f);
-        float startdist = clamp(float(particlelightingfadedist), 0.0f, enddist);
-        vec extent(enddist, enddist, enddist), bbmin = vec(camera1->o).sub(extent), bbmax = vec(camera1->o).add(extent);
-        bindcachedparticlelightparams(particlelightcellkey(camera1->o), camera1->o, enddist, bbmin, bbmax, particlemaplightintensity);
-        LOCALPARAMF(gpuparticlelightingfade, startdist, enddist, 0, 0);
+        bindcachedparticlelightparams(draw.key, draw.center, draw.radius, draw.bbmin, draw.bbmax, particlemaplightintensity);
     }
 
     void rendergpu()
@@ -1294,12 +1413,17 @@ struct varenderer : partrenderer
         uploadgpuparticles();
 
         bool usesoftshader = (type&PT_SOFT) && softparticles;
-        Shader *shader = useparticlelighting(type) ? getgpuparticlelightshader(usesoftshader) :
+        bool uselighting = useparticlelighting(type);
+        if(uselighting)
+        {
+            uploadgpuparticlelightdraws();
+            if(gpulightdraws.empty()) return;
+        }
+        Shader *shader = uselighting ? getgpuparticlelightshader(usesoftshader) :
                          (usesoftshader ? gpuparticlesoftshader : gpuparticleshader);
         if(!shader) return;
         shader->set();
         bindgpuparticleparams();
-        if(useparticlelighting(type)) bindgpuparticlelightparams();
         if(usesoftshader) LOCALPARAMF(softparams, -1.0f/softparticleblend, 0, 0);
 
         float colorscale = type&PT_MOD ? 1 : ldrscale;
@@ -1307,8 +1431,18 @@ struct varenderer : partrenderer
         LOCALPARAMF(colorscale, colorscale, colorscale, colorscale, 1);
 
         glBindTexture(GL_TEXTURE_2D, tex->id);
-        setupgpuparticleattribs();
-        glDrawArraysInstanced_(GL_TRIANGLE_STRIP, 0, 4, numparts);
+        if(uselighting) loopv(gpulightdraws)
+        {
+            const gpuparticlelightdraw &draw = gpulightdraws[i];
+            bindgpuparticlelightparams(draw);
+            setupgpuparticleattribs(gpulightinstancevbo, draw.offset);
+            glDrawArraysInstanced_(GL_TRIANGLE_STRIP, 0, 4, draw.count);
+        }
+        else
+        {
+            setupgpuparticleattribs();
+            glDrawArraysInstanced_(GL_TRIANGLE_STRIP, 0, 4, numparts);
+        }
         cleanupgpuparticleattribs();
     }
 
