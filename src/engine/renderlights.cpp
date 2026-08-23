@@ -2625,7 +2625,7 @@ FVAR(volminstep, 0, 0.0625f, 1e3f);
 FVAR(volprefilter, 0, 4, 1e3f);
 FVAR(voldistclamp, 0, 0.99f, 2);
 CVAR1R(volcolour, 0x808080);
-FVARR(volscale, 0, 0.75f, 16);
+FVARR(volscale, 0, 0.5f, 16);
 VAR(volderiv, -1, 1, 1);
 
 static Shader *deferredlightshader = NULL, *deferredminimapshader = NULL, *deferredmsaapixelshader = NULL, *deferredmsaasampleshader = NULL;
