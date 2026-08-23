@@ -2765,6 +2765,10 @@ void gl_drawview()
         setfog(fogmat, fogbelow, clamp(fogbelow, 0.0f, 1.0f), abovemat);
     }
 
+    // Composite the volume once behind transparent materials and particles. This keeps the
+    // particle layers available to glass/water refraction without adding the volume over them.
+    if(!drawtex) rendervolumetric();
+
     rendertransparent();
     GLERROR;
 
@@ -2777,7 +2781,7 @@ void gl_drawview()
     godRays::render();
     GLERROR;
 
-    rendervolumetric();
+    if(drawtex) rendervolumetric();
     GLERROR;
 
     if(!drawtex && !renderedtransparentparticles)
