@@ -112,8 +112,8 @@ bool initwarning(const char *desc, int level, int type)
 
 #define SCR_MINW 320
 #define SCR_MINH 200
-#define SCR_MAXW 10000
-#define SCR_MAXH 10000
+#define SCR_MAXW INT_MAX
+#define SCR_MAXH INT_MAX
 #define SCR_DEFAULTW 1280
 #define SCR_DEFAULTH 720
 VARFN(screenw, scr_w, SCR_MINW, -1, SCR_MAXW, initwarning(readstr("Setting_ScreenResolution")));
@@ -504,24 +504,38 @@ void inputgrab(bool on, bool delay = false)
 }
 
 bool initwindowpos = false;
+static int windowedw = 0, windowedh = 0;
 
 extern int fullscreen;
+
+static void getwindowedsize(int &w, int &h)
+{
+    SDL_Rect usable;
+    int display = screen ? SDL_GetWindowDisplayIndex(screen) : 0;
+    if(display < 0 || SDL_GetDisplayUsableBounds(display, &usable) < 0)
+    {
+        usable.w = desktopw;
+        usable.h = desktoph;
+    }
+
+    w = scr_w;
+    h = scr_h;
+    if(w <= usable.w && h <= usable.h) return;
+
+    double scale = min(usable.w/double(w), usable.h/double(h));
+    w = max(int(w*scale), SCR_MINW);
+    h = max(int(h*scale), SCR_MINH);
+}
 
 void setfullscreen(bool enable)
 {
     if(!screen) return;
-    if(!enable && (scr_w > desktopw || scr_h > desktoph))
-    {
-        fullscreen = true;
-        conoutf("Cannot desactivate fake fullscreen while oversampling!");
-        playSound(S_ERROR, vec(0, 0, 0), 0, 0, SND_UI);
-        return;
-    }
-
-    SDL_SetWindowFullscreen(screen, enable ? SDL_WINDOW_FULLSCREEN : 0);
+    if(SDL_SetWindowFullscreen(screen, enable ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) < 0)
+        conoutf(CON_ERROR, "Could not switch to %s mode: %s", enable ? "fullscreen" : "windowed", SDL_GetError());
     if(!enable)
     {
-        SDL_SetWindowSize(screen, scr_w, scr_h);
+        getwindowedsize(windowedw, windowedh);
+        SDL_SetWindowSize(screen, windowedw, windowedh);
         if(initwindowpos)
         {
             int winx = SDL_WINDOWPOS_CENTERED, winy = SDL_WINDOWPOS_CENTERED;
@@ -550,7 +564,8 @@ void screenres(int w, int h)
         }
         else
         {
-            SDL_SetWindowSize(screen, scr_w, scr_h);
+            getwindowedsize(windowedw, windowedh);
+            SDL_SetWindowSize(screen, windowedw, windowedh);
             SDL_SetWindowPosition(screen, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
             initwindowpos = false;
         }
@@ -604,6 +619,8 @@ VAR(dbgmodes, 0, 0, 1);
 
 ICOMMAND(getdesktopw, "", (), intret(desktopw));
 ICOMMAND(getdesktoph, "", (), intret(desktoph));
+ICOMMAND(getdisplayw, "", (), intret(screenw));
+ICOMMAND(getdisplayh, "", (), intret(screenh));
 
 void setupscreen()
 {
@@ -626,14 +643,14 @@ void setupscreen()
 
     if(scr_h < 0) scr_h = SCR_DEFAULTH;
     if(scr_w < 0) scr_w = (scr_h*desktopw)/desktoph;
-    if((scr_w > desktopw || scr_h > desktoph) && !fullscreen) { fullscreen = true; setfullscreen(true); }
 
-    int winx = SDL_WINDOWPOS_UNDEFINED, winy = SDL_WINDOWPOS_UNDEFINED, winw = scr_w, winh = scr_h, flags = SDL_WINDOW_RESIZABLE;
+    getwindowedsize(windowedw, windowedh);
+    int winx = SDL_WINDOWPOS_UNDEFINED, winy = SDL_WINDOWPOS_UNDEFINED, winw = windowedw, winh = windowedh, flags = SDL_WINDOW_RESIZABLE;
     if(fullscreen)
     {
-        winw = scr_w;
-        winh = scr_h;
-        flags |= SDL_WINDOW_FULLSCREEN;
+        winw = desktopw;
+        winh = desktoph;
+        flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
         initwindowpos = true;
     }
 
@@ -650,7 +667,6 @@ void setupscreen()
     if(!screen) fatal("failed to create OpenGL window: %s", SDL_GetError());
 
     SDL_SetWindowMinimumSize(screen, SCR_MINW, SCR_MINH);
-    SDL_SetWindowMaximumSize(screen, SCR_MAXW, SCR_MAXH);
 
 #ifdef __APPLE__
     static const int glversions[] = { 32, 20 };
@@ -669,8 +685,8 @@ void setupscreen()
     if(!glcontext) fatal("failed to create OpenGL context: %s", SDL_GetError());
 
     SDL_GetWindowSize(screen, &screenw, &screenh);
-    scr_w = renderw = min(scr_w, screenw);
-    scr_h = renderh = min(scr_h, screenh);
+    renderw = scr_w;
+    renderh = scr_h;
     hudw = screenw;
     hudh = screenh;
 }
@@ -908,8 +924,13 @@ void checkinput()
                         SDL_GetWindowSize(screen, &screenw, &screenh);
                         if(!(SDL_GetWindowFlags(screen) & SDL_WINDOW_FULLSCREEN))
                         {
-                            scr_w = clamp(screenw, SCR_MINW, SCR_MAXW);
-                            scr_h = clamp(screenh, SCR_MINH, SCR_MAXH);
+                            if(screenw != windowedw || screenh != windowedh)
+                            {
+                                scr_w = clamp(screenw, SCR_MINW, SCR_MAXW);
+                                scr_h = clamp(screenh, SCR_MINH, SCR_MAXH);
+                                windowedw = screenw;
+                                windowedh = screenh;
+                            }
                         }
                         gl_resize();
                         break;

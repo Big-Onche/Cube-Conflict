@@ -6,6 +6,7 @@
 bool hasVAO = false, hasTR = false, hasTSW = false, hasPBO = false, hasFBO = false, hasAFBO = false, hasDS = false, hasTF = false, hasCBF = false, hasS3TC = false, hasFXT1 = false, hasLATC = false, hasRGTC = false, hasAF = false, hasFBB = false, hasFBMS = false, hasTMS = false, hasMSS = false, hasFBMSBS = false, hasUBO = false, hasMBR = false, hasDB2 = false, hasDBB = false, hasTG = false, hasTQ = false, hasPF = false, hasTRG = false, hasTI = false, hasHFV = false, hasHFP = false, hasDBT = false, hasDC = false, hasDBGO = false, hasEGPU4 = false, hasGPU4 = false, hasGPU5 = false, hasBFE = false, hasEAL = false, hasCR = false, hasOQ2 = false, hasES2 = false, hasES3 = false, hasCB = false, hasCI = false, hasTS = false;
 bool hasInstancing = false;
 bool mesa = false, intel = false, amd = false, nvidia = false;
+static int hwrenderw = 0, hwrenderh = 0;
 
 int hasstencil = 0;
 
@@ -778,6 +779,12 @@ void gl_checkextensions()
         }
     }
     else fatal("Framebuffer object support is required!");
+
+    GLint renderbuffersize = 0, viewportdims[2] = { 0, 0 };
+    glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &renderbuffersize);
+    glGetIntegerv(GL_MAX_VIEWPORT_DIMS, viewportdims);
+    hwrenderw = min(hwtexsize, min(renderbuffersize, viewportdims[0]));
+    hwrenderh = min(hwtexsize, min(renderbuffersize, viewportdims[1]));
 
     if(glversion >= 300 || hasext("GL_ARB_map_buffer_range"))
     {
@@ -3177,8 +3184,14 @@ int renderw = 0, renderh = 0, hudw = 0, hudh = 0;
 void gl_setupframe(bool force)
 {
     extern int scr_w, scr_h;
-    renderw = min(scr_w, screenw);
-    renderh = min(scr_h, screenh);
+    renderw = scr_w;
+    renderh = scr_h;
+    if(hwrenderw && hwrenderh && (renderw > hwrenderw || renderh > hwrenderh))
+    {
+        double scale = min(hwrenderw/double(renderw), hwrenderh/double(renderh));
+        renderw = max(int(renderw*scale), 1);
+        renderh = max(int(renderh*scale), 1);
+    }
     hudw = screenw;
     hudh = screenh;
     if(!force) return;
