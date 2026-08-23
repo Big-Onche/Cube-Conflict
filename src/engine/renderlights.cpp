@@ -5308,17 +5308,20 @@ bool renderedtransparentparticles = false;
 void rendertransparent()
 {
     renderedtransparentparticles = false;
+    // The edit-mode result is composed after volumetric lighting. Keep lit particles on that same
+    // single-pass path in the main view so post effects cannot brighten them or disturb their order.
+    bool deferparticles = !drawtex && particlelighting && particlelayerlighting;
 
     int hasalphavas = findalphavas();
     int hasmats = findmaterials();
     bool hasmodels = transmdlsx1 < transmdlsx2 && transmdlsy1 < transmdlsy2;
     if(!hasalphavas && !hasmats && !hasmodels)
     {
-        if(!editmode) { renderparticles(); renderedtransparentparticles = true; }
+        if(!editmode && !deferparticles) { renderparticles(); renderedtransparentparticles = true; }
         return;
     }
 
-    if(!editmode && particlelayers && ghasstencil) { renderparticles(PL_UNDER); renderedtransparentparticles = true; }
+    if(!editmode && !deferparticles && particlelayers && ghasstencil) { renderparticles(PL_UNDER); renderedtransparentparticles = true; }
 
     timer *transtimer = begintimer("transparent");
 
@@ -5491,7 +5494,7 @@ void rendertransparent()
 
     endtimer(transtimer);
 
-    if(editmode) return;
+    if(editmode || deferparticles) return;
 
     if(particlelayers && ghasstencil)
     {

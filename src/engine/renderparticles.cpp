@@ -15,7 +15,7 @@ static inline void refreshparticlelighting()
 }
 
 VARP(particlelayers, 0, 1, 1);
-VARFP(particlelayerlighting, 0, 0, 1, refreshparticlelighting());
+VARFP(particlelayerlighting, 0, 1, 1, refreshparticlelighting());
 FVARP(particlebright, 0, 1.75, 100);
 VARP(particlesize, 20, 100, 500);
 

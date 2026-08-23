@@ -761,7 +761,7 @@ static inline model *loadmapmodel(int n)
 static inline mapmodelinfo *getmminfo(int n) { return mapmodels.inrange(n) ? &mapmodels[n] : NULL; }
 
 // renderparticles
-extern int particlelayers;
+extern int particlelayers, particlelayerlighting, particlelighting;
 
 enum { PL_ALL = 0, PL_UNDER, PL_OVER, PL_NOLAYER };
 
