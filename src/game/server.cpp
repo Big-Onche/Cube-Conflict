@@ -12,6 +12,10 @@ int servambient = rnd(9)+1;
 
 namespace game
 {
+#ifdef STANDALONE
+    int soloplayteam = 0;
+#endif
+
     void parseoptions(vector<const char *> &args)
     {
         loopv(args)
