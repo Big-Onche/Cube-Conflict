@@ -3943,6 +3943,62 @@ void saveimage(const char *filename, int format, ImageData &image, bool flip = f
     }
 }
 
+struct ScreenshotJob
+{
+    string filename;
+    int format;
+    ImageData image;
+
+    ScreenshotJob(const char *name, int format, int w, int h) : format(format), image(w, h, 3)
+    {
+        copystring(filename, name);
+    }
+};
+
+static SDL_mutex *screenshotlock = NULL;
+static SDL_cond *screenshotdone = NULL;
+static int pendingscreenshots = 0;
+
+static bool initscreenshotthreading()
+{
+    if(screenshotlock && screenshotdone) return true;
+    if(!screenshotlock) screenshotlock = SDL_CreateMutex();
+    if(!screenshotdone) screenshotdone = SDL_CreateCond();
+    if(screenshotlock && screenshotdone) return true;
+    if(screenshotlock) { SDL_DestroyMutex(screenshotlock); screenshotlock = NULL; }
+    if(screenshotdone) { SDL_DestroyCond(screenshotdone); screenshotdone = NULL; }
+    return false;
+}
+
+static void finishscreenshot()
+{
+    SDL_LockMutex(screenshotlock);
+    pendingscreenshots--;
+    SDL_CondSignal(screenshotdone);
+    SDL_UnlockMutex(screenshotlock);
+}
+
+static int savescreenshotthread(void *data)
+{
+    ScreenshotJob *job = (ScreenshotJob *)data;
+    saveimage(job->filename, job->format, job->image, true);
+    delete job;
+    finishscreenshot();
+    return 0;
+}
+
+void waitforscreenshots()
+{
+    if(!screenshotlock || !screenshotdone) return;
+    SDL_LockMutex(screenshotlock);
+    while(pendingscreenshots > 0) SDL_CondWait(screenshotdone, screenshotlock);
+    SDL_UnlockMutex(screenshotlock);
+    SDL_DestroyCond(screenshotdone);
+    SDL_DestroyMutex(screenshotlock);
+    screenshotdone = NULL;
+    screenshotlock = NULL;
+}
+
 bool loadimage(const char *filename, ImageData &image)
 {
     SDL_Surface *s = loadsurface(path(filename, true));
@@ -3994,10 +4050,52 @@ void screenshot(char *filename)
         concatstring(buf, imageexts[format]);
     }
 
-    ImageData image(screenw, screenh, 3);
-    glPixelStorei(GL_PACK_ALIGNMENT, texalign(image.data, screenw, 3));
-    glReadPixels(0, 0, screenw, screenh, GL_RGB, GL_UNSIGNED_BYTE, image.data);
-    saveimage(path(buf), format, image, true);
+    GLuint fbo = !mainmenu ? shouldscale() : 0;
+    int w = fbo ? gw : screenw, h = fbo ? gh : screenh;
+
+    if(fbo)
+    {
+        int oldhudw = hudw, oldhudh = hudh, oldvieww = vieww, oldviewh = viewh;
+        glBindFramebuffer_(GL_FRAMEBUFFER, fbo);
+        glViewport(0, 0, w, h);
+        hudw = vieww = w;
+        hudh = viewh = h;
+        UI::render();
+        gl_drawhud();
+        hudw = oldhudw;
+        hudh = oldhudh;
+        vieww = oldvieww;
+        viewh = oldviewh;
+    }
+
+    ScreenshotJob *job = new ScreenshotJob(path(buf), format, w, h);
+    glPixelStorei(GL_PACK_ALIGNMENT, texalign(job->image.data, w, 3));
+    glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, job->image.data);
+    if(fbo)
+    {
+        glBindFramebuffer_(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, hudw, hudh);
+    }
+
+    if(initscreenshotthreading())
+    {
+        SDL_LockMutex(screenshotlock);
+        pendingscreenshots++;
+        SDL_UnlockMutex(screenshotlock);
+        SDL_Thread *thread = SDL_CreateThread(savescreenshotthread, "screenshot saver", job);
+        if(thread) SDL_DetachThread(thread);
+        else
+        {
+            saveimage(job->filename, job->format, job->image, true);
+            delete job;
+            finishscreenshot();
+        }
+    }
+    else
+    {
+        saveimage(job->filename, job->format, job->image, true);
+        delete job;
+    }
 }
 
 COMMAND(screenshot, "s");
@@ -4054,4 +4152,3 @@ COMMAND(flipnormalmapy, "ss");
 COMMAND(mergenormalmaps, "ss");
 COMMAND(normalizenormalmap, "ss");
 COMMAND(removealphachannel, "ss");
-
