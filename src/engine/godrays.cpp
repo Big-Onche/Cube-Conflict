@@ -43,8 +43,9 @@ namespace godRays
     FVARR(godraysgeomdensity, 0.25f, 0.85f, 4.0f);
     FVARR(godraysgeommaxdist, 0.01f, 0.14f, 1.0f);
 
-    static int bufferWidth = -1, bufferHeight = -1;
+    static int bufferWidth = -1, bufferHeight = -1, reconstructionWidth = -1, reconstructionHeight = -1;
     static GLuint rayFbo = 0, rayTex = 0;
+    static GLuint rayUpsampleFbo = 0, rayUpsampleTex = 0;
     static GLuint rayFilterFbo = 0, rayFilterTex = 0;
     static GLuint rayGuideFbo = 0, rayGuideTex = 0;
     static GLenum passFormat = GL_RGBA8;
@@ -64,12 +65,16 @@ namespace godRays
     {
         bufferWidth = targetWidth;
         bufferHeight = targetHeight;
+        reconstructionWidth = vieww;
+        reconstructionHeight = viewh;
         passFormat = targetPassFormat;
         guideFormat = targetGuideFormat;
         const int passFilter = (bufferWidth < vieww || bufferHeight < viewh) ? 1 : 0;
 
         if(!rayTex) glGenTextures(1, &rayTex);
         if(!rayFbo) glGenFramebuffers_(1, &rayFbo);
+        if(!rayUpsampleTex) glGenTextures(1, &rayUpsampleTex);
+        if(!rayUpsampleFbo) glGenFramebuffers_(1, &rayUpsampleFbo);
         if(!rayFilterTex) glGenTextures(1, &rayFilterTex);
         if(!rayFilterFbo) glGenFramebuffers_(1, &rayFilterFbo);
         if(!rayGuideTex) glGenTextures(1, &rayGuideTex);
@@ -81,14 +86,20 @@ namespace godRays
         if(glCheckFramebufferStatus_(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             return disable("failed allocating god rays buffers");
 
+        glBindFramebuffer_(GL_FRAMEBUFFER, rayUpsampleFbo);
+        createtexture(rayUpsampleTex, reconstructionWidth, reconstructionHeight, NULL, 3, 1, passFormat, GL_TEXTURE_RECTANGLE);
+        glFramebufferTexture2D_(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, rayUpsampleTex, 0);
+        if(glCheckFramebufferStatus_(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            return disable("failed allocating god rays reconstruction buffer");
+
         glBindFramebuffer_(GL_FRAMEBUFFER, rayFilterFbo);
-        createtexture(rayFilterTex, bufferWidth, bufferHeight, NULL, 3, passFilter, passFormat, GL_TEXTURE_RECTANGLE);
+        createtexture(rayFilterTex, reconstructionWidth, reconstructionHeight, NULL, 3, 1, passFormat, GL_TEXTURE_RECTANGLE);
         glFramebufferTexture2D_(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, rayFilterTex, 0);
         if(glCheckFramebufferStatus_(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             return disable("failed allocating god rays filter buffers");
 
         glBindFramebuffer_(GL_FRAMEBUFFER, rayGuideFbo);
-        createtexture(rayGuideTex, bufferWidth, bufferHeight, NULL, 3, 0, guideFormat, GL_TEXTURE_RECTANGLE);
+        createtexture(rayGuideTex, reconstructionWidth, reconstructionHeight, NULL, 3, 0, guideFormat, GL_TEXTURE_RECTANGLE);
         glFramebufferTexture2D_(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, rayGuideTex, 0);
         if(glCheckFramebufferStatus_(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             return disable("failed allocating god rays depth guide buffer");
@@ -106,8 +117,9 @@ namespace godRays
                   targetHeight = max(int(ceilf(viewh*renderScale)), 1);
         const GLenum targetPassFormat = hasAFBO && hasTF ? GL_RGBA16F : GL_RGBA8;
         const GLenum targetGuideFormat = hasAFBO && hasTF ? GL_RGBA16F : GL_RGBA8;
-        if(rayTex && rayFbo && rayFilterTex && rayFilterFbo && rayGuideTex && rayGuideFbo &&
+        if(rayTex && rayFbo && rayUpsampleTex && rayUpsampleFbo && rayFilterTex && rayFilterFbo && rayGuideTex && rayGuideFbo &&
            bufferWidth == targetWidth && bufferHeight == targetHeight &&
+           reconstructionWidth == vieww && reconstructionHeight == viewh &&
            passFormat == targetPassFormat &&
            guideFormat == targetGuideFormat) return true;
 
@@ -119,12 +131,14 @@ namespace godRays
     {
         if(rayFbo) { glDeleteFramebuffers_(1, &rayFbo); rayFbo = 0; }
         if(rayTex) { glDeleteTextures(1, &rayTex); rayTex = 0; }
+        if(rayUpsampleFbo) { glDeleteFramebuffers_(1, &rayUpsampleFbo); rayUpsampleFbo = 0; }
+        if(rayUpsampleTex) { glDeleteTextures(1, &rayUpsampleTex); rayUpsampleTex = 0; }
         if(rayFilterFbo) { glDeleteFramebuffers_(1, &rayFilterFbo); rayFilterFbo = 0; }
         if(rayFilterTex) { glDeleteTextures(1, &rayFilterTex); rayFilterTex = 0; }
         if(rayGuideFbo) { glDeleteFramebuffers_(1, &rayGuideFbo); rayGuideFbo = 0; }
         if(rayGuideTex) { glDeleteTextures(1, &rayGuideTex); rayGuideTex = 0; }
         passFormat = guideFormat = GL_RGBA8;
-        bufferWidth = bufferHeight = -1;
+        bufferWidth = bufferHeight = reconstructionWidth = reconstructionHeight = -1;
     }
 
     static float getGodraysStrength()
@@ -190,7 +204,8 @@ namespace godRays
             LOCALPARAMF(cloudShadowStrength, cloudShadowStrength);
             LOCALPARAMF(godRayDepthScale, float(vieww)/float(bufferWidth), float(viewh)/float(bufferHeight));
             LOCALPARAMF(godRayMarchParams, max(godraysforwardexp, 0.25f), max(godraysdensity, 0.25f), maxDistance, max(godraysmaxaccum, 0.0f));
-            LOCALPARAMF(godRayDistanceParams, godraysnearstart, max(godraysnearend, godraysnearstart + 1.0f), godrayssteps, godraysstrength*getGodraysStrength());
+            LOCALPARAMF(godRayDistanceParams, godraysnearstart, max(godraysnearend, godraysnearstart + 1.0f), godrayssteps,
+                        godraysstrength*getGodraysStrength());
             screenquad();
         }
 
@@ -218,7 +233,8 @@ namespace godRays
             LOCALPARAM(sunDir, sunlightdir);
             LOCALPARAM(sunColor, sunColor);
             LOCALPARAMF(godRayDepthScale, float(vieww)/float(bufferWidth), float(viewh)/float(bufferHeight));
-            LOCALPARAMF(godRayGeomParams, max(godraysgeomdensity, 0.25f), clamp(godraysgeomdecay, 0.0f, 1.0f), geomMaxDistance, max(godraysgeomforwardexp, 0.25f));
+            LOCALPARAMF(godRayGeomParams, max(godraysgeomdensity, 0.25f), clamp(godraysgeomdecay, 0.0f, 1.0f), geomMaxDistance,
+                        max(godraysgeomforwardexp, 0.25f));
             LOCALPARAMI(godRayGeomSteps, godraysgeomsteps);
             LOCALPARAMF(godRayGeomDistanceParams, godraysgeomstrength*getGodraysStrength(), 0.0f, 0.0f, 0.0f);
             LOCALPARAMF(godRayGeomShapeParams, max(godraysgeomshadowbias, 0.0f), clamp(godraysgeomthreshold, 0.0f, 1.0f), 0.0f, 0.0f);
@@ -228,15 +244,31 @@ namespace godRays
             if(renderCloudPass) glDisable(GL_BLEND);
         }
 
-        GLuint compositeTex = rayTex;
-        // Filtering a reduced buffer cannot be made silhouette-safe: each texel
-        // contains only one depth representative for a much larger screen area.
-        // Reconstruct the raw signal first, as the low-resolution particle path
-        // does, and reserve the depth-aware filter for native resolution.
-        if(godraysatrous && bufferWidth == vieww && bufferHeight == viewh)
+        // Reconstruct before filtering. Filtering the reduced buffer spreads a
+        // single coarse depth representative across silhouettes; filtering this
+        // full-resolution result gives every tap the correct destination depth.
+        glBindFramebuffer_(GL_FRAMEBUFFER, rayUpsampleFbo);
+        glViewport(0, 0, reconstructionWidth, reconstructionHeight);
+        glDisable(GL_BLEND);
+        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        glActiveTexture_(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_RECTANGLE, rayTex);
+        glActiveTexture_(GL_TEXTURE1);
+        if(msaalight) glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msdepthtex);
+        else glBindTexture(GL_TEXTURE_RECTANGLE, gdepthtex);
+        glActiveTexture_(GL_TEXTURE0);
+        SETSHADER(godRayUpsample);
+        LOCALPARAMF(godrayScale,
+                    float(vieww)/float(bufferWidth), float(viewh)/float(bufferHeight),
+                    float(bufferWidth)/float(vieww), float(bufferHeight)/float(viewh));
+        LOCALPARAMF(bilateralDepthScale, godraysupscaleedge);
+        screenquad(bufferWidth, bufferHeight, vieww, viewh);
+
+        GLuint compositeTex = rayUpsampleTex;
+        if(godraysatrous)
         {
             glBindFramebuffer_(GL_FRAMEBUFFER, rayGuideFbo);
-            glViewport(0, 0, bufferWidth, bufferHeight);
+            glViewport(0, 0, reconstructionWidth, reconstructionHeight);
             glClearColor(0, 0, 0, 0);
             glClear(GL_COLOR_BUFFER_BIT);
             glActiveTexture_(GL_TEXTURE0);
@@ -245,14 +277,15 @@ namespace godRays
             SETSHADER(godRayDepthGuide);
             screenquad(vieww, viewh);
 
-            GLuint filterTex[2] = { rayTex, rayFilterTex };
-            GLuint filterFbo[2] = { rayFbo, rayFilterFbo };
+            GLuint filterTex[2] = { rayUpsampleTex, rayFilterTex };
+            GLuint filterFbo[2] = { rayUpsampleFbo, rayFilterFbo };
             int sourceIndex = 0, targetIndex = 1;
-            const int filterIterations = clamp(godraysatrousiter, 1, 3);
+            const bool reducedResolution = bufferWidth < vieww || bufferHeight < viewh;
+            const int filterIterations = reducedResolution ? 3 : clamp(godraysatrousiter, 1, 3);
             loopi(filterIterations)
             {
                 glBindFramebuffer_(GL_FRAMEBUFFER, filterFbo[targetIndex]);
-                glViewport(0, 0, bufferWidth, bufferHeight);
+                glViewport(0, 0, reconstructionWidth, reconstructionHeight);
 
                 glActiveTexture_(GL_TEXTURE0);
                 glBindTexture(GL_TEXTURE_RECTANGLE, filterTex[sourceIndex]);
@@ -260,9 +293,9 @@ namespace godRays
                 glBindTexture(GL_TEXTURE_RECTANGLE, rayGuideTex);
                 glActiveTexture_(GL_TEXTURE0);
                 SETSHADER(godRayATrousFilter);
-                LOCALPARAMF(aTrousSize, float(bufferWidth), float(bufferHeight));
+                LOCALPARAMF(aTrousSize, float(reconstructionWidth), float(reconstructionHeight));
                 LOCALPARAMF(aTrousParams, float(1<<i), godraysatrousalphak, godraysatrousdepth, 0.0f);
-                screenquad(bufferWidth, bufferHeight);
+                screenquad(reconstructionWidth, reconstructionHeight);
 
                 swap(sourceIndex, targetIndex);
             }
@@ -276,16 +309,9 @@ namespace godRays
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_FALSE);
         glActiveTexture_(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_RECTANGLE, compositeTex);
-        glActiveTexture_(GL_TEXTURE1);
-        if(msaalight) glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msdepthtex);
-        else glBindTexture(GL_TEXTURE_RECTANGLE, gdepthtex);
-        glActiveTexture_(GL_TEXTURE0);
         SETSHADER(godRayUpsample);
-        LOCALPARAMF(godrayScale,
-                    float(vieww)/float(bufferWidth), float(viewh)/float(bufferHeight),
-                    float(bufferWidth)/float(vieww), float(bufferHeight)/float(viewh));
-        LOCALPARAMF(bilateralDepthScale, godraysupscaleedge);
-        screenquad(bufferWidth, bufferHeight, vieww, viewh);
+        LOCALPARAMF(godrayScale, 1.0f, 1.0f, 1.0f, 1.0f);
+        screenquad();
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
         glDisable(GL_BLEND);
 
