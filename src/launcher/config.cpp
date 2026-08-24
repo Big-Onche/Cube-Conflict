@@ -1,3 +1,8 @@
+#if defined(__linux__)
+#include <cstdlib>
+#include <filesystem>
+#endif
+
 #include "config.h"
 
 namespace config
@@ -35,7 +40,18 @@ namespace config
             return configFileName;
         }
     #elif defined(__linux__)
-        return configFileName;
+        const char *xdgDataHome = std::getenv("XDG_DATA_HOME");
+        std::filesystem::path dataHome;
+
+        if(xdgDataHome && *xdgDataHome) dataHome = xdgDataHome;
+        else
+        {
+            const char *home = std::getenv("HOME");
+            if(!home || !*home) return std::string();
+            dataHome = std::filesystem::path(home) / ".local" / "share";
+        }
+
+        return (dataHome / "cubeconflict" / "config" / configFileName).string();
     #endif
     }
 
@@ -62,7 +78,13 @@ namespace config
 
     void write()
     {
-        std::ofstream configFile(configPatch());
+        const std::string path = configPatch();
+        if(path.empty()) return;
+    #if defined(__linux__)
+        std::error_code error;
+        std::filesystem::create_directories(std::filesystem::path(path).parent_path(), error);
+    #endif
+        std::ofstream configFile(path);
         loopi(NUMCONFIGVARS) configFile << configVars[i].name << " " << configVars[i].value << "\n";
     }
 }
