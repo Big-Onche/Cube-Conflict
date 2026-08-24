@@ -486,6 +486,12 @@ namespace game
 
     float adaptMuzzleFlash(gameent *d) { return (d==game::hudplayer() && !thirdperson ? zoom ? 2.7f : 1.5f : 1.f)*(d->boostmillis[B_RAGE] ? 1.33f : 1.f); }
 
+    static void muzzleDirSplash(int type, int color, int radius, int num, int fade, const vec &p, const vec &dir, float size, int speed, gameent *owner, int sizemod = 0, bool randomcolor = false)
+    {
+        if(owner == game::hudplayer() && !thirdperson) particles::hudDirSplash(type, color, radius, num, fade, p, dir, size, speed, owner, sizemod, randomcolor);
+        else particles::dirSplash(type, color, radius, num, fade, p, dir, size, speed, sizemod, randomcolor);
+    }
+
     void renderMuzzleEffects(const vec &from, const vec &to, gameent *d, int atk)
     {
         vec pos = d->gameplay.classId==C_SPY && d->abilitymillis[ABILITY_2] ? game::hudgunorigin(d->gunselect, d->o, to, d) : d->render.muzzlePos;
@@ -531,8 +537,8 @@ namespace game
             {
                 bool isNuke = atk == ATK_S_NUKE;
                 float mfSize = 1.5f/adaptMuzzleFlash(d);
-                particles::dirSplash(PART_SPARK, 0xFF5500, 300, 3 + rnd(3), 100, pos, dir, 0.4f, 400, -1, hasShrooms());
-                particles::dirSplash(PART_SMOKE, isNuke ? 0x202020 : 0x333333, 75, isNuke ? 4 : 2, 1250, pos, dir, 1.5f, 30, 6, hasShrooms());
+                muzzleDirSplash(PART_SPARK, 0xFF5500, 300, 3 + rnd(3), 100, pos, dir, 0.4f, 400, d, -1, hasShrooms());
+                muzzleDirSplash(PART_SMOKE, isNuke ? 0x202020 : 0x333333, 75, isNuke ? 4 : 2, 1250, pos, dir, 1.5f, 30, d, 6, hasShrooms());
                 adddynlight(pos, 100, vec(1.25f, 0.75f, 0.3f), 75, 2, lightFlags, 0, vec(1.25f, 0.75f, 0.3f), d);
                 if(atk==ATK_FIREWORKS) break;
                 particle_flare(pos, pos, 250, PART_MF_ROCKET, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFF7700, mfSize, d, hasShrooms(), 12);
@@ -545,7 +551,7 @@ namespace game
             {
                 bool isGau = (atk == ATK_S_GAU8);
                 float mfSize = isGau ? (3.0f / adaptMuzzleFlash(d)) : (2.5f / adaptMuzzleFlash(d));
-                particles::dirSplash(PART_SMOKE, isGau ? 0x282828 : 0x444444, 100, 1, 500, pos, dir, isGau ? 0.5f : 0.2f, 100, 5, hasShrooms());
+                muzzleDirSplash(PART_SMOKE, isGau ? 0x282828 : 0x444444, 100, 1, 500, pos, dir, isGau ? 0.5f : 0.2f, 100, d, 5, hasShrooms());
                 particle_flare(pos, pos, 100, PART_MF_BIG, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xCCAAAA, mfSize - (d->action.gunAcceleration / 5.f), d, hasShrooms());
                 if(!d->action.gunAcceleration) particle_flare(pos, pos, 200, PART_HAZE_MUZZLE, 100, mfSize*2, d, false, 10);
                 adddynlight(pos, isGau ? 125 : 75, vec(1.25f, 0.75f, 0.3f), 35, 2, lightFlags, 0, vec(1.25f, 0.75f, 0.3f), d);
@@ -556,7 +562,7 @@ namespace game
             case ATK_GLOCK:
             {
                 float mfSize = atk == ATK_GLOCK ? (1.25f / adaptMuzzleFlash(d)) : (2.0f / adaptMuzzleFlash(d));
-                particles::dirSplash(PART_SMOKE, 0x444444, 100, 1, 500, pos, dir, 0.2f, 100, 5, hasShrooms());
+                muzzleDirSplash(PART_SMOKE, 0x444444, 100, 1, 500, pos, dir, 0.2f, 100, d, 5, hasShrooms());
                 particle_flare(pos, pos, 125, PART_MF_LITTLE, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFFFFFF, mfSize / 2.f, d, hasShrooms());
                 particle_flare(pos, pos, 75, PART_MF_BIG, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFFAA55, mfSize, d, hasShrooms());
                 particle_flare(pos, pos, 200, PART_HAZE_MUZZLE, 100, mfSize*2, d, false, 10);
@@ -567,8 +573,8 @@ namespace game
             case ATK_HYDRA:
             {
                 float mfSize = 1.0f/adaptMuzzleFlash(d);
-                particles::dirSplash(PART_SPARK, 0xFF2200, 300, 7, 150, pos, dir, 0.4f, 400, -1, hasShrooms());
-                particles::dirSplash(PART_SMOKE, 0x443333, 300, 2, 750, pos, dir, 1.0f, 30, 8, hasShrooms());
+                muzzleDirSplash(PART_SPARK, 0xFF2200, 300, 7, 150, pos, dir, 0.4f, 400, d, -1, hasShrooms());
+                muzzleDirSplash(PART_SMOKE, 0x443333, 300, 2, 750, pos, dir, 1.0f, 30, d, 8, hasShrooms());
                 particle_flare(pos, pos, 140, PART_MF_SHOTGUN, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xCCAAAA, mfSize, d, hasShrooms(), 15);
                 particle_flare(pos, pos, 300, PART_HAZE_MUZZLE, 100, mfSize*2, d, false, 10);
                 adddynlight(pos, 75, vec(1.25f, 0.25f, 0.f), 40, 2, lightFlags, 0, vec(1.25f, 0.25f, 0.f), d);
@@ -579,8 +585,8 @@ namespace game
             case ATK_S_CAMPER:
             {
                 float mfSize = 5.0f/adaptMuzzleFlash(d);
-                particles::dirSplash(PART_SPARK, 0xFFAA00, 400, 7, 50, pos, dir, 0.3f, 400, -1, hasShrooms());
-                particles::dirSplash(PART_SMOKE, 0x222222, 300, 2, 600, pos, dir, 1.0f, 30, 8, hasShrooms());
+                muzzleDirSplash(PART_SPARK, 0xFFAA00, 400, 7, 50, pos, dir, 0.3f, 400, d, -1, hasShrooms());
+                muzzleDirSplash(PART_SMOKE, 0x222222, 300, 2, 600, pos, dir, 1.0f, 30, d, 8, hasShrooms());
                 particle_flare(pos, pos, 100, PART_MF_LITTLE, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFFFFFF, 1.25f, d, hasShrooms());
                 particle_flare(pos, pos, 100, PART_MF_SNIPER, increasedDamages ? 0xFF2222 : wizardAbility ? 0xFF22FF : 0xFFFFFF, (atk==ATK_S_CAMPER ? mfSize * 1.2 : mfSize), d, hasShrooms());
                 particle_flare(pos, pos, 400, PART_HAZE_MUZZLE, 80, mfSize*1.5f, d, false, 10);

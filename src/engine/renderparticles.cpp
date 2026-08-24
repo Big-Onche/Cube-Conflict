@@ -478,14 +478,15 @@ struct partrenderer
     int texclamp;
     uint type;
     int stain;
+    int hudtrack;
     string info;
 
-    partrenderer(const char *texname, int texclamp, int type, int stain = -1)
-        : tex(NULL), texname(texname), texclamp(texclamp), type(type), stain(stain)
+    partrenderer(const char *texname, int texclamp, int type, int stain = -1, int hudtrack = 0)
+        : tex(NULL), texname(texname), texclamp(texclamp), type(type), stain(stain), hudtrack(hudtrack)
     {
     }
-    partrenderer(int type, int stain = -1)
-        : tex(NULL), texname(NULL), texclamp(0), type(type), stain(stain)
+    partrenderer(int type, int stain = -1, int hudtrack = 0)
+        : tex(NULL), texname(NULL), texclamp(0), type(type), stain(stain), hudtrack(hudtrack)
     {
     }
     virtual ~partrenderer()
@@ -521,7 +522,8 @@ struct partrenderer
     {
         o = p->o;
         d = p->d;
-        if(type&PT_TRACK && p->owner) game::particletrack(p->owner, o, d);
+        const bool trackhud = hudtrack && p->owner;
+        if(!trackhud && type&PT_TRACK && p->owner) game::particletrack(p->owner, o, d);
 
         if(!p->size) blend = 0;
         else if(p->fade <= 5)
@@ -542,6 +544,8 @@ struct partrenderer
                 o.add(vec(d).mul(t/5000.0f));
                 o.z -= t*t/(2.0f * 5000.0f * p->gravity);
             }
+
+            if(trackhud) game::hudparticletrack(p->owner, o, d, ts, hudtrack);
 
             if(isvisiblesphere(p->size, o) == VFC_NOT_VISIBLE) return;
 
@@ -593,6 +597,7 @@ struct partrenderer
                 particle_splash(PART_SMOKE, 1, 1750, o, 0x80809A10, 3.f, 50, 50, 4, game::hasShrooms());
             }
         }
+        if(trackhud && p->fade <= 5) game::hudparticletrack(p->owner, o, d, ts, hudtrack);
     }
 
     void debuginfo()
@@ -696,7 +701,7 @@ struct listrenderer : partrenderer
         p->size = size;
         p->owner = NULL;
         p->flags = 0;
-        p->usesoft = shouldusesoftparticle(o, type);
+        p->usesoft = hud ? (type&PT_SOFT) != 0 : shouldusesoftparticle(o, type);
         p->sizemod = clamp(sizemod, -50, 50);
         p->hud = hud;
         p->sound = sound;
@@ -1017,8 +1022,8 @@ struct varenderer : partrenderer
     vector<gpuparticlelightdraw> gpulightdraws;
     vector<gpuparticlestate> gpushadowinstances;
 
-    varenderer(const char *texname, int type, int stain = -1)
-        : partrenderer(texname, 3, type, stain),
+    varenderer(const char *texname, int type, int stain = -1, int hudtrack = 0)
+        : partrenderer(texname, 3, type, stain, hudtrack),
           verts(NULL), parts(NULL), maxparts(0), numparts(0), lastupdate(-1), rndmask(0), vbo(0),
           gpuinstances(NULL), gpuquadvbo(0), gpuinstancevbo(0), gpulightinstancevbo(0), gpushadowinstancevbo(0), gpudirtymin(0),
           gpudirtymax(-1), gpunext(0), gpulastmillis(0), gpulastreclaimmillis(-1)
@@ -1176,7 +1181,7 @@ struct varenderer : partrenderer
         p->size = size;
         p->owner = NULL;
         p->flags = 0x80 | (rndmask ? rnd(0x80) & rndmask : 0);
-        p->usesoft = shouldusesoftparticle(o, type);
+        p->usesoft = hud ? (type&PT_SOFT) != 0 : shouldusesoftparticle(o, type);
         p->color = color;
         p->sizemod = sizemod;
         p->hud = hud;
@@ -1680,8 +1685,8 @@ struct softquadrenderer : quadrenderer
 
 struct hazeRenderer : quadrenderer
 {
-    hazeRenderer(const char *texname, int type)
-        : quadrenderer(texname, type|PT_SHADER)
+    hazeRenderer(const char *texname, int type, int hudtrack = 0)
+        : quadrenderer(texname, type|PT_SHADER, -1, hudtrack)
     {
     }
 
@@ -1771,6 +1776,14 @@ static partrenderer *parts[] =
     new hazeRenderer("media/particles/haze/noise_2.png", PT_HAZE|PT_PART|PT_FEW|PT_LERP|PT_SCROLL|PT_FADE),                  // PART_HAZE_BIG
     new hazeRenderer("media/particles/haze/noise_2.png", PT_HAZE|PT_PART|PT_FEW|PT_TRACK|PT_LERP|PT_SCROLL|PT_FADE),         // PART_HAZE_MUZZLE
     &texts,                                                                                                                  // PART_TEXT
+    new quadrenderer("media/particles/fire/smoke.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_LERP|PT_RND4|PT_SOFT|PT_LABSORPTION|PT_TRACK, -1, HUD_PARTICLE_MUZZLE), // PART_HUD_SMOKE
+    new quadrenderer("media/particles/fire/flames.png", PT_PART|PT_HFLIP|PT_RND4|PT_OVERBRIGHT|PT_TRACK, -1, HUD_PARTICLE_MUZZLE),                       // PART_HUD_FLAME
+    new quadrenderer("media/particles/fire/fire_ball.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_RND4|PT_TRACK, -1, HUD_PARTICLE_MUZZLE),                        // PART_HUD_FIRE_BALL
+    new quadrenderer("media/particles/misc/spark.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_TRACK, -1, HUD_PARTICLE_MUZZLE),                                   // PART_HUD_SPARK
+    new quadrenderer("media/particles/fire/smoke.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_LERP|PT_RND4|PT_SOFT|PT_LABSORPTION|PT_TRACK, -1, HUD_PARTICLE_JOINT), // PART_HUD_JOINT_SMOKE
+    new quadrenderer("media/particles/fire/fire_ball.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_RND4|PT_TRACK, -1, HUD_PARTICLE_JOINT),                           // PART_HUD_JOINT_FIRE_BALL
+    new quadrenderer("media/particles/fire/smoke.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_LERP|PT_RND4|PT_SOFT|PT_LABSORPTION|PT_TRACK, -1, HUD_PARTICLE_CASING), // PART_HUD_CASING_SMOKE
+    new quadrenderer("media/particles/fire/fire_ball.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_RND4|PT_TRACK, -1, HUD_PARTICLE_CASING),                           // PART_HUD_CASING_FIRE_BALL
 };
 
 static const uint particlerenderflagmask = PT_LERP|PT_MOD|PT_BRIGHT|PT_NOTEX|PT_SOFT|PT_SHADER|PT_LABSORPTION;
@@ -1784,7 +1797,7 @@ static inline uint getparticlerenderflags(const partrenderer *p)
 
 static inline uint getparticlerendersortflags(int index)
 {
-    if(index == PART_FLAME)
+    if(index == PART_FLAME || index == PART_HUD_FLAME)
     {
         // Keep flame behind smoke by sorting it with the dense smoke family,
         // while still using its real additive render state at draw time.
@@ -2279,7 +2292,7 @@ static inline particle *newparticle(const vec &o, const vec &d, int fade, int ty
 {
     static particle dummy;
 
-    if(!isInRange(o, parts[type]->type) || o.isneg()) return &dummy;
+    if(!hud && (!isInRange(o, parts[type]->type) || o.isneg())) return &dummy;
     if(seedemitter)
     {
         parts[type]->seedemitter(*seedemitter, o, d, fade, size, gravity);
@@ -2343,6 +2356,64 @@ namespace particles
     {   // spawn particles in a certain direction
         if(minimized) return;
         directionalSplash(type, randomColor ? getRandomColor() : color, radius, num, fade, p, dir, size, speed, sizemod);
+    }
+
+    static int hudparticletype(int type, int track = HUD_PARTICLE_MUZZLE)
+    {
+        if(track == HUD_PARTICLE_JOINT)
+        {
+            if(type == PART_SMOKE) return PART_HUD_JOINT_SMOKE;
+            if(type == PART_FIRE_BALL) return PART_HUD_JOINT_FIRE_BALL;
+            return -1;
+        }
+        if(track == HUD_PARTICLE_CASING)
+        {
+            if(type == PART_SMOKE) return PART_HUD_CASING_SMOKE;
+            if(type == PART_FIRE_BALL) return PART_HUD_CASING_FIRE_BALL;
+            return -1;
+        }
+        switch(type)
+        {
+            case PART_SMOKE: return PART_HUD_SMOKE;
+            case PART_FLAME: return PART_HUD_FLAME;
+            case PART_FIRE_BALL: return PART_HUD_FIRE_BALL;
+            case PART_SPARK: return PART_HUD_SPARK;
+            default: return -1;
+        }
+    }
+
+    void hudDirSplash(int type, int color, int radius, int num, int fade, const vec &p, const vec &dir, float size, int speed, physent *owner, int sizemod, bool randomColor)
+    {
+        if(minimized || !owner) return;
+        int hudtype = hudparticletype(type);
+        if(hudtype < 0)
+        {
+            dirSplash(type, color, radius, num, fade, p, dir, size, speed, sizemod, randomColor);
+            return;
+        }
+
+        bvec4 decoded = decodeparticlecolor(hudtype, randomColor ? getRandomColor() : color);
+        int fmin = 1, fmax = fade*3;
+        speed = min(speed, 2);
+        loopi(num)
+        {
+            int x, y, z;
+            do
+            {
+                x = rnd(radius*2)-radius;
+                y = rnd(radius*2)-radius;
+                z = rnd(radius*2)-radius;
+            }
+            while(x*x + y*y + z*z > radius*radius);
+
+            vec offset(float(x)/3, float(y)/3, float(z)/3), velocity(dir);
+            velocity.normalize().mul(speed + rnd(speed/2)).add(offset);
+            vec localorigin(0, 0, 0);
+            vec localvelocity(velocity.dot(camright), velocity.dot(camdir), velocity.dot(camup));
+            int f = num < 10 ? fmin + rnd(fmax) : fmax - (i*(fmax-fmin))/(num-1);
+            particle *part = newparticle(localorigin, localvelocity, f, hudtype, decoded, size, 50, sizemod, false, true);
+            part->owner = owner;
+        }
     }
 
     VARP(maxtrail, 1, 2000, 10000);
@@ -2438,6 +2509,36 @@ void particle_splash(int type, int num, int fade, const vec &p, int color, float
 {
     if(minimized) return;
     splash(type, randomcolor ? particles::getRandomColor() : color, radius, num, fade, p, size, gravity, sizemod, sound);
+}
+
+void particle_hud_splash(int type, int num, int fade, const vec &p, int color, float size, int radius, int gravity, int sizemod, bool randomcolor, physent *owner, int track)
+{
+    if(minimized || !owner) return;
+    int hudtype = particles::hudparticletype(type, track);
+    if(hudtype < 0)
+    {
+        particle_splash(type, num, fade, p, color, size, radius, gravity, sizemod, randomcolor);
+        return;
+    }
+
+    int fmin = 1, fmax = fade*3;
+    bvec4 decoded = decodeparticlecolor(hudtype, randomcolor ? particles::getRandomColor() : color);
+    loopi(num)
+    {
+        int x, y, z, attempts = 0;
+        do
+        {
+            x = rnd(radius*2)-radius;
+            y = rnd(radius*2)-radius;
+            z = rnd(radius*2)-radius;
+        }
+        while(x*x + y*y + z*z > radius*radius && ++attempts < 8);
+        vec velocity((float)x, (float)y, (float)z);
+        velocity = vec(velocity.dot(camright), velocity.dot(camdir), velocity.dot(camup));
+        int f = num < 10 ? fmin + rnd(fmax) : fmax - (i*(fmax-fmin))/(num-1);
+        particle *part = newparticle(vec(0, 0, 0), velocity, f, hudtype, decoded, size, gravity, sizemod, false, true);
+        part->owner = owner;
+    }
 }
 
 void particle_flare(const vec &p, const vec &dest, int fade, int type, int color, float size, physent *owner, bool randomcolor, int sizemod)
@@ -2619,6 +2720,28 @@ void regularflame(int type, const vec &p, float radius, float height, int color,
         s.x += rndscale(radius*2.0f)-radius;
         s.y += rndscale(radius*2.0f)-radius;
         newparticle(s, v, rnd(max(int(fade*height), 1))+1, type, color, size, gravity, sizemod);
+    }
+}
+
+void regular_hud_flame(int type, const vec &p, float radius, float height, int color, int density, float scale, float speed, float fade, int gravity, physent *owner, int track, int sizemod)
+{
+    if(minimized || !owner) return;
+    int hudtype = particles::hudparticletype(type, track);
+    if(hudtype < 0)
+    {
+        regularflame(type, p, radius, height, color, density, scale, speed, fade, gravity, sizemod);
+        return;
+    }
+
+    float size = scale*min(radius, height)*1.5f;
+    vec velocity(0, 0, min(1.0f, height)*speed);
+    velocity = vec(velocity.dot(camright), velocity.dot(camdir), velocity.dot(camup));
+    loopi(density)
+    {
+        vec origin(rndscale(radius*2.0f)-radius, rndscale(radius*2.0f)-radius, 0);
+        origin = vec(origin.dot(camright), origin.dot(camdir), origin.dot(camup));
+        particle *part = newparticle(origin, velocity, rnd(max(int(fade*height), 1))+1, hudtype, color, size, gravity, sizemod, false, true);
+        part->owner = owner;
     }
 }
 

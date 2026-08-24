@@ -510,6 +510,7 @@ namespace game
 
     void renderWeaponParticles(gameent *d)
     {
+        bool hud = d == hudplayer() && !thirdperson;
         switch(d->gunselect)
         {
             case GUN_FLAMETHROWER:
@@ -518,10 +519,15 @@ namespace game
                 vec muzzlePos = d->render.muzzlePos;
                 if(lastmillis - d->action.lastAttack < 1000 && !d->action.attackAction)
                 {
-                    if(rndevent(85)) particle_splash(PART_SMOKE, 1, 700, muzzlePos, 0x282828, 0.75f, 10, -15, 6, hasShrooms());
+                    if(rndevent(85))
+                    {
+                        if(hud) particle_hud_splash(PART_SMOKE, 1, 700, muzzlePos, 0x282828, 0.75f, 10, -15, 6, hasShrooms(), d, HUD_PARTICLE_MUZZLE);
+                        else particle_splash(PART_SMOKE, 1, 700, muzzlePos, 0x282828, 0.75f, 10, -15, 6, hasShrooms());
+                    }
                     if(rndevent(95))
                     {
-                        particle_splash(PART_FLAME, 2, 300, muzzlePos, 0xFF5500, 1.0f, 10, -10, -2, hasShrooms());
+                        if(hud) particle_hud_splash(PART_FLAME, 2, 300, muzzlePos, 0xFF5500, 1.0f, 10, -10, -2, hasShrooms(), d, HUD_PARTICLE_MUZZLE);
+                        else particle_splash(PART_FLAME, 2, 300, muzzlePos, 0xFF5500, 1.0f, 10, -10, -2, hasShrooms());
                         particle_flare(muzzlePos, muzzlePos, 1000, PART_HAZE_MUZZLE, 50, 4.0f, d);
                     }
                 }
@@ -531,8 +537,16 @@ namespace game
             {
                 if(!rndevent(95)) return;
                 vec casingPos = d->render.casingPos;
-                particle_splash(PART_FIRE_BALL, 2, 80, casingPos, 0xFFC864, 1, 30, 30, 0, hasShrooms());
-                particle_splash(PART_SMOKE, 2, 180, casingPos, 0x444444, 2, 40, 50, 0, hasShrooms());
+                if(hud)
+                {
+                    particle_hud_splash(PART_FIRE_BALL, 2, 80, casingPos, 0xFFC864, 1, 30, 30, 0, hasShrooms(), d, HUD_PARTICLE_CASING);
+                    particle_hud_splash(PART_SMOKE, 2, 180, casingPos, 0x444444, 2, 40, 50, 0, hasShrooms(), d, HUD_PARTICLE_CASING);
+                }
+                else
+                {
+                    particle_splash(PART_FIRE_BALL, 2, 80, casingPos, 0xFFC864, 1, 30, 30, 0, hasShrooms());
+                    particle_splash(PART_SMOKE, 2, 180, casingPos, 0x444444, 2, 40, 50, 0, hasShrooms());
+                }
                 particle_splash(PART_HAZE_SMALL, 2, 250, casingPos, 85, 2, 40, 50, 5);
                 break;
             }
@@ -860,8 +874,16 @@ namespace game
 
         if(rndevent(93))
         {
-            regularflame(PART_SMOKE, d->render.weedPos, 2, 3, 0x888888, 1, 1.3f, 50.0f, 1000.0f, -10);
-            particle_splash(PART_FIRE_BALL,  4, 50, d->render.weedPos, 0xFF6600, 0.6f, 20, 150);
+            if(d == hudplayer() && !thirdperson)
+            {
+                regular_hud_flame(PART_SMOKE, d->render.weedPos, 2, 3, 0x888888, 1, 1.3f, 50.0f, 1000.0f, -10, d, HUD_PARTICLE_JOINT);
+                particle_hud_splash(PART_FIRE_BALL, 4, 50, d->render.weedPos, 0xFF6600, 0.6f, 20, 150, 0, false, d, HUD_PARTICLE_JOINT);
+            }
+            else
+            {
+                regularflame(PART_SMOKE, d->render.weedPos, 2, 3, 0x888888, 1, 1.3f, 50.0f, 1000.0f, -10);
+                particle_splash(PART_FIRE_BALL, 4, 50, d->render.weedPos, 0xFF6600, 0.6f, 20, 150);
+            }
         }
     }
 
@@ -1001,4 +1023,3 @@ namespace game
         entities::preloadentities();
     }
 }
-

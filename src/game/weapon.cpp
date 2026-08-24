@@ -887,6 +887,64 @@ namespace game
         }
     }
 
+    FVARP(hudparticlemovementoffset, 0.0f, 0.25f, 2.0f);
+    static physent *previoushudparticleowner[3] = { NULL, NULL, NULL };
+    static vec previoushudparticleorigin[3], hudparticlemovement[3];
+    static int previoushudparticlemillis[3] = { -1, -1, -1 }, hudparticlemovementmillis[3] = { -1, -1, -1 };
+
+    static void updatehudparticlemovement(physent *owner, const vec &emitter, int track)
+    {
+        int index = clamp(track - HUD_PARTICLE_MUZZLE, 0, 2);
+        if(hudparticlemovementmillis[index] == totalmillis && previoushudparticleowner[index] == owner) return;
+
+        hudparticlemovement[index] = vec(0, 0, 0);
+        if(previoushudparticleowner[index] == owner && previoushudparticlemillis[index] >= 0)
+        {
+            int elapsed = totalmillis - previoushudparticlemillis[index];
+            if(elapsed > 0 && elapsed <= 250 && hudparticlemovementoffset > 0)
+            {
+                vec velocity(emitter);
+                velocity.sub(previoushudparticleorigin[index]).mul(1000.0f/elapsed);
+                float speed = velocity.magnitude();
+                if(speed > 1e-4f)
+                {
+                    float movement = clamp(speed/max(owner->maxspeed, 1.0f), 0.0f, 1.0f);
+                    velocity.div(speed);
+                    hudparticlemovement[index] = vec(-velocity.dot(camright), -velocity.dot(camdir), -velocity.dot(camup)).mul(hudparticlemovementoffset*movement);
+                }
+            }
+        }
+        previoushudparticleowner[index] = owner;
+        previoushudparticleorigin[index] = emitter;
+        previoushudparticlemillis[index] = hudparticlemovementmillis[index] = totalmillis;
+    }
+
+    void hudparticletrack(physent *owner, vec &o, vec &d, int age, int track)
+    {
+        if(!owner || (owner->type != ENT_PLAYER && owner->type != ENT_AI)) return;
+        gameent *pl = (gameent *)owner;
+        vec emitter(-1, -1, -1);
+        switch(track)
+        {
+            case HUD_PARTICLE_JOINT: emitter = pl->render.weedPos; break;
+            case HUD_PARTICLE_CASING: emitter = pl->render.casingPos; break;
+            default: emitter = pl->render.muzzlePos; break;
+        }
+        bool invalidmuzzle = track == HUD_PARTICLE_MUZZLE && (pl->action.lastAttackType < 0 || attacks[pl->action.lastAttackType].gun != pl->gunselect);
+        if(pl != hudplayer() || thirdperson || emitter.x < 0 || invalidmuzzle)
+        {
+            o = vec(-1e16f, -1e16f, -1e16f);
+            d = vec(0, 0, 0);
+            return;
+        }
+        int index = clamp(track - HUD_PARTICLE_MUZZLE, 0, 2);
+        updatehudparticlemovement(owner, emitter, track);
+        o.madd(hudparticlemovement[index], age/500.0f);
+        const vec localorigin(o), localvelocity(d);
+        o = vec(emitter).madd(camright, localorigin.x).madd(camdir, localorigin.y).madd(camup, localorigin.z);
+        d = vec(camright).mul(localvelocity.x).madd(camdir, localvelocity.y).madd(camup, localvelocity.z);
+    }
+
     void dynlighttrack(physent *owner, vec &o, vec &hud)
     {
         if(owner->type!=ENT_PLAYER && owner->type!=ENT_AI) return;
@@ -1102,4 +1160,3 @@ namespace game
         if(!following) following = player1;
     }
 };
-
