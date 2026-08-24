@@ -8,7 +8,7 @@ namespace godRays
 
     // Settings vars
     VARFP(godrays, 0, 1, 1, if(!godrays) cleanup());
-    VARP(godrayssteps, 1, 24, 64);
+    VARP(godrayssteps, 1, 12, 64);
     FVARP(godraysscale, 0.125f, 0.5f, 1.0f);
     VARP(godraysatrous, 0, 1, 1);
     VARP(godraysatrousiter, 1, 2, 3);
@@ -30,7 +30,7 @@ namespace godRays
 
     // Settings vars
     VARP(godraysgeom, 0, 1, 1);
-    VARP(godraysgeomsteps, 1, 32, 64);
+    VARP(godraysgeomsteps, 1, 12, 64);
     FVARP(godraysgeomshadowbias, 0.0f, 2.0f, 32.0f);
     FVARP(godraysgeomforwardexp, 0.25f, 5.0f, 32.0f);
 
