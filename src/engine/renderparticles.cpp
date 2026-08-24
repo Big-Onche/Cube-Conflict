@@ -32,7 +32,7 @@ VARP(softparticlemaxdist, 64, 768, 2048);
 
 VARFP(particlelighting, 0, 1, 1, refreshparticlelighting());
 VARP(particlelightingdynlights, 0, 1, 1);
-FVARFP(particlelightscale, 0.125f, 0.5f, 1.0f, cleanupparticlelightbuffer());
+FVARFP(particlelightscale, 0.125f, 0.4f, 1.0f, cleanupparticlelightbuffer());
 FVARP(particlelightupscaleedge, 0.001f, 0.05f, 1.0f);
 VARP(particlelightingshadowmapblur, 1, 3, 16);
 VARP(particletransmittance, 0, 1, 1);
