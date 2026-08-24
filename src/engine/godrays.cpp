@@ -9,13 +9,14 @@ namespace godRays
     // Settings vars
     VARFP(godrays, 0, 1, 1, if(!godrays) cleanup());
     VARP(godrayssteps, 1, 24, 64);
-    FVARP(godraysscale, 0.125f, 0.375f, 1.0f);
+    FVARP(godraysscale, 0.125f, 0.5f, 1.0f);
     VARP(godraysatrous, 0, 1, 1);
     VARP(godraysatrousiter, 1, 2, 3);
     VARP(godraysglobalstrength, 0, 0, 3); // subtle, normal, intense or cinematic
 
     // Tunables
     FVAR(godraysatrousalphak, 0.0f, 0.0f, 256.0f);
+    FVAR(godraysatrousdepth, 0.0f, 2048.0f, 8192.0f);
     FVAR(godraysupscaleedge, 0.0f, 0.02f, 1.0f);
 
     // Map vars
@@ -187,9 +188,10 @@ namespace godRays
             LOCALPARAM(cloudShadowTransform, cloudShadowTransform);
             LOCALPARAM(cloudShadowColor, getcloudlayershadowcolour().tocolor());
             LOCALPARAMF(cloudShadowStrength, cloudShadowStrength);
+            LOCALPARAMF(godRayDepthScale, float(vieww)/float(bufferWidth), float(viewh)/float(bufferHeight));
             LOCALPARAMF(godRayMarchParams, max(godraysforwardexp, 0.25f), max(godraysdensity, 0.25f), maxDistance, max(godraysmaxaccum, 0.0f));
             LOCALPARAMF(godRayDistanceParams, godraysnearstart, max(godraysnearend, godraysnearstart + 1.0f), godrayssteps, godraysstrength*getGodraysStrength());
-            screenquad(vieww, viewh);
+            screenquad();
         }
 
         if(renderGeomPass)
@@ -215,29 +217,34 @@ namespace godRays
             else SETSHADER(geometryCrepuscularRaysRect);
             LOCALPARAM(sunDir, sunlightdir);
             LOCALPARAM(sunColor, sunColor);
+            LOCALPARAMF(godRayDepthScale, float(vieww)/float(bufferWidth), float(viewh)/float(bufferHeight));
             LOCALPARAMF(godRayGeomParams, max(godraysgeomdensity, 0.25f), clamp(godraysgeomdecay, 0.0f, 1.0f), geomMaxDistance, max(godraysgeomforwardexp, 0.25f));
             LOCALPARAMI(godRayGeomSteps, godraysgeomsteps);
             LOCALPARAMF(godRayGeomDistanceParams, godraysgeomstrength*getGodraysStrength(), 0.0f, 0.0f, 0.0f);
             LOCALPARAMF(godRayGeomShapeParams, max(godraysgeomshadowbias, 0.0f), clamp(godraysgeomthreshold, 0.0f, 1.0f), 0.0f, 0.0f);
             LOCALPARAMI(csmcount, csmsplits);
-            screenquad(vieww, viewh);
+            screenquad();
 
             if(renderCloudPass) glDisable(GL_BLEND);
         }
 
-        glBindFramebuffer_(GL_FRAMEBUFFER, rayGuideFbo);
-        glViewport(0, 0, bufferWidth, bufferHeight);
-        glClearColor(0, 0, 0, 0);
-        glClear(GL_COLOR_BUFFER_BIT);
-        glActiveTexture_(GL_TEXTURE0);
-        if(msaalight) glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msdepthtex);
-        else glBindTexture(GL_TEXTURE_RECTANGLE, gdepthtex);
-        SETSHADER(godRayDepthGuide);
-        screenquad(vieww, viewh);
-
         GLuint compositeTex = rayTex;
-        if(godraysatrous)
+        // Filtering a reduced buffer cannot be made silhouette-safe: each texel
+        // contains only one depth representative for a much larger screen area.
+        // Reconstruct the raw signal first, as the low-resolution particle path
+        // does, and reserve the depth-aware filter for native resolution.
+        if(godraysatrous && bufferWidth == vieww && bufferHeight == viewh)
         {
+            glBindFramebuffer_(GL_FRAMEBUFFER, rayGuideFbo);
+            glViewport(0, 0, bufferWidth, bufferHeight);
+            glClearColor(0, 0, 0, 0);
+            glClear(GL_COLOR_BUFFER_BIT);
+            glActiveTexture_(GL_TEXTURE0);
+            if(msaalight) glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msdepthtex);
+            else glBindTexture(GL_TEXTURE_RECTANGLE, gdepthtex);
+            SETSHADER(godRayDepthGuide);
+            screenquad(vieww, viewh);
+
             GLuint filterTex[2] = { rayTex, rayFilterTex };
             GLuint filterFbo[2] = { rayFbo, rayFilterFbo };
             int sourceIndex = 0, targetIndex = 1;
@@ -252,9 +259,9 @@ namespace godRays
                 glActiveTexture_(GL_TEXTURE1);
                 glBindTexture(GL_TEXTURE_RECTANGLE, rayGuideTex);
                 glActiveTexture_(GL_TEXTURE0);
-                SETSHADER(aTrousFilter);
+                SETSHADER(godRayATrousFilter);
                 LOCALPARAMF(aTrousSize, float(bufferWidth), float(bufferHeight));
-                LOCALPARAMF(aTrousParams, float(1<<i), godraysatrousalphak, 0.0f, 0.0f);
+                LOCALPARAMF(aTrousParams, float(1<<i), godraysatrousalphak, godraysatrousdepth, 0.0f);
                 screenquad(bufferWidth, bufferHeight);
 
                 swap(sourceIndex, targetIndex);
@@ -277,7 +284,7 @@ namespace godRays
         LOCALPARAMF(godrayScale,
                     float(vieww)/float(bufferWidth), float(viewh)/float(bufferHeight),
                     float(bufferWidth)/float(vieww), float(bufferHeight)/float(viewh));
-        LOCALPARAMF(bilateralDepthScale, 1.0f / max(float(farplane) * godraysupscaleedge, 1.0e-4f));
+        LOCALPARAMF(bilateralDepthScale, godraysupscaleedge);
         screenquad(bufferWidth, bufferHeight, vieww, viewh);
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
         glDisable(GL_BLEND);
