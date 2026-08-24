@@ -1732,8 +1732,7 @@ struct shadowcache : hashtable<shadowcachekey, shadowcacheval>
 };
 
 extern int smcache, smfilter, smgather, smalpha, smalphaprec, alphashadow, particleshadow;
-extern float particleshadowalpha;
-extern float particleshadowblur;
+extern float particleshadowalpha, particleshadowscale;
 extern int particletransmittance;
 
 #define SHADOWCACHE_EVICT 2
@@ -1753,11 +1752,16 @@ extern int usetexgather;
 static inline bool usegatherforsm() { return smfilter > 1 && smgather && hasTG && usetexgather; }
 static inline bool usesmcomparemode() { return !usegatherforsm() || (hasTG && hasGPU5 && usetexgather > 1); }
 static inline bool useparticleshadowcolors() { return particleshadow && particleshadowalpha > 0; }
-static inline bool useparticleshadowfilter() { return useparticleshadowcolors() && particleshadowblur > 0; }
 static inline bool uselocalparticleshadowcolors() { return smalpha > 1 && useparticleshadowcolors(); }
 static inline bool usealphashadowcolors() { return smalpha && alphashadow; }
 static inline bool useshadowcolors() { return usealphashadowcolors() || useparticleshadowcolors(); }
-static inline bool useshadowcolorfilter() { return smfilter || useparticleshadowfilter(); }
+static inline float shadowcolorscale()
+{
+    return min(smfilter ? 0.5f : 1.0f, useparticleshadowcolors() ? particleshadowscale : 1.0f);
+}
+static inline bool useshadowcolorfilter() { return shadowcolorscale() < 1.0f; }
+static inline int shadowfilterwidth() { return max(int(ceil(shadowatlaspacker.w * shadowcolorscale())), 1); }
+static inline int shadowfilterheight() { return max(int(ceil(shadowatlaspacker.h * shadowcolorscale())), 1); }
 
 void loadsmshaders()
 {
@@ -1801,7 +1805,7 @@ void viewshadowatlas()
     {
         tw = shadowatlaspacker.w;
         th = shadowatlaspacker.h;
-        if(debugshadowatlas > 2) { tw /= 2; th /= 2; }
+        if(debugshadowatlas > 2) { tw *= shadowcolorscale(); th *= shadowcolorscale(); }
         SETSHADER(hudrect);
     }
     else hudshader->set();
@@ -1853,7 +1857,7 @@ void setupshadowatlas()
             smalign = 1;
 
             if(!shadowfiltertex) glGenTextures(1, &shadowfiltertex);
-            createtexture(shadowfiltertex, shadowatlaspacker.w/2, shadowatlaspacker.h/2, NULL, 3, 1, colcomp, GL_TEXTURE_RECTANGLE);
+            createtexture(shadowfiltertex, shadowfilterwidth(), shadowfilterheight(), NULL, 3, 1, colcomp, GL_TEXTURE_RECTANGLE);
 
             if(!shadowfilterfbo) glGenFramebuffers_(1, &shadowfilterfbo);
             glBindFramebuffer_(GL_FRAMEBUFFER, shadowfilterfbo);
@@ -2980,6 +2984,7 @@ static void bindlighttexs(int msaapass = 0, bool transparent = false)
 static inline void setlightglobals(bool transparent = false)
 {
     GLOBALPARAMF(shadowatlasscale, 1.0f/shadowatlaspacker.w, 1.0f/shadowatlaspacker.h);
+    GLOBALPARAMF(shadowcolorscale, shadowcolorscale());
     if(ao)
     {
         if(transparent || drawtex || (editmode && fullbright))
@@ -3740,6 +3745,7 @@ void rendervolumetric()
     glActiveTexture_(GL_TEXTURE0);
 
     GLOBALPARAMF(shadowatlasscale, 1.0f/shadowatlaspacker.w, 1.0f/shadowatlaspacker.h);
+    GLOBALPARAMF(shadowcolorscale, shadowcolorscale());
     GLOBALPARAMF(volscale, float(vieww)/volw, float(viewh)/volh, float(volw)/vieww, float(volh)/viewh);
     GLOBALPARAMF(volminstep, volminstep);
     GLOBALPARAMF(volprefilter, volprefilter);
@@ -5161,13 +5167,15 @@ void filtershadowcolors()
     if(shadowfilterfbo)
     {
         glBindFramebuffer_(GL_FRAMEBUFFER, shadowfilterfbo);
-        glViewport(0, 0, shadowatlaspacker.w/2, shadowatlaspacker.h/2);
+        glViewport(0, 0, shadowfilterwidth(), shadowfilterheight());
     }
     else glViewport(0, 0, shadowatlaspacker.w, shadowatlaspacker.h);
 
     glDepthMask(GL_FALSE);
 
     GLOBALPARAMF(shadowatlasscale, 1.0f/shadowatlaspacker.w, 1.0f/shadowatlaspacker.h);
+    GLOBALPARAMF(shadowfilterradius, 0.5f/shadowcolorscale());
+    GLOBALPARAMF(particleshadowfilter, useparticleshadowcolors() ? 1.0f : 0.0f);
 
     if(shadowcolorclears.length())
     {

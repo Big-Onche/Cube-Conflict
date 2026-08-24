@@ -54,7 +54,7 @@ VARP(particlesunlightdebug, 0, 0, 2);
 
 VARFP(particleshadow, 0, 1, 1, { cleardeferredlightshaders(); cleanupshadowatlas(); });
 FVARFR(particleshadowalpha, 0.0f, 1.5f, 4.0f, { cleardeferredlightshaders(); cleanupshadowatlas(); });
-FVAR(particleshadowblur, 0.0f, 4.0f, 8.0f);
+FVARFP(particleshadowscale, 0.0625f, 0.125f, 1.0f, cleanupshadowatlas());
 
 
 struct particlelightuploadcache
