@@ -1010,7 +1010,7 @@ struct varenderer : partrenderer
     GLuint vbo;
     gpuparticlestate *gpuinstances;
     GLuint gpuquadvbo, gpuinstancevbo, gpulightinstancevbo, gpushadowinstancevbo;
-    int gpudirtymin, gpudirtymax, gpunext, gpulastmillis;
+    int gpudirtymin, gpudirtymax, gpunext, gpulastmillis, gpulastreclaimmillis;
     vector<vbodraw> vbodraws;
     vector<gpuparticlelightentry> gpulightentries;
     vector<gpuparticlestate> gpulightinstances;
@@ -1021,7 +1021,7 @@ struct varenderer : partrenderer
         : partrenderer(texname, 3, type, stain),
           verts(NULL), parts(NULL), maxparts(0), numparts(0), lastupdate(-1), rndmask(0), vbo(0),
           gpuinstances(NULL), gpuquadvbo(0), gpuinstancevbo(0), gpulightinstancevbo(0), gpushadowinstancevbo(0), gpudirtymin(0),
-          gpudirtymax(-1), gpunext(0), gpulastmillis(0)
+          gpudirtymax(-1), gpunext(0), gpulastmillis(0), gpulastreclaimmillis(-1)
     {
         if(type & PT_HFLIP) rndmask |= 0x01;
         if(type & PT_VFLIP) rndmask |= 0x02;
@@ -1059,6 +1059,7 @@ struct varenderer : partrenderer
         gpudirtymax = -1;
         gpunext = 0;
         gpulastmillis = 0;
+        gpulastreclaimmillis = -1;
         gpulightentries.setsize(0);
         gpulightinstances.setsize(0);
         gpulightdraws.setsize(0);
@@ -1074,6 +1075,7 @@ struct varenderer : partrenderer
         gpudirtymax = -1;
         gpunext = 0;
         gpulastmillis = 0;
+        gpulastreclaimmillis = -1;
         gpulightentries.setsize(0);
         gpulightinstances.setsize(0);
         gpulightdraws.setsize(0);
@@ -1113,14 +1115,56 @@ struct varenderer : partrenderer
         return gpuparticlelightrectshader && gpuparticlelight2dshader && gpuparticlesoftlightrectshader && gpuparticlesoftlight2dshader;
     }
 
+    bool gpuparticleexpired(const particle &p) const
+    {
+        if(p.fade < 0) return true;
+        return lastmillis > p.millis + (p.fade <= 5 ? 0 : p.fade);
+    }
+
+    void reclaimexpiredgpuparticles()
+    {
+        int oldnumparts = numparts, firstdirty = -1;
+        numparts = 0;
+        gpulastmillis = 0;
+        loopi(oldnumparts)
+        {
+            const particle &p = parts[i];
+            if(gpuparticleexpired(p)) continue;
+            if(numparts != i)
+            {
+                parts[numparts] = p;
+                gpuinstances[numparts] = gpuinstances[i];
+                if(firstdirty < 0) firstdirty = numparts;
+            }
+            gpulastmillis = max(gpulastmillis, p.millis + (p.fade <= 5 ? 1 : p.fade));
+            ++numparts;
+        }
+        if(firstdirty >= 0)
+        {
+            gpudirtymin = min(gpudirtymin, firstdirty);
+            gpudirtymax = max(gpudirtymax, numparts - 1);
+        }
+        gpunext = numparts % maxparts;
+        gpulastreclaimmillis = lastmillis;
+    }
+
     particle *addpart(const vec &o, const vec &d, int fade, const bvec4 &color, float size, int gravity, int sizemod, bool sound, bool hud)
     {
         int index;
-        if(usegpuparticles())
+        bool gpupart = usegpuparticles();
+        if(gpupart)
         {
-            index = gpunext;
-            gpunext = (gpunext + 1) % maxparts;
-            numparts = min(numparts + 1, maxparts);
+            if(numparts >= maxparts && gpulastreclaimmillis != lastmillis) reclaimexpiredgpuparticles();
+            if(numparts < maxparts)
+            {
+                index = numparts++;
+                gpunext = numparts % maxparts;
+            }
+            else
+            {
+                index = gpunext;
+                gpunext = (gpunext + 1) % maxparts;
+            }
         }
         else index = numparts < maxparts ? numparts++ : rnd(maxparts); //next free slot, or kill a random kitten
         particle *p = parts + index;
@@ -1138,7 +1182,7 @@ struct varenderer : partrenderer
         p->hud = hud;
         p->sound = sound;
         lastupdate = -1;
-        if(usegpuparticles())
+        if(gpupart)
         {
             gpuparticlestate &state = gpuinstances[index];
             state.originsize = vec4(o, size);
