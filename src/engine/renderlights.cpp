@@ -4781,9 +4781,6 @@ static inline bool clearshadowtransparent(int idx, int side, int transparentmask
     return true;
 }
 
-extern bool rendershadowparticles();
-extern bool hasshadowparticles();
-
 bool rendershadowtransparent(int idx, int side, bool cullside = false, bool particlepass = false)
 {
     const shadowmapinfo &sm = shadowmaps[idx];
@@ -4868,7 +4865,7 @@ void rendercsmshadowmaps()
 
         rendershadowmapworld();
         rendershadowmodelbatches();
-        if(hasshadowparticles()) particleshadowtransparent |= 1<<i;
+        if(hasshadowparticles(true)) particleshadowtransparent |= 1<<i;
     }
 
     int transparentmask = shadowtransparent | particleshadowtransparent;
@@ -5006,12 +5003,12 @@ void rendershadowmaps(int offset = 0)
             if(shadowmapping == SM_SPOT)
             {
                 shadowside = 0;
-                if(hasshadowparticles()) particleshadowtransparent = 1;
+                if(hasshadowparticles(true)) particleshadowtransparent = 1;
             }
             else
             {
                 shadowside = 0;
-                if(hasshadowparticles())
+                if(hasshadowparticles(false))
                 {
                     // Screen-facing particle quads can span cubemap directions that the opaque-receiver frustum cull does not cover. Leaving those
                     // faces unrendered exposes the cubemap selection boundaries as bright or dark 45-degree cones across a particle.

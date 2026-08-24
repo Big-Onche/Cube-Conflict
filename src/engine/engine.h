@@ -774,7 +774,7 @@ extern void debugparticles();
 extern double startparticledebugtimer();
 extern void stopparticledebugtimer(const char *name, double start);
 extern bool rendershadowparticles();
-extern bool hasshadowparticles();
+extern bool hasshadowparticles(bool cullside = true);
 extern void renderparticles(int layer = PL_ALL);
 extern bool printparticles(extentity &e, char *buf, int len);
 extern void cleanupparticles();

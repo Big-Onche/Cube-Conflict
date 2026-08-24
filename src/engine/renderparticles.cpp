@@ -6,7 +6,14 @@
 Shader *particleshader = NULL, *particlenotextureshader = NULL, *particlesoftshader = NULL, *particletextshader = NULL,
        *particleHazeShader = NULL, *gpuparticleshader = NULL, *gpuparticlesoftshader = NULL, *gpuparticleshadowshader = NULL,
        *gpuparticlelightrectshader = NULL, *gpuparticlelight2dshader = NULL,
-       *gpuparticlesoftlightrectshader = NULL, *gpuparticlesoftlight2dshader = NULL;
+       *gpuparticlesoftlightrectshader = NULL, *gpuparticlesoftlight2dshader = NULL, *particlelightupsampleshader = NULL;
+
+enum { PARTICLE_LOWRES_NONE = 0, PARTICLE_LOWRES_OVER, PARTICLE_LOWRES_ADD };
+
+static int particlelightbufferw = -1, particlelightbufferh = -1, particlelowresmode = PARTICLE_LOWRES_NONE;
+static GLuint particlelightfbo = 0, particlelighttex = 0;
+
+static void cleanupparticlelightbuffer();
 
 static inline void refreshparticlelighting()
 {
@@ -25,6 +32,8 @@ VARP(softparticlemaxdist, 64, 768, 2048);
 
 VARFP(particlelighting, 0, 1, 1, refreshparticlelighting());
 VARP(particlelightingdynlights, 0, 1, 1);
+FVARFP(particlelightscale, 0.125f, 0.5f, 1.0f, cleanupparticlelightbuffer());
+FVARP(particlelightupscaleedge, 0.001f, 0.05f, 1.0f);
 VARP(particlelightingshadowmapblur, 1, 3, 16);
 VARP(particletransmittance, 0, 1, 1);
 FVAR(particletransmittanceextinction, 0.0f, 0.75f, 8.0f);
@@ -71,6 +80,41 @@ struct particlelightuploadcache
     }
 };
 static particlelightuploadcache particlelightcache;
+
+static void cleanupparticlelightbuffer()
+{
+    if(particlelightfbo) { glDeleteFramebuffers_(1, &particlelightfbo); particlelightfbo = 0; }
+    if(particlelighttex) { glDeleteTextures(1, &particlelighttex); particlelighttex = 0; }
+    particlelightbufferw = particlelightbufferh = -1;
+}
+
+static bool setupparticlelightbuffer()
+{
+    if(vieww <= 0 || viewh <= 0 || particlelightscale >= 1.0f) return false;
+
+    int targetw = max(int(ceilf(vieww*particlelightscale)), 1), targeth = max(int(ceilf(viewh*particlelightscale)), 1);
+    if(particlelightfbo && particlelighttex && particlelightbufferw == targetw && particlelightbufferh == targeth) return true;
+
+    GLint oldfbo = 0;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &oldfbo);
+    cleanupparticlelightbuffer();
+
+    particlelightbufferw = targetw;
+    particlelightbufferh = targeth;
+    glGenTextures(1, &particlelighttex);
+    glGenFramebuffers_(1, &particlelightfbo);
+    createtexture(particlelighttex, particlelightbufferw, particlelightbufferh, NULL, 3, 0,
+                  hasAFBO && hasTF ? GL_RGBA16F : GL_RGBA8, GL_TEXTURE_RECTANGLE);
+    glBindFramebuffer_(GL_FRAMEBUFFER, particlelightfbo);
+    glFramebufferTexture2D_(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, particlelighttex, 0);
+    bool complete = glCheckFramebufferStatus_(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
+    glBindFramebuffer_(GL_FRAMEBUFFER, GLuint(oldfbo));
+    if(complete) return true;
+
+    conoutf(CON_ERROR, "failed allocating scaled particle lighting buffer; using full resolution");
+    cleanupparticlelightbuffer();
+    return false;
+}
 
 static inline void resetparticlelightcache()
 {
@@ -455,7 +499,7 @@ struct partrenderer
     virtual void update() { }
     virtual void render() = 0;
     virtual bool rendershadow() { return false; }
-    virtual bool hasshadow() { return false; }
+    virtual bool hasshadow(bool cullside = true) { return false; }
     virtual bool haswork() = 0;
     virtual bool usegpuparticles() const { return false; }
     virtual int count() = 0; //for debug
@@ -965,18 +1009,19 @@ struct varenderer : partrenderer
     int maxparts, numparts, lastupdate, rndmask;
     GLuint vbo;
     gpuparticlestate *gpuinstances;
-    GLuint gpuquadvbo, gpuinstancevbo, gpulightinstancevbo;
+    GLuint gpuquadvbo, gpuinstancevbo, gpulightinstancevbo, gpushadowinstancevbo;
     int gpudirtymin, gpudirtymax, gpunext, gpulastmillis;
     vector<vbodraw> vbodraws;
     vector<gpuparticlelightentry> gpulightentries;
     vector<gpuparticlestate> gpulightinstances;
     vector<gpuparticlelightdraw> gpulightdraws;
+    vector<gpuparticlestate> gpushadowinstances;
 
     varenderer(const char *texname, int type, int stain = -1)
         : partrenderer(texname, 3, type, stain),
           verts(NULL), parts(NULL), maxparts(0), numparts(0), lastupdate(-1), rndmask(0), vbo(0),
-          gpuinstances(NULL), gpuquadvbo(0), gpuinstancevbo(0), gpulightinstancevbo(0), gpudirtymin(0), gpudirtymax(-1), gpunext(0),
-          gpulastmillis(0)
+          gpuinstances(NULL), gpuquadvbo(0), gpuinstancevbo(0), gpulightinstancevbo(0), gpushadowinstancevbo(0), gpudirtymin(0),
+          gpudirtymax(-1), gpunext(0), gpulastmillis(0)
     {
         if(type & PT_HFLIP) rndmask |= 0x01;
         if(type & PT_VFLIP) rndmask |= 0x02;
@@ -990,10 +1035,12 @@ struct varenderer : partrenderer
         if(gpuquadvbo) { glDeleteBuffers_(1, &gpuquadvbo); gpuquadvbo = 0; }
         if(gpuinstancevbo) { glDeleteBuffers_(1, &gpuinstancevbo); gpuinstancevbo = 0; }
         if(gpulightinstancevbo) { glDeleteBuffers_(1, &gpulightinstancevbo); gpulightinstancevbo = 0; }
+        if(gpushadowinstancevbo) { glDeleteBuffers_(1, &gpushadowinstancevbo); gpushadowinstancevbo = 0; }
         vbodraws.setsize(0);
         gpulightentries.setsize(0);
         gpulightinstances.setsize(0);
         gpulightdraws.setsize(0);
+        gpushadowinstances.setsize(0);
     }
 
     void init(int n)
@@ -1015,6 +1062,7 @@ struct varenderer : partrenderer
         gpulightentries.setsize(0);
         gpulightinstances.setsize(0);
         gpulightdraws.setsize(0);
+        gpushadowinstances.setsize(0);
     }
 
     void reset()
@@ -1029,6 +1077,7 @@ struct varenderer : partrenderer
         gpulightentries.setsize(0);
         gpulightinstances.setsize(0);
         gpulightdraws.setsize(0);
+        gpushadowinstances.setsize(0);
     }
 
     void resettracked(physent *owner)
@@ -1187,11 +1236,6 @@ struct varenderer : partrenderer
         else genpos<T>(o, d, p->size, ts, p->gravity, vs);
     }
 
-    bool hasshadow()
-    {
-        return usegpuparticles() && haswork() && particleshadow && particleshadowmapping() && particleshadowalpha > 0;
-    }
-
     void genverts()
     {
         loopi(numparts)
@@ -1289,6 +1333,56 @@ struct varenderer : partrenderer
 
         size = max(state.originsize.w + state.lifeflags.z*float(game::gamespeed)*motionage/100000.0f, 0.0f);
         return size > 0.0f;
+    }
+
+    bool gpuparticleshadowintersects(const gpuparticlestate &state, bool cullside) const
+    {
+        if(!state.color.a) return false;
+
+        vec o;
+        float size;
+        if(!getgpuparticlelightbounds(state, o, size)) return false;
+
+        float radius = size*SQRT2;
+        switch(shadowmapping)
+        {
+            case SM_CASCADE:
+                return !cullside || (calcspherecsmsplits(o, radius)&(1<<shadowside)) != 0;
+
+            case SM_SPOT:
+            {
+                vec scenter = vec(o).sub(shadoworigin);
+                float reach = radius + shadowradius;
+                return scenter.squaredlen() < reach*reach && (!cullside || sphereinsidespot(shadowdir, shadowspot, scenter, radius));
+            }
+
+            case SM_CUBEMAP:
+            {
+                vec scenter = vec(o).sub(shadoworigin);
+                float reach = radius + shadowradius;
+                return scenter.squaredlen() < reach*reach && (!cullside || (calcspheresidemask(scenter, radius, shadowbias)&(1<<shadowside)) != 0);
+            }
+        }
+        return false;
+    }
+
+    bool hasshadow(bool cullside = true)
+    {
+        if(!usegpuparticles() || !haswork() || !particleshadow || !particleshadowmapping() || particleshadowalpha <= 0) return false;
+        loopi(numparts) if(gpuparticleshadowintersects(gpuinstances[i], cullside)) return true;
+        return false;
+    }
+
+    void uploadgpushadowparticles()
+    {
+        gpushadowinstances.setsize(0);
+        loopi(numparts) if(gpuparticleshadowintersects(gpuinstances[i], true)) gpushadowinstances.add(gpuinstances[i]);
+        if(gpushadowinstances.empty()) return;
+
+        if(!gpushadowinstancevbo) glGenBuffers_(1, &gpushadowinstancevbo);
+        gle::bindvbo(gpushadowinstancevbo);
+        glBufferData_(GL_ARRAY_BUFFER, gpushadowinstances.length()*sizeof(gpuparticlestate), gpushadowinstances.getbuf(), GL_STREAM_DRAW);
+        gle::clearvbo();
     }
 
     void uploadgpuparticlelightdraws()
@@ -1397,6 +1491,9 @@ struct varenderer : partrenderer
     {
         LOCALPARAMF(gpuparticleparams, float(lastmillis), float(game::gamespeed), float(softparticlemaxdist), 0);
         LOCALPARAMF(gpuparticleoptions, type&PT_RND4 ? 1 : 0, type&PT_ROT ? 1 : 0, type&PT_MOD ? 1 : 0, 0);
+        LOCALPARAMF(particledepthscale, particlelowresmode ? float(vieww)/particlelightbufferw : 1.0f,
+                    particlelowresmode ? float(viewh)/particlelightbufferh : 1.0f);
+        LOCALPARAMF(particlelowresmode, float(particlelowresmode));
         LOCALPARAM(particlebillboardright, camright);
         LOCALPARAM(particlebillboardup, camup);
         LOCALPARAM(particlebillboarddir, camdir);
@@ -1506,6 +1603,8 @@ struct varenderer : partrenderer
         if(!usegpuparticles() || !tex || !particleshadowmapping() || particleshadowalpha <= 0 || !numparts) return false;
 
         uploadgpuparticles();
+        uploadgpushadowparticles();
+        if(gpushadowinstances.empty()) return false;
         gpuparticleshadowshader->set();
         bindgpuparticleparams();
         LOCALPARAMF(colorscale, 1, 1, 1, 1);
@@ -1514,8 +1613,8 @@ struct varenderer : partrenderer
         LOCALPARAM(gpuparticleshadowdir, shadowdir);
         LOCALPARAMF(particleshadowparams, particleshadowalpha, particletransmittanceextinction, particletransmittance ? 1 : 0, 0);
         glBindTexture(GL_TEXTURE_2D, tex->id);
-        setupgpuparticleattribs();
-        glDrawArraysInstanced_(GL_TRIANGLE_STRIP, 0, 4, numparts);
+        setupgpuparticleattribs(gpushadowinstancevbo);
+        glDrawArraysInstanced_(GL_TRIANGLE_STRIP, 0, 4, gpushadowinstances.length());
         cleanupgpuparticleattribs();
         return true;
     }
@@ -1672,12 +1771,12 @@ struct particleshadowbatcher
 {
     void cleanup() {}
 
-    bool prepare()
+    bool prepare(bool cullside)
     {
         loopi(sizeof(parts)/sizeof(parts[0]))
         {
             partrenderer *p = parts[i];
-            if(p->hasshadow()) return true;
+            if(p->hasshadow(cullside)) return true;
         }
         return false;
     }
@@ -1688,7 +1787,7 @@ struct particleshadowbatcher
         loopi(sizeof(parts)/sizeof(parts[0]))
         {
             partrenderer *p = parts[i];
-            if(p->hasshadow()) rendered |= p->rendershadow();
+            if(p->hasshadow(true)) rendered |= p->rendershadow();
         }
         return rendered;
     }
@@ -1712,6 +1811,7 @@ void initparticles()
     if(!gpuparticlelight2dshader) gpuparticlelight2dshader = useshaderbyname("gpuparticlelight2d");
     if(!gpuparticlesoftlightrectshader) gpuparticlesoftlightrectshader = useshaderbyname("gpuparticlesoftlightrect");
     if(!gpuparticlesoftlight2dshader) gpuparticlesoftlight2dshader = useshaderbyname("gpuparticlesoftlight2d");
+    if(!particlelightupsampleshader) particlelightupsampleshader = useshaderbyname("particlelightupsample");
     if(!particletextshader) particletextshader = lookupshaderbyname("particletext");
     if(!particleHazeShader) particleHazeShader = lookupshaderbyname("particleHaze");
     if(!particlerenderorderbuilt) buildparticlerenderorder();
@@ -1729,6 +1829,7 @@ void clearparticles()
 
 void cleanupparticles()
 {
+    cleanupparticlelightbuffer();
     particleshadowbatches.cleanup();
     loopi(sizeof(parts)/sizeof(parts[0])) parts[i]->cleanup();
 }
@@ -1841,7 +1942,7 @@ static inline const char *particledebugrendername(int layer)
     }
 }
 
-static void drawparticledebugtexture(const char *label, GLuint tex, bool msaa, int x, int y, int w, int h)
+static void drawparticledebugtexture(const char *label, GLuint tex, bool msaa, int x, int y, int w, int h, int texw = 0, int texh = 0)
 {
     if(!tex) return;
 
@@ -1859,7 +1960,7 @@ static void drawparticledebugtexture(const char *label, GLuint tex, bool msaa, i
         SETSHADER(hudrect);
         glBindTexture(GL_TEXTURE_RECTANGLE, tex);
     }
-    debugquad(x, y, w, h, 0, 0, gw, gh);
+    debugquad(x, y, w, h, 0, 0, texw > 0 ? texw : gw, texh > 0 ? texh : gh);
     draw_text(label, x, y + h + FONTH/4);
 }
 
@@ -1871,6 +1972,9 @@ static void drawparticledebugfbos()
     drawparticledebugtexture(msaalight ? "particle scene FBO (MSAA)" : "particle scene FBO", msaalight ? mshdrtex : hdrtex, msaalight != 0, x, y, w, h);
     y += h + FONTH*3/2;
     drawparticledebugtexture(msaalight ? "particle refract FBO (MSAA)" : "particle refract FBO", msaalight ? msrefracttex : refracttex, msaalight != 0, x, y, w, h);
+    y += h + FONTH*3/2;
+    drawparticledebugtexture("scaled particle lighting FBO", particlelighttex, false, x, y, w, h,
+                             particlelightbufferw, particlelightbufferh);
 }
 
 static void drawparticledebugtimings()
@@ -1932,33 +2036,29 @@ bool rendershadowparticles()
     return rendered;
 }
 
-bool hasshadowparticles()
+bool hasshadowparticles(bool cullside)
 {
     particledebugscope debugscope("particle shadow prepare");
     if(!useparticleshadows() || !particleshadowmapping() || particleshadowalpha <= 0) return false;
-    return particleshadowbatches.prepare();
+    return particleshadowbatches.prepare(cullside);
 }
 
-void renderparticles(int layer)
+static int getparticlelowresmode(const partrenderer *p)
 {
-    particledebugscope debugscope(particledebugrendername(layer));
-    currentparticlelayer = layer;
-    canstep = layer != PL_UNDER;
-    resetparticlelightcache();
-    heatHaze::invalidateSceneTexture();
-    if(!particlerenderorderbuilt) buildparticlerenderorder();
+    // The scaled target has no hardware depth attachment, so only shaders that perform the soft-particle depth test are eligible.
+    if(!p->usegpuparticles() || !(p->type&PT_LABSORPTION) || !(p->type&PT_SOFT) || (p->type&PT_MOD) ||
+       !useparticlelighting(p->type)) return PARTICLE_LOWRES_NONE;
+    return p->type&PT_LERP ? PARTICLE_LOWRES_OVER : PARTICLE_LOWRES_ADD;
+}
 
-    //want to debug BEFORE the lastpass render (that would delete particles)
-    if(dbgparts && (layer == PL_ALL || layer == PL_UNDER)) loopi(sizeof(parts)/sizeof(parts[0])) parts[i]->debuginfo();
-
+static bool renderparticlepass(int start, int end, uint excludemask, int lowresblend)
+{
     bool rendered = false;
-    bool hasgpuparticlework = false;
-    loopi(numpartrenderers) if(parts[i]->usegpuparticles() && parts[i]->haswork()) { hasgpuparticlework = true; break; }
-    timer *gpuparticletimer = hasgpuparticlework ? begintimer("GPU particles render") : NULL;
-    uint lastflags = PT_LERP|PT_SHADER,
-         excludemask = layer == PL_ALL ? ~0 : (layer != PL_NOLAYER ? PT_NOLAYER : 0);
+    uint lastflags = PT_LERP|PT_SHADER;
+    particlelowresmode = lowresblend;
+    resetparticlelightcache();
 
-    loopi(numpartrenderers)
+    for(int i = start; i < end; ++i)
     {
         partrenderer *p = parts[particlerenderorder[i]];
         if((p->type&PT_NOLAYER) == excludemask || !p->haswork()) continue;
@@ -1968,7 +2068,9 @@ void renderparticles(int layer)
             rendered = true;
             glDepthMask(GL_FALSE);
             glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            if(lowresblend == PARTICLE_LOWRES_OVER) glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+            else if(lowresblend == PARTICLE_LOWRES_ADD) glBlendFunc(GL_ONE, GL_ONE);
+            else glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
             glActiveTexture_(GL_TEXTURE2);
             if(msaalight) glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msdepthtex);
@@ -1980,7 +2082,7 @@ void renderparticles(int layer)
         if(changedbits)
         {
             if(changedbits&PT_LERP) { if(flags&PT_LERP) resetfogcolor(); else zerofogcolor(); }
-            if(changedbits&(PT_LERP|PT_MOD))
+            if(!lowresblend && changedbits&(PT_LERP|PT_MOD))
             {
                 if(flags&PT_LERP) glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 else if(flags&PT_MOD) glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
@@ -2013,10 +2115,104 @@ void renderparticles(int layer)
 
     if(rendered)
     {
-        if(lastflags&(PT_LERP|PT_MOD)) glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        if(!lowresblend && lastflags&(PT_LERP|PT_MOD)) glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         if(!(lastflags&PT_LERP)) resetfogcolor();
         glDisable(GL_BLEND);
         glDepthMask(GL_TRUE);
+    }
+
+    particlelowresmode = PARTICLE_LOWRES_NONE;
+    return rendered;
+}
+
+static void renderparticlelowrespass(int start, int end, uint excludemask, int lowresblend)
+{
+    GLint mainfbo = 0, mainviewport[4];
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &mainfbo);
+    glGetIntegerv(GL_VIEWPORT, mainviewport);
+    bool depthtest = glIsEnabled(GL_DEPTH_TEST) != 0,
+         stenciltest = glIsEnabled(GL_STENCIL_TEST) != 0,
+         scissortest = glIsEnabled(GL_SCISSOR_TEST) != 0;
+
+    if(depthtest) glDisable(GL_DEPTH_TEST);
+    if(stenciltest) glDisable(GL_STENCIL_TEST);
+    if(scissortest) glDisable(GL_SCISSOR_TEST);
+
+    glBindFramebuffer_(GL_FRAMEBUFFER, particlelightfbo);
+    glViewport(0, 0, particlelightbufferw, particlelightbufferh);
+    glClearColor(0, 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    bool rendered = renderparticlepass(start, end, excludemask, lowresblend);
+
+    glBindFramebuffer_(GL_FRAMEBUFFER, GLuint(mainfbo));
+    glViewport(mainviewport[0], mainviewport[1], mainviewport[2], mainviewport[3]);
+    if(stenciltest) glEnable(GL_STENCIL_TEST);
+    if(scissortest) glEnable(GL_SCISSOR_TEST);
+
+    if(rendered)
+    {
+        glDepthMask(GL_FALSE);
+        glEnable(GL_BLEND);
+        if(lowresblend == PARTICLE_LOWRES_ADD) glBlendFunc(GL_ONE, GL_ONE);
+        else glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+        glActiveTexture_(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_RECTANGLE, particlelighttex);
+        glActiveTexture_(GL_TEXTURE1);
+        if(msaalight) glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msdepthtex);
+        else glBindTexture(GL_TEXTURE_RECTANGLE, gdepthtex);
+        glActiveTexture_(GL_TEXTURE0);
+        particlelightupsampleshader->set();
+        LOCALPARAMF(particlelightscaleparams,
+                    float(vieww)/particlelightbufferw, float(viewh)/particlelightbufferh,
+                    float(particlelightbufferw)/vieww, float(particlelightbufferh)/viewh);
+        LOCALPARAMF(particlelightdepthscale, particlelightupscaleedge);
+        screenquad();
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        glDisable(GL_BLEND);
+        glDepthMask(GL_TRUE);
+    }
+
+    if(depthtest) glEnable(GL_DEPTH_TEST);
+}
+
+void renderparticles(int layer)
+{
+    particledebugscope debugscope(particledebugrendername(layer));
+    currentparticlelayer = layer;
+    canstep = layer != PL_UNDER;
+    resetparticlelightcache();
+    heatHaze::invalidateSceneTexture();
+    if(!particlerenderorderbuilt) buildparticlerenderorder();
+
+    //want to debug BEFORE the lastpass render (that would delete particles)
+    if(dbgparts && (layer == PL_ALL || layer == PL_UNDER)) loopi(sizeof(parts)/sizeof(parts[0])) parts[i]->debuginfo();
+
+    bool hasgpuparticlework = false, haslowreswork = false;
+    uint excludemask = layer == PL_ALL ? ~0 : (layer != PL_NOLAYER ? PT_NOLAYER : 0);
+    loopi(numpartrenderers)
+    {
+        partrenderer *p = parts[i];
+        if((p->type&PT_NOLAYER) == excludemask || !p->haswork()) continue;
+        if(p->usegpuparticles()) hasgpuparticlework = true;
+        if(particlelightscale < 1.0f && getparticlelowresmode(p)) haslowreswork = true;
+    }
+    bool lowres = haslowreswork && particlelightupsampleshader && setupparticlelightbuffer();
+    timer *gpuparticletimer = hasgpuparticlework ? begintimer("GPU particles render") : NULL;
+
+    for(int start = 0; start < numpartrenderers;)
+    {
+        partrenderer *p = parts[particlerenderorder[start]];
+        int lowresblend = lowres ? getparticlelowresmode(p) : PARTICLE_LOWRES_NONE, end = start + 1;
+        while(end < numpartrenderers)
+        {
+            p = parts[particlerenderorder[end]];
+            if((lowres ? getparticlelowresmode(p) : PARTICLE_LOWRES_NONE) != lowresblend) break;
+            ++end;
+        }
+
+        if(lowresblend) renderparticlelowrespass(start, end, excludemask, lowresblend);
+        else renderparticlepass(start, end, excludemask, PARTICLE_LOWRES_NONE);
+        start = end;
     }
 
     endtimer(gpuparticletimer);
