@@ -435,7 +435,7 @@ namespace game
             case ATK_ELECTRIC:
                 if(!inWater(to))
                 {
-                    if(isClose) particles::dirSplash(PART_SPARK_L, 0x4488FF, 800, 20, 125, to, bounce, 0.5f, 600, -1, hasShrooms());
+                    if(isClose) particles::dirSplash(PART_SPARK, 0x4488FF, 800, 20, 125, to, bounce, 0.5f, 600, -1, hasShrooms(), 40, L_NOSHADOW|DL_EXPAND);
                     else
                     {
                         particle_splash(PART_SPARK, 40, 125, to, 0x4488FF, 0.04f, 400, 50, 0, hasShrooms());

@@ -772,13 +772,14 @@ namespace game
                 bool hasRoids = d->hasRoids();
                 if(!local) createrays(gun, from, to, d);
                 renderMuzzleEffects(from, to, d, atk);
+
                 loopi(attacks[atk].rays)
                 {
                     vec dest = vec(rays[i]).sub(muzzleOrigin).normalize().mul(1450.0f + rnd(200));
                     if(rnd(2)) particle_flying_flare(muzzleOrigin, dest, 900, PART_HAZE_SMALL, 50, 10.f, 100, 65);
                     switch(rnd(4))
                     {
-                        case 0: particle_flying_flare(muzzleOrigin, dest, 700, PART_FIRE_BALL, hasRoids ? 0x881111 : 0x604930, 1.25f, 100, 16, hasShrooms()); break;
+                        case 0: particle_flying_flare(muzzleOrigin, dest, 700, PART_FIRE_BALL, hasRoids ? 0x881111 : 0xD06000, 1.25f, 100, 16, hasShrooms(), 10, L_NOSHADOW|DL_EXPAND); break;
                         case 1: particle_flying_flare(muzzleOrigin, dest, 700, PART_FIRE_BALL, hasRoids ? 0x770000 : 0x474747, 1.25f, 100, 16, hasShrooms()); break;
                         case 2: particle_flying_flare(muzzleOrigin, dest, 700, PART_FIRE_BALL, hasRoids ? 0x991111 : 0x383838, 1.25f, 100, 16, hasShrooms()); break;
                         default:
@@ -787,7 +788,6 @@ namespace game
                             if(rnd(2) && !isHudPlayer) soundNearmiss(S_FLYBYFLAME, from, rays[i]);
                     }
                 }
-                if(!rnd(2)) bouncers::add(muzzleOrigin, to, local, id, d, BNC_LIGHT, 650, 400);
                 if(isHudPlayer) startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay * 1.5f, vec(0, 0, 0), vec(0, 0, 0), vec((0.15f * recoilSide(300)) / recoilReduce(), 0, 0));
                 gunSound = (d->type==ENT_AI ? S_PYRO_A : S_FLAMETHROWER);
                 break;

@@ -20,8 +20,7 @@ namespace bouncers
         BOUNCERCFG("casing/big",       0.2f, 1.0f, 0,  250, S_B_BIGCASING, 120, SND_FIXEDPITCH, 1.0f),
         BOUNCERCFG("casing/cartridge", 0.2f, 1.0f, 0,  250, S_B_CARTRIDGE, 120, SND_FIXEDPITCH, 1.0f),
         BOUNCERCFG("scrap",            1.5f, 0.7f, 3,  750, S_B_SCRAP,     180, 0,              1.0f),
-        BOUNCERCFG("glass",            0.5f, 0.2f, 0,  500, -1,              0, 0,              1.0f),
-        BOUNCERCFG(NULL,               0.1f, 1.0f, 0,  500, -1,              0, 0,              1.0f)
+        BOUNCERCFG("glass",            0.5f, 0.2f, 0,  500, -1,              0, 0,              1.0f)
     };
 
 #undef BOUNCERCFG
@@ -71,8 +70,6 @@ namespace bouncers
     {
         loopi(NUMBOUNCERS)
         {
-            if(i == BNC_LIGHT) continue;
-
             int variants = variantsClamp[i];
             if(variants <= 0)
             {
@@ -205,7 +202,7 @@ namespace bouncers
     {
         bouncer *b = (bouncer *)d;
 
-        if(d->type != ENT_BOUNCE || !isValid(b->bouncetype) || b->bouncetype == BNC_LIGHT) return;
+        if(d->type != ENT_BOUNCE || !isValid(b->bouncetype)) return;
 
         const auto &cfg = bouncers[b->bouncetype];
 
@@ -232,7 +229,6 @@ namespace bouncers
             bouncer &bnc = *curBouncers[i];
             gameent *owner = ownerOf(bnc);
             bool isGrenade = (bnc.bouncetype == BNC_GRENADE);
-            bool isLight = (bnc.bouncetype == BNC_LIGHT);
             vec old(bnc.o);
 
             bool stopped = false;
@@ -247,27 +243,25 @@ namespace bouncers
                 {
                     int qtime = (step < MAXBOUNCERSUBSTEPS - 1) ? min(30, rtime) : rtime;
                     rtime -= qtime;
-                    stopped = (bnc.bounces && isLight);
+                    stopped = bnc.bounces;
                     if(bnc.bounces <= 5) bounce(&bnc, qtime / 1000.f, 0.6f, 0.5f, 1);
                     if((bnc.lifetime -= qtime) < 0) { stopped = true; break; }
                     step++;
                 }
             }
 
-            if(!isLight)
+
+            bool shouldCheckWater = ((bouncerWaterCheckFrame + i) & 3) == 0 || bnc.o.fastsquaredist(old) > WATERCHECKMOVEDSQ;
+            if(shouldCheckWater)
             {
-                bool shouldCheckWater = ((bouncerWaterCheckFrame + i) & 3) == 0 || bnc.o.fastsquaredist(old) > WATERCHECKMOVEDSQ;
-                if(shouldCheckWater)
+                bool isInWater = inWater(bnc.o);
+                if(!bnc.inwater && isInWater) // the bouncer enter in water
                 {
-                    bool isInWater = inWater(bnc.o);
-                    if(!bnc.inwater && isInWater) // the bouncer enter in water
-                    {
-                        bnc.inwater = true;
-                        particle_splash(PART_WATER, (20 * bnc.radius), 150, bnc.o, 0x28282A, (5.f * bnc.radius), (200.f * bnc.radius), -300, (10.f * bnc.radius), hasShrooms());
-                        if(bnc.radius > 0.5f) playSound(bnc.radius > 1.f ? S_SPLASH : S_IMPACTWATER, vec(bnc.o).addz(5), 250, 100, SND_LOWPRIORITY);
-                    }
-                    else if(bnc.inwater && !isInWater) bnc.inwater = false; // the bouncer bounced outside the water
+                    bnc.inwater = true;
+                    particle_splash(PART_WATER, (20 * bnc.radius), 150, bnc.o, 0x28282A, (5.f * bnc.radius), (200.f * bnc.radius), -300, (10.f * bnc.radius), hasShrooms());
+                    if(bnc.radius > 0.5f) playSound(bnc.radius > 1.f ? S_SPLASH : S_IMPACTWATER, vec(bnc.o).addz(5), 250, 100, SND_LOWPRIORITY);
                 }
+                else if(bnc.inwater && !isInWater) bnc.inwater = false; // the bouncer bounced outside the water
             }
 
             if(stopped || (bnc.bouncetype == BNC_MOLOTOV && bnc.bounces))
@@ -453,9 +447,6 @@ namespace bouncers
                     if(emitPart) particle_splash(PART_FIRE_BALL, 2, 175, bnc.o, flamesColor, 1.f, 20, 0, 4, shrooms);
                     break;
                 }
-                case BNC_LIGHT:
-                    if(emitPart) adddynlight(pos, 115, vec(0.25f, 0.12f, 0.0f), 0, 0, L_VOLUMETRIC|L_NOSHADOW|L_NOSPEC);
-                    break;
             }
         }
     }

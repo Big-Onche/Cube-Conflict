@@ -346,7 +346,7 @@ enum
     // explosions
     PART_SHOCKWAVE, PART_PLASMABURST, PART_PLASMAGRENADE, PART_EXPLOSION,
     // misc
-    PART_BLOOD, PART_GLARE, PART_SPARK, PART_SPARK_L, PART_SPARK_VL, PART_SPARK_P,
+    PART_BLOOD, PART_GLARE, PART_SPARK, PART_SPARK_P,
     // haze
     PART_HAZE_SMALL, PART_HAZE_BIG, PART_HAZE_MUZZLE,
     // text
@@ -365,8 +365,9 @@ enum
 };
 
 extern bool canemitparticles();
-extern void particle_flying_flare(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity = 0, int sizemod = 0, bool randomcolor = false);
-extern void particle_splash(int type, int num, int fade, const vec &p, int color = 0xFFFFFF, float size = 1.0f, int radius = 150, int gravity = 2, int sizemod = 0, bool randomcolor = false, bool sound = false);
+extern void particle_flying_flare(const vec &o, const vec &d, int fade, int type, int color, float size, int gravity = 0, int sizemod = 0,
+                                  bool randomcolor = false, float light = 0, int lightflags = 0);
+extern void particle_splash(int type, int num, int fade, const vec &p, int color = 0xFFFFFF, float size = 1.0f, int radius = 150, int gravity = 2, int sizemod = 0, bool randomcolor = false, bool sound = false, float light = 0, int lightflags = 0);
 extern void particle_hud_splash(int type, int num, int fade, const vec &p, int color, float size, int radius, int gravity, int sizemod, bool randomcolor, physent *owner, int track);
 extern void particle_flare(const vec &p, const vec &dest, int fade, int type, int color = 0xFFFFFF, float size = 0.28f, physent *owner = NULL, bool randomcolor = false, int sizemod = 0);
 extern void particle_fireball(const vec &dest, float max, int type, int fade = -1, int color = 0xFFFFFF, float size = 4.0f, bool randomcolor = false);
@@ -377,7 +378,7 @@ extern void regularshape(int type, int radius, int color, int dir, int num, int 
 namespace particles
 {
     extern uint32_t getRandomColor();
-    extern void dirSplash(int type, int color, int radius, int num, int fade, const vec &p, const vec &dir, float size, int speed, int sizemod = 0, bool randomColor = false);
+    extern void dirSplash(int type, int color, int radius, int num, int fade, const vec &p, const vec &dir, float size, int speed, int sizemod = 0,bool randomColor = false, float light = 0, int lightflags = 0);
     extern void hudDirSplash(int type, int color, int radius, int num, int fade, const vec &p, const vec &dir, float size, int speed, physent *owner, int sizemod = 0, bool randomColor = false);
     extern void trail(int type, int fade, const vec &from, const vec &to, int color = 0xFFFFFF, float size = 1.0f, int gravity = 20);
     extern void meter(const vec &s, float val, int type, int fade = 1, int color = 0xFFFFFF, int color2 = 0xFFFFF, float size = 2.0f, bool hud = false);
