@@ -3044,6 +3044,7 @@ static inline void setlightglobals(bool transparent = false)
 }
 
 enum { MAXPARTICLELIGHTS = 4 };
+VARP(particlelightmaxlights, 1, 2, MAXPARTICLELIGHTS);
 
 static vec4 particlelightposv[MAXPARTICLELIGHTS], particlelightcolorv[MAXPARTICLELIGHTS], particlelightspotv[MAXPARTICLELIGHTS], particlelightshadowv[MAXPARTICLELIGHTS];
 static vec2 particlelightoffsetv[MAXPARTICLELIGHTS];
@@ -3268,7 +3269,7 @@ static inline void resetparticlelightselection(particlelightselection &selection
 
 static inline void uploadparticlelightselection(const particlelightselection &selection)
 {
-    LOCALPARAMI(particlelightcount, selection.count);
+    LOCALPARAMI(particlelightcount, min(selection.count, particlelightmaxlights));
     LOCALPARAMV(particlelightpos, selection.posv, MAXPARTICLELIGHTS);
     LOCALPARAMV(particlelightcolor, selection.colorv, MAXPARTICLELIGHTS);
     LOCALPARAMV(particlelightspot, selection.spotv, MAXPARTICLELIGHTS);
@@ -3276,17 +3277,38 @@ static inline void uploadparticlelightselection(const particlelightselection &se
     LOCALPARAMV(particlelightoffset, selection.offsetv, MAXPARTICLELIGHTS);
 }
 
-static inline float particlelightscore(const vec &center, const vec &bbmin, const vec &bbmax, const vec &lightpos, float lightradius)
+static inline float particlelightattenuation(const vec &sample, const particlelightsource &src)
 {
-    float invradius = 1.0f/max(lightradius, 1.0f);
-    float boxdist = lightpos.dist_to_bb(bbmin, bbmax) * invradius;
-    float bestprobedist = center.dist(lightpos) * invradius;
+    vec lighttosample = vec(sample).sub(src.o);
+    float dist = lighttosample.magnitude();
+    if(dist >= src.radius) return 0.0f;
+
+    float attenuation = 1.0f - dist/src.radius;
+    if(src.spot > 0 && dist > 1.0e-4f)
+    {
+        float spotattenuation = 1.0f - (1.0f - lighttosample.dot(src.dir)/dist) / (1.0f - cos360(src.spot));
+        attenuation *= max(spotattenuation, 0.0f);
+    }
+    return attenuation;
+}
+
+static inline float particlelightcontribution(const vec &center, const vec &bbmin, const vec &bbmax, const particlelightsource &src,
+                                              float lightintensity)
+{
+    vec nearest(clamp(src.o.x, bbmin.x, bbmax.x), clamp(src.o.y, bbmin.y, bbmax.y), clamp(src.o.z, bbmin.z, bbmax.z));
+    float peakattenuation = particlelightattenuation(nearest, src);
+    float sampledattenuation = 2.0f*particlelightattenuation(center, src), sampleweight = 2.0f;
     loopi(8)
     {
         vec corner(i&1 ? bbmax.x : bbmin.x, i&2 ? bbmax.y : bbmin.y, i&4 ? bbmax.z : bbmin.z);
-        bestprobedist = min(bestprobedist, corner.dist(lightpos) * invradius);
+        float attenuation = particlelightattenuation(corner, src);
+        sampledattenuation += attenuation;
+        sampleweight += 1.0f;
+        peakattenuation = max(peakattenuation, attenuation);
     }
-    return boxdist*4.0f + bestprobedist;
+    // Average attenuation estimates overlap with the cell bounds; the peak term preserves smaller, intense local contributions.
+    float averageattenuation = sampledattenuation/sampleweight;
+    return lightintensity * (0.75f*averageattenuation + 0.25f*peakattenuation);
 }
 
 static inline void insertparticlelightcandidate(const vec &center, const vec &bbmin, const vec &bbmax, const particlelightsource &src, float *scores, particlelightselection &selection)
@@ -3303,9 +3325,10 @@ static inline void insertparticlelightcandidate(const vec &center, const vec &bb
     if(lightluma <= 1.0e-4f) return;
     vec chroma = vec(scaledcolor).div(lightluma).max(0.0f).min(3.0f);
 
-    float score = particlelightscore(center, bbmin, bbmax, lightpos, lightradius);
+    float contribution = particlelightcontribution(center, bbmin, bbmax, src, lightluma);
+    if(contribution <= 1.0e-4f) return;
     int insert = -1;
-    loopj(MAXPARTICLELIGHTS) if(score < scores[j]) { insert = j; break; }
+    loopj(MAXPARTICLELIGHTS) if(contribution > scores[j]) { insert = j; break; }
     if(insert < 0) return;
 
     for(int j = MAXPARTICLELIGHTS-1; j > insert; --j)
@@ -3318,7 +3341,7 @@ static inline void insertparticlelightcandidate(const vec &center, const vec &bb
         selection.offsetv[j] = selection.offsetv[j-1];
     }
 
-    scores[insert] = score;
+    scores[insert] = contribution;
     selection.posv[insert] = vec4(lightpos, 1).div(lightradius);
     selection.colorv[insert] = vec4(chroma, lightluma);
     selection.spotv[insert] = src.spot > 0 ? vec4(vec(src.dir).neg(), 1/(1 - cos360(src.spot))) : vec4(0, 0, 0, 0);
@@ -3334,7 +3357,7 @@ static const particlelightselection &collectparticlelights(ullong lightkey, cons
     particlelightselection &selection = particlelightcellcache[lightkey];
     resetparticlelightselection(selection);
     float scores[MAXPARTICLELIGHTS];
-    loopi(MAXPARTICLELIGHTS) scores[i] = 1e16f;
+    loopi(MAXPARTICLELIGHTS) scores[i] = -1.0f;
 
     loopv(particlelightsources) insertparticlelightcandidate(center, bbmin, bbmax, particlelightsources[i], scores, selection);
 
