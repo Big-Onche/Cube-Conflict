@@ -13,8 +13,42 @@ enum { PARTICLE_LOWRES_NONE = 0, PARTICLE_LOWRES_OVER, PARTICLE_LOWRES_ADD };
 static int particlelightbufferw = -1, particlelightbufferh = -1, particlelowresmode = PARTICLE_LOWRES_NONE;
 static GLuint particlelightfbo = 0, particlelighttex = 0;
 static uint particleshadowversion = 0;
+static float particlelowressx1 = 1, particlelowressy1 = 1, particlelowressx2 = -1, particlelowressy2 = -1;
+static bool particlelowresscissor = false;
 
 static void cleanupparticlelightbuffer();
+
+static inline void resetparticlelowresbounds()
+{
+    particlelowressx1 = particlelowressy1 = 1;
+    particlelowressx2 = particlelowressy2 = -1;
+    particlelowresscissor = false;
+}
+
+static inline void addparticlelowresbounds(const vec &center, float radius)
+{
+    float sx1, sy1, sx2, sy2, sz1, sz2;
+    if(!calcspherescissor(center, radius, sx1, sy1, sx2, sy2, sz1, sz2)) return;
+    particlelowressx1 = min(particlelowressx1, sx1);
+    particlelowressy1 = min(particlelowressy1, sy1);
+    particlelowressx2 = max(particlelowressx2, sx2);
+    particlelowressy2 = max(particlelowressy2, sy2);
+}
+
+static bool getparticlelowresscissor(int x, int y, int w, int h, int pad, int &sx, int &sy, int &sw, int &sh)
+{
+    if(particlelowressx1 >= particlelowressx2 || particlelowressy1 >= particlelowressy2) return false;
+    int sx1 = clamp(x + int(floorf((particlelowressx1*0.5f + 0.5f)*w)) - pad, x, x + w),
+        sy1 = clamp(y + int(floorf((particlelowressy1*0.5f + 0.5f)*h)) - pad, y, y + h),
+        sx2 = clamp(x + int(ceilf((particlelowressx2*0.5f + 0.5f)*w)) + pad, x, x + w),
+        sy2 = clamp(y + int(ceilf((particlelowressy2*0.5f + 0.5f)*h)) + pad, y, y + h);
+    if(sx1 >= sx2 || sy1 >= sy2) return false;
+    sx = sx1;
+    sy = sy1;
+    sw = sx2 - sx1;
+    sh = sy2 - sy1;
+    return true;
+}
 
 static inline void refreshparticlelighting()
 {
@@ -419,7 +453,7 @@ struct gpuparticlelightdraw
     ullong key;
     int offset, count;
     vec center, bbmin, bbmax;
-    float radius, depth;
+    float radius, depth, maxsize;
 };
 
 static inline bool isHaze(int type)
@@ -1647,6 +1681,7 @@ struct varenderer : partrenderer
                 draw.bbmin = vec(1e16f, 1e16f, 1e16f);
                 draw.bbmax = vec(-1e16f, -1e16f, -1e16f);
                 draw.depth = 0.0f;
+                draw.maxsize = 0.0f;
                 for(int i = start; i < end; ++i)
                 {
                     const gpuparticlelightentry &entry = gpulightentries[i];
@@ -1657,6 +1692,7 @@ struct varenderer : partrenderer
                     draw.bbmax.y = max(draw.bbmax.y, entry.o.y + entry.size);
                     draw.bbmax.z = max(draw.bbmax.z, entry.o.z + entry.size);
                     draw.depth = max(draw.depth, entry.depth);
+                    draw.maxsize = max(draw.maxsize, entry.size);
                 }
                 draw.center = vec(draw.bbmin).add(draw.bbmax).mul(0.5f);
                 draw.radius = max(draw.bbmin.dist(draw.bbmax)*0.5f, 1.0f);
@@ -1753,6 +1789,27 @@ struct varenderer : partrenderer
         Shader *shader = uselighting ? getgpuparticlelightshader(usesoftshader) :
                          (usesoftshader ? gpuparticlesoftshader : gpuparticleshader);
         if(!shader) return;
+        if(particlelowresmode && !gpulightdraws.empty())
+        {
+            vec bbmin = gpulightdraws[0].bbmin, bbmax = gpulightdraws[0].bbmax;
+            float maxsize = gpulightdraws[0].maxsize;
+            for(int i = 1; i < gpulightdraws.length(); ++i)
+            {
+                const gpuparticlelightdraw &draw = gpulightdraws[i];
+                bbmin.min(draw.bbmin);
+                bbmax.max(draw.bbmax);
+                maxsize = max(maxsize, draw.maxsize);
+            }
+            vec center = vec(bbmin).add(bbmax).mul(0.5f);
+            addparticlelowresbounds(center, bbmin.dist(bbmax)*0.5f + SQRT2*maxsize);
+            int sx, sy, sw, sh;
+            if(getparticlelowresscissor(0, 0, particlelightbufferw, particlelightbufferh, 1, sx, sy, sw, sh))
+            {
+                if(!particlelowresscissor) glEnable(GL_SCISSOR_TEST);
+                glScissor(sx, sy, sw, sh);
+                particlelowresscissor = true;
+            }
+        }
         shader->set();
         bindgpuparticleparams();
         if(usesoftshader) LOCALPARAMF(softparams, -1.0f/softparticleblend, 0, 0);
@@ -2408,30 +2465,48 @@ static bool renderparticlepass(int start, int end, uint excludemask, int lowresb
 
 static void renderparticlelowrespass(int start, int end, uint excludemask, int lowresblend)
 {
-    GLint mainfbo = 0, mainviewport[4];
+    GLint mainfbo = 0, mainviewport[4], mainscissor[4] = { 0, 0, 0, 0 };
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &mainfbo);
     glGetIntegerv(GL_VIEWPORT, mainviewport);
     bool depthtest = glIsEnabled(GL_DEPTH_TEST) != 0,
          stenciltest = glIsEnabled(GL_STENCIL_TEST) != 0,
          scissortest = glIsEnabled(GL_SCISSOR_TEST) != 0;
+    if(scissortest) glGetIntegerv(GL_SCISSOR_BOX, mainscissor);
 
     if(depthtest) glDisable(GL_DEPTH_TEST);
     if(stenciltest) glDisable(GL_STENCIL_TEST);
     if(scissortest) glDisable(GL_SCISSOR_TEST);
 
+    resetparticlelowresbounds();
     glBindFramebuffer_(GL_FRAMEBUFFER, particlelightfbo);
     glViewport(0, 0, particlelightbufferw, particlelightbufferh);
     glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT);
     bool rendered = renderparticlepass(start, end, excludemask, lowresblend);
+    if(particlelowresscissor) glDisable(GL_SCISSOR_TEST);
 
     glBindFramebuffer_(GL_FRAMEBUFFER, GLuint(mainfbo));
     glViewport(mainviewport[0], mainviewport[1], mainviewport[2], mainviewport[3]);
     if(stenciltest) glEnable(GL_STENCIL_TEST);
-    if(scissortest) glEnable(GL_SCISSOR_TEST);
 
-    if(rendered)
+    int sx, sy, sw, sh;
+    int pad = max(int(ceilf(max(float(vieww)/particlelightbufferw, float(viewh)/particlelightbufferh))), 1) + 1;
+    bool upscale = rendered && getparticlelowresscissor(mainviewport[0], mainviewport[1], mainviewport[2], mainviewport[3],
+                                                        pad, sx, sy, sw, sh);
+    if(upscale && scissortest)
     {
+        int sx2 = min(sx + sw, mainscissor[0] + mainscissor[2]), sy2 = min(sy + sh, mainscissor[1] + mainscissor[3]);
+        sx = max(sx, mainscissor[0]);
+        sy = max(sy, mainscissor[1]);
+        sw = sx2 - sx;
+        sh = sy2 - sy;
+        upscale = sw > 0 && sh > 0;
+    }
+
+    if(upscale)
+    {
+        glEnable(GL_SCISSOR_TEST);
+        glScissor(sx, sy, sw, sh);
         glDepthMask(GL_FALSE);
         glEnable(GL_BLEND);
         if(lowresblend == PARTICLE_LOWRES_ADD) glBlendFunc(GL_ONE, GL_ONE);
@@ -2452,6 +2527,13 @@ static void renderparticlelowrespass(int start, int end, uint excludemask, int l
         glDisable(GL_BLEND);
         glDepthMask(GL_TRUE);
     }
+
+    if(scissortest)
+    {
+        glScissor(mainscissor[0], mainscissor[1], mainscissor[2], mainscissor[3]);
+        glEnable(GL_SCISSOR_TEST);
+    }
+    else if(upscale) glDisable(GL_SCISSOR_TEST);
 
     if(depthtest) glEnable(GL_DEPTH_TEST);
 }
