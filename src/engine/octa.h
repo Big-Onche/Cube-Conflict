@@ -81,12 +81,16 @@ struct grasstri
 
 struct Slot;
 
+enum { MAXGRASSPATCHPARTICLEPOSITIONS = 16 };
+
 struct grasspatch
 {
     vec center;
     float radius;
     Slot *slot;
     int offset, count;
+    vec4 particlepositions[MAXGRASSPATCHPARTICLEPOSITIONS];
+    int numparticlepositions;
     ivec blendpos;
     ushort texture, blend;
 };
