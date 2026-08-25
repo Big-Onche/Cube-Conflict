@@ -3,9 +3,9 @@
 static void grasssettingschanged();
 
 VARP(grass, 0, 1, 1);
-VARP(grassdist, 0, 256, 10000);
+VARP(grassdist, 0, 768, 10000);
 FVARP(grasstaper, 0, 0.3f, 1);
-FVARFP(grassstep, 0.5f, 3, 8, grasssettingschanged());
+FVARFP(grassstep, 0.5f, 3.5, 8, grasssettingschanged());
 FVARFP(grassdensity, 0.05f, 0.4, 4, grasssettingschanged());
 VARFP(grasspatchsize, 4, 32, 256, grasssettingschanged());
 VARFP(grassmaxinstances, 1024, 1<<20, 1<<22, grasssettingschanged());
@@ -14,19 +14,19 @@ FVARP(grassmargin, 0, 0.25f, 32);
 FVAR(grassmarginfade, 0, 0, 1);
 VARR(grassscale, 1, 2, 64);
 CVAR0R(grasscolour, 0xFFFFFF);
-FVARR(grasstest, 0, 0.7f, 1);
+FVAR(grasstest, 0, 0.6f, 1);
 
 VARP(grasslod1, 8, 192, 10000);
-VARP(grasslodtransition, 0, 32, 256);
-FVARP(grassloddensity1, 0.05f, 1, 1);
+VAR(grasslodtransition, 0, 64, 256);
+FVAR(grassloddensity1, 0.05f, 1, 1);
 
 VARP(grassshadowcascades, 0, 2, 2);
-FVARP(grassshadowdensity, 0.01f, 1, 1);
+FVAR(grassshadowdensity, 0.01f, 1, 1);
 
 VAR(grassanimmillis, 1, 3000, 60000);
-FVAR(grassanimscale, 0, 0.15f, 1);
-FVARP(grasswindangle, 0, 0, 360);
-FVARP(grasswindscale, 0, 0.015f, 1);
+FVAR(grassanimscale, 0, 0.2f, 1);
+FVAR(grasswindangle, 0, 0, 360);
+FVAR(grasswindscale, 0, 0.015f, 1);
 
 struct grassinstance
 {
