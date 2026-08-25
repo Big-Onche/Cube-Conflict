@@ -450,6 +450,8 @@ namespace game
             case ATK_FIREWORKS:
             case ATK_S_ROCKETS:
             case ATK_S_NUKE:
+            case ATK_KAMIKAZE:
+            case ATK_POWERARMOR:
                 addgrassburnevent(v, attacks[atk].exprad*0.20f);
                 break;
         }
