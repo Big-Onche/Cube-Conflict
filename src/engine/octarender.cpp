@@ -459,6 +459,7 @@ struct vacollect : verthash
 
         va->verts = verts.length();
         va->tris = worldtris/3;
+        va->grassbuf = 0;
         va->vbuf = 0;
         va->vdata = 0;
         va->minvert = 0;
@@ -618,6 +619,7 @@ struct vacollect : verthash
         if(grasstris.length())
         {
             va->grasstris.move(grasstris);
+            buildgrass(va);
             loadgrassshaders();
         }
 
@@ -1216,6 +1218,7 @@ void destroyva(vtxarray *va, bool reparent)
     if(va->ebuf) destroyvbo(va->ebuf);
     if(va->skybuf) destroyvbo(va->skybuf);
     if(va->decalbuf) destroyvbo(va->decalbuf);
+    destroygrass(va);
     if(va->texelems) delete[] va->texelems;
     if(va->decalelems) delete[] va->decalelems;
     if(va->matbuf) delete[] va->matbuf;

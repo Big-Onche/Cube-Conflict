@@ -422,6 +422,8 @@ extern void cleanupprefabs();
 extern ivec worldmin, worldmax, nogimin, nogimax;
 extern vector<tjoint> tjoints;
 extern vector<vtxarray *> varoot, valist;
+extern void buildgrass(vtxarray *va);
+extern void destroygrass(vtxarray *va);
 
 extern ushort encodenormal(const vec &n);
 extern vec decodenormal(ushort norm);
@@ -440,7 +442,7 @@ extern void updatevabbs(bool force = false);
 extern int oqfrags;
 extern float alphafrontsx1, alphafrontsx2, alphafrontsy1, alphafrontsy2, alphabacksx1, alphabacksx2, alphabacksy1, alphabacksy2, alpharefractsx1, alpharefractsx2, alpharefractsy1, alpharefractsy2;
 extern uint alphatiles[LIGHTTILE_MAXH];
-extern vtxarray *visibleva;
+extern vtxarray *visibleva, *shadowva;
 
 extern void visiblecubes(bool cull = true);
 extern void setvfcP(const vec &bbmin = vec(-1, -1, -1), const vec &bbmax = vec(1, 1, 1));
@@ -838,8 +840,8 @@ extern void clearmainmenu();
 
 // grass
 extern void loadgrassshaders();
-extern void generategrass();
 extern void rendergrass();
+extern void rendergrassshadow(int cascade);
 extern void cleanupgrass();
 
 // blendmap

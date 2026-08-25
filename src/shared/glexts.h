@@ -527,9 +527,11 @@ extern PFNGLDRAWBUFFERSPROC glDrawBuffers_;
 // GL_ARB_draw_instanced / GL_ARB_instanced_arrays
 #ifdef __APPLE__
 typedef void (APIENTRYP PFNGLDRAWARRAYSINSTANCEDPROC) (GLenum mode, GLint first, GLsizei count, GLsizei instancecount);
+typedef void (APIENTRYP PFNGLDRAWELEMENTSINSTANCEDPROC) (GLenum mode, GLsizei count, GLenum type, const void *indices, GLsizei instancecount);
 typedef void (APIENTRYP PFNGLVERTEXATTRIBDIVISORPROC) (GLuint index, GLuint divisor);
 #endif
 extern PFNGLDRAWARRAYSINSTANCEDPROC glDrawArraysInstanced_;
+extern PFNGLDRAWELEMENTSINSTANCEDPROC glDrawElementsInstanced_;
 extern PFNGLVERTEXATTRIBDIVISORPROC glVertexAttribDivisor_;
 
 #ifndef GL_VERSION_2_0

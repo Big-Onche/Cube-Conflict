@@ -79,6 +79,15 @@ struct grasstri
     ushort texture, blend;
 };
 
+struct grasspatch
+{
+    vec center;
+    float radius;
+    int offset, count;
+    ushort texture, blend;
+    ivec blendpos;
+};
+
 struct occludequery
 {
     void *owner;
@@ -127,7 +136,7 @@ struct vtxarray
     vertex *vdata;           // vertex data
     ushort voffset, eoffset, skyoffset, decaloffset; // offset into vertex data
     ushort *edata, *skydata, *decaldata; // vertex indices
-    GLuint vbuf, ebuf, skybuf, decalbuf; // VBOs
+    GLuint vbuf, ebuf, skybuf, decalbuf, grassbuf; // VBOs
     ushort minvert, maxvert; // DRE info
     elementset *texelems, *decalelems;   // List of element indices sets (range) per texture
     materialsurface *matbuf; // buffer of material surfaces
@@ -147,6 +156,7 @@ struct vtxarray
     occludequery *query;
     vector<octaentities *> mapmodels, decals;
     vector<grasstri> grasstris;
+    vector<grasspatch> grasspatches;
     int hasmerges, mergelevel;
     int shadowmask, shadowtransparent;
 };

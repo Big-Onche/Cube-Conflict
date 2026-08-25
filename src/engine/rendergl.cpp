@@ -249,6 +249,7 @@ PFNGLCOPYIMAGESUBDATAPROC glCopyImageSubData_ = NULL;
 PFNGLTEXSTORAGE2DPROC glTexStorage2D_ = NULL;
 
 PFNGLDRAWARRAYSINSTANCEDPROC glDrawArraysInstanced_ = NULL;
+PFNGLDRAWELEMENTSINSTANCEDPROC glDrawElementsInstanced_ = NULL;
 PFNGLVERTEXATTRIBDIVISORPROC glVertexAttribDivisor_ = NULL;
 
 void *getprocaddress(const char *name)
@@ -538,6 +539,7 @@ void gl_checkextensions()
     if(glversion >= 330 || (hasext("GL_ARB_draw_instanced") && hasext("GL_ARB_instanced_arrays")))
     {
         glDrawArraysInstanced_ = (PFNGLDRAWARRAYSINSTANCEDPROC)getprocaddress("glDrawArraysInstanced");
+        glDrawElementsInstanced_ = (PFNGLDRAWELEMENTSINSTANCEDPROC)getprocaddress("glDrawElementsInstanced");
         glVertexAttribDivisor_ = (PFNGLVERTEXATTRIBDIVISORPROC)getprocaddress("glVertexAttribDivisor");
         hasInstancing = glDrawArraysInstanced_ && glVertexAttribDivisor_;
         if(hasInstancing && glversion < 330 && dbgexts) conoutf(CON_INIT, "Using ARB instanced particle rendering.");
@@ -2741,7 +2743,6 @@ void gl_drawview()
     if(wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     else if(limitsky() && editmode && showsky) renderexplicitsky(true);
 
-    generategrass();
     rendergrass();
     GLERROR;
 
