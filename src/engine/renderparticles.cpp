@@ -67,7 +67,7 @@ VARP(softparticlemaxdist, 64, 768, 2048);
 
 VARFP(particlelighting, 0, 1, 1, refreshparticlelighting());
 VARP(particlelightingdynlights, 0, 1, 1);
-FVARFP(particlelightscale, 0.125f, 0.4f, 1.0f, cleanupparticlelightbuffer());
+FVARFP(particlelightscale, 0.125f, 0.25f, 1.0f, cleanupparticlelightbuffer());
 FVARP(particlelightupscaleedge, 0.001f, 0.05f, 1.0f);
 VARP(particlelightingshadowmapblur, 1, 3, 16);
 VARP(particlelocallightshadowquality, 0, 0, 1);
@@ -3057,7 +3057,7 @@ int applyRandomOffset(int base, int offset) { return clamp(base + rnd(2 * offset
 
 bool noColors(int r, int g, int b) { return !r && !g && !b; }
 
-int smokeGs() { return 30 + rnd(15); } // setting random smoke grayscale
+int smokeGs() { return 18 + rnd(8); } // setting random smoke grayscale
 
 VARR(windintensity, 0, 0, 10);
 int wind() { return 120 * windintensity; }
