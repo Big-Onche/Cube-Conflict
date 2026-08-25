@@ -27,11 +27,16 @@ VAR(grassanimmillis, 1, 3000, 60000);
 FVAR(grassanimscale, 0, 0.2f, 1);
 FVAR(grasswindangle, 0, 0, 360);
 FVAR(grasswindscale, 0, 0.015f, 1);
-VARP(grassregrowmillis, 100, 10000, 15000);
+VAR(grassregrowmillis, 100, 10000, 15000);
 VAR(grassburnstains, 1, 2, 16);
-CVAR0R(grassburncolour, 0x3F3F3F);
-FVAR(grassburnpadding, -100, -40, 100);
+VAR(grassburnmillis, 1, 800, 5000);
+CVAR0R(grassburncolour, 0x606060);
+CVAR0R(grassburnglowcolour, 0xFF2000);
+FVAR(grassburnpadding, -100, -20, 100);
 FVAR(grassburnvariation, 0, 0.3f, 1);
+FVAR(grassburnscrollx, -2, 0.03f, 2);
+FVAR(grassburnscrolly, -2, 0.5f, 2);
+FVAR(grassburnglowscale, 0, 8, 10);
 
 enum { MAXGRASSDAMAGEPARAMS = 64, MAXGRASSDAMAGES = 4096 };
 
@@ -42,7 +47,7 @@ struct grassdamage
 {
     vec center;
     float radius, seed;
-    int regrowstart;
+    int burnstart, regrowstart;
 };
 
 static vector<grassdamage> grassdamages;
@@ -54,6 +59,7 @@ void addgrassdamage(const vec &center, float radius, int lifetime)
     damage.center = center;
     damage.radius = radius;
     damage.seed = (grasshash(++grassdamageseed) & 0xFFFFFFu)/float(0x1000000u);
+    damage.burnstart = lastmillis;
     damage.regrowstart = lastmillis + max(lifetime, 0);
 }
 
@@ -82,6 +88,7 @@ struct grassmesh
 static GLuint grassmeshvbo = 0, grassmeshebo = 0;
 static grassmesh grassmeshes[2];
 static Shader *grassshader = NULL, *grassshadowshader = NULL;
+static Texture *grassburntex = NULL;
 
 static uint grasshash(uint n)
 {
@@ -349,6 +356,10 @@ static void setgrassparams(Texture *tex, float density, float fade)
     LOCALPARAMF(grasscolourparams, color.x/255.0f, color.y/255.0f, color.z/255.0f, 1.0f);
     bvec burncolor(grassburncolour);
     LOCALPARAMF(grassburncolourparams, burncolor.x/255.0f, burncolor.y/255.0f, burncolor.z/255.0f);
+    bvec burnglowcolor(grassburnglowcolour);
+    LOCALPARAMF(grassburnglowcolourparams, burnglowcolor.x/255.0f, burnglowcolor.y/255.0f, burnglowcolor.z/255.0f);
+    float burntime = lastmillis/1000.0f;
+    LOCALPARAMF(grassburnanimparams, fmodf(burntime*grassburnscrollx, 1.0f), fmodf(burntime*grassburnscrolly, 1.0f), grassburnglowscale);
     LOCALPARAMF(grasstest, grasstest);
 }
 
@@ -360,7 +371,7 @@ static void updategrassdamage()
 static void setgrassdamageparams(const grasspatch &patch)
 {
     vec4 params[MAXGRASSDAMAGEPARAMS];
-    vec2 states[MAXGRASSDAMAGEPARAMS];
+    vec states[MAXGRASSDAMAGEPARAMS];
     int count = 0;
     loopvrev(grassdamages)
     {
@@ -371,9 +382,10 @@ static void setgrassdamageparams(const grasspatch &patch)
         if(patch.center.squaredist(damage.center) > reach*reach) continue;
 
         float growth = lastmillis <= damage.regrowstart ? 0.0f :
-                       min((lastmillis - damage.regrowstart)/float(grassregrowmillis), 1.0f);
+                       min((lastmillis - damage.regrowstart)/float(grassregrowmillis), 1.0f),
+              burn = min((lastmillis - damage.burnstart)/float(grassburnmillis), 1.0f);
         params[count] = vec4(damage.center, damage.radius);
-        states[count++] = vec2(growth, damage.seed);
+        states[count++] = vec(growth, damage.seed, burn);
         if(count >= MAXGRASSDAMAGEPARAMS) break;
     }
     LOCALPARAMF(grassdamagecontrol, float(count), float(grassburnstains), grassburnpadding, grassburnvariation);
@@ -420,6 +432,13 @@ static void rendergrasspatches(vtxarray *vas, bool shadow, int cascade)
     setupgrassattribs();
     glDisable(GL_CULL_FACE);
     glActiveTexture_(GL_TEXTURE0);
+    if(!shadow)
+    {
+        if(!grassburntex) grassburntex = textureload("media/noise/burning_grass.jpg", 0, true, false);
+        glActiveTexture_(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, grassburntex->id);
+        glActiveTexture_(GL_TEXTURE0);
+    }
 
     GLuint texid = 0;
     bool texbound = false;
