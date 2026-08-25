@@ -31,14 +31,14 @@ VAR(grassburnholdmillis, 0, 25000, 300000);
 VAR(grassburnfademillis, 100, 15000, 300000);
 VAR(grassburnpropagatemillis, 1, 500, 10000);
 VAR(grassburnfadeinmillis, 1, 150, 5000);
-VAR(grassburnmillis, 1, 600, 5000);
-CVAR0R(grassburncolour, 0x4C4C4C);
-CVAR0R(grassburnglowcolour, 0xFF2000);
+VAR(grassburnmillis, 1, 500, 5000);
+CVAR0R(grassburncolour, 0x4A3838);
+CVAR0R(grassburnglowcolour, 0xFF2B00);
 FVAR(grassburnpadding, -100, 10, 100);
 FVAR(grassburnvariation, 0, 0.4f, 1);
 FVAR(grassburnscrollx, -2, 0.03f, 2);
-FVAR(grassburnscrolly, -2, 0.6f, 2);
-FVAR(grassburnglowscale, 0, 8, 10);
+FVAR(grassburnscrolly, -2, 0.75f, 2);
+FVAR(grassburnglowscale, 0, 6, 10);
 VAR(grassburnparticles, 0, 1, 1);
 VAR(grassburnparticlemillis, 16, 500, 1000);
 VAR(grassburnparticlemax, 1, 32, 64);
@@ -569,9 +569,9 @@ static void drawgrasslod(const grasspatch &patch, Texture *tex, int lod, float d
     glde++;
 }
 
-static void drawgrasspatchlod(const grasspatch &patch, Texture *tex, float dist, float densityscale)
+static void drawgrasspatchlod(const grasspatch &patch, Texture *tex, float dist, float densityscale, bool shadow)
 {
-    setgrassdamageparams(patch);
+    if(!shadow) setgrassdamageparams(patch);
     float transition = min(float(grasslodtransition), float(grasslod1));
     if(transition > 0 && dist >= grasslod1 - transition && dist <= grasslod1 + transition)
     {
@@ -627,7 +627,7 @@ static void rendergrasspatches(vtxarray *vas, bool shadow, int cascade)
             {
                 if(!(calcspherecsmsplits(patch.center, radius)&(1<<cascade))) continue;
             }
-            else if(isfoggedsphere(radius, patch.center)) continue;
+            else if(isvisiblesphere(radius, patch.center) >= VFC_FOGGED) continue;
 
             Slot &slot = *patch.slot;
             if(!slot.grasstex)
@@ -658,7 +658,7 @@ static void rendergrasspatches(vtxarray *vas, bool shadow, int cascade)
 
             bindgrassinstances(va, patch.offset);
             float densityscale = shadow && cascade > 0 ? grassshadowdensity : 1.0f;
-            drawgrasspatchlod(patch, tex, dist, densityscale);
+            drawgrasspatchlod(patch, tex, dist, densityscale, shadow);
         }
     }
 
