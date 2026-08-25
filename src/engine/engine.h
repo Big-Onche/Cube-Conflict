@@ -842,6 +842,8 @@ extern void clearmainmenu();
 extern void loadgrassshaders();
 extern void rendergrass();
 extern void rendergrassshadow(int cascade);
+extern void addgrassdamage(const vec &center, float radius, int lifetime);
+extern void cleargrassdamage();
 extern void cleanupgrass();
 
 // blendmap

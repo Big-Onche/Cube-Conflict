@@ -79,13 +79,16 @@ struct grasstri
     ushort texture, blend;
 };
 
+struct Slot;
+
 struct grasspatch
 {
     vec center;
     float radius;
+    Slot *slot;
     int offset, count;
-    ushort texture, blend;
     ivec blendpos;
+    ushort texture, blend;
 };
 
 struct occludequery

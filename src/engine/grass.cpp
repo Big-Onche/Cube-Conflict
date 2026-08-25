@@ -14,7 +14,7 @@ FVARP(grassmargin, 0, 0.25f, 32);
 FVAR(grassmarginfade, 0, 0, 1);
 VARR(grassscale, 1, 2, 64);
 CVAR0R(grasscolour, 0xFFFFFF);
-FVAR(grasstest, 0, 0.6f, 1);
+FVAR(grasstest, 0, 0.7f, 1);
 
 VARP(grasslod1, 8, 192, 10000);
 VAR(grasslodtransition, 0, 64, 256);
@@ -27,6 +27,41 @@ VAR(grassanimmillis, 1, 3000, 60000);
 FVAR(grassanimscale, 0, 0.2f, 1);
 FVAR(grasswindangle, 0, 0, 360);
 FVAR(grasswindscale, 0, 0.015f, 1);
+VARP(grassregrowmillis, 100, 10000, 15000);
+VAR(grassburnstains, 1, 2, 16);
+CVAR0R(grassburncolour, 0x3F3F3F);
+FVAR(grassburnpadding, -100, -40, 100);
+FVAR(grassburnvariation, 0, 0.3f, 1);
+
+enum { MAXGRASSDAMAGEPARAMS = 64, MAXGRASSDAMAGES = 4096 };
+
+static uint grasshash(uint n);
+static uint grassdamageseed = 0;
+
+struct grassdamage
+{
+    vec center;
+    float radius, seed;
+    int regrowstart;
+};
+
+static vector<grassdamage> grassdamages;
+
+void addgrassdamage(const vec &center, float radius, int lifetime)
+{
+    if(grassdamages.length() >= MAXGRASSDAMAGES) grassdamages.remove(0);
+    grassdamage &damage = grassdamages.add();
+    damage.center = center;
+    damage.radius = radius;
+    damage.seed = (grasshash(++grassdamageseed) & 0xFFFFFFu)/float(0x1000000u);
+    damage.regrowstart = lastmillis + max(lifetime, 0);
+}
+
+void cleargrassdamage()
+{
+    grassdamages.setsize(0);
+    grassdamageseed = 0;
+}
 
 struct grassinstance
 {
@@ -121,6 +156,7 @@ void buildgrass(vtxarray *va)
     loopv(va->grasstris)
     {
         const grasstri &g = va->grasstris[i];
+        Slot *slot = lookupvslot(g.texture, false).slot;
         float minx = g.v[0].x, maxx = minx, miny = g.v[0].y, maxy = miny;
         loopj(g.numv)
         {
@@ -174,6 +210,7 @@ void buildgrass(vtxarray *va)
             patch.count = count;
             patch.texture = g.texture;
             patch.blend = g.blend;
+            patch.slot = slot;
             patch.blendpos = ivec(g.center);
         }
         if(full) break;
@@ -310,7 +347,41 @@ static void setgrassparams(Texture *tex, float density, float fade)
     LOCALPARAMF(grasswindspatial, grasswindscale, grassmargin, grassmarginfade, 0.0f);
     bvec color(grasscolour);
     LOCALPARAMF(grasscolourparams, color.x/255.0f, color.y/255.0f, color.z/255.0f, 1.0f);
+    bvec burncolor(grassburncolour);
+    LOCALPARAMF(grassburncolourparams, burncolor.x/255.0f, burncolor.y/255.0f, burncolor.z/255.0f);
     LOCALPARAMF(grasstest, grasstest);
+}
+
+static void updategrassdamage()
+{
+    loopvrev(grassdamages) if(lastmillis - grassdamages[i].regrowstart >= grassregrowmillis) grassdamages.removeunordered(i);
+}
+
+static void setgrassdamageparams(const grasspatch &patch)
+{
+    vec4 params[MAXGRASSDAMAGEPARAMS];
+    vec2 states[MAXGRASSDAMAGEPARAMS];
+    int count = 0;
+    loopvrev(grassdamages)
+    {
+        const grassdamage &damage = grassdamages[i];
+        float maxradius = max(damage.radius*(1 + grassburnvariation) + grassburnpadding, 0.0f),
+              reach = patch.radius + maxradius;
+        if(maxradius <= 0) continue;
+        if(patch.center.squaredist(damage.center) > reach*reach) continue;
+
+        float growth = lastmillis <= damage.regrowstart ? 0.0f :
+                       min((lastmillis - damage.regrowstart)/float(grassregrowmillis), 1.0f);
+        params[count] = vec4(damage.center, damage.radius);
+        states[count++] = vec2(growth, damage.seed);
+        if(count >= MAXGRASSDAMAGEPARAMS) break;
+    }
+    LOCALPARAMF(grassdamagecontrol, float(count), float(grassburnstains), grassburnpadding, grassburnvariation);
+    if(count)
+    {
+        LOCALPARAMV(grassdamageparams, params, count);
+        LOCALPARAMV(grassdamagestates, states, count);
+    }
 }
 
 static void drawgrasslod(const grasspatch &patch, Texture *tex, int lod, float density, float fade)
@@ -325,6 +396,7 @@ static void drawgrasslod(const grasspatch &patch, Texture *tex, int lod, float d
 
 static void drawgrasspatchlod(const grasspatch &patch, Texture *tex, float dist, float densityscale)
 {
+    setgrassdamageparams(patch);
     float transition = min(float(grasslodtransition), float(grasslod1));
     if(transition > 0 && dist >= grasslod1 - transition && dist <= grasslod1 + transition)
     {
@@ -343,6 +415,7 @@ static void rendergrasspatches(vtxarray *vas, bool shadow, int cascade)
     Shader *shader = shadow ? grassshadowshader : grassshader;
     if(!shader) return;
 
+    updategrassdamage();
     initgrassmeshes();
     setupgrassattribs();
     glDisable(GL_CULL_FACE);
@@ -372,7 +445,7 @@ static void rendergrasspatches(vtxarray *vas, bool shadow, int cascade)
             }
             else if(isfoggedsphere(radius, patch.center)) continue;
 
-            Slot &slot = *lookupvslot(patch.texture, false).slot;
+            Slot &slot = *patch.slot;
             if(!slot.grasstex)
             {
                 if(!slot.grass) continue;
@@ -423,6 +496,7 @@ void rendergrassshadow(int cascade)
 
 void cleanupgrass()
 {
+    cleargrassdamage();
     if(grassmeshvbo)
     {
         glDeleteBuffers_(1, &grassmeshvbo);

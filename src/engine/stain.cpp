@@ -419,9 +419,9 @@ struct stainrenderer
     float stainradius, stainu, stainv;
     bvec4 staincolor;
 
-    void addstain(const vec &center, const vec &dir, float radius, const bvec &color, int info)
+    int addstain(const vec &center, const vec &dir, float radius, const bvec &color, int info)
     {
-        if(dir.iszero()) return;
+        if(dir.iszero()) return 0;
 
         bbmin = ivec(center).sub(radius);
         bbmax = ivec(center).add(radius).add(1);
@@ -447,10 +447,12 @@ struct stainrenderer
 
         loopi(NUMSTAINBUFS) verts[i].lastvert = verts[i].endvert;
         gentris(worldroot, ivec(0, 0, 0), worldsize>>1);
+        int added = 0;
         loopi(NUMSTAINBUFS)
         {
             stainbuffer &buf = verts[i];
             if(buf.endvert == buf.lastvert) continue;
+            added |= 1<<i;
 
             if(dbgstain)
             {
@@ -467,6 +469,7 @@ struct stainrenderer
             d.endvert = buf.endvert;
             buf.addstain(d);
         }
+        return added;
     }
 
     void gentris(cube &cu, int orient, const ivec &o, int size, materialsurface *mat = NULL, int vismask = 0)
@@ -762,6 +765,7 @@ stainrenderer stains[] =
 void initstains()
 {
     if(initing) return;
+    cleargrassdamage();
     loopi(sizeof(stains)/sizeof(stains[0])) stains[i].init(maxstaintris);
     loopi(sizeof(stains)/sizeof(stains[0])) stains[i].preload();
 }
@@ -769,6 +773,7 @@ void initstains()
 void clearstains()
 {
     loopi(sizeof(stains)/sizeof(stains[0])) stains[i].clearstains();
+    cleargrassdamage();
 }
 
 VARNP(stains, showstains, 0, 1, 1);
@@ -810,7 +815,9 @@ void addstain(int type, const vec &center, const vec &surface, float radius, con
 {
     if(!showstains || type<0 || (size_t)type>=sizeof(stains)/sizeof(stains[0]) || center.dist(camera1->o) - radius > maxstaindistance) return;
     stainrenderer &d = stains[type];
-    d.addstain(center, surface, radius, color, info);
+    if(d.addstain(center, surface, radius, color, info)&((1<<STAINBUF_OPAQUE)|(1<<STAINBUF_TRANSPARENT)) && surface.z > 0 &&
+       (type == STAIN_PLASMA_SCORCH || type == STAIN_EXPL_SCORCH || type == STAIN_BURN))
+        addgrassdamage(center, radius, d.timetolive >= 0 ? d.timetolive : stainfade);
 }
 
 void genstainmmtri(stainrenderer *s, const vec v[3])
