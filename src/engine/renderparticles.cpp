@@ -43,11 +43,11 @@ FVARP(particletransmittancescatter, 0.0f, 0.6f, 1.0f);
 
 FVAR(particlemaplightintensity, 0.0f, 1.5f, 32.0f);
 VARP(particlemaplightcolorinfluence, 0, 200, 200);
-FVAR(particlebacklightintensity, 0.0f, 1.5f, 8.0f);
+FVAR(particlebacklightintensity, 0.0f, 1.0f, 8.0f);
 FVAR(particleshadowapplyintensity, 0.0f, 1.0f, 8.0f);
 
 VAR(particlesunlightdarkabsorb, 0, 88, 100);
-FVARR(particlesunlightintensity, 0.0f, 1.5f, 8.0f);
+FVARR(particlesunlightintensity, 0.0f, 2.5f, 8.0f);
 VARP(particlesunlightcolorinfluence, 0, 100, 100);
 
 VARP(particlelocallightdebug, 0, 0, 4);
@@ -1017,22 +1017,21 @@ struct varenderer : partrenderer
     GLuint vbo;
     gpuparticlestate *gpuinstances;
     uchar *gpushadowmasks;
-    GLuint gpuquadvbo, gpuinstancevbo, gpulightinstancevbo, gpushadowinstancevbo;
+    GLuint gpuquadvbo, gpuinstancevbo, gpulightinstancevbo, gpushadowmaskvbo;
     int gpudirtymin, gpudirtymax, gpunext, gpulastmillis, gpulastreclaimmillis;
-    int gpushadowsidemask;
-    bool gpushadowunculled;
+    int gpushadowsidemask, gpushadowmaskcapacity;
+    bool gpushadowunculled, gpushadowmaskdirty;
     vector<vbodraw> vbodraws;
     vector<gpuparticlelightentry> gpulightentries;
     vector<gpuparticlestate> gpulightinstances;
     vector<gpuparticlelightdraw> gpulightdraws;
-    vector<gpuparticlestate> gpushadowinstances;
 
     varenderer(const char *texname, int type, int stain = -1, int hudtrack = 0)
         : partrenderer(texname, 3, type, stain, hudtrack),
           verts(NULL), parts(NULL), maxparts(0), numparts(0), lastupdate(-1), rndmask(0), vbo(0),
-          gpuinstances(NULL), gpushadowmasks(NULL), gpuquadvbo(0), gpuinstancevbo(0), gpulightinstancevbo(0), gpushadowinstancevbo(0),
+          gpuinstances(NULL), gpushadowmasks(NULL), gpuquadvbo(0), gpuinstancevbo(0), gpulightinstancevbo(0), gpushadowmaskvbo(0),
           gpudirtymin(0), gpudirtymax(-1), gpunext(0), gpulastmillis(0), gpulastreclaimmillis(-1), gpushadowsidemask(0),
-          gpushadowunculled(false)
+          gpushadowmaskcapacity(0), gpushadowunculled(false), gpushadowmaskdirty(true)
     {
         if(type & PT_HFLIP) rndmask |= 0x01;
         if(type & PT_VFLIP) rndmask |= 0x02;
@@ -1046,12 +1045,12 @@ struct varenderer : partrenderer
         if(gpuquadvbo) { glDeleteBuffers_(1, &gpuquadvbo); gpuquadvbo = 0; }
         if(gpuinstancevbo) { glDeleteBuffers_(1, &gpuinstancevbo); gpuinstancevbo = 0; }
         if(gpulightinstancevbo) { glDeleteBuffers_(1, &gpulightinstancevbo); gpulightinstancevbo = 0; }
-        if(gpushadowinstancevbo) { glDeleteBuffers_(1, &gpushadowinstancevbo); gpushadowinstancevbo = 0; }
+        if(gpushadowmaskvbo) { glDeleteBuffers_(1, &gpushadowmaskvbo); gpushadowmaskvbo = 0; }
+        gpushadowmaskcapacity = 0;
         vbodraws.setsize(0);
         gpulightentries.setsize(0);
         gpulightinstances.setsize(0);
         gpulightdraws.setsize(0);
-        gpushadowinstances.setsize(0);
     }
 
     void init(int n)
@@ -1079,9 +1078,9 @@ struct varenderer : partrenderer
         gpulightentries.setsize(0);
         gpulightinstances.setsize(0);
         gpulightdraws.setsize(0);
-        gpushadowinstances.setsize(0);
         gpushadowsidemask = 0;
         gpushadowunculled = false;
+        gpushadowmaskdirty = true;
         ++particleshadowversion;
     }
 
@@ -1098,9 +1097,9 @@ struct varenderer : partrenderer
         gpulightentries.setsize(0);
         gpulightinstances.setsize(0);
         gpulightdraws.setsize(0);
-        gpushadowinstances.setsize(0);
         gpushadowsidemask = 0;
         gpushadowunculled = false;
+        gpushadowmaskdirty = true;
         ++particleshadowversion;
     }
 
@@ -1443,6 +1442,7 @@ struct varenderer : partrenderer
     {
         gpushadowsidemask = 0;
         gpushadowunculled = false;
+        gpushadowmaskdirty = true;
         if(!usegpuparticles() || !haswork() || !particleshadow || !particleshadowmapping() || particleshadowalpha <= 0) return;
 
         loopi(numparts)
@@ -1461,16 +1461,22 @@ struct varenderer : partrenderer
         return cullside ? (gpushadowsidemask&(1<<shadowside)) != 0 : gpushadowunculled;
     }
 
-    void uploadgpushadowparticles()
+    void uploadgpushadowmasks()
     {
-        gpushadowinstances.setsize(0);
-        int sidemask = 1<<shadowside;
-        loopi(numparts) if(gpushadowmasks[i]&sidemask) gpushadowinstances.add(gpuinstances[i]);
-        if(gpushadowinstances.empty()) return;
-
-        if(!gpushadowinstancevbo) glGenBuffers_(1, &gpushadowinstancevbo);
-        gle::bindvbo(gpushadowinstancevbo);
-        glBufferData_(GL_ARRAY_BUFFER, gpushadowinstances.length()*sizeof(gpuparticlestate), gpushadowinstances.getbuf(), GL_STREAM_DRAW);
+        if(!gpushadowmaskvbo)
+        {
+            glGenBuffers_(1, &gpushadowmaskvbo);
+            gle::bindvbo(gpushadowmaskvbo);
+        }
+        else if(!gpushadowmaskdirty) return;
+        else gle::bindvbo(gpushadowmaskvbo);
+        if(gpushadowmaskcapacity != maxparts)
+        {
+            glBufferData_(GL_ARRAY_BUFFER, maxparts*sizeof(uchar), NULL, GL_STREAM_DRAW);
+            gpushadowmaskcapacity = maxparts;
+        }
+        if(numparts) glBufferSubData_(GL_ARRAY_BUFFER, 0, numparts*sizeof(uchar), gpushadowmasks);
+        gpushadowmaskdirty = false;
         gle::clearvbo();
     }
 
@@ -1574,6 +1580,20 @@ struct varenderer : partrenderer
         glDisableVertexAttribArray_(gle::ATTRIB_TEXCOORD1);
         glDisableVertexAttribArray_(gle::ATTRIB_NORMAL);
         gle::clearvbo();
+    }
+
+    void setupgpushadowmaskattrib()
+    {
+        gle::bindvbo(gpushadowmaskvbo);
+        glVertexAttribPointer_(gle::ATTRIB_TANGENT, 1, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(uchar), (const void *)0);
+        glEnableVertexAttribArray_(gle::ATTRIB_TANGENT);
+        glVertexAttribDivisor_(gle::ATTRIB_TANGENT, 1);
+    }
+
+    void cleanupgpushadowmaskattrib()
+    {
+        glVertexAttribDivisor_(gle::ATTRIB_TANGENT, 0);
+        glDisableVertexAttribArray_(gle::ATTRIB_TANGENT);
     }
 
     void bindgpuparticleparams()
@@ -1692,18 +1712,19 @@ struct varenderer : partrenderer
         if(!usegpuparticles() || !tex || !particleshadowmapping() || particleshadowalpha <= 0 || !numparts) return false;
 
         uploadgpuparticles();
-        uploadgpushadowparticles();
-        if(gpushadowinstances.empty()) return false;
+        uploadgpushadowmasks();
         gpuparticleshadowshader->set();
         bindgpuparticleparams();
         LOCALPARAMF(colorscale, 1, 1, 1, 1);
-        LOCALPARAMF(gpuparticleshadowparams, float(shadowmapping), 0, 0, 0);
+        LOCALPARAMF(gpuparticleshadowparams, float(shadowmapping), float(shadowside), 0, 0);
         LOCALPARAM(gpuparticleshadoworigin, shadoworigin);
         LOCALPARAM(gpuparticleshadowdir, shadowdir);
         LOCALPARAMF(particleshadowparams, particleshadowalpha, particletransmittanceextinction, particletransmittance ? 1 : 0, 0);
         glBindTexture(GL_TEXTURE_2D, tex->id);
-        setupgpuparticleattribs(gpushadowinstancevbo);
-        glDrawArraysInstanced_(GL_TRIANGLE_STRIP, 0, 4, gpushadowinstances.length());
+        setupgpuparticleattribs();
+        setupgpushadowmaskattrib();
+        glDrawArraysInstanced_(GL_TRIANGLE_STRIP, 0, 4, numparts);
+        cleanupgpushadowmaskattrib();
         cleanupgpuparticleattribs();
         return true;
     }
