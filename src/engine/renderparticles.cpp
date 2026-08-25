@@ -12,6 +12,7 @@ enum { PARTICLE_LOWRES_NONE = 0, PARTICLE_LOWRES_OVER, PARTICLE_LOWRES_ADD };
 
 static int particlelightbufferw = -1, particlelightbufferh = -1, particlelowresmode = PARTICLE_LOWRES_NONE;
 static GLuint particlelightfbo = 0, particlelighttex = 0;
+static uint particleshadowversion = 0;
 
 static void cleanupparticlelightbuffer();
 
@@ -499,6 +500,7 @@ struct partrenderer
     virtual particle *addpart(const vec &o, const vec &d, int fade, const bvec4 &color, float size, int gravity = 0, int sizemod = 0, bool sound = false, bool hud = false) = 0;
     virtual void update() { }
     virtual void render() = 0;
+    virtual void prepareshadow() { }
     virtual bool rendershadow() { return false; }
     virtual bool hasshadow(bool cullside = true) { return false; }
     virtual bool haswork() = 0;
@@ -1014,8 +1016,11 @@ struct varenderer : partrenderer
     int maxparts, numparts, lastupdate, rndmask;
     GLuint vbo;
     gpuparticlestate *gpuinstances;
+    uchar *gpushadowmasks;
     GLuint gpuquadvbo, gpuinstancevbo, gpulightinstancevbo, gpushadowinstancevbo;
     int gpudirtymin, gpudirtymax, gpunext, gpulastmillis, gpulastreclaimmillis;
+    int gpushadowsidemask;
+    bool gpushadowunculled;
     vector<vbodraw> vbodraws;
     vector<gpuparticlelightentry> gpulightentries;
     vector<gpuparticlestate> gpulightinstances;
@@ -1025,8 +1030,9 @@ struct varenderer : partrenderer
     varenderer(const char *texname, int type, int stain = -1, int hudtrack = 0)
         : partrenderer(texname, 3, type, stain, hudtrack),
           verts(NULL), parts(NULL), maxparts(0), numparts(0), lastupdate(-1), rndmask(0), vbo(0),
-          gpuinstances(NULL), gpuquadvbo(0), gpuinstancevbo(0), gpulightinstancevbo(0), gpushadowinstancevbo(0), gpudirtymin(0),
-          gpudirtymax(-1), gpunext(0), gpulastmillis(0), gpulastreclaimmillis(-1)
+          gpuinstances(NULL), gpushadowmasks(NULL), gpuquadvbo(0), gpuinstancevbo(0), gpulightinstancevbo(0), gpushadowinstancevbo(0),
+          gpudirtymin(0), gpudirtymax(-1), gpunext(0), gpulastmillis(0), gpulastreclaimmillis(-1), gpushadowsidemask(0),
+          gpushadowunculled(false)
     {
         if(type & PT_HFLIP) rndmask |= 0x01;
         if(type & PT_VFLIP) rndmask |= 0x02;
@@ -1053,9 +1059,14 @@ struct varenderer : partrenderer
         DELETEA(parts);
         DELETEA(verts);
         DELETEA(gpuinstances);
+        DELETEA(gpushadowmasks);
         parts = new particle[n];
         verts = new partvert[n*4];
-        if(isgpucandidate()) gpuinstances = new gpuparticlestate[n];
+        if(isgpucandidate())
+        {
+            gpuinstances = new gpuparticlestate[n];
+            gpushadowmasks = new uchar[n];
+        }
         maxparts = n;
         numparts = 0;
         lastupdate = -1;
@@ -1069,6 +1080,9 @@ struct varenderer : partrenderer
         gpulightinstances.setsize(0);
         gpulightdraws.setsize(0);
         gpushadowinstances.setsize(0);
+        gpushadowsidemask = 0;
+        gpushadowunculled = false;
+        ++particleshadowversion;
     }
 
     void reset()
@@ -1085,6 +1099,9 @@ struct varenderer : partrenderer
         gpulightinstances.setsize(0);
         gpulightdraws.setsize(0);
         gpushadowinstances.setsize(0);
+        gpushadowsidemask = 0;
+        gpushadowunculled = false;
+        ++particleshadowversion;
     }
 
     void resettracked(physent *owner)
@@ -1151,6 +1168,7 @@ struct varenderer : partrenderer
         }
         gpunext = numparts % maxparts;
         gpulastreclaimmillis = lastmillis;
+        if(numparts != oldnumparts) ++particleshadowversion;
     }
 
     particle *addpart(const vec &o, const vec &d, int fade, const bvec4 &color, float size, int gravity, int sizemod, bool sound, bool hud)
@@ -1198,6 +1216,7 @@ struct varenderer : partrenderer
             gpudirtymin = min(gpudirtymin, index);
             gpudirtymax = max(gpudirtymax, index);
             gpulastmillis = max(gpulastmillis, p->millis + (fade <= 5 ? 1 : fade));
+            ++particleshadowversion;
         }
         return p;
     }
@@ -1384,48 +1403,69 @@ struct varenderer : partrenderer
         return size > 0.0f;
     }
 
-    bool gpuparticleshadowintersects(const gpuparticlestate &state, bool cullside) const
+    int gpuparticleshadowmask(const gpuparticlestate &state, bool &unculled) const
     {
-        if(!state.color.a) return false;
+        if(!state.color.a) return 0;
 
         vec o;
         float size;
-        if(!getgpuparticlelightbounds(state, o, size)) return false;
+        if(!getgpuparticlelightbounds(state, o, size)) return 0;
 
         float radius = size*SQRT2;
         switch(shadowmapping)
         {
             case SM_CASCADE:
-                return !cullside || (calcspherecsmsplits(o, radius)&(1<<shadowside)) != 0;
+                unculled = true;
+                return calcspherecsmsplits(o, radius);
 
             case SM_SPOT:
             {
                 vec scenter = vec(o).sub(shadoworigin);
                 float reach = radius + shadowradius;
-                return scenter.squaredlen() < reach*reach && (!cullside || sphereinsidespot(shadowdir, shadowspot, scenter, radius));
+                if(scenter.squaredlen() >= reach*reach) return 0;
+                unculled = true;
+                return sphereinsidespot(shadowdir, shadowspot, scenter, radius) ? 1 : 0;
             }
 
             case SM_CUBEMAP:
             {
                 vec scenter = vec(o).sub(shadoworigin);
                 float reach = radius + shadowradius;
-                return scenter.squaredlen() < reach*reach && (!cullside || (calcspheresidemask(scenter, radius, shadowbias)&(1<<shadowside)) != 0);
+                if(scenter.squaredlen() >= reach*reach) return 0;
+                unculled = true;
+                return calcspheresidemask(scenter, radius, shadowbias);
             }
         }
-        return false;
+        return 0;
+    }
+
+    void prepareshadow()
+    {
+        gpushadowsidemask = 0;
+        gpushadowunculled = false;
+        if(!usegpuparticles() || !haswork() || !particleshadow || !particleshadowmapping() || particleshadowalpha <= 0) return;
+
+        loopi(numparts)
+        {
+            bool unculled = false;
+            int sidemask = gpuparticleshadowmask(gpuinstances[i], unculled);
+            gpushadowmasks[i] = uchar(sidemask);
+            gpushadowsidemask |= sidemask;
+            gpushadowunculled |= unculled;
+        }
     }
 
     bool hasshadow(bool cullside = true)
     {
         if(!usegpuparticles() || !haswork() || !particleshadow || !particleshadowmapping() || particleshadowalpha <= 0) return false;
-        loopi(numparts) if(gpuparticleshadowintersects(gpuinstances[i], cullside)) return true;
-        return false;
+        return cullside ? (gpushadowsidemask&(1<<shadowside)) != 0 : gpushadowunculled;
     }
 
     void uploadgpushadowparticles()
     {
         gpushadowinstances.setsize(0);
-        loopi(numparts) if(gpuparticleshadowintersects(gpuinstances[i], true)) gpushadowinstances.add(gpuinstances[i]);
+        int sidemask = 1<<shadowside;
+        loopi(numparts) if(gpushadowmasks[i]&sidemask) gpushadowinstances.add(gpuinstances[i]);
         if(gpushadowinstances.empty()) return;
 
         if(!gpushadowinstancevbo) glGenBuffers_(1, &gpushadowinstancevbo);
@@ -1826,10 +1866,48 @@ static void buildparticlerenderorder()
 
 struct particleshadowbatcher
 {
-    void cleanup() {}
+    bool valid;
+    int mapping, millis, preparedsides;
+    uint version;
+    vec origin, dir;
+    float radius, bias, spot;
+
+    particleshadowbatcher()
+        : valid(false), mapping(0), millis(0), preparedsides(0), version(0), origin(0, 0, 0), dir(0, 0, 0), radius(0), bias(0), spot(0)
+    {
+    }
+
+    void cleanup()
+    {
+        valid = false;
+    }
+
+    bool matchescontext() const
+    {
+        return valid && mapping == shadowmapping && millis == lastmillis && version == particleshadowversion && origin == shadoworigin &&
+               dir == shadowdir && radius == shadowradius && bias == shadowbias && spot == shadowspot;
+    }
 
     bool prepare(bool cullside)
     {
+        int side = 1<<shadowside;
+        bool reuse = shadowmapping == SM_CASCADE && matchescontext() && !(preparedsides&side);
+        if(!reuse)
+        {
+            loopi(sizeof(parts)/sizeof(parts[0])) parts[i]->prepareshadow();
+            valid = true;
+            mapping = shadowmapping;
+            millis = lastmillis;
+            preparedsides = 0;
+            version = particleshadowversion;
+            origin = shadoworigin;
+            dir = shadowdir;
+            radius = shadowradius;
+            bias = shadowbias;
+            spot = shadowspot;
+        }
+        preparedsides |= side;
+
         loopi(sizeof(parts)/sizeof(parts[0]))
         {
             partrenderer *p = parts[i];
