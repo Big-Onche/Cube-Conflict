@@ -842,8 +842,11 @@ extern void clearmainmenu();
 extern void loadgrassshaders();
 extern void rendergrass();
 extern void rendergrassshadow(int cascade);
-extern void addgrassdamage(const vec &center, float radius, int lifetime);
-extern void cleargrassdamage();
+extern float grassburnflamethrowerradius;
+extern void addgrassburnevent(const vec &center, float radius, int lifetime = -1);
+extern void carrygrassburnevent(size_t owner, const vec &center, float radius);
+extern void removegrassburnevent(size_t owner);
+extern void cleargrassburnevents();
 extern void cleanupgrass();
 
 // blendmap

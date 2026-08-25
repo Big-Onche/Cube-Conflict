@@ -27,50 +27,97 @@ VAR(grassanimmillis, 1, 3000, 60000);
 FVAR(grassanimscale, 0, 0.2f, 1);
 FVAR(grasswindangle, 0, 0, 360);
 FVAR(grasswindscale, 0, 0.015f, 1);
-VAR(grassburnholdmillis, 0, 60000, 300000);
+VAR(grassburnholdmillis, 0, 25000, 300000);
 VAR(grassburnfademillis, 100, 15000, 300000);
-VAR(grassburnmillis, 1, 800, 5000);
-CVAR0R(grassburncolour, 0x424242);
+VAR(grassburnpropagatemillis, 1, 500, 10000);
+VAR(grassburnfadeinmillis, 1, 150, 5000);
+VAR(grassburnmillis, 1, 600, 5000);
+CVAR0R(grassburncolour, 0x4C4C4C);
 CVAR0R(grassburnglowcolour, 0xFF2000);
-FVAR(grassburnpadding, -100, 00, 100);
-FVAR(grassburnvariation, 0, 0.3f, 1);
+FVAR(grassburnpadding, -100, 10, 100);
+FVAR(grassburnvariation, 0, 0.4f, 1);
 FVAR(grassburnscrollx, -2, 0.03f, 2);
-FVAR(grassburnscrolly, -2, 0.5f, 2);
+FVAR(grassburnscrolly, -2, 0.6f, 2);
 FVAR(grassburnglowscale, 0, 8, 10);
 VAR(grassburnparticles, 0, 1, 1);
 VAR(grassburnparticlemillis, 16, 500, 1000);
 VAR(grassburnparticlemax, 1, 32, 64);
+VAR(grassburnparticleminmillis, 0, 3000, 10000);
+VAR(grassburnparticlemaxmillis, 0, 6000, 10000);
 FVAR(grassburnsparkspread, 0, 16, 512);
+FVAR(grassburnflamethrowerradius, 0, 12, 256);
+VAR(grassburncarrierinterval, 16, 100, 1000);
+FVAR(grassburncarrierstep, 0, 4, 64);
 
-enum { MAXGRASSDAMAGEPARAMS = 64, MAXGRASSDAMAGES = 4096 };
+enum { MAXGRASSDAMAGEPARAMS = 64, MAXGRASSBURNEVENTS = 4096 };
 
 static uint grasshash(uint n);
 static uint grassdamageseed = 0;
 
-struct grassdamage
+struct grassburnevent
 {
     vec center;
     float radius, seed;
-    int burnstart, recoverstart, lastemit;
+    int burnstart, recoverstart, particleend, lastemit;
 };
 
-static vector<grassdamage> grassdamages;
-
-void addgrassdamage(const vec &center, float radius, int lifetime)
+struct grassburncarrier
 {
-    if(grassdamages.length() >= MAXGRASSDAMAGES) grassdamages.remove(0);
-    grassdamage &damage = grassdamages.add();
-    damage.center = center;
-    damage.radius = radius;
-    damage.seed = (grasshash(++grassdamageseed) & 0xFFFFFFu)/float(0x1000000u);
-    damage.burnstart = lastmillis;
-    damage.recoverstart = lastmillis + (grassburnholdmillis ? grassburnholdmillis : max(lifetime, 0));
-    damage.lastemit = lastmillis - grassburnparticlemillis;
+    size_t owner;
+    vec center;
+    int lastspawn;
+};
+
+static vector<grassburnevent> grassburnevents;
+static vector<grassburncarrier> grassburncarriers;
+
+void addgrassburnevent(const vec &center, float radius, int lifetime)
+{
+    if(center.isneg() || radius <= 0) return;
+    if(grassburnevents.length() >= MAXGRASSBURNEVENTS) grassburnevents.remove(0);
+    grassburnevent &event = grassburnevents.add();
+    event.center = center;
+    event.radius = radius;
+    event.seed = (grasshash(++grassdamageseed) & 0xFFFFFFu)/float(0x1000000u);
+    event.burnstart = lastmillis;
+    event.recoverstart = lastmillis + grassburnpropagatemillis + max(grassburnfadeinmillis, grassburnmillis) +
+                         (lifetime >= 0 ? lifetime : grassburnholdmillis);
+    int minparticlemillis = min(grassburnparticleminmillis, grassburnparticlemaxmillis),
+        maxparticlemillis = max(grassburnparticleminmillis, grassburnparticlemaxmillis);
+    event.particleend = lastmillis + minparticlemillis + int((maxparticlemillis - minparticlemillis)*event.seed + 0.5f);
+    event.lastemit = lastmillis - grassburnparticlemillis;
 }
 
-void cleargrassdamage()
+void carrygrassburnevent(size_t owner, const vec &center, float radius)
 {
-    grassdamages.setsize(0);
+    if(center.isneg() || radius <= 0) return;
+    loopv(grassburncarriers) if(grassburncarriers[i].owner == owner)
+    {
+        grassburncarrier &carrier = grassburncarriers[i];
+        float moveddist = carrier.center.squaredist(center);
+        if(moveddist <= 1e-4f || (lastmillis - carrier.lastspawn < grassburncarrierinterval && moveddist < grassburncarrierstep*grassburncarrierstep)) return;
+        carrier.center = center;
+        carrier.lastspawn = lastmillis;
+        addgrassburnevent(center, radius);
+        return;
+    }
+
+    grassburncarrier &carrier = grassburncarriers.add();
+    carrier.owner = owner;
+    carrier.center = center;
+    carrier.lastspawn = lastmillis;
+    addgrassburnevent(center, radius);
+}
+
+void removegrassburnevent(size_t owner)
+{
+    loopvrev(grassburncarriers) if(grassburncarriers[i].owner == owner) grassburncarriers.removeunordered(i);
+}
+
+void cleargrassburnevents()
+{
+    grassburnevents.setsize(0);
+    grassburncarriers.setsize(0);
     grassdamageseed = 0;
 }
 
@@ -367,51 +414,58 @@ static void cleanupgrassattribs()
     gle::clearebo();
 }
 
-static void setgrassparams(Texture *tex, float density, float fade)
+static void setgrassframeparams()
 {
-    float width = grassheight*tex->xs/float(max(grassscale*tex->ys, 1)),
-          taperstart = grassdist*grasstaper,
-          angle = grasswindangle*RAD,
+    float angle = grasswindangle*RAD,
           windphase = fmodf(float(lastmillis), float(max(grassanimmillis, 1)))/float(max(grassanimmillis, 1));
-    LOCALPARAMF(grassmeshparams, width, float(grassheight), 0.0f, 0.0f);
-    LOCALPARAMF(grassdrawparams, density, fade, float(grassdist), taperstart);
-    LOCALPARAMF(grasswindparams, windphase, grassanimscale, cosf(angle), sinf(angle));
-    LOCALPARAMF(grasswindspatial, grasswindscale, grassmargin, grassmarginfade, 0.0f);
+    GLOBALPARAMF(grasswindparams, windphase, grassanimscale, cosf(angle), sinf(angle));
+    GLOBALPARAMF(grasswindspatial, grasswindscale, grassmargin, grassmarginfade, 0.0f);
     bvec color(grasscolour);
-    LOCALPARAMF(grasscolourparams, color.x/255.0f, color.y/255.0f, color.z/255.0f, 1.0f);
+    GLOBALPARAMF(grasscolourparams, color.x/255.0f, color.y/255.0f, color.z/255.0f, 1.0f);
     bvec burncolor(grassburncolour);
-    LOCALPARAMF(grassburncolourparams, burncolor.x/255.0f, burncolor.y/255.0f, burncolor.z/255.0f);
+    GLOBALPARAMF(grassburncolourparams, burncolor.x/255.0f, burncolor.y/255.0f, burncolor.z/255.0f);
     bvec burnglowcolor(grassburnglowcolour);
-    LOCALPARAMF(grassburnglowcolourparams, burnglowcolor.x/255.0f, burnglowcolor.y/255.0f, burnglowcolor.z/255.0f);
+    GLOBALPARAMF(grassburnglowcolourparams, burnglowcolor.x/255.0f, burnglowcolor.y/255.0f, burnglowcolor.z/255.0f);
     float burntime = lastmillis/1000.0f;
-    LOCALPARAMF(grassburnanimparams, fmodf(burntime*grassburnscrollx, 1.0f), fmodf(burntime*grassburnscrolly, 1.0f), grassburnglowscale);
-    LOCALPARAMF(grasstest, grasstest);
+    GLOBALPARAMF(grassburnanimparams, fmodf(burntime*grassburnscrollx, 1.0f), fmodf(burntime*grassburnscrolly, 1.0f), grassburnglowscale);
+    GLOBALPARAMF(grassburntimingparams, float(grassburnpropagatemillis), float(grassburnfadeinmillis), float(grassburnmillis));
+    GLOBALPARAMF(grasstest, grasstest);
 }
 
-static void updategrassdamage()
+static void setgrassdrawparams(Texture *tex, float density, float fade)
 {
-    loopvrev(grassdamages) if(lastmillis - grassdamages[i].recoverstart >= grassburnfademillis) grassdamages.removeunordered(i);
+    float width = grassheight*tex->xs/float(max(grassscale*tex->ys, 1)),
+          taperstart = grassdist*grasstaper;
+    LOCALPARAMF(grassmeshparams, width, float(grassheight), 0.0f, 0.0f);
+    LOCALPARAMF(grassdrawparams, density, fade, float(grassdist), taperstart);
+}
+
+static void updategrassburnevents()
+{
+    loopvrev(grassburnevents) if(lastmillis - grassburnevents[i].recoverstart >= grassburnfademillis) grassburnevents.removeunordered(i);
 }
 
 static int grassburnparticleframe = -1, grassburnparticleemits = 0;
 
-static bool insidegrassdamage(const vec4 &candidate, const grassdamage &damage)
+static float grassburnignition(const vec4 &candidate, const grassburnevent &event)
 {
-    vec offset = vec(candidate).sub(damage.center);
+    vec offset = vec(candidate).sub(event.center);
     float angle = atan2f(offset.y, offset.x),
-          jitter = sinf(candidate.w*91.713f + damage.seed*37.119f)*43758.5453f;
+          jitter = sinf(candidate.w*91.713f + event.seed*37.119f)*43758.5453f;
     jitter = (jitter - floorf(jitter))*2.0f - 1.0f;
-    float contour = 0.55f*sinf(angle*5.0f + damage.seed*2.0f*M_PI) +
-                    0.30f*sinf(angle*9.0f - damage.seed*4.976f) + 0.15f*jitter,
-          radius = max(damage.radius*(1.0f + grassburnvariation*contour) + grassburnpadding, 0.0f);
-    return radius > 0 && offset.squaredlen() <= radius*radius;
+    float contour = 0.55f*sinf(angle*5.0f + event.seed*2.0f*M_PI) +
+                    0.30f*sinf(angle*9.0f - event.seed*4.976f) + 0.15f*jitter,
+          radius = max(event.radius*(1.0f + grassburnvariation*contour) + grassburnpadding, 0.0f),
+          distance = offset.magnitude();
+    if(radius <= 0 || distance > radius) return 0;
+    float ignitiondelay = distance/radius*grassburnpropagatemillis;
+    return clamp((lastmillis - event.burnstart - ignitiondelay)/float(grassburnfadeinmillis), 0.0f, 1.0f);
 }
 
-static bool findgrassburnparticleposition(vtxarray *vas, const grassdamage &damage, vec &result, float spread = -1,
-                                          const vec *excluded = NULL, int numexcluded = 0)
+static bool findgrassburnparticleposition(vtxarray *vas, const grassburnevent &event, vec &result)
 {
     int matches = 0;
-    float maxradius = max(damage.radius*(1 + grassburnvariation) + grassburnpadding, 0.0f);
+    float maxradius = max(event.radius*(1 + grassburnvariation) + grassburnpadding, 0.0f);
     for(vtxarray *va = vas; va; va = va->next)
     {
         if(!va->grassbuf || va->grasspatches.empty() || va->occluded >= OCCLUDE_GEOM || va->distance > grassdist) continue;
@@ -421,16 +475,12 @@ static bool findgrassburnparticleposition(vtxarray *vas, const grassdamage &dama
             float radius = patch.radius + grassheight,
                   dist = max(camera1->o.dist(patch.center) - patch.radius, 0.0f),
                   reach = patch.radius + maxradius;
-            if(dist > grassdist || isfoggedsphere(radius, patch.center) || patch.center.squaredist(damage.center) > reach*reach) continue;
+            if(dist > grassdist || isfoggedsphere(radius, patch.center) || patch.center.squaredist(event.center) > reach*reach) continue;
 
             loopk(patch.numparticlepositions)
             {
                 const vec4 &candidate = patch.particlepositions[k];
-                if(!insidegrassdamage(candidate, damage)) continue;
-                if(spread >= 0 && vec2(candidate.x, candidate.y).squaredist(vec2(damage.center.x, damage.center.y)) > spread*spread) continue;
-                bool skip = false;
-                loopj(numexcluded) if(vec(candidate).squaredist(excluded[j]) <= 1e-4f) { skip = true; break; }
-                if(skip) continue;
+                if(grassburnignition(candidate, event) <= 0) continue;
                 if(!rnd(++matches)) result = vec(candidate);
             }
         }
@@ -447,35 +497,36 @@ static void emitgrassburnparticles(vtxarray *vas)
         grassburnparticleemits = 0;
     }
 
-    loopv(grassdamages)
+    loopv(grassburnevents)
     {
         if(grassburnparticleemits >= grassburnparticlemax) return;
-        grassdamage &damage = grassdamages[i];
-        if(lastmillis < damage.burnstart || lastmillis >= damage.recoverstart ||
-           lastmillis - damage.lastemit < grassburnparticlemillis) continue;
+        grassburnevent &event = grassburnevents[i];
+        if(lastmillis < event.burnstart || lastmillis >= event.recoverstart || lastmillis >= event.particleend ||
+           lastmillis - event.lastemit < grassburnparticlemillis) continue;
 
-        float maxradius = max(damage.radius*(1 + grassburnvariation) + grassburnpadding, 0.0f);
+        float maxradius = max(event.radius*(1 + grassburnvariation) + grassburnpadding, 0.0f);
         if(maxradius <= 0) continue;
 
+        event.lastemit = lastmillis;
         vec grassorigin;
-        if(!findgrassburnparticleposition(vas, damage, grassorigin)) continue;
+        if(!findgrassburnparticleposition(vas, event, grassorigin)) continue;
         vec origin = grassorigin;
         origin.z += 1.25f;
 
         particle_splash(PART_SMOKE, 1, 1200, origin, 0x20202088, 1.0f, 1, -150, 15);
+        particle_splash(PART_HAZE_SMALL, 1, 800, origin, 60, 8.0f, 1, 0, 1);
         float sparkspread = min(grassburnsparkspread, maxradius);
-        vec usedpositions[3] = { grassorigin };
         loopk(2)
         {
-            vec sparkorigin;
-            if(!findgrassburnparticleposition(vas, damage, sparkorigin, sparkspread, usedpositions, k + 1)) sparkorigin = grassorigin;
-            usedpositions[k + 1] = sparkorigin;
+            float angle = rndscale(2*M_PI), radius = sqrtf(rndscale(1))*sparkspread;
+            vec sparkorigin = grassorigin;
+            sparkorigin.x += cosf(angle)*radius;
+            sparkorigin.y += sinf(angle)*radius;
             sparkorigin.z += 1.25f;
             particle_splash(PART_FIRESPARK, 1, 1000, sparkorigin, 0xFF7020, 0.55f, 1, -60, 0);
         }
-        particle_splash(PART_HAZE_SMALL, 1, 800, origin, 40, 8.0f, 2, -100, 1);
 
-        damage.lastemit = lastmillis;
+
         grassburnparticleemits++;
     }
 }
@@ -483,21 +534,21 @@ static void emitgrassburnparticles(vtxarray *vas)
 static void setgrassdamageparams(const grasspatch &patch)
 {
     vec4 params[MAXGRASSDAMAGEPARAMS];
-    vec states[MAXGRASSDAMAGEPARAMS];
+    vec4 states[MAXGRASSDAMAGEPARAMS];
     int count = 0;
-    loopvrev(grassdamages)
+    loopvrev(grassburnevents)
     {
-        const grassdamage &damage = grassdamages[i];
-        float maxradius = max(damage.radius*(1 + grassburnvariation) + grassburnpadding, 0.0f),
+        const grassburnevent &event = grassburnevents[i];
+        float maxradius = max(event.radius*(1 + grassburnvariation) + grassburnpadding, 0.0f),
               reach = patch.radius + maxradius;
         if(maxradius <= 0) continue;
-        if(patch.center.squaredist(damage.center) > reach*reach) continue;
+        if(patch.center.squaredist(event.center) > reach*reach) continue;
 
-        float recovery = lastmillis <= damage.recoverstart ? 0.0f :
-                         min((lastmillis - damage.recoverstart)/float(grassburnfademillis), 1.0f),
-              burn = min((lastmillis - damage.burnstart)/float(grassburnmillis), 1.0f);
-        params[count] = vec4(damage.center, damage.radius);
-        states[count++] = vec(recovery, damage.seed, burn);
+        float recovery = lastmillis <= event.recoverstart ? 0.0f :
+                         min((lastmillis - event.recoverstart)/float(grassburnfademillis), 1.0f),
+              burnage = max(float(lastmillis - event.burnstart), 0.0f);
+        params[count] = vec4(event.center, event.radius);
+        states[count++] = vec4(recovery, event.seed, burnage, 0.0f);
         if(count >= MAXGRASSDAMAGEPARAMS) break;
     }
     LOCALPARAMF(grassdamagecontrol, float(count), 0.0f, grassburnpadding, grassburnvariation);
@@ -511,7 +562,7 @@ static void setgrassdamageparams(const grasspatch &patch)
 static void drawgrasslod(const grasspatch &patch, Texture *tex, int lod, float density, float fade)
 {
     if(density <= 0 || fade <= 0) return;
-    setgrassparams(tex, density, fade);
+    setgrassdrawparams(tex, density, fade);
     const grassmesh &mesh = grassmeshes[lod];
     glDrawElementsInstanced_(GL_TRIANGLES, mesh.count, GL_UNSIGNED_SHORT, (const void *)(size_t(mesh.offset)*sizeof(ushort)), patch.count);
     xtravertsva += mesh.verts*patch.count;
@@ -539,7 +590,8 @@ static void rendergrasspatches(vtxarray *vas, bool shadow, int cascade)
     Shader *shader = shadow ? grassshadowshader : grassshader;
     if(!shader) return;
 
-    updategrassdamage();
+    setgrassframeparams();
+    updategrassburnevents();
     if(!shadow) emitgrassburnparticles(vas);
     initgrassmeshes();
     setupgrassattribs();
@@ -628,7 +680,7 @@ void rendergrassshadow(int cascade)
 
 void cleanupgrass()
 {
-    cleargrassdamage();
+    cleargrassburnevents();
     if(grassmeshvbo)
     {
         glDeleteBuffers_(1, &grassmeshvbo);

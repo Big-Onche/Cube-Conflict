@@ -264,6 +264,8 @@ namespace bouncers
                 else if(bnc.inwater && !isInWater) bnc.inwater = false; // the bouncer bounced outside the water
             }
 
+            if(bnc.bouncetype == BNC_GLASS) carrygrassburnevent(bnc.entityId, bnc.o, 16);
+
             if(stopped || (bnc.bouncetype == BNC_MOLOTOV && bnc.bounces))
             {
                 if(isGrenade || bnc.bouncetype == BNC_MOLOTOV)
@@ -273,6 +275,7 @@ namespace bouncers
                     if(!owner)
                     {
                         bouncer *removed = curBouncers[i];
+                        removegrassburnevent(removed->entityId);
                         curBouncers[i] = curBouncers.last();
                         curBouncers.pop();
                         freeBouncer(removed);
@@ -295,6 +298,7 @@ namespace bouncers
 
                 }
                 bouncer *removed = curBouncers[i];
+                removegrassburnevent(removed->entityId);
                 curBouncers[i] = curBouncers.last();
                 curBouncers.pop();
                 freeBouncer(removed);
@@ -463,6 +467,7 @@ namespace bouncers
                     stopLinkedSound(bnc->entityId);
                     removeEntityPos(bnc->entityId);
                 }
+                removegrassburnevent(bnc->entityId);
                 bouncer *removed = bnc;
                 curBouncers[i] = curBouncers.last();
                 curBouncers.pop();
@@ -482,6 +487,7 @@ namespace bouncers
                 stopLinkedSound(bnc->entityId);
                 removeEntityPos(bnc->entityId);
             }
+            removegrassburnevent(bnc->entityId);
             freeBouncer(bnc);
         }
     }

@@ -765,7 +765,6 @@ stainrenderer stains[] =
 void initstains()
 {
     if(initing) return;
-    cleargrassdamage();
     loopi(sizeof(stains)/sizeof(stains[0])) stains[i].init(maxstaintris);
     loopi(sizeof(stains)/sizeof(stains[0])) stains[i].preload();
 }
@@ -773,7 +772,6 @@ void initstains()
 void clearstains()
 {
     loopi(sizeof(stains)/sizeof(stains[0])) stains[i].clearstains();
-    cleargrassdamage();
 }
 
 VARNP(stains, showstains, 0, 1, 1);
@@ -815,9 +813,7 @@ void addstain(int type, const vec &center, const vec &surface, float radius, con
 {
     if(!showstains || type<0 || (size_t)type>=sizeof(stains)/sizeof(stains[0]) || center.dist(camera1->o) - radius > maxstaindistance) return;
     stainrenderer &d = stains[type];
-    if(d.addstain(center, surface, radius, color, info)&((1<<STAINBUF_OPAQUE)|(1<<STAINBUF_TRANSPARENT)) && surface.z > 0 &&
-       (type == STAIN_PLASMA_SCORCH || type == STAIN_EXPL_SCORCH || type == STAIN_BURN))
-        addgrassdamage(center, radius, d.timetolive >= 0 ? d.timetolive : stainfade);
+    d.addstain(center, surface, radius, color, info);
 }
 
 void genstainmmtri(stainrenderer *s, const vec v[3])

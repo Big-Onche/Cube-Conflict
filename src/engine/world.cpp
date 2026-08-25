@@ -1480,6 +1480,7 @@ void resetmap()
     clearparticles();
     cleardamagescreen();
     clearstains();
+    cleargrassburnevents();
     clearsleep();
     cancelsel();
     pruneundos();
@@ -1649,4 +1650,3 @@ void mpeditent(int i, const vec &o, int type, int attr1, int attr2, int attr3, i
 
 int getworldsize() { return worldsize; }
 int getmapversion() { return mapversion; }
-

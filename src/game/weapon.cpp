@@ -213,6 +213,16 @@ namespace game
         loopi(attacks[atk].rays) offsetray(from, to, spread(atk, d), attacks[atk].range, rays[i], d);
     }
 
+    static bool flameworldimpact(const vec &from, const vec &to)
+    {
+        vec ray = vec(to).sub(from);
+        float dist = ray.magnitude();
+        if(dist <= 1e-4f) return false;
+        ray.div(dist);
+        const float tolerance = 0.25f;
+        return raycube(from, ray, dist + tolerance, RAY_CLIPMAT|RAY_ALPHAPOLY) < dist + tolerance;
+    }
+
     VARP(blood, 0, 1, 1);
     void damageeffect(int damage, gameent *d, gameent *actor, int atk, bool isAfterburnHit)
     {
@@ -435,6 +445,17 @@ namespace game
 
         switch(atk)
         {
+            case ATK_M32:
+            case ATK_SMAW:
+            case ATK_FIREWORKS:
+            case ATK_S_ROCKETS:
+            case ATK_S_NUKE:
+                addgrassburnevent(v, attacks[atk].exprad*0.20f);
+                break;
+        }
+
+        switch(atk)
+        {
             case ATK_PLASMA:
             case ATK_GRAP1:
             case ATK_SPOCKGUN:
@@ -564,6 +585,7 @@ namespace game
             {
                 vec pos = vec(b.offset).mul(b.offsetmillis/float(OFFSETMILLIS)).add(b.o);
                 explode(b.local, d, pos, vec(0,0,0), NULL, 0, atk);
+                removegrassburnevent(b.entityId);
                 bouncers::curBouncers.remove(i);
                 break;
             }
@@ -773,8 +795,20 @@ namespace game
                 if(!local) createrays(gun, from, to, d);
                 renderMuzzleEffects(from, to, d, atk);
 
+                vec burnpos;
+                float burnposdist = 1e16f;
+
                 loopi(attacks[atk].rays)
                 {
+                    if(flameworldimpact(from, rays[i]))
+                    {
+                        float dist = rays[i].squaredist(to);
+                        if(dist < burnposdist)
+                        {
+                            burnpos = rays[i];
+                            burnposdist = dist;
+                        }
+                    }
                     vec dest = vec(rays[i]).sub(muzzleOrigin).normalize().mul(1450.0f + rnd(200));
                     if(rnd(2)) particle_flying_flare(muzzleOrigin, dest, 900, PART_HAZE_SMALL, 50, 10.f, 100, 65);
                     switch(rnd(4))
@@ -788,6 +822,7 @@ namespace game
                             if(rnd(2) && !isHudPlayer) soundNearmiss(S_FLYBYFLAME, from, rays[i]);
                     }
                 }
+                if(burnposdist < 1e16f) addgrassburnevent(burnpos, grassburnflamethrowerradius);
                 if(isHudPlayer) startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay * 1.5f, vec(0, 0, 0), vec(0, 0, 0), vec((0.15f * recoilSide(300)) / recoilReduce(), 0, 0));
                 gunSound = (d->type==ENT_AI ? S_PYRO_A : S_FLAMETHROWER);
                 break;
