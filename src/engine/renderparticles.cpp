@@ -405,6 +405,15 @@ struct gpuparticlelightentry
     float size, depth;
 };
 
+struct gpuparticlelightstate
+{
+    ullong key;
+    vec o;
+    float size;
+};
+
+static const ullong PARTICLELIGHTINVALIDCELL = ullong(1)<<63;
+
 struct gpuparticlelightdraw
 {
     ullong key;
@@ -1016,22 +1025,30 @@ struct varenderer : partrenderer
     int maxparts, numparts, lastupdate, rndmask;
     GLuint vbo;
     gpuparticlestate *gpuinstances;
+    gpuparticlelightstate *gpulightstates;
     uchar *gpushadowmasks;
     GLuint gpuquadvbo, gpuinstancevbo, gpulightinstancevbo, gpushadowmaskvbo;
     int gpudirtymin, gpudirtymax, gpunext, gpulastmillis, gpulastreclaimmillis;
+    int gpulightpreparedparts, gpulightmotionmillis, gpulightmotiongamespeed, gpulightinstancecapacity;
     int gpushadowsidemask, gpushadowmaskcapacity;
-    bool gpushadowunculled, gpushadowmaskdirty;
+    uint gpustateversion, gpulightmotionversion, gpulightinstanceversion;
+    bool gpulightmotionvalid, gpulightpreparevalid, gpulightvbodirty, gpushadowunculled, gpushadowmaskdirty;
+    vec gpulightpreparecamera;
     vector<vbodraw> vbodraws;
     vector<gpuparticlelightentry> gpulightentries;
     vector<gpuparticlestate> gpulightinstances;
+    vector<int> gpulightinstanceindices;
     vector<gpuparticlelightdraw> gpulightdraws;
 
     varenderer(const char *texname, int type, int stain = -1, int hudtrack = 0)
         : partrenderer(texname, 3, type, stain, hudtrack),
           verts(NULL), parts(NULL), maxparts(0), numparts(0), lastupdate(-1), rndmask(0), vbo(0),
-          gpuinstances(NULL), gpushadowmasks(NULL), gpuquadvbo(0), gpuinstancevbo(0), gpulightinstancevbo(0), gpushadowmaskvbo(0),
-          gpudirtymin(0), gpudirtymax(-1), gpunext(0), gpulastmillis(0), gpulastreclaimmillis(-1), gpushadowsidemask(0),
-          gpushadowmaskcapacity(0), gpushadowunculled(false), gpushadowmaskdirty(true)
+          gpuinstances(NULL), gpulightstates(NULL), gpushadowmasks(NULL), gpuquadvbo(0), gpuinstancevbo(0), gpulightinstancevbo(0),
+          gpushadowmaskvbo(0), gpudirtymin(0), gpudirtymax(-1), gpunext(0), gpulastmillis(0), gpulastreclaimmillis(-1),
+          gpulightpreparedparts(0), gpulightmotionmillis(0), gpulightmotiongamespeed(0), gpulightinstancecapacity(0),
+          gpushadowsidemask(0), gpushadowmaskcapacity(0), gpustateversion(0), gpulightmotionversion(0), gpulightinstanceversion(0),
+          gpulightmotionvalid(false), gpulightpreparevalid(false), gpulightvbodirty(true), gpushadowunculled(false),
+          gpushadowmaskdirty(true), gpulightpreparecamera(0, 0, 0)
     {
         if(type & PT_HFLIP) rndmask |= 0x01;
         if(type & PT_VFLIP) rndmask |= 0x02;
@@ -1047,9 +1064,13 @@ struct varenderer : partrenderer
         if(gpulightinstancevbo) { glDeleteBuffers_(1, &gpulightinstancevbo); gpulightinstancevbo = 0; }
         if(gpushadowmaskvbo) { glDeleteBuffers_(1, &gpushadowmaskvbo); gpushadowmaskvbo = 0; }
         gpushadowmaskcapacity = 0;
+        gpulightinstancecapacity = 0;
+        gpulightmotionvalid = gpulightpreparevalid = false;
+        gpulightvbodirty = true;
         vbodraws.setsize(0);
         gpulightentries.setsize(0);
         gpulightinstances.setsize(0);
+        gpulightinstanceindices.setsize(0);
         gpulightdraws.setsize(0);
     }
 
@@ -1058,12 +1079,14 @@ struct varenderer : partrenderer
         DELETEA(parts);
         DELETEA(verts);
         DELETEA(gpuinstances);
+        DELETEA(gpulightstates);
         DELETEA(gpushadowmasks);
         parts = new particle[n];
         verts = new partvert[n*4];
         if(isgpucandidate())
         {
             gpuinstances = new gpuparticlestate[n];
+            gpulightstates = new gpuparticlelightstate[n];
             gpushadowmasks = new uchar[n];
         }
         maxparts = n;
@@ -1077,10 +1100,15 @@ struct varenderer : partrenderer
         gpulastreclaimmillis = -1;
         gpulightentries.setsize(0);
         gpulightinstances.setsize(0);
+        gpulightinstanceindices.setsize(0);
         gpulightdraws.setsize(0);
+        gpulightpreparedparts = 0;
+        gpulightmotionvalid = gpulightpreparevalid = false;
+        gpulightvbodirty = true;
         gpushadowsidemask = 0;
         gpushadowunculled = false;
         gpushadowmaskdirty = true;
+        ++gpustateversion;
         ++particleshadowversion;
     }
 
@@ -1096,10 +1124,15 @@ struct varenderer : partrenderer
         gpulastreclaimmillis = -1;
         gpulightentries.setsize(0);
         gpulightinstances.setsize(0);
+        gpulightinstanceindices.setsize(0);
         gpulightdraws.setsize(0);
+        gpulightpreparedparts = 0;
+        gpulightmotionvalid = gpulightpreparevalid = false;
+        gpulightvbodirty = true;
         gpushadowsidemask = 0;
         gpushadowunculled = false;
         gpushadowmaskdirty = true;
+        ++gpustateversion;
         ++particleshadowversion;
     }
 
@@ -1167,7 +1200,11 @@ struct varenderer : partrenderer
         }
         gpunext = numparts % maxparts;
         gpulastreclaimmillis = lastmillis;
-        if(numparts != oldnumparts) ++particleshadowversion;
+        if(numparts != oldnumparts)
+        {
+            ++gpustateversion;
+            ++particleshadowversion;
+        }
     }
 
     particle *addpart(const vec &o, const vec &d, int fade, const bvec4 &color, float size, int gravity, int sizemod, bool sound, bool hud)
@@ -1215,6 +1252,7 @@ struct varenderer : partrenderer
             gpudirtymin = min(gpudirtymin, index);
             gpudirtymax = max(gpudirtymax, index);
             gpulastmillis = max(gpulastmillis, p->millis + (fade <= 5 ? 1 : fade));
+            ++gpustateversion;
             ++particleshadowversion;
         }
         return p;
@@ -1480,31 +1518,122 @@ struct varenderer : partrenderer
         gle::clearvbo();
     }
 
-    void uploadgpuparticlelightdraws()
+    bool updategpuparticlelightmotion()
     {
-        gpulightentries.setsize(0);
-        gpulightinstances.setsize(0);
-        gpulightdraws.setsize(0);
+        if(gpulightmotionvalid && gpulightmotionmillis == lastmillis && gpulightmotiongamespeed == game::gamespeed &&
+           gpulightmotionversion == gpustateversion) return false;
+
+        // Particle bounds move every frame, but their light-cell membership usually does not
+        // Keep the entries grouped until a particle crosses a cell boundary, appears or expires
+        bool regroup = !gpulightmotionvalid;
+        int oldpreparedparts = gpulightpreparedparts;
 
         loopi(numparts)
         {
+            gpuparticlelightstate &state = gpulightstates[i];
+            ullong oldkey = gpulightmotionvalid && i < oldpreparedparts ? state.key : PARTICLELIGHTINVALIDCELL;
             vec o;
             float size;
-            if(!getgpuparticlelightbounds(gpuinstances[i], o, size)) continue;
-
-            gpuparticlelightentry &entry = gpulightentries.add();
-            entry.key = particlelightcellkey(o);
-            entry.index = i;
-            entry.o = o;
-            entry.size = size;
-            entry.depth = camera1->o.squaredist(o);
+            state.key = PARTICLELIGHTINVALIDCELL;
+            if(getgpuparticlelightbounds(gpuinstances[i], o, size))
+            {
+                state.key = particlelightcellkey(o);
+                state.o = o;
+                state.size = size;
+            }
+            if(state.key != oldkey) regroup = true;
         }
+        if(gpulightmotionvalid) for(int i = numparts; i < oldpreparedparts; ++i)
+        {
+            if(gpulightstates[i].key != PARTICLELIGHTINVALIDCELL) regroup = true;
+            gpulightstates[i].key = PARTICLELIGHTINVALIDCELL;
+        }
+
+        if(regroup)
+        {
+            gpulightentries.setsize(0);
+            loopi(numparts)
+            {
+                const gpuparticlelightstate &state = gpulightstates[i];
+                if(state.key == PARTICLELIGHTINVALIDCELL) continue;
+
+                gpuparticlelightentry &entry = gpulightentries.add();
+                entry.key = state.key;
+                entry.index = i;
+                entry.o = state.o;
+                entry.size = state.size;
+            }
+            if(!gpulightentries.empty()) gpulightentries.sort(sortgpuparticlelightentriesbykey);
+        }
+        else loopv(gpulightentries)
+        {
+            gpuparticlelightentry &entry = gpulightentries[i];
+            const gpuparticlelightstate &state = gpulightstates[entry.index];
+            entry.o = state.o;
+            entry.size = state.size;
+        }
+
+        gpulightpreparedparts = numparts;
+        gpulightmotionmillis = lastmillis;
+        gpulightmotiongamespeed = game::gamespeed;
+        gpulightmotionversion = gpustateversion;
+        gpulightmotionvalid = true;
+        return true;
+    }
+
+    void rebuildgpuparticlelightinstances()
+    {
+        // Motion is evaluated in the shader, so the copied instance state only changes when particles or their sorted instance order change.
+        bool dirty = gpulightinstanceversion != gpustateversion || gpulightinstanceindices.length() != gpulightentries.length();
+        if(!dirty) loopv(gpulightentries) if(gpulightinstanceindices[i] != gpulightentries[i].index)
+        {
+            dirty = true;
+            break;
+        }
+        if(!dirty) return;
+
+        gpulightinstances.setsize(0);
+        gpulightinstanceindices.setsize(0);
+        gpulightinstances.reserve(gpulightentries.length());
+        gpulightinstanceindices.reserve(gpulightentries.length());
+        loopv(gpulightentries)
+        {
+            int index = gpulightentries[i].index;
+            gpulightinstances.add(gpuinstances[index]);
+            gpulightinstanceindices.add(index);
+        }
+        gpulightinstanceversion = gpustateversion;
+        gpulightvbodirty = true;
+    }
+
+    void uploadgpuparticlelightinstances()
+    {
+        if(gpulightinstances.empty() || (!gpulightvbodirty && gpulightinstancevbo)) return;
+
+        if(!gpulightinstancevbo) glGenBuffers_(1, &gpulightinstancevbo);
+        gle::bindvbo(gpulightinstancevbo);
+        if(gpulightinstancecapacity != maxparts)
+        {
+            glBufferData_(GL_ARRAY_BUFFER, max(maxparts, 1)*sizeof(gpuparticlestate), NULL, GL_STREAM_DRAW);
+            gpulightinstancecapacity = maxparts;
+        }
+        // Orphan only when new instance data is required so the driver never has to wait for an earlier particle draw using this storage.
+        else glBufferData_(GL_ARRAY_BUFFER, max(gpulightinstancecapacity, 1)*sizeof(gpuparticlestate), NULL, GL_STREAM_DRAW);
+        glBufferSubData_(GL_ARRAY_BUFFER, 0, gpulightinstances.length()*sizeof(gpuparticlestate), gpulightinstances.getbuf());
+        gpulightvbodirty = false;
+        gle::clearvbo();
+    }
+
+    void uploadgpuparticlelightdraws()
+    {
+        bool motionchanged = updategpuparticlelightmotion();
+        if(!motionchanged && gpulightpreparevalid && gpulightpreparecamera == camera1->o) return;
+
+        loopv(gpulightentries) gpulightentries[i].depth = camera1->o.squaredist(gpulightentries[i].o);
+        gpulightdraws.setsize(0);
 
         if(!gpulightentries.empty())
         {
-            gpulightentries.sort(sortgpuparticlelightentriesbykey);
-            gpulightinstances.reserve(gpulightentries.length());
-
             for(int start = 0; start < gpulightentries.length();)
             {
                 int end = start + 1;
@@ -1513,7 +1642,7 @@ struct varenderer : partrenderer
 
                 gpuparticlelightdraw &draw = gpulightdraws.add();
                 draw.key = gpulightentries[start].key;
-                draw.offset = gpulightinstances.length();
+                draw.offset = start;
                 draw.count = end - start;
                 draw.bbmin = vec(1e16f, 1e16f, 1e16f);
                 draw.bbmax = vec(-1e16f, -1e16f, -1e16f);
@@ -1521,7 +1650,6 @@ struct varenderer : partrenderer
                 for(int i = start; i < end; ++i)
                 {
                     const gpuparticlelightentry &entry = gpulightentries[i];
-                    gpulightinstances.add(gpuinstances[entry.index]);
                     draw.bbmin.x = min(draw.bbmin.x, entry.o.x - entry.size);
                     draw.bbmin.y = min(draw.bbmin.y, entry.o.y - entry.size);
                     draw.bbmin.z = min(draw.bbmin.z, entry.o.z - entry.size);
@@ -1536,13 +1664,10 @@ struct varenderer : partrenderer
             }
             gpulightdraws.sort(sortgpuparticlelightdrawsbydepth);
         }
-
-        if(!gpulightinstancevbo) glGenBuffers_(1, &gpulightinstancevbo);
-        gle::bindvbo(gpulightinstancevbo);
-        glBufferData_(GL_ARRAY_BUFFER, max(gpulightinstances.length(), 1)*sizeof(gpuparticlestate), NULL, GL_STREAM_DRAW);
-        if(!gpulightinstances.empty())
-            glBufferSubData_(GL_ARRAY_BUFFER, 0, gpulightinstances.length()*sizeof(gpuparticlestate), gpulightinstances.getbuf());
-        gle::clearvbo();
+        rebuildgpuparticlelightinstances();
+        uploadgpuparticlelightinstances();
+        gpulightpreparecamera = camera1->o;
+        gpulightpreparevalid = true;
     }
 
     void setupgpuparticleattribs(GLuint instancevbo = 0, int instanceoffset = 0)
