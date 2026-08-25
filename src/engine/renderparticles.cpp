@@ -70,6 +70,7 @@ VARP(particlelightingdynlights, 0, 1, 1);
 FVARFP(particlelightscale, 0.125f, 0.4f, 1.0f, cleanupparticlelightbuffer());
 FVARP(particlelightupscaleedge, 0.001f, 0.05f, 1.0f);
 VARP(particlelightingshadowmapblur, 1, 3, 16);
+VARP(particlelocallightshadowquality, 0, 0, 1);
 VARP(particletransmittance, 0, 1, 1);
 FVAR(particletransmittanceextinction, 0.0f, 0.75f, 8.0f);
 FVARP(particletransmittancepower, 0.1f, 2.0f, 8.0f);
@@ -1764,6 +1765,7 @@ struct varenderer : partrenderer
         LOCALPARAMF(particledepthscale, particlelowresmode ? float(vieww)/particlelightbufferw : 1.0f,
                     particlelowresmode ? float(viewh)/particlelightbufferh : 1.0f);
         LOCALPARAMF(particlelowresmode, float(particlelowresmode));
+        LOCALPARAMI(particlelocallightshadowquality, particlelocallightshadowquality);
         LOCALPARAM(particlebillboardright, camright);
         LOCALPARAM(particlebillboardup, camup);
         LOCALPARAM(particlebillboarddir, camdir);
