@@ -22,6 +22,11 @@ FVAR(grassloddensity1, 0.05f, 1, 1);
 
 VARP(grassshadowcascades, 0, 2, 2);
 FVAR(grassshadowdensity, 0.01f, 1, 1);
+VAR(grassstats, 0, 0, 1);
+VAR(grassvisiblepatches, 1, 0, 0);
+VAR(grassdrawcalls, 1, 0, 0);
+VAR(grassinstancesrendered, 1, 0, 0);
+VAR(grassmergedtris, 1, 0, 0);
 
 VAR(grassanimmillis, 1, 3000, 60000);
 FVAR(grassanimscale, 0, 0.2f, 1);
@@ -156,6 +161,64 @@ static uint grasshashcombine(uint seed, uint value)
     return grasshash(seed ^ (value + 0x9E3779B9u + (seed << 6) + (seed >> 2)));
 }
 
+struct grasspatchkey
+{
+    int x, y;
+    ushort texture, blend;
+
+    grasspatchkey() {}
+    grasspatchkey(int x, int y, ushort texture, ushort blend) : x(x), y(y), texture(texture), blend(blend) {}
+};
+
+static inline bool htcmp(const grasspatchkey &x, const grasspatchkey &y)
+{
+    return x.x == y.x && x.y == y.y && x.texture == y.texture && x.blend == y.blend;
+}
+
+static inline uint hthash(const grasspatchkey &key)
+{
+    uint hash = grasshashcombine(uint(key.x), uint(key.y));
+    hash = grasshashcombine(hash, uint(key.texture));
+    return grasshashcombine(hash, uint(key.blend));
+}
+
+struct grasscellkey
+{
+    int patch, x, y;
+    uint seed;
+
+    grasscellkey() {}
+    grasscellkey(int patch, int x, int y, uint seed) : patch(patch), x(x), y(y), seed(seed) {}
+};
+
+static inline bool htcmp(const grasscellkey &x, const grasscellkey &y)
+{
+    return x.patch == y.patch && x.x == y.x && x.y == y.y && x.seed == y.seed;
+}
+
+static inline uint hthash(const grasscellkey &key)
+{
+    uint hash = grasshashcombine(uint(key.patch), uint(key.x));
+    hash = grasshashcombine(hash, uint(key.y));
+    return grasshashcombine(hash, key.seed);
+}
+
+struct grassbuildpatch
+{
+    grasspatchkey key;
+    Slot *slot;
+    ivec blendpos;
+    vector<grassinstance> instances;
+    vec bbmin, bbmax;
+    vec4 particlepositions[MAXGRASSPATCHPARTICLEPOSITIONS];
+    int numparticlecandidates, sourcetris;
+
+    grassbuildpatch(const grasspatchkey &key, Slot *slot, const ivec &blendpos) :
+        key(key), slot(slot), blendpos(blendpos), bbmin(1e16f, 1e16f, 1e16f), bbmax(-1e16f, -1e16f, -1e16f), numparticlecandidates(0), sourcetris(0)
+    {
+    }
+};
+
 static float grasshashunit(uint n)
 {
     return (grasshash(n) & 0xFFFFFFu) / float(0x1000000u);
@@ -209,7 +272,11 @@ void buildgrass(vtxarray *va)
     if(glversion < 400 || !glDrawElementsInstanced_ || !glVertexAttribDivisor_ || va->grasstris.empty()) return;
 
     vector<grassinstance> instances;
+    vector<grassbuildpatch *> buildpatches;
+    hashtable<grasspatchkey, int> patchindices;
+    hashset<grasscellkey> generatedcells(1<<16);
     const float spacing = grassstep/sqrtf(grassdensity), patchsize = float(grasspatchsize);
+    int numinstances = 0;
     bool full = false;
     BlendMapCache *blendcache = NULL;
     loopv(va->grasstris) if(va->grasstris[i].blend)
@@ -242,10 +309,19 @@ void buildgrass(vtxarray *va)
                   patchminy = max(miny, py*patchsize), patchmaxy = min(maxy, (py + 1)*patchsize);
             if(patchminx >= patchmaxx || patchminy >= patchmaxy) continue;
 
-            int start = instances.length(),
+            grasspatchkey key(px, py, g.texture, g.blend);
+            int *patchindex = patchindices.access(key);
+            if(!patchindex)
+            {
+                int index = buildpatches.length();
+                patchindices.access(key, index);
+                buildpatches.add(new grassbuildpatch(key, slot, ivec(g.center)));
+                patchindex = patchindices.access(key);
+            }
+            grassbuildpatch &patch = *buildpatches[*patchindex];
+            int start = patch.instances.length(),
                 mingridx = int(floorf(patchminx/spacing)) - 1, maxgridx = int(floorf(patchmaxx/spacing)),
                 mingridy = int(floorf(patchminy/spacing)) - 1, maxgridy = int(floorf(patchmaxy/spacing));
-            vec bbmin(1e16f, 1e16f, 1e16f), bbmax(-1e16f, -1e16f, -1e16f);
 
             for(int gy = mingridy; gy <= maxgridy && !full; ++gy) for(int gx = mingridx; gx <= maxgridx; ++gx)
             {
@@ -257,44 +333,60 @@ void buildgrass(vtxarray *va)
                 float edgedist;
                 if(!insidegrasstri(g, x, y, edgedist)) continue;
 
+                grasscellkey cell(*patchindex, gx, gy, seed);
+                if(generatedcells.access(cell)) continue;
+                generatedcells.add(cell);
+
                 float z = g.surface.zintersect(vec(x, y, 0));
-                grassinstance &inst = instances.add();
+                grassinstance &inst = patch.instances.add();
                 float variation = grasshashunit(cellseed ^ 0x68E31DA4u);
                 inst.originangle = vec4(x, y, z, grasshashunit(cellseed ^ 0x1B56C4E9u)*2*M_PI);
                 inst.variation = vec4(0.8f + 0.4f*variation, grasshashunit(cellseed ^ 0xC2B2AE35u), edgedist, g.surface.z);
-                bbmin.min(vec(x, y, z));
-                bbmax.max(vec(x, y, z));
-                if(instances.length() >= grassmaxinstances) full = true;
+                patch.bbmin.min(vec(x, y, z));
+                patch.bbmax.max(vec(x, y, z));
+                numinstances++;
+                if(numinstances >= grassmaxinstances) full = true;
             }
 
-            int count = instances.length() - start;
+            int count = patch.instances.length() - start;
             if(!count) continue;
-            grasspatch &patch = va->grasspatches.add();
-            patch.center = vec(bbmin).add(bbmax).mul(0.5f);
-            patch.radius = patch.center.dist(bbmax);
-            patch.offset = start;
-            patch.count = count;
-            patch.texture = g.texture;
-            patch.blend = g.blend;
-            patch.slot = slot;
-            patch.blendpos = ivec(g.center);
-            int particlecandidates = 0;
+            patch.sourcetris++;
             loopj(count)
             {
-                const vec4 &candidate = instances[start + j].originangle;
+                const grassinstance &inst = patch.instances[start + j];
+                const vec4 &candidate = inst.originangle;
                 if(g.blend && blendcache && lookupblendmap(blendcache, vec(candidate))/255.0f <= grasstest) continue;
-                int selected = particlecandidates < MAXGRASSPATCHPARTICLEPOSITIONS ? particlecandidates :
-                               int(grasshashcombine(seed, uint(j))%uint(particlecandidates + 1));
-                particlecandidates++;
+                int selected = patch.numparticlecandidates < MAXGRASSPATCHPARTICLEPOSITIONS ? patch.numparticlecandidates :
+                               int(grasshashcombine(seed, uint(j))%uint(patch.numparticlecandidates + 1));
+                patch.numparticlecandidates++;
                 if(selected < MAXGRASSPATCHPARTICLEPOSITIONS)
-                    patch.particlepositions[selected] = vec4(vec(candidate), instances[start + j].variation.y);
+                    patch.particlepositions[selected] = vec4(vec(candidate), inst.variation.y);
             }
-            patch.numparticlepositions = min(particlecandidates, int(MAXGRASSPATCHPARTICLEPOSITIONS));
         }
         if(full) break;
     }
 
     freeblendmapcache(blendcache);
+    loopv(buildpatches)
+    {
+        grassbuildpatch &build = *buildpatches[i];
+        if(build.instances.empty()) continue;
+
+        grasspatch &patch = va->grasspatches.add();
+        patch.center = vec(build.bbmin).add(build.bbmax).mul(0.5f);
+        patch.radius = patch.center.dist(build.bbmax);
+        patch.offset = instances.length();
+        patch.count = build.instances.length();
+        patch.sourcetris = build.sourcetris;
+        patch.texture = build.key.texture;
+        patch.blend = build.key.blend;
+        patch.slot = build.slot;
+        patch.blendpos = build.blendpos;
+        patch.numparticlepositions = min(build.numparticlecandidates, int(MAXGRASSPATCHPARTICLEPOSITIONS));
+        loopj(patch.numparticlepositions) patch.particlepositions[j] = build.particlepositions[j];
+        instances.move(build.instances);
+    }
+    buildpatches.deletecontents();
     if(instances.empty()) return;
     glGenBuffers_(1, &va->grassbuf);
     gle::bindvbo(va->grassbuf);
@@ -559,7 +651,14 @@ static void setgrassdamageparams(const grasspatch &patch)
     }
 }
 
-static void drawgrasslod(const grasspatch &patch, Texture *tex, int lod, float density, float fade)
+struct grassrenderstats
+{
+    int patches, drawcalls, instances, sourcetris;
+
+    grassrenderstats() : patches(0), drawcalls(0), instances(0), sourcetris(0) {}
+};
+
+static void drawgrasslod(const grasspatch &patch, Texture *tex, int lod, float density, float fade, grassrenderstats *stats)
 {
     if(density <= 0 || fade <= 0) return;
     setgrassdrawparams(tex, density, fade);
@@ -567,28 +666,34 @@ static void drawgrasslod(const grasspatch &patch, Texture *tex, int lod, float d
     glDrawElementsInstanced_(GL_TRIANGLES, mesh.count, GL_UNSIGNED_SHORT, (const void *)(size_t(mesh.offset)*sizeof(ushort)), patch.count);
     xtravertsva += mesh.verts*patch.count;
     glde++;
+    if(stats)
+    {
+        stats->drawcalls++;
+        stats->instances += patch.count;
+    }
 }
 
-static void drawgrasspatchlod(const grasspatch &patch, Texture *tex, float dist, float densityscale, bool shadow)
+static void drawgrasspatchlod(const grasspatch &patch, Texture *tex, float dist, float densityscale, bool shadow, grassrenderstats *stats)
 {
     if(!shadow) setgrassdamageparams(patch);
     float transition = min(float(grasslodtransition), float(grasslod1));
     if(transition > 0 && dist >= grasslod1 - transition && dist <= grasslod1 + transition)
     {
         float blend = clamp((dist - (grasslod1 - transition))/(2*transition), 0.0f, 1.0f);
-        drawgrasslod(patch, tex, 0, densityscale, 1 - blend);
-        drawgrasslod(patch, tex, 1, grassloddensity1*densityscale, blend);
+        drawgrasslod(patch, tex, 0, densityscale, 1 - blend, stats);
+        drawgrasslod(patch, tex, 1, grassloddensity1*densityscale, blend, stats);
         return;
     }
 
     int lod = dist < grasslod1 ? 0 : 1;
-    drawgrasslod(patch, tex, lod, (lod ? grassloddensity1 : 1.0f)*densityscale, 1);
+    drawgrasslod(patch, tex, lod, (lod ? grassloddensity1 : 1.0f)*densityscale, 1, stats);
 }
 
 static void rendergrasspatches(vtxarray *vas, bool shadow, int cascade)
 {
     Shader *shader = shadow ? grassshadowshader : grassshader;
     if(!shader) return;
+    grassrenderstats stats;
 
     setgrassframeparams();
     updategrassburnevents();
@@ -656,20 +761,45 @@ static void rendergrasspatches(vtxarray *vas, bool shadow, int cascade)
                 blend = patch.blend;
             }
 
+            grassrenderstats *drawstats = shadow ? NULL : &stats;
+            if(drawstats)
+            {
+                drawstats->patches++;
+                drawstats->sourcetris += patch.sourcetris;
+            }
             bindgrassinstances(va, patch.offset);
             float densityscale = shadow && cascade > 0 ? grassshadowdensity : 1.0f;
-            drawgrasspatchlod(patch, tex, dist, densityscale, shadow);
+            drawgrasspatchlod(patch, tex, dist, densityscale, shadow, drawstats);
         }
     }
 
     cleanupgrassattribs();
     glEnable(GL_CULL_FACE);
+    if(!shadow)
+    {
+        grassvisiblepatches = stats.patches;
+        grassdrawcalls = stats.drawcalls;
+        grassinstancesrendered = stats.instances;
+        grassmergedtris = stats.sourcetris;
+    }
 }
+
+static int lastgrassstatprint = 0;
 
 void rendergrass()
 {
+    grassvisiblepatches = grassdrawcalls = grassinstancesrendered = grassmergedtris = 0;
     if(!grass || !grassdist || glversion < 400 || !glDrawElementsInstanced_ || !visibleva) return;
+    timer *grasscputimer = begintimer("grass", false), *grasstimer = begintimer("grass");
     rendergrasspatches(visibleva, false, 0);
+    endtimer(grasstimer);
+    endtimer(grasscputimer);
+    if(grassstats && totalmillis - lastgrassstatprint >= 1000)
+    {
+        lastgrassstatprint = totalmillis - totalmillis%1000;
+        conoutf(CON_INFO, "grass: %d visible patches, %d draw calls, %d instances, %d source triangle contributions",
+                grassvisiblepatches, grassdrawcalls, grassinstancesrendered, grassmergedtris);
+    }
 }
 
 void rendergrassshadow(int cascade)

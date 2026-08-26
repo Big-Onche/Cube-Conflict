@@ -88,7 +88,7 @@ struct grasspatch
     vec center;
     float radius;
     Slot *slot;
-    int offset, count;
+    int offset, count, sourcetris;
     vec4 particlepositions[MAXGRASSPATCHPARTICLEPOSITIONS];
     int numparticlepositions;
     ivec blendpos;
