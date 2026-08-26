@@ -457,7 +457,7 @@ namespace game
                 float radius = max(float(attacks[atk].exprad), 1.0f);
                 int lifetime = clamp(550 + attacks[atk].exprad/2, 500, 900);
                 float strength = clamp(0.75f + radius/1000.0f, 0.8f, 1.0f), wavespeed = radius/(lifetime*0.00055f);
-                addgrassimpulse(v, vec(0, 0, 0), radius, strength, lifetime, GRASS_IMPULSE_EXPLOSION, wavespeed, 0.18f);
+                grass::addImpulse(v, vec(0, 0, 0), radius, strength, lifetime, grass::IMPULSE_EXPLOSION, wavespeed, 0.18f);
                 break;
             }
         }
@@ -471,7 +471,7 @@ namespace game
             case ATK_S_NUKE:
             case ATK_KAMIKAZE:
             case ATK_POWERARMOR:
-                addgrassburnevent(v, attacks[atk].exprad*0.20f);
+                grass::addBurnEvent(v, attacks[atk].exprad*0.20f);
                 break;
         }
 
@@ -606,7 +606,7 @@ namespace game
             {
                 vec pos = vec(b.offset).mul(b.offsetmillis/float(OFFSETMILLIS)).add(b.o);
                 explode(b.local, d, pos, vec(0,0,0), NULL, 0, atk);
-                removegrassburnevent(b.entityId);
+                grass::removeBurnEvent(b.entityId);
                 bouncers::curBouncers.remove(i);
                 break;
             }
@@ -843,7 +843,7 @@ namespace game
                             if(rnd(2) && !isHudPlayer) soundNearmiss(S_FLYBYFLAME, from, rays[i]);
                     }
                 }
-                if(burnposdist < 1e16f) addgrassburnevent(burnpos, grassburnflamethrowerradius);
+                if(burnposdist < 1e16f) grass::addBurnEvent(burnpos, grass::grassburnflamethrowerradius);
                 if(isHudPlayer) startCameraAnimation(CAM_ANIM_SHOOT, attacks[atk].attackdelay * 1.5f, vec(0, 0, 0), vec(0, 0, 0), vec((0.15f * recoilSide(300)) / recoilReduce(), 0, 0));
                 gunSound = (d->type==ENT_AI ? S_PYRO_A : S_FLAMETHROWER);
                 break;

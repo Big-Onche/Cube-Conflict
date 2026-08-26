@@ -4893,7 +4893,7 @@ void rendercsmshadowmaps()
         shadowside = i;
 
         rendershadowmapworld();
-        rendergrassshadow(i);
+        grass::renderShadow(i);
         rendershadowmodelbatches();
         if(hasshadowparticles(true)) particleshadowtransparent |= 1<<i;
     }

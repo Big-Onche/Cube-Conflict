@@ -2743,7 +2743,7 @@ void gl_drawview()
     if(wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     else if(limitsky() && editmode && showsky) renderexplicitsky(true);
 
-    rendergrass();
+    grass::render();
     GLERROR;
 
     renderao();

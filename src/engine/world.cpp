@@ -1480,8 +1480,8 @@ void resetmap()
     clearparticles();
     cleardamagescreen();
     clearstains();
-    cleargrassimpulses();
-    cleargrassburnevents();
+    grass::clearImpulses();
+    grass::clearBurnEvents();
     clearsleep();
     cancelsel();
     pruneundos();

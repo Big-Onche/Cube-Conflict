@@ -422,8 +422,11 @@ extern void cleanupprefabs();
 extern ivec worldmin, worldmax, nogimin, nogimax;
 extern vector<tjoint> tjoints;
 extern vector<vtxarray *> varoot, valist;
-extern void buildgrass(vtxarray *va);
-extern void destroygrass(vtxarray *va);
+namespace grass
+{
+    extern void build(vtxarray *va);
+    extern void destroy(vtxarray *va);
+}
 
 extern ushort encodenormal(const vec &n);
 extern vec decodenormal(ushort norm);
@@ -838,24 +841,26 @@ extern void clearchanges(int type);
 extern void menuprocess();
 extern void clearmainmenu();
 
-// grass
-enum
+namespace grass
 {
-    GRASS_IMPULSE_BULLET = 0,
-    GRASS_IMPULSE_EXPLOSION
-};
+    enum
+    {
+        IMPULSE_BULLET = 0,
+        IMPULSE_EXPLOSION
+    };
 
-extern void loadgrassshaders();
-extern void rendergrass();
-extern void rendergrassshadow(int cascade);
-extern void addgrassimpulse(const vec &position, const vec &direction, float radius, float strength, int lifetime, int type, float propagationspeed = 0, float falloff = 1, float radial = 0);
-extern void cleargrassimpulses();
-extern float grassburnflamethrowerradius;
-extern void addgrassburnevent(const vec &center, float radius, int lifetime = -1);
-extern void carrygrassburnevent(size_t owner, const vec &center, float radius);
-extern void removegrassburnevent(size_t owner);
-extern void cleargrassburnevents();
-extern void cleanupgrass();
+    extern void loadShaders();
+    extern void render();
+    extern void renderShadow(int cascade);
+    extern void addImpulse(const vec &position, const vec &direction, float radius, float strength, int lifetime, int type, float propagationSpeed = 0, float falloff = 1, float radial = 0);
+    extern void clearImpulses();
+    extern float grassburnflamethrowerradius;
+    extern void addBurnEvent(const vec &center, float radius, int lifetime = -1);
+    extern void carryBurnEvent(size_t owner, const vec &center, float radius);
+    extern void removeBurnEvent(size_t owner);
+    extern void clearBurnEvents();
+    extern void cleanup();
+}
 
 // blendmap
 extern int blendpaintmode;

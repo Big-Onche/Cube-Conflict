@@ -68,32 +68,35 @@ static const surfaceinfo bottomsurface = {0, LAYER_BOTTOM};
 #define brightsurface topsurface
 #define ambientsurface topsurface
 
-struct grasstri
-{
-    vec v[4];
-    int numv;
-    plane surface;
-    vec center;
-    float radius;
-    float minz, maxz;
-    ushort texture, blend;
-};
-
 struct Slot;
 
-enum { MAXGRASSPATCHPARTICLEPOSITIONS = 16 };
-
-struct grasspatch
+namespace grass
 {
-    vec center;
-    float radius;
-    Slot *slot;
-    int offset, count, sourcetris, shadowcount[2];
-    vec4 particlepositions[MAXGRASSPATCHPARTICLEPOSITIONS];
-    int numparticlepositions;
-    ivec blendpos;
-    ushort texture, blend;
-};
+    struct Triangle
+    {
+        vec v[4];
+        int numVerts;
+        plane surface;
+        vec center;
+        float radius;
+        float minZ, maxZ;
+        ushort texture, blend;
+    };
+
+    enum { MAX_PATCH_PARTICLE_POSITIONS = 16 };
+
+    struct Patch
+    {
+        vec center;
+        float radius;
+        Slot *slot;
+        int offset, count, sourceTris, shadowCount[2];
+        vec4 particlePositions[MAX_PATCH_PARTICLE_POSITIONS];
+        int numParticlePositions;
+        ivec blendPos;
+        ushort texture, blend;
+    };
+}
 
 struct occludequery
 {
@@ -143,7 +146,7 @@ struct vtxarray
     vertex *vdata;           // vertex data
     ushort voffset, eoffset, skyoffset, decaloffset; // offset into vertex data
     ushort *edata, *skydata, *decaldata; // vertex indices
-    GLuint vbuf, ebuf, skybuf, decalbuf, grassbuf; // VBOs
+    GLuint vbuf, ebuf, skybuf, decalbuf, grassBuf; // VBOs
     ushort minvert, maxvert; // DRE info
     elementset *texelems, *decalelems;   // List of element indices sets (range) per texture
     materialsurface *matbuf; // buffer of material surfaces
@@ -162,8 +165,8 @@ struct vtxarray
     uchar curvfc, occluded;
     occludequery *query;
     vector<octaentities *> mapmodels, decals;
-    vector<grasstri> grasstris;
-    vector<grasspatch> grasspatches;
+    vector<grass::Triangle> grassTris;
+    vector<grass::Patch> grassPatches;
     int hasmerges, mergelevel;
     int shadowmask, shadowtransparent;
 };
