@@ -21,7 +21,14 @@ VAR(grasslodtransition, 0, 64, 256);
 FVAR(grassloddensity1, 0.05f, 1, 1);
 
 VARP(grassshadowcascades, 0, 2, 2);
-FVAR(grassshadowdensity, 0.01f, 1, 1);
+FVARF(grassshadowdensitynear, 0.01f, 0.65f, 1, grasssettingschanged());
+FVARF(grassshadowdensity, 0.01f, 0.25f, 1, grasssettingschanged());
+VAR(grassshadowlodnear, 0, 1, 1);
+VAR(grassshadowlodfar, 0, 1, 1);
+VAR(grassshadowwindcascades, 0, 1, 2);
+VAR(grassshadowdraws, 1, 0, 0);
+VAR(grassshadowinstances0, 1, 0, 0);
+VAR(grassshadowinstances1, 1, 0, 0);
 VAR(grassstats, 0, 0, 1);
 VAR(grassvisiblepatches, 1, 0, 0);
 VAR(grassdrawcalls, 1, 0, 0);
@@ -384,6 +391,13 @@ void buildgrass(vtxarray *va)
         patch.blendpos = build.blendpos;
         patch.numparticlepositions = min(build.numparticlecandidates, int(MAXGRASSPATCHPARTICLEPOSITIONS));
         loopj(patch.numparticlepositions) patch.particlepositions[j] = build.particlepositions[j];
+        patch.shadowcount[0] = patch.shadowcount[1] = 0;
+        loopvj(build.instances)
+        {
+            float instancehash = build.instances[j].variation.y;
+            if(instancehash <= grassshadowdensitynear) patch.shadowcount[0]++;
+            if(instancehash <= grassshadowdensity) patch.shadowcount[1]++;
+        }
         instances.move(build.instances);
     }
     buildpatches.deletecontents();
@@ -524,11 +538,11 @@ static void setgrassframeparams()
     GLOBALPARAMF(grasstest, grasstest);
 }
 
-static void setgrassdrawparams(Texture *tex, float density, float fade)
+static void setgrassdrawparams(Texture *tex, float density, float fade, float windscale)
 {
     float width = grassheight*tex->xs/float(max(grassscale*tex->ys, 1)),
           taperstart = grassdist*grasstaper;
-    LOCALPARAMF(grassmeshparams, width, float(grassheight), 0.0f, 0.0f);
+    LOCALPARAMF(grassmeshparams, width, float(grassheight), windscale, 0.0f);
     LOCALPARAMF(grassdrawparams, density, fade, float(grassdist), taperstart);
 }
 
@@ -658,10 +672,11 @@ struct grassrenderstats
     grassrenderstats() : patches(0), drawcalls(0), instances(0), sourcetris(0) {}
 };
 
-static void drawgrasslod(const grasspatch &patch, Texture *tex, int lod, float density, float fade, grassrenderstats *stats)
+static void drawgrasslod(const grasspatch &patch, Texture *tex, int lod, float density, float fade, float windscale, grassrenderstats *stats,
+                         int statinstances = -1)
 {
     if(density <= 0 || fade <= 0) return;
-    setgrassdrawparams(tex, density, fade);
+    setgrassdrawparams(tex, density, fade, windscale);
     const grassmesh &mesh = grassmeshes[lod];
     glDrawElementsInstanced_(GL_TRIANGLES, mesh.count, GL_UNSIGNED_SHORT, (const void *)(size_t(mesh.offset)*sizeof(ushort)), patch.count);
     xtravertsva += mesh.verts*patch.count;
@@ -669,24 +684,34 @@ static void drawgrasslod(const grasspatch &patch, Texture *tex, int lod, float d
     if(stats)
     {
         stats->drawcalls++;
-        stats->instances += patch.count;
+        stats->instances += statinstances >= 0 ? statinstances : patch.count;
     }
 }
 
-static void drawgrasspatchlod(const grasspatch &patch, Texture *tex, float dist, float densityscale, bool shadow, grassrenderstats *stats)
+static void drawgrasspatchlod(const grasspatch &patch, Texture *tex, float dist, bool shadow, int cascade, grassrenderstats *stats)
 {
-    if(!shadow) setgrassdamageparams(patch);
+    if(shadow)
+    {
+        int index = clamp(cascade, 0, 1), lod = index ? grassshadowlodfar : grassshadowlodnear;
+        float density = index ? grassshadowdensity : grassshadowdensitynear,
+              windscale = cascade < grassshadowwindcascades ? 1.0f : 0.0f;
+        if(!patch.shadowcount[index]) return;
+        drawgrasslod(patch, tex, lod, density, 1, windscale, stats, patch.shadowcount[index]);
+        return;
+    }
+
+    setgrassdamageparams(patch);
     float transition = min(float(grasslodtransition), float(grasslod1));
     if(transition > 0 && dist >= grasslod1 - transition && dist <= grasslod1 + transition)
     {
         float blend = clamp((dist - (grasslod1 - transition))/(2*transition), 0.0f, 1.0f);
-        drawgrasslod(patch, tex, 0, densityscale, 1 - blend, stats);
-        drawgrasslod(patch, tex, 1, grassloddensity1*densityscale, blend, stats);
+        drawgrasslod(patch, tex, 0, 1, 1 - blend, 1, stats);
+        drawgrasslod(patch, tex, 1, grassloddensity1, blend, 1, stats);
         return;
     }
 
     int lod = dist < grasslod1 ? 0 : 1;
-    drawgrasslod(patch, tex, lod, (lod ? grassloddensity1 : 1.0f)*densityscale, 1, stats);
+    drawgrasslod(patch, tex, lod, lod ? grassloddensity1 : 1.0f, 1, 1, stats);
 }
 
 static void rendergrasspatches(vtxarray *vas, bool shadow, int cascade)
@@ -731,6 +756,7 @@ static void rendergrasspatches(vtxarray *vas, bool shadow, int cascade)
             if(shadow)
             {
                 if(!(calcspherecsmsplits(patch.center, radius)&(1<<cascade))) continue;
+                if(!patch.shadowcount[cascade > 0 ? 1 : 0]) continue;
             }
             else if(isvisiblesphere(radius, patch.center) >= VFC_FOGGED) continue;
 
@@ -761,15 +787,13 @@ static void rendergrasspatches(vtxarray *vas, bool shadow, int cascade)
                 blend = patch.blend;
             }
 
-            grassrenderstats *drawstats = shadow ? NULL : &stats;
-            if(drawstats)
+            if(!shadow)
             {
-                drawstats->patches++;
-                drawstats->sourcetris += patch.sourcetris;
+                stats.patches++;
+                stats.sourcetris += patch.sourcetris;
             }
             bindgrassinstances(va, patch.offset);
-            float densityscale = shadow && cascade > 0 ? grassshadowdensity : 1.0f;
-            drawgrasspatchlod(patch, tex, dist, densityscale, shadow, drawstats);
+            drawgrasspatchlod(patch, tex, dist, shadow, cascade, &stats);
         }
     }
 
@@ -782,6 +806,12 @@ static void rendergrasspatches(vtxarray *vas, bool shadow, int cascade)
         grassinstancesrendered = stats.instances;
         grassmergedtris = stats.sourcetris;
     }
+    else
+    {
+        grassshadowdraws += stats.drawcalls;
+        if(cascade > 0) grassshadowinstances1 += stats.instances;
+        else grassshadowinstances0 += stats.instances;
+    }
 }
 
 static int lastgrassstatprint = 0;
@@ -789,6 +819,7 @@ static int lastgrassstatprint = 0;
 void rendergrass()
 {
     grassvisiblepatches = grassdrawcalls = grassinstancesrendered = grassmergedtris = 0;
+    grassshadowdraws = grassshadowinstances0 = grassshadowinstances1 = 0;
     if(!grass || !grassdist || glversion < 400 || !glDrawElementsInstanced_ || !visibleva) return;
     timer *grasscputimer = begintimer("grass", false), *grasstimer = begintimer("grass");
     rendergrasspatches(visibleva, false, 0);
