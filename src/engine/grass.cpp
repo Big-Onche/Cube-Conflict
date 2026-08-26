@@ -46,6 +46,9 @@ VARP(grassimpulsemaxevents, 1, 64, 256);
 VARP(grassimpulsemaxpatch, 1, 4, 8);
 FVARP(grassimpulsenear, 0, 256, 10000);
 FVARP(grassimpulsedist, 0, 512, 10000);
+FVAR(grassimpulsestrength, 0, 3, 5);
+FVAR(grassimpulsewobble, 0, 0.5f, 1);
+FVAR(grassimpulsewobblespeed, 0, 32, 64);
 FVAR(grassimpulseminstrength, 0, 0.01f, 10);
 VAR(grassimpulsebulletmergemillis, 0, 250, 500);
 FVAR(grassimpulsebulletmergedist, 0, 16, 64);
@@ -980,6 +983,7 @@ static void setgrassframeparams()
           windphase = fmodf(float(lastmillis), float(max(grassanimmillis, 1)))/float(max(grassanimmillis, 1));
     GLOBALPARAMF(grasswindparams, windphase, grassanimscale, cosf(angle), sinf(angle));
     GLOBALPARAMF(grasswindspatial, grasswindscale, grassmargin, grassmarginfade, 0.0f);
+    GLOBALPARAMF(grassimpulsecontrol, grassimpulsestrength, grassimpulsewobble, grassimpulsewobblespeed, 0.0f);
     bvec color(grasscolour);
     GLOBALPARAMF(grasscolourparams, color.x/255.0f, color.y/255.0f, color.z/255.0f, 1.0f);
     GLOBALPARAMF(grasstest, grasstest);
@@ -1122,7 +1126,7 @@ struct grasspatchimpulses
 static void collectgrasspatchimpulses(const grasspatch &patch, grasspatchimpulses &selected)
 {
     selected.count = 0;
-    if(!grassimpulses || grassimpulselist.empty() || !grassimpulsegrid.numelems || !grassimpulsemaxpatch) return;
+    if(!grassimpulses || grassimpulsestrength <= 0 || grassimpulselist.empty() || !grassimpulsegrid.numelems || !grassimpulsemaxpatch) return;
     static vector<int> candidates;
     collectgrassimpulsecandidates(patch.center.x - patch.radius, patch.center.y - patch.radius,
                                   patch.center.x + patch.radius, patch.center.y + patch.radius, candidates);
