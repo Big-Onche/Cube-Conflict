@@ -25,6 +25,9 @@ VARP(grassloddist, 8, 192, 10000);
 VAR(grasslodtransition, 0, 64, 256);
 FVAR(grassfardensity, 0.05f, 1, 1);
 
+FVAR(grassrootdarkness, 0, 1.5f, 2.0f);
+FVAR(grassrootdarknesspower, 0.25f, 5.0f, 16.0f);
+
 VARP(grassshadowcascades, 0, 2, 2);
 FVARF(grassshadowdensitynear, 0.01f, 0.75f, 1, settingsChanged());
 FVARF(grassshadowdensity, 0.01f, 0.5f, 1, settingsChanged());
@@ -1047,7 +1050,8 @@ static void setFrameParams()
     GLOBALPARAMF(grassImpulseControl, grassimpulsestrength, grassimpulsewobble, grassimpulsewobblespeed, grassimpulseafterwind);
     GLOBALPARAMF(grassImpulseAfterWindParams, grassimpulseafterwindmillis/1000.0f, grassimpulseafterwindwobblespeed, 0.0f, 0.0f);
     bvec color(grasscolour);
-    GLOBALPARAMF(grassColourParams, color.x/255.0f, color.y/255.0f, color.z/255.0f, 1.0f);
+    GLOBALPARAMF(grassColourParams, color.x/255.0f, color.y/255.0f, color.z/255.0f, grassrootdarkness);
+    GLOBALPARAMF(grassRootDarknessPower, grassrootdarknesspower);
     GLOBALPARAMF(grassBlendThreshold, grassblendthreshold);
 }
 
