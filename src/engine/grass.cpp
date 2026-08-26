@@ -151,7 +151,7 @@ struct grassmesh
 
 static GLuint grassmeshvbo = 0, grassmeshebo = 0;
 static grassmesh grassmeshes[2];
-static Shader *grassshader = NULL, *grassshadowshader = NULL;
+static Shader *grassshader = NULL, *grassburnshader = NULL, *grassshadowshader = NULL;
 static Texture *grassburntex = NULL;
 
 static uint grasshash(uint n)
@@ -475,12 +475,13 @@ void loadgrassshaders()
 {
     if(glversion < 400) return;
     grassshader = loadgrassshader();
+    grassburnshader = generateshader("grassburn", "grassburnshader");
     grassshadowshader = generateshader("grassshadow", "grassshadowshader");
 }
 
 void cleargrassshaders()
 {
-    grassshader = grassshadowshader = NULL;
+    grassshader = grassburnshader = grassshadowshader = NULL;
 }
 
 static void setupgrassattribs()
@@ -528,6 +529,11 @@ static void setgrassframeparams()
     GLOBALPARAMF(grasswindspatial, grasswindscale, grassmargin, grassmarginfade, 0.0f);
     bvec color(grasscolour);
     GLOBALPARAMF(grasscolourparams, color.x/255.0f, color.y/255.0f, color.z/255.0f, 1.0f);
+    GLOBALPARAMF(grasstest, grasstest);
+}
+
+static void setgrassburnframeparams()
+{
     bvec burncolor(grassburncolour);
     GLOBALPARAMF(grassburncolourparams, burncolor.x/255.0f, burncolor.y/255.0f, burncolor.z/255.0f);
     bvec burnglowcolor(grassburnglowcolour);
@@ -535,7 +541,6 @@ static void setgrassframeparams()
     float burntime = lastmillis/1000.0f;
     GLOBALPARAMF(grassburnanimparams, fmodf(burntime*grassburnscrollx, 1.0f), fmodf(burntime*grassburnscrolly, 1.0f), grassburnglowscale);
     GLOBALPARAMF(grassburntimingparams, float(grassburnpropagatemillis), float(grassburnfadeinmillis), float(grassburnmillis));
-    GLOBALPARAMF(grasstest, grasstest);
 }
 
 static void setgrassdrawparams(Texture *tex, float density, float fade, float windscale)
@@ -637,11 +642,17 @@ static void emitgrassburnparticles(vtxarray *vas)
     }
 }
 
-static void setgrassdamageparams(const grasspatch &patch)
+struct grassdamagebatch
 {
     vec4 params[MAXGRASSDAMAGEPARAMS];
     vec4 states[MAXGRASSDAMAGEPARAMS];
-    int count = 0;
+    int count;
+
+    grassdamagebatch() : count(0) {}
+};
+
+static bool collectgrassdamageparams(const grasspatch &patch, grassdamagebatch &batch)
+{
     loopvrev(grassburnevents)
     {
         const grassburnevent &event = grassburnevents[i];
@@ -653,16 +664,18 @@ static void setgrassdamageparams(const grasspatch &patch)
         float recovery = lastmillis <= event.recoverstart ? 0.0f :
                          min((lastmillis - event.recoverstart)/float(grassburnfademillis), 1.0f),
               burnage = max(float(lastmillis - event.burnstart), 0.0f);
-        params[count] = vec4(event.center, event.radius);
-        states[count++] = vec4(recovery, event.seed, burnage, 0.0f);
-        if(count >= MAXGRASSDAMAGEPARAMS) break;
+        batch.params[batch.count] = vec4(event.center, event.radius);
+        batch.states[batch.count++] = vec4(recovery, event.seed, burnage, 0.0f);
+        if(batch.count >= MAXGRASSDAMAGEPARAMS) break;
     }
-    LOCALPARAMF(grassdamagecontrol, float(count), 0.0f, grassburnpadding, grassburnvariation);
-    if(count)
-    {
-        LOCALPARAMV(grassdamageparams, params, count);
-        LOCALPARAMV(grassdamagestates, states, count);
-    }
+    return batch.count > 0;
+}
+
+static void setgrassdamageparams(const grassdamagebatch &batch)
+{
+    LOCALPARAMF(grassdamagecontrol, float(batch.count), 0.0f, grassburnpadding, grassburnvariation);
+    LOCALPARAMV(grassdamageparams, batch.params, batch.count);
+    LOCALPARAMV(grassdamagestates, batch.states, batch.count);
 }
 
 struct grassrenderstats
@@ -700,7 +713,6 @@ static void drawgrasspatchlod(const grasspatch &patch, Texture *tex, float dist,
         return;
     }
 
-    setgrassdamageparams(patch);
     float transition = min(float(grasslodtransition), float(grasslod1));
     if(transition > 0 && dist >= grasslod1 - transition && dist <= grasslod1 + transition)
     {
@@ -716,27 +728,24 @@ static void drawgrasspatchlod(const grasspatch &patch, Texture *tex, float dist,
 
 static void rendergrasspatches(vtxarray *vas, bool shadow, int cascade)
 {
-    Shader *shader = shadow ? grassshadowshader : grassshader;
-    if(!shader) return;
+    Shader *baseshader = shadow ? grassshadowshader : grassshader;
+    if(!baseshader) return;
     grassrenderstats stats;
 
     setgrassframeparams();
-    updategrassburnevents();
-    if(!shadow) emitgrassburnparticles(vas);
+    if(!shadow)
+    {
+        updategrassburnevents();
+        emitgrassburnparticles(vas);
+    }
     initgrassmeshes();
     setupgrassattribs();
     glDisable(GL_CULL_FACE);
     glActiveTexture_(GL_TEXTURE0);
-    if(!shadow)
-    {
-        if(!grassburntex) grassburntex = textureload("media/noise/burning_grass.jpg", 0, true, false);
-        glActiveTexture_(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, grassburntex->id);
-        glActiveTexture_(GL_TEXTURE0);
-    }
 
     GLuint texid = 0;
-    bool texbound = false;
+    Shader *boundshader = NULL;
+    bool texbound = false, burnframeset = false, burntexbound = false;
     int blend = -1;
     for(vtxarray *va = vas; va; va = shadow ? va->rnext : va->next)
     {
@@ -760,6 +769,11 @@ static void rendergrasspatches(vtxarray *vas, bool shadow, int cascade)
             }
             else if(isvisiblesphere(radius, patch.center) >= VFC_FOGGED) continue;
 
+            // Burn selection only changes shader state; patches keep the same instance buffer and draw ranges.
+            grassdamagebatch damage;
+            bool burning = !shadow && grassburnshader && !grassburnevents.empty() && collectgrassdamageparams(patch, damage);
+            Shader *patchshader = burning ? grassburnshader : baseshader;
+
             Slot &slot = *patch.slot;
             if(!slot.grasstex)
             {
@@ -774,18 +788,34 @@ static void rendergrasspatches(vtxarray *vas, bool shadow, int cascade)
                 texbound = true;
             }
 
-            if(blend != patch.blend)
+            if(burning && !burnframeset)
+            {
+                setgrassburnframeparams();
+                burnframeset = true;
+            }
+            if(burning && !burntexbound)
+            {
+                if(!grassburntex) grassburntex = textureload("media/noise/burning_grass.jpg", 0, true, false);
+                glActiveTexture_(GL_TEXTURE2);
+                glBindTexture(GL_TEXTURE_2D, grassburntex->id);
+                glActiveTexture_(GL_TEXTURE0);
+                burntexbound = true;
+            }
+
+            if(boundshader != patchshader || blend != patch.blend)
             {
                 if(patch.blend)
                 {
                     glActiveTexture_(GL_TEXTURE1);
                     bindblendtexture(patch.blendpos);
                     glActiveTexture_(GL_TEXTURE0);
-                    shader->setvariant(0, 0);
+                    patchshader->setvariant(0, 0);
                 }
-                else shader->set();
+                else patchshader->set();
+                boundshader = patchshader;
                 blend = patch.blend;
             }
+            if(burning) setgrassdamageparams(damage);
 
             if(!shadow)
             {
