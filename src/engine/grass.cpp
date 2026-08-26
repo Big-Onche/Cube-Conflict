@@ -46,9 +46,12 @@ VARP(grassimpulsemaxevents, 1, 64, 256);
 VARP(grassimpulsemaxpatch, 1, 4, 8);
 FVARP(grassimpulsenear, 0, 256, 10000);
 FVARP(grassimpulsedist, 0, 512, 10000);
-FVAR(grassimpulsestrength, 0, 3, 5);
-FVAR(grassimpulsewobble, 0, 0.5f, 1);
+FVAR(grassimpulsestrength, 0, 1, 5);
+FVAR(grassimpulsewobble, 0, 0.6f, 1);
 FVAR(grassimpulsewobblespeed, 0, 32, 64);
+FVAR(grassimpulseafterwind, 0, 3, 5);
+VAR(grassimpulseafterwindmillis, 0, 1500, 2000);
+FVAR(grassimpulseafterwindwobblespeed, 0, 4, 32);
 FVAR(grassimpulseminstrength, 0, 0.01f, 10);
 VAR(grassimpulsebulletmergemillis, 0, 250, 500);
 FVAR(grassimpulsebulletmergedist, 0, 16, 64);
@@ -125,13 +128,13 @@ static void prunegrassimpulses()
     }
 }
 
-void addgrassimpulse(const vec &position, const vec &direction, float radius, float strength, int lifetime, int type, float propagationspeed,
-                     float falloff, float radial)
+void addgrassimpulse(const vec &position, const vec &direction, float radius, float strength, int lifetime, int type, float propagationspeed, float falloff, float radial)
 {
     if(!grassimpulses || position.isneg() || radius <= 0 || strength <= 0 || lifetime <= 0 ||
        (type != GRASS_IMPULSE_BULLET && type != GRASS_IMPULSE_EXPLOSION)) return;
 
     prunegrassimpulses();
+    int effectlifetime = lifetime + (grassimpulseafterwind > 0 ? grassimpulseafterwindmillis : 0);
     vec normalizeddir = vec(direction).safenormalize();
     if(type == GRASS_IMPULSE_BULLET && grassimpulsebulletmergemillis > 0 && grassimpulsebulletmergedist > 0)
     {
@@ -145,7 +148,7 @@ void addgrassimpulse(const vec &position, const vec &direction, float radius, fl
             impulse.direction.add(normalizeddir).safenormalize();
             impulse.radius = max(impulse.radius, radius);
             impulse.strength = max(impulse.strength, strength);
-            impulse.lifetime = max(impulse.lifetime, lifetime);
+            impulse.lifetime = max(impulse.lifetime, effectlifetime);
             impulse.starttime = lastmillis;
             impulse.falloff = max(impulse.falloff, falloff);
             impulse.radial = max(impulse.radial, radial);
@@ -173,7 +176,7 @@ void addgrassimpulse(const vec &position, const vec &direction, float radius, fl
     impulse.falloff = clamp(falloff, 0.0f, 1.0f);
     impulse.radial = max(radial, 0.0f);
     impulse.starttime = lastmillis;
-    impulse.lifetime = lifetime;
+    impulse.lifetime = effectlifetime;
     impulse.type = type;
     impulse.queryversion = 0;
 }
@@ -983,7 +986,8 @@ static void setgrassframeparams()
           windphase = fmodf(float(lastmillis), float(max(grassanimmillis, 1)))/float(max(grassanimmillis, 1));
     GLOBALPARAMF(grasswindparams, windphase, grassanimscale, cosf(angle), sinf(angle));
     GLOBALPARAMF(grasswindspatial, grasswindscale, grassmargin, grassmarginfade, 0.0f);
-    GLOBALPARAMF(grassimpulsecontrol, grassimpulsestrength, grassimpulsewobble, grassimpulsewobblespeed, 0.0f);
+    GLOBALPARAMF(grassimpulsecontrol, grassimpulsestrength, grassimpulsewobble, grassimpulsewobblespeed, grassimpulseafterwind);
+    GLOBALPARAMF(grassimpulseafterwindparams, grassimpulseafterwindmillis/1000.0f, grassimpulseafterwindwobblespeed, 0.0f, 0.0f);
     bvec color(grasscolour);
     GLOBALPARAMF(grasscolourparams, color.x/255.0f, color.y/255.0f, color.z/255.0f, 1.0f);
     GLOBALPARAMF(grasstest, grasstest);
@@ -1146,8 +1150,14 @@ static void collectgrasspatchimpulses(const grasspatch &patch, grasspatchimpulse
         if(impulse.type == GRASS_IMPULSE_EXPLOSION)
         {
             float wave = impulse.propagationspeed > 0 ? age*impulse.propagationspeed : impulse.radius*age*1000.0f/max(impulse.lifetime, 1),
-                  frontwidth = max(impulse.radius*impulse.falloff, 2.0f);
+                  frontwidth = max(impulse.radius*impulse.falloff, 2.0f),
+                  arrivaltime = distance/max(impulse.propagationspeed, 0.001f);
             relevance = max(1.0f - fabsf(distance - wave)/(patch.radius + frontwidth), 0.0f);
+            if(age >= arrivaltime)
+            {
+                float edge = max(1.0f - distance/max(impulse.radius, 0.001f), 0.0f);
+                relevance = max(relevance, 0.5f*edge);
+            }
         }
         float score = grassimpulseremainingstrength(impulse)*relevance;
         if(score <= grassimpulseminstrength) continue;
