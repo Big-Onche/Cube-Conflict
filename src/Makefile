@@ -229,6 +229,7 @@ include/tracy/public/TracyClient.o: CXXFLAGS += -std=c++17
 $(filter shared/%,$(CLIENT_OBJS)): $(filter shared/%,$(CLIENT_PCH))
 $(filter engine/%,$(CLIENT_OBJS)): $(filter engine/%,$(CLIENT_PCH))
 $(filter game/%,$(CLIENT_OBJS)): $(filter game/%,$(CLIENT_PCH))
+$(filter cubeconflict/%,$(CLIENT_OBJS)): game/game.h.gch
 
 $(SERVER_MASTER_OBJS): CXXFLAGS += $(SERVER_INCLUDES)
 
