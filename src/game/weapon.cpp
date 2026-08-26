@@ -448,6 +448,25 @@ namespace game
             case ATK_M32:
             case ATK_SMAW:
             case ATK_FIREWORKS:
+            case ATK_MOLOTOV:
+            case ATK_S_ROCKETS:
+            case ATK_S_NUKE:
+            case ATK_KAMIKAZE:
+            case ATK_POWERARMOR:
+            {
+                float radius = max(float(attacks[atk].exprad), 1.0f);
+                int lifetime = clamp(550 + attacks[atk].exprad/2, 500, 900);
+                float strength = clamp(0.75f + radius/1000.0f, 0.8f, 1.0f), wavespeed = radius/(lifetime*0.00055f);
+                addgrassimpulse(v, vec(0, 0, 0), radius, strength, lifetime, GRASS_IMPULSE_EXPLOSION, wavespeed, 0.18f);
+                break;
+            }
+        }
+
+        switch(atk)
+        {
+            case ATK_M32:
+            case ATK_SMAW:
+            case ATK_FIREWORKS:
             case ATK_S_ROCKETS:
             case ATK_S_NUKE:
             case ATK_KAMIKAZE:

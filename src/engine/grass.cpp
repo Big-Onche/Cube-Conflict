@@ -40,6 +40,20 @@ VAR(grassanimmillis, 1, 3000, 60000);
 FVAR(grassanimscale, 0, 0.2f, 1);
 FVAR(grasswindangle, 0, 0, 360);
 FVAR(grasswindscale, 0, 0.015f, 1);
+
+VARP(grassimpulses, 0, 1, 1);
+VARP(grassimpulsemaxevents, 1, 64, 256);
+VARP(grassimpulsemaxpatch, 1, 4, 8);
+FVARP(grassimpulsenear, 0, 256, 10000);
+FVARP(grassimpulsedist, 0, 512, 10000);
+FVAR(grassimpulseminstrength, 0, 0.01f, 10);
+VAR(grassimpulsebulletmergemillis, 0, 250, 500);
+FVAR(grassimpulsebulletmergedist, 0, 16, 64);
+VAR(grassimpulsesactive, 1, 0, 0);
+VAR(grassimpulsecandidatechecks, 1, 0, 0);
+VAR(grassimpulserelevantchecks, 1, 0, 0);
+VAR(grassimpulsepatchesaffected, 1, 0, 0);
+
 VAR(grassburnholdmillis, 0, 25000, 300000);
 VAR(grassburnfademillis, 100, 15000, 300000);
 VAR(grassburnpropagatemillis, 1, 500, 10000);
@@ -60,7 +74,7 @@ VAR(grassburnparticlemaxmillis, 0, 6000, 10000);
 FVAR(grassburnsparkspread, 0, 16, 512);
 FVAR(grassburnflamethrowerradius, 0, 12, 256);
 VAR(grassburncarrierinterval, 16, 500, 1000);
-FVAR(grassburncarrierstep, 0, 2, 64);
+FVAR(grassburncarrierstep, 0, 64, 64);
 VARFP(grassburnfieldtexelsize, 2, 8, 64, cleargrassburnfield());
 VARFP(grassburnfieldmaxsize, 128, 2048, 4096, cleargrassburnfield());
 VAR(grassburnfielddirtytiles, 1, 0, 0);
@@ -70,10 +84,103 @@ VAR(grassburncandidatechecks, 1, 0, 0);
 VAR(grassburnrelevantchecks, 1, 0, 0);
 VAR(grassburnpatchesaffected, 1, 0, 0);
 
-enum { MAXGRASSBURNEVENTS = 4096, GRASSBURNFIELDTILESIZE = 32, GRASSBURNEVENTCELLSIZE = 64 };
+enum { MAXGRASSIMPULSESPERPATCH = 8, GRASSIMPULSECELLSIZE = 64, MAXGRASSBURNEVENTS = 4096, GRASSBURNFIELDTILESIZE = 32,
+       GRASSBURNEVENTCELLSIZE = 64 };
 
 static uint grasshash(uint n);
 static uint grassdamageseed = 0;
+
+struct grassimpulse
+{
+    vec position, direction;
+    float radius, strength, propagationspeed, falloff, radial;
+    int starttime, lifetime, type;
+    uint queryversion;
+};
+
+static vector<grassimpulse> grassimpulselist;
+static hashtable<ullong, vector<int> > grassimpulsegrid(1<<10);
+static uint grassimpulsequeryversion = 0;
+
+static float grassimpulseremainingstrength(const grassimpulse &impulse)
+{
+    float age = clamp((lastmillis - impulse.starttime)/float(max(impulse.lifetime, 1)), 0.0f, 1.0f);
+    return impulse.strength*(1.0f - age);
+}
+
+static void prunegrassimpulses()
+{
+    loopvrev(grassimpulselist) if(lastmillis - grassimpulselist[i].starttime >= grassimpulselist[i].lifetime)
+        grassimpulselist.removeunordered(i);
+
+    while(grassimpulselist.length() > grassimpulsemaxevents)
+    {
+        int weakest = 0;
+        loopv(grassimpulselist)
+            if(grassimpulseremainingstrength(grassimpulselist[i]) < grassimpulseremainingstrength(grassimpulselist[weakest])) weakest = i;
+        grassimpulselist.removeunordered(weakest);
+    }
+}
+
+void addgrassimpulse(const vec &position, const vec &direction, float radius, float strength, int lifetime, int type, float propagationspeed,
+                     float falloff, float radial)
+{
+    if(!grassimpulses || position.isneg() || radius <= 0 || strength <= 0 || lifetime <= 0 ||
+       (type != GRASS_IMPULSE_BULLET && type != GRASS_IMPULSE_EXPLOSION)) return;
+
+    prunegrassimpulses();
+    vec normalizeddir = vec(direction).safenormalize();
+    if(type == GRASS_IMPULSE_BULLET && grassimpulsebulletmergemillis > 0 && grassimpulsebulletmergedist > 0)
+    {
+        float mergedist = max(grassimpulsebulletmergedist, radius*0.5f), mergeddist2 = mergedist*mergedist;
+        loopv(grassimpulselist)
+        {
+            grassimpulse &impulse = grassimpulselist[i];
+            if(impulse.type != type || lastmillis - impulse.starttime > grassimpulsebulletmergemillis ||
+               impulse.position.squaredist(position) > mergeddist2) continue;
+            impulse.position.add(position).mul(0.5f);
+            impulse.direction.add(normalizeddir).safenormalize();
+            impulse.radius = max(impulse.radius, radius);
+            impulse.strength = max(impulse.strength, strength);
+            impulse.lifetime = max(impulse.lifetime, lifetime);
+            impulse.starttime = lastmillis;
+            impulse.falloff = max(impulse.falloff, falloff);
+            impulse.radial = max(impulse.radial, radial);
+            return;
+        }
+    }
+
+    int target = grassimpulselist.length();
+    if(target >= grassimpulsemaxevents)
+    {
+        int weakest = 0;
+        loopv(grassimpulselist)
+            if(grassimpulseremainingstrength(grassimpulselist[i]) < grassimpulseremainingstrength(grassimpulselist[weakest])) weakest = i;
+        if(strength <= grassimpulseremainingstrength(grassimpulselist[weakest])) return;
+        target = weakest;
+    }
+    else grassimpulselist.add();
+
+    grassimpulse &impulse = grassimpulselist[target];
+    impulse.position = position;
+    impulse.direction = normalizeddir;
+    impulse.radius = radius;
+    impulse.strength = strength;
+    impulse.propagationspeed = max(propagationspeed, 0.0f);
+    impulse.falloff = clamp(falloff, 0.0f, 1.0f);
+    impulse.radial = max(radial, 0.0f);
+    impulse.starttime = lastmillis;
+    impulse.lifetime = lifetime;
+    impulse.type = type;
+    impulse.queryversion = 0;
+}
+
+void cleargrassimpulses()
+{
+    grassimpulselist.setsize(0);
+    grassimpulsegrid.clear();
+    grassimpulsequeryversion = 0;
+}
 
 struct grassburnevent
 {
@@ -171,7 +278,8 @@ struct grassmesh
 
 static GLuint grassmeshvbo = 0, grassmeshebo = 0;
 static grassmesh grassmeshes[2];
-static Shader *grassshader = NULL, *grassburnshader = NULL, *grassshadowshader = NULL;
+static Shader *grassshader = NULL, *grassimpulseshader = NULL, *grassburnshader = NULL, *grassburnimpulseshader = NULL,
+              *grassshadowshader = NULL;
 static Texture *grassburntex = NULL;
 static GLuint grassburnfieldtex = 0;
 static int grassburnfielddim = 0, grassburnfieldworldsize = 0, grassburnfieldtiles = 0;
@@ -195,6 +303,70 @@ static uint grasshash(uint n)
 static uint grasshashcombine(uint seed, uint value)
 {
     return grasshash(seed ^ (value + 0x9E3779B9u + (seed << 6) + (seed >> 2)));
+}
+
+static inline ullong grassimpulsecellkey(int x, int y)
+{
+    return (ullong(uint(x)) << 32) | uint(y);
+}
+
+static bool grassimpulseisrenderable(const grassimpulse &impulse)
+{
+    float strength = grassimpulseremainingstrength(impulse);
+    if(strength <= grassimpulseminstrength || grassimpulsedist <= 0) return false;
+    float dist = max(camera1->o.dist(impulse.position) - impulse.radius, 0.0f),
+          limit = impulse.type == GRASS_IMPULSE_BULLET ? min(grassimpulsenear, grassimpulsedist) : grassimpulsedist;
+    return dist <= limit && isvisiblesphere(impulse.radius + grassheight, impulse.position) != VFC_NOT_VISIBLE;
+}
+
+static void buildgrassimpulsegrid()
+{
+    prunegrassimpulses();
+    enumerate(grassimpulsegrid, vector<int>, bucket, bucket.setsize(0));
+    grassimpulsegrid.recycle();
+    grassimpulsequeryversion = 0;
+    if(!grassimpulses || grassimpulselist.empty()) return;
+
+    int cells = max((worldsize + GRASSIMPULSECELLSIZE - 1)/GRASSIMPULSECELLSIZE, 1);
+    loopv(grassimpulselist)
+    {
+        grassimpulse &impulse = grassimpulselist[i];
+        if(!grassimpulseisrenderable(impulse)) continue;
+        int x1 = clamp(int(floorf((impulse.position.x - impulse.radius)/GRASSIMPULSECELLSIZE)), 0, cells - 1),
+            x2 = clamp(int(floorf((impulse.position.x + impulse.radius)/GRASSIMPULSECELLSIZE)), 0, cells - 1),
+            y1 = clamp(int(floorf((impulse.position.y - impulse.radius)/GRASSIMPULSECELLSIZE)), 0, cells - 1),
+            y2 = clamp(int(floorf((impulse.position.y + impulse.radius)/GRASSIMPULSECELLSIZE)), 0, cells - 1);
+        for(int y = y1; y <= y2; ++y) for(int x = x1; x <= x2; ++x) grassimpulsegrid[grassimpulsecellkey(x, y)].add(i);
+    }
+}
+
+static void collectgrassimpulsecandidates(float x1, float y1, float x2, float y2, vector<int> &candidates)
+{
+    candidates.setsize(0);
+    if(!grassimpulsegrid.numelems) return;
+    int cells = max((worldsize + GRASSIMPULSECELLSIZE - 1)/GRASSIMPULSECELLSIZE, 1),
+        cx1 = clamp(int(floorf(x1/GRASSIMPULSECELLSIZE)), 0, cells - 1),
+        cx2 = clamp(int(floorf(x2/GRASSIMPULSECELLSIZE)), 0, cells - 1),
+        cy1 = clamp(int(floorf(y1/GRASSIMPULSECELLSIZE)), 0, cells - 1),
+        cy2 = clamp(int(floorf(y2/GRASSIMPULSECELLSIZE)), 0, cells - 1);
+    uint queryversion = ++grassimpulsequeryversion;
+    if(!queryversion)
+    {
+        loopv(grassimpulselist) grassimpulselist[i].queryversion = 0;
+        queryversion = ++grassimpulsequeryversion;
+    }
+    for(int y = cy1; y <= cy2; ++y) for(int x = cx1; x <= cx2; ++x)
+    {
+        vector<int> *bucket = grassimpulsegrid.access(grassimpulsecellkey(x, y));
+        if(!bucket) continue;
+        loopv(*bucket)
+        {
+            grassimpulse &impulse = grassimpulselist[(*bucket)[i]];
+            if(impulse.queryversion == queryversion) continue;
+            impulse.queryversion = queryversion;
+            candidates.add((*bucket)[i]);
+        }
+    }
 }
 
 static float grassburneventfieldradius(const grassburnevent &event)
@@ -754,13 +926,15 @@ void loadgrassshaders()
 {
     if(glversion < 400) return;
     grassshader = loadgrassshader();
+    grassimpulseshader = generateshader("grassimpulse", "grassimpulseshader");
     grassburnshader = generateshader("grassburn", "grassburnshader");
+    grassburnimpulseshader = generateshader("grassburnimpulse", "grassburnimpulseshader");
     grassshadowshader = generateshader("grassshadow", "grassshadowshader");
 }
 
 void cleargrassshaders()
 {
-    grassshader = grassburnshader = grassshadowshader = NULL;
+    grassshader = grassimpulseshader = grassburnshader = grassburnimpulseshader = grassshadowshader = NULL;
 }
 
 static void setupgrassattribs()
@@ -937,6 +1111,83 @@ static bool grasspatchusesburnfield(const grasspatch &patch)
     return false;
 }
 
+struct grasspatchimpulses
+{
+    vec4 positions[MAXGRASSIMPULSESPERPATCH], directions[MAXGRASSIMPULSESPERPATCH], params[MAXGRASSIMPULSESPERPATCH];
+    int count;
+
+    grasspatchimpulses() : count(0) {}
+};
+
+static void collectgrasspatchimpulses(const grasspatch &patch, grasspatchimpulses &selected)
+{
+    selected.count = 0;
+    if(!grassimpulses || grassimpulselist.empty() || !grassimpulsegrid.numelems || !grassimpulsemaxpatch) return;
+    static vector<int> candidates;
+    collectgrassimpulsecandidates(patch.center.x - patch.radius, patch.center.y - patch.radius,
+                                  patch.center.x + patch.radius, patch.center.y + patch.radius, candidates);
+
+    int indices[MAXGRASSIMPULSESPERPATCH], limit = min(grassimpulsemaxpatch, int(MAXGRASSIMPULSESPERPATCH));
+    float scores[MAXGRASSIMPULSESPERPATCH];
+    loopv(candidates)
+    {
+        const grassimpulse &impulse = grassimpulselist[candidates[i]];
+        grassimpulsecandidatechecks++;
+        float reach = patch.radius + grassheight + impulse.radius,
+              centerdist = vec2(patch.center).dist(vec2(impulse.position));
+        if(centerdist > reach) continue;
+
+        float distance = max(centerdist - patch.radius, 0.0f), relevance = max(1.0f - distance/max(impulse.radius, 0.001f), 0.0f),
+              age = max(lastmillis - impulse.starttime, 0)/1000.0f;
+        if(impulse.type == GRASS_IMPULSE_EXPLOSION)
+        {
+            float wave = impulse.propagationspeed > 0 ? age*impulse.propagationspeed : impulse.radius*age*1000.0f/max(impulse.lifetime, 1),
+                  frontwidth = max(impulse.radius*impulse.falloff, 2.0f);
+            relevance = max(1.0f - fabsf(distance - wave)/(patch.radius + frontwidth), 0.0f);
+        }
+        float score = grassimpulseremainingstrength(impulse)*relevance;
+        if(score <= grassimpulseminstrength) continue;
+        grassimpulserelevantchecks++;
+
+        int insert = selected.count;
+        if(selected.count < limit) selected.count++;
+        else
+        {
+            if(score <= scores[limit - 1]) continue;
+            insert = limit - 1;
+        }
+        while(insert > 0 && score > scores[insert - 1])
+        {
+            if(insert < limit)
+            {
+                scores[insert] = scores[insert - 1];
+                indices[insert] = indices[insert - 1];
+            }
+            --insert;
+        }
+        scores[insert] = score;
+        indices[insert] = candidates[i];
+    }
+
+    loopi(selected.count)
+    {
+        const grassimpulse &impulse = grassimpulselist[indices[i]];
+        float ageseconds = max(lastmillis - impulse.starttime, 0)/1000.0f,
+              behavior = impulse.type == GRASS_IMPULSE_EXPLOSION ? max(impulse.propagationspeed, 0.001f) : impulse.radial;
+        selected.positions[i] = vec4(impulse.position, impulse.radius);
+        selected.directions[i] = vec4(impulse.direction, impulse.strength);
+        selected.params[i] = vec4(float(impulse.type), ageseconds, behavior, impulse.lifetime/1000.0f);
+    }
+}
+
+static void setgrassimpulseparams(const grasspatchimpulses &impulses)
+{
+    LOCALPARAMI(grassimpulsecount, impulses.count);
+    LOCALPARAMV(grassimpulsepositions, impulses.positions, impulses.count);
+    LOCALPARAMV(grassimpulsedirections, impulses.directions, impulses.count);
+    LOCALPARAMV(grassimpulseparams, impulses.params, impulses.count);
+}
+
 struct grassrenderstats
 {
     int patches, drawcalls, instances, sourcetris;
@@ -994,6 +1245,7 @@ static void rendergrasspatches(vtxarray *vas, bool shadow, int cascade)
     setgrassframeparams();
     if(!shadow)
     {
+        buildgrassimpulsegrid();
         updategrassburnfield();
         emitgrassburnparticles(vas);
     }
@@ -1028,9 +1280,13 @@ static void rendergrasspatches(vtxarray *vas, bool shadow, int cascade)
             }
             else if(isvisiblesphere(radius, patch.center) >= VFC_FOGGED) continue;
 
-            // Burn selection only changes shader state; patches keep the same instance buffer and draw ranges.
-            bool burning = !shadow && grassburnshader && grassburnfieldtex && !grassburnevents.empty() && grasspatchusesburnfield(patch);
-            Shader *patchshader = burning ? grassburnshader : baseshader;
+            grasspatchimpulses patchimpulses;
+            if(!shadow) collectgrasspatchimpulses(patch, patchimpulses);
+            bool interacting = !shadow && patchimpulses.count > 0 && grassimpulseshader,
+                 burning = !shadow && grassburnshader && grassburnfieldtex && !grassburnevents.empty() && grasspatchusesburnfield(patch);
+            // Effect selection only changes shader state; patches keep the same instance buffer and draw ranges.
+            Shader *patchshader = burning ? (interacting && grassburnimpulseshader ? grassburnimpulseshader : grassburnshader) :
+                                  interacting ? grassimpulseshader : baseshader;
 
             Slot &slot = *patch.slot;
             if(!slot.grasstex)
@@ -1075,6 +1331,11 @@ static void rendergrasspatches(vtxarray *vas, bool shadow, int cascade)
                 boundshader = patchshader;
                 blend = patch.blend;
             }
+            if(interacting)
+            {
+                setgrassimpulseparams(patchimpulses);
+                grassimpulsepatchesaffected++;
+            }
 
             if(!shadow)
             {
@@ -1108,11 +1369,14 @@ static int lastgrassstatprint = 0;
 
 void rendergrass()
 {
+    prunegrassimpulses();
     grassvisiblepatches = grassdrawcalls = grassinstancesrendered = grassmergedtris = 0;
     grassshadowdraws = grassshadowinstances0 = grassshadowinstances1 = 0;
     grassburnfielddirtytiles = grassburnfieldtexelsupdated = 0;
     grassburneventsactive = grassburnevents.length();
     grassburncandidatechecks = grassburnrelevantchecks = grassburnpatchesaffected = 0;
+    grassimpulsesactive = grassimpulselist.length();
+    grassimpulsecandidatechecks = grassimpulserelevantchecks = grassimpulsepatchesaffected = 0;
     if(!grass || !grassdist || glversion < 400 || !glDrawElementsInstanced_ || !visibleva) return;
     timer *grasscputimer = begintimer("grass", false), *grasstimer = begintimer("grass");
     rendergrasspatches(visibleva, false, 0);
@@ -1122,9 +1386,11 @@ void rendergrass()
     {
         lastgrassstatprint = totalmillis - totalmillis%1000;
         conoutf(CON_INFO, "grass: %d visible patches, %d draw calls, %d instances, %d source triangle contributions, "
-                         "%d burn events, %d candidate checks, %d relevant checks, %d fire patches, "
+                         "%d impulses, %d impulse candidate checks, %d impulse relevant checks, %d impulse patches, "
+                         "%d burn events, %d burn candidate checks, %d burn relevant checks, %d fire patches, "
                          "%d burn field dirty tiles, %d burn field texels updated",
                 grassvisiblepatches, grassdrawcalls, grassinstancesrendered, grassmergedtris,
+                grassimpulsesactive, grassimpulsecandidatechecks, grassimpulserelevantchecks, grassimpulsepatchesaffected,
                 grassburneventsactive, grassburncandidatechecks, grassburnrelevantchecks, grassburnpatchesaffected,
                 grassburnfielddirtytiles, grassburnfieldtexelsupdated);
     }
@@ -1138,6 +1404,7 @@ void rendergrassshadow(int cascade)
 
 void cleanupgrass()
 {
+    cleargrassimpulses();
     cleargrassburnevents();
     if(grassmeshvbo)
     {

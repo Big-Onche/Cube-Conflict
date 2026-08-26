@@ -29,6 +29,7 @@ namespace game
 
     void renderProjectileExplosion(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk) // particles and light effects on impact for slow projectiles
     {
+        addgrassimpulse(v, vel, 22.0f, 0.9f, 350, GRASS_IMPULSE_BULLET, 0, 0.35f, 0.4f);
         vec lightOrigin = vec(v).sub(vec(vel).mul(10));
         bool hasRoids = owner->hasRoids();
 
@@ -355,6 +356,9 @@ namespace game
 
     void renderBulletImpact(gameent *owner, const vec &v, const vec &vel, dynent *safe, int atk) //particles and light effects on impact for fast projectiles
     {
+        bool heavy = atk == ATK_MINIGUN || atk == ATK_AK47 || atk == ATK_SV98 || atk == ATK_SKS || atk == ATK_S_GAU8;
+        addgrassimpulse(v, vel, heavy ? 28.0f : 22.0f, heavy ? 1.0f : 0.9f, heavy ? 400 : 350, GRASS_IMPULSE_BULLET, 0, 0.35f,
+                        0.4f);
         int distance = camera1->o.dist(v);
         if(distance < 15) return;
 
@@ -416,6 +420,10 @@ namespace game
 
     void renderInstantImpact(const vec &from, const vec &to, const vec &muzzle, int atk, bool hasRoids) //particles and light effects on impact for instant projectiles
     {
+        bool heavy = atk == ATK_S_CAMPER;
+        if(atk != ATK_FLAMETHROWER)
+            addgrassimpulse(to, vec(to).sub(from), heavy ? 28.0f : 22.0f, heavy ? 1.0f : 0.9f, heavy ? 400 : 350,
+                            GRASS_IMPULSE_BULLET, 0, 0.35f, 0.4f);
         int distance = camera1->o.dist(to);
         if(distance < 15) return;
 

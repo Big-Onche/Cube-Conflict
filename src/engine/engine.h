@@ -839,9 +839,18 @@ extern void menuprocess();
 extern void clearmainmenu();
 
 // grass
+enum
+{
+    GRASS_IMPULSE_BULLET = 0,
+    GRASS_IMPULSE_EXPLOSION
+};
+
 extern void loadgrassshaders();
 extern void rendergrass();
 extern void rendergrassshadow(int cascade);
+extern void addgrassimpulse(const vec &position, const vec &direction, float radius, float strength, int lifetime, int type,
+                            float propagationspeed = 0, float falloff = 1, float radial = 0);
+extern void cleargrassimpulses();
 extern float grassburnflamethrowerradius;
 extern void addgrassburnevent(const vec &center, float radius, int lifetime = -1);
 extern void carrygrassburnevent(size_t owner, const vec &center, float radius);

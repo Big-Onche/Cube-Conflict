@@ -1480,6 +1480,7 @@ void resetmap()
     clearparticles();
     cleardamagescreen();
     clearstains();
+    cleargrassimpulses();
     cleargrassburnevents();
     clearsleep();
     cancelsel();
