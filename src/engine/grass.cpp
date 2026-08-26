@@ -37,6 +37,12 @@ VAR(grassanimmillis, 1, 3000, 60000);
 FVAR(grassanimscale, 0, 0.2f, 1);
 FVAR(grasswindangle, 0, 0, 360);
 FVAR(grasswindscale, 0, 0.015f, 1);
+FVAR(grasswindnoisescale, 0.0001f, 0.05f, 0.1f);
+FVAR(grasswindscrollspeed, 0, 0.1f, 1);
+FVAR(grasswindguststrength, 0, 0.55f, 2);
+FVAR(grasswinddirectionvariation, 0, 0.2f, 1);
+FVAR(grasswinddetailscale, 1, 5, 32);
+FVAR(grasswinddetailstrength, 0, 0.2f, 1);
 
 VARP(grassimpulses, 0, 1, 1);
 FVARP(grassimpulsebulletdist, 0, 256, 10000);
@@ -306,7 +312,7 @@ struct Mesh
 static GLuint meshVbo = 0, meshEbo = 0;
 static Mesh meshes[2];
 static Shader *shader = NULL, *impulseShader = NULL, *burnShader = NULL, *burnImpulseShader = NULL, *shadowShader = NULL;
-static Texture *burnTexture = NULL;
+static Texture *burnTexture = NULL, *windTexture = NULL;
 static GLuint burnFieldTexture = 0;
 static int burnFieldDimension = 0, burnFieldWorldSize = 0, burnFieldTiles = 0;
 static float burnFieldCellSize = 0;
@@ -1034,6 +1040,9 @@ static void setFrameParams()
 
     GLOBALPARAMF(grassWindParams, windPhase, grassanimscale, cosf(angle), sinf(angle));
     GLOBALPARAMF(grassWindSpatial, grasswindscale, grassmargin, grassmarginfade, 0.0f);
+    GLOBALPARAMF(grassWindNoiseParams, grasswindnoisescale, lastmillis/1000.0f*grasswindscrollspeed,
+                 grasswindguststrength, grasswinddirectionvariation);
+    GLOBALPARAMF(grassWindDetailParams, grasswinddetailscale, grasswinddetailstrength, 0.0f, 0.0f);
     GLOBALPARAMF(grassImpulseControl, grassimpulsestrength, grassimpulsewobble, grassimpulsewobblespeed, grassimpulseafterwind);
     GLOBALPARAMF(grassImpulseAfterWindParams, grassimpulseafterwindmillis/1000.0f, grassimpulseafterwindwobblespeed, 0.0f, 0.0f);
     bvec color(grasscolour);
@@ -1344,6 +1353,9 @@ static void renderPatches(vtxarray *vas, bool shadow, int cascade, DebugStats *s
     initMeshes();
     setupAttribs();
     glDisable(GL_CULL_FACE);
+    if(!windTexture) windTexture = textureload("media/noise/grass_wind.jpg", 0, true, false);
+    glActiveTexture_(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, windTexture->id);
     glActiveTexture_(GL_TEXTURE0);
 
     GLuint textureId = 0;
