@@ -194,6 +194,12 @@ struct grassburnparticleposition
     int ignition;
 };
 
+struct grassburnfieldupdate
+{
+    int index, ignition, recoverstart, expiry;
+    ushort mask;
+};
+
 struct grassburnevent
 {
     vec center;
@@ -296,7 +302,9 @@ static GLuint grassburnfieldtex = 0;
 static int grassburnfielddim = 0, grassburnfieldworldsize = 0, grassburnfieldtiles = 0;
 static float grassburnfieldcellsize = 0;
 static vector<ushort> grassburnfieldstate;
-static vector<int> grassburnfieldexpiry, grassburnfieldtileexpiry;
+static vector<int> grassburnfieldignition, grassburnfieldrecover, grassburnfieldexpiry, grassburnfieldtileexpiry;
+static vector<grassburnfieldupdate> grassburnfieldpending;
+static vector<uchar> grassburnfielduploaddirty;
 static int grassburnfieldnextexpiry = 0;
 static bool grassburnfieldactive = false;
 
@@ -398,8 +406,12 @@ static void cleargrassburnfield()
     grassburnfielddim = grassburnfieldworldsize = grassburnfieldtiles = 0;
     grassburnfieldcellsize = 0;
     grassburnfieldstate.setsize(0);
+    grassburnfieldignition.setsize(0);
+    grassburnfieldrecover.setsize(0);
     grassburnfieldexpiry.setsize(0);
     grassburnfieldtileexpiry.setsize(0);
+    grassburnfieldpending.setsize(0);
+    grassburnfielduploaddirty.setsize(0);
     grassburnfieldnextexpiry = 0;
     grassburnfieldactive = false;
     loopv(grassburnevents) grassburnevents[i].fieldpending = true;
@@ -419,15 +431,21 @@ static bool setupgrassburnfield()
     grassburnfieldtiles = (grassburnfielddim + GRASSBURNFIELDTILESIZE - 1)/GRASSBURNFIELDTILESIZE;
     int texels = grassburnfielddim*grassburnfielddim, tiles = grassburnfieldtiles*grassburnfieldtiles;
     ushort *state = grassburnfieldstate.pad(texels*3);
-    int *expiry = grassburnfieldexpiry.pad(texels), *tileexpiry = grassburnfieldtileexpiry.pad(tiles);
+    int *ignition = grassburnfieldignition.pad(texels), *recover = grassburnfieldrecover.pad(texels),
+        *expiry = grassburnfieldexpiry.pad(texels), *tileexpiry = grassburnfieldtileexpiry.pad(tiles);
+    uchar *uploaddirty = grassburnfielduploaddirty.pad(tiles);
     memset(state, 0, texels*3*sizeof(ushort));
+    memset(ignition, 0, texels*sizeof(int));
+    memset(recover, 0, texels*sizeof(int));
     memset(expiry, 0, texels*sizeof(int));
     memset(tileexpiry, 0, tiles*sizeof(int));
+    memset(uploaddirty, 0, tiles*sizeof(uchar));
 
     glGenTextures(1, &grassburnfieldtex);
     glActiveTexture_(GL_TEXTURE3);
     createtexture(grassburnfieldtex, grassburnfielddim, grassburnfielddim, NULL, 3, 0, GL_RGB16, GL_TEXTURE_2D, 0, 0, 0, false, GL_RGB);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, grassburnfielddim, grassburnfielddim, GL_RGB, GL_UNSIGNED_SHORT, state);
     glActiveTexture_(GL_TEXTURE0);
     return true;
@@ -440,6 +458,60 @@ static void uploadgrassburnfield(int x1, int y1, int width, int height, vector<u
     loopi(height) memcpy(&pixels[i*width*3], &grassburnfieldstate[((y1 + i)*grassburnfielddim + x1)*3], width*3*sizeof(ushort));
     glTexSubImage2D(GL_TEXTURE_2D, 0, x1, y1, width, height, GL_RGB, GL_UNSIGNED_SHORT, pixels.getbuf());
     grassburnfieldtexelsupdated += width*height;
+}
+
+static bool applygrassburnfieldupdate(const grassburnfieldupdate &update)
+{
+    ushort mask = update.mask;
+    int ignition = update.ignition, recoverstart = update.recoverstart, expiry = update.expiry;
+    if(grassburnfieldexpiry[update.index] > lastmillis && grassburnfieldstate[update.index*3 + 2])
+    {
+        ushort oldmask = grassburnfieldstate[update.index*3 + 2];
+        uint remaining = uint(65535 - oldmask)*uint(65535 - mask);
+        mask = ushort(65535 - (remaining + 32767)/65535);
+        ignition = max(ignition, grassburnfieldignition[update.index]);
+        recoverstart = max(recoverstart, grassburnfieldrecover[update.index]);
+        expiry = max(expiry, grassburnfieldexpiry[update.index]);
+    }
+    grassburnfieldstate[update.index*3] = encodegrassburntime(ignition);
+    grassburnfieldstate[update.index*3 + 1] = encodegrassburntime(recoverstart);
+    grassburnfieldstate[update.index*3 + 2] = mask;
+    grassburnfieldignition[update.index] = ignition;
+    grassburnfieldrecover[update.index] = recoverstart;
+    grassburnfieldexpiry[update.index] = expiry;
+    int x = update.index%grassburnfielddim, y = update.index/grassburnfielddim,
+        tileindex = (y/GRASSBURNFIELDTILESIZE)*grassburnfieldtiles + x/GRASSBURNFIELDTILESIZE;
+    grassburnfieldtileexpiry[tileindex] = max(grassburnfieldtileexpiry[tileindex], expiry);
+    grassburnfieldactive = true;
+    if(!grassburnfieldnextexpiry || expiry < grassburnfieldnextexpiry) grassburnfieldnextexpiry = expiry;
+    return true;
+}
+
+static void applypendinggrassburnfield(vector<ushort> &pixels)
+{
+    for(int i = 0; i < grassburnfieldpending.length();)
+    {
+        if(grassburnfieldpending[i].ignition > lastmillis)
+        {
+            ++i;
+            continue;
+        }
+        grassburnfieldupdate update = grassburnfieldpending.removeunordered(i);
+        if(!applygrassburnfieldupdate(update)) continue;
+        int x = update.index%grassburnfielddim, y = update.index/grassburnfielddim;
+        grassburnfielduploaddirty[(y/GRASSBURNFIELDTILESIZE)*grassburnfieldtiles + x/GRASSBURNFIELDTILESIZE] = 1;
+    }
+
+    loopv(grassburnfielduploaddirty) if(grassburnfielduploaddirty[i])
+    {
+        int tx = i%grassburnfieldtiles, ty = i/grassburnfieldtiles,
+            x1 = tx*GRASSBURNFIELDTILESIZE, y1 = ty*GRASSBURNFIELDTILESIZE,
+            width = min(int(GRASSBURNFIELDTILESIZE), grassburnfielddim - x1),
+            height = min(int(GRASSBURNFIELDTILESIZE), grassburnfielddim - y1);
+        uploadgrassburnfield(x1, y1, width, height, pixels);
+        grassburnfielduploaddirty[i] = 0;
+        grassburnfielddirtytiles++;
+    }
 }
 
 static void rasterizegrassburnevent(grassburnevent &event, vector<ushort> &pixels)
@@ -468,16 +540,14 @@ static void rasterizegrassburnevent(grassburnevent &event, vector<ushort> &pixel
               edge = clamp((radius - distance)/feather + 0.5f, 0.0f, 1.0f);
         if(radius <= 0 || edge <= 0) continue;
 
-        int index = y*grassburnfielddim + x;
-        if(grassburnfieldexpiry[index] > expiry && grassburnfieldstate[index*3 + 2] >= ushort(edge*65535 + 0.5f)) continue;
-        int ignition = event.burnstart + int(min(distance/radius, 1.0f)*grassburnpropagatemillis);
-        grassburnfieldstate[index*3] = encodegrassburntime(ignition);
-        grassburnfieldstate[index*3 + 1] = encodegrassburntime(event.recoverstart);
-        grassburnfieldstate[index*3 + 2] = ushort(edge*65535 + 0.5f);
-        grassburnfieldexpiry[index] = expiry;
-        int tileindex = (y/GRASSBURNFIELDTILESIZE)*grassburnfieldtiles + x/GRASSBURNFIELDTILESIZE;
-        grassburnfieldtileexpiry[tileindex] = max(grassburnfieldtileexpiry[tileindex], expiry);
-        affected = true;
+        grassburnfieldupdate update;
+        update.index = y*grassburnfielddim + x;
+        update.ignition = event.burnstart + int(min(distance/radius, 1.0f)*grassburnpropagatemillis);
+        update.recoverstart = event.recoverstart;
+        update.expiry = expiry;
+        update.mask = ushort(edge*65535 + 0.5f);
+        if(update.ignition > lastmillis) grassburnfieldpending.add(update);
+        else if(applygrassburnfieldupdate(update)) affected = true;
     }
     if(affected)
     {
@@ -490,17 +560,14 @@ static void rasterizegrassburnevent(grassburnevent &event, vector<ushort> &pixel
 static void updategrassburnfield()
 {
     grassburnfielddirtytiles = grassburnfieldtexelsupdated = 0;
-    if(!grassburnfieldtex && grassburnevents.empty())
-    {
-        grassburneventsactive = 0;
-        return;
-    }
     if(!setupgrassburnfield()) return;
 
     vector<ushort> pixels;
     glActiveTexture_(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D, grassburnfieldtex);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+    applypendinggrassburnfield(pixels);
     loopv(grassburnevents) if(grassburnevents[i].fieldpending) rasterizegrassburnevent(grassburnevents[i], pixels);
 
     if(grassburnfieldnextexpiry && lastmillis >= grassburnfieldnextexpiry)
@@ -528,6 +595,7 @@ static void updategrassburnfield()
                 if(grassburnfieldexpiry[index] && grassburnfieldexpiry[index] <= lastmillis)
                 {
                     grassburnfieldstate[index*3] = grassburnfieldstate[index*3 + 1] = grassburnfieldstate[index*3 + 2] = 0;
+                    grassburnfieldignition[index] = grassburnfieldrecover[index] = 0;
                     grassburnfieldexpiry[index] = 0;
                     changed = true;
                 }
@@ -1208,6 +1276,8 @@ static void rendergrasspatches(vtxarray *vas, bool shadow, int cascade)
     {
         buildgrassimpulsegrid();
         updategrassburnfield();
+        setgrassburnframeparams();
+        if(!grassburntex) grassburntex = textureload("media/noise/burning_grass.jpg", 0, true, false);
         emitgrassburnparticles(vas);
     }
     initgrassmeshes();
@@ -1217,7 +1287,7 @@ static void rendergrasspatches(vtxarray *vas, bool shadow, int cascade)
 
     GLuint texid = 0;
     Shader *boundshader = NULL;
-    bool texbound = false, burnframeset = false, burntexbound = false;
+    bool texbound = false, burntexbound = false;
     int blend = -1;
     for(vtxarray *va = vas; va; va = shadow ? va->rnext : va->next)
     {
@@ -1263,11 +1333,6 @@ static void rendergrasspatches(vtxarray *vas, bool shadow, int cascade)
                 texbound = true;
             }
 
-            if(burning && !burnframeset)
-            {
-                setgrassburnframeparams();
-                burnframeset = true;
-            }
             if(burning && !burntexbound)
             {
                 if(!grassburntex) grassburntex = textureload("media/noise/burning_grass.jpg", 0, true, false);
