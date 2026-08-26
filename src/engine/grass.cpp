@@ -26,8 +26,9 @@ VAR(grasslodtransition, 0, 64, 256);
 FVAR(grassfardensity, 0.05f, 1, 1);
 
 VARP(grassshadowcascades, 0, 2, 2);
-FVARF(grassshadowdensitynear, 0.01f, 0.65f, 1, settingsChanged());
-FVARF(grassshadowdensity, 0.01f, 0.25f, 1, settingsChanged());
+FVARF(grassshadowdensitynear, 0.01f, 0.75f, 1, settingsChanged());
+FVARF(grassshadowdensity, 0.01f, 0.5f, 1, settingsChanged());
+FVAR(grassshadowtransition, 0, 1.0f, 1.0f);
 VAR(grassshadowlodnear, 0, 1, 1);
 VAR(grassshadowlodfar, 0, 1, 1);
 VAR(grassshadowwindcascades, 0, 1, 2);
@@ -1348,6 +1349,8 @@ static void renderPatches(vtxarray *vas, bool shadow, int cascade, DebugStats *s
     if(!baseShader) return;
 
     setFrameParams();
+    float nextShadowDensity = cascade + 1 < grassshadowcascades ? grassshadowdensity : 0.0f;
+    GLOBALPARAMF(grassShadowParams, shadow ? grassshadowtransition : 0.0f, nextShadowDensity, 0.0f, 0.0f);
     if(!shadow) setBurnFrameParams();
 
     initMeshes();
