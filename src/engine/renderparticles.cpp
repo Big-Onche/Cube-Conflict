@@ -2018,6 +2018,7 @@ static partrenderer *parts[] =
     &fireballs,                                                                                                              // PART_EXPLOSION
     // misc
     new quadrenderer("<grey>media/particles/misc/blood.png", PT_PART|PT_FLIP|PT_MOD|PT_RND4|PT_COLLIDE, STAIN_BLOOD),        // PART_BLOOD (note: rgb is inverted)
+    new quadrenderer("media/particles/misc/grass.png", PT_PART|PT_FLIP|PT_RND4|PT_LERP|PT_COLLIDE),                          // PART_GRASS
     new quadrenderer("media/particles/misc/glare.png", PT_PART|PT_ROT|PT_FLIP|PT_OVERBRIGHT),                                // PART_GLARE
     new quadrenderer("media/particles/misc/spark.png", PT_PART|PT_FLIP|PT_BRIGHT),                                           // PART_SPARK
     new quadrenderer("media/particles/misc/spark.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_EMITPART),                               // PART_SPARK_P
@@ -2032,7 +2033,7 @@ static partrenderer *parts[] =
     new quadrenderer("media/particles/fire/smoke.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_LERP|PT_RND4|PT_SOFT|PT_LABSORPTION|PT_TRACK, -1, HUD_PARTICLE_JOINT), // PART_HUD_JOINT_SMOKE
     new quadrenderer("media/particles/fire/fire_ball.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_RND4|PT_TRACK, -1, HUD_PARTICLE_JOINT),                           // PART_HUD_JOINT_FIRE_BALL
     new quadrenderer("media/particles/fire/smoke.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_LERP|PT_RND4|PT_SOFT|PT_LABSORPTION|PT_TRACK, -1, HUD_PARTICLE_CASING), // PART_HUD_CASING_SMOKE
-    new quadrenderer("media/particles/fire/fire_ball.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_RND4|PT_TRACK, -1, HUD_PARTICLE_CASING),                           // PART_HUD_CASING_FIRE_BALL
+    new quadrenderer("media/particles/fire/fire_ball.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_RND4|PT_TRACK, -1, HUD_PARTICLE_CASING)                           // PART_HUD_CASING_FIRE_BALL
 };
 
 static const uint particlerenderflagmask = PT_LERP|PT_MOD|PT_BRIGHT|PT_NOTEX|PT_SOFT|PT_SHADER|PT_LABSORPTION;
