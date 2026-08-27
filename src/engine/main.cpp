@@ -1450,6 +1450,7 @@ int main(int argc, char **argv)
 
         inbetweenframes = false;
         gl_drawframe();
+        checkautoscreenshot();
         swapbuffers();
         renderedframe = inbetweenframes = true;
 #if defined(STEAM)

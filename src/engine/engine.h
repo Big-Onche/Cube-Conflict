@@ -699,6 +699,7 @@ extern void renderprogress(float bar, const char *text = "", bool background = f
 
 extern void getframemillis(float &avg, float &best, float &worst);
 extern void getfps(int &fps, int &bestdiff, int &worstdiff);
+extern void checkautoscreenshot();
 extern void swapbuffers(bool overlay = true);
 extern int getclockmillis();
 

@@ -3896,6 +3896,7 @@ enum
 
 VARP(screenshotquality, 0, 97, 100);
 VARP(screenshotformat, 0, IMG_PNG, NUMIMG-1);
+VAR(autoscreenshot, 0, 0, 60000);
 
 const char *imageexts[NUMIMG] = { ".bmp", ".tga", ".png", ".jpg" };
 
@@ -4099,6 +4100,23 @@ void screenshot(char *filename)
 }
 
 COMMAND(screenshot, "s");
+
+void checkautoscreenshot()
+{
+    static int lastautoscreenshot = 0;
+    if(!autoscreenshot)
+    {
+        lastautoscreenshot = totalmillis;
+        return;
+    }
+
+    int interval = max(autoscreenshot, 100);
+    if(totalmillis - lastautoscreenshot < interval) return;
+
+    lastautoscreenshot = totalmillis;
+    static char filename[] = "";
+    screenshot(filename);
+}
 
 void flipnormalmapy(char *destfile, char *normalfile) // jpg/png/tga-> tga
 {
