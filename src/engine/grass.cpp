@@ -8,6 +8,7 @@ static void clearBurnField();
 
 static const int patchSize = 32, maxInstances = 1<<20, impulseMaxEvents = 64, impulseMaxPatch = 4,
                  burnFieldTexelSize = 8, burnFieldMaxSize = 2048;
+static const int IMPULSE_PLAYER = 2;
 
 VARP(grass, 0, 1, 1);
 VARP(grassdist, 0, 768, 10000);
@@ -61,6 +62,13 @@ FVAR(grassimpulseminstrength, 0, 0.01f, 10);
 VAR(grassimpulsebulletmergemillis, 0, 250, 500);
 FVAR(grassimpulsebulletmergedist, 0, 16, 64);
 
+VARP(grassplayerflatten, 0, 1, 1);
+FVARP(grassplayerflattendist, 0, 256, 10000);
+FVAR(grassplayerflattenradius, 1, 16, 64);
+FVAR(grassplayerflattenstrength, 0, 2, 3);
+VAR(grassplayerflattenmillis, 100, 600, 3000);
+FVAR(grassplayerflattenstep, 0.5f, 2, 32);
+
 VAR(grassburnholdmillis, 0, 25000, 300000);
 VAR(grassburnfademillis, 100, 15000, 300000);
 VAR(grassburnpropagatemillis, 1, 500, 10000);
@@ -106,7 +114,8 @@ struct Impulse
 {
     vec position, direction;
     float radius, strength, propagationSpeed, falloff, radial;
-    int startTime, lifetime, type;
+    int startTime, lastRefresh, lifetime, type;
+    const dynent *owner;
     uint queryVersion;
 };
 
@@ -116,14 +125,19 @@ static uint impulseQueryVersion = 0;
 
 static float impulseRemainingStrength(const Impulse &impulse)
 {
-    float age = clamp((lastmillis - impulse.startTime)/float(max(impulse.lifetime, 1)), 0.0f, 1.0f);
+    int referenceTime = impulse.type == IMPULSE_PLAYER ? impulse.lastRefresh : impulse.startTime;
+    float age = clamp((lastmillis - referenceTime)/float(max(impulse.lifetime, 1)), 0.0f, 1.0f);
     return impulse.strength*(1.0f - age);
 }
 
 static void pruneImpulses()
 {
-    loopvrev(impulseList) if(lastmillis - impulseList[i].startTime >= impulseList[i].lifetime)
-        impulseList.removeunordered(i);
+    loopvrev(impulseList)
+    {
+        const Impulse &impulse = impulseList[i];
+        int referenceTime = impulse.type == IMPULSE_PLAYER ? impulse.lastRefresh : impulse.startTime;
+        if(lastmillis - referenceTime >= impulse.lifetime) impulseList.removeunordered(i);
+    }
 
     while(impulseList.length() > impulseMaxEvents)
     {
@@ -159,6 +173,7 @@ void addImpulse(const vec &position, const vec &direction, float radius, float s
             impulse.strength = max(impulse.strength, strength);
             impulse.lifetime = max(impulse.lifetime, effectLifetime);
             impulse.startTime = lastmillis;
+            impulse.lastRefresh = lastmillis;
             impulse.falloff = max(impulse.falloff, falloff);
             impulse.radial = max(impulse.radial, radial);
             return;
@@ -190,9 +205,77 @@ void addImpulse(const vec &position, const vec &direction, float radius, float s
     impulse.falloff = clamp(falloff, 0.0f, 1.0f);
     impulse.radial = max(radial, 0.0f);
     impulse.startTime = lastmillis;
+    impulse.lastRefresh = lastmillis;
     impulse.lifetime = effectLifetime;
     impulse.type = type;
+    impulse.owner = NULL;
     impulse.queryVersion = 0;
+}
+
+static Impulse &addPlayerImpulse(const dynent *owner, const vec &position, const vec &direction, float radius)
+{
+    int target = impulseList.length();
+
+    if(target >= impulseMaxEvents)
+    {
+        target = 0;
+        loopv(impulseList) if(impulseRemainingStrength(impulseList[i]) < impulseRemainingStrength(impulseList[target])) target = i;
+    }
+    else impulseList.add();
+
+    Impulse &impulse = impulseList[target];
+    impulse.position = position;
+    impulse.direction = vec(direction.x, direction.y, 0).safenormalize();
+    impulse.radius = radius;
+    impulse.strength = grassplayerflattenstrength;
+    impulse.propagationSpeed = 0;
+    impulse.falloff = 1;
+    impulse.radial = 1;
+    impulse.startTime = impulse.lastRefresh = lastmillis;
+    impulse.lifetime = grassplayerflattenmillis;
+    impulse.type = IMPULSE_PLAYER;
+    impulse.owner = owner;
+    impulse.queryVersion = 0;
+    return impulse;
+}
+
+static void updatePlayerImpulses()
+{
+    if(!grassimpulses || !grassplayerflatten || grassplayerflattenstrength <= 0 || grassplayerflattendist <= 0) return;
+
+    loopi(game::numdynents())
+    {
+        dynent *d = game::iterdynents(i);
+        if(!d || d->type != ENT_PLAYER || d->state != CS_ALIVE || d->physstate <= PHYS_FALL || d->inwater) continue;
+
+        vec position = d->feetpos(0.2f);
+        if(camera1->o.squaredist(position) > grassplayerflattendist*grassplayerflattendist) continue;
+
+        vec direction(d->vel.x, d->vel.y, 0);
+        float radius = max(grassplayerflattenradius, d->radius), step = min(grassplayerflattenstep, radius);
+        Impulse *contact = NULL;
+
+        loopv(impulseList) if(impulseList[i].type == IMPULSE_PLAYER && impulseList[i].owner == d)
+        {
+            contact = &impulseList[i];
+            break;
+        }
+
+        if(contact && contact->position.squaredist(position) >= step*step)
+        {
+            contact->owner = NULL;
+            contact = NULL;
+        }
+        if(!contact) contact = &addPlayerImpulse(d, position, direction, radius);
+        else
+        {
+            if(direction.squaredlen() > 1e-4f) contact->direction = direction.safenormalize();
+            contact->radius = radius;
+            contact->strength = grassplayerflattenstrength;
+            contact->lifetime = grassplayerflattenmillis;
+            contact->lastRefresh = lastmillis;
+        }
+    }
 }
 
 void clearImpulses()
@@ -351,8 +434,12 @@ static bool impulseIsRenderable(const Impulse &impulse)
 
     if(strength <= grassimpulseminstrength || grassimpulsedist <= 0) return false;
 
-    float dist = max(camera1->o.dist(impulse.position) - impulse.radius, 0.0f),
-          limit = impulse.type == IMPULSE_BULLET ? min(grassimpulsebulletdist, grassimpulsedist) : grassimpulsedist;
+    float centerDist = camera1->o.dist(impulse.position),
+          dist = impulse.type == IMPULSE_PLAYER ? centerDist : max(centerDist - impulse.radius, 0.0f), limit;
+
+    if(impulse.type == IMPULSE_BULLET) limit = min(grassimpulsebulletdist, grassimpulsedist);
+    else if(impulse.type == IMPULSE_PLAYER) limit = min(grassplayerflattendist, grassimpulsedist);
+    else limit = grassimpulsedist;
 
     return dist <= limit && isvisiblesphere(impulse.radius + grassheight, impulse.position) != VFC_NOT_VISIBLE;
 }
@@ -1289,9 +1376,10 @@ static void collectPatchImpulses(const Patch &patch, PatchImpulses &selected, De
     {
         const Impulse &impulse = impulseList[indices[i]];
         float ageSeconds = max(lastmillis - impulse.startTime, 0)/1000.0f,
+              releaseSeconds = impulse.type == IMPULSE_PLAYER ? max(lastmillis - impulse.lastRefresh, 0)/1000.0f : impulse.direction.z,
               behavior = impulse.type == IMPULSE_EXPLOSION ? max(impulse.propagationSpeed, 0.001f) : impulse.radial;
         selected.positions[i] = vec4(impulse.position, impulse.radius);
-        selected.directions[i] = vec4(impulse.direction, impulse.strength);
+        selected.directions[i] = vec4(impulse.direction.x, impulse.direction.y, releaseSeconds, impulse.strength);
         selected.params[i] = vec4(float(impulse.type), ageSeconds, behavior, impulse.lifetime/1000.0f);
     }
 }
@@ -1474,6 +1562,7 @@ void render()
     if(!grass || !grassdist || glversion < 400 || !glDrawElementsInstanced_ || !visibleva) return;
 
     DebugStats stats, *statsPtr = grassstats ? &stats : NULL;
+    updatePlayerImpulses();
     buildImpulseGrid();
     updateBurnField(statsPtr);
 
