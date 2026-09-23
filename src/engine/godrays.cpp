@@ -23,8 +23,9 @@ namespace crepuscular
     VARP(crsteps, 8, 48, 64);
     FVARP(crscale, 0.125f, 0.25f, 1.0f);
     FVARP(crbilateraledge, 1e-5f, 0.02f, 1.0f);
+    FVARP(crsmooth, 0.0f, 0.0f, 16.0f);
 
-    FVARP(crvariation, 0.0f, 0.5f, 1.0f);
+    FVARP(crvariation, 0.0f, 1.5f, 2.0f);
     FVARP(crfreq, 0.25f, 32.0f, 64.0f);
     FVARP(crdetailfreq, 0.5f, 64.0f, 128.0f);
     FVARP(craniso, 1.0f, 16.0f, 32.0f);
@@ -284,6 +285,7 @@ namespace crepuscular
         GLOBALPARAMF(crcompositeparams, float(crw), float(crh), scaleparams.z, scaleparams.w);
         GLOBALPARAMF(crscaleparams, scaleparams.x, scaleparams.y, scaleparams.z, scaleparams.w);
         GLOBALPARAMF(crbilateralparams, crbilateraledge, useupscale ? 1.0f : 0.0f);
+        GLOBALPARAMF(crsmoothparams, crsmooth*scaleparams.z, crsmooth*scaleparams.w);
         GLOBALPARAMF(crtint, raytint.x, raytint.y, raytint.z, crstrength);
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
