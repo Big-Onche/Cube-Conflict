@@ -3171,6 +3171,7 @@ void gl_drawhud()
     pophudmatrix();
 
     drawcrosshair(w, h);
+    lensFlares::debugview();
 
     glDisable(GL_BLEND);
 

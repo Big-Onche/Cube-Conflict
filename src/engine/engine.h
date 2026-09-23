@@ -578,6 +578,7 @@ namespace lensFlares
 {
     extern void addFlares(const vec &o, int color, float size, bool unlimitedDistance, bool lensGhosts, int maxDistance);
     extern void render();
+    extern void debugview();
     extern void cleanup();
 }
 
