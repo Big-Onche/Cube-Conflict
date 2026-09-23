@@ -2777,11 +2777,15 @@ void gl_drawview()
         setfog(fogmat, fogbelow, clamp(fogbelow, 0.0f, 1.0f), abovemat);
     }
 
-    rendertransparent();
-    GLERROR;
-
+    // Put distant sunlight effects behind every particle layer. Existing smoke
+    // alpha blending supplies smooth transmittance (including stacked layers)
+    // without another particle pass or an opacity mask.
     godrays::crepuscular::render();
     godrays::geometry::render();
+    lensFlares::render();
+    GLERROR;
+
+    rendertransparent();
     GLERROR;
 
     // Composite the volume once behind transparent materials and particles. This keeps the
@@ -2832,8 +2836,6 @@ void gl_drawview()
     glDisable(GL_DEPTH_TEST);
 
     if(fogoverlay && fogmat != MAT_AIR) drawfogoverlay(fogmat, fogbelow, clamp(fogbelow, 0.0f, 1.0f), abovemat);
-
-    lensFlares::render();
 
     doaa(setuppostfx(vieww, viewh, scalefbo), processhdr);
     renderpostfx(scalefbo);

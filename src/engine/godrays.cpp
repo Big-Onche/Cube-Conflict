@@ -23,7 +23,7 @@ namespace crepuscular
     VARP(crsteps, 8, 48, 64);
     FVARP(crscale, 0.125f, 0.25f, 1.0f);
     FVARP(crbilateraledge, 1e-5f, 0.02f, 1.0f);
-    FVARP(crsmooth, 0.0f, 0.0f, 16.0f);
+    FVARP(crsmooth, 0.0f, 6.0f, 16.0f);
 
     FVARP(crvariation, 0.0f, 1.5f, 2.0f);
     FVARP(crfreq, 0.25f, 32.0f, 64.0f);
