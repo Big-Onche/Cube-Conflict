@@ -2650,7 +2650,6 @@ namespace particles
         bvec4 decoded = decodeparticlecolor(type, color);
         int fmin = 1;
         int fmax = fade*3;
-        speed = min(speed, 2);
 
         loopi(num)
         {
@@ -2716,7 +2715,6 @@ namespace particles
 
         bvec4 decoded = decodeparticlecolor(hudtype, randomColor ? getRandomColor() : color);
         int fmin = 1, fmax = fade*3;
-        speed = min(speed, 2);
         loopi(num)
         {
             int x, y, z;
