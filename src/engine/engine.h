@@ -557,10 +557,21 @@ namespace postfx
     extern void updateUnderwaterEffect(bool underwater);
 }
 
-namespace godRays
+namespace godrays
 {
-    extern void render();
-    extern void cleanup();
+    namespace crepuscular
+    {
+        extern void init();
+        extern void render();
+        extern bool debugview();
+        extern void cleanup();
+    }
+    namespace geometry
+    {
+        extern void render();
+        extern bool debugview();
+        extern void cleanup();
+    }
 }
 
 namespace lensFlares
@@ -803,10 +814,8 @@ extern void drawskybox(bool clear = false);
 extern bool hasskybox();
 extern bool limitsky();
 extern bool renderexplicitsky(bool outline = false);
-extern bool hasCloudLayerProjection();
-extern bool bindCloudLayer();
-extern float getCloudLayerOpacity();
-extern void getCloudLayerParams(vec4 &params, vec4 &transform);
+extern bool hascloudraysource();
+extern void rendercloudraysource();
 extern bool hascloudlayershadow();
 extern bool bindcloudlayershadow();
 extern float getcloudlayershadowstrength();

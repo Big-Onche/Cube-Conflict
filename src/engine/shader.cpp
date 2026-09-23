@@ -48,6 +48,7 @@ void loadshaders()
 
     loadedshaders = true;
 
+    godrays::crepuscular::init();
     useshaderbyname("lensflare"); // warm deferred lens flares up front so the first look at the sun doesn't hitch.
 }
 

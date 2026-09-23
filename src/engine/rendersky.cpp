@@ -635,21 +635,31 @@ bool hascloudlayershadow()
     return cloudlayer[0] && cloudheight != 0.0f && cloudalpha > 0.0f && cloudshadow > 0.0f && cloudscale > 1.0e-4f && cloudoverlay && cloudoverlay != notexture;
 }
 
-bool hasCloudLayerProjection()
+bool hascloudraysource()
 {
-    return cloudlayer[0] && cloudheight != 0.0f && cloudscale > 1.0e-4f && (cloudalpha > 0.0f || cloudshadow > 0.0f) && cloudoverlay && cloudoverlay != notexture;
+    return cloudlayer[0] && cloudheight > 0.0f && cloudscale > 1.0e-4f && cloudalpha > 0.0f && cloudoverlay && cloudoverlay != notexture;
 }
 
-bool bindCloudLayer()
+void rendercloudraysource()
 {
-    if(!hasCloudLayerProjection()) return false;
-    glBindTexture(GL_TEXTURE_2D, cloudoverlay->id);
-    return true;
-}
-
-float getCloudLayerOpacity()
-{
-    return clamp(cloudalpha, 0.0f, 1.0f);
+    // Use the visible overlay mesh so its UVs, reach, height and edge fade match exactly.
+    const float time = lastmillis/1000.0f, angle = (spincloudlayer*time + yawcloudlayer)*-RAD;
+    float tx = cloudoffsetx + cloudscrollx*time, ty = cloudoffsety + cloudscrolly*time;
+    matrix4 skymatrix = cammatrix, skyprojmatrix;
+    if(cloudreach)
+    {
+        vec cloudpos;
+        cammatrix.transform(vec(camera1->o.x, camera1->o.y, 0), cloudpos);
+        skymatrix.settranslation(cloudpos);
+        adjustcloudreach(angle, tx, ty);
+    }
+    else skymatrix.settranslation(0, 0, 0);
+    skymatrix.rotate_around_z(angle);
+    skyprojmatrix.mul(projmatrix, skymatrix);
+    LOCALPARAM(skymatrix, skyprojmatrix);
+    glDisable(GL_CULL_FACE);
+    drawenvoverlay(cloudoverlay, tx, ty);
+    glEnable(GL_CULL_FACE);
 }
 
 bool bindcloudlayershadow()
@@ -679,11 +689,6 @@ void getcloudlayershadowparams(vec4 &params, vec4 &transform)
     params = vec4(cloudz, 1.0f / max(float(farplane) * cloudscale, 1.0e-4f), fadestart, outerradius);
     transform = vec4(cloudoffsetx + cloudscrollx * time, cloudoffsety + cloudscrolly * time, cosf(angle), sinf(angle));
     adjustcloudreach(angle, transform.x, transform.y);
-}
-
-void getCloudLayerParams(vec4 &params, vec4 &transform)
-{
-    getcloudlayershadowparams(params, transform);
 }
 
 void getskycubetints(vec colors[6], vec2 &front)

@@ -753,7 +753,8 @@ void setupgbuffer()
     cleanupbloom();
     cleanupao();
     cleanupvolumetric();
-    godRays::cleanup();
+    godrays::crepuscular::cleanup();
+    godrays::geometry::cleanup();
     cleanupaa();
     cleanuppostfx();
 
@@ -875,7 +876,8 @@ void cleanupgbuffer()
     if(refracttex) { glDeleteTextures(1, &refracttex); refracttex = 0; }
     gw = gh = -1;
     cleanupscale();
-    godRays::cleanup();
+    godrays::crepuscular::cleanup();
+    godrays::geometry::cleanup();
     cleanupmsbuffer();
     cleardeferredlightshaders();
 }
@@ -5835,6 +5837,8 @@ bool debuglights()
     else if(debuglightscissor) viewlightscissor();
     else if(debugrsm) viewrsm();
     else if(debugrh) viewrh();
+    else if(godrays::crepuscular::debugview()) {}
+    else if(godrays::geometry::debugview()) {}
     else if(!debugaa()) return false;
     return true;
 }
@@ -5845,7 +5849,8 @@ void cleanuplights()
     cleanupbloom();
     cleanupao();
     cleanupvolumetric();
-    godRays::cleanup();
+    godrays::crepuscular::cleanup();
+    godrays::geometry::cleanup();
     lensFlares::cleanup();
     cleanupshadowatlas();
     cleanupradiancehints();
