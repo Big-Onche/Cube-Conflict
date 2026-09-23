@@ -35,7 +35,6 @@ namespace crepuscular
     VAR(debugcr, 0, 0, 1);
 
     FVARR(crstrength, 0.0f, 0.2f, 2.0f);
-    VARP(crglobalstrength, 0, 0, 3);
 
     static void cleanupbuffer()
     {
@@ -285,7 +284,7 @@ namespace crepuscular
         GLOBALPARAMF(crcompositeparams, float(crw), float(crh), scaleparams.z, scaleparams.w);
         GLOBALPARAMF(crscaleparams, scaleparams.x, scaleparams.y, scaleparams.z, scaleparams.w);
         GLOBALPARAMF(crbilateralparams, crbilateraledge, useupscale ? 1.0f : 0.0f);
-        GLOBALPARAMF(crtint, raytint.x, raytint.y, raytint.z, crstrength*(0.5f + 0.5f*crglobalstrength));
+        GLOBALPARAMF(crtint, raytint.x, raytint.y, raytint.z, crstrength);
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_FALSE);
@@ -357,7 +356,6 @@ namespace geometry
     FVARP(grgscale, 0.125f, 0.5f, 1.0f);
     VARP(grgatrous, 0, 1, 1);
     VARP(grgatrousiter, 1, 3, 3);
-    VARP(grgglobalstrength, 0, 0, 3);
 
     // tunables
     FVAR(grgshadowbias, 0.0f, 0.0f, 4.0f);
@@ -376,8 +374,9 @@ namespace geometry
     FVAR(grgthreshold, 0.0f, 0.05f, 1.0f);
 
     // map vars
-    FVARR(grgstrength, 0.0f, 2.0f, 4.0f);
-    FVARR(grgdensity, 0.25f, 2.0f, 4.0f);
+    FVARR(grgstrength, 0.0f, 1.0f, 16.0f);
+    FVARR(grgdensity, 0.25f, 2.0f, 16.0f);
+    FVARR(grgscatterdist, 1.0f, 256.0f, 65536.0f);
     FVARR(grgmaxdist, 0.01f, 0.8f, 1.0f);
     CVARR(grgcolour, 0);
 
@@ -644,11 +643,6 @@ namespace geometry
         bufferwidth = bufferheight = reconstructionwidth = reconstructionheight = -1;
     }
 
-    static float strengthscale()
-    {
-        return 0.5f + 0.5f*grgglobalstrength;
-    }
-
     static void renderraw(int debugmode, float maxdistance, const vec &suncolor)
     {
         glBindFramebuffer_(GL_FRAMEBUFFER, rayfbo);
@@ -675,8 +669,9 @@ namespace geometry
         LOCALPARAMF(godRayDepthScale, float(vieww)/bufferwidth, float(viewh)/bufferheight);
         LOCALPARAMF(godRayGeomParams, max(grgdensity, 0.25f), clamp(grgdecay, 0.0f, 1.0f), maxdistance, max(grgforwardexp, 0.25f));
         LOCALPARAMI(godRayGeomSteps, grgsteps);
+        LOCALPARAMF(godRayGeomExtinction, grgdensity/grgscatterdist);
         LOCALPARAMI(godRayGeomDebug, debugmode);
-        LOCALPARAMF(godRayGeomDistanceParams, grgstrength*strengthscale(), max(grgshaftboost, 0.0f), max(grgdetailboost, 0.0f),
+        LOCALPARAMF(godRayGeomDistanceParams, grgstrength, max(grgshaftboost, 0.0f), max(grgdetailboost, 0.0f),
                     max(grgisolationpower, 0.25f));
         LOCALPARAMF(godRayGeomShapeParams, clamp(grgbaseatmosphere, 0.0f, 0.25f), clamp(grgthreshold, 0.0f, 1.0f),
                     max(grgisolationradius, 0.0f), clamp(grgcsmfade, 0.0f, 0.25f));
@@ -879,7 +874,7 @@ namespace geometry
 
         static const char * const modelabels[7] =
         {
-            "raw visibility", "base atmosphere", "isolated shaft + detail accent", "final volumetric signal",
+            "raw visibility", "base atmosphere", "continuous shafts + isolation accent", "final volumetric signal",
             "CSM coverage (green inside, red outside)", "shadow bias (0 blue, 1 green, 2+ red)", "local isolation mask"
         };
         const char *stagelabels[3] = { "raw raymarch", grgatrous ? "a-trous filtered" : "raymarch source", "final reconstruction" };
