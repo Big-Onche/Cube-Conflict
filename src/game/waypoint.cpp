@@ -417,7 +417,16 @@ namespace ai
         return n;
     }
 
-    static inline float heapscore(waypoint *q) { return q->score(); }
+    struct routeentry
+    {
+        waypoint *node;
+        float curscore, totalscore;
+
+        routeentry() : node(NULL), curscore(0), totalscore(0) {}
+        routeentry(waypoint *node, float curscore) : node(node), curscore(curscore), totalscore(float(int(curscore) + int(node->estscore))) {}
+    };
+
+    static inline float heapscore(const routeentry &entry) { return entry.totalscore; }
 
     bool route(gameent *d, int node, int goal, vector<int> &route, const avoidset &obstacles, int retries)
     {
@@ -425,7 +434,7 @@ namespace ai
             return false;
 
         static ushort routeid = 1;
-        static vector<waypoint *> queue;
+        static vector<routeentry> queue;
 
         if(!routeid)
         {
@@ -459,13 +468,17 @@ namespace ai
         waypoints[node].curscore = waypoints[node].estscore = 0;
         waypoints[node].prev = 0;
         queue.setsize(0);
-        queue.add(&waypoints[node]);
+        queue.add(routeentry(&waypoints[node], 0));
         route.setsize(0);
 
         int lowest = -1;
         while(!queue.empty())
         {
-            waypoint &m = *queue.removeheap();
+            const routeentry entry = queue.removeheap();
+            waypoint &m = *entry.node;
+            // Improving an open node pushes a new entry instead of linearly searching the heap to update the old one.
+            // Discard the stale entry when it reaches the front. Closed nodes have a negative score.
+            if(m.route != routeid || m.curscore < 0 || m.curscore != entry.curscore) continue;
             float prevscore = m.curscore;
             m.curscore = -1;
             loopi(MAXWAYPOINTLINKS)
@@ -487,9 +500,9 @@ namespace ai
                             lowest = link;
                         n.route = routeid;
                         if(link == goal) goto foundgoal;
-                        queue.addheap(&n);
+                        queue.addheap(routeentry(&n, curscore));
                     }
-                    else loopvj(queue) if(queue[j] == &n) { queue.upheap(j); break; }
+                    else queue.addheap(routeentry(&n, curscore));
                 }
             }
         }
@@ -803,4 +816,3 @@ namespace ai
     }
     ICOMMAND(movewaypoints, "iii", (int *dx, int *dy, int *dz), movewaypoints(vec(*dx, *dy, *dz)));
 }
-
