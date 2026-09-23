@@ -29,7 +29,7 @@ FVAR(grassfardensity, 0.05f, 1, 1);
 FVAR(grassrootdarkness, 0, 0.8f, 2.0f);
 FVAR(grassrootdarknesspower, 0.25f, 5.0f, 16.0f);
 
-VARP(grassshadowcascades, 0, 2, 2);
+VARP(grassshadowcascades, 0, 1, 2);
 FVARF(grassshadowdensitynear, 0.01f, 0.75f, 1, settingsChanged());
 FVARF(grassshadowdensity, 0.01f, 0.5f, 1, settingsChanged());
 FVAR(grassshadowtransition, 0, 1.0f, 1.0f);
