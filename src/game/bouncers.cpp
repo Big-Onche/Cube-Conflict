@@ -243,7 +243,6 @@ namespace bouncers
                 {
                     int qtime = (step < MAXBOUNCERSUBSTEPS - 1) ? min(30, rtime) : rtime;
                     rtime -= qtime;
-                    stopped = bnc.bounces;
                     if(bnc.bounces <= 5) bounce(&bnc, qtime / 1000.f, 0.6f, 0.5f, 1);
                     if((bnc.lifetime -= qtime) < 0) { stopped = true; break; }
                     step++;
