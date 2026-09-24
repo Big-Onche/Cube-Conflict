@@ -2082,7 +2082,7 @@ static shadowmapinfo *addshadowmap(ushort x, ushort y, int size, int &idx, int l
 
 #define CSM_MAXSPLITS 8
 
-VARFP(csmmaxsize, 256, 2048, 4096, cleanupcsm());
+VARFP(csmmaxsize, 256, 3072, 8192, cleanupcsm());
 VARFP(csmsplits, 1, 4, CSM_MAXSPLITS, { cleardeferredlightshaders(); cleanupcsm(); });
 FVAR(csmsplitweight, 0, 0.75f, 1);
 VARF(csmshadowmap, 0, 1, 1, { cleardeferredlightshaders(); cleanupcsm(); });
@@ -2091,9 +2091,9 @@ VARP(csmfarplane, 64, 2048, 16384);
 FVAR(csmtransition, 0, 0.1f, 0.3f);
 // Zero fits all sunward casters; a positive value explicitly limits their reach.
 FVAR(csmcastermargin, 0, 0, 16384);
-FVAR(csmconstantbias, 0, 2, 4);
-FVAR(csmslopebias, 0, 2, 4);
-FVAR(csmnormalbias, 0, 1, 4);
+FVAR(csmconstantbias, 0, 0.5f, 4);
+FVAR(csmslopebias, 0, 0.5f, 4);
+FVAR(csmnormalbias, 0, 0.25f, 4);
 VAR(csmcull, 0, 1, 1);
 VAR(csmpcf, 0, 1, 2);
 VAR(debugcsm, 0, 0, 3);
@@ -2106,7 +2106,7 @@ FVAR(csmpcssdist, 0, 512, 16384);
 FVAR(csmpcssfade, 0.01f, 0.25f, 1);
 FVAR(csmpcssminradius, 0, 0, 128);
 FVAR(csmpcssmaxradius, 0, 64, 128);
-FVAR(csmpcsssoftness, 0, 0.8f, 16);
+FVAR(csmpcsssoftness, 0, 1.0f, 16);
 FVAR(csmpcsscascadescale, 0, 0.5f, 1);
 
 static int csmpcsskernelcap()
