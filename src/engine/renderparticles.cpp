@@ -2706,6 +2706,13 @@ namespace particles
         }
     }
 
+    static vec hudparticleorigin(const vec &p)
+    {
+        vec offset(p);
+        offset.sub(camera1->o);
+        return vec(offset.dot(camright), offset.dot(camdir), offset.dot(camup));
+    }
+
     void hudDirSplash(int type, int color, int radius, int num, int fade, const vec &p, const vec &dir, float size, int speed, physent *owner, int sizemod, bool randomColor)
     {
         if(minimized || !owner) return;
@@ -2731,7 +2738,7 @@ namespace particles
 
             vec offset(float(x)/3, float(y)/3, float(z)/3), velocity(dir);
             velocity.normalize().mul(speed + rnd(speed/2)).add(offset);
-            vec localorigin(0, 0, 0);
+            vec localorigin = hudparticleorigin(p);
             vec localvelocity(velocity.dot(camright), velocity.dot(camdir), velocity.dot(camup));
             int f = num < 10 ? fmin + rnd(fmax) : fmax - (i*(fmax-fmin))/(num-1);
             particle *part = newparticle(localorigin, localvelocity, f, hudtype, decoded, size, 50, sizemod, false, true);
@@ -2863,7 +2870,7 @@ void particle_hud_splash(int type, int num, int fade, const vec &p, int color, f
         vec velocity((float)x, (float)y, (float)z);
         velocity = vec(velocity.dot(camright), velocity.dot(camdir), velocity.dot(camup));
         int f = num < 10 ? fmin + rnd(fmax) : fmax - (i*(fmax-fmin))/(num-1);
-        particle *part = newparticle(vec(0, 0, 0), velocity, f, hudtype, decoded, size, gravity, sizemod, false, true);
+        particle *part = newparticle(particles::hudparticleorigin(p), velocity, f, hudtype, decoded, size, gravity, sizemod, false, true);
         part->owner = owner;
     }
 }
@@ -3065,8 +3072,8 @@ void regular_hud_flame(int type, const vec &p, float radius, float height, int c
     velocity = vec(velocity.dot(camright), velocity.dot(camdir), velocity.dot(camup));
     loopi(density)
     {
-        vec origin(rndscale(radius*2.0f)-radius, rndscale(radius*2.0f)-radius, 0);
-        origin = vec(origin.dot(camright), origin.dot(camdir), origin.dot(camup));
+        vec origin = particles::hudparticleorigin(p);
+        origin.add(vec(rndscale(radius*2.0f)-radius, rndscale(radius*2.0f)-radius, 0));
         particle *part = newparticle(origin, velocity, rnd(max(int(fade*height), 1))+1, hudtype, color, size, gravity, sizemod, false, true);
         part->owner = owner;
     }

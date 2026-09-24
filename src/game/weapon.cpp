@@ -943,12 +943,12 @@ namespace game
         }
     }
 
-    FVARP(hudparticlemovementoffset, 0.0f, 0.25f, 2.0f);
+    FVAR(hudparticlemovementoffset, 0.0f, 0.2f, 2.0f);
     static physent *previoushudparticleowner[3] = { NULL, NULL, NULL };
     static vec previoushudparticleorigin[3], hudparticlemovement[3];
     static int previoushudparticlemillis[3] = { -1, -1, -1 }, hudparticlemovementmillis[3] = { -1, -1, -1 };
 
-    static void updatehudparticlemovement(physent *owner, const vec &emitter, int track)
+    static void updatehudparticlemovement(physent *owner, int track)
     {
         int index = clamp(track - HUD_PARTICLE_MUZZLE, 0, 2);
         if(hudparticlemovementmillis[index] == totalmillis && previoushudparticleowner[index] == owner) return;
@@ -959,7 +959,7 @@ namespace game
             int elapsed = totalmillis - previoushudparticlemillis[index];
             if(elapsed > 0 && elapsed <= 250 && hudparticlemovementoffset > 0)
             {
-                vec velocity(emitter);
+                vec velocity(camera1->o);
                 velocity.sub(previoushudparticleorigin[index]).mul(1000.0f/elapsed);
                 float speed = velocity.magnitude();
                 if(speed > 1e-4f)
@@ -971,7 +971,7 @@ namespace game
             }
         }
         previoushudparticleowner[index] = owner;
-        previoushudparticleorigin[index] = emitter;
+        previoushudparticleorigin[index] = camera1->o;
         previoushudparticlemillis[index] = hudparticlemovementmillis[index] = totalmillis;
     }
 
@@ -979,25 +979,17 @@ namespace game
     {
         if(!owner || (owner->type != ENT_PLAYER && owner->type != ENT_AI)) return;
         gameent *pl = (gameent *)owner;
-        vec emitter(-1, -1, -1);
-        switch(track)
-        {
-            case HUD_PARTICLE_JOINT: emitter = pl->render.weedPos; break;
-            case HUD_PARTICLE_CASING: emitter = pl->render.casingPos; break;
-            default: emitter = pl->render.muzzlePos; break;
-        }
-        bool invalidmuzzle = track == HUD_PARTICLE_MUZZLE && (pl->action.lastAttackType < 0 || attacks[pl->action.lastAttackType].gun != pl->gunselect);
-        if(pl != hudplayer() || thirdperson || emitter.x < 0 || invalidmuzzle)
+        if(pl != hudplayer() || thirdperson)
         {
             o = vec(-1e16f, -1e16f, -1e16f);
             d = vec(0, 0, 0);
             return;
         }
         int index = clamp(track - HUD_PARTICLE_MUZZLE, 0, 2);
-        updatehudparticlemovement(owner, emitter, track);
+        updatehudparticlemovement(owner, track);
         o.madd(hudparticlemovement[index], age/500.0f);
         const vec localorigin(o), localvelocity(d);
-        o = vec(emitter).madd(camright, localorigin.x).madd(camdir, localorigin.y).madd(camup, localorigin.z);
+        o = vec(camera1->o).madd(camright, localorigin.x).madd(camdir, localorigin.y).madd(camup, localorigin.z);
         d = vec(camright).mul(localvelocity.x).madd(camdir, localvelocity.y).madd(camup, localvelocity.z);
     }
 
