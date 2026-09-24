@@ -1946,6 +1946,7 @@ VAR(smsoftshadows, 0, 1, 1);
 FVAR(smsoftshadowsoftness, 0, 0.1f, 0.25f);
 FVAR(smsoftshadowradius, 0, 32, 64);
 VAR(smsoftshadowsamples, 1, 16, 32);
+VAR(smsoftshadowblur, 0, 1, 1);
 VAR(smsoftshadowdist, 0, 512, 16384);
 
 VARFR(alphashadow, 0, 2, 2, { cleardeferredlightshaders(); cleanupshadowatlas(); });
@@ -3563,7 +3564,11 @@ static inline void setlightparams(int i, const lightinfo &l)
     {
         getlightshadowparams(l, shadowparamsv[i], shadowoffsetv[i]);
         const shadowmapinfo &sm = shadowmaps[l.shadowmap];
-        shadowsoftv[i] = vec4(localshadowsoftness(l), smsoftshadowradius, smsoftshadowsamples, sm.size);
+        // Store the radius as a fraction of the nominal local-shadow resolution. The shader converts it back through the actual projection scale.
+        // This keeps the apparent penumbra independent from smsize and per-light atlas allocation.
+        const int samples = min(smsoftshadowsamples*(smsoftshadowblur ? 2 : 1), 32);
+        shadowsoftv[i] = vec4(localshadowsoftness(l), smsoftshadowradius/max(float(smmaxsize), 1.0f),
+                              samples, sm.size);
     }
 }
 
