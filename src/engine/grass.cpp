@@ -421,9 +421,12 @@ void clearBurnEvents()
 struct Instance
 {
     // originAngle: world-space position xyz, blade angle w
-    // variation: blade scale x, stable hash y, edge distance z, surface normal z w
-    vec4 originAngle, variation;
+    // variation: blade scale x, stable hash y, edge distance z
+    vec4 originAngle;
+    vec variation;
+    short surfaceSlope[2];
 };
+static_assert(sizeof(Instance) == 8*sizeof(float), "grass instance data must remain tightly packed");
 
 struct MeshVert
 {
@@ -979,11 +982,15 @@ void build(vtxarray *va)
                 if(generatedCells.access(cell)) continue;
                 generatedCells.add(cell);
 
-                float z = g.surface.zintersect(vec(x, y, 0));
+                float z = g.surface.zintersect(vec(x, y, 0)),
+                      scale = 0.8f + 0.4f*hashUnit(cellSeed ^ 0x68E31DA4u),
+                      surfaceZ = max(g.surface.z, 0.25f),
+                      slopePackScale = 32767.0f/4.0f;
                 Instance &inst = patch.instances.add();
-                float variation = hashUnit(cellSeed ^ 0x68E31DA4u);
                 inst.originAngle = vec4(x, y, z, hashUnit(cellSeed ^ 0x1B56C4E9u)*2*M_PI);
-                inst.variation = vec4(0.8f + 0.4f*variation, hashUnit(cellSeed ^ 0xC2B2AE35u), edgeDist, g.surface.z);
+                inst.variation = vec(scale, hashUnit(cellSeed ^ 0xC2B2AE35u), edgeDist);
+                inst.surfaceSlope[0] = short(clamp(-g.surface.x/surfaceZ, -4.0f, 4.0f)*slopePackScale);
+                inst.surfaceSlope[1] = short(clamp(-g.surface.y/surfaceZ, -4.0f, 4.0f)*slopePackScale);
                 patch.bbMin.min(vec(x, y, z));
                 patch.bbMax.max(vec(x, y, z));
                 numInstances++;
@@ -1145,21 +1152,26 @@ static void bindInstances(vtxarray *va, int offset)
     gle::bindvbo(va->grassBuf);
     const Instance *inst = (const Instance *)(size_t(offset)*sizeof(Instance));
     glVertexAttribPointer_(gle::ATTRIB_COLOR, 4, GL_FLOAT, GL_FALSE, sizeof(Instance), inst->originAngle.v);
-    glVertexAttribPointer_(gle::ATTRIB_TEXCOORD1, 4, GL_FLOAT, GL_FALSE, sizeof(Instance), inst->variation.v);
+    glVertexAttribPointer_(gle::ATTRIB_TEXCOORD1, 3, GL_FLOAT, GL_FALSE, sizeof(Instance), inst->variation.v);
+    glVertexAttribPointer_(gle::ATTRIB_NORMAL, 2, GL_SHORT, GL_TRUE, sizeof(Instance), inst->surfaceSlope);
     glEnableVertexAttribArray_(gle::ATTRIB_COLOR);
     glEnableVertexAttribArray_(gle::ATTRIB_TEXCOORD1);
+    glEnableVertexAttribArray_(gle::ATTRIB_NORMAL);
     glVertexAttribDivisor_(gle::ATTRIB_COLOR, 1);
     glVertexAttribDivisor_(gle::ATTRIB_TEXCOORD1, 1);
+    glVertexAttribDivisor_(gle::ATTRIB_NORMAL, 1);
 }
 
 static void cleanupAttribs()
 {
     glVertexAttribDivisor_(gle::ATTRIB_COLOR, 0);
     glVertexAttribDivisor_(gle::ATTRIB_TEXCOORD1, 0);
+    glVertexAttribDivisor_(gle::ATTRIB_NORMAL, 0);
     glDisableVertexAttribArray_(gle::ATTRIB_VERTEX);
     glDisableVertexAttribArray_(gle::ATTRIB_COLOR);
     glDisableVertexAttribArray_(gle::ATTRIB_TEXCOORD0);
     glDisableVertexAttribArray_(gle::ATTRIB_TEXCOORD1);
+    glDisableVertexAttribArray_(gle::ATTRIB_NORMAL);
     gle::clearvbo();
     gle::clearebo();
 }
