@@ -1944,7 +1944,7 @@ VARN(lightbatchstacks, lightbatchstacksused, 1, 0, 0);
 
 VAR(smsoftshadows, 0, 1, 1);
 FVAR(smsoftshadowsoftness, 0, 0.1f, 0.25f);
-FVAR(smsoftshadowradius, 0, 32, 64);
+FVAR(smsoftshadowradius, 0, 16, 64);
 VAR(smsoftshadowsamples, 1, 16, 32);
 VAR(smsoftshadowblur, 0, 1, 1);
 VAR(smsoftshadowdist, 0, 512, 16384);
@@ -2100,9 +2100,9 @@ VAR(debugcsm, 0, 0, 3);
 
 VAR(csmpcss, 0, 1, 1);
 VAR(csmpcssquality, 0, 1, 2);
-VAR(csmpcssblockers, 1, 12, 32);
-VAR(csmpcsssamples, 1, 16, 64);
-FVAR(csmpcssdist, 0, 512, 16384);
+VAR(csmpcssblockers, 1, 8, 32);
+VAR(csmpcsssamples, 1, 8, 64);
+FVAR(csmpcssdist, 0, 256, 16384);
 FVAR(csmpcssfade, 0.01f, 0.25f, 1);
 FVAR(csmpcssminradius, 0, 0, 128);
 FVAR(csmpcssmaxradius, 0, 64, 128);
