@@ -286,7 +286,16 @@ extern void packvslot(vector<uchar> &buf, const VSlot *vs);
 
 // renderlights
 
-enum { L_NOSHADOW = 1<<0, L_NODYNSHADOW = 1<<1, L_VOLUMETRIC = 1<<2, L_NOSPEC = 1<<3, L_SMALPHA = 1<<4 };
+enum
+{
+    L_NOSHADOW = 1<<0,
+    L_NODYNSHADOW = 1<<1,
+    L_VOLUMETRIC = 1<<2,
+    L_NOSPEC = 1<<3,
+    L_SMALPHA = 1<<4,
+    L_ALLFACES = 1<<5,
+    L_SOFTSHADOWS = 1<<6
+};
 
 // dynlight
 enum

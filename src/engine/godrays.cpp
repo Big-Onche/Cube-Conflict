@@ -654,18 +654,10 @@ namespace geometry
         glActiveTexture_(GL_TEXTURE0);
         if(msaalight) glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, msdepthtex);
         else glBindTexture(GL_TEXTURE_RECTANGLE, gdepthtex);
-        glActiveTexture_(GL_TEXTURE2);
-        glBindTexture(shadowatlastarget, shadowatlastex);
-        if(shadowatlastarget == GL_TEXTURE_2D)
-        {
-            glTexParameteri(shadowatlastarget, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-            glTexParameteri(shadowatlastarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(shadowatlastarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        }
+        bindcsmdepth(2);
         glActiveTexture_(GL_TEXTURE0);
 
-        if(shadowatlastarget == GL_TEXTURE_2D) SETSHADER(geometryGodRays2D);
-        else SETSHADER(geometryGodRaysRect);
+        SETSHADER(geometrygodrays);
         LOCALPARAM(sunDir, sunlightdir);
         LOCALPARAM(sunColor, suncolor);
         LOCALPARAMF(godRayDepthScale, float(vieww)/bufferwidth, float(viewh)/bufferheight);
@@ -821,9 +813,12 @@ namespace geometry
     void render()
     {
         debugrendered = false;
-        if(drawtex || !godraysgeom || !csmshadowmap || !shadowatlastex || csmsplits <= 0 || grgstrength <= 0.0f || grgdensity <= 0.0f ||
+        if(drawtex || !godraysgeom || !csmshadowmap || csmsplits <= 0 || grgstrength <= 0.0f || grgdensity <= 0.0f ||
            grgsteps <= 0 || grgmaxdist <= 0.0f)
             return;
+
+        if(!bindcsmdepth(2)) return;
+        glActiveTexture_(GL_TEXTURE0);
 
         const bool customcolour = _grgcolour != 0;
         if((!customcolour && sunlight.iszero()) || sunlightscale <= 0.0f ||

@@ -192,6 +192,11 @@ extern PFNGLDELETEFRAMEBUFFERSPROC         glDeleteFramebuffers_;
 extern PFNGLGENFRAMEBUFFERSPROC            glGenFramebuffers_;
 extern PFNGLFRAMEBUFFERTEXTURE2DPROC       glFramebufferTexture2D_;
 extern PFNGLFRAMEBUFFERTEXTURE3DPROC       glFramebufferTexture3D_;
+extern PFNGLFRAMEBUFFERTEXTURELAYERPROC    glFramebufferTextureLayer_;
+extern PFNGLGENSAMPLERSPROC                glGenSamplers_;
+extern PFNGLDELETESAMPLERSPROC             glDeleteSamplers_;
+extern PFNGLBINDSAMPLERPROC                glBindSampler_;
+extern PFNGLSAMPLERPARAMETERIPROC          glSamplerParameteri_;
 extern PFNGLFRAMEBUFFERRENDERBUFFERPROC    glFramebufferRenderbuffer_;
 extern PFNGLGENERATEMIPMAPPROC             glGenerateMipmap_;
 
