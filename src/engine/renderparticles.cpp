@@ -593,17 +593,18 @@ struct partrenderer
 
             if(trackhud) game::hudparticletrack(p->owner, o, d, ts, hudtrack);
 
-            if(isvisiblesphere(p->size, o) == VFC_NOT_VISIBLE) return;
-
-            if(type&PT_COLLIDE && camera1->o.dist2(p->o) <= particlecollisiondist && o.z < p->val) // avoid useless heavy collision computing if the particle is far away except height
+            // Avoid expensive collision queries for distant particles, but scan before visibility culling so off-screen weather cannot pass
+            // through geometry.
+            if(type&PT_COLLIDE && step && camera1->o.dist2(o) <= particlecollisiondist && o.z < p->val)
             {
+                const float scanrange = p->val - o.z + COLLIDERADIUS;
                 vec hitpos;
-                raycubepos(vec(o.x, o.y, o.z), vec(0, 0, -1), hitpos, COLLIDERADIUS, RAY_CLIPMAT|RAY_LIQUIDMAT|RAY_POLY);
+                float hitdist = raycubepos(vec(o.x, o.y, p->val), vec(0, 0, -1), hitpos, scanrange, RAY_CLIPMAT|RAY_LIQUIDMAT|RAY_POLY);
 
                 float collidez = hitpos.z;
                 float collideVal = collidez + COLLIDEERROR;
 
-                if(o.z >= collideVal) p->val = collideVal; // Only process collision if we're actually at or below the collision point
+                if(hitdist >= scanrange || o.z >= collideVal) p->val = collideVal;
                 else
                 {
                     blend = 0;
@@ -630,6 +631,8 @@ struct partrenderer
                     }
                 }
             }
+
+            if(isvisiblesphere(p->size, o) == VFC_NOT_VISIBLE) return;
 
             if(p->light > 0)
             {
