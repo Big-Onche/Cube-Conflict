@@ -816,6 +816,13 @@ namespace game
                 if(!local) createrays(gun, from, to, d);
                 renderMuzzleEffects(from, to, d, atk);
 
+                vec lightdir = vec(to).sub(muzzleOrigin).safenormalize();
+                const float flicker = (110.f - rnd(21)) / 100.f;
+                const vec color = vec(1.5f*flicker, 0.65f*flicker, 0.15f*flicker);
+                const float range = (attacks[atk].range + 76) - rnd(25);
+                const float spot = 35 - rnd(11);
+                adddynlight(muzzleOrigin, range, color, 200, attacks[atk].attackdelay + 50, L_NODYNSHADOW|L_VOLUMETRIC|L_SOFTSHADOWS|DL_FLASH|DL_REUSE, 0, vec(0, 0, 0), d, lightdir, spot);
+
                 vec burnpos;
                 float burnposdist = 1e16f;
 

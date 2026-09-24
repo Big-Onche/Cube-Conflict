@@ -57,6 +57,24 @@ void adddynlight(const vec &o, float radius, const vec &color, int fade, int pea
     if(!usedynlights) return;
     if(o.dist(camera1->o) > dynlightdist || radius <= 0) return;
 
+    if(owner && flags&DL_REUSE) loopv(dynlights)
+    {
+        dynlight &d = dynlights[i];
+        if(d.owner != owner || !(d.flags&DL_REUSE)) continue;
+        d.o = d.hud = o;
+        d.radius = radius;
+        d.initradius = initradius;
+        d.color = color;
+        d.initcolor = initcolor;
+        d.fade = fade;
+        d.peak = peak;
+        d.expire = fade + peak + lastmillis;
+        d.flags = flags;
+        d.dir = dir;
+        d.spot = spot;
+        return;
+    }
+
     int insert = 0, expire = fade + peak + lastmillis;
     loopvrev(dynlights) if(expire>=dynlights[i].expire) { insert = i+1; break; }
     dynlight d;
@@ -77,10 +95,7 @@ void adddynlight(const vec &o, float radius, const vec &color, int fade, int pea
 
 void cleardynlights()
 {
-    int faded = -1;
-    loopv(dynlights) if(lastmillis<dynlights[i].expire) { faded = i; break; }
-    if(faded<0) dynlights.setsize(0);
-    else if(faded>0) dynlights.remove(0, faded);
+    loopvrev(dynlights) if(lastmillis>=dynlights[i].expire) dynlights.remove(i);
 }
 
 void removetrackeddynlights(physent *owner)
