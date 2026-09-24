@@ -1589,11 +1589,11 @@ void updateCameraAnimations()
             case CAM_ANIM_JUMP:
             {
                 float newPitch = 0.0f;
-                if(progress < 0.4) newPitch = lerp(0, anim.animAxis.y, progress / 0.4);
+                if(progress < 0.4) newPitch = lerpf(0, anim.animAxis.y, progress / 0.4);
                 else
                 {
                     float np = (progress - 0.4f) / 0.6f; // Normalize progress
-                    newPitch = (lerp(anim.animAxis.y, 0, np)) / -1.4f;
+                    newPitch = (lerpf(anim.animAxis.y, 0, np)) / -1.4f;
                 }
                 newAxis.y += newPitch;
             }
@@ -1605,14 +1605,14 @@ void updateCameraAnimations()
 
                 if(progress < 0.4)
                 {
-                    newHeight = lerp(0, anim.animPositions.z, progress / 0.4);
-                    newPitch = lerp(0, anim.animAxis.y, progress / 0.4);
+                    newHeight = lerpf(0, anim.animPositions.z, progress / 0.4);
+                    newPitch = lerpf(0, anim.animAxis.y, progress / 0.4);
                 }
                 else
                 {
                     float np = (progress - 0.4f) / 0.6f; // Normalize progress
-                    newHeight = lerp(anim.animPositions.z, 0, np);
-                    newPitch = (lerp(anim.animAxis.y, 0, np)) / -1.4f;
+                    newHeight = lerpf(anim.animPositions.z, 0, np);
+                    newPitch = (lerpf(anim.animAxis.y, 0, np)) / -1.4f;
                 }
                 newPosition.z = newHeight;
                 newAxis.y += newPitch;
@@ -1623,11 +1623,11 @@ void updateCameraAnimations()
             {
                 float newPitch = 0.0f;
 
-                if(progress < 0.3) newPitch = lerp(0, anim.animAxis.y, progress / 0.3);
+                if(progress < 0.3) newPitch = lerpf(0, anim.animAxis.y, progress / 0.3);
                 else
                 {
                     float descentProgress = (progress - 0.3f) / 0.7f; // Normalize progress
-                    newPitch = (lerp(anim.animAxis.y, 0, descentProgress)) / -2.33f;
+                    newPitch = (lerpf(anim.animAxis.y, 0, descentProgress)) / -2.33f;
                 }
 
                 if(anim.maxAxis.y)
@@ -1639,7 +1639,7 @@ void updateCameraAnimations()
                 }
                 else newAxis.y += newPitch;
 
-                float newYaw = lerp(0, anim.animAxis.x, progress);
+                float newYaw = lerpf(0, anim.animAxis.x, progress);
                 newAxis.x += newYaw;
             }
             break;

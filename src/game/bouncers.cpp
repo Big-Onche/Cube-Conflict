@@ -362,7 +362,7 @@ namespace bouncers
                     }
                     else bnc.roll += rot;
                 }
-                else bnc.pitch = lerp(bnc.pitch, 180, 0.5f);
+                else bnc.pitch = lerpf(bnc.pitch, 180, 0.5f);
             }
 
             if(bouncerType == BNC_MOLOTOV)

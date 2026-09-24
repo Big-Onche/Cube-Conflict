@@ -3,6 +3,8 @@
 #ifndef _TOOLS_H
 #define _TOOLS_H
 
+#include <new>
+
 #ifdef NULL
 #undef NULL
 #endif
@@ -1467,7 +1469,7 @@ struct ipmask
 extern int rygbGradient(int val);
 extern int rgbToHex(int r, int g, int b);
 extern void hexToRgb(int val, int &r, int &g, int &b);
-extern float lerp(float a, float b, float t);
+extern float lerpf(float a, float b, float t);
 extern float rndf(float min, float max);
 
 #endif

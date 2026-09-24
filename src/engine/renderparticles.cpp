@@ -3326,7 +3326,7 @@ static void makeparticles(entity &e)
                     bouncers::add(e.o, pos.add(vec(xOffset, zOffset, yOffset)), true, 0, game::player1, BNC_BIGROCK, 15000+rnd(5000), e.attr6);
                 }
                 playSound(S_EXPL_VOLCANO, e.o, 3000, 1500, SND_NOOCCLUSION);
-                if(game::hudplayer()->physstate == PHYS_FLOOR) shakeScreen(0.1f + lerp(0.f, 0.5f, clamp(camera1->o.dist(e.o) / 1000.0f, 0.f, 1.f)));
+                if(game::hudplayer()->physstate == PHYS_FLOOR) shakeScreen(0.1f + lerpf(0.f, 0.5f, clamp(camera1->o.dist(e.o) / 1000.0f, 0.f, 1.f)));
             }
             break;
         }

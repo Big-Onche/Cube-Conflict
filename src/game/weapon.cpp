@@ -205,7 +205,7 @@ namespace game
     float spread(int atk, gameent *d)
     {
         float aimProgress = getAimProgress(d);
-        return lerp((float)attacks[atk].noaimspread, (float)attacks[atk].aimspread, aimProgress);
+        return lerpf((float)attacks[atk].noaimspread, (float)attacks[atk].aimspread, aimProgress);
     }
 
     void createrays(int atk, const vec &from, const vec &to, gameent *d)             // create random spread of rays
@@ -433,7 +433,7 @@ namespace game
     {
         float distance = camera1->o.dist(v);
         if(distance > maxdist) return;
-        float factor = lerp(1.0f, 0.0f, distance / maxdist); // As normalized distance increases, the factor linearly decreases from 1 to 0
+        float factor = lerpf(1.0f, 0.0f, distance / maxdist); // As normalized distance increases, the factor linearly decreases from 1 to 0
         factor *= factorMod;
         shakeScreen(factor);
     }

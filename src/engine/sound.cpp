@@ -654,8 +654,8 @@ void updateSoundOcclusion(int id)
 
     if(progress < 1.0f)
     {
-        sounds[id].lfOcclusionGain = lerp(sounds[id].lfOcclusionGain, targetLF, progress);
-        sounds[id].hfOcclusionGain = lerp(sounds[id].hfOcclusionGain, targetHF, progress);
+        sounds[id].lfOcclusionGain = lerpf(sounds[id].lfOcclusionGain, targetLF, progress);
+        sounds[id].hfOcclusionGain = lerpf(sounds[id].hfOcclusionGain, targetHF, progress);
     }
     else
     {
