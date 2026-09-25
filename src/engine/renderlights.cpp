@@ -1909,15 +1909,15 @@ const matrix4 cubeshadowviewmatrix[6] =
     matrix4(vec(1, 0, 0), vec(0, 1, 0), vec(0, 0,  1))  // -Z
 };
 
-FVAR(smconstantbias, 0, 2, 4);
-FVAR(smnormalbias, 0, 2, 4);
-FVARF(smslopebias, 0, 2, 4, clearshadowcache());
+FVAR(smconstantbias, 0, 1.5f, 4);
+FVAR(smnormalbias, 0, 1.5f, 4);
+FVARF(smslopebias, 0, 1.5f, 4, clearshadowcache());
 FVAR(smprec, 1e-3f, 1, 1e3f);
 FVAR(smcubeprec, 1e-3f, 1, 1e3f);
 FVAR(smspotprec, 1e-3f, 1, 1e3f);
 
 VARFP(smsize, 10, 12, 14, cleanupshadowatlas());
-VARFP(smdepthprec, 0, 2, 2, cleanupshadowatlas());
+VARFP(smdepthprec, 0, 1, 2, cleanupshadowatlas());
 VAR(smsidecull, 0, 1, 1);
 VAR(smviscull, 0, 1, 1);
 VARF(smborder, 0, 3, 16, clearshadowcache());
@@ -3166,6 +3166,7 @@ struct particlelightsource
     vec o, rawcolor, scaledcolor, dir;
     float radius;
     int spot;
+    bool raycastocclusion;
     vec4 shadowparams;
     vec2 shadowoffset;
 };
@@ -3307,6 +3308,7 @@ static inline void ensureparticlelightsources()
         src.radius = e->attr1;
         src.dir = vec(0, 0, 0);
         src.spot = 0;
+        src.raycastocclusion = false;
         if(e->attached && e->attached->type == ET_SPOTLIGHT)
         {
             src.dir = vec(e->attached->o).sub(e->o).normalize();
@@ -3356,6 +3358,7 @@ static inline void ensureparticlelightsources()
             src.shadowparams = vec4(0, 0, 0, 0);
             src.shadowoffset = vec2(-1, -1);
         }
+        src.raycastocclusion = flags&(L_NOSHADOW|L_NODYNSHADOW) || src.shadowoffset.x < 0;
     }
 }
 
@@ -3451,6 +3454,14 @@ static inline void insertparticlelightcandidate(const vec &center, const vec &bb
     int insert = -1;
     loopj(MAXPARTICLELIGHTS) if(contribution > scores[j]) { insert = j; break; }
     if(insert < 0) return;
+
+    if(src.raycastocclusion)
+    {
+        // Lights without complete dynamic shadowing need a coarse world-geometry fallback for particle receivers.
+        vec ray = vec(center).sub(lightpos);
+        float raydist = ray.magnitude();
+        if(raydist > 1.0e-4f && raycube(lightpos, ray.div(raydist), raydist, RAY_CLIPMAT|RAY_POLY) < raydist) return;
+    }
 
     for(int j = MAXPARTICLELIGHTS-1; j > insert; --j)
     {
