@@ -396,7 +396,7 @@ namespace lensFlares
         if(filled) gle::attribf(x, y, ndcDepth);
         loopi(filled ? occlusionSegments + 1 : occlusionSegments)
         {
-            float a = (2.0f * M_PI * (i % occlusionSegments)) / occlusionSegments;
+            float a = (-2.0f * M_PI * (i % occlusionSegments)) / occlusionSegments;
             gle::attribf(x + cosf(a) * rx, y + sinf(a) * ry, ndcDepth);
         }
         gle::end();
