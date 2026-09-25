@@ -401,6 +401,10 @@ struct particle
         physent *owner;
         struct
         {
+            float collidex, collidey, collidez;
+        };
+        struct
+        {
             uchar color2[3];
             uchar progress;
         };
@@ -512,9 +516,6 @@ static inline bool shouldusesoftparticle(const vec &o, int flags)
     return camera1->o.squaredist(o) <= maxdist*maxdist;
 }
 
-#define COLLIDERADIUS 8.0f
-#define COLLIDEERROR 1.0f
-
 struct partrenderer
 {
     Texture *tex;
@@ -593,43 +594,49 @@ struct partrenderer
 
             if(trackhud) game::hudparticletrack(p->owner, o, d, ts, hudtrack);
 
-            // Avoid expensive collision queries for distant particles, but scan before visibility culling so off-screen weather cannot pass
-            // through geometry.
-            if(type&PT_COLLIDE && step && camera1->o.dist2(o) <= particlecollisiondist && o.z < p->val)
+            if(type&PT_COLLIDE && step)
             {
-                const float scanrange = p->val - o.z + COLLIDERADIUS;
-                vec hitpos;
-                float hitdist = raycubepos(vec(o.x, o.y, p->val), vec(0, 0, -1), hitpos, scanrange, RAY_CLIPMAT|RAY_LIQUIDMAT|RAY_POLY);
-
-                float collidez = hitpos.z;
-                float collideVal = collidez + COLLIDEERROR;
-
-                if(hitdist >= scanrange || o.z >= collideVal) p->val = collideVal;
-                else
+                if(camera1->o.dist2(o) <= particlecollisiondist)
                 {
-                    blend = 0;
-                    switch(stain)
+                    vec collidepos(p->collidex, p->collidey, p->collidez);
+                    vec ray = vec(o).sub(collidepos);
+                    float raylen = ray.magnitude();
+                    if(raylen > 0)
                     {
-                        case STAIN_RAIN:
-                            addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size/7.5f, 0xFFFFFF, type&PT_RND4 ? (p->flags>>5)&3 : 0);
-                            particle_splash(PART_WATER, 3, 120, vec(o.x, o.y, collidez), 0x303048, 0.08f, 50, 500, 4);
-                            if(p->sound) playSound(S_WATERDROP, o, 70, 10);
-                            break;
-                        case STAIN_SNOW:
-                            addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size, bvec(p->color), type&PT_RND4 ? (p->flags>>5)&3 : 0);
-                            break;
-                        case STAIN_BURN:
-                            addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size*1.5f, 0x222222, type&PT_RND4 ? (p->flags>>5)&3 : 0);
-                            addstain(STAIN_BULLET_GLOW, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size, 0xFF6622, type&PT_RND4 ? (p->flags>>5)&3 : 0);
-                            break;
-                        case STAIN_BULLET_GLOW:
-                            addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size*2.5f, 0xFF6622);
-                            break;
-                        case STAIN_BLOOD:
-                            addstain(stain, vec(o.x, o.y, collidez), vec(p->o).sub(o).normalize(), p->size, bvec(0x60, 0xFF, 0xFF), rnd(4));
-                            break;
+                        ray.div(raylen);
+                        vec hitpos;
+                        float hitdist = raycubepos(collidepos, ray, hitpos, raylen, RAY_CLIPMAT|RAY_LIQUIDMAT|RAY_POLY);
+                        if(hitdist < raylen)
+                        {
+                            blend = 0;
+                            vec impactdir = vec(ray).neg();
+                            switch(stain)
+                            {
+                                case STAIN_RAIN:
+                                    addstain(stain, hitpos, impactdir, p->size/7.5f, 0xFFFFFF, type&PT_RND4 ? (p->flags>>5)&3 : 0);
+                                    particle_splash(PART_WATER, 3, 120, hitpos, 0x303048, 0.08f, 50, 500, 4);
+                                    if(p->sound) playSound(S_WATERDROP, hitpos, 70, 10);
+                                    break;
+                                case STAIN_SNOW:
+                                    addstain(stain, hitpos, impactdir, p->size, bvec(p->color), type&PT_RND4 ? (p->flags>>5)&3 : 0);
+                                    break;
+                                case STAIN_BURN:
+                                    addstain(stain, hitpos, impactdir, p->size*1.5f, 0x222222, type&PT_RND4 ? (p->flags>>5)&3 : 0);
+                                    addstain(STAIN_BULLET_GLOW, hitpos, impactdir, p->size, 0xFF6622, type&PT_RND4 ? (p->flags>>5)&3 : 0);
+                                    break;
+                                case STAIN_BULLET_GLOW:
+                                    addstain(stain, hitpos, impactdir, p->size*2.5f, 0xFF6622);
+                                    break;
+                                case STAIN_BLOOD:
+                                    addstain(stain, hitpos, impactdir, p->size, bvec(0x60, 0xFF, 0xFF), rnd(4));
+                                    break;
+                            }
+                        }
                     }
                 }
+                p->collidex = o.x;
+                p->collidey = o.y;
+                p->collidez = o.z;
             }
 
             if(isvisiblesphere(p->size, o) == VFC_NOT_VISIBLE) return;
@@ -748,7 +755,13 @@ struct listrenderer : partrenderer
         p->millis = lastmillis + emitoffset;
         p->color = color;
         p->size = size;
-        p->owner = NULL;
+        if(type&PT_COLLIDE)
+        {
+            p->collidex = o.x;
+            p->collidey = o.y;
+            p->collidez = o.z;
+        }
+        else p->owner = NULL;
         p->flags = 0;
         p->usesoft = hud ? (type&PT_SOFT) != 0 : shouldusesoftparticle(o, type);
         p->sizemod = clamp(sizemod, -50, 50);
@@ -1275,7 +1288,13 @@ struct varenderer : partrenderer
         p->fade = fade;
         p->millis = lastmillis + emitoffset;
         p->size = size;
-        p->owner = NULL;
+        if(type&PT_COLLIDE)
+        {
+            p->collidex = o.x;
+            p->collidey = o.y;
+            p->collidez = o.z;
+        }
+        else p->owner = NULL;
         p->flags = 0x80 | (rndmask ? rnd(0x80) & rndmask : 0);
         p->usesoft = hud ? (type&PT_SOFT) != 0 : shouldusesoftparticle(o, type);
         p->color = color;
@@ -2023,8 +2042,8 @@ static partrenderer *parts[] =
     new quadrenderer("<grey>media/particles/misc/blood.png", PT_PART|PT_FLIP|PT_MOD|PT_RND4|PT_COLLIDE, STAIN_BLOOD),        // PART_BLOOD (note: rgb is inverted)
     new quadrenderer("media/particles/misc/grass.png", PT_PART|PT_FLIP|PT_RND4|PT_LERP|PT_COLLIDE),                          // PART_GRASS
     new quadrenderer("media/particles/misc/glare.png", PT_PART|PT_ROT|PT_FLIP|PT_OVERBRIGHT),                                // PART_GLARE
-    new quadrenderer("media/particles/misc/spark.png", PT_PART|PT_FLIP|PT_BRIGHT),                                           // PART_SPARK
-    new quadrenderer("media/particles/misc/spark.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_EMITPART),                               // PART_SPARK_P
+    new quadrenderer("media/particles/misc/spark.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_COLLIDE),                                // PART_SPARK
+    new quadrenderer("media/particles/misc/spark.png", PT_PART|PT_FLIP|PT_BRIGHT|PT_EMITPART|PT_COLLIDE),                    // PART_SPARK_P
     new hazeRenderer("media/particles/haze/noise_1.png", PT_HAZE|PT_PART|PT_FEW|PT_LERP|PT_SCROLL|PT_FADE),                  // PART_HAZE_SMALL
     new hazeRenderer("media/particles/haze/noise_2.png", PT_HAZE|PT_PART|PT_FEW|PT_LERP|PT_SCROLL|PT_FADE),                  // PART_HAZE_BIG
     new hazeRenderer("media/particles/haze/noise_2.png", PT_HAZE|PT_PART|PT_FEW|PT_TRACK|PT_LERP|PT_SCROLL|PT_FADE),         // PART_HAZE_MUZZLE
@@ -2807,7 +2826,6 @@ namespace particles
 
 static void splash(int type, const bvec4 &color, int radius, int num, int fade, const vec &p, float size, int gravity, int sizemod, bool sound, float light, int lightflags)
 {
-    float collidez = parts[type]->type&PT_COLLIDE ? p.z - raycube(p, vec(0, 0, -1), COLLIDERADIUS, RAY_CLIPMAT|RAY_POLY) + (parts[type]->stain >= 0 ? COLLIDEERROR : 0) : -1;
     int fmin = 1;
     int fmax = fade*3;
     loopi(num)
@@ -2821,8 +2839,7 @@ static void splash(int type, const bvec4 &color, int radius, int num, int fade, 
         } while(x*x + y*y + z*z > radius*radius && ++attempts < 8);
         vec tmp = vec((float)x, (float)y, (float)z);
         int f = (num < 10) ? (fmin + rnd(fmax)) : (fmax - (i*(fmax-fmin))/(num-1)); //help deallocater by using fade distribution rather than random
-        particle *part = setparticlelight(newparticle(p, tmp, f, type, color, size, gravity, sizemod, sound), type, light, lightflags);
-        part->val = collidez;
+        setparticlelight(newparticle(p, tmp, f, type, color, size, gravity, sizemod, sound), type, light, lightflags);
     }
 }
 
@@ -3012,8 +3029,7 @@ void regularshape(int type, int radius, int color, int dir, int num, int fade, c
             }
 
             d.normalize().mul(-vel); // velocity
-            particle *np = newparticle(spawnz, d, fade, type, color, size, gravity, sizemod);
-            np->val = spawnz.z;
+            newparticle(spawnz, d, fade, type, color, size, gravity, sizemod);
         }
         else
         {
@@ -3031,9 +3047,7 @@ void regularshape(int type, int radius, int color, int dir, int num, int fade, c
 			else
 			{
 				vec d = vec(to).sub(from).rescale(vel); //velocity
-				particle *n = newparticle(from, d, rnd(fade*3)+1, type, color, size, gravity);
-				if(parts[type]->type&PT_COLLIDE)
-					n->val = from.z - raycube(from, vec(0, 0, -1), parts[type]->stain >= 0 ? COLLIDERADIUS : max(from.z, 0.0f), RAY_CLIPMAT|RAY_POLY) + (parts[type]->stain >= 0 ? COLLIDEERROR : 0);
+				newparticle(from, d, rnd(fade*3)+1, type, color, size, gravity);
 			}
 		}
     }
