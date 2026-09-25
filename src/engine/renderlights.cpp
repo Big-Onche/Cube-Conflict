@@ -4975,7 +4975,13 @@ bool rendershadowtransparent(int idx, int side, bool cullside = false, bool part
     }
     if(particlepass) rendered |= rendershadowparticles();
 
-    if(rendered && useshadowcolorfilter()) shadowcolorblurs.add(idx * 6 + side);
+    if(useshadowcolorfilter())
+    {
+        if(rendered) shadowcolorblurs.add(idx * 6 + side);
+        // Particle lights enable all cubemap faces, including empty ones. Their raw color was cleared above, but the filtered atlas must also
+        // be cleared or lighting will sample a previous occupant's shadow from this tile.
+        else shadowcolorclears.add(idx * 6 + side);
+    }
     return rendered;
 }
 
