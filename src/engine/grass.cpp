@@ -36,6 +36,7 @@ FVAR(grassshadowtransition, 0, 1.0f, 1.0f);
 VAR(grassshadowlodnear, 0, 1, 1);
 VAR(grassshadowlodfar, 0, 1, 1);
 VAR(grassshadowwindcascades, 0, 1, 2);
+VAR(grassshadowcompact, 0, 1, 1);
 VAR(grassstats, 0, 0, 1);
 
 VAR(grassanimmillis, 1, 3000, 60000);
@@ -1046,6 +1047,11 @@ void build(vtxarray *va)
             if(instanceHash <= grassshadowdensitynear) patch.shadowCount[0]++;
             if(instanceHash <= grassshadowdensity) patch.shadowCount[1]++;
         }
+        // Keep each density's eligible instances in a prefix. Shaders use the stored hash, not the instance index.
+        build.instances.sort([](const Instance &a, const Instance &b)
+        {
+            return a.variation.y < b.variation.y;
+        });
         instances.move(build.instances);
     }
     buildPatches.deletecontents();
@@ -1144,6 +1150,12 @@ static void setupAttribs()
     glEnableVertexAttribArray_(gle::ATTRIB_TEXCOORD0);
     glVertexAttribDivisor_(gle::ATTRIB_VERTEX, 0);
     glVertexAttribDivisor_(gle::ATTRIB_TEXCOORD0, 0);
+    glEnableVertexAttribArray_(gle::ATTRIB_COLOR);
+    glEnableVertexAttribArray_(gle::ATTRIB_TEXCOORD1);
+    glEnableVertexAttribArray_(gle::ATTRIB_NORMAL);
+    glVertexAttribDivisor_(gle::ATTRIB_COLOR, 1);
+    glVertexAttribDivisor_(gle::ATTRIB_TEXCOORD1, 1);
+    glVertexAttribDivisor_(gle::ATTRIB_NORMAL, 1);
     gle::bindebo(meshEbo);
 }
 
@@ -1154,12 +1166,6 @@ static void bindInstances(vtxarray *va, int offset)
     glVertexAttribPointer_(gle::ATTRIB_COLOR, 4, GL_FLOAT, GL_FALSE, sizeof(Instance), inst->originAngle.v);
     glVertexAttribPointer_(gle::ATTRIB_TEXCOORD1, 3, GL_FLOAT, GL_FALSE, sizeof(Instance), inst->variation.v);
     glVertexAttribPointer_(gle::ATTRIB_NORMAL, 2, GL_SHORT, GL_TRUE, sizeof(Instance), inst->surfaceSlope);
-    glEnableVertexAttribArray_(gle::ATTRIB_COLOR);
-    glEnableVertexAttribArray_(gle::ATTRIB_TEXCOORD1);
-    glEnableVertexAttribArray_(gle::ATTRIB_NORMAL);
-    glVertexAttribDivisor_(gle::ATTRIB_COLOR, 1);
-    glVertexAttribDivisor_(gle::ATTRIB_TEXCOORD1, 1);
-    glVertexAttribDivisor_(gle::ATTRIB_NORMAL, 1);
 }
 
 static void cleanupAttribs()
@@ -1528,19 +1534,20 @@ static void setImpulseParams(const PatchImpulses &impulses)
     LOCALPARAMV(grassImpulseParams, impulses.params, impulses.count);
 }
 
-static void drawLod(const Patch &patch, Texture *tex, int lod, float density, float fade, float windScale, DebugStats *stats, int statInstances = -1)
+static void drawLod(const Patch &patch, Texture *tex, int lod, float density, float fade, float windScale, DebugStats *stats, int instances = -1)
 {
     if(density <= 0 || fade <= 0) return;
+    if(instances < 0) instances = patch.count;
     setDrawParams(tex, density, fade, windScale);
     const Mesh &mesh = meshes[lod];
-    glDrawElementsInstanced_(GL_TRIANGLES, mesh.count, GL_UNSIGNED_SHORT, (const void *)(size_t(mesh.offset)*sizeof(ushort)), patch.count);
-    xtravertsva += mesh.verts*patch.count;
+    glDrawElementsInstanced_(GL_TRIANGLES, mesh.count, GL_UNSIGNED_SHORT, (const void *)(size_t(mesh.offset)*sizeof(ushort)), instances);
+    xtravertsva += mesh.verts*instances;
     glde++;
 
     if(stats)
     {
         stats->drawCalls++;
-        stats->instances += statInstances >= 0 ? statInstances : patch.count;
+        stats->instances += instances;
     }
 }
 
@@ -1554,7 +1561,7 @@ static void drawPatchLod(const Patch &patch, Texture *tex, float dist, bool shad
 
         if(!patch.shadowCount[index]) return;
 
-        drawLod(patch, tex, lod, density, 1, windScale, stats, patch.shadowCount[index]);
+        drawLod(patch, tex, lod, density, 1, windScale, stats, grassshadowcompact ? patch.shadowCount[index] : patch.count);
         return;
     }
 

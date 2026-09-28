@@ -341,7 +341,7 @@ void clearqueries()
 
 VARF(oqany, 0, 0, 2, clearqueries());
 VAR(oqfrags, 0, 8, 64);
-VAR(oqwait, 0, 1, 1);
+VAR(oqwait, 0, 0, 1);
 
 static inline GLenum querytarget()
 {
