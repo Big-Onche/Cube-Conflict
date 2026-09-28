@@ -473,7 +473,8 @@ namespace game
         if(d==hudplayer() && forcecampos<0 && !thirdperson)
         {
             vec pos = d->feetpos();
-            rendermodel(mdlname, anim, pos.addz(3.5f), d->yaw, 28, 0, MDL_NOSHADOW, d, NULL, 0, 0, 1.f, vec4(vec::hexcolor(color), trans));
+            rendermodel(mdlname, anim, pos.addz(3.5f), d->yaw, 28, 0, MDL_NOSHADOW | MDL_FIRSTPERSON, d, NULL,
+                        0, 0, 1.f, vec4(vec::hexcolor(color), trans));
         }
     }
 
@@ -850,7 +851,8 @@ namespace game
             basetime = 0;
         }
 
-        rendermodel(getWeaponDir(d->gunselect, true), anim, gunAim.add(sway), d->yaw, d->pitch - gunSwitchAnim(d), 0, MDL_NOBATCH, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), alpha));
+        rendermodel(getWeaponDir(d->gunselect, true), anim, gunAim.add(sway), d->yaw, d->pitch - gunSwitchAnim(d), 0,
+                    MDL_NOBATCH | MDL_FIRSTPERSON, NULL, a, basetime, 0, 1, vec4(vec::hexcolor(color), alpha));
 
         if(d->render.muzzlePos.x >= 0) d->render.muzzlePos = calcavatarpos(d->render.muzzlePos, 12);
         if(d->render.casingPos.x >= 0) d->render.casingPos = calcavatarpos(d->render.casingPos, 12);
@@ -869,7 +871,7 @@ namespace game
         modelattach a[2];
         d->render.weedPos = vec(-1, -1, -1);
         a[0] = modelattach("tag_joint", &d->render.weedPos);
-        rendermodel("hudboost/joint", NULL, sway, d->yaw, d->pitch, 0, MDL_NOBATCH, NULL, a, 0, 0, 1, vec4(1, 1, 1, alpha));
+        rendermodel("hudboost/joint", NULL, sway, d->yaw, d->pitch, 0, MDL_NOBATCH | MDL_FIRSTPERSON, NULL, a, 0, 0, 1, vec4(1, 1, 1, alpha));
         if(d->render.weedPos.x >= 0) d->render.weedPos = calcavatarpos(d->render.weedPos, 12);
 
         if(rndevent(93))
@@ -903,7 +905,8 @@ namespace game
         vec disp;
         if(!powerArmor) vecfromyawpitch(d->yaw, 0, 0, zoomprogress * 3.f, disp);
 
-        rendermodel(getShieldDir(d->armourtype, d->armour, true), NULL, disp.add(sway), d->yaw, d->pitch - shieldSwitchAnim(d), 0, MDL_NOBATCH, NULL, NULL, 0, 0, 1, vec4(1, 1, 1, alpha));
+        rendermodel(getShieldDir(d->armourtype, d->armour, true), NULL, disp.add(sway), d->yaw, d->pitch - shieldSwitchAnim(d), 0,
+                    MDL_NOBATCH | MDL_FIRSTPERSON, NULL, NULL, 0, 0, 1, vec4(1, 1, 1, alpha));
     }
 
     static void renderHudModels(bool transparent)

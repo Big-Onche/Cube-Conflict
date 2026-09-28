@@ -360,6 +360,7 @@ extern bool usepacknorm();
 extern void maskgbuffer(const char *mask);
 extern void syncgbufferparams();
 extern void bindgdepth();
+extern void bindmsdepth();
 extern void preparegbuffer(bool depthclear = true);
 extern void rendergbuffer(bool depthclear = true);
 extern void shadesky();
@@ -368,6 +369,8 @@ extern void shademinimap(const vec &color = vec(-1, -1, -1));
 extern void shademodelpreview(int x, int y, int w, int h, bool background = true, bool scissor = false);
 extern void rendertransparent();
 extern void rendertransparenthud();
+extern void renderfirstpersonlayer(bool body);
+extern void renderfirstpersonmodelbatches();
 extern void renderao();
 extern void loadhdrshaders(int aa = AA_UNUSED);
 extern void processhdr(GLuint outfbo = 0, int aa = AA_UNUSED);
@@ -542,9 +545,17 @@ namespace heatHaze
 
 namespace postfx
 {
+    extern bool separateavatar;
+    extern GLuint avatarfbo;
+    extern void prepareDistortion();
+    extern void cleanupDistortion();
+    extern void renderWorldDistortion();
+    extern void beginAvatar();
+    extern void compositeAvatar();
     extern void initRadialBlur();
     extern void cleanupRadialBlur();
     extern void renderRadialBlur();
+    extern bool hasRadialBlur();
     extern void updateRadialBlur(vec velocity, int shroomsMillis);
 
     extern void updateLensDistortion(bool enable, int gun = 0);

@@ -790,6 +790,7 @@ void rendermodelbatches()
             j = bm.next;
             bm.culled = cullmodel(b.m, bm.center, bm.radius, bm.flags, bm.d);
             if(bm.culled || bm.flags&MDL_ONLYSHADOW) continue;
+            if(postfx::separateavatar && (bm.flags&MDL_FIRSTPERSON)) continue;
             if(bm.colorscale.a < 1 || bm.flags&MDL_FORCETRANSPARENT)
             {
                 float sx1, sy1, sx2, sy2;
@@ -848,6 +849,32 @@ void rendermodelbatches()
     disableaamask();
 }
 
+void renderfirstpersonmodelbatches()
+{
+    enableaamask(transparentlayer);
+    loopv(batches)
+    {
+        modelbatch &b = batches[i];
+        if(!(b.flags&MDL_FIRSTPERSON)) continue;
+        bool rendered = false;
+        for(int j = b.batched; j >= 0;)
+        {
+            batchedmodel &bm = batchedmodels[j];
+            j = bm.next;
+            if(!(bm.flags&MDL_FIRSTPERSON) || (bm.flags&MDL_ONLYSHADOW) || bm.colorscale.a <= 0) continue;
+            if(!rendered)
+            {
+                b.m->startrender();
+                setaamask(true);
+                rendered = true;
+            }
+            renderbatchedmodel(b.m, bm);
+        }
+        if(rendered) b.m->endrender();
+    }
+    disableaamask();
+}
+
 void rendertransparentmodelbatches(int stencil)
 {
     enableaamask(stencil);
@@ -861,6 +888,7 @@ void rendertransparentmodelbatches(int stencil)
             batchedmodel &bm = batchedmodels[j];
             j = bm.next;
             bm.culled = cullmodel(b.m, bm.center, bm.radius, bm.flags, bm.d);
+            if(postfx::separateavatar && (bm.flags&MDL_FIRSTPERSON)) continue;
             if(bm.culled || !(bm.colorscale.a < 1 || bm.flags&MDL_FORCETRANSPARENT) || bm.flags&MDL_ONLYSHADOW) continue;
             if(!rendered)
             {

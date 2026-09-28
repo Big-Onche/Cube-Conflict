@@ -5671,9 +5671,9 @@ void rendertransparent()
     else { renderparticles(); renderedtransparentparticles = true; }
 }
 
-void rendertransparenthud()
+static void renderhudlayer(bool body, bool isolated)
 {
-    if(drawtex || !ghasstencil || !game::checkTransparentHudModels()) return;
+    if(drawtex || !ghasstencil) return;
 
     static const int HUD_TRANSPARENT_LAYER = 5;
 
@@ -5684,6 +5684,14 @@ void rendertransparenthud()
     GLOBALPARAM(linearworldmatrix, linearworldmatrix);
 
     glBindFramebuffer_(GL_FRAMEBUFFER, msaalight ? msfbo : gfbo);
+    if(isolated)
+    {
+        // A second layer must not relight pixels left by the first layer.
+        glStencilMask(0x0F);
+        glClearStencil(0);
+        glClear(GL_STENCIL_BUFFER_BIT);
+        glStencilMask(~0);
+    }
     if(ghasstencil)
     {
         glEnable(GL_STENCIL_TEST);
@@ -5695,23 +5703,35 @@ void rendertransparenthud()
     int oldtransparentlayer = transparentlayer;
     transparentlayer = HUD_TRANSPARENT_LAYER;
 
-    game::renderTransparentHudModels();
+    if(body) renderfirstpersonmodelbatches();
+    else if(game::checkTransparentHudModels()) game::renderTransparentHudModels();
+    else if(isolated) game::renderSolidHudModels();
 
     transparentlayer = oldtransparentlayer;
 
     if(msaalight)
     {
-        glBindFramebuffer_(GL_FRAMEBUFFER, mshdrfbo);
+        glBindFramebuffer_(GL_FRAMEBUFFER, isolated ? postfx::avatarfbo : mshdrfbo);
         if((ghasstencil && msaaedgedetect) || msaalight==2) loopi(2) renderlights(-1, -1, 1, 1, NULL, HUD_TRANSPARENT_LAYER, i+1, true);
         else renderlights(-1, -1, 1, 1, NULL, HUD_TRANSPARENT_LAYER, 3, true);
     }
     else
     {
-        glBindFramebuffer_(GL_FRAMEBUFFER, hdrfbo);
+        glBindFramebuffer_(GL_FRAMEBUFFER, isolated ? postfx::avatarfbo : hdrfbo);
         renderlights(-1, -1, 1, 1, NULL, HUD_TRANSPARENT_LAYER, 0, true);
     }
 
     if(!avatarmask) glDisable(GL_STENCIL_TEST);
+}
+
+void rendertransparenthud()
+{
+    if(game::checkTransparentHudModels()) renderhudlayer(false, false);
+}
+
+void renderfirstpersonlayer(bool body)
+{
+    renderhudlayer(body, true);
 }
 
 VAR(gdepthclear, 0, 1, 1);

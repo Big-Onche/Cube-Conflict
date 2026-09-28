@@ -1866,12 +1866,13 @@ void renderavatar(bool transparent)
 
     // calcavatarpos() needs the world inverse projection matrices while the avatar uses its own projection.
     setcamprojmatrix(false);
-    if(transparent) syncgbufferparams();
+    if(transparent || postfx::separateavatar) syncgbufferparams();
 
     glDepthRange(0.0, 0.05); // restricted depth range for avatar gun/shield
 
     enableavatarmask();
-    if(transparent) rendertransparenthud();
+    if(postfx::separateavatar) renderfirstpersonlayer(false);
+    else if(transparent) rendertransparenthud();
     else game::renderSolidHudModels();
     disableavatarmask();
 
@@ -1879,7 +1880,7 @@ void renderavatar(bool transparent)
 
     projmatrix = oldprojmatrix;
     setcamprojmatrix(false);
-    if(transparent) syncgbufferparams();
+    if(transparent || postfx::separateavatar) syncgbufferparams();
 }
 
 FVAR(polygonoffsetfactor, -1e4f, -3.0f, 1e4f);
@@ -2738,6 +2739,7 @@ void gl_drawview()
         else fogmat = abovemat;
     }
     else fogmat = MAT_AIR;
+    if(!editmode) postfx::updateUnderwaterEffect(fogbelow > 0.6f);
     setfog(abovemat);
     //setfog(fogmat, fogbelow, 1, abovemat);
 
@@ -2745,6 +2747,8 @@ void gl_drawview()
 
     projmatrix.perspective(fovy, aspect, nearplane(), farplane);
     setcamprojmatrix();
+    if(!editmode) postfx::updateRadialBlur(game::getCameraVelocity(), game::hudplayer()->boostmillis[B_SHROOMS]);
+    postfx::prepareDistortion();
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
@@ -2769,7 +2773,7 @@ void gl_drawview()
     GLERROR;
 
     // render solid avatar after AO to avoid weird contact shadows
-    renderavatar(false);
+    if(!postfx::separateavatar) renderavatar(false);
     GLERROR;
 
     glFlush();
@@ -2810,7 +2814,7 @@ void gl_drawview()
     heatHaze::renderWorld();
     GLERROR;
 
-    renderavatar(true); // render transparent avatar right after other transparents
+    if(!postfx::separateavatar) renderavatar(true); // render transparent avatar right after other transparents
     GLERROR;
 
     if(drawtex) rendervolumetric();
@@ -2820,6 +2824,25 @@ void gl_drawview()
     {
         renderparticles();
         GLERROR;
+    }
+
+    if(postfx::separateavatar)
+    {
+        glDisable(GL_CULL_FACE);
+        glDisable(GL_DEPTH_TEST);
+        postfx::renderWorldDistortion();
+        // Camera-relative first-person models have no speed blur: blur only the world before compositing them.
+        postfx::renderRadialBlur();
+        postfx::beginAvatar();
+        glEnable(GL_CULL_FACE);
+        glEnable(GL_DEPTH_TEST);
+        renderfirstpersonlayer(true);
+        renderavatar(false);
+        glDisable(GL_CULL_FACE);
+        glDisable(GL_DEPTH_TEST);
+        postfx::compositeAvatar();
+        glEnable(GL_CULL_FACE);
+        glEnable(GL_DEPTH_TEST);
     }
 
     if(editmode)
@@ -2839,16 +2862,15 @@ void gl_drawview()
             glDepthMask(GL_TRUE);
         }
     }
-    else
-    {
-        postfx::updateUnderwaterEffect(fogbelow > 0.6f);
-        postfx::updateRadialBlur(game::getCameraVelocity(), game::hudplayer()->boostmillis[B_SHROOMS]);
-        postfx::renderRadialBlur();
-        GLERROR;
-    }
 
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
+
+    if(!editmode && !postfx::separateavatar)
+    {
+        postfx::renderRadialBlur();
+        GLERROR;
+    }
 
     if(fogoverlay && fogmat != MAT_AIR) drawfogoverlay(fogmat, fogbelow, clamp(fogbelow, 0.0f, 1.0f), abovemat);
 

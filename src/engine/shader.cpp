@@ -1373,9 +1373,174 @@ struct postfxpass
     uint inputs, freeinputs;
     int outputbind, outputscale;
 
+    bool isdistortion() const
+    {
+        return !strcmp(shader->name, "shrooms") || !strcmp(shader->name, "underwaterwobble");
+    }
+
+    bool deferred() const
+    {
+        return postfx::separateavatar && isdistortion();
+    }
+
     postfxpass() : shader(NULL), inputs(1), freeinputs(1), outputbind(0), outputscale(0) {}
 };
 vector<postfxpass> postfxpasses;
+
+namespace postfx
+{
+    bool separateavatar = false;
+    GLuint avatarfbo = 0;
+    static GLuint distortiontex[2] = { 0, 0 }, distortionfb[2] = { 0, 0 }, avatarcolor = 0;
+    static int distortionw = 0, distortionh = 0;
+
+    void prepareDistortion()
+    {
+        separateavatar = false;
+        if(editmode || isthirdperson() || !ghasstencil) return;
+        if(hasRadialBlur())
+        {
+            separateavatar = true;
+            return;
+        }
+        loopv(postfxpasses) if(postfxpasses[i].isdistortion() && postfxpasses[i].params.x > 0)
+        {
+            separateavatar = true;
+            break;
+        }
+    }
+
+    void cleanupDistortion()
+    {
+        loopi(2)
+        {
+            if(distortiontex[i]) glDeleteTextures(1, &distortiontex[i]);
+            if(distortionfb[i]) glDeleteFramebuffers_(1, &distortionfb[i]);
+            distortiontex[i] = distortionfb[i] = 0;
+        }
+        if(avatarfbo) glDeleteFramebuffers_(1, &avatarfbo);
+        if(avatarcolor) glDeleteRenderbuffers_(1, &avatarcolor);
+        avatarfbo = avatarcolor = 0;
+        distortionw = distortionh = 0;
+    }
+
+    static void setupDistortion()
+    {
+        if(distortionw == vieww && distortionh == viewh && avatarfbo) return;
+        cleanupDistortion();
+        distortionw = vieww;
+        distortionh = viewh;
+        GLenum format = floatformat(hdrformat) ? GL_RGBA16F : GL_RGBA8;
+        loopi(2)
+        {
+            glGenTextures(1, &distortiontex[i]);
+            createtexture(distortiontex[i], vieww, viewh, NULL, 3, 1, format, GL_TEXTURE_RECTANGLE);
+            glGenFramebuffers_(1, &distortionfb[i]);
+            glBindFramebuffer_(GL_FRAMEBUFFER, distortionfb[i]);
+            glFramebufferTexture2D_(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, distortiontex[i], 0);
+            if(glCheckFramebufferStatus_(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) fatal("Failed allocating distortion buffer");
+        }
+        glGenFramebuffers_(1, &avatarfbo);
+        glBindFramebuffer_(GL_FRAMEBUFFER, avatarfbo);
+        if(msaalight)
+        {
+            glGenRenderbuffers_(1, &avatarcolor);
+            glBindRenderbuffer_(GL_RENDERBUFFER, avatarcolor);
+            glRenderbufferStorageMultisample_(GL_RENDERBUFFER, msaasamples, format, vieww, viewh);
+            glBindRenderbuffer_(GL_RENDERBUFFER, 0);
+            glFramebufferRenderbuffer_(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, avatarcolor);
+            bindmsdepth();
+            useshaderbyname("postfxresolve");
+        }
+        else
+        {
+            glFramebufferTexture2D_(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, distortiontex[0], 0);
+            bindgdepth();
+        }
+        if(glCheckFramebufferStatus_(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) fatal("Failed allocating first-person layer");
+    }
+
+    static int distortLayer(const matrix3 &camera)
+    {
+        int src = 0;
+        loopv(postfxpasses)
+        {
+            postfxpass &p = postfxpasses[i];
+            if(!p.isdistortion() || p.params.x <= 0) continue;
+            glBindFramebuffer_(GL_FRAMEBUFFER, distortionfb[src^1]);
+            glBindTexture(GL_TEXTURE_RECTANGLE, distortiontex[src]);
+            p.shader->set();
+            LOCALPARAM(params, p.params);
+            LOCALPARAM(postfxcamera, camera);
+            LOCALPARAMF(postfxprojection, projmatrix.a.x, projmatrix.b.y, projmatrix.c.x, projmatrix.c.y);
+            LOCALPARAMF(postfxsize, vieww, viewh, 1.0f/vieww, 1.0f/viewh);
+            screenquad(vieww, viewh);
+            src ^= 1;
+        }
+        return src;
+    }
+
+    void renderWorldDistortion()
+    {
+        setupDistortion();
+        glActiveTexture_(GL_TEXTURE0);
+        glDisable(GL_STENCIL_TEST);
+        glBindFramebuffer_(GL_FRAMEBUFFER, distortionfb[0]);
+        glViewport(0, 0, vieww, viewh);
+        if(msaalight)
+        {
+            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, mshdrtex);
+            SETSHADER(postfxresolve);
+            LOCALPARAMF(postfxsamples, msaasamples);
+            screenquad();
+        }
+        else
+        {
+            glBindTexture(GL_TEXTURE_RECTANGLE, hdrtex);
+            SETSHADER(postfxcopy);
+            screenquad(vieww, viewh);
+        }
+        int src = distortLayer(matrix3(invcammatrix));
+        glBindFramebuffer_(GL_FRAMEBUFFER, msaalight ? mshdrfbo : hdrfbo);
+        glBindTexture(GL_TEXTURE_RECTANGLE, distortiontex[src]);
+        SETSHADER(postfxcopy);
+        screenquad(vieww, viewh);
+    }
+
+    void beginAvatar()
+    {
+        glBindFramebuffer_(GL_FRAMEBUFFER, avatarfbo);
+        glClearColor(0, 0, 0, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
+    }
+
+    void compositeAvatar()
+    {
+        glActiveTexture_(GL_TEXTURE0);
+        glDisable(GL_STENCIL_TEST);
+        if(msaalight)
+        {
+            glBindFramebuffer_(GL_READ_FRAMEBUFFER, avatarfbo);
+            glBindFramebuffer_(GL_DRAW_FRAMEBUFFER, distortionfb[0]);
+            glBlitFramebuffer_(0, 0, vieww, viewh, 0, 0, vieww, viewh, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        }
+        // This texture contains only premultiplied model color and coverage, never background pixels.
+        int src = distortLayer(matrix3(invviewmatrix));
+        glBindFramebuffer_(GL_FRAMEBUFFER, msaalight ? mshdrfbo : hdrfbo);
+        glBindTexture(GL_TEXTURE_RECTANGLE, distortiontex[src]);
+        SETSHADER(postfxcopy);
+        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND);
+        screenquad(vieww, viewh);
+        glDisable(GL_BLEND);
+    }
+}
+
+static bool haspostfxpasses()
+{
+    loopv(postfxpasses) if(!postfxpasses[i].deferred()) return true;
+    return false;
+}
 
 static int allocatepostfxtex(int scale)
 {
@@ -1393,6 +1558,8 @@ static int allocatepostfxtex(int scale)
 
 void cleanuppostfx(bool fullclean)
 {
+    postfx::cleanupDistortion();
+
     if(fullclean && postfxfb)
     {
         glDeleteFramebuffers_(1, &postfxfb);
@@ -1408,7 +1575,7 @@ void cleanuppostfx(bool fullclean)
 
 GLuint setuppostfx(int w, int h, GLuint outfbo)
 {
-    if(postfxpasses.empty()) return outfbo;
+    if(!haspostfxpasses()) return outfbo;
 
     if(postfxw != w || postfxh != h)
     {
@@ -1434,15 +1601,18 @@ GLuint setuppostfx(int w, int h, GLuint outfbo)
 
 void renderpostfx(GLuint outfbo)
 {
-    if(postfxpasses.empty()) return;
+    if(!haspostfxpasses()) return;
 
     timer *postfxtimer = begintimer("postfx");
     loopv(postfxpasses)
     {
         postfxpass &p = postfxpasses[i];
+        if(p.deferred()) continue;
+        int next = i + 1;
+        while(postfxpasses.inrange(next) && postfxpasses[next].deferred()) ++next;
 
         int tex = -1;
-        if(!postfxpasses.inrange(i+1))
+        if(!postfxpasses.inrange(next))
         {
             glBindFramebuffer_(GL_FRAMEBUFFER, outfbo);
         }
@@ -1457,6 +1627,8 @@ void renderpostfx(GLuint outfbo)
         glViewport(0, 0, w, h);
         p.shader->set();
         LOCALPARAM(params, p.params);
+        LOCALPARAM(postfxcamera, matrix3(invcammatrix));
+        LOCALPARAMF(postfxprojection, projmatrix.a.x, projmatrix.b.y, projmatrix.c.x, projmatrix.c.y);
         int tw = w, th = h, tmu = 0;
         loopj(NUMPOSTFXBINDS) if(p.inputs&(1<<j) && postfxbinds[j] >= 0)
         {
@@ -1470,6 +1642,7 @@ void renderpostfx(GLuint outfbo)
             ++tmu;
         }
         if(tmu) glActiveTexture_(GL_TEXTURE0);
+        LOCALPARAMF(postfxsize, tw, th, 1.0f/tw, 1.0f/th);
         screenquad(tw, th);
 
         loopj(NUMPOSTFXBINDS) if(p.freeinputs&(1<<j) && postfxbinds[j] >= 0)
@@ -1624,7 +1797,11 @@ namespace postfx
 
     void updateRadialBlur(vec velocity, int shroomsMillis)
     {
-        if(!rb && !shroomsMillis) return;
+        if(!rb && !shroomsMillis)
+        {
+            radialBlurStrenght = 0;
+            return;
+        }
 
         int shroomsBlur = 0;
         if(shroomsMillis) shroomsBlur = int(MAXBLUR * min(1.0f * shroomsFadeIn(), shroomsMillis / 5000.f));
@@ -1672,6 +1849,11 @@ namespace postfx
             if(glCheckFramebufferStatus_(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) fatal("Failed allocating radial blur buffer!");
             glBindFramebuffer_(GL_FRAMEBUFFER, mshdrfbo);
         }
+    }
+
+    bool hasRadialBlur()
+    {
+        return radialBlurStrenght > 0;
     }
 
     void renderRadialBlur()
@@ -1723,6 +1905,7 @@ namespace postfx
 
     void init()
     {
+        useshaderbyname("postfxcopy");
         addpostfx("telescopicsight");
         addpostfx("sobel");
         addpostfx("shrooms");
