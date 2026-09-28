@@ -951,6 +951,8 @@ namespace game
     }
 
     FVAR(hudparticlemovementoffset, 0.0f, 0.2f, 2.0f);
+    FVAR(hudparticleangletracking, 0.0f, 0.25f, 1.0f);
+    VAR(hudparticleangletrackingtime, 0, 50, 500);
     static physent *previoushudparticleowner[3] = { NULL, NULL, NULL };
     static vec previoushudparticleorigin[3], hudparticlemovement[3];
     static int previoushudparticlemillis[3] = { -1, -1, -1 }, hudparticlemovementmillis[3] = { -1, -1, -1 };
@@ -982,7 +984,7 @@ namespace game
         previoushudparticlemillis[index] = hudparticlemovementmillis[index] = totalmillis;
     }
 
-    void hudparticletrack(physent *owner, vec &o, vec &d, int age, int track)
+    void hudparticletrack(physent *owner, vec &o, vec &d, int age, int track, const matrix3 &orientation)
     {
         if(!owner || (owner->type != ENT_PLAYER && owner->type != ENT_AI)) return;
         gameent *pl = (gameent *)owner;
@@ -996,8 +998,24 @@ namespace game
         updatehudparticlemovement(owner, track);
         o.madd(hudparticlemovement[index], age/500.0f);
         const vec localorigin(o), localvelocity(d);
-        o = vec(camera1->o).madd(camright, localorigin.x).madd(camdir, localorigin.y).madd(camup, localorigin.z);
-        d = vec(camright).mul(localvelocity.x).madd(camdir, localvelocity.y).madd(camup, localvelocity.z);
+        // Begin with the exact tag transform, then ease into reduced camera-angle tracking.
+        float angletracking = hudparticleangletracking;
+        if(hudparticleangletrackingtime > 0 && age < hudparticleangletrackingtime)
+        {
+            float progress = clamp(age/float(hudparticleangletrackingtime), 0.0f, 1.0f);
+            angletracking += (1.0f - angletracking)*(1.0f - progress);
+        }
+        matrix3 trackedbasis(orientation), rotationdelta;
+        rotationdelta.multranspose(matrix3(camright, camdir, camup), orientation);
+        float angle;
+        vec axis;
+        if(angletracking > 0 && rotationdelta.calcangleaxis(angle, axis))
+        {
+            matrix3 partialrotation(angle*angletracking, axis);
+            trackedbasis.mul(partialrotation, orientation);
+        }
+        o = trackedbasis.transform(localorigin).add(camera1->o);
+        d = trackedbasis.transform(localvelocity);
     }
 
     void dynlighttrack(physent *owner, vec &o, vec &hud)

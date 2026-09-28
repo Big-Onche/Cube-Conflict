@@ -388,6 +388,7 @@ static inline Shader *getgpuparticlelightshader(bool usesoft)
 struct particle
 {
     vec o, d;
+    matrix3 hudorientation;
     int gravity, fade, millis;
     bool hud, sound, usesoft;
     bvec4 color;
@@ -592,7 +593,7 @@ struct partrenderer
                 o.z -= t*t/(2.0f * 5000.0f * p->gravity);
             }
 
-            if(trackhud) game::hudparticletrack(p->owner, o, d, ts, hudtrack);
+            if(trackhud) game::hudparticletrack(p->owner, o, d, ts, hudtrack, p->hudorientation);
 
             if(type&PT_COLLIDE && step)
             {
@@ -652,7 +653,7 @@ struct partrenderer
                 particle_splash(PART_SMOKE, 1, 1750, o, 0x80809A10, 3.f, 50, 50, 4, game::hasShrooms());
             }
         }
-        if(trackhud && p->fade <= 5) game::hudparticletrack(p->owner, o, d, ts, hudtrack);
+        if(trackhud && p->fade <= 5) game::hudparticletrack(p->owner, o, d, ts, hudtrack, p->hudorientation);
     }
 
     void debuginfo()
@@ -768,6 +769,7 @@ struct listrenderer : partrenderer
         p->light = 0;
         p->lightflags = 0;
         p->hud = hud;
+        if(hud) p->hudorientation = matrix3(camright, camdir, camup);
         p->sound = sound;
         return p;
     }
@@ -1302,6 +1304,7 @@ struct varenderer : partrenderer
         p->light = 0;
         p->lightflags = 0;
         p->hud = hud;
+        if(hud) p->hudorientation = matrix3(camright, camdir, camup);
         p->sound = sound;
         lastupdate = -1;
         if(gpupart)
